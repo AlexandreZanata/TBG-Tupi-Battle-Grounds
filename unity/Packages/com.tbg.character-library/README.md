@@ -28,10 +28,18 @@ Definitions load from `content/characters/definitions/{id}.json` at repo root.
 
 ## Tests
 
-Open the Unity project, then **Window → General → Test Runner → EditMode**, or run:
+Open the Unity project, then **Window → General → Test Runner → EditMode**:
+
+| Suite | Coverage |
+|-------|----------|
+| `CharacterCatalogEditModeTests` | Procedural + mesh3d spawn |
+| `CharacterSchemaValidationTests` | JSON contract validation |
+
+Or batchmode:
 
 ```bash
-# Requires Unity 2022.3+ on PATH
 unity -batchmode -projectPath unity -runTests -testPlatform EditMode \
   -assemblyNames TBG.CharacterLibrary.Tests -logFile -
 ```
+
+Test fixtures: `content/characters/meshes/_test_fixture.glb`, `test_mesh3d_spawn.json`.

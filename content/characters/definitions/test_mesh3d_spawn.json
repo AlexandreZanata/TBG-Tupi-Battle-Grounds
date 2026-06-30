@@ -1,0 +1,16 @@
+{
+  "id": "test_mesh3d_spawn",
+  "characterName": "Test Mesh3D Fixture",
+  "archetype": "Tank",
+  "faction": "Humans",
+  "assetMode": "mesh3d",
+  "mesh": "content/characters/meshes/_test_fixture.glb",
+  "heightScale": 1.0,
+  "bodyWidthScale": 1.0,
+  "headScale": 1.0,
+  "limbLengthScale": 1.0,
+  "primaryColor": "#8B7355",
+  "secondaryColor": "#C4A882",
+  "accessories": [],
+  "evolutionStage": 0
+}

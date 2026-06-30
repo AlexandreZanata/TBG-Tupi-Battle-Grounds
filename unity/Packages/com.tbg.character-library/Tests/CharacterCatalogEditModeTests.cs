@@ -25,14 +25,17 @@ namespace TBG.CharacterLibrary.Tests
             }
         }
 
-        [Test]
-        public void Spawn_ProceduralPilot_CreatesGeometryUnderParent()
+        [TestCase("tank_human_01")]
+        [TestCase("dps_undead_01")]
+        [TestCase("support_machine_01")]
+        [TestCase("ranged_plant_01")]
+        public void Spawn_ProceduralPilot_CreatesGeometryUnderParent(string pilotId)
         {
             var catalog = new CharacterCatalog();
-            var instance = catalog.Spawn("tank_human_01", _parent);
+            var instance = catalog.Spawn(pilotId, _parent);
 
             Assert.That(instance, Is.Not.Null);
-            Assert.That(instance.Id, Is.EqualTo("tank_human_01"));
+            Assert.That(instance.Id, Is.EqualTo(pilotId));
             Assert.That(instance.Root.transform.parent, Is.EqualTo(_parent));
             Assert.That(instance.Root.transform.Find("Head"), Is.Not.Null);
             Assert.That(instance.Root.transform.Find("Torso"), Is.Not.Null);
@@ -41,31 +44,28 @@ namespace TBG.CharacterLibrary.Tests
         }
 
         [Test]
-        public void Load_ProceduralPilot_DefaultsToProcedural()
+        public void Spawn_Mesh3dPilot_WhenGlbPresent_CreatesRootUnderParent()
         {
-            var loader = new CharacterDefinitionLoader();
-            var definition = loader.Load("tank_human_01");
+            var catalog = new CharacterCatalog();
+            var instance = catalog.Spawn("test_mesh3d_spawn", _parent);
 
-            Assert.That(definition.AssetMode, Is.EqualTo(CharacterAssetMode.Procedural));
-        }
+            Assert.That(instance.Id, Is.EqualTo("test_mesh3d_spawn"));
+            Assert.That(instance.Root.transform.parent, Is.EqualTo(_parent));
+            Assert.That(instance.Root.name, Is.EqualTo("Test Mesh3D Fixture"));
 
-        [Test]
-        public void Load_Mesh3dSchemaExample_ParsesAssetMode()
-        {
-            var path = Path.Combine(CharacterPaths.DefinitionsDir, "_schema.mesh3d.example.json");
-            var json = File.ReadAllText(path);
-            var record = JsonUtility.FromJson<CharacterDefinitionJsonRecord>(json);
-            var definition = LoadedCharacterDefinition.FromRecord(record);
+            var meshPath = Path.Combine(
+                CharacterPaths.GetRepoRoot(),
+                "content/characters/meshes/_test_fixture.glb");
+            Assert.That(File.Exists(meshPath), Is.True);
 
-            Assert.That(definition.AssetMode, Is.EqualTo(CharacterAssetMode.Mesh3D));
-            Assert.That(definition.MeshPath, Does.EndWith(".glb"));
+            catalog.Release(instance);
         }
 
         [Test]
         public void Spawn_Mesh3dWithoutGlbFile_ThrowsFileNotFound()
         {
             var catalog = new CharacterCatalog();
-            Assert.Throws<FileNotFoundException>(() => catalog.Spawn("_schema.mesh3d.example", _parent));
+            Assert.Throws<FileNotFoundException>(() => catalog.Spawn("test_mesh3d_missing_glb", _parent));
         }
     }
 }

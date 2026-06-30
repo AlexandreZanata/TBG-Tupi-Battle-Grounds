@@ -19,6 +19,9 @@ PILOTS = [
 ]
 
 
+PILOT_IDS = {unit_id for unit_id, *_ in PILOTS}
+
+
 @pytest.fixture(scope="module")
 def repo() -> CharacterRepository:
     return CharacterRepository(find_repo_root())
@@ -43,7 +46,7 @@ def test_pilot_definition_exists_with_card(
 
 
 def test_export_all_cards_idempotent(repo: CharacterRepository) -> None:
-    for unit_id in repo.list_ids():
+    for unit_id in PILOT_IDS:
         defn = repo.load(unit_id)
         before = repo.card_path(unit_id).read_bytes()
         render_card(defn, repo.card_path(unit_id))

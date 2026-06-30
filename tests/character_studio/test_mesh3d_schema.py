@@ -14,6 +14,7 @@ from character_studio.validation import ValidationError, validate_definition
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MESH3D_EXAMPLE = REPO_ROOT / "content/characters/definitions/_schema.mesh3d.example.json"
+PILOT_IDS = {"tank_human_01", "dps_undead_01", "support_machine_01", "ranged_plant_01"}
 
 
 @pytest.fixture
@@ -53,7 +54,7 @@ def test_procedural_definition_without_asset_mode_still_valid(repo: CharacterRep
 def test_existing_pilot_json_files_default_to_procedural() -> None:
     definitions = REPO_ROOT / "content" / "characters" / "definitions"
     for path in sorted(definitions.glob("*.json")):
-        if path.name.startswith("_"):
+        if path.stem not in PILOT_IDS:
             continue
         defn = CharacterDefinition.from_dict(json.loads(path.read_text(encoding="utf-8")))
         validate_definition(defn)

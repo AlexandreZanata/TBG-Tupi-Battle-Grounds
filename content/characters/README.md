@@ -32,6 +32,9 @@ All units share Phase 01 mechanics fields. Phase 02 adds:
 
 Examples: `_schema.example.json`, `_schema.mesh3d.example.json`.
 
+Test-only definitions: `test_mesh3d_spawn.json`, `test_mesh3d_missing_glb.json`.  
+Mesh fixture: `meshes/_test_fixture.glb` (Khronos Box sample for Unity spawn tests).
+
 ## Naming convention
 
 ```

@@ -78,6 +78,7 @@ content/characters/
 
 tools/
   blender/tbg_export/    # Custom Blender add-on
+  blender/RIG-SPEC.md    # Rig naming + body classes
   material-maker/        # .mm project files + export scripts
   krita/templates/
 

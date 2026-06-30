@@ -16,6 +16,7 @@ namespace TBG.CharacterLibrary
 
             var json = File.ReadAllText(path);
             var record = JsonUtility.FromJson<CharacterDefinitionJsonRecord>(json);
+            CharacterDefinitionValidator.ValidateOrThrow(record);
             return LoadedCharacterDefinition.FromRecord(record);
         }
     }
