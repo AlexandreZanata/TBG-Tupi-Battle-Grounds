@@ -79,12 +79,12 @@ def _embed_clip_actions(
     from tools.blender.animation.walk.profiles import resolve_walk_profile  # noqa: PLC0415
 
     walk_profile = resolve_walk_profile(unit_id, body_class)
-    attack_profile = resolve_attack_profile(unit_id)
     for clip_name in clip_names:
         if clip_name == "Walk":
             bake_walk_action(arm_obj, walk_profile, clip_name)
             continue
-        if clip_name == "Attack" and attack_profile is not None:
+        attack_profile = resolve_attack_profile(unit_id, body_class, clip_name)
+        if clip_name in ("Attack", "Attack2") and attack_profile is not None:
             bake_attack_action(arm_obj, attack_profile, clip_name)
             continue
         _create_rest_pose_action(arm_obj, clip_name)

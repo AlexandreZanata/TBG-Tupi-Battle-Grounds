@@ -1,4 +1,4 @@
-"""Bake one-shot trident thrust onto TBG armatures (Blender bpy)."""
+"""Bake one-shot attack actions onto TBG armatures (Blender bpy)."""
 
 from __future__ import annotations
 

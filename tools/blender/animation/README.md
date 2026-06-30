@@ -8,7 +8,7 @@ Modular clip generators for the TBG FK rig (`TBG_*` bones). Each locomotion or c
 | `retarget/` | **Active** | CMU BVH → TBG bone map + gait curve calibration |
 | `root_motion/` | **Active** | Optional `WalkRoot` forward translation on `TBG_Root` |
 | `idle/` | Planned | Breathing / weight-shift idle |
-| `attack/` | **Active** | Trident lunge thrust (`THRUST-ATTACK-SPEC.md`) |
+| `attack/` | **Active** | Thrust + heavy swing (`THRUST-ATTACK-SPEC.md`, `SWING-ATTACK-SPEC.md`) |
 
 ## Layout convention
 
@@ -25,7 +25,7 @@ animation/<clip_type>/
   README.md      # clip-specific docs
 ```
 
-`tools/blender/scripts/` keeps **thin entrypoints** only (`build_walk_clip.py`, shims for legacy imports).
+`tools/blender/scripts/` keeps **thin entrypoints** only (`build_walk_clip.py`, `build_attack_clip.py`, shims for legacy imports).
 
 ## Agent skill
 

@@ -1,25 +1,27 @@
-"""One-hand trident lunge thrust — arm-led extension, subtle lunge, no torso yaw."""
+"""One-hand trident lunge thrust — uses shared kinetic chain."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from tools.blender.animation.attack.constants import (
-    ATTACK_FPS,
-    HIT_MS,
-    RECOVERY_MS,
-    WINDUP_MS,
-    ms_to_frame,
+from tools.blender.animation.attack.chain import (
+    ChainSegment,
+    apply_bone_group,
+    hit_segment_progress,
+    lerp_pose,
+    phase_progress,
+    zero_torso_yaw_roll,
 )
+from tools.blender.animation.attack.constants import ATTACK_FPS, HIT_MS, RECOVERY_MS, WINDUP_MS
 from tools.blender.animation.attack.thrust_poses import (
+    TRIDENT_GUARD_ARM,
     guard_pose,
     hit_peak_pose,
     recovery_end_pose,
     windup_end_pose,
-    _lerp_pose,
 )
-from tools.blender.animation.easing import clamp01, ease_in_expo, ease_out
-from tools.blender.animation.types import BoneEuler, BonePose
+from tools.blender.animation.attack.timing import ms_to_frame
+from tools.blender.animation.types import BonePose
 
 WEAPON_ARM = (
     "TBG_Shoulder.R",
@@ -38,6 +40,12 @@ LEG_BONES = (
 TORSO_BONES = ("TBG_Spine", "TBG_Spine1", "TBG_Neck", "TBG_Head")
 SUPPORT_ARM = ("TBG_UpperArm.L", "TBG_LowerArm.L")
 
+SEG_LEGS = ChainSegment(0.05, 0.22)
+SEG_TORSO = ChainSegment(0.08, 0.20)
+SEG_SHOULDER = ChainSegment(0.11, 0.18)
+SEG_ELBOW = ChainSegment(0.15, 0.16)
+SEG_HAND = ChainSegment(0.19, 0.14)
+
 
 @dataclass(frozen=True)
 class ThrustStyle:
@@ -51,24 +59,24 @@ def sample_thrust_pose_at_ms(time_ms: float, style: ThrustStyle) -> BonePose:
     windup_end = style.windup_ms
     hit_end = windup_end + style.hit_ms
     total = windup_end + style.hit_ms + style.recovery_ms
+    guard = guard_pose()
 
     if time_ms <= 0.0:
-        return _zero_torso_yaw_roll(guard_pose())
+        return zero_torso_yaw_roll(guard, WEAPON_ARM)
     if time_ms < windup_end:
-        p = ease_out(time_ms / windup_end)
-        return _zero_torso_yaw_roll(_lerp_pose(guard_pose(), windup_end_pose(), p))
+        p = phase_progress(time_ms, style.windup_ms)
+        return zero_torso_yaw_roll(lerp_pose(guard, windup_end_pose(), p), WEAPON_ARM)
     if time_ms < hit_end:
         p = (time_ms - windup_end) / style.hit_ms
         return _hit_pose(p, style)
     if time_ms < total:
-        p = ease_out((time_ms - hit_end) / style.recovery_ms)
-        return _zero_torso_yaw_roll(_lerp_pose(hit_peak_pose(), recovery_end_pose(), p))
-    return _zero_torso_yaw_roll(guard_pose())
+        p = phase_progress(time_ms - hit_end, style.recovery_ms)
+        return zero_torso_yaw_roll(lerp_pose(hit_peak_pose(), recovery_end_pose(), p), WEAPON_ARM)
+    return zero_torso_yaw_roll(guard, WEAPON_ARM)
 
 
 def sample_thrust_pose_at_frame(frame: int, style: ThrustStyle) -> BonePose:
-    time_ms = frame / ATTACK_FPS * 1000.0
-    return sample_thrust_pose_at_ms(time_ms, style)
+    return sample_thrust_pose_at_ms(frame / ATTACK_FPS * 1000.0, style)
 
 
 def frame_count(style: ThrustStyle) -> int:
@@ -79,43 +87,17 @@ def frame_count(style: ThrustStyle) -> int:
 def _hit_pose(progress: float, style: ThrustStyle) -> BonePose:
     start = windup_end_pose()
     end = hit_peak_pose()
-    leg_p = ease_in_expo(clamp01(progress / 0.55)) * 0.65
-    torso_p = ease_in_expo(clamp01((progress - 0.15) / 0.50))
-    shoulder_p = ease_in_expo(clamp01((progress - 0.30) / 0.45))
-    elbow_p = ease_in_expo(clamp01((progress - 0.42) / 0.38))
-    hand_p = ease_in_expo(clamp01((progress - 0.55) / 0.30))
-
     out = dict(start)
-    for key in LEG_BONES:
-        out[key] = _lerp_euler(start.get(key), end.get(key), leg_p)
-    for key in TORSO_BONES:
-        out[key] = _lerp_euler(start.get(key), end.get(key), torso_p)
-    out["TBG_Shoulder.R"] = _lerp_euler(start.get("TBG_Shoulder.R"), end.get("TBG_Shoulder.R"), shoulder_p)
-    out["TBG_UpperArm.R"] = _lerp_euler(start.get("TBG_UpperArm.R"), end.get("TBG_UpperArm.R"), shoulder_p)
-    out["TBG_LowerArm.R"] = _lerp_euler(start.get("TBG_LowerArm.R"), end.get("TBG_LowerArm.R"), elbow_p)
-    out["TBG_Hand.R"] = _lerp_euler(start.get("TBG_Hand.R"), end.get("TBG_Hand.R"), hand_p)
-    for key in SUPPORT_ARM:
-        out[key] = _lerp_euler(start.get(key), end.get(key), torso_p * 0.5)
+    apply_bone_group(out, start, end, LEG_BONES, hit_segment_progress(progress, SEG_LEGS) * 0.65)
+    apply_bone_group(out, start, end, TORSO_BONES, hit_segment_progress(progress, SEG_TORSO))
+    apply_bone_group(out, start, end, ("TBG_Shoulder.R", "TBG_UpperArm.R"), hit_segment_progress(progress, SEG_SHOULDER))
+    apply_bone_group(out, start, end, ("TBG_LowerArm.R",), hit_segment_progress(progress, SEG_ELBOW))
+    apply_bone_group(out, start, end, ("TBG_Hand.R",), hit_segment_progress(progress, SEG_HAND))
+    apply_bone_group(out, start, end, SUPPORT_ARM, hit_segment_progress(progress, SEG_TORSO) * 0.5)
 
-    root = _lerp_euler(start.get("TBG_Root"), end.get("TBG_Root"), leg_p)
-    out["TBG_Root"] = (root[0], root[1], root[2] * style.lunge_scale)
-    return _zero_torso_yaw_roll(out)
-
-
-def _zero_torso_yaw_roll(pose: BonePose) -> BonePose:
-    out = dict(pose)
-    for key in ("TBG_Spine", "TBG_Spine1", "TBG_Neck", "TBG_Head"):
-        if key in out:
-            x, _, _ = out[key]
-            out[key] = (x, 0.0, 0.0)
-    for key in WEAPON_ARM:
-        if key in out:
-            x, _, z = out[key]
-            out[key] = (x, 0.0, z)
-    return out
-
-
-def _lerp_euler(a: BoneEuler | None, b: BoneEuler | None, t: float) -> BoneEuler:
-    av = a or (0.0, 0.0, 0.0)
-    bv = b or (0.0, 0.0, 0.0)
-    return tuple(av[i] + (bv[i] - av[i]) * t for i in range(3))
+    root = start.get("TBG_Root", (0.0, 0.0, 0.0))
+    end_root = end.get("TBG_Root", root)
+    leg_p = hit_segment_progress(progress, SEG_LEGS) * 0.65
+    rz = root[2] + (end_root[2] - root[2]) * leg_p * style.lunge_scale
+    out["TBG_Root"] = (root[0], root[1], rz)
+    return zero_torso_yaw_roll(out, WEAPON_ARM)
