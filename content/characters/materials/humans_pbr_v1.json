@@ -1,0 +1,13 @@
+{
+  "id": "humans_pbr_v1",
+  "faction": "Humans",
+  "shader": "TBG/CharacterPBR",
+  "graph": "tools/material-maker/humans_fabric.mm",
+  "properties": {
+    "_Metallic": 0.1,
+    "_Smoothness": 0.45,
+    "_OcclusionStrength": 1.0,
+    "_EmissionStrength": 0.0
+  },
+  "textureSlots": ["albedo", "normal", "orm"]
+}

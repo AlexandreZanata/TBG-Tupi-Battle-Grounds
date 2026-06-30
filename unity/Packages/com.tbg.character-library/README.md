@@ -26,6 +26,12 @@ catalog.Release(instance);
 
 Definitions load from `content/characters/definitions/{id}.json` at repo root.
 
+## Material profiles
+
+`MaterialProfileLoader` reads `content/characters/materials/{id}.json` and builds `TBG/CharacterPBR` materials.
+
+Shader: `Shaders/CharacterPBR.shader` — albedo (`_MainTex`), normal (`_BumpMap`), ORM packed (`_ORMMap`, R=AO G=roughness B=metallic).
+
 ## Tests
 
 Open the Unity project, then **Window → General → Test Runner → EditMode**:
@@ -34,6 +40,7 @@ Open the Unity project, then **Window → General → Test Runner → EditMode**
 |-------|----------|
 | `CharacterCatalogEditModeTests` | Procedural + mesh3d spawn |
 | `CharacterSchemaValidationTests` | JSON contract validation |
+| `MaterialProfileLoaderTests` | Material profile JSON + `TBG/CharacterPBR` |
 
 Or batchmode:
 

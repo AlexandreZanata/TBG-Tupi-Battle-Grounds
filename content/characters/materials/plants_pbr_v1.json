@@ -1,0 +1,13 @@
+{
+  "id": "plants_pbr_v1",
+  "faction": "Plants",
+  "shader": "TBG/CharacterPBR",
+  "graph": "tools/material-maker/plants_organic.mm",
+  "properties": {
+    "_Metallic": 0.02,
+    "_Smoothness": 0.38,
+    "_OcclusionStrength": 1.0,
+    "_EmissionStrength": 0.0
+  },
+  "textureSlots": ["albedo", "normal", "orm"]
+}

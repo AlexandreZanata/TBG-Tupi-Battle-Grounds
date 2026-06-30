@@ -1,0 +1,13 @@
+{
+  "id": "undead_pbr_v1",
+  "faction": "Undead",
+  "shader": "TBG/CharacterPBR",
+  "graph": "tools/material-maker/undead_decay.mm",
+  "properties": {
+    "_Metallic": 0.05,
+    "_Smoothness": 0.28,
+    "_OcclusionStrength": 1.0,
+    "_EmissionStrength": 0.35
+  },
+  "textureSlots": ["albedo", "normal", "orm", "emissive"]
+}

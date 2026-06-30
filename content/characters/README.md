@@ -13,7 +13,7 @@ The **Character Studio** (Unity Editor + web UI) creates, edits, and deletes fil
 | `previews/` | Optional viewport / test captures | Yes |
 | `meshes/` | Authored `.glb` units (Phase 02) | Yes (`.gitkeep` until assets land) |
 | `textures/` | PBR map sets per unit (Phase 02) | Yes (`.gitkeep` until assets land) |
-| `materials/` | Material profile JSON (Phase 02) | Yes (`.gitkeep` until profiles land) |
+| `materials/` | Material profile JSON (Phase 02) | Yes — `*_pbr_v1.json` per faction |
 | `behaviors/` | Behavior profile JSON (Phase 02) | Yes (`.gitkeep` until profiles land) |
 | `animations/` | Shared animator controllers (Phase 02) | Yes (`.gitkeep` until controllers land) |
 
@@ -26,7 +26,20 @@ All units share Phase 01 mechanics fields. Phase 02 adds:
 | `assetMode` | No (default `procedural`) | `procedural` \| `mesh3d` |
 | `mesh` | Yes when `mesh3d` | Path to `.glb` |
 | `textures` | No | `albedo`, `normal`, `orm`; optional `emissive` |
-| `materialProfile` | No | Profile id (e.g. `humans_pbr_v1`) |
+| `materialProfile` | No | Profile id (e.g. `humans_pbr_v1`) — see `materials/` |
+
+## Material profiles (Phase 02 §6)
+
+| Profile id | Faction | Shader |
+|------------|---------|--------|
+| `humans_pbr_v1` | Humans | `TBG/CharacterPBR` |
+| `undead_pbr_v1` | Undead | `TBG/CharacterPBR` |
+| `machines_pbr_v1` | Machines | `TBG/CharacterPBR` |
+| `plants_pbr_v1` | Plants | `TBG/CharacterPBR` |
+
+Texture naming: `{unit_id}_albedo.png`, `{unit_id}_normal.png`, `{unit_id}_orm.png` (optional `{unit_id}_emissive.png`).
+
+Export placeholders: `python3 tools/material-maker/export_textures.py --all-pilots`
 | `behaviorProfile` | No | Profile id (e.g. `tank_melee_v1`) |
 | `animatorController` | No | Path to Unity `.controller` |
 

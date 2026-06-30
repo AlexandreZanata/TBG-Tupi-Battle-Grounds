@@ -34,6 +34,15 @@ Create, edit, delete units and export cards from the browser. Uses the same JSON
 ./scripts/verify.sh
 ```
 
+## Material Maker (texture pipeline)
+
+```bash
+python3 tools/material-maker/export_textures.py --id tank_human_01 --faction Humans
+python3 tools/material-maker/export_textures.py --all-pilots
+```
+
+See [material-maker/README.md](material-maker/README.md).
+
 ## Unity
 
 See [unity/README.md](../unity/README.md) — menu **TBG → Character Studio**.

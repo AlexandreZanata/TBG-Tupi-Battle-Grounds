@@ -1,0 +1,13 @@
+{
+  "id": "machines_pbr_v1",
+  "faction": "Machines",
+  "shader": "TBG/CharacterPBR",
+  "graph": "tools/material-maker/machines_metal.mm",
+  "properties": {
+    "_Metallic": 0.85,
+    "_Smoothness": 0.62,
+    "_OcclusionStrength": 0.9,
+    "_EmissionStrength": 0.0
+  },
+  "textureSlots": ["albedo", "normal", "orm"]
+}
