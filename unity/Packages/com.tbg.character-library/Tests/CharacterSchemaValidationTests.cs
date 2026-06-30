@@ -9,18 +9,18 @@ namespace TBG.CharacterLibrary.Tests
     public sealed class CharacterSchemaValidationTests
     {
         [Test]
-        public void Validate_Mesh3dPilot_HasNoErrors()
+        public void Validate_Mesh3dDemo_HasNoErrors()
         {
-            var record = LoadRecord("tank_human_01");
+            var record = LoadRecord("demo_striker_01");
             var errors = CharacterDefinitionValidator.Validate(record);
             Assert.That(errors, Is.Empty);
             Assert.That(record.assetMode, Is.EqualTo("mesh3d"));
         }
 
         [Test]
-        public void Validate_Mesh3dFixture_HasNoErrors()
+        public void Validate_Mesh3dExample_HasNoErrors()
         {
-            var record = LoadRecord("test_mesh3d_spawn");
+            var record = LoadRecord("_schema.mesh3d.example");
             var errors = CharacterDefinitionValidator.Validate(record);
             Assert.That(errors, Is.Empty);
             Assert.That(record.mesh, Does.EndWith(".glb"));
@@ -29,7 +29,7 @@ namespace TBG.CharacterLibrary.Tests
         [Test]
         public void Validate_Mesh3dWithoutMesh_ReturnsError()
         {
-            var record = LoadRecord("test_mesh3d_spawn");
+            var record = LoadRecord("demo_striker_01");
             record.mesh = null;
             var errors = CharacterDefinitionValidator.Validate(record);
             Assert.That(errors, Does.Contain("mesh3d assetMode requires mesh path"));
@@ -38,7 +38,7 @@ namespace TBG.CharacterLibrary.Tests
         [Test]
         public void Validate_InvalidAssetMode_ReturnsError()
         {
-            var record = LoadRecord("tank_human_01");
+            var record = LoadRecord("demo_striker_01");
             record.assetMode = "fbx";
             var errors = CharacterDefinitionValidator.Validate(record);
             Assert.That(errors, Does.Contain("invalid assetMode: fbx"));
@@ -47,7 +47,7 @@ namespace TBG.CharacterLibrary.Tests
         [Test]
         public void Validate_TexturesObject_RequiresCoreMaps()
         {
-            var record = LoadRecord("test_mesh3d_spawn");
+            var record = LoadRecord("_schema.mesh3d.example");
             record.textures = new CharacterTexturesRecord
             {
                 albedo = string.Empty,
@@ -59,10 +59,10 @@ namespace TBG.CharacterLibrary.Tests
         }
 
         [Test]
-        public void Load_AllPilotDefinitions_PassValidation()
+        public void Load_AllDemoDefinitions_PassValidation()
         {
             var loader = new CharacterDefinitionLoader();
-            foreach (var pilotId in new[] { "tank_human_01", "dps_undead_01", "support_machine_01", "ranged_plant_01" })
+            foreach (var pilotId in new[] { "demo_scout_01", "demo_striker_01", "demo_guard_01" })
             {
                 var definition = loader.Load(pilotId);
                 Assert.That(definition.AssetMode, Is.EqualTo(CharacterAssetMode.Mesh3D));

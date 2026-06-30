@@ -1,0 +1,19 @@
+{
+  "id": "demo_reaver_01",
+  "characterName": "Reaver Pilot",
+  "archetype": "DPS",
+  "faction": "Humans",
+  "assetMode": "mesh3d",
+  "mesh": "content/characters/meshes/demo_reaver_01.glb",
+  "materialProfile": "humans_pbr_v1",
+  "behaviorProfile": "dps_melee_v1",
+  "animatorController": "content/characters/animations/HumanoidLight.controller",
+  "heightScale": 1.0,
+  "bodyWidthScale": 1.0,
+  "headScale": 1.0,
+  "limbLengthScale": 1.0,
+  "primaryColor": "#FFFFFF",
+  "secondaryColor": "#FFFFFF",
+  "accessories": ["Weapon"],
+  "evolutionStage": 0
+}

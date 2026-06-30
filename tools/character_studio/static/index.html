@@ -4,7 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TBG Character Studio</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/css/studio.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
   <div class="app">
@@ -17,6 +25,10 @@
             <p class="brand__sub">Procedural &amp; mesh3d unit definitions</p>
           </div>
         </div>
+        <nav class="topbar__nav">
+          <a class="topbar__link topbar__link--active" href="/" aria-current="page">Studio</a>
+          <a class="topbar__link" href="/showcase.html">Showcase</a>
+        </nav>
         <span id="health" class="badge">checking</span>
       </div>
     </header>
@@ -141,10 +153,30 @@
       </section>
 
       <section class="card panel panel--preview">
-        <header class="panel__head">
-          <h2>Card preview</h2>
+        <header class="panel__head panel__head--preview">
+          <h2>Preview</h2>
+          <div class="preview-tabs" role="tablist">
+            <button type="button" class="preview-tabs__btn is-active" data-tab="viewport3d" role="tab">3D</button>
+            <button type="button" class="preview-tabs__btn" data-tab="card" role="tab">Card</button>
+          </div>
         </header>
-        <div class="preview">
+
+        <div id="viewport3dPanel" class="preview preview--3d" role="tabpanel">
+          <div id="viewer3dLoading" class="preview__loading" hidden>Loading 3D…</div>
+          <div id="viewer3dEmpty" class="preview__empty">Select a unit to preview</div>
+          <div id="viewer3d" class="viewer3d" hidden></div>
+          <div class="viewer3d-controls" id="viewer3dControls" hidden>
+            <label class="viewer3d-controls__toggle">
+              <input type="checkbox" id="autoRotate" />
+              Turntable
+            </label>
+            <button type="button" class="btn btn--ghost btn--sm" id="btnPlayIdle">Idle</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="btnPlayAttack">Attack</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="btnPlayDeath">Death</button>
+          </div>
+        </div>
+
+        <div id="cardPanel" class="preview preview--card" role="tabpanel" hidden>
           <div id="previewEmpty" class="preview__empty">Select a unit to preview</div>
           <img id="cardPreview" class="preview__image" alt="Unit card preview" hidden />
         </div>
@@ -152,6 +184,6 @@
     </main>
   </div>
 
-  <script src="/app.js" defer></script>
+  <script type="module" src="/js/studio/app.js"></script>
 </body>
 </html>

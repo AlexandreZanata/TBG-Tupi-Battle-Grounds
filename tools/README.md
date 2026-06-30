@@ -26,6 +26,14 @@ python3 -m tools.character_studio export-all-cards
 # Open http://127.0.0.1:8765
 ```
 
+**3D preview** (Three.js): studio lighting, orbit + turntable, embedded GLB PBR with color tint, or external textures. Static meshes get procedural Idle/Attack/Death until rigged export.
+
+**Showcase carousel:** http://127.0.0.1:8765/showcase.html — 2 sculpts per slide, click for modal 3D at +30% scale. GLB decode is cached in-browser per mesh URL.
+
+**Import high-poly sculpts:** `tools/mesh-pipeline/optimize_glb.sh` (visual mode = same look, Draco only). Demo units: `demo_scout_01` … `demo_reaver_01`. Max mesh preview **150 MB**.
+
+API: `/api/characters/{id}/mesh`, `/api/content/characters/...`
+
 Create, edit, delete units and export cards from the browser. Uses the same JSON files under `content/characters/`.
 
 ## Verify

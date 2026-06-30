@@ -25,11 +25,10 @@ namespace TBG.CharacterLibrary.Tests
             }
         }
 
-        [TestCase("tank_human_01", "AttackHeavy")]
-        [TestCase("dps_undead_01", "AttackFast")]
-        [TestCase("support_machine_01", "AttackCast")]
-        [TestCase("ranged_plant_01", "AttackRanged")]
-        public void Spawn_Mesh3dPilot_LoadsMeshAndPlaysBehaviors(string pilotId, string attackState)
+        [TestCase("demo_guard_01", "AttackHeavy")]
+        [TestCase("demo_striker_01", "AttackFast")]
+        [TestCase("demo_scout_01", "AttackRanged")]
+        public void Spawn_Mesh3dDemo_LoadsMeshAndPlaysBehaviors(string pilotId, string attackState)
         {
             var catalog = new CharacterCatalog();
             var instance = catalog.Spawn(pilotId, _parent);
@@ -47,22 +46,16 @@ namespace TBG.CharacterLibrary.Tests
             Assert.DoesNotThrow(() => instance.PlayAction(CharacterAction.Death));
 
             var meshPath = Path.Combine(CharacterPaths.GetRepoRoot(), $"content/characters/meshes/{pilotId}.glb");
-            Assert.That(File.Exists(meshPath), Is.True, $"missing pilot glb: {meshPath}");
+            Assert.That(File.Exists(meshPath), Is.True, $"missing demo glb: {meshPath}");
 
             catalog.Release(instance);
         }
 
         [Test]
-        public void Load_AllPilotDefinitions_AreMesh3D()
+        public void Load_AllDemoDefinitions_AreMesh3D()
         {
             var loader = new CharacterDefinitionLoader();
-            foreach (var pilotId in new[]
-                     {
-                         "tank_human_01",
-                         "dps_undead_01",
-                         "support_machine_01",
-                         "ranged_plant_01"
-                     })
+            foreach (var pilotId in new[] { "demo_scout_01", "demo_striker_01", "demo_guard_01" })
             {
                 var definition = loader.Load(pilotId);
                 Assert.That(definition.AssetMode, Is.EqualTo(CharacterAssetMode.Mesh3D));

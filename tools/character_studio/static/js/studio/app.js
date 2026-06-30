@@ -1,3 +1,6 @@
+import { mountCharacterViewer } from "../viewer/viewer3d.js";
+import { playBehaviorAction } from "./behaviorPlayback.js";
+
 const ARCHETYPES = ["Tank", "DPS", "Support", "Ranged", "Control"];
 const FACTIONS = ["Humans", "Undead", "Machines", "Plants"];
 
@@ -5,6 +8,8 @@ const $ = (id) => document.getElementById(id);
 
 let selectedId = null;
 let characterCache = {};
+let viewer = null;
+let activePreviewTab = "viewport3d";
 
 function fillSelect(id, values) {
   $(id).innerHTML = values.map((v) => `<option value="${v}">${v}</option>`).join("");
@@ -22,9 +27,16 @@ function setHealth(state, isError = false) {
   health.className = isError ? "badge badge--error" : "badge badge--ok";
 }
 
-function setPreviewVisible(visible) {
+function setCardPreviewVisible(visible) {
   $("cardPreview").hidden = !visible;
   $("previewEmpty").hidden = visible;
+}
+
+function setViewerVisible(visible) {
+  $("viewer3d").hidden = !visible;
+  $("viewer3dControls").hidden = !visible;
+  $("viewer3dEmpty").hidden = visible;
+  $("viewer3dLoading").hidden = true;
 }
 
 async function api(path, options = {}) {
@@ -48,6 +60,7 @@ function colorInputFromHex(hex) {
 }
 
 function readEditForm() {
+  const cached = characterCache[$("id").value] || {};
   return {
     id: $("id").value,
     characterName: $("characterName").value,
@@ -59,8 +72,13 @@ function readEditForm() {
     limbLengthScale: parseFloat($("limbLengthScale").value),
     primaryColor: $("primaryColor").value,
     secondaryColor: $("secondaryColor").value,
-    accessories: [],
+    accessories: cached.accessories || [],
     evolutionStage: parseInt($("evolutionStage").value, 10),
+    assetMode: cached.assetMode || "procedural",
+    mesh: cached.mesh || null,
+    textures: cached.textures || null,
+    materialProfile: cached.materialProfile || null,
+    behaviorProfile: cached.behaviorProfile || null,
   };
 }
 
@@ -79,6 +97,7 @@ function fillEditForm(data) {
   $("secondaryColor").value = colorInputFromHex(data.secondaryColor);
   $("evolutionStage").value = data.evolutionStage;
   updateMesh3dPanel(data);
+  refreshViewer(data);
 }
 
 function updateMesh3dPanel(data) {
@@ -91,11 +110,10 @@ function updateMesh3dPanel(data) {
   badge.className =
     assetMode === "mesh3d" ? "unit-item__badge unit-item__badge--mesh3d" : "unit-item__badge";
 
-  const showMesh = assetMode === "mesh3d" && data?.mesh;
   panel.hidden = assetMode !== "mesh3d";
-  if (showMesh) {
+  if (assetMode === "mesh3d" && data?.mesh) {
     link.textContent = data.mesh;
-    link.href = "#";
+    link.href = `/api/characters/${data.id}/mesh`;
     link.title = data.mesh;
   } else {
     link.textContent = "—";
@@ -135,6 +153,60 @@ function renderUnitItem(character) {
   `;
 }
 
+function switchPreviewTab(tab) {
+  activePreviewTab = tab;
+  document.querySelectorAll(".preview-tabs__btn").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.tab === tab);
+  });
+  $("viewport3dPanel").hidden = tab !== "viewport3d";
+  $("cardPanel").hidden = tab !== "card";
+}
+
+function ensureViewer() {
+  if (viewer) return viewer;
+  viewer = mountCharacterViewer($("viewer3d"), {
+    onLoading: () => {
+      $("viewer3dLoading").hidden = false;
+      $("viewer3dLoading").textContent = "Loading 3D…";
+      $("viewer3dEmpty").hidden = true;
+    },
+    onProgress: (message) => {
+      $("viewer3dLoading").hidden = false;
+      $("viewer3dLoading").textContent = message;
+    },
+    onReady: () => {
+      $("viewer3dLoading").hidden = true;
+      setViewerVisible(true);
+    },
+    onError: (error) => {
+      $("viewer3dLoading").hidden = true;
+      setViewerVisible(false);
+      $("viewer3dEmpty").hidden = false;
+      $("viewer3dEmpty").textContent = error?.message || "3D preview failed";
+    },
+  });
+  $("autoRotate").addEventListener("change", (e) => viewer.setAutoRotate(e.target.checked));
+  $("btnPlayIdle").addEventListener("click", () => playAction("idle"));
+  $("btnPlayAttack").addEventListener("click", () => playAction("attack"));
+  $("btnPlayDeath").addEventListener("click", () => playAction("death"));
+  return viewer;
+}
+
+async function playAction(action) {
+  if (!viewer || !selectedId) return;
+  const character = { ...characterCache[selectedId], ...readEditForm() };
+  await playBehaviorAction(viewer, character, action);
+}
+
+function refreshViewer(data) {
+  if (!data) {
+    setViewerVisible(false);
+    $("viewer3dEmpty").hidden = false;
+    return;
+  }
+  ensureViewer().loadCharacter(data);
+}
+
 async function loadList() {
   const characters = await api("/api/characters");
   $("unitCount").textContent = `${characters.length} total`;
@@ -157,11 +229,12 @@ async function loadList() {
 
 async function selectCharacter(id) {
   selectedId = id;
-  fillEditForm(await api(`/api/characters/${id}`));
+  const data = await api(`/api/characters/${id}`);
+  fillEditForm(data);
   $("cardPreview").src = cardUrl(id);
-  setPreviewVisible(true);
+  setCardPreviewVisible(true);
   await loadList();
-  setStatus(`Loaded ${id}`);
+  setStatus(`Loaded ${id} — drag to orbit, scroll to zoom`);
 }
 
 async function createCharacter() {
@@ -184,7 +257,8 @@ async function saveCharacter(event) {
   event.preventDefault();
   const body = readEditForm();
   await api(`/api/characters/${body.id}`, { method: "PUT", body: JSON.stringify(body) });
-  characterCache[body.id] = body;
+  const reloaded = await api(`/api/characters/${body.id}`);
+  characterCache[body.id] = reloaded;
   await selectCharacter(body.id);
   setStatus(`Saved ${body.id}`);
 }
@@ -199,7 +273,9 @@ async function deleteCharacter() {
   $("editForm").reset();
   $("editId").textContent = "—";
   $("cardPreview").removeAttribute("src");
-  setPreviewVisible(false);
+  setCardPreviewVisible(false);
+  setViewerVisible(false);
+  $("viewer3dEmpty").hidden = false;
   await loadList();
   setStatus(`Deleted ${id}`);
 }
@@ -209,19 +285,31 @@ async function init() {
   fillSelect("newFaction", FACTIONS);
   fillSelect("archetype", ARCHETYPES);
   fillSelect("faction", FACTIONS);
-  setPreviewVisible(false);
+  setCardPreviewVisible(false);
+  setViewerVisible(false);
+
+  document.querySelectorAll(".preview-tabs__btn").forEach((btn) => {
+    btn.addEventListener("click", () => switchPreviewTab(btn.dataset.tab));
+  });
 
   $("btnCreate").addEventListener("click", () => createCharacter().catch((err) => setStatus(err.message, true)));
   $("editForm").addEventListener("submit", (event) => saveCharacter(event).catch((err) => setStatus(err.message, true)));
   $("btnDelete").addEventListener("click", () => deleteCharacter().catch((err) => setStatus(err.message, true)));
+
+  ["heightScale", "bodyWidthScale", "headScale", "limbLengthScale", "primaryColor", "secondaryColor"].forEach((id) => {
+    $(id).addEventListener("change", () => {
+      if (!selectedId) return;
+      const draft = { ...characterCache[selectedId], ...readEditForm() };
+      refreshViewer(draft);
+    });
+  });
 
   try {
     const health = await api("/api/health");
     setHealth(health.status);
 
     await loadList();
-    const characters = await api("/api/characters");
-    if (characters.length) await selectCharacter(characters[0].id);
+    await selectCharacter("demo_scout_01");
   } catch (error) {
     setHealth("offline", true);
     setStatus(error.message, true);

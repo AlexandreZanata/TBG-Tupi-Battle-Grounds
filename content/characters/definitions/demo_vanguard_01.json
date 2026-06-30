@@ -1,0 +1,19 @@
+{
+  "id": "demo_vanguard_01",
+  "characterName": "Vanguard Pilot",
+  "archetype": "Control",
+  "faction": "Humans",
+  "assetMode": "mesh3d",
+  "mesh": "content/characters/meshes/demo_vanguard_01.glb",
+  "materialProfile": "humans_pbr_v1",
+  "behaviorProfile": "control_cast_v1",
+  "animatorController": "content/characters/animations/HumanoidHeavy.controller",
+  "heightScale": 1.0,
+  "bodyWidthScale": 1.05,
+  "headScale": 1.0,
+  "limbLengthScale": 1.0,
+  "primaryColor": "#FFFFFF",
+  "secondaryColor": "#FFFFFF",
+  "accessories": ["ArmorBlock"],
+  "evolutionStage": 0
+}

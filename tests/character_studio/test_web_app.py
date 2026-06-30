@@ -53,8 +53,8 @@ def test_index_html(client: TestClient) -> None:
     assert response.status_code == 200
     assert "Character Studio" in response.text
     assert "mesh3d" in response.text.lower()
-    assert 'href="/styles.css"' in response.text
-    assert 'src="/app.js"' in response.text
+    assert 'href="/css/studio.css"' in response.text
+    assert 'src="/js/studio/app.js"' in response.text
 
 
 def test_list_includes_mesh_for_mesh3d_units(client: TestClient) -> None:
@@ -84,5 +84,7 @@ def test_list_includes_mesh_for_mesh3d_units(client: TestClient) -> None:
 
 
 def test_static_assets(client: TestClient) -> None:
-    assert client.get("/styles.css").status_code == 200
-    assert client.get("/app.js").status_code == 200
+    assert client.get("/css/studio.css").status_code == 200
+    assert client.get("/js/studio/app.js").status_code == 200
+    assert client.get("/css/showcase.css").status_code == 200
+    assert client.get("/js/showcase/showcase.js").status_code == 200

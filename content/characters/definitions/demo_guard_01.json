@@ -1,0 +1,19 @@
+{
+  "id": "demo_guard_01",
+  "characterName": "Guard Pilot",
+  "archetype": "Tank",
+  "faction": "Humans",
+  "assetMode": "mesh3d",
+  "mesh": "content/characters/meshes/demo_guard_01.glb",
+  "materialProfile": "humans_pbr_v1",
+  "behaviorProfile": "tank_melee_v1",
+  "animatorController": "content/characters/animations/HumanoidHeavy.controller",
+  "heightScale": 1.05,
+  "bodyWidthScale": 1.1,
+  "headScale": 1.0,
+  "limbLengthScale": 1.0,
+  "primaryColor": "#FFFFFF",
+  "secondaryColor": "#FFFFFF",
+  "accessories": ["Shield"],
+  "evolutionStage": 0
+}

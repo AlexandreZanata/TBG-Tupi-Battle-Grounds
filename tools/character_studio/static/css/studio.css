@@ -82,6 +82,36 @@ body {
   color: var(--gray-600);
 }
 
+.topbar__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  margin-right: 0.75rem;
+}
+
+.topbar__link {
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  text-decoration: none;
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+}
+
+.topbar__link:hover {
+  color: var(--black);
+  border-color: var(--black);
+}
+
+.topbar__link--active {
+  color: var(--white);
+  background: var(--black);
+  border-color: var(--black);
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -447,14 +477,112 @@ body {
   top: 1rem;
 }
 
+.panel__head--preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.preview-tabs {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  background: var(--gray-100);
+  border-radius: 999px;
+}
+
+.preview-tabs__btn {
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  background: transparent;
+  cursor: pointer;
+}
+
+.preview-tabs__btn.is-active {
+  color: var(--black);
+  background: var(--white);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
 .preview {
   display: grid;
   place-items: center;
   min-height: 420px;
-  padding: 1.5rem;
+  padding: 1rem;
   background: var(--gray-50);
   border: 1px solid var(--gray-100);
   border-radius: var(--radius-sm);
+}
+
+.preview--3d {
+  grid-template-rows: 1fr auto;
+  align-items: stretch;
+  gap: 0.75rem;
+  min-height: 460px;
+  background: #121218;
+  border-color: #2a2a34;
+}
+
+.viewer3d {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  overflow: hidden;
+  border: 1px solid #2f2f3a;
+  border-radius: var(--radius-sm);
+  background: #0e0e14;
+}
+
+.viewer3d-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  overflow: hidden;
+}
+
+.viewer3d-mount {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.viewer3d-mount canvas {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.viewer3d-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.viewer3d-controls__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+.btn--sm {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+}
+
+.preview__loading {
+  grid-column: 1 / -1;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  text-align: center;
 }
 
 .preview__empty {

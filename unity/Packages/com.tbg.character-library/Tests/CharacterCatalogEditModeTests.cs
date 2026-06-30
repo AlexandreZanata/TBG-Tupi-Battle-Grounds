@@ -40,29 +40,29 @@ namespace TBG.CharacterLibrary.Tests
         }
 
         [Test]
-        public void Spawn_Mesh3dPilot_WhenGlbPresent_CreatesRootUnderParent()
+        public void Spawn_Mesh3dDemo_WhenGlbPresent_CreatesRootUnderParent()
         {
             var catalog = new CharacterCatalog();
-            var instance = catalog.Spawn("test_mesh3d_spawn", _parent);
+            var instance = catalog.Spawn("demo_striker_01", _parent);
 
-            Assert.That(instance.Id, Is.EqualTo("test_mesh3d_spawn"));
+            Assert.That(instance.Id, Is.EqualTo("demo_striker_01"));
             Assert.That(instance.Root.transform.parent, Is.EqualTo(_parent));
-            Assert.That(instance.Root.name, Is.EqualTo("Test Mesh3D Fixture"));
+            Assert.That(instance.Root.name, Is.EqualTo("Striker Pilot"));
             Assert.That(instance.Root.GetComponentsInChildren<MeshFilter>().Length, Is.GreaterThan(0));
 
             var meshPath = Path.Combine(
                 CharacterPaths.GetRepoRoot(),
-                "content/characters/meshes/_test_fixture.glb");
+                "content/characters/meshes/demo_striker_01.glb");
             Assert.That(File.Exists(meshPath), Is.True);
 
             catalog.Release(instance);
         }
 
         [Test]
-        public void Spawn_Mesh3dWithoutGlbFile_ThrowsFileNotFound()
+        public void Spawn_UnknownUnit_ThrowsFileNotFound()
         {
             var catalog = new CharacterCatalog();
-            Assert.Throws<FileNotFoundException>(() => catalog.Spawn("test_mesh3d_missing_glb", _parent));
+            Assert.Throws<FileNotFoundException>(() => catalog.Spawn("missing_unit_xyz", _parent));
         }
     }
 }

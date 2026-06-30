@@ -14,7 +14,13 @@ from character_studio.validation import ValidationError, validate_definition
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MESH3D_EXAMPLE = REPO_ROOT / "content/characters/definitions/_schema.mesh3d.example.json"
-PILOT_IDS = {"tank_human_01", "dps_undead_01", "support_machine_01", "ranged_plant_01"}
+DEMO_MESH3D_IDS = {
+    "demo_scout_01",
+    "demo_striker_01",
+    "demo_guard_01",
+    "demo_vanguard_01",
+    "demo_reaver_01",
+}
 
 
 @pytest.fixture
@@ -51,10 +57,10 @@ def test_procedural_definition_without_asset_mode_still_valid(repo: CharacterRep
     assert loaded.mesh is None
 
 
-def test_existing_pilot_json_files_are_mesh3d() -> None:
+def test_existing_demo_sculpt_json_files_are_mesh3d() -> None:
     definitions = REPO_ROOT / "content" / "characters" / "definitions"
     for path in sorted(definitions.glob("*.json")):
-        if path.stem not in PILOT_IDS:
+        if path.stem not in DEMO_MESH3D_IDS:
             continue
         defn = CharacterDefinition.from_dict(json.loads(path.read_text(encoding="utf-8")))
         validate_definition(defn)
@@ -77,9 +83,9 @@ def test_mesh3d_rejects_non_glb_mesh_path() -> None:
 
 
 def test_mesh3d_valid_with_mesh_and_textures(repo: CharacterRepository) -> None:
-    defn = _mesh3d_definition("dps_undead_01")
+    defn = _mesh3d_definition("studio_mesh3d_unit")
     repo.create(defn)
-    loaded = repo.load("dps_undead_01")
+    loaded = repo.load("studio_mesh3d_unit")
     assert loaded.assetMode == "mesh3d"
     assert loaded.mesh.endswith(".glb")
     assert loaded.textures is not None

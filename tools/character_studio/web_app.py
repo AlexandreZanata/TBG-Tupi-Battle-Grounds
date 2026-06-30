@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .card_renderer import render_card
+from .content_assets import mesh_media_type, resolve_character_asset, texture_media_type
 from .defaults import create_default_definition
 from .models import DEFAULT_ASSET_MODE, CharacterDefinition
 from .paths import find_repo_root
@@ -129,6 +130,40 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
         defn = repo.load(unit_id)
         path = render_card(defn, repo.card_path(unit_id))
         return {"path": str(path)}
+
+    @app.get("/api/characters/{unit_id}/mesh-info")
+    def get_character_mesh_info(unit_id: str) -> dict[str, int | str]:
+        try:
+            defn = repo.load(unit_id)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        if defn.assetMode != "mesh3d" or not defn.mesh:
+            raise HTTPException(status_code=404, detail="unit has no mesh3d asset")
+        path = resolve_character_asset(root, defn.mesh)
+        return {
+            "size": path.stat().st_size,
+            "contentType": mesh_media_type(path),
+        }
+
+    @app.get("/api/characters/{unit_id}/mesh")
+    @app.head("/api/characters/{unit_id}/mesh")
+    def get_character_mesh(unit_id: str) -> FileResponse:
+        try:
+            defn = repo.load(unit_id)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        if defn.assetMode != "mesh3d" or not defn.mesh:
+            raise HTTPException(status_code=404, detail="unit has no mesh3d asset")
+        path = resolve_character_asset(root, defn.mesh)
+        return FileResponse(path, media_type=mesh_media_type(path))
+
+    @app.get("/api/content/{asset_path:path}")
+    def get_content_asset(asset_path: str) -> FileResponse:
+        path = resolve_character_asset(root, asset_path)
+        media_type = mesh_media_type(path)
+        if path.suffix.lower() in {".png", ".jpg", ".jpeg"}:
+            media_type = texture_media_type(path)
+        return FileResponse(path, media_type=media_type)
 
     app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
     return app

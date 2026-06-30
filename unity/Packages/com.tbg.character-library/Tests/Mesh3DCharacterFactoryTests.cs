@@ -26,10 +26,10 @@ namespace TBG.CharacterLibrary.Tests
         }
 
         [Test]
-        public void Load_TestFixture_InstantiatesMeshChild()
+        public void Load_DemoSculpt_InstantiatesMeshChild()
         {
             var loader = new CharacterDefinitionLoader();
-            var definition = loader.Load("test_mesh3d_spawn");
+            var definition = loader.Load("demo_striker_01");
             var meshPath = Path.Combine(CharacterPaths.GetRepoRoot(), definition.MeshPath);
             var factory = new Mesh3DCharacterFactory();
 
@@ -46,7 +46,7 @@ namespace TBG.CharacterLibrary.Tests
         public void Create_AttachesAnimatorComponent()
         {
             var loader = new CharacterDefinitionLoader();
-            var definition = loader.Load("test_mesh3d_spawn");
+            var definition = loader.Load("demo_striker_01");
             var factory = new Mesh3DCharacterFactory();
             var root = factory.Create(definition, _parent);
 
@@ -59,9 +59,11 @@ namespace TBG.CharacterLibrary.Tests
         public void Load_MissingGlb_ThrowsFileNotFound()
         {
             var loader = new CharacterDefinitionLoader();
-            var definition = loader.Load("test_mesh3d_missing_glb");
+            var definition = loader.Load("demo_striker_01");
             var factory = new Mesh3DCharacterFactory();
-            var missingPath = Path.Combine(CharacterPaths.GetRepoRoot(), definition.MeshPath);
+            var missingPath = Path.Combine(
+                CharacterPaths.GetRepoRoot(),
+                "content/characters/meshes/missing_mesh_xyz.glb");
 
             Assert.Throws<FileNotFoundException>(() => factory.Load(missingPath, definition, _parent));
         }
