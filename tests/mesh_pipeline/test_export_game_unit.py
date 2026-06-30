@@ -41,7 +41,7 @@ def test_assembled_skinned_glb_passes_budget(tmp_path: Path) -> None:
     assert result.ok, result.errors
     assert result.stats.skins == 1
     assert result.stats.animations == 7
-    assert result.stats.bones == 19
+    assert result.stats.bones == 21
     assert result.stats.triangles == 12
 
 

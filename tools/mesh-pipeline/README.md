@@ -90,6 +90,8 @@ Pipeline steps:
 Python fallback (no Blender): proxy skinned mesh + clip stubs for CI/dev only.
 
 Validate game meshes: `python3 tools/mesh-pipeline/validate_game_glb.py <path.glb>`  
+Phase 04b baseline audit: `python3 tools/mesh_pipeline/baseline_audit.py --write` → `.local/phases/04b-biped-game-ready-pipeline/AUDIT.md`  
+AI mesh input contract: `tools/blender/scripts/PREP-AI-MESH-SPEC.md`  
 Budget reference: [BUDGETS.md](./BUDGETS.md)
 
 Web studio accepts showcase meshes up to **150 MB** per asset.
