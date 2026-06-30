@@ -1,0 +1,16 @@
+{
+  "id": "support_machine_01",
+  "characterName": "Gear Medic",
+  "archetype": "Support",
+  "faction": "Machines",
+  "heightScale": 0.9,
+  "bodyWidthScale": 0.7,
+  "headScale": 1.2,
+  "limbLengthScale": 0.8,
+  "primaryColor": "#4A6FA5",
+  "secondaryColor": "#B0C4DE",
+  "accessories": [
+    "Helmet"
+  ],
+  "evolutionStage": 0
+}

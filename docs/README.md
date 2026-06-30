@@ -33,6 +33,16 @@ Non-trivial technical and product decisions, recorded before implementation.
 |----------|---------|
 | [design/brand-system.md](design/brand-system.md) | Brand identity, voice, visual system, UI kit |
 | [design/character-creation-guide.md](design/character-creation-guide.md) | Unit design, mechanics-first workflow, 2D art pipeline |
+| [design/procedural-character-generator.md](design/procedural-character-generator.md) | Procedural units — geometry and color 100% in code, Character Studio |
+| [design/pilot-silhouette-checklist.md](design/pilot-silhouette-checklist.md) | Phase 01 pilot unit silhouette validation |
+
+---
+
+## Content (versioned)
+
+| Path | Purpose |
+|------|---------|
+| [../content/characters/](../content/characters/) | Unit JSON definitions, card PNGs, previews (studio CRUD) |
 
 ---
 

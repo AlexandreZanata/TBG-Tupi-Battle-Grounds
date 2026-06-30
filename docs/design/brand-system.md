@@ -119,10 +119,10 @@ Use [GLOSSARY.md](../GLOSSARY.md) as the canonical term list once finalized.
 
 | Faction | Primary / Secondary |
 |---------|---------------------|
-| Humans | `#______` / `#______` |
-| Undead | `#______` / `#______` |
-| Machines | `#______` / `#______` |
-| Plants | `#______` / `#______` |
+| Humans | `#8B7355` | `#C4A882` |
+| Undead | `#4A5D23` | `#7D8B55` |
+| Machines | `#4A6FA5` | `#B0C4DE` |
+| Plants | `#2D5A27` | `#6B8E23` |
 
 **Archetype color hints (gameplay readability):**
 

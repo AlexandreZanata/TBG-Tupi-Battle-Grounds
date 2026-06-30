@@ -1,0 +1,16 @@
+{
+  "id": "ranged_plant_01",
+  "characterName": "Thorn Sniper",
+  "archetype": "Ranged",
+  "faction": "Plants",
+  "heightScale": 1.1,
+  "bodyWidthScale": 0.6,
+  "headScale": 0.8,
+  "limbLengthScale": 1.3,
+  "primaryColor": "#2D5A27",
+  "secondaryColor": "#6B8E23",
+  "accessories": [
+    "Weapon"
+  ],
+  "evolutionStage": 0
+}

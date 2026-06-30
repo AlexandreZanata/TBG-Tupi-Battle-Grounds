@@ -1,0 +1,40 @@
+# Unity — gitignore template
+# Rename or merge when Unity project is created under unity/
+
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.vs/
+.gradle/
+ExportedObj/
+.consulo/
+*.apk
+*.aab
+*.unitypackage
+*.app
+crashlytics-build.properties
+
+# Keep Assets and ProjectSettings versioned
+!Assets/
+!ProjectSettings/
+!Packages/

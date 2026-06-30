@@ -137,6 +137,36 @@
 
 ---
 
+## CharacterDefinition
+
+**Definition:** Parameter set describing a procedural unit — archetype, faction, proportions, colors, accessories, evolution stage. Persisted as JSON under `content/characters/definitions/`.  
+**Not the same as:** ScriptableObject cache in Unity (derived import, not source of truth).  
+**Code name:** `CharacterDefinition`
+
+---
+
+## ProceduralCharacterBuilder
+
+**Definition:** Runtime component that assembles unit geometry from primitives according to a `CharacterDefinition`. No per-unit `.fbx` files.  
+**Code name:** `ProceduralCharacterBuilder`
+
+---
+
+## CharacterStudio
+
+**Definition:** Unity Editor tool (`CharacterStudioWindow`) that creates, edits, deletes unit JSON on disk and exports card images.  
+**Not the same as:** In-game unit shop.  
+**Code name:** `CharacterStudioWindow`
+
+---
+
+## VisualGrammar
+
+**Definition:** Fixed set of shapes, proportion rules, and faction palettes used to generate all procedural units consistently.  
+**Code name:** N/A
+
+---
+
 ## _(Add terms below as domain grows)_
 
 <!--

@@ -13,6 +13,8 @@ Start at **[docs/README.md](docs/README.md)**:
 - [Design decisions (ADRs)](docs/adr/)
 - [Brand system](docs/design/brand-system.md)
 - [Character / unit guide](docs/design/character-creation-guide.md)
+- [Procedural character generator](docs/design/procedural-character-generator.md)
+- [Character content (`content/characters/`)](content/characters/)
 - [Infrastructure](docs/architecture/infrastructure-overview.md)
 - [Glossary](docs/GLOSSARY.md)
 
@@ -22,6 +24,12 @@ Read **[AGENTS.md](AGENTS.md)** first. Cursor rules in `.cursor/rules/` apply au
 
 ```bash
 ./agent-harness/resolve-rules.sh api auth game-server
+```
+
+## Verify
+
+```bash
+./scripts/verify.sh
 ```
 
 ## Key constraints

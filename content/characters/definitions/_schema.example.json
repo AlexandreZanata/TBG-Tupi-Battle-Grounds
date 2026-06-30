@@ -1,0 +1,14 @@
+{
+  "id": "tank_human_01",
+  "characterName": "Iron Guard",
+  "archetype": "Tank",
+  "faction": "Humans",
+  "heightScale": 1.2,
+  "bodyWidthScale": 1.8,
+  "headScale": 0.8,
+  "limbLengthScale": 0.7,
+  "primaryColor": "#8B7355",
+  "secondaryColor": "#C4A882",
+  "accessories": ["Shield"],
+  "evolutionStage": 0
+}

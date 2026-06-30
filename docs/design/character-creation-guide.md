@@ -17,6 +17,8 @@ The 2D vs 3D choice depends on:
 
 For TBG's single-lane, non-lateral-movement design, **2D with a strong consistent style** is the recommended starting point.
 
+> **Alternative pipeline (active):** [procedural-character-generator.md](procedural-character-generator.md) — procedural 3D primitives + faction shaders, JSON on disk, Character Studio for CRUD and card export. Phase 01 tasks: `.local/phases/01-procedural-character-studio/`.
+
 ---
 
 ## 1. 2D vs 3D
