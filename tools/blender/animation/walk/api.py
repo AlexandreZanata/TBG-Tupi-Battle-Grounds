@@ -7,6 +7,8 @@ from tools.blender.animation.walk.profiles import get_walk_style
 from tools.blender.animation.walk.sampler import cycle_frames_for_style, sample_walk_pose
 from tools.blender.animation.walk.types import BoneEuler, GaitPose
 
+SCOUT_PROFILE_ID = "scout_pilot_v1"
+
 __all__ = [
     "WALK_FPS",
     "WALK_FRAMES",
@@ -26,6 +28,10 @@ def sample_pose_at_frame(profile_id: str, frame: int, *, root_motion: bool = Fal
     style = get_walk_style(profile_id)
     frames = cycle_frames_for_style(style)
     pose = sample_walk_pose(frame, frames, style)
+    if profile_id == SCOUT_PROFILE_ID:
+        from tools.blender.animation.shared.trident_guard import merge_guard_arm
+
+        pose = merge_guard_arm(pose)
     if not root_motion:
         return pose
     from tools.blender.animation.root_motion.bake import merge_root_forward

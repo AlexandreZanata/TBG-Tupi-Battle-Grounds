@@ -12,6 +12,8 @@ import { applyStudioLighting, configureRenderer } from "./viewerLighting.js";
 import { bindViewerResize, prepareViewerRoot, readViewerSize, applyRendererSize } from "./viewerResize.js";
 import { placeOnGround, fitCamera, disposeObject } from "./viewerSceneUtils.js";
 import { createFootIkDebug } from "../animation-studio/footIkDebug.js";
+import { playClipOnMixer, prepareClipsForPlayback } from "./clipPlayback.js";
+import { createMotionSmoothing } from "./motionSmoothing.js";
 
 export function mountCharacterViewer(container, options = {}) {
   const mount = prepareViewerRoot(container);
@@ -44,6 +46,7 @@ export function mountCharacterViewer(container, options = {}) {
   let viewportW = width;
   let viewportH = height;
   let footIkDebug = null;
+  let motionSmoothing = null;
 
   const resizeObserver = bindViewerResize(container, renderer, camera, (w, h) => {
     viewportW = w;
@@ -57,6 +60,7 @@ export function mountCharacterViewer(container, options = {}) {
     lastFrameMs = now;
     if (autoRotate && modelRoot) modelRoot.rotation.y += 0.28 * delta;
     if (mixer) mixer.update(delta);
+    motionSmoothing?.afterMixerUpdate(delta);
     footIkDebug?.update();
     controls.update();
     renderer.render(scene, camera);
@@ -72,6 +76,7 @@ export function mountCharacterViewer(container, options = {}) {
     animationClips = [];
     footIkDebug?.dispose();
     footIkDebug = null;
+    motionSmoothing = null;
     if (!modelRoot) return;
     scene.remove(modelRoot);
     disposeObject(modelRoot);
@@ -91,6 +96,8 @@ export function mountCharacterViewer(container, options = {}) {
       animationClips = built.animationClips;
       const mixerRoot = built.rig ?? modelRoot;
       mixer = new THREE.AnimationMixer(mixerRoot);
+      motionSmoothing = createMotionSmoothing(mixerRoot);
+      motionSmoothing.setEnabled(true);
       playClip("Idle", true);
       options.onReady?.(character);
     } catch (error) {
@@ -144,10 +151,11 @@ export function mountCharacterViewer(container, options = {}) {
     const allowProcedural = tier !== "game";
     footIkDebug = createFootIkDebug(gltfScene);
     footIkDebug.setEnabled(false);
+    const clips = embedded ? animations : allowProcedural ? buildProceduralClips() : [];
     return {
       root: displayRoot,
       rig: gltfScene,
-      animationClips: embedded ? animations : allowProcedural ? buildProceduralClips() : [],
+      animationClips: prepareClipsForPlayback(clips),
     };
   }
 
@@ -163,15 +171,13 @@ export function mountCharacterViewer(container, options = {}) {
     const resolved = resolveClipName(name);
     const clip = animationClips.find((c) => c.name === resolved) ?? animationClips.find((c) => c.name === name);
     if (!clip) return false;
-    if (activeAction) {
-      activeAction.stop();
-      mixer.stopAllAction();
-    }
-    activeAction = mixer.clipAction(clip);
-    activeAction.reset().setEffectiveWeight(1).setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
-    activeAction.clampWhenFinished = !loop;
-    activeAction.play();
-    mixer.update(0);
+
+    const { action, played } = playClipOnMixer(mixer, animationClips, clip.name, loop, {
+      previousAction: activeAction,
+    });
+    if (!played) return false;
+
+    activeAction = action;
     footIkDebug?.setWalkActive(loop && (resolved === "Walk" || resolved === "WalkRoot"));
     return true;
   }

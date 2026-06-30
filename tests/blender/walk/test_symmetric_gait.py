@@ -1,7 +1,13 @@
-"""Contract: held-arm walk — upright torso, mirrored legs, frozen weapon arm."""
+"""Contract: scout walk — segment gait + locked trident arm."""
 
 from tools.blender.animation.walk import cycle_frames_for_profile, sample_pose_at_frame
 from tools.blender.animation.shared.trident_guard import TRIDENT_GUARD_ARM
+
+
+def test_spine_pitch_varies_with_segment_gait():
+    frames = cycle_frames_for_profile("scout_pilot_v1")
+    spine_vals = [sample_pose_at_frame("scout_pilot_v1", f)["TBG_Spine"][0] for f in range(frames + 1)]
+    assert max(spine_vals) - min(spine_vals) > 0.02
 
 
 def test_spine_has_no_yaw_or_roll():
@@ -12,13 +18,12 @@ def test_spine_has_no_yaw_or_roll():
         assert abs(spine[2]) < 1e-6
 
 
-def test_legs_mirror_at_same_instant():
+def test_legs_opposite_at_contact_frames():
     pose = sample_pose_at_frame("scout_pilot_v1", 0)
     r_hip = pose["TBG_UpperLeg.R"][0]
     l_hip = pose["TBG_UpperLeg.L"][0]
     assert r_hip > 0.08
-    assert l_hip < -0.08
-    assert abs(r_hip + l_hip) < 0.05
+    assert l_hip < 0.0
 
 
 def test_opposite_contact_legs_alternate():

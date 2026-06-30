@@ -4,8 +4,8 @@
 
 | Module | Status | Used by |
 |--------|--------|---------|
-| `segment_gait.py` | **Primary** (`sampler.py` default) | `humanoid_light_v1`, `humanoid_heavy_v1` |
-| `held_arm_gait.py` | Scout weapon hold | `scout_pilot_v1` → `demo_scout_01` only |
+| `segment_gait.py` | **Primary** (`sampler.py` default) | `humanoid_light_v1`, `humanoid_heavy_v1`, `scout_pilot_v1` |
+| `held_arm_gait.py` | Legacy cosine gait | Reference only |
 | `symmetric_gait.py` | Legacy reference | Tests |
 | `biomech_curves.py` | Calibrated Perry curves | CMU mocap via `retarget/` |
 
@@ -15,7 +15,7 @@
 |---------|---------|---------------|-------|
 | `humanoid_light_v1` | 115 spm | 0.90 | Agile, smaller joint amplitude |
 | `humanoid_heavy_v1` | 95 spm | 1.05 | Slower, reduced arm swing |
-| `scout_pilot_v1` | 110 spm | held_arm | Trident guard on right arm |
+| `scout_pilot_v1` | 110 spm | 0.88 | Segment gait + `merge_guard_arm` (trident) |
 
 ## Specs
 

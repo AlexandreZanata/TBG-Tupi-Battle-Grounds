@@ -94,4 +94,5 @@ Not in MVP scope — see [DEFERRED-ROADMAP.md](DEFERRED-ROADMAP.md):
 - Phase tasks: `.local/phases/03b-biomechanical-movement-module/TASKS.md`
 - Agent skill: `.cursor/skills/tbg-walk-animation/SKILL.md`
 - Clip budgets: `tools/mesh-pipeline/BUDGETS.md`
-- **Post-gate deferrals:** [DEFERRED-ROADMAP.md](DEFERRED-ROADMAP.md) · [ADR-005](../../docs/adr/ADR-005-deferred-movement-features.md)
+- Post-gate deferrals: [DEFERRED-ROADMAP.md](DEFERRED-ROADMAP.md) · [ADR-005](../../docs/adr/ADR-005-deferred-movement-features.md)
+- Open-source GLB survey: [GLB-CHARACTER-ANIMATION-REFERENCES.md](../../docs/research/GLB-CHARACTER-ANIMATION-REFERENCES.md)

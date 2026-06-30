@@ -164,7 +164,11 @@ async function init() {
     setHealth((await api("/api/health")).status);
     await loadList();
     const ids = Object.keys(characterCache);
-    const defaultId = ids.includes("demo_sentinel_01") ? "demo_sentinel_01" : ids[0];
+    const defaultId = ids.includes("demo_scout_01")
+      ? "demo_scout_01"
+      : ids.includes("demo_sentinel_01")
+        ? "demo_sentinel_01"
+        : ids[0];
     if (defaultId) await selectCharacter(defaultId);
   } catch (error) {
     setHealth("offline", true);

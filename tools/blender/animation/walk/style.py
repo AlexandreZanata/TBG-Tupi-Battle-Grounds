@@ -49,10 +49,10 @@ HUMANOID_HEAVY_STYLE = WalkStyle(
 )
 
 SCOUT_PILOT_STYLE = WalkStyle(
-    gait_sampler="held_arm",
+    gait_sampler="segment",
     cadence_spm=110.0,
-    hip_swing=0.20,
-    knee_swing=0.38,
-    pelvis_vertical_m=0.014,
-    arm_swing=0.18,
+    angle_scale=0.88,
+    pelvis_vertical_m=0.038,
+    arm_swing=0.20,
+    arm_swing_r_scale=0.0,
 )
