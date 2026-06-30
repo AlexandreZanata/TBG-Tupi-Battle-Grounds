@@ -36,6 +36,8 @@ Map downloaded GLBs to pilot ids (bbox-matched), Draco-compress, and write to `c
 
 ```bash
 python3 tools/mesh-pipeline/import_showcase_sculpts.py --source-dir /path/to/downloads
+python3 tools/mesh-pipeline/import_showcase_sculpts.py --source-dir /path/to/downloads \
+  --only demo_scout_01 demo_reaver_01
 python3 -m character_studio export-all-cards   # refresh cards (PYTHONPATH=tools)
 ```
 

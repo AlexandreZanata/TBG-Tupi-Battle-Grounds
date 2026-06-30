@@ -23,6 +23,8 @@ DEFAULT_IMPORTS: dict[str, str] = {
     "e76641810d5acb8c6c6b82f36417276f.glb": "demo_vanguard_01",
     "1b13ac9bf5116441b95170cacce2d34f.glb": "demo_sentinel_01",
     "70e087ad8a7b59c0bdadd6c019325cfd.glb": "demo_guard_01",
+    "25d6783c7ee5ec383f940edf0973879c.glb": "demo_scout_01",
+    "27fbc655169662b90769705919e039f8.glb": "demo_reaver_01",
 }
 
 
@@ -71,10 +73,19 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--force", action="store_true", help="Re-import even when byte-identical")
     parser.add_argument("--dry-run", action="store_true", help="Print mapping only")
+    parser.add_argument(
+        "--only",
+        nargs="*",
+        metavar="PILOT_ID",
+        help="Import subset of pilot ids only (e.g. demo_scout_01 demo_reaver_01)",
+    )
     args = parser.parse_args(argv)
 
+    allowed = set(args.only) if args.only else None
     results: dict[str, str] = {}
     for source, pilot_id in resolve_sources(args.source_dir, DEFAULT_IMPORTS):
+        if allowed is not None and pilot_id not in allowed:
+            continue
         if args.dry_run:
             results[pilot_id] = "dry-run"
             continue
