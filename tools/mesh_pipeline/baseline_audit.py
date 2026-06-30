@@ -16,7 +16,7 @@ if str(TOOLS_DIR) not in sys.path:
 
 from mesh_pipeline.game_glb_validate import validate_game_glb  # noqa: E402
 from mesh_pipeline.glb_inspect import inspect_glb  # noqa: E402
-from mesh_pipeline.weight_skew import analyze_weight_skew  # noqa: E402
+from mesh_pipeline.weight_quality import validate_weight_quality  # noqa: E402
 
 
 @dataclass
@@ -65,7 +65,7 @@ def audit_unit(repo: Path, unit_id: str) -> UnitAuditRow:
 
     stats = inspect_glb(game_path)
     validation = validate_game_glb(game_path)
-    skew = analyze_weight_skew(game_path)
+    weight_result = validate_weight_quality(game_path)
     return UnitAuditRow(
         id=unit_id,
         game_glb_exists=True,
@@ -75,10 +75,10 @@ def audit_unit(repo: Path, unit_id: str) -> UnitAuditRow:
         bones=stats.bones,
         animations=stats.animations,
         file_bytes=stats.file_bytes,
-        weight_skewed=skew.skewed,
-        dominant_bone=skew.dominant_bone,
-        dominant_share=round(skew.dominant_share, 4),
-        unweighted_vertices=skew.unweighted_vertices,
+        weight_skewed=not weight_result.passes_gate,
+        dominant_bone=weight_result.skew.dominant_bone,
+        dominant_share=round(weight_result.skew.dominant_share, 4),
+        unweighted_vertices=weight_result.skew.unweighted_vertices,
     )
 
 

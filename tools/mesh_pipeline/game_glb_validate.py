@@ -29,7 +29,7 @@ class ValidationResult:
         return not self.errors
 
 
-def validate_game_glb(path: Path) -> ValidationResult:
+def validate_game_glb(path: Path, *, check_weights: bool = False) -> ValidationResult:
     stats = inspect_glb(path)
     errors: list[str] = []
     warnings: list[str] = []
@@ -70,5 +70,10 @@ def validate_game_glb(path: Path) -> ValidationResult:
             errors.append(
                 f"animations {stats.animations} exceed maximum {MAX_CLIPS_SKINNED}"
             )
+        if check_weights:
+            from mesh_pipeline.weight_quality import validate_weight_quality
+
+            weight_result = validate_weight_quality(path)
+            errors.extend(weight_result.errors)
 
     return ValidationResult(stats=stats, errors=errors, warnings=warnings)

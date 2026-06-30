@@ -135,11 +135,9 @@ def _bind_mesh_to_armature(mesh_obj: bpy.types.Object, arm_obj: bpy.types.Object
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
 
-    from rig_weight_paint import clear_mesh_skin, paint_proximity_weights  # noqa: PLC0415
+    from rig_weight_bind import bind_mesh_with_weight_fallback  # noqa: PLC0415
 
-    clear_mesh_skin(mesh_obj)
-    _widen_bone_envelopes(arm_obj, mesh_obj)
-    paint_proximity_weights(mesh_obj, arm_obj)
+    bind_mesh_with_weight_fallback(mesh_obj, arm_obj, widen_envelopes=_widen_bone_envelopes)
     mesh_obj.parent = arm_obj
 
 

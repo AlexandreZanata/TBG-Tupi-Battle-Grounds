@@ -22,6 +22,8 @@ class WeightSkewReport:
     skewed: bool
     unweighted_vertices: int
     bones_with_weights: int
+    joint_names: tuple[str, ...] = ()
+    bone_max_weight: tuple[tuple[str, float], ...] = ()
 
     @property
     def passes_gate(self) -> bool:
@@ -58,14 +60,15 @@ def _analyze_weight_skew_plain(path: Path, *, threshold: float) -> WeightSkewRep
     gltf, bin_chunk = load_glb(path)
     skins = gltf.get("skins", [])
     if not skins or bin_chunk is None:
-        return WeightSkewReport(0, None, 0.0, True, 0, 0)
+        return WeightSkewReport(0, None, 0.0, True, 0, 0, (), ())
 
     nodes = gltf.get("nodes", [])
     skin_joint_nodes = skins[0].get("joints", [])
-    joint_names = [_node_name(nodes, node_index) for node_index in skin_joint_nodes]
+    joint_names = tuple(_node_name(nodes, node_index) for node_index in skin_joint_nodes)
     counts: Counter[str] = Counter()
     unweighted = 0
     bones_used: set[str] = set()
+    bone_max: dict[str, float] = {name: 0.0 for name in joint_names}
     vertex_count = 0
 
     for mesh in gltf.get("meshes", []):
@@ -91,24 +94,56 @@ def _analyze_weight_skew_plain(path: Path, *, threshold: float) -> WeightSkewRep
                 bone = joint_names[joints[dominant_idx]] if joints[dominant_idx] < len(joint_names) else "?"
                 counts[bone] += 1
                 for idx, weight in zip(joints, norm, strict=True):
-                    if weight > 0.01 and idx < len(joint_names):
-                        bones_used.add(joint_names[idx])
+                    if idx >= len(joint_names):
+                        continue
+                    name = joint_names[idx]
+                    if weight > 0.01:
+                        bones_used.add(name)
+                    bone_max[name] = max(bone_max.get(name, 0.0), weight)
 
     if vertex_count == 0:
-        return WeightSkewReport(0, None, 0.0, True, unweighted, len(bones_used))
+        return _make_report(0, None, 0.0, True, unweighted, bones_used, joint_names, bone_max, threshold)
 
     if not counts:
-        return WeightSkewReport(vertex_count, None, 1.0, True, unweighted, len(bones_used))
+        return _make_report(vertex_count, None, 1.0, True, unweighted, bones_used, joint_names, bone_max, threshold)
 
     dominant_bone, dominant_count = counts.most_common(1)[0]
     share = dominant_count / vertex_count
+    return _make_report(
+        vertex_count,
+        dominant_bone,
+        share,
+        share >= threshold,
+        unweighted,
+        bones_used,
+        joint_names,
+        bone_max,
+        threshold,
+    )
+
+
+def _make_report(
+    vertex_count: int,
+    dominant_bone: str | None,
+    share: float,
+    skewed: bool,
+    unweighted: int,
+    bones_used: set[str],
+    joint_names: tuple[str, ...],
+    bone_max: dict[str, float],
+    threshold: float,
+) -> WeightSkewReport:
+    _ = threshold
+    max_items = tuple(sorted(bone_max.items()))
     return WeightSkewReport(
         vertex_count=vertex_count,
         dominant_bone=dominant_bone,
         dominant_share=share,
-        skewed=share >= threshold,
+        skewed=skewed,
         unweighted_vertices=unweighted,
         bones_with_weights=len(bones_used),
+        joint_names=joint_names,
+        bone_max_weight=max_items,
     )
 
 

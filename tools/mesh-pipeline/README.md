@@ -91,6 +91,7 @@ Python fallback (no Blender): proxy skinned mesh + clip stubs for CI/dev only.
 
 Validate game meshes: `python3 tools/mesh-pipeline/validate_game_glb.py <path.glb>`  
 Phase 04b baseline audit: `python3 tools/mesh_pipeline/baseline_audit.py --write` → `.local/phases/04b-biped-game-ready-pipeline/AUDIT.md`  
+Weight quality gate: `python3 tools/mesh-pipeline/validate_game_glb.py --check-weights <path.glb>` (or `TBG_WEIGHT_GATE=1`)  
 AI mesh input contract: `tools/blender/scripts/PREP-AI-MESH-SPEC.md`  
 Budget reference: [BUDGETS.md](./BUDGETS.md)
 

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -54,6 +55,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Print triangle count only (for optimize_glb.sh).",
     )
+    parser.add_argument(
+        "--check-weights",
+        action="store_true",
+        help="Fail on skin weight quality gate (or set TBG_WEIGHT_GATE=1).",
+    )
     args = parser.parse_args(argv)
 
     if not args.glb.is_file():
@@ -64,7 +70,8 @@ def main(argv: list[str] | None = None) -> int:
         print(inspect_glb(args.glb).triangles)
         return 0
 
-    result = validate_game_glb(args.glb)
+    check_weights = args.check_weights or os.environ.get("TBG_WEIGHT_GATE") == "1"
+    result = validate_game_glb(args.glb, check_weights=check_weights)
     _print_report(args.glb, result)
     return 0 if result.ok else 1
 

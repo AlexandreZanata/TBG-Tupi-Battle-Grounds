@@ -16,6 +16,7 @@ except ImportError as exc:
 
 MAX_INFLUENCES = 4
 SINGLE_BONE_DOMINANCE = 0.85
+MIN_BONE_WEIGHT = 0.01
 
 
 def weights_skewed_to_one_bone(mesh_obj: bpy.types.Object, threshold: float = SINGLE_BONE_DOMINANCE) -> bool:
@@ -61,13 +62,28 @@ def _segments_for_region(
     point: Vector,
     hip_y: float,
 ) -> list[tuple[str, Vector, Vector]]:
-    if point.y < hip_y * 0.9:
-        leg = [s for s in segments if "Leg" in s[0] or "Foot" in s[0]]
+    if point.y < hip_y * 0.92:
+        leg = [
+            s
+            for s in segments
+            if any(tag in s[0] for tag in ("UpperLeg", "LowerLeg", "Foot", "Toe"))
+        ]
         return leg if leg else segments
+    if hip_y * 1.05 < point.y < hip_y * 1.35:
+        arm = [
+            s
+            for s in segments
+            if any(tag in s[0] for tag in ("Arm", "Hand", "Shoulder"))
+        ]
+        return arm if arm else segments
     if point.y > hip_y * 1.2:
-        upper = [s for s in segments if any(tag in s[0] for tag in ("Arm", "Hand", "Shoulder", "Head", "Neck"))]
+        upper = [
+            s
+            for s in segments
+            if any(tag in s[0] for tag in ("Arm", "Hand", "Shoulder", "Head", "Neck"))
+        ]
         return upper if upper else segments
-    torso = [s for s in segments if any(tag in s[0] for tag in ("Spine", "Root", "Shoulder"))]
+    torso = [s for s in segments if any(tag in s[0] for tag in ("Spine", "Root"))]
     return torso if torso else segments
 
 
