@@ -98,10 +98,12 @@ def build_mesh_info(defn: CharacterDefinition, repo_root: Path, tier: str = "sho
         raise HTTPException(status_code=404, detail=f"unit has no {tier} mesh")
 
     path = resolve_character_asset(repo_root, relative)
+    stat = path.stat()
     info: dict[str, int | str | bool | list[str]] = {
         "tier": tier,
         "path": relative,
-        "size": path.stat().st_size,
+        "size": stat.st_size,
+        "mtime": int(stat.st_mtime),
         "contentType": mesh_media_type(path),
     }
 

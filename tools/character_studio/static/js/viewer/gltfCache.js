@@ -1,6 +1,7 @@
 /** In-memory GLB cache — decode once per URL, clone for each viewer instance. */
 
 import * as THREE from "three";
+import * as SkeletonUtils from "three/addons/utils/SkeletonUtils.js";
 
 const sceneCache = new Map();
 
@@ -17,7 +18,7 @@ export function getCachedGltf(url) {
 }
 
 export function cloneGltfEntry(scene, animations = []) {
-  const clonedScene = scene.clone(true);
+  const clonedScene = SkeletonUtils.clone(scene);
   clonedScene.traverse((obj) => {
     if (!(obj instanceof THREE.Mesh) || !obj.material) return;
     obj.material = Array.isArray(obj.material)

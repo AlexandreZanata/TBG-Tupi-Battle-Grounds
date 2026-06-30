@@ -80,22 +80,43 @@ def _mesh_world_bounds(mesh_obj: bpy.types.Object) -> tuple[float, float, float,
 
 
 def _align_armature_to_mesh(arm_obj: bpy.types.Object, mesh_obj: bpy.types.Object) -> None:
-    """Scale and position armature to overlap the decimated mesh bounds."""
+    """Scale and translate armature bone hull to overlap mesh bounds."""
     min_x, max_x, min_y, max_y, min_z, max_z = _mesh_world_bounds(mesh_obj)
-    mesh_height = max(max_y - min_y, 0.01)
-    mesh_center_x = (min_x + max_x) * 0.5
-    mesh_center_z = (min_z + max_z) * 0.5
-
     arm_obj.scale = (1.0, 1.0, 1.0)
     arm_obj.rotation_euler = (0.0, 0.0, 0.0)
-    arm_height = max(arm_obj.dimensions.y, 0.01)
-    scale = mesh_height / arm_height
-    arm_obj.scale = (scale, scale, scale)
+    arm_obj.location = (0.0, 0.0, 0.0)
     bpy.context.view_layer.update()
 
-    arm_obj.location = (mesh_center_x, min_y, mesh_center_z)
+    mesh_height = max(max_y - min_y, 0.01)
+    arm_min_x, arm_max_x, arm_min_y, arm_max_y, arm_min_z, arm_max_z = _armature_world_bounds(arm_obj)
+    arm_height = max(arm_max_y - arm_min_y, 0.01)
+    uniform = mesh_height / arm_height
+    arm_obj.scale = (uniform, uniform, uniform)
+    bpy.context.view_layer.update()
+
+    arm_min_x, arm_max_x, arm_min_y, arm_max_y, arm_min_z, arm_max_z = _armature_world_bounds(arm_obj)
+    mesh_center_x = (min_x + max_x) * 0.5
+    mesh_center_z = (min_z + max_z) * 0.5
+    arm_center_x = (arm_min_x + arm_max_x) * 0.5
+    arm_center_z = (arm_min_z + arm_max_z) * 0.5
+    arm_obj.location = (
+        mesh_center_x - arm_center_x,
+        min_y - arm_min_y,
+        mesh_center_z - arm_center_z,
+    )
     bpy.context.view_layer.update()
     _apply_object_transforms(arm_obj)
+
+
+def _armature_world_bounds(arm_obj: bpy.types.Object) -> tuple[float, float, float, float, float, float]:
+    points: list[Vector] = []
+    for bone in arm_obj.data.bones:
+        points.append(arm_obj.matrix_world @ bone.head_local)
+        points.append(arm_obj.matrix_world @ bone.tail_local)
+    xs = [point.x for point in points]
+    ys = [point.y for point in points]
+    zs = [point.z for point in points]
+    return min(xs), max(xs), min(ys), max(ys), min(zs), max(zs)
 
 
 def _apply_object_transforms(obj: bpy.types.Object) -> None:
@@ -107,31 +128,23 @@ def _apply_object_transforms(obj: bpy.types.Object) -> None:
 
 
 def _bind_mesh_to_armature(mesh_obj: bpy.types.Object, arm_obj: bpy.types.Object) -> None:
-    if mesh_obj.parent is not None:
-        mesh_obj.parent = None
+    import sys
+    from pathlib import Path
 
-    bpy.ops.object.select_all(action="DESELECT")
-    mesh_obj.select_set(True)
-    arm_obj.select_set(True)
-    bpy.context.view_layer.objects.active = mesh_obj
+    scripts_dir = Path(__file__).resolve().parent
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
 
-    try:
-        bpy.ops.object.parent_set(type="ARMATURE_AUTO", keep_transform=True)
-    except RuntimeError:
-        bpy.ops.object.parent_set(type="ARMATURE", keep_transform=True)
+    from rig_weight_paint import clear_mesh_skin, paint_proximity_weights  # noqa: PLC0415
 
-    if mesh_obj.vertex_groups:
-        mesh_obj.parent = arm_obj
-        return
-
-    _assign_envelope_weights(mesh_obj, arm_obj)
+    clear_mesh_skin(mesh_obj)
+    _widen_bone_envelopes(arm_obj, mesh_obj)
+    paint_proximity_weights(mesh_obj, arm_obj)
     mesh_obj.parent = arm_obj
 
 
-def _assign_envelope_weights(mesh_obj: bpy.types.Object, arm_obj: bpy.types.Object) -> None:
-    """Fallback when ARMATURE_AUTO fails — bind all verts to nearest spine chain bone."""
-    mesh_obj.modifiers.new(name="Armature", type="ARMATURE").object = arm_obj
-    bone_names = [bone.name for bone in arm_obj.data.bones]
-    spine = next((name for name in bone_names if "Spine" in name), bone_names[0])
-    group = mesh_obj.vertex_groups.new(name=spine)
-    group.add(list(range(len(mesh_obj.data.vertices))), 1.0, "REPLACE")
+def _widen_bone_envelopes(arm_obj: bpy.types.Object, mesh_obj: bpy.types.Object) -> None:
+    _min_x, _max_x, min_y, max_y, _min_z, _max_z = _mesh_world_bounds(mesh_obj)
+    radius = max(max_y - min_y, 0.01) * 0.12
+    for bone in arm_obj.data.bones:
+        bone.envelope_distance = radius

@@ -70,11 +70,11 @@ def _embed_clip_actions(
     unit_id: str | None,
 ) -> None:
     """Walk gets a keyed cycle; other clips stay rest-pose until authored."""
-    _SCRIPTS = Path(__file__).resolve().parent
-    if str(_SCRIPTS) not in sys.path:
-        sys.path.insert(0, str(_SCRIPTS))
-    from walk_cycle_builder import bake_walk_action  # noqa: PLC0415
-    from walk_cycle_profiles import resolve_walk_profile  # noqa: PLC0415
+    from tools.blender.package_path import ensure_repo_paths
+
+    ensure_repo_paths()
+    from tools.blender.animation.walk.bake import bake_walk_action  # noqa: PLC0415
+    from tools.blender.animation.walk.profiles import resolve_walk_profile  # noqa: PLC0415
 
     walk_profile = resolve_walk_profile(unit_id, body_class)
     for clip_name in clip_names:

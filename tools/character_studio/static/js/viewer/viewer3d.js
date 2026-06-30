@@ -84,7 +84,8 @@ export function mountCharacterViewer(container, options = {}) {
       scene.add(modelRoot);
       fitCamera(modelRoot, camera, viewportW, viewportH);
       animationClips = built.animationClips;
-      mixer = new THREE.AnimationMixer(modelRoot);
+      const mixerRoot = built.rig ?? modelRoot;
+      mixer = new THREE.AnimationMixer(mixerRoot);
       playClip("Idle", true);
       options.onReady?.(character);
     } catch (error) {
@@ -102,11 +103,12 @@ export function mountCharacterViewer(container, options = {}) {
 
   async function buildMesh3dRoot(character, token) {
     const tier = character.meshTier === "game" ? "game" : "showcase";
-    const meshUrl = `/api/characters/${character.id}/mesh?tier=${tier}`;
-    const probe = await probeAsset(meshUrl);
+    const meshBase = `/api/characters/${character.id}/mesh?tier=${tier}`;
+    const probe = await probeAsset(meshBase);
     if (!probe.ok) {
       throw new Error(probe.reason === "too_large" ? "Mesh exceeds 150 MB preview limit" : "Mesh not found");
     }
+    const meshUrl = probe.mtime ? `${meshBase}&v=${probe.mtime}` : meshBase;
     options.onLoading?.(character, { cached: probe.cached });
     if (!probe.cached) {
       options.onProgress?.(`Decoding mesh (${((probe.size || 0) / (1024 * 1024)).toFixed(0)} MB)…`);
@@ -120,16 +122,24 @@ export function mountCharacterViewer(container, options = {}) {
     if (token !== loadToken) return null;
 
     const display = options.displayScale ?? 1;
-    gltfScene.scale.set(
-      (character.bodyWidthScale ?? 1) * display,
-      (character.heightScale ?? 1) * display,
-      (character.bodyWidthScale ?? 1) * display,
-    );
-    placeOnGround(gltfScene);
+    const scaleX = (character.bodyWidthScale ?? 1) * display;
+    const scaleY = (character.heightScale ?? 1) * display;
+    const displayRoot = new THREE.Group();
+    displayRoot.add(gltfScene);
+    displayRoot.scale.set(scaleX, scaleY, scaleX);
+    placeOnGround(displayRoot);
+
+    gltfScene.traverse((obj) => {
+      if (obj.isSkinnedMesh) {
+        obj.frustumCulled = false;
+      }
+    });
+
     const embedded = animations.length > 0;
     const allowProcedural = tier !== "game";
     return {
-      root: gltfScene,
+      root: displayRoot,
+      rig: gltfScene,
       animationClips: embedded ? animations : allowProcedural ? buildProceduralClips() : [],
     };
   }
@@ -146,11 +156,15 @@ export function mountCharacterViewer(container, options = {}) {
     const resolved = resolveClipName(name);
     const clip = animationClips.find((c) => c.name === resolved) ?? animationClips.find((c) => c.name === name);
     if (!clip) return false;
-    if (activeAction) activeAction.fadeOut(0.15);
+    if (activeAction) {
+      activeAction.stop();
+      mixer.stopAllAction();
+    }
     activeAction = mixer.clipAction(clip);
-    activeAction.reset().setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
+    activeAction.reset().setEffectiveWeight(1).setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
     activeAction.clampWhenFinished = !loop;
-    activeAction.fadeIn(0.12).play();
+    activeAction.play();
+    mixer.update(0);
     return true;
   }
 

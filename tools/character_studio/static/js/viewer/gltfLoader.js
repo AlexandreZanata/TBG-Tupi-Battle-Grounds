@@ -68,7 +68,12 @@ export async function probeAsset(url, maxBytes = MAX_PREVIEW_ASSET_BYTES) {
   if (length > maxBytes) {
     return { ok: false, reason: "too_large" };
   }
-  return { ok: true, size: length, cached: Boolean(getCachedGltf(url)) };
+  return {
+    ok: true,
+    size: length,
+    mtime: Number(data.mtime || 0),
+    cached: Boolean(getCachedGltf(url)),
+  };
 }
 
 /** Map `/mesh` asset URL to `/mesh-info`, preserving query string (e.g. tier=showcase). */

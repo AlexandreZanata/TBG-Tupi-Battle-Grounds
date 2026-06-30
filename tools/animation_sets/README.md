@@ -12,7 +12,7 @@ python3 tools/animation_sets/generate_placeholder_clips.py --set humanoid_heavy_
 
 Output: `content/characters/animations/clips/{bodyClass}/{ClipName}.glb`
 
-Also export HumanoidLight walk clip (library + scout unit variant):
+Also export HumanoidLight walk clip (library + scout unit variant). Source: `tools/blender/animation/walk/` — see `.cursor/skills/tbg-walk-animation/SKILL.md`.
 
 ```bash
 ./tools/blender/blender_cmd.sh --background --python tools/blender/scripts/build_walk_clip.py -- HumanoidLight

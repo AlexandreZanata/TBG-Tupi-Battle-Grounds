@@ -121,6 +121,7 @@ def test_mesh_info_game_tier_reports_budget_stats(client: TestClient) -> None:
     body = response.json()
     assert body["tier"] == "game"
     assert body["triangles"] <= 8000
+    assert body["mtime"] > 0
     assert body["animations"] >= 6
     assert body["budgetOk"] is True
     assert "Idle" in body["clipNames"] or body["animations"] >= 1

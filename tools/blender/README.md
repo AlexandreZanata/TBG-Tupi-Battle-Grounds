@@ -13,6 +13,9 @@ Authoring-only scripts for the Real 3D Character Pipeline (Phase 02).
 | [scripts/sculpt_to_game_mesh.py](scripts/sculpt_to_game_mesh.py) | Decimate showcase → low GLB (bpy) |
 | [scripts/attach_tbg_rig.py](scripts/attach_tbg_rig.py) | Attach body-class armature (bpy) |
 | [scripts/retarget_clip_library.py](scripts/retarget_clip_library.py) | Embed named clip actions (bpy) |
+| [animation/](animation/) | Modular clip generators (`walk/`, future `idle/`, `attack/`) |
+| [animation/walk/](animation/walk/) | Parametric in-place walk cycle |
+| [scripts/build_walk_clip.py](scripts/build_walk_clip.py) | CLI — export Walk GLB |
 | [scripts/export_game_unit_bpy.py](scripts/export_game_unit_bpy.py) | In-Blender entry (no PIL) |
 | [scripts/build_rig_template.py](scripts/build_rig_template.py) | Generate `HumanoidHeavy_template.blend` |
 | [templates/](templates/) | Rig `.blend` templates |
