@@ -77,8 +77,21 @@ pytest tests/blender/walk/ tests/blender/attack/ tests/blender/root_motion/ -q
 | Root motion walk | `locomotion.useRootMotionWalk` | `BehaviorPlayer.SyncWalkRootMotion` |
 | Foot IK | `locomotion.footIk` | `LocomotionFootIk` |
 
+## Post-gate deferrals (§7)
+
+Not in MVP scope — see [DEFERRED-ROADMAP.md](DEFERRED-ROADMAP.md):
+
+| ID | Feature | Phase |
+|----|---------|-------|
+| D1 | Full-body IK (VRIK-style) | 06+ |
+| D2 | Motion matching clip DB | 06+ |
+| D3 | ML locomotion controller | Post-MVP |
+| D4 | Quadruped / Mechanical gait | 06 |
+| D5 | Nakama move speed → animation blend | 05 |
+
 ## Related
 
 - Phase tasks: `.local/phases/03b-biomechanical-movement-module/TASKS.md`
 - Agent skill: `.cursor/skills/tbg-walk-animation/SKILL.md`
 - Clip budgets: `tools/mesh-pipeline/BUDGETS.md`
+- **Post-gate deferrals:** [DEFERRED-ROADMAP.md](DEFERRED-ROADMAP.md) · [ADR-005](../../docs/adr/ADR-005-deferred-movement-features.md)

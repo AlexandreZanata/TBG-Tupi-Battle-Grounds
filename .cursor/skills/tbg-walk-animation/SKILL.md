@@ -105,9 +105,9 @@ python3 tools/blender/export_game_unit.py demo_scout_01
 
 ## Out of scope (post-MVP)
 
-- Full-body VRIK / Animation Rigging package
-- Motion matching / ML locomotion
-- Nakama-synced blend trees (Phase 05)
+- Full-body VRIK / Animation Rigging package — [DEFERRED-ROADMAP.md](../../tools/blender/animation/DEFERRED-ROADMAP.md) D1
+- Motion matching / ML locomotion — D2, D3
+- Nakama-synced blend trees — D5 (Phase 05)
 
 ## Verification checklist
 
