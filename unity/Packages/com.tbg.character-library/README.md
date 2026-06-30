@@ -57,7 +57,7 @@ Open the Unity project, then **Window → General → Test Runner → EditMode**
 | `MaterialProfileLoaderTests` | Material profile JSON + `TBG/CharacterPBR` |
 | `BehaviorProfileLoaderTests` | Behavior profiles + `BehaviorPlayer` action mapping |
 | `Mesh3DCharacterFactoryTests` | glTF import, scale, animator attachment |
-| `PilotRosterEditModeTests` | Mesh3d pilot spawn + attack/death behaviors |
+| `PilotRosterEditModeTests` | Mesh3d pilot spawn + attack/death; sentinel game mesh Walk/Ultimate smoke |
 
 Or batchmode:
 

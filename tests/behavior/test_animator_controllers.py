@@ -17,6 +17,8 @@ def test_controller_yaml_includes_triggers_and_attack_state() -> None:
         assert f"m_Name: {trigger}" in yaml_text
     assert "m_Name: AttackHeavy" in yaml_text
     assert "m_Name: Idle" in yaml_text
+    assert "m_Name: Walk" in yaml_text
+    assert "m_Name: Ultimate" in yaml_text
 
 
 def test_generate_all_writes_four_body_classes(tmp_path: Path) -> None:

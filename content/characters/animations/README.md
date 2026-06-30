@@ -25,7 +25,7 @@ python3 tools/animation_sets/generate_placeholder_clips.py --set humanoid_heavy_
 | `Mechanical.controller` | Mechanical | `AttackCast` |
 | `Organic.controller` | Organic | `AttackFast` |
 
-Triggers (all controllers): `Idle`, `Spawn`, `Attack`, `Death`. Phase 03 adds `Walk` and `Ultimate` via behavior profile state names (CrossFade until controller v2).
+Triggers (all controllers): `Idle`, `Spawn`, `Attack`, `Death`, `Walk`, `Ultimate`.
 
 Regenerate YAML assets (writes to `content/characters/animations/` and `Packages/com.tbg.character-library/Animations/`):
 

@@ -52,6 +52,39 @@ namespace TBG.CharacterLibrary.Tests
         }
 
         [Test]
+        public void Spawn_SentinelGameMesh_PlaysWalkAndUltimate()
+        {
+            const string pilotId = "demo_sentinel_01";
+            var loader = new CharacterDefinitionLoader();
+            var definition = loader.Load(pilotId);
+            Assert.That(definition.MeshPath, Does.Contain("meshes/game/demo_sentinel_01.glb"));
+
+            var gameMeshPath = Path.Combine(CharacterPaths.GetRepoRoot(), definition.MeshPath);
+            Assert.That(File.Exists(gameMeshPath), Is.True, $"missing game glb: {gameMeshPath}");
+
+            var catalog = new CharacterCatalog();
+            var instance = catalog.Spawn(pilotId, _parent);
+            var behavior = instance.Behavior as BehaviorPlayer;
+
+            Assert.That(behavior, Is.Not.Null);
+            Assert.That(behavior.GetStateName(CharacterAction.Walk), Is.EqualTo("Walk"));
+            Assert.That(behavior.GetStateName(CharacterAction.Ultimate), Is.EqualTo("Ultimate"));
+            Assert.That(behavior.GetTriggerName(CharacterAction.Walk), Is.EqualTo("Walk"));
+            Assert.That(behavior.GetTriggerName(CharacterAction.Ultimate), Is.EqualTo("Ultimate"));
+
+            var animator = instance.Root.GetComponentInChildren<Animator>();
+            Assert.That(animator, Is.Not.Null);
+            Assert.That(animator.runtimeAnimatorController, Is.Not.Null);
+            Assert.That(HasTrigger(animator, "Walk"), Is.True);
+            Assert.That(HasTrigger(animator, "Ultimate"), Is.True);
+
+            Assert.DoesNotThrow(() => instance.PlayAction(CharacterAction.Walk));
+            Assert.DoesNotThrow(() => instance.PlayAction(CharacterAction.Ultimate));
+
+            catalog.Release(instance);
+        }
+
+        [Test]
         public void Load_AllDemoDefinitions_AreMesh3D()
         {
             var loader = new CharacterDefinitionLoader();
@@ -68,6 +101,19 @@ namespace TBG.CharacterLibrary.Tests
                 Assert.That(definition.BehaviorProfileId, Is.Not.Empty);
                 Assert.That(definition.MaterialProfileId, Is.Not.Empty);
             }
+        }
+
+        private static bool HasTrigger(Animator animator, string name)
+        {
+            foreach (var parameter in animator.parameters)
+            {
+                if (parameter.name == name && parameter.type == AnimatorControllerParameterType.Trigger)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

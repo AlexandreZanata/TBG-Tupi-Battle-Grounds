@@ -9,8 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CONTENT_OUTPUT_DIR = ROOT / "content" / "characters" / "animations"
 PACKAGE_OUTPUT_DIR = ROOT / "unity" / "Packages" / "com.tbg.character-library" / "Animations"
 
-TRIGGERS = ("Idle", "Spawn", "Attack", "Death")
-BASE_STATES = ("Idle", "Spawn", "Death")
+TRIGGERS = ("Idle", "Spawn", "Attack", "Death", "Walk", "Ultimate")
 
 BODY_CLASSES: dict[str, str] = {
     "HumanoidHeavy": "AttackHeavy",
@@ -21,7 +20,7 @@ BODY_CLASSES: dict[str, str] = {
 
 
 def build_controller_yaml(name: str, attack_state: str) -> str:
-    states = list(BASE_STATES[:1]) + ["Spawn", attack_state, "Death"]
+    states = ["Idle", "Spawn", attack_state, "Death", "Walk", "Ultimate"]
     state_ids = {state: 1_102_000_000_100 + index for index, state in enumerate(states)}
     machine_id = 1_107_000_000_200
     transition_ids = {
@@ -32,6 +31,8 @@ def build_controller_yaml(name: str, attack_state: str) -> str:
         "Spawn": "Spawn",
         "Attack": attack_state,
         "Death": "Death",
+        "Walk": "Walk",
+        "Ultimate": "Ultimate",
     }
 
     lines = [
@@ -69,7 +70,14 @@ def build_controller_yaml(name: str, attack_state: str) -> str:
         state = trigger_to_state[trigger]
         lines.extend(_transition_block(transition_ids[trigger], trigger, state_ids[state]))
 
-    y_positions = {"Idle": 0, "Spawn": 120, attack_state: 240, "Death": 360}
+    y_positions = {
+        "Idle": 0,
+        "Spawn": 120,
+        attack_state: 240,
+        "Death": 360,
+        "Walk": 480,
+        "Ultimate": 600,
+    }
     for state in states:
         lines.extend(_state_block(state_ids[state], state, y_positions[state]))
 
