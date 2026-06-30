@@ -11,6 +11,7 @@ from .models import (
     FACTIONS,
     PROPORTION_MAX,
     PROPORTION_MIN,
+    RIG_PROFILES,
     CharacterDefinition,
 )
 
@@ -57,9 +58,19 @@ def validate_definition(defn: CharacterDefinition, existing_ids: set[str] | None
             errors.append(f"{color_name} must be #RRGGBB")
 
     errors.extend(_validate_mesh3d_fields(defn))
+    errors.extend(_validate_rig_fields(defn))
 
     if errors:
         raise ValidationError(errors)
+
+
+def _validate_rig_fields(defn: CharacterDefinition) -> list[str]:
+    errors: list[str] = []
+    if defn.rigProfile not in RIG_PROFILES:
+        errors.append(f"rigProfile must be one of: {', '.join(sorted(RIG_PROFILES))}")
+    if defn.rigExceptionReason and not defn.rigException:
+        errors.append("rigExceptionReason requires rigException: true")
+    return errors
 
 
 def _validate_mesh3d_fields(defn: CharacterDefinition) -> list[str]:

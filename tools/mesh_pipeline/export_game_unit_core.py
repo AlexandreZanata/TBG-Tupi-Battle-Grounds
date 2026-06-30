@@ -53,7 +53,12 @@ def _load_pilot_body_class(unit_id: str, repo: Path) -> str:
     raise ValueError(f"{unit_id}: not found in pilot_roster.json")
 
 
-def load_export_config(unit_id: str, root: Path | None = None) -> GameUnitExportConfig:
+def load_export_config(
+    unit_id: str,
+    root: Path | None = None,
+    *,
+    body_class_override: str | None = None,
+) -> GameUnitExportConfig:
     repo = root or repo_root()
     definition_path = repo / "content/characters/definitions" / f"{unit_id}.json"
     if not definition_path.is_file():
@@ -65,12 +70,13 @@ def load_export_config(unit_id: str, root: Path | None = None) -> GameUnitExport
         raise ValueError(f"{unit_id}: missing showcase mesh path")
 
     game_lod = definition.get("gameLod") or {}
+    body_class = body_class_override or _load_pilot_body_class(unit_id, repo)
     return GameUnitExportConfig(
         unit_id=unit_id,
         showcase_mesh=repo / showcase,
         game_mesh=repo / "content/characters/meshes/game" / f"{unit_id}.glb",
         animation_set_id=definition.get("animationSet", DEFAULT_ANIMATION_SET),
-        body_class=_load_pilot_body_class(unit_id, repo),
+        body_class=body_class,
         tri_target=int(game_lod.get("triTarget", DEFAULT_TRI_TARGET)),
         texture_size=int(game_lod.get("textureSize", DEFAULT_TEXTURE_SIZE)),
     )
@@ -108,12 +114,17 @@ def post_process_game_glb(raw_path: Path, output_path: Path, texture_size: int =
     return output_path
 
 
-def run_blender_export(unit_id: str, repo: Path | None = None) -> Path:
+def run_blender_export(
+    unit_id: str,
+    repo: Path | None = None,
+    *,
+    body_class_override: str | None = None,
+) -> Path:
     repo = repo or repo_root()
     if not blender_available():
         raise RuntimeError("Blender not available — run tools/blender/setup.sh")
 
-    config = load_export_config(unit_id, repo)
+    config = load_export_config(unit_id, repo, body_class_override=body_class_override)
     print(f"export: simplifying {unit_id} via gltf-transform")
     prepare_unit_low_meshes(
         config.unit_id,
@@ -164,13 +175,19 @@ def export_game_unit_python(config: GameUnitExportConfig, repo: Path | None = No
     return config.game_mesh
 
 
-def export_game_unit(unit_id: str, repo: Path | None = None, *, prefer_blender: bool = True) -> ValidationResult:
+def export_game_unit(
+    unit_id: str,
+    repo: Path | None = None,
+    *,
+    prefer_blender: bool = True,
+    body_class_override: str | None = None,
+) -> ValidationResult:
     repo = repo or repo_root()
-    config = load_export_config(unit_id, repo)
+    config = load_export_config(unit_id, repo, body_class_override=body_class_override)
 
     if prefer_blender and blender_available():
         print("export: using Blender pipeline")
-        run_blender_export(unit_id, repo)
+        run_blender_export(unit_id, repo, body_class_override=body_class_override)
     else:
         print("export: using Python fallback (install Blender — tools/blender/setup.sh)")
         export_game_unit_python(config, repo)

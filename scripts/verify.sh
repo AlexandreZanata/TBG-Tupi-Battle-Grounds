@@ -11,6 +11,7 @@ GAME_MESH_DIR="$ROOT/content/characters/meshes/game"
 MAX_TOTAL_GAME_MESH_BYTES=$((80 * 1024 * 1024))
 if compgen -G "$GAME_MESH_DIR/*.glb" > /dev/null; then
   TOTAL_BYTES=0
+  export TBG_WEIGHT_GATE=1
   for glb in "$GAME_MESH_DIR"/*.glb; do
     [[ "$(basename "$glb")" == *.blender-raw.glb ]] && continue
     python3 tools/mesh-pipeline/validate_game_glb.py "$glb"

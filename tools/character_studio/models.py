@@ -11,6 +11,8 @@ FACTIONS = frozenset({"Humans", "Undead", "Machines", "Plants"})
 ACCESSORIES = frozenset({"Shield", "Weapon", "Helmet", "ArmorBlock"})
 ASSET_MODES = frozenset({"procedural", "mesh3d"})
 DEFAULT_ASSET_MODE = "procedural"
+DEFAULT_RIG_PROFILE = "tbg_biped_auto"
+RIG_PROFILES = frozenset({DEFAULT_RIG_PROFILE})
 PROPORTION_MIN = 0.1
 PROPORTION_MAX = 3.0
 EVOLUTION_MIN = 0
@@ -83,6 +85,9 @@ class CharacterDefinition:
     materialProfile: str | None = None
     behaviorProfile: str | None = None
     animatorController: str | None = None
+    rigProfile: str = DEFAULT_RIG_PROFILE
+    rigException: bool = False
+    rigExceptionReason: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         data: dict[str, Any] = {
@@ -116,6 +121,12 @@ class CharacterDefinition:
             data["behaviorProfile"] = self.behaviorProfile
         if self.animatorController:
             data["animatorController"] = self.animatorController
+        if self.rigProfile != DEFAULT_RIG_PROFILE:
+            data["rigProfile"] = self.rigProfile
+        if self.rigException:
+            data["rigException"] = self.rigException
+        if self.rigExceptionReason:
+            data["rigExceptionReason"] = self.rigExceptionReason
         return data
 
     @classmethod
@@ -148,5 +159,10 @@ class CharacterDefinition:
             behaviorProfile=str(data["behaviorProfile"]) if data.get("behaviorProfile") else None,
             animatorController=(
                 str(data["animatorController"]) if data.get("animatorController") else None
+            ),
+            rigProfile=str(data.get("rigProfile", DEFAULT_RIG_PROFILE)),
+            rigException=bool(data.get("rigException", False)),
+            rigExceptionReason=(
+                str(data["rigExceptionReason"]) if data.get("rigExceptionReason") else None
             ),
         )

@@ -15,7 +15,9 @@ if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
 from mesh_pipeline.export_game_batch import batch_export_game_units, roster_unit_ids  # noqa: E402
+from mesh_pipeline.batch_weight_gate import audit_weight_gate, format_weight_gate_table  # noqa: E402
 from mesh_pipeline.game_glb_validate import validate_game_glb  # noqa: E402
+from mesh_pipeline.import_game_ready_core import weight_gate_enabled  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -26,15 +28,24 @@ def main(argv: list[str] | None = None) -> int:
     ids = unit_ids or roster_unit_ids(repo)
 
     validate_failed: list[str] = []
+    check_weights = weight_gate_enabled()
     for unit_id in ids:
         if unit_id in failed:
             continue
-        result = validate_game_glb(repo / "content/characters/meshes/game" / f"{unit_id}.glb")
+        result = validate_game_glb(
+            repo / "content/characters/meshes/game" / f"{unit_id}.glb",
+            check_weights=check_weights,
+        )
         if not result.ok:
             print(f"validation FAILED {unit_id}: {'; '.join(result.errors)}")
             validate_failed.append(unit_id)
 
-    all_failed = sorted(set(failed + validate_failed))
+    weight_rows = [audit_weight_gate(repo, unit_id) for unit_id in ids if unit_id not in failed]
+    if weight_rows:
+        print(format_weight_gate_table(weight_rows))
+    weight_failed = [row.unit_id for row in weight_rows if not row.passes]
+
+    all_failed = sorted(set(failed + validate_failed + weight_failed))
     if all_failed:
         print(f"batch_export_game_units: failed: {' '.join(all_failed)}", file=sys.stderr)
         return 1

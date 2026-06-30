@@ -15,4 +15,6 @@ if [[ ! -f "$ROSTER" ]]; then
 fi
 
 # Optional: TBG_BATCH_WORKERS=4 (default) for parallel gltf-transform post-process
+# Weight gate: TBG_WEIGHT_GATE=1 (default here) — summary table printed at end
+export TBG_WEIGHT_GATE="${TBG_WEIGHT_GATE:-1}"
 python3 "$BATCH" "$@"

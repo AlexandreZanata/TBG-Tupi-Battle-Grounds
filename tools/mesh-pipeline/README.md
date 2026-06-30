@@ -109,6 +109,21 @@ python3 tools/mesh-pipeline/import_showcase_sculpts.py \
 
 Optional: `--voxel-remesh` (auto when >500k tris), `--z-up` for Z-up sources. See [PREP-AI-MESH-SPEC.md](../blender/scripts/PREP-AI-MESH-SPEC.md).
 
+### Unified import (Phase 04b)
+
+Single CLI from raw AI GLB → showcase → game export → weight gate:
+
+```bash
+python3 tools/blender/import_game_ready_unit.py \
+  --source /path/raw.glb --id demo_scout_01 \
+  --body-class HumanoidLight --animation-set humanoid_light_combat_v1 \
+  --mixamo-fallback
+```
+
+Blocked when `rigException: true` in definition JSON — see `.local/phases/04b-biped-game-ready-pipeline/EXCEPTION-WORKFLOW.md`.
+
+Batch export prints a weight-gate summary table (`TBG_WEIGHT_GATE=1` default in `batch_seed_to_game.sh`; CI sets it in `verify.sh`).
+
 Web studio accepts showcase meshes up to **150 MB** per asset.
 
 ## Batch import showcase sculpts
@@ -142,6 +157,8 @@ Manual Blender weight/silhouette fixes: re-export individual ids after editing s
   "meshShowcase": "content/characters/meshes/showcase/demo_sentinel_01.glb",
   "mesh": "content/characters/meshes/game/demo_sentinel_01.glb",
   "animationSet": "humanoid_heavy_combat_v1",
+  "rigProfile": "tbg_biped_auto",
+  "rigException": false,
   "gameLod": { "triTarget": 8000, "textureSize": 1024 }
 }
 ```

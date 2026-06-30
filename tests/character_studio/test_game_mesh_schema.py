@@ -61,6 +61,22 @@ def test_round_trip_serializes_dual_tier_fields() -> None:
     assert restored.animationSet == defn.animationSet
 
 
+def test_rig_profile_defaults_without_json_field() -> None:
+    defn = _dual_tier_definition()
+    assert defn.rigProfile == "tbg_biped_auto"
+    assert defn.rigException is False
+    assert "rigProfile" not in defn.to_dict()
+
+
+def test_rig_exception_serializes_when_true() -> None:
+    defn = _dual_tier_definition()
+    defn.rigException = True
+    defn.rigExceptionReason = "quadruped"
+    payload = defn.to_dict()
+    assert payload["rigException"] is True
+    assert payload["rigExceptionReason"] == "quadruped"
+
+
 def test_game_lod_accepts_valid_overrides() -> None:
     defn = _dual_tier_definition()
     defn.gameLod = GameLod(triTarget=6000, textureSize=512)
