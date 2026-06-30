@@ -1,0 +1,3 @@
+[submodule ".agent-harness"]
+	path = .agent-harness
+	url = git@github.com:AlexandreZanata/GoodPraticesForLLMSandAgents.git
