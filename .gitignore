@@ -12,7 +12,8 @@
 .idea/
 *.swp
 
-# Python tooling (harness scripts)
-__pycache__/
+# Blender rig templates (generated via tools/blender/setup.sh)
+tools/blender/templates/*.blend
+content/characters/meshes/.tmp/
 .venv/
 venv/

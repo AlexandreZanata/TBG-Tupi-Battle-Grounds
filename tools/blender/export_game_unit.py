@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Headless game unit export orchestrator.
 
-Usage (Blender):
-  blender --background --python tools/blender/export_game_unit.py -- demo_sentinel_01
+Prefers Blender (see tools/blender/setup.sh). Python fallback only when Blender is missing.
 
-Usage (Python fallback — no Blender):
+Usage:
   python3 tools/blender/export_game_unit.py demo_sentinel_01
 """
 

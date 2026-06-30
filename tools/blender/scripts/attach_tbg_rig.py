@@ -16,12 +16,19 @@ TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "templates"
 def attach_tbg_rig(low_mesh_path: Path, body_class: str, output_path: Path) -> Path:
     template = TEMPLATE_DIR / f"{body_class}_template.blend"
     if not template.is_file():
-        raise FileNotFoundError(f"missing rig template: {template}")
+        raise FileNotFoundError(
+            f"missing rig template: {template} — run tools/blender/setup.sh"
+        )
 
     bpy.ops.wm.open_mainfile(filepath=str(template))
+    template_body = f"{body_class}_Body"
+    template_mesh = bpy.data.objects.get(template_body)
+    if template_mesh is not None:
+        bpy.data.objects.remove(template_mesh, do_unlink=True)
+
     bpy.ops.import_scene.gltf(filepath=str(low_mesh_path))
 
-    imported = [obj for obj in bpy.context.scene.objects if obj.type == "MESH" and "Body" not in obj.name]
+    imported = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
     armatures = [obj for obj in bpy.context.scene.objects if obj.type == "ARMATURE"]
     if not imported or not armatures:
         raise RuntimeError("expected imported mesh and template armature")

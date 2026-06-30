@@ -11,6 +11,7 @@ except ImportError as exc:
     raise SystemExit("sculpt_to_game_mesh requires Blender bpy") from exc
 
 TRI_TARGET = 8000
+MAX_DECIMATE_PASSES = 12
 
 
 def sculpt_to_game_mesh(showcase_path: Path, output_path: Path, tri_target: int = TRI_TARGET) -> Path:
@@ -20,12 +21,15 @@ def sculpt_to_game_mesh(showcase_path: Path, output_path: Path, tri_target: int 
     if not meshes:
         raise RuntimeError("showcase import produced no meshes")
 
-    for obj in meshes:
-        bpy.context.view_layer.objects.active = obj
-        modifier = obj.modifiers.new(name="TBGDecimate", type="DECIMATE")
-        ratio = min(1.0, tri_target / max(1, _mesh_tri_count(obj)))
-        modifier.ratio = ratio
-        bpy.ops.object.modifier_apply(modifier=modifier.name)
+    for _ in range(MAX_DECIMATE_PASSES):
+        if _total_tri_count(meshes) <= tri_target:
+            break
+        ratio = min(0.5, tri_target / max(1, _total_tri_count(meshes)))
+        for obj in meshes:
+            bpy.context.view_layer.objects.active = obj
+            modifier = obj.modifiers.new(name="TBGDecimate", type="DECIMATE")
+            modifier.ratio = ratio
+            bpy.ops.object.modifier_apply(modifier=modifier.name)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.object.select_all(action="SELECT")
@@ -45,6 +49,8 @@ def _clear_scene() -> None:
     bpy.ops.object.delete()
 
 
-def _mesh_tri_count(obj: bpy.types.Object) -> int:
-    mesh = obj.data
-    return sum(len(poly.vertices) for poly in mesh.polygons)
+def _total_tri_count(meshes: list) -> int:
+    total = 0
+    for obj in meshes:
+        total += sum(len(poly.vertices) for poly in obj.data.polygons)
+    return total

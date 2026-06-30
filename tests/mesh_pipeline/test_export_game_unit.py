@@ -10,7 +10,9 @@ from pathlib import Path
 import pytest
 
 from mesh_pipeline.export_game_unit_core import (
+    BLENDER_CMD,
     PILOT_UNIT_ID,
+    blender_available,
     export_game_unit_python,
     load_export_config,
 )
@@ -51,9 +53,15 @@ def test_export_game_unit_python_writes_valid_pilot_mesh(tmp_path: Path) -> None
         animation_set_id=definition.get("animationSet", "humanoid_heavy_combat_v1"),
         body_class=config.body_class,
     )
-    result = export_game_unit_python(config, REPO_ROOT)
+    output = export_game_unit_python(config, REPO_ROOT)
+    result = validate_game_glb(output)
     assert result.ok, result.errors
-    assert config.game_mesh.is_file()
+    assert output.is_file()
+
+
+def test_blender_wrapper_is_executable() -> None:
+    assert BLENDER_CMD.is_file()
+    assert blender_available()
 
 
 @pytest.fixture(scope="module")
@@ -75,3 +83,5 @@ def test_export_cli_produces_valid_game_mesh(exported_pilot_mesh: Path) -> None:
     assert result.ok, result.errors
     assert result.stats.triangles <= 8000
     assert result.stats.animations >= 6
+    if blender_available():
+        assert result.stats.triangles > 100, "expected Blender-decimated sculpt, not proxy cube"

@@ -25,7 +25,7 @@ Requires Node.js (`npx @gltf-transform/cli`).
 | **game** | Simplify to tri budget + resize + Draco | ≤ 2 MB target | Mobile runtime |
 
 Validate game meshes: `python3 tools/mesh-pipeline/validate_game_glb.py <path.glb>`  
-Export pilot game mesh: `python3 tools/blender/export_game_unit.py demo_sentinel_01`  
+Export pilot game mesh: `python3 tools/blender/export_game_unit.py demo_sentinel_01` (requires `./tools/blender/setup.sh` once)  
 Budget reference: [BUDGETS.md](./BUDGETS.md)
 
 Web studio accepts meshes up to **150 MB** per asset.
