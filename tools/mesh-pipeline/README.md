@@ -30,6 +30,17 @@ Budget reference: [BUDGETS.md](./BUDGETS.md)
 
 Web studio accepts meshes up to **150 MB** per asset.
 
+## Batch import showcase sculpts
+
+Map downloaded GLBs to pilot ids (bbox-matched), Draco-compress, and write to `content/characters/meshes/`:
+
+```bash
+python3 tools/mesh-pipeline/import_showcase_sculpts.py --source-dir /path/to/downloads
+python3 -m character_studio export-all-cards   # refresh cards (PYTHONPATH=tools)
+```
+
+Edit `DEFAULT_IMPORTS` in the script to change filename → pilot id mapping. Skips files already byte-identical to the target.
+
 ## Studio demo units
 
 | id | Source sculpt |
