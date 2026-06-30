@@ -18,6 +18,12 @@ Import CMU cgspeed BVH walk data, extract hip/knee/ankle %cycle curves, and cali
 
 [`BONE_MAP_CMU_TO_TBG.json`](./BONE_MAP_CMU_TO_TBG.json) maps every deformation bone in `RIG-SPEC.md` to CMU joint names.
 
+## Mixamo → TBG (fallback rig path)
+
+[`BONE_MAP_MIXAMO_TO_TBG.json`](./BONE_MAP_MIXAMO_TO_TBG.json) maps Mixamo auto-rig bones to `TBG_*`. Mixamo `Hips` (pelvis) → `TBG_Spine`; `TBG_Root` is injected at import. Loader: `mixamo_bone_map.py`. CLI: `tools/blender/scripts/import_mixamo_fbx.py`.
+
+**Ship policy:** use Mixamo for rig/weights only — animations come from the body-class clip library, not Mixamo downloads.
+
 ## Modules
 
 | File | bpy | Purpose |

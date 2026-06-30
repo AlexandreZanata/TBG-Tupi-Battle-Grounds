@@ -26,3 +26,9 @@ python3 tools/blender/export_game_unit.py demo_scout_01
 ```
 
 Walk is **in-place** (no root XZ) — lane movement is gameplay-driven (`BUDGETS.md`).
+
+## Mixamo fallback (dev-only)
+
+When TBG proximity/auto weights fail the gate, rig via [Mixamo](https://www.mixamo.com/) and import with `import_mixamo_fbx.py`. See `tools/blender/animation/retarget/BONE_MAP_MIXAMO_TO_TBG.json`.
+
+**Ship policy:** Mixamo **mocap clips must not ship** in production game GLBs. Exported units use the **body-class animation library** (`content/characters/animation_sets/`) baked by `export_game_unit.py`. Mixamo is acceptable only as a temporary rig/weight bootstrap during development.
