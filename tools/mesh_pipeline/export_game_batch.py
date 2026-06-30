@@ -69,6 +69,17 @@ def _prepare_low_meshes(unit_ids: list[str], repo: Path, workers: int) -> list[s
     return failed
 
 
+def _print_process_tail(stdout: str, stderr: str, *, max_lines: int = 80) -> None:
+    combined = f"{stdout}\n{stderr}".strip()
+    if not combined:
+        return
+    lines = combined.splitlines()
+    if len(lines) > max_lines:
+        print(f"... ({len(lines) - max_lines} lines omitted)", flush=True)
+    for line in lines[-max_lines:]:
+        print(line, flush=True)
+
+
 def run_blender_batch(unit_ids: list[str], repo: Path | None = None) -> None:
     repo = repo or repo_root()
     if not blender_available():
@@ -82,11 +93,14 @@ def run_blender_batch(unit_ids: list[str], repo: Path | None = None) -> None:
         text=True,
         check=False,
     )
-    combined = f"{proc.stdout}\n{proc.stderr}".strip()
-    if combined:
-        print(combined)
+    combined = f"{proc.stdout}\n{proc.stderr}"
     if proc.returncode != 0 or "Traceback" in combined:
+        _print_process_tail(proc.stdout, proc.stderr)
         raise RuntimeError("Blender batch export failed — see output above")
+    if os.environ.get("TBG_BATCH_VERBOSE") == "1":
+        _print_process_tail(proc.stdout, proc.stderr, max_lines=10_000)
+    else:
+        print(f"Blender batch export OK ({len(unit_ids)} units)", flush=True)
 
 
 def post_process_raw_exports(
