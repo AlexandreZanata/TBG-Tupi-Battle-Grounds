@@ -111,7 +111,7 @@ Optional: `--voxel-remesh` (auto when >500k tris), `--z-up` for Z-up sources. Se
 
 ### Unified import (Phase 04b)
 
-Single CLI from raw AI GLB → showcase → game export → weight gate:
+Single CLI from raw AI GLB → showcase → game export → weight gate. Overview: [biped-game-ready-pipeline.md](../../docs/design/biped-game-ready-pipeline.md).
 
 ```bash
 python3 tools/blender/import_game_ready_unit.py \

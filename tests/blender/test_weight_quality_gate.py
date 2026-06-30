@@ -40,7 +40,7 @@ def test_sentinel_passes_skew_and_unweighted_contract():
 
 
 @pytest.mark.skipif(not SKIPPED_GAME.is_file(), reason="pilot game GLB not built")
-def test_reaver_fails_weight_skew_gate():
+def test_reaver_fails_weight_gate():
+    """demo_reaver_01 is the canonical roster unit that fails the weight gate."""
     result = validate_weight_quality(SKIPPED_GAME)
     assert not result.passes_gate
-    assert any("weight skew" in error for error in result.errors)

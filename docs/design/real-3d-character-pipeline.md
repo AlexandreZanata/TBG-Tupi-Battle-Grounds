@@ -32,6 +32,8 @@ Phase 01 (procedural primitives) stays for fast iteration. This document defines
 
 Export preset: glTF 2.0 binary (`.glb`), Y-up, apply transforms, include animations.
 
+**Phase 04b — biped game-ready path:** AI/sculpt → auto `TBG_*` rig, weight gate, and batch export. See [biped-game-ready-pipeline.md](biped-game-ready-pipeline.md) and [ADR-006](../adr/ADR-006-biped-auto-rig-pipeline.md). Operational commands live in [tools/mesh-pipeline/README.md](../../tools/mesh-pipeline/README.md).
+
 ### 2.2 Krita — texture painting
 
 | Map | File |
@@ -60,7 +62,7 @@ Exported maps merged with Krita albedo where needed.
 |---------|------------------|
 | [Godot](https://github.com/godotengine/godot) | Scene/resource composition patterns |
 | [glTF Sample Assets](https://github.com/KhronosGroup/glTF-Sample-Assets) | Validation models |
-| [Mixamo](https://www.mixamo.com/) | **Dev-only** retarget testing — replace with own anims for ship |
+| [Mixamo](https://www.mixamo.com/) | **Dev-only** rig bootstrap when auto weights fail — see [ADR-006](../adr/ADR-006-biped-auto-rig-pipeline.md); ship owned clips only |
 
 ---
 
