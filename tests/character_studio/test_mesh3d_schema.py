@@ -20,6 +20,9 @@ DEMO_MESH3D_IDS = {
     "demo_guard_01",
     "demo_vanguard_01",
     "demo_reaver_01",
+    "demo_hunter_01",
+    "demo_bruiser_01",
+    "demo_sentinel_01",
 }
 
 

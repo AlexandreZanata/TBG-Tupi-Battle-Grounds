@@ -40,6 +40,30 @@
       "behaviorProfile": "dps_melee_v1",
       "materialProfile": "humans_pbr_v1",
       "animatorController": "content/characters/animations/HumanoidLight.controller"
+    },
+    {
+      "id": "demo_hunter_01",
+      "bodyClass": "HumanoidLight",
+      "faction": "Humans",
+      "behaviorProfile": "ranged_shot_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidLight.controller"
+    },
+    {
+      "id": "demo_bruiser_01",
+      "bodyClass": "HumanoidLight",
+      "faction": "Humans",
+      "behaviorProfile": "dps_melee_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidLight.controller"
+    },
+    {
+      "id": "demo_sentinel_01",
+      "bodyClass": "HumanoidHeavy",
+      "faction": "Humans",
+      "behaviorProfile": "support_cast_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidHeavy.controller"
     }
   ]
 }

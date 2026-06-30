@@ -1,0 +1,19 @@
+{
+  "id": "demo_sentinel_01",
+  "characterName": "Sentinel Pilot",
+  "archetype": "Support",
+  "faction": "Humans",
+  "assetMode": "mesh3d",
+  "mesh": "content/characters/meshes/demo_sentinel_01.glb",
+  "materialProfile": "humans_pbr_v1",
+  "behaviorProfile": "support_cast_v1",
+  "animatorController": "content/characters/animations/HumanoidHeavy.controller",
+  "heightScale": 1.0,
+  "bodyWidthScale": 1.0,
+  "headScale": 1.0,
+  "limbLengthScale": 1.0,
+  "primaryColor": "#FFFFFF",
+  "secondaryColor": "#FFFFFF",
+  "accessories": ["ArmorBlock"],
+  "evolutionStage": 0
+}

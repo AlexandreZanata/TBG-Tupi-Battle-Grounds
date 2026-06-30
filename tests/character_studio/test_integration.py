@@ -14,6 +14,9 @@ STUDIO_UNITS = [
     ("demo_guard_01", "Tank", "Humans", "Guard Pilot"),
     ("demo_vanguard_01", "Control", "Humans", "Vanguard Pilot"),
     ("demo_reaver_01", "DPS", "Humans", "Reaver Pilot"),
+    ("demo_hunter_01", "Ranged", "Humans", "Hunter Pilot"),
+    ("demo_bruiser_01", "DPS", "Humans", "Bruiser Pilot"),
+    ("demo_sentinel_01", "Support", "Humans", "Sentinel Pilot"),
     ("test_procedural_spawn", "Tank", "Humans", "Test Procedural Fixture"),
 ]
 
@@ -23,6 +26,9 @@ MESH3D_IDS = {
     "demo_guard_01",
     "demo_vanguard_01",
     "demo_reaver_01",
+    "demo_hunter_01",
+    "demo_bruiser_01",
+    "demo_sentinel_01",
 }
 
 

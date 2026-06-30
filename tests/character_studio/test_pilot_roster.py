@@ -22,6 +22,9 @@ DEMO_IDS = (
     "demo_guard_01",
     "demo_vanguard_01",
     "demo_reaver_01",
+    "demo_hunter_01",
+    "demo_bruiser_01",
+    "demo_sentinel_01",
 )
 
 
@@ -31,8 +34,8 @@ def pilot_roster() -> list[dict]:
     return list(data["pilots"])
 
 
-def test_pilot_roster_manifest_has_five_demo_sculpts(pilot_roster: list[dict]) -> None:
-    assert len(pilot_roster) == 5
+def test_pilot_roster_manifest_has_eight_demo_sculpts(pilot_roster: list[dict]) -> None:
+    assert len(pilot_roster) == 8
     assert {entry["id"] for entry in pilot_roster} == set(DEMO_IDS)
 
 

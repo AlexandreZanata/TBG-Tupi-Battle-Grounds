@@ -55,7 +55,12 @@ namespace TBG.CharacterLibrary.Tests
         public void Load_AllDemoDefinitions_AreMesh3D()
         {
             var loader = new CharacterDefinitionLoader();
-            foreach (var pilotId in new[] { "demo_scout_01", "demo_striker_01", "demo_guard_01" })
+            foreach (var pilotId in new[]
+                     {
+                         "demo_scout_01", "demo_striker_01", "demo_guard_01",
+                         "demo_vanguard_01", "demo_reaver_01", "demo_hunter_01",
+                         "demo_bruiser_01", "demo_sentinel_01",
+                     })
             {
                 var definition = loader.Load(pilotId);
                 Assert.That(definition.AssetMode, Is.EqualTo(CharacterAssetMode.Mesh3D));
