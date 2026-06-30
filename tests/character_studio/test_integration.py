@@ -37,6 +37,7 @@ def test_pilot_definition_exists_with_card(
     repo: CharacterRepository, unit_id: str, archetype: str, faction: str, name: str
 ) -> None:
     defn = repo.load(unit_id)
+    assert defn.assetMode == "mesh3d"
     assert defn.archetype == archetype
     assert defn.faction == faction
     assert defn.characterName == name

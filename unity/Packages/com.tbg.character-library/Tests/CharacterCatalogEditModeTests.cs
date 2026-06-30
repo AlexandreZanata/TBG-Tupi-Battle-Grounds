@@ -25,17 +25,13 @@ namespace TBG.CharacterLibrary.Tests
             }
         }
 
-        [TestCase("tank_human_01")]
-        [TestCase("dps_undead_01")]
-        [TestCase("support_machine_01")]
-        [TestCase("ranged_plant_01")]
-        public void Spawn_ProceduralPilot_CreatesGeometryUnderParent(string pilotId)
+        [Test]
+        public void Spawn_ProceduralFixture_CreatesGeometryUnderParent()
         {
             var catalog = new CharacterCatalog();
-            var instance = catalog.Spawn(pilotId, _parent);
+            var instance = catalog.Spawn("test_procedural_spawn", _parent);
 
-            Assert.That(instance, Is.Not.Null);
-            Assert.That(instance.Id, Is.EqualTo(pilotId));
+            Assert.That(instance.Id, Is.EqualTo("test_procedural_spawn"));
             Assert.That(instance.Root.transform.parent, Is.EqualTo(_parent));
             Assert.That(instance.Root.transform.Find("Head"), Is.Not.Null);
             Assert.That(instance.Root.transform.Find("Torso"), Is.Not.Null);

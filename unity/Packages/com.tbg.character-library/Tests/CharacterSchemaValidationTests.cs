@@ -9,11 +9,12 @@ namespace TBG.CharacterLibrary.Tests
     public sealed class CharacterSchemaValidationTests
     {
         [Test]
-        public void Validate_ProceduralPilot_HasNoErrors()
+        public void Validate_Mesh3dPilot_HasNoErrors()
         {
             var record = LoadRecord("tank_human_01");
             var errors = CharacterDefinitionValidator.Validate(record);
             Assert.That(errors, Is.Empty);
+            Assert.That(record.assetMode, Is.EqualTo("mesh3d"));
         }
 
         [Test]
@@ -64,7 +65,7 @@ namespace TBG.CharacterLibrary.Tests
             foreach (var pilotId in new[] { "tank_human_01", "dps_undead_01", "support_machine_01", "ranged_plant_01" })
             {
                 var definition = loader.Load(pilotId);
-                Assert.That(definition.AssetMode, Is.EqualTo(CharacterAssetMode.Procedural));
+                Assert.That(definition.AssetMode, Is.EqualTo(CharacterAssetMode.Mesh3D));
             }
         }
 

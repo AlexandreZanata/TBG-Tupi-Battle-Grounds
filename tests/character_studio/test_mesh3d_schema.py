@@ -51,14 +51,15 @@ def test_procedural_definition_without_asset_mode_still_valid(repo: CharacterRep
     assert loaded.mesh is None
 
 
-def test_existing_pilot_json_files_default_to_procedural() -> None:
+def test_existing_pilot_json_files_are_mesh3d() -> None:
     definitions = REPO_ROOT / "content" / "characters" / "definitions"
     for path in sorted(definitions.glob("*.json")):
         if path.stem not in PILOT_IDS:
             continue
         defn = CharacterDefinition.from_dict(json.loads(path.read_text(encoding="utf-8")))
         validate_definition(defn)
-        assert defn.assetMode == "procedural"
+        assert defn.assetMode == "mesh3d"
+        assert defn.mesh is not None
 
 
 def test_mesh3d_requires_mesh_path() -> None:

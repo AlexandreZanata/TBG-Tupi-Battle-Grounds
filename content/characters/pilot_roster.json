@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "pilots": [
+    {
+      "id": "tank_human_01",
+      "bodyClass": "HumanoidHeavy",
+      "faction": "Humans",
+      "behaviorProfile": "tank_melee_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidHeavy.controller"
+    },
+    {
+      "id": "dps_undead_01",
+      "bodyClass": "Organic",
+      "faction": "Undead",
+      "behaviorProfile": "dps_melee_v1",
+      "materialProfile": "undead_pbr_v1",
+      "animatorController": "content/characters/animations/Organic.controller"
+    },
+    {
+      "id": "support_machine_01",
+      "bodyClass": "Mechanical",
+      "faction": "Machines",
+      "behaviorProfile": "support_cast_v1",
+      "materialProfile": "machines_pbr_v1",
+      "animatorController": "content/characters/animations/Mechanical.controller"
+    },
+    {
+      "id": "ranged_plant_01",
+      "bodyClass": "HumanoidLight",
+      "faction": "Plants",
+      "behaviorProfile": "ranged_shot_v1",
+      "materialProfile": "plants_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidLight.controller"
+    }
+  ]
+}

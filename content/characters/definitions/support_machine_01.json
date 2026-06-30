@@ -3,14 +3,22 @@
   "characterName": "Gear Medic",
   "archetype": "Support",
   "faction": "Machines",
+  "assetMode": "mesh3d",
+  "mesh": "content/characters/meshes/support_machine_01.glb",
+  "textures": {
+    "albedo": "content/characters/textures/support_machine_01_albedo.png",
+    "normal": "content/characters/textures/support_machine_01_normal.png",
+    "orm": "content/characters/textures/support_machine_01_orm.png"
+  },
+  "materialProfile": "machines_pbr_v1",
+  "behaviorProfile": "support_cast_v1",
+  "animatorController": "content/characters/animations/Mechanical.controller",
   "heightScale": 0.9,
   "bodyWidthScale": 0.7,
   "headScale": 1.2,
   "limbLengthScale": 0.8,
   "primaryColor": "#4A6FA5",
   "secondaryColor": "#B0C4DE",
-  "accessories": [
-    "Helmet"
-  ],
+  "accessories": ["Helmet"],
   "evolutionStage": 0
 }

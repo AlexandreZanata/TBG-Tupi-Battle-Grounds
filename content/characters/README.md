@@ -11,8 +11,8 @@ The **Character Studio** (Unity Editor + web UI) creates, edits, and deletes fil
 | `definitions/` | Unit parameters (JSON) — studio CRUD | Yes |
 | `cards/` | Card images rendered from procedural 3D | Yes |
 | `previews/` | Optional viewport / test captures | Yes |
-| `meshes/` | Authored `.glb` units (Phase 02) | Yes (`.gitkeep` until assets land) |
-| `textures/` | PBR map sets per unit (Phase 02) | Yes (`.gitkeep` until assets land) |
+| `meshes/` | Authored `.glb` units (Phase 02) | Yes — pilot roster + `_test_fixture.glb` |
+| `textures/` | PBR map sets per unit (Phase 02) | Yes — pilot `*_*.png` sets |
 | `materials/` | Material profile JSON (Phase 02) | Yes — `*_pbr_v1.json` per faction |
 | `behaviors/` | Behavior profile JSON (Phase 02) | Yes — `*_v1.json` per archetype |
 | `animations/` | Shared animator controllers (Phase 02) | Yes — one `.controller` per body class |
@@ -55,9 +55,27 @@ Export placeholders: `python3 tools/material-maker/export_textures.py --all-pilo
 
 Regenerate shared animator controllers: `python3 tools/unity/generate_animator_controllers.py`
 
+## Pilot roster (Phase 02 §10)
+
+Manifest: `pilot_roster.json` — four mesh3d pilots (one per faction).
+
+| id | Body class | Behavior profile |
+|----|------------|------------------|
+| `tank_human_01` | HumanoidHeavy | `tank_melee_v1` |
+| `dps_undead_01` | Organic | `dps_melee_v1` |
+| `support_machine_01` | Mechanical | `support_cast_v1` |
+| `ranged_plant_01` | HumanoidLight | `ranged_shot_v1` |
+
+Provision placeholder meshes (copies `_test_fixture.glb` until authored assets land):
+
+```bash
+python3 tools/material-maker/export_textures.py --all-pilots
+python3 tools/unity/provision_pilot_meshes.py
+```
+
 Examples: `_schema.example.json`, `_schema.mesh3d.example.json`.
 
-Test-only definitions: `test_mesh3d_spawn.json`, `test_mesh3d_missing_glb.json`.  
+Test-only definitions: `test_procedural_spawn.json`, `test_mesh3d_spawn.json`, `test_mesh3d_missing_glb.json`.  
 Mesh fixture: `meshes/_test_fixture.glb` (Khronos Box sample for Unity spawn tests).
 
 ## Naming convention

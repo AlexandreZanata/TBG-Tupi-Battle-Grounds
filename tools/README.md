@@ -51,6 +51,14 @@ python3 tools/unity/generate_animator_controllers.py
 
 Outputs shared body-class controllers to `content/characters/animations/`.
 
+## Pilot mesh placeholders
+
+```bash
+python3 tools/unity/provision_pilot_meshes.py
+```
+
+Copies `_test_fixture.glb` to each pilot id in `pilot_roster.json` until authored meshes land.
+
 ## Unity
 
 See [unity/README.md](../unity/README.md) — menu **TBG → Character Studio**.

@@ -1,0 +1,15 @@
+{
+  "id": "test_procedural_spawn",
+  "characterName": "Test Procedural Fixture",
+  "archetype": "Tank",
+  "faction": "Humans",
+  "assetMode": "procedural",
+  "heightScale": 1.0,
+  "bodyWidthScale": 1.0,
+  "headScale": 1.0,
+  "limbLengthScale": 1.0,
+  "primaryColor": "#8B7355",
+  "secondaryColor": "#C4A882",
+  "accessories": [],
+  "evolutionStage": 0
+}

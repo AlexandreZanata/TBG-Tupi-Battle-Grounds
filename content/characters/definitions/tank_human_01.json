@@ -3,14 +3,22 @@
   "characterName": "Iron Guard",
   "archetype": "Tank",
   "faction": "Humans",
+  "assetMode": "mesh3d",
+  "mesh": "content/characters/meshes/tank_human_01.glb",
+  "textures": {
+    "albedo": "content/characters/textures/tank_human_01_albedo.png",
+    "normal": "content/characters/textures/tank_human_01_normal.png",
+    "orm": "content/characters/textures/tank_human_01_orm.png"
+  },
+  "materialProfile": "humans_pbr_v1",
+  "behaviorProfile": "tank_melee_v1",
+  "animatorController": "content/characters/animations/HumanoidHeavy.controller",
   "heightScale": 1.2,
   "bodyWidthScale": 1.8,
   "headScale": 0.8,
   "limbLengthScale": 0.7,
   "primaryColor": "#8B7355",
   "secondaryColor": "#C4A882",
-  "accessories": [
-    "Shield"
-  ],
+  "accessories": ["Shield"],
   "evolutionStage": 0
 }

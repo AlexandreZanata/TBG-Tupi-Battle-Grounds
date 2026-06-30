@@ -53,6 +53,7 @@ Open the Unity project, then **Window → General → Test Runner → EditMode**
 | `MaterialProfileLoaderTests` | Material profile JSON + `TBG/CharacterPBR` |
 | `BehaviorProfileLoaderTests` | Behavior profiles + `BehaviorPlayer` action mapping |
 | `Mesh3DCharacterFactoryTests` | glTF import, scale, animator attachment |
+| `PilotRosterEditModeTests` | Mesh3d pilot spawn + attack/death behaviors |
 
 Or batchmode:
 
@@ -61,4 +62,4 @@ unity -batchmode -projectPath unity -runTests -testPlatform EditMode \
   -assemblyNames TBG.CharacterLibrary.Tests -logFile -
 ```
 
-Test fixtures: `content/characters/meshes/_test_fixture.glb`, `test_mesh3d_spawn.json`.
+Test fixtures: `content/characters/meshes/_test_fixture.glb`, `test_mesh3d_spawn.json`, `test_procedural_spawn.json`.
