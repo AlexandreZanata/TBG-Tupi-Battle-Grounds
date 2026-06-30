@@ -2,16 +2,57 @@
 
 Use when you export characters from Blender/sculpt tools as static `.glb` files (embedded PBR, no rig).
 
+## Full workflow (Phase 03)
+
+Dual-tier assets: **showcase** (high-poly web preview) and **game** (skinned, clipped, mobile budget).
+
+```mermaid
+flowchart TB
+  subgraph import["Showcase import"]
+    A[Sculpt / Blender export] --> B[optimize_glb.sh --mode visual]
+    B --> C["meshes/showcase/{id}.glb"]
+    C --> D[Definition JSON: meshShowcase + animationSet]
+  end
+
+  subgraph export["Game export (automated)"]
+    D --> E[export_game_unit.py]
+    E --> F1[sculpt_to_game_mesh.py — decimate + bake]
+    F1 --> F2[attach_tbg_rig.py — TBG_* armature + weights]
+    F2 --> F3[retarget_clip_library.py — body-class clips]
+    F3 --> G[post_process: resize + ORM pack + Draco]
+    G --> H["meshes/game/{id}.glb"]
+    H --> I[validate_game_glb.py]
+    I --> J[LOD1 → meshes/game/lod1/]
+  end
+
+  subgraph consume["Consumers"]
+    C --> W1[Web showcase / Animation Studio — Showcase tier]
+    H --> W2[Web Animation Studio — Game tier]
+    H --> U[Unity Mesh3DCharacterFactory — runtime mesh]
+    I --> CI["./scripts/verify.sh — CI gate"]
+  end
+```
+
+**One-time setup per body class:** clip library under `content/characters/animations/clips/{bodyClass}/` and animation set manifest in `content/characters/animation_sets/`.
+
+**Batch all pilot units:**
+
+```bash
+./tools/blender/setup.sh                    # rig templates (HumanoidLight / HumanoidHeavy)
+./tools/mesh-pipeline/batch_seed_to_game.sh # all pilot_roster.json ids
+./scripts/verify.sh                         # validates every meshes/game/*.glb
+```
+
 ## Quick import (web studio preview)
 
 ```bash
 # Default: visual mode — Draco only, preserves geometry + texture resolution
-./tools/mesh-pipeline/optimize_glb.sh /path/to/sculpt.glb content/characters/meshes/my_unit.glb
+./tools/mesh-pipeline/optimize_glb.sh /path/to/sculpt.glb content/characters/meshes/showcase/my_unit.glb
 
 # Smaller / faster preview (decimated mesh + 1024 textures)
 ./tools/mesh-pipeline/optimize_glb.sh --mode preview /path/to/sculpt.glb content/characters/meshes/my_unit_lod.glb
 
-# Mobile game mesh (≤ 8k tris, 1024² textures, Draco)
+# Mobile game mesh (≤ 8k tris, 1024² textures, Draco) — static mesh only; use export_game_unit for skinned
 ./tools/mesh-pipeline/optimize_glb.sh --mode game --tri 8000 --tex 1024 \
   /path/to/showcase.glb content/characters/meshes/game/my_unit.glb
 ```
@@ -22,15 +63,31 @@ Requires Node.js (`npx @gltf-transform/cli`).
 |------|----------------|--------------|--------|
 | **visual** (default) | Draco compress only | ~37–44 MB from ~80 MB source | Same as source |
 | **preview** | Simplify + resize textures + Draco | ~4 MB | Lower fidelity |
-| **game** | Simplify to tri budget + resize + Draco | ≤ 2 MB target | Mobile runtime |
+| **game** | Simplify to tri budget + resize + Draco | ≤ 2 MB target | Mobile runtime (static) |
+
+## Game unit export (skinned + clips)
+
+Single unit:
+
+```bash
+python3 tools/blender/export_game_unit.py demo_sentinel_01
+```
+
+Pipeline steps (Blender headless via `export_game_unit_bpy.py`):
+
+1. **Decimate** showcase GLB to `gameLod.triTarget` (default 8000 tris)
+2. **Attach** `TBG_*` rig from `tools/blender/templates/` (`HumanoidLight` | `HumanoidHeavy`)
+3. **Retarget** clips from animation set manifest onto unit skeleton
+4. **Post-process** — texture resize, ORM pack (`game_glb_texture_pack.py`), Draco
+5. **Validate** — `validate_game_glb.py` (tris, bones, clips, file size)
+6. **LOD1** — static mesh at ~50% tri budget in `meshes/game/lod1/`
+
+Python fallback (no Blender): proxy skinned mesh + clip stubs for CI/dev only.
 
 Validate game meshes: `python3 tools/mesh-pipeline/validate_game_glb.py <path.glb>`  
-Export one pilot: `python3 tools/blender/export_game_unit.py demo_sentinel_01` (requires `./tools/blender/setup.sh` once)  
-Batch export all pilots: `./tools/mesh-pipeline/batch_seed_to_game.sh`  
-Post-process: ORM texture pack + LOD1 static mesh in `meshes/game/lod1/` (automatic on export)  
 Budget reference: [BUDGETS.md](./BUDGETS.md)
 
-Web studio accepts meshes up to **150 MB** per asset.
+Web studio accepts showcase meshes up to **150 MB** per asset.
 
 ## Batch import showcase sculpts
 
@@ -44,7 +101,7 @@ python3 -m character_studio export-all-cards   # refresh cards (PYTHONPATH=tools
 
 Import reads `fixed_test_imports.json` by default. Use `--only demo_scout_01` for a subset.
 
-## Batch export game meshes (Phase 03 §8)
+## Batch export game meshes
 
 ```bash
 ./tools/blender/setup.sh                    # HumanoidHeavy + HumanoidLight rig templates
@@ -56,6 +113,19 @@ Showcase carousel continues to use `meshShowcase` tier; game meshes land in `mes
 
 Manual Blender weight/silhouette fixes: re-export individual ids after editing showcase sculpt.
 
+## Definition JSON (dual-tier)
+
+```json
+{
+  "meshShowcase": "content/characters/meshes/showcase/demo_sentinel_01.glb",
+  "mesh": "content/characters/meshes/game/demo_sentinel_01.glb",
+  "animationSet": "humanoid_heavy_combat_v1",
+  "gameLod": { "triTarget": 8000, "textureSize": 1024 }
+}
+```
+
+Web preview loads `meshShowcase` when present; Unity runtime loads `mesh` (game tier).
+
 ## Studio demo units
 
 | id | Source sculpt |
@@ -63,21 +133,35 @@ Manual Blender weight/silhouette fixes: re-export individual ids after editing s
 | `demo_scout_01` | Scout ranged pilot |
 | `demo_striker_01` | DPS striker |
 | `demo_guard_01` | Tank guard |
+| `demo_sentinel_01` | Heavy sentinel (Phase 03 pilot) |
 
-Open `./scripts/start-studio.sh` → select unit → **3D** tab. First load of visual-mode meshes can take 10–30s (high poly).
+Open `./scripts/start-studio.sh` → **Animation Studio** tab → toggle Showcase / Game tier.
 
 ## Add a unit
 
-1. Run `optimize_glb.sh` (visual mode).
-2. Create `content/characters/definitions/{id}.json` with `assetMode: "mesh3d"`.
-3. Omit `textures` when the GLB already has embedded PBR.
-4. Tint with `primaryColor` / `secondaryColor` in the studio.
+1. Run `optimize_glb.sh` (visual mode) → `meshes/showcase/`.
+2. Create `content/characters/definitions/{id}.json` with `assetMode: "mesh3d"`, `meshShowcase`, `animationSet`.
+3. Run `export_game_unit.py {id}` → `meshes/game/`.
+4. Omit external `textures` when the GLB already has embedded PBR.
+5. Tint with `primaryColor` / `secondaryColor` in the studio.
 
 ## Animations
 
-Static sculpts use procedural Idle / Attack / Death in the browser. For skeletal clips, skin to a Blender `TBG_*` rig per `tools/blender/RIG-SPEC.md` and re-export.
+| Tier | Clips |
+|------|-------|
+| **Showcase** (static sculpt) | Procedural Idle / Attack / Death in browser when no skeletal clips |
+| **Game** (skinned GLB) | Embedded clips from body-class library — Idle, Walk, Attack, Attack2, Ultimate, Death, Spawn |
+
+Rig spec: `tools/blender/RIG-SPEC.md`. Animation sets: `content/characters/animation_sets/`.
 
 ## Limits
 
-- Web preview: **150 MB** per asset.
-- Game target: see [BUDGETS.md](./BUDGETS.md) — ≤ 8k tris, ≤ 64 bones, ≤ 2 MB target GLB.
+- Web showcase preview: **150 MB** per asset.
+- Game target: see [BUDGETS.md](./BUDGETS.md) — ≤ 8k tris, ≤ 64 bones, ≤ 2 MB target GLB, 6–12 clips.
+- CI: `./scripts/verify.sh` fails on budget violations and total game mesh repo size > 80 MB.
+
+## Related
+
+- Phase 03 plan: `.local/phases/03-game-animation-studio/`
+- ADR: [docs/adr/ADR-004-dual-tier-mesh-animation.md](../../docs/adr/ADR-004-dual-tier-mesh-animation.md)
+- Blender scripts: [tools/blender/README.md](../blender/README.md)

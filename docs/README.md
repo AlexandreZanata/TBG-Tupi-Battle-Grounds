@@ -25,6 +25,7 @@ Non-trivial technical and product decisions, recorded before implementation.
 | [ADR-001](adr/ADR-001-real-time-competitive-design.md) | Real-time competitive design (Option A) | Accepted |
 | [ADR-002](adr/ADR-002-nakama-self-hosted-infrastructure.md) | Nakama self-hosted on single VPS | Accepted |
 | [ADR-003](adr/ADR-003-real-3d-character-pipeline.md) | Real 3D pipeline + C# CharacterLibrary | Accepted |
+| [ADR-004](adr/ADR-004-dual-tier-mesh-animation.md) | Dual-tier mesh + animation pipeline (Phase 03) | Accepted |
 
 ---
 
@@ -36,6 +37,7 @@ Non-trivial technical and product decisions, recorded before implementation.
 | [design/character-creation-guide.md](design/character-creation-guide.md) | Unit design, mechanics-first workflow, 2D art pipeline |
 | [design/procedural-character-generator.md](design/procedural-character-generator.md) | Procedural units — geometry and color 100% in code (Phase 01) |
 | [design/real-3d-character-pipeline.md](design/real-3d-character-pipeline.md) | Real 3D meshes, PBR textures, behaviors, C# library (Phase 02) |
+| [adr/ADR-004-dual-tier-mesh-animation.md](adr/ADR-004-dual-tier-mesh-animation.md) | Game vs showcase meshes, clip library, mobile budgets (Phase 03) |
 | [design/pilot-silhouette-checklist.md](design/pilot-silhouette-checklist.md) | Phase 01 pilot unit silhouette validation |
 
 ---
