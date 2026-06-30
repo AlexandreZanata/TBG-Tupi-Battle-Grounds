@@ -120,6 +120,78 @@
       "behaviorProfile": "dps_melee_v1",
       "materialProfile": "humans_pbr_v1",
       "animatorController": "content/characters/animations/HumanoidLight.controller"
+    },
+    {
+      "id": "demo_mystic_01",
+      "bodyClass": "HumanoidHeavy",
+      "faction": "Humans",
+      "behaviorProfile": "control_cast_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidHeavy.controller"
+    },
+    {
+      "id": "demo_champion_01",
+      "bodyClass": "HumanoidLight",
+      "faction": "Humans",
+      "behaviorProfile": "dps_melee_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidLight.controller"
+    },
+    {
+      "id": "demo_phantom_01",
+      "bodyClass": "HumanoidLight",
+      "faction": "Humans",
+      "behaviorProfile": "dps_melee_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidLight.controller"
+    },
+    {
+      "id": "demo_specter_01",
+      "bodyClass": "HumanoidLight",
+      "faction": "Humans",
+      "behaviorProfile": "ranged_shot_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidLight.controller"
+    },
+    {
+      "id": "demo_stalker_01",
+      "bodyClass": "HumanoidLight",
+      "faction": "Humans",
+      "behaviorProfile": "dps_melee_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidLight.controller"
+    },
+    {
+      "id": "demo_shade_01",
+      "bodyClass": "HumanoidLight",
+      "faction": "Humans",
+      "behaviorProfile": "dps_melee_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidLight.controller"
+    },
+    {
+      "id": "demo_colossus_01",
+      "bodyClass": "HumanoidHeavy",
+      "faction": "Humans",
+      "behaviorProfile": "dps_melee_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidHeavy.controller"
+    },
+    {
+      "id": "demo_sovereign_01",
+      "bodyClass": "HumanoidHeavy",
+      "faction": "Humans",
+      "behaviorProfile": "tank_melee_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidHeavy.controller"
+    },
+    {
+      "id": "demo_conqueror_01",
+      "bodyClass": "HumanoidLight",
+      "faction": "Humans",
+      "behaviorProfile": "dps_melee_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidLight.controller"
     }
   ]
 }

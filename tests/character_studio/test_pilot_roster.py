@@ -36,8 +36,8 @@ def pilot_roster() -> list[dict]:
     return list(data["pilots"])
 
 
-def test_pilot_roster_manifest_has_fifteen_fixed_test_sculpts(pilot_roster: list[dict]) -> None:
-    assert len(pilot_roster) == 15
+def test_pilot_roster_manifest_matches_fixed_test_imports(pilot_roster: list[dict]) -> None:
+    assert len(pilot_roster) == len(FIXED_TEST_IDS)
     assert {entry["id"] for entry in pilot_roster} == set(FIXED_TEST_IDS)
 
 

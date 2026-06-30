@@ -16,7 +16,16 @@
     "demo_ranger_01",
     "demo_warden_01",
     "demo_gladiator_01",
-    "demo_raider_01"
+    "demo_raider_01",
+    "demo_mystic_01",
+    "demo_champion_01",
+    "demo_phantom_01",
+    "demo_specter_01",
+    "demo_stalker_01",
+    "demo_shade_01",
+    "demo_colossus_01",
+    "demo_sovereign_01",
+    "demo_conqueror_01"
   ],
   "imports": {
     "27fbc655169662b90769705919e039f8.glb": "demo_reaver_01",
@@ -33,6 +42,15 @@
     "4d625a41b5389aa23bc43b92e96b98f7.glb": "demo_ranger_01",
     "50478c23b1fbd4af3256dd40a74885d4.glb": "demo_warden_01",
     "541a596293a3b8d70e583d18fe1b12ba.glb": "demo_gladiator_01",
-    "7d15bc2ba70f024b67db3dfc52b4474c.glb": "demo_raider_01"
+    "7d15bc2ba70f024b67db3dfc52b4474c.glb": "demo_raider_01",
+    "291cd2bb7c024c5c7474dc8d087450a9.glb": "demo_mystic_01",
+    "586e162b90c3b721ca04e0ac4a87d2d4.glb": "demo_champion_01",
+    "58d7af47f909ca794d504205925760d1.glb": "demo_phantom_01",
+    "103c36603ee970b5ea191ad5d2ed42b1.glb": "demo_specter_01",
+    "e168831d5eea632b66feda8a1dd79a0a(1).glb": "demo_stalker_01",
+    "daf7c9782f41c380ef3d9020ed999821.glb": "demo_shade_01",
+    "b8445c7a55d56f885ee61b681f68abb8.glb": "demo_colossus_01",
+    "ab0dc7025d2c499b8be8136a6575856a(1).glb": "demo_sovereign_01",
+    "79f0ccc7962d005a41c72b8f31f0d095.glb": "demo_conqueror_01"
   }
 }

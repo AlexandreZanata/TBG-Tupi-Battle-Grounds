@@ -15,7 +15,7 @@ from mesh_pipeline.budgets import (
     MIN_CLIPS_SKINNED,
     TARGET_FILE_BYTES,
 )
-from mesh_pipeline.glb_inspect import GlbStats, inspect_glb
+from mesh_pipeline.glb_inspect import GlbStats, inspect_glb, skinned_mesh_has_weights, base_color_texture_is_valid
 
 
 @dataclass(frozen=True)
@@ -54,7 +54,12 @@ def validate_game_glb(path: Path) -> ValidationResult:
             f"file size {stats.file_bytes} bytes exceeds target {TARGET_FILE_BYTES}"
         )
 
+    if stats.materials > 0 and not base_color_texture_is_valid(path):
+        errors.append("base color texture appears empty or black — re-export from showcase")
+
     if stats.skins > 0:
+        if not skinned_mesh_has_weights(path):
+            errors.append("skinned GLB missing JOINTS_0/WEIGHTS_0 on mesh primitives")
         if stats.bones > MAX_BONES:
             errors.append(f"bones {stats.bones} exceed limit {MAX_BONES}")
         if stats.animations < MIN_CLIPS_SKINNED:

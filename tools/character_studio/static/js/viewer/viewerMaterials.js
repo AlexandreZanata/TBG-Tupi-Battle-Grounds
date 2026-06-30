@@ -34,14 +34,39 @@ function upgradeEmbeddedMaterials(root) {
   root.traverse((obj) => {
     if (!(obj instanceof THREE.Mesh)) return;
     const source = Array.isArray(obj.material) ? obj.material : [obj.material];
-    const mapped = source.map((mat) => {
-      if (!mat) return new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55 });
-      mat.side = THREE.DoubleSide;
-      if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace;
-      return mat;
-    });
+    const mapped = source.map((mat) => normalizeEmbeddedMaterial(mat));
     obj.material = Array.isArray(obj.material) ? mapped : mapped[0];
   });
+}
+
+function normalizeEmbeddedMaterial(mat) {
+  if (!mat) {
+    return new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55, side: THREE.DoubleSide });
+  }
+  // KHR_materials_specular → MeshPhysicalMaterial can render black in studio preview.
+  if (mat.isMeshPhysicalMaterial) {
+    mat = new THREE.MeshStandardMaterial({
+      map: mat.map,
+      normalMap: mat.normalMap,
+      metalnessMap: mat.metalnessMap,
+      roughnessMap: mat.roughnessMap,
+      aoMap: mat.aoMap,
+      emissiveMap: mat.emissiveMap,
+      color: mat.color,
+      metalness: mat.metalness ?? 0,
+      roughness: mat.roughness ?? 0.55,
+      aoMapIntensity: mat.aoMapIntensity ?? 1,
+      side: THREE.DoubleSide,
+    });
+  }
+  mat.side = THREE.DoubleSide;
+  if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace;
+  if (mat.emissiveMap) mat.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+  if (mat.normalMap) mat.normalMap.colorSpace = THREE.LinearSRGBColorSpace;
+  if (mat.metalnessMap) mat.metalnessMap.colorSpace = THREE.LinearSRGBColorSpace;
+  if (mat.roughnessMap) mat.roughnessMap.colorSpace = THREE.LinearSRGBColorSpace;
+  if (mat.aoMap) mat.aoMap.colorSpace = THREE.LinearSRGBColorSpace;
+  return mat;
 }
 
 function applyColorTint(root, primaryHex, secondaryHex) {

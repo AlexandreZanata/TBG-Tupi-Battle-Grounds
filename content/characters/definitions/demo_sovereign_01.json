@@ -1,0 +1,21 @@
+{
+  "id": "demo_sovereign_01",
+  "characterName": "Sovereign Pilot",
+  "archetype": "Tank",
+  "faction": "Humans",
+  "assetMode": "mesh3d",
+  "meshShowcase": "content/characters/meshes/showcase/demo_sovereign_01.glb",
+  "mesh": "content/characters/meshes/game/demo_sovereign_01.glb",
+  "animationSet": "humanoid_heavy_combat_v1",
+  "materialProfile": "humans_pbr_v1",
+  "behaviorProfile": "tank_melee_v1",
+  "animatorController": "content/characters/animations/HumanoidHeavy.controller",
+  "heightScale": 1.0,
+  "bodyWidthScale": 1.05,
+  "headScale": 1.0,
+  "limbLengthScale": 1.0,
+  "primaryColor": "#FFFFFF",
+  "secondaryColor": "#FFFFFF",
+  "accessories": ["Shield"],
+  "evolutionStage": 0
+}

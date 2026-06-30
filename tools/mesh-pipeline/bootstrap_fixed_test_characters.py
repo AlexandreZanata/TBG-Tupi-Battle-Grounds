@@ -84,6 +84,26 @@ NEW_CHARACTERS: tuple[dict[str, str], ...] = (
         "animatorController": "content/characters/animations/HumanoidLight.controller",
         "accessories": ["Weapon"],
     },
+    {
+        "id": "demo_mystic_01",
+        "characterName": "Mystic Pilot",
+        "archetype": "Control",
+        "bodyClass": "HumanoidHeavy",
+        "behaviorProfile": "control_cast_v1",
+        "animationSet": "humanoid_heavy_combat_v1",
+        "animatorController": "content/characters/animations/HumanoidHeavy.controller",
+        "accessories": ["Helmet"],
+    },
+    {
+        "id": "demo_champion_01",
+        "characterName": "Champion Pilot",
+        "archetype": "DPS",
+        "bodyClass": "HumanoidLight",
+        "behaviorProfile": "dps_melee_v1",
+        "animationSet": "humanoid_light_combat_v1",
+        "animatorController": "content/characters/animations/HumanoidLight.controller",
+        "accessories": ["Weapon"],
+    },
 )
 
 

@@ -15,8 +15,10 @@ from mesh_pipeline.export_game_unit_core import (
     export_game_unit_python,
     load_export_config,
 )
+from mesh_pipeline.budgets import MAX_TRIANGLES
 from mesh_pipeline.game_glb_assemble import assemble_skinned_game_glb
 from mesh_pipeline.game_glb_validate import validate_game_glb
+from mesh_pipeline.glb_inspect import skinned_mesh_has_weights
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EXPORT_CLI = REPO_ROOT / "tools/blender/export_game_unit.py"
@@ -84,7 +86,8 @@ def exported_pilot_mesh() -> Path:
 def test_export_cli_produces_valid_game_mesh(exported_pilot_mesh: Path) -> None:
     result = validate_game_glb(exported_pilot_mesh)
     assert result.ok, result.errors
-    assert result.stats.triangles <= 8000
+    assert result.stats.triangles <= MAX_TRIANGLES
     assert result.stats.animations >= 6
     if blender_available():
         assert result.stats.triangles > 100, "expected Blender-decimated sculpt, not proxy cube"
+        assert skinned_mesh_has_weights(exported_pilot_mesh)

@@ -75,15 +75,11 @@ export function mountCharacterViewer(container, options = {}) {
 
   async function loadCharacter(character) {
     const token = ++loadToken;
-    const keepPrevious = Boolean(modelRoot);
-    if (!keepPrevious) {
-      removeModelRoot();
-    }
+    removeModelRoot();
     options.onLoading?.(character, { cached: false });
     try {
       const built = await buildCharacterRoot(character, token);
       if (token !== loadToken || cancelled || !built) return;
-      if (keepPrevious) removeModelRoot();
       modelRoot = built.root;
       scene.add(modelRoot);
       fitCamera(modelRoot, camera, viewportW, viewportH);

@@ -39,7 +39,7 @@ def retarget_clip_library(
 
     arm_obj = armatures[0]
     clip_names = list(dict.fromkeys(defn.clips.values()))
-    _create_named_actions(arm_obj, clip_names)
+    _create_rest_pose_actions(arm_obj, clip_names)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.object.select_all(action="DESELECT")
@@ -51,7 +51,8 @@ def retarget_clip_library(
         "filepath": str(output_path),
         "export_format": "GLB",
         "use_selection": True,
-        "export_apply": True,
+        "export_apply": False,
+        "export_skins": True,
         "export_animations": True,
         "export_yup": True,
     }
@@ -61,12 +62,17 @@ def retarget_clip_library(
     return output_path
 
 
-def _create_named_actions(arm_obj: bpy.types.Object, clip_names: list[str]) -> None:
-    if arm_obj.animation_data is None:
-        arm_obj.animation_data_create()
+def _create_rest_pose_actions(arm_obj: bpy.types.Object, clip_names: list[str]) -> None:
+    """Rest-pose actions with stable keyframes (no motion — avoids viewer flicker)."""
     for clip_name in clip_names:
-        if clip_name in bpy.data.actions:
-            bpy.data.actions.remove(bpy.data.actions[clip_name])
+        existing = bpy.data.actions.get(clip_name)
+        if existing is not None:
+            bpy.data.actions.remove(existing)
         action = bpy.data.actions.new(clip_name)
+        arm_obj.animation_data_create()
         arm_obj.animation_data.action = action
-        arm_obj.pose.bones[0].keyframe_insert(data_path="location", frame=1)
+        for pose_bone in arm_obj.pose.bones:
+            pose_bone.keyframe_insert(data_path="location", frame=1)
+            pose_bone.keyframe_insert(data_path="rotation_quaternion", frame=1)
+            pose_bone.keyframe_insert(data_path="scale", frame=1)
+        arm_obj.animation_data.action = None

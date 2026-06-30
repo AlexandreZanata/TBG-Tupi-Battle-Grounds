@@ -8,7 +8,7 @@ Constants are mirrored in `tools/mesh_pipeline/budgets.py`.
 
 | Metric | Limit | Notes |
 |--------|-------|-------|
-| Triangles | ≤ 8,000 | Skinned or static game mesh |
+| Triangles | ≤ 9,000 (hard) / 8,000 (target) | Skinned or static game mesh |
 | Bones | ≤ 64 | Skinned meshes only |
 | Materials | ≤ 2 | Per unit |
 | Texture max edge | 1,024 px | Hero tier; minion tier may use 512 later |

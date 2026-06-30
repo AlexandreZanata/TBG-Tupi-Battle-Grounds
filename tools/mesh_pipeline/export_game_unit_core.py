@@ -4,14 +4,17 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
 from animation_sets.validation import AnimationSet, validate_animation_set
 from mesh_pipeline.game_glb_assemble import assemble_skinned_game_glb
+from mesh_pipeline.game_glb_simplify import prepare_unit_low_meshes
+from mesh_pipeline.game_glb_transform import run_gltf_transform
 from mesh_pipeline.game_glb_validate import ValidationResult, validate_game_glb
+from mesh_pipeline.glb_inspect import inspect_glb
+from mesh_pipeline.glb_mesh_integrity import integrity_error
 
 DEFAULT_ANIMATION_SET = "humanoid_heavy_combat_v1"
 DEFAULT_TRI_TARGET = 8000
@@ -85,23 +88,22 @@ def _load_animation_names(config: GameUnitExportConfig, repo: Path) -> list[str]
     return seen
 
 
-def _run_gltf_transform(args: list[str]) -> None:
-    npx = shutil.which("npx")
-    if npx is None:
-        raise RuntimeError("npx is required for gltf-transform post-process")
-    subprocess.run([npx, "--yes", "@gltf-transform/cli", *args], check=True)
-
-
 def post_process_game_glb(raw_path: Path, output_path: Path, texture_size: int = 1024) -> Path:
-    """Resize textures, pack ORM, and Draco-compress a Blender-exported game GLB."""
+    """Resize textures, pack ORM, strip preview-hostile extensions, Draco-compress."""
     from mesh_pipeline.game_glb_texture_pack import pack_orm_textures
+    from mesh_pipeline.game_glb_strip_extensions import strip_preview_extensions
+
+    mesh_error = integrity_error(raw_path)
+    if mesh_error:
+        raise RuntimeError(f"mesh integrity failed for {raw_path}: {mesh_error}")
 
     tmp = output_path.with_suffix(".post.glb")
-    _run_gltf_transform(
+    run_gltf_transform(
         ["resize", str(raw_path), str(tmp), "--width", str(texture_size), "--height", str(texture_size)]
     )
     pack_orm_textures(tmp)
-    _run_gltf_transform(["draco", str(tmp), str(output_path)])
+    strip_preview_extensions(tmp)
+    run_gltf_transform(["draco", str(tmp), str(output_path)])
     tmp.unlink(missing_ok=True)
     return output_path
 
@@ -110,6 +112,16 @@ def run_blender_export(unit_id: str, repo: Path | None = None) -> Path:
     repo = repo or repo_root()
     if not blender_available():
         raise RuntimeError("Blender not available — run tools/blender/setup.sh")
+
+    config = load_export_config(unit_id, repo)
+    print(f"export: simplifying {unit_id} via gltf-transform")
+    prepare_unit_low_meshes(
+        config.unit_id,
+        config.showcase_mesh,
+        repo,
+        config.tri_target,
+        config.texture_size,
+    )
 
     script = BLENDER_BPY_SCRIPT.resolve()
     proc = subprocess.run(
@@ -123,15 +135,15 @@ def run_blender_export(unit_id: str, repo: Path | None = None) -> Path:
     if combined:
         print(combined)
     if proc.returncode != 0 or "Traceback" in combined:
-        if "Traceback" in combined:
-            raise RuntimeError("Blender export failed — see traceback above")
-        if proc.returncode != 0:
-            raise RuntimeError("Blender export failed")
+        raise RuntimeError("Blender export failed — see traceback above")
 
-    config = load_export_config(unit_id, repo)
     raw = config.game_mesh.with_suffix(".blender-raw.glb")
     if not raw.is_file():
         raise RuntimeError(f"Blender export produced no output: {raw}")
+    from mesh_pipeline.game_glb_simplify import trim_to_tri_budget
+
+    if inspect_glb(raw).triangles > config.tri_target:
+        trim_to_tri_budget(raw, config.tri_target)
     post_process_game_glb(raw, config.game_mesh, config.texture_size)
     raw.unlink(missing_ok=True)
     return config.game_mesh
@@ -147,7 +159,7 @@ def export_game_unit_python(config: GameUnitExportConfig, repo: Path | None = No
     tmp = config.game_mesh.with_suffix(".raw.glb")
     config.game_mesh.parent.mkdir(parents=True, exist_ok=True)
     assemble_skinned_game_glb(tmp, clip_names)
-    _run_gltf_transform(["draco", str(tmp), str(config.game_mesh)])
+    run_gltf_transform(["draco", str(tmp), str(config.game_mesh)])
     tmp.unlink(missing_ok=True)
     return config.game_mesh
 

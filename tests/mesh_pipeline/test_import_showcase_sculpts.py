@@ -26,7 +26,7 @@ def test_import_mapping_covers_fixed_test_roster() -> None:
     )
     mapping = json.loads(result.stdout)
     assert set(mapping) == _expected_ids()
-    assert len(mapping) == 15
+    assert len(mapping) == len(_expected_ids())
 
 
 def test_only_flag_limits_import_subset() -> None:

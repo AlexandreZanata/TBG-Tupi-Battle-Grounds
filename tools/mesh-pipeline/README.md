@@ -35,11 +35,13 @@ flowchart TB
 
 **One-time setup per body class:** clip library under `content/characters/animations/clips/{bodyClass}/` and animation set manifest in `content/characters/animation_sets/`.
 
-**Batch all pilot units:**
+**Batch all pilot units** (one Blender session, parallel post-process):
 
 ```bash
 ./tools/blender/setup.sh                    # rig templates (HumanoidLight / HumanoidHeavy)
-./tools/mesh-pipeline/batch_seed_to_game.sh # all pilot_roster.json ids
+./tools/mesh-pipeline/batch_seed_to_game.sh # all pilot_roster.json ids (~4–6 min for 20 units)
+# Optional: TBG_BATCH_WORKERS=4  parallel gltf-transform (default 4)
+# Subset:    ./tools/mesh-pipeline/batch_seed_to_game.sh demo_scout_01 demo_guard_01
 ./scripts/verify.sh                         # validates every meshes/game/*.glb
 ```
 
@@ -73,14 +75,17 @@ Single unit:
 python3 tools/blender/export_game_unit.py demo_sentinel_01
 ```
 
-Pipeline steps (Blender headless via `export_game_unit_bpy.py`):
+Pipeline steps:
 
-1. **Decimate** showcase GLB to `gameLod.triTarget` (default 8000 tris)
-2. **Attach** `TBG_*` rig from `tools/blender/templates/` (`HumanoidLight` | `HumanoidHeavy`)
-3. **Retarget** clips from animation set manifest onto unit skeleton
-4. **Post-process** — texture resize, ORM pack (`game_glb_texture_pack.py`), Draco
-5. **Validate** — `validate_game_glb.py` (tris, bones, clips, file size)
-6. **LOD1** — static mesh at ~50% tri budget in `meshes/game/lod1/`
+1. **Coarsen** showcase via gltf-transform toward ~50k tris (fast pre-pass for 1M+ sculpts)
+2. **Decimate** coarse mesh to `gameLod.triTarget` (~8k) in Blender with mesh cleanup
+3. **Attach** `TBG_*` rig from `tools/blender/templates/` (`HumanoidLight` | `HumanoidHeavy`)
+4. **Retarget** clips from animation set manifest onto unit skeleton
+5. **Post-process** — texture resize, ORM pack, Draco, mesh-integrity gate
+6. **Validate** — `validate_game_glb.py` (tris, bones, clips, file size)
+7. **LOD1** — static mesh at ~50% tri budget in `meshes/game/lod1/`
+
+**Authoring tip:** pre-normalize raw sculpts to ~50k tris before import (`optimize_glb.sh --mode game --tri 50000`) for faster batch exports. Game tier still lands at ~8k.
 
 Python fallback (no Blender): proxy skinned mesh + clip stubs for CI/dev only.
 

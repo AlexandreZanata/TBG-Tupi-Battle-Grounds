@@ -123,3 +123,48 @@ def _primitive_triangles(primitive: dict, accessors: list[dict]) -> int:
 def _image_dimensions(image_bytes: bytes) -> tuple[int, int]:
     with Image.open(BytesIO(image_bytes)) as image:
         return image.size
+
+
+def skinned_mesh_has_weights(path: Path) -> bool:
+    """Return True when skinned meshes expose joint/weight attributes."""
+    gltf, _bin = load_glb(path)
+    skins = gltf.get("skins", [])
+    if not skins:
+        return True
+    for mesh in gltf.get("meshes", []):
+        for primitive in mesh.get("primitives", []):
+            attrs = primitive.get("attributes", {})
+            if "JOINTS_0" in attrs and "WEIGHTS_0" in attrs:
+                return True
+    return False
+
+
+def base_color_texture_is_valid(path: Path, *, min_avg: float = 8.0) -> bool:
+    """Detect empty/black albedo maps (failed texture bake)."""
+    gltf, bin_chunk = load_glb(path)
+    if bin_chunk is None:
+        return True
+    pbr = (gltf.get("materials") or [{}])[0].get("pbrMetallicRoughness") or {}
+    tex_index = (pbr.get("baseColorTexture") or {}).get("index")
+    if tex_index is None:
+        return True
+    texture = gltf["textures"][tex_index]
+    image = gltf["images"][texture["source"]]
+    if "bufferView" not in image:
+        return True
+    view = gltf["bufferViews"][image["bufferView"]]
+    start = view.get("byteOffset", 0)
+    payload = bin_chunk[start : start + view["byteLength"]]
+    with Image.open(BytesIO(payload)) as img:
+        rgb = img.convert("RGB")
+        pixels = rgb.getdata()
+        if not pixels:
+            return False
+        total = [0.0, 0.0, 0.0]
+        for r, g, b in pixels:
+            total[0] += r
+            total[1] += g
+            total[2] += b
+        count = len(pixels)
+        avg = sum(total) / (3 * count)
+        return avg >= min_avg

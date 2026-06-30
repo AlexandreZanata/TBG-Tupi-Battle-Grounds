@@ -16,4 +16,13 @@ export const SHOWCASE_ORDER = [
   "demo_warden_01",
   "demo_gladiator_01",
   "demo_raider_01",
+  "demo_mystic_01",
+  "demo_champion_01",
+  "demo_phantom_01",
+  "demo_specter_01",
+  "demo_stalker_01",
+  "demo_shade_01",
+  "demo_colossus_01",
+  "demo_sovereign_01",
+  "demo_conqueror_01",
 ];

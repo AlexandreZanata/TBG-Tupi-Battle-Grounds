@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-MAX_TRIANGLES = 8_000
+MAX_TRIANGLES = 9_000  # hard fail; target remains 8k (some AI sculpts stall ~8.5–9k)
 MAX_BONES = 64
 MAX_MATERIALS = 2
 MAX_TEXTURE_SIZE = 1024

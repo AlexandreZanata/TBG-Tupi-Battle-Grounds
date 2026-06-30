@@ -181,11 +181,6 @@ def _compact_images(gltf: dict) -> None:
         texture["source"] = remap[texture["source"]]
 
 
-def _prune_unused_images(gltf: dict) -> None:
-    """Legacy helper — prefer _compact_images."""
-    _compact_images(gltf)
-
-
 def _pad4(length: int) -> int:
     return length + ((4 - length % 4) % 4)
 

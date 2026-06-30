@@ -57,8 +57,12 @@ def export_game_unit_blender(
     lod1_target = max(500, int(tri_target * LOD1_TRI_RATIO))
     lod1_tex = max(256, texture_size // 2)
 
-    sculpt_to_game_mesh(showcase_mesh, lod1_mesh, tri_target=lod1_target, texture_size=lod1_tex)
-    sculpt_to_game_mesh(showcase_mesh, low_mesh, tri_target=tri_target, texture_size=texture_size)
+    # ponytail: low_mesh + lod1 pre-built on host via gltf-transform (see game_glb_simplify.py)
+    tmp_dir = repo / "content/characters/meshes/.tmp"
+    low_mesh = tmp_dir / f"{unit_id}_low.glb"
+    if not low_mesh.is_file():
+        sculpt_to_game_mesh(showcase_mesh, low_mesh, tri_target=tri_target, texture_size=texture_size)
+        sculpt_to_game_mesh(low_mesh, lod1_mesh, tri_target=lod1_target, texture_size=lod1_tex)
     attach_tbg_rig(low_mesh, body_class, skinned_mesh)
     retarget_clip_library(skinned_mesh, animation_set_id, raw_output, repo)
     low_mesh.unlink(missing_ok=True)
