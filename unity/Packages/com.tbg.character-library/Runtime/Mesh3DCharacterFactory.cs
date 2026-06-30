@@ -56,6 +56,7 @@ namespace TBG.CharacterLibrary
 
             var behaviorProfile = ResolveBehaviorProfile(definition);
             Mesh3DAnimatorSetup.Attach(root, definition, behaviorProfile);
+            Locomotion.LocomotionFootIk.Attach(root, behaviorProfile);
 
             return root;
         }

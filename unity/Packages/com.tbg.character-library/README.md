@@ -115,6 +115,8 @@ Phase 03 extensions:
 | `triggers` | Per-action trigger overrides |
 | `timings.ultimateWindupMs`, `timings.ultimateDurationMs` | Ultimate presentation sync |
 | `combat.attackCycle` | `"repeat"` (same attack) or `"rotate"` (alternate Attack / Attack2) |
+| `locomotion.useRootMotionWalk` | Optional `WalkRoot` clip sync (Phase 04 lane) |
+| `locomotion.footIk` | Optional foot plant IK during Walk (default `false`) |
 
 `BehaviorPlayer` maps `CharacterAction` → animator triggers/states from the profile (defaults when `behaviorProfile` is omitted).
 

@@ -76,6 +76,8 @@ python3 tools/mesh-pipeline/validate_game_glb.py content/characters/meshes/game/
 
 Unity stub: `BehaviorProfile.UseRootMotionWalk` + `BehaviorPlayer.SyncWalkRootMotion` (Phase 04 lane sync).
 
+**Foot IK:** optional `locomotion.footIk` on behavior JSON (default `false`). Unity `LocomotionFootIk` uses lightweight two-bone IK — see `tools/blender/animation/MOVEMENT-MODULE.md`.
+
 ## Related
 
 - Blender export warnings: `tools/blender/tbg_export/validation_rules.py` (`MAX_TRIS_MVP`)

@@ -10,6 +10,8 @@ Modular clip generators for the TBG FK rig (`TBG_*` bones). Each locomotion or c
 | `idle/` | Planned | Breathing / weight-shift idle |
 | `attack/` | **Active** | Thrust + heavy swing (`THRUST-ATTACK-SPEC.md`, `SWING-ATTACK-SPEC.md`) |
 
+**Index:** [MOVEMENT-MODULE.md](MOVEMENT-MODULE.md)
+
 ## Layout convention
 
 ```

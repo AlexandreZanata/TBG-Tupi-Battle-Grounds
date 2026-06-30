@@ -15,6 +15,7 @@ namespace TBG.CharacterLibrary
         public int UltimateWindupMs { get; init; }
         public int UltimateDurationMs { get; init; }
         public bool UseRootMotionWalk { get; init; }
+        public bool UseFootIk { get; init; }
 
         private readonly string[] _stateNames;
         private readonly string[] _triggerNames;
@@ -56,6 +57,7 @@ namespace TBG.CharacterLibrary
                 UltimateWindupMs = timings.ultimateWindupMs,
                 UltimateDurationMs = timings.ultimateDurationMs,
                 UseRootMotionWalk = record.locomotion != null && record.locomotion.useRootMotionWalk,
+                UseFootIk = record.locomotion != null && record.locomotion.footIk,
                 _stateNames = new[]
                 {
                     actions.idle,

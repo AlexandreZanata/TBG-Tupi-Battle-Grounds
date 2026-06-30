@@ -102,6 +102,14 @@ def test_animation_studio_page_is_served(client: TestClient) -> None:
     assert "meshTierToggle" in response.text
 
 
+def test_animation_studio_foot_ik_debug_script_exists() -> None:
+    path = (
+        Path(__file__).resolve().parents[2]
+        / "tools/character_studio/static/js/animation-studio/clipControls.js"
+    )
+    assert "footIkDebugToggle" in path.read_text(encoding="utf-8")
+
+
 def test_mesh_showcase_tier_serves_high_poly_sculpt(client: TestClient) -> None:
     response = client.get("/api/characters/demo_striker_01/mesh?tier=showcase")
     assert response.status_code == 200

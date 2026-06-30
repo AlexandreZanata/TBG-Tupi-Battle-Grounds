@@ -45,6 +45,7 @@ namespace TBG.CharacterLibrary
     public sealed class BehaviorLocomotionRecord
     {
         public bool useRootMotionWalk;
+        public bool footIk;
     }
 
     [Serializable]

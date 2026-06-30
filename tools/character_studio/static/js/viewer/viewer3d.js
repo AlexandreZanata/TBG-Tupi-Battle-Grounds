@@ -11,6 +11,7 @@ import { applyCharacterMaterials, normalizeMeshes } from "./viewerMaterials.js";
 import { applyStudioLighting, configureRenderer } from "./viewerLighting.js";
 import { bindViewerResize, prepareViewerRoot, readViewerSize, applyRendererSize } from "./viewerResize.js";
 import { placeOnGround, fitCamera, disposeObject } from "./viewerSceneUtils.js";
+import { createFootIkDebug } from "../animation-studio/footIkDebug.js";
 
 export function mountCharacterViewer(container, options = {}) {
   const mount = prepareViewerRoot(container);
@@ -42,6 +43,7 @@ export function mountCharacterViewer(container, options = {}) {
   let frameId = 0;
   let viewportW = width;
   let viewportH = height;
+  let footIkDebug = null;
 
   const resizeObserver = bindViewerResize(container, renderer, camera, (w, h) => {
     viewportW = w;
@@ -55,6 +57,7 @@ export function mountCharacterViewer(container, options = {}) {
     lastFrameMs = now;
     if (autoRotate && modelRoot) modelRoot.rotation.y += 0.28 * delta;
     if (mixer) mixer.update(delta);
+    footIkDebug?.update();
     controls.update();
     renderer.render(scene, camera);
   };
@@ -67,6 +70,8 @@ export function mountCharacterViewer(container, options = {}) {
     }
     activeAction = null;
     animationClips = [];
+    footIkDebug?.dispose();
+    footIkDebug = null;
     if (!modelRoot) return;
     scene.remove(modelRoot);
     disposeObject(modelRoot);
@@ -137,6 +142,8 @@ export function mountCharacterViewer(container, options = {}) {
 
     const embedded = animations.length > 0;
     const allowProcedural = tier !== "game";
+    footIkDebug = createFootIkDebug(gltfScene);
+    footIkDebug.setEnabled(false);
     return {
       root: displayRoot,
       rig: gltfScene,
@@ -165,6 +172,7 @@ export function mountCharacterViewer(container, options = {}) {
     activeAction.clampWhenFinished = !loop;
     activeAction.play();
     mixer.update(0);
+    footIkDebug?.setWalkActive(loop && (resolved === "Walk" || resolved === "WalkRoot"));
     return true;
   }
 
@@ -193,6 +201,9 @@ export function mountCharacterViewer(container, options = {}) {
     getClipProgress,
     seekClip,
     listClipNames,
+    setFootIkDebugEnabled(value) {
+      footIkDebug?.setEnabled(value);
+    },
     dispose() {
       cancelled = true;
       cancelAnimationFrame(frameId);

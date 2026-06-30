@@ -20,10 +20,19 @@ export function createClipControls(container, getContext) {
       <input type="checkbox" id="walkRootMotionToggle" />
       Root motion walk (WalkRoot)
     </label>
+    <label class="viewer3d-controls__toggle">
+      <input type="checkbox" id="footIkDebugToggle" />
+      Foot IK debug (preview only)
+    </label>
   `;
 
   let activeAction = "idle";
   const walkRootToggle = container.querySelector("#walkRootMotionToggle");
+  const footIkToggle = container.querySelector("#footIkDebugToggle");
+  footIkToggle?.addEventListener("change", () => {
+    const { viewer } = getContext();
+    viewer?.setFootIkDebugEnabled(footIkToggle.checked);
+  });
 
   container.querySelectorAll("[data-action]").forEach((btn) => {
     btn.addEventListener("click", async () => {
@@ -34,6 +43,7 @@ export function createClipControls(container, getContext) {
       await playBehaviorAction(viewer, character, activeAction, {
         walkRootMotion: walkRootToggle?.checked ?? false,
       });
+      viewer?.setFootIkDebugEnabled(footIkToggle?.checked ?? false);
     });
   });
 

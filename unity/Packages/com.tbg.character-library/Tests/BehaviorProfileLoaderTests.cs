@@ -109,5 +109,15 @@ namespace TBG.CharacterLibrary.Tests
 
             Object.DestroyImmediate(root);
         }
+
+        [Test]
+        public void Load_DefaultProfiles_DisableFootIk()
+        {
+            foreach (var profileId in new[] { "tank_melee_v1", "ranged_shot_v1" })
+            {
+                var profile = new BehaviorProfileLoader().Load(profileId);
+                Assert.That(profile.UseFootIk, Is.False, profileId);
+            }
+        }
     }
 }
