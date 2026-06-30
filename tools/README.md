@@ -43,6 +43,14 @@ python3 tools/material-maker/export_textures.py --all-pilots
 
 See [material-maker/README.md](material-maker/README.md).
 
+## Unity animator controllers
+
+```bash
+python3 tools/unity/generate_animator_controllers.py
+```
+
+Outputs shared body-class controllers to `content/characters/animations/`.
+
 ## Unity
 
 See [unity/README.md](../unity/README.md) — menu **TBG → Character Studio**.

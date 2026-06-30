@@ -1,0 +1,82 @@
+using System.IO;
+using NUnit.Framework;
+using TBG.CharacterLibrary;
+using TBG.CharacterSystem.Runtime;
+using UnityEngine;
+
+namespace TBG.CharacterLibrary.Tests
+{
+    public sealed class BehaviorProfileLoaderTests
+    {
+        [TestCase("tank_melee_v1", "Tank", "HumanoidHeavy", "AttackHeavy")]
+        [TestCase("dps_melee_v1", "DPS", "Organic", "AttackFast")]
+        [TestCase("support_cast_v1", "Support", "Mechanical", "AttackCast")]
+        [TestCase("ranged_shot_v1", "Ranged", "HumanoidLight", "AttackRanged")]
+        [TestCase("control_cast_v1", "Control", "HumanoidLight", "AttackRanged")]
+        public void Load_ArchetypeProfile_MapsActions(
+            string profileId,
+            string archetype,
+            string bodyClass,
+            string attackState)
+        {
+            var loader = new BehaviorProfileLoader();
+            var profile = loader.Load(profileId);
+
+            Assert.That(profile.Id, Is.EqualTo(profileId));
+            Assert.That(profile.Archetype, Is.EqualTo(archetype));
+            Assert.That(profile.BodyClass, Is.EqualTo(bodyClass));
+            Assert.That(profile.GetStateName(CharacterAction.Attack), Is.EqualTo(attackState));
+            Assert.That(profile.GetTriggerName(CharacterAction.Attack), Is.EqualTo("Attack"));
+            Assert.That(profile.AttackHitMs, Is.GreaterThan(profile.AttackWindupMs));
+        }
+
+        [Test]
+        public void Load_MissingProfile_ThrowsFileNotFound()
+        {
+            var loader = new BehaviorProfileLoader();
+            Assert.Throws<FileNotFoundException>(() => loader.Load("missing_behavior_v1"));
+        }
+
+        [Test]
+        public void Validate_ProfileWithoutAttackAction_ReturnsError()
+        {
+            var record = LoadRecord("tank_melee_v1");
+            record.actions.attack = string.Empty;
+            var errors = BehaviorProfileLoader.Validate(record);
+            Assert.That(errors, Does.Contain("actions.attack is required"));
+        }
+
+        private static BehaviorProfileJsonRecord LoadRecord(string profileId)
+        {
+            var path = Path.Combine(CharacterPaths.BehaviorsDir, profileId + ".json");
+            var json = File.ReadAllText(path);
+            return JsonUtility.FromJson<BehaviorProfileJsonRecord>(json);
+        }
+    }
+
+    public sealed class BehaviorPlayerTests
+    {
+        [Test]
+        public void PlayAttack_WithProfile_DoesNotThrow()
+        {
+            var root = new GameObject("BehaviorTest");
+            root.AddComponent<Animator>();
+            var profile = new BehaviorProfileLoader().Load("tank_melee_v1");
+            var player = new BehaviorPlayer(root, profile);
+
+            Assert.That(player.GetStateName(CharacterAction.Attack), Is.EqualTo("AttackHeavy"));
+            Assert.DoesNotThrow(() => player.PlayAttack());
+
+            Object.DestroyImmediate(root);
+        }
+
+        [Test]
+        public void PlayAttack_WithoutAnimator_DoesNotThrow()
+        {
+            var root = new GameObject("BehaviorTestNoAnimator");
+            var player = new BehaviorPlayer(root, BehaviorProfile.CreateDefault());
+            Assert.DoesNotThrow(() => player.PlayAttack());
+            Object.DestroyImmediate(root);
+        }
+    }
+}

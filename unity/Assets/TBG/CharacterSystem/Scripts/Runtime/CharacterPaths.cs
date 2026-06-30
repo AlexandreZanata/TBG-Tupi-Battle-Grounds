@@ -16,6 +16,8 @@ namespace TBG.CharacterSystem.Runtime
         public static string PreviewsDir => Path.Combine(GetContentRoot(), "previews");
         public static string TexturesDir => Path.Combine(GetContentRoot(), "textures");
         public static string MaterialsDir => Path.Combine(GetContentRoot(), "materials");
+        public static string BehaviorsDir => Path.Combine(GetContentRoot(), "behaviors");
+        public static string AnimationsDir => Path.Combine(GetContentRoot(), "animations");
 
         public static string GetContentRoot()
         {

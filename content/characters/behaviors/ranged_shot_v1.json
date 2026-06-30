@@ -1,0 +1,23 @@
+{
+  "id": "ranged_shot_v1",
+  "archetype": "Ranged",
+  "bodyClass": "HumanoidLight",
+  "animatorController": "content/characters/animations/HumanoidLight.controller",
+  "clipSource": "embedded",
+  "actions": {
+    "idle": "Idle",
+    "spawn": "Spawn",
+    "attack": "AttackRanged",
+    "death": "Death"
+  },
+  "triggers": {
+    "idle": "Idle",
+    "spawn": "Spawn",
+    "attack": "Attack",
+    "death": "Death"
+  },
+  "timings": {
+    "attackWindupMs": 300,
+    "attackHitMs": 450
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "tank_melee_v1",
+  "archetype": "Tank",
+  "bodyClass": "HumanoidHeavy",
+  "animatorController": "content/characters/animations/HumanoidHeavy.controller",
+  "clipSource": "embedded",
+  "actions": {
+    "idle": "Idle",
+    "spawn": "Spawn",
+    "attack": "AttackHeavy",
+    "death": "Death"
+  },
+  "triggers": {
+    "idle": "Idle",
+    "spawn": "Spawn",
+    "attack": "Attack",
+    "death": "Death"
+  },
+  "timings": {
+    "attackWindupMs": 400,
+    "attackHitMs": 520
+  }
+}

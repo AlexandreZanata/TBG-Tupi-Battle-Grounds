@@ -9,20 +9,27 @@ namespace TBG.CharacterLibrary
         private readonly CharacterDefinitionLoader _loader;
         private readonly ProceduralCharacterBuilder _proceduralBuilder;
         private readonly Mesh3DCharacterFactory _mesh3DFactory;
+        private readonly BehaviorProfileLoader _behaviorLoader;
 
         public CharacterCatalog()
-            : this(new CharacterDefinitionLoader(), new ProceduralCharacterBuilder(), new Mesh3DCharacterFactory())
+            : this(
+                new CharacterDefinitionLoader(),
+                new ProceduralCharacterBuilder(),
+                new Mesh3DCharacterFactory(),
+                new BehaviorProfileLoader())
         {
         }
 
         public CharacterCatalog(
             CharacterDefinitionLoader loader,
             ProceduralCharacterBuilder proceduralBuilder,
-            Mesh3DCharacterFactory mesh3DFactory)
+            Mesh3DCharacterFactory mesh3DFactory,
+            BehaviorProfileLoader behaviorLoader)
         {
             _loader = loader;
             _proceduralBuilder = proceduralBuilder;
             _mesh3DFactory = mesh3DFactory;
+            _behaviorLoader = behaviorLoader;
         }
 
         public CharacterInstance Spawn(string id, Transform parent)
@@ -31,7 +38,8 @@ namespace TBG.CharacterLibrary
             var root = definition.AssetMode == CharacterAssetMode.Mesh3D
                 ? _mesh3DFactory.Create(definition, parent)
                 : SpawnProcedural(definition, parent);
-            var behavior = new BehaviorPlayer(root);
+            var behaviorProfile = ResolveBehaviorProfile(definition);
+            var behavior = new BehaviorPlayer(root, behaviorProfile);
             return new CharacterInstance(id, root, behavior);
         }
 
@@ -53,6 +61,16 @@ namespace TBG.CharacterLibrary
             root.transform.SetParent(parent, false);
             Object.Destroy(scriptable);
             return root;
+        }
+
+        private BehaviorProfile ResolveBehaviorProfile(LoadedCharacterDefinition definition)
+        {
+            if (string.IsNullOrWhiteSpace(definition.BehaviorProfileId))
+            {
+                return BehaviorProfile.CreateDefault();
+            }
+
+            return _behaviorLoader.Load(definition.BehaviorProfileId);
         }
     }
 }

@@ -1,0 +1,81 @@
+using System;
+
+namespace TBG.CharacterLibrary
+{
+    public sealed class BehaviorProfile
+    {
+        public string Id { get; init; }
+        public string Archetype { get; init; }
+        public string BodyClass { get; init; }
+        public string AnimatorControllerPath { get; init; }
+        public string ClipSource { get; init; }
+        public int AttackWindupMs { get; init; }
+        public int AttackHitMs { get; init; }
+
+        private readonly string[] _stateNames;
+        private readonly string[] _triggerNames;
+
+        public static BehaviorProfile CreateDefault()
+        {
+            return new BehaviorProfile
+            {
+                Id = "default",
+                ClipSource = "embedded",
+                _stateNames = new[] { "Idle", "Spawn", "Attack", "Death" },
+                _triggerNames = new[] { "Idle", "Spawn", "Attack", "Death" }
+            };
+        }
+
+        public static BehaviorProfile FromRecord(BehaviorProfileJsonRecord record)
+        {
+            if (record == null || string.IsNullOrWhiteSpace(record.id))
+            {
+                throw new ArgumentException("Behavior profile id is required.");
+            }
+
+            var actions = record.actions ?? new BehaviorActionsRecord();
+            var triggers = record.triggers ?? new BehaviorTriggersRecord();
+            var timings = record.timings ?? new BehaviorTimingsRecord();
+            return new BehaviorProfile
+            {
+                Id = record.id,
+                Archetype = record.archetype,
+                BodyClass = record.bodyClass,
+                AnimatorControllerPath = record.animatorController,
+                ClipSource = record.clipSource,
+                AttackWindupMs = timings.attackWindupMs,
+                AttackHitMs = timings.attackHitMs,
+                _stateNames = new[]
+                {
+                    actions.idle,
+                    actions.spawn,
+                    actions.attack,
+                    actions.death
+                },
+                _triggerNames = new[]
+                {
+                    triggers.idle,
+                    triggers.spawn,
+                    triggers.attack,
+                    triggers.death
+                }
+            };
+        }
+
+        public string GetStateName(CharacterAction action) => ResolveName(_stateNames, action);
+
+        public string GetTriggerName(CharacterAction action) => ResolveName(_triggerNames, action);
+
+        private static string ResolveName(string[] names, CharacterAction action)
+        {
+            var index = (int)action;
+            if (names == null || index < 0 || index >= names.Length)
+            {
+                return action.ToString();
+            }
+
+            var value = names[index];
+            return string.IsNullOrWhiteSpace(value) ? action.ToString() : value;
+        }
+    }
+}

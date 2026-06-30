@@ -12,7 +12,7 @@
   },
   "materialProfile": "humans_pbr_v1",
   "behaviorProfile": "tank_melee_v1",
-  "animatorController": "content/characters/animations/TankHumanoid.controller",
+  "animatorController": "content/characters/animations/HumanoidHeavy.controller",
   "heightScale": 1.2,
   "bodyWidthScale": 1.8,
   "headScale": 0.8,

@@ -14,8 +14,8 @@ The **Character Studio** (Unity Editor + web UI) creates, edits, and deletes fil
 | `meshes/` | Authored `.glb` units (Phase 02) | Yes (`.gitkeep` until assets land) |
 | `textures/` | PBR map sets per unit (Phase 02) | Yes (`.gitkeep` until assets land) |
 | `materials/` | Material profile JSON (Phase 02) | Yes — `*_pbr_v1.json` per faction |
-| `behaviors/` | Behavior profile JSON (Phase 02) | Yes (`.gitkeep` until profiles land) |
-| `animations/` | Shared animator controllers (Phase 02) | Yes (`.gitkeep` until controllers land) |
+| `behaviors/` | Behavior profile JSON (Phase 02) | Yes — `*_v1.json` per archetype |
+| `animations/` | Shared animator controllers (Phase 02) | Yes — one `.controller` per body class |
 
 ## Definition schema (Phase 02 extension)
 
@@ -27,6 +27,8 @@ All units share Phase 01 mechanics fields. Phase 02 adds:
 | `mesh` | Yes when `mesh3d` | Path to `.glb` |
 | `textures` | No | `albedo`, `normal`, `orm`; optional `emissive` |
 | `materialProfile` | No | Profile id (e.g. `humans_pbr_v1`) — see `materials/` |
+| `behaviorProfile` | No | Profile id (e.g. `tank_melee_v1`) — see `behaviors/` |
+| `animatorController` | No | Path to Unity `.controller` — see `animations/` |
 
 ## Material profiles (Phase 02 §6)
 
@@ -40,8 +42,18 @@ All units share Phase 01 mechanics fields. Phase 02 adds:
 Texture naming: `{unit_id}_albedo.png`, `{unit_id}_normal.png`, `{unit_id}_orm.png` (optional `{unit_id}_emissive.png`).
 
 Export placeholders: `python3 tools/material-maker/export_textures.py --all-pilots`
-| `behaviorProfile` | No | Profile id (e.g. `tank_melee_v1`) |
-| `animatorController` | No | Path to Unity `.controller` |
+
+## Behavior profiles (Phase 02 §7)
+
+| Profile id | Archetype | Body class |
+|------------|-----------|------------|
+| `tank_melee_v1` | Tank | HumanoidHeavy |
+| `dps_melee_v1` | DPS | Organic |
+| `support_cast_v1` | Support | Mechanical |
+| `ranged_shot_v1` | Ranged | HumanoidLight |
+| `control_cast_v1` | Control | HumanoidLight |
+
+Regenerate shared animator controllers: `python3 tools/unity/generate_animator_controllers.py`
 
 Examples: `_schema.example.json`, `_schema.mesh3d.example.json`.
 

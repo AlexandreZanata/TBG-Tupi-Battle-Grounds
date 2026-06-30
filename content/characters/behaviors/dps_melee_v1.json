@@ -1,0 +1,23 @@
+{
+  "id": "dps_melee_v1",
+  "archetype": "DPS",
+  "bodyClass": "Organic",
+  "animatorController": "content/characters/animations/Organic.controller",
+  "clipSource": "embedded",
+  "actions": {
+    "idle": "Idle",
+    "spawn": "Spawn",
+    "attack": "AttackFast",
+    "death": "Death"
+  },
+  "triggers": {
+    "idle": "Idle",
+    "spawn": "Spawn",
+    "attack": "Attack",
+    "death": "Death"
+  },
+  "timings": {
+    "attackWindupMs": 250,
+    "attackHitMs": 380
+  }
+}

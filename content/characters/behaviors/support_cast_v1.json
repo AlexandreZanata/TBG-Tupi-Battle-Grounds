@@ -1,0 +1,23 @@
+{
+  "id": "support_cast_v1",
+  "archetype": "Support",
+  "bodyClass": "Mechanical",
+  "animatorController": "content/characters/animations/Mechanical.controller",
+  "clipSource": "embedded",
+  "actions": {
+    "idle": "Idle",
+    "spawn": "Spawn",
+    "attack": "AttackCast",
+    "death": "Death"
+  },
+  "triggers": {
+    "idle": "Idle",
+    "spawn": "Spawn",
+    "attack": "Attack",
+    "death": "Death"
+  },
+  "timings": {
+    "attackWindupMs": 350,
+    "attackHitMs": 600
+  }
+}

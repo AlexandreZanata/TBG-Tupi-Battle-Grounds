@@ -32,6 +32,12 @@ Definitions load from `content/characters/definitions/{id}.json` at repo root.
 
 Shader: `Shaders/CharacterPBR.shader` — albedo (`_MainTex`), normal (`_BumpMap`), ORM packed (`_ORMMap`, R=AO G=roughness B=metallic).
 
+## Behavior profiles
+
+`BehaviorProfileLoader` reads `content/characters/behaviors/{id}.json`. `BehaviorPlayer` maps `CharacterAction` → animator triggers/states from the profile (defaults when `behaviorProfile` is omitted on a definition).
+
+Shared animator controllers: `content/characters/animations/{BodyClass}.controller` (regenerate via `tools/unity/generate_animator_controllers.py`).
+
 ## Tests
 
 Open the Unity project, then **Window → General → Test Runner → EditMode**:
@@ -41,6 +47,7 @@ Open the Unity project, then **Window → General → Test Runner → EditMode**
 | `CharacterCatalogEditModeTests` | Procedural + mesh3d spawn |
 | `CharacterSchemaValidationTests` | JSON contract validation |
 | `MaterialProfileLoaderTests` | Material profile JSON + `TBG/CharacterPBR` |
+| `BehaviorProfileLoaderTests` | Behavior profiles + `BehaviorPlayer` action mapping |
 
 Or batchmode:
 
