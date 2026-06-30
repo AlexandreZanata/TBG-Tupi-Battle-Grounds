@@ -7,10 +7,8 @@
   "bodyWidthScale": 0.8,
   "headScale": 0.9,
   "limbLengthScale": 1.1,
-  "primaryColor": "#4A5D23",
-  "secondaryColor": "#7D8B55",
-  "accessories": [
-    "Weapon"
-  ],
+  "primaryColor": "#4a5d23",
+  "secondaryColor": "#7d8b55",
+  "accessories": [],
   "evolutionStage": 0
 }

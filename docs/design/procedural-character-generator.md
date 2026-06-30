@@ -260,7 +260,7 @@ The **Character Studio** is a Unity Editor window that:
 | **Test** | Spawn unit in test scene; cycle archetype/faction shaders; silhouette check |
 | **Export card** | Run `CardRenderer` → save PNG to `content/characters/cards/` |
 
-Agent implementation tasks: `.local/phases/01-procedural-character-studio/TASKS.md`
+Phase 01 procedural pipeline remains for blockout. Production path: [real-3d-character-pipeline.md](real-3d-character-pipeline.md).
 
 ---
 
