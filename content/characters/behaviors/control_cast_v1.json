@@ -8,16 +8,22 @@
     "idle": "Idle",
     "spawn": "Spawn",
     "attack": "AttackRanged",
-    "death": "Death"
+    "death": "Death",
+    "walk": "Walk",
+    "ultimate": "Ultimate"
   },
   "triggers": {
     "idle": "Idle",
     "spawn": "Spawn",
     "attack": "Attack",
-    "death": "Death"
+    "death": "Death",
+    "walk": "Walk",
+    "ultimate": "Ultimate"
   },
   "timings": {
     "attackWindupMs": 320,
-    "attackHitMs": 500
+    "attackHitMs": 500,
+    "ultimateWindupMs": 500,
+    "ultimateDurationMs": 1900
   }
 }

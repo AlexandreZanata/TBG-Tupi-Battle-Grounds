@@ -9,5 +9,9 @@ namespace TBG.CharacterLibrary
         void PlayAttack();
 
         void PlayDeath();
+
+        void PlayWalk();
+
+        void PlayUltimate();
     }
 }

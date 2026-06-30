@@ -5,6 +5,8 @@ namespace TBG.CharacterLibrary
         Idle,
         Spawn,
         Attack,
-        Death
+        Death,
+        Walk,
+        Ultimate
     }
 }

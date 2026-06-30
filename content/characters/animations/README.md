@@ -1,6 +1,20 @@
 # Shared animator controllers (Phase 02 §7)
 
-One `.controller` per **body class** (see [RIG-SPEC.md](../../tools/blender/RIG-SPEC.md)). Animation clips are embedded in unit `.glb` files (glTF names: `Idle`, `Spawn`, `Attack`, `Death`) or loaded from separate animation `.glb` assets in Phase 02 §8.
+One `.controller` per **body class** (see [RIG-SPEC.md](../../tools/blender/RIG-SPEC.md)). Animation clips are embedded in unit `.glb` files (glTF names: `Idle`, `Spawn`, `Attack`, `Death`) or loaded from separate animation `.glb` assets in Phase 03.
+
+## Clip library (Phase 03)
+
+Shared clips per body class live under `clips/{bodyClass}/{ClipName}.glb`. Manifests in `../animation_sets/` map action keys → clip names.
+
+| Set id | Body class | Clip source |
+|--------|------------|-------------|
+| `humanoid_heavy_combat_v1` | HumanoidHeavy | `clips/HumanoidHeavy/*.glb` |
+
+Regenerate dev placeholder clips (empty animation stubs):
+
+```bash
+python3 tools/animation_sets/generate_placeholder_clips.py --set humanoid_heavy_combat_v1
+```
 
 ## Controllers
 
@@ -11,7 +25,7 @@ One `.controller` per **body class** (see [RIG-SPEC.md](../../tools/blender/RIG-
 | `Mechanical.controller` | Mechanical | `AttackCast` |
 | `Organic.controller` | Organic | `AttackFast` |
 
-Triggers (all controllers): `Idle`, `Spawn`, `Attack`, `Death`.
+Triggers (all controllers): `Idle`, `Spawn`, `Attack`, `Death`. Phase 03 adds `Walk` and `Ultimate` via behavior profile state names (CrossFade until controller v2).
 
 Regenerate YAML assets (writes to `content/characters/animations/` and `Packages/com.tbg.character-library/Animations/`):
 

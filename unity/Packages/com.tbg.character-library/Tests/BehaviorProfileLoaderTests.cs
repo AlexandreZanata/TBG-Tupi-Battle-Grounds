@@ -31,6 +31,16 @@ namespace TBG.CharacterLibrary.Tests
         }
 
         [Test]
+        public void Load_TankProfile_MapsWalkAndUltimate()
+        {
+            var profile = new BehaviorProfileLoader().Load("tank_melee_v1");
+
+            Assert.That(profile.GetStateName(CharacterAction.Walk), Is.EqualTo("Walk"));
+            Assert.That(profile.GetStateName(CharacterAction.Ultimate), Is.EqualTo("Ultimate"));
+            Assert.That(profile.UltimateDurationMs, Is.GreaterThan(profile.UltimateWindupMs));
+        }
+
+        [Test]
         public void Load_MissingProfile_ThrowsFileNotFound()
         {
             var loader = new BehaviorProfileLoader();
@@ -66,6 +76,22 @@ namespace TBG.CharacterLibrary.Tests
 
             Assert.That(player.GetStateName(CharacterAction.Attack), Is.EqualTo("AttackHeavy"));
             Assert.DoesNotThrow(() => player.PlayAttack());
+
+            Object.DestroyImmediate(root);
+        }
+
+        [Test]
+        public void PlayWalkAndUltimate_WithProfile_DoesNotThrow()
+        {
+            var root = new GameObject("BehaviorWalkTest");
+            root.AddComponent<Animator>();
+            var profile = new BehaviorProfileLoader().Load("tank_melee_v1");
+            var player = new BehaviorPlayer(root, profile);
+
+            Assert.That(player.GetStateName(CharacterAction.Walk), Is.EqualTo("Walk"));
+            Assert.That(player.GetStateName(CharacterAction.Ultimate), Is.EqualTo("Ultimate"));
+            Assert.DoesNotThrow(() => player.PlayWalk());
+            Assert.DoesNotThrow(() => player.PlayUltimate());
 
             Object.DestroyImmediate(root);
         }

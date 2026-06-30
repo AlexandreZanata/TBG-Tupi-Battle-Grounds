@@ -16,6 +16,7 @@ The **Character Studio** (Unity Editor + web UI) creates, edits, and deletes fil
 | `materials/` | Material profile JSON (Phase 02) | Yes — `*_pbr_v1.json` per faction |
 | `behaviors/` | Behavior profile JSON (Phase 02) | Yes — `*_v1.json` per archetype |
 | `animations/` | Shared animator controllers (Phase 02) | Yes — one `.controller` per body class |
+| `animation_sets/` | Clip library manifests (Phase 03) | Yes — e.g. `humanoid_heavy_combat_v1.json` |
 
 ## Definition schema (Phase 02 extension)
 

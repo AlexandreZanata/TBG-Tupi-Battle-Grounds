@@ -1,0 +1,14 @@
+{
+  "id": "humanoid_heavy_combat_v1",
+  "bodyClass": "HumanoidHeavy",
+  "clipSource": "library",
+  "clips": {
+    "idle": "Idle",
+    "walk": "Walk",
+    "spawn": "Spawn",
+    "attack": "Attack",
+    "attack2": "Attack2",
+    "ultimate": "Ultimate",
+    "death": "Death"
+  }
+}

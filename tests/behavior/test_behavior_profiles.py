@@ -41,6 +41,8 @@ def test_actions_map_character_action_states() -> None:
     for key in REQUIRED_ACTIONS:
         assert actions[key]
     assert actions["attack"] == "AttackHeavy"
+    assert actions["walk"] == "Walk"
+    assert actions["ultimate"] == "Ultimate"
     assert tank["triggers"]["attack"] == "Attack"
 
 
@@ -62,3 +64,5 @@ def test_timings_are_positive_integers() -> None:
         timings = _load_profile(profile_id)["timings"]
         assert timings["attackWindupMs"] > 0
         assert timings["attackHitMs"] > timings["attackWindupMs"]
+        assert timings["ultimateWindupMs"] > 0
+        assert timings["ultimateDurationMs"] > timings["ultimateWindupMs"]

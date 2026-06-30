@@ -9,6 +9,8 @@ namespace TBG.CharacterLibrary
         public string spawn;
         public string attack;
         public string death;
+        public string walk;
+        public string ultimate;
     }
 
     [Serializable]
@@ -18,6 +20,8 @@ namespace TBG.CharacterLibrary
         public string spawn;
         public string attack;
         public string death;
+        public string walk;
+        public string ultimate;
     }
 
     [Serializable]
@@ -25,6 +29,8 @@ namespace TBG.CharacterLibrary
     {
         public int attackWindupMs;
         public int attackHitMs;
+        public int ultimateWindupMs;
+        public int ultimateDurationMs;
     }
 
     [Serializable]

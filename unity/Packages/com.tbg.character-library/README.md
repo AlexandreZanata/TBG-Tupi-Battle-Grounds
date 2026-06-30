@@ -21,6 +21,8 @@ Local package at `Packages/com.tbg.character-library/`.
 var catalog = new CharacterCatalog();
 var instance = catalog.Spawn("tank_human_01", parentTransform);
 instance.PlayAction(CharacterAction.Attack);
+instance.PlayAction(CharacterAction.Walk);
+instance.PlayAction(CharacterAction.Ultimate);
 catalog.Release(instance);
 ```
 
@@ -34,7 +36,9 @@ Shader: `Shaders/CharacterPBR.shader` — albedo (`_MainTex`), normal (`_BumpMap
 
 ## Behavior profiles
 
-`BehaviorProfileLoader` reads `content/characters/behaviors/{id}.json`. `BehaviorPlayer` maps `CharacterAction` → animator triggers/states from the profile (defaults when `behaviorProfile` is omitted on a definition).
+`BehaviorProfileLoader` reads `content/characters/behaviors/{id}.json`. `BehaviorPlayer` maps `CharacterAction` (including `Walk`, `Ultimate`) → animator triggers/states from the profile (defaults when `behaviorProfile` is omitted on a definition).
+
+Animation set manifests: `content/characters/animation_sets/{id}.json` — shared clip libraries per body class (Phase 03).
 
 Shared animator controllers: `content/characters/animations/{BodyClass}.controller` (regenerate via `tools/unity/generate_animator_controllers.py`).
 

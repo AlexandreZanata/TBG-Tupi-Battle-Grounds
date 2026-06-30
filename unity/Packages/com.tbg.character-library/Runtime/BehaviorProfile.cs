@@ -11,6 +11,8 @@ namespace TBG.CharacterLibrary
         public string ClipSource { get; init; }
         public int AttackWindupMs { get; init; }
         public int AttackHitMs { get; init; }
+        public int UltimateWindupMs { get; init; }
+        public int UltimateDurationMs { get; init; }
 
         private readonly string[] _stateNames;
         private readonly string[] _triggerNames;
@@ -21,8 +23,8 @@ namespace TBG.CharacterLibrary
             {
                 Id = "default",
                 ClipSource = "embedded",
-                _stateNames = new[] { "Idle", "Spawn", "Attack", "Death" },
-                _triggerNames = new[] { "Idle", "Spawn", "Attack", "Death" }
+                _stateNames = new[] { "Idle", "Spawn", "Attack", "Death", "Walk", "Ultimate" },
+                _triggerNames = new[] { "Idle", "Spawn", "Attack", "Death", "Walk", "Ultimate" }
             };
         }
 
@@ -45,19 +47,25 @@ namespace TBG.CharacterLibrary
                 ClipSource = record.clipSource,
                 AttackWindupMs = timings.attackWindupMs,
                 AttackHitMs = timings.attackHitMs,
+                UltimateWindupMs = timings.ultimateWindupMs,
+                UltimateDurationMs = timings.ultimateDurationMs,
                 _stateNames = new[]
                 {
                     actions.idle,
                     actions.spawn,
                     actions.attack,
-                    actions.death
+                    actions.death,
+                    ResolveOptionalAction(actions.walk, "Walk"),
+                    ResolveOptionalAction(actions.ultimate, "Ultimate")
                 },
                 _triggerNames = new[]
                 {
                     triggers.idle,
                     triggers.spawn,
                     triggers.attack,
-                    triggers.death
+                    triggers.death,
+                    ResolveOptionalTrigger(triggers.walk, "Walk"),
+                    ResolveOptionalTrigger(triggers.ultimate, "Ultimate")
                 }
             };
         }
@@ -76,6 +84,16 @@ namespace TBG.CharacterLibrary
 
             var value = names[index];
             return string.IsNullOrWhiteSpace(value) ? action.ToString() : value;
+        }
+
+        private static string ResolveOptionalAction(string value, string fallback)
+        {
+            return string.IsNullOrWhiteSpace(value) ? fallback : value;
+        }
+
+        private static string ResolveOptionalTrigger(string value, string fallback)
+        {
+            return string.IsNullOrWhiteSpace(value) ? fallback : value;
         }
     }
 }

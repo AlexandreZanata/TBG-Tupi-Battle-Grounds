@@ -21,6 +21,10 @@ namespace TBG.CharacterLibrary
 
         public void PlayDeath() => Play(CharacterAction.Death);
 
+        public void PlayWalk() => Play(CharacterAction.Walk);
+
+        public void PlayUltimate() => Play(CharacterAction.Ultimate);
+
         public string GetStateName(CharacterAction action) => _profile.GetStateName(action);
 
         public string GetTriggerName(CharacterAction action) => _profile.GetTriggerName(action);
