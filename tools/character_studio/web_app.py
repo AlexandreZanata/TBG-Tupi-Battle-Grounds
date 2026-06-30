@@ -73,6 +73,7 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
                     "id": unit_id,
                     "assetMode": defn.assetMode,
                     "cardUrl": f"/api/characters/{unit_id}/card",
+                    **({"mesh": defn.mesh} if defn.mesh else {}),
                 }
             )
         return items

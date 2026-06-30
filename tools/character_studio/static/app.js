@@ -78,6 +78,30 @@ function fillEditForm(data) {
   $("primaryColor").value = colorInputFromHex(data.primaryColor);
   $("secondaryColor").value = colorInputFromHex(data.secondaryColor);
   $("evolutionStage").value = data.evolutionStage;
+  updateMesh3dPanel(data);
+}
+
+function updateMesh3dPanel(data) {
+  const assetMode = data?.assetMode || "procedural";
+  const panel = $("mesh3dPanel");
+  const badge = $("assetModeBadge");
+  const link = $("meshPathLink");
+
+  badge.textContent = assetMode;
+  badge.className =
+    assetMode === "mesh3d" ? "unit-item__badge unit-item__badge--mesh3d" : "unit-item__badge";
+
+  const showMesh = assetMode === "mesh3d" && data?.mesh;
+  panel.hidden = assetMode !== "mesh3d";
+  if (showMesh) {
+    link.textContent = data.mesh;
+    link.href = "#";
+    link.title = data.mesh;
+  } else {
+    link.textContent = "—";
+    link.removeAttribute("href");
+    link.removeAttribute("title");
+  }
 }
 
 function cardUrl(id) {
@@ -91,6 +115,10 @@ function renderUnitItem(character) {
   const assetMode = data?.assetMode || character.assetMode || "procedural";
   const badgeClass =
     assetMode === "mesh3d" ? "unit-item__badge unit-item__badge--mesh3d" : "unit-item__badge";
+  const meshHint =
+    assetMode === "mesh3d" && (data?.mesh || character.mesh)
+      ? `<span class="unit-item__mesh">${data?.mesh || character.mesh}</span>`
+      : "";
 
   return `
     <button type="button" class="unit-item${active}" data-id="${character.id}" role="listitem">
@@ -101,6 +129,7 @@ function renderUnitItem(character) {
         <span class="unit-item__name">${name}</span>
         <span class="unit-item__id">${character.id}</span>
         <span class="${badgeClass}">${assetMode}</span>
+        ${meshHint}
       </div>
     </button>
   `;

@@ -14,7 +14,7 @@
           <span class="brand__mark">TBG</span>
           <div>
             <h1>Character Studio</h1>
-            <p class="brand__sub">Procedural unit definitions</p>
+            <p class="brand__sub">Procedural &amp; mesh3d unit definitions</p>
           </div>
         </div>
         <span id="health" class="badge">checking</span>
@@ -118,6 +118,18 @@
             <label for="evolutionStage">Evolution stage</label>
             <input id="evolutionStage" class="input" type="number" min="0" max="2" />
           </div>
+
+          <fieldset id="mesh3dPanel" class="fieldset fieldset--mesh3d" hidden>
+            <legend>Mesh3D</legend>
+            <div class="field">
+              <span class="field__label">Asset mode</span>
+              <span id="assetModeBadge" class="unit-item__badge">procedural</span>
+            </div>
+            <div class="field">
+              <span class="field__label">Mesh (.glb)</span>
+              <a id="meshPathLink" class="mesh-link" href="#" target="_blank" rel="noopener">—</a>
+            </div>
+          </fieldset>
 
           <div class="form__actions">
             <button class="btn btn--primary" type="submit">Save &amp; export card</button>

@@ -285,6 +285,29 @@ body {
   background: var(--white);
 }
 
+.unit-item__mesh {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.625rem;
+  color: var(--gray-600);
+  word-break: break-all;
+}
+
+.fieldset--mesh3d .mesh-link {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--black);
+  word-break: break-all;
+}
+
+.field__label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
 .form {
   display: flex;
   flex-direction: column;

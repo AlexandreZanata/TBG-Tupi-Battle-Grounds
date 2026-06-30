@@ -13,7 +13,7 @@ One `.controller` per **body class** (see [RIG-SPEC.md](../../tools/blender/RIG-
 
 Triggers (all controllers): `Idle`, `Spawn`, `Attack`, `Death`.
 
-Regenerate YAML assets:
+Regenerate YAML assets (writes to `content/characters/animations/` and `Packages/com.tbg.character-library/Animations/`):
 
 ```bash
 python3 tools/unity/generate_animator_controllers.py

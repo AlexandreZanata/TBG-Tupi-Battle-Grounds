@@ -52,8 +52,35 @@ def test_index_html(client: TestClient) -> None:
     response = client.get("/")
     assert response.status_code == 200
     assert "Character Studio" in response.text
+    assert "mesh3d" in response.text.lower()
     assert 'href="/styles.css"' in response.text
     assert 'src="/app.js"' in response.text
+
+
+def test_list_includes_mesh_for_mesh3d_units(client: TestClient) -> None:
+    client.put(
+        "/api/characters/mesh3d_unit",
+        json={
+            "id": "mesh3d_unit",
+            "characterName": "Mesh Unit",
+            "archetype": "Tank",
+            "faction": "Humans",
+            "heightScale": 1.0,
+            "bodyWidthScale": 1.0,
+            "headScale": 1.0,
+            "limbLengthScale": 1.0,
+            "primaryColor": "#FFFFFF",
+            "secondaryColor": "#CCCCCC",
+            "accessories": [],
+            "evolutionStage": 0,
+            "assetMode": "mesh3d",
+            "mesh": "content/characters/meshes/tank_human_01.glb",
+        },
+    )
+    listing = client.get("/api/characters").json()
+    entry = next(item for item in listing if item["id"] == "mesh3d_unit")
+    assert entry["assetMode"] == "mesh3d"
+    assert entry["mesh"] == "content/characters/meshes/tank_human_01.glb"
 
 
 def test_static_assets(client: TestClient) -> None:

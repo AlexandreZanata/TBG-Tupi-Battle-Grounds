@@ -2,7 +2,9 @@
   "name": "TBG.CharacterLibrary.Runtime",
   "rootNamespace": "TBG.CharacterLibrary",
   "references": [
-    "TBG.CharacterSystem.Runtime"
+    "TBG.CharacterSystem.Runtime",
+    "glTFast",
+    "glTFast.Newtonsoft"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

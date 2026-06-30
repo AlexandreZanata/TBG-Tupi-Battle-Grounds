@@ -15,7 +15,9 @@ namespace TBG.CharacterLibrary
             : this(
                 new CharacterDefinitionLoader(),
                 new ProceduralCharacterBuilder(),
-                new Mesh3DCharacterFactory(),
+                new Mesh3DCharacterFactory(
+                    new MaterialProfileLoader(),
+                    new BehaviorProfileLoader()),
                 new BehaviorProfileLoader())
         {
         }

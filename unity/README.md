@@ -12,7 +12,7 @@ var instance = catalog.Spawn("tank_human_01", parentTransform);
 ```
 
 - **Procedural** units use `ProceduralCharacterBuilder` from `TBG.CharacterSystem`.
-- **Mesh3D** units branch to `Mesh3DCharacterFactory` (glTF load in Phase 02 §8).
+- **Mesh3D** units use `Mesh3DCharacterFactory` (glTFast import, materials, animator).
 - glTFast resolves via OpenUPM (`com.atteneder.gltfast`).
 
 See [com.tbg.character-library/README.md](Packages/com.tbg.character-library/README.md).

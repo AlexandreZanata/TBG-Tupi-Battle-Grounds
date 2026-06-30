@@ -52,6 +52,7 @@ namespace TBG.CharacterLibrary.Tests
             Assert.That(instance.Id, Is.EqualTo("test_mesh3d_spawn"));
             Assert.That(instance.Root.transform.parent, Is.EqualTo(_parent));
             Assert.That(instance.Root.name, Is.EqualTo("Test Mesh3D Fixture"));
+            Assert.That(instance.Root.GetComponentsInChildren<MeshFilter>().Length, Is.GreaterThan(0));
 
             var meshPath = Path.Combine(
                 CharacterPaths.GetRepoRoot(),

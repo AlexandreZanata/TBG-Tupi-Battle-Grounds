@@ -22,6 +22,12 @@ def _hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
 
 
 def render_card(defn: CharacterDefinition, output_path: Path) -> Path:
+    if defn.assetMode == "mesh3d":
+        return _render_mesh3d_card(defn, output_path)
+    return _render_procedural_card(defn, output_path)
+
+
+def _render_procedural_card(defn: CharacterDefinition, output_path: Path) -> Path:
     image = Image.new("RGB", (CARD_WIDTH, CARD_HEIGHT), _hex_to_rgb(BACKGROUND))
     draw = ImageDraw.Draw(image)
 
@@ -38,6 +44,24 @@ def render_card(defn: CharacterDefinition, output_path: Path) -> Path:
         secondary = _saturate(secondary, 1.25)
 
     _draw_silhouette(draw, center_x, base_y, defn, primary, secondary, scale)
+    _draw_labels(draw, defn)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(output_path, format="PNG")
+    return output_path
+
+
+def _render_mesh3d_card(defn: CharacterDefinition, output_path: Path) -> Path:
+    image = Image.new("RGB", (CARD_WIDTH, CARD_HEIGHT), _hex_to_rgb(BACKGROUND))
+    draw = ImageDraw.Draw(image)
+    _draw_frame(draw)
+
+    primary = _hex_to_rgb(defn.primaryColor)
+    draw.rectangle((80, 180, CARD_WIDTH - 80, CARD_HEIGHT - 220), fill=primary)
+    draw.text((40, 40), "MESH3D", fill=(255, 255, 255))
+    if defn.mesh:
+        mesh_name = Path(defn.mesh).name
+        draw.text((40, 70), mesh_name, fill=(200, 200, 200))
     _draw_labels(draw, defn)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using TBG.CharacterLibrary;
 using TBG.CharacterSystem.Domain;
 using TBG.CharacterSystem.Runtime;
 using UnityEditor;
@@ -8,16 +10,16 @@ namespace TBG.CharacterSystem.Editor
 {
     public class CharacterStudioWindow : EditorWindow
     {
-        private string _selectedId;
         private CharacterDefinitionData _draft;
+        private string _assetMode = "procedural";
+        private string _meshPath;
         private GameObject _previewRoot;
+        private CharacterInstance _previewInstance;
+        private readonly CharacterCatalog _catalog = new CharacterCatalog();
         private Vector2 _scroll;
 
         [MenuItem("TBG/Character Studio")]
-        public static void Open()
-        {
-            GetWindow<CharacterStudioWindow>("Character Studio");
-        }
+        public static void Open() => GetWindow<CharacterStudioWindow>("Character Studio");
 
         private void OnGUI()
         {
@@ -37,7 +39,7 @@ namespace TBG.CharacterSystem.Editor
             EditorGUILayout.LabelField("Definitions", EditorStyles.boldLabel);
             foreach (var id in CharacterDefinitionRepository.ListIds())
             {
-                if (GUILayout.Button(id))
+                if (GUILayout.Button(CharacterStudioPreviewBuilder.FormatListLabel(id)))
                 {
                     LoadDefinition(id);
                 }
@@ -62,7 +64,6 @@ namespace TBG.CharacterSystem.Editor
                     CharacterDefinitionRepository.Delete(_draft.id);
                     ClearPreview();
                     _draft = null;
-                    _selectedId = null;
                 }
             }
             if (_draft != null && GUILayout.Button("Export Card (Unity)"))
@@ -74,6 +75,13 @@ namespace TBG.CharacterSystem.Editor
         private void DrawEditor()
         {
             EditorGUILayout.LabelField("Edit", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Asset mode", _assetMode);
+            if (string.Equals(_assetMode, "mesh3d", StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(_meshPath))
+            {
+                EditorGUILayout.SelectableLabel(_meshPath, EditorStyles.textField, GUILayout.Height(16));
+            }
+
             _draft.id = EditorGUILayout.TextField("Id", _draft.id);
             _draft.characterName = EditorGUILayout.TextField("Name", _draft.characterName);
             _draft.archetype = (Archetype)EditorGUILayout.EnumPopup("Archetype", _draft.archetype);
@@ -87,8 +95,8 @@ namespace TBG.CharacterSystem.Editor
 
         private void LoadDefinition(string id)
         {
-            _selectedId = id;
             _draft = CharacterDefinitionRepository.Load(id);
+            CharacterStudioPreviewBuilder.LoadAssetModeMetadata(id, out _assetMode, out _meshPath);
             RebuildPreview();
         }
 
@@ -106,6 +114,8 @@ namespace TBG.CharacterSystem.Editor
             var colors = FactionPaletteDefaults.GetColors(faction);
             _draft.primaryColor = colors.primary;
             _draft.secondaryColor = colors.secondary;
+            _assetMode = "procedural";
+            _meshPath = null;
             CharacterDefinitionRepository.Save(_draft);
             RebuildPreview();
         }
@@ -113,23 +123,21 @@ namespace TBG.CharacterSystem.Editor
         private void RebuildPreview()
         {
             ClearPreview();
-            if (_draft == null)
-            {
-                return;
-            }
-
-            var definition = ScriptableObject.CreateInstance<CharacterDefinition>();
-            definition.ApplyData(_draft);
-            var builder = new ProceduralCharacterBuilder();
-            _previewRoot = builder.Build(definition);
-            _previewRoot.transform.position = Vector3.zero;
+            _previewRoot = CharacterStudioPreviewBuilder.Build(_draft, _assetMode, _catalog, out _previewInstance);
         }
 
         private void ClearPreview()
         {
+            if (_previewInstance != null)
+            {
+                _catalog.Release(_previewInstance);
+                _previewInstance = null;
+            }
+
             if (_previewRoot != null)
             {
                 DestroyImmediate(_previewRoot);
+                _previewRoot = null;
             }
         }
 
@@ -142,14 +150,11 @@ namespace TBG.CharacterSystem.Editor
                 return;
             }
 
-            var path = System.IO.Path.Combine(CharacterPaths.CardsDir, _draft.id + ".png");
+            var path = Path.Combine(CharacterPaths.CardsDir, _draft.id + ".png");
             renderer.RenderToFile(_previewRoot, path);
             AssetDatabase.Refresh();
         }
 
-        private void OnDestroy()
-        {
-            ClearPreview();
-        }
+        private void OnDestroy() => ClearPreview();
     }
 }

@@ -6,7 +6,8 @@ import argparse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_DIR = ROOT / "content" / "characters" / "animations"
+CONTENT_OUTPUT_DIR = ROOT / "content" / "characters" / "animations"
+PACKAGE_OUTPUT_DIR = ROOT / "unity" / "Packages" / "com.tbg.character-library" / "Animations"
 
 TRIGGERS = ("Idle", "Spawn", "Attack", "Death")
 BASE_STATES = ("Idle", "Spawn", "Death")
@@ -153,13 +154,21 @@ def _state_machine_block(
     ]
 
 
-def generate_all(output_dir: Path = OUTPUT_DIR) -> list[Path]:
-    output_dir.mkdir(parents=True, exist_ok=True)
+def generate_all(output_dirs: Path | list[Path] | None = None) -> list[Path]:
+    if output_dirs is None:
+        targets = [CONTENT_OUTPUT_DIR, PACKAGE_OUTPUT_DIR]
+    elif isinstance(output_dirs, Path):
+        targets = [output_dirs]
+    else:
+        targets = output_dirs
     written: list[Path] = []
     for body_class, attack_state in BODY_CLASSES.items():
-        path = output_dir / f"{body_class}.controller"
-        path.write_text(build_controller_yaml(body_class, attack_state), encoding="utf-8")
-        written.append(path)
+        yaml_text = build_controller_yaml(body_class, attack_state)
+        for output_dir in targets:
+            output_dir.mkdir(parents=True, exist_ok=True)
+            path = output_dir / f"{body_class}.controller"
+            path.write_text(yaml_text, encoding="utf-8")
+            written.append(path)
     return written
 
 
@@ -168,11 +177,12 @@ def main() -> int:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=OUTPUT_DIR,
-        help="Directory for .controller files",
+        action="append",
+        help="Destination directory (repeatable; defaults to content + package paths)",
     )
     args = parser.parse_args()
-    for path in generate_all(args.output_dir):
+    output_dirs = args.output_dir if args.output_dir else None
+    for path in generate_all(output_dirs):
         print(path.relative_to(ROOT))
     return 0
 

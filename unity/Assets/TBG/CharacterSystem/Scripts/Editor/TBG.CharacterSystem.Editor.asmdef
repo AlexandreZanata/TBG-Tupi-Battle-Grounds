@@ -2,7 +2,8 @@
     "name": "TBG.CharacterSystem.Editor",
     "rootNamespace": "TBG.CharacterSystem.Editor",
     "references": [
-        "TBG.CharacterSystem.Runtime"
+        "TBG.CharacterSystem.Runtime",
+        "TBG.CharacterLibrary.Runtime"
     ],
     "includePlatforms": [
         "Editor"

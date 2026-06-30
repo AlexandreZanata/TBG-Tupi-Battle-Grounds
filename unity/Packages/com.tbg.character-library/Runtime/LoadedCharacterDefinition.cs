@@ -12,6 +12,7 @@ namespace TBG.CharacterLibrary
         public string MaterialProfileId { get; init; }
         public string BehaviorProfileId { get; init; }
         public string AnimatorControllerPath { get; init; }
+        public CharacterTexturePaths Textures { get; init; }
         public CharacterDefinitionData ProceduralData { get; init; }
 
         public static LoadedCharacterDefinition FromRecord(CharacterDefinitionJsonRecord record)
@@ -30,6 +31,7 @@ namespace TBG.CharacterLibrary
                 MaterialProfileId = record.materialProfile,
                 BehaviorProfileId = record.behaviorProfile,
                 AnimatorControllerPath = record.animatorController,
+                Textures = CharacterTexturePaths.FromRecord(record.textures),
                 ProceduralData = ToProceduralData(record)
             };
         }

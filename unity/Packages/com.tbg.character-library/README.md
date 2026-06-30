@@ -13,7 +13,7 @@ Local package at `Packages/com.tbg.character-library/`.
 ## Dependencies
 
 - `TBG.CharacterSystem.Runtime` — `ProceduralCharacterBuilder` (procedural mode)
-- `com.atteneder.gltfast` (OpenUPM) — mesh3d import (wired in Phase 02 §8)
+- `com.atteneder.gltfast` (OpenUPM) — mesh3d glTF import via `Mesh3DCharacterFactory`
 
 ## API
 
@@ -38,6 +38,10 @@ Shader: `Shaders/CharacterPBR.shader` — albedo (`_MainTex`), normal (`_BumpMap
 
 Shared animator controllers: `content/characters/animations/{BodyClass}.controller` (regenerate via `tools/unity/generate_animator_controllers.py`).
 
+## Mesh3D factory
+
+`Mesh3DCharacterFactory.Load(glbPath, definition, parent)` imports `.glb` via glTFast, applies `MaterialProfile` + unit textures, attaches `Animator`, and scales from definition proportions (`heightScale`, `bodyWidthScale`).
+
 ## Tests
 
 Open the Unity project, then **Window → General → Test Runner → EditMode**:
@@ -48,6 +52,7 @@ Open the Unity project, then **Window → General → Test Runner → EditMode**
 | `CharacterSchemaValidationTests` | JSON contract validation |
 | `MaterialProfileLoaderTests` | Material profile JSON + `TBG/CharacterPBR` |
 | `BehaviorProfileLoaderTests` | Behavior profiles + `BehaviorPlayer` action mapping |
+| `Mesh3DCharacterFactoryTests` | glTF import, scale, animator attachment |
 
 Or batchmode:
 
