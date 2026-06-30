@@ -10,6 +10,16 @@ Local package at `Packages/com.tbg.character-library/`.
 | `TBG.CharacterLibrary.Editor` | Import validation scaffold (Phase 02+) |
 | `TBG.CharacterLibrary.Tests` | EditMode contract tests |
 
+## Physics hitboxes (Phase 04b stub)
+
+Runtime bone colliders are **not** in GLB exports. See [physics-hitbox-spec.md](../../../docs/design/physics-hitbox-spec.md).
+
+| Type | Role |
+|------|------|
+| `IHitboxProfile` | Profile contract (Phase 04 attachment) |
+| `BoneColliderDefinition` | Bone name + shape + local offset |
+| `DefaultBipedHitboxProfile` | HumanoidLight / HumanoidHeavy default table |
+
 ## Dependencies
 
 - `TBG.CharacterSystem.Runtime` — `ProceduralCharacterBuilder` (procedural mode)
