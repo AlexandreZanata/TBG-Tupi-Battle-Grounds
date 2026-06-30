@@ -10,6 +10,10 @@ Use when you export characters from Blender/sculpt tools as static `.glb` files 
 
 # Smaller / faster preview (decimated mesh + 1024 textures)
 ./tools/mesh-pipeline/optimize_glb.sh --mode preview /path/to/sculpt.glb content/characters/meshes/my_unit_lod.glb
+
+# Mobile game mesh (≤ 8k tris, 1024² textures, Draco)
+./tools/mesh-pipeline/optimize_glb.sh --mode game --tri 8000 --tex 1024 \
+  /path/to/showcase.glb content/characters/meshes/game/my_unit.glb
 ```
 
 Requires Node.js (`npx @gltf-transform/cli`).
@@ -18,6 +22,10 @@ Requires Node.js (`npx @gltf-transform/cli`).
 |------|----------------|--------------|--------|
 | **visual** (default) | Draco compress only | ~37–44 MB from ~80 MB source | Same as source |
 | **preview** | Simplify + resize textures + Draco | ~4 MB | Lower fidelity |
+| **game** | Simplify to tri budget + resize + Draco | ≤ 2 MB target | Mobile runtime |
+
+Validate game meshes: `python3 tools/mesh-pipeline/validate_game_glb.py <path.glb>`  
+Budget reference: [BUDGETS.md](./BUDGETS.md)
 
 Web studio accepts meshes up to **150 MB** per asset.
 
@@ -45,4 +53,4 @@ Static sculpts use procedural Idle / Attack / Death in the browser. For skeletal
 ## Limits
 
 - Web preview: **150 MB** per asset.
-- Game target: ≤ 8k tris per skinned mesh (TBG Export add-on warning).
+- Game target: see [BUDGETS.md](./BUDGETS.md) — ≤ 8k tris, ≤ 64 bones, ≤ 2 MB target GLB.

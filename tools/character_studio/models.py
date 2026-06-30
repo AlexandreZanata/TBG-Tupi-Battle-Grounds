@@ -60,6 +60,8 @@ class CharacterDefinition:
     evolutionStage: int = 0
     assetMode: str = DEFAULT_ASSET_MODE
     mesh: str | None = None
+    meshShowcase: str | None = None
+    animationSet: str | None = None
     textures: CharacterTextures | None = None
     materialProfile: str | None = None
     behaviorProfile: str | None = None
@@ -83,6 +85,10 @@ class CharacterDefinition:
         }
         if self.mesh:
             data["mesh"] = self.mesh
+        if self.meshShowcase:
+            data["meshShowcase"] = self.meshShowcase
+        if self.animationSet:
+            data["animationSet"] = self.animationSet
         if self.textures:
             data["textures"] = self.textures.to_dict()
         if self.materialProfile:
@@ -115,6 +121,8 @@ class CharacterDefinition:
             evolutionStage=int(data.get("evolutionStage", 0)),
             assetMode=str(data.get("assetMode", DEFAULT_ASSET_MODE)),
             mesh=str(data["mesh"]) if data.get("mesh") else None,
+            meshShowcase=str(data["meshShowcase"]) if data.get("meshShowcase") else None,
+            animationSet=str(data["animationSet"]) if data.get("animationSet") else None,
             textures=textures,
             materialProfile=str(data["materialProfile"]) if data.get("materialProfile") else None,
             behaviorProfile=str(data["behaviorProfile"]) if data.get("behaviorProfile") else None,

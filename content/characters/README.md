@@ -24,7 +24,9 @@ All units share Phase 01 mechanics fields. Phase 02 adds:
 | Field | Required | Values / notes |
 |-------|----------|----------------|
 | `assetMode` | No (default `procedural`) | `procedural` \| `mesh3d` |
-| `mesh` | Yes when `mesh3d` | Path to `.glb` |
+| `mesh` | Yes when `mesh3d` | Game runtime path to `.glb` (≤ 8k tris) |
+| `meshShowcase` | No | High-poly preview `.glb` for web carousel / studio |
+| `animationSet` | No | Clip library id (e.g. `humanoid_heavy_combat_v1`) |
 | `textures` | No | `albedo`, `normal`, `orm`; optional `emissive` |
 | `materialProfile` | No | Profile id (e.g. `humans_pbr_v1`) — see `materials/` |
 | `behaviorProfile` | No | Profile id (e.g. `tank_melee_v1`) — see `behaviors/` |

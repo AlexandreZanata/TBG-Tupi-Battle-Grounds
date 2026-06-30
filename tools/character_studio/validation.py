@@ -71,6 +71,9 @@ def _validate_mesh3d_fields(defn: CharacterDefinition) -> list[str]:
         elif not defn.mesh.lower().endswith(".glb"):
             errors.append("mesh path must be a .glb file")
 
+    errors.extend(_validate_optional_glb_path(defn.meshShowcase, "meshShowcase"))
+    errors.extend(_validate_animation_set(defn.animationSet))
+
     if defn.textures is not None:
         for slot in ("albedo", "normal", "orm"):
             if not getattr(defn.textures, slot):
@@ -84,6 +87,31 @@ def _validate_mesh3d_fields(defn: CharacterDefinition) -> list[str]:
             errors.append(f"{field_name} must be non-empty when provided")
 
     return errors
+
+
+def _validate_optional_glb_path(value: str | None, field_name: str) -> list[str]:
+    if value is None:
+        return []
+    if not value.strip():
+        return [f"{field_name} must be non-empty when provided"]
+    if not value.lower().endswith(".glb"):
+        return [f"{field_name} must be a .glb file"]
+    return []
+
+
+def _validate_animation_set(value: str | None) -> list[str]:
+    if value is None:
+        return []
+    if not value.strip():
+        return ["animationSet must be non-empty when provided"]
+    if not _is_animation_set_id(value):
+        return ["animationSet must be a lowercase identifier (e.g. humanoid_heavy_combat_v1)"]
+    return []
+
+
+def _is_animation_set_id(value: str) -> bool:
+    parts = value.split("_")
+    return bool(parts) and all(part and part[0].isalpha() and part.islower() and part.isascii() for part in parts)
 
 
 def _is_hex_color(value: str) -> bool:

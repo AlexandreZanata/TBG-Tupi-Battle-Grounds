@@ -4,7 +4,9 @@
   "archetype": "Tank",
   "faction": "Humans",
   "assetMode": "mesh3d",
-  "mesh": "content/characters/meshes/tank_human_01.glb",
+  "meshShowcase": "content/characters/meshes/showcase/tank_human_01.glb",
+  "mesh": "content/characters/meshes/game/tank_human_01.glb",
+  "animationSet": "humanoid_heavy_combat_v1",
   "textures": {
     "albedo": "content/characters/textures/tank_human_01_albedo.png",
     "normal": "content/characters/textures/tank_human_01_normal.png",
