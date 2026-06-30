@@ -16,6 +16,11 @@ MESHES_DIR = ROOT / "content" / "characters" / "meshes" / "showcase"
 OPTIMIZE = ROOT / "tools" / "mesh-pipeline" / "optimize_glb.sh"
 MANIFEST_PATH = ROOT / "content/characters/fixed_test_imports.json"
 
+if str(ROOT / "tools") not in sys.path:
+    sys.path.insert(0, str(ROOT / "tools"))
+
+from mesh_pipeline.prep_ai_mesh_run import run_prep_ai_mesh  # noqa: E402
+
 
 def load_import_mapping(manifest: Path | None = None) -> dict[str, str]:
     path = manifest or MANIFEST_PATH
@@ -31,7 +36,15 @@ def file_md5(path: Path) -> str:
     return digest.hexdigest()
 
 
-def import_sculpt(source: Path, pilot_id: str, *, force: bool = False) -> str:
+def import_sculpt(
+    source: Path,
+    pilot_id: str,
+    *,
+    force: bool = False,
+    prep: bool = False,
+    voxel_remesh: bool = False,
+    z_up: bool = False,
+) -> str:
     target = MESHES_DIR / f"{pilot_id}.glb"
     if not source.is_file():
         raise FileNotFoundError(f"missing source glb: {source}")
@@ -42,10 +55,27 @@ def import_sculpt(source: Path, pilot_id: str, *, force: bool = False) -> str:
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(suffix=".glb", delete=False, dir=target.parent) as handle:
         tmp = Path(handle.name)
+    prep_tmp: Path | None = None
     try:
-        subprocess.run([str(OPTIMIZE), "--mode", "visual", str(source), str(tmp)], check=True)
+        pipeline_source = source
+        if prep:
+            with tempfile.NamedTemporaryFile(suffix=".prepped.glb", delete=False, dir=target.parent) as prep_handle:
+                prep_tmp = Path(prep_handle.name)
+            run_prep_ai_mesh(
+                source,
+                prep_tmp,
+                voxel_remesh=voxel_remesh,
+                z_up=z_up,
+            )
+            pipeline_source = prep_tmp
+        subprocess.run(
+            [str(OPTIMIZE), "--mode", "visual", str(pipeline_source), str(tmp)],
+            check=True,
+        )
         tmp.replace(target)
     finally:
+        if prep_tmp is not None and prep_tmp.exists():
+            prep_tmp.unlink(missing_ok=True)
         if tmp.exists() and not target.exists():
             tmp.unlink(missing_ok=True)
     return "imported"
@@ -70,6 +100,17 @@ def main(argv: list[str] | None = None) -> int:
         help="JSON manifest with imports map (default: content/characters/fixed_test_imports.json)",
     )
     parser.add_argument("--force", action="store_true", help="Re-import even when byte-identical")
+    parser.add_argument(
+        "--prep",
+        action="store_true",
+        help="Run prep_ai_mesh (normalize scale/ground) before optimize_glb",
+    )
+    parser.add_argument(
+        "--voxel-remesh",
+        action="store_true",
+        help="With --prep: force voxel remesh (auto when >500k tris)",
+    )
+    parser.add_argument("--z-up", action="store_true", help="With --prep: rotate Z-up source to Y-up")
     parser.add_argument("--dry-run", action="store_true", help="Print mapping only")
     parser.add_argument(
         "--only",
@@ -88,7 +129,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.dry_run:
             results[pilot_id] = "dry-run"
             continue
-        results[pilot_id] = import_sculpt(source, pilot_id, force=args.force)
+        results[pilot_id] = import_sculpt(
+            source,
+            pilot_id,
+            force=args.force,
+            prep=args.prep,
+            voxel_remesh=args.voxel_remesh,
+            z_up=args.z_up,
+        )
 
     print(json.dumps(results, indent=2))
     return 0

@@ -63,19 +63,22 @@ Tolerance band for automated tests: height **1.6–2.0 m** (allows stylized hero
 
 ---
 
-## CLI (planned)
+## CLI
 
 ```bash
 ./tools/blender/blender_cmd.sh --background --python tools/blender/scripts/prep_ai_mesh.py -- \
-  /path/in.glb /path/out.glb [--height 1.8] [--voxel-remesh] [--z-up]
+  /path/in.glb /path/out.glb [--height 1.8] [--voxel-remesh] [--z-up] [--report-json]
 ```
-
----
 
 ## Integration
 
 - `import_showcase_sculpts.py --prep` — run before `optimize_glb.sh --mode visual`
 - Showcase path: `content/characters/meshes/showcase/{id}.glb`
+
+```bash
+python3 tools/mesh-pipeline/import_showcase_sculpts.py \
+  --source-dir /path/to/downloads --prep --only demo_titan_01 --force
+```
 
 ---
 

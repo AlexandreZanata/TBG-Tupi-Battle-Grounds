@@ -94,6 +94,20 @@ Phase 04b baseline audit: `python3 tools/mesh_pipeline/baseline_audit.py --write
 AI mesh input contract: `tools/blender/scripts/PREP-AI-MESH-SPEC.md`  
 Budget reference: [BUDGETS.md](./BUDGETS.md)
 
+### AI mesh prep (Phase 04b)
+
+Normalize raw AI/sculpt GLBs to human scale (1.8 m, feet at Y=0, centered XZ) before showcase import:
+
+```bash
+./tools/blender/blender_cmd.sh --background --python tools/blender/scripts/prep_ai_mesh.py -- \
+  /path/raw.glb /path/prepped.glb --report-json
+
+python3 tools/mesh-pipeline/import_showcase_sculpts.py \
+  --source-dir /path/to/downloads --prep --force --only demo_titan_01
+```
+
+Optional: `--voxel-remesh` (auto when >500k tris), `--z-up` for Z-up sources. See [PREP-AI-MESH-SPEC.md](../blender/scripts/PREP-AI-MESH-SPEC.md).
+
 Web studio accepts showcase meshes up to **150 MB** per asset.
 
 ## Batch import showcase sculpts
