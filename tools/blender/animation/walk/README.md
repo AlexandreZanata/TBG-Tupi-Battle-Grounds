@@ -1,6 +1,25 @@
 # Walk cycle (in-place)
 
-**Symmetric mirrored gait** — `symmetric_gait.py` (primary). Stance 62%, hip cos with `L_hip = -R_hip`, no spine yaw/roll.
+## Sampler roles (audit 2026-06-30)
+
+| Module | Status | Used by |
+|--------|--------|---------|
+| `held_arm_gait.py` | **Primary** (`sampler.py`) | All profiles today; `scout_pilot_v1` locks trident arm |
+| `segment_gait.py` | Ready — Perry trunk + arms | Promote in §2 after scout held-arm validation |
+| `symmetric_gait.py` | Legacy reference only | Tests |
+| `biomech_curves.py` | **Calibrated** | CMU mocap via `retarget/` (subjects 35, 39) |
+
+Mocap calibration: `python3 tools/blender/scripts/retarget_mocap_walk.py --write-curves <bvh...>`
+
+> Legacy note: README previously listed `held_arm_gait` as primary for weapon units only — `sampler.py` still delegates entirely to `held_arm_gait` until §2.
+
+## Specs
+
+| Document | Purpose |
+|----------|---------|
+| [BIOMECHANICAL-WALK-SPEC.md](BIOMECHANICAL-WALK-SPEC.md) | TBG implementation reference |
+| [AI-WALK-AUTHORING-SPEC.md](AI-WALK-AUTHORING-SPEC.md) | **Agent-facing** biomechanical control-point format (Perry phases, keyframe tables, physics rules) |
+| [../retarget/README.md](../retarget/README.md) | CMU BVH → TBG curve calibration |
 
 ## Module map
 
@@ -11,7 +30,10 @@
 | `biomech_curves.py` | Hip/knee/ankle ° vs %cycle | No |
 | `types.py` | `GaitPose`, `BoneEuler` | No |
 | `style.py` | `WalkStyle` + presets | No |
-| `sampler.py` | Pelvis + arms + leg sampling | No |
+| `sampler.py` | **held_arm_gait** delegate | No |
+| `held_arm_gait.py` | Legs-only walk, weapon arm locked | No |
+| `segment_gait.py` | Perry segment gait (next default) | No |
+| `symmetric_gait.py` | Legacy cosine gait | No |
 | `profiles.py` | Unit → profile registry | No |
 | `api.py` | `sample_pose_at_frame` | No |
 | `bake.py` | `bake_walk_action` | **Yes** |
@@ -29,6 +51,7 @@
 ```bash
 ./tools/blender/blender_cmd.sh --background --python tools/blender/scripts/build_walk_clip.py -- HumanoidLight
 python3 tools/blender/export_game_unit.py demo_scout_01
+python3 tools/blender/scripts/retarget_mocap_walk.py --calibrate tests/blender/fixtures/mocap/35_01_walk_excerpt.bvh
 ```
 
 ## Default timing
