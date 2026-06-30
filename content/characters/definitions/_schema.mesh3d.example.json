@@ -7,6 +7,7 @@
   "meshShowcase": "content/characters/meshes/showcase/tank_human_01.glb",
   "mesh": "content/characters/meshes/game/tank_human_01.glb",
   "animationSet": "humanoid_heavy_combat_v1",
+  "gameLod": { "triTarget": 8000, "textureSize": 1024 },
   "textures": {
     "albedo": "content/characters/textures/tank_human_01_albedo.png",
     "normal": "content/characters/textures/tank_human_01_normal.png",

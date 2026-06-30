@@ -11,7 +11,7 @@ The **Character Studio** (Unity Editor + web UI) creates, edits, and deletes fil
 | `definitions/` | Unit parameters (JSON) — studio CRUD | Yes |
 | `cards/` | Card images rendered from procedural 3D | Yes |
 | `previews/` | Optional viewport / test captures | Yes |
-| `meshes/` | Authored `.glb` units (Phase 02) | Yes — pilot roster + `_test_fixture.glb` |
+| `meshes/showcase/` | High-poly preview sculpts (web carousel / studio) | Yes — 8 pilot `demo_*.glb` |
 | `meshes/game/` | Mobile runtime game meshes (Phase 03) | Yes — pilot `demo_sentinel_01.glb` |
 | `textures/` | PBR map sets per unit (Phase 02) | Yes — pilot `*_*.png` sets |
 | `materials/` | Material profile JSON (Phase 02) | Yes — `*_pbr_v1.json` per faction |
@@ -29,6 +29,7 @@ All units share Phase 01 mechanics fields. Phase 02 adds:
 | `mesh` | Yes when `mesh3d` | Game runtime path to `.glb` (≤ 8k tris) |
 | `meshShowcase` | No | High-poly preview `.glb` for web carousel / studio |
 | `animationSet` | No | Clip library id (e.g. `humanoid_heavy_combat_v1`) |
+| `gameLod` | No | `{ "triTarget": 8000, "textureSize": 1024 }` export overrides |
 | `textures` | No | `albedo`, `normal`, `orm`; optional `emissive` |
 | `materialProfile` | No | Profile id (e.g. `humans_pbr_v1`) — see `materials/` |
 | `behaviorProfile` | No | Profile id (e.g. `tank_melee_v1`) — see `behaviors/` |

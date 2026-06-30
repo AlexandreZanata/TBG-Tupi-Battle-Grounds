@@ -26,13 +26,14 @@ Requires Node.js (`npx @gltf-transform/cli`).
 
 Validate game meshes: `python3 tools/mesh-pipeline/validate_game_glb.py <path.glb>`  
 Export pilot game mesh: `python3 tools/blender/export_game_unit.py demo_sentinel_01` (requires `./tools/blender/setup.sh` once)  
+Batch export all pilots: `./tools/mesh-pipeline/batch_seed_to_game.sh`  
 Budget reference: [BUDGETS.md](./BUDGETS.md)
 
 Web studio accepts meshes up to **150 MB** per asset.
 
 ## Batch import showcase sculpts
 
-Map downloaded GLBs to pilot ids (bbox-matched), Draco-compress, and write to `content/characters/meshes/`:
+Map downloaded GLBs to pilot ids (bbox-matched), Draco-compress, and write to `content/characters/meshes/showcase/`:
 
 ```bash
 python3 tools/mesh-pipeline/import_showcase_sculpts.py --source-dir /path/to/downloads

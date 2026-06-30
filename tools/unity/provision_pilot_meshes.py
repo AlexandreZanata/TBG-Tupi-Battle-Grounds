@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 ROSTER_PATH = ROOT / "content" / "characters" / "pilot_roster.json"
 FIXTURE = ROOT / "content" / "characters" / "meshes" / "_test_fixture.glb"
-MESHES_DIR = ROOT / "content" / "characters" / "meshes"
+MESHES_DIR = ROOT / "content" / "characters" / "meshes" / "showcase"
 
 
 def load_pilot_ids() -> list[str]:

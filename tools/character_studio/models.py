@@ -45,6 +45,22 @@ class CharacterTextures:
 
 
 @dataclass
+class GameLod:
+    triTarget: int = 8000
+    textureSize: int = 1024
+
+    def to_dict(self) -> dict[str, int]:
+        return {"triTarget": self.triTarget, "textureSize": self.textureSize}
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> GameLod:
+        return cls(
+            triTarget=int(data.get("triTarget", 8000)),
+            textureSize=int(data.get("textureSize", 1024)),
+        )
+
+
+@dataclass
 class CharacterDefinition:
     id: str
     characterName: str
@@ -62,6 +78,7 @@ class CharacterDefinition:
     mesh: str | None = None
     meshShowcase: str | None = None
     animationSet: str | None = None
+    gameLod: GameLod | None = None
     textures: CharacterTextures | None = None
     materialProfile: str | None = None
     behaviorProfile: str | None = None
@@ -89,6 +106,8 @@ class CharacterDefinition:
             data["meshShowcase"] = self.meshShowcase
         if self.animationSet:
             data["animationSet"] = self.animationSet
+        if self.gameLod:
+            data["gameLod"] = self.gameLod.to_dict()
         if self.textures:
             data["textures"] = self.textures.to_dict()
         if self.materialProfile:
@@ -123,6 +142,7 @@ class CharacterDefinition:
             mesh=str(data["mesh"]) if data.get("mesh") else None,
             meshShowcase=str(data["meshShowcase"]) if data.get("meshShowcase") else None,
             animationSet=str(data["animationSet"]) if data.get("animationSet") else None,
+            gameLod=GameLod.from_dict(data["gameLod"]) if isinstance(data.get("gameLod"), dict) else None,
             textures=textures,
             materialProfile=str(data["materialProfile"]) if data.get("materialProfile") else None,
             behaviorProfile=str(data["behaviorProfile"]) if data.get("behaviorProfile") else None,

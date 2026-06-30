@@ -42,6 +42,10 @@ python3 tools/mesh-pipeline/validate_game_glb.py content/characters/meshes/game/
 
 `--tri` and `--tex` default to `8000` and `1024`.
 
+## Walk clip convention
+
+Lane movement uses an **in-place walk cycle** (no root-motion translation). Units advance along the lane via gameplay position, not animation root motion. Clip names follow `RIG-SPEC.md` (`Walk` in animation set manifests).
+
 ## Related
 
 - Blender export warnings: `tools/blender/tbg_export/validation_rules.py` (`MAX_TRIS_MVP`)

@@ -8,10 +8,20 @@ namespace TBG.CharacterLibrary
 
         void PlayAttack();
 
+        void PlayAttack(int index);
+
+        void PlayAttackRepeat();
+
         void PlayDeath();
 
         void PlayWalk();
 
+        void EnterWalk();
+
+        void ExitWalk();
+
         void PlayUltimate();
+
+        event System.Action<CharacterAction> OnClipComplete;
     }
 }

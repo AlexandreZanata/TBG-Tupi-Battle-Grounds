@@ -9,23 +9,27 @@ namespace TBG.CharacterLibrary
     {
         private readonly MaterialProfileLoader _materialLoader;
         private readonly BehaviorProfileLoader _behaviorLoader;
+        private readonly AnimationSetLoader _animationSetLoader;
 
         public Mesh3DCharacterFactory()
-            : this(new MaterialProfileLoader(), new BehaviorProfileLoader())
+            : this(new MaterialProfileLoader(), new BehaviorProfileLoader(), new AnimationSetLoader())
         {
         }
 
         public Mesh3DCharacterFactory(
             MaterialProfileLoader materialLoader,
-            BehaviorProfileLoader behaviorLoader)
+            BehaviorProfileLoader behaviorLoader,
+            AnimationSetLoader animationSetLoader = null)
         {
             _materialLoader = materialLoader ?? new MaterialProfileLoader();
             _behaviorLoader = behaviorLoader ?? new BehaviorProfileLoader();
+            _animationSetLoader = animationSetLoader ?? new AnimationSetLoader();
         }
 
         public GameObject Create(LoadedCharacterDefinition definition, Transform parent)
         {
             ValidateMeshPath(definition);
+            ResolveAnimationSet(definition);
             var absoluteMeshPath = ResolveAbsolutePath(definition.MeshPath);
             return Load(absoluteMeshPath, definition, parent);
         }
@@ -81,6 +85,16 @@ namespace TBG.CharacterLibrary
             }
 
             return _behaviorLoader.Load(definition.BehaviorProfileId);
+        }
+
+        private void ResolveAnimationSet(LoadedCharacterDefinition definition)
+        {
+            if (string.IsNullOrWhiteSpace(definition.AnimationSetId))
+            {
+                return;
+            }
+
+            _animationSetLoader.Load(definition.AnimationSetId);
         }
     }
 }

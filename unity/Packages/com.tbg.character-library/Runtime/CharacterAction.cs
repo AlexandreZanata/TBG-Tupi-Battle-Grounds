@@ -7,6 +7,8 @@ namespace TBG.CharacterLibrary
         Attack,
         Death,
         Walk,
-        Ultimate
+        Ultimate,
+        Hit,
+        Cast
     }
 }

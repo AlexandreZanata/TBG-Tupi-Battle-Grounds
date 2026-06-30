@@ -22,3 +22,9 @@ def test_humanoid_heavy_walk_clip_on_disk() -> None:
     path = REPO_ROOT / "content/characters/animations/clips/HumanoidHeavy/Walk.glb"
     gltf, _bin_chunk = load_glb(path)
     assert gltf["animations"][0]["name"] == "Walk"
+
+
+def test_humanoid_light_walk_clip_on_disk() -> None:
+    path = REPO_ROOT / "content/characters/animations/clips/HumanoidLight/Walk.glb"
+    gltf, _bin_chunk = load_glb(path)
+    assert gltf["animations"][0]["name"] == "Walk"

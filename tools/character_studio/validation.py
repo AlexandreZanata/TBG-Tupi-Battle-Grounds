@@ -73,6 +73,7 @@ def _validate_mesh3d_fields(defn: CharacterDefinition) -> list[str]:
 
     errors.extend(_validate_optional_glb_path(defn.meshShowcase, "meshShowcase"))
     errors.extend(_validate_animation_set(defn.animationSet))
+    errors.extend(_validate_game_lod(defn.gameLod))
 
     if defn.textures is not None:
         for slot in ("albedo", "normal", "orm"):
@@ -107,6 +108,21 @@ def _validate_animation_set(value: str | None) -> list[str]:
     if not _is_animation_set_id(value):
         return ["animationSet must be a lowercase identifier (e.g. humanoid_heavy_combat_v1)"]
     return []
+
+
+def _validate_game_lod(value: object | None) -> list[str]:
+    if value is None:
+        return []
+    from .models import GameLod
+
+    if not isinstance(value, GameLod):
+        return ["gameLod must be an object with triTarget and textureSize"]
+    errors: list[str] = []
+    if not (1000 <= value.triTarget <= 50000):
+        errors.append("gameLod.triTarget must be between 1000 and 50000")
+    if value.textureSize not in (256, 512, 1024, 2048):
+        errors.append("gameLod.textureSize must be 256, 512, 1024, or 2048")
+    return errors
 
 
 def _is_animation_set_id(value: str) -> bool:

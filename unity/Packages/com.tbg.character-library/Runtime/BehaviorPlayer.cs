@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace TBG.CharacterLibrary
@@ -6,6 +7,7 @@ namespace TBG.CharacterLibrary
     {
         private readonly Animator _animator;
         private readonly BehaviorProfile _profile;
+        private int _attackIndex;
 
         public BehaviorPlayer(GameObject root, BehaviorProfile profile = null)
         {
@@ -13,21 +15,75 @@ namespace TBG.CharacterLibrary
             _profile = profile ?? BehaviorProfile.CreateDefault();
         }
 
+        public event Action<CharacterAction> OnClipComplete;
+
         public void EnterIdle() => Play(CharacterAction.Idle);
 
         public void PlaySpawn() => Play(CharacterAction.Spawn);
 
-        public void PlayAttack() => Play(CharacterAction.Attack);
+        public void PlayAttack() => PlayAttack(0);
+
+        public void PlayAttack(int index)
+        {
+            _attackIndex = index;
+            var action = index <= 0 ? CharacterAction.Attack : CharacterAction.Attack;
+            var state = _profile.GetAttackStateName(index);
+            if (!string.IsNullOrWhiteSpace(state))
+            {
+                CrossFadeState(state);
+                return;
+            }
+
+            Play(action);
+        }
+
+        public void PlayAttackRepeat()
+        {
+            if (string.Equals(_profile.AttackCycle, "rotate", StringComparison.OrdinalIgnoreCase))
+            {
+                PlayAttack(_attackIndex);
+                _attackIndex = _attackIndex == 0 ? 1 : 0;
+                return;
+            }
+
+            PlayAttack(0);
+        }
 
         public void PlayDeath() => Play(CharacterAction.Death);
 
-        public void PlayWalk() => Play(CharacterAction.Walk);
+        public void PlayWalk() => EnterWalk();
+
+        public void EnterWalk()
+        {
+            if (TrySetBool("IsWalking", true))
+            {
+                return;
+            }
+
+            Play(CharacterAction.Walk);
+        }
+
+        public void ExitWalk()
+        {
+            if (TrySetBool("IsWalking", false))
+            {
+                EnterIdle();
+                return;
+            }
+
+            EnterIdle();
+        }
 
         public void PlayUltimate() => Play(CharacterAction.Ultimate);
 
         public string GetStateName(CharacterAction action) => _profile.GetStateName(action);
 
         public string GetTriggerName(CharacterAction action) => _profile.GetTriggerName(action);
+
+        public void NotifyClipComplete(CharacterAction action)
+        {
+            OnClipComplete?.Invoke(action);
+        }
 
         private void Play(CharacterAction action)
         {
@@ -37,7 +93,7 @@ namespace TBG.CharacterLibrary
             }
 
             var trigger = _profile.GetTriggerName(action);
-            if (!string.IsNullOrWhiteSpace(trigger) && HasParameter(trigger))
+            if (!string.IsNullOrWhiteSpace(trigger) && HasParameter(trigger, AnimatorControllerParameterType.Trigger))
             {
                 _animator.SetTrigger(trigger);
                 return;
@@ -46,15 +102,31 @@ namespace TBG.CharacterLibrary
             var state = _profile.GetStateName(action);
             if (!string.IsNullOrWhiteSpace(state))
             {
-                _animator.CrossFade(state, 0.1f, 0);
+                CrossFadeState(state);
             }
         }
 
-        private bool HasParameter(string name)
+        private void CrossFadeState(string state)
+        {
+            _animator.CrossFade(state, 0.1f, 0);
+        }
+
+        private bool TrySetBool(string name, bool value)
+        {
+            if (_animator == null || !HasParameter(name, AnimatorControllerParameterType.Bool))
+            {
+                return false;
+            }
+
+            _animator.SetBool(name, value);
+            return true;
+        }
+
+        private bool HasParameter(string name, AnimatorControllerParameterType type)
         {
             foreach (var parameter in _animator.parameters)
             {
-                if (parameter.name == name && parameter.type == AnimatorControllerParameterType.Trigger)
+                if (parameter.name == name && parameter.type == type)
                 {
                     return true;
                 }

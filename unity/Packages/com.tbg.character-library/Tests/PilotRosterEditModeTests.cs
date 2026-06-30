@@ -45,8 +45,8 @@ namespace TBG.CharacterLibrary.Tests
             Assert.DoesNotThrow(() => instance.PlayAction(CharacterAction.Attack));
             Assert.DoesNotThrow(() => instance.PlayAction(CharacterAction.Death));
 
-            var meshPath = Path.Combine(CharacterPaths.GetRepoRoot(), $"content/characters/meshes/{pilotId}.glb");
-            Assert.That(File.Exists(meshPath), Is.True, $"missing demo glb: {meshPath}");
+            var meshPath = Path.Combine(CharacterPaths.GetRepoRoot(), $"content/characters/meshes/showcase/{pilotId}.glb");
+            Assert.That(File.Exists(meshPath), Is.True, $"missing showcase glb: {meshPath}");
 
             catalog.Release(instance);
         }
@@ -80,6 +80,23 @@ namespace TBG.CharacterLibrary.Tests
 
             Assert.DoesNotThrow(() => instance.PlayAction(CharacterAction.Walk));
             Assert.DoesNotThrow(() => instance.PlayAction(CharacterAction.Ultimate));
+
+            catalog.Release(instance);
+        }
+
+        [Test]
+        public void Spawn_SentinelGameMesh_PlayAttackRepeat_DoesNotThrow()
+        {
+            const string pilotId = "demo_sentinel_01";
+            var catalog = new CharacterCatalog();
+            var instance = catalog.Spawn(pilotId, _parent);
+            var behavior = instance.Behavior as BehaviorPlayer;
+            Assert.That(behavior, Is.Not.Null);
+
+            for (var i = 0; i < 3; i++)
+            {
+                Assert.DoesNotThrow(() => behavior.PlayAttackRepeat());
+            }
 
             catalog.Release(instance);
         }

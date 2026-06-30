@@ -24,9 +24,18 @@ instance.PlayAction(CharacterAction.Attack);
 instance.PlayAction(CharacterAction.Walk);
 instance.PlayAction(CharacterAction.Ultimate);
 catalog.Release(instance);
+
+// Phase 03 behavior v2
+var behavior = instance.Behavior as BehaviorPlayer;
+behavior.EnterWalk();
+behavior.ExitWalk();
+behavior.PlayAttackRepeat();
+behavior.OnClipComplete += action => { /* gameplay sync */ };
 ```
 
-Definitions load from `content/characters/definitions/{id}.json` at repo root.
+Definitions load from `content/characters/definitions/{id}.json` at repo root. Dual-tier fields: `mesh` (game), `meshShowcase` (preview), `animationSet`, optional `gameLod`.
+
+`AnimationSetLoader` resolves clip names from `content/characters/animation_sets/{id}.json`.
 
 ## Material profiles
 
@@ -57,7 +66,8 @@ Open the Unity project, then **Window → General → Test Runner → EditMode**
 | `MaterialProfileLoaderTests` | Material profile JSON + `TBG/CharacterPBR` |
 | `BehaviorProfileLoaderTests` | Behavior profiles + `BehaviorPlayer` action mapping |
 | `Mesh3DCharacterFactoryTests` | glTF import, scale, animator attachment |
-| `PilotRosterEditModeTests` | Mesh3d pilot spawn + attack/death; sentinel game mesh Walk/Ultimate smoke |
+| `PilotRosterEditModeTests` | Mesh3d pilot spawn + attack/death; sentinel game mesh Walk/Ultimate + `PlayAttackRepeat` |
+| `AnimationSetLoaderTests` | Animation set manifest clip resolution |
 
 Or batchmode:
 

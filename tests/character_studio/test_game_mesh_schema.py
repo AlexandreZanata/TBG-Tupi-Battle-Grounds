@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from character_studio.defaults import create_default_definition
-from character_studio.models import CharacterDefinition
+from character_studio.models import CharacterDefinition, GameLod
 from character_studio.validation import ValidationError, validate_definition
 
 
@@ -59,3 +59,12 @@ def test_round_trip_serializes_dual_tier_fields() -> None:
     assert restored.meshShowcase == defn.meshShowcase
     assert restored.mesh == defn.mesh
     assert restored.animationSet == defn.animationSet
+
+
+def test_game_lod_accepts_valid_overrides() -> None:
+    defn = _dual_tier_definition()
+    defn.gameLod = GameLod(triTarget=6000, textureSize=512)
+    validate_definition(defn)
+    payload = defn.to_dict()
+    assert payload["gameLod"]["triTarget"] == 6000
+    assert payload["gameLod"]["textureSize"] == 512

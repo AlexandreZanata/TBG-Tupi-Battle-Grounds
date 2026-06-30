@@ -11,10 +11,16 @@ except ImportError as exc:
     raise SystemExit("sculpt_to_game_mesh requires Blender bpy") from exc
 
 TRI_TARGET = 8000
+TEXTURE_SIZE = 1024
 MAX_DECIMATE_PASSES = 12
 
 
-def sculpt_to_game_mesh(showcase_path: Path, output_path: Path, tri_target: int = TRI_TARGET) -> Path:
+def sculpt_to_game_mesh(
+    showcase_path: Path,
+    output_path: Path,
+    tri_target: int = TRI_TARGET,
+    texture_size: int = TEXTURE_SIZE,
+) -> Path:
     _clear_scene()
     bpy.ops.import_scene.gltf(filepath=str(showcase_path))
     meshes = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
@@ -31,6 +37,7 @@ def sculpt_to_game_mesh(showcase_path: Path, output_path: Path, tri_target: int 
             modifier.ratio = ratio
             bpy.ops.object.modifier_apply(modifier=modifier.name)
 
+    _resize_embedded_textures(texture_size)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.export_scene.gltf(
@@ -44,6 +51,13 @@ def sculpt_to_game_mesh(showcase_path: Path, output_path: Path, tri_target: int 
     return output_path
 
 
+def _resize_embedded_textures(texture_size: int) -> None:
+    for image in bpy.data.images:
+        if image.size[0] <= texture_size and image.size[1] <= texture_size:
+            continue
+        image.scale(texture_size, texture_size)
+
+
 def _clear_scene() -> None:
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete()
@@ -54,3 +68,4 @@ def _total_tri_count(meshes: list) -> int:
     for obj in meshes:
         total += sum(len(poly.vertices) for poly in obj.data.polygons)
     return total
+

@@ -1,7 +1,18 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using TBG.CharacterSystem.Runtime;
+using UnityEngine;
 
 namespace TBG.CharacterLibrary
 {
+    [Serializable]
+    public sealed class GameLodRecord
+    {
+        public int triTarget = 8000;
+        public int textureSize = 1024;
+    }
+
     [Serializable]
     public sealed class CharacterTexturesRecord
     {
@@ -20,6 +31,9 @@ namespace TBG.CharacterLibrary
         public string faction;
         public string assetMode;
         public string mesh;
+        public string meshShowcase;
+        public string animationSet;
+        public GameLodRecord gameLod;
         public CharacterTexturesRecord textures;
         public string materialProfile;
         public string behaviorProfile;

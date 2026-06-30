@@ -3,6 +3,7 @@ import { createMeshTierToggle } from "./meshTierToggle.js";
 import { createClipControls } from "./clipControls.js";
 import { renderMeshBadge } from "./meshBadge.js";
 import { bindTimelineSync } from "./timelineSync.js";
+import { loadBehaviorTimings } from "./behaviorTimings.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -108,6 +109,7 @@ async function loadCharacterIntoViewer() {
   if (!data) return;
   ensureViewer().loadCharacter({ ...data, meshTier });
   await refreshMeshInfo(selectedId);
+  await loadBehaviorTimings($("behaviorTimings"), data.behaviorProfile);
   clipControls?.setActive("idle");
 }
 

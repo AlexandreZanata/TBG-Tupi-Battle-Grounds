@@ -52,7 +52,7 @@ namespace TBG.CharacterLibrary.Tests
 
             var meshPath = Path.Combine(
                 CharacterPaths.GetRepoRoot(),
-                "content/characters/meshes/demo_striker_01.glb");
+                "content/characters/meshes/showcase/demo_striker_01.glb");
             Assert.That(File.Exists(meshPath), Is.True);
 
             catalog.Release(instance);

@@ -1,0 +1,14 @@
+{
+  "id": "humanoid_light_combat_v1",
+  "bodyClass": "HumanoidLight",
+  "clipSource": "library",
+  "clips": {
+    "idle": "Idle",
+    "walk": "Walk",
+    "spawn": "Spawn",
+    "attack": "Attack",
+    "attack2": "Attack2",
+    "ultimate": "Ultimate",
+    "death": "Death"
+  }
+}

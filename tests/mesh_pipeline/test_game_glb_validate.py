@@ -14,7 +14,7 @@ from mesh_pipeline.glb_inspect import inspect_glb
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = REPO_ROOT / "content/characters/meshes/_test_fixture.glb"
-DEMO_GUARD = REPO_ROOT / "content/characters/meshes/demo_guard_01.glb"
+DEMO_GUARD = REPO_ROOT / "content/characters/meshes/showcase/demo_guard_01.glb"
 VALIDATE_CLI = REPO_ROOT / "tools/mesh-pipeline/validate_game_glb.py"
 OPTIMIZE_CLI = REPO_ROOT / "tools/mesh-pipeline/optimize_glb.sh"
 

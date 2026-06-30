@@ -15,6 +15,8 @@ from character_studio.validation import validate_definition
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFINITIONS_DIR = REPO_ROOT / "content" / "characters" / "definitions"
 MESHES_DIR = REPO_ROOT / "content/characters/meshes"
+SHOWCASE_DIR = MESHES_DIR / "showcase"
+GAME_DIR = MESHES_DIR / "game"
 ROSTER_PATH = REPO_ROOT / "content/characters/pilot_roster.json"
 DEMO_IDS = (
     "demo_scout_01",
@@ -26,6 +28,7 @@ DEMO_IDS = (
     "demo_bruiser_01",
     "demo_sentinel_01",
 )
+EXPORTED_GAME_IDS = ("demo_sentinel_01",)
 
 
 @pytest.fixture(scope="module")
@@ -45,17 +48,13 @@ def test_demo_sculpt_definition_is_mesh3d_with_glb(pilot_id: str) -> None:
     defn = CharacterDefinition.from_dict(json.loads(path.read_text(encoding="utf-8")))
     validate_definition(defn)
     assert defn.assetMode == "mesh3d"
-    preview_path = defn.meshShowcase or defn.mesh
-    assert preview_path is not None
-    if defn.meshShowcase:
-        assert defn.mesh.endswith(f"meshes/game/{pilot_id}.glb")
-        preview_glb = REPO_ROOT / defn.meshShowcase
-    else:
-        assert defn.mesh == f"content/characters/meshes/{pilot_id}.glb"
-        preview_glb = REPO_ROOT / defn.mesh
-    assert preview_glb.is_file(), f"missing preview glb: {preview_glb}"
-    assert preview_glb.stat().st_size > 1_000_000
-    if defn.meshShowcase:
+    assert defn.meshShowcase == f"content/characters/meshes/showcase/{pilot_id}.glb"
+    assert defn.mesh == f"content/characters/meshes/game/{pilot_id}.glb"
+    assert defn.animationSet is not None
+    showcase_glb = REPO_ROOT / defn.meshShowcase
+    assert showcase_glb.is_file(), f"missing showcase glb: {showcase_glb}"
+    assert showcase_glb.stat().st_size > 1_000_000
+    if pilot_id in EXPORTED_GAME_IDS:
         game_glb = REPO_ROOT / defn.mesh
         assert game_glb.is_file(), f"missing game glb: {game_glb}"
 
@@ -80,4 +79,4 @@ def test_provision_pilot_meshes_script_skips_existing_demo_glb() -> None:
     )
     assert result.returncode == 0, result.stderr
     for pilot_id in DEMO_IDS:
-        assert (MESHES_DIR / f"{pilot_id}.glb").is_file()
+        assert (SHOWCASE_DIR / f"{pilot_id}.glb").is_file()

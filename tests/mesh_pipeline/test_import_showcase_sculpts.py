@@ -50,7 +50,7 @@ def test_only_flag_limits_import_subset() -> None:
 
 
 def test_imported_sculpts_exist_after_import() -> None:
-    meshes = REPO_ROOT / "content/characters/meshes"
+    meshes = REPO_ROOT / "content/characters/meshes/showcase"
     for pilot_id in (
         "demo_scout_01",
         "demo_reaver_01",

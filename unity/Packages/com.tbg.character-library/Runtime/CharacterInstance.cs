@@ -34,10 +34,13 @@ namespace TBG.CharacterLibrary
                     Behavior.PlayDeath();
                     break;
                 case CharacterAction.Walk:
-                    Behavior.PlayWalk();
+                    Behavior.EnterWalk();
                     break;
                 case CharacterAction.Ultimate:
                     Behavior.PlayUltimate();
+                    break;
+                case CharacterAction.Hit:
+                case CharacterAction.Cast:
                     break;
             }
         }

@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-MESHES_DIR = ROOT / "content" / "characters" / "meshes"
+MESHES_DIR = ROOT / "content" / "characters" / "meshes" / "showcase"
 OPTIMIZE = ROOT / "tools" / "mesh-pipeline" / "optimize_glb.sh"
 
 # Bbox-matched imports (source filename → pilot id). Skip ids already byte-identical.

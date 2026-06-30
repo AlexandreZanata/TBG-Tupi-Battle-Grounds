@@ -8,6 +8,8 @@ namespace TBG.CharacterLibrary
         public string idle;
         public string spawn;
         public string attack;
+        public string attack2;
+        public string attack3;
         public string death;
         public string walk;
         public string ultimate;
@@ -34,6 +36,12 @@ namespace TBG.CharacterLibrary
     }
 
     [Serializable]
+    public sealed class BehaviorCombatRecord
+    {
+        public string attackCycle;
+    }
+
+    [Serializable]
     public sealed class BehaviorProfileJsonRecord
     {
         public string id;
@@ -44,5 +52,6 @@ namespace TBG.CharacterLibrary
         public BehaviorActionsRecord actions;
         public BehaviorTriggersRecord triggers;
         public BehaviorTimingsRecord timings;
+        public BehaviorCombatRecord combat;
     }
 }

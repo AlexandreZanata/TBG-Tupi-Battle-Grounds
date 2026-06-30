@@ -13,8 +13,9 @@ from animation_sets.validation import AnimationSet, validate_animation_set
 from mesh_pipeline.game_glb_assemble import assemble_skinned_game_glb
 from mesh_pipeline.game_glb_validate import ValidationResult, validate_game_glb
 
-PILOT_UNIT_ID = "demo_sentinel_01"
 DEFAULT_ANIMATION_SET = "humanoid_heavy_combat_v1"
+DEFAULT_TRI_TARGET = 8000
+DEFAULT_TEXTURE_SIZE = 1024
 BLENDER_CMD = Path(__file__).resolve().parents[1] / "blender" / "blender_cmd.sh"
 BLENDER_BPY_SCRIPT = (
     Path(__file__).resolve().parents[1] / "blender" / "scripts" / "export_game_unit_bpy.py"
@@ -28,6 +29,8 @@ class GameUnitExportConfig:
     game_mesh: Path
     animation_set_id: str
     body_class: str
+    tri_target: int = DEFAULT_TRI_TARGET
+    texture_size: int = DEFAULT_TEXTURE_SIZE
 
 
 def repo_root() -> Path:
@@ -38,10 +41,16 @@ def blender_available() -> bool:
     return BLENDER_CMD.is_file() and os.access(BLENDER_CMD, os.X_OK)
 
 
-def load_export_config(unit_id: str, root: Path | None = None) -> GameUnitExportConfig:
-    if unit_id != PILOT_UNIT_ID:
-        raise ValueError(f"unsupported unit id: {unit_id} (Step C pilot: {PILOT_UNIT_ID} only)")
+def _load_pilot_body_class(unit_id: str, repo: Path) -> str:
+    roster_path = repo / "content/characters/pilot_roster.json"
+    data = json.loads(roster_path.read_text(encoding="utf-8"))
+    for entry in data.get("pilots", []):
+        if entry.get("id") == unit_id:
+            return str(entry["bodyClass"])
+    raise ValueError(f"{unit_id}: not found in pilot_roster.json")
 
+
+def load_export_config(unit_id: str, root: Path | None = None) -> GameUnitExportConfig:
     repo = root or repo_root()
     definition_path = repo / "content/characters/definitions" / f"{unit_id}.json"
     if not definition_path.is_file():
@@ -52,13 +61,15 @@ def load_export_config(unit_id: str, root: Path | None = None) -> GameUnitExport
     if not showcase:
         raise ValueError(f"{unit_id}: missing showcase mesh path")
 
-    animation_set_id = definition.get("animationSet", DEFAULT_ANIMATION_SET)
+    game_lod = definition.get("gameLod") or {}
     return GameUnitExportConfig(
         unit_id=unit_id,
         showcase_mesh=repo / showcase,
         game_mesh=repo / "content/characters/meshes/game" / f"{unit_id}.glb",
-        animation_set_id=animation_set_id,
-        body_class="HumanoidHeavy",
+        animation_set_id=definition.get("animationSet", DEFAULT_ANIMATION_SET),
+        body_class=_load_pilot_body_class(unit_id, repo),
+        tri_target=int(game_lod.get("triTarget", DEFAULT_TRI_TARGET)),
+        texture_size=int(game_lod.get("textureSize", DEFAULT_TEXTURE_SIZE)),
     )
 
 
@@ -84,7 +95,9 @@ def _run_gltf_transform(args: list[str]) -> None:
 def post_process_game_glb(raw_path: Path, output_path: Path, texture_size: int = 1024) -> Path:
     """Resize textures and Draco-compress a Blender-exported game GLB."""
     tmp = output_path.with_suffix(".post.glb")
-    _run_gltf_transform(["resize", str(raw_path), str(tmp), "--width", str(texture_size), "--height", str(texture_size)])
+    _run_gltf_transform(
+        ["resize", str(raw_path), str(tmp), "--width", str(texture_size), "--height", str(texture_size)]
+    )
     _run_gltf_transform(["draco", str(tmp), str(output_path)])
     tmp.unlink(missing_ok=True)
     return output_path
@@ -116,19 +129,20 @@ def run_blender_export(unit_id: str, repo: Path | None = None) -> Path:
     raw = config.game_mesh.with_suffix(".blender-raw.glb")
     if not raw.is_file():
         raise RuntimeError(f"Blender export produced no output: {raw}")
-    post_process_game_glb(raw, config.game_mesh)
+    post_process_game_glb(raw, config.game_mesh, config.texture_size)
     raw.unlink(missing_ok=True)
     return config.game_mesh
 
 
 def export_game_unit_python(config: GameUnitExportConfig, repo: Path | None = None) -> Path:
-    """Build a pilot game GLB without Blender (proxy skinned mesh + clip stubs)."""
+    """Build a game GLB without Blender (proxy skinned mesh + clip stubs)."""
     repo = repo or repo_root()
     if not config.showcase_mesh.is_file():
         raise FileNotFoundError(f"showcase mesh missing: {config.showcase_mesh}")
 
     clip_names = _load_animation_names(config, repo)
     tmp = config.game_mesh.with_suffix(".raw.glb")
+    config.game_mesh.parent.mkdir(parents=True, exist_ok=True)
     assemble_skinned_game_glb(tmp, clip_names)
     _run_gltf_transform(["draco", str(tmp), str(config.game_mesh)])
     tmp.unlink(missing_ok=True)

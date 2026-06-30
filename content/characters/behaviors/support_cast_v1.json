@@ -8,6 +8,7 @@
     "idle": "Idle",
     "spawn": "Spawn",
     "attack": "AttackCast",
+    "attack2": "Attack2",
     "death": "Death",
     "walk": "Walk",
     "ultimate": "Ultimate"
@@ -25,5 +26,8 @@
     "attackHitMs": 600,
     "ultimateWindupMs": 500,
     "ultimateDurationMs": 2000
+  },
+  "combat": {
+    "attackCycle": "repeat"
   }
 }

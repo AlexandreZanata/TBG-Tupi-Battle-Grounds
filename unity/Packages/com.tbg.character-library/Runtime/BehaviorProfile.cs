@@ -9,6 +9,7 @@ namespace TBG.CharacterLibrary
         public string BodyClass { get; init; }
         public string AnimatorControllerPath { get; init; }
         public string ClipSource { get; init; }
+        public string AttackCycle { get; init; } = "repeat";
         public int AttackWindupMs { get; init; }
         public int AttackHitMs { get; init; }
         public int UltimateWindupMs { get; init; }
@@ -16,6 +17,7 @@ namespace TBG.CharacterLibrary
 
         private readonly string[] _stateNames;
         private readonly string[] _triggerNames;
+        private readonly string _attack2State;
 
         public static BehaviorProfile CreateDefault()
         {
@@ -24,7 +26,8 @@ namespace TBG.CharacterLibrary
                 Id = "default",
                 ClipSource = "embedded",
                 _stateNames = new[] { "Idle", "Spawn", "Attack", "Death", "Walk", "Ultimate" },
-                _triggerNames = new[] { "Idle", "Spawn", "Attack", "Death", "Walk", "Ultimate" }
+                _triggerNames = new[] { "Idle", "Spawn", "Attack", "Death", "Walk", "Ultimate" },
+                _attack2State = "Attack2"
             };
         }
 
@@ -38,6 +41,7 @@ namespace TBG.CharacterLibrary
             var actions = record.actions ?? new BehaviorActionsRecord();
             var triggers = record.triggers ?? new BehaviorTriggersRecord();
             var timings = record.timings ?? new BehaviorTimingsRecord();
+            var combat = record.combat ?? new BehaviorCombatRecord();
             return new BehaviorProfile
             {
                 Id = record.id,
@@ -45,6 +49,7 @@ namespace TBG.CharacterLibrary
                 BodyClass = record.bodyClass,
                 AnimatorControllerPath = record.animatorController,
                 ClipSource = record.clipSource,
+                AttackCycle = string.IsNullOrWhiteSpace(combat.attackCycle) ? "repeat" : combat.attackCycle,
                 AttackWindupMs = timings.attackWindupMs,
                 AttackHitMs = timings.attackHitMs,
                 UltimateWindupMs = timings.ultimateWindupMs,
@@ -66,13 +71,19 @@ namespace TBG.CharacterLibrary
                     triggers.death,
                     ResolveOptionalTrigger(triggers.walk, "Walk"),
                     ResolveOptionalTrigger(triggers.ultimate, "Ultimate")
-                }
+                },
+                _attack2State = ResolveOptionalAction(actions.attack2, "Attack2")
             };
         }
 
         public string GetStateName(CharacterAction action) => ResolveName(_stateNames, action);
 
         public string GetTriggerName(CharacterAction action) => ResolveName(_triggerNames, action);
+
+        public string GetAttackStateName(int index)
+        {
+            return index > 0 ? _attack2State : GetStateName(CharacterAction.Attack);
+        }
 
         private static string ResolveName(string[] names, CharacterAction action)
         {

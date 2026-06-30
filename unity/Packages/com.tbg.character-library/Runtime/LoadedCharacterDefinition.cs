@@ -1,14 +1,36 @@
 using System;
-using TBG.CharacterSystem.Domain;
 
 namespace TBG.CharacterLibrary
 {
+    public sealed class GameLodSettings
+    {
+        public int TriTarget { get; init; } = 8000;
+        public int TextureSize { get; init; } = 1024;
+
+        public static GameLodSettings FromRecord(GameLodRecord record)
+        {
+            if (record == null)
+            {
+                return new GameLodSettings();
+            }
+
+            return new GameLodSettings
+            {
+                TriTarget = record.triTarget > 0 ? record.triTarget : 8000,
+                TextureSize = record.textureSize > 0 ? record.textureSize : 1024
+            };
+        }
+    }
+
     public sealed class LoadedCharacterDefinition
     {
         public string Id { get; init; }
         public string CharacterName { get; init; }
         public CharacterAssetMode AssetMode { get; init; }
         public string MeshPath { get; init; }
+        public string MeshShowcasePath { get; init; }
+        public string AnimationSetId { get; init; }
+        public GameLodSettings GameLod { get; init; }
         public string MaterialProfileId { get; init; }
         public string BehaviorProfileId { get; init; }
         public string AnimatorControllerPath { get; init; }
@@ -28,6 +50,9 @@ namespace TBG.CharacterLibrary
                 CharacterName = record.characterName,
                 AssetMode = ParseAssetMode(record.assetMode),
                 MeshPath = record.mesh,
+                MeshShowcasePath = record.meshShowcase,
+                AnimationSetId = record.animationSet,
+                GameLod = GameLodSettings.FromRecord(record.gameLod),
                 MaterialProfileId = record.materialProfile,
                 BehaviorProfileId = record.behaviorProfile,
                 AnimatorControllerPath = record.animatorController,
