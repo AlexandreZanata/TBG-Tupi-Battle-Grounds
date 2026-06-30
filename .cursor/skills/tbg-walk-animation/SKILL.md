@@ -46,16 +46,15 @@ tools/blender/scripts/
 
 Future clip types (`idle/`, `attack/`) follow the same layout under `animation/`.
 
-## Gait method (Level 2 — biomechanical curves)
+## Gait method (symmetric mirrored — FK TBG rig)
 
-1. **Joint curves** — `biomech_curves.py` (% cycle → °), Catmull-Rom in `curves.py`
-2. **Stance ~60% / swing ~40%** — encoded in Perry/Winter keyframes (not 50/50 sine)
-3. **Dual knee lobe** — stance absorption (~17°) + swing peak (~58°)
-4. **Pelvis** — 2× vertical bob on `TBG_Root`; yaw/roll on `TBG_Spine` (Saunders)
-5. **Arms** — contralateral `sin(2π·τ_opp + π)` vs opposing leg phase
-6. **In-place** — no root XZ; cadence default 110 spm → 33 frames @ 30 fps
+1. **Hips:** `R = A·cos(2πτ)`, `L = -A·cos(2πτ)` — same instant, opposite sagittal (no diagonal)
+2. **Knee/foot:** phase-offset `τ+0.5` per leg; stance 62% / swing 38%
+3. **Pelvis:** vertical bob only on `TBG_Root` — **no** spine yaw/roll
+4. **Arms:** contralateral vs opposing leg phase
+5. **In-place:** no root XZ
 
-Full theory: `tools/blender/animation/walk/BIOMECHANICAL-WALK-SPEC.md`
+Ref: `symmetric_gait.py`. Perry curves in `biomech_curves.py` for future retarget only.
 
 ## Tuning parameters
 

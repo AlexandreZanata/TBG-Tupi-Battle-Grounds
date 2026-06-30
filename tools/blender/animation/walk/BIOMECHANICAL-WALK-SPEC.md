@@ -1,7 +1,7 @@
 # Biomechanical Human Walk — Implementation Reference
 
-> **Implementation:** Level 2 (Catmull-Rom curves) in `sampler.py`, `biomech_curves.py`, `curves.py`.  
-> **Full agent spec:** project brief § Perry/Winter gait — stance 60% / swing 40%, dual knee lobe, Saunders determinants.
+> **Implementation:** symmetric mirrored gait in `symmetric_gait.py` (stance 62%, no spine roll/yaw).  
+> Perry curves in `biomech_curves.py` — reference only; FK TBG needs `L_hip = -R_hip` mapping.
 
 ## Implemented mapping (TBG FK rig)
 
@@ -11,10 +11,10 @@
 | Knee flex | `TBG_LowerLeg.*` | X |
 | Ankle dorsi/plantar | `TBG_Foot.*` | X |
 | Pelvis vertical (2× bob) | `TBG_Root` | location Y |
-| Pelvis yaw | `TBG_Spine` | Y rotation |
-| Pelvis roll (obliquity) | `TBG_Spine` | Z rotation |
-| Torso counter-pitch | `TBG_Spine` / `TBG_Spine1` | X rotation |
+| Torso counter-pitch | `TBG_Spine` / `TBG_Spine1` | X rotation only |
 | Arm swing (contralateral) | `TBG_UpperArm.*` | X (+ unit hold offset) |
+
+**Do not** apply pelvis yaw/roll on `TBG_Spine` for FK rigs — causes diagonal lean.
 
 ## Timing (§4)
 

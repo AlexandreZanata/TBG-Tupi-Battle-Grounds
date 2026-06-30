@@ -1,7 +1,6 @@
 # Walk cycle (in-place)
 
-**Level 2 biomechanical sampler** — Perry/Winter joint curves + Saunders pelvis determinants.  
-See [BIOMECHANICAL-WALK-SPEC.md](BIOMECHANICAL-WALK-SPEC.md) for theory and validation checklist.
+**Symmetric mirrored gait** — `symmetric_gait.py` (primary). Stance 62%, hip cos with `L_hip = -R_hip`, no spine yaw/roll.
 
 ## Module map
 
