@@ -47,13 +47,15 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 if [[ "$MODE" == "visual" ]]; then
   npx --yes @gltf-transform/cli draco "$INPUT" "$OUTPUT"
 elif [[ "$MODE" == "preview" ]]; then
-  npx --yes @gltf-transform/cli simplify "$INPUT" "$TMP/a.glb" --ratio "$RATIO" --error 0.001
+  npx --yes @gltf-transform/cli weld "$INPUT" "$TMP/weld.glb"
+  npx --yes @gltf-transform/cli simplify "$TMP/weld.glb" "$TMP/a.glb" --ratio "$RATIO" --error 0.001
   npx --yes @gltf-transform/cli resize "$TMP/a.glb" "$TMP/b.glb" --width 1024 --height 1024
   npx --yes @gltf-transform/cli draco "$TMP/b.glb" "$OUTPUT"
 elif [[ "$MODE" == "game" ]]; then
   CURRENT_TRIS="$(python3 "$SCRIPT_DIR/validate_game_glb.py" "$INPUT" --triangles-only)"
   RATIO="$(python3 -c "target=${TRI_TARGET}; current=max(1, int('${CURRENT_TRIS}')); print(min(1.0, target / current * 0.95))")"
-  npx --yes @gltf-transform/cli simplify "$INPUT" "$TMP/a.glb" --ratio "$RATIO" --error 0.001
+  npx --yes @gltf-transform/cli weld "$INPUT" "$TMP/weld.glb"
+  npx --yes @gltf-transform/cli simplify "$TMP/weld.glb" "$TMP/a.glb" --ratio "$RATIO" --error 0.001
   npx --yes @gltf-transform/cli resize "$TMP/a.glb" "$TMP/b.glb" --width "$TEX_SIZE" --height "$TEX_SIZE"
   npx --yes @gltf-transform/cli draco "$TMP/b.glb" "$OUTPUT"
 else

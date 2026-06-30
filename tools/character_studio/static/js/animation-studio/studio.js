@@ -1,4 +1,5 @@
 import { mountCharacterViewer } from "../viewer/viewer3d.js";
+import { SHOWCASE_ORDER } from "../showcase/showcaseOrder.js";
 import { createMeshTierToggle } from "./meshTierToggle.js";
 import { createClipControls } from "./clipControls.js";
 import { renderMeshBadge } from "./meshBadge.js";
@@ -42,22 +43,28 @@ function setViewerVisible(visible) {
   $("viewer3dLoading").hidden = true;
 }
 
-function renderUnitItem(character) {
+function sortCharacters(characters) {
+  const order = new Map(SHOWCASE_ORDER.map((id, index) => [id, index]));
+  return [...characters].sort((a, b) => {
+    const left = order.has(a.id) ? order.get(a.id) : 9999;
+    const right = order.has(b.id) ? order.get(b.id) : 9999;
+    return left - right || a.id.localeCompare(b.id);
+  });
+}
+
+function setDetailsVisible(visible) {
+  $("animationDetails").hidden = !visible;
+}
+
+function renderUnitItem(character, index) {
   const data = characterCache[character.id];
   const name = data?.characterName || character.id;
   const active = character.id === selectedId ? " is-active" : "";
-  const badge = data?.animationSet ? "unit-item__badge unit-item__badge--mesh3d" : "unit-item__badge";
 
   return `
-    <button type="button" class="unit-item${active}" data-id="${character.id}" role="listitem">
-      <div class="unit-item__thumb">
-        <img src="${character.cardUrl}?t=${Date.now()}" alt="" />
-      </div>
-      <div class="unit-item__meta">
-        <span class="unit-item__name">${name}</span>
-        <span class="unit-item__id">${character.id}</span>
-        <span class="${badge}">${data?.animationSet ?? "mesh3d"}</span>
-      </div>
+    <button type="button" class="unit-item unit-item--chip${active}" data-id="${character.id}" role="listitem" title="${name}">
+      <span class="unit-item__index">${index}</span>
+      <span class="unit-item__name">${name}</span>
     </button>
   `;
 }
@@ -65,8 +72,10 @@ function renderUnitItem(character) {
 async function refreshMeshInfo(unitId) {
   try {
     renderMeshBadge($("meshBadge"), await api(`/api/characters/${unitId}/mesh-info?tier=${meshTier}`));
+    setDetailsVisible(true);
   } catch {
     renderMeshBadge($("meshBadge"), null);
+    setDetailsVisible(Boolean(selectedId));
   }
 }
 
@@ -114,7 +123,9 @@ async function loadCharacterIntoViewer() {
 }
 
 async function loadList() {
-  const characters = (await api("/api/characters")).filter((c) => c.assetMode === "mesh3d");
+  const characters = sortCharacters(
+    (await api("/api/characters")).filter((c) => c.assetMode === "mesh3d"),
+  );
   $("unitCount").textContent = `${characters.length} mesh3d`;
 
   await Promise.all(
@@ -126,7 +137,7 @@ async function loadList() {
   );
 
   const list = $("charList");
-  list.innerHTML = characters.map(renderUnitItem).join("");
+  list.innerHTML = characters.map((character, index) => renderUnitItem(character, index + 1)).join("");
   list.querySelectorAll(".unit-item").forEach((item) => {
     item.addEventListener("click", () => selectCharacter(item.dataset.id));
   });

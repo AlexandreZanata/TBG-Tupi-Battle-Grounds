@@ -12,4 +12,17 @@ python3 tools/animation_sets/generate_placeholder_clips.py --set humanoid_heavy_
 
 Output: `content/characters/animations/clips/{bodyClass}/{ClipName}.glb`
 
-Replace stubs with real retargeted clips from `HumanoidHeavy_template.blend` before shipping pilot units.
+Also export HumanoidLight walk clip (library + scout unit variant):
+
+```bash
+./tools/blender/blender_cmd.sh --background --python tools/blender/scripts/build_walk_clip.py -- HumanoidLight
+./tools/blender/blender_cmd.sh --background --python tools/blender/scripts/build_walk_clip.py -- HumanoidLight demo_scout_01
+```
+
+Scout uses profile `scout_pilot_v1` (trident arm hold, wider stance). Re-export unit to embed:
+
+```bash
+python3 tools/blender/export_game_unit.py demo_scout_01
+```
+
+Walk is **in-place** (no root XZ) — lane movement is gameplay-driven (`BUDGETS.md`).

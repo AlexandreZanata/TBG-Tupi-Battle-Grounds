@@ -64,7 +64,7 @@ def export_game_unit_blender(
         sculpt_to_game_mesh(showcase_mesh, low_mesh, tri_target=tri_target, texture_size=texture_size)
         sculpt_to_game_mesh(low_mesh, lod1_mesh, tri_target=lod1_target, texture_size=lod1_tex)
     attach_tbg_rig(low_mesh, body_class, skinned_mesh)
-    retarget_clip_library(skinned_mesh, animation_set_id, raw_output, repo)
+    retarget_clip_library(skinned_mesh, animation_set_id, raw_output, repo, unit_id=unit_id)
     low_mesh.unlink(missing_ok=True)
     skinned_mesh.unlink(missing_ok=True)
     return raw_output

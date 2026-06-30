@@ -25,4 +25,5 @@ export const SHOWCASE_ORDER = [
   "demo_colossus_01",
   "demo_sovereign_01",
   "demo_conqueror_01",
+  "demo_titan_01",
 ];

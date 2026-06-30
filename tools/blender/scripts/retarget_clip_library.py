@@ -24,6 +24,7 @@ def retarget_clip_library(
     animation_set_id: str,
     output_path: Path,
     repo_root: Path,
+    unit_id: str | None = None,
 ) -> Path:
     set_path = repo_root / "content/characters/animation_sets" / f"{animation_set_id}.json"
     defn = AnimationSet.from_dict(json.loads(set_path.read_text(encoding="utf-8")))
@@ -39,7 +40,7 @@ def retarget_clip_library(
 
     arm_obj = armatures[0]
     clip_names = list(dict.fromkeys(defn.clips.values()))
-    _create_rest_pose_actions(arm_obj, clip_names)
+    _embed_clip_actions(arm_obj, clip_names, defn.bodyClass, unit_id)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.object.select_all(action="DESELECT")
@@ -62,17 +63,37 @@ def retarget_clip_library(
     return output_path
 
 
-def _create_rest_pose_actions(arm_obj: bpy.types.Object, clip_names: list[str]) -> None:
-    """Rest-pose actions with stable keyframes (no motion — avoids viewer flicker)."""
+def _embed_clip_actions(
+    arm_obj: bpy.types.Object,
+    clip_names: list[str],
+    body_class: str,
+    unit_id: str | None,
+) -> None:
+    """Walk gets a keyed cycle; other clips stay rest-pose until authored."""
+    _SCRIPTS = Path(__file__).resolve().parent
+    if str(_SCRIPTS) not in sys.path:
+        sys.path.insert(0, str(_SCRIPTS))
+    from walk_cycle_builder import bake_walk_action  # noqa: PLC0415
+    from walk_cycle_profiles import resolve_walk_profile  # noqa: PLC0415
+
+    walk_profile = resolve_walk_profile(unit_id, body_class)
     for clip_name in clip_names:
-        existing = bpy.data.actions.get(clip_name)
-        if existing is not None:
-            bpy.data.actions.remove(existing)
-        action = bpy.data.actions.new(clip_name)
-        arm_obj.animation_data_create()
-        arm_obj.animation_data.action = action
-        for pose_bone in arm_obj.pose.bones:
-            pose_bone.keyframe_insert(data_path="location", frame=1)
-            pose_bone.keyframe_insert(data_path="rotation_quaternion", frame=1)
-            pose_bone.keyframe_insert(data_path="scale", frame=1)
-        arm_obj.animation_data.action = None
+        if clip_name == "Walk":
+            bake_walk_action(arm_obj, walk_profile, clip_name)
+            continue
+        _create_rest_pose_action(arm_obj, clip_name)
+
+
+def _create_rest_pose_action(arm_obj: bpy.types.Object, clip_name: str) -> None:
+    """Rest-pose actions with stable keyframes (no motion — avoids viewer flicker)."""
+    existing = bpy.data.actions.get(clip_name)
+    if existing is not None:
+        bpy.data.actions.remove(existing)
+    action = bpy.data.actions.new(clip_name)
+    arm_obj.animation_data_create()
+    arm_obj.animation_data.action = action
+    for pose_bone in arm_obj.pose.bones:
+        pose_bone.keyframe_insert(data_path="location", frame=1)
+        pose_bone.keyframe_insert(data_path="rotation_quaternion", frame=1)
+        pose_bone.keyframe_insert(data_path="scale", frame=1)
+    arm_obj.animation_data.action = None

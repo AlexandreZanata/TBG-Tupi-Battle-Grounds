@@ -36,26 +36,25 @@
     </header>
 
     <main class="animation-layout">
-      <aside class="card panel animation-panel--units">
-        <header class="panel__head">
-          <h2>Units</h2>
-          <span id="unitCount" class="panel__meta">0 mesh3d</span>
-        </header>
-        <div id="charList" class="unit-list" role="list"></div>
-      </aside>
-
-      <section class="card panel">
+      <section class="card panel animation-panel--main">
         <header class="panel__head panel__head--preview">
           <h2 id="editId">—</h2>
           <div id="meshTierToggle"></div>
         </header>
+
+        <div class="animation-units-bar">
+          <div class="animation-units-bar__head">
+            <h3 class="animation-units-bar__title">Units</h3>
+            <span id="unitCount" class="panel__meta">0 mesh3d</span>
+          </div>
+          <div id="charList" class="unit-list unit-list--horizontal" role="list"></div>
+        </div>
 
         <div class="animation-viewport">
           <div id="viewport3dPanel" class="preview preview--3d" role="tabpanel">
             <div id="viewer3dLoading" class="preview__loading" hidden>Loading 3D…</div>
             <div id="viewer3dEmpty" class="preview__empty">Select a unit to preview</div>
             <div id="viewer3d" class="viewer3d" hidden></div>
-            <div id="meshBadge" class="mesh-badge"></div>
             <div class="viewer3d-controls" id="viewer3dControls" hidden>
               <label class="viewer3d-controls__toggle">
                 <input type="checkbox" id="autoRotate" />
@@ -73,7 +72,12 @@
         </div>
 
         <p id="status" class="status" role="status" aria-live="polite"></p>
-        <aside id="behaviorTimings" class="behavior-timings" hidden></aside>
+
+        <section class="animation-details" id="animationDetails" hidden>
+          <h3 class="animation-details__title">Details</h3>
+          <div id="meshBadge" class="mesh-badge"></div>
+          <aside id="behaviorTimings" class="behavior-timings" hidden></aside>
+        </section>
       </section>
     </main>
   </div>

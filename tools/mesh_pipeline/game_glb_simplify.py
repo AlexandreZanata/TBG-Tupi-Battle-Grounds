@@ -11,12 +11,20 @@ from mesh_pipeline.game_glb_transform import run_gltf_transform
 from mesh_pipeline.glb_inspect import inspect_glb
 
 COARSE_TRI_TARGET = 50_000
-SIMPLIFY_ERROR = 0.08
-TRIM_ERROR = 0.25
+SIMPLIFY_ERROR = 0.008
+TRIM_ERROR = 0.003
 MAX_TRIM_PASSES = 5
 MAX_COARSE_PASSES = 6
 BLENDER_CMD = Path(__file__).resolve().parents[1] / "blender" / "blender_cmd.sh"
 SCULPT_SCRIPT = Path(__file__).resolve().parents[1] / "blender" / "scripts" / "sculpt_to_game_mesh.py"
+
+
+def _weld_simplify(source: Path, output: Path, ratio: float, error: float) -> None:
+    """Weld split vertices then simplify — glTF Transform recommended order."""
+    welded = output.with_suffix(".weld.glb")
+    run_gltf_transform(["weld", str(source), str(welded)])
+    run_gltf_transform(["simplify", str(welded), str(output), "--ratio", f"{ratio:.6f}", "--error", str(error)])
+    welded.unlink(missing_ok=True)
 
 
 def coarsen_glb(source: Path, output: Path, coarse_target: int = COARSE_TRI_TARGET) -> Path:
@@ -35,9 +43,7 @@ def coarsen_glb(source: Path, output: Path, coarse_target: int = COARSE_TRI_TARG
             break
         ratio = min(0.5, (coarse_target / max(1, current_tris)) * 0.95)
         nxt = buf_a if pass_idx % 2 == 0 else buf_b
-        run_gltf_transform(
-            ["simplify", str(current), str(nxt), "--ratio", f"{ratio:.6f}", "--error", str(SIMPLIFY_ERROR)]
-        )
+        _weld_simplify(current, nxt, ratio, SIMPLIFY_ERROR)
         if current not in (source, output):
             Path(current).unlink(missing_ok=True)
         current = nxt
@@ -58,9 +64,7 @@ def trim_to_tri_budget(mesh: Path, tri_target: int) -> Path:
         if current <= tri_target:
             return mesh
         ratio = min(1.0, (tri_target / max(1, current)) * 0.95)
-        run_gltf_transform(
-            ["simplify", str(mesh), str(tmp), "--ratio", f"{ratio:.6f}", "--error", str(TRIM_ERROR)]
-        )
+        _weld_simplify(mesh, tmp, ratio, TRIM_ERROR)
         tmp.replace(mesh)
     return mesh
 

@@ -192,6 +192,14 @@
       "behaviorProfile": "dps_melee_v1",
       "materialProfile": "humans_pbr_v1",
       "animatorController": "content/characters/animations/HumanoidLight.controller"
+    },
+    {
+      "id": "demo_titan_01",
+      "bodyClass": "HumanoidHeavy",
+      "faction": "Humans",
+      "behaviorProfile": "dps_melee_v1",
+      "materialProfile": "humans_pbr_v1",
+      "animatorController": "content/characters/animations/HumanoidHeavy.controller"
     }
   ]
 }

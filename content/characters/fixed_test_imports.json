@@ -25,7 +25,8 @@
     "demo_shade_01",
     "demo_colossus_01",
     "demo_sovereign_01",
-    "demo_conqueror_01"
+    "demo_conqueror_01",
+    "demo_titan_01"
   ],
   "imports": {
     "27fbc655169662b90769705919e039f8.glb": "demo_reaver_01",
@@ -51,6 +52,7 @@
     "daf7c9782f41c380ef3d9020ed999821.glb": "demo_shade_01",
     "b8445c7a55d56f885ee61b681f68abb8.glb": "demo_colossus_01",
     "ab0dc7025d2c499b8be8136a6575856a(1).glb": "demo_sovereign_01",
-    "79f0ccc7962d005a41c72b8f31f0d095.glb": "demo_conqueror_01"
+    "79f0ccc7962d005a41c72b8f31f0d095.glb": "demo_conqueror_01",
+    "314b40eacf5524552080502d445d909a.glb": "demo_titan_01"
   }
 }
