@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .card_renderer import render_card
-from .content_assets import mesh_media_type, resolve_character_asset, texture_media_type
+from .content_assets import mesh_media_type, preview_mesh_path, resolve_character_asset, texture_media_type
 from .defaults import create_default_definition
 from .models import DEFAULT_ASSET_MODE, CharacterDefinition
 from .paths import find_repo_root
@@ -139,7 +139,10 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         if defn.assetMode != "mesh3d" or not defn.mesh:
             raise HTTPException(status_code=404, detail="unit has no mesh3d asset")
-        path = resolve_character_asset(root, defn.mesh)
+        preview = preview_mesh_path(defn)
+        if not preview:
+            raise HTTPException(status_code=404, detail="unit has no preview mesh")
+        path = resolve_character_asset(root, preview)
         return {
             "size": path.stat().st_size,
             "contentType": mesh_media_type(path),
@@ -154,7 +157,10 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         if defn.assetMode != "mesh3d" or not defn.mesh:
             raise HTTPException(status_code=404, detail="unit has no mesh3d asset")
-        path = resolve_character_asset(root, defn.mesh)
+        preview = preview_mesh_path(defn)
+        if not preview:
+            raise HTTPException(status_code=404, detail="unit has no preview mesh")
+        path = resolve_character_asset(root, preview)
         return FileResponse(path, media_type=mesh_media_type(path))
 
     @app.get("/api/content/{asset_path:path}")

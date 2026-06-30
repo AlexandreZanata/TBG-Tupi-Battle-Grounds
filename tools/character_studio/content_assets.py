@@ -6,6 +6,8 @@ from pathlib import Path
 
 from fastapi import HTTPException
 
+from .models import CharacterDefinition
+
 MAX_ASSET_BYTES = 150 * 1024 * 1024
 
 
@@ -35,6 +37,13 @@ def resolve_character_asset(repo_root: Path, relative_path: str) -> Path:
         raise HTTPException(status_code=413, detail="asset exceeds preview size limit")
 
     return absolute
+
+
+def preview_mesh_path(defn: CharacterDefinition) -> str | None:
+    """Return showcase mesh for web preview when dual-tier paths are configured."""
+    if defn.meshShowcase:
+        return defn.meshShowcase
+    return defn.mesh
 
 
 def mesh_media_type(path: Path) -> str:

@@ -12,6 +12,7 @@ The **Character Studio** (Unity Editor + web UI) creates, edits, and deletes fil
 | `cards/` | Card images rendered from procedural 3D | Yes |
 | `previews/` | Optional viewport / test captures | Yes |
 | `meshes/` | Authored `.glb` units (Phase 02) | Yes — pilot roster + `_test_fixture.glb` |
+| `meshes/game/` | Mobile runtime game meshes (Phase 03) | Yes — pilot `demo_sentinel_01.glb` |
 | `textures/` | PBR map sets per unit (Phase 02) | Yes — pilot `*_*.png` sets |
 | `materials/` | Material profile JSON (Phase 02) | Yes — `*_pbr_v1.json` per faction |
 | `behaviors/` | Behavior profile JSON (Phase 02) | Yes — `*_v1.json` per archetype |

@@ -45,10 +45,19 @@ def test_demo_sculpt_definition_is_mesh3d_with_glb(pilot_id: str) -> None:
     defn = CharacterDefinition.from_dict(json.loads(path.read_text(encoding="utf-8")))
     validate_definition(defn)
     assert defn.assetMode == "mesh3d"
-    assert defn.mesh == f"content/characters/meshes/{pilot_id}.glb"
-    glb_path = REPO_ROOT / defn.mesh
-    assert glb_path.is_file(), f"missing glb: {glb_path}"
-    assert glb_path.stat().st_size > 1_000_000
+    preview_path = defn.meshShowcase or defn.mesh
+    assert preview_path is not None
+    if defn.meshShowcase:
+        assert defn.mesh.endswith(f"meshes/game/{pilot_id}.glb")
+        preview_glb = REPO_ROOT / defn.meshShowcase
+    else:
+        assert defn.mesh == f"content/characters/meshes/{pilot_id}.glb"
+        preview_glb = REPO_ROOT / defn.mesh
+    assert preview_glb.is_file(), f"missing preview glb: {preview_glb}"
+    assert preview_glb.stat().st_size > 1_000_000
+    if defn.meshShowcase:
+        game_glb = REPO_ROOT / defn.mesh
+        assert game_glb.is_file(), f"missing game glb: {game_glb}"
 
 
 def test_pilot_definitions_match_roster_manifest(pilot_roster: list[dict]) -> None:
