@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TBG Animation Studio</title>
+  <link rel="stylesheet" href="/css/studio.css" />
+  <link rel="stylesheet" href="/css/animation-studio.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar__inner">
+        <div class="brand">
+          <span class="brand__mark">TBG</span>
+          <div>
+            <h1>Animation Studio</h1>
+            <p class="brand__sub">Game mesh clips &amp; mobile budget preview</p>
+          </div>
+        </div>
+        <nav class="topbar__nav">
+          <a class="topbar__link" href="/">Studio</a>
+          <a class="topbar__link" href="/showcase.html">Showcase</a>
+          <a class="topbar__link topbar__link--active" href="/animation-studio.html" aria-current="page">Animation</a>
+        </nav>
+        <span id="health" class="badge">checking</span>
+      </div>
+    </header>
+
+    <main class="animation-layout">
+      <aside class="card panel animation-panel--units">
+        <header class="panel__head">
+          <h2>Units</h2>
+          <span id="unitCount" class="panel__meta">0 mesh3d</span>
+        </header>
+        <div id="charList" class="unit-list" role="list"></div>
+      </aside>
+
+      <section class="card panel">
+        <header class="panel__head panel__head--preview">
+          <h2 id="editId">—</h2>
+          <div id="meshTierToggle"></div>
+        </header>
+
+        <div class="animation-viewport">
+          <div id="viewport3dPanel" class="preview preview--3d" role="tabpanel">
+            <div id="viewer3dLoading" class="preview__loading" hidden>Loading 3D…</div>
+            <div id="viewer3dEmpty" class="preview__empty">Select a unit to preview</div>
+            <div id="viewer3d" class="viewer3d" hidden></div>
+            <div id="meshBadge" class="mesh-badge"></div>
+            <div class="viewer3d-controls" id="viewer3dControls" hidden>
+              <label class="viewer3d-controls__toggle">
+                <input type="checkbox" id="autoRotate" />
+                Turntable
+              </label>
+            </div>
+            <div id="clipControls" class="viewer3d-controls"></div>
+            <div class="timeline">
+              <div class="timeline__row">
+                <span id="timelineTime">0.00s / 0.00s</span>
+                <input id="timelineSlider" class="timeline__slider" type="range" min="0" max="1" step="0.01" value="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/js/animation-studio/studio.js"></script>
+</body>
+</html>

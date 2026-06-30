@@ -10,8 +10,7 @@ import { buildProceduralClips, resolveClipName } from "./proceduralClips.js";
 import { applyCharacterMaterials, normalizeMeshes } from "./viewerMaterials.js";
 import { applyStudioLighting, configureRenderer } from "./viewerLighting.js";
 import { bindViewerResize, prepareViewerRoot, readViewerSize, applyRendererSize } from "./viewerResize.js";
-
-const FIT_PADDING = 1.28;
+import { placeOnGround, fitCamera, disposeObject } from "./viewerSceneUtils.js";
 
 export function mountCharacterViewer(container, options = {}) {
   const mount = prepareViewerRoot(container);
@@ -106,7 +105,8 @@ export function mountCharacterViewer(container, options = {}) {
   }
 
   async function buildMesh3dRoot(character, token) {
-    const meshUrl = `/api/characters/${character.id}/mesh`;
+    const tier = character.meshTier === "game" ? "game" : "showcase";
+    const meshUrl = `/api/characters/${character.id}/mesh?tier=${tier}`;
     const probe = await probeAsset(meshUrl);
     if (!probe.ok) {
       throw new Error(probe.reason === "too_large" ? "Mesh exceeds 150 MB preview limit" : "Mesh not found");
@@ -130,9 +130,11 @@ export function mountCharacterViewer(container, options = {}) {
       (character.bodyWidthScale ?? 1) * display,
     );
     placeOnGround(gltfScene);
+    const embedded = animations.length > 0;
+    const allowProcedural = tier !== "game";
     return {
       root: gltfScene,
-      animationClips: animations.length > 0 ? animations : buildProceduralClips(),
+      animationClips: embedded ? animations : allowProcedural ? buildProceduralClips() : [],
     };
   }
 
@@ -156,12 +158,31 @@ export function mountCharacterViewer(container, options = {}) {
     return true;
   }
 
+  function getClipProgress() {
+    if (!activeAction) return { time: 0, duration: 0, clipName: null };
+    const clip = activeAction.getClip();
+    return { time: activeAction.time, duration: clip.duration, clipName: clip.name };
+  }
+
+  function seekClip(time) {
+    if (!activeAction || !mixer) return;
+    activeAction.time = Math.max(0, Math.min(time, activeAction.getClip().duration));
+    mixer.update(0);
+  }
+
+  function listClipNames() {
+    return animationClips.map((clip) => clip.name);
+  }
+
   return {
     loadCharacter,
     setAutoRotate(value) {
       autoRotate = value;
     },
     playClip,
+    getClipProgress,
+    seekClip,
+    listClipNames,
     dispose() {
       cancelled = true;
       cancelAnimationFrame(frameId);
@@ -171,37 +192,4 @@ export function mountCharacterViewer(container, options = {}) {
       mount.remove();
     },
   };
-}
-
-function placeOnGround(object) {
-  const box = new THREE.Box3().setFromObject(object);
-  const center = box.getCenter(new THREE.Vector3());
-  object.position.x -= center.x;
-  object.position.z -= center.z;
-  object.position.y -= box.min.y;
-}
-
-function fitCamera(object, camera, width, height) {
-  const sphere = new THREE.Box3().setFromObject(object).getBoundingSphere(new THREE.Sphere());
-  const radius = Math.max(sphere.radius, 0.001);
-  const fovRad = (camera.fov * Math.PI) / 180;
-  const aspect = width / Math.max(height, 1);
-  const hFov = 2 * Math.atan(Math.tan(fovRad / 2) * aspect);
-  const distY = radius / Math.sin(fovRad / 2);
-  const distX = radius / Math.sin(hFov / 2);
-  const distance = Math.max(distX, distY) * FIT_PADDING;
-  camera.position.set(distance * 0.55, distance * 0.42, distance * 0.92);
-  camera.lookAt(0, radius * 0.42, 0);
-  camera.near = Math.max(distance / 200, 0.001);
-  camera.far = distance * 24;
-  camera.updateProjectionMatrix();
-}
-
-function disposeObject(object) {
-  object.traverse((child) => {
-    if (!(child instanceof THREE.Mesh)) return;
-    child.geometry?.dispose();
-    const mats = Array.isArray(child.material) ? child.material : [child.material];
-    mats.forEach((m) => m?.dispose?.());
-  });
 }

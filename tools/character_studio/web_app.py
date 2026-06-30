@@ -10,7 +10,13 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .card_renderer import render_card
-from .content_assets import mesh_media_type, preview_mesh_path, resolve_character_asset, texture_media_type
+from .content_assets import (
+    build_mesh_info,
+    mesh_media_type,
+    resolve_character_asset,
+    resolve_mesh_path,
+    texture_media_type,
+)
 from .defaults import create_default_definition
 from .models import DEFAULT_ASSET_MODE, CharacterDefinition
 from .paths import find_repo_root
@@ -132,35 +138,28 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
         return {"path": str(path)}
 
     @app.get("/api/characters/{unit_id}/mesh-info")
-    def get_character_mesh_info(unit_id: str) -> dict[str, int | str]:
+    def get_character_mesh_info(unit_id: str, tier: str = "showcase") -> dict:
         try:
             defn = repo.load(unit_id)
         except FileNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
-        if defn.assetMode != "mesh3d" or not defn.mesh:
+        if defn.assetMode != "mesh3d":
             raise HTTPException(status_code=404, detail="unit has no mesh3d asset")
-        preview = preview_mesh_path(defn)
-        if not preview:
-            raise HTTPException(status_code=404, detail="unit has no preview mesh")
-        path = resolve_character_asset(root, preview)
-        return {
-            "size": path.stat().st_size,
-            "contentType": mesh_media_type(path),
-        }
+        return build_mesh_info(defn, root, tier)
 
     @app.get("/api/characters/{unit_id}/mesh")
     @app.head("/api/characters/{unit_id}/mesh")
-    def get_character_mesh(unit_id: str) -> FileResponse:
+    def get_character_mesh(unit_id: str, tier: str = "showcase") -> FileResponse:
         try:
             defn = repo.load(unit_id)
         except FileNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
-        if defn.assetMode != "mesh3d" or not defn.mesh:
+        if defn.assetMode != "mesh3d":
             raise HTTPException(status_code=404, detail="unit has no mesh3d asset")
-        preview = preview_mesh_path(defn)
-        if not preview:
-            raise HTTPException(status_code=404, detail="unit has no preview mesh")
-        path = resolve_character_asset(root, preview)
+        relative = resolve_mesh_path(defn, tier)
+        if not relative:
+            raise HTTPException(status_code=404, detail=f"unit has no {tier} mesh")
+        path = resolve_character_asset(root, relative)
         return FileResponse(path, media_type=mesh_media_type(path))
 
     @app.get("/api/content/{asset_path:path}")

@@ -46,6 +46,59 @@ def preview_mesh_path(defn: CharacterDefinition) -> str | None:
     return defn.mesh
 
 
+MESH_TIERS = frozenset({"showcase", "game"})
+
+
+def resolve_mesh_path(defn: CharacterDefinition, tier: str = "showcase") -> str | None:
+    """Return relative mesh path for showcase (default) or game tier."""
+    if tier not in MESH_TIERS:
+        raise HTTPException(status_code=400, detail=f"invalid mesh tier: {tier}")
+    if tier == "game":
+        return defn.mesh
+    return preview_mesh_path(defn)
+
+
+def build_mesh_info(defn: CharacterDefinition, repo_root: Path, tier: str = "showcase") -> dict:
+    """Build mesh-info payload for showcase or game tier."""
+    relative = resolve_mesh_path(defn, tier)
+    if not relative:
+        raise HTTPException(status_code=404, detail=f"unit has no {tier} mesh")
+
+    path = resolve_character_asset(repo_root, relative)
+    info: dict[str, int | str | bool | list[str]] = {
+        "tier": tier,
+        "path": relative,
+        "size": path.stat().st_size,
+        "contentType": mesh_media_type(path),
+    }
+
+    if tier != "game":
+        return info
+
+    from mesh_pipeline.game_glb_validate import validate_game_glb
+    from mesh_pipeline.glb_inspect import inspect_glb, load_glb
+
+    stats = inspect_glb(path)
+    validation = validate_game_glb(path)
+    gltf, _ = load_glb(path)
+    clip_names = [anim.get("name", f"clip_{index}") for index, anim in enumerate(gltf.get("animations", []))]
+
+    info.update(
+        {
+            "triangles": stats.triangles,
+            "bones": stats.bones,
+            "animations": stats.animations,
+            "materials": stats.materials,
+            "textures": stats.textures,
+            "maxTextureSize": stats.max_texture_size,
+            "clipNames": clip_names,
+            "budgetOk": validation.ok,
+            "warnings": validation.warnings,
+        }
+    )
+    return info
+
+
 def mesh_media_type(path: Path) -> str:
     suffix = path.suffix.lower()
     if suffix == ".glb":

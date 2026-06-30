@@ -101,3 +101,44 @@ def test_showcase_page_is_served(client: TestClient) -> None:
     assert "showcase-track" in response.text
     assert "/js/showcase/showcase.js" in response.text
     assert "modalPrev" in response.text
+
+
+def test_animation_studio_page_is_served(client: TestClient) -> None:
+    response = client.get("/animation-studio.html")
+    assert response.status_code == 200
+    assert "Animation Studio" in response.text
+    assert "/js/animation-studio/studio.js" in response.text
+    assert "meshTierToggle" in response.text
+
+
+def test_mesh_showcase_tier_serves_high_poly_sculpt(client: TestClient) -> None:
+    response = client.get("/api/characters/demo_striker_01/mesh?tier=showcase")
+    assert response.status_code == 200
+    assert len(response.content) > 1_000_000
+
+
+def test_mesh_game_tier_serves_sentinel_game_glb(client: TestClient) -> None:
+    response = client.get("/api/characters/demo_sentinel_01/mesh?tier=game")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "model/gltf-binary"
+    assert len(response.content) < 5_000_000
+
+
+def test_mesh_info_game_tier_reports_budget_stats(client: TestClient) -> None:
+    response = client.get("/api/characters/demo_sentinel_01/mesh-info?tier=game")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["tier"] == "game"
+    assert body["triangles"] <= 8000
+    assert body["animations"] >= 6
+    assert body["budgetOk"] is True
+    assert "Idle" in body["clipNames"] or body["animations"] >= 1
+
+
+def test_mesh_info_showcase_tier_unchanged(client: TestClient) -> None:
+    response = client.get("/api/characters/demo_guard_01/mesh-info?tier=showcase")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["tier"] == "showcase"
+    assert body["size"] > 1_000_000
+    assert "triangles" not in body
