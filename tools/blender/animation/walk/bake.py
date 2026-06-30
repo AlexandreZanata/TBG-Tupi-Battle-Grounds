@@ -11,8 +11,20 @@ if TYPE_CHECKING:
     import bpy
 
 
-def bake_walk_action(arm_obj: bpy.types.Object, profile_id: str, clip_name: str = "Walk") -> bpy.types.Action:
+from tools.blender.animation.root_motion.bake import clip_name_for_root_motion
+
+
+def bake_walk_action(
+    arm_obj: bpy.types.Object,
+    profile_id: str,
+    clip_name: str = "Walk",
+    *,
+    root_motion: bool = False,
+) -> bpy.types.Action:
     import bpy as _bpy
+
+    if clip_name == "Walk":
+        clip_name = clip_name_for_root_motion(root_motion)
 
     _clear_pose(arm_obj, _bpy)
     arm_obj.animation_data_create()
@@ -26,7 +38,10 @@ def bake_walk_action(arm_obj: bpy.types.Object, profile_id: str, clip_name: str 
 
     for frame in range(walk_frames + 1):
         scene.frame_set(frame)
-        _apply_sampled_pose(arm_obj, sample_pose_at_frame(profile_id, frame))
+        _apply_sampled_pose(
+            arm_obj,
+            sample_pose_at_frame(profile_id, frame, root_motion=root_motion),
+        )
         _keyframe_pose(arm_obj, _bpy)
 
     _set_smooth_interpolation(action)
@@ -44,7 +59,7 @@ def _apply_sampled_pose(arm_obj: bpy.types.Object, table: dict) -> None:
             bone.rotation_euler = (0.0, 0.0, 0.0)
         if bone.name == "TBG_Root":
             root = table.get("TBG_Root", (0.0, 0.0, 0.0))
-            bone.location = (0.0, root[1], 0.0)
+            bone.location = (0.0, root[1], root[2])
         else:
             bone.location = (0.0, 0.0, 0.0)
 

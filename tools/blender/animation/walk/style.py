@@ -24,6 +24,7 @@ class WalkStyle:
     right_arm_hold: BoneEuler = (0.0, 0.0, 0.0)
     spine1_pitch_scale: float = 0.5
     gait_sampler: GaitSampler = "segment"
+    stride_length_m: float = 1.4
     # held_arm_gait only
     hip_swing: float = 0.24
     knee_stance: float = 0.14

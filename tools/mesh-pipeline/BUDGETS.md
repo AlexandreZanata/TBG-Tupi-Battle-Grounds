@@ -66,7 +66,15 @@ python3 tools/mesh-pipeline/validate_game_glb.py content/characters/meshes/game/
 
 ## Walk clip convention
 
-Lane movement uses an **in-place walk cycle** (no root-motion translation). Units advance along the lane via gameplay position, not animation root motion. Clip names follow `RIG-SPEC.md` (`Walk` in animation set manifests).
+**Default:** lane movement uses an **in-place** `Walk` clip (`TBG_Root.z = 0`). Units advance via gameplay position.
+
+**Optional:** `WalkRoot` clip bakes forward root motion (+Z) — `stride_length_m × τ` per cycle (see `tools/blender/animation/root_motion/README.md`). Bake with:
+
+```bash
+./tools/blender/blender_cmd.sh --background --python tools/blender/scripts/build_walk_clip.py -- --root-motion HumanoidLight
+```
+
+Unity stub: `BehaviorProfile.UseRootMotionWalk` + `BehaviorPlayer.SyncWalkRootMotion` (Phase 04 lane sync).
 
 ## Related
 

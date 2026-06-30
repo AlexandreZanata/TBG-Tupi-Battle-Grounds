@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI entry — export Walk clip GLB (delegates to animation.walk.export)."""
+"""CLI entry — export Walk / WalkRoot clip GLB."""
 
 from __future__ import annotations
 
@@ -18,12 +18,19 @@ from tools.blender.animation.walk.export import default_output_path, export_walk
 
 
 def _cli(argv: list[str]) -> int:
-    if not argv:
-        raise SystemExit("usage: build_walk_clip.py <bodyClass> [unit_id]")
-    body_class = argv[0]
-    unit_id = argv[1] if len(argv) > 1 else None
-    out = default_output_path(body_class, unit_id)
-    export_walk_clip(body_class, out, unit_id=unit_id)
+    root_motion = False
+    args: list[str] = []
+    for item in argv:
+        if item == "--root-motion":
+            root_motion = True
+        else:
+            args.append(item)
+    if not args:
+        raise SystemExit("usage: build_walk_clip.py [--root-motion] <bodyClass> [unit_id]")
+    body_class = args[0]
+    unit_id = args[1] if len(args) > 1 else None
+    out = default_output_path(body_class, unit_id, root_motion=root_motion)
+    export_walk_clip(body_class, out, unit_id=unit_id, root_motion=root_motion)
     print(f"Exported walk clip: {out}")
     return 0
 

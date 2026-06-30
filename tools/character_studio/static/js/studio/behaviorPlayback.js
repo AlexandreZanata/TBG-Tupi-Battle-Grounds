@@ -3,6 +3,7 @@
 const FALLBACK = {
   idle: "Idle",
   walk: "Walk",
+  walkRoot: "WalkRoot",
   attack: "Attack",
   attack2: "Attack2",
   death: "Death",
@@ -20,7 +21,10 @@ export async function fetchBehaviorProfile(behaviorProfileId) {
   return response.json();
 }
 
-export function clipNameForAction(profile, action) {
+export function clipNameForAction(profile, action, options = {}) {
+  if (action === "walk" && options.walkRootMotion) {
+    return FALLBACK.walkRoot;
+  }
   if (profile?.actions?.[action]) return profile.actions[action];
   return FALLBACK[action] ?? "Idle";
 }
@@ -29,12 +33,12 @@ export function shouldLoopAction(action) {
   return LOOP_ACTIONS.has(action);
 }
 
-export async function playBehaviorAction(viewer, character, action) {
+export async function playBehaviorAction(viewer, character, action, options = {}) {
   const profile = await fetchBehaviorProfile(character.behaviorProfile);
-  const primary = clipNameForAction(profile, action);
+  const primary = clipNameForAction(profile, action, options);
   const loop = shouldLoopAction(action);
   if (viewer.playClip(primary, loop)) return true;
-  const fallback = FALLBACK[action];
+  const fallback = action === "walk" && options.walkRootMotion ? FALLBACK.walk : FALLBACK[action];
   if (fallback && fallback !== primary) {
     return viewer.playClip(fallback, loop);
   }

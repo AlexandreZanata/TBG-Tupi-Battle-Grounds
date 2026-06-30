@@ -20,6 +20,7 @@ def export_walk_clip(
     output_path: Path,
     *,
     unit_id: str | None = None,
+    root_motion: bool = False,
 ) -> Path:
     import bpy
 
@@ -30,7 +31,7 @@ def export_walk_clip(
     bpy.ops.wm.open_mainfile(filepath=str(template))
     arm_obj = next(obj for obj in bpy.context.scene.objects if obj.type == "ARMATURE")
     profile = resolve_walk_profile(unit_id, body_class)
-    bake_walk_action(arm_obj, profile, "Walk")
+    bake_walk_action(arm_obj, profile, root_motion=root_motion)
 
     meshes = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -55,7 +56,8 @@ def export_walk_clip(
     return output_path
 
 
-def default_output_path(body_class: str, unit_id: str | None = None) -> Path:
+def default_output_path(body_class: str, unit_id: str | None = None, *, root_motion: bool = False) -> Path:
+    clip = "WalkRoot" if root_motion else "Walk"
     if unit_id:
-        return REPO_ROOT / "content/characters/animations/clips/units" / unit_id / "Walk.glb"
-    return REPO_ROOT / "content/characters/animations/clips" / body_class / "Walk.glb"
+        return REPO_ROOT / "content/characters/animations/clips/units" / unit_id / f"{clip}.glb"
+    return REPO_ROOT / "content/characters/animations/clips" / body_class / f"{clip}.glb"

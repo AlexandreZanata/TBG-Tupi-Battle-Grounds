@@ -42,6 +42,12 @@ namespace TBG.CharacterLibrary
     }
 
     [Serializable]
+    public sealed class BehaviorLocomotionRecord
+    {
+        public bool useRootMotionWalk;
+    }
+
+    [Serializable]
     public sealed class BehaviorProfileJsonRecord
     {
         public string id;
@@ -53,5 +59,6 @@ namespace TBG.CharacterLibrary
         public BehaviorTriggersRecord triggers;
         public BehaviorTimingsRecord timings;
         public BehaviorCombatRecord combat;
+        public BehaviorLocomotionRecord locomotion;
     }
 }

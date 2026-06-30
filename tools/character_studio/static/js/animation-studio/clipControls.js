@@ -16,9 +16,14 @@ export function createClipControls(container, getContext) {
       <input type="checkbox" id="clipLoopToggle" checked />
       Loop idle / walk
     </label>
+    <label class="viewer3d-controls__toggle">
+      <input type="checkbox" id="walkRootMotionToggle" />
+      Root motion walk (WalkRoot)
+    </label>
   `;
 
   let activeAction = "idle";
+  const walkRootToggle = container.querySelector("#walkRootMotionToggle");
 
   container.querySelectorAll("[data-action]").forEach((btn) => {
     btn.addEventListener("click", async () => {
@@ -26,7 +31,9 @@ export function createClipControls(container, getContext) {
       if (!viewer || !character) return;
       activeAction = btn.dataset.action;
       highlightActive(container, activeAction);
-      await playBehaviorAction(viewer, character, activeAction);
+      await playBehaviorAction(viewer, character, activeAction, {
+        walkRootMotion: walkRootToggle?.checked ?? false,
+      });
     });
   });
 
@@ -37,6 +44,7 @@ export function createClipControls(container, getContext) {
     },
     getActive: () => activeAction,
     shouldLoop: (action) => shouldLoopAction(action),
+    useWalkRootMotion: () => walkRootToggle?.checked ?? false,
   };
 }
 

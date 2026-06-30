@@ -74,6 +74,22 @@ namespace TBG.CharacterLibrary
             EnterIdle();
         }
 
+        /// <summary>
+        /// ponytail: stub — Phase 04 lane controller applies WalkRoot clip root delta when enabled.
+        /// </summary>
+        public void SyncWalkRootMotion(Vector3 worldDelta)
+        {
+            if (!_profile.UseRootMotionWalk || worldDelta.sqrMagnitude <= 0f)
+            {
+                return;
+            }
+
+            if (TrySetBool("UseRootMotion", true))
+            {
+                return;
+            }
+        }
+
         public void PlayUltimate() => Play(CharacterAction.Ultimate);
 
         public string GetStateName(CharacterAction action) => _profile.GetStateName(action);

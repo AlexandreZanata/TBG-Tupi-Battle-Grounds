@@ -22,10 +22,15 @@ def cycle_frames_for_profile(profile_id: str) -> int:
     return cycle_frames_for_style(get_walk_style(profile_id))
 
 
-def sample_pose_at_frame(profile_id: str, frame: int) -> GaitPose:
+def sample_pose_at_frame(profile_id: str, frame: int, *, root_motion: bool = False) -> GaitPose:
     style = get_walk_style(profile_id)
     frames = cycle_frames_for_style(style)
-    return sample_walk_pose(frame, frames, style)
+    pose = sample_walk_pose(frame, frames, style)
+    if not root_motion:
+        return pose
+    from tools.blender.animation.root_motion.bake import merge_root_forward
+
+    return merge_root_forward(pose, frame, frames, style.stride_length_m)
 
 
 def root_bob_y(frame: int) -> float:

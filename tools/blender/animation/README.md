@@ -6,6 +6,7 @@ Modular clip generators for the TBG FK rig (`TBG_*` bones). Each locomotion or c
 |---------|--------|---------|
 | `walk/` | **Active** | Level-2 biomechanical in-place walk (`BIOMECHANICAL-WALK-SPEC.md`) |
 | `retarget/` | **Active** | CMU BVH → TBG bone map + gait curve calibration |
+| `root_motion/` | **Active** | Optional `WalkRoot` forward translation on `TBG_Root` |
 | `idle/` | Planned | Breathing / weight-shift idle |
 | `attack/` | **Active** | Trident lunge thrust (`THRUST-ATTACK-SPEC.md`) |
 

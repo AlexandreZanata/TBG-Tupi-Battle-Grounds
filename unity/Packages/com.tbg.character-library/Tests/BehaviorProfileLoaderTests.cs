@@ -97,11 +97,16 @@ namespace TBG.CharacterLibrary.Tests
         }
 
         [Test]
-        public void PlayAttack_WithoutAnimator_DoesNotThrow()
+        public void SyncWalkRootMotion_WhenDisabled_IsNoOp()
         {
-            var root = new GameObject("BehaviorTestNoAnimator");
-            var player = new BehaviorPlayer(root, BehaviorProfile.CreateDefault());
-            Assert.DoesNotThrow(() => player.PlayAttack());
+            var root = new GameObject("BehaviorRootMotionTest");
+            root.AddComponent<Animator>();
+            var profile = new BehaviorProfileLoader().Load("tank_melee_v1");
+            var player = new BehaviorPlayer(root, profile);
+
+            Assert.That(profile.UseRootMotionWalk, Is.False);
+            Assert.DoesNotThrow(() => player.SyncWalkRootMotion(new Vector3(0f, 0f, 1f)));
+
             Object.DestroyImmediate(root);
         }
     }

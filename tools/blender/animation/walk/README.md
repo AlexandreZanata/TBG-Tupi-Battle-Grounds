@@ -41,6 +41,8 @@
 ```bash
 ./tools/blender/blender_cmd.sh --background --python tools/blender/scripts/build_walk_clip.py -- HumanoidLight
 python3 tools/blender/export_game_unit.py demo_scout_01
+# Root-motion library clip:
+./tools/blender/blender_cmd.sh --background --python tools/blender/scripts/build_walk_clip.py -- --root-motion HumanoidLight
 ```
 
 ## Default timing
