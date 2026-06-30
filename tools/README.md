@@ -19,6 +19,15 @@ python3 -m tools.character_studio export-card <id>
 python3 -m tools.character_studio export-all-cards
 ```
 
+## Web studio (browser)
+
+```bash
+./scripts/start-studio.sh
+# Open http://127.0.0.1:8765
+```
+
+Create, edit, delete units and export cards from the browser. Uses the same JSON files under `content/characters/`.
+
 ## Verify
 
 ```bash
