@@ -49,18 +49,51 @@ def preview_mesh_path(defn: CharacterDefinition) -> str | None:
 MESH_TIERS = frozenset({"showcase", "game"})
 
 
-def resolve_mesh_path(defn: CharacterDefinition, tier: str = "showcase") -> str | None:
+def resolve_mesh_path(
+    defn: CharacterDefinition,
+    tier: str = "showcase",
+    repo_root: Path | None = None,
+) -> str | None:
     """Return relative mesh path for showcase (default) or game tier."""
     if tier not in MESH_TIERS:
         raise HTTPException(status_code=400, detail=f"invalid mesh tier: {tier}")
     if tier == "game":
         return defn.mesh
-    return preview_mesh_path(defn)
+
+    if repo_root is None:
+        return preview_mesh_path(defn)
+
+    return resolve_showcase_mesh_path(defn, repo_root)
+
+
+def resolve_showcase_mesh_path(defn: CharacterDefinition, repo_root: Path) -> str | None:
+    """Pick first existing showcase candidate (dual-tier, legacy flat, or id-based)."""
+    candidates: list[str] = []
+    if defn.meshShowcase:
+        candidates.append(defn.meshShowcase)
+    if defn.mesh and "/meshes/game/" not in defn.mesh.replace("\\", "/"):
+        candidates.append(defn.mesh)
+    if defn.id:
+        candidates.append(f"content/characters/meshes/showcase/{defn.id}.glb")
+        candidates.append(f"content/characters/meshes/{defn.id}.glb")
+
+    seen: set[str] = set()
+    for relative in candidates:
+        if not relative or relative in seen:
+            continue
+        seen.add(relative)
+        try:
+            resolve_character_asset(repo_root, relative)
+        except HTTPException:
+            continue
+        return relative
+
+    return candidates[0] if candidates else None
 
 
 def build_mesh_info(defn: CharacterDefinition, repo_root: Path, tier: str = "showcase") -> dict:
     """Build mesh-info payload for showcase or game tier."""
-    relative = resolve_mesh_path(defn, tier)
+    relative = resolve_mesh_path(defn, tier, repo_root)
     if not relative:
         raise HTTPException(status_code=404, detail=f"unit has no {tier} mesh")
 

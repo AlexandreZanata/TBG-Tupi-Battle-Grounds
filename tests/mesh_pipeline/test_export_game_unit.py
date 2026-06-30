@@ -11,7 +11,6 @@ import pytest
 
 from mesh_pipeline.export_game_unit_core import (
     BLENDER_CMD,
-    PILOT_UNIT_ID,
     blender_available,
     export_game_unit_python,
     load_export_config,
@@ -21,12 +20,16 @@ from mesh_pipeline.game_glb_validate import validate_game_glb
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EXPORT_CLI = REPO_ROOT / "tools/blender/export_game_unit.py"
+PILOT_UNIT_ID = "demo_sentinel_01"
 GAME_MESH = REPO_ROOT / "content/characters/meshes/game/demo_sentinel_01.glb"
 
 
-def test_load_export_config_rejects_non_pilot_unit() -> None:
-    with pytest.raises(ValueError, match="demo_sentinel_01"):
-        load_export_config("demo_guard_01", REPO_ROOT)
+def test_load_export_config_reads_guard_unit() -> None:
+    config = load_export_config("demo_guard_01", REPO_ROOT)
+    assert config.unit_id == "demo_guard_01"
+    assert config.body_class == "HumanoidHeavy"
+    assert config.showcase_mesh.name == "demo_guard_01.glb"
+    assert "showcase" in str(config.showcase_mesh)
 
 
 def test_assembled_skinned_glb_passes_budget(tmp_path: Path) -> None:
@@ -41,7 +44,7 @@ def test_assembled_skinned_glb_passes_budget(tmp_path: Path) -> None:
 
 
 def test_export_game_unit_python_writes_valid_pilot_mesh(tmp_path: Path) -> None:
-    showcase = REPO_ROOT / "content/characters/meshes/demo_sentinel_01.glb"
+    showcase = REPO_ROOT / "content/characters/meshes/showcase/demo_sentinel_01.glb"
     definition = json.loads(
         (REPO_ROOT / "content/characters/definitions/demo_sentinel_01.json").read_text(encoding="utf-8")
     )

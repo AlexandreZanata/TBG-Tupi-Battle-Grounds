@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -69,6 +69,13 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
     @app.get("/api/health")
     def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/favicon.ico", include_in_schema=False, response_model=None)
+    def favicon() -> FileResponse | Response:
+        icon = STATIC_DIR / "favicon.ico"
+        if icon.is_file():
+            return FileResponse(icon, media_type="image/x-icon")
+        return Response(status_code=204)
 
     @app.get("/api/characters")
     def list_characters() -> list[dict[str, str]]:
@@ -156,7 +163,7 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         if defn.assetMode != "mesh3d":
             raise HTTPException(status_code=404, detail="unit has no mesh3d asset")
-        relative = resolve_mesh_path(defn, tier)
+        relative = resolve_mesh_path(defn, tier, root)
         if not relative:
             raise HTTPException(status_code=404, detail=f"unit has no {tier} mesh")
         path = resolve_character_asset(root, relative)

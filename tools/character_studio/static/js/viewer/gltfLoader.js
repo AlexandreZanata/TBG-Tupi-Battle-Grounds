@@ -58,7 +58,7 @@ async function createLoader() {
 }
 
 export async function probeAsset(url, maxBytes = MAX_PREVIEW_ASSET_BYTES) {
-  const infoUrl = url.replace(/\/mesh$/, "/mesh-info");
+  const infoUrl = toMeshInfoUrl(url);
   const response = await fetch(infoUrl);
   if (!response.ok) {
     return { ok: false, reason: "missing" };
@@ -69,4 +69,11 @@ export async function probeAsset(url, maxBytes = MAX_PREVIEW_ASSET_BYTES) {
     return { ok: false, reason: "too_large" };
   }
   return { ok: true, size: length, cached: Boolean(getCachedGltf(url)) };
+}
+
+/** Map `/mesh` asset URL to `/mesh-info`, preserving query string (e.g. tier=showcase). */
+export function toMeshInfoUrl(meshUrl) {
+  const [path, query = ""] = meshUrl.split("?");
+  const infoPath = path.replace(/\/mesh$/, "/mesh-info");
+  return query ? `${infoPath}?${query}` : infoPath;
 }
