@@ -44,7 +44,7 @@ tools/blender/scripts/
 | `bake.py`, `export.py` | Yes | Blender bake + GLB export |
 | `scripts/*.py` | Yes | CLI entrypoints only |
 
-Future clip types (`idle/`, `attack/`) follow the same layout under `animation/`.
+`attack/` follows the same layout — see `attack/THRUST-ATTACK-SPEC.md` for trident lunge thrust.
 
 ## Gait method (symmetric mirrored — FK TBG rig)
 

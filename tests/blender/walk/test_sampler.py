@@ -27,5 +27,5 @@ def test_frame_to_frame_leg_motion_is_smooth():
     prev = sample_pose_at_frame("humanoid_light_v1", 0)["TBG_UpperLeg.R"][0]
     for frame in range(1, frames + 1):
         cur = sample_pose_at_frame("humanoid_light_v1", frame)["TBG_UpperLeg.R"][0]
-        assert abs(cur - prev) < 0.14
+        assert abs(cur - prev) < 0.18
         prev = cur

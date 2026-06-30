@@ -27,7 +27,7 @@ def test_pelvis_vertical_double_support_is_lowest():
 
 def test_arms_swing_over_cycle():
     frames = cycle_frames_for_profile("humanoid_light_v1")
-    quarter = frames // 4
+    half = frames // 2
     pose_a = sample_pose_at_frame("humanoid_light_v1", 0)
-    pose_b = sample_pose_at_frame("humanoid_light_v1", quarter)
+    pose_b = sample_pose_at_frame("humanoid_light_v1", half)
     assert abs(pose_a["TBG_UpperArm.L"][0] - pose_b["TBG_UpperArm.L"][0]) > 0.06

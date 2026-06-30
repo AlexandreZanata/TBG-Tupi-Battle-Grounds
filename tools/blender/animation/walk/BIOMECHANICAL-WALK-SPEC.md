@@ -1,7 +1,7 @@
 # Biomechanical Human Walk — Implementation Reference
 
-> **Implementation:** symmetric mirrored gait in `symmetric_gait.py` (stance 62%, no spine roll/yaw).  
-> Perry curves in `biomech_curves.py` — reference only; FK TBG needs `L_hip = -R_hip` mapping.
+> **Implementation:** Perry segment gait in `segment_gait.py` (Catmull-Rom on `biomech_curves.py`).  
+> Legacy cosine gait: `symmetric_gait.py` (reference only).
 
 ## Implemented mapping (TBG FK rig)
 
@@ -11,8 +11,9 @@
 | Knee flex | `TBG_LowerLeg.*` | X |
 | Ankle dorsi/plantar | `TBG_Foot.*` | X |
 | Pelvis vertical (2× bob) | `TBG_Root` | location Y |
-| Torso counter-pitch | `TBG_Spine` / `TBG_Spine1` | X rotation only |
-| Arm swing (contralateral) | `TBG_UpperArm.*` | X (+ unit hold offset) |
+| Torso pitch | `TBG_Spine` / `TBG_Spine1` | X rotation only |
+| Neck / head gaze stabilize | `TBG_Neck` / `TBG_Head` | X rotation only |
+| Arm swing (contralateral) | `TBG_UpperArm.*` / `TBG_LowerArm.*` | X (+ unit hold offset) |
 
 **Do not** apply pelvis yaw/roll on `TBG_Spine` for FK rigs — causes diagonal lean.
 
