@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "description": "Fixed showcase sculpt imports — source filename to pilot id",
+  "showcaseOrder": [
+    "demo_reaver_01",
+    "demo_scout_01",
+    "demo_vanguard_01",
+    "demo_striker_01",
+    "demo_sentinel_01",
+    "demo_guard_01",
+    "demo_enforcer_01",
+    "demo_bruiser_01",
+    "demo_hunter_01",
+    "demo_skirmisher_01",
+    "demo_oracle_01",
+    "demo_ranger_01",
+    "demo_warden_01",
+    "demo_gladiator_01",
+    "demo_raider_01"
+  ],
+  "imports": {
+    "27fbc655169662b90769705919e039f8.glb": "demo_reaver_01",
+    "25d6783c7ee5ec383f940edf0973879c.glb": "demo_scout_01",
+    "e76641810d5acb8c6c6b82f36417276f.glb": "demo_vanguard_01",
+    "5ccf65ec1612d2a429ca34b79b930df5.glb": "demo_striker_01",
+    "1b13ac9bf5116441b95170cacce2d34f.glb": "demo_sentinel_01",
+    "70e087ad8a7b59c0bdadd6c019325cfd.glb": "demo_guard_01",
+    "e7fe093da45bd1939dff21912557a478.glb": "demo_enforcer_01",
+    "07dd3dc310083f0449890fa9c9776aa8.glb": "demo_bruiser_01",
+    "120d200084b373275ca28c80e71d0f02.glb": "demo_hunter_01",
+    "33a198b8b69a5152fc6bf67b2fcc6352.glb": "demo_skirmisher_01",
+    "7380221dda4dca0a79d55d4183763572.glb": "demo_oracle_01",
+    "4d625a41b5389aa23bc43b92e96b98f7.glb": "demo_ranger_01",
+    "50478c23b1fbd4af3256dd40a74885d4.glb": "demo_warden_01",
+    "541a596293a3b8d70e583d18fe1b12ba.glb": "demo_gladiator_01",
+    "7d15bc2ba70f024b67db3dfc52b4474c.glb": "demo_raider_01"
+  }
+}

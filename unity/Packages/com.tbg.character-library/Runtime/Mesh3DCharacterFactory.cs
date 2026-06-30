@@ -52,6 +52,7 @@ namespace TBG.CharacterLibrary
             GltfMeshLoader.Instantiate(absoluteGlbPath, root.transform);
             Mesh3DPresentationScaler.Apply(root.transform, definition.ProceduralData);
             Mesh3DMaterialApplier.Apply(root, definition, _materialLoader);
+            CharacterLodGroup.Attach(root, definition.Id);
 
             var behaviorProfile = ResolveBehaviorProfile(definition);
             Mesh3DAnimatorSetup.Attach(root, definition, behaviorProfile);

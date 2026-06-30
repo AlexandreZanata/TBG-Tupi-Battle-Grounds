@@ -7,8 +7,10 @@ from pathlib import Path
 
 from animation_sets.validation import AnimationSet, validate_animation_set
 
-PILOT_UNIT_ID = "demo_sentinel_01"
 DEFAULT_ANIMATION_SET = "humanoid_heavy_combat_v1"
+DEFAULT_TRI_TARGET = 8000
+DEFAULT_TEXTURE_SIZE = 1024
+LOD1_TRI_RATIO = 0.5
 
 
 def repo_root_from_script() -> Path:
@@ -31,6 +33,8 @@ def export_game_unit_blender(
     animation_set_id: str,
     body_class: str,
     repo: Path,
+    tri_target: int = DEFAULT_TRI_TARGET,
+    texture_size: int = DEFAULT_TEXTURE_SIZE,
 ) -> Path:
     tools_dir = repo / "tools"
     scripts_dir = tools_dir / "blender" / "scripts"
@@ -47,8 +51,14 @@ def export_game_unit_blender(
     low_mesh = tmp_dir / f"{unit_id}_low.glb"
     skinned_mesh = tmp_dir / f"{unit_id}_skinned.glb"
     raw_output = game_mesh.with_suffix(".blender-raw.glb")
+    lod1_dir = repo / "content/characters/meshes/game/lod1"
+    lod1_dir.mkdir(parents=True, exist_ok=True)
+    lod1_mesh = lod1_dir / f"{unit_id}.glb"
+    lod1_target = max(500, int(tri_target * LOD1_TRI_RATIO))
+    lod1_tex = max(256, texture_size // 2)
 
-    sculpt_to_game_mesh(showcase_mesh, low_mesh)
+    sculpt_to_game_mesh(showcase_mesh, lod1_mesh, tri_target=lod1_target, texture_size=lod1_tex)
+    sculpt_to_game_mesh(showcase_mesh, low_mesh, tri_target=tri_target, texture_size=texture_size)
     attach_tbg_rig(low_mesh, body_class, skinned_mesh)
     retarget_clip_library(skinned_mesh, animation_set_id, raw_output, repo)
     low_mesh.unlink(missing_ok=True)

@@ -25,24 +25,36 @@ Requires Node.js (`npx @gltf-transform/cli`).
 | **game** | Simplify to tri budget + resize + Draco | ≤ 2 MB target | Mobile runtime |
 
 Validate game meshes: `python3 tools/mesh-pipeline/validate_game_glb.py <path.glb>`  
-Export pilot game mesh: `python3 tools/blender/export_game_unit.py demo_sentinel_01` (requires `./tools/blender/setup.sh` once)  
+Export one pilot: `python3 tools/blender/export_game_unit.py demo_sentinel_01` (requires `./tools/blender/setup.sh` once)  
 Batch export all pilots: `./tools/mesh-pipeline/batch_seed_to_game.sh`  
+Post-process: ORM texture pack + LOD1 static mesh in `meshes/game/lod1/` (automatic on export)  
 Budget reference: [BUDGETS.md](./BUDGETS.md)
 
 Web studio accepts meshes up to **150 MB** per asset.
 
 ## Batch import showcase sculpts
 
-Map downloaded GLBs to pilot ids (bbox-matched), Draco-compress, and write to `content/characters/meshes/showcase/`:
+Manifest: `content/characters/fixed_test_imports.json` (15 fixed test characters).
 
 ```bash
-python3 tools/mesh-pipeline/import_showcase_sculpts.py --source-dir /path/to/downloads
-python3 tools/mesh-pipeline/import_showcase_sculpts.py --source-dir /path/to/downloads \
-  --only demo_scout_01 demo_reaver_01
+python3 tools/mesh-pipeline/bootstrap_fixed_test_characters.py  # new ids + roster order
+python3 tools/mesh-pipeline/import_showcase_sculpts.py --source-dir /path/to/downloads --force
 python3 -m character_studio export-all-cards   # refresh cards (PYTHONPATH=tools)
 ```
 
-Edit `DEFAULT_IMPORTS` in the script to change filename → pilot id mapping. Skips files already byte-identical to the target.
+Import reads `fixed_test_imports.json` by default. Use `--only demo_scout_01` for a subset.
+
+## Batch export game meshes (Phase 03 §8)
+
+```bash
+./tools/blender/setup.sh                    # HumanoidHeavy + HumanoidLight rig templates
+./tools/mesh-pipeline/batch_seed_to_game.sh # all pilot_roster.json ids
+./scripts/verify.sh                         # validates every meshes/game/*.glb
+```
+
+Showcase carousel continues to use `meshShowcase` tier; game meshes land in `meshes/game/` with LOD1 in `meshes/game/lod1/`.
+
+Manual Blender weight/silhouette fixes: re-export individual ids after editing showcase sculpt.
 
 ## Studio demo units
 

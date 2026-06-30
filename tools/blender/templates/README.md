@@ -3,6 +3,7 @@
 | File | Body class | Generate |
 |------|------------|----------|
 | `HumanoidHeavy_template.blend` | HumanoidHeavy | See below |
+| `HumanoidLight_template.blend` | HumanoidLight | See below |
 
 Templates are **not** committed until generated locally (binary, Blender version-specific).
 

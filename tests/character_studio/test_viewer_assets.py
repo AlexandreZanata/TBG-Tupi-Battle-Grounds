@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -60,16 +61,10 @@ def test_preview_asset_limit_is_150mb() -> None:
 
 
 def test_demo_sculpt_units_serve_mesh(client: TestClient) -> None:
-    for unit_id in (
-        "demo_scout_01",
-        "demo_striker_01",
-        "demo_guard_01",
-        "demo_vanguard_01",
-        "demo_reaver_01",
-        "demo_hunter_01",
-        "demo_bruiser_01",
-        "demo_sentinel_01",
-    ):
+    manifest = json.loads(
+        (REPO_ROOT / "content/characters/fixed_test_imports.json").read_text(encoding="utf-8")
+    )
+    for unit_id in manifest["showcaseOrder"]:
         detail = client.get(f"/api/characters/{unit_id}")
         assert detail.status_code == 200
         assert detail.json()["assetMode"] == "mesh3d"
@@ -82,17 +77,13 @@ def test_demo_sculpt_units_serve_mesh(client: TestClient) -> None:
 
 def test_studio_lists_demo_sculpts_and_procedural_fixture(client: TestClient) -> None:
     ids = {entry["id"] for entry in client.get("/api/characters").json()}
-    assert ids == {
-        "demo_scout_01",
-        "demo_striker_01",
-        "demo_guard_01",
-        "demo_vanguard_01",
-        "demo_reaver_01",
-        "demo_hunter_01",
-        "demo_bruiser_01",
-        "demo_sentinel_01",
-        "test_procedural_spawn",
-    }
+    manifest = json.loads(
+        Path(__file__).resolve().parents[2].joinpath("content/characters/fixed_test_imports.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    expected = set(manifest["showcaseOrder"]) | {"test_procedural_spawn"}
+    assert ids == expected
 
 
 def test_showcase_page_is_served(client: TestClient) -> None:

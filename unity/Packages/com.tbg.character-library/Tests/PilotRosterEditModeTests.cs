@@ -105,19 +105,30 @@ namespace TBG.CharacterLibrary.Tests
         public void Load_AllDemoDefinitions_AreMesh3D()
         {
             var loader = new CharacterDefinitionLoader();
-            foreach (var pilotId in new[]
-                     {
-                         "demo_scout_01", "demo_striker_01", "demo_guard_01",
-                         "demo_vanguard_01", "demo_reaver_01", "demo_hunter_01",
-                         "demo_bruiser_01", "demo_sentinel_01",
-                     })
+            var rosterPath = Path.Combine(
+                CharacterPaths.GetRepoRoot(),
+                "content/characters/pilot_roster.json");
+            var rosterJson = JsonUtility.FromJson<PilotRosterJsonRecord>(File.ReadAllText(rosterPath));
+            foreach (var entry in rosterJson.pilots)
             {
-                var definition = loader.Load(pilotId);
+                var definition = loader.Load(entry.id);
                 Assert.That(definition.AssetMode, Is.EqualTo(CharacterAssetMode.Mesh3D));
                 Assert.That(definition.MeshPath, Does.EndWith(".glb"));
                 Assert.That(definition.BehaviorProfileId, Is.Not.Empty);
                 Assert.That(definition.MaterialProfileId, Is.Not.Empty);
             }
+        }
+
+        [Serializable]
+        private sealed class PilotRosterEntryRecord
+        {
+            public string id;
+        }
+
+        [Serializable]
+        private sealed class PilotRosterJsonRecord
+        {
+            public PilotRosterEntryRecord[] pilots;
         }
 
         private static bool HasTrigger(Animator animator, string name)

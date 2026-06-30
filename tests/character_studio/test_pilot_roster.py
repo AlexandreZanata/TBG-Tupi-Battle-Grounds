@@ -11,24 +11,23 @@ import pytest
 
 from character_studio.models import CharacterDefinition
 from character_studio.validation import validate_definition
+from mesh_pipeline.game_glb_validate import validate_game_glb
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFINITIONS_DIR = REPO_ROOT / "content" / "characters" / "definitions"
+DEFINITIONS_DIR = REPO_ROOT / "content/characters/definitions"
 MESHES_DIR = REPO_ROOT / "content/characters/meshes"
 SHOWCASE_DIR = MESHES_DIR / "showcase"
-GAME_DIR = MESHES_DIR / "game"
 ROSTER_PATH = REPO_ROOT / "content/characters/pilot_roster.json"
-DEMO_IDS = (
-    "demo_scout_01",
-    "demo_striker_01",
-    "demo_guard_01",
-    "demo_vanguard_01",
-    "demo_reaver_01",
-    "demo_hunter_01",
-    "demo_bruiser_01",
-    "demo_sentinel_01",
-)
-EXPORTED_GAME_IDS = ("demo_sentinel_01",)
+MANIFEST_PATH = REPO_ROOT / "content/characters/fixed_test_imports.json"
+GAME_MESH_DIR = REPO_ROOT / "content/characters/meshes/game"
+
+
+def _fixed_test_ids() -> tuple[str, ...]:
+    data = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    return tuple(data["showcaseOrder"])
+
+
+FIXED_TEST_IDS = _fixed_test_ids()
 
 
 @pytest.fixture(scope="module")
@@ -37,12 +36,12 @@ def pilot_roster() -> list[dict]:
     return list(data["pilots"])
 
 
-def test_pilot_roster_manifest_has_eight_demo_sculpts(pilot_roster: list[dict]) -> None:
-    assert len(pilot_roster) == 8
-    assert {entry["id"] for entry in pilot_roster} == set(DEMO_IDS)
+def test_pilot_roster_manifest_has_fifteen_fixed_test_sculpts(pilot_roster: list[dict]) -> None:
+    assert len(pilot_roster) == 15
+    assert {entry["id"] for entry in pilot_roster} == set(FIXED_TEST_IDS)
 
 
-@pytest.mark.parametrize("pilot_id", DEMO_IDS)
+@pytest.mark.parametrize("pilot_id", FIXED_TEST_IDS)
 def test_demo_sculpt_definition_is_mesh3d_with_glb(pilot_id: str) -> None:
     path = DEFINITIONS_DIR / f"{pilot_id}.json"
     defn = CharacterDefinition.from_dict(json.loads(path.read_text(encoding="utf-8")))
@@ -54,9 +53,10 @@ def test_demo_sculpt_definition_is_mesh3d_with_glb(pilot_id: str) -> None:
     showcase_glb = REPO_ROOT / defn.meshShowcase
     assert showcase_glb.is_file(), f"missing showcase glb: {showcase_glb}"
     assert showcase_glb.stat().st_size > 1_000_000
-    if pilot_id in EXPORTED_GAME_IDS:
-        game_glb = REPO_ROOT / defn.mesh
-        assert game_glb.is_file(), f"missing game glb: {game_glb}"
+    game_glb = REPO_ROOT / defn.mesh
+    assert game_glb.is_file(), f"missing game glb: {game_glb}"
+    result = validate_game_glb(game_glb)
+    assert result.ok, result.errors
 
 
 def test_pilot_definitions_match_roster_manifest(pilot_roster: list[dict]) -> None:
@@ -78,5 +78,5 @@ def test_provision_pilot_meshes_script_skips_existing_demo_glb() -> None:
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    for pilot_id in DEMO_IDS:
+    for pilot_id in FIXED_TEST_IDS:
         assert (SHOWCASE_DIR / f"{pilot_id}.glb").is_file()

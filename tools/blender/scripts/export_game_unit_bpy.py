@@ -22,8 +22,6 @@ from mesh_pipeline.export_game_unit_blender import (  # noqa: E402
     export_game_unit_blender,
 )
 
-PILOT_UNIT_ID = "demo_sentinel_01"
-
 
 def _parse_unit_id(argv: list[str]) -> str:
     if "--" in argv:
@@ -35,25 +33,36 @@ def _parse_unit_id(argv: list[str]) -> str:
     raise SystemExit("usage: export_game_unit_bpy.py <unit_id>")
 
 
+def _load_body_class(unit_id: str) -> str:
+    roster_path = REPO_ROOT / "content/characters/pilot_roster.json"
+    data = json.loads(roster_path.read_text(encoding="utf-8"))
+    for entry in data.get("pilots", []):
+        if entry.get("id") == unit_id:
+            return str(entry["bodyClass"])
+    raise SystemExit(f"{unit_id}: not found in pilot_roster.json")
+
+
 def main(argv: list[str] | None = None) -> int:
     unit_id = _parse_unit_id(argv if argv is not None else sys.argv)
-    if unit_id != PILOT_UNIT_ID:
-        raise SystemExit(f"Step C pilot only: {PILOT_UNIT_ID}")
-
     definition_path = REPO_ROOT / "content/characters/definitions" / f"{unit_id}.json"
     definition = json.loads(definition_path.read_text(encoding="utf-8"))
     showcase = definition.get("meshShowcase") or definition.get("mesh")
     if not showcase:
         raise SystemExit(f"{unit_id}: missing showcase mesh path")
 
+    game_lod = definition.get("gameLod") or {}
+    tri_target = int(game_lod.get("triTarget", 8000))
+    texture_size = int(game_lod.get("textureSize", 1024))
     game_mesh = REPO_ROOT / "content/characters/meshes/game" / f"{unit_id}.glb"
     output = export_game_unit_blender(
         unit_id=unit_id,
         showcase_mesh=REPO_ROOT / showcase,
         game_mesh=game_mesh,
         animation_set_id=definition.get("animationSet", DEFAULT_ANIMATION_SET),
-        body_class="HumanoidHeavy",
+        body_class=_load_body_class(unit_id),
         repo=REPO_ROOT,
+        tri_target=tri_target,
+        texture_size=texture_size,
     )
     print(f"Exported game mesh (raw): {output}")
     return 0

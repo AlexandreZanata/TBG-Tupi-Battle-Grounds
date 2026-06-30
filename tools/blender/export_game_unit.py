@@ -27,7 +27,7 @@ def _parse_unit_id(argv: list[str]) -> str:
             return args[0]
     if len(argv) >= 2 and not argv[1].startswith("-"):
         return argv[1]
-    raise SystemExit("usage: export_game_unit.py <unit_id>  (pilot: demo_sentinel_01)")
+    raise SystemExit("usage: export_game_unit.py <unit_id>")
 
 
 def _print_validation(path: Path) -> None:

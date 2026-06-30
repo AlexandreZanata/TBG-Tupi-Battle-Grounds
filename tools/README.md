@@ -30,6 +30,25 @@ python3 -m tools.character_studio export-all-cards
 
 **Showcase carousel:** http://127.0.0.1:8765/showcase.html — 2 sculpts per slide, click for modal 3D at +30% scale. GLB decode is cached in-browser per mesh URL.
 
+### Share the carousel with other users
+
+The carousel is a **live web server** (not a single HTML file). Showcase meshes total ~600 MB; viewers stream GLBs from your machine or server.
+
+```bash
+# Same Wi‑Fi / office LAN — share the printed http://<your-ip>:8765/showcase.html link
+./scripts/share-showcase.sh
+
+# Internet link (requires cloudflared or ngrok)
+./scripts/share-showcase.sh tunnel
+
+# Local only
+./scripts/share-showcase.sh local
+```
+
+**Requirements for viewers:** modern browser (Chrome/Firefox/Safari), stable connection. First 3D load per character may take 10–30 s on slow links.
+
+**Deploy on a VPS:** clone repo with `content/characters/meshes/showcase/`, run `./scripts/share-showcase.sh lan` behind nginx/Caddy with TLS, or use `tunnel` for quick demos.
+
 **Import high-poly sculpts:** `tools/mesh-pipeline/optimize_glb.sh` (visual mode = same look, Draco only). Demo units: `demo_scout_01` … `demo_reaver_01`. Max mesh preview **150 MB**.
 
 API: `/api/characters/{id}/mesh`, `/api/content/characters/...`

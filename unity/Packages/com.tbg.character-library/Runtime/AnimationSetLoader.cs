@@ -65,7 +65,9 @@ namespace TBG.CharacterLibrary
 
             var record = JsonUtility.FromJson<AnimationSetJsonRecord>(File.ReadAllText(path));
             ValidateOrThrow(record);
-            return FromRecord(record);
+            var manifest = FromRecord(record);
+            BodyClassClipRegistry.Register(record.bodyClass, record.id);
+            return manifest;
         }
 
         public static AnimationSetManifest FromRecord(AnimationSetJsonRecord record)

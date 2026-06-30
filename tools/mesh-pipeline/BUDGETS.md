@@ -21,6 +21,27 @@ Constants are mirrored in `tools/mesh_pipeline/budgets.py`.
 |--------|--------|-------|
 | GLB file size | ≤ 2 MB | Reported when exceeded; does not fail CI |
 
+## Runtime VRAM (mobile target)
+
+| Assumption | Value |
+|------------|-------|
+| Units visible on screen | 6 (same team + enemies in lane) |
+| Target VRAM per unit (mesh + textures + clips) | ≤ 12 MB |
+| Scene budget (6 units) | ≤ 72 MB character VRAM |
+
+LOD1 static meshes live in `meshes/game/lod1/` at ~50% triangle budget and half texture resolution.
+
+## Animation clip memory
+
+- **Shared per body class:** `HumanoidLight.controller` / `HumanoidHeavy.controller` and clip library under `content/characters/animations/clips/{bodyClass}/`.
+- **Per unit:** game GLB embeds retargeted clips for glTFast; `BodyClassClipRegistry` tracks one animation set id per body class.
+- Future: external clip-only GLBs to deduplicate clip bytes across units.
+
+## Texture strategy (game tier)
+
+- Post-export: `pack_orm_textures()` merges metallic/roughness + occlusion into one ORM map (R=AO, G=roughness, B=metallic).
+- KTX2 / BasisU transcoding: deferred until Unity glTFast path supports it.
+
 ## Static vs skinned
 
 - **Static game mesh** (Step A vertical slice): no skins — validator checks triangles, materials, textures, and file size only.
@@ -30,6 +51,7 @@ Constants are mirrored in `tools/mesh_pipeline/budgets.py`.
 
 ```bash
 python3 tools/mesh-pipeline/validate_game_glb.py content/characters/meshes/game/demo_sentinel_01.glb
+./tools/mesh-pipeline/batch_seed_to_game.sh
 ```
 
 ## Optimize

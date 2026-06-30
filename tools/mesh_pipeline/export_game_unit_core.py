@@ -93,11 +93,14 @@ def _run_gltf_transform(args: list[str]) -> None:
 
 
 def post_process_game_glb(raw_path: Path, output_path: Path, texture_size: int = 1024) -> Path:
-    """Resize textures and Draco-compress a Blender-exported game GLB."""
+    """Resize textures, pack ORM, and Draco-compress a Blender-exported game GLB."""
+    from mesh_pipeline.game_glb_texture_pack import pack_orm_textures
+
     tmp = output_path.with_suffix(".post.glb")
     _run_gltf_transform(
         ["resize", str(raw_path), str(tmp), "--width", str(texture_size), "--height", str(texture_size)]
     )
+    pack_orm_textures(tmp)
     _run_gltf_transform(["draco", str(tmp), str(output_path)])
     tmp.unlink(missing_ok=True)
     return output_path

@@ -17,3 +17,5 @@ tools/blender/templates/*.blend
 content/characters/meshes/.tmp/
 .venv/
 venv/
+__pycache__/
+*.pyc

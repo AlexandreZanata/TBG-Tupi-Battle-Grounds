@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Import authored showcase sculpt GLBs into content/characters/meshes/."""
+"""Import authored showcase sculpt GLBs into content/characters/meshes/showcase/."""
 
 from __future__ import annotations
 
@@ -14,18 +14,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 MESHES_DIR = ROOT / "content" / "characters" / "meshes" / "showcase"
 OPTIMIZE = ROOT / "tools" / "mesh-pipeline" / "optimize_glb.sh"
+MANIFEST_PATH = ROOT / "content/characters/fixed_test_imports.json"
 
-# Bbox-matched imports (source filename → pilot id). Skip ids already byte-identical.
-DEFAULT_IMPORTS: dict[str, str] = {
-    "120d200084b373275ca28c80e71d0f02.glb": "demo_hunter_01",
-    "07dd3dc310083f0449890fa9c9776aa8.glb": "demo_bruiser_01",
-    "5ccf65ec1612d2a429ca34b79b930df5.glb": "demo_striker_01",
-    "e76641810d5acb8c6c6b82f36417276f.glb": "demo_vanguard_01",
-    "1b13ac9bf5116441b95170cacce2d34f.glb": "demo_sentinel_01",
-    "70e087ad8a7b59c0bdadd6c019325cfd.glb": "demo_guard_01",
-    "25d6783c7ee5ec383f940edf0973879c.glb": "demo_scout_01",
-    "27fbc655169662b90769705919e039f8.glb": "demo_reaver_01",
-}
+
+def load_import_mapping(manifest: Path | None = None) -> dict[str, str]:
+    path = manifest or MANIFEST_PATH
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return dict(data["imports"])
 
 
 def file_md5(path: Path) -> str:
@@ -57,10 +52,7 @@ def import_sculpt(source: Path, pilot_id: str, *, force: bool = False) -> str:
 
 
 def resolve_sources(source_dir: Path, mapping: dict[str, str]) -> list[tuple[Path, str]]:
-    pairs: list[tuple[Path, str]] = []
-    for filename, pilot_id in mapping.items():
-        pairs.append((source_dir / filename, pilot_id))
-    return pairs
+    return [(source_dir / filename, pilot_id) for filename, pilot_id in mapping.items()]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -71,19 +63,26 @@ def main(argv: list[str] | None = None) -> int:
         default=Path("/data/downloads"),
         help="Directory containing source .glb files",
     )
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=MANIFEST_PATH,
+        help="JSON manifest with imports map (default: content/characters/fixed_test_imports.json)",
+    )
     parser.add_argument("--force", action="store_true", help="Re-import even when byte-identical")
     parser.add_argument("--dry-run", action="store_true", help="Print mapping only")
     parser.add_argument(
         "--only",
         nargs="*",
         metavar="PILOT_ID",
-        help="Import subset of pilot ids only (e.g. demo_scout_01 demo_reaver_01)",
+        help="Import subset of pilot ids only",
     )
     args = parser.parse_args(argv)
 
+    mapping = load_import_mapping(args.manifest)
     allowed = set(args.only) if args.only else None
     results: dict[str, str] = {}
-    for source, pilot_id in resolve_sources(args.source_dir, DEFAULT_IMPORTS):
+    for source, pilot_id in resolve_sources(args.source_dir, mapping):
         if allowed is not None and pilot_id not in allowed:
             continue
         if args.dry_run:
