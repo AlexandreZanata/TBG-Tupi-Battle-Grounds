@@ -12,6 +12,16 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+
+def _resolve_bvh(path: str) -> Path:
+    candidate = Path(path)
+    if candidate.is_file():
+        return candidate.resolve()
+    rooted = REPO_ROOT / path
+    if rooted.is_file():
+        return rooted
+    raise FileNotFoundError(path)
+
 from tools.blender.animation.retarget.curves_from_mocap import (  # noqa: E402
     calibrate_from_paths,
     extract_curves_from_bvh,
@@ -36,10 +46,10 @@ def main() -> int:
         parser.error("provide at least one BVH path")
     if args.extract:
         for path in args.bvhs:
-            curves = extract_curves_from_bvh(path)
+            curves = extract_curves_from_bvh(_resolve_bvh(path))
             print(json.dumps({"file": path, "curves": _serialize(curves)}, indent=2))
         return 0
-    curves = calibrate_from_paths(args.bvhs, blend=args.blend)
+    curves = calibrate_from_paths([_resolve_bvh(p) for p in args.bvhs], blend=args.blend)
     if args.write_curves:
         _write_biomech_curves(curves)
         print(f"updated {biomech_curves.__file__} from {len(args.bvhs)} BVH(s)")
@@ -89,11 +99,13 @@ def _format_tuple(name: str, keyframes: tuple) -> str:
 def _sample_pose(bvh_path: str, frame: int) -> int:
     from tools.blender.animation.retarget.import_bvh import sample_gait_pose_from_bvh
 
-    pose = sample_gait_pose_from_bvh(bvh_path, frame)
+    pose = sample_gait_pose_from_bvh(_resolve_bvh(bvh_path), frame)
     serial = {bone: [round(v, 4) for v in vals] for bone, vals in pose.items()}
     print(json.dumps({"frame": frame, "pose": serial}, indent=2))
     return 0
 
 
 if __name__ == "__main__":
+    if "--" in sys.argv:
+        sys.argv = [sys.argv[0], *sys.argv[sys.argv.index("--") + 1 :]]
     raise SystemExit(main())

@@ -43,6 +43,8 @@ python3 tools/blender/scripts/retarget_mocap_walk.py --write-curves \
   --sample tests/blender/fixtures/mocap/35_01_walk_excerpt.bvh --frame 60
 ```
 
+Paths may be repo-relative; `blender_cmd.sh` resolves `--python` scripts to absolute paths and mounts the repo for Flatpak/Docker.
+
 ## Reference data
 
 Download CMU walks to `.local/reference/mocap/` (gitignored). Committed test fixture: `tests/blender/fixtures/mocap/35_01_walk_excerpt.bvh`.

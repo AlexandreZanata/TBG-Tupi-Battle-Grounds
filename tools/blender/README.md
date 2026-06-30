@@ -6,7 +6,7 @@ Authoring-only scripts for the Real 3D Character Pipeline (Phase 02).
 |------|---------|
 | [RIG-SPEC.md](RIG-SPEC.md) | Bone naming, body classes, animation names |
 | [tbg_export/](tbg_export/) | Blender add-on — glTF export + validation |
-| [blender_cmd.sh](blender_cmd.sh) | Resolve `blender` or Flatpak `org.blender.Blender` |
+| [blender_cmd.sh](blender_cmd.sh) | Resolve `blender`, Flatpak (repo mount), or Docker (`TBG_BLENDER_DOCKER_IMAGE`) |
 | [setup.sh](setup.sh) | One-time setup — verify Blender + generate rig template |
 | [export_unit.py](export_unit.py) | Headless CLI entry |
 | [export_game_unit.py](export_game_unit.py) | Pilot game mesh orchestrator (prefers Blender) |
@@ -28,11 +28,18 @@ Authoring-only scripts for the Real 3D Character Pipeline (Phase 02).
 
 Installs nothing — detects native `blender` or Flatpak `org.blender.Blender`, then generates `templates/HumanoidHeavy_template.blend` if missing.
 
-Flatpak (Pop!_OS / Linux):
+Flatpak (Pop!_OS / Linux) — mounts the repo (required when the project lives outside `$HOME`, e.g. `/data/dev/...`):
 
 ```bash
 flatpak install flathub org.blender.Blender
 ./tools/blender/setup.sh
+```
+
+Docker (optional):
+
+```bash
+export TBG_BLENDER_DOCKER_IMAGE=nytimes/blender:3.6.4-ubuntu22.04  # example
+./tools/blender/blender_cmd.sh --background --python tools/blender/scripts/build_walk_clip.py -- HumanoidLight
 ```
 
 ## Quick start

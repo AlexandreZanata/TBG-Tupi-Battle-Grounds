@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 
-from tools.blender.animation.shared.trident_guard import TRIDENT_GUARD_ARM
+from tools.blender.animation.shared.trident_guard import merge_guard_arm
 from tools.blender.animation.walk.style import WalkStyle
 from tools.blender.animation.walk.types import BoneEuler, GaitPose
 
@@ -41,8 +41,7 @@ def sample_held_arm_pose(frame: int, cycle_frames: int, style: WalkStyle) -> Gai
         "TBG_UpperArm.L": l_arm,
         "TBG_LowerArm.L": l_fore,
     }
-    pose.update(TRIDENT_GUARD_ARM)
-    return pose
+    return merge_guard_arm(pose)
 
 
 def _knee_foot(tau: float, style: WalkStyle) -> tuple[float, float]:

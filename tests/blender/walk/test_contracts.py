@@ -34,5 +34,5 @@ def test_resolve_scout_profile():
     assert resolve_walk_profile("demo_scout_01", "HumanoidLight") == "scout_pilot_v1"
 
 
-def test_cadence_yields_33_frames_at_110_spm():
-    assert WALK_FRAMES == 33
+def test_humanoid_light_cadence_115_spm():
+    assert cycle_frames_for_profile("humanoid_light_v1") == 31
