@@ -23,7 +23,9 @@ tools/blender/animation/
     constants.py      # WALK_FRAMES, WALK_FPS
     types.py          # GaitPose, BoneEuler
     style.py          # WalkStyle + presets
-    sampler.py        # pure math — NO bpy
+    curves.py         # Catmull-Rom cyclic interpolation
+    biomech_curves.py # Perry/Winter ° vs %cycle keyframes
+    sampler.py        # biomech pose assembly — NO bpy
     profiles.py       # STYLE_PROFILES, UNIT_WALK_PROFILE
     api.py            # sample_pose_at_frame (stable API)
     bake.py           # bake_walk_action (bpy only)
@@ -44,37 +46,27 @@ tools/blender/scripts/
 
 Future clip types (`idle/`, `attack/`) follow the same layout under `animation/`.
 
-## Gait method (parametric, not hand-keyed extremes)
+## Gait method (Level 2 — biomechanical curves)
 
-1. **Four phases** per stride: contact → recoil → passing → high-point
-2. **Legs**: `stride * cos(phase)` on **X axis only** — never Y/Z twist on legs
-3. **Knee**: `knee_support + knee_swing * max(0, sin(phase))`
-4. **Hip bob**: `hip_bob * sin(2 * phase)` (two bobs per cycle)
-5. **Arms**: counter-swing `-arm_swing * cos(phase)` vs legs
-6. **In-place**: only `TBG_Root` Y translation; no root XZ (gameplay moves unit)
+1. **Joint curves** — `biomech_curves.py` (% cycle → °), Catmull-Rom in `curves.py`
+2. **Stance ~60% / swing ~40%** — encoded in Perry/Winter keyframes (not 50/50 sine)
+3. **Dual knee lobe** — stance absorption (~17°) + swing peak (~58°)
+4. **Pelvis** — 2× vertical bob on `TBG_Root`; yaw/roll on `TBG_Spine` (Saunders)
+5. **Arms** — contralateral `sin(2π·τ_opp + π)` vs opposing leg phase
+6. **In-place** — no root XZ; cadence default 110 spm → 33 frames @ 30 fps
 
-Refs: [Rusty Animator walk blueprint](https://rustyanimator.com/walk-cycle-animation/), [Little Polygon locomotion](https://blog.littlepolygon.com/posts/loco1/).
-
-## Add a unit profile
-
-1. Add `WalkStyle(...)` preset in `style.py`
-2. Register in `profiles.py`:
-   - `STYLE_PROFILES["my_profile_v1"] = ...`
-   - `UNIT_WALK_PROFILE["demo_unit_id"] = "my_profile_v1"`
-3. Run tests: `pytest tests/blender/walk/ -q`
-4. Re-export: `python3 tools/blender/export_game_unit.py <unit_id>`
-5. Hard-refresh Animation Studio (`Ctrl+Shift+R`)
+Full theory: `tools/blender/animation/walk/BIOMECHANICAL-WALK-SPEC.md`
 
 ## Tuning parameters
 
-| Field | Typical range | Effect |
-|-------|---------------|--------|
-| `stride` | 0.32–0.45 rad | Thigh swing |
-| `knee_swing` | 0.40–0.55 | Lift-phase knee bend |
-| `hip_bob` | 0.008–0.018 m | Vertical pelvis |
-| `arm_swing` | 0.25–0.40 | Free arm swing |
-| `arm_swing_r_scale` | 0.0–1.0 | Weapon arm damping |
-| `right_arm_hold` | euler offset | Static weapon pose base |
+| Field | Typical | Effect |
+|-------|---------|--------|
+| `cadence_spm` | 100–120 | Cycle length (frames) |
+| `angle_scale` | 0.85–1.0 | Global joint amplitude |
+| `pelvis_vertical_m` | 0.035–0.045 | Hip bob height (m) |
+| `pelvis_yaw_deg` / `pelvis_roll_deg` | 3–5° | Saunders rotation/obliquity |
+| `arm_swing_deg` | 18–28° | Contralateral arm swing |
+| `arm_swing_r_scale` | 0–1 | Weapon arm damping |
 
 ## Commands
 
@@ -107,6 +99,6 @@ python3 tools/blender/export_game_unit.py demo_scout_01
 - [ ] `pytest tests/blender/walk/ -q` passes
 - [ ] Leg bones: Y=0, Z=0 on all frames (contract test)
 - [ ] Frame 0 == frame 40 (loop closure)
-- [ ] Visual check in Animation Studio: Walk ~1.33s, legs alternate
+- [ ] Visual check in Animation Studio: Walk ~1.1s @ 110 spm, legs alternate
 
 See [reference.md](reference.md) for file-size caps and scaling new clip types.

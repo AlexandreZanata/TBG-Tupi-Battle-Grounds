@@ -38,6 +38,8 @@ def export_game_unit_blender(
 ) -> Path:
     tools_dir = repo / "tools"
     scripts_dir = tools_dir / "blender" / "scripts"
+    if str(repo) not in sys.path:
+        sys.path.insert(0, str(repo))
     for path in (tools_dir, scripts_dir):
         if str(path) not in sys.path:
             sys.path.insert(0, str(path))

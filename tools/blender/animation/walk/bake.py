@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from tools.blender.animation.walk.api import sample_pose_at_frame
-from tools.blender.animation.walk.constants import WALK_FRAMES, WALK_FPS
+from tools.blender.animation.walk.api import cycle_frames_for_profile, sample_pose_at_frame
+from tools.blender.animation.walk.constants import WALK_FPS
 
 if TYPE_CHECKING:
     import bpy
@@ -19,17 +19,18 @@ def bake_walk_action(arm_obj: bpy.types.Object, profile_id: str, clip_name: str 
     action = _prepare_action(clip_name, _bpy)
     arm_obj.animation_data.action = action
     scene = _bpy.context.scene
+    walk_frames = cycle_frames_for_profile(profile_id)
     scene.render.fps = WALK_FPS
     scene.frame_start = 0
-    scene.frame_end = WALK_FRAMES
+    scene.frame_end = walk_frames
 
-    for frame in range(WALK_FRAMES + 1):
+    for frame in range(walk_frames + 1):
         scene.frame_set(frame)
         _apply_sampled_pose(arm_obj, sample_pose_at_frame(profile_id, frame))
         _keyframe_pose(arm_obj, _bpy)
 
     _set_smooth_interpolation(action)
-    _mark_cyclic(action)
+    _mark_cyclic(action, walk_frames)
     arm_obj.animation_data.action = None
     return action
 
@@ -92,7 +93,7 @@ def _iter_action_fcurves(action: bpy.types.Action):
                 yield from bag.fcurves
 
 
-def _mark_cyclic(action: bpy.types.Action) -> None:
+def _mark_cyclic(action: bpy.types.Action, walk_frames: int) -> None:
     if hasattr(action, "frame_start"):
         action.frame_start = 0
-        action.frame_end = WALK_FRAMES
+        action.frame_end = walk_frames

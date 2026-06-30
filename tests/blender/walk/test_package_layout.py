@@ -17,7 +17,7 @@ def test_walk_package_exports_public_api():
 
 def test_legacy_walk_gait_shim_reexports():
     shim = importlib.import_module("tools.blender.scripts.walk_gait")
-    assert shim.WALK_FRAMES == 40
+    assert shim.WALK_FRAMES == 33
     assert shim.resolve_walk_profile("demo_scout_01", "HumanoidLight") == "scout_pilot_v1"
 
 

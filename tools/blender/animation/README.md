@@ -4,7 +4,7 @@ Modular clip generators for the TBG FK rig (`TBG_*` bones). Each locomotion or c
 
 | Package | Status | Purpose |
 |---------|--------|---------|
-| [walk/](walk/) | **Active** | Parametric in-place walk cycles |
+| `walk/` | **Active** | Level-2 biomechanical in-place walk (`BIOMECHANICAL-WALK-SPEC.md`) |
 | `idle/` | Planned | Breathing / weight-shift idle |
 | `attack/` | Planned | Combat strike windup / follow-through |
 
