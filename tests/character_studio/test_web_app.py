@@ -31,8 +31,10 @@ def test_create_list_and_get(client: TestClient) -> None:
     assert create.status_code == 201
     listing = client.get("/api/characters")
     assert listing.json()[0]["id"] == "tank_human_99"
+    assert listing.json()[0]["assetMode"] == "procedural"
     detail = client.get("/api/characters/tank_human_99")
     assert detail.json()["characterName"] == "Test"
+    assert detail.json()["assetMode"] == "procedural"
 
 
 def test_card_png(client: TestClient) -> None:
@@ -49,4 +51,11 @@ def test_card_png(client: TestClient) -> None:
 def test_index_html(client: TestClient) -> None:
     response = client.get("/")
     assert response.status_code == 200
-    assert "TBG Character Studio" in response.text
+    assert "Character Studio" in response.text
+    assert 'href="/styles.css"' in response.text
+    assert 'src="/app.js"' in response.text
+
+
+def test_static_assets(client: TestClient) -> None:
+    assert client.get("/styles.css").status_code == 200
+    assert client.get("/app.js").status_code == 200

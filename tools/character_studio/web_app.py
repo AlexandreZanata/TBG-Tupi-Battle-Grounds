@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from .card_renderer import render_card
 from .defaults import create_default_definition
-from .models import CharacterDefinition
+from .models import DEFAULT_ASSET_MODE, CharacterDefinition
 from .paths import find_repo_root
 from .repository import CharacterRepository
 from .validation import ValidationError
@@ -24,6 +24,13 @@ class CreateCharacterRequest(BaseModel):
     archetype: str
     faction: str
     characterName: str | None = None
+
+
+class CharacterTexturesPayload(BaseModel):
+    albedo: str
+    normal: str
+    orm: str
+    emissive: str | None = None
 
 
 class CharacterPayload(BaseModel):
@@ -39,6 +46,12 @@ class CharacterPayload(BaseModel):
     secondaryColor: str
     accessories: list[str] = Field(default_factory=list)
     evolutionStage: int = Field(ge=0, le=2)
+    assetMode: str = DEFAULT_ASSET_MODE
+    mesh: str | None = None
+    textures: CharacterTexturesPayload | None = None
+    materialProfile: str | None = None
+    behaviorProfile: str | None = None
+    animatorController: str | None = None
 
 
 def create_app(repo_root: Path | None = None) -> FastAPI:
@@ -52,7 +65,17 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
 
     @app.get("/api/characters")
     def list_characters() -> list[dict[str, str]]:
-        return [{"id": unit_id, "cardUrl": f"/api/characters/{unit_id}/card"} for unit_id in repo.list_ids()]
+        items: list[dict[str, str]] = []
+        for unit_id in repo.list_ids():
+            defn = repo.load(unit_id)
+            items.append(
+                {
+                    "id": unit_id,
+                    "assetMode": defn.assetMode,
+                    "cardUrl": f"/api/characters/{unit_id}/card",
+                }
+            )
+        return items
 
     @app.get("/api/characters/{unit_id}")
     def get_character(unit_id: str) -> dict:

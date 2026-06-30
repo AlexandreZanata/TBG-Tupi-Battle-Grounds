@@ -3,6 +3,7 @@
   "characterName": "Iron Guard",
   "archetype": "Tank",
   "faction": "Humans",
+  "assetMode": "procedural",
   "heightScale": 1.2,
   "bodyWidthScale": 1.8,
   "headScale": 0.8,

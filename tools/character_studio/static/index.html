@@ -4,339 +4,142 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TBG Character Studio</title>
-  <style>
-    :root {
-      --bg: #1a1a2e;
-      --panel: #16213e;
-      --accent: #e8c547;
-      --text: #f5f5f5;
-      --muted: #9aa0b5;
-      --danger: #e74c3c;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-    header {
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid #2a2a4a;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    h1 { margin: 0; font-size: 1.25rem; color: var(--accent); }
-    main {
-      display: grid;
-      grid-template-columns: 280px 320px 1fr;
-      gap: 1rem;
-      padding: 1rem;
-      min-height: calc(100vh - 64px);
-    }
-    .panel {
-      background: var(--panel);
-      border-radius: 12px;
-      padding: 1rem;
-      overflow: auto;
-    }
-    .panel h2 {
-      margin: 0 0 1rem;
-      font-size: 0.95rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .char-item {
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
-      padding: 0.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-bottom: 0.5rem;
-    }
-    .char-item:hover, .char-item.active { background: #243b6b; }
-    .char-item img {
-      width: 48px;
-      height: 72px;
-      object-fit: cover;
-      border-radius: 4px;
-      background: #0f0f1a;
-    }
-    label {
-      display: block;
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin: 0.75rem 0 0.25rem;
-    }
-    input, select {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #2a2a4a;
-      border-radius: 6px;
-      background: #0f0f1a;
-      color: var(--text);
-    }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-    button {
-      margin-top: 1rem;
-      padding: 0.6rem 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn-primary { background: var(--accent); color: #1a1a2e; }
-    .btn-danger { background: var(--danger); color: white; }
-    .btn-secondary { background: #2a2a4a; color: var(--text); }
-    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    #cardPreview {
-      max-width: 100%;
-      border-radius: 12px;
-      border: 2px solid var(--accent);
-      background: #0f0f1a;
-    }
-    #status {
-      margin-top: 0.75rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-      min-height: 1.2rem;
-    }
-    .error { color: var(--danger); }
-    @media (max-width: 960px) {
-      main { grid-template-columns: 1fr; }
-    }
-  </style>
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <header>
-    <h1>TBG Character Studio</h1>
-    <span id="health">checking...</span>
-  </header>
-  <main>
-    <section class="panel">
-      <h2>Units</h2>
-      <div id="charList"></div>
-      <hr style="border-color:#2a2a4a;margin:1rem 0" />
-      <h2>New unit</h2>
-      <label for="newId">Id</label>
-      <input id="newId" placeholder="tank_human_02" />
-      <div class="row">
-        <div>
-          <label for="newArchetype">Archetype</label>
-          <select id="newArchetype">
-            <option>Tank</option><option>DPS</option><option>Support</option>
-            <option>Ranged</option><option>Control</option>
-          </select>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar__inner">
+        <div class="brand">
+          <span class="brand__mark">TBG</span>
+          <div>
+            <h1>Character Studio</h1>
+            <p class="brand__sub">Procedural unit definitions</p>
+          </div>
         </div>
-        <div>
-          <label for="newFaction">Faction</label>
-          <select id="newFaction">
-            <option>Humans</option><option>Undead</option>
-            <option>Machines</option><option>Plants</option>
-          </select>
-        </div>
+        <span id="health" class="badge">checking</span>
       </div>
-      <label for="newName">Name</label>
-      <input id="newName" placeholder="Display name" />
-      <button class="btn-primary" id="btnCreate" type="button">Create</button>
-    </section>
+    </header>
 
-    <section class="panel">
-      <h2>Edit</h2>
-      <form id="editForm">
-        <input type="hidden" id="id" />
-        <label for="characterName">Name</label>
-        <input id="characterName" required />
-        <div class="row">
-          <div>
-            <label for="archetype">Archetype</label>
-            <select id="archetype"></select>
+    <main class="layout">
+      <aside class="card panel panel--units">
+        <header class="panel__head">
+          <h2>Units</h2>
+          <span id="unitCount" class="panel__meta">0 total</span>
+        </header>
+        <div id="charList" class="unit-list" role="list"></div>
+
+        <div class="panel__section">
+          <h2>New unit</h2>
+          <div class="field">
+            <label for="newId">Id</label>
+            <input id="newId" class="input" placeholder="tank_human_02" autocomplete="off" />
           </div>
-          <div>
-            <label for="faction">Faction</label>
-            <select id="faction"></select>
+          <div class="field-row">
+            <div class="field">
+              <label for="newArchetype">Archetype</label>
+              <select id="newArchetype" class="input"></select>
+            </div>
+            <div class="field">
+              <label for="newFaction">Faction</label>
+              <select id="newFaction" class="input"></select>
+            </div>
           </div>
-        </div>
-        <label for="heightScale">Height</label>
-        <input id="heightScale" type="number" step="0.1" min="0.1" max="3" />
-        <label for="bodyWidthScale">Body width</label>
-        <input id="bodyWidthScale" type="number" step="0.1" min="0.1" max="3" />
-        <label for="headScale">Head</label>
-        <input id="headScale" type="number" step="0.1" min="0.1" max="3" />
-        <label for="limbLengthScale">Limbs</label>
-        <input id="limbLengthScale" type="number" step="0.1" min="0.1" max="3" />
-        <div class="row">
-          <div>
-            <label for="primaryColor">Primary</label>
-            <input id="primaryColor" type="color" />
+          <div class="field">
+            <label for="newName">Display name</label>
+            <input id="newName" class="input" placeholder="Iron Guard" autocomplete="off" />
           </div>
-          <div>
-            <label for="secondaryColor">Secondary</label>
-            <input id="secondaryColor" type="color" />
+          <button class="btn btn--primary btn--block" id="btnCreate" type="button">Create unit</button>
+        </div>
+      </aside>
+
+      <section class="card panel">
+        <header class="panel__head">
+          <h2>Edit</h2>
+          <span id="editId" class="panel__meta">—</span>
+        </header>
+
+        <form id="editForm" class="form">
+          <input type="hidden" id="id" />
+
+          <div class="field">
+            <label for="characterName">Display name</label>
+            <input id="characterName" class="input" required />
           </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="archetype">Archetype</label>
+              <select id="archetype" class="input"></select>
+            </div>
+            <div class="field">
+              <label for="faction">Faction</label>
+              <select id="faction" class="input"></select>
+            </div>
+          </div>
+
+          <fieldset class="fieldset">
+            <legend>Proportions</legend>
+            <div class="field-row field-row--quad">
+              <div class="field">
+                <label for="heightScale">Height</label>
+                <input id="heightScale" class="input" type="number" step="0.1" min="0.1" max="3" />
+              </div>
+              <div class="field">
+                <label for="bodyWidthScale">Body</label>
+                <input id="bodyWidthScale" class="input" type="number" step="0.1" min="0.1" max="3" />
+              </div>
+              <div class="field">
+                <label for="headScale">Head</label>
+                <input id="headScale" class="input" type="number" step="0.1" min="0.1" max="3" />
+              </div>
+              <div class="field">
+                <label for="limbLengthScale">Limbs</label>
+                <input id="limbLengthScale" class="input" type="number" step="0.1" min="0.1" max="3" />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend>Colors</legend>
+            <div class="field-row">
+              <div class="field">
+                <label for="primaryColor">Primary</label>
+                <input id="primaryColor" class="input input--color" type="color" />
+              </div>
+              <div class="field">
+                <label for="secondaryColor">Secondary</label>
+                <input id="secondaryColor" class="input input--color" type="color" />
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="evolutionStage">Evolution stage</label>
+            <input id="evolutionStage" class="input" type="number" min="0" max="2" />
+          </div>
+
+          <div class="form__actions">
+            <button class="btn btn--primary" type="submit">Save &amp; export card</button>
+            <button class="btn btn--ghost" id="btnDelete" type="button">Delete</button>
+          </div>
+        </form>
+
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="card panel panel--preview">
+        <header class="panel__head">
+          <h2>Card preview</h2>
+        </header>
+        <div class="preview">
+          <div id="previewEmpty" class="preview__empty">Select a unit to preview</div>
+          <img id="cardPreview" class="preview__image" alt="Unit card preview" hidden />
         </div>
-        <label for="evolutionStage">Evolution</label>
-        <input id="evolutionStage" type="number" min="0" max="2" />
-        <div class="actions">
-          <button class="btn-primary" type="submit">Save &amp; export card</button>
-          <button class="btn-danger" id="btnDelete" type="button">Delete</button>
-        </div>
-      </form>
-      <div id="status"></div>
-    </section>
+      </section>
+    </main>
+  </div>
 
-    <section class="panel">
-      <h2>Card preview</h2>
-      <img id="cardPreview" alt="Select a unit" width="320" />
-    </section>
-  </main>
-
-  <script>
-    const ARCHETYPES = ["Tank", "DPS", "Support", "Ranged", "Control"];
-    const FACTIONS = ["Humans", "Undead", "Machines", "Plants"];
-    let selectedId = null;
-
-    function fillSelect(id, values) {
-      const el = document.getElementById(id);
-      el.innerHTML = values.map(v => `<option value="${v}">${v}</option>`).join("");
-    }
-    fillSelect("archetype", ARCHETYPES);
-    fillSelect("faction", FACTIONS);
-
-    function setStatus(msg, isError = false) {
-      const el = document.getElementById("status");
-      el.textContent = msg;
-      el.className = isError ? "error" : "";
-    }
-
-    async function api(path, options = {}) {
-      const res = await fetch(path, {
-        headers: { "Content-Type": "application/json" },
-        ...options,
-      });
-      if (res.status === 204) return null;
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.detail ? JSON.stringify(data.detail) : res.statusText);
-      return data;
-    }
-
-    function hexFromColorInput(value) {
-      if (value.startsWith("#") && value.length === 7) return value;
-      return value;
-    }
-
-    function colorInputFromHex(hex) {
-      return hex.startsWith("#") ? hex : `#${hex}`;
-    }
-
-    async function loadList() {
-      const chars = await api("/api/characters");
-      const list = document.getElementById("charList");
-      list.innerHTML = chars.map(c => `
-        <div class="char-item ${c.id === selectedId ? "active" : ""}" data-id="${c.id}">
-          <img src="${c.cardUrl}?t=${Date.now()}" alt="${c.id}" />
-          <span>${c.id}</span>
-        </div>
-      `).join("");
-      list.querySelectorAll(".char-item").forEach(el => {
-        el.addEventListener("click", () => selectCharacter(el.dataset.id));
-      });
-    }
-
-    async function selectCharacter(id) {
-      selectedId = id;
-      const data = await api(`/api/characters/${id}`);
-      document.getElementById("id").value = data.id;
-      document.getElementById("characterName").value = data.characterName;
-      document.getElementById("archetype").value = data.archetype;
-      document.getElementById("faction").value = data.faction;
-      document.getElementById("heightScale").value = data.heightScale;
-      document.getElementById("bodyWidthScale").value = data.bodyWidthScale;
-      document.getElementById("headScale").value = data.headScale;
-      document.getElementById("limbLengthScale").value = data.limbLengthScale;
-      document.getElementById("primaryColor").value = colorInputFromHex(data.primaryColor);
-      document.getElementById("secondaryColor").value = colorInputFromHex(data.secondaryColor);
-      document.getElementById("evolutionStage").value = data.evolutionStage;
-      document.getElementById("cardPreview").src = `/api/characters/${id}/card?t=${Date.now()}`;
-      await loadList();
-      setStatus(`Loaded ${id}`);
-    }
-
-    document.getElementById("btnCreate").addEventListener("click", async () => {
-      try {
-        const body = {
-          id: document.getElementById("newId").value.trim(),
-          archetype: document.getElementById("newArchetype").value,
-          faction: document.getElementById("newFaction").value,
-          characterName: document.getElementById("newName").value.trim() || null,
-        };
-        await api("/api/characters", { method: "POST", body: JSON.stringify(body) });
-        await loadList();
-        await selectCharacter(body.id);
-        setStatus(`Created ${body.id}`);
-      } catch (err) {
-        setStatus(err.message, true);
-      }
-    });
-
-    document.getElementById("editForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      try {
-        const id = document.getElementById("id").value;
-        const body = {
-          id,
-          characterName: document.getElementById("characterName").value,
-          archetype: document.getElementById("archetype").value,
-          faction: document.getElementById("faction").value,
-          heightScale: parseFloat(document.getElementById("heightScale").value),
-          bodyWidthScale: parseFloat(document.getElementById("bodyWidthScale").value),
-          headScale: parseFloat(document.getElementById("headScale").value),
-          limbLengthScale: parseFloat(document.getElementById("limbLengthScale").value),
-          primaryColor: hexFromColorInput(document.getElementById("primaryColor").value),
-          secondaryColor: hexFromColorInput(document.getElementById("secondaryColor").value),
-          accessories: [],
-          evolutionStage: parseInt(document.getElementById("evolutionStage").value, 10),
-        };
-        await api(`/api/characters/${id}`, { method: "PUT", body: JSON.stringify(body) });
-        await selectCharacter(id);
-        setStatus(`Saved ${id}`);
-      } catch (err) {
-        setStatus(err.message, true);
-      }
-    });
-
-    document.getElementById("btnDelete").addEventListener("click", async () => {
-      const id = document.getElementById("id").value;
-      if (!id || !confirm(`Delete ${id}?`)) return;
-      try {
-        await api(`/api/characters/${id}`, { method: "DELETE" });
-        selectedId = null;
-        document.getElementById("editForm").reset();
-        document.getElementById("cardPreview").removeAttribute("src");
-        await loadList();
-        setStatus(`Deleted ${id}`);
-      } catch (err) {
-        setStatus(err.message, true);
-      }
-    });
-
-    async function init() {
-      try {
-        const health = await api("/api/health");
-        document.getElementById("health").textContent = health.status;
-        await loadList();
-        const chars = await api("/api/characters");
-        if (chars.length) await selectCharacter(chars[0].id);
-      } catch (err) {
-        document.getElementById("health").textContent = "offline";
-        setStatus(err.message, true);
-      }
-    }
-    init();
-  </script>
+  <script src="/app.js" defer></script>
 </body>
 </html>

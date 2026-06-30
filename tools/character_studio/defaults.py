@@ -86,4 +86,5 @@ def create_default_definition(
         secondaryColor=secondary,
         accessories=default_accessories_for_archetype(archetype),
         evolutionStage=0,
+        assetMode="procedural",
     )

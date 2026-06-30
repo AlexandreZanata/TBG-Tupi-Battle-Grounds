@@ -1,10 +1,11 @@
-"""Validate character definitions against Phase 01 contract."""
+"""Validate character definitions against Phase 01 + Phase 02 mesh3d contract."""
 
 from __future__ import annotations
 
 from .models import (
     ACCESSORIES,
     ARCHETYPES,
+    ASSET_MODES,
     EVOLUTION_MAX,
     EVOLUTION_MIN,
     FACTIONS,
@@ -35,6 +36,9 @@ def validate_definition(defn: CharacterDefinition, existing_ids: set[str] | None
     if defn.faction not in FACTIONS:
         errors.append(f"invalid faction: {defn.faction}")
 
+    if defn.assetMode not in ASSET_MODES:
+        errors.append(f"invalid assetMode: {defn.assetMode}")
+
     for accessory in defn.accessories:
         if accessory not in ACCESSORIES:
             errors.append(f"invalid accessory: {accessory}")
@@ -52,8 +56,34 @@ def validate_definition(defn: CharacterDefinition, existing_ids: set[str] | None
         if not _is_hex_color(color):
             errors.append(f"{color_name} must be #RRGGBB")
 
+    errors.extend(_validate_mesh3d_fields(defn))
+
     if errors:
         raise ValidationError(errors)
+
+
+def _validate_mesh3d_fields(defn: CharacterDefinition) -> list[str]:
+    errors: list[str] = []
+
+    if defn.assetMode == "mesh3d":
+        if not defn.mesh:
+            errors.append("mesh3d assetMode requires mesh path")
+        elif not defn.mesh.lower().endswith(".glb"):
+            errors.append("mesh path must be a .glb file")
+
+    if defn.textures is not None:
+        for slot in ("albedo", "normal", "orm"):
+            if not getattr(defn.textures, slot):
+                errors.append(f"textures.{slot} is required when textures object is present")
+        if defn.textures.emissive is not None and not defn.textures.emissive.strip():
+            errors.append("textures.emissive must be non-empty when provided")
+
+    for field_name in ("materialProfile", "behaviorProfile", "animatorController"):
+        value = getattr(defn, field_name)
+        if value is not None and not value.strip():
+            errors.append(f"{field_name} must be non-empty when provided")
+
+    return errors
 
 
 def _is_hex_color(value: str) -> bool:

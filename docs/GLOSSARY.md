@@ -139,7 +139,7 @@
 
 ## CharacterDefinition
 
-**Definition:** Parameter set describing a procedural unit — archetype, faction, proportions, colors, accessories, evolution stage. Persisted as JSON under `content/characters/definitions/`.  
+**Definition:** Parameter set describing a unit — archetype, faction, gameplay proportions, colors, accessories, evolution stage, and (Phase 02) `assetMode` with optional mesh, textures, and profile references. Persisted as JSON under `content/characters/definitions/`.  
 **Not the same as:** ScriptableObject cache in Unity (derived import, not source of truth).  
 **Code name:** `CharacterDefinition`
 
@@ -164,6 +164,59 @@
 
 **Definition:** Fixed set of shapes, proportion rules, and faction palettes used to generate all procedural units consistently.  
 **Code name:** N/A
+
+---
+
+## CharacterInstance
+
+**Definition:** Runtime spawned unit — root `GameObject`, behavior handle, and id — produced by `CharacterCatalog.Spawn`.  
+**Not the same as:** `CharacterDefinition` (data on disk) or `Unit` (match combat entity).  
+**Code name:** `CharacterInstance`
+
+---
+
+## CharacterTextures
+
+**Definition:** PBR texture map paths on a `CharacterDefinition` when `assetMode` is `mesh3d` — `albedo`, `normal`, `orm`, and optional `emissive`.  
+**Code name:** `CharacterTextures`
+
+---
+
+## CharacterAssetMode
+
+**Definition:** How a unit is rendered — `procedural` (Phase 01 primitives) or `mesh3d` (authored glTF + PBR).  
+**Enum values:** `procedural`, `mesh3d`  
+**Code name:** `CharacterAssetMode`
+
+---
+
+## CharacterCatalog
+
+**Definition:** C# entry point in `TBG.CharacterLibrary` that loads a definition by id and spawns a `CharacterInstance`.  
+**Not the same as:** Character Studio web UI or JSON repository.  
+**Code name:** `CharacterCatalog`
+
+---
+
+## MaterialProfile
+
+**Definition:** JSON describing shader and PBR parameters for a faction or unit material set.  
+**Code name:** `MaterialProfile`
+
+---
+
+## BehaviorProfile
+
+**Definition:** JSON mapping gameplay presentation actions (idle, attack, death) to Animator states and timings.  
+**Not the same as:** Server combat logic (Nakama).  
+**Code name:** `BehaviorProfile`
+
+---
+
+## Mesh3DCharacterFactory
+
+**Definition:** Loader that instantiates `.glb` units, applies textures, and attaches behavior.  
+**Code name:** `Mesh3DCharacterFactory`
 
 ---
 
