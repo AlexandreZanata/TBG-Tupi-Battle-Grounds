@@ -1,5 +1,17 @@
 {
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.atteneder"
+      ]
+    }
+  ],
   "dependencies": {
+    "com.atteneder.gltfast": "6.12.0",
+    "com.tbg.character-library": "file:com.tbg.character-library",
+    "com.unity.test-framework": "1.1.33",
     "com.unity.ugui": "2.0.0",
     "com.unity.modules.physics": "1.0.0",
     "com.unity.modules.imageconversion": "1.0.0"

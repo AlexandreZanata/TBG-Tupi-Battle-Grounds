@@ -11,11 +11,11 @@ The **Character Studio** (Unity Editor + web UI) creates, edits, and deletes fil
 | `definitions/` | Unit parameters (JSON) — studio CRUD | Yes |
 | `cards/` | Card images rendered from procedural 3D | Yes |
 | `previews/` | Optional viewport / test captures | Yes |
-| `meshes/` | Authored `.glb` units (Phase 02) | Yes |
-| `textures/` | PBR map sets per unit (Phase 02) | Yes |
-| `materials/` | Material profile JSON (Phase 02) | Yes |
-| `behaviors/` | Behavior profile JSON (Phase 02) | Yes |
-| `animations/` | Shared animator controllers (Phase 02) | Yes |
+| `meshes/` | Authored `.glb` units (Phase 02) | Yes (`.gitkeep` until assets land) |
+| `textures/` | PBR map sets per unit (Phase 02) | Yes (`.gitkeep` until assets land) |
+| `materials/` | Material profile JSON (Phase 02) | Yes (`.gitkeep` until profiles land) |
+| `behaviors/` | Behavior profile JSON (Phase 02) | Yes (`.gitkeep` until profiles land) |
+| `animations/` | Shared animator controllers (Phase 02) | Yes (`.gitkeep` until controllers land) |
 
 ## Definition schema (Phase 02 extension)
 
