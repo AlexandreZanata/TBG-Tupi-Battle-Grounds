@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TBG Motion Arena</title>
+  <link rel="stylesheet" href="/css/studio.css" />
+  <link rel="stylesheet" href="/css/animation-studio.css" />
+  <link rel="stylesheet" href="/css/motion-arena.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar__inner">
+        <div class="brand">
+          <span class="brand__mark">TBG</span>
+          <div>
+            <h1>Motion Arena</h1>
+            <p class="brand__sub">WASD locomotion · Perry biomechanical Walk · CMU-calibrated</p>
+          </div>
+        </div>
+        <nav class="topbar__nav">
+          <a class="topbar__link" href="/">Studio</a>
+          <a class="topbar__link" href="/animation-studio.html">Animation</a>
+          <a class="topbar__link topbar__link--active" href="/motion-arena.html" aria-current="page">Arena</a>
+        </nav>
+        <span id="health" class="badge">checking</span>
+      </div>
+    </header>
+
+    <main class="animation-layout motion-arena-layout">
+      <section class="card panel animation-panel--main">
+        <div class="animation-units-bar">
+          <div class="animation-units-bar__head">
+            <h3 class="animation-units-bar__title">Units</h3>
+            <span id="unitCount" class="panel__meta">0 mesh3d</span>
+          </div>
+          <div id="charList" class="unit-list unit-list--horizontal" role="list"></div>
+        </div>
+
+        <div class="motion-arena-hud">
+          <span class="motion-arena-hud__keys">W A S D — move</span>
+          <label class="viewer3d-controls__toggle">
+            <input type="checkbox" id="useRootMotion" />
+            Root motion (WalkRoot)
+          </label>
+          <label class="viewer3d-controls__toggle">
+            <input type="checkbox" id="footIkToggle" />
+            Foot IK (experimental)
+          </label>
+        </div>
+
+        <div class="animation-viewport motion-arena-viewport">
+          <div id="viewer3d" class="viewer3d viewer3d--arena"></div>
+        </div>
+        <p id="status" class="status" role="status">Loading…</p>
+        <p class="motion-arena-note">
+          Walk = alternating heel-strike cycle (hip/knee/ankle FK). Pipeline:
+          <code>OPEN-SOURCE-WALK.md</code>
+        </p>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="/js/motion-arena/arenaApp.js?v=20260701a"></script>
+</body>
+</html>

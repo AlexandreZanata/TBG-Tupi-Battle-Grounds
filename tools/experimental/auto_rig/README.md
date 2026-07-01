@@ -93,6 +93,18 @@ Preview in Character Studio or Motion Arena after export.
 
 ---
 
+## Motion Arena single-pilot dev slice
+
+Arena lists only pilots in `arenaPilotConfig.js` (default: **`demo_bruiser_01`**).
+
+```bash
+PYTHONPATH=tools python3 tools/experimental/auto_rig/promote_arena_pilot.py --id demo_bruiser_01 --fast
+```
+
+Open Character Studio → `/motion-arena.html`.
+
+---
+
 ## Files
 
 | File | Role |

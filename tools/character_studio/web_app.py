@@ -24,6 +24,7 @@ from .repository import CharacterRepository
 from .validation import ValidationError
 
 STATIC_DIR = Path(__file__).parent / "static"
+STUDIO_BUILD_ID = "20260701a"
 
 
 class CreateCharacterRequest(BaseModel):
@@ -68,7 +69,15 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
 
     @app.get("/api/health")
     def health() -> dict[str, str]:
-        return {"status": "ok"}
+        return {"status": "ok", "studioBuild": STUDIO_BUILD_ID}
+
+    @app.middleware("http")
+    async def disable_static_cache(request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+        if path.endswith((".html", ".js", ".css", ".mjs")):
+            response.headers["Cache-Control"] = "no-cache, must-revalidate"
+        return response
 
     @app.get("/favicon.ico", include_in_schema=False, response_model=None)
     def favicon() -> FileResponse | Response:
