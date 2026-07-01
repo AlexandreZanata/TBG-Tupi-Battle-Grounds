@@ -68,9 +68,19 @@ exports/     # Assembled game GLBs
 `tools/assembly_studio/blender/assemble_character.py` — headless script:
 
 1. Load base body + rig
-2. Attach parts at socket bones
-3. Apply material profile
+2. Attach parts at socket bones (bone-parented meshes; base skin weights only)
+3. Apply material profile from `library/materials/{materialId}.json`
 4. Export to `library/exports/{unit_id}.glb`
+
+CLI:
+
+```bash
+tools/assembly_studio/blender/blender_cmd.sh --background \
+  --python tools/assembly_studio/blender/assemble_character.py -- \
+  --recipe path/to/recipe.json
+```
+
+Recipe schema: `library/_schema.recipe.json` — `{ unitId, baseId, parts[], materialId }`.
 
 **MB-Lab** is the recommended base body generator (free, open source, in-Blender, includes rig). See `tools/assembly_studio/blender/mblab_bases.md`.
 

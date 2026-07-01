@@ -1,0 +1,9 @@
+{
+  "unitId": "test_male_head_sword",
+  "baseId": "male",
+  "parts": [
+    "head_round_01",
+    "weapon_sword_01"
+  ],
+  "materialId": "default"
+}

@@ -14,6 +14,7 @@ Library → Body → Head → Parts → Materials → Export → Done
 library/
 ├── _schema.base.json   # Base manifest JSON Schema
 ├── _schema.part.json   # Part manifest JSON Schema
+├── _schema.recipe.json # Assembly recipe JSON Schema
 ├── sockets.json        # Socket id → TBG bone table
 ├── bases/              # Body templates (rig once)
 │   ├── male/
@@ -45,6 +46,7 @@ library/
 |--------|------|
 | Base body | [`_schema.base.json`](_schema.base.json) |
 | Part | [`_schema.part.json`](_schema.part.json) |
+| Assembly recipe | [`_schema.recipe.json`](_schema.recipe.json) |
 
 ### Base example
 
@@ -84,6 +86,19 @@ library/
 | `hand_l` | `TBG_Hand.L` | shields (future) |
 
 See [`sockets.json`](sockets.json) for machine-readable definitions.
+
+### Recipe example
+
+```json
+{
+  "unitId": "demo_guard_male_01",
+  "baseId": "male",
+  "parts": ["head_round_01", "weapon_sword_01"],
+  "materialId": "default"
+}
+```
+
+Assemble via `tools/assembly_studio/blender/blender_cmd.sh` — see [assembly_studio README](../../tools/assembly_studio/README.md).
 
 ## Seed dev fixtures
 

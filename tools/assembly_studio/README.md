@@ -28,6 +28,29 @@ python3 -m tools.character_studio serve
 
 MB-Lab production export: see [`blender/mblab_bases.md`](blender/mblab_bases.md).
 
+## Assemble export (§3)
+
+Recipe JSON (`library/exports/{unitId}.recipe.json`):
+
+```json
+{
+  "unitId": "demo_guard_male_01",
+  "baseId": "male",
+  "parts": ["head_round_01", "weapon_sword_01"],
+  "materialId": "default"
+}
+```
+
+```bash
+tools/assembly_studio/blender/blender_cmd.sh --background \
+  --python tools/assembly_studio/blender/assemble_character.py -- \
+  --recipe content/characters/library/exports/demo_guard_male_01.recipe.json
+```
+
+Output: `content/characters/library/exports/{unitId}.glb`
+
+Pure-Python GLB merge runs automatically when `bpy` is unavailable (CI).
+
 ## Flow
 
 ```text
