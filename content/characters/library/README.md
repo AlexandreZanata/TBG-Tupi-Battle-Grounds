@@ -12,22 +12,21 @@ Library → Body → Head → Parts → Materials → Export → Done
 
 ```text
 library/
-├── bases/              # MB-Lab authored body templates (rig once)
+├── _schema.base.json   # Base manifest JSON Schema
+├── _schema.part.json   # Part manifest JSON Schema
+├── sockets.json        # Socket id → TBG bone table
+├── bases/              # Body templates (rig once)
 │   ├── male/
 │   ├── female/
 │   ├── small/
 │   └── large/
 ├── parts/              # Socket-attached interchangeable pieces
 │   ├── heads/
-│   ├── noses/
-│   ├── beards/
 │   ├── hair/
 │   ├── hats/
-│   ├── backpacks/
 │   ├── armor/
 │   ├── weapons/
-│   ├── wings/
-│   └── tails/
+│   └── …
 ├── materials/          # Palette + faction tint profiles
 ├── rigs/               # One canonical armature per base (TBG_*)
 └── exports/            # Assembled unit GLBs (game + showcase)
@@ -35,12 +34,32 @@ library/
 
 ## Authoring rules
 
-1. **Rig once per base** — MB-Lab generates humanoid + armature inside Blender; promote to `rigs/{base_id}/`.
-2. **Parts use sockets** — each part JSON declares `socket` bone name + local offset; no per-part skinning.
+1. **Rig once per base** — MB-Lab generates humanoid + armature; promote to `rigs/{base_id}/`.
+2. **Parts use sockets** — each part JSON declares `socket` bone name; no per-part skinning.
 3. **Materials are swappable** — body keeps UV0; parts may share atlas or per-part albedo.
 4. **Export is deterministic** — `assemble_character.py` merges selection → single skinned GLB.
 
-## Part manifest schema (draft)
+## Manifest schemas
+
+| Schema | Path |
+|--------|------|
+| Base body | [`_schema.base.json`](_schema.base.json) |
+| Part | [`_schema.part.json`](_schema.part.json) |
+
+### Base example
+
+```json
+{
+  "id": "male",
+  "label": "Male body",
+  "heightM": 1.8,
+  "bodyClass": "HumanoidLight",
+  "mesh": "body.glb",
+  "rig": "../../rigs/male/armature.glb"
+}
+```
+
+### Part example
 
 ```json
 {
@@ -48,18 +67,40 @@ library/
   "category": "heads",
   "baseCompat": ["male", "female"],
   "socket": "TBG_Head",
-  "mesh": "parts/heads/head_round_01.glb",
-  "thumbnail": "parts/heads/head_round_01.webp"
+  "mesh": "head_round_01.glb",
+  "thumbnail": "head_round_01.webp"
 }
 ```
+
+## Socket bone table
+
+| Socket id | Bone | Part categories |
+|-----------|------|-----------------|
+| `head` | `TBG_Head` | heads, hair, hats, noses, beards |
+| `head_top` | `TBG_Head` | hats (crown offset) |
+| `spine_chest` | `TBG_Spine1` | armor, backpacks, wings |
+| `spine_pelvis` | `TBG_Spine` | tails |
+| `hand_r` | `TBG_Hand.R` | weapons |
+| `hand_l` | `TBG_Hand.L` | shields (future) |
+
+See [`sockets.json`](sockets.json) for machine-readable definitions.
+
+## Seed dev fixtures
+
+```bash
+./scripts/seed_library.sh
+```
+
+Generates blocky TBG-skinned bases + box part meshes for pipeline development. Replace with MB-Lab exports per [`mblab_bases.md`](../../tools/assembly_studio/blender/mblab_bases.md).
 
 ## Tools
 
 | Tool | Path |
 |------|------|
-| Web assembler UI | `tools/assembly_studio/static/assembly-studio.html` |
-| Blender merge/export | `tools/assembly_studio/blender/` (Phase 05) |
+| Web assembler UI | `tools/character_studio/static/assembly-studio.html` |
+| Blender merge/export | `tools/assembly_studio/blender/` |
 | MB-Lab base authoring | `tools/assembly_studio/blender/mblab_bases.md` |
+| Library contract tests | `tests/assembly_studio/test_library_contract.py` |
 
 ## Related docs
 

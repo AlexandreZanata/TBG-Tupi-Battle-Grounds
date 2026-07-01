@@ -1,0 +1,12 @@
+{
+  "id": "armor_chest_plate_01",
+  "category": "armor",
+  "baseCompat": [
+    "male",
+    "female",
+    "large"
+  ],
+  "socket": "TBG_Spine1",
+  "mesh": "armor_chest_plate_01.glb",
+  "thumbnail": "armor_chest_plate_01.webp"
+}

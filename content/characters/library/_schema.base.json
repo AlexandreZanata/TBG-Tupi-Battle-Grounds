@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tbg.local/library/_schema.base.json",
+  "title": "TBG base body manifest",
+  "type": "object",
+  "required": ["id", "label", "heightM", "bodyClass", "mesh", "rig"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "enum": ["male", "female", "small", "large"] },
+    "label": { "type": "string", "minLength": 1 },
+    "heightM": { "type": "number", "minimum": 0.5, "maximum": 3.0 },
+    "bodyClass": { "type": "string", "enum": ["HumanoidLight", "HumanoidHeavy"] },
+    "mesh": { "type": "string", "pattern": "^body\\.glb$" },
+    "rig": { "type": "string", "pattern": "^\\.\\./\\.\\./rigs/.+/armature\\.glb$" }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "hat_cap_01",
+  "category": "hats",
+  "baseCompat": [
+    "male",
+    "female",
+    "small",
+    "large"
+  ],
+  "socket": "TBG_Head",
+  "mesh": "hat_cap_01.glb",
+  "thumbnail": "hat_cap_01.webp"
+}

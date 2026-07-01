@@ -19,6 +19,15 @@ python3 -m tools.character_studio serve
 # Open http://127.0.0.1:8765/assembly-studio.html
 ```
 
+## Seed library fixtures
+
+```bash
+./scripts/seed_library.sh   # blocky TBG bases + box parts (dev)
+./scripts/verify.sh         # contract tests
+```
+
+MB-Lab production export: see [`blender/mblab_bases.md`](blender/mblab_bases.md).
+
 ## Flow
 
 ```text

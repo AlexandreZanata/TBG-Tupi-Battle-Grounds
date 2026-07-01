@@ -1,0 +1,8 @@
+{
+  "id": "small",
+  "label": "Small body",
+  "heightM": 1.2,
+  "bodyClass": "HumanoidLight",
+  "mesh": "body.glb",
+  "rig": "../../rigs/small/armature.glb"
+}

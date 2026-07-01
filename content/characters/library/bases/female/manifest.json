@@ -1,0 +1,8 @@
+{
+  "id": "female",
+  "label": "Female body",
+  "heightM": 1.65,
+  "bodyClass": "HumanoidLight",
+  "mesh": "body.glb",
+  "rig": "../../rigs/female/armature.glb"
+}

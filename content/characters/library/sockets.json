@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "sockets": {
+    "head": { "bone": "TBG_Head", "categories": ["heads", "hair", "hats", "noses", "beards"] },
+    "head_top": { "bone": "TBG_Head", "categories": ["hats"], "note": "Optional offset above crown" },
+    "spine_chest": { "bone": "TBG_Spine1", "categories": ["armor", "backpacks", "wings"] },
+    "spine_pelvis": { "bone": "TBG_Spine", "categories": ["tails"] },
+    "hand_r": { "bone": "TBG_Hand.R", "categories": ["weapons"] },
+    "hand_l": { "bone": "TBG_Hand.L", "categories": ["shields"] }
+  }
+}

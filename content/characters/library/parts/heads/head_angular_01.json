@@ -1,0 +1,12 @@
+{
+  "id": "head_angular_01",
+  "category": "heads",
+  "baseCompat": [
+    "male",
+    "female",
+    "large"
+  ],
+  "socket": "TBG_Head",
+  "mesh": "head_angular_01.glb",
+  "thumbnail": "head_angular_01.webp"
+}

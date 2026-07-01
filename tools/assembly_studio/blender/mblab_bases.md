@@ -2,11 +2,23 @@
 
 > MB-Lab is the recommended **free, open-source** base for TBG modular characters.
 
+## Version pin
+
+| Tool | Version |
+|------|---------|
+| MB-Lab | **1.8.1** (final release) |
+| Blender | **4.0.0+** |
+| Rig mode | **Base Skeleton** only (no IK / muscle rigs) |
+
+Download: [MB-Lab releases](https://github.com/animate1978/MB-Lab/releases/tag/1.8.1)
+
+Install: Blender → Edit → Preferences → Add-ons → Install → select `MB-Lab.zip` → enable.
+
 ## Why MB-Lab
 
 | Property | Value |
 |----------|-------|
-| License | Open source (check add-on repo for current license) |
+| License | Open source |
 | Runs in | Blender (no external service) |
 | Outputs | Humanoid mesh + armature |
 | Parameters | Height, weight, muscles, face, hands, legs |
@@ -14,14 +26,47 @@
 
 **Core rule:** Rig **once per base archetype** (`male`, `female`, `small`, `large`). Assembly swaps parts — never re-rig per character.
 
-## Workflow (draft)
+## Export workflow
 
-1. Install MB-Lab add-on in Blender (pin version in this doc when first authored)
-2. Generate humanoid matching base archetype proportions
-3. Rename bones to `TBG_*` per [RIG-SPEC.md](../../blender/RIG-SPEC.md)
-4. Export showcase GLB → `content/characters/library/bases/{archetype}/body.glb`
-5. Export armature → `content/characters/library/rigs/{archetype}/armature.glb`
-6. Write `manifest.json`:
+1. Create character in MB-Lab matching archetype proportions (see table below).
+2. Finalize character → ensure feet at **Y = 0**, facing **+Z**.
+3. Run bone rename (headless or Scripting workspace):
+
+```bash
+blender your_character.blend --background --python tools/assembly_studio/blender/rename_mblab_bones.py
+```
+
+Bone map: [`mblab_bone_map.json`](mblab_bone_map.json) — MB-Lab base skeleton → `TBG_*` per [RIG-SPEC.md](../../archive/tools/blender/RIG-SPEC.md).
+
+4. Export base + manifest:
+
+```bash
+blender your_character.blend --background --python tools/assembly_studio/blender/export_base_body.py -- \
+  --base-id male --height-m 1.8 --body-class HumanoidLight --label "Male body"
+```
+
+5. Verify contract tests: `./scripts/verify.sh`
+
+### CI / dev fixtures (no Blender)
+
+Blocky TBG template seeds placeholder library content for pipeline development:
+
+```bash
+./scripts/seed_library.sh
+```
+
+Replace with MB-Lab exports when art-ready meshes are authored.
+
+## Archetype targets
+
+| Base id | Height (m) | Body class | Notes |
+|---------|------------|------------|-------|
+| `male` | 1.8 | HumanoidLight | Medium build |
+| `female` | 1.65 | HumanoidLight | Slightly narrower |
+| `small` | 1.2 | HumanoidLight | Goblin / child proportions |
+| `large` | 2.1 | HumanoidHeavy | Tank / colossus |
+
+## Manifest (`bases/{id}/manifest.json`)
 
 ```json
 {
@@ -36,15 +81,20 @@
 
 ## Sockets (attach points for parts)
 
+Full table: [`content/characters/library/sockets.json`](../../../content/characters/library/sockets.json)
+
 | Socket id | Bone | Categories |
 |-----------|------|------------|
-| `head` | `TBG_Head` | heads, hair, hats |
-| `spine_chest` | `TBG_Spine2` | armor, backpacks |
-| `hand_r` | `TBG_Hand_R` | weapons |
-| `hand_l` | `TBG_Hand_L` | shields (future) |
+| `head` | `TBG_Head` | heads, hair, hats, noses, beards |
+| `head_top` | `TBG_Head` | hats (optional crown offset) |
+| `spine_chest` | `TBG_Spine1` | armor, backpacks, wings |
+| `spine_pelvis` | `TBG_Spine` | tails |
+| `hand_r` | `TBG_Hand.R` | weapons |
+| `hand_l` | `TBG_Hand.L` | shields (future) |
 
 ## Status
 
-- [ ] MB-Lab version pinned
-- [ ] First `male` base exported
-- [ ] Bone rename map validated against RIG-SPEC
+- [x] MB-Lab version pinned (1.8.1)
+- [x] Bone rename map validated against RIG-SPEC
+- [x] Dev fixtures for all four bases (`seed_library.sh`)
+- [ ] Production MB-Lab meshes replace blocky fixtures

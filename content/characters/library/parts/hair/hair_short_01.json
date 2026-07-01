@@ -1,0 +1,13 @@
+{
+  "id": "hair_short_01",
+  "category": "hair",
+  "baseCompat": [
+    "male",
+    "female",
+    "small",
+    "large"
+  ],
+  "socket": "TBG_Head",
+  "mesh": "hair_short_01.glb",
+  "thumbnail": "hair_short_01.webp"
+}
