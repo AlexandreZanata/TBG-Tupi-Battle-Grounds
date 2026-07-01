@@ -10,13 +10,18 @@ Competitive 1v1 matches inspired by lane-strategy mobile titles: continuous in-m
 
 Start at **[docs/README.md](docs/README.md)**:
 
-- [Design decisions (ADRs)](docs/adr/)
-- [Brand system](docs/design/brand-system.md)
-- [Character / unit guide](docs/design/character-creation-guide.md)
-- [Procedural character generator](docs/design/procedural-character-generator.md)
-- [Character content (`content/characters/`)](content/characters/)
+- [Modular character assembler](docs/design/modular-character-assembler.md) — **current** pipeline
+- [Character content (`content/characters/library/`)](content/characters/library/)
 - [Infrastructure](docs/architecture/infrastructure-overview.md)
-- [Glossary](docs/GLOSSARY.md)
+- Legacy backup: [`archive/`](archive/) (not used by CI)
+
+## Tools
+
+```bash
+pip install -r tools/requirements.txt
+python3 -m tools.character_studio serve   # Studio + Assembler
+./scripts/verify.sh
+```
 
 ## For coding agents
 

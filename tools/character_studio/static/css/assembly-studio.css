@@ -1,0 +1,108 @@
+/* Assembly Studio — extends studio.css layout tokens */
+
+.assembly-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) 1fr minmax(260px, 300px);
+  gap: var(--layout-gap);
+  padding: var(--layout-gap) var(--page-gutter) 2rem;
+  align-items: start;
+}
+
+.assembly-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.assembly-steps__item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  cursor: pointer;
+  background: var(--white);
+}
+
+.assembly-steps__item--active {
+  border-color: var(--black);
+  color: var(--black);
+  box-shadow: var(--shadow);
+}
+
+.assembly-steps__item--done {
+  color: var(--black);
+}
+
+.assembly-steps__num {
+  display: grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-size: 0.7rem;
+}
+
+.assembly-viewport {
+  min-height: 420px;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+}
+
+.assembly-viewport canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.assembly-parts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.assembly-part-card {
+  padding: 0.65rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.assembly-part-card--selected {
+  border-color: var(--black);
+  box-shadow: var(--shadow);
+}
+
+.assembly-part-card__thumb {
+  aspect-ratio: 1;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.35rem;
+}
+
+.assembly-export-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .assembly-layout {
+    grid-template-columns: 1fr;
+  }
+}

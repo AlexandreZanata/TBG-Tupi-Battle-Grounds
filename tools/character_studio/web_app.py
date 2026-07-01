@@ -24,7 +24,7 @@ from .repository import CharacterRepository
 from .validation import ValidationError
 
 STATIC_DIR = Path(__file__).parent / "static"
-STUDIO_BUILD_ID = "20260701b"
+STUDIO_BUILD_ID = "20260701e"
 
 
 class CreateCharacterRequest(BaseModel):

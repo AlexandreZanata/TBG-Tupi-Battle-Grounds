@@ -1,0 +1,31 @@
+.motion-arena-layout .viewer3d--arena {
+  min-height: min(72vh, 720px);
+  border-radius: var(--radius-md, 8px);
+  overflow: hidden;
+}
+
+.motion-arena-hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.motion-arena-hud__keys {
+  padding: 0.25rem 0.5rem;
+  background: var(--gray-100, #f0f0f0);
+  border-radius: 4px;
+  font-family: ui-monospace, monospace;
+}
+
+.motion-arena-note {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--gray-600, #666);
+}
+
+.motion-arena-viewport {
+  min-height: min(72vh, 720px);
+}

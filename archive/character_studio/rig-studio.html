@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TBG Rig Studio</title>
+  <link rel="stylesheet" href="/css/studio.css" />
+  <link rel="stylesheet" href="/css/animation-studio.css" />
+  <link rel="stylesheet" href="/css/rig-studio.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar__inner">
+        <div class="brand">
+          <span class="brand__mark">TBG</span>
+          <div>
+            <h1>Rig Studio</h1>
+            <p class="brand__sub">Place TBG joints in the browser · Blender runs headless</p>
+          </div>
+        </div>
+        <nav class="topbar__nav">
+          <a class="topbar__link" href="/">Studio</a>
+          <a class="topbar__link" href="/showcase.html">Showcase</a>
+          <a class="topbar__link" href="/animation-studio.html">Animation</a>
+          <a class="topbar__link" href="/motion-arena.html">Arena</a>
+          <a class="topbar__link topbar__link--active" href="/rig-studio.html" aria-current="page">Rig</a>
+        </nav>
+        <span id="health" class="badge">checking</span>
+      </div>
+    </header>
+
+    <main class="rig-layout">
+      <aside class="card panel rig-sidebar">
+        <div class="rig-sidebar__head">
+          <h2>Workflow</h2>
+          <ol id="stepList" class="rig-steps"></ol>
+        </div>
+
+        <div class="animation-units-bar rig-units-bar">
+          <div class="animation-units-bar__head">
+            <h3 class="animation-units-bar__title">Units</h3>
+            <span id="unitCount" class="panel__meta">0 mesh3d</span>
+          </div>
+          <div id="charList" class="unit-list unit-list--horizontal" role="list"></div>
+        </div>
+
+        <section id="rigPanel" class="rig-panel" hidden>
+          <div id="unitMeta" class="rig-meta"></div>
+
+          <div id="stepPrep" class="rig-step-panel" hidden>
+            <p class="rig-lead">Blender (background) attaches the TBG skeleton to your mesh. Takes ~30 seconds.</p>
+            <button type="button" id="btnPrep" class="btn btn--primary">Load skeleton</button>
+          </div>
+
+          <div id="stepEdit" class="rig-step-panel" hidden>
+            <h3>Place joints in the viewport</h3>
+            <ol class="rig-checklist">
+              <li>Each ball shows a <strong>number</strong> (1–21) — see legend below.</li>
+              <li><strong>Drag</strong> to place · <strong>double-click</strong> to lock (green ring).</li>
+              <li>Locked joints <strong>stay fixed</strong> when you move others.</li>
+            </ol>
+            <h4 class="rig-legend-title">Joint colors</h4>
+            <div id="boneRegionLegend" class="rig-region-legend"></div>
+            <label class="viewer3d-controls__toggle rig-mirror">
+              <input type="checkbox" id="xrayMesh" checked />
+              X-ray mesh (see joints inside)
+            </label>
+            <label class="viewer3d-controls__toggle rig-mirror">
+              <input type="checkbox" id="wireframeMesh" />
+              Wireframe overlay
+            </label>
+            <label class="viewer3d-controls__toggle rig-mirror">
+              <input type="checkbox" id="showTails" checked />
+              Show bone direction (small dot)
+            </label>
+            <p id="lockStatus" class="rig-lock-status" aria-live="polite"></p>
+            <button type="button" id="btnSaveBones" class="btn btn--primary">Save bone positions</button>
+          </div>
+
+          <div id="stepBind" class="rig-step-panel" hidden>
+            <p class="rig-lead">Blender binds weights, embeds combat clips, writes the game GLB.</p>
+            <button type="button" id="btnFinalize" class="btn btn--primary">Bind &amp; export game mesh</button>
+          </div>
+
+          <div id="stepReview" class="rig-step-panel" hidden>
+            <div id="weightReport" class="rig-weight"></div>
+            <p class="rig-lead">Bake Perry biomechanical Walk on your skeleton, then preview in Arena.</p>
+            <button type="button" id="btnBakeWalk" class="btn btn--primary">Bake walk from skeleton</button>
+            <div class="rig-actions">
+              <a id="linkAnimation" class="btn" href="/animation-studio.html">Animation Studio</a>
+              <a id="linkArena" class="btn btn--primary" href="/motion-arena.html">▶ Preview walk (Arena)</a>
+            </div>
+          </div>
+
+          <details class="rig-advanced">
+            <summary>Quick auto-rig (experimental)</summary>
+            <p class="rig-lead">Skip manual placement — heuristic align only.</p>
+            <button type="button" id="btnAuto" class="btn">Run auto-rig</button>
+          </details>
+
+          <p id="jobStatus" class="status" role="status" aria-live="polite"></p>
+        </section>
+      </aside>
+
+      <section class="card panel rig-viewport-panel">
+        <header class="panel__head panel__head--preview">
+          <h2 id="editId">—</h2>
+          <p id="boneHint" class="rig-viewport-hint" hidden>Drag to place · double-click to lock/unlock</p>
+        </header>
+        <div class="animation-viewport">
+          <div id="viewport3dPanel" class="preview preview--3d">
+            <div id="viewer3dLoading" class="preview__loading" hidden>Loading 3D…</div>
+            <div id="viewer3dEmpty" class="preview__empty">Select a unit to start rigging</div>
+            <div id="viewer3d" class="viewer3d" hidden></div>
+            <div class="viewer3d-controls" id="viewer3dControls" hidden></div>
+          </div>
+        </div>
+        <div id="meshBadge" class="mesh-badge"></div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/js/rig-studio/rigApp.js?v=20260701m"></script>
+</body>
+</html>

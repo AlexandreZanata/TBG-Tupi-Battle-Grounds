@@ -1,0 +1,258 @@
+.rig-layout {
+  display: grid;
+  grid-template-columns: minmax(18rem, 26rem) 1fr;
+  gap: var(--page-gutter);
+  padding: var(--page-gutter);
+  min-height: calc(100vh - 73px);
+}
+
+@media (max-width: 960px) {
+  .rig-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rig-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: calc(100vh - 73px - 2 * var(--page-gutter));
+  overflow-y: auto;
+}
+
+.rig-sidebar__head h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+}
+
+.rig-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--gray-700);
+}
+
+.rig-steps li {
+  margin-bottom: 0.25rem;
+}
+
+.rig-steps li.is-active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.rig-steps li.is-done {
+  color: var(--gray-500);
+}
+
+.rig-units-bar {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.rig-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rig-meta {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+
+.rig-meta strong {
+  color: var(--gray-900);
+}
+
+.rig-step-panel h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.8125rem;
+}
+
+.rig-lead {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--gray-700);
+}
+
+.rig-checklist {
+  margin: 0 0 0.75rem;
+  padding-left: 1.1rem;
+  font-size: 0.75rem;
+  color: var(--gray-700);
+}
+
+.rig-checklist code {
+  font-size: 0.7rem;
+}
+
+.rig-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.rig-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+.rig-cmd {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem;
+  font-size: 0.65rem;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.rig-advanced {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+.rig-advanced summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.rig-weight {
+  font-size: 0.8125rem;
+}
+
+.rig-weight--pass {
+  color: var(--success, #0a7);
+}
+
+.rig-weight--fail {
+  color: var(--danger, #c33);
+}
+
+.rig-viewport-panel {
+  min-height: 28rem;
+}
+
+.rig-tier-toggle {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+}
+
+.rig-tier-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--gray-50);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--gray-100);
+}
+
+.btn--primary {
+  background: var(--accent, #2563eb);
+  border-color: transparent;
+  color: #fff;
+}
+
+.btn--primary:hover {
+  filter: brightness(1.05);
+}
+
+.rig-viewport-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--accent, #2563eb);
+  font-weight: 600;
+}
+
+.rig-mirror {
+  display: flex;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+}
+
+.rig-legend-title {
+  margin: 0.5rem 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gray-600);
+}
+
+.rig-region-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.rig-region-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  color: var(--gray-700);
+}
+
+.rig-region-legend__swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.rig-lock-status {
+  margin: 0.35rem 0 0.5rem;
+  font-size: 0.72rem;
+  color: var(--gray-600);
+  min-height: 1rem;
+}
+
+.rig-lock-status--ok {
+  color: #15803d;
+}
+
+.rig-num-guide {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.45rem;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--gray-200);
+  max-height: 5.5rem;
+  overflow-y: auto;
+}
+
+.rig-num-guide__item {
+  font-size: 0.6rem;
+  color: var(--gray-500);
+  font-family: ui-monospace, monospace;
+}

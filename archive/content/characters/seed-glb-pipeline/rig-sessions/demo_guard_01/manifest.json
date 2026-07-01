@@ -1,0 +1,8 @@
+{
+  "unitId": "demo_guard_01",
+  "bodyClass": "HumanoidHeavy",
+  "boneCount": 21,
+  "archivedAt": "2026-07-01T01:50:16.771497+00:00",
+  "source": ".local/rig-studio/sessions/demo_guard_01/bones.json",
+  "workflow": "rig-studio-manual-placement"
+}

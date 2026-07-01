@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "source_skeleton": "cmu_cgspeed_motionbuilder_bvh",
+  "t_pose": {
+    "up_axis": "Y",
+    "forward_axis": "+Z",
+    "note": "cgspeed BVH frame 0 is T-pose facing +Z; skip frame 0 for gait analysis"
+  },
+  "mapping": {
+    "TBG_Root": "Hips",
+    "TBG_Spine": "LowerBack",
+    "TBG_Spine1": "Spine1",
+    "TBG_Neck": "Neck1",
+    "TBG_Head": "Head",
+    "TBG_Shoulder.L": "LeftShoulder",
+    "TBG_UpperArm.L": "LeftArm",
+    "TBG_LowerArm.L": "LeftForeArm",
+    "TBG_Hand.L": "LeftHand",
+    "TBG_Shoulder.R": "RightShoulder",
+    "TBG_UpperArm.R": "RightArm",
+    "TBG_LowerArm.R": "RightForeArm",
+    "TBG_Hand.R": "RightHand",
+    "TBG_UpperLeg.L": "LeftUpLeg",
+    "TBG_LowerLeg.L": "LeftLeg",
+    "TBG_Foot.L": "LeftFoot",
+    "TBG_Toe.L": "LeftToeBase",
+    "TBG_UpperLeg.R": "RightUpLeg",
+    "TBG_LowerLeg.R": "RightLeg",
+    "TBG_Foot.R": "RightFoot",
+    "TBG_Toe.R": "RightToeBase"
+  },
+  "leg_flexion": {
+    "rotation_order": ["Zrotation", "Yrotation", "Xrotation"],
+    "channel": "Xrotation",
+    "right_scale": -1.0,
+    "left_scale": 1.0,
+    "knee_scale": -1.0,
+    "ankle_scale": -1.0
+  },
+  "cycle_detection": {
+    "leg_joint": "RightUpLeg",
+    "channel": "Xrotation",
+    "min_period_frames": 90,
+    "max_period_frames": 200,
+    "skip_initial_frames": 1
+  },
+  "perry_key_taus": [0.0, 0.02, 0.05, 0.1, 0.3, 0.5, 0.55, 0.6, 0.73, 0.87, 1.0]
+}

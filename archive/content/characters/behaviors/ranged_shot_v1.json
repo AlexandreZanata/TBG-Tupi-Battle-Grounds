@@ -1,0 +1,37 @@
+{
+  "id": "ranged_shot_v1",
+  "archetype": "Ranged",
+  "bodyClass": "HumanoidLight",
+  "animatorController": "content/characters/animations/HumanoidLight.controller",
+  "clipSource": "embedded",
+  "actions": {
+    "idle": "Idle",
+    "spawn": "Spawn",
+    "attack": "AttackRanged",
+    "attack2": "Attack2",
+    "death": "Death",
+    "walk": "Walk",
+    "ultimate": "Ultimate"
+  },
+  "triggers": {
+    "idle": "Idle",
+    "spawn": "Spawn",
+    "attack": "Attack",
+    "death": "Death",
+    "walk": "Walk",
+    "ultimate": "Ultimate"
+  },
+  "timings": {
+    "attackWindupMs": 300,
+    "attackHitMs": 450,
+    "ultimateWindupMs": 450,
+    "ultimateDurationMs": 1700
+  },
+  "combat": {
+    "attackCycle": "repeat"
+  },
+  "locomotion": {
+    "useRootMotionWalk": false,
+    "footIk": true
+  }
+}
