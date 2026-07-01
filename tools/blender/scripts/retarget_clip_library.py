@@ -40,7 +40,7 @@ def retarget_clip_library(
 
     arm_obj = armatures[0]
     clip_names = list(dict.fromkeys(defn.clips.values()))
-    _embed_clip_actions(arm_obj, clip_names, defn.bodyClass, unit_id)
+    _embed_clip_actions(arm_obj, clip_names, defn.bodyClass, unit_id, repo_root)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.object.select_all(action="DESELECT")
@@ -68,6 +68,7 @@ def _embed_clip_actions(
     clip_names: list[str],
     body_class: str,
     unit_id: str | None,
+    repo_root: Path,
 ) -> None:
     """Walk gets a keyed cycle; other clips stay rest-pose until authored."""
     from tools.blender.package_path import ensure_repo_paths
@@ -79,8 +80,21 @@ def _embed_clip_actions(
     from tools.blender.animation.walk.profiles import resolve_walk_profile  # noqa: PLC0415
 
     walk_profile = resolve_walk_profile(unit_id, body_class)
+    unit_walk = (
+        repo_root / "content/characters/animations/clips/units" / unit_id / "Walk.glb"
+        if unit_id
+        else None
+    )
     for clip_name in clip_names:
         if clip_name == "Walk":
+            if unit_walk and unit_walk.is_file():
+                from tools.blender.scripts.cmu_anim_ops import bake_walk_from_unit_clip_glb  # noqa: PLC0415
+
+                try:
+                    bake_walk_from_unit_clip_glb(arm_obj, unit_walk)
+                    continue
+                except RuntimeError as exc:
+                    print(f"retarget_clip_library: unit Walk fallback — {exc}")
             bake_walk_action(arm_obj, walk_profile, clip_name)
             continue
         attack_profile = resolve_attack_profile(unit_id, body_class, clip_name)

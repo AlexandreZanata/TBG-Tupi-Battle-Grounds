@@ -21,7 +21,7 @@ from mesh_pipeline.export_game_unit_core import (  # noqa: E402
 )
 from mesh_pipeline.prep_ai_mesh_run import blender_available  # noqa: E402
 
-DEFAULT_PILOT = "demo_bruiser_01"
+DEFAULT_PILOT = "demo_scout_01"
 BLENDER_CMD = REPO / "tools/blender/blender_cmd.sh"
 ARENA_BPY = REPO / "tools/experimental/auto_rig/arena_pilot_bpy.py"
 
