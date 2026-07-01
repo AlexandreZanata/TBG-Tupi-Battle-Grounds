@@ -79,6 +79,8 @@ Phase 04b **tooling is complete**; roster **pass rate is still open**:
 
 **Next work:** improve bone coverage (neck/head/arms) in `rig_weight_bind.py`, optional Mixamo batch for failures, decimation weld pass for island gate.
 
+**Experimental:** [tools/experimental/auto_rig/](../../tools/experimental/auto_rig/) — standalone headless PoC (prep → template align → bind → export). Blender 5.1 headless `ARMATURE_AUTO` assigns zero weights; default `--bind-mode fallback` uses proximity weights.
+
 Run audit: `python3 tools/mesh_pipeline/baseline_audit.py`
 
 ---

@@ -20,6 +20,8 @@ Authoring-only scripts for the Real 3D Character Pipeline (Phase 02).
 | [scripts/build_rig_template.py](scripts/build_rig_template.py) | Generate `HumanoidHeavy_template.blend` |
 | [templates/](templates/) | Rig `.blend` templates |
 
+Experimental (not production): [tools/experimental/auto_rig/](../experimental/auto_rig/) — standalone headless rig PoC.
+
 ## Setup (required once per machine)
 
 ```bash
