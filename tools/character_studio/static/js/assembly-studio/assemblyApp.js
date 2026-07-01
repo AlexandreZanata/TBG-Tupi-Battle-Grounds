@@ -1,97 +1,106 @@
-/** Assembly Studio — modular character builder (Phase 05). */
+/** Assembly Studio — modular character builder (Phase 05 §4). */
+
+import { fetchLibrary, pollJob, queueExport, recipeFromState } from "./assemblyApi.js";
+import { createPanelRenderer } from "./assemblyPanels.js";
+import { mountAssemblyViewer } from "./assemblyViewer.js";
 
 const STEPS = [
-  { id: "body", label: "Body" },
-  { id: "head", label: "Head" },
-  { id: "parts", label: "Parts" },
-  { id: "materials", label: "Materials" },
-  { id: "review", label: "Review" },
-  { id: "export", label: "Export" },
-];
-
-const BASES = [
-  { id: "male", label: "Male" },
-  { id: "female", label: "Female" },
-  { id: "small", label: "Small" },
-  { id: "large", label: "Large" },
+  { id: "body", label: "Body", categories: [] },
+  { id: "head", label: "Head", categories: ["heads"] },
+  { id: "parts", label: "Parts", categories: ["hair", "armor", "weapons", "hats"] },
+  { id: "materials", label: "Materials", categories: [] },
+  { id: "review", label: "Review", categories: [] },
+  { id: "export", label: "Export", categories: [] },
 ];
 
 const state = {
   step: 0,
   baseId: null,
   parts: {},
+  materialId: "default",
+  unitId: "",
+  library: null,
+  viewer: null,
 };
 
-function renderSteps() {
-  const list = document.getElementById("stepList");
-  if (!list) return;
-  list.innerHTML = "";
-  STEPS.forEach((step, i) => {
-    const li = document.createElement("li");
-    li.className = "assembly-steps__item";
-    if (i === state.step) li.classList.add("assembly-steps__item--active");
-    if (i < state.step) li.classList.add("assembly-steps__item--done");
-    li.innerHTML = `<span class="assembly-steps__num">${i + 1}</span>${step.label}`;
-    li.addEventListener("click", () => goStep(i));
-    list.appendChild(li);
-  });
+function selectedPartIds() {
+  return Object.values(state.parts).filter(Boolean);
 }
 
-function goStep(index) {
-  state.step = Math.max(0, Math.min(index, STEPS.length - 1));
-  renderSteps();
-  renderPanel();
-}
-
-function renderPanel() {
-  const panel = document.getElementById("stepPanel");
-  const title = document.getElementById("stepTitle");
-  if (!panel || !title) return;
-  const step = STEPS[state.step];
-  title.textContent = step.label;
-
-  if (step.id === "body") {
-    panel.innerHTML = `<div class="assembly-parts-grid" id="baseGrid"></div>`;
-    const grid = document.getElementById("baseGrid");
-    BASES.forEach((b) => {
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = "assembly-part-card";
-      if (state.baseId === b.id) card.classList.add("assembly-part-card--selected");
-      card.innerHTML = `<div class="assembly-part-card__thumb"></div>${b.label}`;
-      card.addEventListener("click", () => {
-        state.baseId = b.id;
-        renderPanel();
-        setStatus(`Base: ${b.label}`);
-      });
-      grid.appendChild(card);
-    });
-    return;
+function resolvePart(partId) {
+  if (!state.library?.parts) return null;
+  for (const items of Object.values(state.library.parts)) {
+    const hit = items.find((p) => p.id === partId);
+    if (hit) return hit;
   }
-
-  if (step.id === "export") {
-    panel.innerHTML = `
-      <p class="rig-lead">Blender merges your selection and exports a game-ready GLB.</p>
-      <div class="field">
-        <label for="unitId">Unit id</label>
-        <input id="unitId" class="input" placeholder="tank_human_03" autocomplete="off" />
-      </div>
-      <div class="assembly-export-bar">
-        <button class="btn btn--primary" id="btnExport" type="button">Export via Blender</button>
-      </div>
-      <p id="exportStatus" class="panel__meta">API not wired — Phase 05 §4</p>`;
-    document.getElementById("btnExport")?.addEventListener("click", () => {
-      setStatus("Export queued (stub)");
-    });
-    return;
-  }
-
-  panel.innerHTML = `<p class="rig-lead">Load parts from <code>content/characters/library/</code> — Phase 05 §2.</p>`;
+  return null;
 }
 
 function setStatus(msg) {
   const el = document.getElementById("assemblyStatus");
   if (el) el.textContent = msg;
+}
+
+function goStep(index) {
+  state.step = Math.max(0, Math.min(index, STEPS.length - 1));
+  panels.renderSteps();
+  panels.renderPanel();
+}
+
+const panels = createPanelRenderer({
+  STEPS,
+  state,
+  setStatus,
+  goStep,
+  refreshPreview,
+  runExport,
+});
+
+async function refreshPreview() {
+  if (!state.viewer || !state.baseId || !state.library) return;
+  const base = state.library.bases.find((b) => b.id === state.baseId);
+  if (!base?.meshUrl) return;
+  const parts = selectedPartIds()
+    .map(resolvePart)
+    .filter(Boolean)
+    .map((p) => ({ socket: p.socket, meshUrl: p.meshUrl }));
+  try {
+    await state.viewer.loadPreview({ baseUrl: base.meshUrl, parts });
+  } catch (err) {
+    setStatus(`Preview error: ${err.message}`);
+  }
+}
+
+async function runExport() {
+  const status = document.getElementById("exportStatus");
+  if (!state.baseId) {
+    setStatus("Select a base body first");
+    return;
+  }
+  if (status) status.textContent = "Queuing…";
+  try {
+    const job = await queueExport(recipeFromState(state));
+    if (status) status.textContent = `Job ${job.id} running…`;
+    const finalJob = await waitForJob(job.id);
+    if (finalJob.status === "completed") {
+      const url = finalJob.report?.exportUrl;
+      if (status) status.innerHTML = `Done — <a href="${url}">download GLB</a>`;
+      setStatus("Export complete");
+    } else if (status) {
+      status.textContent = finalJob.error || "Export failed";
+    }
+  } catch (err) {
+    if (status) status.textContent = err.message;
+  }
+}
+
+async function waitForJob(jobId) {
+  for (let i = 0; i < 60; i += 1) {
+    const job = await pollJob(jobId);
+    if (job.status === "completed" || job.status === "failed") return job;
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error("export timed out");
 }
 
 async function checkHealth() {
@@ -108,21 +117,21 @@ async function checkHealth() {
   }
 }
 
-function initViewport() {
+export async function initAssemblyStudio() {
   const host = document.getElementById("viewport");
-  if (!host) return;
-  host.innerHTML = `<p class="panel__meta" style="padding:2rem;text-align:center">3D preview — wire viewer3d in §4</p>`;
-}
-
-export function initAssemblyStudio() {
-  renderSteps();
-  renderPanel();
-  initViewport();
+  if (host) state.viewer = mountAssemblyViewer(host);
+  try {
+    state.library = await fetchLibrary();
+  } catch (err) {
+    setStatus(`Library load failed: ${err.message}`);
+  }
+  panels.renderSteps();
+  panels.renderPanel();
   checkHealth();
   document.getElementById("btnNext")?.addEventListener("click", () => goStep(state.step + 1));
   document.getElementById("btnPrev")?.addEventListener("click", () => goStep(state.step - 1));
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  initAssemblyStudio();
+  void initAssemblyStudio();
 });

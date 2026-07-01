@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from .assembly_recipe import AssemblyRecipe
+
 
 ARCHETYPES = frozenset({"Tank", "DPS", "Support", "Ranged", "Control"})
 FACTIONS = frozenset({"Humans", "Undead", "Machines", "Plants"})
@@ -88,6 +90,7 @@ class CharacterDefinition:
     rigProfile: str = DEFAULT_RIG_PROFILE
     rigException: bool = False
     rigExceptionReason: str | None = None
+    assemblyRecipe: AssemblyRecipe | None = None
 
     def to_dict(self) -> dict[str, Any]:
         data: dict[str, Any] = {
@@ -127,6 +130,8 @@ class CharacterDefinition:
             data["rigException"] = self.rigException
         if self.rigExceptionReason:
             data["rigExceptionReason"] = self.rigExceptionReason
+        if self.assemblyRecipe:
+            data["assemblyRecipe"] = self.assemblyRecipe.to_dict()
         return data
 
     @classmethod
@@ -134,6 +139,11 @@ class CharacterDefinition:
         textures = (
             CharacterTextures.from_dict(data["textures"])
             if isinstance(data.get("textures"), dict)
+            else None
+        )
+        assembly = (
+            AssemblyRecipe.from_dict(data["assemblyRecipe"])
+            if isinstance(data.get("assemblyRecipe"), dict)
             else None
         )
         return cls(
@@ -165,4 +175,5 @@ class CharacterDefinition:
             rigExceptionReason=(
                 str(data["rigExceptionReason"]) if data.get("rigExceptionReason") else None
             ),
+            assemblyRecipe=assembly,
         )

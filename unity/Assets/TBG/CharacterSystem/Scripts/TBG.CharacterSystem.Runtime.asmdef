@@ -1,0 +1,14 @@
+{
+    "name": "TBG.CharacterSystem.Runtime",
+    "rootNamespace": "TBG.CharacterSystem",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

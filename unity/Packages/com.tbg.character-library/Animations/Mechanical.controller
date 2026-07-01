@@ -1,0 +1,224 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!91 &9100000
+AnimatorController:
+  m_ObjectHideFlags: 0
+  m_Name: Mechanical
+  serializedVersion: 5
+  m_AnimatorParameters:
+  - m_Name: Idle
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  - m_Name: Spawn
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  - m_Name: Attack
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  - m_Name: Death
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  - m_Name: Walk
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  - m_Name: Ultimate
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  m_AnimatorLayers:
+  - serializedVersion: 5
+    m_Name: Base Layer
+    m_StateMachine: {fileID: 1107000000200}
+    m_Mask: {fileID: 0}
+    m_Motions: []
+    m_Behaviours: []
+    m_BlendingMode: 0
+    m_SyncedLayerIndex: -1
+    m_DefaultWeight: 0
+    m_IKPass: 0
+    m_SyncedLayerAffectsTiming: 0
+    m_Controller: {fileID: 9100000}
+--- !u!1101 &1101000000300
+AnimatorStateTransition:
+  m_ObjectHideFlags: 1
+  m_Conditions:
+  - m_ConditionMode: 1
+    m_ConditionEvent: Idle
+    m_EventTreshold: 0
+  m_DstState: {fileID: 1102000000100}
+  serializedVersion: 3
+  m_TransitionDuration: 0.1
+  m_HasExitTime: 0
+  m_HasFixedDuration: 1
+  m_CanTransitionToSelf: 1
+--- !u!1101 &1101000000301
+AnimatorStateTransition:
+  m_ObjectHideFlags: 1
+  m_Conditions:
+  - m_ConditionMode: 1
+    m_ConditionEvent: Spawn
+    m_EventTreshold: 0
+  m_DstState: {fileID: 1102000000101}
+  serializedVersion: 3
+  m_TransitionDuration: 0.1
+  m_HasExitTime: 0
+  m_HasFixedDuration: 1
+  m_CanTransitionToSelf: 1
+--- !u!1101 &1101000000302
+AnimatorStateTransition:
+  m_ObjectHideFlags: 1
+  m_Conditions:
+  - m_ConditionMode: 1
+    m_ConditionEvent: Attack
+    m_EventTreshold: 0
+  m_DstState: {fileID: 1102000000102}
+  serializedVersion: 3
+  m_TransitionDuration: 0.1
+  m_HasExitTime: 0
+  m_HasFixedDuration: 1
+  m_CanTransitionToSelf: 1
+--- !u!1101 &1101000000303
+AnimatorStateTransition:
+  m_ObjectHideFlags: 1
+  m_Conditions:
+  - m_ConditionMode: 1
+    m_ConditionEvent: Death
+    m_EventTreshold: 0
+  m_DstState: {fileID: 1102000000103}
+  serializedVersion: 3
+  m_TransitionDuration: 0.1
+  m_HasExitTime: 0
+  m_HasFixedDuration: 1
+  m_CanTransitionToSelf: 1
+--- !u!1101 &1101000000304
+AnimatorStateTransition:
+  m_ObjectHideFlags: 1
+  m_Conditions:
+  - m_ConditionMode: 1
+    m_ConditionEvent: Walk
+    m_EventTreshold: 0
+  m_DstState: {fileID: 1102000000104}
+  serializedVersion: 3
+  m_TransitionDuration: 0.1
+  m_HasExitTime: 0
+  m_HasFixedDuration: 1
+  m_CanTransitionToSelf: 1
+--- !u!1101 &1101000000305
+AnimatorStateTransition:
+  m_ObjectHideFlags: 1
+  m_Conditions:
+  - m_ConditionMode: 1
+    m_ConditionEvent: Ultimate
+    m_EventTreshold: 0
+  m_DstState: {fileID: 1102000000105}
+  serializedVersion: 3
+  m_TransitionDuration: 0.1
+  m_HasExitTime: 0
+  m_HasFixedDuration: 1
+  m_CanTransitionToSelf: 1
+--- !u!1102 &1102000000100
+AnimatorState:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_Name: Idle
+  m_Speed: 1
+  m_Transitions: []
+  m_Position: {x: 300, y: 0, z: 0}
+  m_Motion: {fileID: 0}
+--- !u!1102 &1102000000101
+AnimatorState:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_Name: Spawn
+  m_Speed: 1
+  m_Transitions: []
+  m_Position: {x: 300, y: 120, z: 0}
+  m_Motion: {fileID: 0}
+--- !u!1102 &1102000000102
+AnimatorState:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_Name: AttackCast
+  m_Speed: 1
+  m_Transitions: []
+  m_Position: {x: 300, y: 240, z: 0}
+  m_Motion: {fileID: 0}
+--- !u!1102 &1102000000103
+AnimatorState:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_Name: Death
+  m_Speed: 1
+  m_Transitions: []
+  m_Position: {x: 300, y: 360, z: 0}
+  m_Motion: {fileID: 0}
+--- !u!1102 &1102000000104
+AnimatorState:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_Name: Walk
+  m_Speed: 1
+  m_Transitions: []
+  m_Position: {x: 300, y: 480, z: 0}
+  m_Motion: {fileID: 0}
+--- !u!1102 &1102000000105
+AnimatorState:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_Name: Ultimate
+  m_Speed: 1
+  m_Transitions: []
+  m_Position: {x: 300, y: 600, z: 0}
+  m_Motion: {fileID: 0}
+--- !u!1107 &1107000000200
+AnimatorStateMachine:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_Name: Base Layer
+  m_ChildStates:
+  - serializedVersion: 1
+    m_State: {fileID: 1102000000100}
+    m_Position: {x: 300, y: 100, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 1102000000101}
+    m_Position: {x: 300, y: 101, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 1102000000102}
+    m_Position: {x: 300, y: 102, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 1102000000103}
+    m_Position: {x: 300, y: 103, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 1102000000104}
+    m_Position: {x: 300, y: 104, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 1102000000105}
+    m_Position: {x: 300, y: 105, z: 0}
+  m_ChildStateMachines: []
+  m_AnyStateTransitions:
+  - {fileID: 1101000000300}
+  - {fileID: 1101000000301}
+  - {fileID: 1101000000302}
+  - {fileID: 1101000000303}
+  - {fileID: 1101000000304}
+  - {fileID: 1101000000305}
+  m_EntryTransitions: []
+  m_StateMachineTransitions: {}
+  m_DefaultState: {fileID: 1102000000100}

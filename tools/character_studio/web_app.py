@@ -23,8 +23,10 @@ from .paths import find_repo_root
 from .repository import CharacterRepository
 from .validation import ValidationError
 
+from assembly_studio.routes import create_assembly_router
+
 STATIC_DIR = Path(__file__).parent / "static"
-STUDIO_BUILD_ID = "20260701e"
+STUDIO_BUILD_ID = "20260701f"
 
 
 class CreateCharacterRequest(BaseModel):
@@ -39,6 +41,13 @@ class CharacterTexturesPayload(BaseModel):
     normal: str
     orm: str
     emissive: str | None = None
+
+
+class AssemblyRecipePayload(BaseModel):
+    unitId: str
+    baseId: str
+    parts: list[str] = Field(default_factory=list)
+    materialId: str
 
 
 class CharacterPayload(BaseModel):
@@ -60,6 +69,7 @@ class CharacterPayload(BaseModel):
     materialProfile: str | None = None
     behaviorProfile: str | None = None
     animatorController: str | None = None
+    assemblyRecipe: AssemblyRecipePayload | None = None
 
 
 def create_app(repo_root: Path | None = None) -> FastAPI:
@@ -182,10 +192,11 @@ def create_app(repo_root: Path | None = None) -> FastAPI:
     def get_content_asset(asset_path: str) -> FileResponse:
         path = resolve_character_asset(root, asset_path)
         media_type = mesh_media_type(path)
-        if path.suffix.lower() in {".png", ".jpg", ".jpeg"}:
+        if path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}:
             media_type = texture_media_type(path)
         return FileResponse(path, media_type=media_type)
 
+    app.include_router(create_assembly_router(root))
     app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
     return app
 

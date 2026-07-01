@@ -51,6 +51,15 @@ Output: `content/characters/library/exports/{unitId}.glb`
 
 Pure-Python GLB merge runs automatically when `bpy` is unavailable (CI).
 
+## Web API (§4)
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/assembly/library` | GET | Bases, parts, materials catalog |
+| `/api/assembly/export` | POST | Queue assemble job (recipe JSON) |
+| `/api/assembly/jobs/{id}` | GET | Poll job status |
+| `/api/assembly/exports/{unitId}/mesh` | GET | Download assembled GLB |
+
 ## Flow
 
 ```text

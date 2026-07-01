@@ -59,9 +59,24 @@ def validate_definition(defn: CharacterDefinition, existing_ids: set[str] | None
 
     errors.extend(_validate_mesh3d_fields(defn))
     errors.extend(_validate_rig_fields(defn))
+    errors.extend(_validate_assembly_recipe(defn))
 
     if errors:
         raise ValidationError(errors)
+
+
+def _validate_assembly_recipe(defn: CharacterDefinition) -> list[str]:
+    recipe = defn.assemblyRecipe
+    if recipe is None:
+        return []
+    errors: list[str] = []
+    if not recipe.unitId or not recipe.unitId.replace("_", "").isalnum():
+        errors.append("assemblyRecipe.unitId must be a lowercase identifier")
+    if recipe.baseId not in {"male", "female", "small", "large"}:
+        errors.append("assemblyRecipe.baseId must be male, female, small, or large")
+    if not recipe.materialId:
+        errors.append("assemblyRecipe.materialId is required")
+    return errors
 
 
 def _validate_rig_fields(defn: CharacterDefinition) -> list[str]:
@@ -77,9 +92,9 @@ def _validate_mesh3d_fields(defn: CharacterDefinition) -> list[str]:
     errors: list[str] = []
 
     if defn.assetMode == "mesh3d":
-        if not defn.mesh:
-            errors.append("mesh3d assetMode requires mesh path")
-        elif not defn.mesh.lower().endswith(".glb"):
+        if not defn.mesh and defn.assemblyRecipe is None:
+            errors.append("mesh3d assetMode requires mesh path or assemblyRecipe")
+        elif defn.mesh and not defn.mesh.lower().endswith(".glb"):
             errors.append("mesh path must be a .glb file")
 
     errors.extend(_validate_optional_glb_path(defn.meshShowcase, "meshShowcase"))

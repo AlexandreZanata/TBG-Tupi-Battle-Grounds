@@ -149,4 +149,6 @@ def texture_media_type(path: Path) -> str:
         return "image/png"
     if suffix in {".jpg", ".jpeg"}:
         return "image/jpeg"
+    if suffix == ".webp":
+        return "image/webp"
     return "application/octet-stream"

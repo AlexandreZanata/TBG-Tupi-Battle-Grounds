@@ -93,6 +93,9 @@
   background: var(--gray-100);
   border-radius: var(--radius-sm);
   margin-bottom: 0.35rem;
+  object-fit: cover;
+  width: 100%;
+  display: block;
 }
 
 .assembly-export-bar {

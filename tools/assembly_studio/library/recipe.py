@@ -49,8 +49,11 @@ def validate_recipe(data: dict[str, Any]) -> list[str]:
 
 def resolve_recipe(recipe_path: Path, repo_root: Path | None = None) -> AssemblyRecipe:
     repo = repo_root or Path(__file__).resolve().parents[3]
-    library = repo / "content" / "characters" / "library"
-    data = load_json(recipe_path)
+    return build_recipe(load_json(recipe_path), repo_root=repo)
+
+
+def build_recipe(data: dict[str, Any], *, repo_root: Path) -> AssemblyRecipe:
+    library = repo_root / "content" / "characters" / "library"
     errors = validate_recipe(data)
     if errors:
         raise ValueError(f"invalid recipe: {errors}")
