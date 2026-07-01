@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TBG Manual Assembly</title>
+  <link rel="stylesheet" href="/css/studio.css" />
+  <link rel="stylesheet" href="/css/assembly-studio.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar__inner">
+        <div class="brand">
+          <span class="brand__mark">TBG</span>
+          <div>
+            <h1>Manual Assembly</h1>
+            <p class="brand__sub">Esqueleto · materiais · posição manual das peças</p>
+          </div>
+        </div>
+        <nav class="topbar__nav">
+          <a class="topbar__link" href="/">Studio</a>
+          <a class="topbar__link" href="/assembly-studio.html">Assembler</a>
+          <a class="topbar__link topbar__link--active" href="/manual-assembly.html" aria-current="page">Manual</a>
+          <a class="topbar__link" href="/mixamo-preview.html">Mixamo</a>
+          <a class="topbar__link" href="/mblab-studio.html">MB-Lab</a>
+        </nav>
+        <span id="manualStatus" class="badge">carregando</span>
+      </div>
+    </header>
+
+    <main class="manual-layout">
+      <aside class="card panel manual-sidebar">
+        <section class="manual-section">
+          <h2>Base</h2>
+          <div id="baseList" class="manual-list"></div>
+        </section>
+        <section class="manual-section">
+          <h2>Esqueleto (TBG)</h2>
+          <label class="manual-check"><input type="checkbox" id="btnSkeleton" checked /> Mostrar ossos</label>
+          <div id="boneList" class="manual-list manual-list--scroll"></div>
+        </section>
+        <section class="manual-section">
+          <h2>Materiais</h2>
+          <div id="materialList" class="manual-list"></div>
+        </section>
+      </aside>
+
+      <section class="card panel manual-viewport-wrap">
+        <header class="panel__head">
+          <h2>Viewport</h2>
+          <div class="manual-tools">
+            <button class="btn btn--sm" id="btnMove" type="button" title="Mover (G)">Mover</button>
+            <button class="btn btn--sm" id="btnRotate" type="button" title="Girar (R)">Girar</button>
+            <button class="btn btn--sm" id="btnScale" type="button" title="Escala (S)">Escala</button>
+          </div>
+        </header>
+        <div id="viewport" class="manual-viewport"></div>
+        <p class="panel__meta">1) Clique num osso · 2) Clique numa peça · 3) Ajuste com Mover/Girar/Escala · 4) Export</p>
+      </section>
+
+      <aside class="card panel manual-sidebar">
+        <section class="manual-section">
+          <h2>Peças</h2>
+          <div id="partList" class="manual-list manual-list--scroll"></div>
+        </section>
+        <section class="manual-section">
+          <h2>Export</h2>
+          <div class="field">
+            <label for="unitId">Unit id</label>
+            <input id="unitId" class="input" value="demo_male_sword_01" autocomplete="off" />
+          </div>
+          <button class="btn btn--primary" id="btnExport" type="button">Exportar GLB</button>
+          <p id="exportLink" class="panel__meta"></p>
+        </section>
+      </aside>
+    </main>
+  </div>
+  <script type="module" src="/js/assembly-studio/manualApp.js"></script>
+</body>
+</html>

@@ -49,7 +49,7 @@ namespace TBG.CharacterLibrary
                 Id = record.id,
                 CharacterName = record.characterName,
                 AssetMode = ParseAssetMode(record.assetMode),
-                MeshPath = record.mesh,
+                MeshPath = AssemblyMeshPath.Resolve(record),
                 MeshShowcasePath = record.meshShowcase,
                 AnimationSetId = record.animationSet,
                 GameLod = GameLodSettings.FromRecord(record.gameLod),

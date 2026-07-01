@@ -1,5 +1,7 @@
-# Optional project-specific overrides (not part of harness)
+# Local workspace (tasks, overrides, artifacts)
 .local/
+
+# Ephemeral Cursor task rules
 .cursor/rules/_task-active.mdc
 
 # Environment and secrets
@@ -12,10 +14,9 @@
 .idea/
 *.swp
 
-# Blender rig templates (generated via tools/blender/setup.sh)
-tools/blender/templates/*.blend
-content/characters/meshes/.tmp/
+# Python
 .venv/
 venv/
 __pycache__/
 *.pyc
+.pytest_cache/

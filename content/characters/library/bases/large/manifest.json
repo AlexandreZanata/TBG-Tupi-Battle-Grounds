@@ -1,8 +1,0 @@
-{
-  "id": "large",
-  "label": "Large body",
-  "heightM": 2.1,
-  "bodyClass": "HumanoidHeavy",
-  "mesh": "body.glb",
-  "rig": "../../rigs/large/armature.glb"
-}

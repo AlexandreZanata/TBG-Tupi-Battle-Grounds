@@ -1,35 +1,42 @@
-# TBG Unity Project
+# Unity client — Phase 05
 
-Open `unity/` as a Unity 2022.3 LTS project.
+`Packages/com.tbg.character-library` restored from archive with **assembly export** support.
 
-## Character Library (Phase 02)
+## Assembly recipe (§5)
 
-UPM package: `Packages/com.tbg.character-library/`
+`CharacterDefinition` JSON may include optional `assemblyRecipe`:
 
-```csharp
-var catalog = new TBG.CharacterLibrary.CharacterCatalog();
-var instance = catalog.Spawn("tank_human_01", parentTransform);
+```json
+{
+  "id": "assembled_guard_01",
+  "assetMode": "mesh3d",
+  "animationSet": "humanoid_heavy_combat_v1",
+  "assemblyRecipe": {
+    "unitId": "test_male_head_sword",
+    "baseId": "male",
+    "parts": ["head_round_01", "weapon_sword_01"],
+    "materialId": "default"
+  }
+}
 ```
 
-- **Procedural** units use `ProceduralCharacterBuilder` from `TBG.CharacterSystem`.
-- **Mesh3D** units use `Mesh3DCharacterFactory` (glTFast import, materials, animator).
-- glTFast resolves via OpenUPM (`com.atteneder.gltfast`).
+`Mesh3DCharacterFactory` resolves mesh path to `content/characters/library/exports/{unitId}.glb`.
 
-See [com.tbg.character-library/README.md](Packages/com.tbg.character-library/README.md).
-
-## Character Studio
-
-1. Open scene `Assets/TBG/CharacterSystem/Scenes/CharacterStudioTest.unity`
-2. Menu **TBG → Character Studio**
-3. Definitions read/write `content/characters/definitions/*.json` at repo root
-
-## Headless pipeline (CI)
+## Tests
 
 ```bash
-./scripts/verify.sh
-python3 -m tools.character_studio export-all-cards
+# Generate export GLB first (from repo root)
+./scripts/seed_library.sh
+PYTHONPATH=tools python3 -m assembly_studio.library.assemble_gltf  # or POST /api/assembly/export
+
+# Unity EditMode (requires Unity 2022+ project wired to repo root)
+# See archive/unity for full project; package tests in:
+# unity/Packages/com.tbg.character-library/Tests/AssemblyExportSpawnTests.cs
 ```
 
-Card PNGs are also exportable from Unity via **Export Card** when `CardRenderer` is in scene.
+`AssemblyExportSpawnTests.Create_AssembledExport_HasAnimatorAndWalkClip` ignores when export GLB is missing.
 
-Unity EditMode tests (`TBG.CharacterLibrary.Tests`) require the Unity Editor or batchmode CLI.
+## Related
+
+- [modular-character-assembler.md](../docs/design/modular-character-assembler.md)
+- [assembly_studio README](../tools/assembly_studio/README.md)

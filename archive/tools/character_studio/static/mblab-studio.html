@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TBG MB-Lab Studio</title>
+  <link rel="stylesheet" href="/css/studio.css" />
+  <link rel="stylesheet" href="/css/assembly-studio.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar__inner">
+        <div class="brand">
+          <span class="brand__mark">TBG</span>
+          <div>
+            <h1>MB-Lab Studio</h1>
+            <p class="brand__sub">Instant browser morphs · HQ Blender export</p>
+          </div>
+        </div>
+        <nav class="topbar__nav">
+          <a class="topbar__link" href="/">Studio</a>
+          <a class="topbar__link" href="/assembly-studio.html">Assembler</a>
+          <a class="topbar__link" href="/manual-assembly.html">Manual</a>
+          <a class="topbar__link" href="/mixamo-preview.html">Mixamo</a>
+          <a class="topbar__link" href="/mixamo-edit.html">Mixamo Edit</a>
+          <a class="topbar__link topbar__link--active" href="/mblab-studio.html" aria-current="page">MB-Lab</a>
+        </nav>
+        <span id="mblabStatus" class="badge">loading</span>
+      </div>
+    </header>
+
+    <main class="assembly-layout mblab-layout">
+      <aside class="card panel">
+        <header class="panel__head">
+          <h2>Body</h2>
+          <span class="panel__meta">MB-Lab morphs</span>
+        </header>
+        <form id="mblabForm" class="mblab-form">
+          <label class="mblab-field">
+            <span>Export unit ID</span>
+            <input id="unitId" name="unitId" type="text" value="mblab_preview_01" pattern="[a-z0-9_]+" required />
+          </label>
+          <label class="mblab-field">
+            <span>Base archetype</span>
+            <select id="baseId" name="baseId">
+              <option value="male">Male (1.8 m)</option>
+              <option value="female">Female (1.65 m)</option>
+              <option value="small">Small (1.2 m)</option>
+              <option value="large">Large (2.1 m)</option>
+            </select>
+          </label>
+          <div class="mblab-slider">
+            <label for="age">Age</label>
+            <input id="age" type="range" min="0" max="100" value="30" />
+            <output id="ageOut">0.30</output>
+          </div>
+          <div class="mblab-slider">
+            <label for="bodyMass">Body mass</label>
+            <input id="bodyMass" type="range" min="0" max="100" value="50" />
+            <output id="bodyMassOut">0.50</output>
+          </div>
+          <div class="mblab-slider">
+            <label for="muscles">Muscles</label>
+            <input id="muscles" type="range" min="0" max="100" value="40" />
+            <output id="musclesOut">0.40</output>
+          </div>
+          <div class="mblab-slider">
+            <label for="stature">Stature</label>
+            <input id="stature" type="range" min="0" max="100" value="50" />
+            <output id="statureOut">0.50</output>
+          </div>
+          <label class="manual-check">
+            <input id="blenderSync" type="checkbox" />
+            HQ Blender sync (slow — for GLB download quality)
+          </label>
+          <label class="manual-check">
+            <input id="promoteToLibrary" type="checkbox" />
+            Overwrite library base on Generate
+          </label>
+          <button type="submit" class="btn btn--primary" id="generateBtn">Generate now</button>
+        </form>
+        <p id="templateHint" class="panel__meta" style="margin-top:1rem"></p>
+      </aside>
+
+      <section class="card panel">
+        <header class="panel__head">
+          <h2>Viewport</h2>
+          <span class="panel__meta">Drag to orbit · <a href="/mixamo-preview.html">Mixamo clips</a> for walk/mocap</span>
+        </header>
+        <div id="viewport" class="assembly-viewport"></div>
+      </section>
+
+      <aside class="card panel mblab-side">
+        <header class="panel__head">
+          <h2>Look</h2>
+          <span class="panel__meta">Skin & gear color</span>
+        </header>
+        <div id="lookPanel" class="mblab-look-panel"></div>
+
+        <header class="panel__head" style="margin-top:1rem">
+          <h2>Head</h2>
+          <span class="panel__meta">MB-Lab face morphs</span>
+        </header>
+        <div id="headMorphPanel" class="mblab-head-panel"></div>
+
+        <header class="panel__head" style="margin-top:1rem">
+          <h2>Accessories</h2>
+          <span class="panel__meta">Socket attach · TBG skeleton</span>
+        </header>
+        <p class="panel__meta">Use <strong>MB-Lab hair</strong> — adapts to body/head sliders. Box placeholders hidden.</p>
+        <div id="partsPanel" class="mblab-parts-panel"></div>
+
+        <header class="panel__head" style="margin-top:1rem">
+          <h2>Export GLB</h2>
+        </header>
+        <div class="mblab-export-bar">
+          <button type="button" class="btn btn--primary btn--sm" id="btnDownloadBody">Download body GLB</button>
+          <button type="button" class="btn btn--sm" id="btnExportAssembled">Export body + gear</button>
+        </div>
+        <p class="panel__meta">
+          Body = morphed MB-Lab mesh (enable HQ Blender sync first). Assembled = library base + accessories + preset colors.
+        </p>
+      </aside>
+    </main>
+  </div>
+  <script type="module" src="/js/mblab-studio/mblabApp.js"></script>
+</body>
+</html>

@@ -1,8 +1,0 @@
-{
-  "id": "male",
-  "label": "Male body",
-  "heightM": 1.8,
-  "bodyClass": "HumanoidLight",
-  "mesh": "body.glb",
-  "rig": "../../rigs/male/armature.glb"
-}

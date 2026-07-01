@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TBG Mixamo Preview</title>
+  <link rel="stylesheet" href="/css/studio.css" />
+  <link rel="stylesheet" href="/css/assembly-studio.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar__inner">
+        <div class="brand">
+          <span class="brand__mark">TBG</span>
+          <div>
+            <h1>Mixamo Preview</h1>
+            <p class="brand__sub">FBX imports · preview before editing in Blender</p>
+          </div>
+        </div>
+        <nav class="topbar__nav">
+          <a class="topbar__link" href="/">Studio</a>
+          <a class="topbar__link" href="/assembly-studio.html">Assembler</a>
+          <a class="topbar__link" href="/manual-assembly.html">Manual</a>
+          <a class="topbar__link" href="/mixamo-preview.html">Mixamo</a>
+          <a class="topbar__link" href="/mixamo-edit.html">Mixamo Edit</a>
+          <a class="topbar__link" href="/mblab-studio.html">MB-Lab</a>
+        </nav>
+        <span id="mixamoStatus" class="badge">loading</span>
+      </div>
+    </header>
+
+    <main class="assembly-layout">
+      <aside class="card panel">
+        <header class="panel__head">
+          <h2>Characters</h2>
+          <span class="panel__meta">Mixamo → GLB</span>
+        </header>
+        <div id="charList" class="manual-list"></div>
+        <p class="panel__meta" style="margin-top:1rem">
+          Missing? Run <code>./scripts/import-mixamo-studio.sh</code>
+        </p>
+      </aside>
+
+      <section class="card panel">
+        <header class="panel__head">
+          <h2>Viewport</h2>
+          <span class="panel__meta">Drag to orbit</span>
+        </header>
+        <div id="viewport" class="assembly-viewport"></div>
+      </section>
+
+      <aside class="card panel">
+        <header class="panel__head">
+          <h2>Animation</h2>
+          <span class="panel__meta">Mixamo baked clips</span>
+        </header>
+        <label class="mblab-field">
+          <span>Clip</span>
+          <select id="clipSelect" disabled>
+            <option value="">—</option>
+          </select>
+        </label>
+        <div class="mblab-export-bar" style="margin-top:0.75rem">
+          <button type="button" class="btn btn--primary btn--sm" id="btnPlayClip">Play loop</button>
+          <button type="button" class="btn btn--sm" id="btnStopClip">Stop</button>
+        </div>
+        <p class="panel__meta" style="margin-top:1rem">
+          Drop FBX in <code>content/characters/imports/mixamo/raw/</code>, then
+          <code>./scripts/import-mixamo-studio.sh</code>
+        </p>
+      </aside>
+
+      <aside class="card panel">
+        <header class="panel__head">
+          <h2>Edit in Blender</h2>
+        </header>
+        <ol class="rig-lead" id="editSteps">
+          <li>Open source FBX: <code id="fbxPath">—</code></li>
+          <li>Edit mesh (Tab) or materials (Shading)</li>
+          <li>Re-export: <code>./scripts/import-mixamo-studio.sh</code></li>
+          <li>Refresh this page</li>
+        </ol>
+        <p class="panel__meta">Full guide: <code>content/characters/imports/mixamo/README.md</code></p>
+      </aside>
+    </main>
+  </div>
+  <script type="module" src="/js/mixamo-preview/mixamoApp.js"></script>
+</body>
+</html>

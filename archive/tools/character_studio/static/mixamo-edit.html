@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TBG Mixamo Edit</title>
+  <link rel="stylesheet" href="/css/studio.css" />
+  <link rel="stylesheet" href="/css/assembly-studio.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+    }
+  }
+  </script>
+  <style>
+    .align-hint { font-size: 0.85rem; color: var(--muted, #6b6560); margin: 0.5rem 0 0; }
+    .align-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .align-grid label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; }
+    .align-grid input[type="number"] { width: 100%; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar__inner">
+        <div class="brand">
+          <span class="brand__mark">TBG</span>
+          <div>
+            <h1>Mixamo Edit</h1>
+            <p class="brand__sub">Position Mixamo rig inside your skin · join · TBG export</p>
+          </div>
+        </div>
+        <nav class="topbar__nav">
+          <a class="topbar__link" href="/mixamo-preview.html">Mixamo</a>
+          <a class="topbar__link topbar__link--active" href="/mixamo-edit.html" aria-current="page">Mixamo Edit</a>
+          <a class="topbar__link" href="/mblab-studio.html">MB-Lab</a>
+        </nav>
+        <span id="editStatus" class="badge">loading</span>
+      </div>
+    </header>
+
+    <main class="assembly-layout mblab-layout">
+      <aside class="card panel">
+        <header class="panel__head">
+          <h2>1 · Align</h2>
+          <span class="panel__meta">Skin ghost + Mixamo rig</span>
+        </header>
+        <form id="alignForm" class="mblab-form">
+          <label class="mblab-field">
+            <span>Mixamo rig FBX</span>
+            <select id="mixamoFbx" required></select>
+          </label>
+          <label class="mblab-field">
+            <span>Your skin (GLB)</span>
+            <input id="customMeshFile" type="file" accept=".glb" required />
+          </label>
+          <button type="button" class="btn btn--sm" id="btnLoadAlign">Load align preview</button>
+        </form>
+        <div class="mblab-slider" style="margin-top:0.75rem">
+          <label for="skinOpacity">Skin opacity (ghost)</label>
+          <input id="skinOpacity" type="range" min="8" max="90" value="38" />
+          <output id="skinOpacityOut">0.38</output>
+        </div>
+        <div class="mblab-slider" style="margin-top:0.75rem">
+          <label for="skeletonSize">Skeleton size</label>
+          <input id="skeletonSize" type="range" min="25" max="300" value="100" />
+          <output id="skeletonSizeOut">1.00×</output>
+        </div>
+        <p class="align-hint">Uniform scale on X/Y/Z · feet stay on the grid.</p>
+        <header class="panel__head" style="margin-top:0.75rem">
+          <h2 style="font-size:1rem">Body proportions</h2>
+          <span class="panel__meta">Rest-pose bone tweak · T-pose</span>
+        </header>
+        <div class="mblab-slider">
+          <label for="hipWidth">Hip / leg spread</label>
+          <input id="hipWidth" type="range" min="50" max="200" value="100" />
+          <output id="hipWidthOut">1.00×</output>
+        </div>
+        <div class="mblab-slider">
+          <label for="shoulderWidth">Shoulder spread</label>
+          <input id="shoulderWidth" type="range" min="50" max="200" value="100" />
+          <output id="shoulderWidthOut">1.00×</output>
+        </div>
+        <div class="mblab-slider">
+          <label for="torsoDepth">Torso depth (flatten)</label>
+          <input id="torsoDepth" type="range" min="50" max="200" value="100" />
+          <output id="torsoDepthOut">1.00×</output>
+        </div>
+        <p class="align-hint">Adjusts bind pose only — Mixamo clips still work after Join.</p>
+        <div class="align-grid" style="margin-top:0.5rem">
+          <label>Rig X<input id="rigX" type="number" step="0.01" value="0" /></label>
+          <label>Rig Y<input id="rigY" type="number" step="0.01" value="0" /></label>
+          <label>Rig Z<input id="rigZ" type="number" step="0.01" value="0" /></label>
+        </div>
+        <div class="mblab-export-bar" style="margin-top:0.75rem">
+          <button type="button" class="btn btn--sm" id="btnModeMove">Move rig</button>
+          <button type="button" class="btn btn--sm" id="btnResetRig">Reset rig</button>
+        </div>
+
+        <header class="panel__head" style="margin-top:1.25rem">
+          <h2>2 · Join</h2>
+        </header>
+        <form id="editForm" class="mblab-form">
+          <label class="mblab-field">
+            <span>Unit ID</span>
+            <input id="unitId" value="ybot_skin_01" pattern="[a-z0-9_]+" required />
+          </label>
+          <label class="mblab-field">
+            <span>Label</span>
+            <input id="label" value="Y Bot skin hero" maxlength="80" />
+          </label>
+          <div class="mblab-slider">
+            <label for="heightScale">Height multiplier (join)</label>
+            <input id="heightScale" type="range" min="50" max="200" value="100" />
+            <output id="heightScaleOut">1.00</output>
+          </div>
+          <button type="submit" class="btn btn--primary" id="btnBuild">Join models (Blender)</button>
+        </form>
+      </aside>
+
+      <section class="card panel">
+        <header class="panel__head">
+          <h2>Viewport</h2>
+          <span class="panel__meta">Align preview · joined model + walk test</span>
+        </header>
+        <div id="viewport" class="assembly-viewport"></div>
+      </section>
+
+      <aside class="card panel mblab-side">
+        <header class="panel__head">
+          <h2>Projects</h2>
+        </header>
+        <div id="projectList" class="manual-list"></div>
+        <div class="mblab-export-bar" style="margin-top:0.75rem">
+          <button type="button" class="btn btn--primary btn--sm" id="btnExportProject" disabled>Export GLB</button>
+          <button type="button" class="btn btn--sm" id="btnRemoveProject" disabled>Remove</button>
+        </div>
+        <header class="panel__head" style="margin-top:1rem">
+          <h2>Test walk</h2>
+          <span class="panel__meta">Walking.fbx after Join</span>
+        </header>
+        <select id="clipSelect" disabled><option value="">—</option></select>
+        <div class="mblab-export-bar" style="margin-top:0.75rem">
+          <button type="button" class="btn btn--primary btn--sm" id="btnPlayClip">Play</button>
+          <button type="button" class="btn btn--sm" id="btnStopClip">Stop</button>
+        </div>
+      </aside>
+    </main>
+  </div>
+  <script type="module" src="/js/mixamo-edit/mixamoEditApp.js"></script>
+</body>
+</html>

@@ -1,40 +1,60 @@
-# Archive — legacy TBG character pipeline
+# Archive — legacy TBG project
 
-> **Not part of the active repo.** Backup only — 755+ files.  
-> **Active work:** [modular character assembler](../docs/design/modular-character-assembler.md)
+> **Not part of the active repo.** Backup only.  
+> **Active repo:** Agent Harness + `.local/` tasks only.
 
-Do **not** import from `archive/` in CI, runtime, or new code.
+Do **not** import from `archive/` in CI, runtime, or new code unless a task explicitly restores a path.
 
-## Contents
+## Archived 2026-07-01 (full project pivot)
 
-| Path | What was archived |
-|------|-------------------|
-| `content/characters/seed-glb-pipeline/` | 26 `demo_*` seed units, meshes, rig-sessions |
-| `content/characters/` | animations, behaviors, materials, textures, cards, meshes-legacy |
-| `tools/blender/` | Walk/attack bake, rig, retarget, export |
-| `tools/mesh-pipeline/` + `mesh_pipeline/` | Game GLB batch, weight gate, validate |
-| `tools/auto_rig/` | Browser Rig Studio Blender jobs |
-| `tools/animation_sets/` | Placeholder clip generator |
-| `tools/material-maker/` | PBR texture export |
-| `tools/unity/` | Animator controller scripts |
-| `character_studio/` | Rig / Animation / Arena / Showcase UI + rig API |
-| `character_studio/static-js/` | Three.js viewer, behavior playback |
-| `unity/` | Full Unity client + `com.tbg.character-library` package |
-| `tests/` | Blender, mesh, behavior, material-maker, docs tests |
-| `docs/` | ADR-003–006, Phase 02–04b design specs, research |
-| `.local/phases/04b-*` | Superseded agent tasks |
+All application code moved here. Root keeps harness symlinks, `AGENTS.md`, `.cursor/rules/`, and `archive/`.
 
-## Active replacement
+| Path | Contents |
+|------|----------|
+| `content/` | JSON definitions only — **GLB/FBX assets stripped** (see below) |
+| `THIRD_PARTY_NOTICES.md` | MB-Lab + Mixamo notices (binaries removed) |
+| `docs/` | ADRs, architecture, design specs, glossary |
+| `tools/` | Assembly Studio, Character Studio, Blender scripts, MB-Lab glue |
+| `tests/` | Assembly studio, character studio, behavior contracts |
+| `unity/` | Unity client placeholder + `com.tbg.character-library` |
+| `scripts/` | verify.sh, studio, MB-Lab, Mixamo import scripts |
+| ~~`third_party/`~~ | MB-Lab — **deleted** (~279 MB) |
+| `character_studio/` | Legacy Rig / Animation / Arena UI (pre-pivot) |
+| `.local/` | Phases 01–05 agent tasks, rig-studio sessions, tmp |
+| `.cursor/skills/` | Project-specific Cursor skills (e.g. walk animation) |
+| `pytest.ini` | Former test config (`testpaths = archive/tests` if re-run) |
 
-```text
-content/characters/library/     modular bases + parts
-tools/assembly_studio/          Blender merge (rebuild)
-tools/character_studio/         JSON CRUD + Assembly Studio HTML
-unity/README.md                 placeholder — client rebuild Phase 04
-```
+## Earlier archive (pre-2026-07-01)
+
+| Path | Notes |
+|------|-------|
+| `content/characters/seed-glb-pipeline/` | Phase 04b seed units |
+| `tools/blender/` | Walk bake, retarget, rig scripts |
+| `docs/adr/003–006` | Superseded ADRs |
+
+## Stripped assets (2026-07-01)
+
+Removed from git to shrink the repo (~3.5 GB):
+
+- `third_party/MB-Lab/` — re-vendor from upstream tag `1_8_1`
+- `content/characters/seed-glb-pipeline/` — seed GLB units
+- `content/characters/imports/mixamo/` — Mixamo FBX downloads
+- `content/characters/library/` — assembled GLB exports
+- `content/characters/mblab/` — MB-Lab blend templates
+- `.local/tmp/`, `.local/rig-studio/` — local Blender sessions
+
+Code, docs, and JSON configs remain under `archive/`.
 
 ## Restore one file
 
 ```bash
-cp archive/tools/blender/RIG-SPEC.md tools/assembly_studio/blender/
+cp archive/docs/GLOSSARY.md ../docs/GLOSSARY.md   # after creating docs/ again
+cp archive/scripts/verify.sh ../scripts/verify.sh
+```
+
+## Run archived tests (optional)
+
+```bash
+pip install -r archive/tools/requirements.txt
+pytest -c archive/pytest.ini archive/tests/
 ```

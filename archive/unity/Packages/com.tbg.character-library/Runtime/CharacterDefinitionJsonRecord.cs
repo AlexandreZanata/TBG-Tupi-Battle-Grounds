@@ -23,6 +23,15 @@ namespace TBG.CharacterLibrary
     }
 
     [Serializable]
+    public sealed class AssemblyRecipeRecord
+    {
+        public string unitId;
+        public string baseId;
+        public string[] parts;
+        public string materialId;
+    }
+
+    [Serializable]
     public sealed class CharacterDefinitionJsonRecord
     {
         public string id;
@@ -38,6 +47,7 @@ namespace TBG.CharacterLibrary
         public string materialProfile;
         public string behaviorProfile;
         public string animatorController;
+        public AssemblyRecipeRecord assemblyRecipe;
         public float heightScale = 1f;
         public float bodyWidthScale = 1f;
         public float headScale = 1f;

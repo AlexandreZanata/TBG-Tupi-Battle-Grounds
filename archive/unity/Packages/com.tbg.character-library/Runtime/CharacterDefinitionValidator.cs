@@ -88,6 +88,11 @@ namespace TBG.CharacterLibrary
                 return;
             }
 
+            if (AssemblyMeshPath.HasRecipe(record))
+            {
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(record.mesh))
             {
                 errors.Add("mesh3d assetMode requires mesh path");

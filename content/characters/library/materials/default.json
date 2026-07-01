@@ -1,6 +1,0 @@
-{
-  "id": "default",
-  "label": "Default palette",
-  "body": { "baseColorFactor": [0.72, 0.68, 0.62, 1.0] },
-  "parts": { "baseColorFactor": [0.55, 0.52, 0.48, 1.0] }
-}
