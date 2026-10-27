@@ -1,164 +1,126 @@
 # AGENTS.md — TBG 2.0 (Tupi Battle Grounds)
 
-> **Read this first** in any new agent session (Cursor, Claude Code, Codex,
-> Windsurf, OpenCode, etc.). This repo is the **TBG 2.0 game workspace**:
-> an AI-built indie browser game plus its authoritative Rust server.
-> `archive/` holds the retired implementation (read-only backup).
+The only instruction file for every coding agent (Codex, Claude Code,
+OpenCode, Cursor). Read it, then read only what your task needs.
 
-**Language:** 100% English — code, comments, docs, commits, and all agent output.
+## Mission
 
-**Prime directive:** TBG 2.0 is an AI-built indie game, not enterprise
-software. Optimize for **speed + visual quality + fun + functional
-multiplayer + low cost**. Default behavior: **implement, verify, report,
-continue.** Full policy: [`docs/AI-FIRST-MVP.md`](docs/AI-FIRST-MVP.md).
+Ship a beautiful, fun, real-time 1v1 browser strategy game with a Rust
+authoritative server, built mostly by AI agents, at minimal running cost.
+**A playable game is the goal. Infrastructure is not.** This is an indie
+MVP, not enterprise software: speed, visual quality, fun, working
+multiplayer, low cost.
 
----
+## Map
 
-## 1. What this repo is
+| Path | Contents |
+|------|----------|
+| `docs/GAME-DESIGN.md` | Canon: pillars, glossary, numbered rules, MVP values, fun metrics |
+| `docs/ARCHITECTURE.md` | Stack, crate boundaries, simulation/network model, art pipeline, budgets, deploy, scaling |
+| `docs/ROADMAP.md` | Phases, tasks with tiers and acceptance criteria, the next task |
+| `docs/DECISIONS.md` | Why the big choices were made and what reopens them |
+| `crates/tbg-core` | Deterministic rules, content tables, bot, protocol (shared) |
+| `crates/tbg-client` | Bevy client → WASM/WebGL2 |
+| `crates/tbg-server` | Axum/Tokio authoritative server |
+| `archive/` | Legacy project, read-only (`archive/ARCHIVE-MANIFEST.md`) |
 
-| Is | Is not |
-|----|--------|
-| AI-built browser game (Bevy → WASM/WebGL2) + authoritative Rust server | Enterprise software; Unity/Nakama/Python app |
-| MVP/pre-release: playable 1v1 first, polish early, harden later | Perfect, exhaustively tested, webscale system |
-| Rust workspace: `tbg-core`, `tbg-protocol`, `tbg-client`, `tbg-server`, `tbg-assets` | Microservices, Kubernetes, distributed infra |
+## Non-negotiables
 
-**Authoritative references, in order:** game rules
-(`docs/game-design/`) → AI-first policy (`docs/AI-FIRST-MVP.md`) →
-architecture (`docs/architecture/`) → roadmap (`docs/ROADMAP.md`) →
-decisions (`docs/decisions/`).
+1. **Game rules.** `docs/GAME-DESIGN.md` is canon. Use glossary terms
+   exactly (`BattleLine`, `PlayerIntention`, `SlotCount`, `Archetype`,
+   `Faction`, `Energy`, `Shop`, `Evolution`, `Synergy`, `Stronghold`); no
+   synonyms. Change a rule or number only when your task says so; any new
+   value goes into GAME-DESIGN marked **Proposed** in the same commit.
+2. **Authority.** The server decides combat, `Energy`, shop, evolution,
+   and outcomes. Clients send `PlayerIntention`s only. The seat comes from
+   the connection, never from message content.
+3. **Crate boundaries** (ARCHITECTURE §3). `tbg-core`: no I/O, graphics,
+   async, clocks, floats in simulation state, unseeded randomness, or
+   `HashMap` iteration in the simulation. `tbg-server`: never Bevy.
+   `tbg-client`: never decides online outcomes.
+4. **Security baseline.** No secrets in git. Validate and size-limit every
+   inbound message; never panic on client input; rate limits and
+   timeouts as specified; TLS for anything public.
+5. **Archive.** Never import from, edit, or delete `archive/`.
+6. **Git.** Never push, force-push, or rewrite history. One logical change
+   per commit. No build outputs or large binaries in git.
+7. **English only** in code, comments, docs, and commits.
 
----
+## How to work a task
 
-## 2. AI autonomy (agents do the work)
+1. Pick a task ID from `docs/ROADMAP.md`. Read the files and doc sections
+   it names — not the whole repository, and not `archive/` unless the
+   task needs legacy material.
+2. Climb the YAGNI ladder (adapted from Ponytail, MIT) and stop at the
+   first rung that holds: Does this need to exist? Does the repo already
+   have it? Does `std` or an existing dependency do it? Can it be one
+   line? Only then write the minimum code that works.
+3. Implement the smallest change that meets the task's *Done when*.
+4. Verify (below) and look at the behavior yourself.
+5. Commit, tick the roadmap box with the commit hash, and report: what
+   changed, the commands you ran with their results, and known limitations.
+6. Stuck after two honest attempts: write a three-line `> blocked:` note
+   under the task (tried / exact error / suspected cause) and escalate one
+   tier. Do not keep retrying the same approach.
 
-AI agents own architecture within project boundaries, Rust, WASM/Bevy,
-multiplayer, gameplay, UI/UX, procedural assets, validation, debugging,
-and necessary docs — working autonomously from spec to verified code.
+## Autonomy
 
-- Decide routine engineering questions independently; reuse libraries
-  instead of reinventing; simplest solution that satisfies the requirement.
-- Resolve compilation errors autonomously; no architecture bake-offs
-  when a reasonable choice exists; no planning documents for small tasks.
-- Never stop at code and never declare success without evidence.
-- Ask humans only for: major product decisions, irreversible operations,
-  missing essential requirements, genuinely conflicting constraints.
+Make routine engineering decisions yourself: libraries within the stack,
+module layout inside a crate, naming, refactors your task needs. Ask a
+human only for: game-rule or product changes, anything paid or
+irreversible (VPS, domain, license, deleting data), subjective sign-off on
+look and fun, or requirements that genuinely conflict.
 
----
+## Cost-aware model use
 
-## 3. MVP-first delivery
+| Tier | Use for |
+|------|---------|
+| Cheap | Content tables, roster art specs, boilerplate, focused tests, docs, small fixes |
+| Mid | Features with a clear spec: HUD, lobby, VFX, shop, synergy |
+| Strong | Architecture, simulation core and combat, networking and concurrency, WASM/build failures, security review, bugs that resist two attempts |
 
-Build only what the current milestone requires (`docs/ROADMAP.md`).
-Working features beat perfect unfinished ones; visible progress every
-phase. No microservices, Kubernetes, distributed DBs, caching layers,
-enterprise patterns, generic frameworks, complex monitoring, scaling
-systems, speculative features, or test frameworks heavier than the
-feature. Localized, understood tech debt is acceptable when it does not
-block the next milestone. Build order: arena → units → auto-combat →
-two-player connection → authoritative sim → playable 1v1 → polish.
+Spend tokens on running the compiler and tests, not on re-reading files
+or repeated AI reviews. Never run two agents on the same task.
 
----
+## Code standards
 
-## 4. Minimal verification (no coverage gates)
+- Function ≤ 80 lines, file ≤ 200 lines, cyclomatic complexity ≤ 10.
+  Split instead of nesting. Content tables are exempt from the file cap.
+- Each module starts with a `//!` line stating its responsibility.
+  Comments explain *why*, not *what*.
+- No new dependency without a one-line reason comment in `Cargo.toml`.
+- No trait, generic, or layer for a single implementation; no frameworks.
+- No `unwrap`/`expect` on network input or other untrusted data.
+- Mark deliberate shortcuts with a `ponytail:` comment naming the limit
+  and the upgrade path.
 
-No coverage percentages, no exhaustive suites, no test-per-feature
-mandate. Prefer one meaningful gameplay smoke test over dozens of
-low-value tests. Verify per change: compiles, existing checks pass,
-behavior works, full match can finish (gameplay), two real clients play
-a full match incl. reconnect (multiplayer), assets import/play/look
-right on mobile. Focused regression tests only where meaningfully
-protective. Never skip correctness where player data, fairness, or
-multiplayer results are at stake.
+## Tests (proportional to risk)
 
----
+Write tests where competitive correctness is at stake: determinism,
+`Energy`, shop, evolution, synergy, outcomes, protocol validation, seat
+ownership. Assert the documented contract (cite the rule ID), not the
+implementation. One meaningful scenario beats ten trivial assertions. No
+coverage targets. Never delete a useful test to make a change pass.
 
-## 5. Pragmatic security baseline (mandatory, minimal)
+## Verification
 
-Never expose secrets. Never trust client-reported damage, energy,
-inventory, or victories — simulation stays server-authoritative with
-validated messages, size/resource limits, and basic rate limits. No
-cross-player session control; HTTPS/WSS publicly; no unsafe DB
-operations or obvious injection flaws; no known critical
-vulnerabilities shipped. Advanced anticheat, fraud detection, and
-enterprise identity wait until after gameplay validation.
+```bash
+cargo fmt --all -- --check
+cargo clippy --workspace -- -D warnings
+cargo test --workspace
+cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+```
 
----
+Add per change type: client change → `trunk build --release` in
+`crates/tbg-client/` and look at the page in a browser; visual change →
+gallery screenshots at desktop and phone size; multiplayer change → two
+clients finish a match, including a reconnect. A native build never
+proves browser compatibility. Never claim a check you did not run; quote
+failures exactly.
 
-## 6. Business rules (game domain — never reinterpret)
+## Definition of done
 
-- Ubiquitous language is mandatory: [`docs/game-design/GLOSSARY.md`](docs/game-design/GLOSSARY.md).
-  Use `BattleLine`, `PlayerIntention`, `SlotCount`, `Archetype`, `Faction`,
-  `Energy`, `Shop`, `Evolution`, `Synergy` exactly. Never invent synonyms.
-- Numbered rules in [`docs/game-design/BUSINESS-RULES.md`](docs/game-design/BUSINESS-RULES.md)
-  (confirmed / adapted / proposed / retired). Never invent balance numbers.
-- `tbg-core` owns the domain; `tbg-server` runs it authoritatively;
-  `tbg-client` renders and predicts only. A gameplay rule changes only
-  when a task explicitly authorizes a product-design change.
-
----
-
-## 7. Engineering standards
-
-- **Crate boundaries** (`docs/architecture/RUST-WORKSPACE.md`): `tbg-core`
-  takes no graphics/DB/network deps; `tbg-server` never depends on Bevy
-  rendering; `tbg-protocol` is types only; `tbg-assets` is contracts only.
-  No circular dependencies.
-- **Size caps:** 80 lines/function, 200 lines/file, cyclomatic ≤ 10.
-- **Contract-first tests** (relaxed): assert documented contracts, never
-  mirror implementation; failing-first only where meaningfully protective.
-- **Minimal implementation (Ponytail):** smallest correct, readable,
-  verifiable change; `.cursor/rules/ponytail.mdc` always applies, with the
-  MVP-first exceptions in `docs/AI-FIRST-MVP.md` §13.
-- **Cost-aware models:** cheap models for boilerplate/content/simple
-  scripts and fixes; strong models for architecture, hard compiler or
-  Bevy/WASM problems, sync/determinism, critical gameplay bugs. Read only
-  task-relevant files. On repeated cheap-model failure: stop retrying,
-  write a concise diagnostic handoff.
-- **Verification after each edit:** smallest gate covering the change
-  (`cargo fmt`, `cargo check -p <crate>`, `cargo test --workspace`,
-  browser smoke checks). Never claim tests passed without running them.
-
----
-
-## 8. Tooling instructions
-
-- Toolchain: stable Rust; `rust-toolchain.toml` applies automatically.
-  MSRV 1.97.1 (via bevy 0.20). This file is the single policy source for
-  Codex, Claude Code, and OpenCode; `.cursor/rules/` is the same policy
-  surfaced for Cursor (`mvp-first.mdc` takes precedence on conflicts).
-- Workspace commands (repo root):
-  `cargo metadata --no-deps`, `cargo fmt --all -- --check`,
-  `cargo check --workspace`, `cargo test --workspace`.
-- WASM client gate (Phase 01+):
-  `cargo check -p tbg-client --target wasm32-unknown-unknown`.
-  Native check success never counts as WASM validation.
-- Harness helpers: `agent-harness/rules-path.sh`,
-  `agent-harness/resolve-rules.sh <keywords>`. Rule library lives in
-  `agent-rules/` (symlink into `.agent-harness/` — never edit inside
-  the submodule). Task-scoped rules: resolved via `resolve-rules.sh`,
-  2–6 files only. MVP-first project overrides win over inherited
-  enterprise rigor — see `docs/AI-FIRST-MVP.md` §13.
-
----
-
-## 9. Legacy archive (read-only)
-
-- Game-design sources: `archive/docs/` (ADRs, glossary, infra overview).
-- Manifest and recovery guide: [`archive/ARCHIVE-MANIFEST.md`](archive/ARCHIVE-MANIFEST.md).
-- **Never** import from `archive/` into active code, CI, or builds.
-- **Never** delete or rewrite `archive/`; git history + tag
-  `pre-tbg20-20261027` are the preservation mechanisms.
-- Legacy names in the glossary's "retired" table (`CharacterDefinition`,
-  `CharacterCatalog`, …) must not be reused for new concepts.
-
----
-
-## 10. Agent protocol
-
-1. State which rule files you loaded (brief list).
-2. Implement, verify with evidence, report, continue — one logical change
-   per commit; ask humans only for the §2 escalation cases.
-3. Verify after each edit; record failed or skipped validations honestly.
-4. Definition of done: implemented, compiles, behavior verified,
-   integrated, no obvious critical regression, visually acceptable where
-   applicable, limitations reported.
-5. English only in all artifacts.
+Implemented · compiles (native and WASM where relevant) · verification
+passes · behavior observed working · integrated (no orphaned code) · docs
+updated when a rule, architecture choice, or decision changed · roadmap
+box ticked · limitations reported.

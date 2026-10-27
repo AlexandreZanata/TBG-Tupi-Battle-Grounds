@@ -27,7 +27,7 @@ git show pre-tbg20-20261027:<path> > /tmp/restore-target
 
 | Archived path | Original active path (pre-2026-07-01) | Contents | Status |
 |---------------|----------------------------------------|----------|--------|
-| `archive/docs/` | `docs/` | ADRs 001–007, `GLOSSARY.md`, `architecture/infrastructure-overview.md`, design specs, research notes, `API-CONTRACT.md` / `USE-CASE-EXAMPLE.md` templates | Preserved; game-design rules migrated to `docs/game-design/` with traceability |
+| `archive/docs/` | `docs/` | ADRs 001–007, `GLOSSARY.md`, `architecture/infrastructure-overview.md`, design specs, research notes, `API-CONTRACT.md` / `USE-CASE-EXAMPLE.md` templates | Preserved; game-design rules migrated to `docs/GAME-DESIGN.md` with source references |
 | `archive/content/characters/` | `content/characters/` | JSON definitions, animation/behavior/material contracts, 17 small show-case/walk `.glb` clips | Preserved; large binaries (MB-Lab, Mixamo, seed GLBs, library exports) stripped 2026-07-01, see below |
 | `archive/tools/` | `tools/` | Assembly Studio, Character Studio, Blender scripts, MB-Lab glue, auto-rig, mesh/material pipelines | Preserved, retired from active use |
 | `archive/tests/` | `tests/` | Assembly/behavior/Blender/character-studio contract tests (Python/pytest) | Preserved, not run by active CI |
@@ -70,8 +70,8 @@ No legacy source, doc, or test file was deleted, edited, or relocated.
 | Unity client (C#) | Replaced by Bevy + Rust/WASM browser-first client; Unity licensing/build weight unjustified for solo scope |
 | Nakama self-hosted server (ADR-002) + TypeScript match module | Replaced by minimal Rust (Axum + Tokio) authoritative server on the same single-VPS model; Nakama ops/custom-module weight retired, single-server principle kept |
 | PostgreSQL (Nakama backend) | Replaced by SQLite for initial persistence; migration path kept if CCU demands it |
-| Per-character Blender/MB-Lab/Mixamo rigging pipeline (ADRs 003–006) | Retired after measured ~8% auto weight-gate pass rate (ADR-007); future assets use modular/shared-rig procedural pipeline under `tools/asset-factory/` |
-| Python studio/test tooling (pytest) | Retired from active CI; contracts inform `tbg-assets` validation schemas |
+| Per-character Blender/MB-Lab/Mixamo rigging pipeline (ADRs 003–006) | Retired after measured ~8% auto weight-gate pass rate (ADR-007); future assets are code-built figurines (`docs/ARCHITECTURE.md` §7) |
+| Python studio/test tooling (pytest) | Retired from active CI; contracts kept as reference only |
 | Store IAP (StoreKit / Play Billing) | Deferred; cosmetics-only monetization principle kept, provider integration postponed to post-beta |
 
 ## Large binaries and licensing
@@ -96,3 +96,20 @@ No legacy source, doc, or test file was deleted, edited, or relocated.
 | List a legacy unit definition | `archive/content/characters/definitions/` |
 | Full pre-reboot tree | `git checkout pre-tbg20-20261027` (detached) or browse the `backup/pre-tbg20-20261027` branch |
 | Run legacy Python tests | `pip install -r archive/tools/requirements.txt && pytest -c archive/pytest.ini archive/tests/` (legacy only, not part of 2.0 CI) |
+
+## Simplification after the reboot (2026-10-27)
+
+Backup tag before this step: `pre-simplify-20261027`. Nothing under
+`archive/` moved or changed except three stale pointers above and
+this section. Removed from the repository root:
+
+- `.agent-harness` submodule (`AlexandreZanata/GoodPraticesForLLMSandAgents`)
+  and its `agent-harness` / `agent-rules` symlinks; `.cursor/rules/`.
+- Placeholder `content/`, `tools/asset-factory/`, `tests/`, `deploy/`.
+- `docs/game-design/`, `docs/architecture/`, `docs/decisions/`,
+  `docs/AI-FIRST-MVP.md`, consolidated into `docs/GAME-DESIGN.md`,
+  `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`.
+
+Legacy files in this archive still mention `.agent-harness`, `.cursor/`,
+and `agent-rules/` paths; those references are historical. Recover any of
+them with `git show pre-simplify-20261027:<path>`.

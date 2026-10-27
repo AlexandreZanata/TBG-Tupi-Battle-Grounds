@@ -1,6 +1,7 @@
 # Third-Party Notices
 
-This repository may include adapted guidance from third-party projects. The Agent Harness itself is **MIT** licensed (see [.agent-harness/LICENSE](.agent-harness/LICENSE)).
+Third-party material used by the active project. Add an entry for every
+asset, font, sound, or adapted text you bring in, with its license.
 
 Archived TBG asset notices (MB-Lab, Mixamo): [archive/THIRD_PARTY_NOTICES.md](archive/THIRD_PARTY_NOTICES.md)
 
@@ -14,9 +15,9 @@ Archived TBG asset notices (MB-Lab, Mixamo): [archive/THIRD_PARTY_NOTICES.md](ar
 | **Publisher** | Dietrich Gebert and contributors |
 | **License** | [MIT License](https://opensource.org/licenses/MIT) |
 | **Purpose** | YAGNI / minimal implementation ladder for AI agents |
-| **In this repo** | Static rules only — `.cursor/rules/ponytail.mdc`, `agent-rules/09-ai-agent-specific/minimal-implementation.md` |
+| **In this repo** | The YAGNI ladder in `AGENTS.md` ("How to work a task", step 2), adapted |
 
-Adapted from upstream Ponytail cursor rules. No proxy, plugin, or MCP components are bundled.
+Adapted from upstream Ponytail rules. No proxy, plugin, or MCP components are bundled.
 
 ### MIT — Ponytail
 
