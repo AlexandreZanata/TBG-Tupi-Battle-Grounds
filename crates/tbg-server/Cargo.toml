@@ -12,6 +12,7 @@ name = "tbg-server"
 path = "src/main.rs"
 
 [dependencies]
-axum = { version = "0.8" }
+# WebSocket upgrade for the /ws echo spike (P1). Reason: browser ping over WS.
+axum = { version = "0.8", features = ["ws"] }
 tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "sync", "time"] }
 tbg-core = { path = "../tbg-core" }
