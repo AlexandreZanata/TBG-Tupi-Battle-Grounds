@@ -1,0 +1,23 @@
+# tbg-server: native Rust backend (scaffolding only in Phase 00).
+# Axum/Tokio foundation; matchmaking and simulation arrive in Phase 04.
+# Must never depend on Bevy's renderer.
+
+[package]
+name = "tbg-server"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "tbg-server"
+path = "src/main.rs"
+
+[dependencies]
+# axum: HTTP/WebSocket routing (native server only).
+axum = { version = "0.8" }
+# tokio: async runtime (server-side; minimal feature set).
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "sync", "time"] }
+# rusqlite with bundled SQLite: initial persistence, no system dependency.
+rusqlite = { version = "0.32", features = ["bundled"] }
+tbg-core = { path = "../tbg-core" }
+tbg-protocol = { path = "../tbg-protocol" }

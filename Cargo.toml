@@ -1,0 +1,16 @@
+# TBG 2.0 — Rust workspace root.
+#
+# Members: crates/tbg-core (deterministic domain), crates/tbg-protocol
+# (message contracts), crates/tbg-client (Bevy app), crates/tbg-server
+# (Axum backend), crates/tbg-assets (validation contracts).
+# Dependency rules: docs/architecture/RUST-WORKSPACE.md.
+# No license field until the root LICENSE decision lands (see README).
+
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.97"
