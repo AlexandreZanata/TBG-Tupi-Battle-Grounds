@@ -1,9 +1,11 @@
-//! `tbg-core`: pure deterministic game domain for Tupi Battle Grounds.
+//! `tbg-core`: deterministic game rules shared by client and server.
 //!
-//! Phase 00 exposes the settled domain vocabulary only (see
-//! `docs/game-design/GLOSSARY.md`). Simulation logic (energy, shop,
-//! combat, evolution, synergies) arrives in Phase 03 and must stay free
-//! of graphics, database, network, wall-clock, and unseeded randomness.
+//! Holds the domain vocabulary (docs/GAME-DESIGN.md), and later the
+//! simulation, content tables, bot, and wire protocol. Must stay free of
+//! graphics, database, network I/O, wall-clock time, and unseeded
+//! randomness.
+
+pub mod protocol;
 
 /// Mechanical role of a unit (rule BR-U02).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

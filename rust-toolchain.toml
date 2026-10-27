@@ -1,4 +1,4 @@
 [toolchain]
 channel = "stable"
 components = ["rustfmt", "clippy"]
-# Phase 01 adds: rustup target add wasm32-unknown-unknown
+targets = ["wasm32-unknown-unknown"]

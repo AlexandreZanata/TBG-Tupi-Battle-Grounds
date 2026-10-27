@@ -1,11 +1,13 @@
 //! `tbg-client` placeholder entry point.
 //!
-//! Phase 00: verifies the Bevy dependency resolves and links.
-//! Phase 01 builds the first Bevy/WebAssembly arena prototype here.
+//! Phase 1 (docs/ROADMAP.md) turns this into the Bevy WebGL2 arena spike.
 
 fn main() {
-    // Scaffolding only: headless app core, no window, no scene yet.
-    // Render/audio/windowing plugins arrive in Phase 01.
+    // Headless app core only: no window or renderer yet.
     let _app = bevy::app::App::new().add_plugins(bevy::MinimalPlugins);
-    println!("tbg-client 0.1.0 — Phase 00 scaffolding (not playable)");
+    println!(
+        "tbg-client {} (protocol {}): scaffolding, not playable",
+        env!("CARGO_PKG_VERSION"),
+        tbg_core::protocol::PROTOCOL_VERSION
+    );
 }

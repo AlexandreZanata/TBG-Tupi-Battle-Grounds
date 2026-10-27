@@ -1,10 +1,7 @@
-# TBG 2.0 — Rust workspace root.
-#
-# Members: crates/tbg-core (deterministic domain), crates/tbg-protocol
-# (message contracts), crates/tbg-client (Bevy app), crates/tbg-server
-# (Axum backend), crates/tbg-assets (validation contracts).
-# Dependency rules: docs/architecture/RUST-WORKSPACE.md.
-# No license field until the root LICENSE decision lands (see README).
+# TBG 2.0 Rust workspace. Three crates; boundaries in docs/ARCHITECTURE.md.
+#   tbg-core   deterministic rules + content + protocol (no I/O, no graphics)
+#   tbg-client Bevy browser client (WASM/WebGL2)
+#   tbg-server authoritative Axum/Tokio server (never depends on Bevy)
 
 [workspace]
 resolver = "2"

@@ -1,5 +1,5 @@
-# tbg-client: Bevy browser application (scaffolding only in Phase 00).
-# Rendering/presentation responsibilities; authoritative logic stays in tbg-core.
+# tbg-client: Bevy browser client (WASM/WebGL2). Renders and sends
+# PlayerIntentions; never decides outcomes.
 
 [package]
 name = "tbg-client"
@@ -12,10 +12,6 @@ name = "tbg-client"
 path = "src/main.rs"
 
 [dependencies]
-# bevy 0.20: game framework + ECS (verified on crates.io 2026-10-27).
-# Phase 00 enables only the headless application core: default features
-# (render, audio, windowing) need OS libraries absent from minimal
-# environments and arrive with the Phase 01 arena prototype instead.
+# Headless app core until Phase 1 enables the "3d" and "ui" features.
 bevy = { version = "0.20", default-features = false }
 tbg-core = { path = "../tbg-core" }
-tbg-protocol = { path = "../tbg-protocol" }

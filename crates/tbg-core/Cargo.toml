@@ -1,5 +1,6 @@
-# tbg-core: deterministic game domain (vocabulary types only in Phase 00).
-# No graphics, database, or network dependencies allowed here.
+# tbg-core: deterministic rules, content tables, bot, and wire protocol.
+# Shared by tbg-client (WASM) and tbg-server (native).
+# No graphics, database, network I/O, or wall-clock dependencies.
 
 [package]
 name = "tbg-core"

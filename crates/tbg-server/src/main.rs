@@ -1,12 +1,15 @@
 //! `tbg-server` placeholder entry point.
 //!
-//! Phase 00: verifies the Axum/Tokio/SQLite dependency set resolves.
-//! Matchmaking, authoritative simulation, and persistence arrive in
-//! Phase 04. This binary must never depend on Bevy rendering.
+//! Phase 1 (docs/ROADMAP.md) adds the WebSocket ping route; Phase 5 adds
+//! matchmaking and the authoritative match loop. Never depends on Bevy.
 
 #[tokio::main]
 async fn main() {
-    // Scaffolding only: no listener, no routes, no database yet.
+    // Scaffolding only: no listener or routes yet.
     let _router: axum::Router = axum::Router::new();
-    println!("tbg-server 0.1.0 — Phase 00 scaffolding (no networking yet)");
+    println!(
+        "tbg-server {} (protocol {}): scaffolding, no networking yet",
+        env!("CARGO_PKG_VERSION"),
+        tbg_core::protocol::PROTOCOL_VERSION
+    );
 }
