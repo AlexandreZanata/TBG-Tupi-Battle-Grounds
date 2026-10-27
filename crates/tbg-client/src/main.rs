@@ -6,6 +6,8 @@ use bevy::prelude::*;
 
 mod arena;
 mod camera;
+mod config;
+mod overlay;
 mod walkers;
 
 fn main() {
@@ -20,6 +22,6 @@ fn main() {
             ..default()
         }))
         .insert_resource(ClearColor(Color::srgb_u8(0xA9, 0xD8, 0xF0)))
-        .add_plugins((camera::plugin, arena::plugin, walkers::plugin))
+        .add_plugins((camera::plugin, arena::plugin, walkers::plugin, overlay::plugin))
         .run();
 }

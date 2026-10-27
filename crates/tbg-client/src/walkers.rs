@@ -21,7 +21,7 @@ const COLORS: [[u8; 3]; 4] = [
 pub struct Walker;
 
 #[derive(Resource, Default)]
-struct SpawnState {
+pub struct SpawnState {
     next: usize,
 }
 
@@ -65,6 +65,31 @@ fn spawn_on_input(
         ));
         count.0 += 1;
     }
+}
+
+/// Spawn one walker at `x` (used by `?stress=N` and respawn).
+pub fn spawn_walker_at(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    state: &mut SpawnState,
+    count: &mut WalkerCount,
+    x: f32,
+) {
+    let i = state.next;
+    state.next += 1;
+    let c = COLORS[i % COLORS.len()];
+    commands.spawn((
+        Walker,
+        Mesh3d(meshes.add(Capsule3d::new(0.3, 0.2))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::srgb_u8(c[0], c[1], c[2]),
+            perceptual_roughness: 0.8,
+            ..default()
+        })),
+        Transform::from_xyz(x, SPAWN_Y, LANES[i % LANES.len()]),
+    ));
+    count.0 += 1;
 }
 
 fn move_walkers(

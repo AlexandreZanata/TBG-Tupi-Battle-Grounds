@@ -5294,6 +5294,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "tbg-core",
+ "web-sys",
 ]
 
 [[package]]
