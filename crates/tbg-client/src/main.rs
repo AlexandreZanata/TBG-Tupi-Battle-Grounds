@@ -4,6 +4,9 @@
 
 use bevy::prelude::*;
 
+mod arena;
+mod camera;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -16,13 +19,6 @@ fn main() {
             ..default()
         }))
         .insert_resource(ClearColor(Color::srgb_u8(0xA9, 0xD8, 0xF0)))
-        .add_systems(Startup, setup_camera)
+        .add_plugins((camera::plugin, arena::plugin))
         .run();
-}
-
-fn setup_camera(mut commands: Commands) {
-    commands.spawn((
-        Camera3d::default(),
-        Transform::from_xyz(8.0, 12.0, -6.0).looking_at(Vec3::new(8.0, 0.0, 0.0), Vec3::Y),
-    ));
 }
