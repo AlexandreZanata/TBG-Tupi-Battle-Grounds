@@ -43,8 +43,10 @@ Non-trivial logic leaves **one** runnable contract test (assert or small test fi
 
 This repo also enforces **Agent Harness** rules (`agent-core-principles`, OWASP, TDD pyramid). When Ponytail and harness conflict:
 
-- **Security, authorization, domain architecture** → harness wins.
-- **Coverage gates** → harness TDD targets apply.
+- **Security, authorization, domain architecture** → harness wins,
+  reduced to the MVP baseline in `docs/AI-FIRST-MVP.md` §6.
+- **Coverage gates** → do NOT apply; MVP-first verification in
+  `.cursor/rules/mvp-first.mdc` and `docs/AI-FIRST-MVP.md` §5 applies.
 - **Scope** → Ponytail minimizes diff; harness `change-discipline` still requires one logical change per commit.
 
 Task-scoped detail: `{rules_dir}/09-ai-agent-specific/minimal-implementation.md` via `resolve-rules.sh yagni minimal`.
