@@ -7,7 +7,7 @@ one `Stronghold` falls.
 
 > **Status: pre-alpha, not playable yet.** The repository has been reset to
 > a small Rust workspace with a complete MVP plan. Development starts at
-> [ROADMAP task 1.1](docs/ROADMAP.md).
+> [phase P1](docs/phases/P1-browser-network-spike.md) (see [ROADMAP](docs/ROADMAP.md)).
 
 ## The game
 
@@ -36,7 +36,7 @@ as stylized toy figurines — no rigging pipeline. Details:
 crates/tbg-core    rules, content, bot, protocol (shared, deterministic)
 crates/tbg-client  Bevy browser client
 crates/tbg-server  authoritative game server
-docs/              GAME-DESIGN, ARCHITECTURE, ROADMAP, DECISIONS
+docs/              GAME-DESIGN, ARCHITECTURE, ROADMAP, DECISIONS, phases/
 archive/           legacy Unity/Nakama/Python project (read-only)
 ```
 
@@ -52,13 +52,13 @@ cargo test --workspace
 cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
 ```
 
-Browser builds use [Trunk](https://trunkrs.dev) from roadmap task 1.1
-onward.
+Browser builds use [Trunk](https://trunkrs.dev) from phase P1 onward.
 
 ## Contributing
 
-Humans and AI agents follow [AGENTS.md](AGENTS.md). Pick a task from
-[docs/ROADMAP.md](docs/ROADMAP.md).
+Humans and AI agents follow [AGENTS.md](AGENTS.md). Work is organized in
+phases: [docs/ROADMAP.md](docs/ROADMAP.md) is the index, each phase has an
+executable spec in [docs/phases/](docs/phases/).
 
 ## History
 
@@ -70,5 +70,5 @@ over; its technology does not.
 ## License
 
 No `LICENSE` file yet. MIT is the intended license; the owner adds it
-before the first public release (roadmap task 7.6). Third-party notices:
+before the first public release (phase P8). Third-party notices:
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

@@ -17,7 +17,8 @@ multiplayer, low cost.
 |------|----------|
 | `docs/GAME-DESIGN.md` | Canon: pillars, glossary, numbered rules, MVP values, fun metrics |
 | `docs/ARCHITECTURE.md` | Stack, crate boundaries, simulation/network model, art pipeline, budgets, deploy, scaling |
-| `docs/ROADMAP.md` | Phases, tasks with tiers and acceptance criteria, the next task |
+| `docs/ROADMAP.md` | Phase index, order, status, executor and reviewer workflow |
+| `docs/phases/PN-*.md` | One executable spec per phase: steps, exact types, commands, acceptance, report |
 | `docs/DECISIONS.md` | Why the big choices were made and what reopens them |
 | `crates/tbg-core` | Deterministic rules, content tables, bot, protocol (shared) |
 | `crates/tbg-client` | Bevy client → WASM/WebGL2 |
@@ -46,22 +47,28 @@ multiplayer, low cost.
    per commit. No build outputs or large binaries in git.
 7. **English only** in code, comments, docs, and commits.
 
-## How to work a task
+## How to work a phase (executor)
 
-1. Pick a task ID from `docs/ROADMAP.md`. Read the files and doc sections
-   it names — not the whole repository, and not `archive/` unless the
-   task needs legacy material.
-2. Climb the YAGNI ladder (adapted from Ponytail, MIT) and stop at the
+1. Open the phase file named in `docs/ROADMAP.md`. Read only what its
+   "Read first" list names — not the whole repository, and not
+   `archive/` unless the phase says so.
+2. Work on branch `phase/<pN-name>`. Do the steps in order; run each
+   step's check before the next; commit after each step; never push.
+3. The phase file is the spec. Do not invent rules, numbers, message
+   types, dependencies, or architecture it does not name. If something is
+   ambiguous, take the simplest reading and record it under *Deviations*.
+4. Climb the YAGNI ladder (adapted from Ponytail, MIT) and stop at the
    first rung that holds: Does this need to exist? Does the repo already
    have it? Does `std` or an existing dependency do it? Can it be one
    line? Only then write the minimum code that works.
-3. Implement the smallest change that meets the task's *Done when*.
-4. Verify (below) and look at the behavior yourself.
-5. Commit, tick the roadmap box with the commit hash, and report: what
-   changed, the commands you ran with their results, and known limitations.
-6. Stuck after two honest attempts: write a three-line `> blocked:` note
-   under the task (tried / exact error / suspected cause) and escalate one
-   tier. Do not keep retrying the same approach.
+5. Bevy 0.20 changed many APIs. Copy patterns from the Bevy examples on
+   disk (`~/.cargo/registry/src/index.crates.io-*/bevy-0.20.0/examples/`),
+   never from memory of older versions.
+6. Same error twice → stop that step, write a `> blocked:` note in the
+   phase report (tried / exact error / suspected cause), continue only
+   with steps that do not depend on it.
+7. Finish by filling in the phase report with real command output and
+   measurements, commit it, and stop for review.
 
 ## Autonomy
 
@@ -71,16 +78,16 @@ human only for: game-rule or product changes, anything paid or
 irreversible (VPS, domain, license, deleting data), subjective sign-off on
 look and fun, or requirements that genuinely conflict.
 
-## Cost-aware model use
+## Roles and cost
 
-| Tier | Use for |
-|------|---------|
-| Cheap | Content tables, roster art specs, boilerplate, focused tests, docs, small fixes |
-| Mid | Features with a clear spec: HUD, lobby, VFX, shop, synergy |
-| Strong | Architecture, simulation core and combat, networking and concurrency, WASM/build failures, security review, bugs that resist two attempts |
+| Role | Model | Does |
+|------|-------|------|
+| Executor | cheaper model (e.g. DeepSeek) | Implements one phase file, runs every check, writes the phase report |
+| Reviewer | strong model (e.g. Claude, Codex) | Re-runs acceptance checks, reviews the diff, fixes or returns issues, merges, updates the roadmap status; writes new phase specs |
+| Owner | human | Devices, VPS/domain, look and fun sign-off, product decisions, license |
 
-Spend tokens on running the compiler and tests, not on re-reading files
-or repeated AI reviews. Never run two agents on the same task.
+Spend tokens on running the compiler and tests, not on re-reading files.
+Never run two agents on the same files at the same time.
 
 ## Code standards
 
@@ -123,4 +130,4 @@ failures exactly.
 Implemented · compiles (native and WASM where relevant) · verification
 passes · behavior observed working · integrated (no orphaned code) · docs
 updated when a rule, architecture choice, or decision changed · roadmap
-box ticked · limitations reported.
+report filled in · limitations reported.

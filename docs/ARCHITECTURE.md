@@ -27,12 +27,12 @@ bundle. No Docker, Kubernetes, Redis, queues, or managed game services.
 | Concern | Choice | Version / note |
 |---------|--------|----------------|
 | Toolchain | Rust stable via `rust-toolchain.toml` (installs `wasm32-unknown-unknown`) | env: 1.99.0; MSRV 1.97 (Bevy 0.20) |
-| Client engine | Bevy, features `3d` + `ui` (+ `audio` in Phase 6), WebGL2 | 0.20.0, pinned for the whole MVP |
+| Client engine | Bevy, features `3d` + `ui` (+ `audio` in P7), WebGL2 | 0.20.0, pinned for the whole MVP |
 | WASM build | Trunk (`index.html` in `crates/tbg-client/`) + wasm-opt | 0.22.x (`cargo install --locked trunk`) |
 | Client WebSocket | `ewebsock` (same API on WASM and native) | 0.8.x |
 | Server | Axum (`ws` feature) + Tokio | 0.8.x / 1.x |
 | Wire format | `serde` + `postcard` (binary, varint) | 1.x / 1.1.x |
-| Persistence | `rusqlite` with bundled SQLite (Phase 7 only) | latest at Phase 7 |
+| Persistence | `rusqlite` with bundled SQLite (from P5) | 0.41.x |
 | Edge | Caddy 2: automatic TLS, precompressed static files, WS proxy | distro package |
 | Process | systemd unit, non-root user | — |
 
@@ -70,10 +70,14 @@ Planned modules (create each only when its roadmap task starts):
 | core | `protocol.rs` | `ClientMsg`, `ServerMsg`, `PROTOCOL_VERSION`, encode/decode |
 | client | `main.rs` · `camera.rs` · `arena.rs` | app, states, framing, environment |
 | client | `art/` | `palette.rs`, `mesh.rs`, `figure.rs`, `anim.rs`, `roster/<faction>.rs` |
-| client | `link.rs` · `local.rs` · `net.rs` | `MatchLink` (local or network), view buffer |
-| client | `sync.rs` · `vfx.rs` · `audio.rs` | views → entities, effects, sound |
-| client | `ui/` | `menu.rs`, `hud.rs`, `evolve.rs`, `result.rs` |
-| server | `main.rs` · `ws.rs` · `lobby.rs` · `match_task.rs` · `records.rs` | router/config, connections, pairing/rooms, match loop, SQLite |
+| client | `config.rs` · `overlay.rs` | URL params, server URL; FPS/RTT/view-timing overlay |
+| client | `link.rs` · `local.rs` · `net.rs` | `MatchLink` (local or network, a Bevy `NonSend` resource) |
+| client | `sync.rs` · `visuals.rs` | views → entities; **the only module that knows how units look** (placeholders in P3, figurines from P6) |
+| client | `vfx.rs` · `audio.rs` · `ui/` | effects, sound; `menu.rs`, `hud.rs`, `evolve.rs`, `result.rs`, `toast.rs` |
+| server | `lib.rs` · `main.rs` · `config.rs` | `run(config, listener)` (used by tests), env config |
+| server | `ws.rs` · `lobby.rs` · `match_task.rs` | connections, sessions/queue/rooms, match loop |
+| server | `metrics.rs` · `records.rs` · `names.rs` | counters + `/metrics`, SQLite match records, display names |
+| server | `botclient.rs` · `bin/tbg-bots.rs` | WebSocket bot client for tests and load/latency validation |
 
 Size caps (AGENTS.md) keep every file reviewable in one read. Content
 tables are the one allowed exception.
@@ -114,10 +118,10 @@ tables are the one allowed exception.
   hides private information, and has no desync class of bugs.
 - **Transport:** one WebSocket per client at `/ws`, binary frames,
   postcard-encoded `ClientMsg` / `ServerMsg`.
-- **Messages (draft):**
-  `ClientMsg = Hello{version, resume} | QuickMatch | CreateRoom | JoinRoom{code} | Cancel | Intent{seq, intent} | Ping{t}`;
+- **Messages** (exact definitions: `docs/phases/P2-core-simulation.md` step 9):
+  `ClientMsg = Hello{version, resume} | QuickMatch | CreateRoom | JoinRoom{code} | Cancel | Intent{seq, intent} | Pong{id}`;
   `PlayerIntention = Purchase{offer} | Evolve{unit, branch}`;
-  `ServerMsg = Welcome{token, name} | VersionMismatch{server} | Queued | RoomCreated{code} | MatchStart{seat, opponent} | View(MatchView) | Rejected{seq, reason} | MatchEnd{outcome, reason} | Pong{t}`.
+  `ServerMsg = Welcome{token, name} | VersionMismatch{server} | Queued | RoomCreated{code} | RoomNotFound | MatchStart{you, opponent} | View(MatchView) | Rejected{seq, reason} | MatchEnd{outcome} | Ping{id} | NetStats{rtt_ms} | Error{code}`.
   Intentions carry no seat: the server derives the seat from the connection.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat.
   Clients render about 120 ms behind the newest view and interpolate x.
@@ -137,7 +141,16 @@ tables are the one allowed exception.
   match; they talk through `tokio::sync::mpsc`. No locks on game state.
 - **Limits:** handshake within 5 s; inbound frame ≤ 1 KiB; token bucket
   20 msgs/s (burst 40) per connection, then disconnect; ≤ 8 sockets per IP;
-  ping every 2 s, idle timeout 15 s; global connection cap from config.
+  server ping every 1 s, idle timeout 15 s; global connection cap from config.
+- **Latency measurement:** the server sends `Ping{id}` every second,
+  computes RTT from `Pong{id}`, records it, and returns `NetStats{rtt_ms}`
+  for the client overlay. The client also measures view inter-arrival
+  jitter. Each match logs and stores RTT p50/p95 per seat, step time, tick
+  lateness, and bytes. `GET /metrics` (loopback only) exposes live
+  counters and 60-second RTT percentiles.
+- **Validation tools:** `tbg-bots` runs N bot clients over real
+  WebSockets with artificial delay/jitter and random disconnects; the
+  browser accepts `?lag=MS` to feel added latency.
 - **Bandwidth (hypothesis):** about 400 B per view → about 4 KB/s down and
   under 0.5 KB/s up per player; about 2 MB per 4-minute match for both.
 
@@ -151,14 +164,16 @@ tables are the one allowed exception.
 - **Camera:** fixed perspective (~35° FOV, ~55° pitch). The lane runs along
   the screen's longer axis — vertical on portrait phones (own `Stronghold`
   at the bottom), horizontal on landscape (own `Stronghold` on the left).
-  Framing recomputes on resize.
+  Framing recomputes on resize. The client is first built with placeholder
+  shapes (P3) and gets its final art only after online play is validated
+  on a real server (P4, P5).
 - **Input:** tap/click only. Shop cards are `bevy_ui` buttons; units are
   picked through an enlarged invisible pick volume so moving targets are
   tappable on phones.
 - **UI:** `bevy_ui` for every screen (menu, HUD, evolve panel, result),
   sized in viewport units, thumb-reachable on portrait.
 - **Build:** one WebGL2 release artifact; `opt-level="s"` vs `3` decided by
-  measurement in Phase 1; `wasm-opt -Oz`; brotli/gzip precompressed at
+  measurement in P1; `wasm-opt -Oz`; brotli/gzip precompressed at
   deploy. WebGPU is a later optional build, not an MVP target.
 
 ## 7. Art direction and asset production
@@ -191,7 +206,7 @@ gentle fog, readable from a phone held at arm's length.
   and distance fog. Static parts are merged into a few vertex-colored meshes.
 - **Readability layer:** team ring under each unit (ally `#3FA9F5`, enemy
   `#F2545B`), billboard HP bars, hit flash, spawn pop, death puff.
-- **Starting palette** (approve in Phase 3): Humans `#8B7355` `#C4A882`
+- **Starting palette** (approve in P6): Humans `#8B7355` `#C4A882`
   `#D9B44A` (legacy Iron Guard tones) · Undead `#D8D2C0` `#4B3B5C`
   `#7CF29A` · Machines `#4A5058` `#B5893B` `#FF8A3D` · Plants `#4E9F3D`
   `#6B4F2E` `#F28AB2` · grass `#7BB661`, lane `#C9A46A`, water `#3FA7B5`,
@@ -200,7 +215,7 @@ gentle fog, readable from a phone held at arm's length.
   playing every clip on the real arena in the game camera. Agents capture
   desktop and phone-viewport screenshots; a human approves silhouette,
   proportion, color, motion readability, and consistency.
-- **Audio and fonts (Phase 6):** CC0 sound packs and one OFL display font,
+- **Audio and fonts (P7):** CC0 sound packs and one OFL display font,
   each recorded in `THIRD_PARTY_NOTICES.md`.
 - **Escape hatch:** if a part cannot look right from builders, an offline
   Blender script may export that *static* part as a small GLB. Rigs,
@@ -208,9 +223,9 @@ gentle fog, readable from a phone held at arm's length.
 
 ## 8. Persistence
 
-- **MVP:** guest sessions in memory; one SQLite file (WAL) with one
-  `matches` table — start time, duration, outcome, reason, and per-seat
-  purchases/evolutions as JSON. No personal data and no IP addresses. It
+- **MVP (from P5):** guest sessions in memory; one SQLite file (WAL) with one
+  `matches` table — end time, duration, outcome, reason, seed, per-seat
+  network stats and purchases/evolutions as JSON, server timing. No personal data and no IP addresses. It
   feeds the fun metrics in GAME-DESIGN §6. Writes run off the tick loop
   (`spawn_blocking`).
 - **Boundary:** only `records.rs` touches SQL, behind a few plain functions.
@@ -223,8 +238,10 @@ gentle fog, readable from a phone held at arm's length.
 - Caddy terminates TLS, serves the precompressed static bundle with
   immutable cache headers for hashed files, and proxies `/ws` to
   `tbg-server` on localhost.
-- `deploy/deploy.sh` (Phase 7) builds, rsyncs, and restarts the systemd
-  unit. Firewall opens 22/80/443 only. Secrets live in an env file outside
+- `deploy/deploy.sh` (P5) builds the WASM bundle locally, rsyncs source
+  and bundle, builds `tbg-server` on the VPS (avoids glibc mismatches),
+  installs it, and restarts the systemd unit. `tbg-server` listens on
+  `127.0.0.1:8080` only. Firewall opens 22/80/443 only. Secrets live in an env file outside
   the repository.
 - Backups: nightly `sqlite3 .backup`, 7 local copies, weekly off-site copy.
   Match records are non-critical; a lost day is acceptable.
@@ -249,21 +266,22 @@ buying.
 
 | Metric | Target | Measured in |
 |--------|--------|-------------|
-| WASM download (brotli) | ≤ 4 MB (hard ceiling 6 MB) | Phase 1 |
-| Other assets on first load | ≤ 1 MB | Phase 6 |
-| Time to menu | ≤ 5 s desktop broadband; ≤ 10 s mid-range phone on 4G | Phase 1, 7 |
-| Frame rate | 60 fps desktop; ≥ 30 fps mid-range Android and iPhone 11-class with 30 units | Phase 1, 3, 6 |
-| Draw calls in a busy match | ≤ 300 | Phase 3 |
-| Triangles | ≤ 1 500 per one-slot unit, ≤ 3 000 per two-slot, ≤ 30 000 arena | Phase 3 |
-| Browser memory | ≤ 300 MB | Phase 6 |
-| Sim step, 30 units (release) | ≤ 50 µs | Phase 2 |
-| Server memory | ≤ 100 KB per match + about 64 KB per socket | Phase 7 |
-| Bandwidth per player | ≤ 6 KB/s down, ≤ 0.5 KB/s up | Phase 5 |
-| Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | Phase 7 load test |
+| WASM download (compressed) | ≤ 4 MB (hard ceiling 6 MB) | P1 |
+| Other assets on first load | ≤ 1 MB | P7 |
+| Time to menu | ≤ 5 s desktop broadband; ≤ 10 s mid-range phone on 4G | P1, P5 |
+| Frame rate | 60 fps desktop; ≥ 30 fps mid-range Android and iPhone 11-class with 30 units | P1, P3, P6, P7 |
+| Draw calls in a busy match | ≤ 300 | P6 |
+| Triangles | ≤ 1 500 per one-slot unit, ≤ 3 000 per two-slot, ≤ 30 000 arena | P6 |
+| Browser memory | ≤ 300 MB | P7 |
+| Sim step, 30 units (release) | ≤ 50 µs | P2 |
+| Server memory | ≤ 100 KB per match + about 64 KB per socket | P4, P5 |
+| Bandwidth per player | ≤ 6 KB/s down, ≤ 0.5 KB/s up | P4, P5 |
+| View-gap p95 under 40 ± 20 ms added latency | ≤ 150 ms | P4 |
+| Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | P4 (local), P5 (VPS) |
 
 **Capacity reasoning.** Simulation CPU is tiny (about 20 units, integer
 math). The first limits are socket fan-out and bandwidth: 500 matches ≈
-1 000 players × 4 KB/s ≈ 32 Mbit/s. Measure with the Phase 7 load test
+1 000 players × 4 KB/s ≈ 32 Mbit/s. Measure with `tbg-bots` (P4 locally, P5 on the VPS)
 (bot clients over real WebSockets) at 100/250/500 matches while watching
 CPU, RSS, and bytes/s.
 
@@ -304,4 +322,4 @@ cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
 ```
 
 A native check never proves browser compatibility. Rendering claims need
-the Trunk build running in a real browser (Phase 1 device matrix).
+the Trunk build running in a real browser (P1 device matrix).

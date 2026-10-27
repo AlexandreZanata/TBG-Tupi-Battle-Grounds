@@ -18,7 +18,7 @@ but a second language, no shared Rust rules, and a split toolchain for AI
 agents); *macroquad* (tiny and simple, but weak 3D, no animation or glTF
 pipeline); *three-d* (good WebGL2, small community, no UI or ECS);
 *Fyrox* (weaker web story).
-**Reopen if** the Phase 1 spike fails on iOS Safari or Android Chrome
+**Reopen if** the P1 spike fails on iOS Safari or Android Chrome
 after a one-day strong-agent timebox, brotli WASM exceeds 10 MB after
 optimization, or the arena stress test drops below 30 fps on the
 reference phone. The fallback to evaluate first is a Three.js client
@@ -84,7 +84,7 @@ at 2–6 hours per unit (ADR-007). Rigid parts remove skinning, weight
 painting, retargeting, export, and asset download. Agents iterate with the
 compiler and a gallery screenshot. The toy-figurine style is a deliberate
 look, not a placeholder.
-**Reopen if** human review of the Phase 3 gallery rejects the look twice.
+**Reopen if** human review of the P6 gallery rejects the look twice.
 
 ## D-08 · One client path for practice and online — 2026-10-27
 
@@ -101,7 +101,7 @@ by the server.
 cosmetics in the MVP. Generated names avoid moderation work.
 **Reopen when** cosmetics or ranking enter scope.
 
-## D-10 · SQLite for match records only, added in Phase 7 — 2026-10-27
+## D-10 · SQLite for match records only, added in P5 — 2026-10-27
 
 **Why.** The MVP's only durable data is match telemetry for balance.
 PostgreSQL triggers are listed in ARCHITECTURE §8.
@@ -141,4 +141,29 @@ possible draw; slot cap 8; all values in GAME-DESIGN §5.
 **Why.** Legacy design never defined a win condition, clock, numbers, or
 the meaning of `Reposition`. A playable match needs all of them. Each is
 labeled Proposed so it can be changed without arguing about canon.
-**Reopen** after the first human playtest round (ROADMAP Phase 6).
+**Reopen** after the first human playtest round (P7).
+
+## D-15 · Skeleton first: online validated before any 3D art — 2026-10-27
+
+**Decision.** Phase order is browser spike → rules → skeleton game with
+placeholder shapes → online multiplayer with latency metrics and bot load
+tests → validation on the owner's VPS and domain → only then 3D art and
+content. `visuals.rs` is the seam that later swaps placeholders for
+figurines without touching game, network, or UI code.
+**Why.** Multiplayer, latency, hosting, and capacity are the risks that
+can sink the project; art is the most expensive thing to redo. Proving the
+risky parts with cheap visuals first means art is never built on top of a
+broken foundation.
+
+## D-16 · Executor/reviewer workflow with phase files — 2026-10-27
+
+**Decision.** Each phase has an executable spec in `docs/phases/` written
+for a cheaper executor model (for example DeepSeek): exact types,
+algorithms, file lists, commands, and a report section. A strong reviewer
+model re-runs acceptance checks and reviews each phase before the next
+starts.
+**Why.** Cheap models follow precise specs well but invent badly. Putting
+the decisions in the spec and verifying by commands keeps quality high and
+token cost low.
+**Reopen if** an executor needs more than two review rounds per phase.
+
