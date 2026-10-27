@@ -1,0 +1,16 @@
+services:
+  # Phase 00 skeleton — hardened in Phase 06. No live hostnames here.
+  proxy:
+    # Nginx or Caddy: TLS termination, static files, rate limits.
+    image: nginx:stable
+    ports: ["80:80", "443:443"]
+    depends_on: [server]
+
+  server:
+    # tbg-server (native binary). Built from this repo in Phase 04+.
+    # build: { context: .. }  # enabled once the server listens.
+    image: tbg-server:local
+    volumes: ["tbgdata:/var/lib/tbg"]
+
+volumes:
+  tbgdata:
