@@ -46,7 +46,8 @@ fn net_system(world: &mut World) {
     if now_ms >= world.resource::<NetTimers>().next_ping_ms {
         world.resource_mut::<NetTimers>().next_ping_ms = now_ms + 1000.0;
         if let Some(mut link) = world.get_non_send_mut::<NetLink>() {
-            link.sender.send(WsMessage::Binary(now_ms.to_le_bytes().to_vec()));
+            link.sender
+                .send(WsMessage::Binary(now_ms.to_le_bytes().to_vec()));
         }
     }
     let mut dead = false;

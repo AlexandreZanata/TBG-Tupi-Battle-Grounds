@@ -5,8 +5,8 @@
 
 use axum::{
     extract::{
-        WebSocketUpgrade,
         ws::{Message, WebSocket},
+        WebSocketUpgrade,
     },
     response::IntoResponse,
     routing::get,

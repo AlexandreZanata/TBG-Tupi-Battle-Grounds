@@ -5,7 +5,8 @@
 
 /// Read parameter `name`: on wasm32 from the page query string
 /// (`?name=value`), on native from `TBG_<NAME>` (uppercased).
-pub fn url_param(name: &str) -> Option<String> {    #[cfg(target_arch = "wasm32")]
+pub fn url_param(name: &str) -> Option<String> {
+    #[cfg(target_arch = "wasm32")]
     {
         let search = web_sys::window()?.location().search().ok()?;
         search
@@ -42,7 +43,7 @@ pub fn server_url() -> String {
                 return format!("ws://{hostname}:8080/ws");
             }
         }
-        return "ws://127.0.0.1:8080/ws".into();
+        "ws://127.0.0.1:8080/ws".into()
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

@@ -32,7 +32,12 @@ fn spawn_camera(mut commands: Commands, window: Single<&Window>) {
         fov: FOV_Y,
         ..default()
     });
-    frame(&mut transform, &mut projection, window.width(), window.height());
+    frame(
+        &mut transform,
+        &mut projection,
+        window.width(),
+        window.height(),
+    );
     commands.spawn((Camera3d::default(), transform, projection, ArenaCamera));
 }
 

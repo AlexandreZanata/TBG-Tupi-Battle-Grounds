@@ -28,10 +28,7 @@ pub fn plugin(app: &mut App) {
     app.add_plugins(FrameTimeDiagnosticsPlugin::default())
         .init_resource::<OverlayStats>()
         .init_resource::<StressTarget>()
-        .insert_resource(RefreshTimer(Timer::from_seconds(
-            0.5,
-            TimerMode::Repeating,
-        )))
+        .insert_resource(RefreshTimer(Timer::from_seconds(0.5, TimerMode::Repeating)))
         .add_systems(Startup, (spawn_overlay, spawn_stress))
         .add_systems(Update, (update_overlay, maintain_stress));
 }
@@ -70,7 +67,14 @@ fn spawn_stress(
     target.0 = n;
     for i in 0..n {
         let x = 0.5 + 15.0 * i as f32 / n as f32;
-        walkers::spawn_walker_at(&mut commands, &mut meshes, &mut materials, &mut state, &mut count, x);
+        walkers::spawn_walker_at(
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            &mut state,
+            &mut count,
+            x,
+        );
     }
 }
 
@@ -124,5 +128,8 @@ fn update_overlay(
         .rtt_ms
         .map(|v| format!("{v:.0} ms"))
         .unwrap_or_else(|| "offline".into());
-    text.0 = format!("FPS {fps:.0} | {ms:.1} ms | RTT {rtt} | walkers {}", count.0);
+    text.0 = format!(
+        "FPS {fps:.0} | {ms:.1} ms | RTT {rtt} | walkers {}",
+        count.0
+    );
 }

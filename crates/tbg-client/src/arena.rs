@@ -65,7 +65,7 @@ fn spawn_arena(
     ));
     // Low ambient fill so shadowed faces stay readable.
     commands.insert_resource(GlobalAmbientLight {
-        color: Color::WHITE.into(),
+        color: Color::WHITE,
         brightness: 250.0,
         ..default()
     });
