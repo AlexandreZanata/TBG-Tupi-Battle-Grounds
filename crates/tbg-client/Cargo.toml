@@ -14,6 +14,8 @@ path = "src/main.rs"
 [dependencies]
 # Bevy renderer + UI for the browser spike (P1). Reason: WebGL2 arena + overlay.
 bevy = { version = "0.20", default-features = false, features = ["3d", "ui"] }
+# WebSocket client with the same API on wasm and native (P1). Reason: RTT ping.
+ewebsock = "0.8"
 tbg-core = { path = "../tbg-core" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]

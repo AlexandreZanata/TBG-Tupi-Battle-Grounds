@@ -123,6 +123,6 @@ fn update_overlay(
     let rtt = stats
         .rtt_ms
         .map(|v| format!("{v:.0} ms"))
-        .unwrap_or_else(|| "-- ms".into());
+        .unwrap_or_else(|| "offline".into());
     text.0 = format!("FPS {fps:.0} | {ms:.1} ms | RTT {rtt} | walkers {}", count.0);
 }
