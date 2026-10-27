@@ -12,6 +12,6 @@ name = "tbg-client"
 path = "src/main.rs"
 
 [dependencies]
-# Headless app core until Phase 1 enables the "3d" and "ui" features.
-bevy = { version = "0.20", default-features = false }
+# Bevy renderer + UI for the browser spike (P1). Reason: WebGL2 arena + overlay.
+bevy = { version = "0.20", default-features = false, features = ["3d", "ui"] }
 tbg-core = { path = "../tbg-core" }
