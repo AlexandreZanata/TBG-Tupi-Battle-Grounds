@@ -90,8 +90,8 @@ fn panel() -> impl Bundle {
         Node {
             flex_direction: FlexDirection::Column,
             align_items: AlignItems::Center,
-            padding: UiRect::all(px(24.0)),
-            row_gap: px(12.0),
+            padding: UiRect::all(px(16.0)),
+            row_gap: px(8.0),
             border_radius: BorderRadius::all(px(16.0)),
             ..default()
         },
@@ -99,71 +99,72 @@ fn panel() -> impl Bundle {
     )
 }
 
+/// Two side-by-side children (keeps the menu short enough for a
+/// 1280×800 screen at UI scale 1.5).
+fn pair(a: impl Bundle, b: impl Bundle) -> impl Bundle {
+    (
+        Node {
+            column_gap: px(12.0),
+            ..default()
+        },
+        children![a, b],
+    )
+}
+
 fn build(commands: &mut Commands, account: &Account) {
     // P11 profile chip: guest actions, or name · rating plus log out.
     // P12 ranked section: your rating on the button, or the locked hint.
+    // P13: Ranking panel next to the sound toggle.
     let mut root = commands.spawn((
         screen(JustifyContent::Center),
         DespawnOnExit(GameState::Menu),
         MenuRoot,
     ));
-    match &account.profile {
-        // Logged in: name · rating, log out, ranked with your rating.
-        Some(p) => {
-            let title = format!("{} · {}", p.name, p.rating);
-            let ranked = format!("Ranked Match ({})", p.rating);
-            root.with_children(|root| {
-                root.spawn((
-                    panel(),
-                    children![
-                        label("Tupi Battle Grounds", 34.0),
-                        label("Real-time 1v1 lane strategy", 16.0),
-                        label(title, 14.0),
-                        button("Log out", UiAction::Logout, 200.0),
-                        label("Casual", 20.0),
-                        button("Practice vs Bot", UiAction::Practice, 260.0),
-                        button("Quick Match", UiAction::Quick, 260.0),
-                        button("Play with a friend", UiAction::CreateRoom, 260.0),
-                        label("Ranked", 20.0),
-                        button(&ranked, UiAction::Ranked, 260.0),
-                        button("Ranking", UiAction::OpenRanking, 260.0),
-                        (
-                            button("Sound: on", UiAction::ToggleSound, 260.0),
-                            SoundButton
-                        ),
-                    ],
-                ));
-            });
-        }
-        // Guest: create-account entries, ranked locked.
-        None => {
-            root.with_children(|root| {
-                root.spawn((
-                    panel(),
-                    children![
-                        label("Tupi Battle Grounds", 34.0),
-                        label("Real-time 1v1 lane strategy", 16.0),
-                        label("Guest", 14.0),
-                        button("Create account", UiAction::CreateAccount, 200.0),
-                        button("I have a key", UiAction::HaveKey, 200.0),
-                        label("Casual", 20.0),
-                        button("Practice vs Bot", UiAction::Practice, 260.0),
-                        button("Quick Match", UiAction::Quick, 260.0),
-                        button("Play with a friend", UiAction::CreateRoom, 260.0),
-                        label("Ranked", 20.0),
-                        button(
-                            "Create an account to play ranked",
-                            UiAction::Disabled,
-                            260.0
-                        ),
-                        button("Ranking", UiAction::OpenRanking, 260.0),
-                        (
-                            button("Sound: on", UiAction::ToggleSound, 260.0),
-                            SoundButton
-                        ),
-                    ],
-                ));
-            });
-        }
-    }
+    let (chip, actions, ranked) = match &account.profile {
+        Some(p) => (
+            format!("{} · {}", p.name, p.rating),
+            None,
+            button(
+                &format!("Ranked Match ({})", p.rating),
+                UiAction::Ranked,
+                260.0,
+            ),
+        ),
+        None => (
+            "Guest".to_string(),
+            Some(()),
+            button(
+                "Create an account to play ranked",
+                UiAction::Disabled,
+                260.0,
+            ),
+        ),
+    };
+    root.with_children(|root| {
+        root.spawn(panel()).with_children(|p| {
+            p.spawn(label("Tupi Battle Grounds", 34.0));
+            p.spawn(label("Real-time 1v1 lane strategy", 16.0));
+            p.spawn(label(chip, 14.0));
+            match actions {
+                Some(()) => p.spawn(pair(
+                    button("Create account", UiAction::CreateAccount, 170.0),
+                    button("I have a key", UiAction::HaveKey, 170.0),
+                )),
+                None => p.spawn(button("Log out", UiAction::Logout, 200.0)),
+            };
+            p.spawn(label("Casual", 20.0));
+            p.spawn(button("Practice vs Bot", UiAction::Practice, 260.0));
+            p.spawn(button("Quick Match", UiAction::Quick, 260.0));
+            p.spawn(button("Play with a friend", UiAction::CreateRoom, 260.0));
+            p.spawn(label("Ranked", 20.0));
+            p.spawn(ranked);
+            p.spawn(pair(
+                button("Ranking", UiAction::OpenRanking, 124.0),
+                (
+                    button("Sound: on", UiAction::ToggleSound, 124.0),
+                    SoundButton,
+                ),
+            ));
+        });
+    });
 }

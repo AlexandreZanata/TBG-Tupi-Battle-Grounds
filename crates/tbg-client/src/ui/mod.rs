@@ -15,6 +15,7 @@ mod input;
 mod menu;
 mod queue;
 pub mod ranking;
+mod ranking_ui;
 mod result;
 pub mod textform;
 mod tips;
