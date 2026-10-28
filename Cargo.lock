@@ -5354,6 +5354,7 @@ dependencies = [
  "bevy",
  "ewebsock",
  "tbg-core",
+ "wasm-bindgen",
  "web-sys",
 ]
 

@@ -9,7 +9,28 @@
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2b36; touch-action: none; }
     canvas#bevy { display: block; width: 100%; height: 100%; outline: none; }
+    #tbg-form {
+      position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10;
+      background: #20242c; color: #f0ead8; border: 1px solid #4a5058; border-radius: 12px;
+      padding: 20px; font: 18px system-ui, sans-serif; display: flex; flex-direction: column; gap: 12px;
+      min-width: min(320px, 86vw);
+    }
+    #tbg-form[hidden] { display: none; }
+    #tbg-form input, #tbg-form button { height: 48px; font-size: 18px; border-radius: 8px; border: none; }
+    #tbg-form input { padding: 0 12px; background: #12151b; color: #f0ead8; }
+    #tbg-form button { background: #2e6b9e; color: #fff; }
+    #tbg-form-error { color: #f26d5f; margin: 0; }
+    #tbg-form-error[hidden] { display: none; }
   </style>
 </head>
-<body><canvas id="bevy"></canvas></body>
+<body>
+<canvas id="bevy"></canvas>
+<form id="tbg-form" hidden>
+  <label id="tbg-form-label" for="tbg-input">Name</label>
+  <input id="tbg-input" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <p id="tbg-form-error" hidden></p>
+  <button id="tbg-form-ok" type="submit">OK</button>
+  <button id="tbg-form-cancel" type="button">Cancel</button>
+</form>
+</body>
 </html>

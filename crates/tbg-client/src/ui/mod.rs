@@ -14,6 +14,7 @@ mod menu;
 mod queue;
 mod result;
 mod tips;
+pub mod textform;
 mod toast;
 
 pub use actions::ActionQueue;
@@ -57,6 +58,7 @@ pub fn plugin(app: &mut App) {
         .add_systems(Update, (input::taps, actions::apply, scale_ui).chain())
         .add_plugins((
             actions::plugin,
+            textform::plugin,
             queue::plugin,
             menu::plugin,
             hud::plugin,
