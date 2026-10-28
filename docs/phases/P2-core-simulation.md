@@ -409,9 +409,44 @@ only report them.
 
 ## Phase report
 
-*(Executor fills this in at the end.)*
+Executed by the reviewer agent (Claude) on 2026-10-27, branch `phase/p2-core-simulation`.
 
 - Commands run and results:
-- Balance harness output (1000 matches):
+  - `cargo test -p tbg-core` → `test result: ok. 15 passed; 0 failed`
+    (14 rule tests listed in step 11 plus `time_up_higher_stronghold_wins`).
+  - `cargo clippy --workspace --all-targets -- -D warnings` → clean.
+  - `cargo check -p tbg-core -p tbg-client --target wasm32-unknown-unknown` → ok.
+  - `grep -rnE "f32|f64|HashMap" crates/tbg-core/src` → nothing.
+  - Largest files: `content.rs` 274 (table, exempt), `state.rs` 170, `types.rs` 138.
+- Balance harness output (`cargo run --release -p tbg-core --example balance -- 1000`):
+  ```
+  matches: 1000
+  duration s: median 93 p90 139
+  ended by: stronghold 97.7% | time 2.3% | forfeit 0.0%
+  draws: 1.1%
+  faction-majority Humans: 1035 armies, win 50.3%
+  faction-majority Undead: 147 armies, win 57.8%
+  faction-majority Machines: 122 armies, win 55.7%
+  faction-majority Plants: 696 armies, win 45.3%
+  purchase share Shieldbearer 21.0% · Archer 16.1% · BoneBrute 6.3% · Hexer 12.1%
+                 Sawbot 15.7% · SiegeWalker 0.7% · Bloomkeeper 16.1% · Rootcaller 12.0%
+  evolutions per match: 8.5
+  step µs: mean 0.44 max 120.4 | max units alive 16
+  ```
+  All 1000 matches end. Mean step 0.44 µs (budget 50 µs). Not tuned (P7):
+  median 93 s is below the 2.5–4 min target and Siege Walker is almost never
+  bought by the bot (cost 6 + random reserve rarely affordable).
 - Deviations:
-- Blocked items:
+  1. Root on an already rooted unit keeps the longer duration (spec: "Root
+     replaces anything"; equal reading, avoids shortening a root).
+  2. `combat.rs` split into `combat.rs` + `hits.rs` + `targeting.rs` to stay
+     under 200 lines per file.
+  3. The old one-line vocabulary test in `lib.rs` was removed; the rule tests
+     cover the vocabulary through the content table.
+  4. Harness "faction-majority" picks the faction a seat bought most; ties go
+     to the later faction index. Good enough for trends, not for balance sign-off.
+  5. Added `content::form_of`, `MatchState::is_live`, `slots_used`,
+     `stats_of`, `protocol::valid_room_code`, `ROOM_ALPHABET` (helpers the
+     client and server need; no new rules).
+- Blocked items: none.
+- Needs the owner: nothing for this phase.
