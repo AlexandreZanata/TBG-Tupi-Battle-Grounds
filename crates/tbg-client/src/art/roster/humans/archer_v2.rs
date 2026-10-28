@@ -1,4 +1,4 @@
-//! Candidate Archer (owner review, `?archer=v2`): the base form refined to the
+//! Default Archer v2: the base form refined to the
 //! owner's reference sheet, and the A-branch evolutions Longbow (tier 1: green
 //! hood, feather, yew longbow) and Marksman (tier 2: gilded recurve bow,
 //! team half-cape, gold trim, 7 % larger). Gear lives in `archer_v2_gear`.

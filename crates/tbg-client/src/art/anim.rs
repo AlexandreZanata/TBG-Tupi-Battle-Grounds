@@ -13,15 +13,6 @@ use bevy::prelude::*;
 use tbg_core::UnitKind;
 const FADE: f32 = 0.1;
 
-/// Native Archer motion: the P15 tables, or the `?archer=v2` candidate.
-fn archer_motion(clip: Clip, t: f32, pose: &mut Pose) {
-    if super::archer_v2::enabled() {
-        super::archer_v2_clips::apply(clip, t, pose);
-    } else {
-        super::archer_clips::apply(clip, t, pose);
-    }
-}
-
 #[derive(Component)]
 pub struct Animator {
     pub joints: [Entity; NODE_COUNT],
@@ -97,7 +88,7 @@ impl Animator {
     fn pose(&self, clip: Clip, t: f32) -> Pose {
         let mut pose = sample(clip, t);
         if self.archer {
-            archer_motion(clip, t, &mut pose);
+            super::archer_v2_clips::apply(clip, t, &mut pose);
         }
         pose
     }
@@ -109,7 +100,7 @@ impl Animator {
             *t += dt;
             pose = sample(*clip, *t);
             if archer {
-                archer_motion(*clip, *t, &mut pose);
+                super::archer_v2_clips::apply(*clip, *t, &mut pose);
             }
             if !clip.looping() && *t >= clip.duration() && *clip != Clip::Death {
                 self.action = None;

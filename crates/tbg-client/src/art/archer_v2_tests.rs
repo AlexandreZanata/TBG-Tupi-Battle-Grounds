@@ -1,4 +1,4 @@
-//! Guards for the `?archer=v2` candidate: each form fits the one-slot triangle
+//! Guards for the default Archer v2: each form fits the one-slot triangle
 //! budget (ARCHITECTURE §10), and the side-on draw is reachable — the bow arm
 //! nearly straight, the string arm bent, neither stretched past its length.
 

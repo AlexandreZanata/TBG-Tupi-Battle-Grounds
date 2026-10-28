@@ -54,11 +54,7 @@ impl Form {
     }
 }
 
-pub fn archer_base() -> super::figure::FigureSpec {
-    humans::archer::spec()
-}
-
-/// Candidate Archer forms for owner review (`?archer=v2`): 0 base, 1 Longbow, 2 Marksman.
+/// Default native Archer forms: 0 base, 1 Longbow, 2 Marksman.
 pub fn archer_v2(tier: u8) -> super::figure::FigureSpec {
     humans::archer_v2::spec(tier)
 }

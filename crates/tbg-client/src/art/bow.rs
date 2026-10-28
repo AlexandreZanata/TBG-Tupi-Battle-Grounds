@@ -120,12 +120,7 @@ pub fn strings(
 ) {
     for (a, bow) in &figures {
         let (clip, t) = a.clip_time();
-        let depth = if super::archer_v2::enabled() {
-            super::archer_v2::DRAW
-        } else {
-            0.16
-        };
-        let middle = Vec3::new(0.0, 0.08, -0.23 - tension(clip, t) * depth);
+        let middle = Vec3::new(0.0, 0.08, -0.23 - tension(clip, t) * super::archer_v2::DRAW);
         present_strings(bow, a.archer, middle, &mut transforms, &mut visibility);
         if let Ok(mut tr) = transforms.get_mut(bow.arrow) {
             tr.translation = middle;

@@ -37,17 +37,12 @@ pub fn spawn(commands: &mut Commands, options: &Gallery, unit: UnitKind) {
     ));
 }
 
-/// ` v2 Longbow` and the like when the `?archer=v2` candidate is on review.
+/// Keep the native Archer forms explicit on the review sheet.
 fn form_label(options: &Gallery) -> String {
     let form = ["", " Longbow", " Marksman"][usize::from(options.tier.min(2))];
-    let v2 = if crate::art::archer_v2::enabled() {
-        " v2"
-    } else {
-        ""
-    };
     if options.lineup {
-        format!("{v2} | Base / Longbow / Marksman | idle + anchor")
+        " v2 | Base / Longbow / Marksman | idle + anchor".into()
     } else {
-        format!("{v2}{form}")
+        format!(" v2{form}")
     }
 }

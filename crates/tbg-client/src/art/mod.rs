@@ -12,7 +12,6 @@ pub mod anim;
 #[cfg(test)]
 mod anim_tests;
 mod archer_aim;
-mod archer_clips;
 pub mod archer_v2;
 mod archer_v2_clips;
 #[cfg(test)]
@@ -107,18 +106,11 @@ fn build_library(
     for kind in UNIT_KINDS {
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
-            let v2 = archer_v2::enabled() && branch == 0;
-            if kind == UnitKind::Archer && (tier == 0 || v2) {
-                let spec = if v2 {
-                    roster::archer_v2(tier)
-                } else {
-                    roster::archer_base()
-                };
-                let mut form = native_form(spec, &mut meshes, true);
-                form.bow_half = if v2 { archer_v2::bow_half(tier) } else { 0.64 };
+            if kind == UnitKind::Archer && branch == 0 {
+                let mut form = native_form(roster::archer_v2(tier), &mut meshes, true);
+                form.bow_half = archer_v2::bow_half(tier);
                 info!(
-                    "figure Archer {tier}/{branch}{}: {} triangles + {} bow/arrow triangles, {} mesh joints",
-                    if v2 { " (v2 candidate)" } else { "" },
+                    "figure Archer {tier}/{branch} (v2): {} triangles + {} bow/arrow triangles, {} mesh joints",
                     form.triangles,
                     bow.triangles,
                     form.meshes.iter().flatten().count()

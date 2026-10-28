@@ -89,8 +89,8 @@ fn planted_foot_holds_world_x_while_the_figure_moves() {
 
 #[test]
 fn archer_budget_and_release_anchor_obey_p15() {
-    use super::{archer_clips, bow::BowAssets, figure, mesh, roster};
-    let spec = roster::archer_base();
+    use super::{archer_v2_clips, bow::BowAssets, figure, mesh, roster};
+    let spec = roster::archer_v2(0);
     let triangles: usize = figure::build_joint_meshes(&spec)
         .iter()
         .flatten()
@@ -103,8 +103,8 @@ fn archer_budget_and_release_anchor_obey_p15() {
         triangles + bow.triangles
     );
     let mut pose = sample(Clip::AttackRanged, 0.18);
-    archer_clips::apply(Clip::AttackRanged, 0.18, &mut pose);
-    let p = super::rig::BodyPlan::Humanoid.proportions();
+    archer_v2_clips::apply(Clip::AttackRanged, 0.18, &mut pose);
+    let p = super::archer_v2::plan();
     let wrist = |joints: [Joint; 3]| {
         let mut transform = Mat4::IDENTITY;
         for j in joints {
@@ -118,7 +118,12 @@ fn archer_budget_and_release_anchor_obey_p15() {
     };
     let left = wrist([Joint::UpperArmL, Joint::ForearmL, Joint::HandL]);
     let right = wrist([Joint::UpperArmR, Joint::ForearmR, Joint::HandR]);
-    let anchor = left + Vec3::new(0.0, 0.08, -0.23 - super::archer_aim::draw(0.18) * 0.16);
+    let anchor = left
+        + Vec3::new(
+            -super::archer_v2::STRING_LINE - super::archer_aim::draw(0.18) * super::archer_v2::DRAW,
+            0.08,
+            0.0,
+        );
     assert!(
         (anchor - right).length() < 0.005,
         "anchor {anchor:?}, right {right:?}"

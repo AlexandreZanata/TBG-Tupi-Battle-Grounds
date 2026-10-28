@@ -1,5 +1,5 @@
 //! `&lineup`: one unit's base and A-branch evolutions side by side, frozen at
-//! idle and at the attack anchor (review sheet for the `?archer=v2` candidate).
+//! idle and at the attack anchor (review sheet for the default Archer v2).
 
 use super::{figures::spawn_one, layout::Layout};
 use crate::art::{anim::Clip, FigureLibrary};

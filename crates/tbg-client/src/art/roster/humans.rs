@@ -1,6 +1,5 @@
 //! Humans: disciplined guards — leather, trim, steel, gold.
 
-pub mod archer;
 pub mod archer_v2;
 mod archer_v2_gear;
 

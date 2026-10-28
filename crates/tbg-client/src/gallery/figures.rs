@@ -171,10 +171,10 @@ pub(super) fn spawn_one(
     (root, animator)
 }
 
-/// The `?archer=v2` candidate turns side-on to shoot, so review it at 45° to
+/// The default Archer turns side-on to shoot, so review it at 45° to
 /// see the chest and the arrow line together; everything else keeps 25°.
 fn yaw(kind: UnitKind) -> f32 {
-    if kind == UnitKind::Archer && crate::art::archer_v2::enabled() {
+    if kind == UnitKind::Archer {
         45.0
     } else {
         25.0

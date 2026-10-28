@@ -2,39 +2,20 @@
 
 use super::{
     anim::{Easing, Pose},
-    rig::{self, BodyPlan, Joint, Node, Socket},
+    rig::{self, Joint, Node},
 };
 use bevy::prelude::*;
 
 pub fn draw(t: f32) -> f32 {
     if t < 0.12 {
-        (t / 0.12).clamp(0.0, 1.0)
+        Easing::Linear.sample((t / 0.12).clamp(0.0, 1.0))
     } else if t < 0.18 {
         1.0
     } else {
         (1.0 - (t - 0.18) / 0.04).clamp(0.0, 1.0)
     }
 }
-pub fn apply(t: f32, pose: &mut Pose) {
-    let raise = Easing::CubicOut.sample((t / 0.12).clamp(0.0, 1.0));
-    let recover = Easing::CubicInOut.sample(((t - 0.30) / 0.20).clamp(0.0, 1.0));
-    let left_idle = Vec3::new(0.19, 0.15, 0.21);
-    let right_idle = Vec3::new(-0.20, -0.01, 0.04);
-    let left = left_idle
-        .lerp(Vec3::new(0.05, 0.29, 0.255), raise)
-        .lerp(left_idle, recover);
-    let anchor = left + Vec3::new(0.0, 0.08, -0.23 - draw(t) * 0.16);
-    let release = Easing::CubicOut.sample(((t - 0.18) / 0.08).clamp(0.0, 1.0));
-    let right = right_idle
-        .lerp(anchor, raise)
-        .lerp(Vec3::new(-0.10, 0.34, -0.12), release)
-        .lerp(right_idle, recover);
-    let p = BodyPlan::Humanoid.proportions();
-    arm(pose, true, left, &p);
-    arm(pose, false, right, &p);
-    pose[Node::Prop(Socket::OffhandL).index()].0 = Vec3::ZERO;
-}
-/// Two-bone IK in chest space for the given anatomy (P15 and `?archer=v2`).
+/// Two-bone IK in chest space for the default Archer anatomy.
 pub fn arm(pose: &mut Pose, left: bool, target: Vec3, p: &rig::Proportions) {
     let [upper, fore, hand] = if left {
         [Joint::UpperArmL, Joint::ForearmL, Joint::HandL]

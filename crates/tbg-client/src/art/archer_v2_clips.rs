@@ -1,4 +1,4 @@
-//! Candidate Archer motion (owner review, `?archer=v2`). The attack is a
+//! Default Archer motion. The attack is a
 //! side-on stance: turn and raise (0–0.10 s), draw to the cheek (to 0.12 s),
 //! anchor, Release at 0.18 s (unchanged contract), long follow-through with the
 //! bow arm held (to 0.40 s), recovery (to 0.50 s). Idle and walk reuse P15.
@@ -25,10 +25,10 @@ pub fn full_draw() -> (Vec3, Vec3) {
 
 pub fn apply(clip: Clip, t: f32, pose: &mut Pose) {
     if clip != Clip::AttackRanged {
-        super::archer_clips::apply(clip, t, pose);
+        locomotion(clip, t, pose);
         return;
     }
-    let turn = Easing::CubicOut.sample((t / 0.10).clamp(0.0, 1.0));
+    let turn = Easing::CubicIn.sample((t / 0.10).clamp(0.0, 1.0));
     let back = Easing::CubicInOut.sample(((t - 0.40) / 0.10).clamp(0.0, 1.0));
     let k = turn * (1.0 - back);
     stance(pose, k);
@@ -70,4 +70,39 @@ fn stance(pose: &mut Pose, k: f32) {
 fn degrees(q: Quat) -> Vec3 {
     let (x, y, z) = q.to_euler(EulerRot::XYZ);
     Vec3::new(x, y, z) * 180.0 / std::f32::consts::PI
+}
+
+use super::anim::Easing::*;
+use super::rig::{
+    Joint::*,
+    Node::{Body, Prop},
+};
+use super::{clips::Key, curves::sample_track};
+type Track = (Node, &'static [Key]);
+const Z: [f32; 3] = [0.0; 3];
+
+#[rustfmt::skip]
+const IDLE: &[Track] = &[
+    (Body(UpperArmL), &[(0.0, [-25.0,0.0,-8.0],Z,CubicInOut),(1.0,[-25.0,0.0,-8.0],Z,Hold)]),
+    (Body(ForearmL), &[(0.0, [-65.0,0.0,0.0],Z,Hold)]),
+    (Prop(Socket::OffhandL), &[(0.0,[90.0,0.0,8.0],Z,Hold)]),
+    (Body(UpperArmR), &[(0.0,[-8.0,0.0,-8.0],Z,CubicInOut),(0.5,[-12.0,0.0,-8.0],Z,CubicInOut),(1.0,[-8.0,0.0,-8.0],Z,Hold)]),
+];
+#[rustfmt::skip]
+const WALK: &[Track] = &[
+    (Body(UpperArmL), &[(0.0,[-25.0,0.0,-8.0],Z,CubicInOut),(0.5,[-30.0,0.0,-8.0],Z,CubicInOut),(1.0,[-25.0,0.0,-8.0],Z,Hold)]),
+    (Body(ForearmL), &[(0.0,[-65.0,0.0,0.0],Z,Hold)]),
+    (Prop(Socket::OffhandL), &[(0.0,[90.0,0.0,8.0],Z,Hold)]),
+    (Body(UpperArmR), &[(0.0,[18.0,0.0,-8.0],Z,CubicInOut),(0.5,[-22.0,0.0,-8.0],Z,CubicInOut),(1.0,[18.0,0.0,-8.0],Z,Hold)]),
+];
+fn locomotion(clip: Clip, seconds: f32, pose: &mut Pose) {
+    let tracks = match clip {
+        Clip::Idle => IDLE,
+        Clip::Walk => WALK,
+        _ => return,
+    };
+    let k = (seconds / clip.duration()).rem_euclid(1.0);
+    for (node, keys) in tracks {
+        pose[node.index()] = sample_track(keys, k);
+    }
 }
