@@ -243,10 +243,48 @@ run `ulimit -n 8192` before big bot runs.
 
 ## Phase report
 
-*(Executor fills this in at the end. Replace the real domain/IP with `<domain>`/`<host>`.)*
+Executed by the reviewer agent (Claude) on 2026-10-28, branch `phase/p5-real-environment`.
+**The owner's VPS and domain were not available yet**: everything that can run on
+the development PC was implemented and validated; every step that needs the VPS is
+listed under "Pending VPS validation".
 
-- Commands run and results:
-- R1–R13 table with numbers:
-- Capacity summary (matches vs CPU/RSS/bandwidth):
+- Implemented: `records.rs` (rusqlite 0.41 bundled, WAL, `matches` table filled from
+  the `match_end` JSON line via `spawn_blocking`; per-seat purchases by unit kind,
+  evolutions, intents, rejections, reconnects, RTT p50/p95); graceful shutdown
+  (`Shared.draining`: lobby answers `QuickMatch`/`CreateRoom`/`JoinRoom` with
+  `Error{ServerFull}`, process exits when no match runs or after 300 s); the full
+  `deploy/` kit (`.env.deploy.example`, `Caddyfile.template`, `tbg-server.service`,
+  `provision.sh`, `deploy.sh`, `backup.sh`, `README.md`).
+- Commands run and results (local):
+  - `cargo test -p tbg-server` → **10 passed** (adds `records_insert_and_count`,
+    `draining_server_refuses_new_matches`).
+  - `cargo clippy --workspace --all-targets -- -D warnings` → clean.
+  - `bash -n deploy/*.sh` → ok; `shellcheck deploy/*.sh` → clean.
+  - `backup.sh` against a local DB with 9 old dated copies → new backup written,
+    7 newest kept, the copy opens with `sqlite3` and returns the data (restore OK).
+  - `/metrics`: `curl localhost:8080/metrics` → 200; with `X-Forwarded-For: 1.2.3.4` → **404**.
+  - Graceful-shutdown rehearsal (`target/rehearsal.sh`, release build): 5 bot matches,
+    SIGTERM at 40 s → log `waiting for matches running=5 … 3 … 2 … done running=0`,
+    process exited 60 s after SIGTERM, **10/10 bots completed**, SQLite: 5 rows,
+    avg duration 80 s, all `StrongholdDestroyed`, seat JSON e.g.
+    `{"evolutions":3,"intents":12,"purchases":{"Archer":2,…},"rtt_p50":2,…}`.
+  - An accidental second run against a still-draining server: all new bots got
+    `ServerFull` — the drain rule observed in practice.
+- Pending VPS validation (owner provides VPS IP, SSH sudo user, domain A record):
+  R1 (HTTPS health, metrics not public) · R2 (page load over HTTPS, transfer size) ·
+  R3–R6 (`tbg-bots --url wss://<domain>/ws`, 1/50/50+chaos/100–500 matches, CPU/RSS on
+  the VPS) · R7–R9 (two people on different networks, 4G airplane-mode 10 s / 40 s) ·
+  R10 (restart during a match on the VPS) · R11 (SQLite + backup on the VPS) ·
+  R12 (RTT from the target audience, region decision) · R13 (ufw/ss check).
+  Also first real run of `provision.sh`/`deploy.sh`, Caddy TLS, and `wss://` through
+  the bot tool (rustls) — none could run locally (no Caddy, no TLS endpoint).
 - Deviations:
-- Blocked items:
+  1. `Config.db` (`TBG_DB`, default `tbg.sqlite3`); tests pass `None` unless testing records.
+  2. Per-seat `bytes_out` is not in the record (only the connection log has it);
+     bandwidth comes from `/metrics` and the connection log lines.
+  3. `deploy.sh` passes the SSH user to `provision.sh` (rustup is installed for that user).
+  4. `backup.sh` reads `TBG_DB`/`TBG_BACKUP_DIR` (defaults are the VPS paths) so it can be
+     tested locally; off-site copy via `TBG_BACKUP_REMOTE` (P8 step 4 implemented early).
+- Blocked items: none locally. VPS-dependent items above.
+- Needs the owner: VPS + domain + SSH access, then run `bash deploy/deploy.sh --provision`
+  and the R1–R13 table (or ask the reviewer to run it).

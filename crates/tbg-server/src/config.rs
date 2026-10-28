@@ -11,6 +11,8 @@ pub struct Config {
     /// Simulation tick length; 50 ms in production. Tests shorten it.
     pub tick_ms: u64,
     pub static_dir: Option<PathBuf>,
+    /// SQLite file for match records (`TBG_DB`); `None` disables records.
+    pub db: Option<PathBuf>,
 }
 
 impl Default for Config {
@@ -22,6 +24,7 @@ impl Default for Config {
             reconnect_secs: 30,
             tick_ms: 50,
             static_dir: None,
+            db: None,
         }
     }
 }
@@ -42,6 +45,10 @@ impl Config {
             reconnect_secs: num("TBG_RECONNECT_SECS", d.reconnect_secs),
             tick_ms: num("TBG_TICK_MS", d.tick_ms).max(1),
             static_dir: std::env::var("TBG_STATIC_DIR").ok().map(PathBuf::from),
+            db: Some(
+                std::env::var("TBG_DB")
+                    .map_or_else(|_| PathBuf::from("tbg.sqlite3"), PathBuf::from),
+            ),
         }
     }
 }

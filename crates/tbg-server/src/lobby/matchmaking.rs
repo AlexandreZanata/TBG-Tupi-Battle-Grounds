@@ -93,6 +93,7 @@ impl Lobby {
             self.self_tx.clone(),
             self.config.clone(),
             self.metrics.clone(),
+            self.records.clone(),
         );
         for (seat, token) in Seat::BOTH.into_iter().zip(tokens) {
             if let Some(s) = self.session(&token) {
