@@ -209,10 +209,43 @@ None in the client. Rules are already tested in `tbg-core`.
 
 ## Phase report
 
-*(Executor fills this in at the end.)*
+Executed by the reviewer agent (Claude) on 2026-10-28, branch `phase/p3-skeleton-game`.
 
 - Commands run and results:
-- Matches played (device, result, duration):
-- Screenshots (paths under `docs/media/p3/`, ≤ 300 KB each):
+  - `cargo clippy --workspace --all-targets -- -D warnings` and
+    `cargo clippy -p tbg-client --target wasm32-unknown-unknown -- -D warnings` → clean.
+  - `cargo test --workspace` → 15 passed (tbg-core).
+  - `trunk serve` (dev build) → page loads, no panics in the console.
+  - Release build and size measurement: done at the end of P4 (P4 changes the
+    client again); see the P4 report.
+- Matches played (browser pane, desktop Chrome engine, 373×335 window):
+  - Practice vs Bot started with one click; HUD shows clock, both Stronghold
+    HP bars, Energy, Army n/8, synergy ("Humans 1/2"), rotation bar, 3 cards
+    with faction strip; unaffordable cards grey out.
+  - Buying a card spawns the unit at the own Stronghold; tapping the own unit
+    opens the evolution panel ("Bone Brute | tier 0", Ossified +50% HP (3),
+    Butcher +50% dmg (3), Close); choosing a branch closes the panel.
+  - `?autoplay` full match → DEFEAT, "A Stronghold was destroyed",
+    "Duration 1:10 vs Training Bot"; Play again starts a new match.
+  - Phone portrait test: **pending owner** (real Android/iPhone).
 - Deviations:
-- Blocked items:
+  1. **No Bevy picking.** Hover-based picking missed taps whose press and
+     release land in the same frame (seen with synthetic clicks; same risk for
+     fast phone taps). `ui/input.rs` hit-tests the release position: buttons
+     (`ComputedNode::contains_point`), then the nearest own unit on screen
+     (42 px × UI scale), else "tap outside" (closes the panel). The picking
+     features and `MeshPickingPlugin` were removed (smaller WASM).
+  2. `UnitLook` carries the unit `id` (needed to open its panel).
+  3. Interpolation runs from the previous to the latest view over one view
+     interval (≈100 ms behind) instead of a fixed 0.12 s offset; same intent,
+     smoother with frame-quantized arrivals.
+  4. `?autoplay` (bot plays for this client through `MatchLink`) added as a
+     validation aid; bare URL flags (`?autoplay`) now parse.
+  5. `?stress=N` spawns in `Startup`: Bevy 0.20 runs the first state
+     transition before `PreStartup`, so `OnEnter(Menu)` cannot use assets
+     created there.
+  6. The middle dot `·` is missing from Bevy's default font; separators use `|`.
+  7. Dev profile: line-table debug info only, none for dependencies. Full
+     debug info had grown `target/debug` to 12 GB on a disk with 5 GB free.
+- Blocked items: none.
+- Needs the owner: one match on a real phone (portrait).

@@ -12,8 +12,13 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.97"
 
+[profile.dev]
+# Line tables are enough for panics; full debug info made target/ 12 GB.
+debug = "line-tables-only"
+
 [profile.dev.package."*"]
 opt-level = 2
+debug = false
 
 [profile.release]
 codegen-units = 1
