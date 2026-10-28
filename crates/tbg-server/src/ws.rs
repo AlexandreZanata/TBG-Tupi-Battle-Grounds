@@ -81,7 +81,7 @@ async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
         bytes_out: 0,
         started: Instant::now(),
     };
-    run_loop(&mut socket, &mut rx, &mut c, &app).await;
+    let reason = run_loop(&mut socket, &mut rx, &mut c, &app).await;
     if let Some((seat, m)) = &c.matched {
         let _ = m
             .send(MatchCmd::Detach {
@@ -102,6 +102,7 @@ async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
         bytes_out = c.bytes_out,
         rtt_p50 = percentile(&c.rtts, 0.5),
         rtt_p95 = percentile(&c.rtts, 0.95),
+        reason,
         "conn closed"
     );
 }
@@ -151,7 +152,7 @@ async fn run_loop(
     rx: &mut mpsc::Receiver<ConnEvent>,
     c: &mut Conn,
     app: &AppState,
-) {
+) -> &'static str {
     let mut ping = tokio::time::interval(Duration::from_secs(1));
     let idle = sleep(IDLE);
     tokio::pin!(idle);
@@ -166,18 +167,19 @@ async fn run_loop(
                         Ok(reply) => reply,
                         Err(code) => {
                             let _ = send(socket, &app.metrics, &ServerMsg::Error { code }).await;
-                            return;
+                            return "bad_message";
                         }
                     }
                 }
-                Some(Ok(Message::Close(_))) | Some(Err(_)) | None => return,
+                Some(Ok(Message::Close(_))) | None => return "client_closed",
+                Some(Err(_)) => return "socket_error",
                 Some(Ok(_)) => None,
             },
             ev = rx.recv() => match ev {
                 Some(ConnEvent::Send(msg)) => Some(msg),
                 Some(ConnEvent::EnterMatch { seat, tx }) => { c.matched = Some((seat, tx)); None }
                 Some(ConnEvent::LeaveMatch) => { c.matched = None; None }
-                Some(ConnEvent::Close) | None => return,
+                Some(ConnEvent::Close) | None => return "server_closed",
             },
             _ = ping.tick() => {
                 c.next_ping += 1;
@@ -185,12 +187,12 @@ async fn run_loop(
                 if c.pings.len() > 8 { c.pings.remove(0); }
                 Some(ServerMsg::Ping { id: c.next_ping })
             }
-            _ = &mut idle => return,
+            _ = &mut idle => return "idle_timeout",
         };
         if let Some(msg) = reply {
             match send(socket, &app.metrics, &msg).await {
                 Ok(n) => c.bytes_out += n,
-                Err(_) => return,
+                Err(_) => return "send_failed",
             }
         }
     }
