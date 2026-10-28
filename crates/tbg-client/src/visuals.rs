@@ -4,7 +4,8 @@
 
 use bevy::prelude::*;
 use tbg_core::content::def;
-use tbg_core::{Archetype, UnitId, UnitKind};
+use tbg_core::content::effective_stats;
+use tbg_core::{Archetype, Faction, UnitId, UnitKind};
 
 use crate::art::anim::Animator;
 use crate::art::{figure, FigureLibrary};
@@ -37,6 +38,9 @@ pub struct UnitVisual {
     bar_fill: Entity,
     pub own: bool,
     pub archetype: Archetype,
+    pub faction: Faction,
+    /// Splash radius in tiles (0 = none), for the splash-ring effect.
+    pub splash: f32,
     form: (UnitKind, u8, u8),
     yaw: f32,
     /// Tint material, seconds left, already applied to the joints.
@@ -140,6 +144,8 @@ pub fn spawn_unit_visual(
         bar_fill,
         own: look.own,
         archetype: d.archetype,
+        faction: d.faction,
+        splash: effective_stats(look.kind, look.tier, look.branch, 0).splash as f32 / 1000.0,
         form: (look.kind, look.tier, look.branch),
         yaw: yaw(look.own),
         tint: None,

@@ -34,7 +34,7 @@ branches. Every other phase starts only after the previous one is reviewed.
 | P4 | [P4-online-multiplayer.md](phases/P4-online-multiplayer.md) | **Online 1v1** with reconnect, latency/bandwidth metrics, bot load test validated locally | done (two-device test pending) | yes |
 | P5 | [P5-real-environment.md](phases/P5-real-environment.md) | **Validated on the owner's VPS + domain** over HTTPS/WSS, real devices, measured capacity | code + local rehearsal done; **VPS validation pending** | yes (local) |
 | P6 | [P6-visual-slice.md](phases/P6-visual-slice.md) | One polished 3D figurine + final arena + animation library, human-approved | done (all 8 units); **owner look approval pending** | yes |
-| P7 | [P7-content-feel-balance.md](phases/P7-content-feel-balance.md) | 8 units with art, VFX, audio, balance targets met, playtest done | todo | — |
+| P7 | [P7-content-feel-balance.md](phases/P7-content-feel-balance.md) | 8 units with art, VFX, audio, balance targets met, playtest done | done (bot balance); **human playtest pending** | yes |
 | P8 | [P8-public-launch.md](phases/P8-public-launch.md) | Public URL shared with first players | todo | — |
 
 ## How a phase is executed (executor agent)

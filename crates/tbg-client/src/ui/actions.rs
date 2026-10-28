@@ -6,10 +6,11 @@ use tbg_core::protocol::{valid_room_code, ClientMsg, RoomCode};
 use tbg_core::PlayerIntention;
 
 use super::{evolve, PendingBuy, UiAction};
+use crate::audio::{Sound, Sounds};
 use crate::link::MatchLink;
 use crate::local::LocalMatch;
 use crate::net::{Mode, NetLink};
-use crate::sync::QueueInfo;
+use crate::sync::{LatestView, QueueInfo};
 use crate::{config, GameState};
 
 #[derive(Resource, Default)]
@@ -57,9 +58,16 @@ pub(super) fn apply(
     mut last: ResMut<LastMode>,
     mut queue_info: ResMut<QueueInfo>,
     time: Res<Time>,
+    mut extra: (Res<LatestView>, ResMut<super::Toasts>, ResMut<Sounds>),
 ) {
     let now = time.elapsed_secs_f64();
     for action in std::mem::take(&mut queue.0) {
+        if !matches!(
+            action,
+            UiAction::Disabled | UiAction::CloseEvolve | UiAction::SelectUnit(_)
+        ) {
+            extra.2.play(Sound::Click);
+        }
         let replay_practice = *last == LastMode::Practice;
         let mut online = |mode: Mode, link: &mut MatchLink, last: &mut LastMode| {
             *link = MatchLink::Net(Box::new(NetLink::new(mode, now)));
@@ -110,6 +118,13 @@ pub(super) fn apply(
                 selected.0 = None;
             }
             UiAction::CloseEvolve => selected.0 = None,
+            UiAction::Inspect(offer) => {
+                if let Some(v) = &extra.0 .0 {
+                    let kind = v.offers[usize::from(offer.min(2))];
+                    extra.1.push_for(super::tips::unit_details(kind), 4.5);
+                }
+            }
+            UiAction::ToggleSound => extra.2.toggle_mute(),
             UiAction::Disabled => {}
         }
         if matches!(action, UiAction::Practice | UiAction::PlayAgain) {

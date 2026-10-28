@@ -5,14 +5,14 @@ use tbg_core::content::TICK_HZ;
 use tbg_core::EndReason;
 
 use super::{button, label, screen, UiAction, PANEL};
-use crate::sync::MatchInfo;
+use crate::sync::{MatchInfo, MatchStats};
 use crate::GameState;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Result), spawn);
 }
 
-fn spawn(mut commands: Commands, info: Res<MatchInfo>) {
+fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>) {
     let (title, reason) = match info.outcome {
         Some(o) => {
             let title = match o.winner {
@@ -36,6 +36,10 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>) {
         secs % 60,
         info.opponent
     );
+    let summary = format!(
+        "Units deployed {} | Evolutions {} | Damage to enemy Stronghold {}",
+        stats.bought, stats.evolutions, stats.damage_dealt
+    );
     commands.spawn((
         screen(JustifyContent::Center),
         DespawnOnExit(GameState::Result),
@@ -53,6 +57,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>) {
                 label(title, 40.0),
                 label(reason, 16.0),
                 label(duration, 16.0),
+                label(summary, 16.0),
                 button("Play again", UiAction::PlayAgain, 220.0),
                 button("Menu", UiAction::ToMenu, 220.0),
             ],

@@ -13,6 +13,7 @@ mod input;
 mod menu;
 mod queue;
 mod result;
+mod tips;
 mod toast;
 
 pub use actions::ActionQueue;
@@ -31,6 +32,9 @@ pub enum UiAction {
     PlayAgain,
     ToMenu,
     Buy(u8),
+    /// Long-press on a shop card: show the unit details.
+    Inspect(u8),
+    ToggleSound,
     SelectUnit(UnitId),
     Evolve {
         unit: UnitId,
@@ -59,6 +63,7 @@ pub fn plugin(app: &mut App) {
             evolve::plugin,
             result::plugin,
             toast::plugin,
+            tips::plugin,
         ));
 }
 

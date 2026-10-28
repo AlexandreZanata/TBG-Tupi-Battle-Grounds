@@ -3,10 +3,37 @@
 use bevy::prelude::*;
 
 use super::{button, label, screen, UiAction, PANEL};
+use crate::audio::Sounds;
 use crate::GameState;
 
+/// The mute toggle; its label follows `Sounds::muted`.
+#[derive(Component)]
+struct SoundButton;
+
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(GameState::Menu), spawn);
+    app.add_systems(OnEnter(GameState::Menu), spawn)
+        .add_systems(Update, sound_label.run_if(in_state(GameState::Menu)));
+}
+
+fn sound_label(
+    sounds: Res<Sounds>,
+    buttons: Query<&Children, With<SoundButton>>,
+    mut texts: Query<&mut Text>,
+) {
+    for children in &buttons {
+        for child in children.iter() {
+            if let Ok(mut t) = texts.get_mut(child) {
+                let want = if sounds.muted {
+                    "Sound: off"
+                } else {
+                    "Sound: on"
+                };
+                if t.0 != want {
+                    t.0 = want.into();
+                }
+            }
+        }
+    }
 }
 
 fn spawn(mut commands: Commands) {
@@ -29,6 +56,10 @@ fn spawn(mut commands: Commands) {
                 button("Practice vs Bot", UiAction::Practice, 260.0),
                 button("Quick Match", UiAction::Quick, 260.0),
                 button("Play with a friend", UiAction::CreateRoom, 260.0),
+                (
+                    button("Sound: on", UiAction::ToggleSound, 260.0),
+                    SoundButton
+                ),
             ],
         )],
     ));

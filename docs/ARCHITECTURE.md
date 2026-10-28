@@ -27,7 +27,7 @@ bundle. No Docker, Kubernetes, Redis, queues, or managed game services.
 | Concern | Choice | Version / note |
 |---------|--------|----------------|
 | Toolchain | Rust stable via `rust-toolchain.toml` (installs `wasm32-unknown-unknown`) | env: 1.99.0; MSRV 1.97 (Bevy 0.20) |
-| Client engine | Bevy with an explicit feature list (see `crates/tbg-client/Cargo.toml`; no gamepads, glTF, animation, post-processing, or LUTs; `bevy_audio` + `vorbis` added in P7), WebGL2, camera tonemapping `AcesFitted` | 0.20.0, pinned for the whole MVP |
+| Client engine | Bevy with an explicit feature list (see `crates/tbg-client/Cargo.toml`; no gamepads, glTF, animation, post-processing, or LUTs; `bevy_audio` + `wav` in the WASM build only, P7), WebGL2, camera tonemapping `AcesFitted` | 0.20.0, pinned for the whole MVP |
 | WASM build | Trunk (`index.html` in `crates/tbg-client/`) + wasm-opt | 0.22.x (`cargo install --locked trunk`) |
 | Client WebSocket | `ewebsock` (same API on WASM and native) | 0.8.x |
 | Server | Axum (`ws` feature) + Tokio | 0.8.x / 1.x |
@@ -215,8 +215,9 @@ gentle fog, readable from a phone held at arm's length.
   playing every clip on the real arena in the game camera. Agents capture
   desktop and phone-viewport screenshots; a human approves silhouette,
   proportion, color, motion readability, and consistency.
-- **Audio and fonts (P7):** CC0 sound packs and one OFL display font,
-  each recorded in `THIRD_PARTY_NOTICES.md`.
+- **Audio (P7):** 11 short WAV effects synthesized by
+  `examples/make_sfx.rs` (original, ~130 KB), played only in the browser
+  build (native `bevy_audio` needs ALSA). Font: Bevy's default font.
 - **Escape hatch:** if a part cannot look right from builders, an offline
   Blender script may export that *static* part as a small GLB. Rigs,
   skinning, and per-character animation stay out of scope.

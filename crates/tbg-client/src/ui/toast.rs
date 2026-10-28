@@ -5,11 +5,16 @@ use bevy::prelude::*;
 use super::{label, PANEL};
 
 #[derive(Resource, Default)]
-pub struct Toasts(Vec<String>);
+pub struct Toasts(Vec<(String, f32)>);
 
 impl Toasts {
+    /// Show `text` for `secs` seconds (replaces any toast on screen).
+    pub fn push_for(&mut self, text: impl Into<String>, secs: f32) {
+        self.0.push((text.into(), secs));
+    }
+
     pub fn push(&mut self, text: impl Into<String>) {
-        self.0.push(text.into());
+        self.0.push((text.into(), 1.5));
     }
 }
 
@@ -33,7 +38,9 @@ pub fn plugin(app: &mut App) {
 }
 
 fn show(mut commands: Commands, mut toasts: ResMut<Toasts>, existing: Query<Entity, With<Toast>>) {
-    let Some(text) = toasts.0.pop() else { return };
+    let Some((text, secs)) = toasts.0.pop() else {
+        return;
+    };
     toasts.0.clear();
     for e in &existing {
         commands.entity(e).despawn();
@@ -48,7 +55,7 @@ fn show(mut commands: Commands, mut toasts: ResMut<Toasts>, existing: Query<Enti
             ..default()
         },
         BackgroundColor(PANEL),
-        Toast(1.5),
+        Toast(secs),
         children![label(text, 18.0)],
     ));
 }
