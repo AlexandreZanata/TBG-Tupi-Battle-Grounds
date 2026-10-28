@@ -8,6 +8,8 @@ use bevy::prelude::*;
 use tbg_core::content::LANE_LEN;
 use tbg_core::{Event, MatchView, Outcome, Seat, UnitId};
 
+use crate::art::anim::Animator;
+use crate::art::FigureLibrary;
 use crate::visuals::{self, UnitLook, UnitVisual, VisualAssets};
 
 mod events;
@@ -72,9 +74,10 @@ fn sync_units(
     mut commands: Commands,
     time: Res<Time>,
     assets: Res<VisualAssets>,
+    lib: Res<FigureLibrary>,
     mut buffer: ResMut<ViewBuffer>,
     mut map: ResMut<UnitEntities>,
-    mut visuals: Query<(&mut UnitVisual, &mut Transform)>,
+    mut visuals: Query<(&mut UnitVisual, &mut Transform, &mut Animator)>,
 ) {
     let Some((last_t, last)) = buffer.last.clone() else {
         return;
@@ -95,9 +98,9 @@ fn sync_units(
         let x = prev_x as f64 + (u.x - prev_x) as f64 * alpha;
         let pos = Vec3::new(world_x(x as i32, you), 0.0, lane_z(u.id));
         match map.0.get(&u.id).and_then(|e| visuals.get_mut(*e).ok()) {
-            Some((v, mut t)) => {
+            Some((mut v, mut t, _)) => {
                 t.translation = pos;
-                visuals::update_unit_visual(&mut commands, &assets, &v, u);
+                visuals::update_unit_visual(&mut commands, &assets, &lib, &mut v, u);
             }
             None => {
                 let look = UnitLook {
@@ -109,7 +112,7 @@ fn sync_units(
                 };
                 map.0.insert(
                     u.id,
-                    visuals::spawn_unit_visual(&mut commands, &assets, look, pos),
+                    visuals::spawn_unit_visual(&mut commands, &assets, &lib, look, pos),
                 );
             }
         }
@@ -119,7 +122,7 @@ fn sync_units(
     }
     map.0.retain(|id, e| {
         let alive = last.units.iter().any(|u| u.id == *id);
-        if !alive && !visuals.get(*e).is_ok_and(|(v, _)| v.dying) {
+        if !alive && !visuals.get(*e).is_ok_and(|(v, _, _)| v.dying) {
             commands.entity(*e).try_despawn();
         }
         alive

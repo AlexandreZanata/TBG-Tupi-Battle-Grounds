@@ -1,19 +1,15 @@
-//! Shared meshes and materials for unit visuals (created once, reused by
-//! every unit so the renderer can batch them).
+//! Shared meshes and materials around the figurines (rings, rank pips, HP
+//! bars, projectiles, tints), created once and reused by every unit.
 
 use bevy::prelude::*;
 
 #[derive(Resource)]
 pub struct VisualAssets {
-    pub bodies: [Handle<Mesh>; 2],
-    pub markers: [Handle<Mesh>; 5],
     pub ring: Handle<Mesh>,
     pub tier_cube: Handle<Mesh>,
     pub bar: Handle<Mesh>,
     pub projectile: Handle<Mesh>,
-    pub faction: [Handle<StandardMaterial>; 4],
     pub team: [Handle<StandardMaterial>; 2],
-    pub marker: Handle<StandardMaterial>,
     pub slowed: Handle<StandardMaterial>,
     pub rooted: Handle<StandardMaterial>,
     pub gold: Handle<StandardMaterial>,
@@ -46,9 +42,7 @@ pub(super) fn init(
         })
     };
     let rgb = |c: [u8; 3]| Color::srgb_u8(c[0], c[1], c[2]);
-    let faction = FACTION_COLORS.map(|c| lit(rgb(c)));
     let team = [lit(rgb([0x3F, 0xA9, 0xF5])), lit(rgb([0xF2, 0x54, 0x5B]))];
-    let marker = lit(rgb([0xF4, 0xEE, 0xE0]));
     let slowed = lit(rgb([0x4C, 0x7D, 0xFF]));
     let rooted = lit(rgb([0x7A, 0x4E, 0x22]));
     let gold = lit(rgb([0xD9, 0xB4, 0x4A]));
@@ -71,24 +65,11 @@ pub(super) fn init(
     ]
     .map(&mut unlit);
     commands.insert_resource(VisualAssets {
-        bodies: [
-            meshes.add(Capsule3d::new(0.3, 0.2)),
-            meshes.add(Capsule3d::new(0.45, 0.3)),
-        ],
-        markers: [
-            meshes.add(Cuboid::new(0.26, 0.26, 0.26)),
-            meshes.add(Cone::new(0.16, 0.32)),
-            meshes.add(Sphere::new(0.15)),
-            meshes.add(Cylinder::new(0.05, 0.4)),
-            meshes.add(Torus::new(0.08, 0.16)),
-        ],
-        ring: meshes.add(Cylinder::new(0.42, 0.03)),
+        ring: meshes.add(Cylinder::new(0.42, 0.03).mesh().resolution(16)),
         tier_cube: meshes.add(Cuboid::new(0.12, 0.12, 0.12)),
         bar: meshes.add(Rectangle::new(0.8, 0.08)),
         projectile: meshes.add(Sphere::new(0.09)),
-        faction,
         team,
-        marker,
         slowed,
         rooted,
         gold,

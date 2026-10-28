@@ -1,14 +1,16 @@
-//! Short scale/offset animations, hit tints, projectiles, and HP bars that
-//! face the camera. No animation system: a cue is a timer per unit.
+//! Simulation cues → animation clips, hit/heal tints, projectiles, and HP
+//! bars that face the camera.
 
 use bevy::prelude::*;
+use tbg_core::Archetype;
 
 use super::{UnitVisual, VisualAssets};
+use crate::art::anim::{Animator, Clip};
+use crate::art::FigureLibrary;
 use crate::camera::ArenaCamera;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VisualCue {
-    Spawn,
     AttackStart,
     Hit,
     Heal,
@@ -16,73 +18,69 @@ pub enum VisualCue {
     Death,
 }
 
-impl VisualCue {
-    fn duration(self) -> f32 {
-        match self {
-            VisualCue::Spawn => 0.3,
-            VisualCue::AttackStart => 0.25,
-            VisualCue::Evolved => 0.4,
-            VisualCue::Death => 0.35,
-            VisualCue::Hit | VisualCue::Heal => 0.1,
-        }
-    }
-}
+/// How long a dead unit stays on the field after its death clip.
+const CORPSE_SECS: f32 = 0.9;
 
-/// Start a cue. Hit and Heal only tint; the others animate the body.
-pub fn play_cue(v: &mut UnitVisual, a: &VisualAssets, cue: VisualCue) {
+pub fn play_cue(v: &mut UnitVisual, anim: &mut Animator, a: &VisualAssets, cue: VisualCue) {
     if v.dying {
         return;
     }
     match cue {
-        VisualCue::Hit => v.tint = Some((a.flash.clone(), 0.08)),
-        VisualCue::Heal => v.tint = Some((a.heal.clone(), 0.15)),
+        VisualCue::AttackStart => anim.play(match v.archetype {
+            Archetype::Ranged => Clip::AttackRanged,
+            Archetype::Support | Archetype::Control => Clip::Cast,
+            Archetype::Tank | Archetype::Dps => Clip::AttackMelee,
+        }),
+        VisualCue::Hit => {
+            v.tint = Some((a.flash.clone(), 0.08, false));
+            anim.play_if_free(Clip::Hit);
+        }
+        VisualCue::Heal => v.tint = Some((a.heal.clone(), 0.15, false)),
+        VisualCue::Evolved => anim.play(Clip::Evolve),
         VisualCue::Death => {
             v.dying = true;
-            v.anim = Some((cue, 0.0));
+            anim.play(Clip::Death);
         }
-        _ => v.anim = Some((cue, 0.0)),
     }
 }
 
 pub(super) fn animate(
     mut commands: Commands,
     time: Res<Time>,
-    a: Res<VisualAssets>,
-    mut units: Query<(Entity, &mut UnitVisual)>,
+    lib: Res<FigureLibrary>,
+    mut units: Query<(Entity, &mut UnitVisual, &mut Animator, &Transform)>,
 ) {
     let dt = time.delta_secs();
-    for (root, mut v) in &mut units {
-        let mut t = Transform::from_xyz(0.0, v.body_y, 0.0);
-        if let Some((cue, elapsed)) = v.anim {
-            let k = ((elapsed + dt) / cue.duration()).min(1.0);
-            let facing = if v.own { 1.0 } else { -1.0 };
-            match cue {
-                VisualCue::Spawn => t.scale = Vec3::splat(k.max(0.05)),
-                VisualCue::AttackStart => {
-                    t.translation.x += facing * 0.25 * (k * std::f32::consts::PI).sin()
-                }
-                VisualCue::Evolved => {
-                    t.scale = Vec3::splat(1.0 + 0.3 * (k * std::f32::consts::PI).sin())
-                }
-                VisualCue::Death => t.scale = Vec3::splat((1.0 - k).max(0.01)),
-                VisualCue::Hit | VisualCue::Heal => {}
+    for (root, mut v, mut anim, t) in &mut units {
+        if v.dying {
+            v.dead_for += dt;
+            if v.dead_for > Clip::Death.duration() + CORPSE_SECS {
+                commands.entity(root).try_despawn();
             }
-            v.anim = (k < 1.0).then_some((cue, elapsed + dt));
-            if cue == VisualCue::Death && k >= 1.0 {
-                commands.entity(root).despawn();
-                continue;
+            continue;
+        }
+        let moving = (t.translation.x - v.last_x).abs() > 0.0004;
+        v.last_x = t.translation.x;
+        anim.set_base(if moving { Clip::Walk } else { Clip::Idle });
+        // Swap materials only on tint start and end, not every frame.
+        let joints = v.joints;
+        let tint = v.tint.take();
+        if let Some((mat, left, applied)) = tint {
+            if !applied {
+                for j in joints {
+                    commands.entity(j).try_insert(MeshMaterial3d(mat.clone()));
+                }
+            }
+            if left - dt <= 0.0 {
+                for j in joints {
+                    commands
+                        .entity(j)
+                        .try_insert(MeshMaterial3d(lib.material.clone()));
+                }
+            } else {
+                v.tint = Some((mat, left - dt, true));
             }
         }
-        let material = match &mut v.tint {
-            Some((m, left)) if *left > 0.0 => {
-                *left -= dt;
-                m.clone()
-            }
-            _ => a.faction[v.faction].clone(),
-        };
-        commands
-            .entity(v.body)
-            .insert((t, MeshMaterial3d(material)));
     }
 }
 

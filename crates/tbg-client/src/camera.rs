@@ -43,6 +43,15 @@ fn spawn_camera(mut commands: Commands, window: Single<&Window>) {
     commands.spawn((
         Camera3d::default(),
         Tonemapping::AcesFitted,
+        // Soft haze on the far rim of the diorama; the lane stays crisp.
+        DistanceFog {
+            color: crate::art::palette::SKY,
+            falloff: FogFalloff::Linear {
+                start: 38.0,
+                end: 95.0,
+            },
+            ..default()
+        },
         transform,
         projection,
         ArenaCamera,
