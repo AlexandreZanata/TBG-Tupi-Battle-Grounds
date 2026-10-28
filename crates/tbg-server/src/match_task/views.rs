@@ -24,7 +24,10 @@ impl Match {
         match intent {
             tbg_core::PlayerIntention::Purchase { .. } => {
                 if let Some(u) = self.state.units.last() {
-                    *stats.purchases.entry(format!("{kind:?}", kind = u.kind)).or_default() += 1;
+                    *stats
+                        .purchases
+                        .entry(format!("{kind:?}", kind = u.kind))
+                        .or_default() += 1;
                 }
             }
             tbg_core::PlayerIntention::Evolve { .. } => stats.evolutions += 1,

@@ -262,7 +262,14 @@ async fn protocol_pong_keeps_socket_alive() {
     // for 20 s (a hidden tab) is still connected (idle timeout is 15 s).
     let url = server(30).await;
     let (mut ws, _) = connect_async(url.as_str()).await.unwrap();
-    send(&mut ws, &ClientMsg::Hello { version: PROTOCOL_VERSION, resume: None }).await;
+    send(
+        &mut ws,
+        &ClientMsg::Hello {
+            version: PROTOCOL_VERSION,
+            resume: None,
+        },
+    )
+    .await;
     let deadline = std::time::Instant::now() + Duration::from_secs(20);
     loop {
         let msg = tokio::time::timeout(Duration::from_secs(25), async {

@@ -31,7 +31,19 @@ pub fn plugin(app: &mut App) {
     app.init_resource::<ActionQueue>()
         .init_resource::<IntentSeq>()
         .init_resource::<LastMode>()
-        .add_systems(Startup, join_from_url);
+        .add_systems(Startup, (join_from_url, probe_on_load));
+}
+
+/// P9: with a stored session token and no `?room=`, open a listen-only
+/// link at once; a live match resumes with no tap, otherwise the socket
+/// is reused by the next Quick Match / room action.
+fn probe_on_load(mut link: NonSendMut<MatchLink>) {
+    if config::url_param("room").is_some() {
+        return;
+    }
+    if config::load_token().is_some() {
+        *link = MatchLink::Net(Box::new(NetLink::new(Mode::Probe, 0.0)));
+    }
 }
 
 /// `?room=CODE` joins that private room right away.
@@ -70,6 +82,15 @@ pub(super) fn apply(
         }
         let replay_practice = *last == LastMode::Practice;
         let mut online = |mode: Mode, link: &mut MatchLink, last: &mut LastMode| {
+            // Reuse the probe socket when it is still idle and open.
+            if let MatchLink::Net(n) = link {
+                if n.reuse(mode, now) {
+                    *queue_info = QueueInfo::default();
+                    *last = LastMode::Online;
+                    next.set(GameState::Queue);
+                    return;
+                }
+            }
             *link = MatchLink::Net(Box::new(NetLink::new(mode, now)));
             *queue_info = QueueInfo::default();
             *last = LastMode::Online;

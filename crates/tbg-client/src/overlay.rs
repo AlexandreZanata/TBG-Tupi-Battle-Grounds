@@ -13,6 +13,8 @@ use crate::visuals::UnitVisual;
 #[derive(Resource, Default)]
 pub struct OverlayStats {
     pub rtt_ms: Option<f64>,
+    /// p50 tap-to-acknowledgement latency in ms (`None` before any ack).
+    pub ack_ms: Option<f64>,
     /// Simulated latency from `?lag=MS` (0 when off).
     pub lag_ms: u32,
 }
@@ -71,6 +73,9 @@ fn update_overlay(
     let rtt = stats
         .rtt_ms
         .map_or_else(|| "offline".into(), |v| format!("{v:.0} ms"));
+    let ack = stats
+        .ack_ms
+        .map_or_else(|| "--".into(), |v| format!("{v:.0} ms"));
     let mut g: Vec<f32> = gaps.0.iter().copied().collect();
     g.sort_by(f32::total_cmp);
     let view = g
@@ -82,7 +87,7 @@ fn update_overlay(
         String::new()
     };
     text.0 = format!(
-        "FPS {fps:.0} | {ms:.1} ms | RTT {rtt} | view p95 {view} ms | units {}{lag}",
+        "FPS {fps:.0} | {ms:.1} ms | RTT {rtt} | ack {ack} | view p95 {view} ms | units {}{lag}",
         units.iter().count()
     );
 }

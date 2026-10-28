@@ -9,7 +9,7 @@ use tbg_core::protocol::{RoomCode, ServerMsg};
 use super::{LatestView, MatchInfo, ViewBuffer};
 use crate::audio::{Sound, Sounds};
 use crate::link::MatchLink;
-use crate::net::NetStatus;
+use crate::net::{NetStatus, GIVE_UP};
 use crate::overlay::OverlayStats;
 use crate::ui::{Banner, Toasts};
 use crate::GameState;
@@ -87,8 +87,12 @@ pub(super) fn poll_link(
         }
     }
     stats.0.lag_ms = link.lag_ms();
+    stats.0.ack_ms = link.ack_ms();
     ui.1 .0 = match link.status() {
-        Some(NetStatus::Reconnecting) => Some("Reconnecting...".into()),
+        Some(NetStatus::Reconnecting { since }) => {
+            let left = (GIVE_UP - (now - since)).max(0.0);
+            Some(format!("Reconnecting… {left:.0} s"))
+        }
         Some(NetStatus::Connecting) => Some("Connecting...".into()),
         _ => None,
     };

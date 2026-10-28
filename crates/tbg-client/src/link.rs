@@ -46,6 +46,13 @@ impl MatchLink {
             _ => 0,
         }
     }
+
+    pub fn ack_ms(&self) -> Option<f64> {
+        match self {
+            MatchLink::Net(n) => n.ack_ms(),
+            _ => None,
+        }
+    }
 }
 
 pub fn plugin(app: &mut App) {
