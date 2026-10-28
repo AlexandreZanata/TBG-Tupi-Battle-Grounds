@@ -4,7 +4,7 @@
 use std::collections::VecDeque;
 
 use bevy::prelude::*;
-use tbg_core::protocol::{RoomCode, ServerMsg};
+use tbg_core::protocol::{ErrorCode, RoomCode, ServerMsg};
 
 use super::{LatestView, MatchInfo, ViewBuffer};
 use crate::audio::{Sound, Sounds};
@@ -97,6 +97,17 @@ pub(super) fn poll_link(
                 next.set(GameState::Menu);
             }
             ServerMsg::NetStats { rtt_ms } => stats.0.rtt_ms = Some(f64::from(rtt_ms)),
+            // P14 (BR-P03): the account signed in on another device. Leave the
+            // match screen and stop reconnecting; the stored key still logs
+            // in again on the next reload.
+            ServerMsg::Error {
+                code: ErrorCode::SessionTakenOver,
+            } => {
+                ui.0.push("Your account signed in on another device");
+                account.profile = None;
+                *link = MatchLink::Idle;
+                next.set(GameState::Menu);
+            }
             ServerMsg::Error { code } => ui.0.push(format!("Server: {code:?}")),
             ServerMsg::Leaderboard {
                 total,

@@ -40,12 +40,14 @@ pub fn plugin(app: &mut App) {
 /// P9: with a stored session token and no `?room=`, open a listen-only
 /// link at once; a live match resumes with no tap, otherwise the socket
 /// is reused by the next Quick Match / room action.
-/// P11: a stored account key rides along and logs in after `Welcome`.
+/// P11: a stored account key rides along and logs in after `Welcome`. The
+/// key alone is enough to open the link: the session token lives per tab
+/// (`sessionStorage`), so a new tab or a later visit has none (P14).
 fn probe_on_load(mut link: NonSendMut<MatchLink>, mut account: ResMut<Account>) {
     if config::url_param("room").is_some() {
         return;
     }
-    if config::load_token().is_some() {
+    if config::load_token().is_some() || config::load_account_key().is_some() {
         *link = MatchLink::Net(Box::new(NetLink::new(Mode::Probe, 0.0)));
         arm_auto_login(&mut link, &mut account);
     }

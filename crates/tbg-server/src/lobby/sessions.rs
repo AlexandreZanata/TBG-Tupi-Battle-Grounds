@@ -3,7 +3,7 @@
 use std::net::IpAddr;
 use std::time::{Duration, Instant};
 
-use tbg_core::protocol::Token;
+use tbg_core::protocol::{ServerMsg, Token};
 
 use super::{send, Lobby, Session, SessionState, ROOM_TTL};
 use crate::chan::{ConnEvent, ConnHandle, MatchCmd};
@@ -29,6 +29,14 @@ impl Lobby {
                     seat: *seat,
                     tx: tx.clone(),
                 });
+            }
+            // P14: a resumed session that holds an account tells the new
+            // socket (a reload keeps the token but not the client's profile).
+            if let Some((_, profile)) = &s.account {
+                let msg = ServerMsg::LoggedIn {
+                    profile: profile.clone(),
+                };
+                let _ = conn.tx.try_send(ConnEvent::Send(msg));
             }
             s.conn = Some(conn);
             s.ip = ip;
