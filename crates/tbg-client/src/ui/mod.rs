@@ -10,6 +10,7 @@ mod account_ui;
 mod actions;
 mod evolve;
 mod hud;
+mod hud_top;
 mod hud_update;
 mod input;
 mod menu;
