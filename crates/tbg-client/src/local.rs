@@ -25,6 +25,8 @@ impl LocalMatch {
             outbox: vec![ServerMsg::MatchStart {
                 you: Seat::A,
                 opponent: "Training Bot".into(),
+                mode: tbg_core::protocol::MatchMode::Casual,
+                opponent_rating: None,
             }],
             ended: false,
         }

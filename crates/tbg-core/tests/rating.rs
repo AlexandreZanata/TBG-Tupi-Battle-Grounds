@@ -8,7 +8,13 @@ use tbg_core::rating::{
 #[test]
 fn br_r05_constants() {
     assert_eq!(
-        (START_RATING, RATING_FLOOR, PLACEMENT_GAMES, K_PLACEMENT, K_STANDARD),
+        (
+            START_RATING,
+            RATING_FLOOR,
+            PLACEMENT_GAMES,
+            K_PLACEMENT,
+            K_STANDARD
+        ),
         (1000, 100, 20, 40.0, 24.0)
     );
 }

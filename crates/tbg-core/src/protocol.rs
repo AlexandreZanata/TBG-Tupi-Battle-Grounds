@@ -9,7 +9,15 @@ use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-pub const PROTOCOL_VERSION: u16 = 2;
+pub const PROTOCOL_VERSION: u16 = 3;
+
+/// P12 (BR-R01): casual and ranked play are the same simulation; only the
+/// queue and the rating change differ.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MatchMode {
+    Casual,
+    Ranked,
+}
 pub const MAX_CLIENT_MSG_BYTES: usize = 1024;
 /// Room-code alphabet: no 0/O, 1/I/L.
 pub const ROOM_ALPHABET: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -30,6 +38,8 @@ pub enum ClientMsg {
     Register { name: String },
     Login { key: String },
     Logout,
+    // P12: appended at the end (older peers are rejected by version).
+    RankedMatch,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -39,27 +49,67 @@ pub enum ErrorCode {
     TooManyConnections,
     NotInMatch,
     ServerFull,
+    // P12: appended at the end (older peers are rejected by version).
+    LoginRequired,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ServerMsg {
-    Welcome { token: Token, name: String },
-    VersionMismatch { server: u16 },
+    Welcome {
+        token: Token,
+        name: String,
+    },
+    VersionMismatch {
+        server: u16,
+    },
     Queued,
-    RoomCreated { code: RoomCode },
+    RoomCreated {
+        code: RoomCode,
+    },
     RoomNotFound,
-    MatchStart { you: Seat, opponent: String },
+    MatchStart {
+        you: Seat,
+        opponent: String,
+        // P12: the queue this match came from; `opponent_rating` is `Some`
+        // only for ranked matches.
+        mode: MatchMode,
+        opponent_rating: Option<u16>,
+    },
     View(MatchView),
-    Rejected { seq: u32, reason: Rejection },
-    MatchEnd { outcome: Outcome },
-    Ping { id: u32 },
-    NetStats { rtt_ms: u16 },
-    Error { code: ErrorCode },
+    Rejected {
+        seq: u32,
+        reason: Rejection,
+    },
+    MatchEnd {
+        outcome: Outcome,
+    },
+    Ping {
+        id: u32,
+    },
+    NetStats {
+        rtt_ms: u16,
+    },
+    Error {
+        code: ErrorCode,
+    },
     // P11: appended at the end (v1 peers are rejected by version anyway).
-    Registered { key: String, profile: Profile },
-    LoggedIn { profile: Profile },
+    Registered {
+        key: String,
+        profile: Profile,
+    },
+    LoggedIn {
+        profile: Profile,
+    },
     LoggedOut,
-    AccountError { code: AccountError },
+    AccountError {
+        code: AccountError,
+    },
+    // P12: appended at the end (older peers are rejected by version).
+    RatingChanged {
+        before: u16,
+        after: u16,
+        profile: Profile,
+    },
 }
 
 /// P11 (BR-P01–BR-P05): account failures. `BadKey` covers both unknown

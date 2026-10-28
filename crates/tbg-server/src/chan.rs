@@ -78,6 +78,11 @@ pub enum LobbyCmd {
     MatchEnded {
         tokens: [Token; 2],
     },
+    /// P12: settled ranked ratings per seat `(before, after, profile)`.
+    RankedDone {
+        tokens: [Token; 2],
+        results: [(u16, u16, Profile); 2],
+    },
     /// P11: store replies arrive here so the lobby never awaits SQLite.
     /// Ignored unless `conn_id` is still the session's current connection.
     /// The `String` is the plain `AccountKey`, shown once in the reply only.

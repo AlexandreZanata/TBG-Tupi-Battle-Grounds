@@ -8,12 +8,12 @@ use std::time::{Duration, Instant};
 use tokio::sync::mpsc;
 use tokio::time::MissedTickBehavior;
 
-use tbg_core::protocol::{ServerMsg, Token};
+use tbg_core::protocol::{MatchMode, ServerMsg, Token};
 use tbg_core::{Event, MatchState, Seat};
 
 use crate::chan::{ConnHandle, LobbyCmd, MatchCmd, MATCH_QUEUE};
 use crate::metrics::Metrics;
-use crate::store::Store;
+use crate::store::{AccountId, Store};
 use crate::Config;
 
 mod report;
@@ -24,6 +24,8 @@ pub(crate) struct Player {
     pub token: Token,
     pub name: String,
     pub conn: Option<ConnHandle>,
+    /// P12: account id + rating at pairing time (`None` for guests/casual).
+    pub account: Option<(AccountId, u16)>,
 }
 
 pub(super) struct Match {
@@ -35,12 +37,15 @@ pub(super) struct Match {
     pub(super) pending: [Vec<Event>; 2],
     /// P9: a seat gets an extra view when its intention was applied/rejected.
     pub(super) applied: [bool; 2],
+    /// P12: ranked matches report the result to the store transaction.
+    pub(super) mode: MatchMode,
     pub(super) metrics: Arc<Metrics>,
 }
 
 pub(crate) fn spawn(
     seed: u64,
     players: [Player; 2],
+    mode: MatchMode,
     lobby: mpsc::Sender<LobbyCmd>,
     config: Arc<Config>,
     metrics: Arc<Metrics>,
@@ -54,6 +59,7 @@ pub(crate) fn spawn(
         stats: Default::default(),
         pending: [Vec::new(), Vec::new()],
         applied: [false; 2],
+        mode,
         metrics,
     };
     tokio::spawn(run(m, rx, lobby, config, seed, store));
@@ -73,12 +79,18 @@ async fn run(
     let tick = Duration::from_millis(config.tick_ms);
     let window = Duration::from_secs(config.reconnect_secs);
     for seat in Seat::BOTH {
-        let opponent = m.players[seat.other().index()].name.clone();
+        let other = &m.players[seat.other().index()];
+        // P12: the opponent rating rides along only in ranked matches.
+        let opponent_rating = (m.mode == MatchMode::Ranked)
+            .then(|| other.account.map(|(_, rating)| rating))
+            .flatten();
         m.send(
             seat,
             ServerMsg::MatchStart {
                 you: seat,
-                opponent,
+                opponent: other.name.clone(),
+                mode: m.mode,
+                opponent_rating,
             },
         );
     }
@@ -131,6 +143,32 @@ async fn run(
     let ticks = u128::from(m.state.tick.max(1));
     m.metrics.matches_running.fetch_sub(1, Relaxed);
     m.metrics.matches_finished.fetch_add(1, Relaxed);
+    // P12: ranked results settle in one store transaction; the lobby
+    // delivers `RatingChanged` when it lands (after `MatchEnded` below).
+    // A store failure logs inside and sends nothing — the match already
+    // ended normally.
+    if m.mode == MatchMode::Ranked {
+        if let (Some((a_id, _)), Some((b_id, _))) = (m.players[0].account, m.players[1].account) {
+            if let Some(db) = store.clone() {
+                let outcome = m.state.outcome;
+                let tokens = m.players.each_ref().map(|p| p.token);
+                let duration_s = started.elapsed().as_secs();
+                let factions = [m.stats[0].factions, m.stats[1].factions];
+                let tx = lobby.clone();
+                tokio::spawn(async move {
+                    match db
+                        .ranked_result(a_id, b_id, outcome, duration_s, factions)
+                        .await
+                    {
+                        Ok(results) => {
+                            let _ = tx.send(LobbyCmd::RankedDone { tokens, results }).await;
+                        }
+                        Err(e) => tracing::error!("ranked result failed: {e:?}"),
+                    }
+                });
+            }
+        }
+    }
     let _ = lobby
         .send(LobbyCmd::MatchEnded {
             tokens: m.players.each_ref().map(|p| p.token),
@@ -187,12 +225,17 @@ impl Match {
                 self.detached_at[seat.index()] = None;
                 self.stats[seat.index()].reattached += 1;
                 self.applied[seat.index()] = false;
-                let opponent = self.players[seat.other().index()].name.clone();
+                let other = &self.players[seat.other().index()];
+                let opponent_rating = (self.mode == MatchMode::Ranked)
+                    .then(|| other.account.map(|(_, rating)| rating))
+                    .flatten();
                 self.send(
                     seat,
                     ServerMsg::MatchStart {
                         you: seat,
-                        opponent,
+                        opponent: other.name.clone(),
+                        mode: self.mode,
+                        opponent_rating,
                     },
                 );
                 // Catch up on events buffered while detached.

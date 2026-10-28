@@ -28,6 +28,8 @@ impl Match {
                         .purchases
                         .entry(format!("{kind:?}", kind = u.kind))
                         .or_default() += 1;
+                    // P12: faction mix for the ranked result row.
+                    stats.factions[tbg_core::content::def(u.kind).faction.index()] += 1;
                 }
             }
             tbg_core::PlayerIntention::Evolve { .. } => stats.evolutions += 1,

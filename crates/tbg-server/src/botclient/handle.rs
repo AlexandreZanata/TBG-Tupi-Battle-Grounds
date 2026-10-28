@@ -98,8 +98,11 @@ pub(super) fn handle(
         }
         ServerMsg::Error { code } => return Err(format!("server error {code:?}")),
         ServerMsg::Queued | ServerMsg::RoomCreated { .. } | ServerMsg::RoomNotFound => {}
-        // Bots stay guests unless `--accounts` (register path above).
-        ServerMsg::LoggedIn { .. } | ServerMsg::LoggedOut | ServerMsg::AccountError { .. } => {}
+        // Bots ignore account/rating replies; completion ends the run.
+        ServerMsg::LoggedIn { .. }
+        | ServerMsg::LoggedOut
+        | ServerMsg::AccountError { .. }
+        | ServerMsg::RatingChanged { .. } => {}
     }
     Ok(None)
 }

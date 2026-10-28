@@ -41,10 +41,17 @@ pub(super) fn poll_link(
     let now = time.elapsed_secs_f64();
     for msg in link.poll(now) {
         match msg {
-            ServerMsg::MatchStart { you, opponent } => {
+            ServerMsg::MatchStart {
+                you,
+                opponent,
+                mode,
+                opponent_rating,
+            } => {
                 *info = MatchInfo {
                     you: Some(you),
                     opponent,
+                    ranked: mode == tbg_core::protocol::MatchMode::Ranked,
+                    opponent_rating,
                     ..default()
                 };
                 *buffer = ViewBuffer::default();

@@ -10,9 +10,11 @@ use serde_json::Value;
 use tokio::sync::oneshot;
 
 use tbg_core::protocol::{AccountError, Profile};
+use tbg_core::Outcome;
 
 mod accounts;
 mod matches;
+mod ranked;
 mod schema;
 
 pub type AccountId = i64;
@@ -33,6 +35,14 @@ enum StoreCmd {
     },
     InsertMatch(Value),
     CountMatches(Reply<rusqlite::Result<i64>>),
+    RankedResult {
+        a: AccountId,
+        b: AccountId,
+        outcome: Option<Outcome>,
+        duration_s: u64,
+        factions: [[u32; 4]; 2],
+        reply: Reply<Result<[(u16, u16, Profile); 2], AccountError>>,
+    },
 }
 
 /// Handle to the single writer thread.
@@ -92,6 +102,31 @@ impl Store {
         reply_rx.await.map_err(|_| AccountError::Unavailable)?
     }
 
+    /// Settle a ranked match in one transaction: both Elo updates plus the
+    /// `ranked_matches` row. Returns per-seat `(before, after, profile)`.
+    /// Only [`Outcome`]-level failures surface as `Unavailable`.
+    pub async fn ranked_result(
+        &self,
+        a: AccountId,
+        b: AccountId,
+        outcome: Option<Outcome>,
+        duration_s: u64,
+        factions: [[u32; 4]; 2],
+    ) -> Result<[(u16, u16, Profile); 2], AccountError> {
+        let (reply_tx, reply_rx) = oneshot::channel();
+        self.tx
+            .try_send(StoreCmd::RankedResult {
+                a,
+                b,
+                outcome,
+                duration_s,
+                factions,
+                reply: reply_tx,
+            })
+            .map_err(|_| AccountError::Unavailable)?;
+        reply_rx.await.map_err(|_| AccountError::Unavailable)?
+    }
+
     /// Test/support helper: row count over the writer thread. The count
     /// goes through the same queue, so it observes every insert sent before.
     pub async fn match_count(&self) -> rusqlite::Result<i64> {
@@ -128,6 +163,18 @@ fn worker(mut conn: rusqlite::Connection, rx: std::sync::mpsc::Receiver<StoreCmd
             }
             StoreCmd::CountMatches(reply) => {
                 let _ = reply.send(matches::count(&conn));
+            }
+            StoreCmd::RankedResult {
+                a,
+                b,
+                outcome,
+                duration_s,
+                factions,
+                reply,
+            } => {
+                let result = ranked::ranked_result(&mut conn, a, b, outcome, duration_s, factions)
+                    .map_err(|_| AccountError::Unavailable);
+                let _ = reply.send(result);
             }
         }
     }

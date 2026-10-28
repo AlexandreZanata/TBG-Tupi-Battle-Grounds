@@ -21,6 +21,7 @@ use crate::Config;
 mod account_done;
 mod accounts;
 mod matchmaking;
+mod ranked;
 mod sessions;
 
 const ROOM_TTL: Duration = Duration::from_secs(600);
@@ -51,6 +52,8 @@ pub(super) struct Lobby {
     /// P10: O(1) by token (the lobby is not simulation; `HashMap` is allowed).
     pub(super) sessions: HashMap<Token, Session>,
     pub(super) queue: VecDeque<Token>,
+    /// P12: ranked FIFO; never mixed with the casual queue (BR-R02).
+    pub(super) ranked_queue: VecDeque<Token>,
     /// P9: when each queued session sent `QuickMatch` (for `queue_wait`).
     pub(super) queued_at: HashMap<Token, Instant>,
     pub(super) rooms: Vec<(RoomCode, Token, Instant)>,
@@ -74,6 +77,7 @@ pub(crate) async fn run(
     let mut lobby = Lobby {
         sessions: HashMap::new(),
         queue: VecDeque::new(),
+        ranked_queue: VecDeque::new(),
         queued_at: HashMap::new(),
         rooms: Vec::new(),
         self_tx,
@@ -134,6 +138,9 @@ impl Lobby {
                     }
                 }
             }
+            LobbyCmd::RankedDone { tokens, results } => {
+                self.ranked_done(tokens, results);
+            }
             LobbyCmd::RegisterDone {
                 token,
                 conn_id,
@@ -165,7 +172,10 @@ impl Lobby {
         }
         let wants_match = matches!(
             msg,
-            ClientMsg::QuickMatch | ClientMsg::CreateRoom | ClientMsg::JoinRoom { .. }
+            ClientMsg::QuickMatch
+                | ClientMsg::RankedMatch
+                | ClientMsg::CreateRoom
+                | ClientMsg::JoinRoom { .. }
         );
         if wants_match && draining {
             // Shutting down: running matches finish, no new ones start.
@@ -175,6 +185,7 @@ impl Lobby {
         }
         match msg {
             ClientMsg::QuickMatch => self.quick(token),
+            ClientMsg::RankedMatch => self.ranked(token),
             ClientMsg::CreateRoom => self.create_room(token),
             ClientMsg::JoinRoom { code } => self.join_room(token, code),
             ClientMsg::Cancel => self.leave_waiting(token),

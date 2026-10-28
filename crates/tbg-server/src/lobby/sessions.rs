@@ -72,6 +72,7 @@ impl Lobby {
             !gone || matches!(s.state, SessionState::InMatch { .. })
         });
         self.queue.retain(|t| self.sessions.contains_key(t));
+        self.ranked_queue.retain(|t| self.sessions.contains_key(t));
         self.queued_at.retain(|t, _| self.queue.contains(t));
     }
 }
