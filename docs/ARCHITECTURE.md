@@ -183,6 +183,10 @@ oversized props that define each silhouette (shields, bows, saws, leaves),
 flat-shaded low-poly surfaces, saturated faction palettes, soft warm sun,
 gentle fog, readable from a phone held at arm's length.
 
+**From P15** the medieval style guide in [ART-DIRECTION.md](ART-DIRECTION.md)
+replaces this section's look and extends the figure system (rig v2,
+D-22); until each unit's phase lands, the description below stays true.
+
 **Production: code-built, no Blender, no skinning.**
 
 - **Figurines:** every unit shares one 12-joint body plan (root, hips,
@@ -324,3 +328,14 @@ cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
 
 A native check never proves browser compatibility. Rendering claims need
 the Trunk build running in a real browser (P1 device matrix).
+
+## 14. Planned changes (P9–P31)
+
+Planned in `docs/phases/`; each phase updates the sections above when it
+lands. Summary: P9 `TCP_NODELAY`, acknowledgement views, protocol pings,
+auto-resume (§5); P10 measured server optimizations and a `server` build
+profile (§9, §10); P11 accounts (name + key), a single-writer SQLite store
+task with migrations (§5, §8, §11); P12 ranked queue and Elo (§5, §8); P13
+read-only JSON API + static ranking pages (§5, §8, §9, §11); P15+ the
+medieval visual suite described in [ART-DIRECTION.md](ART-DIRECTION.md)
+(rig v2 and clip sets replace the 12-joint plan in §7; quality tiers).

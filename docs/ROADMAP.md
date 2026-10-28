@@ -1,4 +1,4 @@
-# Roadmap — TBG 2.0 to a public multiplayer MVP
+# Roadmap — TBG 2.0
 
 > The index of all phases. Each phase has its own executable file in
 > [`docs/phases/`](phases/) written for an **executor agent** (a cheaper
@@ -25,6 +25,25 @@ P0 Simplify ✅
 P1 and P2 touch different crates and may run at the same time on two
 branches. Every other phase starts only after the previous one is reviewed.
 
+**After the MVP — two suites, strictly in this order.** The competitive
+online suite must be validated on a real server (P14 gate) before any of
+the visual suite starts. Inside the visual suite, the style lock (P15)
+gates everything; each character gets its own validated phase.
+
+```
+Competitive online                     Medieval visual overhaul (after P14 sign-off)
+P9  Real-time fast path + reconnect    P15 Art direction, rig v2, style lock (Archer)
+ └► P10 Server efficiency               └► P16 Animation sets per class (Archetype)
+     └► P11 Accounts (name + key)           └► P17 Arena + backgrounds for every screen
+         └► P12 Ranked + Elo rating             └► P18 Strongholds: 3 styles
+             └► P13 Global ranking + stats          └► P19 UI kit + standardized cards
+                 └► P14 Real-env validation (GATE)      └► P20 Lobby + ranking pages restyle
+                                                            └► P21 Combat VFX + sound kit
+                                                                └► P22–P29 One phase per character
+                                                                    └► P30 Fluidity + performance
+                                                                        └► P31 Consistency, playtest, v0.2.0
+```
+
 | Phase | File | Milestone at the end | Status | Reviewed |
 |-------|------|----------------------|--------|----------|
 | P0 | — | Lean repository, plan | done | yes |
@@ -36,6 +55,29 @@ branches. Every other phase starts only after the previous one is reviewed.
 | P6 | [P6-visual-slice.md](phases/P6-visual-slice.md) | One polished 3D figurine + final arena + animation library, human-approved | done (all 8 units); **owner look approval pending** | yes |
 | P7 | [P7-content-feel-balance.md](phases/P7-content-feel-balance.md) | 8 units with art, VFX, audio, balance targets met, playtest done | done (bot balance); **human playtest pending** | yes |
 | P8 | [P8-public-launch.md](phases/P8-public-launch.md) | Public URL shared with first players | audit + security review done; **LICENSE, VPS smoke, tag pending owner** | yes (local) |
+| P9 | [P9-realtime-fast-path.md](phases/P9-realtime-fast-path.md) | Instant-feeling taps (ack views, `TCP_NODELAY`); auto-resume, reconnect countdown, hidden tabs stay connected | planned | — |
+| P10 | [P10-server-efficiency.md](phases/P10-server-efficiency.md) | Measured, profiled server: most matches per core | planned | — |
+| P11 | [P11-accounts.md](phases/P11-accounts.md) | Unique player name + account key; login on any device | planned | — |
+| P12 | [P12-ranked-and-rating.md](phases/P12-ranked-and-rating.md) | Ranked queue apart from casual; Elo from both ratings | planned | — |
+| P13 | [P13-global-ranking.md](phases/P13-global-ranking.md) | Global ranking + player stats in game and on `/ranking/` | planned | — |
+| P14 | [P14-competitive-validation.md](phases/P14-competitive-validation.md) | **Gate:** competitive game validated on a real server, data-safety drill, security review | planned | — |
+| P15 | [P15-art-direction-and-rig.md](phases/P15-art-direction-and-rig.md) | Medieval style locked; rig v2; Archer style-lock approved | planned | — |
+| P16 | [P16-class-animation-sets.md](phases/P16-class-animation-sets.md) | Professional clip sets per Archetype, simulation-timed | planned | — |
+| P17 | [P17-arena-and-background.md](phases/P17-arena-and-background.md) | Living medieval battlefield filling every screen ratio | planned | — |
+| P18 | [P18-strongholds.md](phases/P18-strongholds.md) | Three selectable cosmetic Stronghold styles | planned | — |
+| P19 | [P19-ui-kit-and-cards.md](phases/P19-ui-kit-and-cards.md) | Medieval UI kit, one standardized card, accessibility | planned | — |
+| P20 | [P20-lobby-and-ranking-page.md](phases/P20-lobby-and-ranking-page.md) | Medieval lobby (casual/ranked sections) and ranking pages | planned | — |
+| P21 | [P21-combat-vfx-and-sound.md](phases/P21-combat-vfx-and-sound.md) | Pooled effects, projectiles, statuses, sound set v2 | planned | — |
+| P22 | [P22-unit-archer.md](phases/P22-unit-archer.md) | Archer final (reference character) | planned | — |
+| P23 | [P23-unit-shieldbearer.md](phases/P23-unit-shieldbearer.md) | Shieldbearer final | planned | — |
+| P24 | [P24-unit-ogre-archer.md](phases/P24-unit-ogre-archer.md) | Ogre Archer (`SiegeWalker`) final | planned | — |
+| P25 | [P25-unit-bone-brute.md](phases/P25-unit-bone-brute.md) | Bone Brute final | planned | — |
+| P26 | [P26-unit-hexer.md](phases/P26-unit-hexer.md) | Hexer final | planned | — |
+| P27 | [P27-unit-sawknight.md](phases/P27-unit-sawknight.md) | Sawknight (`Sawbot`) final | planned | — |
+| P28 | [P28-unit-bloomkeeper.md](phases/P28-unit-bloomkeeper.md) | Bloomkeeper final | planned | — |
+| P29 | [P29-unit-rootcaller.md](phases/P29-unit-rootcaller.md) | Rootcaller final | planned | — |
+| P30 | [P30-fluidity-and-performance.md](phases/P30-fluidity-and-performance.md) | Auto quality, no hitches, device matrix met | planned | — |
+| P31 | [P31-consistency-and-release.md](phases/P31-consistency-and-release.md) | One visual family; playtest; tag `v0.2.0` | planned | — |
 
 ## Pending validations (owner)
 
@@ -96,6 +138,12 @@ All code for P1–P8 is implemented and validated on the development PC
 | End of P6 | Approves or rejects the look (gallery screenshots) |
 | End of P7 | Runs the playtest round and approves the balance values |
 | P8 | Chooses and adds the LICENSE; announces the URL |
+| P11 | Reviews the blocked-name list; creates an account on two devices |
+| P14 | Provides the server; plays ranked with someone on another network; signs off the gate |
+| P15 | Approves the medieval look, display names, and the pipeline (D-22) |
+| P16–P21 | Approves class animations, arena, Strongholds, UI kit, lobby, effects |
+| P22–P29 | Approves each character (screenshots + live match) |
+| P31 | Runs the playtest; decides balance changes; pushes the tag |
 
 ## Ready-to-send brief (use for any phase)
 
@@ -109,8 +157,8 @@ All code for P1–P8 is implemented and validated on the development PC
 > the phase file with the real command outputs and measurements, commit
 > it, and stop.
 
-## After the MVP (not planned until P8 ships)
+## Later (not planned yet)
 
-Accounts, `Inventory`, cosmetics store (BR-C01–C03) · ranking · units
-9–12 · rematch and spectating · `Reposition`/bench design · WebGPU build ·
-delta views · additional regions (ARCHITECTURE §12).
+`Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · rematch and
+spectating · rating-based matchmaking and seasons (D-18) · `Reposition`/bench
+design · WebGPU build · delta views · additional regions (ARCHITECTURE §12).

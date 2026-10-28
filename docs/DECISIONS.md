@@ -167,3 +167,85 @@ the decisions in the spec and verifying by commands keeps quality high and
 token cost low.
 **Reopen if** an executor needs more than two review rounds per phase.
 
+## D-17 · Accounts = unique name + generated key; no email or password — 2026-10-28 (planned, P11)
+
+**Decision.** A player chooses a unique `PlayerName` and receives an
+`AccountKey` (`Name-XXXX-XXXX-XXXX-XXXX`, 80 random bits). The key is the
+only credential; the server stores a SHA-256 of the secret part. No
+email, password, recovery, or personal data. Supersedes D-09 for players
+who create an account; guests stay as in D-09.
+**Why.** Ranking needs stable identities. A generated high-entropy key
+needs no password rules, hashing cost, email service, or PII handling,
+and works on any device by copy/paste. The cost is "lost key = lost
+account", stated clearly at creation.
+**Reopen if** lost-key requests become common, or cosmetics/purchases make
+account recovery a requirement.
+
+## D-18 · Elo rating with placement K; FIFO pairing that ignores rating — 2026-10-28 (planned, P12)
+
+**Decision.** Ranked uses Elo (start 1000, floor 100, K 40 for the first
+20 games then 24, ±1 minimum on decisive results; GAME-DESIGN §5).
+Pairing takes the two longest-waiting players of a queue regardless of
+rating.
+**Why.** Elo is fair (the gain depends on both ratings), tiny, and easy
+to explain; few players at launch make rating windows pointless — they
+would only lengthen waits. Glicko-2 was considered: better uncertainty
+handling, but more state and harder to explain for no gain at this scale.
+**Reopen when** more than ~200 ranked players are active daily or rating
+gaps in pairings become a measured complaint (then: rating windows that
+widen with wait time, and maybe Glicko-2).
+
+## D-19 · One SQLite writer task for accounts, ratings, and records — 2026-10-28 (planned, P11)
+
+**Decision.** All SQL runs on one dedicated thread that owns the
+connection; async code talks to it by channel; schema migrations are
+numbered and run at startup. Rating updates are single transactions.
+**Why.** Player data now matters; one writer removes lock contention and
+"database is locked" errors while keeping SQLite's zero-ops simplicity.
+**Reopen** with ARCHITECTURE §8's PostgreSQL triggers (two or more servers).
+
+## D-20 · HTML overlay for text entry — 2026-10-28 (planned, P11)
+
+**Decision.** Name and key entry use one small HTML `<input>` overlay
+shown by the client; everything else stays `bevy_ui`.
+**Why.** D-12's reopen condition is met: names and pasted keys need the
+phone keyboard, paste, and accessibility that a canvas UI cannot give
+cheaply.
+
+## D-21 · Ranking pages: static HTML/CSS/vanilla JS + JSON API — 2026-10-28 (planned, P13)
+
+**Decision.** `/ranking/` pages are plain files built into the client
+bundle; the game server serves read-only JSON from an in-memory
+leaderboard snapshot.
+**Why.** Loads in milliseconds on any phone without the WASM, can be
+shared and indexed, costs no framework, and the snapshot makes reads
+almost free for the server.
+**Reopen if** the pages grow into an app (accounts management, social).
+
+## D-22 · Medieval art direction on an extended code-built pipeline — 2026-10-28 (planned, P15)
+
+**Decision.** The visual suite keeps D-07's code-built approach but
+extends it: rig v2 (18 joints with knees and feet, spring-driven
+secondary joints, prop sockets), eased clips with events, per-Archetype
+clip sets, and the medieval style guide in `docs/ART-DIRECTION.md`.
+**Why.** It already ships, stays light on WebGL2 phones (shared merged
+meshes, one material), is reproducible by agents, and avoids the legacy
+skinned pipeline's 8 % pass rate (ADR-007). Knees, feet, springs, and
+better curves remove most of the "toy" stiffness.
+**Fallback.** If the owner rejects the P15 style-lock Archer twice, spike
+one Archer as a Blender-scripted (bpy, in-repo, reproducible) skinned
+glTF with Bevy animation, measure WASM size and phone FPS, and let the
+owner choose.
+
+## D-23 · Stronghold styles are free cosmetics — 2026-10-28 (planned, P18)
+
+**Decision.** Three styles, all free, identical in gameplay, stored on
+the account (guests: on the device), sent to both players by the server.
+**Why.** Personal expression without touching fairness (BR-U05, BR-C04).
+
+## D-24 · Quality tiers remove cost, never information — 2026-10-28 (planned, P17/P30)
+
+**Decision.** Low/Medium/High (+ Auto) tiers change shadows, ambient
+animation, render scale, and effect counts only; team rings, HP bars,
+statuses, and splash rings are always shown.
+**Why.** "Fluid for every player" must not become "unfair on cheap phones".

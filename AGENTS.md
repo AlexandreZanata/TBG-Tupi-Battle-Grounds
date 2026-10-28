@@ -20,6 +20,7 @@ multiplayer, low cost.
 | `docs/ROADMAP.md` | Phase index, order, status, executor and reviewer workflow |
 | `docs/phases/PN-*.md` | One executable spec per phase: steps, exact types, commands, acceptance, report |
 | `docs/DECISIONS.md` | Why the big choices were made and what reopens them |
+| `docs/ART-DIRECTION.md` | Medieval style guide, rig and motion rules, character procedure (visual phases P15+) |
 | `crates/tbg-core` | Deterministic rules, content tables, bot, protocol (shared) |
 | `crates/tbg-client` | Bevy client → WASM/WebGL2 |
 | `crates/tbg-server` | Axum/Tokio authoritative server |

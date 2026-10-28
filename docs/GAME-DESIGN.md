@@ -46,6 +46,13 @@ evolve, and which factions you combine.
 | Inventory | Account-bound collection of owned cosmetics | `Inventory` |
 | Commander | Player-facing name for the player (TBD by brand voice) | `Player` |
 | MVPUnitRoster | Launch target of 12 units; 2.0 ships the first 8 first | — |
+| Account | **Proposed (P11):** a player identity — one `PlayerName` + one `AccountKey`; holds `Rating` and statistics | `Account` |
+| PlayerName | **Proposed (P11):** unique public name chosen at account creation | `PlayerName` |
+| AccountKey | **Proposed (P11):** the only credential: `PlayerName-XXXX-XXXX-XXXX-XXXX` | `AccountKey` |
+| MatchMode | **Proposed (P12):** `Casual` (no rating change) or `Ranked` (accounts only, rating changes) | `MatchMode` |
+| Rating | **Proposed (P12):** an account's ranked skill number (Elo) | `Rating` |
+| Leaderboard | **Proposed (P13):** global ranking of accounts by `Rating` | `Leaderboard` |
+| StrongholdStyle | **Proposed (P18):** cosmetic look of a `Stronghold`: Stone Keep, Timber Fort, Gatehouse | `StrongholdStyle` |
 
 Retired legacy names — never reuse for new concepts: `CharacterDefinition`,
 `CharacterCatalog`, `CharacterStudio(Window)`, `ProceduralCharacterBuilder`,
@@ -96,6 +103,19 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-C01 | Monetization is free-to-play with cosmetics only | Confirmed | S1 |
 | BR-C02 | Persistent cosmetics are bound to an account `Inventory` | Confirmed | S1 |
 | BR-C03 | Store purchases are granted only after server-side receipt validation | Adapted | S1, S2 |
+| BR-C04 | `StrongholdStyle`s are free cosmetics; every style has identical gameplay | Proposed | — |
+| BR-P01 | An `Account` is a unique `PlayerName` plus an `AccountKey`; names are 3–16 letters, digits or `_`, start with a letter, are unique ignoring case, and never change | Proposed | — |
+| BR-P02 | The `AccountKey` is the only credential: shown once at creation, never shown to other players, not recoverable | Proposed | — |
+| BR-P03 | One active session per account; a new login takes over the old one, including a running match | Proposed | — |
+| BR-P04 | Guests may play practice, casual matches, and private rooms; ranked play needs an account | Proposed | — |
+| BR-P05 | A public profile shows name, rating, rank, record, win rate, faction mix, and the last 10 ranked results; no other personal data is stored | Proposed | — |
+| BR-R01 | Two queues: `Casual` (guests and accounts; private rooms are casual) and `Ranked` (accounts only) | Proposed | — |
+| BR-R02 | Matchmaking pairs the two longest-waiting players of the same queue, regardless of rating | Proposed | — |
+| BR-R03 | Every ranked match changes both players' `Rating` from both ratings (Elo, §5); win 1, draw ½, loss 0 | Proposed | — |
+| BR-R04 | A forfeit (including staying disconnected past the window) is a ranked loss and a win for the opponent | Proposed | — |
+| BR-R05 | New accounts start at 1000; a rating never goes below 100; the first 20 ranked games move faster | Proposed | — |
+| BR-R06 | Ratings and results are computed and stored only by the authoritative server | Proposed | — |
+| BR-R07 | The `Leaderboard` lists accounts with ≥ 1 ranked match, ordered by rating, then wins, then name | Proposed | — |
 
 ## 4. How a match plays (MVP)
 
@@ -159,6 +179,10 @@ archetype appears; two units use two slots.
 | Bloomkeeper | Plants | Support | 1 | 3 | 280 | heal 40 | 1.5 | 3.0 | 0.9 | heals instead of attacking |
 | Rootcaller | Plants | Control | 1 | 4 | 300 | 20 | 1.6 | 3.0 | 0.9 | root 0.8 s |
 
+**Display names (Proposed, ART-DIRECTION §5):** `Sawbot` is shown as
+*Sawknight* and `SiegeWalker` as *Ogre Archer*; code ids and stats are
+unchanged.
+
 **Evolution trees** (`T1 → T2` per branch; modifiers stack on the base).
 
 | Unit | Branch A | Branch B |
@@ -180,6 +204,16 @@ archetype appears; two units use two slots.
 | Undead | +20% / +40% attack speed |
 | Machines | +5% / +20% damage |
 | Plants | regenerate 0.75% / 2% max HP per second |
+
+**Ranked rating (Proposed, P12; Elo).** Expected score
+`E = 1 / (1 + 10^((R_opponent − R_own) / 400))`; change
+`round(K × (S − E))` with S = 1 / ½ / 0; a win is at least +1 and a loss at
+most −1. Each player uses their own K.
+
+| Constant | Value | | Constant | Value |
+|----------|-------|-|----------|-------|
+| Start rating | 1000 | | Rating floor | 100 |
+| K, first 20 ranked games | 40 | | K afterwards | 24 |
 
 ## 6. Is it fun? (measured, not claimed)
 
@@ -206,9 +240,11 @@ human playtests. Targets are starting hypotheses.
 - Shop reroll, offer weighting, duplicate rules.
 - Cross-faction synergy combos (allowed by BR-Y01, none defined).
 - Remaining 4 units of the 12-unit `MVPUnitRoster`.
-- Accounts, `Inventory`, `Cosmetic` store, receipt validation (BR-C01–C03
-  stay binding: nothing in the MVP may sell power).
-- Ranking, rematch, spectating, replays, emotes, nicknames.
+- `Inventory`, `Cosmetic` store, receipt validation (BR-C01–C03 stay
+  binding: nothing may sell power). Accounts and ranking are planned in
+  P11–P13.
+- Rematch, spectating, replays, emotes; rating-based matchmaking, seasons,
+  and rating decay (revisit with enough players, D-18).
 
 ## 8. Retired technology decisions (game rules kept)
 
