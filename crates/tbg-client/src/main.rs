@@ -22,6 +22,7 @@ mod visuals;
 pub enum GameState {
     #[default]
     Menu,
+    Queue,
     InMatch,
     Result,
 }
@@ -44,7 +45,6 @@ fn main() {
             camera::plugin,
             arena::plugin,
             overlay::plugin,
-            net::plugin,
             link::plugin,
             visuals::plugin,
             sync::plugin,

@@ -31,5 +31,5 @@ ewebsock = "0.8"
 tbg-core = { path = "../tbg-core" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-# Page URL query params (?stress=, ?server=) on wasm32 (P1). Reason: config + server URL.
-web-sys = { version = "0.3", features = ["Window", "Location"] }
+# Page URL params, session token in localStorage, copying the room link.
+web-sys = { version = "0.3", features = ["Window", "Location", "Storage", "Navigator", "Clipboard"] }

@@ -6,12 +6,15 @@ use bevy::{
     prelude::*,
 };
 
+use crate::sync::ViewGaps;
 use crate::visuals::UnitVisual;
 
 /// Latest measured round-trip time in milliseconds (written by `net`).
 #[derive(Resource, Default)]
 pub struct OverlayStats {
     pub rtt_ms: Option<f64>,
+    /// Simulated latency from `?lag=MS` (0 when off).
+    pub lag_ms: u32,
 }
 
 #[derive(Resource)]
@@ -52,6 +55,7 @@ fn update_overlay(
     diagnostics: Res<DiagnosticsStore>,
     stats: Res<OverlayStats>,
     units: Query<(), With<UnitVisual>>,
+    gaps: Res<ViewGaps>,
     mut text: Single<&mut Text, With<StatsText>>,
 ) {
     timer.0.tick(time.delta());
@@ -67,8 +71,18 @@ fn update_overlay(
     let rtt = stats
         .rtt_ms
         .map_or_else(|| "offline".into(), |v| format!("{v:.0} ms"));
+    let mut g: Vec<f32> = gaps.0.iter().copied().collect();
+    g.sort_by(f32::total_cmp);
+    let view = g
+        .get((g.len() * 95 / 100).min(g.len().saturating_sub(1)))
+        .map_or_else(|| "--".into(), |v| format!("{v:.0}"));
+    let lag = if stats.lag_ms > 0 {
+        format!(" | lag sim {} ms", stats.lag_ms)
+    } else {
+        String::new()
+    };
     text.0 = format!(
-        "FPS {fps:.0} | {ms:.1} ms | RTT {rtt} | units {}",
+        "FPS {fps:.0} | {ms:.1} ms | RTT {rtt} | view p95 {view} ms | units {}{lag}",
         units.iter().count()
     );
 }

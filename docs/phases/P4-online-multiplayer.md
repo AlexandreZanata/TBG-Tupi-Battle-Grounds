@@ -277,10 +277,41 @@ Run the server in release mode: `TBG_MAX_PER_IP=10000 TBG_STATIC_DIR=crates/tbg-
 
 ## Phase report
 
-*(Executor fills this in at the end.)*
+Executed by the reviewer agent (Claude) on 2026-10-28, branch `phase/p4-online-multiplayer`,
+on the owner's Linux PC (16 threads). Server and bots on the same machine.
 
 - Commands run and results:
-- Validation table L1–L10 (result + numbers):
-- Server CPU/RSS during L5:
+  - `cargo test --workspace` → tbg-core 15 passed; tbg-server **8 passed** (the 7
+    listed in step 9 + `private_room_pairs_owner_and_guest`), ~9 s at a 5 ms tick.
+  - `cargo clippy --workspace --all-targets -- -D warnings` and the wasm32 clippy → clean.
+  - `cargo build --release -p tbg-server` → ok (41 s); `trunk build --release` → ok.
+  - WASM (release, opt "s"): raw 23,598,033 B · gzip -9 7,343,161 B · brotli q11 4,593,445 B.
+- Validation table (release server, `TBG_MAX_PER_IP=100000`, real 50 ms tick):
+
+  | # | Result |
+  |---|--------|
+  | L1 | 8/8 integration tests pass |
+  | L2 | 1 match, 2/2 bots completed, 108 s, RTT p50 2 ms, view gap p95 100 ms |
+  | L3 | 50 matches, +40±20 ms each way: 100/100 completed, RTT p50 82 / p95 111 ms, **view gap p95 128 ms** (≤150 ✓) |
+  | L4 | 50 matches, +150±50 ms, 20% chaos: 100/100 completed, **29 drops → 29 resumed**, RTT p95 373 ms |
+  | L5 | **300 concurrent matches** (600 sockets, 10 ms ramp): 600/600 completed, view gap p95 101 ms, **0 late ticks** (max lateness 7 ms over 401 matches) |
+  | L6 | Browser (`?autoplay=quick`) vs 1 socket bot through the release server: full match, VICTORY screen matches the server log (seat A, 74 s) |
+  | L7 | "Play with a friend" → room ACXMR + Copy link; second tab via `?room=ACXMR` joined, match ran to VICTORY (47 s) |
+  | L8 | Browser socket force-closed mid-match (JS) → client reconnected with its token, match continued; server log `"reconnects":1` for that seat |
+  | L9 | Covered by `forfeit_after_window` (real WebSocket, 1 s window). Browser run ended by Stronghold before the window. **Real-device Wi-Fi-off test pending owner.** |
+  | L10 | `?lag=300`: overlay `RTT 308 ms · view p95 110 ms · lag sim 300 ms`; match fully playable |
+
+- Server cost during L5 (300 matches): **peak 1.06 CPU cores, 89.5 MB RSS**; bandwidth over
+  all runs **1.46 KB/s down, 3 B/s up per player** (81,238 player-seconds, budget ≤6 KB/s).
 - Deviations:
-- Blocked items:
+  1. Added `TBG_TICK_MS` (default 50) so tests run whole matches 10× faster.
+  2. `tbg-bots --bots N` to pair a single bot with a browser.
+  3. `tbg-server` modules split (`ws/`, `lobby/`, `match_task/`, `botclient/`) to stay under 200 lines.
+  4. RTT samples also flow to the match task (`MatchCmd::Rtt`) so each match log carries per-seat RTT.
+  5. Client: `?autoplay=quick|practice` starts a mode automatically; reconnecting while queued
+     re-sends the mode (the server drops queued players on disconnect).
+  6. Two tabs of the same browser origin share one session (token in `localStorage`); a second
+     tab takes over the first. Correct for one player; testers must use different devices or origins.
+  7. `wss://` through the bot tool is untested until P5 (no TLS endpoint locally).
+- Blocked items: none.
+- Needs the owner: L7/L9 on two real devices (desktop + phone on the same Wi-Fi), phone Wi-Fi off 10 s and 40 s.

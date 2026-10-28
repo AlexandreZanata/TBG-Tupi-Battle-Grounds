@@ -16,9 +16,20 @@ impl Toasts {
 #[derive(Component)]
 struct Toast(f32);
 
+/// Persistent notice (e.g. "Reconnecting...") shown while `Some`.
+#[derive(Resource, Default)]
+pub struct Banner(pub Option<String>);
+
+#[derive(Component)]
+struct BannerNode;
+
 pub fn plugin(app: &mut App) {
     app.init_resource::<Toasts>()
-        .add_systems(Update, (show, expire));
+        .init_resource::<Banner>()
+        .add_systems(
+            Update,
+            (show, expire, banner.run_if(resource_changed::<Banner>)),
+        );
 }
 
 fn show(mut commands: Commands, mut toasts: ResMut<Toasts>, existing: Query<Entity, With<Toast>>) {
@@ -49,4 +60,24 @@ fn expire(mut commands: Commands, time: Res<Time>, mut toasts: Query<(Entity, &m
             commands.entity(e).despawn();
         }
     }
+}
+
+fn banner(mut commands: Commands, banner: Res<Banner>, nodes: Query<Entity, With<BannerNode>>) {
+    for e in &nodes {
+        commands.entity(e).despawn();
+    }
+    let Some(text) = &banner.0 else { return };
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            top: percent(30.0),
+            justify_self: JustifySelf::Center,
+            padding: UiRect::axes(px(16.0), px(10.0)),
+            border_radius: BorderRadius::all(px(10.0)),
+            ..default()
+        },
+        BackgroundColor(PANEL),
+        BannerNode,
+        children![label(text.clone(), 20.0)],
+    ));
 }

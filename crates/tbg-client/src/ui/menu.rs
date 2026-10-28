@@ -1,4 +1,4 @@
-//! Main menu: practice now, online modes arrive in P4.
+//! Main menu: practice vs bot, quick match, or a private room with a friend.
 
 use bevy::prelude::*;
 
@@ -27,12 +27,8 @@ fn spawn(mut commands: Commands) {
                 label("Tupi Battle Grounds", 34.0),
                 label("Real-time 1v1 lane strategy", 16.0),
                 button("Practice vs Bot", UiAction::Practice, 260.0),
-                button("Quick Match (online soon)", UiAction::Disabled, 260.0),
-                button(
-                    "Play with a friend (online soon)",
-                    UiAction::Disabled,
-                    260.0
-                ),
+                button("Quick Match", UiAction::Quick, 260.0),
+                button("Play with a friend", UiAction::CreateRoom, 260.0),
             ],
         )],
     ));
