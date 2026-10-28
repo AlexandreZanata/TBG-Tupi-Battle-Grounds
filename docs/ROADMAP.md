@@ -55,7 +55,7 @@ P9  Real-time fast path + reconnect    P15 Art direction, rig v2, style lock (Ar
 | P6 | [P6-visual-slice.md](phases/P6-visual-slice.md) | One polished 3D figurine + final arena + animation library, human-approved | done (all 8 units); **owner look approval pending** | yes |
 | P7 | [P7-content-feel-balance.md](phases/P7-content-feel-balance.md) | 8 units with art, VFX, audio, balance targets met, playtest done | done (bot balance); **human playtest pending** | yes |
 | P8 | [P8-public-launch.md](phases/P8-public-launch.md) | Public URL shared with first players | audit + security review done; **LICENSE, VPS smoke, tag pending owner** | yes (local) |
-| P9 | [P9-realtime-fast-path.md](phases/P9-realtime-fast-path.md) | Instant-feeling taps (ack views, `TCP_NODELAY`); auto-resume, reconnect countdown, hidden tabs stay connected | planned | — |
+| P9 | [P9-realtime-fast-path.md](phases/P9-realtime-fast-path.md) | Instant-feeling taps (ack views, `TCP_NODELAY`); auto-resume, reconnect countdown, hidden tabs stay connected | done (phone check in P14) | yes |
 | P10 | [P10-server-efficiency.md](phases/P10-server-efficiency.md) | Measured, profiled server: most matches per core | planned | — |
 | P11 | [P11-accounts.md](phases/P11-accounts.md) | Unique player name + account key; login on any device | planned | — |
 | P12 | [P12-ranked-and-rating.md](phases/P12-ranked-and-rating.md) | Ranked queue apart from casual; Elo from both ratings | planned | — |

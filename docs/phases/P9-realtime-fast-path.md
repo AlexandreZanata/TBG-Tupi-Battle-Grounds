@@ -224,3 +224,22 @@ measured ~50–100 ms) and `protocol_pong_keeps_socket_alive`
   offline 10 s resumes / 40 s forfeits, desktop + phone) were not run —
   no devices attached to this session. Code paths are in place
   (`probe_on_load`, protocol pings, backoff 0.25/0.5/1/2 s to 30 s).
+
+### Review (reviewer, 2026-10-28)
+
+- Re-ran fmt, clippy (native + wasm32), `cargo test --workspace` (core 15,
+  server 12 + 1 unit), wasm check, `trunk build --release`: all pass.
+- Fixed in e754ef0: a failed retry reset the backoff and the countdown
+  (retries every 0.25 s, banner stuck near 30 s); the load-time probe showed
+  "Connecting..." in the menu and a "Connection lost" toast nobody asked
+  for; `…` is not in the default font (ASCII `...`); a forfeit decided after
+  the tick's views skipped the final view (forfeits are now checked first).
+- Browser checks (in-app browser, local release server behind a TCP proxy
+  that was killed to simulate network loss; opponent = `tbg-bots --bots 1`):
+  reload mid-match → resumed with no tap (slow only because the hidden
+  pane runs at 1–2 FPS); proxy down 10 s → `Reconnecting... 25 s`
+  countdown, same match resumed (RTT 41 ms); proxy down 42 s → client gave
+  up at 30 s with "Connection lost" and returned to the menu; menu probe
+  stayed silent. Forfeit-after-window stays covered by the integration test.
+- Minor, not fixed: the first-match tips re-appear after a resume.
+- Still owner-pending: the same checks on a real phone (P14 matrix).
