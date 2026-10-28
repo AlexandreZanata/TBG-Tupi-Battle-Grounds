@@ -9,7 +9,7 @@ use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-pub const PROTOCOL_VERSION: u16 = 1;
+pub const PROTOCOL_VERSION: u16 = 2;
 pub const MAX_CLIENT_MSG_BYTES: usize = 1024;
 /// Room-code alphabet: no 0/O, 1/I/L.
 pub const ROOM_ALPHABET: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -26,6 +26,10 @@ pub enum ClientMsg {
     Cancel,
     Intent { seq: u32, intent: PlayerIntention },
     Pong { id: u32 },
+    // P11: appended at the end (v1 peers are rejected by version anyway).
+    Register { name: String },
+    Login { key: String },
+    Logout,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -51,6 +55,34 @@ pub enum ServerMsg {
     Ping { id: u32 },
     NetStats { rtt_ms: u16 },
     Error { code: ErrorCode },
+    // P11: appended at the end (v1 peers are rejected by version anyway).
+    Registered { key: String, profile: Profile },
+    LoggedIn { profile: Profile },
+    LoggedOut,
+    AccountError { code: AccountError },
+}
+
+/// P11 (BR-P01–BR-P05): account failures. `BadKey` covers both unknown
+/// name and wrong secret (no name oracle beyond `NameTaken` at register).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum AccountError {
+    NameInvalid,
+    NameTaken,
+    BadKey,
+    RateLimited,
+    Unavailable,
+}
+
+/// Public account summary. Rating columns exist from P11; ranked play (P12)
+// fills them beyond the 1000/0 defaults.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Profile {
+    pub name: String,
+    pub rating: u16,
+    pub ranked_games: u32,
+    pub wins: u32,
+    pub losses: u32,
+    pub draws: u32,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
