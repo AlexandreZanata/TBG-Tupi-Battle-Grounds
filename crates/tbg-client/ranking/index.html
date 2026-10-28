@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Global ranking of Tupi Battle Grounds ranked players: rating, games, wins, losses, and win rate.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; object-src 'none'">
+  <title>Global Ranking — Tupi Battle Grounds</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="ranking.css">
+  <script src="ranking.js" defer></script>
+</head>
+<body data-page="board">
+<header class="top">
+  <h1>Tupi Battle Grounds — Global Ranking</h1>
+  <a class="play" href="/">Play now</a>
+</header>
+<main>
+  <form class="search" action="player.html" method="get" role="search">
+    <label for="name">Find a player</label>
+    <div class="search-row">
+      <input id="name" name="name" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false" required pattern="[A-Za-z][A-Za-z0-9_]{2,15}" title="3–16 letters, digits or _; starts with a letter">
+      <button type="submit">Search</button>
+    </div>
+  </form>
+  <p id="status" class="status" role="status">Loading…</p>
+  <div class="table-wrap">
+    <table id="board">
+      <caption class="sr-only">Ranked players ordered by rating, then wins, then name</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="num">#</th>
+          <th scope="col">Player</th>
+          <th scope="col" class="num">Rating</th>
+          <th scope="col" class="num">Games</th>
+          <th scope="col" class="num">W/L/D</th>
+          <th scope="col" class="num">Win rate</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <nav class="pager" aria-label="Ranking pages">
+    <a id="prev" href="?" hidden>← Previous</a>
+    <a id="next" href="?" hidden>Next →</a>
+  </nav>
+</main>
+<footer class="foot"><p id="updated"></p></footer>
+</body>
+</html>
