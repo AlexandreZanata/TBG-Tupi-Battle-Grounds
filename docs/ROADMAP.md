@@ -49,6 +49,8 @@ All code for P1–P8 is implemented and validated on the development PC
 - [ ] **VPS + domain** (P5): provide IP, SSH sudo user, domain A record; run
       `bash deploy/deploy.sh --provision`, then the R1–R13 table (bots over `wss://`,
       capacity 100–500 matches, 4G player, restart, backups, firewall).
+      A temporary-VM run covered R1–R6, R11, R13 and part of R7–R9 (P5 report,
+      "Temporary environment run"); the production host still needs the full table.
 - [ ] **Look approval** (P6): gallery and match screenshots on a real screen.
 - [ ] **Playtest round** (P7): ≥ 4 people, ≥ 10 online matches; confirm or change D-14 values.
 - [ ] **Launch** (P8): add `LICENSE` (MIT intended), uptime checker on `/health`,

@@ -288,3 +288,42 @@ listed under "Pending VPS validation".
 - Blocked items: none locally. VPS-dependent items above.
 - Needs the owner: VPS + domain + SSH access, then run `bash deploy/deploy.sh --provision`
   and the R1–R13 table (or ask the reviewer to run it).
+
+### Temporary environment run (2026-10-28)
+
+A first real-network run on a **temporary** shared VM (8 vCPU, other services on
+it) behind a CDN proxy and the host's existing nginx — not the target `deploy/` kit
+(no Caddy/systemd; the server ran in a container bound to host loopback, 2-CPU
+limit). Host, domain, and setup details are kept out of this repository on purpose.
+All bot traffic came from the development PC over the public internet (`wss://`).
+
+| Check | Result |
+|-------|--------|
+| R1 | `/health` → `ok` over HTTPS; `/metrics` → 404 publicly |
+| R2 | page 200; WASM 7.5 MB gzip (this proxy had no brotli), 0.54 s download |
+| R3 | 1 match completed after fixing `tbg-bots` for `wss://` (79470ca); RTT p50 42 ms |
+| R4 | 6 matches: 12/12 bots completed; RTT p50 45 / p95 80 ms; view gap p95 105, max 236 ms |
+| R5 | 20 matches, 20 % chaos: 39/40 completed; **reconnects 15/15 resumed**; RTT p50 44 / p95 78 ms |
+| R6 | 150 concurrent matches (300 sockets from one PC): 295/300 completed; RTT p50 48 / p95 86 ms; view gap p95 107, max 861 ms; server CPU 0.25–0.35 core (peak 0.61), RSS 44 MiB |
+| R7–R9 | browser vs bot over the internet completed; page reload mid-match + Quick Match → **same match resumed**. Two people / phones / 4G: still pending (owner) |
+| R11 | match rows written to SQLite on the VM; backup not run there |
+| R13 | server reachable only through the proxy (loopback bind); per-IP cap applied to the real client IP from the CDN header (10 sockets → 8 admitted) |
+| R10, R12 | not run |
+
+Findings:
+- Fixed: `tbg-bots` panicked on every `wss://` connection (no rustls crypto provider) — 79470ca.
+- Fixed: two open tabs shared one resume token (`localStorage`) and kept taking over
+  each other's session; the token is now per tab (`sessionStorage`) — 209ea31.
+- Added: the `conn closed` log line now has a `reason` — ec4bcb6.
+- R6 drops: 2 of 300 sockets hit `socket_error` mid-match (network path) and, since
+  bots without chaos never reconnect, became forfeits. Real clients auto-reconnect (R5).
+  Other `idle_timeout` closes were bot sockets left open after `MatchEnd` (bot runner
+  cosmetic issue).
+- Late ticks: one burst (~9 late ticks per match, ≤ 175 ms) during R6 lined up with
+  hypervisor CPU steal on that VM (15 % average steal; one simulation step took 19 ms vs a
+  7 µs mean). Not the simulation; check CPU steal when picking the production host.
+- A hidden browser tab stops answering pings (the frame loop is paused), so the
+  server idles it out after 15 s and forfeits it after the reconnect window. This is
+  the BR rule working, but a phone app-switch longer than ~45 s loses the match.
+- After a page reload the client shows the menu; the match resumes only on the next
+  Play/Quick Match tap. Auto-resume on load would be friendlier (follow-up).
