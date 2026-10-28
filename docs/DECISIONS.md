@@ -249,3 +249,30 @@ the account (guests: on the device), sent to both players by the server.
 animation, render scale, and effect counts only; team rings, HP bars,
 statuses, and splash rings are always shown.
 **Why.** "Fluid for every player" must not become "unfair on cheap phones".
+
+## D-25 · Arcanas are a gated gameplay extra after P31 — 2026-10-28 (Proposed, P32–P38)
+
+**Decision.** Finish all existing phases before beginning this optional
+extra. Start with three Archetype-based trees, six points, six two-rank
+options, additive HP/damage/healing and no supremes. GAME-DESIGN §9 owns
+the proposed rules and values. Audit combat first, implement an offline
+experiment, validate paired-seed matrices and adversarial presets, then
+integrate authoritative selections, UI and durable account presets. Human,
+performance, security and real-server checks gate public activation in P38.
+
+**Why.** Five deep trees for eight units would duplicate Evolution/Synergy,
+make a one-unit Support specialization Shop-dependent, and expose root,
+cadence and Stronghold time-up risks. The small candidate has 141 complete
+presets, so exhaustive preset screening is practical without an optimizer
+or new dependencies. Flat mutually exclusive talents remain the fallback
+if percentage choices fail to produce meaningful strategy.
+
+**Boundary.** All power is free immediately, guests included. Preserve
+Energy, Shop probabilities, SlotCount, existing identity/Elo/FIFO and the
+three-crate architecture. Do not deploy the extra or rewrite historical
+results while executing P32–P37. Writing specs is not balance approval.
+
+**Reopen when** P32 reproduces a rule conflict, P34 finds a compulsory or
+dominated choice, or human playtests find the system unclear or unfun.
+Prefer revising/removing the candidate to adding trees, haste, range,
+Stronghold bonuses or a generic modifier framework.

@@ -44,6 +44,24 @@ P9  Real-time fast path + reconnect    P15 Art direction, rig v2, style lock (Ar
                                                                         └► P31 Consistency, playtest, v0.2.0
 ```
 
+**Optional gameplay extra — only after every existing phase (P0–P31).**
+Arcanas extend the released game; they are not a prerequisite for P13,
+P14, the visual suite, or `v0.2.0`. P32 starts only after P31 is reviewed
+and its owner checkpoints are satisfied. Each extra phase gates the next.
+Writing these specs does not authorize implementation, approve proposed
+balance values, or enable Arcanas on the public server.
+
+```
+P31 reviewed + owner sign-off
+ └► P32 Combat contracts, risk audit, refreshed baseline
+     └► P33 Deterministic Arcanas (offline experiment)
+         └► P34 Simulation, adversarial search, balance gate
+             └► P35 Authoritative match integration and versioned records
+                 └► P36 Arcanas editor, practice, desktop and phone UI
+                     └► P37 Account presets and ranked audit integration
+                         └► P38 Human playtest, performance, release gate
+```
+
 | Phase | File | Milestone at the end | Status | Reviewed |
 |-------|------|----------------------|--------|----------|
 | P0 | — | Lean repository, plan | done | yes |
@@ -78,6 +96,13 @@ P9  Real-time fast path + reconnect    P15 Art direction, rig v2, style lock (Ar
 | P29 | [P29-unit-rootcaller.md](phases/P29-unit-rootcaller.md) | Rootcaller final | planned | — |
 | P30 | [P30-fluidity-and-performance.md](phases/P30-fluidity-and-performance.md) | Auto quality, no hitches, device matrix met | planned | — |
 | P31 | [P31-consistency-and-release.md](phases/P31-consistency-and-release.md) | One visual family; playtest; tag `v0.2.0` | planned | — |
+| P32 | [P32-arcana-baseline-and-combat-contracts.md](phases/P32-arcana-baseline-and-combat-contracts.md) | Refreshed baseline, reproduced combat risks, explicit rule decisions | planned (extra after P31) | — |
+| P33 | [P33-arcana-deterministic-core.md](phases/P33-arcana-deterministic-core.md) | Six bounded options, deterministic modifiers, offline experiment only | planned | — |
+| P34 | [P34-arcana-simulation-and-balance.md](phases/P34-arcana-simulation-and-balance.md) | Paired-seed matrix, bot-policy checks, adversarial search, reviewed tuning | planned | — |
+| P35 | [P35-arcana-authoritative-integration.md](phases/P35-arcana-authoritative-integration.md) | Validated and frozen match presets, reconnect, versioned match records | planned | — |
+| P36 | [P36-arcana-editor-and-practice.md](phases/P36-arcana-editor-and-practice.md) | Complete editor and accurate previews on desktop and phones | planned | — |
+| P37 | [P37-arcana-presets-and-ranked-records.md](phases/P37-arcana-presets-and-ranked-records.md) | One durable preset per account, guest parity, atomic ranked metadata | planned | — |
+| P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
 
 ## Pending validations (owner)
 
@@ -144,6 +169,10 @@ All code for P1–P8 is implemented and validated on the development PC
 | P16–P21 | Approves class animations, arena, Strongholds, UI kit, lobby, effects |
 | P22–P29 | Approves each character (screenshots + live match) |
 | P31 | Runs the playtest; decides balance changes; pushes the tag |
+| P32 | Resolves reproduced rule/canon conflicts and approves the experiment's scope |
+| P34 | Reviews balance evidence; accepts or rejects the proposed tuning before online integration |
+| P36 | Approves the Arcanas editor's look and touch interaction |
+| P38 | Plays the extra, approves fun/fairness, and explicitly authorizes public release |
 
 ## Ready-to-send brief (use for any phase)
 

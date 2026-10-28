@@ -87,8 +87,8 @@ tables are the one allowed exception.
 - **Fixed tick:** 20 Hz (50 ms). All timers are counted in ticks.
 - **Integer math only:** positions in milli-tiles (`i32`, 1 tile = 1000),
   HP and damage as `i32`, percentages as basis points, `Energy` in
-  milli-energy. No floats in state, so outcomes are reproducible on every
-  platform and test assertions are exact.
+  sub-energy (600 = 1 Energy). No floats in state, so outcomes are
+  reproducible on every platform and test assertions are exact.
 - **Coordinates:** seat 0's `Stronghold` at x = 0, seat 1's at
   x = 16 000. The client mirrors x for seat 1 at render time.
 - **Randomness:** one PCG32 stream per seat per purpose (shop), seeded from
@@ -377,3 +377,40 @@ task with migrations (§5, §8, §11); P12 ranked queue and Elo (§5, §8); P13
 read-only JSON API + static ranking pages (§5, §8, §9, §11); P15+ the
 medieval visual suite described in [ART-DIRECTION.md](ART-DIRECTION.md)
 (rig v2 and clip sets replace the 12-joint plan in §7; quality tiers).
+
+## 15. Arcanas extra (Proposed, after P31 only)
+
+P32–P38 in ROADMAP are an optional gameplay extension after the existing
+release, not requirements for P0–P31. GAME-DESIGN §9 owns proposed values;
+DECISIONS D-25 records the rationale. No runtime feature is implemented
+or enabled by this planning addendum.
+
+- **Core (P32–P34):** validate fixed-size presets, calculate additive integer
+  modifiers, preserve Evolution/Synergy HP ratios and deterministic traces.
+  Native examples own clocks, experiments, bot policies and statistics.
+  Experimental tuning is unavailable in default server/WASM release builds.
+  Add no dependency or general modifier/AI framework.
+- **Server (P35):** accept bounded selections only while idle, freeze them
+  at queue/room entry, construct the authoritative MatchState with both
+  presets, and preserve those selections across reconnect/account takeover.
+  Seat/account identity comes from the connection/session. No client bonus
+  values, store reads or I/O participate in simulation ticks.
+- **Wire (P35):** distinguish protocol, preset schema and competitive
+  RulesetVersion. Send static rules/presets at MatchStart and reattach,
+  not in every snapshot. Reuse UnitView max_hp; unchanged Strongholds need
+  no new max-HP field. Retain frame/rate limits and hidden opponent data.
+  Measure packet, heap and tick deltas before approving performance.
+- **Client (P36):** build the editor from the post-P31 Bevy UI kit; previews
+  call the shared formulas with frozen match data where appropriate.
+  Practice uses the same approved rules. Guests get validated local storage
+  and the same complete default and power as accounts.
+- **Store (P35/P37):** additive migrations retain legacy rows. Every match
+  records applied presets/schema/ruleset; ranked metadata is inserted in
+  the rating transaction. One active account preset uses the existing
+  SQLite writer and identity. Acknowledgements distinguish selection from
+  durable save; late replies cannot replace a queued/live match's preset.
+- **Release (P38):** statistical, human, device, security and operating
+  budgets gate activation. Drain before a rules change; preserve outcomes,
+  ratings and historical metadata. Versioned records support audit, not
+  full replay without timed intentions and the old rule implementation.
+  The existing single-VPS/SQLite deployment and Elo/FIFO design remain.
