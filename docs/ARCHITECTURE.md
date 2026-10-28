@@ -131,8 +131,13 @@ tables are the one allowed exception.
   dims optimistically until `last_seq` confirms or `Rejected` arrives.
 - **Sessions:** the server issues a random 128-bit token in `Welcome`; the
   client keeps it per tab (`sessionStorage`) and opens a listen-only probe
-  link on page load, resuming a live match with no tap (P9). No accounts;
-  display names are generated (`Commander 4821`).
+  link on page load, resuming a live match with no tap (P9). Guests get a
+  generated display name (`Commander 4821`); accounts (P11) are a unique
+  `PlayerName` plus a generated `AccountKey` (name + 80-bit secret, the only
+  credential). One active session per account: a new login takes over the
+  old one, including a running match, whose seat token is updated so the
+  end report finds the new session. While logged in, the session carries
+  the account name, which opponents see in `MatchStart`.
 - **Matchmaking:** quick match is a FIFO queue; private rooms use a
   5-character code (unambiguous alphabet, 10-minute expiry), shared as a
   link `?room=CODE`. Bot practice runs locally in the browser.
@@ -146,7 +151,9 @@ tables are the one allowed exception.
   20 msgs/s (burst 40) per connection, then disconnect; ≤ 8 sockets per IP;
   server ping every 1 s plus protocol-level pings every 5 s (any frame —
   binary, ping, or pong — resets the 15 s idle timer, so hidden tabs stay
-  connected); global connection cap from config.
+  connected); account endpoints add per-IP fixed windows (P11: 3 registers
+  per hour, 10 logins per minute, tuned by `TBG_REGISTER_PER_IP_HOUR` /
+  `TBG_LOGIN_PER_IP_MIN`); global connection cap from config.
 - **Latency measurement:** the server sends `Ping{id}` every second,
   computes RTT from `Pong{id}`, records it, and returns `NetStats{rtt_ms}`
   for the client overlay. The client also measures view inter-arrival
@@ -236,9 +243,14 @@ D-22); until each unit's phase lands, the description below stays true.
 - **MVP (from P5):** guest sessions in memory; one SQLite file (WAL) with one
   `matches` table — end time, duration, outcome, reason, seed, per-seat
   network stats and purchases/evolutions as JSON, server timing. No personal data and no IP addresses. It
-  feeds the fun metrics in GAME-DESIGN §6. Writes run off the tick loop
-  (`spawn_blocking`).
-- **Boundary:** only `records.rs` touches SQL, behind a few plain functions.
+  feeds the fun metrics in GAME-DESIGN §6. Match inserts go through the
+  store channel (fire-and-forget, never on the tick loop).
+- **Accounts (from P11):** a single-writer `store` task owns the SQLite
+  connection (schema migrations `v1` matches, `v2` accounts); the lobby
+  never awaits it — account commands carry a oneshot for their reply.
+  The `accounts` table holds the name, lowercase name (UNIQUE), SHA-256 of
+  the key secret, timestamps, and rating columns (defaults 1000/0).
+- **Boundary:** only `store/` touches SQL.
 - **Move to PostgreSQL when** two or more server instances need shared
   writes (accounts, rankings, `Inventory`), or analytics queries start
   competing with match writes. Swap the module then — not before.
@@ -305,6 +317,10 @@ table at 250/500/1000/1500 concurrent matches.
 - Server-authoritative combat, `Energy`, shop, evolution, and outcomes.
 - Seat comes from the connection, never from message content; tokens are
   random, never shown to the other player, and bound to one seat.
+- Account keys: the plain key exists only in the `Registered` reply and the
+  player's own storage; the server stores SHA-256 of the secret and
+  compares hashes in constant shape. Unknown name and wrong secret share
+  one `BadKey` error and code path. Logs never contain keys or IPs.
 - Every message is decoded with size limits; malformed input closes the
   socket; intentions are validated against current state.
 - Rate limits, per-IP socket caps, and timeouts as in §5.

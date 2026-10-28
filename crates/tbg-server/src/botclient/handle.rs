@@ -32,8 +32,7 @@ pub(super) fn handle(
 ) -> Result<Option<Step>, String> {
     /// P11: `Tb` + 10 random alphanumerics (12 chars, starts with a letter).
     fn bot_name(s: &mut Session) -> String {
-        const ALPHA: &[u8] =
-            b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        const ALPHA: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         let mut name = String::from("Tb");
         for _ in 0..10 {
             name.push(ALPHA[s.rng.below(62) as usize] as char);
@@ -100,9 +99,7 @@ pub(super) fn handle(
         ServerMsg::Error { code } => return Err(format!("server error {code:?}")),
         ServerMsg::Queued | ServerMsg::RoomCreated { .. } | ServerMsg::RoomNotFound => {}
         // Bots stay guests unless `--accounts` (register path above).
-        ServerMsg::LoggedIn { .. }
-        | ServerMsg::LoggedOut
-        | ServerMsg::AccountError { .. } => {}
+        ServerMsg::LoggedIn { .. } | ServerMsg::LoggedOut | ServerMsg::AccountError { .. } => {}
     }
     Ok(None)
 }
