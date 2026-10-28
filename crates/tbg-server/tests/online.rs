@@ -37,7 +37,8 @@ async fn send(ws: &mut Ws, msg: &ClientMsg) {
         .unwrap();
 }
 
-/// Next server message, answering pings; `None` once the socket closes.
+/// Next server message, answering pings and skipping `NetStats`;
+/// `None` once the socket closes.
 async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
     loop {
         let msg = tokio::time::timeout(Duration::from_secs(10), ws.next())
@@ -47,6 +48,8 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
         let Message::Binary(b) = msg else { continue };
         match protocol::decode_server(&b).unwrap() {
             ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
+            // Latency housekeeping can arrive between any two replies.
+            ServerMsg::NetStats { .. } => {}
             other => return Some(other),
         }
     }
