@@ -1,6 +1,5 @@
 //! One task per match: owns the `MatchState`, ticks it at a fixed rate,
-//! applies seat-stamped intentions, sends per-seat views every 2nd tick,
-//! and forfeits a seat that stays detached past the reconnect window.
+//! applies seat-stamped intentions and sends per-seat views (incl. ack views).
 
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
@@ -12,12 +11,14 @@ use tokio::time::MissedTickBehavior;
 use tbg_core::protocol::{ServerMsg, Token};
 use tbg_core::{Event, MatchState, Seat};
 
-use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd, MATCH_QUEUE};
+use crate::chan::{ConnHandle, LobbyCmd, MatchCmd, MATCH_QUEUE};
 use crate::metrics::Metrics;
 use crate::records::Records;
 use crate::Config;
 
 mod report;
+mod views;
+use report::SeatStats;
 
 pub(crate) struct Player {
     pub token: Token,
@@ -25,22 +26,15 @@ pub(crate) struct Player {
     pub conn: Option<ConnHandle>,
 }
 
-#[derive(Default)]
-pub(super) struct SeatStats {
-    pub(super) intents: u32,
-    pub(super) rejections: u32,
-    pub(super) rtts: Vec<u16>,
-    pub(super) reattached: u32,
-    pub(super) purchases: std::collections::BTreeMap<String, u32>,
-    pub(super) evolutions: u32,
-}
-
 pub(super) struct Match {
     pub(super) state: MatchState,
     pub(super) players: [Player; 2],
     pub(super) detached_at: [Option<Instant>; 2],
     pub(super) stats: [SeatStats; 2],
-    pub(super) events: Vec<Event>,
+    /// P9: per-seat buffered events; cleared on every view to that seat.
+    pub(super) pending: [Vec<Event>; 2],
+    /// P9: a seat gets an extra view when its intention was applied/rejected.
+    pub(super) applied: [bool; 2],
     pub(super) metrics: Arc<Metrics>,
 }
 
@@ -58,7 +52,8 @@ pub(crate) fn spawn(
         players,
         detached_at: [None, None],
         stats: Default::default(),
-        events: Vec::new(),
+        pending: [Vec::new(), Vec::new()],
+        applied: [false; 2],
         metrics,
     };
     tokio::spawn(run(m, rx, lobby, config, seed, records));
@@ -109,17 +104,24 @@ async fn run(
         let ev = m.state.step();
         let ns = t0.elapsed().as_nanos();
         (step_ns, step_max) = (step_ns + ns, step_max.max(ns));
-        m.events.extend(ev);
-        if m.state.tick.is_multiple_of(2) || m.state.outcome.is_some() {
-            m.send_views();
+        for p in &mut m.pending {
+            p.extend(ev.iter().cloned());
         }
+        // P9: regular 10 Hz views plus an acknowledgement view to the
+        // seat whose intention was applied (or rejected) this tick.
+        let ended = m.state.outcome.is_some();
+        for seat in Seat::BOTH {
+            if m.state.tick.is_multiple_of(2) || ended || m.applied[seat.index()] {
+                m.send_view(seat);
+            }
+        }
+        m.applied = [false; 2];
         for seat in Seat::BOTH {
             if m.detached_at[seat.index()].is_some_and(|t| t.elapsed() > window) {
                 m.state.forfeit(seat);
             }
         }
         if let Some(outcome) = m.state.outcome {
-            m.send_views();
             for seat in Seat::BOTH {
                 m.send(seat, ServerMsg::MatchEnd { outcome });
             }
@@ -158,6 +160,8 @@ impl Match {
         match cmd {
             MatchCmd::Intent { seat, seq, intent } => {
                 self.stats[seat.index()].intents += 1;
+                // P9: any processed intention earns an ack view this tick.
+                self.applied[seat.index()] = true;
                 let result = self.state.apply_intention(seat, seq, intent);
                 if result.is_ok() {
                     self.count_success(seat, intent);
@@ -178,6 +182,7 @@ impl Match {
                 self.players[seat.index()].conn = Some(conn);
                 self.detached_at[seat.index()] = None;
                 self.stats[seat.index()].reattached += 1;
+                self.applied[seat.index()] = false;
                 let opponent = self.players[seat.other().index()].name.clone();
                 self.send(
                     seat,
@@ -186,41 +191,10 @@ impl Match {
                         opponent,
                     },
                 );
-                self.send(seat, ServerMsg::View(self.state.view_for(seat, &[])));
+                // Catch up on events buffered while detached.
+                self.send_view(seat);
             }
             MatchCmd::Rtt { seat, ms } => self.stats[seat.index()].rtts.push(ms),
-        }
-    }
-
-    fn count_success(&mut self, seat: Seat, intent: tbg_core::PlayerIntention) {
-        let stats = &mut self.stats[seat.index()];
-        match intent {
-            tbg_core::PlayerIntention::Purchase { .. } => {
-                if let Some(u) = self.state.units.last() {
-                    *stats.purchases.entry(format!("{:?}", u.kind)).or_default() += 1;
-                }
-            }
-            tbg_core::PlayerIntention::Evolve { .. } => stats.evolutions += 1,
-        }
-    }
-
-    fn detach(&mut self, seat: Seat) {
-        self.players[seat.index()].conn = None;
-        self.detached_at[seat.index()] = Some(Instant::now());
-    }
-
-    /// Never blocks: a full client queue means a too-slow client; drop it.
-    fn send(&mut self, seat: Seat, msg: ServerMsg) {
-        let Some(conn) = &self.players[seat.index()].conn else {
-            return;
-        };
-        match conn.tx.try_send(ConnEvent::Send(msg)) {
-            Ok(()) => {}
-            Err(mpsc::error::TrySendError::Full(_)) => {
-                let _ = conn.tx.try_send(ConnEvent::Close);
-                self.detach(seat);
-            }
-            Err(mpsc::error::TrySendError::Closed(_)) => self.detach(seat),
         }
     }
 }

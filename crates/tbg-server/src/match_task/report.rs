@@ -1,22 +1,21 @@
-//! Per-seat views and the one JSON log line per finished match.
+//! The one JSON log line per finished match.
 
 use std::time::Instant;
-
-use tbg_core::protocol::ServerMsg;
-use tbg_core::Seat;
 
 use super::Match;
 use crate::metrics::percentile;
 
-impl Match {
-    pub(super) fn send_views(&mut self) {
-        let events = std::mem::take(&mut self.events);
-        for seat in Seat::BOTH {
-            let view = self.state.view_for(seat, &events);
-            self.send(seat, ServerMsg::View(view));
-        }
-    }
+#[derive(Default)]
+pub(crate) struct SeatStats {
+    pub(super) intents: u32,
+    pub(super) rejections: u32,
+    pub(super) rtts: Vec<u16>,
+    pub(super) reattached: u32,
+    pub(super) purchases: std::collections::BTreeMap<String, u32>,
+    pub(super) evolutions: u32,
+}
 
+impl Match {
     pub(super) fn log_end(
         &mut self,
         seed: u64,

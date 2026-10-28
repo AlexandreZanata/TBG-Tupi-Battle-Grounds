@@ -5,6 +5,7 @@ use std::net::{IpAddr, SocketAddr};
 use std::sync::atomic::Ordering::Relaxed;
 use std::time::{Duration, Instant};
 
+use axum::body::Bytes;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::{ConnectInfo, State};
 use axum::http::HeaderMap;
@@ -154,6 +155,9 @@ async fn run_loop(
     app: &AppState,
 ) -> &'static str {
     let mut ping = tokio::time::interval(Duration::from_secs(1));
+    // P9: protocol-level pings keep a hidden tab's socket alive; browsers
+    // answer them even while the frame loop (and app-level pongs) is paused.
+    let mut proto_ping = tokio::time::interval(Duration::from_secs(5));
     let idle = sleep(IDLE);
     tokio::pin!(idle);
     loop {
@@ -171,6 +175,15 @@ async fn run_loop(
                         }
                     }
                 }
+                Some(Ok(Message::Ping(payload))) => {
+                    idle.as_mut().reset(tokio::time::Instant::now() + IDLE);
+                    let _ = socket.send(Message::Pong(payload)).await;
+                    None
+                }
+                Some(Ok(Message::Pong(_))) => {
+                    idle.as_mut().reset(tokio::time::Instant::now() + IDLE);
+                    None
+                }
                 Some(Ok(Message::Close(_))) | None => return "client_closed",
                 Some(Err(_)) => return "socket_error",
                 Some(Ok(_)) => None,
@@ -186,6 +199,12 @@ async fn run_loop(
                 c.pings.push((c.next_ping, Instant::now()));
                 if c.pings.len() > 8 { c.pings.remove(0); }
                 Some(ServerMsg::Ping { id: c.next_ping })
+            }
+            _ = proto_ping.tick() => {
+                if socket.send(Message::Ping(Bytes::new())).await.is_err() {
+                    return "send_failed";
+                }
+                None
             }
             _ = &mut idle => return "idle_timeout",
         };
