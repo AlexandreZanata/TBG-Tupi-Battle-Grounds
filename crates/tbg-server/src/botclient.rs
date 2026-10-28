@@ -27,6 +27,8 @@ pub struct BotOpts {
     /// ...and come back with the session token after this long (`None`: never).
     pub rejoin_after: Option<Duration>,
     pub timeout: Duration,
+    /// P11: register a `Tb…` account first, then play logged in.
+    pub accounts: bool,
 }
 
 impl BotOpts {
@@ -38,6 +40,7 @@ impl BotOpts {
             drop_after: None,
             rejoin_after: None,
             timeout: Duration::from_secs(360),
+            accounts: false,
         }
     }
 }
@@ -70,6 +73,8 @@ pub(super) struct Session {
     pub(super) pending: Vec<(u32, Instant)>,
     /// P9: when `QuickMatch` was sent for the current match.
     pub(super) queue_start: Option<Instant>,
+    /// P11: a `Register` was sent for this connection (awaiting the key).
+    pub(super) registering: bool,
 }
 
 pub(super) enum Step {
@@ -89,6 +94,7 @@ pub async fn play_one(opts: BotOpts, seed: u64) -> BotResult {
         drop_at: None,
         pending: Vec::new(),
         queue_start: None,
+        registering: false,
     };
     loop {
         match connect_and_play(&opts, &mut s, &mut r, deadline).await {

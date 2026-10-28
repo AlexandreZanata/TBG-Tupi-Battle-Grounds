@@ -30,12 +30,34 @@ pub(super) fn handle(
     r: &mut BotResult,
     send: &mut impl FnMut(&mut Session, ClientMsg),
 ) -> Result<Option<Step>, String> {
+    /// P11: `Tb` + 10 random alphanumerics (12 chars, starts with a letter).
+    fn bot_name(s: &mut Session) -> String {
+        const ALPHA: &[u8] =
+            b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let mut name = String::from("Tb");
+        for _ in 0..10 {
+            name.push(ALPHA[s.rng.below(62) as usize] as char);
+        }
+        name
+    }
+
     match msg {
         ServerMsg::Welcome { token, .. } => {
             if s.token.replace(token).is_none() {
-                s.queue_start = Some(Instant::now());
-                send(s, ClientMsg::QuickMatch);
+                if opts.accounts && !s.registering {
+                    s.registering = true;
+                    let name = bot_name(s);
+                    send(s, ClientMsg::Register { name });
+                } else {
+                    s.queue_start = Some(Instant::now());
+                    send(s, ClientMsg::QuickMatch);
+                }
             }
+        }
+        // P11: registered (and auto-logged-in); queue for real this time.
+        ServerMsg::Registered { .. } => {
+            s.queue_start = Some(Instant::now());
+            send(s, ClientMsg::QuickMatch);
         }
         ServerMsg::MatchStart { you, .. } => {
             if r.seat.is_none() {
@@ -77,9 +99,8 @@ pub(super) fn handle(
         }
         ServerMsg::Error { code } => return Err(format!("server error {code:?}")),
         ServerMsg::Queued | ServerMsg::RoomCreated { .. } | ServerMsg::RoomNotFound => {}
-        // P11: bots stay guests; account replies never arrive here.
-        ServerMsg::Registered { .. }
-        | ServerMsg::LoggedIn { .. }
+        // Bots stay guests unless `--accounts` (register path above).
+        ServerMsg::LoggedIn { .. }
         | ServerMsg::LoggedOut
         | ServerMsg::AccountError { .. } => {}
     }

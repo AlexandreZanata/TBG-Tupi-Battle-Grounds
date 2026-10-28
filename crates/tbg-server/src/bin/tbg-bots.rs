@@ -2,7 +2,7 @@
 //! real WebSockets and report completion, RTT, view gaps, reconnects.
 //!
 //! `tbg-bots --url ws://127.0.0.1:8080/ws --matches N [--delay-ms D]
-//!   [--jitter-ms J] [--chaos-pct P] [--ramp-ms R] [--bots B]`
+//!   [--jitter-ms J] [--chaos-pct P] [--ramp-ms R] [--bots B] [--accounts]`
 //! Exit code 1 if any bot failed.
 
 use std::time::Duration;
@@ -20,6 +20,8 @@ struct Args {
     ramp_ms: u64,
     /// Override the bot count (default 2 × matches), e.g. 1 to face a browser.
     bots: Option<u64>,
+    /// P11: register a `Tb…` account per bot, then play logged in.
+    accounts: bool,
 }
 
 fn args() -> Args {
@@ -31,8 +33,21 @@ fn args() -> Args {
         chaos_pct: 0,
         ramp_ms: 20,
         bots: None,
+        accounts: false,
     };
     let raw: Vec<String> = std::env::args().skip(1).collect();
+    // Bare flags take no value; everything else comes in key/value pairs.
+    let raw: Vec<String> = raw
+        .into_iter()
+        .filter(|arg| {
+            if arg == "--accounts" {
+                a.accounts = true;
+                false
+            } else {
+                true
+            }
+        })
+        .collect();
     for pair in raw.chunks(2) {
         let (Some(key), Some(value)) = (pair.first(), pair.get(1)) else {
             break;
@@ -68,6 +83,7 @@ async fn main() {
         let mut opts = BotOpts::new(a.url.clone());
         opts.delay_ms = a.delay_ms;
         opts.jitter_ms = a.jitter_ms;
+        opts.accounts = a.accounts;
         if rng.below(100) < a.chaos_pct {
             opts.drop_after = Some(Duration::from_secs(u64::from(20 + rng.below(41))));
             opts.rejoin_after = Some(Duration::from_secs(5));
