@@ -58,6 +58,8 @@ pub(super) struct Conn {
     pub(super) bytes_in: u64,
     pub(super) bytes_out: u64,
     pub(super) started: Instant,
+    /// P13: last `Leaderboard` request (one per second; extras ignored).
+    pub(super) last_leaderboard: Option<Instant>,
 }
 
 async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
@@ -86,6 +88,7 @@ async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
         bytes_in: 0,
         bytes_out: 0,
         started: Instant::now(),
+        last_leaderboard: None,
     };
     let reason = run_loop(&mut socket, &mut rx, &mut c, &app).await;
     if let Some((seat, m)) = &c.matched {

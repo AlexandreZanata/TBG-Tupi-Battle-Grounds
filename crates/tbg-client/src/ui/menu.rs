@@ -3,7 +3,8 @@
 
 use bevy::prelude::*;
 
-use super::account::Account;
+use super::account::{Account, AccountScreen};
+use super::ranking::Ranking;
 use super::{button, label, screen, UiAction, PANEL};
 use crate::audio::Sounds;
 use crate::GameState;
@@ -19,7 +20,11 @@ pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Menu), spawn)
         .add_systems(
             Update,
-            (sound_label, refresh.run_if(resource_changed::<Account>))
+            (
+                sound_label,
+                hide_under_panels,
+                refresh.run_if(resource_changed::<Account>),
+            )
                 .run_if(in_state(GameState::Menu)),
         );
 }
@@ -33,6 +38,26 @@ fn refresh(mut commands: Commands, account: Res<Account>, roots: Query<Entity, W
         commands.entity(e).despawn();
     }
     build(&mut commands, &account);
+}
+
+/// Modal panels (ranking, save your key) hide the menu: taps hit-test the
+/// first visible button, so two overlapping buttons must never both show.
+fn hide_under_panels(
+    ranking: Res<Ranking>,
+    account: Res<Account>,
+    mut roots: Query<&mut Visibility, With<MenuRoot>>,
+) {
+    let modal = ranking.open || matches!(account.screen, AccountScreen::SaveKey { .. });
+    let want = if modal {
+        Visibility::Hidden
+    } else {
+        Visibility::Inherited
+    };
+    for mut v in &mut roots {
+        if *v != want {
+            *v = want;
+        }
+    }
 }
 
 fn sound_label(
@@ -101,6 +126,7 @@ fn build(commands: &mut Commands, account: &Account) {
                         button("Play with a friend", UiAction::CreateRoom, 260.0),
                         label("Ranked", 20.0),
                         button(&ranked, UiAction::Ranked, 260.0),
+                        button("Ranking", UiAction::OpenRanking, 260.0),
                         (
                             button("Sound: on", UiAction::ToggleSound, 260.0),
                             SoundButton
@@ -130,6 +156,7 @@ fn build(commands: &mut Commands, account: &Account) {
                             UiAction::Disabled,
                             260.0
                         ),
+                        button("Ranking", UiAction::OpenRanking, 260.0),
                         (
                             button("Sound: on", UiAction::ToggleSound, 260.0),
                             SoundButton

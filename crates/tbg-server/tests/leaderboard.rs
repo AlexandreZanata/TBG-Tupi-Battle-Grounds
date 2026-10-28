@@ -120,32 +120,38 @@ fn body_json(body: &[u8]) -> serde_json::Value {
     serde_json::from_slice(body).unwrap()
 }
 
-/// Play one idle ranked draw between two fresh accounts.
-async fn ranked_draw(url: &str, a_name: &str, b_name: &str) {
+/// Read one idle player's match from start to end.
+async fn play_out(ws: &mut Ws) {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::MatchStart { .. }) => break,
+            Some(_) => continue,
+            None => panic!("ranked match never started"),
+        }
+    }
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::MatchEnd { .. }) => break,
+            Some(_) => continue,
+            None => panic!("socket closed mid-match"),
+        }
+    }
+}
+
+/// Play one idle ranked draw between two fresh accounts; returns A's key.
+async fn ranked_draw(url: &str, a_name: &str, b_name: &str) -> String {
     let mut a = connect(url).await;
     let mut b = connect(url).await;
     hello(&mut a).await;
     hello(&mut b).await;
-    register_as(&mut a, a_name).await;
+    let key = register_as(&mut a, a_name).await;
     register_as(&mut b, b_name).await;
     send(&mut a, &ClientMsg::RankedMatch).await;
     send(&mut b, &ClientMsg::RankedMatch).await;
-    for ws in [&mut a, &mut b] {
-        loop {
-            match recv(ws).await {
-                Some(ServerMsg::MatchStart { .. }) => break,
-                Some(_) => continue,
-                None => panic!("ranked match never started"),
-            }
-        }
-        loop {
-            match recv(ws).await {
-                Some(ServerMsg::MatchEnd { .. }) => break,
-                Some(_) => continue,
-                None => panic!("socket closed mid-match"),
-            }
-        }
-    }
+    // Drain both sockets at once: at 1 ms ticks an unread socket fills its
+    // queue and the server drops it as a slow client (a forfeit, not a draw).
+    tokio::join!(play_out(&mut a), play_out(&mut b));
+    key
 }
 
 async fn wait_total(base: &str, want: u64) -> serde_json::Value {
@@ -251,17 +257,55 @@ async fn br_r07_limit_clamped_to_100() {
 async fn api_rate_limit_returns_429() {
     let (base, _, _t) = live_server("ratelimit").await;
     // Default 120/min: the 121st request in a minute is refused as JSON.
-    let mut last = (0u16, String::new(), Vec::new());
-    for _ in 0..121 {
-        last = get(&base, "/api/leaderboard").await;
-        assert!(last.0 == 200 || last.0 == 429);
-        if last.0 == 429 {
-            break;
-        }
+    for i in 0..120 {
+        let (status, _, _) = get(&base, "/api/leaderboard").await;
+        assert_eq!(status, 200, "request {}", i + 1);
     }
+    let last = get(&base, "/api/leaderboard").await;
     assert_eq!(last.0, 429);
     assert_eq!(
         body_json(&last.2),
         serde_json::json!({"error": "rate_limited"})
+    );
+}
+
+#[tokio::test]
+async fn br_r07_in_game_leaderboard_matches_api() {
+    let (base, url, _t) = live_server("ws-board").await;
+    let key = ranked_draw(&url, "WsBoardA", "WsBoardB").await;
+    let board = wait_total(&base, 2).await;
+    let mut ws = connect(&url).await;
+    hello(&mut ws).await;
+    send(&mut ws, &ClientMsg::Login { key }).await;
+    assert!(matches!(
+        recv(&mut ws).await,
+        Some(ServerMsg::LoggedIn { .. })
+    ));
+    // Two requests back to back: the second is ignored (1 per second).
+    send(&mut ws, &ClientMsg::Leaderboard { offset: 0 }).await;
+    send(&mut ws, &ClientMsg::Leaderboard { offset: 1 }).await;
+    let Some(ServerMsg::Leaderboard {
+        total,
+        offset,
+        rows,
+        you,
+    }) = recv(&mut ws).await
+    else {
+        panic!("expected Leaderboard");
+    };
+    assert_eq!((total, offset, you), (2, 0, Some(1)));
+    // Same order as the web API (BR-R07).
+    let names: Vec<&str> = rows.iter().map(|r| r.name.as_str()).collect();
+    let api: Vec<&str> = board["rows"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r["name"].as_str().unwrap())
+        .collect();
+    assert_eq!(names, api);
+    let extra = tokio::time::timeout(Duration::from_millis(500), recv(&mut ws)).await;
+    assert!(
+        !matches!(extra, Ok(Some(ServerMsg::Leaderboard { .. }))),
+        "second request within 1 s was answered"
     );
 }

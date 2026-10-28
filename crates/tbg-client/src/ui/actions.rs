@@ -89,6 +89,7 @@ pub(super) fn apply(
     mut extra: (Res<LatestView>, ResMut<super::Toasts>, ResMut<Sounds>),
     mut account: ResMut<Account>,
     mut form: NonSendMut<ActiveForm>,
+    mut ranking: ResMut<super::ranking::Ranking>,
 ) {
     let now = time.elapsed_secs_f64();
     for action in std::mem::take(&mut queue.0) {
@@ -173,6 +174,11 @@ pub(super) fn apply(
             }
             UiAction::ToggleSound => extra.2.toggle_mute(),
             UiAction::Disabled => {}
+            UiAction::OpenRanking
+            | UiAction::RankingPrev
+            | UiAction::RankingNext
+            | UiAction::OpenFullRanking
+            | UiAction::CloseRanking => super::ranking::apply_action(action, &mut ranking),
             // P11: account buttons (state lives in ui/account.rs).
             other => {
                 super::account_ui::apply_action(

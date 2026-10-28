@@ -107,7 +107,8 @@ pub(super) fn handle(
         ServerMsg::LoggedIn { .. }
         | ServerMsg::LoggedOut
         | ServerMsg::AccountError { .. }
-        | ServerMsg::RatingChanged { .. } => {}
+        | ServerMsg::RatingChanged { .. }
+        | ServerMsg::Leaderboard { .. } => {}
     }
     Ok(None)
 }

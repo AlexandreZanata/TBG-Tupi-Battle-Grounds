@@ -100,6 +100,16 @@ pub fn room_link(code: &str) -> String {
     format!("?room={code}")
 }
 
+/// P13: open a same-site page (`/ranking/`) in a new tab.
+pub fn open_url(path: &str) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(w) = web_sys::window() {
+        let _ = w.open_with_url_and_target(path, "_blank");
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = path;
+}
+
 pub fn copy_text(text: &str) {
     #[cfg(target_arch = "wasm32")]
     if let Some(w) = web_sys::window() {

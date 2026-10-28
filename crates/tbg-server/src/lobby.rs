@@ -20,6 +20,7 @@ use crate::Config;
 
 mod account_done;
 mod accounts;
+mod leaderboard;
 mod matchmaking;
 mod ranked;
 mod sessions;
@@ -161,6 +162,8 @@ impl Lobby {
             ClientMsg::Register { name } => return self.register(token, name),
             ClientMsg::Login { key } => return self.login(token, key),
             ClientMsg::Logout => return self.logout(token),
+            // P13: read-only, from any state.
+            ClientMsg::Leaderboard { offset } => return self.leaderboard(token, offset),
             _ => {}
         }
         let draining = self.draining.load(Relaxed);
