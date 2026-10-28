@@ -16,7 +16,7 @@ Only inspect combat/stat code for a measured anomaly.
 ## Affected files and scope
 
 Extend `examples/arcana_balance.rs` with small `examples/arcana_balance/`
-modules for policies, metrics, pairing and statistics (each ≤200 lines).
+modules for policies, metrics, pairing and statistics (one concern per module).
 Reuse P32 observation; compile offline examples only on native targets.
 The optional tuning feature below may touch core Cargo.toml/arcanas/state.
 Adjust content/GAME-DESIGN together only after evidence and the owner's

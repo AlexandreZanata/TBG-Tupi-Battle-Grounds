@@ -43,7 +43,7 @@ only tune and add signature details.
 
 ### 1. Clip data model v2
 `art/clips/` folder: `mod.rs` (types), `shared.rs`, `tank.rs`, `dps.rs`,
-`ranged.rs`, `control.rs`, `support.rs` (each ≤ 200 lines; key tables are
+`ranged.rs`, `control.rs`, `support.rs` (one Archetype per file; key tables are
 content and may be dense). A clip = duration, looping, per-joint tracks of
 eased keys, events (`Strike`, `Release`, `Footstep`), and a `Large`
 timing multiplier (default 1.25).
