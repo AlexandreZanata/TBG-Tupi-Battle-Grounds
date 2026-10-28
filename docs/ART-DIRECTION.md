@@ -161,9 +161,9 @@ collapse sequence at defeat. Budget ≤ 4 000 triangles per style.
 
 | Item | Budget |
 |------|--------|
-| One-slot unit form / two-slot form | ≤ 1 500 / ≤ 3 000 triangles |
+| One-slot unit form / two-slot form | ≤ 1 500 / ≤ 3 000 triangles (**Proposed**, D-26: ≤ 2 500 / ≤ 5 000) |
 | Stronghold style | ≤ 4 000 triangles |
-| Arena + background (all layers) | ≤ 45 000 triangles |
+| Arena + background (all layers) | ≤ 45 000 triangles (**Proposed**, D-26: ≤ 60 000) |
 | Draw calls, busy match (30 units) | ≤ 300 (High), ≤ 200 (Low) |
 | WASM (brotli) / other first-load assets | ≤ 6 MB hard ceiling / ≤ 1.5 MB |
 | Frame rate | 60 FPS desktop; ≥ 30 FPS mid-range phone on Low with 30 units |

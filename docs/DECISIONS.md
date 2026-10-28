@@ -276,3 +276,30 @@ results while executing P32–P37. Writing specs is not balance approval.
 dominated choice, or human playtests find the system unclear or unfun.
 Prefer revising/removing the candidate to adding trees, haste, range,
 Stronghold bonuses or a generic modifier framework.
+
+## D-26 · 100 MB asset ceiling, memory stays lean — 2026-10-28 (Proposed, owner request; P16-A)
+
+**Decision.** The total compressed download (WASM + every asset, lazy ones
+included) may grow to **100 MB** so the art can be richer. First load stays
+small: WASM ≤ 4 MB brotli (ceiling 6 MB) and ≤ 1 MB of other first-load
+assets, so time-to-menu does not move; everything else loads lazily after
+the menu is interactive. Triangle budgets get headroom: ≤ 2 500 per
+one-slot unit form, ≤ 5 000 per two-slot form, ≤ 60 000 for the arena.
+Browser memory stays ≤ 300 MB and shared merged meshes with one material
+stay the rule.
+**Why.** The owner wants a more beautiful, professional look and accepts a
+bigger game, but not a slower start or a heavier runtime.
+**Reopen when** P30 measures phone FPS below budget with the new triangle
+counts, or real players report slow loads.
+
+## D-27 · Desktop lobby is an HTML/CSS layer over the canvas — 2026-10-28 (Proposed, P16-A)
+
+**Decision.** On landscape desktop (≥ 1280×720) the lobby is plain HTML and
+CSS over the live Bevy arena, extending D-20's overlay bridge: no
+framework, no CDN, self-hosted OFL fonts; buttons call existing
+`UiAction`s. Smaller or portrait screens keep the Bevy menu until P20.
+**Why.** The owner's reference needs crisp typography, layered panels,
+blur, gradients, and illustrations that HTML/CSS gives for free and Bevy UI
+would need much custom code for.
+**Reopen when** the overlay causes input or focus bugs on the canvas, or
+P20 decides one lobby for every ratio.

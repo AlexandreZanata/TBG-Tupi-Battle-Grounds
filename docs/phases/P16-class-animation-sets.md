@@ -1,6 +1,6 @@
 # P16 — Animation sets per class (Archetype)
 
-**Depends on:** P15 signed off.
+**Depends on:** P15 signed off and P16-A reviewed.
 **Branch:** `phase/p16-class-animation`.
 **Difficulty:** high (animation quality); the system parts are medium.
 
