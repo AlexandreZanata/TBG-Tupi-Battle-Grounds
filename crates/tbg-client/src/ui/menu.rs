@@ -147,8 +147,8 @@ fn build(commands: &mut Commands, account: &Account) {
             p.spawn(label(chip, 14.0));
             match actions {
                 Some(()) => p.spawn(pair(
-                    button("Create account", UiAction::CreateAccount, 170.0),
-                    button("I have a key", UiAction::HaveKey, 170.0),
+                    button("Create account", UiAction::CreateAccount, 180.0),
+                    button("I have a key", UiAction::HaveKey, 180.0),
                 )),
                 None => p.spawn(button("Log out", UiAction::Logout, 200.0)),
             };

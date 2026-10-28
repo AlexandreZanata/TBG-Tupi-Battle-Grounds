@@ -84,5 +84,5 @@ fn count_rating(
     let t = ((time.elapsed_secs_f64() - arrived) / 0.6).clamp(0.0, 1.0);
     let shown = (f64::from(before) + (f64::from(after) - f64::from(before)) * t).round() as u16;
     let delta = i32::from(after) - i32::from(before);
-    text.0 = format!("Rating {before} → {shown} ({delta:+})");
+    text.0 = format!("Rating {before} -> {shown} ({delta:+})");
 }

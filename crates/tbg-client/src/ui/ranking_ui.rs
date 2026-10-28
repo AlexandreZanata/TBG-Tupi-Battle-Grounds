@@ -183,7 +183,7 @@ pub(super) fn panel(
                     button("Next", next, 124.0),
                 ));
                 p.spawn(button_row(
-                    button("Open full ranking", UiAction::OpenFullRanking, 200.0),
+                    button("Open full ranking", UiAction::OpenFullRanking, 220.0),
                     button("Close", UiAction::CloseRanking, 124.0),
                 ));
             });
