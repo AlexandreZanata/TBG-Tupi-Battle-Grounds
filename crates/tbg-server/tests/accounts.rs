@@ -89,6 +89,22 @@ async fn hello(ws: &mut Ws) {
     assert!(matches!(recv(ws).await, Some(ServerMsg::Welcome { .. })));
 }
 
+/// `Hello` (optionally resuming) and return the session token.
+async fn hello_token(ws: &mut Ws, resume: Option<protocol::Token>) -> protocol::Token {
+    send(
+        ws,
+        &ClientMsg::Hello {
+            version: PROTOCOL_VERSION,
+            resume,
+        },
+    )
+    .await;
+    match recv(ws).await {
+        Some(ServerMsg::Welcome { token, .. }) => token,
+        other => panic!("expected Welcome, got {other:?}"),
+    }
+}
+
 async fn connect(url: &str) -> Ws {
     tokio_tungstenite::connect_async(url).await.unwrap().0
 }
@@ -270,7 +286,7 @@ async fn br_p03_second_login_takes_over_live_match() {
     let (url, _t) = live_server("proto-takeover").await;
     let mut a = connect(&url).await;
     let mut b = connect(&url).await;
-    hello(&mut a).await;
+    let old_token = hello_token(&mut a, None).await;
     hello(&mut b).await;
     let (key, _) = register_as(&mut a, "Takeover").await;
     send(&mut a, &ClientMsg::QuickMatch).await;
@@ -317,6 +333,25 @@ async fn br_p03_second_login_takes_over_live_match() {
             Err(_) => panic!("old socket not closed after takeover"),
         }
     }
+    // The closed device auto-resumes with its old token: it gets a fresh
+    // guest session, never the match it lost (BR-P03).
+    let mut a3 = connect(&url).await;
+    let token = hello_token(&mut a3, Some(old_token)).await;
+    assert_ne!(token, old_token, "old session survived the takeover");
+    let resumed = tokio::time::timeout(Duration::from_millis(500), async {
+        loop {
+            match recv(&mut a3).await {
+                Some(ServerMsg::MatchStart { .. } | ServerMsg::View(_)) => return true,
+                Some(_) => continue,
+                None => return false,
+            }
+        }
+    })
+    .await;
+    assert!(
+        !matches!(resumed, Ok(true)),
+        "old device resumed into the taken-over match"
+    );
 }
 
 #[tokio::test]

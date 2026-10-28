@@ -3,8 +3,6 @@
 //! reply (reconnect, queue join, disconnect in between) is dropped or
 //! answered without changing anything.
 
-use std::time::Instant;
-
 use tbg_core::protocol::{AccountError, Profile, ServerMsg, Token};
 
 use super::accounts::deny;
@@ -91,11 +89,12 @@ impl Lobby {
                             stolen = Some((tx.clone(), *seat));
                         }
                     }
-                    old.conn = None;
-                    old.account = None;
-                    old.detached_at = Some(Instant::now());
                 }
                 self.leave_waiting(old_token);
+                // Drop the old session outright: the closed device
+                // auto-resumes with its old token and must get a fresh
+                // guest session, not the match it just lost.
+                self.sessions.remove(&old_token);
                 stolen
             }
             None => None,
