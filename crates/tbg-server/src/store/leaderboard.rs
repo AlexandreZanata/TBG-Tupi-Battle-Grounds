@@ -60,7 +60,7 @@ pub(super) fn build(conn: &Connection) -> rusqlite::Result<Snapshot> {
     let mut rows = Vec::new();
     let mut by_name = HashMap::new();
     let mut rank = 0u32;
-    let mut mapped = stmt.query_map([], |row| {
+    let mapped = stmt.query_map([], |row| {
         Ok((
             row.get::<_, String>(0)?,
             row.get::<_, String>(1)?,
@@ -71,7 +71,7 @@ pub(super) fn build(conn: &Connection) -> rusqlite::Result<Snapshot> {
             row.get::<_, u32>(6)?,
         ))
     })?;
-    while let Some(entry) = mapped.next() {
+    for entry in mapped {
         let (name, name_lower, rating, games, wins, losses, draws) = entry?;
         rank += 1;
         by_name.insert(name_lower, rank);
