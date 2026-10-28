@@ -160,11 +160,41 @@ real game".
 
 ## Phase report
 
-*(Executor fills this in at the end.)*
+Executed by the reviewer agent (Claude) on 2026-10-28, branch `phase/p6-visual-slice`.
 
-- Commands run and results:
-- Triangle counts / FPS per device:
-- Screenshot paths:
-- Owner verdict:
+- Implemented: `art/` — `palette.rs`; `mesh.rs` (box/ball/pill/cylinder/cone/frustum/
+  ring/lathe builders, flat normals, vertex colors with bottom shading as fake AO,
+  per-joint merge); `figure.rs` (12-joint body plan, `FigureSpec`, joint spawning);
+  `anim.rs` + `clips.rs` (10 keyframed clips, base Idle/Walk + one-shot actions,
+  0.1 s crossfade); `roster/` (**all 8 units × 5 forms**, built once at startup into
+  `FigureLibrary`); final `arena.rs` + `arena/props.rs` (island over water, cliff, lane
+  with tile markers, lathe stone towers with team banners and 3 damage states, seeded
+  props, distance fog, warm sun, `?shadows=0`); `gallery.rs` (`?gallery`, `?gallery=N`
+  close-up). `visuals.rs` now spawns figurines; cues drive clips; evolution swaps
+  meshes and scale.
+- Commands run and results: `cargo clippy --workspace --all-targets -- -D warnings`
+  and wasm32 clippy → clean; `cargo test --workspace` unchanged (25 tests);
+  `trunk serve` dev build → gallery and practice match render, no errors.
+- Triangles (startup log, max over 5 forms): Shieldbearer 1098 · Archer 950 ·
+  Bone Brute 1028 · Hexer 1340 · Sawbot 1208 · Siege Walker 964 · Bloomkeeper 1496 ·
+  Rootcaller 1440 — all within budget (≤ 1500 one-slot, ≤ 3000 two-slot).
+- Draw calls: one shared figurine material; ≤ 12 joint meshes per unit, shared per form;
+  arena = ~10 meshes. Not measured on WebGL2 (no draw-call counter in Bevy's WebGL2 path).
+- FPS (browser pane, desktop iGPU, dev build): 110–150 with 40 animated figurines in
+  the gallery; 150 in a practice match. **Phone FPS pending owner.**
+- Screenshots: `docs/media/p6/gallery-overview.jpg`, `closeup-undead.jpg`,
+  `closeup-machines-plants.jpg`, `match-landscape.jpg` (small pane, 373×335).
 - Deviations:
-- Blocked items:
+  1. All 8 units got their final-style figurine here (P7 step 1 done early): the
+     figure system made each unit a ~40-line data function.
+  2. `spawn_unit_visual` / `update_unit_visual` take `&FigureLibrary` (and `&mut UnitVisual`)
+     — the seam's callers changed in one place (`sync`), nothing else.
+  3. Rank pips (gold A / silver B) kept above the HP bar for evolution readability.
+  4. Trees only on the far side of the island; the camera side has low rocks, bushes,
+     and ferns so nothing hides the lane.
+  5. Figurines are drawn 1.2× life size for phone readability.
+  6. No Blender, no textures, no glTF: everything is code.
+- Blocked items: none.
+- **Needs the owner:** visual approval (silhouette, faction colors, props, motion,
+  "looks like a real game") on a real desktop screen and a phone; phone FPS in a busy
+  match (`?stress=30` and a full match).

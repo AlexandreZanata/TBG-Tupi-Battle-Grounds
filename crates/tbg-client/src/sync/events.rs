@@ -4,23 +4,26 @@ use bevy::prelude::*;
 use tbg_core::{Archetype, Event, Seat, Target, UnitId};
 
 use super::{world_x, UnitEntities};
+use crate::art::anim::Animator;
 use crate::visuals::{self, UnitVisual, VisualAssets, VisualCue};
 
 pub(super) fn apply_event(
     commands: &mut Commands,
     assets: &VisualAssets,
     map: &UnitEntities,
-    visuals: &mut Query<(&mut UnitVisual, &mut Transform)>,
+    visuals: &mut Query<(&mut UnitVisual, &mut Transform, &mut Animator)>,
     ev: Event,
     you: Seat,
 ) {
-    let pos_of = |visuals: &Query<(&mut UnitVisual, &mut Transform)>, t: Target| -> Option<Vec3> {
+    let pos_of = |visuals: &Query<(&mut UnitVisual, &mut Transform, &mut Animator)>,
+                  t: Target|
+     -> Option<Vec3> {
         match t {
             Target::Unit(id) => map
                 .0
                 .get(&id)
                 .and_then(|e| visuals.get(*e).ok())
-                .map(|(_, t)| t.translation + Vec3::Y * 0.5),
+                .map(|(_, t, _)| t.translation + Vec3::Y * 0.6),
             Target::Stronghold(seat) => Some(Vec3::new(
                 world_x(tbg_core::state::stronghold_x(seat), you),
                 1.2,
@@ -28,9 +31,11 @@ pub(super) fn apply_event(
             )),
         }
     };
-    let cue = |visuals: &mut Query<(&mut UnitVisual, &mut Transform)>, id: UnitId, c: VisualCue| {
-        if let Some((mut v, _)) = map.0.get(&id).and_then(|e| visuals.get_mut(*e).ok()) {
-            visuals::play_cue(&mut v, assets, c);
+    let cue = |visuals: &mut Query<(&mut UnitVisual, &mut Transform, &mut Animator)>,
+               id: UnitId,
+               c: VisualCue| {
+        if let Some((mut v, _, mut anim)) = map.0.get(&id).and_then(|e| visuals.get_mut(*e).ok()) {
+            visuals::play_cue(&mut v, &mut anim, assets, c);
         }
     };
     match ev {
@@ -41,7 +46,7 @@ pub(super) fn apply_event(
                     map.0
                         .get(&id)
                         .and_then(|e| visuals.get(*e).ok())
-                        .is_some_and(|(v, _)| {
+                        .is_some_and(|(v, _, _)| {
                             v.archetype != Archetype::Tank && v.archetype != Archetype::Dps
                         })
                 }

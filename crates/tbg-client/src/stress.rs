@@ -4,6 +4,7 @@
 use bevy::prelude::*;
 use tbg_core::UNIT_KINDS;
 
+use crate::art::FigureLibrary;
 use crate::config;
 use crate::visuals::{spawn_unit_visual, UnitLook, VisualAssets};
 
@@ -16,7 +17,7 @@ pub fn plugin(app: &mut App) {
     app.add_systems(Startup, spawn).add_systems(Update, walk);
 }
 
-fn spawn(mut commands: Commands, assets: Res<VisualAssets>) {
+fn spawn(mut commands: Commands, assets: Res<VisualAssets>, lib: Res<FigureLibrary>) {
     let n: usize = config::url_param("stress")
         .and_then(|v| v.parse().ok())
         .unwrap_or(0);
@@ -37,7 +38,7 @@ fn spawn(mut commands: Commands, assets: Res<VisualAssets>) {
             0.0,
             [-0.8, 0.0, 0.8][i % 3],
         );
-        let e = spawn_unit_visual(&mut commands, &assets, look, pos);
+        let e = spawn_unit_visual(&mut commands, &assets, &lib, look, pos);
         commands.entity(e).insert(StressWalker);
     }
 }

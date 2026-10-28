@@ -6,9 +6,11 @@
 use bevy::prelude::*;
 
 mod arena;
+mod art;
 mod autoplay;
 mod camera;
 mod config;
+mod gallery;
 mod link;
 mod local;
 mod net;
@@ -25,6 +27,8 @@ pub enum GameState {
     Queue,
     InMatch,
     Result,
+    /// `?gallery`: art review scene.
+    Gallery,
 }
 
 fn main() {
@@ -42,6 +46,7 @@ fn main() {
         .insert_resource(Time::<Fixed>::from_hz(20.0))
         .init_state::<GameState>()
         .add_plugins((
+            art::plugin,
             camera::plugin,
             arena::plugin,
             overlay::plugin,
@@ -51,6 +56,7 @@ fn main() {
             stress::plugin,
             ui::plugin,
             autoplay::plugin,
+            gallery::plugin,
         ))
         .run();
 }
