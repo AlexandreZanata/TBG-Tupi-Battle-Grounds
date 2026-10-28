@@ -8,6 +8,7 @@ use tbg_core::{Rejection, UnitId};
 pub mod account;
 mod account_ui;
 mod actions;
+mod desktop;
 mod evolve;
 #[cfg(test)]
 mod glyphs;
@@ -89,6 +90,7 @@ pub fn plugin(app: &mut App) {
             account_ui::plugin,
             textform::plugin,
             queue::plugin,
+            desktop::plugin,
             menu::plugin,
             ranking::plugin,
             hud::plugin,

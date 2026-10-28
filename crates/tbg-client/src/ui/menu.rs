@@ -45,9 +45,11 @@ fn refresh(mut commands: Commands, account: Res<Account>, roots: Query<Entity, W
 fn hide_under_panels(
     ranking: Res<Ranking>,
     account: Res<Account>,
+    desktop: Res<super::desktop::DesktopLobby>,
     mut roots: Query<&mut Visibility, With<MenuRoot>>,
 ) {
-    let modal = ranking.open || matches!(account.screen, AccountScreen::SaveKey { .. });
+    let modal =
+        desktop.0 || ranking.open || matches!(account.screen, AccountScreen::SaveKey { .. });
     let want = if modal {
         Visibility::Hidden
     } else {

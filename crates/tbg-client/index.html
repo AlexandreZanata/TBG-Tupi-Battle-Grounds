@@ -9,6 +9,8 @@
   <link data-trunk rel="copy-dir" href="ranking" />
   <link data-trunk rel="copy-dir" href="diagnostics" />
   <script src="diagnostics/measure.js"></script>
+  <link rel="stylesheet" href="assets/lobby/lobby.css">
+  <script defer src="assets/lobby/lobby.js"></script>
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2b36; touch-action: none; }
     canvas#bevy { display: block; width: 100%; height: 100%; outline: none; }
@@ -28,6 +30,60 @@
 </head>
 <body>
 <canvas id="bevy"></canvas>
+
+<div id="tbg-lobby" hidden data-ready="false" data-screen="off" aria-label="Tupi Battle Grounds lobby">
+  <header class="lobby-header">
+    <div class="brand" aria-label="Tupi Battle Grounds"><img data-art="logo" alt="Tupi Battle Grounds" width="300" height="120"></div>
+    <div class="player-chip metal-panel">
+      <svg class="icon"><use href="assets/lobby/icons.svg#shield"/></svg>
+      <div><strong data-player-name>Guest</strong><span data-member hidden><i class="gold">◆</i> <b data-rating>1000</b></span>
+        <span data-guest class="guest-links"><button data-action="register">Create account</button><button data-action="login">I have a key</button></span></div>
+    </div>
+    <nav class="lobby-tabs" aria-label="Main navigation">
+      <button class="active" aria-current="page" data-action="menu"><svg class="icon"><use href="assets/lobby/icons.svg#home"/></svg><span>Lobby</span></button>
+      <button disabled title="Coming later"><svg class="icon"><use href="assets/lobby/icons.svg#arcana"/></svg><span>Arcanas <small>Locked</small></span></button>
+      <button disabled title="Coming later"><svg class="icon"><use href="assets/lobby/icons.svg#helmet"/></svg><span>Troops <small>Locked</small></span></button>
+      <button data-action="ranking"><svg class="icon"><use href="assets/lobby/icons.svg#trophy"/></svg><span>Ranking</span></button>
+      <button data-dialog="settings"><svg class="icon"><use href="assets/lobby/icons.svg#settings"/></svg><span>Settings</span></button>
+    </nav>
+    <button class="sound metal-panel" data-action="sound" aria-label="Toggle sound"><svg class="icon"><use href="assets/lobby/icons.svg#sound"/></svg><span>Sound: <b data-sound>ON</b></span></button>
+  </header>
+  <main class="mode-panel wood-panel" aria-label="Choose a game mode">
+    <span class="corner top-left"></span><span class="corner top-right"></span><span class="corner bottom-left"></span><span class="corner bottom-right"></span>
+    <button class="mode ranked" data-ranked data-action="register"><svg class="icon"><use href="assets/lobby/icons.svg#swords"/></svg><span><strong>Play Online</strong><small data-ranked-hint>Create account to unlock Ranked</small></span><span class="chevron" aria-hidden="true">›</span></button>
+    <button class="mode" data-action="quick"><svg class="icon"><use href="assets/lobby/icons.svg#shield"/></svg><span><strong>Casual</strong><small>Quick Match</small></span><span class="chevron" aria-hidden="true">›</span></button>
+    <button class="mode" data-dialog="friend"><svg class="icon"><use href="assets/lobby/icons.svg#friends"/></svg><span><strong>Play with a Friend</strong><small>Create or join a room</small></span><span class="chevron" aria-hidden="true">›</span></button>
+    <button class="mode" data-action="practice"><svg class="icon"><use href="assets/lobby/icons.svg#bot"/></svg><span><strong>Practice vs Bot</strong><small>Train your strategy</small></span><span class="chevron" aria-hidden="true">›</span></button>
+  </main>
+  <section class="profile-panel metal-panel" aria-label="Your ranked record">
+    <div class="profile-summary"><img data-art="emblem" width="120" height="130" alt="Player crest"><div><h2 data-rank>Unranked</h2><p class="rating-line"><svg class="icon"><use href="assets/lobby/icons.svg#trophy"/></svg><b data-rating>—</b></p><p class="profile-note" data-record-note>Play Ranked to build your record</p></div></div>
+    <div class="record"><div>Wins<strong data-wins>—</strong></div><div>Losses<strong data-losses>—</strong></div><div>Win rate<strong data-win-rate>—</strong></div></div>
+    <p class="stats-status" aria-live="polite" data-stats-status>Create an account to compete</p>
+  </section>
+  <section class="feature-cards" aria-label="Explore the battlegrounds">
+    <button class="feature metal-panel" disabled><img data-art="arcanas" alt="" width="300" height="190"><span class="feature-copy"><strong>Arcanas</strong><small>Coming later</small><span class="feature-lock">Locked</span></span></button>
+    <button class="feature metal-panel" disabled><img data-art="troops" alt="" width="300" height="190"><span class="feature-copy"><strong>Troops</strong><small>Meet the units · Coming later</small><span class="feature-lock">Locked</span></span></button>
+    <button class="feature metal-panel" data-action="ranking"><img data-art="ranking" alt="" width="300" height="190"><span class="feature-copy"><strong>Ranking <i aria-hidden="true">›</i></strong><small>Find your place among the best</small></span></button>
+  </section>
+  <aside class="news-panel metal-panel" aria-label="News">
+    <h2><svg class="icon"><use href="assets/lobby/icons.svg#scroll"/></svg>News from the grounds</h2>
+    <img data-art="news" alt="A medieval battleground" width="500" height="135">
+    <h3 data-news-title>Welcome to Tupi Battle Grounds!</h3><p data-news-body>Real-time 1v1 strategy. Build your BattleLine, evolve your units, and destroy the enemy Stronghold.</p>
+    <div class="news-controls"><button data-news="-1" aria-label="Previous news">‹</button><span data-news-page aria-live="polite">1 / 3</span><button data-news="1" aria-label="Next news">›</button></div>
+  </aside>
+  <dialog id="lobby-friend" class="lobby-dialog metal-panel" aria-labelledby="friend-title">
+    <button class="dialog-close" data-close aria-label="Close friend panel">×</button><p class="eyebrow">Casual · Private room</p><h2 id="friend-title">Gather your rival</h2><p>Share a room link, or enter a code from a friend.</p>
+    <button class="dialog-primary" data-action="create">Create a room</button><div class="divider">or join an existing room</div>
+    <form id="lobby-join"><label for="lobby-room">Room code</label><input id="lobby-room" required minlength="6" maxlength="6" pattern="[A-Za-z0-9]{6}" placeholder="ABCDEF" autocomplete="off" spellcheck="false"><button class="dialog-primary" type="submit">Join room</button></form>
+  </dialog>
+  <dialog id="lobby-settings" class="lobby-dialog metal-panel" aria-labelledby="settings-title">
+    <button class="dialog-close" data-close aria-label="Close settings">×</button><p class="eyebrow">Your camp</p><h2 id="settings-title">Settings</h2>
+    <button class="dialog-primary" data-action="sound">Sound: <b data-sound>ON</b></button>
+    <div data-member hidden><p>Your saved key gives access to your account.</p><button class="dialog-primary" data-action="copy-key">Copy account key</button><button class="dialog-primary" data-action="download-key">Download account key</button><button class="dialog-primary danger" data-action="logout">Log out</button></div>
+    <div data-guest><button class="dialog-primary" data-action="register">Create account</button><button class="dialog-primary" data-action="login">I have a key</button></div>
+  </dialog>
+</div>
+
 <form id="tbg-form" hidden>
   <label id="tbg-form-label" for="tbg-input">Name</label>
   <input id="tbg-input" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false">
