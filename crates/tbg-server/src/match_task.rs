@@ -14,6 +14,7 @@ use tbg_core::{Event, MatchState, Seat};
 
 use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd, MATCH_QUEUE};
 use crate::metrics::Metrics;
+use crate::records::Records;
 use crate::Config;
 
 mod report;
@@ -30,6 +31,8 @@ pub(super) struct SeatStats {
     pub(super) rejections: u32,
     pub(super) rtts: Vec<u16>,
     pub(super) reattached: u32,
+    pub(super) purchases: std::collections::BTreeMap<String, u32>,
+    pub(super) evolutions: u32,
 }
 
 pub(super) struct Match {
@@ -47,6 +50,7 @@ pub(crate) fn spawn(
     lobby: mpsc::Sender<LobbyCmd>,
     config: Arc<Config>,
     metrics: Arc<Metrics>,
+    records: Option<Arc<Records>>,
 ) -> mpsc::Sender<MatchCmd> {
     let (tx, rx) = mpsc::channel(MATCH_QUEUE);
     let m = Match {
@@ -57,7 +61,7 @@ pub(crate) fn spawn(
         events: Vec::new(),
         metrics,
     };
-    tokio::spawn(run(m, rx, lobby, config, seed));
+    tokio::spawn(run(m, rx, lobby, config, seed, records));
     tx
 }
 
@@ -67,6 +71,7 @@ async fn run(
     lobby: mpsc::Sender<LobbyCmd>,
     config: Arc<Config>,
     seed: u64,
+    records: Option<Arc<Records>>,
 ) {
     m.metrics.matches_running.fetch_add(1, Relaxed);
     let started = Instant::now();
@@ -129,7 +134,7 @@ async fn run(
             tokens: m.players.each_ref().map(|p| p.token),
         })
         .await;
-    m.log_end(
+    let line = m.log_end(
         seed,
         started,
         (step_ns / ticks) as u64 / 1000,
@@ -137,6 +142,15 @@ async fn run(
         late,
         max_late as u64,
     );
+    if let Some(db) = records {
+        // Off the tick loop; a failed insert is logged, never fatal.
+        let _ = tokio::task::spawn_blocking(move || {
+            if let Err(e) = db.insert(&line) {
+                tracing::error!("match record insert failed: {e}");
+            }
+        })
+        .await;
+    }
 }
 
 impl Match {
@@ -144,7 +158,11 @@ impl Match {
         match cmd {
             MatchCmd::Intent { seat, seq, intent } => {
                 self.stats[seat.index()].intents += 1;
-                if let Err(reason) = self.state.apply_intention(seat, seq, intent) {
+                let result = self.state.apply_intention(seat, seq, intent);
+                if result.is_ok() {
+                    self.count_success(seat, intent);
+                }
+                if let Err(reason) = result {
                     self.stats[seat.index()].rejections += 1;
                     self.metrics.rejections.fetch_add(1, Relaxed);
                     self.send(seat, ServerMsg::Rejected { seq, reason });
@@ -171,6 +189,18 @@ impl Match {
                 self.send(seat, ServerMsg::View(self.state.view_for(seat, &[])));
             }
             MatchCmd::Rtt { seat, ms } => self.stats[seat.index()].rtts.push(ms),
+        }
+    }
+
+    fn count_success(&mut self, seat: Seat, intent: tbg_core::PlayerIntention) {
+        let stats = &mut self.stats[seat.index()];
+        match intent {
+            tbg_core::PlayerIntention::Purchase { .. } => {
+                if let Some(u) = self.state.units.last() {
+                    *stats.purchases.entry(format!("{:?}", u.kind)).or_default() += 1;
+                }
+            }
+            tbg_core::PlayerIntention::Evolve { .. } => stats.evolutions += 1,
         }
     }
 

@@ -1,0 +1,21 @@
+[Unit]
+Description=TBG game server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=tbg
+Group=tbg
+WorkingDirectory=/var/lib/tbg
+Environment=TBG_ADDR=127.0.0.1:8080
+Environment=TBG_DB=/var/lib/tbg/tbg.sqlite3
+ExecStart=/opt/tbg/bin/tbg-server
+Restart=always
+RestartSec=2
+KillSignal=SIGTERM
+TimeoutStopSec=330
+LimitNOFILE=65536
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

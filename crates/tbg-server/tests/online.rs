@@ -229,3 +229,51 @@ async fn private_room_pairs_owner_and_guest() {
     assert_eq!(seats.len(), 2, "both got MatchStart: {starts:?}");
     assert_ne!(seats[0], seats[1]);
 }
+
+#[tokio::test]
+async fn records_insert_and_count() {
+    // P5: one row per finished match, with per-seat JSON.
+    let dir = std::env::temp_dir().join(format!("tbg-records-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let db = dir.join("test.sqlite3");
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let url = format!("ws://{}/ws", listener.local_addr().unwrap());
+    let config = Config {
+        tick_ms: 5,
+        max_per_ip: 1_000,
+        db: Some(db.clone()),
+        ..Config::default()
+    };
+    tokio::spawn(tbg_server::run(config, listener));
+    let (a, b) = tokio::join!(play_one(fast(&url), 11), play_one(fast(&url), 12));
+    assert!(a.completed && b.completed);
+    tokio::time::sleep(Duration::from_millis(300)).await;
+    let records = tbg_server::records::Records::open(&db).unwrap();
+    assert_eq!(records.count().unwrap(), 1);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[tokio::test]
+async fn draining_server_refuses_new_matches() {
+    // P5 graceful shutdown: no new matches once draining.
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let url = format!("ws://{}/ws", listener.local_addr().unwrap());
+    let shared = tbg_server::Shared::default();
+    shared
+        .draining
+        .store(true, std::sync::atomic::Ordering::Relaxed);
+    let config = Config {
+        tick_ms: 5,
+        ..Config::default()
+    };
+    tokio::spawn(tbg_server::run_with(config, listener, shared));
+    let mut ws = connect(&url).await;
+    hello(&mut ws).await;
+    send(&mut ws, &ClientMsg::QuickMatch).await;
+    assert_eq!(
+        recv(&mut ws).await,
+        Some(ServerMsg::Error {
+            code: ErrorCode::ServerFull
+        })
+    );
+}

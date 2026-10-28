@@ -1,18 +1,19 @@
 //! One task owning sessions, the quick-match queue, and private rooms.
 //! Pairs players and spawns match tasks. Never awaits another task.
 
-use std::sync::atomic::Ordering::Relaxed;
+use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use tokio::sync::mpsc;
 
-use tbg_core::protocol::{ClientMsg, RoomCode, Token};
+use tbg_core::protocol::{ClientMsg, ErrorCode, RoomCode, ServerMsg, Token};
 use tbg_core::Seat;
 
 use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd};
 use crate::metrics::Metrics;
 use crate::names::{display_name, random_bytes};
+use crate::records::Records;
 use crate::Config;
 
 mod matchmaking;
@@ -44,6 +45,8 @@ pub(super) struct Lobby {
     pub(super) self_tx: mpsc::Sender<LobbyCmd>,
     pub(super) config: Arc<Config>,
     pub(super) metrics: Arc<Metrics>,
+    pub(super) records: Option<Arc<Records>>,
+    pub(super) draining: Arc<AtomicBool>,
 }
 
 pub(crate) async fn run(
@@ -51,6 +54,8 @@ pub(crate) async fn run(
     self_tx: mpsc::Sender<LobbyCmd>,
     config: Arc<Config>,
     metrics: Arc<Metrics>,
+    records: Option<Arc<Records>>,
+    draining: Arc<AtomicBool>,
 ) {
     let mut lobby = Lobby {
         sessions: Vec::new(),
@@ -59,6 +64,8 @@ pub(crate) async fn run(
         self_tx,
         config,
         metrics,
+        records,
+        draining,
     };
     let mut cleanup = tokio::time::interval(Duration::from_secs(10));
     loop {
@@ -141,10 +148,21 @@ impl Lobby {
     }
 
     fn client(&mut self, token: Token, msg: ClientMsg) {
+        let draining = self.draining.load(Relaxed);
         let Some(s) = self.session(&token) else {
             return;
         };
         if matches!(s.state, SessionState::InMatch { .. }) {
+            return;
+        }
+        let wants_match = matches!(
+            msg,
+            ClientMsg::QuickMatch | ClientMsg::CreateRoom | ClientMsg::JoinRoom { .. }
+        );
+        if wants_match && draining {
+            // Shutting down: running matches finish, no new ones start.
+            let code = ErrorCode::ServerFull;
+            send(&s.conn, ConnEvent::Send(ServerMsg::Error { code }));
             return;
         }
         match msg {

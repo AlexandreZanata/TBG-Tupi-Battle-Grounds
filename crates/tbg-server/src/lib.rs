@@ -3,7 +3,7 @@
 
 use std::collections::HashMap;
 use std::net::{IpAddr, SocketAddr};
-use std::sync::atomic::AtomicU64;
+use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::{Arc, Mutex};
 
 use axum::extract::{ConnectInfo, State};
@@ -21,6 +21,7 @@ mod lobby;
 mod match_task;
 pub mod metrics;
 mod names;
+pub mod records;
 mod ws;
 
 pub use config::Config;
@@ -36,9 +37,38 @@ pub(crate) struct AppState {
     pub next_conn_id: Arc<AtomicU64>,
 }
 
+/// Handles the binary keeps to drive graceful shutdown.
+#[derive(Clone, Default)]
+pub struct Shared {
+    pub metrics: Arc<Metrics>,
+    /// When set, no new matches start; running ones finish.
+    pub draining: Arc<AtomicBool>,
+}
+
 /// Serve until the listener fails. Tests bind `127.0.0.1:0` and call this.
 pub async fn run(config: Config, listener: TcpListener) -> std::io::Result<()> {
-    let metrics = Arc::new(Metrics::default());
+    run_with(config, listener, Shared::default()).await
+}
+
+pub async fn run_with(
+    config: Config,
+    listener: TcpListener,
+    shared: Shared,
+) -> std::io::Result<()> {
+    let metrics = shared.metrics.clone();
+    let records = config
+        .db
+        .as_ref()
+        .and_then(|path| match records::Records::open(path) {
+            Ok(r) => Some(Arc::new(r)),
+            Err(e) => {
+                tracing::error!(
+                    "match records disabled, cannot open {}: {e}",
+                    path.display()
+                );
+                None
+            }
+        });
     let config = Arc::new(config);
     let (lobby_tx, lobby_rx) = mpsc::channel(chan::LOBBY_QUEUE);
     tokio::spawn(lobby::run(
@@ -46,6 +76,8 @@ pub async fn run(config: Config, listener: TcpListener) -> std::io::Result<()> {
         lobby_tx.clone(),
         config.clone(),
         metrics.clone(),
+        records,
+        shared.draining.clone(),
     ));
     let state = AppState {
         lobby: lobby_tx,

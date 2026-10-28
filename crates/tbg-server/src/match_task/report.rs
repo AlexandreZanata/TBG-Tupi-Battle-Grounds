@@ -25,7 +25,7 @@ impl Match {
         step_us_max: u64,
         late: u32,
         max_late_ms: u64,
-    ) {
+    ) -> serde_json::Value {
         let outcome = self.state.outcome;
         let seats: Vec<serde_json::Value> = self
             .stats
@@ -35,6 +35,7 @@ impl Match {
                 serde_json::json!({
                     "rtt_p50": percentile(&s.rtts, 0.5), "rtt_p95": percentile(&s.rtts, 0.95),
                     "intents": s.intents, "rejections": s.rejections, "reconnects": s.reattached,
+                    "purchases": s.purchases, "evolutions": s.evolutions,
                 })
             })
             .collect();
@@ -46,5 +47,6 @@ impl Match {
             "late_ticks": late, "max_lateness_ms": max_late_ms,
         });
         tracing::info!(target: "match_end", "{line}");
+        line
     }
 }
