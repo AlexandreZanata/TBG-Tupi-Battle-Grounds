@@ -44,7 +44,6 @@ pub const MUSHROOM: Color = hex(0xC85C5C);
 pub const GRASS: Color = hex(0x7BB661);
 pub const LANE: Color = hex(0xC9A46A);
 pub const LANE_DARK: Color = hex(0xB8925A);
-pub const CLIFF: Color = hex(0x8B6B4A);
 pub const WATER: Color = hex(0x3FA7B5);
 pub const ROCK: Color = hex(0x8C8A86);
 pub const STONE: Color = hex(0xB9B2A3);
