@@ -77,6 +77,11 @@ pub(super) fn handle(
         }
         ServerMsg::Error { code } => return Err(format!("server error {code:?}")),
         ServerMsg::Queued | ServerMsg::RoomCreated { .. } | ServerMsg::RoomNotFound => {}
+        // P11: bots stay guests; account replies never arrive here.
+        ServerMsg::Registered { .. }
+        | ServerMsg::LoggedIn { .. }
+        | ServerMsg::LoggedOut
+        | ServerMsg::AccountError { .. } => {}
     }
     Ok(None)
 }

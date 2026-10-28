@@ -13,7 +13,7 @@ use tbg_core::Seat;
 
 use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd, LOBBY_QUEUE};
 use crate::metrics::Metrics;
-use crate::records::Records;
+use crate::store::Store;
 use crate::Config;
 
 mod matchmaking;
@@ -49,7 +49,7 @@ pub(super) struct Lobby {
     pub(super) self_tx: mpsc::Sender<LobbyCmd>,
     pub(super) config: Arc<Config>,
     pub(super) metrics: Arc<Metrics>,
-    pub(super) records: Option<Arc<Records>>,
+    pub(super) store: Option<Arc<Store>>,
     pub(super) draining: Arc<AtomicBool>,
 }
 
@@ -58,7 +58,7 @@ pub(crate) async fn run(
     self_tx: mpsc::Sender<LobbyCmd>,
     config: Arc<Config>,
     metrics: Arc<Metrics>,
-    records: Option<Arc<Records>>,
+    store: Option<Arc<Store>>,
     draining: Arc<AtomicBool>,
 ) {
     let mut lobby = Lobby {
@@ -69,7 +69,7 @@ pub(crate) async fn run(
         self_tx,
         config,
         metrics,
-        records,
+        store,
         draining,
     };
     let mut cleanup = tokio::time::interval(Duration::from_secs(10));

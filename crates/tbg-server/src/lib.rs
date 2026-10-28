@@ -22,7 +22,7 @@ mod lobby;
 mod match_task;
 pub mod metrics;
 mod names;
-pub mod records;
+pub mod store;
 mod ws;
 
 pub use config::Config;
@@ -57,10 +57,10 @@ pub async fn run_with(
     shared: Shared,
 ) -> std::io::Result<()> {
     let metrics = shared.metrics.clone();
-    let records = config
+    let store = config
         .db
         .as_ref()
-        .and_then(|path| match records::Records::open(path) {
+        .and_then(|path| match store::Store::open(path) {
             Ok(r) => Some(Arc::new(r)),
             Err(e) => {
                 tracing::error!(
@@ -77,7 +77,7 @@ pub async fn run_with(
         lobby_tx.clone(),
         config.clone(),
         metrics.clone(),
-        records,
+        store,
         shared.draining.clone(),
     ));
     let state = AppState {

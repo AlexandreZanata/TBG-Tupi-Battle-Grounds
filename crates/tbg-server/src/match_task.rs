@@ -13,7 +13,7 @@ use tbg_core::{Event, MatchState, Seat};
 
 use crate::chan::{ConnHandle, LobbyCmd, MatchCmd, MATCH_QUEUE};
 use crate::metrics::Metrics;
-use crate::records::Records;
+use crate::store::Store;
 use crate::Config;
 
 mod report;
@@ -44,7 +44,7 @@ pub(crate) fn spawn(
     lobby: mpsc::Sender<LobbyCmd>,
     config: Arc<Config>,
     metrics: Arc<Metrics>,
-    records: Option<Arc<Records>>,
+    store: Option<Arc<Store>>,
 ) -> mpsc::Sender<MatchCmd> {
     let (tx, rx) = mpsc::channel(MATCH_QUEUE);
     let m = Match {
@@ -56,7 +56,7 @@ pub(crate) fn spawn(
         applied: [false; 2],
         metrics,
     };
-    tokio::spawn(run(m, rx, lobby, config, seed, records));
+    tokio::spawn(run(m, rx, lobby, config, seed, store));
     tx
 }
 
@@ -66,7 +66,7 @@ async fn run(
     lobby: mpsc::Sender<LobbyCmd>,
     config: Arc<Config>,
     seed: u64,
-    records: Option<Arc<Records>>,
+    store: Option<Arc<Store>>,
 ) {
     m.metrics.matches_running.fetch_add(1, Relaxed);
     let started = Instant::now();
@@ -144,14 +144,9 @@ async fn run(
         late,
         max_late as u64,
     );
-    if let Some(db) = records {
-        // Off the tick loop; a failed insert is logged, never fatal.
-        let _ = tokio::task::spawn_blocking(move || {
-            if let Err(e) = db.insert(&line) {
-                tracing::error!("match record insert failed: {e}");
-            }
-        })
-        .await;
+    // P11: fire-and-forget over the store channel; never blocks the loop.
+    if let Some(db) = store {
+        db.insert_match(&line);
     }
 }
 

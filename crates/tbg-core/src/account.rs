@@ -34,9 +34,35 @@ pub const RESERVED_NAMES: &[&str] = &[
 // over-block (any name containing them); the owner must review this list
 // (P11 report) before launch.
 pub const BLOCKED_SUBSTRINGS: &[&str] = &[
-    "fuck", "shit", "dick", "pussy", "cunt", "whore", "slut", "bitch", "bastard", "asshole",
-    "nazi", "hitler", "porn", "pedo", "rape", "retard", "porra", "caralho", "merda", "puta",
-    "foda", "bosta", "corno", "viado", "arrombado", "babaca", "idiota", "imbecil", "otario",
+    "fuck",
+    "shit",
+    "dick",
+    "pussy",
+    "cunt",
+    "whore",
+    "slut",
+    "bitch",
+    "bastard",
+    "asshole",
+    "nazi",
+    "hitler",
+    "porn",
+    "pedo",
+    "rape",
+    "retard",
+    "porra",
+    "caralho",
+    "merda",
+    "puta",
+    "foda",
+    "bosta",
+    "corno",
+    "viado",
+    "arrombado",
+    "babaca",
+    "idiota",
+    "imbecil",
+    "otario",
     "vagabunda",
 ];
 
@@ -49,7 +75,9 @@ pub fn check_name(name: &str) -> Result<(), AccountError> {
     }
     let bytes = name.as_bytes();
     if !bytes[0].is_ascii_alphabetic()
-        || !bytes.iter().all(|b| b.is_ascii_alphanumeric() || *b == b'_')
+        || !bytes
+            .iter()
+            .all(|b| b.is_ascii_alphanumeric() || *b == b'_')
     {
         return Err(AccountError::NameInvalid);
     }
@@ -57,7 +85,10 @@ pub fn check_name(name: &str) -> Result<(), AccountError> {
     if RESERVED_NAMES.contains(&lower.as_str()) {
         return Err(AccountError::NameInvalid);
     }
-    if BLOCKED_SUBSTRINGS.iter().any(|s| normalize(&lower).contains(s)) {
+    if BLOCKED_SUBSTRINGS
+        .iter()
+        .any(|s| normalize(&lower).contains(s))
+    {
         return Err(AccountError::NameInvalid);
     }
     Ok(())
