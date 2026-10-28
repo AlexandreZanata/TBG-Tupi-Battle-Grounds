@@ -48,7 +48,7 @@ impl Limits {
         )
     }
 
-    /// Drop empty logs; call about once a minute (the lobby cleanup tick).
+    /// Drop expired entries and empty logs; at most once a minute.
     pub fn sweep(&mut self, now: Instant) {
         if self
             .last_sweep
@@ -57,10 +57,19 @@ impl Limits {
             return;
         }
         self.last_sweep = Some(now);
-        self.register.retain(|_, v| !v.is_empty());
-        self.login.retain(|_, v| !v.is_empty());
-        self.api.retain(|_, v| !v.is_empty());
+        // Prune expired entries first: an IP seen once and never again
+        // would otherwise keep a one-entry log forever.
+        prune(&mut self.register, Duration::from_secs(3600), now);
+        prune(&mut self.login, Duration::from_secs(60), now);
+        prune(&mut self.api, Duration::from_secs(60), now);
     }
+}
+
+fn prune(logs: &mut HashMap<IpAddr, Vec<Instant>>, window: Duration, now: Instant) {
+    logs.retain(|_, v| {
+        v.retain(|t| now.saturating_duration_since(*t) < window);
+        !v.is_empty()
+    });
 }
 
 fn check_log(log: &mut Vec<Instant>, max: u32, window: Duration, now: Instant) -> bool {
