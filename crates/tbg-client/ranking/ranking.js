@@ -65,7 +65,7 @@ async function board() {
     const name = el('td', undefined, 'name');
     name.append(playerLink(r.name));
     tr.append(el('td', r.rank, 'num'), name, el('td', r.rating, 'num'),
-      el('td', r.games, 'num'), el('td', record(r), 'num'), el('td', pct(r.win_rate), 'num'));
+      el('td', r.games, 'num opt'), el('td', record(r), 'num'), el('td', pct(r.win_rate), 'num'));
     body.append(tr);
   }
   if (data.total === 0) {

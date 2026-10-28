@@ -49,6 +49,8 @@
 }
 
 * { box-sizing: border-box; }
+/* `display` rules below must never un-hide an element. */
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -122,6 +124,7 @@ h2 { font-size: var(--font-size); margin: 0 0 var(--space-3); }
 
 .status { color: var(--muted); margin: 0 0 var(--space-3); min-height: 1.45em; }
 .status.error { color: var(--loss); }
+.status:empty { display: none; }
 
 .table-wrap { overflow-x: auto; }
 
@@ -137,7 +140,7 @@ th, td { padding: var(--space-2); text-align: left; white-space: nowrap; }
 th { color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
 tbody tr:nth-child(even) { background: var(--surface-alt); }
 .num { text-align: right; }
-td.name { white-space: normal; word-break: break-all; }
+td.name { white-space: normal; overflow-wrap: anywhere; }
 .win { color: var(--win); font-weight: 600; }
 .loss { color: var(--loss); font-weight: 600; }
 
@@ -189,6 +192,12 @@ td.name { white-space: normal; word-break: break-all; }
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Narrow phones: names get the room; games stay on the player page. */
+@media (max-width: 419px) {
+  .opt { display: none; }
+  th, td { padding: var(--space-2) 6px; }
 }
 
 @media (min-width: 600px) {

@@ -39,8 +39,8 @@ matches to finish (graceful shutdown).
 | Rollback | `git checkout <previous tag>` then `bash deploy/deploy.sh` |
 
 Public ranking (P13): Caddy proxies `/api/*` to the server and serves the
-static pages at `https://<domain>/ranking/` (HTML `no-cache`, CSS/JS
-5 minutes; only the hashed WASM bundle is immutable). Check after a deploy:
+static pages at `https://<domain>/ranking/` (all `no-cache`, revalidated by
+ETag; only the hashed WASM bundle is immutable). Check after a deploy:
 
 ```bash
 curl -s https://<domain>/api/leaderboard?limit=3

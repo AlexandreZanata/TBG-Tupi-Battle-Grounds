@@ -289,8 +289,8 @@ D-22); until each unit's phase lands, the description below stays true.
   immutable cache headers for hashed files, and proxies `/ws`, `/health`,
   and `/api/*` to `tbg-server` on localhost. The public ranking pages
   (`/ranking/`, `/ranking/player.html?name=…`, P13) are plain HTML + CSS +
-  vanilla JS copied by Trunk (no framework, about 17 KB); their HTML is
-  `no-cache`, their CSS/JS 5 minutes (not content-hashed).
+  vanilla JS copied by Trunk (no framework, about 15 KB); they are not
+  content-hashed, so all of them are `no-cache` (ETag revalidation).
 - `deploy/deploy.sh` (P5) builds the WASM bundle locally, rsyncs source
   and bundle, builds `tbg-server` on the VPS (avoids glibc mismatches),
   installs it, and restarts the systemd unit. `tbg-server` listens on
