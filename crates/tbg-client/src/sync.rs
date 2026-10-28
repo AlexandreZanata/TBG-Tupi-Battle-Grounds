@@ -6,16 +6,16 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use tbg_core::content::LANE_LEN;
-use tbg_core::protocol::ServerMsg;
 use tbg_core::{Event, MatchView, Outcome, Seat, UnitId};
 
-use crate::link::MatchLink;
-use crate::ui::Toasts;
 use crate::visuals::{self, UnitLook, UnitVisual, VisualAssets};
 
 mod events;
+mod messages;
 use crate::GameState;
 use events::apply_event;
+use messages::poll_link;
+pub use messages::{QueueInfo, ViewGaps};
 
 #[derive(Resource, Default)]
 pub struct MatchInfo {
@@ -29,10 +29,10 @@ pub struct MatchInfo {
 pub struct LatestView(pub Option<MatchView>);
 
 #[derive(Resource, Default)]
-struct ViewBuffer {
-    prev: Option<(f64, MatchView)>,
-    last: Option<(f64, MatchView)>,
-    events: Vec<Event>,
+pub(crate) struct ViewBuffer {
+    pub prev: Option<(f64, MatchView)>,
+    pub last: Option<(f64, MatchView)>,
+    pub events: Vec<Event>,
 }
 
 #[derive(Resource, Default)]
@@ -43,6 +43,8 @@ pub fn plugin(app: &mut App) {
         .init_resource::<LatestView>()
         .init_resource::<ViewBuffer>()
         .init_resource::<UnitEntities>()
+        .init_resource::<QueueInfo>()
+        .init_resource::<ViewGaps>()
         .add_systems(Update, poll_link)
         .add_systems(
             Update,
@@ -51,44 +53,6 @@ pub fn plugin(app: &mut App) {
                 .run_if(in_state(GameState::InMatch)),
         )
         .add_systems(OnExit(GameState::InMatch), clear_units);
-}
-
-fn poll_link(
-    mut link: NonSendMut<MatchLink>,
-    time: Res<Time>,
-    mut info: ResMut<MatchInfo>,
-    mut latest: ResMut<LatestView>,
-    mut buffer: ResMut<ViewBuffer>,
-    mut toasts: ResMut<Toasts>,
-    mut next: ResMut<NextState<GameState>>,
-) {
-    for msg in link.poll() {
-        match msg {
-            ServerMsg::MatchStart { you, opponent } => {
-                *info = MatchInfo {
-                    you: Some(you),
-                    opponent,
-                    ..default()
-                };
-                *buffer = ViewBuffer::default();
-                latest.0 = None;
-                next.set(GameState::InMatch);
-            }
-            ServerMsg::View(view) => {
-                info.last_tick = view.tick;
-                buffer.events.extend(view.events.iter().copied());
-                latest.0 = Some(view.clone());
-                buffer.prev = buffer.last.take();
-                buffer.last = Some((time.elapsed_secs_f64(), view));
-            }
-            ServerMsg::Rejected { reason, .. } => toasts.push(crate::ui::rejection_text(reason)),
-            ServerMsg::MatchEnd { outcome } => {
-                info.outcome = Some(outcome);
-                next.set(GameState::Result);
-            }
-            _ => {}
-        }
-    }
 }
 
 /// Lane x in milli-tiles → world x, mirrored for seat B.

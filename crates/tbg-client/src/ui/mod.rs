@@ -1,29 +1,33 @@
-//! Screens and HUD (`bevy_ui`). Anything clickable carries a `UiAction`;
-//! one observer turns clicks into actions and one system applies them.
+//! Screens and HUD (`bevy_ui`). Anything tappable carries a `UiAction`;
+//! `input.rs` turns taps into actions and `actions.rs` applies them.
 
 use bevy::prelude::*;
-use tbg_core::protocol::ClientMsg;
-use tbg_core::{PlayerIntention, Rejection, UnitId};
+use tbg_core::protocol::RoomCode;
+use tbg_core::{Rejection, UnitId};
 
-use crate::link::MatchLink;
-use crate::local::LocalMatch;
-use crate::GameState;
-
+mod actions;
 mod evolve;
 mod hud;
 mod hud_update;
 mod input;
 mod menu;
+mod queue;
 mod result;
 mod toast;
 
-pub use toast::Toasts;
+pub use actions::ActionQueue;
+pub use toast::{Banner, Toasts};
 
 #[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum UiAction {
     /// Greyed-out button: clicks do nothing.
     Disabled,
     Practice,
+    Quick,
+    CreateRoom,
+    JoinRoom(RoomCode),
+    Cancel,
+    CopyLink,
     PlayAgain,
     ToMenu,
     Buy(u8),
@@ -35,12 +39,6 @@ pub enum UiAction {
     CloseEvolve,
 }
 
-#[derive(Resource, Default)]
-struct ActionQueue(Vec<UiAction>);
-
-#[derive(Resource, Default)]
-struct IntentSeq(u32);
-
 /// Shop card waiting for the view that confirms (or rejects) its purchase.
 #[derive(Resource, Default)]
 pub struct PendingBuy(pub Option<(u8, u32)>);
@@ -51,58 +49,17 @@ pub const DISABLED: Color = Color::srgb(0.30, 0.32, 0.35);
 pub const TEXT: Color = Color::srgb(0.96, 0.95, 0.90);
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<ActionQueue>()
-        .init_resource::<IntentSeq>()
-        .init_resource::<PendingBuy>()
-        .add_systems(Update, (input::taps, apply_actions, scale_ui).chain())
+    app.init_resource::<PendingBuy>()
+        .add_systems(Update, (input::taps, actions::apply, scale_ui).chain())
         .add_plugins((
+            actions::plugin,
+            queue::plugin,
             menu::plugin,
             hud::plugin,
             evolve::plugin,
             result::plugin,
             toast::plugin,
         ));
-}
-
-fn apply_actions(
-    mut queue: ResMut<ActionQueue>,
-    mut link: NonSendMut<MatchLink>,
-    mut next: ResMut<NextState<GameState>>,
-    mut seq: ResMut<IntentSeq>,
-    mut pending: ResMut<PendingBuy>,
-    mut selected: ResMut<evolve::Selected>,
-    time: Res<Time>,
-) {
-    for action in std::mem::take(&mut queue.0) {
-        let mut send = |intent| {
-            seq.0 += 1;
-            link.send(ClientMsg::Intent { seq: seq.0, intent });
-            seq.0
-        };
-        match action {
-            UiAction::Practice | UiAction::PlayAgain => {
-                let seed = time.elapsed().as_nanos() as u64 ^ 0x9e37_79b9_7f4a_7c15;
-                *link = MatchLink::Local(Box::new(LocalMatch::new(seed)));
-                pending.0 = None;
-                selected.0 = None;
-            }
-            UiAction::ToMenu => {
-                *link = MatchLink::Idle;
-                next.set(GameState::Menu);
-            }
-            UiAction::Buy(offer) => {
-                let s = send(PlayerIntention::Purchase { offer });
-                pending.0 = Some((offer, s));
-            }
-            UiAction::SelectUnit(id) => selected.0 = Some(id),
-            UiAction::Evolve { unit, branch } => {
-                send(PlayerIntention::Evolve { unit, branch });
-                selected.0 = None;
-            }
-            UiAction::CloseEvolve => selected.0 = None,
-            UiAction::Disabled => {}
-        }
-    }
 }
 
 /// Scale the whole UI with the smaller window side (phones ≈ 0.9, desktop 1.5).

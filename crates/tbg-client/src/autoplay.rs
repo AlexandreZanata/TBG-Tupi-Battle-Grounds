@@ -1,6 +1,6 @@
-//! `?autoplay`: the `tbg-core` bot plays for this client through the normal
-//! `MatchLink` path (dev and validation aid; P4 uses it for two-browser
-//! matches without clicking).
+//! `?autoplay[=quick|practice]`: the `tbg-core` bot plays for this client
+//! through the normal `MatchLink` path. With a mode it also starts that
+//! match from the menu. Dev and validation aid (two-browser matches).
 
 use bevy::prelude::*;
 use tbg_core::bot::Bot;
@@ -9,6 +9,8 @@ use tbg_core::protocol::ClientMsg;
 use crate::config;
 use crate::link::MatchLink;
 use crate::sync::LatestView;
+use crate::ui::{ActionQueue, UiAction};
+use crate::GameState;
 
 #[derive(Resource)]
 struct Autoplay {
@@ -24,11 +26,26 @@ pub fn plugin(app: &mut App) {
             last_tick: u32::MAX,
             seq: 1_000_000,
         })
-        .add_systems(Update, play);
+        .add_systems(Update, play)
+        .add_systems(OnEnter(GameState::Menu), start);
     }
 }
 
-fn play(mut auto: ResMut<Autoplay>, view: Res<LatestView>, mut link: NonSendMut<MatchLink>) {
+/// Start the requested mode whenever the menu shows.
+fn start(mut queue: ResMut<ActionQueue>) {
+    match config::url_param("autoplay").as_deref() {
+        Some("quick") => queue.0.push(UiAction::Quick),
+        Some("practice") => queue.0.push(UiAction::Practice),
+        _ => {}
+    }
+}
+
+fn play(
+    time: Res<Time>,
+    mut auto: ResMut<Autoplay>,
+    view: Res<LatestView>,
+    mut link: NonSendMut<MatchLink>,
+) {
     let Some(v) = &view.0 else { return };
     if v.tick == auto.last_tick {
         return;
@@ -37,6 +54,6 @@ fn play(mut auto: ResMut<Autoplay>, view: Res<LatestView>, mut link: NonSendMut<
     if let Some(intent) = auto.bot.decide(v) {
         auto.seq += 1;
         let seq = auto.seq;
-        link.send(ClientMsg::Intent { seq, intent });
+        link.send(ClientMsg::Intent { seq, intent }, time.elapsed_secs_f64());
     }
 }

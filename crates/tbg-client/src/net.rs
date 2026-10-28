@@ -1,111 +1,198 @@
-//! WebSocket ping: 1 Hz binary echo measures RTT for the overlay.
-//!
-//! The socket is not `Send` on the web, so it lives in a non-send
-//! resource. One exclusive system owns (re)connect, ping, and receive
-//! because `Commands` cannot insert non-send resources in Bevy 0.20.
-//! RTT uses the wall clock (`Instant`), not Bevy's frame `Time`, so it is
-//! only off by the time until the next frame polls the socket.
+//! Online match link over WebSocket (`ewebsock`): handshake with session
+//! resume, mode request (quick match / room), ping replies, automatic
+//! reconnect, and the `?lag=MS` simulator (MS/2 added each way).
 
-use bevy::{platform::time::Instant, prelude::*};
+use std::collections::VecDeque;
+
 use ewebsock::{WsEvent, WsMessage};
+use tbg_core::protocol::{self, ClientMsg, RoomCode, ServerMsg, Token, PROTOCOL_VERSION};
 
-use crate::{config, overlay};
+use crate::config;
 
-struct NetLink {
-    sender: ewebsock::WsSender,
-    receiver: ewebsock::WsReceiver,
-    open: bool,
+/// Give up reconnecting after this long (server window is 30 s).
+const RECONNECT_FOR: f64 = 35.0;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Mode {
+    Quick,
+    Create,
+    Join(RoomCode),
 }
 
-#[derive(Resource)]
-struct NetTimers {
-    start: Instant,
-    next_ping_ms: f64,
-    next_retry_ms: f64,
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum NetStatus {
+    Connecting,
+    Ready,
+    Reconnecting,
+    Failed(String),
 }
 
-impl Default for NetTimers {
-    fn default() -> Self {
-        Self {
-            start: Instant::now(),
-            next_ping_ms: 0.0,
-            next_retry_ms: 0.0,
-        }
-    }
+pub struct NetLink {
+    mode: Mode,
+    socket: Option<(ewebsock::WsSender, ewebsock::WsReceiver)>,
+    opened: bool,
+    token: Option<Token>,
+    in_match: bool,
+    pub status: NetStatus,
+    lost_at: Option<f64>,
+    next_try: f64,
+    lag: f64,
+    outq: VecDeque<(f64, ClientMsg)>,
+    inq: VecDeque<(f64, ServerMsg)>,
 }
 
-pub fn plugin(app: &mut App) {
-    app.init_resource::<NetTimers>()
-        .add_systems(Update, net_system);
-}
+impl NetLink {
+    pub fn new(mode: Mode, now: f64) -> NetLink {
+        let lag_ms: f64 = config::url_param("lag")
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(0.0);
+        let mut link = NetLink {
+            mode,
+            socket: None,
+            opened: false,
+            token: config::load_token(),
+            in_match: false,
+            status: NetStatus::Connecting,
+            lost_at: None,
+            next_try: now,
+            lag: lag_ms / 2000.0,
+            outq: VecDeque::new(),
+            inq: VecDeque::new(),
+        };
+        link.connect(now);
+        link
+    }
 
-/// Exclusive system: connect, drain events, ping every second, reconnect.
-fn net_system(world: &mut World) {
-    let now_ms = world.resource::<NetTimers>().start.elapsed().as_secs_f64() * 1000.0;
-    if !world.contains_non_send::<NetLink>() {
-        if now_ms >= world.resource::<NetTimers>().next_retry_ms {
-            try_connect(world, now_ms);
-        }
-        return;
+    pub fn lag_ms(&self) -> u32 {
+        (self.lag * 2000.0) as u32
     }
-    let (dead, rtt) = drain_events(world, now_ms);
-    if dead {
-        world.remove_non_send::<NetLink>();
-        world.resource_mut::<NetTimers>().next_retry_ms = now_ms + 2000.0;
-        world.resource_mut::<overlay::OverlayStats>().rtt_ms = None;
-        return;
-    }
-    if let Some(v) = rtt {
-        world.resource_mut::<overlay::OverlayStats>().rtt_ms = Some(v);
-    }
-    let ping_due = now_ms >= world.resource::<NetTimers>().next_ping_ms;
-    let open = world.get_non_send::<NetLink>().is_some_and(|l| l.open);
-    if ping_due && open {
-        world.resource_mut::<NetTimers>().next_ping_ms = now_ms + 1000.0;
-        if let Some(mut link) = world.get_non_send_mut::<NetLink>() {
-            link.sender
-                .send(WsMessage::Binary(now_ms.to_le_bytes().to_vec()));
-        }
-    }
-}
 
-/// Returns (connection lost, latest RTT sample).
-fn drain_events(world: &mut World, now_ms: f64) -> (bool, Option<f64>) {
-    let Some(mut link) = world.get_non_send_mut::<NetLink>() else {
-        return (true, None);
-    };
-    let (mut dead, mut rtt) = (false, None);
-    while let Some(event) = link.receiver.try_recv() {
-        match event {
-            WsEvent::Opened => link.open = true,
-            WsEvent::Message(WsMessage::Binary(bytes)) => {
-                rtt = decode_rtt(&bytes, now_ms).or(rtt);
+    pub fn send(&mut self, msg: ClientMsg, now: f64) {
+        self.outq.push_back((now + self.lag, msg));
+    }
+
+    /// Pump the socket, release lagged messages, reconnect when needed.
+    pub fn poll(&mut self, now: f64) -> Vec<ServerMsg> {
+        self.read_socket(now);
+        self.flush(now);
+        self.reconnect(now);
+        let mut out = Vec::new();
+        while self.inq.front().is_some_and(|(at, _)| *at <= now) {
+            if let Some((_, msg)) = self.inq.pop_front() {
+                out.extend(self.handle(msg, now));
             }
-            WsEvent::Message(_) => {}
-            WsEvent::Closed | WsEvent::Error(_) => dead = true,
+        }
+        out
+    }
+
+    fn connect(&mut self, now: f64) {
+        self.opened = false;
+        self.outq.clear();
+        match ewebsock::connect(config::server_url(), ewebsock::Options::default()) {
+            Ok(pair) => self.socket = Some(pair),
+            Err(_) => self.lost(now),
         }
     }
-    (dead, rtt)
-}
 
-fn try_connect(world: &mut World, now_ms: f64) {
-    match ewebsock::connect(config::server_url(), ewebsock::Options::default()) {
-        Ok((sender, receiver)) => {
-            world.insert_non_send(NetLink {
-                sender,
-                receiver,
-                open: false,
-            });
-            world.resource_mut::<NetTimers>().next_ping_ms = now_ms;
-        }
-        Err(_) => {
-            world.resource_mut::<NetTimers>().next_retry_ms = now_ms + 2000.0;
+    fn lost(&mut self, now: f64) {
+        self.socket = None;
+        self.opened = false;
+        if !matches!(self.status, NetStatus::Failed(_)) {
+            self.status = NetStatus::Reconnecting;
+            self.lost_at.get_or_insert(now);
+            self.next_try = now + 1.0;
         }
     }
-}
 
-/// RTT = now minus the echoed send time; `None` on malformed payloads.
-fn decode_rtt(bytes: &[u8], now_ms: f64) -> Option<f64> {
-    let raw: [u8; 8] = bytes.try_into().ok()?;
-    Some(now_ms - f64::from_le_bytes(raw))
+    fn read_socket(&mut self, now: f64) {
+        let mut events = Vec::new();
+        if let Some((_, rx)) = &self.socket {
+            while let Some(ev) = rx.try_recv() {
+                events.push(ev);
+            }
+        }
+        for ev in events {
+            match ev {
+                WsEvent::Opened => {
+                    self.opened = true;
+                    let hello = ClientMsg::Hello {
+                        version: PROTOCOL_VERSION,
+                        resume: self.token,
+                    };
+                    self.outq.push_front((now + self.lag, hello));
+                }
+                WsEvent::Message(WsMessage::Binary(bytes)) => {
+                    if let Ok(msg) = protocol::decode_server(&bytes) {
+                        self.inq.push_back((now + self.lag, msg));
+                    }
+                }
+                WsEvent::Message(_) => {}
+                WsEvent::Closed | WsEvent::Error(_) => self.lost(now),
+            }
+        }
+    }
+
+    fn flush(&mut self, now: f64) {
+        let Some((tx, _)) = &mut self.socket else {
+            return;
+        };
+        while self.opened && self.outq.front().is_some_and(|(at, _)| *at <= now) {
+            if let Some((_, msg)) = self.outq.pop_front() {
+                tx.send(WsMessage::Binary(protocol::encode(&msg)));
+            }
+        }
+    }
+
+    fn reconnect(&mut self, now: f64) {
+        let Some(lost) = self.lost_at else { return };
+        if self.socket.is_some() || matches!(self.status, NetStatus::Failed(_)) {
+            return;
+        }
+        if now - lost > RECONNECT_FOR {
+            self.status = NetStatus::Failed("Connection lost".into());
+        } else if now >= self.next_try {
+            self.next_try = now + 1.0;
+            self.connect(now);
+        }
+    }
+
+    /// Protocol housekeeping stays here; everything else goes to the game.
+    fn handle(&mut self, msg: ServerMsg, now: f64) -> Option<ServerMsg> {
+        match msg {
+            ServerMsg::Welcome { token, .. } => {
+                config::save_token(&token);
+                self.token = Some(token);
+                self.status = NetStatus::Ready;
+                self.lost_at = None;
+                // Outside a match (first connect, or dropped while queued, which
+                // takes us out of the queue) ask for the mode again.
+                if !self.in_match {
+                    let req = match self.mode {
+                        Mode::Quick => ClientMsg::QuickMatch,
+                        Mode::Create => ClientMsg::CreateRoom,
+                        Mode::Join(code) => ClientMsg::JoinRoom { code },
+                    };
+                    self.send(req, now);
+                }
+                None
+            }
+            ServerMsg::Ping { id } => {
+                self.send(ClientMsg::Pong { id }, now);
+                None
+            }
+            ServerMsg::VersionMismatch { .. } => {
+                self.status =
+                    NetStatus::Failed("A new version is available - reload the page".into());
+                None
+            }
+            other => {
+                match other {
+                    ServerMsg::MatchStart { .. } => self.in_match = true,
+                    ServerMsg::MatchEnd { .. } => self.in_match = false,
+                    _ => {}
+                }
+                Some(other)
+            }
+        }
+    }
 }

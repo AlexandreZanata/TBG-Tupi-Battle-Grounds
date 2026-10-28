@@ -266,18 +266,18 @@ buying.
 
 | Metric | Target | Measured in |
 |--------|--------|-------------|
-| WASM download (compressed) | ≤ 4 MB (hard ceiling 6 MB) | P1 |
+| WASM download (compressed) | ≤ 4 MB (hard ceiling 6 MB) | P1 · measured P4: 4.59 MB brotli, 7.34 MB gzip |
 | Other assets on first load | ≤ 1 MB | P7 |
 | Time to menu | ≤ 5 s desktop broadband; ≤ 10 s mid-range phone on 4G | P1, P5 |
 | Frame rate | 60 fps desktop; ≥ 30 fps mid-range Android and iPhone 11-class with 30 units | P1, P3, P6, P7 |
 | Draw calls in a busy match | ≤ 300 | P6 |
 | Triangles | ≤ 1 500 per one-slot unit, ≤ 3 000 per two-slot, ≤ 30 000 arena | P6 |
 | Browser memory | ≤ 300 MB | P7 |
-| Sim step, 30 units (release) | ≤ 50 µs | P2 |
-| Server memory | ≤ 100 KB per match + about 64 KB per socket | P4, P5 |
-| Bandwidth per player | ≤ 6 KB/s down, ≤ 0.5 KB/s up | P4, P5 |
-| View-gap p95 under 40 ± 20 ms added latency | ≤ 150 ms | P4 |
-| Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | P4 (local), P5 (VPS) |
+| Sim step, 30 units (release) | ≤ 50 µs | P2 · measured: 0.44 µs harness, 4–6 µs in server |
+| Server memory | ≤ 100 KB per match + about 64 KB per socket | P4 local: 89.5 MB RSS at 300 matches |
+| Bandwidth per player | ≤ 6 KB/s down, ≤ 0.5 KB/s up | P4 local: 1.46 KB/s down, 3 B/s up |
+| View-gap p95 under 40 ± 20 ms added latency | ≤ 150 ms | P4 local: 128 ms |
+| Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | P4 local: 300 matches = 1.06 cores, 0 late ticks; VPS pending (P5) |
 
 **Capacity reasoning.** Simulation CPU is tiny (about 20 units, integer
 math). The first limits are socket fan-out and bandwidth: 500 matches ≈

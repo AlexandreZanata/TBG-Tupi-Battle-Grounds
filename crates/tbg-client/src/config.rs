@@ -51,3 +51,53 @@ pub fn server_url() -> String {
         "ws://127.0.0.1:8080/ws".into()
     }
 }
+
+/// Session token kept across page reloads so a player can resume a match.
+pub fn load_token() -> Option<[u8; 16]> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let hex = storage()?.get_item("tbg_token").ok()??;
+        let mut out = [0u8; 16];
+        for (i, b) in out.iter_mut().enumerate() {
+            *b = u8::from_str_radix(hex.get(i * 2..i * 2 + 2)?, 16).ok()?;
+        }
+        Some(out)
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    None
+}
+
+pub fn save_token(token: &[u8; 16]) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(s) = storage() {
+        let hex: String = token.iter().map(|b| format!("{b:02x}")).collect();
+        let _ = s.set_item("tbg_token", &hex);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = token;
+}
+
+#[cfg(target_arch = "wasm32")]
+fn storage() -> Option<web_sys::Storage> {
+    web_sys::window()?.local_storage().ok()?
+}
+
+/// Shareable link that auto-joins a private room.
+pub fn room_link(code: &str) -> String {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(loc) = web_sys::window().map(|w| w.location()) {
+        let origin = loc.origin().unwrap_or_default();
+        let path = loc.pathname().unwrap_or_default();
+        return format!("{origin}{path}?room={code}");
+    }
+    format!("?room={code}")
+}
+
+pub fn copy_text(text: &str) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(w) = web_sys::window() {
+        let _ = w.navigator().clipboard().write_text(text);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = text;
+}
