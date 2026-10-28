@@ -1,9 +1,10 @@
 //! In-match HUD: clock, Stronghold HP, Energy, army slots, synergies,
 //! rotation timer, and the three shop cards. Reads only `LatestView`.
+//! The top line (names, bars, clock) lives in `hud_top`.
 
 use bevy::prelude::*;
 
-use super::{label, screen, UiAction, BUTTON, PANEL};
+use super::{label, screen, UiAction, BUTTON};
 use crate::sync::MatchInfo;
 use crate::GameState;
 
@@ -13,8 +14,6 @@ pub(super) enum Hud {
     Hp(usize),
     EnergyFill,
     Info,
-    /// P12: static `RANKED · name (rating)` badge (set once at spawn).
-    Mode,
     Rotation,
     Card(usize),
     CardText(usize),
@@ -29,7 +28,7 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bundle {
+pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bundle {
     (
         Node {
             width: px(width),
@@ -88,31 +87,16 @@ fn row(gap: f32) -> Node {
     }
 }
 
-fn spawn(mut commands: Commands, info: Res<MatchInfo>) {
-    // P12: ranked badge plus the opponent's rating; casual shows the name.
-    let mode = if info.ranked {
-        match info.opponent_rating {
-            Some(r) => format!("RANKED · {} ({})", info.opponent, r),
-            None => format!("RANKED · {}", info.opponent),
-        }
-    } else {
-        info.opponent.clone()
-    };
-    commands.spawn((
-        screen(JustifyContent::SpaceBetween),
-        DespawnOnExit(GameState::InMatch),
-        children![
-            (
-                row(10.0),
-                BackgroundColor(PANEL),
-                children![
-                    bar(Hud::Hp(0), Color::srgb_u8(0x3F, 0xA9, 0xF5), 110.0, 12.0),
-                    (label("3:00", 22.0), Hud::Clock),
-                    bar(Hud::Hp(1), Color::srgb_u8(0xF2, 0x54, 0x5B), 110.0, 12.0),
-                ],
-            ),
-            (label(mode, 14.0), Hud::Mode),
-            (
+fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) {
+    let narrow = window.width() < 600.0;
+    commands
+        .spawn((
+            screen(JustifyContent::SpaceBetween),
+            DespawnOnExit(GameState::InMatch),
+        ))
+        .with_children(|root| {
+            super::hud_top::spawn(root, &info, narrow);
+            root.spawn((
                 Node {
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
@@ -129,8 +113,8 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>) {
                     ),
                     bar(Hud::Rotation, Color::srgb_u8(0xF4, 0xEE, 0xE0), 352.0, 4.0),
                     (row(8.0), children![card(0), card(1), card(2)]),
+                    super::surrender::button(),
                 ],
-            ),
-        ],
-    ));
+            ));
+        });
 }

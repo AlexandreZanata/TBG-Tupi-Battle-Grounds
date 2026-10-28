@@ -167,10 +167,16 @@ async fn br_r04_ranked_forfeit_is_a_loss() {
     register_as(&mut b, "StayB").await;
     send(&mut a, &ClientMsg::RankedMatch).await;
     send(&mut b, &ClientMsg::RankedMatch).await;
+    // Which seat each socket got depends on queue arrival order (two
+    // connections race), so read the stayer's seat instead of assuming it.
+    let mut stayer_seat = None;
     for ws in [&mut a, &mut b] {
         loop {
             match recv(ws).await {
-                Some(ServerMsg::MatchStart { .. }) => break,
+                Some(ServerMsg::MatchStart { you, .. }) => {
+                    stayer_seat = Some(you);
+                    break;
+                }
                 Some(_) => continue,
                 None => panic!("match never started"),
             }
@@ -179,7 +185,7 @@ async fn br_r04_ranked_forfeit_is_a_loss() {
     drop(a);
     let outcome = play_idle(&mut b).await;
     assert_eq!(outcome.reason, tbg_core::EndReason::Forfeit);
-    assert_eq!(outcome.winner, Some(tbg_core::Seat::B));
+    assert_eq!(outcome.winner, stayer_seat);
     match recv(&mut b).await {
         Some(ServerMsg::RatingChanged {
             before: 1000,
@@ -293,4 +299,69 @@ async fn br_r06_casual_matches_never_touch_rating() {
         ),
         (1000, 0, 0, 0)
     );
+}
+
+async fn await_seat(ws: &mut Ws) -> tbg_core::Seat {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::MatchStart { you, .. }) => return you,
+            Some(_) => {}
+            None => panic!("socket closed before MatchStart"),
+        }
+    }
+}
+
+async fn await_end(ws: &mut Ws) -> tbg_core::Outcome {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::MatchEnd { outcome }) => return outcome,
+            Some(_) => {}
+            None => panic!("socket closed before MatchEnd"),
+        }
+    }
+}
+
+async fn await_rating(ws: &mut Ws) -> (u16, u16, Profile) {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::RatingChanged {
+                before,
+                after,
+                profile,
+            }) => return (before, after, profile),
+            Some(_) => {}
+            None => panic!("socket closed before RatingChanged"),
+        }
+    }
+}
+
+#[tokio::test]
+async fn br_m06_ranked_surrender_is_a_loss() {
+    // BR-M06/BR-R04: a surrender is a forfeit, so the ranked store settles
+    // it as a loss (-20 placement) and stores reason "Forfeit".
+    let (url, t) = live_server("surrender", 30).await;
+    let mut a = connect(&url).await;
+    let mut b = connect(&url).await;
+    hello(&mut a).await;
+    hello(&mut b).await;
+    register_as(&mut a, "SurA").await;
+    register_as(&mut b, "SurB").await;
+    send(&mut a, &ClientMsg::RankedMatch).await;
+    send(&mut b, &ClientMsg::RankedMatch).await;
+    let (seat_a, seat_b) = tokio::join!(await_seat(&mut a), await_seat(&mut b));
+    assert_ne!(seat_a, seat_b);
+    send(&mut a, &ClientMsg::Surrender).await;
+    let (oa, ob) = tokio::join!(await_end(&mut a), await_end(&mut b));
+    assert_eq!(oa, ob);
+    assert_eq!(oa.reason, tbg_core::EndReason::Forfeit);
+    assert_eq!(oa.winner, Some(seat_b));
+    let (ra, rb) = tokio::join!(await_rating(&mut a), await_rating(&mut b));
+    assert_eq!((ra.0, ra.1), (1000, 980), "the surrendering seat loses 20");
+    assert_eq!(ra.2.losses, 1);
+    assert_eq!((rb.0, rb.1), (1000, 1020), "the other seat wins 20");
+    assert_eq!(rb.2.wins, 1);
+    let store = Store::open(&t.db).unwrap();
+    assert_eq!(store.ranked_match_count().await.unwrap(), 1);
+    let stats = store.player_stats("sura".into()).await.unwrap();
+    assert_eq!(stats.recent[0].reason, "Forfeit");
 }

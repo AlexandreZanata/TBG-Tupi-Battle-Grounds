@@ -16,6 +16,7 @@ use crate::metrics::Metrics;
 use crate::store::{AccountId, Store};
 use crate::Config;
 
+mod command;
 mod report;
 mod views;
 use report::SeatStats;
@@ -79,20 +80,8 @@ async fn run(
     let tick = Duration::from_millis(config.tick_ms);
     let window = Duration::from_secs(config.reconnect_secs);
     for seat in Seat::BOTH {
-        let other = &m.players[seat.other().index()];
-        // P12: the opponent rating rides along only in ranked matches.
-        let opponent_rating = (m.mode == MatchMode::Ranked)
-            .then(|| other.account.map(|(_, rating)| rating))
-            .flatten();
-        m.send(
-            seat,
-            ServerMsg::MatchStart {
-                you: seat,
-                opponent: other.name.clone(),
-                mode: m.mode,
-                opponent_rating,
-            },
-        );
+        let start = m.match_start(seat);
+        m.send(seat, start);
     }
     let mut interval = tokio::time::interval(tick);
     interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
@@ -185,63 +174,5 @@ async fn run(
     // P11: fire-and-forget over the store channel; never blocks the loop.
     if let Some(db) = store {
         db.insert_match(&line);
-    }
-}
-
-impl Match {
-    fn command(&mut self, cmd: MatchCmd) {
-        match cmd {
-            MatchCmd::Intent { seat, seq, intent } => {
-                self.stats[seat.index()].intents += 1;
-                // P9: any processed intention earns an ack view this tick.
-                self.applied[seat.index()] = true;
-                let result = self.state.apply_intention(seat, seq, intent);
-                if result.is_ok() {
-                    self.count_success(seat, intent);
-                }
-                if let Err(reason) = result {
-                    self.stats[seat.index()].rejections += 1;
-                    self.metrics.rejections.fetch_add(1, Relaxed);
-                    self.send(seat, ServerMsg::Rejected { seq, reason });
-                }
-            }
-            MatchCmd::Detach { seat, conn_id } => {
-                let current = self.players[seat.index()].conn.as_ref().map(|c| c.id);
-                if current == Some(conn_id) {
-                    self.detach(seat);
-                }
-            }
-            MatchCmd::Attach {
-                seat,
-                conn,
-                new_token,
-            } => {
-                // P11: a login takeover moves the seat to the new session
-                // token so the end-of-match report finds the right session.
-                if let Some(t) = new_token {
-                    self.players[seat.index()].token = t;
-                }
-                self.players[seat.index()].conn = Some(conn);
-                self.detached_at[seat.index()] = None;
-                self.stats[seat.index()].reattached += 1;
-                self.applied[seat.index()] = false;
-                let other = &self.players[seat.other().index()];
-                let opponent_rating = (self.mode == MatchMode::Ranked)
-                    .then(|| other.account.map(|(_, rating)| rating))
-                    .flatten();
-                self.send(
-                    seat,
-                    ServerMsg::MatchStart {
-                        you: seat,
-                        opponent: other.name.clone(),
-                        mode: self.mode,
-                        opponent_rating,
-                    },
-                );
-                // Catch up on events buffered while detached.
-                self.send_view(seat);
-            }
-            MatchCmd::Rtt { seat, ms } => self.stats[seat.index()].rtts.push(ms),
-        }
     }
 }

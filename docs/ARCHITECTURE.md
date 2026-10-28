@@ -123,13 +123,17 @@ tables are the one allowed exception.
   `PlayerIntention = Purchase{offer} | Evolve{unit, branch}`;
   `ServerMsg = Welcome{token, name} | VersionMismatch{server} | Queued | RoomCreated{code} | RoomNotFound | MatchStart{you, opponent} | View(MatchView) | Rejected{seq, reason} | MatchEnd{outcome} | Ping{id} | NetStats{rtt_ms} | Error{code}`.
   Later versions append variants at the end of each enum (`PROTOCOL_VERSION`
-  4): accounts v2 (`Register{name} | Login{key} | Logout` →
+  5): accounts v2 (`Register{name} | Login{key} | Logout` →
   `Registered{key, profile} | LoggedIn{profile} | LoggedOut |
   AccountError{code}`), ranked v3 (`RankedMatch`; `MatchStart` gains
-  `mode, opponent_rating`; `RatingChanged{before, after, profile}`), and
+  `mode, opponent_rating`; `RatingChanged{before, after, profile}`),
   ranking v4 (`Leaderboard{offset}` → `Leaderboard{total, offset, rows,
   you}`: 20 rows from the in-memory snapshot, `you` = your rank; one
-  request per second per connection, extras ignored).
+  request per second per connection, extras ignored), takeover v5
+  (`ErrorCode::SessionTakenOver`), and v6 (`Surrender`, routed like an
+  intention with the connection's seat → `MatchCmd::Surrender` →
+  `MatchState::forfeit`, idempotent; `MatchStart` gains `you_name` and
+  `you_rating` so the HUD names both HP bars).
   Intentions carry no seat: the server derives the seat from the connection.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
@@ -144,7 +148,15 @@ tables are the one allowed exception.
   `PlayerName` plus a generated `AccountKey` (name + 80-bit secret, the only
   credential). One active session per account: a new login takes over the
   old one, including a running match, whose seat token is updated so the
-  end report finds the new session. While logged in, the session carries
+  end report finds the new session. The old socket first gets
+  `Error{SessionTakenOver}` (the client shows "Your account signed in on
+  another device", returns to the menu, and does not reconnect), and its
+  session is dropped so a late auto-resume cannot re-enter the match.
+  Idle sessions expire after the reconnect window, so a `Welcome` whose
+  token differs from the one the client sent is a fresh guest session:
+  with a stored key the client logs in again before any mode request
+  (`net/login.rs`), otherwise ranked answers `LoginRequired`.
+  While logged in, the session carries
   the account name, which opponents see in `MatchStart`.
 - **Ranked (P12):** separate FIFO queue (`RankedMatch`; guests are refused
   with `LoginRequired`, private rooms stay casual). Pairing ignores rating.
@@ -370,6 +382,9 @@ table at 250/500/1000/1500 concurrent matches.
   the DOM with `textContent` / `createElement` only (no `innerHTML`, no
   `eval`, no inline handlers) under a `default-src 'self'` CSP.
 - TLS everywhere public (Caddy); no secrets in git (`.env*` ignored).
+- Data at rest (P14): the database directory and the backup directory are
+  mode 700 and files are created with `UMask=0077` (names, ratings, and key
+  hashes are not world-readable on the host).
 - `cargo audit` before each public deploy.
 - Not in the MVP: advanced anti-cheat, fraud detection, accounts/MFA.
 

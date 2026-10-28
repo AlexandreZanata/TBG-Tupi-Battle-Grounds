@@ -49,6 +49,19 @@ curl -s https://<domain>/api/leaderboard?limit=3
 `TBG_API_PER_IP_MIN` (default 120) limits `/api/*` per IP; raise it only on
 a test server for load runs (`oha`).
 
+Backups and restore drill (P14). `/var/lib/tbg` and `/var/backups/tbg` are
+mode 700 and the unit sets `UMask=0077`: the database holds names,
+ratings, and key hashes. Run the drill after every schema change, on a
+scratch copy and a spare port, never on the live file:
+
+```bash
+ssh <host> sudo /opt/tbg/bin/backup.sh                     # newest copy in /var/backups/tbg
+ssh <host> 'sudo cp /var/backups/tbg/tbg-$(date +%F).sqlite3 /tmp/restore.sqlite3 && sudo chown tbg /tmp/restore.sqlite3'
+ssh <host> 'sudo -u tbg env TBG_ADDR=127.0.0.1:8081 TBG_DB=/tmp/restore.sqlite3 /opt/tbg/bin/tbg-server'   # second terminal
+ssh <host> curl -s localhost:8081/api/players/<Name>       # same rating and history as the live page
+# log in with a real account key in a browser tunnelled to :8081, then stop the scratch server and rm the copy
+```
+
 Match records:
 
 ```sql

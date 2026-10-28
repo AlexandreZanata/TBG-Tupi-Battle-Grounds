@@ -9,7 +9,7 @@ use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-pub const PROTOCOL_VERSION: u16 = 4;
+pub const PROTOCOL_VERSION: u16 = 6;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ.
@@ -42,6 +42,8 @@ pub enum ClientMsg {
     RankedMatch,
     // P13: one leaderboard page (`LEADERBOARD_PAGE` rows from `offset`).
     Leaderboard { offset: u16 },
+    // Post-P14 (BR-M06, Proposed): give up while the match is live.
+    Surrender,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -53,6 +55,9 @@ pub enum ErrorCode {
     ServerFull,
     // P12: appended at the end (older peers are rejected by version).
     LoginRequired,
+    // P14: sent to the old socket when the same account logs in elsewhere
+    // (BR-P03), right before the server closes it.
+    SessionTakenOver,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -71,6 +76,10 @@ pub enum ServerMsg {
     RoomNotFound,
     MatchStart {
         you: Seat,
+        // Post-P14: the HUD puts a name next to each HP bar; ratings ride
+        // along only in ranked matches.
+        you_name: String,
+        you_rating: Option<u16>,
         opponent: String,
         // P12: the queue this match came from; `opponent_rating` is `Some`
         // only for ranked matches.

@@ -122,7 +122,7 @@ fn build(commands: &mut Commands, account: &Account) {
     ));
     let (chip, actions, ranked) = match &account.profile {
         Some(p) => (
-            format!("{} · {}", p.name, p.rating),
+            format!("{} ({})", p.name, p.rating),
             None,
             button(
                 &format!("Ranked Match ({})", p.rating),

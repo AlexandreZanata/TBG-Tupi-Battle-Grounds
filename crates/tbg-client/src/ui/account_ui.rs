@@ -42,7 +42,7 @@ pub fn apply_action(
             if let AccountScreen::SaveKey { key, saved, .. } = &mut account.screen {
                 config::copy_text(key);
                 *saved = true;
-                toasts.push("Key copied — store it somewhere safe");
+                toasts.push("Key copied - store it somewhere safe");
             }
         }
         UiAction::DownloadKey => {
@@ -70,12 +70,12 @@ pub fn apply_action(
         UiAction::Logout => {
             if !account.logout_armed {
                 account.logout_armed = true;
-                toasts.push("Tap Log out again — did you save your key?");
+                toasts.push("Tap Log out again - did you save your key?");
             } else {
                 account.logout_armed = false;
                 match link {
                     MatchLink::Net(n) => n.send(ClientMsg::Logout, now),
-                    _ => toasts.push("No connection — try again"),
+                    _ => toasts.push("No connection - try again"),
                 }
             }
         }
