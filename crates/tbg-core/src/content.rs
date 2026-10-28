@@ -11,8 +11,8 @@ pub const SPAWN_OFFSET: i32 = 500;
 pub const ENERGY_SCALE: u32 = 600;
 pub const ENERGY_START: u32 = 3_000;
 pub const ENERGY_CAP: u32 = 6_000;
-pub const REGEN_RUNNING: u32 = 20;
-pub const REGEN_OVERTIME: u32 = 40;
+pub const REGEN_RUNNING: u32 = 17;
+pub const REGEN_OVERTIME: u32 = 34;
 
 pub const COUNTDOWN: Tick = 60;
 pub const REGULATION: Tick = 3_600;
@@ -25,10 +25,10 @@ pub const OFFERS: usize = 3;
 pub const ROTATION_TICKS: Tick = 200;
 pub const SLOT_CAP: u8 = 8;
 
-pub const STRONGHOLD_HP: i32 = 2_500;
-pub const STRONGHOLD_DAMAGE: i32 = 40;
+pub const STRONGHOLD_HP: i32 = 4_500;
+pub const STRONGHOLD_DAMAGE: i32 = 65;
 pub const STRONGHOLD_INTERVAL: u16 = 20;
-pub const STRONGHOLD_RANGE: i32 = 4_000;
+pub const STRONGHOLD_RANGE: i32 = 6_000;
 
 pub const WINDUP: u16 = 6;
 pub const MIN_INTERVAL: u16 = 5;
@@ -52,10 +52,10 @@ pub enum SynergyEffect {
 
 /// Per faction (index order): the effect and its bp at level 1 and 2.
 pub const SYNERGIES: [(SynergyEffect, [i32; 2]); 4] = [
-    (SynergyEffect::MaxHp, [1_500, 3_500]),
-    (SynergyEffect::AttackSpeed, [1_500, 3_500]),
-    (SynergyEffect::Damage, [1_500, 3_500]),
-    (SynergyEffect::Regen, [100, 250]),
+    (SynergyEffect::MaxHp, [2_000, 4_000]),
+    (SynergyEffect::AttackSpeed, [2_000, 4_000]),
+    (SynergyEffect::Damage, [500, 2_000]),
+    (SynergyEffect::Regen, [75, 200]),
 ];
 
 /// One evolution form: additive modifiers on the base unit.
@@ -155,7 +155,7 @@ use SlotCount::{One, Two};
 #[rustfmt::skip]
 pub const UNITS: [UnitDef; 8] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, One, 1_800,
-        [600, 30, 24, 800, 40, 0, 0], None, [
+        [650, 30, 24, 800, 40, 0, 0], None, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Fortress") },
         FormDef { dmg_bp: 4_000, speed_bp: 2_000, ..form("Vanguard") },
@@ -168,43 +168,43 @@ pub const UNITS: [UnitDef; 8] = [
         FormDef { atk_bp: 4_000, ..form("Volley") },
         FormDef { splash_add: 1_000, ..form("Arrow Rain") },
     ]),
-    unit(UnitKind::BoneBrute, "Bone Brute", Undead, Tank, Two, 3_000,
-        [1_300, 60, 30, 1_000, 30, 0, 0], None, [
+    unit(UnitKind::BoneBrute, "Bone Brute", Undead, Tank, Two, 2_400,
+        [1_300, 75, 30, 1_000, 30, 0, 0], None, [
         FormDef { hp_bp: 5_000, ..form("Ossified") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Bone Wall") },
         FormDef { dmg_bp: 5_000, ..form("Butcher") },
         FormDef { dmg_bp: 3_000, splash_add: 1_200, ..form("Reaper") },
     ]),
     unit(UnitKind::Hexer, "Hexer", Undead, Control, One, 2_400,
-        [260, 25, 28, 3_500, 50, 0, 0], slow(4_000, 40), [
+        [300, 30, 28, 3_500, 50, 0, 0], slow(4_000, 40), [
         FormDef { on_hit: slow(6_000, 40), ..form("Withering") },
         FormDef { dmg_bp: 6_000, ..form("Doom") },
         FormDef { splash_add: 1_000, ..form("Plague") },
         FormDef { dmg_bp: 4_000, splash_add: 500, ..form("Pestilence") },
     ]),
     unit(UnitKind::Sawbot, "Sawbot", Machines, Dps, One, 1_800,
-        [300, 70, 18, 800, 65, 0, 0], None, [
+        [270, 55, 21, 800, 65, 0, 0], None, [
         FormDef { atk_bp: 4_000, ..form("Overclock") },
         FormDef { atk_bp: 4_000, speed_bp: 3_000, ..form("Shredder") },
         FormDef { hp_bp: 6_000, ..form("Plating") },
         FormDef { hp_bp: 6_000, splash_add: 800, ..form("Juggernaut") },
     ]),
-    unit(UnitKind::SiegeWalker, "Siege Walker", Machines, Ranged, Two, 3_600,
-        [700, 120, 50, 6_000, 30, 1_500, 0], None, [
+    unit(UnitKind::SiegeWalker, "Siege Walker", Machines, Ranged, Two, 3_000,
+        [700, 85, 50, 6_000, 30, 1_500, 0], None, [
         FormDef { range_add: 2_000, ..form("Longshot") },
         FormDef { dmg_bp: 5_000, ..form("Artillery") },
         FormDef { splash_add: 1_000, ..form("Shrapnel") },
         FormDef { on_hit: root(16), ..form("Concussion") },
     ]),
     unit(UnitKind::Bloomkeeper, "Bloomkeeper", Plants, Support, One, 1_800,
-        [280, 0, 30, 3_000, 45, 0, 50], None, [
+        [280, 0, 30, 3_000, 45, 0, 40], None, [
         FormDef { heal_bp: 5_000, ..form("Blossom") },
         FormDef { splash_add: 1_500, ..form("Grove") },
         FormDef { hp_bp: 5_000, dmg_add: 25, ..form("Bramble") },
         FormDef { on_hit: root(12), ..form("Thornwarden") },
     ]),
     unit(UnitKind::Rootcaller, "Rootcaller", Plants, Control, One, 2_400,
-        [300, 20, 32, 3_000, 45, 0, 0], root(20), [
+        [300, 20, 32, 3_000, 45, 0, 0], root(16), [
         FormDef { on_hit: root(32), ..form("Deep Roots") },
         FormDef { dmg_bp: 8_000, ..form("Strangle") },
         FormDef { splash_add: 1_000, ..form("Spores") },

@@ -8,14 +8,16 @@ use bevy::prelude::*;
 use tbg_core::content::LANE_LEN;
 use tbg_core::{Event, MatchView, Outcome, Seat, UnitId};
 
-use crate::art::anim::Animator;
 use crate::art::FigureLibrary;
-use crate::visuals::{self, UnitLook, UnitVisual, VisualAssets};
+use crate::audio::Sounds;
+use crate::vfx::VfxAssets;
+use crate::visuals::{self, UnitLook, VisualAssets};
 
 mod events;
 mod messages;
 use crate::GameState;
 use events::apply_event;
+pub use events::MatchStats;
 use messages::poll_link;
 pub use messages::{QueueInfo, ViewGaps};
 
@@ -46,6 +48,7 @@ pub fn plugin(app: &mut App) {
         .init_resource::<ViewBuffer>()
         .init_resource::<UnitEntities>()
         .init_resource::<QueueInfo>()
+        .init_resource::<MatchStats>()
         .init_resource::<ViewGaps>()
         .add_systems(Update, poll_link)
         .add_systems(
@@ -70,6 +73,7 @@ fn lane_z(id: UnitId) -> f32 {
     [-0.8, 0.0, 0.8][(id % 3) as usize]
 }
 
+#[allow(clippy::too_many_arguments)] // the one system that turns views into the scene
 fn sync_units(
     mut commands: Commands,
     time: Res<Time>,
@@ -77,7 +81,8 @@ fn sync_units(
     lib: Res<FigureLibrary>,
     mut buffer: ResMut<ViewBuffer>,
     mut map: ResMut<UnitEntities>,
-    mut visuals: Query<(&mut UnitVisual, &mut Transform, &mut Animator)>,
+    mut visuals: events::Visuals,
+    mut fx_res: (Res<VfxAssets>, ResMut<Sounds>, ResMut<MatchStats>),
 ) {
     let Some((last_t, last)) = buffer.last.clone() else {
         return;
@@ -117,8 +122,16 @@ fn sync_units(
             }
         }
     }
+    let (vfx, sounds, stats) = (&fx_res.0, &mut *fx_res.1, &mut *fx_res.2);
+    let mut fx = events::Fx {
+        assets: &assets,
+        vfx,
+        sounds,
+        stats,
+        you,
+    };
     for ev in std::mem::take(&mut buffer.events) {
-        apply_event(&mut commands, &assets, &map, &mut visuals, ev, you);
+        apply_event(&mut commands, &mut fx, &map, &mut visuals, ev);
     }
     map.0.retain(|id, e| {
         let alive = last.units.iter().any(|u| u.id == *id);

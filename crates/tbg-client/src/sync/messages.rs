@@ -7,6 +7,7 @@ use bevy::prelude::*;
 use tbg_core::protocol::{RoomCode, ServerMsg};
 
 use super::{LatestView, MatchInfo, ViewBuffer};
+use crate::audio::{Sound, Sounds};
 use crate::link::MatchLink;
 use crate::net::NetStatus;
 use crate::overlay::OverlayStats;
@@ -34,6 +35,7 @@ pub(super) fn poll_link(
     mut ui: (ResMut<Toasts>, ResMut<Banner>, ResMut<QueueInfo>),
     mut stats: (ResMut<OverlayStats>, ResMut<ViewGaps>),
     mut next: ResMut<NextState<GameState>>,
+    mut extra: (ResMut<super::MatchStats>, ResMut<Sounds>),
 ) {
     let now = time.elapsed_secs_f64();
     for msg in link.poll(now) {
@@ -45,6 +47,7 @@ pub(super) fn poll_link(
                     ..default()
                 };
                 *buffer = ViewBuffer::default();
+                *extra.0 = super::MatchStats::default();
                 latest.0 = None;
                 next.set(GameState::InMatch);
             }
@@ -64,6 +67,10 @@ pub(super) fn poll_link(
             }
             ServerMsg::Rejected { reason, .. } => ui.0.push(crate::ui::rejection_text(reason)),
             ServerMsg::MatchEnd { outcome } => {
+                let won = outcome.winner.is_some() && outcome.winner == info.you;
+                extra
+                    .1
+                    .play(if won { Sound::Victory } else { Sound::Defeat });
                 info.outcome = Some(outcome);
                 next.set(GameState::Result);
             }

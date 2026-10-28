@@ -101,3 +101,27 @@ pub fn copy_text(text: &str) {
     #[cfg(not(target_arch = "wasm32"))]
     let _ = text;
 }
+
+/// A boolean preference in `localStorage` (false when unavailable).
+pub fn load_flag(key: &str) -> bool {
+    #[cfg(target_arch = "wasm32")]
+    {
+        storage()
+            .and_then(|s| s.get_item(key).ok().flatten())
+            .is_some_and(|v| v == "1")
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = key;
+        false
+    }
+}
+
+pub fn save_flag(key: &str, value: bool) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(s) = storage() {
+        let _ = s.set_item(key, if value { "1" } else { "0" });
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = (key, value);
+}

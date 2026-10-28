@@ -130,6 +130,9 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 
 ## 5. MVP starting values (all **new assumptions**, tune via playtests)
 
+Bot-harness balance pass of 2026-10-28 (P7) is applied below; human
+playtests decide the final values (decision D-14).
+
 Distances in tiles, times in seconds. The simulation stores them as
 integers (see ARCHITECTURE.md §4).
 
@@ -137,9 +140,9 @@ integers (see ARCHITECTURE.md §4).
 |----------|-------|-|----------|-------|
 | BattleLine length (Stronghold to Stronghold) | 16 | | Countdown | 3 |
 | Regulation | 180 | | Overtime | 60 |
-| Energy start / cap | 5 / 10 | | Energy regen | 1 per 1.5 (overtime 1 per 0.75) |
+| Energy start / cap | 5 / 10 | | Energy regen | 1 per ~1.76 s (17 sub-energy/tick; overtime 34) |
 | Shop offers / full rotation | 3 / every 10 | | `SLOT_CAP` | 8 |
-| Stronghold HP | 2500 | | Stronghold attack | 40 dmg / 1.0 s, range 4 |
+| Stronghold HP | 4500 | | Stronghold attack | 65 dmg / 1.0 s, range 6 |
 | Evolution cost tier 1 / tier 2 | 3 / 4 | | Reconnect window | 30 |
 
 **Starter roster (8 units, working names).** Two units per faction; every
@@ -147,14 +150,14 @@ archetype appears; two units use two slots.
 
 | Unit | Faction | Archetype | Slots | Cost | HP | Dmg | Every (s) | Range | Speed | Special |
 |------|---------|-----------|-------|------|----|-----|-----------|-------|-------|---------|
-| Shieldbearer | Humans | Tank | 1 | 3 | 600 | 30 | 1.2 | 0.8 | 0.8 | — |
+| Shieldbearer | Humans | Tank | 1 | 3 | 650 | 30 | 1.2 | 0.8 | 0.8 | — |
 | Archer | Humans | Ranged | 1 | 3 | 220 | 45 | 1.0 | 4.5 | 1.0 | — |
-| Bone Brute | Undead | Tank | 2 | 5 | 1300 | 60 | 1.5 | 1.0 | 0.6 | — |
-| Hexer | Undead | Control | 1 | 4 | 260 | 25 | 1.4 | 3.5 | 1.0 | slow 40% for 2 s |
-| Sawbot | Machines | DPS | 1 | 3 | 300 | 70 | 0.9 | 0.8 | 1.3 | — |
-| Siege Walker | Machines | Ranged | 2 | 6 | 700 | 120 | 2.5 | 6.0 | 0.6 | splash 1.5 |
-| Bloomkeeper | Plants | Support | 1 | 3 | 280 | heal 50 | 1.5 | 3.0 | 0.9 | heals instead of attacking |
-| Rootcaller | Plants | Control | 1 | 4 | 300 | 20 | 1.6 | 3.0 | 0.9 | root 1.0 s |
+| Bone Brute | Undead | Tank | 2 | 4 | 1300 | 75 | 1.5 | 1.0 | 0.6 | — |
+| Hexer | Undead | Control | 1 | 4 | 300 | 30 | 1.4 | 3.5 | 1.0 | slow 40% for 2 s |
+| Sawbot | Machines | DPS | 1 | 3 | 270 | 55 | 1.05 | 0.8 | 1.3 | — |
+| Siege Walker | Machines | Ranged | 2 | 5 | 700 | 85 | 2.5 | 6.0 | 0.6 | splash 1.5 |
+| Bloomkeeper | Plants | Support | 1 | 3 | 280 | heal 40 | 1.5 | 3.0 | 0.9 | heals instead of attacking |
+| Rootcaller | Plants | Control | 1 | 4 | 300 | 20 | 1.6 | 3.0 | 0.9 | root 0.8 s |
 
 **Evolution trees** (`T1 → T2` per branch; modifiers stack on the base).
 
@@ -173,10 +176,10 @@ archetype appears; two units use two slots.
 
 | Faction | Bonus to that faction's units |
 |---------|-------------------------------|
-| Humans | +15% / +35% max HP |
-| Undead | +15% / +35% attack speed |
-| Machines | +15% / +35% damage |
-| Plants | regenerate 1% / 2.5% max HP per second |
+| Humans | +20% / +40% max HP |
+| Undead | +20% / +40% attack speed |
+| Machines | +5% / +20% damage |
+| Plants | regenerate 0.75% / 2% max HP per second |
 
 ## 6. Is it fun? (measured, not claimed)
 

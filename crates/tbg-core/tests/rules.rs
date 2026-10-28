@@ -70,7 +70,10 @@ fn same_seed_and_script_same_hash() {
 fn energy_regenerates_and_caps() {
     // BR-E02
     let mut s = running(3);
-    assert_eq!(s.players[0].energy, ENERGY_START + 20);
+    assert_eq!(
+        s.players[0].energy,
+        ENERGY_START + tbg_core::content::REGEN_RUNNING
+    );
     for _ in 0..1_000 {
         s.step();
     }
@@ -174,7 +177,12 @@ fn synergy_levels_at_two_and_four_and_drop_on_death() {
     }
     s.step();
     assert_eq!(s.players[0].synergy[humans], 1);
-    assert_eq!(s.units[0].max_hp, 690, "+15% HP at level 1");
+    let level1 = tbg_core::content::effective_stats(UnitKind::Shieldbearer, 0, 0, 1).max_hp;
+    assert!(
+        level1 > def(UnitKind::Shieldbearer).hp,
+        "Humans level 1 adds HP"
+    );
+    assert_eq!(s.units[0].max_hp, level1);
     for _ in 0..2 {
         buy(&mut s, Seat::A, UnitKind::Archer).unwrap();
     }

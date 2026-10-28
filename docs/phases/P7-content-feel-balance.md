@@ -123,10 +123,53 @@ values in `docs/DECISIONS.md`.
 
 ## Phase report
 
-*(Executor fills this in at the end.)*
+Executed by the reviewer agent (Claude) on 2026-10-28, branch `phase/p7-content-feel-balance`.
 
-- Commands run and results:
-- Balance iterations table and final harness output:
-- Playtest summary (players, matches, scores, top issues fixed):
-- Deviations:
-- Blocked items:
+- Step 1 (roster art): done in P6 — all 8 units × 5 forms.
+- Step 2 (VFX, `vfx.rs` + `vfx/effects.rs`): splash ring (after the 0.3 s windup, sized
+  by the attacker's splash radius), heal sparkles, evolve burst, synergy pulse on the
+  faction's units, Stronghold hit sparks, death puff; projectiles from P3. Status
+  visuals stay as ring tints (blue slowed, brown rooted). No pool: a few short-lived
+  entities per event is cheap at ≤ 16 units.
+- Step 3 (audio, `audio.rs`): 11 WAV effects **synthesized by
+  `examples/make_sfx.rs`** (original, 132 KB total, budget 600 KB) instead of CC0
+  downloads; per-sound throttle (90 ms) against combat spam; mute toggle in the menu,
+  remembered in `localStorage`. Played only in the WASM build (native `bevy_audio`
+  needs ALSA, missing on this PC). `AssetMetaCheck::Never` added: static hosts answer
+  `*.meta` with index.html. No music loop (deferred).
+- Step 4 (UX): long-press (≥ 0.5 s) on a shop card shows unit details + "good vs /
+  weak vs" for 4.5 s; three first-match hints once per browser; result screen shows
+  units deployed, evolutions, damage to the enemy Stronghold; click sound on buttons.
+  A separate synergy panel was not added: the HUD info line shows active synergies.
+- Step 5 (balance), 14 harness iterations (log in the commit `balance(p7)`); final
+  3000 bot matches:
+  ```
+  duration s: median 150 p90 183
+  ended by: stronghold 69.7% | time 30.3% | forfeit 0.0%
+  draws: 1.3%
+  faction-majority Humans 46.8% · Undead 47.1% · Machines 57.9% · Plants 53.2%
+  purchase share Shieldbearer 21.7 · Archer 15.4 · Bone Brute 11.2 · Hexer 8.8
+                 Sawbot 15.4 · Siege Walker 3.5 · Bloomkeeper 15.4 · Rootcaller 8.7
+  evolutions per match 7.7 · step mean 0.43 µs
+  ```
+  Met: median 2.5–4 min, Stronghold kills ≥ 60%, draws ≤ 2%, 3 of 4 factions in 45–55%.
+  **Not met:** time-ups 30.3% (target ≤ 30, at the edge); Machines 57.9% (273 armies,
+  small sample); Siege Walker 3.5% purchase share — the bot spends Energy as soon as a
+  cheaper unit is affordable, so this mostly measures the bot, not the unit. Harness fix:
+  tied armies are no longer credited to the later faction.
+  Key changes (all in GAME-DESIGN §5): Stronghold HP 4500, attack 65 at range 6 (ranged
+  units no longer outrange it), Energy regen 1 per ~1.76 s, Bone Brute cost 4 / dmg 75,
+  Siege Walker cost 5 / dmg 85, Sawbot 270 HP / 55 dmg / 1.05 s, Hexer 300 HP / 30 dmg,
+  Shieldbearer 650 HP, Bloomkeeper heal 40, Rootcaller root 0.8 s, synergies retuned.
+- Browser checks (dev build, pane): practice match with VFX; `assets/audio/*.wav` served
+  200; "Not enough Energy" toast shown; hints flag set after the three hints; result
+  screen "Units deployed 20 | Evolutions 0 | Damage to enemy Stronghold 0".
+- Release size: WASM raw 24,207,013 B · gzip 7,525,040 B · **brotli 4,700,628 B**;
+  assets 132,334 B. Within the 6 MB ceiling, above the 4 MB target.
+- Commands: `cargo test --workspace` (15 core + 10 server) pass; clippy native + wasm32
+  clean; `trunk build --release` ok.
+- Deviations: original synthesized sounds instead of CC0 packs; no music; no VFX pool;
+  no separate synergy panel; status visuals are ring tints.
+- **Needs the owner:** step 6 playtest round (≥ 4 people, ≥ 10 online matches,
+  readability/fun/play-again form), confirm or change the D-14 values; check sound
+  on iPhone (audio unlock on first tap) and phone FPS with full VFX.

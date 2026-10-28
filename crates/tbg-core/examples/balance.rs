@@ -19,6 +19,7 @@ struct Totals {
     steps: u128,
     max_step_ns: u128,
     max_units: usize,
+    draws: u32,
 }
 
 fn main() {
@@ -80,11 +81,17 @@ fn play(seed: u64, t: &mut Totals) -> bool {
     let o = s.outcome.expect("ended");
     t.durations.push(s.tick / TICK_HZ);
     t.reasons[o.reason as usize] += 1;
+    t.draws += u32::from(o.winner.is_none());
     for seat in Seat::BOTH {
-        let main = (0..4).max_by_key(|&f| bought[seat.index()][f]).unwrap_or(0);
-        t.faction_games[main] += 1;
-        if o.winner == Some(seat) {
-            t.faction_wins[main] += 1;
+        // Strict majority only; tied armies count as mixed (no faction).
+        let counts = bought[seat.index()];
+        let top = counts.iter().copied().max().unwrap_or(0);
+        if top > 0 && counts.iter().filter(|&&c| c == top).count() == 1 {
+            let main = counts.iter().position(|&c| c == top).unwrap_or(0);
+            t.faction_games[main] += 1;
+            if o.winner == Some(seat) {
+                t.faction_wins[main] += 1;
+            }
         }
     }
     true
@@ -102,8 +109,7 @@ fn report(n: u64, t: &mut Totals) {
         pct(t.reasons[1]),
         pct(t.reasons[2])
     );
-    let draws = n as u32 - t.faction_wins.iter().sum::<u32>();
-    println!("draws: {:.1}%", pct(draws));
+    println!("draws: {:.1}%", pct(t.draws));
     for (i, f) in FACTIONS.iter().enumerate() {
         let games = t.faction_games[i].max(1);
         let rate = 100.0 * f64::from(t.faction_wins[i]) / f64::from(games);

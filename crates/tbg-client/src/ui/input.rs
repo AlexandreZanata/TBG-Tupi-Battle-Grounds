@@ -10,6 +10,8 @@ use crate::camera::ArenaCamera;
 
 /// How close (logical px, before UI scale) a tap must be to a unit.
 const UNIT_TAP_RADIUS: f32 = 42.0;
+/// Seconds a press must last to count as a long press.
+const LONG_PRESS: f64 = 0.5;
 
 #[allow(clippy::too_many_arguments)] // one system reading every tap source
 pub(super) fn taps(
@@ -26,7 +28,13 @@ pub(super) fn taps(
     units: Query<(&UiAction, &GlobalTransform), Without<ComputedNode>>,
     camera: Single<(&Camera, &GlobalTransform), With<ArenaCamera>>,
     mut queue: ResMut<ActionQueue>,
+    (time, mut pressed_at): (Res<Time>, Local<f64>),
 ) {
+    let now = time.elapsed_secs_f64();
+    if mouse.just_pressed(MouseButton::Left) || touches.iter_just_pressed().next().is_some() {
+        *pressed_at = now;
+    }
+    let long_press = now - *pressed_at >= LONG_PRESS;
     let mut points: Vec<Vec2> = touches.iter_just_released().map(|t| t.position()).collect();
     if mouse.just_released(MouseButton::Left) {
         points.extend(window.cursor_position());
@@ -38,7 +46,12 @@ pub(super) fn taps(
             // Buttons never overlap in this UI, so the first hit is the one.
             .find(|(_, node, t, vis)| vis.get() && node.contains_point(**t, physical))
             .map(|(a, ..)| *a);
-        let action = hit.or_else(|| nearest_unit(p, &units, &camera, scale.0));
+        let action = match hit {
+            // Holding a shop card shows its details instead of buying.
+            Some(UiAction::Buy(i)) if long_press => Some(UiAction::Inspect(i)),
+            Some(a) => Some(a),
+            None => nearest_unit(p, &units, &camera, scale.0),
+        };
         queue.0.push(action.unwrap_or(UiAction::CloseEvolve));
     }
 }
