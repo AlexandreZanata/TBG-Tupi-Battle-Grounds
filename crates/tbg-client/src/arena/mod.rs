@@ -9,11 +9,14 @@ use crate::{
 };
 use bevy::prelude::*;
 
+mod camp;
 mod cliffs;
 mod geometry;
 mod ground;
 mod props;
+mod rocks;
 mod towers;
+mod trees;
 mod water;
 
 pub(super) type Part = (Shape, Color, Transform);

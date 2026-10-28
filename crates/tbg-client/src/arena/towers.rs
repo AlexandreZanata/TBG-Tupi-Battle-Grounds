@@ -23,7 +23,7 @@ const MID: &[[f32; 2]] = &[[0.76, 0.95], [0.7, 1.65], [0.84, 1.75], [0.84, 1.85]
 pub(super) fn tower(own: bool) -> [(Mesh, f32); 3] {
     let banner = if own { ALLY } else { ENEMY };
     let at = |y: f32| Transform::from_xyz(0.0, y, 0.0);
-    let base = painted(vec![
+    let mut base_parts = vec![
         (Lathe(BASE), STONE, at(0.0)),
         (Cyl(0.76, 0.02), STONE, at(0.95)),
         (
@@ -31,17 +31,30 @@ pub(super) fn tower(own: bool) -> [(Mesh, f32); 3] {
             WOOD,
             Transform::from_xyz(0.78, 0.25, 0.0).with_rotation(Quat::from_rotation_y(1.57)),
         ),
-    ]);
+    ];
+    for y in [0.24, 0.59, 0.94] {
+        base_parts.push((
+            Ring(0.016, if y < 0.3 { 0.83 } else { 0.77 }, 360.0),
+            ROCK,
+            at(y),
+        ));
+    }
+    let base = painted(base_parts);
     let mid = painted(vec![
         (Lathe(MID), STONE, at(0.0)),
         (Cyl(0.84, 0.02), ROCK, at(1.85)),
         (
-            Box(0.06, 0.55, 0.4),
+            Box(0.44, 0.65, 0.035),
             banner,
-            Transform::from_xyz(0.78, 1.25, 0.0),
+            Transform::from_xyz(0.0, 1.25, 0.77),
         ),
     ]);
     let mut crown = Vec::new();
+    crown.push((
+        Box(0.13, 0.13, 0.025),
+        LINEN,
+        Transform::from_xyz(0.0, 1.30, 0.80).with_rotation(Quat::from_rotation_z(0.785)),
+    ));
     for i in 0..8 {
         let a = i as f32 / 8.0 * std::f32::consts::TAU;
         crown.push((
