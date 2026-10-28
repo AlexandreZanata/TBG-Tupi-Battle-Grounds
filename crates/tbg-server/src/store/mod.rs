@@ -23,6 +23,7 @@ mod worker;
 use worker::{worker, StoreCmd};
 
 pub use leaderboard::{LeaderRow, Snapshot};
+pub use ranked::{PlayerStats, RecentMatch};
 
 pub type AccountId = i64;
 
@@ -120,6 +121,19 @@ impl Store {
             })
             .map_err(|_| AccountError::Unavailable)?;
         reply_rx.await.map_err(|_| AccountError::Unavailable)?
+    }
+
+    /// Public profile for `/api/players/{name}` (`None` when unknown).
+    /// At most three indexed queries; the rank comes from the snapshot.
+    pub async fn player_stats(&self, name_lower: String) -> Option<ranked::PlayerStats> {
+        let (reply_tx, reply_rx) = oneshot::channel();
+        self.tx
+            .try_send(StoreCmd::PlayerStats {
+                name_lower,
+                reply: reply_tx,
+            })
+            .ok()?;
+        reply_rx.await.ok()?
     }
 
     /// Test/support helper: ranked-row count over the writer thread.

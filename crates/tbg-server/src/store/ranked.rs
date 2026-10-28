@@ -2,7 +2,7 @@
 //! applies the Elo update with each player's own K, bumps the counters,
 //! and inserts the `ranked_matches` row. Rating changes happen only here.
 
-use rusqlite::{params, Connection};
+use rusqlite::{params, Connection, OptionalExtension};
 use serde_json::json;
 
 use tbg_core::protocol::{Profile, RatingResults};
@@ -31,6 +31,120 @@ fn factions_json(factions: [u32; 4]) -> String {
 
 pub(super) fn count(conn: &Connection) -> rusqlite::Result<i64> {
     conn.query_row("SELECT count(*) FROM ranked_matches", [], |r| r.get(0))
+}
+
+/// Public profile for `/api/players/{name}` (BR-P05): the account row,
+/// faction purchase shares over all ranked matches, and the last 10 ranked
+/// matches newest first. At most three indexed queries; `None` for unknown.
+#[derive(Clone, Debug)]
+pub struct PlayerStats {
+    pub name: String,
+    pub rating: u16,
+    pub peak_rating: u16,
+    pub games: u32,
+    pub wins: u32,
+    pub losses: u32,
+    pub draws: u32,
+    /// `YYYY-MM-DD` from `created_at`.
+    pub joined_day: String,
+    /// Purchase shares in percent, Humans/Undead/Machines/Plants order.
+    pub factions: [f64; 4],
+    pub recent: Vec<RecentMatch>,
+}
+
+#[derive(Clone, Debug)]
+pub struct RecentMatch {
+    /// `YYYY-MM-DD` from `ended_at`.
+    pub date: String,
+    pub opponent: String,
+    /// `W`, `L`, or `D` from this player's side.
+    pub result: String,
+    /// This player's rating delta.
+    pub delta: i32,
+    pub reason: String,
+    pub duration_s: u64,
+}
+
+const FACTION_KEYS: [&str; 4] = ["Humans", "Undead", "Machines", "Plants"];
+
+pub(super) fn player_stats(
+    conn: &Connection,
+    name_lower: &str,
+) -> rusqlite::Result<Option<PlayerStats>> {
+    let Some((id, mut stats)) = conn
+        .query_row(
+            "SELECT id, name, rating, peak_rating, ranked_games, wins, losses, draws,
+             substr(created_at, 1, 10) FROM accounts WHERE name_lower = ?1",
+            rusqlite::params![name_lower],
+            |row| {
+                Ok((
+                    row.get::<_, AccountId>(0)?,
+                    PlayerStats {
+                        name: row.get(1)?,
+                        rating: row.get(2)?,
+                        peak_rating: row.get(3)?,
+                        games: row.get(4)?,
+                        wins: row.get(5)?,
+                        losses: row.get(6)?,
+                        draws: row.get(7)?,
+                        joined_day: row.get(8)?,
+                        factions: [0.0; 4],
+                        recent: Vec::new(),
+                    },
+                ))
+            },
+        )
+        .optional()?
+    else {
+        return Ok(None);
+    };
+    // Faction shares over both sides of every ranked match (one query).
+    let mut totals = [0u64; 4];
+    let mut stmt = conn.prepare(
+        "SELECT a_factions, b_factions, a_id FROM ranked_matches
+         WHERE a_id = ?1 OR b_id = ?1",
+    )?;
+    let mut rows = stmt.query([id])?;
+    while let Some(row) = rows.next()? {
+        let (a_json, b_json, a_id): (String, String, AccountId) =
+            (row.get(0)?, row.get(1)?, row.get(2)?);
+        let mine = if a_id == id { &a_json } else { &b_json };
+        if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(mine) {
+            for (i, key) in FACTION_KEYS.iter().enumerate() {
+                totals[i] += parsed[key].as_u64().unwrap_or(0);
+            }
+        }
+    }
+    let all: u64 = totals.iter().sum();
+    if all > 0 {
+        for (i, share) in stats.factions.iter_mut().enumerate() {
+            *share = (totals[i] as f64 * 1000.0 / all as f64).round() / 10.0;
+        }
+    }
+    // Last 10 with the opponent's name joined in (one query).
+    let mut recent = conn.prepare(
+        "SELECT substr(m.ended_at, 1, 10), o.name,
+         CASE WHEN m.winner IS NULL THEN 'D'
+              WHEN (m.a_id = ?1 AND m.winner = 0) OR (m.b_id = ?1 AND m.winner = 1)
+              THEN 'W' ELSE 'L' END,
+         CASE WHEN m.a_id = ?1 THEN m.a_after - m.a_before ELSE m.b_after - m.b_before END,
+         m.reason, m.duration_s
+         FROM ranked_matches m
+         JOIN accounts o ON o.id = CASE WHEN m.a_id = ?1 THEN m.b_id ELSE m.a_id END
+         WHERE m.a_id = ?1 OR m.b_id = ?1 ORDER BY m.id DESC LIMIT 10",
+    )?;
+    let mut rows = recent.query([id])?;
+    while let Some(row) = rows.next()? {
+        stats.recent.push(RecentMatch {
+            date: row.get(0)?,
+            opponent: row.get(1)?,
+            result: row.get(2)?,
+            delta: row.get(3)?,
+            reason: row.get(4)?,
+            duration_s: row.get::<_, i64>(5)? as u64,
+        });
+    }
+    Ok(Some(stats))
 }
 
 /// Settle a ranked match. Returns per-seat `(before, after, profile)`.

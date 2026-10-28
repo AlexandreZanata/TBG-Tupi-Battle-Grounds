@@ -19,10 +19,11 @@ use tbg_core::Seat;
 use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd, CONN_QUEUE};
 
 mod admission;
+pub(crate) use admission::client_ip;
 mod client_msg;
 use crate::metrics::{percentile, Metrics};
 use crate::AppState;
-use admission::{client_ip, Slot};
+use admission::Slot;
 use client_msg::{on_client_bytes, send};
 
 const HANDSHAKE: Duration = Duration::from_secs(5);

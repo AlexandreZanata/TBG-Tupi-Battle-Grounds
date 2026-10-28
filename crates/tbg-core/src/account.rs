@@ -66,19 +66,26 @@ pub const BLOCKED_SUBSTRINGS: &[&str] = &[
     "vagabunda",
 ];
 
-/// BR-P01: 3–16 ASCII letters/digits/`_`, starts with a letter, not
-/// reserved, no blocked substring (leetspeak-normalized). Uniqueness is
-/// enforced by the store (`NameTaken` on conflict).
-pub fn check_name(name: &str) -> Result<(), AccountError> {
+/// The `PlayerName` shape without the reserved/blocked lists: 3–16 ASCII
+/// letters, digits or `_`, starting with a letter. Used where a full
+/// registration check is wrong (e.g. public profile URLs, which only ever
+/// hold names that already passed `check_name`).
+pub fn valid_name_shape(name: &str) -> bool {
     if name.len() < 3 || name.len() > MAX_NAME_LEN || !name.is_ascii() {
-        return Err(AccountError::NameInvalid);
+        return false;
     }
     let bytes = name.as_bytes();
-    if !bytes[0].is_ascii_alphabetic()
-        || !bytes
+    bytes[0].is_ascii_alphabetic()
+        && bytes
             .iter()
             .all(|b| b.is_ascii_alphanumeric() || *b == b'_')
-    {
+}
+
+/// BR-P01: shape plus reserved and blocked-substring rules
+/// (leetspeak-normalized). Uniqueness is enforced by the store
+/// (`NameTaken` on conflict).
+pub fn check_name(name: &str) -> Result<(), AccountError> {
+    if !valid_name_shape(name) {
         return Err(AccountError::NameInvalid);
     }
     let lower = name.to_ascii_lowercase();

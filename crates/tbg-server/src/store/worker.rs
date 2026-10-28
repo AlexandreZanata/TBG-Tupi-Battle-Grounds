@@ -31,6 +31,10 @@ pub(super) enum StoreCmd {
     InsertMatch(Value),
     CountMatches(Reply<rusqlite::Result<i64>>),
     CountRanked(Reply<rusqlite::Result<i64>>),
+    PlayerStats {
+        name_lower: String,
+        reply: Reply<Option<ranked::PlayerStats>>,
+    },
     RankedResult {
         a: AccountId,
         b: AccountId,
@@ -82,6 +86,10 @@ pub(super) fn worker(
                 StoreCmd::CountRanked(reply) => {
                     let _ = reply.send(ranked::count(&conn));
                 }
+                StoreCmd::PlayerStats { name_lower, reply } => {
+                    let stats = ranked::player_stats(&conn, &name_lower).unwrap_or(None);
+                    let _ = reply.send(stats);
+                }
                 StoreCmd::RankedResult {
                     a,
                     b,
@@ -105,7 +113,9 @@ pub(super) fn worker(
         if dirty && last_build.elapsed() >= SNAPSHOT_EVERY {
             match leaderboard::build(&conn) {
                 Ok(snap) => {
-                    let _ = snapshot_tx.send(StdArc::new(snap));
+                    // `send_replace`: readers may not exist yet, and plain
+                    // `send` drops the value when receiver_count is zero.
+                    snapshot_tx.send_replace(StdArc::new(snap));
                     last_build = Instant::now();
                     dirty = false;
                 }
