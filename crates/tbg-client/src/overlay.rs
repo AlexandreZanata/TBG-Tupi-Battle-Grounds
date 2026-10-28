@@ -48,6 +48,11 @@ fn spawn_overlay(mut commands: Commands) {
             ..default()
         },
         StatsText,
+        if crate::config::url_param("gallery").is_some() {
+            Visibility::Hidden
+        } else {
+            Visibility::Inherited
+        },
     ));
 }
 

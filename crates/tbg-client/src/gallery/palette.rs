@@ -32,7 +32,7 @@ pub fn spawn(
     let slots = SLOTS.map(|s| format!("{s:?}")).join(" / ");
     commands.spawn((
         Text::new(format!(
-            "P15 PALETTE · {slots}\nCrown / Barrow / Ironworks / Wildwood / Environment / UI"
+            "P15 PALETTE | {slots}\nCrown / Barrow / Ironworks / Wildwood / Environment / UI"
         )),
         TextFont {
             font_size: FontSize::Px(16.0),
@@ -42,7 +42,7 @@ pub fn spawn(
         Node {
             position_type: PositionType::Absolute,
             left: px(12),
-            top: px(36),
+            top: px(12),
             max_width: percent(94),
             ..default()
         },

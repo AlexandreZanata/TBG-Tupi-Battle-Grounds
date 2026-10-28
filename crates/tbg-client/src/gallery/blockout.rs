@@ -1,5 +1,6 @@
 //! Eight gray v2 bodies and a front-facing silhouette row for the P15 review.
 
+use super::layout::Layout;
 use crate::{
     art::{anim::Animator, figure, FigureLibrary},
     config,
@@ -11,6 +12,7 @@ pub fn spawn(
     commands: &mut Commands,
     lib: &FigureLibrary,
     mut mats: ResMut<Assets<StandardMaterial>>,
+    portrait: bool,
 ) {
     let silhouette = config::url_param("silhouette").is_some();
     let material = if silhouette {
@@ -26,7 +28,11 @@ pub fn spawn(
         let form = lib.blockout(kind);
         let root = commands
             .spawn((
-                Transform::from_xyz(0.6 + i as f32 * 2.1, 0.0, 0.0),
+                Transform::from_translation(if portrait && !silhouette {
+                    Vec3::new(6.5 + (i % 2) as f32 * 3.0, 0.0, -3.0 + (i / 2) as f32 * 2.0)
+                } else {
+                    Vec3::new(0.6 + i as f32 * 2.1, 0.0, 0.0)
+                }),
                 Visibility::default(),
             ))
             .id();
@@ -45,8 +51,23 @@ pub fn spawn(
             animator.preview = Some((crate::art::anim::Clip::Idle, 0.0));
         }
         commands.entity(root).add_child(figure).insert(animator);
+        if !silhouette {
+            commands.entity(root).insert(Layout::Blockout(i));
+        }
     }
-    commands.spawn((Text::new("P15 BLOCKOUTS · Crown / Barrow / Ironworks / Wildwood\nShieldbearer · Archer · Bone Brute · Hexer · Sawknight · Ogre Archer · Bloomkeeper · Rootcaller"),
-        TextFont { font_size: FontSize::Px(16.0), ..default() }, TextColor(crate::art::palette::INK),
-        Node { position_type: PositionType::Absolute, left: px(12), top: px(36), max_width: percent(94), ..default() }));
+    commands.spawn((
+        Text::new("P15 BLOCKOUTS | rig v2\nCrown / Barrow / Ironworks / Wildwood"),
+        TextFont {
+            font_size: FontSize::Px(16.0),
+            ..default()
+        },
+        TextColor(crate::art::palette::INK),
+        Node {
+            position_type: PositionType::Absolute,
+            left: px(12),
+            top: px(12),
+            max_width: percent(94),
+            ..default()
+        },
+    ));
 }

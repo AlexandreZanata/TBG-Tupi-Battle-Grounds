@@ -189,3 +189,17 @@ Status: implementation in progress; **owner sign-off pending**.
 - Reviewer judgment and owner glance on identification remain pending.
 - Corrected the saw's viewing plane and hid arena/tower geometry for the
   silhouette board after inspecting the first capture.
+
+### Step 5 evidence
+
+- Native check and release build passed. Browser verified named `archer`,
+  slow motion, turntable, silhouette, and frozen quarter-frame contact sheet.
+- `&clip=attackranged` optionally narrows a contact sheet to one clip.
+  Unfiltered `&frames` shows all ten clips of the selected base form;
+  ordinary named-unit gallery shows all five forms cycling all clips.
+- Gallery modules are each below 200 lines. Responsive layout reflows
+  after Bevy receives the browser's initial resize.
+- Palette phone capture was replaced with the correctly framed 375 × 812 view.
+- `&measure` counts actual WebGL draw calls (including shadow passes) and
+  rendered RAF frames over five seconds. Tool smoke check: 60.0 FPS,
+  55 draws/frame for the old Archer quarter-frame sheet on this desktop.
