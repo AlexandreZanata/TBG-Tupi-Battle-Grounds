@@ -139,14 +139,14 @@ fn lights(commands: &mut Commands) {
     let shadows = config::url_param("shadows").as_deref() != Some("0");
     commands.spawn((
         DirectionalLight {
-            color: Color::srgb_u8(0xFF, 0xF4, 0xE0),
+            color: KEY,
             shadow_maps_enabled: shadows,
             ..default()
         },
         Transform::from_xyz(4.0, 12.0, 9.0).looking_at(Vec3::new(8.0, 0.0, 0.0), Vec3::Y),
     ));
     commands.insert_resource(GlobalAmbientLight {
-        color: SKY,
+        color: AMBIENT_SKY,
         brightness: 420.0,
         ..default()
     });

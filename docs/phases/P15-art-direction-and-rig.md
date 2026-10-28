@@ -138,4 +138,22 @@ ARCHITECTURE §7 points to ART-DIRECTION and describes rig v2.
 
 ## Phase report
 
-_Executor fills this in; owner answers (a)(b)(c) are recorded here._
+Status: implementation in progress; **owner sign-off pending**.
+
+### Step 1 evidence
+
+- Release WASM palette board observed in the browser, no console warnings/errors.
+- Screenshot: [palette desktop](../media/p15/palette-desktop.jpg) (1280 × 800).
+- `trunk build --release`: `Finished release profile [optimized] target(s) in 48.31s`.
+- Two-tone ambient uses the sky fill plus baked ground-facing vertex color;
+  the key light and fog are shared with the game.
+
+### Deviations (in progress)
+
+- The phase says 18 body joints, but its exact enum contains 17. Use the
+  17 specified names, plus three secondary joints and three sockets.
+- P14 sign-off was not supplied with this request; execution starts from
+  the requested P13 main. P14 owner validation remains an external prerequisite.
+- The specified server command needs `--bin tbg-server`: Cargo reports
+  `error: cargo run could not determine which binary to run. Use the --bin option to specify a binary, or the default-run manifest key.`
+

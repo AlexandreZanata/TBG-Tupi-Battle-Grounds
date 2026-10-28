@@ -2,6 +2,8 @@
 //! arena, cycling through every animation clip, for visual review and
 //! screenshots. Logs triangles per form at startup (see `art`).
 
+mod palette;
+
 use bevy::prelude::*;
 use tbg_core::UNIT_KINDS;
 
@@ -33,7 +35,17 @@ pub fn plugin(app: &mut App) {
     }
 }
 
-fn spawn(mut commands: Commands, assets: Res<VisualAssets>, lib: Res<FigureLibrary>) {
+fn spawn(
+    mut commands: Commands,
+    assets: Res<VisualAssets>,
+    lib: Res<FigureLibrary>,
+    meshes: ResMut<Assets<Mesh>>,
+    mats: ResMut<Assets<StandardMaterial>>,
+) {
+    if config::url_param("gallery").as_deref() == Some("palette") {
+        palette::spawn(&mut commands, meshes, mats);
+        return;
+    }
     for (col, kind) in UNIT_KINDS.into_iter().enumerate() {
         for (row, (tier, branch)) in FORMS.into_iter().enumerate() {
             info!(
@@ -73,7 +85,12 @@ fn cycle(time: Res<Time>, mut figures: Query<(&mut Animator, &mut Cycle)>) {
 }
 
 /// `?gallery=N` frames unit column N (0..7) up close for review.
-fn close_up(mut camera: Single<&mut Transform, With<ArenaCamera>>) {
+fn close_up(mut camera: Single<&mut Transform, With<ArenaCamera>>, window: Single<&Window>) {
+    if config::url_param("gallery").as_deref() == Some("palette") {
+        **camera =
+            Transform::from_xyz(8.0, 11.0, 14.0).looking_at(Vec3::new(8.0, 0.5, 0.0), Vec3::Y);
+        return;
+    }
     let Some(col) = config::url_param("gallery").and_then(|v| v.parse::<f32>().ok()) else {
         return;
     };
