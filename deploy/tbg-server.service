@@ -16,6 +16,8 @@ KillSignal=SIGTERM
 TimeoutStopSec=330
 LimitNOFILE=65536
 NoNewPrivileges=true
+# P14: files the server creates (database, WAL) are private to `tbg`.
+UMask=0077
 
 [Install]
 WantedBy=multi-user.target

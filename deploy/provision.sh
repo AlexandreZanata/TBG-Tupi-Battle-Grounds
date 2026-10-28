@@ -25,8 +25,10 @@ if [ "$(awk '/MemTotal/ {print $2}' /proc/meminfo)" -lt 3000000 ] && ! swapon --
 fi
 
 id -u tbg >/dev/null 2>&1 || useradd --system --home /var/lib/tbg --shell /usr/sbin/nologin tbg
-install -d -o root -g root /opt/tbg/bin /srv/tbg/web /var/backups/tbg
-install -d -o tbg -g tbg /var/lib/tbg
+install -d -o root -g root /opt/tbg/bin /srv/tbg/web
+# P14: the database and its backups hold names, ratings, and key hashes.
+install -d -m 700 -o root -g root /var/backups/tbg
+install -d -m 700 -o tbg -g tbg /var/lib/tbg
 
 if ! sudo -u "$SSH_USER" bash -lc 'command -v cargo' >/dev/null 2>&1; then
 	sudo -u "$SSH_USER" bash -lc 'curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal'

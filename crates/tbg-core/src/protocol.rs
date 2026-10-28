@@ -9,7 +9,7 @@ use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-pub const PROTOCOL_VERSION: u16 = 4;
+pub const PROTOCOL_VERSION: u16 = 5;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ.
@@ -53,6 +53,9 @@ pub enum ErrorCode {
     ServerFull,
     // P12: appended at the end (older peers are rejected by version).
     LoginRequired,
+    // P14: sent to the old socket when the same account logs in elsewhere
+    // (BR-P03), right before the server closes it.
+    SessionTakenOver,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

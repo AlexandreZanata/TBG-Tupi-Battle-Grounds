@@ -167,10 +167,16 @@ async fn br_r04_ranked_forfeit_is_a_loss() {
     register_as(&mut b, "StayB").await;
     send(&mut a, &ClientMsg::RankedMatch).await;
     send(&mut b, &ClientMsg::RankedMatch).await;
+    // Which seat each socket got depends on queue arrival order (two
+    // connections race), so read the stayer's seat instead of assuming it.
+    let mut stayer_seat = None;
     for ws in [&mut a, &mut b] {
         loop {
             match recv(ws).await {
-                Some(ServerMsg::MatchStart { .. }) => break,
+                Some(ServerMsg::MatchStart { you, .. }) => {
+                    stayer_seat = Some(you);
+                    break;
+                }
                 Some(_) => continue,
                 None => panic!("match never started"),
             }
@@ -179,7 +185,7 @@ async fn br_r04_ranked_forfeit_is_a_loss() {
     drop(a);
     let outcome = play_idle(&mut b).await;
     assert_eq!(outcome.reason, tbg_core::EndReason::Forfeit);
-    assert_eq!(outcome.winner, Some(tbg_core::Seat::B));
+    assert_eq!(outcome.winner, stayer_seat);
     match recv(&mut b).await {
         Some(ServerMsg::RatingChanged {
             before: 1000,
