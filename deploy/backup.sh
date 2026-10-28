@@ -3,6 +3,8 @@
 # Keeps the 7 newest copies. Optional weekly off-site copy (Sundays) to
 # TBG_BACKUP_REMOTE, an rsync/scp target set in /etc/default/tbg-backup.
 set -euo pipefail
+# P14: backups hold names, ratings, and key hashes; owner-only.
+umask 077
 
 DB="${TBG_DB:-/var/lib/tbg/tbg.sqlite3}"
 DIR="${TBG_BACKUP_DIR:-/var/backups/tbg}"
