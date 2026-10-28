@@ -29,6 +29,10 @@ fn factions_json(factions: [u32; 4]) -> String {
     .to_string()
 }
 
+pub(super) fn count(conn: &Connection) -> rusqlite::Result<i64> {
+    conn.query_row("SELECT count(*) FROM ranked_matches", [], |r| r.get(0))
+}
+
 /// Settle a ranked match. Returns per-seat `(before, after, profile)`.
 pub(super) fn ranked_result(
     conn: &mut Connection,

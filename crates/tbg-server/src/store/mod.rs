@@ -35,6 +35,7 @@ enum StoreCmd {
     },
     InsertMatch(Value),
     CountMatches(Reply<rusqlite::Result<i64>>),
+    CountRanked(Reply<rusqlite::Result<i64>>),
     RankedResult {
         a: AccountId,
         b: AccountId,
@@ -127,6 +128,15 @@ impl Store {
         reply_rx.await.map_err(|_| AccountError::Unavailable)?
     }
 
+    /// Test/support helper: ranked-row count over the writer thread.
+    pub async fn ranked_match_count(&self) -> rusqlite::Result<i64> {
+        let (reply_tx, reply_rx) = oneshot::channel();
+        self.tx
+            .try_send(StoreCmd::CountRanked(reply_tx))
+            .map_err(|_| rusqlite::Error::InvalidQuery)?;
+        reply_rx.await.map_err(|_| rusqlite::Error::InvalidQuery)?
+    }
+
     /// Test/support helper: row count over the writer thread. The count
     /// goes through the same queue, so it observes every insert sent before.
     pub async fn match_count(&self) -> rusqlite::Result<i64> {
@@ -163,6 +173,9 @@ fn worker(mut conn: rusqlite::Connection, rx: std::sync::mpsc::Receiver<StoreCmd
             }
             StoreCmd::CountMatches(reply) => {
                 let _ = reply.send(matches::count(&conn));
+            }
+            StoreCmd::CountRanked(reply) => {
+                let _ = reply.send(ranked::count(&conn));
             }
             StoreCmd::RankedResult {
                 a,
