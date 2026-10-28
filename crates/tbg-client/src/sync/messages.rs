@@ -88,17 +88,22 @@ pub(super) fn poll_link(
     }
     stats.0.lag_ms = link.lag_ms();
     stats.0.ack_ms = link.ack_ms();
+    let quiet = link.is_quiet_probe();
     ui.1 .0 = match link.status() {
+        _ if quiet => None,
         Some(NetStatus::Reconnecting { since }) => {
             let left = (GIVE_UP - (now - since)).max(0.0);
-            Some(format!("Reconnecting… {left:.0} s"))
+            Some(format!("Reconnecting... {left:.0} s"))
         }
         Some(NetStatus::Connecting) => Some("Connecting...".into()),
         _ => None,
     };
     if let Some(NetStatus::Failed(why)) = link.status() {
-        ui.0.push(why.clone());
+        // A failed load-time probe is silent; the menu just stays usable.
+        if !quiet {
+            ui.0.push(why.clone());
+            next.set(GameState::Menu);
+        }
         *link = MatchLink::Idle;
-        next.set(GameState::Menu);
     }
 }

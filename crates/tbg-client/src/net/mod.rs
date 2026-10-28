@@ -76,6 +76,12 @@ impl NetLink {
         (self.lag * 2000.0) as u32
     }
 
+    /// A load-time probe outside a match: its connection state is not
+    /// something the player asked for, so the UI stays quiet about it.
+    pub fn is_quiet_probe(&self) -> bool {
+        matches!(self.mode, Mode::Probe) && !self.in_match
+    }
+
     /// p50 tap-to-ack latency in ms (`None` before the first ack).
     pub fn ack_ms(&self) -> Option<f64> {
         self.ack.ms()

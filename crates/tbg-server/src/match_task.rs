@@ -107,8 +107,13 @@ async fn run(
         for p in &mut m.pending {
             p.extend(ev.iter().cloned());
         }
-        // P9: regular 10 Hz views plus an acknowledgement view to the
-        // seat whose intention was applied (or rejected) this tick.
+        // Forfeits first, so a forfeit's final view still goes out below.
+        for seat in Seat::BOTH {
+            if m.detached_at[seat.index()].is_some_and(|t| t.elapsed() > window) {
+                m.state.forfeit(seat);
+            }
+        }
+        // 10 Hz views, plus an ack view to a seat whose intention was processed.
         let ended = m.state.outcome.is_some();
         for seat in Seat::BOTH {
             if m.state.tick.is_multiple_of(2) || ended || m.applied[seat.index()] {
@@ -116,11 +121,6 @@ async fn run(
             }
         }
         m.applied = [false; 2];
-        for seat in Seat::BOTH {
-            if m.detached_at[seat.index()].is_some_and(|t| t.elapsed() > window) {
-                m.state.forfeit(seat);
-            }
-        }
         if let Some(outcome) = m.state.outcome {
             for seat in Seat::BOTH {
                 m.send(seat, ServerMsg::MatchEnd { outcome });

@@ -33,9 +33,14 @@ impl NetLink {
     pub(super) fn lost(&mut self, now: f64) {
         self.socket = None;
         self.opened = false;
-        if !matches!(self.status, NetStatus::Failed(_)) {
-            self.status = NetStatus::Reconnecting { since: now };
-            self.lost_at.get_or_insert(now);
+        if matches!(self.status, NetStatus::Failed(_)) {
+            return;
+        }
+        // A failed retry must not restart the backoff or the countdown.
+        let first = self.lost_at.is_none();
+        let since = *self.lost_at.get_or_insert(now);
+        self.status = NetStatus::Reconnecting { since };
+        if first {
             self.tries = 0;
             self.next_try = now + delay(0);
         }
