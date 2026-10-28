@@ -15,7 +15,7 @@ form)** that the owner approves. Everything after this phase copies it.
 ## Deliverable
 
 - `docs/ART-DIRECTION.md` values locked (palette, proportions, names).
-- Rig v2 in `src/art/` (18 body joints + up to 3 spring joints + sockets),
+- Rig v2 in `src/art/` (17 body joints + up to 3 spring joints + sockets),
   with the old 12-joint figures still rendering through an adapter until
   each unit is redone (P22–P29).
 - `?gallery=blockout`: all 8 units as gray-box blockouts on rig v2.
@@ -255,3 +255,52 @@ The desktop browser at a phone viewport is not a phone benchmark.
   remain because no owner approval was supplied; locking is pending.
 - D-22 and ROADMAP status are unchanged. The reviewer owns integration
   and status updates; no phase completion or approval is claimed.
+
+### Review (reviewer, 2026-10-28)
+
+Inherited the executor's seven commits plus its uncommitted report and
+captures (committed as 42e6093), merged `main` (P10–P14 and the protocol v6
+surrender/names/login fixes) into the branch with no conflicts, and re-ran
+everything on the merged tip.
+
+- **Scope:** the branch changes only `crates/tbg-client` and `docs`; no
+  gameplay, server, protocol, or `tbg-core` change (the determinism goldens in
+  `contract_determinism.rs` are unchanged and pass).
+- **Verification:** `cargo fmt --check`; `clippy --workspace --all-targets -D
+  warnings` and wasm32 clippy: 0 findings; wasm32 `cargo check` ok;
+  `cargo test --workspace`: 93 passed, 0 failed (88 from `main` + 5 art tests:
+  strike sampling, two footsteps per walk cycle, easing endpoints/Hold, planted
+  foot holds world X, and the Archer budget + Release anchor);
+  `trunk build --release` ok, WASM 24 492 794 bytes (+119 KB over `main`).
+- **Archer budget:** 1 042 figure + 74 bow/arrow = **1 116 triangles** (limit
+  1 500), asserted by `archer_budget_and_release_anchor_obey_p15`.
+- **Standards:** every P15 file ≤ 200 lines with a `//!` header; `rig.rs`,
+  `springs.rs`, `curves.rs`, `feet.rs`, and `mesh.rs` name no unit (rig v2 is
+  data-driven). Observation: `anim.rs` routes the Archer base through an
+  `archer` flag to `archer_clips` — acceptable for the style lock; P16
+  (per-Archetype clip sets) should replace the flag with data.
+- **Joint count:** the Deliverable said 18 body joints while the spec's exact
+  enum (and the code) has 17; resolved in the spec text as 17.
+- **Browser (release build, merged tip, 1280×800, in-app browser):**
+  `?gallery=archer` (base in final art + four adapted evolutions),
+  `&frames&clip=attackranged` contact sheet (identical frames to the executor's
+  capture: rest, anchor, follow-through, recovery), and
+  `?gallery=blockout&silhouette`. A live practice match (`?autoplay=practice`)
+  shows the new Archer next to adapted enemy units (Siege Walker, Bone Brute)
+  with the v6 HUD (names beside the bars, Surrender): 41–81 FPS, no console
+  errors — [live match](../media/p15/live-match-adapter-desktop.jpg).
+- **Silhouette row (reviewer judgment):** all eight are identifiable at the
+  64 px row by their hooks; the weakest is Rootcaller, whose root claws read
+  as a small spike — revisit in P29. Archer and Siege Walker both show a bow;
+  body size (Humanoid vs Large) separates them.
+- **Performance:** `?gallery=archer&stress=30&measure` reproduced **169 draws
+  per frame** (executor: 168.9). FPS cannot be judged here: this browser pane
+  renders WebGL in software (it logs no GPU compute/clustering) and reported
+  0.7 FPS for 60 shadowed figures. The executor's GPU desktop measurement
+  (165 FPS) stands; the ≥ 30 FPS mid-range **phone** criterion stays open
+  until a physical phone is measured.
+
+**Status: implementation complete and reviewed; owner sign-off (a), (b),
+(c) of step 7 pending**, together with the step-8 locking it unlocks (remove
+*start* marks in ART-DIRECTION for approved values) and the physical-phone
+FPS check. P16 starts only after (a) is approved.
