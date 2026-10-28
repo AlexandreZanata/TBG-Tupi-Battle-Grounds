@@ -46,6 +46,17 @@ impl MatchLink {
             _ => 0,
         }
     }
+
+    pub fn is_quiet_probe(&self) -> bool {
+        matches!(self, MatchLink::Net(n) if n.is_quiet_probe())
+    }
+
+    pub fn ack_ms(&self) -> Option<f64> {
+        match self {
+            MatchLink::Net(n) => n.ack_ms(),
+            _ => None,
+        }
+    }
 }
 
 pub fn plugin(app: &mut App) {

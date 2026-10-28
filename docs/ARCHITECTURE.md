@@ -123,13 +123,16 @@ tables are the one allowed exception.
   `PlayerIntention = Purchase{offer} | Evolve{unit, branch}`;
   `ServerMsg = Welcome{token, name} | VersionMismatch{server} | Queued | RoomCreated{code} | RoomNotFound | MatchStart{you, opponent} | View(MatchView) | Rejected{seq, reason} | MatchEnd{outcome} | Ping{id} | NetStats{rtt_ms} | Error{code}`.
   Intentions carry no seat: the server derives the seat from the connection.
-- **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat.
+- **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
+  plus an immediate acknowledgement view to the seat whose intention was
+  applied or rejected that tick (P9).
   Clients render about 120 ms behind the newest view and interpolate x.
 - **Prediction:** UI-level only — a tapped card shows pending and `Energy`
   dims optimistically until `last_seq` confirms or `Rejected` arrives.
 - **Sessions:** the server issues a random 128-bit token in `Welcome`; the
-  client keeps it in `localStorage`. No accounts; display names are
-  generated (`Commander 4821`).
+  client keeps it per tab (`sessionStorage`) and opens a listen-only probe
+  link on page load, resuming a live match with no tap (P9). No accounts;
+  display names are generated (`Commander 4821`).
 - **Matchmaking:** quick match is a FIFO queue; private rooms use a
   5-character code (unambiguous alphabet, 10-minute expiry), shared as a
   link `?room=CODE`. Bot practice runs locally in the browser.
@@ -141,7 +144,9 @@ tables are the one allowed exception.
   match; they talk through `tokio::sync::mpsc`. No locks on game state.
 - **Limits:** handshake within 5 s; inbound frame ≤ 1 KiB; token bucket
   20 msgs/s (burst 40) per connection, then disconnect; ≤ 8 sockets per IP;
-  server ping every 1 s, idle timeout 15 s; global connection cap from config.
+  server ping every 1 s plus protocol-level pings every 5 s (any frame —
+  binary, ping, or pong — resets the 15 s idle timer, so hidden tabs stay
+  connected); global connection cap from config.
 - **Latency measurement:** the server sends `Ping{id}` every second,
   computes RTT from `Pong{id}`, records it, and returns `NetStats{rtt_ms}`
   for the client overlay. The client also measures view inter-arrival
@@ -282,6 +287,7 @@ buying.
 | Server memory | ≤ 100 KB per match + about 64 KB per socket | P4 local: 89.5 MB RSS at 300 matches |
 | Bandwidth per player | ≤ 6 KB/s down, ≤ 0.5 KB/s up | P4 local: 1.46 KB/s down, 3 B/s up |
 | View-gap p95 under 40 ± 20 ms added latency | ≤ 150 ms | P4 local: 128 ms |
+| Ack latency p95 (tap to first covering view) | ≤ RTT p95 + 60 ms | P9: measured in the phase report |
 | Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | P4 local: 300 matches = 1.06 cores, 0 late ticks; VPS pending (P5) |
 
 **Capacity reasoning.** Simulation CPU is tiny (about 20 units, integer

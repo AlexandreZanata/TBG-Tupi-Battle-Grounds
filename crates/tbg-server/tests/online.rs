@@ -209,6 +209,120 @@ async fn forfeit_after_window() {
 }
 
 #[tokio::test]
+async fn intent_is_acknowledged_next_tick() {
+    // P9: the acting seat gets a view with `last_seq >= seq` (or a
+    // rejection) within 2 ticks + local slack after its intention.
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let url = format!("ws://{}/ws", listener.local_addr().unwrap());
+    let config = Config {
+        tick_ms: 50,
+        max_per_ip: 1_000,
+        ..Config::default()
+    };
+    tokio::spawn(tbg_server::run(config, listener));
+    let (mut a, mut b) = (connect(&url).await, connect(&url).await);
+    hello(&mut a).await;
+    hello(&mut b).await;
+    send(&mut a, &ClientMsg::QuickMatch).await;
+    send(&mut b, &ClientMsg::QuickMatch).await;
+    // Wait for the first view so the shop offers exist server-side.
+    let mut first_view = false;
+    while !first_view {
+        match recv(&mut a).await {
+            Some(ServerMsg::View(_)) => first_view = true,
+            Some(_) => {}
+            None => panic!("socket closed before first view"),
+        }
+    }
+    let seq = 7u32;
+    let t0 = std::time::Instant::now();
+    send(
+        &mut a,
+        &ClientMsg::Intent {
+            seq,
+            intent: PlayerIntention::Purchase { offer: 0 },
+        },
+    )
+    .await;
+    loop {
+        match tokio::time::timeout(Duration::from_secs(10), recv(&mut a)).await {
+            Ok(Some(ServerMsg::View(v))) if v.last_seq >= seq => break,
+            Ok(Some(ServerMsg::Rejected { seq: s, .. })) if s == seq => break,
+            Ok(Some(_)) => continue,
+            _ => panic!("no ack view for seq {seq}"),
+        }
+    }
+    let ms = t0.elapsed().as_millis();
+    assert!(ms <= 500, "ack took {ms} ms (> 2 ticks + slack)");
+}
+
+#[tokio::test]
+async fn protocol_pong_keeps_socket_alive() {
+    // P9: a client that answers protocol pings but sends no app message
+    // for 20 s (a hidden tab) is still connected (idle timeout is 15 s).
+    let url = server(30).await;
+    let (mut ws, _) = connect_async(url.as_str()).await.unwrap();
+    send(
+        &mut ws,
+        &ClientMsg::Hello {
+            version: PROTOCOL_VERSION,
+            resume: None,
+        },
+    )
+    .await;
+    let deadline = std::time::Instant::now() + Duration::from_secs(20);
+    loop {
+        let msg = tokio::time::timeout(Duration::from_secs(25), async {
+            use futures_util::StreamExt;
+            ws.next().await
+        })
+        .await
+        .expect("timed out waiting for server frames")
+        .expect("stream ended")
+        .expect("socket error");
+        match msg {
+            Message::Binary(b) => match protocol::decode_server(&b).unwrap() {
+                ServerMsg::Welcome { .. } => {}
+                ServerMsg::Ping { id } => {
+                    send(&mut ws, &ClientMsg::Pong { id }).await;
+                }
+                _ => {}
+            },
+            Message::Ping(payload) => {
+                use futures_util::SinkExt;
+                ws.send(Message::Pong(payload)).await.unwrap();
+            }
+            Message::Close(_) => panic!("server closed the hidden-tab socket"),
+            _ => {}
+        }
+        if std::time::Instant::now() >= deadline {
+            break;
+        }
+    }
+    // Still alive: the server answers a fresh ping round.
+    send(&mut ws, &ClientMsg::QuickMatch).await;
+    loop {
+        let msg = tokio::time::timeout(Duration::from_secs(10), async {
+            use futures_util::StreamExt;
+            ws.next().await
+        })
+        .await
+        .expect("no reply after 20 s of protocol-only activity")
+        .expect("stream ended")
+        .expect("socket error");
+        if let Message::Binary(b) = msg {
+            match protocol::decode_server(&b).unwrap() {
+                ServerMsg::Queued => break,
+                ServerMsg::Ping { id } => {
+                    send(&mut ws, &ClientMsg::Pong { id }).await;
+                }
+                _ => continue,
+            }
+        }
+    }
+}
+
+#[tokio::test]
 async fn private_room_pairs_owner_and_guest() {
     let url = server(30).await;
     let (mut owner, mut guest) = (connect(&url).await, connect(&url).await);

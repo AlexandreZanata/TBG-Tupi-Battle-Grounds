@@ -7,7 +7,7 @@ use std::time::Duration;
 use futures_util::{SinkExt, StreamExt};
 use tokio::sync::mpsc;
 use tokio::time::{sleep, sleep_until, timeout, Instant};
-use tokio_tungstenite::{connect_async, tungstenite::Message};
+use tokio_tungstenite::{connect_async_with_config, tungstenite::Message};
 
 use tbg_core::bot::Bot;
 use tbg_core::protocol::{self, ClientMsg, Token, PROTOCOL_VERSION};
@@ -49,6 +49,10 @@ pub struct BotResult {
     pub outcome: Option<Outcome>,
     pub rtt_ms: Vec<u16>,
     pub view_gaps_ms: Vec<u32>,
+    /// P9: tap-to-acknowledgement latency per intention (ms).
+    pub ack_ms: Vec<u16>,
+    /// P9: lobby queue wait per match (ms).
+    pub queue_wait_ms: Vec<u16>,
     pub rejections: u32,
     pub dropped: bool,
     pub reconnected: bool,
@@ -62,6 +66,10 @@ pub(super) struct Session {
     pub(super) seq: u32,
     pub(super) last_view: Option<Instant>,
     pub(super) drop_at: Option<Instant>,
+    /// P9: send time per unacknowledged intention seq.
+    pub(super) pending: Vec<(u32, Instant)>,
+    /// P9: when `QuickMatch` was sent for the current match.
+    pub(super) queue_start: Option<Instant>,
 }
 
 pub(super) enum Step {
@@ -79,6 +87,8 @@ pub async fn play_one(opts: BotOpts, seed: u64) -> BotResult {
         seq: 0,
         last_view: None,
         drop_at: None,
+        pending: Vec::new(),
+        queue_start: None,
     };
     loop {
         match connect_and_play(&opts, &mut s, &mut r, deadline).await {
@@ -109,10 +119,14 @@ async fn connect_and_play(
     r: &mut BotResult,
     deadline: Instant,
 ) -> Result<Step, String> {
-    let (ws, _) = timeout(Duration::from_secs(10), connect_async(opts.url.as_str()))
-        .await
-        .map_err(|_| "connect timeout".to_string())?
-        .map_err(|e| format!("connect: {e}"))?;
+    // P9: disable Nagle on the bot socket (`TCP_NODELAY`), like the server.
+    let (ws, _) = timeout(
+        Duration::from_secs(10),
+        connect_async_with_config(opts.url.as_str(), None, true),
+    )
+    .await
+    .map_err(|_| "connect timeout".to_string())?
+    .map_err(|e| format!("connect: {e}"))?;
     let (mut write, mut read) = ws.split();
     let (in_tx, mut in_rx) = mpsc::unbounded_channel::<(Instant, Vec<u8>)>();
     let (out_tx, mut out_rx) = mpsc::unbounded_channel::<(Instant, Vec<u8>)>();
