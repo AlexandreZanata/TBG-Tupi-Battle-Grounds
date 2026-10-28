@@ -18,6 +18,8 @@ pub struct Metrics {
     pub ticks: AtomicU64,
     pub rejections: AtomicU64,
     rtt: Mutex<VecDeque<(Instant, u16)>>,
+    /// P9: lobby queue waits (ms) over the last 60 s.
+    queue_wait: Mutex<VecDeque<(Instant, u64)>>,
     started: Instant,
 }
 
@@ -34,6 +36,7 @@ impl Default for Metrics {
             ticks: AtomicU64::new(0),
             rejections: AtomicU64::new(0),
             rtt: Mutex::new(VecDeque::new()),
+            queue_wait: Mutex::new(VecDeque::new()),
             started: Instant::now(),
         }
     }
@@ -43,6 +46,17 @@ impl Metrics {
     pub fn record_rtt(&self, ms: u16) {
         let now = Instant::now();
         if let Ok(mut q) = self.rtt.lock() {
+            q.push_back((now, ms));
+            while q.front().is_some_and(|(t, _)| now - *t > RTT_WINDOW) {
+                q.pop_front();
+            }
+        }
+    }
+
+    /// P9: time from `QuickMatch` to `MatchStart` for one session.
+    pub fn record_queue_wait(&self, ms: u64) {
+        let now = Instant::now();
+        if let Ok(mut q) = self.queue_wait.lock() {
             q.push_back((now, ms));
             while q.front().is_some_and(|(t, _)| now - *t > RTT_WINDOW) {
                 q.pop_front();
@@ -61,6 +75,12 @@ impl Metrics {
             .map(|q| q.iter().map(|(_, ms)| *ms).collect())
             .unwrap_or_default();
         rtts.sort_unstable();
+        let mut waits: Vec<u64> = self
+            .queue_wait
+            .lock()
+            .map(|q| q.iter().map(|(_, ms)| *ms).collect())
+            .unwrap_or_default();
+        waits.sort_unstable();
         let get = |c: &AtomicU64| c.load(Relaxed);
         serde_json::json!({
             "uptime_s": self.started.elapsed().as_secs(),
@@ -76,6 +96,8 @@ impl Metrics {
             "rtt_p50_ms": percentile(&rtts, 0.50),
             "rtt_p95_ms": percentile(&rtts, 0.95),
             "rtt_max_ms": rtts.last().copied().unwrap_or(0),
+            "queue_wait_p50_ms": percentile(&waits, 0.50),
+            "queue_wait_p95_ms": percentile(&waits, 0.95),
         })
     }
 }

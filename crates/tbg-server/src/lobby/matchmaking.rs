@@ -16,10 +16,12 @@ impl Lobby {
         match self.queue.iter().position(|t| *t != token) {
             Some(i) => {
                 let other = self.queue.remove(i);
+                self.queued_at.remove(&other);
                 self.pair([other, token]);
             }
             None => {
                 self.queue.push(token);
+                self.queued_at.insert(token, Instant::now());
                 if let Some(s) = self.session(&token) {
                     s.state = SessionState::Queued;
                     send(&s.conn, ConnEvent::Send(ServerMsg::Queued));
@@ -69,6 +71,7 @@ impl Lobby {
     /// Leave the queue or an open room (no-op when idle).
     pub(super) fn leave_waiting(&mut self, token: Token) {
         self.queue.retain(|t| *t != token);
+        self.queued_at.remove(&token);
         self.rooms.retain(|(_, owner, _)| *owner != token);
         if let Some(s) = self.session(&token) {
             if matches!(s.state, SessionState::Queued | SessionState::InRoom) {
@@ -78,6 +81,13 @@ impl Lobby {
     }
 
     pub(super) fn pair(&mut self, tokens: [Token; 2]) {
+        // P9: queue wait per paired session (the joiner waited ~0 ms).
+        for t in tokens {
+            if let Some(t0) = self.queued_at.remove(&t) {
+                self.metrics
+                    .record_queue_wait(t0.elapsed().as_millis().min(u128::from(u64::MAX)) as u64);
+            }
+        }
         let players = tokens.map(|t| {
             let s = self.sessions.iter().find(|s| s.token == t);
             Player {
