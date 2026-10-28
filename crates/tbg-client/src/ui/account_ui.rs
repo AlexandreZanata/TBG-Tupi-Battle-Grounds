@@ -43,6 +43,11 @@ pub fn apply_action(
                 config::copy_text(key);
                 *saved = true;
                 toasts.push("Key copied - store it somewhere safe");
+            } else if account.profile.is_some() {
+                if let Some(key) = config::load_account_key() {
+                    config::copy_text(&key);
+                    toasts.push("Key copied - store it somewhere safe");
+                }
             }
         }
         UiAction::DownloadKey => {

@@ -8,7 +8,10 @@ pub(super) struct DesktopLobby(pub bool);
 pub fn plugin(app: &mut App) {
     app.init_resource::<DesktopLobby>();
     #[cfg(target_arch = "wasm32")]
-    app.add_systems(PreUpdate, web::update);
+    app.add_systems(
+        PreUpdate,
+        (super::desktop_actions::poll, web::update).chain(),
+    );
 }
 
 #[cfg(target_arch = "wasm32")]

@@ -9,6 +9,8 @@ pub mod account;
 mod account_ui;
 mod actions;
 mod desktop;
+#[cfg(target_arch = "wasm32")]
+mod desktop_actions;
 mod evolve;
 #[cfg(test)]
 mod glyphs;
