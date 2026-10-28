@@ -5,51 +5,33 @@
 
 use std::path::Path;
 use std::sync::mpsc::{sync_channel, SyncSender};
+use std::sync::Arc as StdArc;
 
 use serde_json::Value;
-use tokio::sync::oneshot;
+use tokio::sync::{oneshot, watch};
 
 use tbg_core::protocol::{AccountError, Profile, RatingResults};
 use tbg_core::Outcome;
 
 mod accounts;
+pub mod leaderboard;
 mod matches;
 mod ranked;
 mod schema;
+mod worker;
+
+use worker::{worker, StoreCmd};
+
+pub use leaderboard::{LeaderRow, Snapshot};
 
 pub type AccountId = i64;
-
-type Reply<T> = oneshot::Sender<T>;
-
-enum StoreCmd {
-    Register {
-        name: String,
-        name_lower: String,
-        key_hash: [u8; 32],
-        reply: Reply<Result<(AccountId, Profile), AccountError>>,
-    },
-    Login {
-        name_lower: String,
-        key_hash: [u8; 32],
-        reply: Reply<Result<(AccountId, Profile), AccountError>>,
-    },
-    InsertMatch(Value),
-    CountMatches(Reply<rusqlite::Result<i64>>),
-    CountRanked(Reply<rusqlite::Result<i64>>),
-    RankedResult {
-        a: AccountId,
-        b: AccountId,
-        outcome: Option<Outcome>,
-        duration_s: u64,
-        factions: [[u32; 4]; 2],
-        reply: Reply<Result<RatingResults, AccountError>>,
-    },
-}
 
 /// Handle to the single writer thread.
 #[derive(Clone)]
 pub struct Store {
     tx: SyncSender<StoreCmd>,
+    /// P13: published leaderboard; readers clone the `Arc`, never query.
+    snapshot_tx: watch::Sender<StdArc<Snapshot>>,
 }
 
 impl Store {
@@ -57,11 +39,23 @@ impl Store {
         let mut conn = rusqlite::Connection::open(path)?;
         schema::migrate(&mut conn)?;
         let (tx, rx) = sync_channel::<StoreCmd>(1024);
+        let (snapshot_tx, _) = watch::channel(StdArc::new(leaderboard::build(&conn)?));
+        let snapshots = snapshot_tx.clone();
         std::thread::Builder::new()
             .name("tbg-store".into())
-            .spawn(move || worker(conn, rx))
+            .spawn(move || worker(conn, rx, snapshots))
             .map_err(|_| rusqlite::Error::InvalidPath(path.to_path_buf()))?;
-        Ok(Store { tx })
+        Ok(Store { tx, snapshot_tx })
+    }
+
+    /// Current leaderboard snapshot (no SQL on this path).
+    pub fn snapshot(&self) -> StdArc<Snapshot> {
+        self.snapshot_tx.borrow().clone()
+    }
+
+    /// Watch for rebuilt snapshots.
+    pub fn subscribe(&self) -> watch::Receiver<StdArc<Snapshot>> {
+        self.snapshot_tx.subscribe()
     }
 
     /// Fire and forget (match records are non-critical).
@@ -145,50 +139,5 @@ impl Store {
             .try_send(StoreCmd::CountMatches(reply_tx))
             .map_err(|_| rusqlite::Error::InvalidQuery)?;
         reply_rx.await.map_err(|_| rusqlite::Error::InvalidQuery)?
-    }
-}
-
-fn worker(mut conn: rusqlite::Connection, rx: std::sync::mpsc::Receiver<StoreCmd>) {
-    for cmd in rx {
-        match cmd {
-            StoreCmd::Register {
-                name,
-                name_lower,
-                key_hash,
-                reply,
-            } => {
-                let _ = reply.send(accounts::register(&mut conn, &name, &name_lower, &key_hash));
-            }
-            StoreCmd::Login {
-                name_lower,
-                key_hash,
-                reply,
-            } => {
-                let _ = reply.send(accounts::login(&conn, &name_lower, &key_hash));
-            }
-            StoreCmd::InsertMatch(m) => {
-                if let Err(e) = matches::insert(&conn, &m) {
-                    tracing::error!("match record insert failed: {e}");
-                }
-            }
-            StoreCmd::CountMatches(reply) => {
-                let _ = reply.send(matches::count(&conn));
-            }
-            StoreCmd::CountRanked(reply) => {
-                let _ = reply.send(ranked::count(&conn));
-            }
-            StoreCmd::RankedResult {
-                a,
-                b,
-                outcome,
-                duration_s,
-                factions,
-                reply,
-            } => {
-                let result = ranked::ranked_result(&mut conn, a, b, outcome, duration_s, factions)
-                    .map_err(|_| AccountError::Unavailable);
-                let _ = reply.send(result);
-            }
-        }
     }
 }
