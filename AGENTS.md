@@ -92,8 +92,13 @@ Never run two agents on the same files at the same time.
 
 ## Code standards
 
-- Function ≤ 80 lines, file ≤ 200 lines, cyclomatic complexity ≤ 10.
-  Split instead of nesting. Content tables are exempt from the file cap.
+- One responsibility per module and per function. Split by
+  responsibility — a new concern or a second reason to change gets its own
+  module or folder — so the code stays decoupled and can grow. Never build
+  a "god file" that mixes concerns. There is no fixed line limit: a long
+  file or function is a signal to check its cohesion, not a rule to obey.
+- Keep control flow shallow (cyclomatic complexity ≤ 10); split instead of
+  nesting. Content tables may be long.
 - Each module starts with a `//!` line stating its responsibility.
   Comments explain *why*, not *what*.
 - No new dependency without a one-line reason comment in `Cargo.toml`.
