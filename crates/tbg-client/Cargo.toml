@@ -12,8 +12,21 @@ name = "tbg-client"
 path = "src/main.rs"
 
 [dependencies]
-# Bevy renderer + UI for the browser spike (P1). Reason: WebGL2 arena + overlay.
-bevy = { version = "0.20", default-features = false, features = ["3d", "ui"] }
+# Bevy renderer + UI (WebGL2). Explicit features instead of the "3d"/"ui"
+# collections: drops gamepads (gilrs needs libudev), glTF, animation,
+# post-processing, and the embedded tonemapping LUTs, which shrinks the WASM.
+bevy = { version = "0.20", default-features = false, features = [
+    # app core
+    "std", "async_executor", "bevy_asset", "bevy_log", "bevy_state", "reflect_auto_register",
+    # platform: window, input, browser canvas, default font
+    "bevy_winit", "bevy_window", "default_font", "multi_threaded", "webgl2", "x11", "wayland",
+    # 3D rendering
+    "bevy_render", "bevy_core_pipeline", "bevy_pbr", "bevy_light", "bevy_camera",
+    "bevy_color", "bevy_mesh", "bevy_image", "bevy_shader", "bevy_material",
+    # UI, text, picking (picking is used for tapping units in P3)
+    "bevy_ui", "bevy_ui_render", "bevy_text", "bevy_input_focus",
+    "bevy_picking", "mesh_picking", "ui_picking",
+] }
 # WebSocket client with the same API on wasm and native (P1). Reason: RTT ping.
 ewebsock = "0.8"
 tbg-core = { path = "../tbg-core" }

@@ -55,6 +55,8 @@ Files: `crates/tbg-client/Cargo.toml`, `crates/tbg-client/index.html`,
 1. Install tools if missing: `cargo install --locked trunk`.
 2. In `crates/tbg-client/Cargo.toml` change bevy to
    `bevy = { version = "0.20", default-features = false, features = ["3d", "ui"] }`.
+   (Reviewer later replaced the collections with an explicit feature list to
+   shrink the WASM and drop the libudev build dependency; see the current file.)
 3. Root `Cargo.toml`, append:
    ```toml
    [profile.dev.package."*"]
@@ -126,8 +128,8 @@ Files: `src/main.rs`, new `src/camera.rs`, new `src/arena.rs`.
 - `camera.rs`: perspective camera, vertical FOV 35°, looking at the lane
   center `(8, 0, 0)` from above at about 55° pitch.
   - **Landscape** (window width ≥ height): the lane is horizontal on
-    screen, own Stronghold on the left. Camera sits on the −Z side looking
-    toward +Z, tilted down.
+    screen, own Stronghold on the left. Camera sits on the +Z side looking
+    toward −Z, tilted down (screen-right is then +X).
   - **Portrait** (height > width): rotate the camera 90° around the Y axis
     through the lane center so the lane is vertical, own Stronghold at the
     bottom.
@@ -321,3 +323,37 @@ None. This phase is proven by builds and devices.
   - None blocking. Environment limits (not code): no passwordless sudo,
     so Bevy system libs are missing and native workspace-wide
     check/clippy/test could not run locally — covered per-crate + CI.
+
+## Reviewer notes (2026-10-27)
+
+Verdict: **code approved; owner device test still pending.** Fixed in the review commit:
+
+1. **WASM size over the ceiling** (brotli 6.16 MB). Replaced the `3d`/`ui`
+   collections with an explicit Bevy feature list (no gamepads, glTF,
+   animation, post-processing, or tonemapping LUTs) and set the camera to
+   `Tonemapping::AcesFitted` (needs no LUTs). Release, `opt-level = "s"`:
+   raw 24,213,640 B · gzip -9 7,454,018 B · zstd -19 5,018,195 B ·
+   **brotli q11 4,649,445 B** (was 6,161,641). Target is 4 MB; ceiling 6 MB.
+2. **Native workspace checks failed locally** (`libudev` via gamepad
+   support). Gone with the feature trim: `cargo clippy --workspace` and
+   `cargo test --workspace` now pass on this machine.
+3. **Overlay frame time ×1000**: `FRAME_TIME` is already in ms.
+4. **RTT measured with frame time** (`Time`) and pings sent before the
+   socket opened: now uses `bevy::platform::time::Instant`, pings only after
+   `WsEvent::Opened`. Browser check: echo round trip 2–9 ms on localhost,
+   overlay shows `RTT 10 ms` (bounded by frame polling), was 261 ms.
+5. **Every walker allocated its own mesh and material** (no batching):
+   one shared mesh + 4 shared materials; duplicated spawn code removed.
+
+Verified by the reviewer in the browser pane: release build renders with
+no errors; landscape lane horizontal with own Stronghold left; portrait
+(200×330, unscaled) lane vertical with own Stronghold bottom; 30 walkers;
+`FPS 81 | 12.3 ms | RTT 10 ms` in the pane. Gates: fmt, clippy (native
+workspace and wasm32), tests, wasm check, `trunk build --release` — all pass.
+
+Spec corrections made upstream: camera side in step 2 (+Z, as the
+executor found), `insert_non_send` naming in P3, audio features in P7.
+
+Still required for acceptance: the owner's device matrix (step 8) on
+Android Chrome and iOS Safari: renders, FPS with `?stress=30`, load time, RTT.
+

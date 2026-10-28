@@ -27,7 +27,7 @@ bundle. No Docker, Kubernetes, Redis, queues, or managed game services.
 | Concern | Choice | Version / note |
 |---------|--------|----------------|
 | Toolchain | Rust stable via `rust-toolchain.toml` (installs `wasm32-unknown-unknown`) | env: 1.99.0; MSRV 1.97 (Bevy 0.20) |
-| Client engine | Bevy, features `3d` + `ui` (+ `audio` in P7), WebGL2 | 0.20.0, pinned for the whole MVP |
+| Client engine | Bevy with an explicit feature list (see `crates/tbg-client/Cargo.toml`; no gamepads, glTF, animation, post-processing, or LUTs; `bevy_audio` + `vorbis` added in P7), WebGL2, camera tonemapping `AcesFitted` | 0.20.0, pinned for the whole MVP |
 | WASM build | Trunk (`index.html` in `crates/tbg-client/`) + wasm-opt | 0.22.x (`cargo install --locked trunk`) |
 | Client WebSocket | `ewebsock` (same API on WASM and native) | 0.8.x |
 | Server | Axum (`ws` feature) + Tokio | 0.8.x / 1.x |

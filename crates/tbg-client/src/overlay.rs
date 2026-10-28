@@ -52,54 +52,29 @@ fn spawn_overlay(mut commands: Commands) {
 
 fn spawn_stress(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut state: ResMut<walkers::SpawnState>,
+    mut assets: ResMut<walkers::WalkerAssets>,
     mut count: ResMut<walkers::WalkerCount>,
     mut target: ResMut<StressTarget>,
 ) {
     let n: usize = config::url_param("stress")
         .and_then(|v| v.parse().ok())
         .unwrap_or(0);
-    if n == 0 {
-        return;
-    }
     target.0 = n;
     for i in 0..n {
         let x = 0.5 + 15.0 * i as f32 / n as f32;
-        walkers::spawn_walker_at(
-            &mut commands,
-            &mut meshes,
-            &mut materials,
-            &mut state,
-            &mut count,
-            x,
-        );
+        walkers::spawn_walker_at(&mut commands, &mut assets, &mut count, x);
     }
 }
 
+/// Keep `?stress=N` walkers alive by respawning at the own gate.
 fn maintain_stress(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut state: ResMut<walkers::SpawnState>,
+    mut assets: ResMut<walkers::WalkerAssets>,
     mut count: ResMut<walkers::WalkerCount>,
     target: Res<StressTarget>,
 ) {
-    if target.0 == 0 {
-        return;
-    }
-    let mut missing = target.0.saturating_sub(count.0);
-    while missing > 0 {
-        walkers::spawn_walker_at(
-            &mut commands,
-            &mut meshes,
-            &mut materials,
-            &mut state,
-            &mut count,
-            0.5,
-        );
-        missing -= 1;
+    for _ in count.0..target.0 {
+        walkers::spawn_walker_at(&mut commands, &mut assets, &mut count, 0.5);
     }
 }
 
@@ -119,11 +94,11 @@ fn update_overlay(
         .get(&FrameTimeDiagnosticsPlugin::FPS)
         .and_then(|d| d.smoothed())
         .unwrap_or(0.0);
+    // FRAME_TIME is already in milliseconds.
     let ms = diagnostics
         .get(&FrameTimeDiagnosticsPlugin::FRAME_TIME)
         .and_then(|d| d.smoothed())
-        .unwrap_or(0.0)
-        * 1000.0;
+        .unwrap_or(0.0);
     let rtt = stats
         .rtt_ms
         .map(|v| format!("{v:.0} ms"))

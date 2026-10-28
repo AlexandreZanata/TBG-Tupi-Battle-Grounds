@@ -1,7 +1,8 @@
 //! Click/tap walkers: capsules spawned at the own gate, walking +X.
 //!
 //! Left click or touch release spawns one capsule; each moves at
-//! 1.0 tile/s and despawns at the enemy gate. No gameplay.
+//! 1.0 tile/s and despawns at the enemy gate. No gameplay. All walkers
+//! share one mesh and four materials so the renderer can batch them.
 
 use bevy::prelude::*;
 
@@ -20,8 +21,11 @@ const COLORS: [[u8; 3]; 4] = [
 #[derive(Component)]
 pub struct Walker;
 
-#[derive(Resource, Default)]
-pub struct SpawnState {
+/// Shared handles plus the round-robin index for color and lane.
+#[derive(Resource)]
+pub struct WalkerAssets {
+    mesh: Handle<Mesh>,
+    materials: [Handle<StandardMaterial>; 4],
     next: usize,
 }
 
@@ -30,63 +34,59 @@ pub struct SpawnState {
 pub struct WalkerCount(pub usize);
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<SpawnState>()
-        .init_resource::<WalkerCount>()
+    app.init_resource::<WalkerCount>()
+        .add_systems(PreStartup, init_assets)
         .add_systems(Update, (spawn_on_input, move_walkers));
+}
+
+fn init_assets(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // Capsule3d::new(radius, segment length): total height 0.2 + 2 * 0.3 = 0.8.
+    let mesh = meshes.add(Capsule3d::new(0.3, 0.2));
+    let materials = COLORS.map(|c| {
+        materials.add(StandardMaterial {
+            base_color: Color::srgb_u8(c[0], c[1], c[2]),
+            perceptual_roughness: 0.8,
+            ..default()
+        })
+    });
+    commands.insert_resource(WalkerAssets {
+        mesh,
+        materials,
+        next: 0,
+    });
 }
 
 fn spawn_on_input(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     mouse: Res<ButtonInput<MouseButton>>,
     touches: Res<Touches>,
-    mut state: ResMut<SpawnState>,
+    mut assets: ResMut<WalkerAssets>,
     mut count: ResMut<WalkerCount>,
 ) {
-    let mut spawns = 0;
-    if mouse.just_pressed(MouseButton::Left) {
-        spawns += 1;
-    }
-    spawns += touches.iter_just_released().count();
+    let spawns =
+        usize::from(mouse.just_pressed(MouseButton::Left)) + touches.iter_just_released().count();
     for _ in 0..spawns {
-        let i = state.next;
-        state.next += 1;
-        let c = COLORS[i % COLORS.len()];
-        commands.spawn((
-            Walker,
-            Mesh3d(meshes.add(Capsule3d::new(0.3, 0.2))),
-            MeshMaterial3d(materials.add(StandardMaterial {
-                base_color: Color::srgb_u8(c[0], c[1], c[2]),
-                perceptual_roughness: 0.8,
-                ..default()
-            })),
-            Transform::from_xyz(SPAWN_X, SPAWN_Y, LANES[i % LANES.len()]),
-        ));
-        count.0 += 1;
+        spawn_walker_at(&mut commands, &mut assets, &mut count, SPAWN_X);
     }
 }
 
-/// Spawn one walker at `x` (used by `?stress=N` and respawn).
+/// Spawn one walker at `x` (used by taps, `?stress=N`, and respawn).
 pub fn spawn_walker_at(
     commands: &mut Commands,
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-    state: &mut SpawnState,
+    assets: &mut WalkerAssets,
     count: &mut WalkerCount,
     x: f32,
 ) {
-    let i = state.next;
-    state.next += 1;
-    let c = COLORS[i % COLORS.len()];
+    let i = assets.next;
+    assets.next += 1;
     commands.spawn((
         Walker,
-        Mesh3d(meshes.add(Capsule3d::new(0.3, 0.2))),
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::srgb_u8(c[0], c[1], c[2]),
-            perceptual_roughness: 0.8,
-            ..default()
-        })),
+        Mesh3d(assets.mesh.clone()),
+        MeshMaterial3d(assets.materials[i % COLORS.len()].clone()),
         Transform::from_xyz(x, SPAWN_Y, LANES[i % LANES.len()]),
     ));
     count.0 += 1;

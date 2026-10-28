@@ -5,7 +5,7 @@
 //! Distance is recomputed on every `WindowResized` so x in [-2, 18]
 //! stays visible with ~10% margin.
 
-use bevy::{prelude::*, window::WindowResized};
+use bevy::{core_pipeline::tonemapping::Tonemapping, prelude::*, window::WindowResized};
 
 /// Lane center the camera looks at.
 pub const LANE_CENTER: Vec3 = Vec3::new(8.0, 0.0, 0.0);
@@ -38,7 +38,15 @@ fn spawn_camera(mut commands: Commands, window: Single<&Window>) {
         window.width(),
         window.height(),
     );
-    commands.spawn((Camera3d::default(), transform, projection, ArenaCamera));
+    // AcesFitted needs no LUT textures; the default (TonyMcMapface) needs the
+    // `tonemapping_luts` feature, which we leave out to keep the WASM small.
+    commands.spawn((
+        Camera3d::default(),
+        Tonemapping::AcesFitted,
+        transform,
+        projection,
+        ArenaCamera,
+    ));
 }
 
 /// Recompute framing whenever the window size changes (covers startup too).
