@@ -74,10 +74,10 @@ P31 reviewed + owner sign-off
 | P7 | [P7-content-feel-balance.md](phases/P7-content-feel-balance.md) | 8 units with art, VFX, audio, balance targets met, playtest done | done (bot balance); **human playtest pending** | yes |
 | P8 | [P8-public-launch.md](phases/P8-public-launch.md) | Public URL shared with first players | audit + security review done; **LICENSE, VPS smoke, tag pending owner** | yes (local) |
 | P9 | [P9-realtime-fast-path.md](phases/P9-realtime-fast-path.md) | Instant-feeling taps (ack views, `TCP_NODELAY`); auto-resume, reconnect countdown, hidden tabs stay connected | done (phone check in P14) | yes |
-| P10 | [P10-server-efficiency.md](phases/P10-server-efficiency.md) | Measured, profiled server: most matches per core | planned | — |
-| P11 | [P11-accounts.md](phases/P11-accounts.md) | Unique player name + account key; login on any device | planned | — |
-| P12 | [P12-ranked-and-rating.md](phases/P12-ranked-and-rating.md) | Ranked queue apart from casual; Elo from both ratings | planned | — |
-| P13 | [P13-global-ranking.md](phases/P13-global-ranking.md) | Global ranking + player stats in game and on `/ranking/` | planned | — |
+| P10 | [P10-server-efficiency.md](phases/P10-server-efficiency.md) | Measured, profiled server: most matches per core | done | yes |
+| P11 | [P11-accounts.md](phases/P11-accounts.md) | Unique player name + account key; login on any device | done (owner: name list, two devices) | yes |
+| P12 | [P12-ranked-and-rating.md](phases/P12-ranked-and-rating.md) | Ranked queue apart from casual; Elo from both ratings | done (two-device ranked in P14) | yes |
+| P13 | [P13-global-ranking.md](phases/P13-global-ranking.md) | Global ranking + player stats in game and on `/ranking/` | done (phones + VPS in P14) | yes |
 | P14 | [P14-competitive-validation.md](phases/P14-competitive-validation.md) | **Gate:** competitive game validated on a real server, data-safety drill, security review | planned | — |
 | P15 | [P15-art-direction-and-rig.md](phases/P15-art-direction-and-rig.md) | Medieval style locked; rig v2; Archer style-lock approved | planned | — |
 | P16 | [P16-class-animation-sets.md](phases/P16-class-animation-sets.md) | Professional clip sets per Archetype, simulation-timed | planned | — |
