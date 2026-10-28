@@ -31,7 +31,7 @@ pub struct UnitLook {
 #[derive(Component)]
 pub struct UnitVisual {
     figure: Entity,
-    joints: [Entity; 12],
+    joints: [Entity; crate::art::rig::NODE_COUNT],
     ring: Entity,
     tiers: [Entity; 2],
     bar: Entity,

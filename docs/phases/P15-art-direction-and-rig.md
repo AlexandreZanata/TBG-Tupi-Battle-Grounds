@@ -157,3 +157,13 @@ Status: implementation in progress; **owner sign-off pending**.
 - The specified server command needs `--bin tbg-server`: Cargo reports
   `error: cargo run could not determine which binary to run. Use the --bin option to specify a binary, or the default-run manifest key.`
 
+### Step 2 evidence
+
+- Native check passed (temporary unused v2 builders will be consumed by step 4).
+- Release WASM gallery observed: all eight old units, all five forms,
+  changing poses through the adapter; no browser errors.
+- [Adapter gallery](../media/p15/adapter-gallery-desktop.jpg), 1280 × 800.
+- Startup reports 17 body joints + 3 springs + 3 sockets; legacy forms
+  use 15 mesh-bearing joints. Full geometry measurements are recorded below.
+- The first Trunk process ended with exit 143 and no Rust diagnostic.
+  Retry succeeded; Rust release compilation took 53.54 s.

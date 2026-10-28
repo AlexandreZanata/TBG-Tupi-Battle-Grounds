@@ -1,7 +1,7 @@
 //! Keyframe tables for the shared animation library (data, like
 //! `tbg-core`'s content tables). Times are normalized 0..1 per clip.
 
-use super::figure::Joint;
+use super::legacy::Joint;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Clip {

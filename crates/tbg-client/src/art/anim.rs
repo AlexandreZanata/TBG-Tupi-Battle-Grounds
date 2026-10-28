@@ -1,5 +1,5 @@
 //! Shared animation library: keyframed joint rotations/offsets in code,
-//! valid for every figurine because all share the 12-joint body plan.
+//! valid for every figurine because all share the v2 hierarchy (legacy tracks are adapted).
 //! `Animator` plays a looping base clip (Idle/Walk) plus one-shot actions,
 //! crossfading 0.1 s on every change.
 
@@ -7,10 +7,10 @@ use bevy::prelude::*;
 
 use super::clips::Key;
 pub use super::clips::{Clip, CLIPS};
-use super::figure::{rest, BodyPlan, JOINTS};
+use super::rig::{rest, Node, Proportions as BodyPlan, JOINTS, NODE_COUNT};
 
 /// Per joint: rotation (degrees) and offset from the rest pose.
-pub type Pose = [(Vec3, Vec3); 12];
+pub type Pose = [(Vec3, Vec3); NODE_COUNT];
 
 pub fn sample(clip: Clip, seconds: f32) -> Pose {
     let raw = seconds / clip.duration();
@@ -19,9 +19,9 @@ pub fn sample(clip: Clip, seconds: f32) -> Pose {
     } else {
         raw.min(1.0)
     };
-    let mut pose = [(Vec3::ZERO, Vec3::ZERO); 12];
+    let mut pose = [(Vec3::ZERO, Vec3::ZERO); NODE_COUNT];
     for (joint, keys) in clip.tracks() {
-        pose[joint.index()] = sample_track(keys, k);
+        pose[super::adapter::joint(*joint).index()] = sample_track(keys, k);
     }
     pose
 }
@@ -50,7 +50,7 @@ const FADE: f32 = 0.1;
 
 #[derive(Component)]
 pub struct Animator {
-    pub joints: [Entity; 12],
+    pub joints: [Entity; NODE_COUNT],
     plan: BodyPlan,
     base: Clip,
     base_t: f32,
@@ -60,7 +60,7 @@ pub struct Animator {
 }
 
 impl Animator {
-    pub fn new(joints: [Entity; 12], plan: BodyPlan) -> Animator {
+    pub fn new(joints: [Entity; NODE_COUNT], plan: BodyPlan) -> Animator {
         Animator {
             joints,
             plan,
@@ -130,7 +130,7 @@ pub fn animate(
             if let Ok(mut t) = transforms.get_mut(a.joints[j.index()]) {
                 let (rot, off) = pose[j.index()];
                 let r = rot * std::f32::consts::PI / 180.0;
-                t.translation = rest(j, &a.plan) + off;
+                t.translation = rest(Node::Body(j), &a.plan) + off;
                 t.rotation = Quat::from_euler(EulerRot::XYZ, r.x, r.y, r.z);
             }
         }

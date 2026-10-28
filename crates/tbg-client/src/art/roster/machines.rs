@@ -2,7 +2,7 @@
 
 use bevy::prelude::Vec3;
 
-use super::super::figure::{part, BodyPlan, FigureSpec, Joint::*};
+use super::super::legacy::{part, BodyPlan, FigureSpec, Joint::*};
 use super::super::mesh::Shape::*;
 use super::super::palette::*;
 use super::{base_body, Form, Look};

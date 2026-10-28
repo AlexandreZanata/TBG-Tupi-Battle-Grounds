@@ -4,7 +4,7 @@
 use bevy::prelude::*;
 use tbg_core::{SlotCount, UnitKind};
 
-use super::figure::{part, BodyPlan, FigureSpec, Joint::*, PartSpec};
+use super::legacy::{part, BodyPlan, FigureSpec, Joint::*, PartSpec};
 use super::mesh::Shape::*;
 use super::palette::DARK;
 

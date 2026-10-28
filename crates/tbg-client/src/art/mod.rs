@@ -1,5 +1,5 @@
 //! Code-built art (decision D-07): mesh builders, figurines on a shared
-//! 12-joint body plan, a shared animation library, the faction roster.
+//! v2 body plan with a twelve-joint compatibility adapter and shared clips.
 //! Every unit form is built once at startup into `FigureLibrary`.
 
 use std::collections::HashMap;
@@ -7,21 +7,25 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use tbg_core::{UnitKind, UNIT_KINDS};
 
+mod adapter;
 pub mod anim;
 mod clips;
 pub mod figure;
+mod legacy;
 pub mod mesh;
 pub mod palette;
+pub mod rig;
 mod roster;
+mod springs;
 
-use figure::BodyPlan;
+use rig::{Proportions as BodyPlan, NODE_COUNT};
 
 /// The five forms of a unit: base, A1, A2, B1, B2 as (tier, branch).
 pub const FORMS: [(u8, u8); 5] = [(0, 0), (1, 0), (2, 0), (1, 1), (2, 1)];
 
 pub struct FigureForm {
     pub plan: BodyPlan,
-    pub meshes: [Option<Handle<Mesh>>; 12],
+    pub meshes: [Option<Handle<Mesh>>; NODE_COUNT],
     pub triangles: usize,
 }
 
@@ -45,7 +49,11 @@ impl FigureLibrary {
 
 pub fn plugin(app: &mut App) {
     app.add_systems(PreStartup, build_library)
-        .add_systems(Update, anim::animate);
+        .add_systems(Update, anim::animate)
+        .add_systems(
+            PostUpdate,
+            springs::update.after(bevy::transform::TransformSystems::Propagate),
+        );
 }
 
 fn build_library(
@@ -63,8 +71,10 @@ fn build_library(
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
             let spec = roster::figure_spec(kind, tier, branch);
-            let built = figure::build_joint_meshes(&spec);
+            let built = adapter::build(&spec);
+            let joint_count = built.iter().flatten().count();
             let triangles = built.iter().flatten().map(mesh::triangles).sum();
+            info!("figure {kind:?} {tier}/{branch}: 17 body + 3 springs + 3 sockets, {joint_count} mesh joints, {triangles} triangles");
             max_tris = max_tris.max(triangles);
             let handles = built.map(|m| m.map(|m| meshes.add(m)));
             forms.insert(
