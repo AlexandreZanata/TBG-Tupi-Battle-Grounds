@@ -86,3 +86,50 @@ fn planted_foot_holds_world_x_while_the_figure_moves() {
         "{positions:?}"
     );
 }
+
+#[test]
+fn archer_budget_and_release_anchor_obey_p15() {
+    use super::{archer_clips, bow::BowAssets, figure, mesh, roster};
+    let spec = roster::archer_base();
+    let triangles: usize = figure::build_joint_meshes(&spec)
+        .iter()
+        .flatten()
+        .map(mesh::triangles)
+        .sum();
+    let bow = BowAssets::new(&mut Assets::<Mesh>::default());
+    assert!(
+        triangles + bow.triangles <= 1500,
+        "{} triangles",
+        triangles + bow.triangles
+    );
+    let mut pose = sample(Clip::AttackRanged, 0.18);
+    archer_clips::apply(Clip::AttackRanged, 0.18, &mut pose);
+    let p = super::rig::BodyPlan::Humanoid.proportions();
+    let wrist = |joints: [Joint; 3]| {
+        let mut transform = Mat4::IDENTITY;
+        for j in joints {
+            let r = pose[j.index()].0 * std::f32::consts::PI / 180.0;
+            transform *= Mat4::from_rotation_translation(
+                Quat::from_euler(EulerRot::XYZ, r.x, r.y, r.z),
+                super::rig::rest(super::rig::Node::Body(j), &p),
+            );
+        }
+        transform.transform_point3(Vec3::ZERO)
+    };
+    let left = wrist([Joint::UpperArmL, Joint::ForearmL, Joint::HandL]);
+    let right = wrist([Joint::UpperArmR, Joint::ForearmR, Joint::HandR]);
+    let anchor = left + Vec3::new(0.0, 0.08, -0.23 - super::archer_aim::draw(0.18) * 0.16);
+    assert!(
+        (anchor - right).length() < 0.005,
+        "anchor {anchor:?}, right {right:?}"
+    );
+    assert_eq!(
+        events_between(Clip::AttackRanged, 0.17, 0.18),
+        [ClipEvent::Release]
+    );
+    println!(
+        "Archer geometry: {triangles} + {} bow/arrow = {} triangles",
+        bow.triangles,
+        triangles + bow.triangles
+    );
+}

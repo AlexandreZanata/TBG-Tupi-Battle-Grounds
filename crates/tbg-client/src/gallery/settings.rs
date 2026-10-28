@@ -19,6 +19,15 @@ pub struct Gallery {
     pub clip: Option<Clip>,
 }
 impl Gallery {
+    pub fn studio(&self) -> bool {
+        self.unit.is_some() || self.frames || self.mode == "blockout"
+    }
+    pub fn hide_arena(&self) -> bool {
+        self.silhouette || self.studio()
+    }
+    pub fn floor(&self) -> bool {
+        !self.silhouette && !self.frames && self.studio()
+    }
     pub fn read() -> Self {
         let mode = config::url_param("gallery")
             .unwrap_or_default()

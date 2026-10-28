@@ -5,6 +5,10 @@ use super::mesh::Shape;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Joint {
+    #[expect(
+        dead_code,
+        reason = "Preserved P6 data contract; the root carries no mesh"
+    )]
     Root,
     Hips,
     Torso,

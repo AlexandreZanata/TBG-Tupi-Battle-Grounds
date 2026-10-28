@@ -88,7 +88,7 @@ pub fn spawn_unit_visual(
         commands,
         figure_root,
         &form.plan,
-        &form.meshes,
+        form.meshes(look.own),
         &lib.material,
     );
     let ring_mat = &a.team[usize::from(!look.own)];
@@ -100,6 +100,59 @@ pub fn spawn_unit_visual(
             Transform::from_xyz(0.0, 0.02, 0.0).with_scale(ring_scale),
         ))
         .id();
+    let (bar, bar_fill, tiers) = spawn_bar(commands, a, height, &look);
+    let visual = UnitVisual {
+        figure: figure_root,
+        joints,
+        ring,
+        tiers,
+        bar,
+        bar_fill,
+        own: look.own,
+        archetype: d.archetype,
+        faction: d.faction,
+        splash: effective_stats(look.kind, look.tier, look.branch, 0).splash as f32 / 1000.0,
+        form: (look.kind, look.tier, look.branch),
+        yaw: yaw(look.own),
+        tint: None,
+        dying: false,
+        dead_for: 0.0,
+        last_x: pos.x,
+    };
+    let mut animator = Animator::new(joints, form.plan, figure_root, look.kind, look.id);
+    animator.native = form.native;
+    animator.archer = form.native && look.kind == UnitKind::Archer;
+
+    animator.play(crate::art::anim::Clip::Spawn);
+    let root = commands.spawn_empty().id();
+    if animator.archer {
+        crate::art::bow::attach(commands, root, &animator, lib, &lib.material, look.own);
+    }
+    commands
+        .entity(root)
+        .insert((
+            Transform::from_translation(pos),
+            Visibility::default(),
+            visual,
+            animator,
+        ))
+        .add_children(&[figure_root, ring, bar]);
+    if look.own {
+        // Tapping near an own unit opens its evolution panel (ui/input.rs).
+        commands.entity(root).insert(UiAction::SelectUnit(look.id));
+    }
+    root
+}
+
+fn spawn_bar(
+    commands: &mut Commands,
+    a: &VisualAssets,
+    height: f32,
+    look: &UnitLook,
+) -> (Entity, Entity, [Entity; 2]) {
+    let mesh = |m: &Handle<Mesh>, mat: &Handle<StandardMaterial>, t: Transform| {
+        (Mesh3d(m.clone()), MeshMaterial3d(mat.clone()), t)
+    };
     let tier_mat = if look.branch == 0 { &a.gold } else { &a.silver };
     let tiers = [(0u8, -0.08), (1, 0.08)].map(|(i, x)| {
         let vis = if look.tier > i {
@@ -135,38 +188,5 @@ pub fn spawn_unit_visual(
         ))
         .add_children(&[bar_bg, bar_fill, tiers[0], tiers[1]])
         .id();
-    let visual = UnitVisual {
-        figure: figure_root,
-        joints,
-        ring,
-        tiers,
-        bar,
-        bar_fill,
-        own: look.own,
-        archetype: d.archetype,
-        faction: d.faction,
-        splash: effective_stats(look.kind, look.tier, look.branch, 0).splash as f32 / 1000.0,
-        form: (look.kind, look.tier, look.branch),
-        yaw: yaw(look.own),
-        tint: None,
-        dying: false,
-        dead_for: 0.0,
-        last_x: pos.x,
-    };
-    let mut animator = Animator::new(joints, form.plan, figure_root, look.kind, look.id);
-    animator.play(crate::art::anim::Clip::Spawn);
-    let root = commands
-        .spawn((
-            Transform::from_translation(pos),
-            Visibility::default(),
-            visual,
-            animator,
-        ))
-        .add_children(&[figure_root, ring, bar])
-        .id();
-    if look.own {
-        // Tapping near an own unit opens its evolution panel (ui/input.rs).
-        commands.entity(root).insert(UiAction::SelectUnit(look.id));
-    }
-    root
+    (bar, bar_fill, tiers)
 }

@@ -203,3 +203,20 @@ Status: implementation in progress; **owner sign-off pending**.
 - `&measure` counts actual WebGL draw calls (including shadow passes) and
   rendered RAF frames over five seconds. Tool smoke check: 60.0 FPS,
   55 draws/frame for the old Archer quarter-frame sheet on this desktop.
+
+### Step 6 evidence
+
+- Archer base: 1,042 cached triangles on 19 mesh-bearing nodes, plus 74
+  shared bow-string/arrow triangles = **1,116 triangles** (limit 1,500).
+- Five client tests pass, including the actual wrist/bowstring contact at
+  the 0.18 s Release anchor, strike sampling, event counts, and foot locking.
+- [Archer desktop](../media/p15/archer-desktop.jpg),
+  [Archer phone](../media/p15/archer-phone.jpg), and
+  [slow-motion attack contact sheet](../media/p15/archer-attack-contact-desktop.jpg).
+- Browser logged `Archer Release: 0.18 s, arrow leaves bowstring`; no
+  browser errors in the reviewed gallery or 30-Archer stress views.
+- Team tabard/fletching use cached ally/enemy vertex colors with the same
+  material. Only Archer base uses final art; old evolutions remain adapted.
+- Gallery studio floors keep foreground arena props from hiding review
+  figures; palette and live-match checks still use the arena and game light.
+- Physical mid-range-phone performance and subjective approval remain pending.

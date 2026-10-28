@@ -11,6 +11,10 @@ mod adapter;
 pub mod anim;
 #[cfg(test)]
 mod anim_tests;
+mod archer_aim;
+mod archer_clips;
+pub mod arrows;
+pub mod bow;
 mod clips;
 mod curves;
 mod feet;
@@ -31,6 +35,18 @@ pub struct FigureForm {
     pub plan: BodyPlan,
     pub meshes: [Option<Handle<Mesh>>; NODE_COUNT],
     pub triangles: usize,
+    pub native: bool,
+    enemy_meshes: Option<[Option<Handle<Mesh>>; NODE_COUNT]>,
+}
+
+impl FigureForm {
+    pub fn meshes(&self, own: bool) -> &[Option<Handle<Mesh>>; NODE_COUNT] {
+        if own {
+            &self.meshes
+        } else {
+            self.enemy_meshes.as_ref().unwrap_or(&self.meshes)
+        }
+    }
 }
 
 #[derive(Resource)]
@@ -39,6 +55,8 @@ pub struct FigureLibrary {
     blockouts: HashMap<UnitKind, FigureForm>,
     /// One shared material for every figurine (vertex colors).
     pub material: Handle<StandardMaterial>,
+    pub bow: bow::BowAssets,
+    pub stage: Handle<Mesh>,
 }
 
 impl FigureLibrary {
@@ -57,7 +75,11 @@ impl FigureLibrary {
 
 pub fn plugin(app: &mut App) {
     app.add_systems(PreStartup, build_library)
-        .add_systems(Update, anim::animate)
+        .add_systems(Update, (anim::animate, bow::strings, arrows::fly).chain())
+        .add_systems(
+            PostUpdate,
+            arrows::release.after(bevy::transform::TransformSystems::Propagate),
+        )
         .add_systems(
             PostUpdate,
             springs::update.after(bevy::transform::TransformSystems::Propagate),
@@ -74,10 +96,23 @@ fn build_library(
         perceptual_roughness: 0.9,
         ..default()
     });
+    let bow = bow::BowAssets::new(&mut meshes);
     let mut forms = HashMap::new();
     for kind in UNIT_KINDS {
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
+            if kind == UnitKind::Archer && tier == 0 {
+                let form = native_form(roster::archer_base(), &mut meshes, true);
+                info!(
+                    "figure Archer base: {} triangles + {} bow/arrow triangles, {} mesh joints",
+                    form.triangles,
+                    bow.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
             let spec = roster::figure_spec(kind, tier, branch);
             let built = adapter::build(&spec);
             let joint_count = built.iter().flatten().count();
@@ -91,6 +126,8 @@ fn build_library(
                     plan: spec.plan,
                     meshes: handles,
                     triangles,
+                    native: false,
+                    enemy_meshes: None,
                 },
             );
         }
@@ -99,23 +136,41 @@ fn build_library(
     let blockouts = UNIT_KINDS
         .into_iter()
         .map(|kind| {
-            let spec = roster::blockout::spec(kind);
-            let built = figure::build_joint_meshes(&spec);
-            let triangles = built.iter().flatten().map(mesh::triangles).sum();
-            info!("blockout {kind:?}: 17 body + 3 springs + 3 sockets, {triangles} triangles");
-            (
-                kind,
-                FigureForm {
-                    plan: spec.plan,
-                    meshes: built.map(|m| m.map(|m| meshes.add(m))),
-                    triangles,
-                },
-            )
+            let form = native_form(roster::blockout::spec(kind), &mut meshes, false);
+            info!("blockout {kind:?}: {} triangles", form.triangles);
+            (kind, form)
         })
         .collect();
+    let stage = meshes.add(mesh::paint(
+        mesh::build(mesh::Shape::Box(1.3, 0.05, 1.3)),
+        palette::PARCHMENT,
+    ));
     commands.insert_resource(FigureLibrary {
         forms,
         blockouts,
         material,
+        bow,
+        stage,
     });
+}
+
+fn native_form(mut spec: figure::FigureSpec, meshes: &mut Assets<Mesh>, team: bool) -> FigureForm {
+    let built = figure::build_joint_meshes(&spec);
+    let triangles = built.iter().flatten().map(mesh::triangles).sum();
+    let handles = built.map(|m| m.map(|m| meshes.add(m)));
+    let enemy_meshes = team.then(|| {
+        for p in &mut spec.parts {
+            if p.color == palette::ALLY {
+                p.color = palette::ENEMY;
+            }
+        }
+        figure::build_joint_meshes(&spec).map(|m| m.map(|m| meshes.add(m)))
+    });
+    FigureForm {
+        plan: spec.plan,
+        meshes: handles,
+        triangles,
+        native: true,
+        enemy_meshes,
+    }
 }

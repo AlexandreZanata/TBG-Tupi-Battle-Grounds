@@ -54,7 +54,7 @@ fn main() {
                     ..default()
                 }),
         )
-        .insert_resource(ClearColor(Color::srgb_u8(0xA9, 0xD8, 0xF0)))
+        .insert_resource(ClearColor(art::palette::SKY_TOP))
         .insert_resource(Time::<Fixed>::from_hz(20.0))
         .init_state::<GameState>()
         .add_plugins((

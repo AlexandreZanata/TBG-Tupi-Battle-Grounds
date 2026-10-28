@@ -19,6 +19,7 @@ pub struct Animator {
     pub plan: Proportions,
     pub figure: Entity,
     pub native: bool,
+    pub archer: bool,
     pub rate: f32,
     pub preview: Option<(Clip, f32)>,
     pub events: Vec<ClipEvent>,
@@ -46,6 +47,7 @@ impl Animator {
             plan,
             figure,
             native: false,
+            archer: false,
             rate: 1.0,
             preview: None,
             events: Vec::new(),
@@ -78,11 +80,40 @@ impl Animator {
             }
         }
     }
+    pub fn clip_time(&self) -> (Clip, f32) {
+        self.preview
+            .or(self.action)
+            .unwrap_or((self.base, self.base_t))
+    }
+    fn pose(&self, clip: Clip, t: f32) -> Pose {
+        let mut pose = sample(clip, t);
+        if self.archer {
+            super::archer_clips::apply(clip, t, &mut pose);
+        }
+        pose
+    }
+    fn action_pose(&mut self, dt: f32) -> Pose {
+        let mut pose = self.last;
+        let archer = self.archer;
+        if let Some((clip, t)) = &mut self.action {
+            self.events = events_between(*clip, *t, *t + dt);
+            *t += dt;
+            pose = sample(*clip, *t);
+            if archer {
+                super::archer_clips::apply(*clip, *t, &mut pose);
+            }
+            if !clip.looping() && *t >= clip.duration() && *clip != Clip::Death {
+                self.action = None;
+                self.fade = Some((pose, FADE));
+            }
+        }
+        pose
+    }
     fn advance(&mut self, dt: f32) -> (Pose, Option<f32>) {
         self.events.clear();
         if let Some((clip, t)) = self.preview {
             return (
-                sample(clip, t),
+                self.pose(clip, t),
                 (clip == Clip::Walk).then_some(t / clip.duration()),
             );
         }
@@ -93,17 +124,11 @@ impl Animator {
         };
         let previous = self.base_t;
         self.base_t += step;
-        let mut pose = sample(self.base, self.base_t);
+        let mut pose = self.pose(self.base, self.base_t);
         let mut walk = (self.base == Clip::Walk && self.action.is_none())
             .then_some(self.base_t / Clip::Walk.duration());
-        if let Some((clip, t)) = &mut self.action {
-            self.events = events_between(*clip, *t, *t + dt);
-            *t += dt;
-            pose = sample(*clip, *t);
-            if !clip.looping() && *t >= clip.duration() && *clip != Clip::Death {
-                self.action = None;
-                self.fade = Some((pose, FADE));
-            }
+        if self.action.is_some() {
+            pose = self.action_pose(dt);
         } else {
             self.events = events_between(self.base, previous, self.base_t);
         }

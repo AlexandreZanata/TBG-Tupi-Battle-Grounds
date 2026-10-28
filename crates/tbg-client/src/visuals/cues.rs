@@ -59,6 +59,10 @@ pub(super) fn animate(
             }
             continue;
         }
+        let form = lib.get(v.form.0, v.form.1, v.form.2);
+        anim.native = form.native;
+        anim.archer = form.native && v.form.0 == tbg_core::UnitKind::Archer;
+        anim.plan = form.plan;
         let moving = (t.translation.x - v.last_x).abs() > 0.0004;
         v.last_x = t.translation.x;
         anim.set_base(if moving { Clip::Walk } else { Clip::Idle });

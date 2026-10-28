@@ -29,25 +29,14 @@ pub fn spawn(
         .clip
         .map_or_else(|| CLIPS.to_vec(), |clip| vec![clip]);
     if options.frames {
-        for (i, clip) in clips.into_iter().enumerate() {
-            for quarter in 0..4 {
-                let cols = if window.width() > window.height() {
-                    2
-                } else {
-                    1
-                };
-                let pos = Vec3::new(
-                    (i % cols * 4 + quarter) as f32 * 1.6,
-                    0.0,
-                    -((i / cols) as f32) * 2.0,
-                );
-                let mut a = spawn_one(commands, lib, unit, (0, 0), pos, &material);
-                a.1.preview = Some((clip, clip.duration() * quarter as f32 / 4.0));
-                commands
-                    .entity(a.0)
-                    .insert((a.1, Layout::Frame(i, quarter)));
-            }
-        }
+        frames(
+            commands,
+            lib,
+            unit,
+            clips,
+            &material,
+            window.height() > window.width(),
+        );
     } else if options.silhouette || options.unit.is_none() {
         roster(commands, lib, options, &material);
     } else {
@@ -71,6 +60,40 @@ pub fn spawn(
         }
     }
     title(commands, options, unit);
+}
+fn frames(
+    commands: &mut Commands,
+    lib: &FigureLibrary,
+    unit: UnitKind,
+    clips: Vec<Clip>,
+    material: &Handle<StandardMaterial>,
+    portrait: bool,
+) {
+    for (i, clip) in clips.into_iter().enumerate() {
+        for quarter in 0..4 {
+            let layout = Layout::Frame(i, quarter);
+            let (root, mut animator) = spawn_one(
+                commands,
+                lib,
+                unit,
+                (0, 0),
+                layout.position(portrait),
+                material,
+            );
+            animator.preview = Some((clip, clip.duration() * quarter as f32 / 4.0));
+            let stage = commands
+                .spawn((
+                    Mesh3d(lib.stage.clone()),
+                    MeshMaterial3d(lib.material.clone()),
+                    Transform::from_xyz(0.0, -0.08, 0.0),
+                ))
+                .id();
+            commands
+                .entity(root)
+                .add_child(stage)
+                .insert((animator, layout));
+        }
+    }
 }
 fn title(commands: &mut Commands, options: &Gallery, unit: UnitKind) {
     let title = if options.frames {
@@ -152,8 +175,11 @@ fn spawn_one(
         .id();
     let joints = figure::spawn_joints(commands, figure, &form.plan, &form.meshes, material);
     commands.entity(root).add_child(figure);
-    (
-        root,
-        Animator::new(joints, form.plan, figure, kind, root.index_u32()),
-    )
+    let mut animator = Animator::new(joints, form.plan, figure, kind, root.index_u32());
+    animator.native = form.native;
+    animator.archer = form.native && kind == UnitKind::Archer;
+    if animator.archer {
+        crate::art::bow::attach(commands, root, &animator, lib, material, true);
+    }
+    (root, animator)
 }

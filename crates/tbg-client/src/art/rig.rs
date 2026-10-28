@@ -86,29 +86,39 @@ impl Node {
     }
     pub fn parent(self) -> Option<Node> {
         use Joint::*;
-        Some(match self {
-            Self::Body(Root) => return None,
-            Self::Body(Hips) => Self::Body(Root),
-            Self::Body(Spine | ThighL | ThighR) => Self::Body(Hips),
-            Self::Body(Chest) => Self::Body(Spine),
-            Self::Body(Head | UpperArmL | UpperArmR) => Self::Body(Chest),
-            Self::Body(ForearmL) => Self::Body(UpperArmL),
-            Self::Body(HandL) => Self::Body(ForearmL),
-            Self::Body(ForearmR) => Self::Body(UpperArmR),
-            Self::Body(HandR) => Self::Body(ForearmR),
-            Self::Body(ShinL) => Self::Body(ThighL),
-            Self::Body(FootL) => Self::Body(ShinL),
-            Self::Body(ShinR) => Self::Body(ThighR),
-            Self::Body(FootR) => Self::Body(ShinR),
-            Self::Secondary(Spring::Back) => Self::Body(Chest),
-            Self::Secondary(Spring::HeadGear) => Self::Body(Head),
-            Self::Secondary(Spring::Tabard) => Self::Body(Hips),
-            Self::Prop(Socket::WeaponR) => Self::Body(HandR),
-            Self::Prop(Socket::OffhandL) => Self::Body(HandL),
-            Self::Prop(Socket::Back) => Self::Secondary(Spring::Back),
-        })
+        const PARENTS: [Option<Joint>; BODY_COUNT] = [
+            None,
+            Some(Root),
+            Some(Hips),
+            Some(Spine),
+            Some(Chest),
+            Some(Chest),
+            Some(UpperArmL),
+            Some(ForearmL),
+            Some(Chest),
+            Some(UpperArmR),
+            Some(ForearmR),
+            Some(Hips),
+            Some(ThighL),
+            Some(ShinL),
+            Some(Hips),
+            Some(ThighR),
+            Some(ShinR),
+        ];
+        match self {
+            Self::Body(j) => PARENTS[j.index()].map(Self::Body),
+            Self::Secondary(s) => Some(Self::Body([Chest, Head, Hips][s as usize])),
+            Self::Prop(s) => Some(
+                [
+                    Self::Body(HandR),
+                    Self::Body(HandL),
+                    Self::Secondary(Spring::Back),
+                ][s as usize],
+            ),
+        }
     }
 }
+
 impl BodyPlan {
     pub fn proportions(self) -> Proportions {
         Proportions {
@@ -142,39 +152,34 @@ pub fn nodes() -> impl Iterator<Item = Node> {
 }
 
 pub fn rest(node: Node, p: &Proportions) -> Vec3 {
-    use Joint::*;
+    let arm = p.torso.x / 2.0 + 0.05;
+    let body = [
+        Vec3::ZERO,
+        Vec3::new(0.0, p.leg + 0.06, 0.0),
+        Vec3::Y * 0.02,
+        Vec3::ZERO,
+        Vec3::new(0.0, p.torso.y + p.head * 0.85, 0.0),
+        Vec3::new(arm, p.torso.y * 0.9, 0.0),
+        -Vec3::Y * p.arm,
+        -Vec3::Y * p.arm * 0.9,
+        Vec3::new(-arm, p.torso.y * 0.9, 0.0),
+        -Vec3::Y * p.arm,
+        -Vec3::Y * p.arm * 0.9,
+        Vec3::X * p.torso.x * 0.25,
+        -Vec3::Y * p.leg * 0.5,
+        -Vec3::Y * p.leg * 0.5,
+        -Vec3::X * p.torso.x * 0.25,
+        -Vec3::Y * p.leg * 0.5,
+        -Vec3::Y * p.leg * 0.5,
+    ];
+    let secondary = [
+        Vec3::new(0.0, p.torso.y * 0.65, -p.torso.z * 0.65),
+        Vec3::ZERO,
+        Vec3::new(0.0, 0.0, p.torso.z * 0.55),
+    ];
     match node {
-        Node::Body(Root | Chest) => Vec3::ZERO,
-        Node::Body(Hips) => Vec3::new(0.0, p.leg + 0.06, 0.0),
-        Node::Body(Spine) => Vec3::new(0.0, 0.02, 0.0),
-        Node::Body(Head) => Vec3::new(0.0, p.torso.y + p.head * 0.85, 0.0),
-        Node::Body(UpperArmL | UpperArmR) => Vec3::new(
-            (p.torso.x / 2.0 + 0.05)
-                * if matches!(node, Node::Body(UpperArmL)) {
-                    1.0
-                } else {
-                    -1.0
-                },
-            p.torso.y * 0.9,
-            0.0,
-        ),
-        Node::Body(ForearmL | ForearmR) => Vec3::new(0.0, -p.arm, 0.0),
-        Node::Body(HandL | HandR) => Vec3::new(0.0, -p.arm * 0.9, 0.0),
-        Node::Body(ThighL | ThighR) => Vec3::new(
-            p.torso.x
-                * 0.25
-                * if matches!(node, Node::Body(ThighL)) {
-                    1.0
-                } else {
-                    -1.0
-                },
-            0.0,
-            0.0,
-        ),
-        Node::Body(ShinL | FootL | ShinR | FootR) => Vec3::new(0.0, -p.leg * 0.5, 0.0),
-        Node::Secondary(Spring::Back) => Vec3::new(0.0, p.torso.y * 0.65, -p.torso.z * 0.65),
-        Node::Secondary(Spring::HeadGear) => Vec3::ZERO,
-        Node::Secondary(Spring::Tabard) => Vec3::new(0.0, 0.0, p.torso.z * 0.55),
+        Node::Body(j) => body[j.index()],
+        Node::Secondary(s) => secondary[s as usize],
         Node::Prop(_) => Vec3::ZERO,
     }
 }

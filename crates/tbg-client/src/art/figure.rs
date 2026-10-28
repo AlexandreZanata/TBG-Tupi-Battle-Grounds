@@ -69,8 +69,13 @@ pub fn spawn_joints(
         if let Some(m) = &meshes[node.index()] {
             e.insert((Mesh3d(m.clone()), MeshMaterial3d(material.clone())));
         }
-        if let Node::Secondary(_) = node {
-            e.insert(SpringJoint::new(parent));
+        if let Node::Secondary(s) = node {
+            let back = Node::Prop(rig::Socket::Back).index();
+            let used = meshes[node.index()].is_some()
+                || (matches!(s, rig::Spring::Back) && meshes[back].is_some());
+            if used {
+                e.insert(SpringJoint::new(parent));
+            }
         }
         let id = e.id();
         commands.entity(parent).add_child(id);

@@ -13,8 +13,19 @@ pub fn frame(
         return;
     }
     let aspect = window.width() / window.height();
-    let portrait = aspect < 1.0;
-    let (center, half_width, half_height, offset) = match options.mode.as_str() {
+    let (center, width, height, offset) = target(&options, aspect < 1.0);
+    let distance = (width / (0.315 * aspect)).max(height / 0.315);
+    let offset = if options.silhouette { Vec3::Z } else { offset };
+    let (mut t, mut fog) = camera.into_inner();
+    *t = Transform::from_translation(center + offset.normalize() * distance)
+        .looking_at(center, Vec3::Y);
+    fog.falloff = FogFalloff::Linear {
+        start: distance + 15.0,
+        end: distance + 70.0,
+    };
+}
+fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
+    match options.mode.as_str() {
         "palette" => (
             Vec3::new(8.0, 0.5, 0.0),
             5.8,
@@ -25,51 +36,51 @@ pub fn frame(
             Vec3::new(8.0, 0.6, 0.0),
             3.0,
             4.5,
-            Vec3::new(0.0, 6.0, 12.0),
+            Vec3::new(0.0, 14.0, 10.0),
         ),
         "blockout" => (Vec3::new(8.0, 0.7, 0.0), 9.0, 3.0, Vec3::new(0.0, 1.0, 1.0)),
-        _ if options.frames => {
-            let clips = if options.clip.is_some() {
-                1
-            } else {
-                CLIPS.len()
-            };
-            let cols = if portrait { 1 } else { 2 };
-            let rows = clips.div_ceil(cols);
-            let width = (cols.min(clips) * 4 - 1) as f32 * 1.6;
-            let height = (rows - 1) as f32 * 2.0;
-            (
-                Vec3::new(width * 0.5, 0.65, -height * 0.5),
-                width * 0.5 + 1.0,
-                height * 0.5 + 1.6,
-                Vec3::new(0.0, 1.2, 10.0),
-            )
-        }
+        _ if options.frames => sheet(options, portrait),
         _ if options.silhouette => (Vec3::new(8.0, 0.7, -2.8), 9.0, 3.0, Vec3::Z),
-        _ if options.unit.is_some() => (
-            if portrait {
-                Vec3::new(1.0, 0.7, -2.2)
-            } else {
-                Vec3::new(4.0, 0.7, 0.0)
-            },
-            if portrait { 2.3 } else { 5.2 },
-            if portrait { 4.0 } else { 2.2 },
-            Vec3::new(0.0, 2.0, 10.0),
-        ),
+        _ if options.unit.is_some() => unit(portrait),
         _ => (
             Vec3::new(8.0, 0.6, 0.0),
             10.0,
             5.5,
             Vec3::new(0.0, 1.0, 1.0),
         ),
+    }
+}
+fn unit(portrait: bool) -> (Vec3, f32, f32, Vec3) {
+    if portrait {
+        (
+            Vec3::new(1.0, 0.7, -2.2),
+            2.3,
+            4.0,
+            Vec3::new(0.0, 10.0, 14.0),
+        )
+    } else {
+        (
+            Vec3::new(4.0, 0.7, 0.0),
+            5.2,
+            2.2,
+            Vec3::new(0.0, 2.0, 10.0),
+        )
+    }
+}
+fn sheet(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
+    let clips = if options.clip.is_some() {
+        1
+    } else {
+        CLIPS.len()
     };
-    let distance = (half_width / (0.315 * aspect)).max(half_height / 0.315);
-    let offset = if options.silhouette { Vec3::Z } else { offset };
-    let (mut t, mut fog) = camera.into_inner();
-    *t = Transform::from_translation(center + offset.normalize() * distance)
-        .looking_at(center, Vec3::Y);
-    fog.falloff = FogFalloff::Linear {
-        start: distance + 15.0,
-        end: distance + 70.0,
-    };
+    let cols = if portrait { 1 } else { 2 };
+    let rows = clips.div_ceil(cols);
+    let width = (cols.min(clips) * 4 - 1) as f32 * 1.6;
+    let height = (rows - 1) as f32 * 2.0;
+    (
+        Vec3::new(width * 0.5, 0.65 - height * 0.5, 0.0),
+        width * 0.5 + 1.0,
+        height * 0.5 + 1.6,
+        Vec3::new(0.0, 1.2, 10.0),
+    )
 }

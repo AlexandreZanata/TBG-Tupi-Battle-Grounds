@@ -37,7 +37,7 @@ pub fn plugin(app: &mut App) {
             (
                 cycle.before(crate::art::anim::animate),
                 camera::frame,
-                layout::place,
+                layout::place.before(crate::art::anim::animate),
                 turn.after(crate::art::anim::animate),
             )
                 .run_if(in_state(GameState::Gallery)),
@@ -47,7 +47,7 @@ fn spawn(
     mut commands: Commands,
     lib: Res<FigureLibrary>,
     options: Res<Gallery>,
-    meshes: ResMut<Assets<Mesh>>,
+    mut meshes: ResMut<Assets<Mesh>>,
     mats: ResMut<Assets<StandardMaterial>>,
     arena: Query<Entity, With<Mesh3d>>,
     window: Single<&Window>,
@@ -55,10 +55,21 @@ fn spawn(
     if options.stress {
         return;
     }
-    if options.silhouette {
+    if options.hide_arena() {
         for e in &arena {
             commands.entity(e).insert(Visibility::Hidden);
         }
+    }
+    if options.floor() {
+        use crate::art::{mesh, palette};
+        commands.spawn((
+            Mesh3d(meshes.add(mesh::paint(
+                mesh::build(mesh::Shape::Box(60.0, 0.05, 60.0)),
+                palette::PARCHMENT,
+            ))),
+            MeshMaterial3d(lib.material.clone()),
+            Transform::from_xyz(8.0, -0.08, -5.0),
+        ));
     }
     match options.mode.as_str() {
         "palette" => palette::spawn(&mut commands, meshes, mats),

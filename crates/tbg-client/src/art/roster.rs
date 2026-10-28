@@ -54,6 +54,10 @@ impl Form {
     }
 }
 
+pub fn archer_base() -> super::figure::FigureSpec {
+    humans::archer::spec()
+}
+
 pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
     let mut spec = match kind {

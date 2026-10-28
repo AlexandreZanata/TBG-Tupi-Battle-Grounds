@@ -22,8 +22,8 @@ impl Layout {
                 let cols = if portrait { 1 } else { 2 };
                 Vec3::new(
                     (i % cols * 4 + quarter) as f32 * 1.6,
-                    0.0,
                     -((i / cols) as f32) * 2.0,
+                    0.0,
                 )
             }
         }
