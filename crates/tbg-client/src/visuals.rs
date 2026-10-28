@@ -122,11 +122,9 @@ pub fn spawn_unit_visual(
     let mut animator = Animator::new(joints, form.plan, figure_root, look.kind, look.id);
     animator.native = form.native;
     animator.archer = form.native && look.kind == UnitKind::Archer;
-
     animator.play(crate::art::anim::Clip::Spawn);
     let root = commands.spawn_empty().id();
     if animator.archer {
-        let half = form.bow_half;
         crate::art::bow::attach(
             commands,
             root,
@@ -134,7 +132,7 @@ pub fn spawn_unit_visual(
             lib,
             &lib.material,
             look.own,
-            half,
+            form.bow_half,
         );
     }
     commands
