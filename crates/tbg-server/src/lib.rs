@@ -97,7 +97,7 @@ pub async fn run_with(
     }
     let service = app.into_make_service_with_connect_info::<SocketAddr>();
     // P9: instant-feeling taps — disable Nagle on every socket; log, never panic.
-    let listener = listener.tap_io(|stream: &tokio::net::TcpStream| {
+    let listener = listener.tap_io(|stream: &mut tokio::net::TcpStream| {
         if let Err(e) = stream.set_nodelay(true) {
             tracing::warn!("failed to set TCP_NODELAY: {e:#}");
         }
