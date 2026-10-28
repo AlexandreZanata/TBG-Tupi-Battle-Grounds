@@ -8,6 +8,8 @@ use super::legacy::{part, BodyPlan, FigureSpec, Joint::*, PartSpec};
 use super::mesh::Shape::*;
 use super::palette::DARK;
 
+pub mod blockout;
+mod body;
 mod humans;
 mod machines;
 mod plants;

@@ -154,6 +154,9 @@ fn lights(commands: &mut Commands) {
 
 /// Towers lose their crown, then their middle, as Stronghold HP drops.
 fn damage_states(view: Res<LatestView>, mut pieces: Query<(&TowerPiece, &mut Visibility)>) {
+    if config::url_param("gallery").is_some() && config::url_param("silhouette").is_some() {
+        return;
+    }
     let hp = view.0.as_ref().map(|v| {
         let me = v.you.index();
         [v.stronghold_hp[me], v.stronghold_hp[1 - me]].map(|h| h as f32 / STRONGHOLD_HP as f32)

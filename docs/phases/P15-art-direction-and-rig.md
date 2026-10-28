@@ -178,3 +178,14 @@ Status: implementation in progress; **owner sign-off pending**.
   decorrelated by a stable hash of the visual unit id.
 - Bevy's example uses optional `bevy_curve` symbols absent from this
   feature set. Equivalent cubic formulas keep the existing dependency set.
+
+### Step 4 evidence
+
+- Eight gray v2 blockouts rendered in the release browser build.
+- [Silhouette row](../media/p15/blockout-silhouette-desktop.jpg): small
+  body height is approximately 64 px at 1280 × 800; Large bodies retain 1.5× scale.
+- [Gray desktop](../media/p15/blockout-desktop.jpg) and
+  [gray phone](../media/p15/blockout-phone.jpg).
+- Reviewer judgment and owner glance on identification remain pending.
+- Corrected the saw's viewing plane and hid arena/tower geometry for the
+  silhouette board after inspecting the first capture.

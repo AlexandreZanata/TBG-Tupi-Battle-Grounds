@@ -2,6 +2,7 @@
 //! arena, cycling through every animation clip, for visual review and
 //! screenshots. Logs triangles per form at startup (see `art`).
 
+mod blockout;
 mod palette;
 
 use bevy::prelude::*;
@@ -41,7 +42,17 @@ fn spawn(
     lib: Res<FigureLibrary>,
     meshes: ResMut<Assets<Mesh>>,
     mats: ResMut<Assets<StandardMaterial>>,
+    arena: Query<Entity, With<Mesh3d>>,
 ) {
+    if config::url_param("gallery").as_deref() == Some("blockout") {
+        if config::url_param("silhouette").is_some() {
+            for entity in &arena {
+                commands.entity(entity).insert(Visibility::Hidden);
+            }
+        }
+        blockout::spawn(&mut commands, &lib, mats);
+        return;
+    }
     if config::url_param("gallery").as_deref() == Some("palette") {
         palette::spawn(&mut commands, meshes, mats);
         return;
@@ -86,9 +97,21 @@ fn cycle(time: Res<Time>, mut figures: Query<(&mut Animator, &mut Cycle)>) {
 
 /// `?gallery=N` frames unit column N (0..7) up close for review.
 fn close_up(mut camera: Single<&mut Transform, With<ArenaCamera>>, window: Single<&Window>) {
-    if config::url_param("gallery").as_deref() == Some("palette") {
-        **camera =
-            Transform::from_xyz(8.0, 11.0, 14.0).looking_at(Vec3::new(8.0, 0.5, 0.0), Vec3::Y);
+    let mode = config::url_param("gallery").unwrap_or_default();
+    if mode == "blockout" || mode == "palette" {
+        let center = Vec3::new(8.0, 0.7, 0.0);
+        let aspect = window.width() / window.height();
+        let offset = if mode == "palette" {
+            Vec3::new(0.0, 11.0, 14.0).normalize() * (6.0 / (0.315 * aspect)).max(18.0)
+        } else {
+            Vec3::new(0.0, 1.0, 1.0).normalize() * (9.0 / (0.315 * aspect)).max(20.0)
+        };
+        let offset = if mode == "blockout" && config::url_param("silhouette").is_some() {
+            Vec3::Z * (9.0 / (0.315 * aspect)).max(20.0)
+        } else {
+            offset
+        };
+        **camera = Transform::from_translation(center + offset).looking_at(center, Vec3::Y);
         return;
     }
     let Some(col) = config::url_param("gallery").and_then(|v| v.parse::<f32>().ok()) else {

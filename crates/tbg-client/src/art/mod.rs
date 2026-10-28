@@ -36,11 +36,15 @@ pub struct FigureForm {
 #[derive(Resource)]
 pub struct FigureLibrary {
     forms: HashMap<(UnitKind, u8, u8), FigureForm>,
+    blockouts: HashMap<UnitKind, FigureForm>,
     /// One shared material for every figurine (vertex colors).
     pub material: Handle<StandardMaterial>,
 }
 
 impl FigureLibrary {
+    pub fn blockout(&self, kind: UnitKind) -> &FigureForm {
+        &self.blockouts[&kind]
+    }
     pub fn get(&self, kind: UnitKind, tier: u8, branch: u8) -> &FigureForm {
         let key = if tier == 0 {
             (kind, 0, 0)
@@ -92,5 +96,26 @@ fn build_library(
         }
         info!("figure {kind:?}: max {max_tris} triangles over 5 forms");
     }
-    commands.insert_resource(FigureLibrary { forms, material });
+    let blockouts = UNIT_KINDS
+        .into_iter()
+        .map(|kind| {
+            let spec = roster::blockout::spec(kind);
+            let built = figure::build_joint_meshes(&spec);
+            let triangles = built.iter().flatten().map(mesh::triangles).sum();
+            info!("blockout {kind:?}: 17 body + 3 springs + 3 sockets, {triangles} triangles");
+            (
+                kind,
+                FigureForm {
+                    plan: spec.plan,
+                    meshes: built.map(|m| m.map(|m| meshes.add(m))),
+                    triangles,
+                },
+            )
+        })
+        .collect();
+    commands.insert_resource(FigureLibrary {
+        forms,
+        blockouts,
+        material,
+    });
 }
