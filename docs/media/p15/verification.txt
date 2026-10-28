@@ -1,0 +1,18 @@
+$ cargo fmt --all -- --check
+[exit 0]
+
+$ cargo clippy --workspace --all-targets -- -D warnings
+    Checking tbg-client v0.1.0 (/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/crates/tbg-client)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.64s
+[exit 0]
+
+$ cargo clippy -p tbg-client --target wasm32-unknown-unknown -- -D warnings
+    Checking tbg-client v0.1.0 (/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/crates/tbg-client)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.56s
+[exit 0]
+
+$ cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+    Checking tbg-client v0.1.0 (/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/crates/tbg-client)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.50s
+[exit 0]
+

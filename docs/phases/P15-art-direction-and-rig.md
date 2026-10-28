@@ -245,3 +245,13 @@ and the running gallery:
 
 Physical mid-range-phone Low-tier validation remains pending as well.
 The desktop browser at a phone viewport is not a phone benchmark.
+
+### Step 8 evidence
+
+- ARCHITECTURE §7 now describes the implemented rig, adapter, shared
+  assets/material, curves/events, studio review tools, and measurement limits.
+- ART-DIRECTION records candidate proportions, inherited skin, spring
+  settings, and Archer timings. *Start* marks and Proposed names/colors
+  remain because no owner approval was supplied; locking is pending.
+- D-22 and ROADMAP status are unchanged. The reviewer owns integration
+  and status updates; no phase completion or approval is claimed.

@@ -53,7 +53,7 @@
 
 ## 4. Rig and motion language
 
-- **Rig v2 (P15):** 18 body joints — Root, Hips, Spine, Chest, Head,
+- **Rig v2 candidate (P15):** 17 named body joints — Root, Hips, Spine, Chest, Head,
   UpperArmL/R, ForearmL/R, HandL/R, ThighL/R, ShinL/R, FootL/R — plus up
   to 3 **secondary** joints driven by springs (Cape/Quiver, Plume/Hood,
   Tabard/Banner). Props attach to sockets: `WeaponR`, `OffhandL`, `Back`.
@@ -168,3 +168,28 @@ collapse sequence at defeat. Budget ≤ 4 000 triangles per style.
 | WASM (brotli) / other first-load assets | ≤ 6 MB hard ceiling / ≤ 1.5 MB |
 | Frame rate | 60 FPS desktop; ≥ 30 FPS mid-range phone on Low with 30 units |
 | Time to menu | ≤ 5 s desktop; ≤ 10 s mid-range phone on 4G |
+
+## 10. P15 candidate implementation notes (not owner-approved)
+
+Palette values, proportions marked *start*, and display names remain
+**Proposed**: owner sign-off is pending. No value is locked by the executor.
+
+- The exact enum supplied by P15 contains 17 body names despite its "18"
+  label. The candidate implements those names; the reviewer/owner must
+  resolve that documentation discrepancy before treating the rig as locked.
+- Humanoid anatomy is approximately 1.05 units tall with a 0.273 head
+  diameter (26%); the Archer retains the client's existing 1.2× lane
+  prominence. Large blockouts use 1.5× scale; old adapted bodies retain
+  their previous proportions until refinement.
+- Human skin retains the existing `#E8B98A` palette constant as a
+  **Proposed** neutral skin slot. No simulation value changes.
+- Secondary defaults are stiffness 60, damping 8, fixed 120 Hz sub-steps,
+  ±35° per-axis rotation clamps. Only used secondary attachments are driven.
+- Archer base has 1,116 triangles including the shared strings and arrow.
+  Idle lasts 1.60 s; Walk cadence follows content speed and stride;
+  AttackRanged lasts 0.50 s: draw 0–0.12, anchor 0.12–0.18,
+  Release 0.18, follow-through 0.18–0.30, recovery 0.30–0.50.
+- The other seven units are v2 gray blockouts for silhouette review; their
+  existing in-match forms, and the four Archer evolutions, remain adapted.
+- Gallery evidence and the unanswered owner decisions are in the
+  [P15 phase report](phases/P15-art-direction-and-rig.md#phase-report).
