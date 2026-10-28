@@ -171,5 +171,56 @@ row "ack latency p95 ≤ RTT p95 + 60 ms").
 
 ## Phase report
 
-_Executor fills this in: commands run with real output, before/after
-tables, deviations, blocked items._
+Executed 2026-10-28 on the dev PC (branch `phase/p9-realtime-fast-path`).
+Load runs used `TBG_MAX_CONNECTIONS=20000 TBG_MAX_PER_IP=20000`
+(default per-IP cap of 8 would reject 100 bots from one host) and a
+`TBG_DB` file under `/tmp/opencode/`.
+
+### Verification commands (all pass)
+
+```text
+$ cargo fmt --all -- --check            # clean
+$ cargo clippy --workspace -- -D warnings   # clean
+$ cargo test --workspace               # ok: core 15, server 12 (incl. the 2 new tests), rest 0
+$ cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown  # ok
+$ trunk build --release                # success (in crates/tbg-client)
+```
+
+New integration tests (`crates/tbg-server/tests/online.rs`):
+`intent_is_acknowledged_next_tick` (ack ≤ 500 ms with `TBG_TICK_MS=50`,
+measured ~50–100 ms) and `protocol_pong_keeps_socket_alive`
+(20 s of protocol-only traffic, still connected afterwards) — both pass.
+
+### Before/after table (same machine, release server, new `tbg-bots`)
+
+| Run | RTT p50/p95 | ack p50/p95 | view gap p95 | queue wait p95 |
+|-----|-------------|-------------|--------------|----------------|
+| Before, `--matches 50 --delay-ms 40 --jitter-ms 20` | 83 / 110 | 106 / 197 | 128 | 145 |
+| After, same command | 82 / 110 | 106 / 147 | 127 | 123 |
+| Before, `--matches 50` | 2 / 2 | 100 / 100 | 100 | 46 |
+| After, same command | 2 / 2 | 49 / 50 | 100 | 24 |
+
+- ack p95 ≤ RTT p95 + 60 ms in both after runs: 147 ≤ 170 ✔, 50 ≤ 62 ✔.
+- Down-bandwidth per player from server `conn closed` logs
+  (100 conns each): before 1289 B/s, after 1314 B/s (+1.9 %, limit 20 %).
+- `TCP_NODELAY`: no measurable change under 40 ms added delay
+  (delay dominates); kept for the no-delay case and correctness.
+
+### Deviations
+
+- `Mode::Probe` reuse: the probe socket is reused by the next Quick
+  Match / room action; a fresh socket is opened only when the probe
+  socket is gone, busy, or failed.
+- `Reconnecting` banner counts down from the 30 s window; on give-up
+  the client toasts "Connection lost" and returns to the menu (the menu
+  itself is the "Back to menu" destination — no separate button).
+- `NetStatus::Reconnecting` gained a `{ since: f64 }` payload; tab
+  visibility needs no extra hook because `poll` runs every frame and
+  fires a due retry on the first frame after the tab is shown again.
+
+### Blocked / owner-pending
+
+- Browser checks (reload resumes ≤ 3 s, hidden tab 60 s survives,
+  offline 10 s resumes / 40 s forfeits, desktop + phone) were not run —
+  no devices attached to this session. Code paths are in place
+  (`probe_on_load`, protocol pings, backoff 0.25/0.5/1/2 s to 30 s).
