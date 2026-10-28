@@ -8,14 +8,24 @@ use tbg_server::{Config, Shared};
 
 const DRAIN_LIMIT: Duration = Duration::from_secs(300);
 
-#[tokio::main]
-async fn main() {
+fn main() {
+    let config = Config::from_env();
+    // P10: worker count from `TBG_WORKERS` (0 = all cores); the runtime is
+    // built by hand instead of `#[tokio::main]` so the count applies.
+    let mut rt = tokio::runtime::Builder::new_multi_thread();
+    rt.enable_all();
+    if config.workers > 0 {
+        rt.worker_threads(config.workers);
+    }
+    rt.build().expect("tokio runtime").block_on(serve(config));
+}
+
+async fn serve(config: Config) {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .init();
-    let config = Config::from_env();
     let listener = tokio::net::TcpListener::bind(&config.addr)
         .await
         .unwrap_or_else(|e| panic!("tbg-server: cannot bind {}: {e}", config.addr));

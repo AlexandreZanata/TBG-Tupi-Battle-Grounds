@@ -257,6 +257,8 @@ D-22); until each unit's phase lands, the description below stays true.
   Match records are non-critical; a lost day is acceptable.
 - Monitoring: `/health` endpoint + a free external uptime checker +
   structured logs (`journalctl`). Nothing more until there is a need.
+- On a 2 vCPU VPS set `TBG_WORKERS=2` in the env file (P10 measured one
+  worker per core; unset means all cores).
 - Optional: put a free Cloudflare proxy in front for edge caching of the
   static bundle; WebSockets pass through.
 
@@ -284,17 +286,19 @@ buying.
 | Triangles | ≤ 1 500 per one-slot unit, ≤ 3 000 per two-slot, ≤ 30 000 arena | P6 |
 | Browser memory | ≤ 300 MB | P7 |
 | Sim step, 30 units (release) | ≤ 50 µs | P2 · measured: 0.44 µs harness, 4–6 µs in server |
-| Server memory | ≤ 100 KB per match + about 64 KB per socket | P4 local: 89.5 MB RSS at 300 matches |
-| Bandwidth per player | ≤ 6 KB/s down, ≤ 0.5 KB/s up | P4 local: 1.46 KB/s down, 3 B/s up |
+| Server memory | ≤ 100 KB per match + about 64 KB per socket | P10 local: ~300 KB per running match (target missed — sockets and per-connection queues dominate; worst case is bounded by `CONN_QUEUE` and the 64 KiB write cap) |
+| Bandwidth per player | ≤ 6 KB/s down, ≤ 0.5 KB/s up | P4 local: 1.46 KB/s down, 3 B/s up · P10 local: 1.29 KB/s down at 250 matches |
 | View-gap p95 under 40 ± 20 ms added latency | ≤ 150 ms | P4 local: 128 ms |
-| Ack latency p95 (tap to first covering view) | ≤ RTT p95 + 60 ms | P9: measured in the phase report |
-| Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | P4 local: 300 matches = 1.06 cores, 0 late ticks; VPS pending (P5) |
+| Ack latency p95 (tap to first covering view) | ≤ RTT p95 + 60 ms | P9: measured in the phase report · P10 local: 50 ms at 250 matches, no added delay |
+| Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | P10 local: 1000 matches ≈ 1 core, 1500 matches ≈ 1.5 cores, 0 late ticks (16-core dev PC; steady-state `scripts/capacity.sh`) |
+| Tokio workers on a 2 vCPU VPS | — | P10: `TBG_WORKERS=2` (one per core); 1 worker also held 1500 matches with 0 late ticks, but 2 leaves headroom for bursts |
 
 **Capacity reasoning.** Simulation CPU is tiny (about 20 units, integer
 math). The first limits are socket fan-out and bandwidth: 500 matches ≈
-1 000 players × 4 KB/s ≈ 32 Mbit/s. Measure with `tbg-bots` (P4 locally, P5 on the VPS)
+1 000 players × 1.3 KB/s ≈ 10 Mbit/s. Measure with `tbg-bots` (P4 locally, P5 on the VPS)
 (bot clients over real WebSockets) at 100/250/500 matches while watching
-CPU, RSS, and bytes/s.
+CPU, RSS, and bytes/s; `scripts/capacity.sh` (P10) automates the steady-state
+table at 250/500/1000/1500 concurrent matches.
 
 ## 11. Security baseline
 

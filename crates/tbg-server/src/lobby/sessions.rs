@@ -11,7 +11,7 @@ use crate::names::{display_name, random_bytes};
 impl Lobby {
     /// Resume a known session (taking over any older socket) or create one.
     pub(super) fn hello(&mut self, resume: Option<Token>, conn: ConnHandle) -> (Token, String) {
-        if let Some(s) = resume.and_then(|t| self.sessions.iter_mut().find(|s| s.token == t)) {
+        if let Some(s) = resume.and_then(|t| self.sessions.get_mut(&t)) {
             send(&s.conn, ConnEvent::Close);
             if let SessionState::InMatch { tx, seat } = &s.state {
                 let _ = tx.try_send(MatchCmd::Attach {
@@ -35,7 +35,7 @@ impl Lobby {
             detached_at: None,
         };
         let pair = (session.token, session.name.clone());
-        self.sessions.push(session);
+        self.sessions.insert(session.token, session);
         pair
     }
 
@@ -56,12 +56,11 @@ impl Lobby {
         let now = Instant::now();
         self.rooms.retain(|(.., created)| now - *created < ROOM_TTL);
         let window = Duration::from_secs(self.config.reconnect_secs);
-        self.sessions.retain(|s| {
+        self.sessions.retain(|_, s| {
             let gone = s.detached_at.is_some_and(|t| now - t > window);
             !gone || matches!(s.state, SessionState::InMatch { .. })
         });
-        let tokens: Vec<Token> = self.sessions.iter().map(|s| s.token).collect();
-        self.queue.retain(|t| tokens.contains(t));
+        self.queue.retain(|t| self.sessions.contains_key(t));
         self.queued_at.retain(|t, _| self.queue.contains(t));
     }
 }

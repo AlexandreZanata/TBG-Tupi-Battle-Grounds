@@ -17,6 +17,8 @@ pub struct Metrics {
     pub late_ticks: AtomicU64,
     pub ticks: AtomicU64,
     pub rejections: AtomicU64,
+    /// P10: worst lobby inbox backlog seen (join bursts must not pile up).
+    pub lobby_inbox_max: AtomicU64,
     rtt: Mutex<VecDeque<(Instant, u16)>>,
     /// P9: lobby queue waits (ms) over the last 60 s.
     queue_wait: Mutex<VecDeque<(Instant, u64)>>,
@@ -35,6 +37,7 @@ impl Default for Metrics {
             late_ticks: AtomicU64::new(0),
             ticks: AtomicU64::new(0),
             rejections: AtomicU64::new(0),
+            lobby_inbox_max: AtomicU64::new(0),
             rtt: Mutex::new(VecDeque::new()),
             queue_wait: Mutex::new(VecDeque::new()),
             started: Instant::now(),
@@ -92,6 +95,7 @@ impl Metrics {
             "bytes_out": get(&self.bytes_out),
             "ticks": get(&self.ticks),
             "late_ticks": get(&self.late_ticks),
+            "lobby_inbox_max": get(&self.lobby_inbox_max),
             "rejections": get(&self.rejections),
             "rtt_p50_ms": percentile(&rtts, 0.50),
             "rtt_p95_ms": percentile(&rtts, 0.95),

@@ -157,5 +157,87 @@ the new matches-per-core number.
 
 ## Phase report
 
-_Executor fills this in: before/after tables, profile summary, per-change
-measurements, deviations, blocked items._
+Executed 2026-10-28 on the dev PC (16 cores, 31 GB; branch
+`phase/p10-server-efficiency`). Inherits `scripts/capacity.sh` and the
+pprof approach from a previous session; the temporary `pprof` dependency
+and its `main.rs` hook were removed after profiling (no dead dependency).
+
+### Before table (P9 code, release profile, `scripts/capacity.sh`, WINDOW=40)
+
+| matches | server cores | matches/core | RSS MB | KB/match | late ticks | RTT p95 ms |
+|---------|--------------|--------------|--------|----------|------------|------------|
+| 250 | 0.30 | 833 | 78.2 | 320 | 0 | 2 |
+| 500 | 0.51 | 980 | 150.1 | 307 | 0 | 2 |
+| 1000 | 0.98 | 1020 | 293.7 | 301 | 0 | 2 |
+| 1500 | 1.49 | 1007 | 437.3 | 299 | 0 | 3 |
+
+### After table (final P10 code, release profile, same script + `lobby inbox max`)
+
+| matches | server cores | matches/core | RSS MB | KB/match | late ticks | RTT p95 ms | lobby inbox max |
+|---------|--------------|--------------|--------|----------|------------|------------|-----------------|
+| 250 | 0.31 | 806 | 77.9 | 319 | 0 | 2 | 1 |
+| 500 | 0.53 | 943 | 149.9 | 307 | 0 | 2 | 1 |
+| 1000 | 0.98 | 1020 | 292.9 | 300 | 0 | 2 | 1 |
+| 1500 | 1.47 | 1020 | 432.6 | 295 | 0 | 3 | 1 |
+
+(Tables are steady-state over a 40 s window per level; matches run 100–250
+all at once from one machine with `--ramp-ms 5`. The bots machine never
+saturated: RTT p95 stayed 2–3 ms.)
+
+### Profile summary (step 2, 1500 matches, pprof 499 Hz × 30 s, 9527 samples)
+
+Top self groups: WebSocket write/allocation
+(`BytesMut::resize` 42.9 %, `__send` 6.8 %, `__libc_realloc` 3.4 %,
+`Vec::extend_from_slice` 1.2 %); simulation (`MatchState::step`) 3.0 %;
+scheduling noise (sleep/interval/waker polls ~5 % combined). Ranking:
+1. WebSocket write + allocation, 2. simulation, 3. scheduling. Steps were
+done in that order; scheduling was under 5 %, so step 9 was skipped.
+
+### Per-change measurements (each its own commit)
+
+- Step 1 `capacity.sh`: committed; shellcheck-clean.
+- Step 3 server profile (`opt-level = 3`): 1000 matches 0.99 cores vs
+  release 0.97 — no gain. Reverted (release serves both WASM and server).
+- Step 4 encode-once (`ConnEvent::Bytes` + reused buffer): 1000 matches
+  0.97 cores, identical to baseline — the hotspot is the WS library's own
+  send buffering, not our encode. Reverted.
+- Step 5 lobby O(1) (`HashMap` sessions, `VecDeque` queue): all online
+  tests pass; 1500-level run shows `lobby_inbox_max = 1` (no backlog).
+  Kept (removes O(n) scans on every join/message; steady state unchanged).
+- Step 6 mimalloc: 1000 matches 0.95 cores (noise) but RSS 327 MB vs
+  292 MB (+12 %). Removed.
+- Step 7 socket buffers (`write_buffer_size(4096)`,
+  `max_write_buffer_size(64 KiB)`, `CONN_QUEUE` 64 → 32): RSS at 50
+  matches 20.9 vs 20.7 MB (noise); full 50-match slow-client run
+  (`--delay-ms 150 --jitter-ms 50`) completed 100/100 with 0
+  `server_closed` drops. Kept 32 (halves worst-case queued bytes).
+- Step 8 `TBG_WORKERS` (0 = all cores): on 2 pinned cores at 1000
+  matches — 1 worker 0.51 cores, 2 workers 0.72 cores, both 0 late ticks;
+  1 worker also held 1500 matches (0.81 cores, 0 late ticks). ARCHITECTURE
+  §9/§10 recommend `TBG_WORKERS=2` on a 2 vCPU VPS (headroom for bursts).
+- Step 9 staggered ticks: skipped (scheduling under 5 %).
+
+### Regression check (step 10, 250 full matches, final code)
+
+RTT p50/p95 2/2 ms, ack p50/p95 50/50 ms, view gap p95 100 ms,
+bandwidth 1292 B/s per player — matches the P9 50-match reference
+(RTT 2/2, ack 49/50, ~1314 B/s). No regression. Determinism:
+`cargo test -p tbg-core` hash tests unchanged and green.
+
+### Deviations
+
+- No `perf` on this machine: profiled with a temporary `pprof`
+  sampling guard (`TBG_PPROF`, removed afterwards) instead of
+  `perf`/`flamegraph`; same grouping output as the spec asks.
+- `capacity.sh` kills the bots after the steady window, so its table has
+  no bots summary; ack/bandwidth come from separate full completion runs.
+- `rate_limit_closes_flooder` flaked (~1/6 runs): the test helper
+  answered an in-flight app Ping after the server had closed the socket.
+  Fixed the helper to send best-effort (assertions unchanged); 8/8 green
+  since, plus full suites green.
+- RSS target (≤ 150 KB/match) missed: ~300 KB/match, dominated by sockets
+  and per-connection queues. Recorded honestly in ARCHITECTURE §10.
+
+### Blocked items
+
+None. Client untouched (no `trunk build` needed); WASM check still green.

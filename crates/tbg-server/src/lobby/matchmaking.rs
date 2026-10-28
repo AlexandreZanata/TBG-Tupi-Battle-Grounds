@@ -13,14 +13,15 @@ use crate::names::random_bytes;
 impl Lobby {
     pub(super) fn quick(&mut self, token: Token) {
         self.leave_waiting(token);
-        match self.queue.iter().position(|t| *t != token) {
-            Some(i) => {
-                let other = self.queue.remove(i);
+        // The token just left the queue above, so the front (if any) is
+        // the longest-waiting other session.
+        match self.queue.pop_front() {
+            Some(other) => {
                 self.queued_at.remove(&other);
                 self.pair([other, token]);
             }
             None => {
-                self.queue.push(token);
+                self.queue.push_back(token);
                 self.queued_at.insert(token, Instant::now());
                 if let Some(s) = self.session(&token) {
                     s.state = SessionState::Queued;
@@ -89,7 +90,7 @@ impl Lobby {
             }
         }
         let players = tokens.map(|t| {
-            let s = self.sessions.iter().find(|s| s.token == t);
+            let s = self.sessions.get(&t);
             Player {
                 token: t,
                 name: s.map_or_else(String::new, |s| s.name.clone()),
