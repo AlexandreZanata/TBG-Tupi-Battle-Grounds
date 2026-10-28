@@ -39,6 +39,10 @@ pub(crate) async fn handler(
     let ip = client_ip(peer, &headers);
     ws.max_message_size(MAX_CLIENT_MSG_BYTES)
         .max_frame_size(MAX_CLIENT_MSG_BYTES)
+        // P10: small write buffer, bounded pending bytes (backpressure
+        // stays visible as slow-client drops instead of memory growth).
+        .write_buffer_size(4096)
+        .max_write_buffer_size(64 * 1024)
         .on_upgrade(move |socket| connection(socket, ip, app))
 }
 

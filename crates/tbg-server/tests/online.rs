@@ -47,7 +47,15 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
             .ok()?;
         let Message::Binary(b) = msg else { continue };
         match protocol::decode_server(&b).unwrap() {
-            ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
+            // Best-effort: the server may have closed already (e.g. after
+            // a rate-limit error); a failed pong must not fail the test.
+            ServerMsg::Ping { id } => {
+                let _ = ws
+                    .send(Message::Binary(
+                        protocol::encode(&ClientMsg::Pong { id }).into(),
+                    ))
+                    .await;
+            }
             // Latency housekeeping can arrive between any two replies.
             ServerMsg::NetStats { .. } => {}
             other => return Some(other),

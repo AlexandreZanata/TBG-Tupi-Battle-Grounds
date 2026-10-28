@@ -7,7 +7,8 @@ use tokio::sync::{mpsc, oneshot};
 use tbg_core::protocol::{ClientMsg, ServerMsg, Token};
 use tbg_core::{PlayerIntention, Seat};
 
-pub const CONN_QUEUE: usize = 64;
+// P10: 32 measured against 64 below (kept only with no slow-client drops).
+pub const CONN_QUEUE: usize = 32;
 pub const LOBBY_QUEUE: usize = 1024;
 pub const MATCH_QUEUE: usize = 256;
 
