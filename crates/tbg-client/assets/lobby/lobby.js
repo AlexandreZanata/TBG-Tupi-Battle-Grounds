@@ -7,7 +7,20 @@
     if (node.textContent !== String(text)) node.textContent = String(text);
   });
   const dialogs = [...root.querySelectorAll('dialog')];
-  let previousScreen = '', previousPlayer = '', previousRating = '', statsRequest;
+  let previousScreen = '', previousPlayer = '', previousRating = '', statsRequest, artStarted = false;
+  async function loadArt() {
+    if (artStarted) return;
+    artStarted = true;
+    // This manifest lets the owner substitute WebP illustrations without changing code.
+    let sources = {};
+    try { const response = await fetch('assets/lobby/art.json'); if (response.ok) sources = await response.json(); } catch (_) { /* SVG defaults work offline. */ }
+    root.querySelectorAll('[data-art]').forEach(image => {
+      const source = sources[image.dataset.art];
+      image.src = typeof source === 'string' && source.startsWith('assets/lobby/') ? source : 'assets/lobby/' + image.dataset.art + '.svg';
+      image.decoding = 'async';
+    });
+    root.querySelectorAll('use[data-icon]').forEach(icon => icon.setAttribute('href', 'assets/lobby/icons.svg#' + icon.dataset.icon));
+  }
   const send = action => {
     root.dataset.action = action;
     if (action !== 'sound' && action !== 'copy-key' && action !== 'download-key' && action !== 'logout') dialogs.forEach(dialog => dialog.close());
@@ -76,6 +89,7 @@
     set('[data-ranked-hint]', name ? 'Ranked · Compete for rating' : 'Locked · Create account to play Ranked');
     root.querySelector('[data-ranked]').dataset.action = name ? 'ranked' : 'register';
     if (root.hidden) dialogs.forEach(dialog => dialog.close());
+    if (root.dataset.screen === 'lobby') requestAnimationFrame(loadArt);
     if (name !== previousPlayer || root.dataset.rating !== previousRating || (root.dataset.screen === 'lobby' && previousScreen !== 'lobby')) stats(name);
     previousPlayer = name; previousRating = root.dataset.rating; previousScreen = root.dataset.screen;
   }
