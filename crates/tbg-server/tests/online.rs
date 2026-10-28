@@ -373,8 +373,8 @@ async fn records_insert_and_count() {
     let (a, b) = tokio::join!(play_one(fast(&url), 11), play_one(fast(&url), 12));
     assert!(a.completed && b.completed);
     tokio::time::sleep(Duration::from_millis(300)).await;
-    let records = tbg_server::records::Records::open(&db).unwrap();
-    assert_eq!(records.count().unwrap(), 1);
+    let store = tbg_server::store::Store::open(&db).unwrap();
+    assert_eq!(store.match_count().await.unwrap(), 1);
     let _ = std::fs::remove_dir_all(dir);
 }
 

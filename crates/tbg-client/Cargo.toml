@@ -33,5 +33,8 @@ tbg-core = { path = "../tbg-core" }
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # Audio only in the browser build: native bevy_audio needs ALSA (P7).
 bevy = { version = "0.20", default-features = false, features = ["bevy_audio", "wav"] }
-# Page URL params, session token in localStorage, copying the room link.
-web-sys = { version = "0.3", features = ["Window", "Location", "Storage", "Navigator", "Clipboard"] }
+# Page URL params, session token in localStorage, copying the room link,
+# plus the account text-entry overlay (P11, D-20).
+web-sys = { version = "0.3", features = ["Window", "Location", "Storage", "Navigator", "Clipboard", "Document", "Element", "HtmlElement", "HtmlInputElement", "HtmlAnchorElement"] }
+# P11: JS closures for the overlay listeners (companion of web-sys).
+wasm-bindgen = "0.2"

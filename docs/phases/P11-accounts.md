@@ -231,5 +231,63 @@ ARCHITECTURE §5 (messages, sessions), §8 (store task, `accounts` table),
 
 ## Phase report
 
-_Executor fills this in: commands run with real output, test list, browser
-checks, deviations, blocked items._
+Executed 2026-10-28 on the dev PC (branch `phase/p11-accounts`).
+
+### Verification commands (all pass)
+
+```text
+$ cargo fmt --all -- --check            # clean
+$ cargo clippy --workspace -- -D warnings   # clean
+$ cargo test --workspace               # ok: core 6 account + 15 rules, server 10 account + 12 online
+$ cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown  # ok
+$ trunk build --release                # success (dist/ rebuilt with #tbg-form)
+```
+
+New tests: `tbg-core/tests/accounts.rs` (6: name shapes, reserved,
+blocked+leetspeak, key round trip, `O`/`I`/`L`/lowercase normalization,
+bad-key shapes) and `tbg-server/tests/accounts.rs` (4 store-level:
+migrate-twice no-op, register→login, duplicate-name `NameTaken`,
+`BadKey` shared for bad secret and unknown name; 6 protocol-level:
+`Registered` key parses, `NameTaken`/`NameInvalid`, login same profile +
+tampered `BadKey`, 4th-register `RateLimited`, BR-P03 takeover with old
+socket closed and new socket receiving `MatchStart` + `View`, in-match
+register/logout `Unavailable`).
+
+`tbg-bots --matches 2 --accounts` (with `TBG_REGISTER_PER_IP_HOUR`
+raised on the test server only): 4/4 bots registered as `Tb…` and
+completed matches. Server log `grep` after the run: no key text, no IPs,
+no hashes. The 4 rows exist in SQLite with rating 1000, 0 ranked games.
+
+### Browser checks (owner-pending, no devices attached)
+
+Create account on desktop, Copy key, log in with it on a phone; reload
+keeps you logged in; Log out works; typing/pasting/phone keyboard in the
+overlay. Code paths are in place (probe auto-login, `localStorage` key,
+two-tap logout).
+
+### Deviations
+
+- Added `wasm-bindgen = "0.2"` (wasm-only target) next to the allowed
+  web-sys features: `Closure`/JS casts live there. One-line reason in the
+  crate `Cargo.toml`.
+- Rate limits are a sliding log (at most N attempts in any trailing
+  window) rather than strict fixed windows: simpler, strictly tighter.
+  Same env knobs, same defaults.
+- `Register` attaches the account to the session immediately, so the menu
+  profile chip and the save-your-key screen work in one step. The plain
+  key still exists only in the `Registered` reply and client storage.
+- `tbg-bots --accounts` registers then quick-matches on the attached
+  session; the `Login{key}` path is covered by integration tests.
+- Account traffic reuses the idle probe socket (`NetLink::reuse`); a
+  fresh listen-only link opens only when there is no usable socket.
+- `BLOCKED_SUBSTRINGS` (30 EN + PT-BR roots) is a starting list flagged
+  for owner review (P11 human checkpoint; see the `ponytail:` comment in
+  `tbg-core/src/account.rs`).
+- `two_bots_finish_a_match` timed out once when the full workspace suite
+  ran online + account binaries in parallel (environmental contention;
+  green alone and on re-run). Same class as the P10 `rate_limit` flake.
+
+### Blocked items
+
+- Owner checkpoint P11: review the blocked-name list; create an account
+  on two devices (login takeover covered by test, needs a human pair).

@@ -2,20 +2,24 @@
 //! Pairs players and spawns match tasks. Never awaits another task.
 
 use std::collections::{HashMap, VecDeque};
+use std::net::IpAddr;
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use tokio::sync::mpsc;
 
-use tbg_core::protocol::{ClientMsg, ErrorCode, RoomCode, ServerMsg, Token};
+use tbg_core::protocol::{ClientMsg, ErrorCode, Profile, RoomCode, ServerMsg, Token};
 use tbg_core::Seat;
 
 use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd, LOBBY_QUEUE};
+use crate::limits::Limits;
 use crate::metrics::Metrics;
-use crate::records::Records;
+use crate::store::{AccountId, Store};
 use crate::Config;
 
+mod account_done;
+mod accounts;
 mod matchmaking;
 mod sessions;
 
@@ -36,6 +40,10 @@ pub(super) struct Session {
     pub(super) name: String,
     pub(super) conn: Option<ConnHandle>,
     pub(super) state: SessionState,
+    /// P11: logged-in account, if any. Memory only.
+    pub(super) account: Option<(AccountId, Profile)>,
+    /// P11: peer address for rate limits. Memory only, never stored/logged.
+    pub(super) ip: IpAddr,
     pub(super) detached_at: Option<Instant>,
 }
 
@@ -49,7 +57,9 @@ pub(super) struct Lobby {
     pub(super) self_tx: mpsc::Sender<LobbyCmd>,
     pub(super) config: Arc<Config>,
     pub(super) metrics: Arc<Metrics>,
-    pub(super) records: Option<Arc<Records>>,
+    pub(super) store: Option<Arc<Store>>,
+    /// P11: per-IP account rate limits.
+    pub(super) limits: Limits,
     pub(super) draining: Arc<AtomicBool>,
 }
 
@@ -58,7 +68,7 @@ pub(crate) async fn run(
     self_tx: mpsc::Sender<LobbyCmd>,
     config: Arc<Config>,
     metrics: Arc<Metrics>,
-    records: Option<Arc<Records>>,
+    store: Option<Arc<Store>>,
     draining: Arc<AtomicBool>,
 ) {
     let mut lobby = Lobby {
@@ -69,7 +79,8 @@ pub(crate) async fn run(
         self_tx,
         config,
         metrics,
-        records,
+        store,
+        limits: Limits::default(),
         draining,
     };
     let mut cleanup = tokio::time::interval(Duration::from_secs(10));
@@ -107,9 +118,10 @@ impl Lobby {
             LobbyCmd::Hello {
                 resume,
                 conn,
+                ip,
                 reply,
             } => {
-                let pair = self.hello(resume, conn);
+                let pair = self.hello(resume, conn, ip);
                 let _ = reply.send(pair);
             }
             LobbyCmd::Client { token, msg } => self.client(token, msg),
@@ -122,10 +134,28 @@ impl Lobby {
                     }
                 }
             }
+            LobbyCmd::RegisterDone {
+                token,
+                conn_id,
+                result,
+            } => self.register_done(token, conn_id, result),
+            LobbyCmd::LoginDone {
+                token,
+                conn_id,
+                result,
+            } => self.login_done(token, conn_id, result),
         }
     }
 
     fn client(&mut self, token: Token, msg: ClientMsg) {
+        // P11: account messages are answered from any state (`Unavailable`
+        // unless `Idle`); everything else is ignored mid-match.
+        match msg {
+            ClientMsg::Register { name } => return self.register(token, name),
+            ClientMsg::Login { key } => return self.login(token, key),
+            ClientMsg::Logout => return self.logout(token),
+            _ => {}
+        }
         let draining = self.draining.load(Relaxed);
         let Some(s) = self.session(&token) else {
             return;

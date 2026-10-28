@@ -67,6 +67,11 @@ URL options: `?autoplay=practice|quick` (a bot plays for you), `?lag=300`
 (simulated latency), `?gallery` / `?gallery=N` (art review), `?stress=30`,
 `?shadows=0`, `?room=CODE`. Bot load test:
 `cargo run --release -p tbg-server --bin tbg-bots -- --matches 50`.
+Accounts: guests play everything except ranked; "Create account" in the
+menu gives you a name plus a key (your only credential — save it; the
+server stores only its hash). Log in with the key on any device. Load
+tests with `--accounts` need `TBG_REGISTER_PER_IP_HOUR` raised on the test
+server only.
 Deploying to a VPS: [deploy/README.md](deploy/README.md).
 
 ## Contributing

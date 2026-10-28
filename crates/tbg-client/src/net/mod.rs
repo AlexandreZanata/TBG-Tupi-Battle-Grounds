@@ -44,6 +44,8 @@ pub struct NetLink {
     next_try: f64,
     lag: f64,
     ack: AckTracker,
+    /// P11: startup auto-login; sent once, right after `Welcome`.
+    pending_login: Option<String>,
     outq: VecDeque<(f64, ClientMsg)>,
     inq: VecDeque<(f64, ServerMsg)>,
 }
@@ -65,11 +67,17 @@ impl NetLink {
             next_try: now,
             lag: lag_ms / 2000.0,
             ack: AckTracker::default(),
+            pending_login: None,
             outq: VecDeque::new(),
             inq: VecDeque::new(),
         };
         link.connect(now);
         link
+    }
+
+    /// P11: send this key as `Login` right after the next `Welcome`.
+    pub fn login_after_welcome(&mut self, key: String) {
+        self.pending_login = Some(key);
     }
 
     pub fn lag_ms(&self) -> u32 {

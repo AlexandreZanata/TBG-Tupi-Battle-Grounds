@@ -4,6 +4,7 @@
 //! views, the bot, and the wire protocol. Free of graphics, I/O, clocks,
 //! floats in simulation state, and unseeded randomness (docs/ARCHITECTURE.md §4).
 
+pub mod account;
 pub mod bot;
 mod combat;
 pub mod content;
