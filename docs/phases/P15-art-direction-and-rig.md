@@ -167,3 +167,14 @@ Status: implementation in progress; **owner sign-off pending**.
   use 15 mesh-bearing joints. Full geometry measurements are recorded below.
 - The first Trunk process ended with exit 143 and no Rust diagnostic.
   Retry succeeded; Rust release compilation took 53.54 s.
+
+### Step 3 evidence
+
+- `cargo test -p tbg-client`: 4 passed; 0 failed.
+- Tests cover sampling the 0.30 s Strike key, two Footstep events per
+  cycle without duplicate boundaries, all easing endpoints/Hold, and a
+  planted foot retaining world X as the figure moves.
+- Walk cadence uses content speed and stride length; instance phase is
+  decorrelated by a stable hash of the visual unit id.
+- Bevy's example uses optional `bevy_curve` symbols absent from this
+  feature set. Equivalent cubic formulas keep the existing dependency set.

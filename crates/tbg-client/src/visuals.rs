@@ -153,7 +153,7 @@ pub fn spawn_unit_visual(
         dead_for: 0.0,
         last_x: pos.x,
     };
-    let mut animator = Animator::new(joints, form.plan);
+    let mut animator = Animator::new(joints, form.plan, figure_root, look.kind, look.id);
     animator.play(crate::art::anim::Clip::Spawn);
     let root = commands
         .spawn((

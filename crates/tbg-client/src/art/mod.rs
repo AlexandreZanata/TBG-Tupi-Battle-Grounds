@@ -9,7 +9,11 @@ use tbg_core::{UnitKind, UNIT_KINDS};
 
 mod adapter;
 pub mod anim;
+#[cfg(test)]
+mod anim_tests;
 mod clips;
+mod curves;
+mod feet;
 pub mod figure;
 mod legacy;
 pub mod mesh;
