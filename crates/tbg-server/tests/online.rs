@@ -166,23 +166,26 @@ async fn rate_limit_closes_flooder() {
     let url = server(30).await;
     let mut ws = connect(&url).await;
     hello(&mut ws).await;
-    for _ in 0..200 {
-        if ws
-            .send(Message::Binary(
-                protocol::encode(&ClientMsg::Pong { id: 0 }).into(),
-            ))
-            .await
-            .is_err()
-        {
+    // 50 frames (> the 40-frame burst) in one flush, then read only: the
+    // client must not write again. Answering the server's app `Ping` with a
+    // `Pong` after the server dropped the socket made its kernel reply RST,
+    // and the RST discarded the unread `RateLimited` frame on our side (the
+    // old ~1-in-6 flake).
+    for _ in 0..50 {
+        let pong = Message::Binary(protocol::encode(&ClientMsg::Pong { id: 0 }).into());
+        if ws.feed(pong).await.is_err() {
             break;
         }
     }
+    let _ = ws.flush().await;
     let mut saw = false;
-    while let Some(msg) = recv(&mut ws).await {
-        saw |= msg
-            == ServerMsg::Error {
-                code: ErrorCode::RateLimited,
-            };
+    while let Ok(Some(Ok(frame))) = tokio::time::timeout(Duration::from_secs(10), ws.next()).await {
+        if let Message::Binary(b) = frame {
+            saw |= protocol::decode_server(&b)
+                == Ok(ServerMsg::Error {
+                    code: ErrorCode::RateLimited,
+                });
+        }
     }
     assert!(saw, "flooder was not rate limited");
 }
