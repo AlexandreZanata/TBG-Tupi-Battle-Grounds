@@ -5,6 +5,8 @@ use bevy::prelude::*;
 use tbg_core::protocol::RoomCode;
 use tbg_core::{Rejection, UnitId};
 
+pub mod account;
+mod account_ui;
 mod actions;
 mod evolve;
 mod hud;
@@ -13,8 +15,8 @@ mod input;
 mod menu;
 mod queue;
 mod result;
-mod tips;
 pub mod textform;
+mod tips;
 mod toast;
 
 pub use actions::ActionQueue;
@@ -36,6 +38,14 @@ pub enum UiAction {
     /// Long-press on a shop card: show the unit details.
     Inspect(u8),
     ToggleSound,
+    // P11: accounts (handled in actions.rs + account.rs).
+    CreateAccount,
+    HaveKey,
+    CopyKey,
+    DownloadKey,
+    KeySaved,
+    ClosePanel,
+    Logout,
     SelectUnit(UnitId),
     Evolve {
         unit: UnitId,
@@ -58,6 +68,8 @@ pub fn plugin(app: &mut App) {
         .add_systems(Update, (input::taps, actions::apply, scale_ui).chain())
         .add_plugins((
             actions::plugin,
+            account::plugin,
+            account_ui::plugin,
             textform::plugin,
             queue::plugin,
             menu::plugin,

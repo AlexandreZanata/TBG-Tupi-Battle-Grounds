@@ -5,6 +5,8 @@ use bevy::prelude::*;
 use tbg_core::protocol::{valid_room_code, ClientMsg, RoomCode};
 use tbg_core::PlayerIntention;
 
+use super::account::Account;
+use super::textform::ActiveForm;
 use super::{evolve, PendingBuy, UiAction};
 use crate::audio::{Sound, Sounds};
 use crate::link::MatchLink;
@@ -37,12 +39,25 @@ pub fn plugin(app: &mut App) {
 /// P9: with a stored session token and no `?room=`, open a listen-only
 /// link at once; a live match resumes with no tap, otherwise the socket
 /// is reused by the next Quick Match / room action.
-fn probe_on_load(mut link: NonSendMut<MatchLink>) {
+/// P11: a stored account key rides along and logs in after `Welcome`.
+fn probe_on_load(mut link: NonSendMut<MatchLink>, mut account: ResMut<Account>) {
     if config::url_param("room").is_some() {
         return;
     }
     if config::load_token().is_some() {
         *link = MatchLink::Net(Box::new(NetLink::new(Mode::Probe, 0.0)));
+        arm_auto_login(&mut link, &mut account);
+    }
+}
+
+/// P11: a stored key logs in right after the probe's `Welcome`.
+fn arm_auto_login(link: &mut MatchLink, account: &mut Account) {
+    let MatchLink::Net(n) = link else {
+        return;
+    };
+    if let Some(key) = config::load_account_key() {
+        n.login_after_welcome(key);
+        account.auto_login = true;
     }
 }
 
@@ -71,6 +86,8 @@ pub(super) fn apply(
     mut queue_info: ResMut<QueueInfo>,
     time: Res<Time>,
     mut extra: (Res<LatestView>, ResMut<super::Toasts>, ResMut<Sounds>),
+    mut account: ResMut<Account>,
+    mut form: NonSendMut<ActiveForm>,
 ) {
     let now = time.elapsed_secs_f64();
     for action in std::mem::take(&mut queue.0) {
@@ -147,6 +164,17 @@ pub(super) fn apply(
             }
             UiAction::ToggleSound => extra.2.toggle_mute(),
             UiAction::Disabled => {}
+            // P11: account buttons (state lives in ui/account.rs).
+            other => {
+                super::account_ui::apply_action(
+                    other,
+                    &mut link,
+                    &mut account,
+                    &mut form,
+                    &mut extra.1,
+                    now,
+                );
+            }
         }
         if matches!(action, UiAction::Practice | UiAction::PlayAgain) {
             pending.0 = None;

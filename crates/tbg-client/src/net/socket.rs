@@ -110,8 +110,13 @@ impl NetLink {
                 // Outside a match (first connect, or dropped while queued,
                 // which takes us out of the queue) ask for the mode again.
                 // A probe only listens: it resumes if a match finds it.
-                if !self.in_match && !matches!(self.mode, super::Mode::Probe) {
-                    self.send_request(now);
+                // A startup key logs in first and alone (P11).
+                if !self.in_match {
+                    if let Some(key) = self.pending_login.take() {
+                        self.send(ClientMsg::Login { key }, now);
+                    } else if !matches!(self.mode, super::Mode::Probe) {
+                        self.send_request(now);
+                    }
                 }
                 None
             }

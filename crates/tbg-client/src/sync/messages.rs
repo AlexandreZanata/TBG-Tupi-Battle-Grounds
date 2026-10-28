@@ -11,7 +11,7 @@ use crate::audio::{Sound, Sounds};
 use crate::link::MatchLink;
 use crate::net::{NetStatus, GIVE_UP};
 use crate::overlay::OverlayStats;
-use crate::ui::{Banner, Toasts};
+use crate::ui::{account::AccountInbox, Banner, Toasts};
 use crate::GameState;
 
 /// What the queue screen shows.
@@ -36,6 +36,7 @@ pub(super) fn poll_link(
     mut stats: (ResMut<OverlayStats>, ResMut<ViewGaps>),
     mut next: ResMut<NextState<GameState>>,
     mut extra: (ResMut<super::MatchStats>, ResMut<Sounds>),
+    mut inbox: ResMut<AccountInbox>,
 ) {
     let now = time.elapsed_secs_f64();
     for msg in link.poll(now) {
@@ -83,6 +84,11 @@ pub(super) fn poll_link(
             }
             ServerMsg::NetStats { rtt_ms } => stats.0.rtt_ms = Some(f64::from(rtt_ms)),
             ServerMsg::Error { code } => ui.0.push(format!("Server: {code:?}")),
+            // P11: account replies belong to the account panel (ui/account.rs).
+            msg @ (ServerMsg::Registered { .. }
+            | ServerMsg::LoggedIn { .. }
+            | ServerMsg::LoggedOut
+            | ServerMsg::AccountError { .. }) => inbox.0.push(msg),
             _ => {}
         }
     }

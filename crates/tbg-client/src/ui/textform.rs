@@ -30,10 +30,8 @@ pub struct TextEntered {
 #[derive(Message)]
 pub struct TextCancelled;
 
-/// Request state. DOM handles live in `NonSend<ActiveForm>` (JS closures
-/// are not `Send`); the submit/cancel slots bridge the listeners to `poll`.
-/// Not a `Resource` (`!Send` JS closures live here); store with
-/// `insert_non_send` and touch only through `NonSendMut`.
+/// Request state (`NonSend`: JS closures are not `Send`; store with
+/// `insert_non_send`, touch through `NonSendMut`). Slots bridge to `poll`.
 #[derive(Default)]
 pub struct ActiveForm {
     kind: Option<TextKind>,
@@ -68,6 +66,10 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
     let _ = prompt;
 }
 
+pub fn is_open(form: &ActiveForm) -> bool {
+    form.kind.is_some()
+}
+
 /// Hide the form and forget what it was collecting.
 pub fn close(form: &mut ActiveForm) {
     form.kind = None;
@@ -100,7 +102,6 @@ fn poll(
     {
         toasts.push("Accounts need the web build");
         form.kind = None;
-        return;
     }
     #[cfg(target_arch = "wasm32")]
     {
@@ -115,7 +116,8 @@ fn poll(
             }
             return;
         }
-        if let Some(value) = form.submitted.lock().unwrap_or_else(|e| e.into_inner()).take() {
+        let mut slot = form.submitted.lock().unwrap_or_else(|e| e.into_inner());
+        if let Some(value) = slot.take() {
             if let Some(kind) = form.kind {
                 entered.write(TextEntered { kind, value });
             }

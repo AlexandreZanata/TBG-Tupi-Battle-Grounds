@@ -109,6 +109,33 @@ pub fn copy_text(text: &str) {
     let _ = text;
 }
 
+/// P11: the player's own account key (`None` on native). Anyone with it
+/// can play as the account; it lives only in `localStorage`.
+pub fn load_account_key() -> Option<String> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        storage()?.get_item("tbg_account_key").ok()?
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    None
+}
+
+pub fn save_account_key(key: &str) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(s) = storage() {
+        let _ = s.set_item("tbg_account_key", key);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = key;
+}
+
+pub fn delete_account_key() {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(s) = storage() {
+        let _ = s.remove_item("tbg_account_key");
+    }
+}
+
 /// A boolean preference in `localStorage` (false when unavailable).
 pub fn load_flag(key: &str) -> bool {
     #[cfg(target_arch = "wasm32")]
