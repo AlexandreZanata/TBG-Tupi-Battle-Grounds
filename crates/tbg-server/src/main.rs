@@ -1,15 +1,49 @@
-//! `tbg-server` placeholder entry point.
+//! `tbg-server` P1 spike: health check and binary echo WebSocket.
 //!
-//! Phase 1 (docs/ROADMAP.md) adds the WebSocket ping route; Phase 5 adds
-//! matchmaking and the authoritative match loop. Never depends on Bevy.
+//! `GET /health` answers `ok`; `GET /ws` echoes binary frames back.
+//! Matchmaking and the authoritative loop arrive in later phases.
+
+use axum::{
+    extract::{
+        ws::{Message, WebSocket},
+        WebSocketUpgrade,
+    },
+    response::IntoResponse,
+    routing::get,
+    Router,
+};
 
 #[tokio::main]
 async fn main() {
-    // Scaffolding only: no listener or routes yet.
-    let _router: axum::Router = axum::Router::new();
-    println!(
-        "tbg-server {} (protocol {}): scaffolding, no networking yet",
-        env!("CARGO_PKG_VERSION"),
-        tbg_core::protocol::PROTOCOL_VERSION
-    );
+    let addr = std::env::var("TBG_ADDR").unwrap_or_else(|_| "0.0.0.0:8080".to_string());
+    let app = Router::new()
+        .route("/health", get(|| async { "ok" }))
+        .route("/ws", get(ws_handler));
+    let listener = tokio::net::TcpListener::bind(&addr)
+        .await
+        .unwrap_or_else(|e| panic!("tbg-server: cannot bind {addr}: {e}"));
+    println!("tbg-server listening on {addr}");
+    axum::serve(listener, app)
+        .await
+        .unwrap_or_else(|e| panic!("tbg-server: serve failed: {e}"));
+}
+
+async fn ws_handler(ws: WebSocketUpgrade) -> impl IntoResponse {
+    ws.max_message_size(1024)
+        .max_frame_size(1024)
+        .on_upgrade(handle_socket)
+}
+
+async fn handle_socket(mut socket: WebSocket) {
+    while let Some(msg) = socket.recv().await {
+        match msg {
+            Ok(Message::Binary(bytes)) => {
+                if socket.send(Message::Binary(bytes)).await.is_err() {
+                    break;
+                }
+            }
+            Ok(_) => {}
+            Err(_) => break,
+        }
+    }
 }

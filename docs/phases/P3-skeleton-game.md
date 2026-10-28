@@ -73,7 +73,9 @@ impl MatchLink {
     pub fn poll(&mut self) -> Vec<ServerMsg>;        // drains messages produced since the last call
 }
 ```
-Insert with `app.insert_non_send_resource(MatchLink::Idle)`.
+Insert with `app.insert_non_send(MatchLink::Idle)` (Bevy 0.20 name). `Commands` cannot insert
+non-send resources: replace the value from an exclusive system (`fn f(world: &mut World)`,
+see `net.rs` from P1), and read/write it in normal systems with `NonSendMut<MatchLink>`.
 
 `local.rs`:
 ```rust

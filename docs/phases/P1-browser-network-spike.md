@@ -55,6 +55,8 @@ Files: `crates/tbg-client/Cargo.toml`, `crates/tbg-client/index.html`,
 1. Install tools if missing: `cargo install --locked trunk`.
 2. In `crates/tbg-client/Cargo.toml` change bevy to
    `bevy = { version = "0.20", default-features = false, features = ["3d", "ui"] }`.
+   (Reviewer later replaced the collections with an explicit feature list to
+   shrink the WASM and drop the libudev build dependency; see the current file.)
 3. Root `Cargo.toml`, append:
    ```toml
    [profile.dev.package."*"]
@@ -126,8 +128,8 @@ Files: `src/main.rs`, new `src/camera.rs`, new `src/arena.rs`.
 - `camera.rs`: perspective camera, vertical FOV 35°, looking at the lane
   center `(8, 0, 0)` from above at about 55° pitch.
   - **Landscape** (window width ≥ height): the lane is horizontal on
-    screen, own Stronghold on the left. Camera sits on the −Z side looking
-    toward +Z, tilted down.
+    screen, own Stronghold on the left. Camera sits on the +Z side looking
+    toward −Z, tilted down (screen-right is then +X).
   - **Portrait** (height > width): rotate the camera 90° around the Y axis
     through the lane center so the lane is vertical, own Stronghold at the
     bottom.
@@ -260,8 +262,98 @@ None. This phase is proven by builds and devices.
 
 *(Executor fills this in at the end.)*
 
-- Commands run and results:
+- Commands run and results (executor, 2026-10-27, trunk 0.22.1, rustc 1.99.0):
+  - `cargo check -p tbg-client --target wasm32-unknown-unknown` → EXIT=0
+    (3m41s first build; no `getrandom` error, no deviation needed).
+  - `trunk build --release` (per step riche checks, final opt `s` build) → EXIT=0.
+  - `cargo check -p tbg-server` → EXIT=0. `curl -s localhost:8080/health` → `ok`;
+    python `websockets` binary echo test (`8` bytes round-trip, text frame
+    ignored, socket stayed open) → OK.
+  - `cargo fmt --all -- --check` → EXIT=0 (after one `cargo fmt --all` pass).
+  - `cargo clippy -p tbg-server -p tbg-core -- -D warnings` → EXIT=0.
+  - `cargo clippy -p tbg-client --target wasm32-unknown-unknown -- -D warnings`
+    → EXIT=0 (fixed 2 findings: `useless_conversion` on `Color::WHITE`,
+    `needless_return` in `config.rs`).
+  - `cargo test -p tbg-core -p tbg-server` → EXIT=0 (1 passed in tbg-core,
+    0 elsewhere; P1 adds no tests per spec).
+  - `cargo clippy --workspace -- -D warnings` → EXIT=101, environmental only:
+    `libudev-sys` build script fails (`Package libudev was not found`;
+    needs `libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev`,
+    no passwordless sudo on this machine). Same for native
+    `cargo check/test --workspace` (client needs those libs). CI installs
+    them and runs the full workspace commands.
+  - `trunk serve --release` + `tbg-server` started in background;
+    `curl localhost:8000/` → HTTP 200 (5374 bytes index);
+    `curl localhost:8080/health` → `ok`. LAN URL for phones:
+    `http://192.168.15.15:8000/?stress=30` (PC wifi IP on 2026-10-27;
+    re-check with `ip route get 1.1.1.1` if it changes).
 - WASM size raw / gzip / brotli (opt 3 vs "s"):
+  - opt-level 3 (default): raw 43,216,999 B / gzip `-9` 12,215,518 B /
+    brotli q11 7,408,889 B.
+  - opt-level `"s"`: raw 30,411,487 B / gzip `-9` 9,588,759 B /
+    brotli q11 6,161,641 B.
+  - Kept `opt-level = "s"` in root `Cargo.toml` (smaller on all three
+    measures). Brotli 6.16 MB is just over the 6 MB ceiling: reported, not
+    fixed here, per spec. FPS comparison (`"s"` vs 3) pending the owner
+    device test below — reviewer decides if `"s"` costs >15% FPS.
 - Device table (target · renders? · FPS @30 · load time · RTT):
+  - Not measured by executor (no browser automation on this machine).
+    Owner: open `http://192.168.15.15:8000/?stress=30` on Chrome desktop,
+    Firefox desktop, Android Chrome, iOS Safari; record FPS after 20 s,
+    time until arena appears, RTT from overlay. If a phone cannot reach
+    the page/`:8080`, check the PC firewall allows ports 8000 and 8080
+    on the LAN (firewall state could not be checked here: needs root).
 - Deviations:
+  1. `camera.rs`: spec text says landscape camera sits on the −Z side, but
+     that mirrors the lane (own Stronghold on the right). Camera sits on
+     +Z so own is on the left per the acceptance check.
+  2. `net.rs`: spec says store socket with `app.insert_non_send_resource`
+     and use `NonSendMut<T>` in systems, but Bevy 0.20 renamed the API to
+     `insert_non_send` and `Commands` cannot insert non-send resources, so
+     one exclusive system (`fn net_system(world: &mut World)`) owns
+     connect/ping/receive/reconnect; the socket still lives in a non-send
+     resource. No `unwrap` on received data (`decode_rtt` returns `None`
+     on malformed payloads).
+  3. `overlay.rs`: RTT shows `RTT offline` when unknown (step 6 requires
+     the `offline` text; step 4's `-- ms` placeholder retired).
+  4. `web-sys` added in step 4 (not 6) because `?stress=N` already needs
+     `Window`/`Location` on wasm; same features the spec allows.
+  5. `Cargo.toml`: kept `opt-level = "s"` (see sizes above).
 - Blocked items:
+  - None blocking. Environment limits (not code): no passwordless sudo,
+    so Bevy system libs are missing and native workspace-wide
+    check/clippy/test could not run locally — covered per-crate + CI.
+
+## Reviewer notes (2026-10-27)
+
+Verdict: **code approved; owner device test still pending.** Fixed in the review commit:
+
+1. **WASM size over the ceiling** (brotli 6.16 MB). Replaced the `3d`/`ui`
+   collections with an explicit Bevy feature list (no gamepads, glTF,
+   animation, post-processing, or tonemapping LUTs) and set the camera to
+   `Tonemapping::AcesFitted` (needs no LUTs). Release, `opt-level = "s"`:
+   raw 24,213,640 B · gzip -9 7,454,018 B · zstd -19 5,018,195 B ·
+   **brotli q11 4,649,445 B** (was 6,161,641). Target is 4 MB; ceiling 6 MB.
+2. **Native workspace checks failed locally** (`libudev` via gamepad
+   support). Gone with the feature trim: `cargo clippy --workspace` and
+   `cargo test --workspace` now pass on this machine.
+3. **Overlay frame time ×1000**: `FRAME_TIME` is already in ms.
+4. **RTT measured with frame time** (`Time`) and pings sent before the
+   socket opened: now uses `bevy::platform::time::Instant`, pings only after
+   `WsEvent::Opened`. Browser check: echo round trip 2–9 ms on localhost,
+   overlay shows `RTT 10 ms` (bounded by frame polling), was 261 ms.
+5. **Every walker allocated its own mesh and material** (no batching):
+   one shared mesh + 4 shared materials; duplicated spawn code removed.
+
+Verified by the reviewer in the browser pane: release build renders with
+no errors; landscape lane horizontal with own Stronghold left; portrait
+(200×330, unscaled) lane vertical with own Stronghold bottom; 30 walkers;
+`FPS 81 | 12.3 ms | RTT 10 ms` in the pane. Gates: fmt, clippy (native
+workspace and wasm32), tests, wasm check, `trunk build --release` — all pass.
+
+Spec corrections made upstream: camera side in step 2 (+Z, as the
+executor found), `insert_non_send` naming in P3, audio features in P7.
+
+Still required for acceptance: the owner's device matrix (step 8) on
+Android Chrome and iOS Safari: renders, FPS with `?stress=30`, load time, RTT.
+

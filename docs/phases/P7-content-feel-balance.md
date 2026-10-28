@@ -60,7 +60,9 @@ synergy activation pulse on that faction's units, Stronghold hit sparks and
 collapse debris.
 
 ### 3. Audio
-Enable the bevy `audio` feature. About 12 effects (deploy, melee hit,
+Add the bevy features `"bevy_audio", "vorbis"` to the explicit list in
+`crates/tbg-client/Cargo.toml` (do not switch back to the `audio`/`3d`/`ui`
+collections). Local native builds then need `sudo apt-get install libasound2-dev`. About 12 effects (deploy, melee hit,
 ranged shot, cannon, heal, evolve, synergy, Stronghold hit, Stronghold
 destroyed, victory, defeat, button) and one music loop, all **CC0** (for
 example Kenney audio packs), OGG mono 22 kHz, ≤ 600 KB total, in
