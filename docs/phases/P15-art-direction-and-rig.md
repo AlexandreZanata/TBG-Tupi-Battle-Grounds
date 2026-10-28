@@ -220,3 +220,28 @@ Status: implementation in progress; **owner sign-off pending**.
 - Gallery studio floors keep foreground arena props from hiding review
   figures; palette and live-match checks still use the arena and game light.
 - Physical mid-range-phone performance and subjective approval remain pending.
+
+### Step 7 — owner sign-off pending
+
+No owner answers were supplied. The executor does not approve the look,
+display names, or D-22. No rejection count is inferred from implementation
+iterations, and no fallback asset spike has been started.
+
+The owner must record these three answers after reviewing the captures
+and the running gallery:
+
+- **(a) Look: owner sign-off pending.** Approve or list changes to the
+  palette, body proportions, 64 px silhouette identification, hood/linen/
+  bracer/longbow/quiver, team identity, planted feet, secondary lag, and
+  draw → anchor → Release at 0.18 s → follow-through. Review
+  `?gallery=palette`, `?gallery=blockout&silhouette`, `?gallery=archer`,
+  and `?gallery=archer&slow=0.25&clip=attackranged&turn`.
+- **(b) Display names: owner sign-off pending.** Approve or change
+  Shieldbearer, Archer, Bone Brute, Hexer, Sawknight (`Sawbot`), Ogre
+  Archer (`SiegeWalker`), Bloomkeeper, and Rootcaller. Code ids stay unchanged.
+- **(c) Pipeline / D-22: owner sign-off pending.** Confirm keeping the
+  code-built pipeline, or request changes. Only two actual owner
+  rejections trigger the reviewer-run Blender-scripted glTF comparison.
+
+Physical mid-range-phone Low-tier validation remains pending as well.
+The desktop browser at a phone viewport is not a phone benchmark.
