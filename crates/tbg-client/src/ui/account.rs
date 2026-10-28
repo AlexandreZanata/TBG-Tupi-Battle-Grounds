@@ -153,12 +153,16 @@ fn drain_inbox(
                 let was_auto = account.auto_login;
                 account.auto_login = false;
                 account.pending = None;
-                if code == AccountError::Unavailable && (was_auto || account.profile.is_some()) {
+                if code == AccountError::BadKey && !textform::is_open(&form) {
+                    // Post-P14: a stored key failed (or timed out); the
+                    // player continues as guest and the UI says so.
+                    account.profile = None;
+                    toasts.push("Saved key didn't work - playing as guest");
+                } else if code == AccountError::Unavailable
+                    && (was_auto || account.profile.is_some())
+                {
                     // P14: the auto-login raced a resumed match; the server
                     // already sent `LoggedIn` for the session. Stay quiet.
-                } else if was_auto && code == AccountError::BadKey {
-                    // P11: a stale startup key stays stored; the player is guest.
-                    toasts.push("Saved key didn't work — playing as guest");
                 } else if textform::is_open(&form) {
                     textform::set_error(&form, error_text(code));
                 } else {

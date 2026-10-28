@@ -112,6 +112,16 @@ pub(super) fn poll_link(
                 *link = MatchLink::Idle;
                 next.set(GameState::Menu);
             }
+            // Post-P14 (BR-P04): a guest asked for ranked. Drop the stale
+            // profile and go back to the menu instead of a raw error toast.
+            ServerMsg::Error {
+                code: ErrorCode::LoginRequired,
+            } => {
+                account.profile = None;
+                ui.0.push("Log in to play ranked");
+                *link = MatchLink::Idle;
+                next.set(GameState::Menu);
+            }
             ServerMsg::Error { code } => ui.0.push(format!("Server: {code:?}")),
             ServerMsg::Leaderboard {
                 total,

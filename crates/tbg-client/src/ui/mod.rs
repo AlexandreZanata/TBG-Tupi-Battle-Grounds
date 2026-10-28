@@ -17,6 +17,7 @@ mod queue;
 pub mod ranking;
 mod ranking_ui;
 mod result;
+mod start;
 pub mod textform;
 mod tips;
 mod toast;
@@ -87,6 +88,7 @@ pub fn plugin(app: &mut App) {
             hud::plugin,
             evolve::plugin,
             result::plugin,
+            start::plugin,
             toast::plugin,
             tips::plugin,
         ));

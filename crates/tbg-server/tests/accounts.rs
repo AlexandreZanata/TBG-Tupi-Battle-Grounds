@@ -38,11 +38,16 @@ type Ws =
     tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
 
 async fn live_server(name: &str) -> (String, TempDb) {
+    live_server_ttl(name, 30).await
+}
+
+async fn live_server_ttl(name: &str, reconnect_secs: u64) -> (String, TempDb) {
     let t = temp_db(name);
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let url = format!("ws://{}/ws", listener.local_addr().unwrap());
     let config = Config {
         tick_ms: 5,
+        reconnect_secs,
         max_per_ip: 1_000,
         db: Some(t.db.clone()),
         ..Config::default()
@@ -442,4 +447,33 @@ async fn br_p04_resumed_session_reports_its_account() {
         Some(ServerMsg::LoggedIn { profile }) => assert_eq!(profile.name, "Resumer"),
         other => panic!("expected LoggedIn after resume, got {other:?}"),
     }
+}
+
+#[tokio::test]
+async fn br_p03_expired_session_returns_as_guest_and_ranked_is_refused() {
+    // BR-P03: the idle session is dropped after `reconnect_secs`, so the old
+    // token no longer carries the account. BR-R01: that fresh guest session
+    // is refused by the ranked queue with `LoginRequired` — the client must
+    // log in again (see net/login.rs).
+    let (url, _t) = live_server_ttl("proto-expired", 1).await;
+    let mut a = connect(&url).await;
+    let old = hello_token(&mut a, None).await;
+    register_as(&mut a, "Expired").await;
+    drop(a);
+    // The lobby sweeps expired sessions every 10 s.
+    tokio::time::sleep(Duration::from_secs(11)).await;
+    let mut b = connect(&url).await;
+    let fresh = hello_token(&mut b, Some(old)).await;
+    assert_ne!(
+        fresh, old,
+        "old account session survived the reconnect window"
+    );
+    // A resumed session would answer Queued; a fresh guest gets refused.
+    send(&mut b, &ClientMsg::RankedMatch).await;
+    assert!(matches!(
+        recv(&mut b).await,
+        Some(ServerMsg::Error {
+            code: protocol::ErrorCode::LoginRequired
+        })
+    ));
 }
