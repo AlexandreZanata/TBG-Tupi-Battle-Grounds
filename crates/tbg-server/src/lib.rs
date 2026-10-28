@@ -10,6 +10,7 @@ use axum::extract::{ConnectInfo, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
+use axum::serve::ListenerExt;
 use axum::{Json, Router};
 use tokio::net::TcpListener;
 use tokio::sync::mpsc;
@@ -95,6 +96,12 @@ pub async fn run_with(
         app = app.fallback_service(tower_http::services::ServeDir::new(dir));
     }
     let service = app.into_make_service_with_connect_info::<SocketAddr>();
+    // P9: instant-feeling taps — disable Nagle on every socket; log, never panic.
+    let listener = listener.tap_io(|stream: &tokio::net::TcpStream| {
+        if let Err(e) = stream.set_nodelay(true) {
+            tracing::warn!("failed to set TCP_NODELAY: {e:#}");
+        }
+    });
     axum::serve(listener, service).await
 }
 
