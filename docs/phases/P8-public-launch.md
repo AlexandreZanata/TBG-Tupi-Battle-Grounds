@@ -74,11 +74,36 @@ backups; uptime monitoring; final capacity numbers.
 
 ## Phase report
 
-*(Executor fills this in at the end.)*
+Executed by the reviewer agent (Claude) on 2026-10-28, branch `phase/p8-public-launch`.
+Everything that does not need the owner's VPS, domain, or decisions is done.
 
-- Commands run and results:
-- Audit and license summary:
-- Capacity (final):
-- Smoke results:
-- Deviations:
-- Blocked items:
+- Step 1, dependency audit: `cargo audit` → **0 vulnerabilities** in 616 crates; 1
+  allowed warning: `ttf-parser` 0.25.1 unmaintained (RUSTSEC-2026-0192), pulled in by
+  Bevy's text rendering, client-only, no fix without a Bevy upgrade.
+  License list (`cargo tree -e normal --format "{p} | {l}"`, native + wasm32, 436
+  crates): MIT/Apache-2.0 family, BSD-2/3, ISC, Zlib, Unicode-3.0, MIT-0, CC0,
+  BSL-1.0 (dual), and `CDLA-Permissive-2.0` (`webpki-roots` CA data). **No copyleft.**
+  Only our own crates have no license field (owner decision, step 3).
+- Step 2, security review (reviewer): checked against ARCHITECTURE §11 and P4 limits —
+  seat from the connection (test `cannot_evolve_opponent_unit`), 1 KiB frames +
+  strict decoding (test), token bucket (test), 5 s handshake, 15 s idle, per-IP and
+  global caps, bounded queues with slow-client drop, `/metrics` loopback-only (checked
+  in P5), 128-bit random session tokens never sent to other players, no user-written
+  text anywhere (server-generated names), SQL only through bound parameters, no panic
+  paths on client input. **Fixed:** the per-IP limit now reads the *last*
+  `X-Forwarded-For` entry (the one our proxy adds) instead of the first, which a client
+  could forge if a proxy appends instead of replacing (unit test
+  `forwarded_ip_trusted_only_from_local_proxy`). Git history scan: no private keys,
+  no `.env` files, no token-like secrets, no real IPs.
+- Step 4, off-site backups: implemented in P5 (`TBG_BACKUP_REMOTE`, weekly on Sundays);
+  local backup + restore tested. **Off-site restore pending VPS.**
+- Also fixed: an intermittent test (`private_room_pairs_owner_and_guest`) — the helper
+  now skips `NetStats`; 5/5 runs pass.
+- Commands: `cargo test --workspace` → 15 core + 10 server integration + 1 server unit;
+  clippy native + wasm32 clean.
+- **Pending the owner:**
+  - Step 3: add the root `LICENSE` (MIT intended) — then the README "License" section.
+  - Step 5: register `https://<domain>/health` in a free uptime checker.
+  - Step 6: final capacity run on the VPS (P5 R6).
+  - Step 7: public smoke on the VPS (P5 R1–R5, R7–R9, R11) with two people on different networks.
+  - Step 8: tag `v0.1.0` and announce — only after steps 3, 6, 7 and the P6/P7 approvals.

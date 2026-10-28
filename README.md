@@ -5,9 +5,11 @@ a rotating three-offer shop, watch them fight automatically on a single
 lane, evolve them along branching paths, and stack faction synergies until
 one `Stronghold` falls.
 
-> **Status: pre-alpha, not playable yet.** The repository has been reset to
-> a small Rust workspace with a complete MVP plan. Development starts at
-> [phase P1](docs/phases/P1-browser-network-spike.md) (see [ROADMAP](docs/ROADMAP.md)).
+> **Status: MVP feature-complete, validated locally; not public yet.** Practice
+> vs bot, online quick match and private rooms, 8 units with evolutions and
+> synergies, code-built 3D figurines, effects, and sound all run in the
+> browser. Pending: validation on the production VPS, human playtests, and the
+> license file — see [ROADMAP](docs/ROADMAP.md).
 
 ## The game
 
@@ -52,7 +54,20 @@ cargo test --workspace
 cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
 ```
 
-Browser builds use [Trunk](https://trunkrs.dev) from phase P1 onward.
+## Run it locally
+
+```bash
+cargo install --locked trunk                       # once
+(cd crates/tbg-client && trunk build --release)    # build the browser client
+TBG_STATIC_DIR=crates/tbg-client/dist cargo run --release -p tbg-server
+```
+
+Open `http://localhost:8080/` (or `http://<your LAN IP>:8080/` on a phone).
+URL options: `?autoplay=practice|quick` (a bot plays for you), `?lag=300`
+(simulated latency), `?gallery` / `?gallery=N` (art review), `?stress=30`,
+`?shadows=0`, `?room=CODE`. Bot load test:
+`cargo run --release -p tbg-server --bin tbg-bots -- --matches 50`.
+Deploying to a VPS: [deploy/README.md](deploy/README.md).
 
 ## Contributing
 
