@@ -320,7 +320,8 @@ async fn br_p03_second_login_takes_over_live_match() {
         }
     }
     assert!(saw_start && saw_view, "no MatchStart + View after takeover");
-    // The old socket is closed by the takeover.
+    // The old socket is told why, then closed by the takeover (BR-P03).
+    let mut told = false;
     loop {
         match tokio::time::timeout(Duration::from_secs(10), async {
             use futures_util::StreamExt;
@@ -329,10 +330,18 @@ async fn br_p03_second_login_takes_over_live_match() {
         .await
         {
             Ok(None) => break,
+            Ok(Some(Ok(tokio_tungstenite::tungstenite::Message::Binary(b)))) => {
+                told |= protocol::decode_server(&b).is_ok_and(|m| {
+                    m == ServerMsg::Error {
+                        code: protocol::ErrorCode::SessionTakenOver,
+                    }
+                });
+            }
             Ok(Some(_)) => continue,
             Err(_) => panic!("old socket not closed after takeover"),
         }
     }
+    assert!(told, "old device was not told its session was taken over");
     // The closed device auto-resumes with its old token: it gets a fresh
     // guest session, never the match it lost (BR-P03).
     let mut a3 = connect(&url).await;
@@ -416,4 +425,21 @@ async fn br_p02_bad_secret_and_unknown_name_share_badkey() {
         store.login("unknown".into(), hash_of(&secret)).await,
         Err(AccountError::BadKey)
     );
+}
+
+#[tokio::test]
+async fn br_p04_resumed_session_reports_its_account() {
+    // P14: a reload resumes the session by token; the new socket must learn
+    // the session still holds the account (the client's profile is gone).
+    let (url, _t) = live_server("proto-resume-account").await;
+    let mut a = connect(&url).await;
+    let token = hello_token(&mut a, None).await;
+    register_as(&mut a, "Resumer").await;
+    drop(a);
+    let mut a2 = connect(&url).await;
+    assert_eq!(hello_token(&mut a2, Some(token)).await, token);
+    match recv(&mut a2).await {
+        Some(ServerMsg::LoggedIn { profile }) => assert_eq!(profile.name, "Resumer"),
+        other => panic!("expected LoggedIn after resume, got {other:?}"),
+    }
 }

@@ -3,7 +3,7 @@
 //! reply (reconnect, queue join, disconnect in between) is dropped or
 //! answered without changing anything.
 
-use tbg_core::protocol::{AccountError, Profile, ServerMsg, Token};
+use tbg_core::protocol::{AccountError, ErrorCode, Profile, ServerMsg, Token};
 
 use super::accounts::deny;
 use super::{send, Lobby, SessionState};
@@ -74,6 +74,12 @@ impl Lobby {
             Some(old_token) => {
                 let mut stolen = None;
                 if let Some(old) = self.sessions.get_mut(&old_token) {
+                    send(
+                        &old.conn,
+                        ConnEvent::Send(ServerMsg::Error {
+                            code: ErrorCode::SessionTakenOver,
+                        }),
+                    );
                     send(&old.conn, ConnEvent::Close);
                     if let SessionState::InMatch { tx, seat } = &old.state {
                         if let Some(nc) = &new_conn {
