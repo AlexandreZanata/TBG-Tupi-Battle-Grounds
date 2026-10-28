@@ -2,7 +2,7 @@
 //! mix; pairing stays FIFO and ignores rating. Rating math lives only in
 //! the store transaction; the lobby only routes its outcome.
 
-use tbg_core::protocol::{AccountError, ErrorCode, Profile, ServerMsg, Token};
+use tbg_core::protocol::{AccountError, ErrorCode, RatingResults, ServerMsg, Token};
 
 use super::{send, Lobby, SessionState};
 use crate::chan::ConnEvent;
@@ -48,7 +48,7 @@ impl Lobby {
 
     /// Deliver settled ratings: refresh the cached profile and tell the
     /// session's current connection (if any) what changed (BR-R06).
-    pub(super) fn ranked_done(&mut self, tokens: [Token; 2], results: [(u16, u16, Profile); 2]) {
+    pub(super) fn ranked_done(&mut self, tokens: [Token; 2], results: RatingResults) {
         for (token, (before, after, profile)) in tokens.into_iter().zip(results) {
             if let Some(s) = self.session(&token) {
                 if let Some((id, _)) = s.account {

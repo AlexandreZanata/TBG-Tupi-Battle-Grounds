@@ -135,6 +135,9 @@ pub struct Profile {
     pub draws: u32,
 }
 
+/// P12: settled ratings per seat `(before, after, profile)`, seats A then B.
+pub type RatingResults = [(u16, u16, Profile); 2];
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct DecodeError;
 

@@ -11,7 +11,10 @@ use crate::audio::{Sound, Sounds};
 use crate::link::MatchLink;
 use crate::net::{NetStatus, GIVE_UP};
 use crate::overlay::OverlayStats;
-use crate::ui::{account::AccountInbox, Banner, Toasts};
+use crate::ui::{
+    account::{Account, AccountInbox},
+    Banner, Toasts,
+};
 use crate::GameState;
 
 /// What the queue screen shows.
@@ -37,6 +40,7 @@ pub(super) fn poll_link(
     mut next: ResMut<NextState<GameState>>,
     mut extra: (ResMut<super::MatchStats>, ResMut<Sounds>),
     mut inbox: ResMut<AccountInbox>,
+    mut account: ResMut<Account>,
 ) {
     let now = time.elapsed_secs_f64();
     for msg in link.poll(now) {
@@ -54,6 +58,8 @@ pub(super) fn poll_link(
                     opponent_rating,
                     ..default()
                 };
+                // P12: a new match clears the previous rating count-up.
+                account.rating_change = None;
                 *buffer = ViewBuffer::default();
                 *extra.0 = super::MatchStats::default();
                 latest.0 = None;
@@ -91,11 +97,12 @@ pub(super) fn poll_link(
             }
             ServerMsg::NetStats { rtt_ms } => stats.0.rtt_ms = Some(f64::from(rtt_ms)),
             ServerMsg::Error { code } => ui.0.push(format!("Server: {code:?}")),
-            // P11: account replies belong to the account panel (ui/account.rs).
+            // P11/P12: account replies belong to the account panel.
             msg @ (ServerMsg::Registered { .. }
             | ServerMsg::LoggedIn { .. }
             | ServerMsg::LoggedOut
-            | ServerMsg::AccountError { .. }) => inbox.0.push(msg),
+            | ServerMsg::AccountError { .. }
+            | ServerMsg::RatingChanged { .. }) => inbox.0.push(msg),
             _ => {}
         }
     }

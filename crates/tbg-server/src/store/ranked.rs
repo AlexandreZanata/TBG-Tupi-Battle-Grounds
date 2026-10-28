@@ -5,7 +5,7 @@
 use rusqlite::{params, Connection};
 use serde_json::json;
 
-use tbg_core::protocol::Profile;
+use tbg_core::protocol::{Profile, RatingResults};
 use tbg_core::rating::{apply, delta, Score};
 use tbg_core::{Outcome, Seat};
 
@@ -41,7 +41,7 @@ pub(super) fn ranked_result(
     outcome: Option<Outcome>,
     duration_s: u64,
     factions: [[u32; 4]; 2],
-) -> Result<[(u16, u16, Profile); 2], rusqlite::Error> {
+) -> Result<RatingResults, rusqlite::Error> {
     let tx = conn.transaction()?;
     let read = |id: AccountId| -> rusqlite::Result<(u16, u32)> {
         tx.query_row(

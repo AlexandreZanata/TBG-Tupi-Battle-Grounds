@@ -9,7 +9,7 @@ use std::sync::mpsc::{sync_channel, SyncSender};
 use serde_json::Value;
 use tokio::sync::oneshot;
 
-use tbg_core::protocol::{AccountError, Profile};
+use tbg_core::protocol::{AccountError, Profile, RatingResults};
 use tbg_core::Outcome;
 
 mod accounts;
@@ -42,7 +42,7 @@ enum StoreCmd {
         outcome: Option<Outcome>,
         duration_s: u64,
         factions: [[u32; 4]; 2],
-        reply: Reply<Result<[(u16, u16, Profile); 2], AccountError>>,
+        reply: Reply<Result<RatingResults, AccountError>>,
     },
 }
 
@@ -113,7 +113,7 @@ impl Store {
         outcome: Option<Outcome>,
         duration_s: u64,
         factions: [[u32; 4]; 2],
-    ) -> Result<[(u16, u16, Profile); 2], AccountError> {
+    ) -> Result<RatingResults, AccountError> {
         let (reply_tx, reply_rx) = oneshot::channel();
         self.tx
             .try_send(StoreCmd::RankedResult {

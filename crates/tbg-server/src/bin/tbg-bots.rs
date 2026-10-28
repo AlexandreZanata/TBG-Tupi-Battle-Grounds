@@ -2,7 +2,8 @@
 //! real WebSockets and report completion, RTT, view gaps, reconnects.
 //!
 //! `tbg-bots --url ws://127.0.0.1:8080/ws --matches N [--delay-ms D]
-//!   [--jitter-ms J] [--chaos-pct P] [--ramp-ms R] [--bots B] [--accounts]`
+//!   [--jitter-ms J] [--chaos-pct P] [--ramp-ms R] [--bots B] [--accounts]
+//!   [--ranked]`
 //! Exit code 1 if any bot failed.
 
 use std::time::Duration;
@@ -22,6 +23,8 @@ struct Args {
     bots: Option<u64>,
     /// P11: register a `Tb…` account per bot, then play logged in.
     accounts: bool,
+    /// P12: ranked queue (implies `--accounts`).
+    ranked: bool,
 }
 
 fn args() -> Args {
@@ -34,6 +37,7 @@ fn args() -> Args {
         ramp_ms: 20,
         bots: None,
         accounts: false,
+        ranked: false,
     };
     let raw: Vec<String> = std::env::args().skip(1).collect();
     // Bare flags take no value; everything else comes in key/value pairs.
@@ -42,6 +46,11 @@ fn args() -> Args {
         .filter(|arg| {
             if arg == "--accounts" {
                 a.accounts = true;
+                false
+            } else if arg == "--ranked" {
+                // Ranked play needs accounts; one flag turns both on.
+                a.accounts = true;
+                a.ranked = true;
                 false
             } else {
                 true
@@ -84,6 +93,7 @@ async fn main() {
         opts.delay_ms = a.delay_ms;
         opts.jitter_ms = a.jitter_ms;
         opts.accounts = a.accounts;
+        opts.ranked = a.ranked;
         if rng.below(100) < a.chaos_pct {
             opts.drop_after = Some(Duration::from_secs(u64::from(20 + rng.below(41))));
             opts.rejoin_after = Some(Duration::from_secs(5));
