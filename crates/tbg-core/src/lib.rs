@@ -1,64 +1,26 @@
 //! `tbg-core`: deterministic game rules shared by client and server.
 //!
-//! Holds the domain vocabulary (docs/GAME-DESIGN.md), and later the
-//! simulation, content tables, bot, and wire protocol. Must stay free of
-//! graphics, database, network I/O, wall-clock time, and unseeded
-//! randomness.
+//! Domain vocabulary, content tables, the fixed-tick simulation, per-seat
+//! views, the bot, and the wire protocol. Free of graphics, I/O, clocks,
+//! floats in simulation state, and unseeded randomness (docs/ARCHITECTURE.md §4).
 
+pub mod bot;
+mod combat;
+pub mod content;
+mod hits;
+mod intent;
 pub mod protocol;
+pub mod rng;
+pub mod shop;
+pub mod sim;
+pub mod state;
+mod synergy;
+mod targeting;
+pub mod types;
+pub mod view;
 
-/// Mechanical role of a unit (rule BR-U02).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Archetype {
-    Tank,
-    Dps,
-    Support,
-    Ranged,
-    Control,
-}
-
-/// Thematic group defining visual language and synergy rules (rule BR-Y01).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Faction {
-    Humans,
-    Undead,
-    Machines,
-    Plants,
-}
-
-/// Space a unit occupies on the `BattleLine`: one or two slots (rule BR-U03).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum SlotCount {
-    One,
-    Two,
-}
-
-/// All playable archetypes, in glossary order.
-pub const ARCHETYPES: [Archetype; 5] = [
-    Archetype::Tank,
-    Archetype::Dps,
-    Archetype::Support,
-    Archetype::Ranged,
-    Archetype::Control,
-];
-
-/// All factions, in glossary order.
-pub const FACTIONS: [Faction; 4] = [
-    Faction::Humans,
-    Faction::Undead,
-    Faction::Machines,
-    Faction::Plants,
-];
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn glossary_vocabulary_is_complete() {
-        assert_eq!(ARCHETYPES.len(), 5);
-        assert_eq!(FACTIONS.len(), 4);
-        assert!(matches!(SlotCount::One, SlotCount::One));
-        assert!(matches!(SlotCount::Two, SlotCount::Two));
-    }
-}
+pub use intent::{PlayerIntention, Rejection};
+pub use rng::Pcg32;
+pub use state::{EndReason, Event, MatchState, Outcome, Phase, Target, Unit};
+pub use types::*;
+pub use view::{MatchView, UnitView};
