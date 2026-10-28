@@ -38,6 +38,17 @@ matches to finish (graceful shutdown).
 | Off-site weekly copy | put `TBG_BACKUP_REMOTE=user@backuphost:path/` in `/etc/default/tbg-backup` |
 | Rollback | `git checkout <previous tag>` then `bash deploy/deploy.sh` |
 
+Public ranking (P13): Caddy proxies `/api/*` to the server and serves the
+static pages at `https://<domain>/ranking/` (HTML `no-cache`, CSS/JS
+5 minutes; only the hashed WASM bundle is immutable). Check after a deploy:
+
+```bash
+curl -s https://<domain>/api/leaderboard?limit=3
+```
+
+`TBG_API_PER_IP_MIN` (default 120) limits `/api/*` per IP; raise it only on
+a test server for load runs (`oha`).
+
 Match records:
 
 ```sql

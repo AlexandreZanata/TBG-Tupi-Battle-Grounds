@@ -72,6 +72,9 @@ menu gives you a name plus a key (your only credential — save it; the
 server stores only its hash). Log in with the key on any device. Load
 tests with `--accounts` need `TBG_REGISTER_PER_IP_HOUR` raised on the test
 server only.
+Global ranking and player stats: the **Ranking** button in the menu, or
+the public page at `http://localhost:8080/ranking/` (JSON API:
+`/api/leaderboard`, `/api/players/{name}`).
 Deploying to a VPS: [deploy/README.md](deploy/README.md).
 
 ## Contributing

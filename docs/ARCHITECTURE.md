@@ -122,6 +122,14 @@ tables are the one allowed exception.
   `ClientMsg = Hello{version, resume} | QuickMatch | CreateRoom | JoinRoom{code} | Cancel | Intent{seq, intent} | Pong{id}`;
   `PlayerIntention = Purchase{offer} | Evolve{unit, branch}`;
   `ServerMsg = Welcome{token, name} | VersionMismatch{server} | Queued | RoomCreated{code} | RoomNotFound | MatchStart{you, opponent} | View(MatchView) | Rejected{seq, reason} | MatchEnd{outcome} | Ping{id} | NetStats{rtt_ms} | Error{code}`.
+  Later versions append variants at the end of each enum (`PROTOCOL_VERSION`
+  4): accounts v2 (`Register{name} | Login{key} | Logout` →
+  `Registered{key, profile} | LoggedIn{profile} | LoggedOut |
+  AccountError{code}`), ranked v3 (`RankedMatch`; `MatchStart` gains
+  `mode, opponent_rating`; `RatingChanged{before, after, profile}`), and
+  ranking v4 (`Leaderboard{offset}` → `Leaderboard{total, offset, rows,
+  you}`: 20 rows from the in-memory snapshot, `you` = your rank; one
+  request per second per connection, extras ignored).
   Intentions carry no seat: the server derives the seat from the connection.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
@@ -262,6 +270,14 @@ D-22); until each unit's phase lands, the description below stays true.
   `ranked_by_a`, `ranked_by_b`, and `accounts_by_rating` (rating DESC, wins
   DESC, name_lower). The settlement transaction is the only writer of the
   rating columns.
+- **Leaderboard snapshot (P13):** the writer thread keeps every ranked
+  account (≥ 1 ranked game) in rank order (`rating DESC, wins DESC,
+  name_lower ASC`) and publishes it as `Arc<Snapshot>` through a
+  `tokio::sync::watch` channel: built at startup, rebuilt at most every
+  10 s and only after a ranked result committed. `/api/leaderboard` and the
+  WS `Leaderboard` reply only clone the `Arc` — no SQL per request.
+  `/api/players/{name}` runs at most three indexed queries (account row,
+  faction sums, last 10 ranked matches with the opponent name).
 - **Boundary:** only `store/` touches SQL.
 - **Move to PostgreSQL when** two or more server instances need shared
   writes (accounts, rankings, `Inventory`), or analytics queries start
@@ -270,8 +286,11 @@ D-22); until each unit's phase lands, the description below stays true.
 ## 9. Deployment and operating cost
 
 - Caddy terminates TLS, serves the precompressed static bundle with
-  immutable cache headers for hashed files, and proxies `/ws` to
-  `tbg-server` on localhost.
+  immutable cache headers for hashed files, and proxies `/ws`, `/health`,
+  and `/api/*` to `tbg-server` on localhost. The public ranking pages
+  (`/ranking/`, `/ranking/player.html?name=…`, P13) are plain HTML + CSS +
+  vanilla JS copied by Trunk (no framework, about 17 KB); their HTML is
+  `no-cache`, their CSS/JS 5 minutes (not content-hashed).
 - `deploy/deploy.sh` (P5) builds the WASM bundle locally, rsyncs source
   and bundle, builds `tbg-server` on the VPS (avoids glibc mismatches),
   installs it, and restarts the systemd unit. `tbg-server` listens on
@@ -336,6 +355,12 @@ table at 250/500/1000/1500 concurrent matches.
 - Every message is decoded with size limits; malformed input closes the
   socket; intentions are validated against current state.
 - Rate limits, per-IP socket caps, and timeouts as in §5.
+- Read-only API (P13): `/api/*` is limited per IP (`TBG_API_PER_IP_MIN`,
+  default 120 requests per minute → 429 `{"error":"rate_limited"}`); bad
+  name shapes 404 before any query. Replies never carry account ids, key
+  hashes, IPs, or timestamps finer than the day. The ranking pages build
+  the DOM with `textContent` / `createElement` only (no `innerHTML`, no
+  `eval`, no inline handlers) under a `default-src 'self'` CSP.
 - TLS everywhere public (Caddy); no secrets in git (`.env*` ignored).
 - `cargo audit` before each public deploy.
 - Not in the MVP: advanced anti-cheat, fraud detection, accounts/MFA.
