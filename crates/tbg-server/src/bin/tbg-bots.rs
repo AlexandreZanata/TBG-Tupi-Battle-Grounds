@@ -58,6 +58,8 @@ fn args() -> Args {
 
 #[tokio::main]
 async fn main() {
+    // wss:// fails without a process-level crypto provider (rustls 0.23).
+    let _ = rustls::crypto::ring::default_provider().install_default();
     let a = args();
     let mut rng = Pcg32::new(0xb075, 1);
     let mut tasks = Vec::new();
