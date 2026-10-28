@@ -53,10 +53,12 @@ pub fn server_url() -> String {
 }
 
 /// Session token kept across page reloads so a player can resume a match.
+/// Per tab (`sessionStorage`): a shared token made two open tabs keep
+/// taking over each other's session.
 pub fn load_token() -> Option<[u8; 16]> {
     #[cfg(target_arch = "wasm32")]
     {
-        let hex = storage()?.get_item("tbg_token").ok()??;
+        let hex = token_storage()?.get_item("tbg_token").ok()??;
         let mut out = [0u8; 16];
         for (i, b) in out.iter_mut().enumerate() {
             *b = u8::from_str_radix(hex.get(i * 2..i * 2 + 2)?, 16).ok()?;
@@ -69,7 +71,7 @@ pub fn load_token() -> Option<[u8; 16]> {
 
 pub fn save_token(token: &[u8; 16]) {
     #[cfg(target_arch = "wasm32")]
-    if let Some(s) = storage() {
+    if let Some(s) = token_storage() {
         let hex: String = token.iter().map(|b| format!("{b:02x}")).collect();
         let _ = s.set_item("tbg_token", &hex);
     }
@@ -80,6 +82,11 @@ pub fn save_token(token: &[u8; 16]) {
 #[cfg(target_arch = "wasm32")]
 fn storage() -> Option<web_sys::Storage> {
     web_sys::window()?.local_storage().ok()?
+}
+
+#[cfg(target_arch = "wasm32")]
+fn token_storage() -> Option<web_sys::Storage> {
+    web_sys::window()?.session_storage().ok()?
 }
 
 /// Shareable link that auto-joins a private room.
