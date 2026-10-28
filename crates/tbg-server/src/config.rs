@@ -13,6 +13,8 @@ pub struct Config {
     pub static_dir: Option<PathBuf>,
     /// SQLite file for match records (`TBG_DB`); `None` disables records.
     pub db: Option<PathBuf>,
+    /// Tokio worker threads (`TBG_WORKERS`); 0 (default) means all cores.
+    pub workers: usize,
 }
 
 impl Default for Config {
@@ -25,6 +27,7 @@ impl Default for Config {
             tick_ms: 50,
             static_dir: None,
             db: None,
+            workers: 0,
         }
     }
 }
@@ -44,6 +47,7 @@ impl Config {
             max_per_ip: num("TBG_MAX_PER_IP", d.max_per_ip as u64) as usize,
             reconnect_secs: num("TBG_RECONNECT_SECS", d.reconnect_secs),
             tick_ms: num("TBG_TICK_MS", d.tick_ms).max(1),
+            workers: num("TBG_WORKERS", 0) as usize,
             static_dir: std::env::var("TBG_STATIC_DIR").ok().map(PathBuf::from),
             db: Some(
                 std::env::var("TBG_DB")
