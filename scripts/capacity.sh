@@ -6,7 +6,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PROFILE="${PROFILE:-server}"
+# P10 step 3 measured `opt-level = 3` (profile `server`) vs `release`
+# (`opt-level = "s"`) at 1000 matches: 0.99 vs 0.97 cores — no gain, so the
+# release profile serves both the WASM bundle and the server.
+PROFILE="${PROFILE:-release}"
 LEVELS="${LEVELS:-250 500 1000 1500}"
 WINDOW="${WINDOW:-40}"
 ADDR="127.0.0.1:8181"
