@@ -2,7 +2,7 @@
 //! open/close panels, copy the room link.
 
 use bevy::prelude::*;
-use tbg_core::protocol::{valid_room_code, ClientMsg, RoomCode};
+use tbg_core::protocol::ClientMsg;
 use tbg_core::PlayerIntention;
 
 use super::account::Account;
@@ -33,48 +33,7 @@ pub(super) enum LastMode {
 pub fn plugin(app: &mut App) {
     app.init_resource::<ActionQueue>()
         .init_resource::<IntentSeq>()
-        .init_resource::<LastMode>()
-        .add_systems(Startup, (join_from_url, probe_on_load));
-}
-
-/// P9: with a stored session token and no `?room=`, open a listen-only
-/// link at once; a live match resumes with no tap, otherwise the socket
-/// is reused by the next Quick Match / room action.
-/// P11: a stored account key rides along and logs in after `Welcome`. The
-/// key alone is enough to open the link: the session token lives per tab
-/// (`sessionStorage`), so a new tab or a later visit has none (P14).
-fn probe_on_load(mut link: NonSendMut<MatchLink>, mut account: ResMut<Account>) {
-    if config::url_param("room").is_some() {
-        return;
-    }
-    if config::load_token().is_some() || config::load_account_key().is_some() {
-        *link = MatchLink::Net(Box::new(NetLink::new(Mode::Probe, 0.0)));
-        arm_auto_login(&mut link, &mut account);
-    }
-}
-
-/// P11: a stored key logs in right after the probe's `Welcome`.
-fn arm_auto_login(link: &mut MatchLink, account: &mut Account) {
-    let MatchLink::Net(n) = link else {
-        return;
-    };
-    if let Some(key) = config::load_account_key() {
-        n.login_after_welcome(key);
-        account.auto_login = true;
-    }
-}
-
-/// `?room=CODE` joins that private room right away.
-fn join_from_url(mut queue: ResMut<ActionQueue>) {
-    let Some(code) = config::url_param("room") else {
-        return;
-    };
-    let bytes = code.to_ascii_uppercase().into_bytes();
-    if let Ok(code) = RoomCode::try_from(bytes.as_slice()) {
-        if valid_room_code(&code) {
-            queue.0.push(UiAction::JoinRoom(code));
-        }
-    }
+        .init_resource::<LastMode>();
 }
 
 #[allow(clippy::too_many_arguments)] // the one place every action is applied
@@ -90,6 +49,7 @@ pub(super) fn apply(
     time: Res<Time>,
     mut extra: (Res<LatestView>, ResMut<super::Toasts>, ResMut<Sounds>),
     mut account: ResMut<Account>,
+    mut surrender: ResMut<super::surrender::Surrender>,
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
 ) {
@@ -138,6 +98,23 @@ pub(super) fn apply(
                 link.send(ClientMsg::Cancel, now);
                 *link = MatchLink::Idle;
                 next.set(GameState::Menu);
+            }
+            // BR-M06: first tap arms (4 s), second forfeits. Practice leaves
+            // at once; online waits for the server's MatchEnd.
+            UiAction::Surrender => {
+                if !surrender.sent {
+                    if surrender.armed_until.take().is_some() {
+                        surrender.sent = true;
+                        if matches!(&*link, MatchLink::Local(_)) {
+                            *link = MatchLink::Idle;
+                            next.set(GameState::Menu);
+                        } else {
+                            link.send(ClientMsg::Surrender, now);
+                        }
+                    } else {
+                        surrender.armed_until = Some(now + super::surrender::ARMED_SECS);
+                    }
+                }
             }
             UiAction::CopyLink => {
                 if let Some(code) = queue_info.room {

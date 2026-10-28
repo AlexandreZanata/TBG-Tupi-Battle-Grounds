@@ -94,7 +94,7 @@ fn status_text(ranking: &Ranking) -> String {
         (_, Some(_)) => "Loading...".into(),
         (Some(p), None) if p.rows.is_empty() => "No ranked players yet".into(),
         (Some(p), None) => match p.you {
-            Some(you) => format!("{} ranked players · you are #{you}", p.total),
+            Some(you) => format!("{} ranked players - you are #{you}", p.total),
             None => format!("{} ranked players", p.total),
         },
         (None, None) => String::new(),

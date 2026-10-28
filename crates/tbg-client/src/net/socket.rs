@@ -103,6 +103,7 @@ impl NetLink {
     pub(super) fn handle(&mut self, msg: ServerMsg, now: f64) -> Option<ServerMsg> {
         match msg {
             ServerMsg::Welcome { token, .. } => {
+                let previous = self.token;
                 config::save_token(&token);
                 self.token = Some(token);
                 self.status = NetStatus::Ready;
@@ -110,15 +111,32 @@ impl NetLink {
                 // Outside a match (first connect, or dropped while queued,
                 // which takes us out of the queue) ask for the mode again.
                 // A probe only listens: it resumes if a match finds it.
-                // A startup key logs in first and alone (P11).
-                if !self.in_match {
-                    if let Some(key) = self.pending_login.take() {
+                // Post-P14 (BR-P03): a saved key logs in before the mode
+                // request; a resumed session already carries its account.
+                let key = (!self.in_match).then(config::load_account_key).flatten();
+                let retry = self.login_in_flight;
+                if key.is_some()
+                    && (retry || super::needs_login(previous, token, true, self.in_match))
+                {
+                    if let Some(key) = key {
                         self.send(ClientMsg::Login { key }, now);
-                    } else if !matches!(self.mode, super::Mode::Probe) {
-                        self.send_request(now);
                     }
+                    self.login_in_flight = true;
+                    self.login_deadline = Some(now + super::LOGIN_TIMEOUT);
+                    self.held_request |= !matches!(self.mode, super::Mode::Probe);
+                } else if !self.in_match && !matches!(self.mode, super::Mode::Probe) {
+                    self.login_in_flight = false;
+                    self.send_request(now);
                 }
                 None
+            }
+            ServerMsg::LoggedIn { .. } | ServerMsg::AccountError { .. } => {
+                self.login_in_flight = false;
+                self.login_deadline = None;
+                if !self.in_match {
+                    self.release_request(now);
+                }
+                Some(msg)
             }
             ServerMsg::Ping { id } => {
                 self.send(ClientMsg::Pong { id }, now);
@@ -139,7 +157,12 @@ impl NetLink {
             }
             other => {
                 match other {
-                    ServerMsg::MatchStart { .. } => self.in_match = true,
+                    ServerMsg::MatchStart { .. } => {
+                        self.in_match = true;
+                        self.login_in_flight = false;
+                        self.held_request = false;
+                        self.login_deadline = None;
+                    }
                     ServerMsg::MatchEnd { .. } => self.in_match = false,
                     _ => {}
                 }

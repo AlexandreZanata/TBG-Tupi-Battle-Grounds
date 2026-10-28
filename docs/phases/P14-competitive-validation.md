@@ -255,3 +255,80 @@ $ cargo audit              # 0 vulnerabilities; 1 warning: ttf-parser unmaintain
 ### Owner sign-off
 
 Pending. (date + "OK to start P15" goes here after the real-server run.)
+
+### Post-P14 fixes (2026-10-28, branch `fix/surrender-names-login`)
+
+Three owner-reported problems seen on the real host, fixed by the Codex
+executor and reviewed here (protocol v6).
+
+1. **"Login required" and `Commander NNNN` for a logged-in player.** Root
+   cause (reproduced on a local server with a 2 s window): going back to the
+   menu closes the socket; the server drops an idle session after
+   `reconnect_secs` (30 s); the next Quick/Ranked opens a fresh link that
+   resumes the old token, gets a **new guest session**, and asks for a mode
+   without logging in (the automatic login only existed at page load). The UI
+   still showed the profile, ranked answered `LoginRequired`, and the
+   opponent saw the guest name. Fix: `net/login.rs` (`needs_login`): a
+   `Welcome` whose token differs from the one sent is a fresh session, so with
+   a stored key the client logs in first and holds the mode request until
+   `LoggedIn`/`AccountError` (3 s timeout, then guest + notice); a resumed
+   session logs in again never. `LoginRequired` and a bad stored key clear the
+   profile so the UI is truthful. Test: `br_p03_expired_session_returns_as_guest_and_ranked_is_refused`.
+2. **Names beside the HP bars.** `MatchStart` gains `you_name` and
+   `you_rating`; the HUD top row is `[you][blue bar][clock][red bar][opponent]`
+   (rating shown in ranked, "RANKED" badge under the clock), replacing the
+   centered label.
+3. **Surrender (BR-M06, Proposed).** `ClientMsg::Surrender`, routed like an
+   intention (seat from the connection; `NotInMatch` outside a match), calls
+   the existing `MatchState::forfeit`, so no new simulation action and the
+   determinism goldens are unchanged. Two-tap HUD button (arms for 4 s;
+   ranked says "counts as a loss"); practice leaves at once. Results say who
+   gave up. Match records gain `"surrendered"` per seat.
+
+Reviewer additions: ASCII-only UI text (the font drew `·` `—` `–` as boxes;
+`ui/glyphs.rs` fails tests on any non-ASCII string literal), the flaky
+`rate_limit_closes_flooder` fixed at its cause (a `Pong` sent after the server
+closed provoked an RST that discarded the `RateLimited` frame; 60/60 runs
+pass), and guard tests that pin the core values (below).
+
+**Guard tests (never change by accident).** `crates/tbg-core/tests/contract_*.rs`
+and `crates/tbg-server/tests/contract.rs`: GAME-DESIGN §5 constants and units
+in the document's own units, all 32 evolution forms, the Elo constants and a
+frozen delta table, protocol variant order and exact bytes, golden hashes of
+three seeded bot matches, server defaults (30 s window, 50 ms tick, limits)
+and BR-R02 pairing (FIFO, queues never mix). Mutation check: changing Energy
+start, Archer cost, Deep Roots, Elo K, the protocol version, or the reconnect
+window each fails a guard (an Archer cost change fails three). Open canon
+conflict frozen as shipped: Rootcaller Deep Roots 32 t / Overgrowth 28 t
+versus the §5 prose (28 t / 24 t); see P32.
+
+**Verification (final tip).** `cargo fmt --check`, `clippy --workspace
+--all-targets -D warnings`, clippy and `cargo check` for wasm32: clean.
+`cargo test --workspace`: 87 tests in 20 binaries, 3 runs in a row, 0
+failures. `trunk build --release`: ok. Local release server, in-app browser
+(1280x800), peer bot with protocol v6:
+
+| Check | Result |
+|-------|--------|
+| Stored key on a new tab | logs in by itself, name and rating in the menu |
+| Names beside the bars (16-char names both sides) | you blue left, opponent red right, ranked adds `(1000)` and the RANKED badge |
+| Casual surrender | first tap arms, disarms by itself after 4 s, second ends: "You surrendered", opponent gets Forfeit win |
+| Ranked surrender | "Tap again - counts as a loss", result `Rating 1000 -> 980 (-20)`, opponent `1000 -> 1020` |
+| Practice surrender | two taps, back to the menu, still logged in |
+| Reload mid-match (30 s window) | resumed with no tap, names, ratings and badge back |
+| `tbg-bots --ranked --chaos-pct 100 --matches 10` | 20/20 reconnects, 20/20 bots completed, 10 ranked rows, 0 Forfeit, 0 counter mismatches |
+
+**Not verified.** The HUD at phone size (375x812): the in-app browser's
+mobile emulation reports `devicePixelRatio` 2 with a 375x812-pixel canvas, so
+the game draws at double size and ignores taps; this is an emulator artifact
+and was not worked around. By layout arithmetic the narrow top row is about
+408 logical px (bars 70, names 96, clock 44, gaps and padding) at UI scale
+0.89, about 363 px of 375. Also not run: the scenario "menu, wait past the
+window, then Ranked" end to end in the browser (covered by the server test and
+the `needs_login` unit tests, and by the reload scenario above, where the
+browser logged in on a fresh session). Real phones remain owner-pending (P14
+matrix).
+
+Observed on the way, not fixed: at 375 px the menu title ("Tupi Battle Grounds")
+wraps to two lines wider than the panel in the emulator; recheck on a real
+phone before P20.

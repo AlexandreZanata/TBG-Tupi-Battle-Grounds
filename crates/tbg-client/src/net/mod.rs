@@ -3,16 +3,18 @@
 //! reconnect, and the `?lag=MS` simulator (MS/2 added each way).
 
 mod ack;
+mod login;
 mod socket;
 
 use std::collections::VecDeque;
 
 pub(crate) use socket::GIVE_UP;
-use tbg_core::protocol::{ClientMsg, RoomCode, ServerMsg, Token, PROTOCOL_VERSION};
+use tbg_core::protocol::{AccountError, ClientMsg, RoomCode, ServerMsg, Token, PROTOCOL_VERSION};
 
 use crate::config;
 
 use ack::AckTracker;
+use login::{needs_login, LOGIN_TIMEOUT};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mode {
@@ -46,8 +48,10 @@ pub struct NetLink {
     next_try: f64,
     lag: f64,
     ack: AckTracker,
-    /// P11: startup auto-login; sent once, right after `Welcome`.
-    pending_login: Option<String>,
+    /// Post-P14: an automatic `Login` is in flight; a mode request waits.
+    login_in_flight: bool,
+    held_request: bool,
+    login_deadline: Option<f64>,
     outq: VecDeque<(f64, ClientMsg)>,
     inq: VecDeque<(f64, ServerMsg)>,
 }
@@ -69,17 +73,14 @@ impl NetLink {
             next_try: now,
             lag: lag_ms / 2000.0,
             ack: AckTracker::default(),
-            pending_login: None,
+            login_in_flight: false,
+            held_request: false,
+            login_deadline: None,
             outq: VecDeque::new(),
             inq: VecDeque::new(),
         };
         link.connect(now);
         link
-    }
-
-    /// P11: send this key as `Login` right after the next `Welcome`.
-    pub fn login_after_welcome(&mut self, key: String) {
-        self.pending_login = Some(key);
     }
 
     pub fn lag_ms(&self) -> u32 {
@@ -106,7 +107,11 @@ impl NetLink {
         }
         self.mode = mode;
         if !matches!(mode, Mode::Probe) {
-            self.send_request(now);
+            if self.login_in_flight {
+                self.held_request = true;
+            } else {
+                self.send_request(now);
+            }
         }
         true
     }
@@ -140,6 +145,21 @@ impl NetLink {
                 out.extend(self.handle(msg, now));
             }
         }
+        if self.login_in_flight && self.login_deadline.is_some_and(|d| now >= d) {
+            self.login_in_flight = false;
+            self.login_deadline = None;
+            self.release_request(now);
+            out.push(ServerMsg::AccountError {
+                code: AccountError::BadKey,
+            });
+        }
         out
+    }
+
+    /// Send a mode request that waited for the automatic login.
+    fn release_request(&mut self, now: f64) {
+        if std::mem::take(&mut self.held_request) {
+            self.send_request(now);
+        }
     }
 }

@@ -15,6 +15,8 @@ pub(crate) struct SeatStats {
     pub(super) evolutions: u32,
     /// P12: purchases per faction index (for the ranked result row).
     pub(super) factions: [u32; 4],
+    /// BR-M06: this seat tapped Surrender (additive report key).
+    pub(super) surrendered: bool,
 }
 
 impl Match {
@@ -37,6 +39,7 @@ impl Match {
                     "rtt_p50": percentile(&s.rtts, 0.5), "rtt_p95": percentile(&s.rtts, 0.95),
                     "intents": s.intents, "rejections": s.rejections, "reconnects": s.reattached,
                     "purchases": s.purchases, "evolutions": s.evolutions,
+                    "surrendered": s.surrendered,
                 })
             })
             .collect();

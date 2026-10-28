@@ -40,6 +40,10 @@ pub enum MatchCmd {
         seq: u32,
         intent: PlayerIntention,
     },
+    /// BR-M06 (Proposed): `seat` gives up; the other seat wins (BR-M03).
+    Surrender {
+        seat: Seat,
+    },
     /// Ignored unless `conn_id` is the seat's current connection.
     Detach {
         seat: Seat,

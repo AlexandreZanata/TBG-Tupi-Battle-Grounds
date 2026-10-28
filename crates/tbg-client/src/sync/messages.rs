@@ -42,18 +42,23 @@ pub(super) fn poll_link(
     mut inbox: ResMut<AccountInbox>,
     mut account: ResMut<Account>,
     mut ranking: ResMut<crate::ui::ranking::Ranking>,
+    mut surrender: ResMut<crate::ui::surrender::Surrender>,
 ) {
     let now = time.elapsed_secs_f64();
     for msg in link.poll(now) {
         match msg {
             ServerMsg::MatchStart {
                 you,
+                you_name,
+                you_rating,
                 opponent,
                 mode,
                 opponent_rating,
             } => {
                 *info = MatchInfo {
                     you: Some(you),
+                    you_name,
+                    you_rating,
                     opponent,
                     ranked: mode == tbg_core::protocol::MatchMode::Ranked,
                     opponent_rating,
@@ -64,6 +69,10 @@ pub(super) fn poll_link(
                 *buffer = ViewBuffer::default();
                 *extra.0 = super::MatchStats::default();
                 latest.0 = None;
+                crate::ui::surrender::reset(
+                    &mut surrender,
+                    mode == tbg_core::protocol::MatchMode::Ranked,
+                );
                 next.set(GameState::InMatch);
             }
             ServerMsg::View(view) => {
@@ -105,6 +114,16 @@ pub(super) fn poll_link(
             } => {
                 ui.0.push("Your account signed in on another device");
                 account.profile = None;
+                *link = MatchLink::Idle;
+                next.set(GameState::Menu);
+            }
+            // Post-P14 (BR-P04): a guest asked for ranked. Drop the stale
+            // profile and go back to the menu instead of a raw error toast.
+            ServerMsg::Error {
+                code: ErrorCode::LoginRequired,
+            } => {
+                account.profile = None;
+                ui.0.push("Log in to play ranked");
                 *link = MatchLink::Idle;
                 next.set(GameState::Menu);
             }
