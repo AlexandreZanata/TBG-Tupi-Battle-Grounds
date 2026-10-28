@@ -49,6 +49,7 @@ pub(super) fn apply(
     time: Res<Time>,
     mut extra: (Res<LatestView>, ResMut<super::Toasts>, ResMut<Sounds>),
     mut account: ResMut<Account>,
+    mut surrender: ResMut<super::surrender::Surrender>,
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
 ) {
@@ -97,6 +98,23 @@ pub(super) fn apply(
                 link.send(ClientMsg::Cancel, now);
                 *link = MatchLink::Idle;
                 next.set(GameState::Menu);
+            }
+            // BR-M06: first tap arms (4 s), second forfeits. Practice leaves
+            // at once; online waits for the server's MatchEnd.
+            UiAction::Surrender => {
+                if !surrender.sent {
+                    if surrender.armed_until.take().is_some() {
+                        surrender.sent = true;
+                        if matches!(&*link, MatchLink::Local(_)) {
+                            *link = MatchLink::Idle;
+                            next.set(GameState::Menu);
+                        } else {
+                            link.send(ClientMsg::Surrender, now);
+                        }
+                    } else {
+                        surrender.armed_until = Some(now + super::surrender::ARMED_SECS);
+                    }
+                }
             }
             UiAction::CopyLink => {
                 if let Some(code) = queue_info.room {

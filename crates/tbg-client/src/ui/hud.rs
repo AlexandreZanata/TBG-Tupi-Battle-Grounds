@@ -113,6 +113,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
                     ),
                     bar(Hud::Rotation, Color::srgb_u8(0xF4, 0xEE, 0xE0), 352.0, 4.0),
                     (row(8.0), children![card(0), card(1), card(2)]),
+                    super::surrender::button(),
                 ],
             ));
         });

@@ -19,6 +19,7 @@ pub mod ranking;
 mod ranking_ui;
 mod result;
 mod start;
+pub(crate) mod surrender;
 pub mod textform;
 mod tips;
 mod toast;
@@ -64,6 +65,8 @@ pub enum UiAction {
     RankingNext,
     OpenFullRanking,
     CloseRanking,
+    // BR-M06: two-tap surrender in the HUD.
+    Surrender,
 }
 
 /// Shop card waiting for the view that confirms (or rejects) its purchase.
@@ -90,6 +93,7 @@ pub fn plugin(app: &mut App) {
             evolve::plugin,
             result::plugin,
             start::plugin,
+            surrender::plugin,
             toast::plugin,
             tips::plugin,
         ));

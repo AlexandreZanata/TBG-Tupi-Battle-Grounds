@@ -43,6 +43,16 @@ pub(super) fn on_client_bytes(
                 code: ErrorCode::NotInMatch,
             }),
         },
+        // BR-M06: same rate limit and seat stamping as an intention.
+        ClientMsg::Surrender => match &c.matched {
+            Some((seat, m)) => {
+                let _ = m.try_send(MatchCmd::Surrender { seat: *seat });
+                None
+            }
+            None => Some(ServerMsg::Error {
+                code: ErrorCode::NotInMatch,
+            }),
+        },
         ClientMsg::Pong { id } => on_pong(c, app, id, now),
         // P13: one leaderboard request per second per connection.
         ClientMsg::Leaderboard { .. }

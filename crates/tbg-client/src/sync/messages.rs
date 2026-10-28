@@ -42,6 +42,7 @@ pub(super) fn poll_link(
     mut inbox: ResMut<AccountInbox>,
     mut account: ResMut<Account>,
     mut ranking: ResMut<crate::ui::ranking::Ranking>,
+    mut surrender: ResMut<crate::ui::surrender::Surrender>,
 ) {
     let now = time.elapsed_secs_f64();
     for msg in link.poll(now) {
@@ -68,6 +69,10 @@ pub(super) fn poll_link(
                 *buffer = ViewBuffer::default();
                 *extra.0 = super::MatchStats::default();
                 latest.0 = None;
+                crate::ui::surrender::reset(
+                    &mut surrender,
+                    mode == tbg_core::protocol::MatchMode::Ranked,
+                );
                 next.set(GameState::InMatch);
             }
             ServerMsg::View(view) => {

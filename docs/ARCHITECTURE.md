@@ -129,8 +129,11 @@ tables are the one allowed exception.
   `mode, opponent_rating`; `RatingChanged{before, after, profile}`),
   ranking v4 (`Leaderboard{offset}` → `Leaderboard{total, offset, rows,
   you}`: 20 rows from the in-memory snapshot, `you` = your rank; one
-  request per second per connection, extras ignored), and takeover v5
-  (`ErrorCode::SessionTakenOver`).
+  request per second per connection, extras ignored), takeover v5
+  (`ErrorCode::SessionTakenOver`), and v6 (`Surrender`, routed like an
+  intention with the connection's seat → `MatchCmd::Surrender` →
+  `MatchState::forfeit`, idempotent; `MatchStart` gains `you_name` and
+  `you_rating` so the HUD names both HP bars).
   Intentions carry no seat: the server derives the seat from the connection.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
@@ -149,6 +152,10 @@ tables are the one allowed exception.
   `Error{SessionTakenOver}` (the client shows "Your account signed in on
   another device", returns to the menu, and does not reconnect), and its
   session is dropped so a late auto-resume cannot re-enter the match.
+  Idle sessions expire after the reconnect window, so a `Welcome` whose
+  token differs from the one the client sent is a fresh guest session:
+  with a stored key the client logs in again before any mode request
+  (`net/login.rs`), otherwise ranked answers `LoginRequired`.
   While logged in, the session carries
   the account name, which opponents see in `MatchStart`.
 - **Ranked (P12):** separate FIFO queue (`RankedMatch`; guests are refused

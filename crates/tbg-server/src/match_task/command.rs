@@ -45,6 +45,14 @@ impl Match {
                     self.send(seat, ServerMsg::Rejected { seq, reason });
                 }
             }
+            MatchCmd::Surrender { seat } => {
+                // BR-M06/BR-M03: forfeit, idempotent (a second surrender or
+                // an already-finished match changes nothing).
+                if self.state.outcome.is_none() {
+                    self.state.forfeit(seat);
+                    self.stats[seat.index()].surrendered = true;
+                }
+            }
             MatchCmd::Detach { seat, conn_id } => {
                 let current = self.players[seat.index()].conn.as_ref().map(|c| c.id);
                 if current == Some(conn_id) {

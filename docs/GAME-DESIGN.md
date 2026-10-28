@@ -77,6 +77,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-M03 | A disconnected player gets a reconnect window, then forfeits; the match keeps running meanwhile | Adapted | S1, S3 |
 | BR-M04 | Each player has a `Stronghold`; destroying the enemy `Stronghold` wins | Proposed | — |
 | BR-M05 | Fixed match clock: regulation, then overtime with faster `Energy`; tie after overtime is a draw | Proposed | — |
+| BR-M06 | A player may surrender while the match is in countdown, regulation, or overtime; it is a forfeit (BR-M03): the opponent wins and, in ranked, it is a loss (BR-R04) | Proposed | — |
 | BR-B01 | Combat resolves on one lane; units never move laterally | Confirmed | S1, S4 |
 | BR-B02 | A unit enters the lane only through a validated purchase-and-deploy intention; MVP deploys at the buyer's `Stronghold` | Adapted | S2, S3 |
 | BR-B03 | Allied units pass through each other; a unit stops when an enemy is within its range | Proposed | — |
@@ -148,8 +149,9 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 7. **End.** Destroying the enemy `Stronghold` wins immediately. When
    regulation ends, the higher `Stronghold` HP wins; if tied, overtime
    starts with doubled `Energy` regeneration. A tie after overtime is a
-   draw. A player who stays disconnected past the reconnect window
-   forfeits. The result screen offers **Play again**.
+   draw. A player who stays disconnected past the reconnect window, or
+   who surrenders (two taps in the HUD), forfeits. The result screen
+   offers **Play again**.
 
 ## 5. MVP starting values (all **new assumptions**, tune via playtests)
 

@@ -402,3 +402,91 @@ async fn draining_server_refuses_new_matches() {
         })
     );
 }
+
+async fn await_seat(ws: &mut Ws) -> Seat {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::MatchStart { you, .. }) => return you,
+            Some(_) => {}
+            None => panic!("socket closed before MatchStart"),
+        }
+    }
+}
+
+async fn await_end(ws: &mut Ws) -> tbg_core::Outcome {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::MatchEnd { outcome }) => return outcome,
+            Some(_) => {}
+            None => panic!("socket closed before MatchEnd"),
+        }
+    }
+}
+
+#[tokio::test]
+async fn br_m06_surrender_forfeits_once() {
+    // BR-M06/BR-M03: surrendering is a forfeit; both seats see one MatchEnd
+    // with the other side as winner. Outside a match the message is refused.
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let url = format!("ws://{}/ws", listener.local_addr().unwrap());
+    let shared = tbg_server::Shared::default();
+    let metrics = shared.metrics.clone();
+    let config = Config {
+        tick_ms: 5,
+        max_per_ip: 1_000,
+        ..Config::default()
+    };
+    tokio::spawn(tbg_server::run_with(config, listener, shared));
+
+    let mut idle = connect(&url).await;
+    hello(&mut idle).await;
+    send(&mut idle, &ClientMsg::Surrender).await;
+    assert_eq!(
+        recv(&mut idle).await,
+        Some(ServerMsg::Error {
+            code: ErrorCode::NotInMatch
+        })
+    );
+
+    let (mut a, mut b) = (connect(&url).await, connect(&url).await);
+    hello(&mut a).await;
+    hello(&mut b).await;
+    send(&mut a, &ClientMsg::QuickMatch).await;
+    send(&mut b, &ClientMsg::QuickMatch).await;
+    let (seat_a, seat_b) = tokio::join!(await_seat(&mut a), await_seat(&mut b));
+    assert_ne!(seat_a, seat_b);
+
+    // Two surrenders in a row still produce a single end.
+    send(&mut a, &ClientMsg::Surrender).await;
+    send(&mut a, &ClientMsg::Surrender).await;
+    let (oa, ob) = tokio::join!(await_end(&mut a), await_end(&mut b));
+    assert_eq!(oa, ob, "both seats agree on the outcome");
+    assert_eq!(oa.reason, EndReason::Forfeit);
+    assert_eq!(oa.winner, Some(seat_b), "the other seat wins");
+    let second = tokio::time::timeout(Duration::from_millis(300), async {
+        loop {
+            match recv(&mut a).await {
+                Some(ServerMsg::MatchEnd { .. }) => return true,
+                Some(_) => {}
+                None => return false,
+            }
+        }
+    })
+    .await;
+    assert!(!matches!(second, Ok(true)), "duplicate MatchEnd");
+    let deadline = std::time::Instant::now() + Duration::from_secs(2);
+    while metrics
+        .matches_running
+        .load(std::sync::atomic::Ordering::Relaxed)
+        != 0
+        && std::time::Instant::now() < deadline
+    {
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+    assert_eq!(
+        metrics
+            .matches_running
+            .load(std::sync::atomic::Ordering::Relaxed),
+        0
+    );
+}
