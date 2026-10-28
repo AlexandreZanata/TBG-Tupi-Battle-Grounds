@@ -1,6 +1,7 @@
 //! One task owning sessions, the quick-match queue, and private rooms.
 //! Pairs players and spawns match tasks. Never awaits another task.
 
+use std::collections::{HashMap, VecDeque};
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -10,7 +11,7 @@ use tokio::sync::mpsc;
 use tbg_core::protocol::{ClientMsg, ErrorCode, RoomCode, ServerMsg, Token};
 use tbg_core::Seat;
 
-use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd};
+use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd, LOBBY_QUEUE};
 use crate::metrics::Metrics;
 use crate::records::Records;
 use crate::Config;
@@ -39,10 +40,11 @@ pub(super) struct Session {
 }
 
 pub(super) struct Lobby {
-    pub(super) sessions: Vec<Session>,
-    pub(super) queue: Vec<Token>,
+    /// P10: O(1) by token (the lobby is not simulation; `HashMap` is allowed).
+    pub(super) sessions: HashMap<Token, Session>,
+    pub(super) queue: VecDeque<Token>,
     /// P9: when each queued session sent `QuickMatch` (for `queue_wait`).
-    pub(super) queued_at: std::collections::HashMap<Token, Instant>,
+    pub(super) queued_at: HashMap<Token, Instant>,
     pub(super) rooms: Vec<(RoomCode, Token, Instant)>,
     pub(super) self_tx: mpsc::Sender<LobbyCmd>,
     pub(super) config: Arc<Config>,
@@ -60,9 +62,9 @@ pub(crate) async fn run(
     draining: Arc<AtomicBool>,
 ) {
     let mut lobby = Lobby {
-        sessions: Vec::new(),
-        queue: Vec::new(),
-        queued_at: std::collections::HashMap::new(),
+        sessions: HashMap::new(),
+        queue: VecDeque::new(),
+        queued_at: HashMap::new(),
         rooms: Vec::new(),
         self_tx,
         config,
@@ -83,6 +85,9 @@ pub(crate) async fn run(
             .metrics
             .queue_len
             .store(lobby.queue.len() as u64, Relaxed);
+        // P10: worst lobby inbox backlog seen (join bursts must not pile up).
+        let inbox = LOBBY_QUEUE.saturating_sub(lobby.self_tx.capacity()) as u64;
+        lobby.metrics.lobby_inbox_max.fetch_max(inbox, Relaxed);
     }
 }
 
@@ -94,7 +99,7 @@ pub(super) fn send(conn: &Option<ConnHandle>, ev: ConnEvent) {
 
 impl Lobby {
     pub(super) fn session(&mut self, token: &Token) -> Option<&mut Session> {
-        self.sessions.iter_mut().find(|s| &s.token == token)
+        self.sessions.get_mut(token)
     }
 
     fn handle(&mut self, cmd: LobbyCmd) {
