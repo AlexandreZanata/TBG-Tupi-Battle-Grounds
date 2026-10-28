@@ -53,6 +53,9 @@ evolve, and which factions you combine.
 | Rating | **Proposed (P12):** an account's ranked skill number (Elo) | `Rating` |
 | Leaderboard | **Proposed (P13):** global ranking of accounts by `Rating` | `Leaderboard` |
 | StrongholdStyle | **Proposed (P18):** cosmetic look of a `Stronghold`: Stone Keep, Timber Fort, Gatehouse | `StrongholdStyle` |
+| Arcana | **Proposed (P32–P38, extra after P31):** a free pre-match choice that modifies a documented unit attribute | `ArcanaNode` |
+| ArcanaPreset | **Proposed (P32–P38):** six bounded ranks chosen before matchmaking and frozen for a match | `ArcanaPreset` |
+| RulesetVersion | **Proposed (P35):** compiled version of competitive rules and balance values, recorded with match results | `RulesetVersion` |
 
 Retired legacy names — never reuse for new concepts: `CharacterDefinition`,
 `CharacterCatalog`, `CharacterStudio(Window)`, `ProceduralCharacterBuilder`,
@@ -255,3 +258,77 @@ human playtests. Targets are starting hypotheses.
 | PostgreSQL via Nakama | SQLite for MVP match records |
 | Per-character MB-Lab/Mixamo rigging (ADR-003–006; ~8% auto pass rate, ADR-007) | Code-built rigid-part figurines with a shared animation library |
 | StoreKit / Play Billing IAP | Deferred; cosmetics-only principle unchanged |
+
+## 9. Arcanas extra — Proposed, not active (P32–P38)
+
+This is an optional extension **after P31**, not a change to the current
+MVP or a blocker for any existing phase. Values below are experimental
+starting hypotheses. P32 refreshes the evidence on the then-current HEAD;
+P34 must validate them before online integration. P38 gates public release.
+
+| ID | Proposed rule |
+|----|---------------|
+| BR-AR01 | Every player, including a new guest, has all six points and all options immediately; payments, account age, and playtime never grant power |
+| BR-AR02 | A complete preset spends exactly 6 points; each of 6 nodes has rank 0–2, costs 1 point per rank, and has no prerequisites; each two-node tree therefore holds at most 4 points; there are no supremes or unlock levels |
+| BR-AR03 | Eligibility uses the unit's base `Archetype`, remains unchanged by `Evolution`, and grants no new behavior or missing attribute |
+| BR-AR04 | Arcana percentages add to existing percentages on the same base attribute, use wide integer intermediates, and truncate once; preserve current HP percentage when max HP changes |
+| BR-AR05 | Preset editing is allowed only while idle; joining either queue or creating/joining a room freezes selection until cancellation or match end; reconnect and account takeover keep the match's original preset |
+| BR-AR06 | The server validates ranks, budget, schema, ruleset, and session state; clients send selections, never final bonuses or a claimed seat |
+| BR-AR07 | Record both applied presets, their schema, and the RulesetVersion with every result; later tuning never rewrites historical outcomes or Rating |
+| BR-AR08 | Provide one active preset per account, recovered across devices, and local storage for guests; a complete default requires no setup; account ownership never changes available power |
+| BR-AR09 | Casual and Ranked use identical released Arcana rules; existing Elo, FIFO pairing, account identity, Energy, Shop randomness, Evolution costs, SlotCount, and Synergy thresholds do not change |
+| BR-AR10 | The first version changes unit max HP, normal damage, and Bloomkeeper healing only; no Stronghold, cadence, movement, range, slow/root, regeneration-rate, or splash-radius bonuses |
+
+**Node order is a serialization contract**, not alphabetical order.
+Names below are English UI names. `DPS` is `Archetype::Dps` in code.
+
+| Index | Tree / node | Base Archetypes | Per rank | Rank-2 maximum |
+|-------|-------------|-----------------|----------|----------------|
+| 0 | War / Guard | Tank, DPS | +4% base max HP | +8% |
+| 1 | War / Assault | Tank, DPS | +3% base damage | +6% |
+| 2 | Precision / Piercing | Ranged | +3% base damage | +6% |
+| 3 | Precision / Endurance | Ranged | +4% base max HP | +8% |
+| 4 | Vitality / Resilience | Support, Control | +4% base max HP | +8% |
+| 5 | Vitality / Renewal | Support with an existing heal | +5% base direct/splash heal | +10% |
+
+The candidate default is `[2, 0, 2, 0, 2, 0]`. There are 141 complete
+rank vectors. Zero/partial presets are diagnostic or editor states, not
+valid online selections. Vitality does not raise Plants regeneration's
+percentage; a larger max HP can still change its integer healing amount.
+Bloomkeeper's attacking forms keep their healing priority and eligibility.
+Zero damage/healing stays zero. Splash inherits the modified damage or
+heal amount; on-hit status still affects the primary target only.
+
+For each affected attribute, add percentages by source before scaling:
+
+```text
+damage = floor((base_damage + Evolution_flat_damage)
+               * (10000 + Evolution_bp + Synergy_bp + Arcana_bp) / 10000)
+max_hp = floor(base_hp * (10000 + Evolution_bp + Synergy_bp + Arcana_bp) / 10000)
+heal = floor(base_heal * (10000 + Evolution_heal_bp + Arcana_heal_bp) / 10000)
+```
+
+**Acceptance hypotheses, not claims of balance.** Against other complete
+presets, investigate aggregate scores above 55% or individual matchups
+above 65%; report neutral controls separately. Require at least three
+competitive, non-dominated presets and a default within 3 percentage
+points of the best generalist reference. Use held-out paired seeds,
+95% confidence intervals, and the existing §6 fun targets. An unresolved
+counterless advantage blocks release; a 50% aggregate alone proves nothing.
+Human validation needs at least 8 participants and 24 completed matches;
+at least 80% must explain their preset and a relevant reason for defeat.
+
+**Conditional combat proposal, not approved or active.** P32 must first
+reproduce root lock and resolve the documented durations. If needed, test
+a maximum continuous root episode of 32 ticks (1.6 s), including refreshes,
+followed by 8 root-immune ticks (0.4 s). This changes the existing refresh
+rule and needs an explicit owner decision backed by measurements. A
+refresh must never postpone immunity indefinitely. No root bonus is added.
+
+**Deferred alternatives.** Five deep trees, ten points, supremes, Fortress,
+Domination, haste, mobility, and range remain outside this extra. If
+Stronghold max HP ever varies, first propose fixed per-match maxima and
+compare remaining ratios with `i64(hp_a) * i64(max_b)` versus
+`i64(hp_b) * i64(max_a)`, including full-health ties and healing cases.
+Do not implement that unused subsystem in P32–P38. Reopen progression only
+if the small system fails the strategic-choice/playtest gates.

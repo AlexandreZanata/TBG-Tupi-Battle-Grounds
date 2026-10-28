@@ -15,6 +15,7 @@ use axum::{Json, Router};
 use tokio::net::TcpListener;
 use tokio::sync::mpsc;
 
+mod api;
 pub mod botclient;
 mod chan;
 pub mod config;
@@ -37,6 +38,9 @@ pub(crate) struct AppState {
     pub config: Arc<Config>,
     pub ips: Arc<Mutex<HashMap<IpAddr, usize>>>,
     pub next_conn_id: Arc<AtomicU64>,
+    /// P13: snapshot reads and per-IP API limits.
+    pub store: Option<Arc<store::Store>>,
+    pub api_limits: Arc<Mutex<limits::Limits>>,
 }
 
 /// Handles the binary keeps to drive graceful shutdown.
@@ -78,7 +82,7 @@ pub async fn run_with(
         lobby_tx.clone(),
         config.clone(),
         metrics.clone(),
-        store,
+        store.clone(),
         shared.draining.clone(),
     ));
     let state = AppState {
@@ -87,11 +91,15 @@ pub async fn run_with(
         config: config.clone(),
         ips: Arc::default(),
         next_conn_id: Arc::new(AtomicU64::new(1)),
+        store,
+        api_limits: Arc::default(),
     };
     let mut app = Router::new()
         .route("/health", get(|| async { "ok" }))
         .route("/ws", get(ws::handler))
         .route("/metrics", get(metrics_handler))
+        .route("/api/leaderboard", get(api::leaderboard))
+        .route("/api/players/{name}", get(api::player))
         .with_state(state);
     if let Some(dir) = &config.static_dir {
         app = app.fallback_service(tower_http::services::ServeDir::new(dir));

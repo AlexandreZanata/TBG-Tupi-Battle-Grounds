@@ -7,11 +7,13 @@ use std::net::IpAddr;
 use std::time::{Duration, Instant};
 
 /// Sliding-log limiter (stricter than fixed windows: at most `max`
-/// attempts in any trailing window). Two independent logs.
+/// attempts in any trailing window). Independent logs per endpoint.
 #[derive(Default)]
 pub struct Limits {
     register: HashMap<IpAddr, Vec<Instant>>,
     login: HashMap<IpAddr, Vec<Instant>>,
+    /// P13: read-only API limit (`TBG_API_PER_IP_MIN`, default 120/min).
+    api: HashMap<IpAddr, Vec<Instant>>,
     last_sweep: Option<Instant>,
 }
 
@@ -36,7 +38,17 @@ impl Limits {
         )
     }
 
-    /// Drop empty logs; call about once a minute (the lobby cleanup tick).
+    /// `true` when an `/api/*` request is allowed (records it on allow).
+    pub fn check_api(&mut self, ip: IpAddr, max_per_min: u32, now: Instant) -> bool {
+        check_log(
+            self.api.entry(ip).or_default(),
+            max_per_min,
+            Duration::from_secs(60),
+            now,
+        )
+    }
+
+    /// Drop expired entries and empty logs; at most once a minute.
     pub fn sweep(&mut self, now: Instant) {
         if self
             .last_sweep
@@ -45,9 +57,19 @@ impl Limits {
             return;
         }
         self.last_sweep = Some(now);
-        self.register.retain(|_, v| !v.is_empty());
-        self.login.retain(|_, v| !v.is_empty());
+        // Prune expired entries first: an IP seen once and never again
+        // would otherwise keep a one-entry log forever.
+        prune(&mut self.register, Duration::from_secs(3600), now);
+        prune(&mut self.login, Duration::from_secs(60), now);
+        prune(&mut self.api, Duration::from_secs(60), now);
     }
+}
+
+fn prune(logs: &mut HashMap<IpAddr, Vec<Instant>>, window: Duration, now: Instant) {
+    logs.retain(|_, v| {
+        v.retain(|t| now.saturating_duration_since(*t) < window);
+        !v.is_empty()
+    });
 }
 
 fn check_log(log: &mut Vec<Instant>, max: u32, window: Duration, now: Instant) -> bool {

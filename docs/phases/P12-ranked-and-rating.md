@@ -236,3 +236,22 @@ result count-up, Play again re-queues the same mode).
 ### Blocked items
 
 - Owner checkpoint: two-device ranked match + playtest sign-off (P14 gate).
+
+### Review (reviewer, 2026-10-28)
+
+- Reviewer checklist holds: ratings change only inside the store
+  transaction; each side's K uses its own `ranked_games` before the match;
+  casual and private matches never touch the rating columns (tested).
+- Acceptance item the report did not show, run by the reviewer:
+  `tbg-bots --ranked --matches 50 --ramp-ms 20` against a local release
+  server (`TBG_TICK_MS=2`): 100/100 bots completed, RTT p95 2 ms, no store
+  errors in the log; a second run of 40 matches against the same database
+  completed 80/80 after the bot `NameTaken` fix.
+- Found while testing P13: the P12 menu overflowed a 1280×800 screen at UI
+  scale 1.5 (title and sound toggle cut off); fixed in 664e9ac by pairing
+  buttons on shared rows.
+- Minor, not fixed: `ranked_done` matches sessions by token only; a player
+  who logs out and into another account in the few milliseconds between
+  `MatchEnd` and the store reply would see the other account's profile
+  until the next `LoggedIn`.
+- Still owner-pending: two devices play ranked (P14 gate).

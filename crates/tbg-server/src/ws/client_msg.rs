@@ -1,6 +1,6 @@
 //! One validated client frame: rate limit, decode, route; pong → RTT.
 
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use axum::extract::ws::{Message, WebSocket};
 
@@ -10,6 +10,8 @@ use super::{Conn, BUCKET_CAP, BUCKET_REFILL_PER_S};
 use crate::chan::{LobbyCmd, MatchCmd};
 use crate::metrics::Metrics;
 use crate::AppState;
+
+const LEADERBOARD_EVERY: Duration = Duration::from_secs(1);
 
 /// Validate one client frame; `Err` closes the connection.
 pub(super) fn on_client_bytes(
@@ -42,7 +44,17 @@ pub(super) fn on_client_bytes(
             }),
         },
         ClientMsg::Pong { id } => on_pong(c, app, id, now),
+        // P13: one leaderboard request per second per connection.
+        ClientMsg::Leaderboard { .. }
+            if c.last_leaderboard
+                .is_some_and(|t| now.duration_since(t) < LEADERBOARD_EVERY) =>
+        {
+            None
+        }
         other => {
+            if matches!(other, ClientMsg::Leaderboard { .. }) {
+                c.last_leaderboard = Some(now);
+            }
             let cmd = LobbyCmd::Client {
                 token: c.token,
                 msg: other,

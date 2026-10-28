@@ -9,7 +9,7 @@ use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-pub const PROTOCOL_VERSION: u16 = 3;
+pub const PROTOCOL_VERSION: u16 = 4;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ.
@@ -40,6 +40,8 @@ pub enum ClientMsg {
     Logout,
     // P12: appended at the end (older peers are rejected by version).
     RankedMatch,
+    // P13: one leaderboard page (`LEADERBOARD_PAGE` rows from `offset`).
+    Leaderboard { offset: u16 },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -110,6 +112,28 @@ pub enum ServerMsg {
         after: u16,
         profile: Profile,
     },
+    // P13: appended at the end (older peers are rejected by version).
+    // `you` is your rank when logged in with ≥ 1 ranked game.
+    Leaderboard {
+        total: u32,
+        offset: u16,
+        rows: Vec<LeaderRow>,
+        you: Option<u32>,
+    },
+}
+
+/// P13: rows per in-game leaderboard page.
+pub const LEADERBOARD_PAGE: usize = 20;
+
+/// P13 (BR-R07): one public leaderboard row (no account id).
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LeaderRow {
+    pub rank: u32,
+    pub name: String,
+    pub rating: u16,
+    pub wins: u32,
+    pub losses: u32,
+    pub draws: u32,
 }
 
 /// P11 (BR-P01–BR-P05): account failures. `BadKey` covers both unknown

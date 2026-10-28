@@ -19,6 +19,8 @@ pub struct Config {
     pub register_per_ip_hour: u64,
     /// P11: logins allowed per IP per minute (`TBG_LOGIN_PER_IP_MIN`).
     pub login_per_ip_min: u64,
+    /// P13: `/api/*` requests allowed per IP per minute (`TBG_API_PER_IP_MIN`).
+    pub api_per_ip_min: u64,
 }
 
 impl Default for Config {
@@ -34,6 +36,7 @@ impl Default for Config {
             workers: 0,
             register_per_ip_hour: 3,
             login_per_ip_min: 10,
+            api_per_ip_min: 120,
         }
     }
 }
@@ -56,6 +59,7 @@ impl Config {
             workers: num("TBG_WORKERS", 0) as usize,
             register_per_ip_hour: num("TBG_REGISTER_PER_IP_HOUR", d.register_per_ip_hour),
             login_per_ip_min: num("TBG_LOGIN_PER_IP_MIN", d.login_per_ip_min),
+            api_per_ip_min: num("TBG_API_PER_IP_MIN", d.api_per_ip_min),
             static_dir: std::env::var("TBG_STATIC_DIR").ok().map(PathBuf::from),
             db: Some(
                 std::env::var("TBG_DB")

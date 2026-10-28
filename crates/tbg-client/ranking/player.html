@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tupi Battle Grounds player profile: rating, rank, record, faction shares, and recent ranked matches.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; object-src 'none'">
+  <title>Player — Tupi Battle Grounds</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="ranking.css">
+  <script src="ranking.js" defer></script>
+</head>
+<body data-page="player">
+<header class="top">
+  <h1 id="title">Player profile</h1>
+  <a class="play" href="./">Back to ranking</a>
+</header>
+<main>
+  <p id="status" class="status" role="status">Loading…</p>
+  <section id="card" class="card" aria-labelledby="title" hidden>
+    <dl class="stats">
+      <div><dt>Rank</dt><dd id="rank"></dd></div>
+      <div><dt>Rating</dt><dd id="rating"></dd></div>
+      <div><dt>Peak</dt><dd id="peak"></dd></div>
+      <div><dt>Record (W/L/D)</dt><dd id="record"></dd></div>
+      <div><dt>Win rate</dt><dd id="winrate"></dd></div>
+      <div><dt>Joined</dt><dd id="joined"></dd></div>
+    </dl>
+  </section>
+  <section id="factions-box" class="card" aria-labelledby="factions-title" hidden>
+    <h2 id="factions-title">Faction shares</h2>
+    <ul id="factions" class="bars"></ul>
+  </section>
+  <section id="recent-box" class="card" aria-labelledby="recent-title" hidden>
+    <h2 id="recent-title">Last 10 ranked matches</h2>
+    <div class="table-wrap">
+      <table id="recent">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Opponent</th>
+            <th scope="col">Result</th>
+            <th scope="col" class="num">Rating</th>
+            <th scope="col">How</th>
+            <th scope="col" class="num">Time</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<footer class="foot"><a href="/">Play now</a></footer>
+</body>
+</html>

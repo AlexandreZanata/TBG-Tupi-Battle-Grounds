@@ -9,7 +9,8 @@ use axum::http::HeaderMap;
 use crate::AppState;
 
 /// Behind a local reverse proxy (Caddy), trust its `X-Forwarded-For`.
-pub(super) fn client_ip(peer: SocketAddr, headers: &HeaderMap) -> IpAddr {
+/// Shared with the read-only API rate limiter.
+pub(crate) fn client_ip(peer: SocketAddr, headers: &HeaderMap) -> IpAddr {
     let forwarded = headers
         .get("x-forwarded-for")
         .and_then(|v| v.to_str().ok())

@@ -14,6 +14,8 @@ mod hud_update;
 mod input;
 mod menu;
 mod queue;
+pub mod ranking;
+mod ranking_ui;
 mod result;
 pub mod textform;
 mod tips;
@@ -54,6 +56,12 @@ pub enum UiAction {
         branch: u8,
     },
     CloseEvolve,
+    // P13: in-game Ranking panel (ui/ranking.rs).
+    OpenRanking,
+    RankingPrev,
+    RankingNext,
+    OpenFullRanking,
+    CloseRanking,
 }
 
 /// Shop card waiting for the view that confirms (or rejects) its purchase.
@@ -75,6 +83,7 @@ pub fn plugin(app: &mut App) {
             textform::plugin,
             queue::plugin,
             menu::plugin,
+            ranking::plugin,
             hud::plugin,
             evolve::plugin,
             result::plugin,

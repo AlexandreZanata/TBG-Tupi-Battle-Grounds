@@ -2,7 +2,7 @@
 
 use tokio::time::Instant;
 
-use tbg_core::protocol::{ClientMsg, ServerMsg};
+use tbg_core::protocol::{AccountError, ClientMsg, ServerMsg};
 
 use super::{BotOpts, BotResult, Session, Step};
 
@@ -103,11 +103,20 @@ pub(super) fn handle(
         }
         ServerMsg::Error { code } => return Err(format!("server error {code:?}")),
         ServerMsg::Queued | ServerMsg::RoomCreated { .. } | ServerMsg::RoomNotFound => {}
-        // Bots ignore account/rating replies; completion ends the run.
+        // Bot names are seeded, so a rerun against the same database meets
+        // its old names: try the next one instead of waiting forever.
+        ServerMsg::AccountError {
+            code: AccountError::NameTaken,
+        } => {
+            let name = bot_name(s);
+            send(s, ClientMsg::Register { name });
+        }
+        ServerMsg::AccountError { code } => return Err(format!("account error {code:?}")),
+        // Bots ignore other account/rating replies; completion ends the run.
         ServerMsg::LoggedIn { .. }
         | ServerMsg::LoggedOut
-        | ServerMsg::AccountError { .. }
-        | ServerMsg::RatingChanged { .. } => {}
+        | ServerMsg::RatingChanged { .. }
+        | ServerMsg::Leaderboard { .. } => {}
     }
     Ok(None)
 }

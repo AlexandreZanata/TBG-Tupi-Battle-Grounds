@@ -291,3 +291,26 @@ two-tap logout).
 
 - Owner checkpoint P11: review the blocked-name list; create an account
   on two devices (login takeover covered by test, needs a human pair).
+
+### Review (reviewer, 2026-10-28)
+
+- Reviewer checklist holds: one `BadKey` path for unknown name and wrong
+  secret; the key appears only in `Registered` and client storage; the
+  store thread is the only SQL user and the lobby never awaits it; the hash
+  comparison folds all 32 bytes.
+- Fixed (d058ee6): after a BR-P03 takeover the old session was kept
+  (still `InMatch`), and the taken-over device auto-resumes with its old
+  token (P9 backoff) — that resume re-attached it to the match and undid
+  the takeover within ~0.25 s. The old session is now dropped; the
+  takeover test reconnects the old token and asserts a fresh guest session
+  with no `MatchStart`/`View` (fails without the fix).
+- Fixed (44b123a): the per-IP limiter sweep only removed empty logs, so an
+  IP seen once kept its entry forever; the sweep now prunes expired entries.
+- Fixed (P13 branch): `tbg-bots --accounts` hung until its timeout when a
+  rerun met its own seeded names (`NameTaken` ignored); it now retries the
+  next name.
+- Deviation accepted: the spec drops the new guest session and moves the
+  connection into the old one; the code keeps the new session and moves
+  the match (`Attach{new_token}`). Equivalent for players now that the old
+  session is removed.
+- Still owner-pending: blocked-name list review; account on two devices.

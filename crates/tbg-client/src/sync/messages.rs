@@ -41,6 +41,7 @@ pub(super) fn poll_link(
     mut extra: (ResMut<super::MatchStats>, ResMut<Sounds>),
     mut inbox: ResMut<AccountInbox>,
     mut account: ResMut<Account>,
+    mut ranking: ResMut<crate::ui::ranking::Ranking>,
 ) {
     let now = time.elapsed_secs_f64();
     for msg in link.poll(now) {
@@ -97,6 +98,12 @@ pub(super) fn poll_link(
             }
             ServerMsg::NetStats { rtt_ms } => stats.0.rtt_ms = Some(f64::from(rtt_ms)),
             ServerMsg::Error { code } => ui.0.push(format!("Server: {code:?}")),
+            ServerMsg::Leaderboard {
+                total,
+                offset,
+                rows,
+                you,
+            } => ranking.accept(total, offset, rows, you),
             // P11/P12: account replies belong to the account panel.
             msg @ (ServerMsg::Registered { .. }
             | ServerMsg::LoggedIn { .. }

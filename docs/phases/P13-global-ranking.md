@@ -164,5 +164,96 @@ rule). README: link to `/ranking/`.
 
 ## Phase report
 
-_Executor fills this in: commands run with real output, load numbers,
-Lighthouse scores, screenshots, deviations, blocked items._
+Executed 2026-10-28 on the dev PC. Steps 1–2 by the executor (522e117,
+c581c96); the executor stopped there without a report. Steps 3–6, the
+acceptance runs, and this report were done by the reviewer on the same
+branch (the owner asked the reviewer to finish the phase).
+
+### Verification commands (all pass, final tip)
+
+```text
+$ cargo fmt --all -- --check                     # clean
+$ cargo clippy --workspace --all-targets -- -D warnings   # clean
+$ cargo clippy -p tbg-client --target wasm32-unknown-unknown -- -D warnings  # clean
+$ cargo test --workspace   # core 6 account + 5 rating + 15 rules; server 2 unit,
+                           # 10 account, 4 leaderboard, 12 online, 5 ranked
+$ cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown   # ok
+$ trunk build --release    # success; dist/ranking/ = 14 808 bytes (< 40 KB)
+```
+
+Tests: `store::leaderboard::tests::order_and_tiebreaks` (rating, wins and
+`name_lower` tiebreaks); `tests/leaderboard.rs` — both players ranked after
+one ranked match with the public profile (no id/hash fields), `limit=1000`
+→ 100 rows over 102 bot accounts, bad shape and unknown name → identical
+404, requests 1–120 → 200 and the 121st → 429, and the in-game
+`Leaderboard` reply (same order as the API, `you = Some(1)`, a second
+request within 1 s ignored).
+
+### Load (`oha -z 30s -c 200 http://127.0.0.1:8080/api/leaderboard`)
+
+Release server, `TBG_API_PER_IP_MIN=100000000`, 180 ranked accounts
+(default page = 50 rows, 5.17 KiB JSON), oha on the same 16-core machine:
+
+```text
+Success rate 100.00 %   Requests/sec 4939.6   148 024 × [200]
+p50 35.1 ms   p99 125.7 ms   slowest 210.5 ms
+server CPU 49.85 s over 30 s = 1.66 cores → ≈ 2 970 requests/s per core
+```
+
+Snapshot rebuild at 50 180 synthetic accounts: the ordered `SELECT` takes
+30 ms and runs as `SCAN accounts USING INDEX accounts_by_rating`.
+
+### Browser (in-app browser, local release server, `TBG_TICK_MS=2`)
+
+- Real data: `tbg-bots --ranked --matches 50` (100/100 completed) plus 40
+  more (80/80), then one human ranked match against a bot.
+- `/ranking/` and `player.html` at 1280×800, 375×812 and 320×640: table,
+  pager, search, faction bars, last-10 table; no horizontal page scroll
+  at 320 px (Games column hidden under 420 px; tables scroll inside
+  their box).
+- Lighthouse 12, mobile profile: board page Performance 98 /
+  Accessibility 100 / Best Practices 100 (FCP 0.9 s, LCP 1.1 s, CLS
+  0.085, TBT 0 ms); player page 98 / 100 / 100 (FCP 0.8 s, LCP 1.1 s,
+  CLS 0.088).
+- XSS: `player.html?name=<img src=x onerror=alert(1)>` and
+  `?name=Bob_script` render as plain text in the status line; no element
+  is created. No `innerHTML`, `eval`, or inline handlers in the pages.
+- In-game panel: guest opens Ranking → "180 ranked players", rows #1–#20
+  (two columns of 10 at 1280×800, one column of 20 in portrait); Next →
+  #21–#40 with Prev enabled. Registered `ReviewerOne`, played ranked vs
+  one bot → result `Rating 1000 -> 980 (-20)`. Server log has no key text
+  and no IP.
+- Not seen on screen: the highlighted own row (the pane was hidden and
+  stopped taking clicks); covered by the `you == Some(1)` integration
+  assertion and the view code. Real phones: owner-pending (P14 matrix).
+
+### Deviations
+
+- Leaderboard request pacing lives per connection in `ws/client_msg.rs`
+  (extras ignored before reaching the lobby). The client re-sends a wanted
+  page every 1.1 s until its reply arrives, so a fast Prev/Next is never
+  lost; Prev/Next are disabled while a page loads.
+- `updated_at` is the newest ranked match end time (data freshness), not
+  the rebuild time. A result reaches the snapshot within ~10–20 s (10 s
+  throttle, plus up to one 10 s idle wake-up).
+- The in-game panel shows two 10-row columns where the screen is wide
+  but short (a 20-row column does not fit 1280×800 at UI scale 1.5), one
+  column on portrait phones. The menu hides under modal panels (ranking,
+  save your key) because taps hit-test the first visible button.
+- The P12 menu already overflowed 1280×800; paired buttons now share rows.
+- Web pages: 50 rows per page; a `default-src 'self'` CSP meta tag; the
+  spec asked `no-cache` only for HTML, but the ranking CSS/JS are not
+  content-hashed, so all `/ranking/*` files are `no-cache` (ETag) and are
+  excluded from the immutable `*.js` rule (it would have pinned
+  `ranking.js` for a year).
+- `window.open` runs a frame after the tap; browsers allow it as a
+  user-activated popup (Chrome checked); strict popup blockers may still
+  stop it.
+- Lighthouse ran headless from the CLI (`npx lighthouse@12`) instead of
+  Chrome devtools; same engine and mobile profile.
+
+### Blocked items
+
+None. Owner-pending: both pages and the panel on a real Android phone and
+iPhone (P14 device matrix); Caddy routing on the VPS (Caddy is not
+installed on the dev PC, so the template was not run here).

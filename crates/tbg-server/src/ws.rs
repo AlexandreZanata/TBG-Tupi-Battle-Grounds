@@ -19,10 +19,11 @@ use tbg_core::Seat;
 use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd, CONN_QUEUE};
 
 mod admission;
+pub(crate) use admission::client_ip;
 mod client_msg;
 use crate::metrics::{percentile, Metrics};
 use crate::AppState;
-use admission::{client_ip, Slot};
+use admission::Slot;
 use client_msg::{on_client_bytes, send};
 
 const HANDSHAKE: Duration = Duration::from_secs(5);
@@ -57,6 +58,8 @@ pub(super) struct Conn {
     pub(super) bytes_in: u64,
     pub(super) bytes_out: u64,
     pub(super) started: Instant,
+    /// P13: last `Leaderboard` request (one per second; extras ignored).
+    pub(super) last_leaderboard: Option<Instant>,
 }
 
 async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
@@ -85,6 +88,7 @@ async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
         bytes_in: 0,
         bytes_out: 0,
         started: Instant::now(),
+        last_leaderboard: None,
     };
     let reason = run_loop(&mut socket, &mut rx, &mut c, &app).await;
     if let Some((seat, m)) = &c.matched {

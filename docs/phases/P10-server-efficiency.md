@@ -241,3 +241,17 @@ bandwidth 1292 B/s per player — matches the P9 50-match reference
 ### Blocked items
 
 None. Client untouched (no `trunk build` needed); WASM check still green.
+
+### Review (reviewer, 2026-10-28)
+
+- Diff matches the report: only measured wins were kept (lobby `HashMap` +
+  `VecDeque`, bounded socket write buffers, `CONN_QUEUE` 32, `TBG_WORKERS`);
+  the profile, encode-once, and mimalloc experiments were reverted. The
+  lobby `HashMap` is outside the simulation (AGENTS.md rule 3 holds).
+- Re-ran fmt, clippy (native + wasm32), `cargo test --workspace`, wasm
+  check on the merged P10–P13 tip: all pass. Capacity tables were not
+  re-measured (the dev PC was shared with an unrelated 16-process job
+  during this review, so numbers would not be comparable).
+- Timing-based online tests (`rate_limit_closes_flooder`,
+  `two_bots_finish_a_match`, `reconnect_resumes_match`) still flake when the
+  machine is saturated; green on an idle machine (3/3 runs). Not fixed.

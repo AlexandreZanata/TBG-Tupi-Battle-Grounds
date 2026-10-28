@@ -6,11 +6,22 @@ __TBG_DOMAIN__ {
 	handle /health {
 		reverse_proxy 127.0.0.1:8080
 	}
+	# P13: read-only ranking API (the server sends its own 10 s cache
+	# headers and per-IP limits).
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8080
+	}
 	handle {
 		root * /srv/tbg/web
-		@hashed path *.wasm *.js
+		# Only the Trunk bundle is content-hashed; /ranking/ files are not.
+		@hashed {
+			path *.wasm *.js
+			not path /ranking/*
+		}
 		header @hashed Cache-Control "public, max-age=31536000, immutable"
-		@html path / /index.html
+		# Unhashed ranking files revalidate every time (ETag, ~15 KB), so a
+		# deploy never pairs new HTML with stale JS.
+		@html path / /index.html /ranking/*
 		header @html Cache-Control "no-cache"
 		file_server
 	}

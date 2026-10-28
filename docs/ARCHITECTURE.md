@@ -87,8 +87,8 @@ tables are the one allowed exception.
 - **Fixed tick:** 20 Hz (50 ms). All timers are counted in ticks.
 - **Integer math only:** positions in milli-tiles (`i32`, 1 tile = 1000),
   HP and damage as `i32`, percentages as basis points, `Energy` in
-  milli-energy. No floats in state, so outcomes are reproducible on every
-  platform and test assertions are exact.
+  sub-energy (600 = 1 Energy). No floats in state, so outcomes are
+  reproducible on every platform and test assertions are exact.
 - **Coordinates:** seat 0's `Stronghold` at x = 0, seat 1's at
   x = 16 000. The client mirrors x for seat 1 at render time.
 - **Randomness:** one PCG32 stream per seat per purpose (shop), seeded from
@@ -122,6 +122,14 @@ tables are the one allowed exception.
   `ClientMsg = Hello{version, resume} | QuickMatch | CreateRoom | JoinRoom{code} | Cancel | Intent{seq, intent} | Pong{id}`;
   `PlayerIntention = Purchase{offer} | Evolve{unit, branch}`;
   `ServerMsg = Welcome{token, name} | VersionMismatch{server} | Queued | RoomCreated{code} | RoomNotFound | MatchStart{you, opponent} | View(MatchView) | Rejected{seq, reason} | MatchEnd{outcome} | Ping{id} | NetStats{rtt_ms} | Error{code}`.
+  Later versions append variants at the end of each enum (`PROTOCOL_VERSION`
+  4): accounts v2 (`Register{name} | Login{key} | Logout` →
+  `Registered{key, profile} | LoggedIn{profile} | LoggedOut |
+  AccountError{code}`), ranked v3 (`RankedMatch`; `MatchStart` gains
+  `mode, opponent_rating`; `RatingChanged{before, after, profile}`), and
+  ranking v4 (`Leaderboard{offset}` → `Leaderboard{total, offset, rows,
+  you}`: 20 rows from the in-memory snapshot, `you` = your rank; one
+  request per second per connection, extras ignored).
   Intentions carry no seat: the server derives the seat from the connection.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
@@ -262,6 +270,14 @@ D-22); until each unit's phase lands, the description below stays true.
   `ranked_by_a`, `ranked_by_b`, and `accounts_by_rating` (rating DESC, wins
   DESC, name_lower). The settlement transaction is the only writer of the
   rating columns.
+- **Leaderboard snapshot (P13):** the writer thread keeps every ranked
+  account (≥ 1 ranked game) in rank order (`rating DESC, wins DESC,
+  name_lower ASC`) and publishes it as `Arc<Snapshot>` through a
+  `tokio::sync::watch` channel: built at startup, rebuilt at most every
+  10 s and only after a ranked result committed. `/api/leaderboard` and the
+  WS `Leaderboard` reply only clone the `Arc` — no SQL per request.
+  `/api/players/{name}` runs at most three indexed queries (account row,
+  faction sums, last 10 ranked matches with the opponent name).
 - **Boundary:** only `store/` touches SQL.
 - **Move to PostgreSQL when** two or more server instances need shared
   writes (accounts, rankings, `Inventory`), or analytics queries start
@@ -270,8 +286,11 @@ D-22); until each unit's phase lands, the description below stays true.
 ## 9. Deployment and operating cost
 
 - Caddy terminates TLS, serves the precompressed static bundle with
-  immutable cache headers for hashed files, and proxies `/ws` to
-  `tbg-server` on localhost.
+  immutable cache headers for hashed files, and proxies `/ws`, `/health`,
+  and `/api/*` to `tbg-server` on localhost. The public ranking pages
+  (`/ranking/`, `/ranking/player.html?name=…`, P13) are plain HTML + CSS +
+  vanilla JS copied by Trunk (no framework, about 15 KB); they are not
+  content-hashed, so all of them are `no-cache` (ETag revalidation).
 - `deploy/deploy.sh` (P5) builds the WASM bundle locally, rsyncs source
   and bundle, builds `tbg-server` on the VPS (avoids glibc mismatches),
   installs it, and restarts the systemd unit. `tbg-server` listens on
@@ -336,6 +355,12 @@ table at 250/500/1000/1500 concurrent matches.
 - Every message is decoded with size limits; malformed input closes the
   socket; intentions are validated against current state.
 - Rate limits, per-IP socket caps, and timeouts as in §5.
+- Read-only API (P13): `/api/*` is limited per IP (`TBG_API_PER_IP_MIN`,
+  default 120 requests per minute → 429 `{"error":"rate_limited"}`); bad
+  name shapes 404 before any query. Replies never carry account ids, key
+  hashes, IPs, or timestamps finer than the day. The ranking pages build
+  the DOM with `textContent` / `createElement` only (no `innerHTML`, no
+  `eval`, no inline handlers) under a `default-src 'self'` CSP.
 - TLS everywhere public (Caddy); no secrets in git (`.env*` ignored).
 - `cargo audit` before each public deploy.
 - Not in the MVP: advanced anti-cheat, fraud detection, accounts/MFA.
@@ -377,3 +402,40 @@ task with migrations (§5, §8, §11); P12 ranked queue and Elo (§5, §8); P13
 read-only JSON API + static ranking pages (§5, §8, §9, §11); P15+ the
 medieval visual suite described in [ART-DIRECTION.md](ART-DIRECTION.md)
 (rig v2 and clip sets replace the 12-joint plan in §7; quality tiers).
+
+## 15. Arcanas extra (Proposed, after P31 only)
+
+P32–P38 in ROADMAP are an optional gameplay extension after the existing
+release, not requirements for P0–P31. GAME-DESIGN §9 owns proposed values;
+DECISIONS D-25 records the rationale. No runtime feature is implemented
+or enabled by this planning addendum.
+
+- **Core (P32–P34):** validate fixed-size presets, calculate additive integer
+  modifiers, preserve Evolution/Synergy HP ratios and deterministic traces.
+  Native examples own clocks, experiments, bot policies and statistics.
+  Experimental tuning is unavailable in default server/WASM release builds.
+  Add no dependency or general modifier/AI framework.
+- **Server (P35):** accept bounded selections only while idle, freeze them
+  at queue/room entry, construct the authoritative MatchState with both
+  presets, and preserve those selections across reconnect/account takeover.
+  Seat/account identity comes from the connection/session. No client bonus
+  values, store reads or I/O participate in simulation ticks.
+- **Wire (P35):** distinguish protocol, preset schema and competitive
+  RulesetVersion. Send static rules/presets at MatchStart and reattach,
+  not in every snapshot. Reuse UnitView max_hp; unchanged Strongholds need
+  no new max-HP field. Retain frame/rate limits and hidden opponent data.
+  Measure packet, heap and tick deltas before approving performance.
+- **Client (P36):** build the editor from the post-P31 Bevy UI kit; previews
+  call the shared formulas with frozen match data where appropriate.
+  Practice uses the same approved rules. Guests get validated local storage
+  and the same complete default and power as accounts.
+- **Store (P35/P37):** additive migrations retain legacy rows. Every match
+  records applied presets/schema/ruleset; ranked metadata is inserted in
+  the rating transaction. One active account preset uses the existing
+  SQLite writer and identity. Acknowledgements distinguish selection from
+  durable save; late replies cannot replace a queued/live match's preset.
+- **Release (P38):** statistical, human, device, security and operating
+  budgets gate activation. Drain before a rules change; preserve outcomes,
+  ratings and historical metadata. Versioned records support audit, not
+  full replay without timed intentions and the old rule implementation.
+  The existing single-VPS/SQLite deployment and Elo/FIFO design remain.
