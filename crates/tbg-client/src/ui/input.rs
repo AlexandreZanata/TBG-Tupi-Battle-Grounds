@@ -1,0 +1,65 @@
+//! Tap/click → `UiAction`, without Bevy picking. A press and release in
+//! the same frame (fast phone taps, synthetic clicks) never registered
+//! with hover-based picking; this hit-tests the release position directly:
+//! buttons first, then the nearest own unit on screen, else "tap outside".
+
+use bevy::prelude::*;
+
+use super::{ActionQueue, UiAction};
+use crate::camera::ArenaCamera;
+
+/// How close (logical px, before UI scale) a tap must be to a unit.
+const UNIT_TAP_RADIUS: f32 = 42.0;
+
+#[allow(clippy::too_many_arguments)] // one system reading every tap source
+pub(super) fn taps(
+    mouse: Res<ButtonInput<MouseButton>>,
+    touches: Res<Touches>,
+    window: Single<&Window>,
+    scale: Res<UiScale>,
+    buttons: Query<(
+        &UiAction,
+        &ComputedNode,
+        &UiGlobalTransform,
+        &InheritedVisibility,
+    )>,
+    units: Query<(&UiAction, &GlobalTransform), Without<ComputedNode>>,
+    camera: Single<(&Camera, &GlobalTransform), With<ArenaCamera>>,
+    mut queue: ResMut<ActionQueue>,
+) {
+    let mut points: Vec<Vec2> = touches.iter_just_released().map(|t| t.position()).collect();
+    if mouse.just_released(MouseButton::Left) {
+        points.extend(window.cursor_position());
+    }
+    for p in points {
+        let physical = p * window.scale_factor();
+        let hit = buttons
+            .iter()
+            // Buttons never overlap in this UI, so the first hit is the one.
+            .find(|(_, node, t, vis)| vis.get() && node.contains_point(**t, physical))
+            .map(|(a, ..)| *a);
+        let action = hit.or_else(|| nearest_unit(p, &units, &camera, scale.0));
+        queue.0.push(action.unwrap_or(UiAction::CloseEvolve));
+    }
+}
+
+fn nearest_unit(
+    p: Vec2,
+    units: &Query<(&UiAction, &GlobalTransform), Without<ComputedNode>>,
+    camera: &(&Camera, &GlobalTransform),
+    scale: f32,
+) -> Option<UiAction> {
+    let (cam, cam_t) = camera;
+    units
+        .iter()
+        .filter(|(a, _)| matches!(a, UiAction::SelectUnit(_)))
+        .filter_map(|(a, t)| {
+            let screen = cam
+                .world_to_viewport(cam_t, t.translation() + Vec3::Y * 0.5)
+                .ok()?;
+            Some((screen.distance(p), *a))
+        })
+        .filter(|(d, _)| *d <= UNIT_TAP_RADIUS * scale)
+        .min_by(|a, b| a.0.total_cmp(&b.0))
+        .map(|(_, a)| a)
+}

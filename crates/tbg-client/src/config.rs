@@ -12,7 +12,8 @@ pub fn url_param(name: &str) -> Option<String> {
         search
             .trim_start_matches('?')
             .split('&')
-            .filter_map(|pair| pair.split_once('='))
+            // A bare flag (`?autoplay`) reads as an empty value.
+            .map(|pair| pair.split_once('=').unwrap_or((pair, "")))
             .find(|(k, _)| *k == name)
             .map(|(_, v)| v.to_string())
     }
