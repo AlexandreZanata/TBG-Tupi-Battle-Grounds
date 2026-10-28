@@ -35,7 +35,24 @@ branches. Every other phase starts only after the previous one is reviewed.
 | P5 | [P5-real-environment.md](phases/P5-real-environment.md) | **Validated on the owner's VPS + domain** over HTTPS/WSS, real devices, measured capacity | code + local rehearsal done; **VPS validation pending** | yes (local) |
 | P6 | [P6-visual-slice.md](phases/P6-visual-slice.md) | One polished 3D figurine + final arena + animation library, human-approved | done (all 8 units); **owner look approval pending** | yes |
 | P7 | [P7-content-feel-balance.md](phases/P7-content-feel-balance.md) | 8 units with art, VFX, audio, balance targets met, playtest done | done (bot balance); **human playtest pending** | yes |
-| P8 | [P8-public-launch.md](phases/P8-public-launch.md) | Public URL shared with first players | todo | — |
+| P8 | [P8-public-launch.md](phases/P8-public-launch.md) | Public URL shared with first players | audit + security review done; **LICENSE, VPS smoke, tag pending owner** | yes (local) |
+
+## Pending validations (owner)
+
+All code for P1–P8 is implemented and validated on the development PC
+(details in each phase report). What still needs the owner:
+
+- [ ] **Phones** (P1, P3, P6, P7): open the game on an Android phone and an iPhone —
+      renders, touch works, ≥ 30 FPS in a busy match, sound plays after the first tap.
+- [ ] **Two real devices online** (P4): desktop + phone on the same Wi-Fi, a private
+      room via link, phone Wi-Fi off 10 s (resumes) and 40 s (forfeit).
+- [ ] **VPS + domain** (P5): provide IP, SSH sudo user, domain A record; run
+      `bash deploy/deploy.sh --provision`, then the R1–R13 table (bots over `wss://`,
+      capacity 100–500 matches, 4G player, restart, backups, firewall).
+- [ ] **Look approval** (P6): gallery and match screenshots on a real screen.
+- [ ] **Playtest round** (P7): ≥ 4 people, ≥ 10 online matches; confirm or change D-14 values.
+- [ ] **Launch** (P8): add `LICENSE` (MIT intended), uptime checker on `/health`,
+      public smoke test, tag `v0.1.0`.
 
 ## How a phase is executed (executor agent)
 

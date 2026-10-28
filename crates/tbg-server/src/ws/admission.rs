@@ -13,7 +13,9 @@ pub(super) fn client_ip(peer: SocketAddr, headers: &HeaderMap) -> IpAddr {
     let forwarded = headers
         .get("x-forwarded-for")
         .and_then(|v| v.to_str().ok())
-        .and_then(|s| s.split(',').next())
+        // The last entry is the one our own proxy added; earlier entries
+        // come from the client and can be forged.
+        .and_then(|s| s.rsplit(',').next())
         .and_then(|s| s.trim().parse().ok());
     match forwarded {
         Some(ip) if peer.ip().is_loopback() => ip,
@@ -55,5 +57,26 @@ impl Drop for Slot {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn headers(xff: &str) -> HeaderMap {
+        let mut h = HeaderMap::new();
+        h.insert("x-forwarded-for", xff.parse().unwrap());
+        h
+    }
+
+    #[test]
+    fn forwarded_ip_trusted_only_from_local_proxy() {
+        let local: SocketAddr = "127.0.0.1:40000".parse().unwrap();
+        let remote: SocketAddr = "203.0.113.9:40000".parse().unwrap();
+        let spoofed = headers("1.1.1.1, 198.51.100.7");
+        assert_eq!(client_ip(local, &spoofed).to_string(), "198.51.100.7");
+        assert_eq!(client_ip(remote, &spoofed).to_string(), "203.0.113.9");
+        assert_eq!(client_ip(local, &HeaderMap::new()).to_string(), "127.0.0.1");
     }
 }
