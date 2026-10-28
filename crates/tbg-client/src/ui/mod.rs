@@ -38,6 +38,8 @@ pub enum UiAction {
     /// Long-press on a shop card: show the unit details.
     Inspect(u8),
     ToggleSound,
+    // P12: ranked queue (accounts only).
+    Ranked,
     // P11: accounts (handled in actions.rs + account.rs).
     CreateAccount,
     HaveKey,

@@ -29,6 +29,8 @@ pub struct BotOpts {
     pub timeout: Duration,
     /// P11: register a `Tb…` account first, then play logged in.
     pub accounts: bool,
+    /// P12: ranked queue (implies `accounts`).
+    pub ranked: bool,
 }
 
 impl BotOpts {
@@ -41,6 +43,7 @@ impl BotOpts {
             rejoin_after: None,
             timeout: Duration::from_secs(360),
             accounts: false,
+            ranked: false,
         }
     }
 }

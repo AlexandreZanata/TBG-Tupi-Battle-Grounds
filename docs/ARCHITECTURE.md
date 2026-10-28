@@ -138,6 +138,12 @@ tables are the one allowed exception.
   old one, including a running match, whose seat token is updated so the
   end report finds the new session. While logged in, the session carries
   the account name, which opponents see in `MatchStart`.
+- **Ranked (P12):** separate FIFO queue (`RankedMatch`; guests are refused
+  with `LoginRequired`, private rooms stay casual). Pairing ignores rating.
+  Ranked `MatchStart` carries the mode and the opponent's rating; after the
+  match the store settles both Elo updates in one transaction and the lobby
+  delivers `RatingChanged{before, after, profile}` to each live session.
+  Casual matches never touch the rating columns.
 - **Matchmaking:** quick match is a FIFO queue; private rooms use a
   5-character code (unambiguous alphabet, 10-minute expiry), shared as a
   link `?room=CODE`. Bot practice runs locally in the browser.
@@ -250,6 +256,12 @@ D-22); until each unit's phase lands, the description below stays true.
   never awaits it — account commands carry a oneshot for their reply.
   The `accounts` table holds the name, lowercase name (UNIQUE), SHA-256 of
   the key secret, timestamps, and rating columns (defaults 1000/0).
+- **Ranked (from P12):** migration `v3` adds `ranked_matches` (one row per
+  ranked match: both account ids, winner 0/1/NULL, reason, duration, both
+  before/after ratings, both faction-purchase mixes) plus indexes
+  `ranked_by_a`, `ranked_by_b`, and `accounts_by_rating` (rating DESC, wins
+  DESC, name_lower). The settlement transaction is the only writer of the
+  rating columns.
 - **Boundary:** only `store/` touches SQL.
 - **Move to PostgreSQL when** two or more server instances need shared
   writes (accounts, rankings, `Inventory`), or analytics queries start

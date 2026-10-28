@@ -13,6 +13,8 @@ pub(crate) struct SeatStats {
     pub(super) reattached: u32,
     pub(super) purchases: std::collections::BTreeMap<String, u32>,
     pub(super) evolutions: u32,
+    /// P12: purchases per faction index (for the ranked result row).
+    pub(super) factions: [u32; 4],
 }
 
 impl Match {

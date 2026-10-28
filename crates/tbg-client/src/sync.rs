@@ -27,6 +27,9 @@ pub struct MatchInfo {
     pub opponent: String,
     pub outcome: Option<Outcome>,
     pub last_tick: u32,
+    /// P12: ranked matches show a badge and the opponent's rating.
+    pub ranked: bool,
+    pub opponent_rating: Option<u16>,
 }
 
 #[derive(Resource, Default)]

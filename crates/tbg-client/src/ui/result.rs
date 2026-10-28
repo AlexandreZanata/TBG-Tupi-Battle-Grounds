@@ -4,13 +4,18 @@ use bevy::prelude::*;
 use tbg_core::content::TICK_HZ;
 use tbg_core::EndReason;
 
+use super::account::Account;
 use super::{button, label, screen, UiAction, PANEL};
 use crate::sync::{MatchInfo, MatchStats};
 use crate::GameState;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(GameState::Result), spawn);
+    app.add_systems(OnEnter(GameState::Result), spawn)
+        .add_systems(Update, count_rating.run_if(in_state(GameState::Result)));
 }
+
+#[derive(Component)]
+struct RatingLabel;
 
 fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>) {
     let (title, reason) = match info.outcome {
@@ -58,9 +63,26 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>) {
                 label(reason, 16.0),
                 label(duration, 16.0),
                 label(summary, 16.0),
+                (label("", 18.0), RatingLabel),
                 button("Play again", UiAction::PlayAgain, 220.0),
                 button("Menu", UiAction::ToMenu, 220.0),
             ],
         )],
     ));
+}
+
+/// P12: fill the rating label once `RatingChanged` lands, counting the new
+/// value up over 0.6 s. Casual matches (and unranked guests) show nothing.
+fn count_rating(
+    time: Res<Time>,
+    account: Res<Account>,
+    mut text: Single<&mut Text, With<RatingLabel>>,
+) {
+    let Some((before, after, arrived)) = account.rating_change else {
+        return;
+    };
+    let t = ((time.elapsed_secs_f64() - arrived) / 0.6).clamp(0.0, 1.0);
+    let shown = (f64::from(before) + (f64::from(after) - f64::from(before)) * t).round() as u16;
+    let delta = i32::from(after) - i32::from(before);
+    text.0 = format!("Rating {before} → {shown} ({delta:+})");
 }

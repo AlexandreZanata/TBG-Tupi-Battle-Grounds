@@ -4,6 +4,7 @@
 use bevy::prelude::*;
 
 use super::{label, screen, UiAction, BUTTON, PANEL};
+use crate::sync::MatchInfo;
 use crate::GameState;
 
 #[derive(Component)]
@@ -12,6 +13,8 @@ pub(super) enum Hud {
     Hp(usize),
     EnergyFill,
     Info,
+    /// P12: static `RANKED · name (rating)` badge (set once at spawn).
+    Mode,
     Rotation,
     Card(usize),
     CardText(usize),
@@ -85,7 +88,16 @@ fn row(gap: f32) -> Node {
     }
 }
 
-fn spawn(mut commands: Commands) {
+fn spawn(mut commands: Commands, info: Res<MatchInfo>) {
+    // P12: ranked badge plus the opponent's rating; casual shows the name.
+    let mode = if info.ranked {
+        match info.opponent_rating {
+            Some(r) => format!("RANKED · {} ({})", info.opponent, r),
+            None => format!("RANKED · {}", info.opponent),
+        }
+    } else {
+        info.opponent.clone()
+    };
     commands.spawn((
         screen(JustifyContent::SpaceBetween),
         DespawnOnExit(GameState::InMatch),
@@ -99,6 +111,7 @@ fn spawn(mut commands: Commands) {
                     bar(Hud::Hp(1), Color::srgb_u8(0xF2, 0x54, 0x5B), 110.0, 12.0),
                 ],
             ),
+            (label(mode, 14.0), Hud::Mode),
             (
                 Node {
                     flex_direction: FlexDirection::Column,

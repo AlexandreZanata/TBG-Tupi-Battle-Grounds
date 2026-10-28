@@ -175,5 +175,64 @@ the playtest); ARCHITECTURE §5 (messages, queues) and §8 (tables).
 
 ## Phase report
 
-_Executor fills this in: commands run with real output, rating_sim output,
-test list, browser checks, deviations, blocked items._
+Executed 2026-10-28 on the dev PC (branch `phase/p12-ranked-and-rating`).
+
+### Verification commands (all pass)
+
+```text
+$ cargo fmt --all -- --check            # clean
+$ cargo clippy --workspace -- -D warnings   # clean (after two fixes, see below)
+$ cargo test --workspace               # ok: core 6 account + 5 rating + 15 rules,
+                                       # server 10 account + 5 ranked + 12 online
+$ cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown  # ok
+$ trunk build --release                # success
+```
+
+### rating_sim output (step 2)
+
+```text
+mean rating 1000.8
+min 649 max 1417
+games per player min 174 max 231
+spearman skill/rating 0.982
+```
+
+Correlation 0.982 ≥ 0.85 ✔, mean 1000.8 within 1000 ± 30 ✔.
+
+### Test list (step 6, `crates/tbg-server/tests/ranked.rs`)
+
+Two logged-in clients ranked → `MatchStart{Ranked, opponent_rating:
+Some(1000)}`, idle to the end, both `RatingChanged{1000 → 1000}` for the
+draw; forfeit (1 s window) → stayer `RatingChanged{1000 → 1020}` with
+`wins = 1`, leaver re-login shows 980/`losses = 1`; guest `RankedMatch` →
+`LoginRequired`; casual + ranked waiters never pair; casual completion
+never sends `RatingChanged` and leaves rating columns at 1000/0.
+`ranked_matches` has exactly one row per ranked match.
+`tbg-bots --matches 2 --ranked` (register limit raised on the test server
+only): 4/4 bots completed; store shows 1020/1/1/0/0 and 980/1/0/1/0 with two
+`TimeUp` rows (1000→1020 / 1000→980).
+
+### Browser checks (owner-pending, no devices attached)
+
+Two accounts on two devices play ranked; both see the change; a guest sees
+the ranked section locked. Paths are in place (menu sections, HUD badge,
+result count-up, Play again re-queues the same mode).
+
+### Deviations
+
+- `tbg_core::protocol::RatingResults` alias for the per-seat
+  `(before, after, profile)` triples (clippy `type_complexity` on the
+  inline array type).
+- Result-screen count-up uses `.clamp(0.0, 1.0)` (clippy `manual_clamp`).
+- The ranked-takeover path reuses the P11 `Attach{new_token}` mechanism,
+  so a mid-match login still finds the right session for `RatingChanged`.
+- GAME-DESIGN needed no edit: BR-R01–R07 and the §5 Elo values already
+  state exactly what was implemented (status stays **Proposed** until the
+  playtest, as the phase file orders).
+- `two_bots_finish_a_match` timed out once when the full workspace suite
+  ran online + ranked binaries in parallel (environmental contention;
+  green alone and on re-run). Same class as the P10/P11 flakes.
+
+### Blocked items
+
+- Owner checkpoint: two-device ranked match + playtest sign-off (P14 gate).

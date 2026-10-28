@@ -35,6 +35,9 @@ pub struct Account {
     pub(crate) auto_login: bool,
     /// First `Logout` tap arms; the second within the same menu visit logs out.
     pub(crate) logout_armed: bool,
+    /// P12: last settled rating change `(before, after, arrived_at)` for the
+    /// result screen count-up. Cleared on the next `MatchStart`.
+    pub(crate) rating_change: Option<(u16, u16, f64)>,
 }
 
 pub fn plugin(app: &mut App) {
@@ -98,12 +101,13 @@ fn text_cancelled(mut events: MessageReader<TextCancelled>, mut account: ResMut<
     }
 }
 
-#[allow(clippy::too_many_arguments)] // one drain for the four account replies
+#[allow(clippy::too_many_arguments)] // one drain for the account replies
 fn drain_inbox(
     mut inbox: ResMut<AccountInbox>,
     mut account: ResMut<Account>,
     mut form: NonSendMut<ActiveForm>,
     mut toasts: ResMut<Toasts>,
+    time: Res<Time>,
 ) {
     for msg in std::mem::take(&mut inbox.0) {
         match msg {
@@ -131,8 +135,19 @@ fn drain_inbox(
                 account.profile = None;
                 account.screen = AccountScreen::None;
                 account.logout_armed = false;
+                account.rating_change = None;
                 config::delete_account_key();
                 toasts.push("Logged out");
+            }
+            // P12: settled by the store after `MatchEnd`; the result screen
+            // counts it up. The menu chip refreshes from the new profile.
+            ServerMsg::RatingChanged {
+                before,
+                after,
+                profile,
+            } => {
+                account.profile = Some(profile);
+                account.rating_change = Some((before, after, time.elapsed_secs_f64()));
             }
             ServerMsg::AccountError { code } => {
                 let was_auto = account.auto_login;

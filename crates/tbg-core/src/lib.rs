@@ -11,6 +11,7 @@ pub mod content;
 mod hits;
 mod intent;
 pub mod protocol;
+pub mod rating;
 pub mod rng;
 pub mod shop;
 pub mod sim;

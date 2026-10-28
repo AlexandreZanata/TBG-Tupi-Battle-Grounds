@@ -12,13 +12,10 @@ use crate::link::MatchLink;
 use crate::{config, GameState};
 
 #[derive(Component)]
-struct Chip;
-
-#[derive(Component)]
 struct SavePanel;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, (chip, panel).run_if(in_state(GameState::Menu)));
+    app.add_systems(Update, panel.run_if(in_state(GameState::Menu)));
 }
 
 /// Apply the P11 account buttons (called from `actions::apply`).
@@ -84,51 +81,6 @@ pub fn apply_action(
         }
         _ => {}
     }
-}
-
-/// Profile chip at the top: guest actions, or name · rating + log out.
-fn chip(
-    mut commands: Commands,
-    account: Res<Account>,
-    roots: Query<Entity, With<Chip>>,
-    mut last: Local<String>,
-) {
-    let want = match &account.profile {
-        None => "guest".to_string(),
-        Some(p) => format!("{}·{}", p.name, p.rating),
-    };
-    if *last == want {
-        return;
-    }
-    *last = want;
-    for e in &roots {
-        commands.entity(e).despawn();
-    }
-    let mut row = commands.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            top: px(8.0),
-            width: percent(100.0),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            column_gap: px(10.0),
-            ..default()
-        },
-        DespawnOnExit(GameState::Menu),
-        Chip,
-    ));
-    row.with_children(|row| match &account.profile {
-        None => {
-            row.spawn(label("Guest", 16.0));
-            row.spawn(button("Create account", UiAction::CreateAccount, 170.0));
-            row.spawn(button("I have a key", UiAction::HaveKey, 150.0));
-        }
-        Some(p) => {
-            row.spawn(label(format!("{} · {}", p.name, p.rating), 16.0));
-            row.spawn(button("Log out", UiAction::Logout, 120.0));
-        }
-    });
 }
 
 /// Modal save-your-key panel while the screen is open.

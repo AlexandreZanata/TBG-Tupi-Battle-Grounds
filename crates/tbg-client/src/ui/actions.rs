@@ -26,7 +26,8 @@ pub(super) struct IntentSeq(u32);
 pub(super) enum LastMode {
     #[default]
     Practice,
-    Online,
+    Quick,
+    Ranked,
 }
 
 pub fn plugin(app: &mut App) {
@@ -97,20 +98,23 @@ pub(super) fn apply(
         ) {
             extra.2.play(Sound::Click);
         }
-        let replay_practice = *last == LastMode::Practice;
         let mut online = |mode: Mode, link: &mut MatchLink, last: &mut LastMode| {
+            // P12: ranked stays ranked for Play again; rooms re-queue casual.
+            *last = if mode == Mode::Ranked {
+                LastMode::Ranked
+            } else {
+                LastMode::Quick
+            };
             // Reuse the probe socket when it is still idle and open.
             if let MatchLink::Net(n) = link {
                 if n.reuse(mode, now) {
                     *queue_info = QueueInfo::default();
-                    *last = LastMode::Online;
                     next.set(GameState::Queue);
                     return;
                 }
             }
             *link = MatchLink::Net(Box::new(NetLink::new(mode, now)));
             *queue_info = QueueInfo::default();
-            *last = LastMode::Online;
             next.set(GameState::Queue);
         };
         match action {
@@ -118,8 +122,13 @@ pub(super) fn apply(
                 *last = LastMode::Practice;
                 start_practice(&mut link, now)
             }
-            UiAction::PlayAgain if replay_practice => start_practice(&mut link, now),
+            UiAction::PlayAgain if *last == LastMode::Practice => start_practice(&mut link, now),
+            // P12: Play again re-queues the same mode.
+            UiAction::PlayAgain if *last == LastMode::Ranked => {
+                online(Mode::Ranked, &mut link, &mut last)
+            }
             UiAction::Quick | UiAction::PlayAgain => online(Mode::Quick, &mut link, &mut last),
+            UiAction::Ranked => online(Mode::Ranked, &mut link, &mut last),
             UiAction::CreateRoom => online(Mode::Create, &mut link, &mut last),
             UiAction::JoinRoom(code) => online(Mode::Join(code), &mut link, &mut last),
             UiAction::Cancel | UiAction::ToMenu => {

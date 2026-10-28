@@ -2,7 +2,7 @@
 
 use std::time::Instant;
 
-use tbg_core::protocol::{valid_room_code, RoomCode, ServerMsg, Token, ROOM_ALPHABET};
+use tbg_core::protocol::{valid_room_code, MatchMode, RoomCode, ServerMsg, Token, ROOM_ALPHABET};
 use tbg_core::Seat;
 
 use super::{send, Lobby, SessionState};
@@ -18,7 +18,7 @@ impl Lobby {
         match self.queue.pop_front() {
             Some(other) => {
                 self.queued_at.remove(&other);
-                self.pair([other, token]);
+                self.pair([other, token], MatchMode::Casual);
             }
             None => {
                 self.queue.push_back(token);
@@ -59,7 +59,8 @@ impl Lobby {
             Some(i) => {
                 let (_, owner, _) = self.rooms.remove(i);
                 self.leave_waiting(token);
-                self.pair([owner, token]);
+                // Private rooms are always casual (BR-R01).
+                self.pair([owner, token], MatchMode::Casual);
             }
             None => {
                 if let Some(s) = self.session(&token) {
@@ -69,9 +70,11 @@ impl Lobby {
         }
     }
 
-    /// Leave the queue or an open room (no-op when idle).
+    /// Leave either queue or an open room (no-op when idle).
     pub(super) fn leave_waiting(&mut self, token: Token) {
         self.queue.retain(|t| *t != token);
+        // P12: ranked and casual queues never mix, but one cancel leaves both.
+        self.ranked_queue.retain(|t| *t != token);
         self.queued_at.remove(&token);
         self.rooms.retain(|(_, owner, _)| *owner != token);
         if let Some(s) = self.session(&token) {
@@ -81,7 +84,7 @@ impl Lobby {
         }
     }
 
-    pub(super) fn pair(&mut self, tokens: [Token; 2]) {
+    pub(super) fn pair(&mut self, tokens: [Token; 2], mode: MatchMode) {
         // P9: queue wait per paired session (the joiner waited ~0 ms).
         for t in tokens {
             if let Some(t0) = self.queued_at.remove(&t) {
@@ -95,12 +98,15 @@ impl Lobby {
                 token: t,
                 name: s.map_or_else(String::new, |s| s.name.clone()),
                 conn: s.and_then(|s| s.conn.clone()),
+                // P12: account id + rating at pairing time for ranked rows.
+                account: s.and_then(|s| s.account.as_ref().map(|(id, p)| (*id, p.rating))),
             }
         });
         let seed = u64::from_le_bytes(random_bytes::<8>());
         let tx = match_task::spawn(
             seed,
             players,
+            mode,
             self.self_tx.clone(),
             self.config.clone(),
             self.metrics.clone(),

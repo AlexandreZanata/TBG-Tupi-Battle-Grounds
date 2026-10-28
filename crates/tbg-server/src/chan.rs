@@ -6,7 +6,7 @@ use std::net::IpAddr;
 
 use tokio::sync::{mpsc, oneshot};
 
-use tbg_core::protocol::{AccountError, ClientMsg, Profile, ServerMsg, Token};
+use tbg_core::protocol::{AccountError, ClientMsg, Profile, RatingResults, ServerMsg, Token};
 use tbg_core::{PlayerIntention, Seat};
 
 use crate::store::AccountId;
@@ -77,6 +77,11 @@ pub enum LobbyCmd {
     },
     MatchEnded {
         tokens: [Token; 2],
+    },
+    /// P12: settled ranked ratings per seat, seats A then B.
+    RankedDone {
+        tokens: [Token; 2],
+        results: RatingResults,
     },
     /// P11: store replies arrive here so the lobby never awaits SQLite.
     /// Ignored unless `conn_id` is still the session's current connection.

@@ -43,7 +43,7 @@ pub(super) fn handle(
     match msg {
         ServerMsg::Welcome { token, .. } => {
             if s.token.replace(token).is_none() {
-                if opts.accounts && !s.registering {
+                if (opts.accounts || opts.ranked) && !s.registering {
                     s.registering = true;
                     let name = bot_name(s);
                     send(s, ClientMsg::Register { name });
@@ -54,9 +54,14 @@ pub(super) fn handle(
             }
         }
         // P11: registered (and auto-logged-in); queue for real this time.
+        // P12: ranked bots join the ranked queue right away.
         ServerMsg::Registered { .. } => {
             s.queue_start = Some(Instant::now());
-            send(s, ClientMsg::QuickMatch);
+            if opts.ranked {
+                send(s, ClientMsg::RankedMatch);
+            } else {
+                send(s, ClientMsg::QuickMatch);
+            }
         }
         ServerMsg::MatchStart { you, .. } => {
             if r.seat.is_none() {
@@ -98,8 +103,11 @@ pub(super) fn handle(
         }
         ServerMsg::Error { code } => return Err(format!("server error {code:?}")),
         ServerMsg::Queued | ServerMsg::RoomCreated { .. } | ServerMsg::RoomNotFound => {}
-        // Bots stay guests unless `--accounts` (register path above).
-        ServerMsg::LoggedIn { .. } | ServerMsg::LoggedOut | ServerMsg::AccountError { .. } => {}
+        // Bots ignore account/rating replies; completion ends the run.
+        ServerMsg::LoggedIn { .. }
+        | ServerMsg::LoggedOut
+        | ServerMsg::AccountError { .. }
+        | ServerMsg::RatingChanged { .. } => {}
     }
     Ok(None)
 }

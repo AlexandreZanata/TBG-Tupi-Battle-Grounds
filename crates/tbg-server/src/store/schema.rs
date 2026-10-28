@@ -1,6 +1,7 @@
 //! SQLite schema and ordered migrations. v1 is the P5 `matches` table
 //! (kept byte-compatible so old databases keep their rows); v2 adds the
-//! P11 `accounts` table. Timestamps come from SQLite itself.
+//! P11 `accounts` table; v3 adds P12 `ranked_matches` plus the rating
+//! leaderboard index. Timestamps come from SQLite itself.
 
 use rusqlite::Connection;
 
@@ -18,6 +19,23 @@ const MATCHES_V1: &str = "CREATE TABLE IF NOT EXISTS matches (
     late_ticks INTEGER NOT NULL,
     max_lateness_ms INTEGER NOT NULL
 );";
+
+const RANKED_V3: &str = "CREATE TABLE IF NOT EXISTS ranked_matches (
+    id INTEGER PRIMARY KEY,
+    ended_at TEXT NOT NULL,
+    a_id INTEGER NOT NULL REFERENCES accounts(id),
+    b_id INTEGER NOT NULL REFERENCES accounts(id),
+    winner INTEGER,
+    reason TEXT NOT NULL,
+    duration_s INTEGER NOT NULL,
+    a_before INTEGER NOT NULL, a_after INTEGER NOT NULL,
+    b_before INTEGER NOT NULL, b_after INTEGER NOT NULL,
+    a_factions TEXT NOT NULL,
+    b_factions TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ranked_by_a ON ranked_matches(a_id, id);
+CREATE INDEX IF NOT EXISTS ranked_by_b ON ranked_matches(b_id, id);
+CREATE INDEX IF NOT EXISTS accounts_by_rating ON accounts(rating DESC, wins DESC, name_lower);";
 
 const ACCOUNTS_V2: &str = "CREATE TABLE IF NOT EXISTS accounts (
     id INTEGER PRIMARY KEY,
@@ -54,6 +72,10 @@ pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
     if version < 2 {
         tx.execute_batch(ACCOUNTS_V2)?;
         tx.execute("INSERT INTO schema_version(version) VALUES (2)", [])?;
+    }
+    if version < 3 {
+        tx.execute_batch(RANKED_V3)?;
+        tx.execute("INSERT INTO schema_version(version) VALUES (3)", [])?;
     }
     tx.commit()
 }

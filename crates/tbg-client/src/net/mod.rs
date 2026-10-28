@@ -17,6 +17,8 @@ use ack::AckTracker;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mode {
     Quick,
+    /// P12: ranked queue (accounts only; the server refuses guests).
+    Ranked,
     Create,
     Join(RoomCode),
     /// P9: listen-only link opened on page load; resumes a live match if
@@ -119,6 +121,7 @@ impl NetLink {
     fn send_request(&mut self, now: f64) {
         let req = match self.mode {
             Mode::Quick => ClientMsg::QuickMatch,
+            Mode::Ranked => ClientMsg::RankedMatch,
             Mode::Create => ClientMsg::CreateRoom,
             Mode::Join(code) => ClientMsg::JoinRoom { code },
             Mode::Probe => return,
