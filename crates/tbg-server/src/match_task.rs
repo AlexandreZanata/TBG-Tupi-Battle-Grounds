@@ -173,7 +173,16 @@ impl Match {
                     self.detach(seat);
                 }
             }
-            MatchCmd::Attach { seat, conn } => {
+            MatchCmd::Attach {
+                seat,
+                conn,
+                new_token,
+            } => {
+                // P11: a login takeover moves the seat to the new session
+                // token so the end-of-match report finds the right session.
+                if let Some(t) = new_token {
+                    self.players[seat.index()].token = t;
+                }
                 self.players[seat.index()].conn = Some(conn);
                 self.detached_at[seat.index()] = None;
                 self.stats[seat.index()].reattached += 1;

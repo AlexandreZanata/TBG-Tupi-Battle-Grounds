@@ -15,6 +15,10 @@ pub struct Config {
     pub db: Option<PathBuf>,
     /// Tokio worker threads (`TBG_WORKERS`); 0 (default) means all cores.
     pub workers: usize,
+    /// P11: registers allowed per IP per hour (`TBG_REGISTER_PER_IP_HOUR`).
+    pub register_per_ip_hour: u64,
+    /// P11: logins allowed per IP per minute (`TBG_LOGIN_PER_IP_MIN`).
+    pub login_per_ip_min: u64,
 }
 
 impl Default for Config {
@@ -28,6 +32,8 @@ impl Default for Config {
             static_dir: None,
             db: None,
             workers: 0,
+            register_per_ip_hour: 3,
+            login_per_ip_min: 10,
         }
     }
 }
@@ -48,6 +54,8 @@ impl Config {
             reconnect_secs: num("TBG_RECONNECT_SECS", d.reconnect_secs),
             tick_ms: num("TBG_TICK_MS", d.tick_ms).max(1),
             workers: num("TBG_WORKERS", 0) as usize,
+            register_per_ip_hour: num("TBG_REGISTER_PER_IP_HOUR", d.register_per_ip_hour),
+            login_per_ip_min: num("TBG_LOGIN_PER_IP_MIN", d.login_per_ip_min),
             static_dir: std::env::var("TBG_STATIC_DIR").ok().map(PathBuf::from),
             db: Some(
                 std::env::var("TBG_DB")

@@ -18,6 +18,7 @@ use tokio::sync::mpsc;
 pub mod botclient;
 mod chan;
 pub mod config;
+mod limits;
 mod lobby;
 mod match_task;
 pub mod metrics;

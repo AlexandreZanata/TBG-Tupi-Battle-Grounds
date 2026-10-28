@@ -1,5 +1,6 @@
 //! Session resume, disconnects, and periodic cleanup.
 
+use std::net::IpAddr;
 use std::time::{Duration, Instant};
 
 use tbg_core::protocol::Token;
@@ -10,13 +11,19 @@ use crate::names::{display_name, random_bytes};
 
 impl Lobby {
     /// Resume a known session (taking over any older socket) or create one.
-    pub(super) fn hello(&mut self, resume: Option<Token>, conn: ConnHandle) -> (Token, String) {
+    pub(super) fn hello(
+        &mut self,
+        resume: Option<Token>,
+        conn: ConnHandle,
+        ip: IpAddr,
+    ) -> (Token, String) {
         if let Some(s) = resume.and_then(|t| self.sessions.get_mut(&t)) {
             send(&s.conn, ConnEvent::Close);
             if let SessionState::InMatch { tx, seat } = &s.state {
                 let _ = tx.try_send(MatchCmd::Attach {
                     seat: *seat,
                     conn: conn.clone(),
+                    new_token: None,
                 });
                 let _ = conn.tx.try_send(ConnEvent::EnterMatch {
                     seat: *seat,
@@ -24,6 +31,7 @@ impl Lobby {
                 });
             }
             s.conn = Some(conn);
+            s.ip = ip;
             s.detached_at = None;
             return (s.token, s.name.clone());
         }
@@ -32,6 +40,8 @@ impl Lobby {
             name: display_name(),
             conn: Some(conn),
             state: SessionState::Idle,
+            account: None,
+            ip,
             detached_at: None,
         };
         let pair = (session.token, session.name.clone());
@@ -54,6 +64,7 @@ impl Lobby {
     /// Drop expired rooms and long-gone sessions that are not in a match.
     pub(super) fn cleanup(&mut self) {
         let now = Instant::now();
+        self.limits.sweep(now);
         self.rooms.retain(|(.., created)| now - *created < ROOM_TTL);
         let window = Duration::from_secs(self.config.reconnect_secs);
         self.sessions.retain(|_, s| {

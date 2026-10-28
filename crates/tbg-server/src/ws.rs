@@ -71,7 +71,7 @@ async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
     };
     let id = app.next_conn_id.fetch_add(1, Relaxed);
     let (tx, mut rx) = mpsc::channel(CONN_QUEUE);
-    let Some(token) = handshake(&mut socket, &app, ConnHandle { id, tx }).await else {
+    let Some(token) = handshake(&mut socket, &app, ConnHandle { id, tx }, ip).await else {
         return;
     };
     let mut c = Conn {
@@ -113,7 +113,12 @@ async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
 }
 
 /// First message must be `Hello` within 5 s with our protocol version.
-async fn handshake(socket: &mut WebSocket, app: &AppState, conn: ConnHandle) -> Option<Token> {
+async fn handshake(
+    socket: &mut WebSocket,
+    app: &AppState,
+    conn: ConnHandle,
+    ip: IpAddr,
+) -> Option<Token> {
     let first = timeout(HANDSHAKE, socket.recv()).await.ok()??.ok()?;
     let Message::Binary(bytes) = first else {
         return None;
@@ -141,6 +146,8 @@ async fn handshake(socket: &mut WebSocket, app: &AppState, conn: ConnHandle) -> 
         .send(LobbyCmd::Hello {
             resume,
             conn,
+            // P11: memory-only, for account rate limits; never stored/logged.
+            ip,
             reply,
         })
         .await
