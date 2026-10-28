@@ -1,8 +1,12 @@
 //! Account store and protocol tests (GAME-DESIGN BR-P01–BR-P05).
 //! Each test names the rule it protects.
 
-use tbg_core::protocol::AccountError;
+use std::time::Duration;
+
+use futures_util::{SinkExt, StreamExt};
+use tbg_core::protocol::{self, AccountError, ClientMsg, Profile, ServerMsg, PROTOCOL_VERSION};
 use tbg_server::store::Store;
+use tbg_server::Config;
 
 struct TempDb {
     _dir: std::path::PathBuf,
@@ -28,6 +32,74 @@ fn secret_of(byte: u8) -> [u8; 16] {
         *b = byte.wrapping_add(i as u8);
     }
     s
+}
+
+type Ws =
+    tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
+
+async fn live_server(name: &str) -> (String, TempDb) {
+    let t = temp_db(name);
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let url = format!("ws://{}/ws", listener.local_addr().unwrap());
+    let config = Config {
+        tick_ms: 5,
+        max_per_ip: 1_000,
+        db: Some(t.db.clone()),
+        ..Config::default()
+    };
+    tokio::spawn(tbg_server::run(config, listener));
+    (url, t)
+}
+
+async fn send(ws: &mut Ws, msg: &ClientMsg) {
+    ws.send(tokio_tungstenite::tungstenite::Message::Binary(
+        protocol::encode(msg).into(),
+    ))
+    .await
+    .unwrap();
+}
+
+/// Next server message, answering app pings; `None` once closed.
+async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
+    loop {
+        let msg = tokio::time::timeout(Duration::from_secs(10), ws.next())
+            .await
+            .ok()??
+            .ok()?;
+        let tokio_tungstenite::tungstenite::Message::Binary(b) = msg else {
+            continue;
+        };
+        match protocol::decode_server(&b).unwrap() {
+            ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
+            ServerMsg::NetStats { .. } => {}
+            other => return Some(other),
+        }
+    }
+}
+
+async fn hello(ws: &mut Ws) {
+    send(
+        ws,
+        &ClientMsg::Hello {
+            version: PROTOCOL_VERSION,
+            resume: None,
+        },
+    )
+    .await;
+    assert!(matches!(recv(ws).await, Some(ServerMsg::Welcome { .. })));
+}
+
+async fn connect(url: &str) -> Ws {
+    tokio_tungstenite::connect_async(url).await.unwrap().0
+}
+
+/// Register and return the (plain key, profile).
+async fn register_as(ws: &mut Ws, name: &str) -> (String, Profile) {
+    send(ws, &ClientMsg::Register { name: name.into() }).await;
+    match recv(ws).await {
+        Some(ServerMsg::Registered { key, profile }) => (key, profile),
+        other => panic!("expected Registered, got {other:?}"),
+    }
 }
 
 #[tokio::test]
@@ -87,6 +159,205 @@ async fn br_p01_duplicate_name_other_case_taken() {
             .await,
         Err(AccountError::NameTaken)
     );
+}
+
+#[tokio::test]
+async fn br_p01_register_replies_key_that_parses() {
+    let (url, _t) = live_server("proto-reg").await;
+    let mut ws = connect(&url).await;
+    hello(&mut ws).await;
+    let (key, profile) = register_as(&mut ws, "Aldric").await;
+    assert_eq!(profile.name, "Aldric");
+    // The key parses and round-trips the typed name (BR-P02).
+    let (name, _) = tbg_core::account::parse_key(&key).expect("key must parse");
+    assert_eq!(name, "Aldric");
+}
+
+#[tokio::test]
+async fn br_p01_register_name_taken_and_invalid() {
+    let (url, _t) = live_server("proto-taken").await;
+    let mut ws = connect(&url).await;
+    hello(&mut ws).await;
+    register_as(&mut ws, "Aldric").await;
+    // Same name in another case → NameTaken.
+    send(
+        &mut ws,
+        &ClientMsg::Register {
+            name: "ALDRIC".into(),
+        },
+    )
+    .await;
+    assert!(matches!(
+        recv(&mut ws).await,
+        Some(ServerMsg::AccountError {
+            code: AccountError::NameTaken
+        })
+    ));
+    // Bad shape → NameInvalid.
+    send(&mut ws, &ClientMsg::Register { name: "x".into() }).await;
+    assert!(matches!(
+        recv(&mut ws).await,
+        Some(ServerMsg::AccountError {
+            code: AccountError::NameInvalid
+        })
+    ));
+}
+
+#[tokio::test]
+async fn br_p02_login_same_profile_and_bad_secret() {
+    let (url, _t) = live_server("proto-login").await;
+    let mut ws = connect(&url).await;
+    hello(&mut ws).await;
+    let (key, profile) = register_as(&mut ws, "Brienne").await;
+    // A new socket with the key logs into the same profile.
+    let mut ws2 = connect(&url).await;
+    hello(&mut ws2).await;
+    send(&mut ws2, &ClientMsg::Login { key: key.clone() }).await;
+    match recv(&mut ws2).await {
+        Some(ServerMsg::LoggedIn { profile: p }) => assert_eq!(p, profile),
+        other => panic!("expected LoggedIn, got {other:?}"),
+    }
+    // Tampered secret → BadKey on a third socket.
+    let mut bad: Vec<u8> = key.into_bytes();
+    let last = bad.len() - 1;
+    bad[last] = if bad[last] == b'0' { b'1' } else { b'0' };
+    let mut ws3 = connect(&url).await;
+    hello(&mut ws3).await;
+    send(
+        &mut ws3,
+        &ClientMsg::Login {
+            key: String::from_utf8(bad).unwrap(),
+        },
+    )
+    .await;
+    assert!(matches!(
+        recv(&mut ws3).await,
+        Some(ServerMsg::AccountError {
+            code: AccountError::BadKey
+        })
+    ));
+}
+
+#[tokio::test]
+async fn br_p01_register_rate_limited_per_ip() {
+    // Default `TBG_REGISTER_PER_IP_HOUR` is 3: the 4th register is refused.
+    let (url, _t) = live_server("proto-ratelimit").await;
+    for (i, name) in ["Rlone", "Rltwo", "Rlthree"].iter().enumerate() {
+        let mut ws = connect(&url).await;
+        hello(&mut ws).await;
+        register_as(&mut ws, name).await;
+        let _ = i;
+    }
+    let mut ws = connect(&url).await;
+    hello(&mut ws).await;
+    send(
+        &mut ws,
+        &ClientMsg::Register {
+            name: "Rlfour".into(),
+        },
+    )
+    .await;
+    assert!(matches!(
+        recv(&mut ws).await,
+        Some(ServerMsg::AccountError {
+            code: AccountError::RateLimited
+        })
+    ));
+}
+
+#[tokio::test]
+async fn br_p03_second_login_takes_over_live_match() {
+    let (url, _t) = live_server("proto-takeover").await;
+    let mut a = connect(&url).await;
+    let mut b = connect(&url).await;
+    hello(&mut a).await;
+    hello(&mut b).await;
+    let (key, _) = register_as(&mut a, "Takeover").await;
+    send(&mut a, &ClientMsg::QuickMatch).await;
+    send(&mut b, &ClientMsg::QuickMatch).await;
+    // Both sides reach a running match.
+    for ws in [&mut a, &mut b] {
+        loop {
+            match recv(ws).await {
+                Some(ServerMsg::MatchStart { .. }) => break,
+                Some(_) => continue,
+                None => panic!("match never started"),
+            }
+        }
+    }
+    // A second login with the same key takes the match over (BR-P03).
+    let mut a2 = connect(&url).await;
+    hello(&mut a2).await;
+    send(&mut a2, &ClientMsg::Login { key }).await;
+    let mut saw_start = false;
+    let mut saw_view = false;
+    for _ in 0..50 {
+        match recv(&mut a2).await {
+            Some(ServerMsg::LoggedIn { .. }) => continue,
+            Some(ServerMsg::MatchStart { .. }) => saw_start = true,
+            Some(ServerMsg::View(_)) => {
+                saw_view = true;
+                break;
+            }
+            Some(_) => continue,
+            None => panic!("takeover socket closed"),
+        }
+    }
+    assert!(saw_start && saw_view, "no MatchStart + View after takeover");
+    // The old socket is closed by the takeover.
+    loop {
+        match tokio::time::timeout(Duration::from_secs(10), async {
+            use futures_util::StreamExt;
+            a.next().await
+        })
+        .await
+        {
+            Ok(None) => break,
+            Ok(Some(_)) => continue,
+            Err(_) => panic!("old socket not closed after takeover"),
+        }
+    }
+}
+
+#[tokio::test]
+async fn br_p04_account_messages_refused_in_match() {
+    let (url, _t) = live_server("proto-busy").await;
+    let mut a = connect(&url).await;
+    let mut b = connect(&url).await;
+    hello(&mut a).await;
+    hello(&mut b).await;
+    send(&mut a, &ClientMsg::QuickMatch).await;
+    send(&mut b, &ClientMsg::QuickMatch).await;
+    for ws in [&mut a, &mut b] {
+        loop {
+            match recv(ws).await {
+                Some(ServerMsg::MatchStart { .. }) => break,
+                Some(_) => continue,
+                None => panic!("match never started"),
+            }
+        }
+    }
+    // Mid-match register/logout are refused, not applied.
+    send(
+        &mut a,
+        &ClientMsg::Register {
+            name: "Busy".into(),
+        },
+    )
+    .await;
+    assert!(matches!(
+        recv(&mut a).await,
+        Some(ServerMsg::AccountError {
+            code: AccountError::Unavailable
+        })
+    ));
+    send(&mut a, &ClientMsg::Logout).await;
+    assert!(matches!(
+        recv(&mut a).await,
+        Some(ServerMsg::AccountError {
+            code: AccountError::Unavailable
+        })
+    ));
 }
 
 #[tokio::test]
