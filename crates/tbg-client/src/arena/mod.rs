@@ -1,18 +1,14 @@
 //! Diorama assembly: shared vertex-colored layers and authoritative Stronghold views.
 
-use crate::{
-    art::{
-        mesh::{self, Shape},
-        palette::*,
-    },
-    config,
-};
+use crate::art::mesh::{self, Shape};
 use bevy::prelude::*;
 
 mod camp;
 mod cliffs;
 mod geometry;
 mod ground;
+mod life;
+mod lighting;
 mod props;
 mod rocks;
 mod towers;
@@ -23,7 +19,7 @@ pub(super) type Part = (Shape, Color, Transform);
 
 pub fn plugin(app: &mut App) {
     app.add_systems(Startup, spawn_arena)
-        .add_systems(Update, towers::damage_states);
+        .add_systems(Update, (towers::damage_states, life::animate));
 }
 
 pub(super) fn painted(parts: Vec<Part>) -> Mesh {
@@ -59,12 +55,15 @@ fn spawn_arena(
         let triangles = mesh::triangles(&m);
         total += triangles;
         info!("arena {name}: {triangles} triangles");
-        commands.spawn((
+        let mut entity = commands.spawn((
             Name::new(format!("arena {name}")),
             Mesh3d(meshes.add(m)),
             MeshMaterial3d(mat.clone()),
             Transform::default(),
         ));
+        if name == "foam" {
+            entity.insert(life::Foam);
+        }
     }
     for (own, x) in [(true, -0.9), (false, 16.9)] {
         for (piece, hide_below) in towers::tower(own) {
@@ -77,22 +76,7 @@ fn spawn_arena(
             ));
         }
     }
+    total += life::spawn(&mut commands, &mut meshes, &mut mats, &mat);
     info!("arena total: {total} triangles");
-    lights(&mut commands);
-}
-
-fn lights(commands: &mut Commands) {
-    commands.spawn((
-        DirectionalLight {
-            color: KEY,
-            shadow_maps_enabled: config::url_param("shadows").as_deref() != Some("0"),
-            ..default()
-        },
-        Transform::from_xyz(4.0, 12.0, 9.0).looking_at(Vec3::new(8.0, 0.0, 0.0), Vec3::Y),
-    ));
-    commands.insert_resource(GlobalAmbientLight {
-        color: AMBIENT_SKY,
-        brightness: 420.0,
-        ..default()
-    });
+    lighting::spawn(&mut commands);
 }
