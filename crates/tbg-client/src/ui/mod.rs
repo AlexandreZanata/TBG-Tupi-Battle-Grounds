@@ -9,6 +9,8 @@ pub mod account;
 mod account_ui;
 mod actions;
 mod evolve;
+#[cfg(test)]
+mod glyphs;
 mod hud;
 mod hud_top;
 mod hud_update;

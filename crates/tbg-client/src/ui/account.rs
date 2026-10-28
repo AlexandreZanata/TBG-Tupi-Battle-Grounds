@@ -49,7 +49,7 @@ pub fn plugin(app: &mut App) {
 fn error_text(code: AccountError) -> &'static str {
     match code {
         AccountError::NameTaken => "That name is taken",
-        AccountError::NameInvalid => "3–16 letters, digits or _; start with a letter",
+        AccountError::NameInvalid => "3-16 letters, digits or _; start with a letter",
         AccountError::RateLimited => "Too many tries, wait a bit",
         AccountError::Unavailable => "Finish your match first",
         AccountError::BadKey => "That key didn't work",
