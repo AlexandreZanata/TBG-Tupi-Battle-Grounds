@@ -11,3 +11,9 @@ rust-version.workspace = true
 [lib]
 name = "tbg_core"
 path = "src/lib.rs"
+
+[dependencies]
+# Derives for state, views, and protocol messages.
+serde = { version = "1", features = ["derive"] }
+# Compact binary wire format and the state hash input.
+postcard = { version = "1", default-features = false, features = ["alloc"] }

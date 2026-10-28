@@ -28,8 +28,8 @@ branches. Every other phase starts only after the previous one is reviewed.
 | Phase | File | Milestone at the end | Status | Reviewed |
 |-------|------|----------------------|--------|----------|
 | P0 | — | Lean repository, plan | done | yes |
-| P1 | [P1-browser-network-spike.md](phases/P1-browser-network-spike.md) | Bevy runs in desktop + phone browsers; browser ↔ server WebSocket RTT shown | todo | — |
-| P2 | [P2-core-simulation.md](phases/P2-core-simulation.md) | All game rules headless, tested, bot vs bot | todo | — |
+| P1 | [P1-browser-network-spike.md](phases/P1-browser-network-spike.md) | Bevy runs in desktop + phone browsers; browser ↔ server WebSocket RTT shown | done (owner phone test pending) | yes |
+| P2 | [P2-core-simulation.md](phases/P2-core-simulation.md) | All game rules headless, tested, bot vs bot | done | yes |
 | P3 | [P3-skeleton-game.md](phases/P3-skeleton-game.md) | **Skeleton game:** full match vs bot in the browser with placeholder shapes | todo | — |
 | P4 | [P4-online-multiplayer.md](phases/P4-online-multiplayer.md) | **Online 1v1** with reconnect, latency/bandwidth metrics, bot load test validated locally | todo | — |
 | P5 | [P5-real-environment.md](phases/P5-real-environment.md) | **Validated on the owner's VPS + domain** over HTTPS/WSS, real devices, measured capacity | todo | — |
