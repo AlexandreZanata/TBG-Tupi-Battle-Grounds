@@ -24,6 +24,9 @@ pub use messages::{QueueInfo, ViewGaps};
 #[derive(Resource, Default)]
 pub struct MatchInfo {
     pub you: Option<Seat>,
+    /// Post-P14: the HUD shows both names next to the HP bars.
+    pub you_name: String,
+    pub you_rating: Option<u16>,
     pub opponent: String,
     pub outcome: Option<Outcome>,
     pub last_tick: u32,

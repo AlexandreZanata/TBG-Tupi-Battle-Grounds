@@ -48,12 +48,16 @@ pub(super) fn poll_link(
         match msg {
             ServerMsg::MatchStart {
                 you,
+                you_name,
+                you_rating,
                 opponent,
                 mode,
                 opponent_rating,
             } => {
                 *info = MatchInfo {
                     you: Some(you),
+                    you_name,
+                    you_rating,
                     opponent,
                     ranked: mode == tbg_core::protocol::MatchMode::Ranked,
                     opponent_rating,
