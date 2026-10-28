@@ -97,8 +97,18 @@ fn report(a: &Args, results: &[BotResult], elapsed: Duration) -> bool {
         .iter()
         .flat_map(|r| r.view_gaps_ms.iter().copied())
         .collect();
+    let mut ack: Vec<u16> = results
+        .iter()
+        .flat_map(|r| r.ack_ms.iter().copied())
+        .collect();
+    let mut queue: Vec<u16> = results
+        .iter()
+        .flat_map(|r| r.queue_wait_ms.iter().copied())
+        .collect();
     rtt.sort_unstable();
     gaps.sort_unstable();
+    ack.sort_unstable();
+    queue.sort_unstable();
     let dropped = results.iter().filter(|r| r.dropped).count();
     let rejoined = results
         .iter()
@@ -127,12 +137,24 @@ fn report(a: &Args, results: &[BotResult], elapsed: Duration) -> bool {
         percentile(&gaps, 0.95),
         gaps.last().copied().unwrap_or(0)
     );
+    println!(
+        "ack ms p50 {} p95 {} max {}",
+        percentile(&ack, 0.5),
+        percentile(&ack, 0.95),
+        ack.last().copied().unwrap_or(0)
+    );
+    println!(
+        "queue wait ms p50 {} p95 {} max {}",
+        percentile(&queue, 0.5),
+        percentile(&queue, 0.95),
+        queue.last().copied().unwrap_or(0)
+    );
     println!("reconnects attempted {dropped} | succeeded {rejoined}");
     for f in failed.iter().take(5) {
         println!("failure: {:?}", f.error);
     }
     println!(
-        "{{\"matches\":{},\"bots\":{},\"completed\":{completed},\"failed\":{},\"rtt_p50\":{},\"rtt_p95\":{},\"gap_p95\":{},\"gap_max\":{},\"reconnects\":{dropped},\"reconnects_ok\":{rejoined},\"delay_ms\":{},\"jitter_ms\":{}}}",
+        "{{\"matches\":{},\"bots\":{},\"completed\":{completed},\"failed\":{},\"rtt_p50\":{},\"rtt_p95\":{},\"gap_p95\":{},\"gap_max\":{},\"ack_p50\":{},\"ack_p95\":{},\"queue_p95\":{},\"reconnects\":{dropped},\"reconnects_ok\":{rejoined},\"delay_ms\":{},\"jitter_ms\":{}}}",
         a.matches,
         results.len(),
         failed.len(),
@@ -140,6 +162,9 @@ fn report(a: &Args, results: &[BotResult], elapsed: Duration) -> bool {
         percentile(&rtt, 0.95),
         percentile(&gaps, 0.95),
         gaps.last().copied().unwrap_or(0),
+        percentile(&ack, 0.5),
+        percentile(&ack, 0.95),
+        percentile(&queue, 0.95),
         a.delay_ms,
         a.jitter_ms
     );
