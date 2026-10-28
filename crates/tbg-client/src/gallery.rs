@@ -4,8 +4,10 @@ mod blockout;
 mod camera;
 mod figures;
 mod layout;
+mod lineup;
 mod palette;
 mod settings;
+mod title;
 
 use crate::{
     art::{

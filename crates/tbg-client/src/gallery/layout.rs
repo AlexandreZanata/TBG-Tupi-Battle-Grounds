@@ -6,6 +6,8 @@ pub enum Layout {
     Blockout(usize),
     Form(usize),
     Frame(usize, usize),
+    /// `&lineup`: (pose row, form column), the same in either orientation.
+    Lineup(usize, usize),
 }
 impl Layout {
     pub fn position(&self, portrait: bool) -> Vec3 {
@@ -18,6 +20,7 @@ impl Layout {
                 let cols = if portrait { 2 } else { 5 };
                 Vec3::new((i % cols) as f32 * 2.0, 0.0, -((i / cols) as f32) * 2.2)
             }
+            Self::Lineup(row, col) => Vec3::new(col as f32 * 1.7, -(row as f32) * 2.0, 0.0),
             Self::Frame(i, quarter) => {
                 let cols = if portrait { 1 } else { 2 };
                 Vec3::new(

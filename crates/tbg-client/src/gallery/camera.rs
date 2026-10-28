@@ -68,6 +68,15 @@ fn unit(portrait: bool) -> (Vec3, f32, f32, Vec3) {
     }
 }
 fn sheet(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
+    if options.lineup {
+        // Three forms per row, idle above the anchor (`Layout::Lineup`).
+        return (
+            Vec3::new(1.7, -0.35, 0.0),
+            2.7,
+            2.6,
+            Vec3::new(0.0, 1.2, 10.0),
+        );
+    }
     let clips = if options.clip.is_some() {
         1
     } else {

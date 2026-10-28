@@ -126,7 +126,16 @@ pub fn spawn_unit_visual(
     animator.play(crate::art::anim::Clip::Spawn);
     let root = commands.spawn_empty().id();
     if animator.archer {
-        crate::art::bow::attach(commands, root, &animator, lib, &lib.material, look.own);
+        let half = form.bow_half;
+        crate::art::bow::attach(
+            commands,
+            root,
+            &animator,
+            lib,
+            &lib.material,
+            look.own,
+            half,
+        );
     }
     commands
         .entity(root)

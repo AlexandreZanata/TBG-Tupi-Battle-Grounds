@@ -72,6 +72,8 @@ pub struct BowRig {
     strings: [Entity; 2],
     arrow: Entity,
     pub own: bool,
+    /// Half the string length of this form's bow.
+    half: f32,
 }
 pub fn attach(
     commands: &mut Commands,
@@ -80,6 +82,7 @@ pub fn attach(
     lib: &FigureLibrary,
     material: &Handle<StandardMaterial>,
     own: bool,
+    half: f32,
 ) {
     let socket = animator.joints[Node::Prop(Socket::OffhandL).index()];
     let arrow = commands
@@ -107,6 +110,7 @@ pub fn attach(
         strings,
         arrow,
         own,
+        half,
     });
 }
 pub fn strings(
@@ -116,7 +120,12 @@ pub fn strings(
 ) {
     for (a, bow) in &figures {
         let (clip, t) = a.clip_time();
-        let middle = Vec3::new(0.0, 0.08, -0.23 - tension(clip, t) * 0.16);
+        let depth = if super::archer_v2::enabled() {
+            super::archer_v2::DRAW
+        } else {
+            0.16
+        };
+        let middle = Vec3::new(0.0, 0.08, -0.23 - tension(clip, t) * depth);
         present_strings(bow, a.archer, middle, &mut transforms, &mut visibility);
         if let Ok(mut tr) = transforms.get_mut(bow.arrow) {
             tr.translation = middle;
@@ -150,7 +159,7 @@ fn present_strings(
     visibility: &mut Query<&mut Visibility>,
 ) {
     for (i, &entity) in bow.strings.iter().enumerate() {
-        let tip = Vec3::new(0.0, 0.08 + if i == 0 { 0.64 } else { -0.64 }, -0.23);
+        let tip = Vec3::new(0.0, 0.08 + if i == 0 { bow.half } else { -bow.half }, -0.23);
         if let Ok(mut v) = visibility.get_mut(entity) {
             *v = if active {
                 Visibility::Inherited

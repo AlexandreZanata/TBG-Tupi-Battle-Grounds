@@ -13,6 +13,10 @@ pub mod anim;
 mod anim_tests;
 mod archer_aim;
 mod archer_clips;
+pub mod archer_v2;
+mod archer_v2_clips;
+#[cfg(test)]
+mod archer_v2_tests;
 pub mod arrows;
 pub mod bow;
 mod clips;
@@ -36,6 +40,8 @@ pub struct FigureForm {
     pub meshes: [Option<Handle<Mesh>>; NODE_COUNT],
     pub triangles: usize,
     pub native: bool,
+    /// Half the bow-string length for native archer forms (`bow.rs`).
+    pub bow_half: f32,
     enemy_meshes: Option<[Option<Handle<Mesh>>; NODE_COUNT]>,
 }
 
@@ -101,10 +107,18 @@ fn build_library(
     for kind in UNIT_KINDS {
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
-            if kind == UnitKind::Archer && tier == 0 {
-                let form = native_form(roster::archer_base(), &mut meshes, true);
+            let v2 = archer_v2::enabled() && branch == 0;
+            if kind == UnitKind::Archer && (tier == 0 || v2) {
+                let spec = if v2 {
+                    roster::archer_v2(tier)
+                } else {
+                    roster::archer_base()
+                };
+                let mut form = native_form(spec, &mut meshes, true);
+                form.bow_half = if v2 { archer_v2::bow_half(tier) } else { 0.64 };
                 info!(
-                    "figure Archer base: {} triangles + {} bow/arrow triangles, {} mesh joints",
+                    "figure Archer {tier}/{branch}{}: {} triangles + {} bow/arrow triangles, {} mesh joints",
+                    if v2 { " (v2 candidate)" } else { "" },
                     form.triangles,
                     bow.triangles,
                     form.meshes.iter().flatten().count()
@@ -127,6 +141,7 @@ fn build_library(
                     meshes: handles,
                     triangles,
                     native: false,
+                    bow_half: 0.64,
                     enemy_meshes: None,
                 },
             );
@@ -171,6 +186,7 @@ fn native_form(mut spec: figure::FigureSpec, meshes: &mut Assets<Mesh>, team: bo
         meshes: handles,
         triangles,
         native: true,
+        bow_half: 0.64,
         enemy_meshes,
     }
 }

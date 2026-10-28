@@ -17,6 +17,10 @@ pub struct Gallery {
     pub frames: bool,
     pub stress: bool,
     pub clip: Option<Clip>,
+    /// `&tier=1|2`: contact sheet of an evolution (branch A) instead of the base.
+    pub tier: u8,
+    /// `&lineup`: base, tier 1, and tier 2 side by side, idle and at the anchor.
+    pub lineup: bool,
 }
 impl Gallery {
     pub fn studio(&self) -> bool {
@@ -61,11 +65,16 @@ impl Gallery {
                 .clamp(0.01, 4.0),
             silhouette: config::url_param("silhouette").is_some(),
             turn: config::url_param("turn").is_some(),
-            frames: config::url_param("frames").is_some(),
+            frames: config::url_param("frames").is_some() || config::url_param("lineup").is_some(),
             stress: config::url_param("stress")
                 .and_then(|s| s.parse::<usize>().ok())
                 .is_some_and(|n| n > 0),
             clip,
+            tier: config::url_param("tier")
+                .and_then(|s| s.parse::<u8>().ok())
+                .unwrap_or(0)
+                .min(2),
+            lineup: config::url_param("lineup").is_some(),
         }
     }
 }

@@ -29,18 +29,19 @@ pub fn apply(t: f32, pose: &mut Pose) {
         .lerp(anchor, raise)
         .lerp(Vec3::new(-0.10, 0.34, -0.12), release)
         .lerp(right_idle, recover);
-    arm(pose, true, left);
-    arm(pose, false, right);
+    let p = BodyPlan::Humanoid.proportions();
+    arm(pose, true, left, &p);
+    arm(pose, false, right, &p);
     pose[Node::Prop(Socket::OffhandL).index()].0 = Vec3::ZERO;
 }
-fn arm(pose: &mut Pose, left: bool, target: Vec3) {
-    let p = BodyPlan::Humanoid.proportions();
+/// Two-bone IK in chest space for the given anatomy (P15 and `?archer=v2`).
+pub fn arm(pose: &mut Pose, left: bool, target: Vec3, p: &rig::Proportions) {
     let [upper, fore, hand] = if left {
         [Joint::UpperArmL, Joint::ForearmL, Joint::HandL]
     } else {
         [Joint::UpperArmR, Joint::ForearmR, Joint::HandR]
     };
-    let start = rig::rest(Node::Body(upper), &p);
+    let start = rig::rest(Node::Body(upper), p);
     let delta = target - start;
     let distance = delta.length().clamp(0.01, p.arm * 1.9 - 0.0001);
     let direction = delta.normalize_or_zero();

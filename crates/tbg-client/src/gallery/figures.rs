@@ -28,14 +28,22 @@ pub fn spawn(
     let clips = options
         .clip
         .map_or_else(|| CLIPS.to_vec(), |clip| vec![clip]);
-    if options.frames {
+    if options.lineup {
+        super::lineup::spawn(
+            commands,
+            lib,
+            unit,
+            &material,
+            window.height() > window.width(),
+        );
+    } else if options.frames {
         frames(
             commands,
             lib,
             unit,
             clips,
             &material,
-            window.height() > window.width(),
+            (options.tier, window.height() > window.width()),
         );
     } else if options.silhouette || options.unit.is_none() {
         roster(commands, lib, options, &material);
@@ -59,7 +67,7 @@ pub fn spawn(
             ));
         }
     }
-    title(commands, options, unit);
+    super::title::spawn(commands, options, unit);
 }
 fn frames(
     commands: &mut Commands,
@@ -67,7 +75,7 @@ fn frames(
     unit: UnitKind,
     clips: Vec<Clip>,
     material: &Handle<StandardMaterial>,
-    portrait: bool,
+    (tier, portrait): (u8, bool),
 ) {
     for (i, clip) in clips.into_iter().enumerate() {
         for quarter in 0..4 {
@@ -76,7 +84,7 @@ fn frames(
                 commands,
                 lib,
                 unit,
-                (0, 0),
+                (tier, 0),
                 layout.position(portrait),
                 material,
             );
@@ -94,35 +102,6 @@ fn frames(
                 .insert((animator, layout));
         }
     }
-}
-fn title(commands: &mut Commands, options: &Gallery, unit: UnitKind) {
-    let title = if options.frames {
-        format!(
-            "{unit:?} | CONTACT SHEET | 0 / 25 / 50 / 75 %\n{}",
-            options.clip.map_or_else(
-                || "Idle / Walk | Melee / Ranged | Cast / Hit | Death / Spawn | Evolve / Victory"
-                    .into(),
-                |c| format!("{c:?}")
-            )
-        )
-    } else {
-        format!("P15 GALLERY | {} | {}x\nBase / A1 / A2 / B1 / B2 | Idle, Walk, attacks, cast, hit, death, spawn, evolve, victory", options.mode, options.slow)
-    };
-    commands.spawn((
-        Text::new(title),
-        TextFont {
-            font_size: FontSize::Px(16.0),
-            ..default()
-        },
-        TextColor(crate::art::palette::INK),
-        Node {
-            position_type: PositionType::Absolute,
-            top: px(12),
-            left: px(12),
-            max_width: percent(94),
-            ..default()
-        },
-    ));
 }
 fn roster(
     commands: &mut Commands,
@@ -153,7 +132,7 @@ fn roster(
         }
     }
 }
-fn spawn_one(
+pub(super) fn spawn_one(
     commands: &mut Commands,
     lib: &FigureLibrary,
     kind: UnitKind,
@@ -168,7 +147,7 @@ fn spawn_one(
         .id();
     let figure = commands
         .spawn((
-            Transform::from_rotation(Quat::from_rotation_y(25f32.to_radians()))
+            Transform::from_rotation(Quat::from_rotation_y(yaw(kind).to_radians()))
                 .with_scale(Vec3::splat(form.plan.scale)),
             Visibility::default(),
         ))
@@ -179,7 +158,25 @@ fn spawn_one(
     animator.native = form.native;
     animator.archer = form.native && kind == UnitKind::Archer;
     if animator.archer {
-        crate::art::bow::attach(commands, root, &animator, lib, material, true);
+        crate::art::bow::attach(
+            commands,
+            root,
+            &animator,
+            lib,
+            material,
+            true,
+            form.bow_half,
+        );
     }
     (root, animator)
+}
+
+/// The `?archer=v2` candidate turns side-on to shoot, so review it at 45° to
+/// see the chest and the arrow line together; everything else keeps 25°.
+fn yaw(kind: UnitKind) -> f32 {
+    if kind == UnitKind::Archer && crate::art::archer_v2::enabled() {
+        45.0
+    } else {
+        25.0
+    }
 }
