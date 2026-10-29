@@ -188,8 +188,6 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             let caught = caught
                 || favor_vs_bot(scaled(kind, 2, 2, 1), kind, MATCH_PAIRS)
                     >= favor_vs_bot(canon(), kind, MATCH_PAIRS) + 0.10;
-            eprintln!("PROBE {kind:?} strong_flag={} favor_canon={:.3} favor_strong={:.3}", strong.flags(canon()).oppressive.contains(&i), favor_vs_bot(canon(), kind, MATCH_PAIRS), favor_vs_bot(scaled(kind, 2, 2, 1), kind, MATCH_PAIRS));
-            for b in budgets.clone() { eprintln!("PROBE  budget {b}: plain {:.3} strong {:.3}", avg(&plain, b), avg(&strong, b)); }
             assert!(caught, "{kind:?} ×2 HP and damage was not caught");
             // A tripled cost: flagged weak, or clearly weaker everywhere.
             let dear = duels::matrix_of(scaled(kind, 1, 1, 3), forms.clone(), 4);
