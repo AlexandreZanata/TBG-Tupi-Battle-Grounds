@@ -18,7 +18,7 @@ evolve, and which factions you combine.
 | 1 | Live 1v1 PvP: both players act simultaneously; the board evolves in real time |
 | 2 | One `BattleLine`: no lateral movement |
 | 3 | Automation: units move and fight without player input |
-| 4 | Continuous `Shop`: buying during combat brings a new offer; no preparation phase |
+| 4 | Continuous `Shop`: every purchase during combat brings five new offers; no preparation phase |
 | 5 | Branching `Evolution` of deployed units |
 | 6 | Faction `Synergy` bonuses |
 | 7 | Authoritative server owns every competitive outcome |
@@ -35,7 +35,7 @@ evolve, and which factions you combine.
 | Archetype | Mechanical role: `Tank`, `DPS`, `Support`, `Ranged`, `Control` | `Archetype` |
 | Faction | Visual language + synergy group: `Humans`, `Undead`, `Machines`, `Plants` | `Faction` |
 | Energy | The only in-match resource; regenerates; not a currency | `Energy` |
-| Shop | Per-player offer of five distinct units during a match, renewed one card per purchase; not a store (**Proposed**, D-32) | `Shop` |
+| Shop | Per-player offer of five distinct units during a match, redrawn in full on every purchase; not a store (**Proposed**, D-32) | `Shop` |
 | Evolution | In-match branching upgrade of a deployed unit; not account progression | `Evolution` |
 | Synergy | Bonus while enough units of one `Faction` (or a defined combo) are alive | `Synergy` |
 | PlayerIntention | Client request (purchase, evolve, reposition); a request, never a state change | `PlayerIntention` |
@@ -108,7 +108,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-S01 | Each player sees exactly five offers, five distinct units at any time | Proposed (D-32; was three) | S1, S4 |
 | BR-S02 | ~~Shop rotation timers come from the server match clock, identical for both players~~ | **Removed — owner revision 2026-10-29**: offers never rotate on a timer (BR-S04) | S1, S4 |
 | BR-S03 | The shop sells units only, never stats or advantage | Confirmed | S1 |
-| BR-S04 | Offers change only when bought: the bought slot refills at once with a unit drawn uniformly from the units not on screen (never one of the four other offers, never the unit just bought; with 10 units, one of 5). There is no timed rotation and no other redraw | Proposed (owner revision 2026-10-29) | — |
+| BR-S04 | Offers change only when bought: every purchase redraws all five offers at once, uniformly at random from the whole roster as five distinct units (BR-S01), so the unit just bought may appear again (about half the time). There is no timed rotation and no other redraw | Proposed (owner revision 2026-10-29, second revision the same day: was one refilled slot) | — |
 | BR-S05 | Shop randomness is seeded server-side and never revealed to clients | Proposed | — |
 | BR-V01 | Deployed units evolve along a branching tree; the tier-1 choice conditions tier 2 | Confirmed | S4 |
 | BR-V02 | Evolution is paid with `Energy` in the match, never with out-of-match purchases | Adapted | S1, S4 |
@@ -144,7 +144,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
    the same `Energy` and their own five shop offers.
 2. **Buy = deploy.** Tapping an affordable offer sends a `Purchase`
    intention. If valid, the unit spawns in front of the buyer's
-   `Stronghold` and the offer refills. Rejections: insufficient `Energy`,
+   `Stronghold` and all five offers are redrawn. Rejections: insufficient `Energy`,
    stale offer, match not running. There is no army cap (BR-U07).
 3. **Automatic combat.** Units walk toward the enemy `Stronghold`. A unit
    stops when its target is in range: the nearest enemy ahead (unit or
@@ -201,7 +201,7 @@ integers (see ARCHITECTURE.md §4).
 | Match length | open-ended, no clock (BR-M07) | | Augment round | every 60 s of combat; 20 s selection pause |
 | Energy start / cap | 5 / none (BR-E04) | | Energy regen | 1 per ~1.76 s (17 sub-energy/tick) |
 | Interest | regen +25 % per full 5 Energy held, up to ×2.25 at 25 (BR-E06) | | Augment cost Bronze / Silver / Gold / Diamond | 3 / 6 / 10 / 15 |
-| Shop offers / rotation | 5 distinct / none: a purchase refills its slot (BR-S04) | | Army cap | none (BR-U07) |
+| Shop offers / rotation | 5 distinct / none: a purchase redraws all five (BR-S04) | | Army cap | none (BR-U07) |
 | Stronghold HP | 4500 | | Stronghold attack | 53 dmg / 1.0 s, range 6 |
 | Evolution cost tier 1 / tier 2 | 2 / 4 | | Reconnect window | 30 |
 
@@ -499,7 +499,7 @@ windows, ranked Elo (draw ½) and result persistence are unchanged.
 ### 10.3 Shop Reserve (P16-F2)
 
 > Written for a rotating Shop. Since the owner revision of 2026-10-29
-> offers change only on purchase (BR-S04), so a hold would have nothing to
+> every purchase redraws all five offers (BR-S04), so a hold would have nothing to
 > protect against; F2 needs a new design before it is scheduled.
 
 | ID | Proposed rule |

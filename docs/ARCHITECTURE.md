@@ -118,7 +118,7 @@ tables are the one allowed exception.
   never `HashMap` iteration.
 - **Tick order:** 1) apply queued intentions in arrival order; 2) clock,
   phase, `Energy` regen with the Interest boost; 3) Augment rounds (no shop
-  rotation: offers change only on purchase, BR-S04); 4) synergy recompute;
+  rotation: every purchase redraws the five offers, BR-S04); 4) synergy recompute;
   5) statuses tick down; 6) targeting + movement; 7) attacks resolve
   (cooldown, windup, splash, statuses, heals); 8) deaths removed, events
   emitted; 9) outcome check.
