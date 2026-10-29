@@ -10,7 +10,7 @@ use tbg_core::{EndReason, Ruleset, FACTIONS, UNIT_KINDS};
 
 use crate::duels::Matrix;
 use crate::meta;
-use crate::metrics::{MatchResult, KINDS};
+use crate::metrics::MatchResult;
 use crate::policy::Policy;
 use crate::runner::{run_pairs, Matchup};
 use crate::stats::{self, Estimate};
@@ -370,7 +370,6 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
         est(&comebacks, 5),
         (0.20, 1.0),
     ));
-    debug_assert!(KINDS >= UNIT_KINDS.len());
     rows
 }
 

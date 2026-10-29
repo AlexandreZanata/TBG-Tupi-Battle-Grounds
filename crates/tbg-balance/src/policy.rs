@@ -132,7 +132,7 @@ impl Controller {
         }
         self.wait = self.reaction - 1;
         match self.policy {
-            Policy::Bot => None,
+            Policy::Bot => self.bot.decide(view),
             Policy::Heavy => self.buy_by(view, i64::from),
             Policy::Cheap => self.buy_by(view, |cost| -i64::from(cost)),
             Policy::Evolver => self.evolver(view),

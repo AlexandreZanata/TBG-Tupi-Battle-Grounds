@@ -18,6 +18,7 @@ pub struct Side {
 
 impl Side {
     /// Strict purchase-majority faction index, if any (ties are mixed).
+    /// Factions are identity, never tuned, so the canonical table is right.
     pub fn majority(&self) -> Option<usize> {
         let mut counts = [0u32; 4];
         for k in ALL_KINDS {
