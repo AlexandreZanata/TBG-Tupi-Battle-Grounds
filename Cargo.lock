@@ -5360,6 +5360,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "ewebsock",
+ "serde_json",
  "tbg-core",
  "wasm-bindgen",
  "web-sys",

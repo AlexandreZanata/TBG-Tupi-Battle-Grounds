@@ -133,14 +133,9 @@ fn scale_ui(window: Single<&Window>, mut scale: ResMut<UiScale>) {
 }
 
 pub fn rejection_text(reason: Rejection) -> String {
-    match reason {
-        Rejection::NotEnoughEnergy => "Not enough Energy",
-        Rejection::NotEvolvable => "Summons cannot evolve",
-        Rejection::NotRunning => "The match is not running",
-        Rejection::Paused => "Battle paused - choose an Augment",
-        _ => "Action not possible",
-    }
-    .to_string()
+    // P41 step 2 bridge: the catalog owns the copy; step 8 threads the live
+    // `Lang` through. English default keeps behavior identical until then.
+    crate::i18n::content::rejection(crate::i18n::Lang::En, reason).to_string()
 }
 
 /// Text bundle that never blocks clicks on what is behind it.

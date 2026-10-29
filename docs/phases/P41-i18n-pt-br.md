@@ -496,5 +496,29 @@ values". Fill the report.
     lobby.css player-chip/tabs/sound, ranking.css tables + pager.
 - Font sizes (step 3): pending.
 - Measurements before/after (step 12): pending (out of scope for steps 0-5; A-1 unmerged).
-- Deviations: pending.
-- Limitations: pending.
+- Step 2 (this commit): `build.rs` (~150 lines, `serde_json` build-dep with reason
+  comment in `Cargo.toml`) + `src/i18n/{mod.rs,check.rs,content.rs,tests.rs}`; 26 keys
+  in both `assets/i18n/*.json`. Checks: fmt/clippy/test/workspace/wasm all green
+  (44 bin tests incl. 9 new i18n); `trunk build --release` green; menu screenshot
+  identical to baseline. WASM brotli 4,825,673 (+3,570 over step 0, budget +60 KB).
+  Negative demo (deleted `toast.need_energy` from pt-BR, restored after):
+  `thread 'main' panicked at crates/tbg-client/build.rs:51:19: i18n: key missing in
+  pt-BR: toast.need_energy`. Browser smoke (headed, 1920x1080): lobby visible,
+  `data-screen=lobby`, no repeat console errors (one transient 404 on first load,
+  clean on reload).
+- Deviations:
+  - `rejection_text` now returns specific catalog copy for all 13 `Rejection`
+    variants (9 previously fell into `"Action not possible"`); the 4 legacy strings
+    are byte-identical. Full copy review stays in step 10.
+  - Temporary `#[allow(dead_code)]` on `Lang::{code,from_code,tf,plural,decimal}`,
+    `Localized`, the generated `Msg` enum, and `check.rs`, each commented with the
+    step that wires it (4-8); all covered by `i18n/tests.rs` until then.
+  - The 26 pt-BR seed values are provisional: glossary terms use O-P41-1 proposed
+    defaults (Energia, Aprimoramento, Evolução, Ranqueada, Casual); non-glossary
+    words are proposals for owner review in step 10 (Som, Fechar, Pontuação,
+    Partida rápida, Jogue por pontos, …).
+  - Test expectations use `\u{...}` escapes: the current `glyphs` guard scans every
+    string literal under `src/`; step 3 reworks it to the D5 charset rule.
+  - No indexed family exists in the catalog yet, so the family codegen path is
+    covered by a synthetic gap test only; first real family lands in step 7/9.
+- Limitations: steps 0-2 only; A-1 still unmerged, steps 6+ wait for it.
