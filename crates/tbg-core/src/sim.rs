@@ -8,7 +8,7 @@ use crate::content::{
 use crate::rng::Pcg32;
 use crate::state::{EndReason, Event, MatchState, Outcome, Phase, PlayerState};
 use crate::types::Seat;
-use crate::{combat, shop, synergy};
+use crate::{combat, shop, summon, synergy};
 
 impl MatchState {
     pub fn new(seed: u64) -> MatchState {
@@ -47,6 +47,8 @@ impl MatchState {
             shop::rotate(self);
             synergy::update(self, &mut ev);
             combat::tick_timers(self);
+            summon::expire(self);
+            summon::hatch(self, &mut ev);
             combat::run_units(self, &mut ev);
             combat::stronghold_fire(self, &mut ev);
             combat::remove_dead(self, &mut ev);

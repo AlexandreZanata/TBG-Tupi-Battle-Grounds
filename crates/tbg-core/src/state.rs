@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::content::{self, Stats};
+use crate::content::{self, Stats, OFFERS};
 use crate::rng::Pcg32;
 use crate::types::{Faction, Seat, Status, Tick, UnitId, UnitKind};
 
@@ -34,12 +34,18 @@ pub struct Unit {
     pub cooldown: u16,
     pub windup: Option<(Target, u16)>,
     pub status: Status,
+    /// The Nester that hatched this summon (BR-U08); `None` for bought units.
+    pub summoner: Option<UnitId>,
+    /// Tick at which a summon disappears.
+    pub expires_at: Option<Tick>,
+    /// Ticks until a Nester's next hatch (0 for every other kind).
+    pub hatch_cd: u16,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PlayerState {
     pub energy: u32,
-    pub offers: [UnitKind; 3],
+    pub offers: [UnitKind; OFFERS],
     pub stronghold_hp: i32,
     pub stronghold_cooldown: u16,
     /// Synergy level (0..=2) per `Faction` index.
@@ -142,18 +148,22 @@ impl MatchState {
         matches!(self.phase, Phase::Running | Phase::Overtime)
     }
 
-    /// Slots occupied by a seat's living units.
-    pub fn slots_used(&self, seat: Seat) -> u8 {
+    /// A seat's living conventional units (BR-U07: informative, never a cap).
+    pub fn army_size(&self, seat: Seat) -> usize {
         self.units
             .iter()
-            .filter(|u| u.seat == seat && u.hp > 0)
-            .map(|u| content::def(u.kind).slots.count())
-            .sum()
+            .filter(|u| u.seat == seat && u.hp > 0 && !u.kind.is_summon())
+            .count()
     }
 
     pub fn stats_of(&self, u: &Unit) -> Stats {
         let faction = content::def(u.kind).faction.index();
-        let level = self.player(u.seat).synergy[faction];
+        // Summons never receive Synergy (BR-U08).
+        let level = if u.kind.is_summon() {
+            0
+        } else {
+            self.player(u.seat).synergy[faction]
+        };
         content::effective_stats(u.kind, u.tier, u.branch, level)
     }
 

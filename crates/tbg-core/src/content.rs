@@ -2,7 +2,7 @@
 //! simulation units: ticks (20/s), milli-tiles, sub-energy (600 = 1 Energy),
 //! basis points (10 000 = 100%). No other file may contain balance numbers.
 
-use crate::types::{Archetype, Faction, OnHit, SlotCount, Tick, UnitKind};
+use crate::types::{Archetype, Faction, OnHit, Tick, UnitKind};
 
 pub const TICK_HZ: u32 = 20;
 pub const LANE_LEN: i32 = 16_000;
@@ -21,9 +21,17 @@ pub const RUNNING_START: Tick = COUNTDOWN;
 pub const OVERTIME_START: Tick = COUNTDOWN + REGULATION;
 pub const MATCH_END: Tick = OVERTIME_START + OVERTIME;
 
-pub const OFFERS: usize = 3;
+/// Five distinct offers (BR-S01, D-32 Proposed). There is no army cap (BR-U07).
+pub const OFFERS: usize = 5;
 pub const ROTATION_TICKS: Tick = 200;
-pub const SLOT_CAP: u8 = 8;
+
+/// Nester Hatch (BR-U08, Proposed): ticks between hatches, Beetlings alive
+/// per Nester (base / Brood and Hive), per player, and their lifetime.
+pub const HATCH_EVERY: u16 = 80;
+pub const HATCH_EVERY_HIVE: u16 = 60;
+pub const BEETLES_PER_NESTER: [usize; 2] = [2, 3];
+pub const BEETLES_PER_PLAYER: usize = 6;
+pub const BEETLE_LIFETIME: Tick = 200;
 
 pub const STRONGHOLD_HP: i32 = 4_500;
 pub const STRONGHOLD_DAMAGE: i32 = 65;
@@ -103,7 +111,6 @@ pub struct UnitDef {
     pub name: &'static str,
     pub faction: Faction,
     pub archetype: Archetype,
-    pub slots: SlotCount,
     pub cost: u32,
     pub hp: i32,
     pub damage: i32,
@@ -122,7 +129,6 @@ const fn unit(
     name: &'static str,
     faction: Faction,
     archetype: Archetype,
-    slots: SlotCount,
     cost: u32,
     stats: [i32; 7], // hp, damage, interval, range, speed, splash, heal
     on_hit: Option<OnHit>,
@@ -133,7 +139,6 @@ const fn unit(
         name,
         faction,
         archetype,
-        slots,
         cost,
         hp: stats[0],
         damage: stats[1],
@@ -149,68 +154,99 @@ const fn unit(
 
 use Archetype::*;
 use Faction::*;
-use SlotCount::{One, Two};
 
-/// The roster, in `UNIT_KINDS` order.
+/// Every kind, in `UnitKind` (`ALL_KINDS`) order.
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 8] = [
-    unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, One, 1_800,
+pub const UNITS: [UnitDef; 11] = [
+    unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 1_800,
         [650, 30, 24, 800, 40, 0, 0], None, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Fortress") },
         FormDef { dmg_bp: 4_000, speed_bp: 2_000, ..form("Vanguard") },
         FormDef { dmg_bp: 4_000, splash_add: 1_000, ..form("Champion") },
     ]),
-    unit(UnitKind::Archer, "Archer", Humans, Ranged, One, 1_800,
+    unit(UnitKind::Archer, "Archer", Humans, Ranged, 1_800,
         [220, 45, 20, 4_500, 50, 0, 0], None, [
         FormDef { range_add: 1_500, dmg_bp: 2_000, ..form("Longbow") },
         FormDef { dmg_bp: 6_000, ..form("Marksman") },
         FormDef { atk_bp: 4_000, ..form("Volley") },
         FormDef { splash_add: 1_000, ..form("Arrow Rain") },
     ]),
-    unit(UnitKind::BoneBrute, "Bone Brute", Undead, Tank, Two, 2_400,
+    unit(UnitKind::BoneBrute, "Bone Brute", Undead, Tank, 2_400,
         [1_300, 75, 30, 1_000, 30, 0, 0], None, [
         FormDef { hp_bp: 5_000, ..form("Ossified") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Bone Wall") },
         FormDef { dmg_bp: 5_000, ..form("Butcher") },
         FormDef { dmg_bp: 3_000, splash_add: 1_200, ..form("Reaper") },
     ]),
-    unit(UnitKind::Hexer, "Hexer", Undead, Control, One, 2_400,
+    unit(UnitKind::Hexer, "Hexer", Undead, Control, 2_400,
         [300, 30, 28, 3_500, 50, 0, 0], slow(4_000, 40), [
         FormDef { on_hit: slow(6_000, 40), ..form("Withering") },
         FormDef { dmg_bp: 6_000, ..form("Doom") },
         FormDef { splash_add: 1_000, ..form("Plague") },
         FormDef { dmg_bp: 4_000, splash_add: 500, ..form("Pestilence") },
     ]),
-    unit(UnitKind::Sawbot, "Sawbot", Machines, Dps, One, 1_800,
+    unit(UnitKind::Sawbot, "Sawbot", Machines, Dps, 1_800,
         [270, 55, 21, 800, 65, 0, 0], None, [
         FormDef { atk_bp: 4_000, ..form("Overclock") },
         FormDef { atk_bp: 4_000, speed_bp: 3_000, ..form("Shredder") },
         FormDef { hp_bp: 6_000, ..form("Plating") },
         FormDef { hp_bp: 6_000, splash_add: 800, ..form("Juggernaut") },
     ]),
-    unit(UnitKind::SiegeWalker, "Siege Walker", Machines, Ranged, Two, 3_000,
+    unit(UnitKind::SiegeWalker, "Siege Walker", Machines, Ranged, 3_000,
         [700, 85, 50, 6_000, 30, 1_500, 0], None, [
         FormDef { range_add: 2_000, ..form("Longshot") },
         FormDef { dmg_bp: 5_000, ..form("Artillery") },
         FormDef { splash_add: 1_000, ..form("Shrapnel") },
         FormDef { on_hit: root(16), ..form("Concussion") },
     ]),
-    unit(UnitKind::Bloomkeeper, "Bloomkeeper", Plants, Support, One, 1_800,
+    unit(UnitKind::Bloomkeeper, "Bloomkeeper", Plants, Support, 1_800,
         [280, 0, 30, 3_000, 45, 0, 40], None, [
         FormDef { heal_bp: 5_000, ..form("Blossom") },
         FormDef { splash_add: 1_500, ..form("Grove") },
         FormDef { hp_bp: 5_000, dmg_add: 25, ..form("Bramble") },
         FormDef { on_hit: root(12), ..form("Thornwarden") },
     ]),
-    unit(UnitKind::Rootcaller, "Rootcaller", Plants, Control, One, 2_400,
+    unit(UnitKind::Rootcaller, "Rootcaller", Plants, Control, 2_400,
         [300, 20, 32, 3_000, 45, 0, 0], root(16), [
         FormDef { on_hit: root(32), ..form("Deep Roots") },
         FormDef { dmg_bp: 8_000, ..form("Strangle") },
         FormDef { splash_add: 1_000, ..form("Spores") },
         FormDef { range_add: 1_000, on_hit: root(28), ..form("Overgrowth") },
     ]),
+    // P16-B (D-32, Proposed). Nester forms only change Hatch (`hatch_rule`).
+    unit(UnitKind::Nester, "Nester", Plants, Support, 2_400,
+        [300, 15, 30, 2_500, 40, 0, 0], None, [
+        form("Brood"), form("Hive"), form("Venom"), form("Blight"),
+    ]),
+    unit(UnitKind::Rampart, "Rampart", Machines, Tank, 3_000,
+        [1_500, 35, 30, 800, 25, 0, 0], None, [
+        FormDef { hp_bp: 5_000, ..form("Bastion") },
+        FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Citadel") },
+        FormDef { dmg_bp: 6_000, ..form("Spiked") },
+        FormDef { dmg_bp: 4_000, splash_add: 1_000, ..form("Siegebreaker") },
+    ]),
+    // Summon: hatched with its Nester's tier and branch, so these forms are
+    // the Nester's Beetling upgrades (Venom slows, Blight +50 % HP and dmg).
+    unit(UnitKind::Beetling, "Beetling", Plants, Dps, 0,
+        [90, 18, 16, 600, 70, 0, 0], None, [
+        form("Brood"), form("Hive"),
+        FormDef { on_hit: slow(3_000, 20), ..form("Venom") },
+        FormDef { hp_bp: 5_000, dmg_bp: 5_000, ..form("Blight") },
+    ]),
 ];
+
+/// Hatch timing and per-Nester limit for a Nester's form: Brood (A1) raises
+/// the limit, Hive (A2) also hatches faster.
+pub fn hatch_rule(tier: u8, branch: u8) -> (u16, usize) {
+    let brood = branch == 0 && tier >= 1;
+    let every = if branch == 0 && tier >= 2 {
+        HATCH_EVERY_HIVE
+    } else {
+        HATCH_EVERY
+    };
+    (every, BEETLES_PER_NESTER[usize::from(brood)])
+}
 
 pub fn def(kind: UnitKind) -> &'static UnitDef {
     &UNITS[kind as usize]
@@ -239,14 +275,11 @@ pub struct Stats {
 
 pub fn effective_stats(kind: UnitKind, tier: u8, branch: u8, synergy_level: u8) -> Stats {
     let d = def(kind);
+    // No allocation: this runs for every unit on every tick.
     let forms = [form_of(kind, 1, branch), form_of(kind, 2, branch)];
-    let active: Vec<&FormDef> = forms
-        .iter()
-        .take(usize::from(tier.min(2)))
-        .flatten()
-        .copied()
-        .collect();
-    let sum = |f: fn(&FormDef) -> i32| -> i64 { active.iter().map(|x| i64::from(f(x))).sum() };
+    let active = &forms[..usize::from(tier.min(2))];
+    let sum =
+        |f: fn(&FormDef) -> i32| -> i64 { active.iter().flatten().map(|x| i64::from(f(x))).sum() };
     let (mut hp_bp, mut dmg_bp, mut atk_bp) =
         (sum(|f| f.hp_bp), sum(|f| f.dmg_bp), sum(|f| f.atk_bp));
     if synergy_level > 0 {
@@ -269,6 +302,11 @@ pub fn effective_stats(kind: UnitKind, tier: u8, branch: u8, synergy_level: u8) 
         speed: scale(i64::from(d.speed), sum(|f| f.speed_bp)),
         splash: d.splash + sum(|f| f.splash_add) as i32,
         heal: scale(i64::from(d.heal), sum(|f| f.heal_bp)),
-        on_hit: active.iter().rev().find_map(|f| f.on_hit).or(d.on_hit),
+        on_hit: active
+            .iter()
+            .rev()
+            .flatten()
+            .find_map(|f| f.on_hit)
+            .or(d.on_hit),
     }
 }

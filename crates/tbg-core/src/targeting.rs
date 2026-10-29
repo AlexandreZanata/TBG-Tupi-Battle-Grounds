@@ -1,9 +1,10 @@
-//! Who a unit acts on this tick: nearest enemy (unit or Stronghold), or
-//! for Support the most damaged ally in range (GAME-DESIGN §4).
+//! Who a unit acts on this tick: nearest enemy (unit or Stronghold), a
+//! Rampart in range first (Guard, BR-U09), or for Support the most damaged
+//! ally in range (GAME-DESIGN §4). One pass over the units per decision.
 
 use crate::content::{Stats, BP};
 use crate::state::{stronghold_x, MatchState, Target, Unit};
-use crate::types::UnitId;
+use crate::types::{UnitId, UnitKind};
 
 pub(crate) enum Engage {
     /// Attack an enemy or heal an ally.
@@ -24,25 +25,28 @@ pub(crate) fn engage(state: &MatchState, u: &Unit, st: &Stats) -> Option<Engage>
     enemy_in_range(state, u, st.range).map(Engage::Act)
 }
 
-/// Nearest living enemy unit by |dx| (ties: lowest id), or the enemy
+/// Guard first: the nearest living enemy Rampart within range. Otherwise
+/// the nearest living enemy unit by |dx| (ties: lowest id), or the enemy
 /// Stronghold when it is strictly nearer or no enemy unit exists.
-pub(crate) fn nearest_enemy(state: &MatchState, u: &Unit) -> (Target, i32) {
+fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
     let enemy = u.seat.other();
-    let best = state
-        .units
-        .iter()
-        .filter(|e| e.seat == enemy && e.hp > 0)
-        .map(|e| ((e.x - u.x).abs(), e.id))
-        .min();
+    let mut nearest: Option<(i32, UnitId)> = None;
+    let mut guard: Option<(i32, UnitId)> = None;
+    for e in state.units.iter().filter(|e| e.seat == enemy && e.hp > 0) {
+        let key = ((e.x - u.x).abs(), e.id);
+        nearest = Some(nearest.map_or(key, |n| n.min(key)));
+        if e.kind == UnitKind::Rampart && key.0 <= range {
+            guard = Some(guard.map_or(key, |g| g.min(key)));
+        }
+    }
+    if let Some((_, id)) = guard {
+        return Some(Target::Unit(id));
+    }
     let base = (stronghold_x(enemy) - u.x).abs();
-    match best {
+    let (target, dist) = match nearest {
         Some((d, id)) if d <= base => (Target::Unit(id), d),
         _ => (Target::Stronghold(enemy), base),
-    }
-}
-
-fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
-    let (target, dist) = nearest_enemy(state, u);
+    };
     (dist <= range).then_some(target)
 }
 

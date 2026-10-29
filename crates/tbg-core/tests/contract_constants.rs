@@ -46,11 +46,18 @@ fn energy_economy() {
 
 #[test]
 fn shop_slots_stronghold_and_evolution() {
-    // §5: 3 offers, full rotation every 10 s, SLOT_CAP 8, Stronghold 4500 HP
-    // hitting 65 every 1.0 s at range 6, evolutions cost 3 / 4 Energy.
-    assert_eq!(OFFERS, 3);
+    // §5 (D-32): 5 distinct offers, full rotation every 10 s, no army cap,
+    // Stronghold 4500 HP hitting 65 every 1.0 s at range 6, evolutions cost
+    // 3 / 4 Energy. Hatch (BR-U08): every 4 s (Hive 3 s), 2 alive per Nester
+    // (Brood 3), 6 per player, lifetime 10 s.
+    assert_eq!(OFFERS, 5);
     assert_eq!(ROTATION_TICKS, secs(10));
-    assert_eq!(SLOT_CAP, 8);
+    assert_eq!(
+        (u32::from(HATCH_EVERY), u32::from(HATCH_EVERY_HIVE)),
+        (secs(4), secs(3))
+    );
+    assert_eq!((BEETLES_PER_NESTER, BEETLES_PER_PLAYER), ([2, 3], 6));
+    assert_eq!(BEETLE_LIFETIME, secs(10));
     assert_eq!(STRONGHOLD_HP, 4_500);
     assert_eq!(STRONGHOLD_DAMAGE, 65);
     assert_eq!(u32::from(STRONGHOLD_INTERVAL), secs(1));

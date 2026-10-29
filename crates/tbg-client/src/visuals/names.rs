@@ -115,5 +115,8 @@ fn name(kind: UnitKind) -> &'static str {
         UnitKind::SiegeWalker => "Ogre Archer",
         UnitKind::Bloomkeeper => "Bloomkeeper",
         UnitKind::Rootcaller => "Rootcaller",
+        UnitKind::Nester => "Nester",
+        UnitKind::Rampart => "Rampart",
+        UnitKind::Beetling => "Beetling",
     }
 }

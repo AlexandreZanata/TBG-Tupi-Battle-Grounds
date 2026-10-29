@@ -147,7 +147,7 @@ pub(super) fn apply(
             UiAction::CloseEvolve => selected.0 = None,
             UiAction::Inspect(offer) => {
                 if let Some(v) = &extra.0 .0 {
-                    let kind = v.offers[usize::from(offer.min(2))];
+                    let kind = v.offers[usize::from(offer).min(tbg_core::content::OFFERS - 1)];
                     extra.1.push_for(super::tips::unit_details(kind), 4.5);
                 }
             }

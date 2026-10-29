@@ -31,17 +31,32 @@ fn bot_match(seed: u64) -> MatchState {
 
 #[test]
 fn bot_matches_are_frozen() {
+    // D-32 (P16-B): no army cap, five distinct offers, ten units, Hatch and
+    // Guard moved every golden; recomputed in the same commit.
+    use EndReason::{StrongholdDestroyed, TimeUp};
     let goldens = [
-        (1, 0x7b59_d4cc_3576_df97_u64, 2_414, Seat::A),
-        (7, 0xcf7b_951e_9dd2_9935, 1_832, Seat::B),
-        (42, 0x4ad6_363d_2357_8a89, 2_572, Seat::A),
+        (1, 0xc6cb_b48d_5e74_b6d6_u64, 3_661, Seat::A, TimeUp),
+        (
+            7,
+            0x4d74_11fa_6389_4ebd,
+            2_389,
+            Seat::B,
+            StrongholdDestroyed,
+        ),
+        (
+            42,
+            0x578f_482f_20b9_41ea,
+            2_165,
+            Seat::B,
+            StrongholdDestroyed,
+        ),
     ];
-    for (seed, hash, tick, winner) in goldens {
+    for (seed, hash, tick, winner, reason) in goldens {
         let s = bot_match(seed);
         let o = s.outcome.expect("bot match must end");
         assert_eq!(
             (o.winner, o.reason, s.tick),
-            (Some(winner), EndReason::StrongholdDestroyed, tick),
+            (Some(winner), reason, tick),
             "seed {seed}"
         );
         assert_eq!(

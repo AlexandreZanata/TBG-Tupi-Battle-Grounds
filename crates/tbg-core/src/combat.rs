@@ -7,7 +7,7 @@ use crate::content::{
 use crate::hits::{damage, resolve_hit};
 use crate::state::{stronghold_x, Event, MatchState, Target};
 use crate::targeting::{self, Engage};
-use crate::types::{Seat, Status};
+use crate::types::{Seat, Status, UnitKind};
 
 /// Count down statuses and cooldowns.
 pub(crate) fn tick_timers(state: &mut MatchState) {
@@ -94,7 +94,8 @@ fn slowed_interval(interval: u16, status: Status) -> u16 {
     }
 }
 
-/// Each Stronghold shoots the nearest enemy unit in range.
+/// Each Stronghold shoots the nearest enemy unit in range, a Rampart in
+/// range first (Guard, BR-U09).
 pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
     for seat in Seat::BOTH {
         if state.player(seat).stronghold_cooldown > 0 {
@@ -104,11 +105,10 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
         let target = state
             .units
             .iter()
-            .filter(|u| u.seat != seat && u.hp > 0)
-            .map(|u| ((u.x - sx).abs(), u.id))
-            .min()
-            .filter(|(d, _)| *d <= STRONGHOLD_RANGE);
-        if let Some((_, id)) = target {
+            .filter(|u| u.seat != seat && u.hp > 0 && (u.x - sx).abs() <= STRONGHOLD_RANGE)
+            .map(|u| (u.kind != UnitKind::Rampart, (u.x - sx).abs(), u.id))
+            .min();
+        if let Some((_, _, id)) = target {
             let to = Target::Unit(id);
             ev.push(Event::AttackStart {
                 from: Target::Stronghold(seat),

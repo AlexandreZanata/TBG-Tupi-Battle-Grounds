@@ -3,6 +3,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::content::OFFERS;
 use crate::shop::next_rotation_in;
 use crate::sim::phase_ticks_left;
 use crate::state::{Event, MatchState, Outcome, Phase};
@@ -29,9 +30,8 @@ pub struct MatchView {
     pub phase_ticks_left: u32,
     pub you: Seat,
     pub energy: u32,
-    pub offers: [UnitKind; 3],
+    pub offers: [UnitKind; OFFERS],
     pub next_rotation_in: u32,
-    pub slots_used: u8,
     /// Indexed by `Seat::index()`.
     pub stronghold_hp: [i32; 2],
     pub units: Vec<UnitView>,
@@ -52,7 +52,6 @@ impl MatchState {
             energy: me.energy,
             offers: me.offers,
             next_rotation_in: next_rotation_in(self.tick),
-            slots_used: self.slots_used(seat),
             stronghold_hp: [0, 1].map(|i| self.players[i].stronghold_hp),
             units: self
                 .units

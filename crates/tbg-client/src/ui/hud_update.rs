@@ -1,9 +1,7 @@
 //! Per-frame HUD refresh from `LatestView`.
 
 use bevy::prelude::*;
-use tbg_core::content::{
-    def, ENERGY_CAP, ENERGY_SCALE, ROTATION_TICKS, SLOT_CAP, STRONGHOLD_HP, TICK_HZ,
-};
+use tbg_core::content::{def, ENERGY_CAP, ENERGY_SCALE, ROTATION_TICKS, STRONGHOLD_HP, TICK_HZ};
 use tbg_core::{MatchView, Phase, FACTIONS};
 
 use super::hud::Hud;
@@ -56,10 +54,9 @@ pub(super) fn update(
             Hud::CardText(i) => {
                 let d = def(v.offers[*i]);
                 format!(
-                    "{}\n{:?} | {}\nCost {}",
+                    "{}\n{:?}\nCost {}",
                     d.name,
                     d.archetype,
-                    d.slots.count(),
                     d.cost / ENERGY_SCALE
                 )
             }
@@ -70,9 +67,8 @@ pub(super) fn update(
 
 fn buyable(v: &MatchView, i: usize) -> bool {
     let d = def(v.offers[i]);
-    v.energy >= d.cost
-        && v.slots_used + d.slots.count() <= SLOT_CAP
-        && matches!(v.phase, Phase::Running | Phase::Overtime)
+    // Energy is the only purchase condition (BR-U07).
+    v.energy >= d.cost && matches!(v.phase, Phase::Running | Phase::Overtime)
 }
 
 fn clock(v: &MatchView) -> String {
@@ -92,8 +88,23 @@ fn info(v: &MatchView) -> String {
         .collect();
     let energy = v.energy as f32 / ENERGY_SCALE as f32;
     format!(
-        "Energy {energy:.1} | Army {}/{SLOT_CAP} | {}",
-        v.slots_used,
+        "Energy {energy:.1} | {} | {}",
+        army_label(v),
         synergies.join("  ")
     )
+}
+
+/// `Army N`, plus `Brood M` while the seat has summons (BR-U07, BR-U08).
+pub(crate) fn army_label(v: &MatchView) -> String {
+    let army = tbg_core::bot::army(v);
+    let brood = v
+        .units
+        .iter()
+        .filter(|u| u.seat == v.you && u.kind.is_summon())
+        .count();
+    if brood > 0 {
+        format!("Army {army} | Brood {brood}")
+    } else {
+        format!("Army {army}")
+    }
 }

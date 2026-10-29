@@ -2,7 +2,7 @@
 //! props. Evolutions add or swap props and grow the figure 8% per tier.
 
 use bevy::prelude::*;
-use tbg_core::{SlotCount, UnitKind};
+use tbg_core::UnitKind;
 
 use super::legacy::{part, BodyPlan, FigureSpec, Joint::*, PartSpec};
 use super::mesh::Shape::*;
@@ -59,6 +59,15 @@ pub fn archer_v2(tier: u8) -> super::figure::FigureSpec {
     humans::archer_v2::spec(tier)
 }
 
+/// Units drawn with the large body plan. Visual only: since D-32 no unit
+/// takes more army space than another (the old two-slot units plus Rampart).
+pub fn large(kind: UnitKind) -> bool {
+    matches!(
+        kind,
+        UnitKind::BoneBrute | UnitKind::SiegeWalker | UnitKind::Rampart
+    )
+}
+
 pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
     let mut spec = match kind {
@@ -70,9 +79,17 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::SiegeWalker => machines::siege_walker(f),
         UnitKind::Bloomkeeper => plants::bloomkeeper(f),
         UnitKind::Rootcaller => plants::rootcaller(f),
+        // ponytail: P16-B placeholders reuse the nearest figure; final art for
+        // Nester, Rampart, and the Beetling comes in their character phases.
+        UnitKind::Nester => plants::bloomkeeper(f),
+        UnitKind::Rampart => humans::shieldbearer(f),
+        UnitKind::Beetling => plants::rootcaller(f),
     };
-    if tbg_core::content::def(kind).slots == SlotCount::Two {
+    if large(kind) {
         spec.plan.scale = spec.plan.scale.max(BodyPlan::BIG.scale);
+    }
+    if kind.is_summon() {
+        spec.plan.scale *= 0.55;
     }
     // Figurines read 20% larger than life on the lane (toy-diorama style).
     spec.plan.scale *= 1.2 * (1.0 + 0.08 * f32::from(tier.min(2)));

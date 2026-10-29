@@ -6,7 +6,7 @@
 //! exempt from the file-size cap (AGENTS.md).
 
 use tbg_core::content::{def, FormDef, UnitDef, ENERGY_SCALE, TICK_HZ, UNITS};
-use tbg_core::{Archetype, Faction, OnHit, SlotCount, UnitKind};
+use tbg_core::{Archetype, Faction, OnHit, UnitKind, ALL_KINDS, UNIT_KINDS};
 
 /// One §5 roster row: cost in Energy, attack period in centiseconds, range
 /// and speed in centi-tiles (per second for speed), splash in centi-tiles.
@@ -14,7 +14,6 @@ struct Row {
     kind: UnitKind,
     faction: Faction,
     archetype: Archetype,
-    slots: SlotCount,
     cost: u32,
     hp: i32,
     damage: i32,
@@ -27,29 +26,34 @@ struct Row {
 }
 
 #[rustfmt::skip]
-const ROSTER: [Row; 8] = {
-    use Archetype::*; use Faction::*; use SlotCount::*; use UnitKind::*;
+const ROSTER: [Row; 11] = {
+    use Archetype::*; use Faction::*; use UnitKind::*;
     #[allow(clippy::too_many_arguments)] // one call per roster row reads as a table
-    const fn r(kind: UnitKind, faction: Faction, archetype: Archetype, slots: SlotCount,
+    const fn r(kind: UnitKind, faction: Faction, archetype: Archetype,
         cost: u32, hp: i32, damage: i32, heal: i32, every_cs: u32, range_ct: i32,
         speed_ct: i32, splash_ct: i32, on_hit: Option<OnHit>) -> Row {
-        Row { kind, faction, archetype, slots, cost, hp, damage, heal, every_cs, range_ct,
+        Row { kind, faction, archetype, cost, hp, damage, heal, every_cs, range_ct,
               speed_ct, splash_ct, on_hit }
     }
     [
-        r(Shieldbearer, Humans,   Tank,    One, 3,  650, 30,  0, 120, 80,  80,   0, None),
-        r(Archer,       Humans,   Ranged,  One, 3,  220, 45,  0, 100, 450, 100,  0, None),
-        r(BoneBrute,    Undead,   Tank,    Two, 4, 1300, 75,  0, 150, 100, 60,   0, None),
+        r(Shieldbearer, Humans,   Tank,    3,  650, 30,  0, 120, 80,  80,   0, None),
+        r(Archer,       Humans,   Ranged,  3,  220, 45,  0, 100, 450, 100,  0, None),
+        r(BoneBrute,    Undead,   Tank,    4, 1300, 75,  0, 150, 100, 60,   0, None),
         // slow 40 % for 2 s
-        r(Hexer,        Undead,   Control, One, 4,  300, 30,  0, 140, 350, 100,  0,
+        r(Hexer,        Undead,   Control, 4,  300, 30,  0, 140, 350, 100,  0,
           Some(OnHit::Slow { bp: 4_000, ticks: 40 })),
-        r(Sawbot,       Machines, Dps,     One, 3,  270, 55,  0, 105, 80,  130,  0, None),
-        r(SiegeWalker,  Machines, Ranged,  Two, 5,  700, 85,  0, 250, 600, 60, 150, None),
+        r(Sawbot,       Machines, Dps,     3,  270, 55,  0, 105, 80,  130,  0, None),
+        r(SiegeWalker,  Machines, Ranged,  5,  700, 85,  0, 250, 600, 60, 150, None),
         // heals 40 instead of attacking
-        r(Bloomkeeper,  Plants,   Support, One, 3,  280,  0, 40, 150, 300, 90,   0, None),
+        r(Bloomkeeper,  Plants,   Support, 3,  280,  0, 40, 150, 300, 90,   0, None),
         // root 0.8 s
-        r(Rootcaller,   Plants,   Control, One, 4,  300, 20,  0, 160, 300, 90,   0,
+        r(Rootcaller,   Plants,   Control, 4,  300, 20,  0, 160, 300, 90,   0,
           Some(OnHit::Root { ticks: 16 })),
+        // P16-B (D-32, Proposed): Hatch every 4 s; Guard (BR-U09).
+        r(Nester,       Plants,   Support, 4,  300, 15,  0, 150, 250, 80,   0, None),
+        r(Rampart,      Machines, Tank,    5, 1500, 35,  0, 150, 80,  50,   0, None),
+        // summon (BR-U08): never sold, lifetime 10 s
+        r(Beetling,     Plants,   Dps,     0,   90, 18,  0, 80,  60,  140,  0, None),
     ]
 };
 
@@ -60,8 +64,8 @@ fn base_stats_match_game_design_table() {
         let name = u.name;
         assert_eq!(u.kind, row.kind, "UNITS order must follow UnitKind");
         assert_eq!(
-            (u.faction, u.archetype, u.slots),
-            (row.faction, row.archetype, row.slots),
+            (u.faction, u.archetype),
+            (row.faction, row.archetype),
             "{name}"
         );
         assert_eq!(u.cost, row.cost * ENERGY_SCALE, "{name} cost");
@@ -84,16 +88,26 @@ fn base_stats_match_game_design_table() {
 
 #[test]
 fn roster_composition() {
-    // §5: eight units, two per faction, every archetype present, exactly two
-    // units use two slots.
-    assert_eq!(UNITS.len(), 8);
-    for f in [
-        Faction::Humans,
-        Faction::Undead,
-        Faction::Machines,
-        Faction::Plants,
+    // §5 (D-32): ten purchasable units plus the Beetling summon, in
+    // `UnitKind` order; every archetype present; the Shop pool is exactly the
+    // purchasable units (BR-U08: summons are never sold).
+    assert_eq!(UNITS.len(), 11);
+    assert_eq!(UNIT_KINDS.len(), 10);
+    assert!(UNIT_KINDS.iter().all(|k| !k.is_summon()));
+    assert_eq!(
+        UNITS.iter().map(|u| u.kind).collect::<Vec<_>>(),
+        ALL_KINDS.to_vec()
+    );
+    for (f, n) in [
+        (Faction::Humans, 2),
+        (Faction::Undead, 2),
+        (Faction::Machines, 3),
+        (Faction::Plants, 3),
     ] {
-        assert_eq!(UNITS.iter().filter(|u| u.faction == f).count(), 2, "{f:?}");
+        let sold = UNITS
+            .iter()
+            .filter(|u| u.faction == f && !u.kind.is_summon());
+        assert_eq!(sold.count(), n, "{f:?}");
     }
     for a in [
         Archetype::Tank,
@@ -104,10 +118,6 @@ fn roster_composition() {
     ] {
         assert!(UNITS.iter().any(|u| u.archetype == a), "{a:?} missing");
     }
-    assert_eq!(
-        UNITS.iter().filter(|u| u.slots == SlotCount::Two).count(),
-        2
-    );
 }
 
 fn hit(h: Option<OnHit>) -> String {
@@ -175,7 +185,19 @@ Bloomkeeper/Thornwarden: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+
 Rootcaller/Deep Roots: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=root 32t
 Rootcaller/Strangle: hp=0 dmg=8000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Rootcaller/Spores: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=1000 heal=0 dmg+=0 hit=-
-Rootcaller/Overgrowth: hp=0 dmg=0 atk=0 speed=0 range+=1000 splash+=0 heal=0 dmg+=0 hit=root 28t";
+Rootcaller/Overgrowth: hp=0 dmg=0 atk=0 speed=0 range+=1000 splash+=0 heal=0 dmg+=0 hit=root 28t
+Nester/Brood: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Nester/Hive: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Nester/Venom: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Nester/Blight: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rampart/Bastion: hp=5000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rampart/Citadel: hp=5000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=slow 3000bp/30t
+Rampart/Spiked: hp=0 dmg=6000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rampart/Siegebreaker: hp=0 dmg=4000 atk=0 speed=0 range+=0 splash+=1000 heal=0 dmg+=0 hit=-
+Beetling/Brood: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Beetling/Hive: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Beetling/Venom: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=slow 3000bp/20t
+Beetling/Blight: hp=5000 dmg=5000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {

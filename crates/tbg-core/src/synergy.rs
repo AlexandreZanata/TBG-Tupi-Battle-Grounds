@@ -7,8 +7,13 @@ use crate::types::{Seat, FACTIONS};
 
 pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
     for seat in Seat::BOTH {
-        let mut counts = [0u8; 4];
-        for u in state.units.iter().filter(|u| u.seat == seat && u.hp > 0) {
+        // u32: armies are uncapped (BR-U07); summons never count (BR-U08).
+        let mut counts = [0u32; 4];
+        for u in state
+            .units
+            .iter()
+            .filter(|u| u.seat == seat && u.hp > 0 && !u.kind.is_summon())
+        {
             counts[content::def(u.kind).faction.index()] += 1;
         }
         for faction in FACTIONS {
@@ -36,8 +41,11 @@ pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
     }
 }
 
-fn level_for(count: u8) -> u8 {
-    SYNERGY_THRESHOLDS.iter().filter(|&&t| count >= t).count() as u8
+fn level_for(count: u32) -> u8 {
+    SYNERGY_THRESHOLDS
+        .iter()
+        .filter(|&&t| count >= u32::from(t))
+        .count() as u8
 }
 
 /// Units of a faction with a `Regen` synergy heal a share of max HP.
@@ -47,7 +55,7 @@ fn regenerate(state: &mut MatchState) {
         let faction = content::def(u.kind).faction.index();
         let level = state.player(u.seat).synergy[faction];
         let (effect, bps) = SYNERGIES[faction];
-        if level == 0 || effect != SynergyEffect::Regen || u.hp <= 0 {
+        if level == 0 || effect != SynergyEffect::Regen || u.hp <= 0 || u.kind.is_summon() {
             continue;
         }
         let bp = i64::from(bps[usize::from(level) - 1]);

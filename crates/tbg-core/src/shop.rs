@@ -1,17 +1,29 @@
 //! Shop offers: drawn from each seat's own RNG stream (BR-S05), refilled
 //! on purchase, all rotated on one shared clock (BR-S02, BR-S04).
 
-use crate::content::{ROTATION_TICKS, RUNNING_START};
+use crate::content::{OFFERS, ROTATION_TICKS, RUNNING_START};
 use crate::rng::Pcg32;
 use crate::state::MatchState;
 use crate::types::{Tick, UnitKind, UNIT_KINDS};
 
-pub(crate) fn draw(rng: &mut Pcg32) -> UnitKind {
-    UNIT_KINDS[rng.below(UNIT_KINDS.len() as u32) as usize]
+/// Five distinct units (BR-S01): a partial Fisher-Yates over the pool.
+pub(crate) fn initial_offers(rng: &mut Pcg32) -> [UnitKind; OFFERS] {
+    let mut pool = UNIT_KINDS;
+    for i in 0..OFFERS {
+        let j = i + rng.below((pool.len() - i) as u32) as usize;
+        pool.swap(i, j);
+    }
+    std::array::from_fn(|i| pool[i])
 }
 
-pub(crate) fn initial_offers(rng: &mut Pcg32) -> [UnitKind; 3] {
-    [draw(rng), draw(rng), draw(rng)]
+/// Refill one offer with a unit not shown in the other offers.
+pub(crate) fn refill(offers: &mut [UnitKind; OFFERS], slot: usize, rng: &mut Pcg32) {
+    let others = |k: &UnitKind| !offers.iter().enumerate().any(|(i, o)| i != slot && o == k);
+    let count = UNIT_KINDS.iter().filter(|k| others(k)).count();
+    let pick = rng.below(count as u32) as usize;
+    if let Some(&kind) = UNIT_KINDS.iter().filter(|k| others(k)).nth(pick) {
+        offers[slot] = kind;
+    }
 }
 
 /// Redraw all offers of both seats (A first) on rotation ticks.

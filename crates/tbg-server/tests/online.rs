@@ -493,3 +493,66 @@ async fn br_m06_surrender_forfeits_once() {
         0
     );
 }
+
+#[tokio::test]
+async fn br_u07_online_army_stays_in_sync() {
+    // D-32 test 10: a real client buys the cheapest affordable offer all
+    // match long. Its army rebuilt from Spawn/Death events equals the
+    // server's view on every frame, and only Energy ever refuses a purchase.
+    let url = server(30).await;
+    let bot = tokio::spawn(play_one(fast(&url), 21));
+    let mut ws = connect(&url).await;
+    hello(&mut ws).await;
+    send(&mut ws, &ClientMsg::QuickMatch).await;
+    let (mut seq, mut refused) = (0u32, 0u32);
+    let mut mine = std::collections::BTreeSet::new();
+    while let Some(msg) = recv(&mut ws).await {
+        match msg {
+            ServerMsg::View(v) => {
+                for e in &v.events {
+                    match *e {
+                        tbg_core::Event::Spawn { unit, seat, .. } if seat == v.you => {
+                            mine.insert(unit);
+                        }
+                        tbg_core::Event::Death { unit } => {
+                            mine.remove(&unit);
+                        }
+                        _ => {}
+                    }
+                }
+                let seen: std::collections::BTreeSet<_> = v
+                    .units
+                    .iter()
+                    .filter(|u| u.seat == v.you)
+                    .map(|u| u.id)
+                    .collect();
+                assert_eq!(mine, seen, "client and server armies diverged");
+                let live = matches!(
+                    v.phase,
+                    tbg_core::Phase::Running | tbg_core::Phase::Overtime
+                );
+                let cheapest = (0..v.offers.len())
+                    .min_by_key(|&i| tbg_core::content::def(v.offers[i]).cost)
+                    .unwrap_or(0);
+                if live && v.energy >= tbg_core::content::def(v.offers[cheapest]).cost {
+                    seq += 1;
+                    let intent = PlayerIntention::Purchase {
+                        offer: cheapest as u8,
+                    };
+                    send(&mut ws, &ClientMsg::Intent { seq, intent }).await;
+                }
+            }
+            ServerMsg::Rejected { reason, .. } => {
+                assert_eq!(reason, Rejection::NotEnoughEnergy, "only Energy gates");
+                refused += 1;
+            }
+            ServerMsg::MatchEnd { .. } => {
+                bot.abort();
+                assert!(seq - refused > 8, "bought {} units", seq - refused);
+                return;
+            }
+            _ => {}
+        }
+    }
+    panic!("the match never ended");
+}

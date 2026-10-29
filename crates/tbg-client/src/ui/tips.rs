@@ -19,6 +19,15 @@ fn matchup(kind: UnitKind) -> (&'static str, &'static str) {
         UnitKind::SiegeWalker => ("groups, Strongholds", "fast melee up close"),
         UnitKind::Bloomkeeper => ("drawn-out fights", "burst damage"),
         UnitKind::Rootcaller => ("fast melee, chargers", "ranged poke"),
+        UnitKind::Nester => (
+            "long fights, walls of Beetlings",
+            "splash, burst on the Nester",
+        ),
+        UnitKind::Rampart => (
+            "shielding fragile ranged units",
+            "slows, ranged focus, splash",
+        ),
+        UnitKind::Beetling => ("swarming", "splash"),
     }
 }
 
@@ -31,11 +40,10 @@ pub fn unit_details(kind: UnitKind) -> String {
     };
     let (good, bad) = matchup(kind);
     format!(
-        "{} ({:?}, {:?}, {} slot)\nHP {} | {} every {:.2}s | range {:.1} | cost {}\nGood vs {good}\nWeak vs {bad}",
+        "{} ({:?}, {:?})\nHP {} | {} every {:.2}s | range {:.1} | cost {}\nGood vs {good}\nWeak vs {bad}",
         d.name,
         d.faction,
         d.archetype,
-        d.slots.count(),
         d.hp,
         attack,
         f32::from(d.interval) / 20.0,
