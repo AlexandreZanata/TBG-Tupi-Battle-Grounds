@@ -1,8 +1,10 @@
 # P30-B — Server capacity on minimal hardware
 
-**Depends on:** P14 merged (already true). Touches only `tbg-server`,
-`scripts/`, and docs, so it may run between character phases (P22–P29) on
-its own branch — never at the same time as another agent on the same files.
+**Depends on:** P14 merged (already true) and P30-A reviewed. The selected
+view encoding (if any) may touch `tbg-core`, `tbg-server`, and
+`tbg-client`; otherwise this phase touches only `tbg-server`, `scripts/`,
+and docs. It may run between character phases (P22–P29) on its own branch —
+never at the same time as another agent on the same files.
 **Branch:** `phase/p30b-server-capacity`.
 **Difficulty:** medium–high. Measurement-driven like P10: an optimization
 is kept only if the capacity run proves the gain.
@@ -17,7 +19,8 @@ target (~300 KB per running match against ≤ 100 KB).
 
 ## Deliverable
 
-- `scripts/capacity.sh` able to run the server inside a CPU/memory limit.
+- The P30-A decision applied exactly (if any), with its own before/after
+  and integrity tests; no other protocol/view change.
 - A before/after table at 1 vCPU / 1 GB: matches, CPU, RSS, KB per match,
   late ticks, RTT p95, ack p95, bytes/s.
 - The kept optimizations, one commit each with its measured gain.
@@ -35,25 +38,33 @@ record the new value as Proposed.
 - `AGENTS.md`
 - `docs/ARCHITECTURE.md` §5, §10, §12
 - `docs/phases/P10-server-efficiency.md` (method and profile results)
+- `docs/phases/P30A-network-performance-audit.md` (decision and handoff)
 - Server: `src/lib.rs`, `src/main.rs`, `src/ws.rs`, `src/ws/`, `src/lobby.rs`,
   `src/lobby/`, `src/match_task.rs`, `src/chan.rs`, `src/metrics.rs`
 - `scripts/capacity.sh`, root `Cargo.toml` (profiles)
 
 ## Do NOT
 
-- Change the simulation, tick rate, protocol, view contents, matchmaking,
-  rating, or anything players can observe besides latency.
+- Change the simulation, tick rate, matchmaking, rating, or anything
+  players can observe besides latency. The only wire/view change allowed is
+  the exact encoding selected by P30-A, with its integrity and reconnect
+  tests.
 - Weaken validation, size limits, rate limits, timeouts, or seat ownership
   (AGENTS non-negotiables 2 and 4).
 - Add a dependency without a measured reason, or a cache/layer for one use.
 
 ## Steps
 
+### 0. P30-A decision
+Read the P30-A report. If it accepted a view encoding, implement exactly
+that option (protocol version bump, client update, integrity/reconnect
+tests) and record its own before/after. If it accepted none, skip this
+step. Do not reopen alternatives that P30-A measured and rejected.
+
 ### 1. Limited baseline
-Add `LIMIT_CPU` / `LIMIT_MEM` to `capacity.sh` (run the server with
-`systemd-run --user --scope -p CPUQuota=100% -p MemoryMax=1G`, or `taskset`
-plus a cgroup when systemd is unavailable; bots stay outside the limit).
-Run levels 250/500/1000/1500/2000 and record the table.
+Use the `LIMIT_CPU` / `LIMIT_MEM` harness delivered by P30-A; add the flags
+only if they are missing. Run levels 250/500/1000/1500/2000 inside
+1 vCPU / 1 GB (bots stay outside the limit) and record the table.
 
 ### 2. Profile under the limit
 CPU: `perf record -g` at the highest level without late ticks. Memory:
