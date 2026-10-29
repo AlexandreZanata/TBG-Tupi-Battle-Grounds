@@ -101,8 +101,8 @@ cgroup_dir() {
 }
 cgroup_value() { awk -v key="$2" '$1 == key {print $2; found = 1} END {if (!found) print 0}' "$1" 2>/dev/null || echo 0; }
 
-echo "| matches | server cores | bot cores | load1 | matches/core | RSS MB | KB/match | cgroup MB | throttled | mem high | oom | late ticks | RTT p95 ms | lobby max | conns | matches d | KB/s out | KB/s in | KB/s/player | views/s | view B avg |"
-echo "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
+echo "| matches | server cores | bot cores | load1 | matches/core | RSS MB | KB/match | cgroup MB | peak MB | throttled | mem max | oom | late ticks | RTT p95 ms | lobby max | conns | matches d | KB/s out | KB/s in | KB/s/player | views/s | view B avg |"
+echo "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
 for level in $LEVELS; do
 	start_server
 	for _ in $(seq 1 100); do curl -fsS "http://$ADDR/health" >/dev/null 2>&1 && break; sleep 0.1; done
@@ -125,7 +125,7 @@ for level in $LEVELS; do
 	if [ -n "$cg" ] && [ -d "$cg" ]; then
 		mem0=$(cat "$cg/memory.current" 2>/dev/null || echo 0)
 		throttle0=$(cgroup_value "$cg/cpu.stat" nr_throttled)
-		memhigh0=$(cgroup_value "$cg/memory.events" high)
+		memhigh0=$(cgroup_value "$cg/memory.events" max)
 		memoom0=$(cgroup_value "$cg/memory.events" oom)
 	fi
 	late0=$(metric late_ticks)
@@ -142,7 +142,7 @@ for level in $LEVELS; do
 	if [ -n "$cg" ] && [ -d "$cg" ]; then
 		mem1=$(cat "$cg/memory.current" 2>/dev/null || echo 0)
 		throttle1=$(cgroup_value "$cg/cpu.stat" nr_throttled)
-		memhigh1=$(cgroup_value "$cg/memory.events" high)
+		memhigh1=$(cgroup_value "$cg/memory.events" max)
 		memoom1=$(cgroup_value "$cg/memory.events" oom)
 	fi
 	late1=$(metric late_ticks)
@@ -159,6 +159,10 @@ for level in $LEVELS; do
 	bot_cores=$(awk -v a="$b0" -v b="$b1" -v w="$WINDOW" 'BEGIN {printf "%.2f", (b - a) / 100 / w}')
 	load1=$(cut -d' ' -f1 /proc/loadavg)
 	cg_mb=$(awk -v a="$mem0" -v b="$mem1" 'BEGIN {printf "%.0f", (a > b ? a : b) / 1048576}')
+	peak_mb=0
+	if [ -n "$cg" ] && [ -r "$cg/memory.peak" ]; then
+		peak_mb=$(awk -v b="$(cat "$cg/memory.peak")" 'BEGIN {printf "%.0f", b / 1048576}')
+	fi
 	throttled=$(awk -v a="$throttle0" -v b="$throttle1" 'BEGIN {print b - a}')
 	mem_high=$((memhigh1 - memhigh0))
 	mem_oom=$((memoom1 - memoom0))
@@ -169,7 +173,7 @@ for level in $LEVELS; do
 	player_kb=$(awk -v s="$server_kb" -v m="$run1" 'BEGIN {printf "%.2f", (m > 0 ? s / (2 * m) : 0)}')
 	views_s=$(awk -v a="$views0" -v b="$views1" -v w="$WINDOW" 'BEGIN {printf "%.0f", (b - a) / w}')
 	view_avg=$(awk -v a="$views0" -v b="$views1" -v va="$vbytes0" -v vb="$vbytes1" 'BEGIN {n = b - a; printf "%.0f", (n > 0 ? (vb - va) / n : 0)}')
-	echo "| $run1 | $cores | $bot_cores | $load1 | $per_core | $rss | $kb | $cg_mb | $throttled | $mem_high | $mem_oom | $((late1 - late0)) | $rtt | $inbox | $conn1 | $((run1 - run0)) | $server_kb | $in_kb | $player_kb | $views_s | $view_avg |"
+	echo "| $run1 | $cores | $bot_cores | $load1 | $per_core | $rss | $kb | $cg_mb | $peak_mb | $throttled | $mem_high | $mem_oom | $((late1 - late0)) | $rtt | $inbox | $conn1 | $((run1 - run0)) | $server_kb | $in_kb | $player_kb | $views_s | $view_avg |"
 	# conn0 is sampled to make the connection gauge's growth explicit in the log.
 	: "$conn0"
 	stop
