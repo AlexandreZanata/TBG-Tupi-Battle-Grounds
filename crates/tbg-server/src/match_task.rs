@@ -9,6 +9,7 @@ use tokio::sync::mpsc;
 use tokio::time::MissedTickBehavior;
 
 use tbg_core::protocol::{MatchMode, ServerMsg, Token};
+use tbg_core::replay::Replay;
 use tbg_core::{Event, MatchState, Seat};
 
 use crate::chan::{ConnHandle, LobbyCmd, MatchCmd, MATCH_QUEUE};
@@ -41,6 +42,8 @@ pub(super) struct Match {
     /// P12: ranked matches report the result to the store transaction.
     pub(super) mode: MatchMode,
     pub(super) metrics: Arc<Metrics>,
+    /// P16-C: recorded only when a test asked for replays (`Config::replays`).
+    pub(super) replay: Option<Replay>,
 }
 
 pub(crate) fn spawn(
@@ -62,6 +65,10 @@ pub(crate) fn spawn(
         applied: [false; 2],
         mode,
         metrics,
+        replay: config.replays.as_ref().map(|_| Replay {
+            seed,
+            ..Replay::default()
+        }),
     };
     tokio::spawn(run(m, rx, lobby, config, seed, store));
     tx
@@ -111,6 +118,7 @@ async fn run(
         // Forfeits first, so a forfeit's final view still goes out below.
         for seat in Seat::BOTH {
             if m.detached_at[seat.index()].is_some_and(|t| t.elapsed() > window) {
+                m.record(seat, None);
                 m.state.forfeit(seat);
             }
         }
@@ -128,6 +136,10 @@ async fn run(
             }
             break;
         }
+    }
+    if let (Some(mut replay), Some(tx)) = (m.replay.take(), &config.replays) {
+        replay.final_hash = m.state.hash();
+        let _ = tx.send(replay);
     }
     let ticks = u128::from(m.state.tick.max(1));
     m.metrics.matches_running.fetch_sub(1, Relaxed);
