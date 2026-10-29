@@ -256,6 +256,10 @@ pub fn rows(results: &Results, duels: Option<(&Matrix, &Ruleset)>, resamples: u3
         ));
     }
     rows.extend(meta_rows(results));
+    if resamples == 0 {
+        // No bootstrap: do not print a zero-width interval.
+        rows.iter_mut().for_each(|r| r.interval = None);
+    }
     rows
 }
 

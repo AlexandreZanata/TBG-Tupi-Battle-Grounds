@@ -243,7 +243,11 @@ pub fn step(k: Knob, canon: i64) -> (i64, i64) {
         Knob::EnergyStart
         | Knob::EnergyCap
         | Knob::EvolveCost(_)
-        | Knob::Unit(_, UnitField::Cost) => (i64::from(ENERGY_SCALE), 2),
+        // Whole Energy, at most ±25 % (one step for every current cost).
+        | Knob::Unit(_, UnitField::Cost) => {
+            let e = i64::from(ENERGY_SCALE);
+            (e, (canon / 4 / e).max(1))
+        }
         Knob::Form(_, _, FormField::RangeAdd | FormField::SplashAdd | FormField::DmgAdd) => {
             (five_percent, 5)
         }
