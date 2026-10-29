@@ -99,5 +99,9 @@ pub(super) async fn send(
     let bytes = protocol::encode(msg);
     let n = bytes.len() as u64;
     Metrics::add(&metrics.bytes_out, n);
+    if matches!(msg, ServerMsg::View(_)) {
+        Metrics::add(&metrics.view_messages, 1);
+        Metrics::add(&metrics.view_bytes, n);
+    }
     socket.send(Message::Binary(bytes.into())).await.map(|_| n)
 }

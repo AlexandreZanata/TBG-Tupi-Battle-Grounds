@@ -13,9 +13,15 @@ use super::Match;
 
 impl Match {
     /// Send this tick's view to one seat and drain its buffer.
-    pub(super) fn send_view(&mut self, seat: Seat) {
+    /// P30-A: `ack` marks a view sent only because an intention was processed.
+    pub(super) fn send_view(&mut self, seat: Seat, ack: bool) {
         let events = std::mem::take(&mut self.pending[seat.index()]);
         let view = self.state.view_for(seat, &events);
+        let stats = &mut self.stats[seat.index()];
+        stats.views += 1;
+        stats.ack_views += u32::from(ack);
+        stats.events += events.len() as u32;
+        stats.units += view.units.len() as u32;
         self.send(seat, ServerMsg::View(view));
     }
 

@@ -89,7 +89,7 @@ impl Match {
                 let start = self.match_start(seat);
                 self.send(seat, start);
                 // Catch up on events buffered while detached.
-                self.send_view(seat);
+                self.send_view(seat, false);
             }
             MatchCmd::Rtt { seat, ms } => self.stats[seat.index()].rtts.push(ms),
         }

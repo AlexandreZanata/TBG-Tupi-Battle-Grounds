@@ -17,6 +17,11 @@ pub(crate) struct SeatStats {
     pub(super) factions: [u32; 4],
     /// BR-M06: this seat tapped Surrender (additive report key).
     pub(super) surrendered: bool,
+    /// P30-A view observability (never read by gameplay).
+    pub(super) views: u32,
+    pub(super) ack_views: u32,
+    pub(super) events: u32,
+    pub(super) units: u32,
 }
 
 impl Match {
@@ -40,6 +45,8 @@ impl Match {
                     "intents": s.intents, "rejections": s.rejections, "reconnects": s.reattached,
                     "purchases": s.purchases, "evolutions": s.evolutions,
                     "surrendered": s.surrendered,
+                    "views": s.views, "ack_views": s.ack_views,
+                    "events": s.events, "units": s.units,
                 })
             })
             .collect();
