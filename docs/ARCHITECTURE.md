@@ -168,7 +168,10 @@ tables are the one allowed exception.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
   applied or rejected that tick (P9).
-  Clients render about 120 ms behind the newest view and interpolate x.
+  Clients place views on the server clock (`MatchView::clock`), render an
+  adaptive 100–350 ms behind the newest one (one view interval plus the
+  p95 arrival jitter) and interpolate x; events play when the render time
+  reaches their view (P30-C, `tbg-client/src/sync/timeline.rs`).
 - **Prediction:** UI-level only — a tapped card shows pending and `Energy`
   dims optimistically until `last_seq` confirms or `Rejected` arrives.
 - **Sessions:** the server issues a random 128-bit token in `Welcome`; the
