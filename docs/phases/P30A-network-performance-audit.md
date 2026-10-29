@@ -1,8 +1,9 @@
 # P30-A — Network, view, and scalability audit
 
-**Depends on:** P10, P14 and P16-B reviewed (the audit starts from `main`
-with the open army and its measured large-army data). P30-B must not start
-before this phase's report is reviewed.
+**Depends on:** P10, P14, P16-B and P16-C reviewed; starts from `main` at
+`fb47717` or later (open army, balance lab with `headless`/`replay`,
+Arcanas, protocol v8). P30-B must not start before this phase's report is
+reviewed.
 **Branch:** `phase/p30a-network-performance-audit`.
 **Difficulty:** high. Measurement-first: this phase produces evidence, a
 decision, and a handoff. It does not ship a production gameplay or wire
@@ -67,7 +68,8 @@ owner approves an architectural change.
 
 ## Current data path (verify before measuring)
 
-Verified on branch base `1d998f3`; update this map if the code moved.
+Verified on `main` `fb47717` (planning review, 2026-10-29); update this map
+if the code moved.
 
 | Step | Where | What it does |
 |------|-------|--------------|
@@ -81,12 +83,53 @@ Verified on branch base `1d998f3`; update this map if the code moved.
 | Client receive | `crates/tbg-client/src/net/socket.rs`, `sync/messages.rs` | Decode each binary frame; ignored decode errors; copies events into `ViewBuffer.events`; keeps `LatestView` and the last two views. |
 | Client render | `crates/tbg-client/src/sync.rs` (`sync_units`) | Clones the whole `MatchView` every frame, linearly searches `prev.units` per unit, and linearly checks every entity in `retain`. |
 | Limits | `ws.rs`, `chan.rs`, `lobby.rs` | 1 KiB inbound, 20 msgs/s burst 40, 8 sockets/IP, 64 KiB max WS write, `CONN_QUEUE=32`, `MATCH_QUEUE=256`, `LOBBY_QUEUE=1024`, 15 s idle, 5 s handshake, 30 s reconnect window. |
+| Keep-alive | `ws.rs` | A WebSocket `Ping` every 1 s and an app `Ping` every 5 s (answered by `NetStats`): about 1.4 extra server messages per second per connection, on top of 10 views/s and ack views. |
+| Replay | `crates/tbg-core/src/replay.rs`, server `Config::replays` | Records every applied intention per tick; `Replay::run` rebuilds the exact state (contract C4). Use it to check that a reconstructed client view equals the server's view on recorded online matches. |
+| Production path | `tbg.abastevo.com.br` (local deploy notes) | Cloudflare → nginx (TLS terminates there) → `tbg-server` on loopback, in a k3s namespace with a 2 CPU / 1 GiB quota. TLS cost is nginx's, not `tbg-server`'s. |
 
 The current wire is **full snapshots**. `MatchView` carries both players'
 units every view; static unit fields (`seat`, `kind`, `tier`, `branch`)
 are repeated even though they change only on spawn/evolution. The client
 already receives `Spawn` and `Evolved` events, but uses them only for
 presentation, not for state reconstruction.
+
+### Planning measurement (main `fb47717`, reviewer probe, not committed)
+
+300 bot-vs-bot matches (default Arcanas, release), every view encoded with
+postcard exactly as the server would, events accumulated per seat between
+views. Natural armies only; synthetic large armies are step 2's job.
+
+| Metric | Bot vs bot | Seat A heavy spam |
+|---|---|---|
+| View size avg / p95 / max | 137 / 205 / 400 B | 150 / 255 / 608 B |
+| Payload per player at 10 Hz | 1.37 KB/s | 1.50 KB/s |
+| Header (all non-unit, non-event fields) | 22.7 % | 20.8 % |
+| Units | 73.5 % (12.5 B per unit, 8.1 units per view) | 75.6 % |
+| — of which static `seat, kind, tier, branch` | 23.6 % of all bytes | 24.2 % |
+| — of which `max_hp` | 11.8 % of all bytes | 12.1 % |
+| Events | 3.7 % (1.2 per view) | 3.6 % |
+
+Header detail (share of all bytes): `synergy` 5.8 % (8 B), `offers` 3.6 %,
+`stronghold_hp` 2.9 %, `phase` + `outcome` + two lengths 2.9 %, `tick`
+1.4 %, `phase_ticks_left` 1.4 %, `energy` 1.4 %, `last_seq` 1.4 %,
+`next_rotation_in` 1.0 %, `you` 0.7 %.
+
+**`max_hp` is derivable.** For 5.9 million live-unit samples,
+`state.stats_of(u).max_hp == u.max_hp` held without exception: the client
+already has `tbg-core`, the Synergy levels, and both Arcana presets (from
+`MatchStart`), so it can compute every unit's max HP exactly.
+`phase_ticks_left` and `next_rotation_in` are pure functions of `tick` and
+`phase` (`sim::phase_ticks_left`, `shop::next_rotation_in`), and `you` is
+fixed by `MatchStart`. Removing these four fields costs no state on either
+side and saves about **15 %** of payload.
+
+**Per-message overhead is as large as the savings.** At 137 B of payload a
+message also costs roughly 2–4 B of WebSocket framing, ~22 B of TLS record
+(at nginx in production), and 40–52 B of TCP/IP headers. With `TCP_NODELAY`
+(P9) each view is its own packet, so wire bytes are about 1.5× payload and
+CPU per message (syscall, frame, record) does not shrink with the payload.
+Payload savings must therefore be reported both as payload and as estimated
+wire bytes, and the message count is a first-class metric.
 
 Prior evidence to verify, not to trust blindly: P10 measured about
 300 KB RSS per running match, 1.3 KB/s per player at 250 matches, and
@@ -100,13 +143,16 @@ with `BytesMut`) without a new hypothesis and a fresh measurement.
 
 | ID | Hypothesis | Test | Accept if |
 |----|------------|------|-----------|
-| H1 | Static unit fields are a large share of view bytes; header fields and events are small at typical armies. | Field-by-field size breakdown of captured views at 10/20/40/60/100 units/side, synthetic and natural. | Static fields are ≥30% of unit payload at 20+ units/side; events are <20% of the view. |
+| H1 | Static unit fields are a large share of view bytes; events are small at typical armies (planning probe: static 23.6 % of all bytes ≈ 32 % of unit payload, events 3.7 %). | Field-by-field size breakdown of captured views at 10/20/40/60/100 units/side, synthetic and natural. | Static fields are ≥30% of unit payload at 20+ units/side; events are <20% of the view. Report whether events grow faster than units in large battles. |
 | H2 | A static/dynamic split removes that share without per-tick diffing. | Prototype in `view_audit.rs`: static roster/updates plus a complete dynamic list every view; reconstruct every view. | ≥20% fewer bytes at 20 units/side or ≥30% at 100, exact reconstruction, CPU increase ≤10%. |
 | H3 | A per-view delta removes more bytes but costs more CPU, memory, and recovery complexity. | Prototype with per-seat previous state, changed-unit list, spawn/death handling, periodic keyframe, reconstruction. | Only if it beats H2 by ≥15 percentage points at 100 units/side *and* stays within the CPU/memory/latency budgets. |
 | H4 | 10 Hz is the right view rate; lowering it is not a free win. | Compute bytes at 5/8/10 Hz; temporarily run a prototype at 8 and 5 Hz with bots; compare ack, view gap, and bandwidth. | Keep 10 Hz unless a lower rate shows no ack/gap regression and a clear traffic win; never reduce the 20 Hz simulation. |
 | H5 | Ack views are a small share of traffic at human and bot rates. | Count regular vs ack views and bytes per seat. | Compact ack only if ack views are >10% of view bytes at realistic input rates. |
 | H6 | Message size drives the WebSocket write/allocation cost, so reducing bytes also reduces server CPU. | Profile full vs split/delta at the same match count; compare `BytesMut::resize`, allocations, and CPU per match. | Keep a wire change only if it reduces CPU per match or raises matches/core by ≥10% at the same late-tick/RTT quality. |
 | H7 | The client's per-frame full-view clone and O(n²) lookups are measurable at 100 units/side. | Chrome performance capture with the debug army; compare current vs an `Arc` + sorted-merge POC. | Fix in P30/P30-B only if frame time drops ≥15% at 100 units or ≥5 FPS on a mid-range phone, with no visual change. |
+| H8 | "Derive, don't send" removes ~15 % with no state: `max_hp`, `phase_ticks_left`, `next_rotation_in`, `you` (planning probe). | Prototype A (step 3) plus an invariant test over 100 seeds and recorded online replays. | Exact client values on every view; ≥10 % fewer payload bytes at natural armies. |
+| H9 | Message count, not payload, dominates per-player server CPU at natural army sizes. | Count server messages per player per second by type (view, ack view, WS ping, app ping, `NetStats`, other) and profile CPU per message vs per byte at a fixed match count. | If ≥50 % of send CPU is per-message, prefer reducing messages (e.g. fold the 1 s WS ping into traffic that already flows, coalesce an ack view with a regular view due the same tick) over shaving bytes. Never delay an ack (P9). |
+| H10 | Both seats' views repeat the same units and events; building that part once per tick saves CPU and allocations. | Measure `view_for` build time and allocations per tick; prototype one shared unit list per tick (both seats read it) without changing the wire. | Keep only if build+encode CPU per tick drops ≥15 %. This is not P10's rejected encode-once; it changes what is built, not the encoder. |
 
 ## Decision thresholds
 
@@ -171,13 +217,25 @@ Run the harness for synthetic and natural matches. Report, per unit count:
 Separate synthetic topped-up armies from natural bot matches. Do not
 present synthetic numbers as expected player traffic.
 
-### 3. Prototype A — trimmed full snapshots
+### 3. Prototype A — derive, don't send (stateless)
 
-Measure what can be removed without changing semantics: `you` repeated in
-every view, `next_rotation_in` derived from `tick`, redundant empty
-fields, and tighter integer encodings. This is the low-complexity control.
-Report the gain; expect it to be small. Do not spend more than one
-iteration here if it is under 10%.
+Remove every field the client can compute exactly with the `tbg-core` it
+already runs, keeping full snapshots and no per-seat memory:
+
+- `UnitView.max_hp` → a core helper (no `MatchState` needed) that computes a
+  unit's max HP from `kind`, `tier`, `branch`, the seat's Synergy level,
+  and the seat's frozen Arcana preset (and, once P17-A lands, nothing else:
+  Strongholds are not units). Add a core contract test asserting the
+  invariant `stats_of(u).max_hp == u.max_hp` for every live unit after
+  every step on 100 seeds, with Arcanas.
+- `phase_ticks_left`, `next_rotation_in` → the existing core functions.
+- `you` → from `MatchStart`.
+- Tighter integers only where the range is proven and nothing is lost:
+  for example `x` is 0–16 000 milli-tiles, so a `u16` varint takes 2 bytes
+  where today's zigzag `i32` takes 3. Measure the gain before proposing.
+
+Expected from the planning probe: about 15 % fewer payload bytes. This is
+the preferred first wire change if it clears H8; C builds on it.
 
 ### 4. Prototype C — static/dynamic split (preferred candidate)
 
@@ -186,9 +244,12 @@ Prototype:
 - `UnitStatic { id, seat, kind, tier, branch }`: sent for all living units
   in a full snapshot (reconnect/first sync) and only for spawned/evolved
   units in normal views.
-- `UnitDynamic { id, x, hp, max_hp, status }`: sent for **every** living
-  unit in every view. `max_hp` stays dynamic because Synergy and Evolution
-  can change it.
+- `UnitDynamic { id, x, hp, status }`: sent for **every** living unit in
+  every view. `max_hp` is derived on the client (Prototype A), not sent.
+- Low-frequency state moves to the static section too: both seats'
+  Synergy levels (already announced by `SynergyChanged` events) and, when
+  P17-A lands, both `StrongholdView`s (kind, tier, branch, max HP; already
+  announced by `StrongholdEvolved`). A full view carries them all.
 - `MatchView` gains `full: bool` and `static_units: Vec<UnitStatic>`;
   `units` becomes `Vec<UnitDynamic>`.
 - On reconnect, `Attach` sends `full = true` with the complete live roster.
@@ -268,7 +329,12 @@ control):
 
 ### 8. Capacity under limits
 
-Run the limited server at 1 vCPU / 1 GB and 2 vCPU / 8 GB. The bots run
+First read the real traffic of the test server, read-only: `/metrics` is
+not public, so the owner (or a reviewer with VPS access) runs
+`curl -s http://127.0.0.1:18260/metrics` on the VPS twice, 10 minutes
+apart, and records `bytes_out`, `connections`, and `matches_running` (no
+player data). Then run the limited server at **2 CPU / 1 GiB** (the actual
+k3s quota of the test deployment), 1 vCPU / 1 GB, and 2 vCPU / 8 GB. The bots run
 outside the server cgroup. Use natural bot matches, then a separate
 synthetic large-army microbenchmark; do not mix the two.
 
@@ -276,6 +342,8 @@ Levels:
 
 - 1 vCPU / 1 GB: 100, 250, 500, 750, 1000 matches; stop earlier if late
   ticks appear or the load generator saturates.
+- 2 CPU / 1 GiB (the deployed quota): 250, 500, 1000, 1500 matches; same
+  stop rule; this is the row the owner's capacity question needs.
 - 2 vCPU / 8 GB: 500, 1000, 1500, 2000, 2500 matches; same stop rule.
 - Test `TBG_WORKERS=1` and `2` for the 2 vCPU case; record the better
   setting and its late-tick behavior.
@@ -292,10 +360,20 @@ pending.
 
 Fill the comparison matrix and choose one outcome:
 
+Prefer, in this order, the first option that clears the thresholds:
+
 - **No wire change:** current full snapshots meet the thresholds; fix only
-  measured server/client hot spots.
-- **Static/dynamic split:** the recommended low-complexity wire change.
-- **Delta:** only if it clears the threshold and the recovery tests.
+  measured server/client hot spots (H9, H10, H7).
+- **Derive, don't send (A):** stateless; the expected default.
+- **A + static/dynamic split (C):** if A alone misses the traffic threshold.
+- **Delta (B):** only if it beats A + C by the published margin and passes
+  the recovery tests.
+
+Coordinate the protocol number: P39 (quick challenge, protocol v8 on its
+branch) and P17-A (Stronghold views) also change the wire. P30-B takes the
+next unused `PROTOCOL_VERSION` after whichever of them is on `main`, and
+its view design includes `StrongholdView` in the static section if P17-A
+is merged.
 
 Then write the exact P30-B handoff: files, protocol version, tests,
 rollback, and the metrics to re-measure. Revert every prototype that is
@@ -309,7 +387,7 @@ Run:
 
 ```bash
 cargo fmt --all -- --check
-cargo clippy --workspace -- -D warnings
+cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
 shellcheck scripts/capacity.sh
@@ -340,17 +418,21 @@ PROFILE=release LIMIT_CPU=200% LIMIT_MEM=8G \
 cargo run --release -p tbg-server --bin tbg-bots -- \
   --url ws://127.0.0.1:8181/ws --matches 250 --ramp-ms 5
 
-# Client (100-unit practice; requires the debug army parameter)
-cd crates/tbg-client && trunk build --release && trunk serve --release
-# open http://127.0.0.1:8080/?autoplay=practice&army=100&measure=1
+# Client (100-unit practice; requires the debug army parameter).
+# Port 8080 is often taken by another agent's server on the dev PC: pick a
+# free port and point the client at your server with ?server=.
+cd crates/tbg-client && trunk build --release && trunk serve --release --port 18600
+# open http://127.0.0.1:18600/?autoplay=practice&army=100&measure=1
 ```
 
 ## Comparison matrix (fill after measurement)
 
-| Criterion | Current | A: trimmed full | B: delta | C: static/dynamic | D: events only | E: lower Hz | F: compression |
+| Criterion | Current | A: derive, don't send | B: delta | C: A + static/dynamic | D: events only | E: lower Hz | F: compression |
 |-----------|---------|-----------------|----------|-------------------|----------------|-------------|----------------|
 | Bytes/s per player at 20 units | measured | measured | measured | measured | n/a for state | measured/derived | measured/derived |
 | Bytes/s per player at 100 units | measured | measured | measured | measured | n/a | measured/derived | measured/derived |
+| Estimated wire bytes/s per player (payload + WS + TLS + TCP/IP) | measured | measured | measured | measured | n/a | measured/derived | measured/derived |
+| Server messages/s per player | measured | measured | measured | measured | n/a | measured | measured |
 | Build+encode CPU per view | measured | measured | measured | measured | measured | n/a | measured |
 | Extra RAM per match/seat | measured | measured | measured | measured | — | — | — |
 | Client reconstruction cost | measured | measured | measured | measured | n/a | — | decode cost |
@@ -416,7 +498,7 @@ matrix above; do not leave a measured cell empty.
 
 ### C. Benchmarks
 
-| Metric | Current | A: trimmed full | B: delta | C: static/dynamic |
+| Metric | Current | A: derive, don't send | B: delta | C: A + static/dynamic |
 |--------|---------|-----------------|----------|-------------------|
 | KB/s per player at 20 units | measured | measured | measured | measured |
 | KB/s per player at 100 units | measured | measured | measured | measured |
