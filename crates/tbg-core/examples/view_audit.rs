@@ -1787,7 +1787,7 @@ fn main() {
             c.bytes_s / 1000.0
         );
         synthetic.push(format!(
-            "{{\"units_per_side\":{n},{},{},{},{},{},\"shares\":\"{}\",\"sections\":{{{},{},{},{}}},\"timing_us\":{{{},{},{},{},{},{},{},{},{},{}}},\"cache_max_bytes\":{{\"c\":{},\"b\":{}}}}}",
+            "{{\"units_per_side\":{n},{},{},{},{},{},\"shares\":\"{}\",\"sections\":{{{},{},{},{}}},\"timing_us\":{{{},{},{},{},{},{},{},{},{},{},{},{},{}}},\"frequency\":{{\"current\":{{\"10hz_bytes_s\":{:.2},\"8hz_bytes_s\":{:.2},\"5hz_bytes_s\":{:.2}}},\"c\":{{\"10hz_bytes_s\":{:.2},\"8hz_bytes_s\":{:.2},\"5hz_bytes_s\":{:.2}}}}},\"cache_max_bytes\":{{\"c\":{},\"b\":{}}}}}",
             size_json("current", &rec.current, 10.0),
             size_json("a", &rec.a, 10.0),
             size_json("b", &rec.b, 10.0),
@@ -1808,6 +1808,15 @@ fn main() {
             timing_json("encode_c", &rec.encode_c),
             timing_json("sync_clone_linear", &rec.sync_current),
             timing_json("sync_arc_sorted", &rec.sync_poc),
+            timing_json("rebuild_a", &rec.rebuild_a),
+            timing_json("rebuild_b", &rec.rebuild_b),
+            timing_json("rebuild_c", &rec.rebuild_c),
+            rec.current.summary(10.0).bytes_s,
+            rec.freq_current[0].summary(8.0).bytes_s,
+            rec.freq_current[1].summary(5.0).bytes_s,
+            rec.c.summary(10.0).bytes_s,
+            rec.freq_c[0].summary(8.0).bytes_s,
+            rec.freq_c[1].summary(5.0).bytes_s,
             rec.c_cache_max,
             rec.b_cache_max,
         ));
@@ -1896,6 +1905,29 @@ fn main() {
         "| C (A + split) | {:.2} | {:.2} | {:.2} | 10 | 8 | 5 |",
         c10.bytes_s, c8.bytes_s, c5.bytes_s
     );
+    println!();
+    println!();
+    println!("### Synthetic frequency, 20 and 100 units/side");
+    println!();
+    println!("| units/side | variant | 10 Hz B/s | 8 Hz B/s | 5 Hz B/s |");
+    println!("|---|---|---|---|---|");
+    for (n, rec) in [
+        (20, &synthetic_recorders[1]),
+        (100, &synthetic_recorders[4]),
+    ] {
+        println!(
+            "| {n} | current | {:.2} | {:.2} | {:.2} |",
+            rec.current.summary(10.0).bytes_s,
+            rec.freq_current[0].summary(8.0).bytes_s,
+            rec.freq_current[1].summary(5.0).bytes_s
+        );
+        println!(
+            "| {n} | C | {:.2} | {:.2} | {:.2} |",
+            rec.c.summary(10.0).bytes_s,
+            rec.freq_c[0].summary(8.0).bytes_s,
+            rec.freq_c[1].summary(5.0).bytes_s
+        );
+    }
     println!();
     println!(
         "Estimated wire bytes/s per player at 10 Hz: current {:.2}, A {:.2}, B {:.2}, C {:.2} (payload + {} B/message midpoint; range {}–{} B)",
