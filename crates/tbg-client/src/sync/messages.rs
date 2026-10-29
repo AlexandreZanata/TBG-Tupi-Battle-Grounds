@@ -4,10 +4,11 @@
 use std::collections::VecDeque;
 
 use bevy::prelude::*;
-use tbg_core::protocol::{ErrorCode, RoomCode, ServerMsg};
+use tbg_core::protocol::{ErrorCode, InviteToken, RoomCode, ServerMsg};
 
-use super::{LatestView, MatchInfo, ViewBuffer};
+use super::{LatestView, MatchInfo, RematchInfo, ViewBuffer};
 use crate::audio::{Sound, Sounds};
+use crate::config;
 use crate::link::MatchLink;
 use crate::net::{NetStatus, GIVE_UP};
 use crate::overlay::OverlayStats;
@@ -22,6 +23,8 @@ use crate::GameState;
 pub struct QueueInfo {
     pub searching: bool,
     pub room: Option<RoomCode>,
+    pub challenge: Option<InviteToken>,
+    pub joining_challenge: bool,
 }
 
 /// Inter-arrival times of the last 50 views (ms), for the overlay.
@@ -39,6 +42,7 @@ pub(super) fn poll_link(
     mut stats: (ResMut<OverlayStats>, ResMut<ViewGaps>),
     mut next: ResMut<NextState<GameState>>,
     mut extra: (ResMut<super::MatchStats>, ResMut<Sounds>),
+    mut rematch: ResMut<RematchInfo>,
     mut inbox: ResMut<AccountInbox>,
     mut account: ResMut<Account>,
     mut ranking: ResMut<crate::ui::ranking::Ranking>,
@@ -64,12 +68,16 @@ pub(super) fn poll_link(
                     ranked: mode == tbg_core::protocol::MatchMode::Ranked,
                     opponent_rating,
                     arcanas,
+                    challenge: mode == tbg_core::protocol::MatchMode::Challenge,
                     ..default()
                 };
                 // P12: a new match clears the previous rating count-up.
                 account.rating_change = None;
                 *buffer = ViewBuffer::default();
                 *extra.0 = super::MatchStats::default();
+                *rematch = RematchInfo::default();
+                *ui.2 = QueueInfo::default();
+                config::clear_url_param("challenge");
                 latest.0 = None;
                 crate::ui::surrender::reset(
                     &mut surrender,
@@ -100,11 +108,54 @@ pub(super) fn poll_link(
                 info.outcome = Some(outcome);
                 next.set(GameState::Result);
             }
-            ServerMsg::Queued => ui.2.searching = true,
-            ServerMsg::RoomCreated { code } => ui.2.room = Some(code),
+            ServerMsg::Queued => {
+                ui.2.searching = true;
+                ui.2.room = None;
+                ui.2.challenge = None;
+                ui.2.joining_challenge = false;
+            }
+            ServerMsg::RoomCreated { code } => {
+                ui.2.room = Some(code);
+                ui.2.challenge = None;
+                ui.2.joining_challenge = false;
+            }
+            ServerMsg::ChallengeWaiting { token } => {
+                ui.2.challenge = Some(token);
+                ui.2.room = None;
+                ui.2.searching = false;
+                ui.2.joining_challenge = false;
+                next.set(GameState::Queue);
+            }
+            ServerMsg::ChallengeUnavailable => {
+                ui.0.push("Challenge expired or unavailable");
+                *link = MatchLink::Idle;
+                *ui.2 = QueueInfo::default();
+                next.set(GameState::Menu);
+            }
+            ServerMsg::RematchOpen { opponent } => {
+                rematch.open = true;
+                rematch.closed = None;
+                info.challenge = true;
+                if info.opponent.is_empty() {
+                    info.opponent = opponent;
+                }
+                next.set(GameState::Result);
+            }
+            ServerMsg::RematchState {
+                you_requested,
+                opponent_requested,
+            } => {
+                rematch.you_requested = you_requested;
+                rematch.opponent_requested = opponent_requested;
+            }
+            ServerMsg::RematchClosed { declined } => {
+                rematch.open = false;
+                rematch.closed = Some(declined);
+            }
             ServerMsg::RoomNotFound => {
                 ui.0.push("Room not found");
                 *link = MatchLink::Idle;
+                *ui.2 = QueueInfo::default();
                 next.set(GameState::Menu);
             }
             ServerMsg::NetStats { rtt_ms } => stats.0.rtt_ms = Some(f64::from(rtt_ms)),
@@ -129,7 +180,16 @@ pub(super) fn poll_link(
                 *link = MatchLink::Idle;
                 next.set(GameState::Menu);
             }
-            ServerMsg::Error { code } => ui.0.push(format!("Server: {code:?}")),
+            ServerMsg::Error { code } => {
+                if code == ErrorCode::RateLimited && ui.2.joining_challenge {
+                    ui.0.push("Too many challenge attempts, try again later");
+                    *link = MatchLink::Idle;
+                    *ui.2 = QueueInfo::default();
+                    next.set(GameState::Menu);
+                } else {
+                    ui.0.push(format!("Server: {code:?}"));
+                }
+            }
             ServerMsg::Leaderboard {
                 total,
                 offset,

@@ -118,7 +118,12 @@ pub(super) fn handle(
         | ServerMsg::RatingChanged { .. }
         | ServerMsg::Leaderboard { .. }
         | ServerMsg::ArcanasSelected { .. }
-        | ServerMsg::ArcanasRejected { .. } => {}
+        | ServerMsg::ArcanasRejected { .. }
+        | ServerMsg::ChallengeWaiting { .. }
+        | ServerMsg::ChallengeUnavailable
+        | ServerMsg::RematchOpen { .. }
+        | ServerMsg::RematchState { .. }
+        | ServerMsg::RematchClosed { .. } => {}
     }
     Ok(None)
 }

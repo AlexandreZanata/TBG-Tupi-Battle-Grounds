@@ -9,7 +9,7 @@ use std::time::{Duration, Instant};
 
 use tokio::sync::mpsc;
 
-use tbg_core::protocol::{ClientMsg, ErrorCode, Profile, RoomCode, ServerMsg, Token};
+use tbg_core::protocol::{ClientMsg, ErrorCode, InviteToken, Profile, RoomCode, ServerMsg, Token};
 use tbg_core::Seat;
 
 use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd, LOBBY_QUEUE};
@@ -25,6 +25,8 @@ mod leaderboard;
 mod matchmaking;
 mod ranked;
 mod sessions;
+#[cfg(test)]
+mod tests;
 
 const ROOM_TTL: Duration = Duration::from_secs(600);
 
@@ -32,6 +34,9 @@ pub(super) enum SessionState {
     Idle,
     Queued,
     InRoom,
+    InChallenge {
+        token: InviteToken,
+    },
     InMatch {
         tx: mpsc::Sender<MatchCmd>,
         seat: Seat,
@@ -61,6 +66,10 @@ pub(super) struct Lobby {
     /// P9: when each queued session sent `QuickMatch` (for `queue_wait`).
     pub(super) queued_at: HashMap<Token, Instant>,
     pub(super) rooms: Vec<(RoomCode, Token, Instant)>,
+    /// P39: single-use Quick Challenge invitations.
+    pub(super) challenges: Vec<(InviteToken, Token, Instant)>,
+    /// P39: post-match rematch offers for challenge pairs.
+    pub(super) rematches: Vec<RematchTicket>,
     pub(super) self_tx: mpsc::Sender<LobbyCmd>,
     pub(super) config: Arc<Config>,
     pub(super) metrics: Arc<Metrics>,
@@ -68,6 +77,15 @@ pub(super) struct Lobby {
     /// P11: per-IP account rate limits.
     pub(super) limits: Limits,
     pub(super) draining: Arc<AtomicBool>,
+}
+
+/// P39: a rematch offer between the two sessions of a challenge match.
+pub(super) struct RematchTicket {
+    pub(super) players: [Token; 2],
+    pub(super) requested: [bool; 2],
+    /// `None` while the challenge match is live; `Some(deadline)` after
+    /// `MatchEnded`. An open ticket is a ticket with `expires.is_some()`.
+    pub(super) expires: Option<Instant>,
 }
 
 pub(crate) async fn run(
@@ -84,6 +102,8 @@ pub(crate) async fn run(
         ranked_queue: VecDeque::new(),
         queued_at: HashMap::new(),
         rooms: Vec::new(),
+        challenges: Vec::new(),
+        rematches: Vec::new(),
         self_tx,
         config,
         metrics,
@@ -135,10 +155,32 @@ impl Lobby {
             LobbyCmd::Client { token, msg } => self.client(token, msg),
             LobbyCmd::Disconnected { token, conn_id } => self.disconnected(token, conn_id),
             LobbyCmd::MatchEnded { tokens } => {
+                let names = tokens.map(|t| {
+                    self.sessions
+                        .get(&t)
+                        .map_or_else(String::new, |s| s.name.clone())
+                });
                 for t in tokens {
                     if let Some(s) = self.session(&t) {
                         s.state = SessionState::Idle;
                         send(&s.conn, ConnEvent::LeaveMatch);
+                    }
+                }
+                if let Some(i) = self
+                    .rematches
+                    .iter()
+                    .position(|r| r.players == tokens && r.expires.is_none())
+                {
+                    self.rematches[i].expires =
+                        Some(Instant::now() + Duration::from_secs(self.config.rematch_ttl_secs));
+                    for (seat, token) in tokens.iter().enumerate() {
+                        let opponent = names[1 - seat].clone();
+                        if let Some(s) = self.session(token) {
+                            send(
+                                &s.conn,
+                                ConnEvent::Send(ServerMsg::RematchOpen { opponent }),
+                            );
+                        }
                     }
                 }
             }
@@ -189,6 +231,9 @@ impl Lobby {
                 | ClientMsg::RankedMatch
                 | ClientMsg::CreateRoom
                 | ClientMsg::JoinRoom { .. }
+                | ClientMsg::CreateChallenge
+                | ClientMsg::JoinChallenge { .. }
+                | ClientMsg::RequestRematch
         );
         if wants_match && draining {
             // Shutting down: running matches finish, no new ones start.
@@ -201,6 +246,9 @@ impl Lobby {
             ClientMsg::RankedMatch => self.ranked(token),
             ClientMsg::CreateRoom => self.create_room(token),
             ClientMsg::JoinRoom { code } => self.join_room(token, code),
+            ClientMsg::CreateChallenge => self.create_challenge(token),
+            ClientMsg::JoinChallenge { token: invite } => self.join_challenge(token, invite),
+            ClientMsg::RequestRematch => self.request_rematch(token),
             ClientMsg::Cancel => self.leave_waiting(token),
             _ => {}
         }

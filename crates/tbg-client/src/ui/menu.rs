@@ -160,7 +160,12 @@ fn build(commands: &mut Commands, account: &Account) {
             p.spawn(label("Casual", 20.0));
             p.spawn(button("Practice vs Bot", UiAction::Practice, 260.0));
             p.spawn(button("Quick Match", UiAction::Quick, 260.0));
-            p.spawn(button("Play with a friend", UiAction::CreateRoom, 260.0));
+            p.spawn(button(
+                "Challenge a friend",
+                UiAction::CreateChallenge,
+                260.0,
+            ));
+            p.spawn(button("Private room", UiAction::CreateRoom, 260.0));
             p.spawn(label("Ranked", 20.0));
             p.spawn(ranked);
             p.spawn(pair(

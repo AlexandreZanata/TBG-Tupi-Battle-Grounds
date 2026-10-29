@@ -7,24 +7,30 @@ use futures_util::{SinkExt, StreamExt};
 use tokio::net::TcpListener;
 use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, WebSocketStream};
 
-use tbg_core::protocol::{self, ClientMsg, ErrorCode, ServerMsg, PROTOCOL_VERSION};
+use tbg_core::protocol::{
+    self, ClientMsg, ErrorCode, InviteToken, MatchMode, ServerMsg, PROTOCOL_VERSION,
+};
 use tbg_core::{EndReason, PlayerIntention, Rejection, Seat};
 use tbg_server::botclient::{play_one, BotOpts};
 use tbg_server::Config;
 
 type Ws = WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>;
 
-async fn server(reconnect_secs: u64) -> String {
+async fn server_with(config: Config) -> String {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let addr = listener.local_addr().unwrap();
-    let config = Config {
+    tokio::spawn(tbg_server::run(config, listener));
+    format!("ws://{addr}/ws")
+}
+
+async fn server(reconnect_secs: u64) -> String {
+    server_with(Config {
         tick_ms: 5,
         reconnect_secs,
         max_per_ip: 1_000,
         ..Config::default()
-    };
-    tokio::spawn(tbg_server::run(config, listener));
-    format!("ws://{addr}/ws")
+    })
+    .await
 }
 
 async fn connect(url: &str) -> Ws {
@@ -63,7 +69,7 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
     }
 }
 
-async fn hello(ws: &mut Ws) {
+async fn hello_token(ws: &mut Ws) -> [u8; 16] {
     send(
         ws,
         &ClientMsg::Hello {
@@ -72,7 +78,127 @@ async fn hello(ws: &mut Ws) {
         },
     )
     .await;
+    match recv(ws).await {
+        Some(ServerMsg::Welcome { token, .. }) => token,
+        other => panic!("expected Welcome, got {other:?}"),
+    }
+}
+
+async fn hello(ws: &mut Ws) {
+    hello_token(ws).await;
+}
+
+async fn hello_resume(ws: &mut Ws, token: [u8; 16]) {
+    send(
+        ws,
+        &ClientMsg::Hello {
+            version: PROTOCOL_VERSION,
+            resume: Some(token),
+        },
+    )
+    .await;
     assert!(matches!(recv(ws).await, Some(ServerMsg::Welcome { .. })));
+}
+
+async fn create_challenge(ws: &mut Ws) -> InviteToken {
+    send(ws, &ClientMsg::CreateChallenge).await;
+    match recv(ws).await {
+        Some(ServerMsg::ChallengeWaiting { token }) => token,
+        other => panic!("expected ChallengeWaiting, got {other:?}"),
+    }
+}
+
+async fn challenge_start(ws: &mut Ws) -> (Seat, MatchMode) {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::MatchStart { you, mode, .. }) => return (you, mode),
+            Some(_) => {}
+            None => panic!("socket closed before MatchStart"),
+        }
+    }
+}
+
+async fn challenge_result(ws: &mut Ws) -> Result<Seat, ()> {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::MatchStart { you, .. }) => return Ok(you),
+            Some(ServerMsg::ChallengeUnavailable) => return Err(()),
+            Some(_) => {}
+            None => panic!("socket closed before challenge result"),
+        }
+    }
+}
+
+async fn rematch_open(ws: &mut Ws) -> String {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::RematchOpen { opponent }) => return opponent,
+            Some(_) => {}
+            None => panic!("socket closed before RematchOpen"),
+        }
+    }
+}
+
+async fn rematch_state(ws: &mut Ws) -> (bool, bool) {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::RematchState {
+                you_requested,
+                opponent_requested,
+            }) => return (you_requested, opponent_requested),
+            Some(_) => {}
+            None => panic!("socket closed before RematchState"),
+        }
+    }
+}
+
+async fn no_match_start(ws: &mut Ws, wait: Duration) {
+    let deadline = tokio::time::Instant::now() + wait;
+    loop {
+        let left = deadline.saturating_duration_since(tokio::time::Instant::now());
+        if left.is_zero() {
+            return;
+        }
+        match tokio::time::timeout(left, recv(ws)).await {
+            Ok(Some(ServerMsg::MatchStart { .. })) => panic!("unexpected MatchStart"),
+            Ok(Some(_)) => continue,
+            Ok(None) | Err(_) => return,
+        }
+    }
+}
+
+async fn start_challenge(
+    url: &str,
+) -> (
+    Ws,
+    Ws,
+    [u8; 16],
+    [u8; 16],
+    (Seat, MatchMode),
+    (Seat, MatchMode),
+) {
+    let mut owner = connect(url).await;
+    let mut guest = connect(url).await;
+    let owner_token = hello_token(&mut owner).await;
+    let guest_token = hello_token(&mut guest).await;
+    let invite = create_challenge(&mut owner).await;
+    send(&mut guest, &ClientMsg::JoinChallenge { token: invite }).await;
+    let owner_start = challenge_start(&mut owner).await;
+    let guest_start = challenge_start(&mut guest).await;
+    (
+        owner,
+        guest,
+        owner_token,
+        guest_token,
+        owner_start,
+        guest_start,
+    )
+}
+
+async fn end_by_surrender(ws: &mut Ws, other: &mut Ws) {
+    send(ws, &ClientMsg::Surrender).await;
+    let _ = await_end(ws).await;
+    let _ = await_end(other).await;
 }
 
 fn fast(url: &str) -> BotOpts {
@@ -555,4 +681,313 @@ async fn br_u07_online_army_stays_in_sync() {
         }
     }
     panic!("the match never ended");
+}
+
+#[tokio::test]
+async fn challenge_pairs_owner_and_guest_without_code() {
+    let url = server(30).await;
+    let (_, _, _, _, owner_start, guest_start) = start_challenge(&url).await;
+    assert_eq!(
+        (owner_start.1, guest_start.1),
+        (MatchMode::Challenge, MatchMode::Challenge)
+    );
+    assert_ne!(owner_start.0, guest_start.0);
+}
+
+#[tokio::test]
+async fn challenge_only_one_guest_wins() {
+    let url = server(30).await;
+    let mut owner = connect(&url).await;
+    let mut first = connect(&url).await;
+    let mut second = connect(&url).await;
+    hello(&mut owner).await;
+    hello(&mut first).await;
+    hello(&mut second).await;
+    let invite = create_challenge(&mut owner).await;
+    send(&mut first, &ClientMsg::JoinChallenge { token: invite }).await;
+    send(&mut second, &ClientMsg::JoinChallenge { token: invite }).await;
+    let (a, b) = tokio::join!(challenge_result(&mut first), challenge_result(&mut second));
+    assert!(a.is_ok() ^ b.is_ok(), "{a:?} / {b:?}");
+    let (_, mode) = challenge_start(&mut owner).await;
+    assert_eq!(mode, MatchMode::Challenge);
+}
+
+#[tokio::test]
+async fn challenge_rejects_third_guest_and_owner_token() {
+    let url = server(30).await;
+    let mut owner = connect(&url).await;
+    let mut guest = connect(&url).await;
+    hello(&mut owner).await;
+    hello(&mut guest).await;
+    let invite = create_challenge(&mut owner).await;
+    send(&mut owner, &ClientMsg::JoinChallenge { token: invite }).await;
+    assert_eq!(
+        recv(&mut owner).await,
+        Some(ServerMsg::ChallengeUnavailable)
+    );
+    send(&mut guest, &ClientMsg::JoinChallenge { token: invite }).await;
+    let (_, mode) = challenge_start(&mut owner).await;
+    assert_eq!(mode, MatchMode::Challenge);
+    let _ = challenge_start(&mut guest).await;
+    let mut third = connect(&url).await;
+    hello(&mut third).await;
+    send(&mut third, &ClientMsg::JoinChallenge { token: invite }).await;
+    assert_eq!(
+        recv(&mut third).await,
+        Some(ServerMsg::ChallengeUnavailable)
+    );
+}
+
+#[tokio::test]
+async fn challenge_cancel_removes_invite() {
+    let url = server(30).await;
+    let mut owner = connect(&url).await;
+    let mut guest = connect(&url).await;
+    hello(&mut owner).await;
+    hello(&mut guest).await;
+    let old = create_challenge(&mut owner).await;
+    send(&mut owner, &ClientMsg::Cancel).await;
+    let fresh = create_challenge(&mut owner).await;
+    assert_ne!(old, fresh, "cancel must remove the old invite");
+    send(&mut guest, &ClientMsg::JoinChallenge { token: old }).await;
+    assert_eq!(
+        recv(&mut guest).await,
+        Some(ServerMsg::ChallengeUnavailable)
+    );
+}
+
+#[tokio::test]
+async fn challenge_owner_reload_resumes_waiting() {
+    let url = server(30).await;
+    let mut owner = connect(&url).await;
+    let token = hello_token(&mut owner).await;
+    let invite = create_challenge(&mut owner).await;
+    drop(owner);
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    let mut guest = connect(&url).await;
+    hello(&mut guest).await;
+    send(&mut guest, &ClientMsg::JoinChallenge { token: invite }).await;
+    assert_eq!(
+        recv(&mut guest).await,
+        Some(ServerMsg::ChallengeUnavailable),
+        "a reloading host must not start a ghost match"
+    );
+
+    let mut owner = connect(&url).await;
+    hello_resume(&mut owner, token).await;
+    assert_eq!(
+        recv(&mut owner).await,
+        Some(ServerMsg::ChallengeWaiting { token: invite })
+    );
+    send(&mut guest, &ClientMsg::JoinChallenge { token: invite }).await;
+    let (_, mode) = challenge_start(&mut owner).await;
+    assert_eq!(mode, MatchMode::Challenge);
+    let _ = challenge_start(&mut guest).await;
+}
+
+#[tokio::test]
+async fn challenge_guest_reload_resumes_match() {
+    let url = server(30).await;
+    let (mut owner, guest, _, guest_token, _, guest_start) = start_challenge(&url).await;
+    let guest_seat = guest_start.0;
+    drop(guest);
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    let mut guest = connect(&url).await;
+    hello_resume(&mut guest, guest_token).await;
+    let (seat, mode) = challenge_start(&mut guest).await;
+    assert_eq!((seat, mode), (guest_seat, MatchMode::Challenge));
+    end_by_surrender(&mut guest, &mut owner).await;
+}
+
+#[tokio::test]
+async fn challenge_expires() {
+    let url = server_with(Config {
+        tick_ms: 5,
+        max_per_ip: 1_000,
+        challenge_ttl_secs: 1,
+        ..Config::default()
+    })
+    .await;
+    let mut owner = connect(&url).await;
+    let mut guest = connect(&url).await;
+    hello(&mut owner).await;
+    hello(&mut guest).await;
+    let invite = create_challenge(&mut owner).await;
+    tokio::time::sleep(Duration::from_millis(1_100)).await;
+    send(&mut guest, &ClientMsg::JoinChallenge { token: invite }).await;
+    assert_eq!(
+        recv(&mut guest).await,
+        Some(ServerMsg::ChallengeUnavailable)
+    );
+    assert_eq!(
+        recv(&mut owner).await,
+        Some(ServerMsg::ChallengeUnavailable)
+    );
+}
+
+#[tokio::test]
+async fn rematch_requires_both() {
+    let url = server(30).await;
+    let (mut owner, mut guest, _, _, _, _) = start_challenge(&url).await;
+    end_by_surrender(&mut owner, &mut guest).await;
+    let _ = rematch_open(&mut owner).await;
+    let _ = rematch_open(&mut guest).await;
+    send(&mut owner, &ClientMsg::RequestRematch).await;
+    assert_eq!(rematch_state(&mut owner).await, (true, false));
+    assert_eq!(rematch_state(&mut guest).await, (false, true));
+    no_match_start(&mut owner, Duration::from_millis(100)).await;
+    no_match_start(&mut guest, Duration::from_millis(100)).await;
+    send(&mut guest, &ClientMsg::RequestRematch).await;
+    let (a, b) = tokio::join!(challenge_start(&mut owner), challenge_start(&mut guest));
+    assert_eq!((a.1, b.1), (MatchMode::Challenge, MatchMode::Challenge));
+    assert_ne!(a.0, b.0);
+}
+
+#[tokio::test]
+async fn rematch_duplicate_requests_idempotent() {
+    let url = server(30).await;
+    let (mut owner, mut guest, _, _, _, _) = start_challenge(&url).await;
+    end_by_surrender(&mut owner, &mut guest).await;
+    let _ = rematch_open(&mut owner).await;
+    let _ = rematch_open(&mut guest).await;
+    send(&mut owner, &ClientMsg::RequestRematch).await;
+    assert_eq!(rematch_state(&mut owner).await, (true, false));
+    assert_eq!(rematch_state(&mut guest).await, (false, true));
+    send(&mut owner, &ClientMsg::RequestRematch).await;
+    assert_eq!(rematch_state(&mut owner).await, (true, false));
+    assert_eq!(rematch_state(&mut guest).await, (false, true));
+    no_match_start(&mut owner, Duration::from_millis(100)).await;
+    send(&mut guest, &ClientMsg::RequestRematch).await;
+    let (a, b) = tokio::join!(challenge_start(&mut owner), challenge_start(&mut guest));
+    assert_eq!((a.1, b.1), (MatchMode::Challenge, MatchMode::Challenge));
+    no_match_start(&mut owner, Duration::from_millis(100)).await;
+    no_match_start(&mut guest, Duration::from_millis(100)).await;
+}
+
+#[tokio::test]
+async fn rematch_decline_closes() {
+    let url = server(30).await;
+    let (mut owner, mut guest, _, _, _, _) = start_challenge(&url).await;
+    end_by_surrender(&mut owner, &mut guest).await;
+    let _ = rematch_open(&mut owner).await;
+    let _ = rematch_open(&mut guest).await;
+    send(&mut owner, &ClientMsg::RequestRematch).await;
+    let _ = rematch_state(&mut owner).await;
+    let _ = rematch_state(&mut guest).await;
+    send(&mut guest, &ClientMsg::Cancel).await;
+    assert_eq!(
+        recv(&mut owner).await,
+        Some(ServerMsg::RematchClosed { declined: true })
+    );
+    no_match_start(&mut owner, Duration::from_millis(100)).await;
+    no_match_start(&mut guest, Duration::from_millis(100)).await;
+}
+
+#[tokio::test]
+async fn rematch_reload_keeps_offer() {
+    let url = server(30).await;
+    let (mut owner, mut guest, owner_token, _, _, _) = start_challenge(&url).await;
+    end_by_surrender(&mut owner, &mut guest).await;
+    let _ = rematch_open(&mut owner).await;
+    let _ = rematch_open(&mut guest).await;
+    send(&mut owner, &ClientMsg::RequestRematch).await;
+    let _ = rematch_state(&mut owner).await;
+    let _ = rematch_state(&mut guest).await;
+    drop(owner);
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    send(&mut guest, &ClientMsg::RequestRematch).await;
+    assert_eq!(rematch_state(&mut guest).await, (true, true));
+    no_match_start(&mut guest, Duration::from_millis(100)).await;
+
+    let mut owner = connect(&url).await;
+    hello_resume(&mut owner, owner_token).await;
+    let (a, b) = tokio::join!(challenge_start(&mut owner), challenge_start(&mut guest));
+    assert_eq!((a.1, b.1), (MatchMode::Challenge, MatchMode::Challenge));
+    assert_ne!(a.0, b.0);
+}
+
+#[tokio::test]
+async fn rematch_does_not_enter_public_queue() {
+    let url = server(30).await;
+    let (mut owner, mut guest, _, _, _, _) = start_challenge(&url).await;
+    end_by_surrender(&mut owner, &mut guest).await;
+    let _ = rematch_open(&mut owner).await;
+    let _ = rematch_open(&mut guest).await;
+    send(&mut owner, &ClientMsg::RequestRematch).await;
+    let _ = rematch_state(&mut owner).await;
+    let _ = rematch_state(&mut guest).await;
+
+    let mut third = connect(&url).await;
+    hello(&mut third).await;
+    send(&mut third, &ClientMsg::QuickMatch).await;
+    assert_eq!(recv(&mut third).await, Some(ServerMsg::Queued));
+    no_match_start(&mut owner, Duration::from_millis(100)).await;
+    no_match_start(&mut guest, Duration::from_millis(100)).await;
+
+    send(&mut guest, &ClientMsg::RequestRematch).await;
+    let (a, b) = tokio::join!(challenge_start(&mut owner), challenge_start(&mut guest));
+    assert_eq!((a.1, b.1), (MatchMode::Challenge, MatchMode::Challenge));
+    no_match_start(&mut third, Duration::from_millis(100)).await;
+}
+
+#[tokio::test]
+async fn two_guests_same_ip_join_different_challenges() {
+    let url = server(30).await;
+    let mut owner_a = connect(&url).await;
+    let mut owner_b = connect(&url).await;
+    let mut guest_a = connect(&url).await;
+    let mut guest_b = connect(&url).await;
+    hello(&mut owner_a).await;
+    hello(&mut owner_b).await;
+    hello(&mut guest_a).await;
+    hello(&mut guest_b).await;
+    let invite_a = create_challenge(&mut owner_a).await;
+    let invite_b = create_challenge(&mut owner_b).await;
+    send(&mut guest_a, &ClientMsg::JoinChallenge { token: invite_a }).await;
+    send(&mut guest_b, &ClientMsg::JoinChallenge { token: invite_b }).await;
+    let (a, b, c, d) = tokio::join!(
+        challenge_start(&mut owner_a),
+        challenge_start(&mut guest_a),
+        challenge_start(&mut owner_b),
+        challenge_start(&mut guest_b)
+    );
+    assert_eq!(
+        (a.1, b.1, c.1, d.1),
+        (
+            MatchMode::Challenge,
+            MatchMode::Challenge,
+            MatchMode::Challenge,
+            MatchMode::Challenge
+        )
+    );
+}
+
+#[tokio::test]
+async fn challenge_invite_rate_limit() {
+    let url = server_with(Config {
+        tick_ms: 5,
+        max_per_ip: 1_000,
+        invite_per_ip_min: 2,
+        ..Config::default()
+    })
+    .await;
+    let mut guest = connect(&url).await;
+    hello(&mut guest).await;
+    for token in [[1; 16], [2; 16]] {
+        send(&mut guest, &ClientMsg::JoinChallenge { token }).await;
+        assert_eq!(
+            recv(&mut guest).await,
+            Some(ServerMsg::ChallengeUnavailable)
+        );
+    }
+    send(&mut guest, &ClientMsg::JoinChallenge { token: [3; 16] }).await;
+    assert_eq!(
+        recv(&mut guest).await,
+        Some(ServerMsg::Error {
+            code: ErrorCode::RateLimited
+        })
+    );
 }

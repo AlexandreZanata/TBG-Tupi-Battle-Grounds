@@ -2,7 +2,7 @@
 //! `input.rs` turns taps into actions and `actions.rs` applies them.
 
 use bevy::prelude::*;
-use tbg_core::protocol::RoomCode;
+use tbg_core::protocol::{InviteToken, RoomCode};
 use tbg_core::{Rejection, UnitId};
 
 pub mod account;
@@ -45,6 +45,12 @@ pub enum UiAction {
     Quick,
     CreateRoom,
     JoinRoom(RoomCode),
+    // P39: Quick Challenge by link.
+    CreateChallenge,
+    JoinChallenge(InviteToken),
+    ChallengeInvalid,
+    ShareChallenge,
+    RequestRematch,
     Cancel,
     CopyLink,
     PlayAgain,
