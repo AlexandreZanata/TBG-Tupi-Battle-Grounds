@@ -46,6 +46,8 @@ Versions verified on 2026-10-27 against the local cargo registry and
 crates/tbg-core    deterministic rules, content tables, bot, view, protocol
 crates/tbg-client  Bevy browser client (depends on tbg-core)
 crates/tbg-server  authoritative server (depends on tbg-core; never Bevy)
+crates/tbg-balance offline balance lab (native binary; depends on tbg-core
+                   with its `lab` feature; never a dependency of the others)
 ```
 
 | Crate | May depend on | Must never contain |
@@ -53,6 +55,17 @@ crates/tbg-server  authoritative server (depends on tbg-core; never Bevy)
 | `tbg-core` | `serde`, `postcard` only | graphics, async runtime, sockets, filesystem, clocks, floats in simulation state, unseeded randomness |
 | `tbg-client` | `tbg-core`, `bevy`, `ewebsock`, small web helpers | outcome decisions in online play |
 | `tbg-server` | `tbg-core`, `axum`, `tokio`, `rusqlite` | Bevy, rendering, gameplay rules (they live in core) |
+| `tbg-balance` | `tbg-core` (feature `lab`) and `std` only | network, persistence, anything the online game loads |
+
+**Rulesets (D-33, P16-C).** Every tunable number is a `Ruleset` value;
+the simulation reads numbers only through `MatchState::rules()`. The server
+and the client only ever use `Ruleset::canon()`, assembled from
+`content.rs`; `MatchState::with_rules`, `Bot::with_rules`, and the `lab`
+feature (`lab_spawn`) exist for `tbg-balance` alone (contract C10). The
+ruleset is not serialized, so hashes, views, and the wire are unchanged.
+`tbg_core::headless::play` is the server's loop without a clock, and
+`tbg_core::replay` re-runs a recorded match; contract C4 proves the server
+at 5 ms and 50 ms ticks equals the headless replay.
 
 Planned modules (create each only when its roadmap task starts):
 
@@ -67,6 +80,7 @@ Planned modules (create each only when its roadmap task starts):
 | core | `sim.rs` | `MatchState::step()` — the fixed tick, in a fixed order |
 | core | `view.rs` | `view_for(seat) -> MatchView`, redaction, event drain |
 | core | `bot.rs` | seeded heuristic opponent (practice, harness, load test) |
+| core | `ruleset.rs` · `headless.rs` · `replay.rs` · `lab.rs` | numbers as data, the clockless match loop, replays, lab-only duels (P16-C) |
 | core | `protocol.rs` | `ClientMsg`, `ServerMsg`, `PROTOCOL_VERSION`, encode/decode |
 | client | `main.rs` · `camera.rs` · `arena.rs` | app, states, framing, environment |
 | client | `art/` | `palette.rs`, `mesh.rs`, `figure.rs`, `anim.rs`, `roster/<faction>.rs` |
@@ -412,6 +426,13 @@ cargo clippy --workspace -- -D warnings
 cargo check --workspace
 cargo test --workspace
 cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+```
+
+Balance changes add (release builds, D-33):
+
+```bash
+cargo test -p tbg-server --test lab_equivalence -- --ignored   # one 1x match
+cargo run --release -p tbg-balance -- gate --pairs 1000
 ```
 
 A native check never proves browser compatibility. Rendering claims need

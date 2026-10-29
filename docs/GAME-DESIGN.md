@@ -246,6 +246,38 @@ human playtests. Targets are starting hypotheses.
 | Readability | Testers can explain why they lost | ≥ 4 of 5 testers |
 | Replayability | Testers pressing Play again after a match | ≥ 50% |
 
+### Balance lab targets (**Proposed**, P16-C, D-33)
+
+Measured by `tbg-balance gate` over seed pairs (both seat orders, same
+participants), 95 % cluster-bootstrap intervals, against a pool of
+seeded policies that see only their own `MatchView`: `bot` (the shipped
+bot), `evolver`, `saver`, `faction-<f>` for every faction (the *strategic*
+styles), the probes `heavy` and `cheap` (P16-B spam) and `favor-<unit>`
+for every shop unit (the bot, but always buying that unit). Non-bot
+policies decide every 5 views (500 ms). §6 rows above are computed over
+games between strategic styles. Bots are not humans: a passing gate is
+necessary, never sufficient; the owner's playtest decides.
+
+| Row | Target | Required for release |
+|-----|--------|----------------------|
+| Seat A score, `bot` vs `bot` | 48.5–51.5 % | yes |
+| `heavy` vs `bot`, `cheap` vs `bot` | ≤ 55 % each | yes |
+| Strongest strategic style, average against the others | ≤ 60 % | — |
+| Each `favor-<unit>` vs `bot` | median of all favor rows ± 10 pp | — |
+| Energy-equal duels: base forms averaging ≥ 70 % against the other base forms at every budget (20/40/60 Energy) | none | yes |
+| Duels: base forms averaging ≤ 30 % everywhere (Support exempt) | none | — |
+| Duels: forms that win on average and that nothing beats ≥ 60 % | none | — |
+| Duels: Evolved forms losing to their own base form at every budget | ≤ 25 % of forms | — |
+| Duels: Evolution branches never better than their sibling | none | — |
+| Nash equilibrium of the full pool: support / largest weight | ≥ 3 policies / ≤ 50 % | yes |
+
+**Role invariants (Proposed).** Searched rulesets keep: base range ≤
+Stronghold range; cost between 1 Energy and the Energy cap; interval ≥
+the minimum; in a faction with a Tank, a Tank has the most HP per Energy;
+in a faction with a Ranged unit, a Ranged unit has the longest range; a
+zero stays zero (no new ability). Untuned by the lab: Synergy thresholds,
+Hatch limits, slow/root effects, and every structural constant.
+
 ## 7. Deferred (rules kept, not in the MVP)
 
 - `Reposition` intention: legacy names it but defines no semantics; with
