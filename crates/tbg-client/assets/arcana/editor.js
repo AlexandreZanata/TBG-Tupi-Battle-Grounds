@@ -1,4 +1,5 @@
-// Browser-only Arcana draft editor. No actions cross the Rust/network bridge.
+// Arcana editor (D-40). The preset lives in localStorage (`storageKey`);
+// the game reads it when a match starts and the server validates it.
 (() => {
   'use strict';
   const root = document.getElementById('tbg-lobby');
@@ -30,19 +31,19 @@
   function save() {
     try {
       localStorage.setItem(data.storageKey, JSON.stringify({schema:data.previewSchema, ranks}));
-      storageNote = 'Saved locally · this device only';
+      storageNote = 'Saved · used by your next match (accounts keep it on every device)';
     } catch (_) { storageNote = 'Browser storage unavailable · draft kept for this visit'; }
   }
   function load() {
     ranks = [...data.defaultPreset];
     try {
       const raw = localStorage.getItem(data.storageKey);
-      if (raw === null) { storageNote = 'Default selected · edits save on this device'; return; }
+      if (raw === null) { storageNote = 'Default selected · your edits are saved'; return; }
       if (raw.length > 1024) throw new Error('oversized');
       const stored = JSON.parse(raw);
       if (stored?.schema !== data.previewSchema || !rules.editable(stored.ranks, data)) throw new Error('invalid');
       ranks = [...stored.ranks]; storageNote = 'Restored from this browser';
-    } catch (_) { storageNote = 'Saved preview unavailable or invalid · default restored for this visit'; }
+    } catch (_) { storageNote = 'Saved preset unavailable or invalid · default restored'; }
   }
   function change(index, delta) {
     const next = [...ranks]; next[index] += delta;
@@ -135,7 +136,7 @@
   }
   async function prepare() {
     const response = await fetch('assets/arcana/arcana.json');
-    if (!response.ok) throw new Error('Arcana preview data could not load. Close and reopen to retry.');
+    if (!response.ok) throw new Error('Arcana data could not load. Close and reopen to retry.');
     data = await response.json(); load();
     data.families.forEach(familyCard);
     ['intro','scope','controls','eligibility'].forEach(key => text(key, data.copy[key]));
@@ -147,13 +148,14 @@
     if (!desktop.matches || root.hidden || root.dataset.screen !== 'lobby') return;
     opener = button;
     if (!panel.open) panel.showModal();
-    text('status', 'Loading Arcana preview…');
+    text('status', 'Loading Arcanas…');
     get('error').hidden = true;
     try {
       loading ||= prepare().catch(error => { loading = undefined; throw error; });
       await loading;
+      load();
       if (panel.open) { render(); panel.querySelector('.arcana-close').focus(); }
-    } catch (error) { text('error', error.message); get('error').hidden = false; text('status', 'Preview unavailable'); }
+    } catch (error) { text('error', error.message); get('error').hidden = false; text('status', 'Arcanas unavailable'); }
   }));
   get('default').addEventListener('click', () => { if (data) { ranks = [...data.defaultPreset]; save(); render(); } });
   get('reset').addEventListener('click', () => { if (data) { ranks = data.nodes.map(() => 0); save(); render(); } });

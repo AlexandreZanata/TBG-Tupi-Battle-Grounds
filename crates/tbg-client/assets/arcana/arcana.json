@@ -10,7 +10,7 @@
     2,
     0
   ],
-  "storageKey": "tbg.arcana.preview",
+  "storageKey": "tbg.arcanas",
   "families": [
     {
       "id": "war",
@@ -230,15 +230,15 @@
     "name": "Beetling",
     "archetype": "DPS",
     "affected": false,
-    "text": "Beetling (summon): not affected in this preview. Proposed: summons receive no Arcana bonus, matching the BR-U08 exclusion for Synergy; owner approval is still required."
+    "text": "Beetling (summon): no Arcana bonus, like Synergy (BR-U08). Proposed values, active by D-40."
   },
   "copy": {
-    "badge": "Preview - not used in matches yet",
+    "badge": "Active in Practice, Casual, Ranked and private rooms",
     "intro": "Three families. Six points. A strategy of your own.",
-    "complete": "Complete preset \u00b7 browser preview only.",
-    "partial": "Partial preset \u00b7 spend exactly {budget} points to complete it. Editing remains available.",
-    "controls": "Click / Enter / Space / + to add \u00b7 right-click / \u2212 to remove \u00b7 Esc to close",
+    "complete": "Complete preset · your next match uses it.",
+    "partial": "Partial preset · spend exactly {budget} points. Until then matches use the default [2,0,2,0,2,0].",
+    "controls": "Click / Enter / Space / + to add · right-click / − to remove · Esc to close",
     "eligibility": "Eligibility follows base Archetype through every Evolution. Renewal requires an existing heal; it does not give Nester healing.",
-    "scope": "Proposed values \u00b7 no effect in Practice, Casual or Ranked."
+    "scope": "Proposed values (D-40) · locked when you queue, join a room or start Practice."
   }
 }

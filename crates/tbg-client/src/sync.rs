@@ -33,6 +33,8 @@ pub struct MatchInfo {
     /// P12: ranked matches show a badge and the opponent's rating.
     pub ranked: bool,
     pub opponent_rating: Option<u16>,
+    /// D-40: both frozen Arcana presets, indexed by `Seat::index()`.
+    pub arcanas: [tbg_core::ArcanaPreset; 2],
 }
 
 #[derive(Resource, Default)]

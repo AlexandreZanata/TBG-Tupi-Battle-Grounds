@@ -131,6 +131,10 @@ impl NetLink {
             Mode::Join(code) => ClientMsg::JoinRoom { code },
             Mode::Probe => return,
         };
+        // D-40: the editor's latest preset, validated by the server while
+        // idle and frozen by the request right behind it (same order).
+        let ranks = config::load_arcanas().ranks;
+        self.send(ClientMsg::SetArcanas { ranks }, now);
         self.send(req, now);
     }
 

@@ -54,6 +54,7 @@ pub(super) fn poll_link(
                 opponent,
                 mode,
                 opponent_rating,
+                arcanas,
             } => {
                 *info = MatchInfo {
                     you: Some(you),
@@ -62,6 +63,7 @@ pub(super) fn poll_link(
                     opponent,
                     ranked: mode == tbg_core::protocol::MatchMode::Ranked,
                     opponent_rating,
+                    arcanas,
                     ..default()
                 };
                 // P12: a new match clears the previous rating count-up.
@@ -140,6 +142,12 @@ pub(super) fn poll_link(
             | ServerMsg::LoggedOut
             | ServerMsg::AccountError { .. }
             | ServerMsg::RatingChanged { .. }) => inbox.0.push(msg),
+            // D-40: the server's word on the preset (after a change or a
+            // login) becomes what the editor shows and the next match uses.
+            ServerMsg::ArcanasSelected { preset } => crate::config::save_arcanas(preset),
+            ServerMsg::ArcanasRejected { reason } => {
+                ui.0.push(format!("Arcanas not changed: {reason:?}"))
+            }
             _ => {}
         }
     }
