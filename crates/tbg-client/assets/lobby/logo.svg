@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="185" viewBox="0 0 500 185"><defs>
+<linearGradient id="gold" x2=".8" y2="1"><stop stop-color="#fff0b2"/><stop offset=".35" stop-color="#d8aa54"/><stop offset=".6" stop-color="#886030"/><stop offset=".8" stop-color="#f4ce81"/><stop offset="1" stop-color="#9a662d"/></linearGradient>
+<linearGradient id="steel" x2="1" y2="1"><stop stop-color="#f4fcff"/><stop offset=".45" stop-color="#aebdca"/><stop offset=".5" stop-color="#596b7c"/><stop offset="1" stop-color="#d9e5ed"/></linearGradient>
+<linearGradient id="wood" x2="0" y2="1"><stop stop-color="#765135"/><stop offset=".4" stop-color="#37251c"/><stop offset=".52" stop-color="#65432b"/><stop offset="1" stop-color="#231c18"/></linearGradient>
+<radialGradient id="red"><stop stop-color="#b83c22"/><stop offset=".55" stop-color="#4c1e1d"/><stop offset="1" stop-color="#130e17"/></radialGradient>
+<radialGradient id="blue"><stop stop-color="#405d78"/><stop offset="1" stop-color="#0c1824"/></radialGradient>
+<radialGradient id="amber"><stop stop-color="#876137"/><stop offset="1" stop-color="#161b1c"/></radialGradient>
+<linearGradient id="vignette" x2="0" y2="1"><stop stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></linearGradient>
+<filter id="shadow"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000" flood-opacity=".7"/></filter>
+</defs><g filter="url(#shadow)">
+<path d="M24 64L8 40 38 46 30 12 64 28 76 7 99 38H398L429 9 444 31 477 15 466 48 494 41 479 65Z" fill="#3e3329" stroke="#a98249" stroke-width="3"/>
+<g transform="translate(100 86) rotate(-52) scale(0.62)" stroke="#2b2522" stroke-width="3" stroke-linejoin="round"><path d="M-12 38L-13-95 0-128 13-95 12 38Z" fill="url(#steel)"/><path d="M0-123V38" stroke="#e8f0f1" stroke-width="2"/><path d="M-39 31L-37 45-12 40H12L37 45 39 31 14 26H-14Z" fill="url(#gold)"/><path d="M-8 43H8L10 99H-10Z" fill="#623d29"/><path d="M-9 50L9 58M-9 66L9 74M-9 82L9 90" stroke="#bf9255" stroke-width="4"/><path d="M-13 99L0 113 13 99 0 90Z" fill="url(#gold)"/></g><g transform="translate(400 86) rotate(52) scale(0.62)" stroke="#2b2522" stroke-width="3" stroke-linejoin="round"><path d="M-12 38L-13-95 0-128 13-95 12 38Z" fill="url(#steel)"/><path d="M0-123V38" stroke="#e8f0f1" stroke-width="2"/><path d="M-39 31L-37 45-12 40H12L37 45 39 31 14 26H-14Z" fill="url(#gold)"/><path d="M-8 43H8L10 99H-10Z" fill="#623d29"/><path d="M-9 50L9 58M-9 66L9 74M-9 82L9 90" stroke="#bf9255" stroke-width="4"/><path d="M-13 99L0 113 13 99 0 90Z" fill="url(#gold)"/></g>
+<path d="M39 48L250 27 461 48 452 133 421 150H81L48 131Z" fill="url(#wood)" stroke="#171b1c" stroke-width="9"/>
+<path d="M39 48L250 27 461 48 452 133 421 150H81L48 131Z" fill="none" stroke="#bc8c4b" stroke-width="3"/>
+<path d="M64 115H436L451 140 415 162H85L48 140Z" fill="#172023" stroke="#d2a15a" stroke-width="3"/>
+<path d="M235 28L250 5 265 28 250 44Z" fill="url(#gold)" stroke="#292b29" stroke-width="4"/>
+<text x="250" y="108" fill="url(#gold)" stroke="#201a18" stroke-width="4" paint-order="stroke" font-family="Georgia,serif" font-weight="bold" font-size="85" text-anchor="middle" letter-spacing="3">TUPI</text>
+<text x="250" y="140" fill="#f4c776" font-family="Georgia,serif" font-weight="bold" font-size="23" text-anchor="middle" letter-spacing="1.1">BATTLE GROUNDS</text>
+<path d="M239 158L250 176 261 158Z" fill="url(#gold)" stroke="#332a23" stroke-width="2"/>
+<g fill="#cbc6ad" stroke="#1e2527" stroke-width="2"><circle cx="52" cy="58" r="5"/><circle cx="448" cy="58" r="5"/><circle cx="61" cy="128" r="5"/><circle cx="440" cy="128" r="5"/></g></g></svg>

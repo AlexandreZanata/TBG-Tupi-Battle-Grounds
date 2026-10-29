@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="shield" viewBox="0 0 48 48"><path d="M24 3L43 10V25Q40 38 24 46 8 38 5 25V10Z" fill="currentColor"/><path d="M24 8L37 13V25Q34 34 24 40 14 34 11 25V13Z" fill="#54402c"/><path d="M24 11L34 15V25Q31 32 24 37Z" fill="currentColor"/></symbol>
+  <symbol id="home" viewBox="0 0 48 48"><path d="M3 23L24 4 45 23 40 29 36 25V44H27V31H20V44H10V25L7 29Z"/></symbol>
+  <symbol id="swords" viewBox="0 0 48 48"><path d="M3 2L14 5 39 31 34 37 8 13Z"/><path d="M45 2L34 5 9 31 14 37 40 13Z"/><path d="M23 31L27 27 42 42 38 46ZM25 31L21 27 6 42 10 46ZM29 36L39 25 44 29 33 41ZM19 36L9 25 4 29 15 41Z"/></symbol>
+  <symbol id="arcana" viewBox="0 0 48 48"><path d="M24 2L44 14V35L24 47 4 35V14Z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M24 2L34 35 4 14 44 14 14 35 24 2V47M4 35L44 35 24 2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="helmet" viewBox="0 0 48 48"><path d="M24 3Q6 4 6 22L9 39 20 46V26H28V46L39 39 42 22Q42 4 24 3Z"/><path d="M24 3V26M10 20L20 23M38 20L28 23" fill="none" stroke="#222e32" stroke-width="4"/></symbol>
+  <symbol id="trophy" viewBox="0 0 48 48"><path d="M12 3H36L34 22Q32 29 27 30V38H35V44H13V38H21V30Q16 29 14 22Z"/><path d="M13 8H5V16Q5 25 16 25M35 8H43V16Q43 25 32 25" fill="none" stroke="currentColor" stroke-width="4"/></symbol>
+  <symbol id="settings" viewBox="0 0 48 48"><path d="M18 2H30L32 9 37 12 44 12 48 23 42 28 40 34 42 41 32 47 26 42 20 42 13 47 4 40 6 33 3 27 0 23 4 12 11 12 16 9Z"/><circle cx="24" cy="24" r="9" fill="#182326"/></symbol>
+  <symbol id="friends" viewBox="0 0 48 48"><circle cx="24" cy="13" r="8"/><circle cx="8" cy="15" r="6"/><circle cx="40" cy="15" r="6"/><path d="M12 43V32Q12 23 24 23T36 32V43ZM1 39V29Q1 23 10 23L13 24Q8 28 8 34V39ZM47 39V29Q47 23 38 23L35 24Q40 28 40 34V39Z"/></symbol>
+  <symbol id="bot" viewBox="0 0 48 48"><path d="M22 3H26V13H22Z"/><circle cx="24" cy="4" r="4"/><rect x="6" y="13" width="36" height="32" rx="6"/><path d="M1 23H5V35H1ZM43 23H47V35H43Z"/><g fill="#243137"><rect x="13" y="22" width="7" height="7" rx="2"/><rect x="28" y="22" width="7" height="7" rx="2"/><path d="M16 35H32V38H16Z"/></g></symbol>
+  <symbol id="sound" viewBox="0 0 48 48"><path d="M3 18H12L25 7V41L12 30H3Z"/><path d="M32 16Q41 24 32 32M38 8Q55 24 38 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></symbol>
+  <symbol id="scroll" viewBox="0 0 48 48"><path d="M9 5H39L36 38H12L10 45H3L6 12Q6 5 9 5Z"/><path d="M15 13H32M14 20H31M13 27H28" stroke="#333127" stroke-width="3"/></symbol>
+</svg>

@@ -101,11 +101,33 @@ pub fn paint(mut mesh: Mesh, color: Color) -> Mesh {
         .iter()
         .fold((f32::MAX, f32::MIN), |(lo, hi), y| (lo.min(*y), hi.max(*y)));
     let base = color.to_linear();
+    let normals = match mesh.attribute(Mesh::ATTRIBUTE_NORMAL) {
+        Some(VertexAttributeValues::Float32x3(n)) => n.clone(),
+        _ => vec![[0.0, 1.0, 0.0]; ys.len()],
+    };
+    let sky = super::palette::AMBIENT_SKY.to_linear();
+    let ground = super::palette::AMBIENT_GROUND.to_linear();
     let colors: Vec<[f32; 4]> = ys
         .iter()
-        .map(|y| {
-            let k = 0.72 + 0.28 * ((y - lo) / (hi - lo).max(1e-4));
-            [base.red * k, base.green * k, base.blue * k, 1.0]
+        .zip(normals)
+        .map(|(y, n)| {
+            let h = (y - lo) / (hi - lo).max(1e-4);
+            let k = if h < 0.33 {
+                0.82
+            } else if h > 0.67 {
+                1.12
+            } else {
+                1.0
+            };
+            let a = if n[1] >= 0.0 { sky } else { ground };
+            // Shader-free hemispherical fill and a subtle silhouette rim.
+            let rim = 0.04 * (1.0 - n[1].abs());
+            [
+                base.red * k * (0.9 + 0.1 * a.red) + rim,
+                base.green * k * (0.9 + 0.1 * a.green) + rim,
+                base.blue * k * (0.9 + 0.1 * a.blue) + rim,
+                1.0,
+            ]
         })
         .collect();
     mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);

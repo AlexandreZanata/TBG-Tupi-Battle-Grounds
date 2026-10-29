@@ -1,0 +1,11 @@
+{
+  "note": "Actual WebGL calls including shadows; count is diagnostic under D-28. Physical-phone and total browser memory validation remain pending.",
+  "desktop": {
+    "draws": "320.8",
+    "fps": "60.0",
+    "frames": "301",
+    "maximum": "322",
+    "sample": "FPS 60.0 | draws 320.8 (max 322)",
+    "viewport": "1280x800"
+  }
+}

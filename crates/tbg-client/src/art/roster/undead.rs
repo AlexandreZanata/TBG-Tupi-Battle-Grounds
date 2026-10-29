@@ -1,6 +1,6 @@
 //! Undead: bone and dark violet with a spectral green glow.
 
-use super::super::figure::{part, BodyPlan, FigureSpec, Joint::*};
+use super::super::legacy::{part, BodyPlan, FigureSpec, Joint::*};
 use super::super::mesh::Shape::*;
 use super::super::palette::*;
 use super::{base_body, Form, Look};

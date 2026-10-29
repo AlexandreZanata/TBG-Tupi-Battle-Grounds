@@ -8,6 +8,9 @@ use tbg_core::{Rejection, UnitId};
 pub mod account;
 mod account_ui;
 mod actions;
+mod desktop;
+#[cfg(target_arch = "wasm32")]
+mod desktop_actions;
 mod evolve;
 #[cfg(test)]
 mod glyphs;
@@ -89,6 +92,7 @@ pub fn plugin(app: &mut App) {
             account_ui::plugin,
             textform::plugin,
             queue::plugin,
+            desktop::plugin,
             menu::plugin,
             ranking::plugin,
             hud::plugin,

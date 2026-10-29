@@ -1,5 +1,5 @@
 //! Code-built art (decision D-07): mesh builders, figurines on a shared
-//! 12-joint body plan, a shared animation library, the faction roster.
+//! v2 body plan with a twelve-joint compatibility adapter and shared clips.
 //! Every unit form is built once at startup into `FigureLibrary`.
 
 use std::collections::HashMap;
@@ -7,32 +7,67 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use tbg_core::{UnitKind, UNIT_KINDS};
 
+mod adapter;
 pub mod anim;
+#[cfg(test)]
+mod anim_tests;
+mod archer_aim;
+pub mod archer_v2;
+mod archer_v2_clips;
+#[cfg(test)]
+mod archer_v2_tests;
+pub mod arrows;
+pub mod bow;
 mod clips;
+mod curves;
+mod feet;
 pub mod figure;
+mod legacy;
 pub mod mesh;
 pub mod palette;
+pub mod rig;
 mod roster;
+mod springs;
 
-use figure::BodyPlan;
+use rig::{Proportions as BodyPlan, NODE_COUNT};
 
 /// The five forms of a unit: base, A1, A2, B1, B2 as (tier, branch).
 pub const FORMS: [(u8, u8); 5] = [(0, 0), (1, 0), (2, 0), (1, 1), (2, 1)];
 
 pub struct FigureForm {
     pub plan: BodyPlan,
-    pub meshes: [Option<Handle<Mesh>>; 12],
+    pub meshes: [Option<Handle<Mesh>>; NODE_COUNT],
     pub triangles: usize,
+    pub native: bool,
+    /// Half the bow-string length for native archer forms (`bow.rs`).
+    pub bow_half: f32,
+    enemy_meshes: Option<[Option<Handle<Mesh>>; NODE_COUNT]>,
+}
+
+impl FigureForm {
+    pub fn meshes(&self, own: bool) -> &[Option<Handle<Mesh>>; NODE_COUNT] {
+        if own {
+            &self.meshes
+        } else {
+            self.enemy_meshes.as_ref().unwrap_or(&self.meshes)
+        }
+    }
 }
 
 #[derive(Resource)]
 pub struct FigureLibrary {
     forms: HashMap<(UnitKind, u8, u8), FigureForm>,
+    blockouts: HashMap<UnitKind, FigureForm>,
     /// One shared material for every figurine (vertex colors).
     pub material: Handle<StandardMaterial>,
+    pub bow: bow::BowAssets,
+    pub stage: Handle<Mesh>,
 }
 
 impl FigureLibrary {
+    pub fn blockout(&self, kind: UnitKind) -> &FigureForm {
+        &self.blockouts[&kind]
+    }
     pub fn get(&self, kind: UnitKind, tier: u8, branch: u8) -> &FigureForm {
         let key = if tier == 0 {
             (kind, 0, 0)
@@ -45,7 +80,15 @@ impl FigureLibrary {
 
 pub fn plugin(app: &mut App) {
     app.add_systems(PreStartup, build_library)
-        .add_systems(Update, anim::animate);
+        .add_systems(Update, (anim::animate, bow::strings, arrows::fly).chain())
+        .add_systems(
+            PostUpdate,
+            arrows::release.after(bevy::transform::TransformSystems::Propagate),
+        )
+        .add_systems(
+            PostUpdate,
+            springs::update.after(bevy::transform::TransformSystems::Propagate),
+        );
 }
 
 fn build_library(
@@ -58,13 +101,29 @@ fn build_library(
         perceptual_roughness: 0.9,
         ..default()
     });
+    let bow = bow::BowAssets::new(&mut meshes);
     let mut forms = HashMap::new();
     for kind in UNIT_KINDS {
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
+            if kind == UnitKind::Archer && branch == 0 {
+                let mut form = native_form(roster::archer_v2(tier), &mut meshes, true);
+                form.bow_half = archer_v2::bow_half(tier);
+                info!(
+                    "figure Archer {tier}/{branch} (v2): {} triangles + {} bow/arrow triangles, {} mesh joints",
+                    form.triangles,
+                    bow.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
             let spec = roster::figure_spec(kind, tier, branch);
-            let built = figure::build_joint_meshes(&spec);
+            let built = adapter::build(&spec);
+            let joint_count = built.iter().flatten().count();
             let triangles = built.iter().flatten().map(mesh::triangles).sum();
+            info!("figure {kind:?} {tier}/{branch}: 17 body + 3 springs + 3 sockets, {joint_count} mesh joints, {triangles} triangles");
             max_tris = max_tris.max(triangles);
             let handles = built.map(|m| m.map(|m| meshes.add(m)));
             forms.insert(
@@ -73,10 +132,53 @@ fn build_library(
                     plan: spec.plan,
                     meshes: handles,
                     triangles,
+                    native: false,
+                    bow_half: 0.64,
+                    enemy_meshes: None,
                 },
             );
         }
         info!("figure {kind:?}: max {max_tris} triangles over 5 forms");
     }
-    commands.insert_resource(FigureLibrary { forms, material });
+    let blockouts = UNIT_KINDS
+        .into_iter()
+        .map(|kind| {
+            let form = native_form(roster::blockout::spec(kind), &mut meshes, false);
+            info!("blockout {kind:?}: {} triangles", form.triangles);
+            (kind, form)
+        })
+        .collect();
+    let stage = meshes.add(mesh::paint(
+        mesh::build(mesh::Shape::Box(1.3, 0.05, 1.3)),
+        palette::PARCHMENT,
+    ));
+    commands.insert_resource(FigureLibrary {
+        forms,
+        blockouts,
+        material,
+        bow,
+        stage,
+    });
+}
+
+fn native_form(mut spec: figure::FigureSpec, meshes: &mut Assets<Mesh>, team: bool) -> FigureForm {
+    let built = figure::build_joint_meshes(&spec);
+    let triangles = built.iter().flatten().map(mesh::triangles).sum();
+    let handles = built.map(|m| m.map(|m| meshes.add(m)));
+    let enemy_meshes = team.then(|| {
+        for p in &mut spec.parts {
+            if p.color == palette::ALLY {
+                p.color = palette::ENEMY;
+            }
+        }
+        figure::build_joint_meshes(&spec).map(|m| m.map(|m| meshes.add(m)))
+    });
+    FigureForm {
+        plan: spec.plan,
+        meshes: handles,
+        triangles,
+        native: true,
+        bow_half: 0.64,
+        enemy_meshes,
+    }
 }

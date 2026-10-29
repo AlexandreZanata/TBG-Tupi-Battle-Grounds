@@ -33,7 +33,7 @@ gates everything; each character gets its own validated phase.
 ```
 Competitive online                     Medieval visual overhaul (after P14 sign-off)
 P9  Real-time fast path + reconnect    P15 Art direction, rig v2, style lock (Archer)
- └► P10 Server efficiency               └► P16 Animation sets per class (Archetype)
+ └► P10 Server efficiency               └► P16-A Desktop lobby + arena ─► P16 Class animation sets
      └► P11 Accounts (name + key)           └► P17 Arena + backgrounds for every screen
          └► P12 Ranked + Elo rating             └► P18 Strongholds: 3 styles
              └► P13 Global ranking + stats          └► P19 UI kit + standardized cards
@@ -79,7 +79,8 @@ P31 reviewed + owner sign-off
 | P12 | [P12-ranked-and-rating.md](phases/P12-ranked-and-rating.md) | Ranked queue apart from casual; Elo from both ratings | done (two-device ranked in P14) | yes |
 | P13 | [P13-global-ranking.md](phases/P13-global-ranking.md) | Global ranking + player stats in game and on `/ranking/` | done (phones + VPS in P14) | yes |
 | P14 | [P14-competitive-validation.md](phases/P14-competitive-validation.md) | **Gate:** competitive game validated on a real server, data-safety drill, security review | local rehearsal + fixes done; **real-server run and owner sign-off pending** | yes (local) |
-| P15 | [P15-art-direction-and-rig.md](phases/P15-art-direction-and-rig.md) | Medieval style locked; rig v2; Archer style-lock approved | planned | — |
+| P15 | [P15-art-direction-and-rig.md](phases/P15-art-direction-and-rig.md) | Medieval style locked; rig v2; Archer style-lock approved | implemented + reviewed; **owner sign-off (look, names, D-22) and phone FPS pending** | yes (local) |
+| P16-A | [P16A-desktop-lobby-and-arena.md](phases/P16A-desktop-lobby-and-arena.md) | Archer v2 default; desktop lobby and arena match the owner's references | implemented locally; **owner look/phone checks and review pending** | — |
 | P16 | [P16-class-animation-sets.md](phases/P16-class-animation-sets.md) | Professional clip sets per Archetype, simulation-timed | planned | — |
 | P17 | [P17-arena-and-background.md](phases/P17-arena-and-background.md) | Living medieval battlefield filling every screen ratio | planned | — |
 | P18 | [P18-strongholds.md](phases/P18-strongholds.md) | Three selectable cosmetic Stronghold styles | planned | — |
@@ -166,6 +167,7 @@ All code for P1–P8 is implemented and validated on the development PC
 | P11 | Reviews the blocked-name list; creates an account on two devices |
 | P14 | Provides the server; plays ranked with someone on another network; signs off the gate |
 | P15 | Approves the medieval look, display names, and the pipeline (D-22) |
+| P16-A | Approves Archer v2, desktop lobby and arena against the references; answers the four open decisions |
 | P16–P21 | Approves class animations, arena, Strongholds, UI kit, lobby, effects |
 | P22–P29 | Approves each character (screenshots + live match) |
 | P31 | Runs the playtest; decides balance changes; pushes the tag |

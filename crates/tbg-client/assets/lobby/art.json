@@ -1,0 +1,8 @@
+{
+  "logo": "assets/lobby/logo.svg",
+  "emblem": "assets/lobby/emblem.svg",
+  "arcanas": "assets/lobby/arcanas.svg",
+  "troops": "assets/lobby/troops.svg",
+  "ranking": "assets/lobby/ranking.svg",
+  "news": "assets/lobby/news.svg"
+}

@@ -216,53 +216,61 @@ tables are the one allowed exception.
 
 ## 7. Art direction and asset production
 
-**Style:** a tabletop diorama of chunky toy figurines. Big heads and hands,
-oversized props that define each silhouette (shields, bows, saws, leaves),
-flat-shaded low-poly surfaces, saturated faction palettes, soft warm sun,
-gentle fog, readable from a phone held at arm's length.
+**Style candidate (P15; owner sign-off pending):** medieval tabletop
+miniatures. [ART-DIRECTION.md](ART-DIRECTION.md) owns the proposed palette,
+proportions, silhouettes, and motion language. D-22 remains proposed until
+its owner decision is recorded in the P15 report.
 
-**From P15** the medieval style guide in [ART-DIRECTION.md](ART-DIRECTION.md)
-replaces this section's look and extends the figure system (rig v2,
-D-22); until each unit's phase lands, the description below stays true.
+**Production: code-built rigid parts, vertex colors, one shared material.**
 
-**Production: code-built, no Blender, no skinning.**
-
-- **Figurines:** every unit shares one 12-joint body plan (root, hips,
-  torso, head, upper arm/forearm/hand ×2, leg ×2). Parts are low-poly
-  meshes from `art/mesh.rs` (Bevy primitives plus rounded box, lathe, and
-  extrude builders) parented to joints. A `FigureSpec` (data) lists
-  proportions, palette, and parts per joint; evolutions are small spec
-  diffs (added prop, +8% scale per tier, glowing accent at tier 2).
-  Two-slot units use the same plan at about 1.5× scale.
-- **Batching:** at spawn, the parts of each joint are merged into one mesh
-  with vertex colors, cached per (unit form, joint) and shared by every
-  instance; all figurines share one material. Hit flash swaps to a shared
-  flash material for about 80 ms.
-- **Animation:** `art/anim.rs` holds keyframed joint rotations/offsets with
-  easing, shared by every figure: `idle`, `walk`, `attack_melee`,
-  `attack_ranged`, `cast`, `hit`, `death`, `spawn`, `evolve`, `victory`.
-  Clips crossfade over 0.1 s and are triggered by simulation events.
-- **Arena:** generated in `arena.rs`: an elongated grass island with a dirt
-  lane and tile markers, two stone `Stronghold`s with three damage states,
-  low-poly trees/rocks/ferns at the edges, a water skirt, sky clear color,
-  and distance fog. Static parts are merged into a few vertex-colored meshes.
-- **Readability layer:** team ring under each unit (ally `#3FA9F5`, enemy
-  `#F2545B`), billboard HP bars, hit flash, spawn pop, death puff.
-- **Starting palette** (approve in P6): Humans `#8B7355` `#C4A882`
-  `#D9B44A` (legacy Iron Guard tones) · Undead `#D8D2C0` `#4B3B5C`
-  `#7CF29A` · Machines `#4A5058` `#B5893B` `#FF8A3D` · Plants `#4E9F3D`
-  `#6B4F2E` `#F28AB2` · grass `#7BB661`, lane `#C9A46A`, water `#3FA7B5`,
-  rock `#8C8A86`, sky `#A9D8F0`, stone `#B9B2A3`.
-- **Validation:** a gallery mode (`?gallery`) renders every unit form
-  playing every clip on the real arena in the game camera. Agents capture
-  desktop and phone-viewport screenshots; a human approves silhouette,
-  proportion, color, motion readability, and consistency.
-- **Audio (P7):** 11 short WAV effects synthesized by
-  `examples/make_sfx.rs` (original, ~130 KB), played only in the browser
-  build (native `bevy_audio` needs ALSA). Font: Bevy's default font.
-- **Escape hatch:** if a part cannot look right from builders, an offline
-  Blender script may export that *static* part as a small GLB. Rigs,
-  skinning, and per-character animation stay out of scope.
+- **Rig v2:** the phase's supplied enum names 17 body joints: Root, Hips,
+  Spine, Chest, Head, UpperArm/Forearm/Hand ×2, Thigh/Shin/Foot ×2. It
+  labels that list "18"; the implementation follows the exact names and
+  records the discrepancy for review. Optional Back, HeadGear, and Tabard
+  springs use rotation stiffness 60, damping 8, 120 Hz sub-steps and ±35°
+  per-axis clamps. WeaponR, OffhandL, and Back are prop sockets.
+- **Compatibility:** the preserved twelve-joint `FigureSpec`s go through
+  an adapter. Torso maps to Chest, arms to the corresponding v2 joints,
+  and old leg geometry is partitioned onto thigh, shin, and foot without
+  duplicating triangles. Old units and Archer evolutions remain adapted
+  until their refinement phases. Only Archer base has the P15 final-art
+  candidate; all eight new body plans are also available as gray blockouts.
+- **Body plans:** Humanoid and Large use approximately four-head
+  proportions; Large blockouts have 1.5× scale and shoulders 1.4× hips.
+  Legacy proportions and evolution scale remain compatible. Existing
+  client lane prominence is retained for the Archer candidate.
+- **Batching:** parts are merged per joint, cached per form, and shared
+  across instances. Archer team-color variants are cached in vertex
+  colors, so both teams retain the one shared material. Bow strings and
+  arrow geometry are shared assets. Hit flash uses the existing tint material.
+- **Color/light:** named palette constants, three vertex values (0.82,
+  1.0, 1.12), baked sky/ground fill and a small normal-based rim; one warm
+  key, sky ambient, and soft distance fog. No textures or custom unit shader.
+- **Animation:** keys select Linear/CubicIn/CubicOut/CubicInOut/Hold;
+  clip metadata delivers Strike, Release, and Footstep events. Crossfade
+  remains 0.1 s. V2 Walk uses content speed for cadence, two-bone legs,
+  and world-X contact anchors; phase offsets are decorrelated by visual id.
+  Archer draw/anchor releases at 0.18 s and recovers by 0.50 s. Cosmetic
+  arrows follow facing for 0.12 s; target-aware VFX are deferred to P21.
+  Simulation events still decide damage and outcomes.
+- **Arena/readability:** the existing generated arena, Stronghold damage
+  states, team rings, HP bars, and hit/spawn/death feedback remain integrated.
+- **Review tools:** `?gallery=palette`, `?gallery=blockout&silhouette`, and
+  `?gallery=<unit>`; `&slow=0.25`, `&turn`, and `&frames`. Named unit views
+  show five forms; contact sheets show the selected base form at four
+  quarters of every clip (`&clip=attackranged` can narrow the sheet).
+  Neutral studio floors prevent arena props from obscuring review figures;
+  the palette board and live practice still demonstrate the game lighting.
+- **Measurement:** `?gallery=archer&stress=30&measure` creates 30 walking,
+  attacking Archer visuals; `&shadows=0` supplies the current low-cost
+  proxy, not the future P17 Low tier. Opt-in browser diagnostics count
+  actual WebGL calls, including shadow passes. Physical-phone validation
+  and subjective approval remain owner/reviewer gates.
+- **Audio (P7):** 11 original synthesized WAV effects (~130 KB), browser
+  build only. Font remains Bevy's default font.
+- **Fallback:** D-22 permits the reviewer-run Blender-scripted skinned
+  glTF comparison after two owner rejections. P15 adds no glTF, textures,
+  downloaded models, skinning, or dependencies.
 
 ## 8. Persistence
 
@@ -335,10 +343,11 @@ buying.
 |--------|--------|-------------|
 | WASM download (compressed) | ≤ 4 MB (hard ceiling 6 MB) | P1 · measured P4: 4.59 MB brotli, 7.34 MB gzip |
 | Other assets on first load | ≤ 1 MB | P7 |
+| Total download, lazy assets included | ≤ 100 MB, first load unchanged (**Proposed**, D-26) | P16-A |
 | Time to menu | ≤ 5 s desktop broadband; ≤ 10 s mid-range phone on 4G | P1, P5 |
 | Frame rate | 60 fps desktop; ≥ 30 fps mid-range Android and iPhone 11-class with 30 units | P1, P3, P6, P7 |
-| Draw calls in a busy match | ≤ 300 | P6 |
-| Triangles | ≤ 1 500 per one-slot unit, ≤ 3 000 per two-slot, ≤ 30 000 arena | P6 |
+| Draw calls in a busy match | Measured; no fixed maximum (D-28) | P16-A |
+| Triangles | ≤ 1 500 per one-slot unit, ≤ 3 000 per two-slot, ≤ 30 000 arena; **Proposed** (D-26): ≤ 2 500 / ≤ 5 000 / ≤ 60 000 | P6 · P16-A |
 | Browser memory | ≤ 300 MB | P7 |
 | Sim step, 30 units (release) | ≤ 50 µs | P2 · measured: 0.44 µs harness, 4–6 µs in server |
 | Server memory | ≤ 100 KB per match + about 64 KB per socket | P10 local: ~300 KB per running match (target missed — sockets and per-connection queues dominate; worst case is bounded by `CONN_QUEUE` and the 64 KiB write cap) |

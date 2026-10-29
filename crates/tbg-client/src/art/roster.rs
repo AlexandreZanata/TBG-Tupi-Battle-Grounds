@@ -4,10 +4,12 @@
 use bevy::prelude::*;
 use tbg_core::{SlotCount, UnitKind};
 
-use super::figure::{part, BodyPlan, FigureSpec, Joint::*, PartSpec};
+use super::legacy::{part, BodyPlan, FigureSpec, Joint::*, PartSpec};
 use super::mesh::Shape::*;
 use super::palette::DARK;
 
+pub mod blockout;
+mod body;
 mod humans;
 mod machines;
 mod plants;
@@ -50,6 +52,11 @@ impl Form {
             t2: tier >= 2,
         }
     }
+}
+
+/// Default native Archer forms: 0 base, 1 Longbow, 2 Marksman.
+pub fn archer_v2(tier: u8) -> super::figure::FigureSpec {
+    humans::archer_v2::spec(tier)
 }
 
 pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {

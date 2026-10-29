@@ -1,0 +1,19 @@
+{
+  "note": "Desktop hardware for both viewports; no physical-phone claim. Five-second rendered-RAF windows; actual WebGL calls include shadow passes.",
+  "phoneViewport": {
+    "viewport": "375x812",
+    "url": "http://127.0.0.1:8080/?gallery=archer&stress=30&shadows=0&measure",
+    "sample": "FPS 165.0 | draws 85.4 (max 87)",
+    "fps": "165.0",
+    "draws": "85.4",
+    "max": "87"
+  },
+  "desktop": {
+    "viewport": "1280x800",
+    "url": "http://127.0.0.1:8080/?gallery=archer&stress=30&measure",
+    "sample": "FPS 164.8 | draws 168.9 (max 172)",
+    "fps": "164.8",
+    "draws": "168.9",
+    "max": "172"
+  }
+}

@@ -1,6 +1,9 @@
 //! Humans: disciplined guards — leather, trim, steel, gold.
 
-use super::super::figure::{part, BodyPlan, FigureSpec, Joint::*};
+pub mod archer_v2;
+mod archer_v2_gear;
+
+use super::super::legacy::{part, BodyPlan, FigureSpec, Joint::*};
 use super::super::mesh::Shape::*;
 use super::super::palette::*;
 use super::{base_body, Form, Look};

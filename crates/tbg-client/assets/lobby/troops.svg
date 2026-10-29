@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="300" viewBox="0 0 480 300"><defs>
+<linearGradient id="gold" x2=".8" y2="1"><stop stop-color="#fff0b2"/><stop offset=".35" stop-color="#d8aa54"/><stop offset=".6" stop-color="#886030"/><stop offset=".8" stop-color="#f4ce81"/><stop offset="1" stop-color="#9a662d"/></linearGradient>
+<linearGradient id="steel" x2="1" y2="1"><stop stop-color="#f4fcff"/><stop offset=".45" stop-color="#aebdca"/><stop offset=".5" stop-color="#596b7c"/><stop offset="1" stop-color="#d9e5ed"/></linearGradient>
+<linearGradient id="wood" x2="0" y2="1"><stop stop-color="#765135"/><stop offset=".4" stop-color="#37251c"/><stop offset=".52" stop-color="#65432b"/><stop offset="1" stop-color="#231c18"/></linearGradient>
+<radialGradient id="red"><stop stop-color="#b83c22"/><stop offset=".55" stop-color="#4c1e1d"/><stop offset="1" stop-color="#130e17"/></radialGradient>
+<radialGradient id="blue"><stop stop-color="#405d78"/><stop offset="1" stop-color="#0c1824"/></radialGradient>
+<radialGradient id="amber"><stop stop-color="#876137"/><stop offset="1" stop-color="#161b1c"/></radialGradient>
+<linearGradient id="vignette" x2="0" y2="1"><stop stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></linearGradient>
+<filter id="shadow"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000" flood-opacity=".7"/></filter>
+</defs><path fill="url(#blue)" d="M0 0H480V300H0Z"/><path d="M0 112L65 62 125 48 174 96 195 184H0ZM480 112L415 62 355 48 306 96 285 184H480Z" fill="#182b3b" stroke="#576779" stroke-width="3"/><g fill="#244568" stroke="#758899" stroke-width="3"><path d="M42 76L111 63 111 200 76 223 42 201Z"/><path d="M438 76L369 63 369 200 404 223 438 201Z"/></g><g fill="#d2b16a"><path d="M69 103L77 91 85 103 77 117ZM396 103L404 91 412 103 404 117Z"/></g><path d="M37 257L154 223H328L443 257V300H37Z" fill="#1b2731"/><g filter="url(#shadow)" transform="translate(24 20) scale(.9)"><path d="M168 212L156 105Q160 36 240 25 320 36 324 105L312 212 267 251 258 157H222L213 251Z" fill="url(#gold)" stroke="#1c2228" stroke-width="6"/>
+<path d="M240 30V150M165 111L232 127M315 111L248 127" fill="none" stroke="#f5dda1" stroke-width="5"/>
+<path d="M171 130L224 142 221 162 172 147ZM309 130L256 142 259 162 308 147Z" fill="#14212a" stroke="#77613e" stroke-width="3"/>
+<path d="M226 83L240 65 254 83 250 205 240 224 230 205Z" fill="url(#steel)" stroke="#635438" stroke-width="3"/>
+<path d="M170 97Q170 47 226 41M255 41Q309 49 310 99" fill="none" stroke="#ffe8b5" stroke-width="3"/></g><path fill="url(#vignette)" d="M0 0H480V300H0Z"/></svg>

@@ -91,7 +91,7 @@ Startup log: triangles per layer and total; draw calls in a busy match
 ## Acceptance checklist
 
 - [ ] All verification commands from `AGENTS.md` pass; `trunk build --release` passes
-- [ ] Arena total ≤ 45 000 triangles; busy-match draw calls within budget per tier
+- [ ] Arena total ≤ 45 000 triangles; busy-match draw calls recorded per tier (no fixed maximum; D-28)
 - [ ] Five aspect-ratio screenshots with no empty bands, in `docs/media/p17/`
 - [ ] ≥ 30 FPS on a mid-range phone on Low and Medium with 30 units
 - [ ] Owner approves the look (report)

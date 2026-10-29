@@ -64,15 +64,27 @@ fn reframe_on_resize(
     window: Single<&Window>,
     mut resize: MessageReader<WindowResized>,
     mut last: Local<Vec2>,
+    state: Res<State<crate::GameState>>,
+    time: Res<Time>,
 ) {
     let size = Vec2::new(window.width(), window.height());
     let resized = resize.read().count() > 0;
-    if !resized && size == *last {
+    let orbit = desktop(size.x, size.y)
+        && *state.get() == crate::GameState::Menu
+        && !crate::config::arena_preview();
+    if !resized && size == *last && !orbit && !state.is_changed() {
         return;
     }
     *last = size;
     let (mut transform, mut projection) = camera.into_inner();
     frame(&mut transform, &mut projection, size.x, size.y);
+    if orbit {
+        let angle = 8f32.to_radians() * (time.elapsed_secs() * std::f32::consts::TAU / 40.0).sin();
+        let offset = transform.translation - LANE_CENTER;
+        *transform =
+            Transform::from_translation(LANE_CENTER + Quat::from_rotation_y(angle) * offset)
+                .looking_at(LANE_CENTER, Vec3::Y);
+    }
 }
 
 fn frame(transform: &mut Transform, projection: &mut Projection, w: f32, h: f32) {
@@ -87,7 +99,9 @@ fn frame(transform: &mut Transform, projection: &mut Projection, w: f32, h: f32)
     let tan_v = (FOV_Y / 2.0).tan();
     let tan_h = tan_v * w / h;
     // Slant range so the long axis (lane) and short axis both fit.
-    let dist = if portrait {
+    let dist = if desktop(w, h) && w / h >= 1.5 {
+        (13.5 / tan_h).max(7.1 / tan_v)
+    } else if portrait {
         (NEED_LONG / tan_v).max(NEED_SHORT / tan_h)
     } else {
         (NEED_LONG / tan_h).max(NEED_SHORT / tan_v)
@@ -106,4 +120,9 @@ fn frame(transform: &mut Transform, projection: &mut Projection, w: f32, h: f32)
         Vec3::new(0.0, up, across)
     };
     *transform = Transform::from_translation(LANE_CENTER + offset).looking_at(LANE_CENTER, Vec3::Y);
+}
+
+/// D-27 desktop shell breakpoint; the original phone/tablet framing stays intact.
+pub fn desktop(width: f32, height: f32) -> bool {
+    width >= 1280.0 && height >= 720.0 && width > height
 }
