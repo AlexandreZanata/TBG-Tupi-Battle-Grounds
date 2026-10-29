@@ -998,10 +998,10 @@ cargo run --release -p tbg-balance -- value --mode interactions
 cargo run --release -p tbg-balance -- validate --pairs 4096 --threads 16
 ```
 
-- Shadow: 21.36 s, 4 points × 4,096 pairs. `λ_ref = 0.028748`; tick 0
+- Shadow: 28.19 s, 4 points × 4,096 pairs. `λ_ref = 0.028748`; tick 0
   interval includes zero; ticks 600/1,200/1,800 are positive with
   intervals excluding zero.
-- Reference: 82.56 s, 196,608 games, 2,381 games/s. Top values: Archer
+- Reference: 98.30 s, 196,608 games, 2,000 games/s. Top values: Archer
   range +1 tile 507 PVE (+14.57 pp), Bloomkeeper heal +20 % 299 PVE
   (+8.58 pp), Archer damage +20 % 286 PVE (+8.21 pp), Shieldbearer HP
   +20 % 129 PVE (+3.70 pp), Hexer slow 60 % 75 PVE (+2.17 pp), Rootcaller
@@ -1010,7 +1010,7 @@ cargo run --release -p tbg-balance -- validate --pairs 4096 --threads 16
 - Interactions (deterministic): damage + attack speed = −1,665 HP margin
   (diminishing returns); root + ranged damage = +856 (super-additive);
   null pair = 0.
-- Validation: 136.83 s, discovery vs confirmation rank **0.991**;
+- Validation: 135.78 s, discovery vs confirmation rank **0.991**;
   confirmation vs static baseline rank **0.073**. The direct measurement
   is stable out of sample and not a renamed static formula.
 - Canaries: Archer damage ×2 = 1,070 PVE (+30.75 pp); Shieldbearer cost
