@@ -5,7 +5,7 @@ use crate::art::{
     mesh::{self, Shape::*},
     palette::*,
 };
-use bevy::prelude::*;
+use bevy::{light::NotShadowCaster, prelude::*};
 
 #[derive(Component)]
 pub(super) struct Flame(f32);
@@ -54,19 +54,34 @@ pub(super) fn spawn(
     ]);
     let mut triangles = mesh::triangles(&fire) * BRAZIERS.len();
     let fire = meshes.add(fire);
+    let cloth_meshes = [ALLY, ENEMY].map(|color| {
+        [false, true].map(|crest| {
+            let mut parts = vec![(Box(0.36, 0.16, 0.028), color, Transform::default())];
+            if crest {
+                parts.push((
+                    Box(0.10, 0.10, 0.035),
+                    LINEN,
+                    Transform::from_xyz(0.0, 0.0, 0.018)
+                        .with_rotation(Quat::from_rotation_z(0.785)),
+                ));
+            }
+            meshes.add(painted(parts))
+        })
+    });
     for (x, z) in BRAZIERS {
         commands.spawn((
             Mesh3d(fire.clone()),
             MeshMaterial3d(fire_mat.clone()),
             Transform::from_xyz(x, 0.53, z),
             Flame(x + z),
+            NotShadowCaster,
         ));
     }
     for x in [3.9, 12.1] {
         for z in [-2.5, 2.5] {
             triangles += flag(
                 commands,
-                meshes,
+                &cloth_meshes,
                 material,
                 Vec3::new(x, 0.65, z + 0.08),
                 x < 8.0,
@@ -77,7 +92,7 @@ pub(super) fn spawn(
     for (own, x) in [(true, -0.9), (false, 16.9)] {
         triangles += flag(
             commands,
-            meshes,
+            &cloth_meshes,
             material,
             Vec3::new(x, 2.65, 0.0),
             own,
@@ -91,28 +106,17 @@ pub(super) fn spawn(
 
 fn flag(
     commands: &mut Commands,
-    meshes: &mut Assets<Mesh>,
+    meshes: &[[Handle<Mesh>; 2]; 2],
     mat: &Handle<StandardMaterial>,
     at: Vec3,
     own: bool,
     tower: bool,
 ) -> usize {
-    let color = if own { ALLY } else { ENEMY };
-    let mut total = 0;
     for segment in 0..3 {
-        let mut parts = vec![(Box(0.36, 0.16, 0.028), color, Transform::default())];
-        if segment == 1 {
-            parts.push((
-                Box(0.10, 0.10, 0.035),
-                LINEN,
-                Transform::from_xyz(0.0, 0.0, 0.018).with_rotation(Quat::from_rotation_z(0.785)),
-            ));
-        }
-        let m = painted(parts);
-        total += mesh::triangles(&m);
+        let m = &meshes[usize::from(!own)][usize::from(segment == 1)];
         let rest = at + Vec3::new(0.0, -0.08 - segment as f32 * 0.15, 0.0);
         let mut entity = commands.spawn((
-            Mesh3d(meshes.add(m)),
+            Mesh3d(m.clone()),
             MeshMaterial3d(mat.clone()),
             Transform::from_translation(rest),
             Cloth {
@@ -127,7 +131,7 @@ fn flag(
             });
         }
     }
-    total
+    48
 }
 
 #[allow(clippy::type_complexity)] // Disjoint animation queries keep transform access safe.

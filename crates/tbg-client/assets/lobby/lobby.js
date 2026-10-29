@@ -63,7 +63,7 @@
       set('[data-wins]', player.wins);
       set('[data-losses]', player.losses);
       set('[data-win-rate]', Number(player.win_rate).toFixed(0) + '%');
-      set('[data-record-note]', player.games ? player.games + ' ranked matches' : 'Your first Ranked match awaits');
+      set('[data-record-note]', player.games ? player.games + (player.games === 1 ? ' ranked match' : ' ranked matches') : 'Your first Ranked match awaits');
       set('[data-stats-status]', player.games ? 'Ranked record · ' + player.draws + ' draws' : 'Play Ranked to enter the global ranking');
     } catch (error) {
       if (error.name !== 'AbortError') set('[data-stats-status]', 'Ranked record unavailable · try again later');

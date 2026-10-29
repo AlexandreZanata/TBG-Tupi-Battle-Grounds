@@ -1,7 +1,7 @@
 //! Diorama assembly: shared vertex-colored layers and authoritative Stronghold views.
 
 use crate::art::mesh::{self, Shape};
-use bevy::prelude::*;
+use bevy::{light::NotShadowCaster, prelude::*};
 
 mod camp;
 mod cliffs;
@@ -42,7 +42,13 @@ fn spawn_arena(
         perceptual_roughness: 1.0,
         ..default()
     });
+    let sea_mat = mats.add(StandardMaterial {
+        base_color: Color::WHITE,
+        unlit: true,
+        ..default()
+    });
     let mut total = 0;
+    let mut terrain = Vec::with_capacity(5);
     for (name, m) in [
         ("meadow", ground::meadow()),
         ("BattleLine", ground::lane()),
@@ -55,15 +61,28 @@ fn spawn_arena(
         let triangles = mesh::triangles(&m);
         total += triangles;
         info!("arena {name}: {triangles} triangles");
+        if name != "sea" && name != "foam" {
+            terrain.push((m, Transform::default()));
+            continue;
+        }
         let mut entity = commands.spawn((
             Name::new(format!("arena {name}")),
             Mesh3d(meshes.add(m)),
-            MeshMaterial3d(mat.clone()),
+            MeshMaterial3d(sea_mat.clone()),
             Transform::default(),
+            NotShadowCaster,
         ));
         if name == "foam" {
             entity.insert(life::Foam);
         }
+    }
+    if let Some(terrain) = mesh::merge(terrain) {
+        commands.spawn((
+            Name::new("arena merged terrain"),
+            Mesh3d(meshes.add(terrain)),
+            MeshMaterial3d(mat.clone()),
+            Transform::default(),
+        ));
     }
     for (own, x) in [(true, -0.9), (false, 16.9)] {
         for (piece, hide_below) in towers::tower(own) {

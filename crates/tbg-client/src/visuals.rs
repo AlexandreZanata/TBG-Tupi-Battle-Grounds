@@ -2,7 +2,7 @@
 //! is a code-built figurine (`art`) with a team ring, rank pips, and an HP
 //! bar; cues drive the shared animation library.
 
-use bevy::prelude::*;
+use bevy::{light::NotShadowCaster, prelude::*};
 use tbg_core::content::def;
 use tbg_core::content::effective_stats;
 use tbg_core::{Archetype, Faction, UnitId, UnitKind};
@@ -13,6 +13,7 @@ use crate::ui::UiAction;
 
 pub mod assets;
 mod cues;
+mod names;
 mod update;
 
 pub use assets::VisualAssets;
@@ -51,7 +52,8 @@ pub struct UnitVisual {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(PreStartup, assets::init)
+    app.add_plugins(names::plugin)
+        .add_systems(PreStartup, assets::init)
         .add_systems(Update, (cues::animate, cues::billboards, cues::fly));
 }
 
@@ -99,6 +101,7 @@ pub fn spawn_unit_visual(
             ring_mat,
             Transform::from_xyz(0.0, 0.02, 0.0).with_scale(ring_scale),
         ))
+        .insert(NotShadowCaster)
         .id();
     let (bar, bar_fill, tiers) = spawn_bar(commands, a, height, &look);
     let visual = UnitVisual {
@@ -171,6 +174,7 @@ fn spawn_bar(
             .spawn((
                 mesh(&a.tier_cube, tier_mat, Transform::from_xyz(x, 0.1, 0.0)),
                 vis,
+                NotShadowCaster,
             ))
             .id()
     });
@@ -180,6 +184,7 @@ fn spawn_bar(
             &a.bar_fill[0],
             Transform::from_xyz(0.0, 0.0, 0.01),
         ))
+        .insert(NotShadowCaster)
         .id();
     let bar_bg = commands
         .spawn(mesh(
@@ -187,6 +192,7 @@ fn spawn_bar(
             &a.bar_bg,
             Transform::from_scale(Vec3::new(1.04, 1.4, 1.0)),
         ))
+        .insert(NotShadowCaster)
         .id();
     let bar = commands
         .spawn((

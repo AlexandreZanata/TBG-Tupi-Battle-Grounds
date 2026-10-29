@@ -169,3 +169,9 @@ pub fn save_flag(key: &str, value: bool) {
     #[cfg(not(target_arch = "wasm32"))]
     let _ = (key, value);
 }
+
+/// Presentation-only arena inspection for P16-A captures, without the menu or orbit.
+pub fn arena_preview() -> bool {
+    static PREVIEW: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *PREVIEW.get_or_init(|| url_param("arena").is_some())
+}

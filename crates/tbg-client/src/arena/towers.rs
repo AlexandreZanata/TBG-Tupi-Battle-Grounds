@@ -64,11 +64,6 @@ pub(super) fn tower(own: bool) -> [(Mesh, f32); 3] {
         ));
     }
     crown.push((Cyl(0.03, 0.9), WOOD, at(2.3)));
-    crown.push((
-        Box(0.04, 0.32, 0.5),
-        banner,
-        Transform::from_xyz(0.0, 2.55, 0.26),
-    ));
     [(base, -1.0), (mid, 1.0 / 3.0), (painted(crown), 2.0 / 3.0)]
 }
 

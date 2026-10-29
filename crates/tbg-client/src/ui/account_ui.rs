@@ -47,6 +47,8 @@ pub fn apply_action(
                 if let Some(key) = config::load_account_key() {
                     config::copy_text(&key);
                     toasts.push("Key copied - store it somewhere safe");
+                } else {
+                    toasts.push("No saved key on this device");
                 }
             }
         }
@@ -55,6 +57,8 @@ pub fn apply_action(
                 download_key(name, key);
                 *saved = true;
                 toasts.push("Key downloaded");
+            } else {
+                toasts.push("No saved key on this device");
             }
         }
         UiAction::KeySaved => {

@@ -114,6 +114,9 @@ fn pair(a: impl Bundle, b: impl Bundle) -> impl Bundle {
 }
 
 fn build(commands: &mut Commands, account: &Account) {
+    if crate::config::arena_preview() {
+        return;
+    }
     // P11 profile chip: guest actions, or name · rating plus log out.
     // P12 ranked section: your rating on the button, or the locked hint.
     // P13: Ranking panel next to the sound toggle.

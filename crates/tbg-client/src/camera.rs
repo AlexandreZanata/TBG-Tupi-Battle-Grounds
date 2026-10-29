@@ -69,7 +69,9 @@ fn reframe_on_resize(
 ) {
     let size = Vec2::new(window.width(), window.height());
     let resized = resize.read().count() > 0;
-    let orbit = desktop(size.x, size.y) && *state.get() == crate::GameState::Menu;
+    let orbit = desktop(size.x, size.y)
+        && *state.get() == crate::GameState::Menu
+        && !crate::config::arena_preview();
     if !resized && size == *last && !orbit && !state.is_changed() {
         return;
     }

@@ -50,17 +50,18 @@ mod web {
         };
         lobby.0 = camera::desktop(window.width(), window.height())
             && root.get_attribute("data-ready").as_deref() == Some("true");
-        let screen = if !lobby.0 || *state.get() != GameState::Menu {
-            "off"
-        } else if ranking.open {
-            "ranking"
-        } else if matches!(account.screen, AccountScreen::SaveKey { .. }) {
-            "key"
-        } else if textform::is_open(&form) {
-            "form"
-        } else {
-            "lobby"
-        };
+        let screen =
+            if !lobby.0 || *state.get() != GameState::Menu || crate::config::arena_preview() {
+                "off"
+            } else if ranking.open {
+                "ranking"
+            } else if matches!(account.screen, AccountScreen::SaveKey { .. }) {
+                "key"
+            } else if textform::is_open(&form) {
+                "form"
+            } else {
+                "lobby"
+            };
         root.set_hidden(screen != "lobby");
         attr(&root, "data-screen", screen);
         attr(
