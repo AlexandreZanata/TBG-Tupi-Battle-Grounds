@@ -556,15 +556,35 @@ or weaken an existing assertion.
 
 ## Phase report
 
-> Fill after execution. Include the branch HEAD, exact commands, pass/fail
-> counts, manual devices/browsers, screenshots, deviations, and any
-> `> blocked:` item (tried / exact error / suspected cause).
+Executed 2026-10-29 on `phase/p39-quick-challenge`; merged into the
+combined P16-D/P39 review branch. The owner device/browser check is still
+open.
 
-- HEAD:
-- Protocol version:
+- HEAD: `22571c5` (P39 implementation), merged as `c9859a3` with P16-D.
+- Protocol version: 8 (`PROTOCOL_VERSION`; appended `CreateChallenge`,
+  `JoinChallenge`, `RequestRematch`, and the five server replies).
 - Commands and results:
-- Automated tests:
-- Manual acceptance:
-- Performance/memory observation:
-- Deviations:
-- Blocked:
+  - `cargo fmt --all -- --check` pass.
+  - `cargo clippy --workspace -- -D warnings` pass.
+  - `cargo test --workspace`: 159 passed, 0 failed, 1 ignored (C4b real
+    clock) on the combined branch.
+  - `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown`
+    pass.
+  - `trunk build --release` in `crates/tbg-client/` pass.
+  - `cargo test -p tbg-server --test contract_challenge`: 2 passed.
+  - `cargo test -p tbg-server --test online`: 28 passed, including the 16
+    challenge/rematch cases in the phase table.
+- Automated tests: the immutable `tests/contract_challenge.rs` guards
+  BR-R08 (single-use, two distinct sessions, casual/no rating, no code or
+  login) and BR-R09 (both requests, fresh Challenge, never a public
+  queue). The lobby lifecycle tests cover expiry, bounded cleanup, and
+  rematch notification. Existing private-room, queue, reconnect, and
+  ranked tests still pass.
+- Manual acceptance: **pending owner**. Not run on a desktop + phone, and
+  no screenshots were captured in this session.
+- Performance/memory observation: no new dependency; invites and rematch
+  tickets are bounded vectors swept by the existing 10-second cleanup.
+  No load measurement was made.
+- Deviations: no manual device/browser run; the visual HUD/link/rematch
+  layout was not inspected in a browser.
+- Blocked: none.
