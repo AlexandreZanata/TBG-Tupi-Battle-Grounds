@@ -62,8 +62,9 @@ and send static unit identity only on spawn/evolution/full plus a complete
 dynamic list every view. Implement exactly that option (protocol version
 bump, client static cache, full view on `Attach`, integrity/reconnect
 tests) and record its own before/after. Take the next unused
-`PROTOCOL_VERSION` on main at implementation time (v9 at P30-A review); if
-P17-A merged first, add `StrongholdView` to the static section. Do not
+`PROTOCOL_VERSION` on main at implementation time: **v10** now (v9 on
+main); if P17-A merged first and took v10, use v11 and add
+`StrongholdView` to the static section. Do not
 reopen the delta, compression, 5/8 Hz, or client-POC options that P30-A
 measured and rejected.
 

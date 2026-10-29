@@ -659,7 +659,8 @@ tree lookups, and the smaller payloads encode faster). B is deferred.
   id, seat, kind, tier, branch); Synergy moves to a low-frequency
   `Option<[[u8;4];2]>` update. `Ruleset::unit_max_hp` (already added) and
   pure tick/phase helpers derive the removed fields. `PROTOCOL_VERSION`
-  takes the next unused value; main is v9 at review.
+  takes **v10** on current main (v9); if P17-A merges first and takes v10,
+  P30-B takes v11 and adds `StrongholdView` to the static section.
 - Reconnection gets `MatchStart` plus a `full=true` view with every live
   static unit, current Synergy, all dynamic units, and buffered events.
   The client replaces its static map on `full`, upserts otherwise, and
@@ -690,8 +691,9 @@ tree lookups, and the smaller payloads encode faster). B is deferred.
    tracker (no BTreeMap in the hot path), full on first view and `Attach`,
    static changes on spawn/evolve, Synergy update on change.
    `match_task.rs` cadence and ack logic unchanged.
-5. `tbg-core/src/protocol.rs`: bump `PROTOCOL_VERSION` with a comment
-   naming P30-A; server and client deploy together.
+5. `tbg-core/src/protocol.rs`: bump `PROTOCOL_VERSION` to **v10** (v11 if
+   P17-A takes v10 first) with a comment naming P30-A; server and client
+   deploy together.
 6. Tests: `contract_protocol*.rs` (version and view shape),
    `contract_determinism.rs` unchanged, `contract_view.rs` (H8 + C
    reconstruction), online reconnect/slow-client/rate-limit/seat/hidden
