@@ -713,6 +713,19 @@ Measured across 3 runs of 60 seconds each on Chrome 156 (`1280x800`, DPR 1, port
   - [Archer Aim 8 Angles Contact Sheet](docs/media/a1/archer-aim-8angles.jpg) (`docs/media/a1/archer-aim-8angles.jpg`, 277 KB): 4x2 montage demonstrating directional aiming across all 8 angles in the aim lab.
   - [Archer Attack Frames Sheet](docs/media/a1/archer-attack-frames.jpg) (`docs/media/a1/archer-attack-frames.jpg`, 56 KB): 0%, 25%, 50%, 75%, 100% frame-by-frame draw and release.
 
+#### 2.4 Step 6 Melee Prototype Verification
+
+- **Strike Profile Table (`art/melee.rs`):** Implemented data-driven table defining `{ windup_frac, arc_deg, torso_twist_deg, lunge, hit_stop_ms, impact }` for classes `Slash`, `Smash`, `Chop`, `Bash`, `Mech`.
+- **Unit Weapon Mapping:** Shieldbearer -> `Smash` (flanged mace), Bone Brute -> `Chop` (cleaver), Sawbot -> `Mech` (saw/gear spin-up), Rampart -> `Bash` (shield). Scaled per tier evolution (+8% / +16%).
+- **Cosmetic Lunge (`visuals/aim.rs`):** Authoritative forward body shift `<= 0.25` tile along the aim line during melee strike, peaking at `0.30 s` Strike marker, springing back smoothly to 0.0 at clip duration without stretching limbs or teleporting.
+- **Directional Hit Reaction & Recoil (`sync/events.rs`, `visuals/aim.rs`):** Matched via `ImpactRing` FIFO on `Event::Hit`. Target recoils `<= 0.08` tile away from the attacker over 120 ms (additive). Contact sparks spawned at contact side between attacker and target.
+- **Hit-Stop (`art/anim.rs`):** 50 ms pause applied to target animator only (`anim.apply_hit_stop(0.050)`).
+- **Unit Tests:** 5 new contract tests in `art/melee.rs` validating parameters, weapon mappings, tier evolution scaling, lunge timing/spring-back, and directional recoil decay.
+- **Media Artifacts:**
+  - [Shieldbearer Melee Aim](docs/media/a1/melee-shieldbearer-aim.jpg) (`docs/media/a1/melee-shieldbearer-aim.jpg`, 26 KB): Shieldbearer executing directed `Smash` strike against diagonal target with cosmetic lunge.
+  - [Bone Brute Melee Aim](docs/media/a1/melee-bonebrute-aim.jpg) (`docs/media/a1/melee-bonebrute-aim.jpg`, 23 KB): Bone Brute executing directed `Chop` strike with cleaver.
+  - [Crowd Melee Lab](docs/media/a1/melee-crowd-aim.jpg) (`docs/media/a1/melee-crowd-aim.jpg`, 29 KB): 12 melee attackers in a clump surrounding 3 targets.
+
 ### Progress
 
 Step 0 complete (preflight verification).
@@ -721,7 +734,8 @@ Step 2 complete (aim lab before sheets, formal 5-scenario performance baseline a
 Step 3 complete (authored ART-DIRECTION §11 D5 visual standard, class proportion table, faction morphology/material rules, evolution scale progression rules +8%/+16%, and Tupi checklist).
 Step 4 complete (aim core pure Rust in art/aim.rs with facing_yaw, turn_toward, Aim state machine Active/Hold/Release, deadzone, frozen point on despawn, ImpactRing FIFO and 1s expiry; all 11 contract tests passing).
 Step 5 complete (aim wiring system in visuals/aim.rs, D2 targeted arrow flight in art/arrows.rs, duplicate projectile fix, 8-angle lab contact sheet, 2 contract tests passing).
-Steps 6–14 pending.
+Step 6 complete (strike profile table in art/melee.rs, cosmetic lunge, directional recoil, 50ms hit-stop on target animator, contact sparks, 5 contract tests passing, melee verification sheets).
+Steps 7–14 pending.
 
 ### Owner decisions
 

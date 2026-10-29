@@ -24,6 +24,7 @@ mod curves;
 mod feet;
 pub mod figure;
 mod legacy;
+pub mod melee;
 pub mod mesh;
 pub mod palette;
 pub mod rig;

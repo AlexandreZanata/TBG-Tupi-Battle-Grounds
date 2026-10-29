@@ -79,7 +79,24 @@ pub(super) fn apply_event(
             to: Target::Unit(id),
             ..
         } => {
-            let _attacker = fx.ring.pop_matching(Target::Unit(id), fx.time);
+            let matched_attacker = fx.ring.pop_matching(Target::Unit(id), fx.time);
+            let target_pos = at(visuals, Target::Unit(id));
+            if let Some(&e) = map.0.get(&id) {
+                if let Ok((_, _, mut anim)) = visuals.get_mut(e) {
+                    anim.apply_hit_stop(0.050);
+                }
+                if let (Some(attacker_target), Some(t_pos)) = (matched_attacker, target_pos) {
+                    if let Some(attacker_pos) = at(visuals, attacker_target) {
+                        let mut recoil = crate::art::melee::HitRecoil::default();
+                        recoil.trigger(attacker_pos, t_pos);
+                        commands.entity(e).insert(recoil);
+
+                        let dir = (attacker_pos - t_pos).normalize_or_zero();
+                        let contact_pt = t_pos + dir * 0.25 + Vec3::new(0.0, 0.55, 0.0);
+                        vfx::sparks(commands, fx.vfx, contact_pt);
+                    }
+                }
+            }
             cue(map, visuals, fx.assets, id, VisualCue::Hit);
         }
         Event::Hit {

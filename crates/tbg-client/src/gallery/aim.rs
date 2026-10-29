@@ -197,7 +197,10 @@ pub fn update(
         Option<&mut Aim>,
         &Transform,
     )>,
-    mut targets: Query<(&AimTarget, &mut Visibility, &Transform)>,
+    mut targets: Query<
+        (&AimTarget, &mut Visibility, &Transform, &mut Animator),
+        Without<AimAttacker>,
+    >,
     mut transforms: Query<&mut Transform, (Without<AimAttacker>, Without<AimTarget>)>,
 ) {
     let toggle_far = keys.just_pressed(KeyCode::KeyN);
@@ -250,7 +253,9 @@ pub fn update(
         let current_far = attacker.far;
         let mut active_target_pos = None;
 
-        for (target, mut vis, target_t) in &mut targets {
+        let strike_triggered = anim.events.contains(&crate::art::anim::ClipEvent::Strike);
+
+        for (target, mut vis, target_t, mut target_anim) in &mut targets {
             if target.index == current_target && target.far == current_far {
                 if kill_target {
                     *vis = Visibility::Hidden;
@@ -259,6 +264,10 @@ pub fn update(
                 }
                 if *vis != Visibility::Hidden {
                     active_target_pos = Some(target_t.translation);
+                    if strike_triggered {
+                        target_anim.play_if_free(Clip::Hit);
+                        target_anim.apply_hit_stop(0.050);
+                    }
                 }
             } else if target.far != current_far {
                 *vis = Visibility::Hidden;
@@ -297,8 +306,19 @@ pub fn update(
                 active_target_pos,
                 attacker_t.translation,
             );
+
+            let profile = crate::art::melee::strike_profile_for_unit(attacker.kind, 0, 0);
+            let lunge_dist =
+                crate::art::melee::lunge_distance(attacker.timer, 0.30, 0.50, profile.lunge);
+            let lunge_offset = Vec3::new(
+                aim.current_yaw.sin() * lunge_dist,
+                0.0,
+                aim.current_yaw.cos() * lunge_dist,
+            );
+
             if let Ok(mut fig_t) = transforms.get_mut(anim.figure) {
                 fig_t.rotation = Quat::from_rotation_y(aim.current_yaw);
+                fig_t.translation = lunge_offset;
             }
         }
     }
