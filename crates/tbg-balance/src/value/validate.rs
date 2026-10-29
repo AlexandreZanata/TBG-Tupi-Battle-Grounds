@@ -50,7 +50,8 @@ fn ratio(knob: Knob, base: i64, next: i64) -> f64 {
         | Knob::Synergy(..)
         | Knob::HatchEvery
         | Knob::HatchEveryHive
-        | Knob::BeetleLifetime => positive(next) / positive(base),
+        | Knob::BeetleLifetime
+        | Knob::Arcana(_) => positive(next) / positive(base),
     }
 }
 

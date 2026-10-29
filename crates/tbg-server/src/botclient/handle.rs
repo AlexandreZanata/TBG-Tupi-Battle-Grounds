@@ -117,6 +117,8 @@ pub(super) fn handle(
         | ServerMsg::LoggedOut
         | ServerMsg::RatingChanged { .. }
         | ServerMsg::Leaderboard { .. }
+        | ServerMsg::ArcanasSelected { .. }
+        | ServerMsg::ArcanasRejected { .. }
         | ServerMsg::ChallengeWaiting { .. }
         | ServerMsg::ChallengeUnavailable
         | ServerMsg::RematchOpen { .. }

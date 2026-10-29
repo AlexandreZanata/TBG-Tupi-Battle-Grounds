@@ -54,6 +54,7 @@ fn add_session(
             account: None,
             ip: "127.0.0.1".parse().unwrap(),
             detached_at: None,
+            arcanas: tbg_core::ArcanaPreset::DEFAULT,
         },
     );
     rx

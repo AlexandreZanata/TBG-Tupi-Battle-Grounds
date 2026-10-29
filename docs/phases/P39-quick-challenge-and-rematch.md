@@ -80,7 +80,7 @@ seat or a second pairing. No spectator field is added now.
 
 ## Contracts (freeze before coding)
 
-### Wire: `PROTOCOL_VERSION = 8`
+### Wire: `PROTOCOL_VERSION = 9`
 
 Append only; existing variants keep their indices. Old clients are rejected
 by the handshake.
@@ -289,7 +289,7 @@ instead of running a ghost seat forever. `Attach` already clears
 
 ## Steps (in order; check and commit each)
 
-### 1. Protocol v8 and core contract tests
+### 1. Protocol v9 and core contract tests
 
 Files: `crates/tbg-core/src/protocol.rs`,
 `crates/tbg-core/tests/contract_protocol.rs`,
@@ -298,13 +298,13 @@ Rules: ARCHITECTURE §5 append-only wire; D-39; no seat in client messages.
 
 - Add `InviteToken`, the three `ClientMsg` variants, the five `ServerMsg`
   variants, and `MatchMode::Challenge` exactly as above, appended at the end.
-- Bump `PROTOCOL_VERSION` to 8 and update the version-test message.
+- Bump `PROTOCOL_VERSION` to 9 and update the version-test message. Arcana v8 was merged first; the P39 variants are appended after the Arcana variants.
 - Extend the frozen variant-order tests with the new variants and their
   indices. Add exact-byte assertions for at least `JoinChallenge`,
   `ChallengeWaiting`, and `RematchClosed`.
 - **Check:** `cargo test -p tbg-core --test contract_protocol --test contract_protocol_server`.
 - **Done when:** all old indices are unchanged, the new indices are frozen,
-  and the version test names v8 and P39.
+  and the version test names v9, Arcana v8, and P39.
 
 ### 2. Server challenge lifecycle
 
@@ -482,7 +482,7 @@ renumbered or silently changed.
   and `Rematch`, the extended `MatchMode` row, BR-R08, BR-R09, D-39, and
   the removal of "rematch" from the deferred list. Edit them only if the
   implementation proves a contract change; keep them **Proposed**.
-- Update `ARCHITECTURE.md` protocol to v8 and the new messages/mode,
+- Update `ARCHITECTURE.md` protocol to v9 and the new messages/mode,
   sessions/matchmaking/lifecycle, and the invite per-IP limit.
 - Do not rewrite existing decisions or phase files.
 - **Check:** `rg -n "PROTOCOL_VERSION|Quick Challenge|BR-R08|BR-R09" docs`
@@ -551,7 +551,7 @@ or weaken an existing assertion.
 - [ ] Reload during waiting/combat/result recovers the expected state;
       explicit Menu declines the rematch.
 - [ ] Same-IP players are not blocked by the invite limit.
-- [ ] `PROTOCOL_VERSION` is 8; old indices are unchanged; docs agree.
+- [ ] `PROTOCOL_VERSION` is 9; old indices are unchanged; docs agree.
 - [ ] All verification commands above were actually run.
 
 ## Phase report
@@ -561,7 +561,7 @@ combined P16-D/P39 review branch. The owner device/browser check is still
 open.
 
 - HEAD: `22571c5` (P39 implementation), merged as `c9859a3` with P16-D.
-- Protocol version: 8 (`PROTOCOL_VERSION`; appended `CreateChallenge`,
+- Protocol version: 9 (`PROTOCOL_VERSION`; v8 Arcana variants kept, then appended `CreateChallenge`,
   `JoinChallenge`, `RequestRematch`, and the five server replies).
 - Commands and results:
   - `cargo fmt --all -- --check` pass.

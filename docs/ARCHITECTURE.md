@@ -137,17 +137,21 @@ tables are the one allowed exception.
   `PlayerIntention = Purchase{offer} | Evolve{unit, branch}`;
   `ServerMsg = Welcome{token, name} | VersionMismatch{server} | Queued | RoomCreated{code} | RoomNotFound | MatchStart{you, opponent} | View(MatchView) | Rejected{seq, reason} | MatchEnd{outcome} | Ping{id} | NetStats{rtt_ms} | Error{code}`.
   Later versions append variants at the end of each enum (`PROTOCOL_VERSION`
-  5): accounts v2 (`Register{name} | Login{key} | Logout` →
+  9): accounts v2 (`Register{name} | Login{key} | Logout` →
   `Registered{key, profile} | LoggedIn{profile} | LoggedOut |
   AccountError{code}`), ranked v3 (`RankedMatch`; `MatchStart` gains
   `mode, opponent_rating`; `RatingChanged{before, after, profile}`),
   ranking v4 (`Leaderboard{offset}` → `Leaderboard{total, offset, rows,
   you}`: 20 rows from the in-memory snapshot, `you` = your rank; one
   request per second per connection, extras ignored), takeover v5
-  (`ErrorCode::SessionTakenOver`), and v6 (`Surrender`, routed like an
+  (`ErrorCode::SessionTakenOver`), v6 (`Surrender`, routed like an
   intention with the connection's seat → `MatchCmd::Surrender` →
   `MatchState::forfeit`, idempotent; `MatchStart` gains `you_name` and
-  `you_rating` so the HUD names both HP bars).
+  `you_rating` so the HUD names both HP bars), v7 (open army: five offers,
+  no slot fields), v8 (Arcanas: `SetArcanas` → `ArcanasSelected |
+  ArcanasRejected`, both presets in `MatchStart`), and v9 (P39 Quick
+  Challenge: `CreateChallenge | JoinChallenge | RequestRematch` → five
+  challenge/rematch replies, appended after the v8 Arcana messages).
   Intentions carry no seat: the server derives the seat from the connection.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was

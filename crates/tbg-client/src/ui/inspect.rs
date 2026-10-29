@@ -5,7 +5,8 @@
 //! layer (`battle_hud`); smaller screens get the Bevy text panel below.
 
 use bevy::prelude::*;
-use tbg_core::content::{def, effective_stats, form_of, TICK_HZ};
+use tbg_core::content::{def, form_of, TICK_HZ};
+use tbg_core::{ArcanaPreset, Ruleset};
 use tbg_core::{MatchView, OnHit, UnitId};
 
 use super::{label, UiAction, PANEL};
@@ -43,8 +44,10 @@ fn tiles(milli: i32) -> String {
     format!("{:.1}", milli as f32 / 1000.0)
 }
 
-/// `None` once the unit has left the view (dead or gone).
-pub fn report(v: &MatchView, id: UnitId) -> Option<Report> {
+/// `None` once the unit has left the view (dead or gone). `arcanas` are
+/// both frozen presets from `MatchStart` (D-40), so damage and healing
+/// match what the server applies.
+pub fn report(v: &MatchView, id: UnitId, arcanas: &[ArcanaPreset; 2]) -> Option<Report> {
     let u = v.units.iter().find(|u| u.id == id)?;
     let d = def(u.kind);
     // Summons never receive Synergy (BR-U08).
@@ -53,7 +56,13 @@ pub fn report(v: &MatchView, id: UnitId) -> Option<Report> {
     } else {
         v.synergy[u.seat.index()][d.faction.index()]
     };
-    let st = effective_stats(u.kind, u.tier, u.branch, level);
+    // Summons never receive Arcanas either (D-40).
+    let preset = if u.kind.is_summon() {
+        ArcanaPreset::NEUTRAL
+    } else {
+        arcanas[u.seat.index()]
+    };
+    let st = Ruleset::canon().stats_with(u.kind, u.tier, u.branch, level, &preset);
     let seconds = f32::from(st.interval) / TICK_HZ as f32;
     let attack = if st.heal > 0 && st.damage == 0 {
         ("Heal", st.heal)
@@ -173,12 +182,13 @@ fn fallback_panel(
     mut commands: Commands,
     inspected: Res<Inspected>,
     view: Res<LatestView>,
+    info: Res<crate::sync::MatchInfo>,
     desktop: Res<super::battle_hud::DesktopBattle>,
     panels: Query<Entity, With<InspectPanel>>,
     mut texts: Query<&mut Text, With<InspectText>>,
 ) {
     let report = match (inspected.0, &view.0) {
-        (Some(id), Some(v)) if !desktop.0 => report(v, id),
+        (Some(id), Some(v)) if !desktop.0 => report(v, id, &info.arcanas),
         _ => None,
     };
     let Some(r) = report else {
@@ -247,8 +257,9 @@ mod tests {
         let (mine, theirs) = (s.units[0].id, s.units[1].id);
         s.units[1].hp = 123;
         let v = s.view_for(Seat::A, &[]);
-        let own = super::report(&v, mine).unwrap();
-        let enemy = super::report(&v, theirs).unwrap();
+        let neutral = [tbg_core::ArcanaPreset::NEUTRAL; 2];
+        let own = super::report(&v, mine, &neutral).unwrap();
+        let enemy = super::report(&v, theirs, &neutral).unwrap();
         assert!(own.own && !enemy.own);
         assert_eq!((enemy.hp, enemy.max_hp), (123, 300));
         // The canonical value, so a balance pass (D-33) does not break the UI test.
@@ -257,7 +268,7 @@ mod tests {
         assert_eq!(own.on_hit, "Slow 40% 2.0 s");
         assert_eq!((own.every.as_str(), own.range.as_str()), ("1.40 s", "3.5"));
         assert!(
-            super::report(&v, 999).is_none(),
+            super::report(&v, 999, &neutral).is_none(),
             "gone units close the panel"
         );
         let record = enemy.record();

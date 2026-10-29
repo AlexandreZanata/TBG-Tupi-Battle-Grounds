@@ -13,9 +13,29 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 8,
-        "v8 (P39): Quick Challenge invite/rematch messages and MatchMode::Challenge"
+        PROTOCOL_VERSION, 9,
+        "v9: v8 Arcanas plus P39 Quick Challenge/rematch messages and MatchMode::Challenge"
     );
+}
+
+#[test]
+fn v8_arcana_messages_are_appended() {
+    // D-40: appended after every v7 variant (client 13; server 18 and 19).
+    let set = encode(&ClientMsg::SetArcanas {
+        ranks: [2, 0, 2, 0, 2, 0],
+    });
+    assert_eq!(set, [13, 2, 0, 2, 0, 2, 0]);
+    assert!(decode_client(&set).is_ok());
+    // A malformed rank list is a decode error, never a panic.
+    assert!(decode_client(&[13, 2, 0, 2]).is_err());
+    let selected = ServerMsg::ArcanasSelected {
+        preset: tbg_core::ArcanaPreset::DEFAULT,
+    };
+    assert_eq!(encode(&selected), [18, 2, 0, 2, 0, 2, 0]);
+    let rejected = ServerMsg::ArcanasRejected {
+        reason: tbg_core::protocol::ArcanaRejection::NotIdle,
+    };
+    assert_eq!(encode(&rejected), [19, 1]);
 }
 
 #[test]
@@ -42,6 +62,9 @@ fn client_variant_order_is_frozen() {
         ClientMsg::RankedMatch,
         ClientMsg::Leaderboard { offset: 0 },
         ClientMsg::Surrender,
+        ClientMsg::SetArcanas {
+            ranks: [2, 0, 2, 0, 2, 0],
+        },
         ClientMsg::CreateChallenge,
         ClientMsg::JoinChallenge { token: [7; 16] },
         ClientMsg::RequestRematch,
@@ -70,12 +93,12 @@ fn client_bytes_are_frozen() {
     assert_eq!(encode(&ClientMsg::Pong { id: 300 }), [6, 0xAC, 0x02]);
     assert_eq!(encode(&ClientMsg::Leaderboard { offset: 20 }), [11, 20]);
     assert_eq!(encode(&ClientMsg::Surrender), [12]);
-    assert_eq!(encode(&ClientMsg::CreateChallenge), [13]);
+    assert_eq!(encode(&ClientMsg::CreateChallenge), [14]);
     assert_eq!(
         encode(&ClientMsg::JoinChallenge { token: [7; 16] }),
-        [14, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
+        [15, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
     );
-    assert_eq!(encode(&ClientMsg::RequestRematch), [15]);
+    assert_eq!(encode(&ClientMsg::RequestRematch), [16]);
 }
 
 #[test]

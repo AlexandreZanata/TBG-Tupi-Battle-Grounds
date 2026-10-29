@@ -1,6 +1,7 @@
 //! `MatchState::new` and the fixed tick, in the order fixed by
 //! docs/phases/P2-core-simulation.md ("step() order").
 
+use crate::arcana::ArcanaPreset;
 use crate::content::{self, MATCH_END, OVERTIME_START, RUNNING_START};
 use crate::rng::Pcg32;
 use crate::ruleset::{Ruleset, CANON};
@@ -9,12 +10,23 @@ use crate::types::Seat;
 use crate::{combat, shop, summon, synergy};
 
 impl MatchState {
+    /// A match without Arcanas (tests and the lab's neutral baseline).
     pub fn new(seed: u64) -> MatchState {
         MatchState::with_rules(seed, &CANON)
     }
 
+    /// The online match: each seat's frozen, validated preset (BR-AR05).
+    pub fn with_arcanas(seed: u64, arcanas: [ArcanaPreset; 2]) -> MatchState {
+        MatchState::lab(seed, &CANON, arcanas)
+    }
+
     /// A match on another ruleset: the offline balance lab only (D-33).
     pub fn with_rules(seed: u64, rules: &'static Ruleset) -> MatchState {
+        MatchState::lab(seed, rules, [ArcanaPreset::NEUTRAL; 2])
+    }
+
+    /// Any ruleset and presets: the lab's Arcana experiments (D-33, D-40).
+    pub fn lab(seed: u64, rules: &'static Ruleset, arcanas: [ArcanaPreset; 2]) -> MatchState {
         let player = |stream: u64| {
             let mut rng = Pcg32::new(seed, stream);
             PlayerState {
@@ -25,12 +37,16 @@ impl MatchState {
                 synergy: [0; 4],
                 last_seq: 0,
                 rng,
+                arcanas: ArcanaPreset::NEUTRAL,
             }
         };
         MatchState {
             tick: 0,
             phase: Phase::Countdown,
-            players: [player(1), player(2)],
+            players: [0, 1].map(|i| PlayerState {
+                arcanas: arcanas[i],
+                ..player(i as u64 + 1)
+            }),
             units: Vec::new(),
             next_unit_id: 1,
             outcome: None,

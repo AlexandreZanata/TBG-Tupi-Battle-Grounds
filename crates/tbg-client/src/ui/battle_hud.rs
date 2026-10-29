@@ -123,7 +123,7 @@ mod web {
         attr(&root, "data-clock", &super::super::hud_update::clock(v));
         let unit = inspected
             .0
-            .and_then(|id| crate::ui::inspect::report(v, id))
+            .and_then(|id| crate::ui::inspect::report(v, id, &info.arcanas))
             .map(|r| r.record())
             .unwrap_or_default();
         attr(&root, "data-inspect", &unit);

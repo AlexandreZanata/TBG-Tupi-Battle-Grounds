@@ -6,8 +6,10 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use tbg_core::content::TICK_HZ;
+use tbg_core::ArcanaPreset;
 use tbg_core::Ruleset;
 
+use crate::arcanas;
 use crate::cli::Args;
 use crate::duels;
 use crate::gate::{self, Scope};
@@ -130,6 +132,7 @@ pub fn dispatch(a: &Args) -> Result<(), String> {
         "confirm" => confirm(a),
         "value" => value_cmd(a),
         "validate" => validate_cmd(a),
+        "arcana" => arcana_cmd(a),
         other => Err(format!("unknown command `{other}` (see --help)")),
     }
 }
@@ -149,6 +152,7 @@ fn run(a: &Args) -> Result<(), String> {
         policies: [pair.0, pair.1],
         reaction: [c.budget.reaction; 2],
         setup: Setup::None,
+        arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let results: gate::Results =
         [(pair, run_pairs(&[m], c.seeds(), c.budget.threads).remove(0))].into();
@@ -273,6 +277,7 @@ fn throughput(a: &Args) -> Result<(), String> {
         policies: [Policy::Bot; 2],
         reaction: [c.budget.reaction; 2],
         setup: Setup::None,
+        arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let mut text =
         String::from("threads  games/s  speed-up vs 1x (game-seconds per wall-second)\n");
@@ -594,4 +599,79 @@ fn validate_cmd(a: &Args) -> Result<(), String> {
         .write("validation.txt", &text)
         .map_err(|e| e.to_string())?;
     c.finish(0, 0, "P16-D validation")
+}
+
+/// Every complete Arcana preset and the named fixtures against the default
+/// (D-40): the evidence BR-AR's acceptance hypotheses ask for.
+fn arcana_cmd(a: &Args) -> Result<(), String> {
+    let c = ctx(a, 256, CONFIRMATION)?;
+    let policy = match a.str("a") {
+        Some(_) => policy(a, "a")?,
+        None => Policy::Bot,
+    };
+    let all = arcanas::complete();
+    let run = |presets: &[ArcanaPreset]| {
+        arcanas::against(
+            c.rules,
+            presets,
+            ArcanaPreset::DEFAULT,
+            policy,
+            c.seeds(),
+            c.budget.reaction,
+            c.budget.threads,
+        )
+    };
+    let mut rows = run(&all);
+    rows.sort_by(|x, y| y.1.mean.total_cmp(&x.1.mean));
+    let show = |p: &ArcanaPreset, e: &stats::Estimate| {
+        format!(
+            "{:?}  {:>5.1}% [{:.1} – {:.1}]",
+            p.ranks,
+            e.mean * 100.0,
+            e.lo * 100.0,
+            e.hi * 100.0
+        )
+    };
+    let mut text = format!(
+        "{} complete presets vs default {:?}, policy {}, {} seed pairs each\n",
+        rows.len(),
+        ArcanaPreset::DEFAULT.ranks,
+        policy.name(),
+        c.pairs
+    );
+    let above = rows.iter().filter(|r| r.1.lo > 0.55).count();
+    let below = rows.iter().filter(|r| r.1.hi < 0.45).count();
+    let _ = writeln!(
+        text,
+        "interval above 55 %: {above} · interval below 45 %: {below}"
+    );
+    let _ = writeln!(text, "\nnamed fixtures:");
+    let named: Vec<ArcanaPreset> = arcanas::NAMED
+        .iter()
+        .map(|n| ArcanaPreset { ranks: n.1 })
+        .collect();
+    for ((name, _), (p, e)) in arcanas::NAMED.iter().zip(run(&named)) {
+        let _ = writeln!(text, "  {name:<11} {}", show(&p, &e));
+    }
+    let neutral = run(&[ArcanaPreset::NEUTRAL]);
+    let _ = writeln!(
+        text,
+        "  {:<11} {}  (diagnostic, never valid online)",
+        "neutral",
+        show(&neutral[0].0, &neutral[0].1)
+    );
+    let _ = writeln!(text, "\nbest 10:");
+    for (p, e) in rows.iter().take(10) {
+        let _ = writeln!(text, "  {}", show(p, e));
+    }
+    let _ = writeln!(text, "worst 10:");
+    for (p, e) in rows.iter().rev().take(10) {
+        let _ = writeln!(text, "  {}", show(p, e));
+    }
+    print!("{text}");
+    c.out
+        .write("arcana.txt", &text)
+        .map_err(|e| e.to_string())?;
+    let games = (all.len() + named.len() + 1) as u64 * c.pairs * 2;
+    c.finish(games, 0, "")
 }

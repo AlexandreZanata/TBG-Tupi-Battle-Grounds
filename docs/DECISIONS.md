@@ -553,9 +553,9 @@ guessing as a concern while the per-IP invite limiter and the WebSocket
 token bucket bound automated attempts. A separate quick-challenge queue or
 server would duplicate matchmaking and combat for no gain.
 
-**Consequences.** `PROTOCOL_VERSION` 8 appends three `ClientMsg` and five
-`ServerMsg` variants and a `MatchMode::Challenge` value; clients older than
-v8 are refused. Challenge and rematch state is lost on server restart, like
+**Consequences.** `PROTOCOL_VERSION` 9 appends three `ClientMsg` and five
+`ServerMsg` variants after the v8 Arcana messages and a
+`MatchMode::Challenge` value; clients older than v9 are refused. Challenge and rematch state is lost on server restart, like
 guest sessions. A player who closes the tab on the result screen keeps the
 rematch ticket for its TTL so a reload can recover it; an explicit
 Menu/Cancel declines and notifies the other player. Spectators, chat,
@@ -564,3 +564,25 @@ accounts, and persistent invitations remain out of scope.
 **Reopen when** playtests show challenge links being shared beyond two
 players (then a room with spectators, not a bigger invite), or rematch
 abandonment makes the 120-second ticket wasteful.
+
+## D-40 · Arcanas live in every mode before P31 — 2026-10-29 (owner decision)
+
+**Decision.** The owner asked for Arcanas to be fully integrated and live
+on the test server now, in Practice, Casual, Ranked, and private rooms,
+ahead of the P31 gate that P32–P38 assumed. The GAME-DESIGN §9 values
+(six nodes, six points, rank ≤ 2, default `[2,0,2,0,2,0]`) apply as
+**Proposed**. Built on P16-C: per-rank values are `Ruleset` data and lab
+knobs. Protocol v8 adds `SetArcanas`, `ArcanasSelected/Rejected`, and both
+presets in `MatchStart`; the server validates while idle and freezes the
+preset at pairing; accounts keep one preset (schema v4); match and ranked
+rows record both applied presets. Summons get no Arcana bonus (as with
+Synergy, BR-U08). The editor is the Codex desktop editor (D-40 replaces its
+"preview" status); phones use the saved or default preset until the P36
+phone editor exists.
+**Why.** The owner wants players to choose Arcanas before matches now.
+**Guard rails.** Server authority (clients send ranks, never bonuses);
+no preset may score outside 45–55 % against the default in the lab (it
+does not today, `docs/media/arcanas/`); values stay Proposed; the
+RulesetVersion field of P35 is replaced by the protocol version for now.
+**Reopen when** the full P34 matrix, human playtests, or ranked data show
+a dominant preset or a compulsory node.

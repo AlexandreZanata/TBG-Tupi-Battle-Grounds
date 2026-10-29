@@ -4,7 +4,7 @@
 
 use tbg_core::bot::Bot;
 use tbg_core::protocol::{ClientMsg, ServerMsg};
-use tbg_core::{Event, MatchState, PlayerIntention, Seat};
+use tbg_core::{ArcanaPreset, Event, MatchState, PlayerIntention, Seat};
 
 pub struct LocalMatch {
     state: MatchState,
@@ -16,9 +16,11 @@ pub struct LocalMatch {
 }
 
 impl LocalMatch {
-    pub fn new(seed: u64) -> LocalMatch {
+    /// Practice uses the player's saved Arcanas against a default bot (D-40).
+    pub fn new(seed: u64, arcanas: ArcanaPreset) -> LocalMatch {
+        let presets = [arcanas, ArcanaPreset::DEFAULT];
         LocalMatch {
-            state: MatchState::new(seed),
+            state: MatchState::with_arcanas(seed, presets),
             bot: Bot::new(seed ^ 0x5eed),
             queue: Vec::new(),
             events: Vec::new(),
@@ -29,6 +31,7 @@ impl LocalMatch {
                 opponent: "Training Bot".into(),
                 mode: tbg_core::protocol::MatchMode::Casual,
                 opponent_rating: None,
+                arcanas: presets,
             }],
             ended: false,
         }

@@ -11,9 +11,10 @@ use serde_json::Value;
 use tokio::sync::{oneshot, watch};
 
 use tbg_core::protocol::{AccountError, Profile, RatingResults};
-use tbg_core::Outcome;
+use tbg_core::{ArcanaPreset, Outcome};
 
 mod accounts;
+mod arcanas;
 pub mod leaderboard;
 mod matches;
 mod ranked;
@@ -64,6 +65,23 @@ impl Store {
         let _ = self.tx.try_send(StoreCmd::InsertMatch(m.clone()));
     }
 
+    /// D-40: remember an account's preset (fire and forget, BR-AR08).
+    pub fn save_arcanas(&self, account: AccountId, preset: ArcanaPreset) {
+        let _ = self.tx.try_send(StoreCmd::SaveArcanas { account, preset });
+    }
+
+    /// D-40: the account's saved preset, if any (validated on read).
+    pub async fn load_arcanas(&self, account: AccountId) -> Option<ArcanaPreset> {
+        let (reply_tx, reply_rx) = oneshot::channel();
+        self.tx
+            .try_send(StoreCmd::LoadArcanas {
+                account,
+                reply: reply_tx,
+            })
+            .ok()?;
+        reply_rx.await.ok()?
+    }
+
     pub async fn register(
         &self,
         name: String,
@@ -108,6 +126,7 @@ impl Store {
         outcome: Option<Outcome>,
         duration_s: u64,
         factions: [[u32; 4]; 2],
+        arcanas: [ArcanaPreset; 2],
     ) -> Result<RatingResults, AccountError> {
         let (reply_tx, reply_rx) = oneshot::channel();
         self.tx
@@ -117,6 +136,7 @@ impl Store {
                 outcome,
                 duration_s,
                 factions,
+                arcanas,
                 reply: reply_tx,
             })
             .map_err(|_| AccountError::Unavailable)?;

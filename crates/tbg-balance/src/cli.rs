@@ -19,6 +19,7 @@ COMMANDS
   confirm     canon vs --apply on confirmation seeds, every reaction time
   value       P16-D marginal value: reference | shadow | interactions | scenarios
   validate    P16-D discovery vs confirmation rank check and static baseline
+  arcana      every complete Arcana preset vs the default (policy --a, default bot)
 
 FLAGS
   --pairs N         seed pairs per matchup (each pair = 2 seat-swapped games)

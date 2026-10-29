@@ -87,13 +87,14 @@ fn trace(seed: u64) -> (u64, u64, u32) {
 
 #[test]
 fn c2_per_tick_traces_are_frozen() {
-    // (seed, per-tick trace, final hash, end tick), P16-C Proposed values.
+    // (seed, per-tick trace, final hash, end tick): P16-C values, neutral
+    // Arcanas serialized in PlayerState (D-40).
     let goldens = [
-        (1, 0x550b_9853_c7d4_2f76, 0x9ae1_fab4_a68e_7c8b, 2_297),
-        (7, 0x412b_00d2_efaa_b8f7, 0x5e4a_da1a_4ffb_210e, 1_920),
-        (42, 0x1ff2_4478_083b_536e, 0x1f60_ac5e_2d13_415c, 3_233),
-        (1000, 0x2c03_8b17_2b22_d255, 0xb0e5_5880_6f6e_9ecc, 2_160),
-        (65535, 0xad8e_0210_5e75_5f7d, 0xb1ff_d8c4_2e43_9e69, 2_637),
+        (1, 0x2640_1254_faeb_b4fe, 0xdb54_4abe_3ad8_cf6b, 2_297),
+        (7, 0xfed4_fdef_5a47_4707, 0xfcf2_7da6_113f_9cce, 1_920),
+        (42, 0x9770_a977_5577_55b6, 0x0d17_5030_56f8_e31c, 3_233),
+        (1000, 0x8e48_e71f_eba6_180d, 0x6b4a_4a53_cb89_a954, 2_160),
+        (65535, 0x28f3_3c90_e5cb_4aad, 0xde84_c083_5d58_2429, 2_637),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

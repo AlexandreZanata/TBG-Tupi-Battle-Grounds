@@ -103,6 +103,7 @@ async fn start(ws: &mut Ws) -> Start {
                 opponent,
                 mode,
                 opponent_rating,
+                arcanas: _,
             }) => {
                 return Start {
                     seat: you,

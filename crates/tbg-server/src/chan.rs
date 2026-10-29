@@ -100,4 +100,10 @@ pub enum LobbyCmd {
         conn_id: u64,
         result: Result<(AccountId, Profile), AccountError>,
     },
+    /// D-40: an account's saved Arcana preset, loaded after login.
+    ArcanasLoaded {
+        token: Token,
+        account: AccountId,
+        preset: tbg_core::ArcanaPreset,
+    },
 }

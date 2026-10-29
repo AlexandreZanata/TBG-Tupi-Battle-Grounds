@@ -33,6 +33,8 @@ impl Match {
             opponent_rating: ranked
                 .then(|| other.account.map(|(_, rating)| rating))
                 .flatten(),
+            // D-40: both frozen presets on every (re)attach (BR-AR05).
+            arcanas: self.state.players.each_ref().map(|p| p.arcanas),
         }
     }
 

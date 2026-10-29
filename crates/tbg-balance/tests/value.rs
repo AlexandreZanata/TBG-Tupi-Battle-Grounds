@@ -9,7 +9,7 @@ use tbg_balance::value::intervention::Intervention;
 use tbg_balance::value::scenario::{Scenario, Spawn};
 use tbg_balance::value::{self, validate};
 use tbg_core::content::{self, RUNNING_START};
-use tbg_core::{MatchState, Phase, Ruleset, Seat, UnitKind};
+use tbg_core::{ArcanaPreset, MatchState, Phase, Ruleset, Seat, UnitKind};
 
 fn spawn(kind: UnitKind, seat: Seat, x: i32) -> Spawn {
     Spawn {
@@ -241,6 +241,7 @@ fn bot_avoid_parses_and_never_buys_the_avoided_unit() {
         policies: [policy, Policy::Bot],
         reaction: [5, 5],
         setup: Setup::None,
+        arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let games = run_pairs(&[m], 0..4, 2).remove(0);
     for pair in games {

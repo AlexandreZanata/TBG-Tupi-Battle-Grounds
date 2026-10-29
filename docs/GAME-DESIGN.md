@@ -325,12 +325,16 @@ Hatch limits, slow/root effects, and every structural constant.
 | Per-character MB-Lab/Mixamo rigging (ADR-003–006; ~8% auto pass rate, ADR-007) | Code-built rigid-part figurines with a shared animation library |
 | StoreKit / Play Billing IAP | Deferred; cosmetics-only principle unchanged |
 
-## 9. Arcanas extra — Proposed, not active (P32–P38)
+## 9. Arcanas extra — Proposed values, active in every mode (D-40)
 
-This is an optional extension **after P31**, not a change to the current
-MVP or a blocker for any existing phase. Values below are experimental
-starting hypotheses. P32 refreshes the evidence on the then-current HEAD;
-P34 must validate them before online integration. P38 gates public release.
+The owner moved this extension ahead of P31 (D-40, 2026-10-29): Arcanas
+are live in Practice, Casual, Ranked, and private rooms with the values
+below, which stay **Proposed** until playtests. Summons (Beetlings)
+receive no Arcana bonus, like Synergy (BR-U08). Evidence so far: every
+one of the 141 complete presets against the default, bot policy, 512
+paired seeds each, scores 46.5–54.9 % and no 95 % interval leaves
+45–55 % (`docs/media/arcanas/presets-vs-default.txt`); the full
+P34 cross-policy matrix and the P38 human gates remain open.
 
 | ID | Proposed rule |
 |----|---------------|

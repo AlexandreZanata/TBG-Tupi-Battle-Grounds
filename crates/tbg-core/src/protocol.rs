@@ -4,12 +4,15 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::arcana::ArcanaPreset;
 use crate::intent::{PlayerIntention, Rejection};
 use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-pub const PROTOCOL_VERSION: u16 = 8;
+/// v9: the v8 Arcana messages plus the P39 Quick Challenge and rematch
+/// messages; older peers are refused by the handshake.
+pub const PROTOCOL_VERSION: u16 = 9;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a
@@ -48,7 +51,10 @@ pub enum ClientMsg {
     Leaderboard { offset: u16 },
     // Post-P14 (BR-M06, Proposed): give up while the match is live.
     Surrender,
-    // P39: Quick Challenge by link and both-accept rematch.
+    // v8 (D-40, BR-AR05/BR-AR06): choose Arcanas while idle; the server
+    // validates and answers `ArcanasSelected` or `ArcanasRejected`.
+    SetArcanas { ranks: [u8; 6] },
+    // v9 (P39): Quick Challenge by link and both-accept rematch.
     CreateChallenge,
     JoinChallenge { token: InviteToken },
     RequestRematch,
@@ -93,6 +99,9 @@ pub enum ServerMsg {
         // only for ranked matches.
         mode: MatchMode,
         opponent_rating: Option<u16>,
+        /// v8 (D-40): both frozen presets, indexed by `Seat::index()`;
+        /// public once paired (BR-AR05, BR-AR07).
+        arcanas: [ArcanaPreset; 2],
     },
     View(MatchView),
     Rejected {
@@ -137,7 +146,15 @@ pub enum ServerMsg {
         rows: Vec<LeaderRow>,
         you: Option<u32>,
     },
-    // P39: Quick Challenge by link and both-accept rematch.
+    // v8 (D-40): the authoritative selection (also sent after login when
+    // the account has a saved preset, BR-AR08).
+    ArcanasSelected {
+        preset: ArcanaPreset,
+    },
+    ArcanasRejected {
+        reason: ArcanaRejection,
+    },
+    // v9 (P39): Quick Challenge by link and both-accept rematch.
     ChallengeWaiting {
         token: InviteToken,
     },
@@ -152,6 +169,15 @@ pub enum ServerMsg {
     RematchClosed {
         declined: bool,
     },
+}
+
+/// v8 (D-40): why a `SetArcanas` was refused; the previous preset stays.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ArcanaRejection {
+    /// Not exactly six points, or a rank above two (BR-AR02).
+    BadRanks,
+    /// Queued, in a room, or in a match: the preset is frozen (BR-AR05).
+    NotIdle,
 }
 
 /// P13: rows per in-game leaderboard page.

@@ -73,6 +73,7 @@ impl Lobby {
             account: None,
             ip,
             detached_at: None,
+            arcanas: tbg_core::ArcanaPreset::DEFAULT,
         };
         let pair = (session.token, session.name.clone());
         self.sessions.insert(session.token, session);

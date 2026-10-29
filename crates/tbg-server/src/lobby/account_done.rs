@@ -7,7 +7,7 @@ use tbg_core::protocol::{AccountError, ErrorCode, Profile, ServerMsg, Token};
 
 use super::accounts::deny;
 use super::{send, Lobby, SessionState};
-use crate::chan::{ConnEvent, MatchCmd};
+use crate::chan::{ConnEvent, LobbyCmd, MatchCmd};
 use crate::store::AccountId;
 
 impl Lobby {
@@ -115,5 +115,19 @@ impl Lobby {
             s.state = SessionState::InMatch { tx, seat };
         }
         send(&s.conn, ConnEvent::Send(ServerMsg::LoggedIn { profile }));
+        // D-40 (BR-AR08): the account's saved preset follows it to any device.
+        if let Some(store) = self.store.clone() {
+            let tx = self.self_tx.clone();
+            tokio::spawn(async move {
+                if let Some(preset) = store.load_arcanas(id).await {
+                    let cmd = LobbyCmd::ArcanasLoaded {
+                        token,
+                        account: id,
+                        preset,
+                    };
+                    let _ = tx.send(cmd).await;
+                }
+            });
+        }
     }
 }

@@ -98,6 +98,51 @@ pub fn save_token(token: &[u8; 16]) {
     let _ = token;
 }
 
+/// D-40: the Arcana preset the lobby editor saved under `tbg.arcanas`
+/// (`{"schema":1,"ranks":[...]}`); the default when absent, partial or
+/// invalid, so every match always gets a complete preset.
+pub fn load_arcanas() -> tbg_core::ArcanaPreset {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(raw) = storage().and_then(|s| s.get_item(ARCANAS_KEY).ok().flatten()) {
+        if let Some(p) = parse_arcanas(&raw) {
+            return p;
+        }
+    }
+    tbg_core::ArcanaPreset::DEFAULT
+}
+
+/// D-40: keep the server's selection (e.g. an account's saved preset).
+pub fn save_arcanas(preset: tbg_core::ArcanaPreset) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(s) = storage() {
+        let ranks: Vec<String> = preset.ranks.iter().map(u8::to_string).collect();
+        let _ = s.set_item(
+            ARCANAS_KEY,
+            &format!("{{\"schema\":1,\"ranks\":[{}]}}", ranks.join(",")),
+        );
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = preset;
+}
+
+#[cfg(target_arch = "wasm32")]
+const ARCANAS_KEY: &str = "tbg.arcanas";
+
+/// The six numbers after `"ranks":[`, as a complete preset.
+#[cfg(any(target_arch = "wasm32", test))]
+pub fn parse_arcanas(raw: &str) -> Option<tbg_core::ArcanaPreset> {
+    if raw.len() > 1024 {
+        return None;
+    }
+    let list = raw.split("\"ranks\"").nth(1)?;
+    let inner = list.split('[').nth(1)?.split(']').next()?;
+    let ranks: Vec<u8> = inner
+        .split(',')
+        .map(|n| n.trim().parse().ok())
+        .collect::<Option<_>>()?;
+    tbg_core::ArcanaPreset::complete(ranks.try_into().ok()?).ok()
+}
+
 #[cfg(target_arch = "wasm32")]
 fn storage() -> Option<web_sys::Storage> {
     web_sys::window()?.local_storage().ok()?
@@ -285,5 +330,33 @@ mod tests {
             challenge_link(&[0x0F; 16]),
             format!("?challenge={}", "0f".repeat(16))
         );
+    }
+}
+
+#[cfg(test)]
+mod arcana_tests {
+    use super::parse_arcanas;
+    use tbg_core::ArcanaPreset;
+
+    #[test]
+    fn the_editor_document_round_trips_and_bad_input_is_refused() {
+        // The exact document `editor.js` saves (D-40).
+        let doc = r#"{"schema":1,"ranks":[2,2,2,0,0,0]}"#;
+        assert_eq!(
+            parse_arcanas(doc).map(|p| p.ranks),
+            Some([2, 2, 2, 0, 0, 0])
+        );
+        // Partial, oversized, malformed: none becomes a preset.
+        for bad in [
+            r#"{"schema":1,"ranks":[1,0,0,0,0,0]}"#,
+            r#"{"schema":1,"ranks":[3,3,0,0,0,0]}"#,
+            r#"{"schema":1,"ranks":[2,2,2]}"#,
+            r#"{"schema":1,"ranks":"x"}"#,
+            "",
+        ] {
+            assert_eq!(parse_arcanas(bad), None, "{bad}");
+        }
+        assert_eq!(parse_arcanas(&"9".repeat(2000)), None);
+        assert!(ArcanaPreset::complete([2, 0, 2, 0, 2, 0]).is_ok());
     }
 }

@@ -1,7 +1,9 @@
 //! SQLite schema and ordered migrations. v1 is the P5 `matches` table
 //! (kept byte-compatible so old databases keep their rows); v2 adds the
 //! P11 `accounts` table; v3 adds P12 `ranked_matches` plus the rating
-//! leaderboard index. Timestamps come from SQLite itself.
+//! leaderboard index; v4 (D-40) adds each account's saved Arcana preset
+//! and both applied presets on match rows (NULL for older rows).
+//! Timestamps come from SQLite itself.
 
 use rusqlite::Connection;
 
@@ -52,6 +54,12 @@ const ACCOUNTS_V2: &str = "CREATE TABLE IF NOT EXISTS accounts (
     draws INTEGER NOT NULL DEFAULT 0
 );";
 
+const ARCANAS_V4: &str = "ALTER TABLE accounts ADD COLUMN arcanas BLOB;
+ALTER TABLE matches ADD COLUMN a_arcanas BLOB;
+ALTER TABLE matches ADD COLUMN b_arcanas BLOB;
+ALTER TABLE ranked_matches ADD COLUMN a_arcanas BLOB;
+ALTER TABLE ranked_matches ADD COLUMN b_arcanas BLOB;";
+
 /// Pragmas plus every missing migration in one transaction. Re-running on
 /// a migrated database is a no-op.
 pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
@@ -76,6 +84,10 @@ pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
     if version < 3 {
         tx.execute_batch(RANKED_V3)?;
         tx.execute("INSERT INTO schema_version(version) VALUES (3)", [])?;
+    }
+    if version < 4 {
+        tx.execute_batch(ARCANAS_V4)?;
+        tx.execute("INSERT INTO schema_version(version) VALUES (4)", [])?;
     }
     tx.commit()
 }

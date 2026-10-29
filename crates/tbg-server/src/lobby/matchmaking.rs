@@ -306,6 +306,8 @@ impl Lobby {
                 conn: s.and_then(|s| s.conn.clone()),
                 // P12: account id + rating at pairing time for ranked rows.
                 account: s.and_then(|s| s.account.as_ref().map(|(id, p)| (*id, p.rating))),
+                // D-40 (BR-AR05): frozen here; later edits stay in the lobby.
+                arcanas: s.map_or(tbg_core::ArcanaPreset::DEFAULT, |s| s.arcanas),
             }
         });
         if rematchable {

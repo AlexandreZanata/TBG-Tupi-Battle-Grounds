@@ -7,6 +7,7 @@ use serde_json::json;
 
 use tbg_core::protocol::{Profile, RatingResults};
 use tbg_core::rating::{apply, delta, Score};
+use tbg_core::ArcanaPreset;
 use tbg_core::{Outcome, Seat};
 
 use super::AccountId;
@@ -155,6 +156,7 @@ pub(super) fn ranked_result(
     outcome: Option<Outcome>,
     duration_s: u64,
     factions: [[u32; 4]; 2],
+    arcanas: [ArcanaPreset; 2],
 ) -> Result<RatingResults, rusqlite::Error> {
     let tx = conn.transaction()?;
     let read = |id: AccountId| -> rusqlite::Result<(u16, u32)> {
@@ -203,9 +205,9 @@ pub(super) fn ranked_result(
         .unwrap_or_default();
     tx.execute(
         "INSERT INTO ranked_matches (ended_at, a_id, b_id, winner, reason, duration_s,
-         a_before, a_after, b_before, b_after, a_factions, b_factions)
+         a_before, a_after, b_before, b_after, a_factions, b_factions, a_arcanas, b_arcanas)
          VALUES (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), ?1, ?2, ?3, ?4, ?5,
-         ?6, ?7, ?8, ?9, ?10, ?11)",
+         ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
         params![
             a,
             b,
@@ -218,6 +220,9 @@ pub(super) fn ranked_result(
             b_after,
             factions_json(factions[0]),
             factions_json(factions[1]),
+            // D-40 (BR-AR07): the presets the match applied, six bytes each.
+            arcanas[0].ranks.as_slice(),
+            arcanas[1].ranks.as_slice(),
         ],
     )?;
     tx.commit()?;

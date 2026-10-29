@@ -83,8 +83,10 @@ bonuses join the same additive formula (BR-X01).
 Arcanas extend the released game; they are not a prerequisite for P13,
 P14, the visual suite, or `v0.2.0`. P32 starts only after P31 is reviewed
 and its owner checkpoints are satisfied. Each extra phase gates the next.
-Writing these specs does not authorize implementation, approve proposed
-balance values, or enable Arcanas on the public server.
+Writing these specs did not authorize implementation; **D-40 (owner,
+2026-10-29) did**: Arcanas are integrated and live in every mode with
+Proposed values. P32–P38 stay as the checklist for what is still open
+(full P34 matrix, P36 phone editor, P38 human/security gates).
 
 ```
 P31 reviewed + owner sign-off

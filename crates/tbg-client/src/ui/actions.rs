@@ -221,5 +221,6 @@ pub(super) fn apply(
 
 fn start_practice(link: &mut MatchLink, now: f64) {
     let seed = (now * 1e9) as u64 ^ 0x9e37_79b9_7f4a_7c15;
-    *link = MatchLink::Local(Box::new(LocalMatch::new(seed)));
+    let arcanas = config::load_arcanas();
+    *link = MatchLink::Local(Box::new(LocalMatch::new(seed, arcanas)));
 }

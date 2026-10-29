@@ -5,7 +5,7 @@
 use std::ops::Range;
 
 use tbg_core::content::ENERGY_SCALE;
-use tbg_core::{Ruleset, Seat};
+use tbg_core::{ArcanaPreset, Ruleset, Seat};
 
 use crate::metrics::MatchResult;
 use crate::policy::Policy;
@@ -56,12 +56,14 @@ pub fn compare_with(
         policies,
         reaction: [reaction; 2],
         setup: Setup::None,
+        arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let variant = Matchup {
         rules: variant_rules,
         policies,
         reaction: [reaction; 2],
         setup: intervention.setup(),
+        arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let seed_pairs = (seeds.end - seeds.start) as usize;
     let b = run_pairs(&[base], seeds.clone(), threads)
@@ -258,6 +260,7 @@ pub fn score_with_setup(
         policies,
         reaction: [reaction; 2],
         setup,
+        arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let r = run_pairs(&[m], seeds, threads).remove(0);
     mean_score(&r, 0)

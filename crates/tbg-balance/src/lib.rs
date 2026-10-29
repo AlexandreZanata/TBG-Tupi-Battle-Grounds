@@ -2,6 +2,7 @@
 //! with the server's own `step()` back to back on every core, measures
 //! them against the gate, and searches for small number changes.
 
+pub mod arcanas;
 pub mod cli;
 pub mod commands;
 pub mod duels;
