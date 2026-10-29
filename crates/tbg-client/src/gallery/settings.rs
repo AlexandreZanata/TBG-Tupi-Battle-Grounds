@@ -21,6 +21,8 @@ pub struct Gallery {
     pub tier: u8,
     /// `&lineup`: base, tier 1, and tier 2 side by side, idle and at the anchor.
     pub lineup: bool,
+    /// Isolated base-form screenshot for a Shop card.
+    pub portrait: bool,
 }
 impl Gallery {
     pub fn studio(&self) -> bool {
@@ -30,7 +32,7 @@ impl Gallery {
         self.silhouette || self.studio()
     }
     pub fn floor(&self) -> bool {
-        !self.silhouette && !self.frames && self.studio()
+        !self.portrait && !self.silhouette && !self.frames && self.studio()
     }
     pub fn read() -> Self {
         let mode = config::url_param("gallery")
@@ -75,6 +77,7 @@ impl Gallery {
                 .unwrap_or(0)
                 .min(2),
             lineup: config::url_param("lineup").is_some(),
+            portrait: config::url_param("portrait").is_some(),
         }
     }
 }

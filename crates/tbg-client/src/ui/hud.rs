@@ -1,4 +1,4 @@
-//! In-match HUD: clock, Stronghold HP, Energy, army slots, synergies,
+//! In-match HUD: clock, Stronghold HP, Energy, army size, synergies,
 //! rotation timer, and the three shop cards. Reads only `LatestView`.
 //! The top line (names, bars, clock) lives in `hud_top`.
 
@@ -20,7 +20,11 @@ pub(super) enum Hud {
     CardStrip(usize),
 }
 
+#[derive(Component)]
+pub(super) struct HudRoot;
+
 pub fn plugin(app: &mut App) {
+    super::countdown::plugin(app);
     app.add_systems(OnEnter(GameState::InMatch), spawn)
         .add_systems(
             Update,
@@ -92,6 +96,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
     commands
         .spawn((
             screen(JustifyContent::SpaceBetween),
+            HudRoot,
             DespawnOnExit(GameState::InMatch),
         ))
         .with_children(|root| {

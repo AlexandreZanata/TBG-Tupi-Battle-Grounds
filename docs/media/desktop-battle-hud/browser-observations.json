@@ -1,0 +1,22 @@
+{
+  "army": "3 / 8",
+  "desktopHudHidden": false,
+  "enemyHp": "4500 / 4500",
+  "energy": "1.8 / 10",
+  "ownHp": "793 / 4500",
+  "portraits": [
+    {
+      "kind": "Rootcaller",
+      "loaded": true
+    },
+    {
+      "kind": "Shieldbearer",
+      "loaded": true
+    },
+    {
+      "kind": "Archer",
+      "loaded": true
+    }
+  ],
+  "viewport": "1280x800"
+}

@@ -1,7 +1,8 @@
 //! Tap/click → `UiAction`, without Bevy picking. A press and release in
 //! the same frame (fast phone taps, synthetic clicks) never registered
 //! with hover-based picking; this hit-tests the release position directly:
-//! buttons first, then the nearest own unit on screen, else "tap outside".
+//! buttons first, then the nearest unit on screen (own or enemy, for its
+//! status panel), else "tap outside".
 
 use bevy::prelude::*;
 
@@ -52,7 +53,7 @@ pub(super) fn taps(
             Some(a) => Some(a),
             None => nearest_unit(p, &units, &camera, scale.0),
         };
-        queue.0.push(action.unwrap_or(UiAction::CloseEvolve));
+        queue.0.push(action.unwrap_or(UiAction::Deselect));
     }
 }
 

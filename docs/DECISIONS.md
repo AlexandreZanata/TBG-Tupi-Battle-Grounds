@@ -317,6 +317,23 @@ budgets remain in force. Performance is judged by the game running on the
 actual target devices. Do not remove visible detail or shadows solely to meet
 a draw-call number.
 
+## D-29 · Desktop battle HUD uses the existing HTML bridge — 2026-10-28 (owner request)
+
+**Decision.** After P16-A was finalized, the owner supplied a desktop battle
+reference and requested its Stronghold HP bars, Energy panel, and Shop cards.
+The desktop battle HUD extends D-27's HTML/CSS presentation layer. It reads
+`LatestView` and `MatchInfo`, shows numeric current/max Stronghold HP in the
+colored bars, omits the Energy lightning icon, and uses screenshots of the
+actual base unit models in the Shop cards. Smaller viewports and native builds
+retain the Bevy HUD.
+**Authority.** Purchase, inspect, and surrender use the existing UiAction
+queue. The server's seat, HP, Energy, SlotCount, phase, and offers remain the
+source of truth. The reference does not authorize copying its sample numbers
+into the simulation or changing the two-step surrender contract.
+**Art.** A gallery portrait tool captures each base form against a dark studio
+background. Portraits are cached, local WebP UI assets; the 3D scene remains
+vertex-colored. The supplied reference stays in ignored `.local/references/`.
+
 ## D-30 · Triangles are measured, not capped — 2026-10-28 (owner decision)
 
 **Decision.** Remove the fixed triangle maximums for unit forms, Strongholds,

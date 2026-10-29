@@ -28,6 +28,12 @@ pub fn spawn(
     let clips = options
         .clip
         .map_or_else(|| CLIPS.to_vec(), |clip| vec![clip]);
+    if options.portrait {
+        let (root, mut animator) = spawn_one(commands, lib, unit, (0, 0), Vec3::ZERO, &material);
+        animator.preview = Some((Clip::Idle, 0.4));
+        commands.entity(root).insert(animator);
+        return;
+    }
     if options.lineup {
         super::lineup::spawn(
             commands,

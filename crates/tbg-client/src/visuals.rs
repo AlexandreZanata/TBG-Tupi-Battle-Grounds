@@ -34,6 +34,8 @@ pub struct UnitVisual {
     figure: Entity,
     joints: [Entity; crate::art::rig::NODE_COUNT],
     ring: Entity,
+    /// Rest scale of the team ring (the inspected unit's ring pulses above it).
+    ring_base: f32,
     tiers: [Entity; 2],
     bar: Entity,
     bar_fill: Entity,
@@ -54,7 +56,38 @@ pub struct UnitVisual {
 pub fn plugin(app: &mut App) {
     app.add_plugins(names::plugin)
         .add_systems(PreStartup, assets::init)
-        .add_systems(Update, (cues::animate, cues::billboards, cues::fly));
+        .add_systems(
+            Update,
+            (
+                cues::animate,
+                cues::billboards,
+                cues::fly,
+                highlight_inspected,
+            ),
+        );
+}
+
+/// The inspected unit's team ring pulses a little larger (ui/inspect.rs), so
+/// the status panel always points at a visible unit.
+fn highlight_inspected(
+    time: Res<Time>,
+    inspected: Option<Res<crate::ui::inspect::Inspected>>,
+    units: Query<(&UnitVisual, &UiAction)>,
+    mut transforms: Query<&mut Transform>,
+) {
+    let target = inspected.and_then(|i| i.0);
+    let pulse = 1.25 + 0.07 * (time.elapsed_secs() * 6.0).sin();
+    for (v, action) in &units {
+        let UiAction::SelectUnit(id) = action else {
+            continue;
+        };
+        let scale = v.ring_base * if target == Some(*id) { pulse } else { 1.0 };
+        if let Ok(mut t) = transforms.get_mut(v.ring) {
+            if t.scale.x != scale {
+                t.scale = Vec3::splat(scale);
+            }
+        }
+    }
 }
 
 /// Figures turn 25° toward the camera from facing straight down the lane.
@@ -108,6 +141,7 @@ pub fn spawn_unit_visual(
         figure: figure_root,
         joints,
         ring,
+        ring_base: ring_scale.x,
         tiers,
         bar,
         bar_fill,
@@ -147,10 +181,9 @@ pub fn spawn_unit_visual(
             animator,
         ))
         .add_children(&[figure_root, ring, bar]);
-    if look.own {
-        // Tapping near an own unit opens its evolution panel (ui/input.rs).
-        commands.entity(root).insert(UiAction::SelectUnit(look.id));
-    }
+    // Tapping near any unit opens its status panel; own units also get the
+    // Evolution panel (ui/input.rs, ui/actions.rs).
+    commands.entity(root).insert(UiAction::SelectUnit(look.id));
     root
 }
 

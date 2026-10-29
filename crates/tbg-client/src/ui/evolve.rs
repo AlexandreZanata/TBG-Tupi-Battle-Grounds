@@ -4,9 +4,9 @@
 
 use bevy::prelude::*;
 use tbg_core::content::{def, form_of, FormDef, ENERGY_SCALE, EVOLVE_COST};
-use tbg_core::{OnHit, UnitId, UnitView};
+use tbg_core::{OnHit, Phase, UnitId, UnitView};
 
-use super::{button, label, UiAction, PANEL};
+use super::{button, label, UiAction, BUTTON, DISABLED, PANEL};
 use crate::sync::LatestView;
 use crate::GameState;
 
@@ -16,10 +16,20 @@ pub struct Selected(pub Option<UnitId>);
 #[derive(Component)]
 struct EvolvePanel;
 
+#[derive(Component)]
+struct EvolutionChoice {
+    unit: UnitId,
+    branch: u8,
+}
+
 pub fn plugin(app: &mut App) {
     app.init_resource::<Selected>().add_systems(
         Update,
-        (drop_gone, rebuild.run_if(resource_changed::<Selected>))
+        (
+            drop_gone,
+            rebuild.run_if(resource_changed::<Selected>),
+            refresh_choices.run_if(resource_changed::<LatestView>),
+        )
             .chain()
             .run_if(in_state(GameState::InMatch)),
     );
@@ -71,17 +81,15 @@ fn rebuild(
     let mut children = vec![commands.spawn(label(title, 20.0)).id()];
     for (branch, text) in options(u) {
         let cost = EVOLVE_COST[usize::from(u.tier.min(1))];
-        let action = if v.energy >= cost {
-            UiAction::Evolve { unit: id, branch }
-        } else {
-            UiAction::Disabled
-        };
         children.push(
             commands
-                .spawn(button(
-                    &format!("{text} ({})", cost / ENERGY_SCALE),
-                    action,
-                    300.0,
+                .spawn((
+                    button(
+                        &format!("{text} ({})", cost / ENERGY_SCALE),
+                        choice_action(v, id, branch),
+                        300.0,
+                    ),
+                    EvolutionChoice { unit: id, branch },
                 ))
                 .id(),
         );
@@ -95,6 +103,38 @@ fn rebuild(
             .id(),
     );
     commands.entity(panel).add_children(&children);
+}
+
+// Keep the same buttons while Energy regenerates or is spent in the Shop.
+fn refresh_choices(
+    view: Res<LatestView>,
+    mut choices: Query<(&EvolutionChoice, &mut UiAction, &mut BackgroundColor)>,
+) {
+    let Some(v) = &view.0 else { return };
+    for (choice, mut action, mut color) in &mut choices {
+        *action = choice_action(v, choice.unit, choice.branch);
+        color.0 = if *action == UiAction::Disabled {
+            DISABLED
+        } else {
+            BUTTON
+        };
+    }
+}
+
+fn choice_action(v: &tbg_core::MatchView, unit: UnitId, branch: u8) -> UiAction {
+    let available = v.units.iter().any(|u| {
+        u.id == unit
+            && u.seat == v.you
+            && u.tier < 2
+            && (u.tier == 0 || u.branch == branch)
+            && form_of(u.kind, u.tier + 1, branch).is_some()
+            && v.energy >= EVOLVE_COST[usize::from(u.tier.min(1))]
+    }) && matches!(v.phase, Phase::Running | Phase::Overtime);
+    if available {
+        UiAction::Evolve { unit, branch }
+    } else {
+        UiAction::Disabled
+    }
 }
 
 /// Branch choices: tier 0 → A and B; tier 1 → next form of its branch.
@@ -138,4 +178,71 @@ pub fn describe(f: &FormDef) -> String {
         None => {}
     }
     parts.join(", ")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn open_panel_tracks_energy_without_reopening_or_replacing_buttons() {
+        // BR-E02/E03 and BR-V02: regeneration enables Evolution; spending disables it.
+        let mut view = tbg_core::MatchState::new(11).view_for(tbg_core::Seat::A, &[]);
+        view.phase = Phase::Running;
+        view.energy = EVOLVE_COST[0] - 1;
+        view.units.push(UnitView {
+            id: 7,
+            seat: view.you,
+            kind: tbg_core::UnitKind::Archer,
+            tier: 0,
+            branch: 0,
+            x: 0,
+            hp: 100,
+            max_hp: 100,
+            status: 0,
+        });
+        let mut app = App::new();
+        app.insert_resource(LatestView(Some(view)))
+            .insert_resource(Selected(Some(7)))
+            .add_systems(
+                Update,
+                (
+                    drop_gone,
+                    rebuild.run_if(resource_changed::<Selected>),
+                    refresh_choices.run_if(resource_changed::<LatestView>),
+                )
+                    .chain(),
+            );
+        app.update();
+        let mut choices = app.world_mut().query::<(Entity, &EvolutionChoice)>();
+        let buttons: Vec<_> = choices
+            .iter(app.world())
+            .map(|(e, c)| (e, c.branch))
+            .collect();
+        assert_eq!(buttons.len(), 2);
+        for energy in [EVOLVE_COST[0] - 1, EVOLVE_COST[0], EVOLVE_COST[0] - 1] {
+            app.world_mut()
+                .resource_mut::<LatestView>()
+                .0
+                .as_mut()
+                .unwrap()
+                .energy = energy;
+            app.update();
+            for &(entity, branch) in &buttons {
+                let affordable = energy >= EVOLVE_COST[0];
+                assert_eq!(
+                    app.world().get::<UiAction>(entity),
+                    Some(&if affordable {
+                        UiAction::Evolve { unit: 7, branch }
+                    } else {
+                        UiAction::Disabled
+                    })
+                );
+                assert_eq!(
+                    app.world().get::<BackgroundColor>(entity),
+                    Some(&BackgroundColor(if affordable { BUTTON } else { DISABLED }))
+                );
+            }
+        }
+    }
 }

@@ -10,6 +10,8 @@ mod account_ui;
 mod actions;
 #[cfg(test)]
 mod army_tests;
+mod battle_hud;
+mod countdown;
 mod desktop;
 #[cfg(target_arch = "wasm32")]
 mod desktop_actions;
@@ -20,6 +22,7 @@ mod hud;
 mod hud_top;
 mod hud_update;
 mod input;
+pub(crate) mod inspect;
 mod menu;
 mod queue;
 pub mod ranking;
@@ -66,6 +69,10 @@ pub enum UiAction {
         branch: u8,
     },
     CloseEvolve,
+    /// Tap on empty ground or Escape: close Evolution and unit status.
+    Deselect,
+    /// The unit status panel's close button.
+    CloseInspect,
     // P13: in-game Ranking panel (ui/ranking.rs).
     OpenRanking,
     RankingPrev,
@@ -104,7 +111,8 @@ pub fn plugin(app: &mut App) {
             surrender::plugin,
             toast::plugin,
             tips::plugin,
-        ));
+        ))
+        .add_plugins((battle_hud::plugin, inspect::plugin));
 }
 
 /// Scale the whole UI with the smaller window side (phones ≈ 0.9, desktop 1.5).

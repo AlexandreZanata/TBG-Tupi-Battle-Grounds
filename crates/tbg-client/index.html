@@ -11,6 +11,8 @@
   <script src="diagnostics/measure.js"></script>
   <link rel="stylesheet" href="assets/lobby/lobby.css">
   <script defer src="assets/lobby/lobby.js"></script>
+  <link rel="stylesheet" href="assets/battle/hud.css">
+  <script defer src="assets/battle/hud.js"></script>
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2b36; touch-action: none; }
     canvas#bevy { display: block; width: 100%; height: 100%; outline: none; }
@@ -82,6 +84,68 @@
     <div data-member hidden><p>Your saved key gives access to your account.</p><button class="dialog-primary" data-action="copy-key">Copy account key</button><button class="dialog-primary" data-action="download-key">Download account key</button><button class="dialog-primary danger" data-action="logout">Log out</button></div>
     <div data-guest><button class="dialog-primary" data-action="register">Create account</button><button class="dialog-primary" data-action="login">I have a key</button></div>
   </dialog>
+</div>
+
+
+<div id="tbg-battle" hidden data-ready="false" aria-label="Battle controls">
+  <header class="battle-score" aria-label="Stronghold health and match clock">
+    <div class="team-plate ally">
+      <span class="crest" aria-hidden="true"><b data-crest-you>Y</b></span>
+      <div class="plate-body">
+        <span class="battle-name" data-battle-you>You</span>
+        <div class="vitality ally" role="progressbar" aria-label="Your Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-you-hp>-</strong></div>
+      </div>
+    </div>
+    <div class="battle-time" data-phase="running">
+      <strong data-battle-clock>3:00</strong><small data-battle-mode>Casual</small>
+    </div>
+    <div class="team-plate enemy">
+      <div class="plate-body">
+        <span class="battle-name" data-battle-opponent>Opponent</span>
+        <div class="vitality enemy" role="progressbar" aria-label="Enemy Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-enemy-hp>-</strong></div>
+      </div>
+      <span class="crest" aria-hidden="true"><b data-crest-opponent>O</b></span>
+    </div>
+  </header>
+  <button class="battle-surrender" data-battle-action="surrender" data-state="ready"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 4H9V30H6ZM10 5L27 9 25 20 10 17Z"/></svg><span data-battle-surrender>Surrender</span></button>
+  <aside class="unit-inspect" data-inspect-panel hidden aria-label="Unit status">
+    <button class="inspect-close" data-battle-action="close-inspect" aria-label="Close unit status">&times;</button>
+    <div class="inspect-head">
+      <img class="inspect-portrait" alt="" decoding="async">
+      <div class="inspect-title"><strong data-i="name">-</strong><small data-i="form"></small><small class="inspect-tags"><span data-i="owner"></span> &middot; <span data-i="faction"></span> &middot; <span data-i="role"></span></small></div>
+    </div>
+    <div class="vitality inspect-hp" role="progressbar" aria-label="Unit HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-i="hp">-</strong></div>
+    <dl class="inspect-stats">
+      <div><dt data-i="attack-label">Damage</dt><dd data-i="attack"></dd></div>
+      <div><dt>Per second</dt><dd data-i="dps"></dd></div>
+      <div><dt>Attack every</dt><dd data-i="every"></dd></div>
+      <div><dt>Range</dt><dd data-i="range"></dd></div>
+      <div><dt>Speed</dt><dd data-i="speed"></dd></div>
+      <div><dt>Splash</dt><dd data-i="splash"></dd></div>
+      <div><dt>On hit</dt><dd data-i="onhit"></dd></div>
+      <div><dt>Status</dt><dd data-i="status"></dd></div>
+      <div class="wide"><dt>Synergy</dt><dd data-i="synergy"></dd></div>
+    </dl>
+  </aside>
+  <section class="battle-shop" aria-label="Shop">
+    <p class="battle-synergy" data-battle-synergy hidden></p>
+    <div class="battle-resources iron-frame">
+      <span class="resource-label">Energy</span>
+      <div class="energy-track" role="progressbar" aria-label="Energy"><span data-battle-energy-fill></span></div>
+      <strong class="resource-value" data-battle-energy>—</strong>
+      <span class="resource-divider"></span>
+      <svg class="army-icon" viewBox="0 0 36 30" aria-hidden="true"><circle cx="18" cy="7" r="6"/><circle cx="5" cy="9" r="4"/><circle cx="31" cy="9" r="4"/><path d="M10 30V20Q10 14 18 14T26 20V30ZM0 28V19Q0 15 7 15L9 16Q6 20 6 24V28ZM36 28V19Q36 15 29 15L27 16Q30 20 30 24V28Z"/></svg>
+      <span class="resource-label">Army</span><strong class="resource-value" data-battle-army>0</strong>
+    </div>
+    <div class="battle-offers">
+      <button class="battle-card iron-frame" data-offer="0" aria-label="Shop offer one"><span class="card-rotation"><i></i></span><img class="champion-portrait" alt="" decoding="async"><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="1" aria-label="Shop offer two"><span class="card-rotation"><i></i></span><img class="champion-portrait" alt="" decoding="async"><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="2" aria-label="Shop offer three"><span class="card-rotation"><i></i></span><img class="champion-portrait" alt="" decoding="async"><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="3" aria-label="Shop offer four"><span class="card-rotation"><i></i></span><img class="champion-portrait" alt="" decoding="async"><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="4" aria-label="Shop offer five"><span class="card-rotation"><i></i></span><img class="champion-portrait" alt="" decoding="async"><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+    </div>
+    <p class="shop-help">Click to recruit · Hold or right-click for details</p>
+  </section>
 </div>
 
 <form id="tbg-form" hidden>

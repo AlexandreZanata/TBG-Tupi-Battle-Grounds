@@ -1,7 +1,9 @@
 //! Per-frame HUD refresh from `LatestView`.
 
 use bevy::prelude::*;
-use tbg_core::content::{def, ENERGY_CAP, ENERGY_SCALE, ROTATION_TICKS, STRONGHOLD_HP, TICK_HZ};
+use tbg_core::content::{
+    def, ENERGY_CAP, ENERGY_SCALE, REGULATION, ROTATION_TICKS, STRONGHOLD_HP, TICK_HZ,
+};
 use tbg_core::{MatchView, Phase, FACTIONS};
 
 use super::hud::Hud;
@@ -65,16 +67,20 @@ pub(super) fn update(
     }
 }
 
-fn buyable(v: &MatchView, i: usize) -> bool {
+pub(super) fn buyable(v: &MatchView, i: usize) -> bool {
     let d = def(v.offers[i]);
     // Energy is the only purchase condition (BR-U07).
     v.energy >= d.cost && matches!(v.phase, Phase::Running | Phase::Overtime)
 }
 
-fn clock(v: &MatchView) -> String {
+pub(super) fn clock(v: &MatchView) -> String {
     let s = v.phase_ticks_left / TICK_HZ;
     match v.phase {
-        Phase::Countdown => format!("Starting {}", s + 1),
+        Phase::Countdown => format!(
+            "{}:{:02}",
+            REGULATION / TICK_HZ / 60,
+            REGULATION / TICK_HZ % 60
+        ),
         Phase::Overtime => format!("OVERTIME {}:{:02}", s / 60, s % 60),
         _ => format!("{}:{:02}", s / 60, s % 60),
     }
