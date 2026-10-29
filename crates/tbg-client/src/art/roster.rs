@@ -13,7 +13,7 @@ mod body;
 pub mod humans;
 mod machines;
 mod plants;
-mod undead;
+pub mod undead;
 
 /// Base-body colors.
 pub struct Look {
