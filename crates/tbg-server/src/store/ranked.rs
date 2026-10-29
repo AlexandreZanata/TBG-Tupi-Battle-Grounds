@@ -220,7 +220,7 @@ pub(super) fn ranked_result(
             b_after,
             factions_json(factions[0]),
             factions_json(factions[1]),
-            // D-40 (BR-AR07): the presets the match applied, six bytes each.
+            // D-40/P40 (BR-AR07): the presets the match applied, fifteen bytes each.
             arcanas[0].ranks.as_slice(),
             arcanas[1].ranks.as_slice(),
         ],

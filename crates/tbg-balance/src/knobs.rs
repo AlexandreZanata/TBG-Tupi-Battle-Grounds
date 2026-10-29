@@ -94,6 +94,9 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
         beetle_lifetime,
         units,
         arcana_bp,
+        // Untunable by the search: the nine conditional Arcanas are rules,
+        // not per-rank percentages; the named lab builds exercise them.
+        arcana: _,
     } = r;
     let mut v = Vec::new();
     let mut add = |k: Knob, value: i64| {

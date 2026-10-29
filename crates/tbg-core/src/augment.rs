@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 
 use std::ops::{Index, IndexMut};
 
+use crate::arcana;
 use crate::content::{
     augment_def, AugmentBonus, AugmentEffect, AugmentFilter, DamageAnchor, AUGMENTS,
     AUGMENT_CATALOG, AUGMENT_OPTIONS, BP,
@@ -741,11 +742,20 @@ pub fn heal_amount(
     if base <= 0 || target.hp <= 0 || target.hp >= target.max_hp {
         return 0;
     }
-    let bonus = if direct {
+    let mut bonus = if direct {
         heal_bonus_bp(state, healer, target)
     } else {
         0
     };
+    if direct && !target.kind.is_summon() {
+        bonus += arcana::emergency_heal_bp(
+            &state.player(healer).arcanas,
+            &state.rules().arcana,
+            target.hp,
+            target.max_hp,
+        );
+    }
+    let bonus = bonus.clamp(0, 10_000);
     let cut = if state.tick < target.heal_cut_until {
         target.heal_cut_bp
     } else {

@@ -1,37 +1,55 @@
-//! Arcana experiments (D-40, P34 method): every complete preset against
-//! the default, on paired seat-swapped seeds, with cluster intervals.
+//! Arcana experiments (D-40, P34/P40 method): named family builds and every
+//! complete preset against the default, on paired seat-swapped seeds.
 
-use tbg_core::arcana::{BUDGET, MAX_RANK, NODES};
+use tbg_core::arcana::{BUDGET, MAX, NODES};
 use tbg_core::{ArcanaPreset, Ruleset};
 
 use crate::policy::Policy;
 use crate::runner::{run_pairs, Matchup, Setup};
 use crate::stats::{self, Estimate};
 
-/// The P34 named fixtures (schema order Guard, Assault, Piercing,
-/// Endurance, Resilience, Renewal).
-pub const NAMED: [(&str, [u8; NODES]); 8] = [
-    ("melee", [2, 2, 2, 0, 0, 0]),
-    ("ranged", [2, 0, 2, 2, 0, 0]),
-    ("defensive", [2, 0, 0, 2, 2, 0]),
-    ("support", [2, 0, 0, 0, 2, 2]),
-    ("control", [0, 0, 0, 2, 2, 2]),
-    ("hybrid", [1, 1, 1, 1, 1, 1]),
-    ("generalist", [2, 0, 2, 0, 2, 0]),
-    ("extreme", [0, 2, 2, 0, 0, 2]),
+/// The P34/P40 named fixtures (schema order: Guard, Assault, Piercing,
+/// Endurance, Resilience, Renewal, Shieldwall, Battle Rush, Combined Arms,
+/// Hunter's Focus, Quickdraw, Deadeye, Unshaken, Emergency Care, Purification).
+pub const NAMED: [(&str, [u8; NODES]); 10] = [
+    ("war-full", [2, 2, 2, 2, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0]),
+    ("war-nosup", [2, 2, 2, 2, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0]),
+    ("precision", [2, 2, 2, 2, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0]),
+    ("vitality", [2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1]),
+    ("hybrid", [2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+    (
+        "hybrid-children",
+        [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0],
+    ),
+    ("defensive", [2, 2, 0, 0, 2, 2, 1, 1, 0, 0, 0, 0, 1, 1, 0]),
+    ("aggressive", [2, 2, 2, 2, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0]),
+    ("control", [0, 0, 2, 2, 2, 2, 0, 0, 0, 1, 1, 0, 1, 1, 0]),
+    (
+        "ranged-supreme",
+        [2, 2, 2, 2, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+    ),
 ];
 
-/// All complete presets (141), in lexicographic rank order.
+/// The retired six-point default, kept as a diagnostic reference only.
+pub const LEGACY_DEFAULT: [u8; NODES] = [2, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+/// All complete presets, in mixed-radix rank order.
 pub fn complete() -> Vec<ArcanaPreset> {
     let mut out = Vec::new();
-    let base = u32::from(MAX_RANK) + 1;
-    for n in 0..base.pow(NODES as u32) {
-        let ranks: [u8; NODES] = std::array::from_fn(|i| (n / base.pow(i as u32) % base) as u8);
+    let radix: [u32; NODES] = std::array::from_fn(|i| u32::from(MAX[i]) + 1);
+    let total = radix.iter().map(|&r| u64::from(r)).product::<u64>();
+    for n in 0..total {
+        let mut rest = n;
+        let ranks: [u8; NODES] = std::array::from_fn(|i| {
+            let rank = (rest % u64::from(radix[i])) as u8;
+            rest /= u64::from(radix[i]);
+            rank
+        });
         if let Ok(p) = ArcanaPreset::complete(ranks) {
             out.push(p);
         }
     }
-    debug_assert!(out.iter().all(|p| p.ranks.iter().sum::<u8>() == BUDGET));
+    debug_assert!(out.iter().all(|p| p.spent() == u32::from(BUDGET)));
     out
 }
 

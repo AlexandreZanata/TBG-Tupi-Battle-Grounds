@@ -2,6 +2,7 @@
 //! damage reduction, lifesteal, heal cut, Second Wind, shields and on-hit
 //! statuses (GAME-DESIGN §4, §10.7).
 
+use crate::arcana;
 use crate::augment;
 use crate::content::{Stats, BP};
 use crate::state::{stronghold_x, Event, MatchState, Target, Unit};
@@ -20,14 +21,14 @@ pub(crate) fn resolve_hit(
         if state.unit_index(id).is_some_and(|i| state.units[i].seat == attacker.seat));
     if healing {
         let Target::Unit(id) = target else { return };
-        heal(state, attacker.seat, id, st.heal, ev);
+        heal(state, attacker.seat, id, st.heal, true, ev);
         if st.splash > 0 {
             // Index loop, no clone: heals never remove units mid-loop.
             for i in 0..state.units.len() {
                 let a = state.units[i];
                 let near = (a.x - tx).abs() <= st.splash;
                 if a.seat == attacker.seat && a.id != id && a.hp > 0 && a.hp < a.max_hp && near {
-                    heal(state, attacker.seat, a.id, st.heal, ev);
+                    heal(state, attacker.seat, a.id, st.heal, true, ev);
                 }
             }
         }
@@ -35,7 +36,24 @@ pub(crate) fn resolve_hit(
     }
     let mut amount = st.damage;
     if !attacker.kind.is_summon() {
-        amount = scale(amount, augment::situational_bp(state, attacker, target));
+        let target_status = match target {
+            Target::Unit(id) => state
+                .unit_index(id)
+                .map_or(Status::None, |i| state.units[i].status),
+            Target::Stronghold(_) => Status::None,
+        };
+        let army = state.army_of(attacker.seat);
+        let arcana_bp = arcana::damage_bonus_bp(
+            &state.player(attacker.seat).arcanas,
+            &state.rules().arcana,
+            state.rules().def(attacker.kind).archetype,
+            target_status,
+            army.tanks > 0,
+        );
+        amount = scale(
+            amount,
+            augment::situational_bp(state, attacker, target) + arcana_bp,
+        );
     }
     let removed = damage(state, target, amount, ev);
     if let Target::Unit(id) = target {
@@ -52,7 +70,7 @@ pub(crate) fn resolve_hit(
             let bp = augment::lifesteal_bp(&state.player(attacker.seat).augments);
             if conventional && bp > 0 {
                 let healed = (i64::from(removed) * i64::from(bp) / BP) as i32;
-                heal(state, attacker.seat, attacker.id, healed, ev);
+                heal(state, attacker.seat, attacker.id, healed, false, ev);
             }
         }
     }
@@ -126,8 +144,23 @@ pub(crate) fn damage(
             let Some(i) = state.unit_index(id) else {
                 return 0;
             };
-            let owner = state.units[i].seat;
-            let dr = augment::damage_reduction_bp(state, &state.units[i]);
+            let victim = state.units[i];
+            let owner = victim.seat;
+            let conventional = !victim.kind.is_summon();
+            let archetype = state.rules().def(victim.kind).archetype;
+            let army = state.army_of(owner);
+            let arcana_dr = if conventional {
+                arcana::damage_reduction_bp(
+                    &state.player(owner).arcanas,
+                    &state.rules().arcana,
+                    archetype,
+                    army.tanks > 0,
+                    army.dps > 0,
+                )
+            } else {
+                0
+            };
+            let dr = (augment::damage_reduction_bp(state, &victim) + arcana_dr).min(2_000);
             let amount = if dr > 0 {
                 let reduced = i64::from(amount) * (BP - i64::from(dr)) / BP;
                 if amount >= 1 {
@@ -151,8 +184,12 @@ pub(crate) fn damage(
             } else {
                 u.hp = (u.hp - amount).max(0);
             }
+            let removed = before - u.hp;
             ev.push(Event::Hit { to: target, amount });
-            before - u.hp
+            if removed > 0 && u.hp <= 0 && conventional {
+                state.army[owner.index()].remove(archetype);
+            }
+            removed
         }
         Target::Stronghold(seat) => {
             let tick = state.tick;
@@ -175,11 +212,19 @@ pub(crate) fn damage(
     }
 }
 
-fn heal(state: &mut MatchState, healer: Seat, id: u32, amount: i32, ev: &mut Vec<Event>) {
+fn heal(
+    state: &mut MatchState,
+    healer: Seat,
+    id: u32,
+    amount: i32,
+    direct: bool,
+    ev: &mut Vec<Event>,
+) {
     let Some(i) = state.unit_index(id) else {
         return;
     };
-    let effective = augment::heal_amount(state, healer, &state.units[i], amount, true);
+    let target = state.units[i];
+    let effective = augment::heal_amount(state, healer, &target, amount, direct);
     if effective <= 0 {
         return;
     }
@@ -189,6 +234,15 @@ fn heal(state: &mut MatchState, healer: Seat, id: u32, amount: i32, ev: &mut Vec
         to: id,
         amount: effective,
     });
+    if !target.kind.is_summon() {
+        if let Some(status) = arcana::purify_status(
+            &state.player(healer).arcanas,
+            &state.rules().arcana,
+            target.status,
+        ) {
+            state.units[i].status = status;
+        }
+    }
 }
 
 fn status_ticks(base: u16, bp: i32) -> u16 {
@@ -212,13 +266,27 @@ fn apply_on_hit(
         return;
     };
     let bonus = augment::status_duration_bp(&state.player(attacker).augments);
+    let target = state.units[i];
+    let archetype = state.rules().def(target.kind).archetype;
+    let shorten = |ticks| {
+        if target.kind.is_summon() {
+            ticks
+        } else {
+            arcana::shorten_status(
+                &state.player(target.seat).arcanas,
+                &state.rules().arcana,
+                archetype,
+                ticks,
+            )
+        }
+    };
     let on_hit = match on_hit {
         OnHit::Slow { bp, ticks } => OnHit::Slow {
             bp,
-            ticks: status_ticks(ticks, bonus),
+            ticks: shorten(status_ticks(ticks, bonus)),
         },
         OnHit::Root { ticks } => OnHit::Root {
-            ticks: status_ticks(ticks, bonus),
+            ticks: shorten(status_ticks(ticks, bonus)),
         },
     };
     let u = &mut state.units[i];
