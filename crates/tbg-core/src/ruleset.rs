@@ -104,6 +104,23 @@ impl Ruleset {
         self.stats_with(kind, tier, branch, synergy_level, &ArcanaPreset::NEUTRAL)
     }
 
+    /// Max HP a client can derive from the view alone (P30-A H8): the same
+    /// inputs as `stats_with`, with summons pinned to their base form.
+    pub fn unit_max_hp(
+        &self,
+        kind: UnitKind,
+        tier: u8,
+        branch: u8,
+        synergy_level: u8,
+        arcanas: &ArcanaPreset,
+    ) -> i32 {
+        if kind.is_summon() {
+            return self.effective_stats(kind, tier, branch, 0).max_hp;
+        }
+        self.stats_with(kind, tier, branch, synergy_level, arcanas)
+            .max_hp
+    }
+
     /// Effective stats with the seat's Arcanas: their bp add to Evolution and
     /// Synergy bp on the same base and truncate once (BR-AR04).
     pub fn stats_with(
