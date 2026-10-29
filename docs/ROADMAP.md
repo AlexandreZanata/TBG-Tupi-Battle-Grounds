@@ -85,8 +85,10 @@ P14, the visual suite, or `v0.2.0`. P32 starts only after P31 is reviewed
 and its owner checkpoints are satisfied. Each extra phase gates the next.
 Writing these specs did not authorize implementation; **D-40 (owner,
 2026-10-29) did**: Arcanas are integrated and live in every mode with
-Proposed values. P32–P38 stay as the checklist for what is still open
-(full P34 matrix, P36 phone editor, P38 human/security gates).
+Proposed values. **D-42/P40** then expanded the live system to three
+five-node families, twelve points and supremes. P32–P38 stay as the
+checklist for what is still open (full P34 matrix, P38 human/security
+gates); P40 records the tree, migration, editor and lab work.
 
 ```
 P31 reviewed + owner sign-off
@@ -160,6 +162,7 @@ lobby/menu files). It gates no existing phase.
 | P37 | [P37-arcana-presets-and-ranked-records.md](phases/P37-arcana-presets-and-ranked-records.md) | One durable preset per account, guest parity, atomic ranked metadata | planned | — |
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
 | P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; 29 online tests and browser evidence; **owner physical-phone/PWA check pending** | PR #2 follow-up fixes pending |
+| P40 | [P40-arcana-trees.md](phases/P40-arcana-trees.md) | Fifteen-node trees, twelve points, three supremes, preset migration, editor and lab evidence | implemented; automated checks pass; balance review open | — |
 
 ## Pending validations (owner)
 

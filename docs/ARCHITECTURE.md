@@ -160,10 +160,12 @@ tables are the one allowed exception.
   frozen presets in `MatchStart`), and v9 (P39: `CreateChallenge` /
   `JoinChallenge{token}` / `RequestRematch` → `ChallengeWaiting{token}` /
   `ChallengeUnavailable` / `RematchOpen{opponent}` /
-  `RematchState{you_requested, opponent_requested}` / `RematchClosed{declined}`).
+  `RematchState{you_requested, opponent_requested}` / `RematchClosed{declined}`),
+  and v11 (P40: the fifteen-rank `SetArcanas`/`ArcanasSelected` payload and
+  twelve-point schema; both frozen presets still travel in `MatchStart`).
   P39 appends after the Arcana variants, keeping every existing index and
   all `MatchStart` fields; `MatchMode::Challenge` is appended after Ranked.
-  Peers older than v9 are rejected at the handshake.
+  Peers older than v11 are rejected at the handshake.
   Intentions carry no seat: the server derives the seat from the connection.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
@@ -483,41 +485,36 @@ read-only JSON API + static ranking pages (§5, §8, §9, §11); P15+ the
 medieval visual suite described in [ART-DIRECTION.md](ART-DIRECTION.md)
 (rig v2 and clip sets replace the 12-joint plan in §7; quality tiers).
 
-## 15. Arcanas extra (Proposed, after P31 only)
+## 15. Arcanas extra (active by D-40/D-42; values Proposed)
 
-P32–P38 in ROADMAP are an optional gameplay extension after the existing
-release, not requirements for P0–P31. GAME-DESIGN §9 owns proposed values;
-DECISIONS D-25 records the rationale. No runtime feature is implemented
-or enabled by this planning addendum.
+GAME-DESIGN §9 owns the node table, costs, prerequisites and proposed
+values; DECISIONS D-40/D-42 record why the extension is live. P40 expands
+the original six-node system in place.
 
-- **Core (P32–P34):** validate fixed-size presets, calculate additive integer
-  modifiers, preserve Evolution/Synergy HP ratios and deterministic traces.
-  Native examples own clocks, experiments, bot policies and statistics.
-  Experimental tuning is unavailable in default server/WASM release builds.
-  Add no dependency or general modifier/AI framework.
-- **Server (P35):** accept bounded selections only while idle, freeze them
-  at queue/room entry, construct the authoritative MatchState with both
-  presets, and preserve those selections across reconnect/account takeover.
-  Seat/account identity comes from the connection/session. No client bonus
-  values, store reads or I/O participate in simulation ticks.
-- **Wire (P35):** distinguish protocol, preset schema and competitive
-  RulesetVersion. Send static rules/presets at MatchStart and reattach,
-  not in every snapshot. Reuse UnitView max_hp; unchanged Strongholds need
-  no new max-HP field. Retain frame/rate limits and hidden opponent data.
-  Measure packet, heap and tick deltas before approving performance.
-- **Client (P36):** build the editor from the post-P31 Bevy UI kit; previews
-  call the shared formulas with frozen match data where appropriate.
-  Practice uses the same approved rules. Guests get validated local storage
-  and the same complete default and power as accounts.
-- **Store (P35/P37):** additive migrations retain legacy rows. Every match
-  records applied presets/schema/ruleset; ranked metadata is inserted in
-  the rating transaction. One active account preset uses the existing
-  SQLite writer and identity. Acknowledgements distinguish selection from
-  durable save; late replies cannot replace a queued/live match's preset.
-- **Release (P38):** statistical, human, device, security and operating
-  budgets gate activation. Drain before a rules change; preserve outcomes,
-  ratings and historical metadata. Versioned records support audit, not
-  full replay without timed intentions and the old rule implementation.
+- **Core:** `ArcanaPreset` is fifteen rank bytes. `complete` validates
+  per-node maxima, real point cost (supremes cost two) and the shared
+  prerequisite table. Per-rank percentages stay in `Ruleset.arcana_bp`;
+  the nine conditional values live in `Ruleset.arcana`. Stats still add
+  basis points from Evolution, Synergy, Arcanas and Augments before one
+  truncation. Conditional checks read `MatchState::army`, a per-tick
+  living Tank/DPS count decremented on death, so no hit scans the army.
+  No modifier framework, event bus or per-tick allocation is added.
+- **Server:** selections are validated only while idle, frozen at
+  queue/room/challenge entry, carried through reconnect/account takeover,
+  and copied into the authoritative MatchState. Seat identity comes from
+  the connection; no client bonus values reach the simulation.
+- **Wire:** protocol v11 carries fifteen ranks. MatchStart, replay records
+  and ranked rows keep both frozen presets. Six-rank historical rows are
+  read through `ArcanaPreset::migrate_legacy` and are never rewritten.
+- **Client:** the existing HTML editor keeps the three banners/emblems,
+  renders two originals, two children and a centered supreme per family,
+  shows cost and prerequisite state, refuses removals with active
+  dependents, and fits smaller screens without requiring zoom. The game
+  persists schema 2 locally; a schema-1 document is migrated.
+- **Store:** account presets accept six or fifteen bytes; a six-byte row
+  is migrated in place. Match rows record fifteen bytes from now on.
+- **Release:** values stay Proposed. The P34/P40 lab must confirm viable
+  family, hybrid and no-supreme builds and reject a compulsory supreme.
   The existing single-VPS/SQLite deployment and Elo/FIFO design remain.
 
 ## 16. Strategic expansion (Proposed, P16-F1–F8)
