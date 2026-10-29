@@ -133,6 +133,7 @@ pub fn dispatch(a: &Args) -> Result<(), String> {
         "value" => value_cmd(a),
         "validate" => validate_cmd(a),
         "arcana" => arcana_cmd(a),
+        "arcana-named" => arcana_named_cmd(a),
         other => Err(format!("unknown command `{other}` (see --help)")),
     }
 }
@@ -599,6 +600,60 @@ fn validate_cmd(a: &Args) -> Result<(), String> {
         .write("validation.txt", &text)
         .map_err(|e| e.to_string())?;
     c.finish(0, 0, "P16-D validation")
+}
+
+/// Confirmation block for the named builds and the retired six-point default
+/// against the twelve-point default, with a larger paired sample (P40).
+fn arcana_named_cmd(a: &Args) -> Result<(), String> {
+    let c = ctx(a, 512, CONFIRMATION)?;
+    let policy = match a.str("a") {
+        Some(_) => policy(a, "a")?,
+        None => Policy::Bot,
+    };
+    let mut presets: Vec<(&str, ArcanaPreset)> = arcanas::NAMED
+        .iter()
+        .map(|(name, ranks)| (*name, ArcanaPreset { ranks: *ranks }))
+        .collect();
+    presets.push((
+        "legacy-6pt",
+        ArcanaPreset {
+            ranks: arcanas::LEGACY_DEFAULT,
+        },
+    ));
+    let ran: Vec<ArcanaPreset> = presets.iter().map(|(_, p)| *p).collect();
+    let rows = arcanas::against(
+        c.rules,
+        &ran,
+        ArcanaPreset::DEFAULT,
+        policy,
+        c.seeds(),
+        c.budget.reaction,
+        c.budget.threads,
+    );
+    let mut text = format!(
+        "named builds vs default {:?}, policy {}, {} seed pairs each\n",
+        ArcanaPreset::DEFAULT.ranks,
+        policy.name(),
+        c.pairs
+    );
+    for ((name, _), (_, e)) in presets.iter().zip(rows.iter()) {
+        let _ = writeln!(
+            text,
+            "  {name:<16} {:>5.1}% [{:.1} – {:.1}]",
+            e.mean * 100.0,
+            e.lo * 100.0,
+            e.hi * 100.0
+        );
+    }
+    print!("{text}");
+    c.out
+        .write("arcana-named.txt", &text)
+        .map_err(|e| e.to_string())?;
+    c.finish(
+        (ran.len() as u64) * c.pairs * 2,
+        0,
+        "P40 named confirmation",
+    )
 }
 
 /// Every complete Arcana preset and the named fixtures against the default

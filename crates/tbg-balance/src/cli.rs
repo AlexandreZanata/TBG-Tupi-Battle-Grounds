@@ -20,6 +20,7 @@ COMMANDS
   value       P16-D marginal value: reference | shadow | interactions | scenarios
   validate    P16-D discovery vs confirmation rank check and static baseline
   arcana      every complete Arcana preset vs the default (policy --a, default bot)
+  arcana-named  the ten named builds plus the retired six-point default (higher pairs)
 
 FLAGS
   --pairs N         seed pairs per matchup (each pair = 2 seat-swapped games)
