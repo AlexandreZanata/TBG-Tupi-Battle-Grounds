@@ -1,11 +1,11 @@
 # P39 — Quick Challenge by link and rematch
 
 **Depends on:** the current guest-session, reconnect, and result-screen code
-(P4, P9, P14) and protocol v7 at the planning HEAD. P14 owner sign-off is
+(P4, P9, P14) and protocol v8 with active Arcanas (D-40) at the integration base. P14 owner sign-off is
 not a gate for this lobby feature. Independent of the P16-F strategic
 expansion and the visual suite. Do not run it concurrently with P16-F4,
 P16-F7, P16-A, or P16-B: they edit the same lobby/menu files.
-**Branch:** `phase/p39-quick-challenge`.
+**Branch:** `phase/p39-quick-challenge-pr`.
 **Status:** planned; this file authorizes no production code by itself.
 **Difficulty:** medium. One lobby feature, one protocol bump, three screens.
 
@@ -80,7 +80,7 @@ seat or a second pairing. No spectator field is added now.
 
 ## Contracts (freeze before coding)
 
-### Wire: `PROTOCOL_VERSION = 8`
+### Wire: `PROTOCOL_VERSION = 9`
 
 Append only; existing variants keep their indices. Old clients are rejected
 by the handshake.
@@ -90,12 +90,12 @@ pub type InviteToken = [u8; 16];
 
 pub enum MatchMode { Casual, Ranked, Challenge } // Challenge = index 2
 
-// ClientMsg, appended after Surrender
+// ClientMsg, appended after SetArcanas (index 13)
 CreateChallenge,
 JoinChallenge { token: InviteToken },
 RequestRematch,
 
-// ServerMsg, appended after Leaderboard
+// ServerMsg, appended after ArcanasRejected (index 19)
 ChallengeWaiting { token: InviteToken },
 ChallengeUnavailable,
 RematchOpen { opponent: String },
@@ -103,9 +103,9 @@ RematchState { you_requested: bool, opponent_requested: bool },
 RematchClosed { declined: bool },
 ```
 
-Wire indices: `CreateChallenge` 13, `JoinChallenge` 14, `RequestRematch` 15;
-`ChallengeWaiting` 18, `ChallengeUnavailable` 19, `RematchOpen` 20,
-`RematchState` 21, `RematchClosed` 22. `MatchStart` keeps its fields;
+Wire indices: `CreateChallenge` 14, `JoinChallenge` 15, `RequestRematch` 16;
+`ChallengeWaiting` 20, `ChallengeUnavailable` 21, `RematchOpen` 22,
+`RematchState` 23, `RematchClosed` 24. `MatchStart` keeps its fields, including both frozen Arcana presets;
 `mode: MatchMode::Challenge` identifies a challenge match to the client.
 `Challenge` is a casual match on the wire, never ranked.
 
@@ -289,7 +289,7 @@ instead of running a ghost seat forever. `Attach` already clears
 
 ## Steps (in order; check and commit each)
 
-### 1. Protocol v8 and core contract tests
+### 1. Protocol v9 and core contract tests
 
 Files: `crates/tbg-core/src/protocol.rs`,
 `crates/tbg-core/tests/contract_protocol.rs`,
@@ -298,13 +298,13 @@ Rules: ARCHITECTURE §5 append-only wire; D-39; no seat in client messages.
 
 - Add `InviteToken`, the three `ClientMsg` variants, the five `ServerMsg`
   variants, and `MatchMode::Challenge` exactly as above, appended at the end.
-- Bump `PROTOCOL_VERSION` to 8 and update the version-test message.
+- Bump `PROTOCOL_VERSION` to 9 and update the version-test message.
 - Extend the frozen variant-order tests with the new variants and their
   indices. Add exact-byte assertions for at least `JoinChallenge`,
   `ChallengeWaiting`, and `RematchClosed`.
 - **Check:** `cargo test -p tbg-core --test contract_protocol --test contract_protocol_server`.
 - **Done when:** all old indices are unchanged, the new indices are frozen,
-  and the version test names v8 and P39.
+  and the version test names v9 and P39.
 
 ### 2. Server challenge lifecycle
 
@@ -482,7 +482,7 @@ renumbered or silently changed.
   and `Rematch`, the extended `MatchMode` row, BR-R08, BR-R09, D-39, and
   the removal of "rematch" from the deferred list. Edit them only if the
   implementation proves a contract change; keep them **Proposed**.
-- Update `ARCHITECTURE.md` protocol to v8 and the new messages/mode,
+- Update `ARCHITECTURE.md` protocol to v9 and the new messages/mode,
   sessions/matchmaking/lifecycle, and the invite per-IP limit.
 - Do not rewrite existing decisions or phase files.
 - **Check:** `rg -n "PROTOCOL_VERSION|Quick Challenge|BR-R08|BR-R09" docs`
@@ -551,7 +551,7 @@ or weaken an existing assertion.
 - [ ] Reload during waiting/combat/result recovers the expected state;
       explicit Menu declines the rematch.
 - [ ] Same-IP players are not blocked by the invite limit.
-- [ ] `PROTOCOL_VERSION` is 8; old indices are unchanged; docs agree.
+- [ ] `PROTOCOL_VERSION` is 9; old indices are unchanged; docs agree.
 - [ ] All verification commands above were actually run.
 
 ## Phase report

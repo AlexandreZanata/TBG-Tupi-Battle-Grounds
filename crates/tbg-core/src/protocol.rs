@@ -10,8 +10,8 @@ use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-/// v8 (D-40): Arcana selection and both frozen presets in `MatchStart`.
-pub const PROTOCOL_VERSION: u16 = 8;
+/// v9 (D-39/P39): append challenge/rematch after v8 Arcanas (D-40).
+pub const PROTOCOL_VERSION: u16 = 9;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ.
@@ -19,12 +19,16 @@ pub const PROTOCOL_VERSION: u16 = 8;
 pub enum MatchMode {
     Casual,
     Ranked,
+    /// BR-R08: a direct invitation with casual rules and no rating change.
+    Challenge,
 }
 pub const MAX_CLIENT_MSG_BYTES: usize = 1024;
 /// Room-code alphabet: no 0/O, 1/I/L.
 pub const ROOM_ALPHABET: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 
 pub type Token = [u8; 16];
+/// P39: a single-use Quick Challenge invitation, independent of `Token`.
+pub type InviteToken = [u8; 16];
 pub type RoomCode = [u8; 5];
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -49,6 +53,10 @@ pub enum ClientMsg {
     // v8 (D-40, BR-AR05/BR-AR06): choose Arcanas while idle; the server
     // validates and answers `ArcanasSelected` or `ArcanasRejected`.
     SetArcanas { ranks: [u8; 6] },
+    // v9 (P39): append after Arcanas so every older index stays frozen.
+    CreateChallenge,
+    JoinChallenge { token: InviteToken },
+    RequestRematch,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -144,6 +152,21 @@ pub enum ServerMsg {
     },
     ArcanasRejected {
         reason: ArcanaRejection,
+    },
+    // v9 (P39): Quick Challenge and both-accept rematch.
+    ChallengeWaiting {
+        token: InviteToken,
+    },
+    ChallengeUnavailable,
+    RematchOpen {
+        opponent: String,
+    },
+    RematchState {
+        you_requested: bool,
+        opponent_requested: bool,
+    },
+    RematchClosed {
+        declined: bool,
     },
 }
 

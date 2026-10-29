@@ -5,15 +5,16 @@
 //! clients are then refused by the handshake instead of misreading frames).
 
 use tbg_core::protocol::{
-    decode_client, encode, AccountError, ClientMsg, ErrorCode, ServerMsg, PROTOCOL_VERSION,
+    decode_client, encode, AccountError, ClientMsg, ErrorCode, MatchMode, ServerMsg,
+    PROTOCOL_VERSION,
 };
 use tbg_core::PlayerIntention;
 
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 8,
-        "v8 (D-40): SetArcanas, ArcanasSelected/Rejected, presets in MatchStart"
+        PROTOCOL_VERSION, 9,
+        "v9 (D-39/P39): challenge/rematch appended after D-40 Arcanas"
     );
 }
 
@@ -61,6 +62,12 @@ fn client_variant_order_is_frozen() {
         ClientMsg::RankedMatch,
         ClientMsg::Leaderboard { offset: 0 },
         ClientMsg::Surrender,
+        ClientMsg::SetArcanas {
+            ranks: [2, 0, 2, 0, 2, 0],
+        },
+        ClientMsg::CreateChallenge,
+        ClientMsg::JoinChallenge { token: [7; 16] },
+        ClientMsg::RequestRematch,
     ];
     for (tag, msg) in order.iter().enumerate() {
         let bytes = encode(msg);
@@ -86,6 +93,19 @@ fn client_bytes_are_frozen() {
     assert_eq!(encode(&ClientMsg::Pong { id: 300 }), [6, 0xAC, 0x02]);
     assert_eq!(encode(&ClientMsg::Leaderboard { offset: 20 }), [11, 20]);
     assert_eq!(encode(&ClientMsg::Surrender), [12]);
+    assert_eq!(encode(&ClientMsg::CreateChallenge), [14]);
+    assert_eq!(
+        encode(&ClientMsg::JoinChallenge { token: [7; 16] }),
+        [15, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
+    );
+    assert_eq!(encode(&ClientMsg::RequestRematch), [16]);
+}
+
+#[test]
+fn match_mode_order_is_frozen() {
+    assert_eq!(encode(&MatchMode::Casual), [0]);
+    assert_eq!(encode(&MatchMode::Ranked), [1]);
+    assert_eq!(encode(&MatchMode::Challenge), [2]);
 }
 
 #[test]

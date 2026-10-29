@@ -448,9 +448,10 @@ guessing as a concern while the per-IP invite limiter and the WebSocket
 token bucket bound automated attempts. A separate quick-challenge queue or
 server would duplicate matchmaking and combat for no gain.
 
-**Consequences.** `PROTOCOL_VERSION` 8 appends three `ClientMsg` and five
-`ServerMsg` variants and a `MatchMode::Challenge` value; clients older than
-v8 are refused. Challenge and rematch state is lost on server restart, like
+**Consequences.** `PROTOCOL_VERSION` 9 appends three `ClientMsg` and five
+`ServerMsg` variants after the v8 Arcanas variants, preserving their indices,
+and a `MatchMode::Challenge` value; clients older than
+v9 are refused. Challenge and rematch state is lost on server restart, like
 guest sessions. A player who closes the tab on the result screen keeps the
 rematch ticket for its TTL so a reload can recover it; an explicit
 Menu/Cancel declines and notifies the other player. Spectators, chat,
