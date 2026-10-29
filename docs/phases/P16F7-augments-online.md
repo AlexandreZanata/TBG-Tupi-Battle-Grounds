@@ -1,5 +1,12 @@
 # P16-F7 — Augments online: server, desktop and phone UI, telemetry
 
+> **Owner revision 2026-10-29 (D-41).** Executed on branch
+> `phase/p16f-infinite-economy`, with one change to this spec: the War
+> Council is a modal pause for both players, not a non-modal panel during
+> combat (BR-AG12–AG14). Protocol v10, desktop HTML and Bevy phone UI,
+> reconnect inside a pause. Telemetry/records of picks are not done.
+> Report: [P16-F1 phase report](P16F1-economy-and-siege.md#phase-report).
+
 **Depends on:** P16-F6 reviewed, its gate passed, owner decision O-8.
 **Branch:** `phase/p16f7-augments-online`.
 **Difficulty:** medium–high (two UIs with a non-modal panel during
@@ -209,6 +216,8 @@ Step 6: look and touch approval, O-11. After step 7: play online matches
 with every round.
 
 ## Phase report
+
+Owner revision 2026-10-29: see the [combined report](P16F1-economy-and-siege.md#phase-report). The original checklist below is kept for the gated work still open.
 
 _Not executed._ Fill in: starting state; captures; icon sizes; switch and
 goldens; two-client run with reconnects; performance; deviations; blocked

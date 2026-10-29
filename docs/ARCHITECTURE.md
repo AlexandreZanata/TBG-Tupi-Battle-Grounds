@@ -67,6 +67,13 @@ ruleset is not serialized, so hashes, views, and the wire are unchanged.
 `tbg_core::replay` re-runs a recorded match; contract C4 proves the server
 at 5 ms and 50 ms ticks equals the headless replay.
 
+**Two clocks (D-41, BR-AG12–AG14).** `MatchState::tick` is the combat
+clock; every rule that counts time reads it, and it freezes while an
+Augment round pauses the battle. `MatchState::clock` counts `step()`
+calls, pauses included: it closes a paused round, paces views (10 Hz),
+and keys replay ops. A paused `step()` touches nothing but the selection
+clock and the close check, so no extra task or timer exists for pauses.
+
 Planned modules (create each only when its roadmap task starts):
 
 | Crate | Module | Responsibility |
@@ -204,8 +211,8 @@ tables are the one allowed exception.
   or a new match action declines it. Invites and tickets are bounded by
   the existing 10-second cleanup, with lazy expiry on joins/requests/resume.
   No additional permanent task or timer is needed.
-- **Lifecycle:** paired → `MatchStart` → countdown → running → overtime →
-  `MatchEnd` → both sessions return to the lobby. Disconnected seats stay
+- **Lifecycle:** paired → `MatchStart` → countdown → running (open-ended,
+  with Augment pauses; D-41) → `MatchEnd` → both sessions return to the lobby. Disconnected seats stay
   in the running match for 30 s; reconnecting with the token resumes with
   a full view; otherwise the seat forfeits (BR-M03). A seat already
   detached at pairing starts the same reconnect timer.
@@ -514,7 +521,13 @@ or enabled by this planning addendum.
 
 ## 16. Strategic expansion (Proposed, P16-F1–F8)
 
-Planning addendum; nothing here is implemented. GAME-DESIGN §10 owns the
+> **Owner revision 2026-10-29 (D-41).** Uncapped `Energy`, Interest and
+> infinite Augment rounds are implemented and active; `siege`,
+> `ServerLimit`, `SERVER_LIMIT` and the `Siege`/`Collapse` wire variants
+> were dropped (the protocol is v10, not an appended v9). The bullets
+> below are the original plan, kept for F2–F4.
+
+Planning addendum. GAME-DESIGN §10 owns the
 rules and values, D-34–D-38 the reasons, each phase file the exact steps.
 
 - **Ruleset-gated mechanics.** Each mechanic is a `Ruleset` field whose

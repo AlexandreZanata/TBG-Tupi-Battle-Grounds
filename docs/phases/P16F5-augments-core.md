@@ -1,5 +1,12 @@
 # P16-F5 — Augments core: rounds, mirrored draws, the first 14 (offline)
 
+> **Owner revision 2026-10-29 (D-41).** Superseded in part and executed on
+> branch `phase/p16f-infinite-economy`: rounds every 60 s of combat
+> forever (not three), four options from a reshuffled deck (no rarity
+> profiles), unlimited copies, and a battle pause per round (BR-AG12–AG14).
+> All 40 Augments shipped at once; no Δ table was measured. Report:
+> [P16-F1 phase report](P16F1-economy-and-siege.md#phase-report).
+
 **Depends on:** P16-F4 reviewed, canon switched (kinds and Fortifications
 online).
 **Branch:** `phase/p16f5-augments-core`.
@@ -285,6 +292,8 @@ Step 7 (O-6, O-7, O-10, tuned values). Step 6 may stop early under the
 continue rule.
 
 ## Phase report
+
+Owner revision 2026-10-29: see the [combined report](P16F1-economy-and-siege.md#phase-report). The original checklist below is kept for the gated work still open.
 
 _Not executed._ Fill in: starting state; refreeze proof; Δ table with
 intervals; Forgo and pick rates; round timing and draw comparisons; tuned

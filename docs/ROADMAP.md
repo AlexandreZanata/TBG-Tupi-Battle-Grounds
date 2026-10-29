@@ -63,7 +63,7 @@ Writing these specs approves no value and enables nothing.
 
 ```
 P16-C reviewed ─► P16-D Pre-balance value model (engine implemented; must fix or explain `saver`)
- └► P16-F1 Uncapped Energy, Interest, Siege/Collapse   (core+lab+HUD; switch)
+ └► P16-F1 Uncapped Energy, Interest (Siege/Collapse dropped, D-41)
      └► P16-F2 Shop Reserve                               (core+lab+HUD; switch)
          └► P16-F3 Stronghold kinds + Fortifications      (core+lab, offline)
              └► P16-F4 Kinds online: selection, store, lobby, HUD, 3D (switch)
@@ -127,14 +127,14 @@ lobby/menu files). It gates no existing phase.
 | P16-B | [P16B-open-army-and-new-units.md](phases/P16B-open-army-and-new-units.md) | No army cap; five Shop offers; Nester and Rampart; large-army balance and performance measured | merged and on the test VPS (owner, 2026-10-29) with placeholder art; **final art, client FPS, fun check, balance decision pending** | yes (code) |
 | P16-C | [P16C-balance-lab.md](phases/P16C-balance-lab.md) | Millions of headless matches proven equal to 1×; ruleset as data; opponent pool, duels, Nash meta, search; reviewed balance proposal; lab contract tests | lab, contracts, 1× proof done; 8-number proposal applied (Proposed); **owner: mechanic for banked waves/spam, then playtest** | yes (self-review) |
 | P16-D | [P16D-prebalance-value-model.md](phases/P16D-prebalance-value-model.md) | Offline PVE engine: one-sided full-match value, Energy shadow price, interaction canaries, held-out validation; P16-C findings still open | engine implemented and measured; **owner balance decision pending**; P16-F1 blocked by `saver` | — |
-| P16-F1 | [P16F1-economy-and-siege.md](phases/P16F1-economy-and-siege.md) | Uncapped Energy, low-balance Interest, Siege/Collapse, no time-up decision; lab-gated switch; HUD | planned (after P16-D) | — |
+| P16-F1 | [P16F1-economy-and-siege.md](phases/P16F1-economy-and-siege.md) | Uncapped Energy, low-balance Interest, Siege/Collapse, no time-up decision; lab-gated switch; HUD | **owner revision D-41**: economy active, open-ended matches (no Siege/Collapse); lab gate not run; PR open from `phase/p16f-infinite-economy`, review pending | — |
 | P16-F2 | [P16F2-shop-reserve.md](phases/P16F2-shop-reserve.md) | Hold one Shop offer for 20 s; lab comparison; HUD | planned | — |
 | P16-F3 | [P16F3-stronghold-kinds-core.md](phases/P16F3-stronghold-kinds-core.md) | Per-seat Stronghold, four kinds, Bounty, Fortifications; lab matrices (offline) | planned | — |
 | P16-F4 | [P16F4-stronghold-kinds-online.md](phases/P16F4-stronghold-kinds-online.md) | Selection frozen at queue, persistence, lobby, Fortify panel, four 3D kinds | planned | — |
-| P16-F5 | [P16F5-augments-core.md](phases/P16F5-augments-core.md) | Augment rounds, mirrored draws, Forgo, the first 14 Augments; Δ value per Augment (offline) | planned | — |
-| P16-F6 | [P16F6-augment-catalog.md](phases/P16F6-augment-catalog.md) | All 40 Augments, adversarial triples, tuned catalog (offline) | planned | — |
-| P16-F7 | [P16F7-augments-online.md](phases/P16F7-augments-online.md) | War Council on desktop and phones, records, practice bot | planned | — |
-| P16-F8 | [P16F8-strategic-validation.md](phases/P16F8-strategic-validation.md) | Full gate, long matches, capacity, human playtest, release decision | planned | — |
+| P16-F5 | [P16F5-augments-core.md](phases/P16F5-augments-core.md) | Augment rounds, mirrored draws, Forgo, the first 14 Augments; Δ value per Augment (offline) | **owner revision D-41**: infinite rounds with a battle pause, all 40 active; Δ table not measured; same PR | — |
+| P16-F6 | [P16F6-augment-catalog.md](phases/P16F6-augment-catalog.md) | All 40 Augments, adversarial triples, tuned catalog (offline) | catalog implemented (D-41); adversarial balance open | — |
+| P16-F7 | [P16F7-augments-online.md](phases/P16F7-augments-online.md) | War Council on desktop and phones, records, practice bot | **owner revision D-41**: online, modal War Council pause on desktop and phone; records open; same PR | — |
+| P16-F8 | [P16F8-strategic-validation.md](phases/P16F8-strategic-validation.md) | Full gate, long matches, capacity, human playtest, release decision | planned; every gate open after D-41 | — |
 | P16 | [P16-class-animation-sets.md](phases/P16-class-animation-sets.md) | Professional clip sets per Archetype, simulation-timed | planned | — |
 | P17 | [P17-arena-and-background.md](phases/P17-arena-and-background.md) | Living medieval battlefield filling every screen ratio | **archived** (owner, 2026-10-28; D-31) | — |
 | P18 | [P18-strongholds.md](phases/P18-strongholds.md) | Three selectable cosmetic Stronghold styles | **archived** (owner, 2026-10-28; D-31) | — |
