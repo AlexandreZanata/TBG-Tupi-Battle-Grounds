@@ -151,7 +151,7 @@ collapse sequence at defeat. Budget ≤ 4 000 triangles per style.
    (Archer) and every finished unit: same scale logic, palette rules,
    detail density, outline/rim, motion energy.
 7. **Performance:** 30 copies of this unit fighting in `?stress=30` on the
-   Low tier on a mid-range phone ≥ 30 FPS; draw calls ≤ budget.
+   Low tier on a mid-range phone ≥ 30 FPS; draw calls recorded for diagnostics (no fixed maximum; D-28).
 8. **Validation:** desktop 1920×1080 and phone 390×844 screenshots — turn-
    around, five forms, a contact sheet of every clip (frames at 0, 25, 50,
    75 %), and an in-match shot. Saved ≤ 300 KB each to
@@ -164,7 +164,7 @@ collapse sequence at defeat. Budget ≤ 4 000 triangles per style.
 | One-slot unit form / two-slot form | ≤ 1 500 / ≤ 3 000 triangles (**Proposed**, D-26: ≤ 2 500 / ≤ 5 000) |
 | Stronghold style | ≤ 4 000 triangles |
 | Arena + background (all layers) | ≤ 45 000 triangles (**Proposed**, D-26: ≤ 60 000) |
-| Draw calls, busy match (30 units) | ≤ 300 (High), ≤ 200 (Low) |
+| Draw calls, busy match (30 units) | Measured; no fixed maximum (D-28) |
 | WASM (brotli) / other first-load assets | ≤ 6 MB hard ceiling / ≤ 1.5 MB |
 | Frame rate | 60 FPS desktop; ≥ 30 FPS mid-range phone on Low with 30 units |
 | Time to menu | ≤ 5 s desktop; ≤ 10 s mid-range phone on 4G |

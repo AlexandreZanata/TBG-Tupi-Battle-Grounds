@@ -303,3 +303,16 @@ blur, gradients, and illustrations that HTML/CSS gives for free and Bevy UI
 would need much custom code for.
 **Reopen when** the overlay causes input or focus bugs on the canvas, or
 P20 decides one lobby for every ratio.
+
+## D-28 · Draw calls are a diagnostic, not a visual ceiling — 2026-10-28 (owner-approved)
+
+**Decision.** Remove the fixed maximum draw-call count from the architecture,
+art direction, and visual phase acceptance checks. More draw calls are allowed
+when they improve the game's appearance. Keep recording counts so regressions
+can be investigated; a count alone must not reject a visual improvement.
+**Why.** The owner explicitly prioritizes a more beautiful game over an arbitrary
+render-submission ceiling during P16-A implementation.
+**Still applies.** Readability, measured FPS targets, triangle and download
+budgets remain in force. Performance is judged by the game running on the
+actual target devices. Do not remove visible detail or shadows solely to meet
+a draw-call number.

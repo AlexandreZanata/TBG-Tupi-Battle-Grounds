@@ -154,7 +154,7 @@ one capture each of menu and match proving no regression.
 
 - [ ] All verification commands from `AGENTS.md` pass; `trunk build --release` passes
 - [ ] Desktop captures in `docs/media/p16a/`; comparisons kept in `.local/` only
-- [ ] Arena ≤ 60 000 triangles, busy-match draw calls ≤ 300 (D-26)
+- [ ] Arena ≤ 60 000 triangles (D-26); draw calls recorded, with no fixed maximum (D-28)
 - [ ] 60 fps on the desktop dev machine with 30 units; phone not regressed
 - [ ] WASM brotli ≤ 6 MB; first-load assets and lobby art within D-26
 - [ ] Every lobby action works (guest and account), including a ranked queue

@@ -69,7 +69,7 @@ screenshot in the report (ART-DIRECTION §8 step 6).
 
 ### 7. Performance
 ART-DIRECTION §8 step 7 (`?stress=30` of this unit, Low tier, mid-range
-phone ≥ 30 FPS; draw calls within budget).
+phone ≥ 30 FPS; draw calls recorded for diagnostics; no fixed maximum, D-28).
 
 ### 8. Validation and owner approval
 ART-DIRECTION §8 step 8. Screenshots to `docs/media/units/rootcaller/`.

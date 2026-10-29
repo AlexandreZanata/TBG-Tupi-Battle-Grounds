@@ -346,7 +346,7 @@ buying.
 | Total download, lazy assets included | ≤ 100 MB, first load unchanged (**Proposed**, D-26) | P16-A |
 | Time to menu | ≤ 5 s desktop broadband; ≤ 10 s mid-range phone on 4G | P1, P5 |
 | Frame rate | 60 fps desktop; ≥ 30 fps mid-range Android and iPhone 11-class with 30 units | P1, P3, P6, P7 |
-| Draw calls in a busy match | ≤ 300 | P6 |
+| Draw calls in a busy match | Measured; no fixed maximum (D-28) | P16-A |
 | Triangles | ≤ 1 500 per one-slot unit, ≤ 3 000 per two-slot, ≤ 30 000 arena; **Proposed** (D-26): ≤ 2 500 / ≤ 5 000 / ≤ 60 000 | P6 · P16-A |
 | Browser memory | ≤ 300 MB | P7 |
 | Sim step, 30 units (release) | ≤ 50 µs | P2 · measured: 0.44 µs harness, 4–6 µs in server |
