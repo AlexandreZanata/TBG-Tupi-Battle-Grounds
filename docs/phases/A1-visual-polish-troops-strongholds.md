@@ -726,6 +726,43 @@ Measured across 3 runs of 60 seconds each on Chrome 156 (`1280x800`, DPR 1, port
   - [Bone Brute Melee Aim](docs/media/a1/melee-bonebrute-aim.jpg) (`docs/media/a1/melee-bonebrute-aim.jpg`, 23 KB): Bone Brute executing directed `Chop` strike with cleaver.
   - [Crowd Melee Lab](docs/media/a1/melee-crowd-aim.jpg) (`docs/media/a1/melee-crowd-aim.jpg`, 29 KB): 12 melee attackers in a clump surrounding 3 targets.
 
+#### 2.5 Step 7 Prototype Gate Interim Report
+
+- **Side-by-Side Comparison Sheets:**
+  - [Melee Aim Comparison](docs/media/a1/gate-comparison-melee.jpg) (`docs/media/a1/gate-comparison-melee.jpg`, 186 KB): Side-by-side comparison of Step 1 misaimed diagonal swing (left) vs Step 6 directed strike with cosmetic lunge, contact spark, and directional recoil (right).
+  - [40-per-Side Stress Comparison](docs/media/a1/gate-comparison-stress.jpg) (`docs/media/a1/gate-comparison-stress.jpg`, 365 KB): Step 2 baseline (left) vs Step 7 gate rerun (right).
+
+- **40-per-Side Performance Re-Run (60s Hardware GPU: Intel RPL-P OpenGL 4.6):**
+
+| Metric | Step 2 Baseline | Step 7 Gate Rerun | Delta / Acceptance | Status |
+|---|---|---|---|---|
+| **FPS** | 109.6 | 151.4 | +38.1% (faster) | PASS |
+| **Frame Time p50** | 6.1 ms | 6.1 ms | 0.0% (parity) | PASS |
+| **Frame Time p95** | 26.3 ms | 8.3 ms | -68.4% (well within $\le +10\%$ ceiling of 28.9 ms) | PASS |
+| **Frame Time p99** | 36.5 ms | 27.2 ms | -25.5% (reduced tail latency) | PASS |
+| **JS Heap** | 28.86 MB | 11.62 MB | -59.7% | PASS |
+| **Wasm Memory** | 94.69 MB | 94.75 MB | +0.06% (well within $\le +5\%$ ceiling of 99.42 MB) | PASS |
+| **Entities** | 2,932 | 2,933 | +1 entity | PASS |
+| **Draw Calls** | 452.0 | 451.8 | -0.2 draws | PASS |
+
+- **F4 Melee Reach Distances and Verdict Table:**
+
+| Unit Kind | Class | Weapon | Auth Range / Reach | Diagonal Gap ($\Delta z = 1.6$) | Cosmetic Lunge | Impact Pairing & Recoil | Reach Verdict | Action on Option B (O-A1-5) |
+|---|---|---|---|---|---|---|---|---|
+| **Shieldbearer** | Tank | Flanged Mace (`Smash`) | 1.00 / 0.50 | 0.71 tile | 0.22 tile | Spark on contact side + 0.08 recoil | **Option A suffices** | Reject Option B; no lane convergence needed |
+| **Bone Brute** | Tank | Cleaver (`Chop`) | 1.10 / 0.60 | 0.61 tile | 0.24 tile | Spark on contact side + 0.08 recoil | **Option A suffices** | Reject Option B; no lane convergence needed |
+| **Sawbot** | Dps | Spinning Saw (`Mech`) | 1.00 / 0.50 | 0.71 tile | 0.20 tile | Spark on contact side + 0.08 recoil | **Option A suffices** | Reject Option B; no lane convergence needed |
+| **Rampart** | Tank | Shield (`Bash`) | 1.00 / 0.50 | 0.71 tile | 0.25 tile | Grit burst on contact + 0.08 recoil | **Option A suffices** | Reject Option B; no lane convergence needed |
+| **Rootcaller** | Control | Root Claws (`Slash`) | 1.10 / 0.60 | 0.61 tile | 0.22 tile | Spark on contact side + 0.08 recoil | **Option A suffices** | Reject Option B; no lane convergence needed |
+
+*Verdict Rationale:* Across all 5 melee units, the combination of authoritative facing yaw toward the target ($D1$), forward cosmetic lunge along the aim line peaking at $0.30\text{ s}$ ($D3$), contact sparks placed on the target's near bounding cylinder ($D3$), and target directional recoil ($D3$) eliminates the perception of "striking empty air". Attacks read crisply as connected across the 1.6-tile lane diagonal without requiring visual lane displacement. Option B (O-A1-5) is therefore formally rejected.
+
+- **Gate Verification Checks:**
+  - Invariant I1 (`git diff main --stat -- crates/tbg-core crates/tbg-server crates/tbg-balance Cargo.lock`): completely empty.
+  - Test suite (`cargo test --workspace`): 100% green across all crates.
+  - Frame time p95: 8.3 ms (baseline 26.3 ms; limit 28.9 ms).
+  - Duplicate projectile: zero duplicate projectiles spawned.
+
 ### Progress
 
 Step 0 complete (preflight verification).
@@ -735,7 +772,8 @@ Step 3 complete (authored ART-DIRECTION §11 D5 visual standard, class proportio
 Step 4 complete (aim core pure Rust in art/aim.rs with facing_yaw, turn_toward, Aim state machine Active/Hold/Release, deadzone, frozen point on despawn, ImpactRing FIFO and 1s expiry; all 11 contract tests passing).
 Step 5 complete (aim wiring system in visuals/aim.rs, D2 targeted arrow flight in art/arrows.rs, duplicate projectile fix, 8-angle lab contact sheet, 2 contract tests passing).
 Step 6 complete (strike profile table in art/melee.rs, cosmetic lunge, directional recoil, 50ms hit-stop on target animator, contact sparks, 5 contract tests passing, melee verification sheets).
-Steps 7–14 pending.
+Step 7 complete (prototype gate passed; side-by-side sheets generated, 40-per-side baseline rerun p95 = 8.3ms vs 26.3ms baseline, F4 reach table confirms Option A suffices, I1 clean, zero duplicate projectiles).
+Steps 8–14 pending.
 
 ### Owner decisions
 
