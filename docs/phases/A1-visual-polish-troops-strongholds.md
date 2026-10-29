@@ -707,7 +707,8 @@ Step 0 complete (preflight verification).
 Step 1 complete (audit report, corrected F4 live melee reach measurements for all 5 melee units, F5 duplicate projectile verification, 55-form roster audit, triangle and entity counts, misaimed diagonal attack screenshot).
 Step 2 complete (aim lab before sheets, formal 5-scenario performance baseline across 3 runs of 60s, hardware GPU measurements, baseline screenshots and raw metrics committed).
 Step 3 complete (authored ART-DIRECTION §11 D5 visual standard, class proportion table, faction morphology/material rules, evolution scale progression rules +8%/+16%, and Tupi checklist).
-Steps 4–14 pending.
+Step 4 complete (aim core pure Rust in art/aim.rs with facing_yaw, turn_toward, Aim state machine Active/Hold/Release, deadzone, frozen point on despawn, ImpactRing FIFO and 1s expiry; all 11 contract tests passing).
+Steps 5–14 pending.
 
 ### Owner decisions
 

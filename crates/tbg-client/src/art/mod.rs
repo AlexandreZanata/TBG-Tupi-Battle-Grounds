@@ -8,6 +8,7 @@ use bevy::prelude::*;
 use tbg_core::{UnitKind, ALL_KINDS};
 
 mod adapter;
+pub mod aim;
 pub mod anim;
 #[cfg(test)]
 mod anim_tests;
