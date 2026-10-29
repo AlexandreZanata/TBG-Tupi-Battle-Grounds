@@ -68,7 +68,8 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
         };
         let interval = if quickdraw > 0 {
             let base = i64::from(state.rules().def(u.kind).interval);
-            let bp = i64::from(st.atk_bp) + i64::from(quickdraw);
+            // BR-X02: every attack-speed source together stays within +100%.
+            let bp = (i64::from(st.atk_bp) + i64::from(quickdraw)).min(10_000);
             (base * BP / (BP + bp)) as u16
         } else {
             st.interval

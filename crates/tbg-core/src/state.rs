@@ -298,7 +298,7 @@ impl MatchState {
         self.stats_for(u.seat, u.kind, u.tier, u.branch)
     }
 
-    /// Stats of a seat's conventional unit: Synergy, Arcanas and Augments.
+    /// The seat's cached living Tank and DPS counts (BR-AR06).
     pub fn army_of(&self, seat: Seat) -> ArmyComposition {
         self.army[seat.index()]
     }
@@ -317,6 +317,7 @@ impl MatchState {
         self.army = army;
     }
 
+    /// Stats of a seat's conventional unit: Synergy, Arcanas and Augments.
     pub fn stats_for(&self, seat: Seat, kind: UnitKind, tier: u8, branch: u8) -> Stats {
         let p = self.player(seat);
         let level = p.synergy[self.rules.def(kind).faction.index()];

@@ -168,6 +168,28 @@ fn quickdraw_and_deadeye_change_attack_timing_in_combat() {
 }
 
 #[test]
+fn quickdraw_stays_inside_the_attack_speed_cap() {
+    // BR-X02: all attack-speed sources together are at most +100%, so an
+    // Augment stack already at the cap leaves Quickdraw nothing to add.
+    let interval = |preset: ArcanaPreset| {
+        let mut s = arena(6, preset, ArcanaPreset::NEUTRAL);
+        // Tuned Gears (id 8, Machines +8% attack speed), far past the cap.
+        s.players[0].augments[8] = 200;
+        spawn(&mut s, Seat::A, UnitKind::SiegeWalker, 6_000);
+        let target = spawn(&mut s, Seat::B, UnitKind::Rampart, 7_000);
+        let hits = hit_ticks(&mut s, target, 3);
+        hits[2] - hits[1]
+    };
+    let capped = interval(DEFAULT);
+    assert_eq!(capped, 25, "half of the 2.5 s base interval");
+    assert_eq!(
+        interval(PRECISION_FULL),
+        capped,
+        "Quickdraw cannot exceed the cap"
+    );
+}
+
+#[test]
 fn emergency_care_boosts_low_hp_heals_and_purification_cleanses_control() {
     let run = |preset: ArcanaPreset| {
         let mut s = arena(5, preset, ArcanaPreset::NEUTRAL);

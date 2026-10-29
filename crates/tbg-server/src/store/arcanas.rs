@@ -38,7 +38,9 @@ pub(super) fn load(conn: &Connection, account: AccountId) -> Option<ArcanaPreset
     if blob.len() == 6 {
         let old: [u8; 6] = blob.try_into().ok()?;
         let preset = ArcanaPreset::migrate_legacy(old);
-        save(conn, account, preset).ok()?;
+        // A failed write-back only means the next load migrates again; the
+        // player must still get the migrated preset for this session.
+        let _ = save(conn, account, preset);
         return Some(preset);
     }
     let ranks: [u8; NODES] = blob.try_into().ok()?;
