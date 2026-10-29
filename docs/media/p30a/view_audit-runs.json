@@ -1,0 +1,92 @@
+{
+  "runs": 5,
+  "bytes": {
+    "current": {
+      "median": 133.65,
+      "min": 133.65,
+      "max": 133.65
+    },
+    "a": {
+      "median": 113.77,
+      "min": 113.77,
+      "max": 113.77
+    },
+    "b": {
+      "median": 46.8,
+      "min": 46.8,
+      "max": 46.8
+    },
+    "c": {
+      "median": 78.06,
+      "min": 78.06,
+      "max": 78.06
+    },
+    "d": {
+      "median": 8.8,
+      "min": 8.8,
+      "max": 8.8
+    }
+  },
+  "timing_median_us": {
+    "build_current": 0.221,
+    "encode_current": 0.793,
+    "build_a": 0.173,
+    "encode_a": 0.695,
+    "build_b": 0.511,
+    "encode_b": 0.471,
+    "build_c": 0.328,
+    "encode_c": 0.59,
+    "rebuild_a": 0.393,
+    "rebuild_b": 0.886,
+    "rebuild_c": 0.711
+  },
+  "timing_p95_of_run_medians_us": {
+    "build_current": 0.234,
+    "encode_current": 0.815,
+    "build_a": 0.184,
+    "encode_a": 0.713,
+    "build_b": 0.547,
+    "encode_b": 0.485,
+    "build_c": 0.347,
+    "encode_c": 0.61,
+    "rebuild_a": 0.412,
+    "rebuild_b": 0.931,
+    "rebuild_c": 0.741
+  },
+  "synthetic_cpu": {
+    "20": {
+      "build_current": 0.69,
+      "encode_current": 2.642,
+      "build_a": 0.77,
+      "encode_a": 2.17,
+      "build_b": 2.084,
+      "encode_b": 1.332,
+      "build_c": 1.224,
+      "encode_c": 1.93,
+      "sync_clone_linear": 1.432,
+      "sync_arc_sorted": 1.633
+    },
+    "100": {
+      "build_current": 2.021,
+      "encode_current": 10.322,
+      "build_a": 2.442,
+      "encode_a": 8.779,
+      "build_b": 7.208,
+      "encode_b": 4.989,
+      "build_c": 3.822,
+      "encode_c": 7.314,
+      "sync_clone_linear": 17.486,
+      "sync_arc_sorted": 7.179
+    }
+  },
+  "client_sync_us": {
+    "clone_linear": {
+      "median": 0.151,
+      "p95_of_medians": 0.159
+    },
+    "arc_sorted": {
+      "median": 0.337,
+      "p95_of_medians": 0.362
+    }
+  }
+}
