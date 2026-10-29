@@ -1052,7 +1052,7 @@ cargo run --release -p tbg-balance -- validate --pairs 4096 --threads 16
 ```bash
 cargo fmt --all -- --check                 # pass
 cargo clippy --workspace -- -D warnings    # pass
-cargo test --workspace                     # 133 passed, 0 failed, 1 ignored
+cargo test --workspace                     # 168 passed, 0 failed, 1 ignored (merged with Arcana v8)
 cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown  # pass
 cargo run --release -p tbg-balance -- gate --pairs 1000 --threads 16    # completed
 ```

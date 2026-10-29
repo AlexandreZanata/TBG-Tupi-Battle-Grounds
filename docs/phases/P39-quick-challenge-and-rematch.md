@@ -566,8 +566,8 @@ open.
 - Commands and results:
   - `cargo fmt --all -- --check` pass.
   - `cargo clippy --workspace -- -D warnings` pass.
-  - `cargo test --workspace`: 159 passed, 0 failed, 1 ignored (C4b real
-    clock) on the combined branch.
+  - `cargo test --workspace`: 168 passed, 0 failed, 1 ignored (C4b real
+    clock) on the combined branch after merging Arcana v8.
   - `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown`
     pass.
   - `trunk build --release` in `crates/tbg-client/` pass.
