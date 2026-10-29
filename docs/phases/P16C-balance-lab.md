@@ -505,8 +505,8 @@ panic would shift parallel results) and two minor ones are fixed in
    Some(Outcome { winner: Some(B), reason: StrongholdDestroyed }), hash
    a0852a9cebc2849c` — `ok`, 118.42 s.
    Re-run after the review fix: `tick 50 ms: 31 commands, end tick 1777,
-   ... hash 23be0711733de518` — `ok`, 88.83 s. Final `cargo test --workspace`:
-   121 passed, 0 failed, 1 ignored (C4b).
+   ... hash 23be0711733de518` — `ok`, 88.83 s. Final `cargo test --workspace`
+   after the applied proposal: 121 passed, 0 failed, 1 ignored (C4b).
 6. **Pool and duels**: policies `bot`, `heavy`, `cheap`, `evolver`,
    `saver`, `faction-*` ×4, `favor-*` ×10, `random`; duels over 50 forms
    × 3 budgets × both seat orders (14,700 duels, 0.15 s).
@@ -577,17 +577,30 @@ Undead 48.8 → 56.8 % (now above band), strongest strategic style 92.8 %
 rows 18 → 18; the Nash mix moves from 100 % `saver` to 100 %
 `faction-machines`.
 
-**Decision per step 9.2: not applied.** The confirmed proposal is a real
-improvement on held-out seeds, but numbers alone do not bring heavy spam
-to ≤ 55 % or give the meta-game more than one equilibrium style; the
-required rows still fail. `content.rs` and GAME-DESIGN §5 are unchanged,
-so every golden stays valid. **Owner decisions needed:** (a) apply the
-8-number proposal as Proposed values for playtest
-(`--apply evolve_cost.0=1200,stronghold_damage=53,Shieldbearer.cost=2400,Hexer.damage=29,Sawbot.cost=2400,Sawbot.hp=231,SiegeWalker.speed=33,Rampart.cost=3600`);
-(b) a mechanic against banked waves and spam (options to evaluate in a
-new phase: a lower Energy cap, a per-seat deploy cooldown, or a cost that
-grows with the living army); (c) whether the gate's Proposed thresholds
-are right. C12 (`gate --strict`) fails on CANON until then.
+**Decision: applied on the owner's request (2026-10-29), as Proposed.**
+Step 9.2 stopped first because numbers alone do not bring heavy spam to
+≤ 55 % or widen the Nash support; the owner then chose to apply the
+confirmed proposal for playtest. `content.rs`, GAME-DESIGN §5,
+`contract_roster.rs`, `contract_constants.rs`, the determinism goldens,
+and the C2 traces changed in one commit (`balance(p16c)`). Gate on the
+new CANON, confirmation seeds, 1,000 pairs, 344,000 games, 57 s
+(`docs/media/p16c/gate-after.txt`): 18 of 40 rows still fail. Machines
+70.9 %, Undead 56.7 %, Humans 44.7 %, Plants 28.6 %; heavy vs bot
+58.5 % [55.4–61.4]; strongest style `faction-machines` 77.4 %; Nash mix
+100 % `faction-machines`; Evolutions never worth their Energy 47.5 %.
+C12 (`gate --strict`) still fails on the required rows.
+**Still open for the owner:** a mechanic against banked waves and spam
+(a lower Energy cap, a per-seat deploy cooldown, or a cost that grows
+with the living army) in its own phase, the gate's Proposed thresholds,
+and the playtest of these values.
+
+Applying the proposal also changed two tests on purpose. The C7 canary
+now accepts a shift of 20 points or half the remaining headroom, and it
+falls back to the match row (`favor-<unit>` vs `bot`, 256 pairs) when
+duels alone miss it. The reason: a doubled Shieldbearer that costs 4 gains
+only 11 points in 40-Energy duels, because ranged units still beat it. The
+client UI test `report_follows_live_hp_for_own_and_enemy_units` now reads
+Hexer's damage from `content::def`, not the literal 30.
 
 ### Deviations
 
