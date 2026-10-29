@@ -103,8 +103,13 @@ async fn start(ws: &mut Ws) -> Start {
                 opponent,
                 mode,
                 opponent_rating,
-                arcanas: _,
+                arcanas,
             }) => {
+                assert_eq!(
+                    arcanas,
+                    [tbg_core::ArcanaPreset::DEFAULT; 2],
+                    "BR-AR05: Challenge preserves the frozen presets"
+                );
                 return Start {
                     seat: you,
                     mode,
@@ -112,7 +117,7 @@ async fn start(ws: &mut Ws) -> Start {
                     opponent,
                     you_rating,
                     opponent_rating,
-                }
+                };
             }
             Some(_) => {}
             None => panic!("socket closed before MatchStart"),

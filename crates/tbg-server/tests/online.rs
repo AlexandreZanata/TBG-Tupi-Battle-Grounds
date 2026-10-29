@@ -991,3 +991,110 @@ async fn challenge_invite_rate_limit() {
         })
     );
 }
+
+#[tokio::test]
+async fn challenge_freezes_arcanas_through_reconnect_and_rematch() {
+    // BR-AR05 + BR-R08/R09: frozen presets survive reconnect and rematch;
+    // the rematch runs a new server seed without joining a public queue.
+    use tbg_core::protocol::ArcanaRejection;
+    use tbg_core::ArcanaPreset;
+
+    let (replay_tx, mut replays) = tokio::sync::mpsc::unbounded_channel();
+    let url = server_with(Config {
+        tick_ms: 5,
+        max_per_ip: 1_000,
+        replays: Some(replay_tx),
+        ..Config::default()
+    })
+    .await;
+    let (mut owner, mut guest) = (connect(&url).await, connect(&url).await);
+    hello(&mut owner).await;
+    let guest_token = hello_token(&mut guest).await;
+    let presets = [
+        ArcanaPreset::complete([2, 2, 2, 0, 0, 0]).unwrap(),
+        ArcanaPreset::complete([0, 0, 0, 2, 2, 2]).unwrap(),
+    ];
+    for (ws, preset) in [(&mut owner, presets[0]), (&mut guest, presets[1])] {
+        send(
+            ws,
+            &ClientMsg::SetArcanas {
+                ranks: preset.ranks,
+            },
+        )
+        .await;
+        assert_eq!(recv(ws).await, Some(ServerMsg::ArcanasSelected { preset }));
+    }
+    let invite = create_challenge(&mut owner).await;
+    send(
+        &mut owner,
+        &ClientMsg::SetArcanas {
+            ranks: ArcanaPreset::DEFAULT.ranks,
+        },
+    )
+    .await;
+    assert_eq!(
+        recv(&mut owner).await,
+        Some(ServerMsg::ArcanasRejected {
+            reason: ArcanaRejection::NotIdle
+        })
+    );
+    send(&mut guest, &ClientMsg::JoinChallenge { token: invite }).await;
+    for ws in [&mut owner, &mut guest] {
+        assert_challenge_presets(ws, presets).await;
+    }
+    send(
+        &mut guest,
+        &ClientMsg::SetArcanas {
+            ranks: ArcanaPreset::DEFAULT.ranks,
+        },
+    )
+    .await;
+    loop {
+        match recv(&mut guest).await {
+            Some(ServerMsg::ArcanasRejected { reason }) => {
+                assert_eq!(reason, ArcanaRejection::NotIdle);
+                break;
+            }
+            Some(_) => {}
+            None => panic!("socket closed before ArcanasRejected"),
+        }
+    }
+    drop(guest);
+    let mut guest = connect(&url).await;
+    hello_resume(&mut guest, guest_token).await;
+    assert_challenge_presets(&mut guest, presets).await;
+    end_by_surrender(&mut owner, &mut guest).await;
+    rematch_open(&mut owner).await;
+    rematch_open(&mut guest).await;
+    send(&mut owner, &ClientMsg::RequestRematch).await;
+    send(&mut guest, &ClientMsg::RequestRematch).await;
+    for ws in [&mut owner, &mut guest] {
+        assert_challenge_presets(ws, presets).await;
+    }
+    end_by_surrender(&mut guest, &mut owner).await;
+    let first = tokio::time::timeout(Duration::from_secs(2), replays.recv())
+        .await
+        .unwrap()
+        .unwrap();
+    let second = tokio::time::timeout(Duration::from_secs(2), replays.recv())
+        .await
+        .unwrap()
+        .unwrap();
+    assert_ne!(first.seed, second.seed, "BR-R09: a fresh server seed");
+    assert_eq!(first.arcanas, presets);
+    assert_eq!(second.arcanas, presets);
+}
+
+async fn assert_challenge_presets(ws: &mut Ws, expected: [tbg_core::ArcanaPreset; 2]) {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::MatchStart { mode, arcanas, .. }) => {
+                assert_eq!(mode, MatchMode::Challenge);
+                assert_eq!(arcanas, expected, "BR-AR05: frozen presets in seat order");
+                return;
+            }
+            Some(_) => {}
+            None => panic!("socket closed before MatchStart"),
+        }
+    }
+}

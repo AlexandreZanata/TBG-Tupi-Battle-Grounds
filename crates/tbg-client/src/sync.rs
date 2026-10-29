@@ -33,15 +33,17 @@ pub struct MatchInfo {
     /// P12: ranked matches show a badge and the opponent's rating.
     pub ranked: bool,
     pub opponent_rating: Option<u16>,
-    /// P39: the result screen offers a rematch only for a Challenge match.
-    pub challenge: bool,
     /// D-40: both frozen Arcana presets, indexed by `Seat::index()`.
     pub arcanas: [tbg_core::ArcanaPreset; 2],
+    /// P39: the result screen offers a rematch only for a Challenge match.
+    pub challenge: bool,
 }
 
 /// P39: the result-screen rematch offer and its request state.
 #[derive(Resource, Default)]
 pub struct RematchInfo {
+    /// Ignore offers already in flight when the player explicitly leaves.
+    pub dismissed: bool,
     pub open: bool,
     pub you_requested: bool,
     pub opponent_requested: bool,

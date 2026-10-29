@@ -147,11 +147,15 @@ tables are the one allowed exception.
   (`ErrorCode::SessionTakenOver`), v6 (`Surrender`, routed like an
   intention with the connection's seat → `MatchCmd::Surrender` →
   `MatchState::forfeit`, idempotent; `MatchStart` gains `you_name` and
-  `you_rating` so the HUD names both HP bars), v7 (open army: five offers,
-  no slot fields), v8 (Arcanas: `SetArcanas` → `ArcanasSelected |
-  ArcanasRejected`, both presets in `MatchStart`), and v9 (P39 Quick
-  Challenge: `CreateChallenge | JoinChallenge | RequestRematch` → five
-  challenge/rematch replies, appended after the v8 Arcana messages).
+  `you_rating` so the HUD names both HP bars), v7 (five Shop offers),
+  v8 (D-40: `SetArcanas` → `ArcanasSelected` / `ArcanasRejected`, both
+  frozen presets in `MatchStart`), and v9 (P39: `CreateChallenge` /
+  `JoinChallenge{token}` / `RequestRematch` → `ChallengeWaiting{token}` /
+  `ChallengeUnavailable` / `RematchOpen{opponent}` /
+  `RematchState{you_requested, opponent_requested}` / `RematchClosed{declined}`).
+  P39 appends after the Arcana variants, keeping every existing index and
+  all `MatchStart` fields; `MatchMode::Challenge` is appended after Ranked.
+  Peers older than v9 are rejected at the handshake.
   Intentions carry no seat: the server derives the seat from the connection.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
@@ -185,10 +189,26 @@ tables are the one allowed exception.
 - **Matchmaking:** quick match is a FIFO queue; private rooms use a
   5-character code (unambiguous alphabet, 10-minute expiry), shared as a
   link `?room=CODE`. Bot practice runs locally in the browser.
+- **Quick Challenge (P39, BR-R08):** `?challenge=<32 hex>` consumes an
+  independent 128-bit OS-random invitation, single-use with a 10-minute
+  TTL. It pairs the owner and exactly one different session directly,
+  through the same `pair` and match task, with no queue or Rating change.
+  Creating/joining freezes Arcanas like queue/room entry (BR-AR05).
+  An owner reload preserves the invite within the reconnect window; a
+  guest cannot consume it while the owner is disconnected. Explicit
+  Cancel removes it. Private rooms keep their code and existing behavior.
+- **Rematch (P39, BR-R09):** Challenge results open a 120-second in-memory
+  ticket for the same sessions. Both must request and be connected before
+  expiry; pairing uses a fresh seed and keeps casual rules, no queue and
+  no Rating change. Disconnect preserves the offer for reload; Menu/Cancel
+  or a new match action declines it. Invites and tickets are bounded by
+  the existing 10-second cleanup, with lazy expiry on joins/requests/resume.
+  No additional permanent task or timer is needed.
 - **Lifecycle:** paired → `MatchStart` → countdown → running → overtime →
   `MatchEnd` → both sessions return to the lobby. Disconnected seats stay
   in the running match for 30 s; reconnecting with the token resumes with
-  a full view; otherwise the seat forfeits (BR-M03).
+  a full view; otherwise the seat forfeits (BR-M03). A seat already
+  detached at pairing starts the same reconnect timer.
 - **Concurrency:** one task per connection, one lobby task, one task per
   match; they talk through `tokio::sync::mpsc`. No locks on game state.
 - **Limits:** handshake within 5 s; inbound frame ≤ 1 KiB; token bucket
@@ -197,7 +217,9 @@ tables are the one allowed exception.
   binary, ping, or pong — resets the 15 s idle timer, so hidden tabs stay
   connected); account endpoints add per-IP fixed windows (P11: 3 registers
   per hour, 10 logins per minute, tuned by `TBG_REGISTER_PER_IP_HOUR` /
-  `TBG_LOGIN_PER_IP_MIN`); global connection cap from config.
+  `TBG_LOGIN_PER_IP_MIN`); Challenge joins add a separate sliding log
+  (30 attempts per IP per minute, shared-NAT players allowed); global
+  connection cap from config.
 - **Latency measurement:** the server sends `Ping{id}` every second,
   computes RTT from `Pong{id}`, records it, and returns `NetStats{rtt_ms}`
   for the client overlay. The client also measures view inter-arrival

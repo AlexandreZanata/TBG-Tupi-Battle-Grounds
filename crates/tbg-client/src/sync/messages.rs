@@ -21,6 +21,8 @@ use crate::GameState;
 /// What the queue screen shows.
 #[derive(Resource, Default)]
 pub struct QueueInfo {
+    /// A late waiting reply must not reopen a screen after Cancel.
+    pub cancelled: bool,
     pub searching: bool,
     pub room: Option<RoomCode>,
     pub challenge: Option<InviteToken>,
@@ -67,8 +69,8 @@ pub(super) fn poll_link(
                     opponent,
                     ranked: mode == tbg_core::protocol::MatchMode::Ranked,
                     opponent_rating,
-                    challenge: mode == tbg_core::protocol::MatchMode::Challenge,
                     arcanas,
+                    challenge: mode == tbg_core::protocol::MatchMode::Challenge,
                     ..default()
                 };
                 // P12: a new match clears the previous rating count-up.
@@ -119,6 +121,7 @@ pub(super) fn poll_link(
                 ui.2.challenge = None;
                 ui.2.joining_challenge = false;
             }
+            ServerMsg::ChallengeWaiting { .. } if ui.2.cancelled => {}
             ServerMsg::ChallengeWaiting { token } => {
                 ui.2.challenge = Some(token);
                 ui.2.room = None;
@@ -132,6 +135,7 @@ pub(super) fn poll_link(
                 *ui.2 = QueueInfo::default();
                 next.set(GameState::Menu);
             }
+            ServerMsg::RematchOpen { .. } if rematch.dismissed => {}
             ServerMsg::RematchOpen { opponent } => {
                 rematch.open = true;
                 rematch.closed = None;

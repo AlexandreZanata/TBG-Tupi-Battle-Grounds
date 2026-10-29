@@ -188,3 +188,63 @@ fn update_rematch(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rematch_controls_follow_the_offer_without_query_conflicts() {
+        // Runs the actual Bevy queries: a B0001 regression fails on update.
+        let mut app = App::new();
+        app.insert_resource(MatchInfo {
+            challenge: true,
+            ..default()
+        })
+        .init_resource::<MatchStats>()
+        .init_resource::<RematchInfo>()
+        .init_resource::<Account>()
+        .insert_resource(Time::<()>::default())
+        .add_systems(Startup, spawn)
+        .add_systems(Update, (count_rating, hide_for_challenge, update_rematch));
+        app.update();
+        let mut buttons = app
+            .world_mut()
+            .query_filtered::<&Node, With<RematchButton>>();
+        assert_eq!(buttons.single(app.world()).unwrap().display, Display::None);
+        {
+            let mut offer = app.world_mut().resource_mut::<RematchInfo>();
+            offer.open = true;
+            offer.opponent_requested = true;
+        }
+        app.update();
+        assert_eq!(buttons.single(app.world()).unwrap().display, Display::Flex);
+        let mut texts = app.world_mut().query::<&Text>();
+        assert!(texts.iter(app.world()).any(|t| t.0 == "Accept rematch"));
+        app.world_mut().resource_mut::<RematchInfo>().you_requested = true;
+        app.update();
+        assert_eq!(buttons.single(app.world()).unwrap().display, Display::None);
+        assert!(texts
+            .iter(app.world())
+            .any(|t| t.0 == "Starting rematch..."));
+        {
+            let mut offer = app.world_mut().resource_mut::<RematchInfo>();
+            offer.open = false;
+            offer.closed = Some(true);
+        }
+        app.update();
+        assert!(texts
+            .iter(app.world())
+            .any(|t| t.0 == "Opponent declined the rematch"));
+        app.world_mut().resource_mut::<MatchInfo>().challenge = false;
+        app.update();
+        let mut normal = app
+            .world_mut()
+            .query_filtered::<&Node, With<HideForChallenge>>();
+        assert!(normal.iter(app.world()).all(|n| n.display == Display::Flex));
+        let mut labels = app
+            .world_mut()
+            .query_filtered::<&Node, With<RematchLabel>>();
+        assert_eq!(labels.single(app.world()).unwrap().display, Display::None);
+    }
+}

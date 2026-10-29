@@ -101,6 +101,18 @@ impl Lobby {
         else {
             return;
         };
+        if self.rematches[i]
+            .expires
+            .is_some_and(|e| Instant::now() >= e)
+            || self.rematches[i]
+                .players
+                .iter()
+                .any(|p| !self.sessions.contains_key(p))
+        {
+            let ticket = self.rematches.remove(i);
+            self.expire_ticket(ticket);
+            return;
+        }
         let ticket = &self.rematches[i];
         let seat = usize::from(ticket.players[1] == token);
         let other = ticket.players[1 - seat];

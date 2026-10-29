@@ -47,7 +47,10 @@ impl Lobby {
         let Some(s) = self.session(&token) else {
             return;
         };
-        if s.account.as_ref().is_some_and(|(id, _)| *id == account) {
+        // A late database reply cannot change an already frozen selection.
+        if matches!(s.state, SessionState::Idle)
+            && s.account.as_ref().is_some_and(|(id, _)| *id == account)
+        {
             s.arcanas = preset;
             send(
                 &s.conn,

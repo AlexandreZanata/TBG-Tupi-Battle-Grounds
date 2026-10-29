@@ -1,13 +1,18 @@
 # P39 — Quick Challenge by link and rematch
 
 **Depends on:** the current guest-session, reconnect, and result-screen code
-(P4, P9, P14) and protocol v7 at the planning HEAD. P14 owner sign-off is
+(P4, P9, P14) and protocol v8 with active Arcanas (D-40) at the integration base. P14 owner sign-off is
 not a gate for this lobby feature. Independent of the P16-F strategic
 expansion and the visual suite. Do not run it concurrently with P16-F4,
 P16-F7, P16-A, or P16-B: they edit the same lobby/menu files.
-**Branch:** `phase/p39-quick-challenge`.
-**Status:** planned; this file authorizes no production code by itself.
+**Branch:** `phase/p39-quick-challenge-pr`.
+**Status:** implemented and validated; PR review and owner device/playtest checks pending.
 **Difficulty:** medium. One lobby feature, one protocol bump, three screens.
+
+**Integration follow-up (PR #2):** main already received the original P39
+implementation with P16-D through PR #1 (`077abe7`). PR #2 now contains
+review fixes and browser evidence; protocol v9 and all existing wire
+contracts remain unchanged from main.
 
 ## Goal
 
@@ -90,12 +95,12 @@ pub type InviteToken = [u8; 16];
 
 pub enum MatchMode { Casual, Ranked, Challenge } // Challenge = index 2
 
-// ClientMsg, appended after Surrender
+// ClientMsg, appended after SetArcanas (index 13)
 CreateChallenge,
 JoinChallenge { token: InviteToken },
 RequestRematch,
 
-// ServerMsg, appended after Leaderboard
+// ServerMsg, appended after ArcanasRejected (index 19)
 ChallengeWaiting { token: InviteToken },
 ChallengeUnavailable,
 RematchOpen { opponent: String },
@@ -103,9 +108,9 @@ RematchState { you_requested: bool, opponent_requested: bool },
 RematchClosed { declined: bool },
 ```
 
-Wire indices: `CreateChallenge` 13, `JoinChallenge` 14, `RequestRematch` 15;
-`ChallengeWaiting` 18, `ChallengeUnavailable` 19, `RematchOpen` 20,
-`RematchState` 21, `RematchClosed` 22. `MatchStart` keeps its fields;
+Wire indices: `CreateChallenge` 14, `JoinChallenge` 15, `RequestRematch` 16;
+`ChallengeWaiting` 20, `ChallengeUnavailable` 21, `RematchOpen` 22,
+`RematchState` 23, `RematchClosed` 24. `MatchStart` keeps its fields, including both frozen Arcana presets;
 `mode: MatchMode::Challenge` identifies a challenge match to the client.
 `Challenge` is a casual match on the wire, never ranked.
 
@@ -298,13 +303,13 @@ Rules: ARCHITECTURE §5 append-only wire; D-39; no seat in client messages.
 
 - Add `InviteToken`, the three `ClientMsg` variants, the five `ServerMsg`
   variants, and `MatchMode::Challenge` exactly as above, appended at the end.
-- Bump `PROTOCOL_VERSION` to 9 and update the version-test message. Arcana v8 was merged first; the P39 variants are appended after the Arcana variants.
+- Bump `PROTOCOL_VERSION` to 9 and update the version-test message.
 - Extend the frozen variant-order tests with the new variants and their
   indices. Add exact-byte assertions for at least `JoinChallenge`,
   `ChallengeWaiting`, and `RematchClosed`.
 - **Check:** `cargo test -p tbg-core --test contract_protocol --test contract_protocol_server`.
 - **Done when:** all old indices are unchanged, the new indices are frozen,
-  and the version test names v9, Arcana v8, and P39.
+  and the version test names v9 and P39.
 
 ### 2. Server challenge lifecycle
 
@@ -425,8 +430,8 @@ the invite token is never a credential.
 - Add `config::parse_invite_token`, `config::invite_token_hex`,
   `config::challenge_link`, `config::share_text`, and
   `config::clear_url_param`. Reuse the existing hex token helpers where
-  possible. Add `web-sys` features `History` and `ShareData` (update the
-  dependency comment); no new crate.
+  possible. Add the `web-sys` `History` feature and a small `wasm-bindgen` browser
+  helper that catches share/clipboard Promise rejections; no new crate.
 - Parse `?challenge=` before `?room=`; suppress the probe when either is
   present; show the invalid-link toast for malformed tokens.
 - Handle `ChallengeWaiting`, `ChallengeUnavailable`, `RematchOpen`,
@@ -539,52 +544,226 @@ or weaken an existing assertion.
 
 ## Reviewer checklist
 
-- [ ] Existing `CreateRoom`/`JoinRoom`/`?room=` behavior and TTL unchanged.
-- [ ] Challenge token is 128-bit OS-random, single-use, independent of the
+- [x] Existing `CreateRoom`/`JoinRoom`/`?room=` behavior and TTL unchanged.
+- [x] Challenge token is 128-bit OS-random, single-use, independent of the
       session token, and never logged.
-- [ ] Only two distinct session tokens can occupy a challenge match; the
+- [x] Only two distinct session tokens can occupy a challenge match; the
       owner cannot join its own invite; a third guest cannot interfere.
-- [ ] No match task is spawned before the second session joins.
-- [ ] Challenge/rematch state is bounded and swept; no permanent task.
-- [ ] Rematch requires both requests, uses a fresh seed, is not ranked, and
+- [x] No match task is spawned before the second session joins.
+- [x] Challenge/rematch state is bounded and swept; no permanent task.
+- [x] Rematch requires both requests, uses a fresh seed, is not ranked, and
       never enters the public queue.
-- [ ] Reload during waiting/combat/result recovers the expected state;
+- [x] Reload during waiting/combat/result recovers the expected state;
       explicit Menu declines the rematch.
-- [ ] Same-IP players are not blocked by the invite limit.
-- [ ] `PROTOCOL_VERSION` is 9; old indices are unchanged; docs agree.
-- [ ] All verification commands above were actually run.
+- [x] Same-IP players are not blocked by the invite limit.
+- [x] `PROTOCOL_VERSION` is 9; old indices are unchanged; docs agree.
+- [x] All verification commands above were actually run.
 
 ## Phase report
 
-Executed 2026-10-29 on `phase/p39-quick-challenge`; merged into the
-combined P16-D/P39 review branch. The owner device/browser check is still
-open.
+- Date: 2026-10-29. Initial review implementation HEAD: `c239dee`, recorded
+  by `5569b11`. Branch: `phase/p39-quick-challenge-pr`, originally created
+  directly from `fb47717`. Original `phase/p39-quick-challenge` remains at
+  `22571c5`. The follow-up integrates main `077abe7` after PR #1 brought
+  the original P39 and P16-D into main. P16-D/P16-F are preserved as that
+  baseline; this PR changes none of their source, specs, or evidence.
+- Protocol: **v9**. P39 follows v8 Arcanas: client tags 14–16, server tags
+  20–24, Challenge mode tag 2. The existing Arcana tags and all `MatchStart`
+  fields/bytes stay intact. BR-AR05 explicitly includes Quick Challenge.
 
-- HEAD: `22571c5` (P39 implementation), merged as `c9859a3` with P16-D.
-- Protocol version: 9 (`PROTOCOL_VERSION`; v8 Arcana variants kept, then appended `CreateChallenge`,
-  `JoinChallenge`, `RequestRematch`, and the five server replies).
-- Commands and results:
-  - `cargo fmt --all -- --check` pass.
-  - `cargo clippy --workspace -- -D warnings` pass.
-  - `cargo test --workspace`: 168 passed, 0 failed, 1 ignored (C4b real
-    clock) on the combined branch after merging Arcana v8.
-  - `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown`
-    pass.
-  - `trunk build --release` in `crates/tbg-client/` pass.
-  - `cargo test -p tbg-server --test contract_challenge`: 2 passed.
-  - `cargo test -p tbg-server --test online`: 28 passed, including the 16
-    challenge/rematch cases in the phase table.
-- Automated tests: the immutable `tests/contract_challenge.rs` guards
-  BR-R08 (single-use, two distinct sessions, casual/no rating, no code or
-  login) and BR-R09 (both requests, fresh Challenge, never a public
-  queue). The lobby lifecycle tests cover expiry, bounded cleanup, and
-  rematch notification. Existing private-room, queue, reconnect, and
-  ranked tests still pass.
-- Manual acceptance: **pending owner**. Not run on a desktop + phone, and
-  no screenshots were captured in this session.
-- Performance/memory observation: no new dependency; invites and rematch
-  tickets are bounded vectors swept by the existing 10-second cleanup.
-  No load measurement was made.
-- Deviations: no manual device/browser run; the visual HUD/link/rematch
-  layout was not inspected in a browser.
-- Blocked: none.
+### Commands and real results
+
+All commands ran on the new branch. WebSocket tests used loopback sockets.
+
+```text
+cargo fmt --all -- --check
+  exit 0
+cargo clippy --workspace -- -D warnings
+  Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.99s
+cargo test --workspace
+  166 passed; 0 failed; 1 ignored (sum of the individual suite results)
+cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+  Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.73s
+trunk build --release  (crates/tbg-client; RUST_LOG=info, persistent terminal)
+  Finished `release` profile [optimized] target(s) in 0.41s
+  2026-10-29T15:46:27.141208Z  INFO ✅ success
+  exit 0
+git diff --check
+  exit 0
+node scripts/check-p39-share.mjs
+  7 share/clipboard scenarios passed; no unhandled rejections
+```
+
+The full workspace run includes 29 online tests, 11 server unit tests,
+3 server production/FIFO contract tests, 2 BR-R08/BR-R09 contract tests,
+3 existing online Arcana tests, and 8 protocol contract tests. The client
+has 26 passing tests, re-run after the final URL wrapping change, along
+with WASM, fmt and clippy. The one existing ignored test is
+`c4b_realtime_server_match_equals_headless_replay`: a 1x match, explicitly
+reserved for balance phases/releases; the normal replay-equivalence test
+passed. No assertions were deleted or weakened.
+
+Additional regression evidence:
+
+- `match_task::tests::challenge_initial_detached_forfeits` starts seat A
+  detached, observes the full one-second test reconnect window, then gets
+  `MatchEnd { winner: B, reason: Forfeit }` and match cleanup.
+- `challenge_freezes_arcanas_through_reconnect_and_rematch` checks two
+  distinct presets, rejection of waiting/in-match edits, guest reconnect,
+  both rematch requests, unchanged presets and different replay seeds.
+- Lobby tests cover lazy rematch expiry on resume, drain protection, a
+  delayed account preset arriving after challenge freeze, expired invite
+  cleanup (including 100 records), ticket cleanup and takeover tokens.
+- Client tests run the real waiting/result Bevy systems, including all
+  rematch states, so the conflicting-query B0001 regression fails directly.
+  Transport tests ensure reconnect never recreates or reconsumes an invite.
+
+### Browser observations
+
+Used the Codex in-app Chromium browser, two independent tabs, desktop
+1440×900 and 1280×720, and a **390×844 viewport**. This is viewport testing,
+not a physical Android device. A local authoritative server ran at 50 ms
+on `127.0.0.1:8081`, two workers, a disposable SQLite file in `/tmp`, and
+`?lag=100` on both tabs. The existing service on port 8080 was left alone.
+
+Observed working:
+
+- Desktop and Bevy menus expose Challenge and Private Room separately.
+- Create/copy invite; Share falls back to copy in this browser; reload the
+  host waiting screen and keep the same link; join automatically in the
+  other tab with a different guest name/seat.
+- After `MatchStart`, only `challenge` disappears from the guest URL;
+  `server`, `lag` and `#guest-p39` remain. Reload the guest during combat
+  and resume the same names, seat and running clock.
+- Both clients finish the match by Surrender. A single rematch request
+  shows Waiting/Accept without starting a match. Host result reload shows
+  MATCH OVER and the restored request, with no stale duration/summary.
+  Accept starts a fresh countdown between the same guests. Both clients
+  finish that rematch; Menu on one side delivers Opponent declined on the
+  other, hides the request button, and returns the leaver to the menu.
+- Cancel leaves the public queue; the other client stays searching rather
+  than pairing with the canceled client. Private Room still opens its
+  create/join dialog, creates a code/link, and Cancel removes the room.
+  Opening the canceled code returns to the menu. The existing real-socket
+  private-room pairing/FIFO/ranked tests also pass.
+- Cancel a challenge, then open its copied link in the other client:
+  Joining returns to the menu rather than starting a match. Copy was also
+  verified on the phone viewport. Final waiting URLs wrap inside the panel
+  on both desktop and phone, including a long `server` override.
+- No browser console errors in either tab during the completed match and
+  rematch; no B0001 panic. Ranked remains locked for guests; authenticated
+  ranked regression was tested automatically, not played manually.
+
+Screenshots (actual browser captures):
+
+- [Desktop menu](../media/p39/desktop-menu.jpg),
+  [waiting](../media/p39/desktop-waiting.jpg),
+  [match](../media/p39/desktop-match.jpg),
+  [result](../media/p39/desktop-result.jpg).
+- [Phone menu](../media/p39/phone-menu.jpg),
+  [waiting with wrapped URL](../media/p39/phone-waiting.jpg),
+  [match](../media/p39/phone-match.jpg),
+  [result](../media/p39/phone-result.jpg),
+  [one request](../media/p39/phone-rematch-wait.jpg),
+  [result reload](../media/p39/phone-rematch-reload.jpg),
+  [decline](../media/p39/phone-rematch-declined.jpg).
+
+### Deviations and limits
+
+- Initially ported the three original P39 commits onto `fb47717`, resolving
+  Arcanas/D-40 without the old P16-F ancestry. v9 replaced the planning
+  branch's colliding v8. After PR #1 landed, integrated `077abe7` without
+  rewriting history. Protocol declarations and frozen-wire tests now match
+  main exactly, including its additional Arcana byte assertions. No balance
+  value or P16-D/P16-F file differs from the new base.
+- The initial-detach proof is a deterministic match-task unit test rather
+  than a nondeterministic WebSocket pairing race, as allowed by the
+  handoff. It exercises the actual spawn/forfeit path.
+- `contract_challenge.rs` only gains the mandatory Arcana field binding
+  and an extra frozen-preset assertion; all original BR-R08/R09 assertions
+  remain. This integration was committed with the BR-AR05 canon update.
+- Challenge and rematch code have separate lobby modules. Reconnect now
+  preserves acknowledged invite/result modes; resume enforces expiry and
+  draining; late database replies cannot change frozen selections; late
+  waiting/offer messages cannot reopen an explicitly dismissed screen.
+- Sharing uses the existing wasm-bindgen dependency for feature detection,
+  AbortError handling and clipboard fallback. Native share-sheet success,
+  physical Android, installed PWA and owner look/fun sign-off remain
+  unverified. This client has no installable PWA manifest/service worker;
+  adding that is outside P39. No claim of PWA/device acceptance is made.
+- No dedicated performance/heap benchmark was run. Final release WASM:
+  **24,712,473 bytes**, uncompressed. State uses the existing bounded
+  session lifetime and cleanup sweep; the 100-expired-invite test passes.
+
+### Execution interruptions
+
+> blocked (resolved): initial loopback tests failed in the sandbox with
+> `Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }`.
+> Running the same tests with local-socket permissions passed.
+
+> blocked (resolved): build sessions were interrupted with signal 15
+> (`exit 143`), including one after Trunk had printed `✅ success`.
+> Rust compilation had succeeded; the suspected cause was execution-session
+> lifetime, not confirmed. Stopped the interrupted invocation, inspected
+> logs/processes, and changed to a persistent terminal with full logs.
+> The final invocation printed `✅ success` and returned **exit 0**; the
+> final package was reloaded and the wrapped link verified in the browser.
+
+No implementation blocker remains. PR review and the physical-device/PWA
+and subjective owner acceptance checks remain pending; no merge or public
+deployment is included in this work.
+
+
+### Follow-up after PR #1 merged into main
+
+The checks on `5569b11` both passed (GitHub Actions runs `40906366558`
+and `40906267887`; no review comments or unresolved review threads). The
+subsequent main merge `077abe7` made PR #2 conflict because it included the
+original P39 separately. Integrated that main into this branch with a
+merge commit, retaining the reviewed reconnect/expiry/Arcana fixes and
+all contract assertions. Auto-merge duplicates of `MatchInfo.challenge`,
+initial detach initialization, and decision D-39 were removed before checks.
+The P16-D engine, its contract tests/evidence, and the P16-F plans match
+`077abe7` exactly; they are not additional changes in PR #2.
+
+Re-ran on the integrated tree:
+
+```text
+cargo fmt --all -- --check
+  exit 0
+cargo clippy --workspace -- -D warnings
+  Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.33s
+cargo test --workspace
+  178 passed; 0 failed; 1 ignored (sum of the individual suite results)
+cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+  Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.03s
+node scripts/check-p39-share.mjs
+  7 share/clipboard scenarios passed; no unhandled rejections
+```
+
+```text
+trunk build --release  (crates/tbg-client; RUST_LOG=info, persistent terminal)
+  Finished `release` profile [optimized] target(s) in 1m 09s
+  2026-10-29T16:08:01.583042Z  INFO ✅ success
+  exit 0
+git diff --check
+  exit 0
+```
+
+Rechecked the integrated package in two new browser sessions against the
+local 50 ms authoritative server, with `?lag=100`. Created an invite and
+reloaded the waiting host: the same displayed invite returned. The second
+session joined by that displayed link; `challenge` disappeared while
+`server`, `lag` and the fragment remained. Guest combat reload resumed the
+same opponents and clock. Both players received the result after Surrender.
+One request showed Accept on the other side; host result reload retained
+the offer, Accept started a fresh countdown, and both clients finished the
+rematch. No console errors occurred. Captured the refreshed desktop result,
+390×844 result/accept view and rematch view in the existing screenshot files.
+Clipboard/share success remains covered by the initial browser run and the
+seven Promise scenarios; it was not re-established in this follow-up run.
+Physical Android, installed PWA and subjective owner sign-off remain open.
+
+The original two successful CI runs belong to `5569b11`; CI must run again
+on this follow-up merge commit. PR #2 remains open, with no PR merge or
+public deployment authorized by this continuation.

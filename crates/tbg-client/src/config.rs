@@ -171,28 +171,60 @@ pub fn challenge_link(token: &[u8; 16]) -> String {
     if let Some(loc) = web_sys::window().map(|w| w.location()) {
         let origin = loc.origin().unwrap_or_default();
         let path = loc.pathname().unwrap_or_default();
-        return format!("{origin}{path}?challenge={hex}");
+        let server = url_param("server").map_or_else(String::new, |s| format!("&server={s}"));
+        return format!("{origin}{path}?challenge={hex}{server}");
     }
     format!("?challenge={hex}")
+}
+
+// Browser support varies, and dismissing the share sheet rejects its Promise.
+// Keep both that rejection and clipboard denial inside the browser helper.
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen::prelude::wasm_bindgen(inline_js = r#"
+export function tbgCopyText(text) {
+    if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
+}
+export function tbgShareText(title, url) {
+    const data = { title, text: title, url };
+    try {
+        if (typeof navigator.share === 'function' &&
+            (typeof navigator.canShare !== 'function' || navigator.canShare(data))) {
+            navigator.share(data).catch(error => {
+                if (error.name !== 'AbortError') tbgCopyText(url);
+            });
+            return;
+        }
+    } catch (_) { /* Unsupported data falls back to the clipboard. */ }
+    tbgCopyText(url);
+}
+"#)]
+extern "C" {
+    #[wasm_bindgen::prelude::wasm_bindgen(js_name = tbgShareText)]
+    fn browser_share_text(title: &str, url: &str);
+    #[wasm_bindgen::prelude::wasm_bindgen(js_name = tbgCopyText)]
+    fn browser_copy_text(text: &str);
 }
 
 /// P39: native share sheet when available; copying the link otherwise.
 pub fn share_text(title: &str, url: &str) {
     #[cfg(target_arch = "wasm32")]
-    if let Some(window) = web_sys::window() {
-        let navigator = window.navigator();
-        let data = web_sys::ShareData::new();
-        data.set_title(title);
-        data.set_text(title);
-        data.set_url(url);
-        if web_sys::Navigator::can_share_with_data(&navigator, &data) {
-            let _ = web_sys::Navigator::share_with_data(&navigator, &data);
-            return;
-        }
-    }
+    browser_share_text(title, url);
     #[cfg(not(target_arch = "wasm32"))]
-    let _ = title;
-    copy_text(url);
+    let _ = (title, url);
+}
+
+#[cfg(any(target_arch = "wasm32", test))]
+fn without_url_param(search: &str, name: &str) -> String {
+    let rest: Vec<&str> = search
+        .trim_start_matches('?')
+        .split('&')
+        .filter(|pair| !pair.is_empty() && pair.split('=').next() != Some(name))
+        .collect();
+    if rest.is_empty() {
+        String::new()
+    } else {
+        format!("?{}", rest.join("&"))
+    }
 }
 
 /// P39: remove one query parameter without disturbing the others.
@@ -201,22 +233,14 @@ pub fn clear_url_param(name: &str) {
     if let Some(window) = web_sys::window() {
         let loc = window.location();
         let search = loc.search().unwrap_or_default();
-        let rest: Vec<&str> = search
-            .trim_start_matches('?')
-            .split('&')
-            .filter(|pair| !pair.is_empty() && pair.split('=').next() != Some(name))
-            .collect();
-        let query = if rest.is_empty() {
-            String::new()
-        } else {
-            format!("?{}", rest.join("&"))
-        };
+        let query = without_url_param(&search, name);
         if let Ok(history) = window.history() {
             let url = format!(
-                "{}{}{}",
+                "{}{}{}{}",
                 loc.origin().unwrap_or_default(),
                 loc.pathname().unwrap_or_default(),
-                query
+                query,
+                loc.hash().unwrap_or_default()
             );
             let _ = history.replace_state_with_url(&wasm_bindgen::JsValue::NULL, "", Some(&url));
         }
@@ -237,9 +261,7 @@ pub fn open_url(path: &str) {
 
 pub fn copy_text(text: &str) {
     #[cfg(target_arch = "wasm32")]
-    if let Some(w) = web_sys::window() {
-        let _ = w.navigator().clipboard().write_text(text);
-    }
+    browser_copy_text(text);
     #[cfg(not(target_arch = "wasm32"))]
     let _ = text;
 }
@@ -302,38 +324,6 @@ pub fn arena_preview() -> bool {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn invite_token_hex_round_trip() {
-        let token = [0xAB; 16];
-        assert_eq!(invite_token_hex(&token), "ab".repeat(16));
-        assert_eq!(parse_invite_token(&invite_token_hex(&token)), Some(token));
-    }
-
-    #[test]
-    fn invite_token_accepts_uppercase_hex() {
-        assert_eq!(parse_invite_token(&"AB".repeat(16)), Some([0xAB; 16]));
-    }
-
-    #[test]
-    fn invite_token_rejects_bad_length_and_chars() {
-        assert_eq!(parse_invite_token("ab"), None);
-        assert_eq!(parse_invite_token(&"zz".repeat(16)), None);
-        assert_eq!(parse_invite_token(&"a".repeat(31)), None);
-    }
-
-    #[test]
-    fn native_challenge_link_contains_the_token() {
-        assert_eq!(
-            challenge_link(&[0x0F; 16]),
-            format!("?challenge={}", "0f".repeat(16))
-        );
-    }
-}
-
-#[cfg(test)]
 mod arcana_tests {
     use super::parse_arcanas;
     use tbg_core::ArcanaPreset;
@@ -358,5 +348,53 @@ mod arcana_tests {
         }
         assert_eq!(parse_arcanas(&"9".repeat(2000)), None);
         assert!(ArcanaPreset::complete([2, 0, 2, 0, 2, 0]).is_ok());
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn invite_token_hex_round_trip() {
+        let token = [0xAB; 16];
+        assert_eq!(invite_token_hex(&token), "ab".repeat(16));
+        assert_eq!(parse_invite_token(&invite_token_hex(&token)), Some(token));
+    }
+
+    #[test]
+    fn invite_token_accepts_uppercase_hex() {
+        assert_eq!(parse_invite_token(&"AB".repeat(16)), Some([0xAB; 16]));
+    }
+
+    #[test]
+    fn invite_token_rejects_bad_length_and_chars() {
+        assert_eq!(parse_invite_token("ab"), None);
+        assert_eq!(parse_invite_token(&"zz".repeat(16)), None);
+        assert_eq!(parse_invite_token(&"a".repeat(31)), None);
+    }
+
+    #[test]
+    fn removing_a_consumed_invite_preserves_server_and_lag() {
+        assert_eq!(
+            without_url_param(
+                "?server=ws://localhost:8080/ws&challenge=abc&lag=200",
+                "challenge"
+            ),
+            "?server=ws://localhost:8080/ws&lag=200"
+        );
+        assert_eq!(without_url_param("?challenge=abc", "challenge"), "");
+        assert_eq!(
+            without_url_param("?challenge=abc&challenge=def&room=ABCDE", "challenge"),
+            "?room=ABCDE"
+        );
+    }
+
+    #[test]
+    fn native_challenge_link_contains_the_token() {
+        assert_eq!(
+            challenge_link(&[0x0F; 16]),
+            format!("?challenge={}", "0f".repeat(16))
+        );
     }
 }

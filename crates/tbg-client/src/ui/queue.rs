@@ -2,6 +2,7 @@
 //! After 30 s of searching, practice is offered.
 
 use bevy::prelude::*;
+use bevy::text::LineBreak;
 
 use super::{button, label, screen, UiAction, PANEL};
 use crate::config;
@@ -48,6 +49,7 @@ fn spawn(mut commands: Commands, time: Res<Time>) {
                 (label("Connecting...", 22.0), StatusText),
                 (
                     label("", 12.0),
+                    TextLayout::new(Justify::Left, LineBreak::AnyCharacter),
                     Node {
                         max_width: px(360.0),
                         ..default()
@@ -141,5 +143,38 @@ fn update(
         } else {
             Display::None
         };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn challenge_waiting_queries_and_copy_share_controls_work_together() {
+        let mut app = App::new();
+        app.insert_resource(Time::<()>::default())
+            .insert_resource(QueueInfo {
+                challenge: Some([7; 16]),
+                ..default()
+            })
+            .add_systems(Startup, spawn)
+            .add_systems(Update, update);
+        app.update();
+        let mut texts = app.world_mut().query::<&Text>();
+        assert!(texts
+            .iter(app.world())
+            .any(|t| t.0.contains("Waiting for your friend")));
+        let mut buttons = app.world_mut().query::<(&QueueButton, &Node)>();
+        for (kind, node) in buttons.iter(app.world()) {
+            assert_eq!(
+                node.display,
+                if matches!(kind, QueueButton::Practice) {
+                    Display::None
+                } else {
+                    Display::Flex
+                }
+            );
+        }
     }
 }

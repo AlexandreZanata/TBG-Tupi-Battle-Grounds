@@ -19,6 +19,8 @@ use crate::Config;
 
 mod command;
 mod report;
+#[cfg(test)]
+mod tests;
 mod views;
 use report::SeatStats;
 

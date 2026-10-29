@@ -328,7 +328,7 @@ Hatch limits, slow/root effects, and every structural constant.
 ## 9. Arcanas extra — Proposed values, active in every mode (D-40)
 
 The owner moved this extension ahead of P31 (D-40, 2026-10-29): Arcanas
-are live in Practice, Casual, Ranked, and private rooms with the values
+are live in Practice, Casual, Ranked, private rooms, and Quick Challenge with the values
 below, which stay **Proposed** until playtests. Summons (Beetlings)
 receive no Arcana bonus, like Synergy (BR-U08). Evidence so far: every
 one of the 141 complete presets against the default, bot policy, 512
@@ -342,7 +342,7 @@ P34 cross-policy matrix and the P38 human gates remain open.
 | BR-AR02 | A complete preset spends exactly 6 points; each of 6 nodes has rank 0–2, costs 1 point per rank, and has no prerequisites; each two-node tree therefore holds at most 4 points; there are no supremes or unlock levels |
 | BR-AR03 | Eligibility uses the unit's base `Archetype`, remains unchanged by `Evolution`, and grants no new behavior or missing attribute |
 | BR-AR04 | Arcana percentages add to existing percentages on the same base attribute, use wide integer intermediates, and truncate once; preserve current HP percentage when max HP changes |
-| BR-AR05 | Preset editing is allowed only while idle; joining either queue or creating/joining a room freezes selection until cancellation or match end; reconnect and account takeover keep the match's original preset |
+| BR-AR05 | Preset editing is allowed only while idle; joining either queue or creating/joining a room or Quick Challenge freezes selection until cancellation or match end; reconnect and account takeover keep the match's original preset |
 | BR-AR06 | The server validates ranks, budget, schema, ruleset, and session state; clients send selections, never final bonuses or a claimed seat |
 | BR-AR07 | Record both applied presets, their schema, and the RulesetVersion with every result; later tuning never rewrites historical outcomes or Rating |
 | BR-AR08 | Provide one active preset per account, recovered across devices, and local storage for guests; a complete default requires no setup; account ownership never changes available power |
