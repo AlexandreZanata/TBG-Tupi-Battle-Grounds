@@ -1,0 +1,73 @@
+seat A score, bot vs bot                         50.3% [49.8% – 50.8%]        target 48.5% – 51.5%      PASS
+median duration (s)                              118 s                        target 150 s – 240 s      FAIL
+ended by Stronghold kill                         87.5% [87.1% – 87.9%]        target 60.0% – 100.0%     PASS
+ended by time                                    12.5% [12.1% – 12.9%]        target 0.0% – 30.0%       PASS
+draws                                             0.2% [0.2% – 0.3%]          target 0.0% – 2.0%        PASS
+faction-majority Humans score                    35.6% [35.0% – 36.2%]        target 45.0% – 55.0%      FAIL
+faction-majority Undead score                    48.8% [47.6% – 50.0%]        target 45.0% – 55.0%      PASS
+faction-majority Machines score                  84.8% [84.2% – 85.3%]        target 45.0% – 55.0%      FAIL
+faction-majority Plants score                    21.0% [20.1% – 21.9%]        target 45.0% – 55.0%      FAIL
+purchase share Shieldbearer                      17.0% [16.9% – 17.2%]        target 5.0% – 100.0%      PASS
+purchase share Archer                            12.1% [12.0% – 12.2%]        target 5.0% – 100.0%      PASS
+purchase share BoneBrute                         10.2% [10.1% – 10.4%]        target 5.0% – 100.0%      PASS
+purchase share Hexer                              8.1% [7.9% – 8.2%]          target 5.0% – 100.0%      PASS
+purchase share Sawbot                            12.0% [11.9% – 12.1%]        target 5.0% – 100.0%      PASS
+purchase share SiegeWalker                        8.4% [8.3% – 8.5%]          target 5.0% – 100.0%      PASS
+purchase share Bloomkeeper                       11.6% [11.5% – 11.7%]        target 5.0% – 100.0%      PASS
+purchase share Rootcaller                         5.7% [5.6% – 5.8%]          target 5.0% – 100.0%      PASS
+purchase share Nester                             5.8% [5.7% – 5.9%]          target 5.0% – 100.0%      PASS
+purchase share Rampart                            9.2% [9.0% – 9.3%]          target 5.0% – 100.0%      PASS
+comebacks (behind at 2:00, won)                   6.3% [5.8% – 6.8%]          target 20.0% – 100.0%     FAIL
+strongest strategic style (saver)                93.2%                        target 0.0% – 60.0%       FAIL
+heavy vs bot                                     61.8% [58.8% – 64.8%]        target 0.0% – 55.0%       FAIL
+cheap vs bot                                     39.2% [36.2% – 42.1%]        target 0.0% – 55.0%       PASS
+favor-shieldbearer vs bot (median ±10 pp)        42.4% [39.4% – 45.5%]        target 32.5% – 52.4%      PASS
+favor-archer vs bot (median ±10 pp)              64.8% [62.0% – 67.7%]        target 32.5% – 52.4%      FAIL
+favor-bonebrute vs bot (median ±10 pp)           53.3% [50.2% – 56.4%]        target 32.5% – 52.4%      FAIL
+favor-hexer vs bot (median ±10 pp)               38.6% [35.7% – 41.5%]        target 32.5% – 52.4%      PASS
+favor-sawbot vs bot (median ±10 pp)              30.8% [28.1% – 33.6%]        target 32.5% – 52.4%      FAIL
+favor-siegewalker vs bot (median ±10 pp)         65.2% [62.3% – 68.1%]        target 32.5% – 52.4%      FAIL
+favor-bloomkeeper vs bot (median ±10 pp)         37.9% [34.9% – 40.8%]        target 32.5% – 52.4%      PASS
+favor-rootcaller vs bot (median ±10 pp)          28.9% [26.2% – 31.7%]        target 32.5% – 52.4%      FAIL
+favor-nester vs bot (median ±10 pp)              42.2% [39.1% – 45.2%]        target 32.5% – 52.4%      PASS
+favor-rampart vs bot (median ±10 pp)             47.5% [44.5% – 50.6%]        target 32.5% – 52.4%      PASS
+duel base forms weak everywhere                      2                        target 0 – 0              FAIL
+duel base forms oppressive everywhere                3                        target 0 – 0              FAIL
+duel forms without a counter                         0                        target 0 – 0              PASS
+duel Evolutions never worth their Energy         70.0%                        target 0.0% – 25.0%       FAIL
+duel Evolution branches without a niche              1                        target 0 – 0              FAIL
+Nash support (policies ≥ 1 %)                        1                        target 3 – ∞              FAIL
+Nash largest weight                             100.0%                        target 0.0% – 50.0%       FAIL
+40 rows, 18 failing
+
+policy                    nash  vs-mix
+saver                    100.0%   50.0%
+bot                        0.0%    4.1%
+evolver                    0.0%    0.0%
+faction-humans             0.0%    4.3%
+faction-undead             0.0%    3.7%
+faction-machines           0.0%   28.8%
+faction-plants             0.0%    0.3%
+heavy                      0.0%    7.6%
+cheap                      0.0%    1.6%
+favor-shieldbearer         0.0%    3.3%
+favor-archer               0.0%    3.9%
+favor-bonebrute            0.0%    4.6%
+favor-hexer                0.0%    1.9%
+favor-sawbot               0.0%    1.1%
+favor-siegewalker          0.0%    8.5%
+favor-bloomkeeper          0.0%    2.5%
+favor-rootcaller           0.0%    1.2%
+favor-nester               0.0%    2.5%
+favor-rampart              0.0%    3.3%
+
+git_head: fb98e75
+ruleset_fingerprint: f941b7b437f16f7e
+applied: canon
+seeds: 1000000..1001000 (1000 pairs)
+threads: 16
+reaction_views: 5
+wall_s: 140.69
+games: 344000
+games_per_s: 2445
+game_seconds_per_wall_second: 308468

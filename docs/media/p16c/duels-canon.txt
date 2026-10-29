@@ -1,0 +1,56 @@
+weak everywhere: Sawbot, Rootcaller
+oppressive everywhere: BoneBrute, SiegeWalker, Nester
+without a counter: 
+Evolutions never worth their Energy: Shieldbearer/Bulwark, Shieldbearer/Fortress, Shieldbearer/Vanguard, Archer/Volley, BoneBrute/Ossified, BoneBrute/BoneWall, BoneBrute/Butcher, Hexer/Withering, Hexer/Doom, Sawbot/Overclock, Sawbot/Shredder, Sawbot/Plating, SiegeWalker/Shrapnel, SiegeWalker/Concussion, Bloomkeeper/Blossom, Bloomkeeper/Grove, Bloomkeeper/Bramble, Bloomkeeper/Thornwarden, Rootcaller/DeepRoots, Rootcaller/Strangle, Rootcaller/Overgrowth, Nester/Brood, Nester/Hive, Nester/Venom, Nester/Blight, Rampart/Bastion, Rampart/Citadel, Rampart/Spiked
+branches without a niche: Hexer tier 1
+average duel score per form against every form (budgets [20, 40, 60]):
+  Shieldbearer                   88%   71%   67%
+  Shieldbearer/Bulwark           65%   41%   39%
+  Shieldbearer/Fortress          43%   28%   26%
+  Shieldbearer/Vanguard          57%   39%   39%
+  Shieldbearer/Champion          63%   65%   65%
+  Archer                         92%   80%   76%
+  Archer/Longbow                 73%   71%   74%
+  Archer/Marksman                67%   65%   62%
+  Archer/Volley                  69%   63%   63%
+  Archer/ArrowRain               55%   73%   81%
+  BoneBrute                      96%   82%   86%
+  BoneBrute/Ossified             87%   77%   71%
+  BoneBrute/BoneWall             51%   63%   63%
+  BoneBrute/Butcher              85%   77%   70%
+  BoneBrute/Reaper               63%   88%   84%
+  Hexer                          69%   45%   38%
+  Hexer/Withering                18%   14%   14%
+  Hexer/Doom                      6%    4%    9%
+  Hexer/Plague                   31%   59%   69%
+  Hexer/Pestilence                4%   36%   62%
+  Sawbot                         65%   55%   47%
+  Sawbot/Overclock               39%   30%   24%
+  Sawbot/Shredder                33%   27%   16%
+  Sawbot/Plating                 47%   37%   31%
+  Sawbot/Juggernaut              55%   59%   58%
+  SiegeWalker                   100%   96%   96%
+  SiegeWalker/Longshot           88%  100%   98%
+  SiegeWalker/Artillery          47%   98%  100%
+  SiegeWalker/Shrapnel           86%   94%   93%
+  SiegeWalker/Concussion         31%   88%   93%
+  Bloomkeeper                    47%   35%   33%
+  Bloomkeeper/Blossom            23%   14%   20%
+  Bloomkeeper/Grove               8%    7%    4%
+  Bloomkeeper/Bramble            29%   20%   27%
+  Bloomkeeper/Thornwarden        20%   10%   10%
+  Rootcaller                     47%   23%   20%
+  Rootcaller/DeepRoots           20%    8%    5%
+  Rootcaller/Strangle             6%    0%    0%
+  Rootcaller/Spores              17%   24%   26%
+  Rootcaller/Overgrowth          12%    4%   10%
+  Nester                         86%   74%   73%
+  Nester/Brood                   38%   54%   59%
+  Nester/Hive                    20%   40%   35%
+  Nester/Venom                   42%   54%   57%
+  Nester/Blight                  29%   38%   47%
+  Rampart                        86%   63%   64%
+  Rampart/Bastion                63%   57%   47%
+  Rampart/Citadel                32%   33%   35%
+  Rampart/Spiked                 63%   47%   41%
+  Rampart/Siegebreaker           38%   69%   71%
