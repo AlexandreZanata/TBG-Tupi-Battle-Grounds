@@ -1,0 +1,33 @@
+P30-A client measurement (2026-10-29), branch phase/p30a-network-audit.
+
+Environment: Chrome 156.0.8078.73 on the development PC. The client was
+served by our own tbg-server on 127.0.0.1:18600 with TBG_STATIC_DIR=dist.
+The match was local practice with ?autoplay=practice&army=N&measure-free
+frame sampling through Chrome DevTools Protocol (requestAnimationFrame
+timestamps, 6 s warm-up, 10 s capture, Performance.getMetrics).
+
+Browser frame signal is blocked on this machine:
+- headless=new + SwiftShader: renderer "ANGLE (Google, Vulkan 1.3.0
+  (SwiftShader Device (Subzero)))"; army=100, 1280x720, 1x: 1.07 FPS,
+  frame p50 1000 ms, p95 1000 ms, JSHeap 5.5 MB, 1398 nodes.
+- headful, Intel Mesa (RPL-P): 1.30 FPS, frame p50 1000 ms, heap 5.5 MB.
+- Xvfb + headful, Intel Mesa: 1.03 FPS, frame p50 1000 ms, heap 8.3 MB.
+- A blank data: URL in the same browser runs rAF at ~71 Hz.
+- army=10 / 40 / 100 all render at ~1.0-1.3 FPS, so the throttle is not
+  the unit count. The game page, not rendering work, is the variable.
+Conclusion: Chrome does not deliver frame callbacks to the game page in
+any mode available here; absolute FPS, frame-time p95, and phone FPS are
+NOT measured. The H7 decision uses the native proxy below instead.
+
+Native proxy of the exact sync operations (view_audit example, 100 units
+per side, five runs, median): full MatchView clone + linear prev lookup +
+linear retain = 8.86 us/frame; Arc clone + sorted merge + HashSet retain =
+3.45 us/frame (-61%). At the natural 8-unit army it is 0.09 us/frame and
+the Arc path is slower (0.20 us) because the HashSet allocation dominates.
+Even at 100 units, 8.9 us is ~0.05% of a 16.7 ms frame; removing it cannot
+clear the >=15% frame-time threshold. The client Arc/sorted-merge POC was
+implemented, WASM-checked, and reverted; it is not in the branch.
+
+Raw runs: the browser probe script lived in target/ only (not committed);
+the numbers above are the complete output. The ?army=N UI parameter is
+kept (inert without the query parameter).
