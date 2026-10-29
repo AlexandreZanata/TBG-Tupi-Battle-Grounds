@@ -1,0 +1,200 @@
+git_head: 6d8e7f1
+ruleset_fingerprint: 0adbfe1c73bbe3ed
+applied: evolve_cost.0=1200,stronghold_damage=53,Shieldbearer.cost=2400,Hexer.damage=29,Sawbot.cost=2400,Sawbot.hp=231,SiegeWalker.speed=33,Rampart.cost=3600
+seeds: 1000000..1004096 (4096 pairs)
+threads: 16
+reaction_views: 5
+wall_s: 851.00
+
+== canon, reaction 5 ==
+seat A score, bot vs bot                         50.0% [49.8% – 50.3%]        target 48.5% – 51.5%      PASS
+median duration (s)                              118 s                        target 150 s – 240 s      FAIL
+ended by Stronghold kill                         87.7% [87.5% – 87.9%]        target 60.0% – 100.0%     PASS
+ended by time                                    12.3% [12.1% – 12.5%]        target 0.0% – 30.0%       PASS
+draws                                             0.2% [0.2% – 0.3%]          target 0.0% – 2.0%        PASS
+faction-majority Humans score                    35.5% [35.2% – 35.8%]        target 45.0% – 55.0%      FAIL
+faction-majority Undead score                    48.8% [48.2% – 49.4%]        target 45.0% – 55.0%      PASS
+faction-majority Machines score                  85.2% [84.9% – 85.4%]        target 45.0% – 55.0%      FAIL
+faction-majority Plants score                    21.5% [21.0% – 21.9%]        target 45.0% – 55.0%      FAIL
+purchase share Shieldbearer                      17.1% [17.0% – 17.2%]        target 5.0% – 100.0%      PASS
+purchase share Archer                            12.1% [12.0% – 12.2%]        target 5.0% – 100.0%      PASS
+purchase share BoneBrute                         10.2% [10.1% – 10.3%]        target 5.0% – 100.0%      PASS
+purchase share Hexer                              8.0% [8.0% – 8.1%]          target 5.0% – 100.0%      PASS
+purchase share Sawbot                            11.9% [11.8% – 11.9%]        target 5.0% – 100.0%      PASS
+purchase share SiegeWalker                        8.5% [8.4% – 8.5%]          target 5.0% – 100.0%      PASS
+purchase share Bloomkeeper                       11.6% [11.6% – 11.7%]        target 5.0% – 100.0%      PASS
+purchase share Rootcaller                         5.7% [5.7% – 5.8%]          target 5.0% – 100.0%      PASS
+purchase share Nester                             5.7% [5.7% – 5.8%]          target 5.0% – 100.0%      PASS
+purchase share Rampart                            9.1% [9.1% – 9.2%]          target 5.0% – 100.0%      PASS
+comebacks (behind at 2:00, won)                   6.4% [6.2% – 6.7%]          target 20.0% – 100.0%     FAIL
+strongest strategic style (saver)                92.8%                        target 0.0% – 60.0%       FAIL
+heavy vs bot                                     62.8% [61.3% – 64.2%]        target 0.0% – 55.0%       FAIL
+cheap vs bot                                     40.1% [38.7% – 41.7%]        target 0.0% – 55.0%       PASS
+favor-shieldbearer vs bot (median ±10 pp)        42.8% [41.3% – 44.3%]        target 32.8% – 52.8%      PASS
+favor-archer vs bot (median ±10 pp)              66.3% [64.9% – 67.7%]        target 32.8% – 52.8%      FAIL
+favor-bonebrute vs bot (median ±10 pp)           52.9% [51.4% – 54.4%]        target 32.8% – 52.8%      FAIL
+favor-hexer vs bot (median ±10 pp)               37.1% [35.6% – 38.5%]        target 32.8% – 52.8%      PASS
+favor-sawbot vs bot (median ±10 pp)              29.3% [27.9% – 30.7%]        target 32.8% – 52.8%      FAIL
+favor-siegewalker vs bot (median ±10 pp)         66.7% [65.2% – 68.1%]        target 32.8% – 52.8%      FAIL
+favor-bloomkeeper vs bot (median ±10 pp)         38.2% [36.7% – 39.6%]        target 32.8% – 52.8%      PASS
+favor-rootcaller vs bot (median ±10 pp)          31.1% [29.7% – 32.5%]        target 32.8% – 52.8%      FAIL
+favor-nester vs bot (median ±10 pp)              41.1% [39.6% – 42.6%]        target 32.8% – 52.8%      PASS
+favor-rampart vs bot (median ±10 pp)             48.6% [47.2% – 50.2%]        target 32.8% – 52.8%      PASS
+duel base forms weak everywhere                      2                        target 0 – 0              FAIL
+duel base forms oppressive everywhere                3                        target 0 – 0              FAIL
+duel forms without a counter                         0                        target 0 – 0              PASS
+duel Evolutions never worth their Energy         70.0%                        target 0.0% – 25.0%       FAIL
+duel Evolution branches without a niche              1                        target 0 – 0              FAIL
+Nash support (policies ≥ 1 %)                        1                        target 3 – ∞              FAIL
+Nash largest weight                             100.0%                        target 0.0% – 50.0%       FAIL
+40 rows, 18 failing
+
+policy                    nash  vs-mix
+saver                    100.0%   50.0%
+bot                        0.0%    3.4%
+evolver                    0.0%    0.1%
+faction-humans             0.0%    4.8%
+faction-undead             0.0%    3.8%
+faction-machines           0.0%   30.6%
+faction-plants             0.0%    0.3%
+heavy                      0.0%    7.4%
+cheap                      0.0%    1.4%
+favor-shieldbearer         0.0%    3.2%
+favor-archer               0.0%    4.0%
+favor-bonebrute            0.0%    4.1%
+favor-hexer                0.0%    1.8%
+favor-sawbot               0.0%    1.2%
+favor-siegewalker          0.0%    8.7%
+favor-bloomkeeper          0.0%    2.5%
+favor-rootcaller           0.0%    1.0%
+favor-nester               0.0%    2.0%
+favor-rampart              0.0%    3.3%
+
+-- canon, reaction 1 --
+seat A score, bot vs bot                         50.0% [49.8% – 50.3%]        target 48.5% – 51.5%      PASS
+heavy vs bot                                     62.4% [60.9% – 63.8%]        target 0.0% – 55.0%       FAIL
+cheap vs bot                                     40.4% [38.9% – 41.9%]        target 0.0% – 55.0%       PASS
+favor-shieldbearer vs bot (median ±10 pp)        43.6% [42.1% – 45.1%]        target 33.6% – 53.6%      PASS
+favor-archer vs bot (median ±10 pp)              67.1% [65.7% – 68.5%]        target 33.6% – 53.6%      FAIL
+favor-bonebrute vs bot (median ±10 pp)           54.3% [52.8% – 55.8%]        target 33.6% – 53.6%      FAIL
+favor-hexer vs bot (median ±10 pp)               35.7% [34.3% – 37.2%]        target 33.6% – 53.6%      PASS
+favor-sawbot vs bot (median ±10 pp)              27.3% [26.0% – 28.6%]        target 33.6% – 53.6%      FAIL
+favor-siegewalker vs bot (median ±10 pp)         67.9% [66.5% – 69.3%]        target 33.6% – 53.6%      FAIL
+favor-bloomkeeper vs bot (median ±10 pp)         38.1% [36.6% – 39.5%]        target 33.6% – 53.6%      PASS
+favor-rootcaller vs bot (median ±10 pp)          30.1% [28.8% – 31.5%]        target 33.6% – 53.6%      FAIL
+favor-nester vs bot (median ±10 pp)              41.8% [40.4% – 43.3%]        target 33.6% – 53.6%      PASS
+favor-rampart vs bot (median ±10 pp)             46.3% [44.8% – 47.8%]        target 33.6% – 53.6%      PASS
+13 rows, 6 failing
+
+-- canon, reaction 10 --
+seat A score, bot vs bot                         50.0% [49.8% – 50.3%]        target 48.5% – 51.5%      PASS
+heavy vs bot                                     62.5% [61.0% – 64.0%]        target 0.0% – 55.0%       FAIL
+cheap vs bot                                     39.2% [37.7% – 40.7%]        target 0.0% – 55.0%       PASS
+favor-shieldbearer vs bot (median ±10 pp)        43.0% [41.5% – 44.5%]        target 33.0% – 53.0%      PASS
+favor-archer vs bot (median ±10 pp)              64.3% [62.8% – 65.7%]        target 33.0% – 53.0%      FAIL
+favor-bonebrute vs bot (median ±10 pp)           50.7% [49.2% – 52.2%]        target 33.0% – 53.0%      PASS
+favor-hexer vs bot (median ±10 pp)               36.7% [35.3% – 38.1%]        target 33.0% – 53.0%      PASS
+favor-sawbot vs bot (median ±10 pp)              30.3% [28.9% – 31.6%]        target 33.0% – 53.0%      FAIL
+favor-siegewalker vs bot (median ±10 pp)         66.5% [65.1% – 67.9%]        target 33.0% – 53.0%      FAIL
+favor-bloomkeeper vs bot (median ±10 pp)         38.9% [37.5% – 40.4%]        target 33.0% – 53.0%      PASS
+favor-rootcaller vs bot (median ±10 pp)          31.8% [30.4% – 33.2%]        target 33.0% – 53.0%      FAIL
+favor-nester vs bot (median ±10 pp)              40.4% [38.9% – 41.9%]        target 33.0% – 53.0%      PASS
+favor-rampart vs bot (median ±10 pp)             47.6% [46.1% – 49.1%]        target 33.0% – 53.0%      PASS
+13 rows, 5 failing
+
+== proposal, reaction 5 ==
+seat A score, bot vs bot                         50.0% [49.7% – 50.2%]        target 48.5% – 51.5%      PASS
+median duration (s)                              116 s                        target 150 s – 240 s      FAIL
+ended by Stronghold kill                         89.5% [89.3% – 89.7%]        target 60.0% – 100.0%     PASS
+ended by time                                    10.5% [10.3% – 10.7%]        target 0.0% – 30.0%       PASS
+draws                                             0.1% [0.1% – 0.2%]          target 0.0% – 2.0%        PASS
+faction-majority Humans score                    44.0% [43.7% – 44.4%]        target 45.0% – 55.0%      FAIL
+faction-majority Undead score                    56.8% [56.2% – 57.4%]        target 45.0% – 55.0%      FAIL
+faction-majority Machines score                  71.8% [71.4% – 72.1%]        target 45.0% – 55.0%      FAIL
+faction-majority Plants score                    28.7% [28.4% – 29.1%]        target 45.0% – 55.0%      FAIL
+purchase share Shieldbearer                      12.3% [12.2% – 12.3%]        target 5.0% – 100.0%      PASS
+purchase share Archer                            16.1% [16.1% – 16.2%]        target 5.0% – 100.0%      PASS
+purchase share BoneBrute                         12.2% [12.2% – 12.3%]        target 5.0% – 100.0%      PASS
+purchase share Hexer                              8.1% [8.1% – 8.2%]          target 5.0% – 100.0%      PASS
+purchase share Sawbot                             7.9% [7.9% – 8.0%]          target 5.0% – 100.0%      PASS
+purchase share SiegeWalker                        8.2% [8.1% – 8.2%]          target 5.0% – 100.0%      PASS
+purchase share Bloomkeeper                       15.9% [15.8% – 15.9%]        target 5.0% – 100.0%      PASS
+purchase share Rootcaller                         6.2% [6.2% – 6.3%]          target 5.0% – 100.0%      PASS
+purchase share Nester                             6.2% [6.1% – 6.2%]          target 5.0% – 100.0%      PASS
+purchase share Rampart                            6.9% [6.9% – 6.9%]          target 5.0% – 100.0%      PASS
+comebacks (behind at 2:00, won)                   9.0% [8.7% – 9.3%]          target 20.0% – 100.0%     FAIL
+strongest strategic style (faction-machines)     78.8%                        target 0.0% – 60.0%       FAIL
+heavy vs bot                                     59.7% [58.2% – 61.2%]        target 0.0% – 55.0%       FAIL
+cheap vs bot                                     44.1% [42.6% – 45.6%]        target 0.0% – 55.0%       PASS
+favor-shieldbearer vs bot (median ±10 pp)        41.4% [39.9% – 42.8%]        target 35.0% – 55.0%      PASS
+favor-archer vs bot (median ±10 pp)              58.7% [57.2% – 60.2%]        target 35.0% – 55.0%      FAIL
+favor-bonebrute vs bot (median ±10 pp)           60.1% [58.6% – 61.6%]        target 35.0% – 55.0%      FAIL
+favor-hexer vs bot (median ±10 pp)               38.1% [36.7% – 39.6%]        target 35.0% – 55.0%      PASS
+favor-sawbot vs bot (median ±10 pp)              28.3% [27.0% – 29.7%]        target 35.0% – 55.0%      FAIL
+favor-siegewalker vs bot (median ±10 pp)         63.8% [62.3% – 65.2%]        target 35.0% – 55.0%      FAIL
+favor-bloomkeeper vs bot (median ±10 pp)         45.0% [43.6% – 46.5%]        target 35.0% – 55.0%      PASS
+favor-rootcaller vs bot (median ±10 pp)          31.9% [30.5% – 33.3%]        target 35.0% – 55.0%      FAIL
+favor-nester vs bot (median ±10 pp)              41.8% [40.3% – 43.4%]        target 35.0% – 55.0%      PASS
+favor-rampart vs bot (median ±10 pp)             50.4% [48.9% – 51.9%]        target 35.0% – 55.0%      PASS
+duel base forms weak everywhere                      2                        target 0 – 0              FAIL
+duel base forms oppressive everywhere                3                        target 0 – 0              FAIL
+duel forms without a counter                         0                        target 0 – 0              PASS
+duel Evolutions never worth their Energy         47.5%                        target 0.0% – 25.0%       FAIL
+duel Evolution branches without a niche              2                        target 0 – 0              FAIL
+Nash support (policies ≥ 1 %)                        1                        target 3 – ∞              FAIL
+Nash largest weight                             100.0%                        target 0.0% – 50.0%       FAIL
+40 rows, 19 failing
+
+policy                    nash  vs-mix
+faction-machines         100.0%   50.0%
+bot                        0.0%   32.3%
+evolver                    0.0%    9.5%
+saver                      0.0%   32.5%
+faction-humans             0.0%   18.0%
+faction-undead             0.0%   28.8%
+faction-plants             0.0%    5.9%
+heavy                      0.0%   35.9%
+cheap                      0.0%   17.5%
+favor-shieldbearer         0.0%   24.9%
+favor-archer               0.0%   31.7%
+favor-bonebrute            0.0%   42.3%
+favor-hexer                0.0%   19.1%
+favor-sawbot               0.0%   14.8%
+favor-siegewalker          0.0%   47.4%
+favor-bloomkeeper          0.0%   28.1%
+favor-rootcaller           0.0%   15.5%
+favor-nester               0.0%   21.5%
+favor-rampart              0.0%   32.0%
+
+-- proposal, reaction 1 --
+seat A score, bot vs bot                         50.0% [49.7% – 50.2%]        target 48.5% – 51.5%      PASS
+heavy vs bot                                     60.7% [59.2% – 62.2%]        target 0.0% – 55.0%       FAIL
+cheap vs bot                                     44.3% [42.9% – 45.8%]        target 0.0% – 55.0%       PASS
+favor-shieldbearer vs bot (median ±10 pp)        41.4% [39.9% – 42.9%]        target 33.8% – 53.8%      PASS
+favor-archer vs bot (median ±10 pp)              58.0% [56.5% – 59.5%]        target 33.8% – 53.8%      FAIL
+favor-bonebrute vs bot (median ±10 pp)           60.1% [58.6% – 61.6%]        target 33.8% – 53.8%      FAIL
+favor-hexer vs bot (median ±10 pp)               35.5% [34.0% – 36.9%]        target 33.8% – 53.8%      PASS
+favor-sawbot vs bot (median ±10 pp)              24.7% [23.4% – 26.0%]        target 33.8% – 53.8%      FAIL
+favor-siegewalker vs bot (median ±10 pp)         63.8% [62.3% – 65.3%]        target 33.8% – 53.8%      FAIL
+favor-bloomkeeper vs bot (median ±10 pp)         43.8% [42.3% – 45.3%]        target 33.8% – 53.8%      PASS
+favor-rootcaller vs bot (median ±10 pp)          28.7% [27.3% – 30.1%]        target 33.8% – 53.8%      FAIL
+favor-nester vs bot (median ±10 pp)              41.9% [40.4% – 43.4%]        target 33.8% – 53.8%      PASS
+favor-rampart vs bot (median ±10 pp)             49.0% [47.5% – 50.6%]        target 33.8% – 53.8%      PASS
+13 rows, 6 failing
+
+-- proposal, reaction 10 --
+seat A score, bot vs bot                         50.0% [49.7% – 50.2%]        target 48.5% – 51.5%      PASS
+heavy vs bot                                     58.4% [56.9% – 59.9%]        target 0.0% – 55.0%       FAIL
+cheap vs bot                                     42.0% [40.6% – 43.5%]        target 0.0% – 55.0%       PASS
+favor-shieldbearer vs bot (median ±10 pp)        41.7% [40.2% – 43.1%]        target 35.0% – 55.0%      PASS
+favor-archer vs bot (median ±10 pp)              56.7% [55.2% – 58.2%]        target 35.0% – 55.0%      FAIL
+favor-bonebrute vs bot (median ±10 pp)           55.5% [54.0% – 57.0%]        target 35.0% – 55.0%      FAIL
+favor-hexer vs bot (median ±10 pp)               37.7% [36.3% – 39.2%]        target 35.0% – 55.0%      PASS
+favor-sawbot vs bot (median ±10 pp)              29.7% [28.4% – 31.1%]        target 35.0% – 55.0%      FAIL
+favor-siegewalker vs bot (median ±10 pp)         62.7% [61.2% – 64.2%]        target 35.0% – 55.0%      FAIL
+favor-bloomkeeper vs bot (median ±10 pp)         45.0% [43.5% – 46.5%]        target 35.0% – 55.0%      PASS
+favor-rootcaller vs bot (median ±10 pp)          32.2% [30.8% – 33.7%]        target 35.0% – 55.0%      FAIL
+favor-nester vs bot (median ±10 pp)              39.0% [37.6% – 40.5%]        target 35.0% – 55.0%      PASS
+favor-rampart vs bot (median ±10 pp)             49.2% [47.7% – 50.8%]        target 35.0% – 55.0%      PASS
+13 rows, 6 failing
+

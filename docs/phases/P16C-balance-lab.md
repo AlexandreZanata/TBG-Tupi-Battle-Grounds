@@ -448,7 +448,188 @@ in the browser (costs and stats on cards match the new values).
 
 ## Phase report
 
-_Not executed. Fill in: baseline, throughput table, C4a/C4b output, duel
-matrix summary, payoff matrix and Nash mix, gate before/after, proposal
-and confirmation intervals, owner decision, eleventh-unit drill, deviations,
-blockers, limitations (bots are not humans)._
+Executed 2026-10-29 by Claude (executor and self-reviewer) on
+`phase/p16c-balance-lab`, branched from P16-B (`15f914d`). An independent
+review agent read the diff afterwards; its two real findings (a late
+intention after the outcome was not recorded for the replay; a worker
+panic would shift parallel results) and two minor ones are fixed in
+`fix(p16c): review findings`.
+
+### What exists now
+
+- **`tbg-core`**: `Ruleset` (`ruleset.rs`; `CANON` assembled from
+  `content.rs`, skipped in serialization), `MatchState::with_rules`,
+  `Bot::with_rules`, `headless::play` (the server loop without a clock),
+  `replay::Replay`, feature `lab` with `lab_spawn` (`lab.rs`).
+- **`crates/tbg-balance`** (no new dependencies): `run`, `duels`, `meta`,
+  `gate`, `throughput`, `screen`, `search`, `confirm`. Modules: `cli`,
+  `commands`, `runner`, `policy`, `metrics`, `stats`, `duels`, `meta`,
+  `gate`, `knobs`, `search`, `report`.
+- **`tbg-server`**: `Config::replays` (tests only, never from the
+  environment) records applied intentions and forfeits per tick plus the
+  final hash.
+- **Contracts**: core `contract_lab.rs` (C1, C2, C10), server
+  `lab_equivalence.rs` (C4a, C4b), balance `tests/contract.rs` (C3, C5–C9,
+  C11). C12 is `tbg-balance gate --strict`.
+
+### Step results
+
+1. **Baseline** (`docs/media/p16c/baseline-*.txt`, 20,000 matches each,
+   second run identical except timing): bot vs bot median 136 s, seat A
+   50.0 %; heavy vs bot 63.1 %; cheap vs bot 41.6 %; 23–25 s per 20,000
+   matches on one thread.
+2. **Speed invariance**: C1 allow-list scan passes (and fails when
+   `use std::time::Instant;` is added to `combat.rs`); C2 per-tick traces
+   for seeds 1, 7, 42, 1000, 65535 frozen; the existing final-hash goldens
+   unchanged.
+3. **Ruleset as data**: every golden byte-identical; the three 20,000-match
+   baselines reproduced line for line (`diff` shows only the timing line).
+4. **Throughput** (`docs/media/p16c/throughput.txt`, bot vs bot, idle PC):
+
+   | threads | games/s | game-seconds per wall-second |
+   |---|---|---|
+   | 1 | 800 | 111,809× |
+   | 2 | 1,596 | 223,108× |
+   | 4 | 2,944 | 411,591× |
+   | 8 | 5,013 | 700,848× |
+   | 16 | 5,644 | 789,164× |
+
+   One million games ≈ 3 minutes on this PC. The full gate (344,000
+   games + 7,350 duels) took 141 s while a search shared the CPU. Every
+   thread count gives identical results (checked by `throughput` itself
+   and by C3).
+5. **1× proof**: C4a (real WebSocket bot match at a 5 ms tick) and C4b
+   (production 50 ms tick, `--ignored`) both replay headless to the
+   server's final hash and outcome; a wrong seed does not.
+   C4b output: `tick 50 ms: 38 commands, end tick 2365, outcome
+   Some(Outcome { winner: Some(B), reason: StrongholdDestroyed }), hash
+   a0852a9cebc2849c` — `ok`, 118.42 s.
+   Re-run after the review fix: `tick 50 ms: 31 commands, end tick 1777,
+   ... hash 23be0711733de518` — `ok`, 88.83 s. Final `cargo test --workspace`:
+   121 passed, 0 failed, 1 ignored (C4b).
+6. **Pool and duels**: policies `bot`, `heavy`, `cheap`, `evolver`,
+   `saver`, `faction-*` ×4, `favor-*` ×10, `random`; duels over 50 forms
+   × 3 budgets × both seat orders (14,700 duels, 0.15 s).
+7. **Gate on the canonical ruleset** (`docs/media/p16c/gate-canon.txt`,
+   confirmation seeds 1,000,000.., 1,000 pairs, 344,000 games): 40 rows,
+   18 failing. See *Findings*.
+8. **Search** and 9. **Apply**: see *Search and confirmation*.
+10. **Contracts**: all pass; debug `cargo test -p tbg-balance` ≈ 33 s.
+    **Eleventh-unit drill** (scratch worktree, not committed): an Archer
+    copy with ×3 damage ("Longarm") needed only its `UnitKind`, roster,
+    and content rows — the lab registered its knobs, `favor-longarm`
+    policy, and five duel forms by itself; duels flagged it oppressive;
+    `favor-longarm` scored 83.6 % [80.4–86.8] against `bot`; all C3–C11
+    ran on it and passed; the determinism goldens failed as they must.
+    Adding a field `armor` to `UnitDef` stopped `tbg-balance` from
+    compiling (`E0027: pattern does not mention field armor` in
+    `knobs.rs`) until registered.
+
+### Findings (canonical P16-B rules)
+
+Confirmation seeds, 4,096 pairs (1.4 M games per ruleset), 95 % intervals:
+
+1. **Banking beats trickling.** `saver` (wait for 10 Energy, then buy the
+   most expensive offers at once) averages 92.8 % against the other
+   strategic styles and beats `bot` 95.5–96.0 % at 100 ms, 500 ms, and
+   1 s reactions (500 pairs each); the Nash mix is 100 % `saver`.
+   Concentrated waves arrive together and win every local fight; any
+   human can do this. This is a mechanic-level finding (Lanchester), not
+   a single bad number.
+2. **Machines dominate, Plants and Humans lag.** Faction-majority score:
+   Machines 85.2 %, Undead 48.8 %, Humans 35.5 %, Plants 21.5 %.
+   Siege Walker: duel base form 96–100 %, `favor-siegewalker` 66.7 %;
+   `favor-archer` 66.3 %.
+3. **Evolution is overpriced** (confirms P16-B): 70 % of evolved forms
+   lose to their own base form Energy for Energy; `evolver` scores 0.1 %
+   against the Nash mix. Heavy spam beats `bot` 62.8 % [61.3–64.2].
+4. **Duels:** oppressive base forms Bone Brute, Siege Walker, Nester; weak
+   base forms Sawbot, Rootcaller; Hexer tier 1 has a branch never better
+   than its sibling. No form is counterless.
+5. Comebacks 6.4 % (target ≥ 20 %), median 118 s among strategic styles
+   (target 150–240 s). Seat bias is clean: 50.0 % [49.8–50.3].
+
+### Search and confirmation
+
+`tbg-balance search --pairs 1024 --generations 30 --lambda 16 --top 24`
+(screen: 257 variants on the screening block; 30 generations on the
+discovery block; 2,531 s): discovery loss 5,765 → 2,264 with 8 changes
+(`docs/media/p16c/proposal.md`, `search.log`):
+
+| Knob | Canon | Proposed |
+|---|---|---|
+| Evolution cost tier 1 | 3 Energy | 2 Energy |
+| Stronghold damage | 65 | 53 |
+| Shieldbearer cost | 3 | 4 |
+| Hexer damage | 30 | 29 |
+| Sawbot cost / HP | 3 / 270 | 4 / 231 |
+| Siege Walker speed | 0.60 | 0.66 tiles/s |
+| Rampart cost | 5 | 6 |
+
+`confirm --pairs 4096` on the untouched confirmation block
+(`docs/media/p16c/confirm.txt`, 851 s), canon → proposal:
+Machines 85.2 → 71.8 %, Humans 35.5 → 44.0 %, Plants 21.5 → 28.7 %,
+Undead 48.8 → 56.8 % (now above band), strongest strategic style 92.8 %
+(`saver`) → 78.8 % (`faction-machines`), heavy vs bot 62.8 → 59.7 %
+(58.4–60.7 % across reactions), Evolutions never worth their Energy
+70 → 47.5 %, comebacks 6.4 → 9.0 %, `favor-archer` 66.3 → 58.7 %,
+`favor-bonebrute` 52.9 → 60.1 %, branches without a niche 1 → 2. Failing
+rows 18 → 18; the Nash mix moves from 100 % `saver` to 100 %
+`faction-machines`.
+
+**Decision per step 9.2: not applied.** The confirmed proposal is a real
+improvement on held-out seeds, but numbers alone do not bring heavy spam
+to ≤ 55 % or give the meta-game more than one equilibrium style; the
+required rows still fail. `content.rs` and GAME-DESIGN §5 are unchanged,
+so every golden stays valid. **Owner decisions needed:** (a) apply the
+8-number proposal as Proposed values for playtest
+(`--apply evolve_cost.0=1200,stronghold_damage=53,Shieldbearer.cost=2400,Hexer.damage=29,Sawbot.cost=2400,Sawbot.hp=231,SiegeWalker.speed=33,Rampart.cost=3600`);
+(b) a mechanic against banked waves and spam (options to evaluate in a
+new phase: a lower Energy cap, a per-seat deploy cooldown, or a cost that
+grows with the living army); (c) whether the gate's Proposed thresholds
+are right. C12 (`gate --strict`) fails on CANON until then.
+
+### Deviations
+
+- `Mono(k)` became `Favor(k)` (the shipped bot, but always buying `k`):
+  a one-unit army scored 0 % for 8 of 10 units, measuring the policy's
+  handicap, not the unit. Its row is relative (median ± 10 pp).
+- Duel budgets are 20/40/60 Energy, not 10/20/40: at 10 Energy integer
+  unit counts wasted up to 40 % of the budget for evolved forms.
+- Duel weak/oppressive flags compare base forms with base forms; evolved
+  forms are judged against their own base form (new row "Evolutions never
+  worth their Energy", ≤ 25 %). Support is exempt from "weak". A form is
+  "counterless" only if it also wins on average (a flat roster would
+  otherwise flag every form).
+- New searched row "strongest strategic style ≤ 60 %": the Nash rows need
+  the full pool and are gate-only, and the search needed a cheap proxy.
+- C4a uses the real server at a 5 ms tick (the existing test convention)
+  instead of tokio's paused clock: paused time auto-advances while
+  sockets wait and would fire client timeouts. 5 ms and 50 ms both equal
+  the headless replay, which is the stronger statement.
+- Per-kind damage dealt/taken is not measured: `Event::Hit` carries no
+  attacker; adding one would change the wire. Purchases, Evolutions per
+  branch, army size, and the 2:00 checkpoint are measured.
+- C7 canaries: "flagged, or the base form's average moves ≥ 20 pp at
+  every budget" (a ×3 cost does not make a strong unit weak, only
+  average). Pure healers (no damage) use a match canary (`favor-<unit>`
+  vs `bot` +10 pp, 24 pairs).
+- Knob steps: 5 % of the canonical value (±25 %), 500 bp for form
+  percentages (±4 steps), whole Energy within ±25 % for costs (one step
+  for every current cost, after a smoke search proposed halving the
+  Nester's cost).
+- Reaction time: non-`bot` policies decide every 5 views (500 ms);
+  `favor-*` falls back to the bot at the bot's own pace.
+- Fixed a pre-existing race in `tests/accounts.rs`
+  (`br_p04_account_messages_refused_in_match`): under full CPU load a
+  `View` arrived before `AccountError`.
+
+### Limitations
+
+- Bots are not humans. A passing gate is necessary, never sufficient;
+  every value stays **Proposed** until the owner's playtest.
+- The lab varies numbers only. Mechanic options (for example a cost that
+  grows with the army, or a deploy cooldown against banking) need an
+  owner decision and their own phase.
+- Duels have no Shop or Stronghold fire; they measure cost efficiency,
+  not the whole game.
