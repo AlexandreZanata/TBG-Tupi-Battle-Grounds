@@ -826,8 +826,8 @@ overhead, and network path.
   were non-monotonic between passes (2000 clean once, 1500 throttled
   twice) because other processes spiked; every committed run's `load1`,
   bot cores, cgroup throttles, and memory peak are in the raw files. The
-  very first 1 vCPU table (1000 clean, 750 clean) was lost when another
-  process removed `target/p30a-logs/`; it is quoted only where the
+  very first 1 vCPU table (1000 clean, 750 clean) was lost when `target/p30a-logs/`
+  disappeared during the run (cause unknown); it is quoted only where the
   committed final pass is strictly worse, and the lost numbers are marked
   in the report. The VPS
   capacity table and the production `/metrics` reading (owner: two
