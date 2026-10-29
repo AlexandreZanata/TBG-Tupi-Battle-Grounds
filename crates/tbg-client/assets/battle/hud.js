@@ -116,7 +116,7 @@
     pause.hidden = false;
     const seconds = Math.ceil(Number(parts[1]) / 20);
     set('[data-council-timer]', Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2,'0'));
-    root.querySelector('.council-clock').classList.toggle('urgent', seconds <= 10);
+    root.querySelector('.council-clock').classList.toggle('urgent', seconds <= 5);
     const resolved = parts[2] === 'true';
     const defs = (s.councilOptions || '').split('|');
     const scale = Math.max(1, number('energyScale'));

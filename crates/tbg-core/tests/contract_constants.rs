@@ -39,6 +39,8 @@ fn uncapped_energy_and_interest() {
         (5 * ENERGY_SCALE, ENERGY_SCALE / 4, 5)
     );
     assert_eq!(AUGMENT_ROUND_TICKS, secs(60));
+    // Owner revision: the selection pause is 20 s, not 60 s (BR-AG13).
+    assert_eq!(AUGMENT_WINDOW_TICKS, secs(20));
     assert_eq!(AUGMENT_FIRST_ROUND, RUNNING_START + secs(60));
     assert_eq!(AUGMENT_COST, [3, 6, 10, 15].map(|e| e * ENERGY_SCALE));
     let secs_per_energy = ENERGY_SCALE as f64 / (REGEN_RUNNING * TICK_HZ) as f64;

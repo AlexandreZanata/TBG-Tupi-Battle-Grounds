@@ -29,6 +29,8 @@ pub const INTEREST_MAX_BANDS: u32 = 5;
 pub const AUGMENT_CATALOG: usize = 40;
 pub const AUGMENT_OPTIONS: usize = 4;
 pub const AUGMENT_ROUND_TICKS: Tick = 1_200;
+/// How long a round's selection pause lasts (BR-AG13): 20 s, owner revision.
+pub const AUGMENT_WINDOW_TICKS: Tick = 400;
 pub const AUGMENT_FIRST_ROUND: Tick = RUNNING_START + AUGMENT_ROUND_TICKS;
 pub const AUGMENT_COST: [u32; 4] = [1_800, 3_600, 6_000, 9_000];
 

@@ -414,16 +414,16 @@ golden seeds are unchanged (seed 1 A 2 297, 7 B 1 920, 42 B 3 233,
 **Owner-required pause tests** (`crates/tbg-core/tests/augment_pause.rs`,
 `crates/tbg-server/tests/online.rs`): (1) both seats frozen on the same
 round and combat tick; (2) units, attacks in flight and cooldowns
-unchanged over 600 paused steps; (3) Energy, `low`, Interest, offers
+unchanged over 300 paused steps; (3) Energy, `low`, Interest, offers
 unchanged; (4) one confirmation never resumes; (5) both confirmations
 resume on the next step; (6) the deadline resumes with an idle player
-after exactly 1 200 steps; (7) the pick is invisible to the other seat
+after exactly 400 steps (20 s; first built as 60 s, shortened by the owner afterwards); (7) the pick is invisible to the other seat
 until resolution; (8) repeat or changed choices rejected and charged once;
 (9) online: the undecided seat disconnects and the deadline still resumes
 the battle, then it reconnects into the resumed battle; a seat reconnecting
 mid-pause gets the round, less time left and its confirmation; (10) the
-next draw is 1 200 combat ticks later, 2 400 selection steps including the
-pause; (11) a replay with choices made 40 and 700 steps into pauses
+next draw is 1 200 combat ticks later, 1 600 selection steps including the
+20-s pause; (11) a replay with choices made 40 and 300 steps into pauses
 reproduces the final hash, and the server-vs-headless C4a contract passes;
 (12) desktop UI checked in the browser (phone not checked: owner rule,
 desktop only).

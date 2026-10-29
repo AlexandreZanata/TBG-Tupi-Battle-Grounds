@@ -614,7 +614,7 @@ in every mode, ahead of the lab gates of D-34:
   round; copies unlimited and stacking (BR-AG01–AG11).
 - Every round **pauses the battle for both players** (BR-AG12–AG14). The
   combat tick freezes; a separate selection clock (`MatchState::clock`,
-  one per server step) closes the 60-s window. The round resolves as soon
+  one per server step) closes the 20-s window (first built as 60 s; the owner shortened it the same day). The round resolves as soon
   as both confirmed, or at the deadline. Picks are paid on confirmation
   but stay hidden until both outcomes apply on the same step.
 **How.** No new task, timer or sync system: the existing match task keeps

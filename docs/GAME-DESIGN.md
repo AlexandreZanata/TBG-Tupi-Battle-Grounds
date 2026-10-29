@@ -169,7 +169,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 8. **War Council.** Every 60 s of combat the whole battle pauses for both
    players and the same four `Augment`s are offered. Each player buys one
    or forgoes; a confirmed choice is final and hidden until the round
-   resolves. The battle resumes when both have confirmed or after 60 s of
+   resolves. The battle resumes when both have confirmed or after 20 s of
    selection (BR-AG01–AG14).
 9. **End.** Matches are open-ended (BR-M07): destroying the enemy
    `Stronghold` wins immediately, and nothing is ever decided by a clock.
@@ -197,7 +197,7 @@ integers (see ARCHITECTURE.md §4).
 | Constant | Value | | Constant | Value |
 |----------|-------|-|----------|-------|
 | BattleLine length (Stronghold to Stronghold) | 16 | | Countdown | 3 |
-| Match length | open-ended, no clock (BR-M07) | | Augment round | every 60 s of combat; 60 s selection pause |
+| Match length | open-ended, no clock (BR-M07) | | Augment round | every 60 s of combat; 20 s selection pause |
 | Energy start / cap | 5 / none (BR-E04) | | Energy regen | 1 per ~1.76 s (17 sub-energy/tick) |
 | Interest | every 10 s: `min(low / 5, 5) × 0.25` (BR-E06) | | Augment cost Bronze / Silver / Gold / Diamond | 3 / 6 / 10 / 15 |
 | Shop offers / rotation | 5 distinct / none: a purchase refills its slot (BR-S04) | | Army cap | none (BR-U07) |
@@ -543,7 +543,7 @@ Owner's starting proposal was +10 % / +10 % + 5 %; the capability at tier
 | BR-AG10 | An Augment applies to summons only if its text names Beetlings; it never makes a summon count for Synergy or Bounty |
 | BR-AG11 | Augment effects are computed only by the simulation; clients send a round and an option index, never an effect |
 | BR-AG12 | **Pause.** While a round is open the whole battle is frozen for both players: no movement, attack, damage, healing, cooldown, status, summon, Synergy, `Energy` regen, Interest, purchase or Evolution. `Purchase` and `Evolve` are rejected (`Paused`); only `ChooseAugment` and `Forgo` are accepted. The field stays visible |
-| BR-AG13 | **Two clocks.** The combat tick is frozen during a pause; a separate selection clock (one per server step, 20 per second) keeps running and closes the window after 60 s. The round resolves on the first step after both players confirmed, or at the deadline, whichever is first; one confirmation never resumes the battle. A disconnected player does not extend the window; a reconnecting player gets the round, the time left and their confirmation back. Replays record intentions by selection clock |
+| BR-AG13 | **Two clocks.** The combat tick is frozen during a pause; a separate selection clock (one per server step, 20 per second) keeps running and closes the window after **20 s** (400 steps, `AUGMENT_WINDOW_TICKS`; owner revision 2026-10-29, was 60 s). The round resolves on the first step after both players confirmed, or at the deadline, whichever is first; one confirmation never resumes the battle. A disconnected player does not extend the window; a reconnecting player gets the round, the time left and their confirmation back. Replays record intentions by selection clock |
 | BR-AG14 | **Hidden choices.** A purchase is validated and paid when confirmed, but the opponent sees neither it nor a Forgo until the round resolves. At resolution both outcomes apply in seat order on the same step and become public; combat resumes on the next step for both |
 
 | Rarity | Cost | Forgo |

@@ -3,7 +3,9 @@
 //! or the window ends (BR-AG13), and a confirmed pick stays hidden until
 //! the round resolves (BR-AG14).
 
-use tbg_core::content::{augment_def, AUGMENT_COST, AUGMENT_ROUND_TICKS, ENERGY_SCALE};
+use tbg_core::content::{
+    augment_def, AUGMENT_COST, AUGMENT_ROUND_TICKS, AUGMENT_WINDOW_TICKS, ENERGY_SCALE,
+};
 use tbg_core::replay::Replay;
 use tbg_core::{
     ArcanaPreset, Event, MatchState, Phase, PlayerIntention, Rejection, Seat, Unit, UnitKind,
@@ -73,11 +75,11 @@ fn br_ag12_a_round_freezes_units_attacks_cooldowns_and_the_economy() {
     );
     let before = frozen_part(&s);
     let clock = s.clock;
-    for _ in 0..600 {
+    for _ in 0..300 {
         assert!(s.step().is_empty(), "a paused step emits nothing");
     }
     assert!(s.augments.selecting());
-    assert_eq!(s.clock, clock + 600, "the selection clock keeps running");
+    assert_eq!(s.clock, clock + 300, "the selection clock keeps running");
     assert_eq!(frozen_part(&s), before, "combat, Energy, Interest, Shop");
     // Both seats see the same paused round at the same combat tick.
     let (a, b) = (s.view_for(Seat::A, &[]), s.view_for(Seat::B, &[]));
@@ -138,7 +140,8 @@ fn br_ag13_both_confirmations_resume_at_once_for_both() {
 fn br_ag13_the_deadline_resumes_with_an_idle_player() {
     let mut s = paused_battle(5);
     let window = s.augments.deadline - s.clock;
-    assert_eq!(window, AUGMENT_ROUND_TICKS, "60 s of selection time");
+    assert_eq!(window, AUGMENT_WINDOW_TICKS, "20 s of selection time");
+    assert_eq!(window, 20 * 20);
     let id = s.augments.options[1];
     choose(&mut s, Seat::A, 1).unwrap();
     let mut events = Vec::new();
@@ -212,8 +215,8 @@ fn br_ag01_the_next_draw_counts_only_effective_combat() {
     assert_eq!(s.augments.opened_at - first_tick, AUGMENT_ROUND_TICKS);
     assert_eq!(
         s.clock - first_clock,
-        2 * AUGMENT_ROUND_TICKS,
-        "60 s of selection plus 60 s of combat"
+        AUGMENT_WINDOW_TICKS + AUGMENT_ROUND_TICKS,
+        "20 s of selection plus 60 s of combat"
     );
 }
 
@@ -240,7 +243,7 @@ fn br_ag13_a_replay_keeps_paused_choices_in_order() {
         }
         if s.augments.selecting() {
             let round = s.augments.round;
-            let waited = s.clock + AUGMENT_ROUND_TICKS - s.augments.deadline;
+            let waited = s.clock + AUGMENT_WINDOW_TICKS - s.augments.deadline;
             if waited == 40 {
                 act(
                     &mut s,
@@ -248,7 +251,7 @@ fn br_ag13_a_replay_keeps_paused_choices_in_order() {
                     PlayerIntention::ChooseAugment { round, option: 3 },
                 );
             }
-            if waited == 700 && round == 1 {
+            if waited == 300 && round == 1 {
                 act(&mut s, Seat::A, PlayerIntention::Forgo { round });
             }
         }

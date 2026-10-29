@@ -89,13 +89,14 @@ fn trace(seed: u64) -> (u64, u64, u32) {
 fn c2_per_tick_traces_are_frozen() {
     // (seed, per-tick trace, final hash, end combat tick): owner revision
     // 2026-10-29 (uncapped Energy, Interest, the Augment pause with its
-    // paused steps traced, and purchase-only Shop refills, BR-S04).
+    // paused steps traced, purchase-only Shop refills, BR-S04, and the 20 s
+    // selection window, BR-AG13: only the traces moved, final hashes did not).
     let goldens = [
-        (1, 0x9f65_bbf1_f512_5174, 0x7242_2aae_5147_d2e7, 3_664),
-        (7, 0x91af_276c_a398_095a, 0x7d5a_9954_45c7_a322, 2_146),
-        (42, 0xebee_8a6a_7e50_2f29, 0xf3a6_1b6c_8581_3910, 2_342),
-        (1000, 0x75f0_7920_f365_a300, 0xa634_79ae_6844_aefe, 4_195),
-        (65535, 0x12fd_2b7a_48e8_9aaa, 0xc6f2_5831_ee16_2fcd, 2_079),
+        (1, 0x501b_cc9f_bdf0_e458, 0x7242_2aae_5147_d2e7, 3_664),
+        (7, 0x058c_86bb_1dd4_2d38, 0x7d5a_9954_45c7_a322, 2_146),
+        (42, 0x6865_c895_84b7_7f7b, 0xf3a6_1b6c_8581_3910, 2_342),
+        (1000, 0x19e8_b049_e90e_d7e4, 0xa634_79ae_6844_aefe, 4_195),
+        (65535, 0xe465_ccbb_34a4_e900, 0xc6f2_5831_ee16_2fcd, 2_079),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");
