@@ -132,6 +132,8 @@
       card.dataset.available = available ? 'true' : 'false';
       card.disabled = !available && !(resolved && council.picked === i);
       card.classList.toggle('selected', council.picked === i);
+      // Short of Energy: grey, like an unaffordable Shop card.
+      card.classList.toggle('unaffordable', !resolved && !affordable);
       card.setAttribute('aria-pressed', council.picked === i ? 'true' : 'false');
       card.setAttribute('aria-label', (name || 'Augment') + ', ' + (text || '') + ', ' + (cost || '0') + ' Energy');
     });
