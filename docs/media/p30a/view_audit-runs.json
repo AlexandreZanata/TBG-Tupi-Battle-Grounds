@@ -28,30 +28,30 @@
     }
   },
   "timing_median_us": {
-    "build_current": 0.127,
-    "encode_current": 0.474,
-    "build_a": 0.12,
-    "encode_a": 0.381,
-    "build_b": 0.312,
-    "encode_b": 0.261,
+    "build_current": 0.123,
+    "encode_current": 0.468,
+    "build_a": 0.124,
+    "encode_a": 0.376,
+    "build_b": 0.303,
+    "encode_b": 0.258,
     "build_c": 0.179,
-    "encode_c": 0.352,
-    "rebuild_a": 0.223,
-    "rebuild_b": 0.502,
-    "rebuild_c": 0.393
+    "encode_c": 0.349,
+    "rebuild_a": 0.212,
+    "rebuild_b": 0.486,
+    "rebuild_c": 0.383
   },
   "timing_p95_of_run_medians_us": {
-    "build_current": 0.131,
-    "encode_current": 0.506,
-    "build_a": 0.124,
-    "encode_a": 0.394,
-    "build_b": 0.325,
-    "encode_b": 0.27,
-    "build_c": 0.184,
-    "encode_c": 0.362,
-    "rebuild_a": 0.232,
-    "rebuild_b": 0.522,
-    "rebuild_c": 0.408
+    "build_current": 0.124,
+    "encode_current": 0.476,
+    "build_a": 0.127,
+    "encode_a": 0.379,
+    "build_b": 0.306,
+    "encode_b": 0.259,
+    "build_c": 0.181,
+    "encode_c": 0.352,
+    "rebuild_a": 0.213,
+    "rebuild_b": 0.49,
+    "rebuild_c": 0.384
   },
   "synthetic": [
     {
@@ -80,19 +80,19 @@
         "b": 1232
       },
       "timing_median_us": {
-        "build_current": 0.21,
-        "encode_current": 0.8,
-        "build_a": 0.27,
-        "encode_a": 0.68,
-        "build_b": 0.614,
-        "encode_b": 0.439,
-        "build_c": 0.387,
-        "encode_c": 0.601,
-        "sync_clone_linear": 0.24,
-        "sync_arc_sorted": 0.386,
-        "rebuild_a": 0.405,
-        "rebuild_b": 1.043,
-        "rebuild_c": 0.821
+        "build_current": 0.204,
+        "encode_current": 0.806,
+        "build_a": 0.267,
+        "encode_a": 0.679,
+        "build_b": 0.609,
+        "encode_b": 0.444,
+        "build_c": 0.378,
+        "encode_c": 0.605,
+        "sync_clone_linear": 0.224,
+        "sync_arc_sorted": 0.419,
+        "rebuild_a": 0.391,
+        "rebuild_b": 1.011,
+        "rebuild_c": 0.784
       }
     },
     {
@@ -121,19 +121,19 @@
         "b": 2464
       },
       "timing_median_us": {
-        "build_current": 0.363,
-        "encode_current": 1.438,
-        "build_a": 0.434,
-        "encode_a": 1.192,
-        "build_b": 1.112,
-        "encode_b": 0.775,
-        "build_c": 0.669,
-        "encode_c": 1.065,
-        "sync_clone_linear": 0.789,
-        "sync_arc_sorted": 0.75,
-        "rebuild_a": 0.752,
-        "rebuild_b": 2.101,
-        "rebuild_c": 1.643
+        "build_current": 0.345,
+        "encode_current": 1.429,
+        "build_a": 0.408,
+        "encode_a": 1.166,
+        "build_b": 1.014,
+        "encode_b": 0.715,
+        "build_c": 0.645,
+        "encode_c": 1.02,
+        "sync_clone_linear": 0.703,
+        "sync_arc_sorted": 0.716,
+        "rebuild_a": 0.704,
+        "rebuild_b": 1.929,
+        "rebuild_c": 1.513
       }
     },
     {
@@ -162,19 +162,19 @@
         "b": 5096
       },
       "timing_median_us": {
-        "build_current": 0.498,
-        "encode_current": 2.578,
-        "build_a": 0.654,
-        "encode_a": 2.135,
-        "build_b": 1.651,
-        "encode_b": 1.217,
-        "build_c": 0.951,
-        "encode_c": 1.852,
-        "sync_clone_linear": 2.157,
-        "sync_arc_sorted": 1.365,
-        "rebuild_a": 1.418,
-        "rebuild_b": 4.424,
-        "rebuild_c": 3.383
+        "build_current": 0.496,
+        "encode_current": 2.53,
+        "build_a": 0.627,
+        "encode_a": 2.119,
+        "build_b": 1.602,
+        "encode_b": 1.209,
+        "build_c": 0.901,
+        "encode_c": 1.825,
+        "sync_clone_linear": 2.14,
+        "sync_arc_sorted": 1.337,
+        "rebuild_a": 1.365,
+        "rebuild_b": 4.141,
+        "rebuild_c": 3.191
       }
     },
     {
@@ -203,19 +203,19 @@
         "b": 7392
       },
       "timing_median_us": {
-        "build_current": 0.618,
-        "encode_current": 3.82,
-        "build_a": 0.852,
-        "encode_a": 3.169,
-        "build_b": 2.352,
-        "encode_b": 1.957,
-        "build_c": 1.204,
-        "encode_c": 2.716,
-        "sync_clone_linear": 4.12,
-        "sync_arc_sorted": 2.086,
-        "rebuild_a": 2.097,
-        "rebuild_b": 7.608,
-        "rebuild_c": 5.822
+        "build_current": 0.608,
+        "encode_current": 3.802,
+        "build_a": 0.82,
+        "encode_a": 3.172,
+        "build_b": 2.304,
+        "encode_b": 1.95,
+        "build_c": 1.168,
+        "encode_c": 2.699,
+        "sync_clone_linear": 4.018,
+        "sync_arc_sorted": 2.078,
+        "rebuild_a": 2.071,
+        "rebuild_b": 7.219,
+        "rebuild_c": 5.67
       }
     },
     {
@@ -244,39 +244,63 @@
         "b": 11872
       },
       "timing_median_us": {
-        "build_current": 0.897,
-        "encode_current": 6.2,
-        "build_a": 1.308,
-        "encode_a": 5.172,
-        "build_b": 3.443,
-        "encode_b": 3.037,
-        "build_c": 1.756,
-        "encode_c": 4.353,
-        "sync_clone_linear": 8.881,
-        "sync_arc_sorted": 3.67,
-        "rebuild_a": 3.467,
-        "rebuild_b": 16.745,
-        "rebuild_c": 13.147
+        "build_current": 0.888,
+        "encode_current": 6.038,
+        "build_a": 1.235,
+        "encode_a": 5.071,
+        "build_b": 3.297,
+        "encode_b": 2.893,
+        "build_c": 1.655,
+        "encode_c": 4.238,
+        "sync_clone_linear": 8.859,
+        "sync_arc_sorted": 3.452,
+        "rebuild_a": 3.301,
+        "rebuild_b": 15.261,
+        "rebuild_c": 12.25
       }
     }
   ],
   "client_sync_us": {
     "clone_linear": {
-      "median": 0.094,
-      "p95_of_medians": 0.097
+      "median": 0.092,
+      "p95_of_medians": 0.094
     },
     "arc_sorted": {
-      "median": 0.2,
-      "p95_of_medians": 0.206
+      "median": 0.203,
+      "p95_of_medians": 0.204
     }
   },
   "h10": {
-    "two_median_us": 0.33,
-    "shared_median_us": 0.255,
+    "two_median_us": 0.317,
+    "shared_median_us": 0.249,
     "alloc_two_calls": 22,
     "alloc_two_bytes": 1824,
     "alloc_shared_calls": 31,
     "alloc_shared_bytes": 1824
+  },
+  "header_fields": {
+    "energy": 475062,
+    "last_seq": 459524,
+    "next_rotation_in": 332900,
+    "offers": 1192930,
+    "outcome": 238586,
+    "phase": 238586,
+    "phase_ticks_left": 470488,
+    "stronghold_hp": 953368,
+    "synergy": 1908688,
+    "tick": 464372,
+    "you": 238586
+  },
+  "event_counts": {
+    "AttackStart": 120176,
+    "Death": 6218,
+    "Evolved": 1560,
+    "Heal": 26262,
+    "Hit": 93888,
+    "PhaseChanged": 202,
+    "Spawn": 8056,
+    "StatusApplied": 7752,
+    "SynergyChanged": 3330
   },
   "integrity": {
     "reconnect_c": true,

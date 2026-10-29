@@ -287,11 +287,11 @@ fn collect_shares(view: &MatchView, agg: &mut ShareAgg) {
     agg.views += 1;
     agg.total += total as u64;
     agg.header += header as u64;
-    agg.units += unit_fields as u64;
+    agg.units += units_bytes as u64;
     agg.unit_static += unit_static as u64;
     agg.unit_max_hp += unit_max_hp as u64;
     agg.unit_dynamic += unit_dynamic as u64;
-    agg.events += event_sum as u64;
+    agg.events += events_bytes as u64;
     agg.units_seen += view.units.len() as u64;
     agg.events_seen += view.events.len() as u64;
     for (name, n) in header_fields {
@@ -1853,6 +1853,23 @@ fn main() {
     print_summary_row("D events only", &natural.d, 10.0);
     println!();
     println!("Field shares: {}", shares_line(&natural.shares));
+    println!();
+    println!("### Header bytes (share of the whole message)");
+    println!();
+    println!("| field | bytes | share |");
+    println!("|---|---|---|");
+    for (name, bytes) in &natural.shares.header_fields {
+        println!(
+            "| {name} | {} | {:.1}% |",
+            bytes / natural.shares.views.max(1),
+            *bytes as f64 * 100.0 / natural.shares.total as f64
+        );
+    }
+    println!();
+    println!(
+        "Unit fields exclude the vector count prefix; the small gap to the unit share is that prefix."
+    );
+    println!("Event counts: {:?}", natural.shares.event_counts);
     println!(
         "Section shares: A [{}] | B [{}] | C [{}] | D [{}]",
         sections_line(natural.sec_a),
@@ -2158,6 +2175,20 @@ fn main() {
         timing_json("clone_linear", &natural.sync_current),
         timing_json("arc_sorted", &natural.sync_poc)
     );
+    let header_json: Vec<String> = natural
+        .shares
+        .header_fields
+        .iter()
+        .map(|(name, bytes)| format!("\"{name}\":{bytes}"))
+        .collect();
+    let event_json: Vec<String> = natural
+        .shares
+        .event_counts
+        .iter()
+        .map(|(name, count)| format!("\"{name}\":{count}"))
+        .collect();
+    println!("    \"header_fields\": {{{}}},", header_json.join(","));
+    println!("    \"event_counts\": {{{}}},", event_json.join(","));
     println!(
         "    \"timing_us\": {{{},{},{},{},{},{},{},{},{},{},{}}},",
         timing_json("build_current", &natural.build_current),
