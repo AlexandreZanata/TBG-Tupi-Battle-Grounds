@@ -44,9 +44,14 @@ fn ratio(knob: Knob, base: i64, next: i64) -> f64 {
         | Knob::StrongholdDamage
         | Knob::StrongholdRange
         | Knob::EnergyStart
-        | Knob::EnergyCap
         | Knob::RegenRunning
-        | Knob::RegenOvertime
+        | Knob::InterestBand
+        | Knob::InterestPerBand
+        | Knob::InterestMaxBands
+        | Knob::AugmentRoundTicks
+        | Knob::AugmentWindow
+        | Knob::AugmentForgo
+        | Knob::AugmentCost(_)
         | Knob::Synergy(..)
         | Knob::HatchEvery
         | Knob::HatchEveryHive

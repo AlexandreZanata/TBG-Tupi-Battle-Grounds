@@ -113,9 +113,9 @@ async fn play_idle(ws: &mut Ws) -> tbg_core::Outcome {
 }
 
 #[tokio::test]
-async fn br_r01_ranked_pairing_and_draw_rating() {
-    // BR-R01/R02: two accounts queue ranked and pair; BR-R03: a draw moves
-    // neither rating (equal 1000 vs 1000, placement K).
+async fn br_r01_ranked_pairing_and_decisive_rating() {
+    // BR-R01/R02: two accounts queue ranked and pair. With open-ended
+    // matches, a surrender produces the decisive rating pair (BR-R03).
     let (url, t) = live_server("draw", 30).await;
     let mut a = connect(&url).await;
     let mut b = connect(&url).await;
@@ -125,30 +125,51 @@ async fn br_r01_ranked_pairing_and_draw_rating() {
     register_as(&mut b, "RankB").await;
     send(&mut a, &ClientMsg::RankedMatch).await;
     send(&mut b, &ClientMsg::RankedMatch).await;
-    for ws in [&mut a, &mut b] {
+    let mut seats = [None, None];
+    for (i, ws) in [&mut a, &mut b].into_iter().enumerate() {
         loop {
             match recv(ws).await {
                 Some(ServerMsg::MatchStart {
+                    you,
                     mode: MatchMode::Ranked,
                     opponent_rating: Some(1000),
                     ..
-                }) => break,
+                }) => {
+                    seats[i] = Some(you);
+                    break;
+                }
                 Some(_) => continue,
                 None => panic!("ranked match never started"),
             }
         }
     }
+    // B gives up; A wins by forfeit.
+    send(&mut b, &ClientMsg::Surrender).await;
     let (oa, ob) = tokio::join!(play_idle(&mut a), play_idle(&mut b));
     assert_eq!(oa, ob);
-    for ws in [&mut a, &mut b] {
-        match recv(ws).await {
-            Some(ServerMsg::RatingChanged {
-                before: 1000,
-                after: 1000,
-                profile,
-            }) => assert_eq!(profile.ranked_games, 1),
-            other => panic!("expected unchanged rating, got {other:?}"),
+    assert_eq!(oa.reason, tbg_core::EndReason::Forfeit);
+    assert_eq!(oa.winner, seats[0]);
+    match recv(&mut a).await {
+        Some(ServerMsg::RatingChanged {
+            before: 1000,
+            after: 1020,
+            profile,
+        }) => {
+            assert_eq!(profile.ranked_games, 1);
+            assert_eq!(profile.wins, 1);
         }
+        other => panic!("expected winner rating, got {other:?}"),
+    }
+    match recv(&mut b).await {
+        Some(ServerMsg::RatingChanged {
+            before: 1000,
+            after: 980,
+            profile,
+        }) => {
+            assert_eq!(profile.ranked_games, 1);
+            assert_eq!(profile.losses, 1);
+        }
+        other => panic!("expected loser rating, got {other:?}"),
     }
     let store = Store::open(&t.db).unwrap();
     assert_eq!(store.ranked_match_count().await.unwrap(), 1);
@@ -284,9 +305,11 @@ async fn br_r06_casual_matches_never_touch_rating() {
             }
         }
     }
-    // Finish the match, then confirm the columns are untouched.
+    // Finish the match (one surrender), then confirm the columns are untouched.
+    send(&mut b, &ClientMsg::Surrender).await;
     let (oa, ob) = tokio::join!(play_idle(&mut a), play_idle(&mut b));
     assert_eq!(oa, ob);
+    assert_eq!(oa.reason, tbg_core::EndReason::Forfeit);
     let mut a2 = connect(&url).await;
     hello(&mut a2).await;
     let profile = login_as(&mut a2, &key_a).await;

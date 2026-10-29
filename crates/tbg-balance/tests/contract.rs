@@ -27,9 +27,18 @@ fn canon() -> &'static Ruleset {
 const MATCH_PAIRS: u64 = 256;
 
 fn favor_vs_bot(rules: &'static Ruleset, k: UnitKind, pairs: u64) -> f64 {
+    favor_vs(rules, k, pairs, Policy::Bot)
+}
+
+/// Score of `favor-<unit>` against `opponent`. Since the Shop changes only
+/// on a purchase (BR-S04, D-44) a unit is offered rarely, so the match row
+/// against the shipped bot (which also buys tanks and the dearest cards)
+/// dilutes a planted imbalance; the cheap-spam opponent leaves the favored
+/// unit as the only variable.
+fn favor_vs(rules: &'static Ruleset, k: UnitKind, pairs: u64, opponent: Policy) -> f64 {
     let m = Matchup {
         rules,
-        policies: [Policy::Favor(k), Policy::Bot],
+        policies: [Policy::Favor(k), opponent],
         reaction: [gate::REACTION; 2],
         setup: Setup::None,
         arcanas: [ArcanaPreset::NEUTRAL; 2],
@@ -187,7 +196,9 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             // the match row must move (`favor-<unit>` vs `bot`).
             let caught = caught
                 || favor_vs_bot(scaled(kind, 2, 2, 1), kind, MATCH_PAIRS)
-                    >= favor_vs_bot(canon(), kind, MATCH_PAIRS) + 0.10;
+                    >= favor_vs_bot(canon(), kind, MATCH_PAIRS) + 0.10
+                || favor_vs(scaled(kind, 2, 2, 1), kind, MATCH_PAIRS, Policy::Cheap)
+                    >= favor_vs(canon(), kind, MATCH_PAIRS, Policy::Cheap) + 0.10;
             assert!(caught, "{kind:?} ×2 HP and damage was not caught");
             // A tripled cost: flagged weak, or clearly weaker everywhere.
             let dear = duels::matrix_of(scaled(kind, 1, 1, 3), forms.clone(), 4);
@@ -197,7 +208,9 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
                     .all(|b| moved(avg(&plain, b) - avg(&dear, b), avg(&plain, b)));
             let caught = caught
                 || favor_vs_bot(scaled(kind, 1, 1, 3), kind, MATCH_PAIRS)
-                    <= favor_vs_bot(canon(), kind, MATCH_PAIRS) - 0.10;
+                    <= favor_vs_bot(canon(), kind, MATCH_PAIRS) - 0.10
+                || favor_vs(scaled(kind, 1, 1, 3), kind, MATCH_PAIRS, Policy::Cheap)
+                    <= favor_vs(canon(), kind, MATCH_PAIRS, Policy::Cheap) - 0.10;
             assert!(caught, "{kind:?} ×3 cost was not caught");
         } else {
             // A pure healer cannot win a duel: measured in matches instead.

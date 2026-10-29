@@ -1,5 +1,5 @@
 //! In-match HUD: clock, Stronghold HP, Energy, army size, synergies,
-//! rotation timer, and the three shop cards. Reads only `LatestView`.
+//! and the five shop cards. Reads only `LatestView`.
 //! The top line (names, bars, clock) lives in `hud_top`.
 
 use bevy::prelude::*;
@@ -14,10 +14,50 @@ pub(super) enum Hud {
     Hp(usize),
     EnergyFill,
     Info,
-    Rotation,
     Card(usize),
     CardText(usize),
     CardStrip(usize),
+    Augments,
+    CouncilStatus,
+    CouncilRow,
+    CouncilOption(usize),
+    CouncilOptionText(usize),
+    Forgo,
+    ForgoText,
+}
+
+fn council_card(i: usize) -> impl Bundle {
+    (
+        Node {
+            width: px(150.0),
+            min_height: px(64.0),
+            padding: UiRect::all(px(5.0)),
+            flex_direction: FlexDirection::Column,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        BackgroundColor(BUTTON),
+        UiAction::ChooseAugment(i as u8),
+        Hud::CouncilOption(i),
+        children![(label("", 11.0), Hud::CouncilOptionText(i))],
+    )
+}
+
+fn forgo_card() -> impl Bundle {
+    (
+        Node {
+            width: px(86.0),
+            min_height: px(46.0),
+            padding: UiRect::all(px(4.0)),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        BackgroundColor(BUTTON),
+        UiAction::ForgoAugment,
+        Hud::Forgo,
+        children![(label("Forgo", 12.0), Hud::ForgoText)],
+    )
 }
 
 #[derive(Component)]
@@ -109,14 +149,32 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
                     ..default()
                 },
                 children![
+                    (label("", 13.0), Hud::Augments),
                     (label("", 15.0), Hud::Info),
+                    (label("", 12.0), Hud::CouncilStatus),
+                    (
+                        Node {
+                            display: Display::None,
+                            flex_wrap: FlexWrap::Wrap,
+                            justify_content: JustifyContent::Center,
+                            row_gap: px(6.0),
+                            ..row(6.0)
+                        },
+                        Hud::CouncilRow,
+                        children![
+                            council_card(0),
+                            council_card(1),
+                            council_card(2),
+                            council_card(3),
+                            forgo_card()
+                        ]
+                    ),
                     bar(
                         Hud::EnergyFill,
                         Color::srgb_u8(0xB4, 0x7C, 0xFF),
                         352.0,
                         14.0
                     ),
-                    bar(Hud::Rotation, Color::srgb_u8(0xF4, 0xEE, 0xE0), 352.0, 4.0),
                     (
                         row(8.0),
                         children![card(0), card(1), card(2), card(3), card(4)]

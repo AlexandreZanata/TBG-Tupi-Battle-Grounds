@@ -59,7 +59,8 @@ pub fn arena(rules: &Ruleset) -> &'static Ruleset {
     let mut r = rules.clone();
     r.stronghold_damage = 0;
     r.regen_running = 0;
-    r.regen_overtime = 0;
+    r.interest.max_bands = 0;
+    r.augment.round_ticks = 0;
     // ponytail: leaked once per tested ruleset (a few KB, freed at exit);
     // a lifetime on MatchState would touch every online caller.
     Box::leak(Box::new(r))

@@ -138,6 +138,7 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
                             side.evolutions[u.kind as usize][usize::from(branch.min(1))] += 1;
                         }
                     }
+                    PlayerIntention::ChooseAugment { .. } | PlayerIntention::Forgo { .. } => {}
                 }
             }
             Moment::Intention { .. } => {}

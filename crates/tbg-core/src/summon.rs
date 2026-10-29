@@ -1,6 +1,7 @@
 //! Nester Hatch and summon lifetime (BR-U08). These limits belong to the
 //! ability, never to the army: bought units stay uncapped (BR-U07, D-32).
 
+use crate::augment;
 use crate::content::BEETLES_PER_PLAYER;
 use crate::state::{Event, MatchState, Unit};
 use crate::types::{Status, UnitId, UnitKind};
@@ -15,12 +16,23 @@ pub(crate) fn expire(state: &mut MatchState) {
     }
 }
 
-/// The living summons of one seat, by summoner. Fixed size: the per-player
-/// limit bounds it, so a tick allocates nothing here.
-#[derive(Default)]
+/// Hard safety bound for the summon entity count per seat. Augment copies
+/// raise the gameplay limit up to this fixed array size (no per-tick alloc).
+const MAX_SUMMONS: usize = 64;
+
+/// The living summons of one seat, by summoner.
 struct Brood {
-    by: [UnitId; BEETLES_PER_PLAYER],
+    by: [UnitId; MAX_SUMMONS],
     len: usize,
+}
+
+impl Default for Brood {
+    fn default() -> Brood {
+        Brood {
+            by: [0; MAX_SUMMONS],
+            len: 0,
+        }
+    }
 }
 
 impl Brood {
@@ -31,12 +43,17 @@ impl Brood {
             .count()
     }
 
-    fn push(&mut self, nester: UnitId) {
-        if self.len < BEETLES_PER_PLAYER {
+    fn push(&mut self, nester: UnitId, limit: usize) {
+        if self.len < limit.min(MAX_SUMMONS) {
             self.by[self.len] = nester;
             self.len += 1;
         }
     }
+}
+
+fn limit(state: &MatchState, seat: crate::types::Seat) -> usize {
+    let add = augment::summon_limit_add(&state.player(seat).augments);
+    (BEETLES_PER_PLAYER + usize::from(add)).min(MAX_SUMMONS)
 }
 
 /// Each living Nester, in id order, hatches when its timer is done and both
@@ -45,7 +62,7 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
     let mut brood = [Brood::default(), Brood::default()];
     for u in state.units.iter().filter(|u| u.hp > 0) {
         if let Some(nester) = u.summoner {
-            brood[u.seat.index()].push(nester);
+            brood[u.seat.index()].push(nester, MAX_SUMMONS);
         }
     }
     for idx in 0..state.units.len() {
@@ -60,11 +77,12 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
             continue;
         }
         let (every, per_nester) = state.rules.hatch_rule(n.tier, n.branch);
+        let cap = limit(state, n.seat);
         let seat_brood = &mut brood[n.seat.index()];
-        if seat_brood.len >= BEETLES_PER_PLAYER || seat_brood.of(n.id) >= per_nester {
+        if seat_brood.len >= cap || seat_brood.of(n.id) >= per_nester {
             continue;
         }
-        seat_brood.push(n.id);
+        seat_brood.push(n.id, cap);
         state.units[idx].hatch_cd = every;
         spawn_beetling(state, &n, ev);
     }
@@ -74,9 +92,22 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
 /// and position; ids keep growing, so `units` stays sorted by id.
 fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
     let kind = UnitKind::Beetling;
+    let bonus = augment::unit_bonus(
+        &state.player(nester.seat).augments,
+        state.player(nester.seat).synergy,
+        kind,
+        nester.tier,
+    );
     let max_hp = state
         .rules
-        .effective_stats(kind, nester.tier, nester.branch, 0)
+        .stats_with(
+            kind,
+            nester.tier,
+            nester.branch,
+            0,
+            &crate::arcana::ArcanaPreset::NEUTRAL,
+            &bonus,
+        )
         .max_hp;
     let id = state.next_unit_id;
     state.next_unit_id += 1;
@@ -95,6 +126,10 @@ fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
         summoner: Some(nester.id),
         expires_at: Some(state.tick + state.rules.beetle_lifetime),
         hatch_cd: 0,
+        haste_until: 0,
+        heal_cut_until: 0,
+        heal_cut_bp: 0,
+        second_wind_used: 0,
     });
     ev.push(Event::Spawn {
         unit: id,

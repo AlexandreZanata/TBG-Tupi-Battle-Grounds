@@ -1,5 +1,12 @@
 # P16-F1 — Economy and Siege: uncapped Energy, Interest, no time-up decision
 
+> **Owner revision 2026-10-29 (D-41) — executed in reduced form on branch
+> `phase/p16f-infinite-economy`.** Goal 1 (uncapped Energy, Interest) is
+> active. Goal 2 is replaced: no Siege, no Collapse, no server limit;
+> matches are open-ended (BR-M07). Goal 3 (lab gate before the switch) was
+> skipped by owner decision and stays open. Goal 4 is done for the economy.
+> The combined phase report for the revision is at the end of this file.
+
 **Depends on:** P16-D (balance) reviewed and merged, with the P16-C `saver`
 finding fixed or explained in its report. P16-E is not part of this plan.
 **Branch:** `phase/p16f1-economy-and-siege`.
@@ -352,8 +359,110 @@ confirm the Interest meter and the Siege are understandable.
 
 ## Phase report
 
-_Not executed._ Fill in: starting state; baseline; experiment table
-(cells a–e, band screen) with intervals; owner decision; chosen values;
-goldens refreeze proof; gate after the switch; C4a/C4b; performance
-before/after; browser and two-client checks; deviations; blocked items;
-limitations (bots are not humans).
+### Owner revision 2026-10-29 (D-41), branch `phase/p16f-infinite-economy`
+
+Executed as one combined change for P16-F1 (economy, open-ended matches)
+and P16-F5–F7 (infinite Augments online), plus the owner's mandatory
+**global pause during Augment selection** (BR-AG12–AG14). Not the spec
+above: no lab gate, no Siege/Collapse, no `ServerLimit`.
+
+**Starting state.** Base `origin/main` becd566. The previous agent left the
+economy, the 40 Augments, protocol v10 and both HUDs uncommitted;
+`cargo test -p tbg-core`, `-p tbg-client` (26), server `online` (29 of 30),
+`ranked` (6) and `leaderboard` (4) passed; the new online Augment test did
+not compile (it read `b_view` before defining it, then compared it with
+itself).
+
+**What changed in this pass.**
+- Online test rewritten around the pause (below); it now compiles and
+  checks real values.
+- `MatchState::clock` (selection clock, every step) beside `tick` (combat
+  clock, frozen while paused). `step()` during a round only advances the
+  clock and resolves on both confirmations or the deadline; Interest,
+  regen, Shop, combat, cooldowns, summons and Synergy do not run.
+- `PlayerState::augment_pick`: a confirmed id stays hidden; Energy is paid
+  on confirmation; both outcomes apply in seat order at resolution.
+  `Forgo` rewards are paid at resolution too (canon value 0).
+- `Rejection::Paused` for `Purchase`/`Evolve` during a pause.
+- `ReplayOp.clock` replaces `ReplayOp.tick`; views and the bot cadence run
+  on the selection clock in the server, the practice match and `headless`.
+- `ServerMsg::View(Box<MatchView>)` (clippy `large_enum_variant`; same
+  wire bytes). `MatchView.clock` added.
+- Practice/reference bot forgoes every round (`ponytail:` comment).
+- Desktop HTML War Council is a modal over a dim veil that blocks the
+  field: four cards with descriptions and costs, time left, select then
+  **Confirm choice**, **Forgo**, then "Augment selected! / Waiting for
+  opponent...". Bevy fallback HUD: Council row only while paused, Shop and
+  Evolution disabled, waiting text.
+
+**Goldens refrozen** (`contract_determinism`, `contract_lab` C2): the new
+serialized fields move every hash; outcomes and end combat ticks of all
+golden seeds are unchanged (seed 1 A 2 297, 7 B 1 920, 42 B 3 233,
+1000 → 2 160, 65535 → 2 637).
+
+**Verification (2026-10-29, this machine).**
+
+| Check | Result |
+|-------|--------|
+| `cargo fmt --all -- --check` | exit 0 |
+| `cargo clippy --workspace -- -D warnings` | exit 0 (also clean with `--all-targets`) |
+| `cargo test --workspace` | exit 0; `tbg-balance` contract 7 passed in 193.34 s, value 12; `tbg-client` 26; `tbg-core` augment_pause 9, augment_effects 14, augments_infinite 10, economy_interest 13, contract_determinism 2, contract_lab 3; server online 30, ranked 6, leaderboard 4, lab_equivalence C4a 1 (C4b ignored) |
+| `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown` | exit 0 |
+| `trunk build --release` | success |
+| Browser, desktop 1440×900, two real clients (desktop + second tab) on a local server at :8137 | paused at 1:00 for both; four cards, costs, descriptions, 0:55 timer; select + confirm → "Augment selected! Waiting for opponent..." with the clock frozen at 1:00 and Energy 16 → 13; the idle opponent never confirmed and the battle resumed at the deadline with "Reinforced Shields" shown; Shop clicks behind the veil did nothing |
+
+**Owner-required pause tests** (`crates/tbg-core/tests/augment_pause.rs`,
+`crates/tbg-server/tests/online.rs`): (1) both seats frozen on the same
+round and combat tick; (2) units, attacks in flight and cooldowns
+unchanged over 300 paused steps; (3) Energy, `low`, Interest, offers
+unchanged; (4) one confirmation never resumes; (5) both confirmations
+resume on the next step; (6) the deadline resumes with an idle player
+after exactly 400 steps (20 s; first built as 60 s, shortened by the owner afterwards); (7) the pick is invisible to the other seat
+until resolution; (8) repeat or changed choices rejected and charged once;
+(9) online: the undecided seat disconnects and the deadline still resumes
+the battle, then it reconnects into the resumed battle; a seat reconnecting
+mid-pause gets the round, less time left and its confirmation; (10) the
+next draw is 1 200 combat ticks later, 1 600 selection steps including the
+20-s pause; (11) a replay with choices made 40 and 300 steps into pauses
+reproduces the final hash, and the server-vs-headless C4a contract passes;
+(12) desktop UI checked in the browser (phone not checked: owner rule,
+desktop only).
+
+**Deviations.** Phone (Bevy) War Council confirms on one tap, without a
+separate Confirm step, and does not highlight the chosen card; not
+browser-checked (desktop-only rule). The bot never buys Augments.
+
+**Shop follow-up (owner request, same day).** Offers no longer rotate
+every 10 s; a purchase refills its slot with a unit drawn uniformly from
+the five not on screen (never the one just bought, BR-S04), from the
+seat's server-seeded stream (online seeds come from the OS generator). The
+card timer bar is gone from the desktop HUD; `INTEREST_TICKS` replaces
+`ROTATION_TICKS` for the Interest period; `MatchView.next_rotation_in` is
+removed. Bot goldens moved with this rule (seed 1 now B at 3 664, 7 A at
+2 146, 42 B at 2 342). Test: `rules.rs`
+`br_s04_a_purchase_refills_with_an_unseen_unit_and_nothing_rotates`
+(400 purchases: never a shown unit, others untouched, all 10 units
+reachable; offers unchanged over 1 000 steps without a purchase).
+
+**Limitations (not measured or not done).**
+- Balance is **not measured**: no `tbg-balance` run for uncapped Energy,
+  Interest or infinite Augments; GAME-DESIGN §10.9 gates are open; P16-C's
+  `saver` finding probably gets stronger.
+- No `ruleset_fp` (ruleset fingerprint) is recorded with matches.
+- Not every cap is visible in the UI (lifesteal, damage reduction, status,
+  move and attack-speed caps; Bounty ceiling).
+- Matches have no time bound at all; one long match costs one task.
+- Augment picks are not in match records or telemetry yet.
+
+**Interest revision (owner, same day, D-43).** The 10-s Interest payment
+is replaced by a regen boost: every full 5 `Energy` held adds 25 % of the
+base regen, counting at most 25 (×1.25 at 5 up to ×2.25), so
+`PlayerState::low`, `interest_paid`, `Event::InterestPaid` and the payment
+fields of `MatchView` are gone (`regen_bp` replaces them; protocol v12).
+The Bounty window keeps its 10-s reset. `economy_interest.rs` is rewritten
+for the new rule; the contract goldens (`contract_determinism`,
+`contract_lab` C2) are refrozen because the faster Energy flow moves bot
+outcomes and end ticks (seed 1 B at 2 687, 7 A at 2 221, 42 B at 2 408).
+Balance is still not measured: banking now pays continuously and is likely
+stronger than before.
+

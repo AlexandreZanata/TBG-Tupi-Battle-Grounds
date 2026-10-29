@@ -1,0 +1,10 @@
+300 bot matches (300 ended), default Arcanas, every 4th combat tick sampled
+seat-ticks sampled: 418548
+Shieldwall    a DPS ally alive:                 7.5% of seat-ticks
+Battle Rush   a Tank ally alive:               74.1% of seat-ticks
+Combined Arms Tank and DPS both alive:          5.7% of seat-ticks
+Hunter's Focus Ranged attack on controlled:    25.0% of 82063 Ranged windup ticks
+Quickdraw     Ranged target within 2 tiles:     8.6% of Ranged windup ticks
+Emergency Care heal on an ally below 40% HP:   32.0% of 54902 Support heal windup ticks
+Purification  heal on a slowed/rooted ally:    14.5% of Support heal windup ticks
+Unshaken      status landing on Support/Control:  16.9% of 41948 statuses applied

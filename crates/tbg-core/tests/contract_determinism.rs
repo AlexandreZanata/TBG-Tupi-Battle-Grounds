@@ -18,28 +18,31 @@ fn bot_match(seed: u64) -> MatchState {
 
 #[test]
 fn bot_matches_are_frozen() {
-    // D-40: every PlayerState now serializes its Arcana preset, so the
-    // hashes moved; outcomes and end ticks are unchanged (neutral presets).
+    // Owner revision 2026-10-29: uncapped Energy, Interest as a regen boost
+    // (every full 5 Energy held adds 25 % of the base regen), the Augment
+    // pause, and a Shop that changes only on purchase (BR-S04). The faster
+    // Energy flow changes what the bots can buy, so outcomes and end combat
+    // ticks moved with the hashes.
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0xdb54_4abe_3ad8_cf6b_u64,
-            2_297,
-            Seat::A,
-            StrongholdDestroyed,
-        ),
-        (
-            7,
-            0xfcf2_7da6_113f_9cce,
-            1_920,
+            0xe9a8_4877_7c0c_ce81_u64,
+            2_687,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
+            7,
+            0x2802_0743_cf00_b10d,
+            2_221,
+            Seat::A,
+            StrongholdDestroyed,
+        ),
+        (
             42,
-            0x0d17_5030_56f8_e31c,
-            3_233,
+            0xe43e_e20c_42ce_4607,
+            2_408,
             Seat::B,
             StrongholdDestroyed,
         ),

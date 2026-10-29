@@ -1,5 +1,10 @@
 # P16-F6 — Augment catalog: the remaining 26 and adversarial balance
 
+> **Owner revision 2026-10-29 (D-41).** All 40 Augments are implemented
+> and active (each copy stacks). The adversarial balance work of this
+> phase was **not** done; it stays the open follow-up. Report:
+> [P16-F1 phase report](P16F1-economy-and-siege.md#phase-report).
+
 **Depends on:** P16-F5 reviewed, its gate passed on confirmation seeds, and
 its owner checkpoint done (round machinery and the 14 ★ Augments work
 offline). Canon rounds stay **disabled** through this phase; P16-F7 turns
@@ -502,6 +507,8 @@ postcard bytes. Views and the wire do not change in this phase.
   Plants regen; mend window starts at the first mend).
 
 ## Phase report
+
+Owner revision 2026-10-29: see the [combined report](P16F1-economy-and-siege.md#phase-report). The original checklist below is kept for the gated work still open.
 
 _Not executed._ Fill in:
 

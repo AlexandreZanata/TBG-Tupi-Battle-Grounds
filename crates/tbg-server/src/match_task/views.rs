@@ -16,7 +16,7 @@ impl Match {
     pub(super) fn send_view(&mut self, seat: Seat) {
         let events = std::mem::take(&mut self.pending[seat.index()]);
         let view = self.state.view_for(seat, &events);
-        self.send(seat, ServerMsg::View(view));
+        self.send(seat, ServerMsg::View(Box::new(view)));
     }
 
     pub(super) fn count_success(&mut self, seat: Seat, intent: tbg_core::PlayerIntention) {
@@ -33,6 +33,8 @@ impl Match {
                 }
             }
             tbg_core::PlayerIntention::Evolve { .. } => stats.evolutions += 1,
+            tbg_core::PlayerIntention::ChooseAugment { .. }
+            | tbg_core::PlayerIntention::Forgo { .. } => {}
         }
     }
 

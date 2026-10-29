@@ -67,6 +67,13 @@ ruleset is not serialized, so hashes, views, and the wire are unchanged.
 `tbg_core::replay` re-runs a recorded match; contract C4 proves the server
 at 5 ms and 50 ms ticks equals the headless replay.
 
+**Two clocks (D-41, BR-AG12–AG14).** `MatchState::tick` is the combat
+clock; every rule that counts time reads it, and it freezes while an
+Augment round pauses the battle. `MatchState::clock` counts `step()`
+calls, pauses included: it closes a paused round, paces views (10 Hz),
+and keys replay ops. A paused `step()` touches nothing but the selection
+clock and the close check, so no extra task or timer exists for pauses.
+
 Planned modules (create each only when its roadmap task starts):
 
 | Crate | Module | Responsibility |
@@ -110,7 +117,8 @@ tables are the one allowed exception.
   it (BR-S05). Units, iteration, and targeting use `Vec` order by unit id —
   never `HashMap` iteration.
 - **Tick order:** 1) apply queued intentions in arrival order; 2) clock,
-  phase, `Energy` regen; 3) shop rotation; 4) synergy recompute;
+  phase, `Energy` regen with the Interest boost; 3) Augment rounds (no shop
+  rotation: offers change only on purchase, BR-S04); 4) synergy recompute;
   5) statuses tick down; 6) targeting + movement; 7) attacks resolve
   (cooldown, windup, splash, statuses, heals); 8) deaths removed, events
   emitted; 9) outcome check.
@@ -119,7 +127,7 @@ tables are the one allowed exception.
   views drain them so the client animates exactly what happened.
 - **Views:** `view_for(seat)` returns tick, phase, clock, both Stronghold
   HPs, all units (id, owner, kind, form, x, hp, max_hp, status), the
-  seat's own `Energy`, offers, rotation timer, and `last_seq` (last applied
+  seat's own `Energy`, offers, regen multiplier, and `last_seq` (last applied
   intention). Opponent `Energy`, offers, and seeds are never included.
 - **Determinism check:** `MatchState::hash()` (FNV over the state) lets
   tests assert that the same seed and intention script give the same
@@ -152,15 +160,20 @@ tables are the one allowed exception.
   frozen presets in `MatchStart`), and v9 (P39: `CreateChallenge` /
   `JoinChallenge{token}` / `RequestRematch` → `ChallengeWaiting{token}` /
   `ChallengeUnavailable` / `RematchOpen{opponent}` /
-  `RematchState{you_requested, opponent_requested}` / `RematchClosed{declined}`).
+  `RematchState{you_requested, opponent_requested}` / `RematchClosed{declined}`),
+  and v11 (P40: the fifteen-rank `SetArcanas`/`ArcanasSelected` payload and
+  twelve-point schema; both frozen presets still travel in `MatchStart`).
   P39 appends after the Arcana variants, keeping every existing index and
   all `MatchStart` fields; `MatchMode::Challenge` is appended after Ranked.
-  Peers older than v9 are rejected at the handshake.
+  Peers older than v11 are rejected at the handshake.
   Intentions carry no seat: the server derives the seat from the connection.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
   applied or rejected that tick (P9).
-  Clients render about 120 ms behind the newest view and interpolate x.
+  Clients place views on the server clock (`MatchView::clock`), render an
+  adaptive 100–350 ms behind the newest one (one view interval plus the
+  p95 arrival jitter) and interpolate x; events play when the render time
+  reaches their view (P30-C, `tbg-client/src/sync/timeline.rs`).
 - **Prediction:** UI-level only — a tapped card shows pending and `Energy`
   dims optimistically until `last_seq` confirms or `Rejected` arrives.
 - **Sessions:** the server issues a random 128-bit token in `Welcome`; the
@@ -204,8 +217,8 @@ tables are the one allowed exception.
   or a new match action declines it. Invites and tickets are bounded by
   the existing 10-second cleanup, with lazy expiry on joins/requests/resume.
   No additional permanent task or timer is needed.
-- **Lifecycle:** paired → `MatchStart` → countdown → running → overtime →
-  `MatchEnd` → both sessions return to the lobby. Disconnected seats stay
+- **Lifecycle:** paired → `MatchStart` → countdown → running (open-ended,
+  with Augment pauses; D-41) → `MatchEnd` → both sessions return to the lobby. Disconnected seats stay
   in the running match for 30 s; reconnecting with the token resumes with
   a full view; otherwise the seat forfeits (BR-M03). A seat already
   detached at pairing starts the same reconnect timer.
@@ -475,46 +488,47 @@ read-only JSON API + static ranking pages (§5, §8, §9, §11); P15+ the
 medieval visual suite described in [ART-DIRECTION.md](ART-DIRECTION.md)
 (rig v2 and clip sets replace the 12-joint plan in §7; quality tiers).
 
-## 15. Arcanas extra (Proposed, after P31 only)
+## 15. Arcanas extra (active by D-40/D-42; values Proposed)
 
-P32–P38 in ROADMAP are an optional gameplay extension after the existing
-release, not requirements for P0–P31. GAME-DESIGN §9 owns proposed values;
-DECISIONS D-25 records the rationale. No runtime feature is implemented
-or enabled by this planning addendum.
+GAME-DESIGN §9 owns the node table, costs, prerequisites and proposed
+values; DECISIONS D-40/D-42 record why the extension is live. P40 expands
+the original six-node system in place.
 
-- **Core (P32–P34):** validate fixed-size presets, calculate additive integer
-  modifiers, preserve Evolution/Synergy HP ratios and deterministic traces.
-  Native examples own clocks, experiments, bot policies and statistics.
-  Experimental tuning is unavailable in default server/WASM release builds.
-  Add no dependency or general modifier/AI framework.
-- **Server (P35):** accept bounded selections only while idle, freeze them
-  at queue/room entry, construct the authoritative MatchState with both
-  presets, and preserve those selections across reconnect/account takeover.
-  Seat/account identity comes from the connection/session. No client bonus
-  values, store reads or I/O participate in simulation ticks.
-- **Wire (P35):** distinguish protocol, preset schema and competitive
-  RulesetVersion. Send static rules/presets at MatchStart and reattach,
-  not in every snapshot. Reuse UnitView max_hp; unchanged Strongholds need
-  no new max-HP field. Retain frame/rate limits and hidden opponent data.
-  Measure packet, heap and tick deltas before approving performance.
-- **Client (P36):** build the editor from the post-P31 Bevy UI kit; previews
-  call the shared formulas with frozen match data where appropriate.
-  Practice uses the same approved rules. Guests get validated local storage
-  and the same complete default and power as accounts.
-- **Store (P35/P37):** additive migrations retain legacy rows. Every match
-  records applied presets/schema/ruleset; ranked metadata is inserted in
-  the rating transaction. One active account preset uses the existing
-  SQLite writer and identity. Acknowledgements distinguish selection from
-  durable save; late replies cannot replace a queued/live match's preset.
-- **Release (P38):** statistical, human, device, security and operating
-  budgets gate activation. Drain before a rules change; preserve outcomes,
-  ratings and historical metadata. Versioned records support audit, not
-  full replay without timed intentions and the old rule implementation.
+- **Core:** `ArcanaPreset` is fifteen rank bytes. `complete` validates
+  per-node maxima, real point cost (supremes cost two) and the shared
+  prerequisite table. Per-rank percentages stay in `Ruleset.arcana_bp`;
+  the nine conditional values live in `Ruleset.arcana`. Stats still add
+  basis points from Evolution, Synergy, Arcanas and Augments before one
+  truncation. Conditional checks read `MatchState::army`, a per-tick
+  living Tank/DPS count decremented on death, so no hit scans the army.
+  No modifier framework, event bus or per-tick allocation is added.
+- **Server:** selections are validated only while idle, frozen at
+  queue/room/challenge entry, carried through reconnect/account takeover,
+  and copied into the authoritative MatchState. Seat identity comes from
+  the connection; no client bonus values reach the simulation.
+- **Wire:** protocol v11 carries fifteen ranks. MatchStart, replay records
+  and ranked rows keep both frozen presets. Six-rank historical rows are
+  read through `ArcanaPreset::migrate_legacy` and are never rewritten.
+- **Client:** the existing HTML editor keeps the three banners/emblems,
+  renders two originals, two children and a centered supreme per family,
+  shows cost and prerequisite state, refuses removals with active
+  dependents, and fits smaller screens without requiring zoom. The game
+  persists schema 2 locally; a schema-1 document is migrated.
+- **Store:** account presets accept six or fifteen bytes; a six-byte row
+  is migrated in place. Match rows record fifteen bytes from now on.
+- **Release:** values stay Proposed. The P34/P40 lab must confirm viable
+  family, hybrid and no-supreme builds and reject a compulsory supreme.
   The existing single-VPS/SQLite deployment and Elo/FIFO design remain.
 
 ## 16. Strategic expansion (Proposed, P16-F1–F8)
 
-Planning addendum; nothing here is implemented. GAME-DESIGN §10 owns the
+> **Owner revision 2026-10-29 (D-41).** Uncapped `Energy`, Interest and
+> infinite Augment rounds are implemented and active; `siege`,
+> `ServerLimit`, `SERVER_LIMIT` and the `Siege`/`Collapse` wire variants
+> were dropped (the protocol is v10, not an appended v9). The bullets
+> below are the original plan, kept for F2–F4.
+
+Planning addendum. GAME-DESIGN §10 owns the
 rules and values, D-34–D-38 the reasons, each phase file the exact steps.
 
 - **Ruleset-gated mechanics.** Each mechanic is a `Ruleset` field whose

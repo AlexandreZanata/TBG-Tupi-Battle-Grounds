@@ -36,8 +36,14 @@ impl Bot {
 
     /// Called once per view (10 per second).
     pub fn decide(&mut self, view: &MatchView) -> Option<PlayerIntention> {
-        if !matches!(view.phase, crate::Phase::Running | crate::Phase::Overtime) {
+        if view.phase != crate::Phase::Running {
             return None;
+        }
+        // ponytail: the bot forgoes every Augment round so a paused battle
+        // resumes as soon as its human opponent confirms (BR-AG13). Upgrade:
+        // an Augment preference once the lab measures one (D-33).
+        if let Some(round) = &view.augment_round {
+            return (!round.resolved).then_some(PlayerIntention::Forgo { round: round.round });
         }
         if self.wait > 0 {
             self.wait -= 1;

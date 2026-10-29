@@ -1,7 +1,9 @@
 //! Automatic combat (BR-U01, BR-U04): statuses, movement, windup and
 //! hits, splash, heals, Stronghold fire, deaths.
 
-use crate::content::{BP, LANE_LEN, WINDUP};
+use crate::arcana;
+use crate::augment;
+use crate::content::{BP, LANE_LEN, MIN_INTERVAL, WINDUP};
 use crate::hits::{damage, resolve_hit};
 use crate::state::{stronghold_x, Event, MatchState, Target};
 use crate::targeting::{self, Engage};
@@ -29,6 +31,7 @@ pub(crate) fn tick_timers(state: &mut MatchState) {
 
 /// Every living unit acts once, in ascending id order.
 pub(crate) fn run_units(state: &mut MatchState, ev: &mut Vec<Event>) {
+    state.refresh_army();
     for idx in 0..state.units.len() {
         advance_unit(state, idx, ev);
     }
@@ -52,9 +55,29 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
         if targeting::alive(state, target) {
             resolve_hit(state, &u, target, &st, ev);
         }
+        let distance = (targeting::target_x(state, target) - u.x).abs();
+        let quickdraw = if u.kind.is_summon() {
+            0
+        } else {
+            arcana::attack_speed_bp(
+                &state.player(u.seat).arcanas,
+                &state.rules().arcana,
+                state.rules().def(u.kind).archetype,
+                distance,
+            )
+        };
+        let interval = if quickdraw > 0 {
+            let base = i64::from(state.rules().def(u.kind).interval);
+            // BR-X02: every attack-speed source together stays within +100%.
+            let bp = (i64::from(st.atk_bp) + i64::from(quickdraw)).min(10_000);
+            (base * BP / (BP + bp)) as u16
+        } else {
+            st.interval
+        }
+        .max(MIN_INTERVAL);
         let unit = &mut state.units[idx];
         unit.windup = None;
-        unit.cooldown = slowed_interval(st.interval, u.status).saturating_sub(WINDUP);
+        unit.cooldown = slowed_interval(interval, u.status).saturating_sub(WINDUP);
         return;
     }
     match targeting::engage(state, &u, &st) {
@@ -69,10 +92,25 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
         }
         Some(Engage::Hold) => {}
         None => {
-            let speed = match u.status {
+            let mut speed = match u.status {
                 Status::Slowed { bp, .. } => scale_down(st.speed, bp),
                 _ => st.speed,
             };
+            let mut haste = augment::haste_move_bp(&state.player(u.seat).augments, &u, state.tick);
+            if !u.kind.is_summon() {
+                let army = state.army_of(u.seat);
+                haste += arcana::move_bonus_bp(
+                    &state.player(u.seat).arcanas,
+                    &state.rules().arcana,
+                    state.rules().def(u.kind).archetype,
+                    army.tanks > 0,
+                );
+            }
+            let haste = haste.min(5_000);
+            if haste > 0 {
+                speed = ((i64::from(speed) * (BP + i64::from(haste)) / BP).min(i64::from(i32::MAX)))
+                    as i32;
+            }
             let x = u.x + u.seat.dir() * speed;
             state.units[idx].x = x.clamp(0, LANE_LEN);
         }
@@ -113,15 +151,45 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
                 from: Target::Stronghold(seat),
                 to,
             });
-            damage(state, to, rules.stronghold_damage, ev);
+            let p = state.player(seat);
+            let bp =
+                augment::stronghold_damage_bp(&p.augments, state.tick, p.fury_until, p.fury_stacks);
+            let amount = if bp == 0 {
+                rules.stronghold_damage
+            } else {
+                (i64::from(rules.stronghold_damage) * (BP + i64::from(bp)) / BP) as i32
+            };
+            let was_alive = state
+                .unit_index(id)
+                .map(|i| state.units[i].hp > 0 && !state.units[i].kind.is_summon())
+                .unwrap_or(false);
+            let removed = damage(state, to, amount.max(1), ev);
+            let killed = was_alive && state.unit_index(id).is_some_and(|i| state.units[i].hp <= 0);
+            if killed && removed > 0 {
+                if let Some((max, ticks)) = augment::tower_fury_rule(&state.player(seat).augments) {
+                    let until = state.tick.saturating_add(u32::from(ticks));
+                    let p = state.player_mut(seat);
+                    p.fury_stacks = p.fury_stacks.saturating_add(1).min(max);
+                    p.fury_until = until;
+                }
+            }
             state.player_mut(seat).stronghold_cooldown = rules.stronghold_interval;
         }
     }
 }
 
 pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
+    let mut dead = [0u32; 2];
     for u in state.units.iter().filter(|u| u.hp <= 0) {
         ev.push(Event::Death { unit: u.id });
+        if !u.kind.is_summon() {
+            dead[u.seat.index()] += 1;
+        }
     }
     state.units.retain(|u| u.hp > 0);
+    for seat in Seat::BOTH {
+        for _ in 0..dead[seat.index()] {
+            augment::on_eligible_kill(state, seat);
+        }
+    }
 }

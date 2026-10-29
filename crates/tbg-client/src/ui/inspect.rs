@@ -62,7 +62,13 @@ pub fn report(v: &MatchView, id: UnitId, arcanas: &[ArcanaPreset; 2]) -> Option<
     } else {
         arcanas[u.seat.index()]
     };
-    let st = Ruleset::canon().stats_with(u.kind, u.tier, u.branch, level, &preset);
+    let bonus = tbg_core::augment::unit_bonus(
+        &v.augments[u.seat.index()],
+        v.synergy[u.seat.index()],
+        u.kind,
+        u.tier,
+    );
+    let st = Ruleset::canon().stats_with(u.kind, u.tier, u.branch, level, &preset, &bonus);
     let seconds = f32::from(st.interval) / TICK_HZ as f32;
     let attack = if st.heal > 0 && st.damage == 0 {
         ("Heal", st.heal)

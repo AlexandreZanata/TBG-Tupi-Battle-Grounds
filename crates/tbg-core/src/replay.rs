@@ -1,19 +1,20 @@
 //! Re-running a recorded match (D-33): the server records every intention
-//! and forfeit with the tick it was applied at; replaying them on the same
+//! and forfeit with the step it was applied at; replaying them on the same
 //! seed must give the same state, whatever clock drove the original.
+//! Ops are keyed by `MatchState::clock`, not the combat tick, so choices
+//! made during an Augment pause keep their order and timing (BR-AG13).
 
 use serde::{Deserialize, Serialize};
 
 use crate::arcana::ArcanaPreset;
-use crate::content::MATCH_END;
 use crate::intent::PlayerIntention;
 use crate::state::{MatchState, Phase};
 use crate::types::{Seat, Tick};
 
-/// One recorded command, applied before the step of `tick`.
+/// One recorded command, applied before the step at selection clock `clock`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ReplayOp {
-    pub tick: Tick,
+    pub clock: Tick,
     pub seat: Seat,
     /// `None` is a forfeit (surrender or reconnect window expired).
     pub intent: Option<(u32, PlayerIntention)>,
@@ -38,7 +39,7 @@ impl Replay {
         intent: Option<(u32, PlayerIntention)>,
     ) {
         self.ops.push(ReplayOp {
-            tick: state.tick,
+            clock: state.clock,
             seat,
             intent,
         });
@@ -49,7 +50,7 @@ impl Replay {
         let mut state = MatchState::with_arcanas(self.seed, self.arcanas);
         let mut ops = self.ops.iter().peekable();
         loop {
-            while let Some(op) = ops.next_if(|op| op.tick == state.tick) {
+            while let Some(op) = ops.next_if(|op| op.clock == state.clock) {
                 match op.intent {
                     Some((seq, intent)) => {
                         let _ = state.apply_intention(op.seat, seq, intent);
@@ -57,7 +58,7 @@ impl Replay {
                     None => state.forfeit(op.seat),
                 }
             }
-            if state.phase == Phase::Ended || state.tick > MATCH_END + 5 {
+            if state.phase == Phase::Ended || state.clock > 20 * 60 * 60 * 12 {
                 return state;
             }
             state.step();

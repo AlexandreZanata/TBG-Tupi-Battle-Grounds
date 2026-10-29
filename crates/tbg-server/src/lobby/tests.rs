@@ -234,7 +234,8 @@ fn delayed_account_preset_cannot_change_a_waiting_challenge() {
         draws: 0,
     };
     lobby.sessions.get_mut(&token).unwrap().account = Some((1, profile));
-    let preset = tbg_core::ArcanaPreset::complete([0, 0, 0, 2, 2, 2]).unwrap();
+    let preset =
+        tbg_core::ArcanaPreset::complete([2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1]).unwrap();
     lobby.arcanas_loaded(token, 1, preset);
     assert_eq!(
         lobby.sessions[&token].arcanas,

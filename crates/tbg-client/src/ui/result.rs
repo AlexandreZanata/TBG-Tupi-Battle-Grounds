@@ -40,7 +40,6 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>) {
             };
             let reason = match o.reason {
                 EndReason::StrongholdDestroyed => "A Stronghold was destroyed",
-                EndReason::TimeUp => "Time is up: Stronghold HP decided",
                 // BR-M06/BR-M03: say which side gave up.
                 EndReason::Forfeit => match o.winner {
                     Some(w) if Some(w) == info.you => "Your opponent surrendered or disconnected",

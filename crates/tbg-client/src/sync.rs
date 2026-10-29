@@ -1,4 +1,4 @@
-//! `ServerMsg` → world: match info, view buffer with interpolation, unit
+//! `ServerMsg` → world: match info, the render timeline (P30-C), unit
 //! entities, event cues. The only place that mirrors coordinates: the
 //! player's own Stronghold is always at world x = 0.
 
@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use tbg_core::content::LANE_LEN;
-use tbg_core::{Event, MatchView, Outcome, Seat, UnitId};
+use tbg_core::{MatchView, Outcome, Seat, UnitId};
 
 use crate::art::FigureLibrary;
 use crate::audio::Sounds;
@@ -15,6 +15,7 @@ use crate::visuals::{self, UnitLook, VisualAssets};
 
 mod events;
 mod messages;
+mod timeline;
 use crate::GameState;
 use events::apply_event;
 pub use events::MatchStats;
@@ -56,9 +57,9 @@ pub struct LatestView(pub Option<MatchView>);
 
 #[derive(Resource, Default)]
 pub(crate) struct ViewBuffer {
-    pub prev: Option<(f64, MatchView)>,
-    pub last: Option<(f64, MatchView)>,
-    pub events: Vec<Event>,
+    pub timeline: timeline::Timeline,
+    /// Local arrival time of the newest view (view-gap diagnostics).
+    pub last_arrival: Option<f64>,
 }
 
 #[derive(Resource, Default)]
@@ -107,44 +108,22 @@ fn sync_units(
     mut visuals: events::Visuals,
     mut fx_res: (Res<VfxAssets>, ResMut<Sounds>, ResMut<MatchStats>),
 ) {
-    let Some((last_t, last)) = buffer.last.clone() else {
+    let now = time.elapsed_secs_f64();
+    let mut scene = Scene {
+        commands: &mut commands,
+        assets: &assets,
+        lib: &lib,
+        map: &mut map,
+        visuals: &mut visuals,
+    };
+    // Borrowed, not cloned: the frame lives only while units are placed.
+    let placed = buffer
+        .timeline
+        .frame(now, time.delta_secs_f64())
+        .map(|f| scene.place(f.from, f.to, f.alpha));
+    let Some((you, alive)) = placed else {
         return;
     };
-    let you = last.you;
-    let alpha = match &buffer.prev {
-        Some((prev_t, _)) => {
-            ((time.elapsed_secs_f64() - last_t) / (last_t - prev_t).max(0.05)).clamp(0.0, 1.0)
-        }
-        None => 1.0,
-    };
-    for u in &last.units {
-        let prev_x = buffer
-            .prev
-            .as_ref()
-            .and_then(|(_, p)| p.units.iter().find(|p| p.id == u.id))
-            .map_or(u.x, |p| p.x);
-        let x = prev_x as f64 + (u.x - prev_x) as f64 * alpha;
-        let pos = Vec3::new(world_x(x as i32, you), 0.0, lane_z(u.id));
-        match map.0.get(&u.id).and_then(|e| visuals.get_mut(*e).ok()) {
-            Some((mut v, mut t, _)) => {
-                t.translation = pos;
-                visuals::update_unit_visual(&mut commands, &assets, &lib, &mut v, u);
-            }
-            None => {
-                let look = UnitLook {
-                    id: u.id,
-                    kind: u.kind,
-                    tier: u.tier,
-                    branch: u.branch,
-                    own: u.seat == you,
-                };
-                map.0.insert(
-                    u.id,
-                    visuals::spawn_unit_visual(&mut commands, &assets, &lib, look, pos),
-                );
-            }
-        }
-    }
     let (vfx, sounds, stats) = (&fx_res.0, &mut *fx_res.1, &mut *fx_res.2);
     let mut fx = events::Fx {
         assets: &assets,
@@ -153,16 +132,63 @@ fn sync_units(
         stats,
         you,
     };
-    for ev in std::mem::take(&mut buffer.events) {
+    for ev in buffer.timeline.take_events() {
         apply_event(&mut commands, &mut fx, &map, &mut visuals, ev);
     }
     map.0.retain(|id, e| {
-        let alive = last.units.iter().any(|u| u.id == *id);
+        let alive = alive.contains(id);
         if !alive && !visuals.get(*e).is_ok_and(|(v, _, _)| v.dying) {
             commands.entity(*e).try_despawn();
         }
         alive
     });
+}
+
+/// What placing units needs from the ECS, borrowed for one frame.
+struct Scene<'a, 'w, 's, 'qw, 'qs> {
+    commands: &'a mut Commands<'w, 's>,
+    assets: &'a VisualAssets,
+    lib: &'a FigureLibrary,
+    map: &'a mut UnitEntities,
+    visuals: &'a mut events::Visuals<'qw, 'qs>,
+}
+
+impl Scene<'_, '_, '_, '_, '_> {
+    /// Move, update or spawn the visual of every unit of `from`, `alpha`
+    /// of the way to its position in `to`; return the seat and unit ids.
+    fn place(&mut self, from: &MatchView, to: &MatchView, alpha: f32) -> (Seat, Vec<UnitId>) {
+        let you = from.you;
+        for u in &from.units {
+            // A unit absent from the next view (it died) holds its position.
+            let to_x = to.units.iter().find(|n| n.id == u.id).map_or(u.x, |n| n.x);
+            let x = u.x as f32 + (to_x - u.x) as f32 * alpha;
+            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, lane_z(u.id));
+            match self
+                .map
+                .0
+                .get(&u.id)
+                .and_then(|e| self.visuals.get_mut(*e).ok())
+            {
+                Some((mut v, mut t, _)) => {
+                    t.translation = pos;
+                    visuals::update_unit_visual(self.commands, self.assets, self.lib, &mut v, u);
+                }
+                None => {
+                    let look = UnitLook {
+                        id: u.id,
+                        kind: u.kind,
+                        tier: u.tier,
+                        branch: u.branch,
+                        own: u.seat == you,
+                    };
+                    let e =
+                        visuals::spawn_unit_visual(self.commands, self.assets, self.lib, look, pos);
+                    self.map.0.insert(u.id, e);
+                }
+            }
+        }
+        (you, from.units.iter().map(|u| u.id).collect())
+    }
 }
 
 fn clear_units(mut commands: Commands, mut map: ResMut<UnitEntities>) {

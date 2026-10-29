@@ -13,6 +13,8 @@ use crate::types::{Seat, Status, UnitId, UnitKind};
 pub enum PlayerIntention {
     Purchase { offer: u8 },
     Evolve { unit: UnitId, branch: u8 },
+    ChooseAugment { round: u32, option: u8 },
+    Forgo { round: u32 },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -26,6 +28,16 @@ pub enum Rejection {
     WrongBranch,
     /// Summons never evolve (BR-U08).
     NotEvolvable,
+    /// A repeated or out-of-order intention (BR-A02).
+    Stale,
+    /// The Augment round is closed, unknown, or already resolved.
+    RoundClosed,
+    BadOption,
+    /// The feature is disabled in this ruleset.
+    Unavailable,
+    /// An Augment selection pauses the battle: only `ChooseAugment` and
+    /// `Forgo` are accepted until it resolves (BR-AG12).
+    Paused,
 }
 
 impl MatchState {
@@ -39,9 +51,17 @@ impl MatchState {
         if !self.is_live() {
             return Err(Rejection::NotRunning);
         }
+        let paused = self.augments.selecting();
         match intent {
+            PlayerIntention::Purchase { .. } | PlayerIntention::Evolve { .. } if paused => {
+                Err(Rejection::Paused)
+            }
             PlayerIntention::Purchase { offer } => self.purchase(seat, offer),
             PlayerIntention::Evolve { unit, branch } => self.evolve(seat, unit, branch),
+            PlayerIntention::ChooseAugment { round, option } => {
+                crate::augment::buy(self, seat, round, option)
+            }
+            PlayerIntention::Forgo { round } => crate::augment::forgo(self, seat, round),
         }
     }
 
@@ -53,12 +73,17 @@ impl MatchState {
         let kind = self.player(seat).offers[slot];
         let cost = self.rules.def(kind).cost;
         // Energy is the only gate: no army cap (BR-U07).
-        if self.player(seat).energy < cost {
+        if !self.player_mut(seat).spend(cost) {
             return Err(Rejection::NotEnoughEnergy);
         }
-        self.spawn(seat, kind, 0, 0);
+        let id = self.spawn(seat, kind, 0, 0);
+        let haste = crate::augment::deploy_haste_until(&self.player(seat).augments, self.tick);
+        if haste > 0 {
+            if let Some(idx) = self.unit_index(id) {
+                self.units[idx].haste_until = haste;
+            }
+        }
         let p = self.player_mut(seat);
-        p.energy -= cost;
         shop::refill(&mut p.offers, slot, &mut p.rng);
         Ok(())
     }
@@ -87,6 +112,10 @@ impl MatchState {
             status: Status::None,
             summoner: None,
             expires_at: None,
+            haste_until: 0,
+            heal_cut_until: 0,
+            heal_cut_bp: 0,
+            second_wind_used: 0,
             hatch_cd: if kind == UnitKind::Nester {
                 self.rules.hatch_rule(tier, branch).0
             } else {
@@ -124,11 +153,13 @@ impl MatchState {
         if !branch_ok {
             return Err(Rejection::WrongBranch);
         }
-        let cost = self.rules.evolve_cost[usize::from(u.tier)];
-        if self.player(seat).energy < cost {
+        let discount = crate::augment::evolve_discount(&self.player(seat).augments);
+        let cost = self.rules.evolve_cost[usize::from(u.tier)]
+            .saturating_sub(discount)
+            .max(crate::content::ENERGY_SCALE);
+        if !self.player_mut(seat).spend(cost) {
             return Err(Rejection::NotEnoughEnergy);
         }
-        self.player_mut(seat).energy -= cost;
         let unit = &mut self.units[idx];
         unit.tier += 1;
         unit.branch = branch;

@@ -4,15 +4,16 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::arcana::ArcanaPreset;
+use crate::arcana::{self, ArcanaPreset};
 use crate::intent::{PlayerIntention, Rejection};
 use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-/// v9: the v8 Arcana messages plus the P39 Quick Challenge and rematch
-/// messages; older peers are refused by the handshake.
-pub const PROTOCOL_VERSION: u16 = 9;
+/// v12: Interest became a regen boost (`MatchView::regen_bp` replaces the
+/// payment fields, `Event::InterestPaid` is gone). v11 was the fifteen-node
+/// Arcana schema; older peers are refused.
+pub const PROTOCOL_VERSION: u16 = 12;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a
@@ -53,7 +54,8 @@ pub enum ClientMsg {
     Surrender,
     // v8 (D-40, BR-AR05/BR-AR06): choose Arcanas while idle; the server
     // validates and answers `ArcanasSelected` or `ArcanasRejected`.
-    SetArcanas { ranks: [u8; 6] },
+    // v11: fifteen ranks (P40); the seat still comes from the connection.
+    SetArcanas { ranks: [u8; arcana::NODES] },
     // v9 (P39): Quick Challenge by link and both-accept rematch.
     CreateChallenge,
     JoinChallenge { token: InviteToken },
@@ -103,7 +105,8 @@ pub enum ServerMsg {
         /// public once paired (BR-AR05, BR-AR07).
         arcanas: [ArcanaPreset; 2],
     },
-    View(MatchView),
+    /// Boxed: a view is far larger than every other message.
+    View(Box<MatchView>),
     Rejected {
         seq: u32,
         reason: Rejection,
@@ -174,7 +177,8 @@ pub enum ServerMsg {
 /// v8 (D-40): why a `SetArcanas` was refused; the previous preset stays.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ArcanaRejection {
-    /// Not exactly six points, or a rank above two (BR-AR02).
+    /// Any invalid tree: wrong budget, rank above its node maximum or an
+    /// unmet prerequisite (BR-AR02/AR03).
     BadRanks,
     /// Queued, in a room, or in a match: the preset is frozen (BR-AR05).
     NotIdle,

@@ -98,13 +98,16 @@ pub fn save_token(token: &[u8; 16]) {
     let _ = token;
 }
 
-/// D-40: the Arcana preset the lobby editor saved under `tbg.arcanas`
-/// (`{"schema":1,"ranks":[...]}`); the default when absent, partial or
-/// invalid, so every match always gets a complete preset.
+/// D-40/P40: the Arcana preset the lobby editor saved under `tbg.arcanas`
+/// (`{"schema":2,"ranks":[...]}`); a schema-1 six-node document is migrated,
+/// and the default is used when absent, partial or invalid, so every match
+/// always gets a complete preset.
 pub fn load_arcanas() -> tbg_core::ArcanaPreset {
     #[cfg(target_arch = "wasm32")]
     if let Some(raw) = storage().and_then(|s| s.get_item(ARCANAS_KEY).ok().flatten()) {
         if let Some(p) = parse_arcanas(&raw) {
+            // Persist the migrated/completed schema so the next load is direct.
+            save_arcanas(p);
             return p;
         }
     }
@@ -118,7 +121,7 @@ pub fn save_arcanas(preset: tbg_core::ArcanaPreset) {
         let ranks: Vec<String> = preset.ranks.iter().map(u8::to_string).collect();
         let _ = s.set_item(
             ARCANAS_KEY,
-            &format!("{{\"schema\":1,\"ranks\":[{}]}}", ranks.join(",")),
+            &format!("{{\"schema\":2,\"ranks\":[{}]}}", ranks.join(",")),
         );
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -128,10 +131,11 @@ pub fn save_arcanas(preset: tbg_core::ArcanaPreset) {
 #[cfg(target_arch = "wasm32")]
 const ARCANAS_KEY: &str = "tbg.arcanas";
 
-/// The six numbers after `"ranks":[`, as a complete preset.
+/// The numbers after `"ranks":[`, as a complete preset. Six values are a
+/// schema-1 tree and migrate; fifteen are validated as the current schema.
 #[cfg(any(target_arch = "wasm32", test))]
 pub fn parse_arcanas(raw: &str) -> Option<tbg_core::ArcanaPreset> {
-    if raw.len() > 1024 {
+    if raw.len() > 4096 {
         return None;
     }
     let list = raw.split("\"ranks\"").nth(1)?;
@@ -140,6 +144,11 @@ pub fn parse_arcanas(raw: &str) -> Option<tbg_core::ArcanaPreset> {
         .split(',')
         .map(|n| n.trim().parse().ok())
         .collect::<Option<_>>()?;
+    if ranks.len() == 6 {
+        return Some(tbg_core::ArcanaPreset::migrate_legacy(
+            ranks.try_into().ok()?,
+        ));
+    }
     tbg_core::ArcanaPreset::complete(ranks.try_into().ok()?).ok()
 }
 
@@ -329,25 +338,32 @@ mod arcana_tests {
     use tbg_core::ArcanaPreset;
 
     #[test]
-    fn the_editor_document_round_trips_and_bad_input_is_refused() {
-        // The exact document `editor.js` saves (D-40).
-        let doc = r#"{"schema":1,"ranks":[2,2,2,0,0,0]}"#;
+    fn the_editor_document_round_trips_and_legacy_rows_migrate() {
+        // The exact document `editor.js` saves (P40).
+        let doc = r#"{"schema":2,"ranks":[2,2,2,2,2,2,0,0,0,0,0,0,0,0,0]}"#;
         assert_eq!(
             parse_arcanas(doc).map(|p| p.ranks),
-            Some([2, 2, 2, 0, 0, 0])
+            Some(ArcanaPreset::DEFAULT.ranks)
+        );
+        // A schema-1 six-node row preserves its ranks and gains the six
+        // new points on the original nodes.
+        let legacy = r#"{"schema":1,"ranks":[2,0,2,0,2,0]}"#;
+        assert_eq!(
+            parse_arcanas(legacy).map(|p| p.ranks),
+            Some(ArcanaPreset::DEFAULT.ranks)
         );
         // Partial, oversized, malformed: none becomes a preset.
         for bad in [
-            r#"{"schema":1,"ranks":[1,0,0,0,0,0]}"#,
-            r#"{"schema":1,"ranks":[3,3,0,0,0,0]}"#,
-            r#"{"schema":1,"ranks":[2,2,2]}"#,
-            r#"{"schema":1,"ranks":"x"}"#,
+            r#"{"schema":2,"ranks":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}"#,
+            r#"{"schema":2,"ranks":[3,3,0,0,0,0,0,0,0,0,0,0,0,0,0]}"#,
+            r#"{"schema":2,"ranks":[2,2,2]}"#,
+            r#"{"schema":2,"ranks":"x"}"#,
             "",
         ] {
             assert_eq!(parse_arcanas(bad), None, "{bad}");
         }
-        assert_eq!(parse_arcanas(&"9".repeat(2000)), None);
-        assert!(ArcanaPreset::complete([2, 0, 2, 0, 2, 0]).is_ok());
+        assert_eq!(parse_arcanas(&"9".repeat(5_000)), None);
+        assert!(ArcanaPreset::complete(ArcanaPreset::DEFAULT.ranks).is_ok());
     }
 }
 

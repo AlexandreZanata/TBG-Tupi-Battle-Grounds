@@ -47,10 +47,10 @@ fn play(
     mut link: NonSendMut<MatchLink>,
 ) {
     let Some(v) = &view.0 else { return };
-    if v.tick == auto.last_tick {
+    if v.clock == auto.last_tick {
         return;
     }
-    auto.last_tick = v.tick;
+    auto.last_tick = v.clock;
     if let Some(intent) = auto.bot.decide(v) {
         auto.seq += 1;
         let seq = auto.seq;

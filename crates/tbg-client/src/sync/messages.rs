@@ -88,18 +88,16 @@ pub(super) fn poll_link(
                 next.set(GameState::InMatch);
             }
             ServerMsg::View(view) => {
-                if let Some((t, _)) = &buffer.last {
+                if let Some(t) = buffer.last_arrival.replace(now) {
                     let gaps = &mut stats.1 .0;
                     gaps.push_back(((now - t) * 1000.0) as f32);
-                    if gaps.len() > 50 {
+                    if gaps.len() > 200 {
                         gaps.pop_front();
                     }
                 }
                 info.last_tick = view.tick;
-                buffer.events.extend(view.events.iter().copied());
-                latest.0 = Some(view.clone());
-                buffer.prev = buffer.last.take();
-                buffer.last = Some((now, view));
+                latest.0 = Some((*view).clone());
+                buffer.timeline.push(now, *view);
             }
             ServerMsg::Rejected { reason, .. } => ui.0.push(crate::ui::rejection_text(reason)),
             ServerMsg::MatchEnd { outcome } => {

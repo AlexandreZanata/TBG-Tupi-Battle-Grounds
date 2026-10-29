@@ -120,15 +120,8 @@ fn body_json(body: &[u8]) -> serde_json::Value {
     serde_json::from_slice(body).unwrap()
 }
 
-/// Read one idle player's match from start to end.
-async fn play_out(ws: &mut Ws) {
-    loop {
-        match recv(ws).await {
-            Some(ServerMsg::MatchStart { .. }) => break,
-            Some(_) => continue,
-            None => panic!("ranked match never started"),
-        }
-    }
+/// Drain one socket until the match ends.
+async fn play_end(ws: &mut Ws) {
     loop {
         match recv(ws).await {
             Some(ServerMsg::MatchEnd { .. }) => break,
@@ -138,8 +131,8 @@ async fn play_out(ws: &mut Ws) {
     }
 }
 
-/// Play one idle ranked draw between two fresh accounts; returns A's key.
-async fn ranked_draw(url: &str, a_name: &str, b_name: &str) -> String {
+/// Play one decisive ranked match (B surrenders); returns A's key.
+async fn ranked_win(url: &str, a_name: &str, b_name: &str) -> String {
     let mut a = connect(url).await;
     let mut b = connect(url).await;
     hello(&mut a).await;
@@ -148,9 +141,17 @@ async fn ranked_draw(url: &str, a_name: &str, b_name: &str) -> String {
     register_as(&mut b, b_name).await;
     send(&mut a, &ClientMsg::RankedMatch).await;
     send(&mut b, &ClientMsg::RankedMatch).await;
-    // Drain both sockets at once: at 1 ms ticks an unread socket fills its
-    // queue and the server drops it as a slow client (a forfeit, not a draw).
-    tokio::join!(play_out(&mut a), play_out(&mut b));
+    for ws in [&mut a, &mut b] {
+        loop {
+            match recv(ws).await {
+                Some(ServerMsg::MatchStart { .. }) => break,
+                Some(_) => continue,
+                None => panic!("ranked match never started"),
+            }
+        }
+    }
+    send(&mut b, &ClientMsg::Surrender).await;
+    tokio::join!(play_end(&mut a), play_end(&mut b));
     key
 }
 
@@ -170,7 +171,7 @@ async fn wait_total(base: &str, want: u64) -> serde_json::Value {
 #[tokio::test]
 async fn br_r07_leaderboard_and_player_profile() {
     let (base, url, _t) = live_server("board").await;
-    ranked_draw(&url, "BoardA", "BoardB").await;
+    ranked_win(&url, "BoardA", "BoardB").await;
     // BR-R07: both appear ordered by rating, then wins, then name.
     let board = wait_total(&base, 2).await;
     assert_eq!(board["rows"][0]["name"], "BoardA");
@@ -200,12 +201,12 @@ async fn br_r07_leaderboard_and_player_profile() {
             p["games"].as_u64().unwrap(),
             p["win_rate"].as_f64().unwrap()
         ),
-        ("BoardA", 1000, 1, 1, 0.0)
+        ("BoardA", 1020, 1, 1, 100.0)
     );
     assert_eq!(p["joined"].as_str().unwrap().len(), 10);
     assert_eq!(p["recent"].as_array().unwrap().len(), 1);
-    assert_eq!(p["recent"][0]["result"], "D");
-    assert_eq!(p["recent"][0]["delta"], 0);
+    assert_eq!(p["recent"][0]["result"], "W");
+    assert_eq!(p["recent"][0]["delta"], 20);
     assert_eq!(p["recent"][0]["opponent"], "BoardB");
     assert!(p.get("key_hash").is_none() && p.get("id").is_none());
     // Unknown name and bad shape both 404 with the same body.
@@ -272,7 +273,7 @@ async fn api_rate_limit_returns_429() {
 #[tokio::test]
 async fn br_r07_in_game_leaderboard_matches_api() {
     let (base, url, _t) = live_server("ws-board").await;
-    let key = ranked_draw(&url, "WsBoardA", "WsBoardB").await;
+    let key = ranked_win(&url, "WsBoardA", "WsBoardB").await;
     let board = wait_total(&base, 2).await;
     let mut ws = connect(&url).await;
     hello(&mut ws).await;

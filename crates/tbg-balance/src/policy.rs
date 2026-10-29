@@ -126,7 +126,7 @@ impl Controller {
     }
 
     pub fn decide(&mut self, view: &MatchView) -> Option<PlayerIntention> {
-        if !matches!(view.phase, Phase::Running | Phase::Overtime) {
+        if view.phase != Phase::Running {
             return None;
         }
         // The shipped bot keeps its own reaction schedule.
@@ -220,8 +220,21 @@ impl Controller {
         }
     }
 
+    fn bank_target(&self) -> u32 {
+        let bands = self
+            .rules
+            .interest
+            .band
+            .saturating_mul(self.rules.interest.max_bands);
+        if bands > 0 {
+            bands
+        } else {
+            25 * tbg_core::content::ENERGY_SCALE
+        }
+    }
+
     fn saver(&mut self, view: &MatchView) -> Option<PlayerIntention> {
-        if view.energy >= self.rules.energy_cap {
+        if view.energy >= self.bank_target() {
             self.spending = true;
         }
         if !self.spending {
@@ -248,14 +261,23 @@ impl Controller {
         }
         let offered = (0..OFFERS).any(|i| of_f(&i));
         // Without a faction offer, avoid wasting Energy at the cap.
-        (!offered && view.energy >= rules.energy_cap)
+        (!offered && view.energy >= self.bank_target())
             .then(|| self.buy_by(view, |cost| -i64::from(cost)))
             .flatten()
     }
 
+    /// Buy `k` whenever it is offered. The Shop only changes on a purchase
+    /// (BR-S04), so a player who wants `k` keeps buying the cheapest card to
+    /// bring new ones, as a human would; with nothing affordable it plays
+    /// like the shipped bot.
     fn favor(&mut self, view: &MatchView, k: UnitKind) -> Option<PlayerIntention> {
-        let pick = self.affordable(view).find(|&i| view.offers[i] == k);
-        match pick {
+        if let Some(i) = self.affordable(view).find(|&i| view.offers[i] == k) {
+            return Some(purchase(i));
+        }
+        let cheapest = self
+            .affordable(view)
+            .min_by_key(|&i| (self.cost(view, i), i));
+        match cheapest {
             Some(i) => Some(purchase(i)),
             None => self.bot.decide(view),
         }

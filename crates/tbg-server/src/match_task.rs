@@ -134,7 +134,9 @@ async fn run(
         // 10 Hz views, plus an ack view to a seat whose intention was processed.
         let ended = m.state.outcome.is_some();
         for seat in Seat::BOTH {
-            if m.state.tick.is_multiple_of(2) || ended || m.applied[seat.index()] {
+            // The selection clock keeps 10 Hz views flowing during an
+            // Augment pause, when the combat tick is frozen (BR-AG13).
+            if m.state.clock.is_multiple_of(2) || ended || m.applied[seat.index()] {
                 m.send_view(seat);
             }
         }
@@ -150,7 +152,7 @@ async fn run(
         replay.final_hash = m.state.hash();
         let _ = tx.send(replay);
     }
-    let ticks = u128::from(m.state.tick.max(1));
+    let ticks = u128::from(m.state.clock.max(1));
     m.metrics.matches_running.fetch_sub(1, Relaxed);
     m.metrics.matches_finished.fetch_add(1, Relaxed);
     // P12: ranked results settle in one store transaction; the lobby

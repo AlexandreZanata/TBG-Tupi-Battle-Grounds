@@ -1,5 +1,9 @@
 # P16-F8 — Strategic validation: lab, load, long matches, playtest, release
 
+> **Owner revision 2026-10-29 (D-41).** Not executed. Every gate here is
+> still open for the active economy and Augments; Siege/Collapse rows no
+> longer apply (D-36 superseded).
+
 **Depends on:** P16-F7 reviewed, canon switched (every P16-F mechanic on).
 **Branch:** `phase/p16f8-strategic-validation`.
 **Difficulty:** medium in code (mostly running and reading), high in
@@ -211,6 +215,8 @@ and compared with its earlier measurement (never with a hypothesis).
 Steps 6, 7 and 8.
 
 ## Phase report
+
+Owner revision 2026-10-29: see the [combined report](P16F1-economy-and-siege.md#phase-report). The original checklist below is kept for the gated work still open.
 
 _Not executed._ Fill in: starting state and decisions O-1–O-12; gate;
 families; long matches; search and proposal; costs; playtest; accepted

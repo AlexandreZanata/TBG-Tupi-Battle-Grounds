@@ -438,6 +438,10 @@ numbers (then remove it before adding another).
 
 ## D-35 · Uncapped Energy with low-balance Interest and bounded generation — 2026-10-29 (Proposed, P16-F1)
 
+> **Revised by D-41 (owner revision, same day).** The rules below are now
+> active as written, but they were switched on without the `banker-N`
+> gate this entry required; that evidence is still missing.
+
 **Decision.** Remove the 10-Energy cap (BR-E04). Pay Interest every 10 s
 on the lowest balance held since the previous payment: 0.25 per full 5,
 at most 1.25 (BR-E05–E07). Kill Bounties are capped per window and by a
@@ -461,6 +465,10 @@ artificial limit by another name); a growing Interest without maximum
 size and value, or playtests find passive play dominant.
 
 ## D-36 · Siege and Collapse replace the time-up decision — 2026-10-29 (Proposed, P16-F1)
+
+> **Superseded by D-41 (owner revision, same day).** No time-up decision
+> remains, but neither do `Siege`, `Collapse` nor the `ServerLimit` draw:
+> matches are open-ended. Kept for history.
 
 **Decision.** No result is decided by comparing HP at a time (BR-M07). At
 4:00 of running time the phase becomes `Siege` (today's overtime slot):
@@ -508,6 +516,11 @@ balance and draw.
 players cannot tell the kinds apart at a glance.
 
 ## D-38 · Augments: three mirrored rounds and a closed effect list — 2026-10-29 (Proposed, P16-F5–F7)
+
+> **Superseded by D-41 (owner revision, same day)** for rounds, options,
+> limits and timing: a round every 60 s of combat, forever, four options,
+> unlimited copies, and a battle pause per round. The revised 40-effect
+> catalog and the closed effect list stand. Kept for history.
 
 **Decision.** Three `AugmentRound`s at 0:30, 2:00 and 3:30; both players
 see the same three options; one purchase or Forgo (+2) per round; at most
@@ -586,3 +599,151 @@ does not today, `docs/media/arcanas/`); values stay Proposed; the
 RulesetVersion field of P35 is replaced by the protocol version for now.
 **Reopen when** the full P34 matrix, human playtests, or ranked data show
 a dominant preset or a compulsory node.
+
+## D-41 · Owner revision: open-ended matches, compounding Interest, infinite Augment rounds that pause the battle — 2026-10-29 (owner decision)
+
+**Decision.** The owner switched the P16-F economy and Augments on now,
+in every mode, ahead of the lab gates of D-34:
+- Matches have no clock and no time-based result (BR-M07). `Phase` is
+  `Countdown`/`Running`/`Ended`; `EndReason` is `StrongholdDestroyed`/
+  `Forfeit`. Siege, Collapse and `ServerLimit` are dropped, not deferred.
+- `Energy` is uncapped (`Ruleset.energy_cap = None`) and Interest compounds
+  on the low-water mark every 10 s of combat (BR-E04–E08, D-35 numbers).
+- An Augment round opens every 60 s of combat, forever, with four mirrored
+  options from a reshuffled deck of all 40; one purchase or Forgo per
+  round; copies unlimited and stacking (BR-AG01–AG11).
+- Every round **pauses the battle for both players** (BR-AG12–AG14). The
+  combat tick freezes; a separate selection clock (`MatchState::clock`,
+  one per server step) closes the 20-s window (first built as 60 s; the owner shortened it the same day). The round resolves as soon
+  as both confirmed, or at the deadline. Picks are paid on confirmation
+  but stay hidden until both outcomes apply on the same step.
+**How.** No new task, timer or sync system: the existing match task keeps
+calling `step()` at 20 Hz; a paused `step()` only advances the selection
+clock and checks the close condition, so the server, the practice match,
+`headless` and `replay` all pause identically. Views go out on the
+selection clock (10 Hz) so countdowns and reconnects work while the
+combat tick is frozen. Replay ops are keyed by the selection clock, so a
+choice made late in a pause replays at the same step. `ServerMsg::View`
+boxes the now larger `MatchView`. The practice bot forgoes every round so
+a human never waits a full minute on it.
+**Why.** The owner wants a long-form economic game where saving and
+adapting matter and a pause makes each Augment choice a deliberate,
+simultaneous decision instead of a distraction mid-fight; hiding picks
+removes any advantage from confirming second, and the separate clock means
+a frozen battle can never freeze the selection.
+**Accepted risks.** Balance is not measured: P16-C's `saver` finding
+(banking dominates) is likely stronger with Interest; unlimited copies
+grow HP and damage linearly; open-ended matches have no server-side time
+bound (a match ends only by Stronghold, forfeit or reconnect expiry). The
+match ruleset fingerprint (`ruleset_fp`) is not recorded yet.
+**Open owner questions.** Forgo value (canon 0, lab +2); whether to keep
+the 6-hour offline safety bound; Shop Reserve, Stronghold kinds and
+Fortifications (F2–F4) remain unscheduled.
+**Reopen when** the lab or playtests show a dominant banking or
+single-Augment strategy, pauses feel too frequent, or match lengths
+threaten server capacity.
+
+## D-42 · Owner revision: fifteen Arcanas, twelve points and three supremes — 2026-10-29 (owner decision)
+
+**Decision.** The owner expanded the live Arcana system (D-40) from six
+nodes and six points to three five-node families and twelve points.
+Every family keeps its two original nodes unchanged (indices 0–5), adds
+two one-point children and one two-point supreme, for 15 nodes and 8
+points to complete a family. A player may finish one family plus 4
+points elsewhere, or build 4/4/4 without a supreme. All options remain
+free and available to every account and guest; no progression, account
+gate or payment is introduced.
+- **Effects.** War adds Shieldwall, Battle Rush and Combined Arms;
+  Precision adds Hunter's Focus, Quickdraw and Deadeye; Vitality adds
+  Unshaken, Emergency Care and Purification. The conditional values are
+  Proposed and tunable through `Ruleset.arcana`; the original per-rank
+  values stay in `Ruleset.arcana_bp`.
+- **Prerequisites.** A child needs its parent at rank 1; a supreme needs
+  both originals at rank 2 and both children. Removing a rank that would
+  invalidate a held dependent is refused and names the dependent; the
+  editor and the server use the same table.
+- **Schema and wire.** `ArcanaPreset` is 15 rank bytes and validates the
+  real point cost (supremes cost 2). Protocol v11 changes `SetArcanas`
+  and `ArcanasSelected`; older peers are rejected at the handshake.
+  Both frozen presets still travel in `MatchStart`, match records and
+  ranked rows.
+- **Migration.** Account rows and browser storage accept the old
+  six-byte/rank document. The six original ranks are preserved; the six
+  new points raise the original nodes to rank 2 in index order. No child
+  or supreme is selected automatically, so migration cannot grant a
+  behavior the player did not choose. Match and ranked history rows are
+  not rewritten. The complete default is
+  `[2,2,2,2,2,2,0,0,0,0,0,0,0,0,0]`.
+- **Simulation.** Conditional army checks use per-tick living role
+  counts, decremented on death, instead of scanning the army per hit.
+  Deadeye changes only conventional Ranged range; Quickdraw only the
+  post-hit cooldown; Unshaken only incoming duration; Purification only
+  after a real heal. No new event bus, trait framework or per-tick
+  allocation is added.
+
+**Why.** The six small percentage nodes produced shallow choices. The
+owner wants War, Precision and Vitality to change how an army is built
+and fights, while keeping the existing art, editor, authority, freeze
+and persistence infrastructure.
+
+**Guard rails.** Values stay Proposed. Summons remain excluded. The
+twelve-point build must be validated by the P16-C/P16-D lab (named builds
+and the complete-preset screen) before release claims; a supreme may not
+become universally mandatory and a hybrid build must remain viable.
+Historical presets, results and Rating are never reinterpreted.
+
+**Reopen when** the lab shows a dominant or never-used node, a supreme
+has no viable counter, or the editor/database schema needs another
+version.
+
+**Audit addendum (2026-10-29, `phase/p40-review`).** A review of the
+executor's work re-measured the lab on 3 072 paired seeds with a null
+control and held-out confirmation: the first numbers (512 pairs, ±4 pp,
+duplicated builds) were noise. Deadeye moves from +0.1 to **+0.25 tile**
+(null 49.4 %, +0.1 51.6 %, +0.25 53.7 %, +0.5 57.0 %); Quickdraw no longer
+exceeds the +100 % attack-speed cap (BR-X02). Not fixed, by evidence: the
+default 4/4/4 beats every build that swaps flat originals for War or
+Vitality conditions (war-full 47.7 %, vitality 47.2 %, war-vitality
+44.2 %), and Shieldwall and Combined Arms have a DPS ally in only 7.5 % and
+5.7 % of bot seat-ticks. Those values need policies that play each family
+before they are retuned. Evidence: `docs/media/p40/`.
+
+## D-43 · Interest becomes a regen boost on the Energy held — 2026-10-29 (owner decision)
+
+**Decision.** The owner replaced the 10-s Interest payment (D-35, D-41)
+with a continuous boost: every full 5 `Energy` held adds 25 % of the base
+regeneration, counting at most 25 `Energy` (×1.25 at 5, ×1.50 at 10, ×1.75
+at 15, ×2.00 at 20, ×2.25 at 25 or more). `Energy` itself stays uncapped.
+`MatchView::regen_bp` replaces the payment fields, `Event::InterestPaid`,
+`PlayerState::low` and `interest_paid` are gone, protocol v12, and the
+Bounty window keeps its own 10-s reset (`BOUNTY_WINDOW_TICKS`).
+**Why.** One rule that is visible every second (the HUD shows ×1.50 and
+how many of the 5 steps are filled) instead of a lump every ten seconds,
+and no low-water mark to explain. Reading the balance at the start of each
+tick lets a spend lower the rate at once, so nothing needs a special case.
+**Cost accepted.** The base regen of 17 sub-energy per tick (about 0.57
+`Energy` per second) is unchanged; the owner described the base as "1 per
+second", which is read as the unboosted rate, not as a new base. At 25 held
+the player regenerates about 1.28 per second, 125 % more than idle, and the
+lab has not measured the effect (P16-C's `saver` finding is likely
+stronger).
+**Reopen when** the lab or playtests show banking dominates, or the owner
+wants an absolute base of 1 `Energy` per second.
+
+## D-44 · The lab's planted-imbalance contract (C7) under a purchase-only Shop — 2026-10-29
+
+**Decision.** BR-S04 (offers change only when bought) made a unit appear
+rarely, so the shipped-bot match row of contract C7 stopped detecting a
+planted ×2 HP and damage Shieldbearer (+0.009; it passed before the Shop
+change, on `4f332ed`). `favor-<unit>` now buys the cheapest card to bring
+new ones when its unit is not offered, as a player must under BR-S04, and
+C7 adds one more disjunct: the same planted imbalance measured against the
+cheap-spam policy. No threshold moved (±0.10 on 256 pairs, 20 points on a
+duel row).
+**Why.** A contract that goes red because the game changed, not because a
+unit is unbalanced, would hide real regressions; the thresholds are a
+product decision and stay. The duel rows alone cannot carry C7 (nine
+opponents make one duel 0.111, under the 0.20 step).
+**Reopen when** the Shop gains another way to refresh offers (Reserve,
+F2), or a planted imbalance is missed again.
+

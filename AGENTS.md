@@ -11,6 +11,11 @@ authoritative server, built mostly by AI agents, at minimal running cost.
 MVP, not enterprise software: speed, visual quality, fun, working
 multiplayer, low cost.
 
+**Platform focus (owner rule, 2026-10-29): desktop browsers only, for
+now.** Mobile is a later maturity stage of the game. Do not design,
+verify, or fix phone layouts or touch input unless a task explicitly asks;
+keep existing phone code compiling, but spend no effort on it.
+
 ## Map
 
 | Path | Contents |
@@ -133,7 +138,8 @@ cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
 
 Add per change type: client change → `trunk build --release` in
 `crates/tbg-client/` and look at the page in a browser; visual change →
-gallery screenshots at desktop and phone size; multiplayer change → two
+gallery screenshots at desktop size (phone only when a task asks, see
+*Platform focus*); multiplayer change → two
 clients finish a match, including a reconnect. A native build never
 proves browser compatibility. Never claim a check you did not run; quote
 failures exactly.

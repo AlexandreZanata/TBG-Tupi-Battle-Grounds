@@ -1,13 +1,22 @@
 {
-  "previewSchema": 1,
-  "pointBudget": 6,
+  "previewSchema": 2,
+  "pointBudget": 12,
   "maxRank": 2,
   "defaultPreset": [
     2,
-    0,
+    2,
+    2,
+    2,
+    2,
     2,
     0,
-    2,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     0
   ],
   "storageKey": "tbg.arcanas",
@@ -112,6 +121,7 @@
       "index": 0,
       "id": "guard",
       "family": "war",
+      "kind": "original",
       "name": "Guard",
       "archetypes": [
         "Tank",
@@ -123,6 +133,10 @@
       "rankTwoPercent": 8,
       "perRankText": "+4% base max HP",
       "rankTwoText": "+8%",
+      "cost": 1,
+      "maxRank": 2,
+      "requires": [],
+      "effect": "Raises maximum HP on every Tank and DPS in your army.",
       "asset": {
         "svg": "guard.svg",
         "display": "guard.webp"
@@ -132,6 +146,7 @@
       "index": 1,
       "id": "assault",
       "family": "war",
+      "kind": "original",
       "name": "Assault",
       "archetypes": [
         "Tank",
@@ -143,6 +158,10 @@
       "rankTwoPercent": 6,
       "perRankText": "+3% base damage",
       "rankTwoText": "+6%",
+      "cost": 1,
+      "maxRank": 2,
+      "requires": [],
+      "effect": "Raises normal attack damage on every Tank and DPS in your army.",
       "asset": {
         "svg": "assault.svg",
         "display": "assault.webp"
@@ -152,6 +171,7 @@
       "index": 2,
       "id": "piercing",
       "family": "precision",
+      "kind": "original",
       "name": "Piercing",
       "archetypes": [
         "Ranged"
@@ -162,6 +182,10 @@
       "rankTwoPercent": 6,
       "perRankText": "+3% base damage",
       "rankTwoText": "+6%",
+      "cost": 1,
+      "maxRank": 2,
+      "requires": [],
+      "effect": "Raises normal attack damage on every Ranged unit.",
       "asset": {
         "svg": "piercing.svg",
         "display": "piercing.webp"
@@ -171,6 +195,7 @@
       "index": 3,
       "id": "endurance",
       "family": "precision",
+      "kind": "original",
       "name": "Endurance",
       "archetypes": [
         "Ranged"
@@ -181,6 +206,10 @@
       "rankTwoPercent": 8,
       "perRankText": "+4% base max HP",
       "rankTwoText": "+8%",
+      "cost": 1,
+      "maxRank": 2,
+      "requires": [],
+      "effect": "Raises maximum HP on every Ranged unit.",
       "asset": {
         "svg": "endurance.svg",
         "display": "endurance.webp"
@@ -190,6 +219,7 @@
       "index": 4,
       "id": "resilience",
       "family": "vitality",
+      "kind": "original",
       "name": "Resilience",
       "archetypes": [
         "Support",
@@ -201,6 +231,10 @@
       "rankTwoPercent": 8,
       "perRankText": "+4% base max HP",
       "rankTwoText": "+8%",
+      "cost": 1,
+      "maxRank": 2,
+      "requires": [],
+      "effect": "Raises maximum HP on every Support and Control unit.",
       "asset": {
         "svg": "resilience.svg",
         "display": "resilience.webp"
@@ -210,6 +244,7 @@
       "index": 5,
       "id": "renewal",
       "family": "vitality",
+      "kind": "original",
       "name": "Renewal",
       "archetypes": [
         "Support"
@@ -220,9 +255,312 @@
       "rankTwoPercent": 10,
       "perRankText": "+5% base direct/splash heal",
       "rankTwoText": "+10%",
+      "cost": 1,
+      "maxRank": 2,
+      "requires": [],
+      "effect": "Raises the heal amount of units that already heal. It never grants healing.",
       "asset": {
         "svg": "renewal.svg",
         "display": "renewal.webp"
+      }
+    },
+    {
+      "index": 6,
+      "id": "shieldwall",
+      "family": "war",
+      "kind": "child",
+      "name": "Shieldwall",
+      "archetypes": [
+        "Tank"
+      ],
+      "eligibility": "Tank",
+      "requiresExistingHeal": false,
+      "perRankPercent": 6,
+      "rankTwoPercent": 6,
+      "perRankText": "Tanks take 6% less damage",
+      "rankTwoText": "",
+      "cost": 1,
+      "maxRank": 1,
+      "requires": [
+        [
+          0,
+          1
+        ]
+      ],
+      "effect": "Tanks take 6% less damage while at least one allied conventional DPS is alive. It never stacks with more DPS.",
+      "asset": {
+        "svg": "guard.svg",
+        "display": "guard.webp"
+      }
+    },
+    {
+      "index": 7,
+      "id": "battle-rush",
+      "family": "war",
+      "kind": "child",
+      "name": "Battle Rush",
+      "archetypes": [
+        "DPS"
+      ],
+      "eligibility": "DPS",
+      "requiresExistingHeal": false,
+      "perRankPercent": 12,
+      "rankTwoPercent": 12,
+      "perRankText": "DPS gain +12% movement speed",
+      "rankTwoText": "",
+      "cost": 1,
+      "maxRank": 1,
+      "requires": [
+        [
+          1,
+          1
+        ]
+      ],
+      "effect": "DPS move 12% faster while at least one allied conventional Tank is alive. It never stacks with more Tanks.",
+      "asset": {
+        "svg": "assault.svg",
+        "display": "assault.webp"
+      }
+    },
+    {
+      "index": 8,
+      "id": "combined-arms",
+      "family": "war",
+      "kind": "supreme",
+      "name": "Combined Arms",
+      "archetypes": [
+        "Tank",
+        "DPS"
+      ],
+      "eligibility": "Tank, DPS",
+      "requiresExistingHeal": false,
+      "perRankPercent": 5,
+      "rankTwoPercent": 8,
+      "perRankText": "Tanks take 5% less damage; DPS deal +8% damage",
+      "rankTwoText": "",
+      "cost": 2,
+      "maxRank": 1,
+      "requires": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          7,
+          1
+        ]
+      ],
+      "effect": "While at least one allied conventional Tank and one DPS are alive, Tanks take 5% less damage and DPS deal +8% damage.",
+      "asset": {
+        "svg": "war.svg",
+        "display": "war.webp"
+      }
+    },
+    {
+      "index": 9,
+      "id": "hunters-focus",
+      "family": "precision",
+      "kind": "child",
+      "name": "Hunter's Focus",
+      "archetypes": [
+        "Ranged"
+      ],
+      "eligibility": "Ranged",
+      "requiresExistingHeal": false,
+      "perRankPercent": 12,
+      "rankTwoPercent": 12,
+      "perRankText": "+12% damage to slowed or rooted targets",
+      "rankTwoText": "",
+      "cost": 1,
+      "maxRank": 1,
+      "requires": [
+        [
+          2,
+          1
+        ]
+      ],
+      "effect": "Ranged deal 12% more damage against enemies already affected by slow or root when the attack resolves.",
+      "asset": {
+        "svg": "piercing.svg",
+        "display": "piercing.webp"
+      }
+    },
+    {
+      "index": 10,
+      "id": "quickdraw",
+      "family": "precision",
+      "kind": "child",
+      "name": "Quickdraw",
+      "archetypes": [
+        "Ranged"
+      ],
+      "eligibility": "Ranged",
+      "requiresExistingHeal": false,
+      "perRankPercent": 15,
+      "rankTwoPercent": 15,
+      "perRankText": "+15% attack speed within two tiles",
+      "rankTwoText": "",
+      "cost": 1,
+      "maxRank": 1,
+      "requires": [
+        [
+          3,
+          1
+        ]
+      ],
+      "effect": "Ranged attack 15% faster when their current target is within two tiles. Cooldowns keep their minimum interval.",
+      "asset": {
+        "svg": "endurance.svg",
+        "display": "endurance.webp"
+      }
+    },
+    {
+      "index": 11,
+      "id": "deadeye",
+      "family": "precision",
+      "kind": "supreme",
+      "name": "Deadeye",
+      "archetypes": [
+        "Ranged"
+      ],
+      "eligibility": "Ranged",
+      "requiresExistingHeal": false,
+      "perRankPercent": 0,
+      "rankTwoPercent": 0,
+      "perRankText": "+0.25 tile attack range",
+      "rankTwoText": "",
+      "cost": 2,
+      "maxRank": 1,
+      "requires": [
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          9,
+          1
+        ],
+        [
+          10,
+          1
+        ]
+      ],
+      "effect": "Every conventional Ranged unit gains 0.25 tile of attack range. Strongholds and summons are unchanged.",
+      "asset": {
+        "svg": "precision.svg",
+        "display": "precision.webp"
+      }
+    },
+    {
+      "index": 12,
+      "id": "unshaken",
+      "family": "vitality",
+      "kind": "child",
+      "name": "Unshaken",
+      "archetypes": [
+        "Support",
+        "Control"
+      ],
+      "eligibility": "Support, Control",
+      "requiresExistingHeal": false,
+      "perRankPercent": 25,
+      "rankTwoPercent": 25,
+      "perRankText": "Slow and root last 25% less",
+      "rankTwoText": "",
+      "cost": 1,
+      "maxRank": 1,
+      "requires": [
+        [
+          4,
+          1
+        ]
+      ],
+      "effect": "Slow and root effects on Support and Control units last 25% less. Slow intensity is unchanged.",
+      "asset": {
+        "svg": "resilience.svg",
+        "display": "resilience.webp"
+      }
+    },
+    {
+      "index": 13,
+      "id": "emergency-care",
+      "family": "vitality",
+      "kind": "child",
+      "name": "Emergency Care",
+      "archetypes": [
+        "Support"
+      ],
+      "eligibility": "Support with an existing heal",
+      "requiresExistingHeal": true,
+      "perRankPercent": 15,
+      "rankTwoPercent": 15,
+      "perRankText": "+15% direct healing below 40% HP",
+      "rankTwoText": "",
+      "cost": 1,
+      "maxRank": 1,
+      "requires": [
+        [
+          5,
+          1
+        ]
+      ],
+      "effect": "Direct heals are 15% stronger when the ally is below 40% of maximum HP. The check happens before the heal.",
+      "asset": {
+        "svg": "renewal.svg",
+        "display": "renewal.webp"
+      }
+    },
+    {
+      "index": 14,
+      "id": "purification",
+      "family": "vitality",
+      "kind": "supreme",
+      "name": "Purification",
+      "archetypes": [
+        "Support"
+      ],
+      "eligibility": "Support with an existing heal",
+      "requiresExistingHeal": true,
+      "perRankPercent": 0,
+      "rankTwoPercent": 0,
+      "perRankText": "Heals cleanse slow and shorten root",
+      "rankTwoText": "",
+      "cost": 2,
+      "maxRank": 1,
+      "requires": [
+        [
+          4,
+          2
+        ],
+        [
+          5,
+          2
+        ],
+        [
+          12,
+          1
+        ],
+        [
+          13,
+          1
+        ]
+      ],
+      "effect": "A real heal on a conventional ally removes slow and halves the remaining root duration. Overhealing never triggers it.",
+      "asset": {
+        "svg": "vitality.svg",
+        "display": "vitality.webp"
       }
     }
   ],
@@ -230,15 +568,15 @@
     "name": "Beetling",
     "archetype": "DPS",
     "affected": false,
-    "text": "Beetling (summon): no Arcana bonus, like Synergy (BR-U08). Proposed values, active by D-40."
+    "text": "Beetling (summon): no Arcana bonus and never counts for Shieldwall, Battle Rush or Combined Arms, like Synergy (BR-U08). Proposed values, active by D-40/P40."
   },
   "copy": {
     "badge": "Active in Practice, Casual, Ranked and private rooms",
-    "intro": "Three families. Six points. A strategy of your own.",
-    "complete": "Complete preset · your next match uses it.",
-    "partial": "Partial preset · spend exactly {budget} points. Until then matches use the default [2,0,2,0,2,0].",
-    "controls": "Click / Enter / Space / + to add · right-click / − to remove · Esc to close",
-    "eligibility": "Eligibility follows base Archetype through every Evolution. Renewal requires an existing heal; it does not give Nester healing.",
-    "scope": "Proposed values (D-40) · locked when you queue, join a room or start Practice."
+    "intro": "Three families. Five choices each. Twelve points and a supreme to earn.",
+    "complete": "Complete build \u00b7 your next match uses it.",
+    "partial": "Incomplete build \u00b7 spend exactly {budget} points. Until then matches use the default.",
+    "controls": "Click / Enter / Space / + to add \u00b7 right-click / \u2212 to remove \u00b7 Esc to close",
+    "eligibility": "Eligibility follows base Archetype through every Evolution. Summons receive no Arcana bonus. Deadeye affects conventional Ranged only.",
+    "scope": "Proposed values (P40) \u00b7 locked when you queue, join a room or start Practice."
   }
 }

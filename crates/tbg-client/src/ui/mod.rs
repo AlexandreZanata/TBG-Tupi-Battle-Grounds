@@ -87,6 +87,9 @@ pub enum UiAction {
     CloseRanking,
     // BR-M06: two-tap surrender in the HUD.
     Surrender,
+    // Owner revision 2026-10-29: War Council actions.
+    ChooseAugment(u8),
+    ForgoAugment,
 }
 
 /// Shop card waiting for the view that confirms (or rejects) its purchase.
@@ -134,6 +137,7 @@ pub fn rejection_text(reason: Rejection) -> String {
         Rejection::NotEnoughEnergy => "Not enough Energy",
         Rejection::NotEvolvable => "Summons cannot evolve",
         Rejection::NotRunning => "The match is not running",
+        Rejection::Paused => "Battle paused - choose an Augment",
         _ => "Action not possible",
     }
     .to_string()

@@ -47,7 +47,7 @@ fn server_variant_order_is_frozen() {
             opponent_rating: None,
             arcanas: [tbg_core::ArcanaPreset::DEFAULT; 2],
         },
-        ServerMsg::View(view),
+        ServerMsg::View(Box::new(view)),
         ServerMsg::Rejected {
             seq: 1,
             reason: Rejection::NotEnoughEnergy,
@@ -109,7 +109,7 @@ fn server_variant_order_is_frozen() {
 #[test]
 fn server_bytes_are_frozen() {
     // MatchStart field order: you, you_name, you_rating, opponent, mode,
-    // opponent_rating (1000 = varint E8 07), arcanas (v8: six ranks per seat).
+    // opponent_rating (1000 = varint E8 07), arcanas (v11: fifteen ranks per seat).
     let start = ServerMsg::MatchStart {
         you: Seat::B,
         you_name: "Ann".into(),
@@ -125,8 +125,8 @@ fn server_bytes_are_frozen() {
     assert_eq!(
         encode(&start),
         [
-            5, 1, 3, b'A', b'n', b'n', 1, 0xE8, 0x07, 2, b'B', b'o', 1, 0, 2, 0, 2, 0, 2, 0, 0, 0,
-            0, 0, 0, 0
+            5, 1, 3, b'A', b'n', b'n', 1, 0xE8, 0x07, 2, b'B', b'o', 1, 0, 2, 2, 2, 2, 2, 2, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         ]
     );
     let end = ServerMsg::MatchEnd {
@@ -135,7 +135,11 @@ fn server_bytes_are_frozen() {
             reason: EndReason::Forfeit,
         },
     };
-    assert_eq!(encode(&end), [8, 1, 1, 2]);
+    assert_eq!(
+        encode(&end),
+        [8, 1, 1, 1],
+        "Forfeit is now EndReason index 1"
+    );
     let row = LeaderRow {
         rank: 1,
         name: "Ann".into(),
@@ -158,7 +162,7 @@ fn server_bytes_are_frozen() {
         encode(&ServerMsg::ArcanasSelected {
             preset: tbg_core::ArcanaPreset::DEFAULT
         }),
-        [18, 2, 0, 2, 0, 2, 0]
+        [18, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
     assert_eq!(
         encode(&ServerMsg::ArcanasRejected {
