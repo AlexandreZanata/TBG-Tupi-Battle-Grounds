@@ -20,7 +20,9 @@ pub struct Limits {
 }
 
 impl Limits {
-    /// `true` when the register attempt is allowed (records it on allow).
+    /// `true` when the register attempt is allowed. It reserves one slot
+    /// while the store works; `refund_register` gives it back when no
+    /// account was created, so only created accounts count (BR-P01).
     pub fn check_register(&mut self, ip: IpAddr, max_per_hour: u32, now: Instant) -> bool {
         check_log(
             self.register.entry(ip).or_default(),
@@ -28,6 +30,14 @@ impl Limits {
             Duration::from_secs(3600),
             now,
         )
+    }
+
+    /// Return the slot a refused registration reserved (name taken, store
+    /// unavailable): a free name must not be blocked by earlier refusals.
+    pub fn refund_register(&mut self, ip: IpAddr) {
+        if let Some(log) = self.register.get_mut(&ip) {
+            log.pop();
+        }
     }
 
     /// `true` when the login attempt is allowed (records it on allow).

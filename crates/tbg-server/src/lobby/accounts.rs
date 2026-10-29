@@ -50,15 +50,17 @@ impl Lobby {
         if tbg_core::account::check_name(&name).is_err() {
             return self.account_error(&token, AccountError::NameInvalid);
         }
+        // Checked before the limit: a refusal that creates nothing never
+        // reserves a register slot (BR-P01).
+        let Some(store) = self.store.clone() else {
+            return self.account_error(&token, AccountError::Unavailable);
+        };
         if !self
             .limits
             .check_register(ip, self.config.register_per_ip_hour as u32, Instant::now())
         {
             return self.account_error(&token, AccountError::RateLimited);
         }
-        let Some(store) = self.store.clone() else {
-            return self.account_error(&token, AccountError::Unavailable);
-        };
         let tx = self.self_tx.clone();
         tokio::spawn(async move {
             let secret = tbg_core::account::encode_secret(&random_bytes::<10>());
@@ -72,6 +74,7 @@ impl Lobby {
                 .send(LobbyCmd::RegisterDone {
                     token,
                     conn_id,
+                    ip,
                     result,
                 })
                 .await;
