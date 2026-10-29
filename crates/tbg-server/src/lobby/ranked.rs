@@ -35,7 +35,7 @@ impl Lobby {
         }
         self.leave_waiting(token);
         match self.ranked_queue.pop_front() {
-            Some(other) => self.pair([other, token], tbg_core::protocol::MatchMode::Ranked),
+            Some(other) => self.pair([other, token], tbg_core::protocol::MatchMode::Ranked, false),
             None => {
                 self.ranked_queue.push_back(token);
                 if let Some(s) = self.session(&token) {

@@ -1,9 +1,10 @@
-//! Waiting screen: searching for an opponent, or a private room code with
-//! a share link. After 30 s of searching, practice is offered.
+//! Waiting screen: quick match, private room code, or Quick Challenge link.
+//! After 30 s of searching, practice is offered.
 
 use bevy::prelude::*;
 
 use super::{button, label, screen, UiAction, PANEL};
+use crate::config;
 use crate::sync::QueueInfo;
 use crate::GameState;
 
@@ -11,7 +12,14 @@ use crate::GameState;
 struct StatusText;
 
 #[derive(Component)]
-struct PracticeOffer;
+struct LinkText;
+
+#[derive(Component, Clone, Copy)]
+enum QueueButton {
+    Copy,
+    Share,
+    Practice,
+}
 
 #[derive(Resource)]
 struct Entered(f64);
@@ -38,6 +46,34 @@ fn spawn(mut commands: Commands, time: Res<Time>) {
             BackgroundColor(PANEL),
             children![
                 (label("Connecting...", 22.0), StatusText),
+                (
+                    label("", 12.0),
+                    Node {
+                        max_width: px(360.0),
+                        ..default()
+                    },
+                    LinkText,
+                ),
+                (
+                    Node {
+                        column_gap: px(8.0),
+                        ..default()
+                    },
+                    children![
+                        (
+                            button("Copy link", UiAction::CopyLink, 150.0),
+                            QueueButton::Copy
+                        ),
+                        (
+                            button("Share", UiAction::ShareChallenge, 120.0),
+                            QueueButton::Share
+                        ),
+                        (
+                            button("Practice while you wait", UiAction::Practice, 220.0),
+                            QueueButton::Practice
+                        ),
+                    ],
+                ),
                 button("Cancel", UiAction::Cancel, 220.0),
             ],
         )],
@@ -45,40 +81,65 @@ fn spawn(mut commands: Commands, time: Res<Time>) {
 }
 
 fn update(
-    mut commands: Commands,
     time: Res<Time>,
     entered: Res<Entered>,
     info: Res<QueueInfo>,
-    mut text: Single<&mut Text, With<StatusText>>,
-    offers: Query<(), With<PracticeOffer>>,
+    mut text: Single<&mut Text, (With<StatusText>, Without<LinkText>)>,
+    mut link_text: Single<&mut Text, (With<LinkText>, Without<StatusText>)>,
+    mut buttons: Query<(&QueueButton, &mut Node)>,
 ) {
     let waited = (time.elapsed_secs_f64() - entered.0) as u32;
     let clock = format!("{}:{:02}", waited / 60, waited % 60);
-    text.0 = match (&info.room, info.searching) {
-        (Some(code), _) => format!(
-            "Room {}\nShare the link with a friend\nWaiting {clock}",
-            String::from_utf8_lossy(code)
-        ),
-        (None, true) => format!("Searching for an opponent... {clock}"),
-        (None, false) => "Connecting...".into(),
+    let (status, link, copy, share, practice) = if let Some(token) = info.challenge {
+        (
+            format!("Challenge created\nWaiting for your friend {clock}"),
+            config::challenge_link(&token),
+            true,
+            true,
+            false,
+        )
+    } else if info.joining_challenge {
+        (
+            "Joining challenge...".into(),
+            String::new(),
+            false,
+            false,
+            false,
+        )
+    } else if let Some(code) = info.room {
+        (
+            format!(
+                "Room {}\nShare the link with a friend\nWaiting {clock}",
+                String::from_utf8_lossy(&code)
+            ),
+            config::room_link(&String::from_utf8_lossy(&code)),
+            true,
+            false,
+            false,
+        )
+    } else if info.searching {
+        (
+            format!("Searching for an opponent... {clock}"),
+            String::new(),
+            false,
+            false,
+            waited >= 30,
+        )
+    } else {
+        ("Connecting...".into(), String::new(), false, false, false)
     };
-    let wants_offer = info.room.is_some() || (info.searching && waited >= 30);
-    if wants_offer && offers.is_empty() {
-        let (text, action) = if info.room.is_some() {
-            ("Copy link", UiAction::CopyLink)
-        } else {
-            ("Practice while you wait", UiAction::Practice)
+    text.0 = status;
+    link_text.0 = link;
+    for (kind, mut node) in &mut buttons {
+        let visible = match kind {
+            QueueButton::Copy => copy,
+            QueueButton::Share => share,
+            QueueButton::Practice => practice,
         };
-        commands.spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                bottom: percent(12.0),
-                justify_self: JustifySelf::Center,
-                ..default()
-            },
-            PracticeOffer,
-            DespawnOnExit(GameState::Queue),
-            children![button(text, action, 260.0)],
-        ));
+        node.display = if visible {
+            Display::Flex
+        } else {
+            Display::None
+        };
     }
 }

@@ -137,17 +137,21 @@ tables are the one allowed exception.
   `PlayerIntention = Purchase{offer} | Evolve{unit, branch}`;
   `ServerMsg = Welcome{token, name} | VersionMismatch{server} | Queued | RoomCreated{code} | RoomNotFound | MatchStart{you, opponent} | View(MatchView) | Rejected{seq, reason} | MatchEnd{outcome} | Ping{id} | NetStats{rtt_ms} | Error{code}`.
   Later versions append variants at the end of each enum (`PROTOCOL_VERSION`
-  5): accounts v2 (`Register{name} | Login{key} | Logout` →
+  9): accounts v2 (`Register{name} | Login{key} | Logout` →
   `Registered{key, profile} | LoggedIn{profile} | LoggedOut |
   AccountError{code}`), ranked v3 (`RankedMatch`; `MatchStart` gains
   `mode, opponent_rating`; `RatingChanged{before, after, profile}`),
   ranking v4 (`Leaderboard{offset}` → `Leaderboard{total, offset, rows,
   you}`: 20 rows from the in-memory snapshot, `you` = your rank; one
   request per second per connection, extras ignored), takeover v5
-  (`ErrorCode::SessionTakenOver`), and v6 (`Surrender`, routed like an
+  (`ErrorCode::SessionTakenOver`), v6 (`Surrender`, routed like an
   intention with the connection's seat → `MatchCmd::Surrender` →
   `MatchState::forfeit`, idempotent; `MatchStart` gains `you_name` and
-  `you_rating` so the HUD names both HP bars).
+  `you_rating` so the HUD names both HP bars), v7 (open army: five offers,
+  no slot fields), v8 (Arcanas: `SetArcanas` → `ArcanasSelected |
+  ArcanasRejected`, both presets in `MatchStart`), and v9 (P39 Quick
+  Challenge: `CreateChallenge | JoinChallenge | RequestRematch` → five
+  challenge/rematch replies, appended after the v8 Arcana messages).
   Intentions carry no seat: the server derives the seat from the connection.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
@@ -485,3 +489,48 @@ or enabled by this planning addendum.
   ratings and historical metadata. Versioned records support audit, not
   full replay without timed intentions and the old rule implementation.
   The existing single-VPS/SQLite deployment and Elo/FIFO design remain.
+
+## 16. Strategic expansion (Proposed, P16-F1–F8)
+
+Planning addendum; nothing here is implemented. GAME-DESIGN §10 owns the
+rules and values, D-34–D-38 the reasons, each phase file the exact steps.
+
+- **Ruleset-gated mechanics.** Each mechanic is a `Ruleset` field whose
+  canonical value disables it (`energy_cap`, `interest`, `siege`,
+  `reserve_ticks`, `fortify_enabled`, `augment_rounds`). The lab measures
+  enabled variants; the owner's switch changes `content.rs` once. The
+  server and client still only use `Ruleset::canon()` (C10).
+- **Core.** Per-seat Stronghold data on `PlayerState` (kind, max HP,
+  Fortification tier/branch, shield); one `scale_hp` helper for every max-HP
+  change; one `PlayerState::spend` for every Energy cost (Interest
+  low-water). One new module, `augment.rs`: the closed `AugmentEffect`
+  enum, the mirrored draw (PCG32 stream 3; stream 5 picks the practice
+  bot's kind), and fixed-size per-player bp sums. Hooks stay in the module
+  they modify (`effective_stats`, `hits.rs`, `combat.rs`, `intent.rs`,
+  `summon.rs`). No effect engine, event bus, trait, allocation per tick, or
+  dependency.
+- **Determinism.** New serialized fields move hash goldens; each phase
+  proves unchanged outcomes, events and purchases before refreezing (P16-F1
+  step 2). `SERVER_LIMIT` bounds `headless`/`replay`; contracts prove it
+  unreachable.
+- **Wire.** Appended variants only: `Phase::Overtime` renamed `Siege` at
+  the same index; `EndReason` + `Collapse`, `ServerLimit`; intentions
+  `Reserve`, `Release`, `Fortify`, `ChooseAugment`, `Forgo`;
+  `ClientMsg::SelectStronghold`; `MatchStart` + both kinds; `MatchView` +
+  Interest, Collapse rate, hold, Stronghold max, Fortification, kinds,
+  round, Augments, shields, Evolution cost. One `PROTOCOL_VERSION` bump per
+  phase that changes the wire. Opponent Energy, offers, holds and RNG stay
+  hidden; kinds, Fortifications and equipped Augments are public.
+- **Server.** Kind chosen while idle, frozen in the queue ticket or room,
+  restored on reconnect/takeover. `DRAIN_LIMIT` grows past the longest
+  possible match (P16-F1).
+- **Store.** Additive migrations: `matches.ruleset_fp` (P16-F1),
+  `accounts.stronghold_kind` (P16-F4); seat JSON gains kind,
+  Fortifications, Augment offers/choices, Interest and Bounty totals.
+- **Client.** Desktop HTML HUD (D-29) and the Bevy fallback both gain the
+  Interest meter, Siege clock, hold locks, kind indicators, the Fortify
+  panel and the non-modal War Council; four code-built Stronghold
+  silhouettes with shared Fortification overlays (D-30 measured triangles).
+- **Budgets.** Step time ≤ +10 % at 100 units a side over P16-B; view
+  growth of tens of bytes; per-match memory under 1 KB more; measured in
+  every phase and re-checked under load in P16-F8.

@@ -30,6 +30,18 @@ pub enum Moment<'a> {
 /// Returns false if the match did not end in time (a simulation bug).
 pub fn play(
     state: &mut MatchState,
+    decide: impl FnMut(Seat, &MatchView) -> Option<PlayerIntention>,
+    observe: impl FnMut(Moment<'_>),
+) -> bool {
+    play_with(state, |_| {}, decide, observe)
+}
+
+/// Same loop as `play`, but calls `before_step` before every tick. The
+/// offline value engine uses it to grant Energy at a chosen tick; the
+/// online game never calls this with a non-trivial hook.
+pub fn play_with(
+    state: &mut MatchState,
+    mut before_step: impl FnMut(&mut MatchState),
     mut decide: impl FnMut(Seat, &MatchView) -> Option<PlayerIntention>,
     mut observe: impl FnMut(Moment<'_>),
 ) -> bool {
@@ -38,6 +50,7 @@ pub fn play(
         if state.tick > MATCH_END + GRACE {
             return false;
         }
+        before_step(state);
         if state.tick.is_multiple_of(2) {
             for seat in Seat::BOTH {
                 let view = state.view_for(seat, &events);

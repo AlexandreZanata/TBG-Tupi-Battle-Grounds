@@ -10,6 +10,36 @@ use tbg_core::{ArcanaPreset, MatchState, PlayerIntention, Ruleset, Seat};
 use crate::metrics::{observe_tick, participant, MatchResult, Side};
 use crate::policy::{Controller, Policy};
 
+/// A lab-only change applied before a chosen tick. The online server never
+/// uses it; the value engine uses it to price Energy at a point in time.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum Setup {
+    #[default]
+    None,
+    /// Add sub-energy to one participant at `tick`. `seat` is a participant
+    /// index, not a physical seat; `play` maps it after the seat swap.
+    Energy {
+        seat: usize,
+        tick: u32,
+        sub_energy: u32,
+    },
+}
+
+impl Setup {
+    fn apply(self, state: &mut MatchState) {
+        if let Setup::Energy {
+            seat,
+            tick,
+            sub_energy,
+        } = self
+        {
+            if state.tick == tick && seat < 2 {
+                state.players[seat].energy = state.players[seat].energy.saturating_add(sub_energy);
+            }
+        }
+    }
+}
+
 /// Two participants on one ruleset. Participant 0 is "the row" in reports.
 #[derive(Clone, Copy, Debug)]
 pub struct Matchup {
@@ -17,6 +47,8 @@ pub struct Matchup {
     pub policies: [Policy; 2],
     /// Views between decisions per participant.
     pub reaction: [u32; 2],
+    /// Lab-only setup; `None` in every production and gate path.
+    pub setup: Setup,
     /// Arcana preset per participant (it follows the participant on a swap).
     pub arcanas: [ArcanaPreset; 2],
 }
@@ -62,6 +94,19 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
     if swapped {
         state.players.swap(0, 1);
     }
+    // Keep the setup attached to the participant, not to the physical seat.
+    let setup = match m.setup {
+        Setup::Energy {
+            seat,
+            tick,
+            sub_energy,
+        } => Setup::Energy {
+            seat: if swapped { 1 - seat } else { seat },
+            tick,
+            sub_energy,
+        },
+        Setup::None => Setup::None,
+    };
     let mut ctl: [Controller; 2] = std::array::from_fn(|p| {
         Controller::new(
             m.policies[p],
@@ -72,8 +117,9 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
     });
     let mut sides: [Side; 2] = Default::default();
     let mut hp = None;
-    let ended = headless::play(
+    let ended = headless::play_with(
         &mut state,
+        |state| setup.apply(state),
         |seat, view| ctl[participant(seat, seat_a)].decide(view),
         |moment| match moment {
             Moment::Intention {

@@ -78,6 +78,22 @@ fn server_variant_order_is_frozen() {
             rows: Vec::new(),
             you: None,
         },
+        ServerMsg::ArcanasSelected {
+            preset: tbg_core::ArcanaPreset::DEFAULT,
+        },
+        ServerMsg::ArcanasRejected {
+            reason: tbg_core::protocol::ArcanaRejection::NotIdle,
+        },
+        ServerMsg::ChallengeWaiting { token: [7; 16] },
+        ServerMsg::ChallengeUnavailable,
+        ServerMsg::RematchOpen {
+            opponent: "Bo".into(),
+        },
+        ServerMsg::RematchState {
+            you_requested: true,
+            opponent_requested: false,
+        },
+        ServerMsg::RematchClosed { declined: true },
     ];
     for (tag, msg) in order.iter().enumerate() {
         let bytes = encode(msg);
@@ -137,5 +153,40 @@ fn server_bytes_are_frozen() {
     assert_eq!(
         encode(&board),
         [17, 1, 0, 1, 1, 3, b'A', b'n', b'n', 0xFC, 0x07, 1, 0, 0, 1, 1]
+    );
+    assert_eq!(
+        encode(&ServerMsg::ArcanasSelected {
+            preset: tbg_core::ArcanaPreset::DEFAULT
+        }),
+        [18, 2, 0, 2, 0, 2, 0]
+    );
+    assert_eq!(
+        encode(&ServerMsg::ArcanasRejected {
+            reason: tbg_core::protocol::ArcanaRejection::NotIdle
+        }),
+        [19, 1]
+    );
+    let waiting = ServerMsg::ChallengeWaiting { token: [7; 16] };
+    assert_eq!(
+        encode(&waiting),
+        [20, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
+    );
+    assert_eq!(encode(&ServerMsg::ChallengeUnavailable), [21]);
+    assert_eq!(
+        encode(&ServerMsg::RematchOpen {
+            opponent: "Bo".into()
+        }),
+        [22, 2, b'B', b'o']
+    );
+    assert_eq!(
+        encode(&ServerMsg::RematchState {
+            you_requested: true,
+            opponent_requested: false
+        }),
+        [23, 1, 0]
+    );
+    assert_eq!(
+        encode(&ServerMsg::RematchClosed { declined: true }),
+        [24, 1]
     );
 }

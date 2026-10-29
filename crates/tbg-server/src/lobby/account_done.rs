@@ -96,6 +96,7 @@ impl Lobby {
                         }
                     }
                 }
+                self.replace_rematch_player(old_token, token);
                 self.leave_waiting(old_token);
                 // Drop the old session outright: the closed device
                 // auto-resumes with its old token and must get a fresh

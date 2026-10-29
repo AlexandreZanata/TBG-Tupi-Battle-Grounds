@@ -58,11 +58,14 @@ pub(crate) fn spawn(
     store: Option<Arc<Store>>,
 ) -> mpsc::Sender<MatchCmd> {
     let (tx, rx) = mpsc::channel(MATCH_QUEUE);
+    let detached_at = players
+        .each_ref()
+        .map(|p| p.conn.is_none().then(Instant::now));
     let arcanas = players.each_ref().map(|p| p.arcanas);
     let m = Match {
         state: MatchState::with_arcanas(seed, arcanas),
         players,
-        detached_at: [None, None],
+        detached_at,
         stats: Default::default(),
         pending: [Vec::new(), Vec::new()],
         applied: [false; 2],

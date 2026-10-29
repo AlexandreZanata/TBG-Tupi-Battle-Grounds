@@ -5,7 +5,7 @@ use tbg_core::arcana::{BUDGET, MAX_RANK, NODES};
 use tbg_core::{ArcanaPreset, Ruleset};
 
 use crate::policy::Policy;
-use crate::runner::{run_pairs, Matchup};
+use crate::runner::{run_pairs, Matchup, Setup};
 use crate::stats::{self, Estimate};
 
 /// The P34 named fixtures (schema order Guard, Assault, Piercing,
@@ -51,6 +51,7 @@ pub fn against(
             rules,
             policies: [policy; 2],
             reaction: [reaction; 2],
+            setup: Setup::None,
             arcanas: [p, opponent],
         })
         .collect();

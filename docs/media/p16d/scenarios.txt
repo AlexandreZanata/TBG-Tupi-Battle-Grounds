@@ -1,0 +1,4 @@
+shieldbearer_vs_archer_with_bloomkeeper: ticks 1200 margin 1890 unit-damage A 220 B 585 healing A 585 B 0
+archer_vs_shieldbearer: ticks 900 margin -650 unit-damage A 630 B 220 healing A 0 B 0
+rootcaller_archer_vs_bonebrute: ticks 1200 margin -1935 unit-damage A 1015 B 520 healing A 0 B 0
+shieldbearer_vs_sawbot: ticks 900 margin 810 unit-damage A 231 B 440 healing A 0 B 0
