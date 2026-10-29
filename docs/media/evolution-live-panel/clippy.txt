@@ -1,0 +1,2 @@
+    Checking tbg-client v0.1.0 (/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/crates/tbg-client)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.30s

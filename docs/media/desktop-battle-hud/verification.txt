@@ -1,0 +1,48 @@
+Desktop battle HUD follow-up to P16-A, 2026-10-28
+
+Order
+- P16-A implementation/report finalized at 05f2e41.
+- D-28 removed the fixed draw-call ceiling before that phase was finalized.
+- The separate attached battle HUD reference was implemented afterward.
+
+Automated checks
+- cargo fmt --all -- --check: passed.
+- cargo clippy --workspace -- -D warnings: passed.
+- cargo test --workspace: 96 passed, 0 failed (see workspace-tests.txt).
+  The restricted run could not open integration-test sockets:
+  Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }.
+  The permitted local-socket rerun passed all tests.
+- cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown: passed.
+- node --check crates/tbg-client/assets/battle/hud.js: passed.
+- git diff --check: passed.
+- trunk build --release in crates/tbg-client: passed.
+
+Browser checks (local release WASM, isolated local server/test database)
+- 1920x1080 and 1280x800: framed blue/red HP bars, numeric actual HP,
+  clock, purple Energy bar without a lightning icon, Army, three Shop
+  portraits, costs, rotation strip, Synergy, and two-step Surrender.
+- Observed partial HP: 1872/4500, 793/4500, and 1950/4500.
+- Opposite online seats showed 1950/4500 and 4500/4500 mirrored correctly.
+- Online card purchase: Energy 8.5 to 5.6, Army 0 to 1; replacement offer
+  loaded its own portrait. Right-click inspection worked while unaffordable.
+- Reload resumed the online match; two-step Surrender ended both clients
+  with opposite Defeat/Victory results.
+- Enter activated a focused card and retained focus after the pending state.
+- 390x844 viewport: HTML battle root hidden; existing Bevy HUD visible.
+- Resizing the same match to desktop restored the new HUD and real HP.
+- All eight real-model portraits inspected; all three live offer images loaded.
+- No browser warnings or errors observed.
+
+Evidence
+- battle-1920x1080.jpg: full desktop battle HUD.
+- battle-1280x800.jpg: smaller desktop with actual damage.
+- phone-fallback-390x844.jpg: original phone HUD.
+- online-reconnect-result.jpg: completed online match after reconnect.
+- all-eight-portraits.jpg: captured base-model portrait contact sheet.
+- browser-observations.json: rendered values and image load state.
+- build-metrics.json: compressed WASM and local asset sizes.
+
+Limits
+- Physical phone performance and the owner's visual approval remain pending.
+- No game rule, core, server, or protocol change; no push or deployment.
+- Screenshots containing the supplied reference stay in ignored .local/.

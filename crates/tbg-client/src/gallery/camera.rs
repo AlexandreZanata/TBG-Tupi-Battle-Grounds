@@ -25,6 +25,18 @@ pub fn frame(
     };
 }
 fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
+    if options.portrait {
+        let large = matches!(
+            options.unit,
+            Some(tbg_core::UnitKind::BoneBrute | tbg_core::UnitKind::SiegeWalker)
+        );
+        return (
+            Vec3::new(0.0, if large { 1.05 } else { 0.78 }, 0.0),
+            if large { 1.6 } else { 1.05 },
+            if large { 1.35 } else { 1.05 },
+            Vec3::new(0.0, 1.2, 10.0),
+        );
+    }
     match options.mode.as_str() {
         "palette" => (
             Vec3::new(8.0, 0.5, 0.0),
