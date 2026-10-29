@@ -81,9 +81,9 @@ pub struct Unit {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PlayerState {
     pub energy: u32,
-    /// Lowest balance since the previous Interest payment (BR-E06).
-    pub low: u32,
-    pub interest_paid: u64,
+    /// Regen left over from the Interest multiplier, in ten-thousandths of
+    /// a sub-energy, so the boost is exact (BR-E06).
+    pub regen_frac: u32,
     pub offers: [UnitKind; OFFERS],
     pub stronghold_hp: i32,
     pub stronghold_cooldown: u16,
@@ -166,10 +166,6 @@ pub enum Event {
     PhaseChanged {
         phase: Phase,
     },
-    InterestPaid {
-        seat: Seat,
-        amount: u32,
-    },
     RoundOpened {
         round: u32,
     },
@@ -227,19 +223,17 @@ pub fn stronghold_x(seat: Seat) -> i32 {
 }
 
 impl PlayerState {
-    /// The one spend path: rejects overdrafts and lowers the Interest
-    /// low-water mark (BR-E03, BR-E06).
+    /// The one spend path: rejects overdrafts (BR-E03). The balance drops
+    /// at once, and with it the Interest boost (BR-E06).
     pub fn spend(&mut self, cost: u32) -> bool {
         if self.energy < cost {
             return false;
         }
         self.energy -= cost;
-        self.low = self.low.min(self.energy);
         true
     }
 
-    /// Credit Energy without raising the low-water mark (regen, Bounty,
-    /// Forgo, Interest before the mark is reset).
+    /// Credit Energy (Bounty, Forgo) and return what was added.
     pub fn credit(&mut self, amount: u32) -> u32 {
         let before = self.energy;
         self.energy = self.energy.saturating_add(amount);

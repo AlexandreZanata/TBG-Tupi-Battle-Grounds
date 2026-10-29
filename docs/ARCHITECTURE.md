@@ -117,7 +117,7 @@ tables are the one allowed exception.
   it (BR-S05). Units, iteration, and targeting use `Vec` order by unit id —
   never `HashMap` iteration.
 - **Tick order:** 1) apply queued intentions in arrival order; 2) clock,
-  phase, `Energy` regen; 3) Interest and Augment rounds (no shop
+  phase, `Energy` regen with the Interest boost; 3) Augment rounds (no shop
   rotation: offers change only on purchase, BR-S04); 4) synergy recompute;
   5) statuses tick down; 6) targeting + movement; 7) attacks resolve
   (cooldown, windup, splash, statuses, heals); 8) deaths removed, events
@@ -127,7 +127,7 @@ tables are the one allowed exception.
   views drain them so the client animates exactly what happened.
 - **Views:** `view_for(seat)` returns tick, phase, clock, both Stronghold
   HPs, all units (id, owner, kind, form, x, hp, max_hp, status), the
-  seat's own `Energy`, offers, Interest timer, and `last_seq` (last applied
+  seat's own `Energy`, offers, regen multiplier, and `last_seq` (last applied
   intention). Opponent `Energy`, offers, and seeds are never included.
 - **Determinism check:** `MatchState::hash()` (FNV over the state) lets
   tests assert that the same seed and intention script give the same

@@ -708,3 +708,42 @@ Vitality conditions (war-full 47.7 %, vitality 47.2 %, war-vitality
 5.7 % of bot seat-ticks. Those values need policies that play each family
 before they are retuned. Evidence: `docs/media/p40/`.
 
+## D-43 · Interest becomes a regen boost on the Energy held — 2026-10-29 (owner decision)
+
+**Decision.** The owner replaced the 10-s Interest payment (D-35, D-41)
+with a continuous boost: every full 5 `Energy` held adds 25 % of the base
+regeneration, counting at most 25 `Energy` (×1.25 at 5, ×1.50 at 10, ×1.75
+at 15, ×2.00 at 20, ×2.25 at 25 or more). `Energy` itself stays uncapped.
+`MatchView::regen_bp` replaces the payment fields, `Event::InterestPaid`,
+`PlayerState::low` and `interest_paid` are gone, protocol v12, and the
+Bounty window keeps its own 10-s reset (`BOUNTY_WINDOW_TICKS`).
+**Why.** One rule that is visible every second (the HUD shows ×1.50 and
+how many of the 5 steps are filled) instead of a lump every ten seconds,
+and no low-water mark to explain. Reading the balance at the start of each
+tick lets a spend lower the rate at once, so nothing needs a special case.
+**Cost accepted.** The base regen of 17 sub-energy per tick (about 0.57
+`Energy` per second) is unchanged; the owner described the base as "1 per
+second", which is read as the unboosted rate, not as a new base. At 25 held
+the player regenerates about 1.28 per second, 125 % more than idle, and the
+lab has not measured the effect (P16-C's `saver` finding is likely
+stronger).
+**Reopen when** the lab or playtests show banking dominates, or the owner
+wants an absolute base of 1 `Energy` per second.
+
+## D-44 · The lab's planted-imbalance contract (C7) under a purchase-only Shop — 2026-10-29
+
+**Decision.** BR-S04 (offers change only when bought) made a unit appear
+rarely, so the shipped-bot match row of contract C7 stopped detecting a
+planted ×2 HP and damage Shieldbearer (+0.009; it passed before the Shop
+change, on `4f332ed`). `favor-<unit>` now buys the cheapest card to bring
+new ones when its unit is not offered, as a player must under BR-S04, and
+C7 adds one more disjunct: the same planted imbalance measured against the
+cheap-spam policy. No threshold moved (±0.10 on 256 pairs, 20 points on a
+duel row).
+**Why.** A contract that goes red because the game changed, not because a
+unit is unbalanced, would hide real regressions; the thresholds are a
+product decision and stay. The duel rows alone cannot carry C7 (nine
+opponents make one duel 0.111, under the 0.20 step).
+**Reopen when** the Shop gains another way to refresh offers (Reserve,
+F2), or a planted imbalance is missed again.
+

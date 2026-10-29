@@ -59,7 +59,7 @@ evolve, and which factions you combine.
 | RulesetVersion | **Proposed (P35):** compiled version of competitive rules and balance values, recorded with match results | `RulesetVersion` |
 | StrongholdKind | **Proposed (P16-F3, not active):** a free pre-match choice of `Stronghold` with its own stats and passive; mechanical, unlike `StrongholdStyle` | `StrongholdKind` |
 | Fortification | **Proposed (P16-F3, not active):** in-match branching upgrade of a player's own `Stronghold`, paid with `Energy`; never called `Evolution` | `Fortification` |
-| Interest | **Proposed (P16-F1, not active):** periodic `Energy` paid on the lowest balance held since the previous payment | `Interest` |
+| Interest | A boost to `Energy` regeneration that grows with the `Energy` held: +25 % of the base rate for every full 5 `Energy`, counting at most 25 (BR-E05–E07, owner revision 2026-10-29) | `Interest` |
 | Bounty | **Proposed (P16-F1, not active):** `Energy` granted for an eligible kill, bounded per payment window | `Bounty` |
 | Siege | **Proposed (P16-F1, not active):** the match phase after the running phase in which both `Stronghold`s suffer `Collapse`; replaces overtime | `Phase::Siege` |
 | Collapse | **Proposed (P16-F1, not active):** symmetric structural loss of a percentage of each `Stronghold`'s max HP per second during `Siege` | `Collapse` |
@@ -163,9 +163,10 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 6. **Synergy.** Each faction has bonuses at 2 and 4 living units of that
    faction (every conventional unit counts as one; summons do not count). Bonuses apply to that
    faction's units only, recomputed every tick, preserving HP percentage.
-7. **Interest.** Every 10 s of combat both players earn Interest on the
-   lowest `Energy` they held since the previous payment (BR-E05–E07), so
-   saving compounds; spending lowers the next payment.
+7. **Interest.** Every full 5 `Energy` a player holds adds 25 % to their
+   `Energy` regeneration, counting at most 25: 5 held regenerates ×1.25,
+   10 ×1.50, 15 ×1.75, 20 ×2.00 and 25 or more ×2.25 (BR-E05–E07).
+   Saving compounds, and spending lowers the rate at once.
 8. **War Council.** Every 60 s of combat the whole battle pauses for both
    players and the same four `Augment`s are offered. Each player buys one
    or forgoes; a confirmed choice is final and hidden until the round
@@ -199,7 +200,7 @@ integers (see ARCHITECTURE.md §4).
 | BattleLine length (Stronghold to Stronghold) | 16 | | Countdown | 3 |
 | Match length | open-ended, no clock (BR-M07) | | Augment round | every 60 s of combat; 20 s selection pause |
 | Energy start / cap | 5 / none (BR-E04) | | Energy regen | 1 per ~1.76 s (17 sub-energy/tick) |
-| Interest | every 10 s: `min(low / 5, 5) × 0.25` (BR-E06) | | Augment cost Bronze / Silver / Gold / Diamond | 3 / 6 / 10 / 15 |
+| Interest | regen +25 % per full 5 Energy held, up to ×2.25 at 25 (BR-E06) | | Augment cost Bronze / Silver / Gold / Diamond | 3 / 6 / 10 / 15 |
 | Shop offers / rotation | 5 distinct / none: a purchase refills its slot (BR-S04) | | Army cap | none (BR-U07) |
 | Stronghold HP | 4500 | | Stronghold attack | 53 dmg / 1.0 s, range 6 |
 | Evolution cost tier 1 / tier 2 | 2 / 4 | | Reconnect window | 30 |
@@ -462,11 +463,11 @@ reuse one.
 
 | ID | Rule (active, owner revision 2026-10-29) |
 |----|---------------|
-| BR-E04 | `Energy` has no gameplay cap; every *generating* source has a documented bound per window instead (regen per tick, Interest per payment, Bounty per window, Forgo per round) |
-| BR-E05 | Interest is paid every 10 s of combat (`INTEREST_TICKS`, 200), to both players on the same tick |
-| BR-E06 | Interest = `min(low / band, max_bands) × per_band`, where `low` is the lowest balance the player held since the previous payment (spending lowers it; gains never raise it); after the payment `low` becomes the current balance |
-| BR-E07 | Interest, Bounty and Forgo Energy are added with saturating `u32` arithmetic in sub-energy and integer division (never rounded up); `low` starts at the start balance and the first payment is at 0:10 of running time |
-| BR-E08 | An eligible kill is the death by damage of an enemy conventional unit (BR-U08: summons and expiries are never eligible); every Bounty source of a player sums per kill and is capped by the sum of their caps and by a per-player ceiling of 1 Energy per 10-s window (windows reset on Interest ticks) |
+| BR-E04 | `Energy` has no gameplay cap; every *generating* source has a documented bound per window instead (regen per tick with the Interest boost, Bounty per window, Forgo per round) |
+| BR-E05 | Interest is a regen boost, not a payment: every full 5 `Energy` the player holds adds 25 % of the base regen (`INTEREST_BAND` 3 000 sub-energy, `INTEREST_PER_BAND` 2 500 bp), counting at most 5 steps (25 `Energy`); a player holding 5 regenerates ×1.25, 10 ×1.50, 15 ×1.75, 20 ×2.00, 25 or more ×2.25 (owner revision 2026-10-29, replaces the 10-s payment) |
+| BR-E06 | The boost reads the player's balance at the start of each combat tick, before that tick's regen, so a spend lowers it immediately and nothing can be gamed around a payment instant; `Energy` itself is never capped, only the steps counted |
+| BR-E07 | Regen is `regen_running × (10 000 + steps × 2 500) / 10 000` sub-energy per tick with the remainder carried in `PlayerState::regen_frac`, so the rate is exact over time; Bounty and Forgo Energy and the regen add with saturating `u32` arithmetic; no regen runs in the countdown, an Augment pause or after the end |
+| BR-E08 | An eligible kill is the death by damage of an enemy conventional unit (BR-U08: summons and expiries are never eligible); every Bounty source of a player sums per kill and is capped by the sum of their caps and by a per-player ceiling of 1 Energy per 10-s window (windows reset every 10 s of combat) |
 | BR-E09 | No `Augment`, `StrongholdKind` or `Fortification` changes base regen, Interest bands, or Shop probabilities |
 | BR-E10 | Purchases, Evolutions, Fortifications and Augments are still rejected when `Energy` is short (BR-E03) |
 
@@ -474,13 +475,12 @@ reuse one.
 |----------|-------|----------------------|
 | Start | 5 (unchanged unless P16-D changes it) | 3 000 |
 | Base regen | 17 per tick, unchanged; no `Siege` doubling | — |
-| Interest period | 10 s (200 combat ticks) | — |
-| Interest band / value per band / max bands | 5 / 0.25 / 5 (max 1.25 per payment at a low of 25) | 3 000 / 150 / 5 |
+| Interest band / boost per band / max bands | 5 Energy / +25 % of base regen / 5 (×2.25 at 25 held) | 3 000 / 2 500 bp / 5 |
 | Bounty ceiling | 1.0 per player per window | 600 |
 
-Tick order addition: intentions (they lower `low`), then regen, then
-Interest on payment ticks, then the window reset. Interest counts combat
-ticks: an Augment pause (BR-AG12) neither pays it nor moves its timer.
+Tick order: intentions (they lower the balance), then regen with the
+Interest boost read from that balance, then the Bounty window reset every
+10 s. An Augment pause (BR-AG12) runs no regen.
 
 ### 10.2 Victory without a clock (P16-F1, revised)
 

@@ -10,9 +10,10 @@ use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-/// v11: the fifteen-node Arcana schema (12 points, prerequisites, 2-point
-/// supremes); the `SetArcanas` rank vector grew, so older peers are refused.
-pub const PROTOCOL_VERSION: u16 = 11;
+/// v12: Interest became a regen boost (`MatchView::regen_bp` replaces the
+/// payment fields, `Event::InterestPaid` is gone). v11 was the fifteen-node
+/// Arcana schema; older peers are refused.
+pub const PROTOCOL_VERSION: u16 = 12;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a

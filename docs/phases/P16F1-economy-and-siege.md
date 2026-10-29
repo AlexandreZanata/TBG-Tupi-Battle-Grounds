@@ -453,3 +453,16 @@ reachable; offers unchanged over 1 000 steps without a purchase).
   move and attack-speed caps; Bounty ceiling).
 - Matches have no time bound at all; one long match costs one task.
 - Augment picks are not in match records or telemetry yet.
+
+**Interest revision (owner, same day, D-43).** The 10-s Interest payment
+is replaced by a regen boost: every full 5 `Energy` held adds 25 % of the
+base regen, counting at most 25 (×1.25 at 5 up to ×2.25), so
+`PlayerState::low`, `interest_paid`, `Event::InterestPaid` and the payment
+fields of `MatchView` are gone (`regen_bp` replaces them; protocol v12).
+The Bounty window keeps its 10-s reset. `economy_interest.rs` is rewritten
+for the new rule; the contract goldens (`contract_determinism`,
+`contract_lab` C2) are refrozen because the faster Energy flow moves bot
+outcomes and end ticks (seed 1 B at 2 687, 7 A at 2 221, 42 B at 2 408).
+Balance is still not measured: banking now pays continuously and is likely
+stronger than before.
+

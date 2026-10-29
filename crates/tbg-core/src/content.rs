@@ -20,10 +20,12 @@ pub const REGEN_OVERTIME: u32 = 34;
 pub const COUNTDOWN: Tick = 60;
 pub const RUNNING_START: Tick = COUNTDOWN;
 
-/// Interest: paid every `INTEREST_TICKS` of combat from the lowest balance held since
-/// the previous payment, then re-invested (BR-E05–E07).
+/// Interest (owner revision 2026-10-29, BR-E05–E07): every full 5 Energy a
+/// player holds raises the Energy regeneration by 25 %, counting at most 25
+/// Energy (5 steps, up to +125 %). Energy itself has no cap.
 pub const INTEREST_BAND: u32 = 3_000;
-pub const INTEREST_PER_BAND: u32 = 150;
+/// Regen bonus per step, in basis points of the base regen.
+pub const INTEREST_PER_BAND: u32 = 2_500;
 pub const INTEREST_MAX_BANDS: u32 = 5;
 
 /// Augments: four options every 60 s of running time, forever (BR-AG01–08).
@@ -37,8 +39,8 @@ pub const AUGMENT_COST: [u32; 4] = [1_800, 3_600, 6_000, 9_000];
 
 /// Five distinct offers (BR-S01, D-32 Proposed). There is no army cap (BR-U07).
 pub const OFFERS: usize = 5;
-/// Interest period: 10 s of combat (BR-E05). The Shop no longer rotates.
-pub const INTEREST_TICKS: Tick = 200;
+/// Bounty window: 10 s of combat (BR-E08). The Shop never rotates (BR-S04).
+pub const BOUNTY_WINDOW_TICKS: Tick = 200;
 
 /// Nester Hatch (BR-U08, Proposed): ticks between hatches, Beetlings alive
 /// per Nester (base / Brood and Hive), per player, and their lifetime.

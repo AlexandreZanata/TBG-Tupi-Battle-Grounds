@@ -22,7 +22,6 @@ fn paused_battle(seed: u64) -> MatchState {
     }
     for p in &mut s.players {
         p.energy = 1_000 * ENERGY_SCALE;
-        p.low = p.energy;
     }
     for seq in 1..=4 {
         for seat in Seat::BOTH {
@@ -50,8 +49,7 @@ fn frozen_part(s: &MatchState) -> (u32, Vec<Unit>, String) {
         .map(|p| {
             (
                 p.energy,
-                p.low,
-                p.interest_paid,
+                p.regen_frac,
                 p.offers,
                 p.stronghold_hp,
                 p.stronghold_cooldown,

@@ -87,9 +87,10 @@
     const visualMax = 25 * scale;
     root.querySelector('[data-battle-energy-fill]').style.width = percent(number('energy'),visualMax) + '%';
     const track = root.querySelector('.energy-track'); track.setAttribute('aria-valuenow', energy); track.setAttribute('aria-valuemax','25'); track.setAttribute('aria-valuemin','0');
-    set('[data-battle-interest]', '+' + (number('interest') / scale).toFixed(2));
-    const interestSeconds = Math.ceil(number('interestIn') / 20);
-    set('[data-battle-interest-in]', Math.floor(interestSeconds / 60) + ':' + String(interestSeconds % 60).padStart(2,'0'));
+    // Interest (BR-E05): each full 5 Energy held adds 25 % to the regeneration.
+    const boost = number('regen') / 10000;
+    set('[data-battle-interest]', '×' + boost.toFixed(2));
+    set('[data-battle-interest-in]', Math.min(5, Math.floor(energy / 5)) + '/5');
     const ownAugments = root.dataset.augmentsYou || ''; const enemyAugments = root.dataset.augmentsEnemy || '';
     const youAug = root.querySelector('[data-augments-you]'); youAug.hidden = !ownAugments; set('[data-augments-you]', ownAugments);
     const enemyAug = root.querySelector('[data-augments-enemy]'); enemyAug.hidden = !enemyAugments; set('[data-augments-enemy]', enemyAugments);
@@ -147,6 +148,6 @@
     set('[data-battle-surrender]',s.surrender === 'sent' ? 'Leaving...' : s.surrender === 'armed' ? 'Confirm?' : 'Surrender');
     surrender.title = s.surrender === 'armed' ? (s.ranked === 'true' ? 'Confirm: this counts as a Ranked loss' : 'Click again to surrender') : 'Click twice to surrender';
   }
-  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-hp-own','data-hp-enemy','data-hp-max','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-scale','data-army','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect','data-interest','data-interest-in','data-augments-you','data-augments-enemy','data-council','data-council-options']});
+  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-hp-own','data-hp-enemy','data-hp-max','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-scale','data-army','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect','data-regen','data-augments-you','data-augments-enemy','data-council','data-council-options']});
   root.dataset.ready = 'true';
 })();

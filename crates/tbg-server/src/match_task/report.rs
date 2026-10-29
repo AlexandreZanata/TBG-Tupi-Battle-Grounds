@@ -65,7 +65,6 @@ impl Match {
             // D-40 (BR-AR07): the presets this match applied.
             "arcanas": self.state.players.each_ref().map(|p| p.arcanas.ranks),
             // Owner revision 2026-10-29: economy and Augment telemetry.
-            "interest_paid": self.state.players.each_ref().map(|p| p.interest_paid),
             "augments": augments,
         });
         tracing::info!(target: "match_end", "{line}");

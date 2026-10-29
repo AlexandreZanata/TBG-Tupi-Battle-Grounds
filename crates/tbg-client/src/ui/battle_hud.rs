@@ -130,8 +130,7 @@ mod web {
         attr(&root, "data-inspect", &unit);
         attr(&root, "data-energy", &v.energy.to_string());
         attr(&root, "data-energy-scale", &ENERGY_SCALE.to_string());
-        attr(&root, "data-interest", &v.interest_next.to_string());
-        attr(&root, "data-interest-in", &v.interest_in.to_string());
+        attr(&root, "data-regen", &v.regen_bp.to_string());
         attr(
             &root,
             "data-augments-you",

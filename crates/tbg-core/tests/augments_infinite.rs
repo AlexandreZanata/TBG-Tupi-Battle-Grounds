@@ -32,7 +32,6 @@ fn resolve(s: &mut MatchState) {
 fn rich(s: &mut MatchState) {
     for p in &mut s.players {
         p.energy = 1_000 * ENERGY_SCALE;
-        p.low = p.energy;
     }
 }
 
@@ -224,7 +223,6 @@ fn br_ag07_a_short_player_may_wait_and_buy_later() {
     open(&mut s, 1);
     let cost = AUGMENT_COST[augment_def(s.augments.options[0]).unwrap().rarity.index()];
     s.players[0].energy = cost - 1;
-    s.players[0].low = s.players[0].energy;
     assert_eq!(choose(&mut s, Seat::A, 0), Err(Rejection::NotEnoughEnergy));
     s.players[0].energy = cost;
     choose(&mut s, Seat::A, 0).unwrap();

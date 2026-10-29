@@ -18,30 +18,31 @@ fn bot_match(seed: u64) -> MatchState {
 
 #[test]
 fn bot_matches_are_frozen() {
-    // Owner revision 2026-10-29: uncapped Energy, Interest, the Augment
-    // pause, and a Shop that changes only on purchase (BR-S04, no timed
-    // rotation). The Shop change alters what the bots can buy, so outcomes
-    // and end combat ticks moved too.
+    // Owner revision 2026-10-29: uncapped Energy, Interest as a regen boost
+    // (every full 5 Energy held adds 25 % of the base regen), the Augment
+    // pause, and a Shop that changes only on purchase (BR-S04). The faster
+    // Energy flow changes what the bots can buy, so outcomes and end combat
+    // ticks moved with the hashes.
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0x118b_ade0_a882_9113_u64,
-            3_664,
+            0xe9a8_4877_7c0c_ce81_u64,
+            2_687,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0xf923_ec31_cb58_6502,
-            2_146,
+            0x2802_0743_cf00_b10d,
+            2_221,
             Seat::A,
             StrongholdDestroyed,
         ),
         (
             42,
-            0xeb02_d978_ecaf_90c0,
-            2_342,
+            0xe43e_e20c_42ce_4607,
+            2_408,
             Seat::B,
             StrongholdDestroyed,
         ),

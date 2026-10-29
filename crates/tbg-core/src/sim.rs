@@ -4,7 +4,7 @@
 
 use crate::arcana::ArcanaPreset;
 use crate::augment::{self, AugmentState};
-use crate::content::RUNNING_START;
+use crate::content::{BOUNTY_WINDOW_TICKS, RUNNING_START};
 use crate::rng::Pcg32;
 use crate::ruleset::{Ruleset, CANON};
 use crate::state::{EndReason, Event, MatchState, Outcome, Phase, PlayerState};
@@ -33,8 +33,7 @@ impl MatchState {
             let mut rng = Pcg32::new(seed, stream);
             PlayerState {
                 energy: rules.energy_start,
-                low: rules.energy_start,
-                interest_paid: 0,
+                regen_frac: 0,
                 offers: shop::initial_offers(&mut rng),
                 stronghold_hp: rules.stronghold_hp,
                 stronghold_cooldown: 0,
@@ -95,7 +94,11 @@ impl MatchState {
         if self.phase != Phase::Ended {
             if self.is_live() {
                 self.regen_energy();
-                augment::pay_interest(self, &mut ev);
+                if self.tick > RUNNING_START
+                    && (self.tick - RUNNING_START).is_multiple_of(BOUNTY_WINDOW_TICKS)
+                {
+                    augment::reset_windows(self);
+                }
                 augment::tick(self, &mut ev);
                 self.expire_shields();
             }
@@ -140,10 +143,16 @@ impl MatchState {
     }
 
     fn regen_energy(&mut self) {
-        let regen = self.rules.regen_running;
+        let regen = u64::from(self.rules.regen_running);
+        let rule = self.rules.interest;
         let cap = self.rules.energy_cap;
         for p in &mut self.players {
-            p.energy = p.energy.saturating_add(regen);
+            // Interest (BR-E05–E07): the more Energy is held, the faster it
+            // grows; the remainder carries over so the rate stays exact.
+            let scaled = regen * u64::from(rule.regen_bp(p.energy)) + u64::from(p.regen_frac);
+            p.regen_frac = (scaled % 10_000) as u32;
+            let gain = u32::try_from(scaled / 10_000).unwrap_or(u32::MAX);
+            p.energy = p.energy.saturating_add(gain);
             if let Some(cap) = cap {
                 p.energy = p.energy.min(cap);
             }

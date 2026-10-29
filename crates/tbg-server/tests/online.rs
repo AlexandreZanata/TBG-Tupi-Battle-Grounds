@@ -1159,7 +1159,11 @@ async fn br_ag_online_paused_round_hidden_pick_reconnect_and_deadline() {
     assert_eq!(a_view.tick, b_view.tick, "frozen on the same combat tick");
     assert_eq!(a_seat, a_view.you);
     assert_eq!(b_seat, b_view.you);
-    assert!(a_view.interest_paid > 0, "first Interest payment happened");
+    assert!(
+        a_view.regen_bp >= 10_000 && a_view.regen_bp <= 22_500,
+        "Interest boost {}",
+        a_view.regen_bp
+    );
     let pause_tick = a_view.tick;
 
     // Gameplay is rejected while paused.

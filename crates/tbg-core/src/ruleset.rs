@@ -6,7 +6,7 @@
 //! Structural values stay `const` in `content.rs` and are never tuned:
 //! they define units of measure, protocol shapes, or array bounds
 //! (`TICK_HZ`, `LANE_LEN`, `SPAWN_OFFSET`, `ENERGY_SCALE`, `BP`, `OFFERS`,
-//! `INTEREST_TICKS`, `COUNTDOWN`, `WINDUP`,
+//! `BOUNTY_WINDOW_TICKS`, `COUNTDOWN`, `WINDUP`,
 //! `MIN_INTERVAL`, `REGEN_PERIOD`, `BEETLES_PER_PLAYER`).
 
 use crate::arcana::{self, ArcanaPreset, ArcanaValues};
@@ -21,9 +21,21 @@ use crate::types::{Tick, UnitKind, ALL_KINDS};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InterestRule {
+    /// Sub-energy held per step (5 Energy).
     pub band: u32,
+    /// Regen bonus per step, in basis points of the base regen.
     pub per_band: u32,
+    /// Steps counted at most (25 Energy).
     pub max_bands: u32,
+}
+
+impl InterestRule {
+    /// Regen multiplier in basis points for a balance: 10 000 is the base
+    /// rate, +`per_band` for every full `band` held, up to `max_bands`.
+    pub fn regen_bp(&self, energy: u32) -> u32 {
+        let steps = (energy / self.band.max(1)).min(self.max_bands);
+        10_000 + steps.saturating_mul(self.per_band)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

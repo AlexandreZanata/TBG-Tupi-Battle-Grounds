@@ -158,10 +158,9 @@ fn info(v: &MatchView) -> String {
         .map(|f| format!("{f:?} {}/2", v.synergy[v.you.index()][f.index()]))
         .collect();
     let energy = v.energy as f32 / ENERGY_SCALE as f32;
-    let interest = v.interest_next as f32 / ENERGY_SCALE as f32;
-    let in_s = v.interest_in.div_ceil(TICK_HZ);
+    let regen = v.regen_bp as f32 / 10_000.0;
     format!(
-        "Energy {energy:.1} | Interest +{interest:.2} in {in_s}s | {} | {}",
+        "Energy {energy:.1} | Regen x{regen:.2} | {} | {}",
         army_label(v),
         synergies.join("  ")
     )

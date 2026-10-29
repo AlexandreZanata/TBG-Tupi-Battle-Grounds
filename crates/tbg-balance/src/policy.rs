@@ -266,9 +266,18 @@ impl Controller {
             .flatten()
     }
 
+    /// Buy `k` whenever it is offered. The Shop only changes on a purchase
+    /// (BR-S04), so a player who wants `k` keeps buying the cheapest card to
+    /// bring new ones, as a human would; with nothing affordable it plays
+    /// like the shipped bot.
     fn favor(&mut self, view: &MatchView, k: UnitKind) -> Option<PlayerIntention> {
-        let pick = self.affordable(view).find(|&i| view.offers[i] == k);
-        match pick {
+        if let Some(i) = self.affordable(view).find(|&i| view.offers[i] == k) {
+            return Some(purchase(i));
+        }
+        let cheapest = self
+            .affordable(view)
+            .min_by_key(|&i| (self.cost(view, i), i));
+        match cheapest {
             Some(i) => Some(purchase(i)),
             None => self.bot.decide(view),
         }

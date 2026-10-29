@@ -65,15 +65,13 @@ fn same_seed_and_script_same_hash() {
 fn energy_regenerates_without_cap_and_pays_interest() {
     // BR-E04–E07: uncapped regen plus compounding interest.
     let mut s = running(3);
-    assert_eq!(
-        s.players[0].energy,
-        ENERGY_START + tbg_core::content::REGEN_RUNNING
-    );
+    // 5 Energy held is one Interest step: the first tick regenerates
+    // 17 x 1.25 = 21.25 sub-energy (BR-E05).
+    assert_eq!(s.players[0].energy, ENERGY_START + 21);
     for _ in 0..1_000 {
         s.step();
     }
     assert!(s.players[0].energy > 6_000, "{}", s.players[0].energy);
-    assert!(s.players[0].interest_paid > 0);
 }
 
 #[test]

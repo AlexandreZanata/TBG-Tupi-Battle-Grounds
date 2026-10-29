@@ -694,43 +694,6 @@ pub fn reset_windows(state: &mut MatchState) {
     }
 }
 
-/// Interest on the lowest balance since the previous payment, credited and
-/// re-invested (BR-E05–E07). Both seats always pay on the same tick.
-pub(crate) fn pay_interest(state: &mut MatchState, ev: &mut Vec<Event>) {
-    let rule = state.rules.interest;
-    let due = state.tick > crate::content::RUNNING_START
-        && (state.tick - crate::content::RUNNING_START)
-            .is_multiple_of(crate::content::INTEREST_TICKS);
-    if !due || rule.band == 0 {
-        return;
-    }
-    for seat in Seat::BOTH {
-        let p = state.player_mut(seat);
-        let bands = (p.low / rule.band).min(rule.max_bands);
-        let amount = bands.saturating_mul(rule.per_band);
-        let credited = p.credit(amount);
-        p.low = p.energy;
-        p.interest_paid = p.interest_paid.saturating_add(u64::from(credited));
-        if credited > 0 {
-            ev.push(Event::InterestPaid {
-                seat,
-                amount: credited,
-            });
-        }
-    }
-    reset_windows(state);
-}
-
-/// Combat ticks until the next Interest payment (BR-E05).
-pub fn next_interest_in(tick: Tick) -> u32 {
-    use crate::content::{INTEREST_TICKS, RUNNING_START};
-    if tick < RUNNING_START {
-        RUNNING_START + INTEREST_TICKS - tick
-    } else {
-        INTEREST_TICKS - (tick - RUNNING_START) % INTEREST_TICKS
-    }
-}
-
 /// Effective heal after Triage and Grievous Wounds, capped at missing HP.
 pub fn heal_amount(
     state: &MatchState,

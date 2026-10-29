@@ -3,7 +3,6 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::augment::next_interest_in;
 use crate::augment::AugmentCounts;
 use crate::content::{AUGMENT_OPTIONS, OFFERS, RUNNING_START};
 use crate::sim::phase_ticks_left;
@@ -49,11 +48,9 @@ pub struct MatchView {
     pub phase_ticks_left: u32,
     pub you: Seat,
     pub energy: u32,
-    /// Interest the next payment would make at the current low mark.
-    pub interest_next: u32,
-    /// Ticks until that payment.
-    pub interest_in: u32,
-    pub interest_paid: u64,
+    /// Energy regeneration now, in basis points of the base rate: 10 000
+    /// plus 2 500 per full 5 Energy held, at most 22 500 (BR-E05).
+    pub regen_bp: u32,
     pub offers: [UnitKind; OFFERS],
     /// Indexed by `Seat::index()`.
     pub stronghold_hp: [i32; 2],
@@ -73,8 +70,6 @@ pub struct MatchView {
 impl MatchState {
     pub fn view_for(&self, seat: Seat, events: &[Event]) -> MatchView {
         let me = self.player(seat);
-        let interest = self.rules.interest;
-        let bands = (me.low / interest.band.max(1)).min(interest.max_bands);
         let round = (self.is_live() && self.augments.selecting()).then(|| {
             let costs = self.augments.options.map(|id| {
                 crate::content::augment_def(id)
@@ -97,9 +92,7 @@ impl MatchState {
             phase_ticks_left: phase_ticks_left(self),
             you: seat,
             energy: me.energy,
-            interest_next: bands.saturating_mul(interest.per_band),
-            interest_in: next_interest_in(self.tick),
-            interest_paid: me.interest_paid,
+            regen_bp: self.rules.interest.regen_bp(me.energy),
             offers: me.offers,
             stronghold_hp: [0, 1].map(|i| self.players[i].stronghold_hp),
             shields: [0, 1].map(|i| self.players[i].shield),

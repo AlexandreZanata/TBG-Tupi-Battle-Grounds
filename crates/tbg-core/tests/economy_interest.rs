@@ -1,5 +1,6 @@
-//! Owner revision 2026-10-29: uncapped Energy, ten-second Interest on the
-//! low-water mark, compounding, and open-ended matches.
+//! Owner revision 2026-10-29: uncapped Energy and Interest as a regen boost
+//! (every full 5 Energy held adds 25 % of the base regen, at most 25 Energy
+//! counted), plus open-ended matches (BR-E02–E08).
 
 use tbg_core::content::{
     ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, INTEREST_PER_BAND, REGEN_RUNNING,
@@ -15,194 +16,162 @@ fn live(seed: u64) -> MatchState {
     s
 }
 
-fn at(s: &mut MatchState, tick: u32) {
-    while s.tick < tick {
+/// Energy a seat gains over `ticks` steps from `energy` (no spending).
+fn gain(energy: u32, ticks: u32) -> u32 {
+    let mut s = live(1);
+    s.players[0].energy = energy;
+    s.players[0].regen_frac = 0;
+    for _ in 0..ticks {
         s.step();
     }
-}
-
-fn payment(s: &mut MatchState) -> (u32, u32) {
-    let before = [0, 1].map(|i| s.players[i].interest_paid);
-    s.step();
-    (
-        (s.players[0].interest_paid - before[0]) as u32,
-        (s.players[1].interest_paid - before[1]) as u32,
-    )
+    s.players[0].energy - energy
 }
 
 #[test]
-fn br_e05_first_payment_is_ten_seconds_after_running() {
-    let mut s = live(1);
-    at(&mut s, RUNNING_START + 200);
-    assert_eq!(s.players[0].interest_paid, 0);
-    let paid = payment(&mut s);
-    assert_eq!(paid, (150, 150), "5 Energy low pays 0.25");
-    assert_eq!(s.players[0].low, s.players[0].energy);
-}
-
-#[test]
-fn br_e05_both_seats_are_paid_on_the_same_tick() {
-    let mut s = live(2);
-    at(&mut s, RUNNING_START + 200);
-    s.players[0].low = 9_000;
-    s.players[1].low = 9_000;
-    let paid = payment(&mut s);
-    assert_eq!(paid, (450, 450));
-}
-
-#[test]
-fn br_e05_formula_covers_every_band_and_caps_per_payment() {
+fn br_e05_every_five_energy_adds_a_quarter_of_the_base_regen() {
+    let rule = Ruleset::canon().interest;
     let cases = [
-        (0, 0),
-        (INTEREST_BAND - 1, 0),
-        (INTEREST_BAND, INTEREST_PER_BAND),
-        (2 * INTEREST_BAND - 1, INTEREST_PER_BAND),
-        (2 * INTEREST_BAND, 2 * INTEREST_PER_BAND),
-        (5 * INTEREST_BAND, 5 * INTEREST_PER_BAND),
-        (50 * INTEREST_BAND, INTEREST_MAX_BANDS * INTEREST_PER_BAND),
+        (0, 10_000),
+        (INTEREST_BAND - 1, 10_000),
+        (INTEREST_BAND, 12_500),
+        (2 * INTEREST_BAND - 1, 12_500),
+        (2 * INTEREST_BAND, 15_000),
+        (3 * INTEREST_BAND, 17_500),
+        (4 * INTEREST_BAND, 20_000),
+        (5 * INTEREST_BAND, 22_500),
+        (50 * INTEREST_BAND, 22_500),
+        (u32::MAX, 22_500),
     ];
-    for (low, want) in cases {
-        let mut s = live(3);
-        at(&mut s, RUNNING_START + 200);
-        s.players[0].low = low;
-        s.players[1].low = low;
-        let paid = payment(&mut s);
-        assert_eq!(paid, (want, want), "low {low}");
+    for (energy, want) in cases {
+        assert_eq!(rule.regen_bp(energy), want, "{energy} sub-energy");
     }
+    assert_eq!(INTEREST_PER_BAND, 2_500);
+    assert_eq!(INTEREST_MAX_BANDS, 5);
 }
 
 #[test]
-fn br_e05_regen_never_raises_the_low_water_mark() {
-    let mut s = live(4);
-    at(&mut s, RUNNING_START + 200);
-    s.players[0].energy = 2 * INTEREST_BAND;
-    s.players[0].low = 2 * INTEREST_BAND;
-    // Regen in the payment tick must not move the mark.
-    s.players[0].energy = s.players[0].energy.saturating_add(REGEN_RUNNING);
-    let paid = payment(&mut s);
-    assert_eq!(paid.0, 2 * INTEREST_PER_BAND);
-    assert_eq!(
-        s.players[0].low, s.players[0].energy,
-        "the next interval starts from the post-payment balance"
-    );
+fn br_e05_the_rate_is_exact_over_time() {
+    // 20 ticks of a 1.25x rate are 425 sub-energy; the fraction never leaks.
+    let base = u64::from(REGEN_RUNNING) * 20;
+    assert_eq!(u64::from(gain(INTEREST_BAND, 20)), base * 125 / 100);
+    assert_eq!(u64::from(gain(2 * INTEREST_BAND, 20)), base * 150 / 100);
+    assert_eq!(u64::from(gain(4 * INTEREST_BAND, 20)), base * 200 / 100);
+    // 17 * 2.25 per tick is 38.25: 4 ticks give exactly 153.
+    assert_eq!(gain(30 * INTEREST_BAND, 4), 153);
+    assert_eq!(gain(0, 20), u32::try_from(base).unwrap());
 }
 
 #[test]
-fn br_e05_a_spend_lowers_the_mark_even_before_payment() {
-    let mut s = live(5);
-    at(&mut s, RUNNING_START + 200);
-    s.players[0].energy = 5 * INTEREST_BAND;
-    s.players[0].low = 5 * INTEREST_BAND;
-    assert!(s.players[0].spend(6 * ENERGY_SCALE));
-    assert_eq!(s.players[0].low, 19 * ENERGY_SCALE);
-    let paid = payment(&mut s);
-    assert_eq!(paid.0, 3 * INTEREST_PER_BAND, "19 Energy is 0.75");
-}
-
-#[test]
-fn br_e05_a_purchase_on_the_payment_tick_counts_first() {
-    let mut s = live(6);
-    at(&mut s, RUNNING_START + 200);
+fn br_e05_the_boost_follows_the_balance_at_once() {
+    let mut s = live(2);
     s.players[0].energy = 25 * ENERGY_SCALE;
-    s.players[0].low = 25 * ENERGY_SCALE;
-    s.players[0].offers[0] = tbg_core::UnitKind::Archer;
-    s.apply_intention(Seat::A, 1, tbg_core::PlayerIntention::Purchase { offer: 0 })
-        .unwrap();
-    assert_eq!(s.players[0].low, 22 * ENERGY_SCALE);
-    let paid = payment(&mut s);
-    assert_eq!(paid.0, 4 * INTEREST_PER_BAND, "22 Energy is 1.00");
+    assert_eq!(s.view_for(Seat::A, &[]).regen_bp, 22_500);
+    assert!(s.players[0].spend(6 * ENERGY_SCALE));
+    // 19 Energy holds three full steps of five.
+    assert_eq!(s.view_for(Seat::A, &[]).regen_bp, 17_500);
+    assert!(s.players[0].spend(19 * ENERGY_SCALE));
+    assert_eq!(s.view_for(Seat::A, &[]).regen_bp, 10_000);
 }
 
 #[test]
-fn br_e06_interest_is_credited_and_compounds() {
-    let mut idle = live(7);
-    let mut spender = live(7);
-    let mut idle_total = 0u64;
-    for i in 1..=20 {
-        let tick = RUNNING_START + 200 * i;
-        at(&mut idle, tick);
-        let paid = payment(&mut idle);
-        idle_total += u64::from(paid.0);
-        at(&mut spender, tick);
-        let p = &mut spender.players[0];
-        let cost = p.energy;
-        if cost > 0 {
-            p.spend(cost);
-        }
-        payment(&mut spender);
+fn br_e05_the_cap_limits_the_boost_not_the_energy() {
+    let mut s = live(3);
+    s.players[0].energy = 100 * ENERGY_SCALE;
+    s.players[0].regen_frac = 0;
+    let start = s.players[0].energy;
+    for _ in 0..1_000 {
+        s.step();
     }
-    assert!(idle_total > 0);
-    assert!(
-        idle.players[0].interest_paid > spender.players[0].interest_paid,
-        "banking must earn more Interest than immediate spending"
-    );
-    assert!(idle.players[0].interest_paid > u64::from(INTEREST_PER_BAND));
+    // 1 000 ticks at the maximum 2.25x of 17 sub-energy per tick, pauses
+    // excluded (the Augment round at 1:00 is not reached in 1 000 ticks).
+    assert_eq!(s.players[0].energy - start, 38_250);
+    assert!(s.outcome.is_none());
 }
 
 #[test]
-fn br_e06_payment_never_duplicates_on_serialize_roundtrip() {
+fn br_e06_banking_compounds_and_spending_resets_it() {
+    let mut banker = live(7);
+    let mut spender = live(7);
+    for _ in 0..1_000 {
+        banker.step();
+        spender.step();
+        let p = &mut spender.players[0];
+        let all = p.energy;
+        p.spend(all);
+    }
+    let held = banker.players[0].energy;
+    let flat = u64::from(REGEN_RUNNING) * 1_000;
+    assert!(u64::from(held) > flat + u64::from(tbg_core::content::ENERGY_START));
+    assert!(spender.players[0].energy < held);
+}
+
+#[test]
+fn br_e06_the_remainder_survives_a_serialize_roundtrip() {
     let mut s = live(8);
-    at(&mut s, RUNNING_START + 200);
+    s.players[0].energy = 3 * INTEREST_BAND;
+    for _ in 0..7 {
+        s.step();
+    }
+    assert!(s.players[0].regen_frac > 0, "17 x 1.5 leaves a remainder");
     let bytes = postcard::to_allocvec(&s).unwrap();
     let mut restored: MatchState = postcard::from_bytes(&bytes).unwrap();
-    let a = payment(&mut s);
-    let b = payment(&mut restored);
-    assert_eq!(a, b);
+    for _ in 0..50 {
+        s.step();
+        restored.step();
+    }
+    assert_eq!(s.players[0].energy, restored.players[0].energy);
     assert_eq!(s.hash(), restored.hash());
 }
 
 #[test]
 fn br_e07_energy_saturates_without_overflow() {
     let mut s = live(9);
-    at(&mut s, RUNNING_START + 200);
     s.players[0].energy = u32::MAX - 2;
-    s.players[0].low = u32::MAX - 2;
     s.players[1].energy = u32::MAX - 2;
-    s.players[1].low = u32::MAX - 2;
     s.step();
     assert_eq!(s.players[0].energy, u32::MAX);
-    assert_eq!(s.players[0].low, u32::MAX);
     assert_eq!(s.players[1].energy, u32::MAX);
 }
 
 #[test]
-fn br_e03_no_interest_before_running_or_after_ended() {
+fn br_e03_no_regen_before_running_or_after_ended() {
     let mut s = MatchState::new(10);
+    let start = s.players[0].energy;
     for _ in 0..RUNNING_START {
         s.step();
     }
-    assert_eq!(s.players[0].interest_paid, 0);
+    assert_eq!(s.players[0].energy, start, "the countdown pays nothing");
     s.forfeit(Seat::B);
-    let paid = s.players[0].interest_paid;
+    let ended = s.players[0].energy;
     for _ in 0..1_000 {
         s.step();
     }
-    assert_eq!(s.players[0].interest_paid, paid);
+    assert_eq!(s.players[0].energy, ended);
 }
 
 #[test]
-fn br_e02_energy_has_no_gameplay_cap() {
+fn br_e08_the_bounty_window_resets_every_ten_seconds_of_combat() {
     let mut s = live(11);
-    s.players[0].energy = 100 * ENERGY_SCALE;
-    s.players[0].low = s.players[0].energy;
-    for _ in 0..1_000 {
+    s.players[0].bounty_window = 123;
+    while s.tick < RUNNING_START + 199 {
         s.step();
     }
-    assert!(s.players[0].energy > 100 * ENERGY_SCALE);
-    assert!(s.outcome.is_none());
+    assert_eq!(s.players[0].bounty_window, 123);
+    s.step();
+    s.step();
+    assert_eq!(s.players[0].bounty_window, 0);
 }
 
 #[test]
 fn br_e03_overspend_is_rejected_and_spend_is_the_only_path() {
     let mut p = PlayerState {
         energy: 100,
-        low: 200,
         ..MatchState::new(1).players[0].clone()
     };
     assert!(!p.spend(101));
-    assert_eq!((p.energy, p.low), (100, 200));
+    assert_eq!(p.energy, 100);
     assert!(p.spend(100));
-    assert_eq!((p.energy, p.low), (0, 0));
+    assert_eq!(p.energy, 0);
 }
 
 #[test]
@@ -211,6 +180,7 @@ fn br_e06_a_lab_forgo_reward_is_paid_once_per_round() {
     rules.augment.round_ticks = 200;
     rules.augment.window = 200;
     rules.augment.forgo_energy = 2 * ENERGY_SCALE;
+    rules.regen_running = 0;
     let rules: &'static Ruleset = Box::leak(Box::new(rules));
     let mut s = MatchState::with_rules(12, rules);
     while s.augments.round == 0 {

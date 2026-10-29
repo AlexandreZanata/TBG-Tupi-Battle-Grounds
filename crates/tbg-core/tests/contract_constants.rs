@@ -29,14 +29,15 @@ fn open_ended_match_and_lane() {
 
 #[test]
 fn uncapped_energy_and_interest() {
-    // Owner revision: start 5 Energy, no gameplay cap, Interest every 10 s.
+    // Owner revision: start 5 Energy, no gameplay cap; every full 5 Energy
+    // held adds 25 % of the base regen, counting at most 25 Energy.
     assert_eq!(ENERGY_SCALE, 600);
     assert_eq!(ENERGY_START, 5 * ENERGY_SCALE);
     assert_eq!(REGEN_RUNNING, 17);
-    assert_eq!(INTEREST_TICKS, secs(10));
+    assert_eq!(BOUNTY_WINDOW_TICKS, secs(10));
     assert_eq!(
         (INTEREST_BAND, INTEREST_PER_BAND, INTEREST_MAX_BANDS),
-        (5 * ENERGY_SCALE, ENERGY_SCALE / 4, 5)
+        (5 * ENERGY_SCALE, 2_500, 5)
     );
     assert_eq!(AUGMENT_ROUND_TICKS, secs(60));
     // Owner revision: the selection pause is 20 s, not 60 s (BR-AG13).

@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 11,
-        "v11: the fifteen-node Arcana schema and twelve-point budget"
+        PROTOCOL_VERSION, 12,
+        "v12: Interest as a regen boost (MatchView::regen_bp); v11 was the fifteen-node Arcana schema"
     );
 }
 

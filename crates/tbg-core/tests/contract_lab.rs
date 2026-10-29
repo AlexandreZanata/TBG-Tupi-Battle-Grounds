@@ -87,15 +87,16 @@ fn trace(seed: u64) -> (u64, u64, u32) {
 
 #[test]
 fn c2_per_tick_traces_are_frozen() {
-    // (seed, per-tick trace, final hash, end combat tick): P40 resized the
-    // serialized neutral preset to fifteen ranks; ticks and outcomes did
-    // not move, so only the hash inputs changed.
+    // (seed, per-tick trace, final hash, end combat tick): owner revision
+    // 2026-10-29 (uncapped Energy, Interest as a regen boost, the Augment
+    // pause with its paused steps traced, purchase-only Shop refills, the
+    // 20 s selection window, and P40's fifteen-rank Arcana state).
     let goldens = [
-        (1, 0x2873_8722_05d6_2f3e, 0x118b_ade0_a882_9113, 3_664),
-        (7, 0x666e_9519_f260_4cac, 0xf923_ec31_cb58_6502, 2_146),
-        (42, 0xfcd1_9af0_a7c1_1ec5, 0xeb02_d978_ecaf_90c0, 2_342),
-        (1000, 0xe3a4_f9d7_bdfc_fb2a, 0xbc3e_460c_830e_c404, 4_195),
-        (65535, 0x01e1_0019_835d_15de, 0x8d3d_48fb_d8a9_6843, 2_079),
+        (1, 0xc46a_7092_9d56_c4ce, 0xe9a8_4877_7c0c_ce81, 2_687),
+        (7, 0x7024_4ebf_3ed7_d996, 0x2802_0743_cf00_b10d, 2_221),
+        (42, 0x7e6b_250f_2271_2cb7, 0xe43e_e20c_42ce_4607, 2_408),
+        (1000, 0x21f1_8d54_1300_f2d7, 0x398f_4c6d_bc3f_9129, 2_349),
+        (65535, 0x09d7_ae62_7d01_9604, 0xf260_ab0a_e168_dd10, 2_020),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");
