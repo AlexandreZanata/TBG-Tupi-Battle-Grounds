@@ -4,7 +4,9 @@
 //! bounds-checked index, with no hash, parse, or fetch on any path. Static
 //! labels carry [`Localized`] and are re-texted only when [`Lang`] changes.
 
+use bevy::asset::{AssetId, Assets};
 use bevy::prelude::*;
+use bevy::text::Font;
 
 pub(crate) mod check;
 pub mod content;
@@ -114,7 +116,16 @@ impl Lang {
 #[allow(dead_code)] // First live labels land in step 8; tested in `tests`.
 pub struct Localized(pub Msg);
 
+/// Latin-1 UI face (P41, O-P41-3): Noto Sans, same family as the lobby `Camp`.
+/// Subset with the D5 charset; see `assets/fonts/OFL.txt` for the commands.
+static UI_FONT: &[u8] = include_bytes!("../../assets/fonts/BattlegroundSansUi.ttf");
+
 pub fn plugin(app: &mut App) {
     app.init_resource::<Lang>()
         .add_systems(Update, Lang::retext_system.run_if(resource_changed::<Lang>));
+    // Same slot `bevy_text` used for its default font, so every existing
+    // `TextFont` without a handle keeps working with no other change.
+    let mut fonts = app.world_mut().resource_mut::<Assets<Font>>();
+    let font = Font::from_bytes(UI_FONT.to_vec());
+    fonts.insert(AssetId::default(), font).unwrap();
 }

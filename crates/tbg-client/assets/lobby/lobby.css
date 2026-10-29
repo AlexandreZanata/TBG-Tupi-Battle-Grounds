@@ -1,6 +1,8 @@
 /* Desktop diorama lobby. Phone and tablet retain the existing Bevy menu. */
 @font-face{font-family:Battleground;src:url('assets/fonts/BattlegroundDisplay.woff2') format('woff2');font-weight:700;font-display:swap}
 @font-face{font-family:Camp;src:url('assets/fonts/BattlegroundSans.woff2') format('woff2');font-weight:400 700;font-display:swap}
+@font-face{font-family:Battleground;src:url('assets/fonts/BattlegroundDisplay-ext.woff2') format('woff2');font-weight:700;font-display:swap;unicode-range:U+00A0-00B6,U+00B8-00FF,U+2018,U+201C-201D,U+2022,U+2026,U+2192,U+25C6}
+@font-face{font-family:Camp;src:url('assets/fonts/BattlegroundSans-ext.woff2') format('woff2');font-weight:400 700;font-display:swap;unicode-range:U+00A0-00B6,U+00B8-00FF,U+2018,U+201C-201D,U+2022,U+2026,U+2192,U+25C6}
 #tbg-lobby{--gold:#dfba74;--muted:#c4c1b6;--edge:#8a6946;position:fixed;inset:0;z-index:3;pointer-events:none;color:#f6f1e4;font:clamp(14px,1.02vw,20px)/1.45 Camp,system-ui,sans-serif;background:radial-gradient(ellipse at 67% 43%,transparent 10%,#0b100b29 60%,#060c0ccc 110%)}
 #tbg-lobby[hidden]{display:none!important}#tbg-lobby [hidden]{display:none!important}
 #tbg-lobby button,#tbg-lobby input{font:inherit}#tbg-lobby button{color:inherit;cursor:pointer}#tbg-lobby button:disabled{cursor:default}#tbg-lobby button:focus-visible,#tbg-lobby input:focus-visible{outline:3px solid #72dcff;outline-offset:4px}#tbg-lobby button{transition:filter .15s,transform .12s}#tbg-lobby button:hover:enabled{filter:brightness(1.16)}#tbg-lobby button:active:enabled{transform:scale(.985)}

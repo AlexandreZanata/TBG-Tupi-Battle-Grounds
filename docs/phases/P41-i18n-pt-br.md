@@ -494,7 +494,30 @@ values". Fill the report.
     260.0 (menu/account panel); CSS `white-space:nowrap`:
     hud.css battle-resources/champion-name/battle-name/inspect-title/battle-augments,
     lobby.css player-chip/tabs/sound, ranking.css tables + pager.
-- Font sizes (step 3): pending.
+- Font sizes (step 3, this commit): base `*.woff2` byte-identical (git untouched):
+  Display 18,856 / Sans 16,392 / SansBold 16,296. New: `BattlegroundDisplay-ext`
+  10,152 / `BattlegroundSans-ext` 9,020 / `BattlegroundSansBold-ext` 8,884 (all
+  woff2); Bevy `BattlegroundSansUi.ttf` 31,000 (Noto Sans Regular, O-P41-3).
+  Exact commands (repo root; `NS=/usr/share/fonts/truetype/noto`):
+  `pyftsubset $NS/<NotoSerif-Bold|NotoSans-Regular|NotoSans-Bold>.ttf
+  --unicodes="U+00A0-00B6,U+00B8-00FF,U+2018,U+201C-201D,U+2022,U+2026"
+  --layout-features='kern,liga' --output-file=A-<tag>.ttf`;
+  `pyftsubset $NS/<NotoSansSymbols-Regular|Bold>.ttf --unicodes="U+2192" ...`
+  and `pyftsubset $NS/NotoSansSymbols2-Regular.ttf --unicodes="U+25C6" ...` for
+  B/C; `fonttools merge A B C --output-file=M-<tag>.ttf`;
+  `pyftsubset M-<tag>.ttf --unicodes="<ext plus U+2192,U+25C6>"
+  --layout-features='kern,liga' --flavor=woff2 --output-file=*-ext.woff2`;
+  `BattlegroundSansUi.ttf` is the full-D5 merge of NotoSans-Regular + B + C.
+  CSS: one `*-ext.woff2` `@font-face` per family/weight with the matching
+  `unicode-range` in `lobby.css` (Battleground/Camp) and `hud.css` (BattleBody);
+  `editor.css` inherits the lobby faces; `ranking.css` stays system-ui until step 11.
+  Bevy: `default_font` dropped; `i18n::plugin` embeds the TTF at
+  `AssetId::default()` exactly as `bevy_text` did. `glyphs.rs` now enforces the D5
+  charset over `src/` literals and both catalogs. Gallery: headed-Chrome
+  1920x1080 screenshots show `Ação Evolução ÁÂÃÀÇÉÊÍÓÔÕÚÜ ãõç → ◆` with no tofu
+  in the lobby (Display + Sans; only base+ext woff2 fetched, ext on demand) and
+  in Bevy overlay text (Noto Sans replaces Fira Mono). WASM brotli 4,831,437
+  (+9,334 vs step 0, budget +60 KB). No console/page errors on the final build.
 - Measurements before/after (step 12): pending (out of scope for steps 0-5; A-1 unmerged).
 - Step 2 (this commit): `build.rs` (~150 lines, `serde_json` build-dep with reason
   comment in `Cargo.toml`) + `src/i18n/{mod.rs,check.rs,content.rs,tests.rs}`; 26 keys
@@ -521,4 +544,10 @@ values". Fill the report.
     string literal under `src/`; step 3 reworks it to the D5 charset rule.
   - No indexed family exists in the catalog yet, so the family codegen path is
     covered by a synthetic gap test only; first real family lands in step 7/9.
+  - The OFL-named sources (Noto Serif Bold, Noto Sans R/B) lack U+2192 and U+25C6,
+    so the ext subsets merge those two glyphs from Noto Sans Symbols (Regular/Bold)
+    and Noto Sans Symbols 2 — same Noto project and OFL license, recorded in
+    `OFL.txt`. Before this step the lobby `◆` already fell back to a system font.
+  - Step 3 Bevy proof used a temporary overlay string (reverted before commit;
+    `git diff` on `overlay.rs` is empty); the committed tree contains no probe.
 - Limitations: steps 0-2 only; A-1 still unmerged, steps 6+ wait for it.
