@@ -425,7 +425,75 @@ values". Fill the report.
     250.0/250.0/250.0 ms (Bevy delta clamp) and are NOT valid baselines; all
     numbers above are headed-Chrome on `ANGLE (Intel, Mesa Intel(R) Graphics
     (RPL-P), OpenGL ES 3.2)`. No NVIDIA-GPU run (Chrome picked Intel).
-- String inventory (step 1): pending.
+- String inventory (step 1, appendix; counts are user-visible strings, not code lines):
+  - HTML chrome: `index.html` 141 text nodes + 38 localizable attrs
+    (`aria-label/title/alt/placeholder`, incl. `data-art` alts, dialog titles,
+    lobby tabs/modes/profile/feature/news/friend/settings/battle/inspect/shop/council/form);
+    `ranking/index.html` 15 + 2; `ranking/player.html` 19 + 3.
+  - JS, `assets/lobby/lobby.js` (~16): Guest, sound ON/OFF, ranked hints,
+    3 news items + pager `1 / 3`, record note, stats statuses (`Loading your ranked
+    record…`, `Ranked record · N draws`, …), `ranked matches` singular/plural.
+  - JS, `assets/battle/hud.js` (~22 composed/static): `You/Opponent`, mode
+    `Ranked/Casual`, `Get ready`, `Yours/Enemy`, `Stronghold HP` suffixes,
+    `tiles`, `tiles/s`, `DPS` (from `Dps`), `Energy` in costs, `not enough`,
+    council `Forgo/Confirm choice/Augment selected!/Round forgone./Waiting for
+    opponent...`, surrender `Surrender/Confirm?/Leaving...` + titles,
+    `Shop offer one…five` aria-labels, `Click to recruit…` help.
+  - JS, `assets/arcana/editor.js` (chrome ~20 + data): `Points left X / 12`,
+    complete/partial copy with `{budget}`, storage notes (5), notices
+    (`…is at its maximum rank.`, `Not enough points for …`, `Requires …`,
+    `Remove … first.`), `No prerequisite/Requirements met`, cost
+    `N point(s)`, rank `N / M`, aria-labels per node, `Add/Remove a rank…`;
+    `preset.js` composes `… rank R (now N)` (missing-prereq list).
+  - JS, `ranking/ranking.js` (~20): `Win/Loss/Draw`, reason map
+    (`Stronghold destroyed/Time up/Forfeit`), `Cannot reach the server…`,
+    `Too many requests…`, `The ranking is unavailable right now.`,
+    `No ranked players yet…`, `No players on this page.`,
+    `N ranked players · showing A–B`, `Updated <locale>`, `Unranked`,
+    `#N Global`, `Your first Ranked match awaits`, `No player named “…”`,
+    faction names from `FACTIONS` (client-side list).
+  - Data, `assets/arcana/arcana.json`: 7 `copy.*` + 1 `summon.text` + 3 family
+    `name/description` + 15 nodes × (`name/eligibility/perRankText/effect`,
+    some `rankTwoText`) = 72 node/family fields; `arcana.json` keeps
+    ids/numbers/art after step 7.
+  - Rust Bevy (static `label(`/`button(` literals): menu 12, account_ui 7,
+    queue 5, result 4 (`Request rematch/Play again/Menu` + dynamic below),
+    ranking_ui 5, evolve 2, surrender 1, hud 1 (`Forgo`), hud_top 2
+    (`3:00`, `RANKED`), countdown 1 (`STARTING`), overlay 1 (`FPS --`,
+    stays English per D6); dynamic `format!`/composed-with-numbers:
+    `rejection_text` 5, result 10 (`VICTORY/DEFEAT/DRAW/MATCH OVER`,
+    reason lines, `vs {opp}`, `Duration M:SS vs …`, `Units deployed N | …`,
+    `Rating A -> B (+D)`, rematch states ×5), account errors 4 + toasts
+    (`Logged in as {name}`, `Logged out`, …), queue clocks/statuses
+    (`Challenge created\nWaiting for your friend M:SS`, `Searching… M:SS`,
+    `Joining challenge...`), menu (`Sound: on/off`, `{name} ({rating})`,
+    `Ranked Match ({rating})`), evolve title/options
+    (`{name} | tier N`, `{form}: {desc}`, `+N% …`, `+N.N …`, `+N dmg attack`,
+    `hits root N.Ns`), tips 2 + per-unit pairs + `heals N/{N} dmg`,
+    inspect (`Damage/Heal`, `{N:.1}` s), hud_update (`Chosen/Forgo`,
+    `STARTING`, `M:SS`, `{Faction:?} N/2`, `Augments: …/none`,
+    `{name} xN`, `Army N [| Brood M]`), hud_top name truncation (user data),
+    textform prompts from Rust (`Paste your account key`, `Name`) + server
+    refusal errors via `set_error` (server codes, client-rendered), `OK/Cancel`.
+  - Rust→DOM bridge (Rust composes, JS renders; D6): `data-offer-N`
+    (`Kind|name|Archetype|cost|Faction|available|pending`), `data-inspect`
+    18-field record, `data-council-options` (`id:name:text:cost`, text may
+    contain `:`), `data-synergy` (`Faction N/2 | …`); portrait `kind` stays the
+    `UnitKind` id (never translated).
+  - Core canon (English source, step 9 keys): 11 `UnitKind` (types.rs),
+    forms per kind, `AUGMENTS` 40 (`AUGMENT_CATALOG`), 4 `Faction`,
+    5 `Archetype`, synergies, Strongholds; Interest display `×1.00` +
+    tooltip (`Every 5 Energy you hold adds 25%…`) with comma decimal in pt-BR.
+  - Server sends no prose: `protocol.rs` carries player names/room codes/keys
+    and `Rejection` codes only (sole string literal is `ROOM_ALPHABET`);
+    server-src English literals are test names, SQLite pragmas, and internal
+    faction stat keys (API JSON data, rendered client-side). No server change.
+  - Fixed-width containers for the step 10 layout pass: Bevy `button(..,
+    width)` 124.0 (Prev/Next/Ranking/Sound), 140.0 (Close), 150.0 (Copy link),
+    120.0 (Share), 180.0 (account), 200.0 (Log out), 220.0 (rematch/result/queue),
+    260.0 (menu/account panel); CSS `white-space:nowrap`:
+    hud.css battle-resources/champion-name/battle-name/inspect-title/battle-augments,
+    lobby.css player-chip/tabs/sound, ranking.css tables + pager.
 - Font sizes (step 3): pending.
 - Measurements before/after (step 12): pending (out of scope for steps 0-5; A-1 unmerged).
 - Deviations: pending.
