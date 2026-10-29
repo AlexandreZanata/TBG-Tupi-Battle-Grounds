@@ -48,7 +48,9 @@ evolve, and which factions you combine.
 | Account | **Proposed (P11):** a player identity — one `PlayerName` + one `AccountKey`; holds `Rating` and statistics | `Account` |
 | PlayerName | **Proposed (P11):** unique public name chosen at account creation | `PlayerName` |
 | AccountKey | **Proposed (P11):** the only credential: `PlayerName-XXXX-XXXX-XXXX-XXXX` | `AccountKey` |
-| MatchMode | **Proposed (P12):** `Casual` (no rating change) or `Ranked` (accounts only, rating changes) | `MatchMode` |
+| MatchMode | **Proposed (P12, P39):** `Casual` (no rating change), `Ranked` (accounts only, rating changes), or `Challenge` (a direct invitation match; casual rules, no rating change) | `MatchMode` |
+| Quick Challenge | **Proposed (P39):** a direct invitation match created in one click; one different session joins by link; casual rules, no rating, no queue | `Challenge` |
+| Rematch | **Proposed (P39):** a new Challenge match between the same two sessions after both request it within the expiry | `RematchTicket` |
 | Rating | **Proposed (P12):** an account's ranked skill number (Elo) | `Rating` |
 | Leaderboard | **Proposed (P13):** global ranking of accounts by `Rating` | `Leaderboard` |
 | StrongholdStyle | **Proposed (P18):** cosmetic look of a `Stronghold`: Stone Keep, Timber Fort, Gatehouse | `StrongholdStyle` |
@@ -133,6 +135,8 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-R05 | New accounts start at 1000; a rating never goes below 100; the first 20 ranked games move faster | Proposed | — |
 | BR-R06 | Ratings and results are computed and stored only by the authoritative server | Proposed | — |
 | BR-R07 | The `Leaderboard` lists accounts with ≥ 1 ranked match, ordered by rating, then wins, then name | Proposed | — |
+| BR-R08 | A Quick Challenge is a direct invitation, not a queue; it pairs the inviting session and exactly one different session, is casual (no rating change), and uses the same simulation and reconnect rules | Proposed (P39) | — |
+| BR-R09 | A rematch is a new Challenge match between the same two sessions; it requires both requests within the expiry while both sessions are connected, uses a fresh seed, and never enters a queue or changes rating | Proposed (P39) | — |
 
 ## 4. How a match plays (MVP)
 
@@ -308,8 +312,8 @@ Hatch limits, slow/root effects, and every structural constant.
 - `Inventory`, `Cosmetic` store, receipt validation (BR-C01–C03 stay
   binding: nothing may sell power). Accounts and ranking are planned in
   P11–P13.
-- Rematch, spectating, replays, emotes; rating-based matchmaking, seasons,
-  and rating decay (revisit with enough players, D-18).
+- Spectating, replays, emotes; rating-based matchmaking, seasons, and
+  rating decay (revisit with enough players, D-18).
 
 ## 8. Retired technology decisions (game rules kept)
 

@@ -116,7 +116,12 @@ pub(super) fn handle(
         ServerMsg::LoggedIn { .. }
         | ServerMsg::LoggedOut
         | ServerMsg::RatingChanged { .. }
-        | ServerMsg::Leaderboard { .. } => {}
+        | ServerMsg::Leaderboard { .. }
+        | ServerMsg::ChallengeWaiting { .. }
+        | ServerMsg::ChallengeUnavailable
+        | ServerMsg::RematchOpen { .. }
+        | ServerMsg::RematchState { .. }
+        | ServerMsg::RematchClosed { .. } => {}
     }
     Ok(None)
 }

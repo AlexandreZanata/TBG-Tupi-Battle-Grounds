@@ -24,6 +24,14 @@ fn production_defaults() {
     assert_eq!((c.max_per_ip, c.max_connections), (8, 2_000));
     assert_eq!((c.register_per_ip_hour, c.login_per_ip_min), (3, 10));
     assert_eq!(c.api_per_ip_min, 120);
+    assert_eq!(
+        (
+            c.challenge_ttl_secs,
+            c.rematch_ttl_secs,
+            c.invite_per_ip_min
+        ),
+        (600, 120, 30)
+    );
     assert_eq!(c.workers, 0);
     assert_eq!(c.addr, "0.0.0.0:8080");
 }

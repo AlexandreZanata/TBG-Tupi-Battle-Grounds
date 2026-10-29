@@ -33,6 +33,18 @@ pub struct MatchInfo {
     /// P12: ranked matches show a badge and the opponent's rating.
     pub ranked: bool,
     pub opponent_rating: Option<u16>,
+    /// P39: the result screen offers a rematch only for a Challenge match.
+    pub challenge: bool,
+}
+
+/// P39: the result-screen rematch offer and its request state.
+#[derive(Resource, Default)]
+pub struct RematchInfo {
+    pub open: bool,
+    pub you_requested: bool,
+    pub opponent_requested: bool,
+    /// `Some(true)` for an explicit decline, `Some(false)` for expiry.
+    pub closed: Option<bool>,
 }
 
 #[derive(Resource, Default)]
@@ -54,6 +66,7 @@ pub fn plugin(app: &mut App) {
         .init_resource::<ViewBuffer>()
         .init_resource::<UnitEntities>()
         .init_resource::<QueueInfo>()
+        .init_resource::<RematchInfo>()
         .init_resource::<MatchStats>()
         .init_resource::<ViewGaps>()
         .add_systems(Update, poll_link)

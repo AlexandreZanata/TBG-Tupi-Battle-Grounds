@@ -14,6 +14,8 @@ pub struct Limits {
     login: HashMap<IpAddr, Vec<Instant>>,
     /// P13: read-only API limit (`TBG_API_PER_IP_MIN`, default 120/min).
     api: HashMap<IpAddr, Vec<Instant>>,
+    /// P39: Quick Challenge join attempts (default 30/min).
+    invite: HashMap<IpAddr, Vec<Instant>>,
     last_sweep: Option<Instant>,
 }
 
@@ -48,6 +50,16 @@ impl Limits {
         )
     }
 
+    /// `true` when a Quick Challenge join is allowed (records it on allow).
+    pub fn check_invite(&mut self, ip: IpAddr, max_per_min: u32, now: Instant) -> bool {
+        check_log(
+            self.invite.entry(ip).or_default(),
+            max_per_min,
+            Duration::from_secs(60),
+            now,
+        )
+    }
+
     /// Drop expired entries and empty logs; at most once a minute.
     pub fn sweep(&mut self, now: Instant) {
         if self
@@ -62,6 +74,7 @@ impl Limits {
         prune(&mut self.register, Duration::from_secs(3600), now);
         prune(&mut self.login, Duration::from_secs(60), now);
         prune(&mut self.api, Duration::from_secs(60), now);
+        prune(&mut self.invite, Duration::from_secs(60), now);
     }
 }
 

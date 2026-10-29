@@ -9,20 +9,24 @@ use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-pub const PROTOCOL_VERSION: u16 = 7;
+pub const PROTOCOL_VERSION: u16 = 8;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
-/// queue and the rating change differ.
+/// queue and the rating change differ. P39 (BR-R08): `Challenge` is a
+/// direct invitation match with casual rules and no rating change.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum MatchMode {
     Casual,
     Ranked,
+    Challenge,
 }
 pub const MAX_CLIENT_MSG_BYTES: usize = 1024;
 /// Room-code alphabet: no 0/O, 1/I/L.
 pub const ROOM_ALPHABET: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 
 pub type Token = [u8; 16];
+/// P39: a single-use Quick Challenge invitation. Independent of `Token`.
+pub type InviteToken = [u8; 16];
 pub type RoomCode = [u8; 5];
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -44,6 +48,10 @@ pub enum ClientMsg {
     Leaderboard { offset: u16 },
     // Post-P14 (BR-M06, Proposed): give up while the match is live.
     Surrender,
+    // P39: Quick Challenge by link and both-accept rematch.
+    CreateChallenge,
+    JoinChallenge { token: InviteToken },
+    RequestRematch,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -128,6 +136,21 @@ pub enum ServerMsg {
         offset: u16,
         rows: Vec<LeaderRow>,
         you: Option<u32>,
+    },
+    // P39: Quick Challenge by link and both-accept rematch.
+    ChallengeWaiting {
+        token: InviteToken,
+    },
+    ChallengeUnavailable,
+    RematchOpen {
+        opponent: String,
+    },
+    RematchState {
+        you_requested: bool,
+        opponent_requested: bool,
+    },
+    RematchClosed {
+        declined: bool,
     },
 }
 

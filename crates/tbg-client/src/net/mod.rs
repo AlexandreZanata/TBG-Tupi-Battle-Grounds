@@ -9,7 +9,9 @@ mod socket;
 use std::collections::VecDeque;
 
 pub(crate) use socket::GIVE_UP;
-use tbg_core::protocol::{AccountError, ClientMsg, RoomCode, ServerMsg, Token, PROTOCOL_VERSION};
+use tbg_core::protocol::{
+    AccountError, ClientMsg, InviteToken, RoomCode, ServerMsg, Token, PROTOCOL_VERSION,
+};
 
 use crate::config;
 
@@ -23,6 +25,10 @@ pub enum Mode {
     Ranked,
     Create,
     Join(RoomCode),
+    /// P39: create a Quick Challenge invitation.
+    CreateChallenge,
+    /// P39: consume a Quick Challenge invitation.
+    JoinChallenge(InviteToken),
     /// P9: listen-only link opened on page load; resumes a live match if
     /// the server still holds the session, asks for nothing otherwise.
     Probe,
@@ -129,6 +135,8 @@ impl NetLink {
             Mode::Ranked => ClientMsg::RankedMatch,
             Mode::Create => ClientMsg::CreateRoom,
             Mode::Join(code) => ClientMsg::JoinRoom { code },
+            Mode::CreateChallenge => ClientMsg::CreateChallenge,
+            Mode::JoinChallenge(token) => ClientMsg::JoinChallenge { token },
             Mode::Probe => return,
         };
         self.send(req, now);
