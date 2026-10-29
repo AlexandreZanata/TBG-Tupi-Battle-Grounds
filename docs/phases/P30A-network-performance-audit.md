@@ -425,39 +425,46 @@ cd crates/tbg-client && trunk build --release && trunk serve --release --port 18
 # open http://127.0.0.1:18600/?autoplay=practice&army=100&measure=1
 ```
 
-## Comparison matrix (fill after measurement)
+## Comparison matrix (measured 2026-10-29)
+
+Payload bytes are postcard view messages including the one-byte `ServerMsg`
+tag, synthetic armies at 10 Hz unless stated; wire estimates add 71 B per
+message (WS 2–4 + TLS ~22 + TCP/IP 40–52). Natural bot traffic is shown
+separately below. “not measured” means exactly that.
 
 | Criterion | Current | A: derive, don't send | B: delta | C: A + static/dynamic | D: events only | E: lower Hz | F: compression |
-|-----------|---------|-----------------|----------|-------------------|----------------|-------------|----------------|
-| Bytes/s per player at 20 units | measured | measured | measured | measured | n/a for state | measured/derived | measured/derived |
-| Bytes/s per player at 100 units | measured | measured | measured | measured | n/a | measured/derived | measured/derived |
-| Estimated wire bytes/s per player (payload + WS + TLS + TCP/IP) | measured | measured | measured | measured | n/a | measured/derived | measured/derived |
-| Server messages/s per player | measured | measured | measured | measured | n/a | measured | measured |
-| Build+encode CPU per view | measured | measured | measured | measured | measured | n/a | measured |
-| Extra RAM per match/seat | measured | measured | measured | measured | — | — | — |
-| Client reconstruction cost | measured | measured | measured | measured | n/a | — | decode cost |
+|-----------|---------|-----------------------|----------|-----------------------|----------------|-------------|----------------|
+| Bytes/s per player at 20 units | 5.64 KB/s | 4.78 KB/s | 1.70 KB/s | 3.12 KB/s | n/a for state (0.25 KB/s) | 5.64 / 4.56 / 2.93 KB/s at 10/8/5 Hz | 5.64 KB/s (7.04 gzip-6, 6.25 zstd-3: larger) |
+| Bytes/s per player at 100 units | 28.75 KB/s | 24.63 KB/s | 10.47 KB/s | 16.53 KB/s | n/a (1.31 KB/s) | 28.75 / 23.26 / 15.01 KB/s | 28.75 KB/s (35.87 / 31.89: larger) |
+| Estimated wire bytes/s per player | 6.35 / 29.46 KB/s | 5.49 / 25.34 KB/s | 2.41 / 11.18 KB/s | 3.83 / 17.24 KB/s | n/a | 6.35 / 5.13 / 3.28 at 20 units; 29.46 / 24.12 / 15.74 at 100 | 7.75 / 36.58 KB/s (gzip) |
+| Server messages/s per player | 11.6 (10.22 view incl. ack, 1.0 WS ping, 0.2 app ping, 0.2 NetStats) | 11.6 | 11.6 | 11.6 | n/a | 9.6 / 6.6 at 8/5 Hz | 11.6 |
+| Build+encode CPU per view (20 / 100 units) | 1.77 / 6.93 µs | 1.57 / 6.31 µs | 1.73 / 6.19 µs | 1.67 / 5.89 µs | not measured | n/a (same per view) | decode cost not measured |
+| Extra RAM per match/seat | 0 | 0 | 2.46 KB at 20, 11.9 KB at 100 | 0.53 KB at 20, 2.54 KB at 100 | — | — | — |
+| Client reconstruction cost (20 / 100 units) | n/a (no reconstruction) | 0.70 / 3.30 µs | 1.93 / 15.26 µs | 1.51 / 12.25 µs | impossible (no state) | — | not measured |
 | Complexity (files/state machine) | — | low | high | medium | low | low | medium |
 | Desync/recovery risk | low | low | medium | low | high | low | low |
 | Reconnect impact | full view | full view | keyframe required | full view | none | full view | full view |
 | Debuggability | high | high | low | high | low | high | medium |
-| Decision | — | — | — | — | — | — | — |
+| Decision | — | reject alone (14.9% < 20% traffic); part of C | defer (beats C by 21–25 pp but delta is deferred when C clears, and load latency was not measured) | **accept (A + C)** | reject | reject (gap 150/200 ms) | reject (larger per message) |
 
-Do not fill a cell with a guess. Use `not measured` and explain why.
+Natural bot corpus, 100 seeds, 133.65 B/view current: A 113.77 (−14.9%),
+B 46.80 (−65.0%), C 78.06 (−41.6%), D 8.80 (−93.4%). Five runs, identical
+bytes; medians of per-run medians for CPU.
 
 ## Acceptance checklist
 
-- [ ] Baseline reproduced on the audit commit; hardware and build recorded
-- [ ] `view_audit.rs` runs from a clean checkout; raw output is committed
-- [ ] Synthetic and natural matches are reported separately
-- [ ] Every alternative that was tested has bytes, CPU, RAM, and integrity data
-- [ ] The chosen option clears the published threshold; rejected options say why
-- [ ] No game rule, tick rate, or production wire format changed in this phase
-- [ ] Reconnect, slow-client, rate-limit, seat-ownership, and hidden-data tests pass
-- [ ] The client stays exactly synchronized on 100 seeds and chaos reconnects
-- [ ] P30-B has an exact handoff or an explicit "no wire change" decision
-- [ ] Every non-chosen prototype is reverted; no dead dependency
-- [ ] All verification commands pass
-- [ ] Phase report and `docs/media/p30a/` raw files committed
+- [x] Baseline reproduced on the audit commit; hardware and build recorded
+- [x] `view_audit.rs` runs from a clean checkout; raw output is committed
+- [x] Synthetic and natural matches are reported separately
+- [x] Every alternative that was tested has bytes, CPU, RAM, and integrity data
+- [x] The chosen option clears the published threshold; rejected options say why
+- [x] No game rule, tick rate, or production wire format changed in this phase
+- [x] Reconnect, slow-client, rate-limit, seat-ownership, and hidden-data tests pass
+- [x] The client stays exactly synchronized on 100 seeds and chaos reconnects
+- [x] P30-B has an exact handoff or an explicit "no wire change" decision
+- [x] Every non-chosen prototype is reverted; no dead dependency
+- [x] All verification commands pass
+- [x] Phase report and `docs/media/p30a/` raw files committed
 
 ## Risks and mitigations
 
@@ -482,101 +489,360 @@ Do not fill a cell with a guess. Use `not measured` and explain why.
 
 ## Phase report
 
+Executed 2026-10-29 on the development PC (i7-13620H, 16 threads / 10
+cores, 31 GiB, Linux 7.2.6), release profile, audit commit `a641cf4` plus
+this report commit. Branch `phase/p30a-network-audit`; raw outputs in
+`docs/media/p30a/`. The production wire, `PROTOCOL_VERSION`, tick rate,
+rules, and outcomes are unchanged; `git diff origin/main --
+crates/tbg-core/src/protocol.rs crates/tbg-core/src/view.rs` is empty.
+
 ### A. Current diagnosis
 
-- Data flow: tick → events → per-seat full view → postcard → Axum WS →
-  browser decode → view buffer → render.
-- Measured bottlenecks, with profile/counter evidence.
-- What is already optimized and must not be re-litigated.
-- Opportunities, risks, and limits of the measurements.
+- Data flow verified: 20 Hz tick → per-seat pending events → full
+  `MatchView` each 10 Hz (or on an ack) → postcard → Axum WS → browser
+  decode → `ViewBuffer` → render. Reconnect re-sends `MatchStart` and a
+  full view with buffered events.
+- **Wire size.** Natural bot corpus (100 seeds, 238 586 views, 7.76
+  units/view, 1.12 events/view): 133.65 B average, 196 B p95, 324 B max;
+  1.34 KB/s payload per player at 10 Hz. Composition: header 22.0%,
+  units 73.6% (static identity 23.4%, `max_hp` 11.7%, dynamic 37.7%),
+  events 4.4%. Static identity + `max_hp` = **35.1% of all bytes**.
+  Header detail: `synergy` 7.1%, `offers` 4.4%, `stronghold_hp` 3.5%,
+  `energy` 1.8%, `tick`/`phase_ticks_left`/`last_seq` 1.7% each,
+  `next_rotation_in` 1.2%, `phase`/`outcome`/`you` 0.9% each.
+- **Synthetic armies** (both seats topped up, 10 Hz): 296 B at 10
+  units/side (2.96 KB/s), 564 B at 20 (5.64), 1141 at 40 (11.41), 1722
+  at 60 (17.22), 2875 at 100 (28.75); max 7 754 B, below the 64 KiB WS
+  cap. Static identity stays ~28.4–28.9% of bytes and `max_hp`
+  ~13.8–14.5%; events grow linearly (2.6 → 22.9 per view), not faster
+  than units in bytes.
+- **Message mix and ack.** A 250-match full bot run (500 players, 2 CPU /
+  1 GiB, 245 s, 0 failed, 0 late ticks): 605 047 views, 10 097 ack views
+  = **1.67%**; 1.14 events/view and 7.93 units/view over the match life;
+  10.22 view messages/s/player. Add the 1 s WS Ping, 5 s app Ping and
+  5 s NetStats: ~11.6 server messages/s/player. Ack views are therefore
+  not worth compacting (H5 rejected).
+- **Server CPU and capacity** (local cgroup estimates; bots outside the
+  cgroup; every row records its load in `capacity-*.txt`):
+  - 1 vCPU / 1 GB: 750 matches clean; 1000 was 0.54 cores / 0 late ticks
+    in one pass and 0.67 cores / 3 cgroup throttles / 3 854 late ticks in
+    another; 1300 and 1500 fail (10/3 throttles, 20 122/19 923 late).
+  - 2 CPU / 1 GiB (the deployed quota): 1000 clean in every uncontaminated
+    pass (0.54–0.67 cores, 1 493–1 852 matches/core); 1500 clean in 2 of
+    3 dedicated passes (1.09–1.10 cores, 0 late) and failed in one
+    (1 throttle, 5 467 late); 2000 failed in both passes (4–5 throttles,
+    27 598/48 626 late). The cgroup `cpu.stat` throttle count tracks the
+    late-tick bursts exactly, and RSS/cgroup peak (588 MB at 2000) is well
+    under 1 GiB: the first limit is **CPU quota burst throttling**, not
+    RAM and not the bot generator (0.8–2.3 bot cores, host load 4–8).
+  - 2 vCPU / 8 GB: 1000 and 1500 clean with 2 workers (1500: 1.09 cores,
+    0 late), 2000 fails (1.66 cores, 34 400 late), 2500 fails harder
+    (1.88 cores, 56 647 late, RTT p95 21 ms). 1 worker is more efficient
+    at 1000 (0.54 vs 0.67 cores, 1 852 vs 1 493 matches/core) but saturates
+    one core at 2000 (90 783 late); 2 workers reach higher total work.
+  - RSS is ~297 KB per running match (290.3 MB at 1000, 431.3 MB at 1500,
+    572.6 MB at 2000). The P30-B target of ≤150 KB/match is not met.
+- **Client.** Browser frame timing is blocked on this machine (see
+  Deviations). The native proxy of the exact sync operations at 100
+  units/side is 8.86 µs/frame for clone + linear lookup + linear retain
+  and 3.45 µs for Arc clone + sorted merge + HashSet retain (−61% of the
+  sync cost). The absolute 8.9 µs is ~0.05% of a 16.7 ms frame, so the
+  clone/lookup cannot account for a 15% frame-time change; H7 is not
+  proven and no client POC is kept.
+- **Send path.** No `perf`/`pprof` on this machine; the P10 pprof hook was
+  deliberately not reintroduced. `BytesMut::resize`, allocation shares,
+  and the H9 “≥50% of send CPU is per-message” split are **not measured**.
+  The measured view build+encode is 1.77 µs at 20 units and 6.93 µs at
+  100 (per seat per view), and the capacity CPU is 0.54–0.67 cores for
+  1000 matches, so a wire change cannot be justified on CPU grounds
+  alone. Message count is a first-class cost: 133 B payload + ~71 B
+  estimated framing/TLS/TCP per message.
+- Already optimized and not re-litigated: P10 lobby `HashMap`/`VecDeque`,
+  bounded socket write buffer, `CONN_QUEUE=32`, `TBG_WORKERS`, TCP_NODELAY;
+  mimalloc, `opt-level=3`, and encode-once were measured and rejected.
+- Opportunities: remove derivable fields (A), stop repeating static unit
+  identity and low-frequency Synergy (C). Risks: every view-format change
+  touches reconnect and the client cache; the measurements are local
+  cgroup estimates on a shared PC; the VPS `/metrics` and the real VPS
+  capacity table remain owner work.
 
 ### B. Alternative comparison
 
-For each tested alternative (A–H): how it works, benefits, costs,
-complexity, measured results, risks, and accept/reject reason. Fill the
-matrix above; do not leave a measured cell empty.
+- **A — derive, don't send.** Works exactly: `max_hp` from
+  `Ruleset::unit_max_hp` (kind/tier/branch/Synergy/Arcanas),
+  `phase_ticks_left` from tick+phase, `next_rotation_in` from tick, `you`
+  from `MatchStart`. Natural 113.77 B (−14.9%), 20 units 478 B (−15.2%),
+  100 units 2 463 B (−14.3%). Build+encode 1.57 µs at 20 (−11.3%) and
+  6.31 µs at 100 (−9.0%); zero extra RAM; reconstruction 0.75/3.47 µs.
+  Exact on 100 seeds and every edge case. **Rejected alone**: it misses
+  the ≥20% traffic threshold at 20 units/side; it is part of C.
+- **B — delta.** Sorted static+dynamic caches, changed-unit list,
+  removals, keyframe every 100 views (1.0% of views). Natural 46.80 B
+  (−65.0%), 20 units 170 B (−69.9%), 100 units 1 047 B (−63.6%). Build+
+  encode 1.73/6.19 µs (−2.5%/−10.6%); 2.46 KB/seat at 20, 11.9 KB at 100;
+  client reconstruction 1.93/15.26 µs. Exact on 100 seeds, reconnect,
+  and a deliberately lost delta (12 views mismatched, recovered at the
+  next keyframe). It beats C by 21–25 percentage points. **Deferred, not
+  chosen**: the spec defers delta when the simpler split clears the
+  threshold; the extra state machine and keyframe recovery are
+  disproportionate to the additional gain, and its load latency was not
+  measured (no deployed prototype). Reopen only if C fails recovery or
+  the VPS proves bandwidth is the first limit after C.
+- **C — A + static/dynamic.** Full static roster on first view/reconnect,
+  spawned/evolved units only afterwards, complete dynamic list every
+  view, Synergy update only on full/change. Natural 78.06 B (−41.6%),
+  20 units 312 B (−44.7%), 100 units 1 653 B (−42.5%). Build+encode
+  1.67/5.89 µs (−5.6%/−15.0%); client cache 0.53 KB/seat at 20, 2.54 KB
+  at 100; reconstruction 1.51/12.25 µs. Exact on 100 seeds and all edge
+  cases; a missing static id is rejected and forces the full-snapshot
+  reconnect. **Accepted.**
+- **D — events only.** 8.80 B (−93.4%) but cannot reconstruct position,
+  HP, or roster; it is the negative control and is rejected.
+- **E — lower view rate.** Measured with a temporary `TBG_VIEW_HZ` hook
+  (reverted): 20 bot matches each at 10/8/5 Hz, 2 CPU / 1 GiB.
+  - 10 Hz: 1.358 KB/s/player, gap p95 100 ms, ack p95 50 ms.
+  - 8 Hz: 1.030 KB/s, gap p95 150 ms, ack p95 50 ms.
+  - 5 Hz: 0.689 KB/s, gap p95 200 ms, ack p95 50 ms.
+  Ack latency is unchanged because ack views are immediate, but the
+  view-gap budget (p95 ≤150 ms) is only reached at 8 Hz and broken at
+  5 Hz. **Rejected**: keep 10 Hz and the 20 Hz simulation.
+- **F — compression.** 200 real encoded views: 14 853 B raw, 18 538 B
+  with `gzip -6` (1.248×) and 16 471 B with `zstd -3` (1.109×) when each
+  message is compressed alone. **Rejected**: per-message compression is
+  larger; no transport path without a dependency.
+- **G — send path.** Not measured (no profiler); see A. No change.
+- **H — client sync.** Browser FPS blocked; native proxy proves the sync
+  cost is 8.9 µs at 100 units, far below the frame-time threshold.
+  **Rejected for now**; keep `?army=N` for the later client phase.
 
 ### C. Benchmarks
 
-| Metric | Current | A: derive, don't send | B: delta | C: A + static/dynamic |
-|--------|---------|-----------------|----------|-------------------|
-| KB/s per player at 20 units | measured | measured | measured | measured |
-| KB/s per player at 100 units | measured | measured | measured | measured |
-| Build+encode CPU per view | measured | measured | measured | measured |
-| Server CPU per match at fixed load | measured | measured | measured | measured |
-| RSS per match / per connection | measured | measured | measured | measured |
-| Ack p95 / RTT p95 | measured | measured | measured | measured |
-| Integrity on 100 seeds | verified | verified | verified | verified |
-| Reconnect mid-combat | verified | verified | verified | verified |
+Hardware/build: dev PC above, `--release`, 100 natural seeds (seeds
+1–100, default Arcanas), five repetitions, medians. Payload bytes; wire
+estimates add 71 B per message. Synthetic and natural are separate.
 
-State the hardware, build profile, seeds, repetitions, warm-up, and
-whether each number is payload, WebSocket frame, or wire bytes. Label
-synthetic and natural matches separately. Do not fill an unmeasured cell.
+| Metric | Current | A: derive, don't send | B: delta | C: A + static/dynamic |
+|--------|---------|-----------------------|----------|-----------------------|
+| KB/s per player at 20 units (payload) | 5.64 | 4.78 | 1.70 | 3.12 |
+| KB/s per player at 100 units (payload) | 28.75 | 24.63 | 10.47 | 16.53 |
+| KB/s per player natural (payload) | 1.337 | 1.138 | 0.468 | 0.781 |
+| Estimated wire KB/s, 20 / 100 units | 6.35 / 29.46 | 5.49 / 25.34 | 2.41 / 11.18 | 3.83 / 17.24 |
+| Build+encode CPU per view, 20 / 100 units | 1.77 / 6.93 µs | 1.57 / 6.31 µs | 1.73 / 6.19 µs | 1.67 / 5.89 µs |
+| Server CPU per match at fixed load | 0.54 ms per match/s (1000 matches, 0.54 cores) | not measured under load (no deployed wire) | not measured under load | not measured under load |
+| RSS per match / per connection | 297 KB/match; per-connection share not separated | no change | +23.7 KB/match at 100 units | +5.1 KB/match at 100 units |
+| Ack p95 / RTT p95 | 50 / 2 ms at 250 matches | not measured under load (ack path unchanged) | not measured under load | not measured under load (ack path unchanged) |
+| Integrity on 100 seeds | control | verified (zero mismatches) | verified (zero mismatches) | verified (zero mismatches) |
+| Reconnect mid-combat | 100/100 chaos reconnects | full view | keyframe; lost delta recovered | full view; 100/100 chaos |
+
+Run `view_audit` for the raw tables; `full250-*.txt`, `chaos50-*.txt`,
+`capacity-*.txt`, and `viewhz-*.txt` in `docs/media/p30a/` support every
+row. No cell is a guess; unmeasured cells say why.
 
 ### D. Chosen architecture
 
-- Which option won and why.
-- What is reused unchanged.
-- What changes (files, types, protocol version).
-- How reconnection gets a full snapshot.
-- How events remain presentation-only and ordered.
-- How the client detects and recovers from a missing/invalid reference.
-- How the design can grow to more units, effects, Strongholds, Arcanas,
-  Augments, and spectators without a rewrite.
+**A + C: derive the four client-computable fields, and split unit static
+identity from dynamic state.** A alone misses the traffic threshold; C
+clears it at 20 and 100 units with exact reconstruction and lower
+build+encode CPU than today (the sorted static tracker removes per-unit
+tree lookups, and the smaller payloads encode faster). B is deferred.
 
-### E. Minimum implementation plan
+- Reused unchanged: 20 Hz simulation, 10 Hz views, postcard/WebSocket,
+  `MatchStart` (Arcanas and `you`), immediate ack views, presentation-only
+  events, server authority, reconnect timing, 64 KiB write cap.
+- What changes in P30-B: `MatchView` loses `you`, `phase_ticks_left`,
+  `next_rotation_in`, and `UnitView.max_hp`; units become
+  `Vec<UnitDynamic>` plus a `full: bool` and `Vec<UnitStatic>` (static =
+  id, seat, kind, tier, branch); Synergy moves to a low-frequency
+  `Option<[[u8;4];2]>` update. `Ruleset::unit_max_hp` (already added) and
+  pure tick/phase helpers derive the removed fields. `PROTOCOL_VERSION`
+  takes the next unused value; main is v9 at review.
+- Reconnection gets `MatchStart` plus a `full=true` view with every live
+  static unit, current Synergy, all dynamic units, and buffered events.
+  The client replaces its static map on `full`, upserts otherwise, and
+  reconnects if a dynamic id has no static entry. Decode errors trigger
+  the existing reconnect instead of being ignored.
+- Events stay presentation-only and ordered: they are carried in every
+  view exactly as today; no damage, targeting, Energy, or outcome moves
+  into the client.
+- Growth: the static section can carry P17-A `StrongholdView`s, Arcana
+  and Augment metadata later without touching the dynamic list. The
+  dynamic list stays complete every view, so one lost view cannot leave a
+  stale position or HP; only the static map needs recovery.
 
-- Exact files and type/message changes, in order.
-- Tests: determinism, view integrity, reconnect, slow client, rate limit,
-  seat ownership, hidden data, size ceiling.
-- Acceptance criteria and the commands that prove them.
-- Risks and rollback (protocol version, redeploy, no data migration).
-- What P30-B implements versus what P30 or a later phase implements.
-- VPS validation procedure and the values still unknown.
+### E. Minimum implementation plan (P30-B step 0)
+
+1. `tbg-core/src/view.rs`: add `UnitStatic`, `UnitDynamic`, `full`,
+   `static_units`; remove the four redundant fields; add
+   `sim::phase_ticks_left_at(tick, phase)` and use
+   `shop::next_rotation_in(tick)`. Keep `view_for` as the canonical full
+   view for the bot/lab/tests.
+2. `tbg-core/src/ruleset.rs`: `unit_max_hp` is already present; extend the
+   `contract_view.rs` H8 test with C reconstruction on 100 seeds and the
+   spawn/death/summon/evolution/status/Synergy/reconnect edge cases.
+3. `tbg-client/src/sync.rs` + `sync/messages.rs`: static map, full
+   replacement, upsert/prune, derived `max_hp`/counters, reconnect on a
+   missing static or decode error; `?army=N` stays.
+4. `tbg-server/src/match_task/views.rs`: per-seat sorted `Vec<UnitStatic>`
+   tracker (no BTreeMap in the hot path), full on first view and `Attach`,
+   static changes on spawn/evolve, Synergy update on change.
+   `match_task.rs` cadence and ack logic unchanged.
+5. `tbg-core/src/protocol.rs`: bump `PROTOCOL_VERSION` with a comment
+   naming P30-A; server and client deploy together.
+6. Tests: `contract_protocol*.rs` (version and view shape),
+   `contract_determinism.rs` unchanged, `contract_view.rs` (H8 + C
+   reconstruction), online reconnect/slow-client/rate-limit/seat/hidden
+   data, a 100-seed reconstruction, 50 chaos reconnects, size ceiling
+   (<64 KiB). Commands: the four `AGENTS.md` verification commands,
+   `shellcheck`, `cargo test -p tbg-server --test online`, and
+   `trunk build --release`.
+7. P30-B must re-measure: payload bytes/view at 20/100, view messages/s,
+   build+encode µs, matches/core at 1 vCPU/1 GB and 2 CPU/1 GiB with 0
+   late ticks, RSS/match, ack/RTT/view-gap p95 at 250 matches, ack-view
+   share, and reconnect/chaos. Before/after on the same machine.
+- Rollback: revert the protocol/view commit and redeploy the previous
+  binary with its matching client; old peers are rejected by the version
+  check, so deploy both together. No data migration; no DB schema change.
+- VPS validation still unknown: the owner's `/metrics` reading, the real
+  VPS CPU/network mix, and whether the 1 GiB quota behaves like the local
+  cgroup. P30-B owns the final VPS table.
 
 ### F. Capacity estimate
 
-Separate **measured**, **extrapolated**, and **unknown**. Include:
+**Measured (local cgroups, bots outside):**
 
-- matches and players per vCPU at the measured late-tick/RTT quality;
-- MB RSS per match and per connection;
-- KB/s per player and per match at 10/20/100 units/side;
-- monthly traffic formula and an occupancy table, with the plan's actual
-  traffic allowance marked as a value the owner must confirm;
-- the first limit (CPU, RAM, bandwidth, file descriptors, or load
-  generator) and the safety margin;
-- the difference between local cgroup results and a VPS.
+| Limit | clean matches | server cores | matches/core | RSS MB | KB/match | late ticks | RTT p95 |
+|---|---|---|---|---|---|---|---|
+| 1 vCPU / 1 GB | 750 | 0.39 | 1 923 | 219.8 | 300 | 0 | 3 ms |
+| 1 vCPU / 1 GB | 1 000 | 0.54–0.67 | 1 493–1 852 | 290.3 | 297 | 0–3 854 (0–3 throttles) | 3–4 ms |
+| 2 CPU / 1 GiB | 1 000 | 0.54–0.67 | 1 493–1 852 | 290.7 | 298 | 0 | 3 ms |
+| 2 CPU / 1 GiB | 1 500 | 1.09–1.18 | 1 271–1 376 | 431.2 | 294 | 0 in 2/3, 5 467 in 1/3 | 3 ms |
+| 2 CPU / 1 GiB | 2 000 | 1.27–1.66 | 1 205–1 575 | 572.6 | 293 | 27 598–48 626 | 15 ms |
+| 2 vCPU / 8 GB | 1 500 | 1.09 | 1 376 | 431.1 | 294 | 0 | 3 ms |
+| 2 vCPU / 8 GB | 2 000 | 1.66 | 1 205 | 572.6 | 293 | 34 400 | 12 ms |
+| 2 vCPU / 8 GB | 2 500 | 1.88 | 1 329 | 713.5 | 292 | 56 647 | 21 ms |
 
-Formula for projections (decimal GB; state the assumed occupancy and
-hours per month):
+**Extrapolated.** Safe capacity at 2 CPU / 1 GiB is **1000 matches**
+(2000 sockets) with a small margin; 1500 is likely but one pass in three
+hit a CPU-quota burst. At 1 vCPU / 1 GB, 750 is safe and 1000 is marginal
+under external load. The first limit is CPU quota burst throttling, not
+RAM (peak 588 MB < 1 GiB) and not the bot generator (≤2.3 bot cores on 16).
+C removes ~42% of payload and ~6–15% of build+encode CPU; CPU-bound
+capacity could rise up to ~10%, and bandwidth-bound traffic falls 42%.
+That gain is **not measured under a deployed C**; P30-B must measure it.
 
-`monthly_GB = matches × 2 players × KB_per_s_player × seconds_per_month / 1_000_000`
+**Monthly traffic** (`monthly_GB = matches × 2 × KB_per_s_player ×
+2 592 000 / 1 000 000`, decimal GB, 30-day month, payload only; wire is
+~1.5× payload with the measured 71 B/message overhead):
+
+| Occupancy (matches) | current payload GB | current wire GB | C payload GB | C wire GB |
+|---|---|---|---|---|
+| 25% (250) | 1 646 | 2 469 | 961 | 1 442 |
+| 50% (500) | 3 292 | 4 938 | 1 923 | 2 884 |
+| 75% (750) | 4 938 | 7 407 | 2 884 | 4 326 |
+| 100% (1000) | 6 584 | 9 876 | 3 846 | 5 769 |
+
+The plan's actual traffic allowance is an **owner value to confirm**.
+These are local cgroup estimates; a VPS may differ in CPU steal, TLS
+overhead, and network path.
 
 ### G. Decisions deferred
 
-List explicitly what is not being built now and the measured trigger that
-would reopen each item. At minimum: delta if static/dynamic won,
-compression, spectator replication, multi-server matchmaking, external
-queues, client prediction, and transport changes.
+- **Delta (B):** reopen only if C fails recovery/desync or if the VPS
+  shows bandwidth is still the first limit after C, with a measured
+  ≥15 pp gain over C at 100 units.
+- **Compression:** reopen only with a transport that compresses across
+  messages and a ≥30% payload win without a new dependency.
+- **5/8 Hz views:** reopen only if the 150 ms view-gap budget changes;
+  5 Hz already loses 200 ms gaps.
+- **H10 shared build:** measured −5.4% build+encode for two seats, below
+  the −15% threshold; reopen with a different view layout.
+- **H7 client Arc/sorted merge:** defer to P30 (client phase) with a real
+  device measurement; the native cost is only 8.9 µs at 100 units.
+- **Spectator replication, prediction/rollback, multi-region, external
+  queues, transport changes, client-side outcomes:** unchanged and
+  deferred by default.
+- **P17-A StrongholdView:** add it to C's static section when that branch
+  merges; protocol number must be coordinated then.
 
 ### Answers to the 15 questions
 
-1. Real bottleneck:
-2. Wasted bytes per update:
-3. Unnecessary fields:
-4. Changed-data-only feasibility:
-5. Delta versus simpler split:
-6. Simpler hybrid:
-7. Achievable traffic reduction:
-8. CPU/RAM cost:
-9. Client synchronization:
-10. Reconnect safety:
-11. Command latency:
-12. Capacity gain per vCPU:
-13. Worth doing now:
-14. Deferred:
-15. Implementation sequence:
+1. **Real bottleneck:** server CPU-quota bursts at ~1500–2000 matches
+   (2 CPU) and ~1000 (1 vCPU); wire bytes are dominated by static unit
+   identity and `max_hp` (35.1%). Client sync is 8.9 µs/frame at 100
+   units, not a bottleneck.
+2. **Wasted bytes per update:** 35.1% of all bytes are static identity
+   (23.4%) + `max_hp` (11.7%); header 22.0%, events 4.4%.
+3. **Unnecessary fields:** `max_hp`, `phase_ticks_left`,
+   `next_rotation_in`, `you`, and the repeated `seat/kind/tier/branch`
+   (plus repeated Synergy).
+4. **Changed-data-only feasibility:** yes; B reconstructs exactly and
+   recovers from a lost delta at a keyframe, but needs per-seat state.
+5. **Delta versus simpler split:** B saves 21–25 pp more than C at
+   20/100 units; the spec defers delta when the split clears, so C wins
+   on risk.
+6. **Simpler hybrid:** A + C (derive + static/dynamic split).
+7. **Achievable traffic reduction:** 41.6% natural, 44.7% at 20 units,
+   42.5% at 100 units.
+8. **CPU/RAM cost:** build+encode −5.6% at 20 and −15.0% at 100; extra
+   client cache 0.53 KB/seat at 20 and 2.54 KB at 100; server static
+   tracker is a sorted Vec.
+9. **Client synchronization:** exact on 238 586 views over 100 seeds and
+   all edge cases; a missing static id is rejected, not rendered.
+10. **Reconnect safety:** 100/100 chaos reconnects and 250/250 matches
+    completed; full view on attach.
+11. **Command latency:** ack p95 50 ms / RTT p95 2 ms at 10 Hz; lowering
+    to 8/5 Hz keeps ack p95 50 ms but raises view gap p95 to 150/200 ms.
+12. **Capacity gain per vCPU:** current 1 493–1 852 matches/core at 1000;
+    C could add up to ~10% CPU-bound and cut bandwidth 42%, but this is
+    extrapolated until P30-B measures a deployed C.
+13. **Worth doing now:** A + C.
+14. **Deferred:** B delta, compression, 5/8 Hz, H10, client Arc POC,
+    spectators, prediction, external queues, transport changes.
+15. **Smallest sequence:** core types/helpers + invariant/rebuild tests;
+    client cache/derive; server sorted tracker + full attach; version
+    bump; integrity/capacity re-measure.
 
 ### Deviations, blocked items, and pending VPS tests
 
-_Executor fills this in with real command output._
+- Branch name is `phase/p30a-network-audit` (owner instruction), not the
+  spec's `phase/p30a-network-performance-audit`. The branch was rebased
+  on `origin/main` before review; main's protocol is v9.
+- No `perf` on this machine. The P10 pprof hook was not reintroduced
+  (no dependency churn); `BytesMut::resize`/allocation shares and the H9
+  per-message CPU split are **not measured**. The capacity CPU and the
+  view-build microbenchmark are the evidence instead.
+- Browser FPS is blocked: headless SwiftShader, headful Intel Mesa, and
+  Xvfb all run the game page at ~1.0–1.4 FPS while a blank page runs rAF
+  at ~71 Hz; army=10/40/100 are all ~1 FPS. Absolute FPS/frame p95 and
+  phone measurements are therefore not measured; the native sync proxy is
+  used for H7. Details in `docs/media/p30a/client-measurement.txt`.
+- Capacity numbers are local cgroup estimates on a shared PC. Late ticks
+  were non-monotonic between passes (2000 clean once, 1500 throttled
+  twice) because other processes spiked; every run's `load1`, bot cores,
+  cgroup throttles, and memory peak are in the raw files. The VPS
+  capacity table and the production `/metrics` reading (owner: two
+  `curl -s http://127.0.0.1:18260/metrics` samples 10 minutes apart) are
+  **pending owner**.
+- The 8/5 Hz and the delta-loss/reconnect prototypes are reverted. The
+  only retained production code is: the `view_audit.rs` example, the
+  `Ruleset::unit_max_hp` helper, the `SeatStats`/global view counters,
+  the capacity script extensions, the `?army=N` debug parameter, and the
+  H8 contract test. `crates/tbg-core/src/protocol.rs` and `view.rs` are
+  byte-for-byte identical to `origin/main`.
+- P17-A is not on main; if it merges first, P30-B takes the next protocol
+  version after it and adds `StrongholdView` to C's static section.
+
+### Verification (real output)
+
+```
+cargo fmt --all -- --check                  -> exit 0
+cargo clippy --workspace --all-targets -D warnings -> exit 0
+cargo test --workspace                      -> all suites pass (contract_view 1,
+                                               contract_protocol 6+2, online 28,
+                                               determinism/rules/accounts/ranked green)
+cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown -> exit 0
+shellcheck scripts/capacity.sh              -> exit 0
+cargo run --release -p tbg-core --example view_audit -> exit 0
+git diff origin/main -- crates/tbg-core/src/protocol.rs crates/tbg-core/src/view.rs -> 0 lines
+(cd crates/tbg-client && trunk build --release) -> success
+```

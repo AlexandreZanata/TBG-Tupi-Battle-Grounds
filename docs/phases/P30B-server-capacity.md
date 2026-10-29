@@ -56,10 +56,16 @@ record the new value as Proposed.
 ## Steps
 
 ### 0. P30-A decision
-Read the P30-A report. If it accepted a view encoding, implement exactly
-that option (protocol version bump, client update, integrity/reconnect
-tests) and record its own before/after. If it accepted none, skip this
-step. Do not reopen alternatives that P30-A measured and rejected.
+Read the P30-A report. **P30-A (2026-10-29) accepted A + C:** derive
+`max_hp`, `phase_ticks_left`, `next_rotation_in`, and `you` on the client,
+and send static unit identity only on spawn/evolution/full plus a complete
+dynamic list every view. Implement exactly that option (protocol version
+bump, client static cache, full view on `Attach`, integrity/reconnect
+tests) and record its own before/after. Take the next unused
+`PROTOCOL_VERSION` on main at implementation time (v9 at P30-A review); if
+P17-A merged first, add `StrongholdView` to the static section. Do not
+reopen the delta, compression, 5/8 Hz, or client-POC options that P30-A
+measured and rejected.
 
 ### 1. Limited baseline
 Use the `LIMIT_CPU` / `LIMIT_MEM` harness delivered by P30-A; add the flags
