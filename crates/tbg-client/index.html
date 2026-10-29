@@ -9,10 +9,11 @@
   <link data-trunk rel="copy-dir" href="ranking" />
   <link data-trunk rel="copy-dir" href="diagnostics" />
   <script src="diagnostics/measure.js"></script>
-  <link rel="stylesheet" href="assets/lobby/lobby.css">
-  <script defer src="assets/lobby/lobby.js"></script>
-  <link rel="stylesheet" href="assets/battle/hud.css">
-  <script defer src="assets/battle/hud.js"></script>
+  <!-- Hashed by Trunk so every deploy changes the URL (no stale CDN/browser cache). -->
+  <link data-trunk rel="css" href="assets/lobby/lobby.css" />
+  <script data-trunk defer src="assets/lobby/lobby.js"></script>
+  <link data-trunk rel="css" href="assets/battle/hud.css" />
+  <script data-trunk defer src="assets/battle/hud.js"></script>
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2b36; touch-action: none; }
     canvas#bevy { display: block; width: 100%; height: 100%; outline: none; }
