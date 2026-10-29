@@ -157,7 +157,14 @@ impl NetLink {
             }
             other => {
                 match other {
+                    // Once acknowledged, invites and result offers are resumed
+                    // by the server. Reissuing the original request replaces
+                    // the host invite or consumes the guest invite twice.
+                    ServerMsg::ChallengeWaiting { .. } | ServerMsg::RematchOpen { .. } => {
+                        self.mode = super::Mode::Probe;
+                    }
                     ServerMsg::MatchStart { .. } => {
+                        self.mode = super::Mode::Probe;
                         self.in_match = true;
                         self.login_in_flight = false;
                         self.held_request = false;
@@ -168,6 +175,95 @@ impl NetLink {
                 }
                 Some(other)
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::net::Mode;
+
+    fn link(mode: Mode) -> NetLink {
+        NetLink {
+            mode,
+            socket: None,
+            opened: false,
+            token: Some([1; 16]),
+            in_match: false,
+            status: NetStatus::Ready,
+            lost_at: None,
+            tries: 0,
+            next_try: 0.0,
+            lag: 0.0,
+            ack: Default::default(),
+            login_in_flight: false,
+            held_request: false,
+            login_deadline: None,
+            outq: Default::default(),
+            inq: Default::default(),
+        }
+    }
+
+    #[test]
+    fn acknowledged_challenge_reconnects_without_recreating_the_invite() {
+        // BR-R08: reconnect must preserve the link already shared.
+        let mut net = link(Mode::CreateChallenge);
+        net.handle(ServerMsg::ChallengeWaiting { token: [7; 16] }, 0.0);
+        net.lost(1.0);
+        net.handle(
+            ServerMsg::Welcome {
+                token: [1; 16],
+                name: "A".into(),
+            },
+            2.0,
+        );
+        assert_eq!(net.mode, Mode::Probe);
+        assert!(net.outq.is_empty(), "Hello alone resumes the invitation");
+    }
+
+    #[test]
+    fn challenge_result_reconnects_without_consuming_the_invite_again() {
+        // BR-R09: both host and guest resume the result offer, not a mode.
+        for mode in [Mode::CreateChallenge, Mode::JoinChallenge([7; 16])] {
+            let mut net = link(mode);
+            net.handle(
+                ServerMsg::MatchStart {
+                    you: tbg_core::Seat::A,
+                    you_name: "A".into(),
+                    you_rating: None,
+                    opponent: "B".into(),
+                    mode: protocol::MatchMode::Challenge,
+                    opponent_rating: None,
+                    arcanas: [tbg_core::ArcanaPreset::DEFAULT; 2],
+                },
+                0.0,
+            );
+            net.handle(
+                ServerMsg::MatchEnd {
+                    outcome: tbg_core::Outcome {
+                        winner: Some(tbg_core::Seat::B),
+                        reason: tbg_core::EndReason::Forfeit,
+                    },
+                },
+                1.0,
+            );
+            net.handle(
+                ServerMsg::RematchOpen {
+                    opponent: "B".into(),
+                },
+                1.0,
+            );
+            net.lost(2.0);
+            net.handle(
+                ServerMsg::Welcome {
+                    token: [1; 16],
+                    name: "A".into(),
+                },
+                3.0,
+            );
+            assert_eq!(net.mode, Mode::Probe);
+            assert!(net.outq.is_empty());
         }
     }
 }

@@ -168,3 +168,77 @@ fn login_takeover_moves_the_rematch_token() {
 
     assert_eq!(lobby.rematches[0].players, [new, other]);
 }
+
+#[test]
+fn resume_cannot_start_an_expired_rematch_before_cleanup() {
+    // BR-R09: both requests must still be inside the offer's lifetime.
+    let (mut lobby, _self_rx) = lobby();
+    let a = [1; 16];
+    let b = [2; 16];
+    let _a_rx = add_session(&mut lobby, a, SessionState::Idle);
+    let mut b_rx = add_session(&mut lobby, b, SessionState::Idle);
+    lobby.disconnected(a, 1);
+    lobby.rematches.push(RematchTicket {
+        players: [a, b],
+        requested: [true, true],
+        expires: Some(Instant::now() - Duration::from_secs(1)),
+    });
+    let (tx, mut a_rx) = mpsc::channel(8);
+    lobby.hello(
+        Some(a),
+        ConnHandle { id: 2, tx },
+        "127.0.0.1".parse().unwrap(),
+    );
+    assert!(lobby.rematches.is_empty());
+    expect(&mut a_rx, ServerMsg::RematchClosed { declined: false });
+    expect(&mut b_rx, ServerMsg::RematchClosed { declined: false });
+    assert!(matches!(lobby.sessions[&a].state, SessionState::Idle));
+}
+
+#[test]
+fn reconnect_during_drain_keeps_rematch_from_starting() {
+    let (mut lobby, _self_rx) = lobby();
+    let a = [1; 16];
+    let b = [2; 16];
+    let _a_rx = add_session(&mut lobby, a, SessionState::Idle);
+    let _b_rx = add_session(&mut lobby, b, SessionState::Idle);
+    lobby.rematches.push(RematchTicket {
+        players: [a, b],
+        requested: [true, true],
+        expires: Some(Instant::now() + Duration::from_secs(60)),
+    });
+    lobby
+        .draining
+        .store(true, std::sync::atomic::Ordering::Relaxed);
+    lobby.try_start_rematch([a, b]);
+    assert_eq!(lobby.rematches.len(), 1);
+    assert!(matches!(lobby.sessions[&a].state, SessionState::Idle));
+}
+
+#[test]
+fn delayed_account_preset_cannot_change_a_waiting_challenge() {
+    // BR-AR05: even a database reply must respect the frozen selection.
+    let (mut lobby, _self_rx) = lobby();
+    let token = [1; 16];
+    let mut rx = add_session(
+        &mut lobby,
+        token,
+        SessionState::InChallenge { token: [7; 16] },
+    );
+    let profile = tbg_core::protocol::Profile {
+        name: "Tester".into(),
+        rating: 1000,
+        ranked_games: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+    };
+    lobby.sessions.get_mut(&token).unwrap().account = Some((1, profile));
+    let preset = tbg_core::ArcanaPreset::complete([0, 0, 0, 2, 2, 2]).unwrap();
+    lobby.arcanas_loaded(token, 1, preset);
+    assert_eq!(
+        lobby.sessions[&token].arcanas,
+        tbg_core::ArcanaPreset::DEFAULT
+    );
+    assert!(rx.try_recv().is_err());
+}

@@ -143,3 +143,36 @@ fn update(
         };
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn challenge_waiting_queries_and_copy_share_controls_work_together() {
+        let mut app = App::new();
+        app.insert_resource(Time::<()>::default())
+            .insert_resource(QueueInfo {
+                challenge: Some([7; 16]),
+                ..default()
+            })
+            .add_systems(Startup, spawn)
+            .add_systems(Update, update);
+        app.update();
+        let mut texts = app.world_mut().query::<&Text>();
+        assert!(texts
+            .iter(app.world())
+            .any(|t| t.0.contains("Waiting for your friend")));
+        let mut buttons = app.world_mut().query::<(&QueueButton, &Node)>();
+        for (kind, node) in buttons.iter(app.world()) {
+            assert_eq!(
+                node.display,
+                if matches!(kind, QueueButton::Practice) {
+                    Display::None
+                } else {
+                    Display::Flex
+                }
+            );
+        }
+    }
+}

@@ -47,7 +47,12 @@ pub(super) fn apply(
     mut last: ResMut<LastMode>,
     mut queue_info: ResMut<QueueInfo>,
     time: Res<Time>,
-    mut extra: (Res<LatestView>, ResMut<super::Toasts>, ResMut<Sounds>),
+    mut extra: (
+        Res<LatestView>,
+        ResMut<super::Toasts>,
+        ResMut<Sounds>,
+        ResMut<crate::sync::RematchInfo>,
+    ),
     mut account: ResMut<Account>,
     mut surrender: ResMut<super::surrender::Surrender>,
     mut form: NonSendMut<ActiveForm>,
@@ -123,6 +128,8 @@ pub(super) fn apply(
                     *link = MatchLink::Idle;
                 }
                 *queue_info = QueueInfo::default();
+                queue_info.cancelled = true;
+                extra.3.dismissed = true;
                 next.set(GameState::Menu);
             }
             // BR-M06: first tap arms (4 s), second forfeits. Practice leaves

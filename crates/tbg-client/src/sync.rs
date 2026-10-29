@@ -42,6 +42,8 @@ pub struct MatchInfo {
 /// P39: the result-screen rematch offer and its request state.
 #[derive(Resource, Default)]
 pub struct RematchInfo {
+    /// Ignore offers already in flight when the player explicitly leaves.
+    pub dismissed: bool,
     pub open: bool,
     pub you_requested: bool,
     pub opponent_requested: bool,

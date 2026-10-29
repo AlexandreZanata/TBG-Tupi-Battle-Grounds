@@ -21,9 +21,11 @@ use crate::Config;
 mod account_done;
 mod accounts;
 mod arcanas;
+mod challenge;
 mod leaderboard;
 mod matchmaking;
 mod ranked;
+mod rematch;
 mod sessions;
 #[cfg(test)]
 mod tests;
@@ -137,6 +139,12 @@ pub(super) fn send(conn: &Option<ConnHandle>, ev: ConnEvent) {
 }
 
 impl Lobby {
+    pub(super) fn send_to(&mut self, token: Token, msg: ServerMsg) {
+        if let Some(s) = self.session(&token) {
+            send(&s.conn, ConnEvent::Send(msg));
+        }
+    }
+
     pub(super) fn session(&mut self, token: &Token) -> Option<&mut Session> {
         self.sessions.get_mut(token)
     }
