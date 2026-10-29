@@ -18,22 +18,28 @@ fn bot_match(seed: u64) -> MatchState {
 
 #[test]
 fn bot_matches_are_frozen() {
-    // D-32 (P16-B): no army cap, five distinct offers, ten units, Hatch and
-    // Guard moved every golden; recomputed in the same commit.
-    use EndReason::{StrongholdDestroyed, TimeUp};
+    // P16-C (D-33, Proposed): eight balance numbers from the lab moved
+    // every golden; recomputed in the same commit.
+    use EndReason::StrongholdDestroyed;
     let goldens = [
-        (1, 0xc6cb_b48d_5e74_b6d6_u64, 3_661, Seat::A, TimeUp),
+        (
+            1,
+            0x9ae1_fab4_a68e_7c8b_u64,
+            2_297,
+            Seat::A,
+            StrongholdDestroyed,
+        ),
         (
             7,
-            0x4d74_11fa_6389_4ebd,
-            2_389,
+            0x5e4a_da1a_4ffb_210e,
+            1_920,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0x578f_482f_20b9_41ea,
-            2_165,
+            0x1f60_ac5e_2d13_415c,
+            3_233,
             Seat::B,
             StrongholdDestroyed,
         ),

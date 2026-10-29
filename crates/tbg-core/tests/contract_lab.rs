@@ -87,13 +87,13 @@ fn trace(seed: u64) -> (u64, u64, u32) {
 
 #[test]
 fn c2_per_tick_traces_are_frozen() {
-    // (seed, per-tick trace, final hash, end tick), P16-B rules.
+    // (seed, per-tick trace, final hash, end tick), P16-C Proposed values.
     let goldens = [
-        (1, 0x5a73_daa3_9bb8_6163, 0xc6cb_b48d_5e74_b6d6, 3_661),
-        (7, 0x9538_e20c_1757_6804, 0x4d74_11fa_6389_4ebd, 2_389),
-        (42, 0xd263_da2e_ba06_7279, 0x578f_482f_20b9_41ea, 2_165),
-        (1000, 0x6362_a5cc_a12c_d418, 0x5316_962f_729b_93a1, 3_438),
-        (65535, 0x51e6_2191_8bc8_f575, 0x55d1_0949_06e6_a070, 3_040),
+        (1, 0x550b_9853_c7d4_2f76, 0x9ae1_fab4_a68e_7c8b, 2_297),
+        (7, 0x412b_00d2_efaa_b8f7, 0x5e4a_da1a_4ffb_210e, 1_920),
+        (42, 0x1ff2_4478_083b_536e, 0x1f60_ac5e_2d13_415c, 3_233),
+        (1000, 0x2c03_8b17_2b22_d255, 0xb0e5_5880_6f6e_9ecc, 2_160),
+        (65535, 0xad8e_0210_5e75_5f7d, 0xb1ff_d8c4_2e43_9e69, 2_637),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

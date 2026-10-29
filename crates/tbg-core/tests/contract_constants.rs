@@ -59,10 +59,10 @@ fn shop_slots_stronghold_and_evolution() {
     assert_eq!((BEETLES_PER_NESTER, BEETLES_PER_PLAYER), ([2, 3], 6));
     assert_eq!(BEETLE_LIFETIME, secs(10));
     assert_eq!(STRONGHOLD_HP, 4_500);
-    assert_eq!(STRONGHOLD_DAMAGE, 65);
+    assert_eq!(STRONGHOLD_DAMAGE, 53);
     assert_eq!(u32::from(STRONGHOLD_INTERVAL), secs(1));
     assert_eq!(STRONGHOLD_RANGE, 6 * TILE);
-    assert_eq!(EVOLVE_COST, [3 * ENERGY_SCALE, 4 * ENERGY_SCALE]);
+    assert_eq!(EVOLVE_COST, [2 * ENERGY_SCALE, 4 * ENERGY_SCALE]);
     // Combat timing shared by every unit (ARCHITECTURE §4).
     assert_eq!((WINDUP, MIN_INTERVAL, BP), (6, 5, 10_000));
 }
