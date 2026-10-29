@@ -58,7 +58,7 @@ impl Ctx {
     }
 
     /// Write the manifest; `games` and `game_ticks` give the speed-up.
-    fn finish(&self, games: u64, game_ticks: u64) -> Result<(), String> {
+    fn finish(&self, games: u64, game_ticks: u64, note: &str) -> Result<(), String> {
         let wall = self.started.elapsed().as_secs_f64();
         let mut m = String::new();
         let _ = writeln!(
@@ -88,6 +88,9 @@ impl Ctx {
             self.seed_start + self.pairs,
             self.pairs
         );
+        if !note.is_empty() {
+            let _ = writeln!(m, "{note}");
+        }
         let _ = writeln!(m, "threads: {}", self.budget.threads);
         let _ = writeln!(m, "reaction_views: {}", self.budget.reaction);
         let _ = writeln!(m, "wall_s: {wall:.2}");
@@ -164,7 +167,7 @@ fn run(a: &Args) -> Result<(), String> {
     print!("{text}");
     c.out.write("run.txt", &text).map_err(|e| e.to_string())?;
     let (g, t) = games_and_ticks(&results);
-    c.finish(g, t)
+    c.finish(g, t, "")
 }
 
 fn duels_cmd(a: &Args) -> Result<(), String> {
@@ -178,7 +181,7 @@ fn duels_cmd(a: &Args) -> Result<(), String> {
     c.out
         .write("duels.csv", &report::duels_csv(&m, c.rules))
         .map_err(|e| e.to_string())?;
-    c.finish(0, 0)
+    c.finish(0, 0, "")
 }
 
 fn meta_text(results: &gate::Results) -> (String, String) {
@@ -214,7 +217,7 @@ fn meta_cmd(a: &Args) -> Result<(), String> {
     c.out.write("meta.txt", &text).map_err(|e| e.to_string())?;
     c.out.write("payoff.csv", &csv).map_err(|e| e.to_string())?;
     let (g, t) = games_and_ticks(&results);
-    c.finish(g, t)
+    c.finish(g, t, "")
 }
 
 /// Rows a release must pass (GAME-DESIGN §6 "Balance lab", required).
@@ -247,7 +250,7 @@ fn gate_cmd(a: &Args) -> Result<(), String> {
     w("duels.txt", &report::duel_summary(&matrix, c.rules))?;
     w("duels.csv", &report::duels_csv(&matrix, c.rules))?;
     let (g, t) = games_and_ticks(&results);
-    c.finish(g, t)?;
+    c.finish(g, t, "")?;
     let failing: Vec<&str> = rows
         .iter()
         .filter(|r| required(&r.name) && !r.pass())
@@ -291,7 +294,7 @@ fn throughput(a: &Args) -> Result<(), String> {
     c.out
         .write("throughput.txt", &text)
         .map_err(|e| e.to_string())?;
-    c.finish(0, 0)
+    c.finish(0, 0, "")
 }
 
 fn screen(a: &Args) -> Result<(), String> {
@@ -314,7 +317,11 @@ fn screen(a: &Args) -> Result<(), String> {
     c.out
         .write("screen.csv", &text)
         .map_err(|e| e.to_string())?;
-    c.finish(0, 0)
+    let note = format!(
+        "screening_block: {SCREENING}..{} (fixed)",
+        SCREENING + c.pairs
+    );
+    c.finish(0, 0, &note)
 }
 
 fn search_cmd(a: &Args) -> Result<(), String> {
@@ -360,7 +367,13 @@ fn search_cmd(a: &Args) -> Result<(), String> {
     println!("{md}");
     c.out.write("proposal.md", &md).map_err(|e| e.to_string())?;
     c.out.write("search.log", &log).map_err(|e| e.to_string())?;
-    c.finish(0, 0)
+    let screened_pairs = (c.pairs / 4).max(32);
+    let note = format!(
+        "screening_block: {SCREENING}..{} (fixed)\ndiscovery_block: {DISCOVERY}..{} (fixed)",
+        SCREENING + screened_pairs,
+        DISCOVERY + c.pairs
+    );
+    c.finish(0, 0, &note)
 }
 
 fn confirm(a: &Args) -> Result<(), String> {
@@ -406,5 +419,5 @@ fn confirm(a: &Args) -> Result<(), String> {
     c.out
         .write("confirm.txt", &text)
         .map_err(|e| e.to_string())?;
-    c.finish(0, 0)
+    c.finish(0, 0, "")
 }

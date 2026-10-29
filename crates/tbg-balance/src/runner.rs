@@ -42,7 +42,10 @@ pub fn parallel_map<T: Sync, R: Send>(
             .collect();
         workers
             .into_iter()
-            .flat_map(|w| w.join().unwrap_or_default())
+            .flat_map(|w| {
+                // A panicking job must fail the run, never shift results.
+                w.join().unwrap_or_else(|e| std::panic::resume_unwind(e))
+            })
             .collect()
     });
     out.sort_unstable_by_key(|(i, _)| *i);

@@ -338,6 +338,9 @@ pub fn valid(r: &Ruleset) -> Result<(), String> {
             return Err(format!("{:?}: interval below the minimum", k));
         }
     }
+    if r.synergies.iter().any(|(_, bp)| bp[0] > bp[1]) {
+        return Err("a level-1 Synergy bonus above its level-2 bonus".into());
+    }
     if r.evolve_cost.iter().any(|&c| c > r.energy_cap) || r.energy_start > r.energy_cap {
         return Err("Evolution cost or start Energy above the cap".into());
     }

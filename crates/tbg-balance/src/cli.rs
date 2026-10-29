@@ -21,7 +21,7 @@ COMMANDS
 FLAGS
   --pairs N         seed pairs per matchup (each pair = 2 seat-swapped games)
   --threads N       worker threads (default: all cores)
-  --seed-start S    first seed of the block
+  --seed-start S    first seed of the block (screen and search use fixed blocks)
   --reaction R      views between decisions for non-bot policies (default 5)
   --apply SPEC      ruleset changes: name=value,... (knob names from `screen`)
   --out DIR         output directory (default target/balance/<command>)

@@ -10,11 +10,11 @@ use super::Match;
 
 impl Match {
     /// P16-C: log a command for the replay, at the tick it is applied.
+    /// Logged even after the outcome: a late intention still sets
+    /// `last_seq`, which is part of the state hash.
     pub(super) fn record(&mut self, seat: Seat, intent: Option<(u32, PlayerIntention)>) {
-        if self.state.outcome.is_none() {
-            if let Some(r) = &mut self.replay {
-                r.record(&self.state, seat, intent);
-            }
+        if let Some(r) = &mut self.replay {
+            r.record(&self.state, seat, intent);
         }
     }
 
