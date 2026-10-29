@@ -93,6 +93,12 @@ P31 reviewed + owner sign-off
                          └► P38 Human playtest, performance, release gate
 ```
 
+**Lobby extras — independent (P39).** Quick Challenge by link and rematch
+reuse guest sessions, private-room pairing, the match task, reconnect, and
+the result screen. They add no queue and no second server. P39 may run
+after P14; do not run it concurrently with P16-F4/F7 or P16-A/P16-B (same
+lobby/menu files). It gates no existing phase.
+
 | Phase | File | Milestone at the end | Status | Reviewed |
 |-------|------|----------------------|--------|----------|
 | P0 | — | Lean repository, plan | done | yes |
@@ -147,6 +153,7 @@ P31 reviewed + owner sign-off
 | P36 | [P36-arcana-editor-and-practice.md](phases/P36-arcana-editor-and-practice.md) | Complete editor and accurate previews on desktop and phones | planned | — |
 | P37 | [P37-arcana-presets-and-ranked-records.md](phases/P37-arcana-presets-and-ranked-records.md) | One durable preset per account, guest parity, atomic ranked metadata | planned | — |
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
+| P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | planned (independent; P14 code) | — |
 
 ## Pending validations (owner)
 
@@ -228,6 +235,7 @@ All code for P1–P8 is implemented and validated on the development PC
 | P34 | Reviews balance evidence; accepts or rejects the proposed tuning before online integration |
 | P36 | Approves the Arcanas editor's look and touch interaction |
 | P38 | Plays the extra, approves fun/fairness, and explicitly authorizes public release |
+| P39 | Plays a challenge link on desktop and phone, accepts a rematch, and confirms private rooms still work |
 
 ## Ready-to-send brief (use for any phase)
 
@@ -243,6 +251,6 @@ All code for P1–P8 is implemented and validated on the development PC
 
 ## Later (not planned yet)
 
-`Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · rematch and
-spectating · rating-based matchmaking and seasons (D-18) · `Reposition`/bench
-design · WebGPU build · delta views · additional regions (ARCHITECTURE §12).
+`Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · spectating ·
+rating-based matchmaking and seasons (D-18) · `Reposition`/bench design ·
+WebGPU build · delta views · additional regions (ARCHITECTURE §12).

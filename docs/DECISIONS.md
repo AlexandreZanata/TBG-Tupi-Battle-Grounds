@@ -529,3 +529,38 @@ start economy affords within the 30-s window.
 **Reopen when** a single Augment's value exceeds its gate after tuning, the
 Forgo rate exceeds 50 % in a round (options too weak) or falls below 5 %
 (Forgo pointless), or playtests find the window too busy on phones.
+
+## D-39 · Quick Challenge by link and rematch reuse the lobby and match task — 2026-10-29 (Proposed, P39)
+
+**Decision.** Add a direct Quick Challenge flow beside the existing private
+room. The server issues a 128-bit single-use `InviteToken` (32 hex chars in
+`?challenge=`), independent of the session token; it expires after 10
+minutes and pairs the inviting session with exactly one different session.
+Challenge matches are `MatchMode::Challenge`: the same simulation, pairing,
+reconnect, and result path as Casual, but no queue and no rating change.
+After a challenge match, a 120-second in-memory `RematchTicket` lets the two
+sessions request a new match; it starts only when both request and are
+connected, with a fresh seed, and never enters a public queue. Private rooms keep their 5-character
+code, `?room=CODE`, TTL, and pairing path. Invitations and rematch tickets
+are lobby memory only, cleaned by the existing 10-second sweep; no
+simulation starts before two sessions are paired.
+
+**Why.** It reuses every existing session, pairing, match-task, reconnect,
+and result mechanism; the only new state is two small invitation records in
+the lobby. A 5-character room code (~25 bits) is fine for a manually shared
+private room but not for a public one-click invite; 128 bits removes
+guessing as a concern while the per-IP invite limiter and the WebSocket
+token bucket bound automated attempts. A separate quick-challenge queue or
+server would duplicate matchmaking and combat for no gain.
+
+**Consequences.** `PROTOCOL_VERSION` 8 appends three `ClientMsg` and five
+`ServerMsg` variants and a `MatchMode::Challenge` value; clients older than
+v8 are refused. Challenge and rematch state is lost on server restart, like
+guest sessions. A player who closes the tab on the result screen keeps the
+rematch ticket for its TTL so a reload can recover it; an explicit
+Menu/Cancel declines and notifies the other player. Spectators, chat,
+accounts, and persistent invitations remain out of scope.
+
+**Reopen when** playtests show challenge links being shared beyond two
+players (then a room with spectators, not a bigger invite), or rematch
+abandonment makes the 120-second ticket wasteful.
