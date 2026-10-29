@@ -3,7 +3,7 @@
 use std::net::IpAddr;
 use std::time::{Duration, Instant};
 
-use tbg_core::protocol::{ServerMsg, Token};
+use tbg_core::protocol::{InviteToken, ServerMsg, Token};
 
 use super::{send, Lobby, Session, SessionState, ROOM_TTL};
 use crate::chan::{ConnEvent, ConnHandle, MatchCmd};
@@ -38,10 +38,32 @@ impl Lobby {
                 };
                 let _ = conn.tx.try_send(ConnEvent::Send(msg));
             }
+            let token = s.token;
+            let name = s.name.clone();
+            let challenge = match s.state {
+                SessionState::InChallenge { token } => Some(token),
+                _ => None,
+            };
+            let idle = matches!(s.state, SessionState::Idle);
             s.conn = Some(conn);
             s.ip = ip;
             s.detached_at = None;
-            return (s.token, s.name.clone());
+            if let Some(invite) = challenge {
+                if self
+                    .challenges
+                    .iter()
+                    .any(|(t, owner, _)| *t == invite && *owner == token)
+                {
+                    self.send_to(token, ServerMsg::ChallengeWaiting { token: invite });
+                } else if let Some(s) = self.session(&token) {
+                    if matches!(s.state, SessionState::InChallenge { token } if token == invite) {
+                        s.state = SessionState::Idle;
+                    }
+                }
+            } else if idle {
+                self.resume_rematch(token);
+            }
+            return (token, name);
         }
         let session = Session {
             token: random_bytes::<16>(),
@@ -66,10 +88,40 @@ impl Lobby {
         }
         s.conn = None;
         s.detached_at = Some(Instant::now());
-        self.leave_waiting(token);
+        self.leave_queue_room(token);
     }
 
-    /// Drop expired rooms and long-gone sessions that are not in a match.
+    /// A reload on the result screen recovers the open rematch offer.
+    fn resume_rematch(&mut self, token: Token) {
+        let Some(i) = self
+            .rematches
+            .iter()
+            .position(|r| r.expires.is_some() && r.players.contains(&token))
+        else {
+            return;
+        };
+        let ticket = &self.rematches[i];
+        let seat = usize::from(ticket.players[1] == token);
+        let other = ticket.players[1 - seat];
+        let opponent = self
+            .sessions
+            .get(&other)
+            .map_or_else(String::new, |s| s.name.clone());
+        let you_requested = ticket.requested[seat];
+        let opponent_requested = ticket.requested[1 - seat];
+        let players = ticket.players;
+        self.send_to(token, ServerMsg::RematchOpen { opponent });
+        self.send_to(
+            token,
+            ServerMsg::RematchState {
+                you_requested,
+                opponent_requested,
+            },
+        );
+        self.try_start_rematch(players);
+    }
+
+    /// Drop expired rooms, invites, rematches, and long-gone sessions.
     pub(super) fn cleanup(&mut self) {
         let now = Instant::now();
         self.limits.sweep(now);
@@ -82,5 +134,48 @@ impl Lobby {
         self.queue.retain(|t| self.sessions.contains_key(t));
         self.ranked_queue.retain(|t| self.sessions.contains_key(t));
         self.queued_at.retain(|t, _| self.queue.contains(t));
+
+        let ttl = Duration::from_secs(self.config.challenge_ttl_secs);
+        let expired: Vec<(InviteToken, Token)> = self
+            .challenges
+            .iter()
+            .filter(|(_, owner, created)| {
+                now.saturating_duration_since(*created) >= ttl || !self.sessions.contains_key(owner)
+            })
+            .map(|(invite, owner, _)| (*invite, *owner))
+            .collect();
+        self.challenges.retain(|(_, owner, created)| {
+            now.saturating_duration_since(*created) < ttl && self.sessions.contains_key(owner)
+        });
+        for (invite, owner) in expired {
+            self.expire_challenge(owner, invite);
+        }
+
+        let mut closed = Vec::new();
+        self.rematches.retain(|ticket| {
+            let expired = ticket.expires.is_some_and(|e| now >= e);
+            let gone = ticket
+                .players
+                .iter()
+                .any(|p| !self.sessions.contains_key(p));
+            if expired {
+                closed.extend(ticket.players);
+                false
+            } else if gone {
+                closed.extend(
+                    ticket
+                        .players
+                        .iter()
+                        .copied()
+                        .filter(|p| self.sessions.contains_key(p)),
+                );
+                false
+            } else {
+                true
+            }
+        });
+        for token in closed {
+            self.send_to(token, ServerMsg::RematchClosed { declined: false });
+        }
     }
 }

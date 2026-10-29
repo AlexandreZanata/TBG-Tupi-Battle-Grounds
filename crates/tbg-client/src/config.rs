@@ -52,18 +52,38 @@ pub fn server_url() -> String {
     }
 }
 
+fn hex16(token: &[u8; 16]) -> String {
+    token.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+fn parse_hex16(hex: &str) -> Option<[u8; 16]> {
+    if hex.len() != 32 {
+        return None;
+    }
+    let mut out = [0u8; 16];
+    for (i, b) in out.iter_mut().enumerate() {
+        *b = u8::from_str_radix(hex.get(i * 2..i * 2 + 2)?, 16).ok()?;
+    }
+    Some(out)
+}
+
+/// P39: hex encoding used by the `?challenge=` link.
+pub fn invite_token_hex(token: &[u8; 16]) -> String {
+    hex16(token)
+}
+
+/// P39: parse the 32-hex-character invite token from a URL.
+pub fn parse_invite_token(hex: &str) -> Option<[u8; 16]> {
+    parse_hex16(hex)
+}
+
 /// Session token kept across page reloads so a player can resume a match.
 /// Per tab (`sessionStorage`): a shared token made two open tabs keep
 /// taking over each other's session.
 pub fn load_token() -> Option<[u8; 16]> {
     #[cfg(target_arch = "wasm32")]
     {
-        let hex = token_storage()?.get_item("tbg_token").ok()??;
-        let mut out = [0u8; 16];
-        for (i, b) in out.iter_mut().enumerate() {
-            *b = u8::from_str_radix(hex.get(i * 2..i * 2 + 2)?, 16).ok()?;
-        }
-        Some(out)
+        parse_hex16(&token_storage()?.get_item("tbg_token").ok()??)
     }
     #[cfg(not(target_arch = "wasm32"))]
     None
@@ -72,8 +92,7 @@ pub fn load_token() -> Option<[u8; 16]> {
 pub fn save_token(token: &[u8; 16]) {
     #[cfg(target_arch = "wasm32")]
     if let Some(s) = token_storage() {
-        let hex: String = token.iter().map(|b| format!("{b:02x}")).collect();
-        let _ = s.set_item("tbg_token", &hex);
+        let _ = s.set_item("tbg_token", &hex16(token));
     }
     #[cfg(not(target_arch = "wasm32"))]
     let _ = token;
@@ -98,6 +117,67 @@ pub fn room_link(code: &str) -> String {
         return format!("{origin}{path}?room={code}");
     }
     format!("?room={code}")
+}
+
+/// P39: shareable link that auto-joins a Quick Challenge.
+pub fn challenge_link(token: &[u8; 16]) -> String {
+    let hex = invite_token_hex(token);
+    #[cfg(target_arch = "wasm32")]
+    if let Some(loc) = web_sys::window().map(|w| w.location()) {
+        let origin = loc.origin().unwrap_or_default();
+        let path = loc.pathname().unwrap_or_default();
+        return format!("{origin}{path}?challenge={hex}");
+    }
+    format!("?challenge={hex}")
+}
+
+/// P39: native share sheet when available; copying the link otherwise.
+pub fn share_text(title: &str, url: &str) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(window) = web_sys::window() {
+        let navigator = window.navigator();
+        let data = web_sys::ShareData::new();
+        data.set_title(title);
+        data.set_text(title);
+        data.set_url(url);
+        if web_sys::Navigator::can_share_with_data(&navigator, &data) {
+            let _ = web_sys::Navigator::share_with_data(&navigator, &data);
+            return;
+        }
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = title;
+    copy_text(url);
+}
+
+/// P39: remove one query parameter without disturbing the others.
+pub fn clear_url_param(name: &str) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(window) = web_sys::window() {
+        let loc = window.location();
+        let search = loc.search().unwrap_or_default();
+        let rest: Vec<&str> = search
+            .trim_start_matches('?')
+            .split('&')
+            .filter(|pair| !pair.is_empty() && pair.split('=').next() != Some(name))
+            .collect();
+        let query = if rest.is_empty() {
+            String::new()
+        } else {
+            format!("?{}", rest.join("&"))
+        };
+        if let Ok(history) = window.history() {
+            let url = format!(
+                "{}{}{}",
+                loc.origin().unwrap_or_default(),
+                loc.pathname().unwrap_or_default(),
+                query
+            );
+            let _ = history.replace_state_with_url(&wasm_bindgen::JsValue::NULL, "", Some(&url));
+        }
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = name;
 }
 
 /// P13: open a same-site page (`/ranking/`) in a new tab.
@@ -174,4 +254,36 @@ pub fn save_flag(key: &str, value: bool) {
 pub fn arena_preview() -> bool {
     static PREVIEW: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     *PREVIEW.get_or_init(|| url_param("arena").is_some())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn invite_token_hex_round_trip() {
+        let token = [0xAB; 16];
+        assert_eq!(invite_token_hex(&token), "ab".repeat(16));
+        assert_eq!(parse_invite_token(&invite_token_hex(&token)), Some(token));
+    }
+
+    #[test]
+    fn invite_token_accepts_uppercase_hex() {
+        assert_eq!(parse_invite_token(&"AB".repeat(16)), Some([0xAB; 16]));
+    }
+
+    #[test]
+    fn invite_token_rejects_bad_length_and_chars() {
+        assert_eq!(parse_invite_token("ab"), None);
+        assert_eq!(parse_invite_token(&"zz".repeat(16)), None);
+        assert_eq!(parse_invite_token(&"a".repeat(31)), None);
+    }
+
+    #[test]
+    fn native_challenge_link_contains_the_token() {
+        assert_eq!(
+            challenge_link(&[0x0F; 16]),
+            format!("?challenge={}", "0f".repeat(16))
+        );
+    }
 }

@@ -159,5 +159,8 @@ fn server_bytes_are_frozen() {
         }),
         [21, 1, 0]
     );
-    assert_eq!(encode(&ServerMsg::RematchClosed { declined: true }), [22, 1]);
+    assert_eq!(
+        encode(&ServerMsg::RematchClosed { declined: true }),
+        [22, 1]
+    );
 }

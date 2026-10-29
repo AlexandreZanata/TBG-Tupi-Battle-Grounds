@@ -99,9 +99,30 @@ pub(super) fn apply(
             UiAction::Ranked => online(Mode::Ranked, &mut link, &mut last),
             UiAction::CreateRoom => online(Mode::Create, &mut link, &mut last),
             UiAction::JoinRoom(code) => online(Mode::Join(code), &mut link, &mut last),
+            UiAction::CreateChallenge => online(Mode::CreateChallenge, &mut link, &mut last),
+            UiAction::JoinChallenge(token) => {
+                online(Mode::JoinChallenge(token), &mut link, &mut last);
+                queue_info.joining_challenge = true;
+            }
+            UiAction::ChallengeInvalid => extra.1.push("Challenge link invalid"),
+            UiAction::ShareChallenge => {
+                if let Some(token) = queue_info.challenge {
+                    let url = config::challenge_link(&token);
+                    config::share_text("Join my TBG challenge", &url);
+                }
+            }
+            UiAction::RequestRematch => link.send(ClientMsg::RequestRematch, now),
             UiAction::Cancel | UiAction::ToMenu => {
                 link.send(ClientMsg::Cancel, now);
-                *link = MatchLink::Idle;
+                let parked = if let MatchLink::Net(n) = &mut *link {
+                    n.reuse(Mode::Probe, now)
+                } else {
+                    false
+                };
+                if !parked {
+                    *link = MatchLink::Idle;
+                }
+                *queue_info = QueueInfo::default();
                 next.set(GameState::Menu);
             }
             // BR-M06: first tap arms (4 s), second forfeits. Practice leaves
@@ -122,7 +143,9 @@ pub(super) fn apply(
                 }
             }
             UiAction::CopyLink => {
-                if let Some(code) = queue_info.room {
+                if let Some(token) = queue_info.challenge {
+                    config::copy_text(&config::challenge_link(&token));
+                } else if let Some(code) = queue_info.room {
                     config::copy_text(&config::room_link(&String::from_utf8_lossy(&code)));
                 }
             }

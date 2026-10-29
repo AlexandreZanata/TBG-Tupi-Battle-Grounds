@@ -138,14 +138,20 @@ pub enum ServerMsg {
         you: Option<u32>,
     },
     // P39: Quick Challenge by link and both-accept rematch.
-    ChallengeWaiting { token: InviteToken },
+    ChallengeWaiting {
+        token: InviteToken,
+    },
     ChallengeUnavailable,
-    RematchOpen { opponent: String },
+    RematchOpen {
+        opponent: String,
+    },
     RematchState {
         you_requested: bool,
         opponent_requested: bool,
     },
-    RematchClosed { declined: bool },
+    RematchClosed {
+        declined: bool,
+    },
 }
 
 /// P13: rows per in-game leaderboard page.

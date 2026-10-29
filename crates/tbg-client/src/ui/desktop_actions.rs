@@ -28,6 +28,7 @@ fn action(value: &str) -> Option<UiAction> {
         "practice" => UiAction::Practice,
         "quick" => UiAction::Quick,
         "ranked" => UiAction::Ranked,
+        "challenge" => UiAction::CreateChallenge,
         "create" => UiAction::CreateRoom,
         "register" => UiAction::CreateAccount,
         "login" => UiAction::HaveKey,

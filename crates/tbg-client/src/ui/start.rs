@@ -1,6 +1,6 @@
-//! Startup wiring: `?room=CODE` joins that room, and a stored token or
-//! account key opens the listen-only probe link (P9/P11). The probe's
-//! automatic login lives in `net/socket.rs`.
+//! Startup wiring: `?challenge=TOKEN` / `?room=CODE` joins that match, and
+//! a stored token or account key opens the listen-only probe link (P9/P11).
+//! The probe's automatic login lives in `net/socket.rs`.
 
 use bevy::prelude::*;
 use tbg_core::protocol::{valid_room_code, RoomCode};
@@ -15,8 +15,16 @@ pub fn plugin(app: &mut App) {
     app.add_systems(Startup, (join_from_url, probe_on_load));
 }
 
-/// `?room=CODE` joins that private room right away.
+/// `?challenge=TOKEN` joins a Quick Challenge; `?room=CODE` joins a
+/// private room. The challenge link takes precedence.
 fn join_from_url(mut queue: ResMut<ActionQueue>) {
+    if let Some(hex) = config::url_param("challenge") {
+        match config::parse_invite_token(&hex) {
+            Some(token) => queue.0.push(super::UiAction::JoinChallenge(token)),
+            None => queue.0.push(super::UiAction::ChallengeInvalid),
+        }
+        return;
+    }
     let Some(code) = config::url_param("room") else {
         return;
     };
@@ -28,13 +36,13 @@ fn join_from_url(mut queue: ResMut<ActionQueue>) {
     }
 }
 
-/// P9: with a stored session token and no `?room=`, open a listen-only
-/// link at once; a live match resumes with no tap, otherwise the socket
-/// is reused by the next Quick Match / room action.
+/// P9: with a stored session token and no `?room=` / `?challenge=`, open a
+/// listen-only link at once; a live match resumes with no tap, otherwise the
+/// socket is reused by the next Quick Match / room / challenge action.
 /// Post-P14: any new session logs in with the stored key before asking
 /// for a mode, so the name and ranked eligibility stay correct.
 fn probe_on_load(mut link: NonSendMut<MatchLink>, mut account: ResMut<Account>) {
-    if config::url_param("room").is_some() {
+    if config::url_param("room").is_some() || config::url_param("challenge").is_some() {
         return;
     }
     if config::load_token().is_some() || config::load_account_key().is_some() {
