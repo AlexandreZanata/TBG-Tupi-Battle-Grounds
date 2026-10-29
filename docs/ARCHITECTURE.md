@@ -485,3 +485,48 @@ or enabled by this planning addendum.
   ratings and historical metadata. Versioned records support audit, not
   full replay without timed intentions and the old rule implementation.
   The existing single-VPS/SQLite deployment and Elo/FIFO design remain.
+
+## 16. Strategic expansion (Proposed, P16-F1–F8)
+
+Planning addendum; nothing here is implemented. GAME-DESIGN §10 owns the
+rules and values, D-34–D-38 the reasons, each phase file the exact steps.
+
+- **Ruleset-gated mechanics.** Each mechanic is a `Ruleset` field whose
+  canonical value disables it (`energy_cap`, `interest`, `siege`,
+  `reserve_ticks`, `fortify_enabled`, `augment_rounds`). The lab measures
+  enabled variants; the owner's switch changes `content.rs` once. The
+  server and client still only use `Ruleset::canon()` (C10).
+- **Core.** Per-seat Stronghold data on `PlayerState` (kind, max HP,
+  Fortification tier/branch, shield); one `scale_hp` helper for every max-HP
+  change; one `PlayerState::spend` for every Energy cost (Interest
+  low-water). One new module, `augment.rs`: the closed `AugmentEffect`
+  enum, the mirrored draw (PCG32 stream 3; stream 5 picks the practice
+  bot's kind), and fixed-size per-player bp sums. Hooks stay in the module
+  they modify (`effective_stats`, `hits.rs`, `combat.rs`, `intent.rs`,
+  `summon.rs`). No effect engine, event bus, trait, allocation per tick, or
+  dependency.
+- **Determinism.** New serialized fields move hash goldens; each phase
+  proves unchanged outcomes, events and purchases before refreezing (P16-F1
+  step 2). `SERVER_LIMIT` bounds `headless`/`replay`; contracts prove it
+  unreachable.
+- **Wire.** Appended variants only: `Phase::Overtime` renamed `Siege` at
+  the same index; `EndReason` + `Collapse`, `ServerLimit`; intentions
+  `Reserve`, `Release`, `Fortify`, `ChooseAugment`, `Forgo`;
+  `ClientMsg::SelectStronghold`; `MatchStart` + both kinds; `MatchView` +
+  Interest, Collapse rate, hold, Stronghold max, Fortification, kinds,
+  round, Augments, shields, Evolution cost. One `PROTOCOL_VERSION` bump per
+  phase that changes the wire. Opponent Energy, offers, holds and RNG stay
+  hidden; kinds, Fortifications and equipped Augments are public.
+- **Server.** Kind chosen while idle, frozen in the queue ticket or room,
+  restored on reconnect/takeover. `DRAIN_LIMIT` grows past the longest
+  possible match (P16-F1).
+- **Store.** Additive migrations: `matches.ruleset_fp` (P16-F1),
+  `accounts.stronghold_kind` (P16-F4); seat JSON gains kind,
+  Fortifications, Augment offers/choices, Interest and Bounty totals.
+- **Client.** Desktop HTML HUD (D-29) and the Bevy fallback both gain the
+  Interest meter, Siege clock, hold locks, kind indicators, the Fortify
+  panel and the non-modal War Council; four code-built Stronghold
+  silhouettes with shared Fortification overlays (D-30 measured triangles).
+- **Budgets.** Step time ≤ +10 % at 100 units a side over P16-B; view
+  growth of tens of bytes; per-match memory under 1 KB more; measured in
+  every phase and re-checked under load in P16-F8.

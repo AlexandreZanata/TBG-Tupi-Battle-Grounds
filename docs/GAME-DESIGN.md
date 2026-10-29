@@ -431,7 +431,7 @@ Interest on payment ticks, then the window reset.
 | ID | Proposed rule |
 |----|---------------|
 | BR-M07 | A match is never decided by comparing Stronghold HP at a time; it ends when a Stronghold reaches 0 HP, by forfeit (BR-M03, BR-M06), or by the server-protection limit (BR-M11) |
-| BR-M08 | At 4:00 of running time the phase becomes `Siege`: base Energy regen doubles and every second each Stronghold loses `floor(max_hp × rate / 10 000)` HP, `rate` = 10 bp × (1 + full 10-s steps elapsed in `Siege`) |
+| BR-M08 | At 4:00 of running time the phase becomes `Siege`: base Energy regen doubles and every second each Stronghold loses `floor(max_hp × rate / 10 000)` HP, `rate` = 10 bp + 10 bp × ((s − 1) / 10) for Siege second s = 1, 2, … (integer division) |
 | BR-M09 | `Collapse` ignores shields and damage reduction, is never a kill (no Bounty, Mend or Fury), and resolves before units act; if it brings a Stronghold to 0 the match ends that tick with reason `Collapse`; both at 0 on the same tick is a draw |
 | BR-M10 | Stronghold healing is bounded per window (BR-X10), so Collapse always outgrows it: with no damage at all, a full Stronghold falls within 140 s of `Siege` start; every match ends before 6:40 of running time (contract test, P16-F1) |
 | BR-M11 | Server protection, not a game rule: a match still live at 10:00 of running time ends as a draw with reason `ServerLimit`; a contract test proves the rules cannot reach it |
@@ -535,7 +535,7 @@ Owner's starting proposal was +10 % / +10 % + 5 %; the capability at tier
 | BR-X08 | Max HP changes keep the HP fraction (BR-K07 rule, also for units, as today) |
 | BR-X09 | Each source is finite (one kind, two Fortification tiers, two Evolution tiers, two Synergy levels, three Augments) and every timed effect has a cap or a cooldown: no bonus stacks without bound |
 | BR-X10 | Stronghold healing exists only through named effects with a per-window cap and never exceeds max HP; at most one Stronghold shield exists at a time and it absorbs unit and Stronghold damage only |
-| BR-X11 | Conditional effects are evaluated once per tick, after the Shop step, from that tick's state, in fixed seat and unit-id order |
+| BR-X11 | Conditional effects read the state when they apply — position and HP-fraction conditions at hit resolution, Synergy-count conditions after that tick's Synergy update — in the simulation's fixed seat and unit-id order; nothing caches a condition across ticks |
 
 ### 10.8 Augment catalog (40, Proposed)
 
