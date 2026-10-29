@@ -1,9 +1,10 @@
 //! Seeded heuristic opponent: practice mode, balance harness, load tests.
 //! Acts only from its `MatchView`, like a real client.
 
-use crate::content::{self, ENERGY_SCALE, EVOLVE_COST, OFFERS};
+use crate::content::{ENERGY_SCALE, OFFERS};
 use crate::intent::PlayerIntention;
 use crate::rng::Pcg32;
+use crate::ruleset::{Ruleset, CANON};
 use crate::types::Archetype;
 use crate::view::MatchView;
 
@@ -16,13 +17,20 @@ const EVOLVE_ARMY: usize = 6;
 pub struct Bot {
     rng: Pcg32,
     wait: u32,
+    rules: &'static Ruleset,
 }
 
 impl Bot {
     pub fn new(seed: u64) -> Bot {
+        Bot::with_rules(seed, &CANON)
+    }
+
+    /// A bot reading costs from another ruleset: the balance lab only (D-33).
+    pub fn with_rules(seed: u64, rules: &'static Ruleset) -> Bot {
         Bot {
             rng: Pcg32::new(seed, 7),
             wait: 0,
+            rules,
         }
     }
 
@@ -44,21 +52,21 @@ impl Bot {
     }
 
     /// Energy is the only purchase condition (BR-U07).
-    fn fits(view: &MatchView, offer: usize) -> bool {
-        content::def(view.offers[offer]).cost <= view.energy
+    fn fits(&self, view: &MatchView, offer: usize) -> bool {
+        self.rules.def(view.offers[offer]).cost <= view.energy
     }
 
     fn buy_tank(&mut self, view: &MatchView) -> Option<PlayerIntention> {
         let own_tank = view
             .units
             .iter()
-            .any(|u| u.seat == view.you && content::def(u.kind).archetype == Archetype::Tank);
+            .any(|u| u.seat == view.you && self.rules.def(u.kind).archetype == Archetype::Tank);
         if own_tank {
             return None;
         }
         (0..OFFERS)
             .find(|&i| {
-                content::def(view.offers[i]).archetype == Archetype::Tank && Self::fits(view, i)
+                self.rules.def(view.offers[i]).archetype == Archetype::Tank && self.fits(view, i)
             })
             .map(|i| PlayerIntention::Purchase { offer: i as u8 })
     }
@@ -66,9 +74,9 @@ impl Bot {
     fn buy_best(&mut self, view: &MatchView) -> Option<PlayerIntention> {
         let reserve = self.rng.below(3) * ENERGY_SCALE;
         (0..OFFERS)
-            .filter(|&i| Self::fits(view, i))
-            .max_by_key(|&i| (content::def(view.offers[i]).cost, std::cmp::Reverse(i)))
-            .filter(|&i| view.energy >= content::def(view.offers[i]).cost + reserve)
+            .filter(|&i| self.fits(view, i))
+            .max_by_key(|&i| (self.rules.def(view.offers[i]).cost, std::cmp::Reverse(i)))
+            .filter(|&i| view.energy >= self.rules.def(view.offers[i]).cost + reserve)
             .map(|i| PlayerIntention::Purchase { offer: i as u8 })
     }
 
@@ -82,7 +90,7 @@ impl Bot {
             .iter()
             .filter(|u| u.seat == view.you && u.tier < 2 && !u.kind.is_summon())
             .min_by_key(|u| u.id)?;
-        if view.energy < EVOLVE_COST[usize::from(unit.tier)] {
+        if view.energy < self.rules.evolve_cost[usize::from(unit.tier)] {
             return None;
         }
         let branch = if unit.tier == 0 {

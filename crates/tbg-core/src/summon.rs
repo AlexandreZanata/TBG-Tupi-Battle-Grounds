@@ -1,7 +1,7 @@
 //! Nester Hatch and summon lifetime (BR-U08). These limits belong to the
 //! ability, never to the army: bought units stay uncapped (BR-U07, D-32).
 
-use crate::content::{effective_stats, hatch_rule, BEETLES_PER_PLAYER, BEETLE_LIFETIME};
+use crate::content::BEETLES_PER_PLAYER;
 use crate::state::{Event, MatchState, Unit};
 use crate::types::{Status, UnitId, UnitKind};
 
@@ -59,7 +59,7 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
         if cd > 0 {
             continue;
         }
-        let (every, per_nester) = hatch_rule(n.tier, n.branch);
+        let (every, per_nester) = state.rules.hatch_rule(n.tier, n.branch);
         let seat_brood = &mut brood[n.seat.index()];
         if seat_brood.len >= BEETLES_PER_PLAYER || seat_brood.of(n.id) >= per_nester {
             continue;
@@ -74,7 +74,10 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
 /// and position; ids keep growing, so `units` stays sorted by id.
 fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
     let kind = UnitKind::Beetling;
-    let max_hp = effective_stats(kind, nester.tier, nester.branch, 0).max_hp;
+    let max_hp = state
+        .rules
+        .effective_stats(kind, nester.tier, nester.branch, 0)
+        .max_hp;
     let id = state.next_unit_id;
     state.next_unit_id += 1;
     state.units.push(Unit {
@@ -90,7 +93,7 @@ fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
         windup: None,
         status: Status::None,
         summoner: Some(nester.id),
-        expires_at: Some(state.tick + BEETLE_LIFETIME),
+        expires_at: Some(state.tick + state.rules.beetle_lifetime),
         hatch_cd: 0,
     });
     ev.push(Event::Spawn {

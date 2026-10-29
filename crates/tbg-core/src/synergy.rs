@@ -1,11 +1,12 @@
 //! Faction synergies (BR-Y01, BR-Y02): levels from living-unit counts,
 //! stat refresh on level change, Plants regeneration.
 
-use crate::content::{self, SynergyEffect, BP, REGEN_PERIOD, SYNERGIES, SYNERGY_THRESHOLDS};
+use crate::content::{SynergyEffect, BP, REGEN_PERIOD};
 use crate::state::{Event, MatchState};
 use crate::types::{Seat, FACTIONS};
 
 pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
+    let rules = state.rules;
     for seat in Seat::BOTH {
         // u32: armies are uncapped (BR-U07); summons never count (BR-U08).
         let mut counts = [0u32; 4];
@@ -14,10 +15,10 @@ pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
             .iter()
             .filter(|u| u.seat == seat && u.hp > 0 && !u.kind.is_summon())
         {
-            counts[content::def(u.kind).faction.index()] += 1;
+            counts[rules.def(u.kind).faction.index()] += 1;
         }
         for faction in FACTIONS {
-            let level = level_for(counts[faction.index()]);
+            let level = level_for(rules.synergy_thresholds, counts[faction.index()]);
             let current = &mut state.player_mut(seat).synergy[faction.index()];
             if *current == level {
                 continue;
@@ -30,7 +31,7 @@ pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
             });
             for idx in 0..state.units.len() {
                 let u = state.units[idx];
-                if u.seat == seat && content::def(u.kind).faction == faction {
+                if u.seat == seat && rules.def(u.kind).faction == faction {
                     state.refresh_max_hp(idx);
                 }
             }
@@ -41,8 +42,8 @@ pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
     }
 }
 
-fn level_for(count: u32) -> u8 {
-    SYNERGY_THRESHOLDS
+fn level_for(thresholds: [u8; 2], count: u32) -> u8 {
+    thresholds
         .iter()
         .filter(|&&t| count >= u32::from(t))
         .count() as u8
@@ -50,11 +51,12 @@ fn level_for(count: u32) -> u8 {
 
 /// Units of a faction with a `Regen` synergy heal a share of max HP.
 fn regenerate(state: &mut MatchState) {
+    let rules = state.rules;
     for idx in 0..state.units.len() {
         let u = state.units[idx];
-        let faction = content::def(u.kind).faction.index();
+        let faction = rules.def(u.kind).faction.index();
         let level = state.player(u.seat).synergy[faction];
-        let (effect, bps) = SYNERGIES[faction];
+        let (effect, bps) = rules.synergies[faction];
         if level == 0 || effect != SynergyEffect::Regen || u.hp <= 0 || u.kind.is_summon() {
             continue;
         }

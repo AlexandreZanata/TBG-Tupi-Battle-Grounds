@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::content::{self, Stats, OFFERS};
 use crate::rng::Pcg32;
+use crate::ruleset::Ruleset;
 use crate::types::{Faction, Seat, Status, Tick, UnitId, UnitKind};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -121,6 +122,10 @@ pub struct MatchState {
     /// Events created by intentions, returned by the next `step()`.
     #[serde(skip)]
     pub(crate) pending: Vec<Event>,
+    /// Balance numbers for this match: always `CANON` online (D-33). Not
+    /// serialized, so hashes and views do not depend on it.
+    #[serde(skip, default = "Ruleset::canon")]
+    pub(crate) rules: &'static Ruleset,
 }
 
 /// x position of a seat's Stronghold.
@@ -132,6 +137,10 @@ pub fn stronghold_x(seat: Seat) -> i32 {
 }
 
 impl MatchState {
+    pub fn rules(&self) -> &'static Ruleset {
+        self.rules
+    }
+
     pub fn player(&self, seat: Seat) -> &PlayerState {
         &self.players[seat.index()]
     }
@@ -157,14 +166,14 @@ impl MatchState {
     }
 
     pub fn stats_of(&self, u: &Unit) -> Stats {
-        let faction = content::def(u.kind).faction.index();
+        let faction = self.rules.def(u.kind).faction.index();
         // Summons never receive Synergy (BR-U08).
         let level = if u.kind.is_summon() {
             0
         } else {
             self.player(u.seat).synergy[faction]
         };
-        content::effective_stats(u.kind, u.tier, u.branch, level)
+        self.rules.effective_stats(u.kind, u.tier, u.branch, level)
     }
 
     /// Recompute a unit's max HP, keeping its HP ratio (GAME-DESIGN §4).

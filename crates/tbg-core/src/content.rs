@@ -1,7 +1,9 @@
 //! Every balance number of the MVP (docs/GAME-DESIGN.md §5), in integer
 //! simulation units: ticks (20/s), milli-tiles, sub-energy (600 = 1 Energy),
-//! basis points (10 000 = 100%). No other file may contain balance numbers.
+//! basis points (10 000 = 100%). No other file may contain balance numbers;
+//! the simulation reads them through `ruleset::CANON` (D-33).
 
+use crate::ruleset::CANON;
 use crate::types::{Archetype, Faction, OnHit, Tick, UnitKind};
 
 pub const TICK_HZ: u32 = 20;
@@ -67,7 +69,7 @@ pub const SYNERGIES: [(SynergyEffect, [i32; 2]); 4] = [
 ];
 
 /// One evolution form: additive modifiers on the base unit.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FormDef {
     pub name: &'static str,
     pub hp_bp: i32,
@@ -105,7 +107,7 @@ const fn root(ticks: u16) -> Option<OnHit> {
 }
 
 /// Base stats of a unit kind plus its forms `[A1, A2, B1, B2]`.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct UnitDef {
     pub kind: UnitKind,
     pub name: &'static str,
@@ -236,28 +238,19 @@ pub const UNITS: [UnitDef; 11] = [
     ]),
 ];
 
-/// Hatch timing and per-Nester limit for a Nester's form: Brood (A1) raises
-/// the limit, Hive (A2) also hatches faster.
+/// Canonical Hatch rule (see `Ruleset::hatch_rule`).
 pub fn hatch_rule(tier: u8, branch: u8) -> (u16, usize) {
-    let brood = branch == 0 && tier >= 1;
-    let every = if branch == 0 && tier >= 2 {
-        HATCH_EVERY_HIVE
-    } else {
-        HATCH_EVERY
-    };
-    (every, BEETLES_PER_NESTER[usize::from(brood)])
+    CANON.hatch_rule(tier, branch)
 }
 
+/// Canonical unit definition, for the client UI and the server.
 pub fn def(kind: UnitKind) -> &'static UnitDef {
-    &UNITS[kind as usize]
+    CANON.def(kind)
 }
 
-/// The form a unit at `tier` (1 or 2) on `branch` (0 = A, 1 = B) has.
+/// Canonical form (see `Ruleset::form_of`).
 pub fn form_of(kind: UnitKind, tier: u8, branch: u8) -> Option<&'static FormDef> {
-    if tier == 0 || tier > 2 || branch > 1 {
-        return None;
-    }
-    Some(&def(kind).forms[usize::from(branch) * 2 + usize::from(tier) - 1])
+    CANON.form_of(kind, tier, branch)
 }
 
 /// Effective stats after evolution forms and the seat's synergy level.
@@ -273,40 +266,7 @@ pub struct Stats {
     pub on_hit: Option<OnHit>,
 }
 
+/// Canonical effective stats (see `Ruleset::effective_stats`).
 pub fn effective_stats(kind: UnitKind, tier: u8, branch: u8, synergy_level: u8) -> Stats {
-    let d = def(kind);
-    // No allocation: this runs for every unit on every tick.
-    let forms = [form_of(kind, 1, branch), form_of(kind, 2, branch)];
-    let active = &forms[..usize::from(tier.min(2))];
-    let sum =
-        |f: fn(&FormDef) -> i32| -> i64 { active.iter().flatten().map(|x| i64::from(f(x))).sum() };
-    let (mut hp_bp, mut dmg_bp, mut atk_bp) =
-        (sum(|f| f.hp_bp), sum(|f| f.dmg_bp), sum(|f| f.atk_bp));
-    if synergy_level > 0 {
-        let (effect, bps) = SYNERGIES[d.faction.index()];
-        let bp = i64::from(bps[usize::from(synergy_level.min(2)) - 1]);
-        match effect {
-            SynergyEffect::MaxHp => hp_bp += bp,
-            SynergyEffect::AttackSpeed => atk_bp += bp,
-            SynergyEffect::Damage => dmg_bp += bp,
-            SynergyEffect::Regen => {}
-        }
-    }
-    let scale = |base: i64, bp: i64| (base * (BP + bp) / BP) as i32;
-    let interval = i64::from(d.interval) * BP / (BP + atk_bp);
-    Stats {
-        max_hp: scale(i64::from(d.hp), hp_bp),
-        damage: scale(i64::from(d.damage) + sum(|f| f.dmg_add), dmg_bp),
-        interval: (interval as u16).max(MIN_INTERVAL),
-        range: d.range + sum(|f| f.range_add) as i32,
-        speed: scale(i64::from(d.speed), sum(|f| f.speed_bp)),
-        splash: d.splash + sum(|f| f.splash_add) as i32,
-        heal: scale(i64::from(d.heal), sum(|f| f.heal_bp)),
-        on_hit: active
-            .iter()
-            .rev()
-            .flatten()
-            .find_map(|f| f.on_hit)
-            .or(d.on_hit),
-    }
+    CANON.effective_stats(kind, tier, branch, synergy_level)
 }

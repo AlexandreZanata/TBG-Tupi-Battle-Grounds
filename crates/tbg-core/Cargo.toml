@@ -12,6 +12,11 @@ rust-version.workspace = true
 name = "tbg_core"
 path = "src/lib.rs"
 
+[features]
+# Offline balance lab only (D-33): unit duels without the Shop. Never
+# enabled by tbg-server or tbg-client (contract C10).
+lab = []
+
 [dependencies]
 # Derives for state, views, and protocol messages.
 serde = { version = "1", features = ["derive"] }
