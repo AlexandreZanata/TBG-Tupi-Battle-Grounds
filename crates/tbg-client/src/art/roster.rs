@@ -2,11 +2,11 @@
 //! props. Evolutions add or swap props and grow the figure 8% per tier.
 
 use bevy::prelude::*;
-use tbg_core::{SlotCount, UnitKind};
+use tbg_core::UnitKind;
 
 use super::legacy::{part, BodyPlan, FigureSpec, Joint::*, PartSpec};
 use super::mesh::Shape::*;
-use super::palette::DARK;
+use super::palette::{BARK, DARK, LEAF, LEAF_DARK, LEATHER, SKIN, TRIM};
 
 pub mod blockout;
 mod body;
@@ -59,6 +59,43 @@ pub fn archer_v2(tier: u8) -> super::figure::FigureSpec {
     humans::archer_v2::spec(tier)
 }
 
+// ponytail: P16-B placeholder looks, recolored so the new units read as
+// their own units on the lane and in Shop portraits until their final art.
+/// Hive druid: honey and amber instead of leaf green.
+const NESTER: &[(Color, Color)] = &[
+    (LEAF, Color::srgb_u8(0xE0, 0x9B, 0x2A)),
+    (LEAF_DARK, Color::srgb_u8(0x8A, 0x55, 0x1C)),
+];
+/// Clockwork wall: iron plates and brass instead of skin and leather.
+const RAMPART: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0x5C, 0x63, 0x6B)),
+    (LEATHER, Color::srgb_u8(0x3E, 0x44, 0x4C)),
+    (TRIM, Color::srgb_u8(0xC8, 0x8F, 0x2E)),
+];
+/// Beetle shell: dark lacquer instead of bark.
+const BEETLING: &[(Color, Color)] = &[
+    (BARK, Color::srgb_u8(0x2B, 0x33, 0x24)),
+    (LEAF, Color::srgb_u8(0xC8, 0x8F, 0x2E)),
+];
+
+fn recolor(mut spec: FigureSpec, map: &[(Color, Color)]) -> FigureSpec {
+    for part in &mut spec.parts {
+        if let Some((_, to)) = map.iter().find(|(from, _)| *from == part.color) {
+            part.color = *to;
+        }
+    }
+    spec
+}
+
+/// Units drawn with the large body plan. Visual only: since D-32 no unit
+/// takes more army space than another (the old two-slot units plus Rampart).
+pub fn large(kind: UnitKind) -> bool {
+    matches!(
+        kind,
+        UnitKind::BoneBrute | UnitKind::SiegeWalker | UnitKind::Rampart
+    )
+}
+
 pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
     let mut spec = match kind {
@@ -70,9 +107,22 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::SiegeWalker => machines::siege_walker(f),
         UnitKind::Bloomkeeper => plants::bloomkeeper(f),
         UnitKind::Rootcaller => plants::rootcaller(f),
+        // ponytail: P16-B placeholders reuse the nearest figure; final art for
+        // Nester, Rampart, and the Beetling comes in their character phases.
+        UnitKind::Nester => recolor(plants::bloomkeeper(f), NESTER),
+        UnitKind::Rampart => recolor(humans::shieldbearer(f), RAMPART),
+        UnitKind::Beetling => recolor(plants::rootcaller(f), BEETLING),
     };
-    if tbg_core::content::def(kind).slots == SlotCount::Two {
+    if large(kind) {
         spec.plan.scale = spec.plan.scale.max(BodyPlan::BIG.scale);
+    }
+    if kind == UnitKind::Rampart {
+        // ponytail: a stretched Shieldbearer at full large scale towers over
+        // the Bone Brute; keep the placeholder between human and large.
+        spec.plan.scale = 1.25;
+    }
+    if kind.is_summon() {
+        spec.plan.scale *= 0.55;
     }
     // Figurines read 20% larger than life on the lane (toy-diorama style).
     spec.plan.scale *= 1.2 * (1.0 + 0.08 * f32::from(tier.min(2)));

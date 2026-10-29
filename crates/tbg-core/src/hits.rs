@@ -20,7 +20,9 @@ pub(crate) fn resolve_hit(
         let Target::Unit(id) = target else { return };
         heal(state, id, st.heal, ev);
         if st.splash > 0 {
-            for a in state.units.clone() {
+            // Index loop, no clone: heals never remove units mid-loop.
+            for i in 0..state.units.len() {
+                let a = state.units[i];
                 let near = (a.x - tx).abs() <= st.splash;
                 if a.seat == attacker.seat && a.id != id && a.hp > 0 && a.hp < a.max_hp && near {
                     heal(state, a.id, st.heal, ev);
@@ -47,7 +49,9 @@ fn splash(
     st: &Stats,
     ev: &mut Vec<Event>,
 ) {
-    for e in state.units.clone() {
+    // Index loop, no clone: dead units are only removed in `remove_dead`.
+    for i in 0..state.units.len() {
+        let e = state.units[i];
         let near = (e.x - tx).abs() <= st.splash;
         if e.seat == enemy && e.hp > 0 && near && primary != Target::Unit(e.id) {
             damage(state, Target::Unit(e.id), st.damage, ev);

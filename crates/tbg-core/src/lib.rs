@@ -16,6 +16,7 @@ pub mod rng;
 pub mod shop;
 pub mod sim;
 pub mod state;
+mod summon;
 mod synergy;
 mod targeting;
 pub mod types;

@@ -3,9 +3,9 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::content::{self, EVOLVE_COST, LANE_LEN, OFFERS, SLOT_CAP, SPAWN_OFFSET};
+use crate::content::{self, hatch_rule, EVOLVE_COST, LANE_LEN, OFFERS, SPAWN_OFFSET};
 use crate::state::{Event, MatchState, Unit};
-use crate::types::{Seat, Status, UnitId};
+use crate::types::{Seat, Status, UnitId, UnitKind};
 use crate::{content::effective_stats, shop};
 
 /// A request from a client; never a state change until validated.
@@ -20,11 +20,12 @@ pub enum Rejection {
     NotRunning,
     BadOffer,
     NotEnoughEnergy,
-    SlotCapReached,
     NotYourUnit,
     UnitGone,
     MaxTier,
     WrongBranch,
+    /// Summons never evolve (BR-U08).
+    NotEvolvable,
 }
 
 impl MatchState {
@@ -51,11 +52,9 @@ impl MatchState {
         }
         let kind = self.player(seat).offers[slot];
         let d = content::def(kind);
+        // Energy is the only gate: no army cap (BR-U07).
         if self.player(seat).energy < d.cost {
             return Err(Rejection::NotEnoughEnergy);
-        }
-        if self.slots_used(seat) + d.slots.count() > SLOT_CAP {
-            return Err(Rejection::SlotCapReached);
         }
         let level = self.player(seat).synergy[d.faction.index()];
         let max_hp = effective_stats(kind, 0, 0, level).max_hp;
@@ -77,10 +76,17 @@ impl MatchState {
             cooldown: 0,
             windup: None,
             status: Status::None,
+            summoner: None,
+            expires_at: None,
+            hatch_cd: if kind == UnitKind::Nester {
+                hatch_rule(0, 0).0
+            } else {
+                0
+            },
         });
         let p = self.player_mut(seat);
         p.energy -= d.cost;
-        p.offers[slot] = shop::draw(&mut p.rng);
+        shop::refill(&mut p.offers, slot, &mut p.rng);
         self.pending.push(Event::Spawn {
             unit: id,
             seat,
@@ -97,6 +103,9 @@ impl MatchState {
         let u = self.units[idx];
         if u.seat != seat {
             return Err(Rejection::NotYourUnit);
+        }
+        if u.kind.is_summon() {
+            return Err(Rejection::NotEvolvable);
         }
         if u.tier >= 2 {
             return Err(Rejection::MaxTier);

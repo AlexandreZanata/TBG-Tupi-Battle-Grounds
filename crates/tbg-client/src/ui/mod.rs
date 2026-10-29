@@ -8,6 +8,8 @@ use tbg_core::{Rejection, UnitId};
 pub mod account;
 mod account_ui;
 mod actions;
+#[cfg(test)]
+mod army_tests;
 mod battle_hud;
 mod countdown;
 mod desktop;
@@ -124,7 +126,7 @@ fn scale_ui(window: Single<&Window>, mut scale: ResMut<UiScale>) {
 pub fn rejection_text(reason: Rejection) -> String {
     match reason {
         Rejection::NotEnoughEnergy => "Not enough Energy",
-        Rejection::SlotCapReached => "Army is full (8 slots)",
+        Rejection::NotEvolvable => "Summons cannot evolve",
         Rejection::NotRunning => "The match is not running",
         _ => "Action not possible",
     }

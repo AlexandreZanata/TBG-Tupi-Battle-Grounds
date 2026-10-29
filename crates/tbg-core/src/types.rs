@@ -65,23 +65,7 @@ impl Faction {
     }
 }
 
-/// Space a unit occupies on the `BattleLine`: one or two slots (rule BR-U03).
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum SlotCount {
-    One,
-    Two,
-}
-
-impl SlotCount {
-    pub fn count(self) -> u8 {
-        match self {
-            SlotCount::One => 1,
-            SlotCount::Two => 2,
-        }
-    }
-}
-
-/// The eight units of the MVP starter roster (GAME-DESIGN §5).
+/// Every unit kind (GAME-DESIGN §5): the purchasable roster, then summons.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum UnitKind {
     Shieldbearer,
@@ -92,9 +76,15 @@ pub enum UnitKind {
     SiegeWalker,
     Bloomkeeper,
     Rootcaller,
+    // P16-B (D-32, Proposed): appended so older kinds keep their indices.
+    Nester,
+    Rampart,
+    /// Summon hatched by a Nester (BR-U08); never in the Shop.
+    Beetling,
 }
 
-pub const UNIT_KINDS: [UnitKind; 8] = [
+/// The purchasable roster: the Shop's pool (summons excluded).
+pub const UNIT_KINDS: [UnitKind; 10] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -103,7 +93,31 @@ pub const UNIT_KINDS: [UnitKind; 8] = [
     UnitKind::SiegeWalker,
     UnitKind::Bloomkeeper,
     UnitKind::Rootcaller,
+    UnitKind::Nester,
+    UnitKind::Rampart,
 ];
+
+/// Every kind, in `UnitKind` order (content tables, art, audio).
+pub const ALL_KINDS: [UnitKind; 11] = [
+    UnitKind::Shieldbearer,
+    UnitKind::Archer,
+    UnitKind::BoneBrute,
+    UnitKind::Hexer,
+    UnitKind::Sawbot,
+    UnitKind::SiegeWalker,
+    UnitKind::Bloomkeeper,
+    UnitKind::Rootcaller,
+    UnitKind::Nester,
+    UnitKind::Rampart,
+    UnitKind::Beetling,
+];
+
+impl UnitKind {
+    /// Summons are created by abilities, never bought (BR-U08).
+    pub fn is_summon(self) -> bool {
+        self == UnitKind::Beetling
+    }
+}
 
 /// All playable archetypes, in glossary order.
 pub const ARCHETYPES: [Archetype; 5] = [

@@ -47,7 +47,12 @@ fn tiles(milli: i32) -> String {
 pub fn report(v: &MatchView, id: UnitId) -> Option<Report> {
     let u = v.units.iter().find(|u| u.id == id)?;
     let d = def(u.kind);
-    let level = v.synergy[u.seat.index()][d.faction.index()];
+    // Summons never receive Synergy (BR-U08).
+    let level = if u.kind.is_summon() {
+        0
+    } else {
+        v.synergy[u.seat.index()][d.faction.index()]
+    };
     let st = effective_stats(u.kind, u.tier, u.branch, level);
     let seconds = f32::from(st.interval) / TICK_HZ as f32;
     let attack = if st.heal > 0 && st.damage == 0 {

@@ -61,7 +61,7 @@ mod web {
         GameState,
     };
     use tbg_core::{
-        content::{def, ENERGY_CAP, ENERGY_SCALE, ROTATION_TICKS, SLOT_CAP, STRONGHOLD_HP},
+        content::{def, ENERGY_CAP, ENERGY_SCALE, OFFERS, ROTATION_TICKS, STRONGHOLD_HP},
         FACTIONS,
     };
     use wasm_bindgen::JsCast;
@@ -133,7 +133,8 @@ mod web {
         attr(
             &root,
             "data-army",
-            &format!("{} / {SLOT_CAP}", v.slots_used),
+            // `Army N` (BR-U07), plus `| Brood M` while summons live (BR-U08).
+            super::super::hud_update::army_label(v).trim_start_matches("Army "),
         );
         attr(
             &root,
@@ -161,17 +162,17 @@ mod web {
                 "ready"
             },
         );
-        for i in 0..3 {
+        for i in 0..OFFERS {
             let d = def(v.offers[i]);
             let pending = pending.0.is_some_and(|(offer, _)| usize::from(offer) == i);
             let available = super::super::hud_update::buyable(v, i) && !pending;
             let data = format!(
-                "{:?}|{}|{:?}|{}|{}|{}|{}",
+                "{:?}|{}|{:?}|{}|{:?}|{}|{}",
                 v.offers[i],
                 d.name,
                 d.archetype,
                 d.cost / ENERGY_SCALE,
-                d.slots.count(),
+                d.faction,
                 available,
                 pending
             );
@@ -190,7 +191,10 @@ mod web {
             return Some(UiAction::CloseInspect);
         }
         let (kind, index) = value.split_once(':')?;
-        let index = index.parse::<u8>().ok().filter(|i| *i < 3)?;
+        let index = index
+            .parse::<u8>()
+            .ok()
+            .filter(|i| usize::from(*i) < OFFERS)?;
         match kind {
             "buy" => Some(UiAction::Buy(index)),
             "inspect" => Some(UiAction::Inspect(index)),

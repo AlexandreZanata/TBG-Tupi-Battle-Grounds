@@ -11,7 +11,10 @@ use tbg_core::PlayerIntention;
 
 #[test]
 fn protocol_version() {
-    assert_eq!(PROTOCOL_VERSION, 6, "v6: Surrender + names in MatchStart");
+    assert_eq!(
+        PROTOCOL_VERSION, 7,
+        "v7 (D-32): five offers, army-cap fields and rejection removed, NotEvolvable"
+    );
 }
 
 #[test]

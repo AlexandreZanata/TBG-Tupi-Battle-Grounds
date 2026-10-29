@@ -9,7 +9,7 @@ use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-pub const PROTOCOL_VERSION: u16 = 6;
+pub const PROTOCOL_VERSION: u16 = 7;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ.

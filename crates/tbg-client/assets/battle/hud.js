@@ -19,6 +19,13 @@
   });
   document.addEventListener('keydown', event => { if (!root.hidden && event.key === 'Escape') send('deselect'); });
   const slug = name => name.toLowerCase().replace(/[^a-z0-9]/g,'');
+  // Units without a portrait yet (P16-B Nester, Rampart, Beetling) show none.
+  const portrait = (image, kind) => {
+    if (image.dataset.kind === kind) return;
+    image.dataset.kind = kind; image.style.visibility = 'hidden';
+    image.onload = () => { image.style.visibility = ''; };
+    image.src = 'assets/battle/portraits/' + slug(kind) + '.webp';
+  };
   // Fill moves at once; the pale trail follows after a beat, so a hit reads
   // as a chunk that drains away. A drop also flashes the bar.
   function bar(node, hp, max, label) {
@@ -49,7 +56,7 @@
     panel.hidden = false;
     panel.dataset.team = own === 'true' ? 'ally' : 'enemy';
     const image = panel.querySelector('img');
-    if (image.dataset.kind !== kind) { image.dataset.kind = kind; image.src = 'assets/battle/portraits/' + slug(kind) + '.webp'; }
+    portrait(image, kind);
     const put = (key, value) => panel.querySelectorAll('[data-i="'+key+'"]').forEach(n => { if (n.textContent !== value) n.textContent = value; });
     put('name', name); put('form', form); put('owner', own === 'true' ? 'Yours' : 'Enemy'); put('faction', faction); put('role', role);
     put('attack-label', attackLabel); put('attack', attack); put('dps', dps); put('every', every); put('range', range + ' tiles');
@@ -73,26 +80,26 @@
     set('[data-battle-energy]', readable(energy) + ' / ' + readable(cap));
     root.querySelector('[data-battle-energy-fill]').style.width = percent(number('energy'),number('energyMax')) + '%';
     const track = root.querySelector('.energy-track'); track.setAttribute('aria-valuenow', energy); track.setAttribute('aria-valuemax',cap); track.setAttribute('aria-valuemin','0');
-    set('[data-battle-army]', s.army || '0 / 8');
+    set('[data-battle-army]', s.army || '0');
     root.style.setProperty('--rotation', percent(number('rotation'),1) + '%');
     const synergy = root.querySelector('[data-battle-synergy]'); synergy.hidden = !s.synergy; set('[data-battle-synergy]',s.synergy || '');
     cards.forEach((card,i) => {
-      const [kind,name,role,cost,slots,available,pending] = (root.getAttribute('data-offer-'+i) || '').split('|');
+      const [kind,name,role,cost,faction,available,pending] = (root.getAttribute('data-offer-'+i) || '').split('|');
       if (!kind) return;
       const image = card.querySelector('img');
-      if (image.dataset.kind !== kind) { image.dataset.kind = kind; image.src = 'assets/battle/portraits/' + slug(kind) + '.webp'; }
+      portrait(image, kind);
       card.querySelector('.champion-name').textContent = name;
       const roleLabel = role === 'Dps' ? 'DPS' : role;
-      card.querySelector('.champion-role').textContent = roleLabel + ' · ' + slots + (slots === '1' ? ' slot' : ' slots');
+      card.querySelector('.champion-role').textContent = roleLabel + ' · ' + faction;
       card.querySelector('.card-cost b').textContent = cost;
-      card.querySelector('.card-slots').textContent = '●'.repeat(Math.min(2,Number(slots)||1));
+      card.querySelector('.card-slots').textContent = '';
       card.dataset.available = available; card.disabled = false; card.setAttribute('aria-disabled',available === 'true' ? 'false' : 'true'); card.classList.toggle('unaffordable',available !== 'true'); card.classList.toggle('pending',pending === 'true'); card.setAttribute('aria-busy',pending === 'true' ? 'true' : 'false');
-      card.setAttribute('aria-label',name + ', '+roleLabel+', '+slots+(slots === '1' ? ' slot, ' : ' slots, ')+cost+' Energy'); card.title = name + ' · '+cost+' Energy. Hold or right-click for details.';
+      card.setAttribute('aria-label',name + ', '+roleLabel+', '+faction+', '+cost+' Energy'); card.title = name + ' · '+cost+' Energy. Hold or right-click for details.';
     });
     const surrender = root.querySelector('.battle-surrender'); surrender.dataset.state = s.surrender || 'ready'; surrender.disabled = s.surrender === 'sent';
     set('[data-battle-surrender]',s.surrender === 'sent' ? 'Leaving...' : s.surrender === 'armed' ? 'Confirm?' : 'Surrender');
     surrender.title = s.surrender === 'armed' ? (s.ranked === 'true' ? 'Confirm: this counts as a Ranked loss' : 'Click again to surrender') : 'Click twice to surrender';
   }
-  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-hp-own','data-hp-enemy','data-hp-max','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-max','data-energy-scale','data-army','data-rotation','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-inspect']});
+  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-hp-own','data-hp-enemy','data-hp-max','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-max','data-energy-scale','data-army','data-rotation','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect']});
   root.dataset.ready = 'true';
 })();

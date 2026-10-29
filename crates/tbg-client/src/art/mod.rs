@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use tbg_core::{UnitKind, UNIT_KINDS};
+use tbg_core::{UnitKind, ALL_KINDS};
 
 mod adapter;
 pub mod anim;
@@ -103,7 +103,7 @@ fn build_library(
     });
     let bow = bow::BowAssets::new(&mut meshes);
     let mut forms = HashMap::new();
-    for kind in UNIT_KINDS {
+    for kind in ALL_KINDS {
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
             if kind == UnitKind::Archer && branch == 0 {
@@ -140,7 +140,7 @@ fn build_library(
         }
         info!("figure {kind:?}: max {max_tris} triangles over 5 forms");
     }
-    let blockouts = UNIT_KINDS
+    let blockouts = ALL_KINDS
         .into_iter()
         .map(|kind| {
             let form = native_form(roster::blockout::spec(kind), &mut meshes, false);

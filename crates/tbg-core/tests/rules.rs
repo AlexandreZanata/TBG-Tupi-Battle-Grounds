@@ -100,20 +100,6 @@ fn purchase_rejected_during_countdown() {
 }
 
 #[test]
-fn slot_cap_rejects_purchase() {
-    // BR-U06
-    let mut s = running(6);
-    for _ in 0..4 {
-        buy(&mut s, Seat::A, UnitKind::BoneBrute).unwrap();
-    }
-    assert_eq!(s.slots_used(Seat::A), 8);
-    assert_eq!(
-        buy(&mut s, Seat::A, UnitKind::Archer),
-        Err(Rejection::SlotCapReached)
-    );
-}
-
-#[test]
 fn purchased_offer_refills_and_rotation_is_shared() {
     // BR-S02, BR-S04
     let mut s = running(7);
@@ -257,12 +243,12 @@ fn view_hides_opponent_energy_and_offers() {
     let mut s = running(14);
     s.players[0].energy = 1_234;
     s.players[1].energy = 4_321;
-    s.players[0].offers = [UnitKind::Archer; 3];
-    s.players[1].offers = [UnitKind::Hexer; 3];
+    s.players[0].offers = [UnitKind::Archer; 5];
+    s.players[1].offers = [UnitKind::Hexer; 5];
     let v = s.view_for(Seat::A, &[]);
     assert_eq!(
         (v.energy, v.offers, v.you),
-        (1_234, [UnitKind::Archer; 3], Seat::A)
+        (1_234, [UnitKind::Archer; 5], Seat::A)
     );
     assert_eq!(def(UnitKind::Archer).cost, 1_800);
 }

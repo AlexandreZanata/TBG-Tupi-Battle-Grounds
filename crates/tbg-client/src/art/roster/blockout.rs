@@ -12,11 +12,11 @@ use crate::art::{
         Socket,
     },
 };
-use tbg_core::{SlotCount, UnitKind};
+use tbg_core::UnitKind;
 
 #[rustfmt::skip]
 pub fn spec(kind: UnitKind) -> FigureSpec {
-    let plan = if tbg_core::content::def(kind).slots == SlotCount::Two {
+    let plan = if super::large(kind) {
         BodyPlan::Large
     } else {
         BodyPlan::Humanoid
@@ -71,6 +71,9 @@ pub fn spec(kind: UnitKind) -> FigureSpec {
         UnitKind::SiegeWalker => bow(&mut parts, 0.78, true),
         UnitKind::Bloomkeeper => staff(&mut parts, true),
         UnitKind::Rootcaller => roots(&mut parts),
+        UnitKind::Nester => staff(&mut parts, false),
+        UnitKind::Rampart => parts.push(part(Prop(Socket::OffhandL), Box(0.55, 0.8, 0.1), FRAME, [0.05, 0.12, 0.14])),
+        UnitKind::Beetling => roots(&mut parts),
     }
     FigureSpec { plan, parts }
 }

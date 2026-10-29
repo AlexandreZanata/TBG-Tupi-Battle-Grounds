@@ -29,7 +29,7 @@ multiplayer, low cost.
 ## Non-negotiables
 
 1. **Game rules.** `docs/GAME-DESIGN.md` is canon. Use glossary terms
-   exactly (`BattleLine`, `PlayerIntention`, `SlotCount`, `Archetype`,
+   exactly (`BattleLine`, `PlayerIntention`, `Archetype`,
    `Faction`, `Energy`, `Shop`, `Evolution`, `Synergy`, `Stronghold`); no
    synonyms. Change a rule or number only when your task says so; any new
    value goes into GAME-DESIGN marked **Proposed** in the same commit.
