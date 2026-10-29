@@ -12,11 +12,30 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Secondary, Spring},
 };
 
+#[allow(dead_code)]
 pub fn spec(tier: u8) -> FigureSpec {
+    spec_full(tier, 0)
+}
+
+pub fn spec_full(tier: u8, branch: u8) -> FigureSpec {
     let mut plan = crate::art::archer_v2::plan();
-    // The client's 20 % lane-readability scale; the Marksman stands taller.
-    plan.scale *= 1.2 * if tier >= 2 { 1.07 } else { 1.0 };
-    let hood = if tier == 0 { OAK } else { HOOD_GREEN };
+    // Strict evolution scaling: 1.00x Base, 1.08x Tier 1, 1.16x Tier 2
+    let evo_scale = match tier {
+        1 => 1.08,
+        2 => 1.16,
+        _ => 1.00,
+    };
+    // The client's 20 % lane-readability scale
+    plan.scale = 1.20 * evo_scale;
+
+    let hood = if tier == 0 {
+        OAK
+    } else if branch == 1 {
+        DARK_LEATHER
+    } else {
+        HOOD_GREEN
+    };
+
     let mut parts = body::parts(&plan, LINEN, SKIN, DARK_LEATHER);
     for p in &mut parts {
         if matches!(p.node, Body(ThighL | ThighR)) {
@@ -26,12 +45,44 @@ pub fn spec(tier: u8) -> FigureSpec {
     tunic(&mut parts);
     head(&mut parts, hood, tier);
     gear::bow(&mut parts, tier);
-    gear::quiver(&mut parts, tier);
-    if tier >= 1 {
-        gear::ranger(&mut parts);
-    }
-    if tier >= 2 {
-        gear::marksman(&mut parts);
+
+    if branch == 1 && tier >= 1 {
+        // Branch B (Volley / Arrow Rain): Dual quivers on back
+        parts.push(part(
+            Secondary(Spring::Back),
+            Box(0.12, 0.36, 0.08),
+            LEATHER,
+            [-0.08, 0.18, -0.16],
+        ));
+        parts.push(part(
+            Secondary(Spring::Back),
+            Box(0.12, 0.36, 0.08),
+            LEATHER,
+            [0.08, 0.18, -0.16],
+        ));
+        if tier >= 2 {
+            // Broad shoulder cape with gold trim
+            parts.push(part(
+                Secondary(Spring::Back),
+                Box(0.38, 0.45, 0.02),
+                ALLY,
+                [0.0, 0.12, -0.18],
+            ));
+            parts.push(part(
+                Secondary(Spring::Back),
+                Box(0.38, 0.03, 0.025),
+                GOLD,
+                [0.0, -0.10, -0.18],
+            ));
+        }
+    } else {
+        gear::quiver(&mut parts, tier);
+        if tier >= 1 {
+            gear::ranger(&mut parts);
+        }
+        if tier >= 2 {
+            gear::marksman(&mut parts);
+        }
     }
     FigureSpec { plan, parts }
 }

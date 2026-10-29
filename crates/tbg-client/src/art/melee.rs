@@ -92,9 +92,27 @@ pub const fn profile_for_class(class: WeaponClass) -> StrikeProfile {
 }
 
 /// Resolves the weapon class and profile for a specific unit form.
-pub fn strike_profile_for_unit(kind: UnitKind, tier: u8, _branch: u8) -> StrikeProfile {
+pub fn strike_profile_for_unit(kind: UnitKind, tier: u8, branch: u8) -> StrikeProfile {
     let mut profile = match kind {
+        UnitKind::Shieldbearer if branch == 1 => StrikeProfile {
+            class: WeaponClass::Slash,
+            windup_frac: 0.55,
+            arc_deg: 40.0,
+            torso_twist_deg: 16.0,
+            lunge: 0.24,
+            hit_stop_ms: 50.0,
+            impact: ImpactVfx::Spark,
+        },
         UnitKind::Shieldbearer => profile_for_class(WeaponClass::Smash),
+        UnitKind::BoneBrute if branch == 1 => StrikeProfile {
+            class: WeaponClass::Slash,
+            windup_frac: 0.60,
+            arc_deg: 100.0,
+            torso_twist_deg: 32.0,
+            lunge: 0.25,
+            hit_stop_ms: 50.0,
+            impact: ImpactVfx::HeavySpark,
+        },
         UnitKind::BoneBrute => profile_for_class(WeaponClass::Chop),
         UnitKind::Sawbot => profile_for_class(WeaponClass::Mech),
         UnitKind::Rampart => profile_for_class(WeaponClass::Bash),

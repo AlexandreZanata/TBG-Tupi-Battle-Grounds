@@ -108,13 +108,32 @@ fn build_library(
     for kind in ALL_KINDS {
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
-            if kind == UnitKind::Archer && branch == 0 {
-                let mut form = native_form(roster::archer_v2(tier), &mut meshes, true);
+            if kind == UnitKind::Archer {
+                let mut form = native_form(
+                    roster::humans::archer_v2::spec_full(tier, branch),
+                    &mut meshes,
+                    true,
+                );
                 form.bow_half = archer_v2::bow_half(tier);
                 info!(
                     "figure Archer {tier}/{branch} (v2): {} triangles + {} bow/arrow triangles, {} mesh joints",
                     form.triangles,
                     bow.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Shieldbearer {
+                let form = native_form(
+                    roster::humans::shieldbearer_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Shieldbearer {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
                     form.meshes.iter().flatten().count()
                 );
                 max_tris = max_tris.max(form.triangles);

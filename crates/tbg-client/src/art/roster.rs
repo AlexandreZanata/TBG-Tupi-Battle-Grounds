@@ -10,7 +10,7 @@ use super::palette::{BARK, DARK, LEAF, LEAF_DARK, LEATHER, SKIN, TRIM};
 
 pub mod blockout;
 mod body;
-mod humans;
+pub mod humans;
 mod machines;
 mod plants;
 mod undead;
@@ -55,6 +55,7 @@ impl Form {
 }
 
 /// Default native Archer forms: 0 base, 1 Longbow, 2 Marksman.
+#[allow(dead_code)]
 pub fn archer_v2(tier: u8) -> super::figure::FigureSpec {
     humans::archer_v2::spec(tier)
 }
