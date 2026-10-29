@@ -8,7 +8,8 @@
 use std::time::Instant;
 
 use tbg_core::bot::Bot;
-use tbg_core::content::{def, MATCH_END, RUNNING_START, TICK_HZ};
+use tbg_core::content::{def, RUNNING_START, TICK_HZ};
+use tbg_core::headless::{self, Moment};
 use tbg_core::*;
 
 #[derive(Default)]
@@ -76,54 +77,49 @@ fn play(seed: u64, policy: Policy, t: &mut Totals) -> bool {
     let mut bought = [[0u32; 4]; 2];
     let mut kinds = [[false; 10]; 2];
     let mut hp_at_2min = None;
-    let mut events = Vec::new();
-    while s.phase != Phase::Ended {
-        if s.tick > MATCH_END + 5 {
-            return false;
+    let mut last = Instant::now();
+    let decide = |seat: Seat, view: &MatchView| {
+        if seat == Seat::A && policy != Policy::Bot {
+            spam(view, policy)
+        } else {
+            bots[seat.index()].decide(view)
         }
-        if s.tick.is_multiple_of(2) {
-            for seat in Seat::BOTH {
-                let view = s.view_for(seat, &events);
-                let decided = if seat == Seat::A && policy != Policy::Bot {
-                    spam(&view, policy)
-                } else {
-                    bots[seat.index()].decide(&view)
-                };
-                if let Some(intent) = decided {
-                    let kind = match intent {
-                        PlayerIntention::Purchase { offer } => {
-                            Some(view.offers[usize::from(offer)])
-                        }
-                        PlayerIntention::Evolve { .. } => None,
-                    };
-                    if s.apply_intention(seat, s.tick, intent).is_ok() {
-                        match kind {
-                            Some(k) => {
-                                t.purchases[k as usize] += 1;
-                                kinds[seat.index()][k as usize] = true;
-                                bought[seat.index()][def(k).faction.index()] += 1;
-                            }
-                            None => t.evolutions += 1,
-                        }
-                    }
-                }
+    };
+    let ended = headless::play(&mut s, decide, |m| match m {
+        Moment::Intention {
+            seat,
+            view,
+            intent,
+            result: Ok(()),
+        } => match intent {
+            PlayerIntention::Purchase { offer } => {
+                let k = view.offers[usize::from(offer)];
+                t.purchases[k as usize] += 1;
+                kinds[seat.index()][k as usize] = true;
+                bought[seat.index()][def(k).faction.index()] += 1;
             }
-            events.clear();
+            PlayerIntention::Evolve { .. } => t.evolutions += 1,
+        },
+        Moment::Intention { .. } => {}
+        Moment::Stepped { state } => {
+            // Whole tick: step, both views, both decisions.
+            let ns = last.elapsed().as_nanos();
+            last = Instant::now();
+            t.step_ns += ns;
+            t.steps += 1;
+            t.max_step_ns = t.max_step_ns.max(ns);
+            t.max_units = t.max_units.max(state.units.len());
+            t.max_army = t
+                .max_army
+                .max(state.army_size(Seat::A))
+                .max(state.army_size(Seat::B));
+            if state.tick == RUNNING_START + 120 * TICK_HZ {
+                hp_at_2min = Some([0, 1].map(|i| state.players[i].stronghold_hp));
+            }
         }
-        let start = Instant::now();
-        events.extend(s.step());
-        let ns = start.elapsed().as_nanos();
-        t.step_ns += ns;
-        t.steps += 1;
-        t.max_step_ns = t.max_step_ns.max(ns);
-        t.max_units = t.max_units.max(s.units.len());
-        t.max_army = t
-            .max_army
-            .max(s.army_size(Seat::A))
-            .max(s.army_size(Seat::B));
-        if s.tick == RUNNING_START + 120 * TICK_HZ {
-            hp_at_2min = Some([0, 1].map(|i| s.players[i].stronghold_hp));
-        }
+    });
+    if !ended {
+        return false;
     }
     let o = s.outcome.expect("ended");
     t.durations.push(s.tick / TICK_HZ);
@@ -199,7 +195,7 @@ fn report(n: u64, t: &mut Totals) {
         f64::from(t.evolutions) / n as f64
     );
     println!(
-        "step µs: mean {:.2} max {:.1} | max units alive {}",
+        "tick µs (step + views + bots): mean {:.2} max {:.1} | max units alive {}",
         t.step_ns as f64 / t.steps as f64 / 1_000.0,
         t.max_step_ns as f64 / 1_000.0,
         t.max_units

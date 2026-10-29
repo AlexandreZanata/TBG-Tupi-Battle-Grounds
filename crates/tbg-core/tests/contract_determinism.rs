@@ -7,25 +7,12 @@
 //! in the same commit; if not, it is a bug.
 
 use tbg_core::bot::Bot;
-use tbg_core::content::MATCH_END;
-use tbg_core::{EndReason, MatchState, Phase, Seat};
+use tbg_core::{headless, EndReason, MatchState, Phase, Seat};
 
 fn bot_match(seed: u64) -> MatchState {
     let mut s = MatchState::new(seed);
     let mut bots = [Bot::new(seed * 2 + 1), Bot::new(seed * 2 + 2)];
-    let mut events = Vec::new();
-    while s.phase != Phase::Ended && s.tick < MATCH_END + 5 {
-        if s.tick.is_multiple_of(2) {
-            for seat in Seat::BOTH {
-                let view = s.view_for(seat, &events);
-                if let Some(intent) = bots[seat.index()].decide(&view) {
-                    let _ = s.apply_intention(seat, s.tick, intent);
-                }
-            }
-            events.clear();
-        }
-        events.extend(s.step());
-    }
+    headless::play(&mut s, |seat, view| bots[seat.index()].decide(view), |_| {});
     s
 }
 
