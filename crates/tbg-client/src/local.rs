@@ -4,7 +4,7 @@
 
 use tbg_core::bot::Bot;
 use tbg_core::protocol::{ClientMsg, ServerMsg};
-use tbg_core::{ArcanaPreset, Event, MatchState, PlayerIntention, Seat};
+use tbg_core::{ArcanaPreset, Event, MatchState, Phase, PlayerIntention, Seat};
 
 pub struct LocalMatch {
     state: MatchState,
@@ -17,10 +17,34 @@ pub struct LocalMatch {
 
 impl LocalMatch {
     /// Practice uses the player's saved Arcanas against a default bot (D-40).
-    pub fn new(seed: u64, arcanas: ArcanaPreset) -> LocalMatch {
+    /// `army` is the P30-A debug parameter: top both sides up to N units
+    /// before the first view; `None` is the normal practice match.
+    pub fn new(seed: u64, arcanas: ArcanaPreset, army: Option<usize>) -> LocalMatch {
         let presets = [arcanas, ArcanaPreset::DEFAULT];
+        let mut state = MatchState::with_arcanas(seed, presets);
+        if let Some(n) = army {
+            while state.phase != Phase::Running {
+                state.step();
+            }
+            let mut next = [0usize; 2];
+            for seat in Seat::BOTH {
+                while state.army_size(seat) < n {
+                    let kind =
+                        tbg_core::UNIT_KINDS[next[seat.index()] % tbg_core::UNIT_KINDS.len()];
+                    next[seat.index()] += 1;
+                    state.players[seat.index()].offers[0] = kind;
+                    state.players[seat.index()].energy = 6_000;
+                    if state
+                        .apply_intention(seat, 0, PlayerIntention::Purchase { offer: 0 })
+                        .is_err()
+                    {
+                        break;
+                    }
+                }
+            }
+        }
         LocalMatch {
-            state: MatchState::with_arcanas(seed, presets),
+            state,
             bot: Bot::new(seed ^ 0x5eed),
             queue: Vec::new(),
             events: Vec::new(),
