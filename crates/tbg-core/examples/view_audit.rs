@@ -9,8 +9,11 @@
 //! `cargo run --release -p tbg-core --example view_audit`
 
 use std::alloc::{GlobalAlloc, Layout, System};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::Arc;
+use std::sync::OnceLock;
 use std::time::Instant;
 
 use serde::Serialize;
@@ -18,6 +21,7 @@ use serde::Serialize;
 use tbg_core::arcana::ArcanaPreset;
 use tbg_core::bot::Bot;
 use tbg_core::content::{self, MATCH_END, OFFERS};
+use tbg_core::protocol::{encode, ServerMsg};
 use tbg_core::ruleset::Ruleset;
 use tbg_core::shop::next_rotation_in;
 use tbg_core::{
@@ -35,6 +39,8 @@ const KEYFRAME_VIEWS: u32 = 100;
 const WIRE_OVERHEAD_MIN: u64 = 64;
 const WIRE_OVERHEAD_MAX: u64 = 78;
 const WIRE_OVERHEAD_MID: u64 = 71;
+/// `TBG_AUDIT_VIEW_DIR`: write raw encoded views for the compression check.
+static VIEW_DUMP: OnceLock<Option<PathBuf>> = OnceLock::new();
 
 static COUNT_ALLOC: AtomicBool = AtomicBool::new(false);
 static ALLOC_CALLS: AtomicU64 = AtomicU64::new(0);
@@ -424,32 +430,73 @@ fn phase_ticks_left_at(tick: Tick, phase: Phase) -> u32 {
 
 // ---------- Prototype builds ----------
 
-fn build_a(view: &MatchView) -> ViewA {
+fn status_code(status: Status) -> u8 {
+    match status {
+        Status::None => 0,
+        Status::Slowed { .. } => 1,
+        Status::Rooted { .. } => 2,
+    }
+}
+
+fn live_units(state: &MatchState) -> impl Iterator<Item = &tbg_core::Unit> {
+    state.units.iter().filter(|unit| unit.hp > 0)
+}
+
+fn state_statics(state: &MatchState) -> Vec<UnitStatic> {
+    live_units(state)
+        .map(|unit| UnitStatic {
+            id: unit.id,
+            seat: unit.seat,
+            kind: unit.kind,
+            tier: unit.tier,
+            branch: unit.branch,
+        })
+        .collect()
+}
+
+fn state_dynamics(state: &MatchState) -> Vec<UnitDynamic> {
+    live_units(state)
+        .map(|unit| UnitDynamic {
+            id: unit.id,
+            x: unit.x,
+            hp: unit.hp,
+            status: status_code(unit.status),
+        })
+        .collect()
+}
+
+/// Build Prototype A directly from the state, as the server would.
+fn build_a_state(state: &MatchState, seat: Seat, events: &[Event]) -> ViewA {
+    let me = state.player(seat);
     ViewA {
-        tick: view.tick,
-        phase: view.phase,
-        energy: view.energy,
-        offers: view.offers,
-        stronghold_hp: view.stronghold_hp,
-        units: view
-            .units
-            .iter()
-            .map(|u| UnitA {
-                id: u.id,
-                seat: u.seat,
-                kind: u.kind,
-                tier: u.tier,
-                branch: u.branch,
-                x: u.x,
-                hp: u.hp,
-                status: u.status,
+        tick: state.tick,
+        phase: state.phase,
+        energy: me.energy,
+        offers: me.offers,
+        stronghold_hp: [0, 1].map(|i| state.players[i].stronghold_hp),
+        units: live_units(state)
+            .map(|unit| UnitA {
+                id: unit.id,
+                seat: unit.seat,
+                kind: unit.kind,
+                tier: unit.tier,
+                branch: unit.branch,
+                x: unit.x,
+                hp: unit.hp,
+                status: status_code(unit.status),
             })
             .collect(),
-        synergy: view.synergy,
-        last_seq: view.last_seq,
-        events: view.events.clone(),
-        outcome: view.outcome,
+        synergy: [0, 1].map(|i| state.players[i].synergy),
+        last_seq: me.last_seq,
+        events: events.to_vec(),
+        outcome: state.outcome,
     }
+}
+
+#[derive(Default, Clone)]
+struct StaticTracker {
+    units: Vec<UnitStatic>,
+    synergy: [[u8; 4]; 2],
 }
 
 #[derive(Default, Clone)]
@@ -458,35 +505,50 @@ struct StaticCache {
     synergy: [[u8; 4]; 2],
 }
 
-fn build_statics(
-    view: &MatchView,
-    cache: &mut StaticCache,
+/// Sorted merge: both lists are sorted by `UnitId` (ids only grow).
+fn update_statics(
+    current: &[UnitStatic],
+    tracker: &mut StaticTracker,
+    synergy: [[u8; 4]; 2],
     full: bool,
 ) -> (Vec<UnitStatic>, Option<[[u8; 4]; 2]>) {
     let mut statics = Vec::new();
-    for unit in &view.units {
-        let update = unit_static(unit);
-        if full || cache.units.get(&unit.id) != Some(&update) {
-            statics.push(update);
+    if full {
+        statics.extend_from_slice(current);
+    } else {
+        let mut old = 0;
+        for unit in current {
+            while tracker
+                .units
+                .get(old)
+                .is_some_and(|previous| previous.id < unit.id)
+            {
+                old += 1;
+            }
+            let changed = match tracker.units.get(old) {
+                Some(previous) if previous.id == unit.id => {
+                    old += 1;
+                    previous != unit
+                }
+                _ => true,
+            };
+            if changed {
+                statics.push(unit.clone());
+            }
         }
     }
-    let synergy = (full || cache.synergy != view.synergy).then_some(view.synergy);
-    if full {
-        cache.units.clear();
+    let synergy_update = (full || tracker.synergy != synergy).then_some(synergy);
+    tracker.units.clear();
+    tracker.units.extend_from_slice(current);
+    if let Some(update) = synergy_update {
+        tracker.synergy = update;
     }
-    for unit in &statics {
-        cache.units.insert(unit.id, unit.clone());
-    }
-    let live: BTreeSet<UnitId> = view.units.iter().map(|u| u.id).collect();
-    cache.units.retain(|id, _| live.contains(id));
-    if let Some(synergy) = synergy {
-        cache.synergy = synergy;
-    }
-    (statics, synergy)
+    (statics, synergy_update)
 }
 
-fn build_c(view: &MatchView, cache: &mut StaticCache, full: bool) -> ViewC {
-    let (static_units, synergy) = build_statics(view, cache, full);
+fn build_c(view: &MatchView, tracker: &mut StaticTracker, full: bool) -> ViewC {
+    let current: Vec<UnitStatic> = view.units.iter().map(unit_static).collect();
+    let (static_units, synergy) = update_statics(&current, tracker, view.synergy, full);
     ViewC {
         tick: view.tick,
         phase: view.phase,
@@ -500,6 +562,34 @@ fn build_c(view: &MatchView, cache: &mut StaticCache, full: bool) -> ViewC {
         last_seq: view.last_seq,
         events: view.events.clone(),
         outcome: view.outcome,
+    }
+}
+
+/// Build Prototype C directly from the state, as the server would.
+fn build_c_state(
+    state: &MatchState,
+    seat: Seat,
+    events: &[Event],
+    tracker: &mut StaticTracker,
+    full: bool,
+) -> ViewC {
+    let me = state.player(seat);
+    let synergy = [0, 1].map(|i| state.players[i].synergy);
+    let (static_units, synergy_update) =
+        update_statics(&state_statics(state), tracker, synergy, full);
+    ViewC {
+        tick: state.tick,
+        phase: state.phase,
+        energy: me.energy,
+        offers: me.offers,
+        stronghold_hp: [0, 1].map(|i| state.players[i].stronghold_hp),
+        full,
+        static_units,
+        units: state_dynamics(state),
+        synergy: synergy_update,
+        last_seq: me.last_seq,
+        events: events.to_vec(),
+        outcome: state.outcome,
     }
 }
 
@@ -590,57 +680,63 @@ fn assemble_b(view: &ViewB, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Se
 
 #[derive(Default, Clone)]
 struct DeltaCache {
-    statics: BTreeMap<UnitId, UnitStatic>,
+    statics: StaticCache,
     dynamics: BTreeMap<UnitId, UnitDynamic>,
-    synergy: [[u8; 4]; 2],
 }
 
-fn build_b(view: &MatchView, cache: &mut DeltaCache, full: bool) -> ViewB {
-    let mut statics = Vec::new();
-    let mut forced = BTreeSet::new();
-    for unit in &view.units {
-        let update = unit_static(unit);
-        if full || cache.statics.get(&unit.id) != Some(&update) {
-            statics.push(update);
-            forced.insert(unit.id);
-        }
-    }
-    let synergy = (full || cache.synergy != view.synergy).then_some(view.synergy);
+#[derive(Default, Clone)]
+struct DeltaTracker {
+    statics: StaticTracker,
+    dynamics: Vec<UnitDynamic>,
+}
+
+fn update_dynamics(
+    current: &[UnitDynamic],
+    forced: &BTreeSet<UnitId>,
+    tracker: &mut Vec<UnitDynamic>,
+    full: bool,
+) -> (Vec<UnitDynamic>, Vec<UnitId>) {
     let mut units = Vec::new();
-    let live: BTreeSet<UnitId> = view.units.iter().map(|u| u.id).collect();
-    for unit in &view.units {
-        let update = unit_dynamic(unit);
-        if full || forced.contains(&unit.id) || cache.dynamics.get(&unit.id) != Some(&update) {
-            units.push(update);
+    let mut removed = Vec::new();
+    let mut old = 0;
+    for unit in current {
+        while tracker
+            .get(old)
+            .is_some_and(|previous| previous.id < unit.id)
+        {
+            removed.push(tracker[old].id);
+            old += 1;
+        }
+        let changed = match tracker.get(old) {
+            Some(previous) if previous.id == unit.id => {
+                old += 1;
+                full || forced.contains(&unit.id) || previous != unit
+            }
+            _ => true,
+        };
+        if changed {
+            units.push(*unit);
         }
     }
-    let removed: Vec<UnitId> = if full {
-        Vec::new()
-    } else {
-        cache
-            .dynamics
-            .keys()
-            .filter(|id| !live.contains(id))
-            .copied()
-            .collect()
-    };
+    while let Some(previous) = tracker.get(old) {
+        removed.push(previous.id);
+        old += 1;
+    }
     if full {
-        cache.statics.clear();
-        cache.dynamics.clear();
+        removed.clear();
     }
-    for unit in &statics {
-        cache.statics.insert(unit.id, unit.clone());
-    }
-    cache.statics.retain(|id, _| live.contains(id));
-    for unit in &units {
-        cache.dynamics.insert(unit.id, *unit);
-    }
-    for id in &removed {
-        cache.dynamics.remove(id);
-    }
-    if let Some(synergy) = synergy {
-        cache.synergy = synergy;
-    }
+    tracker.clear();
+    tracker.extend_from_slice(current);
+    (units, removed)
+}
+
+fn build_b(view: &MatchView, tracker: &mut DeltaTracker, full: bool) -> ViewB {
+    let current_statics: Vec<UnitStatic> = view.units.iter().map(unit_static).collect();
+    let (static_units, synergy) =
+        update_statics(&current_statics, &mut tracker.statics, view.synergy, full);
+    let forced: BTreeSet<UnitId> = static_units.iter().map(|unit| unit.id).collect();
+    let current_dynamics: Vec<UnitDynamic> = view.units.iter().map(unit_dynamic).collect();
+    let (units, removed) = update_dynamics(&current_dynamics, &forced, &mut tracker.dynamics, full);
     ViewB {
         tick: view.tick,
         phase: view.phase,
@@ -648,13 +744,45 @@ fn build_b(view: &MatchView, cache: &mut DeltaCache, full: bool) -> ViewB {
         offers: view.offers,
         stronghold_hp: view.stronghold_hp,
         full,
-        static_units: statics,
+        static_units,
         units,
         removed,
         synergy,
         last_seq: view.last_seq,
         events: view.events.clone(),
         outcome: view.outcome,
+    }
+}
+
+/// Build Prototype B directly from the state, as the server would.
+fn build_b_state(
+    state: &MatchState,
+    seat: Seat,
+    events: &[Event],
+    tracker: &mut DeltaTracker,
+    full: bool,
+) -> ViewB {
+    let me = state.player(seat);
+    let synergy = [0, 1].map(|i| state.players[i].synergy);
+    let (static_units, synergy_update) =
+        update_statics(&state_statics(state), &mut tracker.statics, synergy, full);
+    let forced: BTreeSet<UnitId> = static_units.iter().map(|unit| unit.id).collect();
+    let (units, removed) =
+        update_dynamics(&state_dynamics(state), &forced, &mut tracker.dynamics, full);
+    ViewB {
+        tick: state.tick,
+        phase: state.phase,
+        energy: me.energy,
+        offers: me.offers,
+        stronghold_hp: [0, 1].map(|i| state.players[i].stronghold_hp),
+        full,
+        static_units,
+        units,
+        removed,
+        synergy: synergy_update,
+        last_seq: me.last_seq,
+        events: events.to_vec(),
+        outcome: state.outcome,
     }
 }
 
@@ -666,27 +794,33 @@ fn rebuild_b(
     rules: &Ruleset,
 ) -> Result<MatchView, &'static str> {
     if view.full {
-        cache.statics.clear();
+        cache.statics.units.clear();
         cache.dynamics.clear();
     }
     for stat in &view.static_units {
-        cache.statics.insert(stat.id, stat.clone());
+        cache.statics.units.insert(stat.id, stat.clone());
     }
     for id in &view.removed {
-        cache.statics.remove(id);
+        cache.statics.units.remove(id);
         cache.dynamics.remove(id);
     }
     for dynamic in &view.units {
         cache.dynamics.insert(dynamic.id, *dynamic);
     }
     if let Some(synergy) = view.synergy {
-        cache.synergy = synergy;
+        cache.statics.synergy = synergy;
     }
     let dynamics: Vec<UnitDynamic> = cache.dynamics.values().copied().collect();
-    let units = rebuild_units(&dynamics, &cache.statics, cache.synergy, arcanas, rules)?;
+    let units = rebuild_units(
+        &dynamics,
+        &cache.statics.units,
+        cache.statics.synergy,
+        arcanas,
+        rules,
+    )?;
     let live: BTreeSet<UnitId> = cache.dynamics.keys().copied().collect();
-    cache.statics.retain(|id, _| live.contains(id));
-    Ok(assemble_b(view, units, cache.synergy, you))
+    cache.statics.units.retain(|id, _| live.contains(id));
+    Ok(assemble_b(view, units, cache.statics.synergy, you))
 }
 
 fn assert_same(got: &MatchView, want: &MatchView, label: &str, context: &str) {
@@ -725,9 +859,9 @@ fn assert_same(got: &MatchView, want: &MatchView, label: &str, context: &str) {
 
 #[derive(Default)]
 struct SeatHarness {
-    c_server: StaticCache,
+    c_server: StaticTracker,
     c_client: StaticCache,
-    b_server: DeltaCache,
+    b_server: DeltaTracker,
     b_client: DeltaCache,
     c_views: u32,
     b_views: u32,
@@ -766,7 +900,7 @@ struct Recorder {
     b_changed_units: u64,
     freq_current: [SizeStats; 2],
     freq_c: [SizeStats; 2],
-    freq_caches: [[StaticCache; 2]; 2],
+    freq_caches: [[StaticTracker; 2]; 2],
     freq_views: [[u32; 2]; 2],
     buckets_current: Vec<SizeStats>,
     buckets_c: Vec<SizeStats>,
@@ -777,6 +911,9 @@ struct Recorder {
     h10_alloc_samples: u64,
     c_cache_max: usize,
     b_cache_max: usize,
+    sync_prev: [Option<Arc<MatchView>>; 2],
+    sync_current: Samples,
+    sync_poc: Samples,
     seats: [SeatHarness; 2],
 }
 
@@ -815,7 +952,7 @@ impl Default for Recorder {
             b_changed_units: 0,
             freq_current: std::array::from_fn(|_| SizeStats::default()),
             freq_c: std::array::from_fn(|_| SizeStats::default()),
-            freq_caches: std::array::from_fn(|_| std::array::from_fn(|_| StaticCache::default())),
+            freq_caches: std::array::from_fn(|_| std::array::from_fn(|_| StaticTracker::default())),
             freq_views: [[0; 2]; 2],
             buckets_current: (0..6).map(|_| SizeStats::default()).collect(),
             buckets_c: (0..6).map(|_| SizeStats::default()).collect(),
@@ -826,6 +963,9 @@ impl Default for Recorder {
             h10_alloc_samples: 0,
             c_cache_max: 0,
             b_cache_max: 0,
+            sync_prev: std::array::from_fn(|_| None),
+            sync_current: Samples::default(),
+            sync_poc: Samples::default(),
             seats: std::array::from_fn(|_| SeatHarness::default()),
         }
     }
@@ -846,8 +986,10 @@ impl Recorder {
     #[allow(clippy::too_many_lines)] // one measurement path, kept linear for auditability
     fn record(
         &mut self,
+        state: &MatchState,
         seat: Seat,
         view: &MatchView,
+        events: &[Event],
         arcanas: &[ArcanaPreset; 2],
         rules: &Ruleset,
     ) {
@@ -870,7 +1012,7 @@ impl Recorder {
 
         // A: derive, don't send.
         let start = Instant::now();
-        let a = build_a(view);
+        let a = build_a_state(state, seat, events);
         self.build_a.push(start.elapsed().as_nanos() as u64);
         let start = Instant::now();
         let a_bytes = message_len(&a);
@@ -898,7 +1040,13 @@ impl Recorder {
             self.c_full += 1;
         }
         let start = Instant::now();
-        let c = build_c(view, &mut self.seats[seat.index()].c_server, full);
+        let c = build_c_state(
+            state,
+            seat,
+            events,
+            &mut self.seats[seat.index()].c_server,
+            full,
+        );
         self.build_c.push(start.elapsed().as_nanos() as u64);
         let start = Instant::now();
         let c_bytes = message_len(&c);
@@ -943,7 +1091,13 @@ impl Recorder {
             self.b_full += 1;
         }
         let start = Instant::now();
-        let b = build_b(view, &mut self.seats[seat.index()].b_server, full);
+        let b = build_b_state(
+            state,
+            seat,
+            events,
+            &mut self.seats[seat.index()].b_server,
+            full,
+        );
         self.build_b.push(start.elapsed().as_nanos() as u64);
         self.b_changed_units += b.units.len() as u64;
         let start = Instant::now();
@@ -976,7 +1130,7 @@ impl Recorder {
         }
         self.rebuild_b.push(start.elapsed().as_nanos() as u64);
         let cache = &self.seats[seat.index()].b_client;
-        let bytes = (cache.statics.len() + cache.dynamics.len())
+        let bytes = (cache.statics.units.len() + cache.dynamics.len())
             * (std::mem::size_of::<UnitId>()
                 + std::mem::size_of::<UnitStatic>()
                 + std::mem::size_of::<UnitDynamic>());
@@ -996,6 +1150,49 @@ impl Recorder {
             events: field_len(&d.events) as u64,
             ..Sections::default()
         });
+
+        // Client sync hot path proxy (P30-A H7): full clone + linear lookup
+        // versus Arc clone + sorted merge + HashSet retain.
+        if self.views.is_multiple_of(8) {
+            if let Some(previous) = &self.sync_prev[seat.index()] {
+                let start = Instant::now();
+                let cloned = (**previous).clone();
+                let mut found = 0;
+                for unit in &cloned.units {
+                    if cloned.units.iter().any(|same| unit.id == same.id) {
+                        found += 1;
+                    }
+                }
+                for unit in &previous.units {
+                    let _ = cloned.units.iter().find(|current| current.id == unit.id);
+                }
+                let live: Vec<UnitId> = cloned.units.iter().map(|unit| unit.id).collect();
+                for id in &live {
+                    let _ = cloned.units.iter().any(|unit| unit.id == *id);
+                }
+                std::hint::black_box(found);
+                self.sync_current.push(start.elapsed().as_nanos() as u64);
+
+                let start = Instant::now();
+                let last = Arc::clone(previous);
+                let mut old = 0;
+                for unit in &last.units {
+                    while old < last.units.len() && last.units[old].id < unit.id {
+                        old += 1;
+                    }
+                    if let Some(previous) = last.units.get(old) {
+                        let _ = previous.x;
+                    }
+                }
+                let live: HashSet<UnitId> = last.units.iter().map(|unit| unit.id).collect();
+                for id in &live {
+                    let _ = live.contains(id);
+                }
+                std::hint::black_box((&last, &live));
+                self.sync_poc.push(start.elapsed().as_nanos() as u64);
+            }
+            self.sync_prev[seat.index()] = Some(Arc::new(view.clone()));
+        }
     }
 
     /// Lower-frequency sizes: current full snapshot and C, seat by seat.
@@ -1133,7 +1330,7 @@ fn run_synthetic(n: usize) -> Recorder {
                 let start = Instant::now();
                 let view = state.view_for(seat, &events);
                 rec.build_current.push(start.elapsed().as_nanos() as u64);
-                rec.record(seat, &view, &arcanas, rules);
+                rec.record(&state, seat, &view, &events, &arcanas, rules);
             }
             if rec.h10_alloc_samples < 4 && (n == 20 || n == 100) {
                 let (_, calls, bytes) = alloc_scope(|| {
@@ -1186,10 +1383,20 @@ fn run_synthetic(n: usize) -> Recorder {
     rec
 }
 
+fn dump_view(dir: &Path, index: usize, view: &MatchView) {
+    let bytes = encode(&ServerMsg::View(view.clone()));
+    let path = dir.join(format!("{index:04}.bin"));
+    if let Err(error) = std::fs::write(&path, bytes) {
+        panic!("cannot write {}: {error}", path.display());
+    }
+}
+
 fn run_natural() -> Recorder {
     let mut rec = Recorder::default();
     let arcanas = [ArcanaPreset::DEFAULT; 2];
     let rules = Ruleset::canon();
+    let dump_dir = VIEW_DUMP.get().and_then(|dir| dir.as_deref());
+    let mut dumped = 0usize;
     for seed in 1..=NATURAL_SEEDS {
         let mut state = MatchState::with_arcanas(seed, arcanas);
         let mut bots = [Bot::new(seed), Bot::new(seed ^ 0x9e37_79b9)];
@@ -1203,7 +1410,13 @@ fn run_natural() -> Recorder {
                     let start = Instant::now();
                     let view = state.view_for(seat, &events);
                     rec.build_current.push(start.elapsed().as_nanos() as u64);
-                    rec.record(seat, &view, &arcanas, rules);
+                    rec.record(&state, seat, &view, &events, &arcanas, rules);
+                    if let Some(dir) = dump_dir {
+                        if seat == Seat::A && dumped < 200 {
+                            dump_view(dir, dumped, &view);
+                            dumped += 1;
+                        }
+                    }
                     if let Some(intent) = bots[seat.index()].decide(&view) {
                         let _ = state.apply_intention(seat, state.tick, intent);
                     }
@@ -1284,12 +1497,14 @@ fn integrity_tests(max_synthetic_units: usize) -> Integrity {
 
     let state = MatchState::with_arcanas(7, arcanas);
     let no_units = state.view_for(Seat::A, &[]);
+    let mut tracker = StaticTracker::default();
     let mut cache = StaticCache::default();
-    let mut delta = DeltaCache::default();
-    let payload = build_c(&no_units, &mut cache, true);
+    let payload = build_c(&no_units, &mut tracker, true);
     let c_ok = rebuild_c(&payload, &mut cache, Seat::A, &arcanas, rules)
         .is_ok_and(|view| view == no_units);
-    let payload = build_b(&no_units, &mut delta, true);
+    let mut delta_tracker = DeltaTracker::default();
+    let mut delta = DeltaCache::default();
+    let payload = build_b(&no_units, &mut delta_tracker, true);
     let b_ok = rebuild_b(&payload, &mut delta, Seat::A, &arcanas, rules)
         .is_ok_and(|view| view == no_units);
 
@@ -1302,8 +1517,9 @@ fn integrity_tests(max_synthetic_units: usize) -> Integrity {
     let _ = one.apply_intention(Seat::A, 1, PlayerIntention::Purchase { offer: 0 });
     one.step();
     let one_view = one.view_for(Seat::A, &[]);
+    let mut tracker = StaticTracker::default();
     let mut cache = StaticCache::default();
-    let payload = build_c(&one_view, &mut cache, true);
+    let payload = build_c(&one_view, &mut tracker, true);
     let one_ok = rebuild_c(&payload, &mut cache, Seat::A, &arcanas, rules)
         .is_ok_and(|view| view == one_view);
 
@@ -1313,8 +1529,8 @@ fn integrity_tests(max_synthetic_units: usize) -> Integrity {
     let mut events = Vec::new();
     let mut c_client: [StaticCache; 2] = std::array::from_fn(|_| StaticCache::default());
     let mut b_client: [DeltaCache; 2] = std::array::from_fn(|_| DeltaCache::default());
-    let mut c_server: [StaticCache; 2] = std::array::from_fn(|_| StaticCache::default());
-    let mut b_server: [DeltaCache; 2] = std::array::from_fn(|_| DeltaCache::default());
+    let mut c_server: [StaticTracker; 2] = std::array::from_fn(|_| StaticTracker::default());
+    let mut b_server: [DeltaTracker; 2] = std::array::from_fn(|_| DeltaTracker::default());
     let mut c_views = [0u32; 2];
     let mut b_views = [0u32; 2];
     let mut reconnect_c = false;
@@ -1536,6 +1752,11 @@ fn timing_json(label: &str, samples: &Samples) -> String {
 }
 
 fn main() {
+    let dump_dir = std::env::var_os("TBG_AUDIT_VIEW_DIR").map(PathBuf::from);
+    if let Some(dir) = &dump_dir {
+        std::fs::create_dir_all(dir).expect("create TBG_AUDIT_VIEW_DIR");
+    }
+    let _ = VIEW_DUMP.set(dump_dir);
     println!("# P30-A view audit");
     println!("Generated by `cargo run --release -p tbg-core --example view_audit`.");
     println!();
@@ -1566,7 +1787,7 @@ fn main() {
             c.bytes_s / 1000.0
         );
         synthetic.push(format!(
-            "{{\"units_per_side\":{n},{},{},{},{},{},\"shares\":\"{}\",\"sections\":{{{},{},{},{}}},\"timing_us\":{{{},{},{},{},{},{},{},{}}},\"cache_max_bytes\":{{\"c\":{},\"b\":{}}}}}",
+            "{{\"units_per_side\":{n},{},{},{},{},{},\"shares\":\"{}\",\"sections\":{{{},{},{},{}}},\"timing_us\":{{{},{},{},{},{},{},{},{},{},{}}},\"cache_max_bytes\":{{\"c\":{},\"b\":{}}}}}",
             size_json("current", &rec.current, 10.0),
             size_json("a", &rec.a, 10.0),
             size_json("b", &rec.b, 10.0),
@@ -1585,6 +1806,8 @@ fn main() {
             timing_json("encode_b", &rec.encode_b),
             timing_json("build_c", &rec.build_c),
             timing_json("encode_c", &rec.encode_c),
+            timing_json("sync_clone_linear", &rec.sync_current),
+            timing_json("sync_arc_sorted", &rec.sync_poc),
             rec.c_cache_max,
             rec.b_cache_max,
         ));
@@ -1759,9 +1982,32 @@ fn main() {
             med(&cpu20.rebuild_c),
             med(&cpu100.rebuild_c),
         ),
+        (
+            "client sync: clone+linear",
+            med(&cpu20.sync_current),
+            med(&cpu100.sync_current),
+        ),
+        (
+            "client sync: Arc+sorted",
+            med(&cpu20.sync_poc),
+            med(&cpu100.sync_poc),
+        ),
     ] {
         println!("| {label} | {a:.2} | {b:.2} |");
     }
+    println!();
+    let sync_current = med(&cpu100.sync_current);
+    let sync_poc = med(&cpu100.sync_poc);
+    println!(
+        "Client sync at 100 units/side: clone+linear {:.2} µs, Arc+sorted {:.2} µs ({:.1}% of the sync cost removed). Browser FPS is blocked on this machine (see report).",
+        sync_current,
+        sync_poc,
+        if sync_current > 0.0 {
+            100.0 * (sync_current - sync_poc) / sync_current
+        } else {
+            0.0
+        }
+    );
     println!();
 
     println!("## H10 shared build (two seats, same tick)");
@@ -1874,6 +2120,11 @@ fn main() {
     println!(
         "    \"cache_max_bytes\": {{\"c\": {}, \"b\": {}}},",
         natural.c_cache_max, natural.b_cache_max
+    );
+    println!(
+        "    \"client_sync_us\": {{{}, {}}},",
+        timing_json("clone_linear", &natural.sync_current),
+        timing_json("arc_sorted", &natural.sync_poc)
     );
     println!(
         "    \"timing_us\": {{{},{},{},{},{},{},{},{},{},{},{}}},",
