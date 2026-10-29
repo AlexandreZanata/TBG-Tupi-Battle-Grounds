@@ -524,9 +524,12 @@ crates/tbg-core/src/protocol.rs crates/tbg-core/src/view.rs` is empty.
   not worth compacting (H5 rejected).
 - **Server CPU and capacity** (local cgroup estimates; bots outside the
   cgroup; every row records its load in `capacity-*.txt`):
-  - 1 vCPU / 1 GB: 750 matches clean; 1000 was 0.54 cores / 0 late ticks
-    in one pass and 0.67 cores / 3 cgroup throttles / 3 854 late ticks in
-    another; 1300 and 1500 fail (10/3 throttles, 20 122/19 923 late).
+  - 1 vCPU / 1 GB: 1000 was 0.54 cores / 0 late ticks in one pass and
+    0.67 cores / 3 cgroup throttles / 3 854 late ticks in another; 1300
+    and 1500 fail (10/3 throttles, 20 122/19 923 late). A fresh 750 pass
+    at host load 10.21 showed 1450 late ticks with **zero** cgroup
+    throttles (0.63 cores): host scheduling, not the server quota, was
+    late.
   - 2 CPU / 1 GiB (the deployed quota): 1000 clean in every uncontaminated
     pass (0.54–0.67 cores, 1 493–1 852 matches/core); 1500 clean in 2 of
     3 dedicated passes (1.09–1.10 cores, 0 late) and failed in one
@@ -712,8 +715,8 @@ tree lookups, and the smaller payloads encode faster). B is deferred.
 
 | Limit | clean matches | server cores | matches/core | RSS MB | KB/match | late ticks | RTT p95 |
 |---|---|---|---|---|---|---|---|
-| 1 vCPU / 1 GB | 750 | 0.39 | 1 923 | 219.8 | 300 | 0 | 3 ms |
-| 1 vCPU / 1 GB | 1 000 | 0.54–0.67 | 1 493–1 852 | 290.3 | 297 | 0–3 854 (0–3 throttles) | 3–4 ms |
+| 1 vCPU / 1 GB | 750 | 0.63 | 1 190 | 219.8 | 300 | 1 450 (0 throttles; host load 10.21) | 4 ms |
+| 1 vCPU / 1 GB | 1 000 | 0.54–0.67 | 1 493–1 852 | 290.3 | 297 | 0–3 854 (0–3 throttles; host load 5–7) | 3–4 ms |
 | 2 CPU / 1 GiB | 1 000 | 0.54–0.67 | 1 493–1 852 | 290.7 | 298 | 0 | 3 ms |
 | 2 CPU / 1 GiB | 1 500 | 1.09–1.18 | 1 271–1 376 | 431.2 | 294 | 0 in 2/3, 5 467 in 1/3 | 3 ms |
 | 2 CPU / 1 GiB | 2 000 | 1.27–1.66 | 1 205–1 575 | 572.6 | 293 | 27 598–48 626 | 15 ms |
@@ -721,11 +724,13 @@ tree lookups, and the smaller payloads encode faster). B is deferred.
 | 2 vCPU / 8 GB | 2 000 | 1.66 | 1 205 | 572.6 | 293 | 34 400 | 12 ms |
 | 2 vCPU / 8 GB | 2 500 | 1.88 | 1 329 | 713.5 | 292 | 56 647 | 21 ms |
 
-**Extrapolated.** Safe capacity at 2 CPU / 1 GiB is **1000 matches**
-(2000 sockets) with a small margin; 1500 is likely but one pass in three
-hit a CPU-quota burst. At 1 vCPU / 1 GB, 750 is safe and 1000 is marginal
-under external load. The first limit is CPU quota burst throttling, not
-RAM (peak 588 MB < 1 GiB) and not the bot generator (≤2.3 bot cores on 16).
+**Extrapolated.** On an idle host (load ≤5), 1000 matches (2000 sockets)
+at 2 CPU / 1 GiB and 1 vCPU / 1 GB were clean; 1500 at 2 CPU is likely but
+one pass in three hit a CPU-quota burst, and 2000 fails. Under heavy host
+load (~10) even 750 at 1 vCPU had 1450 late ticks with no cgroup
+throttles: host scheduling matters as much as the quota. The first server
+limit is CPU quota burst throttling, not RAM (peak 588 MB < 1 GiB) and not
+the bot generator (≤2.3 bot cores on 16); the VPS must confirm both.
 C removes ~42% of payload and ~6–15% of build+encode CPU; CPU-bound
 capacity could rise up to ~10%, and bandwidth-bound traffic falls 42%.
 That gain is **not measured under a deployed C**; P30-B must measure it.
