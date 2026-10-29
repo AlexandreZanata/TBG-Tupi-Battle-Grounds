@@ -95,8 +95,8 @@ metric() { curl -fsS "http://$ADDR/metrics" | sed -E "s/.*\"$1\":([0-9]+).*/\1/"
 cpu_ticks() { awk '{print $14 + $15}' "/proc/$1/stat"; }
 rss_mb() { awk '/VmRSS/ {printf "%.1f", $2 / 1024}' "/proc/$1/status"; }
 
-echo "| matches | server cores | matches/core | RSS MB | KB/match | late ticks | RTT p95 ms | lobby max | conns | matches d | KB/s out | KB/s in | KB/s/player | views/s | view B avg |"
-echo "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
+echo "| matches | server cores | bot cores | load1 | matches/core | RSS MB | KB/match | late ticks | RTT p95 ms | lobby max | conns | matches d | KB/s out | KB/s in | KB/s/player | views/s | view B avg |"
+echo "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
 for level in $LEVELS; do
 	start_server
 	for _ in $(seq 1 100); do curl -fsS "http://$ADDR/health" >/dev/null 2>&1 && break; sleep 0.1; done
@@ -113,6 +113,7 @@ for level in $LEVELS; do
 	done
 	sleep 3
 	t0=$(cpu_ticks "$SRV")
+	b0=$(cpu_ticks "$BOTS")
 	late0=$(metric late_ticks)
 	out0=$(metric bytes_out)
 	in0=$(metric bytes_in)
@@ -122,6 +123,7 @@ for level in $LEVELS; do
 	vbytes0=$(metric view_bytes)
 	sleep "$WINDOW"
 	t1=$(cpu_ticks "$SRV")
+	b1=$(cpu_ticks "$BOTS")
 	late1=$(metric late_ticks)
 	out1=$(metric bytes_out)
 	in1=$(metric bytes_in)
@@ -133,6 +135,8 @@ for level in $LEVELS; do
 	rtt=$(metric rtt_p95_ms)
 	inbox=$(metric lobby_inbox_max)
 	cores=$(awk -v a="$t0" -v b="$t1" -v w="$WINDOW" 'BEGIN {printf "%.2f", (b - a) / 100 / w}')
+	bot_cores=$(awk -v a="$b0" -v b="$b1" -v w="$WINDOW" 'BEGIN {printf "%.2f", (b - a) / 100 / w}')
+	load1=$(cut -d' ' -f1 /proc/loadavg)
 	per_core=$(awk -v m="$run1" -v c="$cores" 'BEGIN {printf "%.0f", (c > 0 ? m / c : 0)}')
 	kb=$(awk -v r="$rss" -v m="$run1" 'BEGIN {printf "%.0f", (m > 0 ? r * 1024 / m : 0)}')
 	server_kb=$(awk -v a="$out0" -v b="$out1" -v w="$WINDOW" 'BEGIN {printf "%.1f", (b - a) / 1024 / w}')
@@ -140,7 +144,7 @@ for level in $LEVELS; do
 	player_kb=$(awk -v s="$server_kb" -v m="$run1" 'BEGIN {printf "%.2f", (m > 0 ? s / (2 * m) : 0)}')
 	views_s=$(awk -v a="$views0" -v b="$views1" -v w="$WINDOW" 'BEGIN {printf "%.0f", (b - a) / w}')
 	view_avg=$(awk -v a="$views0" -v b="$views1" -v va="$vbytes0" -v vb="$vbytes1" 'BEGIN {n = b - a; printf "%.0f", (n > 0 ? (vb - va) / n : 0)}')
-	echo "| $run1 | $cores | $per_core | $rss | $kb | $((late1 - late0)) | $rtt | $inbox | $conn1 | $((run1 - run0)) | $server_kb | $in_kb | $player_kb | $views_s | $view_avg |"
+	echo "| $run1 | $cores | $bot_cores | $load1 | $per_core | $rss | $kb | $((late1 - late0)) | $rtt | $inbox | $conn1 | $((run1 - run0)) | $server_kb | $in_kb | $player_kb | $views_s | $view_avg |"
 	# conn0 is sampled to make the connection gauge's growth explicit in the log.
 	: "$conn0"
 	stop
