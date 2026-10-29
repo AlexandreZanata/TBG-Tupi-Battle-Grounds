@@ -17,11 +17,11 @@ for(let i=0;i<720;i++) {
     if(lobby&&!lobby.hidden) {lobby.querySelector('[data-action="practice"]').click();return 'starting';}
     if(!battle||battle.hidden)return 'off';
     const cards=[...battle.querySelectorAll('.battle-card')];
-    const card=cards.find(card=>card.dataset.available==='true' && /^(Rampart|Sawbot),/.test(card.getAttribute('aria-label')||''));
+    const card=cards.find(card=>card.dataset.available==='true' && /^(Nester|Rampart|Sawbot),/.test(card.getAttribute('aria-label')||''));
     if(card) {const label=card.getAttribute('aria-label');card.click();return label;}
     return 'playing';
   })()`);
-  if(state==='playing'||/^(Rampart|Sawbot),/.test(state))playing=true;
+  if(state==='playing'||/^(Nester|Rampart|Sawbot),/.test(state))playing=true;
   if(state!=='playing'&&state!=='off') console.log(state);
   for(const e of c.events.slice(offset)) {
     if(e.method==='Runtime.consoleAPICalled') logs.push({time:e.params.timestamp,text:e.params.args.map(a=>a.value??a.description??'').join(' ')});

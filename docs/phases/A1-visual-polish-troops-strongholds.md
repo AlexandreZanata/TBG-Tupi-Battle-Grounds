@@ -1,6 +1,6 @@
 # A-1 — Professional visual polish: troops, animation, targeted combat, Strongholds
 
-**Status:** handed off at owner request; step 0 passed, step 1 partial (spec written 2026-10-29 against HEAD `f15432f` on
+**Status:** step 0 passed, step 1 audit complete; steps 2–14 pending (spec written 2026-10-29 against HEAD `f15432f` on
 `phase/p40-arcana-trees`; `main` = `077abe7`). Writing this spec changes no
 rule and enables nothing.
 **Depends on:** nothing competitive. Reads (never edits) the P16-F3/F4
@@ -541,22 +541,143 @@ $ git diff main --stat -- crates/tbg-core crates/tbg-server crates/tbg-balance C
 (no output)
 ```
 
+### Step 1: Audit report (no code)
+
+#### 1.1 Verified Findings F1–F11
+
+| Finding | Status | Exact `file:line` | Verified Evidence / Correction |
+|---|---|---|---|
+| F1 | Confirmed | `crates/tbg-core/src/state.rs:83,85`, `crates/tbg-core/src/content.rs:48`, `crates/tbg-core/src/combat.rs:47–67,97–119` | Authoritative target is passed in `Event::AttackStart { from: Target, to: Target }` for both units and Strongholds. `Event::Hit { to, amount }` carries no attacker. Units deal damage after `WINDUP = 6` ticks (300 ms). Stronghold deals damage in the same tick (`combat::stronghold_fire`) with no windup. |
+| F2 | Confirmed | `crates/tbg-client/src/sync.rs:90,95` | The simulation is strictly 1-D (`UnitView.x`). The 3 presentation lanes `lane_z(id) = [-0.8, 0.0, 0.8][(id.0 % 3) as usize]` are a client-only cosmetic spread. `sync::world_x` mirrors X coordinates for Seat B. |
+| F3 | Confirmed | `crates/tbg-client/src/visuals.rs:94,153`, `crates/tbg-client/src/visuals/update.rs:31`, `crates/tbg-client/src/sync/events.rs:139,150` | Figure yaw is fixed at `+65.0°` (Seat A) or `-65.0°` (Seat B) at spawn. On Evolution, `update.rs` re-applies the exact same fixed yaw. On `AttackStart`, `events.rs` only triggers `VisualCue::AttackStart`, never orienting the figure toward the target entity. |
+| F4 | Corrected & Measured | `crates/tbg-core/src/content.rs:169,183,197,230,239` | 1D base melee ranges: Shieldbearer 0.8, Sawbot 0.8, Rampart 0.8, BoneBrute 1.0, Beetling 0.6. Presentation lane separation is up to 1.6 in Z. Real 3D XZ distance at `Hit` reaches up to 1.887 (BoneBrute), 1.789 (Sawbot), 1.705 (Beetling), 1.000 (Rampart), 0.994 (Shieldbearer), while 1D DX remains strictly within range (max 1.0, 0.8, 0.6, 0.8, 0.79). |
+| F5 | Confirmed & Measured | `crates/tbg-client/src/art/arrows.rs:33–48`, `crates/tbg-client/src/sync/events.rs:166–172` | Confirmed duplicate projectile for native Archer: on `Event::AttackStart`, `events.rs` immediately spawns a generic straight-line projectile via `visuals::spawn_projectile`. Then 0.18s later at `ClipEvent::Release`, `art/arrows.rs` spawns a native `FlyingArrow` oriented by fixed socket yaw (`velocity: rotation * Vec3::Z * range / 0.12`). Logged 53 native arrows and 341 generic projectiles during audit matches. |
+| F6 | Corrected & Confirmed | `crates/tbg-client/src/art/mod.rs:109–150`, `crates/tbg-client/src/art/roster.rs:101–115`, `crates/tbg-client/src/art/roster/blockout.rs` | Planning audit was inaccurate: live non-native units are NOT gray blockouts; they are colored legacy bodies adapted to rig v2 (`adapter::build`). Only Archer 0/0, 1/0, and 2/0 use native rig v2 (`archer_v2(tier)`). Archer 1/1, 2/1 and all other 10 kinds use adapted legacy forms. Gray native blockouts exist solely in `FigureLibrary.blockouts` as separate review assets. Nester, Rampart, and Beetling recolor Bloomkeeper, Shieldbearer, and Rootcaller. |
+| F7 | Confirmed | `crates/tbg-client/src/art/clips.rs:14–174`, `crates/tbg-client/src/visuals/cues.rs:34` | Shared clip set: `Idle`, `Walk`, `AttackMelee`, `AttackRanged`, `Cast`, `Hit`, `Death`, `Spawn`, `Evolve`, `Victory`. `STRIKE_TIME = 0.30s`, `RELEASE_TIME = 0.18s` (ranged) / `0.22s` (cast). `CORPSE_SECS = 0.9s`. `Hit` is a non-directional flash tint + clip. Foot-locking and spring secondary physics only run for native figures. |
+| F8 | Confirmed | `crates/tbg-client/src/arena/towers.rs:33–78` | No `StrongholdKind`, tier, branch, or view field exists in codebase at HEAD. The existing tower is a single procedural mesh with base/middle/crown hiding at `<= 2/3` and `<= 1/3` HP against the constant `STRONGHOLD_HP`. |
+| F9 | Confirmed | `docs/GAME-DESIGN.md:472–517` | Treasury, Redoubt, Ballista, Banner names and the shared Walls/Arms tree are planned in GAME-DESIGN §10.4–10.5 (lines 472–517 on main). The glossary is in §2 (not §3). A-1 implements only the visual presentation layer (`StrongholdLook`), keeping live gameplay mapped to `Classic`. |
+| F10 | Confirmed | `crates/tbg-client/src/sync/events.rs:108–111`, `crates/tbg-client/src/arena/mod.rs:84–85` | Stronghold attack events originate from logical `(world_x, 1.2, 0.0)` at `x = 0` (Seat A) and `x = 16` (Seat B). The visible arena towers are placed at `x = -0.9` and `x = 16.9`. Turret muzzle and hit sockets must be placed on the visible structure. |
+| F11 | Confirmed | `crates/tbg-client/src/gallery/settings.rs`, `crates/tbg-client/src/stress.rs:43`, `crates/tbg-client/src/overlay.rs`, `crates/tbg-client/src/autoplay.rs`, `crates/tbg-client/diagnostics/measure.js` | Diagnostic and gallery harness exists on main: `?gallery=...`, `?stress=N` (spawns 2N total units, divided by parity), `?autoplay=...`, FPS/draw overlay. `diagnostics/measure.js` hooks WebGL calls and frame timings. |
+
+#### 1.2 Corrected Live Melee Reach Measurements (F4)
+
+Recorded in live browser gameplay under hardware rendering (`ANGLE (Intel, Mesa Intel(R) Graphics (RPL-P), OpenGL 4.6)`) using the corrected FIFO probe (Hit/Heal consumption, Stronghold accounting, 5-tick minimum windup delay, 20-tick TTL):
+
+| Melee Kind | Archetype | 1D Range | Observed Hits | 1D DX Min | 1D DX Max | DZ Values | Real XZ Min | Real XZ Avg | Real XZ Max | Theoretical Max $\sqrt{\text{range}^2 + 1.6^2}$ |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Shieldbearer | Tank (Humans) | 0.800 | 10 | 0.590 | 0.790 | 0.0, 0.8 | 0.590 | 0.832 | 0.994 | 1.789 |
+| Sawbot | Dps (Machines) | 0.800 | 20 | 0.250 | 0.800 | 0.0, 0.8, 1.6 | 0.790 | 1.141 | 1.789 | 1.789 |
+| Rampart | Tank (Machines) | 0.800 | 4 | 0.550 | 0.600 | 0.0, 0.8 | 0.550 | 0.768 | 1.000 | 1.789 |
+| Bone Brute | Tank (Undead) | 1.000 | 87 | 0.480 | 1.000 | 0.0, 0.8, 1.6 | 0.540 | 1.415 | 1.887 | 1.887 |
+| Beetling | Dps (Plants) | 0.600 | 83 | 0.250 | 0.600 | 0.0, 0.8, 1.6 | 0.540 | 0.965 | 1.705 | 1.709 |
+
+*Analysis:*
+In 1D simulation space, every melee unit strictly respects `|dx| <= range`. However, because presentation lanes are separated by up to `dz = 1.6`, the true Euclidean distance in XZ space at `Hit` reaches up to $1.887$ for Bone Brute and $1.789$ for Sawbot. Without aim orientation and lunge, melee units visually swing at empty air when engaging enemies on diagonal lanes.
+
+#### 1.3 Duplicate Projectile Bug Audit (F5)
+
+- Live audit confirmed duplicate projectile emissions for native Archer:
+  1. `crates/tbg-client/src/sync/events.rs:166–172`: on `Event::AttackStart`, `visuals::spawn_projectile` fires an immediate generic projectile along the vector from attacker to target.
+  2. `crates/tbg-client/src/art/arrows.rs:33–48`: 0.18s later at `ClipEvent::Release`, `art/arrows.rs` spawns a native `FlyingArrow` oriented by fixed socket yaw (`velocity: rotation * Vec3::Z * range / 0.12`).
+- 53 native arrows and 341 generic projectiles were captured in the targeted audit session. Native arrows flew horizontally along fixed direction `(-0.9063, 0.0, +0.4226)` regardless of target position.
+- Resolution in Step 5: eliminate generic projectile spawn for native casters/archers; unify projectile emission through D2 socket origin and chest target endpoint.
+
+#### 1.4 Per-Unit Entity Count and Triangles Per Form (55 Forms)
+
+Total forms: 11 kinds × 5 forms (`(0,0), (1,0), (2,0), (1,1), (2,1)`) = 55 forms.
+Triangles extracted from startup registration logs (`docs/media/a1/baseline-form-triangles.txt`); entity counts verified via `A1_ENTITIES` probe in `crates/tbg-client/src/visuals.rs`.
+
+| Unit Kind | Faction | Archetype | Native? | Form 0/0 (Base) | Form 1/0 (A1) | Form 2/0 (A2) | Form 1/1 (B1) | Form 2/1 (B2) | Max Tris | Entity Count |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Shieldbearer | Humans | Tank | Adapted | 880 | 1,000 | 808 | 898 | 1,098 | 1,098 | 31 |
+| Archer | Humans | Ranged | Base+A Native | 1,178 + 74 | 1,274 + 74 | 1,406 + 74 | 926 (adapt) | 950 (adapt) | 1,406 (+74) | 34 (native) / 31 (adapt) |
+| Bone Brute | Undead | Tank | Adapted | 932 | 968 | 1,028 | 836 | 864 | 1,028 | 31 |
+| Hexer | Undead | Control | Adapted | 832 | 992 | 1,112 | 1,100 | 1,340 | 1,340 | 31 |
+| Sawbot | Machines | Dps | Adapted | 948 | 1,096 | 1,208 | 972 | 984 | 1,208 | 31 |
+| Siege Walker | Machines | Ranged | Adapted | 880 | 880 | 880 | 936 | 964 | 964 | 31 |
+| Bloomkeeper | Plants | Support | Adapted | 1,376 | 1,376 | 1,496 | 1,400 | 1,470 | 1,496 | 31 |
+| Rootcaller | Plants | Control | Adapted | 880 | 880 | 1,120 | 1,200 | 1,440 | 1,440 | 31 |
+| Nester | Plants | Support | Adapted (recolor) | 1,376 | 1,376 | 1,496 | 1,400 | 1,470 | 1,496 | 31 |
+| Rampart | Machines | Tank | Adapted (recolor) | 880 | 1,000 | 808 | 898 | 1,098 | 1,098 | 31 |
+| Beetling | Plants | Dps | Adapted (recolor) | 880 | 880 | 1,120 | 1,200 | 1,440 | 1,440 | 31 |
+
+#### 1.5 55-Form Roster Silhouette, Weapon & Evolution Audit
+
+| Kind | Form | Name | Faction | Class | Current Body | Current Weapon | Weapon Profile | Silhouette Verdict | Identity Verdict | Animation / Rig Issues | Evolution Issues |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Shieldbearer | 0/0 | Base | Humans | Tank | Adapted | Sword + round shield | Slash | Generic round shield; lacks kite shield | Uses generic human body; sword conflicts with mace identity | Fixed ±65° yaw; no lunge; strikes air | Baseline |
+| Shieldbearer | 1/0 | Bulwark | Humans | Tank | Adapted | Sword + gold-rim shield | Slash | Slightly larger shield, still round | Minimal visual distinction from base | Same fixed yaw and no reaction pairing | Scale +8% present in scale formula, but mesh changes minor |
+| Shieldbearer | 2/0 | Fortress | Humans | Tank | Adapted | Sword + tower shield + crest | Slash | Distinct tower shield and red crest | Reads as Tank; lacks flanged mace | Weapon swing doesn't match tower shield weight | Scale +16%; good crest silhouette |
+| Shieldbearer | 1/1 | Vanguard | Humans | Tank | Adapted | Spear (0.85m) + buckler | Slash / Thrust | Reads as spearman rather than tank | Diverges from Tank archetype | Spear uses sword slash clip | Weapon class changes to spear without unique clip |
+| Shieldbearer | 2/1 | Champion | Humans | Tank | Adapted | Long spear (1.05m) + banner | Slash / Thrust | Back banner and pauldrons give strong silhouette | Good silhouette, but weapon is spear not mace | No directional aim for spear tip | High triangle count (1098); good banner |
+| Archer | 0/0 | Base | Humans | Ranged | Native v2 | Yew shortbow | Ranged | Good hooded silhouette; offhand bow | Strong human archer identity | Spawns generic projectile + native arrow | Baseline |
+| Archer | 1/0 | Longbow | Humans | Ranged | Native v2 | Yew longbow | Ranged | Green hood, feather; taller bow | Clear progression | Duplicate projectile bug; arrow ignores target | Scale has NO growth (`1.0x` in code) contrary to +8% rule |
+| Archer | 2/0 | Marksman | Humans | Ranged | Native v2 | Gilded recurve bow | Ranged | Half-cape, gold trim, gilded bow | Excellent noble archer identity | Arrow flies along fixed yaw, missing target on diagonal | Scale grows only +7% (`1.07x`) instead of +16% |
+| Archer | 1/1 | Volley | Humans | Ranged | Adapted | Dual quivers + recurve bow | Ranged | Drops native rig! Uses adapted legacy | Loss of visual fidelity from native A branch | BowRig may linger; feet slide without lock | Regression to legacy adapted body |
+| Archer | 2/1 | Arrow Rain | Humans | Ranged | Adapted | Cape + double quivers | Ranged | Broad shoulders from cape | Silhouette blurred by boxy legacy parts | Lacks native secondary springs | Adapted body; does not match A branch fidelity |
+| Bone Brute | 0/0 | Base | Undead | Tank | Adapted | Bone club | Smash | Hunched giant with ribs; distinct | Strong undead brute silhouette | Club swings horizontally across lane, missing diagonal | Baseline |
+| Bone Brute | 1/0 | Ossified | Undead | Tank | Adapted | Bone club + bone chestplate | Smash | Bulkier torso | Reads as tank | Swings air at lane z=0.8 offset | Scale +8% |
+| Bone Brute | 2/0 | Bone Wall | Undead | Tank | Adapted | Bone club + ribcage shield | Smash / Bash | Wide silhouette with rib shield on left hand | Excellent defensive silhouette | Shield is static, no bash animation | Scale +16%; shield gives great shape |
+| Bone Brute | 1/1 | Butcher | Undead | Tank | Adapted | Iron cleaver | Chop | Asymmetric right arm | Reads as aggressive DPS/tank hybrid | Swing is generic attack clip | Weapon change to cleaver has no Chop profile |
+| Bone Brute | 2/1 | Reaper | Undead | Tank | Adapted | Scythe (1.15m iron shaft) | Chop / Slash | Tall scythe polearm silhouette | Very distinct, grim reaper motif | Scythe blade clips ground during idle/walk | High reach weapon still hits air at dz=1.6 |
+| Hexer | 0/0 | Base | Undead | Control | Adapted | Skull staff | Cast | Hooded cone head + staff; slender | Distinct mystical silhouette | Cast projectile leaves from center, not staff tip | Baseline |
+| Hexer | 1/0 | Withering | Undead | Control | Adapted | Staff + glowing eye orbs | Cast | Orbs add top-heavy silhouette | Mystical undead identity | Cast clip has no target aim | Scale +8% |
+| Hexer | 2/0 | Doom | Undead | Control | Adapted | Large staff + glowing ring aura | Cast | Floating glowing ring above staff | Strong tier 2 magical silhouette | Ring is rigidly parented to hand joint | Scale +16%; aura readable |
+| Hexer | 1/1 | Plague | Undead | Control | Adapted | Censer on chain (left hand) | Cast | Asymmetric censer and spores | Strong alchemical/plague theme | Spores are static balls, no motion/smoke | Good branch divergence |
+| Hexer | 2/1 | Pestilence | Undead | Control | Adapted | Censer + 5 floating spore balls | Cast | Wide halo of green spores | High silhouette volume (1340 tris) | Spore spheres clip into body during animation | Very high triangle count for adapted body |
+| Sawbot | 0/0 | Base | Machines | Dps | Adapted | Right-hand circular saw | Mech | Boxy head, glowing eye slot, spinning saw | Strong steampunk automaton look | Human limb arcs look unnatural on robot | Baseline |
+| Sawbot | 1/0 | Overclock | Machines | Dps | Adapted | Twin saws (both hands) | Mech | Wide aggressive dual-arm silhouette | Reads immediately as high-DPS mech | Both arms swing with human punch motion | Scale +8% |
+| Sawbot | 2/0 | Shredder | Machines | Dps | Adapted | Twin saws + dual exhaust pipes | Mech | Exhaust stacks on back give vertical read | Clear evolution from base and A1 | Exhaust pipes are static, no smoke particles | Scale +16%; 1208 tris |
+| Sawbot | 1/1 | Plating | Machines | Dps | Adapted | Single saw + front/back heavy plates | Mech | Wider, armored torso | Looks more like Tank than DPS | Armor plates clip into arms during attack | Good branch differentiation |
+| Sawbot | 2/1 | Juggernaut | Machines | Dps | Adapted | Large saw (r=0.27) + tower helm | Mech | Tall rectangular headplate | Distinct heavy juggernaut | Tower helm clips into shoulders on walk | High mass silhouette |
+| Siege Walker | 0/0 | Base | Machines | Ranged | Adapted | Torso cannon barrel (0.95m) | Ranged (Mech) | Slender tall legs, torso barrel; NOT arbalest | Conflicts with spec (cannon vs arbalest) | Recoil is whole body rock; no weapon aim | Baseline |
+| Siege Walker | 1/0 | Longshot | Machines | Ranged | Adapted | Long cannon barrel (1.25m) | Ranged (Mech) | Extremely long protruding barrel | Clear long-range read | Barrel clips through obstacles and ally units | Identical triangle count to base (880) |
+| Siege Walker | 2/0 | Artillery | Machines | Ranged | Adapted | Long barrel + brass muzzle ring | Ranged (Mech) | Brass muzzle accentuates barrel tip | High visual clarity at muzzle | Barrel doesn't elevate or traverse to aim | Scale +16%; same 880 tris |
+| Siege Walker | 1/1 | Shrapnel | Machines | Ranged | Adapted | Triple cannon barrels (3x) | Ranged (Mech) | Multi-barrel array across torso | Strong volley artillery silhouette | 3 barrels shoot 1 generic projectile | Distinct wide profile |
+| Siege Walker | 2/1 | Concussion | Machines | Ranged | Adapted | Triple barrels + rear brass boiler | Ranged (Mech) | Rear counterweight boiler balances silhouette | Industrial heavy artillery | Boiler doesn't steam or glow | Good weight balance |
+| Bloomkeeper | 0/0 | Base | Plants | Support | Adapted | Blossom staff + leaf cloak | Cast | Flower-petal head ring + cloak | Distinct floral druid silhouette | Heal cast has no directional aim | Baseline; 1376 tris |
+| Bloomkeeper | 1/0 | Blossom | Plants | Support | Adapted | Larger blossom petals | Cast | Head petals expand from 0.07 to 0.09 | Subtle change, hard to read at camera | Petal ring clips into torso on walk | Minimal silhouette change from base |
+| Bloomkeeper | 2/0 | Grove | Plants | Support | Adapted | Blossom ring halo behind head | Cast | Outer halo ring gives regal priest silhouette | Reads as high tier healer | Halo is rigid, rotates with head | Scale +16%; 1496 tris |
+| Bloomkeeper | 1/1 | Bramble | Plants | Support | Adapted | Bark armor slabs on torso | Cast | Thick wooden chest plate | Reads tougher, more durable | Armor slabs clip into arms | Scale +8% |
+| Bloomkeeper | 2/1 | Thornwarden | Plants | Support | Adapted | Bark armor + 5 thorny wood cones | Cast | Spiky chest plate with 5 horn/cones | Aggressive thorny silhouette | Spikes look somewhat chaotic at distance | Good branch differentiation |
+| Rootcaller | 0/0 | Base | Plants | Control | Adapted | Twin vine whips (both hands) | Slash / Cast | Spiky sprout ears + vine arms | Small woodland creature / treant | Vine whips are rigid pills, don't bend | Baseline; 880 tris |
+| Rootcaller | 1/0 | Deep Roots | Plants | Control | Adapted | Long vine whips (0.7m vs 0.5m) | Slash / Cast | Longer arms reach further | Subtle at camera distance | Long rigid pills look stiff in attack clip | Minimal change |
+| Rootcaller | 2/0 | Strangle | Plants | Control | Adapted | Long whips + leaf wrist cuffs | Slash / Cast | Leaf cuffs add green silhouette volume | Reads as evolved plant controller | Cuffs clip into body on walk | Scale +16%; 1120 tris |
+| Rootcaller | 1/1 | Spores | Plants | Control | Adapted | Mushroom cap on head (r=0.24) | Slash / Cast | Domed toadstool cap silhouette | Completely changes silhouette; very readable | Cap clips into shoulders during idle breath | Excellent silhouette branch |
+| Rootcaller | 2/1 | Overgrowth | Plants | Control | Adapted | Large cap (r=0.30) + 3 body mushrooms | Slash / Cast | Huge spotted mushroom crown + torso clusters | Highly readable fungus treant | Torso mushrooms clip into arms on attack | Scale +16%; 1440 tris |
+| Nester | 0/0 | Base | Plants | Support | Adapted (recolor) | Recolor of Bloomkeeper (NESTER) | Cast | Identical to Bloomkeeper except color | Lacks unique silhouette; placeholder | Reuses Bloomkeeper animation directly | Reuses Bloomkeeper forms |
+| Nester | 1/0 | Brood | Plants | Support | Adapted (recolor) | Recolor of Bloomkeeper A1 | Cast | Identical to Bloomkeeper A1 | No hive or insect thematic geometry | No egg or nest props | Recolor placeholder |
+| Nester | 2/0 | Hive | Plants | Support | Adapted (recolor) | Recolor of Bloomkeeper A2 | Cast | Identical to Bloomkeeper A2 | Lacks wasp/bee hive silhouette | Petal ring recolored to yellow/brown | Recolor placeholder |
+| Nester | 1/1 | Venom | Plants | Support | Adapted (recolor) | Recolor of Bloomkeeper B1 | Cast | Identical to Bloomkeeper B1 | No venom glands or stingers | Same bark slab geometry | Recolor placeholder |
+| Nester | 2/1 | Blight | Plants | Support | Adapted (recolor) | Recolor of Bloomkeeper B2 | Cast | Identical to Bloomkeeper B2 | No blight motifs | Same chest thorns | Recolor placeholder |
+| Rampart | 0/0 | Base | Machines | Tank | Adapted (recolor) | Recolor of Shieldbearer (RAMPART) | Slash (Mech) | Scaled-up Shieldbearer (`scale=1.25`) | Human knight proportions clash with Mech faction | Uses human walk and sword swing | Reuses Shieldbearer forms |
+| Rampart | 1/0 | Bastion | Machines | Tank | Adapted (recolor) | Recolor of Shieldbearer A1 | Slash (Mech) | Large round shield, colored gunmetal | Still reads as human knight in armor | No mechanical joints or tread/wall silhouette | Recolor placeholder |
+| Rampart | 2/0 | Citadel | Machines | Tank | Adapted (recolor) | Recolor of Shieldbearer A2 | Slash (Mech) | Tower shield recolored to iron/orange | Reads as heavy knight, not mechanical wall | Knight crest on helmet looks medieval human | Recolor placeholder |
+| Rampart | 1/1 | Spiked | Machines | Tank | Adapted (recolor) | Recolor of Shieldbearer B1 | Thrust / Slash | Spearman knight recolored | Not a tank, not a machine wall | Spear thrust clip | Recolor placeholder |
+| Rampart | 2/1 | Siegebreaker | Machines | Tank | Adapted (recolor) | Recolor of Shieldbearer B2 | Thrust / Slash | Knight with back banner recolored | Completely contradicts Machines aesthetic | Back banner is medieval fabric | Recolor placeholder |
+| Beetling | 0/0 | Base | Plants | Dps | Adapted (recolor) | Recolor of Rootcaller (`scale=0.55`) | Slash | Scaled-down Rootcaller treant | Reads as mini-treant, NOT a beetle/insect | Uses treant whip arms, not mandibles | Summon inherits Nester tier/branch |
+| Beetling | 1/0 | Brood | Plants | Dps | Adapted (recolor) | Recolor of Rootcaller A1 (`scale=0.55`) | Slash | Mini-treant with longer arms | Still not an insect | No beetle carapace or legs | Reuses Rootcaller A1 |
+| Beetling | 2/0 | Hive | Plants | Dps | Adapted (recolor) | Recolor of Rootcaller A2 (`scale=0.55`) | Slash | Mini-treant with leaf cuffs | Treant silhouette | Same whip animation | Reuses Rootcaller A2 |
+| Beetling | 1/1 | Venom | Plants | Dps | Adapted (recolor) | Recolor of Rootcaller B1 (`scale=0.55`) | Slash | Mini-treant with mushroom cap | Mushroom head looks fungal, not insectoid | Mushroom cap wobbles with head | Reuses Rootcaller B1 |
+| Beetling | 2/1 | Blight | Plants | Dps | Adapted (recolor) | Recolor of Rootcaller B2 (`scale=0.55`) | Slash | Mini-treant with large mushroom + body fungi | Reads as mushroom goblin | High triangle count for small summon (1440 tris!) | Reuses Rootcaller B2 |
+
+#### 1.6 Evidence Artifacts
+
+- [Misaimed Diagonal Attack Screenshot](docs/media/a1/misaimed-diagonal.jpg) (`docs/media/a1/misaimed-diagonal.jpg`, 133 KB): live scene showing Bone Brute on lane $z = -0.8$ and Shieldbearer on lane $z = +0.8$ engaging across a 1.6-tile diagonal gap with fixed $\pm 65^\circ$ yaw, visibly swinging at empty air.
+- [Autoplay Match Result](docs/media/a1/autoplay-result.jpg) (`docs/media/a1/autoplay-result.jpg`, 83 KB): complete match vs bot (DEFEAT / Stronghold destroyed, 1:52).
+- [Targeted Match Result](docs/media/a1/targeted-result.jpg) (`docs/media/a1/targeted-result.jpg`, 83 KB): targeted practice match deploying Rampart, Sawbot, Nester, and Beetlings (DEFEAT, 1:35).
+- [Baseline Form Triangles](docs/media/a1/baseline-form-triangles.txt) (`docs/media/a1/baseline-form-triangles.txt`): actual startup logs for all 55 forms.
+- [Targeted Audit Console JSON](docs/media/a1/preliminary-targeted.json) (`docs/media/a1/preliminary-targeted.json`, 237 KB): full CDP console capture of corrected reach measurements and projectile events.
+- [Temporary Audit Probe Patch](docs/media/a1/temporary-audit-probe.patch) (`docs/media/a1/temporary-audit-probe.patch`): exact diff of the temporary instrumentation used to gather live measurements, preserved for reproduction.
+
 ### Progress
 
-Step 0 complete. Step 1 partially audited; steps 2–14 pending. Execution
-was interrupted at the owner's request to continue in Antigravity.
-No permanent gameplay or presentation behavior change has been made.
-Temporary probes were saved as a patch and removed from client source.
+Step 0 complete (preflight verification).
+Step 1 complete (audit report, corrected F4 live melee reach measurements for all 5 melee units, F5 duplicate projectile verification, 55-form roster audit, triangle and entity counts, misaimed diagonal attack screenshot).
+Steps 2–14 pending.
 
-The full resume instructions, corrected source recognition, evidence,
-verification outputs, preliminary-measurement caveat and remaining steps
-are in [A1-HANDOFF.md](../A1-HANDOFF.md).
-
-A Chromium hardware-rendered autoplay match reached the result screen
-(1:52, Stronghold destroyed). Formal performance baseline: not measured.
-Firefox gameplay, online/reconnect and final acceptance: not run.
-The preliminary F4 measurements require repeating with the corrected
-probe; they are not accepted audit results.
+No permanent gameplay or client presentation code changes were committed (I1–I6 hold).
+Temporary audit probe used during step 1 was saved in `docs/media/a1/temporary-audit-probe.patch` and completely removed from client source; pristine release client was rebuilt via `trunk build --release`.
 
 ### Owner decisions
 
