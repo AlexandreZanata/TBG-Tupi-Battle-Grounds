@@ -198,8 +198,9 @@ impl Lobby {
             LobbyCmd::RegisterDone {
                 token,
                 conn_id,
+                ip,
                 result,
-            } => self.register_done(token, conn_id, result),
+            } => self.register_done(token, conn_id, ip, result),
             LobbyCmd::LoginDone {
                 token,
                 conn_id,

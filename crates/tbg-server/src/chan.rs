@@ -93,6 +93,8 @@ pub enum LobbyCmd {
     RegisterDone {
         token: Token,
         conn_id: u64,
+        /// The address whose register slot this attempt reserved.
+        ip: IpAddr,
         result: Result<(AccountId, Profile, String), AccountError>,
     },
     LoginDone {

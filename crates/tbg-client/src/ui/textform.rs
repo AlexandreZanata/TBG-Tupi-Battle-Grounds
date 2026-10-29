@@ -173,6 +173,16 @@ fn wire_dom(mut form: NonSendMut<ActiveForm>) {
         {
             *submitted.lock().unwrap_or_else(|e| e.into_inner()) = Some(input.value());
         }
+        // A new attempt hides the previous refusal: an old "That name is
+        // taken" must never stay under a different name while it is checked.
+        if let Some(error) = web_sys::window()
+            .and_then(|w| w.document())
+            .and_then(|d| d.get_element_by_id("tbg-form-error"))
+            .and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok())
+        {
+            error.set_text_content(None);
+            error.set_hidden(true);
+        }
     });
     form_el
         .add_event_listener_with_callback("submit", submit.as_ref().unchecked_ref())
