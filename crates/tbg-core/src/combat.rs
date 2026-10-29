@@ -1,9 +1,7 @@
 //! Automatic combat (BR-U01, BR-U04): statuses, movement, windup and
 //! hits, splash, heals, Stronghold fire, deaths.
 
-use crate::content::{
-    BP, LANE_LEN, STRONGHOLD_DAMAGE, STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, WINDUP,
-};
+use crate::content::{BP, LANE_LEN, WINDUP};
 use crate::hits::{damage, resolve_hit};
 use crate::state::{stronghold_x, Event, MatchState, Target};
 use crate::targeting::{self, Engage};
@@ -97,6 +95,7 @@ fn slowed_interval(interval: u16, status: Status) -> u16 {
 /// Each Stronghold shoots the nearest enemy unit in range, a Rampart in
 /// range first (Guard, BR-U09).
 pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
+    let rules = state.rules;
     for seat in Seat::BOTH {
         if state.player(seat).stronghold_cooldown > 0 {
             continue;
@@ -105,7 +104,7 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
         let target = state
             .units
             .iter()
-            .filter(|u| u.seat != seat && u.hp > 0 && (u.x - sx).abs() <= STRONGHOLD_RANGE)
+            .filter(|u| u.seat != seat && u.hp > 0 && (u.x - sx).abs() <= rules.stronghold_range)
             .map(|u| (u.kind != UnitKind::Rampart, (u.x - sx).abs(), u.id))
             .min();
         if let Some((_, _, id)) = target {
@@ -114,8 +113,8 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
                 from: Target::Stronghold(seat),
                 to,
             });
-            damage(state, to, STRONGHOLD_DAMAGE, ev);
-            state.player_mut(seat).stronghold_cooldown = STRONGHOLD_INTERVAL;
+            damage(state, to, rules.stronghold_damage, ev);
+            state.player_mut(seat).stronghold_cooldown = rules.stronghold_interval;
         }
     }
 }

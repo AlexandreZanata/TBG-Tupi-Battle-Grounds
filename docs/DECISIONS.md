@@ -381,3 +381,24 @@ allowed only with measured evidence and is documented apart from game rules.
 **Reopen when** the harness or playtests show a dominant spam strategy that
 cost/stat tuning cannot fix, or large armies miss the frame-rate or server
 targets after optimization.
+
+## D-33 · Balance lab: headless matches at full speed, ruleset as data — 2026-10-29 (owner request, planned P16-C)
+
+**Decision.** Balance is measured by an offline lab (`crates/tbg-balance`)
+that plays millions of complete matches with the same `step()` the server
+runs, back to back on every core instead of every 50 ms. The tick length is
+never scaled. Every tunable number becomes a `Ruleset` value; the online
+game only ever uses the canonical ruleset built from `content.rs`. The lab
+measures many opponent policies, Energy-equal unit duels, paired seeds with
+bootstrap intervals, and a Nash meta-game, then searches for small,
+confirmed number changes.
+**Why.** One heuristic bot and a few thousand matches (P7, P16-B) measure
+the bot more than the game; the open army (D-32) made balance harder and
+the heavy-spam finding needs evidence, not guesses.
+**Guard rails.** Equality with 1× is proven by trace goldens and a real
+server match replayed headless; lab contract tests are generic over the
+roster and append-only; confirmation seeds are never used for tuning;
+values stay **Proposed** until the owner's playtest; no mechanic change
+without its own owner decision.
+**Reopen when** lab predictions and real match records disagree
+persistently, or the lab's cost to maintain exceeds its value.

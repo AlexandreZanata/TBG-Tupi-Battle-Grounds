@@ -24,6 +24,7 @@ multiplayer, low cost.
 | `crates/tbg-core` | Deterministic rules, content tables, bot, protocol (shared) |
 | `crates/tbg-client` | Bevy client → WASM/WebGL2 |
 | `crates/tbg-server` | Axum/Tokio authoritative server |
+| `crates/tbg-balance` | Offline balance lab: millions of headless matches, gate, search (D-33) |
 | `archive/` | Legacy project, read-only (`archive/ARCHIVE-MANIFEST.md`) |
 
 ## Non-negotiables
@@ -114,6 +115,12 @@ Write tests where competitive correctness is at stake: determinism,
 ownership. Assert the documented contract (cite the rule ID), not the
 implementation. One meaningful scenario beats ten trivial assertions. No
 coverage targets. Never delete a useful test to make a change pass.
+
+Contract tests (`tests/contract_*.rs`, `tbg-balance/tests/contract.rs`)
+are append-only: change one only in the same commit as the GAME-DESIGN or
+DECISIONS change it guards, and name that change in the commit message.
+Balance numbers change only with `tbg-balance` evidence (D-33); gate
+thresholds are product decisions, never test fixes.
 
 ## Verification
 

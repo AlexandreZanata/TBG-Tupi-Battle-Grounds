@@ -8,11 +8,16 @@ pub mod account;
 pub mod bot;
 mod combat;
 pub mod content;
+pub mod headless;
 mod hits;
 mod intent;
+#[cfg(feature = "lab")]
+mod lab;
 pub mod protocol;
 pub mod rating;
+pub mod replay;
 pub mod rng;
+pub mod ruleset;
 pub mod shop;
 pub mod sim;
 pub mod state;
@@ -24,6 +29,7 @@ pub mod view;
 
 pub use intent::{PlayerIntention, Rejection};
 pub use rng::Pcg32;
+pub use ruleset::Ruleset;
 pub use state::{EndReason, Event, MatchState, Outcome, Phase, Target, Unit};
 pub use types::*;
 pub use view::{MatchView, UnitView};

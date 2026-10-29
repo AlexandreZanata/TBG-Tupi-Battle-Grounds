@@ -1,0 +1,299 @@
+git_head: 6d8e7f1
+ruleset_fingerprint: f941b7b437f16f7e
+applied: canon
+seeds: 0..1024 (1024 pairs)
+threads: 16
+reaction_views: 5
+wall_s: 2531.05
+screening_block: 200000..200256 (fixed; this run predates the manifest note)
+
+canon loss 5731.0
+energy_start -2 -> 5532.0
+energy_start +2 -> 5523.4
+energy_cap -2 -> 5044.9
+energy_cap +2 -> 5305.7
+regen_running -2 -> 5586.6
+regen_running +2 -> 5605.9
+regen_overtime -2 -> 5729.7
+regen_overtime +2 -> 5738.7
+evolve_cost.0 -2 -> 4949.9
+evolve_cost.0 +2 -> 5869.7
+evolve_cost.1 -2 -> 5595.1
+evolve_cost.1 +2 -> 5853.6
+stronghold_hp -2 -> 5724.9
+stronghold_hp +2 -> 5737.1
+stronghold_damage -2 -> 5753.9
+stronghold_damage +2 -> 5601.5
+stronghold_interval -2 -> 5761.7
+stronghold_interval +2 -> 5752.8
+stronghold_range +2 -> 5758.1
+synergy.humans.1 -2 -> 5708.9
+synergy.humans.1 +2 -> 5731.5
+synergy.humans.2 -2 -> 5686.9
+synergy.humans.2 +2 -> 5705.9
+synergy.undead.1 -2 -> 5731.0
+synergy.undead.1 +2 -> 5749.0
+synergy.undead.2 -2 -> 5730.4
+synergy.undead.2 +2 -> 5806.8
+synergy.machines.1 -2 -> 5701.9
+synergy.machines.1 +2 -> 5772.8
+synergy.machines.2 -2 -> 5708.6
+synergy.machines.2 +2 -> 5716.9
+synergy.plants.1 -2 -> 5738.3
+synergy.plants.1 +2 -> 5731.0
+synergy.plants.2 -2 -> 5723.5
+synergy.plants.2 +2 -> 5728.8
+hatch_every -2 -> 5800.9
+hatch_every +2 -> 5845.1
+hatch_every_hive -2 -> 5734.7
+hatch_every_hive +2 -> 5821.7
+beetle_lifetime -2 -> 5769.9
+beetle_lifetime +2 -> 5763.1
+Shieldbearer.cost -2 -> 5761.1
+Shieldbearer.cost +2 -> 5165.3
+Shieldbearer.hp -2 -> 5748.4
+Shieldbearer.hp +2 -> 5961.3
+Shieldbearer.damage -2 -> 5712.1
+Shieldbearer.damage +2 -> 5719.1
+Shieldbearer.interval -2 -> 5658.9
+Shieldbearer.interval +2 -> 5712.5
+Shieldbearer.range -2 -> 5888.6
+Shieldbearer.range +2 -> 5718.1
+Shieldbearer.speed -2 -> 5769.9
+Shieldbearer.speed +2 -> 5735.5
+Shieldbearer.Bulwark.hp_bp -2 -> 5723.1
+Shieldbearer.Bulwark.hp_bp +2 -> 5805.1
+Shieldbearer.Fortress.hp_bp -2 -> 5740.5
+Shieldbearer.Fortress.hp_bp +2 -> 5730.4
+Shieldbearer.Vanguard.dmg_bp -2 -> 5792.3
+Shieldbearer.Vanguard.dmg_bp +2 -> 5809.7
+Shieldbearer.Vanguard.speed_bp -2 -> 5725.6
+Shieldbearer.Vanguard.speed_bp +2 -> 5735.1
+Shieldbearer.Champion.dmg_bp -2 -> 5732.3
+Shieldbearer.Champion.dmg_bp +2 -> 5799.3
+Shieldbearer.Champion.splash_add -2 -> 5727.9
+Shieldbearer.Champion.splash_add +2 -> 5732.5
+Archer.cost -2 -> 5728.3
+Archer.cost +2 -> 5329.0
+Archer.hp -2 -> 5635.9
+Archer.hp +2 -> 5742.5
+Archer.damage -2 -> 5760.1
+Archer.damage +2 -> 5845.5
+Archer.interval -2 -> 5626.2
+Archer.interval +2 -> 5888.5
+Archer.range -2 -> 5827.3
+Archer.range +2 -> 5627.7
+Archer.speed -2 -> 5635.2
+Archer.speed +2 -> 5697.9
+Archer.Longbow.dmg_bp -2 -> 5747.8
+Archer.Longbow.dmg_bp +2 -> 5791.5
+Archer.Longbow.range_add -2 -> 5734.4
+Archer.Longbow.range_add +2 -> 5761.5
+Archer.Marksman.dmg_bp -2 -> 5729.9
+Archer.Marksman.dmg_bp +2 -> 5706.0
+Archer.Volley.atk_bp -2 -> 5733.9
+Archer.Volley.atk_bp +2 -> 5721.9
+Archer.ArrowRain.splash_add -2 -> 5737.8
+Archer.ArrowRain.splash_add +2 -> 5734.3
+BoneBrute.cost -2 -> 5426.1
+BoneBrute.cost +2 -> 5725.3
+BoneBrute.hp -2 -> 5617.2
+BoneBrute.hp +2 -> 5455.7
+BoneBrute.damage -2 -> 5690.2
+BoneBrute.damage +2 -> 5682.1
+BoneBrute.interval -2 -> 5808.4
+BoneBrute.interval +2 -> 5783.4
+BoneBrute.range -2 -> 5728.5
+BoneBrute.range +2 -> 5659.7
+BoneBrute.speed -2 -> 5701.4
+BoneBrute.speed +2 -> 5771.3
+BoneBrute.Ossified.hp_bp -2 -> 5674.1
+BoneBrute.Ossified.hp_bp +2 -> 5743.0
+BoneBrute.BoneWall.hp_bp -2 -> 5709.9
+BoneBrute.BoneWall.hp_bp +2 -> 5732.6
+BoneBrute.Butcher.dmg_bp -2 -> 5787.2
+BoneBrute.Butcher.dmg_bp +2 -> 5734.5
+BoneBrute.Reaper.dmg_bp -2 -> 5739.7
+BoneBrute.Reaper.dmg_bp +2 -> 5733.2
+BoneBrute.Reaper.splash_add -2 -> 5736.8
+BoneBrute.Reaper.splash_add +2 -> 5730.2
+Hexer.cost -2 -> 5892.8
+Hexer.cost +2 -> 5324.1
+Hexer.hp -2 -> 5719.5
+Hexer.hp +2 -> 5747.2
+Hexer.damage -2 -> 5578.7
+Hexer.damage +2 -> 5697.0
+Hexer.interval -2 -> 5735.0
+Hexer.interval +2 -> 5629.8
+Hexer.range -2 -> 5744.1
+Hexer.range +2 -> 5647.0
+Hexer.speed -2 -> 5680.8
+Hexer.speed +2 -> 5695.9
+Hexer.Doom.dmg_bp -2 -> 5728.1
+Hexer.Doom.dmg_bp +2 -> 5730.4
+Hexer.Plague.splash_add -2 -> 5741.3
+Hexer.Plague.splash_add +2 -> 5724.7
+Hexer.Pestilence.dmg_bp -2 -> 5720.4
+Hexer.Pestilence.dmg_bp +2 -> 5735.5
+Hexer.Pestilence.splash_add -2 -> 5731.7
+Hexer.Pestilence.splash_add +2 -> 5732.4
+Sawbot.cost -2 -> 5150.5
+Sawbot.cost +2 -> 5713.9
+Sawbot.hp -2 -> 5532.7
+Sawbot.hp +2 -> 5710.3
+Sawbot.damage -2 -> 5694.8
+Sawbot.damage +2 -> 5577.7
+Sawbot.interval -2 -> 5637.6
+Sawbot.interval +2 -> 5786.8
+Sawbot.range -2 -> 5736.3
+Sawbot.range +2 -> 5921.7
+Sawbot.speed -2 -> 5980.6
+Sawbot.speed +2 -> 5966.9
+Sawbot.Overclock.atk_bp -2 -> 5707.8
+Sawbot.Overclock.atk_bp +2 -> 5498.9
+Sawbot.Shredder.atk_bp -2 -> 5715.6
+Sawbot.Shredder.atk_bp +2 -> 5731.0
+Sawbot.Shredder.speed_bp -2 -> 5727.2
+Sawbot.Shredder.speed_bp +2 -> 5726.4
+Sawbot.Plating.hp_bp -2 -> 5729.1
+Sawbot.Plating.hp_bp +2 -> 5713.2
+Sawbot.Juggernaut.hp_bp -2 -> 5732.0
+Sawbot.Juggernaut.hp_bp +2 -> 5735.9
+Sawbot.Juggernaut.splash_add -2 -> 5731.0
+Sawbot.Juggernaut.splash_add +2 -> 5732.7
+SiegeWalker.cost -2 -> 6360.3
+SiegeWalker.cost +2 -> 5348.1
+SiegeWalker.hp -2 -> 5724.9
+SiegeWalker.hp +2 -> 5763.9
+SiegeWalker.damage -2 -> 5698.0
+SiegeWalker.damage +2 -> 5818.5
+SiegeWalker.interval -2 -> 5796.5
+SiegeWalker.interval +2 -> 5716.5
+SiegeWalker.range -2 -> 5711.5
+SiegeWalker.speed -2 -> 5827.5
+SiegeWalker.speed +2 -> 5620.4
+SiegeWalker.splash -2 -> 5768.6
+SiegeWalker.splash +2 -> 5857.9
+SiegeWalker.Longshot.range_add -2 -> 5737.5
+SiegeWalker.Longshot.range_add +2 -> 5724.8
+SiegeWalker.Artillery.dmg_bp -2 -> 5725.9
+SiegeWalker.Artillery.dmg_bp +2 -> 5810.6
+SiegeWalker.Shrapnel.splash_add -2 -> 5743.8
+SiegeWalker.Shrapnel.splash_add +2 -> 5728.6
+Bloomkeeper.cost -2 -> 5399.5
+Bloomkeeper.cost +2 -> 5886.0
+Bloomkeeper.hp -2 -> 5792.3
+Bloomkeeper.hp +2 -> 5695.5
+Bloomkeeper.interval -2 -> 5688.1
+Bloomkeeper.interval +2 -> 5866.3
+Bloomkeeper.range -2 -> 5749.2
+Bloomkeeper.range +2 -> 5845.5
+Bloomkeeper.speed -2 -> 5759.2
+Bloomkeeper.speed +2 -> 5851.9
+Bloomkeeper.heal -2 -> 5837.1
+Bloomkeeper.heal +2 -> 5631.6
+Bloomkeeper.Blossom.heal_bp -2 -> 5807.4
+Bloomkeeper.Blossom.heal_bp +2 -> 5742.9
+Bloomkeeper.Grove.splash_add -2 -> 5730.2
+Bloomkeeper.Grove.splash_add +2 -> 5729.9
+Bloomkeeper.Bramble.hp_bp -2 -> 5750.9
+Bloomkeeper.Bramble.hp_bp +2 -> 5730.2
+Bloomkeeper.Bramble.dmg_add -2 -> 5722.6
+Bloomkeeper.Bramble.dmg_add +2 -> 5731.7
+Rootcaller.cost -2 -> 5597.5
+Rootcaller.cost +2 -> 5080.6
+Rootcaller.hp -2 -> 5733.8
+Rootcaller.hp +2 -> 5697.8
+Rootcaller.damage -2 -> 5808.8
+Rootcaller.damage +2 -> 5726.9
+Rootcaller.interval -2 -> 5634.0
+Rootcaller.interval +2 -> 5798.6
+Rootcaller.range -2 -> 5877.0
+Rootcaller.range +2 -> 5792.4
+Rootcaller.speed -2 -> 5959.0
+Rootcaller.speed +2 -> 5745.4
+Rootcaller.Strangle.dmg_bp -2 -> 5731.2
+Rootcaller.Strangle.dmg_bp +2 -> 5727.7
+Rootcaller.Spores.splash_add -2 -> 5734.4
+Rootcaller.Spores.splash_add +2 -> 5725.5
+Rootcaller.Overgrowth.range_add -2 -> 5725.7
+Rootcaller.Overgrowth.range_add +2 -> 5729.5
+Nester.cost -2 -> 5880.2
+Nester.cost +2 -> 5269.0
+Nester.hp -2 -> 5799.5
+Nester.hp +2 -> 5782.3
+Nester.damage -2 -> 5841.7
+Nester.damage +2 -> 5742.0
+Nester.interval -2 -> 5700.4
+Nester.interval +2 -> 5700.8
+Nester.range -2 -> 5863.8
+Nester.range +2 -> 5729.0
+Nester.speed -2 -> 5936.0
+Nester.speed +2 -> 5886.1
+Rampart.cost -2 -> 5073.1
+Rampart.cost +2 -> 5173.5
+Rampart.hp -2 -> 5609.7
+Rampart.hp +2 -> 5758.0
+Rampart.damage -2 -> 5735.4
+Rampart.damage +2 -> 5756.6
+Rampart.interval -2 -> 5656.3
+Rampart.interval +2 -> 5692.1
+Rampart.range -2 -> 5681.6
+Rampart.range +2 -> 5629.4
+Rampart.speed -2 -> 5701.5
+Rampart.speed +2 -> 5696.3
+Rampart.Bastion.hp_bp -2 -> 5713.4
+Rampart.Bastion.hp_bp +2 -> 5734.9
+Rampart.Citadel.hp_bp -2 -> 5717.5
+Rampart.Citadel.hp_bp +2 -> 5725.8
+Rampart.Spiked.dmg_bp -2 -> 5749.4
+Rampart.Spiked.dmg_bp +2 -> 5721.3
+Rampart.Siegebreaker.dmg_bp -2 -> 5741.7
+Rampart.Siegebreaker.dmg_bp +2 -> 5721.3
+Rampart.Siegebreaker.splash_add -2 -> 5731.2
+Rampart.Siegebreaker.splash_add +2 -> 5737.2
+Beetling.hp -2 -> 5756.0
+Beetling.hp +2 -> 5832.3
+Beetling.damage -2 -> 5759.6
+Beetling.damage +2 -> 5727.1
+Beetling.interval -2 -> 5716.4
+Beetling.interval +2 -> 5718.2
+Beetling.range -2 -> 5773.7
+Beetling.range +2 -> 6003.1
+Beetling.speed -2 -> 5818.3
+Beetling.speed +2 -> 6075.4
+Beetling.Blight.hp_bp -2 -> 5726.6
+Beetling.Blight.hp_bp +2 -> 5741.4
+Beetling.Blight.dmg_bp -2 -> 5727.8
+Beetling.Blight.dmg_bp +2 -> 5731.4
+gen 0: canon loss 5765.2
+gen 1: improved loss 4845.0 penalty 2.9 [evolve_cost.0-1, Sawbot.hp-1]
+gen 2: improved loss 3665.6 penalty 4.4 [evolve_cost.0-1, Sawbot.hp-1, Rampart.cost+1]
+gen 3: improved loss 3405.9 penalty 7.3 [evolve_cost.0-1, Shieldbearer.cost+1, Sawbot.hp-1, Rampart.cost+1, Rampart.hp+1]
+gen 4: improved loss 3293.9 penalty 9.0 [evolve_cost.0-1, stronghold_damage-2, Shieldbearer.cost+1, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1, Rampart.hp+1]
+gen 5: improved loss 3047.8 penalty 11.1 [evolve_cost.0-1, stronghold_damage-2, Shieldbearer.cost+1, Archer.cost+1, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1, Rampart.hp+1]
+gen 6: kept loss 3047.8 penalty 11.1 [evolve_cost.0-1, stronghold_damage-2, Shieldbearer.cost+1, Archer.cost+1, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1, Rampart.hp+1]
+gen 7: improved loss 3047.4 penalty 10.9 [evolve_cost.0-1, stronghold_damage-1, Shieldbearer.cost+1, Archer.cost+1, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1, Rampart.hp+1]
+gen 8: kept loss 3047.4 penalty 10.9 [evolve_cost.0-1, stronghold_damage-1, Shieldbearer.cost+1, Archer.cost+1, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1, Rampart.hp+1]
+gen 9: improved loss 2989.6 penalty 11.3 [evolve_cost.0-1, stronghold_damage-3, Shieldbearer.cost+1, Archer.cost+1, Hexer.damage+1, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1]
+gen 10: improved loss 2968.3 penalty 11.3 [evolve_cost.0-1, stronghold_damage-3, Shieldbearer.cost+1, Archer.cost+1, Hexer.damage-1, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1]
+gen 11: improved loss 2954.2 penalty 11.6 [evolve_cost.0-1, stronghold_damage-3, Shieldbearer.cost+1, Archer.cost+1, Hexer.damage-3, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1]
+gen 12: kept loss 2954.2 penalty 11.6 [evolve_cost.0-1, stronghold_damage-3, Shieldbearer.cost+1, Archer.cost+1, Hexer.damage-3, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1]
+gen 13: improved loss 2392.7 penalty 11.6 [evolve_cost.0-1, stronghold_damage-3, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1]
+gen 14: kept loss 2392.7 penalty 11.6 [evolve_cost.0-1, stronghold_damage-3, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-1, SiegeWalker.speed+1, Rampart.cost+1]
+gen 15: improved loss 2341.7 penalty 12.1 [evolve_cost.0-1, stronghold_damage-3, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+1, Rampart.cost+1]
+gen 16: improved loss 2293.7 penalty 12.4 [evolve_cost.0-1, stronghold_damage-3, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 17: kept loss 2293.7 penalty 12.4 [evolve_cost.0-1, stronghold_damage-3, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 18: improved loss 2268.0 penalty 12.9 [evolve_cost.0-1, stronghold_damage-5, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 19: kept loss 2268.0 penalty 12.9 [evolve_cost.0-1, stronghold_damage-5, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 20: kept loss 2268.0 penalty 12.9 [evolve_cost.0-1, stronghold_damage-5, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 21: kept loss 2268.0 penalty 12.9 [evolve_cost.0-1, stronghold_damage-5, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 22: kept loss 2268.0 penalty 12.9 [evolve_cost.0-1, stronghold_damage-5, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 23: kept loss 2268.0 penalty 12.9 [evolve_cost.0-1, stronghold_damage-5, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 24: kept loss 2268.0 penalty 12.9 [evolve_cost.0-1, stronghold_damage-5, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 25: kept loss 2268.0 penalty 12.9 [evolve_cost.0-1, stronghold_damage-5, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 26: kept loss 2268.0 penalty 12.9 [evolve_cost.0-1, stronghold_damage-5, Shieldbearer.cost+1, Hexer.damage-3, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 27: improved loss 2264.2 penalty 12.3 [evolve_cost.0-1, stronghold_damage-4, Shieldbearer.cost+1, Hexer.damage-1, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 28: kept loss 2264.2 penalty 12.3 [evolve_cost.0-1, stronghold_damage-4, Shieldbearer.cost+1, Hexer.damage-1, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 29: kept loss 2264.2 penalty 12.3 [evolve_cost.0-1, stronghold_damage-4, Shieldbearer.cost+1, Hexer.damage-1, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]
+gen 30: kept loss 2264.2 penalty 12.3 [evolve_cost.0-1, stronghold_damage-4, Shieldbearer.cost+1, Hexer.damage-1, Sawbot.cost+1, Sawbot.hp-3, SiegeWalker.speed+3, Rampart.cost+1]

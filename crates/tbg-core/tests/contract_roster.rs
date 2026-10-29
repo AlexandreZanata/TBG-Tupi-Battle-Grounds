@@ -36,14 +36,14 @@ const ROSTER: [Row; 11] = {
               speed_ct, splash_ct, on_hit }
     }
     [
-        r(Shieldbearer, Humans,   Tank,    3,  650, 30,  0, 120, 80,  80,   0, None),
+        r(Shieldbearer, Humans,   Tank,    4,  650, 30,  0, 120, 80,  80,   0, None),
         r(Archer,       Humans,   Ranged,  3,  220, 45,  0, 100, 450, 100,  0, None),
         r(BoneBrute,    Undead,   Tank,    4, 1300, 75,  0, 150, 100, 60,   0, None),
         // slow 40 % for 2 s
-        r(Hexer,        Undead,   Control, 4,  300, 30,  0, 140, 350, 100,  0,
+        r(Hexer,        Undead,   Control, 4,  300, 29,  0, 140, 350, 100,  0,
           Some(OnHit::Slow { bp: 4_000, ticks: 40 })),
-        r(Sawbot,       Machines, Dps,     3,  270, 55,  0, 105, 80,  130,  0, None),
-        r(SiegeWalker,  Machines, Ranged,  5,  700, 85,  0, 250, 600, 60, 150, None),
+        r(Sawbot,       Machines, Dps,     4,  231, 55,  0, 105, 80,  130,  0, None),
+        r(SiegeWalker,  Machines, Ranged,  5,  700, 85,  0, 250, 600, 66, 150, None),
         // heals 40 instead of attacking
         r(Bloomkeeper,  Plants,   Support, 3,  280,  0, 40, 150, 300, 90,   0, None),
         // root 0.8 s
@@ -51,7 +51,7 @@ const ROSTER: [Row; 11] = {
           Some(OnHit::Root { ticks: 16 })),
         // P16-B (D-32, Proposed): Hatch every 4 s; Guard (BR-U09).
         r(Nester,       Plants,   Support, 4,  300, 15,  0, 150, 250, 80,   0, None),
-        r(Rampart,      Machines, Tank,    5, 1500, 35,  0, 150, 80,  50,   0, None),
+        r(Rampart,      Machines, Tank,    6, 1500, 35,  0, 150, 80,  50,   0, None),
         // summon (BR-U08): never sold, lifetime 10 s
         r(Beetling,     Plants,   Dps,     0,   90, 18,  0, 80,  60,  140,  0, None),
     ]

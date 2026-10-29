@@ -1,0 +1,11 @@
+threads  games/s  game-s per wall-s  speed-up vs 1x
+      1      800             111809          111809x
+      2     1596             223108          223108x
+      4     2944             411591          411591x
+      8     5013             700848          700848x
+     16     5644             789164          789164x
+
+seeds: 0..2000 (2000 pairs)
+threads: 16
+wall_s: 10.37
+(Bot vs Bot, 2000 seed pairs = 4000 games per row, release, idle dev PC, 16 hardware threads)

@@ -21,6 +21,10 @@ pub struct Config {
     pub login_per_ip_min: u64,
     /// P13: `/api/*` requests allowed per IP per minute (`TBG_API_PER_IP_MIN`).
     pub api_per_ip_min: u64,
+    /// P16-C: tests receive every finished match's replay here, to prove a
+    /// headless re-run gives the same state (D-33). Never set from the
+    /// environment: the seed stays on the server (BR-S05).
+    pub replays: Option<tokio::sync::mpsc::UnboundedSender<tbg_core::replay::Replay>>,
 }
 
 impl Default for Config {
@@ -37,6 +41,7 @@ impl Default for Config {
             register_per_ip_hour: 3,
             login_per_ip_min: 10,
             api_per_ip_min: 120,
+            replays: None,
         }
     }
 }
@@ -65,6 +70,7 @@ impl Config {
                 std::env::var("TBG_DB")
                     .map_or_else(|_| PathBuf::from("tbg.sqlite3"), PathBuf::from),
             ),
+            replays: None,
         }
     }
 }

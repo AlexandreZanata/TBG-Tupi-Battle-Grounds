@@ -251,7 +251,9 @@ mod tests {
         let enemy = super::report(&v, theirs).unwrap();
         assert!(own.own && !enemy.own);
         assert_eq!((enemy.hp, enemy.max_hp), (123, 300));
-        assert_eq!(own.attack, ("Damage", 30));
+        // The canonical value, so a balance pass (D-33) does not break the UI test.
+        let damage = tbg_core::content::def(UnitKind::Hexer).damage;
+        assert_eq!(own.attack, ("Damage", damage));
         assert_eq!(own.on_hit, "Slow 40% 2.0 s");
         assert_eq!((own.every.as_str(), own.range.as_str()), ("1.40 s", "3.5"));
         assert!(

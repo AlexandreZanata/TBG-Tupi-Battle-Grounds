@@ -82,6 +82,17 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
     }
 }
 
+/// Next non-`View` message: views keep arriving during a match, so a
+/// reply can come after one under load.
+async fn recv_no_views(ws: &mut Ws) -> Option<ServerMsg> {
+    loop {
+        match recv(ws).await? {
+            ServerMsg::View(_) => continue,
+            other => return Some(other),
+        }
+    }
+}
+
 async fn hello(ws: &mut Ws) {
     send(
         ws,
@@ -395,14 +406,14 @@ async fn br_p04_account_messages_refused_in_match() {
     )
     .await;
     assert!(matches!(
-        recv(&mut a).await,
+        recv_no_views(&mut a).await,
         Some(ServerMsg::AccountError {
             code: AccountError::Unavailable
         })
     ));
     send(&mut a, &ClientMsg::Logout).await;
     assert!(matches!(
-        recv(&mut a).await,
+        recv_no_views(&mut a).await,
         Some(ServerMsg::AccountError {
             code: AccountError::Unavailable
         })

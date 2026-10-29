@@ -3,10 +3,10 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::content::{self, hatch_rule, EVOLVE_COST, LANE_LEN, OFFERS, SPAWN_OFFSET};
+use crate::content::{LANE_LEN, OFFERS, SPAWN_OFFSET};
+use crate::shop;
 use crate::state::{Event, MatchState, Unit};
 use crate::types::{Seat, Status, UnitId, UnitKind};
-use crate::{content::effective_stats, shop};
 
 /// A request from a client; never a state change until validated.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -51,13 +51,23 @@ impl MatchState {
             return Err(Rejection::BadOffer);
         }
         let kind = self.player(seat).offers[slot];
-        let d = content::def(kind);
+        let cost = self.rules.def(kind).cost;
         // Energy is the only gate: no army cap (BR-U07).
-        if self.player(seat).energy < d.cost {
+        if self.player(seat).energy < cost {
             return Err(Rejection::NotEnoughEnergy);
         }
-        let level = self.player(seat).synergy[d.faction.index()];
-        let max_hp = effective_stats(kind, 0, 0, level).max_hp;
+        self.spawn(seat, kind, 0, 0);
+        let p = self.player_mut(seat);
+        p.energy -= cost;
+        shop::refill(&mut p.offers, slot, &mut p.rng);
+        Ok(())
+    }
+
+    /// A new unit in front of the seat's Stronghold, at full HP for its form
+    /// and the seat's current Synergy.
+    pub(crate) fn spawn(&mut self, seat: Seat, kind: UnitKind, tier: u8, branch: u8) -> UnitId {
+        let level = self.player(seat).synergy[self.rules.def(kind).faction.index()];
+        let max_hp = self.rules.effective_stats(kind, tier, branch, level).max_hp;
         let id = self.next_unit_id;
         self.next_unit_id += 1;
         let x = match seat {
@@ -68,8 +78,8 @@ impl MatchState {
             id,
             seat,
             kind,
-            tier: 0,
-            branch: 0,
+            tier,
+            branch,
             x,
             hp: max_hp,
             max_hp,
@@ -79,20 +89,17 @@ impl MatchState {
             summoner: None,
             expires_at: None,
             hatch_cd: if kind == UnitKind::Nester {
-                hatch_rule(0, 0).0
+                self.rules.hatch_rule(tier, branch).0
             } else {
                 0
             },
         });
-        let p = self.player_mut(seat);
-        p.energy -= d.cost;
-        shop::refill(&mut p.offers, slot, &mut p.rng);
         self.pending.push(Event::Spawn {
             unit: id,
             seat,
             kind,
         });
-        Ok(())
+        id
     }
 
     fn evolve(&mut self, seat: Seat, id: UnitId, branch: u8) -> Result<(), Rejection> {
@@ -118,7 +125,7 @@ impl MatchState {
         if !branch_ok {
             return Err(Rejection::WrongBranch);
         }
-        let cost = EVOLVE_COST[usize::from(u.tier)];
+        let cost = self.rules.evolve_cost[usize::from(u.tier)];
         if self.player(seat).energy < cost {
             return Err(Rejection::NotEnoughEnergy);
         }

@@ -2,13 +2,22 @@
 //! the first `MatchStart` of each seat (also re-sent on attach).
 
 use tbg_core::protocol::{MatchMode, ServerMsg};
-use tbg_core::Seat;
+use tbg_core::{PlayerIntention, Seat};
 
 use crate::chan::MatchCmd;
 
 use super::Match;
 
 impl Match {
+    /// P16-C: log a command for the replay, at the tick it is applied.
+    /// Logged even after the outcome: a late intention still sets
+    /// `last_seq`, which is part of the state hash.
+    pub(super) fn record(&mut self, seat: Seat, intent: Option<(u32, PlayerIntention)>) {
+        if let Some(r) = &mut self.replay {
+            r.record(&self.state, seat, intent);
+        }
+    }
+
     pub(super) fn match_start(&self, seat: Seat) -> ServerMsg {
         let me = &self.players[seat.index()];
         let other = &self.players[seat.other().index()];
@@ -33,6 +42,7 @@ impl Match {
                 self.stats[seat.index()].intents += 1;
                 // P9: any processed intention earns an ack view this tick.
                 self.applied[seat.index()] = true;
+                self.record(seat, Some((seq, intent)));
                 let result = self.state.apply_intention(seat, seq, intent);
                 if result.is_ok() {
                     self.count_success(seat, intent);
@@ -49,6 +59,7 @@ impl Match {
                 // BR-M06/BR-M03: forfeit, idempotent (a second surrender or
                 // an already-finished match changes nothing).
                 if self.state.outcome.is_none() {
+                    self.record(seat, None);
                     self.state.forfeit(seat);
                     self.stats[seat.index()].surrendered = true;
                 }

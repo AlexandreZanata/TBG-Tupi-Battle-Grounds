@@ -1,7 +1,9 @@
 //! Every balance number of the MVP (docs/GAME-DESIGN.md §5), in integer
 //! simulation units: ticks (20/s), milli-tiles, sub-energy (600 = 1 Energy),
-//! basis points (10 000 = 100%). No other file may contain balance numbers.
+//! basis points (10 000 = 100%). No other file may contain balance numbers;
+//! the simulation reads them through `ruleset::CANON` (D-33).
 
+use crate::ruleset::CANON;
 use crate::types::{Archetype, Faction, OnHit, Tick, UnitKind};
 
 pub const TICK_HZ: u32 = 20;
@@ -34,14 +36,15 @@ pub const BEETLES_PER_PLAYER: usize = 6;
 pub const BEETLE_LIFETIME: Tick = 200;
 
 pub const STRONGHOLD_HP: i32 = 4_500;
-pub const STRONGHOLD_DAMAGE: i32 = 65;
+/// P16-C lab evidence (D-33, Proposed): 65 → 53.
+pub const STRONGHOLD_DAMAGE: i32 = 53;
 pub const STRONGHOLD_INTERVAL: u16 = 20;
 pub const STRONGHOLD_RANGE: i32 = 6_000;
 
 pub const WINDUP: u16 = 6;
 pub const MIN_INTERVAL: u16 = 5;
-/// Cost of evolving to tier 1 and to tier 2.
-pub const EVOLVE_COST: [u32; 2] = [1_800, 2_400];
+/// Cost of evolving to tier 1 and to tier 2 (P16-C, Proposed: tier 1 3 → 2).
+pub const EVOLVE_COST: [u32; 2] = [1_200, 2_400];
 pub const BP: i64 = 10_000;
 
 /// Synergy thresholds: living units of one faction for level 1 and 2.
@@ -67,7 +70,7 @@ pub const SYNERGIES: [(SynergyEffect, [i32; 2]); 4] = [
 ];
 
 /// One evolution form: additive modifiers on the base unit.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FormDef {
     pub name: &'static str,
     pub hp_bp: i32,
@@ -105,7 +108,7 @@ const fn root(ticks: u16) -> Option<OnHit> {
 }
 
 /// Base stats of a unit kind plus its forms `[A1, A2, B1, B2]`.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct UnitDef {
     pub kind: UnitKind,
     pub name: &'static str,
@@ -158,7 +161,7 @@ use Faction::*;
 /// Every kind, in `UnitKind` (`ALL_KINDS`) order.
 #[rustfmt::skip]
 pub const UNITS: [UnitDef; 11] = [
-    unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 1_800,
+    unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Fortress") },
@@ -180,21 +183,21 @@ pub const UNITS: [UnitDef; 11] = [
         FormDef { dmg_bp: 3_000, splash_add: 1_200, ..form("Reaper") },
     ]),
     unit(UnitKind::Hexer, "Hexer", Undead, Control, 2_400,
-        [300, 30, 28, 3_500, 50, 0, 0], slow(4_000, 40), [
+        [300, 29, 28, 3_500, 50, 0, 0], slow(4_000, 40), [
         FormDef { on_hit: slow(6_000, 40), ..form("Withering") },
         FormDef { dmg_bp: 6_000, ..form("Doom") },
         FormDef { splash_add: 1_000, ..form("Plague") },
         FormDef { dmg_bp: 4_000, splash_add: 500, ..form("Pestilence") },
     ]),
-    unit(UnitKind::Sawbot, "Sawbot", Machines, Dps, 1_800,
-        [270, 55, 21, 800, 65, 0, 0], None, [
+    unit(UnitKind::Sawbot, "Sawbot", Machines, Dps, 2_400,
+        [231, 55, 21, 800, 65, 0, 0], None, [
         FormDef { atk_bp: 4_000, ..form("Overclock") },
         FormDef { atk_bp: 4_000, speed_bp: 3_000, ..form("Shredder") },
         FormDef { hp_bp: 6_000, ..form("Plating") },
         FormDef { hp_bp: 6_000, splash_add: 800, ..form("Juggernaut") },
     ]),
     unit(UnitKind::SiegeWalker, "Siege Walker", Machines, Ranged, 3_000,
-        [700, 85, 50, 6_000, 30, 1_500, 0], None, [
+        [700, 85, 50, 6_000, 33, 1_500, 0], None, [
         FormDef { range_add: 2_000, ..form("Longshot") },
         FormDef { dmg_bp: 5_000, ..form("Artillery") },
         FormDef { splash_add: 1_000, ..form("Shrapnel") },
@@ -219,7 +222,7 @@ pub const UNITS: [UnitDef; 11] = [
         [300, 15, 30, 2_500, 40, 0, 0], None, [
         form("Brood"), form("Hive"), form("Venom"), form("Blight"),
     ]),
-    unit(UnitKind::Rampart, "Rampart", Machines, Tank, 3_000,
+    unit(UnitKind::Rampart, "Rampart", Machines, Tank, 3_600,
         [1_500, 35, 30, 800, 25, 0, 0], None, [
         FormDef { hp_bp: 5_000, ..form("Bastion") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Citadel") },
@@ -236,28 +239,19 @@ pub const UNITS: [UnitDef; 11] = [
     ]),
 ];
 
-/// Hatch timing and per-Nester limit for a Nester's form: Brood (A1) raises
-/// the limit, Hive (A2) also hatches faster.
+/// Canonical Hatch rule (see `Ruleset::hatch_rule`).
 pub fn hatch_rule(tier: u8, branch: u8) -> (u16, usize) {
-    let brood = branch == 0 && tier >= 1;
-    let every = if branch == 0 && tier >= 2 {
-        HATCH_EVERY_HIVE
-    } else {
-        HATCH_EVERY
-    };
-    (every, BEETLES_PER_NESTER[usize::from(brood)])
+    CANON.hatch_rule(tier, branch)
 }
 
+/// Canonical unit definition, for the client UI and the server.
 pub fn def(kind: UnitKind) -> &'static UnitDef {
-    &UNITS[kind as usize]
+    CANON.def(kind)
 }
 
-/// The form a unit at `tier` (1 or 2) on `branch` (0 = A, 1 = B) has.
+/// Canonical form (see `Ruleset::form_of`).
 pub fn form_of(kind: UnitKind, tier: u8, branch: u8) -> Option<&'static FormDef> {
-    if tier == 0 || tier > 2 || branch > 1 {
-        return None;
-    }
-    Some(&def(kind).forms[usize::from(branch) * 2 + usize::from(tier) - 1])
+    CANON.form_of(kind, tier, branch)
 }
 
 /// Effective stats after evolution forms and the seat's synergy level.
@@ -273,40 +267,7 @@ pub struct Stats {
     pub on_hit: Option<OnHit>,
 }
 
+/// Canonical effective stats (see `Ruleset::effective_stats`).
 pub fn effective_stats(kind: UnitKind, tier: u8, branch: u8, synergy_level: u8) -> Stats {
-    let d = def(kind);
-    // No allocation: this runs for every unit on every tick.
-    let forms = [form_of(kind, 1, branch), form_of(kind, 2, branch)];
-    let active = &forms[..usize::from(tier.min(2))];
-    let sum =
-        |f: fn(&FormDef) -> i32| -> i64 { active.iter().flatten().map(|x| i64::from(f(x))).sum() };
-    let (mut hp_bp, mut dmg_bp, mut atk_bp) =
-        (sum(|f| f.hp_bp), sum(|f| f.dmg_bp), sum(|f| f.atk_bp));
-    if synergy_level > 0 {
-        let (effect, bps) = SYNERGIES[d.faction.index()];
-        let bp = i64::from(bps[usize::from(synergy_level.min(2)) - 1]);
-        match effect {
-            SynergyEffect::MaxHp => hp_bp += bp,
-            SynergyEffect::AttackSpeed => atk_bp += bp,
-            SynergyEffect::Damage => dmg_bp += bp,
-            SynergyEffect::Regen => {}
-        }
-    }
-    let scale = |base: i64, bp: i64| (base * (BP + bp) / BP) as i32;
-    let interval = i64::from(d.interval) * BP / (BP + atk_bp);
-    Stats {
-        max_hp: scale(i64::from(d.hp), hp_bp),
-        damage: scale(i64::from(d.damage) + sum(|f| f.dmg_add), dmg_bp),
-        interval: (interval as u16).max(MIN_INTERVAL),
-        range: d.range + sum(|f| f.range_add) as i32,
-        speed: scale(i64::from(d.speed), sum(|f| f.speed_bp)),
-        splash: d.splash + sum(|f| f.splash_add) as i32,
-        heal: scale(i64::from(d.heal), sum(|f| f.heal_bp)),
-        on_hit: active
-            .iter()
-            .rev()
-            .flatten()
-            .find_map(|f| f.on_hit)
-            .or(d.on_hit),
-    }
+    CANON.effective_stats(kind, tier, branch, synergy_level)
 }

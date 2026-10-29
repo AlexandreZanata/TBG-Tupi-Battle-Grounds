@@ -1,23 +1,26 @@
 //! `MatchState::new` and the fixed tick, in the order fixed by
 //! docs/phases/P2-core-simulation.md ("step() order").
 
-use crate::content::{
-    self, ENERGY_CAP, ENERGY_START, MATCH_END, OVERTIME_START, REGEN_OVERTIME, REGEN_RUNNING,
-    RUNNING_START, STRONGHOLD_HP,
-};
+use crate::content::{self, MATCH_END, OVERTIME_START, RUNNING_START};
 use crate::rng::Pcg32;
+use crate::ruleset::{Ruleset, CANON};
 use crate::state::{EndReason, Event, MatchState, Outcome, Phase, PlayerState};
 use crate::types::Seat;
 use crate::{combat, shop, summon, synergy};
 
 impl MatchState {
     pub fn new(seed: u64) -> MatchState {
+        MatchState::with_rules(seed, &CANON)
+    }
+
+    /// A match on another ruleset: the offline balance lab only (D-33).
+    pub fn with_rules(seed: u64, rules: &'static Ruleset) -> MatchState {
         let player = |stream: u64| {
             let mut rng = Pcg32::new(seed, stream);
             PlayerState {
-                energy: ENERGY_START,
+                energy: rules.energy_start,
                 offers: shop::initial_offers(&mut rng),
-                stronghold_hp: STRONGHOLD_HP,
+                stronghold_hp: rules.stronghold_hp,
                 stronghold_cooldown: 0,
                 synergy: [0; 4],
                 last_seq: 0,
@@ -32,6 +35,7 @@ impl MatchState {
             next_unit_id: 1,
             outcome: None,
             pending: Vec::new(),
+            rules,
         }
     }
 
@@ -100,12 +104,13 @@ impl MatchState {
 
     fn regen_energy(&mut self) {
         let regen = match self.phase {
-            Phase::Running => REGEN_RUNNING,
-            Phase::Overtime => REGEN_OVERTIME,
+            Phase::Running => self.rules.regen_running,
+            Phase::Overtime => self.rules.regen_overtime,
             _ => return,
         };
+        let cap = self.rules.energy_cap;
         for p in &mut self.players {
-            p.energy = (p.energy + regen).min(ENERGY_CAP);
+            p.energy = (p.energy + regen).min(cap);
         }
     }
 
