@@ -72,6 +72,7 @@ impl MatchState {
             next_unit_id: 1,
             outcome: None,
             augments: AugmentState::new(seed, first_round),
+            army: Default::default(),
             pending: Vec::new(),
             rules,
         }

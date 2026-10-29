@@ -70,7 +70,7 @@ async fn connect(url: &str) -> Ws {
     ws
 }
 
-async fn select(ws: &mut Ws, ranks: [u8; 6]) -> Option<ServerMsg> {
+async fn select(ws: &mut Ws, ranks: [u8; tbg_core::arcana::NODES]) -> Option<ServerMsg> {
     send(ws, &ClientMsg::SetArcanas { ranks }).await;
     recv(ws).await
 }
@@ -79,16 +79,16 @@ async fn select(ws: &mut Ws, ranks: [u8; 6]) -> Option<ServerMsg> {
 async fn br_ar06_only_complete_presets_while_idle() {
     let url = server("idle").await;
     let mut a = connect(&url).await;
-    let melee = ArcanaPreset::complete([2, 2, 2, 0, 0, 0]).unwrap();
+    let melee = ArcanaPreset::complete([2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0]).unwrap();
     assert_eq!(
         select(&mut a, melee.ranks).await,
         Some(ServerMsg::ArcanasSelected { preset: melee })
     );
     for bad in [
-        [2, 2, 2, 2, 0, 0],
-        [3, 3, 0, 0, 0, 0],
-        [0; 6],
-        [1, 1, 1, 1, 1, 0],
+        [2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0; tbg_core::arcana::NODES],
+        [2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0],
     ] {
         assert_eq!(
             select(&mut a, bad).await,
@@ -121,7 +121,7 @@ async fn br_ar06_only_complete_presets_while_idle() {
 async fn br_ar05_presets_are_frozen_at_pairing_and_public_in_match_start() {
     let url = server("frozen").await;
     let (mut a, mut b) = (connect(&url).await, connect(&url).await);
-    let control = ArcanaPreset::complete([0, 0, 0, 2, 2, 2]).unwrap();
+    let control = ArcanaPreset::complete([2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1]).unwrap();
     assert!(matches!(
         select(&mut a, control.ranks).await,
         Some(ServerMsg::ArcanasSelected { .. })
@@ -165,7 +165,7 @@ async fn br_ar08_an_account_keeps_its_preset_across_devices() {
     let Some(ServerMsg::Registered { key, .. }) = recv(&mut first).await else {
         panic!("not registered");
     };
-    let ranged = ArcanaPreset::complete([2, 0, 2, 2, 0, 0]).unwrap();
+    let ranged = ArcanaPreset::complete([2, 2, 2, 2, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0]).unwrap();
     assert!(matches!(
         select(&mut first, ranged.ranks).await,
         Some(ServerMsg::ArcanasSelected { .. })

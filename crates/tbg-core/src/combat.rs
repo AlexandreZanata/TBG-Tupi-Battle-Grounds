@@ -1,8 +1,9 @@
 //! Automatic combat (BR-U01, BR-U04): statuses, movement, windup and
 //! hits, splash, heals, Stronghold fire, deaths.
 
+use crate::arcana;
 use crate::augment;
-use crate::content::{BP, LANE_LEN, WINDUP};
+use crate::content::{BP, LANE_LEN, MIN_INTERVAL, WINDUP};
 use crate::hits::{damage, resolve_hit};
 use crate::state::{stronghold_x, Event, MatchState, Target};
 use crate::targeting::{self, Engage};
@@ -30,6 +31,7 @@ pub(crate) fn tick_timers(state: &mut MatchState) {
 
 /// Every living unit acts once, in ascending id order.
 pub(crate) fn run_units(state: &mut MatchState, ev: &mut Vec<Event>) {
+    state.refresh_army();
     for idx in 0..state.units.len() {
         advance_unit(state, idx, ev);
     }
@@ -53,9 +55,29 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
         if targeting::alive(state, target) {
             resolve_hit(state, &u, target, &st, ev);
         }
+        let distance = (targeting::target_x(state, target) - u.x).abs();
+        let quickdraw = if u.kind.is_summon() {
+            0
+        } else {
+            arcana::attack_speed_bp(
+                &state.player(u.seat).arcanas,
+                &state.rules().arcana,
+                state.rules().def(u.kind).archetype,
+                distance,
+            )
+        };
+        let interval = if quickdraw > 0 {
+            let base = i64::from(state.rules().def(u.kind).interval);
+            // BR-X02: every attack-speed source together stays within +100%.
+            let bp = (i64::from(st.atk_bp) + i64::from(quickdraw)).min(10_000);
+            (base * BP / (BP + bp)) as u16
+        } else {
+            st.interval
+        }
+        .max(MIN_INTERVAL);
         let unit = &mut state.units[idx];
         unit.windup = None;
-        unit.cooldown = slowed_interval(st.interval, u.status).saturating_sub(WINDUP);
+        unit.cooldown = slowed_interval(interval, u.status).saturating_sub(WINDUP);
         return;
     }
     match targeting::engage(state, &u, &st) {
@@ -74,7 +96,17 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
                 Status::Slowed { bp, .. } => scale_down(st.speed, bp),
                 _ => st.speed,
             };
-            let haste = augment::haste_move_bp(&state.player(u.seat).augments, &u, state.tick);
+            let mut haste = augment::haste_move_bp(&state.player(u.seat).augments, &u, state.tick);
+            if !u.kind.is_summon() {
+                let army = state.army_of(u.seat);
+                haste += arcana::move_bonus_bp(
+                    &state.player(u.seat).arcanas,
+                    &state.rules().arcana,
+                    state.rules().def(u.kind).archetype,
+                    army.tanks > 0,
+                );
+            }
+            let haste = haste.min(5_000);
             if haste > 0 {
                 speed = ((i64::from(speed) * (BP + i64::from(haste)) / BP).min(i64::from(i32::MAX)))
                     as i32;

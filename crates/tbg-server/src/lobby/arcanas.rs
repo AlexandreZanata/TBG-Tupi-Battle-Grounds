@@ -10,7 +10,7 @@ use crate::chan::ConnEvent;
 use crate::store::AccountId;
 
 impl Lobby {
-    pub(super) fn set_arcanas(&mut self, token: Token, ranks: [u8; 6]) {
+    pub(super) fn set_arcanas(&mut self, token: Token, ranks: [u8; tbg_core::arcana::NODES]) {
         let store = self.store.clone();
         let Some(s) = self.session(&token) else {
             return;

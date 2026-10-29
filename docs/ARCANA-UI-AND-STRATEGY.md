@@ -1,5 +1,9 @@
 # Arcana UI preview and competitive integration strategy
 
+> Historical: this document describes the six-node preview. D-42/P40
+> replaced the live tree with fifteen nodes and twelve points; GAME-DESIGN
+> §9 and `docs/phases/P40-arcana-trees.md` are the current sources.
+
 This branch supplies a desktop art/editor preview only. The badge reads
 **Preview - not used in matches yet**. Changes are confined to the client,
 art tooling, screenshots and this document. No selection crosses the HTML

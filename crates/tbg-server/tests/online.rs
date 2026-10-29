@@ -1008,8 +1008,8 @@ async fn challenge_freezes_arcanas_through_reconnect_and_rematch() {
     hello(&mut owner).await;
     let guest_token = hello_token(&mut guest).await;
     let presets = [
-        ArcanaPreset::complete([2, 2, 2, 0, 0, 0]).unwrap(),
-        ArcanaPreset::complete([0, 0, 0, 2, 2, 2]).unwrap(),
+        ArcanaPreset::complete([2, 2, 2, 2, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0]).unwrap(),
+        ArcanaPreset::complete([2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1]).unwrap(),
     ];
     for (ws, preset) in [(&mut owner, presets[0]), (&mut guest, presets[1])] {
         send(

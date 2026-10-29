@@ -7,7 +7,7 @@ use crate::augment::{AugmentCounts, AugmentState};
 use crate::content::{self, Stats, OFFERS};
 use crate::rng::Pcg32;
 use crate::ruleset::Ruleset;
-use crate::types::{Faction, Seat, Status, Tick, UnitId, UnitKind};
+use crate::types::{Archetype, Faction, Seat, Status, Tick, UnitId, UnitKind};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Phase {
@@ -21,6 +21,33 @@ pub enum Phase {
 pub enum Target {
     Unit(UnitId),
     Stronghold(Seat),
+}
+
+/// Living conventional units per combat role, refreshed once per tick and
+/// decremented on death. The conditional Arcanas read this instead of
+/// scanning the army for every hit (BR-AR06).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ArmyComposition {
+    pub tanks: u16,
+    pub dps: u16,
+}
+
+impl ArmyComposition {
+    fn add(&mut self, archetype: Archetype) {
+        match archetype {
+            Archetype::Tank => self.tanks = self.tanks.saturating_add(1),
+            Archetype::Dps => self.dps = self.dps.saturating_add(1),
+            _ => {}
+        }
+    }
+
+    pub(crate) fn remove(&mut self, archetype: Archetype) {
+        match archetype {
+            Archetype::Tank => self.tanks = self.tanks.saturating_sub(1),
+            Archetype::Dps => self.dps = self.dps.saturating_sub(1),
+            _ => {}
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -178,6 +205,10 @@ pub struct MatchState {
     pub outcome: Option<Outcome>,
     /// Augment draw, cycle and open round (BR-AG01–08).
     pub augments: AugmentState,
+    /// Per-seat living role counts for conditional Arcanas; derived each
+    /// tick, so it is not serialized or part of the state hash.
+    #[serde(skip, default)]
+    pub(crate) army: [ArmyComposition; 2],
     /// Events created by intentions, returned by the next `step()`.
     #[serde(skip)]
     pub(crate) pending: Vec<Event>,
@@ -265,6 +296,25 @@ impl MatchState {
             );
         }
         self.stats_for(u.seat, u.kind, u.tier, u.branch)
+    }
+
+    /// The seat's cached living Tank and DPS counts (BR-AR06).
+    pub fn army_of(&self, seat: Seat) -> ArmyComposition {
+        self.army[seat.index()]
+    }
+
+    /// Rebuild the conditional-Arcana counts from the living conventional
+    /// army. Called once per combat tick; `damage` decrements on death.
+    pub(crate) fn refresh_army(&mut self) {
+        let mut army = [ArmyComposition::default(); 2];
+        for u in self
+            .units
+            .iter()
+            .filter(|u| u.hp > 0 && !u.kind.is_summon())
+        {
+            army[u.seat.index()].add(self.rules.def(u.kind).archetype);
+        }
+        self.army = army;
     }
 
     /// Stats of a seat's conventional unit: Synergy, Arcanas and Augments.

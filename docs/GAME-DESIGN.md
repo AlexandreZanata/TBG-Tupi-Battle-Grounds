@@ -54,8 +54,8 @@ evolve, and which factions you combine.
 | Rating | **Proposed (P12):** an account's ranked skill number (Elo) | `Rating` |
 | Leaderboard | **Proposed (P13):** global ranking of accounts by `Rating` | `Leaderboard` |
 | StrongholdStyle | **Proposed (P18):** cosmetic look of a `Stronghold`: Stone Keep, Timber Fort, Gatehouse | `StrongholdStyle` |
-| Arcana | **Proposed (P32–P38, extra after P31):** a free pre-match choice that modifies a documented unit attribute | `ArcanaNode` |
-| ArcanaPreset | **Proposed (P32–P38):** six bounded ranks chosen before matchmaking and frozen for a match | `ArcanaPreset` |
+| Arcana | **Proposed (P40, active):** a free pre-match choice in one of three five-node families that modifies a documented unit attribute or conditional combat behavior | `ArcanaNode` |
+| ArcanaPreset | **Proposed (P40, active):** fifteen bounded ranks costing exactly twelve points, chosen before matchmaking and frozen for a match | `ArcanaPreset` |
 | RulesetVersion | **Proposed (P35):** compiled version of competitive rules and balance values, recorded with match results | `RulesetVersion` |
 | StrongholdKind | **Proposed (P16-F3, not active):** a free pre-match choice of `Stronghold` with its own stats and passive; mechanical, unlike `StrongholdStyle` | `StrongholdKind` |
 | Fortification | **Proposed (P16-F3, not active):** in-match branching upgrade of a player's own `Stronghold`, paid with `Energy`; never called `Evolution` | `Fortification` |
@@ -333,83 +333,112 @@ Hatch limits, slow/root effects, and every structural constant.
 | Per-character MB-Lab/Mixamo rigging (ADR-003–006; ~8% auto pass rate, ADR-007) | Code-built rigid-part figurines with a shared animation library |
 | StoreKit / Play Billing IAP | Deferred; cosmetics-only principle unchanged |
 
-## 9. Arcanas extra — Proposed values, active in every mode (D-40)
+## 9. Arcanas extra — Proposed values, active in every mode (D-40/P40)
 
-The owner moved this extension ahead of P31 (D-40, 2026-10-29): Arcanas
-are live in Practice, Casual, Ranked, private rooms, and Quick Challenge with the values
-below, which stay **Proposed** until playtests. Summons (Beetlings)
-receive no Arcana bonus, like Synergy (BR-U08). Evidence so far: every
-one of the 141 complete presets against the default, bot policy, 512
-paired seeds each, scores 46.5–54.9 % and no 95 % interval leaves
-45–55 % (`docs/media/arcanas/presets-vs-default.txt`); the full
-P34 cross-policy matrix and the P38 human gates remain open.
+The owner moved this extension ahead of P31 (D-40) and expanded it to
+three five-node families on 2026-10-29 (D-42): Arcanas are live in
+Practice, Casual, Ranked, private rooms, and Quick Challenge with the
+values below, which stay **Proposed** until playtests. Summons (Beetlings)
+receive no Arcana bonus and never count for a conditional Arcana, like
+Synergy (BR-U08). The new effects are conditional and should be measured
+in the P34/P40 lab before any value is treated as final.
 
 | ID | Proposed rule |
 |----|---------------|
-| BR-AR01 | Every player, including a new guest, has all six points and all options immediately; payments, account age, and playtime never grant power |
-| BR-AR02 | A complete preset spends exactly 6 points; each of 6 nodes has rank 0–2, costs 1 point per rank, and has no prerequisites; each two-node tree therefore holds at most 4 points; there are no supremes or unlock levels |
-| BR-AR03 | Eligibility uses the unit's base `Archetype`, remains unchanged by `Evolution`, and grants no new behavior or missing attribute |
-| BR-AR04 | Arcana percentages add to existing percentages on the same base attribute, use wide integer intermediates, and truncate once; preserve current HP percentage when max HP changes |
-| BR-AR05 | Preset editing is allowed only while idle; joining either queue or creating/joining a room or Quick Challenge freezes selection until cancellation or match end; reconnect and account takeover keep the match's original preset |
-| BR-AR06 | The server validates ranks, budget, schema, ruleset, and session state; clients send selections, never final bonuses or a claimed seat |
-| BR-AR07 | Record both applied presets, their schema, and the RulesetVersion with every result; later tuning never rewrites historical outcomes or Rating |
-| BR-AR08 | Provide one active preset per account, recovered across devices, and local storage for guests; a complete default requires no setup; account ownership never changes available power |
-| BR-AR09 | Casual and Ranked use identical released Arcana rules; existing Elo, FIFO pairing, account identity, Energy, Shop randomness, Evolution costs, and Synergy thresholds do not change |
-| BR-AR10 | The first version changes unit max HP, normal damage, and Bloomkeeper healing only; no Stronghold, cadence, movement, range, slow/root, regeneration-rate, or splash-radius bonuses |
+| BR-AR01 | Every player, including a new guest, has all twelve points and all fifteen options immediately; payments, account age, and playtime never grant power |
+| BR-AR02 | A complete preset spends exactly 12 points over 15 nodes. Indices 0–5 and the six children have rank 0–2 (original) or 0–1 (child) and cost 1 point per rank; indices 8, 11 and 14 are supremes with rank 0–1 and cost 2 points. Node order is a serialization contract |
+| BR-AR03 | A child needs its parent at rank 1. A supreme needs both original nodes at rank 2 and both children at rank 1. The editor and the server enforce the same table; a removal that would invalidate a held dependent is refused with the dependent named |
+| BR-AR04 | Eligibility uses the unit's base `Archetype`, remains unchanged by `Evolution`, and grants no new behavior or missing attribute; summons are excluded from every Arcana |
+| BR-AR05 | Percentage bonuses add in basis points with Evolution, Synergy, Arcana and Augment sources on the same attribute and truncate once. Conditional bonuses are evaluated at the attack, movement, status or heal resolution point named below, never pre-applied |
+| BR-AR06 | Conditional army checks count living conventional units only. A condition activates once no matter how many units satisfy it, is rebuilt from the living army each combat tick, and is decremented when a unit dies |
+| BR-AR07 | Unshaken changes only the duration of an incoming slow or root on Support and Control; slow intensity is untouched and a duration never falls below one tick |
+| BR-AR08 | Emergency Care compares HP before the heal with integer arithmetic (`hp × 10 000 < 40 % × max_hp`); overheal is never converted into another resource and the bonus never creates healing |
+| BR-AR09 | Purification requires a real heal greater than zero on a conventional ally, removes an active slow, and halves the remaining root duration (minimum one tick). It cannot trigger another heal and never removes other control |
+| BR-AR10 | Deadeye adds 0.25 tile (250 milli-tiles) of attack range to conventional Ranged units only; Strongholds, summons and non-Ranged units are unchanged, and no special targeting is added. Dose-response on 3 072 paired seeds (Precision build against the default): +0.1 tile 51.6 %, +0.25 tile 53.7 %, +0.5 tile 57.0 %, none 49.1 % (noise floor 49.4 %); +0.25 keeps the supreme visible and inside the 55 % investigation line (P40 audit, `docs/media/p40/deadeye-dose.txt`) |
+| BR-AR11 | Preset editing is allowed only while idle; joining either queue or creating/joining a room or Quick Challenge freezes selection until cancellation or match end; reconnect and account takeover keep the match's original preset |
+| BR-AR12 | The server validates ranks, budget, prerequisites, schema, ruleset, and session state; clients send selections, never final bonuses or a claimed seat |
+| BR-AR13 | One active preset per account, recovered across devices, and local storage for guests. A schema-1 six-rank preset keeps its ranks; the six new points raise the original nodes to rank 2 in index order, never selecting a child or supreme automatically. The complete default is `[2,2,2,2,2,2,0,0,0,0,0,0,0,0,0]` |
+| BR-AR14 | Record both applied presets, their schema, and the RulesetVersion with every result; later tuning never rewrites historical outcomes, stored six-rank rows or Rating |
 
-**Node order is a serialization contract**, not alphabetical order.
-Names below are English UI names. `DPS` is `Archetype::Dps` in code.
+**Node order and prerequisites are a serialization contract**, not
+alphabetical order. Names below are English UI names. `DPS` is
+`Archetype::Dps` in code.
 
-| Index | Tree / node | Base Archetypes | Per rank | Rank-2 maximum |
-|-------|-------------|-----------------|----------|----------------|
-| 0 | War / Guard | Tank, DPS | +4% base max HP | +8% |
-| 1 | War / Assault | Tank, DPS | +3% base damage | +6% |
-| 2 | Precision / Piercing | Ranged | +3% base damage | +6% |
-| 3 | Precision / Endurance | Ranged | +4% base max HP | +8% |
-| 4 | Vitality / Resilience | Support, Control | +4% base max HP | +8% |
-| 5 | Vitality / Renewal | Support with an existing heal | +5% base direct/splash heal | +10% |
+| Index | Family / node | Cost | Requires |
+|-------|---------------|------|----------|
+| 0 | War / Guard | 1 | none |
+| 1 | War / Assault | 1 | none |
+| 2 | Precision / Piercing | 1 | none |
+| 3 | Precision / Endurance | 1 | none |
+| 4 | Vitality / Resilience | 1 | none |
+| 5 | Vitality / Renewal | 1 | none |
+| 6 | War / Shieldwall | 1 | Guard 1 |
+| 7 | War / Battle Rush | 1 | Assault 1 |
+| 8 | War / Combined Arms | 2 | Guard 2, Assault 2, Shieldwall 1, Battle Rush 1 |
+| 9 | Precision / Hunter's Focus | 1 | Piercing 1 |
+| 10 | Precision / Quickdraw | 1 | Endurance 1 |
+| 11 | Precision / Deadeye | 2 | Piercing 2, Endurance 2, Hunter's Focus 1, Quickdraw 1 |
+| 12 | Vitality / Unshaken | 1 | Resilience 1 |
+| 13 | Vitality / Emergency Care | 1 | Renewal 1 |
+| 14 | Vitality / Purification | 2 | Resilience 2, Renewal 2, Unshaken 1, Emergency Care 1 |
 
-The candidate default is `[2, 0, 2, 0, 2, 0]`. There are 141 complete
-rank vectors. Zero/partial presets are diagnostic or editor states, not
-valid online selections. Vitality does not raise Plants regeneration's
-percentage; a larger max HP can still change its integer healing amount.
-Bloomkeeper's attacking forms keep their healing priority and eligibility.
-Zero damage/healing stays zero. Splash inherits the modified damage or
-heal amount; on-hit status still affects the primary target only.
+The six original nodes keep their values:
+
+| Index | Node | Base Archetypes | Per rank | Rank-2 maximum |
+|-------|------|-----------------|----------|----------------|
+| 0 | Guard | Tank, DPS | +4% base max HP | +8% |
+| 1 | Assault | Tank, DPS | +3% base damage | +6% |
+| 2 | Piercing | Ranged | +3% base damage | +6% |
+| 3 | Endurance | Ranged | +4% base max HP | +8% |
+| 4 | Resilience | Support, Control | +4% base max HP | +8% |
+| 5 | Renewal | Support with an existing heal | +5% base direct/splash heal | +10% |
+
+**War — front line and mixed pressure.** Shieldwall gives Tanks 6% damage
+reduction while at least one allied conventional DPS is alive; more DPS
+never stack it. Battle Rush gives DPS 12% movement speed while at least
+one allied conventional Tank is alive. Combined Arms, the War supreme,
+adds 5% Tank damage reduction and 8% DPS damage while both roles are
+alive. These reductions combine with Augment reduction and obey its 20%
+global cap.
+
+**Precision — range and target control.** Hunter's Focus gives Ranged 12%
+damage against a target already slowed or rooted when the hit resolves;
+the hit that applies the status does not count. Quickdraw gives Ranged 15%
+attack speed when the current target is within two tiles (2 000
+milli-tiles), respecting `MIN_INTERVAL`. Deadeye, the Precision supreme,
+adds 0.25 tile (250 milli-tiles) of attack range to conventional Ranged units; the owner's +0.5 tile proposal measured 57.0% against the default (above the 55% investigation line) and +0.1 tile only 51.6% (P40 audit, BR-AR10).
+
+**Vitality — support, survival and recovery.** Unshaken shortens incoming
+slow and root durations on Support and Control by 25%. Emergency Care
+raises direct heal efficiency by 15% when the ally is below 40% HP before
+the heal. Purification, the Vitality supreme, removes slow and halves the
+remaining root whenever a real heal lands on a conventional ally.
+
+**Builds.** A complete family costs 8 points; with 12 available, the
+player can finish one supreme and spend the remaining 4 in another family,
+or distribute 4/4/4 across all three without a supreme. The hybrid build
+must remain viable; supremes are deliberately conditional. The default
+preset is the 4/4/4 original-node build above; it selects no conditional
+node automatically.
 
 For each affected attribute, add percentages by source before scaling:
 
 ```text
 damage = floor((base_damage + Evolution_flat_damage)
-               * (10000 + Evolution_bp + Synergy_bp + Arcana_bp) / 10000)
-max_hp = floor(base_hp * (10000 + Evolution_bp + Synergy_bp + Arcana_bp) / 10000)
-heal = floor(base_heal * (10000 + Evolution_heal_bp + Arcana_heal_bp) / 10000)
+               * (10000 + Evolution_bp + Synergy_bp + Arcana_bp + Augment_bp) / 10000)
+max_hp = floor(base_hp * (10000 + Evolution_bp + Synergy_bp + Arcana_bp + Augment_bp) / 10000)
+heal = floor(base_heal * (10000 + Evolution_heal_bp + Arcana_heal_bp + Augment_heal_bp) / 10000)
 ```
 
-**Acceptance hypotheses, not claims of balance.** Against other complete
-presets, investigate aggregate scores above 55% or individual matchups
-above 65%; report neutral controls separately. Require at least three
-competitive, non-dominated presets and a default within 3 percentage
-points of the best generalist reference. Use held-out paired seeds,
-95% confidence intervals, and the existing §6 fun targets. An unresolved
-counterless advantage blocks release; a 50% aggregate alone proves nothing.
-Human validation needs at least 8 participants and 24 completed matches;
-at least 80% must explain their preset and a relevant reason for defeat.
-
-**Conditional combat proposal, not approved or active.** P32 must first
-reproduce root lock and resolve the documented durations. If needed, test
-a maximum continuous root episode of 32 ticks (1.6 s), including refreshes,
-followed by 8 root-immune ticks (0.4 s). This changes the existing refresh
-rule and needs an explicit owner decision backed by measurements. A
-refresh must never postpone immunity indefinitely. No root bonus is added.
-
-**Deferred alternatives.** Five deep trees, ten points, supremes, Fortress,
-Domination, haste, mobility, and range remain outside this extra. If
-Stronghold max HP ever varies, first propose fixed per-match maxima and
-compare remaining ratios with `i64(hp_a) * i64(max_b)` versus
-`i64(hp_b) * i64(max_a)`, including full-health ties and healing cases.
-Do not implement that unused subsystem in P32–P38. Reopen progression only
-if the small system fails the strategic-choice/playtest gates.
+**Acceptance hypotheses, not claims of balance.** Against the default,
+investigate scores above 55% or individual matchups above 65%; require at
+least three competitive, non-dominated builds and a default within 3
+percentage points of the best generalist reference. Use paired seeds,
+seat swaps and 95% confidence intervals. A conditional node that never
+activates in representative matches is not offering a decision and must
+be retuned or rejected. Human validation still needs at least 8
+participants and 24 completed matches, with 80% able to explain their
+build and one relevant reason for defeat.
 
 ## 10. Strategic expansion (P16-F1–F8)
 

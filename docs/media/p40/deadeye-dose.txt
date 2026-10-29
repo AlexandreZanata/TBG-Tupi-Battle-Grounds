@@ -1,0 +1,7 @@
+3072 seed pairs per row, policy bot, seeds 0..3072
+  null: default vs default                  49.4% [47.7 - 51.0]
+  precision without Deadeye (10 pts)        49.1% [47.3 - 50.8]
+  precision, Deadeye +0 milli-tiles         49.1% [47.3 - 50.8]
+  precision, Deadeye +100 milli-tiles       51.6% [49.8 - 53.3]
+  precision, Deadeye +250 milli-tiles       53.7% [52.0 - 55.4]
+  precision, Deadeye +500 milli-tiles       57.0% [55.3 - 58.6]

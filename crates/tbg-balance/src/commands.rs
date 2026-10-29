@@ -133,6 +133,7 @@ pub fn dispatch(a: &Args) -> Result<(), String> {
         "value" => value_cmd(a),
         "validate" => validate_cmd(a),
         "arcana" => arcana_cmd(a),
+        "arcana-named" => arcana_named_cmd(a),
         other => Err(format!("unknown command `{other}` (see --help)")),
     }
 }
@@ -601,6 +602,64 @@ fn validate_cmd(a: &Args) -> Result<(), String> {
     c.finish(0, 0, "P16-D validation")
 }
 
+/// Confirmation block for the named builds and the retired six-point default
+/// against the twelve-point default, with a larger paired sample (P40).
+fn arcana_named_cmd(a: &Args) -> Result<(), String> {
+    let c = ctx(a, 512, CONFIRMATION)?;
+    let policy = match a.str("a") {
+        Some(_) => policy(a, "a")?,
+        None => Policy::Bot,
+    };
+    // The null row is the default against itself: the lab's noise floor.
+    // Any build whose interval overlaps it is not measurably different.
+    let mut presets: Vec<(&str, ArcanaPreset)> = vec![("null", ArcanaPreset::DEFAULT)];
+    presets.extend(
+        arcanas::NAMED
+            .iter()
+            .map(|(name, ranks)| (*name, ArcanaPreset { ranks: *ranks })),
+    );
+    presets.push((
+        "legacy-6pt",
+        ArcanaPreset {
+            ranks: arcanas::LEGACY_DEFAULT,
+        },
+    ));
+    let ran: Vec<ArcanaPreset> = presets.iter().map(|(_, p)| *p).collect();
+    let rows = arcanas::against(
+        c.rules,
+        &ran,
+        ArcanaPreset::DEFAULT,
+        policy,
+        c.seeds(),
+        c.budget.reaction,
+        c.budget.threads,
+    );
+    let mut text = format!(
+        "named builds vs default {:?}, policy {}, {} seed pairs each\n",
+        ArcanaPreset::DEFAULT.ranks,
+        policy.name(),
+        c.pairs
+    );
+    for ((name, _), (_, e)) in presets.iter().zip(rows.iter()) {
+        let _ = writeln!(
+            text,
+            "  {name:<16} {:>5.1}% [{:.1} – {:.1}]",
+            e.mean * 100.0,
+            e.lo * 100.0,
+            e.hi * 100.0
+        );
+    }
+    print!("{text}");
+    c.out
+        .write("arcana-named.txt", &text)
+        .map_err(|e| e.to_string())?;
+    c.finish(
+        (ran.len() as u64) * c.pairs * 2,
+        0,
+        "P40 named confirmation",
+    )
+}
+
 /// Every complete Arcana preset and the named fixtures against the default
 /// (D-40): the evidence BR-AR's acceptance hypotheses ask for.
 fn arcana_cmd(a: &Args) -> Result<(), String> {
@@ -668,10 +727,37 @@ fn arcana_cmd(a: &Args) -> Result<(), String> {
     for (p, e) in rows.iter().rev().take(10) {
         let _ = writeln!(text, "  {}", show(p, e));
     }
+    // The screen picks extremes, which are biased high or low by chance
+    // (winner's curse): confirm the best and worst on held-out seeds.
+    let confirm_pairs = a.num("confirm-pairs", 2_048)?;
+    let confirm: Vec<ArcanaPreset> = rows
+        .iter()
+        .take(10)
+        .chain(rows.iter().rev().take(5))
+        .map(|r| r.0)
+        .collect();
+    let held_out = c.seed_start + 1_000_000;
+    let confirmed = arcanas::against(
+        c.rules,
+        &confirm,
+        ArcanaPreset::DEFAULT,
+        policy,
+        held_out..held_out + confirm_pairs,
+        c.budget.reaction,
+        c.budget.threads,
+    );
+    let _ = writeln!(
+        text,
+        "\nbest 10 and worst 5 confirmed on held-out seeds, {confirm_pairs} pairs:"
+    );
+    for (p, e) in &confirmed {
+        let _ = writeln!(text, "  {}", show(p, e));
+    }
     print!("{text}");
     c.out
         .write("arcana.txt", &text)
         .map_err(|e| e.to_string())?;
-    let games = (all.len() + named.len() + 1) as u64 * c.pairs * 2;
+    let games = (all.len() + named.len() + 1) as u64 * c.pairs * 2
+        + confirm.len() as u64 * confirm_pairs * 2;
     c.finish(games, 0, "")
 }

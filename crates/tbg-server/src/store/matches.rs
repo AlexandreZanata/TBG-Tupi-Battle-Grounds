@@ -8,14 +8,14 @@ pub(super) fn insert(conn: &Connection, m: &Value) -> rusqlite::Result<()> {
     let int = |k: &str| m[k].as_i64().unwrap_or(0);
     let text = |k: &str| m[k].as_str().map(str::to_string);
     let seat = |i: usize| m["seats"][i].to_string();
-    // D-40 (BR-AR07): six rank bytes per seat; NULL when the line lacks them.
+    // D-40/P40 (BR-AR07): fifteen rank bytes per seat; NULL when absent.
     let arcanas = |i: usize| -> Option<Vec<u8>> {
         let ranks = m["arcanas"][i].as_array()?;
         let bytes: Option<Vec<u8>> = ranks
             .iter()
             .map(|r| u8::try_from(r.as_u64()?).ok())
             .collect();
-        bytes.filter(|b| b.len() == 6)
+        bytes.filter(|b| b.len() == tbg_core::arcana::NODES)
     };
     conn.execute(
         "INSERT INTO matches (ended_at, duration_s, winner, reason, seed, seat_a, seat_b,

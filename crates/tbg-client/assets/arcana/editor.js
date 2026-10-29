@@ -1,5 +1,7 @@
-// Arcana editor (D-40). The preset lives in localStorage (`storageKey`);
-// the game reads it when a match starts and the server validates it.
+// Arcana editor (D-40/P40). The preset lives in localStorage (`storageKey`);
+// the game reads it when a match starts and the server validates it. The
+// same three family banners and node art are reused; children and supremes
+// add their own frames and connection lines.
 (() => {
   'use strict';
   const root = document.getElementById('tbg-lobby');
@@ -8,8 +10,7 @@
   const rules = globalThis.TbgArcanaPreset;
   const get = name => panel.querySelector('[data-a="' + name + '"]');
   const text = (name, value) => { get(name).textContent = value; };
-  const desktop = matchMedia('(min-width:1280px) and (min-height:720px) and (orientation:landscape)');
-  let data, loading, ranks, opener, storageNote = '', cards = [], branches = [];
+  let data, loading, ranks, opener, storageNote = '', notice = '', cards = [], branches = [];
   function element(tag, className, content) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -18,7 +19,7 @@
   }
   function art(asset, className, size, alt) {
     const image = element('img', className);
-    image.width = size; image.alt = alt; image.decoding = 'async'; image.loading = 'lazy';
+    image.width = size; image.height = size; image.alt = alt; image.decoding = 'async'; image.loading = 'lazy';
     image.src = 'assets/arcana/' + asset.display;
     return image;
   }
@@ -39,27 +40,54 @@
     try {
       const raw = localStorage.getItem(data.storageKey);
       if (raw === null) { storageNote = 'Default selected · your edits are saved'; return; }
-      if (raw.length > 1024) throw new Error('oversized');
+      if (raw.length > 4096) throw new Error('oversized');
       const stored = JSON.parse(raw);
-      if (stored?.schema !== data.previewSchema || !rules.editable(stored.ranks, data)) throw new Error('invalid');
+      if (!Array.isArray(stored?.ranks)) throw new Error('invalid');
+      if (stored.ranks.length === 6) {
+        ranks = rules.migrate(stored.ranks, data); save();
+        storageNote = 'Saved six-node preset migrated to twelve points';
+        return;
+      }
+      if (!rules.editable(stored.ranks, data)) throw new Error('invalid');
       ranks = [...stored.ranks]; storageNote = 'Restored from this browser';
     } catch (_) { storageNote = 'Saved preset unavailable or invalid · default restored'; }
   }
   function change(index, delta) {
-    const next = [...ranks]; next[index] += delta;
-    if (!rules.editable(next, data)) return;
-    ranks = next; save(); render();
+    const node = data.nodes[index];
+    const value = ranks[index];
+    if (delta > 0) {
+      if (value >= node.maxRank) notice = node.name + ' is at its maximum rank.';
+      else if (rules.spent(ranks, data) + node.cost > data.pointBudget) notice = 'Not enough points for ' + node.name + '.';
+      else if (node.requires.some(([i, rank]) => ranks[i] < rank)) {
+        notice = 'Requires ' + rules.missing(ranks, data, node).join(', ') + '.';
+      } else {
+        notice = ''; ranks = [...ranks]; ranks[index] += 1; save();
+      }
+    } else if (value > 0) {
+      const blocked = rules.dependents(ranks, data, index, value - 1);
+      if (blocked.length) notice = 'Remove ' + blocked.join(', ') + ' first.';
+      else { notice = ''; ranks = [...ranks]; ranks[index] -= 1; save(); }
+    }
+    render();
+  }
+  function requirement(node) {
+    if (!node.requires.length) return 'No prerequisite';
+    const missing = rules.missing(ranks, data, node);
+    return missing.length ? 'Requires ' + missing.join(', ') : 'Requirements met';
   }
   function nodeCard(node) {
-    const card = element('article', 'arcana-node');
-    card.dataset.node = node.id;
+    const card = element('article', 'arcana-node arcana-node-' + node.kind);
+    card.dataset.node = node.id; card.dataset.kind = node.kind;
+    const cost = element('span', 'arcana-cost', node.cost + (node.cost > 1 ? ' points' : ' point'));
     const add = control('Add a rank to ' + node.name, undefined, () => change(node.index, 1));
     add.className = 'arcana-node-main';
     add.append(art(node.asset, 'arcana-node-icon', 72, ''));
     const copy = element('span', 'arcana-node-copy');
-    copy.append(element('strong', '', node.name), element('span', 'arcana-per-rank', node.perRankText + ' per rank'), element('span', 'arcana-max', 'Rank 2: ' + node.rankTwoText));
+    copy.append(element('strong', '', node.name));
+    copy.append(element('span', 'arcana-per-rank', node.perRankText));
+    copy.append(element('span', 'arcana-effect', node.effect));
     const pips = element('span', 'arcana-pips');
-    for (let i = 0; i < data.maxRank; i++) pips.append(element('i'));
+    for (let i = 0; i < node.maxRank; i++) pips.append(element('i'));
     copy.append(pips); add.append(copy);
     card.addEventListener('contextmenu', event => { event.preventDefault(); change(node.index, -1); });
     card.addEventListener('click', event => { if (!event.target.closest('button')) change(node.index, 1); });
@@ -68,15 +96,18 @@
         event.preventDefault(); change(node.index, event.key === '-' || event.key === '_' ? -1 : 1);
       }
     });
-    const units = data.roster.filter(unit => node.archetypes.includes(unit.archetype) && (!node.requiresExistingHeal || unit.existingHeal));
     const affected = element('p', 'arcana-affected');
+    const units = data.roster.filter(unit => node.archetypes.includes(unit.archetype) && (!node.requiresExistingHeal || unit.existingHeal));
     affected.append(element('b', '', node.eligibility), document.createTextNode(' · ' + units.map(unit => unit.name).join(', ')));
+    const requires = element('p', 'arcana-requires');
     const toolbar = element('div', 'arcana-node-tools');
     const minus = control('Remove a rank from ' + node.name, '−', () => change(node.index, -1));
     const rank = element('output'); rank.setAttribute('aria-label', node.name + ' rank');
     const plus = control('Add a rank to ' + node.name, '+', () => change(node.index, 1));
-    toolbar.append(minus, rank, plus); card.append(add, affected, toolbar);
-    cards.push({node, card, add, minus, plus, rank, pips}); return card;
+    toolbar.append(minus, rank, plus);
+    card.append(cost, add, affected, requires, toolbar);
+    cards[node.index] = {node, card, add, minus, plus, rank, pips, requires};
+    return card;
   }
   function familyCard(family) {
     const section = element('section', 'arcana-family');
@@ -87,25 +118,35 @@
     const emblem = art(family.emblem, 'arcana-emblem', 160, family.name + ' emblem'); emblem.height = 160;
     header.append(image, emblem, element('h2', '', family.name), element('p', '', family.description));
     const nodes = element('div', 'arcana-nodes');
-    data.nodes.filter(node => node.family === family.id).forEach(node => nodes.append(nodeCard(node)));
+    const familyNodes = data.nodes.filter(node => node.family === family.id);
+    const row = kind => {
+      const line = element('div', 'arcana-node-row arcana-' + kind + '-row');
+      familyNodes.filter(node => node.kind === kind).forEach(node => line.append(nodeCard(node)));
+      return line;
+    };
+    nodes.append(row('original'), row('child'), row('supreme'));
     section.append(header, nodes); get('families').append(section);
-    branches.push({family, section, header, nodes});
+    branches.push({family, section, header, nodes, cards: familyNodes.map(node => node.index)});
   }
   function render() {
-    const left = data.pointBudget - rules.spent(ranks);
-    text('points', 'Points left ' + left + ' / ' + data.pointBudget);
-    text('status', rules.complete(ranks, data) ? data.copy.complete : data.copy.partial.replace('{budget}', data.pointBudget));
-    get('status').dataset.complete = String(rules.complete(ranks, data));
+    const spent = rules.spent(ranks, data);
+    text('points', 'Points left ' + (data.pointBudget - spent) + ' / ' + data.pointBudget);
+    text('status', notice || (rules.complete(ranks, data) ? data.copy.complete : data.copy.partial.replace('{budget}', data.pointBudget)));
+    get('status').dataset.complete = String(!notice && rules.complete(ranks, data));
     text('storage', storageNote);
-    for (const {node, card, add, minus, plus, rank, pips} of cards) {
-      const value = ranks[node.index]; card.dataset.rank = value;
-      rank.textContent = value + ' / ' + data.maxRank;
+    for (const {node, card, add, minus, plus, rank, pips, requires} of cards) {
+      const value = ranks[node.index];
+      const addable = rules.canAdd(ranks, data, node.index);
+      const locked = value === 0 && node.requires.some(([i, r]) => ranks[i] < r);
+      card.dataset.rank = value; card.dataset.locked = String(locked);
+      rank.textContent = value + ' / ' + node.maxRank;
       minus.disabled = value === 0;
-      plus.disabled = left === 0 || value === data.maxRank;
-      // Keep the main card focusable at the cap so minus/right-click remain usable.
-      add.dataset.addBlocked = String(plus.disabled);
-      add.setAttribute('aria-label', node.name + ', rank ' + value + ' of ' + data.maxRank + '. ' + node.perRankText + ' per rank. Add with Enter or plus; remove with minus.');
+      plus.disabled = !addable;
+      add.dataset.addBlocked = String(!addable);
+      add.setAttribute('aria-label', node.name + ', rank ' + value + ' of ' + node.maxRank + '. Cost ' + node.cost + ' points. ' + requirement(node) + '. Add with Enter or plus; remove with minus.');
       [...pips.children].forEach((pip, index) => { pip.dataset.filled = String(index < value); });
+      requires.textContent = requirement(node);
+      requires.dataset.met = String(!locked);
     }
     requestAnimationFrame(connect);
   }
@@ -125,12 +166,25 @@
     };
     const center = anchor(get('center'), 'bottom');
     for (const branch of branches) {
-      const nodes = data.nodes.filter(node => node.family === branch.family.id);
-      const invested = nodes.some(node => ranks[node.index] > 0);
+      const invested = branch.cards.some(index => ranks[index] > 0);
       branch.section.dataset.active = String(invested);
       path(center, anchor(branch.header, 'top'), branch.family.color, invested);
-      for (const node of nodes) {
-        path(anchor(branch.header, 'bottom'), anchor(cards[node.index].card, 'top'), branch.family.color, ranks[node.index] > 0);
+      const originals = branch.cards.filter(index => data.nodes[index].kind === 'original');
+      for (const index of originals) {
+        path(anchor(branch.header, 'bottom'), anchor(cards[index].card, 'top'), branch.family.color, ranks[index] > 0);
+      }
+      for (const index of branch.cards) {
+        const node = data.nodes[index];
+        if (node.kind === 'child') {
+          for (const [parent] of node.requires) {
+            path(anchor(cards[parent].card, 'bottom'), anchor(cards[index].card, 'top'), branch.family.color, ranks[index] > 0);
+          }
+        }
+        if (node.kind === 'supreme') {
+          for (const [parent] of node.requires.filter(([, rank]) => rank === 1)) {
+            path(anchor(cards[parent].card, 'bottom'), anchor(cards[index].card, 'top'), branch.family.color, ranks[index] > 0);
+          }
+        }
       }
     }
   }
@@ -142,10 +196,10 @@
     ['intro','scope','controls','eligibility'].forEach(key => text(key, data.copy[key]));
     document.getElementById('arcana-badge').textContent = data.copy.badge;
     text('summon', data.summon.text);
-    text('default', 'Default [' + data.defaultPreset.join(',') + ']');
+    text('default', 'Restore default');
   }
   root.querySelectorAll('[data-arcana-open]').forEach(button => button.addEventListener('click', async () => {
-    if (!desktop.matches || root.hidden || root.dataset.screen !== 'lobby') return;
+    if (root.hidden || root.dataset.screen !== 'lobby') return;
     opener = button;
     if (!panel.open) panel.showModal();
     text('status', 'Loading Arcanas…');
@@ -157,9 +211,8 @@
       if (panel.open) { render(); panel.querySelector('.arcana-close').focus(); }
     } catch (error) { text('error', error.message); get('error').hidden = false; text('status', 'Arcanas unavailable'); }
   }));
-  get('default').addEventListener('click', () => { if (data) { ranks = [...data.defaultPreset]; save(); render(); } });
-  get('reset').addEventListener('click', () => { if (data) { ranks = data.nodes.map(() => 0); save(); render(); } });
+  get('default').addEventListener('click', () => { if (data) { notice = ''; ranks = [...data.defaultPreset]; save(); render(); } });
+  get('reset').addEventListener('click', () => { if (data) { notice = ''; ranks = data.nodes.map(() => 0); save(); render(); } });
   panel.addEventListener('close', () => { if (!root.hidden) opener?.focus(); });
-  desktop.addEventListener('change', () => { if (!desktop.matches) panel.close(); });
   new ResizeObserver(() => requestAnimationFrame(connect)).observe(panel);
 })();

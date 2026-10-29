@@ -9,9 +9,9 @@
 //! `INTEREST_TICKS`, `COUNTDOWN`, `WINDUP`,
 //! `MIN_INTERVAL`, `REGEN_PERIOD`, `BEETLES_PER_PLAYER`).
 
-use crate::arcana::{self, ArcanaPreset};
+use crate::arcana::{self, ArcanaPreset, ArcanaValues};
 use crate::content::{
-    AugmentBonus, FormDef, Stats, SynergyEffect, UnitDef, ARCANA_BP, AUGMENT_COST,
+    AugmentBonus, FormDef, Stats, SynergyEffect, UnitDef, ARCANA_BP, ARCANA_VALUES, AUGMENT_COST,
     AUGMENT_WINDOW_TICKS, BEETLES_PER_NESTER, BEETLE_LIFETIME, BP, ENERGY_START, EVOLVE_COST,
     HATCH_EVERY, HATCH_EVERY_HIVE, INTEREST_BAND, INTEREST_MAX_BANDS, INTEREST_PER_BAND,
     MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP, STRONGHOLD_INTERVAL,
@@ -59,8 +59,10 @@ pub struct Ruleset {
     pub beetle_lifetime: Tick,
     /// Every kind, in `ALL_KINDS` order.
     pub units: [UnitDef; ALL_KINDS.len()],
-    /// Arcana bp per rank, in node order (GAME-DESIGN §9).
-    pub arcana_bp: [i32; arcana::NODES],
+    /// Arcana bp per rank of the six original nodes (GAME-DESIGN §9).
+    pub arcana_bp: [i32; 6],
+    /// Conditional Arcana values for the nine new nodes.
+    pub arcana: ArcanaValues,
 }
 
 /// The only ruleset the server and the client use.
@@ -92,6 +94,7 @@ pub static CANON: Ruleset = Ruleset {
     beetle_lifetime: BEETLE_LIFETIME,
     units: UNITS,
     arcana_bp: ARCANA_BP,
+    arcana: ARCANA_VALUES,
 };
 
 impl Ruleset {
@@ -162,7 +165,13 @@ impl Ruleset {
         };
         let (mut hp_bp, mut dmg_bp, mut atk_bp) =
             (sum(|f| f.hp_bp), sum(|f| f.dmg_bp), sum(|f| f.atk_bp));
-        let a = arcana::bonus(arcanas, &self.arcana_bp, d.archetype, d.heal > 0);
+        let a = arcana::bonus(
+            arcanas,
+            &self.arcana_bp,
+            &self.arcana,
+            d.archetype,
+            d.heal > 0,
+        );
         hp_bp += a.hp_bp + augments.hp_bp;
         dmg_bp += a.dmg_bp + augments.dmg_bp;
         atk_bp += augments.atk_bp;
@@ -187,8 +196,9 @@ impl Ruleset {
         Stats {
             max_hp: scale(i64::from(d.hp), hp_bp),
             damage: scale(i64::from(d.damage) + sum(|f| f.dmg_add), dmg_bp),
+            atk_bp: atk_bp.clamp(0, 10_000) as i32,
             interval: (interval as u16).max(MIN_INTERVAL),
-            range: d.range + sum(|f| f.range_add) as i32,
+            range: d.range + sum(|f| f.range_add) as i32 + a.range_add,
             speed: scale(i64::from(d.speed), move_bp),
             splash: d.splash + sum(|f| f.splash_add) as i32,
             heal: scale(

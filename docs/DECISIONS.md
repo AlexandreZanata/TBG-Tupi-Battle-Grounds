@@ -642,3 +642,69 @@ Fortifications (F2–F4) remain unscheduled.
 **Reopen when** the lab or playtests show a dominant banking or
 single-Augment strategy, pauses feel too frequent, or match lengths
 threaten server capacity.
+
+## D-42 · Owner revision: fifteen Arcanas, twelve points and three supremes — 2026-10-29 (owner decision)
+
+**Decision.** The owner expanded the live Arcana system (D-40) from six
+nodes and six points to three five-node families and twelve points.
+Every family keeps its two original nodes unchanged (indices 0–5), adds
+two one-point children and one two-point supreme, for 15 nodes and 8
+points to complete a family. A player may finish one family plus 4
+points elsewhere, or build 4/4/4 without a supreme. All options remain
+free and available to every account and guest; no progression, account
+gate or payment is introduced.
+- **Effects.** War adds Shieldwall, Battle Rush and Combined Arms;
+  Precision adds Hunter's Focus, Quickdraw and Deadeye; Vitality adds
+  Unshaken, Emergency Care and Purification. The conditional values are
+  Proposed and tunable through `Ruleset.arcana`; the original per-rank
+  values stay in `Ruleset.arcana_bp`.
+- **Prerequisites.** A child needs its parent at rank 1; a supreme needs
+  both originals at rank 2 and both children. Removing a rank that would
+  invalidate a held dependent is refused and names the dependent; the
+  editor and the server use the same table.
+- **Schema and wire.** `ArcanaPreset` is 15 rank bytes and validates the
+  real point cost (supremes cost 2). Protocol v11 changes `SetArcanas`
+  and `ArcanasSelected`; older peers are rejected at the handshake.
+  Both frozen presets still travel in `MatchStart`, match records and
+  ranked rows.
+- **Migration.** Account rows and browser storage accept the old
+  six-byte/rank document. The six original ranks are preserved; the six
+  new points raise the original nodes to rank 2 in index order. No child
+  or supreme is selected automatically, so migration cannot grant a
+  behavior the player did not choose. Match and ranked history rows are
+  not rewritten. The complete default is
+  `[2,2,2,2,2,2,0,0,0,0,0,0,0,0,0]`.
+- **Simulation.** Conditional army checks use per-tick living role
+  counts, decremented on death, instead of scanning the army per hit.
+  Deadeye changes only conventional Ranged range; Quickdraw only the
+  post-hit cooldown; Unshaken only incoming duration; Purification only
+  after a real heal. No new event bus, trait framework or per-tick
+  allocation is added.
+
+**Why.** The six small percentage nodes produced shallow choices. The
+owner wants War, Precision and Vitality to change how an army is built
+and fights, while keeping the existing art, editor, authority, freeze
+and persistence infrastructure.
+
+**Guard rails.** Values stay Proposed. Summons remain excluded. The
+twelve-point build must be validated by the P16-C/P16-D lab (named builds
+and the complete-preset screen) before release claims; a supreme may not
+become universally mandatory and a hybrid build must remain viable.
+Historical presets, results and Rating are never reinterpreted.
+
+**Reopen when** the lab shows a dominant or never-used node, a supreme
+has no viable counter, or the editor/database schema needs another
+version.
+
+**Audit addendum (2026-10-29, `phase/p40-review`).** A review of the
+executor's work re-measured the lab on 3 072 paired seeds with a null
+control and held-out confirmation: the first numbers (512 pairs, ±4 pp,
+duplicated builds) were noise. Deadeye moves from +0.1 to **+0.25 tile**
+(null 49.4 %, +0.1 51.6 %, +0.25 53.7 %, +0.5 57.0 %); Quickdraw no longer
+exceeds the +100 % attack-speed cap (BR-X02). Not fixed, by evidence: the
+default 4/4/4 beats every build that swaps flat originals for War or
+Vitality conditions (war-full 47.7 %, vitality 47.2 %, war-vitality
+44.2 %), and Shieldwall and Combined Arms have a DPS ally in only 7.5 % and
+5.7 % of bot seat-ticks. Those values need policies that play each family
+before they are retuned. Evidence: `docs/media/p40/`.
+

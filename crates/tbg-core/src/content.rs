@@ -3,6 +3,7 @@
 //! basis points (10 000 = 100%). No other file may contain balance numbers;
 //! the simulation reads them through `ruleset::CANON` (D-33).
 
+use crate::arcana::ArcanaValues;
 use crate::ruleset::CANON;
 use crate::types::{Archetype, Faction, OnHit, Tick, UnitKind};
 
@@ -53,9 +54,28 @@ pub const STRONGHOLD_DAMAGE: i32 = 53;
 pub const STRONGHOLD_INTERVAL: u16 = 20;
 pub const STRONGHOLD_RANGE: i32 = 6_000;
 
-/// Arcanas (GAME-DESIGN §9, Proposed values active by D-40): bp per rank in
-/// node order Guard, Assault, Piercing, Endurance, Resilience, Renewal.
+/// Arcanas (GAME-DESIGN §9, Proposed values active by D-40): bp per rank of
+/// the six original nodes, in serialization order Guard, Assault, Piercing,
+/// Endurance, Resilience, Renewal.
 pub const ARCANA_BP: [i32; 6] = [400, 300, 300, 400, 400, 500];
+
+/// Conditional Arcanas (BR-AR05–AR10, P40): the initial Proposed values of
+/// the nine new nodes.
+pub const ARCANA_VALUES: ArcanaValues = ArcanaValues {
+    shieldwall_dr_bp: 600,
+    battle_rush_move_bp: 1_200,
+    combined_arms_dr_bp: 500,
+    combined_arms_dmg_bp: 800,
+    hunters_focus_dmg_bp: 1_200,
+    quickdraw_atk_bp: 1_500,
+    quickdraw_distance: 2_000,
+    // P40 audit: +250 milli-tiles (docs/media/p40/deadeye-dose.txt).
+    deadeye_range: 250,
+    unshaken_duration_bp: 2_500,
+    emergency_care_heal_bp: 1_500,
+    emergency_care_below_bp: 4_000,
+    purification_root_cut_bp: 5_000,
+};
 
 pub const WINDUP: u16 = 6;
 pub const MIN_INTERVAL: u16 = 5;
@@ -275,6 +295,8 @@ pub fn form_of(kind: UnitKind, tier: u8, branch: u8) -> Option<&'static FormDef>
 pub struct Stats {
     pub max_hp: i32,
     pub damage: i32,
+    /// Static attack-speed basis points already folded into `interval`.
+    pub atk_bp: i32,
     pub interval: u16,
     pub range: i32,
     pub speed: i32,
