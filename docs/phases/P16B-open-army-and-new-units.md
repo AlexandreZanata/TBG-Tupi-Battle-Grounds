@@ -208,6 +208,15 @@ portraits, tap cycling, visual lateral spread), client FPS at 100 units a
 side, step 10 fun check, the two-client match with a reconnect, and the
 owner's decision on the balance finding below.
 
+### Owner decision 2026-10-29
+
+The owner chose to ship all of P16-B to the test VPS (five offers, no army
+cap, Nester and Rampart) before the art and the balance decision. Nester,
+Rampart, and the Beetling use recolored placeholder figures (honey hive
+druid, iron-and-brass wall, dark beetle shell) and Shop portraits captured
+with the D-29 gallery tool; final art and the spam-balance decision remain
+open. All values stay **Proposed**.
+
 ### What changed
 
 - `SLOT_CAP`, `SlotCount`, `slots_used`, and the cap rejection are deleted;

@@ -116,6 +116,11 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
     if large(kind) {
         spec.plan.scale = spec.plan.scale.max(BodyPlan::BIG.scale);
     }
+    if kind == UnitKind::Rampart {
+        // ponytail: a stretched Shieldbearer at full large scale towers over
+        // the Bone Brute; keep the placeholder between human and large.
+        spec.plan.scale = 1.25;
+    }
     if kind.is_summon() {
         spec.plan.scale *= 0.55;
     }
