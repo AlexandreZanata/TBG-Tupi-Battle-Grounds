@@ -99,6 +99,7 @@ fn play(seed: u64, policy: Policy, t: &mut Totals) -> bool {
                 bought[seat.index()][def(k).faction.index()] += 1;
             }
             PlayerIntention::Evolve { .. } => t.evolutions += 1,
+            PlayerIntention::ChooseAugment { .. } | PlayerIntention::Forgo { .. } => {}
         },
         Moment::Intention { .. } => {}
         Moment::Stepped { state } => {

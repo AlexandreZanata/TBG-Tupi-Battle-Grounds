@@ -57,7 +57,7 @@ fn run(n: usize) {
         if tick % 2 == 1 {
             let mut both = std::mem::take(&mut previous);
             both.extend(events);
-            let size = encode(&ServerMsg::View(s.view_for(Seat::A, &both))).len();
+            let size = encode(&ServerMsg::View(Box::new(s.view_for(Seat::A, &both)))).len();
             bytes += size;
             max_bytes = max_bytes.max(size);
             views += 1;

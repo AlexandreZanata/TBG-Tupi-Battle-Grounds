@@ -11,19 +11,40 @@
 
 use crate::arcana::{self, ArcanaPreset};
 use crate::content::{
-    FormDef, Stats, SynergyEffect, UnitDef, ARCANA_BP, BEETLES_PER_NESTER, BEETLE_LIFETIME, BP,
-    ENERGY_CAP, ENERGY_START, EVOLVE_COST, HATCH_EVERY, HATCH_EVERY_HIVE, MIN_INTERVAL,
-    REGEN_OVERTIME, REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP, STRONGHOLD_INTERVAL,
-    STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
+    AugmentBonus, FormDef, Stats, SynergyEffect, UnitDef, ARCANA_BP, AUGMENT_COST,
+    BEETLES_PER_NESTER, BEETLE_LIFETIME, BP, ENERGY_START, EVOLVE_COST, HATCH_EVERY,
+    HATCH_EVERY_HIVE, INTEREST_BAND, INTEREST_MAX_BANDS, INTEREST_PER_BAND, MIN_INTERVAL,
+    REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP, STRONGHOLD_INTERVAL, STRONGHOLD_RANGE,
+    SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
 };
 use crate::types::{Tick, UnitKind, ALL_KINDS};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct InterestRule {
+    pub band: u32,
+    pub per_band: u32,
+    pub max_bands: u32,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct AugmentRule {
+    /// Running ticks between draws; 0 disables rounds.
+    pub round_ticks: u32,
+    /// How long a round stays open.
+    pub window: u32,
+    pub costs: [u32; 4],
+    /// Energy granted for declining or letting a round expire (0 = none).
+    pub forgo_energy: u32,
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Ruleset {
     pub energy_start: u32,
-    pub energy_cap: u32,
+    /// `None` = no gameplay cap (canon); `Some` is a lab comparison only.
+    pub energy_cap: Option<u32>,
     pub regen_running: u32,
-    pub regen_overtime: u32,
+    pub interest: InterestRule,
+    pub augment: AugmentRule,
     /// Cost of evolving to tier 1 and to tier 2.
     pub evolve_cost: [u32; 2],
     pub stronghold_hp: i32,
@@ -45,9 +66,19 @@ pub struct Ruleset {
 /// The only ruleset the server and the client use.
 pub static CANON: Ruleset = Ruleset {
     energy_start: ENERGY_START,
-    energy_cap: ENERGY_CAP,
+    energy_cap: None,
     regen_running: REGEN_RUNNING,
-    regen_overtime: REGEN_OVERTIME,
+    interest: InterestRule {
+        band: INTEREST_BAND,
+        per_band: INTEREST_PER_BAND,
+        max_bands: INTEREST_MAX_BANDS,
+    },
+    augment: AugmentRule {
+        round_ticks: 1_200,
+        window: 1_200,
+        costs: AUGMENT_COST,
+        forgo_energy: 0,
+    },
     evolve_cost: EVOLVE_COST,
     stronghold_hp: STRONGHOLD_HP,
     stronghold_damage: STRONGHOLD_DAMAGE,
@@ -101,11 +132,18 @@ impl Ruleset {
         branch: u8,
         synergy_level: u8,
     ) -> Stats {
-        self.stats_with(kind, tier, branch, synergy_level, &ArcanaPreset::NEUTRAL)
+        self.stats_with(
+            kind,
+            tier,
+            branch,
+            synergy_level,
+            &ArcanaPreset::NEUTRAL,
+            &AugmentBonus::default(),
+        )
     }
 
-    /// Effective stats with the seat's Arcanas: their bp add to Evolution and
-    /// Synergy bp on the same base and truncate once (BR-AR04).
+    /// Effective stats with the seat's Arcanas and Augments: every source
+    /// adds bp on the same base and truncates once (BR-AR04, BR-X01).
     pub fn stats_with(
         &self,
         kind: UnitKind,
@@ -113,6 +151,7 @@ impl Ruleset {
         branch: u8,
         synergy_level: u8,
         arcanas: &ArcanaPreset,
+        augments: &AugmentBonus,
     ) -> Stats {
         let d = self.def(kind);
         // No allocation: this runs for every unit on every tick.
@@ -124,8 +163,10 @@ impl Ruleset {
         let (mut hp_bp, mut dmg_bp, mut atk_bp) =
             (sum(|f| f.hp_bp), sum(|f| f.dmg_bp), sum(|f| f.atk_bp));
         let a = arcana::bonus(arcanas, &self.arcana_bp, d.archetype, d.heal > 0);
-        hp_bp += a.hp_bp;
-        dmg_bp += a.dmg_bp;
+        hp_bp += a.hp_bp + augments.hp_bp;
+        dmg_bp += a.dmg_bp + augments.dmg_bp;
+        atk_bp += augments.atk_bp;
+        let move_bp = augments.move_bp;
         if synergy_level > 0 {
             let (effect, bps) = self.synergies[d.faction.index()];
             let bp = i64::from(bps[usize::from(synergy_level.min(2)) - 1]);
@@ -136,16 +177,24 @@ impl Ruleset {
                 SynergyEffect::Regen => {}
             }
         }
-        let scale = |base: i64, bp: i64| (base * (BP + bp) / BP) as i32;
+        let scale = |base: i64, bp: i64| {
+            let value = base.saturating_mul(BP.saturating_add(bp)) / BP;
+            value.clamp(0, i64::from(i32::MAX)) as i32
+        };
+        let atk_bp = atk_bp.min(10_000);
         let interval = i64::from(d.interval) * BP / (BP + atk_bp);
+        let move_bp = (move_bp + sum(|f| f.speed_bp)).min(5_000);
         Stats {
             max_hp: scale(i64::from(d.hp), hp_bp),
             damage: scale(i64::from(d.damage) + sum(|f| f.dmg_add), dmg_bp),
             interval: (interval as u16).max(MIN_INTERVAL),
             range: d.range + sum(|f| f.range_add) as i32,
-            speed: scale(i64::from(d.speed), sum(|f| f.speed_bp)),
+            speed: scale(i64::from(d.speed), move_bp),
             splash: d.splash + sum(|f| f.splash_add) as i32,
-            heal: scale(i64::from(d.heal), sum(|f| f.heal_bp) + a.heal_bp),
+            heal: scale(
+                i64::from(d.heal),
+                sum(|f| f.heal_bp) + a.heal_bp + augments.heal_bp,
+            ),
             on_hit: active
                 .iter()
                 .rev()

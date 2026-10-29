@@ -97,7 +97,6 @@ fn arena(rules: &Ruleset, stronghold_fire: bool, regen: bool) -> &'static Rulese
     }
     if !regen {
         r.regen_running = 0;
-        r.regen_overtime = 0;
     }
     // ponytail: one small leak per scenario run; the lab is a short-lived
     // process and a lifetime would touch every scenario/test signature.

@@ -59,12 +59,14 @@ impl LocalMatch {
         }
         self.events.extend(self.state.step());
         let over = self.state.outcome.is_some();
-        if self.state.tick.is_multiple_of(2) || over {
+        if self.state.clock.is_multiple_of(2) || over {
             let view = self.state.view_for(Seat::A, &self.events);
-            self.outbox.push(ServerMsg::View(view));
+            self.outbox.push(ServerMsg::View(Box::new(view)));
             let bot_view = self.state.view_for(Seat::B, &self.events);
             if let Some(intent) = self.bot.decide(&bot_view) {
-                let _ = self.state.apply_intention(Seat::B, self.state.tick, intent);
+                let _ = self
+                    .state
+                    .apply_intention(Seat::B, self.state.clock, intent);
             }
             self.events.clear();
         }

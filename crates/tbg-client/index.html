@@ -112,6 +112,7 @@
       <div class="plate-body">
         <span class="battle-name" data-battle-you>You</span>
         <div class="vitality ally" role="progressbar" aria-label="Your Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-you-hp>-</strong></div>
+        <small class="battle-augments" data-augments-you hidden></small>
       </div>
     </div>
     <div class="battle-time" data-phase="running">
@@ -121,6 +122,7 @@
       <div class="plate-body">
         <span class="battle-name" data-battle-opponent>Opponent</span>
         <div class="vitality enemy" role="progressbar" aria-label="Enemy Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-enemy-hp>-</strong></div>
+        <small class="battle-augments" data-augments-enemy hidden></small>
       </div>
       <span class="crest" aria-hidden="true"><b data-crest-opponent>O</b></span>
     </div>
@@ -152,6 +154,8 @@
       <div class="energy-track" role="progressbar" aria-label="Energy"><span data-battle-energy-fill></span></div>
       <strong class="resource-value" data-battle-energy>—</strong>
       <span class="resource-divider"></span>
+      <span class="resource-label">Interest</span><strong class="resource-value interest-value" data-battle-interest>+0.00</strong><small class="interest-next" data-battle-interest-in>0:10</small>
+      <span class="resource-divider"></span>
       <svg class="army-icon" viewBox="0 0 36 30" aria-hidden="true"><circle cx="18" cy="7" r="6"/><circle cx="5" cy="9" r="4"/><circle cx="31" cy="9" r="4"/><path d="M10 30V20Q10 14 18 14T26 20V30ZM0 28V19Q0 15 7 15L9 16Q6 20 6 24V28ZM36 28V19Q36 15 29 15L27 16Q30 20 30 24V28Z"/></svg>
       <span class="resource-label">Army</span><strong class="resource-value" data-battle-army>0</strong>
     </div>
@@ -164,6 +168,26 @@
     </div>
     <p class="shop-help">Click to recruit · Hold or right-click for details</p>
   </section>
+  <div class="battle-pause" data-pause hidden>
+    <section class="battle-council iron-frame" role="dialog" aria-modal="true" aria-labelledby="council-title">
+      <header class="council-head">
+        <div><small class="council-paused">Battle paused</small><strong id="council-title">War Council</strong></div>
+        <div class="council-clock"><small>Time left</small><time data-council-timer>1:00</time></div>
+      </header>
+      <p class="council-help">Both players choose one Augment from the same four. The battle resumes when both confirm or time runs out.</p>
+      <div class="council-options">
+        <button class="council-card" data-council-option="0"><b class="council-name">—</b><span class="council-text"></span><span class="council-cost"></span></button>
+        <button class="council-card" data-council-option="1"><b class="council-name">—</b><span class="council-text"></span><span class="council-cost"></span></button>
+        <button class="council-card" data-council-option="2"><b class="council-name">—</b><span class="council-text"></span><span class="council-cost"></span></button>
+        <button class="council-card" data-council-option="3"><b class="council-name">—</b><span class="council-text"></span><span class="council-cost"></span></button>
+      </div>
+      <footer class="council-actions">
+        <button class="council-forgo" data-battle-action="forgo">Forgo</button>
+        <button class="council-confirm" data-battle-action="confirm" disabled>Confirm choice</button>
+      </footer>
+      <div class="council-wait" data-council-wait hidden role="status" aria-live="polite"><strong data-council-wait-title>Augment selected!</strong><span>Waiting for opponent...</span></div>
+    </section>
+  </div>
 </div>
 
 <form id="tbg-form" hidden>

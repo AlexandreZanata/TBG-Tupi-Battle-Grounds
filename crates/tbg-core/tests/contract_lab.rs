@@ -87,14 +87,15 @@ fn trace(seed: u64) -> (u64, u64, u32) {
 
 #[test]
 fn c2_per_tick_traces_are_frozen() {
-    // (seed, per-tick trace, final hash, end tick): P16-C values, neutral
-    // Arcanas serialized in PlayerState (D-40).
+    // (seed, per-tick trace, final hash, end combat tick): owner revision
+    // 2026-10-29 (uncapped Energy, Interest, and the Augment pause, whose
+    // paused steps are traced too).
     let goldens = [
-        (1, 0x2640_1254_faeb_b4fe, 0xdb54_4abe_3ad8_cf6b, 2_297),
-        (7, 0xfed4_fdef_5a47_4707, 0xfcf2_7da6_113f_9cce, 1_920),
-        (42, 0x9770_a977_5577_55b6, 0x0d17_5030_56f8_e31c, 3_233),
-        (1000, 0x8e48_e71f_eba6_180d, 0x6b4a_4a53_cb89_a954, 2_160),
-        (65535, 0x28f3_3c90_e5cb_4aad, 0xde84_c083_5d58_2429, 2_637),
+        (1, 0x0036_3c5d_9b4a_6cf7, 0x2df9_1cf5_1992_b742, 2_297),
+        (7, 0x662e_aa59_ee97_bb0e, 0xc0f8_26bd_4985_7274, 1_920),
+        (42, 0x4d13_5aa6_6b25_be8d, 0x8052_0948_8c9c_d534, 3_233),
+        (1000, 0x8533_96e0_9a8c_ae09, 0x2fc9_eee9_ee15_e798, 2_160),
+        (65535, 0x325b_3da4_5799_9db3, 0x3674_cc2a_f02b_756b, 2_637),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

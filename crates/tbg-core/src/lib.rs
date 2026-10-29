@@ -6,6 +6,7 @@
 
 pub mod account;
 pub mod arcana;
+pub mod augment;
 pub mod bot;
 mod combat;
 pub mod content;
@@ -32,6 +33,6 @@ pub use arcana::ArcanaPreset;
 pub use intent::{PlayerIntention, Rejection};
 pub use rng::Pcg32;
 pub use ruleset::Ruleset;
-pub use state::{EndReason, Event, MatchState, Outcome, Phase, Target, Unit};
+pub use state::{EndReason, Event, MatchState, Outcome, Phase, PlayerState, Target, Unit};
 pub use types::*;
 pub use view::{MatchView, UnitView};

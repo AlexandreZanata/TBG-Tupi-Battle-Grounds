@@ -129,7 +129,7 @@ fn choice_action(v: &tbg_core::MatchView, unit: UnitId, branch: u8) -> UiAction 
             && (u.tier == 0 || u.branch == branch)
             && form_of(u.kind, u.tier + 1, branch).is_some()
             && v.energy >= EVOLVE_COST[usize::from(u.tier.min(1))]
-    }) && matches!(v.phase, Phase::Running | Phase::Overtime);
+    }) && v.phase == Phase::Running;
     if available {
         UiAction::Evolve { unit, branch }
     } else {

@@ -438,6 +438,10 @@ numbers (then remove it before adding another).
 
 ## D-35 · Uncapped Energy with low-balance Interest and bounded generation — 2026-10-29 (Proposed, P16-F1)
 
+> **Revised by D-41 (owner revision, same day).** The rules below are now
+> active as written, but they were switched on without the `banker-N`
+> gate this entry required; that evidence is still missing.
+
 **Decision.** Remove the 10-Energy cap (BR-E04). Pay Interest every 10 s
 on the lowest balance held since the previous payment: 0.25 per full 5,
 at most 1.25 (BR-E05–E07). Kill Bounties are capped per window and by a
@@ -461,6 +465,10 @@ artificial limit by another name); a growing Interest without maximum
 size and value, or playtests find passive play dominant.
 
 ## D-36 · Siege and Collapse replace the time-up decision — 2026-10-29 (Proposed, P16-F1)
+
+> **Superseded by D-41 (owner revision, same day).** No time-up decision
+> remains, but neither do `Siege`, `Collapse` nor the `ServerLimit` draw:
+> matches are open-ended. Kept for history.
 
 **Decision.** No result is decided by comparing HP at a time (BR-M07). At
 4:00 of running time the phase becomes `Siege` (today's overtime slot):
@@ -508,6 +516,11 @@ balance and draw.
 players cannot tell the kinds apart at a glance.
 
 ## D-38 · Augments: three mirrored rounds and a closed effect list — 2026-10-29 (Proposed, P16-F5–F7)
+
+> **Superseded by D-41 (owner revision, same day)** for rounds, options,
+> limits and timing: a round every 60 s of combat, forever, four options,
+> unlimited copies, and a battle pause per round. The revised 40-effect
+> catalog and the closed effect list stand. Kept for history.
 
 **Decision.** Three `AugmentRound`s at 0:30, 2:00 and 3:30; both players
 see the same three options; one purchase or Forgo (+2) per round; at most
@@ -586,3 +599,46 @@ does not today, `docs/media/arcanas/`); values stay Proposed; the
 RulesetVersion field of P35 is replaced by the protocol version for now.
 **Reopen when** the full P34 matrix, human playtests, or ranked data show
 a dominant preset or a compulsory node.
+
+## D-41 · Owner revision: open-ended matches, compounding Interest, infinite Augment rounds that pause the battle — 2026-10-29 (owner decision)
+
+**Decision.** The owner switched the P16-F economy and Augments on now,
+in every mode, ahead of the lab gates of D-34:
+- Matches have no clock and no time-based result (BR-M07). `Phase` is
+  `Countdown`/`Running`/`Ended`; `EndReason` is `StrongholdDestroyed`/
+  `Forfeit`. Siege, Collapse and `ServerLimit` are dropped, not deferred.
+- `Energy` is uncapped (`Ruleset.energy_cap = None`) and Interest compounds
+  on the low-water mark every 10 s of combat (BR-E04–E08, D-35 numbers).
+- An Augment round opens every 60 s of combat, forever, with four mirrored
+  options from a reshuffled deck of all 40; one purchase or Forgo per
+  round; copies unlimited and stacking (BR-AG01–AG11).
+- Every round **pauses the battle for both players** (BR-AG12–AG14). The
+  combat tick freezes; a separate selection clock (`MatchState::clock`,
+  one per server step) closes the 60-s window. The round resolves as soon
+  as both confirmed, or at the deadline. Picks are paid on confirmation
+  but stay hidden until both outcomes apply on the same step.
+**How.** No new task, timer or sync system: the existing match task keeps
+calling `step()` at 20 Hz; a paused `step()` only advances the selection
+clock and checks the close condition, so the server, the practice match,
+`headless` and `replay` all pause identically. Views go out on the
+selection clock (10 Hz) so countdowns and reconnects work while the
+combat tick is frozen. Replay ops are keyed by the selection clock, so a
+choice made late in a pause replays at the same step. `ServerMsg::View`
+boxes the now larger `MatchView`. The practice bot forgoes every round so
+a human never waits a full minute on it.
+**Why.** The owner wants a long-form economic game where saving and
+adapting matter and a pause makes each Augment choice a deliberate,
+simultaneous decision instead of a distraction mid-fight; hiding picks
+removes any advantage from confirming second, and the separate clock means
+a frozen battle can never freeze the selection.
+**Accepted risks.** Balance is not measured: P16-C's `saver` finding
+(banking dominates) is likely stronger with Interest; unlimited copies
+grow HP and damage linearly; open-ended matches have no server-side time
+bound (a match ends only by Stronghold, forfeit or reconnect expiry). The
+match ruleset fingerprint (`ruleset_fp`) is not recorded yet.
+**Open owner questions.** Forgo value (canon 0, lab +2); whether to keep
+the 6-hour offline safety bound; Shop Reserve, Stronghold kinds and
+Fortifications (F2–F4) remain unscheduled.
+**Reopen when** the lab or playtests show a dominant banking or
+single-Augment strategy, pauses feel too frequent, or match lengths
+threaten server capacity.

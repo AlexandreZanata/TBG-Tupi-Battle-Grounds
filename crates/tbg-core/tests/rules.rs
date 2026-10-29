@@ -2,7 +2,7 @@
 //! Each test names the rule it protects.
 
 use tbg_core::bot::Bot;
-use tbg_core::content::{def, ENERGY_START, MATCH_END, OVERTIME_START};
+use tbg_core::content::{def, ENERGY_START};
 use tbg_core::protocol::{decode_client, encode, ClientMsg};
 use tbg_core::*;
 
@@ -25,7 +25,7 @@ fn bot_match(seed: u64) -> MatchState {
     let mut s = MatchState::new(seed);
     let mut bots = [Bot::new(seed * 2 + 1), Bot::new(seed * 2 + 2)];
     let mut events = Vec::new();
-    while s.phase != Phase::Ended && s.tick < MATCH_END + 5 {
+    while s.phase != Phase::Ended && s.tick < 20 * 60 * 60 * 6 {
         if s.tick.is_multiple_of(2) {
             for seat in Seat::BOTH {
                 let view = s.view_for(seat, &events);
@@ -41,20 +41,15 @@ fn bot_match(seed: u64) -> MatchState {
 }
 
 #[test]
-fn empty_match_ends_in_draw_at_time_up() {
-    // BR-M05: tie at regulation → overtime; tie after overtime → draw.
+fn empty_match_never_ends_by_time() {
+    // Owner revision: no clock, no Siege, no Collapse, no automatic damage.
     let mut s = MatchState::new(1);
-    let mut calls = 0;
-    while s.outcome.is_none() {
+    for _ in 0..20 * 60 * 20 {
         s.step();
-        calls += 1;
-        if s.tick == OVERTIME_START + 1 {
-            assert_eq!(s.phase, Phase::Overtime);
-        }
     }
-    assert_eq!(calls, MATCH_END + 1);
-    let o = s.outcome.unwrap();
-    assert_eq!((o.winner, o.reason), (None, EndReason::TimeUp));
+    assert_eq!(s.outcome, None);
+    assert_eq!(s.phase, Phase::Running);
+    assert!(s.players.iter().all(|p| p.stronghold_hp > 0));
 }
 
 #[test]
@@ -67,8 +62,8 @@ fn same_seed_and_script_same_hash() {
 }
 
 #[test]
-fn energy_regenerates_and_caps() {
-    // BR-E02
+fn energy_regenerates_without_cap_and_pays_interest() {
+    // BR-E04–E07: uncapped regen plus compounding interest.
     let mut s = running(3);
     assert_eq!(
         s.players[0].energy,
@@ -77,7 +72,8 @@ fn energy_regenerates_and_caps() {
     for _ in 0..1_000 {
         s.step();
     }
-    assert_eq!(s.players[0].energy, 6_000);
+    assert!(s.players[0].energy > 6_000, "{}", s.players[0].energy);
+    assert!(s.players[0].interest_paid > 0);
 }
 
 #[test]
@@ -198,16 +194,16 @@ fn stronghold_destroyed_wins() {
 }
 
 #[test]
-fn time_up_higher_stronghold_wins() {
-    // BR-M05
+fn unequal_strongholds_do_not_end_by_time() {
+    // BR-M07: only destruction or forfeit decide the match.
     let mut s = running(12);
     s.players[0].stronghold_hp -= 1;
-    while s.outcome.is_none() {
+    for _ in 0..20 * 60 * 20 {
         s.step();
     }
-    assert_eq!(s.tick, OVERTIME_START + 1);
-    let o = s.outcome.unwrap();
-    assert_eq!((o.winner, o.reason), (Some(Seat::B), EndReason::TimeUp));
+    assert_eq!(s.outcome, None);
+    assert_eq!(s.players[0].stronghold_hp, 4_499);
+    assert_eq!(s.players[1].stronghold_hp, 4_500);
 }
 
 #[test]

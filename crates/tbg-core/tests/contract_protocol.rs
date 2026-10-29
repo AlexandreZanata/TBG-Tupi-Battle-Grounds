@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 9,
-        "v9: v8 Arcanas plus P39 Quick Challenge/rematch messages and MatchMode::Challenge"
+        PROTOCOL_VERSION, 10,
+        "v10: open-ended matches, Interest, infinite Augment rounds, new intentions"
     );
 }
 
@@ -99,6 +99,25 @@ fn client_bytes_are_frozen() {
         [15, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
     );
     assert_eq!(encode(&ClientMsg::RequestRematch), [16]);
+}
+
+#[test]
+fn v10_augment_intentions_are_appended() {
+    let choose = ClientMsg::Intent {
+        seq: 7,
+        intent: PlayerIntention::ChooseAugment {
+            round: 11,
+            option: 3,
+        },
+    };
+    let bytes = encode(&choose);
+    assert_eq!(bytes[0], 5, "Intent keeps its tag");
+    assert_eq!(decode_client(&bytes).as_ref(), Ok(&choose));
+    let forgo = ClientMsg::Intent {
+        seq: 8,
+        intent: PlayerIntention::Forgo { round: 12 },
+    };
+    assert_eq!(decode_client(&encode(&forgo)).as_ref(), Ok(&forgo));
 }
 
 #[test]

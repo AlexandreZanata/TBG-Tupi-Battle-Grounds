@@ -286,7 +286,7 @@ fn large_battle_views_fit_the_wire() {
         let events = s.step();
         let mut both = std::mem::replace(&mut previous, events.clone());
         both.extend(events);
-        let bytes = encode(&ServerMsg::View(s.view_for(Seat::A, &both))).len();
+        let bytes = encode(&ServerMsg::View(Box::new(s.view_for(Seat::A, &both)))).len();
         largest = largest.max(bytes);
     }
     assert!(living(&s, Seat::B, UnitKind::Beetling) > 0);

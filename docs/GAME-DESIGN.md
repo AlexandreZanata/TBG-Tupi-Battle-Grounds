@@ -84,11 +84,11 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | ID | Rule | Status | Src |
 |----|------|--------|-----|
 | BR-M01 | A match is a live session between exactly two players | Confirmed | S1 |
-| BR-M02 | No sub-rounds or preparation phases; shopping and combat overlap | Confirmed | S1 |
+| BR-M02 | No sub-rounds or preparation phases; shopping and combat overlap. The only exception is the Augment selection pause (BR-AG12, owner revision 2026-10-29) | Confirmed | S1 |
 | BR-M03 | A disconnected player gets a reconnect window, then forfeits; the match keeps running meanwhile | Adapted | S1, S3 |
 | BR-M04 | Each player has a `Stronghold`; destroying the enemy `Stronghold` wins | Proposed | — |
-| BR-M05 | Fixed match clock: regulation, then overtime with faster `Energy`; tie after overtime is a draw (replaced by BR-M07–M11 when P16-F1 activates, §10) | Proposed | — |
-| BR-M06 | A player may surrender while the match is in countdown, regulation, or overtime; it is a forfeit (BR-M03): the opponent wins and, in ranked, it is a loss (BR-R04) | Proposed | — |
+| BR-M05 | ~~Fixed match clock: regulation, then overtime with faster `Energy`; tie after overtime is a draw~~ | **Removed — owner revision 2026-10-29 (D-41)**: matches are open-ended, BR-M07 | — |
+| BR-M06 | A player may surrender while the match is in countdown or running (an Augment pause included); it is a forfeit (BR-M03): the opponent wins and, in ranked, it is a loss (BR-R04) | Proposed | — |
 | BR-B01 | Combat resolves on one lane; units never move laterally | Confirmed | S1, S4 |
 | BR-B02 | A unit enters the lane only through a validated purchase-and-deploy intention; MVP deploys at the buyer's `Stronghold` | Adapted | S2, S3 |
 | BR-B03 | Allied units pass through each other; a unit stops when an enemy is within its range | Proposed | — |
@@ -103,7 +103,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-U09 | Guard: an enemy unit or `Stronghold` whose attack range reaches a living Rampart must target the nearest such Rampart | Proposed (D-32) | — |
 | BR-U10 | A server-protection entity limit, if ever needed, is documented as server protection with measured evidence (ARCHITECTURE), never as an army rule | Proposed (D-32) | — |
 | BR-E01 | `Energy` is the only in-match resource, distinct from any currency | Confirmed | S4 |
-| BR-E02 | `Energy` regenerates over time under server rules, up to a cap (the cap is removed by BR-E04 when P16-F1 activates, §10; owner decision D-35) | Confirmed | S2, S4 |
+| BR-E02 | `Energy` regenerates over time under server rules; there is no gameplay cap (BR-E04, owner revision 2026-10-29, D-41) | Confirmed | S2, S4 |
 | BR-E03 | Purchases and evolutions exceeding available `Energy` are rejected, never queued or owed | Adapted | S1 |
 | BR-S01 | Each player sees exactly five offers, five distinct units at any time | Proposed (D-32; was three) | S1, S4 |
 | BR-S02 | Shop rotation timers come from the server match clock, identical for both players | Confirmed | S1, S4 |
@@ -163,12 +163,19 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 6. **Synergy.** Each faction has bonuses at 2 and 4 living units of that
    faction (every conventional unit counts as one; summons do not count). Bonuses apply to that
    faction's units only, recomputed every tick, preserving HP percentage.
-7. **End.** Destroying the enemy `Stronghold` wins immediately. When
-   regulation ends, the higher `Stronghold` HP wins; if tied, overtime
-   starts with doubled `Energy` regeneration. A tie after overtime is a
-   draw. A player who stays disconnected past the reconnect window, or
-   who surrenders (two taps in the HUD), forfeits. The result screen
-   offers **Play again**.
+7. **Interest.** Every 10 s of combat both players earn Interest on the
+   lowest `Energy` they held since the previous payment (BR-E05–E07), so
+   saving compounds; spending lowers the next payment.
+8. **War Council.** Every 60 s of combat the whole battle pauses for both
+   players and the same four `Augment`s are offered. Each player buys one
+   or forgoes; a confirmed choice is final and hidden until the round
+   resolves. The battle resumes when both have confirmed or after 60 s of
+   selection (BR-AG01–AG14).
+9. **End.** Matches are open-ended (BR-M07): destroying the enemy
+   `Stronghold` wins immediately, and nothing is ever decided by a clock.
+   A player who stays disconnected past the reconnect window, or who
+   surrenders (two taps in the HUD), forfeits. Both Strongholds falling on
+   the same tick is a draw. The result screen offers **Play again**.
 
 ## 5. MVP starting values (all **new assumptions**, tune via playtests)
 
@@ -190,8 +197,9 @@ integers (see ARCHITECTURE.md §4).
 | Constant | Value | | Constant | Value |
 |----------|-------|-|----------|-------|
 | BattleLine length (Stronghold to Stronghold) | 16 | | Countdown | 3 |
-| Regulation | 180 | | Overtime | 60 |
-| Energy start / cap | 5 / 10 | | Energy regen | 1 per ~1.76 s (17 sub-energy/tick; overtime 34) |
+| Match length | open-ended, no clock (BR-M07) | | Augment round | every 60 s of combat; 60 s selection pause |
+| Energy start / cap | 5 / none (BR-E04) | | Energy regen | 1 per ~1.76 s (17 sub-energy/tick) |
+| Interest | every 10 s: `min(low / 5, 5) × 0.25` (BR-E06) | | Augment cost Bronze / Silver / Gold / Diamond | 3 / 6 / 10 / 15 |
 | Shop offers / full rotation | 5 distinct / every 10 (**Proposed**) | | Army cap | none (BR-U07) |
 | Stronghold HP | 4500 | | Stronghold attack | 53 dmg / 1.0 s, range 6 |
 | Evolution cost tier 1 / tier 2 | 2 / 4 | | Reconnect window | 30 |
@@ -403,26 +411,27 @@ compare remaining ratios with `i64(hp_a) * i64(max_b)` versus
 Do not implement that unused subsystem in P32–P38. Reopen progression only
 if the small system fails the strategic-choice/playtest gates.
 
-## 10. Strategic expansion — Proposed, not active (P16-F1–F8)
+## 10. Strategic expansion (P16-F1–F8)
 
-Planned after P16-D (balance). Nothing in this section is active: each
-mechanic enters the `Ruleset` disabled, the balance lab measures it, and
-the owner switches it on in its phase (D-34). Values are starting
-hypotheses. Existing rules in §3–§6 stay binding until the phase that
-replaces them is reviewed. Rule IDs are stable; never reuse one.
-
-**Four properties that are not the same thing** (D-36):
+**Owner revision 2026-10-29 (D-41).** The owner switched on, without the
+lab gate, an open-ended match, uncapped `Energy` with compounding
+Interest (§10.1), and infinite Augment rounds that pause the battle
+(§10.6, all 40 of §10.8). Siege, Collapse and every time victory (§10.2)
+are removed, not deferred. Shop Reserve, Stronghold kinds and
+Fortifications (§10.3–§10.5) stay **Proposed, not active**. Balance of
+the active parts is **not measured** (§10.9). Rule IDs are stable; never
+reuse one.
 
 | Property | Meaning | This design |
 |----------|---------|-------------|
 | No time-up decision | No result is ever decided by comparing HP at a clock time | yes (BR-M07) |
-| Ends only by unit damage | Only units and Strongholds can reduce Stronghold HP | **no** — `Collapse` also does during `Siege` |
-| Progressive structural attrition | Both Strongholds lose HP over time, symmetrically | yes, from 4:00 (BR-M08) |
-| Mathematical termination | Every match ends before a bound computable from the rules | yes (BR-M10), plus a server-protection limit that the contracts prove unreachable (BR-M11) |
+| Ends only by unit damage | Only units and Strongholds can reduce Stronghold HP | yes (Collapse removed) |
+| Progressive structural attrition | Both Strongholds lose HP over time, symmetrically | **no** (removed with Siege) |
+| Mathematical termination | Every match ends before a bound computable from the rules | **no**: open-ended by owner decision; the offline harness keeps a 6-hour safety bound, the server none |
 
-### 10.1 Economy (P16-F1)
+### 10.1 Economy (P16-F1) — active
 
-| ID | Proposed rule |
+| ID | Rule (active, owner revision 2026-10-29) |
 |----|---------------|
 | BR-E04 | `Energy` has no gameplay cap; every *generating* source has a documented bound per window instead (regen per tick, Interest per payment, Bounty per window, Forgo per round) |
 | BR-E05 | Interest is paid every 10 s of running time (the Shop rotation ticks), to both players on the same tick |
@@ -435,29 +444,28 @@ replaces them is reviewed. Rule IDs are stable; never reuse one.
 | Constant | Value | Sub-energy (600 = 1) |
 |----------|-------|----------------------|
 | Start | 5 (unchanged unless P16-D changes it) | 3 000 |
-| Base regen running / `Siege` | unchanged / doubled (today 17 / 34 per tick) | — |
+| Base regen | 17 per tick, unchanged; no `Siege` doubling | — |
 | Interest period | 10 s (200 ticks), on the rotation ticks | — |
 | Interest band / value per band / max bands | 5 / 0.25 / 5 (max 1.25 per payment at a low of 25) | 3 000 / 150 / 5 |
 | Bounty ceiling | 1.0 per player per window | 600 |
 
 Tick order addition: intentions (they lower `low`), then regen, then
-Interest on payment ticks, then the window reset.
+Interest on payment ticks, then the window reset. Interest counts combat
+ticks: an Augment pause (BR-AG12) neither pays it nor moves its timer.
 
-### 10.2 Victory, Siege and Collapse (P16-F1)
+### 10.2 Victory without a clock (P16-F1, revised)
 
-| ID | Proposed rule |
-|----|---------------|
-| BR-M07 | A match is never decided by comparing Stronghold HP at a time; it ends when a Stronghold reaches 0 HP, by forfeit (BR-M03, BR-M06), or by the server-protection limit (BR-M11) |
-| BR-M08 | At 4:00 of running time the phase becomes `Siege`: base Energy regen doubles and every second each Stronghold loses `floor(max_hp × rate / 10 000)` HP, `rate` = 10 bp + 10 bp × ((s − 1) / 10) for Siege second s = 1, 2, … (integer division) |
-| BR-M09 | `Collapse` ignores shields and damage reduction, is never a kill (no Bounty, Mend or Fury), and resolves before units act; if it brings a Stronghold to 0 the match ends that tick with reason `Collapse`; both at 0 on the same tick is a draw |
-| BR-M10 | Stronghold healing is bounded per window (BR-X10), so Collapse always outgrows it: with no damage at all, a full Stronghold falls within 140 s of `Siege` start; every match ends before 6:40 of running time (contract test, P16-F1) |
-| BR-M11 | Server protection, not a game rule: a match still live at 10:00 of running time ends as a draw with reason `ServerLimit`; a contract test proves the rules cannot reach it |
+| ID | Rule |
+|----|------|
+| BR-M07 | A match is never decided by time: it ends only when a Stronghold reaches 0 HP (both on the same tick is a draw) or by forfeit (BR-M03, BR-M06). There is no match length (active, owner revision 2026-10-29) |
+| BR-M08 | ~~`Siege` at 4:00 with doubled regen and percentage `Collapse`~~ **Removed** (owner revision 2026-10-29, D-41) |
+| BR-M09 | ~~`Collapse` damage rules~~ **Removed** |
+| BR-M10 | ~~Termination bound of 6:40~~ **Removed**: matches are open-ended |
+| BR-M11 | ~~`ServerLimit` draw at 10:00~~ **Removed**: no gameplay or server time limit ends a match |
 
-Collapse is a percentage of each Stronghold's own max HP, so every
-`StrongholdKind` and `Fortification` falls at the same pace from the same
-HP fraction: endurance builds are rewarded for surviving damage, never for
-outlasting a clock. Forfeit, surrender, reconnect windows, ranked Elo
-(draw ½) and result persistence are unchanged.
+`Phase` is `Countdown`, `Running` or `Ended`; `EndReason` is
+`StrongholdDestroyed` or `Forfeit`. Forfeit, surrender, reconnect
+windows, ranked Elo (draw ½) and result persistence are unchanged.
 
 ### 10.3 Shop Reserve (P16-F2)
 
@@ -515,25 +523,28 @@ English names avoid existing Evolution names (`Bastion`, `Artillery`,
 Owner's starting proposal was +10 % / +10 % + 5 %; the capability at tier
 2 replaces the invisible +5 % (D-37).
 
-### 10.6 Augments (P16-F5–F7)
+### 10.6 Augments (P16-F5–F7) — active, owner revision 2026-10-29
 
-| ID | Proposed rule |
+| ID | Rule (active) |
 |----|---------------|
-| BR-AG01 | Three `AugmentRound`s open at 0:30, 2:00 and 3:30 of running time; each stays open 30 s while combat, Shop, Evolution and Fortification continue |
-| BR-AG02 | Rarity profiles: round 1 Bronze, Bronze, Silver; round 2 Bronze, Silver, Gold; round 3 Silver, Gold, Diamond |
-| BR-AG03 | Both players receive the same three options, drawn by the server from a match stream (seed stream 3) that clients never see (pending owner decision O-6) |
-| BR-AG04 | Draw: for each slot in profile order, uniform among that rarity's Augments never offered earlier in this match and not already in this offer; if none of the three is Universal, the first slot (in profile order) whose rarity still has an eligible Universal Augment is redrawn from those; if no rarity has one, the draw stands |
-| BR-AG05 | A player buys at most one option per round (`ChooseAugment{round, option}`), or declines (`Forgo{round}`); the round then closes for that player only |
-| BR-AG06 | Declining, or letting the 30 s expire without a purchase, grants Forgo +2 Energy once per round; disconnecting and reconnecting changes nothing; nothing is ever assigned automatically |
-| BR-AG07 | A player short of Energy may wait inside the window; a match that ends with an open round grants nothing |
-| BR-AG08 | A player holds at most three Augments (one per round), kept until the match ends; there is no sell, swap or reroll |
-| BR-AG09 | Each player's equipped Augments are public to both players |
+| BR-AG01 | An `AugmentRound` opens every 60 s of effective combat (1 200 combat ticks), the first at 1:00 of running time, for as long as the match lasts; selection pauses never count toward the next draw |
+| BR-AG02 | Each round offers four distinct Augments, read in order from one shuffled deck of all 40; after ten rounds every Augment has been offered once and the deck is reshuffled (rarity profiles are retired) |
+| BR-AG03 | Both players receive the same four options, drawn by the server from a match stream (seed stream 3) that clients never see |
+| BR-AG04 | A player who has not confirmed when the selection window ends forgoes the round; nothing is ever assigned automatically |
+| BR-AG05 | A player confirms at most once per round: buy one option (`ChooseAugment{round, option}`) or decline (`Forgo{round}`). A confirmation is final; any later choice for that round is rejected (`RoundClosed`) |
+| BR-AG06 | Declining or expiring grants `forgo_energy` once per round: canon **0** (a +2 value exists only in lab tests; owner question). Disconnecting and reconnecting changes nothing |
+| BR-AG07 | A player short of `Energy` cannot buy in that round (`Energy` is frozen during the pause) and may buy in a later one; a match that ends during a pause grants nothing |
+| BR-AG08 | Copies are unlimited: the same Augment may be bought again in any later round and copies stack linearly (counts saturate at 65 535). There is no sell, swap or reroll |
+| BR-AG09 | Each player's applied Augments and copy counts are public to both players |
 | BR-AG10 | An Augment applies to summons only if its text names Beetlings; it never makes a summon count for Synergy or Bounty |
 | BR-AG11 | Augment effects are computed only by the simulation; clients send a round and an option index, never an effect |
+| BR-AG12 | **Pause.** While a round is open the whole battle is frozen for both players: no movement, attack, damage, healing, cooldown, status, summon, Synergy, `Energy` regen, Interest, Shop rotation, purchase or Evolution. `Purchase` and `Evolve` are rejected (`Paused`); only `ChooseAugment` and `Forgo` are accepted. The field stays visible |
+| BR-AG13 | **Two clocks.** The combat tick is frozen during a pause; a separate selection clock (one per server step, 20 per second) keeps running and closes the window after 60 s. The round resolves on the first step after both players confirmed, or at the deadline, whichever is first; one confirmation never resumes the battle. A disconnected player does not extend the window; a reconnecting player gets the round, the time left and their confirmation back. Replays record intentions by selection clock |
+| BR-AG14 | **Hidden choices.** A purchase is validated and paid when confirmed, but the opponent sees neither it nor a Forgo until the round resolves. At resolution both outcomes apply in seat order on the same step and become public; combat resumes on the next step for both |
 
 | Rarity | Cost | Forgo |
 |--------|------|-------|
-| Bronze | 3 | +2 for any round |
+| Bronze | 3 | 0 (canon) for any round |
 | Silver | 6 | |
 | Gold | 10 | |
 | Diamond | 15 | |
@@ -550,7 +561,7 @@ Owner's starting proposal was +10 % / +10 % + 5 %; the capability at tier
 | BR-X06 | Lifesteal Σ ≤ 1 200 bp of the HP actually removed by a primary hit on an enemy conventional unit (never splash, Strongholds or summons); never above max HP |
 | BR-X07 | Status duration Σ ≤ +3 000 bp; any root contract adopted by P32 still bounds root |
 | BR-X08 | Max HP changes keep the HP fraction (BR-K07 rule, also for units, as today) |
-| BR-X09 | Each source is finite (one kind, two Fortification tiers, two Evolution tiers, two Synergy levels, three Augments) and every timed effect has a cap or a cooldown: no bonus stacks without bound |
+| BR-X09 | Revised by the owner (2026-10-29): Augment copies are unlimited, so max-HP, damage and Stronghold-damage percentages from copies grow linearly without a cap (saturating `i64`/`u16` arithmetic). Attributes with a cap keep it: attack speed (BR-X02), move (BR-X03), damage reduction (BR-X05), lifesteal (BR-X06), status duration (BR-X07), heal bonus and heal cut ≤ 100 %, Bounty ceiling (BR-E08); every timed effect keeps its cooldown or window |
 | BR-X10 | Stronghold healing exists only through named effects with a per-window cap and never exceeds max HP; at most one Stronghold shield exists at a time and it absorbs unit and Stronghold damage only |
 | BR-X11 | Conditional effects read the state when they apply — position and HP-fraction conditions at hit resolution, Synergy-count conditions after that tick's Synergy update — in the simulation's fixed seat and unit-id order; nothing caches a condition across ticks |
 
@@ -559,8 +570,9 @@ Owner's starting proposal was +10 % / +10 % + 5 %; the capability at tier
 Index order is a serialization contract (P16-F5). **U** = Universal
 (useful to any army); otherwise the tag names who benefits. Percentages
 use BR-X01–X07. Per-Augment analysis (interactions, counters, exploits,
-tests, hypotheses) lives in [P16-F6](phases/P16F6-augment-catalog.md); the
-first 14 marked ★ ship first in P16-F5.
+tests, hypotheses) lives in [P16-F6](phases/P16F6-augment-catalog.md).
+Owner revision 2026-10-29: all 40 are active (★ marked the planned first
+batch only), and each copy adds its full effect again (BR-AG08).
 
 | # | Id | Name | Tag | Effect |
 |---|----|------|-----|--------|
@@ -606,10 +618,15 @@ first 14 marked ★ ship first in P16-F5.
 | 39 | `hive_awakening` | Hive Awakening | Beetlings | Beetlings +25 % damage; your summon limit +1 (6 → 7) |
 
 Rarity by index: 0–9 Bronze, 10–19 Silver, 20–29 Gold, 30–39 Diamond.
-Universal per rarity: 3 / 4 / 7 / 4, so BR-AG04 can always place one
-(★ subset: 2 / 3 / 3 / 3).
+Universal per rarity: 3 / 4 / 7 / 4 (★ subset: 2 / 3 / 3 / 3).
 
 ### 10.9 Balance targets for the expansion (Proposed, P16-F gates)
+
+**Not measured.** The owner revision went live without running these
+gates; no `tbg-balance` evidence exists yet for uncapped `Energy`,
+Interest or infinite Augments, and the reference bot forgoes every
+round. Rows about `Siege`, `Collapse`, running-time bounds and Augment
+triples no longer apply.
 
 Measured with the P16-C lab (paired seeds, both seat orders, 95 %
 cluster-bootstrap intervals). Bots are not humans: passing is necessary,

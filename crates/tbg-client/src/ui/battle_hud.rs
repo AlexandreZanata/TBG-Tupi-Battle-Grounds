@@ -61,7 +61,8 @@ mod web {
         GameState,
     };
     use tbg_core::{
-        content::{def, ENERGY_CAP, ENERGY_SCALE, OFFERS, ROTATION_TICKS, STRONGHOLD_HP},
+        augment::AugmentCounts,
+        content::{augment_def, def, ENERGY_SCALE, OFFERS, ROTATION_TICKS, STRONGHOLD_HP},
         FACTIONS,
     };
     use wasm_bindgen::JsCast;
@@ -128,8 +129,55 @@ mod web {
             .unwrap_or_default();
         attr(&root, "data-inspect", &unit);
         attr(&root, "data-energy", &v.energy.to_string());
-        attr(&root, "data-energy-max", &ENERGY_CAP.to_string());
         attr(&root, "data-energy-scale", &ENERGY_SCALE.to_string());
+        attr(&root, "data-interest", &v.interest_next.to_string());
+        attr(&root, "data-interest-in", &v.interest_in.to_string());
+        attr(
+            &root,
+            "data-augments-you",
+            &augment_label(&v.augments[v.you.index()]),
+        );
+        attr(
+            &root,
+            "data-augments-enemy",
+            &augment_label(&v.augments[v.you.other().index()]),
+        );
+        let (council, options) = match &v.augment_round {
+            Some(round) if round.ticks_left > 0 => {
+                let ids = round
+                    .options
+                    .iter()
+                    .map(u8::to_string)
+                    .collect::<Vec<_>>()
+                    .join(",");
+                let options = round
+                    .options
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(i, id)| {
+                        let def = augment_def(*id)?;
+                        Some(format!(
+                            "{}:{}:{}:{}",
+                            def.id,
+                            def.name,
+                            def.text,
+                            round.costs[i] / ENERGY_SCALE
+                        ))
+                    })
+                    .collect::<Vec<_>>()
+                    .join("|");
+                (
+                    format!(
+                        "{}|{}|{}|{}",
+                        round.round, round.ticks_left, round.resolved, ids
+                    ),
+                    options,
+                )
+            }
+            _ => ("closed".to_string(), String::new()),
+        };
+        attr(&root, "data-council", &council);
+        attr(&root, "data-council-options", &options);
         attr(
             &root,
             "data-army",
@@ -190,16 +238,35 @@ mod web {
         if value == "close-inspect" {
             return Some(UiAction::CloseInspect);
         }
+        if value == "forgo" {
+            return Some(UiAction::ForgoAugment);
+        }
         let (kind, index) = value.split_once(':')?;
-        let index = index
-            .parse::<u8>()
-            .ok()
-            .filter(|i| usize::from(*i) < OFFERS)?;
+        let index = index.parse::<u8>().ok()?;
         match kind {
-            "buy" => Some(UiAction::Buy(index)),
-            "inspect" => Some(UiAction::Inspect(index)),
+            "buy" => (usize::from(index) < OFFERS).then_some(UiAction::Buy(index)),
+            "inspect" => (usize::from(index) < OFFERS).then_some(UiAction::Inspect(index)),
+            "aug" => (usize::from(index) < tbg_core::content::AUGMENT_OPTIONS)
+                .then_some(UiAction::ChooseAugment(index)),
             _ => None,
         }
+    }
+
+    fn augment_label(counts: &AugmentCounts) -> String {
+        counts
+            .iter()
+            .enumerate()
+            .filter(|(_, copies)| **copies > 0)
+            .filter_map(|(id, copies)| {
+                let def = augment_def(id as u8)?;
+                Some(if *copies > 1 {
+                    format!("{} x{copies}", def.name)
+                } else {
+                    def.name.to_string()
+                })
+            })
+            .collect::<Vec<_>>()
+            .join(" | ")
     }
 }
 

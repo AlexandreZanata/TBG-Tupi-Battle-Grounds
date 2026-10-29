@@ -18,28 +18,29 @@ fn secs(s: u32) -> u32 {
 }
 
 #[test]
-fn match_clock_and_lane() {
-    // §5: countdown 3 s, regulation 180 s, overtime 60 s, lane 16 tiles.
+fn open_ended_match_and_lane() {
+    // Owner revision 2026-10-29: countdown 3 s, no regulation/overtime.
     assert_eq!(TICK_HZ, 20, "simulation rate (ARCHITECTURE §5: 20 Hz)");
     assert_eq!(COUNTDOWN, secs(3));
-    assert_eq!(REGULATION, secs(180));
-    assert_eq!(OVERTIME, secs(60));
     assert_eq!(RUNNING_START, COUNTDOWN);
-    assert_eq!(OVERTIME_START, COUNTDOWN + REGULATION);
-    assert_eq!(MATCH_END, secs(3 + 180 + 60));
     assert_eq!(LANE_LEN, 16 * TILE);
     assert_eq!(SPAWN_OFFSET, TILE / 2);
 }
 
 #[test]
-fn energy_economy() {
-    // §5: Energy start 5, cap 10, regen 1 per ~1.76 s (17 sub-energy per
-    // tick, doubled in overtime).
+fn uncapped_energy_and_interest() {
+    // Owner revision: start 5 Energy, no gameplay cap, Interest every 10 s.
     assert_eq!(ENERGY_SCALE, 600);
     assert_eq!(ENERGY_START, 5 * ENERGY_SCALE);
-    assert_eq!(ENERGY_CAP, 10 * ENERGY_SCALE);
     assert_eq!(REGEN_RUNNING, 17);
-    assert_eq!(REGEN_OVERTIME, 2 * REGEN_RUNNING);
+    assert_eq!(ROTATION_TICKS, secs(10));
+    assert_eq!(
+        (INTEREST_BAND, INTEREST_PER_BAND, INTEREST_MAX_BANDS),
+        (5 * ENERGY_SCALE, ENERGY_SCALE / 4, 5)
+    );
+    assert_eq!(AUGMENT_ROUND_TICKS, secs(60));
+    assert_eq!(AUGMENT_FIRST_ROUND, RUNNING_START + secs(60));
+    assert_eq!(AUGMENT_COST, [3, 6, 10, 15].map(|e| e * ENERGY_SCALE));
     let secs_per_energy = ENERGY_SCALE as f64 / (REGEN_RUNNING * TICK_HZ) as f64;
     assert!((secs_per_energy - 1.76).abs() < 0.01, "{secs_per_energy}");
 }

@@ -324,11 +324,6 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
         est(&share(EndReason::StrongholdDestroyed), 2),
         (0.60, 1.0),
     ));
-    rows.push(pct(
-        "ended by time",
-        est(&share(EndReason::TimeUp), 3),
-        (0.0, 0.30),
-    ));
     let draws = cluster(&games, |r| (f64::from(u8::from(r.winner.is_none())), 1.0));
     rows.push(pct("draws", est(&draws, 4), (0.0, 0.02)));
     for f in FACTIONS {

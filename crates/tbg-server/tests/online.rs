@@ -653,10 +653,7 @@ async fn br_u07_online_army_stays_in_sync() {
                     .map(|u| u.id)
                     .collect();
                 assert_eq!(mine, seen, "client and server armies diverged");
-                let live = matches!(
-                    v.phase,
-                    tbg_core::Phase::Running | tbg_core::Phase::Overtime
-                );
+                let live = v.phase == tbg_core::Phase::Running;
                 let cheapest = (0..v.offers.len())
                     .min_by_key(|&i| tbg_core::content::def(v.offers[i]).cost)
                     .unwrap_or(0);
@@ -1095,6 +1092,153 @@ async fn assert_challenge_presets(ws: &mut Ws, expected: [tbg_core::ArcanaPreset
             }
             Some(_) => {}
             None => panic!("socket closed before MatchStart"),
+        }
+    }
+}
+
+async fn wait_for_round(ws: &mut Ws) -> tbg_core::MatchView {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::View(view)) if view.augment_round.is_some() => return *view,
+            Some(_) => {}
+            None => panic!("socket closed before the first Augment round"),
+        }
+    }
+}
+
+async fn wait_for_view(
+    ws: &mut Ws,
+    predicate: impl Fn(&tbg_core::MatchView) -> bool,
+) -> tbg_core::MatchView {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::View(view)) if predicate(&view) => return *view,
+            Some(_) => {}
+            None => panic!("socket closed while waiting for a view"),
+        }
+    }
+}
+
+#[tokio::test]
+async fn br_ag_online_paused_round_hidden_pick_reconnect_and_deadline() {
+    let url = server(30).await;
+    let mut a = connect(&url).await;
+    let mut b = connect(&url).await;
+    let a_token = hello_token(&mut a).await;
+    let b_token = hello_token(&mut b).await;
+    send(&mut a, &ClientMsg::QuickMatch).await;
+    send(&mut b, &ClientMsg::QuickMatch).await;
+    let (a_seat, b_seat) = tokio::join!(
+        async {
+            loop {
+                match recv(&mut a).await {
+                    Some(ServerMsg::MatchStart { you, .. }) => return you,
+                    Some(_) => continue,
+                    None => panic!("A never started"),
+                }
+            }
+        },
+        async {
+            loop {
+                match recv(&mut b).await {
+                    Some(ServerMsg::MatchStart { you, .. }) => return you,
+                    Some(_) => continue,
+                    None => panic!("B never started"),
+                }
+            }
+        }
+    );
+    // BR-AG12: both seats are paused on the same round and combat tick.
+    let (a_view, b_view) = tokio::join!(wait_for_round(&mut a), wait_for_round(&mut b));
+    let round = a_view.augment_round.clone().unwrap();
+    let b_round = b_view.augment_round.clone().unwrap();
+    assert_eq!(
+        (round.round, round.options),
+        (b_round.round, b_round.options)
+    );
+    assert_eq!(a_view.tick, b_view.tick, "frozen on the same combat tick");
+    assert_eq!(a_seat, a_view.you);
+    assert_eq!(b_seat, b_view.you);
+    assert!(a_view.interest_paid > 0, "first Interest payment happened");
+    let pause_tick = a_view.tick;
+
+    // Gameplay is rejected while paused.
+    let mut seq = 1;
+    send(
+        &mut a,
+        &ClientMsg::Intent {
+            seq,
+            intent: PlayerIntention::Purchase { offer: 0 },
+        },
+    )
+    .await;
+    expect_rejection(&mut a, seq, Rejection::Paused).await;
+
+    // One confirmation: A waits, B sees nothing of it (BR-AG14).
+    seq += 1;
+    let intent = PlayerIntention::ChooseAugment {
+        round: round.round,
+        option: 0,
+    };
+    let id = usize::from(round.options[0]);
+    send(&mut a, &ClientMsg::Intent { seq, intent }).await;
+    let waiting = wait_for_view(&mut a, |v| {
+        v.augment_round.as_ref().is_some_and(|r| r.resolved)
+    })
+    .await;
+    assert_eq!(waiting.augments[a_seat.index()].get(id), 0, "hidden");
+    assert_eq!(waiting.tick, pause_tick, "one choice never resumes");
+    let b_sees = wait_for_view(&mut b, |v| v.clock > waiting.clock).await;
+    assert!(!b_sees.augment_round.as_ref().unwrap().resolved);
+    assert_eq!(b_sees.augments[a_seat.index()].get(id), 0);
+    seq += 1;
+    send(&mut a, &ClientMsg::Intent { seq, intent }).await;
+    expect_rejection(&mut a, seq, Rejection::RoundClosed).await;
+    // A replay of an accepted seq is stale and cannot buy twice.
+    send(&mut a, &ClientMsg::Intent { seq: 2, intent }).await;
+    expect_rejection(&mut a, 2, Rejection::Stale).await;
+
+    // Reconnecting inside the pause restores the round, the remaining
+    // time and the confirmation.
+    drop(a);
+    let mut a2 = connect(&url).await;
+    hello_resume(&mut a2, a_token).await;
+    let resumed = wait_for_view(&mut a2, |v| v.augment_round.is_some()).await;
+    let r = resumed.augment_round.unwrap();
+    assert!(r.resolved && r.ticks_left < round.ticks_left);
+    assert_eq!(resumed.tick, pause_tick);
+
+    // B disconnects without choosing: the selection clock still runs out
+    // and the battle resumes for A (BR-AG13).
+    drop(b);
+    let after = wait_for_view(&mut a2, |v| v.augment_round.is_none()).await;
+    assert_eq!(after.augments[a_seat.index()].get(id), 1, "pick applied");
+    assert!(after.events.iter().any(|e| matches!(
+        e,
+        tbg_core::Event::Forgone { seat, .. } if *seat == b_seat
+    )));
+    let running = wait_for_view(&mut a2, |v| v.tick > pause_tick).await;
+    assert!(running.augment_round.is_none());
+
+    // B comes back to the resumed battle and sees A's public copy.
+    let mut b2 = connect(&url).await;
+    hello_resume(&mut b2, b_token).await;
+    let b_back = wait_for_view(&mut b2, |v| v.tick > pause_tick).await;
+    assert_eq!(b_back.augments[a_seat.index()].get(id), 1);
+
+    send(&mut a2, &ClientMsg::Surrender).await;
+    let _ = await_end(&mut b2).await;
+}
+
+async fn expect_rejection(ws: &mut Ws, seq: u32, reason: Rejection) {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::Rejected { seq: s, reason: r }) => {
+                assert_eq!((s, r), (seq, reason));
+                return;
+            }
+            Some(_) => continue,
+            None => panic!("socket closed before the rejection"),
         }
     }
 }

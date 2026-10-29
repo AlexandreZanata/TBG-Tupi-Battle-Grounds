@@ -1,8 +1,10 @@
-//! `MatchState::new` and the fixed tick, in the order fixed by
-//! docs/phases/P2-core-simulation.md ("step() order").
+//! `MatchState::new` and the fixed tick. Matches have no gameplay clock:
+//! they end only by Stronghold destruction, forfeit, or operational safety
+//! outside the simulation.
 
 use crate::arcana::ArcanaPreset;
-use crate::content::{self, MATCH_END, OVERTIME_START, RUNNING_START};
+use crate::augment::{self, AugmentState};
+use crate::content::RUNNING_START;
 use crate::rng::Pcg32;
 use crate::ruleset::{Ruleset, CANON};
 use crate::state::{EndReason, Event, MatchState, Outcome, Phase, PlayerState};
@@ -31,6 +33,8 @@ impl MatchState {
             let mut rng = Pcg32::new(seed, stream);
             PlayerState {
                 energy: rules.energy_start,
+                low: rules.energy_start,
+                interest_paid: 0,
                 offers: shop::initial_offers(&mut rng),
                 stronghold_hp: rules.stronghold_hp,
                 stronghold_cooldown: 0,
@@ -38,10 +42,27 @@ impl MatchState {
                 last_seq: 0,
                 rng,
                 arcanas: ArcanaPreset::NEUTRAL,
+                augments: Default::default(),
+                augment_resolved: 0,
+                augment_pick: None,
+                bounty_window: 0,
+                mend_window_start: 0,
+                mend_in_window: 0,
+                shield: 0,
+                shield_until: 0,
+                last_stand_used: false,
+                fury_stacks: 0,
+                fury_until: 0,
             }
+        };
+        let first_round = if rules.augment.round_ticks == 0 {
+            0
+        } else {
+            RUNNING_START.saturating_add(rules.augment.round_ticks)
         };
         MatchState {
             tick: 0,
+            clock: 0,
             phase: Phase::Countdown,
             players: [0, 1].map(|i| PlayerState {
                 arcanas: arcanas[i],
@@ -50,21 +71,34 @@ impl MatchState {
             units: Vec::new(),
             next_unit_id: 1,
             outcome: None,
+            augments: AugmentState::new(seed, first_round),
             pending: Vec::new(),
             rules,
         }
     }
 
-    /// Advance exactly one tick and return its events.
+    /// Advance exactly one step and return its events. While an Augment
+    /// selection is open the step only runs the selection clock: combat,
+    /// Energy, Interest and every timer stay frozen (BR-AG12).
     pub fn step(&mut self) -> Vec<Event> {
         let mut ev = std::mem::take(&mut self.pending);
         if self.phase == Phase::Ended {
             return ev;
         }
+        self.clock += 1;
+        if self.augments.selecting() {
+            augment::selection_step(self, &mut ev);
+            return ev;
+        }
         self.advance_phase(&mut ev);
         if self.phase != Phase::Ended {
-            self.regen_energy();
-            shop::rotate(self);
+            if self.is_live() {
+                self.regen_energy();
+                shop::rotate(self);
+                augment::pay_interest(self, &mut ev);
+                augment::tick(self, &mut ev);
+                self.expire_shields();
+            }
             synergy::update(self, &mut ev);
             combat::tick_timers(self);
             summon::expire(self);
@@ -97,36 +131,34 @@ impl MatchState {
     }
 
     fn advance_phase(&mut self, ev: &mut Vec<Event>) {
-        if self.tick == RUNNING_START {
+        if self.tick == RUNNING_START && self.phase == Phase::Countdown {
             self.phase = Phase::Running;
             ev.push(Event::PhaseChanged {
                 phase: Phase::Running,
             });
-        } else if self.tick == OVERTIME_START || self.tick == MATCH_END {
-            let [a, b] = [0, 1].map(|i| self.players[i].stronghold_hp);
-            if a != b {
-                let winner = if a > b { Seat::A } else { Seat::B };
-                self.end(Some(winner), EndReason::TimeUp, ev);
-            } else if self.tick == MATCH_END {
-                self.end(None, EndReason::TimeUp, ev);
-            } else {
-                self.phase = Phase::Overtime;
-                ev.push(Event::PhaseChanged {
-                    phase: Phase::Overtime,
-                });
-            }
         }
     }
 
     fn regen_energy(&mut self) {
-        let regen = match self.phase {
-            Phase::Running => self.rules.regen_running,
-            Phase::Overtime => self.rules.regen_overtime,
-            _ => return,
-        };
+        let regen = self.rules.regen_running;
         let cap = self.rules.energy_cap;
         for p in &mut self.players {
-            p.energy = (p.energy + regen).min(cap);
+            p.energy = p.energy.saturating_add(regen);
+            if let Some(cap) = cap {
+                p.energy = p.energy.min(cap);
+            }
+        }
+    }
+
+    fn expire_shields(&mut self) {
+        let tick = self.tick;
+        for p in &mut self.players {
+            if p.shield_until <= tick {
+                p.shield = 0;
+            }
+            if p.fury_until <= tick {
+                p.fury_stacks = 0;
+            }
         }
     }
 
@@ -150,12 +182,11 @@ impl MatchState {
     }
 }
 
-/// Ticks left in the current phase (0 once ended).
+/// Ticks left in the current phase (0 once running or ended: no gameplay
+/// clock). Countdown is the only bounded phase.
 pub fn phase_ticks_left(state: &MatchState) -> u32 {
     match state.phase {
-        Phase::Countdown => RUNNING_START - state.tick,
-        Phase::Running => OVERTIME_START.saturating_sub(state.tick),
-        Phase::Overtime => content::MATCH_END.saturating_sub(state.tick),
-        Phase::Ended => 0,
+        Phase::Countdown => RUNNING_START.saturating_sub(state.tick),
+        Phase::Running | Phase::Ended => 0,
     }
 }

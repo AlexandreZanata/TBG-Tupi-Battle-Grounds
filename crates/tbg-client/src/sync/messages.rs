@@ -97,9 +97,9 @@ pub(super) fn poll_link(
                 }
                 info.last_tick = view.tick;
                 buffer.events.extend(view.events.iter().copied());
-                latest.0 = Some(view.clone());
+                latest.0 = Some((*view).clone());
                 buffer.prev = buffer.last.take();
-                buffer.last = Some((now, view));
+                buffer.last = Some((now, *view));
             }
             ServerMsg::Rejected { reason, .. } => ui.0.push(crate::ui::rejection_text(reason)),
             ServerMsg::MatchEnd { outcome } => {

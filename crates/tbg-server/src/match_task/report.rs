@@ -43,6 +43,19 @@ impl Match {
                 })
             })
             .collect();
+        let augments: Vec<Vec<(u8, u16)>> = self
+            .state
+            .players
+            .iter()
+            .map(|p| {
+                p.augments
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, copies)| **copies > 0)
+                    .map(|(id, copies)| (id as u8, *copies))
+                    .collect()
+            })
+            .collect();
         let line = serde_json::json!({
             "seed": seed, "duration_s": started.elapsed().as_secs(), "ticks": self.state.tick,
             "winner": outcome.and_then(|o| o.winner).map(|w| format!("{w:?}")),
@@ -51,6 +64,9 @@ impl Match {
             "late_ticks": late, "max_lateness_ms": max_late_ms,
             // D-40 (BR-AR07): the presets this match applied.
             "arcanas": self.state.players.each_ref().map(|p| p.arcanas.ranks),
+            // Owner revision 2026-10-29: economy and Augment telemetry.
+            "interest_paid": self.state.players.each_ref().map(|p| p.interest_paid),
+            "augments": augments,
         });
         tracing::info!(target: "match_end", "{line}");
         line

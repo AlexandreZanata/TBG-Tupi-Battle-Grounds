@@ -60,7 +60,25 @@ pub(super) fn apply(
     mut inspected: ResMut<super::inspect::Inspected>,
 ) {
     let now = time.elapsed_secs_f64();
+    // BR-AG12: while an Augment selection pauses the battle, only the War
+    // Council answers; the server would reject the rest anyway.
+    let paused = extra
+        .0
+         .0
+        .as_ref()
+        .is_some_and(|v| v.augment_round.is_some());
+    if paused {
+        selected.0 = None;
+    }
     for action in std::mem::take(&mut queue.0) {
+        if paused
+            && matches!(
+                action,
+                UiAction::Buy(_) | UiAction::Evolve { .. } | UiAction::SelectUnit(_)
+            )
+        {
+            continue;
+        }
         if !matches!(
             action,
             UiAction::Disabled
@@ -154,6 +172,37 @@ pub(super) fn apply(
                     config::copy_text(&config::challenge_link(&token));
                 } else if let Some(code) = queue_info.room {
                     config::copy_text(&config::room_link(&String::from_utf8_lossy(&code)));
+                }
+            }
+            UiAction::ChooseAugment(option) => {
+                if let Some(round) = extra.0 .0.as_ref().and_then(|v| v.augment_round.as_ref()) {
+                    if !round.resolved && round.ticks_left > 0 {
+                        seq.0 += 1;
+                        link.send(
+                            ClientMsg::Intent {
+                                seq: seq.0,
+                                intent: PlayerIntention::ChooseAugment {
+                                    round: round.round,
+                                    option,
+                                },
+                            },
+                            now,
+                        );
+                    }
+                }
+            }
+            UiAction::ForgoAugment => {
+                if let Some(round) = extra.0 .0.as_ref().and_then(|v| v.augment_round.as_ref()) {
+                    if !round.resolved && round.ticks_left > 0 {
+                        seq.0 += 1;
+                        link.send(
+                            ClientMsg::Intent {
+                                seq: seq.0,
+                                intent: PlayerIntention::Forgo { round: round.round },
+                            },
+                            now,
+                        );
+                    }
                 }
             }
             UiAction::Buy(offer) => {

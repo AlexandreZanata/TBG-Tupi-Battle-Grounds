@@ -1,9 +1,10 @@
 //! Faction synergies (BR-Y01, BR-Y02): levels from living-unit counts,
 //! stat refresh on level change, Plants regeneration.
 
+use crate::augment;
 use crate::content::{SynergyEffect, BP, REGEN_PERIOD};
 use crate::state::{Event, MatchState};
-use crate::types::{Seat, FACTIONS};
+use crate::types::{Seat, UnitKind, FACTIONS};
 
 pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
     let rules = state.rules;
@@ -29,10 +30,22 @@ pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
                 faction,
                 level,
             });
-            for idx in 0..state.units.len() {
-                let u = state.units[idx];
-                if u.seat == seat && rules.def(u.kind).faction == faction {
-                    state.refresh_max_hp(idx);
+            // Convergence is conditional on two active Synergies, so a
+            // level change can move every unit; otherwise only the faction.
+            let convergence = augment::unit_bonus(
+                &state.player(seat).augments,
+                state.player(seat).synergy,
+                UnitKind::Shieldbearer,
+                0,
+            );
+            if convergence.hp_bp > 0 || convergence.dmg_bp > 0 {
+                state.refresh_units(seat);
+            } else {
+                for idx in 0..state.units.len() {
+                    let u = state.units[idx];
+                    if u.seat == seat && rules.def(u.kind).faction == faction {
+                        state.refresh_max_hp(idx);
+                    }
                 }
             }
         }
@@ -61,7 +74,13 @@ fn regenerate(state: &mut MatchState) {
             continue;
         }
         let bp = i64::from(bps[usize::from(level) - 1]);
-        let heal = (i64::from(u.max_hp) * bp / BP) as i32;
+        let mut heal = (i64::from(u.max_hp) * bp / BP) as i32;
+        if state.tick < u.heal_cut_until {
+            heal = (i64::from(heal) * i64::from(10_000 - u.heal_cut_bp).max(0) / 10_000) as i32;
+        }
+        if heal <= 0 {
+            continue;
+        }
         let unit = &mut state.units[idx];
         unit.hp = (unit.hp + heal).min(unit.max_hp);
     }

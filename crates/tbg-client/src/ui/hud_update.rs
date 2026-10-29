@@ -2,7 +2,8 @@
 
 use bevy::prelude::*;
 use tbg_core::content::{
-    def, ENERGY_CAP, ENERGY_SCALE, REGULATION, ROTATION_TICKS, STRONGHOLD_HP, TICK_HZ,
+    augment_def, def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, ROTATION_TICKS,
+    STRONGHOLD_HP, TICK_HZ,
 };
 use tbg_core::{MatchView, Phase, FACTIONS};
 
@@ -27,8 +28,20 @@ pub(super) fn update(
         let fraction = match hud {
             Hud::Hp(0) => v.stronghold_hp[me] as f32 / STRONGHOLD_HP as f32,
             Hud::Hp(_) => v.stronghold_hp[1 - me] as f32 / STRONGHOLD_HP as f32,
-            Hud::EnergyFill => v.energy as f32 / ENERGY_CAP as f32,
+            Hud::EnergyFill => {
+                let band = (INTEREST_BAND * INTEREST_MAX_BANDS) as f32;
+                (v.energy as f32 / band.max(1.0)).min(1.0)
+            }
             Hud::Rotation => 1.0 - v.next_rotation_in as f32 / ROTATION_TICKS as f32,
+            // The War Council row exists only while the battle is paused.
+            Hud::CouncilRow => {
+                node.display = if v.augment_round.is_some() {
+                    Display::Flex
+                } else {
+                    Display::None
+                };
+                continue;
+            }
             _ => continue,
         };
         node.width = percent(100.0 * fraction.clamp(0.0, 1.0));
@@ -46,6 +59,20 @@ pub(super) fn update(
                 let c = FACTION_COLORS[def(v.offers[*i]).faction.index()];
                 color.0 = Color::srgb_u8(c[0], c[1], c[2]);
             }
+            Hud::CouncilOption(i) => {
+                let open = v
+                    .augment_round
+                    .as_ref()
+                    .is_some_and(|r| !r.resolved && r.ticks_left > 0 && v.energy >= r.costs[*i]);
+                color.0 = if open { BUTTON } else { DISABLED };
+            }
+            Hud::Forgo => {
+                let open = v
+                    .augment_round
+                    .as_ref()
+                    .is_some_and(|r| !r.resolved && r.ticks_left > 0);
+                color.0 = if open { BUTTON } else { DISABLED };
+            }
             _ => {}
         }
     }
@@ -62,6 +89,50 @@ pub(super) fn update(
                     d.cost / ENERGY_SCALE
                 )
             }
+            Hud::Augments => augment_list(v, v.you.index()),
+            Hud::CouncilStatus => match &v.augment_round {
+                Some(r) => {
+                    let s = r.ticks_left.div_ceil(TICK_HZ);
+                    if r.resolved {
+                        format!(
+                            "Augment selected! Waiting for opponent... {}:{:02}",
+                            s / 60,
+                            s % 60
+                        )
+                    } else {
+                        format!(
+                            "BATTLE PAUSED - War Council {}:{:02} left\nChoose one Augment",
+                            s / 60,
+                            s % 60
+                        )
+                    }
+                }
+                None => "War Council every 1:00 of battle".into(),
+            },
+            Hud::CouncilOptionText(i) => v
+                .augment_round
+                .as_ref()
+                .and_then(|r| {
+                    let id = *r.options.get(*i)?;
+                    let d = augment_def(id)?;
+                    Some(format!(
+                        "{}\n{} Energy\n{}",
+                        d.name,
+                        r.costs[*i] / ENERGY_SCALE,
+                        d.text
+                    ))
+                })
+                .unwrap_or_default(),
+            Hud::ForgoText => {
+                if v.augment_round
+                    .as_ref()
+                    .is_some_and(|r| r.resolved && r.ticks_left > 0)
+                {
+                    "Chosen".into()
+                } else {
+                    "Forgo".into()
+                }
+            }
             _ => continue,
         };
     }
@@ -69,21 +140,17 @@ pub(super) fn update(
 
 pub(super) fn buyable(v: &MatchView, i: usize) -> bool {
     let d = def(v.offers[i]);
-    // Energy is the only purchase condition (BR-U07).
-    v.energy >= d.cost && matches!(v.phase, Phase::Running | Phase::Overtime)
+    // Energy is the only purchase condition (BR-U07); the Shop is frozen
+    // while an Augment selection pauses the battle (BR-AG12).
+    v.energy >= d.cost && v.phase == Phase::Running && v.augment_round.is_none()
 }
 
 pub(super) fn clock(v: &MatchView) -> String {
-    let s = v.phase_ticks_left / TICK_HZ;
-    match v.phase {
-        Phase::Countdown => format!(
-            "{}:{:02}",
-            REGULATION / TICK_HZ / 60,
-            REGULATION / TICK_HZ % 60
-        ),
-        Phase::Overtime => format!("OVERTIME {}:{:02}", s / 60, s % 60),
-        _ => format!("{}:{:02}", s / 60, s % 60),
+    if v.phase == Phase::Countdown {
+        return "STARTING".into();
     }
+    let s = v.elapsed / TICK_HZ;
+    format!("{}:{:02}", s / 60, s % 60)
 }
 
 fn info(v: &MatchView) -> String {
@@ -93,11 +160,35 @@ fn info(v: &MatchView) -> String {
         .map(|f| format!("{f:?} {}/2", v.synergy[v.you.index()][f.index()]))
         .collect();
     let energy = v.energy as f32 / ENERGY_SCALE as f32;
+    let interest = v.interest_next as f32 / ENERGY_SCALE as f32;
+    let in_s = v.interest_in.div_ceil(TICK_HZ);
     format!(
-        "Energy {energy:.1} | {} | {}",
+        "Energy {energy:.1} | Interest +{interest:.2} in {in_s}s | {} | {}",
         army_label(v),
         synergies.join("  ")
     )
+}
+
+fn augment_list(v: &MatchView, seat: usize) -> String {
+    let list = v.augments[seat]
+        .iter()
+        .enumerate()
+        .filter(|(_, copies)| **copies > 0)
+        .filter_map(|(id, copies)| {
+            let def = augment_def(id as u8)?;
+            Some(if *copies > 1 {
+                format!("{} x{copies}", def.name)
+            } else {
+                def.name.to_string()
+            })
+        })
+        .collect::<Vec<_>>()
+        .join(" | ");
+    if list.is_empty() {
+        "Augments: none".into()
+    } else {
+        format!("Augments: {list}")
+    }
 }
 
 /// `Army N`, plus `Brood M` while the seat has summons (BR-U07, BR-U08).

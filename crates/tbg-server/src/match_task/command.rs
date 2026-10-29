@@ -44,8 +44,16 @@ impl Match {
                 self.stats[seat.index()].intents += 1;
                 // P9: any processed intention earns an ack view this tick.
                 self.applied[seat.index()] = true;
-                self.record(seat, Some((seq, intent)));
-                let result = self.state.apply_intention(seat, seq, intent);
+                // A replayed or out-of-order intention never mutates twice and
+                // never enters the replay log.
+                let current = self.state.player(seat).last_seq;
+                let stale = seq != 0 && seq <= current;
+                let result = if stale {
+                    Err(tbg_core::Rejection::Stale)
+                } else {
+                    self.record(seat, Some((seq, intent)));
+                    self.state.apply_intention(seat, seq, intent)
+                };
                 if result.is_ok() {
                     self.count_success(seat, intent);
                 }

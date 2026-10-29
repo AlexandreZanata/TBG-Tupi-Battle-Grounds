@@ -47,7 +47,7 @@ fn server_variant_order_is_frozen() {
             opponent_rating: None,
             arcanas: [tbg_core::ArcanaPreset::DEFAULT; 2],
         },
-        ServerMsg::View(view),
+        ServerMsg::View(Box::new(view)),
         ServerMsg::Rejected {
             seq: 1,
             reason: Rejection::NotEnoughEnergy,
@@ -135,7 +135,11 @@ fn server_bytes_are_frozen() {
             reason: EndReason::Forfeit,
         },
     };
-    assert_eq!(encode(&end), [8, 1, 1, 2]);
+    assert_eq!(
+        encode(&end),
+        [8, 1, 1, 1],
+        "Forfeit is now EndReason index 1"
+    );
     let row = LeaderRow {
         rank: 1,
         name: "Ann".into(),

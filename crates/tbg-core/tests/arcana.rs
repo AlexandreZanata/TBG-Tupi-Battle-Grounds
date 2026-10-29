@@ -1,7 +1,7 @@
 //! Arcana contracts (GAME-DESIGN §9, BR-AR01–BR-AR10, D-40). Append-only.
 
 use tbg_core::arcana::{self, ArcanaError};
-use tbg_core::content::{def, ARCANA_BP, BP};
+use tbg_core::content::{def, AugmentBonus, ARCANA_BP, BP};
 use tbg_core::{
     ArcanaPreset, Archetype, MatchState, Phase, PlayerIntention, Ruleset, Seat, UnitKind,
     UNIT_KINDS,
@@ -51,7 +51,7 @@ fn br_ar03_ar04_bonus_by_base_archetype_on_every_unit() {
             [2, 0, 2, 0, 2, 0],
         ] {
             let p = ArcanaPreset::complete(ranks).unwrap();
-            let s = r.stats_with(kind, 0, 0, 0, &p);
+            let s = r.stats_with(kind, 0, 0, 0, &p, &AugmentBonus::default());
             assert_eq!(
                 (s.max_hp, s.damage, s.heal),
                 expect(kind, ranks),
@@ -72,7 +72,14 @@ fn br_ar04_bp_add_to_evolution_and_synergy_then_truncate_once() {
     // Shieldbearer Bulwark (+50 % HP), Humans level 1 (+20 % HP), Guard 2 (+8 %).
     let r = Ruleset::canon();
     let p = ArcanaPreset::complete([2, 0, 2, 0, 2, 0]).unwrap();
-    let s = r.stats_with(UnitKind::Shieldbearer, 1, 0, 1, &p);
+    let s = r.stats_with(
+        UnitKind::Shieldbearer,
+        1,
+        0,
+        1,
+        &p,
+        &AugmentBonus::default(),
+    );
     assert_eq!(s.max_hp, 650 * (10_000 + 5_000 + 2_000 + 800) / 10_000);
 }
 

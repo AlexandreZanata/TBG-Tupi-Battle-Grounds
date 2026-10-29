@@ -10,9 +10,9 @@ use crate::state::Outcome;
 use crate::types::Seat;
 use crate::view::MatchView;
 
-/// v9: the v8 Arcana messages plus the P39 Quick Challenge and rematch
-/// messages; older peers are refused by the handshake.
-pub const PROTOCOL_VERSION: u16 = 9;
+/// v10: open-ended matches, Interest, infinite Augment rounds and the
+/// revised Rejection/PlayerIntention variants; older peers are refused.
+pub const PROTOCOL_VERSION: u16 = 10;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a
@@ -103,7 +103,8 @@ pub enum ServerMsg {
         /// public once paired (BR-AR05, BR-AR07).
         arcanas: [ArcanaPreset; 2],
     },
-    View(MatchView),
+    /// Boxed: a view is far larger than every other message.
+    View(Box<MatchView>),
     Rejected {
         seq: u32,
         reason: Rejection,

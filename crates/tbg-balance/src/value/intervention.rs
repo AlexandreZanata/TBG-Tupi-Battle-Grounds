@@ -128,7 +128,7 @@ fn validate(r: &Ruleset) -> Result<(), String> {
     if r.stronghold_interval < MIN_INTERVAL || r.stronghold_range < 0 {
         return Err("Stronghold interval below the minimum or negative range".into());
     }
-    if r.energy_start == 0 || r.energy_cap < r.energy_start {
+    if r.energy_start == 0 || r.energy_cap.is_some_and(|cap| cap < r.energy_start) {
         return Err("Energy start or cap outside its bounds".into());
     }
     for (_, bp) in r.synergies {

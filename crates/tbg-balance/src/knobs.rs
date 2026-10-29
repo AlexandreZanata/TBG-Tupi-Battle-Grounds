@@ -34,9 +34,14 @@ pub enum FormField {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Knob {
     EnergyStart,
-    EnergyCap,
     RegenRunning,
-    RegenOvertime,
+    InterestBand,
+    InterestPerBand,
+    InterestMaxBands,
+    AugmentRoundTicks,
+    AugmentWindow,
+    AugmentForgo,
+    AugmentCost(usize),
     EvolveCost(usize),
     StrongholdHp,
     StrongholdDamage,
@@ -69,9 +74,11 @@ const ARCANA_NAMES: [&str; 6] = [
 pub fn all(r: &Ruleset) -> Vec<Knob> {
     let Ruleset {
         energy_start,
-        energy_cap,
+        // Untunable: no gameplay cap. The lab builds `Some(cap)` directly.
+        energy_cap: _,
         regen_running,
-        regen_overtime,
+        interest,
+        augment,
         evolve_cost,
         stronghold_hp,
         stronghold_damage,
@@ -95,9 +102,16 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
         }
     };
     add(Knob::EnergyStart, i64::from(*energy_start));
-    add(Knob::EnergyCap, i64::from(*energy_cap));
     add(Knob::RegenRunning, i64::from(*regen_running));
-    add(Knob::RegenOvertime, i64::from(*regen_overtime));
+    add(Knob::InterestBand, i64::from(interest.band));
+    add(Knob::InterestPerBand, i64::from(interest.per_band));
+    add(Knob::InterestMaxBands, i64::from(interest.max_bands));
+    add(Knob::AugmentRoundTicks, i64::from(augment.round_ticks));
+    add(Knob::AugmentWindow, i64::from(augment.window));
+    add(Knob::AugmentForgo, i64::from(augment.forgo_energy));
+    for (i, cost) in augment.costs.iter().enumerate() {
+        add(Knob::AugmentCost(i), i64::from(*cost));
+    }
     for (i, c) in evolve_cost.iter().enumerate() {
         add(Knob::EvolveCost(i), i64::from(*c));
     }
@@ -226,9 +240,14 @@ field!(u16, u32, i32);
 fn slot(r: &mut Ruleset, k: Knob) -> &mut dyn Field {
     match k {
         Knob::EnergyStart => &mut r.energy_start,
-        Knob::EnergyCap => &mut r.energy_cap,
         Knob::RegenRunning => &mut r.regen_running,
-        Knob::RegenOvertime => &mut r.regen_overtime,
+        Knob::InterestBand => &mut r.interest.band,
+        Knob::InterestPerBand => &mut r.interest.per_band,
+        Knob::InterestMaxBands => &mut r.interest.max_bands,
+        Knob::AugmentRoundTicks => &mut r.augment.round_ticks,
+        Knob::AugmentWindow => &mut r.augment.window,
+        Knob::AugmentForgo => &mut r.augment.forgo_energy,
+        Knob::AugmentCost(i) => &mut r.augment.costs[i],
         Knob::EvolveCost(i) => &mut r.evolve_cost[i],
         Knob::StrongholdHp => &mut r.stronghold_hp,
         Knob::StrongholdDamage => &mut r.stronghold_damage,
@@ -258,8 +277,9 @@ pub fn step(k: Knob, canon: i64) -> (i64, i64) {
     let five_percent = (canon.abs() / 20).max(1);
     match k {
         Knob::EnergyStart
-        | Knob::EnergyCap
         | Knob::EvolveCost(_)
+        | Knob::AugmentCost(_)
+        | Knob::AugmentForgo
         // Whole Energy, at most ±25 % (one step for every current cost).
         | Knob::Unit(_, UnitField::Cost) => {
             let e = i64::from(ENERGY_SCALE);
@@ -279,8 +299,9 @@ pub fn step(k: Knob, canon: i64) -> (i64, i64) {
 fn floor(k: Knob) -> i64 {
     match k {
         Knob::EnergyStart
-        | Knob::EnergyCap
         | Knob::EvolveCost(_)
+        | Knob::AugmentCost(_)
+        | Knob::AugmentForgo
         | Knob::Unit(_, UnitField::Cost) => i64::from(ENERGY_SCALE),
         Knob::Unit(_, UnitField::Interval) | Knob::StrongholdInterval => i64::from(MIN_INTERVAL),
         _ => 1,
@@ -298,6 +319,13 @@ pub fn name(r: &Ruleset, k: Knob) -> String {
     let unit = |i: usize| format!("{:?}", r.units[i].kind);
     match k {
         Knob::EvolveCost(i) => format!("evolve_cost.{i}"),
+        Knob::AugmentCost(i) => format!("augment_cost.{i}"),
+        Knob::InterestBand => "interest.band".into(),
+        Knob::InterestPerBand => "interest.per_band".into(),
+        Knob::InterestMaxBands => "interest.max_bands".into(),
+        Knob::AugmentRoundTicks => "augment.round_ticks".into(),
+        Knob::AugmentWindow => "augment.window".into(),
+        Knob::AugmentForgo => "augment.forgo_energy".into(),
         Knob::Arcana(i) => format!("arcana.{}", ARCANA_NAMES[i]),
         Knob::Synergy(f, l) => format!("synergy.{:?}.{}", FACTIONS[f], l + 1).to_lowercase(),
         Knob::Unit(i, f) => format!("{}.{}", unit(i), snake(&format!("{f:?}"))),
@@ -351,7 +379,8 @@ pub fn valid(r: &Ruleset) -> Result<(), String> {
         if d.range > r.stronghold_range {
             return Err(format!("{:?}: base range above the Stronghold's", k));
         }
-        if d.cost < ENERGY_SCALE || d.cost > r.energy_cap {
+        let cap = r.energy_cap.unwrap_or(u32::MAX);
+        if d.cost < ENERGY_SCALE || d.cost > cap {
             return Err(format!("{:?}: cost outside 1..=cap Energy", k));
         }
         if d.interval < MIN_INTERVAL {
@@ -361,7 +390,8 @@ pub fn valid(r: &Ruleset) -> Result<(), String> {
     if r.synergies.iter().any(|(_, bp)| bp[0] > bp[1]) {
         return Err("a level-1 Synergy bonus above its level-2 bonus".into());
     }
-    if r.evolve_cost.iter().any(|&c| c > r.energy_cap) || r.energy_start > r.energy_cap {
+    let cap = r.energy_cap.unwrap_or(u32::MAX);
+    if r.evolve_cost.iter().any(|&c| c > cap) || r.energy_start > cap {
         return Err("Evolution cost or start Energy above the cap".into());
     }
     for f in FACTIONS {

@@ -1,6 +1,7 @@
 //! Automatic combat (BR-U01, BR-U04): statuses, movement, windup and
 //! hits, splash, heals, Stronghold fire, deaths.
 
+use crate::augment;
 use crate::content::{BP, LANE_LEN, WINDUP};
 use crate::hits::{damage, resolve_hit};
 use crate::state::{stronghold_x, Event, MatchState, Target};
@@ -69,10 +70,15 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
         }
         Some(Engage::Hold) => {}
         None => {
-            let speed = match u.status {
+            let mut speed = match u.status {
                 Status::Slowed { bp, .. } => scale_down(st.speed, bp),
                 _ => st.speed,
             };
+            let haste = augment::haste_move_bp(&state.player(u.seat).augments, &u, state.tick);
+            if haste > 0 {
+                speed = ((i64::from(speed) * (BP + i64::from(haste)) / BP).min(i64::from(i32::MAX)))
+                    as i32;
+            }
             let x = u.x + u.seat.dir() * speed;
             state.units[idx].x = x.clamp(0, LANE_LEN);
         }
@@ -113,15 +119,45 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
                 from: Target::Stronghold(seat),
                 to,
             });
-            damage(state, to, rules.stronghold_damage, ev);
+            let p = state.player(seat);
+            let bp =
+                augment::stronghold_damage_bp(&p.augments, state.tick, p.fury_until, p.fury_stacks);
+            let amount = if bp == 0 {
+                rules.stronghold_damage
+            } else {
+                (i64::from(rules.stronghold_damage) * (BP + i64::from(bp)) / BP) as i32
+            };
+            let was_alive = state
+                .unit_index(id)
+                .map(|i| state.units[i].hp > 0 && !state.units[i].kind.is_summon())
+                .unwrap_or(false);
+            let removed = damage(state, to, amount.max(1), ev);
+            let killed = was_alive && state.unit_index(id).is_some_and(|i| state.units[i].hp <= 0);
+            if killed && removed > 0 {
+                if let Some((max, ticks)) = augment::tower_fury_rule(&state.player(seat).augments) {
+                    let until = state.tick.saturating_add(u32::from(ticks));
+                    let p = state.player_mut(seat);
+                    p.fury_stacks = p.fury_stacks.saturating_add(1).min(max);
+                    p.fury_until = until;
+                }
+            }
             state.player_mut(seat).stronghold_cooldown = rules.stronghold_interval;
         }
     }
 }
 
 pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
+    let mut dead = [0u32; 2];
     for u in state.units.iter().filter(|u| u.hp <= 0) {
         ev.push(Event::Death { unit: u.id });
+        if !u.kind.is_summon() {
+            dead[u.seat.index()] += 1;
+        }
     }
     state.units.retain(|u| u.hp > 0);
+    for seat in Seat::BOTH {
+        for _ in 0..dead[seat.index()] {
+            augment::on_eligible_kill(state, seat);
+        }
+    }
 }

@@ -126,7 +126,7 @@ impl Controller {
     }
 
     pub fn decide(&mut self, view: &MatchView) -> Option<PlayerIntention> {
-        if !matches!(view.phase, Phase::Running | Phase::Overtime) {
+        if view.phase != Phase::Running {
             return None;
         }
         // The shipped bot keeps its own reaction schedule.
@@ -220,8 +220,21 @@ impl Controller {
         }
     }
 
+    fn bank_target(&self) -> u32 {
+        let bands = self
+            .rules
+            .interest
+            .band
+            .saturating_mul(self.rules.interest.max_bands);
+        if bands > 0 {
+            bands
+        } else {
+            25 * tbg_core::content::ENERGY_SCALE
+        }
+    }
+
     fn saver(&mut self, view: &MatchView) -> Option<PlayerIntention> {
-        if view.energy >= self.rules.energy_cap {
+        if view.energy >= self.bank_target() {
             self.spending = true;
         }
         if !self.spending {
@@ -248,7 +261,7 @@ impl Controller {
         }
         let offered = (0..OFFERS).any(|i| of_f(&i));
         // Without a faction offer, avoid wasting Energy at the cap.
-        (!offered && view.energy >= rules.energy_cap)
+        (!offered && view.energy >= self.bank_target())
             .then(|| self.buy_by(view, |cost| -i64::from(cost)))
             .flatten()
     }
