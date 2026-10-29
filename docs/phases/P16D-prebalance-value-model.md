@@ -964,7 +964,9 @@ itself.
 Executed 2026-10-29 on `phase/p16d-prebalance-value-model`, based on the
 P16-C final proposal (`1ba4d30`, 8-number proposal applied, gate-after
 recorded) plus the P16-F specs. The engine is offline only; no server,
-client, protocol, or competitive rule changed.
+client, protocol, or competitive rule changed. The final rerun after merging
+Arcana v8 (neutral presets in the value paths) reproduced every value exactly;
+only the ruleset fingerprint changed.
 
 ### Status
 
@@ -998,10 +1000,10 @@ cargo run --release -p tbg-balance -- value --mode interactions
 cargo run --release -p tbg-balance -- validate --pairs 4096 --threads 16
 ```
 
-- Shadow: 28.19 s, 4 points × 4,096 pairs. `λ_ref = 0.028748`; tick 0
+- Shadow: 18.39 s, 4 points × 4,096 pairs. `λ_ref = 0.028748`; tick 0
   interval includes zero; ticks 600/1,200/1,800 are positive with
   intervals excluding zero.
-- Reference: 98.30 s, 196,608 games, 2,000 games/s. Top values: Archer
+- Reference: 65.02 s, 196,608 games, 3,024 games/s. Top values: Archer
   range +1 tile 507 PVE (+14.57 pp), Bloomkeeper heal +20 % 299 PVE
   (+8.58 pp), Archer damage +20 % 286 PVE (+8.21 pp), Shieldbearer HP
   +20 % 129 PVE (+3.70 pp), Hexer slow 60 % 75 PVE (+2.17 pp), Rootcaller
@@ -1010,7 +1012,7 @@ cargo run --release -p tbg-balance -- validate --pairs 4096 --threads 16
 - Interactions (deterministic): damage + attack speed = −1,665 HP margin
   (diminishing returns); root + ranged damage = +856 (super-additive);
   null pair = 0.
-- Validation: 135.78 s, discovery vs confirmation rank **0.991**;
+- Validation: 106.05 s, discovery vs confirmation rank **0.991**;
   confirmation vs static baseline rank **0.073**. The direct measurement
   is stable out of sample and not a renamed static formula.
 - Canaries: Archer damage ×2 = 1,070 PVE (+30.75 pp); Shieldbearer cost
