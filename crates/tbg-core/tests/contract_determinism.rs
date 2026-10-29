@@ -18,27 +18,27 @@ fn bot_match(seed: u64) -> MatchState {
 
 #[test]
 fn bot_matches_are_frozen() {
-    // P16-C (D-33, Proposed): eight balance numbers from the lab moved
-    // every golden; recomputed in the same commit.
+    // D-40: every PlayerState now serializes its Arcana preset, so the
+    // hashes moved; outcomes and end ticks are unchanged (neutral presets).
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0x9ae1_fab4_a68e_7c8b_u64,
+            0xdb54_4abe_3ad8_cf6b_u64,
             2_297,
             Seat::A,
             StrongholdDestroyed,
         ),
         (
             7,
-            0x5e4a_da1a_4ffb_210e,
+            0xfcf2_7da6_113f_9cce,
             1_920,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0x1f60_ac5e_2d13_415c,
+            0x0d17_5030_56f8_e31c,
             3_233,
             Seat::B,
             StrongholdDestroyed,

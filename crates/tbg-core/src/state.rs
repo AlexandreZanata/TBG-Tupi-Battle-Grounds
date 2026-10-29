@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::arcana::ArcanaPreset;
 use crate::content::{self, Stats, OFFERS};
 use crate::rng::Pcg32;
 use crate::ruleset::Ruleset;
@@ -53,6 +54,8 @@ pub struct PlayerState {
     pub synergy: [u8; 4],
     pub last_seq: u32,
     pub rng: Pcg32,
+    /// Frozen for the whole match (BR-AR05); public once paired.
+    pub arcanas: ArcanaPreset,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -166,14 +169,18 @@ impl MatchState {
     }
 
     pub fn stats_of(&self, u: &Unit) -> Stats {
-        let faction = self.rules.def(u.kind).faction.index();
-        // Summons never receive Synergy (BR-U08).
-        let level = if u.kind.is_summon() {
-            0
-        } else {
-            self.player(u.seat).synergy[faction]
-        };
-        self.rules.effective_stats(u.kind, u.tier, u.branch, level)
+        // Summons never receive Synergy or Arcanas (BR-U08, D-40).
+        if u.kind.is_summon() {
+            return self.rules.effective_stats(u.kind, u.tier, u.branch, 0);
+        }
+        self.stats_for(u.seat, u.kind, u.tier, u.branch)
+    }
+
+    /// Stats of a seat's conventional unit: its Synergy level and Arcanas.
+    pub fn stats_for(&self, seat: Seat, kind: UnitKind, tier: u8, branch: u8) -> Stats {
+        let p = self.player(seat);
+        let level = p.synergy[self.rules.def(kind).faction.index()];
+        self.rules.stats_with(kind, tier, branch, level, &p.arcanas)
     }
 
     /// Recompute a unit's max HP, keeping its HP ratio (GAME-DESIGN §4).

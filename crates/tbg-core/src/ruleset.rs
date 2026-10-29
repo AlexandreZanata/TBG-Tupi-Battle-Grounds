@@ -9,11 +9,12 @@
 //! `ROTATION_TICKS`, `COUNTDOWN`, `REGULATION`, `OVERTIME`, `WINDUP`,
 //! `MIN_INTERVAL`, `REGEN_PERIOD`, `BEETLES_PER_PLAYER`).
 
+use crate::arcana::{self, ArcanaPreset};
 use crate::content::{
-    FormDef, Stats, SynergyEffect, UnitDef, BEETLES_PER_NESTER, BEETLE_LIFETIME, BP, ENERGY_CAP,
-    ENERGY_START, EVOLVE_COST, HATCH_EVERY, HATCH_EVERY_HIVE, MIN_INTERVAL, REGEN_OVERTIME,
-    REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP, STRONGHOLD_INTERVAL, STRONGHOLD_RANGE,
-    SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
+    FormDef, Stats, SynergyEffect, UnitDef, ARCANA_BP, BEETLES_PER_NESTER, BEETLE_LIFETIME, BP,
+    ENERGY_CAP, ENERGY_START, EVOLVE_COST, HATCH_EVERY, HATCH_EVERY_HIVE, MIN_INTERVAL,
+    REGEN_OVERTIME, REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP, STRONGHOLD_INTERVAL,
+    STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
 };
 use crate::types::{Tick, UnitKind, ALL_KINDS};
 
@@ -37,6 +38,8 @@ pub struct Ruleset {
     pub beetle_lifetime: Tick,
     /// Every kind, in `ALL_KINDS` order.
     pub units: [UnitDef; ALL_KINDS.len()],
+    /// Arcana bp per rank, in node order (GAME-DESIGN §9).
+    pub arcana_bp: [i32; arcana::NODES],
 }
 
 /// The only ruleset the server and the client use.
@@ -57,6 +60,7 @@ pub static CANON: Ruleset = Ruleset {
     beetles_per_nester: BEETLES_PER_NESTER,
     beetle_lifetime: BEETLE_LIFETIME,
     units: UNITS,
+    arcana_bp: ARCANA_BP,
 };
 
 impl Ruleset {
@@ -88,13 +92,27 @@ impl Ruleset {
         (every, self.beetles_per_nester[usize::from(brood)])
     }
 
-    /// Effective stats after evolution forms and the seat's synergy level.
+    /// Effective stats after evolution forms and the seat's synergy level,
+    /// without Arcanas (display, tests, and the lab's neutral matches).
     pub fn effective_stats(
         &self,
         kind: UnitKind,
         tier: u8,
         branch: u8,
         synergy_level: u8,
+    ) -> Stats {
+        self.stats_with(kind, tier, branch, synergy_level, &ArcanaPreset::NEUTRAL)
+    }
+
+    /// Effective stats with the seat's Arcanas: their bp add to Evolution and
+    /// Synergy bp on the same base and truncate once (BR-AR04).
+    pub fn stats_with(
+        &self,
+        kind: UnitKind,
+        tier: u8,
+        branch: u8,
+        synergy_level: u8,
+        arcanas: &ArcanaPreset,
     ) -> Stats {
         let d = self.def(kind);
         // No allocation: this runs for every unit on every tick.
@@ -105,6 +123,9 @@ impl Ruleset {
         };
         let (mut hp_bp, mut dmg_bp, mut atk_bp) =
             (sum(|f| f.hp_bp), sum(|f| f.dmg_bp), sum(|f| f.atk_bp));
+        let a = arcana::bonus(arcanas, &self.arcana_bp, d.archetype, d.heal > 0);
+        hp_bp += a.hp_bp;
+        dmg_bp += a.dmg_bp;
         if synergy_level > 0 {
             let (effect, bps) = self.synergies[d.faction.index()];
             let bp = i64::from(bps[usize::from(synergy_level.min(2)) - 1]);
@@ -124,7 +145,7 @@ impl Ruleset {
             range: d.range + sum(|f| f.range_add) as i32,
             speed: scale(i64::from(d.speed), sum(|f| f.speed_bp)),
             splash: d.splash + sum(|f| f.splash_add) as i32,
-            heal: scale(i64::from(d.heal), sum(|f| f.heal_bp)),
+            heal: scale(i64::from(d.heal), sum(|f| f.heal_bp) + a.heal_bp),
             on_hit: active
                 .iter()
                 .rev()

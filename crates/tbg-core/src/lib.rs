@@ -5,6 +5,7 @@
 //! floats in simulation state, and unseeded randomness (docs/ARCHITECTURE.md §4).
 
 pub mod account;
+pub mod arcana;
 pub mod bot;
 mod combat;
 pub mod content;
@@ -27,6 +28,7 @@ mod targeting;
 pub mod types;
 pub mod view;
 
+pub use arcana::ArcanaPreset;
 pub use intent::{PlayerIntention, Rejection};
 pub use rng::Pcg32;
 pub use ruleset::Ruleset;

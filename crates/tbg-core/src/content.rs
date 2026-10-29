@@ -41,6 +41,10 @@ pub const STRONGHOLD_DAMAGE: i32 = 53;
 pub const STRONGHOLD_INTERVAL: u16 = 20;
 pub const STRONGHOLD_RANGE: i32 = 6_000;
 
+/// Arcanas (GAME-DESIGN §9, Proposed values active by D-40): bp per rank in
+/// node order Guard, Assault, Piercing, Endurance, Resilience, Renewal.
+pub const ARCANA_BP: [i32; 6] = [400, 300, 300, 400, 400, 500];
+
 pub const WINDUP: u16 = 6;
 pub const MIN_INTERVAL: u16 = 5;
 /// Cost of evolving to tier 1 and to tier 2 (P16-C, Proposed: tier 1 3 → 2).

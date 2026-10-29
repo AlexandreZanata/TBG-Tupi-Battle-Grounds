@@ -51,7 +51,19 @@ pub enum Knob {
     Unit(usize, UnitField),
     /// `ALL_KINDS` index, form index `[A1, A2, B1, B2]`.
     Form(usize, usize, FormField),
+    /// Arcana node index (bp per rank, GAME-DESIGN §9).
+    Arcana(usize),
 }
+
+/// Arcana node names in serialization order (GAME-DESIGN §9).
+const ARCANA_NAMES: [&str; 6] = [
+    "guard",
+    "assault",
+    "piercing",
+    "endurance",
+    "resilience",
+    "renewal",
+];
 
 /// Every knob whose canonical value is non-zero.
 pub fn all(r: &Ruleset) -> Vec<Knob> {
@@ -74,6 +86,7 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
         beetles_per_nester: _,
         beetle_lifetime,
         units,
+        arcana_bp,
     } = r;
     let mut v = Vec::new();
     let mut add = |k: Knob, value: i64| {
@@ -100,6 +113,9 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
     add(Knob::HatchEvery, i64::from(*hatch_every));
     add(Knob::HatchEveryHive, i64::from(*hatch_every_hive));
     add(Knob::BeetleLifetime, i64::from(*beetle_lifetime));
+    for (i, bp) in arcana_bp.iter().enumerate() {
+        add(Knob::Arcana(i), i64::from(*bp));
+    }
     for (k, u) in units.iter().enumerate() {
         let UnitDef {
             // Identity, never tuned.
@@ -224,6 +240,7 @@ fn slot(r: &mut Ruleset, k: Knob) -> &mut dyn Field {
         Knob::BeetleLifetime => &mut r.beetle_lifetime,
         Knob::Unit(k, f) => unit_field(&mut r.units[k], f),
         Knob::Form(k, i, f) => form_field(&mut r.units[k].forms[i], f),
+        Knob::Arcana(i) => &mut r.arcana_bp[i],
     }
 }
 
@@ -252,6 +269,8 @@ pub fn step(k: Knob, canon: i64) -> (i64, i64) {
             (five_percent, 5)
         }
         Knob::Form(..) => (500, 4),
+        // One percentage point per rank, at most ±2 (P34 sensitivity).
+        Knob::Arcana(_) => (100, 2),
         _ => (five_percent, 5),
     }
 }
@@ -279,6 +298,7 @@ pub fn name(r: &Ruleset, k: Knob) -> String {
     let unit = |i: usize| format!("{:?}", r.units[i].kind);
     match k {
         Knob::EvolveCost(i) => format!("evolve_cost.{i}"),
+        Knob::Arcana(i) => format!("arcana.{}", ARCANA_NAMES[i]),
         Knob::Synergy(f, l) => format!("synergy.{:?}.{}", FACTIONS[f], l + 1).to_lowercase(),
         Knob::Unit(i, f) => format!("{}.{}", unit(i), snake(&format!("{f:?}"))),
         Knob::Form(i, j, f) => format!(

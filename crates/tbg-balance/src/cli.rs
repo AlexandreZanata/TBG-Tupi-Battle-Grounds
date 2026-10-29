@@ -17,6 +17,7 @@ COMMANDS
   screen      every knob at -2 and +2 steps (screening seeds)
   search      screen, then the (1+λ) search; writes proposal.md
   confirm     canon vs --apply on confirmation seeds, every reaction time
+  arcana      every complete Arcana preset vs the default (policy --a, default bot)
 
 FLAGS
   --pairs N         seed pairs per matchup (each pair = 2 seat-swapped games)

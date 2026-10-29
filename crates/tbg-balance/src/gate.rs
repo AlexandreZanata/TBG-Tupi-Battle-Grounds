@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 use std::ops::Range;
 
 use tbg_core::content::TICK_HZ;
+use tbg_core::ArcanaPreset;
 use tbg_core::{EndReason, Ruleset, FACTIONS, UNIT_KINDS};
 
 use crate::duels::Matrix;
@@ -62,6 +63,7 @@ pub fn run(
             rules,
             policies: [a, b],
             reaction: [reaction; 2],
+            arcanas: [ArcanaPreset::NEUTRAL; 2],
         })
         .collect();
     list.into_iter()

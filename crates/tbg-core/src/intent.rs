@@ -66,8 +66,7 @@ impl MatchState {
     /// A new unit in front of the seat's Stronghold, at full HP for its form
     /// and the seat's current Synergy.
     pub(crate) fn spawn(&mut self, seat: Seat, kind: UnitKind, tier: u8, branch: u8) -> UnitId {
-        let level = self.player(seat).synergy[self.rules.def(kind).faction.index()];
-        let max_hp = self.rules.effective_stats(kind, tier, branch, level).max_hp;
+        let max_hp = self.stats_for(seat, kind, tier, branch).max_hp;
         let id = self.next_unit_id;
         self.next_unit_id += 1;
         let x = match seat {

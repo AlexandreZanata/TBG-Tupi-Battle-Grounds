@@ -5,7 +5,7 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use tbg_core::headless::{self, Moment};
-use tbg_core::{MatchState, PlayerIntention, Ruleset, Seat};
+use tbg_core::{ArcanaPreset, MatchState, PlayerIntention, Ruleset, Seat};
 
 use crate::metrics::{observe_tick, participant, MatchResult, Side};
 use crate::policy::{Controller, Policy};
@@ -17,6 +17,8 @@ pub struct Matchup {
     pub policies: [Policy; 2],
     /// Views between decisions per participant.
     pub reaction: [u32; 2],
+    /// Arcana preset per participant (it follows the participant on a swap).
+    pub arcanas: [ArcanaPreset; 2],
 }
 
 /// Map `f` over `items` on `threads` workers; results in item order.
@@ -55,7 +57,7 @@ pub fn parallel_map<T: Sync, R: Send>(
 /// One game. `swapped` puts participant 1 on seat A; each participant keeps
 /// its own Shop stream and policy seed in both games of a pair.
 pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
-    let mut state = MatchState::with_rules(seed, m.rules);
+    let mut state = MatchState::lab(seed, m.rules, m.arcanas);
     let seat_a = usize::from(swapped);
     if swapped {
         state.players.swap(0, 1);

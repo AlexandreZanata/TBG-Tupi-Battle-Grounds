@@ -11,6 +11,7 @@ use tbg_balance::policy::Policy;
 use tbg_balance::runner::{parallel_map, run_pairs, Matchup};
 use tbg_balance::stats;
 use tbg_core::content;
+use tbg_core::ArcanaPreset;
 use tbg_core::{MatchState, Pcg32, Ruleset, Seat, UnitKind, UNIT_KINDS};
 
 fn leak(r: Ruleset) -> &'static Ruleset {
@@ -30,6 +31,7 @@ fn favor_vs_bot(rules: &'static Ruleset, k: UnitKind, pairs: u64) -> f64 {
         rules,
         policies: [Policy::Favor(k), Policy::Bot],
         reaction: [gate::REACTION; 2],
+        arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let r = run_pairs(&[m], 0..pairs, 4).remove(0);
     r.iter().map(|p| p[0].score(0) + p[1].score(0)).sum::<f64>() / (2 * pairs) as f64
@@ -52,6 +54,7 @@ fn c3_results_do_not_depend_on_thread_count() {
         rules: canon(),
         policies: [Policy::Heavy, Policy::Bot],
         reaction: [1, 5],
+        arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let one = run_pairs(&[m], 0..6, 1);
     let many = run_pairs(&[m], 0..6, 4);
@@ -302,6 +305,7 @@ fn c11_every_policy_plays_legal_complete_matches() {
             rules: canon(),
             policies: [p, Policy::Bot],
             reaction: [1, 1],
+            arcanas: [ArcanaPreset::NEUTRAL; 2],
         };
         // `play` panics if a match does not end; rejections are fine.
         let r = run_pairs(&[m], 0..2, 4).remove(0);
