@@ -346,3 +346,21 @@ needed from P17–P20; the remaining value is in competitive performance on
 minimal hardware and in each character's quality and Evolution readability.
 **Reopen when** the owner asks for phone-specific lobby/arena work,
 Stronghold styles, or a shared effects kit.
+
+## D-32 · Open army, five offers, Nester and Rampart — 2026-10-28 (owner decision, planned P16-B)
+
+**Decision.** Remove the army cap entirely: `SLOT_CAP` and `SlotCount` leave
+the game, and no other number replaces them; `Energy` alone gates purchases.
+The Shop shows five offers. Two units join the roster: Nester (Plants
+Support summoner, owner name *Ninhador*) and Rampart (Machines Tank with
+Guard, owner name *Baluarte*). Summon limits belong to the Hatch ability,
+not to the army. There is no per-type limit on Ramparts.
+**Why.** The owner wants strategic freedom, large battles, and varied
+compositions; the eight-slot ceiling decided armies more than choices did.
+**Guard rails.** Unit values are **Proposed** and are re-checked with a
+before/after harness run and adversarial spam policies; performance is
+measured from 10 to 100 units per side; a server-protection entity limit is
+allowed only with measured evidence and is documented apart from game rules.
+**Reopen when** the harness or playtests show a dominant spam strategy that
+cost/stat tuning cannot fix, or large armies miss the frame-rate or server
+targets after optimization.

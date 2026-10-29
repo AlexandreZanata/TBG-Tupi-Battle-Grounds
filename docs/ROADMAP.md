@@ -33,7 +33,7 @@ gates everything; each character gets its own validated phase.
 ```
 Competitive online                     Medieval visual overhaul (after P14 sign-off)
 P9  Real-time fast path + reconnect    P15 Art direction, rig v2, style lock (Archer)
- └► P10 Server efficiency               └► P16-A Desktop lobby + arena ─► P16 Class animation sets
+ └► P10 Server efficiency               └► P16-A Desktop lobby + arena ─► P16-B Open army ─► P16 Class animations
      └► P11 Accounts (name + key)           └► P22–P29 One phase per character and its Evolutions
          └► P12 Ranked + Elo rating             └► P30 Fluidity + performance (client)
              └► P13 Global ranking + stats          └► P31 Consistency, playtest, v0.2.0
@@ -43,7 +43,8 @@ P9  Real-time fast path + reconnect    P15 Art direction, rig v2, style lock (Ar
 
 Archived 2026-10-28 by the owner (D-31): P17 arena for every ratio, P18
 Stronghold styles, P19 UI kit + cards, P20 lobby restyle, P21 effects kit.
-Their files stay in docs/phases/ for reference only.
+Their files stay in docs/phases/ for reference only. Final-quality phases
+for Nester and Rampart are written after P16-B is reviewed.
 ```
 
 **Optional gameplay extra — only after every existing phase (P0–P31).**
@@ -83,6 +84,7 @@ P31 reviewed + owner sign-off
 | P14 | [P14-competitive-validation.md](phases/P14-competitive-validation.md) | **Gate:** competitive game validated on a real server, data-safety drill, security review | local rehearsal + fixes done; **real-server run and owner sign-off pending** | yes (local) |
 | P15 | [P15-art-direction-and-rig.md](phases/P15-art-direction-and-rig.md) | Medieval style locked; rig v2; Archer style-lock approved | done; merged with P16-A (owner approved Archer v2 and the desktop look); phone FPS pending | yes |
 | P16-A | [P16A-desktop-lobby-and-arena.md](phases/P16A-desktop-lobby-and-arena.md) | Archer v2 default; desktop lobby and arena match the owner's references | done; desktop look owner-approved; physical-phone check pending | yes |
+| P16-B | [P16B-open-army-and-new-units.md](phases/P16B-open-army-and-new-units.md) | No army cap; five Shop offers; Nester and Rampart; large-army balance and performance measured | planned | — |
 | P16 | [P16-class-animation-sets.md](phases/P16-class-animation-sets.md) | Professional clip sets per Archetype, simulation-timed | planned | — |
 | P17 | [P17-arena-and-background.md](phases/P17-arena-and-background.md) | Living medieval battlefield filling every screen ratio | **archived** (owner, 2026-10-28; D-31) | — |
 | P18 | [P18-strongholds.md](phases/P18-strongholds.md) | Three selectable cosmetic Stronghold styles | **archived** (owner, 2026-10-28; D-31) | — |
@@ -171,6 +173,7 @@ All code for P1–P8 is implemented and validated on the development PC
 | P14 | Provides the server; plays ranked with someone on another network; signs off the gate |
 | P15 | [P15-art-direction-and-rig.md](phases/P15-art-direction-and-rig.md) | Medieval style locked; rig v2; Archer style-lock approved | done; merged with P16-A (owner approved Archer v2 and the desktop look); phone FPS pending | yes |
 | P16-A | [P16A-desktop-lobby-and-arena.md](phases/P16A-desktop-lobby-and-arena.md) | Archer v2 default; desktop lobby and arena match the owner's references | done; desktop look owner-approved; physical-phone check pending | yes |
+| P16-B | Approves the new units' look and the Proposed balance values after the playtest |
 | P16 | Approves class animations |
 | P22–P29 | Approves each character (screenshots + live match) |
 | P31 | Runs the playtest; decides balance changes; pushes the tag |
