@@ -9,6 +9,7 @@ pub mod account;
 mod account_ui;
 mod actions;
 mod battle_hud;
+mod countdown;
 mod desktop;
 #[cfg(target_arch = "wasm32")]
 mod desktop_actions;

@@ -24,6 +24,7 @@ pub(super) enum Hud {
 pub(super) struct HudRoot;
 
 pub fn plugin(app: &mut App) {
+    super::countdown::plugin(app);
     app.add_systems(OnEnter(GameState::InMatch), spawn)
         .add_systems(
             Update,
