@@ -1,6 +1,6 @@
 # P26 — Character refinement: Hexer
 
-**Depends on:** P25 reviewed (and P21 effects kit merged).
+**Depends on:** P25 reviewed.
 **Branch:** `phase/p26-hexer`.
 **Difficulty:** medium–high (art and animation quality).
 
@@ -61,7 +61,7 @@ Timing table in the report (clip, duration, key times, event time).
 Hex orb projectile (curving, soul-fire glow); slow = spectral chains at the target's feet for the status duration; Plague/Pestilence splash = green mist ring (exact radius). Sounds: hex whisper on cast, soft impact hiss.
 
 ### 5. Portrait and card
-Re-render the portrait (P19) and check the card at Shop size on a phone.
+Re-render the Shop-card portrait (D-29 gallery portrait tool) and check the card at Shop size on desktop and phone.
 
 ### 6. Consistency lineup
 `?gallery=lineup`: this unit's five forms next to every finished unit;

@@ -1,5 +1,8 @@
 # P20 — Medieval lobby and ranking pages
 
+> **Archived 2026-10-28 by the owner (D-31).** Not part of the current track;
+> kept for reference only. Reopen only on an explicit owner request.
+
 **Depends on:** P19 reviewed.
 **Branch:** `phase/p20-lobby`.
 **Difficulty:** medium.

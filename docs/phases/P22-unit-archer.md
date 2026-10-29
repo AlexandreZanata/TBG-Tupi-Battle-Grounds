@@ -1,6 +1,6 @@
 # P22 — Character refinement: Archer
 
-**Depends on:** P21 reviewed (and P21 effects kit merged).
+**Depends on:** P16 reviewed.
 **Branch:** `phase/p22-archer`.
 **Difficulty:** medium–high (art and animation quality).
 
@@ -63,7 +63,7 @@ Timing table in the report (clip, duration, key times, event time).
 Arrow projectile with team fletching; Arrow Rain arrows arc high and land as a splash ring; Marksman arrows leave a faint trail. Sounds: bow twang variants; Marksman: heavier twang.
 
 ### 5. Portrait and card
-Re-render the portrait (P19) and check the card at Shop size on a phone.
+Re-render the Shop-card portrait (D-29 gallery portrait tool) and check the card at Shop size on desktop and phone.
 
 ### 6. Consistency lineup
 `?gallery=lineup`: this unit's five forms next to every finished unit;

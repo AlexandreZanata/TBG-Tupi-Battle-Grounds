@@ -1,5 +1,8 @@
 # P17 — Medieval battlefield arena and backgrounds for every screen
 
+> **Archived 2026-10-28 by the owner (D-31).** Not part of the current track;
+> kept for reference only. Reopen only on an explicit owner request.
+
 **Depends on:** P16 reviewed.
 **Branch:** `phase/p17-arena`.
 **Difficulty:** medium–high (art quality + performance).

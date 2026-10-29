@@ -1,5 +1,8 @@
 # P18 — Strongholds: visual upgrade and three selectable styles
 
+> **Archived 2026-10-28 by the owner (D-31).** Not part of the current track;
+> kept for reference only. Reopen only on an explicit owner request.
+
 **Depends on:** P17 reviewed.
 **Branch:** `phase/p18-strongholds`.
 **Difficulty:** medium.

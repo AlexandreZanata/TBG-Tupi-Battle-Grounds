@@ -1,6 +1,6 @@
 # P23 — Character refinement: Shieldbearer
 
-**Depends on:** P22 reviewed (and P21 effects kit merged).
+**Depends on:** P22 reviewed.
 **Branch:** `phase/p23-shieldbearer`.
 **Difficulty:** medium–high (art and animation quality).
 
@@ -61,7 +61,7 @@ Timing table in the report (clip, duration, key times, event time).
 Metal sparks on mace hits; Fortress slow shows the spectral chains (P21); Champion sweep shows the exact splash ring. Sounds: shield bash, mace hit variants, armor clank on footsteps (quiet).
 
 ### 5. Portrait and card
-Re-render the portrait (P19) and check the card at Shop size on a phone.
+Re-render the Shop-card portrait (D-29 gallery portrait tool) and check the card at Shop size on desktop and phone.
 
 ### 6. Consistency lineup
 `?gallery=lineup`: this unit's five forms next to every finished unit;

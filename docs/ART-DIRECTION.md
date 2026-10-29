@@ -100,9 +100,15 @@ Code ids never change; display names are **Proposed** until P15 sign-off.
 | `Bloomkeeper` | Bloomkeeper | Plants | Support | druid with a flowering staff, leaf cloak | A Blossom→Grove: blooming crown, petal aura / B Bramble→Thornwarden: thorn armor, briar whip |
 | `Rootcaller` | Rootcaller | Plants | Control | small treant shaman, root-claw hands | A Deep Roots→Strangle: longer claws, vine coils / B Spores→Overgrowth: mushroom cap, spore sacs |
 
-Evolution progression for every unit: tier 1 adds one large readable
-piece and +6 % scale; tier 2 adds the signature piece, an accent glow, and
-another +6 %. Branch A reads defensive/precise, branch B offensive/area.
+Evolution progression for every unit (**Proposed**, owner 2026-10-28,
+D-31): an Evolution must read at match distance without zooming. Every tier
+changes at least three things: (1) scale — tier 1 +8 %, tier 2 +16 % over
+the base form; (2) a large-surface color or material change (cloak, hood,
+armor plates — not only a trim); (3) a new silhouette piece. Tier 2 also
+carries the branch's signature artifact with an accent glow (gold or team
+color). Branch A reads defensive/precise, branch B offensive/area. Check:
+on the 1280×800 lineup at match-camera distance a tester names base,
+tier 1, and tier 2 of every unit correctly.
 
 ## 6. Strongholds
 
@@ -140,8 +146,9 @@ collapse sequence at defeat. Budget ≤ 4 000 triangles per style.
    silhouettes of all 8 units' base forms side by side; the new unit must
    be identifiable at 64 px height. Screenshot in the report.
 3. **Model:** base form on rig v2 using only palette slots; then the four
-   evolution forms per §5. Triangle budget: ≤ 1 500 (one-slot) or
-   ≤ 3 000 (two-slot) per form, from the gallery log.
+   evolution forms per §5. Triangles per form are logged from the gallery
+   and reported; there is no fixed maximum (D-30) — the FPS check in step 7
+   decides.
 4. **Animation:** the Archetype clip set (§4) tuned to this body, plus the
    signature extras; timing table (clip, duration, key frames, strike/
    release time) in the report; strike/release times obey §4's contract.
@@ -161,9 +168,7 @@ collapse sequence at defeat. Budget ≤ 4 000 triangles per style.
 
 | Item | Budget |
 |------|--------|
-| One-slot unit form / two-slot form | ≤ 1 500 / ≤ 3 000 triangles (**Proposed**, D-26: ≤ 2 500 / ≤ 5 000) |
-| Stronghold style | ≤ 4 000 triangles |
-| Arena + background (all layers) | ≤ 45 000 triangles (**Proposed**, D-26: ≤ 60 000) |
+| Triangles: unit forms, Stronghold, arena | Measured and reported; no fixed maximum (D-30) |
 | Draw calls, busy match (30 units) | Measured; no fixed maximum (D-28) |
 | WASM (brotli) / other first-load assets | ≤ 6 MB hard ceiling / ≤ 1.5 MB |
 | Frame rate | 60 FPS desktop; ≥ 30 FPS mid-range phone on Low with 30 units |

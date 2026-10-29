@@ -17,6 +17,10 @@ input. Quality adapts automatically; information never disappears.
 - Input that responds on press, not release.
 - A device matrix with measured FPS, frame-time p95, load time, memory.
 - WASM and asset sizes at or under budget.
+- Pooled effects and projectiles with zero per-frame allocation (moved
+  here from the archived P21, D-31).
+- Triangle counts per unit form and arena layer reported (no fixed cap,
+  D-30); detail is reduced only where a measured FPS or memory target fails.
 
 ## Read first (only these)
 

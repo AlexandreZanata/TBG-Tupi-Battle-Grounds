@@ -1,5 +1,8 @@
 # P21 — Combat effects, projectiles, and sound kit
 
+> **Archived 2026-10-28 by the owner (D-31).** Not part of the current track;
+> kept for reference only. Reopen only on an explicit owner request.
+
 **Depends on:** P20 reviewed.
 **Branch:** `phase/p21-vfx-kit`.
 **Difficulty:** medium.

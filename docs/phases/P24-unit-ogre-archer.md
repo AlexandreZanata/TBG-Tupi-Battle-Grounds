@@ -1,6 +1,6 @@
 # P24 — Character refinement: Ogre Archer
 
-**Depends on:** P23 reviewed (and P21 effects kit merged).
+**Depends on:** P23 reviewed.
 **Branch:** `phase/p24-siegewalker`.
 **Difficulty:** medium–high (art and animation quality).
 
@@ -63,7 +63,7 @@ Timing table in the report (clip, duration, key times, event time).
 Heavy bolt projectile with spin and dust trail, arcing; impact = splash ring of radius 1.5 (exact, from content), dust and splinters; Concussion root shows roots/chains per P21 root visual. Sounds: heavy bolt release, crank ratchet, ogre grunt (low volume), Large footstep thud.
 
 ### 5. Portrait and card
-Re-render the portrait (P19) and check the card at Shop size on a phone.
+Re-render the Shop-card portrait (D-29 gallery portrait tool) and check the card at Shop size on desktop and phone.
 
 ### 6. Consistency lineup
 `?gallery=lineup`: this unit's five forms next to every finished unit;

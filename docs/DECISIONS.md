@@ -316,3 +316,33 @@ render-submission ceiling during P16-A implementation.
 budgets remain in force. Performance is judged by the game running on the
 actual target devices. Do not remove visible detail or shadows solely to meet
 a draw-call number.
+
+## D-30 · Triangles are measured, not capped — 2026-10-28 (owner decision)
+
+**Decision.** Remove the fixed triangle maximums for unit forms, Strongholds,
+and the arena (supersedes the triangle part of D-26). Every visual phase
+still logs and reports triangle counts per form and per arena layer.
+**Why.** The owner wants the most beautiful, professional game the hardware
+allows; a fixed number rejected visible quality that the frame rate could
+afford.
+**Still applies.** 60 FPS desktop and ≥ 30 FPS on a mid-range phone with 30
+units, browser memory ≤ 300 MB, the download budgets of D-26, shared merged
+meshes with one material. Detail is cut only when a measured FPS or memory
+target fails, starting with what players notice least.
+
+## D-31 · Visual track narrowed to characters and performance — 2026-10-28 (owner decision)
+
+**Decision.** Archive P17 (arena for every ratio), P18 (Stronghold styles),
+P19 (UI kit and cards), P20 (lobby restyle), and P21 (effects kit). The
+track after P16-A is P16 (class animation sets), P22–P29 (each character and
+its Evolutions), P30 (client fluidity and performance), P30-B (server
+capacity on minimal hardware), and P31 (consistency, playtest, release).
+Character phases build their effects and sounds on the existing `vfx` and
+`audio` modules; P21's pooling rule (no per-frame allocation, pooled
+effects) moves into P30. Every Evolution must read clearly at match
+distance (ART-DIRECTION §5, Proposed).
+**Why.** The desktop lobby and arena (P16-A) already cover what the owner
+needed from P17–P20; the remaining value is in competitive performance on
+minimal hardware and in each character's quality and Evolution readability.
+**Reopen when** the owner asks for phone-specific lobby/arena work,
+Stronghold styles, or a shared effects kit.

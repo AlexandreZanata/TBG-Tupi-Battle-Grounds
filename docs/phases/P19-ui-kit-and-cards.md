@@ -1,5 +1,8 @@
 # P19 — Medieval UI kit and standardized cards
 
+> **Archived 2026-10-28 by the owner (D-31).** Not part of the current track;
+> kept for reference only. Reopen only on an explicit owner request.
+
 **Depends on:** P18 reviewed.
 **Branch:** `phase/p19-ui-kit`.
 **Difficulty:** medium.
