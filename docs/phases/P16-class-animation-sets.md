@@ -1,6 +1,6 @@
 # P16 — Animation sets per class (Archetype)
 
-**Depends on:** P16-B reviewed.
+**Depends on:** P16-C reviewed (attack intervals settle before clips are timed).
 **Branch:** `phase/p16-class-animation`.
 **Difficulty:** high (animation quality); the system parts are medium.
 
