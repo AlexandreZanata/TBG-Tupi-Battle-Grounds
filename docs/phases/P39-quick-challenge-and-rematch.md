@@ -9,6 +9,11 @@ P16-F7, P16-A, or P16-B: they edit the same lobby/menu files.
 **Status:** implemented and validated; PR review and owner device/playtest checks pending.
 **Difficulty:** medium. One lobby feature, one protocol bump, three screens.
 
+**Integration follow-up (PR #2):** main already received the original P39
+implementation with P16-D through PR #1 (`077abe7`). PR #2 now contains
+review fixes and browser evidence; protocol v9 and all existing wire
+contracts remain unchanged from main.
+
 ## Goal
 
 A guest clicks **Challenge a friend**, shares one link, and a second guest
@@ -556,10 +561,12 @@ or weaken an existing assertion.
 
 ## Phase report
 
-- Date: 2026-10-29. Implementation HEAD: `c239dee`; this report/evidence
-  commit follows. Branch: `phase/p39-quick-challenge-pr`, based directly on
-  `origin/main` (`fb47717`). Original `phase/p39-quick-challenge` is preserved
-  at `22571c5`. No P16-F files or commits were carried into this branch.
+- Date: 2026-10-29. Initial review implementation HEAD: `c239dee`, recorded
+  by `5569b11`. Branch: `phase/p39-quick-challenge-pr`, originally created
+  directly from `fb47717`. Original `phase/p39-quick-challenge` remains at
+  `22571c5`. The follow-up integrates main `077abe7` after PR #1 brought
+  the original P39 and P16-D into main. P16-D/P16-F are preserved as that
+  baseline; this PR changes none of their source, specs, or evidence.
 - Protocol: **v9**. P39 follows v8 Arcanas: client tags 14–16, server tags
   20–24, Challenge mode tag 2. The existing Arcana tags and all `MatchStart`
   fields/bytes stay intact. BR-AR05 explicitly includes Quick Challenge.
@@ -663,9 +670,12 @@ Screenshots (actual browser captures):
 
 ### Deviations and limits
 
-- Ported the three original P39 commits onto current main, resolving
-  Arcanas/D-40 rather than including the old P16-F ancestry. v9 replaces
-  the planning branch's colliding v8; no balance values changed.
+- Initially ported the three original P39 commits onto `fb47717`, resolving
+  Arcanas/D-40 without the old P16-F ancestry. v9 replaced the planning
+  branch's colliding v8. After PR #1 landed, integrated `077abe7` without
+  rewriting history. Protocol declarations and frozen-wire tests now match
+  main exactly, including its additional Arcana byte assertions. No balance
+  value or P16-D/P16-F file differs from the new base.
 - The initial-detach proof is a deterministic match-task unit test rather
   than a nondeterministic WebSocket pairing race, as allowed by the
   handoff. It exercises the actual spawn/forfeit path.
@@ -702,3 +712,58 @@ Screenshots (actual browser captures):
 No implementation blocker remains. PR review and the physical-device/PWA
 and subjective owner acceptance checks remain pending; no merge or public
 deployment is included in this work.
+
+
+### Follow-up after PR #1 merged into main
+
+The checks on `5569b11` both passed (GitHub Actions runs `40906366558`
+and `40906267887`; no review comments or unresolved review threads). The
+subsequent main merge `077abe7` made PR #2 conflict because it included the
+original P39 separately. Integrated that main into this branch with a
+merge commit, retaining the reviewed reconnect/expiry/Arcana fixes and
+all contract assertions. Auto-merge duplicates of `MatchInfo.challenge`,
+initial detach initialization, and decision D-39 were removed before checks.
+The P16-D engine, its contract tests/evidence, and the P16-F plans match
+`077abe7` exactly; they are not additional changes in PR #2.
+
+Re-ran on the integrated tree:
+
+```text
+cargo fmt --all -- --check
+  exit 0
+cargo clippy --workspace -- -D warnings
+  Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.33s
+cargo test --workspace
+  178 passed; 0 failed; 1 ignored (sum of the individual suite results)
+cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+  Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.03s
+node scripts/check-p39-share.mjs
+  7 share/clipboard scenarios passed; no unhandled rejections
+```
+
+```text
+trunk build --release  (crates/tbg-client; RUST_LOG=info, persistent terminal)
+  Finished `release` profile [optimized] target(s) in 1m 09s
+  2026-10-29T16:08:01.583042Z  INFO ✅ success
+  exit 0
+git diff --check
+  exit 0
+```
+
+Rechecked the integrated package in two new browser sessions against the
+local 50 ms authoritative server, with `?lag=100`. Created an invite and
+reloaded the waiting host: the same displayed invite returned. The second
+session joined by that displayed link; `challenge` disappeared while
+`server`, `lag` and the fragment remained. Guest combat reload resumed the
+same opponents and clock. Both players received the result after Surrender.
+One request showed Accept on the other side; host result reload retained
+the offer, Accept started a fresh countdown, and both clients finished the
+rematch. No console errors occurred. Captured the refreshed desktop result,
+390×844 result/accept view and rematch view in the existing screenshot files.
+Clipboard/share success remains covered by the initial browser run and the
+seven Promise scenarios; it was not re-established in this follow-up run.
+Physical Android, installed PWA and subjective owner sign-off remain open.
+
+The original two successful CI runs belong to `5569b11`; CI must run again
+on this follow-up merge commit. PR #2 remains open, with no PR merge or
+public deployment authorized by this continuation.

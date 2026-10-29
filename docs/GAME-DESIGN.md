@@ -57,6 +57,16 @@ evolve, and which factions you combine.
 | Arcana | **Proposed (P32–P38, extra after P31):** a free pre-match choice that modifies a documented unit attribute | `ArcanaNode` |
 | ArcanaPreset | **Proposed (P32–P38):** six bounded ranks chosen before matchmaking and frozen for a match | `ArcanaPreset` |
 | RulesetVersion | **Proposed (P35):** compiled version of competitive rules and balance values, recorded with match results | `RulesetVersion` |
+| StrongholdKind | **Proposed (P16-F3, not active):** a free pre-match choice of `Stronghold` with its own stats and passive; mechanical, unlike `StrongholdStyle` | `StrongholdKind` |
+| Fortification | **Proposed (P16-F3, not active):** in-match branching upgrade of a player's own `Stronghold`, paid with `Energy`; never called `Evolution` | `Fortification` |
+| Interest | **Proposed (P16-F1, not active):** periodic `Energy` paid on the lowest balance held since the previous payment | `Interest` |
+| Bounty | **Proposed (P16-F1, not active):** `Energy` granted for an eligible kill, bounded per payment window | `Bounty` |
+| Siege | **Proposed (P16-F1, not active):** the match phase after the running phase in which both `Stronghold`s suffer `Collapse`; replaces overtime | `Phase::Siege` |
+| Collapse | **Proposed (P16-F1, not active):** symmetric structural loss of a percentage of each `Stronghold`'s max HP per second during `Siege` | `Collapse` |
+| Reserve | **Proposed (P16-F2, not active):** one `Shop` offer a player holds out of rotation for a limited time | `Reserve` |
+| Augment | **Proposed (P16-F5, not active):** an in-match bonus bought with `Energy` from an `AugmentRound`; not an `Arcana` (pre-match) and not a store item | `Augment` |
+| AugmentRound | **Proposed (P16-F5, not active):** a timed offer of three `Augment`s, identical for both players | `AugmentRound` |
+| Forgo | **Proposed (P16-F5, not active):** declining or letting an `AugmentRound` expire, compensated with `Energy` | `Forgo` |
 
 Retired legacy names — never reuse for new concepts: `CharacterDefinition`,
 `CharacterCatalog`, `CharacterStudio(Window)`, `ProceduralCharacterBuilder`,
@@ -77,7 +87,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-M02 | No sub-rounds or preparation phases; shopping and combat overlap | Confirmed | S1 |
 | BR-M03 | A disconnected player gets a reconnect window, then forfeits; the match keeps running meanwhile | Adapted | S1, S3 |
 | BR-M04 | Each player has a `Stronghold`; destroying the enemy `Stronghold` wins | Proposed | — |
-| BR-M05 | Fixed match clock: regulation, then overtime with faster `Energy`; tie after overtime is a draw | Proposed | — |
+| BR-M05 | Fixed match clock: regulation, then overtime with faster `Energy`; tie after overtime is a draw (replaced by BR-M07–M11 when P16-F1 activates, §10) | Proposed | — |
 | BR-M06 | A player may surrender while the match is in countdown, regulation, or overtime; it is a forfeit (BR-M03): the opponent wins and, in ranked, it is a loss (BR-R04) | Proposed | — |
 | BR-B01 | Combat resolves on one lane; units never move laterally | Confirmed | S1, S4 |
 | BR-B02 | A unit enters the lane only through a validated purchase-and-deploy intention; MVP deploys at the buyer's `Stronghold` | Adapted | S2, S3 |
@@ -93,7 +103,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-U09 | Guard: an enemy unit or `Stronghold` whose attack range reaches a living Rampart must target the nearest such Rampart | Proposed (D-32) | — |
 | BR-U10 | A server-protection entity limit, if ever needed, is documented as server protection with measured evidence (ARCHITECTURE), never as an army rule | Proposed (D-32) | — |
 | BR-E01 | `Energy` is the only in-match resource, distinct from any currency | Confirmed | S4 |
-| BR-E02 | `Energy` regenerates over time under server rules, up to a cap | Confirmed | S2, S4 |
+| BR-E02 | `Energy` regenerates over time under server rules, up to a cap (the cap is removed by BR-E04 when P16-F1 activates, §10; owner decision D-35) | Confirmed | S2, S4 |
 | BR-E03 | Purchases and evolutions exceeding available `Energy` are rejected, never queued or owed | Adapted | S1 |
 | BR-S01 | Each player sees exactly five offers, five distinct units at any time | Proposed (D-32; was three) | S1, S4 |
 | BR-S02 | Shop rotation timers come from the server match clock, identical for both players | Confirmed | S1, S4 |
@@ -112,7 +122,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-C01 | Monetization is free-to-play with cosmetics only | Confirmed | S1 |
 | BR-C02 | Persistent cosmetics are bound to an account `Inventory` | Confirmed | S1 |
 | BR-C03 | Store purchases are granted only after server-side receipt validation | Adapted | S1, S2 |
-| BR-C04 | `StrongholdStyle`s are free cosmetics; every style has identical gameplay | Proposed | — |
+| BR-C04 | `StrongholdStyle`s are free cosmetics; every style has identical gameplay (styles stay cosmetic; mechanical `StrongholdKind`s are separate, BR-K01–K08, D-37) | Proposed | — |
 | BR-P01 | An `Account` is a unique `PlayerName` plus an `AccountKey`; names are 3–16 letters, digits or `_`, start with a letter, are unique ignoring case, and never change | Proposed | — |
 | BR-P02 | The `AccountKey` is the only credential: shown once at creation, never shown to other players, not recoverable | Proposed | — |
 | BR-P03 | One active session per account; a new login takes over the old one, including a running match | Proposed | — |
@@ -392,3 +402,231 @@ compare remaining ratios with `i64(hp_a) * i64(max_b)` versus
 `i64(hp_b) * i64(max_a)`, including full-health ties and healing cases.
 Do not implement that unused subsystem in P32–P38. Reopen progression only
 if the small system fails the strategic-choice/playtest gates.
+
+## 10. Strategic expansion — Proposed, not active (P16-F1–F8)
+
+Planned after P16-D (balance). Nothing in this section is active: each
+mechanic enters the `Ruleset` disabled, the balance lab measures it, and
+the owner switches it on in its phase (D-34). Values are starting
+hypotheses. Existing rules in §3–§6 stay binding until the phase that
+replaces them is reviewed. Rule IDs are stable; never reuse one.
+
+**Four properties that are not the same thing** (D-36):
+
+| Property | Meaning | This design |
+|----------|---------|-------------|
+| No time-up decision | No result is ever decided by comparing HP at a clock time | yes (BR-M07) |
+| Ends only by unit damage | Only units and Strongholds can reduce Stronghold HP | **no** — `Collapse` also does during `Siege` |
+| Progressive structural attrition | Both Strongholds lose HP over time, symmetrically | yes, from 4:00 (BR-M08) |
+| Mathematical termination | Every match ends before a bound computable from the rules | yes (BR-M10), plus a server-protection limit that the contracts prove unreachable (BR-M11) |
+
+### 10.1 Economy (P16-F1)
+
+| ID | Proposed rule |
+|----|---------------|
+| BR-E04 | `Energy` has no gameplay cap; every *generating* source has a documented bound per window instead (regen per tick, Interest per payment, Bounty per window, Forgo per round) |
+| BR-E05 | Interest is paid every 10 s of running time (the Shop rotation ticks), to both players on the same tick |
+| BR-E06 | Interest = `min(low / band, max_bands) × per_band`, where `low` is the lowest balance the player held since the previous payment (spending lowers it; gains never raise it); after the payment `low` becomes the current balance |
+| BR-E07 | Interest, Bounty and Forgo Energy are added with saturating `u32` arithmetic in sub-energy and integer division (never rounded up); `low` starts at the start balance and the first payment is at 0:10 of running time |
+| BR-E08 | An eligible kill is the death by damage of an enemy conventional unit (BR-U08: summons and expiries are never eligible); every Bounty source of a player sums per kill and is capped by the sum of their caps and by a per-player ceiling of 1 Energy per 10-s window (windows reset on Interest ticks) |
+| BR-E09 | No `Augment`, `StrongholdKind` or `Fortification` changes base regen, Interest bands, or Shop probabilities |
+| BR-E10 | Purchases, Evolutions, Fortifications and Augments are still rejected when `Energy` is short (BR-E03) |
+
+| Constant | Value | Sub-energy (600 = 1) |
+|----------|-------|----------------------|
+| Start | 5 (unchanged unless P16-D changes it) | 3 000 |
+| Base regen running / `Siege` | unchanged / doubled (today 17 / 34 per tick) | — |
+| Interest period | 10 s (200 ticks), on the rotation ticks | — |
+| Interest band / value per band / max bands | 5 / 0.25 / 5 (max 1.25 per payment at a low of 25) | 3 000 / 150 / 5 |
+| Bounty ceiling | 1.0 per player per window | 600 |
+
+Tick order addition: intentions (they lower `low`), then regen, then
+Interest on payment ticks, then the window reset.
+
+### 10.2 Victory, Siege and Collapse (P16-F1)
+
+| ID | Proposed rule |
+|----|---------------|
+| BR-M07 | A match is never decided by comparing Stronghold HP at a time; it ends when a Stronghold reaches 0 HP, by forfeit (BR-M03, BR-M06), or by the server-protection limit (BR-M11) |
+| BR-M08 | At 4:00 of running time the phase becomes `Siege`: base Energy regen doubles and every second each Stronghold loses `floor(max_hp × rate / 10 000)` HP, `rate` = 10 bp + 10 bp × ((s − 1) / 10) for Siege second s = 1, 2, … (integer division) |
+| BR-M09 | `Collapse` ignores shields and damage reduction, is never a kill (no Bounty, Mend or Fury), and resolves before units act; if it brings a Stronghold to 0 the match ends that tick with reason `Collapse`; both at 0 on the same tick is a draw |
+| BR-M10 | Stronghold healing is bounded per window (BR-X10), so Collapse always outgrows it: with no damage at all, a full Stronghold falls within 140 s of `Siege` start; every match ends before 6:40 of running time (contract test, P16-F1) |
+| BR-M11 | Server protection, not a game rule: a match still live at 10:00 of running time ends as a draw with reason `ServerLimit`; a contract test proves the rules cannot reach it |
+
+Collapse is a percentage of each Stronghold's own max HP, so every
+`StrongholdKind` and `Fortification` falls at the same pace from the same
+HP fraction: endurance builds are rewarded for surviving damage, never for
+outlasting a clock. Forfeit, surrender, reconnect windows, ranked Elo
+(draw ½) and result persistence are unchanged.
+
+### 10.3 Shop Reserve (P16-F2)
+
+| ID | Proposed rule |
+|----|---------------|
+| BR-S06 | A player may hold one visible offer (`Reserve{offer, kind}`), free, for 20 s (400 ticks); `kind` must match the offer or the intention is rejected as stale |
+| BR-S07 | A held offer is skipped by rotation; refills and rotations never show a duplicate of it (BR-S01 still holds for all five) |
+| BR-S08 | Buying the held offer consumes the hold and refills the slot normally; `Release` ends the hold early |
+| BR-S09 | When a hold ends (expiry or `Release`) the card stays as a normal offer until the next rotation; an offer that has been held cannot be held again until its slot is redrawn |
+| BR-S10 | Same-tick order: intentions first (a purchase or hold at an expiry or rotation tick sees the offers before the Shop step), then hold expiry, then rotation |
+
+### 10.4 Stronghold kinds (P16-F3/F4)
+
+| ID | Proposed rule |
+|----|---------------|
+| BR-K01 | Every player, guests included, chooses one of four `StrongholdKind`s for free; account age, rating, payments and playtime never unlock or change them |
+| BR-K02 | The choice can change only while idle; joining a queue or creating/joining a room freezes it until cancel or match end; reconnect and account takeover keep the match's kinds |
+| BR-K03 | Both kinds are public from `MatchStart` (name, icon, silhouette, stats) |
+| BR-K04 | A player who never chose gets the default kind (Redoubt, pending owner decision O-3) |
+| BR-K05 | Practice: the bot's kind is drawn uniformly from the match seed and shown at start |
+| BR-K06 | A kind changes Stronghold max HP, damage, and at most one passive; never range, attack interval, unit costs, Shop, Energy start, regen or Interest |
+| BR-K07 | Max HP is per seat and changes only with `Fortification`; current HP never exceeds max; a max change keeps the HP fraction (`hp' = floor(hp × max' / max)` in `i64`, at least 1 if hp ≥ 1) and never heals the fraction |
+| BR-K08 | `StrongholdStyle` (cosmetic, BR-C04) never hides or imitates a kind's silhouette cues |
+
+Kinds are percentages of the canonical Stronghold (today 4 500 HP, 65
+damage per 1.0 s, range 6), so P16-D tuning carries over. `Classic` (the
+canonical Stronghold) stays in the lab as the neutral control and as the
+online kind until P16-F4 activates selection.
+
+| Kind (code) | Owner name | HP bp | Damage bp | Today | Passive |
+|-------------|------------|-------|-----------|-------|---------|
+| `Treasury` | Torre do Tesouro | −700 | −800 | 4 185 / 59 | Bounty 0.15 Energy per eligible kill, cap 0.6 per window |
+| `Redoubt` | Torre Bastião | +1 500 | −1 500 | 5 175 / 55 | none: endurance |
+| `Ballista` | Torre de Artilharia | −1 100 | +2 300 | 4 005 / 79 | none: firepower (lab variant B: +800 bp damage and splash 1.0 tile) |
+| `Banner` | Torre do Comando | −400 | −800 | 4 320 / 59 | own conventional units within 4 tiles of this Stronghold: +10 % damage |
+
+English names avoid existing Evolution names (`Bastion`, `Artillery`,
+`Fortress`) and the glossary's `Commander`; the owner may rename (O-2).
+
+### 10.5 Fortification (P16-F3/F4)
+
+| ID | Proposed rule |
+|----|---------------|
+| BR-F01 | Each Stronghold starts at tier 0; `Fortify{branch}` at tier 0 picks Walls (0) or Arms (1) at tier 1; at tier 1 only the same branch reaches tier 2 |
+| BR-F02 | No duplicate, out-of-order, or branch-changing Fortification; the server validates cost, tier and branch (`Rejection::MaxFortification`, `WrongBranch`, `NotEnoughEnergy`) |
+| BR-F03 | Allowed in Running and Siege; effects apply from the next step; max HP follows BR-K07 |
+| BR-F04 | Tier and branch are public, visible on the model and in the HUD, and kept across reconnect |
+| BR-F05 | All four kinds share the same tree (kind-exclusive tiers are deferred, D-37) |
+
+| Branch | Tier 1 (6 Energy) | Tier 2 (10 Energy) |
+|--------|-------------------|--------------------|
+| Walls | Reinforced Walls: +15 % max HP | Curtain Wall: +15 % max HP more; Stronghold hits slow 20 % for 1.0 s |
+| Arms | Heavy Bolts: +15 % damage | War Engines: +15 % damage more; Stronghold hits splash 1.0 tile |
+
+Owner's starting proposal was +10 % / +10 % + 5 %; the capability at tier
+2 replaces the invisible +5 % (D-37).
+
+### 10.6 Augments (P16-F5–F7)
+
+| ID | Proposed rule |
+|----|---------------|
+| BR-AG01 | Three `AugmentRound`s open at 0:30, 2:00 and 3:30 of running time; each stays open 30 s while combat, Shop, Evolution and Fortification continue |
+| BR-AG02 | Rarity profiles: round 1 Bronze, Bronze, Silver; round 2 Bronze, Silver, Gold; round 3 Silver, Gold, Diamond |
+| BR-AG03 | Both players receive the same three options, drawn by the server from a match stream (seed stream 3) that clients never see (pending owner decision O-6) |
+| BR-AG04 | Draw: for each slot in profile order, uniform among that rarity's Augments never offered earlier in this match and not already in this offer; if none of the three is Universal, the first slot (in profile order) whose rarity still has an eligible Universal Augment is redrawn from those; if no rarity has one, the draw stands |
+| BR-AG05 | A player buys at most one option per round (`ChooseAugment{round, option}`), or declines (`Forgo{round}`); the round then closes for that player only |
+| BR-AG06 | Declining, or letting the 30 s expire without a purchase, grants Forgo +2 Energy once per round; disconnecting and reconnecting changes nothing; nothing is ever assigned automatically |
+| BR-AG07 | A player short of Energy may wait inside the window; a match that ends with an open round grants nothing |
+| BR-AG08 | A player holds at most three Augments (one per round), kept until the match ends; there is no sell, swap or reroll |
+| BR-AG09 | Each player's equipped Augments are public to both players |
+| BR-AG10 | An Augment applies to summons only if its text names Beetlings; it never makes a summon count for Synergy or Bounty |
+| BR-AG11 | Augment effects are computed only by the simulation; clients send a round and an option index, never an effect |
+
+| Rarity | Cost | Forgo |
+|--------|------|-------|
+| Bronze | 3 | +2 for any round |
+| Silver | 6 | |
+| Gold | 10 | |
+| Diamond | 15 | |
+
+### 10.7 Modifier stacking contract (all P16-F phases)
+
+| ID | Proposed rule |
+|----|---------------|
+| BR-X01 | Percentage bonuses to one attribute add in basis points across all sources (Evolution, Synergy, Arcana when it exists, Augment, kind, Fortification, Banner aura, conditional effects) and apply once: `floor((base + flat) × (10 000 + Σbp) / 10 000)` with `i64` intermediates |
+| BR-X02 | Attack interval: `max(MIN_INTERVAL, floor(base × 10 000 / (10 000 + Σatk_bp)))`, Σatk_bp ≤ +10 000 |
+| BR-X03 | Move speed Σbp ≤ +5 000; slow strength is never modified by Augments |
+| BR-X04 | Situational damage (vs Strongholds, vs Tanks, vs low-HP targets, comeback) joins Σbp at hit time; one truncation |
+| BR-X05 | Damage reduction from all sources ≤ 2 000 bp, applied after BR-X04: `floor(dmg × (10 000 − Σdr) / 10 000)`, at least 1 when dmg ≥ 1; Collapse is never reduced |
+| BR-X06 | Lifesteal Σ ≤ 1 200 bp of the HP actually removed by a primary hit on an enemy conventional unit (never splash, Strongholds or summons); never above max HP |
+| BR-X07 | Status duration Σ ≤ +3 000 bp; any root contract adopted by P32 still bounds root |
+| BR-X08 | Max HP changes keep the HP fraction (BR-K07 rule, also for units, as today) |
+| BR-X09 | Each source is finite (one kind, two Fortification tiers, two Evolution tiers, two Synergy levels, three Augments) and every timed effect has a cap or a cooldown: no bonus stacks without bound |
+| BR-X10 | Stronghold healing exists only through named effects with a per-window cap and never exceeds max HP; at most one Stronghold shield exists at a time and it absorbs unit and Stronghold damage only |
+| BR-X11 | Conditional effects read the state when they apply — position and HP-fraction conditions at hit resolution, Synergy-count conditions after that tick's Synergy update — in the simulation's fixed seat and unit-id order; nothing caches a condition across ticks |
+
+### 10.8 Augment catalog (40, Proposed)
+
+Index order is a serialization contract (P16-F5). **U** = Universal
+(useful to any army); otherwise the tag names who benefits. Percentages
+use BR-X01–X07. Per-Augment analysis (interactions, counters, exploits,
+tests, hypotheses) lives in [P16-F6](phases/P16F6-augment-catalog.md); the
+first 14 marked ★ ship first in P16-F5.
+
+| # | Id | Name | Tag | Effect |
+|---|----|------|-----|--------|
+| 0 | `forced_march` | Forced March | U | Units you buy move +40 % for 5 s after spawning |
+| 1 | `field_kit` ★ | Field Kit | U | Conventional units +4 % max HP |
+| 2 | `sentry` ★ | Sentry | U | Your Stronghold +10 % damage |
+| 3 | `steady_aim` ★ | Steady Aim | Ranged | Ranged +8 % damage |
+| 4 | `reinforced_shields` ★ | Reinforced Shields | Tank | Tanks +8 % max HP |
+| 5 | `first_aid` | First Aid | Support | +10 % direct and splash heal |
+| 6 | `drilled_ranks` | Drilled Ranks | Humans | Humans +8 % damage |
+| 7 | `frenzied_bones` | Frenzied Bones | Undead | Undead +8 % attack speed |
+| 8 | `tuned_gears` | Tuned Gears | Machines | Machines +8 % attack speed |
+| 9 | `hardy_sap` | Hardy Sap | Plants | Plants +8 % max HP |
+| 10 | `plunder` ★ | Plunder | U | Bounty 0.15 Energy per eligible kill, cap 0.45 per window |
+| 11 | `stone_mend` | Stone Mend | U | Stronghold heals 50 HP per eligible kill, cap 150 HP per 30 s |
+| 12 | `field_promotion` ★ | Field Promotion | U | Evolutions cost 1 Energy less (minimum 1) |
+| 13 | `veterans` ★ | Veterans | U | Evolved units +8 % max HP, +4 % damage |
+| 14 | `shield_wall` | Shield Wall | Rampart | Your conventional units within 1.5 tiles of your living Rampart take −8 % damage |
+| 15 | `siege_arrows` ★ | Siege Arrows | Ranged | Ranged +15 % damage to Strongholds |
+| 16 | `armored_brood` | Armored Brood | Beetlings | Beetlings +25 % max HP |
+| 17 | `triage` | Triage | Support | +25 % direct heal on allies below 40 % HP |
+| 18 | `lingering_hex` | Lingering Hex | Control | Slow and root you apply last +15 % |
+| 19 | `shield_step` | Shield Step | Tank | Tanks +12 % move, +5 % max HP |
+| 20 | `war_leech` ★ | War Leech | U | Lifesteal 8 % (BR-X06) |
+| 21 | `conquerors` ★ | Conquerors | U | Conventional units +12 % damage to Strongholds |
+| 22 | `tower_fury` | Tower Fury | U | Each kill by your Stronghold: +5 % Stronghold damage, max 3 stacks, all reset 12 s after the last kill |
+| 23 | `entrenched` | Entrenched | U | While your Stronghold is below 50 % HP, your units within 5 tiles of it take −10 % damage |
+| 24 | `grievous_wounds` | Grievous Wounds | U | Your hits reduce healing the target receives by 40 % for 2 s (no stacking) |
+| 25 | `giant_slayer` ★ | Giant Slayer | U | +15 % damage to enemy Tanks |
+| 26 | `executioner` | Executioner | U | +20 % damage to targets below 35 % HP |
+| 27 | `hunters_instinct` | Hunter's Instinct | DPS | DPS +10 % attack speed, +8 % move |
+| 28 | `iron_vanguard` | Iron Vanguard | Tank | Tanks +15 % max HP, +10 % move |
+| 29 | `spellweaver` | Spellweaver | Control | Control +20 % attack speed |
+| 30 | `last_bastion` ★ | Last Bastion | U | Once, when your Stronghold first falls below 25 % HP: shield of 12 % max HP for 15 s |
+| 31 | `desperate_assault` ★ | Desperate Assault | U | While your Stronghold HP fraction is below the enemy's: +15 % damage to Strongholds |
+| 32 | `legacy` ★ | Legacy | U | Evolved units +15 % max HP, +10 % damage |
+| 33 | `second_wind` | Second Wind | U | Each conventional unit survives its first lethal hit with 1 HP (once per unit) |
+| 34 | `convergence` | Convergence | Two factions | With Synergy active for two Factions: conventional units +8 % max HP, +8 % damage |
+| 35 | `royal_banner` | Royal Banner | Humans | Humans +12 % max HP, +10 % damage |
+| 36 | `deathless_legion` | Deathless Legion | Undead | Undead +15 % attack speed, +10 % max HP |
+| 37 | `iron_legion` | Iron Legion | Machines | Machines +15 % damage, +10 % attack speed |
+| 38 | `bountiful_harvest` | Bountiful Harvest | Plants | Plants +10 % max HP, +15 % direct heal |
+| 39 | `hive_awakening` | Hive Awakening | Beetlings | Beetlings +25 % damage; your summon limit +1 (6 → 7) |
+
+Rarity by index: 0–9 Bronze, 10–19 Silver, 20–29 Gold, 30–39 Diamond.
+Universal per rarity: 3 / 4 / 7 / 4, so BR-AG04 can always place one
+(★ subset: 2 / 3 / 3 / 3).
+
+### 10.9 Balance targets for the expansion (Proposed, P16-F gates)
+
+Measured with the P16-C lab (paired seeds, both seat orders, 95 %
+cluster-bootstrap intervals). Bots are not humans: passing is necessary,
+never sufficient (§6).
+
+| Row | Target |
+|-----|--------|
+| Best `banker-N` (N ∈ 10, 15, 20, 25, 30, 40) against the strategic pool | ≤ P16-D's `saver` score + 3 pp, and ≤ 60 % |
+| `rush` and `eco` against the strategic pool | 40–60 % each |
+| Median / p90 / p99 / max running time | 150–240 s / ≤ 330 s / ≤ 390 s / < 400 s |
+| Matches reaching `Siege` / ended by `Collapse` | ≤ 35 % / ≤ 15 % |
+| Siege stretches of 60 s with no Stronghold damage from units | ≤ 1 % of matches |
+| Each kind against the field of kinds (pool × kinds) | 45–55 % |
+| Any kind head-to-head | ≤ 60 % |
+| Each Fortification branch | has a matchup where buying it beats not buying it; `fortify-always` ≤ 55 % |
+| Each Augment's value Δ = score(bot + forced Augment) − score(bot + Forgo), same seeds | Bronze/Silver ≥ 0 pp; every Augment ≤ +12 pp |
+| Pick rate of one Augment by the greedy policy when offered | ≤ 60 % |
+| Best Augment triple found by adversarial search, against the pool | ≤ 65 % |
+| Comebacks (behind at 2:00, then won) | not below the P16-D canon; target ≥ 20 % |
+| Nash support / largest weight | ≥ 3 / ≤ 50 % |

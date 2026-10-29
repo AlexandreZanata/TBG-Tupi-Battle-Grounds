@@ -17,9 +17,10 @@ use crate::knobs;
 use crate::meta;
 use crate::policy::Policy;
 use crate::report::{self, Out};
-use crate::runner::{run_pairs, Matchup};
+use crate::runner::{run_pairs, Matchup, Setup};
 use crate::search::{self, Budget, Settings, CONFIRMATION, DISCOVERY, SCREENING};
 use crate::stats;
+use crate::value::{self, estimate, report as value_report};
 
 struct Ctx {
     rules: &'static Ruleset,
@@ -129,6 +130,8 @@ pub fn dispatch(a: &Args) -> Result<(), String> {
         "screen" => screen(a),
         "search" => search_cmd(a),
         "confirm" => confirm(a),
+        "value" => value_cmd(a),
+        "validate" => validate_cmd(a),
         "arcana" => arcana_cmd(a),
         other => Err(format!("unknown command `{other}` (see --help)")),
     }
@@ -148,6 +151,7 @@ fn run(a: &Args) -> Result<(), String> {
         rules: c.rules,
         policies: [pair.0, pair.1],
         reaction: [c.budget.reaction; 2],
+        setup: Setup::None,
         arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let results: gate::Results =
@@ -272,6 +276,7 @@ fn throughput(a: &Args) -> Result<(), String> {
         rules: c.rules,
         policies: [Policy::Bot; 2],
         reaction: [c.budget.reaction; 2],
+        setup: Setup::None,
         arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let mut text =
@@ -425,6 +430,175 @@ fn confirm(a: &Args) -> Result<(), String> {
         .write("confirm.txt", &text)
         .map_err(|e| e.to_string())?;
     c.finish(0, 0, "")
+}
+
+fn shadow_points(
+    c: &Ctx,
+    seeds: std::ops::Range<u64>,
+) -> Result<Vec<estimate::ShadowPoint>, String> {
+    estimate::shadow_with(
+        c.rules,
+        &[0, 600, 1_200, 1_800],
+        c.budget.reaction,
+        seeds,
+        c.budget.threads,
+    )
+}
+
+fn reference_rows(
+    c: &Ctx,
+    lambda_ref: f64,
+    seeds: std::ops::Range<u64>,
+) -> Result<Vec<value_report::ReferenceRow>, String> {
+    let mut rows = Vec::new();
+    for candidate in value::catalog() {
+        let cmp = estimate::compare_with(
+            c.rules,
+            candidate.intervention,
+            candidate.policies(),
+            c.budget.reaction,
+            seeds.clone(),
+            c.budget.threads,
+        )?;
+        let pve = candidate
+            .kind
+            .map(|_| estimate::pve(&cmp.delta, lambda_ref));
+        rows.push(value_report::ReferenceRow {
+            name: candidate.name,
+            kind: candidate.kind,
+            delta: cmp.delta,
+            pve,
+            lambda_ref,
+            seeds: cmp.seed_pairs,
+        });
+    }
+    Ok(rows)
+}
+
+fn value_cmd(a: &Args) -> Result<(), String> {
+    let c = ctx(a, 128, DISCOVERY)?;
+    let mode = a.str("mode").unwrap_or("reference");
+    match mode {
+        "shadow" => {
+            let points = shadow_points(&c, c.seeds())?;
+            let text = value_report::shadow_table(&points);
+            print!("{text}");
+            c.out
+                .write("shadow.txt", &text)
+                .map_err(|e| e.to_string())?;
+            c.finish(0, 0, "shadow price of one Energy")
+        }
+        "interactions" => {
+            let rows = interaction_rows(&c)?;
+            let text = value_report::interaction_table(&rows);
+            print!("{text}");
+            c.out
+                .write("interactions.txt", &text)
+                .map_err(|e| e.to_string())?;
+            c.finish(0, 0, "deterministic micro-scenario interactions")
+        }
+        "scenarios" => {
+            let mut text = String::new();
+            for pair in value::pairs() {
+                let r = pair.scenario.run(c.rules);
+                let _ = writeln!(
+                    text,
+                    "{}: ticks {} margin {} unit-damage A {} B {} healing A {} B {}",
+                    r.name,
+                    r.ticks,
+                    r.margin,
+                    r.metrics[0].unit_damage,
+                    r.metrics[1].unit_damage,
+                    r.metrics[0].healing,
+                    r.metrics[1].healing
+                );
+            }
+            print!("{text}");
+            c.out
+                .write("scenarios.txt", &text)
+                .map_err(|e| e.to_string())?;
+            c.finish(0, 0, "deterministic micro-scenarios")
+        }
+        "reference" => {
+            let points = shadow_points(&c, c.seeds())?;
+            let lambda_ref = estimate::reference_lambda(&points)?;
+            let rows = reference_rows(&c, lambda_ref, c.seeds())?;
+            let text = value_report::reference_table(&rows, lambda_ref);
+            let csv = value_report::reference_csv(&rows, lambda_ref);
+            print!("{text}");
+            c.out
+                .write("values.txt", &text)
+                .map_err(|e| e.to_string())?;
+            c.out.write("values.csv", &csv).map_err(|e| e.to_string())?;
+            let games = (rows.len() as u64) * c.pairs * 4;
+            c.finish(games, 0, "full-match PVE, paired seeds")
+        }
+        other => Err(format!(
+            "unknown value mode `{other}` (reference, shadow, interactions, scenarios)"
+        )),
+    }
+}
+
+fn interaction_rows(c: &Ctx) -> Result<Vec<value_report::InteractionRow>, String> {
+    let mut rows = Vec::new();
+    for pair in value::pairs() {
+        let base = pair.scenario.run(c.rules);
+        let a_world = pair.a.rules_from(c.rules)?.unwrap_or(c.rules);
+        let b_world = pair.b.rules_from(c.rules)?.unwrap_or(c.rules);
+        let both_world = pair.b.rules_from(a_world)?.unwrap_or(a_world);
+        let a = pair.scenario.run(a_world);
+        let b = pair.scenario.run(b_world);
+        let both = pair.scenario.run(both_world);
+        rows.push(value_report::InteractionRow {
+            name: pair.name,
+            base: base.margin,
+            a: a.margin,
+            b: b.margin,
+            both: both.margin,
+        });
+    }
+    Ok(rows)
+}
+
+fn validate_cmd(a: &Args) -> Result<(), String> {
+    let c = ctx(a, 128, DISCOVERY)?;
+    let points = shadow_points(&c, c.seeds())?;
+    let lambda_ref = estimate::reference_lambda(&points)?;
+    let discovery = reference_rows(&c, lambda_ref, c.seeds())?;
+    let confirmation = reference_rows(&c, lambda_ref, CONFIRMATION..CONFIRMATION + c.pairs)?;
+    let mut text = String::from(
+        "candidate                          discovery PVE   confirmation PVE   static power\n",
+    );
+    let mut d = Vec::new();
+    let mut f = Vec::new();
+    let mut s = Vec::new();
+    for (a, b) in discovery.iter().zip(&confirmation) {
+        if let (Some(pa), Some(pb)) = (a.pve, b.pve) {
+            let sp = value::validate::static_power(
+                &value::catalog()
+                    .into_iter()
+                    .find(|c| c.name == a.name)
+                    .ok_or("candidate missing")?,
+            );
+            d.push(pa.value);
+            f.push(pb.value);
+            s.push(sp);
+            let _ = writeln!(
+                text,
+                "{:<32} {:>12.1} {:>16.1} {:>14.3}",
+                a.name, pa.value, pb.value, sp
+            );
+        }
+    }
+    let stability = estimate::spearman(&d, &f);
+    let baseline = estimate::spearman(&f, &s);
+    let _ = writeln!(text, "\ndiscovery vs confirmation rank: {stability:?}");
+    let _ = writeln!(text, "confirmation vs static baseline rank: {baseline:?}");
+    print!("{text}");
+    c.out
+        .write("validation.txt", &text)
+        .map_err(|e| e.to_string())?;
+    c.finish(0, 0, "P16-D validation")
 }
 
 /// Every complete Arcana preset and the named fixtures against the default

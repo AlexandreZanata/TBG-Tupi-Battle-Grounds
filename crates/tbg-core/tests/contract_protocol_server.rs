@@ -154,6 +154,18 @@ fn server_bytes_are_frozen() {
         encode(&board),
         [17, 1, 0, 1, 1, 3, b'A', b'n', b'n', 0xFC, 0x07, 1, 0, 0, 1, 1]
     );
+    assert_eq!(
+        encode(&ServerMsg::ArcanasSelected {
+            preset: tbg_core::ArcanaPreset::DEFAULT
+        }),
+        [18, 2, 0, 2, 0, 2, 0]
+    );
+    assert_eq!(
+        encode(&ServerMsg::ArcanasRejected {
+            reason: tbg_core::protocol::ArcanaRejection::NotIdle
+        }),
+        [19, 1]
+    );
     let waiting = ServerMsg::ChallengeWaiting { token: [7; 16] };
     assert_eq!(
         encode(&waiting),

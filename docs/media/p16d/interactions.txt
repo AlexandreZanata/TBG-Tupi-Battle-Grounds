@@ -1,0 +1,5 @@
+pair                                   base          A          B        A+B interaction
+hp_plus_heal                           1890       2020       1890       2020          0
+damage_plus_attack_speed               -650       1414       1315       1714      -1665
+root_plus_ranged_damage               -1935       1450      -1764       2477        856
+null_hp_plus_unrelated_range            810        940        810        940          0

@@ -242,6 +242,8 @@ owner choose.
 **Decision.** Three styles, all free, identical in gameplay, stored on
 the account (guests: on the device), sent to both players by the server.
 **Why.** Personal expression without touching fairness (BR-U05, BR-C04).
+**Amended by D-37 (Proposed, 2026-10-29):** styles stay cosmetic; the
+mechanical `StrongholdKind` is a separate concept with its own rules.
 
 ## D-24 · Quality tiers remove cost, never information — 2026-10-28 (planned, P17/P30)
 
@@ -403,27 +405,130 @@ without its own owner decision.
 **Reopen when** lab predictions and real match records disagree
 persistently, or the lab's cost to maintain exceeds its value.
 
-## D-40 · Arcanas live in every mode before P31 — 2026-10-29 (owner decision)
+## D-34 · Strategic expansion P16-F: mechanics enter as disabled ruleset data — 2026-10-29 (Proposed, owner request)
 
-**Decision.** The owner asked for Arcanas to be fully integrated and live
-on the test server now, in Practice, Casual, Ranked, and private rooms,
-ahead of the P31 gate that P32–P38 assumed. The GAME-DESIGN §9 values
-(six nodes, six points, rank ≤ 2, default `[2,0,2,0,2,0]`) apply as
-**Proposed**. Built on P16-C: per-rank values are `Ruleset` data and lab
-knobs. Protocol v8 adds `SetArcanas`, `ArcanasSelected/Rejected`, and both
-presets in `MatchStart`; the server validates while idle and freezes the
-preset at pairing; accounts keep one preset (schema v4); match and ranked
-rows record both applied presets. Summons get no Arcana bonus (as with
-Synergy, BR-U08). The editor is the Codex desktop editor (D-40 replaces its
-"preview" status); phones use the saved or default preset until the P36
-phone editor exists.
-**Why.** The owner wants players to choose Arcanas before matches now.
-**Guard rails.** Server authority (clients send ranks, never bonuses);
-no preset may score outside 45–55 % against the default in the lab (it
-does not today, `docs/media/arcanas/`); values stay Proposed; the
-RulesetVersion field of P35 is replaced by the protocol version for now.
-**Reopen when** the full P34 matrix, human playtests, or ranked data show
-a dominant preset or a compulsory node.
+**Decision.** Plan a strategic expansion as phases P16-F1–F8 after P16-D
+(balance; spec not written yet). P16-E is not used by this plan. Order:
+economy and Siege (F1) → Shop Reserve (F2) → Stronghold kinds and
+Fortifications offline (F3) and online (F4) → Augments core (F5), full
+catalog (F6), online (F7) → competitive validation and release (F8).
+Every new mechanic is a `Ruleset` field whose canonical value disables
+it, so the online game does not change until the owner switches it on in
+the phase that integrates it, after the lab gate (GAME-DESIGN §10.9).
+Effects are a closed enum read at fixed hooks of `step()`; no effect
+engine, event bus, trait hierarchy, or new dependency. Arcanas (P32–P38)
+are not replaced: their additive formula is the same as BR-X01, with the
+Arcana term empty until P33.
+**Why.** P16-C showed banking (`saver`, 93 %), heavy spam (61.8 %) and
+weak Evolutions dominate today; the expansion multiplies the ways to spend
+Energy, so each mechanic must be measured against those findings before
+players see it. Ruleset-gated mechanics reuse the lab, keep goldens
+meaningful, and let a rejected mechanic be removed without a revert.
+**Owner decisions pending** (asked in the phase that needs them):
+O-1 scope, and whether F5–F8 interleave with the visual track (P16,
+P22–P31) or run first; O-2 English and owner names of the kinds; O-3 the
+default kind; O-4 Siege/Collapse (D-36); O-5 uncapped Energy with
+Interest (D-35); O-6 identical Augment options for both players; O-7
+three rounds at 0:30/2:00/3:30; O-8 the revised Augment catalog (D-38);
+O-9 Fortification values; O-10 public equipped Augments; O-11 each canon
+switch (F1, F2, F4, F7); O-12 Banner aura and the Ballista variant.
+**Reopen when** P16-D changes the economy or the victory rule in a way
+that invalidates F1, or a gate shows a mechanic cannot be balanced by
+numbers (then remove it before adding another).
+
+## D-35 · Uncapped Energy with low-balance Interest and bounded generation — 2026-10-29 (Proposed, P16-F1)
+
+**Decision.** Remove the 10-Energy cap (BR-E04). Pay Interest every 10 s
+on the lowest balance held since the previous payment: 0.25 per full 5,
+at most 1.25 (BR-E05–E07). Kill Bounties are capped per window and by a
+1-Energy ceiling (BR-E08). No Augment, kind or Fortification touches base
+regen, Interest or Shop probabilities (BR-E09).
+**Why.** A cap punishes saving for a planned spike; Interest rewards it.
+Reading the lowest balance, not the balance at the payment tick, makes
+Interest pay for Energy actually held and resolves "a purchase on the
+payment tick" without a special case. Max Interest is 22 % of base income,
+paid only while 25 Energy (about seven units) sits off the field.
+**Risk accepted only with evidence.** P16-C measured banking to the cap
+(`saver`) at 93 % against the pool: deploying a stored army instantly at
+home beats units that arrive one by one. Removing the cap and paying
+Interest strengthen exactly that. F1 may not switch canon unless P16-D has
+fixed or explained the `saver` result and the `banker-N` rows pass
+(GAME-DESIGN §10.9). Alternatives considered: Interest read at the payment
+tick (gameable by spending right after it); a soft cap with decay (an
+artificial limit by another name); a growing Interest without maximum
+(exponential, rejected).
+**Reopen when** a `banker-N` policy exceeds its gate after tuning band
+size and value, or playtests find passive play dominant.
+
+## D-36 · Siege and Collapse replace the time-up decision — 2026-10-29 (Proposed, P16-F1)
+
+**Decision.** No result is decided by comparing HP at a time (BR-M07). At
+4:00 of running time the phase becomes `Siege` (today's overtime slot):
+regen doubles and both Strongholds lose a growing percentage of their own
+max HP per second (`Collapse`, BR-M08–M10). A server-protection limit at
+10:00 ends a live match as a draw (`ServerLimit`, BR-M11); contracts prove
+it unreachable. `Phase::Overtime` keeps its wire index renamed `Siege`;
+`EndReason::TimeUp` stays for old records and is never produced again.
+**Why.** Without a clock decision, uncapped Energy, Interest, Redoubt,
+Walls, healing, lifesteal and Stone Mend can make two defensive players
+trade forever, and an endless match costs server time and players'
+patience. Options compared: damage-taken multipliers over time and
+bonuses against Strongholds (no guarantee if nothing reaches the
+Stronghold); absolute HP decay (favors high-HP kinds); weakening
+Stronghold fire (no guarantee); an absolute time limit with an HP
+comparison (what the owner wants removed). Percentage Collapse is the
+only option that guarantees an end, treats every kind and Fortification
+alike, and still leaves 1–2 minutes of play in which the side behind can
+come back.
+**Consequences.** `headless`/`replay` stop bounds, the trace goldens, the
+`TimeUp` gate row, the client clock and result text, and the server's
+shutdown `DRAIN_LIMIT` (300 s, shorter than the new worst case) change in
+F1.
+**Reopen when** Collapse decides more than 15 % of matches, or players
+report the late game as a countdown rather than a fight.
+
+## D-37 · Mechanical Stronghold kinds and a shared Fortification tree — 2026-10-29 (Proposed, P16-F3/F4)
+
+**Decision.** Four free `StrongholdKind`s (Treasury, Redoubt, Ballista,
+Banner), defined as basis points of the canonical Stronghold, chosen
+while idle and frozen at queue or room entry (BR-K01–K08). One shared
+`Fortification` tree, Walls or Arms, 6 then 10 Energy, whose tier 2 adds a
+capability (slow or splash) instead of a second invisible +5 % (BR-F01–F05).
+`StrongholdStyle` (D-23, archived P18) stays cosmetic and separate.
+**Why.** Kinds give a pre-match identity that the Shop cannot take away;
+percentages survive P16-D tuning. Raw tower power (HP × damage, canon =
+1.00) is 0.86 Treasury, 0.98 Redoubt, 1.09 Ballista, 0.88 Banner: the two
+utility kinds pay for their passives, which the lab must confirm. Tower
+HP costs 3–4× more Energy per HP than a Tank and tower damage far more
+than an Archer, so +10 % tiers would rarely be bought; +15 % and a tier-2
+capability make the investment a real alternative. Kind-exclusive tiers
+are deferred: four kinds × two branches already give eight end states to
+balance and draw.
+**Reopen when** a kind leaves 45–55 % against the field after tuning, or
+players cannot tell the kinds apart at a glance.
+
+## D-38 · Augments: three mirrored rounds and a closed effect list — 2026-10-29 (Proposed, P16-F5–F7)
+
+**Decision.** Three `AugmentRound`s at 0:30, 2:00 and 3:30; both players
+see the same three options; one purchase or Forgo (+2) per round; at most
+three Augments, public, permanent; no sell, swap, reroll or fourth round
+(BR-AG01–AG11). The owner's 40-Augment list is revised to 40 distinct
+effects (GAME-DESIGN §10.8; mapping in P16-F6): duplicates of the same
+effect at a higher rarity are merged, invisible values (+4 % tower damage,
++6 % Control damage on 20–30 base damage) are raised or replaced, and new
+counters (Grievous Wounds vs healing, Giant Slayer vs Tanks, Executioner,
+Second Wind vs burst) fill the gaps. Fourteen ship first (F5); the rest
+only after F5 passes its gate.
+**Why.** Identical options remove seat and luck asymmetry from the most
+random system in the game; the remaining difference is how well each
+player adapts their army, which is skill. Three rounds fit the 2.5–4
+minute target and Siege at 4:00, so the three-Augment limit needs no
+replacement UI. Offers every 90 s would give most matches one round
+(1:30); 0:30 lets every player use the system, at a cost (3–6 Energy) the
+start economy affords within the 30-s window.
+**Reopen when** a single Augment's value exceeds its gate after tuning, the
+Forgo rate exceeds 50 % in a round (options too weak) or falls below 5 %
+(Forgo pointless), or playtests find the window too busy on phones.
 
 ## D-39 · Quick Challenge by link and rematch reuse the lobby and match task — 2026-10-29 (Proposed, P39)
 
@@ -449,9 +554,8 @@ token bucket bound automated attempts. A separate quick-challenge queue or
 server would duplicate matchmaking and combat for no gain.
 
 **Consequences.** `PROTOCOL_VERSION` 9 appends three `ClientMsg` and five
-`ServerMsg` variants after the v8 Arcanas variants, preserving their indices,
-and a `MatchMode::Challenge` value; clients older than
-v9 are refused. Challenge and rematch state is lost on server restart, like
+`ServerMsg` variants after the v8 Arcana messages and a
+`MatchMode::Challenge` value; clients older than v9 are refused. Challenge and rematch state is lost on server restart, like
 guest sessions. A player who closes the tab on the result screen keeps the
 rematch ticket for its TTL so a reload can recover it; an explicit
 Menu/Cancel declines and notifies the other player. Spectators, chat,
@@ -460,3 +564,25 @@ accounts, and persistent invitations remain out of scope.
 **Reopen when** playtests show challenge links being shared beyond two
 players (then a room with spectators, not a bigger invite), or rematch
 abandonment makes the 120-second ticket wasteful.
+
+## D-40 · Arcanas live in every mode before P31 — 2026-10-29 (owner decision)
+
+**Decision.** The owner asked for Arcanas to be fully integrated and live
+on the test server now, in Practice, Casual, Ranked, and private rooms,
+ahead of the P31 gate that P32–P38 assumed. The GAME-DESIGN §9 values
+(six nodes, six points, rank ≤ 2, default `[2,0,2,0,2,0]`) apply as
+**Proposed**. Built on P16-C: per-rank values are `Ruleset` data and lab
+knobs. Protocol v8 adds `SetArcanas`, `ArcanasSelected/Rejected`, and both
+presets in `MatchStart`; the server validates while idle and freezes the
+preset at pairing; accounts keep one preset (schema v4); match and ranked
+rows record both applied presets. Summons get no Arcana bonus (as with
+Synergy, BR-U08). The editor is the Codex desktop editor (D-40 replaces its
+"preview" status); phones use the saved or default preset until the P36
+phone editor exists.
+**Why.** The owner wants players to choose Arcanas before matches now.
+**Guard rails.** Server authority (clients send ranks, never bonuses);
+no preset may score outside 45–55 % against the default in the lab (it
+does not today, `docs/media/arcanas/`); values stay Proposed; the
+RulesetVersion field of P35 is replaced by the protocol version for now.
+**Reopen when** the full P34 matrix, human playtests, or ranked data show
+a dominant preset or a compulsory node.

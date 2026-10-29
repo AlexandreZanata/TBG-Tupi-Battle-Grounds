@@ -17,6 +17,8 @@ COMMANDS
   screen      every knob at -2 and +2 steps (screening seeds)
   search      screen, then the (1+λ) search; writes proposal.md
   confirm     canon vs --apply on confirmation seeds, every reaction time
+  value       P16-D marginal value: reference | shadow | interactions | scenarios
+  validate    P16-D discovery vs confirmation rank check and static baseline
   arcana      every complete Arcana preset vs the default (policy --a, default bot)
 
 FLAGS
@@ -33,9 +35,11 @@ FLAGS
   --top K           knobs searched, best screened first (default 24)
   --search-seed S   search randomness (default 1)
   --strict          gate exits non-zero when a required row fails
+  --mode NAME       value mode: reference (default), shadow, interactions,
+                    scenarios
 ";
 
-const FLAGS: [&str; 13] = [
+const FLAGS: [&str; 14] = [
     "pairs",
     "threads",
     "seed-start",
@@ -49,6 +53,7 @@ const FLAGS: [&str; 13] = [
     "top",
     "search-seed",
     "strict",
+    "mode",
 ];
 
 pub struct Args {

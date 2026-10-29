@@ -47,6 +47,38 @@ Their files stay in docs/phases/ for reference only. Final-quality phases
 for Nester and Rampart are written after P16-B is reviewed.
 ```
 
+**Strategic expansion — after P16-D (Proposed, D-34).** P16-D now has a
+written plan: an offline universal pre-balance value model (PVE) that
+measures marginal attributes, abilities, Evolutions, economy, Strongholds,
+Augments, and Arcanas before full matches, and resolves the P16-C findings
+(`saver`, heavy spam, Evolution value, faction spread). It is offline only
+and changes no production rule by itself. P16-E is not used. P16-F turns
+the game into a deeper strategy game
+(GAME-DESIGN §10): uncapped Energy with Interest, Siege instead of a
+time-up decision, Shop Reserve, four mechanical Stronghold kinds with
+Fortifications, and Augment rounds. Every mechanic enters the `Ruleset`
+disabled, passes a lab gate (§10.9), and is switched on online only by the
+owner in the phase that integrates it. Each phase gates the next.
+Writing these specs approves no value and enables nothing.
+
+```
+P16-C reviewed ─► P16-D Pre-balance value model (engine implemented; must fix or explain `saver`)
+ └► P16-F1 Uncapped Energy, Interest, Siege/Collapse   (core+lab+HUD; switch)
+     └► P16-F2 Shop Reserve                               (core+lab+HUD; switch)
+         └► P16-F3 Stronghold kinds + Fortifications      (core+lab, offline)
+             └► P16-F4 Kinds online: selection, store, lobby, HUD, 3D (switch)
+                 └► P16-F5 Augment rounds + first 14      (core+lab, offline)
+                     └► P16-F6 Full catalog of 40, adversarial balance (offline)
+                         └► P16-F7 Augments online, War Council UI (switch)
+                             └► P16-F8 Validation, load, playtest, release decision
+```
+
+Whether the visual track (P16, P22–P31) waits for P16-F8 or interleaves
+after P16-F4 is owner decision O-1 (D-34); two agents never work on the
+same files at once. Arcanas (P32–P38) stay after P31 unchanged; P32's
+baseline then includes every switched-on P16-F mechanic, and Arcana
+bonuses join the same additive formula (BR-X01).
+
 **Optional gameplay extra — only after every existing phase (P0–P31).**
 Arcanas extend the released game; they are not a prerequisite for P13,
 P14, the visual suite, or `v0.2.0`. P32 starts only after P31 is reviewed
@@ -94,6 +126,15 @@ lobby/menu files). It gates no existing phase.
 | P16-A | [P16A-desktop-lobby-and-arena.md](phases/P16A-desktop-lobby-and-arena.md) | Archer v2 default; desktop lobby and arena match the owner's references | done; desktop look owner-approved; physical-phone check pending | yes |
 | P16-B | [P16B-open-army-and-new-units.md](phases/P16B-open-army-and-new-units.md) | No army cap; five Shop offers; Nester and Rampart; large-army balance and performance measured | merged and on the test VPS (owner, 2026-10-29) with placeholder art; **final art, client FPS, fun check, balance decision pending** | yes (code) |
 | P16-C | [P16C-balance-lab.md](phases/P16C-balance-lab.md) | Millions of headless matches proven equal to 1×; ruleset as data; opponent pool, duels, Nash meta, search; reviewed balance proposal; lab contract tests | lab, contracts, 1× proof done; 8-number proposal applied (Proposed); **owner: mechanic for banked waves/spam, then playtest** | yes (self-review) |
+| P16-D | [P16D-prebalance-value-model.md](phases/P16D-prebalance-value-model.md) | Offline PVE engine: one-sided full-match value, Energy shadow price, interaction canaries, held-out validation; P16-C findings still open | engine implemented and measured; **owner balance decision pending**; P16-F1 blocked by `saver` | — |
+| P16-F1 | [P16F1-economy-and-siege.md](phases/P16F1-economy-and-siege.md) | Uncapped Energy, low-balance Interest, Siege/Collapse, no time-up decision; lab-gated switch; HUD | planned (after P16-D) | — |
+| P16-F2 | [P16F2-shop-reserve.md](phases/P16F2-shop-reserve.md) | Hold one Shop offer for 20 s; lab comparison; HUD | planned | — |
+| P16-F3 | [P16F3-stronghold-kinds-core.md](phases/P16F3-stronghold-kinds-core.md) | Per-seat Stronghold, four kinds, Bounty, Fortifications; lab matrices (offline) | planned | — |
+| P16-F4 | [P16F4-stronghold-kinds-online.md](phases/P16F4-stronghold-kinds-online.md) | Selection frozen at queue, persistence, lobby, Fortify panel, four 3D kinds | planned | — |
+| P16-F5 | [P16F5-augments-core.md](phases/P16F5-augments-core.md) | Augment rounds, mirrored draws, Forgo, the first 14 Augments; Δ value per Augment (offline) | planned | — |
+| P16-F6 | [P16F6-augment-catalog.md](phases/P16F6-augment-catalog.md) | All 40 Augments, adversarial triples, tuned catalog (offline) | planned | — |
+| P16-F7 | [P16F7-augments-online.md](phases/P16F7-augments-online.md) | War Council on desktop and phones, records, practice bot | planned | — |
+| P16-F8 | [P16F8-strategic-validation.md](phases/P16F8-strategic-validation.md) | Full gate, long matches, capacity, human playtest, release decision | planned | — |
 | P16 | [P16-class-animation-sets.md](phases/P16-class-animation-sets.md) | Professional clip sets per Archetype, simulation-timed | planned | — |
 | P17 | [P17-arena-and-background.md](phases/P17-arena-and-background.md) | Living medieval battlefield filling every screen ratio | **archived** (owner, 2026-10-28; D-31) | — |
 | P18 | [P18-strongholds.md](phases/P18-strongholds.md) | Three selectable cosmetic Stronghold styles | **archived** (owner, 2026-10-28; D-31) | — |
@@ -118,7 +159,7 @@ lobby/menu files). It gates no existing phase.
 | P36 | [P36-arcana-editor-and-practice.md](phases/P36-arcana-editor-and-practice.md) | Complete editor and accurate previews on desktop and phones | planned | — |
 | P37 | [P37-arcana-presets-and-ranked-records.md](phases/P37-arcana-presets-and-ranked-records.md) | One durable preset per account, guest parity, atomic ranked metadata | planned | — |
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
-| P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; verified, PR review and owner device checks pending | pending PR |
+| P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; 29 online tests and browser evidence; **owner physical-phone/PWA check pending** | PR #2 follow-up fixes pending |
 
 ## Pending validations (owner)
 
@@ -185,7 +226,16 @@ All code for P1–P8 is implemented and validated on the development PC
 | P16-A | [P16A-desktop-lobby-and-arena.md](phases/P16A-desktop-lobby-and-arena.md) | Archer v2 default; desktop lobby and arena match the owner's references | done; desktop look owner-approved; physical-phone check pending | yes |
 | P16-B | Approves the new units' look and the Proposed balance values after the playtest |
 | P16-C | Approves D-33, the balance proposal (or a mechanic change for heavy spam), then playtests the new values |
+| P16-D | Approves the PVE methodology and the balance packet; resolves whether `saver` needs a rule change before P16-F1 |
 | P16 | Approves class animations |
+| P16-F1 | Siege/Collapse (O-4) and uncapped Energy with Interest (O-5) from the lab table; switches canon |
+| P16-F2 | Switches Shop Reserve on |
+| P16-F3 | Kind names (O-2), Fortification values (O-9), Banner aura and Ballista variant (O-12) |
+| P16-F4 | Default kind (O-3); approves the four Stronghold looks, lobby and Fortify panel; switches canon |
+| P16-F5 | Identical options (O-6), three rounds (O-7), public Augments (O-10), tuned values |
+| P16-F6 | Approves the revised catalog (O-8) |
+| P16-F7 | Approves the War Council on desktop and phones; switches Augments on |
+| P16-F8 | Runs the playtest (≥ 8 people, ≥ 24 matches); balance and release decision |
 | P22–P29 | Approves each character (screenshots + live match) |
 | P31 | Runs the playtest; decides balance changes; pushes the tag |
 | P32 | Resolves reproduced rule/canon conflicts and approves the experiment's scope |

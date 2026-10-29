@@ -14,7 +14,7 @@ use tbg_core::PlayerIntention;
 fn protocol_version() {
     assert_eq!(
         PROTOCOL_VERSION, 9,
-        "v9 (D-39/P39): challenge/rematch appended after D-40 Arcanas"
+        "v9: v8 Arcanas plus P39 Quick Challenge/rematch messages and MatchMode::Challenge"
     );
 }
 

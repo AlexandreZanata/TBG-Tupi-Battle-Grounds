@@ -8,7 +8,7 @@ use tbg_balance::gate;
 use tbg_balance::knobs;
 use tbg_balance::meta;
 use tbg_balance::policy::Policy;
-use tbg_balance::runner::{parallel_map, run_pairs, Matchup};
+use tbg_balance::runner::{parallel_map, run_pairs, Matchup, Setup};
 use tbg_balance::stats;
 use tbg_core::content;
 use tbg_core::ArcanaPreset;
@@ -31,6 +31,7 @@ fn favor_vs_bot(rules: &'static Ruleset, k: UnitKind, pairs: u64) -> f64 {
         rules,
         policies: [Policy::Favor(k), Policy::Bot],
         reaction: [gate::REACTION; 2],
+        setup: Setup::None,
         arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let r = run_pairs(&[m], 0..pairs, 4).remove(0);
@@ -54,6 +55,7 @@ fn c3_results_do_not_depend_on_thread_count() {
         rules: canon(),
         policies: [Policy::Heavy, Policy::Bot],
         reaction: [1, 5],
+        setup: Setup::None,
         arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
     let one = run_pairs(&[m], 0..6, 1);
@@ -305,6 +307,7 @@ fn c11_every_policy_plays_legal_complete_matches() {
             rules: canon(),
             policies: [p, Policy::Bot],
             reaction: [1, 1],
+            setup: Setup::None,
             arcanas: [ArcanaPreset::NEUTRAL; 2],
         };
         // `play` panics if a match does not end; rejections are fine.
