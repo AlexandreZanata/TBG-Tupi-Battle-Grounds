@@ -199,5 +199,126 @@ fixes that keep large armies possible.
 
 ## Phase report
 
-_Executor fills this in: baseline and after tables, performance table,
-proposed balance changes with evidence, fun notes, deviations._
+### Status (2026-10-29, reviewer: algorithms and tests)
+
+Done on `phase/p16b-open-army`: steps 1–5, the step-6 HUD count and five
+cards (placeholder figures only), steps 7–8 measured, step 9 complete.
+**Still open:** step 6 art (Nester, Beetling, Rampart final figures and
+portraits, tap cycling, visual lateral spread), client FPS at 100 units a
+side, step 10 fun check, the two-client match with a reconnect, and the
+owner's decision on the balance finding below.
+
+### What changed
+
+- `SLOT_CAP`, `SlotCount`, `slots_used`, and the cap rejection are deleted;
+  Energy is the only purchase gate (BR-U07). The large body of Bone Brute,
+  Siege Walker, and Rampart comes from `art::roster::large` (visual only).
+- Five distinct offers: partial Fisher-Yates on draw, refills never
+  duplicate another visible offer (BR-S01).
+- `summon.rs`: Hatch timer, per-Nester and per-player limits with a
+  fixed-size counter (no allocation), lifetime expiry; summons never sell,
+  evolve (`Rejection::NotEvolvable`), hatch, or count for Synergy.
+- Guard in `targeting.rs` (one pass computes nearest enemy and nearest
+  Rampart in range) and in `stronghold_fire`.
+- Large-army safety found while reading the code: Synergy counts were `u8`
+  (overflow past 255 units of one faction), splash and splash heal cloned
+  the whole unit list per hit, `effective_stats` allocated per unit per
+  tick. All three fixed.
+- Bot: buys while Energy allows; prefers evolving from army 6 (a play
+  style, never a limit); never tries to evolve summons.
+- Protocol v7; determinism goldens recomputed (seed 1 now ends on time).
+
+### Tests (`cargo test --workspace`: 107 passed, 0 failed)
+
+| # | Test | Where |
+|---|------|-------|
+| 1–3 | `br_u07_army_grows_past_eight_while_energy_lasts` (40 units; only Energy rejects) | core `open_army.rs` |
+| 4 | `br_u07_former_two_slot_units_have_no_capacity_condition` (12 each) | core |
+| 5 | `army_label_counts_living_units_and_summons_apart` | client `ui/army_tests.rs` |
+| 6 | `br_y01_synergy_with_large_armies_skips_summons` (300 units) | core |
+| 7 | `br_u08_hatch_respects_its_own_limits`, `br_u08_beetlings_take_the_nesters_form` | core |
+| 8 | `br_u09_guard_holds_with_one_hundred_units_per_side`, `br_u09_guard_also_binds_the_stronghold` | core |
+| 9 | `determinism_with_large_armies` (100+ units a side) | core |
+| 10 | `br_u07_online_army_stays_in_sync` (real WebSocket match: army rebuilt from events equals every server view; only Energy refuses) | server `online.rs` |
+| 11 | `large_battle_views_fit_the_wire` (< 32 KiB) + `examples/army_load.rs` | core |
+| 12 | `no_slot_rule_survives_in_the_code` (scans every `.rs` in `crates/`) | core |
+
+Plus `br_s01_five_distinct_offers_after_draws_and_refills` and the updated
+contract guards (`contract_constants`, `contract_roster`,
+`contract_protocol`, `contract_determinism`). Test 10 does not require
+more than eight living units online: over the wire Energy cannot be
+forced, and natural play rarely keeps nine alive against the bot; tests 1,
+4, and 9 prove the uncapped army in the simulation itself.
+
+### Balance: before vs after (2000 bot matches per row, same seeds)
+
+"Before" is commit `121ca8c` (eight-slot cap, three offers, eight units),
+run with the new harness metrics; spam policies respected the old cap.
+Files: `docs/media/p16b/balance-{before,after}-{bot,heavy,cheap}.txt`.
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Median duration (bot vs bot) | 149 s | 138 s |
+| Ended by Stronghold / time | 70.7 % / 29.4 % | 82.6 % / 17.4 % |
+| Comebacks (behind at 2:00, then won) | 6.0 % | 2.8 % |
+| Evolutions per match | 7.7 | 7.4 |
+| Max army (one side) | 8 | 21 |
+| **Heavy spam vs bot (seat A wins)** | **42.1 %** | **60.5 %** |
+| Cheap spam vs bot | 29.3 % | 41.5 % |
+| Siege Walker win when bought | 59.5 % | 66.5 % |
+| Bone Brute win when bought | 45.9 % | 44.9 % |
+| Rampart / Nester win when bought | — | 46.7 % / 43.3 % |
+
+**Finding (owner decision needed).** Without the cap, buying every
+affordable unit beats the bot's buy-and-evolve mix 60–62 % of the time,
+even at the bot's own decision pace (61.8 %). Cause: with the cap,
+Evolution was where Energy went once the army was full; without it, a new
+unit gives about twice the stats per Energy of an Evolution (a Shieldbearer
+Evolution adds 325 HP for 3 Energy; another Shieldbearer adds 650 HP and 30
+damage). Cheaper Evolutions do not fix it: costs 2/3 → heavy spam 59.7 %;
+2/4 → 58.9 %. Comebacks also fell (6.0 → 2.8 %, both far from the ≥ 20 %
+target). Bone Brute did **not** become dominant without its two-slot cost;
+Siege Walker was already strong when bought (59.5 %) and rose to 66.5 %.
+
+Candidate corrections, none applied (numbers stay as before, all values
+**Proposed**):
+1. Stronger Evolutions (e.g. tier-1 forms worth a second unit's stats),
+   re-run the heavy-spam check.
+2. A per-purchase cost that grows with the living army — economy, not a
+   cap: nothing is ever refused, buying just gets dearer.
+3. Accept for now and judge with human playtests (the bot is a weak
+   opponent; humans may out-play spam).
+4. Siege Walker: watch, possibly −10 % damage, after 1–3.
+
+### Performance (`examples/army_load.rs`, release, dev PC)
+
+| units/side | live units | step mean µs | p95 | p99 | max | view bytes avg / max | KB/s per player |
+|---|---|---|---|---|---|---|---|
+| 10 | 20 | 0.9 | 1.4 | 2.0 | 5.4 | 298 / 393 | 3.0 |
+| 20 | 40 | 2.9 | 3.9 | 5.0 | 8.4 | 566 / 895 | 5.7 |
+| 40 | 81 | 9.0 | 10.6 | 11.6 | 24.3 | 1137 / 1715 | 11.4 |
+| 60 | 122 | 18.1 | 20.5 | 22.2 | 35.8 | 1711 / 2604 | 17.1 |
+| 100 | 203 | 45.4 | 50.7 | 53.5 | 57.2 | 2857 / 5492 | 28.6 |
+
+- Simulation: targeting is still O(n²) per tick, but 200 units cost ~45 µs
+  per step (~0.9 ms CPU per match-second): not the bottleneck. Keeping
+  the live-position semantics (units move during the tick) was preferred
+  over a per-tick sorted snapshot that would change behavior.
+- Server memory: `Unit` state for 200 units is ~12 KB per match.
+- **Bandwidth is the real cost**: full views at 10 Hz exceed the 6 KB/s
+  budget from about 20 units a side (28.6 KB/s at 100). Typical bot
+  matches peak at 21–40 living units in total (≈ 3–6 KB/s). The
+  proportional fix is delta views (only changed units), listed in
+  ARCHITECTURE §12 "Later"; recommended for P30-B. No unit limit was added
+  (BR-U10 not used).
+- Client FPS with 100 units a side: not measured yet (open).
+
+### Deviations
+
+- Beetling archetype: the table said "—"; the code needs one, `Dps` chosen.
+- The Beetling keeps its Nester's tier and branch, so Venom/Blight are the
+  Beetling's own forms (no new modifier fields needed).
+- A Nester whose Beetlings are capped stays ready and hatches as soon as
+  one expires or dies.
+- Test 10 checks sync and refusals online; "more than eight alive" is
+  proven in the simulation tests (see above).

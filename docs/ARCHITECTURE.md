@@ -350,6 +350,7 @@ buying.
 | Triangles | Measured and reported per unit form and arena layer; no fixed maximum (D-30) — the frame-rate and memory targets decide | P6 · P16-A |
 | Browser memory | ≤ 300 MB | P7 |
 | Sim step, 30 units (release) | ≤ 50 µs | P2 · measured: 0.44 µs harness, 4–6 µs in server |
+| Sim step, large armies (release) | measured, no fixed cap (D-32) | P16-B: 200 units 45 µs mean / 54 µs p99; full views 28.6 KB/s per player at 100 a side (delta views recommended, P30-B) |
 | Server memory | ≤ 100 KB per match + about 64 KB per socket | P10 local: ~300 KB per running match (target missed — sockets and per-connection queues dominate; worst case is bounded by `CONN_QUEUE` and the 64 KiB write cap) |
 | Bandwidth per player | ≤ 6 KB/s down, ≤ 0.5 KB/s up | P4 local: 1.46 KB/s down, 3 B/s up · P10 local: 1.29 KB/s down at 250 matches |
 | View-gap p95 under 40 ± 20 ms added latency | ≤ 150 ms | P4 local: 128 ms |

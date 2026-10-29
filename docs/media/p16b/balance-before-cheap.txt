@@ -1,0 +1,19 @@
+matches: 2000
+duration s: median 133 p90 183
+ended by: stronghold 80.9% | time 19.1% | forfeit 0.0%
+draws: 1.8%
+faction-majority Humans: 2615 armies, win 46.3%
+faction-majority Undead: 129 armies, win 74.4%
+faction-majority Machines: 207 armies, win 47.8%
+faction-majority Plants: 520 armies, win 47.3%
+purchase share Shieldbearer: 21.4% | win when bought 47.8%
+purchase share Archer: 18.7% | win when bought 48.3%
+purchase share BoneBrute: 7.2% | win when bought 47.4%
+purchase share Hexer: 6.8% | win when bought 48.0%
+purchase share Sawbot: 18.7% | win when bought 45.8%
+purchase share SiegeWalker: 1.7% | win when bought 79.6%
+purchase share Bloomkeeper: 18.6% | win when bought 48.3%
+purchase share Rootcaller: 6.9% | win when bought 46.5%
+seat A wins: 29.3% | comebacks (behind at 2:00, then won): 3.8% of 926 | max army 8
+evolutions per match: 4.9
+step µs: mean 0.27 max 611.1 | max units alive 16
