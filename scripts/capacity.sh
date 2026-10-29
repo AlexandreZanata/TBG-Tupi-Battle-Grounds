@@ -89,7 +89,12 @@ echo "| matches | server cores | matches/core | RSS MB | KB/match | late ticks |
 echo "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
 for level in $LEVELS; do
 	start_server
-	for _ in $(seq 1 50); do curl -fsS "http://$ADDR/health" >/dev/null 2>&1 && break; sleep 0.1; done
+	for _ in $(seq 1 100); do curl -fsS "http://$ADDR/health" >/dev/null 2>&1 && break; sleep 0.1; done
+	if ! curl -fsS "http://$ADDR/health" >/dev/null 2>&1; then
+		echo "capacity: server did not start on $ADDR" >&2
+		tail -20 "$WORK/server.log" >&2 || true
+		exit 1
+	fi
 	"$BIN/tbg-bots" --url "ws://$ADDR/ws" --matches "$level" --ramp-ms 5 >"$WORK/bots.log" 2>&1 &
 	BOTS=$!
 	for _ in $(seq 1 120); do
