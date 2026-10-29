@@ -17,7 +17,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # P10 step 3 measured `opt-level = 3` (profile `server`) vs `release`
-# (`opt-level = "s"`) at 1000 matches: 0.99 vs 0.97 cores - no gain, so the
+# (`opt-level = "s"`) at 1000 matches: 0.99 vs 0.97 cores — no gain, so the
 # release profile serves both the WASM bundle and the server.
 PROFILE="${PROFILE:-release}"
 LEVELS="${LEVELS:-250 500 1000 1500}"
@@ -102,7 +102,7 @@ cgroup_dir() {
 cgroup_value() { awk -v key="$2" '$1 == key {print $2; found = 1} END {if (!found) print 0}' "$1" 2>/dev/null || echo 0; }
 
 echo "| matches | server cores | bot cores | load1 | matches/core | RSS MB | KB/match | cgroup MB | peak MB | throttled | mem max | oom | late ticks | RTT p95 ms | lobby max | conns | matches d | KB/s out | KB/s in | KB/s/player | views/s | view B avg |"
-echo "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
+echo "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
 for level in $LEVELS; do
 	start_server
 	for _ in $(seq 1 100); do curl -fsS "http://$ADDR/health" >/dev/null 2>&1 && break; sleep 0.1; done
@@ -131,7 +131,6 @@ for level in $LEVELS; do
 	late0=$(metric late_ticks)
 	out0=$(metric bytes_out)
 	in0=$(metric bytes_in)
-	conn0=$(metric connections)
 	run0=$(metric matches_running)
 	views0=$(metric view_messages)
 	vbytes0=$(metric view_bytes)
@@ -174,7 +173,5 @@ for level in $LEVELS; do
 	views_s=$(awk -v a="$views0" -v b="$views1" -v w="$WINDOW" 'BEGIN {printf "%.0f", (b - a) / w}')
 	view_avg=$(awk -v a="$views0" -v b="$views1" -v va="$vbytes0" -v vb="$vbytes1" 'BEGIN {n = b - a; printf "%.0f", (n > 0 ? (vb - va) / n : 0)}')
 	echo "| $run1 | $cores | $bot_cores | $load1 | $per_core | $rss | $kb | $cg_mb | $peak_mb | $throttled | $mem_high | $mem_oom | $((late1 - late0)) | $rtt | $inbox | $conn1 | $((run1 - run0)) | $server_kb | $in_kb | $player_kb | $views_s | $view_avg |"
-	# conn0 is sampled to make the connection gauge's growth explicit in the log.
-	: "$conn0"
 	stop
 done
