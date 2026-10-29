@@ -11,6 +11,7 @@ use crate::art::anim::Animator;
 use crate::art::{figure, FigureLibrary};
 use crate::ui::UiAction;
 
+pub mod aim;
 pub mod assets;
 mod cues;
 mod names;
@@ -31,7 +32,7 @@ pub struct UnitLook {
 /// Root of one unit's visual; child entities are listed for updates.
 #[derive(Component)]
 pub struct UnitVisual {
-    figure: Entity,
+    pub figure: Entity,
     joints: [Entity; crate::art::rig::NODE_COUNT],
     ring: Entity,
     /// Rest scale of the team ring (the inspected unit's ring pulses above it).
@@ -45,7 +46,7 @@ pub struct UnitVisual {
     /// Splash radius in tiles (0 = none), for the splash-ring effect.
     pub splash: f32,
     form: (UnitKind, u8, u8),
-    yaw: f32,
+    pub yaw: f32,
     /// Tint material, seconds left, already applied to the joints.
     tint: Option<(Handle<StandardMaterial>, f32, bool)>,
     pub dying: bool,
@@ -59,6 +60,7 @@ pub fn plugin(app: &mut App) {
         .add_systems(
             Update,
             (
+                aim::update_aim,
                 cues::animate,
                 cues::billboards,
                 cues::fly,

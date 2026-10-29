@@ -50,20 +50,10 @@ impl Gallery {
         let mode = config::url_param("gallery")
             .unwrap_or_default()
             .to_lowercase();
-        let unit = mode
-            .parse::<usize>()
-            .ok()
-            .and_then(|i| UNIT_KINDS.get(i).copied())
-            .or_else(|| {
-                UNIT_KINDS
-                    .into_iter()
-                    .find(|kind| slug(&format!("{kind:?}")) == slug(&mode))
-            })
-            .or(match mode.as_str() {
-                "sawknight" => Some(UnitKind::Sawbot),
-                "ogrearcher" => Some(UnitKind::SiegeWalker),
-                _ => None,
-            });
+        let unit = config::url_param("unit")
+            .as_deref()
+            .and_then(parse_unit_kind)
+            .or_else(|| parse_unit_kind(&mode));
         let clip = config::url_param("clip").and_then(|s| {
             CLIPS
                 .into_iter()
@@ -104,4 +94,20 @@ impl Gallery {
 }
 fn slug(s: &str) -> String {
     s.to_ascii_lowercase().replace(['-', '_', ' '], "")
+}
+
+fn parse_unit_kind(s: &str) -> Option<UnitKind> {
+    s.parse::<usize>()
+        .ok()
+        .and_then(|i| UNIT_KINDS.get(i).copied())
+        .or_else(|| {
+            UNIT_KINDS
+                .into_iter()
+                .find(|kind| slug(&format!("{kind:?}")) == slug(s))
+        })
+        .or(match s {
+            "sawknight" => Some(UnitKind::Sawbot),
+            "ogrearcher" => Some(UnitKind::SiegeWalker),
+            _ => None,
+        })
 }

@@ -701,6 +701,18 @@ Measured across 3 runs of 60 seconds each on Chrome 156 (`1280x800`, DPR 1, port
 - [Autoplay Match Baseline](docs/media/a1/baseline/baseline-autoplay.jpg) (`docs/media/a1/baseline/baseline-autoplay.jpg`, 136 KB): 60-second in-match state vs bot.
 - [Baseline Performance JSON](docs/media/a1/baseline/baseline-performance.json) (`docs/media/a1/baseline/baseline-performance.json`, 6.4 KB): complete 3-run raw data capture and median metrics.
 
+#### 2.3 Step 5 Aim Wiring & Archer Prototype Verification
+
+- **Aim System Wiring (`visuals/aim.rs`):** Single authoritative system `update_aim` drives figure child yaw toward authoritative target (`Quat::from_rotation_y(aim.current_yaw)`). Base yaw (`v.yaw`) maintained when idle or walking.
+- **Targeted Projectile (`art/arrows.rs`):** Implemented D2 flight from bow socket directly to target chest (`Vec3::new(0.0, 0.55, 0.0)`), duration clamped to 0.12s, rotation aligned to flight velocity. Removed legacy facing-directed range calculation and redundant generic projectile spawning on native archers.
+- **Contract Tests:**
+  - `test_arrow_endpoint_accuracy_across_8_angles`: Verified discrete 60 Hz integration arrives within < 0.15 tile of target chest across all 8 angles x near/far.
+  - `test_arrow_spawn_direction_matches_aim_dir`: Verified arrow horizontal flight direction aligns with aim direction within < 1.0 deg at spawn across all 8 angles.
+- **Aim Lab (`?gallery=aim`):** Attacker at center, targets on 8-angle ring x {near, far}, retargeting (1-8 and space keys), target kill test (K key), near/far toggle (N key), crowd mode (12 attackers around 3 targets), and unit query parameter `&unit=`.
+- **Media Artifacts:**
+  - [Archer Aim 8 Angles Contact Sheet](docs/media/a1/archer-aim-8angles.jpg) (`docs/media/a1/archer-aim-8angles.jpg`, 277 KB): 4x2 montage demonstrating directional aiming across all 8 angles in the aim lab.
+  - [Archer Attack Frames Sheet](docs/media/a1/archer-attack-frames.jpg) (`docs/media/a1/archer-attack-frames.jpg`, 56 KB): 0%, 25%, 50%, 75%, 100% frame-by-frame draw and release.
+
 ### Progress
 
 Step 0 complete (preflight verification).
@@ -708,7 +720,8 @@ Step 1 complete (audit report, corrected F4 live melee reach measurements for al
 Step 2 complete (aim lab before sheets, formal 5-scenario performance baseline across 3 runs of 60s, hardware GPU measurements, baseline screenshots and raw metrics committed).
 Step 3 complete (authored ART-DIRECTION §11 D5 visual standard, class proportion table, faction morphology/material rules, evolution scale progression rules +8%/+16%, and Tupi checklist).
 Step 4 complete (aim core pure Rust in art/aim.rs with facing_yaw, turn_toward, Aim state machine Active/Hold/Release, deadzone, frozen point on despawn, ImpactRing FIFO and 1s expiry; all 11 contract tests passing).
-Steps 5–14 pending.
+Step 5 complete (aim wiring system in visuals/aim.rs, D2 targeted arrow flight in art/arrows.rs, duplicate projectile fix, 8-angle lab contact sheet, 2 contract tests passing).
+Steps 6–14 pending.
 
 ### Owner decisions
 

@@ -2,6 +2,7 @@
 
 use super::{figures::spawn_one, settings::Gallery};
 use crate::art::{
+    aim::{Aim, BASE_YAW_OWN},
     anim::{Animator, Clip},
     FigureLibrary,
 };
@@ -57,7 +58,13 @@ pub fn spawn(
             let (target_root, mut target_anim) =
                 spawn_one(commands, lib, target_kind, (0, 0), pos, &material);
             target_anim.play(Clip::Idle);
-            commands.entity(target_root).insert(target_anim);
+            commands.entity(target_root).insert((
+                target_anim,
+                AimTarget {
+                    index: t,
+                    far: false,
+                },
+            ));
         }
         for a in 0..12 {
             let angle = a as f32 * std::f32::consts::TAU / 12.0;
@@ -70,14 +77,28 @@ pub fn spawn(
                 pos,
                 &material,
             );
-            attacker_anim.play(match attacker_kind {
+            let clip = match attacker_kind {
                 UnitKind::Archer | UnitKind::SiegeWalker => Clip::AttackRanged,
                 UnitKind::Hexer
                 | UnitKind::Bloomkeeper
                 | UnitKind::Rootcaller
                 | UnitKind::Nester => Clip::Cast,
                 _ => Clip::AttackMelee,
-            });
+            };
+            attacker_anim.play(clip);
+            let hold = match clip {
+                Clip::AttackRanged => 0.18,
+                Clip::Cast => 0.22,
+                _ => 0.30,
+            };
+            let mut aim = Aim::new(
+                tbg_core::Target::Unit(a as u32),
+                0.0,
+                hold,
+                BASE_YAW_OWN,
+                BASE_YAW_OWN,
+            );
+            aim.last_target_point = Some(center);
             commands.entity(attacker_root).insert((
                 attacker_anim,
                 AimAttacker {
@@ -87,6 +108,7 @@ pub fn spawn(
                     timer: 0.0,
                     interval: 1.2,
                 },
+                aim,
             ));
         }
     } else {
@@ -99,13 +121,37 @@ pub fn spawn(
             center,
             &material,
         );
-        attacker_anim.play(match attacker_kind {
+        let clip = match attacker_kind {
             UnitKind::Archer | UnitKind::SiegeWalker => Clip::AttackRanged,
             UnitKind::Hexer | UnitKind::Bloomkeeper | UnitKind::Rootcaller | UnitKind::Nester => {
                 Clip::Cast
             }
             _ => Clip::AttackMelee,
-        });
+        };
+        attacker_anim.play(clip);
+        let hold = match clip {
+            Clip::AttackRanged => 0.18,
+            Clip::Cast => 0.22,
+            _ => 0.30,
+        };
+
+        let target_dist = if options.far { 4.2 } else { 1.6 };
+        let target_angle = (options.angle % 8) as f32 * std::f32::consts::TAU / 8.0;
+        let initial_target_pos = center
+            + Vec3::new(
+                target_angle.sin() * target_dist,
+                0.0,
+                target_angle.cos() * target_dist,
+            );
+
+        let mut aim = Aim::new(
+            tbg_core::Target::Unit(0),
+            0.0,
+            hold,
+            BASE_YAW_OWN,
+            BASE_YAW_OWN,
+        );
+        aim.last_target_point = Some(initial_target_pos);
 
         commands.entity(attacker_root).insert((
             attacker_anim,
@@ -116,6 +162,7 @@ pub fn spawn(
                 timer: 0.0,
                 interval: 1.2,
             },
+            aim,
         ));
 
         // Spawn targets at 8 angles (both near and far).
@@ -144,8 +191,14 @@ pub fn spawn(
 pub fn update(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
-    mut attackers: Query<(&mut Animator, &mut AimAttacker)>,
-    mut targets: Query<(&AimTarget, &mut Visibility)>,
+    mut attackers: Query<(
+        &mut Animator,
+        &mut AimAttacker,
+        Option<&mut Aim>,
+        &Transform,
+    )>,
+    mut targets: Query<(&AimTarget, &mut Visibility, &Transform)>,
+    mut transforms: Query<&mut Transform, (Without<AimAttacker>, Without<AimTarget>)>,
 ) {
     let toggle_far = keys.just_pressed(KeyCode::KeyN);
     let kill_target = keys.just_pressed(KeyCode::KeyK);
@@ -179,20 +232,8 @@ pub fn update(
         selected_angle = Some(usize::MAX); // cycle
     }
 
-    for (mut anim, mut attacker) in &mut attackers {
+    for (mut anim, mut attacker, mut aim_opt, attacker_t) in &mut attackers {
         attacker.timer += time.delta_secs();
-        if attacker.timer >= attacker.interval {
-            attacker.timer = 0.0;
-            let clip = match attacker.kind {
-                UnitKind::Archer | UnitKind::SiegeWalker => Clip::AttackRanged,
-                UnitKind::Hexer
-                | UnitKind::Bloomkeeper
-                | UnitKind::Rootcaller
-                | UnitKind::Nester => Clip::Cast,
-                _ => Clip::AttackMelee,
-            };
-            anim.play(clip);
-        }
 
         if let Some(angle) = selected_angle {
             if angle == usize::MAX {
@@ -207,16 +248,57 @@ pub fn update(
 
         let current_target = attacker.target_index;
         let current_far = attacker.far;
+        let mut active_target_pos = None;
 
-        for (target, mut vis) in &mut targets {
+        for (target, mut vis, target_t) in &mut targets {
             if target.index == current_target && target.far == current_far {
                 if kill_target {
                     *vis = Visibility::Hidden;
                 } else if *vis == Visibility::Hidden && !kill_target {
                     *vis = Visibility::Inherited;
                 }
+                if *vis != Visibility::Hidden {
+                    active_target_pos = Some(target_t.translation);
+                }
             } else if target.far != current_far {
                 *vis = Visibility::Hidden;
+            }
+        }
+
+        let clip = match attacker.kind {
+            UnitKind::Archer | UnitKind::SiegeWalker => Clip::AttackRanged,
+            UnitKind::Hexer | UnitKind::Bloomkeeper | UnitKind::Rootcaller | UnitKind::Nester => {
+                Clip::Cast
+            }
+            _ => Clip::AttackMelee,
+        };
+
+        if attacker.timer >= attacker.interval {
+            attacker.timer = 0.0;
+            anim.play(clip);
+            let hold = match clip {
+                Clip::AttackRanged => 0.18,
+                Clip::Cast => 0.22,
+                _ => 0.30,
+            };
+            if let Some(ref mut aim) = aim_opt {
+                aim.retarget(
+                    tbg_core::Target::Unit(current_target as u32),
+                    time.elapsed_secs_f64(),
+                    hold,
+                );
+            }
+        }
+
+        if let Some(ref mut aim) = aim_opt {
+            aim.update(
+                time.elapsed_secs_f64(),
+                time.delta_secs(),
+                active_target_pos,
+                attacker_t.translation,
+            );
+            if let Ok(mut fig_t) = transforms.get_mut(anim.figure) {
+                fig_t.rotation = Quat::from_rotation_y(aim.current_yaw);
             }
         }
     }

@@ -35,6 +35,8 @@ pub(super) struct Fx<'a> {
     pub sounds: &'a mut Sounds,
     pub stats: &'a mut MatchStats,
     pub you: Seat,
+    pub time: f64,
+    pub ring: &'a mut crate::art::aim::ImpactRing,
 }
 
 fn pos_of(map: &UnitEntities, visuals: &Visuals, you: Seat, t: Target) -> Option<Vec3> {
@@ -76,7 +78,10 @@ pub(super) fn apply_event(
         Event::Hit {
             to: Target::Unit(id),
             ..
-        } => cue(map, visuals, fx.assets, id, VisualCue::Hit),
+        } => {
+            let _attacker = fx.ring.pop_matching(Target::Unit(id), fx.time);
+            cue(map, visuals, fx.assets, id, VisualCue::Hit);
+        }
         Event::Hit {
             to: Target::Stronghold(seat),
             amount,
@@ -152,14 +157,33 @@ fn attack(
                 .0
                 .get(&id)
                 .and_then(|e| visuals.get(*e).ok())
-                .map(|(v, _, _)| (v.archetype, v.splash));
-            let (arch, splash) = info.unwrap_or((Archetype::Tank, 0.0));
+                .map(|(v, _, anim)| (v.archetype, v.splash, anim.archer, v.yaw));
+            let (arch, splash, is_archer, base_yaw) =
+                info.unwrap_or((Archetype::Tank, 0.0, false, 0.0));
+
+            if let Some(&e) = map.0.get(&id) {
+                let hold = match arch {
+                    Archetype::Ranged => 0.18,
+                    Archetype::Support | Archetype::Control => 0.22,
+                    Archetype::Tank | Archetype::Dps => 0.30,
+                };
+                commands.entity(e).insert(crate::art::aim::Aim::new(
+                    to, fx.time, hold, base_yaw, base_yaw,
+                ));
+            }
+            fx.ring.push(from, to, fx.time + 0.30);
+
             fx.sounds.play(match arch {
                 Archetype::Ranged if splash > 0.0 => Sound::Cannon,
                 Archetype::Ranged | Archetype::Control | Archetype::Support => Sound::Shot,
                 Archetype::Tank | Archetype::Dps => Sound::Melee,
             });
-            (!matches!(arch, Archetype::Tank | Archetype::Dps), splash)
+            // Native archer fires its own targeted projectile at Release (D2).
+            // Eliminate duplicate generic projectile from AttackStart (F5).
+            (
+                !matches!(arch, Archetype::Tank | Archetype::Dps) && !is_archer,
+                splash,
+            )
         }
         Target::Stronghold(_) => (true, 0.0),
     };

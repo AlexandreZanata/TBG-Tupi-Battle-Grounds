@@ -9,10 +9,10 @@
 use bevy::prelude::*;
 pub use tbg_core::state::Target as AimTarget;
 
-/// Dead-zone to eliminate angular jitter on small oscillations (2.0° in radians).
+/// Dead-zone to eliminate angular jitter on small oscillations (2.0 deg in radians).
 pub const DEAD_ZONE: f32 = 0.034_906_585; // 2.0 * PI / 180.0
 
-/// Maximum angular slew rate toward target (~720°/s in radians/sec).
+/// Maximum angular slew rate toward target (~720 deg/s in radians/sec).
 pub const MAX_SLEW_RATE: f32 = 12.566_371; // 4.0 * PI
 
 /// Duration in seconds to return from aim yaw to base idle yaw.
@@ -21,10 +21,10 @@ pub const RELEASE_DURATION: f32 = 0.150;
 /// Expiry lifetime in seconds for unmatched impact pairing entries in the FIFO ring.
 pub const IMPACT_EXPIRY_SECS: f64 = 1.0;
 
-/// Base visual yaw for Seat A (own units, facing +X down lane, turned 25° toward camera).
+/// Base visual yaw for Seat A (own units, facing +X down lane, turned 25 deg toward camera).
 pub const BASE_YAW_OWN: f32 = 65.0 * std::f32::consts::PI / 180.0;
 
-/// Base visual yaw for Seat B (enemy units, facing -X down lane, turned 25° toward camera).
+/// Base visual yaw for Seat B (enemy units, facing -X down lane, turned 25 deg toward camera).
 pub const BASE_YAW_ENEMY: f32 = -65.0 * std::f32::consts::PI / 180.0;
 
 /// Computes the desired world yaw for an attacker to face a target point in the XZ plane.
@@ -33,9 +33,9 @@ pub const BASE_YAW_ENEMY: f32 = -65.0 * std::f32::consts::PI / 180.0;
 /// - +X is right (down the lane from Seat A to Seat B)
 /// - +Z is toward the match camera (forward from lane)
 ///
-/// A figure at local yaw 0 faces +Z. Rotation by yaw θ yields forward vector (sin θ, 0, cos θ).
+/// A figure at local yaw 0 faces +Z. Rotation by yaw angle yields forward vector (sin angle, 0, cos angle).
 /// Therefore, the world yaw to point from `attacker` to `target` is:
-/// θ = atan2(dx, dz) where dx = target.x - attacker.x, dz = target.z - attacker.z.
+/// angle = atan2(dx, dz) where dx = target.x - attacker.x, dz = target.z - attacker.z.
 pub fn facing_yaw(attacker: Vec3, target: Vec3) -> f32 {
     let dx = target.x - attacker.x;
     let dz = target.z - attacker.z;
@@ -45,7 +45,7 @@ pub fn facing_yaw(attacker: Vec3, target: Vec3) -> f32 {
     dx.atan2(dz)
 }
 
-/// Normalizes an angle in radians to the range (-π, π].
+/// Normalizes an angle in radians to the range (-PI, PI].
 pub fn normalize_angle(mut angle: f32) -> f32 {
     while angle > std::f32::consts::PI {
         angle -= std::f32::consts::TAU;
@@ -56,7 +56,7 @@ pub fn normalize_angle(mut angle: f32) -> f32 {
     angle
 }
 
-/// Computes the shortest angular difference (to - from) in (-π, π].
+/// Computes the shortest angular difference (to - from) in (-PI, PI].
 pub fn shortest_angle_diff(from: f32, to: f32) -> f32 {
     normalize_angle(to - from)
 }
@@ -80,7 +80,7 @@ pub enum AimPhase {
     Active,
     /// Holding aim facing the target until strike/release time.
     Hold,
-    /// Returning smoothly to base yaw (+65° / -65°) over `RELEASE_DURATION`.
+    /// Returning smoothly to base yaw (+65 deg / -65 deg) over `RELEASE_DURATION`.
     Release,
 }
 
@@ -93,7 +93,7 @@ pub struct Aim {
     pub started: f64,
     /// Windup hold duration before release/strike (e.g. 0.18s ranged, 0.30s melee).
     pub hold: f32,
-    /// Idle base yaw to return to (+65° own, -65° enemy).
+    /// Idle base yaw to return to (+65 deg own, -65 deg enemy).
     pub base_yaw: f32,
     /// Current rendered yaw angle.
     pub current_yaw: f32,
@@ -193,7 +193,7 @@ pub struct ImpactEntry {
 ///
 /// In TBG, `Event::Hit { to, amount }` carries no attacker. The FIFO pairs each `Hit`
 /// with the oldest pending `AttackStart { from, to }` for that target.
-#[derive(Default, Clone, Debug)]
+#[derive(Resource, Default, Clone, Debug)]
 pub struct ImpactRing {
     entries: Vec<ImpactEntry>,
 }
@@ -250,7 +250,7 @@ mod tests {
         // Contract check (I4): Attacker at origin (5.0, 0.0, 0.0).
         let attacker = Vec3::new(5.0, 0.0, 0.0);
 
-        // Target front (+X down lane): dx = 3.0, dz = 0.0 => +90° (+π/2)
+        // Target front (+X down lane): dx = 3.0, dz = 0.0 => +90 deg (+PI/2)
         let target_front = Vec3::new(8.0, 0.0, 0.0);
         let yaw_front = facing_yaw(attacker, target_front);
         assert!(
@@ -258,12 +258,12 @@ mod tests {
             "front yaw was {yaw_front}"
         );
 
-        // Target down (+Z towards camera): dx = 0.0, dz = 2.0 => 0.0°
+        // Target down (+Z towards camera): dx = 0.0, dz = 2.0 => 0.0 deg
         let target_down = Vec3::new(5.0, 0.0, 2.0);
         let yaw_down = facing_yaw(attacker, target_down);
         assert!(yaw_down.abs() < EPSILON, "down yaw was {yaw_down}");
 
-        // Target up (-Z away from camera): dx = 0.0, dz = -2.0 => 180° (π)
+        // Target up (-Z away from camera): dx = 0.0, dz = -2.0 => 180 deg (PI)
         let target_up = Vec3::new(5.0, 0.0, -2.0);
         let yaw_up = facing_yaw(attacker, target_up);
         assert!((yaw_up.abs() - PI).abs() < EPSILON, "up yaw was {yaw_up}");
@@ -271,10 +271,10 @@ mod tests {
 
     #[test]
     fn test_aim_facing_diagonal() {
-        // Contract check (I4): 45° diagonals.
+        // Contract check (I4): 45 deg diagonals.
         let attacker = Vec3::new(4.0, 0.0, 0.0);
 
-        // Forward-camera diagonal (+X, +Z): dx = 2.0, dz = 2.0 => +45° (+π/4)
+        // Forward-camera diagonal (+X, +Z): dx = 2.0, dz = 2.0 => +45 deg (+PI/4)
         let target_diag_pos = Vec3::new(6.0, 0.0, 2.0);
         let yaw_pos = facing_yaw(attacker, target_diag_pos);
         assert!(
@@ -282,7 +282,7 @@ mod tests {
             "diag pos yaw was {yaw_pos}"
         );
 
-        // Forward-away diagonal (+X, -Z): dx = 2.0, dz = -2.0 => +135° (+3π/4)
+        // Forward-away diagonal (+X, -Z): dx = 2.0, dz = -2.0 => +135 deg (+3PI/4)
         let target_diag_neg = Vec3::new(6.0, 0.0, -2.0);
         let yaw_neg = facing_yaw(attacker, target_diag_neg);
         assert!(
@@ -304,7 +304,7 @@ mod tests {
         let target_far = Vec3::new(8.0, 0.0, 0.0);
         assert!((facing_yaw(attacker, target_far) - PI / 2.0).abs() < EPSILON);
 
-        // Target behind (-X): dx = -3.0, dz = 0.0 => -90° (-π/2)
+        // Target behind (-X): dx = -3.0, dz = 0.0 => -90 deg (-PI/2)
         let target_behind = Vec3::new(-1.0, 0.0, 0.0);
         assert!((facing_yaw(attacker, target_behind) - (-PI / 2.0)).abs() < EPSILON);
     }
@@ -331,8 +331,8 @@ mod tests {
 
     #[test]
     fn test_shortest_arc_across_pi() {
-        // From +170° (+2.967 rad) to -170° (-2.967 rad).
-        // Shortest step is +20° (+0.349 rad) passing through ±π, NOT -340°.
+        // From +170 deg (+2.967 rad) to -170 deg (-2.967 rad).
+        // Shortest step is +20 deg (+0.349 rad) passing through +/-PI, NOT -340 deg.
         let from = 170.0 * PI / 180.0;
         let to = -170.0 * PI / 180.0;
         let diff = shortest_angle_diff(from, to);
@@ -350,13 +350,16 @@ mod tests {
 
     #[test]
     fn test_deadzone_prevents_jitter() {
-        // Target jitters by 1.5° (0.026 rad < DEAD_ZONE 0.035 rad):
+        // Target jitters by 1.5 deg (0.026 rad < DEAD_ZONE 0.035 rad):
         let current = 1.0;
         let desired = current + 0.025; // < DEAD_ZONE
         let result = turn_toward(current, desired, 0.5, DEAD_ZONE);
-        assert_eq!(result, current, "Dead-zone must eliminate jitter when < 2°");
+        assert_eq!(
+            result, current,
+            "Dead-zone must eliminate jitter when < 2 deg"
+        );
 
-        // Target moves by 3.0° (0.052 rad > DEAD_ZONE):
+        // Target moves by 3.0 deg (0.052 rad > DEAD_ZONE):
         let desired_move = current + 0.052;
         let result_move = turn_toward(current, desired_move, 0.5, DEAD_ZONE);
         assert!(
@@ -370,7 +373,7 @@ mod tests {
         let target = AimTarget::Unit(10);
         let base_yaw = BASE_YAW_OWN;
         let attacker_pos = Vec3::new(2.0, 0.0, 0.0);
-        let target_pos = Vec3::new(6.0, 0.0, 0.0); // directly down lane (+π/2)
+        let target_pos = Vec3::new(6.0, 0.0, 0.0); // directly down lane (+PI/2)
 
         let mut aim = Aim::new(target, 0.0, 0.30, base_yaw, base_yaw);
         assert_eq!(aim.phase, AimPhase::Active);
@@ -379,7 +382,7 @@ mod tests {
         aim.update(0.10, 0.10, Some(target_pos), attacker_pos);
         assert!(aim.current_yaw > base_yaw);
 
-        // Step 2: dt = 0.10s (elapsed 0.20 < 0.30) -> reaches desired yaw (+π/2), enters Hold
+        // Step 2: dt = 0.10s (elapsed 0.20 < 0.30) -> reaches desired yaw (+PI/2), enters Hold
         aim.update(0.20, 0.10, Some(target_pos), attacker_pos);
         assert!((aim.current_yaw - PI / 2.0).abs() < DEAD_ZONE);
         assert_eq!(aim.phase, AimPhase::Hold);
