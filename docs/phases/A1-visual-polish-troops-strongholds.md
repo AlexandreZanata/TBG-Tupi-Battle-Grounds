@@ -670,14 +670,43 @@ Triangles extracted from startup registration logs (`docs/media/a1/baseline-form
 - [Targeted Audit Console JSON](docs/media/a1/preliminary-targeted.json) (`docs/media/a1/preliminary-targeted.json`, 237 KB): full CDP console capture of corrected reach measurements and projectile events.
 - [Temporary Audit Probe Patch](docs/media/a1/temporary-audit-probe.patch) (`docs/media/a1/temporary-audit-probe.patch`): exact diff of the temporary instrumentation used to gather live measurements, preserved for reproduction.
 
+### Step 2: Baselines before any change
+
+#### 2.1 Formal Performance Baseline Matrix (Hardware GPU: Intel RPL-P OpenGL 4.6)
+
+Measured across 3 runs of 60 seconds each on Chrome 156 (`1280x800`, DPR 1, port 9333) with release client. Medians computed across the 3 independent runs:
+
+| Scenario | Mode / URL Param | Units (Total / Per Side) | Median FPS | Frame Time p50 (ms) | Frame Time p95 (ms) | Frame Time p99 (ms) | JS Heap (MB) | Wasm Mem (MB) | Bevy Entities | Mesh Assets | Material Assets | WebGL Draws / Frame |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **10 per side** | `?stress=20&measure` | 20 (10 / 10) | 84.9 | 6.1 | 34.1 | 134.6 | 24.36 | 89.50 | 993 | 1,100 | 25 | 359 |
+| **40 per side** | `?stress=80&measure` | 80 (40 / 40) | 109.6 | 6.1 | 26.3 | 36.5 | 28.86 | 94.69 | 2,932 | 1,100 | 25 | 452 |
+| **100 per side** | `?stress=200&measure` | 200 (100 / 100) | 60.5 | 12.3 | 41.9 | 55.1 | 30.67 | 104.44 | 6,809 | 1,100 | 25 | 630 |
+| **200 per side** | `?stress=400&measure` | 400 (200 / 200) | 29.7 | 23.9 | 75.5 | 385.2 | 17.72 | 139.75 | 13,273 | 1,100 | 25 | 927 |
+| **Autoplay Practice** | `?autoplay=practice&measure` | Live vs-bot match | 107.0 | 6.1 | 23.8 | 31.5 | 18.32 | 85.31 | 971 | 1,100 | 25 | 265 |
+
+*Performance Observations:*
+- Steady-state frame time median (p50) remains at 6.1 ms (~160 Hz display cadence) up to 80 active units and in live practice gameplay (p50 = 6.1 ms, FPS = 107.0).
+- At 200 total units (`stress=200`), frame time p50 settles at 12.3 ms with 60.5 FPS, satisfying the 60 FPS desktop requirement (ART-DIRECTION §9).
+- At extreme stress of 400 units (`stress=400`, 13,273 ECS entities), frame time p50 is 23.9 ms (29.7 FPS), testing high-density crowd bounds.
+- CPU task duration tracking (`Performance.getMetrics` TaskDuration) requires continuous tracing/devtools profiling; marked "not measured" outside tracing sessions.
+- Draw calls scale from 265 (in live practice) to 452 (80 units) and 927 (400 units) thanks to Bevy mesh sharing and batching.
+
+#### 2.2 Baseline Media Artifacts
+
+- [Aim Lab Before Screenshot](docs/media/a1/baseline/baseline-aim.jpg) (`docs/media/a1/baseline/baseline-aim.jpg`, 35 KB): standalone `?gallery=aim` lab displaying baseline Archer and targets before aim orientation changes.
+- [Stress 20 Units Baseline](docs/media/a1/baseline/baseline-stress-20.jpg) (`docs/media/a1/baseline/baseline-stress-20.jpg`, 158 KB): 10 units per side walking the lane.
+- [Stress 80 Units Baseline](docs/media/a1/baseline/baseline-stress-80.jpg) (`docs/media/a1/baseline/baseline-stress-80.jpg`, 178 KB): 40 units per side walking the lane.
+- [Stress 200 Units Baseline](docs/media/a1/baseline/baseline-stress-200.jpg) (`docs/media/a1/baseline/baseline-stress-200.jpg`, 185 KB): 100 units per side stress test.
+- [Stress 400 Units Baseline](docs/media/a1/baseline/baseline-stress-400.jpg) (`docs/media/a1/baseline/baseline-stress-400.jpg`, 185 KB): 200 units per side stress test.
+- [Autoplay Match Baseline](docs/media/a1/baseline/baseline-autoplay.jpg) (`docs/media/a1/baseline/baseline-autoplay.jpg`, 136 KB): 60-second in-match state vs bot.
+- [Baseline Performance JSON](docs/media/a1/baseline/baseline-performance.json) (`docs/media/a1/baseline/baseline-performance.json`, 6.4 KB): complete 3-run raw data capture and median metrics.
+
 ### Progress
 
 Step 0 complete (preflight verification).
 Step 1 complete (audit report, corrected F4 live melee reach measurements for all 5 melee units, F5 duplicate projectile verification, 55-form roster audit, triangle and entity counts, misaimed diagonal attack screenshot).
-Steps 2–14 pending.
-
-No permanent gameplay or client presentation code changes were committed (I1–I6 hold).
-Temporary audit probe used during step 1 was saved in `docs/media/a1/temporary-audit-probe.patch` and completely removed from client source; pristine release client was rebuilt via `trunk build --release`.
+Step 2 complete (aim lab before sheets, formal 5-scenario performance baseline across 3 runs of 60s, hardware GPU measurements, baseline screenshots and raw metrics committed).
+Steps 3–14 pending.
 
 ### Owner decisions
 

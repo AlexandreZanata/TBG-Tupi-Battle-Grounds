@@ -19,6 +19,14 @@ pub struct Gallery {
     pub clip: Option<Clip>,
     /// `&tier=1|2`: contact sheet of an evolution (branch A) instead of the base.
     pub tier: u8,
+    /// `&branch=0|1`: branch A or B.
+    pub branch: u8,
+    /// `&angle=0..7`: target angle index in aim lab.
+    pub angle: usize,
+    /// `&far`: far target distance in aim lab.
+    pub far: bool,
+    /// `&crowd`: crowd mode in aim lab.
+    pub crowd: bool,
     /// `&lineup`: base, tier 1, and tier 2 side by side, idle and at the anchor.
     pub lineup: bool,
     /// Isolated base-form screenshot for a Shop card.
@@ -26,7 +34,11 @@ pub struct Gallery {
 }
 impl Gallery {
     pub fn studio(&self) -> bool {
-        self.unit.is_some() || self.frames || self.mode == "blockout" || self.mode == "strongholds"
+        self.unit.is_some()
+            || self.frames
+            || self.mode == "blockout"
+            || self.mode == "strongholds"
+            || self.mode == "aim"
     }
     pub fn hide_arena(&self) -> bool {
         self.silhouette || self.studio()
@@ -76,6 +88,15 @@ impl Gallery {
                 .and_then(|s| s.parse::<u8>().ok())
                 .unwrap_or(0)
                 .min(2),
+            branch: config::url_param("branch")
+                .and_then(|s| s.parse::<u8>().ok())
+                .unwrap_or(0)
+                .min(1),
+            angle: config::url_param("angle")
+                .and_then(|s| s.parse::<usize>().ok())
+                .unwrap_or(0),
+            far: config::url_param("far").is_some(),
+            crowd: config::url_param("crowd").is_some(),
             lineup: config::url_param("lineup").is_some(),
             portrait: config::url_param("portrait").is_some(),
         }

@@ -123,10 +123,24 @@ fn update_overlay(
     buffer: Res<ViewBuffer>,
     probe: Option<Res<Probe>>,
     mut text: Single<&mut Text, With<StatsText>>,
+    _all_entities: Query<Entity>,
+    _meshes: Res<Assets<Mesh>>,
+    _materials: Res<Assets<StandardMaterial>>,
 ) {
     timer.0.tick(time.delta());
     if !timer.0.just_finished() {
         return;
+    }
+    #[cfg(target_arch = "wasm32")]
+    if crate::config::url_param("measure").is_some() {
+        if let Some(doc) = web_sys::window().and_then(|w| w.document()) {
+            if let Some(el) = doc.get_element_by_id("tbg-measure") {
+                let _ =
+                    el.set_attribute("data-entities", &_all_entities.iter().count().to_string());
+                let _ = el.set_attribute("data-meshes", &_meshes.len().to_string());
+                let _ = el.set_attribute("data-materials", &_materials.len().to_string());
+            }
+        }
     }
     let get = |d| diagnostics.get(d).and_then(|d| d.smoothed()).unwrap_or(0.0);
     // FRAME_TIME is already in milliseconds.
