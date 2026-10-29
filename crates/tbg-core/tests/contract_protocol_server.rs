@@ -45,6 +45,7 @@ fn server_variant_order_is_frozen() {
             opponent: "Bo".into(),
             mode: MatchMode::Casual,
             opponent_rating: None,
+            arcanas: [tbg_core::ArcanaPreset::DEFAULT; 2],
         },
         ServerMsg::View(view),
         ServerMsg::Rejected {
@@ -92,7 +93,7 @@ fn server_variant_order_is_frozen() {
 #[test]
 fn server_bytes_are_frozen() {
     // MatchStart field order: you, you_name, you_rating, opponent, mode,
-    // opponent_rating (1000 = varint E8 07).
+    // opponent_rating (1000 = varint E8 07), arcanas (v8: six ranks per seat).
     let start = ServerMsg::MatchStart {
         you: Seat::B,
         you_name: "Ann".into(),
@@ -100,10 +101,17 @@ fn server_bytes_are_frozen() {
         opponent: "Bo".into(),
         mode: MatchMode::Ranked,
         opponent_rating: None,
+        arcanas: [
+            tbg_core::ArcanaPreset::DEFAULT,
+            tbg_core::ArcanaPreset::NEUTRAL,
+        ],
     };
     assert_eq!(
         encode(&start),
-        [5, 1, 3, b'A', b'n', b'n', 1, 0xE8, 0x07, 2, b'B', b'o', 1, 0]
+        [
+            5, 1, 3, b'A', b'n', b'n', 1, 0xE8, 0x07, 2, b'B', b'o', 1, 0, 2, 0, 2, 0, 2, 0, 0, 0,
+            0, 0, 0, 0
+        ]
     );
     let end = ServerMsg::MatchEnd {
         outcome: Outcome {

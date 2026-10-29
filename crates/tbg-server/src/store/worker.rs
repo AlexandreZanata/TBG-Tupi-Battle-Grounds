@@ -9,10 +9,10 @@ use serde_json::Value;
 use tokio::sync::{oneshot, watch};
 
 use tbg_core::protocol::{AccountError, Profile, RatingResults};
-use tbg_core::Outcome;
+use tbg_core::{ArcanaPreset, Outcome};
 
 use super::leaderboard::{self, Snapshot};
-use super::{accounts, matches, ranked, AccountId};
+use super::{accounts, arcanas, matches, ranked, AccountId};
 
 type Reply<T> = oneshot::Sender<T>;
 
@@ -41,7 +41,16 @@ pub(super) enum StoreCmd {
         outcome: Option<Outcome>,
         duration_s: u64,
         factions: [[u32; 4]; 2],
+        arcanas: [ArcanaPreset; 2],
         reply: Reply<Result<RatingResults, AccountError>>,
+    },
+    SaveArcanas {
+        account: AccountId,
+        preset: ArcanaPreset,
+    },
+    LoadArcanas {
+        account: AccountId,
+        reply: Reply<Option<ArcanaPreset>>,
     },
 }
 
@@ -96,15 +105,25 @@ pub(super) fn worker(
                     outcome,
                     duration_s,
                     factions,
+                    arcanas,
                     reply,
                 } => {
-                    let result =
-                        ranked::ranked_result(&mut conn, a, b, outcome, duration_s, factions)
-                            .map_err(|_| AccountError::Unavailable);
+                    let result = ranked::ranked_result(
+                        &mut conn, a, b, outcome, duration_s, factions, arcanas,
+                    )
+                    .map_err(|_| AccountError::Unavailable);
                     if result.is_ok() {
                         dirty = true;
                     }
                     let _ = reply.send(result);
+                }
+                StoreCmd::SaveArcanas { account, preset } => {
+                    if let Err(e) = arcanas::save(&conn, account, preset) {
+                        tracing::error!("arcana preset save failed: {e}");
+                    }
+                }
+                StoreCmd::LoadArcanas { account, reply } => {
+                    let _ = reply.send(arcanas::load(&conn, account));
                 }
             },
             Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}

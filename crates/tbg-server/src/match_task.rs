@@ -28,6 +28,8 @@ pub(crate) struct Player {
     pub conn: Option<ConnHandle>,
     /// P12: account id + rating at pairing time (`None` for guests/casual).
     pub account: Option<(AccountId, u16)>,
+    /// D-40: the Arcanas frozen at pairing (BR-AR05).
+    pub arcanas: tbg_core::ArcanaPreset,
 }
 
 pub(super) struct Match {
@@ -56,8 +58,9 @@ pub(crate) fn spawn(
     store: Option<Arc<Store>>,
 ) -> mpsc::Sender<MatchCmd> {
     let (tx, rx) = mpsc::channel(MATCH_QUEUE);
+    let arcanas = players.each_ref().map(|p| p.arcanas);
     let m = Match {
-        state: MatchState::new(seed),
+        state: MatchState::with_arcanas(seed, arcanas),
         players,
         detached_at: [None, None],
         stats: Default::default(),
@@ -67,6 +70,7 @@ pub(crate) fn spawn(
         metrics,
         replay: config.replays.as_ref().map(|_| Replay {
             seed,
+            arcanas,
             ..Replay::default()
         }),
     };
@@ -155,10 +159,11 @@ async fn run(
                 let tokens = m.players.each_ref().map(|p| p.token);
                 let duration_s = started.elapsed().as_secs();
                 let factions = [m.stats[0].factions, m.stats[1].factions];
+                let arcanas = m.state.players.each_ref().map(|p| p.arcanas);
                 let tx = lobby.clone();
                 tokio::spawn(async move {
                     match db
-                        .ranked_result(a_id, b_id, outcome, duration_s, factions)
+                        .ranked_result(a_id, b_id, outcome, duration_s, factions, arcanas)
                         .await
                     {
                         Ok(results) => {

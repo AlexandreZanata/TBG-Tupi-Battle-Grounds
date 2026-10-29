@@ -4,6 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::arcana::ArcanaPreset;
 use crate::content::MATCH_END;
 use crate::intent::PlayerIntention;
 use crate::state::{MatchState, Phase};
@@ -22,6 +23,8 @@ pub struct ReplayOp {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Replay {
     pub seed: u64,
+    /// D-40: both presets frozen at pairing.
+    pub arcanas: [ArcanaPreset; 2],
     pub ops: Vec<ReplayOp>,
     /// `MatchState::hash()` when the original match ended.
     pub final_hash: u64,
@@ -41,9 +44,9 @@ impl Replay {
         });
     }
 
-    /// Rebuild the match on the canonical ruleset.
+    /// Rebuild the match on the canonical ruleset and the recorded presets.
     pub fn run(&self) -> MatchState {
-        let mut state = MatchState::new(self.seed);
+        let mut state = MatchState::with_arcanas(self.seed, self.arcanas);
         let mut ops = self.ops.iter().peekable();
         loop {
             while let Some(op) = ops.next_if(|op| op.tick == state.tick) {

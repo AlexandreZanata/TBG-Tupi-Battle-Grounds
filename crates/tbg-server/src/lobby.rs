@@ -20,6 +20,7 @@ use crate::Config;
 
 mod account_done;
 mod accounts;
+mod arcanas;
 mod leaderboard;
 mod matchmaking;
 mod ranked;
@@ -47,6 +48,8 @@ pub(super) struct Session {
     /// P11: peer address for rate limits. Memory only, never stored/logged.
     pub(super) ip: IpAddr,
     pub(super) detached_at: Option<Instant>,
+    /// D-40: the Arcanas the next match will freeze (BR-AR05).
+    pub(super) arcanas: tbg_core::ArcanaPreset,
 }
 
 pub(super) struct Lobby {
@@ -152,6 +155,11 @@ impl Lobby {
                 conn_id,
                 result,
             } => self.login_done(token, conn_id, result),
+            LobbyCmd::ArcanasLoaded {
+                token,
+                account,
+                preset,
+            } => self.arcanas_loaded(token, account, preset),
         }
     }
 
@@ -164,6 +172,8 @@ impl Lobby {
             ClientMsg::Logout => return self.logout(token),
             // P13: read-only, from any state.
             ClientMsg::Leaderboard { offset } => return self.leaderboard(token, offset),
+            // D-40: answered in every state (`NotIdle` unless idle).
+            ClientMsg::SetArcanas { ranks } => return self.set_arcanas(token, ranks),
             _ => {}
         }
         let draining = self.draining.load(Relaxed);

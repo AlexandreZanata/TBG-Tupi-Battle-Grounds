@@ -12,9 +12,29 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 7,
-        "v7 (D-32): five offers, army-cap fields and rejection removed, NotEvolvable"
+        PROTOCOL_VERSION, 8,
+        "v8 (D-40): SetArcanas, ArcanasSelected/Rejected, presets in MatchStart"
     );
+}
+
+#[test]
+fn v8_arcana_messages_are_appended() {
+    // D-40: appended after every v7 variant (client 13; server 18 and 19).
+    let set = encode(&ClientMsg::SetArcanas {
+        ranks: [2, 0, 2, 0, 2, 0],
+    });
+    assert_eq!(set, [13, 2, 0, 2, 0, 2, 0]);
+    assert!(decode_client(&set).is_ok());
+    // A malformed rank list is a decode error, never a panic.
+    assert!(decode_client(&[13, 2, 0, 2]).is_err());
+    let selected = ServerMsg::ArcanasSelected {
+        preset: tbg_core::ArcanaPreset::DEFAULT,
+    };
+    assert_eq!(encode(&selected), [18, 2, 0, 2, 0, 2, 0]);
+    let rejected = ServerMsg::ArcanasRejected {
+        reason: tbg_core::protocol::ArcanaRejection::NotIdle,
+    };
+    assert_eq!(encode(&rejected), [19, 1]);
 }
 
 #[test]

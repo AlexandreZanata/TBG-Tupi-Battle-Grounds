@@ -116,7 +116,9 @@ pub(super) fn handle(
         ServerMsg::LoggedIn { .. }
         | ServerMsg::LoggedOut
         | ServerMsg::RatingChanged { .. }
-        | ServerMsg::Leaderboard { .. } => {}
+        | ServerMsg::Leaderboard { .. }
+        | ServerMsg::ArcanasSelected { .. }
+        | ServerMsg::ArcanasRejected { .. } => {}
     }
     Ok(None)
 }
