@@ -402,3 +402,25 @@ values stay **Proposed** until the owner's playtest; no mechanic change
 without its own owner decision.
 **Reopen when** lab predictions and real match records disagree
 persistently, or the lab's cost to maintain exceeds its value.
+
+## D-40 · Arcanas live in every mode before P31 — 2026-10-29 (owner decision)
+
+**Decision.** The owner asked for Arcanas to be fully integrated and live
+on the test server now, in Practice, Casual, Ranked, and private rooms,
+ahead of the P31 gate that P32–P38 assumed. The GAME-DESIGN §9 values
+(six nodes, six points, rank ≤ 2, default `[2,0,2,0,2,0]`) apply as
+**Proposed**. Built on P16-C: per-rank values are `Ruleset` data and lab
+knobs. Protocol v8 adds `SetArcanas`, `ArcanasSelected/Rejected`, and both
+presets in `MatchStart`; the server validates while idle and freezes the
+preset at pairing; accounts keep one preset (schema v4); match and ranked
+rows record both applied presets. Summons get no Arcana bonus (as with
+Synergy, BR-U08). The editor is the Codex desktop editor (D-40 replaces its
+"preview" status); phones use the saved or default preset until the P36
+phone editor exists.
+**Why.** The owner wants players to choose Arcanas before matches now.
+**Guard rails.** Server authority (clients send ranks, never bonuses);
+no preset may score outside 45–55 % against the default in the lab (it
+does not today, `docs/media/arcanas/`); values stay Proposed; the
+RulesetVersion field of P35 is replaced by the protocol version for now.
+**Reopen when** the full P34 matrix, human playtests, or ranked data show
+a dominant preset or a compulsory node.
