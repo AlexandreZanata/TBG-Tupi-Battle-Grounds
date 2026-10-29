@@ -524,12 +524,13 @@ crates/tbg-core/src/protocol.rs crates/tbg-core/src/view.rs` is empty.
   not worth compacting (H5 rejected).
 - **Server CPU and capacity** (local cgroup estimates; bots outside the
   cgroup; every row records its load in `capacity-*.txt`):
-  - 1 vCPU / 1 GB: 1000 was 0.54 cores / 0 late ticks in one pass and
-    0.67 cores / 3 cgroup throttles / 3 854 late ticks in another; 1300
-    and 1500 fail (10/3 throttles, 20 122/19 923 late). A fresh 750 pass
-    at host load 10.21 showed 1450 late ticks with **zero** cgroup
-    throttles (0.63 cores): host scheduling, not the server quota, was
-    late.
+  - 1 vCPU / 1 GB: 1000 was 0.54 cores / 0 late ticks in the first pass
+    and 0.67 cores / 3 cgroup throttles / 3 854 late ticks in the
+    committed pass; 1300 and 1500 fail (10/3 throttles, 20 122/19 923
+    late). A fresh 750 pass at host load 10.21 showed 1450 late ticks with
+    **zero** cgroup throttles (0.63 cores): host scheduling, not the
+    server quota, was late. The first 1000 pass predates the committed
+    raw files (its log was lost; see Deviations).
   - 2 CPU / 1 GiB (the deployed quota): 1000 clean in every uncontaminated
     pass (0.54–0.67 cores, 1 493–1 852 matches/core); 1500 clean in 2 of
     3 dedicated passes (1.09–1.10 cores, 0 late) and failed in one
@@ -716,7 +717,7 @@ tree lookups, and the smaller payloads encode faster). B is deferred.
 | Limit | clean matches | server cores | matches/core | RSS MB | KB/match | late ticks | RTT p95 |
 |---|---|---|---|---|---|---|---|
 | 1 vCPU / 1 GB | 750 | 0.63 | 1 190 | 219.8 | 300 | 1 450 (0 throttles; host load 10.21) | 4 ms |
-| 1 vCPU / 1 GB | 1 000 | 0.54–0.67 | 1 493–1 852 | 290.3 | 297 | 0–3 854 (0–3 throttles; host load 5–7) | 3–4 ms |
+| 1 vCPU / 1 GB | 1 000 | 0.54–0.67 | 1 493–1 852 | 290.3 | 297 | 0 (first pass, log lost) – 3 854 (committed, 3 throttles) | 3–4 ms |
 | 2 CPU / 1 GiB | 1 000 | 0.54–0.67 | 1 493–1 852 | 290.7 | 298 | 0 | 3 ms |
 | 2 CPU / 1 GiB | 1 500 | 1.09–1.18 | 1 271–1 376 | 431.2 | 294 | 0 in 2/3, 5 467 in 1/3 | 3 ms |
 | 2 CPU / 1 GiB | 2 000 | 1.27–1.66 | 1 205–1 575 | 572.6 | 293 | 27 598–48 626 | 15 ms |
@@ -823,8 +824,12 @@ overhead, and network path.
   used for H7. Details in `docs/media/p30a/client-measurement.txt`.
 - Capacity numbers are local cgroup estimates on a shared PC. Late ticks
   were non-monotonic between passes (2000 clean once, 1500 throttled
-  twice) because other processes spiked; every run's `load1`, bot cores,
-  cgroup throttles, and memory peak are in the raw files. The VPS
+  twice) because other processes spiked; every committed run's `load1`,
+  bot cores, cgroup throttles, and memory peak are in the raw files. The
+  very first 1 vCPU table (1000 clean, 750 clean) was lost when another
+  process removed `target/p30a-logs/`; it is quoted only where the
+  committed final pass is strictly worse, and the lost numbers are marked
+  in the report. The VPS
   capacity table and the production `/metrics` reading (owner: two
   `curl -s http://127.0.0.1:18260/metrics` samples 10 minutes apart) are
   **pending owner**.
