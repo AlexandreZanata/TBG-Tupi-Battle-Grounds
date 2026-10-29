@@ -209,6 +209,8 @@ struct ShareAgg {
     unit_static: u64,
     unit_max_hp: u64,
     unit_dynamic: u64,
+    /// Same dynamic fields with `x` and `hp` as `u16` varints (P30-A step 3).
+    unit_dynamic_tight: u64,
     events: u64,
     units_seen: u64,
     events_seen: u64,
@@ -257,6 +259,7 @@ fn collect_shares(view: &MatchView, agg: &mut ShareAgg) {
     let mut unit_static = 0;
     let mut unit_max_hp = 0;
     let mut unit_dynamic = 0;
+    let mut unit_dynamic_tight = 0;
     for unit in &view.units {
         unit_static += field_len(&unit.seat)
             + field_len(&unit.kind)
@@ -267,6 +270,10 @@ fn collect_shares(view: &MatchView, agg: &mut ShareAgg) {
             + field_len(&unit.x)
             + field_len(&unit.hp)
             + field_len(&unit.status);
+        let x = u16::try_from(unit.x).expect("x must fit u16 for the tight-integer estimate");
+        let hp = u16::try_from(unit.hp).expect("live hp must fit u16");
+        unit_dynamic_tight +=
+            field_len(&unit.id) + field_len(&x) + field_len(&hp) + field_len(&unit.status);
     }
     let unit_fields = unit_static + unit_max_hp + unit_dynamic;
     let unit_prefix = units_bytes - unit_fields;
@@ -291,6 +298,7 @@ fn collect_shares(view: &MatchView, agg: &mut ShareAgg) {
     agg.unit_static += unit_static as u64;
     agg.unit_max_hp += unit_max_hp as u64;
     agg.unit_dynamic += unit_dynamic as u64;
+    agg.unit_dynamic_tight += unit_dynamic_tight as u64;
     agg.events += events_bytes as u64;
     agg.units_seen += view.units.len() as u64;
     agg.events_seen += view.events.len() as u64;
@@ -1698,7 +1706,7 @@ fn shares_line(agg: &ShareAgg) -> String {
         }
     };
     format!(
-        "header {:.1}% | units {:.1}% (static {:.1}%, max_hp {:.1}%, dynamic {:.1}%) | events {:.1}% | {:.2} units/view | {:.2} events/view",
+        "header {:.1}% | units {:.1}% (static {:.1}%, max_hp {:.1}%, dynamic {:.1}%) | events {:.1}% | {:.2} units/view | {:.2} events/view | u16 x/hp would save {:.1}% of all bytes",
         pct(agg.header),
         pct(agg.units),
         pct(agg.unit_static),
@@ -1707,6 +1715,7 @@ fn shares_line(agg: &ShareAgg) -> String {
         pct(agg.events),
         agg.units_seen as f64 / agg.views.max(1) as f64,
         agg.events_seen as f64 / agg.views.max(1) as f64,
+        pct(agg.unit_dynamic - agg.unit_dynamic_tight),
     )
 }
 
