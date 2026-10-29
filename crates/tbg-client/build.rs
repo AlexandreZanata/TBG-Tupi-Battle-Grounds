@@ -100,7 +100,11 @@ fn main() {
     for ((head, tail), mut members) in families {
         members.sort_unstable();
         let name = (head.replace('.', "_") + "_" + &tail.replace('.', "_")).to_ascii_uppercase();
-        code.push_str(&format!("pub const {name}: [Msg; {}] = [", members.len()));
+        // JS indexes some families dynamically; Rust mappings land in steps 7-9.
+        code.push_str(&format!(
+            "#[allow(dead_code)] pub const {name}: [Msg; {}] = [",
+            members.len()
+        ));
         for (_, key) in &members {
             code.push_str(&format!("Msg::{}, ", check::variant(key)));
         }

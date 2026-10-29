@@ -519,6 +519,19 @@ values". Fill the report.
   in Bevy overlay text (Noto Sans replaces Fira Mono). WASM brotli 4,831,437
   (+9,334 vs step 0, budget +60 KB). No console/page errors on the final build.
 - Measurements before/after (step 12): pending (out of scope for steps 0-5; A-1 unmerged).
+- Step 5 (this commit): lobby fully keyed — 106 keys/catalog (was 27), every
+  `#tbg-lobby` text node and aria/title/alt attribute carries `data-i18n*`;
+  `lobby.js` renders through `TBG_I18N` (incl. `plural` for ranked matches and
+  the news pager), gates `data-ready` on `TBG_I18N.ready`, and re-renders on
+  `tbg:lang`. `#tbg-battle`, `#tbg-form`, and `data-a=*` untouched (steps 6-8).
+  Checks: fmt/clippy/test/wasm green; `trunk build --release` green; headed
+  Chrome 1920x1080: EN lobby pixel-identical to baseline; switch re-renders to
+  PT without reload; fresh pt-BR visit paints Portuguese (no English flash);
+  settings/friend dialogs fully Portuguese; gate test with 6 s catalog stall
+  keeps `data-ready=false` (lobby hidden) until settle; no page errors.
+  Sizes: WASM brotli 4,832,050 (+613 vs step 3, +9,947 vs step 0, budget
+  +60 KB); English first-load +2,702 brotli (i18n.js 1,285 + en.json 1,417,
+  budget +15 KB); pt-BR adds pt-BR.json (1,740) + `*-ext.woff2` on demand.
 - Step 4 (this commit): inline resolver (top of `<head>`), `assets/i18n/i18n.js`
   (`TBG_I18N`: lang/t/plural/number/apply/ready/setLang, `cache: 'no-cache'` with
   en fallback then key fallback, one cached `Intl.NumberFormat` per language,
@@ -578,4 +591,22 @@ values". Fill the report.
     any CSP adjustment.
   - Step 4: readiness gating (`data-ready` waiting on `TBG_I18N.ready`) is
     step 5's job; `lobby.js` still sets `data-ready` immediately.
-- Limitations: steps 0-2 only; A-1 still unmerged, steps 6+ wait for it.
+  - Step 5: indexed keys are 0-based (`lobby.news.0…2`); the gap check requires
+    exactly 0..n because codegen indexes families directly by id (D2). The
+    story index doubles as the catalog id in `lobby.js`.
+  - Step 5: the `›` chevrons and `‹ ›` pager stay literal system-font glyphs
+    (outside the D5 charset, so never catalog values); the Ranking `›` lives
+    in a separate `<i>` so `data-i18n` never wipes it. Step 10 may restyle them.
+  - Step 5: the guest ranked hint first-paint text was unified to the JS value
+    (`Locked · Create account to play Ranked`; the HTML previously said
+    `Create account to unlock Ranked`).
+  - Step 5: generated family tables (`LOBBY_NEWS_TITLE/BODY`) carry
+    `#[allow(dead_code)]` until Rust-side indexed mappings land in steps 7-9.
+  - Step 5: all non-glossary pt-BR values remain owner-review proposals
+    (step 10 fills the rest of the catalog the same way).
+  - Step 5: under an artificial 12 s catalog stall the lobby transiently shows
+    raw keys behind `data-ready=false` (never user-visible text in the wrong
+    language); normal loads resolve in milliseconds with no flash.
+- Limitations: steps 0-5 done; A-1 still unmerged, steps 6+ wait for it.
+  Screenshots so far: step-0 practice baseline, step-2 menu, step-3 lobby+Bevy
+  font probes, step-4 pt-BR battle, step-5 lobby en/pt + settings/friend pt.
