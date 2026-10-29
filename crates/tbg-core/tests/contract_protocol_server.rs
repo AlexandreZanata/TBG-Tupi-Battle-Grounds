@@ -77,6 +77,16 @@ fn server_variant_order_is_frozen() {
             rows: Vec::new(),
             you: None,
         },
+        ServerMsg::ChallengeWaiting { token: [7; 16] },
+        ServerMsg::ChallengeUnavailable,
+        ServerMsg::RematchOpen {
+            opponent: "Bo".into(),
+        },
+        ServerMsg::RematchState {
+            you_requested: true,
+            opponent_requested: false,
+        },
+        ServerMsg::RematchClosed { declined: true },
     ];
     for (tag, msg) in order.iter().enumerate() {
         let bytes = encode(msg);
@@ -130,4 +140,24 @@ fn server_bytes_are_frozen() {
         encode(&board),
         [17, 1, 0, 1, 1, 3, b'A', b'n', b'n', 0xFC, 0x07, 1, 0, 0, 1, 1]
     );
+    let waiting = ServerMsg::ChallengeWaiting { token: [7; 16] };
+    assert_eq!(
+        encode(&waiting),
+        [18, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
+    );
+    assert_eq!(encode(&ServerMsg::ChallengeUnavailable), [19]);
+    assert_eq!(
+        encode(&ServerMsg::RematchOpen {
+            opponent: "Bo".into()
+        }),
+        [20, 2, b'B', b'o']
+    );
+    assert_eq!(
+        encode(&ServerMsg::RematchState {
+            you_requested: true,
+            opponent_requested: false
+        }),
+        [21, 1, 0]
+    );
+    assert_eq!(encode(&ServerMsg::RematchClosed { declined: true }), [22, 1]);
 }
