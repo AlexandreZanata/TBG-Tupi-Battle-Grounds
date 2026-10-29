@@ -2,6 +2,7 @@
 //! After 30 s of searching, practice is offered.
 
 use bevy::prelude::*;
+use bevy::text::LineBreak;
 
 use super::{button, label, screen, UiAction, PANEL};
 use crate::config;
@@ -48,6 +49,7 @@ fn spawn(mut commands: Commands, time: Res<Time>) {
                 (label("Connecting...", 22.0), StatusText),
                 (
                     label("", 12.0),
+                    TextLayout::new(Justify::Left, LineBreak::AnyCharacter),
                     Node {
                         max_width: px(360.0),
                         ..default()
