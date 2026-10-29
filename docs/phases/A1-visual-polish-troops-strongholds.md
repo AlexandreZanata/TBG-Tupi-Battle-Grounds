@@ -1,6 +1,6 @@
 # A-1 — Professional visual polish: troops, animation, targeted combat, Strongholds
 
-**Status:** in progress; step 0 passed (spec written 2026-10-29 against HEAD `f15432f` on
+**Status:** handed off at owner request; step 0 passed, step 1 partial (spec written 2026-10-29 against HEAD `f15432f` on
 `phase/p40-arcana-trees`; `main` = `077abe7`). Writing this spec changes no
 rule and enables nothing.
 **Depends on:** nothing competitive. Reads (never edits) the P16-F3/F4
@@ -518,8 +518,12 @@ item not run.
 - `Google Chrome 156.0.8078.73`; `Mozilla Firefox 158.0.1`.
 - Chromium WebGL2: available. Renderer:
   `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)`.
-  **Software GPU.** Browser profile: `/tmp/tbg-a1-chrome`; local DevTools
+  **Software GPU in the initial headless session only.** Browser profile: `/tmp/tbg-a1-chrome`; local DevTools
   port 9331. Hardware and software results must not be combined.
+- Subsequent desktop audit used hardware:
+  `ANGLE (Intel, Mesa Intel(R) Graphics (RPL-P), OpenGL 4.6)`;
+  profile `/tmp/tbg-a1-chrome-gpu`, port 9333, viewport 1280×800/DPR 1.
+  No formal before/after performance comparison has been collected.
 - `PROTOCOL_VERSION = 9` (`crates/tbg-core/src/protocol.rs:15`).
 
 Untouched-source preflight, both exit 0:
@@ -539,8 +543,20 @@ $ git diff main --stat -- crates/tbg-core crates/tbg-server crates/tbg-balance C
 
 ### Progress
 
-Step 0 complete. Steps 1–14 pending. No gameplay or presentation behavior
-has changed. Performance and browser match validation: not measured.
+Step 0 complete. Step 1 partially audited; steps 2–14 pending. Execution
+was interrupted at the owner's request to continue in Antigravity.
+No permanent gameplay or presentation behavior change has been made.
+Temporary probes were saved as a patch and removed from client source.
+
+The full resume instructions, corrected source recognition, evidence,
+verification outputs, preliminary-measurement caveat and remaining steps
+are in [A1-HANDOFF.md](../A1-HANDOFF.md).
+
+A Chromium hardware-rendered autoplay match reached the result screen
+(1:52, Stronghold destroyed). Formal performance baseline: not measured.
+Firefox gameplay, online/reconnect and final acceptance: not run.
+The preliminary F4 measurements require repeating with the corrected
+probe; they are not accepted audit results.
 
 ### Owner decisions
 
