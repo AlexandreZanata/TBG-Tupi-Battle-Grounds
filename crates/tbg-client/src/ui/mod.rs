@@ -8,6 +8,7 @@ use tbg_core::{Rejection, UnitId};
 pub mod account;
 mod account_ui;
 mod actions;
+mod battle_hud;
 mod desktop;
 #[cfg(target_arch = "wasm32")]
 mod desktop_actions;
@@ -102,7 +103,8 @@ pub fn plugin(app: &mut App) {
             surrender::plugin,
             toast::plugin,
             tips::plugin,
-        ));
+        ))
+        .add_plugins(battle_hud::plugin);
 }
 
 /// Scale the whole UI with the smaller window side (phones ≈ 0.9, desktop 1.5).

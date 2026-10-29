@@ -23,7 +23,7 @@ pub struct OverlayStats {
 struct RefreshTimer(Timer);
 
 #[derive(Component)]
-struct StatsText;
+pub(crate) struct StatsText;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(FrameTimeDiagnosticsPlugin::default())

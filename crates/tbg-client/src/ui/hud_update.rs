@@ -68,14 +68,14 @@ pub(super) fn update(
     }
 }
 
-fn buyable(v: &MatchView, i: usize) -> bool {
+pub(super) fn buyable(v: &MatchView, i: usize) -> bool {
     let d = def(v.offers[i]);
     v.energy >= d.cost
         && v.slots_used + d.slots.count() <= SLOT_CAP
         && matches!(v.phase, Phase::Running | Phase::Overtime)
 }
 
-fn clock(v: &MatchView) -> String {
+pub(super) fn clock(v: &MatchView) -> String {
     let s = v.phase_ticks_left / TICK_HZ;
     match v.phase {
         Phase::Countdown => format!("Starting {}", s + 1),

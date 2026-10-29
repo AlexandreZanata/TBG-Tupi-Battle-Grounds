@@ -45,17 +45,22 @@ pub fn plugin(app: &mut App) {
                 .run_if(in_state(GameState::Gallery)),
         );
 }
+#[allow(clippy::too_many_arguments)] // Review scene resources and portrait clear color.
 fn spawn(
     mut commands: Commands,
     lib: Res<FigureLibrary>,
     options: Res<Gallery>,
     mut meshes: ResMut<Assets<Mesh>>,
     mats: ResMut<Assets<StandardMaterial>>,
+    mut clear: ResMut<ClearColor>,
     arena: Query<Entity, With<Mesh3d>>,
     window: Single<&Window>,
 ) {
     if options.stress {
         return;
+    }
+    if options.portrait {
+        clear.0 = Color::srgb_u8(0x14, 0x20, 0x2a);
     }
     if options.hide_arena() {
         for e in &arena {

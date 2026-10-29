@@ -1,4 +1,4 @@
-Battleground Display and Battleground Sans are Latin subsets of Noto Serif Bold and Noto Sans Regular.
+Battleground Display and Battleground Sans are Latin subsets of Noto Serif Bold and Noto Sans Regular/Bold.
 Copyright 2010, 2012-2020 Google Inc.; 2015-2020 Google LLC.
 Source: https://github.com/notofonts/noto-fonts
 Subset and renamed for Tupi Battle Grounds with fonttools.

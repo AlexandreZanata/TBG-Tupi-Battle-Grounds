@@ -20,6 +20,9 @@ pub(super) enum Hud {
     CardStrip(usize),
 }
 
+#[derive(Component)]
+pub(super) struct HudRoot;
+
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::InMatch), spawn)
         .add_systems(
@@ -92,6 +95,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
     commands
         .spawn((
             screen(JustifyContent::SpaceBetween),
+            HudRoot,
             DespawnOnExit(GameState::InMatch),
         ))
         .with_children(|root| {

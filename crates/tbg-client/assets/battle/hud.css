@@ -1,0 +1,61 @@
+/* Desktop battle HUD, following the owner's island reference. */
+@font-face{font-family:BattleBody;src:url('../fonts/BattlegroundSans.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:BattleBody;src:url('../fonts/BattlegroundSansBold.woff2') format('woff2');font-weight:700;font-display:swap}
+#tbg-battle{--edge:#c3a46a;--ink:#121e29;position:fixed;inset:0;z-index:3;color:#f7f4ea;pointer-events:none;font:16px/1.3 BattleBody,system-ui,sans-serif}
+#tbg-battle[hidden],#tbg-battle [hidden]{display:none!important}
+#tbg-battle button{font:inherit;color:inherit;cursor:pointer;pointer-events:auto}
+#tbg-battle button:focus-visible{outline:3px solid #72dcff;outline-offset:4px}
+#tbg-battle button:disabled{cursor:default}
+.iron-frame{--cut:11px;position:relative;isolation:isolate;background:linear-gradient(135deg,#f2deb1,#95764b 38%,#d5b882 65%,#746045);border:0;clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% var(--cut),100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,var(--cut) 100%,0 calc(100% - var(--cut)),0 var(--cut))}
+.iron-frame::before{content:'';position:absolute;inset:3px;background:linear-gradient(135deg,#263440,#111e2b 48%,#0b1421);clip-path:inherit;z-index:-1;box-shadow:inset 0 0 0 2px #050b12,inset 0 4px 12px #080c18}
+.battle-score{position:absolute;top:14px;left:50%;transform:translateX(-50%);box-sizing:border-box;width:min(56vw,1000px);min-width:720px;height:64px;padding:10px 18px;display:grid;grid-template-columns:28px minmax(50px,100px) minmax(120px,1fr) 106px minmax(120px,1fr) minmax(60px,130px) 28px;gap:10px;align-items:center;pointer-events:auto}
+.battle-crown{width:28px;height:30px;fill:currentColor;filter:drop-shadow(0 2px 1px #000a)}
+.battle-crown.ally{color:#26b8ff}.battle-crown.enemy{color:#ff3749}
+.battle-name{font-size:clamp(13px,1.12vw,19px);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 1px #000}
+.battle-name.ally{color:#d1e5ff}.battle-name.enemy{color:#ff9094;text-align:right}
+.vitality{position:relative;height:25px;box-sizing:border-box;border:2px solid #718797;border-radius:20px;background:#0a111d;box-shadow:0 1px 3px #0009,inset 0 1px 4px #000c;overflow:hidden;text-align:center}
+.vitality-fill{position:absolute;inset:0 auto 0 0;width:100%;border-radius:16px;box-shadow:inset 0 2px 3px #ffffff66,inset 0 -2px 3px #0003;transition:width .15s linear}
+.vitality.ally .vitality-fill{background:linear-gradient(#4dd5ff,#16a4f3 65%,#0785cb)}
+.vitality.enemy .vitality-fill{background:linear-gradient(#ff6f76,#f83349 65%,#d81433)}
+.vitality strong{position:relative;z-index:1;font-size:14px;line-height:21px;font-weight:700;letter-spacing:.02em;text-shadow:0 1px 1px #000}
+.battle-time{text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:42px;color:#f5dfb6}
+.battle-time>strong{font:700 clamp(26px,2.15vw,38px)/1 Battleground,Georgia,serif;white-space:nowrap;text-shadow:0 2px 2px #000}
+.battle-time small{font:9px Camp,sans-serif;letter-spacing:.2em;text-transform:uppercase;margin-top:3px;color:#e8c98c}
+.battle-surrender{position:absolute;top:14px;right:18px;width:190px;min-height:60px;padding:12px 15px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px!important;font-weight:700!important}
+.battle-surrender::before{background:linear-gradient(#b72336,#8b1227);box-shadow:inset 0 0 0 2px #4d1521,inset 0 4px 12px #e3353c50}
+.battle-surrender svg{width:25px;height:28px;fill:#fff}.battle-surrender[data-state='armed']::before{background:linear-gradient(#db6341,#ab321f)}
+.battle-surrender[data-state='sent']{opacity:.65}
+.battle-shop{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.battle-resources{height:54px;width:calc(100% + 40px);padding:10px 24px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:16px;pointer-events:auto;white-space:nowrap}
+.resource-label{font-size:19px;font-weight:700;text-shadow:0 2px 2px #000}.resource-value{font-size:18px;font-variant-numeric:tabular-nums;min-width:58px;text-align:center;letter-spacing:.03em}
+.resource-divider{height:27px;width:1px;background:linear-gradient(transparent,#a4afbb66,transparent);margin:0 6px}
+.energy-track{width:clamp(145px,12vw,220px);height:23px;border:2px solid #53616f;border-radius:20px;background:#0c1421;box-shadow:inset 0 2px 6px #0008;overflow:hidden}
+.energy-track>span{display:block;height:100%;width:0;background:linear-gradient(#df9cff,#b751f5 65%,#8d25d2);box-shadow:inset 0 2px 3px #fff7;border-radius:15px 0 0 15px;transition:width .12s linear}
+.army-icon{width:30px;height:27px;fill:#f2e8d5;filter:drop-shadow(0 2px 1px #0008)}
+.battle-offers{display:flex;gap:14px;pointer-events:auto}
+.battle-card{width:clamp(170px,12.25vw,235px);height:clamp(195px,24vh,260px);padding:0;text-align:left;transition:filter .15s,transform .1s}
+.battle-card::before{inset:5px;background:radial-gradient(ellipse at 50% 25%,#344958,#172631 62%,#0a111b 85%)}
+.battle-card:hover:enabled{filter:brightness(1.12) drop-shadow(0 0 7px #f6d99c55)}
+.battle-card:active:enabled{transform:scale(.96)}
+.battle-card:disabled{filter:brightness(.8)}
+.battle-card.unaffordable .champion-portrait{filter:saturate(.72) brightness(.85)}
+.battle-card.unaffordable .card-cost b{color:#d4a6a0}
+.battle-card.unaffordable .card-cost{background:linear-gradient(#49382d,#262325)}
+.battle-card.pending{animation:pending-shop .65s ease-in-out infinite alternate}
+.card-rotation{position:absolute;top:8px;left:16px;right:16px;height:6px;border-radius:4px;border:1px solid #12241a;background:#162820;z-index:2;box-shadow:0 1px 1px #000}
+.card-rotation i{display:block;width:var(--rotation,100%);height:100%;border-radius:3px;background:linear-gradient(#bdff85,#75d954)}
+.champion-portrait{position:absolute;left:6px;top:15px;width:calc(100% - 12px);height:75%;object-fit:cover;object-position:center 43%;mask-image:linear-gradient(#000 65%,transparent 100%)}
+.card-caption{position:absolute;left:15px;right:10px;bottom:55px;z-index:1;display:flex;flex-direction:column;gap:3px;text-shadow:0 1px 1px #000}
+.champion-name{font-size:clamp(16px,1.16vw,21px);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.champion-role{font-size:clamp(11px,.87vw,15px);color:#dddeda}
+.champion-tier{position:absolute;right:16px;bottom:66px;padding:2px 5px;border:1px solid #adb2b7;border-radius:4px;background:linear-gradient(#46505c,#202934);font-size:13px;box-shadow:0 2px 2px #0008;z-index:2}
+.card-caption .champion-role{padding-right:35px}
+.card-cost{position:absolute;bottom:12px;left:27%;right:27%;min-height:32px;display:flex;align-items:center;justify-content:center;gap:9px;background:linear-gradient(#6a4b2e,#30271f);border:1px solid #d4ac68;clip-path:polygon(7px 0,calc(100% - 7px) 0,100% 7px,100% calc(100% - 7px),calc(100% - 7px) 100%,7px 100%,0 calc(100% - 7px),0 7px);font-size:19px;z-index:2}
+.card-cost i{display:block;width:16px;height:16px;border:2px solid #ffe4a2;border-radius:50%;background:radial-gradient(at 35% 25%,#ffe989,#efaf24 60%,#b5730d);box-shadow:0 1px 2px #0008}
+.card-slots{position:absolute;bottom:20px;right:10px;font-size:9px;color:#acb4b5;letter-spacing:2px}
+.shop-help{font-size:10px;letter-spacing:.05em;margin:0;color:#f7e8cb;opacity:.85;text-shadow:0 1px 3px #000}
+.battle-synergy{margin:0;padding:4px 15px;border:1px solid #a8905f88;background:#132430dd;border-radius:5px;font-size:12px;color:#f2dcaa;pointer-events:auto}
+@keyframes pending-shop{from{filter:brightness(.9)}to{filter:brightness(1.25)}}
+@media(max-width:1279px),(max-height:719px),(orientation:portrait){#tbg-battle{display:none!important}}
+@media(min-width:1280px) and (max-width:1450px){.battle-score{min-width:710px;gap:8px;grid-template-columns:25px minmax(45px,75px) minmax(115px,1fr) 98px minmax(115px,1fr) minmax(50px,100px) 25px}.battle-surrender{right:12px;width:160px;font-size:14px!important}.battle-resources{height:48px;gap:12px;padding:8px 16px}.resource-label{font-size:16px}.resource-value{font-size:16px}.battle-shop{bottom:10px}.battle-card{--cut:10px}.champion-name{max-width:140px}}
+@media(prefers-reduced-motion:reduce){.vitality-fill,.energy-track>span,.battle-card{transition:none}.battle-card.pending{animation:none}}
