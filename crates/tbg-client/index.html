@@ -88,16 +88,45 @@
 
 
 <div id="tbg-battle" hidden data-ready="false" aria-label="Battle controls">
-  <header class="battle-score iron-frame" aria-label="Stronghold health and match clock">
-    <svg class="battle-crown ally" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 9L10 15 16 3 22 15 29 9 25 26H7Z"/><path d="M7 28H25V31H7Z"/></svg>
-    <span class="battle-name ally" data-battle-you>You</span>
-    <div class="vitality ally" role="progressbar" aria-label="Your Stronghold HP"><span class="vitality-fill"></span><strong data-battle-you-hp>—</strong></div>
-    <div class="battle-time"><strong data-battle-clock>3:00</strong><small data-battle-ranked hidden>Ranked</small></div>
-    <div class="vitality enemy" role="progressbar" aria-label="Enemy Stronghold HP"><span class="vitality-fill"></span><strong data-battle-enemy-hp>—</strong></div>
-    <span class="battle-name enemy" data-battle-opponent>Opponent</span>
-    <svg class="battle-crown enemy" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 9L10 15 16 3 22 15 29 9 25 26H7Z"/><path d="M7 28H25V31H7Z"/></svg>
+  <header class="battle-score" aria-label="Stronghold health and match clock">
+    <div class="team-plate ally">
+      <span class="crest" aria-hidden="true"><b data-crest-you>Y</b></span>
+      <div class="plate-body">
+        <span class="battle-name" data-battle-you>You</span>
+        <div class="vitality ally" role="progressbar" aria-label="Your Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-you-hp>-</strong></div>
+      </div>
+    </div>
+    <div class="battle-time" data-phase="running">
+      <strong data-battle-clock>3:00</strong><small data-battle-mode>Casual</small>
+    </div>
+    <div class="team-plate enemy">
+      <div class="plate-body">
+        <span class="battle-name" data-battle-opponent>Opponent</span>
+        <div class="vitality enemy" role="progressbar" aria-label="Enemy Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-enemy-hp>-</strong></div>
+      </div>
+      <span class="crest" aria-hidden="true"><b data-crest-opponent>O</b></span>
+    </div>
   </header>
-  <button class="battle-surrender iron-frame" data-battle-action="surrender"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 4H9V30H6ZM10 5L27 9 25 20 10 17Z"/></svg><span data-battle-surrender>Surrender</span></button>
+  <button class="battle-surrender" data-battle-action="surrender" data-state="ready"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 4H9V30H6ZM10 5L27 9 25 20 10 17Z"/></svg><span data-battle-surrender>Surrender</span></button>
+  <aside class="unit-inspect" data-inspect-panel hidden aria-label="Unit status">
+    <button class="inspect-close" data-battle-action="close-inspect" aria-label="Close unit status">&times;</button>
+    <div class="inspect-head">
+      <img class="inspect-portrait" alt="" decoding="async">
+      <div class="inspect-title"><strong data-i="name">-</strong><small data-i="form"></small><small class="inspect-tags"><span data-i="owner"></span> &middot; <span data-i="faction"></span> &middot; <span data-i="role"></span></small></div>
+    </div>
+    <div class="vitality inspect-hp" role="progressbar" aria-label="Unit HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-i="hp">-</strong></div>
+    <dl class="inspect-stats">
+      <div><dt data-i="attack-label">Damage</dt><dd data-i="attack"></dd></div>
+      <div><dt>Per second</dt><dd data-i="dps"></dd></div>
+      <div><dt>Attack every</dt><dd data-i="every"></dd></div>
+      <div><dt>Range</dt><dd data-i="range"></dd></div>
+      <div><dt>Speed</dt><dd data-i="speed"></dd></div>
+      <div><dt>Splash</dt><dd data-i="splash"></dd></div>
+      <div><dt>On hit</dt><dd data-i="onhit"></dd></div>
+      <div><dt>Status</dt><dd data-i="status"></dd></div>
+      <div class="wide"><dt>Synergy</dt><dd data-i="synergy"></dd></div>
+    </dl>
+  </aside>
   <section class="battle-shop" aria-label="Shop">
     <p class="battle-synergy" data-battle-synergy hidden></p>
     <div class="battle-resources iron-frame">

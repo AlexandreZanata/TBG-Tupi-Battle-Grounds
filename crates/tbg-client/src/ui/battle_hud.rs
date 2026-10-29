@@ -2,8 +2,9 @@
 
 use bevy::prelude::*;
 
+/// Whether the HTML battle layer is showing (desktop landscape).
 #[derive(Resource, Default)]
-struct DesktopBattle(bool);
+pub(crate) struct DesktopBattle(pub bool);
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<DesktopBattle>()
@@ -76,6 +77,7 @@ mod web {
         state: Res<State<GameState>>,
         view: Res<LatestView>,
         details: (Res<MatchInfo>, Res<PendingBuy>, Res<Surrender>),
+        inspected: Res<crate::ui::inspect::Inspected>,
         mut queue: ResMut<ActionQueue>,
         mut desktop: ResMut<DesktopBattle>,
     ) {
@@ -119,6 +121,12 @@ mod web {
             if info.ranked { "true" } else { "false" },
         );
         attr(&root, "data-clock", &super::super::hud_update::clock(v));
+        let unit = inspected
+            .0
+            .and_then(|id| crate::ui::inspect::report(v, id))
+            .map(|r| r.record())
+            .unwrap_or_default();
+        attr(&root, "data-inspect", &unit);
         attr(&root, "data-energy", &v.energy.to_string());
         attr(&root, "data-energy-max", &ENERGY_CAP.to_string());
         attr(&root, "data-energy-scale", &ENERGY_SCALE.to_string());
@@ -175,8 +183,11 @@ mod web {
         if value == "surrender" {
             return Some(UiAction::Surrender);
         }
-        if value == "close-evolve" {
-            return Some(UiAction::CloseEvolve);
+        if value == "deselect" {
+            return Some(UiAction::Deselect);
+        }
+        if value == "close-inspect" {
+            return Some(UiAction::CloseInspect);
         }
         let (kind, index) = value.split_once(':')?;
         let index = index.parse::<u8>().ok().filter(|i| *i < 3)?;

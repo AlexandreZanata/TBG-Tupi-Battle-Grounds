@@ -52,12 +52,17 @@ pub(super) fn apply(
     mut surrender: ResMut<super::surrender::Surrender>,
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
+    mut inspected: ResMut<super::inspect::Inspected>,
 ) {
     let now = time.elapsed_secs_f64();
     for action in std::mem::take(&mut queue.0) {
         if !matches!(
             action,
-            UiAction::Disabled | UiAction::CloseEvolve | UiAction::SelectUnit(_)
+            UiAction::Disabled
+                | UiAction::CloseEvolve
+                | UiAction::SelectUnit(_)
+                | UiAction::Deselect
+                | UiAction::CloseInspect
         ) {
             extra.2.play(Sound::Click);
         }
@@ -132,7 +137,16 @@ pub(super) fn apply(
                 );
                 pending.0 = Some((offer, seq.0));
             }
-            UiAction::SelectUnit(id) => selected.0 = Some(id),
+            UiAction::SelectUnit(id) => {
+                inspected.0 = Some(id);
+                // Evolution only for own units; enemies just show their status.
+                let own = extra
+                    .0
+                     .0
+                    .as_ref()
+                    .is_some_and(|v| v.units.iter().any(|u| u.id == id && u.seat == v.you));
+                selected.0 = own.then_some(id);
+            }
             UiAction::Evolve { unit, branch } => {
                 seq.0 += 1;
                 link.send(
@@ -145,6 +159,11 @@ pub(super) fn apply(
                 selected.0 = None;
             }
             UiAction::CloseEvolve => selected.0 = None,
+            UiAction::Deselect => {
+                selected.0 = None;
+                inspected.0 = None;
+            }
+            UiAction::CloseInspect => inspected.0 = None,
             UiAction::Inspect(offer) => {
                 if let Some(v) = &extra.0 .0 {
                     let kind = v.offers[usize::from(offer.min(2))];
