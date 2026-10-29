@@ -94,9 +94,15 @@ start_server() {
 metric() { curl -fsS "http://$ADDR/metrics" | sed -E "s/.*\"$1\":([0-9]+).*/\1/"; }
 cpu_ticks() { awk '{print $14 + $15}' "/proc/$1/stat"; }
 rss_mb() { awk '/VmRSS/ {printf "%.1f", $2 / 1024}' "/proc/$1/status"; }
+cgroup_dir() {
+	local cg
+	cg=$(awk -F: '$1 == "0" {print $3}' "/proc/$1/cgroup" 2>/dev/null)
+	[ -n "$cg" ] && printf '/sys/fs/cgroup%s' "$cg"
+}
+cgroup_value() { awk -v key="$2" '$1 == key {print $2; found = 1} END {if (!found) print 0}' "$1" 2>/dev/null || echo 0; }
 
-echo "| matches | server cores | bot cores | load1 | matches/core | RSS MB | KB/match | late ticks | RTT p95 ms | lobby max | conns | matches d | KB/s out | KB/s in | KB/s/player | views/s | view B avg |"
-echo "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
+echo "| matches | server cores | bot cores | load1 | matches/core | RSS MB | KB/match | cgroup MB | throttled | mem high | oom | late ticks | RTT p95 ms | lobby max | conns | matches d | KB/s out | KB/s in | KB/s/player | views/s | view B avg |"
+echo "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
 for level in $LEVELS; do
 	start_server
 	for _ in $(seq 1 100); do curl -fsS "http://$ADDR/health" >/dev/null 2>&1 && break; sleep 0.1; done
@@ -114,6 +120,14 @@ for level in $LEVELS; do
 	sleep 3
 	t0=$(cpu_ticks "$SRV")
 	b0=$(cpu_ticks "$BOTS")
+	cg=$(cgroup_dir "$SRV")
+	mem0=0 throttle0=0 memhigh0=0 memoom0=0
+	if [ -n "$cg" ] && [ -d "$cg" ]; then
+		mem0=$(cat "$cg/memory.current" 2>/dev/null || echo 0)
+		throttle0=$(cgroup_value "$cg/cpu.stat" nr_throttled)
+		memhigh0=$(cgroup_value "$cg/memory.events" high)
+		memoom0=$(cgroup_value "$cg/memory.events" oom)
+	fi
 	late0=$(metric late_ticks)
 	out0=$(metric bytes_out)
 	in0=$(metric bytes_in)
@@ -124,6 +138,13 @@ for level in $LEVELS; do
 	sleep "$WINDOW"
 	t1=$(cpu_ticks "$SRV")
 	b1=$(cpu_ticks "$BOTS")
+	mem1=0 throttle1=0 memhigh1=0 memoom1=0
+	if [ -n "$cg" ] && [ -d "$cg" ]; then
+		mem1=$(cat "$cg/memory.current" 2>/dev/null || echo 0)
+		throttle1=$(cgroup_value "$cg/cpu.stat" nr_throttled)
+		memhigh1=$(cgroup_value "$cg/memory.events" high)
+		memoom1=$(cgroup_value "$cg/memory.events" oom)
+	fi
 	late1=$(metric late_ticks)
 	out1=$(metric bytes_out)
 	in1=$(metric bytes_in)
@@ -137,6 +158,10 @@ for level in $LEVELS; do
 	cores=$(awk -v a="$t0" -v b="$t1" -v w="$WINDOW" 'BEGIN {printf "%.2f", (b - a) / 100 / w}')
 	bot_cores=$(awk -v a="$b0" -v b="$b1" -v w="$WINDOW" 'BEGIN {printf "%.2f", (b - a) / 100 / w}')
 	load1=$(cut -d' ' -f1 /proc/loadavg)
+	cg_mb=$(awk -v a="$mem0" -v b="$mem1" 'BEGIN {printf "%.0f", (a > b ? a : b) / 1048576}')
+	throttled=$(awk -v a="$throttle0" -v b="$throttle1" 'BEGIN {print b - a}')
+	mem_high=$((memhigh1 - memhigh0))
+	mem_oom=$((memoom1 - memoom0))
 	per_core=$(awk -v m="$run1" -v c="$cores" 'BEGIN {printf "%.0f", (c > 0 ? m / c : 0)}')
 	kb=$(awk -v r="$rss" -v m="$run1" 'BEGIN {printf "%.0f", (m > 0 ? r * 1024 / m : 0)}')
 	server_kb=$(awk -v a="$out0" -v b="$out1" -v w="$WINDOW" 'BEGIN {printf "%.1f", (b - a) / 1024 / w}')
@@ -144,7 +169,7 @@ for level in $LEVELS; do
 	player_kb=$(awk -v s="$server_kb" -v m="$run1" 'BEGIN {printf "%.2f", (m > 0 ? s / (2 * m) : 0)}')
 	views_s=$(awk -v a="$views0" -v b="$views1" -v w="$WINDOW" 'BEGIN {printf "%.0f", (b - a) / w}')
 	view_avg=$(awk -v a="$views0" -v b="$views1" -v va="$vbytes0" -v vb="$vbytes1" 'BEGIN {n = b - a; printf "%.0f", (n > 0 ? (vb - va) / n : 0)}')
-	echo "| $run1 | $cores | $bot_cores | $load1 | $per_core | $rss | $kb | $((late1 - late0)) | $rtt | $inbox | $conn1 | $((run1 - run0)) | $server_kb | $in_kb | $player_kb | $views_s | $view_avg |"
+	echo "| $run1 | $cores | $bot_cores | $load1 | $per_core | $rss | $kb | $cg_mb | $throttled | $mem_high | $mem_oom | $((late1 - late0)) | $rtt | $inbox | $conn1 | $((run1 - run0)) | $server_kb | $in_kb | $player_kb | $views_s | $view_avg |"
 	# conn0 is sampled to make the connection gauge's growth explicit in the log.
 	: "$conn0"
 	stop
