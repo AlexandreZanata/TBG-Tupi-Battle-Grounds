@@ -99,3 +99,47 @@ fn c2_per_tick_traces_are_frozen() {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");
     }
 }
+
+/// Every `.rs` file under `dir`, recursively.
+fn sources(dir: &Path) -> Vec<std::path::PathBuf> {
+    let mut out = Vec::new();
+    let mut stack = vec![dir.to_path_buf()];
+    while let Some(d) = stack.pop() {
+        for entry in std::fs::read_dir(&d).expect("read dir") {
+            let path = entry.expect("dir entry").path();
+            if path.is_dir() {
+                stack.push(path);
+            } else if path.extension().is_some_and(|e| e == "rs") {
+                out.push(path);
+            }
+        }
+    }
+    out
+}
+
+#[test]
+fn c10_online_crates_only_play_the_canonical_ruleset() {
+    let crates = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+    for name in ["tbg-server", "tbg-client"] {
+        let dir = crates.join(name);
+        let manifest = std::fs::read_to_string(dir.join("Cargo.toml")).expect("manifest");
+        let core_line = manifest
+            .lines()
+            .find(|l| l.trim_start().starts_with("tbg-core"))
+            .unwrap_or_else(|| panic!("{name}: no tbg-core dependency line"));
+        assert!(
+            !core_line.contains("lab"),
+            "{name}: enables tbg-core's `lab` feature (C10)"
+        );
+        for path in sources(&dir.join("src")) {
+            let text = std::fs::read_to_string(&path).expect("read source");
+            for word in ["with_rules", "lab_spawn", "Ruleset {", "Box::leak"] {
+                assert!(
+                    !text.contains(word),
+                    "{}: `{word}` could play a non-canonical ruleset online (C10)",
+                    path.display()
+                );
+            }
+        }
+    }
+}
