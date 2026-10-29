@@ -18,7 +18,7 @@ evolve, and which factions you combine.
 | 1 | Live 1v1 PvP: both players act simultaneously; the board evolves in real time |
 | 2 | One `BattleLine`: no lateral movement |
 | 3 | Automation: units move and fight without player input |
-| 4 | Continuous `Shop`: offers rotate during combat; no preparation phase |
+| 4 | Continuous `Shop`: buying during combat brings a new offer; no preparation phase |
 | 5 | Branching `Evolution` of deployed units |
 | 6 | Faction `Synergy` bonuses |
 | 7 | Authoritative server owns every competitive outcome |
@@ -35,7 +35,7 @@ evolve, and which factions you combine.
 | Archetype | Mechanical role: `Tank`, `DPS`, `Support`, `Ranged`, `Control` | `Archetype` |
 | Faction | Visual language + synergy group: `Humans`, `Undead`, `Machines`, `Plants` | `Faction` |
 | Energy | The only in-match resource; regenerates; not a currency | `Energy` |
-| Shop | Per-player rotating offer of five distinct units during a match; not a store (**Proposed**, D-32) | `Shop` |
+| Shop | Per-player offer of five distinct units during a match, renewed one card per purchase; not a store (**Proposed**, D-32) | `Shop` |
 | Evolution | In-match branching upgrade of a deployed unit; not account progression | `Evolution` |
 | Synergy | Bonus while enough units of one `Faction` (or a defined combo) are alive | `Synergy` |
 | PlayerIntention | Client request (purchase, evolve, reposition); a request, never a state change | `PlayerIntention` |
@@ -106,9 +106,9 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-E02 | `Energy` regenerates over time under server rules; there is no gameplay cap (BR-E04, owner revision 2026-10-29, D-41) | Confirmed | S2, S4 |
 | BR-E03 | Purchases and evolutions exceeding available `Energy` are rejected, never queued or owed | Adapted | S1 |
 | BR-S01 | Each player sees exactly five offers, five distinct units at any time | Proposed (D-32; was three) | S1, S4 |
-| BR-S02 | Shop rotation timers come from the server match clock, identical for both players | Confirmed | S1, S4 |
+| BR-S02 | ~~Shop rotation timers come from the server match clock, identical for both players~~ | **Removed — owner revision 2026-10-29**: offers never rotate on a timer (BR-S04) | S1, S4 |
 | BR-S03 | The shop sells units only, never stats or advantage | Confirmed | S1 |
-| BR-S04 | A purchased offer refills immediately; all offers rotate on a shared timer | Proposed | — |
+| BR-S04 | Offers change only when bought: the bought slot refills at once with a unit drawn uniformly from the units not on screen (never one of the four other offers, never the unit just bought; with 10 units, one of 5). There is no timed rotation and no other redraw | Proposed (owner revision 2026-10-29) | — |
 | BR-S05 | Shop randomness is seeded server-side and never revealed to clients | Proposed | — |
 | BR-V01 | Deployed units evolve along a branching tree; the tier-1 choice conditions tier 2 | Confirmed | S4 |
 | BR-V02 | Evolution is paid with `Energy` in the match, never with out-of-match purchases | Adapted | S1, S4 |
@@ -200,7 +200,7 @@ integers (see ARCHITECTURE.md §4).
 | Match length | open-ended, no clock (BR-M07) | | Augment round | every 60 s of combat; 60 s selection pause |
 | Energy start / cap | 5 / none (BR-E04) | | Energy regen | 1 per ~1.76 s (17 sub-energy/tick) |
 | Interest | every 10 s: `min(low / 5, 5) × 0.25` (BR-E06) | | Augment cost Bronze / Silver / Gold / Diamond | 3 / 6 / 10 / 15 |
-| Shop offers / full rotation | 5 distinct / every 10 (**Proposed**) | | Army cap | none (BR-U07) |
+| Shop offers / rotation | 5 distinct / none: a purchase refills its slot (BR-S04) | | Army cap | none (BR-U07) |
 | Stronghold HP | 4500 | | Stronghold attack | 53 dmg / 1.0 s, range 6 |
 | Evolution cost tier 1 / tier 2 | 2 / 4 | | Reconnect window | 30 |
 
@@ -434,7 +434,7 @@ reuse one.
 | ID | Rule (active, owner revision 2026-10-29) |
 |----|---------------|
 | BR-E04 | `Energy` has no gameplay cap; every *generating* source has a documented bound per window instead (regen per tick, Interest per payment, Bounty per window, Forgo per round) |
-| BR-E05 | Interest is paid every 10 s of running time (the Shop rotation ticks), to both players on the same tick |
+| BR-E05 | Interest is paid every 10 s of combat (`INTEREST_TICKS`, 200), to both players on the same tick |
 | BR-E06 | Interest = `min(low / band, max_bands) × per_band`, where `low` is the lowest balance the player held since the previous payment (spending lowers it; gains never raise it); after the payment `low` becomes the current balance |
 | BR-E07 | Interest, Bounty and Forgo Energy are added with saturating `u32` arithmetic in sub-energy and integer division (never rounded up); `low` starts at the start balance and the first payment is at 0:10 of running time |
 | BR-E08 | An eligible kill is the death by damage of an enemy conventional unit (BR-U08: summons and expiries are never eligible); every Bounty source of a player sums per kill and is capped by the sum of their caps and by a per-player ceiling of 1 Energy per 10-s window (windows reset on Interest ticks) |
@@ -445,7 +445,7 @@ reuse one.
 |----------|-------|----------------------|
 | Start | 5 (unchanged unless P16-D changes it) | 3 000 |
 | Base regen | 17 per tick, unchanged; no `Siege` doubling | — |
-| Interest period | 10 s (200 ticks), on the rotation ticks | — |
+| Interest period | 10 s (200 combat ticks) | — |
 | Interest band / value per band / max bands | 5 / 0.25 / 5 (max 1.25 per payment at a low of 25) | 3 000 / 150 / 5 |
 | Bounty ceiling | 1.0 per player per window | 600 |
 
@@ -468,6 +468,10 @@ ticks: an Augment pause (BR-AG12) neither pays it nor moves its timer.
 windows, ranked Elo (draw ½) and result persistence are unchanged.
 
 ### 10.3 Shop Reserve (P16-F2)
+
+> Written for a rotating Shop. Since the owner revision of 2026-10-29
+> offers change only on purchase (BR-S04), so a hold would have nothing to
+> protect against; F2 needs a new design before it is scheduled.
 
 | ID | Proposed rule |
 |----|---------------|
@@ -538,7 +542,7 @@ Owner's starting proposal was +10 % / +10 % + 5 %; the capability at tier
 | BR-AG09 | Each player's applied Augments and copy counts are public to both players |
 | BR-AG10 | An Augment applies to summons only if its text names Beetlings; it never makes a summon count for Synergy or Bounty |
 | BR-AG11 | Augment effects are computed only by the simulation; clients send a round and an option index, never an effect |
-| BR-AG12 | **Pause.** While a round is open the whole battle is frozen for both players: no movement, attack, damage, healing, cooldown, status, summon, Synergy, `Energy` regen, Interest, Shop rotation, purchase or Evolution. `Purchase` and `Evolve` are rejected (`Paused`); only `ChooseAugment` and `Forgo` are accepted. The field stays visible |
+| BR-AG12 | **Pause.** While a round is open the whole battle is frozen for both players: no movement, attack, damage, healing, cooldown, status, summon, Synergy, `Energy` regen, Interest, purchase or Evolution. `Purchase` and `Evolve` are rejected (`Paused`); only `ChooseAugment` and `Forgo` are accepted. The field stays visible |
 | BR-AG13 | **Two clocks.** The combat tick is frozen during a pause; a separate selection clock (one per server step, 20 per second) keeps running and closes the window after 60 s. The round resolves on the first step after both players confirmed, or at the deadline, whichever is first; one confirmation never resumes the battle. A disconnected player does not extend the window; a reconnecting player gets the round, the time left and their confirmation back. Replays record intentions by selection clock |
 | BR-AG14 | **Hidden choices.** A purchase is validated and paid when confirmed, but the opponent sees neither it nor a Forgo until the round resolves. At resolution both outcomes apply in seat order on the same step and become public; combat resumes on the next step for both |
 

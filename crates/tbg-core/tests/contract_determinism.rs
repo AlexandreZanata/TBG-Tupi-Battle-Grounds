@@ -18,30 +18,30 @@ fn bot_match(seed: u64) -> MatchState {
 
 #[test]
 fn bot_matches_are_frozen() {
-    // Owner revision 2026-10-29: uncapped Energy, Interest and the Augment
-    // pause (the selection clock and hidden picks are serialized; BR-AG12)
-    // moved the hashes; outcomes and end combat ticks are the same as the
-    // P16-D canon for these bot matches.
+    // Owner revision 2026-10-29: uncapped Energy, Interest, the Augment
+    // pause, and a Shop that changes only on purchase (BR-S04, no timed
+    // rotation). The Shop change alters what the bots can buy, so outcomes
+    // and end combat ticks moved too.
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0x2df9_1cf5_1992_b742_u64,
-            2_297,
-            Seat::A,
-            StrongholdDestroyed,
-        ),
-        (
-            7,
-            0xc0f8_26bd_4985_7274,
-            1_920,
+            0x7242_2aae_5147_d2e7_u64,
+            3_664,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
+            7,
+            0x7d5a_9954_45c7_a322,
+            2_146,
+            Seat::A,
+            StrongholdDestroyed,
+        ),
+        (
             42,
-            0x8052_0948_8c9c_d534,
-            3_233,
+            0xf3a6_1b6c_8581_3910,
+            2_342,
             Seat::B,
             StrongholdDestroyed,
         ),

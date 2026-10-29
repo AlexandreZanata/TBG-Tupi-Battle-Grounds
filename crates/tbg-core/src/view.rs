@@ -3,9 +3,9 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::augment::next_interest_in;
 use crate::augment::AugmentCounts;
 use crate::content::{AUGMENT_OPTIONS, OFFERS, RUNNING_START};
-use crate::shop::next_rotation_in;
 use crate::sim::phase_ticks_left;
 use crate::state::{Event, MatchState, Outcome, Phase};
 use crate::types::{Seat, Status, Tick, UnitId, UnitKind};
@@ -55,7 +55,6 @@ pub struct MatchView {
     pub interest_in: u32,
     pub interest_paid: u64,
     pub offers: [UnitKind; OFFERS],
-    pub next_rotation_in: u32,
     /// Indexed by `Seat::index()`.
     pub stronghold_hp: [i32; 2],
     pub shields: [i32; 2],
@@ -99,10 +98,9 @@ impl MatchState {
             you: seat,
             energy: me.energy,
             interest_next: bands.saturating_mul(interest.per_band),
-            interest_in: next_rotation_in(self.tick),
+            interest_in: next_interest_in(self.tick),
             interest_paid: me.interest_paid,
             offers: me.offers,
-            next_rotation_in: next_rotation_in(self.tick),
             stronghold_hp: [0, 1].map(|i| self.players[i].stronghold_hp),
             shields: [0, 1].map(|i| self.players[i].shield),
             units: self

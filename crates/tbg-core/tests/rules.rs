@@ -96,21 +96,38 @@ fn purchase_rejected_during_countdown() {
 }
 
 #[test]
-fn purchased_offer_refills_and_rotation_is_shared() {
-    // BR-S02, BR-S04
+fn br_s04_a_purchase_refills_with_an_unseen_unit_and_nothing_rotates() {
+    // BR-S01, BR-S04 (owner revision 2026-10-29): offers change only on a
+    // purchase; the refill is never one of the five units on screen, the
+    // bought one included, and every unseen unit can come up.
     let mut s = running(7);
-    let before = s.players[0].rng.clone();
-    buy(&mut s, Seat::A, UnitKind::Archer).unwrap();
-    assert_ne!(s.players[0].rng, before, "purchase redraws the offer");
-    let (va, vb) = (s.view_for(Seat::A, &[]), s.view_for(Seat::B, &[]));
-    assert_eq!(va.next_rotation_in, vb.next_rotation_in);
-    for _ in 0..va.next_rotation_in {
+    let offers = s.players[0].offers;
+    // Five former rotation periods, still before the first Augment pause.
+    for _ in 0..1_000 {
         s.step();
     }
-    let rngs = [s.players[0].rng.clone(), s.players[1].rng.clone()];
-    s.step();
-    assert_ne!(s.players[0].rng, rngs[0]);
-    assert_ne!(s.players[1].rng, rngs[1]);
+    assert_eq!(s.players[0].offers, offers, "no timed rotation");
+    let mut seen = std::collections::BTreeSet::new();
+    for seq in 1..=400 {
+        let before = s.players[0].offers;
+        s.players[0].energy = 10 * ENERGY_START;
+        let slot = (seq % 5) as u8;
+        s.apply_intention(Seat::A, seq, PlayerIntention::Purchase { offer: slot })
+            .unwrap();
+        let after = s.players[0].offers;
+        let new = after[usize::from(slot)];
+        assert!(!before.contains(&new), "{new:?} was already on screen");
+        for i in (0..5).filter(|&i| i != usize::from(slot)) {
+            assert_eq!(after[i], before[i], "other offers stay put");
+        }
+        let mut distinct = after.to_vec();
+        distinct.sort_unstable_by_key(|k| *k as u8);
+        distinct.dedup();
+        assert_eq!(distinct.len(), 5, "five distinct offers");
+        seen.insert(new as u8);
+        s.units.clear();
+    }
+    assert_eq!(seen.len(), UNIT_KINDS.len(), "every unit can be drawn");
 }
 
 #[test]

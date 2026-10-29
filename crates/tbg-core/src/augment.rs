@@ -699,7 +699,7 @@ pub(crate) fn pay_interest(state: &mut MatchState, ev: &mut Vec<Event>) {
     let rule = state.rules.interest;
     let due = state.tick > crate::content::RUNNING_START
         && (state.tick - crate::content::RUNNING_START)
-            .is_multiple_of(crate::content::ROTATION_TICKS);
+            .is_multiple_of(crate::content::INTEREST_TICKS);
     if !due || rule.band == 0 {
         return;
     }
@@ -718,6 +718,16 @@ pub(crate) fn pay_interest(state: &mut MatchState, ev: &mut Vec<Event>) {
         }
     }
     reset_windows(state);
+}
+
+/// Combat ticks until the next Interest payment (BR-E05).
+pub fn next_interest_in(tick: Tick) -> u32 {
+    use crate::content::{INTEREST_TICKS, RUNNING_START};
+    if tick < RUNNING_START {
+        RUNNING_START + INTEREST_TICKS - tick
+    } else {
+        INTEREST_TICKS - (tick - RUNNING_START) % INTEREST_TICKS
+    }
 }
 
 /// Effective heal after Triage and Grievous Wounds, capped at missing HP.

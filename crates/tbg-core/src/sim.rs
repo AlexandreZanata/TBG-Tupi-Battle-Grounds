@@ -94,7 +94,6 @@ impl MatchState {
         if self.phase != Phase::Ended {
             if self.is_live() {
                 self.regen_energy();
-                shop::rotate(self);
                 augment::pay_interest(self, &mut ev);
                 augment::tick(self, &mut ev);
                 self.expire_shields();

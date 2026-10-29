@@ -95,7 +95,6 @@
     const enemyAug = root.querySelector('[data-augments-enemy]'); enemyAug.hidden = !enemyAugments; set('[data-augments-enemy]', enemyAugments);
     renderCouncil(s);
     set('[data-battle-army]', s.army || '0');
-    root.style.setProperty('--rotation', percent(number('rotation'),1) + '%');
     const synergy = root.querySelector('[data-battle-synergy]'); synergy.hidden = !s.synergy; set('[data-battle-synergy]',s.synergy || '');
     cards.forEach((card,i) => {
       const [kind,name,role,cost,faction,available,pending] = (root.getAttribute('data-offer-'+i) || '').split('|');
@@ -146,6 +145,6 @@
     set('[data-battle-surrender]',s.surrender === 'sent' ? 'Leaving...' : s.surrender === 'armed' ? 'Confirm?' : 'Surrender');
     surrender.title = s.surrender === 'armed' ? (s.ranked === 'true' ? 'Confirm: this counts as a Ranked loss' : 'Click again to surrender') : 'Click twice to surrender';
   }
-  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-hp-own','data-hp-enemy','data-hp-max','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-scale','data-army','data-rotation','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect','data-interest','data-interest-in','data-augments-you','data-augments-enemy','data-council','data-council-options']});
+  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-hp-own','data-hp-enemy','data-hp-max','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-scale','data-army','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect','data-interest','data-interest-in','data-augments-you','data-augments-enemy','data-council','data-council-options']});
   root.dataset.ready = 'true';
 })();

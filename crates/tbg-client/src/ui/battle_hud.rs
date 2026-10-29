@@ -62,7 +62,7 @@ mod web {
     };
     use tbg_core::{
         augment::AugmentCounts,
-        content::{augment_def, def, ENERGY_SCALE, OFFERS, ROTATION_TICKS, STRONGHOLD_HP},
+        content::{augment_def, def, ENERGY_SCALE, OFFERS, STRONGHOLD_HP},
         FACTIONS,
     };
     use wasm_bindgen::JsCast;
@@ -183,14 +183,6 @@ mod web {
             "data-army",
             // `Army N` (BR-U07), plus `| Brood M` while summons live (BR-U08).
             super::super::hud_update::army_label(v).trim_start_matches("Army "),
-        );
-        attr(
-            &root,
-            "data-rotation",
-            &format!(
-                "{:.4}",
-                1.0 - v.next_rotation_in as f32 / ROTATION_TICKS as f32
-            ),
         );
         let synergies = FACTIONS
             .iter()

@@ -1,5 +1,5 @@
 //! In-match HUD: clock, Stronghold HP, Energy, army size, synergies,
-//! rotation timer, and the three shop cards. Reads only `LatestView`.
+//! and the five shop cards. Reads only `LatestView`.
 //! The top line (names, bars, clock) lives in `hud_top`.
 
 use bevy::prelude::*;
@@ -14,7 +14,6 @@ pub(super) enum Hud {
     Hp(usize),
     EnergyFill,
     Info,
-    Rotation,
     Card(usize),
     CardText(usize),
     CardStrip(usize),
@@ -176,7 +175,6 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
                         352.0,
                         14.0
                     ),
-                    bar(Hud::Rotation, Color::srgb_u8(0xF4, 0xEE, 0xE0), 352.0, 4.0),
                     (
                         row(8.0),
                         children![card(0), card(1), card(2), card(3), card(4)]

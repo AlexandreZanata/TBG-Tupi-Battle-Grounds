@@ -19,7 +19,7 @@ pub const REGEN_OVERTIME: u32 = 34;
 pub const COUNTDOWN: Tick = 60;
 pub const RUNNING_START: Tick = COUNTDOWN;
 
-/// Interest: paid on Shop rotation ticks from the lowest balance held since
+/// Interest: paid every `INTEREST_TICKS` of combat from the lowest balance held since
 /// the previous payment, then re-invested (BR-E05–E07).
 pub const INTEREST_BAND: u32 = 3_000;
 pub const INTEREST_PER_BAND: u32 = 150;
@@ -34,7 +34,8 @@ pub const AUGMENT_COST: [u32; 4] = [1_800, 3_600, 6_000, 9_000];
 
 /// Five distinct offers (BR-S01, D-32 Proposed). There is no army cap (BR-U07).
 pub const OFFERS: usize = 5;
-pub const ROTATION_TICKS: Tick = 200;
+/// Interest period: 10 s of combat (BR-E05). The Shop no longer rotates.
+pub const INTEREST_TICKS: Tick = 200;
 
 /// Nester Hatch (BR-U08, Proposed): ticks between hatches, Beetlings alive
 /// per Nester (base / Brood and Hive), per player, and their lifetime.

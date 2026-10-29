@@ -33,7 +33,7 @@ fn uncapped_energy_and_interest() {
     assert_eq!(ENERGY_SCALE, 600);
     assert_eq!(ENERGY_START, 5 * ENERGY_SCALE);
     assert_eq!(REGEN_RUNNING, 17);
-    assert_eq!(ROTATION_TICKS, secs(10));
+    assert_eq!(INTEREST_TICKS, secs(10));
     assert_eq!(
         (INTEREST_BAND, INTEREST_PER_BAND, INTEREST_MAX_BANDS),
         (5 * ENERGY_SCALE, ENERGY_SCALE / 4, 5)
@@ -47,12 +47,12 @@ fn uncapped_energy_and_interest() {
 
 #[test]
 fn shop_slots_stronghold_and_evolution() {
-    // §5 (D-32): 5 distinct offers, full rotation every 10 s, no army cap,
+    // §5 (D-32): 5 distinct offers, no timed rotation (owner revision
+    // 2026-10-29: offers change only on purchase, BR-S04), no army cap,
     // Stronghold 4500 HP hitting 65 every 1.0 s at range 6, evolutions cost
     // 3 / 4 Energy. Hatch (BR-U08): every 4 s (Hive 3 s), 2 alive per Nester
     // (Brood 3), 6 per player, lifetime 10 s.
     assert_eq!(OFFERS, 5);
-    assert_eq!(ROTATION_TICKS, secs(10));
     assert_eq!(
         (u32::from(HATCH_EVERY), u32::from(HATCH_EVERY_HIVE)),
         (secs(4), secs(3))

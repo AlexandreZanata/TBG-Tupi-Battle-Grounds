@@ -432,6 +432,18 @@ desktop only).
 separate Confirm step, and does not highlight the chosen card; not
 browser-checked (desktop-only rule). The bot never buys Augments.
 
+**Shop follow-up (owner request, same day).** Offers no longer rotate
+every 10 s; a purchase refills its slot with a unit drawn uniformly from
+the five not on screen (never the one just bought, BR-S04), from the
+seat's server-seeded stream (online seeds come from the OS generator). The
+card timer bar is gone from the desktop HUD; `INTEREST_TICKS` replaces
+`ROTATION_TICKS` for the Interest period; `MatchView.next_rotation_in` is
+removed. Bot goldens moved with this rule (seed 1 now B at 3 664, 7 A at
+2 146, 42 B at 2 342). Test: `rules.rs`
+`br_s04_a_purchase_refills_with_an_unseen_unit_and_nothing_rotates`
+(400 purchases: never a shown unit, others untouched, all 10 units
+reachable; offers unchanged over 1 000 steps without a purchase).
+
 **Limitations (not measured or not done).**
 - Balance is **not measured**: no `tbg-balance` run for uncapped Energy,
   Interest or infinite Augments; GAME-DESIGN §10.9 gates are open; P16-C's

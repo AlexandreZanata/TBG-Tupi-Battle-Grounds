@@ -2,8 +2,7 @@
 
 use bevy::prelude::*;
 use tbg_core::content::{
-    augment_def, def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, ROTATION_TICKS,
-    STRONGHOLD_HP, TICK_HZ,
+    augment_def, def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, STRONGHOLD_HP, TICK_HZ,
 };
 use tbg_core::{MatchView, Phase, FACTIONS};
 
@@ -32,7 +31,6 @@ pub(super) fn update(
                 let band = (INTEREST_BAND * INTEREST_MAX_BANDS) as f32;
                 (v.energy as f32 / band.max(1.0)).min(1.0)
             }
-            Hud::Rotation => 1.0 - v.next_rotation_in as f32 / ROTATION_TICKS as f32,
             // The War Council row exists only while the battle is paused.
             Hud::CouncilRow => {
                 node.display = if v.augment_round.is_some() {

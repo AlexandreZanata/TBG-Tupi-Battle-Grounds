@@ -6,7 +6,7 @@
 //! Structural values stay `const` in `content.rs` and are never tuned:
 //! they define units of measure, protocol shapes, or array bounds
 //! (`TICK_HZ`, `LANE_LEN`, `SPAWN_OFFSET`, `ENERGY_SCALE`, `BP`, `OFFERS`,
-//! `ROTATION_TICKS`, `COUNTDOWN`, `REGULATION`, `OVERTIME`, `WINDUP`,
+//! `INTEREST_TICKS`, `COUNTDOWN`, `WINDUP`,
 //! `MIN_INTERVAL`, `REGEN_PERIOD`, `BEETLES_PER_PLAYER`).
 
 use crate::arcana::{self, ArcanaPreset};
