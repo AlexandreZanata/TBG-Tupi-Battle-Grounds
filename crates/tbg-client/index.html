@@ -1,6 +1,33 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script>
+  // P41 language resolver: ?lang=, then tbg.lang, then the browser, else en.
+  // Runs before anything else; Rust and i18n.js read documentElement.lang.
+  (function () {
+    try {
+      var asked = new URLSearchParams(location.search).get('lang');
+      var code = null;
+      if (asked) code = /^pt/i.test(asked) ? 'pt-BR' : (/^en/i.test(asked) ? 'en' : null);
+      if (!code) { try { code = localStorage.getItem('tbg.lang'); } catch (e) {} }
+      if (code !== 'pt-BR' && code !== 'en') {
+        var list = (navigator.languages && navigator.languages.length)
+          ? navigator.languages : (navigator.language ? [navigator.language] : []);
+        code = 'en';
+        for (var i = 0; i < list.length; i++) {
+          if (/^pt/i.test(list[i])) { code = 'pt-BR'; break; }
+          if (/^en/i.test(list[i])) { code = 'en'; break; }
+        }
+      }
+      document.documentElement.lang = code;
+      // Start the catalog fetch early; i18n.js awaits the same URL (cache hit).
+      var preload = document.createElement('link');
+      preload.rel = 'preload'; preload.as = 'fetch'; preload.crossOrigin = 'anonymous';
+      preload.href = 'assets/i18n/' + code + '.json';
+      document.head.appendChild(preload);
+    } catch (e) { document.documentElement.lang = 'en'; }
+  })();
+  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Tupi Battle Grounds</title>
@@ -11,6 +38,7 @@
   <script src="diagnostics/measure.js"></script>
   <!-- Hashed by Trunk so every deploy changes the URL (no stale CDN/browser cache). -->
   <link data-trunk rel="css" href="assets/lobby/lobby.css" />
+  <script data-trunk defer src="assets/i18n/i18n.js"></script>
   <script data-trunk defer src="assets/lobby/lobby.js"></script>
   <link data-trunk rel="css" href="assets/arcana/editor.css" />
   <script data-trunk defer src="assets/arcana/preset.js"></script>
@@ -99,6 +127,10 @@
   <dialog id="lobby-settings" class="lobby-dialog metal-panel" aria-labelledby="settings-title">
     <button class="dialog-close" data-close aria-label="Close settings">×</button><p class="eyebrow">Your camp</p><h2 id="settings-title">Settings</h2>
     <button class="dialog-primary" data-action="sound">Sound: <b data-sound>ON</b></button>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button data-lang="en" aria-pressed="true">English</button>
+      <button data-lang="pt-BR" aria-pressed="false">Português (Brasil)</button>
+    </div>
     <div data-member hidden><p>Your saved key gives access to your account.</p><button class="dialog-primary" data-action="copy-key">Copy account key</button><button class="dialog-primary" data-action="download-key">Download account key</button><button class="dialog-primary danger" data-action="logout">Log out</button></div>
     <div data-guest><button class="dialog-primary" data-action="register">Create account</button><button class="dialog-primary" data-action="login">I have a key</button></div>
   </dialog>

@@ -49,6 +49,7 @@ pub(super) fn poll_link(
     mut account: ResMut<Account>,
     mut ranking: ResMut<crate::ui::ranking::Ranking>,
     mut surrender: ResMut<crate::ui::surrender::Surrender>,
+    lang: Res<crate::i18n::Lang>,
 ) {
     let now = time.elapsed_secs_f64();
     for msg in link.poll(now) {
@@ -99,7 +100,9 @@ pub(super) fn poll_link(
                 latest.0 = Some((*view).clone());
                 buffer.timeline.push(now, *view);
             }
-            ServerMsg::Rejected { reason, .. } => ui.0.push(crate::ui::rejection_text(reason)),
+            ServerMsg::Rejected { reason, .. } => {
+                ui.0.push(crate::ui::rejection_text(reason, *lang))
+            }
             ServerMsg::MatchEnd { outcome } => {
                 let won = outcome.winner.is_some() && outcome.winner == info.you;
                 extra

@@ -20,8 +20,6 @@ include!(concat!(env!("OUT_DIR"), "/catalog.rs"));
 pub enum Lang {
     #[default]
     En,
-    /// First constructed in step 4 from `<html lang>`.
-    #[allow(dead_code)]
     PtBr,
 }
 
@@ -46,21 +44,9 @@ impl Lang {
             }
         }
     }
-}
-
-// Steps 4-8 wire the live call sites; covered by `tests` until then.
-#[allow(dead_code)]
-impl Lang {
-    /// BCP 47 code for `<html lang>` and the catalog file name.
-    pub fn code(self) -> &'static str {
-        match self {
-            Lang::En => "en",
-            Lang::PtBr => "pt-BR",
-        }
-    }
 
     /// `pt*` → PtBr, `en*` → En (so `pt-PT` opens in Portuguese); else `None`.
-    /// Startup only, never on the hot path.
+    /// Startup and the language switch only, never on the hot path.
     pub fn from_code(code: &str) -> Option<Self> {
         let lower = code.to_ascii_lowercase();
         if lower.starts_with("pt") {
@@ -69,6 +55,18 @@ impl Lang {
             Some(Lang::En)
         } else {
             None
+        }
+    }
+}
+
+// Steps 5-8 wire the live call sites; covered by `tests` until then.
+#[allow(dead_code)]
+impl Lang {
+    /// BCP 47 code for `<html lang>` and the catalog file name.
+    pub fn code(self) -> &'static str {
+        match self {
+            Lang::En => "en",
+            Lang::PtBr => "pt-BR",
         }
     }
 
@@ -120,8 +118,28 @@ pub struct Localized(pub Msg);
 /// Subset with the D5 charset; see `assets/fonts/OFL.txt` for the commands.
 static UI_FONT: &[u8] = include_bytes!("../../assets/fonts/BattlegroundSansUi.ttf");
 
+/// Language at startup: `<html lang>` on wasm (written by the resolver),
+/// `?lang=` through [`crate::config::url_param`] on native; else English.
+fn startup_lang() -> Lang {
+    #[cfg(target_arch = "wasm32")]
+    {
+        web_sys::window()
+            .and_then(|w| w.document())
+            .and_then(|d| d.document_element())
+            .and_then(|e| e.get_attribute("lang"))
+            .and_then(|code| Lang::from_code(&code))
+            .unwrap_or_default()
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        crate::config::url_param("lang")
+            .and_then(|code| Lang::from_code(&code))
+            .unwrap_or_default()
+    }
+}
+
 pub fn plugin(app: &mut App) {
-    app.init_resource::<Lang>()
+    app.insert_resource(startup_lang())
         .add_systems(Update, Lang::retext_system.run_if(resource_changed::<Lang>));
     // Same slot `bevy_text` used for its default font, so every existing
     // `TextFont` without a handle keeps working with no other change.

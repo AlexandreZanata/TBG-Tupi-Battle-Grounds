@@ -79,6 +79,17 @@ fn placeholder_fill_uses_named_args() {
 }
 
 #[test]
+fn from_code_maps_browser_tags() {
+    assert_eq!(Lang::from_code("pt-BR"), Some(Lang::PtBr));
+    assert_eq!(Lang::from_code("pt-PT"), Some(Lang::PtBr));
+    assert_eq!(Lang::from_code("pt"), Some(Lang::PtBr));
+    assert_eq!(Lang::from_code("en-US"), Some(Lang::En));
+    assert_eq!(Lang::from_code("en"), Some(Lang::En));
+    assert_eq!(Lang::from_code("fr"), None);
+    assert_eq!(Lang::from_code(""), None);
+}
+
+#[test]
 fn plural_follows_each_language_rule() {
     let (one, other) = (Msg::LobbyPlayersOne, Msg::LobbyPlayersOther);
     assert_eq!(Lang::En.plural(one, other, 1), one);

@@ -519,6 +519,20 @@ values". Fill the report.
   in Bevy overlay text (Noto Sans replaces Fira Mono). WASM brotli 4,831,437
   (+9,334 vs step 0, budget +60 KB). No console/page errors on the final build.
 - Measurements before/after (step 12): pending (out of scope for steps 0-5; A-1 unmerged).
+- Step 4 (this commit): inline resolver (top of `<head>`), `assets/i18n/i18n.js`
+  (`TBG_I18N`: lang/t/plural/number/apply/ready/setLang, `cache: 'no-cache'` with
+  en fallback then key fallback, one cached `Intl.NumberFormat` per language,
+  compare-before-write in `apply`, `tbg:lang` event), Settings selector
+  (`English` / `Português (Brasil)`, `aria-pressed`), `UiAction::SetLang` via
+  `data-action="lang:…"`, Rust startup reads `<html lang>` (wasm) / `?lang`
+  (native), `<title>` follows the catalog (`meta.title`), `rejection_text`
+  takes the live `Lang`. Checks (headed Chrome 1920x1080): pt-PT first visit →
+  pt-BR with nothing stored; en-US first visit → en; switch → html/i18n/title/
+  storage all pt-BR + `aria-pressed`; reload → persists; `?lang=en` overrides
+  stored pt-BR for the visit. `trunk build --release` green; no console errors.
+  This removed the step-2 `allow(dead_code)` on `from_code` and the `PtBr`
+  variant (both now constructed); `code/tf/plural/decimal/Localized/Msg/check`
+  allows remain for steps 5-8.
 - Step 2 (this commit): `build.rs` (~150 lines, `serde_json` build-dep with reason
   comment in `Cargo.toml`) + `src/i18n/{mod.rs,check.rs,content.rs,tests.rs}`; 26 keys
   in both `assets/i18n/*.json`. Checks: fmt/clippy/test/workspace/wasm all green
@@ -550,4 +564,18 @@ values". Fill the report.
     `OFL.txt`. Before this step the lobby `◆` already fell back to a system font.
   - Step 3 Bevy proof used a temporary overlay string (reverted before commit;
     `git diff` on `overlay.rs` is empty); the committed tree contains no probe.
+  - Step 4: the Rust side (startup `<html lang>` read, `SetLang` → resource,
+    `rejection_text(lang, …)`) is proven by unit tests (`from_code` tags,
+    `content::rejection` pt-BR contains "Energia"); a browser-visible rejection
+    toast was not captured — capture attempts kept colliding with the 2.0 s/14 s
+    tips toasts (same 1.5 s toast slot), countdown buys stay pending instead of
+    rejecting `NotRunning`, and match regen outruns click-draining. Retry in
+    step 8 when more toast paths are Lang-driven.
+  - Step 4: `?lang=` overrides for the visit only (it does not rewrite
+    `tbg.lang`); the next plain visit returns to the stored language.
+  - Step 4: ranking pages do not load the resolver/`i18n.js` yet (their CSP
+    `default-src 'self'` blocks inline scripts); step 11 owns that, including
+    any CSP adjustment.
+  - Step 4: readiness gating (`data-ready` waiting on `TBG_I18N.ready`) is
+    step 5's job; `lobby.js` still sets `data-ready` immediately.
 - Limitations: steps 0-2 only; A-1 still unmerged, steps 6+ wait for it.
