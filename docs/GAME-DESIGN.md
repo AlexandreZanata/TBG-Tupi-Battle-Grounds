@@ -9,7 +9,7 @@
 
 **Tupi Battle Grounds (TBG)** is an open-source, browser-first, real-time
 1v1 strategy game: automatic combat on a single lane, a continuous
-three-offer shop, branching unit evolution, and faction synergies. No
+five-offer shop, branching unit evolution, and faction synergies. No
 micromanagement — depth comes from what you buy, when you deploy, how you
 evolve, and which factions you combine.
 
@@ -34,9 +34,8 @@ evolve, and which factions you combine.
 | Unit | Deployable character with `Archetype`, `Faction`, stats, `Energy` cost; not a skin | `Unit` |
 | Archetype | Mechanical role: `Tank`, `DPS`, `Support`, `Ranged`, `Control` | `Archetype` |
 | Faction | Visual language + synergy group: `Humans`, `Undead`, `Machines`, `Plants` | `Faction` |
-| SlotCount | Space a unit uses: `One` or `Two` | `SlotCount` |
 | Energy | The only in-match resource; regenerates; not a currency | `Energy` |
-| Shop | Per-player rotating offer of three units during a match; not a store | `Shop` |
+| Shop | Per-player rotating offer of five distinct units during a match; not a store (**Proposed**, D-32) | `Shop` |
 | Evolution | In-match branching upgrade of a deployed unit; not account progression | `Evolution` |
 | Synergy | Bonus while enough units of one `Faction` (or a defined combo) are alive | `Synergy` |
 | PlayerIntention | Client request (purchase, evolve, reposition); a request, never a state change | `PlayerIntention` |
@@ -83,14 +82,18 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-B03 | Allied units pass through each other; a unit stops when an enemy is within its range | Proposed | — |
 | BR-U01 | Deployed units move and fight automatically | Confirmed | S1 |
 | BR-U02 | Every unit has one `Archetype`, one `Faction`, a stat block, and an `Energy` cost | Confirmed | S4, S5 |
-| BR-U03 | Every unit has a `SlotCount` of 1 or 2, visually and mechanically consistent | Confirmed | S4, S5 |
+| BR-U03 | ~~Every unit has a `SlotCount` of 1 or 2~~ | **Removed — D-32** | — |
 | BR-U04 | Damage, deaths, and results are computed only by the authoritative simulation | Confirmed | S1, S2 |
 | BR-U05 | Cosmetics never change stats, hitboxes, or behavior | Confirmed | S1 |
-| BR-U06 | A player's living units may occupy at most `SLOT_CAP` slots; a purchase that would exceed it is rejected | Adapted | S4 ("slot") |
+| BR-U06 | ~~A player's living units may occupy at most `SLOT_CAP` slots~~ | **Removed — D-32** | — |
+| BR-U07 | There is no limit on how many conventional units a player may own; only `Energy` gates purchases | Proposed (D-32) | — |
+| BR-U08 | A summon is a temporary unit created by a unit's ability: it costs no `Energy`, is never sold, never evolves, never summons, neither counts toward nor receives `Synergy`, is not part of the army count, and disappears when its lifetime ends | Proposed (D-32) | — |
+| BR-U09 | Guard: an enemy unit or `Stronghold` whose attack range reaches a living Rampart must target the nearest such Rampart | Proposed (D-32) | — |
+| BR-U10 | A server-protection entity limit, if ever needed, is documented as server protection with measured evidence (ARCHITECTURE), never as an army rule | Proposed (D-32) | — |
 | BR-E01 | `Energy` is the only in-match resource, distinct from any currency | Confirmed | S4 |
 | BR-E02 | `Energy` regenerates over time under server rules, up to a cap | Confirmed | S2, S4 |
 | BR-E03 | Purchases and evolutions exceeding available `Energy` are rejected, never queued or owed | Adapted | S1 |
-| BR-S01 | Each player sees exactly three unit offers | Confirmed | S1, S4 |
+| BR-S01 | Each player sees exactly five offers, five distinct units at any time | Proposed (D-32; was three) | S1, S4 |
 | BR-S02 | Shop rotation timers come from the server match clock, identical for both players | Confirmed | S1, S4 |
 | BR-S03 | The shop sells units only, never stats or advantage | Confirmed | S1 |
 | BR-S04 | A purchased offer refills immediately; all offers rotate on a shared timer | Proposed | — |
@@ -124,11 +127,11 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 ## 4. How a match plays (MVP)
 
 1. **Start.** Two players are paired. 3-second countdown; both start with
-   the same `Energy` and their own three shop offers.
+   the same `Energy` and their own five shop offers.
 2. **Buy = deploy.** Tapping an affordable offer sends a `Purchase`
    intention. If valid, the unit spawns in front of the buyer's
    `Stronghold` and the offer refills. Rejections: insufficient `Energy`,
-   slot cap reached, stale offer, match not running.
+   stale offer, match not running. There is no army cap (BR-U07).
 3. **Automatic combat.** Units walk toward the enemy `Stronghold`. A unit
    stops when its target is in range: the nearest enemy ahead (unit or
    `Stronghold`; ties broken by lowest unit id). It attacks on its
@@ -144,7 +147,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
    that follows the chosen branch. Evolution is instant, costs `Energy`,
    and keeps the unit's current HP percentage.
 6. **Synergy.** Each faction has bonuses at 2 and 4 living units of that
-   faction (a two-slot unit counts as one unit). Bonuses apply to that
+   faction (every conventional unit counts as one; summons do not count). Bonuses apply to that
    faction's units only, recomputed every tick, preserving HP percentage.
 7. **End.** Destroying the enemy `Stronghold` wins immediately. When
    regulation ends, the higher `Stronghold` HP wins; if tied, overtime
@@ -166,23 +169,27 @@ integers (see ARCHITECTURE.md §4).
 | BattleLine length (Stronghold to Stronghold) | 16 | | Countdown | 3 |
 | Regulation | 180 | | Overtime | 60 |
 | Energy start / cap | 5 / 10 | | Energy regen | 1 per ~1.76 s (17 sub-energy/tick; overtime 34) |
-| Shop offers / full rotation | 3 / every 10 | | `SLOT_CAP` | 8 |
+| Shop offers / full rotation | 5 distinct / every 10 (**Proposed**) | | Army cap | none (BR-U07) |
 | Stronghold HP | 4500 | | Stronghold attack | 65 dmg / 1.0 s, range 6 |
 | Evolution cost tier 1 / tier 2 | 3 / 4 | | Reconnect window | 30 |
 
-**Starter roster (8 units, working names).** Two units per faction; every
-archetype appears; two units use two slots.
+**Roster (10 units + 1 summon, working names).** Every archetype appears.
+Bone Brute, Siege Walker, and Rampart are drawn with the large body plan
+(visual only since D-32). Nester, Rampart, and the Beetling are **Proposed**.
 
-| Unit | Faction | Archetype | Slots | Cost | HP | Dmg | Every (s) | Range | Speed | Special |
-|------|---------|-----------|-------|------|----|-----|-----------|-------|-------|---------|
-| Shieldbearer | Humans | Tank | 1 | 3 | 650 | 30 | 1.2 | 0.8 | 0.8 | — |
-| Archer | Humans | Ranged | 1 | 3 | 220 | 45 | 1.0 | 4.5 | 1.0 | — |
-| Bone Brute | Undead | Tank | 2 | 4 | 1300 | 75 | 1.5 | 1.0 | 0.6 | — |
-| Hexer | Undead | Control | 1 | 4 | 300 | 30 | 1.4 | 3.5 | 1.0 | slow 40% for 2 s |
-| Sawbot | Machines | DPS | 1 | 3 | 270 | 55 | 1.05 | 0.8 | 1.3 | — |
-| Siege Walker | Machines | Ranged | 2 | 5 | 700 | 85 | 2.5 | 6.0 | 0.6 | splash 1.5 |
-| Bloomkeeper | Plants | Support | 1 | 3 | 280 | heal 40 | 1.5 | 3.0 | 0.9 | heals instead of attacking |
-| Rootcaller | Plants | Control | 1 | 4 | 300 | 20 | 1.6 | 3.0 | 0.9 | root 0.8 s |
+| Unit | Faction | Archetype | Cost | HP | Dmg | Every (s) | Range | Speed | Special |
+|------|---------|-----------|------|----|-----|-----------|-------|-------|---------|
+| Shieldbearer | Humans | Tank | 3 | 650 | 30 | 1.2 | 0.8 | 0.8 | — |
+| Archer | Humans | Ranged | 3 | 220 | 45 | 1.0 | 4.5 | 1.0 | — |
+| Bone Brute | Undead | Tank | 4 | 1300 | 75 | 1.5 | 1.0 | 0.6 | — |
+| Hexer | Undead | Control | 4 | 300 | 30 | 1.4 | 3.5 | 1.0 | slow 40% for 2 s |
+| Sawbot | Machines | DPS | 3 | 270 | 55 | 1.05 | 0.8 | 1.3 | — |
+| Siege Walker | Machines | Ranged | 5 | 700 | 85 | 2.5 | 6.0 | 0.6 | splash 1.5 |
+| Bloomkeeper | Plants | Support | 3 | 280 | heal 40 | 1.5 | 3.0 | 0.9 | heals instead of attacking |
+| Rootcaller | Plants | Control | 4 | 300 | 20 | 1.6 | 3.0 | 0.9 | root 0.8 s |
+| Nester | Plants | Support | 4 | 300 | 15 | 1.5 | 2.5 | 0.8 | Hatch: every 4.0 s a Beetling; ≤ 2 alive per Nester, ≤ 6 per player |
+| Rampart | Machines | Tank | 5 | 1500 | 35 | 1.5 | 0.8 | 0.5 | Guard (BR-U09) |
+| *Beetling (summon)* | Plants | DPS | — | 90 | 18 | 0.8 | 0.6 | 1.4 | lifetime 10 s; inherits the Nester's tier and branch at hatch |
 
 **Display names (Proposed, ART-DIRECTION §5):** `Sawbot` is shown as
 *Sawknight* and `SiegeWalker` as *Ogre Archer*; code ids and stats are
@@ -200,6 +207,8 @@ unchanged.
 | Siege Walker | Longshot +2 range → Artillery +50% dmg | Shrapnel splash +1.0 → Concussion hits root 0.8 s |
 | Bloomkeeper | Blossom +50% heal → Grove heal splash 1.5 | Bramble +50% HP, gains 25 dmg attack → Thornwarden hits root 0.6 s |
 | Rootcaller | Deep Roots root +0.6 s → Strangle +80% dmg | Spores splash 1.0 → Overgrowth +1 range, root +0.4 s |
+| Nester | Brood ≤ 3 alive per Nester → Hive hatch every 3.0 s | Venom Beetling hits slow 30% 1.0 s → Blight Beetlings +50% HP, +50% dmg |
+| Rampart | Bastion +50% HP → Citadel +50% HP, hits slow 30% 1.5 s | Spiked +60% dmg → Siegebreaker +40% dmg, splash 1.0 |
 
 **Synergies** (living units of the faction: 2 / 4).
 
@@ -278,7 +287,7 @@ P34 must validate them before online integration. P38 gates public release.
 | BR-AR06 | The server validates ranks, budget, schema, ruleset, and session state; clients send selections, never final bonuses or a claimed seat |
 | BR-AR07 | Record both applied presets, their schema, and the RulesetVersion with every result; later tuning never rewrites historical outcomes or Rating |
 | BR-AR08 | Provide one active preset per account, recovered across devices, and local storage for guests; a complete default requires no setup; account ownership never changes available power |
-| BR-AR09 | Casual and Ranked use identical released Arcana rules; existing Elo, FIFO pairing, account identity, Energy, Shop randomness, Evolution costs, SlotCount, and Synergy thresholds do not change |
+| BR-AR09 | Casual and Ranked use identical released Arcana rules; existing Elo, FIFO pairing, account identity, Energy, Shop randomness, Evolution costs, and Synergy thresholds do not change |
 | BR-AR10 | The first version changes unit max HP, normal damage, and Bloomkeeper healing only; no Stronghold, cadence, movement, range, slow/root, regeneration-rate, or splash-radius bonuses |
 
 **Node order is a serialization contract**, not alphabetical order.

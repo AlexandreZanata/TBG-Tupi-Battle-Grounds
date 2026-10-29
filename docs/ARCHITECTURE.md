@@ -58,7 +58,7 @@ Planned modules (create each only when its roadmap task starts):
 
 | Crate | Module | Responsibility |
 |-------|--------|----------------|
-| core | `types.rs` | ids, `Faction`, `Archetype`, `SlotCount`, fixed-point helpers |
+| core | `types.rs` | ids, `Faction`, `Archetype`, fixed-point helpers |
 | core | `content.rs` | roster, evolution trees, synergies, match constants (GAME-DESIGN §5) as `const` tables |
 | core | `rng.rs` | PCG32, ~20 lines, no external crate |
 | core | `state.rs` | `MatchState`, `PlayerState`, `UnitState`, `Stronghold`, `Phase` |
