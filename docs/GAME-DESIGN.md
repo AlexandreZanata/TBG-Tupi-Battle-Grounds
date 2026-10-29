@@ -171,6 +171,15 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 Bot-harness balance pass of 2026-10-28 (P7) is applied below; human
 playtests decide the final values (decision D-14).
 
+**P16-C balance-lab pass, 2026-10-29 (Proposed, D-33).** Eight numbers
+changed on lab evidence confirmed on held-out seeds
+(`docs/media/p16c/confirm.txt`): Evolution tier 1 cost 3 → 2, Stronghold
+attack 65 → 53, Shieldbearer cost 3 → 4, Hexer damage 30 → 29, Sawbot
+cost 3 → 4 and HP 270 → 231, Siege Walker speed 0.6 → 0.66, Rampart cost
+5 → 6. They narrow the faction spread and Evolution's cost gap; they do
+not remove banked-wave dominance or heavy spam (P16-C report). The
+owner's playtest decides.
+
 Distances in tiles, times in seconds. The simulation stores them as
 integers (see ARCHITECTURE.md §4).
 
@@ -180,8 +189,8 @@ integers (see ARCHITECTURE.md §4).
 | Regulation | 180 | | Overtime | 60 |
 | Energy start / cap | 5 / 10 | | Energy regen | 1 per ~1.76 s (17 sub-energy/tick; overtime 34) |
 | Shop offers / full rotation | 5 distinct / every 10 (**Proposed**) | | Army cap | none (BR-U07) |
-| Stronghold HP | 4500 | | Stronghold attack | 65 dmg / 1.0 s, range 6 |
-| Evolution cost tier 1 / tier 2 | 3 / 4 | | Reconnect window | 30 |
+| Stronghold HP | 4500 | | Stronghold attack | 53 dmg / 1.0 s, range 6 |
+| Evolution cost tier 1 / tier 2 | 2 / 4 | | Reconnect window | 30 |
 
 **Roster (10 units + 1 summon, working names).** Every archetype appears.
 Bone Brute, Siege Walker, and Rampart are drawn with the large body plan
@@ -189,16 +198,16 @@ Bone Brute, Siege Walker, and Rampart are drawn with the large body plan
 
 | Unit | Faction | Archetype | Cost | HP | Dmg | Every (s) | Range | Speed | Special |
 |------|---------|-----------|------|----|-----|-----------|-------|-------|---------|
-| Shieldbearer | Humans | Tank | 3 | 650 | 30 | 1.2 | 0.8 | 0.8 | — |
+| Shieldbearer | Humans | Tank | 4 | 650 | 30 | 1.2 | 0.8 | 0.8 | — |
 | Archer | Humans | Ranged | 3 | 220 | 45 | 1.0 | 4.5 | 1.0 | — |
 | Bone Brute | Undead | Tank | 4 | 1300 | 75 | 1.5 | 1.0 | 0.6 | — |
-| Hexer | Undead | Control | 4 | 300 | 30 | 1.4 | 3.5 | 1.0 | slow 40% for 2 s |
-| Sawbot | Machines | DPS | 3 | 270 | 55 | 1.05 | 0.8 | 1.3 | — |
-| Siege Walker | Machines | Ranged | 5 | 700 | 85 | 2.5 | 6.0 | 0.6 | splash 1.5 |
+| Hexer | Undead | Control | 4 | 300 | 29 | 1.4 | 3.5 | 1.0 | slow 40% for 2 s |
+| Sawbot | Machines | DPS | 4 | 231 | 55 | 1.05 | 0.8 | 1.3 | — |
+| Siege Walker | Machines | Ranged | 5 | 700 | 85 | 2.5 | 6.0 | 0.66 | splash 1.5 |
 | Bloomkeeper | Plants | Support | 3 | 280 | heal 40 | 1.5 | 3.0 | 0.9 | heals instead of attacking |
 | Rootcaller | Plants | Control | 4 | 300 | 20 | 1.6 | 3.0 | 0.9 | root 0.8 s |
 | Nester | Plants | Support | 4 | 300 | 15 | 1.5 | 2.5 | 0.8 | Hatch: every 4.0 s a Beetling; ≤ 2 alive per Nester, ≤ 6 per player |
-| Rampart | Machines | Tank | 5 | 1500 | 35 | 1.5 | 0.8 | 0.5 | Guard (BR-U09) |
+| Rampart | Machines | Tank | 6 | 1500 | 35 | 1.5 | 0.8 | 0.5 | Guard (BR-U09) |
 | *Beetling (summon)* | Plants | DPS | — | 90 | 18 | 0.8 | 0.6 | 1.4 | lifetime 10 s; inherits the Nester's tier and branch at hatch |
 
 **Display names (Proposed, ART-DIRECTION §5):** `Sawbot` is shown as

@@ -21,6 +21,10 @@ fn canon() -> &'static Ruleset {
     Ruleset::canon()
 }
 
+/// Seed pairs for match canaries (healers, duel fallbacks): the opponent plays
+/// the same ruleset, so the shift is diluted and needs a larger sample.
+const MATCH_PAIRS: u64 = 256;
+
 fn favor_vs_bot(rules: &'static Ruleset, k: UnitKind, pairs: u64) -> f64 {
     let m = Matchup {
         rules,
@@ -164,26 +168,36 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             let i = base(kind);
             let avg = |m: &duels::Matrix, b: usize| m.average_among(b, i, |_| true).unwrap_or(0.0);
             let budgets = 0..duels::BUDGETS.len();
-            // Doubled HP and damage: flagged oppressive, or at least 20
-            // points stronger against the other base forms at every budget.
+            // A shift must be at least 20 points, or half the room left
+            // (a unit already winning most duels cannot gain 20 more).
+            let moved = |shift: f64, room: f64| shift >= 0.20f64.min(room / 2.0);
+            // Doubled HP and damage: flagged oppressive, or clearly stronger
+            // against the other base forms at every budget.
             let strong = duels::matrix_of(scaled(kind, 2, 2, 1), forms.clone(), 4);
             let caught = strong.flags(canon()).oppressive.contains(&i)
                 || budgets
                     .clone()
-                    .all(|b| avg(&strong, b) - avg(&plain, b) >= 0.20);
+                    .all(|b| moved(avg(&strong, b) - avg(&plain, b), 1.0 - avg(&plain, b)));
+            // Duels alone may miss it (a tank still loses to range): then
+            // the match row must move (`favor-<unit>` vs `bot`).
+            let caught = caught
+                || favor_vs_bot(scaled(kind, 2, 2, 1), kind, MATCH_PAIRS)
+                    >= favor_vs_bot(canon(), kind, MATCH_PAIRS) + 0.10;
             assert!(caught, "{kind:?} ×2 HP and damage was not caught");
-            // A tripled cost is caught as weak, or at least as a drop of
-            // 20 points against the other base forms at every budget.
+            // A tripled cost: flagged weak, or clearly weaker everywhere.
             let dear = duels::matrix_of(scaled(kind, 1, 1, 3), forms.clone(), 4);
             let caught = dear.flags(canon()).weak.contains(&i)
                 || budgets
                     .clone()
-                    .all(|b| avg(&plain, b) - avg(&dear, b) >= 0.20);
+                    .all(|b| moved(avg(&plain, b) - avg(&dear, b), avg(&plain, b)));
+            let caught = caught
+                || favor_vs_bot(scaled(kind, 1, 1, 3), kind, MATCH_PAIRS)
+                    <= favor_vs_bot(canon(), kind, MATCH_PAIRS) - 0.10;
             assert!(caught, "{kind:?} ×3 cost was not caught");
         } else {
             // A pure healer cannot win a duel: measured in matches instead.
-            let canon_score = favor_vs_bot(canon(), kind, 24);
-            let strong = favor_vs_bot(scaled(kind, 2, 2, 1), kind, 24);
+            let canon_score = favor_vs_bot(canon(), kind, MATCH_PAIRS);
+            let strong = favor_vs_bot(scaled(kind, 2, 2, 1), kind, MATCH_PAIRS);
             assert!(
                 strong >= canon_score + 0.10,
                 "{kind:?} ×2 HP and heal: {canon_score:.2} -> {strong:.2}"

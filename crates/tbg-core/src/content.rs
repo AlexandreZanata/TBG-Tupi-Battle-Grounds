@@ -36,14 +36,15 @@ pub const BEETLES_PER_PLAYER: usize = 6;
 pub const BEETLE_LIFETIME: Tick = 200;
 
 pub const STRONGHOLD_HP: i32 = 4_500;
-pub const STRONGHOLD_DAMAGE: i32 = 65;
+/// P16-C lab evidence (D-33, Proposed): 65 → 53.
+pub const STRONGHOLD_DAMAGE: i32 = 53;
 pub const STRONGHOLD_INTERVAL: u16 = 20;
 pub const STRONGHOLD_RANGE: i32 = 6_000;
 
 pub const WINDUP: u16 = 6;
 pub const MIN_INTERVAL: u16 = 5;
-/// Cost of evolving to tier 1 and to tier 2.
-pub const EVOLVE_COST: [u32; 2] = [1_800, 2_400];
+/// Cost of evolving to tier 1 and to tier 2 (P16-C, Proposed: tier 1 3 → 2).
+pub const EVOLVE_COST: [u32; 2] = [1_200, 2_400];
 pub const BP: i64 = 10_000;
 
 /// Synergy thresholds: living units of one faction for level 1 and 2.
@@ -160,7 +161,7 @@ use Faction::*;
 /// Every kind, in `UnitKind` (`ALL_KINDS`) order.
 #[rustfmt::skip]
 pub const UNITS: [UnitDef; 11] = [
-    unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 1_800,
+    unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Fortress") },
@@ -182,21 +183,21 @@ pub const UNITS: [UnitDef; 11] = [
         FormDef { dmg_bp: 3_000, splash_add: 1_200, ..form("Reaper") },
     ]),
     unit(UnitKind::Hexer, "Hexer", Undead, Control, 2_400,
-        [300, 30, 28, 3_500, 50, 0, 0], slow(4_000, 40), [
+        [300, 29, 28, 3_500, 50, 0, 0], slow(4_000, 40), [
         FormDef { on_hit: slow(6_000, 40), ..form("Withering") },
         FormDef { dmg_bp: 6_000, ..form("Doom") },
         FormDef { splash_add: 1_000, ..form("Plague") },
         FormDef { dmg_bp: 4_000, splash_add: 500, ..form("Pestilence") },
     ]),
-    unit(UnitKind::Sawbot, "Sawbot", Machines, Dps, 1_800,
-        [270, 55, 21, 800, 65, 0, 0], None, [
+    unit(UnitKind::Sawbot, "Sawbot", Machines, Dps, 2_400,
+        [231, 55, 21, 800, 65, 0, 0], None, [
         FormDef { atk_bp: 4_000, ..form("Overclock") },
         FormDef { atk_bp: 4_000, speed_bp: 3_000, ..form("Shredder") },
         FormDef { hp_bp: 6_000, ..form("Plating") },
         FormDef { hp_bp: 6_000, splash_add: 800, ..form("Juggernaut") },
     ]),
     unit(UnitKind::SiegeWalker, "Siege Walker", Machines, Ranged, 3_000,
-        [700, 85, 50, 6_000, 30, 1_500, 0], None, [
+        [700, 85, 50, 6_000, 33, 1_500, 0], None, [
         FormDef { range_add: 2_000, ..form("Longshot") },
         FormDef { dmg_bp: 5_000, ..form("Artillery") },
         FormDef { splash_add: 1_000, ..form("Shrapnel") },
@@ -221,7 +222,7 @@ pub const UNITS: [UnitDef; 11] = [
         [300, 15, 30, 2_500, 40, 0, 0], None, [
         form("Brood"), form("Hive"), form("Venom"), form("Blight"),
     ]),
-    unit(UnitKind::Rampart, "Rampart", Machines, Tank, 3_000,
+    unit(UnitKind::Rampart, "Rampart", Machines, Tank, 3_600,
         [1_500, 35, 30, 800, 25, 0, 0], None, [
         FormDef { hp_bp: 5_000, ..form("Bastion") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Citadel") },
