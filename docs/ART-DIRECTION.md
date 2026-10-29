@@ -198,3 +198,64 @@ Palette values, proportions marked *start*, and display names remain
   existing in-match forms, and the four Archer evolutions, remain adapted.
 - Gallery evidence and the unanswered owner decisions are in the
   [P15 phase report](phases/P15-art-direction-and-rig.md#phase-report).
+
+## 11. Visual standard: Unit proportions, faction morphology, and evolution (A-1)
+
+This section formalizes the visual contract (D5) governing unit models on the rig-v2 anatomy, ensuring high readability at the match camera across all archetypes, factions, and tiers.
+
+### 11.1 Class proportion table (Rig-v2 Humanoid ≈ 1.05 tall, head 0.26 of height; Large plan ×1.5)
+
+| Archetype (Class) | Shoulder : Hip Ratio | Limb Thickness Factor | Weapon / Prop Scale | Stance & Posture Characteristics | Readability Priority at Match Camera |
+|---|---|---|---|---|---|
+| **Tank** | 1.40 | ×1.25 | Shield or 2H weapon ≥ 0.70 of body height | Wide stance, grounded feet, vertical heavy posture | Bulky silhouette, immovable mass, prominent defensive shield |
+| **DPS** | 1.15 | ×1.00 | Asymmetric oversized weapon ≥ 0.65 of body height | Forward lean, aggressive crouch, dynamic tension | Silhouette asymmetry, sharp weapon arc, kinetic energy |
+| **Ranged** | 0.95 | ×0.85 | Weapon (bow/arbalest) ≥ 1.05 of body height (taller than body) | Slim upright stance, off-hand free/nocked, drawn tension | Tall vertical weapon profile, clear off-hand silhouette |
+| **Support** | 1.00 | ×0.90 | Staff or relic with glowing top orb/bloom (≥ 0.60 height) | Rounded contours, upright calm posture, open hands | Soft organic curves, luminous head/staff accent, light tones |
+| **Control** | 0.90 | ×0.85 | Tall crooked staff / symbol with lingering glow accent | Tall head silhouette (hood, crown, horns), slender body | High vertical reach, imposing headgear, occult focal point |
+
+*Large body plan:* Units with two slots (`BoneBrute`, `SiegeWalker`) scale uniformly by ×1.50 over humanoid baseline (height ≈ 1.575), shoulder:hip ratio 1.40 minimum, with wide heavy gait and ground impact shockwaves.
+
+### 11.2 Faction morphology and material palette rules
+
+Colors strictly follow the palette defined in §3. Mechanical and organic constraints are non-negotiable:
+
+| Faction | Primary Material (Base) | Secondary Material (Shade) | Accent Material (Glow / Energy) | Structural & Joint Morphology Rules |
+|---|---|---|---|---|
+| **Humans** (*The Crown*) | Steel `#9AA3AD` | Oak wood `#7A5636` | Gold `#D9B44A` (plus linen `#E6D8B8`) | Classic medieval armor, plate and mail, articulated elbow/knee cops, heroic humanoid arcs. |
+| **Undead** (*The Barrow*) | Bone `#D8D2C0` | Rusted iron `#6E4B3A` | Soul-fire `#7CF29A` (plus tattered violet `#4B3B5C`) | Exposed ribcages, jagged bone protrusions, asymmetrical rotting joints, jerky hunched postures. |
+| **Machines** (*The Ironworks*) | Iron `#4A5058` | Brass `#B5893B` | Forge glow `#FF8A3D` (plus leather `#5C3B26`) | **Rigid mechanical pivots and pistons only.** No organic flexing or human limb arcs; boxy plate assemblies, visible rivets and exhausts. |
+| **Plants** (*The Wildwood*) | Bark `#6B4F2E` | Moss green `#4E9F3D` | Bloom pink `#F28AB2` (plus amber sap `#F2B544`) | Curving organic vine boughs, root tendrils, mushroom caps, natural foliage volumes; zero sharp industrial corners. |
+
+### 11.3 Evolution visual progression rules
+
+To ensure tier progression reads instantly without zooming (D-31), every evolution form must satisfy four mandatory criteria:
+1. **Geometric Scale Growth:**
+   - Tier 0 (Base): 1.00× scale.
+   - Tier 1 (Branches A1, B1): exactly **+8 % scale** (1.08×).
+   - Tier 2 (Branches A2, B2): exactly **+16 % scale** (1.16×).
+2. **Surface Material / Color Shift:**
+   - At least one major structural surface (cloak, tabard, pauldrons, carapace, or plating) must undergo a prominent material/color change (not merely an edge highlight or trim line).
+3. **Silhouette Piece Addition:**
+   - Each tier adds at least one distinct new silhouette-breaking attachment: crest, horn, banner, cape, pauldrons, spore sac, or auxiliary weapon piece.
+4. **Branch Identity & Signature Artifact:**
+   - **Branch A (Defensive / Precision):** Reinforced armor pieces, tower shields, extended weapon lengths, balanced symmetric silhouettes.
+   - **Branch B (Offensive / Area / Havoc):** Aggressive asymmetry, dual weapons, heavy warheads, spiked appendages, or auxiliary quivers/censers.
+   - **Tier 2 Signature Artifact:** Must carry the branch's capstone artifact displaying a subtle emissive glow (gold `#D9B44A` or faction/team accent).
+
+### 11.4 Detail density and rendering rules
+
+- **Structural Readability:** Large, clean geometric shapes only. No micro-detail readable below ≈ 6 px from match camera distance.
+- **Shading Treatment:** Smooth-shaded large organic/curved surfaces; crisp flat-shaded small mechanical details, blades, and bevels.
+- **Single Shared Material:** All figures share `FigureLibrary.material` across the workspace. Zero per-unit custom shaders or dynamic pipeline allocations.
+- **HUD & Status Integrity:** Ring bases, rank pips, and vitality bars use standard scale formulas and remain visually anchored regardless of evolution tier.
+
+### 11.5 "Tupi Look" validation checklist
+
+Before signing off on any troop, strongpoint, or arena asset, verify the 6-point Tupi aesthetic checklist:
+- [ ] **Palette Fidelity:** Vertex colors drawn exclusively from §3 palette; no arbitrary uncalibrated RGB hexes.
+- [ ] **Proportions & Scale:** Matches class proportion table (§11.1); head is 26% of body height; weapon ≥ 60% of body; evolution scaling strictly respects 1.00 / 1.08 / 1.16.
+- [ ] **Warm Light Harmony:** Renders coherently under key light `#FFE9C7`, dual ambient sky/ground (`#A9C8E8` / `#6B5A43`), and soft arena fog.
+- [ ] **Joint Pivots & Morphology:** Biological arcs for Humans/Undead/Plants; strict mechanical hinges/pivots with zero organic flexion for Machines.
+- [ ] **Ground Plane / Floor Height:** Feet contact floor firmly at $Y = 0.0$; no clipping into the arena turf and no floating during walk/attack clips.
+- [ ] **Rim Separation:** Silhouette edges separate distinctly against both green grass (`#7BB661`) and sandy road (`#C9A46A`) backgrounds under match camera zoom.
+

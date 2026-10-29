@@ -706,7 +706,8 @@ Measured across 3 runs of 60 seconds each on Chrome 156 (`1280x800`, DPR 1, port
 Step 0 complete (preflight verification).
 Step 1 complete (audit report, corrected F4 live melee reach measurements for all 5 melee units, F5 duplicate projectile verification, 55-form roster audit, triangle and entity counts, misaimed diagonal attack screenshot).
 Step 2 complete (aim lab before sheets, formal 5-scenario performance baseline across 3 runs of 60s, hardware GPU measurements, baseline screenshots and raw metrics committed).
-Steps 3–14 pending.
+Step 3 complete (authored ART-DIRECTION §11 D5 visual standard, class proportion table, faction morphology/material rules, evolution scale progression rules +8%/+16%, and Tupi checklist).
+Steps 4–14 pending.
 
 ### Owner decisions
 
