@@ -401,9 +401,32 @@ values". Fill the report.
 
 > Fill in with real command output and measurements (AGENTS.md step 7).
 
-- Baselines (step 0):
-- String inventory (step 1):
-- Font sizes (step 3):
-- Measurements before/after (step 12):
-- Deviations:
-- Limitations:
+- Baselines (step 0, branch `phase/p41-i18n` @ `77c1107`, 2026-10-29):
+  - Checks: `cargo fmt --all -- --check` clean; `cargo clippy --workspace -- -D warnings`
+    clean (20.04 s); `cargo test --workspace` all green; `cargo check -p tbg-client
+    -p tbg-core --target wasm32-unknown-unknown` clean; `trunk build --release` green.
+  - WASM: `dist/tbg-client-*.wasm` 24,773,413 bytes raw; brotli-11 4,822,103;
+    gzip 7,713,137.
+  - First-load assets (en, brotli-11): index.html 4,780 + js glue 14,999 +
+    lobby.js/css 1,894/2,694 + hud.js/css 3,339/4,372 + editor.js/css 3,356/2,939 +
+    preset.js 720 + 3 fonts (already woff2) 18,856/16,396/16,293 = 90,638 total.
+  - Time to menu (headed Chrome, Intel iGPU Mesa RPL-P, 1920x1080, local
+    http.server, cold profile): `#tbg-lobby[data-ready="true"]` after 1,839 ms
+    (headless runs: 1,906 ms / 1,849 ms).
+  - `?stress=200` menu (headed, 25 s warmup, `?measure` overlay window):
+    frame p50/p95/p99 31.9/52.4/62.5 ms, fps ~40, motion stall 0.00% jump 0.01%.
+  - Practice vs bot at 3-min mark, attended (bought offer 0 every ~12 s, match
+    still live at T+180 s, `over=False`): frame p50/p95/p99 16.8/20.5/23.7 ms,
+    >33 ms frames 0, fps ~48, motion stall 0.54% jump 0.11%. Unattended match
+    ends ~1:07 (DEFEAT, 0 units deployed), so step 12 must repeat the attended
+    procedure for comparability. One hitch noted: T+90 s sample in the
+    unattended run showed fps 5.5 / p95 127 ms (single-window anomaly, recovered).
+  - Render path note: headless-with-SwiftShader runs pin the probe at
+    250.0/250.0/250.0 ms (Bevy delta clamp) and are NOT valid baselines; all
+    numbers above are headed-Chrome on `ANGLE (Intel, Mesa Intel(R) Graphics
+    (RPL-P), OpenGL ES 3.2)`. No NVIDIA-GPU run (Chrome picked Intel).
+- String inventory (step 1): pending.
+- Font sizes (step 3): pending.
+- Measurements before/after (step 12): pending (out of scope for steps 0-5; A-1 unmerged).
+- Deviations: pending.
+- Limitations: pending.
