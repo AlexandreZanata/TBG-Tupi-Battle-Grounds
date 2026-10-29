@@ -1,0 +1,244 @@
+{
+  "previewSchema": 1,
+  "pointBudget": 6,
+  "maxRank": 2,
+  "defaultPreset": [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+  ],
+  "storageKey": "tbg.arcana.preview",
+  "families": [
+    {
+      "id": "war",
+      "name": "War",
+      "color": "#e99579",
+      "description": "Hold the line. Strike with purpose.",
+      "emblem": {
+        "svg": "war.svg",
+        "display": "war.webp"
+      },
+      "banner": {
+        "svg": "banner-war.svg",
+        "display": "banner-war.webp"
+      }
+    },
+    {
+      "id": "precision",
+      "name": "Precision",
+      "color": "#7bc7eb",
+      "description": "Make every shot count.",
+      "emblem": {
+        "svg": "precision.svg",
+        "display": "precision.webp"
+      },
+      "banner": {
+        "svg": "banner-precision.svg",
+        "display": "banner-precision.webp"
+      }
+    },
+    {
+      "id": "vitality",
+      "name": "Vitality",
+      "color": "#a7ce82",
+      "description": "Endure. Restore. Outlast.",
+      "emblem": {
+        "svg": "vitality.svg",
+        "display": "vitality.webp"
+      },
+      "banner": {
+        "svg": "banner-vitality.svg",
+        "display": "banner-vitality.webp"
+      }
+    }
+  ],
+  "roster": [
+    {
+      "name": "Shieldbearer",
+      "archetype": "Tank",
+      "existingHeal": false
+    },
+    {
+      "name": "Archer",
+      "archetype": "Ranged",
+      "existingHeal": false
+    },
+    {
+      "name": "Bone Brute",
+      "archetype": "Tank",
+      "existingHeal": false
+    },
+    {
+      "name": "Hexer",
+      "archetype": "Control",
+      "existingHeal": false
+    },
+    {
+      "name": "Sawknight",
+      "archetype": "DPS",
+      "existingHeal": false
+    },
+    {
+      "name": "Ogre Archer",
+      "archetype": "Ranged",
+      "existingHeal": false
+    },
+    {
+      "name": "Bloomkeeper",
+      "archetype": "Support",
+      "existingHeal": true
+    },
+    {
+      "name": "Rootcaller",
+      "archetype": "Control",
+      "existingHeal": false
+    },
+    {
+      "name": "Nester",
+      "archetype": "Support",
+      "existingHeal": false
+    },
+    {
+      "name": "Rampart",
+      "archetype": "Tank",
+      "existingHeal": false
+    }
+  ],
+  "nodes": [
+    {
+      "index": 0,
+      "id": "guard",
+      "family": "war",
+      "name": "Guard",
+      "archetypes": [
+        "Tank",
+        "DPS"
+      ],
+      "eligibility": "Tank, DPS",
+      "requiresExistingHeal": false,
+      "perRankPercent": 4,
+      "rankTwoPercent": 8,
+      "perRankText": "+4% base max HP",
+      "rankTwoText": "+8%",
+      "asset": {
+        "svg": "guard.svg",
+        "display": "guard.webp"
+      }
+    },
+    {
+      "index": 1,
+      "id": "assault",
+      "family": "war",
+      "name": "Assault",
+      "archetypes": [
+        "Tank",
+        "DPS"
+      ],
+      "eligibility": "Tank, DPS",
+      "requiresExistingHeal": false,
+      "perRankPercent": 3,
+      "rankTwoPercent": 6,
+      "perRankText": "+3% base damage",
+      "rankTwoText": "+6%",
+      "asset": {
+        "svg": "assault.svg",
+        "display": "assault.webp"
+      }
+    },
+    {
+      "index": 2,
+      "id": "piercing",
+      "family": "precision",
+      "name": "Piercing",
+      "archetypes": [
+        "Ranged"
+      ],
+      "eligibility": "Ranged",
+      "requiresExistingHeal": false,
+      "perRankPercent": 3,
+      "rankTwoPercent": 6,
+      "perRankText": "+3% base damage",
+      "rankTwoText": "+6%",
+      "asset": {
+        "svg": "piercing.svg",
+        "display": "piercing.webp"
+      }
+    },
+    {
+      "index": 3,
+      "id": "endurance",
+      "family": "precision",
+      "name": "Endurance",
+      "archetypes": [
+        "Ranged"
+      ],
+      "eligibility": "Ranged",
+      "requiresExistingHeal": false,
+      "perRankPercent": 4,
+      "rankTwoPercent": 8,
+      "perRankText": "+4% base max HP",
+      "rankTwoText": "+8%",
+      "asset": {
+        "svg": "endurance.svg",
+        "display": "endurance.webp"
+      }
+    },
+    {
+      "index": 4,
+      "id": "resilience",
+      "family": "vitality",
+      "name": "Resilience",
+      "archetypes": [
+        "Support",
+        "Control"
+      ],
+      "eligibility": "Support, Control",
+      "requiresExistingHeal": false,
+      "perRankPercent": 4,
+      "rankTwoPercent": 8,
+      "perRankText": "+4% base max HP",
+      "rankTwoText": "+8%",
+      "asset": {
+        "svg": "resilience.svg",
+        "display": "resilience.webp"
+      }
+    },
+    {
+      "index": 5,
+      "id": "renewal",
+      "family": "vitality",
+      "name": "Renewal",
+      "archetypes": [
+        "Support"
+      ],
+      "eligibility": "Support with an existing heal",
+      "requiresExistingHeal": true,
+      "perRankPercent": 5,
+      "rankTwoPercent": 10,
+      "perRankText": "+5% base direct/splash heal",
+      "rankTwoText": "+10%",
+      "asset": {
+        "svg": "renewal.svg",
+        "display": "renewal.webp"
+      }
+    }
+  ],
+  "summon": {
+    "name": "Beetling",
+    "archetype": "DPS",
+    "affected": false,
+    "text": "Beetling (summon): not affected in this preview. Proposed: summons receive no Arcana bonus, matching the BR-U08 exclusion for Synergy; owner approval is still required."
+  },
+  "copy": {
+    "badge": "Preview - not used in matches yet",
+    "intro": "Three families. Six points. A strategy of your own.",
+    "complete": "Complete preset \u00b7 browser preview only.",
+    "partial": "Partial preset \u00b7 spend exactly {budget} points to complete it. Editing remains available.",
+    "controls": "Click / Enter / Space / + to add \u00b7 right-click / \u2212 to remove \u00b7 Esc to close",
+    "eligibility": "Eligibility follows base Archetype through every Evolution. Renewal requires an existing heal; it does not give Nester healing.",
+    "scope": "Proposed values \u00b7 no effect in Practice, Casual or Ranked."
+  }
+}
