@@ -80,7 +80,7 @@ P31 reviewed + owner sign-off
 | P13 | [P13-global-ranking.md](phases/P13-global-ranking.md) | Global ranking + player stats in game and on `/ranking/` | done (phones + VPS in P14) | yes |
 | P14 | [P14-competitive-validation.md](phases/P14-competitive-validation.md) | **Gate:** competitive game validated on a real server, data-safety drill, security review | local rehearsal + fixes done; **real-server run and owner sign-off pending** | yes (local) |
 | P15 | [P15-art-direction-and-rig.md](phases/P15-art-direction-and-rig.md) | Medieval style locked; rig v2; Archer style-lock approved | implemented + reviewed; **owner sign-off (look, names, D-22) and phone FPS pending** | yes (local) |
-| P16-A | [P16A-desktop-lobby-and-arena.md](phases/P16A-desktop-lobby-and-arena.md) | Archer v2 default; desktop lobby and arena match the owner's references | planned | — |
+| P16-A | [P16A-desktop-lobby-and-arena.md](phases/P16A-desktop-lobby-and-arena.md) | Archer v2 default; desktop lobby and arena match the owner's references | implemented locally; **owner look/phone checks and review pending** | — |
 | P16 | [P16-class-animation-sets.md](phases/P16-class-animation-sets.md) | Professional clip sets per Archetype, simulation-timed | planned | — |
 | P17 | [P17-arena-and-background.md](phases/P17-arena-and-background.md) | Living medieval battlefield filling every screen ratio | planned | — |
 | P18 | [P18-strongholds.md](phases/P18-strongholds.md) | Three selectable cosmetic Stronghold styles | planned | — |

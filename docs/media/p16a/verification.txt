@@ -1,0 +1,28 @@
+P16-A local verification, 2026-10-28 (America/Cuiaba)
+
+cargo fmt --all -- --check
+exit 0, no output
+
+cargo clippy --workspace -- -D warnings
+Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.73s
+exit 0
+
+cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.55s
+exit 0
+
+node --check crates/tbg-client/assets/lobby/lobby.js
+exit 0, no output
+
+git diff --check
+exit 0, no output
+
+cargo test --workspace
+95 passed, 0 failed in 20 result groups (including empty binary/doc groups).
+The full real output is preserved in workspace-tests.txt.
+The server integration tests ran outside the socket-restricted sandbox.
+
+trunk build --release (in crates/tbg-client)
+Finished `release` profile [optimized] target(s) in 1m 03s
+2026-10-29T00:22:10.596238Z INFO success
+exit 0

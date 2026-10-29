@@ -1,0 +1,56 @@
+[
+  {
+    "level": "log",
+    "message": "%cINFO%c crates/tbg-client/src/arena/mod.rs:63%c arena meadow: 192 triangles color: whitesmoke; background: #444 color: gray; font-style: italic color: inherit",
+    "timestamp": "2026-10-29T00:23:40.081Z",
+    "url": "http://127.0.0.1:18080/tbg-client-599358903c416765.js"
+  },
+  {
+    "level": "log",
+    "message": "%cINFO%c crates/tbg-client/src/arena/mod.rs:63%c arena BattleLine: 444 triangles color: whitesmoke; background: #444 color: gray; font-style: italic color: inherit",
+    "timestamp": "2026-10-29T00:23:40.082Z",
+    "url": "http://127.0.0.1:18080/tbg-client-599358903c416765.js"
+  },
+  {
+    "level": "log",
+    "message": "%cINFO%c crates/tbg-client/src/arena/mod.rs:63%c arena cliffs: 384 triangles color: whitesmoke; background: #444 color: gray; font-style: italic color: inherit",
+    "timestamp": "2026-10-29T00:23:40.082Z",
+    "url": "http://127.0.0.1:18080/tbg-client-599358903c416765.js"
+  },
+  {
+    "level": "log",
+    "message": "%cINFO%c crates/tbg-client/src/arena/mod.rs:63%c arena sea: 12 triangles color: whitesmoke; background: #444 color: gray; font-style: italic color: inherit",
+    "timestamp": "2026-10-29T00:23:40.082Z",
+    "url": "http://127.0.0.1:18080/tbg-client-599358903c416765.js"
+  },
+  {
+    "level": "log",
+    "message": "%cINFO%c crates/tbg-client/src/arena/mod.rs:63%c arena foam: 384 triangles color: whitesmoke; background: #444 color: gray; font-style: italic color: inherit",
+    "timestamp": "2026-10-29T00:23:40.082Z",
+    "url": "http://127.0.0.1:18080/tbg-client-599358903c416765.js"
+  },
+  {
+    "level": "log",
+    "message": "%cINFO%c crates/tbg-client/src/arena/mod.rs:63%c arena offshore rocks: 2000 triangles color: whitesmoke; background: #444 color: gray; font-style: italic color: inherit",
+    "timestamp": "2026-10-29T00:23:40.083Z",
+    "url": "http://127.0.0.1:18080/tbg-client-599358903c416765.js"
+  },
+  {
+    "level": "log",
+    "message": "%cINFO%c crates/tbg-client/src/arena/mod.rs:63%c arena props: 31828 triangles color: whitesmoke; background: #444 color: gray; font-style: italic color: inherit",
+    "timestamp": "2026-10-29T00:23:40.083Z",
+    "url": "http://127.0.0.1:18080/tbg-client-599358903c416765.js"
+  },
+  {
+    "level": "log",
+    "message": "%cINFO%c crates/tbg-client/src/arena/life.rs:103%c arena life: 624 triangles, 27 animated entities color: whitesmoke; background: #444 color: gray; font-style: italic color: inherit",
+    "timestamp": "2026-10-29T00:23:40.083Z",
+    "url": "http://127.0.0.1:18080/tbg-client-599358903c416765.js"
+  },
+  {
+    "level": "log",
+    "message": "%cINFO%c crates/tbg-client/src/arena/mod.rs:99%c arena total: 37212 triangles color: whitesmoke; background: #444 color: gray; font-style: italic color: inherit",
+    "timestamp": "2026-10-29T00:23:40.083Z",
+    "url": "http://127.0.0.1:18080/tbg-client-599358903c416765.js"
+  }
+]

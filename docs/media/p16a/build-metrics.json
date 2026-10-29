@@ -1,0 +1,9 @@
+{
+  "wasm_bytes": 24584031,
+  "wasm_brotli_bytes": 5556563,
+  "all_assets_uncompressed_bytes": 209308,
+  "lobby_svg_bytes": 21756,
+  "font_woff2_bytes": 35248,
+  "other_first_load_upper_bound_bytes": 342023,
+  "wasm_brotli_quality": 9
+}
