@@ -28,6 +28,9 @@ pub enum Policy {
     /// much leaning on one unit helps (a pure one-unit army measured the
     /// policy's handicap, not the unit).
     Favor(UnitKind),
+    /// `Bot`, but never buys this unit. The value engine uses it so a
+    /// one-sided stat change cannot leak into the control seat's army.
+    BotAvoid(UnitKind),
     /// Uniformly random legal action (sanity floor).
     Random,
 }
@@ -56,6 +59,7 @@ impl Policy {
             Policy::Faction(f) => (5, f.index()),
             Policy::Favor(k) => (6, k as usize),
             Policy::Random => (7, 0),
+            Policy::BotAvoid(k) => (8, k as usize),
         }
     }
 
@@ -74,16 +78,23 @@ impl Policy {
         v
     }
 
+    /// Lab policies that exist only for one-sided value experiments.
+    pub fn value_extra() -> Vec<Policy> {
+        UNIT_KINDS.into_iter().map(Policy::BotAvoid).collect()
+    }
+
     pub fn name(self) -> String {
         match self {
             Policy::Faction(f) => format!("faction-{f:?}").to_lowercase(),
             Policy::Favor(k) => format!("favor-{k:?}").to_lowercase(),
+            Policy::BotAvoid(k) => format!("avoid-{k:?}").to_lowercase(),
             other => format!("{other:?}").to_lowercase(),
         }
     }
 
     pub fn parse(s: &str) -> Option<Policy> {
         let mut all = Policy::pool();
+        all.extend(Policy::value_extra());
         all.push(Policy::Random);
         all.into_iter().find(|p| p.name() == s.to_lowercase())
     }
@@ -139,6 +150,7 @@ impl Controller {
             Policy::Saver => self.saver(view),
             Policy::Faction(f) => self.faction(view, f),
             Policy::Favor(k) => self.favor(view, k),
+            Policy::BotAvoid(k) => self.avoid(view, k),
             Policy::Random => self.random(view),
         }
     }
@@ -246,6 +258,18 @@ impl Controller {
         match pick {
             Some(i) => Some(purchase(i)),
             None => self.bot.decide(view),
+        }
+    }
+
+    fn avoid(&mut self, view: &MatchView, k: UnitKind) -> Option<PlayerIntention> {
+        match self.bot.decide(view) {
+            Some(PlayerIntention::Purchase { offer }) if view.offers[usize::from(offer)] == k => {
+                self.affordable(view)
+                    .filter(|&i| view.offers[i] != k)
+                    .max_by_key(|&i| (self.cost(view, i), std::cmp::Reverse(i)))
+                    .map(purchase)
+            }
+            other => other,
         }
     }
 

@@ -62,7 +62,7 @@ owner in the phase that integrates it. Each phase gates the next.
 Writing these specs approves no value and enables nothing.
 
 ```
-P16-C reviewed ─► P16-D Pre-balance value model (spec written; must fix or explain `saver`)
+P16-C reviewed ─► P16-D Pre-balance value model (engine implemented; must fix or explain `saver`)
  └► P16-F1 Uncapped Energy, Interest, Siege/Collapse   (core+lab+HUD; switch)
      └► P16-F2 Shop Reserve                               (core+lab+HUD; switch)
          └► P16-F3 Stronghold kinds + Fortifications      (core+lab, offline)
@@ -118,7 +118,7 @@ P31 reviewed + owner sign-off
 | P16-A | [P16A-desktop-lobby-and-arena.md](phases/P16A-desktop-lobby-and-arena.md) | Archer v2 default; desktop lobby and arena match the owner's references | done; desktop look owner-approved; physical-phone check pending | yes |
 | P16-B | [P16B-open-army-and-new-units.md](phases/P16B-open-army-and-new-units.md) | No army cap; five Shop offers; Nester and Rampart; large-army balance and performance measured | merged and on the test VPS (owner, 2026-10-29) with placeholder art; **final art, client FPS, fun check, balance decision pending** | yes (code) |
 | P16-C | [P16C-balance-lab.md](phases/P16C-balance-lab.md) | Millions of headless matches proven equal to 1×; ruleset as data; opponent pool, duels, Nash meta, search; reviewed balance proposal; lab contract tests | lab, contracts, 1× proof done; 8-number proposal applied (Proposed); **owner: mechanic for banked waves/spam, then playtest** | yes (self-review) |
-| P16-D | [P16D-prebalance-value-model.md](phases/P16D-prebalance-value-model.md) | Offline PVE model: context-weighted marginal value, Energy shadow price, interactions/dominance, calibrated surrogate, held-out validation; P16-C findings resolved; no production change by itself | spec written; **implementation in progress** | — |
+| P16-D | [P16D-prebalance-value-model.md](phases/P16D-prebalance-value-model.md) | Offline PVE engine: one-sided full-match value, Energy shadow price, interaction canaries, held-out validation; P16-C findings still open | engine implemented and measured; **owner balance decision pending**; P16-F1 blocked by `saver` | — |
 | P16-F1 | [P16F1-economy-and-siege.md](phases/P16F1-economy-and-siege.md) | Uncapped Energy, low-balance Interest, Siege/Collapse, no time-up decision; lab-gated switch; HUD | planned (after P16-D) | — |
 | P16-F2 | [P16F2-shop-reserve.md](phases/P16F2-shop-reserve.md) | Hold one Shop offer for 20 s; lab comparison; HUD | planned | — |
 | P16-F3 | [P16F3-stronghold-kinds-core.md](phases/P16F3-stronghold-kinds-core.md) | Per-seat Stronghold, four kinds, Bounty, Fortifications; lab matrices (offline) | planned | — |

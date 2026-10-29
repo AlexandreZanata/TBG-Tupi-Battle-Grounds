@@ -12,7 +12,7 @@ use crate::duels::Matrix;
 use crate::meta;
 use crate::metrics::MatchResult;
 use crate::policy::Policy;
-use crate::runner::{run_pairs, Matchup};
+use crate::runner::{run_pairs, Matchup, Setup};
 use crate::stats::{self, Estimate};
 
 /// Default views between decisions for every non-`Bot` policy (500 ms).
@@ -62,6 +62,7 @@ pub fn run(
             rules,
             policies: [a, b],
             reaction: [reaction; 2],
+            setup: Setup::None,
         })
         .collect();
     list.into_iter()

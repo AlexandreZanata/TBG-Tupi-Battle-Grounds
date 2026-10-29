@@ -1,0 +1,17 @@
+lambda_ref 0.028748 score/Energy; 100 PVE = 1 Energy at the reference
+
+candidate                          d score           95% interval        PVE           95% interval  source
+shieldbearer_hp_20                   3.70% [   2.81% ..    4.61%]      128.9          97.9 .. 160.3  full-match, one-sided
+archer_damage_20                     8.21% [   7.09% ..    9.36%]      285.6         246.7 .. 325.5  full-match, one-sided
+archer_range_plus_1                 14.57% [  13.34% ..   15.78%]      506.8         464.1 .. 548.8  full-match, one-sided
+sawbot_interval_minus_10             0.25% [  -0.21% ..    0.70%]        8.7           -7.4 .. 24.4  full-match, one-sided
+siegewalker_splash_plus_1            0.49% [   0.29% ..    0.71%]       17.0           10.2 .. 24.6  full-match, one-sided
+bloomkeeper_heal_20                  8.58% [   7.56% ..    9.61%]      298.5         263.1 .. 334.2  full-match, one-sided
+rampart_hp_20                        0.35% [   0.11% ..    0.61%]       12.3            3.8 .. 21.2  full-match, one-sided
+rootcaller_root_plus_0_4s            1.15% [   0.40% ..    1.89%]       39.9           13.8 .. 65.6  full-match, one-sided
+hexer_slow_60                        2.17% [   1.32% ..    3.00%]       75.4          46.1 .. 104.5  full-match, one-sided
+canary_archer_damage_x2             30.75% [  29.30% ..   32.23%]     1069.6       1019.3 .. 1121.0  full-match, one-sided
+canary_shieldbearer_cost_plus_1     -3.25% [  -4.60% ..   -1.92%]     -113.2        -160.1 .. -66.7  full-match, one-sided
+global_evolution_cost_minus_1       -1.15% [  -2.09% ..   -0.22%]          -                      -  full-match, global
+
+12 candidates, 4096 seed pairs each

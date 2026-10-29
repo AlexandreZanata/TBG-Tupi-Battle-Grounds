@@ -1,0 +1,15 @@
+candidate                          discovery PVE   confirmation PVE   static power
+shieldbearer_hp_20                      128.9            145.4          0.406
+archer_damage_20                        285.6            303.4          0.330
+archer_range_plus_1                     506.8            564.3          0.336
+sawbot_interval_minus_10                  8.7              3.6          0.279
+siegewalker_splash_plus_1                17.0             15.5          0.661
+bloomkeeper_heal_20                     298.5            317.6          0.255
+rampart_hp_20                            12.3             22.7          0.583
+rootcaller_root_plus_0_4s                39.9             34.4          0.117
+hexer_slow_60                            75.4             78.6          0.194
+canary_archer_damage_x2                1069.6           1134.6          0.550
+canary_shieldbearer_cost_plus_1        -113.2            -98.3          0.271
+
+discovery vs confirmation rank: Some(0.990909090909091)
+confirmation vs static baseline rank: Some(0.07272727272727272)

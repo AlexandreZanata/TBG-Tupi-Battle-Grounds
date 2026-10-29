@@ -7,10 +7,10 @@ enabled.
 
 **Branch:** `phase/p16d-prebalance-value-model`.
 
-**Status:** planning only. This file specifies a future executable phase;
-none of its steps has been run. The branch that contains it changes only
-docs. No production rule, number, protocol message, server path, client
-path, or dependency is touched by this plan.
+**Status:** the offline value engine is implemented and measured; the
+owner balance decision is still open. No production rule, number,
+protocol message, server path, client path, or dependency is changed by
+the engine. The phase is not marked reviewed.
 
 **Difficulty:** high in method, medium in code. The hard part is choosing
 a defensible measurement model and proving it is useful; the Rust surface
@@ -961,20 +961,111 @@ itself.
 
 ## 17. Phase report
 
-_Not executed. Fill in with real command output only:_
+Executed 2026-10-29 on `phase/p16d-prebalance-value-model`, based on the
+P16-C final proposal (`1ba4d30`, 8-number proposal applied, gate-after
+recorded) plus the P16-F specs. The engine is offline only; no server,
+client, protocol, or competitive rule changed.
 
-- Starting state: HEAD, branch, dirty files, reviewed P16-C commit and
-  gate, P16-F status.
-- Methodology: chosen model, reference contexts, weights, λ_ref, model
-  version.
-- Throughput: value runs, matches/s, wall time, cost per stage.
-- Value table: coverage, top/bottom PVE, notable breakpoints.
-- Interactions: detected families, redundant/dead/oppressive flags,
-  canaries.
-- P16-C findings: `saver`, heavy spam, Evolution, faction spread, with
-  intervals and the decision.
-- Calibration: baseline comparison, held-out metrics, go/no-go.
-- Owner decision and applied numbers (or no-go).
-- Verification commands and exact output.
-- Deviations, blockers, and limitations (bots are not humans; planned
-  systems are hypothetical; any metric that could not be attributed).
+### Status
+
+Implemented: the deterministic scenario runner, one-sided full-match
+counterfactuals, the Energy shadow price, PVE, interaction canaries,
+held-out validation, and the `value`/`validate` commands. The P16-C
+findings are **not closed**; the owner balance decision and any mechanic
+change remain open. P16-F1 is still blocked by the `saver`/banked-wave
+finding.
+
+### Files
+
+| Area | Change |
+|------|--------|
+| `tbg-core/src/headless.rs` | `play_with` hook; `play` is the no-hook wrapper, so online behavior is unchanged |
+| `tbg-core/src/lab.rs` | `lab_spawn_at`; reuses `spawn` and only overrides `x` |
+| `tbg-balance/src/runner.rs` | lab-only `Setup::Energy`, participant-aware under seat swap |
+| `tbg-balance/src/policy.rs` | `BotAvoid(k)` for one-sided control seats |
+| `tbg-balance/src/value/*` | `intervention`, `scenario`, `measure`, `estimate`, `report`, `validate`, `catalog`, `pairs` |
+| `tbg-balance/src/{cli,commands}.rs` | `value` and `validate` commands and flags |
+| `tbg-balance/tests/value.rs` | 12 value contracts |
+| `docs/PREBALANCE.md` | methodology, evidence, contracts, limitations |
+| `docs/media/p16d/` | small measured summaries |
+
+### Commands and real output
+
+```bash
+cargo run --release -p tbg-balance -- value --mode shadow --pairs 4096 --threads 16
+cargo run --release -p tbg-balance -- value --mode reference --pairs 4096 --threads 16
+cargo run --release -p tbg-balance -- value --mode interactions
+cargo run --release -p tbg-balance -- validate --pairs 4096 --threads 16
+```
+
+- Shadow: 21.36 s, 4 points × 4,096 pairs. `λ_ref = 0.028748`; tick 0
+  interval includes zero; ticks 600/1,200/1,800 are positive with
+  intervals excluding zero.
+- Reference: 82.56 s, 196,608 games, 2,381 games/s. Top values: Archer
+  range +1 tile 507 PVE (+14.57 pp), Bloomkeeper heal +20 % 299 PVE
+  (+8.58 pp), Archer damage +20 % 286 PVE (+8.21 pp), Shieldbearer HP
+  +20 % 129 PVE (+3.70 pp), Hexer slow 60 % 75 PVE (+2.17 pp), Rootcaller
+  root +0.4 s 40 PVE (+1.15 pp). Sawbot interval −10 % is 9 PVE with an
+  interval crossing zero; Rampart HP +20 % is 12 PVE.
+- Interactions (deterministic): damage + attack speed = −1,665 HP margin
+  (diminishing returns); root + ranged damage = +856 (super-additive);
+  null pair = 0.
+- Validation: 136.83 s, discovery vs confirmation rank **0.991**;
+  confirmation vs static baseline rank **0.073**. The direct measurement
+  is stable out of sample and not a renamed static formula.
+- Canaries: Archer damage ×2 = 1,070 PVE (+30.75 pp); Shieldbearer cost
+  +1 Energy = −113 PVE (−3.25 pp). Both were caught.
+
+### P16-C findings
+
+- `saver` / banked waves: still open. The tool shows mid-game Energy is
+  valuable (λ ≈ 0.03 per Energy at 0:30 and 1:00), but the `banker-N`
+  policy family and a direct burst-deployment measurement are not
+  implemented. P16-F1 remains blocked.
+- Heavy spam: still open. The one-sided cost canary is negative, but the
+  new-unit-versus-Evolution comparison is not yet a full finding.
+- Evolution value: the global Evolution-cost change is −1.15 pp in the
+  bot pool; it is a global balance effect, not a one-sided PVE. The
+  47.5 % "Evolutions never worth their Energy" duel row remains the
+  primary evidence.
+- Faction spread: not analyzed by this first engine run; the P16-C
+  gate-after (Machines 70.9 %, Plants 28.6 %) is unchanged.
+
+### Deviations
+
+- The surrogate is not implemented. Direct full-match measurement is
+  already cheap at this catalog size (82 s for 196,608 games), and the
+  static baseline ranks poorly (0.073). No surrogate claim is made; a
+  future phase must beat the static baseline on held-out units and
+  policies before using one.
+- Match-snapshot contexts and the `banker-N` policy family are not
+  implemented. The one-sided `Favor(k) vs avoid-k` design is an upper
+  bound, not average match value.
+- The `global_evolution_cost_minus_1` row is reported as a global balance
+  effect, not as PVE.
+- No balance number was applied. The owner checkpoint is open.
+
+### Verification
+
+```bash
+cargo fmt --all -- --check                 # pass
+cargo clippy --workspace -- -D warnings    # pass
+cargo test --workspace                     # 133 passed, 0 failed, 1 ignored
+cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown  # pass
+cargo run --release -p tbg-balance -- gate --pairs 1000 --threads 16    # completed
+```
+
+The gate reproduces the P16-C final result exactly: 40 rows, 18 failing,
+same rows and values (`docs/media/p16d/gate-after-p16d.txt`). The new
+core hooks therefore did not change online behavior. The one ignored test
+is C4b, the full 1× real-clock server match, as in P16-C. The value
+engine adds no dependency and is not a dependency of `tbg-server` or
+`tbg-client`.
+
+### Limitations
+
+The model balances bot policies, not humans. The Energy price is a bot
+lower bound. Micro-scenarios are deterministic and narrow. Planned
+systems (Interest, Siege, Reserve, kinds, Fortifications, Augments,
+Arcanas) have contracts only and no measured value yet. The owner's
+playtest still decides fun and fairness.

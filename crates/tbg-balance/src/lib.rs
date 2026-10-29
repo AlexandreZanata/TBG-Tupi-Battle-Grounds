@@ -14,3 +14,4 @@ pub mod report;
 pub mod runner;
 pub mod search;
 pub mod stats;
+pub mod value;
