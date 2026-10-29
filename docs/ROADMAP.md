@@ -47,9 +47,13 @@ Their files stay in docs/phases/ for reference only. Final-quality phases
 for Nester and Rampart are written after P16-B is reviewed.
 ```
 
-**Strategic expansion — after P16-D (Proposed, D-34).** P16-D (balance,
-answering the P16-C findings) is planned but its spec is not written yet;
-P16-E is not used. P16-F turns the game into a deeper strategy game
+**Strategic expansion — after P16-D (Proposed, D-34).** P16-D now has a
+written plan: an offline universal pre-balance value model (PVE) that
+measures marginal attributes, abilities, Evolutions, economy, Strongholds,
+Augments, and Arcanas before full matches, and resolves the P16-C findings
+(`saver`, heavy spam, Evolution value, faction spread). It is offline only
+and changes no production rule by itself. P16-E is not used. P16-F turns
+the game into a deeper strategy game
 (GAME-DESIGN §10): uncapped Energy with Interest, Siege instead of a
 time-up decision, Shop Reserve, four mechanical Stronghold kinds with
 Fortifications, and Augment rounds. Every mechanic enters the `Ruleset`
@@ -58,7 +62,7 @@ owner in the phase that integrates it. Each phase gates the next.
 Writing these specs approves no value and enables nothing.
 
 ```
-P16-C reviewed ─► P16-D Balance (spec pending; must fix or explain `saver`)
+P16-C reviewed ─► P16-D Pre-balance value model (spec written; must fix or explain `saver`)
  └► P16-F1 Uncapped Energy, Interest, Siege/Collapse   (core+lab+HUD; switch)
      └► P16-F2 Shop Reserve                               (core+lab+HUD; switch)
          └► P16-F3 Stronghold kinds + Fortifications      (core+lab, offline)
@@ -114,7 +118,7 @@ P31 reviewed + owner sign-off
 | P16-A | [P16A-desktop-lobby-and-arena.md](phases/P16A-desktop-lobby-and-arena.md) | Archer v2 default; desktop lobby and arena match the owner's references | done; desktop look owner-approved; physical-phone check pending | yes |
 | P16-B | [P16B-open-army-and-new-units.md](phases/P16B-open-army-and-new-units.md) | No army cap; five Shop offers; Nester and Rampart; large-army balance and performance measured | merged and on the test VPS (owner, 2026-10-29) with placeholder art; **final art, client FPS, fun check, balance decision pending** | yes (code) |
 | P16-C | [P16C-balance-lab.md](phases/P16C-balance-lab.md) | Millions of headless matches proven equal to 1×; ruleset as data; opponent pool, duels, Nash meta, search; reviewed balance proposal; lab contract tests | lab, contracts, and 1× proof done; **owner: balance proposal and the Saver finding, then playtest** | yes (self-review) |
-| P16-D | — (spec not written) | Balance decisions after P16-C: `saver`, heavy spam, Evolution value, faction spread | planned by the owner | — |
+| P16-D | [P16D-prebalance-value-model.md](phases/P16D-prebalance-value-model.md) | Offline PVE model: context-weighted marginal value, Energy shadow price, interactions/dominance, calibrated surrogate, held-out validation; P16-C findings resolved; no production change by itself | spec written; **awaiting owner review**; implementation not started | — |
 | P16-F1 | [P16F1-economy-and-siege.md](phases/P16F1-economy-and-siege.md) | Uncapped Energy, low-balance Interest, Siege/Collapse, no time-up decision; lab-gated switch; HUD | planned (after P16-D) | — |
 | P16-F2 | [P16F2-shop-reserve.md](phases/P16F2-shop-reserve.md) | Hold one Shop offer for 20 s; lab comparison; HUD | planned | — |
 | P16-F3 | [P16F3-stronghold-kinds-core.md](phases/P16F3-stronghold-kinds-core.md) | Per-seat Stronghold, four kinds, Bounty, Fortifications; lab matrices (offline) | planned | — |
@@ -213,6 +217,7 @@ All code for P1–P8 is implemented and validated on the development PC
 | P16-A | [P16A-desktop-lobby-and-arena.md](phases/P16A-desktop-lobby-and-arena.md) | Archer v2 default; desktop lobby and arena match the owner's references | done; desktop look owner-approved; physical-phone check pending | yes |
 | P16-B | Approves the new units' look and the Proposed balance values after the playtest |
 | P16-C | Approves D-33, the balance proposal (or a mechanic change for heavy spam), then playtests the new values |
+| P16-D | Approves the PVE methodology and the balance packet; resolves whether `saver` needs a rule change before P16-F1 |
 | P16 | Approves class animations |
 | P16-F1 | Siege/Collapse (O-4) and uncapped Energy with Interest (O-5) from the lab table; switches canon |
 | P16-F2 | Switches Shop Reserve on |
