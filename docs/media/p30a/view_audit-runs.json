@@ -28,65 +28,268 @@
     }
   },
   "timing_median_us": {
-    "build_current": 0.221,
-    "encode_current": 0.793,
-    "build_a": 0.173,
-    "encode_a": 0.695,
-    "build_b": 0.511,
-    "encode_b": 0.471,
-    "build_c": 0.328,
-    "encode_c": 0.59,
-    "rebuild_a": 0.393,
-    "rebuild_b": 0.886,
-    "rebuild_c": 0.711
+    "build_current": 0.127,
+    "encode_current": 0.474,
+    "build_a": 0.12,
+    "encode_a": 0.381,
+    "build_b": 0.312,
+    "encode_b": 0.261,
+    "build_c": 0.179,
+    "encode_c": 0.352,
+    "rebuild_a": 0.223,
+    "rebuild_b": 0.502,
+    "rebuild_c": 0.393
   },
   "timing_p95_of_run_medians_us": {
-    "build_current": 0.234,
-    "encode_current": 0.815,
-    "build_a": 0.184,
-    "encode_a": 0.713,
-    "build_b": 0.547,
-    "encode_b": 0.485,
-    "build_c": 0.347,
-    "encode_c": 0.61,
-    "rebuild_a": 0.412,
-    "rebuild_b": 0.931,
-    "rebuild_c": 0.741
+    "build_current": 0.131,
+    "encode_current": 0.506,
+    "build_a": 0.124,
+    "encode_a": 0.394,
+    "build_b": 0.325,
+    "encode_b": 0.27,
+    "build_c": 0.184,
+    "encode_c": 0.362,
+    "rebuild_a": 0.232,
+    "rebuild_b": 0.522,
+    "rebuild_c": 0.408
   },
-  "synthetic_cpu": {
-    "20": {
-      "build_current": 0.69,
-      "encode_current": 2.642,
-      "build_a": 0.77,
-      "encode_a": 2.17,
-      "build_b": 2.084,
-      "encode_b": 1.332,
-      "build_c": 1.224,
-      "encode_c": 1.93,
-      "sync_clone_linear": 1.432,
-      "sync_arc_sorted": 1.633
+  "synthetic": [
+    {
+      "units_per_side": 10,
+      "current_avg_b": 296.06,
+      "a_avg_b": 250.98,
+      "b_avg_b": 90.43,
+      "c_avg_b": 165.42,
+      "d_avg_b": 14.87,
+      "current_kb_s": 2.96062,
+      "c_kb_s": 1.65422,
+      "frequency": {
+        "current": {
+          "10hz_bytes_s": 2960.62,
+          "8hz_bytes_s": 2390.18,
+          "5hz_bytes_s": 1535.48
+        },
+        "c": {
+          "10hz_bytes_s": 1654.22,
+          "8hz_bytes_s": 1346.98,
+          "5hz_bytes_s": 886.38
+        }
+      },
+      "cache_max_bytes": {
+        "c": 264,
+        "b": 1232
+      },
+      "timing_median_us": {
+        "build_current": 0.21,
+        "encode_current": 0.8,
+        "build_a": 0.27,
+        "encode_a": 0.68,
+        "build_b": 0.614,
+        "encode_b": 0.439,
+        "build_c": 0.387,
+        "encode_c": 0.601,
+        "sync_clone_linear": 0.24,
+        "sync_arc_sorted": 0.386,
+        "rebuild_a": 0.405,
+        "rebuild_b": 1.043,
+        "rebuild_c": 0.821
+      }
     },
-    "100": {
-      "build_current": 2.021,
-      "encode_current": 10.322,
-      "build_a": 2.442,
-      "encode_a": 8.779,
-      "build_b": 7.208,
-      "encode_b": 4.989,
-      "build_c": 3.822,
-      "encode_c": 7.314,
-      "sync_clone_linear": 17.486,
-      "sync_arc_sorted": 7.179
+    {
+      "units_per_side": 20,
+      "current_avg_b": 564.0,
+      "a_avg_b": 478.25,
+      "b_avg_b": 169.98,
+      "c_avg_b": 312.13,
+      "d_avg_b": 25.21,
+      "current_kb_s": 5.63995,
+      "c_kb_s": 3.12135,
+      "frequency": {
+        "current": {
+          "10hz_bytes_s": 5639.95,
+          "8hz_bytes_s": 4555.22,
+          "5hz_bytes_s": 2926.88
+        },
+        "c": {
+          "10hz_bytes_s": 3121.35,
+          "8hz_bytes_s": 2543.22,
+          "5hz_bytes_s": 1675.28
+        }
+      },
+      "cache_max_bytes": {
+        "c": 528,
+        "b": 2464
+      },
+      "timing_median_us": {
+        "build_current": 0.363,
+        "encode_current": 1.438,
+        "build_a": 0.434,
+        "encode_a": 1.192,
+        "build_b": 1.112,
+        "encode_b": 0.775,
+        "build_c": 0.669,
+        "encode_c": 1.065,
+        "sync_clone_linear": 0.789,
+        "sync_arc_sorted": 0.75,
+        "rebuild_a": 0.752,
+        "rebuild_b": 2.101,
+        "rebuild_c": 1.643
+      }
+    },
+    {
+      "units_per_side": 40,
+      "current_avg_b": 1140.76,
+      "a_avg_b": 972.85,
+      "b_avg_b": 376.06,
+      "c_avg_b": 644.62,
+      "d_avg_b": 50.84,
+      "current_kb_s": 11.4076,
+      "c_kb_s": 6.446149999999999,
+      "frequency": {
+        "current": {
+          "10hz_bytes_s": 11407.6,
+          "8hz_bytes_s": 9220.15,
+          "5hz_bytes_s": 5938.98
+        },
+        "c": {
+          "10hz_bytes_s": 6446.15,
+          "8hz_bytes_s": 5258.5,
+          "5hz_bytes_s": 3477.03
+        }
+      },
+      "cache_max_bytes": {
+        "c": 1092,
+        "b": 5096
+      },
+      "timing_median_us": {
+        "build_current": 0.498,
+        "encode_current": 2.578,
+        "build_a": 0.654,
+        "encode_a": 2.135,
+        "build_b": 1.651,
+        "encode_b": 1.217,
+        "build_c": 0.951,
+        "encode_c": 1.852,
+        "sync_clone_linear": 2.157,
+        "sync_arc_sorted": 1.365,
+        "rebuild_a": 1.418,
+        "rebuild_b": 4.424,
+        "rebuild_c": 3.383
+      }
+    },
+    {
+      "units_per_side": 60,
+      "current_avg_b": 1721.65,
+      "a_avg_b": 1472.1,
+      "b_avg_b": 631.88,
+      "c_avg_b": 983.76,
+      "d_avg_b": 79.3,
+      "current_kb_s": 17.21647,
+      "c_kb_s": 9.837579999999999,
+      "frequency": {
+        "current": {
+          "10hz_bytes_s": 17216.47,
+          "8hz_bytes_s": 13924.58,
+          "5hz_bytes_s": 8982.67
+        },
+        "c": {
+          "10hz_bytes_s": 9837.58,
+          "8hz_bytes_s": 8035.2,
+          "5hz_bytes_s": 5326.98
+        }
+      },
+      "cache_max_bytes": {
+        "c": 1584,
+        "b": 7392
+      },
+      "timing_median_us": {
+        "build_current": 0.618,
+        "encode_current": 3.82,
+        "build_a": 0.852,
+        "encode_a": 3.169,
+        "build_b": 2.352,
+        "encode_b": 1.957,
+        "build_c": 1.204,
+        "encode_c": 2.716,
+        "sync_clone_linear": 4.12,
+        "sync_arc_sorted": 2.086,
+        "rebuild_a": 2.097,
+        "rebuild_b": 7.608,
+        "rebuild_c": 5.822
+      }
+    },
+    {
+      "units_per_side": 100,
+      "current_avg_b": 2875.44,
+      "a_avg_b": 2462.95,
+      "b_avg_b": 1047.04,
+      "c_avg_b": 1653.34,
+      "d_avg_b": 131.32,
+      "current_kb_s": 28.75443,
+      "c_kb_s": 16.5334,
+      "frequency": {
+        "current": {
+          "10hz_bytes_s": 28754.43,
+          "8hz_bytes_s": 23256.42,
+          "5hz_bytes_s": 15010.52
+        },
+        "c": {
+          "10hz_bytes_s": 16533.4,
+          "8hz_bytes_s": 13503.68,
+          "5hz_bytes_s": 8957.48
+        }
+      },
+      "cache_max_bytes": {
+        "c": 2544,
+        "b": 11872
+      },
+      "timing_median_us": {
+        "build_current": 0.897,
+        "encode_current": 6.2,
+        "build_a": 1.308,
+        "encode_a": 5.172,
+        "build_b": 3.443,
+        "encode_b": 3.037,
+        "build_c": 1.756,
+        "encode_c": 4.353,
+        "sync_clone_linear": 8.881,
+        "sync_arc_sorted": 3.67,
+        "rebuild_a": 3.467,
+        "rebuild_b": 16.745,
+        "rebuild_c": 13.147
+      }
     }
-  },
+  ],
   "client_sync_us": {
     "clone_linear": {
-      "median": 0.151,
-      "p95_of_medians": 0.159
+      "median": 0.094,
+      "p95_of_medians": 0.097
     },
     "arc_sorted": {
-      "median": 0.337,
-      "p95_of_medians": 0.362
+      "median": 0.2,
+      "p95_of_medians": 0.206
     }
+  },
+  "h10": {
+    "two_median_us": 0.33,
+    "shared_median_us": 0.255,
+    "alloc_two_calls": 22,
+    "alloc_two_bytes": 1824,
+    "alloc_shared_calls": 31,
+    "alloc_shared_bytes": 1824
+  },
+  "integrity": {
+    "reconnect_c": true,
+    "reconnect_b": true,
+    "delta_loss_mismatches": 12,
+    "delta_loss_recovered": true,
+    "missing_static_c": true,
+    "missing_static_b": true,
+    "hidden_ok": true,
+    "edge_no_units": true,
+    "edge_one_unit": true,
+    "edge_200_units": true,
+    "max_view_bytes": 7754,
+    "size_ceiling_ok": true
   }
 }
