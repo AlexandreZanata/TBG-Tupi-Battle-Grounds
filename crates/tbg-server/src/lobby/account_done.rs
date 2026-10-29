@@ -3,6 +3,8 @@
 //! reply (reconnect, queue join, disconnect in between) is dropped or
 //! answered without changing anything.
 
+use std::net::IpAddr;
+
 use tbg_core::protocol::{AccountError, ErrorCode, Profile, ServerMsg, Token};
 
 use super::accounts::deny;
@@ -15,8 +17,14 @@ impl Lobby {
         &mut self,
         token: Token,
         conn_id: u64,
+        ip: IpAddr,
         result: Result<(AccountId, Profile, String), AccountError>,
     ) {
+        // No account was created: give the reserved slot back, even when the
+        // reply itself is stale and dropped below (BR-P01).
+        if result.is_err() {
+            self.limits.refund_register(ip);
+        }
         let Some(s) = self.session(&token) else {
             return;
         };

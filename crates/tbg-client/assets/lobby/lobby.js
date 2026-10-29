@@ -47,7 +47,7 @@
   });
   async function stats(name) {
     if (statsRequest) statsRequest.abort();
-    set('[data-rank]', 'Unranked');
+    set('[data-global-rank]', 'Unranked');
     set('[data-wins], [data-losses], [data-win-rate]', '—');
     set('[data-record-note]', name ? 'Your global standing' : 'Play Ranked to build your record');
     set('[data-stats-status]', name ? 'Loading your ranked record…' : 'Create an account to compete');
@@ -59,7 +59,7 @@
       if (!response.ok) throw new Error('unavailable');
       const player = await response.json();
       if (root.dataset.player !== name) return;
-      set('[data-rank]', Number.isInteger(player.rank) ? '#' + player.rank + ' Global' : 'Unranked');
+      set('[data-global-rank]', Number.isInteger(player.rank) ? '#' + player.rank + ' Global' : 'Unranked');
       set('[data-wins]', player.wins);
       set('[data-losses]', player.losses);
       set('[data-win-rate]', Number(player.win_rate).toFixed(0) + '%');
