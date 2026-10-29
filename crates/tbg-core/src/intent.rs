@@ -84,7 +84,8 @@ impl MatchState {
             }
         }
         let p = self.player_mut(seat);
-        shop::refill(&mut p.offers, slot, &mut p.rng);
+        // BR-S04: every purchase redraws all five offers, the bought one too.
+        p.offers = shop::draw_offers(&mut p.rng);
         Ok(())
     }
 

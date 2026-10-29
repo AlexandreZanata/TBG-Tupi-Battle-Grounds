@@ -34,7 +34,7 @@ impl MatchState {
             PlayerState {
                 energy: rules.energy_start,
                 regen_frac: 0,
-                offers: shop::initial_offers(&mut rng),
+                offers: shop::draw_offers(&mut rng),
                 stronghold_hp: rules.stronghold_hp,
                 stronghold_cooldown: 0,
                 synergy: [0; 4],

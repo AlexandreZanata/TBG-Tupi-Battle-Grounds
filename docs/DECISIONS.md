@@ -747,3 +747,25 @@ opponents make one duel 0.111, under the 0.20 step).
 **Reopen when** the Shop gains another way to refresh offers (Reserve,
 F2), or a planted imbalance is missed again.
 
+## D-45 · A purchase redraws all five Shop offers — 2026-10-29 (owner decision)
+
+**Decision.** Every purchase now redraws all five offers at random from
+the whole roster, as five distinct units (BR-S01 holds): the unit just
+bought can come back, about half the time. It replaces the earlier
+same-day one-slot refill (BR-S04). There is still no timed rotation.
+`shop::draw_offers` serves the first offers and every redraw; `refill` is
+gone. The player's own RNG stream drives it (BR-S05), so replays and
+hashes stay deterministic; the contract goldens are refrozen.
+**Why.** Choosing a card now reshuffles what the player can reach next,
+so a plan can no longer be broken by one unlucky slot, and a wanted unit
+is available about half the time instead of one time in five.
+**Read as.** "Five random cards, the bought one allowed" is read as five
+*distinct* units, keeping BR-S01; independent draws that may repeat a
+unit inside one set are not implemented. Say if duplicates inside a set
+are wanted.
+**D-44 still holds.** With the full redraw the original C7 still missed a
+planted ×3-cost Siege Walker, so the cheap-spam disjunct and the
+refresh-by-buying `favor` policy stay (both are lab-only).
+**Reopen when** the lab shows the Shop makes banking or one unit
+dominant, or the owner wants duplicates inside an offer set.
+
