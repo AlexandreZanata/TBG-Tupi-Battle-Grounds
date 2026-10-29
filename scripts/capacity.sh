@@ -28,7 +28,17 @@ LIMIT_CPU="${LIMIT_CPU:-}"
 LIMIT_MEM="${LIMIT_MEM:-}"
 TBG_WORKERS="${TBG_WORKERS:-}"
 WORK="$(mktemp -d)"
-trap 'kill "${BOTS:-}" "${SRV:-}" 2>/dev/null || true; rm -rf "$WORK"' EXIT
+stop() {
+	kill "${BOTS:-}" "${SRV:-}" 2>/dev/null || true
+	for _ in $(seq 1 20); do
+		[ -z "${SRV:-}" ] || ! kill -0 "$SRV" 2>/dev/null && break
+		sleep 0.5
+	done
+	kill -9 "${SRV:-}" 2>/dev/null || true
+	wait "${BOTS:-}" "${SRV:-}" 2>/dev/null || true
+	BOTS="" SRV=""
+}
+trap 'stop; rm -rf "$WORK"' EXIT
 
 cargo build --quiet --profile "$PROFILE" -p tbg-server --bins
 BIN="$ROOT/target/$PROFILE"
@@ -133,7 +143,5 @@ for level in $LEVELS; do
 	echo "| $run1 | $cores | $per_core | $rss | $kb | $((late1 - late0)) | $rtt | $inbox | $conn1 | $((run1 - run0)) | $server_kb | $in_kb | $player_kb | $views_s | $view_avg |"
 	# conn0 is sampled to make the connection gauge's growth explicit in the log.
 	: "$conn0"
-	kill "$BOTS" "$SRV" 2>/dev/null || true
-	wait "$BOTS" "$SRV" 2>/dev/null || true
-	BOTS="" SRV=""
+	stop
 done
