@@ -155,7 +155,7 @@ lobby/menu files). It gates no existing phase.
 | P28 | [P28-unit-bloomkeeper.md](phases/P28-unit-bloomkeeper.md) | Bloomkeeper final | planned | — |
 | P29 | [P29-unit-rootcaller.md](phases/P29-unit-rootcaller.md) | Rootcaller final | planned | — |
 | P30 | [P30-fluidity-and-performance.md](phases/P30-fluidity-and-performance.md) | Auto quality, no hitches, device matrix met | planned | — |
-| P30-A | [P30A-network-performance-audit.md](phases/P30A-network-performance-audit.md) | Evidence-based view/network decision; no production wire change; gates P30-B | implemented on `phase/p30a-network-audit`: decision **A + C**, capacity/reconnect/frequency measured, report and raw evidence committed; **reviewer sign-off pending** | — |
+| P30-A | [P30A-network-performance-audit.md](phases/P30A-network-performance-audit.md) | Evidence-based view/network decision; no production wire change; gates P30-B | implemented on `phase/p30a-network-audit`: decision **A + C**, capacity/reconnect/frequency measured, report and raw evidence committed; reviewer audit done 2026-10-29 (gaps closed in the report); merge pending owner | — |
 | P30-B | [P30B-server-capacity.md](phases/P30B-server-capacity.md) | Most players per minimal server; applies the P30-A decision; measured before/after on 1 vCPU / 1 GB | planned | — |
 | P31 | [P31-consistency-and-release.md](phases/P31-consistency-and-release.md) | One visual family; playtest; tag `v0.2.0` | planned | — |
 | P32 | [P32-arcana-baseline-and-combat-contracts.md](phases/P32-arcana-baseline-and-combat-contracts.md) | Refreshed baseline, reproduced combat risks, explicit rule decisions | planned (extra after P31) | — |

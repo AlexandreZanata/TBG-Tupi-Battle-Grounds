@@ -858,3 +858,53 @@ cargo run --release -p tbg-core --example view_audit -> exit 0
 git diff origin/main -- crates/tbg-core/src/protocol.rs crates/tbg-core/src/view.rs -> 0 lines
 (cd crates/tbg-client && trunk build --release) -> success
 ```
+
+### Reviewer audit (2026-10-29)
+
+Re-run by the reviewer on the audit tip plus the fixes below:
+
+- `cargo fmt --check`, `cargo clippy --workspace --all-targets -D warnings`,
+  `cargo test --workspace` (all suites green; `online` has 29 tests on the
+  current main base), `shellcheck scripts/capacity.sh`: pass.
+- `view_audit` re-run: every byte figure (synthetic 296/564/1141/1722/2875 B,
+  natural 133.6/113.8/46.8/78.1/8.8 B) and every integrity assertion
+  reproduces exactly; timings reproduce within noise
+  (`docs/media/p30a/view_audit-review-tight-integers.txt`).
+- Capacity re-run at 2 CPU / 1 GiB, 250 and 500 matches (`WINDOW=20`, host
+  load ~4): 0 late ticks, 0 throttles, RTT p95 2 ms, 306–317 KB/match,
+  1 190–1 471 matches/core, 1.00 KB/s/player: consistent with the report.
+- The branch merges cleanly into `origin/main` (`9a813d7`); the production
+  `protocol.rs` and `view.rs` are unchanged.
+
+Gaps found and closed:
+
+1. **Tighter integers were never measured** (spec step 3). Added to
+   `view_audit`: encoding `x` and `hp` as `u16` varints saves **3.0 %** of
+   all natural bytes and 3.7–4.0 % at 10–100 synthetic units (about 5–7 %
+   of C's size; only units with `x ≥ 8192` pay the third byte today).
+   Below the 20 % threshold alone, so it is not a decision driver, but it
+   is free to add to the P30-B view types (`UnitDynamic.x: u16`, range
+   proven by the harness `expect`). Recommended as part of P30-B step 0.
+2. **No DECISIONS entry**, although P30-B must change append-only protocol
+   contract tests and name a decision. Added D-41 (Proposed).
+3. **`?army=N` was unbounded** (an open-army purchase loop in the browser
+   thread). Clamped to 300.
+4. **`capacity.sh`**: the Markdown separator row had 21 cells for 22
+   columns, a dead `conn0` sample was kept alive with a no-op, and an
+   unrelated comment was edited. Fixed.
+
+Reviewer notes that do not block:
+
+- B (delta) beats C by 21–25 pp, above the 15 pp complexity margin, and
+  fits the RAM budget (+11.9 KB/seat at 100 units, ~8 % of 297 KB/match).
+  Deferral rests on the spec's "defer delta when C clears" rule and on
+  bandwidth not being the measured first limit (1.3 KB/s/player,
+  CPU-quota bursts are). Latency under load for B was not measured. The
+  reopen condition in D-41 covers it.
+- The split's server tracker adds ~0.5 KB/seat at 20 units, whereas the
+  RAM threshold says a split should not grow RSS; the growth is ~0.4 % of
+  a match, accepted.
+- The 1 vCPU / 1000-match "0 late ticks" first pass has no raw file and
+  must not be used as evidence; the committed passes are authoritative.
+- `view_audit.rs` is ~2 200 lines; acceptable as an example harness, but
+  P30-B must not copy it into production modules.
