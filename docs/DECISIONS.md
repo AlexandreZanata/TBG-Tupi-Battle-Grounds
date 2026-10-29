@@ -695,3 +695,16 @@ Historical presets, results and Rating are never reinterpreted.
 **Reopen when** the lab shows a dominant or never-used node, a supreme
 has no viable counter, or the editor/database schema needs another
 version.
+
+**Audit addendum (2026-10-29, `phase/p40-review`).** A review of the
+executor's work re-measured the lab on 3 072 paired seeds with a null
+control and held-out confirmation: the first numbers (512 pairs, ±4 pp,
+duplicated builds) were noise. Deadeye moves from +0.1 to **+0.25 tile**
+(null 49.4 %, +0.1 51.6 %, +0.25 53.7 %, +0.5 57.0 %); Quickdraw no longer
+exceeds the +100 % attack-speed cap (BR-X02). Not fixed, by evidence: the
+default 4/4/4 beats every build that swaps flat originals for War or
+Vitality conditions (war-full 47.7 %, vitality 47.2 %, war-vitality
+44.2 %), and Shieldwall and Combined Arms have a DPS ally in only 7.5 % and
+5.7 % of bot seat-ticks. Those values need policies that play each family
+before they are retuned. Evidence: `docs/media/p40/`.
+
