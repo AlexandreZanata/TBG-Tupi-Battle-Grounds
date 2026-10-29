@@ -354,7 +354,7 @@ in the P34/P40 lab before any value is treated as final.
 | BR-AR07 | Unshaken changes only the duration of an incoming slow or root on Support and Control; slow intensity is untouched and a duration never falls below one tick |
 | BR-AR08 | Emergency Care compares HP before the heal with integer arithmetic (`hp × 10 000 < 40 % × max_hp`); overheal is never converted into another resource and the bonus never creates healing |
 | BR-AR09 | Purification requires a real heal greater than zero on a conventional ally, removes an active slow, and halves the remaining root duration (minimum one tick). It cannot trigger another heal and never removes other control |
-| BR-AR10 | Deadeye adds 0.1 tile (100 milli-tiles) of attack range to conventional Ranged units only; Strongholds, summons and non-Ranged units are unchanged, and no special targeting is added. The initial +0.5 tile proposal measured about 60% against the default and was reduced to keep the supreme inside the 45–55% gate |
+| BR-AR10 | Deadeye adds 0.25 tile (250 milli-tiles) of attack range to conventional Ranged units only; Strongholds, summons and non-Ranged units are unchanged, and no special targeting is added. Dose-response on 3 072 paired seeds (Precision build against the default): +0.1 tile 51.6 %, +0.25 tile 53.7 %, +0.5 tile 57.0 %, none 49.1 % (noise floor 49.4 %); +0.25 keeps the supreme visible and inside the 55 % investigation line (P40 audit, `docs/media/p40/deadeye-dose.txt`) |
 | BR-AR11 | Preset editing is allowed only while idle; joining either queue or creating/joining a room or Quick Challenge freezes selection until cancellation or match end; reconnect and account takeover keep the match's original preset |
 | BR-AR12 | The server validates ranks, budget, prerequisites, schema, ruleset, and session state; clients send selections, never final bonuses or a claimed seat |
 | BR-AR13 | One active preset per account, recovered across devices, and local storage for guests. A schema-1 six-rank preset keeps its ranks; the six new points raise the original nodes to rank 2 in index order, never selecting a child or supreme automatically. The complete default is `[2,2,2,2,2,2,0,0,0,0,0,0,0,0,0]` |
@@ -406,7 +406,7 @@ damage against a target already slowed or rooted when the hit resolves;
 the hit that applies the status does not count. Quickdraw gives Ranged 15%
 attack speed when the current target is within two tiles (2 000
 milli-tiles), respecting `MIN_INTERVAL`. Deadeye, the Precision supreme,
-adds 0.1 tile (100 milli-tiles) of attack range to conventional Ranged units; the initial +0.5 tile proposal measured about 60% against the default and was reduced with P40 lab evidence.
+adds 0.25 tile (250 milli-tiles) of attack range to conventional Ranged units; the owner's +0.5 tile proposal measured 57.0% against the default (above the 55% investigation line) and +0.1 tile only 51.6% (P40 audit, BR-AR10).
 
 **Vitality — support, survival and recovery.** Unshaken shortens incoming
 slow and root durations on Support and Control by 25%. Emergency Care

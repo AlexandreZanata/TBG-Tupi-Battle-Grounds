@@ -67,7 +67,8 @@ pub const ARCANA_VALUES: ArcanaValues = ArcanaValues {
     hunters_focus_dmg_bp: 1_200,
     quickdraw_atk_bp: 1_500,
     quickdraw_distance: 2_000,
-    deadeye_range: 100,
+    // P40 audit: +250 milli-tiles (docs/media/p40/deadeye-dose.txt).
+    deadeye_range: 250,
     unshaken_duration_bp: 2_500,
     emergency_care_heal_bp: 1_500,
     emergency_care_below_bp: 4_000,

@@ -435,7 +435,7 @@
       "requiresExistingHeal": false,
       "perRankPercent": 0,
       "rankTwoPercent": 0,
-      "perRankText": "+0.1 tile attack range",
+      "perRankText": "+0.25 tile attack range",
       "rankTwoText": "",
       "cost": 2,
       "maxRank": 1,
@@ -457,7 +457,7 @@
           1
         ]
       ],
-      "effect": "Every conventional Ranged unit gains 0.1 tile of attack range. Strongholds and summons are unchanged.",
+      "effect": "Every conventional Ranged unit gains 0.25 tile of attack range. Strongholds and summons are unchanged.",
       "asset": {
         "svg": "precision.svg",
         "display": "precision.webp"
