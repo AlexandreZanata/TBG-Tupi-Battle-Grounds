@@ -1,0 +1,13 @@
+# tbg-balance: offline balance lab (D-33, docs/phases/P16C-balance-lab.md).
+# Plays millions of headless matches with the server's own simulation.
+# Native only; never a dependency of tbg-server or tbg-client.
+
+[package]
+name = "tbg-balance"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+# The rules under test; `lab` adds unit duels without the Shop.
+tbg-core = { path = "../tbg-core", features = ["lab"] }
