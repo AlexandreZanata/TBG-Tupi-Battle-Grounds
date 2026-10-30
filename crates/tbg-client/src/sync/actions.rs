@@ -36,6 +36,11 @@ pub(super) fn cue(
                 impacts::land(commands, fx.vfx, Impact::Shards, at, Area::default());
             }
         }
+        Event::Boarded { crab, .. } => {
+            if let Some((_, _, mut anim)) = map.0.get(&crab).and_then(|e| visuals.get_mut(*e).ok()) {
+                anim.play(crate::art::anim::Clip::Cast);
+            }
+        }
         _ => {}
     }
 }

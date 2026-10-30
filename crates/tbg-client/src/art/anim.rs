@@ -38,6 +38,8 @@ pub struct Animator {
     /// Walk in place at content speed (review tools): feet are not planted.
     pub treadmill: bool,
     pub gait: Gait,
+    /// When carried by a carrier (e.g. riding a Cargo Crab), sits mounted in saddle.
+    pub carried: bool,
     base: Clip,
     base_t: f32,
     action: Option<(Clip, f32)>,
@@ -80,6 +82,7 @@ impl Animator {
             aim_at: None,
             treadmill: false,
             gait,
+            carried: false,
             base: Clip::Idle,
             base_t: phase * Clip::Idle.duration(),
             action: None,
@@ -274,7 +277,10 @@ pub fn animate(
         let frame = root.to_matrix() * figure;
         a.observe(root.translation, &frame, dt);
         let (mut pose, walk) = a.advance(dt);
-        if let Some(phase) = walk {
+        if a.carried {
+            apply_mounted(&mut pose);
+            a.feet.reset();
+        } else if let Some(phase) = walk {
             let (r, o) = pose[Joint::Root.index()];
             let root_joint = Mat4::from_rotation_translation(ik::quat(r), o);
             let stride = Stride {
@@ -296,4 +302,15 @@ pub fn animate(
             }
         }
     }
+}
+
+/// Seated saddle posture for units riding a carrier (e.g. Cargo Crab).
+fn apply_mounted(pose: &mut Pose) {
+    pose[Joint::ThighL.index()].0 = Vec3::new(65.0, -12.0, -14.0);
+    pose[Joint::ThighR.index()].0 = Vec3::new(65.0, 12.0, 14.0);
+    pose[Joint::ShinL.index()].0 = Vec3::new(-75.0, 0.0, 0.0);
+    pose[Joint::ShinR.index()].0 = Vec3::new(-75.0, 0.0, 0.0);
+    pose[Joint::FootL.index()].0 = Vec3::new(15.0, 0.0, 0.0);
+    pose[Joint::FootR.index()].0 = Vec3::new(15.0, 0.0, 0.0);
+    pose[Joint::Hips.index()].1[1] -= 0.05;
 }

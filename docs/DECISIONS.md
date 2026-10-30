@@ -1001,3 +1001,27 @@ the 20 Hz simulation are unchanged.
 **Reopen when** the VPS shows bandwidth, not CPU, is still the first limit
 after C (then delta, with a ≥15 pp measured gain over C at 100 units), or
 C fails the 100-seed reconstruction or the 50-match reconnect chaos.
+
+## D-56 · Cargo Crab rework: united pair, carried view bit, and carry speed boost — 2026-10-30 (Proposed)
+
+**Decision.** The Cargo Crab carries an eligible allied non-Tank unit as a
+united pair. The pair advances at the speed of the faster of the two
+multiplied by $(1 + \text{carry bonus})$ (starting at base +20 % / 2 000 bp).
+Single-target attacks target the crab first; area/splash damage continues reaching
+the carried passenger at distance 0. Upon crab death, the passenger dismounts 0.2
+tile behind the crab toward its base with its current HP intact and a 3 s
+re-boarding lock. `PROTOCOL_VERSION` is bumped to 16 to pack `FX_CARRIED`
+(`1 << 14`) in `UnitView.fx` for client saddle presentation.
+**Why.** Gives the Cargo Crab a distinctive and impactful tactical identity
+while preserving deterministic server-authoritative simulation rules. Offline
+balance lab evaluation (`cargo_crab_balance`, 1 024 paired matches with side
+inversion) showed: alone 62.5 % win rate (36.76 s avg duration); with Archer
+passenger 81.2 % win rate (14.71 s avg duration, 81.2 % passenger survival); with
+Bloomkeeper passenger 50.0 % win rate (36.53 s avg duration, 68.8 % survival).
+**Consequences.** `PROTOCOL_VERSION` 16 requires client and server lockstep; older
+peers are refused. The client presents carried units seated in the crab's saddle
+(`y = 0.38`) moving as one unit, with legs draped and no walking footsteps.
+Contract tests guard determinism, symmetry, tiebreak, speed bonus, single-target
+absorption, and view flags.
+**Reopen when** live match telemetry or playtests show carrier pairs excessively
+oppressive against melee comps or too fragile against AoE splash drafts.
