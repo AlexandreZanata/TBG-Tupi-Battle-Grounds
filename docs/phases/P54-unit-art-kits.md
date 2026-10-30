@@ -312,9 +312,34 @@ gave 7–14 FPS and is discarded. Phone measurement is out of scope
 - `p54/gait-legacy-legs.jpg` — adapted Shieldbearer forms walking with
   bent knees and no torn leg meshes.
 
-### Open for the owner
+### Owner approval (2026-10-30)
 
-- Look and fun sign-off of the three kits and the aiming towers.
+The owner reviewed the release build on `localhost` and **approved
+everything**: the three kits, gait v2 and the aiming Artillery (frozen,
+D-48). Follow-up requested the same day and done here (D-49): animated
+defenders and lobby-faithful dress for the four other towers, using the
+lobby portraits (`assets/stronghold/<kind>.webp`) as reference, in the
+same low-poly style:
+
+| Tower | Defender and animation | Dress after the portrait |
+|-------|------------------------|--------------------------|
+| Classic | crossbowman walks round the crown to face the target, aims, recoils | steps, lintel, door studs, arrow slits, gold band |
+| Bastion | gun port: shutter flies open, a falconet runs out, fires, runs back | arched gate on steps, conical corner turrets with pennants, crenellated keep with flag |
+| Treasury | roof dormer: trapdoors open, a brass mortar lobs a purse of gold (gold impact) | eight-sided terracotta roof, gold dome and spire, finials and pennants, team banners, steps, windows, striped awnings |
+| Command | archer on the platform turns, draws and looses | cloth panels on the rail, heraldic banner, arched door, masonry courses, steps |
+
+Evidence: `docs/media/p54/towers-dressed-own.jpg`,
+`towers-dressed-enemy.jpg` (mirrored side), `towers-defenders-zoom.jpg`.
+Checks after the follow-up: fmt ok, client clippy ok, `cargo test -p
+tbg-client` 60 passed (tower barrel aim on both sides covers the new
+`orbit` solve), `trunk build --release` ok at `4292d0d` (1 min 13 s), and
+browser review of both sides.
+
+How it was done and how to make the next kit or defender:
+[`docs/art/UNIT-ART-KITS.md`](../art/UNIT-ART-KITS.md).
+
+### Still open
+
 - The Siege Walker's display name ("Ogre Archer" vs. its bombard).
 - Next kits: Archer (target-aware arrows), then the other units.
 

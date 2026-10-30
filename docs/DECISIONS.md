@@ -802,7 +802,7 @@ every kind for a near-tower army (`docs/media/p17/lab/`).
 **Reopen when** the matrix or live play shows a kind above 55 % against
 the field, or a branch that is never worth buying.
 
-## D-48 · Per-unit art kits; distance-driven gait; aiming Strongholds — 2026-10-30 (owner request)
+## D-48 · Per-unit art kits; distance-driven gait; aiming Strongholds — 2026-10-30 (owner request; approved)
 
 **Decision.** Each character owns a code-built *art kit*
 (`crates/tbg-client/src/art/kits/<unit>/`): its five-form figure on rig v2,
@@ -832,3 +832,43 @@ with a shoulder bombard ("bazooka", owner 2026-10-30), not the P24
 arbalest; its "Ogre Archer" display name is an open owner decision.
 **Reopen when** a kit's pose cost shows up in the 30-unit stress
 measurement, or skinned glTF replaces code-built figures (D-22).
+**Approved (owner, 2026-10-30).** After reviewing the build at
+`localhost` (gallery forms, `&range`, `&evolve`, walking, aiming towers)
+the owner approved the three kits, gait v2 and the Artillery's aim and
+projectiles as they stand; the Artillery's animation is frozen. The
+Siege Walker's display name stays an open owner decision.
+
+## D-49 · Defenders and lobby-faithful dress for the gunless Strongholds — 2026-10-30 (owner request)
+
+**Decision.** Every Stronghold kind now shows who fires its shot, animated
+for its role, and is dressed after its lobby portrait
+(`assets/stronghold/<kind>.webp`, GPT-generated, D-46) in the same
+low-poly vertex-color style as the kits:
+- **Classic:** a crossbowman in a team tabard and kettle hat walks round
+  the crown to face the target, aims, recoils (`gunners.rs`); steps,
+  lintel, door studs, arrow slits and a gold band.
+- **Bastion:** a gun port in the wall facing the enemy; its shutter flies
+  open on every shot and a swivel falconet runs out through it, fires and
+  runs back (Sentinel's ballista keeps firing on Royal Sentinel); an
+  arched gate up a flight of steps, four round corner turrets with
+  conical roofs and team pennants, a crenellated keep with its flag.
+- **Treasury:** a stone dormer on an eight-sided terracotta roof whose
+  trapdoors open for a brass mortar that lobs a purse of gold (its own
+  `ShotKind::Coins` and gold impact); a gold dome with a lantern spire,
+  gold finials and team pennants on the pillars, team banners beside the
+  vault, entry steps, gold-framed windows, striped market awnings.
+- **Command:** an archer on the observation platform turns, draws and
+  looses; cloth panels on the rail, a heraldic banner over an arched
+  door, masonry courses and entry steps.
+**How.** Defenders are ordinary tower pieces: `Motion::Swivel` (walks
+round the tower's axis with the aim), `Motion::Mounted` (a carried
+weapon: orbits, aims, recoils), `Motion::Kick` (a fixed gun: aims,
+recoils; negative recoil runs it out of a port), `Motion::Hatch` (swings
+open on a shot, then shuts). `aim::Turret` gained `orbit` (aim from the
+tower axis) and `arc` (a port's yaw limit). A tower whose defender fell
+with its damage state still looses a bolt from its top.
+**Unchanged.** The Artillery (approved, D-48), all simulation values and
+the render-delayed shot timing.
+**Reopen when** a defender reads poorly at match distance or the owner
+wants a different role animation.
+

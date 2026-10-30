@@ -322,8 +322,11 @@ its owner decision is recorded in the P15 report.
 - **Aiming Strongholds:** the render-delayed `AttackStart` of a tower
   becomes a `TowerOrders` entry; the Artillery carriage and barrel and the
   Sentinel ballista slew onto the target (yaw, elevation along their own
-  shot) and fire cannonball or bolt from the muzzle; gunless kinds loose a
-  crossbow bolt from their top (`arena/strongholds/aim.rs`).
+  shot) and fire cannonball or bolt from the muzzle. The other kinds have
+  animated defenders (D-49, `arena/strongholds/gunners.rs`): Classic
+  crossbowman, Bastion gun port and falconet, Treasury roof mortar lobbing
+  gold, Command archer; a fallen defender leaves a bolt from the top.
+  Guide: [art/UNIT-ART-KITS.md](art/UNIT-ART-KITS.md).
 - **Arena/readability:** the existing generated arena, Stronghold damage
   states, team rings, HP bars, and hit/spawn/death feedback remain integrated.
 - **Review tools:** `?gallery=palette`, `?gallery=blockout&silhouette`, and
