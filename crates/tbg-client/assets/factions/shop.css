@@ -1,0 +1,15 @@
+/* Faction Shop molds surround the existing 3D portrait; only the portrait loses color when unavailable. */
+.battle-card{--faction-accent:#b79b68;--frame-portrait-top:17%;--frame-portrait-height:47%;--frame-name-y:72%;--frame-role-y:79%;--frame-cost-y:90%;height:auto;aspect-ratio:720/1024;clip-path:none;border:0;border-radius:9px;isolation:isolate;overflow:visible;background:transparent;box-shadow:none;transition:transform .12s,box-shadow .15s}
+.battle-card::before{display:none}.battle-card:hover:enabled{filter:none;box-shadow:0 0 15px color-mix(in srgb,var(--faction-accent) 45%,transparent)}.battle-card:focus-visible{outline:3px solid #8cddff;outline-offset:4px}
+.champion-frame{position:absolute;inset:0;z-index:3;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.battle-card .champion-portrait{left:12%;top:var(--frame-portrait-top);width:76%;height:var(--frame-portrait-height);object-fit:cover;object-position:center 43%;background:#14212b;mask-image:linear-gradient(#000 95%,transparent);z-index:1;transition:filter .15s}
+.battle-card.unaffordable,.battle-card.unaffordable:hover:enabled,.battle-card:disabled{filter:none}
+.battle-card.unaffordable .champion-portrait{filter:grayscale(1) brightness(.62)}
+.battle-card .card-caption{inset:0;z-index:4;gap:0;pointer-events:none}
+.battle-card .champion-name{position:absolute;top:var(--frame-name-y);left:13%;right:13%;transform:translateY(-50%);max-width:none;text-align:center;font:700 clamp(14px,1.05vw,19px)/1.1 Battleground,Georgia,serif;color:#f6ebcc;text-shadow:0 1px 2px #000}
+.battle-card .champion-role{position:absolute;top:var(--frame-role-y);left:13%;right:13%;transform:translateY(-50%);padding:0;text-align:center;white-space:nowrap;font:clamp(10px,.72vw,13px)/1.2 Camp,BattleBody,sans-serif;color:#c6d3d6}
+.battle-card .champion-tier{top:22%;right:15%;bottom:auto;z-index:4;padding:2px 4px;font:700 10px/1.1 Camp,BattleBody,sans-serif;background:#091822bc;border-color:var(--faction-accent)}
+.battle-card .card-cost,.battle-card.unaffordable .card-cost{left:50%;right:auto;bottom:auto;top:var(--frame-cost-y);transform:translate(-50%,-50%);width:29%;height:6%;min-height:0;z-index:4;gap:6px;clip-path:none;border:0;background:none;font-size:clamp(13px,1vw,18px);line-height:1;color:#f7ebca;white-space:nowrap}
+.battle-card .card-cost i{width:.68em;height:.68em;border-width:1px;flex:none}.battle-card .card-cost b{font-variant-numeric:tabular-nums;line-height:1}.battle-card.unaffordable .card-cost i{filter:grayscale(1)}.battle-card.unaffordable .card-cost b{color:#9ca5a6}
+.battle-card .card-slots{display:none}
+@media(prefers-reduced-motion:reduce){.battle-card,.battle-card .champion-portrait{transition:none}}

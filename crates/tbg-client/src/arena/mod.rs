@@ -9,8 +9,10 @@ mod geometry;
 mod ground;
 mod life;
 mod lighting;
+mod maritime;
 mod props;
 mod rocks;
+mod scenery;
 mod strongholds;
 pub(super) mod theme;
 mod themes;
@@ -21,8 +23,10 @@ mod water;
 pub(super) type Part = (Shape, Color, Transform);
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Startup, spawn_arena)
-        .add_systems(Update, (towers::damage_states, life::animate));
+    app.add_systems(Startup, spawn_arena).add_systems(
+        Update,
+        (towers::damage_states, life::animate, maritime::animate),
+    );
     strongholds::plugin(app);
 }
 
@@ -61,7 +65,7 @@ fn spawn_arena(
         ("BattleLine", ground::lane(theme)),
         ("cliffs", cliffs::mesh(theme)),
         ("sea", water::sea(theme)),
-        ("foam", water::coast(theme)),
+        ("foam", foam(theme)),
         ("offshore rocks", water::rocks(theme)),
         (
             "props",
@@ -116,9 +120,26 @@ fn spawn_arena(
             NotShadowCaster,
         ));
     }
+    // The maritime scenery (isles, lighthouse, pier) belongs to the Forest's
+    // seascape; the themed arenas have their own offshore silhouettes.
+    if theme == theme::Theme::Forest {
+        total += scenery::spawn(&mut commands, &mut meshes, &mat);
+    }
     // The Strongholds are the kind-based D-46 towers (owner-approved P54
     // look) in every arena: `strongholds` builds them from the views.
     total += life::spawn(&mut commands, &mut meshes, &mut mats, &mat, theme);
     info!("arena total: {total} triangles");
     lighting::spawn(&mut commands, theme);
+}
+
+/// The coastal foam, plus the seascape's offshore foam in the Forest.
+fn foam(theme: theme::Theme) -> Mesh {
+    if theme != theme::Theme::Forest {
+        return water::coast(theme);
+    }
+    mesh::merge(vec![
+        (water::coast(theme), Transform::default()),
+        (scenery::foam(), Transform::default()),
+    ])
+    .unwrap_or_else(|| Cuboid::new(0.01, 0.01, 0.01).into())
 }

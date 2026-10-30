@@ -1,0 +1,156 @@
+{
+  "All affordable": [
+    {
+      "cost": {
+        "bottom": 702.90625,
+        "height": 14.5,
+        "left": 290.3515625,
+        "right": 339.6484375,
+        "top": 688.40625,
+        "width": 49.296875,
+        "x": 290.3515625,
+        "y": 688.40625
+      },
+      "faction": "Machines",
+      "frameFilter": "none",
+      "portraitFilter": "none"
+    },
+    {
+      "cost": {
+        "bottom": 706.28125,
+        "height": 14.5,
+        "left": 474.3515625,
+        "right": 523.6484375,
+        "top": 691.78125,
+        "width": 49.296875,
+        "x": 474.3515625,
+        "y": 691.78125
+      },
+      "faction": "Undead",
+      "frameFilter": "none",
+      "portraitFilter": "none"
+    },
+    {
+      "cost": {
+        "bottom": 708.21875,
+        "height": 14.5,
+        "left": 658.3515625,
+        "right": 707.6484375,
+        "top": 693.71875,
+        "width": 49.296875,
+        "x": 658.3515625,
+        "y": 693.71875
+      },
+      "faction": "Plants",
+      "frameFilter": "none",
+      "portraitFilter": "none"
+    },
+    {
+      "cost": {
+        "bottom": 706.28125,
+        "height": 14.5,
+        "left": 842.3515625,
+        "right": 891.6484375,
+        "top": 691.78125,
+        "width": 49.296875,
+        "x": 842.3515625,
+        "y": 691.78125
+      },
+      "faction": "Undead",
+      "frameFilter": "none",
+      "portraitFilter": "none"
+    },
+    {
+      "cost": {
+        "bottom": 709.421875,
+        "height": 14.5,
+        "left": 1026.3515625,
+        "right": 1075.6484375,
+        "top": 694.921875,
+        "width": 49.296875,
+        "x": 1026.3515625,
+        "y": 694.921875
+      },
+      "faction": "Humans",
+      "frameFilter": "none",
+      "portraitFilter": "none"
+    }
+  ],
+  "None affordable": [
+    {
+      "cost": {
+        "bottom": 702.90625,
+        "height": 14.5,
+        "left": 290.3515625,
+        "right": 339.6484375,
+        "top": 688.40625,
+        "width": 49.296875,
+        "x": 290.3515625,
+        "y": 688.40625
+      },
+      "faction": "Machines",
+      "frameFilter": "none",
+      "portraitFilter": "grayscale(1) brightness(0.62)"
+    },
+    {
+      "cost": {
+        "bottom": 706.28125,
+        "height": 14.5,
+        "left": 474.3515625,
+        "right": 523.6484375,
+        "top": 691.78125,
+        "width": 49.296875,
+        "x": 474.3515625,
+        "y": 691.78125
+      },
+      "faction": "Undead",
+      "frameFilter": "none",
+      "portraitFilter": "grayscale(1) brightness(0.62)"
+    },
+    {
+      "cost": {
+        "bottom": 708.21875,
+        "height": 14.5,
+        "left": 658.3515625,
+        "right": 707.6484375,
+        "top": 693.71875,
+        "width": 49.296875,
+        "x": 658.3515625,
+        "y": 693.71875
+      },
+      "faction": "Plants",
+      "frameFilter": "none",
+      "portraitFilter": "grayscale(1) brightness(0.62)"
+    },
+    {
+      "cost": {
+        "bottom": 706.28125,
+        "height": 14.5,
+        "left": 842.3515625,
+        "right": 891.6484375,
+        "top": 691.78125,
+        "width": 49.296875,
+        "x": 842.3515625,
+        "y": 691.78125
+      },
+      "faction": "Undead",
+      "frameFilter": "none",
+      "portraitFilter": "grayscale(1) brightness(0.62)"
+    },
+    {
+      "cost": {
+        "bottom": 709.421875,
+        "height": 14.5,
+        "left": 1026.3515625,
+        "right": 1075.6484375,
+        "top": 694.921875,
+        "width": 49.296875,
+        "x": 1026.3515625,
+        "y": 694.921875
+      },
+      "faction": "Humans",
+      "frameFilter": "none",
+      "portraitFilter": "grayscale(1) brightness(0.62)"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "reference_1920": {
+    "before": {
+      "p95": 11.2,
+      "fps": 155.6,
+      "draws": 422.5,
+      "heapUsedBytes": 10598907,
+      "firstFrameMs": 720.5
+    },
+    "after": {
+      "p95": 12.9,
+      "fps": 132.4,
+      "draws": 423.6,
+      "heapUsedBytes": 10655697,
+      "firstFrameMs": 653.6
+    },
+    "increase_percent": 15.178571428571441,
+    "maximum_p95_ms": 12.9,
+    "accepted": true
+  },
+  "desktop_1366": {
+    "before": {
+      "p95": 17,
+      "fps": 60,
+      "draws": 422.5,
+      "heapUsedBytes": 10689206,
+      "firstFrameMs": 684
+    },
+    "after": {
+      "p95": 17.1,
+      "fps": 60,
+      "draws": 423.5,
+      "heapUsedBytes": 10761338,
+      "firstFrameMs": 716.2
+    },
+    "increase_percent": 0.588235294117645,
+    "cadence": "Both samples were at 60 FPS; compare only within this pair."
+  },
+  "limitations": [
+    "Local foreground IAB measurements, not a hardware-wide guarantee.",
+    "Reported p95 values have 0.1 ms precision.",
+    "JS heap excludes total WASM/GPU/browser memory."
+  ]
+}
