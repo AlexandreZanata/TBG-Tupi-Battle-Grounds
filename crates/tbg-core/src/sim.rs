@@ -46,6 +46,8 @@ impl MatchState {
                 synergy: [0; 4],
                 last_seq: 0,
                 rng,
+                // Cargo streams 11/12: distinct from the Shop streams 1/2.
+                cargo_rng: Pcg32::new(seed, stream + 10),
                 arcanas: ArcanaPreset::NEUTRAL,
                 augments: Default::default(),
                 augment_resolved: 0,

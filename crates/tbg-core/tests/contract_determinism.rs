@@ -29,19 +29,22 @@ fn bot_matches_are_frozen() {
     // behavior identical (verified).
     // P48-A: `surge_until` grew `UnitFx`; hashes moved once more,
     // behavior identical (verified).
+    // P48-B: `betray_bp`/`betray_stumble` grew `UnitFx` and `cargo_rng`
+    // joined `PlayerState`; hashes moved once more, behavior identical
+    // (verified).
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0xeeb0_f41a_10fe_716f_u64,
+            0x83a5_a17a_bd03_3d93u64,
             2_214,
             Seat::B,
             StrongholdDestroyed,
         ),
-        (7, 0x6e16_a638_0864_685, 3_284, Seat::B, StrongholdDestroyed),
+        (7, 0xf888_bb06_077f_1856, 3_284, Seat::B, StrongholdDestroyed),
         (
             42,
-            0x66bf_c3d3_b770_da1,
+            0x3fc1_d634_494b_7736,
             1_833,
             Seat::B,
             StrongholdDestroyed,

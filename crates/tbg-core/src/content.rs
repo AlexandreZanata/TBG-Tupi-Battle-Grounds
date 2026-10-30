@@ -346,7 +346,7 @@ use Faction::*;
 
 /// Every kind, in `UnitKind` (`ALL_KINDS`) order.
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 24] = [
+pub const UNITS: [UnitDef; 27] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
@@ -583,6 +583,40 @@ pub const UNITS: [UnitDef; 24] = [
         form("Emergency Shield"),
         form("Faster Legs"),
         form("Overdrive"),
+    ]),
+    // P48-B (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave E2, plus the
+    // Cargo Crate summon kind. Not in the Shop pool until the P53 owner switch.
+    unit(UnitKind::Puppetmaster, "Puppetmaster", Undead, Control, 2_400,
+        [260, 0, 160, 4_000, 45, 0, 0], None, [
+        [Ability::Puppet { window: 100, immune: 240, bonus_bp: 0, targets: 1, stumble: false }, Ability::None],
+        [Ability::Puppet { window: 100, immune: 240, bonus_bp: 2_500, targets: 1, stumble: false }, Ability::None],
+        [Ability::Puppet { window: 100, immune: 240, bonus_bp: 5_000, targets: 1, stumble: true }, Ability::None],
+        [Ability::Puppet { window: 100, immune: 240, bonus_bp: 0, targets: 1, stumble: false }, Ability::None],
+        [Ability::Puppet { window: 100, immune: 240, bonus_bp: 0, targets: 2, stumble: false }, Ability::None],
+    ], [
+        form("Painful Betrayal"),
+        form("Cruel Stumble"),
+        FormDef { atk_bp: 3_333, ..form("Faster Strings") },
+        form("Double Puppet"),
+    ]),
+    unit(UnitKind::Smuggler, "Smuggler", Humans, Support, 3_600,
+        [320, 0, 400, 5_000, 30, 0, 0], None, [
+        [Ability::Cargo { every: 400, open: 40, table: [20, 42, 28, 8, 2], double_every: 0 }, Ability::None],
+        [Ability::Cargo { every: 400, open: 40, table: [10, 40, 34, 12, 4], double_every: 0 }, Ability::None],
+        [Ability::Cargo { every: 400, open: 40, table: [6, 28, 38, 20, 8], double_every: 0 }, Ability::None],
+        [Ability::Cargo { every: 360, open: 40, table: [20, 42, 28, 8, 2], double_every: 0 }, Ability::None],
+        [Ability::Cargo { every: 400, open: 40, table: [20, 42, 28, 8, 2], double_every: 3 }, Ability::None],
+    ], [
+        form("Better Connections"),
+        form("Black Market"),
+        // 400 ticks → 360 (18 s): any atk_bp in 1081..=1111 lands exactly.
+        FormDef { atk_bp: 1_100, ..form("Faster Deliveries") },
+        form("Double Shipment"),
+    ]),
+    // Cargo crate: 120 HP, no attack, no movement (speed 0), targetable.
+    unit(UnitKind::Crate, "Crate", Humans, Support, 0,
+        [120, 0, 20, 0, 0, 0, 0], None, NO_ABILITIES, [
+        form("Crate"), form("Crate"), form("Crate"), form("Crate"),
     ]),
 ];
 

@@ -61,7 +61,7 @@ const ROSTER: [Row; 11] = {
 /// order. Not in the Shop pool until the P53 owner switch; checked against
 /// the §11 starting values in the document's units.
 #[rustfmt::skip]
-const STAGED: [Row; 13] = {
+const STAGED: [Row; 15] = {
     use Archetype::*; use Faction::*; use UnitKind::*;
     #[allow(clippy::too_many_arguments)]
     const fn r(kind: UnitKind, faction: Faction, archetype: Archetype,
@@ -88,6 +88,8 @@ const STAGED: [Row; 13] = {
         r(Drumguard,    Humans,   Support, 3,  260, 0,   0, 100, 300, 100,   0, None),
         r(Leechroot,    Plants,   Dps,     3,  220, 10,  0, 160, 120, 90,    0, None),
         r(CargoCrab,    Machines, Tank,    5, 1400, 20,  0, 150, 80,  50,    0, None),
+        r(Puppetmaster, Undead,   Control, 4,  260, 0,   0, 800, 400, 90,    0, None),
+        r(Smuggler,     Humans,   Support, 6,  320, 0,   0, 2000, 500, 60,    0, None),
     ]
 };
 
@@ -156,7 +158,7 @@ fn roster_composition() {
     // conventional kinds, P45 another three, P46 another three and P47 two
     // more (§11, not in the Shop pool until P53); the pool itself stays
     // exactly the ten purchasable units.
-    assert_eq!(UNITS.len(), 24);
+    assert_eq!(UNITS.len(), 27);
     assert_eq!(UNIT_KINDS.len(), 10);
     assert!(UNIT_KINDS.iter().all(|k| k.is_conventional()));
     assert_eq!(
@@ -164,9 +166,9 @@ fn roster_composition() {
         ALL_KINDS.to_vec()
     );
     for (f, n) in [
-        (Faction::Humans, 6),
-        (Faction::Undead, 4),
-        (Faction::Machines, 6),
+        (Faction::Humans, 7),
+        (Faction::Undead, 5),
+        (Faction::Machines, 5),
         (Faction::Plants, 7),
     ] {
         let sold = UNITS
@@ -191,6 +193,24 @@ fn hit(h: Option<OnHit>) -> String {
         Some(OnHit::Slow { bp, ticks }) => format!("slow {bp}bp/{ticks}t"),
         Some(OnHit::Root { ticks }) => format!("root {ticks}t"),
     }
+}
+
+/// The Smuggler's cargo crate (P48-B): a summon kind with 120 HP, no
+/// attack and no movement, never in the Shop pool.
+#[test]
+fn cargo_crate_is_a_summon_kind() {
+    let u = def(UnitKind::Crate);
+    assert!(u.kind.is_summon());
+    assert_eq!((u.cost, u.hp, u.damage), (0, 120, 0));
+    assert_eq!(u.speed, 0, "crates never move");
+    assert!(!UNIT_KINDS.contains(&u.kind), "never in the Shop");
+    assert!(
+        !ALL_KINDS
+            .into_iter()
+            .filter(|k| k.is_conventional())
+            .any(|k| k == u.kind),
+        "never counted as conventional"
+    );
 }
 
 fn form_line(unit: &str, f: &FormDef) -> String {
@@ -314,7 +334,19 @@ Leechroot/Blood Hunger: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=
 Cargo Crab/Reinforced Shell: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Cargo Crab/Emergency Shield: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Cargo Crab/Faster Legs: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Cargo Crab/Overdrive: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Cargo Crab/Overdrive: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Puppetmaster/Painful Betrayal: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Puppetmaster/Cruel Stumble: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Puppetmaster/Faster Strings: hp=0 dmg=0 atk=3333 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Puppetmaster/Double Puppet: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Smuggler/Better Connections: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Smuggler/Black Market: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Smuggler/Faster Deliveries: hp=0 dmg=0 atk=1100 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Smuggler/Double Shipment: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {

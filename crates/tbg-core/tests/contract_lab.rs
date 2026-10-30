@@ -97,12 +97,15 @@ fn c2_per_tick_traces_are_frozen() {
     // identical (verified).
     // P48-A: `surge_until` grew `UnitFx`; hashes moved once more,
     // behavior identical (verified).
+    // P48-B: `betray_bp`/`betray_stumble` grew `UnitFx` and `cargo_rng`
+    // joined `PlayerState`; hashes moved once more, behavior identical
+    // (verified).
     let goldens = [
-        (1, 0xc961_a8f3_7248_272f, 0xeeb0_f41a_10fe_716f, 2_214),
-        (7, 0x5bdf_ae44_8c3e_71ef, 0x6e16_a638_0864_685, 3_284),
-        (42, 0x4df1_0b03_be3f_96db, 0x66bf_c3d3_b770_da1, 1_833),
-        (1000, 0x149a_89f3_2141_6632, 0x2d54_f568_da0a_3149, 2_641),
-        (65535, 0xd7c7_174a_dbba_4ae3, 0x55cd_3184_1b02_0467, 1_740),
+        (1, 0xbf08_ca77_e13b_f05b, 0x83a5_a17a_bd03_3d93, 2_214),
+        (7, 0xd836_6bf0_ffe9_4133, 0xf888_bb06_077f_1856, 3_284),
+        (42, 0x14ad_2e7e_3455_6210, 0x3fc1_d634_494b_7736, 1_833),
+        (1000, 0x0e04_bbff_0c07_0ede, 0xd079_1d10_95d5_d965, 2_641),
+        (65535, 0xea8e_f129_d419_3753, 0xff6c_3897_2bed_89ea, 1_740),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

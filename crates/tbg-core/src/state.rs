@@ -79,8 +79,13 @@ pub struct UnitFx {
     /// Rewritten every tick by the bonds pass, like the march fields.
     pub march_ignore_slow: bool,
     /// Cargo Crab B2 Overdrive: surge movement until this tick (re-armed
-    /// 220 ticks after it lapses, i.e. a 15 s cooldown from a 4 s surge).
+    /// 220 ticks after it lapses, i.e. a 15 s cooldown on a 4 s surge).
     pub surge_until: Tick,
+    /// Puppetmaster betrayal bonus, in basis points (A1 +25 %, A2 +50 %),
+    /// stored at confuse time; applied to the betrayal hit.
+    pub betray_bp: i16,
+    /// Puppetmaster A2 Stumble: the betrayer is slowed 30 % for 2 s.
+    pub betray_stumble: bool,
     pub bond: Option<UnitId>,
     pub carrier: Option<UnitId>,
     pub passenger: Option<UnitId>,
@@ -142,6 +147,9 @@ pub struct PlayerState {
     pub synergy: [u8; 4],
     pub last_seq: u32,
     pub rng: Pcg32,
+    /// Smuggler cargo stream (P48-B): a new hidden stream per seat, never
+    /// in views (BR-S05).
+    pub cargo_rng: Pcg32,
     /// Frozen for the whole match (BR-AR05); public once paired.
     pub arcanas: ArcanaPreset,
     /// Copies owned per Augment id (compact, fixed size; no purchase list).
@@ -377,10 +385,15 @@ impl MatchState {
 
     pub fn stats_of(&self, u: &Unit) -> Stats {
         // Summons never receive Synergy or Arcanas (BR-U08, D-40); only
-        // Augments naming Beetlings reach them (BR-AG10).
+        // Augments naming Beetlings reach them (BR-AG10). Cargo and crates
+        // take no Augments at all (P48-B, §C.11).
         if u.is_summon() {
             let p = self.player(u.seat);
-            let bonus = crate::augment::unit_bonus(&p.augments, p.synergy, u.kind, u.tier);
+            let bonus = if u.kind == UnitKind::Beetling {
+                crate::augment::unit_bonus(&p.augments, p.synergy, u.kind, u.tier)
+            } else {
+                crate::content::AugmentBonus::default()
+            };
             return self.rules.stats_with(
                 u.kind,
                 u.tier,

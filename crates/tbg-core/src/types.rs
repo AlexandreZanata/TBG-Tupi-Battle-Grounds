@@ -100,6 +100,11 @@ pub enum UnitKind {
     // P48-A (Proposed, staged): wave E1. Same staging rules.
     Leechroot,
     CargoCrab,
+    // P48-B (Proposed, staged): wave E2. Same staging rules.
+    Puppetmaster,
+    Smuggler,
+    /// Smuggler cargo crate (BR-U08); never in the Shop.
+    Crate,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -119,7 +124,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
 #[rustfmt::skip]
-pub const ALL_KINDS: [UnitKind; 24] = [
+pub const ALL_KINDS: [UnitKind; 27] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -144,12 +149,16 @@ pub const ALL_KINDS: [UnitKind; 24] = [
     UnitKind::Drumguard,
     UnitKind::Leechroot,
     UnitKind::CargoCrab,
+    UnitKind::Puppetmaster,
+    UnitKind::Smuggler,
+    UnitKind::Crate,
 ];
 
 impl UnitKind {
-    /// Summons are created by abilities, never bought (BR-U08).
+    /// Summon kinds: created by abilities, never bought (BR-U08). Beetlings
+    /// hatch from Nesters; crates drop from Smugglers.
     pub fn is_summon(self) -> bool {
-        self == UnitKind::Beetling
+        matches!(self, UnitKind::Beetling | UnitKind::Crate)
     }
 
     /// Conventional units: everything the lab duels and favors (BR-U08:
@@ -163,7 +172,7 @@ impl UnitKind {
 /// lab and the Practice preview draw from (P46: 19 kinds; grows per wave
 /// until the P53 owner switch moves it into `CANON.pool`).
 #[rustfmt::skip]
-pub const FULL_POOL: [UnitKind; 23] = [
+pub const FULL_POOL: [UnitKind; 25] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -187,6 +196,8 @@ pub const FULL_POOL: [UnitKind; 23] = [
     UnitKind::Drumguard,
     UnitKind::Leechroot,
     UnitKind::CargoCrab,
+    UnitKind::Puppetmaster,
+    UnitKind::Smuggler,
 ];
 
 /// All playable archetypes, in glossary order.

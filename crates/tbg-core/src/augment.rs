@@ -263,8 +263,10 @@ pub fn forgo(state: &mut MatchState, seat: Seat, round: u32) -> Result<(), Rejec
 
 fn filter_matches(filter: AugmentFilter, kind: UnitKind, tier: u8) -> bool {
     let def = crate::content::def(kind);
+    // Only Beetlings match Beetling augments; other summons (cargo,
+    // crates) take no Augments at all (BR-U08).
     if kind.is_summon() {
-        return filter == AugmentFilter::Beetlings;
+        return kind == UnitKind::Beetling && filter == AugmentFilter::Beetlings;
     }
     match filter {
         AugmentFilter::Conventional => true,
