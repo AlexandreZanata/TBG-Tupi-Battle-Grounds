@@ -274,25 +274,6 @@ fn eval_bond(state: &MatchState, di: usize) -> Option<UnitId> {
         .map(|(_, id)| id)
 }
 
-/// Oilpress formation anchor check (§C.8): an Oilpress counts as engaged
-/// while a living enemy unit stands within `engage` in front of it.
-pub(crate) fn engaged_oilpress(state: &MatchState, idx: usize) -> Option<(i32, i32)> {
-    let u = &state.units[idx];
-    let [a, b] = state.rules().def(u.kind).ability(u.tier, u.branch);
-    let formation = [a, b].into_iter().find_map(|ability| match ability {
-        Ability::Formation { engage, gap } => Some((engage, gap)),
-        _ => None,
-    });
-    let (engage, gap) = formation?;
-    let dir = u.seat.dir();
-    let engaged = state.units.iter().any(|e| {
-        #[cfg(feature = "bench-profile")]
-        crate::profiling::FORMATION_CANDIDATES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        e.seat != u.seat && e.hp > 0 && (e.x - u.x) * dir > 0 && (e.x - u.x).abs() <= engage
-    });
-    engaged.then_some((u.x, gap))
-}
-
 /// Cargo Crab boarding (P48-A, §C.15): every tick, each crab without a
 /// passenger boards the nearest eligible ally within `board` (conventional,
 /// not a Tank, not carried, not under a re-board lock; ties lowest id).

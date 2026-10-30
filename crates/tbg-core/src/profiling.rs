@@ -1,4 +1,4 @@
-//! Opt-in operation counts for single-threaded native experiments. These
+//! Opt-in operation counts for isolated native experiments. These
 //! counters are not simulation state, serialized, or enabled online.
 
 use std::sync::atomic::{AtomicU64, Ordering::Relaxed};
