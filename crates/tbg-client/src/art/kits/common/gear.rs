@@ -32,78 +32,12 @@ pub fn sword(at: Node, len: f32, blade: Color, guard: Color) -> Vec<PartSpec> {
     ]
 }
 
-/// A one-handed axe: haft along +Z, the head at its end, edge down.
-pub fn axe(at: Node, haft: f32, head: f32, metal: Color, wood: Color) -> Vec<PartSpec> {
-    vec![
-        part(at, Cyl(0.024, haft), wood, [0.0, 0.0, haft * 0.35]).rot(X90),
-        part(
-            at,
-            Box(0.03, head, head * 0.7),
-            metal,
-            [0.0, -head * 0.35, haft * 0.8],
-        ),
-        part(
-            at,
-            Box(0.034, 0.025, head * 0.75),
-            STEEL,
-            [0.0, -head * 0.85, haft * 0.8],
-        ),
-    ]
-}
-
-/// A great polearm axe held upright: long haft along +Y, a broad head and
-/// a back spike at the top.
-pub fn poleaxe(at: Node, haft: f32, metal: Color, wood: Color) -> Vec<PartSpec> {
-    let top = haft * 0.7;
-    vec![
-        part(at, Cyl(0.024, haft), wood, [0.0, haft * 0.2, 0.0]),
-        part(at, Box(0.03, 0.3, 0.26), metal, [0.0, top - 0.1, 0.14]),
-        part(at, Box(0.034, 0.32, 0.03), STEEL, [0.0, top - 0.1, 0.28]),
-        part(at, Cone(0.03, 0.14), metal, [0.0, top - 0.08, -0.08]).rot([-90.0, 0.0, 0.0]),
-        part(at, Cone(0.025, 0.12), STEEL, [0.0, top + 0.12, 0.0]),
-        part(at, Cyl(0.03, 0.04), GOLD, [0.0, top - 0.3, 0.0]),
-    ]
-}
-
-/// A flanged mace along +Z.
-pub fn mace(at: Node, len: f32, head: Color) -> Vec<PartSpec> {
-    let mut v = vec![
-        part(at, Cyl(0.022, len), DARK_LEATHER, [0.0, 0.0, len * 0.35]).rot(X90),
-        part(at, Ball(0.07), head, [0.0, 0.0, len * 0.85]),
-    ];
-    for a in [0.0f32, 90.0] {
-        v.push(part(at, Box(0.16, 0.025, 0.08), head, [0.0, 0.0, len * 0.85]).rot([0.0, 0.0, a]));
-    }
-    v
-}
-
 /// A war hammer along +Z.
 pub fn hammer(at: Node, len: f32, head: Color) -> Vec<PartSpec> {
     vec![
         part(at, Cyl(0.024, len), WOOD, [0.0, 0.0, len * 0.35]).rot(X90),
         part(at, Box(0.12, 0.2, 0.12), head, [0.0, 0.0, len * 0.85]),
         part(at, Box(0.13, 0.04, 0.13), GOLD, [0.0, 0.0, len * 0.85]),
-    ]
-}
-
-/// A spear along +Z with a leaf blade.
-pub fn spear(at: Node, len: f32, tip: Color) -> Vec<PartSpec> {
-    vec![
-        part(at, Cyl(0.02, len), WOOD, [0.0, 0.0, len * 0.3]).rot(X90),
-        part(at, Cone(0.045, 0.2), tip, [0.0, 0.0, len * 0.8 + 0.1])
-            .rot(X90)
-            .scale([1.0, 1.0, 0.45]),
-        part(at, Cyl(0.03, 0.03), tip, [0.0, 0.0, len * 0.8 - 0.02]).rot(X90),
-    ]
-}
-
-/// A round shield on the forearm's outside (+X), boss and rim.
-pub fn round_shield(at: Node, r: f32, face: Color, rim: Color) -> Vec<PartSpec> {
-    let z90 = [0.0, 0.0, 90.0];
-    vec![
-        part(at, Cyl(r, 0.04), face, [0.07, -0.02, 0.0]).rot(z90),
-        part(at, Ring(0.016, r, 360.0), rim, [0.09, -0.02, 0.0]).rot(z90),
-        part(at, Ball(r * 0.25), rim, [0.1, -0.02, 0.0]),
     ]
 }
 
@@ -150,16 +84,6 @@ pub fn staff(at: Node, len: f32, wood: Color) -> Vec<PartSpec> {
 /// The top of a staff made with `staff` (where to put its head).
 pub fn staff_top(len: f32) -> [f32; 3] {
     [0.0, len * 0.8, 0.03]
-}
-
-/// A longbow held upright in the left hand.
-pub fn longbow(at: Node, half: f32, wood: Color) -> Vec<PartSpec> {
-    vec![
-        part(at, Box(0.025, half, 0.03), wood, [0.0, half * 0.5, 0.04]).rot([-8.0, 0.0, 0.0]),
-        part(at, Box(0.025, half, 0.03), wood, [0.0, -half * 0.5, 0.04]).rot([8.0, 0.0, 0.0]),
-        part(at, Box(0.035, 0.1, 0.04), DARK_LEATHER, [0.0, 0.0, 0.04]),
-        part(at, Box(0.006, half * 2.0, 0.006), LINEN, [0.0, 0.0, -0.06]),
-    ]
 }
 
 /// A quiver of arrows on the back spring.

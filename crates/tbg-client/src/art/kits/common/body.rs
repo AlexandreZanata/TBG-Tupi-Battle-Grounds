@@ -150,8 +150,6 @@ pub enum Helm {
     Plumed(Color, Color),
     /// Cap with two horns.
     Horned(Color, Color),
-    /// A circlet of spikes.
-    Crown(Color),
 }
 
 pub fn helmet(v: &mut Vec<PartSpec>, p: &Proportions, helm: Helm) {
@@ -191,23 +189,6 @@ pub fn helmet(v: &mut Vec<PartSpec>, p: &Proportions, helm: Helm) {
                     )
                     .rot([0.0, 0.0, -40.0 * s]),
                 );
-            }
-        }
-        Helm::Crown(c) => {
-            v.push(part(
-                Body(Head),
-                Cyl(h * 0.95, 0.04),
-                c,
-                [0.0, h * 0.62, 0.0],
-            ));
-            for i in 0..5 {
-                let a = (i as f32 - 2.0) * 0.45;
-                v.push(part(
-                    Body(Head),
-                    Cone(h * 0.16, h * 0.55),
-                    c,
-                    [a.sin() * h * 0.9, h * 0.88, a.cos() * h * 0.9],
-                ));
             }
         }
     }

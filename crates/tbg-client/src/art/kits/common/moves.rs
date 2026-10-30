@@ -351,11 +351,6 @@ pub fn guard(pose: &mut Pose, w: f32) {
     tools::add(pose, ForearmL, [-30.0 * w, 0.0, 0.0]);
 }
 
-/// How far into a one-shot clip the moment is, after `start` seconds.
-pub fn past(m: &Moment, start: f32, span: f32) -> f32 {
-    snap(m.t, start, start + span)
-}
-
 /// Both hands on a pole held in the right hand's socket (haft along +Y):
 /// `swing` turns it about the body (degrees, + toward the left), `tilt`
 /// leans its top forward (degrees), `drop` lowers the hands, `span` is

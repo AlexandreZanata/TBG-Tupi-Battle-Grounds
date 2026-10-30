@@ -12,7 +12,6 @@ pub struct Form {
     pub a: bool,
     pub b: bool,
     pub t2: bool,
-    pub tier: u8,
 }
 
 impl Form {
@@ -21,7 +20,6 @@ impl Form {
             a: tier >= 1 && branch == 0,
             b: tier >= 1 && branch == 1,
             t2: tier >= 2,
-            tier: tier.min(2),
         }
     }
 }

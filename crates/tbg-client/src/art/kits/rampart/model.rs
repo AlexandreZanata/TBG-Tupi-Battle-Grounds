@@ -11,7 +11,7 @@ use crate::art::{
     kits::common::{body, Form},
     mesh::Shape::*,
     palette::*,
-    rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
+    rig::{Joint::*, Node::Body, Node::Secondary, Proportions, Spring},
 };
 
 const HOT: Color = Color::srgb(1.0, 0.55, 0.18);
