@@ -9,8 +9,10 @@ mod geometry;
 mod ground;
 mod life;
 mod lighting;
+mod maritime;
 mod props;
 mod rocks;
+mod scenery;
 mod strongholds;
 mod towers;
 mod trees;
@@ -19,8 +21,10 @@ mod water;
 pub(super) type Part = (Shape, Color, Transform);
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Startup, spawn_arena)
-        .add_systems(Update, (towers::damage_states, life::animate));
+    app.add_systems(Startup, spawn_arena).add_systems(
+        Update,
+        (towers::damage_states, life::animate, maritime::animate),
+    );
     strongholds::plugin(app);
 }
 
@@ -56,7 +60,14 @@ fn spawn_arena(
         ("BattleLine", ground::lane()),
         ("cliffs", cliffs::mesh()),
         ("sea", water::sea()),
-        ("foam", water::coast()),
+        (
+            "foam",
+            mesh::merge(vec![
+                (water::coast(), Transform::default()),
+                (scenery::foam(), Transform::default()),
+            ])
+            .unwrap_or_else(|| Cuboid::new(0.01, 0.01, 0.01).into()),
+        ),
         ("offshore rocks", water::rocks()),
         ("props", painted(props::scatter())),
     ] {
@@ -86,6 +97,7 @@ fn spawn_arena(
             Transform::default(),
         ));
     }
+    total += scenery::spawn(&mut commands, &mut meshes, &mat);
     total += life::spawn(&mut commands, &mut meshes, &mut mats, &mat);
     info!("arena total: {total} triangles");
     lighting::spawn(&mut commands);

@@ -198,3 +198,7 @@ Palette values, proportions marked *start*, and display names remain
   existing in-match forms, and the four Archer evolutions, remain adapted.
 - Gallery evidence and the unanswered owner decisions are in the
   [P15 phase report](phases/P15-art-direction-and-rig.md#phase-report).
+
+## Owner-approved maritime scenery follow-up (2026-10-30)
+
+The original arena geometry/camera remains fixed. Procedural offshore isles, lighthouse, pier, sailboat and a small cascade enrich the surroundings; batched vertex-colored azure water and broken foam provide depth. The main arena keeps one warm key and cool fill, one 1024 shadow map/cascade. Offshore objects share existing PBR materials and skip shadow casting/receiving; no texture or custom water shader is introduced. The owner approved the displayed design and the specific 12.9 ms reference-case p95 acceptance bound. See [implementation, measurements and scope](art/ARENA-SEASCAPE.md) and [versioned acceptance criteria](art/ARENA-SEASCAPE-PERFORMANCE.json); broader device/download budgets remain unchanged.
