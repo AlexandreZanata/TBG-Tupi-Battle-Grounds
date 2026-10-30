@@ -50,6 +50,39 @@ impl ArmyComposition {
     }
 }
 
+/// One victim's share of an affliction stack list (Rotcap poison, Old Finn
+/// fish, P45): fixed arrays, no allocation, deterministic replacement.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Stack {
+    pub left: u16,
+    pub value: u16,
+}
+
+/// Per-unit ability state (ROSTER-EXPANSION §F.2): a compact `Copy` block.
+/// All zeroes until the unit's wave lands; never part of views in P43.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct UnitFx {
+    pub poison: [Stack; 6],
+    pub fish: [Stack; 3],
+    pub confused_until: Tick,
+    pub immune_until: Tick,
+    pub ward_until: Tick,
+    pub betray: bool,
+    pub attacks: u8,
+    pub essence: u16,
+    pub essence_progress: u32,
+    pub plates: u8,
+    pub plate_hp: i16,
+    pub march_move_bp: u16,
+    pub march_dr_bp: u16,
+    pub bond: Option<UnitId>,
+    pub carrier: Option<UnitId>,
+    pub passenger: Option<UnitId>,
+    pub board_lock: Tick,
+    pub shield: u16,
+    pub shield_until: Tick,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Unit {
     pub id: UnitId,
@@ -76,6 +109,8 @@ pub struct Unit {
     pub heal_cut_bp: i32,
     /// Second Wind charges already spent by this unit.
     pub second_wind_used: u8,
+    /// Ability state (all zero until the unit's wave lands).
+    pub fx: UnitFx,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

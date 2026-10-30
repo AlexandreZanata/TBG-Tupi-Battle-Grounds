@@ -122,6 +122,7 @@ impl MatchState {
             } else {
                 0
             },
+            fx: crate::state::UnitFx::default(),
         });
         self.pending.push(Event::Spawn {
             unit: id,

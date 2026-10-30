@@ -91,13 +91,14 @@ fn c2_per_tick_traces_are_frozen() {
     // 2026-10-29 (uncapped Energy, Interest as a regen boost, the Augment
     // pause with its paused steps traced, the 20 s selection window,
     // P40's fifteen-rank Arcana state, and a full Shop redraw per
-    // purchase, BR-S04).
+    // purchase, BR-S04). P43: the zeroed `UnitFx` block moved the hashes
+    // with tick, winner and reason identical (verified).
     let goldens = [
-        (1, 0xa296_7863_f7e4_b613, 0xdb60_17b9_3aca_b0e3, 2_214),
-        (7, 0x6b10_7c9e_0af6_65e9, 0x63e0_e852_daf5_2b2b, 3_284),
-        (42, 0xcdea_52a4_78e7_ac93, 0xfa64_74e3_f698_ccf9, 1_833),
-        (1000, 0xf0ce_f15f_c90d_8a1c, 0xf81a_863b_4a9c_9d2d, 2_641),
-        (65535, 0x5747_2463_8f98_17b3, 0x1da2_eee4_d2a3_1a55, 1_740),
+        (1, 0xd4d1_7533_ea20_cabf, 0x23e0_57af_9b0f_fc5f, 2_214),
+        (7, 0x44f3_6189_d0ae_2767, 0xc745_33b0_2893_d54d, 3_284),
+        (42, 0x069f_504c_6b6d_cbab, 0xbca2_5a25_93de_46b1, 1_833),
+        (1000, 0x952b_6552_b9dc_ecea, 0x344b_6919_239f_50e9, 2_641),
+        (65535, 0xd58b_f232_2fe6_1d43, 0xeb31_9814_0ff4_f37f, 1_740),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

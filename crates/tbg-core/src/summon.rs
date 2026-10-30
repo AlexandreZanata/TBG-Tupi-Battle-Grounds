@@ -127,6 +127,7 @@ fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
         summoner: Some(nester.id),
         expires_at: Some(state.tick + state.rules.beetle_lifetime),
         action_cd: 0,
+        fx: crate::state::UnitFx::default(),
         haste_until: 0,
         heal_cut_until: 0,
         heal_cut_bp: 0,

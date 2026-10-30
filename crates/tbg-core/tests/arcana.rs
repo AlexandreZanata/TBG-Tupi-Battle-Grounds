@@ -162,6 +162,7 @@ fn br_ar10_deadeye_adds_range_only_to_conventional_ranged() {
         summoner: None,
         expires_at: None,
         action_cd: 0,
+        fx: tbg_core::state::UnitFx::default(),
         haste_until: 0,
         heal_cut_until: 0,
         heal_cut_bp: 0,

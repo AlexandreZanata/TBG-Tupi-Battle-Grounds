@@ -23,25 +23,27 @@ fn bot_matches_are_frozen() {
     // pause, and a Shop that redraws all five offers on every purchase
     // (BR-S04). The faster Energy flow and the new draws change what the
     // bots can buy, so outcomes and end combat ticks moved with the hashes.
+    // P43: the zeroed `UnitFx` block joined the serialized state, so hashes
+    // moved again with tick, winner and reason identical (verified).
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0xdb60_17b9_3aca_b0e3_u64,
+            0x23e0_57af_9b0f_fc5f_u64,
             2_214,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0x63e0_e852_daf5_2b2b,
+            0xc745_33b0_2893_d54d,
             3_284,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0xfa64_74e3_f698_ccf9,
+            0xbca2_5a25_93de_46b1,
             1_833,
             Seat::B,
             StrongholdDestroyed,
