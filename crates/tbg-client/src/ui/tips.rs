@@ -28,6 +28,10 @@ fn matchup(kind: UnitKind) -> (&'static str, &'static str) {
             "slows, ranged focus, splash",
         ),
         UnitKind::Beetling => ("swarming", "splash"),
+        // P44 wave A (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Longaxe => ("second-rank heavies", "swarms, burst"),
+        UnitKind::Farwatch => ("safe chip from home", "Rampart guard, dives"),
+        UnitKind::Bombard => ("clumped armies", "spread out, dives"),
         // P43: staged kinds render as a blockout until their wave lands.
         #[allow(unreachable_patterns)]
         _ => ("a new unit", "scout it first"),

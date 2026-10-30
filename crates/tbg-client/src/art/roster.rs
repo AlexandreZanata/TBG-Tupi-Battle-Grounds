@@ -75,7 +75,20 @@ const RAMPART: &[(Color, Color)] = &[
 /// Beetle shell: dark lacquer instead of bark.
 const BEETLING: &[(Color, Color)] = &[
     (BARK, Color::srgb_u8(0x2B, 0x33, 0x24)),
-    (LEAF, Color::srgb_u8(0xC8, 0x8F, 0x2E)),
+    (LEAF, Color::srgb_u8(0xC8, 0x8F, 0x2A)),
+];
+/// P44 placeholders: recolored figures until the character phases.
+const LONGAXE: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0x8A, 0x6F, 0x4D)),
+    (LEATHER, Color::srgb_u8(0x4E, 0x5A, 0x66)),
+];
+const FARWATCH: &[(Color, Color)] = &[
+    (LEATHER, Color::srgb_u8(0x2E, 0x4A, 0x66)),
+    (TRIM, Color::srgb_u8(0x7F, 0xA8, 0xC9)),
+];
+const BOMBARD: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0x3A, 0x3F, 0x45)),
+    (TRIM, Color::srgb_u8(0xD9, 0x5A, 0x2B)),
 ];
 
 fn recolor(mut spec: FigureSpec, map: &[(Color, Color)]) -> FigureSpec {
@@ -112,6 +125,11 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::Nester => recolor(plants::bloomkeeper(f), NESTER),
         UnitKind::Rampart => recolor(humans::shieldbearer(f), RAMPART),
         UnitKind::Beetling => recolor(plants::rootcaller(f), BEETLING),
+        // P44 placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Longaxe => recolor(humans::shieldbearer(f), LONGAXE),
+        UnitKind::Farwatch => recolor(humans::archer(f), FARWATCH),
+        UnitKind::Bombard => recolor(machines::siege_walker(f), BOMBARD),
         // P43: staged kinds render as a plain gray silhouette until their
         // wave lands (art/mod.rs builds every kind in ALL_KINDS).
         #[allow(unreachable_patterns)]
