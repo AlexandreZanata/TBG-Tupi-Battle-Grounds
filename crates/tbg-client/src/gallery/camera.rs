@@ -97,11 +97,11 @@ fn unit(portrait: bool) -> (Vec3, f32, f32, Vec3) {
 }
 fn sheet(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
     if options.lineup {
-        // Three forms per row, idle above the anchor (`Layout::Lineup`).
+        // Five forms per row; idle, walk and attack rows (`Layout::Lineup`).
         return (
-            Vec3::new(1.7, -0.35, 0.0),
-            2.7,
-            2.6,
+            Vec3::new(4.2, -1.45, 0.0),
+            5.0,
+            4.5,
             Vec3::new(0.0, 1.2, 10.0),
         );
     }

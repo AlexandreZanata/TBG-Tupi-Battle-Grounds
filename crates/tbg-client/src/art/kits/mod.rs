@@ -5,7 +5,9 @@
 
 pub mod aim;
 mod bone_brute;
+pub mod common;
 pub mod gait;
+mod longaxe;
 mod rootcaller;
 mod siege_walker;
 mod tools;
@@ -81,6 +83,7 @@ pub struct Moment {
 static SIEGE_WALKER: Kit = siege_walker::KIT;
 static BONE_BRUTE: Kit = bone_brute::KIT;
 static ROOTCALLER: Kit = rootcaller::KIT;
+static LONGAXE: Kit = longaxe::KIT;
 
 /// The kit of `kind`, if it has one.
 pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
@@ -88,6 +91,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::SiegeWalker => Some(&SIEGE_WALKER),
         UnitKind::BoneBrute => Some(&BONE_BRUTE),
         UnitKind::Rootcaller => Some(&ROOTCALLER),
+        UnitKind::Longaxe => Some(&LONGAXE),
         _ => None,
     }
 }

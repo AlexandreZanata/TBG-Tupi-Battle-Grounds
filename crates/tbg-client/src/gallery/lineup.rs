@@ -1,13 +1,20 @@
-//! `&lineup`: one unit's base and A-branch evolutions side by side, frozen at
-//! idle and at the attack anchor (review sheet for the default Archer v2).
+//! `&lineup`: one unit's five forms (base, A1, A2, B1, B2) side by side,
+//! frozen at idle, mid-stride, and at its archetype's attack key pose.
 
 use super::{figures::spawn_one, layout::Layout};
-use crate::art::{anim::Clip, FigureLibrary};
+use crate::art::{anim::Clip, FigureLibrary, FORMS};
 use bevy::prelude::*;
-use tbg_core::UnitKind;
+use tbg_core::{Archetype, UnitKind};
 
-/// Poses per row: idle, and the full draw just before the 0.18 s Release.
-const POSES: [(Clip, f32); 2] = [(Clip::Idle, 0.4), (Clip::AttackRanged, 0.15)];
+/// The attack row's clip and moment: the full draw just before a ranged
+/// Release, the windup peak of a swing, the raised hands of a cast.
+fn attack(unit: UnitKind) -> (Clip, f32) {
+    match tbg_core::content::def(unit).archetype {
+        Archetype::Ranged => (Clip::AttackRanged, 0.15),
+        Archetype::Tank | Archetype::Dps => (Clip::AttackMelee, 0.22),
+        Archetype::Control | Archetype::Support => (Clip::Cast, 0.18),
+    }
+}
 
 pub fn spawn(
     commands: &mut Commands,
@@ -16,11 +23,12 @@ pub fn spawn(
     material: &Handle<StandardMaterial>,
     portrait: bool,
 ) {
-    for (row, (clip, t)) in POSES.into_iter().enumerate() {
-        for tier in 0..3u8 {
-            let layout = Layout::Lineup(row, usize::from(tier));
+    let poses = [(Clip::Idle, 0.4), (Clip::Walk, 0.15), attack(unit)];
+    for (row, (clip, t)) in poses.into_iter().enumerate() {
+        for (col, form) in FORMS.into_iter().enumerate() {
+            let layout = Layout::Lineup(row, col);
             let pos = layout.position(portrait);
-            let (root, mut animator) = spawn_one(commands, lib, unit, (tier, 0), pos, material);
+            let (root, mut animator) = spawn_one(commands, lib, unit, form, pos, material);
             animator.preview = Some((clip, t));
             let stage = commands
                 .spawn((

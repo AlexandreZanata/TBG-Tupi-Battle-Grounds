@@ -15,16 +15,18 @@ use crate::art::{
 };
 use crate::vfx::shots;
 
-const KITS: [UnitKind; 3] = [
-    UnitKind::SiegeWalker,
-    UnitKind::BoneBrute,
-    UnitKind::Rootcaller,
-];
+/// Every kind that has an art kit.
+fn kits() -> Vec<UnitKind> {
+    tbg_core::ALL_KINDS
+        .into_iter()
+        .filter(|k| kit(*k).is_some())
+        .collect()
+}
 
 #[test]
 fn every_kit_form_builds_within_the_doubled_budget() {
     // ART-DIRECTION §8 / P24: 3 000 triangles per form, doubled by the owner.
-    for kind in KITS {
+    for kind in kits() {
         let k = kit(kind).expect("kit");
         for (tier, branch) in FORMS {
             let spec = (k.figure)(tier, branch);
@@ -48,7 +50,7 @@ fn every_kit_form_builds_within_the_doubled_budget() {
 
 #[test]
 fn kits_keep_the_simulation_event_times() {
-    for kind in KITS {
+    for kind in kits() {
         let k = kit(kind).expect("kit");
         for (clip, event, at) in [
             (Clip::AttackMelee, ClipEvent::Strike, 0.30),
@@ -60,6 +62,28 @@ fn kits_keep_the_simulation_event_times() {
                 "{kind:?} {clip:?} ends before its event"
             );
             assert_eq!(events_between(clip, at - 0.01, at), [event]);
+        }
+    }
+}
+
+#[test]
+fn every_kit_has_five_distinct_forms() {
+    // Owner request (P55): base, A1, A2, B1, B2 each read differently.
+    let sig = |k: &super::Kit, (t, b): (u8, u8)| {
+        let mut v: Vec<String> = (k.figure)(t, b)
+            .parts
+            .iter()
+            .map(|p| format!("{:?}/{:?}/{:?}", p.color.to_srgba(), p.shape, p.at))
+            .collect();
+        v.sort();
+        v
+    };
+    for kind in kits() {
+        let k = kit(kind).expect("kit");
+        for (i, a) in FORMS.iter().enumerate() {
+            for b in &FORMS[i + 1..] {
+                assert_ne!(sig(k, *a), sig(k, *b), "{kind:?} {a:?} looks like {b:?}");
+            }
         }
     }
 }

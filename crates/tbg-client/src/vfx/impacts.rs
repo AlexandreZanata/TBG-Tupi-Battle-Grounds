@@ -29,6 +29,21 @@ pub enum Impact {
     Bolt,
     /// Treasury: the purse bursts in a shower of gold.
     Coins,
+    /// Kit champions (P55).
+    Poison,
+    Splash,
+    Hex,
+    Bloom,
+    Seed,
+    Cleanse,
+    Blood,
+    Puppet,
+    Drain,
+    Oil,
+    Burn,
+    Shards,
+    Sparks,
+    Bite,
 }
 
 /// What the attacker brings to an impact: splash radius (tiles, 0 = none)
@@ -228,6 +243,187 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
         }
         Impact::Cannon => cannon(commands, a, at, 1.0),
         Impact::GreatCannon => cannon(commands, a, at, 1.5),
+        Impact::Poison => motes(commands, a, at, &a.spore, (7, 0.9), area.splash.max(0.5)),
+        Impact::Splash => {
+            motes(commands, a, at, &a.water, (9, 1.4), 0.6);
+            spawn(
+                commands,
+                &a.ring,
+                &a.water,
+                ground,
+                Motion::Grow { radius: 0.5 },
+                0.0,
+                0.3,
+            );
+        }
+        Impact::Hex => {
+            spawn(
+                commands,
+                &a.puff,
+                &a.violet,
+                at,
+                Motion::Flash { size: 0.2 },
+                0.0,
+                0.14,
+            );
+            spawn(
+                commands,
+                &a.ring,
+                &a.violet,
+                ground,
+                Motion::Grow {
+                    radius: area.splash.max(0.45),
+                },
+                0.0,
+                0.35,
+            );
+            motes(commands, a, at, &a.violet, (5, 0.7), 0.4);
+        }
+        Impact::Bloom => {
+            motes(commands, a, at, &a.petal, (7, 0.8), 0.5);
+            spawn(
+                commands,
+                &a.ring,
+                &a.green,
+                ground,
+                Motion::Grow {
+                    radius: area.splash.max(0.4),
+                },
+                0.0,
+                0.35,
+            );
+        }
+        Impact::Seed => {
+            dust(commands, a, ground, 3, 0.08);
+            motes(commands, a, at, &a.spore, (4, 0.6), 0.3);
+        }
+        Impact::Cleanse => {
+            spawn(
+                commands,
+                &a.puff,
+                &a.white,
+                at,
+                Motion::Flash { size: 0.22 },
+                0.0,
+                0.14,
+            );
+            spawn(
+                commands,
+                &a.ring,
+                &a.green,
+                ground,
+                Motion::Grow { radius: 0.45 },
+                0.0,
+                0.4,
+            );
+            motes(commands, a, at, &a.spore, (6, 1.0), 0.3);
+        }
+        Impact::Blood => {
+            spawn(
+                commands,
+                &a.puff,
+                &a.blood,
+                at,
+                Motion::Flash { size: 0.16 },
+                0.0,
+                0.12,
+            );
+            motes(commands, a, at, &a.blood, (6, 0.9), 0.35);
+        }
+        Impact::Puppet => {
+            spawn(
+                commands,
+                &a.ring,
+                &a.violet,
+                at,
+                Motion::Grow { radius: 0.35 },
+                0.0,
+                0.4,
+            );
+            motes(commands, a, at, &a.violet, (5, 1.1), 0.25);
+        }
+        Impact::Drain => {
+            motes(commands, a, at, &a.blood, (4, 0.8), 0.25);
+            motes(commands, a, at, &a.spore, (4, 0.8), 0.25);
+        }
+        Impact::Oil => {
+            spawn(
+                commands,
+                &a.ring,
+                &a.oil,
+                ground,
+                Motion::Grow {
+                    radius: area.splash.max(0.55),
+                },
+                0.0,
+                0.5,
+            );
+            for (i, dir) in around(6, 0.3).enumerate() {
+                let vel = dir * 0.9 + Vec3::Y * (1.2 + 0.2 * (i % 2) as f32);
+                spawn(
+                    commands,
+                    &a.puff,
+                    &a.oil,
+                    at,
+                    Motion::Debris { vel, size: 0.05 },
+                    0.0,
+                    0.5,
+                );
+            }
+        }
+        Impact::Burn => {
+            spawn(
+                commands,
+                &a.puff,
+                &a.fire,
+                at,
+                Motion::Flash { size: 0.24 },
+                0.0,
+                0.14,
+            );
+            motes(commands, a, at, &a.orange, (7, 1.2), 0.3);
+        }
+        Impact::Shards => {
+            for (i, dir) in around(7, 0.2).enumerate() {
+                let vel = dir * 1.3 + Vec3::Y * (1.6 + 0.2 * (i % 3) as f32);
+                spawn(
+                    commands,
+                    &a.chip,
+                    &a.root,
+                    at,
+                    Motion::Debris { vel, size: 0.06 },
+                    0.0,
+                    0.6,
+                );
+            }
+            dust(commands, a, ground, 3, 0.12);
+        }
+        Impact::Sparks => {
+            for dir in around(8, 0.5) {
+                let d = (dir + Vec3::Y * 0.6) * 0.8;
+                spawn(
+                    commands,
+                    &a.ball,
+                    &a.orange,
+                    at,
+                    Motion::Burst { dir: d },
+                    0.0,
+                    0.22,
+                );
+            }
+        }
+        Impact::Bite => {
+            spawn(
+                commands,
+                &a.puff,
+                &a.white,
+                at,
+                Motion::Flash { size: 0.14 },
+                0.0,
+                0.1,
+            );
+            dust(commands, a, ground, 3, 0.08);
+        }
         Impact::Coins => {
             spawn(
                 commands,
@@ -338,6 +534,29 @@ fn blast(commands: &mut Commands, a: &VfxAssets, at: Vec3, radius: f32, size: f3
         0.0,
         0.35,
     );
+}
+
+/// Glowing motes bursting up and out: (count, lift), spread radius.
+fn motes(
+    commands: &mut Commands,
+    a: &VfxAssets,
+    at: Vec3,
+    mat: &Handle<StandardMaterial>,
+    (n, lift): (usize, f32),
+    spread: f32,
+) {
+    for (i, dir) in around(n, 0.3).enumerate() {
+        let vel = dir * spread + Vec3::Y * (lift + 0.1 * (i % 3) as f32);
+        spawn(
+            commands,
+            &a.ball,
+            mat,
+            at,
+            Motion::Puff { vel, size: 0.04 },
+            0.0,
+            0.55,
+        );
+    }
 }
 
 /// A heavy blow on the ground: dust ring, dust puffs, bone and rock chips.
@@ -584,6 +803,8 @@ pub enum Burst {
     Soul,
     /// Plants: a ring of sprouting roots and a shower of leaves.
     Bloom,
+    /// Humans: a gold flash, a team-colored ring and rising gold motes.
+    Valor,
 }
 
 pub fn evolution(commands: &mut Commands, a: &VfxAssets, burst: Burst, at: Vec3) {
@@ -664,6 +885,27 @@ pub fn evolution(commands: &mut Commands, a: &VfxAssets, burst: Burst, at: Vec3)
                     0.9,
                 );
             }
+        }
+        Burst::Valor => {
+            spawn(
+                commands,
+                &a.puff,
+                &a.flash,
+                at,
+                Motion::Flash { size: 0.4 },
+                0.0,
+                0.18,
+            );
+            spawn(
+                commands,
+                &a.ring,
+                &a.gold,
+                ground,
+                Motion::Grow { radius: 1.2 },
+                0.0,
+                0.5,
+            );
+            motes(commands, a, at, &a.gold, (10, 1.3), 0.5);
         }
         Burst::Bloom => {
             roots_ring(commands, a, ground, &a.root, 7, (0.55, 0.6), 0.35);

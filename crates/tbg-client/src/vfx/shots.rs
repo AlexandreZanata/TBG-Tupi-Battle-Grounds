@@ -33,6 +33,17 @@ pub enum ShotKind {
     Crossbow,
     /// Treasury: a spinning purse of gold lobbed high.
     Coins,
+    /// Kit champions (P55).
+    Arrow,
+    Glob,
+    Fish,
+    Bomb,
+    Hex,
+    Petal,
+    Seed,
+    Flask,
+    Blood,
+    Puppet,
 }
 
 #[derive(Clone, Copy)]
@@ -45,13 +56,29 @@ enum Body {
     Ball,
     Bolt,
     Purse,
+    Arrow,
+    Glob,
+    Fish,
+    Bomb,
+    Orb,
+    Petal,
+    Seed,
+    Flask,
 }
 
 #[derive(Clone, Copy)]
 enum Trail {
-    Smoke { every: f32, size: f32 },
+    /// Small glowing motes of one effect material.
+    Motes(Mote),
+    Smoke {
+        every: f32,
+        size: f32,
+    },
     Sparks,
-    Ridge { every: f32, size: f32 },
+    Ridge {
+        every: f32,
+        size: f32,
+    },
 }
 
 /// How a kind looks and flies.
@@ -64,6 +91,16 @@ struct Look {
     /// Spin about the nose, radians per second.
     roll: f32,
     impact: Impact,
+}
+
+/// The material of a mote trail.
+#[derive(Clone, Copy)]
+enum Mote {
+    Spore,
+    Water,
+    Violet,
+    Petal,
+    Blood,
 }
 
 /// Seconds a unit shot flies: Release at 0.18 s plus this lands at the
@@ -197,6 +234,86 @@ fn look(kind: ShotKind) -> Look {
             14.0,
             Impact::Coins,
         ),
+        Arrow => (
+            Some((Body::Arrow, 1.0)),
+            0.03,
+            UNIT_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Bolt,
+        ),
+        Glob => (
+            Some((Body::Glob, 1.0)),
+            0.12,
+            UNIT_FLIGHT,
+            Trail::Motes(Mote::Spore),
+            8.0,
+            Impact::Poison,
+        ),
+        Fish => (
+            Some((Body::Fish, 1.0)),
+            0.35,
+            CAST_FLIGHT,
+            Trail::Motes(Mote::Water),
+            22.0,
+            Impact::Splash,
+        ),
+        Bomb => (
+            Some((Body::Bomb, 1.0)),
+            0.25,
+            UNIT_FLIGHT,
+            smoke(0.016, 0.09),
+            6.0,
+            Impact::Blast,
+        ),
+        Hex => (
+            Some((Body::Orb, 0.9)),
+            0.05,
+            CAST_FLIGHT,
+            Trail::Motes(Mote::Violet),
+            0.0,
+            Impact::Hex,
+        ),
+        Petal => (
+            Some((Body::Petal, 1.0)),
+            0.12,
+            CAST_FLIGHT,
+            Trail::Motes(Mote::Petal),
+            10.0,
+            Impact::Bloom,
+        ),
+        Seed => (
+            Some((Body::Seed, 1.0)),
+            0.2,
+            CAST_FLIGHT,
+            Trail::Motes(Mote::Spore),
+            12.0,
+            Impact::Seed,
+        ),
+        Flask => (
+            Some((Body::Flask, 1.0)),
+            0.3,
+            0.32,
+            Trail::Motes(Mote::Spore),
+            14.0,
+            Impact::Cleanse,
+        ),
+        Blood => (
+            Some((Body::Orb, 1.0)),
+            0.15,
+            0.3,
+            Trail::Motes(Mote::Blood),
+            0.0,
+            Impact::Blood,
+        ),
+        Puppet => (
+            Some((Body::Orb, 0.8)),
+            0.1,
+            0.26,
+            Trail::Motes(Mote::Violet),
+            0.0,
+            Impact::Puppet,
+        ),
     };
     Look {
         body,
@@ -223,6 +340,14 @@ pub struct ShotMeshes {
     ball: Handle<Mesh>,
     bolt: Handle<Mesh>,
     purse: Handle<Mesh>,
+    arrow: Handle<Mesh>,
+    glob: Handle<Mesh>,
+    fish: Handle<Mesh>,
+    bomb: Handle<Mesh>,
+    orb: Handle<Mesh>,
+    petal: Handle<Mesh>,
+    seed: Handle<Mesh>,
+    flask: Handle<Mesh>,
 }
 
 impl ShotMeshes {
@@ -307,6 +432,89 @@ impl ShotMeshes {
                 (Cyl(0.06, 0.012), GOLD, Transform::from_xyz(0.0, 0.07, 0.0)),
                 (Ball(0.025), GOLD, Transform::from_xyz(0.05, 0.05, 0.0)),
             ]),
+            arrow: build(vec![
+                (Cyl(0.012, 0.6), TIMBER, along(0.0)),
+                (Cone(0.03, 0.09), STEEL, along(0.34)),
+                (
+                    Box(0.004, 0.06, 0.1),
+                    LINEN,
+                    Transform::from_xyz(0.0, 0.0, -0.26),
+                ),
+                (
+                    Box(0.06, 0.004, 0.1),
+                    LINEN,
+                    Transform::from_xyz(0.0, 0.0, -0.26),
+                ),
+            ]),
+            glob: build(vec![
+                (
+                    Ball(0.075),
+                    Color::srgb(0.55, 0.85, 0.2),
+                    Transform::IDENTITY,
+                ),
+                (
+                    Ball(0.04),
+                    Color::srgb(0.75, 0.95, 0.35),
+                    Transform::from_xyz(0.03, 0.04, -0.06),
+                ),
+                (Ball(0.03), MUSHROOM, Transform::from_xyz(-0.04, 0.03, 0.02)),
+            ]),
+            fish: build(vec![
+                (
+                    Ball(0.07),
+                    Color::srgb(0.55, 0.65, 0.72),
+                    Transform::from_scale(Vec3::new(0.7, 0.9, 1.8)),
+                ),
+                (
+                    Cone(0.06, 0.1),
+                    Color::srgb(0.45, 0.55, 0.65),
+                    along(-0.16).with_scale(Vec3::new(1.0, 1.0, 0.25)),
+                ),
+                (Ball(0.015), DARK, Transform::from_xyz(0.035, 0.03, 0.08)),
+                (
+                    Box(0.01, 0.05, 0.08),
+                    Color::srgb(0.85, 0.55, 0.45),
+                    Transform::from_xyz(0.0, 0.07, 0.0),
+                ),
+            ]),
+            bomb: build(vec![
+                (Ball(0.1), DARK, Transform::IDENTITY),
+                (Cyl(0.03, 0.05), IRON, Transform::from_xyz(0.0, 0.1, 0.0)),
+                (Cyl(0.008, 0.08), LINEN, Transform::from_xyz(0.0, 0.16, 0.0)),
+                (Ball(0.025), ORANGE, Transform::from_xyz(0.0, 0.2, 0.0)),
+            ]),
+            orb: build(vec![
+                (Ball(0.07), Color::srgb(0.95, 0.9, 1.0), Transform::IDENTITY),
+                (
+                    Ring(0.012, 0.09, 360.0),
+                    Color::srgb(0.6, 0.45, 0.9),
+                    Transform::IDENTITY,
+                ),
+            ]),
+            petal: build(vec![
+                (Ball(0.03), GOLD, Transform::IDENTITY),
+                (Ball(0.045), BLOSSOM, Transform::from_xyz(0.05, 0.0, 0.0)),
+                (Ball(0.045), BLOSSOM, Transform::from_xyz(-0.05, 0.0, 0.0)),
+                (Ball(0.045), BLOSSOM, Transform::from_xyz(0.0, 0.05, 0.0)),
+                (Ball(0.045), BLOSSOM, Transform::from_xyz(0.0, -0.05, 0.0)),
+            ]),
+            seed: build(vec![
+                (
+                    Ball(0.05),
+                    BARK,
+                    Transform::from_scale(Vec3::new(0.8, 0.8, 1.3)),
+                ),
+                (
+                    Cone(0.04, 0.08),
+                    LEAF,
+                    Transform::from_xyz(0.0, 0.06, 0.0).with_scale(Vec3::new(1.0, 1.0, 0.3)),
+                ),
+            ]),
+            flask: build(vec![
+                (Ball(0.06), Color::srgb(0.6, 0.95, 0.5), Transform::IDENTITY),
+                (Cyl(0.022, 0.06), LINEN, Transform::from_xyz(0.0, 0.07, 0.0)),
+                (Cyl(0.026, 0.025), WOOD, Transform::from_xyz(0.0, 0.1, 0.0)),
+            ]),
         }
     }
     fn get(&self, body: Body) -> &Handle<Mesh> {
@@ -319,6 +527,14 @@ impl ShotMeshes {
             Body::Ball => &self.ball,
             Body::Bolt => &self.bolt,
             Body::Purse => &self.purse,
+            Body::Arrow => &self.arrow,
+            Body::Glob => &self.glob,
+            Body::Fish => &self.fish,
+            Body::Bomb => &self.bomb,
+            Body::Orb => &self.orb,
+            Body::Petal => &self.petal,
+            Body::Seed => &self.seed,
+            Body::Flask => &self.flask,
         }
     }
 }
@@ -390,6 +606,7 @@ pub(super) fn fly(
         let every = match l.trail {
             Trail::Smoke { every, .. } | Trail::Ridge { every, .. } => every,
             Trail::Sparks => 0.03,
+            Trail::Motes(_) => 0.02,
         };
         while s.trail >= every {
             s.trail -= every;
@@ -406,6 +623,28 @@ fn trail(commands: &mut Commands, a: &VfxAssets, trail: Trail, at: Vec3, dir: Ve
     // A cheap deterministic jitter from the shot's age.
     let j = Vec3::new((age * 91.0).sin(), (age * 57.0).cos(), (age * 73.0).sin());
     match trail {
+        Trail::Motes(mote) => {
+            let mat = match mote {
+                Mote::Spore => &a.spore,
+                Mote::Water => &a.water,
+                Mote::Violet => &a.violet,
+                Mote::Petal => &a.petal,
+                Mote::Blood => &a.blood,
+            };
+            let drift = Vec3::new(j.x * 0.2, 0.25 + 0.1 * j.y, j.z * 0.2);
+            spawn(
+                commands,
+                &a.ball,
+                mat,
+                at,
+                Motion::Puff {
+                    vel: drift,
+                    size: 0.035,
+                },
+                0.0,
+                0.4,
+            );
+        }
         Trail::Smoke { size, .. } => {
             spawn(commands, &a.puff, &a.smoke, at, smoke(j, size), 0.0, 0.55);
             if (age * 100.0) as i32 % 3 == 0 {

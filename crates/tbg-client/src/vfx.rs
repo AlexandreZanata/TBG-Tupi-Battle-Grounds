@@ -41,6 +41,11 @@ pub struct VfxAssets {
     pub(super) rock: Handle<StandardMaterial>,
     pub(super) leaf: Handle<StandardMaterial>,
     pub(super) amber: Handle<StandardMaterial>,
+    pub(super) violet: Handle<StandardMaterial>,
+    pub(super) blood: Handle<StandardMaterial>,
+    pub(super) water: Handle<StandardMaterial>,
+    pub(super) petal: Handle<StandardMaterial>,
+    pub(super) oil: Handle<StandardMaterial>,
     /// Lit vertex colors, for painted projectile meshes.
     pub(super) painted: Handle<StandardMaterial>,
     pub(super) shots: shots::ShotMeshes,
@@ -104,6 +109,10 @@ fn init(
     let flash = glow(Color::srgb_u8(0xFF, 0xF1, 0xB8));
     let spore = glow(Color::srgb_u8(0xD8, 0xF0, 0x6A));
     let amber = glow(SAP);
+    let violet = glow(Color::srgb_u8(0xA8, 0x7B, 0xFF));
+    let blood = glow(Color::srgb_u8(0xC8, 0x1E, 0x32));
+    let water = glow(Color::srgb_u8(0x8C, 0xD8, 0xFF));
+    let petal = glow(BLOSSOM);
     let mut lit = |c: Color| {
         mats.add(StandardMaterial {
             base_color: c,
@@ -119,6 +128,7 @@ fn init(
     let rock = lit(ROCK);
     let leaf = lit(LEAF);
     let painted = lit(Color::WHITE);
+    let oil = lit(Color::srgb_u8(0x24, 0x20, 0x28));
     let shots = shots::ShotMeshes::new(&mut meshes);
     let ball = |level: u32| {
         Sphere::new(1.0)
@@ -162,6 +172,11 @@ fn init(
         rock,
         leaf,
         amber,
+        violet,
+        blood,
+        water,
+        petal,
+        oil,
         painted,
         shots,
     });

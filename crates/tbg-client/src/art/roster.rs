@@ -12,7 +12,7 @@ use super::palette::{
 };
 
 pub mod blockout;
-mod body;
+pub(crate) mod body;
 mod humans;
 mod machines;
 mod plants;

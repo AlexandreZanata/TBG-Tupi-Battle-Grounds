@@ -6,7 +6,8 @@ use tbg_core::UnitKind;
 
 pub fn spawn(commands: &mut Commands, options: &Gallery, unit: UnitKind) {
     let title = if options.lineup {
-        format!("{unit:?}{}", form_label(options))
+        let name = tbg_core::content::def(unit).name;
+        format!("{name} | Base / A1 / A2 / B1 / B2\nrows: idle / walk / attack")
     } else if options.frames {
         format!(
             "{unit:?}{} | CONTACT SHEET | 0 / 25 / 50 / 75 %\n{}",
@@ -40,9 +41,5 @@ pub fn spawn(commands: &mut Commands, options: &Gallery, unit: UnitKind) {
 /// Keep the native Archer forms explicit on the review sheet.
 fn form_label(options: &Gallery) -> String {
     let form = ["", " Longbow", " Marksman"][usize::from(options.tier.min(2))];
-    if options.lineup {
-        " v2 | Base / Longbow / Marksman | idle + anchor".into()
-    } else {
-        format!(" v2{form}")
-    }
+    format!(" v2{form}")
 }
