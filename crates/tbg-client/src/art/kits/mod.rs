@@ -6,8 +6,11 @@
 pub mod aim;
 mod bone_brute;
 pub mod common;
+mod drumguard;
+mod farwatch;
 pub mod gait;
 mod longaxe;
+mod old_finn;
 mod rootcaller;
 mod siege_walker;
 mod tools;
@@ -58,6 +61,9 @@ pub enum Attack {
         tip: fn(u8, u8) -> Vec3,
         impact: fn(u8, u8) -> Impact,
     },
+    /// No basic attack (passive supports); its actions are cued by their
+    /// own events (`sync/events.rs`).
+    None,
 }
 
 /// Everything a kit's pose layer may depend on, for one sampled clip.
@@ -84,6 +90,9 @@ static SIEGE_WALKER: Kit = siege_walker::KIT;
 static BONE_BRUTE: Kit = bone_brute::KIT;
 static ROOTCALLER: Kit = rootcaller::KIT;
 static LONGAXE: Kit = longaxe::KIT;
+static FARWATCH: Kit = farwatch::KIT;
+static OLD_FINN: Kit = old_finn::KIT;
+static DRUMGUARD: Kit = drumguard::KIT;
 
 /// The kit of `kind`, if it has one.
 pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
@@ -92,6 +101,9 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::BoneBrute => Some(&BONE_BRUTE),
         UnitKind::Rootcaller => Some(&ROOTCALLER),
         UnitKind::Longaxe => Some(&LONGAXE),
+        UnitKind::Farwatch => Some(&FARWATCH),
+        UnitKind::OldFinn => Some(&OLD_FINN),
+        UnitKind::Drumguard => Some(&DRUMGUARD),
         _ => None,
     }
 }
