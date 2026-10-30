@@ -9,6 +9,8 @@ pub mod account;
 mod account_ui;
 mod actions;
 #[cfg(test)]
+mod arena_data_tests;
+#[cfg(test)]
 mod army_tests;
 #[cfg(test)]
 mod augment_data_tests;

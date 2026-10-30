@@ -53,12 +53,16 @@
   <link data-trunk rel="css" href="assets/stronghold/picker.css" />
   <script data-trunk defer src="assets/stronghold/describe.js"></script>
   <script data-trunk defer src="assets/stronghold/picker.js"></script>
+  <link data-trunk rel="css" href="assets/arenas/arenas.css" />
+  <script data-trunk defer src="assets/arenas/describe.js"></script>
+  <script data-trunk defer src="assets/arenas/hub.js"></script>
   <link data-trunk rel="css" href="assets/battle/hud.css" />
   <link data-trunk rel="css" href="assets/battle/fortify.css" />
   <link data-trunk rel="css" href="assets/factions/shop.css" />
   <script data-trunk defer src="assets/factions/art.js"></script>
   <script data-trunk defer src="assets/augments/art.js"></script>
   <script data-trunk defer src="assets/battle/hud.js"></script>
+  <script data-trunk defer src="assets/arenas/banner.js"></script>
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2b36; touch-action: none; }
     canvas#bevy { display: block; width: 100%; height: 100%; outline: none; }
@@ -79,6 +83,7 @@
       <button class="active" aria-current="page" data-action="menu"><svg class="icon"><use data-icon="home"/></svg><span data-i18n="lobby.tabs.lobby">Lobby</span></button>
       <button data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><svg class="icon"><use data-icon="arcana"/></svg><span data-i18n="lobby.tabs.arcanas">Arcanas</span></button>
       <button data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><svg class="icon"><use data-icon="tower"/></svg><span data-i18n="lobby.tabs.stronghold">Stronghold</span></button>
+      <button data-arena-open aria-haspopup="dialog" aria-controls="arena-hub"><svg class="icon"><use data-icon="island"/></svg><span data-i18n="lobby.tabs.arenas">Arenas</span></button>
       <button disabled data-i18n-title="lobby.tabs.coming" title="Coming later"><svg class="icon"><use data-icon="helmet"/></svg><span><span data-i18n="lobby.tabs.troops">Troops</span> <small data-i18n="lobby.tabs.locked">Locked</small></span></button>
       <button data-action="ranking"><svg class="icon"><use data-icon="trophy"/></svg><span data-i18n="lobby.tabs.ranking">Ranking</span></button>
       <button data-dialog="settings"><svg class="icon"><use data-icon="settings"/></svg><span data-i18n="lobby.tabs.settings">Settings</span></button>
@@ -132,6 +137,12 @@
     <div class="tower-scroll"><div class="tower-grid" data-s="grid" role="group" aria-label="Stronghold kinds"></div></div>
     <footer class="tower-footer"><div><p data-s="status" role="status"></p><small data-s="storage"></small></div><div class="tower-notes"><small data-s="fortify"></small><small data-s="controls"></small></div></footer>
   </dialog>
+  <dialog id="arena-hub" aria-labelledby="arena-title">
+    <header class="arena-header"><div><p class="arena-eyebrow" data-i18n="arenas.eyebrow">Choose the battlefield</p><h1 id="arena-title" data-i18n="arenas.title">Arenas</h1><p data-i18n="arenas.intro">Five battlefields, one small rule each. Both sides always play under the same rule.</p></div><div class="arena-scope"><span data-i18n="arenas.online">Online, the server draws the arena for every match</span><small data-i18n="arenas.practice">Your choice is your Practice arena</small></div><button class="arena-close" data-i18n-aria-label="arenas.close" aria-label="Close Arenas">×</button></header>
+    <p data-ar="error" role="alert" hidden></p>
+    <div class="arena-scroll"><div class="arena-grid" data-ar="grid" role="group" data-i18n-aria-label="arenas.title" aria-label="Arenas"></div></div>
+    <footer class="arena-footer"><p data-ar="status" role="status"></p></footer>
+  </dialog>
   <dialog id="lobby-friend" class="lobby-dialog metal-panel" aria-labelledby="friend-title">
     <button class="dialog-close" data-close data-i18n-aria-label="lobby.friend.close" aria-label="Close friend panel">×</button><p class="eyebrow" data-i18n="lobby.friend.eyebrow">Casual · Private room</p><h2 id="friend-title" data-i18n="lobby.friend.title">Gather your rival</h2><p data-i18n="lobby.friend.body">Share a room link, or enter a code from a friend.</p>
     <button class="dialog-primary" data-action="create" data-i18n="lobby.friend.create">Create a room</button><div class="divider" data-i18n="lobby.friend.join_label">or join an existing room</div>
@@ -163,6 +174,7 @@
     <div class="battle-time" data-phase="running">
       <strong data-battle-clock>3:00</strong><small data-battle-mode>Casual</small>
     </div>
+    <button class="arena-chip" data-arena-chip hidden type="button"><svg aria-hidden="true"><use href="assets/lobby/icons.svg#island"/></svg><b></b></button>
     <div class="team-plate enemy">
       <div class="plate-body">
         <span class="plate-line"><span class="plate-tower" data-plate-tower="enemy"></span><span class="battle-name" data-battle-opponent>Opponent</span></span>
@@ -172,6 +184,7 @@
       <span class="crest" aria-hidden="true"><b data-crest-opponent>O</b></span>
     </div>
   </header>
+  <div class="arena-banner" data-arena-banner hidden aria-live="polite"><small data-arena-label>Arena</small><strong data-arena-name></strong><span data-arena-effect></span><em data-arena-fair></em></div>
   <button class="battle-surrender" data-battle-action="surrender" data-state="ready"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 4H9V30H6ZM10 5L27 9 25 20 10 17Z"/></svg><span data-battle-surrender>Surrender</span></button>
   <aside class="unit-inspect" data-inspect-panel hidden aria-label="Unit status">
     <button class="inspect-close" data-battle-action="close-inspect" aria-label="Close unit status">&times;</button>

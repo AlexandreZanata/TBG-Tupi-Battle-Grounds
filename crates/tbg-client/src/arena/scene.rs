@@ -112,6 +112,10 @@ mod tests {
             }
         }
         assert_eq!(count::<With<ArenaScene>>(&mut app), forest);
-        assert_eq!(count::<()>(&mut app), world, "nothing leaks outside the scene");
+        assert_eq!(
+            count::<()>(&mut app),
+            world,
+            "nothing leaks outside the scene"
+        );
     }
 }
