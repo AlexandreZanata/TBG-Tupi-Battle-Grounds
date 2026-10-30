@@ -161,6 +161,15 @@ lobby/menu files). It gates no existing phase.
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
 | P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; immutable BR-R08/R09 contract and 28 online tests pass; **owner desktop/phone check pending** | — |
 
+## Independent arena art follow-up
+
+[Arena visual variants](phases/ARENAS-visual-variants.md) adds Frozen Tundra,
+Volcanic Forge, Ancient Ruins and Storm Valley around the unchanged arena 1
+layout. The owner requested client visuals and documentation only, based on
+`main`; no gameplay modifiers or authoritative arena selection are included.
+See the [arena art catalog and preview links](ARENAS.md). Implementation and
+desktop evidence are tracked in that report; owner visual approval is pending.
+
 ## Pending validations (owner)
 
 All code for P1–P8 is implemented and validated on the development PC

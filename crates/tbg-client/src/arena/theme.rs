@@ -4,7 +4,7 @@ use crate::{art::palette::*, config};
 use bevy::prelude::*;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub(super) enum Theme {
+pub(crate) enum Theme {
     #[default]
     Forest,
     Tundra,
@@ -13,7 +13,7 @@ pub(super) enum Theme {
     Storm,
 }
 
-pub(super) struct Palette {
+pub(crate) struct Palette {
     pub ground: [Color; 2],
     pub lane: [Color; 4],
     pub cliff: [Color; 3],

@@ -11,6 +11,8 @@ mod life;
 mod lighting;
 mod props;
 mod rocks;
+pub(super) mod theme;
+mod themes;
 mod towers;
 mod trees;
 mod water;
@@ -37,6 +39,9 @@ fn spawn_arena(
     mut meshes: ResMut<Assets<Mesh>>,
     mut mats: ResMut<Assets<StandardMaterial>>,
 ) {
+    let theme = theme::Theme::selected();
+    info!("arena theme: {} (visual only)", theme.name());
+    let kit = themes::build(theme);
     let mat = mats.add(StandardMaterial {
         base_color: Color::WHITE,
         perceptual_roughness: 1.0,
@@ -50,13 +55,20 @@ fn spawn_arena(
     let mut total = 0;
     let mut terrain = Vec::with_capacity(5);
     for (name, m) in [
-        ("meadow", ground::meadow()),
-        ("BattleLine", ground::lane()),
-        ("cliffs", cliffs::mesh()),
-        ("sea", water::sea()),
-        ("foam", water::coast()),
-        ("offshore rocks", water::rocks()),
-        ("props", painted(props::scatter())),
+        ("meadow", ground::meadow(theme)),
+        ("BattleLine", ground::lane(theme)),
+        ("cliffs", cliffs::mesh(theme)),
+        ("sea", water::sea(theme)),
+        ("foam", water::coast(theme)),
+        ("offshore rocks", water::rocks(theme)),
+        (
+            "props",
+            painted(if theme == theme::Theme::Forest {
+                props::scatter()
+            } else {
+                kit.props
+            }),
+        ),
     ] {
         let triangles = mesh::triangles(&m);
         total += triangles;
@@ -72,7 +84,7 @@ fn spawn_arena(
             Transform::default(),
             NotShadowCaster,
         ));
-        if name == "foam" {
+        if name == "foam" && theme != theme::Theme::Tundra {
             entity.insert(life::Foam);
         }
     }
@@ -84,8 +96,31 @@ fn spawn_arena(
             Transform::default(),
         ));
     }
+    if !kit.glow.is_empty() {
+        let glow = painted(kit.glow);
+        let triangles = mesh::triangles(&glow);
+        total += triangles;
+        info!("arena accents: {triangles} triangles");
+        let glow_mat = mats.add(StandardMaterial {
+            base_color: Color::WHITE,
+            unlit: true,
+            ..default()
+        });
+        commands.spawn((
+            Name::new("arena themed accents"),
+            Mesh3d(meshes.add(glow)),
+            MeshMaterial3d(glow_mat),
+            Transform::default(),
+            NotShadowCaster,
+        ));
+    }
     for (own, x) in [(true, -0.9), (false, 16.9)] {
-        for (piece, hide_below) in towers::tower(own) {
+        let pieces = if theme == theme::Theme::Forest {
+            towers::tower(own)
+        } else {
+            themes::structures::tower(theme, own)
+        };
+        for (piece, hide_below) in pieces {
             total += mesh::triangles(&piece);
             commands.spawn((
                 Mesh3d(meshes.add(piece)),
@@ -95,7 +130,7 @@ fn spawn_arena(
             ));
         }
     }
-    total += life::spawn(&mut commands, &mut meshes, &mut mats, &mat);
+    total += life::spawn(&mut commands, &mut meshes, &mut mats, &mat, theme);
     info!("arena total: {total} triangles");
-    lighting::spawn(&mut commands);
+    lighting::spawn(&mut commands, theme);
 }
