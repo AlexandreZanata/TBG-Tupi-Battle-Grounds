@@ -94,3 +94,13 @@ Production changes are limited to `crates/tbg-client/src/arena/water.rs`, `scene
 Local commits: `14a1795` diagnosis/baseline; `b593890` ocean; `a07fe38` background; `627f5dc` lighting; `4a51de7` composition; `9b55932` approved p95 limit and retained design. Final evidence is committed separately at the branch tip. At the initial local handoff, no push, PR, main merge or VPS change had been performed. Owner approved the displayed design and revised reference-case p95 limit on 2026-10-30.
 
 The work follows the owner's attached executable brief rather than a numbered roadmap phase. The dedicated `codex/arena-seascape` branch follows the host's branch convention and starts from the refreshed main base. This follow-up does not mark the broader P30 device/performance program complete.
+
+## Publication integration (2026-10-30)
+
+At the owner's request to publish all work from this chat, merge commit `39c5a47` combines all seven seascape commits through `5e8a7ba` with the existing art PR #14 (`codex/ranking-ui`, previously `120fa72`). The sole merge conflict was in ROADMAP.md; both follow-up records are retained. Rendering/diagnostic source matches `5e8a7ba` exactly, and presentation/assets/tests match `120fa72` exactly. Core/server/dependencies remain unchanged against the fetched main base `6ef155b`.
+
+Integrated validation: `cargo fmt --all -- --check`, `cargo clippy --workspace -- -D warnings`, `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown`, `node --check crates/tbg-client/diagnostics/measure.js`, and `trunk build --release` all pass. `cargo test --workspace -- --skip records_insert_and_count --test-threads=1` passes **266 tests**, with one existing ignored case and the documented excluded persistence case; the excluded case was not retried. `node --test --test-isolation=none --test-reporter=tap crates/tbg-client/tests/*.test.js` passes **27 tests**. Native suite: 221.5 s; release packaging: 79.9 s.
+
+The combined release WASM SHA-256 is `50426c57cb645409d6284ae6eb86472d96192915d07469eaeccd0de8d8157748` (24949503 bytes). It matches the approved measured WASM. On the integrated release, a local 1280x720 desktop browser check showed the illustrated lobby and the new 3D environment together, then real Practice with a successful Archer purchase, Army changing from 0 to 1, offer refresh, live combat and all four colored Faction frames. No error-level browser logs were observed. [Combined lobby](../media/art-publication/lobby-integrated.jpg), [combined Practice at 0:20](../media/art-publication/practice-integrated.jpg). This is an integration check, not a new paired performance measurement.
+
+Publication targets the existing PR #14; no main merge or VPS deployment is included.
