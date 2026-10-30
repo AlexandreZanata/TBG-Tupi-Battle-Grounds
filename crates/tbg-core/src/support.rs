@@ -50,9 +50,7 @@ pub(crate) fn transfer_pair(
         // Donor: highest %, then nearest, then lowest id.
         let better_donor = match donor {
             None => true,
-            Some((p, d, id, _)) => {
-                (pct, Reverse(dist), Reverse(id)) > (p, Reverse(d), Reverse(id))
-            }
+            Some((p, d, id, _)) => (pct, Reverse(dist), Reverse(id)) > (p, Reverse(d), Reverse(id)),
         };
         if better_donor {
             donor = Some((pct, dist, a.id, a.hp - 1));
@@ -95,14 +93,21 @@ pub(crate) fn transfer_cast(
     second: bool,
     ev: &mut Vec<Event>,
 ) {
-    if let Some((donor, receiver, headroom)) = transfer_pair(state, attacker, range, [None, None])
-    {
+    if let Some((donor, receiver, headroom)) = transfer_pair(state, attacker, range, [None, None]) {
         transfer_one(state, donor, receiver, amount_param, low_bp, headroom, ev);
         if second {
             if let Some((donor2, receiver2, headroom2)) =
                 transfer_pair(state, attacker, range, [Some(donor), Some(receiver)])
             {
-                transfer_one(state, donor2, receiver2, amount_param, low_bp, headroom2, ev);
+                transfer_one(
+                    state,
+                    donor2,
+                    receiver2,
+                    amount_param,
+                    low_bp,
+                    headroom2,
+                    ev,
+                );
             }
         }
     }

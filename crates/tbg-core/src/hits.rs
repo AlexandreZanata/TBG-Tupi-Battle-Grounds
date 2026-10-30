@@ -212,12 +212,17 @@ fn absorb_plates(state: &mut MatchState, id: u32, amount: i32, ev: &mut Vec<Even
     let Some(i) = state.unit_index(id) else {
         return amount;
     };
-    let [a, b] = state.rules().def(state.units[i].kind).ability(
-        state.units[i].tier,
-        state.units[i].branch,
-    );
+    let [a, b] = state
+        .rules()
+        .def(state.units[i].kind)
+        .ability(state.units[i].tier, state.units[i].branch);
     let plates = [a, b].into_iter().find_map(|ability| match ability {
-        Ability::Plates { count, hp, shrapnel, .. } => Some((count, hp, shrapnel)),
+        Ability::Plates {
+            count,
+            hp,
+            shrapnel,
+            ..
+        } => Some((count, hp, shrapnel)),
         _ => None,
     });
     let Some((_count, plate_max, shrapnel)) = plates else {
@@ -239,11 +244,7 @@ fn absorb_plates(state: &mut MatchState, id: u32, amount: i32, ev: &mut Vec<Even
             let u = &mut state.units[i];
             if broken {
                 u.fx.plates = left - 1;
-                u.fx.plate_hp = if u.fx.plates > 0 {
-                    plate_max as i16
-                } else {
-                    0
-                };
+                u.fx.plate_hp = if u.fx.plates > 0 { plate_max as i16 } else { 0 };
             } else {
                 u.fx.plate_hp = (cur - take) as i16;
             }
@@ -337,7 +338,7 @@ fn rampage_radius(state: &MatchState, attacker: &Unit) -> i32 {
         _ => None,
     });
     match rampage {
-        Some(r) if r > 0 && attacker.fx.plates == 0 => i32::from(r),
+        Some(r) if r > 0 && attacker.fx.plates == 0 => r,
         _ => 0,
     }
 }

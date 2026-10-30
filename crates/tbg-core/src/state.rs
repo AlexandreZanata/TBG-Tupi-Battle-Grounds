@@ -389,12 +389,21 @@ impl MatchState {
         // Caps hold exactly (BR-X02, BR-X03): never above the uncapped max.
         let [a, b] = self.rules.def(u.kind).ability(u.tier, u.branch);
         for ability in [a, b] {
-            if let Ability::Plates { count, move_bp, atk_bp, .. } = ability {
+            if let Ability::Plates {
+                count,
+                move_bp,
+                atk_bp,
+                ..
+            } = ability
+            {
                 let broken = i64::from(count.saturating_sub(u.fx.plates));
                 if broken > 0 {
                     let base = self.rules.def(u.kind);
-                    st.speed = (i64::from(st.speed) * (10_000 + i64::from(move_bp) * broken) / BP) as i32;
-                    st.speed = st.speed.min((i64::from(base.speed) * 15_000 / 10_000) as i32);
+                    st.speed =
+                        (i64::from(st.speed) * (10_000 + i64::from(move_bp) * broken) / BP) as i32;
+                    st.speed = st
+                        .speed
+                        .min((i64::from(base.speed) * 15_000 / 10_000) as i32);
                     let atk = (i64::from(st.atk_bp) + i64::from(atk_bp) * broken).min(10_000);
                     st.atk_bp = atk as i32;
                     st.interval = ((i64::from(base.interval) * 10_000 / (10_000 + atk))

@@ -38,7 +38,11 @@ fn plates_absorb_before_hp() {
     let mut hits = 0;
     for _ in 0..200 {
         for e in s.step() {
-            if let Event::Hit { to: Target::Unit(id), .. } = e {
+            if let Event::Hit {
+                to: Target::Unit(id),
+                ..
+            } = e
+            {
                 if id == wall {
                     hits += 1;
                 }
@@ -103,7 +107,9 @@ fn plates_never_restore() {
     // Root the wall in place: otherwise it marches into Stronghold range
     // and the test would measure Stronghold fire, not plates.
     let i = s.unit_index(wall).expect("wall must live");
-    s.units[i].status = tbg_core::Status::Rooted { ticks_left: u16::MAX };
+    s.units[i].status = tbg_core::Status::Rooted {
+        ticks_left: u16::MAX,
+    };
     // The keeper heals HP back, but no plate may come back. Plate 2 keeps
     // the 35-point remainder the breaking hit carried over.
     step_n(&mut s, 150);
@@ -156,7 +162,11 @@ fn root_cancels_burn_at_no_cost() {
     let mut wound = false;
     for _ in 0..200 {
         for e in s.step() {
-            if let Event::AttackStart { from: Target::Unit(a), .. } = e {
+            if let Event::AttackStart {
+                from: Target::Unit(a),
+                ..
+            } = e
+            {
                 if a == furnace {
                     wound = true;
                 }
@@ -168,14 +178,20 @@ fn root_cancels_burn_at_no_cost() {
     }
     assert!(wound, "the Furnace never wound up (scenario broken)");
     let i = s.unit_index(furnace).expect("furnace must live");
-    s.units[i].status = tbg_core::Status::Rooted { ticks_left: u16::MAX };
+    s.units[i].status = tbg_core::Status::Rooted {
+        ticks_left: u16::MAX,
+    };
     // The B Brute keeps hitting for 75 while the Furnace is rooted: every
     // HP lost must be a multiple of 75 (no 26-point burns interleaved), and
     // the Furnace must never land a hit of its own.
     let mut furnace_hits = 0;
     for _ in 0..60 {
         for e in s.step() {
-            if let Event::Hit { to: Target::Unit(id), .. } = e {
+            if let Event::Hit {
+                to: Target::Unit(id),
+                ..
+            } = e
+            {
                 if id == enemy {
                     furnace_hits += 1;
                 }
@@ -207,7 +223,10 @@ fn deathblow_resolves_at_max_multiplier() {
     for _ in 0..120 {
         for e in s.step() {
             match e {
-                Event::Hit { to: Target::Unit(id), amount } if id == victim => {
+                Event::Hit {
+                    to: Target::Unit(id),
+                    amount,
+                } if id == victim => {
                     if dealt == 0 {
                         dealt = amount;
                     }
@@ -223,7 +242,10 @@ fn deathblow_resolves_at_max_multiplier() {
         }
     }
     assert_eq!(dealt, 144, "Deathblow must resolve at ×4 (36 × 4)");
-    assert!(died, "the Deathblow Furnace must die at the end of the tick");
+    assert!(
+        died,
+        "the Deathblow Furnace must die at the end of the tick"
+    );
 }
 
 // Blood Furnace (§C.13): simultaneous deaths — the 144 hit also kills a
@@ -266,7 +288,11 @@ fn no_multiplier_vs_strongholds() {
     let mut after = 0;
     for _ in 0..200 {
         for e in s.step() {
-            if let Event::Hit { to: Target::Stronghold(_), amount } = e {
+            if let Event::Hit {
+                to: Target::Stronghold(_),
+                amount,
+            } = e
+            {
                 dealt = amount;
                 let j = s.unit_index(furnace).expect("furnace must live");
                 after = s.units[j].hp;
@@ -334,10 +360,7 @@ fn transfer_respects_heal_cut() {
     }
     assert_eq!(transferred, 120, "base transfer moves 120");
     let i = s.unit_index(receiver).expect("receiver must live");
-    assert_eq!(
-        s.units[i].hp, 160,
-        "a 50 % cut turns 120 into a 60 HP gain"
-    );
+    assert_eq!(s.units[i].hp, 160, "a 50 % cut turns 120 into a 60 HP gain");
 }
 
 // Bloodweaver (§C.14): summons are neither donors nor receivers. The
@@ -369,14 +392,8 @@ fn summons_never_join_transfers() {
         }
     }
     let (from, to) = first.expect("a transfer must happen (scenario broken)");
-    assert_ne!(
-        to, beetling,
-        "the damaged summon must never receive"
-    );
-    assert_ne!(
-        from, beetling,
-        "summons must never donate"
-    );
+    assert_ne!(to, beetling, "the damaged summon must never receive");
+    assert_ne!(from, beetling, "summons must never donate");
 }
 
 // Bloodweaver (§C.14): ties go to the nearest, then the lowest id.

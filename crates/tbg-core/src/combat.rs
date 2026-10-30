@@ -211,9 +211,7 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
             let victims: Vec<UnitId> = state
                 .units
                 .iter()
-                .filter(|u| {
-                    u.seat == enemy && u.hp > 0 && (u.x - s.x).abs() <= SHRAPNEL_RADIUS
-                })
+                .filter(|u| u.seat == enemy && u.hp > 0 && (u.x - s.x).abs() <= SHRAPNEL_RADIUS)
                 .map(|u| u.id)
                 .collect();
             for id in victims {
