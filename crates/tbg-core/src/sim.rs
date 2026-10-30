@@ -112,6 +112,7 @@ impl MatchState {
             }
             synergy::update(self, &mut ev);
             combat::tick_timers(self);
+            crate::afflictions::tick(self, &mut ev);
             summon::expire(self);
             summon::hatch(self, &mut ev);
             combat::run_units(self, &mut ev);

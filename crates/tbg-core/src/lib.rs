@@ -5,11 +5,11 @@
 //! floats in simulation state, and unseeded randomness (docs/ARCHITECTURE.md §4).
 
 pub mod account;
+mod afflictions;
 pub mod arcana;
 pub mod augment;
 pub mod bot;
-mod combat;
-pub mod content;
+mod combat;pub mod content;
 pub mod headless;
 mod hits;
 mod intent;

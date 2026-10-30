@@ -96,6 +96,19 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
                 Status::Slowed { bp, .. } => scale_down(st.speed, bp),
                 _ => st.speed,
             };
+            // Old Finn fish (P45): movement only, multiplicative with any
+            // status slow, so no combination reaches zero. Never touches
+            // the attack interval.
+            let fish_bp: i64 = u
+                .fx
+                .fish
+                .iter()
+                .filter(|s| s.left > 0)
+                .map(|s| i64::from(s.value))
+                .sum();
+            if fish_bp > 0 {
+                speed = (i64::from(speed) * (BP - fish_bp.min(BP)) / BP) as i32;
+            }
             let mut haste = augment::haste_move_bp(&state.player(u.seat).augments, &u, state.tick);
             if !u.is_summon() {
                 let army = state.army_of(u.seat);
