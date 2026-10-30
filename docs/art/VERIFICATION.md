@@ -1,8 +1,8 @@
 # Art implementation verification transcript
 
 These are the actual command outputs from the isolated `art/missing-assets`
-worktree. The phase is blocked on the Augment byte budget and live Practice
-observation; successful compilation does not resolve either requirement.
+worktree. Historical failures below are retained. The final resolution section records
+the passing budget and actual in-app Practice observation after owner continuation.
 
 ## `cargo fmt --all -- --check`
 
@@ -780,5 +780,79 @@ progress bar is 25%. No browser errors or art HTTP failures occurred.
   ],
   "errors": [],
   "assetFailures": []
+}
+```
+
+## Resolved art acceptance checks (2026-10-30)
+
+The owner instructed completion before the authorized merge/deployment.
+Illustrations now compare at 200 px and ship at 400 px Q90; frames and
+all quality gates are unchanged. The display panel is 1120 px wide.
+
+```text
+TOTAL augments gzip SVG + WebP bytes: 3829406 budget: 4000000
+```
+
+The complete Node command including `tests/art.test.js` returned exit 0:
+
+```text
+✔ tests/arcana.test.js (273.135877ms)
+✔ tests/art.test.js (464.851432ms)
+✔ tests/lobby.test.js (102.693438ms)
+✔ tests/stronghold.test.js (101.746642ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 498.390364
+```
+
+`trunk build --release` after the budget update returned exit 0:
+
+```text
+    Finished `release` profile [optimized] target(s) in 0.39s
+```
+
+The labeled component fixture also passed again at both sizes after the
+width change. A real in-app browser Practice round was then captured at
+1920×1080 and 1366×768 after all pictures loaded and viewport paint
+settled. These are real match screenshots, separately named
+`augments-practice-*`; the fixture screenshots remain labeled.
+
+Actual DOM projection from that round:
+
+```json
+{
+  "cards": [
+    {
+      "art": true,
+      "frame": true,
+      "name": "Second Wind",
+      "rarity": "Diamond"
+    },
+    {
+      "art": true,
+      "frame": true,
+      "name": "Desperate Assault",
+      "rarity": "Diamond"
+    },
+    {
+      "art": true,
+      "frame": true,
+      "name": "Hardy Sap",
+      "rarity": "Silver"
+    },
+    {
+      "art": true,
+      "frame": true,
+      "name": "Legacy",
+      "rarity": "Diamond"
+    }
+  ],
+  "clock": "1:00",
+  "council": "1|363|false|33,31,9,32"
 }
 ```

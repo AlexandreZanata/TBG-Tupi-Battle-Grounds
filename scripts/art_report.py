@@ -45,7 +45,7 @@ def report(name):
                  'unused older vectors were retuned to fit the expanded set within the same 3 MB budget. '
                  'Original approved prompts remain in `../ARCANA-UI-AND-STRATEGY.md`.\n\n')
     elif name == 'augments':
-        text += ('**BLOCKED: exceeds the 4,000,000 B budget by 67,598 B; see `../ART-ASSETS.md`.** Display comparison widths are 210 px for illustrations and 300 px for frames; '
+        text += ('The budget is 4,000,000 B. Display comparison widths are 200 px for illustrations and 300 px for frames; '
                  'the subject is also inspected at the requested 180 px scale. Only the four current options and their frames preload '
                  'when an authoritative round opens. Names, rarities, texts and timing are checked against core by client Rust tests.\n\n')
     else:
