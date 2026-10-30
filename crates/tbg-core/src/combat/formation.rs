@@ -11,13 +11,25 @@ struct Anchor {
 }
 
 pub(super) struct FormationIndex {
-    anchors: Vec<Anchor>,
+    /// Discovered on the first movement of the pass: a tick where nobody
+    /// moves (engaged armies) skips the per-unit ability scan entirely.
+    anchors: Option<Vec<Anchor>>,
     enemies: Vec<i32>,
 }
 
 impl FormationIndex {
-    pub(super) fn new(state: &MatchState) -> Self {
-        let anchors: Vec<_> = state
+    /// Unit indices and forms stay fixed during the combat pass (spawns
+    /// happen before it, removals after it), so discovering the anchors
+    /// lazily finds the same set as discovering them up front.
+    pub(super) fn new() -> Self {
+        Self {
+            anchors: None,
+            enemies: Vec::new(),
+        }
+    }
+
+    fn discover(state: &MatchState) -> Vec<Anchor> {
+        state
             .units
             .iter()
             .enumerate()
@@ -32,24 +44,23 @@ impl FormationIndex {
                         _ => None,
                     })
             })
-            .collect();
-        let capacity = if anchors.is_empty() {
-            0
-        } else {
-            state.units.len()
-        };
-        Self {
-            anchors,
-            enemies: Vec::with_capacity(capacity),
-        }
+            .collect()
     }
 
     pub(super) fn clamp(&mut self, state: &MatchState, u: &Unit, new_x: i32) -> i32 {
+        if self.anchors.is_none() {
+            let found = Self::discover(state);
+            if !found.is_empty() {
+                self.enemies.reserve(state.units.len());
+            }
+            self.anchors = Some(found);
+        }
+        let anchors = self.anchors.as_deref().unwrap_or(&[]);
         let ahead = |a: &&Anchor| {
             let oil = &state.units[a.index];
             oil.seat == u.seat && oil.hp > 0 && oil.id != u.id && (oil.x - u.x) * u.seat.dir() > 0
         };
-        if !self.anchors.iter().any(|a| ahead(&a)) {
+        if !anchors.iter().any(|a| ahead(&a)) {
             return new_x;
         }
         // Rebuild from the CURRENT state for this moving unit. A start-of-
@@ -63,8 +74,7 @@ impl FormationIndex {
                 .map(|e| e.x),
         );
         self.enemies.sort_unstable();
-        let anchor = self
-            .anchors
+        let anchor = anchors
             .iter()
             .filter(ahead)
             .filter(|a| {

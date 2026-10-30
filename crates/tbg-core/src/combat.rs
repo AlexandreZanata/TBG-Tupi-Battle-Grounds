@@ -39,7 +39,7 @@ pub(crate) fn run_units(state: &mut MatchState, ev: &mut Vec<Event>) {
     sync_passengers(state);
     // Unit indices and form parameters stay fixed during this pass: all
     // spawns happen before it and removal happens afterwards.
-    let mut formations = FormationIndex::new(state);
+    let mut formations = FormationIndex::new();
     for idx in 0..state.units.len() {
         advance_unit(state, idx, ev, &mut formations);
     }
