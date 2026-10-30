@@ -14,9 +14,16 @@ use super::Match;
 impl Match {
     /// Send this tick's view to one seat and drain its buffer.
     pub(super) fn send_view(&mut self, seat: Seat) {
-        let events = std::mem::take(&mut self.pending[seat.index()]);
-        let view = self.state.view_for(seat, &events);
-        self.send(seat, ServerMsg::View(Box::new(view)));
+        let i = seat.index();
+        // A detached seat would have the view dropped by `send`: skip
+        // building it. Its events are drained either way, as before.
+        if self.players[i].conn.is_some() {
+            let view = self.state.view_for(seat, &self.pending[i]);
+            self.send(seat, ServerMsg::View(Box::new(view)));
+        }
+        // `clear` keeps the capacity; `mem::take` left an empty buffer to
+        // regrow on every view interval.
+        self.pending[i].clear();
     }
 
     pub(super) fn count_success(&mut self, seat: Seat, intent: tbg_core::PlayerIntention) {
