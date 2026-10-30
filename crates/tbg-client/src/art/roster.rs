@@ -186,12 +186,12 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::Bloodweaver => recolor(undead::hexer(f), WEAVER),
         // P47 placeholders (blockout recolors); final art in the wave's
         // character phase.
-    UnitKind::Oilpress => recolor(machines::siege_walker(f), OILPRESS),
-    UnitKind::Drumguard => recolor(humans::shieldbearer(f), DRUMGUARD),
-    // P48-A placeholders (blockout recolors); final art in the wave's
-    // character phase.
-    UnitKind::Leechroot => recolor(plants::bloomkeeper(f), LEECHROOT),
-    UnitKind::CargoCrab => recolor(machines::sawbot(f), CRAB),
+        UnitKind::Oilpress => recolor(machines::siege_walker(f), OILPRESS),
+        UnitKind::Drumguard => recolor(humans::shieldbearer(f), DRUMGUARD),
+        // P48-A placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Leechroot => recolor(plants::bloomkeeper(f), LEECHROOT),
+        UnitKind::CargoCrab => recolor(machines::sawbot(f), CRAB),
         // P43: staged kinds render as a plain gray silhouette until their
         // wave lands (art/mod.rs builds every kind in ALL_KINDS).
         #[allow(unreachable_patterns)]

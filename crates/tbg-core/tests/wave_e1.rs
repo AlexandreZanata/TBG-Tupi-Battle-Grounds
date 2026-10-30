@@ -3,9 +3,7 @@
 
 #![cfg(feature = "lab")]
 
-use tbg_core::{
-    ArcanaPreset, Event, MatchState, Ruleset, Seat, Status, Target, UnitKind,
-};
+use tbg_core::{ArcanaPreset, Event, MatchState, Ruleset, Seat, Status, Target, UnitKind};
 
 fn rules() -> &'static Ruleset {
     Ruleset::canon()
@@ -42,7 +40,8 @@ fn leechroot_stacks_grow_and_scale_damage() {
     let i = s.unit_index(leech).expect("leech must live");
     let st = s.stats_of(&s.units[i]);
     assert_eq!(
-        st.damage, 10 + i32::from(stacks),
+        st.damage,
+        10 + i32::from(stacks),
         "each stack adds +1 damage"
     );
     // BR-X02 shared cap: attack speed never exceeds +100 %.
@@ -92,7 +91,10 @@ fn leechroot_ignores_strongholds_and_summons() {
                 Event::Spawn { unit, kind, .. } if kind == UnitKind::Beetling => {
                     beetlings.push(unit);
                 }
-                Event::Hit { to: Target::Unit(id), .. } if beetlings.contains(&id) => {
+                Event::Hit {
+                    to: Target::Unit(id),
+                    ..
+                } if beetlings.contains(&id) => {
                     hit_summon = true;
                 }
                 _ => {}
@@ -177,7 +179,11 @@ fn carried_units_cannot_be_targeted() {
     let mut on_passenger = 0;
     for _ in 0..200 {
         for e in s.step() {
-            if let Event::Hit { to: Target::Unit(id), .. } = e {
+            if let Event::Hit {
+                to: Target::Unit(id),
+                ..
+            } = e
+            {
                 if id == crab {
                     on_crab += 1;
                 }
@@ -226,7 +232,11 @@ fn windup_redirects_to_the_crab_on_boarding() {
     let mut winding = false;
     for _ in 0..200 {
         for e in s.step() {
-            if let Event::AttackStart { to: Target::Unit(id), .. } = e {
+            if let Event::AttackStart {
+                to: Target::Unit(id),
+                ..
+            } = e
+            {
                 if id == future {
                     winding = true;
                 }
@@ -242,7 +252,11 @@ fn windup_redirects_to_the_crab_on_boarding() {
     let mut hit_passenger = false;
     for _ in 0..30 {
         for e in s.step() {
-            if let Event::Hit { to: Target::Unit(id), .. } = e {
+            if let Event::Hit {
+                to: Target::Unit(id),
+                ..
+            } = e
+            {
                 if id == crab {
                     hit_crab = true;
                 }
@@ -292,7 +306,9 @@ fn crab_death_dismounts_behind_with_lock() {
     );
     // Root it in place so the lock (not distance) is what prevents
     // re-boarding over the next 50 ticks.
-    s.units[i].status = tbg_core::Status::Rooted { ticks_left: u16::MAX };
+    s.units[i].status = tbg_core::Status::Rooted {
+        ticks_left: u16::MAX,
+    };
     let mut reboarded = false;
     for _ in 0..50 {
         for e in s.step() {
@@ -336,7 +352,11 @@ fn passenger_acts_from_the_crab() {
     let mut acted = false;
     for _ in 0..200 {
         for e in s.step() {
-            if let Event::AttackStart { from: Target::Unit(a), .. } = e {
+            if let Event::AttackStart {
+                from: Target::Unit(a),
+                ..
+            } = e
+            {
                 if a == passenger {
                     acted = true;
                 }

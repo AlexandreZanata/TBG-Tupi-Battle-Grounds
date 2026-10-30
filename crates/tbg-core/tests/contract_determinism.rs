@@ -38,13 +38,7 @@ fn bot_matches_are_frozen() {
             Seat::B,
             StrongholdDestroyed,
         ),
-        (
-            7,
-            0x6e16_a638_0864_685,
-            3_284,
-            Seat::B,
-            StrongholdDestroyed,
-        ),
+        (7, 0x6e16_a638_0864_685, 3_284, Seat::B, StrongholdDestroyed),
         (
             42,
             0x66bf_c3d3_b770_da1,

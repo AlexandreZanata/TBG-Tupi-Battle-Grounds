@@ -154,8 +154,10 @@ pub(crate) fn feed_essence(state: &mut MatchState, attacker: &Unit, removed: i32
         return;
     };
     let mut stacks = u32::from(state.units[ai].fx.essence);
-    let mut progress =
-        state.units[ai].fx.essence_progress.saturating_add(removed.max(0) as u32);
+    let mut progress = state.units[ai]
+        .fx
+        .essence_progress
+        .saturating_add(removed.max(0) as u32);
     // The cost rises with every stack, so the loop always terminates.
     let mut cost = u32::from(base).saturating_add(u32::from(step).saturating_mul(stacks));
     while progress >= cost.max(1) && stacks < u32::from(u16::MAX) {

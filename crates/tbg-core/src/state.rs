@@ -422,11 +422,8 @@ impl MatchState {
                 let n = u.fx.essence;
                 if n > 0 {
                     let base = self.rules.def(u.kind);
-                    st.damage = st
-                        .damage
-                        .saturating_add(i32::from(dmg) * i32::from(n));
-                    let atk =
-                        (i64::from(st.atk_bp) + i64::from(atk_bp) * i64::from(n)).min(10_000);
+                    st.damage = st.damage.saturating_add(i32::from(dmg) * i32::from(n));
+                    let atk = (i64::from(st.atk_bp) + i64::from(atk_bp) * i64::from(n)).min(10_000);
                     st.atk_bp = atk as i32;
                     st.interval = ((i64::from(base.interval) * 10_000 / (10_000 + atk))
                         .max(i64::from(MIN_INTERVAL))) as u16;

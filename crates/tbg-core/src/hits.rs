@@ -237,7 +237,7 @@ fn absorb_shield(state: &mut MatchState, id: UnitId, amount: i32) -> i32 {
         return amount;
     };
     let u = &mut state.units[i];
-    if u.fx.shield <= 0 || state.tick >= u.fx.shield_until {
+    if u.fx.shield == 0 || state.tick >= u.fx.shield_until {
         return amount;
     }
     let absorb = amount.min(i32::from(u.fx.shield));

@@ -255,7 +255,10 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
             .units
             .iter()
             .filter(|u| {
-                u.seat != seat && u.hp > 0 && crate::targeting::targetable(state, u.id) && (u.x - sx).abs() <= rules.stronghold_range
+                u.seat != seat
+                    && u.hp > 0
+                    && crate::targeting::targetable(state, u.id)
+                    && (u.x - sx).abs() <= rules.stronghold_range
             })
             .map(|u| {
                 let guard = rules

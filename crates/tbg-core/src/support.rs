@@ -327,7 +327,7 @@ pub(crate) fn boarding(state: &mut MatchState, ev: &mut Vec<Event>) {
                 continue;
             }
             let dist = (a.x - crab.x).abs();
-            if dist <= board && best.map_or(true, |(d, id)| (dist, a.id) < (d, id)) {
+            if dist <= board && best.is_none_or(|(d, id)| (dist, a.id) < (d, id)) {
                 best = Some((dist, a.id));
             }
         }
@@ -342,14 +342,14 @@ pub(crate) fn boarding(state: &mut MatchState, ev: &mut Vec<Event>) {
         state.units[pi].x = crab.x;
         if let Some(ci) = state.unit_index(crab.id) {
             state.units[ci].fx.passenger = Some(pid);
-        // B2 Overdrive: +40 % move for 4 s, re-armed 15 s after the
-        // previous surge started (surge lasts 80 of those ticks).
-        if surge > 0
-            && (state.units[ci].fx.surge_until == 0
-                || state.tick >= state.units[ci].fx.surge_until.saturating_sub(80) + 300)
-        {
-            state.units[ci].fx.surge_until = state.tick.saturating_add(80);
-        }
+            // B2 Overdrive: +40 % move for 4 s, re-armed 15 s after the
+            // previous surge started (surge lasts 80 of those ticks).
+            if surge > 0
+                && (state.units[ci].fx.surge_until == 0
+                    || state.tick >= state.units[ci].fx.surge_until.saturating_sub(80) + 300)
+            {
+                state.units[ci].fx.surge_until = state.tick.saturating_add(80);
+            }
         }
         // Enemy windups already aimed at the passenger hit the crab instead.
         for u in state.units.iter_mut() {
@@ -368,17 +368,19 @@ pub(crate) fn boarding(state: &mut MatchState, ev: &mut Vec<Event>) {
 
 /// The crab's Carry params, if any.
 fn carry_of(state: &MatchState, u: &Unit) -> Option<(i32, u16, u16, u16, u16, u16)> {
-    abilities_of(state, u).into_iter().find_map(|ability| match ability {
-        Ability::Carry {
-            board,
-            lock,
-            dr_bp,
-            move_bp,
-            shield_bp,
-            surge_bp,
-        } => Some((board, lock, dr_bp, move_bp, shield_bp, surge_bp)),
-        _ => None,
-    })
+    abilities_of(state, u)
+        .into_iter()
+        .find_map(|ability| match ability {
+            Ability::Carry {
+                board,
+                lock,
+                dr_bp,
+                move_bp,
+                shield_bp,
+                surge_bp,
+            } => Some((board, lock, dr_bp, move_bp, shield_bp, surge_bp)),
+            _ => None,
+        })
 }
 
 /// Crab movement bonus while carrying (B1 steady, B2 surge): basis points.
@@ -411,7 +413,12 @@ pub(crate) fn carry_dr_bp(state: &MatchState, u: &Unit) -> u16 {
 
 /// Dismount a passenger: 0.2 tile behind the crab (toward its own base)
 /// with a 3 s re-board lock (P48-A, §C.15). Called from `remove_dead`.
-pub(crate) fn dismount(state: &mut MatchState, crab: UnitId, passenger: UnitId, ev: &mut Vec<Event>) {
+pub(crate) fn dismount(
+    state: &mut MatchState,
+    crab: UnitId,
+    passenger: UnitId,
+    ev: &mut Vec<Event>,
+) {
     let Some(ci) = state.unit_index(crab) else {
         return;
     };
