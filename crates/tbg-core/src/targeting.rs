@@ -28,14 +28,32 @@ pub(crate) fn engage(state: &MatchState, u: &Unit, st: &Stats) -> Option<Engage>
             return enemy_in_range(state, u, st.range).map(|_| Engage::Hold);
         }
     }
-    enemy_in_range(state, u, st.range).map(Engage::Act)
+    let no_stronghold = state
+        .rules()
+        .def(u.kind)
+        .ability(u.tier, u.branch)
+        .contains(&Ability::NoStronghold);
+    match enemy_in_range(state, u, st.range) {
+        // A unit that never targets Strongholds holds when the Stronghold
+        // is the only thing in range (Farwatch, §C.2).
+        Some(Target::Stronghold(_)) if no_stronghold => Some(Engage::Hold),
+        Some(t) => Some(Engage::Act(t)),
+        None => None,
+    }
 }
 
 /// Guard first: the nearest living enemy Rampart within range. Otherwise
 /// the nearest living enemy unit by |dx| (ties: lowest id), or the enemy
-/// Stronghold when it is strictly nearer or no enemy unit exists.
+/// Stronghold when it is strictly nearer or no enemy unit exists. A unit
+/// that never targets Strongholds (Farwatch) takes the nearest enemy unit
+/// in range instead, and holds when there is none.
 fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
     let enemy = u.seat.other();
+    let no_stronghold = state
+        .rules()
+        .def(u.kind)
+        .ability(u.tier, u.branch)
+        .contains(&Ability::NoStronghold);
     let mut nearest: Option<(i32, UnitId)> = None;
     let mut guard: Option<(i32, UnitId)> = None;
     for e in state.units.iter().filter(|e| e.seat == enemy && e.hp > 0) {
@@ -55,7 +73,7 @@ fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
     }
     let base = (stronghold_x(enemy) - u.x).abs();
     let (target, dist) = match nearest {
-        Some((d, id)) if d <= base => (Target::Unit(id), d),
+        Some((d, id)) if d <= base || no_stronghold => (Target::Unit(id), d),
         _ => (Target::Stronghold(enemy), base),
     };
     (dist <= range).then_some(target)

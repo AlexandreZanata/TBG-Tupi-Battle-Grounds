@@ -4,7 +4,7 @@
 
 use crate::arcana;
 use crate::augment;
-use crate::content::{Stats, BP};
+use crate::content::{Ability, Stats, BP};
 use crate::state::{stronghold_x, Event, MatchState, Target, Unit};
 use crate::targeting;
 use crate::types::{OnHit, Seat, Status};
@@ -56,7 +56,9 @@ pub(crate) fn resolve_hit(
         );
         amount = scale(
             amount,
-            augment::situational_bp(state, attacker, target) + arcana_bp,
+            augment::situational_bp(state, attacker, target)
+                + arcana_bp
+                + conditional_bp(state, attacker, target),
         );
     }
     let removed = damage(state, target, amount, ev);
@@ -67,6 +69,7 @@ pub(crate) fn resolve_hit(
     if let Target::Unit(id) = target {
         if !attacker.is_summon() {
             apply_heal_cut(state, attacker.seat, id);
+            apply_form_heal_cut(state, attacker, id);
         }
     }
     // Lifesteal: primary hit on an enemy conventional unit only (BR-X06).
@@ -102,6 +105,59 @@ fn scale(value: i32, bp: i32) -> i32 {
     out.clamp(0, i64::from(i32::MAX)) as i32
 }
 
+/// Form conditional damage (P44): each active form's `vs_below_bp` /
+/// `vs_above_bp` applies when the target's HP fraction meets its threshold.
+/// Read at hit resolution (BR-X11); unit targets only.
+fn conditional_bp(state: &MatchState, attacker: &Unit, target: Target) -> i32 {
+    let Target::Unit(id) = target else {
+        return 0;
+    };
+    let Some(i) = state.unit_index(id) else {
+        return 0;
+    };
+    let victim = state.units[i];
+    let mut bp = 0;
+    let rules = state.rules();
+    for tier in 1..=attacker.tier.min(2) {
+        if let Some(f) = rules.form_of(attacker.kind, tier, attacker.branch) {
+            if f.vs_below_bp != 0
+                && i64::from(victim.hp) * BP < i64::from(f.vs_below_hp_bp) * i64::from(victim.max_hp)
+            {
+                bp += f.vs_below_bp;
+            }
+            if f.vs_above_bp != 0
+                && i64::from(victim.hp) * BP > i64::from(f.vs_above_hp_bp) * i64::from(victim.max_hp)
+            {
+                bp += f.vs_above_bp;
+            }
+        }
+    }
+    bp
+}
+
+/// On-hit heal cut from the attacker's forms (P44, Farwatch B2): summed bp
+/// with the longest duration, applied after the Augment cut.
+fn apply_form_heal_cut(state: &mut MatchState, attacker: &Unit, id: u32) {
+    let (mut bp, mut ticks) = (0, 0);
+    let rules = state.rules();
+    for tier in 1..=attacker.tier.min(2) {
+        if let Some(f) = rules.form_of(attacker.kind, tier, attacker.branch) {
+            if f.heal_cut_bp > 0 {
+                bp += f.heal_cut_bp;
+                ticks = ticks.max(f.heal_cut_ticks);
+            }
+        }
+    }
+    if bp <= 0 {
+        return;
+    }
+    let until = state.tick.saturating_add(u32::from(ticks));
+    if let Some(i) = state.unit_index(id) {
+        state.units[i].heal_cut_until = until;
+        state.units[i].heal_cut_bp = bp;
+    }
+}
+
 fn apply_heal_cut(state: &mut MatchState, attacker: Seat, id: u32) {
     let bp = augment::heal_cut_bp(state, attacker);
     if bp <= 0 {
@@ -115,7 +171,10 @@ fn apply_heal_cut(state: &mut MatchState, attacker: Seat, id: u32) {
     }
 }
 
-/// Damage every other enemy (units and Stronghold) within the radius.
+/// Splash around the primary impact (P44): the attacker's splash share of
+/// the hit. A friendly blast (Bombard) reaches every unit of both seats —
+/// allies, the attacker itself — and the enemy Stronghold, but never the
+/// own Stronghold. Situational bonuses and statuses stay primary-only.
 fn splash(
     state: &mut MatchState,
     attacker: &Unit,
@@ -125,22 +184,36 @@ fn splash(
     ev: &mut Vec<Event>,
 ) {
     let enemy = attacker.seat.other();
+    let friendly = state
+        .rules()
+        .def(attacker.kind)
+        .ability(attacker.tier, attacker.branch)
+        .contains(&Ability::Blast { friendly: true });
+    let amount = scale(st.damage, st.splash_bp - 10_000);
     // Index loop, no clone: dead units are only removed in `remove_dead`.
     for i in 0..state.units.len() {
         let e = state.units[i];
         let near = (e.x - tx).abs() <= st.splash;
-        if e.seat == enemy && e.hp > 0 && near && primary != Target::Unit(e.id) {
-            let _removed = damage(state, Target::Unit(e.id), st.damage, ev);
+        if e.hp > 0 && near && primary != Target::Unit(e.id) && (friendly || e.seat == enemy) {
+            let _removed = damage(state, Target::Unit(e.id), amount, ev);
             #[cfg(feature = "lab")]
             crate::lab::dealt(state, attacker, _removed);
             if !attacker.is_summon() {
                 apply_heal_cut(state, attacker.seat, e.id);
+                apply_form_heal_cut(state, attacker, e.id);
             }
         }
     }
+    if friendly {
+        let base = Target::Stronghold(enemy);
+        if primary != base && (stronghold_x(enemy) - tx).abs() <= st.splash {
+            damage(state, base, amount, ev);
+        }
+        return;
+    }
     let base = Target::Stronghold(enemy);
     if primary != base && (stronghold_x(enemy) - tx).abs() <= st.splash {
-        damage(state, base, st.damage, ev);
+        damage(state, base, amount, ev);
     }
 }
 
