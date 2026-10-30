@@ -135,8 +135,9 @@ pub fn roster_csv(results: &crate::gate::Results, rules: &Ruleset) -> String {
             }
         }
     }
-    let mut s =
-        String::from("kind,purchases,dealt,taken,healed,status_ticks,dealt_per_energy,taken_per_energy\n");
+    let mut s = String::from(
+        "kind,purchases,dealt,taken,healed,status_ticks,dealt_per_energy,taken_per_energy\n",
+    );
     for k in tbg_core::ALL_KINDS {
         let i = k as usize;
         let divisor = purchases[i] * u64::from(rules.def(k).cost);

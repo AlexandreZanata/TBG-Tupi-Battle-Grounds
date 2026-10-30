@@ -392,10 +392,7 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
         (0.20, 1.0),
     ));
     let stalls = cluster(&games, |r| {
-        (
-            f64::from(u8::from(r.stall >= 60 * TICK_HZ)),
-            1.0,
-        )
+        (f64::from(u8::from(r.stall >= 60 * TICK_HZ)), 1.0)
     });
     rows.push(pct(
         "matches with a 60 s stall",

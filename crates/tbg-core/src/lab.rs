@@ -93,8 +93,7 @@ pub(crate) fn healed(state: &mut MatchState, healer: &Unit, amount: i32) {
 
 pub(crate) fn status(state: &mut MatchState, attacker: &Unit, ticks: u16) {
     if ticks > 0 {
-        state.lab.status_ticks[attacker.seat.index()][attacker.kind as usize] +=
-            u64::from(ticks);
+        state.lab.status_ticks[attacker.seat.index()][attacker.kind as usize] += u64::from(ticks);
     }
 }
 

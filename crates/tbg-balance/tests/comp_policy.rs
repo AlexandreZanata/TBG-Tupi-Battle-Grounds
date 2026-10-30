@@ -14,7 +14,10 @@ fn comp_name_and_parse_round_trip() {
         Some(UnitKind::Rampart),
     ]);
     assert_eq!(three.name(), "comp-siegewalker-archer-rampart");
-    assert_eq!(Policy::parse("comp-siegewalker-archer-rampart"), Some(three));
+    assert_eq!(
+        Policy::parse("comp-siegewalker-archer-rampart"),
+        Some(three)
+    );
     // Order is kept: the reverse names a different policy.
     let reversed = Policy::parse("comp-bonebrute-archer").expect("reversed comp parses");
     assert_eq!(reversed.name(), "comp-bonebrute-archer");
@@ -25,7 +28,11 @@ fn comp_name_and_parse_round_trip() {
             if a == b {
                 continue;
             }
-            let name = format!("comp-{}-{}", format!("{a:?}").to_lowercase(), format!("{b:?}").to_lowercase());
+            let name = format!(
+                "comp-{}-{}",
+                format!("{a:?}").to_lowercase(),
+                format!("{b:?}").to_lowercase()
+            );
             assert_eq!(Policy::parse(&name).map(|p| p.name()), Some(name));
         }
     }
