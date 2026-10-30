@@ -163,7 +163,7 @@ lobby/menu files). It gates no existing phase.
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
 | P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; 29 online tests and browser evidence; **owner physical-phone/PWA check pending** | PR #2 follow-up fixes pending |
 | P40 | [P40-arcana-trees.md](phases/P40-arcana-trees.md) | Fifteen-node trees, twelve points, three supremes, preset migration, editor and lab evidence | implemented; audited on `phase/p40-review` (Quickdraw cap fixed, Deadeye re-measured to +0.25 tile); War and Vitality builds trail the default, browser look check open | — |
-| P46 | [P46-live-spectate-and-presence.md](phases/P46-live-spectate-and-presence.md) | Live ranked match list, featured "Live now", real-time spectating for guests and accounts, online presence | planned (owner request 2026-10-29); depends on PR #10 | — |
+| P47 | [P47-live-spectate-and-presence.md](phases/P47-live-spectate-and-presence.md) | Live ranked match list, featured "Live now", real-time spectating for guests and accounts, online presence | planned (owner request 2026-10-29); depends on PR #10 | — |
 
 ## Pending validations (owner)
 
@@ -262,6 +262,6 @@ All code for P1–P8 is implemented and validated on the development PC
 
 ## Later (not planned yet)
 
-`Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P46) ·
+`Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·
 rating-based matchmaking and seasons (D-18) · `Reposition`/bench design ·
 WebGPU build · delta views · additional regions (ARCHITECTURE §12).

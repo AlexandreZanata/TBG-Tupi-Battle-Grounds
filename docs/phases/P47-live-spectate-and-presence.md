@@ -1,11 +1,11 @@
-# P46 — Live ranked matches, spectating and online presence
+# P47 — Live ranked matches, spectating and online presence
 
 **Depends on:** PR #10 merged (protocol v13, D-46 Stronghold kinds in
 `MatchView.strongholds`). If P41 (i18n) is merged first, every new string
 goes through its catalog. Do not run concurrently with any phase that
 edits `lobby.rs`, `match_task/*`, `protocol.rs` or the desktop lobby
 (`index.html`, `assets/lobby/*`).
-**Branch:** `phase/p46-live-spectate`.
+**Branch:** `phase/p47-live-spectate`.
 **Status:** planned (owner request 2026-10-29).
 **Difficulty:** medium–high. One protocol bump, a public view in core, a
 lobby registry with a snapshot, fan-out in the match task, two read-only
@@ -22,7 +22,7 @@ plus a small "N watching" badge.
 
 ## Read first (only these)
 
-- `AGENTS.md`; `docs/ROADMAP.md` (P46 row); this file.
+- `AGENTS.md`; `docs/ROADMAP.md` (P47 row); this file.
 - `docs/GAME-DESIGN.md`: glossary, BR-S05 (private information), BR-M01–M07,
   BR-R01–R09, BR-AG09/12/14 (Augment visibility), BR-SK08.
 - `docs/ARCHITECTURE.md` §5 (sessions, rates, limits, concurrency), §9,
@@ -56,7 +56,7 @@ plus a small "N watching" badge.
 No replays or VOD, no chat, no betting or predictions, no casual, room,
 challenge or practice spectating, no spectator camera control beyond the
 fixed arena camera, no delta views (still "Later"), no persistence (all of
-P46 is memory only; no schema change), no rule or balance change.
+P47 is memory only; no schema change), no rule or balance change.
 
 ## Owner decisions (defaults used unless the owner says otherwise)
 
@@ -192,7 +192,7 @@ client re-sends `Spectate` from `?watch=` or from the last id kept in
 
 ### 0. Baseline
 `scripts/capacity.sh` at 250 matches (CPU, RSS, bytes/s, late ticks) and
-a `tbg-bots` run. Save the results to `docs/media/p46/baseline.txt`.
+a `tbg-bots` run. Save the results to `docs/media/p47/baseline.txt`.
 
 ### 1. Core `PublicView` and the event classification
 Add the view, `public_view`, and `MatchView.spectators`. Contract tests:
@@ -240,7 +240,7 @@ end, disconnect and stop. Online tests (`tests/online.rs`):
 - `tbg-bots --spectators N` opens N anonymous sockets that read `/api/live` and watch random listed ids.
 
 Measure at 250 matches with 0, 500 and 2 000 spectators and record the
-results in `docs/media/p46/capacity.txt`.
+results in `docs/media/p47/capacity.txt`.
 
 ### 7. Client transport
 - `Spectate` / `StopSpectating`, `?watch=<hex>` and `sessionStorage` resume;
@@ -315,7 +315,7 @@ collision test for the new `data-*` names.
 - After the deploy, verify:
   - health, and the served wasm hash equals the local build;
   - `/api/live` and `/api/online` answer within limits;
-  - the DB is unchanged (no schema change in P46);
+  - the DB is unchanged (no schema change in P47);
   - other namespaces are unchanged;
   - nginx is unchanged and `nginx -t` passes;
   - teste.abastevo answers 200;
