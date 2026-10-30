@@ -265,7 +265,7 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
             .filter(|u| {
                 u.seat != seat
                     && u.hp > 0
-                    && crate::targeting::targetable(state, u.id)
+                    && crate::targeting::targetable(u)
                     && (u.x - sx).abs() <= tower.range
             })
             .map(|u| {
