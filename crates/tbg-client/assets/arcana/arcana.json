@@ -289,8 +289,8 @@
       ],
       "effect": "Tanks take 6% less damage while at least one allied conventional DPS is alive. It never stacks with more DPS.",
       "asset": {
-        "svg": "guard.svg",
-        "display": "guard.webp"
+        "svg": "shieldwall.svg",
+        "display": "shieldwall.webp"
       }
     },
     {
@@ -318,8 +318,8 @@
       ],
       "effect": "DPS move 12% faster while at least one allied conventional Tank is alive. It never stacks with more Tanks.",
       "asset": {
-        "svg": "assault.svg",
-        "display": "assault.webp"
+        "svg": "battle-rush.svg",
+        "display": "battle-rush.webp"
       }
     },
     {
@@ -360,8 +360,8 @@
       ],
       "effect": "While at least one allied conventional Tank and one DPS are alive, Tanks take 5% less damage and DPS deal +8% damage.",
       "asset": {
-        "svg": "war.svg",
-        "display": "war.webp"
+        "svg": "combined-arms.svg",
+        "display": "combined-arms.webp"
       }
     },
     {
@@ -389,8 +389,8 @@
       ],
       "effect": "Ranged deal 12% more damage against enemies already affected by slow or root when the attack resolves.",
       "asset": {
-        "svg": "piercing.svg",
-        "display": "piercing.webp"
+        "svg": "hunters-focus.svg",
+        "display": "hunters-focus.webp"
       }
     },
     {
@@ -418,8 +418,8 @@
       ],
       "effect": "Ranged attack 15% faster when their current target is within two tiles. Cooldowns keep their minimum interval.",
       "asset": {
-        "svg": "endurance.svg",
-        "display": "endurance.webp"
+        "svg": "quickdraw.svg",
+        "display": "quickdraw.webp"
       }
     },
     {
@@ -459,8 +459,8 @@
       ],
       "effect": "Every conventional Ranged unit gains 0.25 tile of attack range. Strongholds and summons are unchanged.",
       "asset": {
-        "svg": "precision.svg",
-        "display": "precision.webp"
+        "svg": "deadeye.svg",
+        "display": "deadeye.webp"
       }
     },
     {
@@ -489,8 +489,8 @@
       ],
       "effect": "Slow and root effects on Support and Control units last 25% less. Slow intensity is unchanged.",
       "asset": {
-        "svg": "resilience.svg",
-        "display": "resilience.webp"
+        "svg": "unshaken.svg",
+        "display": "unshaken.webp"
       }
     },
     {
@@ -518,8 +518,8 @@
       ],
       "effect": "Direct heals are 15% stronger when the ally is below 40% of maximum HP. The check happens before the heal.",
       "asset": {
-        "svg": "renewal.svg",
-        "display": "renewal.webp"
+        "svg": "emergency-care.svg",
+        "display": "emergency-care.webp"
       }
     },
     {
@@ -559,8 +559,8 @@
       ],
       "effect": "A real heal on a conventional ally removes slow and halves the remaining root duration. Overhealing never triggers it.",
       "asset": {
-        "svg": "vitality.svg",
-        "display": "vitality.webp"
+        "svg": "purification.svg",
+        "display": "purification.webp"
       }
     }
   ],
@@ -573,10 +573,11 @@
   "copy": {
     "badge": "Active in Practice, Casual, Ranked and private rooms",
     "intro": "Three families. Five choices each. Twelve points and a supreme to earn.",
-    "complete": "Complete build \u00b7 your next match uses it.",
-    "partial": "Incomplete build \u00b7 spend exactly {budget} points. Until then matches use the default.",
-    "controls": "Click / Enter / Space / + to add \u00b7 right-click / \u2212 to remove \u00b7 Esc to close",
+    "complete": "Complete build · your next match uses it.",
+    "partial": "Incomplete build · spend exactly {budget} points. Until then matches use the default.",
+    "controls": "Click / Enter / Space / + to add · right-click / − to remove · Esc to close",
     "eligibility": "Eligibility follows base Archetype through every Evolution. Summons receive no Arcana bonus. Deadeye affects conventional Ranged only.",
-    "scope": "Proposed values (P40) \u00b7 locked when you queue, join a room or start Practice."
-  }
+    "scope": "Proposed values (P40) · locked when you queue, join a room or start Practice."
+  },
+  "artBudgetBytes": 3000000
 }
