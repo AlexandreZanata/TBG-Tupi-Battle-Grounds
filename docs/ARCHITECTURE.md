@@ -167,6 +167,9 @@ tables are the one allowed exception.
   all `MatchStart` fields; `MatchMode::Challenge` is appended after Ranked.
   Peers older than v11 are rejected at the handshake.
   Intentions carry no seat: the server derives the seat from the connection.
+  Online intention sequences are positive and strictly increasing per
+  seat. Zero is reserved for offline simulation calls; rejecting it before
+  core application prevents resetting `last_seq` and replaying purchases.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
   applied or rejected that tick (P9).
