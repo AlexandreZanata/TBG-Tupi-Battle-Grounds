@@ -36,7 +36,9 @@ fn formation_holds_allies_behind_the_wall() {
     // Root the wall in place: it is the anchor, and a marching wall would
     // move the assertion window.
     let i = s.unit_index(wall).expect("wall must exist");
-    s.units[i].status = tbg_core::Status::Rooted { ticks_left: u16::MAX };
+    s.units[i].status = tbg_core::Status::Rooted {
+        ticks_left: u16::MAX,
+    };
     let ally = s.lab_spawn_at(Seat::A, UnitKind::Sawbot, 0, 0, 4_000);
     let enemy = s.lab_spawn_at(Seat::B, UnitKind::BoneBrute, 0, 0, 9_000);
     step_n(&mut s, 200);
@@ -94,7 +96,9 @@ fn bond_hysteresis_is_deterministic() {
     let ally1 = s.lab_spawn_at(Seat::A, UnitKind::BoneBrute, 0, 0, 6_500);
     for id in [drummer, ally1] {
         let i = s.unit_index(id).expect("unit must exist");
-        s.units[i].status = tbg_core::Status::Rooted { ticks_left: u16::MAX };
+        s.units[i].status = tbg_core::Status::Rooted {
+            ticks_left: u16::MAX,
+        };
     }
     step_n(&mut s, 20);
     let bond_of = |s: &MatchState| s.units[s.unit_index(1).unwrap()].fx.bond;
@@ -102,7 +106,9 @@ fn bond_hysteresis_is_deterministic() {
     // A challenger 350 closer (1150 vs 1500) does not steal the bond.
     let ally2 = s.lab_spawn_at(Seat::A, UnitKind::Sawbot, 0, 0, 6_150);
     let i = s.unit_index(ally2).expect("ally must exist");
-    s.units[i].status = tbg_core::Status::Rooted { ticks_left: u16::MAX };
+    s.units[i].status = tbg_core::Status::Rooted {
+        ticks_left: u16::MAX,
+    };
     step_n(&mut s, 20);
     assert_eq!(
         bond_of(&s),
@@ -131,7 +137,9 @@ fn best_bonus_wins_with_two_drummers() {
     let ally = s.lab_spawn_at(Seat::A, UnitKind::BoneBrute, 0, 0, 5_500);
     for id in [1, 2, ally] {
         let i = s.unit_index(id).expect("unit must exist");
-        s.units[i].status = tbg_core::Status::Rooted { ticks_left: u16::MAX };
+        s.units[i].status = tbg_core::Status::Rooted {
+            ticks_left: u16::MAX,
+        };
     }
     step_n(&mut s, 20);
     let i = s.unit_index(ally).expect("ally must exist");
@@ -156,7 +164,11 @@ fn march_damage_reduction_applies() {
     let mut first = 0;
     for _ in 0..200 {
         for e in s.step() {
-            if let Event::Hit { to: Target::Unit(id), amount } = e {
+            if let Event::Hit {
+                to: Target::Unit(id),
+                amount,
+            } = e
+            {
                 if id == ally && first == 0 {
                     first = amount;
                 }
@@ -182,7 +194,9 @@ fn b2_ally_ignores_slow_and_fish_for_movement() {
     let _hexer = s.lab_spawn_at(Seat::B, UnitKind::Hexer, 0, 0, 9_000);
     let _finn = s.lab_spawn_at(Seat::B, UnitKind::OldFinn, 0, 0, 9_200);
     let i = s.unit_index(drummer).expect("drummer must exist");
-    s.units[i].status = tbg_core::Status::Rooted { ticks_left: u16::MAX };
+    s.units[i].status = tbg_core::Status::Rooted {
+        ticks_left: u16::MAX,
+    };
     let mut slowed = false;
     let mut positions = Vec::new();
     for _ in 0..60 {
@@ -221,7 +235,11 @@ fn a2_ignores_slow_root_and_fish_movement() {
     let mut hits = 0;
     for _ in 0..150 {
         for e in s.step() {
-            if let Event::Hit { to: Target::Unit(id), .. } = e {
+            if let Event::Hit {
+                to: Target::Unit(id),
+                ..
+            } = e
+            {
                 if id == wall {
                     hits += 1;
                 }

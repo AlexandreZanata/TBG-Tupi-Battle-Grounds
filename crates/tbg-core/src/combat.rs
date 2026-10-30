@@ -129,8 +129,7 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
             // Drumguard march bonus joins haste under the BR-X03 cap.
             let bonus = (i64::from(haste) + i64::from(u.fx.march_move_bp)).min(5_000);
             if bonus > 0 {
-                speed = ((i64::from(speed) * (BP + bonus) / BP).min(i64::from(i32::MAX)))
-                    as i32;
+                speed = ((i64::from(speed) * (BP + bonus) / BP).min(i64::from(i32::MAX))) as i32;
             }
             let mut x = u.x + u.seat.dir() * speed;
             x = formation_clamp(state, &u, x);
@@ -153,7 +152,7 @@ fn formation_clamp(state: &MatchState, u: &Unit, new_x: i32) -> i32 {
             continue;
         }
         if let Some((ox, gap)) = crate::support::engaged_oilpress(state, idx) {
-            if (ox - u.x) * dir > 0 && anchor.map_or(true, |(d, _, _)| (ox - u.x).abs() < d) {
+            if (ox - u.x) * dir > 0 && anchor.is_none_or(|(d, _, _)| (ox - u.x).abs() < d) {
                 anchor = Some(((ox - u.x).abs(), ox, gap));
             }
         }

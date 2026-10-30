@@ -208,16 +208,18 @@ pub(crate) fn bonds(state: &mut MatchState) {
 
 /// The drummer's March params, if any (absolute per form slot, like Brew).
 fn march_of(state: &MatchState, u: &Unit) -> Option<(i32, u16, u16, i32, bool)> {
-    abilities_of(state, u).into_iter().find_map(|ability| match ability {
-        Ability::March {
-            reach,
-            move_bp,
-            dr_bp,
-            hysteresis,
-            ignore_slow,
-        } => Some((reach, move_bp, dr_bp, hysteresis, ignore_slow)),
-        _ => None,
-    })
+    abilities_of(state, u)
+        .into_iter()
+        .find_map(|ability| match ability {
+            Ability::March {
+                reach,
+                move_bp,
+                dr_bp,
+                hysteresis,
+                ignore_slow,
+            } => Some((reach, move_bp, dr_bp, hysteresis, ignore_slow)),
+            _ => None,
+        })
 }
 
 /// Bonded ally candidates: living allied conventional non-Drummers in
