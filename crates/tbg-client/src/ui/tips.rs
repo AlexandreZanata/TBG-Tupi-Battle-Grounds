@@ -32,6 +32,10 @@ fn matchup(kind: UnitKind) -> (&'static str, &'static str) {
         UnitKind::Longaxe => ("second-rank heavies", "swarms, burst"),
         UnitKind::Farwatch => ("safe chip from home", "Rampart guard, dives"),
         UnitKind::Bombard => ("clumped armies", "spread out, dives"),
+        // P45 wave B (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Rotcap => ("tanky fronts", "burst, cleanse"),
+        UnitKind::OldFinn => ("melee approaches", "ranged armies, cleanse"),
+        UnitKind::AntidoteBrewer => ("control and poison", "pure damage"),
         // P43: staged kinds render as a blockout until their wave lands.
         #[allow(unreachable_patterns)]
         _ => ("a new unit", "scout it first"),

@@ -90,6 +90,19 @@ const BOMBARD: &[(Color, Color)] = &[
     (SKIN, Color::srgb_u8(0x3A, 0x3F, 0x45)),
     (TRIM, Color::srgb_u8(0xD9, 0x5A, 0x2B)),
 ];
+/// P45 placeholders: recolored figures until the character phases.
+const ROTCAP: &[(Color, Color)] = &[
+    (BARK, Color::srgb_u8(0x4A, 0x2E, 0x5A)),
+    (LEAF, Color::srgb_u8(0x7F, 0xC9, 0x4A)),
+];
+const OLDFINN: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0x6B, 0x7B, 0x8A)),
+    (LEATHER, Color::srgb_u8(0x2E, 0x4A, 0x5A)),
+];
+const ANTIDOTE: &[(Color, Color)] = &[
+    (LEAF, Color::srgb_u8(0xC9, 0xB8, 0x4A)),
+    (LEAF_DARK, Color::srgb_u8(0x6B, 0x8A, 0x2E)),
+];
 
 fn recolor(mut spec: FigureSpec, map: &[(Color, Color)]) -> FigureSpec {
     for part in &mut spec.parts {
@@ -130,6 +143,11 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::Longaxe => recolor(humans::shieldbearer(f), LONGAXE),
         UnitKind::Farwatch => recolor(humans::archer(f), FARWATCH),
         UnitKind::Bombard => recolor(machines::siege_walker(f), BOMBARD),
+        // P45 placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Rotcap => recolor(plants::rootcaller(f), ROTCAP),
+        UnitKind::OldFinn => recolor(humans::shieldbearer(f), OLDFINN),
+        UnitKind::AntidoteBrewer => recolor(plants::bloomkeeper(f), ANTIDOTE),
         // P43: staged kinds render as a plain gray silhouette until their
         // wave lands (art/mod.rs builds every kind in ALL_KINDS).
         #[allow(unreachable_patterns)]
