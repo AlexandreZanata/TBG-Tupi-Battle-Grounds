@@ -42,6 +42,8 @@ pub(crate) struct AppState {
     /// P13: snapshot reads and per-IP API limits.
     pub store: Option<Arc<store::Store>>,
     pub api_limits: Arc<Mutex<limits::Limits>>,
+    /// P47: the lobby's live snapshot, read-only (`/api/live`, `/api/online`).
+    pub live: watch::Receiver<Arc<live::LiveSnapshot>>,
 }
 
 /// Handles the binary keeps to drive graceful shutdown.
@@ -79,7 +81,7 @@ pub async fn run_with(
     let config = Arc::new(config);
     let (lobby_tx, lobby_rx) = mpsc::channel(chan::LOBBY_QUEUE);
     // P47: the lobby publishes the live snapshot; the API only reads it.
-    let (live_tx, _live_rx) = watch::channel(Arc::default());
+    let (live_tx, live_rx) = watch::channel(Arc::default());
     tokio::spawn(lobby::run(
         lobby_rx,
         lobby_tx.clone(),
@@ -97,6 +99,7 @@ pub async fn run_with(
         next_conn_id: Arc::new(AtomicU64::new(1)),
         store,
         api_limits: Arc::default(),
+        live: live_rx,
     };
     let mut app = Router::new()
         .route("/health", get(|| async { "ok" }))
@@ -104,6 +107,8 @@ pub async fn run_with(
         .route("/metrics", get(metrics_handler))
         .route("/api/leaderboard", get(api::leaderboard))
         .route("/api/players/{name}", get(api::player))
+        .route("/api/live", get(api::live))
+        .route("/api/online", get(api::online))
         .with_state(state);
     if let Some(dir) = &config.static_dir {
         app = app.fallback_service(tower_http::services::ServeDir::new(dir));
