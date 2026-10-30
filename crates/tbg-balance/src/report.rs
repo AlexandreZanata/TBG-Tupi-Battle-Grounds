@@ -104,6 +104,64 @@ pub fn rows_csv(rows: &[Row]) -> String {
     s
 }
 
+/// Per-kind lab counters (P42): one line per kind in `ALL_KINDS` order.
+/// The per-Energy columns divide by `purchases × cost` and stay empty when
+/// that is 0; summons have no cost, so theirs are always empty.
+pub fn roster_csv(results: &crate::gate::Results, rules: &Ruleset) -> String {
+    let n = tbg_core::ALL_KINDS.len();
+    let mut purchases = vec![0u64; n];
+    let mut dealt = vec![0u64; n];
+    let mut taken = vec![0u64; n];
+    let mut healed = vec![0u64; n];
+    let mut status = vec![0u64; n];
+    for pairs in results.values() {
+        for game in pairs.iter().flat_map(|p| [&p[0], &p[1]]) {
+            for p in 0..2 {
+                for (k, &count) in game.sides[p].purchases.iter().enumerate() {
+                    purchases[k] += u64::from(count);
+                }
+                for (k, &total) in game.stats.dealt[p].iter().enumerate() {
+                    dealt[k] += total;
+                }
+                for (k, &total) in game.stats.taken[p].iter().enumerate() {
+                    taken[k] += total;
+                }
+                for (k, &total) in game.stats.healed[p].iter().enumerate() {
+                    healed[k] += total;
+                }
+                for (k, &total) in game.stats.status_ticks[p].iter().enumerate() {
+                    status[k] += total;
+                }
+            }
+        }
+    }
+    let mut s =
+        String::from("kind,purchases,dealt,taken,healed,status_ticks,dealt_per_energy,taken_per_energy\n");
+    for k in tbg_core::ALL_KINDS {
+        let i = k as usize;
+        let divisor = purchases[i] * u64::from(rules.def(k).cost);
+        let per = |total: u64| {
+            if divisor == 0 {
+                String::new()
+            } else {
+                format!("{:.2}", total as f64 / divisor as f64)
+            }
+        };
+        let _ = writeln!(
+            s,
+            "{k:?},{},{},{},{},{},{},{}",
+            purchases[i],
+            dealt[i],
+            taken[i],
+            healed[i],
+            status[i],
+            per(dealt[i]),
+            per(taken[i])
+        );
+    }
+    s
+}
+
 pub fn payoff_csv(ps: &[Policy], m: &[Vec<f64>], mix: &[f64]) -> String {
     let mut s = String::from("policy,nash_weight");
     for p in ps {

@@ -314,6 +314,28 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
         unit: Unit::Seconds,
         searched: true,
     }];
+    // Reference rows (P42): they never fail; later phases compare against
+    // them (ROSTER-EXPANSION §I).
+    let quantile = |q: usize| {
+        f64::from(ticks[(ticks.len() * q / 100).min(ticks.len() - 1)]) / f64::from(TICK_HZ)
+    };
+    for (name, value) in [
+        ("p90 duration (s)", quantile(90)),
+        ("p99 duration (s)", quantile(99)),
+        (
+            "max duration (s)",
+            f64::from(ticks[ticks.len() - 1]) / f64::from(TICK_HZ),
+        ),
+    ] {
+        rows.push(Row {
+            name: name.into(),
+            value,
+            interval: None,
+            band: (0.0, f64::MAX),
+            unit: Unit::Seconds,
+            searched: false,
+        });
+    }
     let share = |reason: EndReason| {
         cluster(&games, move |r| {
             (f64::from(u8::from(r.reason == reason)), 1.0)
@@ -368,6 +390,17 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
         "comebacks (behind at 2:00, won)",
         est(&comebacks, 5),
         (0.20, 1.0),
+    ));
+    let stalls = cluster(&games, |r| {
+        (
+            f64::from(u8::from(r.stall >= 60 * TICK_HZ)),
+            1.0,
+        )
+    });
+    rows.push(pct(
+        "matches with a 60 s stall",
+        est(&stalls, 6),
+        (0.0, 0.01),
     ));
     rows
 }

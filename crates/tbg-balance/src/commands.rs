@@ -175,6 +175,9 @@ fn run(a: &Args) -> Result<(), String> {
     )));
     print!("{text}");
     c.out.write("run.txt", &text).map_err(|e| e.to_string())?;
+    c.out
+        .write("roster.csv", &report::roster_csv(&results, c.rules))
+        .map_err(|e| e.to_string())?;
     let (g, t) = games_and_ticks(&results);
     c.finish(g, t, "")
 }
@@ -255,6 +258,7 @@ fn gate_cmd(a: &Args) -> Result<(), String> {
     let w = |n: &str, s: &str| c.out.write(n, s).map_err(|e| e.to_string());
     w("gate.txt", &format!("{table}\n{meta_txt}"))?;
     w("gate.csv", &report::rows_csv(&rows))?;
+    w("roster.csv", &report::roster_csv(&results, c.rules))?;
     w("payoff.csv", &payoff)?;
     w("duels.txt", &report::duel_summary(&matrix, c.rules))?;
     w("duels.csv", &report::duels_csv(&matrix, c.rules))?;
