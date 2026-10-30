@@ -40,6 +40,10 @@ fn action(value: &str) -> Option<UiAction> {
         "close-panel" => UiAction::ClosePanel,
         "sound" => UiAction::ToggleSound,
         "menu" => UiAction::Disabled,
+        // P41: the language selector pokes `data-action="lang:pt-BR"`.
+        _ if value.starts_with("lang:") => {
+            return crate::i18n::Lang::from_code(&value["lang:".len()..]).map(UiAction::SetLang);
+        }
         _ => {
             let code = value.strip_prefix("join:")?;
             if !code

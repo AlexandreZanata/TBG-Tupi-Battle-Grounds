@@ -2,6 +2,11 @@ Battleground Display and Battleground Sans are Latin subsets of Noto Serif Bold 
 Copyright 2010, 2012-2020 Google Inc.; 2015-2020 Google LLC.
 Source: https://github.com/notofonts/noto-fonts
 Subset and renamed for Tupi Battle Grounds with fonttools.
+P41: the ASCII files above are unchanged. The *-ext.woff2 files add the rest of
+the D5 charset (U+00A0-00FF, U+2018, U+201C-201D, U+2022, U+2026) from the same
+sources; U+2192 comes from Noto Sans Symbols (Regular/Bold) and U+25C6 from
+Noto Sans Symbols 2, same project and license. BattlegroundSansUi.ttf is the
+full D5 subset of Noto Sans Regular for the Bevy UI (O-P41-3).
 
 License: OFL-1.1
 PREAMBLE

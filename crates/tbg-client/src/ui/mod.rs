@@ -94,6 +94,9 @@ pub enum UiAction {
     CloseRanking,
     // BR-M06: two-tap surrender in the HUD.
     Surrender,
+    // P41: lobby Settings language switch (DOM selector via data-action).
+    #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))] // built from DOM strings on the web
+    SetLang(crate::i18n::Lang),
     // Owner revision 2026-10-29: War Council actions.
     ChooseAugment(u8),
     ForgoAugment,
@@ -141,17 +144,8 @@ fn scale_ui(window: Single<&Window>, mut scale: ResMut<UiScale>) {
     }
 }
 
-pub fn rejection_text(reason: Rejection) -> String {
-    match reason {
-        Rejection::NotEnoughEnergy => "Not enough Energy",
-        Rejection::NotEvolvable => "Summons cannot evolve",
-        Rejection::NotRunning => "The match is not running",
-        Rejection::Paused => "Battle paused - choose an Augment",
-        Rejection::MaxTier => "Already at the highest tier",
-        Rejection::WrongBranch => "That branch is closed",
-        _ => "Action not possible",
-    }
-    .to_string()
+pub fn rejection_text(reason: Rejection, lang: crate::i18n::Lang) -> String {
+    crate::i18n::content::rejection(lang, reason).to_string()
 }
 
 /// Text bundle that never blocks clicks on what is behind it.

@@ -18,8 +18,9 @@ path = "src/main.rs"
 bevy = { version = "0.20", default-features = false, features = [
     # app core
     "std", "async_executor", "bevy_asset", "bevy_log", "bevy_state", "reflect_auto_register",
-    # platform: window, input, browser canvas, default font
-    "bevy_winit", "bevy_window", "default_font", "multi_threaded", "webgl2", "x11", "wayland",
+    # platform: window, input, browser canvas (P41: default_font dropped, the
+    # i18n plugin embeds a Latin-1 Noto Sans subset at AssetId::default instead)
+    "bevy_winit", "bevy_window", "multi_threaded", "webgl2", "x11", "wayland",
     # 3D rendering
     "bevy_render", "bevy_core_pipeline", "bevy_pbr", "bevy_light", "bevy_camera",
     "bevy_color", "bevy_mesh", "bevy_image", "bevy_shader", "bevy_material",
@@ -29,6 +30,10 @@ bevy = { version = "0.20", default-features = false, features = [
 # WebSocket client with the same API on wasm and native (P1). Reason: RTT ping.
 ewebsock = "0.8"
 tbg-core = { path = "../tbg-core" }
+
+[build-dependencies]
+# Build-time only: parse assets/i18n/*.json in build.rs (P41, D2).
+serde_json = "1"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # Audio only in the browser build: native bevy_audio needs ALSA (P7).

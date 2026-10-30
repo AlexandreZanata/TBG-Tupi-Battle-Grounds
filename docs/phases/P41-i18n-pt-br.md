@@ -401,9 +401,212 @@ values". Fill the report.
 
 > Fill in with real command output and measurements (AGENTS.md step 7).
 
-- Baselines (step 0):
-- String inventory (step 1):
-- Font sizes (step 3):
-- Measurements before/after (step 12):
+- Baselines (step 0, branch `phase/p41-i18n` @ `77c1107`, 2026-10-29):
+  - Checks: `cargo fmt --all -- --check` clean; `cargo clippy --workspace -- -D warnings`
+    clean (20.04 s); `cargo test --workspace` all green; `cargo check -p tbg-client
+    -p tbg-core --target wasm32-unknown-unknown` clean; `trunk build --release` green.
+  - WASM: `dist/tbg-client-*.wasm` 24,773,413 bytes raw; brotli-11 4,822,103;
+    gzip 7,713,137.
+  - First-load assets (en, brotli-11): index.html 4,780 + js glue 14,999 +
+    lobby.js/css 1,894/2,694 + hud.js/css 3,339/4,372 + editor.js/css 3,356/2,939 +
+    preset.js 720 + 3 fonts (already woff2) 18,856/16,396/16,293 = 90,638 total.
+  - Time to menu (headed Chrome, Intel iGPU Mesa RPL-P, 1920x1080, local
+    http.server, cold profile): `#tbg-lobby[data-ready="true"]` after 1,839 ms
+    (headless runs: 1,906 ms / 1,849 ms).
+  - `?stress=200` menu (headed, 25 s warmup, `?measure` overlay window):
+    frame p50/p95/p99 31.9/52.4/62.5 ms, fps ~40, motion stall 0.00% jump 0.01%.
+  - Practice vs bot at 3-min mark, attended (bought offer 0 every ~12 s, match
+    still live at T+180 s, `over=False`): frame p50/p95/p99 16.8/20.5/23.7 ms,
+    >33 ms frames 0, fps ~48, motion stall 0.54% jump 0.11%. Unattended match
+    ends ~1:07 (DEFEAT, 0 units deployed), so step 12 must repeat the attended
+    procedure for comparability. One hitch noted: T+90 s sample in the
+    unattended run showed fps 5.5 / p95 127 ms (single-window anomaly, recovered).
+  - Render path note: headless-with-SwiftShader runs pin the probe at
+    250.0/250.0/250.0 ms (Bevy delta clamp) and are NOT valid baselines; all
+    numbers above are headed-Chrome on `ANGLE (Intel, Mesa Intel(R) Graphics
+    (RPL-P), OpenGL ES 3.2)`. No NVIDIA-GPU run (Chrome picked Intel).
+- String inventory (step 1, appendix; counts are user-visible strings, not code lines):
+  - HTML chrome: `index.html` 141 text nodes + 38 localizable attrs
+    (`aria-label/title/alt/placeholder`, incl. `data-art` alts, dialog titles,
+    lobby tabs/modes/profile/feature/news/friend/settings/battle/inspect/shop/council/form);
+    `ranking/index.html` 15 + 2; `ranking/player.html` 19 + 3.
+  - JS, `assets/lobby/lobby.js` (~16): Guest, sound ON/OFF, ranked hints,
+    3 news items + pager `1 / 3`, record note, stats statuses (`Loading your ranked
+    record…`, `Ranked record · N draws`, …), `ranked matches` singular/plural.
+  - JS, `assets/battle/hud.js` (~22 composed/static): `You/Opponent`, mode
+    `Ranked/Casual`, `Get ready`, `Yours/Enemy`, `Stronghold HP` suffixes,
+    `tiles`, `tiles/s`, `DPS` (from `Dps`), `Energy` in costs, `not enough`,
+    council `Forgo/Confirm choice/Augment selected!/Round forgone./Waiting for
+    opponent...`, surrender `Surrender/Confirm?/Leaving...` + titles,
+    `Shop offer one…five` aria-labels, `Click to recruit…` help.
+  - JS, `assets/arcana/editor.js` (chrome ~20 + data): `Points left X / 12`,
+    complete/partial copy with `{budget}`, storage notes (5), notices
+    (`…is at its maximum rank.`, `Not enough points for …`, `Requires …`,
+    `Remove … first.`), `No prerequisite/Requirements met`, cost
+    `N point(s)`, rank `N / M`, aria-labels per node, `Add/Remove a rank…`;
+    `preset.js` composes `… rank R (now N)` (missing-prereq list).
+  - JS, `ranking/ranking.js` (~20): `Win/Loss/Draw`, reason map
+    (`Stronghold destroyed/Time up/Forfeit`), `Cannot reach the server…`,
+    `Too many requests…`, `The ranking is unavailable right now.`,
+    `No ranked players yet…`, `No players on this page.`,
+    `N ranked players · showing A–B`, `Updated <locale>`, `Unranked`,
+    `#N Global`, `Your first Ranked match awaits`, `No player named “…”`,
+    faction names from `FACTIONS` (client-side list).
+  - Data, `assets/arcana/arcana.json`: 7 `copy.*` + 1 `summon.text` + 3 family
+    `name/description` + 15 nodes × (`name/eligibility/perRankText/effect`,
+    some `rankTwoText`) = 72 node/family fields; `arcana.json` keeps
+    ids/numbers/art after step 7.
+  - Rust Bevy (static `label(`/`button(` literals): menu 12, account_ui 7,
+    queue 5, result 4 (`Request rematch/Play again/Menu` + dynamic below),
+    ranking_ui 5, evolve 2, surrender 1, hud 1 (`Forgo`), hud_top 2
+    (`3:00`, `RANKED`), countdown 1 (`STARTING`), overlay 1 (`FPS --`,
+    stays English per D6); dynamic `format!`/composed-with-numbers:
+    `rejection_text` 5, result 10 (`VICTORY/DEFEAT/DRAW/MATCH OVER`,
+    reason lines, `vs {opp}`, `Duration M:SS vs …`, `Units deployed N | …`,
+    `Rating A -> B (+D)`, rematch states ×5), account errors 4 + toasts
+    (`Logged in as {name}`, `Logged out`, …), queue clocks/statuses
+    (`Challenge created\nWaiting for your friend M:SS`, `Searching… M:SS`,
+    `Joining challenge...`), menu (`Sound: on/off`, `{name} ({rating})`,
+    `Ranked Match ({rating})`), evolve title/options
+    (`{name} | tier N`, `{form}: {desc}`, `+N% …`, `+N.N …`, `+N dmg attack`,
+    `hits root N.Ns`), tips 2 + per-unit pairs + `heals N/{N} dmg`,
+    inspect (`Damage/Heal`, `{N:.1}` s), hud_update (`Chosen/Forgo`,
+    `STARTING`, `M:SS`, `{Faction:?} N/2`, `Augments: …/none`,
+    `{name} xN`, `Army N [| Brood M]`), hud_top name truncation (user data),
+    textform prompts from Rust (`Paste your account key`, `Name`) + server
+    refusal errors via `set_error` (server codes, client-rendered), `OK/Cancel`.
+  - Rust→DOM bridge (Rust composes, JS renders; D6): `data-offer-N`
+    (`Kind|name|Archetype|cost|Faction|available|pending`), `data-inspect`
+    18-field record, `data-council-options` (`id:name:text:cost`, text may
+    contain `:`), `data-synergy` (`Faction N/2 | …`); portrait `kind` stays the
+    `UnitKind` id (never translated).
+  - Core canon (English source, step 9 keys): 11 `UnitKind` (types.rs),
+    forms per kind, `AUGMENTS` 40 (`AUGMENT_CATALOG`), 4 `Faction`,
+    5 `Archetype`, synergies, Strongholds; Interest display `×1.00` +
+    tooltip (`Every 5 Energy you hold adds 25%…`) with comma decimal in pt-BR.
+  - Server sends no prose: `protocol.rs` carries player names/room codes/keys
+    and `Rejection` codes only (sole string literal is `ROOM_ALPHABET`);
+    server-src English literals are test names, SQLite pragmas, and internal
+    faction stat keys (API JSON data, rendered client-side). No server change.
+  - Fixed-width containers for the step 10 layout pass: Bevy `button(..,
+    width)` 124.0 (Prev/Next/Ranking/Sound), 140.0 (Close), 150.0 (Copy link),
+    120.0 (Share), 180.0 (account), 200.0 (Log out), 220.0 (rematch/result/queue),
+    260.0 (menu/account panel); CSS `white-space:nowrap`:
+    hud.css battle-resources/champion-name/battle-name/inspect-title/battle-augments,
+    lobby.css player-chip/tabs/sound, ranking.css tables + pager.
+- Font sizes (step 3, this commit): base `*.woff2` byte-identical (git untouched):
+  Display 18,856 / Sans 16,392 / SansBold 16,296. New: `BattlegroundDisplay-ext`
+  10,152 / `BattlegroundSans-ext` 9,020 / `BattlegroundSansBold-ext` 8,884 (all
+  woff2); Bevy `BattlegroundSansUi.ttf` 31,000 (Noto Sans Regular, O-P41-3).
+  Exact commands (repo root; `NS=/usr/share/fonts/truetype/noto`):
+  `pyftsubset $NS/<NotoSerif-Bold|NotoSans-Regular|NotoSans-Bold>.ttf
+  --unicodes="U+00A0-00B6,U+00B8-00FF,U+2018,U+201C-201D,U+2022,U+2026"
+  --layout-features='kern,liga' --output-file=A-<tag>.ttf`;
+  `pyftsubset $NS/<NotoSansSymbols-Regular|Bold>.ttf --unicodes="U+2192" ...`
+  and `pyftsubset $NS/NotoSansSymbols2-Regular.ttf --unicodes="U+25C6" ...` for
+  B/C; `fonttools merge A B C --output-file=M-<tag>.ttf`;
+  `pyftsubset M-<tag>.ttf --unicodes="<ext plus U+2192,U+25C6>"
+  --layout-features='kern,liga' --flavor=woff2 --output-file=*-ext.woff2`;
+  `BattlegroundSansUi.ttf` is the full-D5 merge of NotoSans-Regular + B + C.
+  CSS: one `*-ext.woff2` `@font-face` per family/weight with the matching
+  `unicode-range` in `lobby.css` (Battleground/Camp) and `hud.css` (BattleBody);
+  `editor.css` inherits the lobby faces; `ranking.css` stays system-ui until step 11.
+  Bevy: `default_font` dropped; `i18n::plugin` embeds the TTF at
+  `AssetId::default()` exactly as `bevy_text` did. `glyphs.rs` now enforces the D5
+  charset over `src/` literals and both catalogs. Gallery: headed-Chrome
+  1920x1080 screenshots show `Ação Evolução ÁÂÃÀÇÉÊÍÓÔÕÚÜ ãõç → ◆` with no tofu
+  in the lobby (Display + Sans; only base+ext woff2 fetched, ext on demand) and
+  in Bevy overlay text (Noto Sans replaces Fira Mono). WASM brotli 4,831,437
+  (+9,334 vs step 0, budget +60 KB). No console/page errors on the final build.
+- Measurements before/after (step 12): pending (out of scope for steps 0-5; A-1 unmerged).
+- Step 5 (this commit): lobby fully keyed — 106 keys/catalog (was 27), every
+  `#tbg-lobby` text node and aria/title/alt attribute carries `data-i18n*`;
+  `lobby.js` renders through `TBG_I18N` (incl. `plural` for ranked matches and
+  the news pager), gates `data-ready` on `TBG_I18N.ready`, and re-renders on
+  `tbg:lang`. `#tbg-battle`, `#tbg-form`, and `data-a=*` untouched (steps 6-8).
+  Checks: fmt/clippy/test/wasm green; `trunk build --release` green; headed
+  Chrome 1920x1080: EN lobby pixel-identical to baseline; switch re-renders to
+  PT without reload; fresh pt-BR visit paints Portuguese (no English flash);
+  settings/friend dialogs fully Portuguese; gate test with 6 s catalog stall
+  keeps `data-ready=false` (lobby hidden) until settle; no page errors.
+  Sizes: WASM brotli 4,832,050 (+613 vs step 3, +9,947 vs step 0, budget
+  +60 KB); English first-load +2,702 brotli (i18n.js 1,285 + en.json 1,417,
+  budget +15 KB); pt-BR adds pt-BR.json (1,740) + `*-ext.woff2` on demand.
+- Step 4 (this commit): inline resolver (top of `<head>`), `assets/i18n/i18n.js`
+  (`TBG_I18N`: lang/t/plural/number/apply/ready/setLang, `cache: 'no-cache'` with
+  en fallback then key fallback, one cached `Intl.NumberFormat` per language,
+  compare-before-write in `apply`, `tbg:lang` event), Settings selector
+  (`English` / `Português (Brasil)`, `aria-pressed`), `UiAction::SetLang` via
+  `data-action="lang:…"`, Rust startup reads `<html lang>` (wasm) / `?lang`
+  (native), `<title>` follows the catalog (`meta.title`), `rejection_text`
+  takes the live `Lang`. Checks (headed Chrome 1920x1080): pt-PT first visit →
+  pt-BR with nothing stored; en-US first visit → en; switch → html/i18n/title/
+  storage all pt-BR + `aria-pressed`; reload → persists; `?lang=en` overrides
+  stored pt-BR for the visit. `trunk build --release` green; no console errors.
+  This removed the step-2 `allow(dead_code)` on `from_code` and the `PtBr`
+  variant (both now constructed); `code/tf/plural/decimal/Localized/Msg/check`
+  allows remain for steps 5-8.
+- Step 2 (this commit): `build.rs` (~150 lines, `serde_json` build-dep with reason
+  comment in `Cargo.toml`) + `src/i18n/{mod.rs,check.rs,content.rs,tests.rs}`; 26 keys
+  in both `assets/i18n/*.json`. Checks: fmt/clippy/test/workspace/wasm all green
+  (44 bin tests incl. 9 new i18n); `trunk build --release` green; menu screenshot
+  identical to baseline. WASM brotli 4,825,673 (+3,570 over step 0, budget +60 KB).
+  Negative demo (deleted `toast.need_energy` from pt-BR, restored after):
+  `thread 'main' panicked at crates/tbg-client/build.rs:51:19: i18n: key missing in
+  pt-BR: toast.need_energy`. Browser smoke (headed, 1920x1080): lobby visible,
+  `data-screen=lobby`, no repeat console errors (one transient 404 on first load,
+  clean on reload).
 - Deviations:
-- Limitations:
+  - `rejection_text` now returns specific catalog copy for all 13 `Rejection`
+    variants (9 previously fell into `"Action not possible"`); the 4 legacy strings
+    are byte-identical. Full copy review stays in step 10.
+  - Temporary `#[allow(dead_code)]` on `Lang::{code,from_code,tf,plural,decimal}`,
+    `Localized`, the generated `Msg` enum, and `check.rs`, each commented with the
+    step that wires it (4-8); all covered by `i18n/tests.rs` until then.
+  - The 26 pt-BR seed values are provisional: glossary terms use O-P41-1 proposed
+    defaults (Energia, Aprimoramento, Evolução, Ranqueada, Casual); non-glossary
+    words are proposals for owner review in step 10 (Som, Fechar, Pontuação,
+    Partida rápida, Jogue por pontos, …).
+  - Test expectations use `\u{...}` escapes: the current `glyphs` guard scans every
+    string literal under `src/`; step 3 reworks it to the D5 charset rule.
+  - No indexed family exists in the catalog yet, so the family codegen path is
+    covered by a synthetic gap test only; first real family lands in step 7/9.
+  - The OFL-named sources (Noto Serif Bold, Noto Sans R/B) lack U+2192 and U+25C6,
+    so the ext subsets merge those two glyphs from Noto Sans Symbols (Regular/Bold)
+    and Noto Sans Symbols 2 — same Noto project and OFL license, recorded in
+    `OFL.txt`. Before this step the lobby `◆` already fell back to a system font.
+  - Step 3 Bevy proof used a temporary overlay string (reverted before commit;
+    `git diff` on `overlay.rs` is empty); the committed tree contains no probe.
+  - Step 4: the Rust side (startup `<html lang>` read, `SetLang` → resource,
+    `rejection_text(lang, …)`) is proven by unit tests (`from_code` tags,
+    `content::rejection` pt-BR contains "Energia"); a browser-visible rejection
+    toast was not captured — capture attempts kept colliding with the 2.0 s/14 s
+    tips toasts (same 1.5 s toast slot), countdown buys stay pending instead of
+    rejecting `NotRunning`, and match regen outruns click-draining. Retry in
+    step 8 when more toast paths are Lang-driven.
+  - Step 4: `?lang=` overrides for the visit only (it does not rewrite
+    `tbg.lang`); the next plain visit returns to the stored language.
+  - Step 4: ranking pages do not load the resolver/`i18n.js` yet (their CSP
+    `default-src 'self'` blocks inline scripts); step 11 owns that, including
+    any CSP adjustment.
+  - Step 4: readiness gating (`data-ready` waiting on `TBG_I18N.ready`) is
+    step 5's job; `lobby.js` still sets `data-ready` immediately.
+  - Step 5: indexed keys are 0-based (`lobby.news.0…2`); the gap check requires
+    exactly 0..n because codegen indexes families directly by id (D2). The
+    story index doubles as the catalog id in `lobby.js`.
+  - Step 5: the `›` chevrons and `‹ ›` pager stay literal system-font glyphs
+    (outside the D5 charset, so never catalog values); the Ranking `›` lives
+    in a separate `<i>` so `data-i18n` never wipes it. Step 10 may restyle them.
+  - Step 5: the guest ranked hint first-paint text was unified to the JS value
+    (`Locked · Create account to play Ranked`; the HTML previously said
+    `Create account to unlock Ranked`).
+  - Step 5: generated family tables (`LOBBY_NEWS_TITLE/BODY`) carry
+    `#[allow(dead_code)]` until Rust-side indexed mappings land in steps 7-9.
+  - Step 5: all non-glossary pt-BR values remain owner-review proposals
+    (step 10 fills the rest of the catalog the same way).
+  - Step 5: under an artificial 12 s catalog stall the lobby transiently shows
+    raw keys behind `data-ready=false` (never user-visible text in the wrong
+    language); normal loads resolve in milliseconds with no flash.
+- Limitations: steps 0-5 done; A-1 still unmerged, steps 6+ wait for it.
+  Screenshots so far: step-0 practice baseline, step-2 menu, step-3 lobby+Bevy
+  font probes, step-4 pt-BR battle, step-5 lobby en/pt + settings/friend pt.

@@ -61,6 +61,7 @@ pub(super) fn apply(
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
     mut inspected: ResMut<super::inspect::Inspected>,
+    mut lang_res: ResMut<crate::i18n::Lang>,
 ) {
     let now = time.elapsed_secs_f64();
     // BR-AG12: while an Augment selection pauses the battle, only the War
@@ -271,6 +272,8 @@ pub(super) fn apply(
                 }
             }
             UiAction::ToggleSound => extra.2.toggle_mute(),
+            // P41: menu-only switch (the Settings dialog lives in the menu).
+            UiAction::SetLang(lang) => *lang_res = lang,
             UiAction::Disabled => {}
             UiAction::OpenRanking
             | UiAction::RankingPrev
