@@ -21,6 +21,11 @@ pub(crate) fn resolve_hit(
         if state.unit_index(id).is_some_and(|i| state.units[i].seat == attacker.seat));
     if healing {
         let Target::Unit(id) = target else { return };
+        // Action units (the Antidote) brew instead of healing.
+        if let Some((strip, ward, second)) = crate::afflictions::brew_of(state, attacker) {
+            crate::afflictions::brew_cast(state, attacker, st.range, id, strip, ward, second, ev);
+            return;
+        }
         let _restored = heal(state, attacker.seat, id, st.heal, true, ev);
         #[cfg(feature = "lab")]
         crate::lab::healed(state, attacker, _restored);
@@ -65,6 +70,14 @@ pub(crate) fn resolve_hit(
     #[cfg(feature = "lab")]
     if let Target::Unit(_) = target {
         crate::lab::dealt(state, attacker, removed);
+    }
+    if let Target::Unit(id) = target {
+        let hostile = state.unit_index(id).is_some_and(|i| {
+            state.units[i].seat != attacker.seat && state.units[i].hp > 0
+        });
+        if hostile {
+            crate::afflictions::apply_stacks(state, attacker, st, id, ev);
+        }
     }
     if let Target::Unit(id) = target {
         if !attacker.is_summon() {
@@ -361,6 +374,11 @@ fn apply_on_hit(
     let Some(i) = state.unit_index(id) else {
         return 0;
     };
+    // A ward ignores incoming slows, roots (and confusion): damage is not
+    // blocked (§C.9).
+    if state.tick < state.units[i].fx.ward_until {
+        return 0;
+    }
     let bonus = augment::status_duration_bp(&state.player(attacker).augments);
     let target = state.units[i];
     let archetype = state.rules().def(target.kind).archetype;

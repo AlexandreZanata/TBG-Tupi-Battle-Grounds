@@ -14,6 +14,13 @@ pub(crate) enum Engage {
 }
 
 pub(crate) fn engage(state: &MatchState, u: &Unit, st: &Stats) -> Option<Engage> {
+    // Action units (the Antidote) brew instead of attacking when an ally
+    // needs it; with nobody afflicted the cooldown stays ready.
+    if crate::afflictions::brew_of(state, u).is_some() {
+        if let Some(ally) = crate::afflictions::brew_target(state, u, st.range, None) {
+            return Some(Engage::Act(Target::Unit(ally)));
+        }
+    }
     // Units with no attack and no heal hold when an enemy is in range and
     // never emit `Hit{amount: 0}` (P43; unreachable today: every kind
     // attacks or heals).
