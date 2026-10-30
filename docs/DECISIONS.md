@@ -1023,3 +1023,21 @@ seat. The Forest keeps every previous number.
 policy win rates past the D-33 gate, players find a modifier unreadable,
 or the owner wants arena choice online.
 
+## D-58 · C7 measures planted imbalances on the ten-kind Shop pool — 2026-10-30 (owner-authorized CI fix)
+
+**Decision.** C7 (`c7_planted_imbalances_are_caught_for_every_unit`)
+builds its detection rulesets on the original ten-kind Shop pool
+(`UNIT_KINDS`) instead of the full 25-kind pool that `CANON` carries since
+D-50. Duels, match rows, planted ×2 and ×3 values and all thresholds stay
+as they were; only the pool the Shop draws from changes for C7.
+**Why.** With the full pool a unit is offered much less often, so the
+`favor-<unit>` row does not buy the planted unit often enough and the ×3
+cost of the Siege Walker moves that row by less than the 0.10 gate. In a
+release build C7 failed with `SiegeWalker ×3 cost was not caught` on
+`15e4792` and passed after the change (all seven contracts green). The
+failure was the test's sensitivity under the wider pool, not a balance
+result; the thresholds are a product decision and were not touched.
+**Limit.** C7 no longer exercises the 25-kind pool that online play draws
+from. Balance of the fifteen new units is still unmeasured.
+**Reopen at P50 tuning**, when the lab must measure every unit on the pool
+online play uses and the gate may need a sample or a row change.
