@@ -215,6 +215,66 @@ fn build_library(
                 forms.insert((kind, tier, branch), form);
                 continue;
             }
+            if kind == UnitKind::Bloomkeeper {
+                let form = native_form(
+                    roster::plants::bloomkeeper_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Bloomkeeper {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Rootcaller {
+                let form = native_form(
+                    roster::plants::rootcaller_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Rootcaller {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Nester {
+                let form = native_form(
+                    roster::plants::nester_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Nester {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Beetling {
+                let form = native_form(
+                    roster::plants::beetling_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Beetling {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
             let spec = roster::figure_spec(kind, tier, branch);
             let built = adapter::build(&spec);
             let joint_count = built.iter().flatten().count();

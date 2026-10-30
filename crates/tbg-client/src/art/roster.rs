@@ -12,7 +12,7 @@ pub mod blockout;
 mod body;
 pub mod humans;
 pub mod machines;
-mod plants;
+pub mod plants;
 pub mod undead;
 
 /// Base-body colors.

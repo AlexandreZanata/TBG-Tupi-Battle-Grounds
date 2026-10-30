@@ -108,6 +108,7 @@ fn parse_unit_kind(s: &str) -> Option<UnitKind> {
         .or(match s {
             "sawknight" => Some(UnitKind::Sawbot),
             "ogrearcher" => Some(UnitKind::SiegeWalker),
+            "beetling" => Some(UnitKind::Beetling),
             _ => None,
         })
 }
