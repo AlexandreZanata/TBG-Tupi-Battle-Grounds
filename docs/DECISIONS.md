@@ -800,29 +800,38 @@ the first `strongholds` lab matrix showed Artillery at 61–67 % against
 every kind for a near-tower army (`docs/media/p17/lab/`).
 **Reopen when** the matrix or live play shows a kind above 55 % against
 the field, or a branch that is never worth buying.
-## D-54 · View wire: derive four fields and split static unit identity (A + C) — 2026-10-29 (Proposed, P30-A; numbered D-41 on its branch, renumbered at consolidation)
+## D-47 · Troop aim and visual polish ported from A-1 onto the D-46 towers — 2026-10-29
 
-**Decision.** P30-A measured the full-snapshot `MatchView` and chose to
-(A) stop sending what the client computes exactly (`max_hp`,
-`phase_ticks_left`, `next_rotation_in`, `you`) and (C) send unit static
-identity (`seat`, `kind`, `tier`, `branch`) only on spawn, evolution, and
-full views (reconnect), with a complete dynamic list (`id`, `x`, `hp`,
-`status`) every view. Measured payload: −41.6 % natural, −44.7 % at 20
-units/side, −42.5 % at 100, with build+encode CPU not higher. Delta views,
-compression, 5/8 Hz, and a client rewrite were measured and rejected or
-deferred. P30-B applies it as the next `PROTOCOL_VERSION` (v10 unless P17-A
-takes it first); that commit changes the append-only protocol contract
-tests and must name this decision.
-**Why.** Static identity plus `max_hp` is 35 % of every view and is
-repeated 10×/s; the split keeps one lost view from leaving a stale
-position or HP and needs no keyframe state machine.
-**Guard rails.** Server authority is unchanged (the client derives
-presentation values, never outcomes); a decode error or an unknown static
-id forces the existing reconnect; events stay presentation-only; 10 Hz and
-the 20 Hz simulation are unchanged.
-**Reopen when** the VPS shows bandwidth, not CPU, is still the first limit
-after C (then delta, with a ≥15 pp measured gain over C at 100 units), or
-C fails the 100-seed reconstruction or the 50-match reconnect chaos.
+**Decision.**
+1. Directional aim for ranged, control and support units, and directed
+   strikes for melee units, are driven only by the authoritative
+   `Event::AttackStart { from, to }`. The client never pre-aims, never
+   predicts, and never changes simulation state or tick boundaries.
+2. All 11 unit kinds (55 forms) are native rig-v2 forms with faction death
+   styles, parametric idle and walk cycles, and a deferred impact ring that
+   pairs each projectile or strike with its target reaction.
+3. The A-1 Stronghold layer (`Classic`, `Treasury`, `Redoubt`, `Ballista`,
+   `Banner`, the shared Walls/Arms kit, the turret pivot and its aim
+   height) was **not** ported. The towers are the D-46 ones (Treasury,
+   Bastion, Artillery, Command, kind-exclusive Fortification). When a unit
+   attacks a Stronghold it aims at the core's `stronghold_x`, which is the
+   lane-side face of the D-46 tower (the tower stands 0.9 behind it), at the
+   same impact height as the shot in `sync/events.rs`.
+**Why.** A-1 was authored on the old `main` (`077abe7`) in parallel with
+D-46; its troop work is independent of towers, while its tower work
+duplicated and contradicted D-46. The A-1 report called its decision
+"D-41", a number already in use; this entry replaces it.
+**Guard rails.** `tbg-core`, `tbg-server`, `tbg-balance` and `Cargo.lock`
+are unchanged by the port; asset reuse stays one mesh and one material per
+form; the D-46 contract tests are untouched.
+**Consolidation (2026-10-30).** The P54/P55 kits (D-51, D-53) came later
+and are the owner's character direction: a unit with a kit keeps its own
+aim, shots, impacts and Death clip, and A-1's aim, hit reactions and
+faction deaths apply to units without a kit (today the Archer, whose
+five native forms come from A-1). A-1's other v2 forms remain the
+fallback for a kind without a kit; death hides HP bars for every unit.
+**Reopen when** a Stronghold kind needs its own impact point or muzzle for
+unit reactions, or phone support needs lighter forms.
 
 ## D-48 · Roster expansion: fifteen units, staged by ruleset pool — 2026-10-29 (owner decision)
 
@@ -967,29 +976,26 @@ times and the protocol.
 match distance, or the view packs the carrier and plate bits (then the
 Cargo Crab can seat its passenger and the Shatterback can shed plates).
 
-## D-47 · Troop aim and visual polish ported from A-1 onto the D-46 towers — 2026-10-29
+## D-54 · View wire: derive four fields and split static unit identity (A + C) — 2026-10-29 (Proposed, P30-A; numbered D-41 on its branch, renumbered at consolidation)
 
-**Decision.**
-1. Directional aim for ranged, control and support units, and directed
-   strikes for melee units, are driven only by the authoritative
-   `Event::AttackStart { from, to }`. The client never pre-aims, never
-   predicts, and never changes simulation state or tick boundaries.
-2. All 11 unit kinds (55 forms) are native rig-v2 forms with faction death
-   styles, parametric idle and walk cycles, and a deferred impact ring that
-   pairs each projectile or strike with its target reaction.
-3. The A-1 Stronghold layer (`Classic`, `Treasury`, `Redoubt`, `Ballista`,
-   `Banner`, the shared Walls/Arms kit, the turret pivot and its aim
-   height) was **not** ported. The towers are the D-46 ones (Treasury,
-   Bastion, Artillery, Command, kind-exclusive Fortification). When a unit
-   attacks a Stronghold it aims at the core's `stronghold_x`, which is the
-   lane-side face of the D-46 tower (the tower stands 0.9 behind it), at the
-   same impact height as the shot in `sync/events.rs`.
-**Why.** A-1 was authored on the old `main` (`077abe7`) in parallel with
-D-46; its troop work is independent of towers, while its tower work
-duplicated and contradicted D-46. The A-1 report called its decision
-"D-41", a number already in use; this entry replaces it.
-**Guard rails.** `tbg-core`, `tbg-server`, `tbg-balance` and `Cargo.lock`
-are unchanged by the port; asset reuse stays one mesh and one material per
-form; the D-46 contract tests are untouched.
-**Reopen when** a Stronghold kind needs its own impact point or muzzle for
-unit reactions, or phone support needs lighter forms.
+**Decision.** P30-A measured the full-snapshot `MatchView` and chose to
+(A) stop sending what the client computes exactly (`max_hp`,
+`phase_ticks_left`, `next_rotation_in`, `you`) and (C) send unit static
+identity (`seat`, `kind`, `tier`, `branch`) only on spawn, evolution, and
+full views (reconnect), with a complete dynamic list (`id`, `x`, `hp`,
+`status`) every view. Measured payload: −41.6 % natural, −44.7 % at 20
+units/side, −42.5 % at 100, with build+encode CPU not higher. Delta views,
+compression, 5/8 Hz, and a client rewrite were measured and rejected or
+deferred. P30-B applies it as the next `PROTOCOL_VERSION` (v10 unless P17-A
+takes it first); that commit changes the append-only protocol contract
+tests and must name this decision.
+**Why.** Static identity plus `max_hp` is 35 % of every view and is
+repeated 10×/s; the split keeps one lost view from leaving a stale
+position or HP and needs no keyframe state machine.
+**Guard rails.** Server authority is unchanged (the client derives
+presentation values, never outcomes); a decode error or an unknown static
+id forces the existing reconnect; events stay presentation-only; 10 Hz and
+the 20 Hz simulation are unchanged.
+**Reopen when** the VPS shows bandwidth, not CPU, is still the first limit
+after C (then delta, with a ≥15 pp measured gain over C at 100 units), or
+C fails the 100-seed reconstruction or the 50-match reconnect chaos.
