@@ -10,11 +10,13 @@ use crate::state::Outcome;
 use crate::types::{Seat, StrongholdKind};
 use crate::view::MatchView;
 
-/// v13: Stronghold kinds and Fortification (D-46: `SetStronghold`,
-/// `MatchView::strongholds`, `PlayerIntention::Fortify`). v12: Interest became a regen boost (`MatchView::regen_bp` replaces the
+/// v14: the P43 staged affliction/carrier events and `UnitView.fx` merged
+/// with the D-46 Stronghold kinds. v13 was Stronghold kinds and Fortification
+/// (D-46: `SetStronghold`, `MatchView::strongholds`, `PlayerIntention::Fortify`).
+/// v12: Interest became a regen boost (`MatchView::regen_bp` replaces the
 /// payment fields, `Event::InterestPaid` is gone). v11 was the fifteen-node
 /// Arcana schema; older peers are refused.
-pub const PROTOCOL_VERSION: u16 = 13;
+pub const PROTOCOL_VERSION: u16 = 14;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a

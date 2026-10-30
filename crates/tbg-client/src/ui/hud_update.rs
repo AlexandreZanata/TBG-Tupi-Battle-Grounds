@@ -199,7 +199,7 @@ pub(crate) fn army_label(v: &MatchView) -> String {
     let brood = v
         .units
         .iter()
-        .filter(|u| u.seat == v.you && u.kind.is_summon())
+        .filter(|u| u.seat == v.you && u.is_summon())
         .count();
     if brood > 0 {
         format!("Army {army} | Brood {brood}")

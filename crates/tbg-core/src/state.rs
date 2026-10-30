@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::arcana::ArcanaPreset;
 use crate::augment::{AugmentCounts, AugmentState};
-use crate::content::{self, Stats, OFFERS};
+use crate::content::{self, Ability, Stats, BP, MIN_INTERVAL, OFFERS};
 use crate::rng::Pcg32;
 use crate::ruleset::Ruleset;
 use crate::types::{Archetype, Faction, Seat, Status, StrongholdKind, Tick, UnitId, UnitKind};
@@ -50,6 +50,60 @@ impl ArmyComposition {
     }
 }
 
+/// One victim's share of an affliction stack list (Rotcap poison, Old Finn
+/// fish, P45): fixed arrays, no allocation, deterministic replacement.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Stack {
+    pub left: u16,
+    pub value: u16,
+}
+
+/// Per-unit ability state (ROSTER-EXPANSION §F.2): a compact `Copy` block.
+/// All zeroes until the unit's wave lands; never part of views in P43.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct UnitFx {
+    pub poison: [Stack; 6],
+    pub fish: [Stack; 3],
+    pub confused_until: Tick,
+    pub immune_until: Tick,
+    pub ward_until: Tick,
+    pub betray: bool,
+    pub attacks: u8,
+    pub essence: u16,
+    pub essence_progress: u32,
+    pub plates: u8,
+    pub plate_hp: i16,
+    pub march_move_bp: u16,
+    pub march_dr_bp: u16,
+    /// Drumguard B2: the bonded ally ignores slows and fish (not root).
+    /// Rewritten every tick by the bonds pass, like the march fields.
+    pub march_ignore_slow: bool,
+    /// Cargo Crab B2 Overdrive: surge movement until this tick (re-armed
+    /// 220 ticks after it lapses, i.e. a 15 s cooldown on a 4 s surge).
+    pub surge_until: Tick,
+    /// Puppetmaster betrayal bonus, in basis points (A1 +25 %, A2 +50 %),
+    /// stored at confuse time and applied to the betrayal hit.
+    pub betray_bp: u16,
+    /// Puppetmaster A2 Stumble: the betrayer is slowed 30 % for 2 s.
+    pub betray_stumble: bool,
+    pub bond: Option<UnitId>,
+    pub carrier: Option<UnitId>,
+    pub passenger: Option<UnitId>,
+    pub board_lock: Tick,
+    pub shield: u16,
+    pub shield_until: Tick,
+}
+
+/// Queued A2 Shatterback shrapnel (P46): processed in `remove_dead` before
+/// removal, never recursively. Runtime-only: skipped by serde, so hashes
+/// never see it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) struct Shrapnel {
+    pub x: i32,
+    pub seat: Seat,
+    pub amount: i32,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Unit {
     pub id: UnitId,
@@ -68,7 +122,7 @@ pub struct Unit {
     /// Tick at which a summon disappears.
     pub expires_at: Option<Tick>,
     /// Ticks until a Nester's next hatch (0 for every other kind).
-    pub hatch_cd: u16,
+    pub action_cd: u16,
     /// Forced March: move bonus while `tick < haste_until`.
     pub haste_until: Tick,
     /// Grievous Wounds: healing received is cut while `tick < heal_cut_until`.
@@ -76,6 +130,8 @@ pub struct Unit {
     pub heal_cut_bp: i32,
     /// Second Wind charges already spent by this unit.
     pub second_wind_used: u8,
+    /// Ability state (all zero until the unit's wave lands).
+    pub fx: UnitFx,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -98,6 +154,9 @@ pub struct PlayerState {
     pub synergy: [u8; 4],
     pub last_seq: u32,
     pub rng: Pcg32,
+    /// Smuggler cargo stream (P48-B): a new hidden stream per seat, never
+    /// in views (BR-S05).
+    pub cargo_rng: Pcg32,
     /// Frozen for the whole match (BR-AR05); public once paired.
     pub arcanas: ArcanaPreset,
     /// Copies owned per Augment id (compact, fixed size; no purchase list).
@@ -196,6 +255,39 @@ pub enum Event {
     SecondWind {
         unit: UnitId,
     },
+    // v13 (P43, ROSTER-EXPANSION §F.4): staged affliction and carrier
+    // events. Unused until their waves land; appended, never reordered.
+    PoisonTick {
+        unit: UnitId,
+        amount: i32,
+    },
+    Betrayal {
+        unit: UnitId,
+        ally: UnitId,
+    },
+    Cleansed {
+        unit: UnitId,
+    },
+    PlateBroken {
+        unit: UnitId,
+    },
+    CrateOpened {
+        /// The crate's own id (`crate` is a keyword); `opened` is the cargo.
+        unit: UnitId,
+        opened: Option<UnitId>,
+    },
+    Transfer {
+        from: UnitId,
+        to: UnitId,
+        amount: i32,
+    },
+    Boarded {
+        crab: UnitId,
+        unit: UnitId,
+    },
+    Dismounted {
+        unit: UnitId,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -225,6 +317,15 @@ pub struct MatchState {
     /// serialized, so hashes and views do not depend on it.
     #[serde(skip, default = "Ruleset::canon")]
     pub(crate) rules: &'static Ruleset,
+    /// Per-seat, per-kind combat counters for the balance lab (P42). Never
+    /// serialized, so the state hash and views never see them.
+    #[cfg(feature = "lab")]
+    #[serde(skip, default)]
+    pub lab: crate::lab::LabStats,
+    /// Queued A2 shrapnel, drained in `remove_dead` before removal (P46).
+    /// Runtime-only, like `pending`.
+    #[serde(skip)]
+    pub(crate) shrapnel: Vec<Shrapnel>,
 }
 
 /// x position of a seat's Stronghold.
@@ -232,6 +333,14 @@ pub fn stronghold_x(seat: Seat) -> i32 {
     match seat {
         Seat::A => 0,
         Seat::B => content::LANE_LEN,
+    }
+}
+
+impl Unit {
+    /// Summons are recognized by unit, not by kind (BR-U08): a carried
+    /// roster kind (Cargo Crab, P48) is still a summon.
+    pub(crate) fn is_summon(&self) -> bool {
+        self.summoner.is_some() || self.kind.is_summon()
     }
 }
 
@@ -283,16 +392,21 @@ impl MatchState {
     pub fn army_size(&self, seat: Seat) -> usize {
         self.units
             .iter()
-            .filter(|u| u.seat == seat && u.hp > 0 && !u.kind.is_summon())
+            .filter(|u| u.seat == seat && u.hp > 0 && !u.is_summon())
             .count()
     }
 
     pub fn stats_of(&self, u: &Unit) -> Stats {
         // Summons never receive Synergy or Arcanas (BR-U08, D-40); only
-        // Augments naming Beetlings reach them (BR-AG10).
-        if u.kind.is_summon() {
+        // Augments naming Beetlings reach them (BR-AG10). Cargo and crates
+        // take no Augments at all (P48-B, §C.11).
+        if u.is_summon() {
             let p = self.player(u.seat);
-            let bonus = crate::augment::unit_bonus(&p.augments, p.synergy, u.kind, u.tier);
+            let bonus = if u.kind == UnitKind::Beetling {
+                crate::augment::unit_bonus(&p.augments, p.synergy, u.kind, u.tier)
+            } else {
+                crate::content::AugmentBonus::default()
+            };
             return self.rules.stats_with(
                 u.kind,
                 u.tier,
@@ -302,7 +416,47 @@ impl MatchState {
                 &bonus,
             );
         }
-        self.stats_for(u.seat, u.kind, u.tier, u.branch)
+        let mut st = self.stats_for(u.seat, u.kind, u.tier, u.branch);
+        // P46: broken Shatterback plates permanently speed up the unit.
+        // Caps hold exactly (BR-X02, BR-X03): never above the uncapped max.
+        let [a, b] = self.rules.def(u.kind).ability(u.tier, u.branch);
+        for ability in [a, b] {
+            if let Ability::Plates {
+                count,
+                move_bp,
+                atk_bp,
+                ..
+            } = ability
+            {
+                let broken = i64::from(count.saturating_sub(u.fx.plates));
+                if broken > 0 {
+                    let base = self.rules.def(u.kind);
+                    st.speed =
+                        (i64::from(st.speed) * (10_000 + i64::from(move_bp) * broken) / BP) as i32;
+                    st.speed = st
+                        .speed
+                        .min((i64::from(base.speed) * 15_000 / 10_000) as i32);
+                    let atk = (i64::from(st.atk_bp) + i64::from(atk_bp) * broken).min(10_000);
+                    st.atk_bp = atk as i32;
+                    st.interval = ((i64::from(base.interval) * 10_000 / (10_000 + atk))
+                        .max(i64::from(MIN_INTERVAL))) as u16;
+                }
+            }
+            // P48-A: Leechroot Essence — +damage and +attack speed per
+            // stack, the attack-speed part joining the BR-X02 cap.
+            if let Ability::Essence { dmg, atk_bp, .. } = ability {
+                let n = u.fx.essence;
+                if n > 0 {
+                    let base = self.rules.def(u.kind);
+                    st.damage = st.damage.saturating_add(i32::from(dmg) * i32::from(n));
+                    let atk = (i64::from(st.atk_bp) + i64::from(atk_bp) * i64::from(n)).min(10_000);
+                    st.atk_bp = atk as i32;
+                    st.interval = ((i64::from(base.interval) * 10_000 / (10_000 + atk))
+                        .max(i64::from(MIN_INTERVAL))) as u16;
+                }
+            }
+        }
+        st
     }
 
     /// The seat's cached living Tank and DPS counts (BR-AR06).
@@ -314,11 +468,7 @@ impl MatchState {
     /// army. Called once per combat tick; `damage` decrements on death.
     pub(crate) fn refresh_army(&mut self) {
         let mut army = [ArmyComposition::default(); 2];
-        for u in self
-            .units
-            .iter()
-            .filter(|u| u.hp > 0 && !u.kind.is_summon())
-        {
+        for u in self.units.iter().filter(|u| u.hp > 0 && !u.is_summon()) {
             army[u.seat.index()].add(self.rules.def(u.kind).archetype);
         }
         self.army = army;

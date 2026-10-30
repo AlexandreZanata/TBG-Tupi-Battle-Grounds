@@ -5,7 +5,7 @@
 //! every form has a counter (GAME-DESIGN §6 "Counterplay").
 
 use tbg_core::content::{ENERGY_SCALE, RUNNING_START, TICK_HZ};
-use tbg_core::{Archetype, MatchState, Phase, Ruleset, Seat, UnitKind, UNIT_KINDS};
+use tbg_core::{Archetype, MatchState, Phase, Ruleset, Seat, UnitKind};
 
 use crate::runner::parallel_map;
 
@@ -40,11 +40,13 @@ impl Form {
     }
 }
 
-/// Base, A1, A2, B1, B2 of every shop unit (summons excluded).
+/// Base, A1, A2, B1, B2 of every conventional unit (summons excluded).
 pub fn forms() -> Vec<Form> {
-    UNIT_KINDS
+    tbg_core::ALL_KINDS
         .iter()
-        .flat_map(|&kind| {
+        .copied()
+        .filter(|k| k.is_conventional())
+        .flat_map(|kind| {
             [(0, 0), (1, 0), (2, 0), (1, 1), (2, 1)].map(|(tier, branch)| Form {
                 kind,
                 tier,

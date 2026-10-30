@@ -301,14 +301,14 @@ its owner decision is recorded in the P15 report.
   key, sky ambient, and soft distance fog. No textures or custom unit shader.
 - **Animation:** keys select Linear/CubicIn/CubicOut/CubicInOut/Hold;
   clip metadata delivers Strike, Release, and Footstep events. Crossfade
-  remains 0.1 s. Walk (gait v2, D-48) advances by the distance the figure
+  remains 0.1 s. Walk (gait v2, D-51) advances by the distance the figure
   travels over its stride, on two-bone legs for every figure, with feet
   locked in world X and Z while planted and a 0.15 s stop hysteresis;
   animation runs in `PostUpdate` after all movement. Phase offsets are
   decorrelated by visual id. Archer draw/anchor releases at 0.18 s and
   recovers by 0.50 s; its cosmetic arrows still follow facing for 0.12 s.
   Simulation events still decide damage and outcomes.
-- **Unit art kits (D-48, P54):** `art/kits/<unit>/` owns a unit's five
+- **Unit art kits (D-51, P54):** `art/kits/<unit>/` owns a unit's five
   rig-v2 forms (`model.rs`), its signature pose layer over the shared
   clips (`motion.rs`: keyframe tables and procedural IK), gait, aim and
   attack (`mod.rs`: its own `ShotKind` from a muzzle socket, or a melee
@@ -323,7 +323,7 @@ its owner decision is recorded in the P15 report.
   becomes a `TowerOrders` entry; the Artillery carriage and barrel and the
   Sentinel ballista slew onto the target (yaw, elevation along their own
   shot) and fire cannonball or bolt from the muzzle. The other kinds have
-  animated defenders (D-49, `arena/strongholds/gunners.rs`): Classic
+  animated defenders (D-52, `arena/strongholds/gunners.rs`): Classic
   crossbowman, Bastion gun port and falconet, Treasury roof mortar lobbing
   gold, Command archer; a fallen defender leaves a bolt from the top.
   Guide: [art/UNIT-ART-KITS.md](art/UNIT-ART-KITS.md).

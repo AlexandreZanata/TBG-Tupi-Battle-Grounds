@@ -23,6 +23,7 @@ fn unit(id: u32, x: i32) -> UnitView {
         hp: 100,
         max_hp: 100,
         status: 0,
+        fx: 0,
     }
 }
 

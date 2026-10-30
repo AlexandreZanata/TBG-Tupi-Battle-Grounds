@@ -5,7 +5,7 @@ use crate::{
     config,
 };
 use bevy::prelude::*;
-use tbg_core::{UnitKind, UNIT_KINDS};
+use tbg_core::{UnitKind, ALL_KINDS, UNIT_KINDS};
 
 #[derive(Resource)]
 pub struct Gallery {
@@ -49,8 +49,10 @@ impl Gallery {
             .parse::<usize>()
             .ok()
             .and_then(|i| UNIT_KINDS.get(i).copied())
+            // By name, staged kinds too: their placeholders need review
+            // before the Shop pool switch (P53).
             .or_else(|| {
-                UNIT_KINDS
+                ALL_KINDS
                     .into_iter()
                     .find(|kind| slug(&format!("{kind:?}")) == slug(&mode))
             })

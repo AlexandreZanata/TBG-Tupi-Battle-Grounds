@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 13,
-        "v13: Stronghold kinds and Fortification (D-46); v12 was Interest as a regen boost"
+        PROTOCOL_VERSION, 14,
+        "v14: roster waves (P43 events, UnitView.fx) merged with D-46 Stronghold kinds"
     );
 }
 

@@ -272,7 +272,7 @@ human playtests. Targets are starting hypotheses.
 | Decisive play | Matches decided by Stronghold kill / overtime / draw | ≥ 60% / ≤ 30% / ≤ 2% |
 | Decision frequency | Intentions per player per match | ≥ 25 (one every 4–7 s) |
 | Strategic variety | Win rate of any faction-majority army (harness + humans) | 45–55% |
-| Roster health | Purchase share of each unit | ≥ 5% |
+| Roster health | Purchase share of each unit | ≥ 2.5 % (owner decision O-R2, 2026-10-29: 5 % is impossible with 25 units, whose even share is 4.0 %) |
 | Counterplay | Every unit has a documented counter in the roster | 100% |
 | Comebacks | Wins by the player behind in Stronghold HP at 2:00 | ≥ 20% |
 | Readability | Testers can explain why they lost | ≥ 4 of 5 testers |
@@ -686,3 +686,25 @@ never sufficient (§6).
 | Best Augment triple found by adversarial search, against the pool | ≤ 65 % |
 | Comebacks (behind at 2:00, then won) | not below the P16-D canon; target ≥ 20 % |
 | Nash support / largest weight | ≥ 3 / ≤ 50 % |
+
+## 11. Roster expansion (active, values Proposed)
+
+Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). Since the owner switch of 2026-10-30 (D-50) all fifteen are in the `Shop` online, ahead of the P50 tuning and P53 plan: their rules are active and every number stays **Proposed** until the balance lab confirms it (D-33).
+
+| Unit | Faction | Class | Cost | HP | Dmg | Every | Range | Speed | Identity in one line |
+|------|---------|-------|------|----|-----|-------|-------|-------|----------------------|
+| Rotcap | Plants | Ranged | 3 | 200 | 12 | 1.5 | 3.5 | 0.9 | Each hit adds a poison stack (6/s, 10 s, ≤ 6 per victim) that outlives it |
+| Farwatch | Humans | Ranged | 3 | 150 | 70 | 4.0 | 12.0 | 0.9 | Shoots units across most of the lane; never targets Strongholds |
+| Leechroot | Plants | DPS | 3 | 220 | 10 | 1.6 | 1.2 | 0.9 | Damage dealt to enemy units becomes permanent stacks, no maximum; lost on death |
+| Bombard | Machines | Ranged | 5 | 1 000 | 24 | 2.2 | 4.0 | 0.5 | Blast radius 1.0 hits every unit, both sides and itself |
+| Old Finn | Humans | Control | 3 | 240 | 8 | 2.0 | 3.5 | 0.9 | Fish: −15 % move each, ≤ 3, 5 s; never slows attacks |
+| Drumguard | Humans | Support | 3 | 260 | — | — | 2.0 | 1.0 | Bond to the nearest ally: +25 % move, −15 % damage taken |
+| Longaxe | Humans | DPS | 4 | 360 | 100 | 2.4 | 1.6 | 0.7 | Heavy melee that strikes over its own front line |
+| Oilpress | Machines | Tank | 7 | 3 600 | 25 | 2.5 | 0.8 | 0.3 | Most HP in the game; while engaged, own units cannot walk past it |
+| Antidote Brewer | Plants | Support | 3 | 260 | — | 4.0 | 3.0 | 0.9 | Cleanses the most afflicted ally and wards it 1 s |
+| Puppetmaster | Undead | Control | 4 | 260 | — | 8.0 | 4.0 | 0.9 | The hardest-hitting enemy in range strikes its own ally once |
+| Smuggler | Humans | Support | 6 | 320 | — | 20.0 | 5.0 | 0.6 | Every 20 s a crate opens into a random unit — or nothing |
+| Shatterback | Plants | Tank | 4 | 560 + 4 × 100 plates | 30 | 1.5 | 0.8 | 0.55 | Each broken plate: permanently faster moves and attacks |
+| Blood Furnace | Undead | DPS | 4 | 440 | 36 | 1.8 | 0.8 | 0.9 | Each hit burns 6 % max HP; damage grows up to ×4 as HP falls |
+| Bloodweaver | Undead | Support | 3 | 300 | — | 5.0 | 3.0 | 0.9 | Moves up to 120 HP from the healthiest ally to the most wounded |
+| Cargo Crab | Machines | Tank | 5 | 1 400 | 20 | 1.5 | 0.8 | 0.5 | Carries one non-Tank ally that single-target attacks cannot reach |

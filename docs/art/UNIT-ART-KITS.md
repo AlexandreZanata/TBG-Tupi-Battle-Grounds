@@ -4,7 +4,7 @@ P54 gave the Siege Walker, Bone Brute and Rootcaller their own code-built
 "asset library": model, animations, aim, projectile and impacts. It also
 made every unit walk without sliding and turned the Strongholds' shots into
 animated weapons that aim at their targets. The owner approved the result on
-2026-10-30 (D-48, D-49). This page records how it was done and is the guide
+2026-10-30 (D-51, D-52). This page records how it was done and is the guide
 for the next characters.
 
 Read with: `docs/phases/P54-unit-art-kits.md` (spec and report),
@@ -52,7 +52,7 @@ Read with: `docs/phases/P54-unit-art-kits.md` (spec and report),
    - legacy legs tearing at the knee once knees bent.
 5. **Owner review** on `localhost` with the gallery links (§7). The owner
    approved, then asked for defenders and lobby-faithful dress on the
-   gunless towers (D-49), using the lobby portraits in
+   gunless towers (D-52), using the lobby portraits in
    `crates/tbg-client/assets/stronghold/<kind>.webp` as reference.
 6. **Light verification only** (owner request): fmt, client clippy, client
    tests, WASM check, one release build, browser review. Core, server and

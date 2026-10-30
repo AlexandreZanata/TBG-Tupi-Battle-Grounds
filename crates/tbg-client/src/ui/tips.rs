@@ -28,6 +28,31 @@ fn matchup(kind: UnitKind) -> (&'static str, &'static str) {
             "slows, ranged focus, splash",
         ),
         UnitKind::Beetling => ("swarming", "splash"),
+        // P44 wave A (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Longaxe => ("second-rank heavies", "swarms, burst"),
+        UnitKind::Farwatch => ("safe chip from home", "Rampart guard, dives"),
+        UnitKind::Bombard => ("clumped armies", "spread out, dives"),
+        // P45 wave B (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Rotcap => ("tanky fronts", "burst, cleanse"),
+        UnitKind::OldFinn => ("melee approaches", "ranged armies, cleanse"),
+        UnitKind::AntidoteBrewer => ("control and poison", "pure damage"),
+        // P46 wave C (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Shatterback => ("long fights", "burst before plates break"),
+        UnitKind::BloodFurnace => ("clumped melee", "focus it early, control"),
+        UnitKind::Bloodweaver => ("armies that trade HP", "burst, heal cut"),
+        // P47 wave D (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Oilpress => ("protect the line", "go around, burst it down"),
+        UnitKind::Drumguard => ("one protected carry", "kill the drummer"),
+        // P48-A wave E1 (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Leechroot => ("left alone too long", "burst it, splash it"),
+        UnitKind::CargoCrab => ("one protected carry", "splash the crab"),
+        // P48-B wave E2 (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Puppetmaster => ("your best hitter", "spread out, burst it"),
+        UnitKind::Smuggler => ("ammo-hungry ranged", "kill the crates, dive it"),
+        UnitKind::Crate => ("free ammo", "deny it"),
+        // P43: staged kinds render as a blockout until their wave lands.
+        #[allow(unreachable_patterns)]
+        _ => ("a new unit", "scout it first"),
     }
 }
 

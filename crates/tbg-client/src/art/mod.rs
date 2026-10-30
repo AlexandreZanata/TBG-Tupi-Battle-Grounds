@@ -1,6 +1,6 @@
 //! Code-built art (decision D-07): mesh builders, figurines on a shared
 //! v2 body plan with a twelve-joint compatibility adapter and shared clips,
-//! and per-unit art kits (D-48) that own their figure, motion, aim and
+//! and per-unit art kits (D-51) that own their figure, motion, aim and
 //! attack. Every unit form is built once at startup into `FigureLibrary`.
 
 use std::collections::HashMap;
@@ -30,6 +30,8 @@ pub mod mesh;
 pub mod palette;
 pub mod rig;
 pub(crate) mod roster;
+#[cfg(test)]
+mod roster_tests;
 mod springs;
 
 use rig::{Proportions as BodyPlan, NODE_COUNT};

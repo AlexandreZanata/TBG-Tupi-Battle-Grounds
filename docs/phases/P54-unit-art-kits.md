@@ -186,7 +186,7 @@ axis points at the target within 1°.
 `?gallery=<unit>&stress=N` uses that unit. All AGENTS verification,
 `trunk build --release`, browser screenshots (desktop) of each kit's
 forms and range, a Practice match observed, FPS measured. Update
-ARCHITECTURE §7 and DECISIONS (D-48). Fill in the report.
+ARCHITECTURE §7 and DECISIONS (D-51). Fill in the report.
 
 ## Acceptance checklist
 
@@ -249,7 +249,7 @@ All within the P24 budget doubled by the owner (≤ 6 000).
 - **Siege Walker identity.** P24 planned an ogre with a geared arbalest;
   the owner's request (2026-10-30) names a bazooka, so the kit carries a
   shoulder bombard. The display name stays "Ogre Archer" (an open owner
-  decision, D-48).
+  decision, D-51).
 - **Base branch.** P54 was cut from `origin/main` (6ef155b), not from the
   in-progress roster expansion (P42–P48B), which the owner asked to keep
   apart.
@@ -316,7 +316,7 @@ gave 7–14 FPS and is discarded. Phone measurement is out of scope
 
 The owner reviewed the release build on `localhost` and **approved
 everything**: the three kits, gait v2 and the aiming Artillery (frozen,
-D-48). Follow-up requested the same day and done here (D-49): animated
+D-51). Follow-up requested the same day and done here (D-52): animated
 defenders and lobby-faithful dress for the four other towers, using the
 lobby portraits (`assets/stronghold/<kind>.webp`) as reference, in the
 same low-poly style:

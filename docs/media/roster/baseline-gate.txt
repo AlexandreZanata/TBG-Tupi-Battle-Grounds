@@ -1,0 +1,65 @@
+seat A score, bot vs bot                         49.3% [48.8% – 49.9%]        target 48.5% – 51.5%      PASS
+median duration (s)                              107 s                        target 150 s – 240 s      FAIL
+p90 duration (s)                                 169 s                        target 0 s – 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368 s PASS
+p99 duration (s)                                 271 s                        target 0 s – 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368 s PASS
+max duration (s)                                 549 s                        target 0 s – 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368 s PASS
+ended by Stronghold kill                        100.0% [100.0% – 100.0%]      target 60.0% – 100.0%     PASS
+draws                                             0.0% [0.0% – 0.0%]          target 0.0% – 2.0%        PASS
+faction-majority Humans score                    37.8% [37.1% – 38.5%]        target 45.0% – 55.0%      FAIL
+faction-majority Undead score                    64.1% [63.0% – 65.3%]        target 45.0% – 55.0%      FAIL
+faction-majority Machines score                  79.9% [79.3% – 80.6%]        target 45.0% – 55.0%      FAIL
+faction-majority Plants score                    24.2% [23.4% – 25.0%]        target 45.0% – 55.0%      FAIL
+purchase share Shieldbearer                      11.6% [11.5% – 11.8%]        target 2.5% – 100.0%      PASS
+purchase share Archer                            16.1% [16.0% – 16.3%]        target 2.5% – 100.0%      PASS
+purchase share BoneBrute                         11.1% [10.9% – 11.2%]        target 2.5% – 100.0%      PASS
+purchase share Hexer                              7.0% [6.9% – 7.1%]          target 2.5% – 100.0%      PASS
+purchase share Sawbot                             6.5% [6.4% – 6.6%]          target 2.5% – 100.0%      PASS
+purchase share SiegeWalker                        9.4% [9.3% – 9.6%]          target 2.5% – 100.0%      PASS
+purchase share Bloomkeeper                       16.7% [16.6% – 16.8%]        target 2.5% – 100.0%      PASS
+purchase share Rootcaller                         5.3% [5.2% – 5.4%]          target 2.5% – 100.0%      PASS
+purchase share Nester                             5.2% [5.1% – 5.3%]          target 2.5% – 100.0%      PASS
+purchase share Rampart                           11.1% [11.0% – 11.3%]        target 2.5% – 100.0%      PASS
+comebacks (behind at 2:00, won)                  26.9% [25.9% – 27.9%]        target 20.0% – 100.0%     PASS
+matches with a 60 s stall                         0.6% [0.5% – 0.6%]          target 0.0% – 1.0%        PASS
+strongest strategic style (saver)                95.7%                        target 0.0% – 60.0%       FAIL
+heavy vs bot                                     57.6% [54.6% – 60.5%]        target 0.0% – 55.0%       FAIL
+cheap vs bot                                     47.7% [44.7% – 50.7%]        target 0.0% – 55.0%       PASS
+favor-shieldbearer vs bot (median ±10 pp)        40.1% [37.2% – 43.1%]        target 32.3% – 52.3%      PASS
+favor-archer vs bot (median ±10 pp)              52.5% [49.5% – 55.5%]        target 32.3% – 52.3%      FAIL
+favor-bonebrute vs bot (median ±10 pp)           61.4% [58.4% – 64.3%]        target 32.3% – 52.3%      FAIL
+favor-hexer vs bot (median ±10 pp)               41.2% [38.2% – 44.1%]        target 32.3% – 52.3%      PASS
+favor-sawbot vs bot (median ±10 pp)              36.4% [33.4% – 39.4%]        target 32.3% – 52.3%      PASS
+favor-siegewalker vs bot (median ±10 pp)         58.6% [55.7% – 61.6%]        target 32.3% – 52.3%      FAIL
+favor-bloomkeeper vs bot (median ±10 pp)         36.0% [33.3% – 38.9%]        target 32.3% – 52.3%      PASS
+favor-rootcaller vs bot (median ±10 pp)          39.0% [36.0% – 41.8%]        target 32.3% – 52.3%      PASS
+favor-nester vs bot (median ±10 pp)              42.3% [39.3% – 45.3%]        target 32.3% – 52.3%      PASS
+favor-rampart vs bot (median ±10 pp)             45.1% [42.1% – 48.0%]        target 32.3% – 52.3%      PASS
+duel base forms weak everywhere                      2                        target 0 – 0              FAIL
+duel base forms oppressive everywhere                3                        target 0 – 0              FAIL
+duel forms without a counter                         0                        target 0 – 0              PASS
+duel Evolutions never worth their Energy         47.5%                        target 0.0% – 25.0%       FAIL
+duel Evolution branches without a niche              2                        target 0 – 0              FAIL
+Nash support (policies ≥ 1 %)                        1                        target 3 – ∞              FAIL
+Nash largest weight                             100.0%                        target 0.0% – 50.0%       FAIL
+43 rows, 16 failing
+
+policy                    nash  vs-mix
+saver                    100.0%   50.0%
+bot                        0.0%    0.5%
+evolver                    0.0%    0.1%
+faction-humans             0.0%    5.6%
+faction-undead             0.0%    8.0%
+faction-machines           0.0%   10.9%
+faction-plants             0.0%    0.7%
+heavy                      0.0%    0.6%
+cheap                      0.0%    0.2%
+favor-shieldbearer         0.0%    0.2%
+favor-archer               0.0%    0.3%
+favor-bonebrute            0.0%    0.4%
+favor-hexer                0.0%    0.1%
+favor-sawbot               0.0%    0.3%
+favor-siegewalker          0.0%    0.8%
+favor-bloomkeeper          0.0%    0.1%
+favor-rootcaller           0.0%    0.1%
+favor-nester               0.0%    0.0%
+favor-rampart              0.0%    0.3%

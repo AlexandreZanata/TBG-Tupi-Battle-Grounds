@@ -24,7 +24,7 @@ impl LocalMatch {
         let selectable = StrongholdKind::SELECTABLE;
         let bot_kind = selectable[(seed % selectable.len() as u64) as usize];
         LocalMatch {
-            state: MatchState::with_arcanas(seed, presets).with_strongholds([stronghold, bot_kind]),
+            state: MatchState::with_preview(seed, presets).with_strongholds([stronghold, bot_kind]),
             bot: Bot::new(seed ^ 0x5eed),
             queue: Vec::new(),
             events: Vec::new(),

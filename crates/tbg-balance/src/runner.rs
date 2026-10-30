@@ -155,6 +155,18 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
     );
     assert!(ended, "match {seed} did not end: simulation bug");
     let outcome = state.outcome.expect("an ended match has an outcome");
+    // Counters are per seat; the report is per participant (P42).
+    let mut stats = tbg_core::lab::LabStats::default();
+    for seat in Seat::BOTH {
+        let p = participant(seat, seat_a);
+        stats.dealt[p] = state.lab.dealt[seat.index()];
+        stats.taken[p] = state.lab.taken[seat.index()];
+        stats.healed[p] = state.lab.healed[seat.index()];
+        stats.status_ticks[p] = state.lab.status_ticks[seat.index()];
+        stats.stronghold_dealt[p] = state.lab.stronghold_dealt[seat.index()];
+    }
+    stats.last_progress = state.lab.last_progress;
+    stats.longest_stall = state.lab.longest_stall;
     MatchResult {
         winner: outcome.winner.map(|w: Seat| participant(w, seat_a)),
         reason: outcome.reason,
@@ -162,6 +174,8 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
         hp_at_checkpoint: hp,
         sides,
         seat_a,
+        stats,
+        stall: state.lab.stall_at_end(state.tick),
     }
 }
 

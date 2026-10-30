@@ -23,28 +23,41 @@ fn bot_matches_are_frozen() {
     // pause, and a Shop that redraws all five offers on every purchase
     // (BR-S04). The faster Energy flow and the new draws change what the
     // bots can buy, so outcomes and end combat ticks moved with the hashes.
+    // P43: the zeroed `UnitFx` block joined the serialized state, so hashes
+    // moved again with tick, winner and reason identical (verified).
+    // P47: `march_ignore_slow` grew `UnitFx`; hashes moved once more,
+    // behavior identical (verified).
+    // P48-A: `surge_until` grew `UnitFx`; hashes moved once more,
+    // behavior identical (verified).
+    // P48-B: `betray_bp`/`betray_stumble` grew `UnitFx` and `cargo_rng`
+    // joined `PlayerState`; hashes moved once more, behavior identical
+    // (verified).
     // D-46 added the Stronghold kind and Fortification to the state: the
     // Classic matches, winners and end ticks are unchanged, only the hash.
+    // Merge of the roster waves with D-46: both grew the serialized state;
+    // hashes refrozen once, tick, winner and reason identical (verified).
+    // D-50: the Shop draws all 25 kinds, so the bots buy differently; end
+    // ticks moved, every match still ends by a destroyed Stronghold.
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0x002a_6144_d3ae_b8f3_u64,
-            2_214,
+            0x761f_36c9_e382_648fu64,
+            3_336,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0x11ce_a806_1a70_15db,
-            3_284,
+            0x4d1d_af66_d7d2_ff79,
+            2_286,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0xbf9b_d770_b820_9249,
-            1_833,
+            0xa1b4_2046_33c4_0547,
+            6_295,
             Seat::B,
             StrongholdDestroyed,
         ),

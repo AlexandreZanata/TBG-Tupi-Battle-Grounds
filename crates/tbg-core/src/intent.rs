@@ -3,7 +3,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::content::{LANE_LEN, OFFERS, SPAWN_OFFSET};
+use crate::content::{Ability, LANE_LEN, OFFERS, SPAWN_OFFSET};
 use crate::shop;
 use crate::state::{Event, MatchState, Unit};
 use crate::types::{Seat, Status, UnitId, UnitKind};
@@ -102,14 +102,15 @@ impl MatchState {
                 self.units[idx].haste_until = haste;
             }
         }
-        let p = self.player_mut(seat);
         // BR-S04: every purchase redraws all five offers, the bought one too.
-        p.offers = shop::draw_offers(&mut p.rng);
+        let pool = self.rules.pool;
+        let p = self.player_mut(seat);
+        p.offers = shop::draw_offers(&mut p.rng, pool);
         Ok(())
     }
 
     /// A new unit in front of the seat's Stronghold, at full HP for its form
-    /// and the seat's current Synergy.
+    /// and the seat's current Synergy. Hatch and cargo timers start full.
     pub(crate) fn spawn(&mut self, seat: Seat, kind: UnitKind, tier: u8, branch: u8) -> UnitId {
         let max_hp = self.stats_for(seat, kind, tier, branch).max_hp;
         let id = self.next_unit_id;
@@ -136,12 +137,36 @@ impl MatchState {
             heal_cut_until: 0,
             heal_cut_bp: 0,
             second_wind_used: 0,
-            hatch_cd: if kind == UnitKind::Nester {
+            action_cd: if self.rules.def(kind).ability(0, 0).contains(&Ability::Hatch) {
                 self.rules.hatch_rule(tier, branch).0
+            } else if let Some(every) =
+                self.rules
+                    .def(kind)
+                    .ability(0, 0)
+                    .into_iter()
+                    .find_map(|ability| match ability {
+                        Ability::Cargo { every, .. } => Some(every),
+                        _ => None,
+                    })
+            {
+                // Smugglers drop the first crate after a full interval.
+                every.max(1)
             } else {
                 0
             },
+            fx: crate::state::UnitFx::default(),
         });
+        // P46: Shatterback plates start full (never restored afterwards).
+        let [a, b] = self.rules.def(kind).ability(0, 0);
+        for ability in [a, b] {
+            if let Ability::Plates { count, hp, .. } = ability {
+                if let Some(idx) = self.unit_index(id) {
+                    self.units[idx].fx.plates = count;
+                    self.units[idx].fx.plate_hp = hp as i16;
+                }
+                break;
+            }
+        }
         self.pending.push(Event::Spawn {
             unit: id,
             seat,
@@ -159,7 +184,7 @@ impl MatchState {
         if u.seat != seat {
             return Err(Rejection::NotYourUnit);
         }
-        if u.kind.is_summon() {
+        if u.is_summon() {
             return Err(Rejection::NotEvolvable);
         }
         if u.tier >= 2 {
