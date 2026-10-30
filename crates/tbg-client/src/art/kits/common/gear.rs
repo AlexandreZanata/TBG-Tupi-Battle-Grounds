@@ -256,3 +256,36 @@ pub fn lantern(at: Node, at_xyz: [f32; 3], size: f32) -> Vec<PartSpec> {
         .rot(X90),
     ]
 }
+
+/// A rod from `a` to `b` (both in `at`'s space): struts, pistons, legs.
+pub fn strut(at: Node, a: [f32; 3], b: [f32; 3], r: f32, color: Color) -> PartSpec {
+    let (a, b) = (Vec3::from(a), Vec3::from(b));
+    let d = b - a;
+    let turn = Quat::from_rotation_arc(Vec3::Y, d.normalize_or(Vec3::Y));
+    let (x, y, z) = turn.to_euler(EulerRot::XYZ);
+    part(at, Cyl(r, d.length()), color, ((a + b) * 0.5).to_array()).rot([
+        x.to_degrees(),
+        y.to_degrees(),
+        z.to_degrees(),
+    ])
+}
+
+/// A round black bomb with a short fuse.
+pub fn bomb(at: Node, at_xyz: [f32; 3], size: f32) -> Vec<PartSpec> {
+    let [x, y, z] = at_xyz;
+    vec![
+        part(at, Ball(0.055 * size), DARK, [x, y, z]),
+        part(
+            at,
+            Cyl(0.02 * size, 0.02 * size),
+            IRON,
+            [x, y + 0.055 * size, z],
+        ),
+        part(
+            at,
+            Cyl(0.006 * size, 0.04 * size),
+            LINEN,
+            [x, y + 0.08 * size, z],
+        ),
+    ]
+}

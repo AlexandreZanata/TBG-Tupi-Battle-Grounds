@@ -4,13 +4,16 @@
 //! function pointers; units without a kit keep the shared library.
 
 pub mod aim;
+mod bombard;
 mod bone_brute;
+mod cargo_crab;
 mod cargo_crate;
 pub mod common;
 mod drumguard;
 mod farwatch;
 pub mod gait;
 mod longaxe;
+mod oilpress;
 mod old_finn;
 mod rootcaller;
 mod siege_walker;
@@ -97,6 +100,9 @@ static OLD_FINN: Kit = old_finn::KIT;
 static DRUMGUARD: Kit = drumguard::KIT;
 static SMUGGLER: Kit = smuggler::KIT;
 static CRATE: Kit = cargo_crate::KIT;
+static BOMBARD: Kit = bombard::KIT;
+static OILPRESS: Kit = oilpress::KIT;
+static CARGO_CRAB: Kit = cargo_crab::KIT;
 
 /// The kit of `kind`, if it has one.
 pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
@@ -110,6 +116,9 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Drumguard => Some(&DRUMGUARD),
         UnitKind::Smuggler => Some(&SMUGGLER),
         UnitKind::Crate => Some(&CRATE),
+        UnitKind::Bombard => Some(&BOMBARD),
+        UnitKind::Oilpress => Some(&OILPRESS),
+        UnitKind::CargoCrab => Some(&CARGO_CRAB),
         _ => None,
     }
 }
