@@ -1,5 +1,9 @@
 //! Machines: gunmetal and iron with brass and hot-orange accents.
 
+pub mod rampart_v2;
+pub mod sawbot_v2;
+pub mod siege_walker_v2;
+
 use bevy::prelude::Vec3;
 
 use super::super::legacy::{part, BodyPlan, FigureSpec, Joint::*};

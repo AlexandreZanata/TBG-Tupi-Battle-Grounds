@@ -11,7 +11,7 @@ use super::palette::{BARK, DARK, LEAF, LEAF_DARK, LEATHER, SKIN, TRIM};
 pub mod blockout;
 mod body;
 pub mod humans;
-mod machines;
+pub mod machines;
 mod plants;
 pub mod undead;
 

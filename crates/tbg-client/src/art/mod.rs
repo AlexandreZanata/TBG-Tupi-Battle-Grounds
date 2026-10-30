@@ -170,6 +170,51 @@ fn build_library(
                 forms.insert((kind, tier, branch), form);
                 continue;
             }
+            if kind == UnitKind::Sawbot {
+                let form = native_form(
+                    roster::machines::sawbot_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Sawbot {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::SiegeWalker {
+                let form = native_form(
+                    roster::machines::siege_walker_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure SiegeWalker {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Rampart {
+                let form = native_form(
+                    roster::machines::rampart_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Rampart {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
             let spec = roster::figure_spec(kind, tier, branch);
             let built = adapter::build(&spec);
             let joint_count = built.iter().flatten().count();
