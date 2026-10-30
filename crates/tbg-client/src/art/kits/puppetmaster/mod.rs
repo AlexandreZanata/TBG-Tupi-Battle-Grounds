@@ -1,7 +1,8 @@
-//! Puppetmaster kit: no basic attack. It dances its marionette with small
-//! jerks of the control while idle, strolls with a showman's swagger, and
-//! points its control at the enemy it turns (`Cast`, cued from the
-//! betrayal). Rises from the ground; falls back on death.
+//! Puppetmaster kit: it dances its marionette with small jerks of the
+//! control while idle, strolls with a showman's swagger, and points its
+//! control at the enemy it turns, the strings' hex leaving the cross on
+//! the cast Release (confusing is its attack). Rises from the ground;
+//! falls back on death.
 
 mod model;
 
@@ -11,16 +12,21 @@ use super::common::{moves, moves::*, Form};
 use super::{tools, Attack, Gait, Kit, Moment};
 use crate::art::{
     anim::{Clip, Pose},
-    rig::Proportions,
+    rig::{Node, Proportions, Socket},
 };
-use crate::vfx::impacts::Burst;
+use crate::vfx::{impacts::Burst, shots::ShotKind};
 use model::plan;
 
 pub const KIT: Kit = Kit {
     figure: model::spec,
     pose,
     gait: Gait::LIGHT,
-    attack: Attack::None,
+    attack: Attack::Shot {
+        from: Node::Prop(Socket::WeaponR),
+        muzzle: |_, _| model::CROSS,
+        shot: |_, _| ShotKind::Puppet,
+        flash: |_, _| None,
+    },
     evolve: Burst::Soul,
     durations: moves::DURATIONS,
 };

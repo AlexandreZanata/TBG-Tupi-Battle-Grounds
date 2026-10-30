@@ -20,6 +20,11 @@ pub const BLOOD: Color = Color::srgb(0.88, 0.1, 0.14);
 /// Staff length (socket space, +Y).
 pub const STAFF: f32 = 1.05;
 
+/// The spindle's head (weapon space): the blood thread leaves from here.
+pub fn spindle_top() -> Vec3 {
+    Vec3::from(gear::staff_top(STAFF))
+}
+
 pub fn plan(tier: u8) -> Proportions {
     body::plan(false, 1.0, tier)
 }

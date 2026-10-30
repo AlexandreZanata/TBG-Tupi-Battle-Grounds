@@ -5,8 +5,10 @@
 
 pub mod aim;
 mod antidote_brewer;
+mod beetling;
 mod blood_furnace;
 mod bloodweaver;
+mod bloomkeeper;
 mod bombard;
 mod bone_brute;
 mod cargo_crab;
@@ -15,14 +17,19 @@ pub mod common;
 mod drumguard;
 mod farwatch;
 pub mod gait;
+mod hexer;
 mod leechroot;
 mod longaxe;
+mod nester;
 mod oilpress;
 mod old_finn;
 mod puppetmaster;
+mod rampart;
 mod rootcaller;
 mod rotcap;
+mod sawbot;
 mod shatterback;
+mod shieldbearer;
 mod siege_walker;
 mod smuggler;
 mod tools;
@@ -117,6 +124,13 @@ static SHATTERBACK: Kit = shatterback::KIT;
 static BLOOD_FURNACE: Kit = blood_furnace::KIT;
 static BLOODWEAVER: Kit = bloodweaver::KIT;
 static PUPPETMASTER: Kit = puppetmaster::KIT;
+static SHIELDBEARER: Kit = shieldbearer::KIT;
+static HEXER: Kit = hexer::KIT;
+static SAWBOT: Kit = sawbot::KIT;
+static BLOOMKEEPER: Kit = bloomkeeper::KIT;
+static NESTER: Kit = nester::KIT;
+static BEETLING: Kit = beetling::KIT;
+static RAMPART: Kit = rampart::KIT;
 
 /// The kit of `kind`, if it has one.
 pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
@@ -140,6 +154,13 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::BloodFurnace => Some(&BLOOD_FURNACE),
         UnitKind::Bloodweaver => Some(&BLOODWEAVER),
         UnitKind::Puppetmaster => Some(&PUPPETMASTER),
+        UnitKind::Shieldbearer => Some(&SHIELDBEARER),
+        UnitKind::Hexer => Some(&HEXER),
+        UnitKind::Sawbot => Some(&SAWBOT),
+        UnitKind::Bloomkeeper => Some(&BLOOMKEEPER),
+        UnitKind::Nester => Some(&NESTER),
+        UnitKind::Beetling => Some(&BEETLING),
+        UnitKind::Rampart => Some(&RAMPART),
         _ => None,
     }
 }

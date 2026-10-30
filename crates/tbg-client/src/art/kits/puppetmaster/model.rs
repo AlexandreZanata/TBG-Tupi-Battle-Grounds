@@ -19,6 +19,8 @@ pub const MAGIC: Color = Color::srgb(0.78, 0.48, 1.0);
 const STRING: Color = Color::srgb(0.92, 0.9, 0.85);
 /// How far below the control the puppet hangs (socket space).
 const DROP: f32 = 0.4;
+/// The control cross's center (weapon space): the hex leaves from here.
+pub const CROSS: Vec3 = Vec3::new(0.0, -0.05, 0.12);
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.04, tier);

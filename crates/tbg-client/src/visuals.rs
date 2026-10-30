@@ -86,6 +86,9 @@ impl UnitVisual {
     pub fn engage(&mut self, target: AimTarget) {
         self.aim = Some((target, self.interval + AIM_GRACE));
     }
+    pub fn kind(&self) -> UnitKind {
+        self.form.0
+    }
     /// The unit fires or strikes through its own art kit.
     pub fn has_kit(&self) -> bool {
         self.kit().is_some()

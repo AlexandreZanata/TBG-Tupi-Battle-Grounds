@@ -1,6 +1,7 @@
 //! Smuggler kit: no basic attack; a shifty idle with darting glances, a
 //! sneaking walk, and a toss whenever one of his crates lands (`Cast`,
-//! cued from the crate's arrival). He pops in as if out of a crate.
+//! cued from the crate's spawn in `sync/actions.rs`). He pops in as if out
+//! of a crate.
 
 mod model;
 

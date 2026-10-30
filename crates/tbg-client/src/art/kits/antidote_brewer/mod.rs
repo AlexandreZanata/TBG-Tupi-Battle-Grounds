@@ -1,6 +1,7 @@
-//! Antidote Brewer kit: no basic attack. It swirls its flask while idle,
-//! hurries with the flask held up, and tosses a cure at the ally it
-//! cleanses (`Cast`, cued from the cleanse). Pops up out of the soil.
+//! Antidote Brewer kit: it swirls its flask while idle, hurries with the
+//! flask held up, and tosses the cure at the ally it cleanses (its brew is
+//! its attack, so the flask leaves the hand on the cast Release). Pops up
+//! out of the soil.
 
 mod model;
 
@@ -10,16 +11,21 @@ use super::common::{moves, moves::*};
 use super::{tools, Attack, Gait, Kit, Moment};
 use crate::art::{
     anim::{Clip, Pose},
-    rig::{Joint, Proportions},
+    rig::{Joint, Node, Proportions, Socket},
 };
-use crate::vfx::impacts::Burst;
+use crate::vfx::{impacts::Burst, shots::ShotKind};
 use model::plan;
 
 pub const KIT: Kit = Kit {
     figure: model::spec,
     pose,
     gait: Gait::LIGHT,
-    attack: Attack::None,
+    attack: Attack::Shot {
+        from: Node::Prop(Socket::WeaponR),
+        muzzle: |_, _| model::FLASK,
+        shot: |_, _| ShotKind::Flask,
+        flash: |_, _| None,
+    },
     evolve: Burst::Bloom,
     durations: moves::DURATIONS,
 };

@@ -426,3 +426,45 @@ pub fn toss(m: &Moment, pose: &mut Pose, p: &Proportions) {
     tools::face(pose, m.aim, Vec3::ZERO);
     tools::plant(pose, p, tools::stance(p, 1.2, 0.06));
 }
+
+/// A staff (along the right socket's +Y) held upright at the right side:
+/// `tilt` leans its head forward (degrees), `lift` raises the hand,
+/// `fore` pushes it forward.
+pub fn staff(pose: &mut Pose, p: &Proportions, tilt: f32, lift: f32, fore: f32) {
+    let grip = Quat::from_rotation_x(tilt.to_radians());
+    tools::reach(
+        pose,
+        false,
+        Vec3::new(-0.22, 0.06 + lift, 0.12 + fore),
+        Some(grip),
+        (p, Vec3::new(-1.0, -0.5, -0.4)),
+    );
+}
+
+/// A staff cast: raise the staff, thrust its head at the target on the
+/// cast Release (0.22 s), the free hand clawing after it; then settle.
+pub fn staff_cast(m: &Moment, pose: &mut Pose, p: &Proportions) {
+    let raise = window(m.t, 0.0, 0.2);
+    let thrust = snap(m.t, 0.2, 0.24) * (1.0 - window(m.t, 0.4, 0.62));
+    tools::face(pose, m.aim, Vec3::ZERO);
+    tools::add(
+        pose,
+        Chest,
+        [-8.0 * raise * (1.0 - thrust) + 12.0 * thrust, 0.0, 0.0],
+    );
+    staff(
+        pose,
+        p,
+        -15.0 * raise + 70.0 * thrust,
+        0.15 * raise,
+        0.18 * thrust,
+    );
+    tools::reach(
+        pose,
+        true,
+        Vec3::new(0.18, 0.2 + 0.1 * raise, 0.25 + 0.1 * thrust),
+        None,
+        (p, Vec3::new(1.0, -0.6, -0.3)),
+    );
+    tools::plant(pose, p, tools::stance(p, 1.3, 0.08));
+}

@@ -68,6 +68,7 @@ pub(super) fn apply_event(
 ) {
     let you = fx.you;
     let at = |visuals: &Visuals, t| pos_of(map, visuals, you, t);
+    super::actions::cue(commands, fx, map, visuals, ev);
     match ev {
         Event::Spawn { seat, .. } if seat == you => {
             fx.stats.bought += 1;

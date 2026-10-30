@@ -19,6 +19,9 @@ pub const CURE: Color = Color::srgb(0.4, 0.95, 0.85);
 const WICKER: Color = Color::srgb(0.66, 0.5, 0.28);
 const GLASS: Color = Color::srgb(0.7, 0.9, 0.95);
 
+/// The flask in the right hand (weapon space): the cure leaves from here.
+pub const FLASK: Vec3 = Vec3::new(0.0, 0.07, 0.03);
+
 pub fn plan(tier: u8) -> Proportions {
     body::plan(false, 0.92, tier)
 }
@@ -109,7 +112,7 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 fn hands(v: &mut Vec<PartSpec>, f: Form) {
     let r = Prop(Socket::WeaponR);
     let big = if f.a { 1.5 } else { 1.25 };
-    v.extend(gear::flask(r, [0.0, 0.07, 0.03], CURE, big));
+    v.extend(gear::flask(r, FLASK.to_array(), CURE, big));
     if f.a {
         v.push(part(
             r,
