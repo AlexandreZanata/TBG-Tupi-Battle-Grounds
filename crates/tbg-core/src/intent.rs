@@ -117,7 +117,7 @@ impl MatchState {
             heal_cut_until: 0,
             heal_cut_bp: 0,
             second_wind_used: 0,
-            hatch_cd: if kind == UnitKind::Nester {
+            action_cd: if kind == UnitKind::Nester {
                 self.rules.hatch_rule(tier, branch).0
             } else {
                 0
@@ -140,7 +140,7 @@ impl MatchState {
         if u.seat != seat {
             return Err(Rejection::NotYourUnit);
         }
-        if u.kind.is_summon() {
+        if u.is_summon() {
             return Err(Rejection::NotEvolvable);
         }
         if u.tier >= 2 {

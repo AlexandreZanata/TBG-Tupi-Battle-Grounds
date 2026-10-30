@@ -39,7 +39,7 @@ pub(crate) fn resolve_hit(
         return;
     }
     let mut amount = st.damage;
-    if !attacker.kind.is_summon() {
+    if !attacker.is_summon() {
         let target_status = match target {
             Target::Unit(id) => state
                 .unit_index(id)
@@ -65,15 +65,15 @@ pub(crate) fn resolve_hit(
         crate::lab::dealt(state, attacker, removed);
     }
     if let Target::Unit(id) = target {
-        if !attacker.kind.is_summon() {
+        if !attacker.is_summon() {
             apply_heal_cut(state, attacker.seat, id);
         }
     }
     // Lifesteal: primary hit on an enemy conventional unit only (BR-X06).
-    if !attacker.kind.is_summon() && removed > 0 {
+    if !attacker.is_summon() && removed > 0 {
         if let Target::Unit(id) = target {
             let conventional = state.unit_index(id).is_some_and(|i| {
-                !state.units[i].kind.is_summon() && state.units[i].seat != attacker.seat
+                !state.units[i].is_summon() && state.units[i].seat != attacker.seat
             });
             let bp = augment::lifesteal_bp(&state.player(attacker.seat).augments);
             if conventional && bp > 0 {
@@ -133,7 +133,7 @@ fn splash(
             let _removed = damage(state, Target::Unit(e.id), st.damage, ev);
             #[cfg(feature = "lab")]
             crate::lab::dealt(state, attacker, _removed);
-            if !attacker.kind.is_summon() {
+            if !attacker.is_summon() {
                 apply_heal_cut(state, attacker.seat, e.id);
             }
         }
@@ -160,7 +160,7 @@ pub(crate) fn damage(
             };
             let victim = state.units[i];
             let owner = victim.seat;
-            let conventional = !victim.kind.is_summon();
+            let conventional = !victim.is_summon();
             let archetype = state.rules().def(victim.kind).archetype;
             let army = state.army_of(owner);
             let arcana_dr = if conventional {
@@ -191,7 +191,7 @@ pub(crate) fn damage(
                 return 0;
             }
             let before = u.hp;
-            if !u.kind.is_summon() && amount >= before && u.second_wind_used < copies {
+            if !u.is_summon() && amount >= before && u.second_wind_used < copies {
                 u.hp = 1;
                 u.second_wind_used = u.second_wind_used.saturating_add(1);
                 ev.push(Event::SecondWind { unit: id });
@@ -254,7 +254,7 @@ fn heal(
         to: id,
         amount: effective,
     });
-    if !target.kind.is_summon() {
+    if !target.is_summon() {
         if let Some(status) = arcana::purify_status(
             &state.player(healer).arcanas,
             &state.rules().arcana,
@@ -290,7 +290,7 @@ fn apply_on_hit(
     let target = state.units[i];
     let archetype = state.rules().def(target.kind).archetype;
     let shorten = |ticks| {
-        if target.kind.is_summon() {
+        if target.is_summon() {
             ticks
         } else {
             arcana::shorten_status(

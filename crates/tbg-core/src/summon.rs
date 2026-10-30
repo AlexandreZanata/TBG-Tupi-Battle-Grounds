@@ -71,8 +71,8 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
             continue;
         }
         // Count down and hatch on the same tick: exactly `every` ticks apart.
-        let cd = n.hatch_cd.saturating_sub(1);
-        state.units[idx].hatch_cd = cd;
+        let cd = n.action_cd.saturating_sub(1);
+        state.units[idx].action_cd = cd;
         if cd > 0 {
             continue;
         }
@@ -83,7 +83,7 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
             continue;
         }
         seat_brood.push(n.id, cap);
-        state.units[idx].hatch_cd = every;
+        state.units[idx].action_cd = every;
         spawn_beetling(state, &n, ev);
     }
 }
@@ -125,7 +125,7 @@ fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
         status: Status::None,
         summoner: Some(nester.id),
         expires_at: Some(state.tick + state.rules.beetle_lifetime),
-        hatch_cd: 0,
+        action_cd: 0,
         haste_until: 0,
         heal_cut_until: 0,
         heal_cut_bp: 0,

@@ -161,7 +161,7 @@ fn br_ar10_deadeye_adds_range_only_to_conventional_ranged() {
         status: Status::None,
         summoner: None,
         expires_at: None,
-        hatch_cd: 0,
+        action_cd: 0,
         haste_until: 0,
         heal_cut_until: 0,
         heal_cut_bp: 0,

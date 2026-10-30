@@ -56,7 +56,7 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
             resolve_hit(state, &u, target, &st, ev);
         }
         let distance = (targeting::target_x(state, target) - u.x).abs();
-        let quickdraw = if u.kind.is_summon() {
+        let quickdraw = if u.is_summon() {
             0
         } else {
             arcana::attack_speed_bp(
@@ -97,7 +97,7 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
                 _ => st.speed,
             };
             let mut haste = augment::haste_move_bp(&state.player(u.seat).augments, &u, state.tick);
-            if !u.kind.is_summon() {
+            if !u.is_summon() {
                 let army = state.army_of(u.seat);
                 haste += arcana::move_bonus_bp(
                     &state.player(u.seat).arcanas,
@@ -184,7 +184,7 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
     let mut dead = [0u32; 2];
     for u in state.units.iter().filter(|u| u.hp <= 0) {
         ev.push(Event::Death { unit: u.id });
-        if !u.kind.is_summon() {
+        if !u.is_summon() {
             dead[u.seat.index()] += 1;
         }
     }

@@ -68,7 +68,7 @@ pub struct Unit {
     /// Tick at which a summon disappears.
     pub expires_at: Option<Tick>,
     /// Ticks until a Nester's next hatch (0 for every other kind).
-    pub hatch_cd: u16,
+    pub action_cd: u16,
     /// Forced March: move bonus while `tick < haste_until`.
     pub haste_until: Tick,
     /// Grievous Wounds: healing received is cut while `tick < heal_cut_until`.
@@ -227,6 +227,14 @@ pub fn stronghold_x(seat: Seat) -> i32 {
     }
 }
 
+impl Unit {
+    /// Summons are recognized by unit, not by kind (BR-U08): a carried
+    /// roster kind (Cargo Crab, P48) is still a summon.
+    pub(crate) fn is_summon(&self) -> bool {
+        self.summoner.is_some() || self.kind.is_summon()
+    }
+}
+
 impl PlayerState {
     /// The one spend path: rejects overdrafts (BR-E03). The balance drops
     /// at once, and with it the Interest boost (BR-E06).
@@ -275,14 +283,14 @@ impl MatchState {
     pub fn army_size(&self, seat: Seat) -> usize {
         self.units
             .iter()
-            .filter(|u| u.seat == seat && u.hp > 0 && !u.kind.is_summon())
+            .filter(|u| u.seat == seat && u.hp > 0 && !u.is_summon())
             .count()
     }
 
     pub fn stats_of(&self, u: &Unit) -> Stats {
         // Summons never receive Synergy or Arcanas (BR-U08, D-40); only
         // Augments naming Beetlings reach them (BR-AG10).
-        if u.kind.is_summon() {
+        if u.is_summon() {
             let p = self.player(u.seat);
             let bonus = crate::augment::unit_bonus(&p.augments, p.synergy, u.kind, u.tier);
             return self.rules.stats_with(
@@ -309,7 +317,7 @@ impl MatchState {
         for u in self
             .units
             .iter()
-            .filter(|u| u.hp > 0 && !u.kind.is_summon())
+            .filter(|u| u.hp > 0 && !u.is_summon())
         {
             army[u.seat.index()].add(self.rules.def(u.kind).archetype);
         }

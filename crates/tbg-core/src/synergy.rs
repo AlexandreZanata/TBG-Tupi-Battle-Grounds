@@ -14,7 +14,7 @@ pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
         for u in state
             .units
             .iter()
-            .filter(|u| u.seat == seat && u.hp > 0 && !u.kind.is_summon())
+            .filter(|u| u.seat == seat && u.hp > 0 && !u.is_summon())
         {
             counts[rules.def(u.kind).faction.index()] += 1;
         }
@@ -70,7 +70,7 @@ fn regenerate(state: &mut MatchState) {
         let faction = rules.def(u.kind).faction.index();
         let level = state.player(u.seat).synergy[faction];
         let (effect, bps) = rules.synergies[faction];
-        if level == 0 || effect != SynergyEffect::Regen || u.hp <= 0 || u.kind.is_summon() {
+        if level == 0 || effect != SynergyEffect::Regen || u.hp <= 0 || u.is_summon() {
             continue;
         }
         let bp = i64::from(bps[usize::from(level) - 1]);

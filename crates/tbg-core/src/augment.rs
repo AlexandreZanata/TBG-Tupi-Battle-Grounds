@@ -374,7 +374,7 @@ pub fn status_duration_bp(counts: &AugmentCounts) -> i32 {
 }
 
 pub fn haste_move_bp(counts: &AugmentCounts, unit: &Unit, tick: Tick) -> i32 {
-    if unit.kind.is_summon() || tick >= unit.haste_until {
+    if unit.is_summon() || tick >= unit.haste_until {
         return 0;
     }
     AUGMENTS
@@ -710,7 +710,7 @@ pub fn heal_amount(
     } else {
         0
     };
-    if direct && !target.kind.is_summon() {
+    if direct && !target.is_summon() {
         bonus += arcana::emergency_heal_bp(
             &state.player(healer).arcanas,
             &state.rules().arcana,
