@@ -83,9 +83,10 @@ impl MatchState {
                 self.units[idx].haste_until = haste;
             }
         }
-        let p = self.player_mut(seat);
         // BR-S04: every purchase redraws all five offers, the bought one too.
-        p.offers = shop::draw_offers(&mut p.rng);
+        let pool = self.rules.pool;
+        let p = self.player_mut(seat);
+        p.offers = shop::draw_offers(&mut p.rng, pool);
         Ok(())
     }
 

@@ -17,10 +17,11 @@ pub struct LocalMatch {
 
 impl LocalMatch {
     /// Practice uses the player's saved Arcanas against a default bot (D-40).
+    /// The staging pool (P43): identical to canon until new kinds land.
     pub fn new(seed: u64, arcanas: ArcanaPreset) -> LocalMatch {
         let presets = [arcanas, ArcanaPreset::DEFAULT];
         LocalMatch {
-            state: MatchState::with_arcanas(seed, presets),
+            state: MatchState::with_preview(seed, presets),
             bot: Bot::new(seed ^ 0x5eed),
             queue: Vec::new(),
             events: Vec::new(),

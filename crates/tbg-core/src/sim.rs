@@ -22,6 +22,12 @@ impl MatchState {
         MatchState::lab(seed, &CANON, arcanas)
     }
 
+    /// Practice preview (ROSTER-EXPANSION §F.5): the full staging pool,
+    /// offline only. Identical to canon until P44 adds new kinds.
+    pub fn with_preview(seed: u64, arcanas: [ArcanaPreset; 2]) -> MatchState {
+        MatchState::lab(seed, Ruleset::preview(), arcanas)
+    }
+
     /// A match on another ruleset: the offline balance lab only (D-33).
     pub fn with_rules(seed: u64, rules: &'static Ruleset) -> MatchState {
         MatchState::lab(seed, rules, [ArcanaPreset::NEUTRAL; 2])
@@ -34,7 +40,7 @@ impl MatchState {
             PlayerState {
                 energy: rules.energy_start,
                 regen_frac: 0,
-                offers: shop::draw_offers(&mut rng),
+                offers: shop::draw_offers(&mut rng, rules.pool),
                 stronghold_hp: rules.stronghold_hp,
                 stronghold_cooldown: 0,
                 synergy: [0; 4],
