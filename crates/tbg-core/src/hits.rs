@@ -23,6 +23,11 @@ pub(crate) fn resolve_hit(
         crate::support::betray_resolve(state, attacker, target, st, ev);
         return;
     }
+    // Puppetmasters confuse instead of dealing damage (§C.10).
+    if crate::support::puppet_of(state, attacker).is_some() {
+        crate::support::puppet_cast(state, attacker, target, st.range, ev);
+        return;
+    }
     let healing = matches!(target, Target::Unit(id)
         if state.unit_index(id).is_some_and(|i| state.units[i].seat == attacker.seat));
     if healing {
@@ -30,11 +35,6 @@ pub(crate) fn resolve_hit(
         // Action units brew or transfer instead of healing.
         if let Some((strip, ward, second)) = crate::afflictions::brew_of(state, attacker) {
             crate::afflictions::brew_cast(state, attacker, st.range, id, strip, ward, second, ev);
-            return;
-        }
-        // Puppetmasters confuse instead of healing.
-        if crate::support::puppet_of(state, attacker).is_some() {
-            crate::support::puppet_cast(state, attacker, st.range, ev);
             return;
         }
         // Bloodweavers transfer instead of healing.

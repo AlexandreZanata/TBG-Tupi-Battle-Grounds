@@ -1,5 +1,6 @@
-//! Nester Hatch and summon lifetime (BR-U08). These limits belong to the
-//! ability, never to the army: bought units stay uncapped (BR-U07, D-32).
+//! Nester Hatch, Smuggler cargo crates and summon lifetime (BR-U08). These
+//! limits belong to the ability, never to the army: bought units stay
+//! uncapped (BR-U07, D-32).
 
 use crate::augment;
 use crate::content::{Ability, BEETLES_PER_PLAYER};
@@ -62,7 +63,11 @@ fn limit(state: &MatchState, seat: crate::types::Seat) -> usize {
 pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
     let mut brood = [Brood::default(), Brood::default()];
     // Only Beetlings count toward the per-seat cap (cargo is uncapped).
-    for u in state.units.iter().filter(|u| u.hp > 0 && u.kind == UnitKind::Beetling) {
+    for u in state
+        .units
+        .iter()
+        .filter(|u| u.hp > 0 && u.kind == UnitKind::Beetling)
+    {
         if let Some(nester) = u.summoner {
             brood[u.seat.index()].push(nester, MAX_SUMMONS);
         }
@@ -80,7 +85,12 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
             crate_tick(state, idx, &n, ev);
             continue;
         }
-        if !state.rules.def(n.kind).ability(n.tier, n.branch).contains(&Ability::Hatch) {
+        if !state
+            .rules
+            .def(n.kind)
+            .ability(n.tier, n.branch)
+            .contains(&Ability::Hatch)
+        {
             continue;
         }
         // Count down and hatch on the same tick: exactly `every` ticks apart.
@@ -183,7 +193,7 @@ fn cargo_tick(state: &mut MatchState, idx: usize, smuggler: &Unit) {
     let mut draws = 1u8;
     if double_every > 0 {
         let n = state.units[idx].fx.attacks.saturating_add(1);
-        if n % double_every == 0 {
+        if n.is_multiple_of(double_every) {
             state.units[idx].fx.attacks = 0;
             draws = 2;
         } else {
@@ -287,7 +297,11 @@ fn cargo_draw(
     let mut common = Vec::new();
     let mut strong = Vec::new();
     let mut any = Vec::new();
-    for k in crate::types::ALL_KINDS.iter().copied().filter(|k| k.is_conventional()) {
+    for k in crate::types::ALL_KINDS
+        .iter()
+        .copied()
+        .filter(|k| k.is_conventional())
+    {
         let cost = rules.def(k).cost;
         if cost == crate::content::ENERGY_SCALE * 3 {
             common.push(k);
@@ -332,13 +346,18 @@ fn cargo_draw(
     if pool.is_empty() {
         return None;
     }
-    let kind = pool[state.players[seat.index()].cargo_rng.below(pool.len() as u32) as usize];
-    Some(spawn_cargo(state, seat, summoner, x, kind, tier, branch, ev))
+    let kind = pool[state.players[seat.index()]
+        .cargo_rng
+        .below(pool.len() as u32) as usize];
+    Some(spawn_cargo(
+        state, seat, summoner, x, kind, tier, branch, ev,
+    ))
 }
 
 /// A cargo unit: a permanent summon of a roster kind (P48-B, §C.11).
 /// No lifetime, no Energy, no Bounty/Synergy/Arcana/Augment/Evolution;
 /// never feeds Leechroot (all gated on `is_summon`).
+#[allow(clippy::too_many_arguments)] // one spawn helper; reads as a table row
 fn spawn_cargo(
     state: &mut MatchState,
     seat: crate::types::Seat,
@@ -389,4 +408,53 @@ fn spawn_cargo(
         kind,
     });
     id
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::content::ENERGY_SCALE;
+
+    /// §C.11: the cargo table holds over 100 000 crates — every outcome
+    /// share within 1 percentage point and a χ² (4 dof) under the 1 %
+    /// critical value; cargo is never a Smuggler, Nester or summon.
+    #[test]
+    fn cargo_table_holds_over_100k_crates() {
+        const DRAWS: u32 = 100_000;
+        let table = [20u16, 42, 28, 8, 2];
+        let mut state = MatchState::new(48);
+        let mut seen = [0u32; 5];
+        let mut ev = Vec::new();
+        for _ in 0..DRAWS {
+            let Some(id) = cargo_draw(&mut state, Seat::A, None, 0, table, &mut ev) else {
+                seen[0] += 1;
+                continue;
+            };
+            let u = state.units.pop().expect("the cargo was just pushed");
+            assert_eq!(u.id, id);
+            assert!(u.kind.is_conventional());
+            assert!(!matches!(u.kind, UnitKind::Smuggler | UnitKind::Nester));
+            let cost = state.rules().def(u.kind).cost;
+            let outcome = match u.tier {
+                0 if cost == ENERGY_SCALE * 3 => 1,
+                0 => 2,
+                t => 2 + usize::from(t),
+            };
+            seen[outcome] += 1;
+        }
+        // Integer arithmetic only (C1 forbids floats in simulation sources):
+        // expected = DRAWS × p / 100 = 1000 × p, so χ² × 1000 = Σ (o − e)² / p.
+        let mut chi2_milli = 0u64;
+        for (i, &p) in table.iter().enumerate() {
+            let expected = i64::from(DRAWS) * i64::from(p) / 100;
+            let diff = i64::from(seen[i]) - expected;
+            // 1 percentage point of 100 000 draws is 1 000 draws.
+            assert!(diff.abs() < 1_000, "outcome {i}: {} vs {expected}", seen[i]);
+            chi2_milli += (diff * diff) as u64 / u64::from(p);
+        }
+        assert!(
+            chi2_milli < 13_280,
+            "χ² {chi2_milli}/1000 over 4 dof (1 % critical 13.28)"
+        );
+    }
 }

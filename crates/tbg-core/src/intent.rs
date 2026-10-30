@@ -120,12 +120,16 @@ impl MatchState {
             second_wind_used: 0,
             action_cd: if self.rules.def(kind).ability(0, 0).contains(&Ability::Hatch) {
                 self.rules.hatch_rule(tier, branch).0
-            } else if let Some(every) = self.rules.def(kind).ability(0, 0).into_iter().find_map(
-                |ability| match ability {
-                    Ability::Cargo { every, .. } => Some(every),
-                    _ => None,
-                },
-            ) {
+            } else if let Some(every) =
+                self.rules
+                    .def(kind)
+                    .ability(0, 0)
+                    .into_iter()
+                    .find_map(|ability| match ability {
+                        Ability::Cargo { every, .. } => Some(every),
+                        _ => None,
+                    })
+            {
                 // Smugglers drop the first crate after a full interval.
                 every.max(1)
             } else {

@@ -605,7 +605,8 @@ pub const UNITS: [UnitDef; 27] = [
         [Ability::Cargo { every: 400, open: 40, table: [10, 40, 34, 12, 4], double_every: 0 }, Ability::None],
         [Ability::Cargo { every: 400, open: 40, table: [6, 28, 38, 20, 8], double_every: 0 }, Ability::None],
         [Ability::Cargo { every: 360, open: 40, table: [20, 42, 28, 8, 2], double_every: 0 }, Ability::None],
-        [Ability::Cargo { every: 400, open: 40, table: [20, 42, 28, 8, 2], double_every: 3 }, Ability::None],
+        // B2 keeps B1's 18 s: rows are absolute per slot (§C.11: +48 %/min).
+        [Ability::Cargo { every: 360, open: 40, table: [20, 42, 28, 8, 2], double_every: 3 }, Ability::None],
     ], [
         form("Better Connections"),
         form("Black Market"),

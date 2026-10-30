@@ -4,7 +4,7 @@
 use std::cmp::Reverse;
 
 use crate::afflictions::abilities_of;
-use crate::content::{Ability, LANE_LEN, Stats};
+use crate::content::{Ability, Stats, LANE_LEN};
 use crate::state::{Event, MatchState, Target, Unit};
 use crate::types::{Archetype, OnHit, UnitId};
 
@@ -340,21 +340,23 @@ pub(crate) fn boarding(state: &mut MatchState, ev: &mut Vec<Event>) {
         // Board: sync the passenger now (run_units syncs every tick after).
         state.units[pi].fx.carrier = Some(crab.id);
         state.units[pi].x = crab.x;
-    if let Some(ci) = state.unit_index(crab.id) {
-        state.units[ci].fx.passenger = Some(pid);
-        // B2 Overdrive: +40 % move for 4 s, re-armed 15 s after the
-        // previous surge started (surge lasts 80 of those ticks).
-        if surge > 0
-            && (state.units[ci].fx.surge_until == 0
-                || state.tick >= state.units[ci].fx.surge_until.saturating_sub(80) + 300)
-        {
-            state.units[ci].fx.surge_until = state.tick.saturating_add(80);
+        if let Some(ci) = state.unit_index(crab.id) {
+            state.units[ci].fx.passenger = Some(pid);
+            // B2 Overdrive: +40 % move for 4 s, re-armed 15 s after the
+            // previous surge started (surge lasts 80 of those ticks).
+            if surge > 0
+                && (state.units[ci].fx.surge_until == 0
+                    || state.tick >= state.units[ci].fx.surge_until.saturating_sub(80) + 300)
+            {
+                state.units[ci].fx.surge_until = state.tick.saturating_add(80);
+            }
         }
-    }
-        // Enemy windups already aimed at the passenger hit the crab instead.
+        // Enemy windups already aimed at the passenger hit the crab instead;
+        // so do betrayals, which never hit a carried unit (§C.10).
         for u in state.units.iter_mut() {
             if let Some((target, ticks)) = u.windup {
-                if target == crate::state::Target::Unit(pid) && u.seat != crab.seat {
+                if target == crate::state::Target::Unit(pid) && (u.seat != crab.seat || u.fx.betray)
+                {
                     u.windup = Some((crate::state::Target::Unit(crab.id), ticks));
                 }
             }
@@ -451,7 +453,8 @@ pub(crate) fn puppet_of(state: &MatchState, u: &Unit) -> Option<(u16, u16, u16, 
 
 /// Puppetmaster target ranking (§C.10): enemy conventional units in range
 /// with a basic attack (damage > 0, no heal), not Confused and not immune:
-/// highest static hit damage first, ties nearest, then lowest id.
+/// highest static hit damage first, ties nearest, then lowest id. Warded
+/// and control-immune units are skipped.
 fn puppet_ranked(state: &MatchState, u: &Unit, range: i32) -> Vec<UnitId> {
     let mut out: Vec<(i32, i32, UnitId)> = Vec::new();
     for e in state.units.iter() {
@@ -461,6 +464,10 @@ fn puppet_ranked(state: &MatchState, u: &Unit, range: i32) -> Vec<UnitId> {
             || e.is_summon()
             || state.tick < e.fx.confused_until
             || state.tick < e.fx.immune_until
+            // The Antidote ward blocks the cast (§C.9, §D); Oilpress A2 is
+            // immune to control, confusion included (§C.8).
+            || state.tick < e.fx.ward_until
+            || crate::afflictions::is_immune_to_control(e)
         {
             continue;
         }
@@ -480,21 +487,25 @@ pub(crate) fn puppet_target(state: &MatchState, u: &Unit, range: i32) -> Option<
 }
 
 /// The Puppetmaster's cast (§C.10): confuse up to `targets` distinct enemies
-/// for `window` ticks, storing the betrayal bonus. Confused units betray on
-/// the next attack they start. Emits StatusApplied per victim.
+/// for `window` ticks, storing the betrayal bonus. The windup target (the
+/// one `AttackStart` showed) goes first while still eligible. Confused
+/// units betray on the next attack they start. Emits StatusApplied per victim.
 pub(crate) fn puppet_cast(
     state: &mut MatchState,
     attacker: &Unit,
+    target: Target,
     range: i32,
     ev: &mut Vec<Event>,
 ) {
     let Some((window, _immune, bonus, targets, stumble)) = puppet_of(state, attacker) else {
         return;
     };
-    for id in puppet_ranked(state, attacker, range)
-        .into_iter()
-        .take(usize::from(targets.max(1)))
-    {
+    let mut ranked = puppet_ranked(state, attacker, range);
+    if let Some(pos) = ranked.iter().position(|&id| target == Target::Unit(id)) {
+        let shown = ranked.remove(pos);
+        ranked.insert(0, shown);
+    }
+    for id in ranked.into_iter().take(usize::from(targets.max(1))) {
         if let Some(i) = state.unit_index(id) {
             state.units[i].fx.confused_until = state.tick.saturating_add(u32::from(window));
             state.units[i].fx.betray_bp = bonus;
@@ -527,7 +538,12 @@ pub(crate) fn betray_target(state: &MatchState, u: &Unit, range: i32) -> Option<
 /// retargets its nearest own ally instead (the AttackStart already shows
 /// the betrayal). Returns the windup target and whether it is a betrayal;
 /// heals and casts are never redirected.
-pub(crate) fn betray_windup(state: &MatchState, u: &Unit, range: i32, target: Target) -> (Target, bool) {
+pub(crate) fn betray_windup(
+    state: &MatchState,
+    u: &Unit,
+    range: i32,
+    target: Target,
+) -> (Target, bool) {
     let is_enemy_target = match target {
         Target::Unit(id) => state
             .unit_index(id)
@@ -580,7 +596,10 @@ pub(crate) fn betray_resolve(
         let _applied = crate::hits::apply_on_hit(
             state,
             attacker.id,
-            OnHit::Slow { bp: 3_000, ticks: 40 },
+            OnHit::Slow {
+                bp: 3_000,
+                ticks: 40,
+            },
             attacker.seat,
             ev,
         );
