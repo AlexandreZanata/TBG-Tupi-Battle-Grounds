@@ -1023,6 +1023,27 @@ seat. The Forest keeps every previous number.
 policy win rates past the D-33 gate, players find a modifier unreadable,
 or the owner wants arena choice online.
 
+## D-57 · Units take up space on screen: display layout only — 2026-10-30 (owner request; look pending owner sign-off)
+
+**Decision.** Large armies no longer draw units inside each other. The
+client decides where each unit is drawn, per seat and every frame
+(`visuals/layout.rs`): front first, five files across the lane, and a
+unit whose file is taken steps back one rank toward its own Stronghold
+(at most eight ranks). Back and file ease over about a tenth of a second.
+The display layout is presentation only: the server keeps the
+one-dimensional `x`, and the simulation stays one-dimensional. The front
+line is drawn at its true `x`; nothing is drawn ahead of it.
+**Contracts.** None changes: no protocol, `tbg-core`, `tbg-server`,
+GAME-DESIGN or contract test.
+**Why.** Units stacked on one spot read as one unit to a player (40
+bot matches under the old lane rule: 41 % of units overlapped two or more
+others, and one unit overlapped 16 others at worst). Bodies that block each other would change combat,
+DPS and balance (P57 options A and B) and cost server time every tick; a
+display layout costs nothing on the server and moves no number.
+**Reopen when** the owner wants bodies to block each other (the simulation
+then needs two-dimensional positions, and this layout would follow them),
+or the layout misses its frame budget at real army sizes.
+
 ## D-58 · C7 measures planted imbalances on the ten-kind Shop pool — 2026-10-30 (owner-authorized CI fix)
 
 **Decision.** C7 (`c7_planted_imbalances_are_caught_for_every_unit`)
