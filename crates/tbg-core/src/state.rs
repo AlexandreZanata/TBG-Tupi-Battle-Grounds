@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::arcana::ArcanaPreset;
 use crate::augment::{AugmentCounts, AugmentState};
-use crate::content::{self, Stats, OFFERS};
+use crate::content::{self, Ability, Stats, BP, MIN_INTERVAL, OFFERS};
 use crate::rng::Pcg32;
 use crate::ruleset::Ruleset;
 use crate::types::{Archetype, Faction, Seat, Status, Tick, UnitId, UnitKind};
@@ -81,6 +81,16 @@ pub struct UnitFx {
     pub board_lock: Tick,
     pub shield: u16,
     pub shield_until: Tick,
+}
+
+/// Queued A2 Shatterback shrapnel (P46): processed in `remove_dead` before
+/// removal, never recursively. Runtime-only: skipped by serde, so hashes
+/// never see it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) struct Shrapnel {
+    pub x: i32,
+    pub seat: Seat,
+    pub amount: i32,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -285,6 +295,10 @@ pub struct MatchState {
     #[cfg(feature = "lab")]
     #[serde(skip, default)]
     pub lab: crate::lab::LabStats,
+    /// Queued A2 shrapnel, drained in `remove_dead` before removal (P46).
+    /// Runtime-only, like `pending`.
+    #[serde(skip)]
+    pub(crate) shrapnel: Vec<Shrapnel>,
 }
 
 /// x position of a seat's Stronghold.
@@ -370,7 +384,25 @@ impl MatchState {
                 &bonus,
             );
         }
-        self.stats_for(u.seat, u.kind, u.tier, u.branch)
+        let mut st = self.stats_for(u.seat, u.kind, u.tier, u.branch);
+        // P46: broken Shatterback plates permanently speed up the unit.
+        // Caps hold exactly (BR-X02, BR-X03): never above the uncapped max.
+        let [a, b] = self.rules.def(u.kind).ability(u.tier, u.branch);
+        for ability in [a, b] {
+            if let Ability::Plates { count, move_bp, atk_bp, .. } = ability {
+                let broken = i64::from(count.saturating_sub(u.fx.plates));
+                if broken > 0 {
+                    let base = self.rules.def(u.kind);
+                    st.speed = (i64::from(st.speed) * (10_000 + i64::from(move_bp) * broken) / BP) as i32;
+                    st.speed = st.speed.min((i64::from(base.speed) * 15_000 / 10_000) as i32);
+                    let atk = (i64::from(st.atk_bp) + i64::from(atk_bp) * broken).min(10_000);
+                    st.atk_bp = atk as i32;
+                    st.interval = ((i64::from(base.interval) * 10_000 / (10_000 + atk))
+                        .max(i64::from(MIN_INTERVAL))) as u16;
+                }
+            }
+        }
+        st
     }
 
     /// The seat's cached living Tank and DPS counts (BR-AR06).

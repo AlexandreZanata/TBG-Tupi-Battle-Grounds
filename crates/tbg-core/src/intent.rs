@@ -125,6 +125,17 @@ impl MatchState {
             },
             fx: crate::state::UnitFx::default(),
         });
+        // P46: Shatterback plates start full (never restored afterwards).
+        let [a, b] = self.rules.def(kind).ability(0, 0);
+        for ability in [a, b] {
+            if let Ability::Plates { count, hp, .. } = ability {
+                if let Some(idx) = self.unit_index(id) {
+                    self.units[idx].fx.plates = count;
+                    self.units[idx].fx.plate_hp = hp as i16;
+                }
+                break;
+            }
+        }
         self.pending.push(Event::Spawn {
             unit: id,
             seat,

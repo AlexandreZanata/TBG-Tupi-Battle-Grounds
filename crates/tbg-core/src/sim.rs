@@ -79,6 +79,7 @@ impl MatchState {
             augments: AugmentState::new(seed, first_round),
             army: Default::default(),
             pending: Vec::new(),
+            shrapnel: Vec::new(),
             rules,
             #[cfg(feature = "lab")]
             lab: crate::lab::LabStats::default(),

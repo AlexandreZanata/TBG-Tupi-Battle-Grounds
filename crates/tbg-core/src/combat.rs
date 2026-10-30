@@ -7,7 +7,7 @@ use crate::content::{Ability, BP, LANE_LEN, MIN_INTERVAL, WINDUP};
 use crate::hits::{damage, resolve_hit};
 use crate::state::{stronghold_x, Event, MatchState, Target};
 use crate::targeting::{self, Engage};
-use crate::types::{Seat, Status};
+use crate::types::{Seat, Status, UnitId};
 
 /// Count down statuses and cooldowns.
 pub(crate) fn tick_timers(state: &mut MatchState) {
@@ -198,7 +198,29 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
     }
 }
 
+/// A2 shrapnel blast radius in milli-tiles (§C.12: 1.0 tile).
+const SHRAPNEL_RADIUS: i32 = 1_000;
+
 pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
+    // P46: drain the shrapnel queue before removal. Chains terminate:
+    // shrapnel only spawns on plate breaks, and plates only decrease.
+    while !state.shrapnel.is_empty() {
+        let queue = std::mem::take(&mut state.shrapnel);
+        for s in queue {
+            let enemy = s.seat.other();
+            let victims: Vec<UnitId> = state
+                .units
+                .iter()
+                .filter(|u| {
+                    u.seat == enemy && u.hp > 0 && (u.x - s.x).abs() <= SHRAPNEL_RADIUS
+                })
+                .map(|u| u.id)
+                .collect();
+            for id in victims {
+                crate::hits::damage(state, Target::Unit(id), s.amount, ev);
+            }
+        }
+    }
     let mut dead = [0u32; 2];
     for u in state.units.iter().filter(|u| u.hp <= 0) {
         ev.push(Event::Death { unit: u.id });

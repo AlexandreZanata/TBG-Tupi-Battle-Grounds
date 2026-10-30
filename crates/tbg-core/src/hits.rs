@@ -26,6 +26,11 @@ pub(crate) fn resolve_hit(
             crate::afflictions::brew_cast(state, attacker, st.range, id, strip, ward, second, ev);
             return;
         }
+        // Bloodweavers transfer instead of healing.
+        if let Some((amount, low_bp, second)) = crate::support::transfer_of(state, attacker) {
+            crate::support::transfer_cast(state, attacker, st.range, amount, low_bp, second, ev);
+            return;
+        }
         let _restored = heal(state, attacker.seat, id, st.heal, true, ev);
         #[cfg(feature = "lab")]
         crate::lab::healed(state, attacker, _restored);
@@ -63,7 +68,9 @@ pub(crate) fn resolve_hit(
             amount,
             augment::situational_bp(state, attacker, target)
                 + arcana_bp
-                + conditional_bp(state, attacker, target),
+                + conditional_bp(state, attacker, target)
+                + furnace_bonus(state, attacker, target)
+                + plates_bonus(state, attacker),
         );
     }
     let removed = damage(state, target, amount, ev);
@@ -107,6 +114,17 @@ pub(crate) fn resolve_hit(
     }
     if st.splash > 0 {
         splash(state, attacker, target, tx, st, ev);
+    } else {
+        // Shatterback Rampage: plateless hits splash at the rampage radius.
+        let rampage = rampage_radius(state, attacker);
+        if rampage > 0 {
+            let ramped = Stats {
+                splash: rampage,
+                splash_bp: 10_000,
+                ..*st
+            };
+            splash(state, attacker, target, tx, &ramped, ev);
+        }
     }
 }
 
@@ -183,6 +201,144 @@ fn apply_heal_cut(state: &mut MatchState, attacker: Seat, id: u32) {
     if let Some(i) = state.unit_index(id) {
         state.units[i].heal_cut_until = until;
         state.units[i].heal_cut_bp = bp;
+    }
+}
+
+/// Shatterback plates (P46): damage after reduction empties the current
+/// plate before HP. Each broken plate emits `PlateBroken`; an A2 plate also
+/// queues shrapnel (drained in `remove_dead`, never recursive). Plates are
+/// never restored: heals, regen and transfers only touch HP.
+fn absorb_plates(state: &mut MatchState, id: u32, amount: i32, ev: &mut Vec<Event>) -> i32 {
+    let Some(i) = state.unit_index(id) else {
+        return amount;
+    };
+    let [a, b] = state.rules().def(state.units[i].kind).ability(
+        state.units[i].tier,
+        state.units[i].branch,
+    );
+    let plates = [a, b].into_iter().find_map(|ability| match ability {
+        Ability::Plates { count, hp, shrapnel, .. } => Some((count, hp, shrapnel)),
+        _ => None,
+    });
+    let Some((_count, plate_max, shrapnel)) = plates else {
+        return amount;
+    };
+    let mut rest = amount;
+    while rest > 0 {
+        let (left, cur) = {
+            let u = &state.units[i];
+            (u.fx.plates, i32::from(u.fx.plate_hp))
+        };
+        if left == 0 || cur <= 0 {
+            break;
+        }
+        let take = rest.min(cur);
+        rest -= take;
+        let broken = take >= cur;
+        {
+            let u = &mut state.units[i];
+            if broken {
+                u.fx.plates = left - 1;
+                u.fx.plate_hp = if u.fx.plates > 0 {
+                    plate_max as i16
+                } else {
+                    0
+                };
+            } else {
+                u.fx.plate_hp = (cur - take) as i16;
+            }
+        }
+        if broken {
+            ev.push(Event::PlateBroken { unit: id });
+            if shrapnel > 0 {
+                let u = &state.units[i];
+                state.shrapnel.push(crate::state::Shrapnel {
+                    x: u.x,
+                    seat: u.seat,
+                    amount: i32::from(shrapnel),
+                });
+            }
+        }
+    }
+    rest
+}
+
+/// Blood Furnace sacrifice (P46): when a hit resolves, the Furnace burns a
+/// fraction of its current max HP — ignoring reduction, shields, plates
+/// and Second Wind — and that hit deals base × (1 + 3 × lost) through one
+/// truncation (BR-X04). The multiplier is off vs Strongholds, but the burn
+/// is still paid. A burn to 0 HP still resolves at the maximum multiplier;
+/// the Furnace then dies at the end of the tick (Deathblow).
+fn furnace_bonus(state: &mut MatchState, attacker: &Unit, target: Target) -> i32 {
+    let [a, b] = state
+        .rules()
+        .def(attacker.kind)
+        .ability(attacker.tier, attacker.branch);
+    let furnace = [a, b].into_iter().find_map(|ability| match ability {
+        Ability::Furnace { burn_bp, max_bp } => Some((burn_bp, max_bp)),
+        _ => None,
+    });
+    let Some((burn_bp, max_bp)) = furnace else {
+        return 0;
+    };
+    // Root (no windup) and dead targets cancel at no cost: only a resolving
+    // hit burns.
+    let resolves = match target {
+        Target::Unit(id) => state.unit_index(id).is_some_and(|i| state.units[i].hp > 0),
+        Target::Stronghold(seat) => state.player(seat).stronghold_hp > 0,
+    };
+    if !resolves {
+        return 0;
+    }
+    let max_hp = attacker.max_hp.max(1);
+    let burn = (i64::from(max_hp) * i64::from(burn_bp) / 10_000).max(1) as i32;
+    if let Some(ai) = state.unit_index(attacker.id) {
+        state.units[ai].hp = (state.units[ai].hp - burn).max(0);
+    }
+    if matches!(target, Target::Stronghold(_)) {
+        return 0;
+    }
+    let hp_after = state
+        .unit_index(attacker.id)
+        .map_or(0, |ai| state.units[ai].hp);
+    let lost_bp = i64::from(max_hp - hp_after) * 10_000 / i64::from(max_hp);
+    (i64::from(max_bp) * lost_bp / 10_000) as i32
+}
+
+/// Shatterback Unleashed (P46): +8 % damage per broken plate.
+fn plates_bonus(state: &MatchState, attacker: &Unit) -> i32 {
+    let [a, b] = state
+        .rules()
+        .def(attacker.kind)
+        .ability(attacker.tier, attacker.branch);
+    let bonus = [a, b].into_iter().find_map(|ability| match ability {
+        Ability::Plates { count, dmg_bp, .. } => Some((count, dmg_bp)),
+        _ => None,
+    });
+    let Some((count, dmg_bp)) = bonus else {
+        return 0;
+    };
+    if dmg_bp == 0 {
+        return 0;
+    }
+    let broken = count.saturating_sub(attacker.fx.plates);
+    i32::from(dmg_bp) * i32::from(broken)
+}
+
+/// Shatterback Rampage (P46): with no plates left, hits splash at the
+/// rampage radius (enemies only, full share).
+fn rampage_radius(state: &MatchState, attacker: &Unit) -> i32 {
+    let [a, b] = state
+        .rules()
+        .def(attacker.kind)
+        .ability(attacker.tier, attacker.branch);
+    let rampage = [a, b].into_iter().find_map(|ability| match ability {
+        Ability::Plates { rampage, .. } => Some(rampage),
+        _ => None,
+    });
+    match rampage {
+        Some(r) if r > 0 && attacker.fx.plates == 0 => i32::from(r),
+        _ => 0,
     }
 }
 
@@ -273,6 +429,8 @@ pub(crate) fn damage(
             } else {
                 amount
             };
+            // P46: Shatterback plates absorb after damage reduction, before HP.
+            let amount = absorb_plates(state, id, amount, ev);
             let copies = augment::second_wind_charges(&state.player(owner).augments);
             let u = &mut state.units[i];
             if u.hp <= 0 {

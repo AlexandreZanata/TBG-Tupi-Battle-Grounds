@@ -15,10 +15,18 @@ pub(crate) enum Engage {
 
 pub(crate) fn engage(state: &MatchState, u: &Unit, st: &Stats) -> Option<Engage> {
     // Action units (the Antidote) brew instead of attacking when an ally
-    // needs it; with nobody afflicted the cooldown stays ready.
+    // needs it.
     if crate::afflictions::brew_of(state, u).is_some() {
         if let Some(ally) = crate::afflictions::brew_target(state, u, st.range, None) {
             return Some(Engage::Act(Target::Unit(ally)));
+        }
+    }
+    // No-attack healers-with-nothing-to-do are handled below; Bloodweavers
+    // transfer instead of attacking when a pair exists.
+    if crate::support::transfer_of(state, u).is_some() {
+        if let Some((donor, _, _)) = crate::support::transfer_pair(state, u, st.range, [None, None])
+        {
+            return Some(Engage::Act(Target::Unit(donor)));
         }
     }
     // Units with no attack and no heal hold when an enemy is in range and

@@ -25,7 +25,7 @@ pub mod shop;
 pub mod sim;
 pub mod state;
 mod summon;
-mod synergy;
+mod support;mod synergy;
 mod targeting;
 pub mod types;
 pub mod view;

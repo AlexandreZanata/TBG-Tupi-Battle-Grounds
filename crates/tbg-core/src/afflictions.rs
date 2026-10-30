@@ -63,7 +63,7 @@ pub(crate) fn tick(state: &mut MatchState, ev: &mut Vec<Event>) {
 
 /// The attacker's ability pair: form slots are absolute (F.1), so the
 /// current tier's slot is the whole answer — no cross-tier fallback.
-fn abilities_of(state: &MatchState, attacker: &Unit) -> [Ability; 2] {
+pub(crate) fn abilities_of(state: &MatchState, attacker: &Unit) -> [Ability; 2] {
     state
         .rules()
         .def(attacker.kind)
