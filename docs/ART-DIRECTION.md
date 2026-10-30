@@ -259,3 +259,6 @@ Before signing off on any troop, strongpoint, or arena asset, verify the 6-point
 - [ ] **Ground Plane / Floor Height:** Feet contact floor firmly at $Y = 0.0$; no clipping into the arena turf and no floating during walk/attack clips.
 - [ ] **Rim Separation:** Silhouette edges separate distinctly against both green grass (`#7BB661`) and sandy road (`#C9A46A`) backgrounds under match camera zoom.
 
+## Owner-approved maritime scenery follow-up (2026-10-30)
+
+The original arena geometry/camera remains fixed. Procedural offshore isles, lighthouse, pier, sailboat and a small cascade enrich the surroundings; batched vertex-colored azure water and broken foam provide depth. The main arena keeps one warm key and cool fill, one 1024 shadow map/cascade. Offshore objects share existing PBR materials and skip shadow casting/receiving; no texture or custom water shader is introduced. The owner approved the displayed design and the specific 12.9 ms reference-case p95 acceptance bound. See [implementation, measurements and scope](art/ARENA-SEASCAPE.md) and [versioned acceptance criteria](art/ARENA-SEASCAPE-PERFORMANCE.json); broader device/download budgets remain unchanged.

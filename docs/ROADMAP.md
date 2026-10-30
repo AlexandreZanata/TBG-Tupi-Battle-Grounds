@@ -277,6 +277,14 @@ All code for P1–P8 is implemented and validated on the development PC
 > the phase file with the real command outputs and measurements, commit
 > it, and stop.
 
+## Owner-requested art follow-ups (2026-10-30)
+
+Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and future Synergy emblems](art/FACTIONS.md), then [illustrated lobby and account presentation](art/LOBBY-PRESENTATION.md). Reports include asset budgets, measured fidelity, desktop galleries and verification limits. These cosmetic follow-ups do not complete or replace a planned gameplay phase.
+
+## Owner-requested seascape follow-up (2026-10-30)
+
+[Arena seascape](art/ARENA-SEASCAPE.md): implemented and validated on `codex/arena-seascape`, based on main `6ef155b`, then integrated into `codex/ranking-ui` for PR #14 at the owner's request to publish all changes from this chat. Owner approved the displayed design and the 12.9 ms reference p95 limit (+15.2% over its measured baseline). Report includes before/after desktop captures, performance/build measurements, local commits and the separate pre-existing online-test exclusion. Current authorization is GitHub publication only; no main merge or VPS deployment. Broader P30 status is unchanged.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·

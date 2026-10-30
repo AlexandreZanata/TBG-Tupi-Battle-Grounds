@@ -1,9 +1,10 @@
 {
-  "logo": "assets/lobby/logo.svg",
-  "emblem": "assets/lobby/emblem.svg",
-  "arcanas": "assets/lobby/arcanas.svg",
-  "troops": "assets/lobby/troops.svg",
-  "ranking": "assets/lobby/ranking.svg",
+  "logo": "assets/lobby/logo-v2.webp",
+  "emblem": "assets/lobby/crest-v2.webp",
+  "arcanas": "assets/lobby/arcanas-v2.webp",
+  "troops": "assets/lobby/troops-v2.webp",
+  "ranking": "assets/lobby/ranking-v2.webp",
   "news": "assets/lobby/news.svg",
-  "strongholds": "assets/lobby/strongholds.svg"
+  "strongholds": "assets/lobby/strongholds-v2.webp",
+  "profile": "assets/lobby/profile-v2.webp"
 }

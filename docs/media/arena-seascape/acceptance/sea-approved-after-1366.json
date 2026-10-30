@@ -1,0 +1,399 @@
+{
+  "label": "sea-approved-after-1366",
+  "width": 1366,
+  "height": 768,
+  "samples": [
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.5",
+        "elapsedMs": "15132.2",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "12247619",
+        "heapUsedBytes": "10195743",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.2;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.0/18.0 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.5",
+        "elapsedMs": "15132.2",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "12247619",
+        "heapUsedBytes": "10195743",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.2;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.0/18.0 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.5",
+        "elapsedMs": "15132.2",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "12247619",
+        "heapUsedBytes": "10195743",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.5;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.0/18.0 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.5",
+        "elapsedMs": "15132.2",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "12247619",
+        "heapUsedBytes": "10195743",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=60.6;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.1/18.1 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.5",
+        "elapsedMs": "15132.2",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "12247619",
+        "heapUsedBytes": "10195743",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.9;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.1/18.1 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.4",
+        "elapsedMs": "20148.7",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "13034574",
+        "heapUsedBytes": "10761338",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.5;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.1/18.1 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.4",
+        "elapsedMs": "20148.7",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "13034574",
+        "heapUsedBytes": "10761338",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.2;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.1/18.1 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.4",
+        "elapsedMs": "20148.7",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "13034574",
+        "heapUsedBytes": "10761338",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.2;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.1/18.1 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.4",
+        "elapsedMs": "20148.7",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "13034574",
+        "heapUsedBytes": "10761338",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.2;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.1/18.1 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.4",
+        "elapsedMs": "20148.7",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "13034574",
+        "heapUsedBytes": "10761338",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.2;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.1/18.1 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.5",
+        "elapsedMs": "25165.2",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "12772598",
+        "heapUsedBytes": "11092046",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.5;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.0/18.1 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    },
+    {
+      "canvas": {
+        "height": "768",
+        "rect": {
+          "bottom": 768,
+          "height": 768,
+          "left": 0,
+          "right": 1366,
+          "top": 0,
+          "width": 1366,
+          "x": 0,
+          "y": 0
+        },
+        "width": "1366"
+      },
+      "gl": {
+        "draws": "423.5",
+        "elapsedMs": "25165.2",
+        "firstFrameMs": "716.2",
+        "fps": "60.0",
+        "frames": "301",
+        "heapTotalBytes": "12772598",
+        "heapUsedBytes": "11092046",
+        "maximum": "425",
+        "renderer": "WebKit WebGL",
+        "visibility": "visible"
+      },
+      "height": 768,
+      "rust": "fps=59.9;rtt=offline;ack=--;units=60;frame p50/p95/p99 16.7/17.1/18.1 ms >33ms 0 | view p99 0 | delay 0 ms buf 0 starve 0 snap 0 stale 0 | motion stall 0.00% jump 0.00%",
+      "visibility": "visible",
+      "width": 1366
+    }
+  ],
+  "summary": {
+    "p95": 17.1,
+    "fps": 60,
+    "draws": 423.5,
+    "heapUsedBytes": 10761338,
+    "firstFrameMs": 716.2
+  },
+  "errors": []
+}

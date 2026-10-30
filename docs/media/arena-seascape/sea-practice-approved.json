@@ -1,0 +1,20 @@
+[
+  {
+    "army": "6",
+    "battleVisible": true,
+    "clock": "1:00",
+    "gl": {
+      "draws": "239.6",
+      "elapsedMs": "60227.5",
+      "firstFrameMs": "679.9",
+      "fps": "60.0",
+      "frames": "301",
+      "heapTotalBytes": "13300604",
+      "heapUsedBytes": "11012324",
+      "maximum": "286",
+      "renderer": "WebKit WebGL",
+      "visibility": "visible"
+    },
+    "rust": "fps=59.9;rtt=offline;ack=--;units=6;frame p50/p95/p99 16.7/17.0/17.6 ms >33ms 0 | view p99 101 | delay 111 ms buf 3 starve 0 snap 0 stale 0 | motion stall 0.66% jump 0.00%"
+  }
+]
