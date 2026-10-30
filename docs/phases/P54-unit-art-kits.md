@@ -190,16 +190,124 @@ ARCHITECTURE §7 and DECISIONS (D-48). Fill in the report.
 
 ## Acceptance checklist
 
-- [ ] `cargo fmt --all -- --check`, `cargo clippy --workspace -- -D warnings`,
-      `cargo test --workspace`, WASM check, `trunk build --release` pass
-- [ ] Timing contract unchanged (events at 0.30 / 0.18 / 0.22 s)
-- [ ] Planted feet do not slide (test) for every unit; no walk/idle flicker
-- [ ] Siege Walker muzzle points at its target; shells leave the muzzle
-- [ ] Artillery barrel and ballista track their target; own projectiles
-- [ ] Five forms per kit with the §5 Evolution reads; triangle counts logged
-- [ ] Desktop screenshots in `docs/media/units/<unit>/` (≤ 300 KB each)
-- [ ] 30-unit stress FPS recorded per kit
+- [x] `cargo fmt`, client clippy/tests, WASM check pass; `trunk build --release`
+      passed at `ecacd71` (workspace tests not run: no core/server change)
+- [x] Timing contract unchanged (events at 0.30 / 0.18 / 0.22 s)
+- [x] Planted feet do not slide (test) for every unit; no walk/idle flicker
+- [x] Siege Walker muzzle points at its target; shells leave the muzzle
+- [x] Artillery barrel and ballista track their target; own projectiles
+- [x] Five forms per kit with the §5 Evolution reads; triangle counts logged
+- [x] Desktop screenshots in `docs/media/units/<unit>/` (≤ 300 KB each)
+- [ ] 30-unit stress FPS recorded per kit (measured under heavy load only; re-measure)
 
 ## Phase report
 
-_Filled in at the end._
+### What was built
+
+| Area | Files | Result |
+|------|-------|--------|
+| Kit format | `art/kits/{mod,aim,gait,tools,tests}.rs` | `Kit { figure, pose, gait, attack, evolve, durations }`, a static registry `kits::kit(UnitKind)`; `Attack::Shot { from, muzzle, shot, flash }` or `Attack::Melee { from, tip, impact }` |
+| IK | `art/ik.rs` | Two-bone hinge IK (no twist at knees/elbows), used by legs, held weapons and reaches |
+| Gait v2 | `art/feet.rs`, `art/anim.rs`, `visuals/cues.rs` | Cadence = distance travelled / stride for every figure; feet locked in world X and Z while planted; lateral steps solved, not slid; 0.15 s stop hysteresis; animation in `PostUpdate` after all movement; review figures walk on a treadmill |
+| Aim | `kits/aim.rs`, `visuals.rs` (`engage`), `anim.rs` | A unit keeps its target for its interval + 0.7 s; kits turn the body so an off-center weapon lines up exactly (`line_yaw`) and raise it to the launch tangent of their own shot |
+| Glow layer | `art/figure.rs`, `art/mod.rs` | `.glow()` parts merge into one unlit mesh per joint (eyes, furnace, runes, souls, spores) |
+| Shots and impacts | `vfx/shots.rs`, `vfx/impacts.rs`, `vfx.rs` | 13 shot kinds, 14 impacts, 6 muzzles, footfall dust, 3 Evolution bursts; shared meshes/materials only |
+| Kit attacks | `visuals/attacks.rs`, `sync/events.rs` | Release fires the kit's shot from the real muzzle (with flash and backblast); Strike lands the impact at the blade/target; kits skip the generic ball |
+| Siege Walker | `kits/siege_walker/` | Ogre gunner, shoulder bombard held by both hands (IK), braced aim, recoil, crank reload, drop-in spawn, skyward salute on Evolve |
+| Bone Brute | `kits/bone_brute/` | Hunched skeleton, soul in the ribcage; slam / sweep alternation, shield bash (Bone Wall), double chop (Butcher), reaping sweep (Reaper); rises from the ground; roars on Evolve |
+| Rootcaller | `kits/rootcaller/` | Treant shaman; claws driven into the ground, root ridge to the target, roots for the real root duration, spores on branch B; sprouts on spawn; blooms on Evolve |
+| Strongholds | `arena/strongholds/{aim,motion,artillery,bastion,parts,mod}.rs` | Artillery carriage/barrel and Sentinel ballista slew onto the target and fire their own cannonball/bolt from the muzzle; others loose a crossbow bolt; gallery towers track a dummy |
+| Review | `gallery/range.rs`, `gallery/settings.rs`, `stress.rs` | `?gallery=<unit>&range[&evolve]`; `?gallery=<unit>&stress=N` cycles the unit's five forms |
+
+### Timing table (ART-DIRECTION §4 unchanged)
+
+| Kit | Clip | Length | Key times | Event |
+|-----|------|--------|-----------|-------|
+| Siege Walker | AttackRanged | 0.62 s | brace 0–0.12, Release + recoil 0.18–0.21, recover 0.24–0.55 | Release 0.18 s, shell 0.12 s → 0.30 s |
+| Siege Walker | Idle (engaged) | loop | crank 0.5–1.55 s after each shot | — |
+| Siege Walker | Evolve | 0.9 s | raise 0–0.27, salute 0.34, settle 0.68–0.9 | — |
+| Bone Brute | AttackMelee | 0.62 s | windup 0–0.20, strike 0.20–0.30, hold to 0.40, recover to 0.62 | Strike 0.30 s |
+| Bone Brute | Evolve | 0.9 s | gather 0–0.36, roar 0.27–0.86 | — |
+| Rootcaller | Cast | 0.6 s | raise 0–0.14, slam 0.14–0.22, channel to 0.45, pull out to 0.6 | Release 0.22 s, ridge 0.08 s → 0.30 s |
+| Rootcaller | Evolve | 0.9 s | sink 0–0.27, bloom 0.32–0.9 | — |
+| Strongholds | — | — | slew ≤ 0.15 s onto a new target | cannonball 0.30–0.34 s, bolts 0.22 s |
+
+Tests: `kits_keep_the_simulation_event_times`, `unit_shots_land_on_the_simulation_hit`.
+
+### Triangles per form (gallery log / `every_kit_form_builds_within_the_doubled_budget`)
+
+| Kit | Base | A1 | A2 | B1 | B2 |
+|-----|------|----|----|----|----|
+| Siege Walker | 1 824 | 2 222 | 2 148 | 2 270 | 2 450 |
+| Bone Brute | 3 376 | 3 688 | 3 904 | 3 860 | 3 986 |
+| Rootcaller | 1 460 | 2 248 | 2 928 | 2 190 | 2 754 |
+
+All within the P24 budget doubled by the owner (≤ 6 000).
+
+### Deviations
+
+- **Siege Walker identity.** P24 planned an ogre with a geared arbalest;
+  the owner's request (2026-10-30) names a bazooka, so the kit carries a
+  shoulder bombard. The display name stays "Ogre Archer" (an open owner
+  decision, D-48).
+- **Base branch.** P54 was cut from `origin/main` (6ef155b), not from the
+  in-progress roster expansion (P42–P48B), which the owner asked to keep
+  apart.
+- **Steps committed by area**, not one commit per numbered step: the kit
+  framework, the shots and the three kits only compile together.
+- **Archer** keeps its own release layer and facing-directed arrows; it
+  gains gait v2 only (its target-aware arrow is a follow-up kit).
+
+### Verification (real output)
+
+The phase changes only `crates/tbg-client` and docs
+(`git diff --stat origin/main..HEAD -- crates/tbg-core crates/tbg-server
+crates/tbg-balance` is empty), so the checks were scoped to the client and
+run at low priority (`nice -n 19`, `-j 4`) at the owner's request: the
+machine was saturated by another session's `tbg-balance gate` and a full
+`cargo test --workspace` plus LTO release builds made it unusable.
+
+| Check | Result |
+|-------|--------|
+| `cargo fmt --all -- --check` | ok |
+| `cargo clippy -p tbg-client -- -D warnings` | ok (no warnings) |
+| `cargo test -p tbg-client` | `60 passed; 0 failed` (new: IK reach/hinge, foot lock X/Z at three headings and both gaits, stride path, adapted legs on whole segments, shot endpoints/tangent, unit and cast shots land at 0.30 s, kit event times, kit budgets, bombard aim, off-center yaw, tower barrel aim on both sides) |
+| `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown` | ok |
+| `trunk build --release` | ok at `ecacd71` (round 1, 38 min under load); not re-run for the last fix commit, which only touched the adapter, base-body legs, effect sizes and melee placement — `trunk build` (dev) ok at `5413843` |
+| Browser (headless Chrome, GPU, 1600×900) | gallery forms, `&range`, `&clip=walk`, `?gallery=strongholds` observed on the dev build |
+
+Not run: `cargo test --workspace` (no core/server/balance change), a
+Practice match and a two-client online match (no protocol or simulation
+change), a calmer FPS measurement (below).
+
+### Performance
+
+Measured once with `?stress=30&measure&shadows=1` (1920×1080, headless
+Chrome on the Intel iGPU) while the machine sat at load 40–57 from
+another session's lab gate, so the FPS figures are not usable: 7–14 FPS
+for 30 kit units, ~470–500 WebGL draws per frame (diagnostic only,
+D-28). Cost model: a kit pose is a few dozen trig/lerp per unit and one
+aim solve; glow adds 1–3 draws per unit; each shot spawns ≤ 12 short
+effect entities. **Open:** re-measure on an idle machine against the
+same stress on `main` before owner sign-off.
+
+### Evidence (`docs/media/`)
+
+- `units/siegewalker/p54-forms.jpg`, `p54-range-aim.jpg` — five forms;
+  every bombard aimed at its own dummy with the pennant up.
+- `units/bonebrute/p54-forms.jpg`, `p54-range.jpg` — five forms; swings
+  and a ground impact on the dummies.
+- `units/rootcaller/p54-forms.jpg`, `p54-range-roots.jpg` — five forms;
+  the root ridge running to the target, a spore ring.
+- `p54/strongholds-aim.jpg` — every kind and form; Artillery barrels and
+  the Sentinel ballista turned onto moving dummies, cannonballs in flight.
+- `p54/gait-legacy-legs.jpg` — adapted Shieldbearer forms walking with
+  bent knees and no torn leg meshes.
+
+### Open for the owner
+
+- Look and fun sign-off of the three kits and the aiming towers.
+- The Siege Walker's display name ("Ogre Archer" vs. its bombard).
+- Re-run `trunk build --release` and the FPS stress on an idle machine.
+- Next kits: Archer (target-aware arrows), then the other units.
+
