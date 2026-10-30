@@ -301,15 +301,35 @@ its owner decision is recorded in the P15 report.
   key, sky ambient, and soft distance fog. No textures or custom unit shader.
 - **Animation:** keys select Linear/CubicIn/CubicOut/CubicInOut/Hold;
   clip metadata delivers Strike, Release, and Footstep events. Crossfade
-  remains 0.1 s. V2 Walk uses content speed for cadence, two-bone legs,
-  and world-X contact anchors; phase offsets are decorrelated by visual id.
-  Archer draw/anchor releases at 0.18 s and recovers by 0.50 s. Cosmetic
-  arrows follow facing for 0.12 s; target-aware VFX are deferred to P21.
+  remains 0.1 s. Walk (gait v2, D-48) advances by the distance the figure
+  travels over its stride, on two-bone legs for every figure, with feet
+  locked in world X and Z while planted and a 0.15 s stop hysteresis;
+  animation runs in `PostUpdate` after all movement. Phase offsets are
+  decorrelated by visual id. Archer draw/anchor releases at 0.18 s and
+  recovers by 0.50 s; its cosmetic arrows still follow facing for 0.12 s.
   Simulation events still decide damage and outcomes.
+- **Unit art kits (D-48, P54):** `art/kits/<unit>/` owns a unit's five
+  rig-v2 forms (`model.rs`), its signature pose layer over the shared
+  clips (`motion.rs`: keyframe tables and procedural IK), gait, aim and
+  attack (`mod.rs`: its own `ShotKind` from a muzzle socket, or a melee
+  `Impact` at the blade). Kits aim with the body (an off-center weapon is
+  lined up exactly) and raise the weapon to the launch tangent of their
+  own shot (`kits::aim`); `visuals/attacks.rs` fires on Release / Strike
+  from the real joint transforms. Glow parts merge into one unlit layer
+  per joint. Shots (`vfx/shots.rs`) fly a parabola in fixed times that
+  keep ART-DIRECTION §4's 0.30 s impact; impacts and muzzles
+  (`vfx/impacts.rs`) use shared meshes and materials only.
+- **Aiming Strongholds:** the render-delayed `AttackStart` of a tower
+  becomes a `TowerOrders` entry; the Artillery carriage and barrel and the
+  Sentinel ballista slew onto the target (yaw, elevation along their own
+  shot) and fire cannonball or bolt from the muzzle; gunless kinds loose a
+  crossbow bolt from their top (`arena/strongholds/aim.rs`).
 - **Arena/readability:** the existing generated arena, Stronghold damage
   states, team rings, HP bars, and hit/spawn/death feedback remain integrated.
 - **Review tools:** `?gallery=palette`, `?gallery=blockout&silhouette`, and
-  `?gallery=<unit>`; `&slow=0.25`, `&turn`, and `&frames`. Named unit views
+  `?gallery=<unit>`; `&slow=0.25`, `&turn`, and `&frames`;
+  `?gallery=<unit>&range` (five forms attacking dummies on the BattleLine)
+  and `?gallery=<unit>&stress=N` (N walking, attacking copies of its forms). Named unit views
   show five forms; contact sheets show the selected base form at four
   quarters of every clip (`&clip=attackranged` can narrow the sheet).
   Neutral studio floors prevent arena props from obscuring review figures;

@@ -801,3 +801,34 @@ the first `strongholds` lab matrix showed Artillery at 61–67 % against
 every kind for a near-tower army (`docs/media/p17/lab/`).
 **Reopen when** the matrix or live play shows a kind above 55 % against
 the field, or a branch that is never worth buying.
+
+## D-48 · Per-unit art kits; distance-driven gait; aiming Strongholds — 2026-10-30 (owner request)
+
+**Decision.** Each character owns a code-built *art kit*
+(`crates/tbg-client/src/art/kits/<unit>/`): its five-form figure on rig v2,
+a signature pose layer over the shared clip library, its gait, its aim
+and its attack style — its own projectile, muzzle effect and impact, or
+its own melee impact. Kits are plain data and function pointers in a
+static registry (`kits::kit(UnitKind)`), like the Stronghold `PartDef`s;
+no trait, no engine layer, no assets. First kits: Siege Walker, Bone
+Brute, Rootcaller (P54). Units without a kit keep the shared library and
+the generic projectile until their own phase.
+**Gait v2 (all units).** Walk cadence is the distance the figure actually
+travels divided by its stride, so feet never slide at any speed, slow or
+Evolution bonus; planted feet lock in world X and Z; every figure
+(native or adapted) walks on two-bone legs; walk/idle has a 0.15 s stop
+hysteresis. Animation runs in `PostUpdate` after all movement.
+**Aim.** A unit that attacks keeps its target for one interval plus
+0.7 s; kits turn the body (an off-center weapon is lined up exactly) and
+raise the weapon to the launch tangent of their own shot, which leaves
+the real muzzle. Strongholds aim their gun (Artillery carriage and
+barrel, Sentinel ballista) the same way and fire their own cannonball or
+bolt from it on the render-delayed `AttackStart`; gunless towers loose a
+crossbow bolt from their top.
+**Unchanged.** All of this is cosmetic: no simulation value, event,
+timing or protocol changed; ART-DIRECTION §4's 0.30 / 0.18 / 0.22 s event
+times hold (kits only lengthen recoveries). The Siege Walker is drawn
+with a shoulder bombard ("bazooka", owner 2026-10-30), not the P24
+arbalest; its "Ogre Archer" display name is an open owner decision.
+**Reopen when** a kit's pose cost shows up in the 30-unit stress
+measurement, or skinned glTF replaces code-built figures (D-22).
