@@ -247,17 +247,145 @@ Fill in the report below with real outputs and commit
 
 ## Phase report
 
-*(executor fills this in)*
-
 ### Status
+
+Done. All six steps executed in order, each checked before commit. No
+gameplay, protocol, server or client change. Every golden hash and trace
+unchanged (no edit to `contract_determinism.rs` or `contract_lab.rs`).
+
+Commits on `phase/p42-roster-baseline` (on top of `ba2d2e7`):
+
+- `344214e` docs(p42): roster canon, D-46, roster health 2.5 %
+- `5185de2` feat(p42): lab combat counters
+- `8633c6a` feat(p42): duration, stall and per-kind rows
+- `a9af5dc` feat(p42): comp policy
+- `58e9220` docs(p42): baseline on main
+- `484c93a` style(p42): cargo fmt
 
 ### Commands run (real output)
 
+`cargo test -p tbg-balance` (step 1, after the 2.5 % band change):
+
+```text
+test result: ok. 6 passed; 0 failed (unit)
+test result: ok. 7 passed; 0 failed (contract, 90.87 s)
+test result: ok. 12 passed; 0 failed (value)
+... every suite ok, 0 failed
+```
+
+`cargo test -p tbg-core` (feature off) and
+`cargo test -p tbg-core --features lab` (step 2): every suite ok in both
+configurations, goldens identical; new test
+`lab_stats::lab_counters_balance_on_bot_vs_bot` passes (1.19 s, 20 seeds).
+The first version failed on seed 1 (`taken 19805 != dealt + stronghold
+24170`): the primary-hit hook also counted direct hits on Strongholds.
+Fixed by recording `dealt` for unit targets only (see Deviations).
+
+`cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown`:
+
+```text
+Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.34s
+```
+
+(no warnings; the feature is off there, nothing leaks).
+
+`cargo run --release -p tbg-balance -- gate --pairs 16` (step 3 smoke):
+the four new rows print (`p90 duration (s)`, `p99 duration (s)`,
+`max duration (s)`, `matches with a 60 s stall`) and `roster.csv` is
+written (11 kinds in `ALL_KINDS` order, Beetling per-Energy columns empty).
+
+`cargo run --release -p tbg-balance -- run --a comp-archer-bonebrute
+--b bot --pairs 16` (step 4 smoke):
+
+```text
+comp-archer-bonebrute vs bot: 68.8% [43.8 – 87.5] over 16 seed pairs
+```
+
+Step 5 baselines (release, 16 threads):
+
+```text
+gate --pairs 1024: 352256 games in ~165 s, ~2140 games/s
+duels: wall_s 0.93
+run --a comp-archer-bonebrute --b bot --pairs 256:
+  comp-archer-bonebrute vs bot: 66.0% [60.2 – 71.9] over 256 seed pairs
+```
+
+Reproducibility: the gate was run twice to two output dirs; `cmp` on
+`gate.txt`, `gate.csv`, `roster.csv`, `duels.txt`, `duels.csv`,
+`payoff.csv` reports IDENTICAL for all six (manifests differ only in
+`wall_s`, as expected).
+
+Acceptance checklist runs (step 6):
+
+```text
+cargo fmt --all -- --check        -> FMT_OK (after one `cargo fmt --all`)
+cargo clippy --workspace -- -D warnings -> Finished, no warnings
+cargo test --workspace            -> 39 suites "test result: ok", 0 failed
+cargo test -p tbg-core --features lab -> no failures (incl. lab_stats)
+cargo check ... wasm32-unknown-unknown -> Finished, clean
+```
+
+`git diff ba2d2e7 -- crates/tbg-core/src` (non-`cfg` lines only): the two
+return-type changes (`heal -> i32`, `apply_on_hit -> u16`), their
+underscore bindings, the `Target::Unit` guard on the primary `dealt`
+hook, and `pub mod lab`. No other behavior change.
+
 ### Baseline summary (from `docs/media/roster/`)
+
+`gate --pairs 1024`, canon, seeds 1000000..1001024. 43 rows, 16 failing
+(the plan's §A.3 counted 12 of 39; the 4 new rows add 3 passing duration
+references + 1 passing stall row).
 
 | Row | Value | Target | Pass |
 |-----|-------|--------|------|
+| Seat A, bot vs bot | 49.3 % [48.8–49.9] | 48.5–51.5 | PASS |
+| Median duration | 107 s | 150–240 s | FAIL |
+| p90 / p99 / max duration (new) | 169 / 271 / 549 s | reference only | PASS |
+| Ended by Stronghold kill | 100.0 % | ≥ 60 % | PASS |
+| Draws | 0.0 % | ≤ 2 % | PASS |
+| Faction-majority Humans / Undead / Machines / Plants | 37.8 / 64.1 / 79.9 / 24.2 % | 45–55 % | FAIL ×4 |
+| Purchase share, all 10 kinds (new band) | 5.2–16.7 % (min Nester) | ≥ 2.5 % | PASS ×10 |
+| Comebacks | 26.9 % [25.9–27.9] | ≥ 20 % | PASS |
+| Matches with a 60 s stall (new) | 0.6 % [0.5–0.6] | ≤ 1 % | PASS |
+| Strongest strategic style (saver) | 95.7 % | ≤ 60 % | FAIL |
+| heavy vs bot | 57.6 % [54.6–60.5] | ≤ 55 % | FAIL |
+| cheap vs bot | 47.7 % [44.7–50.7] | ≤ 55 % | PASS |
+| favor vs bot (median band 32.3–52.3) | 3 fail: archer 52.5, bonebrute 61.4, siegewalker 58.6 | median ± 10 pp | FAIL ×3 |
+| Duel weak / oppressive / counterless | 2 / 3 / 0 | 0 / 0 / 0 | FAIL, FAIL, PASS |
+| Duel Evolutions never worth Energy | 47.5 % | ≤ 25 % | FAIL |
+| Duel branches without a niche | 2 (Archer T1, Bloomkeeper T2) | 0 | FAIL |
+| Nash support / largest weight | 1 / 100.0 % (saver) | ≥ 3 / ≤ 50 % | FAIL ×2 |
+| comp-archer-bonebrute vs bot (256 pairs) | 66.0 % [60.2–71.9] | n/a (baseline) | — |
+
+Duels: weak everywhere Sawbot, Rootcaller; oppressive BoneBrute,
+SiegeWalker, Nester; 19 evolved forms never worth their Energy
+(full list in `baseline-duels.txt`). Roster per-Energy leaders:
+SiegeWalker dealt 0.56, Archer 0.37; BoneBrute taken 0.63
+(`baseline-roster.csv`). Counts: 7 665 549 Shieldbearer-scale purchases
+over 352 256 games; Beetling dealt 70 444 312 with 0 purchases
+(summons are never bought; per-Energy columns empty).
 
 ### Deviations
 
+- D1: the `resolve_hit` primary `dealt` hook fires only for unit targets
+  (`if let Target::Unit(_)`). The spec lists it unconditionally, but the
+  spec's own invariant (Σ taken == Σ dealt + stronghold_dealt) requires
+  the condition: direct hits on Strongholds have no `taken` counter. The
+  first test run proved this (seed 1 mismatch quoted above).
+- D2: `crates/tbg-core/src/lib.rs`: `mod lab` became `pub mod lab` so the
+  spec's `pub lab` field and `pub stall_at_end` are nameable from the
+  lab crate. No behavior change: the module still exists only with the
+  `lab` feature, which the server and client never enable (C10 holds;
+  wasm check is clean).
+- D3: hook-only bindings use underscore names (`_restored`, `_applied`,
+  `_removed`) so the feature-off build stays warning-free; without the
+  feature the values are ignored, exactly as the spec allows.
+- D4: the four new gate rows use `searched: false` (reference-only, like
+  the Nash rows). They never fail by construction (`(0.0, f64::MAX)` /
+  the stall band passes at 0.6 %), so the search loss is unaffected
+  either way. The `f64::MAX` band prints as a long number in `gate.txt`;
+  kept spec-literal.
+
 ### Blocked
+
+Nothing. No step hit the same error twice; no `> blocked:` note needed.
