@@ -39,6 +39,10 @@
   <!-- Hashed by Trunk so every deploy changes the URL (no stale CDN/browser cache). -->
   <link data-trunk rel="css" href="assets/lobby/lobby.css" />
   <script data-trunk defer src="assets/i18n/i18n.js"></script>
+  <link data-trunk rel="css" href="assets/ranking/ranking.css" />
+  <script data-trunk defer src="assets/ranking/data.js"></script>
+  <script data-trunk defer src="assets/ranking/render.js"></script>
+  <script data-trunk defer src="assets/ranking/controller.js"></script>
   <script data-trunk defer src="assets/lobby/lobby.js"></script>
   <link data-trunk rel="css" href="assets/arcana/editor.css" />
   <script data-trunk defer src="assets/arcana/preset.js"></script>
@@ -88,6 +92,7 @@
     </nav>
     <button class="sound metal-panel" data-action="sound" data-i18n-aria-label="lobby.sound.toggle" aria-label="Toggle sound"><svg class="icon"><use data-icon="sound"/></svg><span><span data-i18n="lobby.sound.label">Sound:</span> <b data-sound>ON</b></span></button>
   </header>
+  <section id="tbg-ranking" hidden aria-label="Global Rankings"></section>
   <main class="mode-panel wood-panel" data-i18n-aria-label="lobby.mode.choose">
     <span class="corner top-left"></span><span class="corner top-right"></span><span class="corner bottom-left"></span><span class="corner bottom-right"></span>
     <button class="mode ranked" data-ranked data-action="register"><svg class="icon"><use data-icon="swords"/></svg><span><strong data-i18n="lobby.mode.play_online">Play Online</strong><small data-ranked-hint data-i18n="lobby.mode.ranked_hint_guest">Locked · Create account to play Ranked</small></span><span class="chevron" aria-hidden="true">›</span></button>
@@ -239,10 +244,10 @@
       <p class="council-help">Both players choose one Augment from the same four. The battle resumes when both confirm or time runs out.</p>
       <div class="council-timer-track" role="progressbar" aria-label="Augment choice time remaining"><span data-council-progress></span></div>
       <div class="council-options">
-        <button class="council-card" data-council-option="0"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
-        <button class="council-card" data-council-option="1"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
-        <button class="council-card" data-council-option="2"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
-        <button class="council-card" data-council-option="3"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="0"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="1"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="2"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="3"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
       </div>
       <footer class="council-actions">
         <button class="council-forgo" data-battle-action="forgo">Forgo</button>

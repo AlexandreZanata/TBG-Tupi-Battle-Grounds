@@ -1,8 +1,6 @@
-// Ranking pages (P13): fetch the read-only API and build the DOM with
-// textContent and createElement only — server data never becomes HTML.
+//! Public player profiles: read-only API fields become text nodes and encoded links.
 'use strict';
 
-const PAGE = 50;
 const NAME_RE = /^[A-Za-z][A-Za-z0-9_]{2,15}$/;
 const FACTIONS = ['Humans', 'Undead', 'Machines', 'Plants'];
 const REASONS = {
@@ -47,46 +45,6 @@ function playerLink(name) {
 
 const pct = (n) => Number(n).toFixed(1) + '%';
 const record = (p) => p.wins + '/' + p.losses + '/' + p.draws;
-
-async function board() {
-  const params = new URLSearchParams(location.search);
-  const asked = parseInt(params.get('offset') || '0', 10) || 0;
-  const offset = Math.max(0, Math.min(100000, asked));
-  let data;
-  try {
-    data = await getJson('/api/leaderboard?offset=' + offset + '&limit=' + PAGE);
-  } catch (e) {
-    return setStatus(e.message, true);
-  }
-  if (!data) return setStatus('The ranking is unavailable right now.', true);
-  const body = document.querySelector('#board tbody');
-  for (const r of data.rows) {
-    const tr = el('tr');
-    const name = el('td', undefined, 'name');
-    name.append(playerLink(r.name));
-    tr.append(el('td', r.rank, 'num'), name, el('td', r.rating, 'num'),
-      el('td', r.games, 'num opt'), el('td', record(r), 'num'), el('td', pct(r.win_rate), 'num'));
-    body.append(tr);
-  }
-  if (data.total === 0) {
-    setStatus('No ranked players yet. Play a ranked match to appear here.');
-  } else if (data.rows.length === 0) {
-    setStatus('No players on this page.');
-  } else {
-    const last = offset + data.rows.length;
-    setStatus(data.total + ' ranked players · showing ' + (offset + 1) + '–' + last);
-  }
-  const prev = document.getElementById('prev');
-  const next = document.getElementById('next');
-  prev.href = '?offset=' + Math.max(0, offset - PAGE);
-  prev.hidden = offset === 0;
-  next.href = '?offset=' + (offset + PAGE);
-  next.hidden = offset + PAGE >= data.total;
-  const when = new Date(data.updated_at);
-  if (!Number.isNaN(when.getTime())) {
-    document.getElementById('updated').textContent = 'Updated ' + when.toLocaleString();
-  }
-}
 
 function fillCard(p) {
   document.getElementById('title').textContent = p.name;
@@ -156,8 +114,4 @@ async function player() {
   fillRecent(p);
 }
 
-if (document.body.dataset.page === 'player') {
-  player();
-} else {
-  board();
-}
+player();

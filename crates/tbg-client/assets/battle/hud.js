@@ -220,7 +220,7 @@
       card.querySelector('.council-name').textContent = name || '—';
       card.querySelector('.council-text').textContent = text || '';
       const affordable = Number(cost) * scale <= Number(s.energy);
-      card.querySelector('.council-cost').textContent = cost ? cost + ' Energy' + (affordable || resolved ? '' : ' · not enough') : '';
+      card.querySelector('.council-cost').textContent = cost;
       const available = !resolved && affordable;
       if (!available && council.picked === i && !resolved) council.picked = null;
       card.dataset.available = available ? 'true' : 'false';
@@ -229,7 +229,7 @@
       // Short of Energy: grey, like an unaffordable Shop card.
       card.classList.toggle('unaffordable', !resolved && !affordable);
       card.setAttribute('aria-pressed', council.picked === i ? 'true' : 'false');
-      card.setAttribute('aria-label', (name || 'Augment') + ', ' + (text || '') + ', ' + (cost || '0') + ' Energy');
+      card.setAttribute('aria-label', (name || 'Augment') + ', ' + (text || '') + ', ' + (cost || '0') + ' Energy' + (!resolved && !affordable ? ', not enough Energy' : ''));
     });
     confirmButton.disabled = resolved || council.picked === null;
     pause.querySelector('.council-forgo').disabled = resolved;
