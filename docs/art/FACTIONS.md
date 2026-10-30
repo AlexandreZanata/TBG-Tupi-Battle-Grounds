@@ -2,7 +2,7 @@
 
 ## Result
 
-The four canonical Factions each have a separate colored Shop mold and a distinctive generated emblem. The existing ten 3D troop portrait files are byte-for-byte unchanged. Only the portrait becomes grayscale when unavailable; the frame keeps its Faction colors. Prices, authoritative availability, five offers, purchase intentions, inspect actions and competitive rules are unchanged. The emblems are saved separately for future use and are not loaded or added to the match HUD.
+The four canonical Factions each have a separate colored Shop mold and a distinctive generated emblem. The existing ten 3D troop portrait files are byte-for-byte unchanged. Only the portrait becomes grayscale when unavailable; the frame keeps its Faction colors. Prices, authoritative availability, five offers, purchase intentions, inspect actions and competitive rules are unchanged. Since the owner's HUD revision (2026-10-30) each Shop card shows its Faction emblem centered in the frame's top orb; the orb position and size are per-Faction layout values in `factions.json`. The emblem is cosmetic: it adds no Synergy UI.
 
 ## Canon and palettes
 
