@@ -103,6 +103,19 @@ const ANTIDOTE: &[(Color, Color)] = &[
     (LEAF, Color::srgb_u8(0xC9, 0xB8, 0x4A)),
     (LEAF_DARK, Color::srgb_u8(0x6B, 0x8A, 0x2E)),
 ];
+/// P46 placeholders: recolored figures until the character phases.
+const SHATTERBACK: &[(Color, Color)] = &[
+    (BARK, Color::srgb_u8(0x5A, 0x4A, 0x2E)),
+    (LEAF, Color::srgb_u8(0x8A, 0x6B, 0x3A)),
+];
+const FURNACE: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0x3A, 0x2E, 0x2E)),
+    (LEATHER, Color::srgb_u8(0xD9, 0x5A, 0x2B)),
+];
+const WEAVER: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0x8A, 0x7B, 0x9B)),
+    (LEATHER, Color::srgb_u8(0x4A, 0x3A, 0x5A)),
+];
 
 fn recolor(mut spec: FigureSpec, map: &[(Color, Color)]) -> FigureSpec {
     for part in &mut spec.parts {
@@ -148,6 +161,11 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::Rotcap => recolor(plants::rootcaller(f), ROTCAP),
         UnitKind::OldFinn => recolor(humans::shieldbearer(f), OLDFINN),
         UnitKind::AntidoteBrewer => recolor(plants::bloomkeeper(f), ANTIDOTE),
+        // P46 placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Shatterback => recolor(plants::rootcaller(f), SHATTERBACK),
+        UnitKind::BloodFurnace => recolor(undead::bone_brute(f), FURNACE),
+        UnitKind::Bloodweaver => recolor(undead::hexer(f), WEAVER),
         // P43: staged kinds render as a plain gray silhouette until their
         // wave lands (art/mod.rs builds every kind in ALL_KINDS).
         #[allow(unreachable_patterns)]

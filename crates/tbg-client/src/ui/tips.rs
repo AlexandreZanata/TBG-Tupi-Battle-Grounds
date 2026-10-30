@@ -36,6 +36,10 @@ fn matchup(kind: UnitKind) -> (&'static str, &'static str) {
         UnitKind::Rotcap => ("tanky fronts", "burst, cleanse"),
         UnitKind::OldFinn => ("melee approaches", "ranged armies, cleanse"),
         UnitKind::AntidoteBrewer => ("control and poison", "pure damage"),
+        // P46 wave C (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Shatterback => ("long fights", "burst before plates break"),
+        UnitKind::BloodFurnace => ("clumped melee", "focus it early, control"),
+        UnitKind::Bloodweaver => ("armies that trade HP", "burst, heal cut"),
         // P43: staged kinds render as a blockout until their wave lands.
         #[allow(unreachable_patterns)]
         _ => ("a new unit", "scout it first"),
