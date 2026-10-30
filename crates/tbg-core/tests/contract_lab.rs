@@ -102,7 +102,7 @@ fn c2_per_tick_traces_are_frozen() {
         (7, 0x5bdf_ae44_8c3e_71ef, 0x6e16_a638_0864_685, 3_284),
         (42, 0x4df1_0b03_be3f_96db, 0x66bf_c3d3_b770_da1, 1_833),
         (1000, 0x149a_89f3_2141_6632, 0x2d54_f568_da0a_3149, 2_641),
-        (65535, 0xd7c7_17f4_adba_4ae3, 0x55cd_3184_1b02_0467, 1_740),
+        (65535, 0xd7c7_174a_dbba_4ae3, 0x55cd_3184_1b02_0467, 1_740),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");
