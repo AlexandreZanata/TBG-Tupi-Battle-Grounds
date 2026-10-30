@@ -11,7 +11,7 @@ use tbg_core::{
 };
 
 /// Every conventional kind (summons excluded): the lab duels and favors the
-/// staged roster, while the Shop draws only `Ruleset.pool` (until P53).
+/// staged roster, while the Shop draws only `Ruleset.pool` (all 25 kinds since D-50).
 fn conventional() -> impl Iterator<Item = UnitKind> {
     ALL_KINDS.into_iter().filter(|k| k.is_conventional())
 }

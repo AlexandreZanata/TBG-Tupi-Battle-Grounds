@@ -104,12 +104,13 @@ fn c2_per_tick_traces_are_frozen() {
     // (verified).
     // Merge of the roster waves with D-46: both grew the serialized state;
     // hashes refrozen once, tick, winner and reason identical (verified).
+    // D-50: the Shop draws all 25 kinds; traces and end ticks moved.
     let goldens = [
-        (1, 0xd562_4a7f_4e1a_85ab, 0x72ab_a8ee_5567_01f3, 2_214),
-        (7, 0xaa5c_1aba_452b_6d53, 0xaea5_e367_028b_4446, 3_284),
-        (42, 0xf876_2d7c_8d79_e010, 0x3a9a_cfe5_ccf4_c056, 1_833),
-        (1000, 0x5c50_0da9_2346_8c7e, 0xf52f_db68_13a9_0435, 2_641),
-        (65535, 0x668b_70c2_62fe_fab3, 0xbdaa_dfbe_4c8e_89ba, 1_740),
+        (1, 0xfdb5_6e79_1b6f_3390, 0x761f_36c9_e382_648f, 3_336),
+        (7, 0x20bc_9a0f_8ff7_693c, 0x4d1d_af66_d7d2_ff79, 2_286),
+        (42, 0xaca4_42d9_e202_c38c, 0xa1b4_2046_33c4_0547, 6_295),
+        (1000, 0x6ff6_7492_c2ac_a53d, 0xa9c5_f9c4_4ef6_18bf, 6_683),
+        (65535, 0x14e6_a68c_71c0_31b5, 0x1a97_ec95_8cac_2c36, 5_531),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

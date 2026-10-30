@@ -36,26 +36,28 @@ fn bot_matches_are_frozen() {
     // Classic matches, winners and end ticks are unchanged, only the hash.
     // Merge of the roster waves with D-46: both grew the serialized state;
     // hashes refrozen once, tick, winner and reason identical (verified).
+    // D-50: the Shop draws all 25 kinds, so the bots buy differently; end
+    // ticks moved, every match still ends by a destroyed Stronghold.
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0x72ab_a8ee_5567_01f3u64,
-            2_214,
+            0x761f_36c9_e382_648fu64,
+            3_336,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0xaea5_e367_028b_4446,
-            3_284,
+            0x4d1d_af66_d7d2_ff79,
+            2_286,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0x3a9a_cfe5_ccf4_c056,
-            1_833,
+            0xa1b4_2046_33c4_0547,
+            6_295,
             Seat::B,
             StrongholdDestroyed,
         ),

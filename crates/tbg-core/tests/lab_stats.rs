@@ -6,11 +6,16 @@
 
 use tbg_core::bot::Bot;
 use tbg_core::headless;
-use tbg_core::{ArcanaPreset, MatchState, Ruleset, Seat};
+use tbg_core::{ArcanaPreset, MatchState, Ruleset, Seat, UNIT_KINDS};
 
 #[test]
 fn lab_counters_balance_on_bot_vs_bot() {
-    let rules: &'static Ruleset = Ruleset::canon();
+    // The ten original kinds: poison, self-burn, blood transfer and betrayal
+    // move HP outside this invariant, so it holds only on that pool (D-50).
+    let rules: &'static Ruleset = Box::leak(Box::new(Ruleset {
+        pool: &UNIT_KINDS,
+        ..Ruleset::canon().clone()
+    }));
     for seed in 1..=20u64 {
         let mut state = MatchState::lab(seed, rules, [ArcanaPreset::NEUTRAL; 2]);
         let mut bots = [

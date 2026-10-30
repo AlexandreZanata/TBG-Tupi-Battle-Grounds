@@ -34,7 +34,7 @@ struct Ctx {
 
 fn ctx(a: &Args, default_pairs: u64, default_seed: u64) -> Result<Ctx, String> {
     // P44: the lab plays the full staging pool (ROSTER-EXPANSION §F.5);
-    // online stays on `CANON.pool` until the P53 owner switch.
+    // since D-50 online draws the same pool.
     let mut rules = Ruleset::preview().clone();
     let applied = a.str("apply").unwrap_or("").to_string();
     knobs::apply(&mut rules, &applied)?;

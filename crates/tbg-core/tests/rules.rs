@@ -105,7 +105,8 @@ fn br_s04_a_purchase_redraws_all_five_offers_and_nothing_rotates() {
         s.step();
     }
     assert_eq!(s.players[0].offers, offers, "no timed rotation");
-    let mut shown = [0u32; UNIT_KINDS.len()];
+    let pool = Ruleset::canon().pool;
+    let mut shown = vec![0u32; pool.len()];
     let (mut bought_back, mut redraws) = (0u32, 0u32);
     for seq in 1..=400 {
         let before = s.players[0].offers;
@@ -122,7 +123,7 @@ fn br_s04_a_purchase_redraws_all_five_offers_and_nothing_rotates() {
         redraws += u32::from(after != before);
         bought_back += u32::from(after.contains(&bought));
         for k in after {
-            shown[UNIT_KINDS.iter().position(|&u| u == k).unwrap()] += 1;
+            shown[pool.iter().position(|&u| u == k).unwrap()] += 1;
         }
         s.units.clear();
     }
@@ -130,17 +131,14 @@ fn br_s04_a_purchase_redraws_all_five_offers_and_nothing_rotates() {
         redraws > 390,
         "every purchase redraws the five cards: {redraws}"
     );
-    // A unit is among five of ten about half the time, the bought one too.
+    // A unit is among five of 25 a fifth of the time (D-50), the bought
+    // one too: 80 of 400 expected, σ ≈ 8.
     assert!(
-        (140..=260).contains(&bought_back),
-        "the bought unit comes back about half the time: {bought_back}"
+        (50..=110).contains(&bought_back),
+        "the bought unit comes back about a fifth of the time: {bought_back}"
     );
     for (i, n) in shown.iter().enumerate() {
-        assert!(
-            (140..=260).contains(n),
-            "{:?} shown {n} of 400",
-            UNIT_KINDS[i]
-        );
+        assert!((50..=110).contains(n), "{:?} shown {n} of 400", pool[i]);
     }
 }
 

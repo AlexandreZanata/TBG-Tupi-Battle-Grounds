@@ -840,3 +840,17 @@ cheapest shape that keeps P43 behavior-identical (gate CSV byte-identical
 to the P42 baseline on the same seeds).
 **Reopen when** a wave needs a third ability on one form, or the pool
 switch needs more than a field assignment.
+
+## D-50 · All fifteen new units go online before P50 tuning — 2026-10-30 (owner decision)
+
+**Decision.** The owner moves the P53 pool switch forward: `CANON.pool`
+is `FULL_POOL` (25 kinds), so online, Practice and the lab draw the same
+`Shop`. Rules from ROSTER-EXPANSION are active; every number stays
+**Proposed**. Shop portraits exist only for the ten original kinds, so
+the fifteen show an empty card until owner art lands.
+**Why.** The owner wants the full roster playable on the test server now
+and accepts untuned values; P50 tunes them with `tbg-balance` evidence.
+The P42 lab baseline on the ten-kind pool stays the reference for D-48.
+**Reopen when** live play or the lab shows a new unit that breaks
+matches (e.g. a stall or a share outside the D-48 gate), or the owner
+wants the pool back to ten.

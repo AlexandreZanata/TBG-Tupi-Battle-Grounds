@@ -17,7 +17,7 @@ use crate::content::{
     INTEREST_PER_BAND, MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP,
     STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
 };
-use crate::types::{Tick, UnitKind, ALL_KINDS, FULL_POOL, UNIT_KINDS};
+use crate::types::{Tick, UnitKind, ALL_KINDS, FULL_POOL};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InterestRule {
@@ -72,8 +72,7 @@ pub struct Ruleset {
     pub beetles_per_nester: [usize; 2],
     pub beetle_lifetime: Tick,
     /// The Shop pool: which kinds offers draw from (ROSTER-EXPANSION §F.5).
-    /// Staged, not tuned. `CANON.pool` stays the current ten until the P53
-    /// owner switch; staged runs use `preview()`.
+    /// All 25 kinds since the owner switch (D-50); values stay Proposed.
     pub pool: &'static [UnitKind],
     /// Every kind, in `ALL_KINDS` order.
     pub units: [UnitDef; ALL_KINDS.len()],
@@ -111,7 +110,7 @@ pub static CANON: Ruleset = Ruleset {
     hatch_every_hive: HATCH_EVERY_HIVE,
     beetles_per_nester: BEETLES_PER_NESTER,
     beetle_lifetime: BEETLE_LIFETIME,
-    pool: &UNIT_KINDS,
+    pool: &FULL_POOL,
     units: UNITS,
     arcana_bp: ARCANA_BP,
     arcana: ARCANA_VALUES,
@@ -122,8 +121,8 @@ impl Ruleset {
         &CANON
     }
 
-    /// The full staging roster as the Shop pool (ROSTER-EXPANSION §F.5):
-    /// the lab's staging runs and the Practice preview draw from it.
+    /// The full roster as the Shop pool (ROSTER-EXPANSION §F.5): equal to
+    /// canon since D-50; the lab and Practice keep calling it by name.
     /// Leaked once (a few KB, freed at exit).
     pub fn preview() -> &'static Ruleset {
         Box::leak(Box::new(Ruleset {

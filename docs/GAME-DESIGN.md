@@ -687,9 +687,9 @@ never sufficient (§6).
 | Comebacks (behind at 2:00, then won) | not below the P16-D canon; target ≥ 20 % |
 | Nash support / largest weight | ≥ 3 / ≤ 50 % |
 
-## 11. Roster expansion (planned, not active)
+## 11. Roster expansion (active, values Proposed)
 
-Fifteen new units are planned in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). Every value there is **Proposed, not active**: none of the fifteen is in the `Shop`, and no rule, number, or threshold below changes the live game until its phase in P42–P53 switches it on.
+Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). Since the owner switch of 2026-10-30 (D-50) all fifteen are in the `Shop` online, ahead of the P50 tuning and P53 plan: their rules are active and every number stays **Proposed** until the balance lab confirms it (D-33).
 
 | Unit | Faction | Class | Cost | HP | Dmg | Every | Range | Speed | Identity in one line |
 |------|---------|-------|------|----|-----|-------|-------|-------|----------------------|
