@@ -7,13 +7,16 @@ use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, watch};
 
-use tbg_core::protocol::{ClientMsg, ErrorCode, InviteToken, Profile, RoomCode, ServerMsg, Token};
+use tbg_core::protocol::{
+    ClientMsg, ErrorCode, InviteToken, LiveId, Profile, RoomCode, ServerMsg, Token,
+};
 use tbg_core::Seat;
 
 use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd, LOBBY_QUEUE};
 use crate::limits::Limits;
+use crate::live::LiveSnapshot;
 use crate::metrics::Metrics;
 use crate::store::{AccountId, Store};
 use crate::Config;
@@ -23,15 +26,20 @@ mod accounts;
 mod arcanas;
 mod challenge;
 mod leaderboard;
+mod live;
 mod matchmaking;
+mod presence;
 mod ranked;
 mod rematch;
 mod sessions;
+mod spectate;
 mod strongholds;
 #[cfg(test)]
 mod tests;
 
 const ROOM_TTL: Duration = Duration::from_secs(600);
+/// BR-LV07 / ARCHITECTURE §5: the live snapshot is rebuilt at most this often.
+const PUBLISH_EVERY: Duration = Duration::from_secs(1);
 
 pub(super) enum SessionState {
     Idle,
@@ -43,6 +51,10 @@ pub(super) enum SessionState {
     InMatch {
         tx: mpsc::Sender<MatchCmd>,
         seat: Seat,
+    },
+    /// P47 (BR-LV02): listen-only in a public match; never a seat.
+    Watching {
+        id: LiveId,
     },
 }
 
@@ -60,6 +72,8 @@ pub(super) struct Session {
     pub(super) arcanas: tbg_core::ArcanaPreset,
     /// D-46: the Stronghold kind the next match will freeze (BR-SK01).
     pub(super) stronghold: tbg_core::StrongholdKind,
+    /// P47 (BR-LV09): when this session last sent `Spectate` (one per second).
+    pub(super) last_spectate: Option<Instant>,
 }
 
 pub(super) struct Lobby {
@@ -82,6 +96,12 @@ pub(super) struct Lobby {
     /// P11: per-IP account rate limits.
     pub(super) limits: Limits,
     pub(super) draining: Arc<AtomicBool>,
+    /// P47: public matches running now (BR-LV01); private ones never enter.
+    pub(super) live: HashMap<LiveId, live::LiveMatch>,
+    /// P47: the snapshot `/api/live` and `/api/online` read.
+    pub(super) live_tx: watch::Sender<Arc<LiveSnapshot>>,
+    /// P47 (BR-LV07): the featured match and when it got the spot.
+    pub(super) featured: Option<(LiveId, Instant)>,
 }
 
 /// P39: a rematch offer between the two sessions of a challenge match.
@@ -100,6 +120,7 @@ pub(crate) async fn run(
     metrics: Arc<Metrics>,
     store: Option<Arc<Store>>,
     draining: Arc<AtomicBool>,
+    live_tx: watch::Sender<Arc<LiveSnapshot>>,
 ) {
     let mut lobby = Lobby {
         sessions: HashMap::new(),
@@ -115,8 +136,12 @@ pub(crate) async fn run(
         store,
         limits: Limits::default(),
         draining,
+        live: HashMap::new(),
+        live_tx,
+        featured: None,
     };
     let mut cleanup = tokio::time::interval(Duration::from_secs(10));
+    let mut publish = tokio::time::interval(PUBLISH_EVERY);
     loop {
         tokio::select! {
             cmd = rx.recv() => match cmd {
@@ -124,6 +149,7 @@ pub(crate) async fn run(
                 None => return,
             },
             _ = cleanup.tick() => lobby.cleanup(),
+            _ = publish.tick() => lobby.publish_live(Instant::now()),
         }
         lobby
             .metrics
@@ -165,7 +191,11 @@ impl Lobby {
             }
             LobbyCmd::Client { token, msg } => self.client(token, msg),
             LobbyCmd::Disconnected { token, conn_id } => self.disconnected(token, conn_id),
-            LobbyCmd::MatchEnded { tokens } => {
+            LobbyCmd::LiveProgress { id, progress } => self.live_progress(id, progress),
+            LobbyCmd::MatchEnded { tokens, live } => {
+                if let Some(id) = live {
+                    self.live_ended(id);
+                }
                 let names = tokens.map(|t| {
                     self.sessions
                         .get(&t)
@@ -235,8 +265,13 @@ impl Lobby {
             ClientMsg::SetArcanas { ranks } => return self.set_arcanas(token, ranks),
             // D-46: same idle-only rule as the Arcanas (BR-SK01).
             ClientMsg::SetStronghold { kind } => return self.set_stronghold(token, kind),
+            // P47: watching is listen-only and answered from any state.
+            ClientMsg::Spectate { id } => return self.spectate(token, id),
+            ClientMsg::StopSpectating => return self.end_watch(token),
             _ => {}
         }
+        // Any other lobby request ends a watch first (BR-LV02).
+        self.end_watch(token);
         let draining = self.draining.load(Relaxed);
         let Some(s) = self.session(&token) else {
             return;

@@ -4,6 +4,7 @@ use std::time::{Duration, Instant};
 
 use tbg_core::protocol::{ErrorCode, InviteToken, MatchMode, ServerMsg, Token};
 
+use super::live::Listing;
 use super::{send, Lobby, SessionState};
 use crate::chan::ConnEvent;
 use crate::names::random_bytes;
@@ -72,7 +73,7 @@ impl Lobby {
         }
         self.challenges.remove(i);
         self.leave_waiting(token);
-        self.pair([owner, token], MatchMode::Challenge, true);
+        self.pair([owner, token], MatchMode::Challenge, true, Listing::Private);
     }
 
     pub(super) fn expire_challenge(&mut self, owner: Token, invite: InviteToken) {

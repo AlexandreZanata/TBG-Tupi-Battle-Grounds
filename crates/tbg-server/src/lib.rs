@@ -13,13 +13,14 @@ use axum::routing::get;
 use axum::serve::ListenerExt;
 use axum::{Json, Router};
 use tokio::net::TcpListener;
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, watch};
 
 mod api;
 pub mod botclient;
 mod chan;
 pub mod config;
 mod limits;
+mod live;
 mod lobby;
 mod match_task;
 pub mod metrics;
@@ -77,6 +78,8 @@ pub async fn run_with(
         });
     let config = Arc::new(config);
     let (lobby_tx, lobby_rx) = mpsc::channel(chan::LOBBY_QUEUE);
+    // P47: the lobby publishes the live snapshot; the API only reads it.
+    let (live_tx, _live_rx) = watch::channel(Arc::default());
     tokio::spawn(lobby::run(
         lobby_rx,
         lobby_tx.clone(),
@@ -84,6 +87,7 @@ pub async fn run_with(
         metrics.clone(),
         store.clone(),
         shared.draining.clone(),
+        live_tx,
     ));
     let state = AppState {
         lobby: lobby_tx,

@@ -17,6 +17,10 @@ impl Lobby {
         conn: ConnHandle,
         ip: IpAddr,
     ) -> (Token, String) {
+        // A reload does not resume a watch: the new socket starts `Idle` (BR-LV02).
+        if let Some(t) = resume {
+            self.end_watch(t);
+        }
         if let Some(s) = resume.and_then(|t| self.sessions.get_mut(&t)) {
             send(&s.conn, ConnEvent::Close);
             if let SessionState::InMatch { tx, seat } = &s.state {
@@ -75,6 +79,7 @@ impl Lobby {
             detached_at: None,
             arcanas: tbg_core::ArcanaPreset::DEFAULT,
             stronghold: tbg_core::StrongholdKind::DEFAULT,
+            last_spectate: None,
         };
         let pair = (session.token, session.name.clone());
         self.sessions.insert(session.token, session);
@@ -88,6 +93,11 @@ impl Lobby {
         if s.conn.as_ref().is_none_or(|c| c.id != conn_id) {
             return;
         }
+        // While the socket is still attached, so the match drops this conn.
+        self.end_watch(token);
+        let Some(s) = self.session(&token) else {
+            return;
+        };
         s.conn = None;
         s.detached_at = Some(Instant::now());
         self.leave_queue_room(token);

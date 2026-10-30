@@ -5,6 +5,7 @@ use std::time::Instant;
 
 use tbg_core::protocol::{MatchMode, ServerMsg, Token};
 
+use super::live::Listing;
 use super::{Lobby, RematchTicket, SessionState};
 
 impl Lobby {
@@ -89,7 +90,7 @@ impl Lobby {
             return;
         }
         let ticket = self.rematches.remove(i);
-        self.pair(ticket.players, MatchMode::Challenge, true);
+        self.pair(ticket.players, MatchMode::Challenge, true, Listing::Private);
     }
 
     /// P39 (BR-P03): a login takeover moves a seat to a new session token.
