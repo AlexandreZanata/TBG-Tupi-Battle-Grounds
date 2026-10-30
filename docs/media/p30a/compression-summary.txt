@@ -1,0 +1,1 @@
+files=200 raw=14853 gzip6=18538 zstd3=16471 gzip_ratio=1.2481 zstd_ratio=1.1089

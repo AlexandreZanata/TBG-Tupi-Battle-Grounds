@@ -801,3 +801,26 @@ the first `strongholds` lab matrix showed Artillery at 61–67 % against
 every kind for a near-tower army (`docs/media/p17/lab/`).
 **Reopen when** the matrix or live play shows a kind above 55 % against
 the field, or a branch that is never worth buying.
+## D-54 · View wire: derive four fields and split static unit identity (A + C) — 2026-10-29 (Proposed, P30-A; numbered D-41 on its branch, renumbered at consolidation)
+
+**Decision.** P30-A measured the full-snapshot `MatchView` and chose to
+(A) stop sending what the client computes exactly (`max_hp`,
+`phase_ticks_left`, `next_rotation_in`, `you`) and (C) send unit static
+identity (`seat`, `kind`, `tier`, `branch`) only on spawn, evolution, and
+full views (reconnect), with a complete dynamic list (`id`, `x`, `hp`,
+`status`) every view. Measured payload: −41.6 % natural, −44.7 % at 20
+units/side, −42.5 % at 100, with build+encode CPU not higher. Delta views,
+compression, 5/8 Hz, and a client rewrite were measured and rejected or
+deferred. P30-B applies it as the next `PROTOCOL_VERSION` (v10 unless P17-A
+takes it first); that commit changes the append-only protocol contract
+tests and must name this decision.
+**Why.** Static identity plus `max_hp` is 35 % of every view and is
+repeated 10×/s; the split keeps one lost view from leaving a stale
+position or HP and needs no keyframe state machine.
+**Guard rails.** Server authority is unchanged (the client derives
+presentation values, never outcomes); a decode error or an unknown static
+id forces the existing reconnect; events stay presentation-only; 10 Hz and
+the 20 Hz simulation are unchanged.
+**Reopen when** the VPS shows bandwidth, not CPU, is still the first limit
+after C (then delta, with a ≥15 pp measured gain over C at 100 units), or
+C fails the 100-seed reconstruction or the 50-match reconnect chaos.

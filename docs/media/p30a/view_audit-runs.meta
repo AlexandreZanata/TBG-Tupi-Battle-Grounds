@@ -1,0 +1,10 @@
+run 1 load: 6.88 10.21 9.61
+exit 0 load: 7.13 10.20 9.61
+run 2 load: 7.13 10.20 9.61
+exit 0 load: 7.12 10.15 9.60
+run 3 load: 7.12 10.15 9.60
+exit 0 load: 7.11 10.10 9.58
+run 4 load: 7.11 10.10 9.58
+exit 0 load: 7.11 10.10 9.58
+run 5 load: 7.11 10.10 9.58
+exit 0 load: 7.18 10.06 9.58

@@ -137,11 +137,13 @@ async fn run(
         }
         // 10 Hz views, plus an ack view to a seat whose intention was processed.
         let ended = m.state.outcome.is_some();
+        // The selection clock keeps 10 Hz views flowing during an Augment
+        // pause, when the combat tick is frozen (BR-AG13).
+        let regular = m.state.clock.is_multiple_of(2) || ended;
         for seat in Seat::BOTH {
-            // The selection clock keeps 10 Hz views flowing during an
-            // Augment pause, when the combat tick is frozen (BR-AG13).
-            if m.state.clock.is_multiple_of(2) || ended || m.applied[seat.index()] {
-                m.send_view(seat);
+            let ack = m.applied[seat.index()] && !regular;
+            if regular || m.applied[seat.index()] {
+                m.send_view(seat, ack);
             }
         }
         m.applied = [false; 2];

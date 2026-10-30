@@ -1,0 +1,3687 @@
+[
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 66,
+  "late_ticks": 0,
+  "max_lateness_ms": 1,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 11,
+    "events": 629,
+    "evolutions": 0,
+    "intents": 11,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 3,
+     "Nester": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 2,
+    "surrendered": false,
+    "units": 4264,
+    "views": 681
+   },
+   {
+    "ack_views": 12,
+    "events": 629,
+    "evolutions": 5,
+    "intents": 12,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 2,
+     "BoneBrute": 2,
+     "Rootcaller": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 2,
+    "surrendered": false,
+    "units": 4269,
+    "views": 682
+   }
+  ],
+  "seed": 10066015712605391826,
+  "step_us_max": 29,
+  "step_us_mean": 3,
+  "ticks": 1337,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 72,
+  "late_ticks": 0,
+  "max_lateness_ms": 2,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 12,
+    "events": 909,
+    "evolutions": 0,
+    "intents": 12,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Rootcaller": 2,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 5540,
+    "views": 735
+   },
+   {
+    "ack_views": 13,
+    "events": 909,
+    "evolutions": 7,
+    "intents": 13,
+    "purchases": {
+     "Archer": 3,
+     "BoneBrute": 1,
+     "Nester": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 5545,
+    "views": 736
+   }
+  ],
+  "seed": 5591164334034970685,
+  "step_us_max": 110,
+  "step_us_mean": 3,
+  "ticks": 1444,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 80,
+  "late_ticks": 0,
+  "max_lateness_ms": 5,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 14,
+    "events": 845,
+    "evolutions": 7,
+    "intents": 14,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 1,
+     "BoneBrute": 1,
+     "Nester": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 5628,
+    "views": 822
+   },
+   {
+    "ack_views": 12,
+    "events": 845,
+    "evolutions": 0,
+    "intents": 12,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 2,
+     "BoneBrute": 1,
+     "Nester": 1,
+     "Rampart": 1,
+     "Rootcaller": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 5615,
+    "views": 820
+   }
+  ],
+  "seed": 839052439866922256,
+  "step_us_max": 41,
+  "step_us_mean": 3,
+  "ticks": 1614,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 85,
+  "late_ticks": 0,
+  "max_lateness_ms": 2,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 13,
+    "events": 1048,
+    "evolutions": 0,
+    "intents": 13,
+    "purchases": {
+     "Archer": 1,
+     "Bloomkeeper": 2,
+     "BoneBrute": 4,
+     "Nester": 1,
+     "Rootcaller": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6692,
+    "views": 866
+   },
+   {
+    "ack_views": 15,
+    "events": 1048,
+    "evolutions": 7,
+    "intents": 15,
+    "purchases": {
+     "Archer": 3,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Nester": 2,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6715,
+    "views": 868
+   }
+  ],
+  "seed": 14180203156504615517,
+  "step_us_max": 680,
+  "step_us_mean": 5,
+  "ticks": 1704,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 85,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 16,
+    "events": 894,
+    "evolutions": 4,
+    "intents": 16,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6843,
+    "views": 869
+   },
+   {
+    "ack_views": 13,
+    "events": 894,
+    "evolutions": 0,
+    "intents": 13,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Rampart": 1,
+     "Rootcaller": 1,
+     "Sawbot": 2,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6815,
+    "views": 866
+   }
+  ],
+  "seed": 15624948676092283564,
+  "step_us_max": 72,
+  "step_us_mean": 4,
+  "ticks": 1703,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 86,
+  "late_ticks": 0,
+  "max_lateness_ms": 5,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 15,
+    "events": 923,
+    "evolutions": 4,
+    "intents": 15,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 2,
+     "BoneBrute": 2,
+     "Nester": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6570,
+    "views": 878
+   },
+   {
+    "ack_views": 13,
+    "events": 923,
+    "evolutions": 0,
+    "intents": 13,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 3,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Nester": 2,
+     "Rampart": 1,
+     "Rootcaller": 1,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6558,
+    "views": 876
+   }
+  ],
+  "seed": 7996013146556097072,
+  "step_us_max": 31,
+  "step_us_mean": 4,
+  "ticks": 1723,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 86,
+  "late_ticks": 0,
+  "max_lateness_ms": 4,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 14,
+    "events": 886,
+    "evolutions": 0,
+    "intents": 14,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 3,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 5928,
+    "views": 882
+   },
+   {
+    "ack_views": 16,
+    "events": 886,
+    "evolutions": 7,
+    "intents": 16,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 2,
+     "BoneBrute": 1,
+     "Nester": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 5946,
+    "views": 884
+   }
+  ],
+  "seed": 2435274821300387959,
+  "step_us_max": 26,
+  "step_us_mean": 3,
+  "ticks": 1733,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 88,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 15,
+    "events": 1021,
+    "evolutions": 1,
+    "intents": 15,
+    "purchases": {
+     "Archer": 1,
+     "Bloomkeeper": 6,
+     "BoneBrute": 4,
+     "Rootcaller": 2,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7192,
+    "views": 903
+   },
+   {
+    "ack_views": 16,
+    "events": 1021,
+    "evolutions": 7,
+    "intents": 16,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 3,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Rootcaller": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7203,
+    "views": 904
+   }
+  ],
+  "seed": 12375715382092578685,
+  "step_us_max": 110,
+  "step_us_mean": 5,
+  "ticks": 1773,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 90,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 17,
+    "events": 996,
+    "evolutions": 8,
+    "intents": 17,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 3,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7176,
+    "views": 923
+   },
+   {
+    "ack_views": 14,
+    "events": 996,
+    "evolutions": 0,
+    "intents": 14,
+    "purchases": {
+     "Bloomkeeper": 3,
+     "BoneBrute": 2,
+     "Nester": 3,
+     "Rootcaller": 4,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7154,
+    "views": 920
+   }
+  ],
+  "seed": 13884059939571769240,
+  "step_us_max": 49,
+  "step_us_mean": 4,
+  "ticks": 1810,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 90,
+  "late_ticks": 0,
+  "max_lateness_ms": 4,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 16,
+    "events": 859,
+    "evolutions": 5,
+    "intents": 16,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 2,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Rootcaller": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 5750,
+    "views": 919
+   },
+   {
+    "ack_views": 15,
+    "events": 859,
+    "evolutions": 0,
+    "intents": 15,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 3,
+     "BoneBrute": 1,
+     "Hexer": 3,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 5750,
+    "views": 918
+   }
+  ],
+  "seed": 8278865854647189220,
+  "step_us_max": 73,
+  "step_us_mean": 4,
+  "ticks": 1803,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 91,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 14,
+    "events": 840,
+    "evolutions": 0,
+    "intents": 14,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 3,
+     "BoneBrute": 1,
+     "Rampart": 1,
+     "Rootcaller": 1,
+     "Shieldbearer": 4
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 5986,
+    "views": 932
+   },
+   {
+    "ack_views": 16,
+    "events": 840,
+    "evolutions": 9,
+    "intents": 16,
+    "purchases": {
+     "Archer": 1,
+     "Bloomkeeper": 2,
+     "BoneBrute": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 5995,
+    "views": 934
+   }
+  ],
+  "seed": 17798907958424285932,
+  "step_us_max": 44,
+  "step_us_mean": 3,
+  "ticks": 1833,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 94,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 17,
+    "events": 1070,
+    "evolutions": 5,
+    "intents": 17,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 5,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 8180,
+    "views": 965
+   },
+   {
+    "ack_views": 14,
+    "events": 1070,
+    "evolutions": 0,
+    "intents": 14,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 4,
+     "BoneBrute": 2,
+     "Rampart": 2,
+     "Sawbot": 1,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 8143,
+    "views": 962
+   }
+  ],
+  "seed": 1707494989998051553,
+  "step_us_max": 92,
+  "step_us_mean": 5,
+  "ticks": 1893,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 94,
+  "late_ticks": 0,
+  "max_lateness_ms": 4,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 16,
+    "events": 677,
+    "evolutions": 7,
+    "intents": 16,
+    "purchases": {
+     "Archer": 1,
+     "Bloomkeeper": 1,
+     "BoneBrute": 3,
+     "Rootcaller": 1,
+     "Sawbot": 2,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 5347,
+    "views": 966
+   },
+   {
+    "ack_views": 15,
+    "events": 677,
+    "evolutions": 0,
+    "intents": 15,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 3,
+     "Hexer": 2,
+     "Nester": 2,
+     "Rootcaller": 1,
+     "Shieldbearer": 4
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 5341,
+    "views": 965
+   }
+  ],
+  "seed": 18438859069023500383,
+  "step_us_max": 136,
+  "step_us_mean": 4,
+  "ticks": 1897,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 96,
+  "late_ticks": 0,
+  "max_lateness_ms": 2,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 17,
+    "events": 1554,
+    "evolutions": 9,
+    "intents": 17,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 2,
+     "BoneBrute": 1,
+     "Nester": 2,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 10302,
+    "views": 988
+   },
+   {
+    "ack_views": 16,
+    "events": 1554,
+    "evolutions": 1,
+    "intents": 16,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 5,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Nester": 1,
+     "Rootcaller": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 2,
+    "surrendered": false,
+    "units": 10294,
+    "views": 987
+   }
+  ],
+  "seed": 17712833192674584445,
+  "step_us_max": 96,
+  "step_us_mean": 4,
+  "ticks": 1939,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 96,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 17,
+    "events": 1033,
+    "evolutions": 5,
+    "intents": 17,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 3,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7507,
+    "views": 988
+   },
+   {
+    "ack_views": 15,
+    "events": 1033,
+    "evolutions": 0,
+    "intents": 15,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 2,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Nester": 2,
+     "Shieldbearer": 5
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7493,
+    "views": 986
+   }
+  ],
+  "seed": 5212361363175863746,
+  "step_us_max": 242,
+  "step_us_mean": 4,
+  "ticks": 1940,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 97,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 17,
+    "events": 1018,
+    "evolutions": 7,
+    "intents": 17,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 3,
+     "BoneBrute": 1,
+     "Nester": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 6955,
+    "views": 992
+   },
+   {
+    "ack_views": 18,
+    "events": 1018,
+    "evolutions": 1,
+    "intents": 18,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 7,
+     "BoneBrute": 2,
+     "Sawbot": 1,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 6965,
+    "views": 993
+   }
+  ],
+  "seed": 18200171878798675346,
+  "step_us_max": 2094,
+  "step_us_mean": 4,
+  "ticks": 1947,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 96,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 16,
+    "events": 905,
+    "evolutions": 0,
+    "intents": 16,
+    "purchases": {
+     "Archer": 6,
+     "Bloomkeeper": 2,
+     "Rootcaller": 2,
+     "Sawbot": 1,
+     "Shieldbearer": 5
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 6429,
+    "views": 979
+   },
+   {
+    "ack_views": 16,
+    "events": 905,
+    "evolutions": 6,
+    "intents": 16,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 1,
+     "BoneBrute": 1,
+     "Nester": 1,
+     "Rampart": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6427,
+    "views": 979
+   }
+  ],
+  "seed": 10703121635442072614,
+  "step_us_max": 78,
+  "step_us_mean": 4,
+  "ticks": 1923,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 98,
+  "late_ticks": 0,
+  "max_lateness_ms": 5,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 17,
+    "events": 924,
+    "evolutions": 9,
+    "intents": 17,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 2,
+     "BoneBrute": 1,
+     "Shieldbearer": 2,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6230,
+    "views": 1001
+   },
+   {
+    "ack_views": 15,
+    "events": 924,
+    "evolutions": 0,
+    "intents": 15,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 2,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Nester": 2,
+     "Rampart": 1,
+     "Sawbot": 2,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6219,
+    "views": 999
+   }
+  ],
+  "seed": 13158366254893428181,
+  "step_us_max": 42,
+  "step_us_mean": 4,
+  "ticks": 1966,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 97,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 18,
+    "events": 1051,
+    "evolutions": 9,
+    "intents": 18,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 5,
+     "BoneBrute": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7698,
+    "views": 995
+   },
+   {
+    "ack_views": 16,
+    "events": 1051,
+    "evolutions": 0,
+    "intents": 16,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 5,
+     "BoneBrute": 2,
+     "Nester": 1,
+     "Rampart": 1,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7687,
+    "views": 993
+   }
+  ],
+  "seed": 4855385567970037250,
+  "step_us_max": 59,
+  "step_us_mean": 4,
+  "ticks": 1951,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 100,
+  "late_ticks": 0,
+  "max_lateness_ms": 4,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 17,
+    "events": 1091,
+    "evolutions": 0,
+    "intents": 17,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 8,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Shieldbearer": 2,
+     "SiegeWalker": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6931,
+    "views": 1023
+   },
+   {
+    "ack_views": 19,
+    "events": 1091,
+    "evolutions": 11,
+    "intents": 19,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 2,
+     "BoneBrute": 2,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 6947,
+    "views": 1025
+   }
+  ],
+  "seed": 15850600653829787130,
+  "step_us_max": 65,
+  "step_us_mean": 3,
+  "ticks": 2009,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 100,
+  "late_ticks": 0,
+  "max_lateness_ms": 5,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 16,
+    "events": 1549,
+    "evolutions": 1,
+    "intents": 16,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 6,
+     "BoneBrute": 2,
+     "Nester": 1,
+     "Rampart": 2,
+     "Sawbot": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 9728,
+    "views": 1018
+   },
+   {
+    "ack_views": 18,
+    "events": 1549,
+    "evolutions": 8,
+    "intents": 18,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 3,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Nester": 1,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 9747,
+    "views": 1020
+   }
+  ],
+  "seed": 1246264332430737216,
+  "step_us_max": 122,
+  "step_us_mean": 5,
+  "ticks": 2001,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 101,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 16,
+    "events": 1810,
+    "evolutions": 1,
+    "intents": 16,
+    "purchases": {
+     "Archer": 1,
+     "Bloomkeeper": 5,
+     "BoneBrute": 2,
+     "Nester": 2,
+     "Rampart": 1,
+     "Shieldbearer": 3,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 11565,
+    "views": 1036
+   },
+   {
+    "ack_views": 19,
+    "events": 1810,
+    "evolutions": 9,
+    "intents": 19,
+    "purchases": {
+     "Archer": 6,
+     "Bloomkeeper": 2,
+     "BoneBrute": 1,
+     "Nester": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 11596,
+    "views": 1039
+   }
+  ],
+  "seed": 903158247906311205,
+  "step_us_max": 166,
+  "step_us_mean": 4,
+  "ticks": 2037,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 102,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 18,
+    "events": 1070,
+    "evolutions": 5,
+    "intents": 18,
+    "purchases": {
+     "Archer": 6,
+     "Bloomkeeper": 2,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7297,
+    "views": 1048
+   },
+   {
+    "ack_views": 16,
+    "events": 1070,
+    "evolutions": 0,
+    "intents": 16,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Nester": 2,
+     "Rootcaller": 2,
+     "Sawbot": 1,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7275,
+    "views": 1046
+   }
+  ],
+  "seed": 12108152181978236685,
+  "step_us_max": 56,
+  "step_us_mean": 4,
+  "ticks": 2058,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 101,
+  "late_ticks": 0,
+  "max_lateness_ms": 2,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 16,
+    "events": 1235,
+    "evolutions": 0,
+    "intents": 16,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 5,
+     "BoneBrute": 2,
+     "Rootcaller": 1,
+     "Shieldbearer": 6
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 7768,
+    "views": 1036
+   },
+   {
+    "ack_views": 19,
+    "events": 1235,
+    "evolutions": 8,
+    "intents": 19,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 5,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7791,
+    "views": 1039
+   }
+  ],
+  "seed": 9383798866288330331,
+  "step_us_max": 36,
+  "step_us_mean": 4,
+  "ticks": 2037,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 108,
+  "late_ticks": 0,
+  "max_lateness_ms": 2,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 19,
+    "events": 1634,
+    "evolutions": 9,
+    "intents": 19,
+    "purchases": {
+     "Archer": 1,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Nester": 2,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 10410,
+    "views": 1110
+   },
+   {
+    "ack_views": 17,
+    "events": 1634,
+    "evolutions": 0,
+    "intents": 17,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 3,
+     "BoneBrute": 4,
+     "Rampart": 1,
+     "Rootcaller": 1,
+     "Sawbot": 3,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 10401,
+    "views": 1108
+   }
+  ],
+  "seed": 4227631977027170349,
+  "step_us_max": 200,
+  "step_us_mean": 5,
+  "ticks": 2180,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 113,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 19,
+    "events": 861,
+    "evolutions": 7,
+    "intents": 19,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 2,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Nester": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 7637,
+    "views": 1157
+   },
+   {
+    "ack_views": 18,
+    "events": 861,
+    "evolutions": 0,
+    "intents": 18,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 4,
+     "BoneBrute": 4,
+     "Hexer": 1,
+     "Rootcaller": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 4
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 7628,
+    "views": 1156
+   }
+  ],
+  "seed": 14617009949671963074,
+  "step_us_max": 41,
+  "step_us_mean": 4,
+  "ticks": 2273,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 114,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 17,
+    "events": 1117,
+    "evolutions": 0,
+    "intents": 17,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Rampart": 2,
+     "Rootcaller": 2,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 8240,
+    "views": 1162
+   },
+   {
+    "ack_views": 20,
+    "events": 1117,
+    "evolutions": 5,
+    "intents": 20,
+    "purchases": {
+     "Archer": 6,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 8254,
+    "views": 1165
+   }
+  ],
+  "seed": 2157975995687821768,
+  "step_us_max": 53,
+  "step_us_mean": 3,
+  "ticks": 2288,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 115,
+  "late_ticks": 0,
+  "max_lateness_ms": 4,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 21,
+    "events": 1361,
+    "evolutions": 8,
+    "intents": 21,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 6,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 8859,
+    "views": 1175
+   },
+   {
+    "ack_views": 18,
+    "events": 1361,
+    "evolutions": 0,
+    "intents": 18,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 5,
+     "BoneBrute": 5,
+     "Hexer": 1,
+     "Nester": 2,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 8831,
+    "views": 1172
+   }
+  ],
+  "seed": 4989178284118477518,
+  "step_us_max": 32,
+  "step_us_mean": 3,
+  "ticks": 2305,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 115,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 20,
+    "events": 1596,
+    "evolutions": 5,
+    "intents": 20,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Nester": 2,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 10390,
+    "views": 1179
+   },
+   {
+    "ack_views": 20,
+    "events": 1596,
+    "evolutions": 7,
+    "intents": 20,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 4,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Rampart": 1,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 10391,
+    "views": 1179
+   }
+  ],
+  "seed": 7237163511143293647,
+  "step_us_max": 54,
+  "step_us_mean": 6,
+  "ticks": 2316,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 116,
+  "late_ticks": 0,
+  "max_lateness_ms": 5,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 19,
+    "events": 1032,
+    "evolutions": 0,
+    "intents": 19,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 4,
+     "BoneBrute": 3,
+     "Nester": 1,
+     "Rootcaller": 1,
+     "Shieldbearer": 5
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 7780,
+    "views": 1186
+   },
+   {
+    "ack_views": 19,
+    "events": 1032,
+    "evolutions": 6,
+    "intents": 19,
+    "purchases": {
+     "Archer": 2,
+     "BoneBrute": 3,
+     "Hexer": 1,
+     "Nester": 2,
+     "Sawbot": 1,
+     "Shieldbearer": 2,
+     "SiegeWalker": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7782,
+    "views": 1186
+   }
+  ],
+  "seed": 16014201455106205778,
+  "step_us_max": 40,
+  "step_us_mean": 3,
+  "ticks": 2331,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 116,
+  "late_ticks": 0,
+  "max_lateness_ms": 4,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 22,
+    "events": 1797,
+    "evolutions": 13,
+    "intents": 22,
+    "purchases": {
+     "Archer": 1,
+     "Bloomkeeper": 6,
+     "BoneBrute": 1,
+     "Hexer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 11940,
+    "views": 1190
+   },
+   {
+    "ack_views": 20,
+    "events": 1797,
+    "evolutions": 3,
+    "intents": 20,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 8,
+     "BoneBrute": 3,
+     "Hexer": 1,
+     "Nester": 1,
+     "Rampart": 1,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 11925,
+    "views": 1188
+   }
+  ],
+  "seed": 3420536064556832755,
+  "step_us_max": 586,
+  "step_us_mean": 5,
+  "ticks": 2334,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 117,
+  "late_ticks": 0,
+  "max_lateness_ms": 4,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 19,
+    "events": 1069,
+    "evolutions": 0,
+    "intents": 19,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 5,
+     "BoneBrute": 4,
+     "Hexer": 1,
+     "Rootcaller": 2,
+     "Shieldbearer": 5
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 8143,
+    "views": 1196
+   },
+   {
+    "ack_views": 20,
+    "events": 1069,
+    "evolutions": 9,
+    "intents": 20,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 2,
+     "BoneBrute": 1,
+     "Hexer": 1,
+     "Sawbot": 2,
+     "Shieldbearer": 1,
+     "SiegeWalker": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 8160,
+    "views": 1197
+   }
+  ],
+  "seed": 5214678972746267812,
+  "step_us_max": 69,
+  "step_us_mean": 5,
+  "ticks": 2352,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 120,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 20,
+    "events": 1360,
+    "evolutions": 7,
+    "intents": 20,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 2,
+     "BoneBrute": 3,
+     "Rampart": 2,
+     "Sawbot": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 8894,
+    "views": 1230
+   },
+   {
+    "ack_views": 19,
+    "events": 1360,
+    "evolutions": 0,
+    "intents": 19,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 3,
+     "BoneBrute": 4,
+     "Hexer": 2,
+     "Rootcaller": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 8892,
+    "views": 1229
+   }
+  ],
+  "seed": 9680390443290719213,
+  "step_us_max": 49,
+  "step_us_mean": 4,
+  "ticks": 2417,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 121,
+  "late_ticks": 0,
+  "max_lateness_ms": 2,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 19,
+    "events": 947,
+    "evolutions": 0,
+    "intents": 19,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Hexer": 3,
+     "Sawbot": 2,
+     "Shieldbearer": 5
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7233,
+    "views": 1232
+   },
+   {
+    "ack_views": 21,
+    "events": 947,
+    "evolutions": 4,
+    "intents": 21,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 5,
+     "BoneBrute": 2,
+     "Rootcaller": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 2,
+     "SiegeWalker": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 7252,
+    "views": 1234
+   }
+  ],
+  "seed": 12764699292424844842,
+  "step_us_max": 257,
+  "step_us_mean": 3,
+  "ticks": 2423,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 126,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 22,
+    "events": 1875,
+    "evolutions": 9,
+    "intents": 22,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 6,
+     "BoneBrute": 1,
+     "Nester": 1,
+     "Rampart": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 13010,
+    "views": 1286
+   },
+   {
+    "ack_views": 21,
+    "events": 1875,
+    "evolutions": 2,
+    "intents": 21,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 8,
+     "BoneBrute": 3,
+     "Rootcaller": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 12999,
+    "views": 1285
+   }
+  ],
+  "seed": 6969868392006746541,
+  "step_us_max": 57,
+  "step_us_mean": 6,
+  "ticks": 2525,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 132,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 21,
+    "events": 1588,
+    "evolutions": 0,
+    "intents": 21,
+    "purchases": {
+     "Archer": 6,
+     "Bloomkeeper": 5,
+     "BoneBrute": 5,
+     "Hexer": 1,
+     "Nester": 1,
+     "Rampart": 1,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 11364,
+    "views": 1345
+   },
+   {
+    "ack_views": 24,
+    "events": 1588,
+    "evolutions": 8,
+    "intents": 24,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 5,
+     "BoneBrute": 3,
+     "Hexer": 1,
+     "Sawbot": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 11390,
+    "views": 1348
+   }
+  ],
+  "seed": 17566184303709452322,
+  "step_us_max": 57,
+  "step_us_mean": 4,
+  "ticks": 2646,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 134,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 22,
+    "events": 1371,
+    "evolutions": 7,
+    "intents": 23,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 5,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Rootcaller": 1,
+     "Shieldbearer": 3,
+     "SiegeWalker": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 10127,
+    "views": 1364
+   },
+   {
+    "ack_views": 23,
+    "events": 1371,
+    "evolutions": 3,
+    "intents": 23,
+    "purchases": {
+     "Archer": 7,
+     "Bloomkeeper": 4,
+     "BoneBrute": 2,
+     "Shieldbearer": 7
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 10143,
+    "views": 1365
+   }
+  ],
+  "seed": 15180339897768270927,
+  "step_us_max": 77,
+  "step_us_mean": 5,
+  "ticks": 2681,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 133,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 24,
+    "events": 1544,
+    "evolutions": 6,
+    "intents": 24,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 5,
+     "BoneBrute": 2,
+     "Hexer": 2,
+     "Nester": 1,
+     "Rootcaller": 1,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 9403,
+    "views": 1358
+   },
+   {
+    "ack_views": 21,
+    "events": 1544,
+    "evolutions": 0,
+    "intents": 21,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 6,
+     "BoneBrute": 4,
+     "Hexer": 2,
+     "Rootcaller": 2,
+     "Sawbot": 1,
+     "Shieldbearer": 2,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 9390,
+    "views": 1355
+   }
+  ],
+  "seed": 15282102990161461187,
+  "step_us_max": 55,
+  "step_us_mean": 4,
+  "ticks": 2665,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 135,
+  "late_ticks": 0,
+  "max_lateness_ms": 2,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 22,
+    "events": 1268,
+    "evolutions": 2,
+    "intents": 22,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 3,
+     "BoneBrute": 3,
+     "Hexer": 1,
+     "Nester": 1,
+     "Rootcaller": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 4,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 9635,
+    "views": 1376
+   },
+   {
+    "ack_views": 23,
+    "events": 1268,
+    "evolutions": 5,
+    "intents": 23,
+    "purchases": {
+     "Archer": 6,
+     "Bloomkeeper": 4,
+     "BoneBrute": 2,
+     "Shieldbearer": 4,
+     "SiegeWalker": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 9641,
+    "views": 1377
+   }
+  ],
+  "seed": 13650287017769572981,
+  "step_us_max": 49,
+  "step_us_mean": 3,
+  "ticks": 2706,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 137,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 24,
+    "events": 1437,
+    "evolutions": 9,
+    "intents": 24,
+    "purchases": {
+     "Archer": 7,
+     "Bloomkeeper": 2,
+     "Nester": 1,
+     "Rampart": 1,
+     "Shieldbearer": 3,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 9957,
+    "views": 1398
+   },
+   {
+    "ack_views": 21,
+    "events": 1437,
+    "evolutions": 0,
+    "intents": 21,
+    "purchases": {
+     "Archer": 2,
+     "Bloomkeeper": 5,
+     "BoneBrute": 6,
+     "Hexer": 1,
+     "Nester": 1,
+     "Rootcaller": 2,
+     "Sawbot": 1,
+     "Shieldbearer": 2,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 9937,
+    "views": 1395
+   }
+  ],
+  "seed": 7869516208524981196,
+  "step_us_max": 53,
+  "step_us_mean": 4,
+  "ticks": 2745,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 137,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 24,
+    "events": 1585,
+    "evolutions": 9,
+    "intents": 24,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 4,
+     "BoneBrute": 1,
+     "Nester": 1,
+     "Rampart": 1,
+     "Rootcaller": 1,
+     "Shieldbearer": 2,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 10694,
+    "views": 1396
+   },
+   {
+    "ack_views": 24,
+    "events": 1585,
+    "evolutions": 1,
+    "intents": 24,
+    "purchases": {
+     "Archer": 6,
+     "Bloomkeeper": 10,
+     "BoneBrute": 4,
+     "Rootcaller": 2,
+     "Shieldbearer": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 10694,
+    "views": 1396
+   }
+  ],
+  "seed": 3590554505570704380,
+  "step_us_max": 57,
+  "step_us_mean": 5,
+  "ticks": 2742,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 136,
+  "late_ticks": 0,
+  "max_lateness_ms": 2,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 24,
+    "events": 1774,
+    "evolutions": 9,
+    "intents": 24,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 4,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Sawbot": 2,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 11975,
+    "views": 1390
+   },
+   {
+    "ack_views": 23,
+    "events": 1774,
+    "evolutions": 3,
+    "intents": 23,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 8,
+     "BoneBrute": 3,
+     "Rampart": 1,
+     "Rootcaller": 1,
+     "Shieldbearer": 3,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 11965,
+    "views": 1389
+   }
+  ],
+  "seed": 2777097671242526124,
+  "step_us_max": 41,
+  "step_us_mean": 5,
+  "ticks": 2729,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 139,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 24,
+    "events": 1374,
+    "evolutions": 9,
+    "intents": 24,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 3,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Rootcaller": 1,
+     "Shieldbearer": 3,
+     "SiegeWalker": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 10506,
+    "views": 1423
+   },
+   {
+    "ack_views": 22,
+    "events": 1374,
+    "evolutions": 0,
+    "intents": 22,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 6,
+     "BoneBrute": 3,
+     "Hexer": 1,
+     "Nester": 1,
+     "Rampart": 1,
+     "Rootcaller": 3,
+     "Shieldbearer": 2,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 10491,
+    "views": 1421
+   }
+  ],
+  "seed": 11259070238420756786,
+  "step_us_max": 51,
+  "step_us_mean": 5,
+  "ticks": 2796,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 142,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 25,
+    "events": 1845,
+    "evolutions": 8,
+    "intents": 25,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 5,
+     "BoneBrute": 1,
+     "Nester": 2,
+     "Rootcaller": 1,
+     "Shieldbearer": 4
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 12116,
+    "views": 1447
+   },
+   {
+    "ack_views": 23,
+    "events": 1845,
+    "evolutions": 2,
+    "intents": 23,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 6,
+     "BoneBrute": 5,
+     "Hexer": 3,
+     "Nester": 1,
+     "Rampart": 1,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 12109,
+    "views": 1445
+   }
+  ],
+  "seed": 4598763389698458016,
+  "step_us_max": 274,
+  "step_us_mean": 4,
+  "ticks": 2841,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 147,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 23,
+    "events": 1754,
+    "evolutions": 0,
+    "intents": 23,
+    "purchases": {
+     "Archer": 9,
+     "Bloomkeeper": 3,
+     "BoneBrute": 3,
+     "Rampart": 1,
+     "Rootcaller": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 2,
+     "SiegeWalker": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 12240,
+    "views": 1502
+   },
+   {
+    "ack_views": 27,
+    "events": 1754,
+    "evolutions": 15,
+    "intents": 27,
+    "purchases": {
+     "Archer": 1,
+     "Bloomkeeper": 6,
+     "BoneBrute": 2,
+     "Sawbot": 1,
+     "Shieldbearer": 1,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 12272,
+    "views": 1506
+   }
+  ],
+  "seed": 15116636656745286626,
+  "step_us_max": 289,
+  "step_us_mean": 5,
+  "ticks": 2955,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 166,
+  "late_ticks": 0,
+  "max_lateness_ms": 5,
+  "reason": "StrongholdDestroyed",
+  "seats": [
+   {
+    "ack_views": 26,
+    "events": 1887,
+    "evolutions": 2,
+    "intents": 26,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 5,
+     "BoneBrute": 6,
+     "Nester": 3,
+     "Rootcaller": 2,
+     "Sawbot": 2,
+     "Shieldbearer": 2,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 13791,
+    "views": 1688
+   },
+   {
+    "ack_views": 29,
+    "events": 1887,
+    "evolutions": 7,
+    "intents": 29,
+    "purchases": {
+     "Archer": 7,
+     "Bloomkeeper": 5,
+     "BoneBrute": 4,
+     "Hexer": 1,
+     "Nester": 1,
+     "Rampart": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 4,
+    "surrendered": false,
+    "units": 13821,
+    "views": 1691
+   }
+  ],
+  "seed": 5208220514993861643,
+  "step_us_max": 119,
+  "step_us_mean": 5,
+  "ticks": 3321,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 183,
+  "late_ticks": 0,
+  "max_lateness_ms": 5,
+  "reason": "TimeUp",
+  "seats": [
+   {
+    "ack_views": 31,
+    "events": 1832,
+    "evolutions": 5,
+    "intents": 31,
+    "purchases": {
+     "Archer": 8,
+     "Bloomkeeper": 7,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Nester": 2,
+     "Rampart": 1,
+     "Shieldbearer": 4,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 13576,
+    "views": 1863
+   },
+   {
+    "ack_views": 29,
+    "events": 1832,
+    "evolutions": 2,
+    "intents": 29,
+    "purchases": {
+     "Archer": 8,
+     "Bloomkeeper": 3,
+     "BoneBrute": 2,
+     "Hexer": 1,
+     "Nester": 2,
+     "Rootcaller": 1,
+     "Sawbot": 2,
+     "Shieldbearer": 6,
+     "SiegeWalker": 2
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 13555,
+    "views": 1861
+   }
+  ],
+  "seed": 5856851060048560003,
+  "step_us_max": 38,
+  "step_us_mean": 5,
+  "ticks": 3661,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 183,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "TimeUp",
+  "seats": [
+   {
+    "ack_views": 30,
+    "events": 2104,
+    "evolutions": 2,
+    "intents": 30,
+    "purchases": {
+     "Archer": 8,
+     "Bloomkeeper": 3,
+     "BoneBrute": 4,
+     "Hexer": 5,
+     "Nester": 1,
+     "Rootcaller": 1,
+     "Sawbot": 2,
+     "Shieldbearer": 3,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 15274,
+    "views": 1862
+   },
+   {
+    "ack_views": 31,
+    "events": 2104,
+    "evolutions": 9,
+    "intents": 31,
+    "purchases": {
+     "Archer": 3,
+     "Bloomkeeper": 6,
+     "BoneBrute": 4,
+     "Nester": 3,
+     "Rootcaller": 2,
+     "Sawbot": 1,
+     "Shieldbearer": 2,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 15281,
+    "views": 1863
+   }
+  ],
+  "seed": 5845078486874716571,
+  "step_us_max": 62,
+  "step_us_mean": 5,
+  "ticks": 3661,
+  "winner": "B"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 183,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "TimeUp",
+  "seats": [
+   {
+    "ack_views": 29,
+    "events": 2054,
+    "evolutions": 5,
+    "intents": 29,
+    "purchases": {
+     "Archer": 4,
+     "Bloomkeeper": 4,
+     "BoneBrute": 3,
+     "Nester": 3,
+     "Rootcaller": 2,
+     "Sawbot": 2,
+     "Shieldbearer": 3,
+     "SiegeWalker": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 15495,
+    "views": 1861
+   },
+   {
+    "ack_views": 30,
+    "events": 2054,
+    "evolutions": 6,
+    "intents": 30,
+    "purchases": {
+     "Archer": 6,
+     "Bloomkeeper": 4,
+     "BoneBrute": 3,
+     "Hexer": 2,
+     "Rootcaller": 5,
+     "Sawbot": 1,
+     "Shieldbearer": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 15511,
+    "views": 1862
+   }
+  ],
+  "seed": 2040381650754874661,
+  "step_us_max": 665,
+  "step_us_mean": 5,
+  "ticks": 3661,
+  "winner": "A"
+ },
+ {
+  "arcanas": [
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ],
+   [
+    2,
+    0,
+    2,
+    0,
+    2,
+    0
+   ]
+  ],
+  "duration_s": 243,
+  "late_ticks": 0,
+  "max_lateness_ms": 3,
+  "reason": "TimeUp",
+  "seats": [
+   {
+    "ack_views": 47,
+    "events": 3395,
+    "evolutions": 2,
+    "intents": 47,
+    "purchases": {
+     "Archer": 5,
+     "Bloomkeeper": 12,
+     "BoneBrute": 8,
+     "Hexer": 1,
+     "Nester": 1,
+     "Rootcaller": 5,
+     "Sawbot": 3,
+     "Shieldbearer": 7,
+     "SiegeWalker": 3
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 24481,
+    "views": 2479
+   },
+   {
+    "ack_views": 54,
+    "events": 3395,
+    "evolutions": 25,
+    "intents": 54,
+    "purchases": {
+     "Archer": 7,
+     "Bloomkeeper": 12,
+     "BoneBrute": 1,
+     "Hexer": 2,
+     "Nester": 1,
+     "Sawbot": 1,
+     "Shieldbearer": 4,
+     "SiegeWalker": 1
+    },
+    "reconnects": 1,
+    "rejections": 0,
+    "rtt_p50": 2,
+    "rtt_p95": 3,
+    "surrendered": false,
+    "units": 24557,
+    "views": 2486
+   }
+  ],
+  "seed": 10756519326152267254,
+  "step_us_max": 127,
+  "step_us_mean": 5,
+  "ticks": 4861,
+  "winner": "B"
+ }
+]

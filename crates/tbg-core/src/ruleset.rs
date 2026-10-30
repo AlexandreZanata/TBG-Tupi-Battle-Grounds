@@ -160,6 +160,28 @@ impl Ruleset {
         )
     }
 
+    /// Max HP a client can derive from the view alone (P30-A H8): the same
+    /// inputs as `stats_with` (the view carries both seats' Augment counts).
+    pub fn unit_max_hp(
+        &self,
+        kind: UnitKind,
+        tier: u8,
+        branch: u8,
+        synergy_level: u8,
+        arcanas: &ArcanaPreset,
+        augments: &AugmentBonus,
+    ) -> i32 {
+        // Summons never receive Synergy or Arcanas, only Augments that name
+        // them (BR-U08, D-40, BR-AG10), as in `MatchState::stats_of`.
+        if kind.is_summon() {
+            return self
+                .stats_with(kind, tier, branch, 0, &ArcanaPreset::NEUTRAL, augments)
+                .max_hp;
+        }
+        self.stats_with(kind, tier, branch, synergy_level, arcanas, augments)
+            .max_hp
+    }
+
     /// Effective stats with the seat's Arcanas and Augments: every source
     /// adds bp on the same base and truncates once (BR-AR04, BR-X01).
     pub fn stats_with(

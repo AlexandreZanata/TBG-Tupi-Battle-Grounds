@@ -7,10 +7,10 @@
 use super::*;
 use crate::i18n::check::check_pair;
 
-fn seed() -> (
-    Vec<(&'static str, &'static str)>,
-    Vec<(&'static str, &'static str)>,
-) {
+/// One catalog as `(key, value)` pairs.
+type Pairs = Vec<(&'static str, &'static str)>;
+
+fn seed() -> (Pairs, Pairs) {
     (
         vec![("a.title", "Hello"), ("b.count", "Need {cost} Energy")],
         vec![

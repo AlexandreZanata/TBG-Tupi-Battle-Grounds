@@ -1,0 +1,4 @@
+| matches | server cores | bot cores | load1 | matches/core | RSS MB | KB/match | cgroup MB | peak MB | throttled | mem max | oom | late ticks | RTT p95 ms | lobby max | conns | matches d | KB/s out | KB/s in | KB/s/player | views/s | view B avg |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 2000 | 1.66 | 2.06 | 5.89 | 1205 | 572.6 | 293 | 586 | 588 | 5 | 0 | 0 | 48626 | 15 | 1 | 4000 | 0 | 4925.7 | 10.3 | 1.23 | 37433 | 134 |
+| 2000 | 1.58 | 1.92 | 6.79 | 1266 | 572.6 | 293 | 586 | 588 | 4 | 0 | 0 | 27598 | 15 | 2 | 4000 | 0 | 5072.7 | 10.4 | 1.27 | 38949 | 133 |

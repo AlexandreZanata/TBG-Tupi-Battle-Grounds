@@ -1,0 +1,11 @@
+P30-A frequency prototype (temporary TBG_VIEW_HZ hook, reverted).
+Command: three servers on 127.0.0.1:18190/18188/18185, 2 CPU / 1 GiB each,
+TBG_WORKERS=2, 20 bot matches each, ramp 5 ms. Bots outside the cgroups.
+Machine load at start: 19.18 12.71 9.05 (another user job); bots finished in 183 s.
+
+hz  completed/failed  rtt p95  view gap p50/p95/max ms  ack p50/p95 ms  view KB/s/player  ack share
+10  40/0              3        99/100/107               49/50           1.358            1.65%
+8   40/0              3        101/150/156              49/50           1.030            1.99%
+5   40/0              3        199/200/207              49/50           0.689            3.03%
+
+Raw bot lines: viewhz-<hz>-bots.txt; metrics: viewhz-<hz>-metrics.json.
