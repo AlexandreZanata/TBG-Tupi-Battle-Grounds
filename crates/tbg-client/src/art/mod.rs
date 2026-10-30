@@ -27,6 +27,8 @@ pub mod mesh;
 pub mod palette;
 pub mod rig;
 mod roster;
+#[cfg(test)]
+mod roster_tests;
 mod springs;
 
 use rig::{Proportions as BodyPlan, NODE_COUNT};

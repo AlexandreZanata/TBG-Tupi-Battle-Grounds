@@ -46,6 +46,10 @@ fn matchup(kind: UnitKind) -> (&'static str, &'static str) {
         // P48-A wave E1 (staged; §11 identity lines, not in the Shop yet).
         UnitKind::Leechroot => ("left alone too long", "burst it, splash it"),
         UnitKind::CargoCrab => ("one protected carry", "splash the crab"),
+        // P48-B wave E2 (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Puppetmaster => ("your best hitter", "spread out, burst it"),
+        UnitKind::Smuggler => ("ammo-hungry ranged", "kill the crates, dive it"),
+        UnitKind::Crate => ("free ammo", "deny it"),
         // P43: staged kinds render as a blockout until their wave lands.
         #[allow(unreachable_patterns)]
         _ => ("a new unit", "scout it first"),
