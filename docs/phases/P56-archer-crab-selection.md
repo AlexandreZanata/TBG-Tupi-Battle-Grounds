@@ -24,6 +24,8 @@ This phase implements three major fronts in Tupi Battle Grounds:
 3. `573e59e` `feat(client): implement clean unit selection and selective nameplates`
 4. `d1816d2` `style: format files according to rustfmt`
 5. `d591e75` `fix(balance,client): resolve clippy warnings`
+6. `ba8fb3b` `docs: add P56 phase report, roadmap entry, and visual evidence`
+7. `0c881ad` `style(balance): format cargo_crab_balance example with rustfmt`
 
 ## Proposed Game Design Numbers & Balance Evidence (D-56)
 
