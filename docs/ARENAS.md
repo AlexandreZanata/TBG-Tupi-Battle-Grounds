@@ -5,6 +5,8 @@ assets. All five arenas use the same island outline, camera, Stronghold
 positions and BattleLine dimensions. Verdant Forest is the unchanged default.
 This is an art delivery: every arena has identical gameplay.
 
+![The four new arena environments](media/arenas/overview.jpg)
+
 ## Open the scenes
 
 After `trunk serve` in `crates/tbg-client`, open:

@@ -1,0 +1,269 @@
+{
+  "layer_triangles": {
+    "Verdant Forest": {
+      "meadow": 192,
+      "BattleLine": 444,
+      "cliffs": 384,
+      "sea": 12,
+      "foam": 384,
+      "offshore rocks": 2000,
+      "props": 31828,
+      "life": 624,
+      "total": 37212,
+      "Strongholds": 1344
+    },
+    "Frozen Tundra": {
+      "meadow": 192,
+      "BattleLine": 444,
+      "cliffs": 384,
+      "sea": 12,
+      "foam": 384,
+      "offshore rocks": 1484,
+      "props": 13702,
+      "life": 624,
+      "total": 17650,
+      "Strongholds": 424
+    },
+    "Storm Valley": {
+      "meadow": 192,
+      "BattleLine": 444,
+      "cliffs": 384,
+      "sea": 12,
+      "foam": 384,
+      "offshore rocks": 916,
+      "props": 13806,
+      "accents": 396,
+      "life": 624,
+      "total": 18250,
+      "Strongholds": 1092
+    },
+    "Ancient Ruins": {
+      "meadow": 192,
+      "BattleLine": 444,
+      "cliffs": 384,
+      "sea": 12,
+      "foam": 384,
+      "offshore rocks": 3288,
+      "props": 15866,
+      "life": 624,
+      "total": 21746,
+      "Strongholds": 552
+    },
+    "Volcanic Forge": {
+      "meadow": 192,
+      "BattleLine": 444,
+      "cliffs": 384,
+      "sea": 384,
+      "foam": 384,
+      "offshore rocks": 1680,
+      "props": 12884,
+      "accents": 640,
+      "life": 624,
+      "total": 18096,
+      "Strongholds": 480
+    }
+  },
+  "browser_samples": [
+    {
+      "theme": "tundra",
+      "mode": "busy",
+      "width": 1920,
+      "height": 1080,
+      "draws": "376.8",
+      "fps": "127.8",
+      "frames": "639",
+      "maximum": "378"
+    },
+    {
+      "theme": "storm",
+      "mode": "busy",
+      "width": 1920,
+      "height": 1080,
+      "draws": "377.0",
+      "fps": "98.0",
+      "frames": "490",
+      "maximum": "377"
+    },
+    {
+      "theme": "ruins",
+      "mode": "busy",
+      "width": 1920,
+      "height": 1080,
+      "draws": "376.8",
+      "fps": "127.4",
+      "frames": "637",
+      "maximum": "379"
+    },
+    {
+      "theme": "forest",
+      "mode": "busy",
+      "width": 1920,
+      "height": 1080,
+      "draws": "376.9",
+      "fps": "40.5",
+      "frames": "203",
+      "maximum": "378"
+    },
+    {
+      "theme": "tundra",
+      "mode": "empty",
+      "width": 1280,
+      "height": 800,
+      "draws": "29.0",
+      "fps": "104.6",
+      "frames": "523",
+      "maximum": "29"
+    },
+    {
+      "theme": "ruins",
+      "mode": "empty",
+      "width": 1280,
+      "height": 800,
+      "draws": "29.0",
+      "fps": "57.3",
+      "frames": "287",
+      "maximum": "29"
+    },
+    {
+      "theme": "storm",
+      "mode": "empty",
+      "width": 1280,
+      "height": 800,
+      "draws": "31.0",
+      "fps": "91.3",
+      "frames": "457",
+      "maximum": "31"
+    },
+    {
+      "theme": "volcanic",
+      "mode": "empty",
+      "width": 1280,
+      "height": 800,
+      "draws": "31.0",
+      "fps": "107.1",
+      "frames": "536",
+      "maximum": "31"
+    },
+    {
+      "theme": "volcanic",
+      "mode": "busy",
+      "width": 1920,
+      "height": 1080,
+      "draws": "377.0",
+      "fps": "43.7",
+      "frames": "219",
+      "maximum": "377"
+    }
+  ],
+  "wasm": {
+    "filename": "tbg-client-8866f7cdb1e834c3_bg.wasm",
+    "bytes": 24757226,
+    "brotli_q9_bytes": 5600489
+  },
+  "notes": [
+    "Browser samples are five-second diagnostic windows, not a controlled sustained-FPS benchmark.",
+    "All samples include the existing key-light shadow pass.",
+    "Busy means the existing mixed 30-unit visual workload, not a simulated battle.",
+    "A separate Practice vs Bot match finished after 1:33 with 15 units deployed, displaying the damaged Stronghold and result."
+  ],
+  "screenshots": [
+    {
+      "file": "forest-busy-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 204266
+    },
+    {
+      "file": "forest-empty-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 153437
+    },
+    {
+      "file": "ruins-busy-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 192875
+    },
+    {
+      "file": "ruins-empty-1280x800.jpg",
+      "width": 1280,
+      "height": 800,
+      "bytes": 84607
+    },
+    {
+      "file": "ruins-empty-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 141096
+    },
+    {
+      "file": "ruins-practice-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 213590
+    },
+    {
+      "file": "ruins-practice-result-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 140315
+    },
+    {
+      "file": "storm-busy-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 217646
+    },
+    {
+      "file": "storm-empty-1280x800.jpg",
+      "width": 1280,
+      "height": 800,
+      "bytes": 101089
+    },
+    {
+      "file": "storm-empty-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 170053
+    },
+    {
+      "file": "tundra-busy-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 235986
+    },
+    {
+      "file": "tundra-empty-1280x800.jpg",
+      "width": 1280,
+      "height": 800,
+      "bytes": 111549
+    },
+    {
+      "file": "tundra-empty-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 180758
+    },
+    {
+      "file": "volcanic-busy-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 217057
+    },
+    {
+      "file": "volcanic-empty-1280x800.jpg",
+      "width": 1280,
+      "height": 800,
+      "bytes": 101814
+    },
+    {
+      "file": "volcanic-empty-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 168070
+    }
+  ],
+  "source_revision": "62e20c057fc54911f59f84187fd54ec2f4cc5e29",
+  "base_revision": "077abe7e4cdd0ac06b8bddc64d849bdb69d053c0"
+}
