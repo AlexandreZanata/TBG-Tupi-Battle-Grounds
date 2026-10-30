@@ -25,6 +25,8 @@ fn bot_matches_are_frozen() {
     // bots can buy, so outcomes and end combat ticks moved with the hashes.
     // P43: the zeroed `UnitFx` block joined the serialized state, so hashes
     // moved again with tick, winner and reason identical (verified).
+    // P47: `march_ignore_slow` grew `UnitFx`; hashes moved once more,
+    // behavior identical (verified).
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (

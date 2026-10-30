@@ -548,7 +548,7 @@ pub const UNITS: [UnitDef; 22] = [
         [Ability::March { reach: 2_000, move_bp: 2_500, dr_bp: 1_800, hysteresis: 500, ignore_slow: true }, Ability::None],
     ], [
         form("War March"),
-        form("Steady Cadence"),
+        form("Grand March"),
         form("Iron Rhythm"),
         form("Unbreakable Rhythm"),
     ]),

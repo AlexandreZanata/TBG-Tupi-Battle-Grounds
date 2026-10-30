@@ -92,7 +92,9 @@ fn c2_per_tick_traces_are_frozen() {
     // pause with its paused steps traced, the 20 s selection window,
     // P40's fifteen-rank Arcana state, and a full Shop redraw per
     // purchase, BR-S04). P43: the zeroed `UnitFx` block moved the hashes
-    // with tick, winner and reason identical (verified).
+    // with tick, winner and reason identical (verified). P47:
+    // `march_ignore_slow` grew `UnitFx`; hashes moved once more, behavior
+    // identical (verified).
     let goldens = [
         (1, 0xf89a_12cd_9f40_6df3, 0x2640_f195_cc12_a103, 2_214),
         (7, 0x36e9_eb5a_afe8_b6b9, 0x598f_f581_edba_b4fb, 3_284),
