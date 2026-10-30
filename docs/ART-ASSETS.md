@@ -42,6 +42,9 @@ PlayerIntentions. They do not change Energy or round resolution before
 the authoritative view. A Rust test checks all 40 IDs, names, rarities,
 descriptions and round timing against core.
 
+The three catalog URLs carry the art release revision so cached pre-art
+JSON cannot retain old picture references or the old Stronghold schema.
+
 The fallback encoding keeps Q90 and alpha. Augment illustration display
 comparison is 200 px, frames 300 px; small icons and tower portraits use
 lossless WebP. Detailed VTracer approximations that miss the unchanged
@@ -52,10 +55,11 @@ quality thresholds remain documented and are never selected in the UI.
 `cargo fmt --all -- --check`, `cargo clippy --workspace -- -D warnings`,
 `cargo test --workspace` (**267 passed, 0 failed, 1 ignored**),
 `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown`
-and `trunk build --release` passed. The required three existing Node
+and `trunk build --release` passed again after synchronizing with main
+(`Already up to date.`). The required three existing Node
 suites passed (**13 tests**). Two new lazy-loader/rarity tests also passed.
 The complete Node command including the unchanged strict asset budget contract
-now passes. The final illustrations are 400 px WebPs displayed at no more
+now passes (**16 Node tests**). The final illustrations are 400 px WebPs displayed at no more
 than the measured 200 px width; quality stays Q90 and the dialog is 1120 px wide.
 Full actual output is in the linked verification transcript.
 

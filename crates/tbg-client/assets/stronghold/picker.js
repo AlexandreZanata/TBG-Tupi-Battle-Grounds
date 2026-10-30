@@ -126,7 +126,7 @@
     });
   }
   async function prepare() {
-    const response = await fetch('assets/stronghold/strongholds.json');
+    const response = await fetch('assets/stronghold/strongholds.json?art=20261030');
     if (!response.ok) throw new Error('Stronghold data could not load. Close and reopen to retry.');
     data = await response.json();
     tower.sprite();

@@ -23,7 +23,7 @@
     const key = ids.join(','); active = key;
     if (data) { preload(ids); return data; }
     if (loading || failed === key) return null;
-    loading = fetch(source('augments.json'))
+    loading = fetch(source('augments.json?art=20261030'))
       .then(response => { if (!response.ok) throw new Error('Augment art unavailable'); return response.json(); })
       .then(value => { data = value; if (active === key) { preload(ids); update(); } })
       .catch(() => { failed = key; })
