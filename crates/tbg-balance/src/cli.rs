@@ -20,6 +20,7 @@ COMMANDS
   value       P16-D marginal value: reference | shadow | interactions | scenarios
   validate    P16-D discovery vs confirmation rank check and static baseline
   arcana      every complete Arcana preset vs the default (policy --a, default bot)
+  strongholds every Stronghold kind vs every kind and Classic (policy --a, default bot)
   arcana-named  the ten named builds, a null control and the retired six-point default (higher pairs)
 
 FLAGS

@@ -5,7 +5,7 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use tbg_core::headless::{self, Moment};
-use tbg_core::{ArcanaPreset, MatchState, PlayerIntention, Ruleset, Seat};
+use tbg_core::{ArcanaPreset, MatchState, PlayerIntention, Ruleset, Seat, StrongholdKind};
 
 use crate::metrics::{observe_tick, participant, MatchResult, Side};
 use crate::policy::{Controller, Policy};
@@ -23,6 +23,9 @@ pub enum Setup {
         tick: u32,
         sub_energy: u32,
     },
+    /// Stronghold kind per participant (D-46); it follows the participant
+    /// on a swap like the Arcana preset.
+    Strongholds([StrongholdKind; 2]),
 }
 
 impl Setup {
@@ -90,6 +93,9 @@ pub fn parallel_map<T: Sync, R: Send>(
 /// its own Shop stream and policy seed in both games of a pair.
 pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
     let mut state = MatchState::lab(seed, m.rules, m.arcanas);
+    if let Setup::Strongholds(kinds) = m.setup {
+        state = state.with_strongholds(kinds);
+    }
     let seat_a = usize::from(swapped);
     if swapped {
         state.players.swap(0, 1);
@@ -105,7 +111,7 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
             tick,
             sub_energy,
         },
-        Setup::None => Setup::None,
+        other => other,
     };
     let mut ctl: [Controller; 2] = std::array::from_fn(|p| {
         Controller::new(
@@ -138,7 +144,9 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
                             side.evolutions[u.kind as usize][usize::from(branch.min(1))] += 1;
                         }
                     }
-                    PlayerIntention::ChooseAugment { .. } | PlayerIntention::Forgo { .. } => {}
+                    PlayerIntention::ChooseAugment { .. }
+                    | PlayerIntention::Forgo { .. }
+                    | PlayerIntention::Fortify { .. } => {}
                 }
             }
             Moment::Intention { .. } => {}

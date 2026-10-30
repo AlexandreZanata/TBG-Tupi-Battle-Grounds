@@ -11,10 +11,24 @@ use crate::types::{Seat, Status, UnitId, UnitKind};
 /// A request from a client; never a state change until validated.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PlayerIntention {
-    Purchase { offer: u8 },
-    Evolve { unit: UnitId, branch: u8 },
-    ChooseAugment { round: u32, option: u8 },
-    Forgo { round: u32 },
+    Purchase {
+        offer: u8,
+    },
+    Evolve {
+        unit: UnitId,
+        branch: u8,
+    },
+    ChooseAugment {
+        round: u32,
+        option: u8,
+    },
+    Forgo {
+        round: u32,
+    },
+    /// Next Fortification tier of the seat's own tower (BR-SK05).
+    Fortify {
+        branch: u8,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -53,7 +67,11 @@ impl MatchState {
         }
         let paused = self.augments.selecting();
         match intent {
-            PlayerIntention::Purchase { .. } | PlayerIntention::Evolve { .. } if paused => {
+            PlayerIntention::Purchase { .. }
+            | PlayerIntention::Evolve { .. }
+            | PlayerIntention::Fortify { .. }
+                if paused =>
+            {
                 Err(Rejection::Paused)
             }
             PlayerIntention::Purchase { offer } => self.purchase(seat, offer),
@@ -62,6 +80,7 @@ impl MatchState {
                 crate::augment::buy(self, seat, round, option)
             }
             PlayerIntention::Forgo { round } => crate::augment::forgo(self, seat, round),
+            PlayerIntention::Fortify { branch } => crate::stronghold::fortify(self, seat, branch),
         }
     }
 

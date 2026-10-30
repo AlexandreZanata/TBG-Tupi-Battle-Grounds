@@ -135,6 +135,15 @@ impl Lobby {
                     };
                     let _ = tx.send(cmd).await;
                 }
+                // D-46 (BR-SK01): the saved kind follows the account too.
+                if let Some(kind) = store.load_stronghold(id).await {
+                    let cmd = LobbyCmd::StrongholdLoaded {
+                        token,
+                        account: id,
+                        kind,
+                    };
+                    let _ = tx.send(cmd).await;
+                }
             });
         }
     }

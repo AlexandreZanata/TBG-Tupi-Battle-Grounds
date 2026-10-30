@@ -80,6 +80,9 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
         interest,
         augment,
         evolve_cost,
+        // Untunable by the knob search: Fortification only exists on the
+        // four player kinds, and the search plays the Classic tower (D-46).
+        fortify_cost: _,
         stronghold_hp,
         stronghold_damage,
         stronghold_interval,

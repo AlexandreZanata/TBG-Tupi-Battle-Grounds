@@ -52,7 +52,9 @@ pub(crate) fn resolve_hit(
         );
         amount = scale(
             amount,
-            augment::situational_bp(state, attacker, target) + arcana_bp,
+            augment::situational_bp(state, attacker, target)
+                + arcana_bp
+                + crate::stronghold::aura_bp(state, attacker),
         );
     }
     let removed = damage(state, target, amount, ev);

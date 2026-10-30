@@ -9,10 +9,10 @@ use serde_json::Value;
 use tokio::sync::{oneshot, watch};
 
 use tbg_core::protocol::{AccountError, Profile, RatingResults};
-use tbg_core::{ArcanaPreset, Outcome};
+use tbg_core::{ArcanaPreset, Outcome, StrongholdKind};
 
 use super::leaderboard::{self, Snapshot};
-use super::{accounts, arcanas, matches, ranked, AccountId};
+use super::{accounts, arcanas, matches, ranked, strongholds, AccountId};
 
 type Reply<T> = oneshot::Sender<T>;
 
@@ -51,6 +51,14 @@ pub(super) enum StoreCmd {
     LoadArcanas {
         account: AccountId,
         reply: Reply<Option<ArcanaPreset>>,
+    },
+    SaveStronghold {
+        account: AccountId,
+        kind: StrongholdKind,
+    },
+    LoadStronghold {
+        account: AccountId,
+        reply: Reply<Option<StrongholdKind>>,
     },
 }
 
@@ -124,6 +132,14 @@ pub(super) fn worker(
                 }
                 StoreCmd::LoadArcanas { account, reply } => {
                     let _ = reply.send(arcanas::load(&conn, account));
+                }
+                StoreCmd::SaveStronghold { account, kind } => {
+                    if let Err(e) = strongholds::save(&conn, account, kind) {
+                        tracing::error!("stronghold kind save failed: {e}");
+                    }
+                }
+                StoreCmd::LoadStronghold { account, reply } => {
+                    let _ = reply.send(strongholds::load(&conn, account));
                 }
             },
             Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}

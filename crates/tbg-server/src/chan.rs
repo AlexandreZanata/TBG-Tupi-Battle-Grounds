@@ -108,4 +108,10 @@ pub enum LobbyCmd {
         account: AccountId,
         preset: tbg_core::ArcanaPreset,
     },
+    /// D-46: an account's saved Stronghold kind, loaded after login.
+    StrongholdLoaded {
+        token: Token,
+        account: AccountId,
+        kind: tbg_core::StrongholdKind,
+    },
 }

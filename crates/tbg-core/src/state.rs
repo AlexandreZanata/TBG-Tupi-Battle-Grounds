@@ -7,7 +7,7 @@ use crate::augment::{AugmentCounts, AugmentState};
 use crate::content::{self, Stats, OFFERS};
 use crate::rng::Pcg32;
 use crate::ruleset::Ruleset;
-use crate::types::{Archetype, Faction, Seat, Status, Tick, UnitId, UnitKind};
+use crate::types::{Archetype, Faction, Seat, Status, StrongholdKind, Tick, UnitId, UnitKind};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Phase {
@@ -87,6 +87,13 @@ pub struct PlayerState {
     pub offers: [UnitKind; OFFERS],
     pub stronghold_hp: i32,
     pub stronghold_cooldown: u16,
+    /// Frozen at pairing (BR-SK01); public to both seats.
+    pub stronghold: StrongholdKind,
+    /// Fortification tier (0..=2) and branch (0 = A, 1 = B), BR-SK05.
+    pub fort_tier: u8,
+    pub fort_branch: u8,
+    /// Treasury Spoils earned in the current Bounty window (BR-SK02).
+    pub spoils_window: u32,
     /// Synergy level (0..=2) per `Faction` index.
     pub synergy: [u8; 4],
     pub last_seq: u32,
@@ -155,6 +162,12 @@ pub enum Event {
     },
     Evolved {
         unit: UnitId,
+        tier: u8,
+        branch: u8,
+    },
+    /// A seat bought a Fortification tier for its own tower (BR-SK05).
+    Fortified {
+        seat: Seat,
         tier: u8,
         branch: u8,
     },

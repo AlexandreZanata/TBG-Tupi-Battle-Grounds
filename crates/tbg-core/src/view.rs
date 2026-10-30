@@ -7,7 +7,7 @@ use crate::augment::AugmentCounts;
 use crate::content::{AUGMENT_OPTIONS, OFFERS, RUNNING_START};
 use crate::sim::phase_ticks_left;
 use crate::state::{Event, MatchState, Outcome, Phase};
-use crate::types::{Seat, Status, Tick, UnitId, UnitKind};
+use crate::types::{Seat, Status, StrongholdKind, Tick, UnitId, UnitKind};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UnitView {
@@ -35,6 +35,16 @@ pub struct RoundView {
     pub resolved: bool,
 }
 
+/// One seat's tower as both seats see it (BR-SK08): kind, Fortification
+/// and the current maximum HP.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StrongholdView {
+    pub kind: StrongholdKind,
+    pub tier: u8,
+    pub branch: u8,
+    pub max_hp: i32,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MatchView {
     /// Combat tick: frozen while an Augment selection pauses the battle.
@@ -54,6 +64,8 @@ pub struct MatchView {
     pub offers: [UnitKind; OFFERS],
     /// Indexed by `Seat::index()`.
     pub stronghold_hp: [i32; 2],
+    /// Indexed by `Seat::index()`; public to both seats (BR-SK08).
+    pub strongholds: [StrongholdView; 2],
     pub shields: [i32; 2],
     pub units: Vec<UnitView>,
     pub synergy: [[u8; 4]; 2],
@@ -95,6 +107,12 @@ impl MatchState {
             regen_bp: self.rules.interest.regen_bp(me.energy),
             offers: me.offers,
             stronghold_hp: [0, 1].map(|i| self.players[i].stronghold_hp),
+            strongholds: Seat::BOTH.map(|s| StrongholdView {
+                kind: self.player(s).stronghold,
+                tier: self.player(s).fort_tier,
+                branch: self.player(s).fort_branch,
+                max_hp: self.stronghold(s).max_hp,
+            }),
             shields: [0, 1].map(|i| self.players[i].shield),
             units: self
                 .units
