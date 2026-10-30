@@ -6,7 +6,7 @@
   const D=globalThis.TbgRankingData,R=globalThis.TbgRankingRender;
   const BASE='/assets/ranking/',REV='?v=ranking-1';
   const query=new URLSearchParams(location.search);
-  let active=false,mounted,art={},at=0,total=0,leaders=null,loading=false,pageId=0,profileId=0,pageRequest,profileRequest;
+  let active=false,ready=false,mounted,art={},at=0,total=0,leaders=null,loading=false,pageId=0,profileId=0,pageRequest,profileRequest;
   const identity=()=>game?(lobby.dataset.player||''):(D.NAME.test(query.get('player')||'')?query.get('player'):'');
   async function json(path,signal){
     const response=await fetch(path,{signal,headers:{Accept:'application/json'}});
@@ -35,7 +35,8 @@
         root.replaceChildren(content);root.dataset.context=game?'game':'web';
         root.querySelectorAll('[data-ranking-art]').forEach(img=>{const source=art[img.dataset.rankingArt];if(!source)throw new Error('art');img.src=source;img.decoding='async';});
         if(game)root.querySelector('.ranking-search').target='_blank';
-      }).catch(error=>{mounted=null;throw error;});
+        ready=true;
+      }).catch(error=>{ready=false;mounted=null;throw error;});
     return mounted;
   }
   async function loadPage(offset){
@@ -83,7 +84,7 @@
     if(button.dataset.rankingAction==='refresh'){if(!mounted)open();else if(!loading){loadPage(at);loadProfile();}}
     if(button.dataset.rankingAction==='play'&&!game)location.assign('/?panel=ranking');
   });
-  if(game)new MutationObserver(()=>{if(active){loadPage(at);loadProfile();}}).observe(lobby,{attributes:true,attributeFilter:['data-player','data-rating']});
+  if(game)new MutationObserver(()=>{if(active&&ready){loadPage(at);loadProfile();}}).observe(lobby,{attributes:true,attributeFilter:['data-player','data-rating']});
   globalThis.TbgRanking=Object.freeze({open,close});
   if(!game)open();
 })();

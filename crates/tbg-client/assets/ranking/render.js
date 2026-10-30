@@ -39,7 +39,7 @@
     text(root,'status',data.total?data.total+' ranked players · '+(at+1)+'–'+(at+data.rows.length):'The first champion is still to come');
     get(root,'status').classList.remove('ranking-error');
     const date=new Date(data.updated_at);
-    text(root,'updated',Number.isNaN(date.getTime())?'':'Last ranked result · '+new Intl.DateTimeFormat('en',{dateStyle:'medium'}).format(date));
+    text(root,'updated',Number.isNaN(date.getTime())?'':'Leaderboard updated · '+new Intl.DateTimeFormat('en',{dateStyle:'medium'}).format(date));
   }
   function pager(root,at,total,loading){
     const p=D.pages(at,total),buttons=[];
@@ -57,11 +57,11 @@
     root.querySelector('[data-ranking-action="refresh"]').disabled=loading;
     root.querySelector('.ranking-table').setAttribute('aria-busy',String(loading));
   }
-  function recent(root,p){
+  function recent(root,p,game){
     const rows=(p?p.recent:[]).slice(0,5).map(m=>{
       const words={W:['Win','ranking-wins'],L:['Loss','ranking-losses'],D:['Draw','ranking-draw']};
       const [word,cls]=words[m.result],li=node('li');
-      const opponent=node('a','vs '+m.opponent);opponent.href='/ranking/player.html?name='+encodeURIComponent(m.opponent);
+      const opponent=node('a');profileLink(opponent,m.opponent,game);opponent.textContent='vs '+m.opponent;
       li.append(opponent,node('b',word,cls),node('span',D.delta(m.delta),'ranking-delta'));return li;
     });
     if(!rows.length)rows.push(node('li',p?'No ranked matches yet.':'Sign in to see your recent ranked matches','ranking-empty-recent'));
@@ -78,7 +78,7 @@
     if(game)play.dataset.action=name?'ranked':'register';
     const link=get(root,'profile-link');link.hidden=!p;
     if(p){link.href='/ranking/player.html?name='+encodeURIComponent(p.name);if(game){link.target='_blank';link.rel='noopener';}}
-    recent(root,p);
+    recent(root,p,game);
   }
   function navigation(lobby,open){
     if(!lobby)return;
