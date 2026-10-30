@@ -165,11 +165,18 @@ pub fn base_body(p: &BodyPlan, look: &Look) -> Vec<PartSpec> {
             [0.0, -arm * 0.45, 0.0],
         ));
         v.push(part(hand, Ball(0.078), look.skin, [0.0, -0.035, 0.0]));
+        // Thigh and shin overlap at the knee so two-bone walking bends cleanly.
         v.push(part(
             leg_j,
-            Pill(0.078, leg * 0.5),
+            Pill(0.078, leg * 0.25),
             look.limbs,
-            [0.0, -leg / 2.0, 0.0],
+            [0.0, -leg * 0.25, 0.0],
+        ));
+        v.push(part(
+            leg_j,
+            Pill(0.072, leg * 0.25),
+            look.limbs,
+            [0.0, -leg * 0.74, 0.0],
         ));
         v.push(part(
             leg_j,

@@ -234,3 +234,28 @@ fn archer_budget_and_release_anchor_obey_p15() {
         triangles + bow.triangles
     );
 }
+
+#[test]
+fn adapted_legs_ride_whole_segments_so_knees_bend_cleanly() {
+    use super::{adapter, roster};
+    use tbg_core::UnitKind;
+    // Gait v2 bends every knee; a leg mesh cut by triangles would tear.
+    for kind in [
+        UnitKind::Shieldbearer,
+        UnitKind::Hexer,
+        UnitKind::Sawbot,
+        UnitKind::Bloomkeeper,
+    ] {
+        let built = adapter::build(&roster::figure_spec(kind, 0, 0));
+        for j in [
+            Joint::ThighL,
+            Joint::ShinL,
+            Joint::FootL,
+            Joint::ThighR,
+            Joint::ShinR,
+            Joint::FootR,
+        ] {
+            assert!(built[j.index()].is_some(), "{kind:?} has no {j:?} segment");
+        }
+    }
+}

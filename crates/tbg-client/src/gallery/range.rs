@@ -27,7 +27,7 @@ pub(super) const FIRST_X: f32 = 2.0;
 /// Distance from shooter to dummy: inside the form's range, never closer
 /// than a melee swing.
 pub(super) fn reach(unit: UnitKind) -> f32 {
-    (effective_stats(unit, 0, 0, 0).range as f32 / 1000.0 * 0.85).clamp(1.3, 5.2)
+    (effective_stats(unit, 0, 0, 0).range as f32 / 1000.0 * 0.85).clamp(1.7, 5.2)
 }
 
 pub(super) fn spawn(

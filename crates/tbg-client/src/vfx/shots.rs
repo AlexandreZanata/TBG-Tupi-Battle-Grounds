@@ -423,7 +423,7 @@ fn trail(commands: &mut Commands, a: &VfxAssets, trail: Trail, at: Vec3, dir: Ve
                 &a.root,
                 (at.with_y(0.0), lean),
                 Motion::Sprout {
-                    size: Vec3::new(0.09, 0.26, 0.09) * size * (0.8 + 0.3 * j.x.abs()),
+                    size: Vec3::new(0.12, 0.34, 0.12) * size * (0.8 + 0.3 * j.x.abs()),
                     hold: 0.05,
                 },
                 (0.0, 0.34),

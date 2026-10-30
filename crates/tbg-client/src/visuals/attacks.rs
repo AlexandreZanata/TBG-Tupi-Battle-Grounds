@@ -16,8 +16,9 @@ use crate::vfx::{
     shots, VfxAssets,
 };
 
-/// How far a melee blade may be from its target and still land on it.
-const REACH: f32 = 1.8;
+/// How far a melee target may stand from the attacker and still take the
+/// impact (the blade may be behind it mid-combo, e.g. a shield bash).
+const REACH: f32 = 2.6;
 
 pub(super) fn release(
     mut commands: Commands,
@@ -62,7 +63,7 @@ pub(super) fn release(
                 let blade = g.transform_point(tip(tier, branch));
                 let at = a
                     .aim_at
-                    .filter(|t| t.xz().distance(blade.xz()) < REACH)
+                    .filter(|t| t.xz().distance(root.translation.xz()) < REACH)
                     .unwrap_or(blade);
                 let kind = impact(tier, branch);
                 impacts::land(&mut commands, &vfx, kind, at.with_y(0.3), area);

@@ -116,10 +116,19 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
                 ground,
                 &a.root,
                 5,
-                (0.22, 0.55),
+                (0.36, 0.8),
                 area.hold.max(0.6),
             );
-            dust(commands, a, ground, 4, 0.12);
+            roots_ring(
+                commands,
+                a,
+                ground,
+                &a.leaf,
+                4,
+                (0.3, 0.55),
+                area.hold.max(0.6),
+            );
+            dust(commands, a, ground, 4, 0.14);
         }
         Impact::Strangle => {
             roots_ring(
@@ -128,7 +137,7 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
                 ground,
                 &a.root,
                 7,
-                (0.24, 0.75),
+                (0.4, 1.0),
                 area.hold.max(0.6),
             );
             roots_ring(
@@ -137,7 +146,7 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
                 ground,
                 &a.amber,
                 4,
-                (0.14, 0.45),
+                (0.26, 0.6),
                 area.hold.max(0.6),
             );
             dust(commands, a, ground, 5, 0.14);
@@ -149,7 +158,7 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
                 ground,
                 &a.root,
                 5,
-                (0.22, 0.55),
+                (0.36, 0.8),
                 area.hold.max(0.6),
             );
             let r = area.splash.max(0.8);
@@ -393,7 +402,7 @@ fn roots_ring(
             mat,
             (ground.with_y(0.0) + dir * radius, tilt),
             Motion::Sprout {
-                size: Vec3::new(0.12, h, 0.12),
+                size: Vec3::new(0.17, h, 0.17),
                 hold,
             },
             (0.01 * i as f32, 0.29 + hold),
