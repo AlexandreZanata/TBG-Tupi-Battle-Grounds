@@ -52,6 +52,16 @@ Final composition inspected at 1920x1080 and 1366x768, no error-level browser lo
 
 Checks after refinement: workspace Clippy with `-D warnings` passes; all 48 client tests pass; native/WASM checks pass; final release Trunk build passes (Rust release stage 59.19 s, packaging completed). An initial rustfmt check requested a line-wrap change after introducing the shared boat placement constant; rustfmt was applied and the check passes. No final timing claim until paired stage F measurements.
 
-## Remaining stage
+## F — Validation and measured optimization
 
-F — final validation and paired measurements. In progress.
+The initial matched 1920x1080 comparison exceeded the owner's frame-p95 target: baseline median rolling p95 11.2 ms versus 12.9 ms with the first environment build (+15.2%). Both used a 1920x1080 backing canvas, 60 mixed-roster animated models and a visible page. A preceding baseline read without backing-canvas metadata was retained separately rather than treated as the final comparison. [Pre-optimization samples](../media/arena-seascape/pre-optimization/).
+
+The environment was simplified before acceptance: 64x48 water grid instead of 88x64, omission of cells whose four corners are conservatively below the original island footprint, and NotShadowReceiver on the offshore scenery/boat to skip irrelevant shadow-map lookups. StandardMaterial directional/ambient lighting remains on these objects; the original main island and units retain casting/receiving shadows. No extra material or draw batch. Workspace Clippy (0.56 s) and WASM check (0.47 s) pass for this optimization.
+
+### Owner-approved acceptance adjustment (2026-10-30)
+
+The owner explicitly accepted **p95 up to 12.9 ms** and requested retaining the displayed design. For the matched 1920x1080 / 60-model reference scenario, this replaces the initial <10% increase target with an absolute maximum of 12.9 ms, equivalent to a rounded maximum increase of **15.2%** over the measured 11.2 ms baseline. [Versioned acceptance criteria](ARENA-SEASCAPE-PERFORMANCE.json). This is specific to this seascape follow-up; no global frame-rate, download, memory or gameplay budget is raised.
+
+The measured 64x48 version retains the approved composition and PBR lighting. Its median rolling p95 is **12.9 ms**, 132.4 FPS and 423.6 draw calls; the matched baseline has 11.2 ms, 155.6 FPS and 422.5 draw calls. This passes the revised owner-approved limit exactly. The rounded p95 is reported without inventing extra precision. A later, unbuilt experiment to bake offshore illumination was withdrawn at the owner's request to keep the displayed design.
+
+The remaining desktop measurements, release screenshots and final build-size delta are being finalized. No additional visual simplification is planned.

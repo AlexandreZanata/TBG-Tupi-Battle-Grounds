@@ -2,7 +2,10 @@
 
 use super::{geometry::Surface, painted, Part};
 use crate::art::{mesh, mesh::Shape::*, palette::*};
-use bevy::{light::NotShadowCaster, prelude::*};
+use bevy::{
+    light::{NotShadowCaster, NotShadowReceiver},
+    prelude::*,
+};
 
 pub(super) fn lighthouse(parts: &mut Vec<Part>, at: Vec3) {
     for (shape, color, y) in [
@@ -156,6 +159,7 @@ pub(super) fn spawn_boat(
         Transform::from_translation(at).with_scale(Vec3::splat(scale)),
         Sailboat(at),
         NotShadowCaster,
+        NotShadowReceiver,
     ));
     triangles
 }

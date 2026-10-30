@@ -19,19 +19,23 @@ pub(super) fn sea() -> Mesh {
         let fx = x as f32;
         let fz = z as f32;
         Vec3::new(
-            -16.0 + fx * 48.0 / 88.0 + (fx * 1.7 + fz * 2.3).sin() * 0.10,
+            -16.0 + fx * 48.0 / 64.0 + (fx * 1.7 + fz * 2.3).sin() * 0.10,
             LEVEL + (fx * 0.6 + fz * 0.8).sin() * 0.006,
-            -20.0 + fz * 0.5 + (fx * 2.1 - fz * 1.3).cos() * 0.08,
+            -20.0 + fz * 32.0 / 48.0 + (fx * 2.1 - fz * 1.3).cos() * 0.08,
         )
     };
-    for z in 0..64 {
-        for x in 0..88 {
+    for z in 0..48 {
+        for x in 0..64 {
             let [a, b, c, d] = [
                 point(x, z),
                 point(x, z + 1),
                 point(x + 1, z + 1),
                 point(x + 1, z),
             ];
+            // All four corners lie safely inside the original rocky footprint.
+            if [a, b, c, d].iter().all(|p| shore_distance(p.x, p.z) < 0.93) {
+                continue;
+            }
             let near = ((1.5 - shore_distance(a.x, a.z)) / 0.48).clamp(0.0, 1.0);
             let noise = rng.below(1000) as f32 / 1000.0 - 0.5;
             let swell = (a.x * 1.8 + a.z * 2.6).sin() * 0.012 + noise * 0.035;

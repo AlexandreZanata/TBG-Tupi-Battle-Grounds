@@ -2,7 +2,10 @@
 
 use super::{geometry::Surface, maritime, painted, trees, water, Part};
 use crate::art::{mesh, mesh::Shape::*, palette::*};
-use bevy::{light::NotShadowCaster, prelude::*};
+use bevy::{
+    light::{NotShadowCaster, NotShadowReceiver},
+    prelude::*,
+};
 use tbg_core::Pcg32;
 
 struct Islet {
@@ -156,6 +159,7 @@ pub(super) fn spawn(
         MeshMaterial3d(material.clone()),
         Transform::default(),
         NotShadowCaster,
+        NotShadowReceiver,
     ));
     let boat = maritime::spawn_boat(commands, meshes, material, BOAT, 0.68);
     info!("arena offshore scenery: {triangles} triangles, boat: {boat} triangles; 2 draw batches");
