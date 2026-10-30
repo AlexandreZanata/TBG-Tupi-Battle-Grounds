@@ -22,7 +22,11 @@ pub const KIT: Kit = Kit {
         impact,
     },
     evolve: crate::vfx::impacts::Burst::Soul,
-    durations: &[(Clip::Evolve, 0.9), (Clip::AttackMelee, motion::ATTACK), (Clip::Spawn, 0.6)],
+    durations: &[
+        (Clip::Evolve, 0.9),
+        (Clip::AttackMelee, motion::ATTACK),
+        (Clip::Spawn, 0.6),
+    ],
 };
 
 fn impact(tier: u8, branch: u8) -> Impact {

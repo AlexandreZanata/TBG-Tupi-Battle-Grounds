@@ -61,10 +61,10 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
         _ if options.range => {
             let gap = options.unit.map_or(4.0, super::range::reach);
             (
-                Vec3::new(1.5 + gap * 0.5, 0.6, 0.0),
-                gap + 3.2,
-                5.6,
-                Vec3::new(0.0, 1.3, 1.0),
+                Vec3::new(super::range::FIRST_X + gap * 0.5, 0.5, 0.3),
+                gap + 3.0,
+                3.4,
+                Vec3::new(0.0, 1.25, 1.0),
             )
         }
         _ if options.frames => sheet(options, portrait),

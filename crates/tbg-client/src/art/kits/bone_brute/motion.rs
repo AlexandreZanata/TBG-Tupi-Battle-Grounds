@@ -114,10 +114,10 @@ fn idle(m: &Moment, pose: &mut Pose, p: &Proportions, f: Form) {
     tools::set(
         pose,
         UpperArmR,
-        [-12.0 - 28.0 * engaged, 0.0, -10.0 - 4.0 * engaged],
+        [-18.0 - 22.0 * engaged, 0.0, -10.0 - 4.0 * engaged],
     );
-    tools::set(pose, ForearmR, [-28.0 - 27.0 * engaged, 0.0, 0.0]);
-    tools::set(pose, HandR, [55.0 - 35.0 * engaged, 0.0, 0.0]);
+    tools::set(pose, ForearmR, [-40.0 - 15.0 * engaged, 0.0, 0.0]);
+    tools::set(pose, HandR, [22.0 - 12.0 * engaged, 0.0, 0.0]);
     let shield = if f.a { -40.0 } else { 0.0 };
     tools::set(
         pose,
@@ -153,8 +153,8 @@ fn walk(m: &Moment, pose: &mut Pose, f: Form) {
             4.0 * phase.sin(),
         ],
     );
-    tools::add(pose, ForearmR, [-30.0, 0.0, 0.0]);
-    tools::set(pose, HandR, [50.0, 0.0, 0.0]);
+    tools::add(pose, ForearmR, [-35.0, 0.0, 0.0]);
+    tools::set(pose, HandR, [25.0, 0.0, 0.0]);
     if f.a {
         tools::add(pose, ForearmL, [-35.0, 0.0, 0.0]);
     }
@@ -235,7 +235,11 @@ fn roar(m: &Moment, pose: &mut Pose, p: &Proportions) {
     tools::add(pose, Spine, [30.0 * crouch - 18.0 * roar, 0.0, 0.0]);
     tools::add(pose, Head, [10.0 * crouch - 30.0 * roar, 0.0, 0.0]);
     for (upper, fore, s) in [(UpperArmL, ForearmL, 1.0f32), (UpperArmR, ForearmR, -1.0)] {
-        tools::set(pose, upper, [-20.0 * crouch - 40.0 * roar, 0.0, s * (10.0 + 100.0 * roar)]);
+        tools::set(
+            pose,
+            upper,
+            [-20.0 * crouch - 40.0 * roar, 0.0, s * (10.0 + 100.0 * roar)],
+        );
         tools::set(pose, fore, [-40.0 * crouch - 30.0 * roar, 0.0, 0.0]);
     }
     tools::shift(pose, Hips, [0.0, -0.08 * crouch, 0.0]);

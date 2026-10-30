@@ -8,7 +8,7 @@ use std::f32::consts::TAU;
 
 use bevy::prelude::*;
 
-use super::model::{bombard, plan, Bombard, Form};
+use super::model::{bombard, plan, Bombard, Form, CRANK};
 use crate::art::{
     anim::{Clip, Pose},
     kits::{
@@ -30,8 +30,8 @@ struct Carry {
 /// Resting on the shoulder, muzzle tipped up.
 fn at_ease() -> Carry {
     Carry {
-        at: Vec3::new(-0.25, 0.31, 0.05),
-        turn: Quat::from_rotation_y(8f32.to_radians()) * Quat::from_rotation_x(-22f32.to_radians()),
+        at: Vec3::new(-0.27, 0.17, 0.08),
+        turn: Quat::from_rotation_y(6f32.to_radians()) * Quat::from_rotation_x(-18f32.to_radians()),
     }
 }
 
@@ -40,7 +40,7 @@ fn at_ease() -> Carry {
 const TWIST: f32 = 20.0;
 fn braced() -> Carry {
     Carry {
-        at: Vec3::new(-0.24, 0.3, 0.12),
+        at: Vec3::new(-0.25, 0.16, 0.14),
         turn: Quat::from_rotation_y(TWIST.to_radians()),
     }
 }
@@ -69,7 +69,12 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         stance(pose, &p, brace);
         aim_gun(m, pose, (&p, &gun), &mut carry, brace);
     }
-    hands(m, pose, &p, &gun, carry);
+    let support = match m.clip {
+        Clip::Idle => brace,
+        Clip::AttackRanged | Clip::Evolve => 1.0,
+        _ => 0.0,
+    };
+    hands(m, pose, (&p, &gun), carry, support);
 }
 
 fn idle(m: &Moment, pose: &mut Pose, engaged: f32) -> Carry {
@@ -178,12 +183,19 @@ fn aim_gun(
     carry.turn *= Quat::from_rotation_x(-up * 0.7);
 }
 
-/// Right hand on the grip, left hand on the fore-grip, or on the crank
+/// Right hand on the grip; the left hand joins on the fore-grip by
+/// `support` (0 leaves the shared clip's free arm), or turns the crank
 /// between shots (two turns from 0.55 s to 1.5 s after the shot).
-fn hands(m: &Moment, pose: &mut Pose, p: &Proportions, gun: &Bombard, carry: Carry) {
+fn hands(
+    m: &Moment,
+    pose: &mut Pose,
+    (p, gun): (&Proportions, &Bombard),
+    carry: Carry,
+    support: f32,
+) {
     let right_pole = Vec3::new(-1.0, -0.7, -0.5);
     tools::reach(pose, false, carry.at, Some(carry.turn), (p, right_pole));
-    if m.clip == Clip::Walk {
+    if support <= 0.0 {
         return;
     }
     let crank = if m.clip == Clip::Idle && m.aim.is_some() {
@@ -192,14 +204,14 @@ fn hands(m: &Moment, pose: &mut Pose, p: &Proportions, gun: &Bombard, carry: Car
         0.0
     };
     let turn = (m.since_attack - 0.55) * TAU * 2.1;
-    let crank_at = Vec3::new(0.15, 0.12, -0.16) + Vec3::new(0.0, turn.sin(), turn.cos()) * 0.05;
+    let crank_at = CRANK + Vec3::new(0.0, turn.sin(), turn.cos()) * 0.045;
     let grip = gun.fore_grip.lerp(crank_at, crank);
+    let arm = [Joint::UpperArmL, Joint::ForearmL, Joint::HandL];
+    let free = arm.map(|j| pose[j.index()].0);
     let left_pole = Vec3::new(1.0, -0.8, -0.3);
-    tools::reach(
-        pose,
-        true,
-        carry.at + carry.turn * grip,
-        Some(carry.turn),
-        (p, left_pole),
-    );
+    let target = carry.at + carry.turn * grip;
+    tools::reach(pose, true, target, Some(carry.turn), (p, left_pole));
+    for (j, rest) in arm.into_iter().zip(free) {
+        pose[j.index()].0 = rest.lerp(pose[j.index()].0, support);
+    }
 }

@@ -521,23 +521,79 @@ pub fn evolution(commands: &mut Commands, a: &VfxAssets, burst: Burst, at: Vec3)
     let ground = at.with_y(0.05);
     match burst {
         Burst::Forge => {
-            spawn(commands, &a.ring, &a.fire, ground, Motion::Grow { radius: 1.2 }, 0.0, 0.45);
-            spawn(commands, &a.puff, &a.fire, at, Motion::Flash { size: 0.45 }, 0.0, 0.2);
+            spawn(
+                commands,
+                &a.ring,
+                &a.fire,
+                ground,
+                Motion::Grow { radius: 1.2 },
+                0.0,
+                0.45,
+            );
+            spawn(
+                commands,
+                &a.puff,
+                &a.fire,
+                at,
+                Motion::Flash { size: 0.45 },
+                0.0,
+                0.2,
+            );
             for (i, dir) in around(10, 0.0).enumerate() {
                 let up = dir * 0.7 + Vec3::Y * (1.2 + 0.1 * (i % 3) as f32);
-                spawn(commands, &a.ball, &a.orange, at, Motion::Burst { dir: up }, 0.0, 0.45);
+                spawn(
+                    commands,
+                    &a.ball,
+                    &a.orange,
+                    at,
+                    Motion::Burst { dir: up },
+                    0.0,
+                    0.45,
+                );
             }
             for dir in around(5, 0.5) {
                 let vel = dir * 0.5 + Vec3::Y * 0.9;
-                spawn(commands, &a.puff, &a.smoke, at, Motion::Puff { vel, size: 0.2 }, 0.05, 0.8);
+                spawn(
+                    commands,
+                    &a.puff,
+                    &a.smoke,
+                    at,
+                    Motion::Puff { vel, size: 0.2 },
+                    0.05,
+                    0.8,
+                );
             }
         }
         Burst::Soul => {
-            spawn(commands, &a.ring, &a.green, ground, Motion::Grow { radius: 1.3 }, 0.0, 0.5);
-            spawn(commands, &a.puff, &a.green, at, Motion::Flash { size: 0.5 }, 0.0, 0.22);
+            spawn(
+                commands,
+                &a.ring,
+                &a.green,
+                ground,
+                Motion::Grow { radius: 1.3 },
+                0.0,
+                0.5,
+            );
+            spawn(
+                commands,
+                &a.puff,
+                &a.green,
+                at,
+                Motion::Flash { size: 0.5 },
+                0.0,
+                0.22,
+            );
             for (i, dir) in around(8, 0.3).enumerate() {
                 let vel = dir * 0.35 + Vec3::Y * (1.0 + 0.15 * (i % 2) as f32);
-                spawn(commands, &a.puff, &a.green, at + dir * 0.3, Motion::Puff { vel, size: 0.09 }, 0.02 * i as f32, 0.9);
+                spawn(
+                    commands,
+                    &a.puff,
+                    &a.green,
+                    at + dir * 0.3,
+                    Motion::Puff { vel, size: 0.09 },
+                    0.02 * i as f32,
+                    0.9,
+                );
             }
         }
         Burst::Bloom => {
@@ -545,10 +601,29 @@ pub fn evolution(commands: &mut Commands, a: &VfxAssets, burst: Burst, at: Vec3)
             roots_ring(commands, a, ground, &a.leaf, 5, (0.75, 0.35), 0.3);
             for (i, dir) in around(10, 0.2).enumerate() {
                 let vel = dir * 1.1 + Vec3::Y * (2.4 + 0.2 * (i % 3) as f32);
-                spawn(commands, &a.chip, &a.leaf, at, Motion::Debris { vel, size: 0.06 }, 0.0, 0.8);
+                spawn(
+                    commands,
+                    &a.chip,
+                    &a.leaf,
+                    at,
+                    Motion::Debris { vel, size: 0.06 },
+                    0.0,
+                    0.8,
+                );
             }
             for dir in around(5, 0.9) {
-                spawn(commands, &a.puff, &a.spore, at, Motion::Puff { vel: dir * 0.5 + Vec3::Y * 0.6, size: 0.06 }, 0.1, 0.8);
+                spawn(
+                    commands,
+                    &a.puff,
+                    &a.spore,
+                    at,
+                    Motion::Puff {
+                        vel: dir * 0.5 + Vec3::Y * 0.6,
+                        size: 0.06,
+                    },
+                    0.1,
+                    0.8,
+                );
             }
         }
     }

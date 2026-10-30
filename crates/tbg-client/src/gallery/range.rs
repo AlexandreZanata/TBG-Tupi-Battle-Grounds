@@ -5,7 +5,9 @@
 use bevy::prelude::*;
 use tbg_core::{content::effective_stats, UnitKind};
 
+use super::settings::Gallery;
 use crate::art::{anim::Animator, FigureLibrary, FORMS};
+use crate::vfx::{impacts, VfxAssets};
 use crate::visuals::{self, AimTarget, UnitLook, UnitVisual, VisualAssets, VisualCue};
 
 /// A shooter, its dummy, and its clock.
@@ -15,11 +17,12 @@ pub(super) struct Range {
     interval: f32,
     next: f32,
     hit: Option<f32>,
+    shots: u32,
 }
 
 /// Across-lane spacing between the five firing lines.
-const LANE: f32 = 1.2;
-const FIRST_X: f32 = 1.5;
+const LANE: f32 = 1.6;
+pub(super) const FIRST_X: f32 = 2.0;
 
 /// Distance from shooter to dummy: inside the form's range, never closer
 /// than a melee swing.
@@ -69,6 +72,7 @@ pub(super) fn spawn(
             interval: f32::from(s.interval) / tbg_core::content::TICK_HZ as f32,
             next: 0.8 + 0.25 * i as f32,
             hit: None,
+            shots: 0,
         });
     }
 }
@@ -76,18 +80,34 @@ pub(super) fn spawn(
 /// Start each attack on its interval and land the dummy's hit reaction at
 /// the simulation's 0.30 s.
 pub(super) fn fire(
+    mut commands: Commands,
     time: Res<Time>,
-    assets: Res<VisualAssets>,
-    mut units: Query<(&mut UnitVisual, &mut Animator, Option<&mut Range>)>,
+    options: Res<Gallery>,
+    (assets, vfx): (Res<VisualAssets>, Res<VfxAssets>),
+    mut units: Query<(
+        &mut UnitVisual,
+        &mut Animator,
+        &Transform,
+        Option<&mut Range>,
+    )>,
 ) {
     let now = time.elapsed_secs();
     let mut hits = Vec::new();
-    for (mut v, mut anim, range) in &mut units {
+    for (mut v, mut anim, at, range) in &mut units {
         let Some(mut r) = range else {
             continue;
         };
         if now >= r.next {
-            r.next = now + r.interval;
+            r.next = now + r.interval.max(1.0);
+            r.shots += 1;
+            if options.evolve && r.shots % 3 == 0 {
+                visuals::play_cue(&mut v, &mut anim, &assets, VisualCue::Evolved);
+                if let Some(kit) = v.kit() {
+                    let p = at.translation + Vec3::Y * 0.6;
+                    impacts::evolution(&mut commands, &vfx, kit.evolve, p);
+                }
+                continue;
+            }
             r.hit = Some(now + 0.3);
             v.engage(AimTarget::Unit(r.target));
             visuals::play_cue(&mut v, &mut anim, &assets, VisualCue::AttackStart);
@@ -98,7 +118,7 @@ pub(super) fn fire(
         }
     }
     for target in hits {
-        if let Ok((mut v, mut anim, _)) = units.get_mut(target) {
+        if let Ok((mut v, mut anim, _, _)) = units.get_mut(target) {
             visuals::play_cue(&mut v, &mut anim, &assets, VisualCue::Hit);
         }
     }

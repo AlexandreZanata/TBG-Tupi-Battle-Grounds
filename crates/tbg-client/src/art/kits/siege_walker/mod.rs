@@ -24,7 +24,11 @@ pub const KIT: Kit = Kit {
     },
     // Large: a ×1.25 recovery; Release stays at 0.18 s.
     evolve: crate::vfx::impacts::Burst::Forge,
-    durations: &[(Clip::Evolve, 0.9), (Clip::AttackRanged, 0.62), (Clip::Spawn, 0.5)],
+    durations: &[
+        (Clip::Evolve, 0.9),
+        (Clip::AttackRanged, 0.62),
+        (Clip::Spawn, 0.5),
+    ],
 };
 
 /// Base shell, Longshot long shell, Artillery great shell, Shrapnel

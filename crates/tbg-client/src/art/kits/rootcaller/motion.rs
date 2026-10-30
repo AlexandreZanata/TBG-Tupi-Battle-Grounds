@@ -101,7 +101,11 @@ fn bloom(m: &Moment, pose: &mut Pose, p: &Proportions) {
     tools::add(pose, Spine, [35.0 * crouch - 12.0 * open, 0.0, 0.0]);
     tools::add(pose, Head, [-25.0 * open, 0.0, 0.0]);
     for (upper, fore, s) in [(UpperArmL, ForearmL, 1.0f32), (UpperArmR, ForearmR, -1.0)] {
-        tools::set(pose, upper, [-30.0 * crouch - 150.0 * open, 0.0, s * (10.0 + 35.0 * open)]);
+        tools::set(
+            pose,
+            upper,
+            [-30.0 * crouch - 150.0 * open, 0.0, s * (10.0 + 35.0 * open)],
+        );
         tools::set(pose, fore, [-30.0 * crouch - 10.0 * open, 0.0, 0.0]);
     }
     tools::shift(pose, Hips, [0.0, -0.1 * crouch, 0.0]);

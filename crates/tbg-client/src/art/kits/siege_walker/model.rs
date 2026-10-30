@@ -59,27 +59,31 @@ pub struct Bombard {
     pub breech: Vec3,
 }
 
-const BORE: f32 = 0.15;
+/// Barrel axis height above the grip: the hand rides at chest height and
+/// the barrel rests on the shoulder.
+const BORE: f32 = 0.26;
+/// Where the left hand turns the reload crank (centre of its circle).
+pub const CRANK: Vec3 = Vec3::new(0.13, BORE - 0.05, 0.02);
 
 pub fn bombard(f: Form) -> Bombard {
     let (len, back) = gun_length(f);
     let bell = if f.b && !f.t2 { 0.16 } else { 0.08 };
     Bombard {
         muzzle: Vec3::new(0.0, BORE, back + len + bell),
-        fore_grip: Vec3::new(0.15, 0.05, 0.17),
+        fore_grip: Vec3::new(0.12, 0.1, 0.12),
         breech: Vec3::new(0.0, BORE, back - 0.08),
     }
 }
 
 fn gun_length(f: Form) -> (f32, f32) {
     let len = match (f.a, f.b, f.t2) {
-        (true, _, false) => 1.25,
-        (true, _, true) => 1.12,
-        (_, true, false) => 0.9,
-        (_, true, true) => 1.0,
-        _ => 0.98,
+        (true, _, false) => 1.08,
+        (true, _, true) => 0.98,
+        (_, true, false) => 0.8,
+        (_, true, true) => 0.9,
+        _ => 0.86,
     };
-    (len, -0.36)
+    (len, -0.32)
 }
 
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
@@ -193,7 +197,7 @@ fn chest(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         )
         .scale([1.0, 1.0, 0.74]),
         part(Body(Chest), Ball(0.19), OGRE_SKIN, [0.0, 0.1, 0.08]).scale([1.15, 0.9, 0.85]),
-        part(Body(Chest), Ball(0.14), OGRE_SKIN, [0.0, h, -0.03]).scale([2.0, 0.75, 1.1]),
+        part(Body(Chest), Ball(0.13), OGRE_SKIN, [0.0, h * 0.94, -0.04]).scale([1.7, 0.6, 1.0]),
     ]);
     // Leather harness crossing the chest, a brass ring at the crossing.
     for s in [-1.0f32, 1.0] {
@@ -462,6 +466,12 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 
 fn back(v: &mut Vec<PartSpec>, f: Form) {
     let b = Secondary(Spring::Back);
+    // A team pennant on a pole: the side reads from the match camera.
+    v.extend([
+        part(b, Cyl(0.014, 0.62), WOOD, [0.12, 0.22, -0.16]),
+        part(b, Box(0.02, 0.15, 0.2), ALLY, [0.12, 0.44, -0.27]),
+        part(b, Box(0.022, 0.03, 0.2), GOLD, [0.12, 0.36, -0.27]),
+    ]);
     if f.t2 {
         // A furnace-boiler that feeds the great guns; glowing firebox.
         v.extend([
@@ -504,11 +514,11 @@ fn gun(v: &mut Vec<PartSpec>, f: Form) {
     let front = back + len;
     let along = |x: f32, z: f32| [x, BORE, z];
     let r = if f.t2 {
-        0.1
-    } else if f.a {
-        0.07
-    } else {
         0.088
+    } else if f.a {
+        0.064
+    } else {
+        0.078
     };
     let (metal, band) = match (f.a, f.t2) {
         (true, true) => (GUNMETAL, GOLD),
@@ -516,41 +526,36 @@ fn gun(v: &mut Vec<PartSpec>, f: Form) {
         _ if f.b && f.t2 => (GUNMETAL, IRON),
         _ => (BRONZE, IRON),
     };
+    let x90 = [90.0, 0.0, 0.0];
     if f.a && f.t2 {
         // Artillery: twin bores side by side with gold muzzles.
-        for x in [-0.075, 0.075] {
-            v.push(
-                part(w, Cyl(0.075, len), metal, along(x, back + len * 0.5)).rot([90.0, 0.0, 0.0]),
-            );
-            v.push(
-                part(w, Frustum(0.1, 0.082, 0.1), GOLD, along(x, front + 0.04))
-                    .rot([90.0, 0.0, 0.0]),
-            );
+        for x in [-0.068, 0.068] {
+            v.push(part(w, Cyl(0.064, len), metal, along(x, back + len * 0.5)).rot(x90));
+            v.push(part(w, Frustum(0.085, 0.07, 0.09), GOLD, along(x, front + 0.04)).rot(x90));
         }
         v.push(part(
             w,
-            Box(0.3, 0.12, 0.5),
+            Box(0.27, 0.11, 0.44),
             GUNMETAL,
-            along(0.0, back + 0.3),
+            along(0.0, back + 0.28),
         ));
-        v.push(part(w, Box(0.31, 0.025, 0.06), HOT, along(0.0, back + 0.48)).glow());
+        v.push(part(w, Box(0.28, 0.022, 0.05), HOT, along(0.0, back + 0.44)).glow());
     } else {
-        v.push(part(w, Cyl(r, len), metal, along(0.0, back + len * 0.5)).rot([90.0, 0.0, 0.0]));
-        let muzzle = if f.b && !f.t2 {
-            // Shrapnel: a wide blunderbuss bell.
+        v.push(part(w, Cyl(r, len), metal, along(0.0, back + len * 0.5)).rot(x90));
+        let blunderbuss = f.b && !f.t2;
+        // Shrapnel: a wide blunderbuss bell.
+        let muzzle = if blunderbuss {
             Frustum(r * 2.3, r * 1.05, 0.16)
         } else {
             Frustum(r * 1.4, r * 1.05, 0.08)
         };
-        let bell = if f.b && !f.t2 { 0.08 } else { 0.04 };
-        v.push(part(w, muzzle, band, along(0.0, front + bell)).rot([90.0, 0.0, 0.0]));
+        let bell = if blunderbuss { 0.08 } else { 0.04 };
+        v.push(part(w, muzzle, band, along(0.0, front + bell)).rot(x90));
     }
     for k in [0.12, 0.45, 0.82] {
-        v.push(
-            part(w, Cyl(r * 1.18, 0.035), band, along(0.0, back + len * k)).rot([90.0, 0.0, 0.0]),
-        );
+        v.push(part(w, Cyl(r * 1.18, 0.035), band, along(0.0, back + len * k)).rot(x90));
     }
-    // Breech block, exhaust flare, sight, grip, fore-grip, side crank.
+    // Breech block, exhaust flare, sight, mount and grip, fore-grip, crank.
     v.extend([
         part(w, Box(r * 2.5, r * 2.5, 0.13), IRON, along(0.0, back)),
         part(
@@ -566,63 +571,39 @@ fn gun(v: &mut Vec<PartSpec>, f: Form) {
             IRON,
             [0.0, BORE + r + 0.02, front - 0.12],
         ),
+        part(w, Box(0.07, 0.12, 0.12), IRON, [0.0, BORE - r - 0.04, 0.02]),
         part(w, Box(0.05, 0.15, 0.065), OAK, [0.0, 0.03, 0.0]).rot([12.0, 0.0, 0.0]),
-        part(w, Box(0.16, 0.035, 0.035), OAK, [0.075, 0.09, 0.17]),
-        part(w, Box(0.04, 0.09, 0.04), OAK, [0.15, 0.05, 0.17]),
-        part(w, Cyl(0.045, 0.03), BRASS, [r + 0.02, BORE, back + 0.2]).rot([0.0, 0.0, 90.0]),
+        part(w, Box(0.12, 0.03, 0.03), OAK, [0.07, 0.15, 0.12]),
+        part(w, Box(0.035, 0.1, 0.035), OAK, [0.12, 0.1, 0.12]),
+        part(w, Cyl(0.04, 0.03), BRASS, [r + 0.02, BORE, CRANK.z]).rot([0.0, 0.0, 90.0]),
         part(
             w,
-            Box(0.02, 0.09, 0.02),
+            Box(0.018, 0.06, 0.018),
             IRON,
-            [r + 0.04, BORE - 0.04, back + 0.2],
+            [r + 0.04, BORE - 0.03, CRANK.z],
+        ),
+        part(
+            w,
+            Box(0.02, 0.02, 0.05),
+            OAK,
+            [r + 0.05, BORE - 0.06, CRANK.z],
         ),
     ]);
     if f.a && !f.t2 {
         // Longshot: a long brass telescope along the barrel.
-        v.push(
-            part(
-                w,
-                Cyl(0.026, 0.42),
-                BRASS,
-                [0.06, BORE + r + 0.035, back + 0.45],
-            )
-            .rot([90.0, 0.0, 0.0]),
-        );
-        v.push(
-            part(
-                w,
-                Cyl(0.034, 0.04),
-                BRASS,
-                [0.06, BORE + r + 0.035, back + 0.68],
-            )
-            .rot([90.0, 0.0, 0.0]),
-        );
+        let top = BORE + r + 0.035;
+        v.push(part(w, Cyl(0.026, 0.42), BRASS, [0.06, top, back + 0.45]).rot(x90));
+        v.push(part(w, Cyl(0.034, 0.04), BRASS, [0.06, top, back + 0.68]).rot(x90));
     }
     if f.b && f.t2 {
         // Concussion: a drum magazine of hammer shells with glowing bands.
-        v.push(
-            part(w, Cyl(0.14, 0.14), IRON, [0.0, BORE - 0.02, back + 0.3]).rot([0.0, 0.0, 90.0]),
-        );
-        v.push(
-            part(
-                w,
-                Ring(0.014, 0.14, 360.0),
-                HOT,
-                [0.06, BORE - 0.02, back + 0.3],
-            )
-            .rot([0.0, 0.0, 90.0])
-            .glow(),
-        );
-        v.push(
-            part(
-                w,
-                Ring(0.014, 0.14, 360.0),
-                HOT,
-                [-0.06, BORE - 0.02, back + 0.3],
-            )
-            .rot([0.0, 0.0, 90.0])
-            .glow(),
-        );
+        let z90 = [0.0, 0.0, 90.0];
+        let drum = [0.0, BORE - 0.02, back + 0.3];
+        v.push(part(w, Cyl(0.14, 0.14), IRON, drum).rot(z90));
+        for x in [-0.06, 0.06] {
+            let at = [x, BORE - 0.02, back + 0.3];
+            v.push(part(w, Ring(0.014, 0.14, 360.0), HOT, at).rot(z90).glow());
+        }
         v.push(part(
             w,
             Box(0.12, 0.08, 0.1),

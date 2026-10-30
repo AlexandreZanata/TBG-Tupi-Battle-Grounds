@@ -74,6 +74,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     head(&mut v, f);
     arms(&mut v, &p, f);
     growth(&mut v, f);
+    colors(&mut v, &p);
     FigureSpec { plan: p, parts: v }
 }
 
@@ -155,6 +156,13 @@ fn trunk(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             [0.0, h * 0.93, 0.0],
         )
         .scale([1.0, 1.0, 0.85]),
+        part(Body(Chest), Cone(0.06, 0.17), LEAF, [0.17, h * 1.02, 0.0])
+            .rot([0.0, 0.0, -62.0])
+            .scale([1.0, 1.0, 0.35]),
+        part(Body(Chest), Cone(0.06, 0.17), LEAF, [-0.17, h * 1.02, 0.0])
+            .rot([0.0, 0.0, 62.0])
+            .scale([1.0, 1.0, 0.35]),
+        part(Body(Chest), Ball(0.07), moss, [0.0, h * 0.35, 0.15]).scale([1.4, 0.8, 0.5]),
     ]);
     for (i, a) in [0.0f32, 1.3, 2.6, 3.9, 5.1].into_iter().enumerate() {
         let (x, z) = (a.cos() * 0.19, a.sin() * 0.16);
@@ -188,13 +196,15 @@ fn trunk(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             )
             .rot([-10.0, 0.0, 0.0]),
         );
-        for (y, s) in [(0.12, 1.0f32), (0.24, -1.0)] {
+        for (y, s) in [(0.1, 1.0f32), (0.22, -1.0)] {
             v.push(
-                part(Body(Chest), Ring(0.014, 0.19, 300.0), LEAF, [0.0, y, 0.0]).rot([
-                    0.0,
-                    0.0,
-                    9.0 * s,
-                ]),
+                part(
+                    Body(Chest),
+                    Ring(0.01, 0.178, 280.0),
+                    LEAF_DARK,
+                    [0.0, y, 0.0],
+                )
+                .rot([0.0, 40.0 * s, 10.0 * s]),
             );
         }
     }
@@ -216,15 +226,33 @@ fn head(v: &mut Vec<PartSpec>, f: Form) {
         part(Body(Head), Ball(0.15), BARK, [0.0, 0.02, 0.0]).scale([0.92, 1.12, 0.9]),
         part(
             Body(Head),
-            Box(0.22, 0.05, 0.07),
+            Box(0.24, 0.035, 0.06),
             BARK_DARK,
-            [0.0, 0.05, 0.11],
+            [0.0, 0.07, 0.115],
         )
-        .rot([-14.0, 0.0, 0.0]),
+        .rot([-18.0, 0.0, 0.0]),
         part(Body(Head), Cone(0.03, 0.1), BARK, [0.0, 0.0, 0.15]).rot([95.0, 0.0, 0.0]),
-        part(Body(Head), Cone(0.1, 0.2), MOSS, [0.0, -0.17, 0.07]).rot([168.0, 0.0, 0.0]),
-        part(Body(Head), Box(0.045, 0.03, 0.02), eye, [0.05, 0.02, 0.13]).glow(),
-        part(Body(Head), Box(0.045, 0.03, 0.02), eye, [-0.05, 0.02, 0.13]).glow(),
+        part(
+            Body(Head),
+            Box(0.09, 0.016, 0.02),
+            DARK,
+            [0.0, -0.065, 0.13],
+        ),
+        part(Body(Head), Cone(0.09, 0.2), MOSS, [0.0, -0.14, 0.09]).rot([160.0, 0.0, 0.0]),
+        part(
+            Body(Head),
+            Box(0.06, 0.042, 0.02),
+            eye,
+            [0.055, 0.025, 0.133],
+        )
+        .glow(),
+        part(
+            Body(Head),
+            Box(0.06, 0.042, 0.02),
+            eye,
+            [-0.055, 0.025, 0.133],
+        )
+        .glow(),
     ]);
     match (f.a, f.b, f.t2) {
         // Strangle: a crown of thorns with amber tips.
@@ -328,8 +356,8 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             v.push(
                 part(
                     Body(fore),
-                    Ring(0.013, 0.065, 360.0),
-                    LEAF,
+                    Ring(0.009, 0.06, 360.0),
+                    LEAF_DARK,
                     [0.0, -a * 0.3, 0.0],
                 )
                 .rot([12.0, 0.0, 0.0]),
@@ -337,8 +365,8 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             v.push(
                 part(
                     Body(upper),
-                    Ring(0.013, 0.07, 360.0),
-                    LEAF,
+                    Ring(0.009, 0.062, 360.0),
+                    LEAF_DARK,
                     [0.0, -a * 0.6, 0.0],
                 )
                 .rot([-10.0, 0.0, 0.0]),
@@ -356,6 +384,22 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 }
 
 /// Fungus on the spore branch: shoulder sacs, then a cluster on the back.
+/// A team sash over the shoulder and a team blossom on the head: the side
+/// reads from the match camera.
+fn colors(v: &mut Vec<PartSpec>, p: &Proportions) {
+    v.extend([
+        part(
+            Body(Chest),
+            Box(0.07, 0.46, 0.03),
+            ALLY,
+            [0.02, p.torso.y * 0.5, 0.15],
+        )
+        .rot([-4.0, 0.0, 34.0]),
+        part(Body(Head), Ball(0.045), ALLY, [-0.09, 0.15, 0.06]),
+        part(Body(Head), Ball(0.022), GOLD, [-0.09, 0.15, 0.1]),
+    ]);
+}
+
 fn growth(v: &mut Vec<PartSpec>, f: Form) {
     if !f.b {
         return;

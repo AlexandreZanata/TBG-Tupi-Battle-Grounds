@@ -53,7 +53,7 @@ pub fn tip(f: Form) -> Vec3 {
     if f.b && f.t2 {
         Vec3::new(0.0, 0.42, 0.44)
     } else {
-        Vec3::new(0.0, 0.05, 0.62)
+        Vec3::new(0.0, -0.05, 0.5)
     }
 }
 
@@ -67,6 +67,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     skull(&mut v, f);
     arms(&mut v, &p, f);
     weapons(&mut v, f);
+    colors(&mut v);
     FigureSpec { plan: p, parts: v }
 }
 
@@ -116,6 +117,27 @@ fn legs(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             ));
         }
     }
+}
+
+/// Team rag tied round the left arm and a team hem on the cape: the side
+/// reads from the match camera.
+fn colors(v: &mut Vec<PartSpec>) {
+    v.extend([
+        part(Body(UpperArmL), Box(0.1, 0.06, 0.1), ALLY, [0.0, -0.1, 0.0]),
+        part(
+            Body(UpperArmL),
+            Box(0.03, 0.12, 0.02),
+            ALLY,
+            [0.04, -0.17, -0.04],
+        )
+        .rot([0.0, 0.0, 12.0]),
+        part(
+            Secondary(Spring::Back),
+            Box(0.43, 0.06, 0.025),
+            ALLY,
+            [0.0, -0.32, -0.04],
+        ),
+    ]);
 }
 
 fn pelvis(v: &mut Vec<PartSpec>, f: Form) {
@@ -293,9 +315,9 @@ fn ribcage(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         v.push(
             part(
                 Body(Chest),
-                Frustum(0.2, 0.32, 0.34),
+                Frustum(0.17, 0.3, 0.16),
                 VIOLET,
-                [0.0, h * 0.72, -0.03],
+                [0.0, h * 0.9, -0.03],
             )
             .scale([1.0, 1.0, 0.8]),
         );
@@ -345,11 +367,11 @@ fn skull(v: &mut Vec<PartSpec>, f: Form) {
         v.push(
             part(
                 Secondary(Spring::HeadGear),
-                Ball(0.17),
+                Ball(0.165),
                 VIOLET,
-                [0.0, 0.05, -0.04],
+                [0.0, 0.07, -0.07],
             )
-            .scale([1.05, 1.0, 1.1]),
+            .scale([1.1, 1.05, 0.95]),
         );
         for i in 0..5 {
             let x = (i as f32 - 2.0) * 0.045;
@@ -427,17 +449,21 @@ fn weapons(v: &mut Vec<PartSpec>, f: Form) {
     }
 }
 
-/// A heavy chopping blade along +Z from the fist, edge down.
+/// A heavy chopping blade along +Z from the fist, edge down: dark iron,
+/// a bright edge, rust bitten into the flat.
 fn cleaver(v: &mut Vec<PartSpec>, at: crate::art::rig::Node, bloody: bool) {
     v.extend([
-        part(at, Cyl(0.028, 0.26), OLD_BONE, [0.0, 0.0, 0.05]).rot([90.0, 0.0, 0.0]),
-        part(at, Ball(0.04), BONE, [0.0, 0.0, -0.09]),
-        part(at, Box(0.035, 0.24, 0.46), RUST, [0.0, -0.06, 0.4]),
-        part(at, Box(0.04, 0.035, 0.46), STEEL, [0.0, -0.18, 0.4]),
-        part(at, Box(0.04, 0.05, 0.05), IRON, [0.0, 0.04, 0.6]),
+        part(at, Cyl(0.026, 0.22), DARK_LEATHER, [0.0, 0.0, 0.03]).rot([90.0, 0.0, 0.0]),
+        part(at, Ball(0.038), BONE, [0.0, 0.0, -0.09]),
+        part(at, Box(0.06, 0.07, 0.04), IRON, [0.0, -0.01, 0.15]),
+        part(at, Box(0.032, 0.21, 0.36), GUNMETAL, [0.0, -0.06, 0.33]),
+        part(at, Box(0.038, 0.03, 0.37), DARK, [0.0, 0.05, 0.33]),
+        part(at, Box(0.036, 0.03, 0.36), STEEL, [0.0, -0.165, 0.33]),
+        part(at, Box(0.034, 0.08, 0.1), RUST, [0.0, -0.04, 0.42]),
+        part(at, Cyl(0.025, 0.04), DARK, [0.0, -0.02, 0.24]).rot([0.0, 0.0, 90.0]),
     ]);
     if bloody {
-        v.push(part(at, Box(0.042, 0.06, 0.16), BLOOD, [0.0, -0.13, 0.52]));
+        v.push(part(at, Box(0.037, 0.06, 0.14), BLOOD, [0.0, -0.13, 0.44]));
     }
 }
 
