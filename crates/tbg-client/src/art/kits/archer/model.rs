@@ -122,14 +122,8 @@ fn quivers(v: &mut Vec<PartSpec>, f: Form) {
         // Branch B: Dual quivers on back
         for (x, rot) in [(-0.10, -12.0), (0.10, 12.0)] {
             let rim = if f.t2 { GOLD } else { DARK_LEATHER };
-            v.push(
-                part(b, Cyl(0.055, 0.34), LEATHER, [x, 0.04, -0.08])
-                    .rot([0.0, 0.0, rot]),
-            );
-            v.push(
-                part(b, Ring(0.008, 0.056, 360.0), rim, [x, 0.18, -0.08])
-                    .rot([0.0, 0.0, rot]),
-            );
+            v.push(part(b, Cyl(0.055, 0.34), LEATHER, [x, 0.04, -0.08]).rot([0.0, 0.0, rot]));
+            v.push(part(b, Ring(0.008, 0.056, 360.0), rim, [x, 0.18, -0.08]).rot([0.0, 0.0, rot]));
             // Arrows bristling from both quivers
             for (dx, dz) in [(-0.02, -0.02), (0.02, 0.01), (0.0, -0.03)] {
                 let fletch = if f.t2 { ORANGE } else { RED_CLOTH };
@@ -172,7 +166,12 @@ fn bow(v: &mut Vec<PartSpec>, f: Form) {
     };
 
     // Grip
-    v.push(part(at, Box(0.045, 0.14, 0.05), DARK_LEATHER, [0.0, 0.08, 0.0]));
+    v.push(part(
+        at,
+        Box(0.045, 0.14, 0.05),
+        DARK_LEATHER,
+        [0.0, 0.08, 0.0],
+    ));
 
     // Upper limb
     v.push(

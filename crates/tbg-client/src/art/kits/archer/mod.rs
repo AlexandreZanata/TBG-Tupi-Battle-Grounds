@@ -112,10 +112,26 @@ fn aim(m: &Moment, pose: &mut Pose, p: &Proportions) {
     // Turn body side-on to face target
     tools::face(pose, m.aim, Vec3::ZERO);
     tools::shift(pose, Joint::Hips, [0.0, -p.leg * 0.06 * draw_k, 0.0]);
-    tools::add(pose, Joint::Hips, [0.0, -42.0 * draw_k * (1.0 - recover_k), 0.0]);
-    tools::add(pose, Joint::Spine, [0.0, -15.0 * draw_k * (1.0 - recover_k), 0.0]);
-    tools::add(pose, Joint::Chest, [0.0, -22.0 * draw_k * (1.0 - recover_k), 0.0]);
-    tools::add(pose, Joint::Head, [0.0, 78.0 * draw_k * (1.0 - recover_k), 0.0]);
+    tools::add(
+        pose,
+        Joint::Hips,
+        [0.0, -42.0 * draw_k * (1.0 - recover_k), 0.0],
+    );
+    tools::add(
+        pose,
+        Joint::Spine,
+        [0.0, -15.0 * draw_k * (1.0 - recover_k), 0.0],
+    );
+    tools::add(
+        pose,
+        Joint::Chest,
+        [0.0, -22.0 * draw_k * (1.0 - recover_k), 0.0],
+    );
+    tools::add(
+        pose,
+        Joint::Head,
+        [0.0, 78.0 * draw_k * (1.0 - recover_k), 0.0],
+    );
 
     // Elevation along arrow flight arc
     let up = moves::aim_level(m, pose, 0.85, shots::arc(ShotKind::Arrow));
@@ -170,5 +186,9 @@ fn aim(m: &Moment, pose: &mut Pose, p: &Proportions) {
         );
     }
 
-    tools::plant(pose, p, tools::stance(p, 1.25, 0.14 * draw_k * (1.0 - recover_k)));
+    tools::plant(
+        pose,
+        p,
+        tools::stance(p, 1.25, 0.14 * draw_k * (1.0 - recover_k)),
+    );
 }

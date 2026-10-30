@@ -50,7 +50,11 @@ fn run_match(
     let crab_id = s.lab_spawn_at(crab_seat, UnitKind::CargoCrab, 0, 0, crab_spawn_x);
     let mut passenger_id = None;
     if let Some(pkind) = passenger_kind {
-        let px = if crab_seat == Seat::A { crab_spawn_x + 50 } else { crab_spawn_x - 50 };
+        let px = if crab_seat == Seat::A {
+            crab_spawn_x + 50
+        } else {
+            crab_spawn_x - 50
+        };
         passenger_id = Some(s.lab_spawn_at(crab_seat, pkind, 0, 0, px));
     }
 
@@ -65,7 +69,9 @@ fn run_match(
         let elapsed = s.tick - start_tick;
 
         let crab_alive = s.unit_index(crab_id).map_or(false, |i| s.units[i].hp > 0);
-        let pass_alive = passenger_id.map_or(false, |pid| s.unit_index(pid).map_or(false, |i| s.units[i].hp > 0));
+        let pass_alive = passenger_id.map_or(false, |pid| {
+            s.unit_index(pid).map_or(false, |i| s.units[i].hp > 0)
+        });
         let opp_alive = s.unit_index(opp_id).map_or(false, |i| s.units[i].hp > 0);
 
         let team_crab_alive = crab_alive || pass_alive;
@@ -123,7 +129,10 @@ fn main() {
     let with_archer = evaluate(Some(UnitKind::Archer), pairs);
     let with_bloom = evaluate(Some(UnitKind::Bloomkeeper), pairs);
 
-    println!("{:<32} {:>8} {:>10} {:>10} {:>12} {:>14}", "Configuration", "Matches", "Win%", "Draw%", "Avg Duration", "Pass. Survival");
+    println!(
+        "{:<32} {:>8} {:>10} {:>10} {:>12} {:>14}",
+        "Configuration", "Matches", "Win%", "Draw%", "Avg Duration", "Pass. Survival"
+    );
     println!("{:-<92}", "");
 
     let print_row = |name: &str, r: SimResult, is_carried: bool| {
@@ -131,11 +140,17 @@ fn main() {
         let draw_pct = r.draws as f64 / r.total_matches as f64 * 100.0;
         let avg_dur = r.total_ticks as f64 / r.total_matches as f64 / TICK_HZ as f64;
         let surv_pct = if is_carried {
-            format!("{:.1}%", r.passenger_survived as f64 / r.total_matches as f64 * 100.0)
+            format!(
+                "{:.1}%",
+                r.passenger_survived as f64 / r.total_matches as f64 * 100.0
+            )
         } else {
             "N/A".into()
         };
-        println!("{:<32} {:>8} {:>9.1}% {:>9.1}% {:>10.2}s {:>14}", name, r.total_matches, win_pct, draw_pct, avg_dur, surv_pct);
+        println!(
+            "{:<32} {:>8} {:>9.1}% {:>9.1}% {:>10.2}s {:>14}",
+            name, r.total_matches, win_pct, draw_pct, avg_dur, surv_pct
+        );
     };
 
     print_row("Cargo Crab (Alone)", alone, false);

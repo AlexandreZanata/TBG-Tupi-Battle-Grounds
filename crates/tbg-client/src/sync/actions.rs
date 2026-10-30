@@ -37,7 +37,8 @@ pub(super) fn cue(
             }
         }
         Event::Boarded { crab, .. } => {
-            if let Some((_, _, mut anim)) = map.0.get(&crab).and_then(|e| visuals.get_mut(*e).ok()) {
+            if let Some((_, _, mut anim)) = map.0.get(&crab).and_then(|e| visuals.get_mut(*e).ok())
+            {
                 anim.play(crate::art::anim::Clip::Cast);
             }
         }

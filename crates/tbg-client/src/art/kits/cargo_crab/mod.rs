@@ -53,7 +53,11 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             tools::set(
                 pose,
                 Joint::UpperArmR,
-                [-85.0 - 25.0 * tools::hold(k, [0.15, 0.30, 0.50, 0.85]), -10.0, -8.0],
+                [
+                    -85.0 - 25.0 * tools::hold(k, [0.15, 0.30, 0.50, 0.85]),
+                    -10.0,
+                    -8.0,
+                ],
             );
             tools::set(
                 pose,
@@ -97,7 +101,11 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
                 tools::set(
                     pose,
                     Joint::UpperArmR,
-                    [-20.0 - 50.0 * settle, -15.0 + 15.0 * settle, 15.0 - 15.0 * settle],
+                    [
+                        -20.0 - 50.0 * settle,
+                        -15.0 + 15.0 * settle,
+                        15.0 - 15.0 * settle,
+                    ],
                 );
                 tools::set(pose, Joint::ForearmR, [-60.0 + 25.0 * settle, 0.0, 0.0]);
                 tools::set(pose, Joint::UpperArmL, [-40.0 - 30.0 * settle, 0.0, 12.0]);

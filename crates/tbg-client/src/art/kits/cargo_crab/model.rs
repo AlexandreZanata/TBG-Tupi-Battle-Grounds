@@ -89,8 +89,7 @@ fn shell(v: &mut Vec<PartSpec>, f: Form) {
         }
         for s in [-1.0f32, 1.0] {
             v.push(
-                part(h, Cone(0.04, 0.14), STEEL, [s * 0.44, 0.06, 0.05])
-                    .rot([0.0, 0.0, -80.0 * s]),
+                part(h, Cone(0.04, 0.14), STEEL, [s * 0.44, 0.06, 0.05]).rot([0.0, 0.0, -80.0 * s]),
             );
         }
     }
@@ -197,8 +196,7 @@ fn claw(v: &mut Vec<PartSpec>, p: &Proportions, f: Form, s: f32) {
             [0.0, -p.arm * 0.45, 0.0],
         ),
         // Palm joint
-        part(Body(hand), Ball(0.10 * big), GUNMETAL, [0.0, -0.08, 0.0])
-            .scale([0.88, 1.28, 0.95]),
+        part(Body(hand), Ball(0.10 * big), GUNMETAL, [0.0, -0.08, 0.0]).scale([0.88, 1.28, 0.95]),
         // Orange carapace shield plate on claw
         part(
             Body(hand),
