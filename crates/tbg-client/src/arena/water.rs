@@ -9,7 +9,7 @@ use bevy::prelude::*;
 use tbg_core::Pcg32;
 
 pub(super) const LEVEL: f32 = -1.40;
-const DEEP: Color = Color::srgb(0.035, 0.43, 0.68);
+const DEEP: Color = Color::srgb(0.045, 0.51, 0.75);
 const FOAM: Color = Color::srgb(0.82, 0.96, 0.94);
 
 pub(super) fn sea() -> Mesh {
@@ -37,9 +37,9 @@ pub(super) fn sea() -> Mesh {
             let swell = (a.x * 1.8 + a.z * 2.6).sin() * 0.012 + noise * 0.035;
             let color = |shade: f32| {
                 Color::srgb(
-                    0.035 + near * 0.025 + swell * 0.3,
-                    0.43 + near * 0.17 + swell + shade,
-                    0.68 + near * 0.085 + swell * 0.7 + shade,
+                    0.045 + near * 0.025 + swell * 0.3,
+                    0.51 + near * 0.15 + swell + shade,
+                    0.75 + near * 0.065 + swell * 0.7 + shade,
                 )
             };
             water.triangle(a, b, c, color(0.0));
@@ -129,7 +129,12 @@ pub(super) fn foam_ring(surface: &mut Surface, center: Vec3, radius: Vec2) {
             )
         };
         surface.quad(
-            [point(a, 0.95), point(b, 0.95), point(b, 1.5), point(a, 1.5)],
+            [
+                point(a, 0.95),
+                point(b, 0.95),
+                point(b, 1.28),
+                point(a, 1.28),
+            ],
             Color::srgb(0.11, 0.67, 0.77),
         );
         if i % 5 != 2 {
@@ -156,7 +161,7 @@ fn glints(surface: &mut Surface) {
         }
         let width = 0.12 + rng.below(280) as f32 * 0.001;
         let p = Vec3::new(x, LEVEL + 0.05, z);
-        let color = Color::srgb(0.13, 0.64, 0.79);
+        let color = Color::srgb(0.20, 0.73, 0.86);
         surface.quad(
             [
                 p,

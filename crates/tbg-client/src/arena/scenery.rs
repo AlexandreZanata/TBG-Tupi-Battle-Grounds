@@ -27,6 +27,8 @@ const ISLETS: [Islet; 2] = [
     },
 ];
 
+const BOAT: Vec3 = Vec3::new(17.8, water::LEVEL + 0.08, 5.1);
+
 fn island(def: &Islet) -> Mesh {
     const SIDES: usize = 14;
     let mut rng = Pcg32::new(def.seed, 13);
@@ -39,10 +41,20 @@ fn island(def: &Islet) -> Mesh {
     ];
     let point = |i: usize, band: usize| {
         let angle = i as f32 * std::f32::consts::TAU / SIDES as f32;
+        let crag = match band {
+            1 => 0.90 + (i % 3) as f32 * 0.10,
+            2 => 0.91 + (i % 4) as f32 * 0.065,
+            _ => 1.0,
+        };
         Vec3::new(
-            def.at.x + angle.cos() * def.radius.x * radii[i] * levels[band].0,
-            levels[band].1,
-            def.at.y + angle.sin() * def.radius.y * radii[i] * levels[band].0,
+            def.at.x + angle.cos() * def.radius.x * radii[i] * levels[band].0 * crag,
+            levels[band].1
+                + if band == 0 {
+                    0.0
+                } else {
+                    (i as f32 * 2.2).sin() * 0.15
+                },
+            def.at.y + angle.sin() * def.radius.y * radii[i] * levels[band].0 * crag,
         )
     };
     let mut surface = Surface::default();
@@ -60,8 +72,8 @@ fn island(def: &Islet) -> Mesh {
             green,
         );
         for band in 0..3 {
-            let value = [0.66, 0.54, 0.44][band] + (i % 4) as f32 * 0.025;
-            let color = Color::srgb(value * 0.96, value, value * 0.98);
+            let value = [0.58, 0.50, 0.44][band] + (i % 4) as f32 * 0.025;
+            let color = Color::srgb(value * 0.93, value * 0.97, value);
             surface.quad(
                 [
                     point(i, band),
@@ -145,12 +157,7 @@ pub(super) fn spawn(
         Transform::default(),
         NotShadowCaster,
     ));
-    let boat = maritime::spawn_boat(
-        commands,
-        meshes,
-        material,
-        Vec3::new(-2.2, water::LEVEL + 0.12, -6.2),
-    );
+    let boat = maritime::spawn_boat(commands, meshes, material, BOAT, 0.68);
     info!("arena offshore scenery: {triangles} triangles, boat: {boat} triangles; 2 draw batches");
     triangles + boat
 }
@@ -171,30 +178,45 @@ pub(super) fn foam() -> Mesh {
             Vec2::new(scale, scale * 0.8),
         );
     }
+    water::foam_ring(&mut surface, BOAT, Vec2::new(0.68, 0.26));
     waterfall(&mut surface);
     surface.finish()
 }
 
 fn waterfall(surface: &mut Surface) {
-    let upper = Vec3::new(21.15, 0.98, -6.08);
-    let lower = Vec3::new(21.15, water::LEVEL + 0.08, -5.48);
-    for (offset, width, color) in [
+    // Follow the cliff's protruding ledge so the sheet remains attached and visible.
+    let points = [
+        Vec3::new(21.15, 0.98, -6.26),
+        Vec3::new(21.15, 0.98, -5.96),
+        Vec3::new(21.15, 0.48, -5.48),
+        Vec3::new(21.15, water::LEVEL + 0.08, -5.08),
+    ];
+    for (index, (offset, width, color)) in [
         (0.0, 0.46, Color::srgb(0.27, 0.76, 0.85)),
         (-0.11, 0.085, Color::srgb(0.75, 0.94, 0.96)),
         (0.10, 0.06, Color::srgb(0.57, 0.86, 0.94)),
-    ] {
-        let shift = Vec3::new(offset, 0.0, if offset == 0.0 { 0.0 } else { 0.012 });
-        let u = upper + shift;
-        let l = lower + shift;
-        surface.quad(
-            [
-                l - Vec3::X * width * 0.5,
-                l + Vec3::X * width * 0.5,
-                u + Vec3::X * width * 0.5,
-                u - Vec3::X * width * 0.5,
-            ],
-            color,
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let shift = Vec3::new(
+            offset,
+            if index == 0 { 0.0 } else { 0.008 },
+            if index == 0 { 0.0 } else { 0.012 },
         );
+        for pair in points.windows(2) {
+            let u = pair[0] + shift;
+            let l = pair[1] + shift;
+            surface.quad(
+                [
+                    l - Vec3::X * width * 0.5,
+                    l + Vec3::X * width * 0.5,
+                    u + Vec3::X * width * 0.5,
+                    u - Vec3::X * width * 0.5,
+                ],
+                color,
+            );
+        }
     }
-    water::foam_ring(surface, lower, Vec2::new(0.46, 0.30));
+    water::foam_ring(surface, points[3], Vec2::new(0.46, 0.30));
 }

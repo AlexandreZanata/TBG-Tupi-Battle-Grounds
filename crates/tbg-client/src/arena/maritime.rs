@@ -8,8 +8,8 @@ pub(super) fn lighthouse(parts: &mut Vec<Part>, at: Vec3) {
     for (shape, color, y) in [
         (Cyl(0.54, 0.18), ROCK, 0.09),
         (Frustum(0.29, 0.43, 2.10), LINEN, 1.14),
-        (Frustum(0.38, 0.40, 0.28), RED_CLOTH, 0.66),
-        (Frustum(0.33, 0.35, 0.28), RED_CLOTH, 1.39),
+        (Frustum(0.415, 0.435, 0.28), RED_CLOTH, 0.66),
+        (Frustum(0.365, 0.385, 0.28), RED_CLOTH, 1.39),
         (Cyl(0.45, 0.10), STONE, 2.20),
         (Cyl(0.29, 0.36), SKY_TOP, 2.43),
         (Cone(0.47, 0.43), RED_CLOTH, 2.80),
@@ -74,6 +74,7 @@ pub(super) fn spawn_boat(
     meshes: &mut Assets<Mesh>,
     material: &Handle<StandardMaterial>,
     at: Vec3,
+    scale: f32,
 ) -> usize {
     let mut hull = Surface::default();
     let rim = [
@@ -152,7 +153,7 @@ pub(super) fn spawn_boat(
         Name::new("offshore sailboat"),
         Mesh3d(meshes.add(boat)),
         MeshMaterial3d(material.clone()),
-        Transform::from_translation(at),
+        Transform::from_translation(at).with_scale(Vec3::splat(scale)),
         Sailboat(at),
         NotShadowCaster,
     ));

@@ -44,6 +44,14 @@ Retained the original warm upper-left light direction, StandardMaterial path, ca
 
 WASM target check: pass (0.46 s). Composition/readability and the final frame-time target remain browser gates; values may be refined in stage E.
 
-## Remaining stages
+## E — Composition and readability
 
-E — composition; F — final validation and paired measurements. In progress.
+Release browser inspection led to a brighter azure base, smaller shallow halos, irregular offshore cliff profiles and visible lighthouse bands. The cascade follows the protruding cliff ledge instead of disappearing behind it. The small sailboat now sits in open foreground water at the right edge, with a shared-batch contact wake; its first locations were occluded by the original island/forest, so placement was refined without changing the camera or arena. The boat remains bounded bob/roll only.
+
+Final composition inspected at 1920x1080 and 1366x768, no error-level browser logs. [After 1920](../media/arena-seascape/sea-empty-after-1920.jpg) / [after 1366](../media/arena-seascape/sea-empty-after-1366.jpg). The original meadow, BattleLine, cliffs, props, Stronghold code, character code, UI and camera file remain untouched. Original components still dominate the center. New framing elements remain outside the play surface.
+
+Checks after refinement: workspace Clippy with `-D warnings` passes; all 48 client tests pass; native/WASM checks pass; final release Trunk build passes (Rust release stage 59.19 s, packaging completed). An initial rustfmt check requested a line-wrap change after introducing the shared boat placement constant; rustfmt was applied and the check passes. No final timing claim until paired stage F measurements.
+
+## Remaining stage
+
+F — final validation and paired measurements. In progress.
