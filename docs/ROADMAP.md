@@ -259,6 +259,10 @@ All code for P1–P8 is implemented and validated on the development PC
 > the phase file with the real command outputs and measurements, commit
 > it, and stop.
 
+## Owner-requested seascape follow-up (2026-10-30)
+
+[Arena seascape](art/ARENA-SEASCAPE.md): implemented and validated locally on `codex/arena-seascape`, based on main `6ef155b`. Owner approved the displayed design and the 12.9 ms reference p95 limit (+15.2% over its measured baseline). Report includes before/after desktop captures, performance/build measurements, local commits and the separate pre-existing online-test exclusion. No push or PR is authorized for this task; broader P30 status is unchanged.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · spectating ·
