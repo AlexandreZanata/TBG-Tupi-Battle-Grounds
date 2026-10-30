@@ -107,6 +107,11 @@ the result screen. They add no queue and no second server. P39 may run
 after P14; do not run it concurrently with P16-F4/F7 or P16-A/P16-B (same
 lobby/menu files). It gates no existing phase.
 
+**Roster expansion — planned (P42–P53).** Fifteen new units, their
+shared systems, lab gates and release criteria are planned in
+[ROSTER-EXPANSION.md](ROSTER-EXPANSION.md) (Proposed; nothing active).
+Phase files are written one at a time, starting with P42.
+
 | Phase | File | Milestone at the end | Status | Reviewed |
 |-------|------|----------------------|--------|----------|
 | P0 | — | Lean repository, plan | done | yes |
@@ -163,6 +168,7 @@ lobby/menu files). It gates no existing phase.
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
 | P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; 29 online tests and browser evidence; **owner physical-phone/PWA check pending** | PR #2 follow-up fixes pending |
 | P40 | [P40-arcana-trees.md](phases/P40-arcana-trees.md) | Fifteen-node trees, twelve points, three supremes, preset migration, editor and lab evidence | implemented; audited on `phase/p40-review` (Quickdraw cap fixed, Deadeye re-measured to +0.25 tile); War and Vitality builds trail the default, browser look check open | — |
+| P42 | [P42-roster-baseline.md](phases/P42-roster-baseline.md) | Roster canon (D-46), lab combat counters, stall and duration rows, `comp-*` policy, baseline on main | planned | — |
 
 ## Pending validations (owner)
 
