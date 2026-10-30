@@ -773,7 +773,13 @@ Step 4 complete (aim core pure Rust in art/aim.rs with facing_yaw, turn_toward, 
 Step 5 complete (aim wiring system in visuals/aim.rs, D2 targeted arrow flight in art/arrows.rs, duplicate projectile fix, 8-angle lab contact sheet, 2 contract tests passing).
 Step 6 complete (strike profile table in art/melee.rs, cosmetic lunge, directional recoil, 50ms hit-stop on target animator, contact sparks, 5 contract tests passing, melee verification sheets).
 Step 7 complete (prototype gate passed; side-by-side sheets generated, 40-per-side baseline rerun p95 = 8.3ms vs 26.3ms baseline, F4 reach table confirms Option A suffices, I1 clean, zero duplicate projectiles).
-Steps 8–14 pending.
+Step 8 complete (Troop polish by Faction complete across all 4 factions in commits `67adbf2`, `e579f03`, `7cd21cc`, `0b91920`):
+  - Humans: Shieldbearer (kite shield, flanged mace; A Bulwark/Fortress tower shield + plate + crest, B Vanguard/Champion spear + fluted pauldrons + back banner), Archer (v2 forms across all 5 tiers/branches, verified with D1/D2 aim).
+  - Undead: Bone Brute (hunched giant with ribcage armor; A bone pauldrons + rib/skull shield, B twin cleavers / Reaper two-handed scythe), Hexer (hooded cowl, skull staff; A bone crown + occult halo ring, B hanging censer + pestilence mist).
+  - Machines: Sawbot (mechanical chassis, orange visor, boiler core, buzzsaw; A twin saws + back exhaust stacks, B ironclad bolted mantlet + tower helm + giant saw), Siege Walker (Large body plan war-engine, brass optics, geared great-bow; A double-limb ballista, B multi-rail launcher + ammo drum), Rampart (wall-like Tank without human limbs; mantlet shield wall, bunker observation turret; A spiked bastion, B crenellated redoubt).
+  - Plants: Bloomkeeper (flowering staff, leaf cloak, petal halo; A grove bloom halo ring, B thornwarden cuirass + briar shield), Rootcaller (small treant, root claws; A strangle tendrils + leaf cuffs, B overgrowth mushroom cap canopy), Nester (hive druid, hollow tree hive on back, honey crook staff; A swarm brood hive + honey crown, B chitin warden carapace + mandible horns), Beetling (miniature 0.55x summon, cheap mesh budget, beetle carapace, matching Nester's tier/branch look).
+  - All 11 unit kinds across all 5 forms (55 forms total) fully migrated to native rig-v2. Contact sheets and 64px black silhouettes verified in gallery and committed to `docs/media/a1/`.
+Steps 9–14 pending.
 
 ### Owner decisions
 
