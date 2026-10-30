@@ -78,6 +78,9 @@ pub struct UnitFx {
     /// Drumguard B2: the bonded ally ignores slows and fish (not root).
     /// Rewritten every tick by the bonds pass, like the march fields.
     pub march_ignore_slow: bool,
+    /// Cargo Crab B2 Overdrive: surge movement until this tick (re-armed
+    /// 220 ticks after it lapses, i.e. a 15 s cooldown from a 4 s surge).
+    pub surge_until: Tick,
     pub bond: Option<UnitId>,
     pub carrier: Option<UnitId>,
     pub passenger: Option<UnitId>,

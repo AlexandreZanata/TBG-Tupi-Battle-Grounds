@@ -95,12 +95,14 @@ fn c2_per_tick_traces_are_frozen() {
     // with tick, winner and reason identical (verified). P47:
     // `march_ignore_slow` grew `UnitFx`; hashes moved once more, behavior
     // identical (verified).
+    // P48-A: `surge_until` grew `UnitFx`; hashes moved once more,
+    // behavior identical (verified).
     let goldens = [
-        (1, 0xf89a_12cd_9f40_6df3, 0x2640_f195_cc12_a103, 2_214),
-        (7, 0x36e9_eb5a_afe8_b6b9, 0x598f_f581_edba_b4fb, 3_284),
-        (42, 0x1de6_fb32_8aa2_7f33, 0xadea_ab78_9c12_6579, 1_833),
-        (1000, 0x35ec_63d0_464d_ab8c, 0xcc9e_7b44_3710_914d, 2_641),
-        (65535, 0xb43a_f429_af3a_d693, 0x2789_7b66_a2c2_b585, 1_740),
+        (1, 0xc961_a8f3_7248_272f, 0xeeb0_f41a_10fe_716f, 2_214),
+        (7, 0x5bdf_ae44_8c3e_71ef, 0x6e16_a638_0864_685, 3_284),
+        (42, 0x4df1_0b03_be3f_96db, 0x66bf_c3d3_b770_da1, 1_833),
+        (1000, 0x149a_89f3_2141_6632, 0x2d54_f568_da0a_3149, 2_641),
+        (65535, 0xd7c7_17f4_adba_4ae3, 0x55cd_3184_1b02_0467, 1_740),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

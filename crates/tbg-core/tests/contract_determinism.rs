@@ -27,25 +27,27 @@ fn bot_matches_are_frozen() {
     // moved again with tick, winner and reason identical (verified).
     // P47: `march_ignore_slow` grew `UnitFx`; hashes moved once more,
     // behavior identical (verified).
+    // P48-A: `surge_until` grew `UnitFx`; hashes moved once more,
+    // behavior identical (verified).
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0x2640_f195_cc12_a103_u64,
+            0xeeb0_f41a_10fe_716f_u64,
             2_214,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0x598f_f581_edba_b4fb,
+            0x6e16_a638_0864_685,
             3_284,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0xadea_ab78_9c12_6579,
+            0x66bf_c3d3_b770_da1,
             1_833,
             Seat::B,
             StrongholdDestroyed,

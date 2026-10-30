@@ -189,6 +189,7 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
                 splash_hit: _,
                 heal_cut_bp: _,
                 heal_cut_ticks: _,
+                lifesteal_bp: _,
                 vs_below_bp: _,
                 vs_below_hp_bp: _,
                 vs_above_bp: _,

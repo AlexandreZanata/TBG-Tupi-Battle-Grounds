@@ -61,7 +61,7 @@ const ROSTER: [Row; 11] = {
 /// order. Not in the Shop pool until the P53 owner switch; checked against
 /// the §11 starting values in the document's units.
 #[rustfmt::skip]
-const STAGED: [Row; 11] = {
+const STAGED: [Row; 13] = {
     use Archetype::*; use Faction::*; use UnitKind::*;
     #[allow(clippy::too_many_arguments)]
     const fn r(kind: UnitKind, faction: Faction, archetype: Archetype,
@@ -86,6 +86,8 @@ const STAGED: [Row; 11] = {
         // 2.0 lives in March.reach); Oilpress Every is 2.5 s.
         r(Oilpress,     Machines, Tank,    7, 3600, 25,  0, 250, 80,  30,    0, None),
         r(Drumguard,    Humans,   Support, 3,  260, 0,   0, 100, 300, 100,   0, None),
+        r(Leechroot,    Plants,   Dps,     3,  220, 10,  0, 160, 120, 90,    0, None),
+        r(CargoCrab,    Machines, Tank,    5, 1400, 20,  0, 150, 80,  50,    0, None),
     ]
 };
 
@@ -154,7 +156,7 @@ fn roster_composition() {
     // conventional kinds, P45 another three, P46 another three and P47 two
     // more (§11, not in the Shop pool until P53); the pool itself stays
     // exactly the ten purchasable units.
-    assert_eq!(UNITS.len(), 22);
+    assert_eq!(UNITS.len(), 24);
     assert_eq!(UNIT_KINDS.len(), 10);
     assert!(UNIT_KINDS.iter().all(|k| k.is_conventional()));
     assert_eq!(
@@ -164,8 +166,8 @@ fn roster_composition() {
     for (f, n) in [
         (Faction::Humans, 6),
         (Faction::Undead, 4),
-        (Faction::Machines, 5),
-        (Faction::Plants, 6),
+        (Faction::Machines, 6),
+        (Faction::Plants, 7),
     ] {
         let sold = UNITS
             .iter()
@@ -304,7 +306,15 @@ Oilpress/Black Mire: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=1000 heal=0 dmg+=
 Drumguard/War March: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Drumguard/Grand March: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Drumguard/Iron Rhythm: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Drumguard/Unbreakable Rhythm: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Drumguard/Unbreakable Rhythm: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Leechroot/Faster Feeding: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Leechroot/Endless Growth: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Leechroot/Life Drain: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Leechroot/Blood Hunger: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cargo Crab/Reinforced Shell: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cargo Crab/Emergency Shield: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cargo Crab/Faster Legs: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cargo Crab/Overdrive: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {

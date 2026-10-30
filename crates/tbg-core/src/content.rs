@@ -130,6 +130,9 @@ pub struct FormDef {
     pub heal_cut_bp: i32,
     /// ticks the heal cut lasts.
     pub heal_cut_ticks: u16,
+    /// Lifesteal of the hit, in basis points (Leechroot B1/B2 only; highest
+    /// tier wins, joining the BR-X06 12 % cap with Augments).
+    pub lifesteal_bp: i32,
     /// Conditional damage bonus, in basis points (P44 wires the thresholds).
     pub vs_below_bp: i32,
     /// HP fraction threshold for `vs_below_bp`, in basis points of max HP.
@@ -156,6 +159,7 @@ const fn form(name: &'static str) -> FormDef {
         splash_hit: false,
         heal_cut_bp: 0,
         heal_cut_ticks: 0,
+        lifesteal_bp: 0,
         vs_below_bp: 0,
         vs_below_hp_bp: 0,
         vs_above_bp: 0,
@@ -342,7 +346,7 @@ use Faction::*;
 
 /// Every kind, in `UnitKind` (`ALL_KINDS`) order.
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 22] = [
+pub const UNITS: [UnitDef; 24] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
@@ -551,6 +555,34 @@ pub const UNITS: [UnitDef; 22] = [
         form("Grand March"),
         form("Iron Rhythm"),
         form("Unbreakable Rhythm"),
+    ]),
+    // P48-A (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave E1. Not in the
+    // Shop pool until the P53 owner switch.
+    unit(UnitKind::Leechroot, "Leechroot", Plants, Dps, 1_800,
+        [220, 10, 32, 1_200, 45, 0, 0], None, [
+        [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
+        [Ability::Essence { base: 30, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
+        [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 300 }, Ability::None],
+        [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
+        [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
+    ], [
+        form("Faster Feeding"),
+        form("Endless Growth"),
+        FormDef { lifesteal_bp: 600, ..form("Life Drain") },
+        FormDef { lifesteal_bp: 1_200, ..form("Blood Hunger") },
+    ]),
+    unit(UnitKind::CargoCrab, "Cargo Crab", Machines, Tank, 3_000,
+        [1_400, 20, 30, 800, 25, 0, 0], None, [
+        [Ability::Carry { board: 500, lock: 60, dr_bp: 0, move_bp: 0, shield_bp: 0, surge_bp: 0 }, Ability::None],
+        [Ability::Carry { board: 500, lock: 60, dr_bp: 1_500, move_bp: 0, shield_bp: 0, surge_bp: 0 }, Ability::None],
+        [Ability::Carry { board: 500, lock: 60, dr_bp: 1_500, move_bp: 0, shield_bp: 2_000, surge_bp: 0 }, Ability::None],
+        [Ability::Carry { board: 500, lock: 60, dr_bp: 0, move_bp: 2_000, shield_bp: 0, surge_bp: 0 }, Ability::None],
+        [Ability::Carry { board: 500, lock: 60, dr_bp: 0, move_bp: 2_000, shield_bp: 0, surge_bp: 4_000 }, Ability::None],
+    ], [
+        form("Reinforced Shell"),
+        form("Emergency Shield"),
+        form("Faster Legs"),
+        form("Overdrive"),
     ]),
 ];
 
