@@ -136,6 +136,12 @@ impl Policy {
         }
         let mut kinds = Vec::with_capacity(3);
         for part in parts {
+            // §E.5 short name.
+            let part = if part == "antidote" {
+                "antidotebrewer"
+            } else {
+                part
+            };
             let kind = conventional().find(|k| format!("{k:?}").to_lowercase() == part)?;
             if kind.is_summon() || kinds.contains(&kind) {
                 return None;

@@ -170,6 +170,24 @@ fn run(a: &Args) -> Result<(), String> {
         e.hi * 100.0,
         e.n
     );
+    // Stagnation row for turtle comps (P47): share of games stalling 60 s
+    // with no Stronghold damage and no conventional death (P42 stall rule).
+    let games: u32 = results.values().map(|p| p.len() as u32).sum::<u32>() * 2;
+    let stalled: u32 = results
+        .values()
+        .flat_map(|p| p.iter().flat_map(|g| [&g[0], &g[1]]))
+        .filter(|r| r.stall >= 60 * tbg_core::content::TICK_HZ)
+        .count() as u32;
+    text.push_str(&format!(
+        "stalled matches (60 s): {:.1}% ({}/{})\n",
+        if games > 0 {
+            100.0 * f64::from(stalled) / f64::from(games)
+        } else {
+            0.0
+        },
+        stalled,
+        games
+    ));
     text.push_str(&report::table(&gate::rows(
         &results,
         None,
