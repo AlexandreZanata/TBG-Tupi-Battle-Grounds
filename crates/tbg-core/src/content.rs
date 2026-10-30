@@ -338,7 +338,7 @@ use Faction::*;
 
 /// Every kind, in `UnitKind` (`ALL_KINDS`) order.
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 17] = [
+pub const UNITS: [UnitDef; 20] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
@@ -478,6 +478,47 @@ pub const UNITS: [UnitDef; 17] = [
         form("Perfect Remedy"),
         FormDef { atk_bp: 3_333, ..form("Quick Mixing") },
         form("Double Flask"),
+    ]),
+    // P46 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave C. Not in the
+    // Shop pool until the P53 owner switch.
+    unit(UnitKind::Shatterback, "Shatterback", Plants, Tank, 2_400,
+        [560, 30, 30, 800, 28, 0, 0], None, [
+        [Ability::Plates { count: 4, hp: 100, move_bp: 1_250, atk_bp: 1_000, dmg_bp: 0, shrapnel: 0, rampage: 0 }, Ability::None],
+        [Ability::Plates { count: 4, hp: 150, move_bp: 1_250, atk_bp: 1_000, dmg_bp: 0, shrapnel: 0, rampage: 0 }, Ability::None],
+        [Ability::Plates { count: 4, hp: 150, move_bp: 1_250, atk_bp: 1_000, dmg_bp: 0, shrapnel: 50, rampage: 0 }, Ability::None],
+        [Ability::Plates { count: 4, hp: 100, move_bp: 1_250, atk_bp: 1_000, dmg_bp: 800, shrapnel: 0, rampage: 0 }, Ability::None],
+        [Ability::Plates { count: 4, hp: 100, move_bp: 1_250, atk_bp: 1_000, dmg_bp: 800, shrapnel: 0, rampage: 800 }, Ability::None],
+    ], [
+        form("Thornplates"),
+        form("Thorn Shrapnel"),
+        form("Unleashed"),
+        form("Rampage"),
+    ]),
+    unit(UnitKind::BloodFurnace, "Blood Furnace", Undead, Dps, 2_400,
+        [440, 36, 36, 800, 45, 0, 0], None, [
+        [Ability::Furnace { burn_bp: 600, max_bp: 30_000 }, Ability::None],
+        [Ability::Furnace { burn_bp: 600, max_bp: 35_000 }, Ability::None],
+        [Ability::Furnace { burn_bp: 600, max_bp: 45_000 }, Ability::None],
+        [Ability::Furnace { burn_bp: 500, max_bp: 30_000 }, Ability::None],
+        [Ability::Furnace { burn_bp: 400, max_bp: 30_000 }, Ability::None],
+    ], [
+        form("Infernal Core"),
+        form("Dying Sun"),
+        form("Efficient Combustion"),
+        form("Eternal Embers"),
+    ]),
+    unit(UnitKind::Bloodweaver, "Bloodweaver", Undead, Support, 1_800,
+        [300, 0, 100, 3_000, 45, 0, 0], None, [
+        [Ability::Transfer { amount: 120, low_bp: 0, second: false }, Ability::None],
+        [Ability::Transfer { amount: 156, low_bp: 0, second: false }, Ability::None],
+        [Ability::Transfer { amount: 156, low_bp: 2_000, second: false }, Ability::None],
+        [Ability::Transfer { amount: 120, low_bp: 0, second: false }, Ability::None],
+        [Ability::Transfer { amount: 120, low_bp: 0, second: true }, Ability::None],
+    ], [
+        form("Deep Transfer"),
+        form("Last Offering"),
+        FormDef { atk_bp: 2_500, ..form("Rapid Circulation") },
+        form("Shared Blood"),
     ]),
 ];
 

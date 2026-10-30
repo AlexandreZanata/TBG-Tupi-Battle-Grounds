@@ -90,6 +90,10 @@ pub enum UnitKind {
     Rotcap,
     OldFinn,
     AntidoteBrewer,
+    // P46 (Proposed, staged): wave C. Same staging rules.
+    Shatterback,
+    BloodFurnace,
+    Bloodweaver,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -109,7 +113,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
 #[rustfmt::skip]
-pub const ALL_KINDS: [UnitKind; 17] = [
+pub const ALL_KINDS: [UnitKind; 20] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -127,6 +131,9 @@ pub const ALL_KINDS: [UnitKind; 17] = [
     UnitKind::Rotcap,
     UnitKind::OldFinn,
     UnitKind::AntidoteBrewer,
+    UnitKind::Shatterback,
+    UnitKind::BloodFurnace,
+    UnitKind::Bloodweaver,
 ];
 
 impl UnitKind {
@@ -143,10 +150,10 @@ impl UnitKind {
 }
 
 /// The full conventional roster in `UnitKind` order: the staging pool the
-/// lab and the Practice preview draw from (P45: 16 kinds; grows per wave
+/// lab and the Practice preview draw from (P46: 19 kinds; grows per wave
 /// until the P53 owner switch moves it into `CANON.pool`).
 #[rustfmt::skip]
-pub const FULL_POOL: [UnitKind; 16] = [
+pub const FULL_POOL: [UnitKind; 19] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -163,6 +170,9 @@ pub const FULL_POOL: [UnitKind; 16] = [
     UnitKind::Rotcap,
     UnitKind::OldFinn,
     UnitKind::AntidoteBrewer,
+    UnitKind::Shatterback,
+    UnitKind::BloodFurnace,
+    UnitKind::Bloodweaver,
 ];
 
 /// All playable archetypes, in glossary order.
