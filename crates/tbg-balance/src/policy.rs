@@ -6,9 +6,15 @@
 use tbg_core::bot::Bot;
 use tbg_core::content::OFFERS;
 use tbg_core::{
-    Archetype, Faction, MatchView, Pcg32, Phase, PlayerIntention, Ruleset, UnitKind, FACTIONS,
-    UNIT_KINDS,
+    Archetype, Faction, MatchView, Pcg32, Phase, PlayerIntention, Ruleset, UnitKind, ALL_KINDS,
+    FACTIONS,
 };
+
+/// Every conventional kind (summons excluded): the lab duels and favors the
+/// staged roster, while the Shop draws only `Ruleset.pool` (until P53).
+fn conventional() -> impl Iterator<Item = UnitKind> {
+    ALL_KINDS.into_iter().filter(|k| k.is_conventional())
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Policy {
@@ -85,13 +91,13 @@ impl Policy {
     pub fn pool() -> Vec<Policy> {
         let mut v = Policy::strategic();
         v.extend([Policy::Heavy, Policy::Cheap]);
-        v.extend(UNIT_KINDS.map(Policy::Favor));
+        v.extend(conventional().map(Policy::Favor));
         v
     }
 
     /// Lab policies that exist only for one-sided value experiments.
     pub fn value_extra() -> Vec<Policy> {
-        UNIT_KINDS.into_iter().map(Policy::BotAvoid).collect()
+        conventional().map(Policy::BotAvoid).collect()
     }
 
     pub fn name(self) -> String {
@@ -130,13 +136,11 @@ impl Policy {
         }
         let mut kinds = Vec::with_capacity(3);
         for part in parts {
-            let kind = UNIT_KINDS
-                .iter()
-                .find(|k| format!("{k:?}").to_lowercase() == part)?;
-            if kind.is_summon() || kinds.contains(kind) {
+            let kind = conventional().find(|k| format!("{k:?}").to_lowercase() == part)?;
+            if kind.is_summon() || kinds.contains(&kind) {
                 return None;
             }
-            kinds.push(*kind);
+            kinds.push(kind);
         }
         Some(Policy::Comp([
             Some(kinds[0]),

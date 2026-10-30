@@ -3,7 +3,7 @@
 //! cloned `Ruleset`; the canonical ruleset is never modified.
 
 use tbg_core::content::{ENERGY_SCALE, MIN_INTERVAL};
-use tbg_core::{OnHit, Ruleset, UnitKind, ALL_KINDS, UNIT_KINDS};
+use tbg_core::{OnHit, Ruleset, UnitKind, ALL_KINDS};
 
 use crate::knobs::{self, Knob};
 use crate::runner::Setup;
@@ -102,7 +102,7 @@ impl Intervention {
 /// test a role-breaking change, but never a negative HP, a zero interval, or
 /// a slow of 100 % that would divide by zero.
 fn validate(r: &Ruleset) -> Result<(), String> {
-    for k in UNIT_KINDS {
+    for k in ALL_KINDS.into_iter().filter(|k| k.is_conventional()) {
         let d = r.def(k);
         if d.cost < ENERGY_SCALE {
             return Err(format!("{k:?}: cost below 1 Energy"));

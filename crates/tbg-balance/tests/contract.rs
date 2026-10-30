@@ -226,17 +226,18 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
 
 #[test]
 fn c8_a_flat_roster_flags_nothing() {
-    // Every shop unit gets the Shieldbearer's base stats; no Synergy bonus.
+    // Every conventional unit gets the Shieldbearer's base stats, forms and
+    // (empty) abilities; no Synergy bonus. P44: staged kinds join the flat
+    // roster, or their own forms and abilities would break the symmetry.
     let mut r = canon().clone();
     let template = *r.def(UnitKind::Shieldbearer);
-    for kind in UNIT_KINDS {
+    for kind in tbg_core::ALL_KINDS.into_iter().filter(|k| k.is_conventional()) {
         let d = &mut r.units[kind as usize];
         *d = tbg_core::content::UnitDef {
             kind,
             name: d.name,
             faction: d.faction,
             archetype: d.archetype,
-            forms: d.forms,
             ..template
         };
     }

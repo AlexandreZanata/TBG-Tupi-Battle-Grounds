@@ -389,9 +389,12 @@ pub fn apply(r: &mut Ruleset, spec: &str) -> Result<(), String> {
 /// Role invariants (Proposed, GAME-DESIGN §5 note). A candidate breaking
 /// one is discarded before any match is played.
 pub fn valid(r: &Ruleset) -> Result<(), String> {
-    for k in UNIT_KINDS {
+    for k in tbg_core::ALL_KINDS.into_iter().filter(|k| k.is_conventional()) {
         let d = r.def(k);
-        if d.range > r.stronghold_range {
+        // Farwatch never targets Strongholds, so the range cap does not
+        // apply to it (ROSTER-EXPANSION §C.2 role invariant).
+        let no_stronghold = d.ability(0, 0).contains(&tbg_core::content::Ability::NoStronghold);
+        if !no_stronghold && d.range > r.stronghold_range {
             return Err(format!("{:?}: base range above the Stronghold's", k));
         }
         let cap = r.energy_cap.unwrap_or(u32::MAX);
@@ -410,9 +413,10 @@ pub fn valid(r: &Ruleset) -> Result<(), String> {
         return Err("Evolution cost or start Energy above the cap".into());
     }
     for f in FACTIONS {
-        let units: Vec<&UnitDef> = UNIT_KINDS
-            .iter()
-            .map(|&k| r.def(k))
+        let units: Vec<&UnitDef> = tbg_core::ALL_KINDS
+            .into_iter()
+            .filter(|k| k.is_conventional())
+            .map(|k| r.def(k))
             .filter(|d| d.faction == f)
             .collect();
         // The faction's best unit by `key` belongs to the Archetype, if any.

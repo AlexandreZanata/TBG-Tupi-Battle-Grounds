@@ -7,7 +7,7 @@ use std::ops::Range;
 
 use tbg_core::content::TICK_HZ;
 use tbg_core::ArcanaPreset;
-use tbg_core::{EndReason, Ruleset, FACTIONS, UNIT_KINDS};
+use tbg_core::{EndReason, Ruleset, ALL_KINDS, FACTIONS};
 
 use crate::duels::Matrix;
 use crate::meta;
@@ -44,7 +44,12 @@ pub fn matchups(scope: Scope) -> Vec<(Policy, Policy)> {
     }
     if scope == Scope::Suite {
         v.extend([Policy::Heavy, Policy::Cheap].map(|p| (p, Policy::Bot)));
-        v.extend(UNIT_KINDS.map(|k| (Policy::Favor(k), Policy::Bot)));
+        v.extend(
+            ALL_KINDS
+                .into_iter()
+                .filter(|k| k.is_conventional())
+                .map(|k| (Policy::Favor(k), Policy::Bot)),
+        );
     }
     v
 }
@@ -198,9 +203,10 @@ pub fn rows(results: &Results, duels: Option<(&Matrix, &Ruleset)>, resamples: u3
             ));
         }
     }
-    let favor: Vec<(Policy, Vec<f64>)> = UNIT_KINDS
-        .iter()
-        .filter_map(|&k| {
+    let favor: Vec<(Policy, Vec<f64>)> = ALL_KINDS
+        .into_iter()
+        .filter(|k| k.is_conventional())
+        .filter_map(|k| {
             Some((
                 Policy::Favor(k),
                 scores(results, Policy::Favor(k), Policy::Bot)?,
@@ -360,7 +366,7 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
             (0.45, 0.55),
         ));
     }
-    for k in UNIT_KINDS {
+    for k in ALL_KINDS.into_iter().filter(|k| k.is_conventional()) {
         let c = cluster(&games, |r| {
             let all: u32 = r
                 .sides

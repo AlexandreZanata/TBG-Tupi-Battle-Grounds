@@ -33,7 +33,9 @@ struct Ctx {
 }
 
 fn ctx(a: &Args, default_pairs: u64, default_seed: u64) -> Result<Ctx, String> {
-    let mut rules = Ruleset::canon().clone();
+    // P44: the lab plays the full staging pool (ROSTER-EXPANSION §F.5);
+    // online stays on `CANON.pool` until the P53 owner switch.
+    let mut rules = Ruleset::preview().clone();
     let applied = a.str("apply").unwrap_or("").to_string();
     knobs::apply(&mut rules, &applied)?;
     let cores = std::thread::available_parallelism().map_or(1, |n| n.get()) as u64;
