@@ -17,7 +17,7 @@ use crate::content::{
     MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP, STRONGHOLD_INTERVAL,
     STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
 };
-use crate::types::{Tick, UnitKind, ALL_KINDS, UNIT_KINDS};
+use crate::types::{Tick, UnitKind, ALL_KINDS, FULL_POOL, UNIT_KINDS};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InterestRule {
@@ -120,12 +120,11 @@ impl Ruleset {
     }
 
     /// The full staging roster as the Shop pool (ROSTER-EXPANSION §F.5):
-    /// the lab's staging runs and the Practice preview use it once P44
-    /// adds new kinds. Today it is the same ten kinds as `CANON.pool`, so
-    /// behavior is identical. Leaked once (a few KB, freed at exit).
+    /// the lab's staging runs and the Practice preview draw from it.
+    /// Leaked once (a few KB, freed at exit).
     pub fn preview() -> &'static Ruleset {
         Box::leak(Box::new(Ruleset {
-            pool: &UNIT_KINDS,
+            pool: &FULL_POOL,
             ..CANON.clone()
         }))
     }

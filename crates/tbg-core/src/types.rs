@@ -133,6 +133,25 @@ impl UnitKind {
     }
 }
 
+/// The full conventional roster in `UnitKind` order: the staging pool the
+/// lab and the Practice preview draw from (P44: 13 kinds; grows per wave
+/// until the P53 owner switch moves it into `CANON.pool`).
+pub const FULL_POOL: [UnitKind; 13] = [
+    UnitKind::Shieldbearer,
+    UnitKind::Archer,
+    UnitKind::BoneBrute,
+    UnitKind::Hexer,
+    UnitKind::Sawbot,
+    UnitKind::SiegeWalker,
+    UnitKind::Bloomkeeper,
+    UnitKind::Rootcaller,
+    UnitKind::Nester,
+    UnitKind::Rampart,
+    UnitKind::Longaxe,
+    UnitKind::Farwatch,
+    UnitKind::Bombard,
+];
+
 /// All playable archetypes, in glossary order.
 pub const ARCHETYPES: [Archetype; 5] = [
     Archetype::Tank,
