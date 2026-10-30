@@ -36,39 +36,109 @@
         "Modest HP ({maxHp}) and damage ({damage})",
         "Pays nothing while your army is not killing"
       ],
-      "stats": { "maxHp": 4185, "damage": 48, "interval": 20, "range": 6000, "spoils": 90, "spoilsCap": 360, "auraBp": 0, "auraRange": 0 },
+      "stats": {
+        "maxHp": 4185,
+        "damage": 48,
+        "interval": 20,
+        "range": 6000,
+        "spoils": 90,
+        "spoilsCap": 360,
+        "auraBp": 0,
+        "auraRange": 0
+      },
       "branches": [
         {
           "name": "Armored Vault",
           "steps": [
             {
               "name": "Reinforced Vault",
-              "delta": { "hpBp": 1200 },
-              "stats": { "maxHp": 4687, "damage": 48, "interval": 20, "range": 6000, "spoils": 90, "spoilsCap": 360, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "hpBp": 1200
+              },
+              "stats": {
+                "maxHp": 4687,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 90,
+                "spoilsCap": 360,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             },
             {
               "name": "Grand Vault",
-              "delta": { "hpBp": 1200 },
-              "stats": { "maxHp": 5189, "damage": 48, "interval": 20, "range": 6000, "spoils": 90, "spoilsCap": 360, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "hpBp": 1200
+              },
+              "stats": {
+                "maxHp": 5189,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 90,
+                "spoilsCap": 360,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             }
-          ]
+          ],
+          "asset": {
+            "svg": "armored-vault.svg",
+            "display": "armored-vault.webp"
+          }
         },
         {
           "name": "Mint",
           "steps": [
             {
               "name": "Coinage",
-              "delta": { "spoilsAdd": 30 },
-              "stats": { "maxHp": 4185, "damage": 48, "interval": 20, "range": 6000, "spoils": 120, "spoilsCap": 360, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "spoilsAdd": 30
+              },
+              "stats": {
+                "maxHp": 4185,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 120,
+                "spoilsCap": 360,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             },
             {
               "name": "Royal Mint",
-              "delta": { "spoilsAdd": 30, "spoilsCapAdd": 180 },
-              "stats": { "maxHp": 4185, "damage": 48, "interval": 20, "range": 6000, "spoils": 150, "spoilsCap": 540, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "spoilsAdd": 30,
+                "spoilsCapAdd": 180
+              },
+              "stats": {
+                "maxHp": 4185,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 150,
+                "spoilsCap": 540,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             }
-          ]
+          ],
+          "asset": {
+            "svg": "mint.svg",
+            "display": "mint.webp"
+          }
         }
-      ]
+      ],
+      "portrait": {
+        "svg": "treasury.svg",
+        "display": "treasury.webp"
+      },
+      "banner": {
+        "svg": "banner-treasury.svg",
+        "display": "banner-treasury.webp"
+      }
     },
     {
       "kind": "Bastion",
@@ -88,39 +158,108 @@
         "Lowest damage ({damage})",
         "No effect beyond its walls"
       ],
-      "stats": { "maxHp": 5175, "damage": 47, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 0, "auraRange": 0 },
+      "stats": {
+        "maxHp": 5175,
+        "damage": 47,
+        "interval": 20,
+        "range": 6000,
+        "spoils": 0,
+        "spoilsCap": 0,
+        "auraBp": 0,
+        "auraRange": 0
+      },
       "branches": [
         {
           "name": "Fortress",
           "steps": [
             {
               "name": "Reinforced Walls",
-              "delta": { "hpBp": 1500 },
-              "stats": { "maxHp": 5951, "damage": 47, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "hpBp": 1500
+              },
+              "stats": {
+                "maxHp": 5951,
+                "damage": 47,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             },
             {
               "name": "Imperial Fortress",
-              "delta": { "hpBp": 1500 },
-              "stats": { "maxHp": 6727, "damage": 47, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "hpBp": 1500
+              },
+              "stats": {
+                "maxHp": 6727,
+                "damage": 47,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             }
-          ]
+          ],
+          "asset": {
+            "svg": "fortress.svg",
+            "display": "fortress.webp"
+          }
         },
         {
           "name": "Sentinel",
           "steps": [
             {
               "name": "Watchtower",
-              "delta": { "rangeAdd": 1000 },
-              "stats": { "maxHp": 5175, "damage": 47, "interval": 20, "range": 7000, "spoils": 0, "spoilsCap": 0, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "rangeAdd": 1000
+              },
+              "stats": {
+                "maxHp": 5175,
+                "damage": 47,
+                "interval": 20,
+                "range": 7000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             },
             {
               "name": "Royal Sentinel",
-              "delta": { "dmgBp": 1500 },
-              "stats": { "maxHp": 5175, "damage": 54, "interval": 20, "range": 7000, "spoils": 0, "spoilsCap": 0, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "dmgBp": 1500
+              },
+              "stats": {
+                "maxHp": 5175,
+                "damage": 54,
+                "interval": 20,
+                "range": 7000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             }
-          ]
+          ],
+          "asset": {
+            "svg": "sentinel.svg",
+            "display": "sentinel.webp"
+          }
         }
-      ]
+      ],
+      "portrait": {
+        "svg": "bastion.svg",
+        "display": "bastion.webp"
+      },
+      "banner": {
+        "svg": "banner-bastion.svg",
+        "display": "banner-bastion.webp"
+      }
     },
     {
       "kind": "Artillery",
@@ -140,39 +279,108 @@
         "Lowest HP ({maxHp})",
         "No passive effect"
       ],
-      "stats": { "maxHp": 3825, "damage": 58, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 0, "auraRange": 0 },
+      "stats": {
+        "maxHp": 3825,
+        "damage": 58,
+        "interval": 20,
+        "range": 6000,
+        "spoils": 0,
+        "spoilsCap": 0,
+        "auraBp": 0,
+        "auraRange": 0
+      },
       "branches": [
         {
           "name": "Heavy Cannon",
           "steps": [
             {
               "name": "Heavy Shot",
-              "delta": { "dmgBp": 2000 },
-              "stats": { "maxHp": 3825, "damage": 69, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "dmgBp": 2000
+              },
+              "stats": {
+                "maxHp": 3825,
+                "damage": 69,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             },
             {
               "name": "Great Cannon",
-              "delta": { "dmgBp": 2000 },
-              "stats": { "maxHp": 3825, "damage": 81, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "dmgBp": 2000
+              },
+              "stats": {
+                "maxHp": 3825,
+                "damage": 81,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             }
-          ]
+          ],
+          "asset": {
+            "svg": "heavy-cannon.svg",
+            "display": "heavy-cannon.webp"
+          }
         },
         {
           "name": "Rapid Fire",
           "steps": [
             {
               "name": "Quick Reload",
-              "delta": { "interval": 17 },
-              "stats": { "maxHp": 3825, "damage": 58, "interval": 17, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "interval": 17
+              },
+              "stats": {
+                "maxHp": 3825,
+                "damage": 58,
+                "interval": 17,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             },
             {
               "name": "Advanced Mechanism",
-              "delta": { "interval": 14 },
-              "stats": { "maxHp": 3825, "damage": 58, "interval": 14, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 0, "auraRange": 0 }
+              "delta": {
+                "interval": 14
+              },
+              "stats": {
+                "maxHp": 3825,
+                "damage": 58,
+                "interval": 14,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
             }
-          ]
+          ],
+          "asset": {
+            "svg": "rapid-fire.svg",
+            "display": "rapid-fire.webp"
+          }
         }
-      ]
+      ],
+      "portrait": {
+        "svg": "artillery.svg",
+        "display": "artillery.webp"
+      },
+      "banner": {
+        "svg": "banner-artillery.svg",
+        "display": "banner-artillery.webp"
+      }
     },
     {
       "kind": "Command",
@@ -192,39 +400,109 @@
         "Modest HP ({maxHp}) and damage ({damage})",
         "Only helps units fighting close to your tower"
       ],
-      "stats": { "maxHp": 4320, "damage": 48, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 500, "auraRange": 4000 },
+      "stats": {
+        "maxHp": 4320,
+        "damage": 48,
+        "interval": 20,
+        "range": 6000,
+        "spoils": 0,
+        "spoilsCap": 0,
+        "auraBp": 500,
+        "auraRange": 4000
+      },
       "branches": [
         {
           "name": "War Standard",
           "steps": [
             {
               "name": "War Cry",
-              "delta": { "auraBpAdd": 300 },
-              "stats": { "maxHp": 4320, "damage": 48, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 800, "auraRange": 4000 }
+              "delta": {
+                "auraBpAdd": 300
+              },
+              "stats": {
+                "maxHp": 4320,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 800,
+                "auraRange": 4000
+              }
             },
             {
               "name": "Supreme Command",
-              "delta": { "auraBpAdd": 300 },
-              "stats": { "maxHp": 4320, "damage": 48, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 1100, "auraRange": 4000 }
+              "delta": {
+                "auraBpAdd": 300
+              },
+              "stats": {
+                "maxHp": 4320,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 1100,
+                "auraRange": 4000
+              }
             }
-          ]
+          ],
+          "asset": {
+            "svg": "war-standard.svg",
+            "display": "war-standard.webp"
+          }
         },
         {
           "name": "Forward Banner",
           "steps": [
             {
               "name": "Outpost",
-              "delta": { "auraRangeAdd": 1000 },
-              "stats": { "maxHp": 4320, "damage": 48, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 500, "auraRange": 5000 }
+              "delta": {
+                "auraRangeAdd": 1000
+              },
+              "stats": {
+                "maxHp": 4320,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 500,
+                "auraRange": 5000
+              }
             },
             {
               "name": "High Command",
-              "delta": { "auraRangeAdd": 1000 },
-              "stats": { "maxHp": 4320, "damage": 48, "interval": 20, "range": 6000, "spoils": 0, "spoilsCap": 0, "auraBp": 500, "auraRange": 6000 }
+              "delta": {
+                "auraRangeAdd": 1000
+              },
+              "stats": {
+                "maxHp": 4320,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 500,
+                "auraRange": 6000
+              }
             }
-          ]
+          ],
+          "asset": {
+            "svg": "forward-banner.svg",
+            "display": "forward-banner.webp"
+          }
         }
-      ]
+      ],
+      "portrait": {
+        "svg": "command.svg",
+        "display": "command.webp"
+      },
+      "banner": {
+        "svg": "banner-command.svg",
+        "display": "banner-command.webp"
+      }
     }
-  ]
+  ],
+  "artBudgetBytes": 2000000
 }

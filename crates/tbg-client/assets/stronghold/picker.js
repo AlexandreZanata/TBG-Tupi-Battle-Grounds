@@ -17,13 +17,18 @@
     if (content !== undefined) node.textContent = content;
     return node;
   }
-  function drawing(name, className) {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('class', className); svg.setAttribute('aria-hidden', 'true');
-    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-    use.setAttribute('href', tower.icon(name));
-    svg.append(use);
-    return svg;
+  function artImage(asset, className, alt) {
+    const image = element('img', className);
+    image.dataset.towerArt = asset.display;
+    image.alt = alt; image.decoding = 'async'; image.loading = 'lazy';
+    return image;
+  }
+  function loadArt() {
+    // The picker data also prepares the profile chip while idle; pictures wait for open.
+    if (!panel.open) return;
+    panel.querySelectorAll('[data-tower-art]').forEach(image => {
+      if (!image.hasAttribute('src')) image.src = 'assets/stronghold/' + image.dataset.towerArt;
+    });
   }
   const locked = () => root.hidden || root.dataset.screen !== 'lobby';
   function load() {
@@ -59,7 +64,9 @@
   }
   function branchBlock(def, branch) {
     const block = element('section', 'tower-branch');
-    block.append(element('h4', '', (branch ? 'B · ' : 'A · ') + def.branches[branch].name));
+    const heading = element('h4');
+    heading.append(artImage(def.branches[branch].asset, 'tower-branch-art', ''), element('span', '', (branch ? 'B · ' : 'A · ') + def.branches[branch].name));
+    block.append(heading);
     const steps = element('ol');
     def.branches[branch].steps.forEach((step, i) => {
       const item = element('li');
@@ -75,7 +82,7 @@
     const article = element('article', 'tower-card');
     article.dataset.towerKind = def.kind; article.style.setProperty('--tower', def.color);
     article.setAttribute('aria-label', def.name + ' Stronghold');
-    const art = element('div', 'tower-art'); art.append(drawing(def.kind, 'tower-drawing'), element('span', 'tower-flag', 'Selected'));
+    const art = element('div', 'tower-art'); art.append(artImage(def.banner, 'tower-banner', ''), artImage(def.portrait, 'tower-drawing tower-portrait', def.name + ' Stronghold'), element('span', 'tower-flag', 'Selected'));
     const head = element('header', 'tower-head');
     head.append(element('h2', '', def.name), element('p', 'tower-specialty', def.specialty), element('p', 'tower-summary', def.summary));
     const passive = element('section', 'tower-passive');
@@ -133,7 +140,7 @@
     if (!panel.open) panel.showModal();
     get('error').hidden = true;
     try {
-      await ready(); load();
+      await ready(); load(); loadArt();
       if (panel.open) { render(); panel.querySelector('.tower-close').focus(); }
     } catch (error) { text('error', error.message); get('error').hidden = false; }
   }));
