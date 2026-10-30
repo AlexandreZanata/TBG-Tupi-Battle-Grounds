@@ -21,6 +21,7 @@ pub mod arrows;
 pub mod bow;
 mod clips;
 mod curves;
+pub mod death;
 mod feet;
 pub mod figure;
 mod legacy;

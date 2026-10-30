@@ -18,6 +18,8 @@ mod names;
 mod update;
 
 pub use assets::VisualAssets;
+#[cfg(test)]
+pub use cues::CORPSE_SECS;
 pub use cues::{play_cue, spawn_projectile, VisualCue};
 pub use update::update_unit_visual;
 

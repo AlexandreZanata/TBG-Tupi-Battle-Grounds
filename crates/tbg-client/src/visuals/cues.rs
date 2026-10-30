@@ -19,7 +19,7 @@ pub enum VisualCue {
 }
 
 /// How long a dead unit stays on the field after its death clip.
-const CORPSE_SECS: f32 = 0.9;
+pub const CORPSE_SECS: f32 = 0.9;
 
 pub fn play_cue(v: &mut UnitVisual, anim: &mut Animator, a: &VisualAssets, cue: VisualCue) {
     if v.dying {
@@ -54,6 +54,18 @@ pub(super) fn animate(
     for (root, mut v, mut anim, t) in &mut units {
         if v.dying {
             v.dead_for += dt;
+            commands.entity(v.bar).try_insert(Visibility::Hidden);
+            commands.entity(v.ring).try_insert(Visibility::Hidden);
+            for t_cube in &v.tiers {
+                commands.entity(*t_cube).try_insert(Visibility::Hidden);
+            }
+
+            let form = lib.get(v.form.0, v.form.1, v.form.2);
+            let faction = tbg_core::content::UNITS[v.form.0 as usize].faction;
+            let death_transform =
+                crate::art::death::evaluate(faction, v.dead_for, form.plan.scale, v.yaw);
+            commands.entity(v.figure).try_insert(death_transform);
+
             if v.dead_for > Clip::Death.duration() + CORPSE_SECS {
                 commands.entity(root).try_despawn();
             }
