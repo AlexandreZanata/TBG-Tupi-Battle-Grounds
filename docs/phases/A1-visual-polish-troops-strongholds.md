@@ -1,5 +1,14 @@
 # A-1 — Professional visual polish: troops, animation, targeted combat, Strongholds
 
+> **Port note (D-47).** The troop work of this phase (steps 0–9 and 13) was
+> cherry-picked onto the D-46 branch (`phase/a1-troops-port`). The Stronghold
+> work (steps 10–12 and contract D4) is **superseded by D-46** (Treasury,
+> Bastion, Artillery, Command; kind-exclusive Fortification) and was not
+> ported. Where the text below names the A-1 Stronghold layer
+> (`StrongholdLook`, Redoubt, Ballista, Banner, Walls/Arms, turret pivot), it
+> is historical. Evidence under `docs/media/a1/` that shows A-1 towers is kept
+> as history only.
+
 **Status:** step 0 passed, step 1 audit complete; steps 2–14 pending (spec written 2026-10-29 against HEAD `f15432f` on
 `phase/p40-arcana-trees`; `main` = `077abe7`). Writing this spec changes no
 rule and enables nothing.
@@ -186,7 +195,7 @@ AimTarget = Unit(UnitId) | Stronghold(Seat)          (copied from the event, not
 - Stronghold target: the aim point is the Stronghold hit point on the side
   facing the attacker (never its centre inside the mesh).
 
-### D4. Stronghold look layer (art only)
+### D4. Stronghold look layer (art only) — superseded by D-46, not ported
 
 ```
 StrongholdLook { kind: Classic|Treasury|Redoubt|Ballista|Banner, tier: 0..=2, branch: Walls|Arms }
@@ -387,7 +396,7 @@ schedule. **Check:** timing unit tests (Strike/Release at their contract
 times ± 1 frame, clip < interval) and a corpse/effect leak test (entity
 count returns to the pre-battle value after a 60 s fight plus 3 s).
 
-### 10. Stronghold models (D4, Tier 0)
+### 10. Stronghold models (D4, Tier 0) — superseded by D-46
 `arena/strongholds/*` for the four kinds + `Classic`, per-seat spawn, team
 banners, sockets, three HP states, hit shake, collapse. `?gallery=strongholds`
 shows 4 kinds × 2 seats at the match camera and in silhouette. Practice mode
@@ -396,7 +405,7 @@ the kind data exists (O-A1-1). **Check:** silhouettes of the four kinds are
 distinct at 64 px; footprint/height budget respected; sheet with units on
 lanes ±0.8 next to each tower proving visibility.
 
-### 11. Tier and branch kit + transition
+### 11. Tier and branch kit + transition — superseded by D-46
 `tier.rs` add-ons and the growth transition (D4). `?gallery=strongholds`
 shows every kind at T0, T1 Walls, T1 Arms, T2 Walls, T2 Arms (a key cycles
 the tiers and plays the transition). **Check:** each step is distinguishable
@@ -405,7 +414,7 @@ listed in the report); the transition has no frame with a missing piece
 (frame-by-frame sheet); reconnect snapshot test: the first look is applied
 with no animation.
 
-### 12. Stronghold attack
+### 12. Stronghold attack — superseded by D-46
 Turret pivot, muzzle origin, recoil, deferred target reaction (D4a) for all
 kinds and tiers (T1/T2 change the weapon geometry but not the socket
 contract). **Check:** the aim lab runs with a Stronghold as the attacker
@@ -779,7 +788,14 @@ Step 8 complete (Troop polish by Faction complete across all 4 factions in commi
   - Machines: Sawbot (mechanical chassis, orange visor, boiler core, buzzsaw; A twin saws + back exhaust stacks, B ironclad bolted mantlet + tower helm + giant saw), Siege Walker (Large body plan war-engine, brass optics, geared great-bow; A double-limb ballista, B multi-rail launcher + ammo drum), Rampart (wall-like Tank without human limbs; mantlet shield wall, bunker observation turret; A spiked bastion, B crenellated redoubt).
   - Plants: Bloomkeeper (flowering staff, leaf cloak, petal halo; A grove bloom halo ring, B thornwarden cuirass + briar shield), Rootcaller (small treant, root claws; A strangle tendrils + leaf cuffs, B overgrowth mushroom cap canopy), Nester (hive druid, hollow tree hive on back, honey crook staff; A swarm brood hive + honey crown, B chitin warden carapace + mandible horns), Beetling (miniature 0.55x summon, cheap mesh budget, beetle carapace, matching Nester's tier/branch look).
   - All 11 unit kinds across all 5 forms (55 forms total) fully migrated to native rig-v2. Contact sheets and 64px black silhouettes verified in gallery and committed to `docs/media/a1/`.
-Steps 9–14 pending.
+Step 9 complete (full animation pass, commit `4177298`):
+  - Parametric animation profiles: idle breathing amplitude, walk cadence with foot-lock synchronization.
+  - Faction death styles in `art/death.rs`: Humans fall backward; Undead collapse and sink; Machines jitter and power down; Plants wilt and sink.
+  - Spawn and Evolve preserve orientation and identity.
+  - Timing contract tests in `art/anim_tests.rs`: Strike/Release at contract times ±1 frame, clip < interval, corpse despawn on its fixed schedule.
+Steps 10–12 (Stronghold models, tier and branch kit, Stronghold attack): **superseded by D-46**. The A-1 commits `e84dc80`, `40b8704` and `42bf957` were not applied, and the tower part of `2a23fce` was dropped. The towers are the D-46 ones (`arena/strongholds/`, `?gallery=strongholds`, lobby picker, Fortification panel). Troops that attack a Stronghold aim at the core's `stronghold_x` at the impact height of `sync/events.rs`.
+Step 13 (performance, regression, compatibility, evidence in commit `586d33b`): measured on A-1's own branch; the post-port measurements are in *Port verification* below.
+Step 14: ART-DIRECTION §11, the decision (renumbered D-41 → D-47 and reduced to aim and troop polish) and the ROADMAP row are done in the port.
 
 ### Owner decisions
 
