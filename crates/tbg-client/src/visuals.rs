@@ -134,8 +134,8 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-/// The selected unit's ground ring pulses as a luminous base halo,
-/// and the figure receives a subtle visual elevation (+0.07 Y) to emphasize focus.
+/// The selected unit's ground ring pulses as a luminous base halo. The
+/// figure itself is not lifted: `aim` owns its translation every frame.
 fn highlight_inspected(
     time: Res<Time>,
     inspected: Option<Res<crate::ui::inspect::Inspected>>,
@@ -153,12 +153,6 @@ fn highlight_inspected(
         if let Ok(mut t) = transforms.get_mut(v.ring) {
             if (t.scale.x - scale).abs() > 1e-4 {
                 t.scale = Vec3::splat(scale);
-            }
-        }
-        if let Ok(mut t) = transforms.get_mut(v.figure) {
-            let target_y = if is_selected { 0.07 } else { 0.0 };
-            if (t.translation.y - target_y).abs() > 1e-4 {
-                t.translation.y = target_y;
             }
         }
     }

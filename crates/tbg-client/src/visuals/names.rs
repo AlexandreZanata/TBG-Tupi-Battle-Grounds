@@ -5,6 +5,9 @@ use crate::camera::{self, ArenaCamera};
 use bevy::prelude::*;
 use tbg_core::UnitKind;
 
+/// Wide enough for the longest name ("Antidote Brewer") at 12 px.
+const TAG_W: f32 = 124.0;
+
 #[derive(Component)]
 struct Nameplate(Entity, tbg_core::UnitId);
 
@@ -27,7 +30,7 @@ fn spawn(
             Nameplate(entity, *id),
             Text::new(name(unit.form.0)),
             TextFont {
-                font_size: FontSize::Px(10.0),
+                font_size: FontSize::Px(12.0),
                 ..default()
             },
             TextColor(Color::srgb(0.96, 0.94, 0.88)),
@@ -35,9 +38,9 @@ fn spawn(
             BorderColor::all(Color::srgba(0.85, 0.72, 0.38, 0.80)),
             Node {
                 position_type: PositionType::Absolute,
-                width: px(88.0),
-                height: px(16.0),
-                border_radius: BorderRadius::all(px(3.0)),
+                width: px(TAG_W),
+                height: px(20.0),
+                border_radius: BorderRadius::all(px(4.0)),
                 border: UiRect::all(px(1.0)),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
@@ -51,8 +54,7 @@ fn spawn(
 
 fn position(
     mut commands: Commands,
-    window: Single<&Window>,
-    scale: Res<UiScale>,
+    (window, scale): (Single<&Window>, Res<UiScale>),
     camera: Single<(&Camera, &GlobalTransform), With<ArenaCamera>>,
     inspected: Option<Res<crate::ui::inspect::Inspected>>,
     units: Query<&UnitVisual>,
@@ -84,8 +86,8 @@ fn position(
             continue;
         };
 
-        node.left = px(point.x / scale.0 - 44.0);
-        node.top = px(point.y / scale.0 - 18.0);
+        node.left = px(point.x / scale.0 - TAG_W / 2.0);
+        node.top = px(point.y / scale.0 - 24.0);
         *visibility = Visibility::Inherited;
     }
 }
