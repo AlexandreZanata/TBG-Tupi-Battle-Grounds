@@ -57,11 +57,11 @@ const ROSTER: [Row; 11] = {
     ]
 };
 
-/// P44 (Proposed, staged, GAME-DESIGN §11): wave A in `UnitKind` order.
-/// Not in the Shop pool until the P53 owner switch; checked against the §11
-/// starting values in the document's units.
+/// P44–P45 (Proposed, staged, GAME-DESIGN §11): wave A and B in `UnitKind`
+/// order. Not in the Shop pool until the P53 owner switch; checked against
+/// the §11 starting values in the document's units.
 #[rustfmt::skip]
-const STAGED: [Row; 3] = {
+const STAGED: [Row; 6] = {
     use Archetype::*; use Faction::*; use UnitKind::*;
     #[allow(clippy::too_many_arguments)]
     const fn r(kind: UnitKind, faction: Faction, archetype: Archetype,
@@ -74,11 +74,14 @@ const STAGED: [Row; 3] = {
         r(Longaxe,      Humans,   Dps,     4,  360, 100, 0, 240, 160, 70,    0, None),
         r(Farwatch,     Humans,   Ranged,  3,  150, 70,  0, 400, 1200, 90,   0, None),
         r(Bombard,      Machines, Ranged,  5, 1000, 24,  0, 220, 400, 50, 100, None),
+        r(Rotcap,       Plants,   Ranged,  3,  200, 12,  0, 150, 350, 90,    0, None),
+        r(OldFinn,      Humans,   Control, 3,  240, 8,   0, 200, 350, 90,    0, None),
+        r(AntidoteBrewer, Plants, Support, 3,  260, 0,   0, 400, 300, 90,    0, None),
     ]
 };
 
 #[test]
-fn staged_wave_a_matches_section_11() {
+fn staged_waves_match_section_11() {
     for row in &STAGED {
         let u: &UnitDef = def(row.kind);
         let name = u.name;
@@ -139,9 +142,9 @@ fn base_stats_match_game_design_table() {
 fn roster_composition() {
     // §5 (D-32): ten purchasable units plus the Beetling summon, in
     // `UnitKind` order; every archetype present. P44 stages three more
-    // conventional kinds (§11, not in the Shop pool until P53); the pool
-    // itself stays exactly the ten purchasable units.
-    assert_eq!(UNITS.len(), 14);
+    // conventional kinds and P45 another three (§11, not in the Shop pool
+    // until P53); the pool itself stays exactly the ten purchasable units.
+    assert_eq!(UNITS.len(), 17);
     assert_eq!(UNIT_KINDS.len(), 10);
     assert!(UNIT_KINDS.iter().all(|k| k.is_conventional()));
     assert_eq!(
@@ -149,10 +152,10 @@ fn roster_composition() {
         ALL_KINDS.to_vec()
     );
     for (f, n) in [
-        (Faction::Humans, 4),
+        (Faction::Humans, 5),
         (Faction::Undead, 2),
         (Faction::Machines, 4),
-        (Faction::Plants, 3),
+        (Faction::Plants, 5),
     ] {
         let sold = UNITS
             .iter()
@@ -259,7 +262,19 @@ Farwatch/Deep Wound: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 h
 Bombard/Bigger Blast: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=500 heal=0 dmg+=0 hit=-
 Bombard/Heavy Ordnance: hp=0 dmg=2500 atk=0 speed=0 range+=0 splash+=500 heal=0 dmg+=0 hit=-
 Bombard/Reinforced Hull: hp=5000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Bombard/Relentless Shelling: hp=0 dmg=0 atk=4300 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Bombard/Relentless Shelling: hp=0 dmg=0 atk=4300 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rotcap/Potent Toxin: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rotcap/Deadly Venom: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rotcap/Spore Split: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rotcap/Toxic Rain: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Old Finn/Big Catch: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Old Finn/Giant Catfish: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Old Finn/Double Catch: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Old Finn/Fish Shower: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Antidote Brewer/Master Antidote: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Antidote Brewer/Perfect Remedy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Antidote Brewer/Quick Mixing: hp=0 dmg=0 atk=3333 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Antidote Brewer/Double Flask: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {

@@ -86,6 +86,10 @@ pub enum UnitKind {
     Longaxe,
     Farwatch,
     Bombard,
+    // P45 (Proposed, staged): wave B. Same staging rules.
+    Rotcap,
+    OldFinn,
+    AntidoteBrewer,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -104,7 +108,8 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 ];
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
-pub const ALL_KINDS: [UnitKind; 14] = [
+#[rustfmt::skip]
+pub const ALL_KINDS: [UnitKind; 17] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -119,6 +124,9 @@ pub const ALL_KINDS: [UnitKind; 14] = [
     UnitKind::Longaxe,
     UnitKind::Farwatch,
     UnitKind::Bombard,
+    UnitKind::Rotcap,
+    UnitKind::OldFinn,
+    UnitKind::AntidoteBrewer,
 ];
 
 impl UnitKind {
@@ -135,9 +143,10 @@ impl UnitKind {
 }
 
 /// The full conventional roster in `UnitKind` order: the staging pool the
-/// lab and the Practice preview draw from (P44: 13 kinds; grows per wave
+/// lab and the Practice preview draw from (P45: 16 kinds; grows per wave
 /// until the P53 owner switch moves it into `CANON.pool`).
-pub const FULL_POOL: [UnitKind; 13] = [
+#[rustfmt::skip]
+pub const FULL_POOL: [UnitKind; 16] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -151,6 +160,9 @@ pub const FULL_POOL: [UnitKind; 13] = [
     UnitKind::Longaxe,
     UnitKind::Farwatch,
     UnitKind::Bombard,
+    UnitKind::Rotcap,
+    UnitKind::OldFinn,
+    UnitKind::AntidoteBrewer,
 ];
 
 /// All playable archetypes, in glossary order.

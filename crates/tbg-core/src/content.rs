@@ -338,7 +338,7 @@ use Faction::*;
 
 /// Every kind, in `UnitKind` (`ALL_KINDS`) order.
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 14] = [
+pub const UNITS: [UnitDef; 17] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
@@ -437,6 +437,47 @@ pub const UNITS: [UnitDef; 14] = [
         FormDef { splash_add: 500, dmg_bp: 2_500, ..form("Heavy Ordnance") },
         FormDef { hp_bp: 5_000, ..form("Reinforced Hull") },
         FormDef { atk_bp: 4_300, ..form("Relentless Shelling") },
+    ]),
+    // P45 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave B. Not in the
+    // Shop pool until the P53 owner switch.
+    unit(UnitKind::Rotcap, "Rotcap", Plants, Ranged, 1_800,
+        [200, 12, 30, 3_500, 45, 0, 0], None, [
+        [Ability::Poison { dps: 6, pulses: 10, cap: 6 }, Ability::None],
+        [Ability::Poison { dps: 8, pulses: 10, cap: 6 }, Ability::None],
+        [Ability::Poison { dps: 10, pulses: 10, cap: 6 }, Ability::None],
+        [Ability::Poison { dps: 6, pulses: 10, cap: 6 }, Ability::Echo { every: 3, extra: 1 }],
+        [Ability::Poison { dps: 6, pulses: 10, cap: 6 }, Ability::Echo { every: 2, extra: 1 }],
+    ], [
+        form("Potent Toxin"),
+        form("Deadly Venom"),
+        form("Spore Split"),
+        form("Toxic Rain"),
+    ]),
+    unit(UnitKind::OldFinn, "Old Finn", Humans, Control, 1_800,
+        [240, 8, 40, 3_500, 45, 0, 0], None, [
+        [Ability::Fish { bp: 1_500, ticks: 100, cap: 3, per_hit: 1 }, Ability::None],
+        [Ability::Fish { bp: 2_000, ticks: 100, cap: 3, per_hit: 1 }, Ability::None],
+        [Ability::Fish { bp: 2_000, ticks: 100, cap: 3, per_hit: 2 }, Ability::None],
+        [Ability::Fish { bp: 1_500, ticks: 100, cap: 3, per_hit: 1 }, Ability::Echo { every: 3, extra: 1 }],
+        [Ability::Fish { bp: 1_500, ticks: 100, cap: 3, per_hit: 1 }, Ability::Echo { every: 3, extra: 2 }],
+    ], [
+        form("Big Catch"),
+        form("Giant Catfish"),
+        form("Double Catch"),
+        form("Fish Shower"),
+    ]),
+    unit(UnitKind::AntidoteBrewer, "Antidote Brewer", Plants, Support, 1_800,
+        [260, 0, 80, 3_000, 45, 0, 0], None, [
+        [Ability::Brew { strip_poison: 3, ward: 20, second: false }, Ability::None],
+        [Ability::Brew { strip_poison: 6, ward: 40, second: false }, Ability::None],
+        [Ability::Brew { strip_poison: 6, ward: 70, second: false }, Ability::None],
+        [Ability::Brew { strip_poison: 3, ward: 20, second: false }, Ability::None],
+        [Ability::Brew { strip_poison: 3, ward: 20, second: true }, Ability::None],
+    ], [
+        form("Master Antidote"),
+        form("Perfect Remedy"),
+        FormDef { atk_bp: 3_333, ..form("Quick Mixing") },
+        form("Double Flask"),
     ]),
 ];
 
