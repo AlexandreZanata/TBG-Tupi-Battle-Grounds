@@ -1,7 +1,8 @@
 # ARENAS-G — Themed arenas in the real game
 
-**Status:** in progress on `phase/arenas-gameplay` (from the consolidation
-branch, carrying the five visual arenas of `codex/themed-arenas`).
+**Status:** implemented on `phase/arenas-gameplay` (from the consolidation
+branch, carrying the five visual arenas of `codex/themed-arenas`); step 4's
+lab measurement is deferred by the owner (2026-10-30).
 **Goal:** the arena is part of the match. The server draws it at pairing,
 both seats play under the same small modifier, practice lets the player
 choose it, the scene switches without a reload, and a lobby page presents
@@ -77,4 +78,31 @@ AGENTS.md pass, plus `trunk build --release` and desktop browser checks.
 
 ## Phase report
 
-_Filled in at the end._
+**Done.** Steps 1–3 and 5–7. `475495e` core, server, protocol v15 and
+client wiring with D-55; `0b31d9f` the Arenas page and the in-match
+banner. The Forest takes the owner-approved seascape of PR #14
+unchanged; the other four arenas keep their own sea, shore and light.
+Codex's themed towers are dropped: every arena uses the D-46 kind towers.
+
+**Checks run.** `cargo fmt --check`, `cargo clippy --workspace
+--all-targets -D warnings` (native and wasm32), `cargo test --workspace
+--exclude tbg-balance`: 310 passed, 0 failed (includes
+`tbg-core/tests/arenas.rs` 9, `tbg-server/tests/arenas.rs` 2, the
+scene-switch leak test, `ui::arena_data_tests`); Node `tests/*.test.js`
+30 passed; `trunk build --release`. Browser (headless Chrome, GPU,
+1920×1080 and 1280×800): all five scenes render; choosing Volcanic on
+the Arenas page switches the lobby scene with no reload and saves
+`tbg.arena`; Train here on the Ruins starts Practice in the Ruins with
+the banner ("Each player's first Evolution costs 1 Energy less") and the
+chip; the page in pt-BR. Two bots on a local server finished matches
+with the arena stored per match row (0 and 3).
+
+**Not done / limits.**
+- Step 4 (lab `--arena`, the `arenas` comparison, tuning) is deferred by
+  the owner; all five values stay **Proposed**.
+- With `--chaos-pct 100` and a 10 ms test tick, one bot reconnect timed
+  out; the consolidation base without arenas fails the same way (a bot
+  scheduled to drop after the match already ended), so it is a harness
+  limit, not an arena change.
+- The thumbnails are 640×360 WebP crops of real 1920×1080 captures.
+- Desktop only; phone layout not checked (AGENTS.md platform focus).
