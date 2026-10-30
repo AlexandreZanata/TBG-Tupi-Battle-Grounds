@@ -4,7 +4,7 @@
 use bevy::prelude::*;
 use tbg_core::Archetype;
 
-use super::{UnitVisual, VisualAssets};
+use super::{AimTarget, UnitVisual, VisualAssets};
 use crate::art::anim::{Animator, Clip};
 use crate::art::FigureLibrary;
 use crate::camera::ArenaCamera;
@@ -20,6 +20,11 @@ pub enum VisualCue {
 
 /// How long a dead unit stays on the field after its death clip.
 const CORPSE_SECS: f32 = 0.9;
+/// A unit stops walking only after this long without moving, so a frame
+/// without a new view never flickers it into idle.
+const STOP_SECS: f32 = 0.15;
+/// Aim at the chest of a unit, not its feet.
+const CHEST: f32 = 0.6;
 
 pub fn play_cue(v: &mut UnitVisual, anim: &mut Animator, a: &VisualAssets, cue: VisualCue) {
     if v.dying {
@@ -49,9 +54,11 @@ pub(super) fn animate(
     time: Res<Time>,
     lib: Res<FigureLibrary>,
     mut units: Query<(Entity, &mut UnitVisual, &mut Animator, &Transform)>,
+    targets: Query<&Transform, With<UnitVisual>>,
 ) {
     let dt = time.delta_secs();
     for (root, mut v, mut anim, t) in &mut units {
+        anim.aim_at = aim(&mut v, &targets, dt);
         if v.dying {
             v.dead_for += dt;
             if v.dead_for > Clip::Death.duration() + CORPSE_SECS {
@@ -63,9 +70,15 @@ pub(super) fn animate(
         anim.native = form.native;
         anim.archer = form.native && v.form.0 == tbg_core::UnitKind::Archer;
         anim.plan = form.plan;
+        anim.form = (v.form.1, v.form.2);
         let moving = (t.translation.x - v.last_x).abs() > 0.0004;
         v.last_x = t.translation.x;
-        anim.set_base(if moving { Clip::Walk } else { Clip::Idle });
+        v.still = if moving { 0.0 } else { v.still + dt };
+        anim.set_base(if v.still < STOP_SECS {
+            Clip::Walk
+        } else {
+            Clip::Idle
+        });
         // Swap materials only on tint start and end, not every frame.
         let joints = v.joints;
         let tint = v.tint.take();
@@ -86,6 +99,18 @@ pub(super) fn animate(
             }
         }
     }
+}
+
+/// The engaged target's world point, while the engagement lasts and the
+/// target still exists.
+fn aim(v: &mut UnitVisual, targets: &Query<&Transform, With<UnitVisual>>, dt: f32) -> Option<Vec3> {
+    let (target, left) = v.aim?;
+    let at = match target {
+        AimTarget::Unit(e) => targets.get(e).ok().map(|t| t.translation + Vec3::Y * CHEST),
+        AimTarget::Point(p) => Some(p),
+    };
+    v.aim = at.filter(|_| left > dt).map(|_| (target, left - dt));
+    at
 }
 
 /// HP bars always face the camera.

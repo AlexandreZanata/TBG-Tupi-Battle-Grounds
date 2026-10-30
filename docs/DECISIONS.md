@@ -877,3 +877,92 @@ The P42 lab baseline on the ten-kind pool stays the reference for D-48.
 **Reopen when** live play or the lab shows a new unit that breaks
 matches (e.g. a stall or a share outside the D-48 gate), or the owner
 wants the pool back to ten.
+
+## D-51 · Per-unit art kits; distance-driven gait; aiming Strongholds — 2026-10-30 (owner request; approved)
+
+**Decision.** Each character owns a code-built *art kit*
+(`crates/tbg-client/src/art/kits/<unit>/`): its five-form figure on rig v2,
+a signature pose layer over the shared clip library, its gait, its aim
+and its attack style — its own projectile, muzzle effect and impact, or
+its own melee impact. Kits are plain data and function pointers in a
+static registry (`kits::kit(UnitKind)`), like the Stronghold `PartDef`s;
+no trait, no engine layer, no assets. First kits: Siege Walker, Bone
+Brute, Rootcaller (P54). Units without a kit keep the shared library and
+the generic projectile until their own phase.
+**Gait v2 (all units).** Walk cadence is the distance the figure actually
+travels divided by its stride, so feet never slide at any speed, slow or
+Evolution bonus; planted feet lock in world X and Z; every figure
+(native or adapted) walks on two-bone legs; walk/idle has a 0.15 s stop
+hysteresis. Animation runs in `PostUpdate` after all movement.
+**Aim.** A unit that attacks keeps its target for one interval plus
+0.7 s; kits turn the body (an off-center weapon is lined up exactly) and
+raise the weapon to the launch tangent of their own shot, which leaves
+the real muzzle. Strongholds aim their gun (Artillery carriage and
+barrel, Sentinel ballista) the same way and fire their own cannonball or
+bolt from it on the render-delayed `AttackStart`; gunless towers loose a
+crossbow bolt from their top.
+**Unchanged.** All of this is cosmetic: no simulation value, event,
+timing or protocol changed; ART-DIRECTION §4's 0.30 / 0.18 / 0.22 s event
+times hold (kits only lengthen recoveries). The Siege Walker is drawn
+with a shoulder bombard ("bazooka", owner 2026-10-30), not the P24
+arbalest; its "Ogre Archer" display name is an open owner decision.
+**Reopen when** a kit's pose cost shows up in the 30-unit stress
+measurement, or skinned glTF replaces code-built figures (D-22).
+**Approved (owner, 2026-10-30).** After reviewing the build at
+`localhost` (gallery forms, `&range`, `&evolve`, walking, aiming towers)
+the owner approved the three kits, gait v2 and the Artillery's aim and
+projectiles as they stand; the Artillery's animation is frozen. The
+Siege Walker's display name stays an open owner decision.
+
+## D-52 · Defenders and lobby-faithful dress for the gunless Strongholds — 2026-10-30 (owner request)
+
+**Decision.** Every Stronghold kind now shows who fires its shot, animated
+for its role, and is dressed after its lobby portrait
+(`assets/stronghold/<kind>.webp`, GPT-generated, D-46) in the same
+low-poly vertex-color style as the kits:
+- **Classic:** a crossbowman in a team tabard and kettle hat walks round
+  the crown to face the target, aims, recoils (`gunners.rs`); steps,
+  lintel, door studs, arrow slits and a gold band.
+- **Bastion:** a gun port in the wall facing the enemy; its shutter flies
+  open on every shot and a swivel falconet runs out through it, fires and
+  runs back (Sentinel's ballista keeps firing on Royal Sentinel); an
+  arched gate up a flight of steps, four round corner turrets with
+  conical roofs and team pennants, a crenellated keep with its flag.
+- **Treasury:** a stone dormer on an eight-sided terracotta roof whose
+  trapdoors open for a brass mortar that lobs a purse of gold (its own
+  `ShotKind::Coins` and gold impact); a gold dome with a lantern spire,
+  gold finials and team pennants on the pillars, team banners beside the
+  vault, entry steps, gold-framed windows, striped market awnings.
+- **Command:** an archer on the observation platform turns, draws and
+  looses; cloth panels on the rail, a heraldic banner over an arched
+  door, masonry courses and entry steps.
+**How.** Defenders are ordinary tower pieces: `Motion::Swivel` (walks
+round the tower's axis with the aim), `Motion::Mounted` (a carried
+weapon: orbits, aims, recoils), `Motion::Kick` (a fixed gun: aims,
+recoils; negative recoil runs it out of a port), `Motion::Hatch` (swings
+open on a shot, then shuts). `aim::Turret` gained `orbit` (aim from the
+tower axis) and `arc` (a port's yaw limit). A tower whose defender fell
+with its damage state still looses a bolt from its top.
+**Unchanged.** The Artillery (approved, D-51), all simulation values and
+the render-delayed shot timing.
+**Reopen when** a defender reads poorly at match distance or the owner
+wants a different role animation.
+
+## D-53 · Every champion on its own art kit — 2026-10-30 (owner request)
+
+**Decision.** The P54 kits (D-51) and the Stronghold defenders (D-52) are
+the visual standard for every champion. Twenty-three champions that still
+used the shared library now have their own kit (figure with five distinct
+forms, motion for every clip, own projectile or melee impact): the
+fifteen new champions and the Smuggler's Crate, and the originals
+Shieldbearer, Hexer, Sawbot, Bloomkeeper, Nester, Beetling and Rampart.
+Kits share one library (`art/kits/common/`: anatomy, dress, gear, motion
+blocks on the fixed event times). Support actions with an `AttackStart`
+are shot kits; the crate toss, the blood transfer stream and broken
+plates are cued from their own events (`sync/actions.rs`).
+**Unchanged.** The Siege Walker, Bone Brute and Rootcaller kits, the
+towers, the Archer's approved v2 figure, all simulation values, event
+times and the protocol.
+**Reopen when** the owner rejects a kit's look, a kit reads poorly at
+match distance, or the view packs the carrier and plate bits (then the
+Cargo Crab can seat its passenger and the Shatterback can shed plates).

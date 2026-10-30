@@ -13,6 +13,7 @@ use crate::audio::Sounds;
 use crate::vfx::VfxAssets;
 use crate::visuals::{self, UnitLook, VisualAssets};
 
+mod actions;
 mod events;
 mod messages;
 mod timeline;
@@ -106,7 +107,12 @@ fn sync_units(
     mut buffer: ResMut<ViewBuffer>,
     mut map: ResMut<UnitEntities>,
     mut visuals: events::Visuals,
-    mut fx_res: (Res<VfxAssets>, ResMut<Sounds>, ResMut<MatchStats>),
+    mut fx_res: (
+        Res<VfxAssets>,
+        ResMut<Sounds>,
+        ResMut<MatchStats>,
+        ResMut<visuals::TowerOrders>,
+    ),
 ) {
     let now = time.elapsed_secs_f64();
     let mut scene = Scene {
@@ -124,12 +130,13 @@ fn sync_units(
     let Some((you, alive)) = placed else {
         return;
     };
-    let (vfx, sounds, stats) = (&fx_res.0, &mut *fx_res.1, &mut *fx_res.2);
+    let (vfx, sounds, stats, orders) = (&fx_res.0, &mut *fx_res.1, &mut *fx_res.2, &mut *fx_res.3);
     let mut fx = events::Fx {
         assets: &assets,
         vfx,
         sounds,
         stats,
+        orders,
         you,
     };
     for ev in buffer.timeline.take_events() {

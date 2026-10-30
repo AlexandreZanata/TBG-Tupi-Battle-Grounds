@@ -177,6 +177,8 @@ Phase files are written one at a time, starting with P42.
 | P41 | [P41-i18n-pt-br.md](phases/P41-i18n-pt-br.md) | Client-only English + Brazilian Portuguese: compiled catalogs, lobby language selector, Latin-1 fonts, zero per-frame cost | planned (owner decisions O-P41-1…5 open) | — |
 | P47 | [P47-live-spectate-and-presence.md](phases/P47-live-spectate-and-presence.md) | Live ranked match list, featured "Live now", real-time spectating for guests and accounts, online presence | planned (owner request 2026-10-29); depends on PR #10 | — |
 | P42 | [P42-roster-baseline.md](phases/P42-roster-baseline.md) | Roster canon (D-48), lab combat counters, stall and duration rows, `comp-*` policy, baseline on main | in progress | — |
+| P54 | [P54-unit-art-kits.md](phases/P54-unit-art-kits.md) | Unit art kits (own model, motion, aim, projectile per character); gait v2 for every unit; Strongholds aim and fire their own projectiles; Siege Walker, Bone Brute, Rootcaller final kits | done; **owner approved (2026-10-30)**; tower defenders and lobby-faithful dress added (D-52) | yes (owner) |
+| P55 | [P55-champion-kits.md](phases/P55-champion-kits.md) | Every unrefined champion on its own art kit (fifteen new champions, the Crate, seven originals) on a shared kit library; support action cues (D-53) | implemented; **owner look review pending** | yes (owner) |
 
 ## Pending validations (owner)
 

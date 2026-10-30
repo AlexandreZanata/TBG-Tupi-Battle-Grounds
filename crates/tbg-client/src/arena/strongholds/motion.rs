@@ -1,12 +1,13 @@
-//! Shot-driven motion: the Artillery barrel kicks and its gears notch on
-//! every authoritative shot of that seat's Stronghold, timed to the render
-//! delay so the kick lands with the projectile; mint parts turn on their own.
+//! Shot-driven motion: aimed guns turn onto their target (`aim.rs`), the
+//! Artillery barrel kicks and its gears notch on every shot, defenders turn
+//! and recoil, hatches swing open, gallery towers fire on their own; mint
+//! parts turn on their own.
 
+use super::aim::gun_rotation;
 use super::parts::Motion;
 use super::Tower;
-use crate::sync::{LatestView, ViewBuffer};
+use crate::visuals::AimTarget;
 use bevy::prelude::*;
-use tbg_core::{Event, Target};
 
 /// Recoil of an Artillery form and its authoritative firing interval.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -26,57 +27,27 @@ pub(super) struct Moving {
     pub rest: Transform,
 }
 
-/// Upper bound on queued shots, so a hidden tab cannot pile them up.
-const MAX_QUEUED: usize = 8;
-
-/// Queue every `AttackStart` from a Stronghold onto that seat's live
-/// tower. Events reach the scene one render delay after the view arrives,
-/// so the kick waits that long too.
-pub(super) fn queue_shots(
-    view: Res<LatestView>,
-    buffer: Res<ViewBuffer>,
-    time: Res<Time>,
-    mut towers: Query<&mut Tower>,
-) {
-    if !view.is_changed() {
-        return;
-    }
-    let Some(v) = view.0.as_ref() else {
-        return;
-    };
-    let at = time.elapsed_secs_f64() + f64::from(buffer.timeline.stats.delay_ms) / 1000.0;
-    for ev in &v.events {
-        let Event::AttackStart {
-            from: Target::Stronghold(seat),
-            ..
-        } = ev
-        else {
-            continue;
-        };
-        let own = *seat == v.you;
-        for mut tower in &mut towers {
-            if tower.live && tower.own == own && tower.due.len() < MAX_QUEUED {
-                tower.due.push(at);
-            }
-        }
-    }
-}
-
-/// Advance every gun's clock and fire the shots that are due.
-pub(super) fn fire(time: Res<Time>, mut towers: Query<&mut Tower>) {
-    let now = time.elapsed_secs_f64();
-    for mut tower in &mut towers {
-        let Some(gun) = tower.gun else {
-            tower.due.clear();
-            continue;
-        };
+/// Gallery towers (not live) fire on their own at the authoritative
+/// interval (one second for the gunless kinds), at a dummy target
+/// sweeping in front of them.
+pub(super) fn fire(time: Res<Time>, mut towers: Query<(&mut Tower, &Transform)>) {
+    for (mut tower, root) in &mut towers {
         tower.since += time.delta_secs();
-        let queued = tower.due.len();
-        tower.due.retain(|t| *t > now);
-        let autofire = !tower.live && tower.since >= gun.interval;
-        if tower.due.len() < queued || autofire {
-            tower.since = 0.0;
-            tower.shots = tower.shots.wrapping_add(1);
+        if tower.live {
+            continue;
+        }
+        let interval = tower.gun.map_or(1.0, |g| g.interval);
+        let clock = time.elapsed_secs();
+        let ahead = if tower.own { 1.0 } else { -1.0 };
+        let dummy = Vec3::new(
+            ahead * (4.0 + 1.5 * (clock * 0.7).sin()),
+            0.6,
+            1.8 * (clock * 0.45).sin(),
+        );
+        tower.target = Some(AimTarget::Point(root.translation + dummy));
+        tower.idle = 0.0;
+        if tower.since >= interval && tower.pending.is_none() {
+            tower.pending = Some(0.0);
         }
     }
 }
@@ -97,11 +68,28 @@ pub(super) fn animate(
 
 fn pose(moving: &Moving, tower: &Tower, clock: f32) -> Transform {
     let rest = moving.rest;
+    let aimed = gun_rotation(tower.own, tower.yaw, tower.pitch);
     match moving.motion {
         Motion::Kick(distance) => {
-            let k = tower.gun.map_or(0.0, |g| kick(tower.since / g.recover));
-            rest.with_translation(rest.translation + rest.rotation * Vec3::NEG_X * distance * k)
+            let k = kick(tower.since / recover(tower));
+            rest.with_rotation(aimed)
+                .with_translation(rest.translation + aimed * Vec3::NEG_X * distance * k)
         }
+        Motion::Mounted(distance) => {
+            let k = kick(tower.since / recover(tower));
+            let turn = Quat::from_rotation_y(tower.yaw);
+            rest.with_rotation(aimed)
+                .with_translation(turn * rest.translation + aimed * Vec3::NEG_X * distance * k)
+        }
+        Motion::Hatch(angle) => {
+            rest.with_rotation(rest.rotation * Quat::from_rotation_x(-angle * hatch(tower.since)))
+        }
+        Motion::Swivel => {
+            let turn = Quat::from_rotation_y(tower.yaw);
+            rest.with_rotation(turn * rest.rotation)
+                .with_translation(turn * rest.translation)
+        }
+        Motion::Aim => rest.with_rotation(aimed),
         Motion::Notch(angle) => {
             let settle = tower
                 .gun
@@ -115,6 +103,20 @@ fn pose(moving: &Moving, tower: &Tower, clock: f32) -> Transform {
             rest.with_rotation(rest.rotation * Quat::from_rotation_y(clock * speed))
         }
     }
+}
+
+/// Seconds a gun takes to settle after a shot: the Artillery's own, else a
+/// light weapon's.
+fn recover(tower: &Tower) -> f32 {
+    tower.gun.map_or(0.3, |g| g.recover)
+}
+
+/// How far a hatch stands open (0..=1) `since` seconds after a shot:
+/// snaps open, holds while the shot leaves, swings shut.
+pub(super) fn hatch(since: f32) -> f32 {
+    let open = (since / 0.06).clamp(0.0, 1.0);
+    let shut = ((since - 0.3) / 0.35).clamp(0.0, 1.0);
+    open * (1.0 - shut * shut * (3.0 - 2.0 * shut))
 }
 
 /// Recoil offset (0..=1) at `x` = time since the shot / recovery time: a

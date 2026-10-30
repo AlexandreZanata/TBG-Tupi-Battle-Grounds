@@ -50,41 +50,137 @@ fn all_easings_preserve_keys_and_hold_preserves_contact() {
     assert_eq!(Easing::Hold.sample(0.99), 0.0);
 }
 
+/// World position of a foot after forward kinematics through the rig.
+fn foot_world(
+    pose: &super::anim::Pose,
+    frame: Mat4,
+    foot: [Joint; 5],
+    p: &super::rig::Proportions,
+) -> Vec3 {
+    let mut world = frame;
+    for j in foot {
+        let (r, offset) = pose[j.index()];
+        world *= Mat4::from_rotation_translation(
+            super::ik::quat(r),
+            super::rig::rest(super::rig::Node::Body(j), p) + offset,
+        );
+    }
+    world.transform_point3(Vec3::ZERO)
+}
+
 #[test]
-fn planted_foot_holds_world_x_while_the_figure_moves() {
+fn planted_feet_hold_world_x_and_z_at_any_speed_and_heading() {
     use super::{
-        feet::FootLocks,
-        rig::{self, BodyPlan, Node},
+        feet::{FootLocks, Stride},
+        kits::Gait,
+        rig::BodyPlan,
     };
-    let p = BodyPlan::Humanoid.proportions();
+    // ART-DIRECTION §4: feet planted while in contact, no foot sliding.
+    for (gait, plan) in [
+        (Gait::LIGHT, BodyPlan::Humanoid.proportions()),
+        (Gait::HEAVY, BodyPlan::Large.proportions()),
+    ] {
+        for yaw in [65f32, -65.0, 90.0] {
+            let rot = Quat::from_rotation_y(yaw.to_radians());
+            let dir = (rot.inverse() * Vec3::X).with_y(0.0).normalize();
+            let stride = gait.cycle(plan.leg) * plan.scale;
+            for (side, legs, start) in [
+                (
+                    0,
+                    [
+                        Joint::Root,
+                        Joint::Hips,
+                        Joint::ThighL,
+                        Joint::ShinL,
+                        Joint::FootL,
+                    ],
+                    0.05,
+                ),
+                (
+                    1,
+                    [
+                        Joint::Root,
+                        Joint::Hips,
+                        Joint::ThighR,
+                        Joint::ShinR,
+                        Joint::FootR,
+                    ],
+                    0.55,
+                ),
+            ] {
+                let _ = side;
+                let mut locks = FootLocks::default();
+                let mut feet = Vec::new();
+                for step in 0..8 {
+                    let phase = start + step as f32 * 0.05;
+                    let frame = Mat4::from_scale_rotation_translation(
+                        Vec3::splat(plan.scale),
+                        rot,
+                        Vec3::X * phase * stride,
+                    );
+                    let mut pose = sample(Clip::Walk, phase * Clip::Walk.duration());
+                    let s = Stride {
+                        phase,
+                        dir,
+                        lock: true,
+                    };
+                    locks.apply(&mut pose, &s, frame, &plan, &gait);
+                    feet.push(foot_world(&pose, frame, legs, &plan));
+                }
+                for f in &feet {
+                    let drift = (f.xz() - feet[0].xz()).length();
+                    assert!(
+                        drift < 0.001,
+                        "yaw {yaw}: planted foot drifts {drift} ({feet:?})"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn unlocked_feet_follow_the_stride_path_and_stay_reachable() {
+    use super::{
+        feet::{FootLocks, Stride},
+        kits::Gait,
+        rig::BodyPlan,
+    };
+    let plan = BodyPlan::Large.proportions();
     let mut locks = FootLocks::default();
-    let mut positions = Vec::new();
-    for (phase, x) in [(0.1, 0.0), (0.15, 0.012)] {
-        let frame =
-            Mat4::from_rotation_translation(Quat::from_rotation_y(65f32.to_radians()), Vec3::X * x);
-        let mut pose = sample(Clip::Walk, phase * Clip::Walk.duration());
-        locks.apply(&mut pose, phase, frame, &p);
-        let mut world = frame;
-        for j in [
-            Joint::Root,
-            Joint::Hips,
-            Joint::ThighL,
-            Joint::ShinL,
-            Joint::FootL,
-        ] {
-            let (r, offset) = pose[j.index()];
-            let r = r * std::f32::consts::PI / 180.0;
-            world *= Mat4::from_rotation_translation(
-                Quat::from_euler(EulerRot::XYZ, r.x, r.y, r.z),
-                rig::rest(Node::Body(j), &p) + offset,
+    for step in 0..20 {
+        let phase = step as f32 * 0.05;
+        let mut pose = sample(Clip::Walk, 0.0);
+        let s = Stride {
+            phase,
+            dir: Vec3::Z,
+            lock: false,
+        };
+        locks.apply(&mut pose, &s, Mat4::IDENTITY, &plan, &Gait::HEAVY);
+        let foot = foot_world(
+            &pose,
+            Mat4::IDENTITY,
+            [
+                Joint::Root,
+                Joint::Hips,
+                Joint::ThighL,
+                Joint::ShinL,
+                Joint::FootL,
+            ],
+            &plan,
+        );
+        assert!(
+            foot.y > 0.055,
+            "foot sinks below the ground at {phase}: {foot:?}"
+        );
+        if phase < 0.5 {
+            let along = Gait::HEAVY.cycle(plan.leg) * (0.25 - phase);
+            assert!(
+                (foot.z - along).abs() < 0.002,
+                "contact path at {phase}: {foot:?}"
             );
         }
-        positions.push(world.transform_point3(Vec3::ZERO).x);
     }
-    assert!(
-        (positions[0] - positions[1]).abs() < 0.0001,
-        "{positions:?}"
-    );
 }
 
 #[test]
@@ -137,4 +233,29 @@ fn archer_budget_and_release_anchor_obey_p15() {
         bow.triangles,
         triangles + bow.triangles
     );
+}
+
+#[test]
+fn adapted_legs_ride_whole_segments_so_knees_bend_cleanly() {
+    use super::{adapter, roster};
+    use tbg_core::UnitKind;
+    // Gait v2 bends every knee; a leg mesh cut by triangles would tear.
+    for kind in [
+        UnitKind::Shieldbearer,
+        UnitKind::Hexer,
+        UnitKind::Sawbot,
+        UnitKind::Bloomkeeper,
+    ] {
+        let built = adapter::build(&roster::figure_spec(kind, 0, 0));
+        for j in [
+            Joint::ThighL,
+            Joint::ShinL,
+            Joint::FootL,
+            Joint::ThighR,
+            Joint::ShinR,
+            Joint::FootR,
+        ] {
+            assert!(built[j.index()].is_some(), "{kind:?} has no {j:?} segment");
+        }
+    }
 }

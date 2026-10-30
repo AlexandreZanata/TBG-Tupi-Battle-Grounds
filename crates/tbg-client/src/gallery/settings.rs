@@ -23,10 +23,17 @@ pub struct Gallery {
     pub lineup: bool,
     /// Isolated base-form screenshot for a Shop card.
     pub portrait: bool,
+    /// `&range`: the five forms attacking dummies on the BattleLine.
+    pub range: bool,
+    /// `&evolve` (with `&range`): every third attack is an Evolution flourish.
+    pub evolve: bool,
 }
 impl Gallery {
     pub fn studio(&self) -> bool {
-        self.unit.is_some() || self.frames || self.mode == "blockout" || self.mode == "strongholds"
+        (self.unit.is_some() && !self.range)
+            || self.frames
+            || self.mode == "blockout"
+            || self.mode == "strongholds"
     }
     pub fn hide_arena(&self) -> bool {
         self.silhouette || self.studio()
@@ -80,6 +87,8 @@ impl Gallery {
                 .min(2),
             lineup: config::url_param("lineup").is_some(),
             portrait: config::url_param("portrait").is_some(),
+            range: config::url_param("range").is_some(),
+            evolve: config::url_param("evolve").is_some(),
         }
     }
 }
