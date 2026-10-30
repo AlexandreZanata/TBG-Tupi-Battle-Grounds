@@ -68,22 +68,21 @@ fn run_match(
         s.step();
         let elapsed = s.tick - start_tick;
 
-        let crab_alive = s.unit_index(crab_id).map_or(false, |i| s.units[i].hp > 0);
-        let pass_alive = passenger_id.map_or(false, |pid| {
-            s.unit_index(pid).map_or(false, |i| s.units[i].hp > 0)
+        let crab_alive = s.unit_index(crab_id).is_some_and(|i| s.units[i].hp > 0);
+        let pass_alive = passenger_id.is_some_and(|pid| {
+            s.unit_index(pid).is_some_and(|i| s.units[i].hp > 0)
         });
-        let opp_alive = s.unit_index(opp_id).map_or(false, |i| s.units[i].hp > 0);
+        let opp_alive = s.unit_index(opp_id).is_some_and(|i| s.units[i].hp > 0);
 
         let team_crab_alive = crab_alive || pass_alive;
 
         if !team_crab_alive || !opp_alive || elapsed >= max_ticks || s.phase == Phase::Ended {
-            survived = pass_alive;
             let score = match (team_crab_alive, opp_alive) {
                 (true, false) => 1.0,
                 (false, true) => 0.0,
                 _ => 0.5,
             };
-            return (score, elapsed, survived);
+            return (score, elapsed, pass_alive);
         }
     }
 }

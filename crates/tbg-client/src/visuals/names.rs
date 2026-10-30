@@ -49,6 +49,7 @@ fn spawn(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn position(
     mut commands: Commands,
     window: Single<&Window>,
