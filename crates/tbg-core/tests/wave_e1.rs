@@ -3,7 +3,7 @@
 
 #![cfg(feature = "lab")]
 
-use tbg_core::{ArcanaPreset, Event, MatchState, Ruleset, Seat, Status, Target, UnitKind};
+use tbg_core::{ArcanaPreset, Event, MatchState, Ruleset, Seat, Target, UnitKind};
 
 fn rules() -> &'static Ruleset {
     Ruleset::canon()
@@ -88,7 +88,11 @@ fn leechroot_ignores_strongholds_and_summons() {
     for _ in 0..300 {
         for e in s.step() {
             match e {
-                Event::Spawn { unit, kind, .. } if kind == UnitKind::Beetling => {
+                Event::Spawn {
+                    unit,
+                    kind: UnitKind::Beetling,
+                    ..
+                } => {
                     beetlings.push(unit);
                 }
                 Event::Hit {

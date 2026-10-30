@@ -4,7 +4,7 @@
 
 #![cfg(feature = "lab")]
 
-use tbg_core::{headless, ArcanaPreset, Event, MatchState, Ruleset, Seat, Target, UnitKind};
+use tbg_core::{ArcanaPreset, Event, MatchState, Ruleset, Seat, Target, UnitKind};
 
 fn rules() -> &'static Ruleset {
     Ruleset::canon()

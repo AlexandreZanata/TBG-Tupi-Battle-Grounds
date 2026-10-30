@@ -226,10 +226,11 @@ fn ward_blocks_effects_not_damage() {
                 Event::Hit {
                     to: Target::Unit(id),
                     amount,
-                } if id == victim && amount > 0 => {
-                    if brewed_at.is_some_and(|b| t >= b && t < b + 70) {
-                        damage_taken = true;
-                    }
+                } if id == victim
+                    && amount > 0
+                    && brewed_at.is_some_and(|b| t >= b && t < b + 70) =>
+                {
+                    damage_taken = true;
                 }
                 _ => {}
             }
