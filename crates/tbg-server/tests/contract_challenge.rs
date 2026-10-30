@@ -104,6 +104,8 @@ async fn start(ws: &mut Ws) -> Start {
                 mode,
                 opponent_rating,
                 arcanas,
+                // D-55: checked by tests/arenas.rs (same arena both seats).
+                arena: _,
             }) => {
                 assert_eq!(
                     arcanas,

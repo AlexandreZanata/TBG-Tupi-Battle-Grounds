@@ -9,6 +9,8 @@ pub mod account;
 mod account_ui;
 mod actions;
 #[cfg(test)]
+mod arena_data_tests;
+#[cfg(test)]
 mod army_tests;
 #[cfg(test)]
 mod augment_data_tests;
@@ -97,6 +99,10 @@ pub enum UiAction {
     // P41: lobby Settings language switch (DOM selector via data-action).
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))] // built from DOM strings on the web
     SetLang(crate::i18n::Lang),
+    /// ARENAS-G: the lobby's Arenas page shows its choice behind the menu.
+    #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
+    // built from DOM strings on the web
+    PreviewArena(tbg_core::Arena),
     // Owner revision 2026-10-29: War Council actions.
     ChooseAugment(u8),
     ForgoAugment,

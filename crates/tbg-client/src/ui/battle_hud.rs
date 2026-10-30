@@ -130,6 +130,8 @@ mod web {
         attr(&root, "data-hp-max-enemy", &max[1].to_string());
         tower(&root, v, fortifying.0.is_some());
         attr(&root, "data-you", &info.you_name);
+        // ARENAS-G: the match's arena for the start banner and info chip.
+        attr(&root, "data-arena", info.arena.slug());
         attr(&root, "data-opponent", &info.opponent);
         attr(
             &root,

@@ -35,6 +35,8 @@ impl Match {
                 .flatten(),
             // D-40: both frozen presets on every (re)attach (BR-AR05).
             arcanas: self.state.players.each_ref().map(|p| p.arcanas),
+            // ARENAS-G: the arena drawn at pairing, on every (re)attach.
+            arena: self.state.arena,
         }
     }
 

@@ -236,6 +236,7 @@ mod tests {
                     mode: protocol::MatchMode::Challenge,
                     opponent_rating: None,
                     arcanas: [tbg_core::ArcanaPreset::DEFAULT; 2],
+                    arena: tbg_core::Arena::Forest,
                 },
                 0.0,
             );

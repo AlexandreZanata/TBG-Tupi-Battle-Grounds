@@ -37,6 +37,8 @@ pub struct MatchInfo {
     pub opponent_rating: Option<u16>,
     /// D-40: both frozen Arcana presets, indexed by `Seat::index()`.
     pub arcanas: [tbg_core::ArcanaPreset; 2],
+    /// ARENAS-G: the match's arena, from `MatchStart` (never from the URL).
+    pub arena: tbg_core::Arena,
     /// P39: the result screen offers a rematch only for a Challenge match.
     pub challenge: bool,
 }

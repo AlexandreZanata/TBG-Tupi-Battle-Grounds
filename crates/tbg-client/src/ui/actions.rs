@@ -61,7 +61,7 @@ pub(super) fn apply(
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
     mut inspected: ResMut<super::inspect::Inspected>,
-    mut lang_res: ResMut<crate::i18n::Lang>,
+    (mut lang_res, mut arena): (ResMut<crate::i18n::Lang>, ResMut<crate::arena::ActiveArena>),
 ) {
     let now = time.elapsed_secs_f64();
     // BR-AG12: while an Augment selection pauses the battle, only the War
@@ -274,6 +274,9 @@ pub(super) fn apply(
             UiAction::ToggleSound => extra.2.toggle_mute(),
             // P41: menu-only switch (the Settings dialog lives in the menu).
             UiAction::SetLang(lang) => *lang_res = lang,
+            UiAction::PreviewArena(a) => {
+                arena.set_if_neq(crate::arena::ActiveArena::of(a));
+            }
             UiAction::Disabled => {}
             UiAction::OpenRanking
             | UiAction::RankingPrev
@@ -307,5 +310,8 @@ fn start_practice(link: &mut MatchLink, now: f64) {
     let army = config::url_param("army")
         .and_then(|value| value.parse::<usize>().ok())
         .map(|n| n.min(300));
-    *link = MatchLink::Local(Box::new(LocalMatch::new(seed, arcanas, stronghold, army)));
+    let arena = config::load_arena();
+    *link = MatchLink::Local(Box::new(LocalMatch::new(
+        seed, arcanas, stronghold, army, arena,
+    )));
 }

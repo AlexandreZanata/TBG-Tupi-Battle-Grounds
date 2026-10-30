@@ -102,6 +102,9 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
         arcana: _,
         // Untunable: staging data, not balance (ROSTER-EXPANSION §F.5).
         pool: _,
+        // Untunable by the global search: arenas are compared one by one
+        // against the Forest (the `arenas` command, D-55).
+        arenas: _,
     } = r;
     let mut v = Vec::new();
     let mut add = |k: Knob, value: i64| {

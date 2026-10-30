@@ -76,6 +76,9 @@ pub struct MatchView {
     /// Energy regeneration now, in basis points of the base rate: 10 000
     /// plus 2 500 per full 5 Energy held, at most 22 500 (BR-E05).
     pub regen_bp: u32,
+    /// v15 (ARENAS-G): what evolving a tier-0 and a tier-1 unit costs this
+    /// seat now (Augment and arena discounts applied).
+    pub evolve_costs: [u32; 2],
     pub offers: [UnitKind; OFFERS],
     /// Indexed by `Seat::index()`.
     pub stronghold_hp: [i32; 2],
@@ -120,6 +123,7 @@ impl MatchState {
             you: seat,
             energy: me.energy,
             regen_bp: self.rules.interest.regen_bp(me.energy),
+            evolve_costs: [0, 1].map(|tier| self.evolve_price(seat, tier)),
             offers: me.offers,
             stronghold_hp: [0, 1].map(|i| self.players[i].stronghold_hp),
             strongholds: Seat::BOTH.map(|s| StrongholdView {

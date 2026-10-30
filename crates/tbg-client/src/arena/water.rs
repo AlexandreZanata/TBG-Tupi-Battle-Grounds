@@ -1,8 +1,10 @@
-//! Batched faceted sea, turquoise shallows and broken foam with cosmetic drift.
+//! The sea around the island: the Forest's batched faceted seascape (owner-approved),
+//! and each themed arena's own surface, shallows and offshore silhouettes.
 
 use super::{
     geometry::{outline, Surface, SEGMENTS},
     painted,
+    theme::Theme,
 };
 use crate::art::{mesh, mesh::Shape::*, palette::*};
 use bevy::prelude::*;
@@ -12,7 +14,31 @@ pub(super) const LEVEL: f32 = -1.40;
 const DEEP: Color = Color::srgb(0.045, 0.51, 0.75);
 const FOAM: Color = Color::srgb(0.82, 0.96, 0.94);
 
-pub(super) fn sea() -> Mesh {
+pub(super) fn sea(theme: Theme) -> Mesh {
+    if theme == Theme::Forest {
+        forest_sea()
+    } else {
+        themed_sea(theme)
+    }
+}
+
+pub(super) fn coast(theme: Theme) -> Mesh {
+    if theme == Theme::Forest {
+        forest_coast()
+    } else {
+        themed_coast(theme)
+    }
+}
+
+pub(super) fn rocks(theme: Theme) -> Mesh {
+    if theme == Theme::Forest {
+        forest_rocks()
+    } else {
+        surroundings(theme)
+    }
+}
+
+fn forest_sea() -> Mesh {
     let mut water = Surface::default();
     let mut rng = Pcg32::new(0x0cea_51de, 9);
     let point = |x: usize, z: usize| {
@@ -69,7 +95,7 @@ fn shore_distance(x: f32, z: f32) -> f32 {
     (((x - 8.0) / 12.0).powi(2) + (z / 5.7).powi(2)).sqrt()
 }
 
-pub(super) fn coast() -> Mesh {
+fn forest_coast() -> Mesh {
     let rim = outline();
     let center = Vec3::new(8.0, 0.0, 0.0);
     let mut surface = Surface::default();
@@ -189,7 +215,7 @@ fn rock_sites() -> [(Vec3, f32, f32); 10] {
     })
 }
 
-pub(super) fn rocks() -> Mesh {
+fn forest_rocks() -> Mesh {
     painted(
         rock_sites()
             .into_iter()
@@ -204,4 +230,166 @@ pub(super) fn rocks() -> Mesh {
             })
             .collect(),
     )
+}
+
+fn themed_sea(theme: Theme) -> Mesh {
+    let sea = painted(vec![(
+        Box(180.0, 0.02, 180.0),
+        theme.palette().sea,
+        Transform::from_xyz(8.0, -1.40, 0.0),
+    )]);
+    if theme != Theme::Volcanic {
+        return sea;
+    }
+    // Wide, broken currents read as molten rock without a water shader or particles.
+    let mut currents = Surface::default();
+    for band in 0..4 {
+        let radius = 1.3 + band as f32 * 0.34;
+        for i in 0..SEGMENTS {
+            if (i + band * 7) % 11 < 3 {
+                continue;
+            }
+            let point = |k: usize, width: f32| {
+                let a = k as f32 * std::f32::consts::TAU / SEGMENTS as f32;
+                let r = radius + (a * 5.0 + band as f32).sin() * 0.035 + width;
+                Vec3::new(8.0 + a.cos() * 12.0 * r, -1.38, a.sin() * 5.7 * r)
+            };
+            currents.quad(
+                [
+                    point(i, 0.0),
+                    point(i + 1, 0.0),
+                    point(i + 1, 0.025),
+                    point(i, 0.025),
+                ],
+                theme.palette().shore[1 + band % 2],
+            );
+        }
+    }
+    crate::art::mesh::merge(vec![
+        (sea, Transform::default()),
+        (currents.finish(), Transform::default()),
+    ])
+    .unwrap_or_else(|| Cuboid::new(0.01, 0.01, 0.01).into())
+}
+
+fn themed_coast(theme: Theme) -> Mesh {
+    let rim = outline();
+    let center = Vec3::new(8.0, 0.0, 0.0);
+    let mut surface = Surface::default();
+    let [foam, shallow, deep] = theme.palette().shore;
+    for (inside, outside, color) in [
+        (0.97, 1.045, foam),
+        (1.045, 1.085, shallow),
+        (1.085, 1.13, deep),
+    ] {
+        for i in 0..SEGMENTS {
+            let j = (i + 1) % SEGMENTS;
+            let point = |k: usize, s: f32| {
+                let mut p = center + (rim[k] - center) * s;
+                p.y = -1.375;
+                p
+            };
+            surface.quad(
+                [
+                    point(i, inside),
+                    point(j, inside),
+                    point(j, outside),
+                    point(i, outside),
+                ],
+                color,
+            );
+        }
+    }
+    surface.finish()
+}
+
+/// Offshore silhouettes replace the base rocks, while retaining the island envelope.
+fn surroundings(theme: Theme) -> Mesh {
+    let p = theme.palette();
+    let mut parts = Vec::new();
+    for i in 0..14 {
+        let a = (i as f32 + 0.35) * std::f32::consts::TAU / 14.0;
+        let at = Vec3::new(8.0 + a.cos() * 13.4, -1.30, a.sin() * 7.0);
+        let s = 0.4 + (i % 3) as f32 * 0.22;
+        match theme {
+            Theme::Tundra => {
+                parts.push((
+                    Cyl(s, 0.08),
+                    p.shore[1],
+                    Transform::from_translation(at).with_scale(Vec3::new(1.5, 1.0, 0.85)),
+                ));
+                parts.push((
+                    Cone(s * 0.65, s * 1.15),
+                    p.shore[0],
+                    Transform::from_translation(at + Vec3::Y * s * 0.5)
+                        .with_scale(Vec3::new(1.2, 1.0, 0.8)),
+                ));
+            }
+            Theme::Volcanic => {
+                parts.push((
+                    Cyl(s * 0.55, s * 1.8),
+                    p.dark,
+                    Transform::from_translation(at + Vec3::Y * s * 0.4),
+                ));
+                parts.push((
+                    Cyl(s * 0.57, 0.05),
+                    p.stone,
+                    Transform::from_translation(at + Vec3::Y * s * 1.3),
+                ));
+            }
+            Theme::Ruins => {
+                parts.push((Box(s, s * 0.25, s), p.dark, Transform::from_translation(at)));
+                parts.push((
+                    Cyl(s * 0.27, s * 1.3),
+                    p.stone,
+                    Transform::from_translation(at + Vec3::Y * s * 0.5)
+                        .with_rotation(Quat::from_rotation_z(0.22)),
+                ));
+                parts.push((
+                    Box(s * 0.7, s * 0.15, s * 0.7),
+                    p.stone,
+                    Transform::from_translation(at + Vec3::Y * s * 1.15),
+                ));
+            }
+            _ => {
+                parts.push((
+                    Cone(s * 0.7, s * 1.5),
+                    p.dark,
+                    Transform::from_translation(at + Vec3::Y * s * 0.4)
+                        .with_rotation(Quat::from_rotation_z(-0.15)),
+                ));
+                for dz in [-0.4, 0.4] {
+                    parts.push((
+                        Box(s * 1.7, 0.018, 0.06),
+                        p.shore[0],
+                        Transform::from_translation(at + Vec3::new(0.0, -0.05, dz * s))
+                            .with_rotation(Quat::from_rotation_y(-0.2)),
+                    ));
+                }
+            }
+        }
+    }
+    // Broad, flat polygons give the surrounding surface its own material language.
+    for i in 0..32 {
+        let a = i as f32 * std::f32::consts::TAU / 32.0;
+        let at = Vec3::new(
+            8.0 + a.cos() * (15.0 + (i % 3) as f32 * 2.0),
+            -1.375,
+            a.sin() * (8.0 + (i % 4) as f32),
+        );
+        let (shape, color, scale) = match theme {
+            Theme::Tundra => (Cyl(1.0, 0.02), p.shore[1], Vec3::new(1.2, 1.0, 0.55)),
+            Theme::Volcanic => (Cyl(1.0, 0.025), p.dark, Vec3::new(1.1, 1.0, 0.65)),
+            Theme::Ruins => (Ball(0.28), p.plant, Vec3::new(1.0, 0.12, 0.7)),
+            _ => (Box(1.7, 0.02, 0.06), p.shore[1], Vec3::ONE),
+        };
+        parts.push((
+            shape,
+            color,
+            Transform::from_translation(at)
+                .with_scale(scale)
+                .with_rotation(Quat::from_rotation_y(a)),
+        ));
+    }
+    painted(parts)
 }

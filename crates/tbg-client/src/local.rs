@@ -26,12 +26,14 @@ impl LocalMatch {
         arcanas: ArcanaPreset,
         stronghold: StrongholdKind,
         army: Option<usize>,
+        arena: tbg_core::Arena,
     ) -> LocalMatch {
         let presets = [arcanas, ArcanaPreset::DEFAULT];
         let selectable = StrongholdKind::SELECTABLE;
         let bot_kind = selectable[(seed % selectable.len() as u64) as usize];
-        let mut state =
-            MatchState::with_preview(seed, presets).with_strongholds([stronghold, bot_kind]);
+        let mut state = MatchState::with_preview(seed, presets)
+            .with_strongholds([stronghold, bot_kind])
+            .with_arena(arena);
         if let Some(n) = army {
             while state.phase != Phase::Running {
                 state.step();
@@ -66,6 +68,8 @@ impl LocalMatch {
                 mode: tbg_core::protocol::MatchMode::Casual,
                 opponent_rating: None,
                 arcanas: presets,
+                // ARENAS-G: the player's Practice choice; same rules as online.
+                arena,
             }],
             ended: false,
         }

@@ -153,6 +153,7 @@ pub(super) fn spawn_boat(
     .unwrap_or_else(|| Cuboid::new(0.01, 0.01, 0.01).into());
     let triangles = mesh::triangles(&boat);
     commands.spawn((
+        super::ArenaScene,
         Name::new("offshore sailboat"),
         Mesh3d(meshes.add(boat)),
         MeshMaterial3d(material.clone()),

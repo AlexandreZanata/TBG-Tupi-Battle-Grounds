@@ -1,17 +1,33 @@
 //! Warm upper-left sunlight with one focused shadow cascade and cool sky fill.
 
-use crate::{art::palette::*, config};
+use super::theme::Theme;
+use crate::{art::palette::SKY_TOP, config};
 use bevy::{
     light::{CascadeShadowConfigBuilder, DirectionalLightShadowMap},
     prelude::*,
 };
 
-pub(super) fn spawn(commands: &mut Commands) {
+pub(super) fn spawn(commands: &mut Commands, theme: Theme) {
+    let palette = theme.palette();
+    // The Forest keeps the owner-approved seascape contrast; the themed
+    // arenas keep the levels their scenes were approved with.
+    let (lux, ambient) = if theme == Theme::Forest {
+        (13_000.0, 950.0)
+    } else {
+        (12_000.0, 1200.0)
+    };
+    // Always set: switching back to the Forest must restore its sky.
+    commands.insert_resource(ClearColor(if theme == Theme::Forest {
+        SKY_TOP
+    } else {
+        palette.sky
+    }));
     commands.insert_resource(DirectionalLightShadowMap { size: 1024 });
     commands.spawn((
+        super::ArenaScene,
         DirectionalLight {
-            color: KEY,
-            illuminance: 13_000.0,
+            color: palette.key,
+            illuminance: lux,
             shadow_maps_enabled: config::url_param("shadows").as_deref() != Some("0"),
             ..default()
         },
@@ -24,8 +40,8 @@ pub(super) fn spawn(commands: &mut Commands) {
         .build(),
     ));
     commands.insert_resource(GlobalAmbientLight {
-        color: AMBIENT_SKY,
-        brightness: 950.0,
+        color: palette.ambient,
+        brightness: ambient,
         ..default()
     });
 }

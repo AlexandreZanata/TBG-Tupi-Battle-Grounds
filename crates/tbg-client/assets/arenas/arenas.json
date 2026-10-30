@@ -1,0 +1,12 @@
+{
+  "storageKey": "tbg.arena",
+  "defaultArena": "forest",
+  "energyScale": 600,
+  "arenas": [
+    { "id": 0, "slug": "forest", "image": "forest.webp", "accent": "#7bb661", "moveBp": 0, "attackBp": 0, "regenBp": 0, "firstEvolveDiscount": 0 },
+    { "id": 1, "slug": "tundra", "image": "tundra.webp", "accent": "#9fd3ec", "moveBp": -1000, "attackBp": 0, "regenBp": 0, "firstEvolveDiscount": 0 },
+    { "id": 2, "slug": "volcanic", "image": "volcanic.webp", "accent": "#ff8a3d", "moveBp": 0, "attackBp": 800, "regenBp": 0, "firstEvolveDiscount": 0 },
+    { "id": 3, "slug": "ruins", "image": "ruins.webp", "accent": "#d9b44a", "moveBp": 0, "attackBp": 0, "regenBp": 0, "firstEvolveDiscount": 600 },
+    { "id": 4, "slug": "storm", "image": "storm.webp", "accent": "#8fa8ff", "moveBp": 0, "attackBp": 0, "regenBp": 800, "firstEvolveDiscount": 0 }
+  ]
+}

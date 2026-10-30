@@ -11,4 +11,5 @@
   <symbol id="sound" viewBox="0 0 48 48"><path d="M3 18H12L25 7V41L12 30H3Z"/><path d="M32 16Q41 24 32 32M38 8Q55 24 38 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></symbol>
   <symbol id="scroll" viewBox="0 0 48 48"><path d="M9 5H39L36 38H12L10 45H3L6 12Q6 5 9 5Z"/><path d="M15 13H32M14 20H31M13 27H28" stroke="#333127" stroke-width="3"/></symbol>
   <symbol id="tower" viewBox="0 0 48 48"><path d="M8 4H14V9H19V4H29V9H34V4H40V16L36 19V44H12V19L8 16Z"/><path d="M20 44V34Q20 28 24 28 28 28 28 34V44ZM22 15H26V22H22Z" fill="#222e32"/></symbol>
+  <symbol id="island" viewBox="0 0 48 48"><path d="M4 30Q24 20 44 30L38 38H10Z"/><path d="M16 27L23 8L30 26Z"/><path d="M3 42Q8 39 13 42T23 42T33 42T45 42" fill="none" stroke="currentColor" stroke-width="3"/></symbol>
 </svg>

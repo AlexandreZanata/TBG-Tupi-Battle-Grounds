@@ -62,7 +62,9 @@ pub(super) fn poll_link(
                 mode,
                 opponent_rating,
                 arcanas,
+                arena,
             } => {
+                info!("match arena: {}", arena.slug());
                 *info = MatchInfo {
                     you: Some(you),
                     you_name,
@@ -71,6 +73,7 @@ pub(super) fn poll_link(
                     ranked: mode == tbg_core::protocol::MatchMode::Ranked,
                     opponent_rating,
                     arcanas,
+                    arena,
                     challenge: mode == tbg_core::protocol::MatchMode::Challenge,
                     ..default()
                 };

@@ -999,3 +999,27 @@ the 20 Hz simulation are unchanged.
 **Reopen when** the VPS shows bandwidth, not CPU, is still the first limit
 after C (then delta, with a ≥15 pp measured gain over C at 100 units), or
 C fails the 100-seed reconstruction or the 50-match reconnect chaos.
+
+## D-55 · Themed arenas are part of the match — 2026-10-30 (owner request; values Proposed)
+
+**Decision.** The five visual arenas (Forest, Tundra, Volcanic, Ruins,
+Storm) become a match property. The server draws one uniformly at pairing
+from the OS RNG (never the match seed or a simulation stream) and sends it
+in `MatchStart` (protocol v15); reconnects get the same one; replays and
+match rows record it (SQLite v6, nullable column). Each non-neutral arena
+applies one symmetric modifier (GAME-DESIGN §12): Tundra −10 % movement,
+Volcanic +8 % attack speed, Ruins −1 Energy on each player's first
+successful Evolution, Storm +8 % base regeneration. `MatchState::arena`
+is fixed at creation; `PlayerState::arena_discount_used` tracks the Ruins
+discount; the view carries both effective Evolution prices.
+**Contracts.** This commit changes the append-only contracts: the
+protocol version and `MatchStart` bytes (arena field), and the
+determinism and lab hashes (the state serializes the arena and the
+discount flag; ticks, winners and reasons are unchanged in the Forest).
+**Why.** The owner wants the arenas in the real game; one small,
+symmetric, readable change per arena adds variety without favouring a
+seat. The Forest keeps every previous number.
+**Reopen when** the balance lab shows an arena moving the seat or
+policy win rates past the D-33 gate, players find a modifier unreadable,
+or the owner wants arena choice online.
+

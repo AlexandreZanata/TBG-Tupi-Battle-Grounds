@@ -11,11 +11,11 @@
 
 use crate::arcana::{self, ArcanaPreset, ArcanaValues};
 use crate::content::{
-    AugmentBonus, FormDef, Stats, SynergyEffect, UnitDef, ARCANA_BP, ARCANA_VALUES, AUGMENT_COST,
-    AUGMENT_WINDOW_TICKS, BEETLES_PER_NESTER, BEETLE_LIFETIME, BP, ENERGY_START, EVOLVE_COST,
-    FORTIFY_COST, HATCH_EVERY, HATCH_EVERY_HIVE, INTEREST_BAND, INTEREST_MAX_BANDS,
-    INTEREST_PER_BAND, MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP,
-    STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
+    ArenaRule, AugmentBonus, FormDef, Stats, SynergyEffect, UnitDef, ARCANA_BP, ARCANA_VALUES,
+    ARENA_RULES, AUGMENT_COST, AUGMENT_WINDOW_TICKS, BEETLES_PER_NESTER, BEETLE_LIFETIME, BP,
+    ENERGY_START, EVOLVE_COST, FORTIFY_COST, HATCH_EVERY, HATCH_EVERY_HIVE, INTEREST_BAND,
+    INTEREST_MAX_BANDS, INTEREST_PER_BAND, MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE,
+    STRONGHOLD_HP, STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
 };
 use crate::types::{Tick, UnitKind, ALL_KINDS, FULL_POOL};
 
@@ -80,6 +80,8 @@ pub struct Ruleset {
     pub arcana_bp: [i32; 6],
     /// Conditional Arcana values for the nine new nodes.
     pub arcana: ArcanaValues,
+    /// Arena modifiers by `Arena::index()` (ARENAS-G).
+    pub arenas: [ArenaRule; 5],
 }
 
 /// The only ruleset the server and the client use.
@@ -114,6 +116,7 @@ pub static CANON: Ruleset = Ruleset {
     units: UNITS,
     arcana_bp: ARCANA_BP,
     arcana: ARCANA_VALUES,
+    arenas: ARENA_RULES,
 };
 
 impl Ruleset {

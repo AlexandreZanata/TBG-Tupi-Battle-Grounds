@@ -1,9 +1,12 @@
 //! Faceted gray stone strata, following the meadow's irregular perimeter.
 
-use super::geometry::{outline, Surface, SEGMENTS};
+use super::{
+    geometry::{outline, Surface, SEGMENTS},
+    theme::Theme,
+};
 use bevy::prelude::*;
 
-pub(super) fn mesh() -> Mesh {
+pub(super) fn mesh(theme: Theme) -> Mesh {
     let rim = outline();
     let center = Vec3::new(8.0, 0.0, 0.0);
     let mut surface = Surface::default();
@@ -20,8 +23,19 @@ pub(super) fn mesh() -> Mesh {
                 p
             };
             let value = [0.68, 0.57, 0.43][band] + (i % 5) as f32 * 0.018;
-            let light = Color::srgb(value, value * 0.97, value * 0.92);
-            let shade = Color::srgb(value * 0.88, value * 0.86, value * 0.85);
+            let (light, shade) = if theme == Theme::Forest {
+                (
+                    Color::srgb(value, value * 0.97, value * 0.92),
+                    Color::srgb(value * 0.88, value * 0.86, value * 0.85),
+                )
+            } else {
+                let color = theme.palette().cliff[band].to_srgba();
+                let k = 1.0 + (i % 5) as f32 * 0.025;
+                (
+                    Color::srgb(color.red * k, color.green * k, color.blue * k),
+                    Color::srgb(color.red * 0.85, color.green * 0.85, color.blue * 0.85),
+                )
+            };
             let [a, b, c, d] = [
                 point(i, band),
                 point(j, band),

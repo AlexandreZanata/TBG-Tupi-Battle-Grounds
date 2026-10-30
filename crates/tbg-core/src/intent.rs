@@ -175,6 +175,20 @@ impl MatchState {
         id
     }
 
+    /// What evolving a `tier` unit costs this seat now: the base price less
+    /// Augment discounts and, until spent, the arena's first-Evolution
+    /// discount; never below one Energy. The view shows exactly this.
+    pub fn evolve_price(&self, seat: Seat, tier: u8) -> u32 {
+        let p = self.player(seat);
+        let mut discount = crate::augment::evolve_discount(&p.augments);
+        if !p.arena_discount_used {
+            discount = discount.saturating_add(self.arena_rule().first_evolve_discount);
+        }
+        self.rules.evolve_cost[usize::from(tier.min(1))]
+            .saturating_sub(discount)
+            .max(crate::content::ENERGY_SCALE)
+    }
+
     fn evolve(&mut self, seat: Seat, id: UnitId, branch: u8) -> Result<(), Rejection> {
         let idx = self
             .unit_index(id)
@@ -198,12 +212,14 @@ impl MatchState {
         if !branch_ok {
             return Err(Rejection::WrongBranch);
         }
-        let discount = crate::augment::evolve_discount(&self.player(seat).augments);
-        let cost = self.rules.evolve_cost[usize::from(u.tier)]
-            .saturating_sub(discount)
-            .max(crate::content::ENERGY_SCALE);
+        let cost = self.evolve_price(seat, u.tier);
         if !self.player_mut(seat).spend(cost) {
             return Err(Rejection::NotEnoughEnergy);
+        }
+        // ARENAS-G: the first-Evolution discount is spent only here, after
+        // a valid, paid Evolution; a replayed intention never gets here.
+        if self.arena_rule().first_evolve_discount > 0 {
+            self.player_mut(seat).arena_discount_used = true;
         }
         let unit = &mut self.units[idx];
         unit.tier += 1;

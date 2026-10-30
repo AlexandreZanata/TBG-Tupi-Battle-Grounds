@@ -8,7 +8,7 @@ use crate::content::{BOUNTY_WINDOW_TICKS, RUNNING_START};
 use crate::rng::Pcg32;
 use crate::ruleset::{Ruleset, CANON};
 use crate::state::{EndReason, Event, MatchState, Outcome, Phase, PlayerState};
-use crate::types::{Seat, StrongholdKind};
+use crate::types::{Arena, Seat, StrongholdKind};
 use crate::{combat, shop, summon, synergy};
 
 impl MatchState {
@@ -44,6 +44,13 @@ impl MatchState {
         self
     }
 
+    /// The match's arena (ARENAS-G), set before the first tick and fixed
+    /// for the match; the Forest is neutral.
+    pub fn with_arena(mut self, arena: Arena) -> MatchState {
+        self.arena = arena;
+        self
+    }
+
     /// Any ruleset and presets: the lab's Arcana experiments (D-33, D-40).
     pub fn lab(seed: u64, rules: &'static Ruleset, arcanas: [ArcanaPreset; 2]) -> MatchState {
         let player = |stream: u64| {
@@ -75,6 +82,7 @@ impl MatchState {
                 last_stand_used: false,
                 fury_stacks: 0,
                 fury_until: 0,
+                arena_discount_used: false,
             }
         };
         let first_round = if rules.augment.round_ticks == 0 {
@@ -94,6 +102,7 @@ impl MatchState {
             next_unit_id: 1,
             outcome: None,
             augments: AugmentState::new(seed, first_round),
+            arena: Arena::Forest,
             army: Default::default(),
             pending: Vec::new(),
             shrapnel: Vec::new(),
@@ -175,10 +184,14 @@ impl MatchState {
         let regen = u64::from(self.rules.regen_running);
         let rule = self.rules.interest;
         let cap = self.rules.energy_cap;
+        // ARENAS-G: the arena adds bp of the base rate beside Interest's, so
+        // Interest itself is untouched and the remainder keeps both exact.
+        let arena_bp = self.arena_rule().regen_bp;
         for p in &mut self.players {
             // Interest (BR-E05–E07): the more Energy is held, the faster it
             // grows; the remainder carries over so the rate stays exact.
-            let scaled = regen * u64::from(rule.regen_bp(p.energy)) + u64::from(p.regen_frac);
+            let bp = rule.regen_bp(p.energy) + arena_bp;
+            let scaled = regen * u64::from(bp) + u64::from(p.regen_frac);
             p.regen_frac = (scaled % 10_000) as u32;
             let gain = u32::try_from(scaled / 10_000).unwrap_or(u32::MAX);
             p.energy = p.energy.saturating_add(gain);
