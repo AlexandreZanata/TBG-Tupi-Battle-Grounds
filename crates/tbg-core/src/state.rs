@@ -218,6 +218,39 @@ pub enum Event {
     SecondWind {
         unit: UnitId,
     },
+    // v13 (P43, ROSTER-EXPANSION §F.4): staged affliction and carrier
+    // events. Unused until their waves land; appended, never reordered.
+    PoisonTick {
+        unit: UnitId,
+        amount: i32,
+    },
+    Betrayal {
+        unit: UnitId,
+        ally: UnitId,
+    },
+    Cleansed {
+        unit: UnitId,
+    },
+    PlateBroken {
+        unit: UnitId,
+    },
+    CrateOpened {
+        /// The crate's own id (`crate` is a keyword); `opened` is the cargo.
+        unit: UnitId,
+        opened: Option<UnitId>,
+    },
+    Transfer {
+        from: UnitId,
+        to: UnitId,
+        amount: i32,
+    },
+    Boarded {
+        crab: UnitId,
+        unit: UnitId,
+    },
+    Dismounted {
+        unit: UnitId,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

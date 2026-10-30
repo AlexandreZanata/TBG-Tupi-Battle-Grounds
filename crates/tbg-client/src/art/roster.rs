@@ -6,7 +6,7 @@ use tbg_core::UnitKind;
 
 use super::legacy::{part, BodyPlan, FigureSpec, Joint::*, PartSpec};
 use super::mesh::Shape::*;
-use super::palette::{BARK, DARK, LEAF, LEAF_DARK, LEATHER, SKIN, TRIM};
+use super::palette::{BARK, DARK, FRAME, LEAF, LEAF_DARK, LEATHER, SKIN, STEEL, TRIM};
 
 pub mod blockout;
 mod body;
@@ -112,6 +112,16 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::Nester => recolor(plants::bloomkeeper(f), NESTER),
         UnitKind::Rampart => recolor(humans::shieldbearer(f), RAMPART),
         UnitKind::Beetling => recolor(plants::rootcaller(f), BEETLING),
+        // P43: staged kinds render as a plain gray silhouette until their
+        // wave lands (art/mod.rs builds every kind in ALL_KINDS).
+        _ => {
+            let plan = BodyPlan::SMALL;
+            let look = Look::new(STEEL, STEEL, STEEL, FRAME);
+            FigureSpec {
+                plan,
+                parts: base_body(&plan, &look),
+            }
+        }
     };
     if large(kind) {
         spec.plan.scale = spec.plan.scale.max(BodyPlan::BIG.scale);

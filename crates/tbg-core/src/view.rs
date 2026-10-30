@@ -21,6 +21,10 @@ pub struct UnitView {
     pub max_hp: i32,
     /// 0 none, 1 slowed, 2 rooted.
     pub status: u8,
+    /// Packed ability state (ROSTER-EXPANSION §F.4): poison 3 bits, fish 2,
+    /// confused 1, ward 1, bonded 1, plates 3, growth 3, carried 1, 1 spare.
+    /// Zero until the waves land.
+    pub fx: u16,
 }
 
 /// One open Augment round, identical options for both seats.
@@ -127,5 +131,7 @@ fn unit_view(u: &crate::state::Unit) -> UnitView {
             Status::Slowed { .. } => 1,
             Status::Rooted { .. } => 2,
         },
+        // P43: no affliction or carrier state exists yet.
+        fx: 0,
     }
 }

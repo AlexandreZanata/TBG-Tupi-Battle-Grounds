@@ -28,6 +28,8 @@ fn matchup(kind: UnitKind) -> (&'static str, &'static str) {
             "slows, ranged focus, splash",
         ),
         UnitKind::Beetling => ("swarming", "splash"),
+        // P43: staged kinds render as a blockout until their wave lands.
+        _ => ("a new unit", "scout it first"),
     }
 }
 

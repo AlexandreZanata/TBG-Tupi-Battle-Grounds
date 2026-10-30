@@ -74,6 +74,8 @@ pub fn spec(kind: UnitKind) -> FigureSpec {
         UnitKind::Nester => staff(&mut parts, false),
         UnitKind::Rampart => parts.push(part(Prop(Socket::OffhandL), Box(0.55, 0.8, 0.1), FRAME, [0.05, 0.12, 0.14])),
         UnitKind::Beetling => roots(&mut parts),
+        // P43: staged kinds keep the plain silhouette until their wave lands.
+        _ => {}
     }
     FigureSpec { plan, parts }
 }
