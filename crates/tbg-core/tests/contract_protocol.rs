@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 15,
-        "v15: arenas (D-55): MatchStart::arena and MatchView::evolve_costs"
+        PROTOCOL_VERSION, 16,
+        "v16: Cargo Crab passenger bit packed in UnitView.fx (D-56); v15 was arenas (D-55)"
     );
 }
 

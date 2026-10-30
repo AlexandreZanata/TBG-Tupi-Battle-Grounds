@@ -17,8 +17,9 @@ use crate::view::MatchView;
 /// (D-46: `SetStronghold`, `MatchView::strongholds`, `PlayerIntention::Fortify`).
 /// v12: Interest became a regen boost (`MatchView::regen_bp` replaces the
 /// payment fields, `Event::InterestPaid` is gone). v11 was the fifteen-node
-/// Arcana schema; older peers are refused.
-pub const PROTOCOL_VERSION: u16 = 15;
+/// Arcana schema; v15 is arenas (D-55: `MatchStart::arena`, `MatchView::evolve_costs`);
+/// v16 packs `FX_CARRIED` into `UnitView.fx` (D-56). Older peers are refused.
+pub const PROTOCOL_VERSION: u16 = 16;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a

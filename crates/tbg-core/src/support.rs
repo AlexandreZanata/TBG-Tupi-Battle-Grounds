@@ -361,20 +361,22 @@ fn carry_of(state: &MatchState, u: &Unit) -> Option<(i32, u16, u16, u16, u16, u1
         })
 }
 
-/// Crab movement bonus while carrying (B1 steady, B2 surge): basis points.
+/// Crab movement bonus while carrying (D-56: base +20% / 2 000 bp, B1 steady, B2 surge): basis points.
 pub(crate) fn carry_move_bp(state: &MatchState, u: &Unit) -> u16 {
     if u.fx.passenger.is_none() {
         return 0;
     }
+    const BASE_CARRY_MOVE_BP: u16 = 2_000;
     match carry_of(state, u) {
         Some((_, _, _, move_bp, _, surge_bp)) => {
-            if surge_bp > 0 && state.tick < u.fx.surge_until {
+            let extra = if surge_bp > 0 && state.tick < u.fx.surge_until {
                 surge_bp
             } else {
                 move_bp
-            }
+            };
+            BASE_CARRY_MOVE_BP.saturating_add(extra)
         }
-        None => 0,
+        None => BASE_CARRY_MOVE_BP,
     }
 }
 

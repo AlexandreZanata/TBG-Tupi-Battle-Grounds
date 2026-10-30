@@ -145,6 +145,23 @@ fn advance_unit(
                     _ => st.speed,
                 }
             };
+            // D-56: a Cargo Crab carrying a passenger moves at the speed of the
+            // faster of the two units before carry bonuses are applied.
+            if let Some(pid) = u.fx.passenger {
+                if let Some(pi) = state.unit_index(pid) {
+                    let pu = &state.units[pi];
+                    let pst = state.stats_of(pu);
+                    let pass_speed = if pu.fx.march_ignore_slow {
+                        pst.speed
+                    } else {
+                        match pu.status {
+                            Status::Slowed { bp, .. } => scale_down(pst.speed, bp),
+                            _ => pst.speed,
+                        }
+                    };
+                    speed = speed.max(pass_speed);
+                }
+            }
             // Old Finn fish (P45): movement only, multiplicative with any
             // status slow, so no combination reaches zero. Never touches
             // the attack interval. Oilpress A2 immunity covers it.

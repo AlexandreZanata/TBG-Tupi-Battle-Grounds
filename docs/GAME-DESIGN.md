@@ -708,7 +708,7 @@ Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). S
 | Shatterback | Plants | Tank | 4 | 560 + 4 × 100 plates | 30 | 1.5 | 0.8 | 0.55 | Each broken plate: permanently faster moves and attacks |
 | Blood Furnace | Undead | DPS | 4 | 440 | 36 | 1.8 | 0.8 | 0.9 | Each hit burns 6 % max HP; damage grows up to ×4 as HP falls |
 | Bloodweaver | Undead | Support | 3 | 300 | — | 5.0 | 3.0 | 0.9 | Moves up to 120 HP from the healthiest ally to the most wounded |
-| Cargo Crab | Machines | Tank | 5 | 1 400 | 20 | 1.5 | 0.8 | 0.5 | Carries one non-Tank ally that single-target attacks cannot reach |
+| Cargo Crab | Machines | Tank | 5 | 1 400 | 20 | 1.5 | 0.8 | 0.5 | Carries one non-Tank ally: pair moves at max(crab, passenger) × 1.20; single-target attacks hit crab first; dismounts on death with intact HP and 3 s lock (D-56, Proposed) |
 
 ## 12. Arenas (active, values Proposed, ARENAS-G, D-55)
 

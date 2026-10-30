@@ -31,10 +31,18 @@ pub struct UnitView {
 /// its kind alone cannot tell, and the server refuses to evolve it.
 pub const FX_SUMMON: u16 = 1 << 15;
 
+/// `UnitView.fx` bit for a carried passenger, e.g. riding a Cargo Crab (D-56, §C.15).
+pub const FX_CARRIED: u16 = 1 << 14;
+
 impl UnitView {
     /// Summoned by kind (Beetling, Crate) or by unit (Smuggler cargo).
     pub fn is_summon(&self) -> bool {
         self.kind.is_summon() || self.fx & FX_SUMMON != 0
+    }
+
+    /// Carried by a carrier (e.g. riding a Cargo Crab).
+    pub fn is_carried(&self) -> bool {
+        self.fx & FX_CARRIED != 0
     }
 }
 
@@ -164,7 +172,16 @@ fn unit_view(u: &crate::state::Unit) -> UnitView {
             Status::Slowed { .. } => 1,
             Status::Rooted { .. } => 2,
         },
-        // P43: affliction and carrier bits are not packed yet.
-        fx: if u.is_summon() { FX_SUMMON } else { 0 },
+        // D-56: carried bit packed for passenger presentation; other affliction bits pending.
+        fx: {
+            let mut fx = 0;
+            if u.is_summon() {
+                fx |= FX_SUMMON;
+            }
+            if u.fx.carrier.is_some() {
+                fx |= FX_CARRIED;
+            }
+            fx
+        },
     }
 }
