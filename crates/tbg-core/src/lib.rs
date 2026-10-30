@@ -14,7 +14,7 @@ pub mod headless;
 mod hits;
 mod intent;
 #[cfg(feature = "lab")]
-mod lab;
+pub mod lab;
 pub mod protocol;
 pub mod rating;
 pub mod replay;

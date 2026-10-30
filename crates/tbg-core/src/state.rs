@@ -212,6 +212,11 @@ pub struct MatchState {
     /// serialized, so hashes and views do not depend on it.
     #[serde(skip, default = "Ruleset::canon")]
     pub(crate) rules: &'static Ruleset,
+    /// Per-seat, per-kind combat counters for the balance lab (P42). Never
+    /// serialized, so the state hash and views never see them.
+    #[cfg(feature = "lab")]
+    #[serde(skip, default)]
+    pub lab: crate::lab::LabStats,
 }
 
 /// x position of a seat's Stronghold.

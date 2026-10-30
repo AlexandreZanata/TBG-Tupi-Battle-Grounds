@@ -74,6 +74,8 @@ impl MatchState {
             army: Default::default(),
             pending: Vec::new(),
             rules,
+            #[cfg(feature = "lab")]
+            lab: crate::lab::LabStats::default(),
         }
     }
 

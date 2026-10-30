@@ -164,6 +164,8 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
                 .map(|i| state.units[i].hp > 0 && !state.units[i].kind.is_summon())
                 .unwrap_or(false);
             let removed = damage(state, to, amount.max(1), ev);
+            #[cfg(feature = "lab")]
+            crate::lab::stronghold(state, seat, removed);
             let killed = was_alive && state.unit_index(id).is_some_and(|i| state.units[i].hp <= 0);
             if killed && removed > 0 {
                 if let Some((max, ticks)) = augment::tower_fury_rule(&state.player(seat).augments) {
@@ -187,6 +189,10 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
         }
     }
     state.units.retain(|u| u.hp > 0);
+    #[cfg(feature = "lab")]
+    if dead[0] + dead[1] > 0 {
+        crate::lab::progress(state);
+    }
     for seat in Seat::BOTH {
         for _ in 0..dead[seat.index()] {
             augment::on_eligible_kill(state, seat);

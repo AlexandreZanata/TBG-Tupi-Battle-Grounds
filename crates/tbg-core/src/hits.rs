@@ -21,14 +21,18 @@ pub(crate) fn resolve_hit(
         if state.unit_index(id).is_some_and(|i| state.units[i].seat == attacker.seat));
     if healing {
         let Target::Unit(id) = target else { return };
-        heal(state, attacker.seat, id, st.heal, true, ev);
+        let _restored = heal(state, attacker.seat, id, st.heal, true, ev);
+        #[cfg(feature = "lab")]
+        crate::lab::healed(state, attacker, _restored);
         if st.splash > 0 {
             // Index loop, no clone: heals never remove units mid-loop.
             for i in 0..state.units.len() {
                 let a = state.units[i];
                 let near = (a.x - tx).abs() <= st.splash;
                 if a.seat == attacker.seat && a.id != id && a.hp > 0 && a.hp < a.max_hp && near {
-                    heal(state, attacker.seat, a.id, st.heal, true, ev);
+                    let _restored = heal(state, attacker.seat, a.id, st.heal, true, ev);
+                    #[cfg(feature = "lab")]
+                    crate::lab::healed(state, attacker, _restored);
                 }
             }
         }
@@ -56,6 +60,10 @@ pub(crate) fn resolve_hit(
         );
     }
     let removed = damage(state, target, amount, ev);
+    #[cfg(feature = "lab")]
+    if let Target::Unit(_) = target {
+        crate::lab::dealt(state, attacker, removed);
+    }
     if let Target::Unit(id) = target {
         if !attacker.kind.is_summon() {
             apply_heal_cut(state, attacker.seat, id);
@@ -70,12 +78,16 @@ pub(crate) fn resolve_hit(
             let bp = augment::lifesteal_bp(&state.player(attacker.seat).augments);
             if conventional && bp > 0 {
                 let healed = (i64::from(removed) * i64::from(bp) / BP) as i32;
-                heal(state, attacker.seat, attacker.id, healed, false, ev);
+                let _restored = heal(state, attacker.seat, attacker.id, healed, false, ev);
+                #[cfg(feature = "lab")]
+                crate::lab::healed(state, attacker, _restored);
             }
         }
     }
     if let (Target::Unit(id), Some(on_hit)) = (target, st.on_hit) {
-        apply_on_hit(state, id, on_hit, attacker.seat, ev);
+        let _applied = apply_on_hit(state, id, on_hit, attacker.seat, ev);
+        #[cfg(feature = "lab")]
+        crate::lab::status(state, attacker, _applied);
     }
     if st.splash > 0 {
         splash(state, attacker, target, tx, st, ev);
@@ -118,7 +130,9 @@ fn splash(
         let e = state.units[i];
         let near = (e.x - tx).abs() <= st.splash;
         if e.seat == enemy && e.hp > 0 && near && primary != Target::Unit(e.id) {
-            damage(state, Target::Unit(e.id), st.damage, ev);
+            let _removed = damage(state, Target::Unit(e.id), st.damage, ev);
+            #[cfg(feature = "lab")]
+            crate::lab::dealt(state, attacker, _removed);
             if !attacker.kind.is_summon() {
                 apply_heal_cut(state, attacker.seat, e.id);
             }
@@ -189,6 +203,8 @@ pub(crate) fn damage(
             if removed > 0 && u.hp <= 0 && conventional {
                 state.army[owner.index()].remove(archetype);
             }
+            #[cfg(feature = "lab")]
+            crate::lab::taken(state, owner, victim.kind, removed);
             removed
         }
         Target::Stronghold(seat) => {
@@ -207,6 +223,10 @@ pub(crate) fn damage(
             if removed > 0 {
                 augment::after_stronghold_damage(state, seat, ev);
             }
+            #[cfg(feature = "lab")]
+            if removed > 0 {
+                crate::lab::progress(state);
+            }
             removed
         }
     }
@@ -219,14 +239,14 @@ fn heal(
     amount: i32,
     direct: bool,
     ev: &mut Vec<Event>,
-) {
+) -> i32 {
     let Some(i) = state.unit_index(id) else {
-        return;
+        return 0;
     };
     let target = state.units[i];
     let effective = augment::heal_amount(state, healer, &target, amount, direct);
     if effective <= 0 {
-        return;
+        return 0;
     }
     let u = &mut state.units[i];
     u.hp = (u.hp + effective).min(u.max_hp);
@@ -243,6 +263,7 @@ fn heal(
             state.units[i].status = status;
         }
     }
+    effective
 }
 
 fn status_ticks(base: u16, bp: i32) -> u16 {
@@ -261,9 +282,9 @@ fn apply_on_hit(
     on_hit: OnHit,
     attacker: Seat,
     ev: &mut Vec<Event>,
-) {
+) -> u16 {
     let Some(i) = state.unit_index(id) else {
-        return;
+        return 0;
     };
     let bonus = augment::status_duration_bp(&state.player(attacker).augments);
     let target = state.units[i];
@@ -289,9 +310,13 @@ fn apply_on_hit(
             ticks: shorten(status_ticks(ticks, bonus)),
         },
     };
+    let applied = match on_hit {
+        OnHit::Slow { ticks, .. } => ticks,
+        OnHit::Root { ticks } => ticks,
+    };
     let u = &mut state.units[i];
     if u.hp <= 0 {
-        return;
+        return 0;
     }
     u.status = match (on_hit, u.status) {
         (OnHit::Root { ticks }, Status::Rooted { ticks_left }) => Status::Rooted {
@@ -315,4 +340,5 @@ fn apply_on_hit(
         },
     };
     ev.push(Event::StatusApplied { unit: id });
+    applied
 }
