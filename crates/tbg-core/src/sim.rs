@@ -8,7 +8,7 @@ use crate::content::{BOUNTY_WINDOW_TICKS, RUNNING_START};
 use crate::rng::Pcg32;
 use crate::ruleset::{Ruleset, CANON};
 use crate::state::{EndReason, Event, MatchState, Outcome, Phase, PlayerState};
-use crate::types::Seat;
+use crate::types::{Seat, StrongholdKind};
 use crate::{combat, shop, summon, synergy};
 
 impl MatchState {
@@ -27,6 +27,17 @@ impl MatchState {
         MatchState::lab(seed, rules, [ArcanaPreset::NEUTRAL; 2])
     }
 
+    /// Each seat's frozen Stronghold kind (BR-SK01), set before the first
+    /// tick; the tower starts at that kind's full HP.
+    pub fn with_strongholds(mut self, kinds: [StrongholdKind; 2]) -> MatchState {
+        for seat in Seat::BOTH {
+            self.player_mut(seat).stronghold = kinds[seat.index()];
+            let max = self.stronghold(seat).max_hp;
+            self.player_mut(seat).stronghold_hp = max;
+        }
+        self
+    }
+
     /// Any ruleset and presets: the lab's Arcana experiments (D-33, D-40).
     pub fn lab(seed: u64, rules: &'static Ruleset, arcanas: [ArcanaPreset; 2]) -> MatchState {
         let player = |stream: u64| {
@@ -37,6 +48,10 @@ impl MatchState {
                 offers: shop::draw_offers(&mut rng),
                 stronghold_hp: rules.stronghold_hp,
                 stronghold_cooldown: 0,
+                stronghold: StrongholdKind::Classic,
+                fort_tier: 0,
+                fort_branch: 0,
+                spoils_window: 0,
                 synergy: [0; 4],
                 last_seq: 0,
                 rng,

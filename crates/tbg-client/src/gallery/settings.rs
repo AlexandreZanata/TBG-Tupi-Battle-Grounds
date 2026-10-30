@@ -26,7 +26,7 @@ pub struct Gallery {
 }
 impl Gallery {
     pub fn studio(&self) -> bool {
-        self.unit.is_some() || self.frames || self.mode == "blockout"
+        self.unit.is_some() || self.frames || self.mode == "blockout" || self.mode == "strongholds"
     }
     pub fn hide_arena(&self) -> bool {
         self.silhouette || self.studio()

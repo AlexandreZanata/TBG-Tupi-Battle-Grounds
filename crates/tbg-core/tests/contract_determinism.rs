@@ -23,25 +23,27 @@ fn bot_matches_are_frozen() {
     // pause, and a Shop that redraws all five offers on every purchase
     // (BR-S04). The faster Energy flow and the new draws change what the
     // bots can buy, so outcomes and end combat ticks moved with the hashes.
+    // D-46 added the Stronghold kind and Fortification to the state: the
+    // Classic matches, winners and end ticks are unchanged, only the hash.
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0xdb60_17b9_3aca_b0e3_u64,
+            0x002a_6144_d3ae_b8f3_u64,
             2_214,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0x63e0_e852_daf5_2b2b,
+            0x11ce_a806_1a70_15db,
             3_284,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0xfa64_74e3_f698_ccf9,
+            0xbf9b_d770_b820_9249,
             1_833,
             Seat::B,
             StrongholdDestroyed,

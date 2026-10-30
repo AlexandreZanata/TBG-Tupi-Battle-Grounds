@@ -489,8 +489,16 @@ pub fn situational_bp(state: &MatchState, attacker: &Unit, target: crate::state:
     bp.clamp(i64::from(i32::MIN), i64::from(i32::MAX)) as i32
 }
 
+/// Comeback compares HP ratios: kinds have different maximums (BR-SK07).
 fn behind(state: &MatchState, seat: Seat) -> bool {
-    state.player(seat).stronghold_hp < state.player(seat.other()).stronghold_hp
+    let ratio = |s: Seat| {
+        (
+            i64::from(state.player(s).stronghold_hp),
+            i64::from(state.stronghold(s).max_hp.max(1)),
+        )
+    };
+    let ((hp, max), (other_hp, other_max)) = (ratio(seat), ratio(seat.other()));
+    hp * other_max < other_hp * max
 }
 
 pub fn damage_reduction_bp(state: &MatchState, target: &Unit) -> i32 {
@@ -519,7 +527,7 @@ pub fn damage_reduction_bp(state: &MatchState, target: &Unit) -> i32 {
                 DamageAnchor::OwnStronghold => {
                     (below_bp == 0
                         || i64::from(p.stronghold_hp) * BP
-                            < i64::from(below_bp) * i64::from(state.rules.stronghold_hp))
+                            < i64::from(below_bp) * i64::from(state.stronghold(target.seat).max_hp))
                         && (target.x - own_x).abs() <= radius
                 }
             };
@@ -618,7 +626,7 @@ pub fn after_stronghold_damage(state: &mut MatchState, seat: Seat, ev: &mut Vec<
     let Some((below_bp, shield_bp, ticks)) = last_stand(&p.augments) else {
         return;
     };
-    let max = state.rules.stronghold_hp.max(1);
+    let max = state.stronghold(seat).max_hp.max(1);
     if p.stronghold_hp <= 0
         || i64::from(p.stronghold_hp) * BP >= i64::from(below_bp) * i64::from(max)
     {
@@ -677,7 +685,7 @@ pub(crate) fn on_eligible_kill(state: &mut MatchState, dead: Seat) {
             _ => {}
         }
     }
-    let max = state.rules.stronghold_hp;
+    let max = state.stronghold(killer).max_hp;
     let p = state.player_mut(killer);
     p.bounty_window = p.bounty_window.saturating_add(bounty);
     p.credit(bounty);
@@ -686,11 +694,13 @@ pub(crate) fn on_eligible_kill(state: &mut MatchState, dead: Seat) {
     if mend > 0 && p.stronghold_hp > 0 {
         p.stronghold_hp = p.stronghold_hp.saturating_add(mend).min(max);
     }
+    crate::stronghold::spoils(state, killer);
 }
 
 pub fn reset_windows(state: &mut MatchState) {
     for p in &mut state.players {
         p.bounty_window = 0;
+        p.spoils_window = 0;
     }
 }
 

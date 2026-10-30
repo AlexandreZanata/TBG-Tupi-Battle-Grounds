@@ -27,6 +27,7 @@ mod matchmaking;
 mod ranked;
 mod rematch;
 mod sessions;
+mod strongholds;
 #[cfg(test)]
 mod tests;
 
@@ -57,6 +58,8 @@ pub(super) struct Session {
     pub(super) detached_at: Option<Instant>,
     /// D-40: the Arcanas the next match will freeze (BR-AR05).
     pub(super) arcanas: tbg_core::ArcanaPreset,
+    /// D-46: the Stronghold kind the next match will freeze (BR-SK01).
+    pub(super) stronghold: tbg_core::StrongholdKind,
 }
 
 pub(super) struct Lobby {
@@ -211,6 +214,11 @@ impl Lobby {
                 account,
                 preset,
             } => self.arcanas_loaded(token, account, preset),
+            LobbyCmd::StrongholdLoaded {
+                token,
+                account,
+                kind,
+            } => self.stronghold_loaded(token, account, kind),
         }
     }
 
@@ -225,6 +233,8 @@ impl Lobby {
             ClientMsg::Leaderboard { offset } => return self.leaderboard(token, offset),
             // D-40: answered in every state (`NotIdle` unless idle).
             ClientMsg::SetArcanas { ranks } => return self.set_arcanas(token, ranks),
+            // D-46: same idle-only rule as the Arcanas (BR-SK01).
+            ClientMsg::SetStronghold { kind } => return self.set_stronghold(token, kind),
             _ => {}
         }
         let draining = self.draining.load(Relaxed);

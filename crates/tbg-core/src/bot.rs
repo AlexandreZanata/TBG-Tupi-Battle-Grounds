@@ -5,7 +5,7 @@ use crate::content::{ENERGY_SCALE, OFFERS};
 use crate::intent::PlayerIntention;
 use crate::rng::Pcg32;
 use crate::ruleset::{Ruleset, CANON};
-use crate::types::Archetype;
+use crate::types::{Archetype, StrongholdKind};
 use crate::view::MatchView;
 
 /// Energy at which the bot evolves when it found nothing to buy.
@@ -52,6 +52,7 @@ impl Bot {
         self.wait = 3 + self.rng.below(6);
         let big_army = army(view) >= EVOLVE_ARMY;
         self.buy_tank(view)
+            .or_else(|| big_army.then(|| self.fortify(view)).flatten())
             .or_else(|| big_army.then(|| self.evolve(view, 0)).flatten())
             .or_else(|| self.buy_best(view))
             .or_else(|| self.evolve(view, EVOLVE_AT))
@@ -108,6 +109,27 @@ impl Bot {
             unit: unit.id,
             branch,
         })
+    }
+}
+
+impl Bot {
+    /// Fortify its own tower once the army is big (BR-SK05). Never on the
+    /// Classic reference tower, so the lab's Classic baselines keep the same
+    /// bot (D-33).
+    fn fortify(&mut self, view: &MatchView) -> Option<PlayerIntention> {
+        let own = view.strongholds[view.you.index()];
+        if own.kind == StrongholdKind::Classic || own.tier >= 2 {
+            return None;
+        }
+        if view.energy < self.rules.fortify_cost[usize::from(own.tier)] {
+            return None;
+        }
+        let branch = if own.tier == 0 {
+            self.rng.below(2) as u8
+        } else {
+            own.branch
+        };
+        Some(PlayerIntention::Fortify { branch })
     }
 }
 

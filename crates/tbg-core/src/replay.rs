@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use crate::arcana::ArcanaPreset;
 use crate::intent::PlayerIntention;
 use crate::state::{MatchState, Phase};
-use crate::types::{Seat, Tick};
+use crate::types::{Seat, StrongholdKind, Tick};
 
 /// One recorded command, applied before the step at selection clock `clock`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -26,6 +26,8 @@ pub struct Replay {
     pub seed: u64,
     /// D-40: both presets frozen at pairing.
     pub arcanas: [ArcanaPreset; 2],
+    /// BR-SK01: both Stronghold kinds frozen at pairing.
+    pub strongholds: [StrongholdKind; 2],
     pub ops: Vec<ReplayOp>,
     /// `MatchState::hash()` when the original match ended.
     pub final_hash: u64,
@@ -47,7 +49,8 @@ impl Replay {
 
     /// Rebuild the match on the canonical ruleset and the recorded presets.
     pub fn run(&self) -> MatchState {
-        let mut state = MatchState::with_arcanas(self.seed, self.arcanas);
+        let mut state =
+            MatchState::with_arcanas(self.seed, self.arcanas).with_strongholds(self.strongholds);
         let mut ops = self.ops.iter().peekable();
         loop {
             while let Some(op) = ops.next_if(|op| op.clock == state.clock) {

@@ -4,5 +4,6 @@
   "arcanas": "assets/lobby/arcanas.svg",
   "troops": "assets/lobby/troops.svg",
   "ranking": "assets/lobby/ranking.svg",
-  "news": "assets/lobby/news.svg"
+  "news": "assets/lobby/news.svg",
+  "strongholds": "assets/lobby/strongholds.svg"
 }

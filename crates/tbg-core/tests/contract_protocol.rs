@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 12,
-        "v12: Interest as a regen boost (MatchView::regen_bp); v11 was the fifteen-node Arcana schema"
+        PROTOCOL_VERSION, 13,
+        "v13: Stronghold kinds and Fortification (D-46); v12 was Interest as a regen boost"
     );
 }
 

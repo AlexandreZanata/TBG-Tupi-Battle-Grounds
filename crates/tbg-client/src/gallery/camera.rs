@@ -44,6 +44,13 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
             4.0,
             Vec3::new(0.0, 11.0, 14.0),
         ),
+        // Four rows of five forms, 3.2 apart in x and 3.6 back in z.
+        "strongholds" => (
+            Vec3::new(8.0, 1.3, -5.0),
+            10.8,
+            7.4,
+            Vec3::new(0.0, 1.4, 1.0),
+        ),
         "blockout" if portrait && !options.silhouette => (
             Vec3::new(8.0, 0.6, 0.0),
             3.0,

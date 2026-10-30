@@ -1,0 +1,11 @@
+command: ./target/release/tbg-balance strongholds --a bot --pairs 512 --threads 12 --out docs/media/p17/lab/bot
+git_head: 0154dd4
+ruleset_fingerprint: 0a11d764280d327e
+applied: canon
+seeds: 1000000..1000512 (512 pairs)
+threads: 12
+reaction_views: 5
+wall_s: 10.05
+games: 25600
+games_per_s: 2547
+game_seconds_per_wall_second: 0

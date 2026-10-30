@@ -54,7 +54,10 @@ pub(super) fn apply(
         ResMut<crate::sync::RematchInfo>,
     ),
     mut account: ResMut<Account>,
-    mut surrender: ResMut<super::surrender::Surrender>,
+    (mut surrender, mut fortifying): (
+        ResMut<super::surrender::Surrender>,
+        ResMut<super::fortify::PendingFortify>,
+    ),
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
     mut inspected: ResMut<super::inspect::Inspected>,
@@ -74,7 +77,10 @@ pub(super) fn apply(
         if paused
             && matches!(
                 action,
-                UiAction::Buy(_) | UiAction::Evolve { .. } | UiAction::SelectUnit(_)
+                UiAction::Buy(_)
+                    | UiAction::Evolve { .. }
+                    | UiAction::SelectUnit(_)
+                    | UiAction::Fortify(_)
             )
         {
             continue;
@@ -237,6 +243,21 @@ pub(super) fn apply(
                 );
                 selected.0 = None;
             }
+            // D-46: one Fortify in flight; the tier shown changes only when
+            // the authoritative view does.
+            UiAction::Fortify(branch) => {
+                if fortifying.0.is_none() {
+                    seq.0 += 1;
+                    link.send(
+                        ClientMsg::Intent {
+                            seq: seq.0,
+                            intent: PlayerIntention::Fortify { branch },
+                        },
+                        now,
+                    );
+                    fortifying.0 = Some(seq.0);
+                }
+            }
             UiAction::CloseEvolve => selected.0 = None,
             UiAction::Deselect => {
                 selected.0 = None;
@@ -278,5 +299,6 @@ pub(super) fn apply(
 fn start_practice(link: &mut MatchLink, now: f64) {
     let seed = (now * 1e9) as u64 ^ 0x9e37_79b9_7f4a_7c15;
     let arcanas = config::load_arcanas();
-    *link = MatchLink::Local(Box::new(LocalMatch::new(seed, arcanas)));
+    let stronghold = config::load_stronghold();
+    *link = MatchLink::Local(Box::new(LocalMatch::new(seed, arcanas, stronghold)));
 }

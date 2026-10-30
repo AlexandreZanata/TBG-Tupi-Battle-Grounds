@@ -143,6 +143,9 @@ impl NetLink {
         // idle and frozen by the request right behind it (same order).
         let ranks = config::load_arcanas().ranks;
         self.send(ClientMsg::SetArcanas { ranks }, now);
+        // D-46: the picker's kind, frozen by the same request (BR-SK01).
+        let kind = config::load_stronghold();
+        self.send(ClientMsg::SetStronghold { kind }, now);
         self.send(req, now);
     }
 

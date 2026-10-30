@@ -90,14 +90,15 @@ fn c2_per_tick_traces_are_frozen() {
     // (seed, per-tick trace, final hash, end combat tick): owner revision
     // 2026-10-29 (uncapped Energy, Interest as a regen boost, the Augment
     // pause with its paused steps traced, the 20 s selection window,
-    // P40's fifteen-rank Arcana state, and a full Shop redraw per
-    // purchase, BR-S04).
+    // P40's fifteen-rank Arcana state, a full Shop redraw per purchase,
+    // BR-S04, and the D-46 Stronghold fields: same Classic matches and end
+    // ticks, only the serialized state grew).
     let goldens = [
-        (1, 0xa296_7863_f7e4_b613, 0xdb60_17b9_3aca_b0e3, 2_214),
-        (7, 0x6b10_7c9e_0af6_65e9, 0x63e0_e852_daf5_2b2b, 3_284),
-        (42, 0xcdea_52a4_78e7_ac93, 0xfa64_74e3_f698_ccf9, 1_833),
-        (1000, 0xf0ce_f15f_c90d_8a1c, 0xf81a_863b_4a9c_9d2d, 2_641),
-        (65535, 0x5747_2463_8f98_17b3, 0x1da2_eee4_d2a3_1a55, 1_740),
+        (1, 0x8a75_6b3a_3e26_38c3, 0x002a_6144_d3ae_b8f3, 2_214),
+        (7, 0x1144_9ef1_cb17_bdc9, 0x11ce_a806_1a70_15db, 3_284),
+        (42, 0xde18_bddc_8ae6_1c03, 0xbf9b_d770_b820_9249, 1_833),
+        (1000, 0x7695_62f8_9e14_07dc, 0xd27a_de45_0381_f79d, 2_641),
+        (65535, 0x8263_e7d0_69de_33d3, 0xf4d7_b131_bc48_6a05, 1_740),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

@@ -133,6 +133,7 @@ pub fn dispatch(a: &Args) -> Result<(), String> {
         "value" => value_cmd(a),
         "validate" => validate_cmd(a),
         "arcana" => arcana_cmd(a),
+        "strongholds" => strongholds_cmd(a),
         "arcana-named" => arcana_named_cmd(a),
         other => Err(format!("unknown command `{other}` (see --help)")),
     }
@@ -662,6 +663,51 @@ fn arcana_named_cmd(a: &Args) -> Result<(), String> {
 
 /// Every complete Arcana preset and the named fixtures against the default
 /// (D-40): the evidence BR-AR's acceptance hypotheses ask for.
+/// D-46: win share of each Stronghold kind (row) against each kind and the
+/// Classic reference (column), for one policy on both sides.
+fn strongholds_cmd(a: &Args) -> Result<(), String> {
+    use crate::strongholds;
+    let c = ctx(a, 256, CONFIRMATION)?;
+    let policy = match a.str("a") {
+        Some(_) => policy(a, "a")?,
+        None => Policy::Bot,
+    };
+    let cells = strongholds::matrix(
+        c.rules,
+        policy,
+        c.seeds(),
+        c.budget.reaction,
+        c.budget.threads,
+    );
+    let mut text = format!(
+        "Stronghold kinds, row vs column, policy {}, {} seed pairs per cell\n{:<10}",
+        policy.name(),
+        c.pairs,
+        ""
+    );
+    for col in strongholds::KINDS {
+        let _ = write!(text, "{:>22}", format!("{col:?}"));
+    }
+    for row in strongholds::KINDS {
+        let _ = write!(text, "\n{:<10}", format!("{row:?}"));
+        for (_, _, e) in cells.iter().filter(|(r, _, _)| *r == row) {
+            let cell = format!(
+                "{:.1}% [{:.1}-{:.1}]",
+                e.mean * 100.0,
+                e.lo * 100.0,
+                e.hi * 100.0
+            );
+            let _ = write!(text, "{cell:>22}");
+        }
+    }
+    text.push('\n');
+    print!("{text}");
+    c.out
+        .write("strongholds.txt", &text)
+        .map_err(|e| e.to_string())?;
+    c.finish(cells.len() as u64 * c.pairs * 2, 0, "")
+}
+
 fn arcana_cmd(a: &Args) -> Result<(), String> {
     let c = ctx(a, 256, CONFIRMATION)?;
     let policy = match a.str("a") {

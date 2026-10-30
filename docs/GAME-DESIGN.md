@@ -57,8 +57,8 @@ evolve, and which factions you combine.
 | Arcana | **Proposed (P40, active):** a free pre-match choice in one of three five-node families that modifies a documented unit attribute or conditional combat behavior | `ArcanaNode` |
 | ArcanaPreset | **Proposed (P40, active):** fifteen bounded ranks costing exactly twelve points, chosen before matchmaking and frozen for a match | `ArcanaPreset` |
 | RulesetVersion | **Proposed (P35):** compiled version of competitive rules and balance values, recorded with match results | `RulesetVersion` |
-| StrongholdKind | **Proposed (P16-F3, not active):** a free pre-match choice of `Stronghold` with its own stats and passive; mechanical, unlike `StrongholdStyle` | `StrongholdKind` |
-| Fortification | **Proposed (P16-F3, not active):** in-match branching upgrade of a player's own `Stronghold`, paid with `Energy`; never called `Evolution` | `Fortification` |
+| StrongholdKind | A free pre-match choice of `Stronghold` (Treasury, Bastion, Artillery, Command) with its own stats, passive and Fortification branches (D-46); mechanical, unlike `StrongholdStyle` | `StrongholdKind` |
+| Fortification | In-match branching upgrade of a player's own `Stronghold`, paid with `Energy`, two kind-exclusive branches (D-46); never called `Evolution` | `Fortification` |
 | Interest | A boost to `Energy` regeneration that grows with the `Energy` held: +25 % of the base rate for every full 5 `Energy`, counting at most 25 (BR-E05–E07, owner revision 2026-10-29) | `Interest` |
 | Bounty | **Proposed (P16-F1, not active):** `Energy` granted for an eligible kill, bounded per payment window | `Bounty` |
 | Siege | **Proposed (P16-F1, not active):** the match phase after the running phase in which both `Stronghold`s suffer `Collapse`; replaces overtime | `Phase::Siege` |
@@ -122,7 +122,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-C01 | Monetization is free-to-play with cosmetics only | Confirmed | S1 |
 | BR-C02 | Persistent cosmetics are bound to an account `Inventory` | Confirmed | S1 |
 | BR-C03 | Store purchases are granted only after server-side receipt validation | Adapted | S1, S2 |
-| BR-C04 | `StrongholdStyle`s are free cosmetics; every style has identical gameplay (styles stay cosmetic; mechanical `StrongholdKind`s are separate, BR-K01–K08, D-37) | Proposed | — |
+| BR-C04 | `StrongholdStyle`s are free cosmetics; every style has identical gameplay (styles stay cosmetic; mechanical `StrongholdKind`s are separate, BR-SK01–SK09, D-46) | Proposed | — |
 | BR-P01 | An `Account` is a unique `PlayerName` plus an `AccountKey`; names are 3–16 letters, digits or `_`, start with a letter, are unique ignoring case, and never change | Proposed | — |
 | BR-P02 | The `AccountKey` is the only credential: shown once at creation, never shown to other players, not recoverable | Proposed | — |
 | BR-P03 | One active session per account; a new login takes over the old one, including a running match | Proposed | — |
@@ -447,8 +447,8 @@ build and one relevant reason for defeat.
 lab gate, an open-ended match, uncapped `Energy` with compounding
 Interest (§10.1), and infinite Augment rounds that pause the battle
 (§10.6, all 40 of §10.8). Siege, Collapse and every time victory (§10.2)
-are removed, not deferred. Shop Reserve, Stronghold kinds and
-Fortifications (§10.3–§10.5) stay **Proposed, not active**. Balance of
+are removed, not deferred. Shop Reserve (§10.3) stays **Proposed, not active**; Stronghold kinds and
+Fortification (§10.4–§10.5) are active by D-46. Balance of
 the active parts is **not measured** (§10.9). Rule IDs are stable; never
 reuse one.
 
@@ -510,51 +510,57 @@ windows, ranked Elo (draw ½) and result persistence are unchanged.
 | BR-S09 | When a hold ends (expiry or `Release`) the card stays as a normal offer until the next rotation; an offer that has been held cannot be held again until its slot is redrawn |
 | BR-S10 | Same-tick order: intentions first (a purchase or hold at an expiry or rotation tick sees the offers before the Shop step), then hold expiry, then rotation |
 
-### 10.4 Stronghold kinds (P16-F3/F4)
+### 10.4 Stronghold kinds — active (owner decision 2026-10-29, D-46)
 
-| ID | Proposed rule |
-|----|---------------|
-| BR-K01 | Every player, guests included, chooses one of four `StrongholdKind`s for free; account age, rating, payments and playtime never unlock or change them |
-| BR-K02 | The choice can change only while idle; joining a queue or creating/joining a room freezes it until cancel or match end; reconnect and account takeover keep the match's kinds |
-| BR-K03 | Both kinds are public from `MatchStart` (name, icon, silhouette, stats) |
-| BR-K04 | A player who never chose gets the default kind (Redoubt, pending owner decision O-3) |
-| BR-K05 | Practice: the bot's kind is drawn uniformly from the match seed and shown at start |
-| BR-K06 | A kind changes Stronghold max HP, damage, and at most one passive; never range, attack interval, unit costs, Shop, Energy start, regen or Interest |
-| BR-K07 | Max HP is per seat and changes only with `Fortification`; current HP never exceeds max; a max change keeps the HP fraction (`hp' = floor(hp × max' / max)` in `i64`, at least 1 if hp ≥ 1) and never heals the fraction |
-| BR-K08 | `StrongholdStyle` (cosmetic, BR-C04) never hides or imitates a kind's silhouette cues |
+The owner's product spec of 2026-10-29 replaces the earlier proposal
+(BR-K01–K08: Treasury, Redoubt, Ballista, Banner on one shared Walls/Arms
+tree). Those IDs are retired, never reused. Values below are **Proposed**:
+the lab matrix in `docs/media/p17/lab/` is the only evidence so far.
 
-Kinds are percentages of the canonical Stronghold (today 4 500 HP, 65
-damage per 1.0 s, range 6), so P16-D tuning carries over. `Classic` (the
-canonical Stronghold) stays in the lab as the neutral control and as the
-online kind until P16-F4 activates selection.
+| ID | Rule |
+|----|------|
+| BR-SK01 | Every player, guests included, picks one of four `StrongholdKind`s for free (Treasury, Bastion, Artillery, Command); nothing unlocks or changes them. The choice changes only while idle; queueing, creating or joining a room freezes it until cancel or match end; pairing copies it into the match; reconnect keeps it. No choice = Bastion. Accounts keep their kind. `Classic` is the reference tower for tests and the lab, never selectable online |
+| BR-SK02 | Treasury **Spoils**: each eligible kill (an enemy conventional unit's death, BR-U08: never a summon, an ally or an expiry) credits its owner 0.15 Energy, at most 0.6 Energy per 10 s Bounty window; paid from the authoritative death in the step it happens, independent of the Augment Bounty |
+| BR-SK03 | A kind sets the tower's base max HP and damage as basis points of the reference tower (table below); range 6 tiles and one shot per 20 ticks unless a Fortification changes them. Every value acts on the real shot, not only on the HUD |
+| BR-SK04 | Command **War Banner**: own conventional units (never summons, never Strongholds) within the radius of their own tower deal +5 % damage, read from their position at hit time and added once to the other damage bp (BR-X01); nothing is stored on the unit, so it ends the moment it leaves |
+| BR-SK05 | `Fortify{branch}` buys the next tier of the player's own tower: tier 1 (3 Energy) picks branch A (0) or B (1) for the rest of the match, tier 2 (4 Energy) repeats it. The server rejects a third tier or a second purchase of a tier (`MaxTier`), a branch change (`WrongBranch`), too little Energy (`NotEnoughEnergy`), an open Augment selection (`Paused`) and anything after the end (`NotRunning`). Its own price, never the unit `EVOLVE_COST` |
+| BR-SK06 | Fortification percentages are of the kind's own base and add up across tiers; `interval` steps replace the base interval |
+| BR-SK07 | A max HP change keeps the HP fraction, rounded down, never a free heal (`hp' = floor(hp × max' / max)`, alive stays ≥ 1). Effects measured against "max HP" (Last Bastion, Stone Mend, Comeback's HP comparison by fraction) use the seat's own max |
+| BR-SK08 | Both towers' kind, tier, branch and max HP are public in every view and on the model |
+| BR-SK09 | The practice bot's kind follows the match seed (`SELECTABLE[seed % 4]`), so a practice match replays exactly; the bot fortifies only a player kind, never `Classic` |
 
-| Kind (code) | Owner name | HP bp | Damage bp | Today | Passive |
-|-------------|------------|-------|-----------|-------|---------|
-| `Treasury` | Torre do Tesouro | −700 | −800 | 4 185 / 59 | Bounty 0.15 Energy per eligible kill, cap 0.6 per window |
-| `Redoubt` | Torre Bastião | +1 500 | −1 500 | 5 175 / 55 | none: endurance |
-| `Ballista` | Torre de Artilharia | −1 100 | +2 300 | 4 005 / 79 | none: firepower (lab variant B: +800 bp damage and splash 1.0 tile) |
-| `Banner` | Torre do Comando | −400 | −800 | 4 320 / 59 | own conventional units within 4 tiles of this Stronghold: +10 % damage |
+| Kind | Owner name | HP bp | Damage bp | Today (4 500 / 53 ref.) | Passive |
+|------|------------|-------|-----------|------------------------|---------|
+| `Treasury` | Torre do Tesouro | −700 | −800 | 4 185 HP / 48 | Spoils (BR-SK02) |
+| `Bastion` | Torre Bastião | +1 500 | −1 000 | 5 175 HP / 47 | none: the most HP (Fortified Structure) |
+| `Artillery` | Torre de Artilharia | −1 500 | +1 000 | 3 825 HP / 58 | none: the most damage |
+| `Command` | Torre do Comando | −400 | −800 | 4 320 HP / 48 | War Banner +5 % within 4 tiles (BR-SK04) |
 
-English names avoid existing Evolution names (`Bastion`, `Artillery`,
-`Fortress`) and the glossary's `Commander`; the owner may rename (O-2).
+Treasury and Command keep the product hypotheses' ratios (4 200/60 and
+4 300/60 against a 4 500/65 reference) on today's tower. Bastion
+(hypothesis 5 200/55) and Artillery (4 000/80) started there too (−1 500
+and −1 100 / +2 300 bp); the first lab matrix had Artillery win 61–67 %
+against every kind for a near-tower army and Bastion lose 62 % to it, so
+Artillery moved to −1 500 / +1 000 and Bastion's damage to −1 000
+(`docs/media/p17/lab/`, P17 report). Artillery keeps the most damage,
+Bastion the most HP. `Bastion`, `Artillery` and `Fortress` are
+also unit Evolution form names; the owner chose these names, and the
+picker and HUD always show them as Stronghold names.
 
-### 10.5 Fortification (P16-F3/F4)
+### 10.5 Fortification — active (D-46)
 
-| ID | Proposed rule |
-|----|---------------|
-| BR-F01 | Each Stronghold starts at tier 0; `Fortify{branch}` at tier 0 picks Walls (0) or Arms (1) at tier 1; at tier 1 only the same branch reaches tier 2 |
-| BR-F02 | No duplicate, out-of-order, or branch-changing Fortification; the server validates cost, tier and branch (`Rejection::MaxFortification`, `WrongBranch`, `NotEnoughEnergy`) |
-| BR-F03 | Allowed in Running and Siege; effects apply from the next step; max HP follows BR-K07 |
-| BR-F04 | Tier and branch are public, visible on the model and in the HUD, and kept across reconnect |
-| BR-F05 | All four kinds share the same tree (kind-exclusive tiers are deferred, D-37) |
+| Kind | Branch A tier 1 → tier 2 | Branch B tier 1 → tier 2 |
+|------|--------------------------|--------------------------|
+| Treasury | **Armored Vault**: Reinforced Vault +12 % max HP → Grand Vault +12 % more | **Mint**: Coinage 0.20 Energy per kill → Royal Mint 0.25 per kill, window cap 0.9 |
+| Bastion | **Fortress**: Reinforced Walls +15 % max HP → Imperial Fortress +15 % more | **Sentinel**: Watchtower +1 tile range → Royal Sentinel +15 % damage |
+| Artillery | **Heavy Cannon**: Heavy Shot +20 % damage → Great Cannon +20 % more | **Rapid Fire**: Quick Reload 20 → 17 ticks → Advanced Mechanism 14 ticks |
+| Command | **War Standard**: War Cry +8 % → Supreme Command +11 % | **Forward Banner**: Outpost radius 5 tiles → High Command 6 tiles (+5 % stays) |
 
-| Branch | Tier 1 (6 Energy) | Tier 2 (10 Energy) |
-|--------|-------------------|--------------------|
-| Walls | Reinforced Walls: +15 % max HP | Curtain Wall: +15 % max HP more; Stronghold hits slow 20 % for 1.0 s |
-| Arms | Heavy Bolts: +15 % damage | War Engines: +15 % damage more; Stronghold hits splash 1.0 tile |
-
-Owner's starting proposal was +10 % / +10 % + 5 %; the capability at tier
-2 replaces the invisible +5 % (D-37).
+Costs: tier 1 3 Energy, tier 2 4 Energy (`FORTIFY_COST`). The Royal Mint
+ceiling (0.9 Energy per window) was not in the product spec, which asked
+for a moderate raise: it is +50 % over 0.6, so at most 0.09 Energy a
+second from Spoils, still below the base regen; lab evidence pending. Artillery has no splash:
+the product spec asks for none unless evidence needs it.
 
 ### 10.6 Augments (P16-F5–F7) — active, owner revision 2026-10-29
 
