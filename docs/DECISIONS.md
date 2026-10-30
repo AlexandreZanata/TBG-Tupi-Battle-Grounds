@@ -769,3 +769,23 @@ refresh-by-buying `favor` policy stay (both are lab-only).
 **Reopen when** the lab shows the Shop makes banking or one unit
 dominant, or the owner wants duplicates inside an offer set.
 
+## D-46 · Roster expansion: fifteen units, staged by ruleset pool — 2026-10-29 (owner decision)
+
+**Decision.** Fifteen new units enter the game in stages through phases
+P42–P53, as planned in `docs/ROSTER-EXPANSION.md` (Rotcap, Farwatch,
+Leechroot, Bombard, Old Finn, Drumguard, Longaxe, Oilpress, Antidote
+Brewer, Puppetmaster, Smuggler, Shatterback, Blood Furnace, Bloodweaver,
+Cargo Crab): both Shatterback (designed here, no draft exists) and Cargo
+Crab are in (O-R1); the roster-health gate becomes ≥ 2.5 % purchase share
+per unit (O-R2); no new unit reaches the `Shop` before its wave, and the
+pool switch is an owner decision in P53.
+**Why.** The current game already fails 12 of 39 lab rows before any new
+unit exists (median duration, three faction rows, the strongest strategic
+style, the Nash mix, duel outliers and weak Evolutions), so new units are
+judged relative to a frozen P42 baseline plus absolute rows the baseline
+already passes, with the old outliers rebalanced by numbers first; with 25
+kinds a 5 % per-unit share is impossible (even share 4.0 %) and offer odds
+per unit fall from 50 % to 20 % of sets, so the threshold moves to about
+60 % of the even share and the lab watches dilution.
+**Reopen when** a wave shows a unit that numbers cannot balance.
+

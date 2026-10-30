@@ -356,7 +356,8 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
         rows.push(pct(
             format!("purchase share {k:?}"),
             est(&c, 20 + k as u64),
-            (0.05, 1.0),
+            // O-R2: 2.5 % (about 60 % of the even share at 25 kinds).
+            (0.025, 1.0),
         ));
     }
     let comebacks = cluster(&games, |r| match r.comeback() {
