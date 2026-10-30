@@ -133,6 +133,17 @@ pub(in crate::arena) fn tower(theme: Theme, own: bool) -> [(Mesh, f32); 3] {
         ),
     ];
     let mut crown = Vec::new();
+    decorate_tower(theme, &mut base, &mut mid, &mut crown);
+    crown.push((Cyl(0.03, 0.9), p.wood, Transform::from_xyz(0.0, 2.3, 0.0)));
+    [
+        (painted(base), -1.0),
+        (painted(mid), 1.0 / 3.0),
+        (painted(crown), 2.0 / 3.0),
+    ]
+}
+
+fn decorate_tower(theme: Theme, base: &mut Vec<Part>, mid: &mut Vec<Part>, crown: &mut Vec<Part>) {
+    let p = theme.palette();
     match theme {
         Theme::Tundra => {
             base.push((
@@ -230,10 +241,4 @@ pub(in crate::arena) fn tower(theme: Theme, own: bool) -> [(Mesh, f32); 3] {
             ]);
         }
     }
-    crown.push((Cyl(0.03, 0.9), p.wood, Transform::from_xyz(0.0, 2.3, 0.0)));
-    [
-        (painted(base), -1.0),
-        (painted(mid), 1.0 / 3.0),
-        (painted(crown), 2.0 / 3.0),
-    ]
 }

@@ -9,11 +9,43 @@ use crate::art::{mesh::Shape::*, palette::*};
 use bevy::prelude::*;
 
 pub(super) fn sea(theme: Theme) -> Mesh {
-    painted(vec![(
+    let sea = painted(vec![(
         Box(180.0, 0.02, 180.0),
         theme.palette().sea,
         Transform::from_xyz(8.0, -1.40, 0.0),
-    )])
+    )]);
+    if theme != Theme::Volcanic {
+        return sea;
+    }
+    // Wide, broken currents read as molten rock without a water shader or particles.
+    let mut currents = Surface::default();
+    for band in 0..4 {
+        let radius = 1.3 + band as f32 * 0.34;
+        for i in 0..SEGMENTS {
+            if (i + band * 7) % 11 < 3 {
+                continue;
+            }
+            let point = |k: usize, width: f32| {
+                let a = k as f32 * std::f32::consts::TAU / SEGMENTS as f32;
+                let r = radius + (a * 5.0 + band as f32).sin() * 0.035 + width;
+                Vec3::new(8.0 + a.cos() * 12.0 * r, -1.38, a.sin() * 5.7 * r)
+            };
+            currents.quad(
+                [
+                    point(i, 0.0),
+                    point(i + 1, 0.0),
+                    point(i + 1, 0.025),
+                    point(i, 0.025),
+                ],
+                theme.palette().shore[1 + band % 2],
+            );
+        }
+    }
+    crate::art::mesh::merge(vec![
+        (sea, Transform::default()),
+        (currents.finish(), Transform::default()),
+    ])
+    .unwrap_or_else(|| Cuboid::new(0.01, 0.01, 0.01).into())
 }
 
 pub(super) fn coast(theme: Theme) -> Mesh {
