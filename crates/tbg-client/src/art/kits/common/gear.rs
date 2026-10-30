@@ -227,3 +227,32 @@ pub fn crate_box(at: Node, at_xyz: [f32; 3], size: f32) -> Vec<PartSpec> {
         part(at, Box(s * 0.2, s * 0.2, s * 1.04), GOLD, [x, y, z]),
     ]
 }
+
+/// A small lantern: brass cap and base around a glowing flame, with a
+/// carrying ring on top.
+pub fn lantern(at: Node, at_xyz: [f32; 3], size: f32) -> Vec<PartSpec> {
+    let [x, y, z] = at_xyz;
+    let s = size;
+    vec![
+        part(at, Ball(0.045 * s), SAP, [x, y, z]).glow(),
+        part(
+            at,
+            Box(0.08 * s, 0.025 * s, 0.08 * s),
+            BRASS,
+            [x, y + 0.05 * s, z],
+        ),
+        part(
+            at,
+            Box(0.08 * s, 0.025 * s, 0.08 * s),
+            BRASS,
+            [x, y - 0.05 * s, z],
+        ),
+        part(
+            at,
+            Ring(0.008 * s, 0.03 * s, 360.0),
+            BRASS,
+            [x, y + 0.08 * s, z],
+        )
+        .rot(X90),
+    ]
+}

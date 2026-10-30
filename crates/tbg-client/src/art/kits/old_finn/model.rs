@@ -8,7 +8,7 @@ use bevy::prelude::*;
 
 use crate::art::{
     figure::{part, FigureSpec, PartSpec},
-    kits::common::{body, Form},
+    kits::common::{body, gear, Form},
     mesh::Shape::*,
     palette::*,
     rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
@@ -206,8 +206,7 @@ fn creel(v: &mut Vec<PartSpec>, f: Form) {
         for (x, y) in [(-0.08, -0.2), (0.07, -0.18), (0.0, -0.26)] {
             fish(v, [x, y, -0.18], 0.6, FISH, 70.0);
         }
-        v.push(part(b, Cyl(0.04, 0.08), BRASS, [-0.14, 0.05, -0.02]));
-        v.push(part(b, Ball(0.035), SAP, [-0.14, 0.05, -0.02]).glow());
+        v.extend(gear::lantern(b, [-0.15, 0.04, -0.02], 1.2));
     }
 }
 

@@ -5,6 +5,7 @@
 
 pub mod aim;
 mod bone_brute;
+mod cargo_crate;
 pub mod common;
 mod drumguard;
 mod farwatch;
@@ -13,6 +14,7 @@ mod longaxe;
 mod old_finn;
 mod rootcaller;
 mod siege_walker;
+mod smuggler;
 mod tools;
 
 use bevy::prelude::*;
@@ -93,6 +95,8 @@ static LONGAXE: Kit = longaxe::KIT;
 static FARWATCH: Kit = farwatch::KIT;
 static OLD_FINN: Kit = old_finn::KIT;
 static DRUMGUARD: Kit = drumguard::KIT;
+static SMUGGLER: Kit = smuggler::KIT;
+static CRATE: Kit = cargo_crate::KIT;
 
 /// The kit of `kind`, if it has one.
 pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
@@ -104,6 +108,8 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Farwatch => Some(&FARWATCH),
         UnitKind::OldFinn => Some(&OLD_FINN),
         UnitKind::Drumguard => Some(&DRUMGUARD),
+        UnitKind::Smuggler => Some(&SMUGGLER),
+        UnitKind::Crate => Some(&CRATE),
         _ => None,
     }
 }
