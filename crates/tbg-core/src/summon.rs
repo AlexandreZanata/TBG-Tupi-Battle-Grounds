@@ -2,7 +2,7 @@
 //! ability, never to the army: bought units stay uncapped (BR-U07, D-32).
 
 use crate::augment;
-use crate::content::BEETLES_PER_PLAYER;
+use crate::content::{Ability, BEETLES_PER_PLAYER};
 use crate::state::{Event, MatchState, Unit};
 use crate::types::{Status, UnitId, UnitKind};
 
@@ -67,7 +67,8 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
     }
     for idx in 0..state.units.len() {
         let n = state.units[idx];
-        if n.kind != UnitKind::Nester || n.hp <= 0 {
+        if n.hp <= 0 || !state.rules.def(n.kind).ability(n.tier, n.branch).contains(&Ability::Hatch)
+        {
             continue;
         }
         // Count down and hatch on the same tick: exactly `every` ticks apart.

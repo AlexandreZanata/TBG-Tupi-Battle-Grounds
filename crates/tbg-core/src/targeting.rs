@@ -2,9 +2,9 @@
 //! Rampart in range first (Guard, BR-U09), or for Support the most damaged
 //! ally in range (GAME-DESIGN §4). One pass over the units per decision.
 
-use crate::content::{Stats, BP};
+use crate::content::{Ability, Stats, BP};
 use crate::state::{stronghold_x, MatchState, Target, Unit};
-use crate::types::{UnitId, UnitKind};
+use crate::types::{UnitId};
 
 pub(crate) enum Engage {
     /// Attack an enemy or heal an ally.
@@ -14,6 +14,12 @@ pub(crate) enum Engage {
 }
 
 pub(crate) fn engage(state: &MatchState, u: &Unit, st: &Stats) -> Option<Engage> {
+    // Units with no attack and no heal hold when an enemy is in range and
+    // never emit `Hit{amount: 0}` (P43; unreachable today: every kind
+    // attacks or heals).
+    if st.damage == 0 && st.heal == 0 {
+        return enemy_in_range(state, u, st.range).map(|_| Engage::Hold);
+    }
     if st.heal > 0 {
         if let Some(ally) = most_damaged_ally(state, u, st.range) {
             return Some(Engage::Act(Target::Unit(ally)));
@@ -35,7 +41,8 @@ fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
     for e in state.units.iter().filter(|e| e.seat == enemy && e.hp > 0) {
         let key = ((e.x - u.x).abs(), e.id);
         nearest = Some(nearest.map_or(key, |n| n.min(key)));
-        if e.kind == UnitKind::Rampart && key.0 <= range {
+        let is_guard = state.rules.def(e.kind).ability(e.tier, e.branch).contains(&Ability::Guard);
+        if is_guard && key.0 <= range {
             guard = Some(guard.map_or(key, |g| g.min(key)));
         }
     }

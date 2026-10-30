@@ -107,7 +107,8 @@ pub const SYNERGIES: [(SynergyEffect, [i32; 2]); 4] = [
     (SynergyEffect::Regen, [75, 200]),
 ];
 
-/// One evolution form: additive modifiers on the base unit.
+/// One evolution form: additive modifiers on the base unit, plus the shared
+/// hooks later waves read (P43: defaults keep today's behavior exactly).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FormDef {
     pub name: &'static str,
@@ -120,6 +121,14 @@ pub struct FormDef {
     pub heal_bp: i32,
     pub dmg_add: i32,
     pub on_hit: Option<OnHit>,
+    /// Splash damage share, in basis points of the hit (10 000 = full).
+    pub splash_bp: i32,
+    /// Healing cut applied by the hit, in basis points.
+    pub heal_cut_bp: i32,
+    /// Conditional damage bonus, in basis points (P44 wires the thresholds).
+    pub vs_below_bp: i32,
+    /// Conditional damage bonus, in basis points (P44 wires the thresholds).
+    pub vs_above_bp: i32,
 }
 
 const fn form(name: &'static str) -> FormDef {
@@ -134,6 +143,10 @@ const fn form(name: &'static str) -> FormDef {
         heal_bp: 0,
         dmg_add: 0,
         on_hit: None,
+        splash_bp: 10_000,
+        heal_cut_bp: 0,
+        vs_below_bp: 0,
+        vs_above_bp: 0,
     }
 }
 
@@ -143,6 +156,34 @@ const fn slow(bp: u16, ticks: u16) -> Option<OnHit> {
 
 const fn root(ticks: u16) -> Option<OnHit> {
     Some(OnHit::Root { ticks })
+}
+
+/// Closed ability list (ROSTER-EXPANSION §F.1, Proposed): one variant per
+/// future mechanic, read at fixed hooks of `step()`. Only `Hatch` and
+/// `Guard` are migrated in P43; every new kind ships `None` until its wave.
+/// Fields are integers in simulation units.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Ability {
+    None,
+    /// Nester Hatch (values unchanged, still from the Hatch rule).
+    Hatch,
+    /// Rampart Guard (BR-U09).
+    Guard,
+    Poison { dps: u16, pulses: u8, cap: u8 },
+    Fish { bp: u16, ticks: u16, cap: u8, per_hit: u8 },
+    Echo { every: u8, extra: u8 },
+    Blast { friendly: bool },
+    NoStronghold,
+    Essence { base: u16, step: u16, dmg: u16, atk_bp: u16 },
+    Formation { engage: i32, gap: i32 },
+    March { reach: i32, move_bp: u16, dr_bp: u16, hysteresis: i32, ignore_slow: bool },
+    Brew { strip_poison: u8, ward: u16, second: bool },
+    Puppet { window: u16, immune: u16, bonus_bp: u16, targets: u8, stumble: bool },
+    Cargo { every: u16, open: u16, table: [u16; 5], double_every: u8 },
+    Plates { count: u8, hp: u16, move_bp: u16, atk_bp: u16, dmg_bp: u16, shrapnel: u16, rampage: i32 },
+    Carry { board: i32, lock: u16, dr_bp: u16, move_bp: u16, shield_bp: u16, surge_bp: u16 },
+    Furnace { burn_bp: u16, max_bp: u16 },
+    Transfer { amount: u16, low_bp: u16, second: bool },
 }
 
 /// Base stats of a unit kind plus its forms `[A1, A2, B1, B2]`.
@@ -161,8 +202,29 @@ pub struct UnitDef {
     pub splash: i32,
     pub heal: i32,
     pub on_hit: Option<OnHit>,
+    /// Absolute abilities per form slot (base, A1, A2, B1, B2); a slot holds
+    /// up to two variants (Rotcap needs Poison + Echo in P45).
+    pub abilities: [[Ability; 2]; 5],
     pub forms: [FormDef; 4],
 }
+
+impl UnitDef {
+    /// The ability pair of a form: base is slot 0, tier 1/2 on branch A/B
+    /// are slots 1–4. Out-of-range tiers read the base slot.
+    pub const fn ability(&self, tier: u8, branch: u8) -> [Ability; 2] {
+        self.abilities[match (tier, branch) {
+            (1, 0) => 1,
+            (2, 0) => 2,
+            (1, 1) => 3,
+            (2, 1) => 4,
+            _ => 0,
+        }]
+    }
+}
+
+const NO_ABILITIES: [[Ability; 2]; 5] = [[Ability::None; 2]; 5];
+const HATCH_ABILITIES: [[Ability; 2]; 5] = [[Ability::Hatch; 2]; 5];
+const GUARD_ABILITIES: [[Ability; 2]; 5] = [[Ability::Guard; 2]; 5];
 
 #[allow(clippy::too_many_arguments)] // one call per roster row reads as a table
 const fn unit(
@@ -173,6 +235,7 @@ const fn unit(
     cost: u32,
     stats: [i32; 7], // hp, damage, interval, range, speed, splash, heal
     on_hit: Option<OnHit>,
+    abilities: [[Ability; 2]; 5],
     forms: [FormDef; 4],
 ) -> UnitDef {
     UnitDef {
@@ -189,6 +252,7 @@ const fn unit(
         splash: stats[5],
         heal: stats[6],
         on_hit,
+        abilities,
         forms,
     }
 }
@@ -200,56 +264,56 @@ use Faction::*;
 #[rustfmt::skip]
 pub const UNITS: [UnitDef; 11] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
-        [650, 30, 24, 800, 40, 0, 0], None, [
+        [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Fortress") },
         FormDef { dmg_bp: 4_000, speed_bp: 2_000, ..form("Vanguard") },
         FormDef { dmg_bp: 4_000, splash_add: 1_000, ..form("Champion") },
     ]),
     unit(UnitKind::Archer, "Archer", Humans, Ranged, 1_800,
-        [220, 45, 20, 4_500, 50, 0, 0], None, [
+        [220, 45, 20, 4_500, 50, 0, 0], None, NO_ABILITIES, [
         FormDef { range_add: 1_500, dmg_bp: 2_000, ..form("Longbow") },
         FormDef { dmg_bp: 6_000, ..form("Marksman") },
         FormDef { atk_bp: 4_000, ..form("Volley") },
         FormDef { splash_add: 1_000, ..form("Arrow Rain") },
     ]),
     unit(UnitKind::BoneBrute, "Bone Brute", Undead, Tank, 2_400,
-        [1_300, 75, 30, 1_000, 30, 0, 0], None, [
+        [1_300, 75, 30, 1_000, 30, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Ossified") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Bone Wall") },
         FormDef { dmg_bp: 5_000, ..form("Butcher") },
         FormDef { dmg_bp: 3_000, splash_add: 1_200, ..form("Reaper") },
     ]),
     unit(UnitKind::Hexer, "Hexer", Undead, Control, 2_400,
-        [300, 29, 28, 3_500, 50, 0, 0], slow(4_000, 40), [
+        [300, 29, 28, 3_500, 50, 0, 0], slow(4_000, 40), NO_ABILITIES, [
         FormDef { on_hit: slow(6_000, 40), ..form("Withering") },
         FormDef { dmg_bp: 6_000, ..form("Doom") },
         FormDef { splash_add: 1_000, ..form("Plague") },
         FormDef { dmg_bp: 4_000, splash_add: 500, ..form("Pestilence") },
     ]),
     unit(UnitKind::Sawbot, "Sawbot", Machines, Dps, 2_400,
-        [231, 55, 21, 800, 65, 0, 0], None, [
+        [231, 55, 21, 800, 65, 0, 0], None, NO_ABILITIES, [
         FormDef { atk_bp: 4_000, ..form("Overclock") },
         FormDef { atk_bp: 4_000, speed_bp: 3_000, ..form("Shredder") },
         FormDef { hp_bp: 6_000, ..form("Plating") },
         FormDef { hp_bp: 6_000, splash_add: 800, ..form("Juggernaut") },
     ]),
     unit(UnitKind::SiegeWalker, "Siege Walker", Machines, Ranged, 3_000,
-        [700, 85, 50, 6_000, 33, 1_500, 0], None, [
+        [700, 85, 50, 6_000, 33, 1_500, 0], None, NO_ABILITIES, [
         FormDef { range_add: 2_000, ..form("Longshot") },
         FormDef { dmg_bp: 5_000, ..form("Artillery") },
         FormDef { splash_add: 1_000, ..form("Shrapnel") },
         FormDef { on_hit: root(16), ..form("Concussion") },
     ]),
     unit(UnitKind::Bloomkeeper, "Bloomkeeper", Plants, Support, 1_800,
-        [280, 0, 30, 3_000, 45, 0, 40], None, [
+        [280, 0, 30, 3_000, 45, 0, 40], None, NO_ABILITIES, [
         FormDef { heal_bp: 5_000, ..form("Blossom") },
         FormDef { splash_add: 1_500, ..form("Grove") },
         FormDef { hp_bp: 5_000, dmg_add: 25, ..form("Bramble") },
         FormDef { on_hit: root(12), ..form("Thornwarden") },
     ]),
     unit(UnitKind::Rootcaller, "Rootcaller", Plants, Control, 2_400,
-        [300, 20, 32, 3_000, 45, 0, 0], root(16), [
+        [300, 20, 32, 3_000, 45, 0, 0], root(16), NO_ABILITIES, [
         FormDef { on_hit: root(32), ..form("Deep Roots") },
         FormDef { dmg_bp: 8_000, ..form("Strangle") },
         FormDef { splash_add: 1_000, ..form("Spores") },
@@ -257,11 +321,11 @@ pub const UNITS: [UnitDef; 11] = [
     ]),
     // P16-B (D-32, Proposed). Nester forms only change Hatch (`hatch_rule`).
     unit(UnitKind::Nester, "Nester", Plants, Support, 2_400,
-        [300, 15, 30, 2_500, 40, 0, 0], None, [
+        [300, 15, 30, 2_500, 40, 0, 0], None, HATCH_ABILITIES, [
         form("Brood"), form("Hive"), form("Venom"), form("Blight"),
     ]),
     unit(UnitKind::Rampart, "Rampart", Machines, Tank, 3_600,
-        [1_500, 35, 30, 800, 25, 0, 0], None, [
+        [1_500, 35, 30, 800, 25, 0, 0], None, GUARD_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bastion") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Citadel") },
         FormDef { dmg_bp: 6_000, ..form("Spiked") },
@@ -270,7 +334,7 @@ pub const UNITS: [UnitDef; 11] = [
     // Summon: hatched with its Nester's tier and branch, so these forms are
     // the Nester's Beetling upgrades (Venom slows, Blight +50 % HP and dmg).
     unit(UnitKind::Beetling, "Beetling", Plants, Dps, 0,
-        [90, 18, 16, 600, 70, 0, 0], None, [
+        [90, 18, 16, 600, 70, 0, 0], None, NO_ABILITIES, [
         form("Brood"), form("Hive"),
         FormDef { on_hit: slow(3_000, 20), ..form("Venom") },
         FormDef { hp_bp: 5_000, dmg_bp: 5_000, ..form("Blight") },

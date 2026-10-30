@@ -3,7 +3,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::content::{LANE_LEN, OFFERS, SPAWN_OFFSET};
+use crate::content::{Ability, LANE_LEN, OFFERS, SPAWN_OFFSET};
 use crate::shop;
 use crate::state::{Event, MatchState, Unit};
 use crate::types::{Seat, Status, UnitId, UnitKind};
@@ -117,7 +117,7 @@ impl MatchState {
             heal_cut_until: 0,
             heal_cut_bp: 0,
             second_wind_used: 0,
-            action_cd: if kind == UnitKind::Nester {
+            action_cd: if self.rules.def(kind).ability(0, 0).contains(&Ability::Hatch) {
                 self.rules.hatch_rule(tier, branch).0
             } else {
                 0

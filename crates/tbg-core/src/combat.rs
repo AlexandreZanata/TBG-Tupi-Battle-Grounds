@@ -3,11 +3,11 @@
 
 use crate::arcana;
 use crate::augment;
-use crate::content::{BP, LANE_LEN, MIN_INTERVAL, WINDUP};
+use crate::content::{Ability, BP, LANE_LEN, MIN_INTERVAL, WINDUP};
 use crate::hits::{damage, resolve_hit};
 use crate::state::{stronghold_x, Event, MatchState, Target};
 use crate::targeting::{self, Engage};
-use crate::types::{Seat, Status, UnitKind};
+use crate::types::{Seat, Status};
 
 /// Count down statuses and cooldowns.
 pub(crate) fn tick_timers(state: &mut MatchState) {
@@ -143,7 +143,10 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
             .units
             .iter()
             .filter(|u| u.seat != seat && u.hp > 0 && (u.x - sx).abs() <= rules.stronghold_range)
-            .map(|u| (u.kind != UnitKind::Rampart, (u.x - sx).abs(), u.id))
+            .map(|u| {
+                let guard = rules.def(u.kind).ability(u.tier, u.branch).contains(&Ability::Guard);
+                (!guard, (u.x - sx).abs(), u.id)
+            })
             .min();
         if let Some((_, _, id)) = target {
             let to = Target::Unit(id);
