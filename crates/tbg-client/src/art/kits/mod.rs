@@ -5,6 +5,8 @@
 
 pub mod aim;
 mod antidote_brewer;
+mod blood_furnace;
+mod bloodweaver;
 mod bombard;
 mod bone_brute;
 mod cargo_crab;
@@ -17,6 +19,7 @@ mod leechroot;
 mod longaxe;
 mod oilpress;
 mod old_finn;
+mod puppetmaster;
 mod rootcaller;
 mod rotcap;
 mod shatterback;
@@ -111,6 +114,9 @@ static ROTCAP: Kit = rotcap::KIT;
 static LEECHROOT: Kit = leechroot::KIT;
 static ANTIDOTE_BREWER: Kit = antidote_brewer::KIT;
 static SHATTERBACK: Kit = shatterback::KIT;
+static BLOOD_FURNACE: Kit = blood_furnace::KIT;
+static BLOODWEAVER: Kit = bloodweaver::KIT;
+static PUPPETMASTER: Kit = puppetmaster::KIT;
 
 /// The kit of `kind`, if it has one.
 pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
@@ -131,6 +137,9 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Leechroot => Some(&LEECHROOT),
         UnitKind::AntidoteBrewer => Some(&ANTIDOTE_BREWER),
         UnitKind::Shatterback => Some(&SHATTERBACK),
+        UnitKind::BloodFurnace => Some(&BLOOD_FURNACE),
+        UnitKind::Bloodweaver => Some(&BLOODWEAVER),
+        UnitKind::Puppetmaster => Some(&PUPPETMASTER),
         _ => None,
     }
 }
