@@ -34,7 +34,7 @@ pub(crate) fn tick(state: &mut MatchState, ev: &mut Vec<Event>) {
             s.left = s.left.saturating_sub(1);
         }
     }
-    if state.tick % REGEN_PERIOD != 0 {
+    if !state.tick.is_multiple_of(REGEN_PERIOD) {
         return;
     }
     let mut pulses: Vec<(UnitId, i32)> = Vec::new();
@@ -42,13 +42,12 @@ pub(crate) fn tick(state: &mut MatchState, ev: &mut Vec<Event>) {
         if u.hp <= 0 {
             continue;
         }
-        let total: i64 = u
-            .fx
-            .poison
-            .iter()
-            .filter(|s| s.left > 0)
-            .map(|s| i64::from(s.value))
-            .sum();
+        let total: i64 =
+            u.fx.poison
+                .iter()
+                .filter(|s| s.left > 0)
+                .map(|s| i64::from(s.value))
+                .sum();
         if total > 0 {
             pulses.push((u.id, total.clamp(0, i64::from(i32::MAX)) as i32));
         }
@@ -87,13 +86,7 @@ pub(crate) fn brew_of(state: &MatchState, attacker: &Unit) -> Option<(u8, u16, b
 
 /// Apply the attacker's Poison/Fish stacks to one enemy unit: warded units
 /// and corpses take nothing. Emits `StatusApplied` per applied stack type.
-fn apply_types(
-    state: &mut MatchState,
-    attacker: &Unit,
-    st: &Stats,
-    id: u32,
-    ev: &mut Vec<Event>,
-) {
+fn apply_types(state: &mut MatchState, attacker: &Unit, st: &Stats, id: u32, ev: &mut Vec<Event>) {
     let Some(i) = state.unit_index(id) else {
         return;
     };
@@ -106,8 +99,7 @@ fn apply_types(
                 // Fixed when applied: the static damage bonus scales the stack, so
                 // later buffs never rewrite it (§C.1).
                 let base = state.rules().def(attacker.kind).damage.max(1);
-                let pulse =
-                    (i64::from(dps) * i64::from(st.damage) / i64::from(base)) as i32;
+                let pulse = (i64::from(dps) * i64::from(st.damage) / i64::from(base)) as i32;
                 let pulse = pulse.clamp(0, i32::MAX) as u16;
                 // The tail covers the tenth pulse on the 20-tick grid.
                 let since = state.tick % REGEN_PERIOD;
@@ -120,22 +112,17 @@ fn apply_types(
                     .saturating_mul(REGEN_PERIOD)
                     .saturating_add(delta)
                     .min(u32::from(u16::MAX)) as u16;
-                add_stack(
-                    &mut state.units[i].fx.poison,
-                    usize::from(cap),
-                    left,
-                    pulse,
-                );
+                add_stack(&mut state.units[i].fx.poison, usize::from(cap), left, pulse);
                 ev.push(Event::StatusApplied { unit: id });
             }
-            Ability::Fish { bp, ticks, cap, per_hit } => {
+            Ability::Fish {
+                bp,
+                ticks,
+                cap,
+                per_hit,
+            } => {
                 for _ in 0..per_hit {
-                    add_stack(
-                        &mut state.units[i].fx.fish,
-                        usize::from(cap),
-                        ticks,
-                        bp,
-                    );
+                    add_stack(&mut state.units[i].fx.fish, usize::from(cap), ticks, bp);
                 }
                 ev.push(Event::StatusApplied { unit: id });
             }
@@ -155,10 +142,12 @@ pub(crate) fn apply_stacks(
     ev: &mut Vec<Event>,
 ) {
     apply_types(state, attacker, st, id, ev);
-    let echo = abilities_of(state, attacker).into_iter().find_map(|ability| match ability {
-        Ability::Echo { every, extra } => Some((every, extra)),
-        _ => None,
-    });
+    let echo = abilities_of(state, attacker)
+        .into_iter()
+        .find_map(|ability| match ability {
+            Ability::Echo { every, extra } => Some((every, extra)),
+            _ => None,
+        });
     let Some((every, extra)) = echo else {
         return;
     };
@@ -167,7 +156,7 @@ pub(crate) fn apply_stacks(
         return;
     };
     let n = state.units[ai].fx.attacks.saturating_add(1);
-    if n % every == 0 {
+    if n.is_multiple_of(every) {
         state.units[ai].fx.attacks = 0;
         let mut others: Vec<(i32, UnitId)> = state
             .units
@@ -262,6 +251,7 @@ fn cleanse(
 
 /// The Antidote's brew (§C.9): cleanse the most afflicted ally; Double Flask
 /// also cleanses the next one, without the ward.
+#[allow(clippy::too_many_arguments)] // one call site; reads as a table
 pub(crate) fn brew_cast(
     state: &mut MatchState,
     attacker: &Unit,

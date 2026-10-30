@@ -72,9 +72,9 @@ pub(crate) fn resolve_hit(
         crate::lab::dealt(state, attacker, removed);
     }
     if let Target::Unit(id) = target {
-        let hostile = state.unit_index(id).is_some_and(|i| {
-            state.units[i].seat != attacker.seat && state.units[i].hp > 0
-        });
+        let hostile = state
+            .unit_index(id)
+            .is_some_and(|i| state.units[i].seat != attacker.seat && state.units[i].hp > 0);
         if hostile {
             crate::afflictions::apply_stacks(state, attacker, st, id, ev);
         }

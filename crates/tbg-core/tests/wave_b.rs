@@ -61,9 +61,10 @@ fn rotcap_stack_pulses_exactly_ten_times() {
     let victim = s.lab_spawn_at(Seat::B, UnitKind::BoneBrute, 0, 0, 7_000);
     // Let exactly the first hit land, then remove the source.
     for _ in 0..500 {
-        let applied = s.step().iter().any(|e| {
-            matches!(e, Event::StatusApplied { unit } if *unit == victim)
-        });
+        let applied = s
+            .step()
+            .iter()
+            .any(|e| matches!(e, Event::StatusApplied { unit } if *unit == victim));
         if applied {
             break;
         }
@@ -99,11 +100,7 @@ fn rotcap_echo_stacks_the_second_nearest() {
     // Two attacks (ticks 6 and 36: combat runs through the countdown):
     // no echo yet.
     step_n(&mut s, 40);
-    assert_eq!(
-        poison_count(&s, far),
-        0,
-        "echo fired before the 3rd attack"
-    );
+    assert_eq!(poison_count(&s, far), 0, "echo fired before the 3rd attack");
     // The 3rd attack (tick 66) echoes onto the 2nd-nearest enemy.
     step_n(&mut s, 120);
     assert!(
@@ -126,7 +123,11 @@ fn fish_slows_movement_not_attacks() {
             break;
         }
         for e in s.step() {
-            if let Event::AttackStart { from: Target::Unit(a), .. } = e {
+            if let Event::AttackStart {
+                from: Target::Unit(a),
+                ..
+            } = e
+            {
                 if a == diver {
                     attacks.push(t);
                 }
@@ -222,7 +223,10 @@ fn ward_blocks_effects_not_damage() {
                         blocked_status = false;
                     }
                 }
-                Event::Hit { to: Target::Unit(id), amount } if id == victim && amount > 0 => {
+                Event::Hit {
+                    to: Target::Unit(id),
+                    amount,
+                } if id == victim && amount > 0 => {
                     if brewed_at.is_some_and(|b| t >= b && t < b + 70) {
                         damage_taken = true;
                     }
@@ -234,22 +238,24 @@ fn ward_blocks_effects_not_damage() {
             break;
         }
     }
-    assert!(brewed_at.is_some(), "the Antidote never brewed (scenario broken)");
+    assert!(
+        brewed_at.is_some(),
+        "the Antidote never brewed (scenario broken)"
+    );
     assert!(
         blocked_status,
         "a slow, poison or fish landed inside the ward"
     );
-    assert_eq!(
-        fish_count(&s, victim),
-        0,
-        "fish stacked inside the ward"
-    );
+    assert_eq!(fish_count(&s, victim), 0, "fish stacked inside the ward");
     assert_eq!(
         poison_count(&s, victim),
         0,
         "poison stacked inside the ward"
     );
-    assert!(damage_taken, "no damage landed inside the ward (scenario broken)");
+    assert!(
+        damage_taken,
+        "no damage landed inside the ward (scenario broken)"
+    );
 }
 
 // Antidote (§C.9): one brew strips up to 3 poison stacks, all fish, status.

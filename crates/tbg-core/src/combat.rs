@@ -99,13 +99,12 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
             // Old Finn fish (P45): movement only, multiplicative with any
             // status slow, so no combination reaches zero. Never touches
             // the attack interval.
-            let fish_bp: i64 = u
-                .fx
-                .fish
-                .iter()
-                .filter(|s| s.left > 0)
-                .map(|s| i64::from(s.value))
-                .sum();
+            let fish_bp: i64 =
+                u.fx.fish
+                    .iter()
+                    .filter(|s| s.left > 0)
+                    .map(|s| i64::from(s.value))
+                    .sum();
             if fish_bp > 0 {
                 speed = (i64::from(speed) * (BP - fish_bp.min(BP)) / BP) as i32;
             }
