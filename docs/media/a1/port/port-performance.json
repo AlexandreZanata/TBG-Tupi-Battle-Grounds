@@ -1,0 +1,297 @@
+{
+  "10_per_side": {
+    "runs": [
+      {
+        "sampleCount": 1865,
+        "fps": 84.8,
+        "p50": 11.7,
+        "p95": 21.3,
+        "p99": 25.2,
+        "entities": 999,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 366.1,
+        "jsHeapBytes": 15545433,
+        "wasmMemoryBytes": 110231552,
+        "cpuTaskSecs": 0
+      },
+      {
+        "sampleCount": 2455,
+        "fps": 111.6,
+        "p50": 6.1,
+        "p95": 18.4,
+        "p99": 24.6,
+        "entities": 999,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 366.2,
+        "jsHeapBytes": 20211778,
+        "wasmMemoryBytes": 110231552,
+        "cpuTaskSecs": 0
+      },
+      {
+        "sampleCount": 1341,
+        "fps": 61.1,
+        "p50": 18.1,
+        "p95": 24.8,
+        "p99": 28.2,
+        "entities": 999,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 366.2,
+        "jsHeapBytes": 15986237,
+        "wasmMemoryBytes": 110231552,
+        "cpuTaskSecs": 0
+      }
+    ],
+    "median": {
+      "fps": 84.8,
+      "p50": 11.7,
+      "p95": 21.3,
+      "p99": 25.2,
+      "jsHeapMB": 15.25,
+      "wasmMemMB": 105.13,
+      "entities": 999,
+      "meshes": 1938,
+      "materials": 27,
+      "cpuTaskSecs": 0,
+      "draws": 366
+    }
+  },
+  "40_per_side": {
+    "runs": [
+      {
+        "sampleCount": 1176,
+        "fps": 53.5,
+        "p50": 18.3,
+        "p95": 30.3,
+        "p99": 33.9,
+        "entities": 2938,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 459.7,
+        "jsHeapBytes": 19876043,
+        "wasmMemoryBytes": 115671040,
+        "cpuTaskSecs": 0
+      },
+      {
+        "sampleCount": 1209,
+        "fps": 55,
+        "p50": 18.2,
+        "p95": 30.3,
+        "p99": 34.7,
+        "entities": 2938,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 459.6,
+        "jsHeapBytes": 24882846,
+        "wasmMemoryBytes": 115671040,
+        "cpuTaskSecs": 0
+      },
+      {
+        "sampleCount": 1431,
+        "fps": 65.1,
+        "p50": 17.7,
+        "p95": 27.4,
+        "p99": 33,
+        "entities": 2938,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 459.7,
+        "jsHeapBytes": 20218601,
+        "wasmMemoryBytes": 115671040,
+        "cpuTaskSecs": 0
+      }
+    ],
+    "median": {
+      "fps": 55,
+      "p50": 18.2,
+      "p95": 30.3,
+      "p99": 33.9,
+      "jsHeapMB": 19.28,
+      "wasmMemMB": 110.31,
+      "entities": 2938,
+      "meshes": 1938,
+      "materials": 27,
+      "cpuTaskSecs": 0,
+      "draws": 460
+    }
+  },
+  "100_per_side": {
+    "runs": [
+      {
+        "sampleCount": 1125,
+        "fps": 51.2,
+        "p50": 18.3,
+        "p95": 30.4,
+        "p99": 35.9,
+        "entities": 6814,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 641.2,
+        "jsHeapBytes": 24171830,
+        "wasmMemoryBytes": 125108224,
+        "cpuTaskSecs": 0
+      },
+      {
+        "sampleCount": 929,
+        "fps": 42.3,
+        "p50": 24.1,
+        "p95": 31.7,
+        "p99": 48.4,
+        "entities": 6815,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 641.2,
+        "jsHeapBytes": 24816409,
+        "wasmMemoryBytes": 126353408,
+        "cpuTaskSecs": 0
+      },
+      {
+        "sampleCount": 3581,
+        "fps": 163,
+        "p50": 6.1,
+        "p95": 8,
+        "p99": 9,
+        "entities": 6816,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 641.2,
+        "jsHeapBytes": 24316755,
+        "wasmMemoryBytes": 125108224,
+        "cpuTaskSecs": 0
+      }
+    ],
+    "median": {
+      "fps": 51.2,
+      "p50": 18.3,
+      "p95": 30.4,
+      "p99": 35.9,
+      "jsHeapMB": 23.19,
+      "wasmMemMB": 119.31,
+      "entities": 6815,
+      "meshes": 1938,
+      "materials": 27,
+      "cpuTaskSecs": 0,
+      "draws": 641
+    }
+  },
+  "200_per_side": {
+    "runs": [
+      {
+        "sampleCount": 2366,
+        "fps": 107.6,
+        "p50": 8.2,
+        "p95": 15.5,
+        "p99": 18.3,
+        "entities": 13276,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 945.5,
+        "jsHeapBytes": 28905058,
+        "wasmMemoryBytes": 162922496,
+        "cpuTaskSecs": 0
+      },
+      {
+        "sampleCount": 2355,
+        "fps": 107.2,
+        "p50": 8.3,
+        "p95": 15.4,
+        "p99": 18.3,
+        "entities": 13276,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 945.6,
+        "jsHeapBytes": 33994349,
+        "wasmMemoryBytes": 161284096,
+        "cpuTaskSecs": 0
+      },
+      {
+        "sampleCount": 2402,
+        "fps": 109.3,
+        "p50": 7.8,
+        "p95": 15.2,
+        "p99": 18.2,
+        "entities": 13275,
+        "meshes": 1938,
+        "materials": 27,
+        "draws": 945.5,
+        "jsHeapBytes": 28526148,
+        "wasmMemoryBytes": 161349632,
+        "cpuTaskSecs": 0
+      }
+    ],
+    "median": {
+      "fps": 107.6,
+      "p50": 8.2,
+      "p95": 15.4,
+      "p99": 18.3,
+      "jsHeapMB": 27.57,
+      "wasmMemMB": 153.88,
+      "entities": 13276,
+      "meshes": 1938,
+      "materials": 27,
+      "cpuTaskSecs": 0,
+      "draws": 946
+    }
+  },
+  "autoplay_practice": {
+    "runs": [
+      {
+        "sampleCount": 3096,
+        "fps": 140.9,
+        "p50": 6.1,
+        "p95": 13.5,
+        "p99": 15.2,
+        "entities": 663,
+        "meshes": 1946,
+        "materials": 27,
+        "draws": 226.8,
+        "jsHeapBytes": 28356082,
+        "wasmMemoryBytes": 105840640,
+        "cpuTaskSecs": 0
+      },
+      {
+        "sampleCount": 2960,
+        "fps": 134.7,
+        "p50": 6.1,
+        "p95": 14.9,
+        "p99": 20.9,
+        "entities": 627,
+        "meshes": 1946,
+        "materials": 27,
+        "draws": 226.3,
+        "jsHeapBytes": 34320672,
+        "wasmMemoryBytes": 110297088,
+        "cpuTaskSecs": 0
+      },
+      {
+        "sampleCount": 831,
+        "fps": 37.9,
+        "p50": 19.8,
+        "p95": 54.6,
+        "p99": 197.4,
+        "entities": 702,
+        "meshes": 1946,
+        "materials": 27,
+        "draws": 241.1,
+        "jsHeapBytes": 28387162,
+        "wasmMemoryBytes": 105775104,
+        "cpuTaskSecs": 0
+      }
+    ],
+    "median": {
+      "fps": 134.7,
+      "p50": 6.1,
+      "p95": 14.9,
+      "p99": 20.9,
+      "jsHeapMB": 27.07,
+      "wasmMemMB": 100.94,
+      "entities": 663,
+      "meshes": 1946,
+      "materials": 27,
+      "cpuTaskSecs": 0,
+      "draws": 227
+    }
+  }
+}

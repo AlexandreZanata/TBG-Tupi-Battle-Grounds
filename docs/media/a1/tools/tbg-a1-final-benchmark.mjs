@@ -1,9 +1,10 @@
 import fs from 'node:fs/promises';
 import { connect } from './tbg-a1-cdp.mjs';
 
-const PORT = 9333;
-const BASE_URL = 'http://127.0.0.1:8131';
-const DURATION_MS = 20000;
+const PORT = Number(process.env.CDP_PORT || process.env.PORT || 9333);
+const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:8131';
+const DURATION_MS = Number(process.env.DURATION_MS || 20000);
+const OUT_FILE = process.env.OUT_FILE || 'docs/media/a1/final/final-performance.json';
 
 function median(arr) {
   if (!arr.length) return 0;
@@ -59,14 +60,15 @@ async function main() {
   const client = await connect(PORT);
   console.log('Connected! Starting Step 13 final benchmark...');
 
-  await fs.mkdir('docs/media/a1/final', { recursive: true });
+  const SHOT_DIR = process.env.SHOT_DIR || 'docs/media/a1/final';
+  await fs.mkdir(SHOT_DIR, { recursive: true });
 
   const scenarios = [
-    { name: '10_per_side', query: 'stress=20&measure', screenshot: 'docs/media/a1/final/final-stress-20.jpg' },
-    { name: '40_per_side', query: 'stress=80&measure', screenshot: 'docs/media/a1/final/final-stress-80.jpg' },
-    { name: '100_per_side', query: 'stress=200&measure', screenshot: 'docs/media/a1/final/final-stress-200.jpg' },
-    { name: '200_per_side', query: 'stress=400&measure', screenshot: 'docs/media/a1/final/final-stress-400.jpg' },
-    { name: 'autoplay_practice', query: 'autoplay=practice&measure', screenshot: 'docs/media/a1/final/final-autoplay.jpg' },
+    { name: '10_per_side', query: 'stress=20&measure', screenshot: `${SHOT_DIR}/final-stress-20.jpg` },
+    { name: '40_per_side', query: 'stress=80&measure', screenshot: `${SHOT_DIR}/final-stress-80.jpg` },
+    { name: '100_per_side', query: 'stress=200&measure', screenshot: `${SHOT_DIR}/final-stress-200.jpg` },
+    { name: '200_per_side', query: 'stress=400&measure', screenshot: `${SHOT_DIR}/final-stress-400.jpg` },
+    { name: 'autoplay_practice', query: 'autoplay=practice&measure', screenshot: `${SHOT_DIR}/final-autoplay.jpg` },
   ];
 
   const results = {};
@@ -103,10 +105,10 @@ async function main() {
   }
 
   await fs.writeFile(
-    'docs/media/a1/final/final-performance.json',
+    OUT_FILE,
     JSON.stringify(results, null, 2),
   );
-  console.log('\nResults saved to docs/media/a1/final/final-performance.json');
+  console.log(`\nResults saved to ${OUT_FILE}`);
 
   client.close();
 }
