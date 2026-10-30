@@ -82,8 +82,8 @@ pub struct UnitFx {
     /// 220 ticks after it lapses, i.e. a 15 s cooldown on a 4 s surge).
     pub surge_until: Tick,
     /// Puppetmaster betrayal bonus, in basis points (A1 +25 %, A2 +50 %),
-    /// stored at confuse time; applied to the betrayal hit.
-    pub betray_bp: i16,
+    /// stored at confuse time and applied to the betrayal hit.
+    pub betray_bp: u16,
     /// Puppetmaster A2 Stumble: the betrayer is slowed 30 % for 2 s.
     pub betray_stumble: bool,
     pub bond: Option<UnitId>,

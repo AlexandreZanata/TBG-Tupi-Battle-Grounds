@@ -4,7 +4,7 @@
 use crate::augment;
 use crate::content::{Ability, BEETLES_PER_PLAYER};
 use crate::state::{Event, MatchState, Unit};
-use crate::types::{Status, UnitId, UnitKind};
+use crate::types::{Seat, Status, UnitId, UnitKind};
 
 /// Summons whose lifetime ended drop to 0 HP; `remove_dead` reports them.
 pub(crate) fn expire(state: &mut MatchState) {
@@ -58,22 +58,29 @@ fn limit(state: &MatchState, seat: crate::types::Seat) -> usize {
 
 /// Each living Nester, in id order, hatches when its timer is done and both
 /// limits allow; a blocked Nester stays ready and hatches once space frees.
+/// Smugglers drop cargo crates on the same pass; crates open on it too.
 pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
     let mut brood = [Brood::default(), Brood::default()];
-    for u in state.units.iter().filter(|u| u.hp > 0) {
+    // Only Beetlings count toward the per-seat cap (cargo is uncapped).
+    for u in state.units.iter().filter(|u| u.hp > 0 && u.kind == UnitKind::Beetling) {
         if let Some(nester) = u.summoner {
             brood[u.seat.index()].push(nester, MAX_SUMMONS);
         }
     }
     for idx in 0..state.units.len() {
         let n = state.units[idx];
-        if n.hp <= 0
-            || !state
-                .rules
-                .def(n.kind)
-                .ability(n.tier, n.branch)
-                .contains(&Ability::Hatch)
-        {
+        if n.hp <= 0 {
+            continue;
+        }
+        if n.kind == UnitKind::Smuggler {
+            cargo_tick(state, idx, &n);
+            continue;
+        }
+        if n.kind == UnitKind::Crate {
+            crate_tick(state, idx, &n, ev);
+            continue;
+        }
+        if !state.rules.def(n.kind).ability(n.tier, n.branch).contains(&Ability::Hatch) {
             continue;
         }
         // Count down and hatch on the same tick: exactly `every` ticks apart.
@@ -143,4 +150,243 @@ fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
         seat: nester.seat,
         kind,
     });
+}
+
+/// Smuggler cargo (P48-B, §C.11): every `every` ticks the Smuggler drops a
+/// Crate (120 HP, no attack, no movement, targetable) at its own x. The
+/// first crate comes after a full interval.
+fn cargo_tick(state: &mut MatchState, idx: usize, smuggler: &Unit) {
+    let cd = smuggler.action_cd.saturating_sub(1);
+    state.units[idx].action_cd = cd;
+    if cd > 0 {
+        return;
+    }
+    let [a, b] = state
+        .rules()
+        .def(smuggler.kind)
+        .ability(smuggler.tier, smuggler.branch);
+    let cargo = [a, b].into_iter().find_map(|ability| match ability {
+        Ability::Cargo {
+            every,
+            open,
+            table: _,
+            double_every,
+        } => Some((every, open, double_every)),
+        _ => None,
+    });
+    let Some((every, open, double_every)) = cargo else {
+        return;
+    };
+    state.units[idx].action_cd = every.max(1);
+    // B2 Double Shipment: every `double_every`-th crate holds two draws.
+    // The draw count rides on the crate (`fx.attacks`), decided at drop.
+    let mut draws = 1u8;
+    if double_every > 0 {
+        let n = state.units[idx].fx.attacks.saturating_add(1);
+        if n % double_every == 0 {
+            state.units[idx].fx.attacks = 0;
+            draws = 2;
+        } else {
+            state.units[idx].fx.attacks = n;
+        }
+    }
+    let id = state.next_unit_id;
+    state.next_unit_id += 1;
+    state.units.push(Unit {
+        id,
+        seat: smuggler.seat,
+        kind: UnitKind::Crate,
+        tier: 0,
+        branch: 0,
+        x: smuggler.x,
+        hp: state.rules().def(UnitKind::Crate).hp,
+        max_hp: state.rules().def(UnitKind::Crate).hp,
+        cooldown: 0,
+        windup: None,
+        status: Status::None,
+        summoner: smuggler.summoner.or(Some(smuggler.id)),
+        expires_at: None,
+        action_cd: open,
+        fx: crate::state::UnitFx {
+            attacks: draws,
+            ..Default::default()
+        },
+        haste_until: 0,
+        heal_cut_until: 0,
+        heal_cut_bp: 0,
+        second_wind_used: 0,
+    });
+}
+
+/// A cargo crate opening (P48-B, §C.11): after `open` ticks the crate draws
+/// `draws` times from the cargo table and releases the cargo as permanent
+/// summons (never Bounty/Synergy/Arcana/Augment/Evolution, never Leechroot
+/// food — all gated by `is_summon`). A destroyed crate releases nothing.
+fn crate_tick(state: &mut MatchState, idx: usize, krate: &Unit, ev: &mut Vec<Event>) {
+    let cd = krate.action_cd.saturating_sub(1);
+    state.units[idx].action_cd = cd;
+    if cd > 0 {
+        return;
+    }
+    let draws = state.units[idx].fx.attacks.max(1);
+    let table = cargo_table_of(state, krate);
+    let summoner = krate.summoner;
+    let x = krate.x;
+    let mut opened = None;
+    for _ in 0..draws {
+        if let Some(id) = cargo_draw(state, krate.seat, summoner, x, table, ev) {
+            if opened.is_none() {
+                opened = Some(id);
+            }
+        }
+    }
+    ev.push(Event::CrateOpened {
+        unit: krate.id,
+        opened,
+    });
+    // The open crate is spent.
+    if let Some(i) = state.unit_index(krate.id) {
+        state.units[i].hp = 0;
+    }
+}
+
+/// The cargo table of the crate's Smuggler (live read: a mid-crate
+/// Evolution applies); the base table if the Smuggler is gone.
+fn cargo_table_of(state: &MatchState, krate: &Unit) -> [u16; 5] {
+    krate
+        .summoner
+        .and_then(|sid| state.unit_index(sid))
+        .and_then(|si| {
+            let s = &state.units[si];
+            if s.hp <= 0 || s.kind != UnitKind::Smuggler {
+                return None;
+            }
+            let [a, b] = state.rules().def(s.kind).ability(s.tier, s.branch);
+            [a, b].into_iter().find_map(|ability| match ability {
+                Ability::Cargo { table, .. } => Some(table),
+                _ => None,
+            })
+        })
+        .unwrap_or([20, 42, 28, 8, 2])
+}
+
+/// One cargo draw: Empty returns nothing; Common/Strong draw a base form;
+/// Elite/Legendary draw a random tier-1/2 form with a random branch.
+/// Eligible kinds: the staged roster except Smuggler and Nester (summons
+/// never summon, BR-U08); cost-3 for Common, cost 4–6 for Strong.
+/// The cargo is a summon of the smuggler's line (`summoner`).
+fn cargo_draw(
+    state: &mut MatchState,
+    seat: Seat,
+    summoner: Option<UnitId>,
+    x: i32,
+    table: [u16; 5],
+    ev: &mut Vec<Event>,
+) -> Option<UnitId> {
+    let rules = state.rules();
+    let mut common = Vec::new();
+    let mut strong = Vec::new();
+    let mut any = Vec::new();
+    for k in crate::types::ALL_KINDS.iter().copied().filter(|k| k.is_conventional()) {
+        let cost = rules.def(k).cost;
+        if cost == crate::content::ENERGY_SCALE * 3 {
+            common.push(k);
+        }
+        if (crate::content::ENERGY_SCALE * 4..=crate::content::ENERGY_SCALE * 6).contains(&cost)
+            && k != UnitKind::Smuggler
+            && k != UnitKind::Nester
+        {
+            strong.push(k);
+        }
+        if k != UnitKind::Smuggler && k != UnitKind::Nester {
+            any.push(k);
+        }
+    }
+    let roll = state.players[seat.index()].cargo_rng.below(100);
+    let mut acc = 0u32;
+    let mut outcome = 0usize;
+    for (i, &w) in table.iter().enumerate() {
+        acc += u32::from(w);
+        if roll < acc {
+            outcome = i;
+            break;
+        }
+        // A malformed table (sums below 100) falls through to Legendary.
+        if i == table.len() - 1 {
+            outcome = table.len() - 1;
+        }
+    }
+    let (pool, tier, branch) = match outcome {
+        0 => return None,
+        1 => (common, 0, 0),
+        2 => (strong, 0, 0),
+        3 => {
+            let b = state.players[seat.index()].cargo_rng.below(2) as u8;
+            (any, 1, b)
+        }
+        _ => {
+            let b = state.players[seat.index()].cargo_rng.below(2) as u8;
+            (any, 2, b)
+        }
+    };
+    if pool.is_empty() {
+        return None;
+    }
+    let kind = pool[state.players[seat.index()].cargo_rng.below(pool.len() as u32) as usize];
+    Some(spawn_cargo(state, seat, summoner, x, kind, tier, branch, ev))
+}
+
+/// A cargo unit: a permanent summon of a roster kind (P48-B, §C.11).
+/// No lifetime, no Energy, no Bounty/Synergy/Arcana/Augment/Evolution;
+/// never feeds Leechroot (all gated on `is_summon`).
+fn spawn_cargo(
+    state: &mut MatchState,
+    seat: crate::types::Seat,
+    summoner: Option<UnitId>,
+    x: i32,
+    kind: UnitKind,
+    tier: u8,
+    branch: u8,
+    ev: &mut Vec<Event>,
+) -> UnitId {
+    let max_hp = state
+        .rules()
+        .stats_with(
+            kind,
+            tier,
+            branch,
+            0,
+            &crate::arcana::ArcanaPreset::NEUTRAL,
+            &crate::content::AugmentBonus::default(),
+        )
+        .max_hp;
+    let id = state.next_unit_id;
+    state.next_unit_id += 1;
+    state.units.push(Unit {
+        id,
+        seat,
+        kind,
+        tier,
+        branch,
+        x,
+        hp: max_hp,
+        max_hp,
+        cooldown: 0,
+        windup: None,
+        status: Status::None,
+        summoner,
+        expires_at: None,
+        action_cd: 0,
+        fx: Default::default(),
+        haste_until: 0,
+        heal_cut_until: 0,
+        heal_cut_bp: 0,
+        second_wind_used: 0,
+    });
+    ev.push(Event::Spawn {
+        unit: id,
+        seat,
+        kind,
+    });
+    id
 }

@@ -29,6 +29,12 @@ pub(crate) fn engage(state: &MatchState, u: &Unit, st: &Stats) -> Option<Engage>
             return Some(Engage::Act(Target::Unit(donor)));
         }
     }
+    // Puppetmasters confuse instead of attacking when a victim exists.
+    if crate::support::puppet_of(state, u).is_some() {
+        if let Some(victim) = crate::support::puppet_target(state, u, st.range) {
+            return Some(Engage::Act(Target::Unit(victim)));
+        }
+    }
     // Units with no attack and no heal hold when an enemy is in range and
     // never emit `Hit{amount: 0}` (P43; unreachable today: every kind
     // attacks or heals).

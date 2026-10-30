@@ -64,7 +64,9 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
         return;
     }
     if let Status::Rooted { .. } = u.status {
+        // Root cancels the windup and any betrayal with it (§C.10).
         state.units[idx].windup = None;
+        state.units[idx].fx.betray = false;
         return;
     }
     let st = state.stats_of(&u);
@@ -104,7 +106,12 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
     match targeting::engage(state, &u, &st) {
         Some(Engage::Act(target)) => {
             if u.cooldown == 0 {
+                // Confused attackers betray their own ally instead (§C.10):
+                // decided at windup start, so AttackStart already shows it.
+                // Root cancels the windup and the betrayal with it.
+                let (target, betrayed) = crate::support::betray_windup(state, &u, st.range, target);
                 state.units[idx].windup = Some((target, WINDUP));
+                state.units[idx].fx.betray = betrayed;
                 ev.push(Event::AttackStart {
                     from: Target::Unit(u.id),
                     to: target,

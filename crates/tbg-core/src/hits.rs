@@ -17,13 +17,24 @@ pub(crate) fn resolve_hit(
     ev: &mut Vec<Event>,
 ) {
     let tx = targeting::target_x(state, target);
+    // A betrayed attack never heals: it hits the ally instead (§C.10).
+    // Checked before healing, since the windup was retargeted onto an ally.
+    if attacker.fx.betray {
+        crate::support::betray_resolve(state, attacker, target, st, ev);
+        return;
+    }
     let healing = matches!(target, Target::Unit(id)
         if state.unit_index(id).is_some_and(|i| state.units[i].seat == attacker.seat));
     if healing {
         let Target::Unit(id) = target else { return };
-        // Action units (the Antidote) brew instead of healing.
+        // Action units brew or transfer instead of healing.
         if let Some((strip, ward, second)) = crate::afflictions::brew_of(state, attacker) {
             crate::afflictions::brew_cast(state, attacker, st.range, id, strip, ward, second, ev);
+            return;
+        }
+        // Puppetmasters confuse instead of healing.
+        if crate::support::puppet_of(state, attacker).is_some() {
+            crate::support::puppet_cast(state, attacker, st.range, ev);
             return;
         }
         // Bloodweavers transfer instead of healing.
@@ -154,7 +165,7 @@ pub(crate) fn resolve_hit(
     }
 }
 
-fn scale(value: i32, bp: i32) -> i32 {
+pub(crate) fn scale(value: i32, bp: i32) -> i32 {
     if bp == 0 {
         return value;
     }
@@ -311,7 +322,7 @@ fn absorb_plates(state: &mut MatchState, id: u32, amount: i32, ev: &mut Vec<Even
 /// truncation (BR-X04). The multiplier is off vs Strongholds, but the burn
 /// is still paid. A burn to 0 HP still resolves at the maximum multiplier;
 /// the Furnace then dies at the end of the tick (Deathblow).
-fn furnace_bonus(state: &mut MatchState, attacker: &Unit, target: Target) -> i32 {
+pub(crate) fn furnace_bonus(state: &mut MatchState, attacker: &Unit, target: Target) -> i32 {
     let [a, b] = state
         .rules()
         .def(attacker.kind)
@@ -348,7 +359,7 @@ fn furnace_bonus(state: &mut MatchState, attacker: &Unit, target: Target) -> i32
 }
 
 /// Shatterback Unleashed (P46): +8 % damage per broken plate.
-fn plates_bonus(state: &MatchState, attacker: &Unit) -> i32 {
+pub(crate) fn plates_bonus(state: &MatchState, attacker: &Unit) -> i32 {
     let [a, b] = state
         .rules()
         .def(attacker.kind)
@@ -583,7 +594,7 @@ fn status_ticks(base: u16, bp: i32) -> u16 {
 /// Root replaces anything (keeping the longer root); a stronger slow
 /// replaces a slow, an equal or weaker one refreshes it; slow never
 /// replaces root. Only duration is modified by Augments (BR-X07).
-fn apply_on_hit(
+pub(crate) fn apply_on_hit(
     state: &mut MatchState,
     id: u32,
     on_hit: OnHit,

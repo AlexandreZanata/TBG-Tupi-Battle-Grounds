@@ -168,7 +168,7 @@ fn roster_composition() {
     for (f, n) in [
         (Faction::Humans, 7),
         (Faction::Undead, 5),
-        (Faction::Machines, 5),
+        (Faction::Machines, 6),
         (Faction::Plants, 7),
     ] {
         let sold = UNITS
