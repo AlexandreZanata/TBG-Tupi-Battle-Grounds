@@ -31,6 +31,11 @@ pub enum Policy {
     /// `Bot`, but never buys this unit. The value engine uses it so a
     /// one-sided stat change cannot leak into the control seat's army.
     BotAvoid(UnitKind),
+    /// The shipped bot, but buying any of two or three named units (P42):
+    /// the first affordable offer that is one of them, else the cheapest
+    /// affordable offer to redraw the Shop. Later phases probe unit
+    /// combinations with it; it never joins the pool.
+    Comp([Option<UnitKind>; 3]),
     /// Uniformly random legal action (sanity floor).
     Random,
 }
@@ -60,6 +65,12 @@ impl Policy {
             Policy::Favor(k) => (6, k as usize),
             Policy::Random => (7, 0),
             Policy::BotAvoid(k) => (8, k as usize),
+            Policy::Comp(kinds) => {
+                // Three kind indices packed into one number (`None` is 11).
+                let idx = |o: Option<UnitKind>| o.map_or(11, |k| k as usize);
+                let packed = (idx(kinds[0]) * 12 + idx(kinds[1])) * 12 + idx(kinds[2]);
+                (9, packed)
+            }
         }
     }
 
@@ -88,15 +99,50 @@ impl Policy {
             Policy::Faction(f) => format!("faction-{f:?}").to_lowercase(),
             Policy::Favor(k) => format!("favor-{k:?}").to_lowercase(),
             Policy::BotAvoid(k) => format!("avoid-{k:?}").to_lowercase(),
+            Policy::Comp(kinds) => {
+                let names: Vec<String> = kinds
+                    .iter()
+                    .filter_map(|o| o.map(|k| format!("{k:?}").to_lowercase()))
+                    .collect();
+                format!("comp-{}", names.join("-"))
+            }
             other => format!("{other:?}").to_lowercase(),
         }
     }
 
     pub fn parse(s: &str) -> Option<Policy> {
+        let s = s.to_lowercase();
+        if let Some(rest) = s.strip_prefix("comp-") {
+            return Self::parse_comp(rest);
+        }
         let mut all = Policy::pool();
         all.extend(Policy::value_extra());
         all.push(Policy::Random);
-        all.into_iter().find(|p| p.name() == s.to_lowercase())
+        all.into_iter().find(|p| p.name() == s)
+    }
+
+    /// Two or three distinct purchasable kinds; rejects unknown names,
+    /// duplicates, and summons.
+    fn parse_comp(rest: &str) -> Option<Policy> {
+        let parts: Vec<&str> = rest.split('-').collect();
+        if parts.len() != 2 && parts.len() != 3 {
+            return None;
+        }
+        let mut kinds = Vec::with_capacity(3);
+        for part in parts {
+            let kind = UNIT_KINDS
+                .iter()
+                .find(|k| format!("{k:?}").to_lowercase() == part)?;
+            if kind.is_summon() || kinds.contains(kind) {
+                return None;
+            }
+            kinds.push(*kind);
+        }
+        Some(Policy::Comp([
+            Some(kinds[0]),
+            Some(kinds[1]),
+            kinds.get(2).copied(),
+        ]))
     }
 }
 
@@ -137,7 +183,7 @@ impl Controller {
             self.wait -= 1;
             // A fallback bot keeps its own pace between our decisions.
             return match self.policy {
-                Policy::Favor(_) => self.bot.decide(view),
+                Policy::Favor(_) | Policy::Comp(_) => self.bot.decide(view),
                 _ => None,
             };
         }
@@ -150,6 +196,7 @@ impl Controller {
             Policy::Saver => self.saver(view),
             Policy::Faction(f) => self.faction(view, f),
             Policy::Favor(k) => self.favor(view, k),
+            Policy::Comp(kinds) => self.comp(view, &kinds),
             Policy::BotAvoid(k) => self.avoid(view, k),
             Policy::Random => self.random(view),
         }
@@ -271,7 +318,24 @@ impl Controller {
     /// bring new ones, as a human would; with nothing affordable it plays
     /// like the shipped bot.
     fn favor(&mut self, view: &MatchView, k: UnitKind) -> Option<PlayerIntention> {
-        if let Some(i) = self.affordable(view).find(|&i| view.offers[i] == k) {
+        self.favor_any(view, &[k])
+    }
+
+    /// Buy the first affordable offer that is one of `kinds`; otherwise the
+    /// cheapest affordable offer to redraw the Shop (the D-44
+    /// refresh-by-buying behavior `Favor` uses).
+    fn comp(&mut self, view: &MatchView, kinds: &[Option<UnitKind>; 3]) -> Option<PlayerIntention> {
+        let kinds: Vec<UnitKind> = kinds.iter().filter_map(|&k| k).collect();
+        self.favor_any(view, &kinds)
+    }
+
+    /// The shared `Favor`/`Comp` buy path: named kinds first, then the
+    /// cheapest card to redraw the Shop, then the shipped bot.
+    fn favor_any(&mut self, view: &MatchView, kinds: &[UnitKind]) -> Option<PlayerIntention> {
+        if let Some(i) = self
+            .affordable(view)
+            .find(|&i| kinds.contains(&view.offers[i]))
+        {
             return Some(purchase(i));
         }
         let cheapest = self
