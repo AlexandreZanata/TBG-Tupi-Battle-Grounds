@@ -406,20 +406,30 @@ buying.
 | Triangles | Measured and reported per unit form and arena layer; no fixed maximum (D-30) — the frame-rate and memory targets decide | P6 · P16-A |
 | Browser memory | ≤ 300 MB | P7 |
 | Sim step, 30 units (release) | ≤ 50 µs | P2 · measured: 0.44 µs harness, 4–6 µs in server |
-| Sim step, large armies (release) | measured, no fixed cap (D-32) | P16-B: 200 units 45 µs mean / 54 µs p99; full views 28.6 KB/s per player at 100 a side (delta views recommended, P30-B) |
-| Server memory | ≤ 100 KB per match + about 64 KB per socket | P10 local: ~300 KB per running match (target missed — sockets and per-connection queues dominate; worst case is bounded by `CONN_QUEUE` and the 64 KiB write cap) |
+| Sim step, large armies (release) | measured, no fixed cap (D-32) | Historical P16-B: about 200 units 45 µs mean / 54 µs p99. P30-D experimental 25-kind fixtures: mixed 200 units 225→130 µs mean; adversarial formation 1,000 units 117→6.56 ms. Different workloads; full data and exact-state validation in P30-D. |
+| Server memory | ≤ 100 KB per match + about 64 KB per socket | Historical P10: ~300 KB/match. P30-D local experimental read buffer 128→4 KiB: 1,000 matches 294→49 MiB RSS (~50 KiB/match including two sockets); repeated, 60-second windows. Long-session growth is not a soak-tested bound. |
 | Bandwidth per player | ≤ 6 KB/s down, ≤ 0.5 KB/s up | P4 local: 1.46 KB/s down, 3 B/s up · P10 local: 1.29 KB/s down at 250 matches |
 | View-gap p95 under 40 ± 20 ms added latency | ≤ 150 ms | P4 local: 128 ms |
 | Ack latency p95 (tap to first covering view) | ≤ RTT p95 + 60 ms | P9: measured in the phase report · P10 local: 50 ms at 250 matches, no added delay |
-| Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | P10 local: 1000 matches ≈ 1 core, 1500 matches ≈ 1.5 cores, 0 late ticks (16-core dev PC; steady-state `scripts/capacity.sh`) |
-| Tokio workers on a 2 vCPU VPS | — | P10: `TBG_WORKERS=2` (one per core); 1 worker also held 1500 matches with 0 late ticks, but 2 leaves headroom for bursts |
+| Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | Historical P10: 1,500 matches ≈ 1.5 cores. P30-D local 1-CPU/1-GiB cgroup: 2,000 matches, 0 late ticks for 60 s, 0.529 busy cores and 92 MiB RSS. Development hardware, not a production-VPS capacity guarantee or a measured maximum. |
+| Tokio workers on a 2 vCPU VPS | — | Historical P10 recommendation: 2. P30-D local 1,000-match points: 1 worker 0.297 cores / RTT p95 3 ms; 2 workers 0.413 cores / 2 ms, both 0 late ticks. More workers did not minimize CPU in this workload; live configuration unchanged. |
 
-**Capacity reasoning.** Simulation CPU is tiny (about 20 units, integer
-math). The first limits are socket fan-out and bandwidth: 500 matches ≈
-1 000 players × 1.3 KB/s ≈ 10 Mbit/s. Measure with `tbg-bots` (P4 locally, P5 on the VPS)
+**Capacity reasoning.** Keep typical-match throughput separate from dense
+army simulation. P30-D removed redundant targeting searches, cubic
+formation engagement and temporary sorting, but those core changes alone
+did not materially improve ordinary 1,000-match CPU. Right-sizing the
+socket read buffer did: about 43% less CPU and 83% less RSS in repeated
+local 1-CPU/1-GiB runs. Full snapshots still scale with visible units;
+the measured lossless-delta prototype is not part of the wire protocol.
+See [P30-D](phases/P30D-server-performance.md) for workloads, raw evidence,
+known test limits and unshipped experiments. Public hardware, shared
+services, long matches, TLS and real-network capacity remain separate
+validation. Measure with `tbg-bots` (P4 locally, P5 on the VPS)
 (bot clients over real WebSockets) at 100/250/500 matches while watching
 CPU, RSS, and bytes/s; `scripts/capacity.sh` (P10) automates the steady-state
-table at 250/500/1000/1500 concurrent matches.
+table at 250/500/1000/1500 concurrent matches. P30-D adds
+`scripts/performance_capacity.py`: localhost-only disposable cgroups,
+explicit CPU/memory caps, separate generator affinity and retained samples.
 
 ## 11. Security baseline
 

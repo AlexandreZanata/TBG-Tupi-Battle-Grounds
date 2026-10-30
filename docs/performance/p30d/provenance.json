@@ -1,0 +1,227 @@
+{
+  "baseline": {
+    "binary": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p30d/baseline",
+    "binary_sha256": "554598901a21d46d8c84dd422b43ddfa7938a3a25ecd3339f097d0c75f59fd5f",
+    "git_head": "ca5069ef64d57af512e299ce6c68f7ee1e7d28ac",
+    "arguments": {
+      "binary": ".local/p30d/baseline",
+      "compare": null,
+      "output": ".local/p30d/results",
+      "label": "baseline",
+      "cpu": "2",
+      "ticks": 120,
+      "sizes": "10,20,50,100,200,300,500,1000",
+      "seeds": "1,7,42",
+      "scenes": "melee,ranged,healing,mixed,formation,puppet,cargo"
+    },
+    "metadata": [
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false"
+    ],
+    "elapsed_s": 70.623
+  },
+  "direct": {
+    "binary": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p30d/direct",
+    "binary_sha256": "fe19c72ee9c1cc0157fcc271c015cd627db3afb6221c24d3209f90afb6b800d0",
+    "git_head": "7bba85d4d4ec536fb2a77159d5c3761ccef55c3a",
+    "arguments": {
+      "binary": ".local/p30d/direct",
+      "compare": null,
+      "output": ".local/p30d/results",
+      "label": "direct",
+      "cpu": "2",
+      "ticks": 120,
+      "sizes": "10,20,50,100,200,300,500,1000",
+      "seeds": "1,7,42",
+      "scenes": "melee,ranged,healing,mixed,formation,puppet,cargo"
+    },
+    "metadata": [
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false"
+    ],
+    "elapsed_s": 56.442
+  },
+  "formation": {
+    "binary": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p30d/formation",
+    "binary_sha256": "be3715ceb60b79245e1c572e7d7da50714df37cbf3008f7adf435b4a777bd4d0",
+    "git_head": "eca93464abfa1cd3400e0750af12e78828c6f8c5",
+    "arguments": {
+      "binary": ".local/p30d/formation",
+      "compare": null,
+      "output": ".local/p30d/results",
+      "label": "formation",
+      "cpu": "2",
+      "ticks": 120,
+      "sizes": "10,20,50,100,200,300,500,1000",
+      "seeds": "1,7,42",
+      "scenes": "melee,ranged,healing,mixed,formation,puppet,cargo"
+    },
+    "metadata": [
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false"
+    ],
+    "elapsed_s": 13.554
+  },
+  "bonds": {
+    "binary": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p30d/bonds",
+    "binary_sha256": "9365a2c51c44ba6f2edaef5c85b92a6f7b47f8d31ef7bb3b3df348cf3b2010a2",
+    "git_head": "f303560f64747acb5a7fec501c782fe72b16fd72",
+    "arguments": {
+      "binary": ".local/p30d/bonds",
+      "compare": null,
+      "output": ".local/p30d/results",
+      "label": "bonds",
+      "cpu": "2",
+      "ticks": 120,
+      "sizes": "10,20,50,100,200,300,500,1000",
+      "seeds": "1,7,42",
+      "scenes": "melee,ranged,healing,mixed,formation,puppet,cargo"
+    },
+    "metadata": [
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false"
+    ],
+    "elapsed_s": 12.336
+  },
+  "final": {
+    "binary": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p30d/final",
+    "binary_sha256": "d38fcdabb33278d3d92cb1bf6b8d117ec7b2e35f5ca8b24345f6f5ad3a8d31a5",
+    "git_head": "f303560f64747acb5a7fec501c782fe72b16fd72",
+    "arguments": {
+      "binary": ".local/p30d/final",
+      "compare": null,
+      "output": ".local/p30d/results",
+      "label": "final",
+      "cpu": "2",
+      "ticks": 120,
+      "sizes": "10,20,50,100,200,300,500,1000",
+      "seeds": "1,7,42",
+      "scenes": "melee,ranged,healing,mixed,formation,puppet,cargo"
+    },
+    "metadata": [
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false"
+    ],
+    "elapsed_s": 12.42
+  },
+  "buffer": {
+    "binary": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p30d/buffer",
+    "binary_sha256": "ff84d8d12c818eb22ef91be28a76138602e1b95d8ab4a2c635fcc3bb853aba6d",
+    "git_head": "71d74a9527054af1385555a398fdb6768066696d",
+    "arguments": {
+      "binary": ".local/p30d/buffer",
+      "compare": null,
+      "output": ".local/p30d/results",
+      "label": "buffer",
+      "cpu": "2",
+      "ticks": 120,
+      "sizes": "10,20,50,100,200,300,500,1000",
+      "seeds": "1,7,42",
+      "scenes": "melee,ranged,healing,mixed,formation,puppet,cargo"
+    },
+    "metadata": [
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false"
+    ],
+    "elapsed_s": 13.37
+  },
+  "baseline-alloc": {
+    "binary": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p30d/baseline-alloc",
+    "binary_sha256": "54da5ee5fda5ec7dfdd7db90171914ec883cc954d96fb8f1b02ea5c33c85b370",
+    "git_head": "ca5069ef64d57af512e299ce6c68f7ee1e7d28ac",
+    "arguments": {
+      "binary": ".local/p30d/baseline-alloc",
+      "compare": null,
+      "output": ".local/p30d/results",
+      "label": "baseline-alloc",
+      "cpu": "2",
+      "ticks": 20,
+      "sizes": "10,20,50,100,200,300,500,1000",
+      "seeds": "1",
+      "scenes": "melee,ranged,healing,mixed,formation,puppet,cargo"
+    },
+    "metadata": [
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,true"
+    ],
+    "elapsed_s": 24.007
+  },
+  "final-alloc": {
+    "binary": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p30d/final-alloc",
+    "binary_sha256": "57aad381ce7f38f37ff148d59bd2fa1abca6261ba70c03cddca66f6613d3cfb8",
+    "git_head": "f303560f64747acb5a7fec501c782fe72b16fd72",
+    "arguments": {
+      "binary": ".local/p30d/final-alloc",
+      "compare": null,
+      "output": ".local/p30d/results",
+      "label": "final-alloc",
+      "cpu": "2",
+      "ticks": 20,
+      "sizes": "10,20,50,100,200,300,500,1000",
+      "seeds": "1",
+      "scenes": "melee,ranged,healing,mixed,formation,puppet,cargo"
+    },
+    "metadata": [
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,true"
+    ],
+    "elapsed_s": 0.822
+  },
+  "buffer-alloc": {
+    "binary": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p30d/buffer-alloc",
+    "binary_sha256": "940ddc1997f20646e9fd36f42325343a9eb69432a4007275f71438e3c4e240e7",
+    "git_head": "71d74a9527054af1385555a398fdb6768066696d",
+    "arguments": {
+      "binary": ".local/p30d/buffer-alloc",
+      "compare": null,
+      "output": ".local/p30d/results",
+      "label": "buffer-alloc",
+      "cpu": "2",
+      "ticks": 20,
+      "sizes": "10,20,50,100,200,300,500,1000",
+      "seeds": "1",
+      "scenes": "melee,ranged,healing,mixed,formation,puppet,cargo"
+    },
+    "metadata": [
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,true"
+    ],
+    "elapsed_s": 0.883
+  },
+  "opt3": {
+    "binary": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p30d/opt3",
+    "binary_sha256": "ed4fae5f5b64a0e8f5ad81426d4724f7846e956ae159f4f5758197c7cdaa18ae",
+    "git_head": "f303560f64747acb5a7fec501c782fe72b16fd72",
+    "arguments": {
+      "binary": ".local/p30d/opt3",
+      "compare": null,
+      "output": ".local/p30d/results",
+      "label": "opt3",
+      "cpu": "2",
+      "ticks": 120,
+      "sizes": "10,20,50,100,200,300,500,1000",
+      "seeds": "1,7,42",
+      "scenes": "melee,ranged,healing,mixed,formation,puppet,cargo"
+    },
+    "metadata": [
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false",
+      "meta,unit_bytes,180,fx_bytes,108,unit_view_bytes,24,event_bytes,16,match_bytes,568,view_bytes,320,allocations,false"
+    ],
+    "elapsed_s": 11.507
+  },
+  "_implementation_mapping": {
+    "baseline": "ca5069e (original core plus opt-in instrumentation/harness)",
+    "direct": "eca9346",
+    "formation": "f303560",
+    "bonds": "71d74a9",
+    "final": "71d74a9 (later driver revision, same core)",
+    "buffer": "3c00e30",
+    "read4k": "b2a6971",
+    "final_harness": "d41aeef",
+    "notes": "git_head in each run is the then-current HEAD; candidates were measured before acceptance commits. Binaries have independent SHA-256 identities. baseline-v2 adds only the corrected fixture pause handling for long traces."
+  }
+}

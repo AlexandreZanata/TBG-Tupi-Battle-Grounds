@@ -158,7 +158,7 @@ Phase files are written one at a time, starting with P42.
 | P29 | [P29-unit-rootcaller.md](phases/P29-unit-rootcaller.md) | Rootcaller final | planned | — |
 | P30 | [P30-fluidity-and-performance.md](phases/P30-fluidity-and-performance.md) | Auto quality, no hitches, device matrix met | planned | — |
 | P30-B | [P30B-server-capacity.md](phases/P30B-server-capacity.md) | Most players per minimal server; measured before/after on 1 vCPU / 1 GB | planned | — |
-| P30-D | [P30D-server-performance.md](phases/P30D-server-performance.md) | Current-roster baseline, algorithm audit, exact-behavior performance experiments, and local capacity; no production changes | investigation in progress on `phase/p30d-server-performance` (owner, 2026-10-30) | — |
+| P30-D | [P30D-server-performance.md](phases/P30D-server-performance.md) | Current-roster audit, exact-behavior core optimizations, smaller socket buffers, local constrained capacity; no production changes | experimental implementation and measured report complete; **review pending, full-workspace C7 exceeded 300 s** | — |
 | P31 | [P31-consistency-and-release.md](phases/P31-consistency-and-release.md) | One visual family; playtest; tag `v0.2.0` | planned | — |
 | P32 | [P32-arcana-baseline-and-combat-contracts.md](phases/P32-arcana-baseline-and-combat-contracts.md) | Refreshed baseline, reproduced combat risks, explicit rule decisions | planned (extra after P31) | — |
 | P33 | [P33-arcana-deterministic-core.md](phases/P33-arcana-deterministic-core.md) | Six bounded options, deterministic modifiers, offline experiment only | planned | — |
