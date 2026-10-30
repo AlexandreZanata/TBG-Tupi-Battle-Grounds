@@ -1,0 +1,508 @@
+{
+  "schema": 1,
+  "storageKey": "tbg.stronghold",
+  "defaultKind": "Bastion",
+  "energyScale": 600,
+  "tickHz": 20,
+  "windowTicks": 200,
+  "fortifyCost": [
+    1800,
+    2400
+  ],
+  "copy": {
+    "intro": "Four towers, free for everyone. Pick the one that guards your BattleLine.",
+    "badge": "Active in Practice, Casual, Ranked and private rooms",
+    "scope": "Locked when you queue, join a room or start Practice. Your next match uses the selected tower.",
+    "fortify": "In battle, Fortify your own tower: tier 1 picks a branch for good, tier 2 must follow it. Max HP gains keep your current HP percentage.",
+    "controls": "Click or Enter to select · Tab to move · Esc to close",
+    "locked": "Locked · your tower is frozen until the match or queue ends"
+  },
+  "kinds": [
+    {
+      "kind": "Treasury",
+      "name": "Treasury",
+      "specialty": "Economy",
+      "color": "#e3b54a",
+      "summary": "A gilded vault that turns every enemy loss into Energy.",
+      "passive": {
+        "name": "Spoils",
+        "text": "Each eligible enemy conventional unit that dies pays you {spoils} Energy, at most {spoilsCap} Energy per {window} window. Summons, friendly deaths and expirations never pay."
+      },
+      "advantages": [
+        "Extra Energy from every eligible kill",
+        "Mint branch raises the Spoils and its cap"
+      ],
+      "disadvantages": [
+        "Modest HP ({maxHp}) and damage ({damage})",
+        "Pays nothing while your army is not killing"
+      ],
+      "stats": {
+        "maxHp": 4185,
+        "damage": 48,
+        "interval": 20,
+        "range": 6000,
+        "spoils": 90,
+        "spoilsCap": 360,
+        "auraBp": 0,
+        "auraRange": 0
+      },
+      "branches": [
+        {
+          "name": "Armored Vault",
+          "steps": [
+            {
+              "name": "Reinforced Vault",
+              "delta": {
+                "hpBp": 1200
+              },
+              "stats": {
+                "maxHp": 4687,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 90,
+                "spoilsCap": 360,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            },
+            {
+              "name": "Grand Vault",
+              "delta": {
+                "hpBp": 1200
+              },
+              "stats": {
+                "maxHp": 5189,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 90,
+                "spoilsCap": 360,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            }
+          ],
+          "asset": {
+            "svg": "armored-vault.svg",
+            "display": "armored-vault.webp"
+          }
+        },
+        {
+          "name": "Mint",
+          "steps": [
+            {
+              "name": "Coinage",
+              "delta": {
+                "spoilsAdd": 30
+              },
+              "stats": {
+                "maxHp": 4185,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 120,
+                "spoilsCap": 360,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            },
+            {
+              "name": "Royal Mint",
+              "delta": {
+                "spoilsAdd": 30,
+                "spoilsCapAdd": 180
+              },
+              "stats": {
+                "maxHp": 4185,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 150,
+                "spoilsCap": 540,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            }
+          ],
+          "asset": {
+            "svg": "mint.svg",
+            "display": "mint.webp"
+          }
+        }
+      ],
+      "portrait": {
+        "svg": "treasury.svg",
+        "display": "treasury.webp"
+      },
+      "banner": {
+        "svg": "banner-treasury.svg",
+        "display": "banner-treasury.webp"
+      }
+    },
+    {
+      "kind": "Bastion",
+      "name": "Bastion",
+      "specialty": "Endurance",
+      "color": "#7fb0dc",
+      "summary": "Massive walls and shields that outlast any siege.",
+      "passive": {
+        "name": "Fortified Structure",
+        "text": "The highest Stronghold HP ({maxHp}). No other effect."
+      },
+      "advantages": [
+        "Highest HP of all towers ({maxHp})",
+        "Fortress stacks more HP; Sentinel adds range and damage"
+      ],
+      "disadvantages": [
+        "Lowest damage ({damage})",
+        "No effect beyond its walls"
+      ],
+      "stats": {
+        "maxHp": 5175,
+        "damage": 47,
+        "interval": 20,
+        "range": 6000,
+        "spoils": 0,
+        "spoilsCap": 0,
+        "auraBp": 0,
+        "auraRange": 0
+      },
+      "branches": [
+        {
+          "name": "Fortress",
+          "steps": [
+            {
+              "name": "Reinforced Walls",
+              "delta": {
+                "hpBp": 1500
+              },
+              "stats": {
+                "maxHp": 5951,
+                "damage": 47,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            },
+            {
+              "name": "Imperial Fortress",
+              "delta": {
+                "hpBp": 1500
+              },
+              "stats": {
+                "maxHp": 6727,
+                "damage": 47,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            }
+          ],
+          "asset": {
+            "svg": "fortress.svg",
+            "display": "fortress.webp"
+          }
+        },
+        {
+          "name": "Sentinel",
+          "steps": [
+            {
+              "name": "Watchtower",
+              "delta": {
+                "rangeAdd": 1000
+              },
+              "stats": {
+                "maxHp": 5175,
+                "damage": 47,
+                "interval": 20,
+                "range": 7000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            },
+            {
+              "name": "Royal Sentinel",
+              "delta": {
+                "dmgBp": 1500
+              },
+              "stats": {
+                "maxHp": 5175,
+                "damage": 54,
+                "interval": 20,
+                "range": 7000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            }
+          ],
+          "asset": {
+            "svg": "sentinel.svg",
+            "display": "sentinel.webp"
+          }
+        }
+      ],
+      "portrait": {
+        "svg": "bastion.svg",
+        "display": "bastion.webp"
+      },
+      "banner": {
+        "svg": "banner-bastion.svg",
+        "display": "banner-bastion.webp"
+      }
+    },
+    {
+      "kind": "Artillery",
+      "name": "Artillery",
+      "specialty": "Firepower",
+      "color": "#e98a4f",
+      "summary": "A great cannon that hits harder than any other tower.",
+      "passive": {
+        "name": "No passive",
+        "text": "Raw power instead: the highest Stronghold damage ({damage} per shot)."
+      },
+      "advantages": [
+        "Highest damage of all towers ({damage})",
+        "Heavy Cannon hits harder; Rapid Fire reloads faster"
+      ],
+      "disadvantages": [
+        "Lowest HP ({maxHp})",
+        "No passive effect"
+      ],
+      "stats": {
+        "maxHp": 3825,
+        "damage": 58,
+        "interval": 20,
+        "range": 6000,
+        "spoils": 0,
+        "spoilsCap": 0,
+        "auraBp": 0,
+        "auraRange": 0
+      },
+      "branches": [
+        {
+          "name": "Heavy Cannon",
+          "steps": [
+            {
+              "name": "Heavy Shot",
+              "delta": {
+                "dmgBp": 2000
+              },
+              "stats": {
+                "maxHp": 3825,
+                "damage": 69,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            },
+            {
+              "name": "Great Cannon",
+              "delta": {
+                "dmgBp": 2000
+              },
+              "stats": {
+                "maxHp": 3825,
+                "damage": 81,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            }
+          ],
+          "asset": {
+            "svg": "heavy-cannon.svg",
+            "display": "heavy-cannon.webp"
+          }
+        },
+        {
+          "name": "Rapid Fire",
+          "steps": [
+            {
+              "name": "Quick Reload",
+              "delta": {
+                "interval": 17
+              },
+              "stats": {
+                "maxHp": 3825,
+                "damage": 58,
+                "interval": 17,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            },
+            {
+              "name": "Advanced Mechanism",
+              "delta": {
+                "interval": 14
+              },
+              "stats": {
+                "maxHp": 3825,
+                "damage": 58,
+                "interval": 14,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0
+              }
+            }
+          ],
+          "asset": {
+            "svg": "rapid-fire.svg",
+            "display": "rapid-fire.webp"
+          }
+        }
+      ],
+      "portrait": {
+        "svg": "artillery.svg",
+        "display": "artillery.webp"
+      },
+      "banner": {
+        "svg": "banner-artillery.svg",
+        "display": "banner-artillery.webp"
+      }
+    },
+    {
+      "kind": "Command",
+      "name": "Command",
+      "specialty": "Army support",
+      "color": "#e0575a",
+      "summary": "Banners and a royal crest that rally the troops nearby.",
+      "passive": {
+        "name": "War Banner",
+        "text": "Your conventional units within {auraRange} of this tower deal +{auraBp} damage. Never summons or towers; it ends the moment a unit leaves."
+      },
+      "advantages": [
+        "Stronger conventional units near your tower",
+        "War Standard raises the bonus; Forward Banner widens it"
+      ],
+      "disadvantages": [
+        "Modest HP ({maxHp}) and damage ({damage})",
+        "Only helps units fighting close to your tower"
+      ],
+      "stats": {
+        "maxHp": 4320,
+        "damage": 48,
+        "interval": 20,
+        "range": 6000,
+        "spoils": 0,
+        "spoilsCap": 0,
+        "auraBp": 500,
+        "auraRange": 4000
+      },
+      "branches": [
+        {
+          "name": "War Standard",
+          "steps": [
+            {
+              "name": "War Cry",
+              "delta": {
+                "auraBpAdd": 300
+              },
+              "stats": {
+                "maxHp": 4320,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 800,
+                "auraRange": 4000
+              }
+            },
+            {
+              "name": "Supreme Command",
+              "delta": {
+                "auraBpAdd": 300
+              },
+              "stats": {
+                "maxHp": 4320,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 1100,
+                "auraRange": 4000
+              }
+            }
+          ],
+          "asset": {
+            "svg": "war-standard.svg",
+            "display": "war-standard.webp"
+          }
+        },
+        {
+          "name": "Forward Banner",
+          "steps": [
+            {
+              "name": "Outpost",
+              "delta": {
+                "auraRangeAdd": 1000
+              },
+              "stats": {
+                "maxHp": 4320,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 500,
+                "auraRange": 5000
+              }
+            },
+            {
+              "name": "High Command",
+              "delta": {
+                "auraRangeAdd": 1000
+              },
+              "stats": {
+                "maxHp": 4320,
+                "damage": 48,
+                "interval": 20,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 500,
+                "auraRange": 6000
+              }
+            }
+          ],
+          "asset": {
+            "svg": "forward-banner.svg",
+            "display": "forward-banner.webp"
+          }
+        }
+      ],
+      "portrait": {
+        "svg": "command.svg",
+        "display": "command.webp"
+      },
+      "banner": {
+        "svg": "banner-command.svg",
+        "display": "banner-command.webp"
+      }
+    }
+  ],
+  "artBudgetBytes": 2000000
+}

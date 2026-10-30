@@ -52,7 +52,7 @@ Practice preview flag. Behavior must not change.
 
 - D1: form abilities are `[[Ability; 2]; 5]` (fixed pair per slot),
   decided here per §F.1 ("decided in P43"): Rotcap needs Poison + Echo on
-  one form. Recorded as D-47.
+  one form. Recorded as D-49.
 - D2: `Ruleset::preview()` is built with `Box::leak` (core-side, like
   `duels::arena`); Practice uses the new `MatchState::with_preview()`.
   C10-safe (none of its forbidden words appear in client sources).
@@ -77,4 +77,4 @@ phase); the harness two-bot WS match passes locally.
 - Tick/winner/reason per golden identical to P42; only hashes moved.
 - `cmp` gate CSVs yourself: `target/balance/p43-gate/` vs P42 outputs.
 - `Comp`/`Favor`/`pool` untouched in behavior; C10 still passes.
-- D-47 acceptable as an executor decision.
+- D-49 acceptable as an executor decision.

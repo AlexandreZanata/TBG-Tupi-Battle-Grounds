@@ -115,6 +115,8 @@ impl Lobby {
                 account: s.and_then(|s| s.account.as_ref().map(|(id, p)| (*id, p.rating))),
                 // D-40 (BR-AR05): frozen here; later edits stay in the lobby.
                 arcanas: s.map_or(tbg_core::ArcanaPreset::DEFAULT, |s| s.arcanas),
+                // D-46 (BR-SK01): frozen here like the Arcanas.
+                stronghold: s.map_or(tbg_core::StrongholdKind::DEFAULT, |s| s.stronghold),
             }
         });
         if rematchable {

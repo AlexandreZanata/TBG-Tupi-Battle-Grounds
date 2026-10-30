@@ -51,6 +51,13 @@ fn relative_hp(view: &tbg_core::MatchView) -> [i32; 2] {
     ]
 }
 
+/// Each seat's own max HP: kinds and Fortification differ (BR-SK07).
+#[cfg(any(target_arch = "wasm32", test))]
+fn relative_max(view: &tbg_core::MatchView) -> [i32; 2] {
+    let me = view.you.index();
+    [view.strongholds[me].max_hp, view.strongholds[1 - me].max_hp]
+}
+
 #[cfg(target_arch = "wasm32")]
 mod web {
     use super::*;
@@ -62,7 +69,7 @@ mod web {
     };
     use tbg_core::{
         augment::AugmentCounts,
-        content::{augment_def, def, ENERGY_SCALE, OFFERS, STRONGHOLD_HP},
+        content::{augment_def, def, ENERGY_SCALE, OFFERS},
         FACTIONS,
     };
     use wasm_bindgen::JsCast;
@@ -77,7 +84,12 @@ mod web {
         window: Single<&Window>,
         state: Res<State<GameState>>,
         view: Res<LatestView>,
-        details: (Res<MatchInfo>, Res<PendingBuy>, Res<Surrender>),
+        details: (
+            Res<MatchInfo>,
+            Res<PendingBuy>,
+            Res<Surrender>,
+            Res<crate::ui::fortify::PendingFortify>,
+        ),
         inspected: Res<crate::ui::inspect::Inspected>,
         mut queue: ResMut<ActionQueue>,
         mut desktop: ResMut<DesktopBattle>,
@@ -106,14 +118,17 @@ mod web {
         if !desktop.0 {
             return;
         }
-        let (info, pending, surrender) = details;
+        let (info, pending, surrender, fortifying) = details;
         let Some(v) = &view.0 else {
             return;
         };
         let hp = relative_hp(v);
         attr(&root, "data-hp-own", &hp[0].to_string());
         attr(&root, "data-hp-enemy", &hp[1].to_string());
-        attr(&root, "data-hp-max", &STRONGHOLD_HP.to_string());
+        let max = relative_max(v);
+        attr(&root, "data-hp-max-own", &max[0].to_string());
+        attr(&root, "data-hp-max-enemy", &max[1].to_string());
+        tower(&root, v, fortifying.0.is_some());
         attr(&root, "data-you", &info.you_name);
         attr(&root, "data-opponent", &info.opponent);
         attr(
@@ -219,6 +234,24 @@ mod web {
         }
     }
 
+    /// D-46: both towers (`Kind|tier|branch`) and what each of your
+    /// branches offers now; hud.js only displays these.
+    fn tower(root: &web_sys::HtmlElement, v: &tbg_core::MatchView, pending: bool) {
+        use crate::ui::fortify::{offer, own, record};
+        attr(root, "data-tower-you", &record(own(v)));
+        attr(
+            root,
+            "data-tower-enemy",
+            &record(v.strongholds[v.you.other().index()]),
+        );
+        let offers = format!(
+            "{}|{}",
+            offer(v, 0, pending).code(),
+            offer(v, 1, pending).code()
+        );
+        attr(root, "data-fortify", &offers);
+    }
+
     fn action(value: &str) -> Option<UiAction> {
         if value == "surrender" {
             return Some(UiAction::Surrender);
@@ -236,6 +269,7 @@ mod web {
         let index = index.parse::<u8>().ok()?;
         match kind {
             "buy" => (usize::from(index) < OFFERS).then_some(UiAction::Buy(index)),
+            "fortify" => (index <= 1).then_some(UiAction::Fortify(index)),
             "inspect" => (usize::from(index) < OFFERS).then_some(UiAction::Inspect(index)),
             "aug" => (usize::from(index) < tbg_core::content::AUGMENT_OPTIONS)
                 .then_some(UiAction::ChooseAugment(index)),
@@ -269,5 +303,8 @@ mod tests {
         let mut view = tbg_core::MatchState::new(7).view_for(tbg_core::Seat::B, &[]);
         view.stronghold_hp = [3200, 1800];
         assert_eq!(super::relative_hp(&view), [1800, 3200]);
+        view.strongholds[0].max_hp = 5175;
+        view.strongholds[1].max_hp = 3825;
+        assert_eq!(super::relative_max(&view), [3825, 5175]);
     }
 }

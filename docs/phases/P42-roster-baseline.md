@@ -4,7 +4,7 @@
 five Shop offers). Plan: [ROSTER-EXPANSION.md](../ROSTER-EXPANSION.md).
 **Runs before:** P43 (shared foundations). Owner decisions: O-R1 (both
 Shatterback and Cargo Crab), O-R2 (roster health ≥ 2.5 %), recorded as
-D-46 in step 1.
+D-48 in step 1.
 **Branch:** `phase/p42-roster-baseline` (already exists on GitHub with the
 plan; work on it).
 **Difficulty:** low. No gameplay, protocol, server or client change.
@@ -16,7 +16,7 @@ see what the plan needs to judge them, and freeze a baseline of the
 current game to compare every later phase against:
 
 1. Canon: the planned roster is written into GAME-DESIGN as **Proposed,
-   not active**; the roster-health threshold becomes 2.5 % (O-R2); D-46.
+   not active**; the roster-health threshold becomes 2.5 % (O-R2); D-48.
 2. Per-kind combat counters and a stall measure in the lab (behind the
    existing `lab` feature only).
 3. New lab rows: duration percentiles and "matches with a 60 s stall".
@@ -62,7 +62,7 @@ Files: `docs/GAME-DESIGN.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`,
   in `ROSTER-EXPANSION.md`, every value is **Proposed, not active**, none
   is in the Shop; then copy the summary table of ROSTER-EXPANSION §B.3
   exactly (15 rows).
-- DECISIONS: append `## D-46 · Roster expansion: fifteen units, staged by
+- DECISIONS: append `## D-48 · Roster expansion: fifteen units, staged by
   ruleset pool — 2026-10-29 (owner decision)`, with **Decision** (the 15
   units of §B.1, Shatterback and Cargo Crab both in, O-R1; roster health
   2.5 %, O-R2; units enter through the phases P42–P53), **Why** (one
@@ -77,7 +77,7 @@ Files: `docs/GAME-DESIGN.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`,
   and name O-R2 in the commit message.
 
 **Check:** `cargo test -p tbg-balance`.
-**Done when:** committed (`docs(p42): roster canon, D-46, roster health 2.5 %`).
+**Done when:** committed (`docs(p42): roster canon, D-48, roster health 2.5 %`).
 
 ### 2. Lab counters in the core (feature-gated)
 
@@ -233,7 +233,7 @@ Fill in the report below with real outputs and commit
 - [ ] Every golden hash and trace unchanged (no edit to `contract_determinism.rs` or `contract_lab.rs`)
 - [ ] `git diff main -- crates/tbg-core/src` shows only `cfg(feature = "lab")` code plus the two return-type changes
 - [ ] Baseline files committed and reproducible byte for byte
-- [ ] GAME-DESIGN §6 and §11, D-46 and ROADMAP updated
+- [ ] GAME-DESIGN §6 and §11, D-48 and ROADMAP updated
 
 ## Reviewer checklist
 
@@ -255,7 +255,7 @@ unchanged (no edit to `contract_determinism.rs` or `contract_lab.rs`).
 
 Commits on `phase/p42-roster-baseline` (on top of `ba2d2e7`):
 
-- `344214e` docs(p42): roster canon, D-46, roster health 2.5 %
+- `344214e` docs(p42): roster canon, D-48, roster health 2.5 %
 - `5185de2` feat(p42): lab combat counters
 - `8633c6a` feat(p42): duration, stall and per-kind rows
 - `a9af5dc` feat(p42): comp policy

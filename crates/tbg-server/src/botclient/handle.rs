@@ -119,6 +119,8 @@ pub(super) fn handle(
         | ServerMsg::Leaderboard { .. }
         | ServerMsg::ArcanasSelected { .. }
         | ServerMsg::ArcanasRejected { .. }
+        | ServerMsg::StrongholdSelected { .. }
+        | ServerMsg::StrongholdRejected { .. }
         | ServerMsg::ChallengeWaiting { .. }
         | ServerMsg::ChallengeUnavailable
         | ServerMsg::RematchOpen { .. }

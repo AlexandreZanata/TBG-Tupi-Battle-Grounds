@@ -252,11 +252,12 @@ fn slowed_interval(interval: u16, status: Status) -> u16 {
 /// Each Stronghold shoots the nearest enemy unit in range, a Rampart in
 /// range first (Guard, BR-U09).
 pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
-    let rules = state.rules;
     for seat in Seat::BOTH {
         if state.player(seat).stronghold_cooldown > 0 {
             continue;
         }
+        // Kind and Fortification shape the real shot (BR-SK03, BR-SK06).
+        let tower = state.stronghold(seat);
         let sx = stronghold_x(seat);
         let target = state
             .units
@@ -265,10 +266,11 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
                 u.seat != seat
                     && u.hp > 0
                     && crate::targeting::targetable(state, u.id)
-                    && (u.x - sx).abs() <= rules.stronghold_range
+                    && (u.x - sx).abs() <= tower.range
             })
             .map(|u| {
-                let guard = rules
+                let guard = state
+                    .rules()
                     .def(u.kind)
                     .ability(u.tier, u.branch)
                     .contains(&Ability::Guard);
@@ -285,13 +287,13 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
             let bp =
                 augment::stronghold_damage_bp(&p.augments, state.tick, p.fury_until, p.fury_stacks);
             let amount = if bp == 0 {
-                rules.stronghold_damage
+                tower.damage
             } else {
-                (i64::from(rules.stronghold_damage) * (BP + i64::from(bp)) / BP) as i32
+                (i64::from(tower.damage) * (BP + i64::from(bp)) / BP) as i32
             };
             let was_alive = state
                 .unit_index(id)
-                .map(|i| state.units[i].hp > 0 && !state.units[i].kind.is_summon())
+                .map(|i| state.units[i].hp > 0 && !state.units[i].is_summon())
                 .unwrap_or(false);
             let removed = damage(state, to, amount.max(1), ev);
             #[cfg(feature = "lab")]
@@ -305,7 +307,7 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
                     p.fury_until = until;
                 }
             }
-            state.player_mut(seat).stronghold_cooldown = rules.stronghold_interval;
+            state.player_mut(seat).stronghold_cooldown = tower.interval;
         }
     }
 }

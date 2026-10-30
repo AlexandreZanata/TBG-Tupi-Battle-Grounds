@@ -64,6 +64,9 @@ impl Match {
             "late_ticks": late, "max_lateness_ms": max_late_ms,
             // D-40 (BR-AR07): the presets this match applied.
             "arcanas": self.state.players.each_ref().map(|p| p.arcanas.ranks),
+            "strongholds": self.state.players.each_ref().map(|p| {
+                [p.stronghold.index() as u8, p.fort_tier, p.fort_branch]
+            }),
             // Owner revision 2026-10-29: economy and Augment telemetry.
             "augments": augments,
         });

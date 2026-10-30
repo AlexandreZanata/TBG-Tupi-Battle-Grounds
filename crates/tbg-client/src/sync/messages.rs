@@ -210,6 +210,11 @@ pub(super) fn poll_link(
             ServerMsg::ArcanasRejected { reason } => {
                 ui.0.push(format!("Arcanas not changed: {reason:?}"))
             }
+            // D-46: same for the Stronghold kind.
+            ServerMsg::StrongholdSelected { kind } => crate::config::save_stronghold(kind),
+            ServerMsg::StrongholdRejected { reason } => {
+                ui.0.push(format!("Stronghold not changed: {reason:?}"))
+            }
             _ => {}
         }
     }

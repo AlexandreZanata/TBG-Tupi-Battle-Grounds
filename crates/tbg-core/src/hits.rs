@@ -81,7 +81,8 @@ pub(crate) fn resolve_hit(
                 + arcana_bp
                 + conditional_bp(state, attacker, target)
                 + furnace_bonus(state, attacker, target)
-                + plates_bonus(state, attacker),
+                + plates_bonus(state, attacker)
+                + crate::stronghold::aura_bp(state, attacker),
         );
     }
     let removed = damage(state, target, amount, ev);

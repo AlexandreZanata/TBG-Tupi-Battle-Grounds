@@ -131,6 +131,40 @@ pub fn save_arcanas(preset: tbg_core::ArcanaPreset) {
 #[cfg(target_arch = "wasm32")]
 const ARCANAS_KEY: &str = "tbg.arcanas";
 
+/// D-46: the Stronghold kind the lobby picker saved under `tbg.stronghold`
+/// (the kind's name, e.g. `Artillery`); Bastion when absent or invalid
+/// (BR-SK01).
+pub fn load_stronghold() -> tbg_core::StrongholdKind {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(raw) = storage().and_then(|s| s.get_item(STRONGHOLD_KEY).ok().flatten()) {
+        if let Some(kind) = parse_stronghold(&raw) {
+            return kind;
+        }
+    }
+    tbg_core::StrongholdKind::DEFAULT
+}
+
+/// D-46: keep the server's selection (e.g. an account's saved kind).
+pub fn save_stronghold(kind: tbg_core::StrongholdKind) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(s) = storage() {
+        let _ = s.set_item(STRONGHOLD_KEY, &format!("{kind:?}"));
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = kind;
+}
+
+#[cfg(target_arch = "wasm32")]
+const STRONGHOLD_KEY: &str = "tbg.stronghold";
+
+/// A selectable kind by name; anything else (Classic, junk) is `None`.
+#[cfg(any(target_arch = "wasm32", test))]
+pub fn parse_stronghold(raw: &str) -> Option<tbg_core::StrongholdKind> {
+    tbg_core::StrongholdKind::SELECTABLE
+        .into_iter()
+        .find(|k| format!("{k:?}") == raw.trim())
+}
+
 /// The numbers after `"ranks":[`, as a complete preset. Six values are a
 /// schema-1 tree and migrate; fifteen are validated as the current schema.
 #[cfg(any(target_arch = "wasm32", test))]
@@ -330,6 +364,22 @@ pub fn save_flag(key: &str, value: bool) {
 pub fn arena_preview() -> bool {
     static PREVIEW: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     *PREVIEW.get_or_init(|| url_param("arena").is_some())
+}
+
+#[cfg(test)]
+mod stronghold_tests {
+    use super::parse_stronghold;
+    use tbg_core::StrongholdKind;
+
+    #[test]
+    fn picker_names_parse_and_classic_never_does() {
+        for kind in StrongholdKind::SELECTABLE {
+            assert_eq!(parse_stronghold(&format!("{kind:?}")), Some(kind));
+        }
+        for bad in ["Classic", "", "artillery", "Bastion; drop", "4"] {
+            assert_eq!(parse_stronghold(bad), None, "{bad}");
+        }
+    }
 }
 
 #[cfg(test)]

@@ -18,6 +18,7 @@ async fn challenge_initial_detached_forfeits() {
         }),
         account: None,
         arcanas: ArcanaPreset::DEFAULT,
+        stronghold: tbg_core::StrongholdKind::DEFAULT,
     });
     let (lobby_tx, mut lobby_rx) = mpsc::channel(8);
     let config = Arc::new(Config {

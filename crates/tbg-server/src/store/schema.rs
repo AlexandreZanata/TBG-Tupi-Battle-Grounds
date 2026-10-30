@@ -60,6 +60,9 @@ ALTER TABLE matches ADD COLUMN b_arcanas BLOB;
 ALTER TABLE ranked_matches ADD COLUMN a_arcanas BLOB;
 ALTER TABLE ranked_matches ADD COLUMN b_arcanas BLOB;";
 
+/// D-46: the account's chosen Stronghold kind (`StrongholdKind::index`).
+const STRONGHOLD_V5: &str = "ALTER TABLE accounts ADD COLUMN stronghold INTEGER;";
+
 /// Pragmas plus every missing migration in one transaction. Re-running on
 /// a migrated database is a no-op.
 pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
@@ -88,6 +91,10 @@ pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
     if version < 4 {
         tx.execute_batch(ARCANAS_V4)?;
         tx.execute("INSERT INTO schema_version(version) VALUES (4)", [])?;
+    }
+    if version < 5 {
+        tx.execute_batch(STRONGHOLD_V5)?;
+        tx.execute("INSERT INTO schema_version(version) VALUES (5)", [])?;
     }
     tx.commit()
 }

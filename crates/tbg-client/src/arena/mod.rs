@@ -11,6 +11,7 @@ mod life;
 mod lighting;
 mod props;
 mod rocks;
+mod strongholds;
 mod towers;
 mod trees;
 mod water;
@@ -20,6 +21,7 @@ pub(super) type Part = (Shape, Color, Transform);
 pub fn plugin(app: &mut App) {
     app.add_systems(Startup, spawn_arena)
         .add_systems(Update, (towers::damage_states, life::animate));
+    strongholds::plugin(app);
 }
 
 pub(super) fn painted(parts: Vec<Part>) -> Mesh {
@@ -83,17 +85,6 @@ fn spawn_arena(
             MeshMaterial3d(mat.clone()),
             Transform::default(),
         ));
-    }
-    for (own, x) in [(true, -0.9), (false, 16.9)] {
-        for (piece, hide_below) in towers::tower(own) {
-            total += mesh::triangles(&piece);
-            commands.spawn((
-                Mesh3d(meshes.add(piece)),
-                MeshMaterial3d(mat.clone()),
-                Transform::from_xyz(x, 0.0, 0.0),
-                towers::TowerPiece { own, hide_below },
-            ));
-        }
     }
     total += life::spawn(&mut commands, &mut meshes, &mut mats, &mat);
     info!("arena total: {total} triangles");

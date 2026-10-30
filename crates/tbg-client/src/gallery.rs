@@ -81,6 +81,8 @@ fn spawn(
     match options.mode.as_str() {
         "palette" => palette::spawn(&mut commands, meshes, mats),
         "blockout" => blockout::spawn(&mut commands, &lib, mats, window.height() > window.width()),
+        // Built by `arena::strongholds`, which owns the tower parts.
+        "strongholds" => {}
         _ => figures::spawn(&mut commands, &lib, &options, mats, &window),
     }
 }

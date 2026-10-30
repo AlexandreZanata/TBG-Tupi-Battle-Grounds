@@ -13,9 +13,9 @@ use crate::arcana::{self, ArcanaPreset, ArcanaValues};
 use crate::content::{
     AugmentBonus, FormDef, Stats, SynergyEffect, UnitDef, ARCANA_BP, ARCANA_VALUES, AUGMENT_COST,
     AUGMENT_WINDOW_TICKS, BEETLES_PER_NESTER, BEETLE_LIFETIME, BP, ENERGY_START, EVOLVE_COST,
-    HATCH_EVERY, HATCH_EVERY_HIVE, INTEREST_BAND, INTEREST_MAX_BANDS, INTEREST_PER_BAND,
-    MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP, STRONGHOLD_INTERVAL,
-    STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
+    FORTIFY_COST, HATCH_EVERY, HATCH_EVERY_HIVE, INTEREST_BAND, INTEREST_MAX_BANDS,
+    INTEREST_PER_BAND, MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP,
+    STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
 };
 use crate::types::{Tick, UnitKind, ALL_KINDS, FULL_POOL, UNIT_KINDS};
 
@@ -59,6 +59,8 @@ pub struct Ruleset {
     pub augment: AugmentRule,
     /// Cost of evolving to tier 1 and to tier 2.
     pub evolve_cost: [u32; 2],
+    /// Stronghold Fortification to tier 1 and to tier 2 (BR-SK05).
+    pub fortify_cost: [u32; 2],
     pub stronghold_hp: i32,
     pub stronghold_damage: i32,
     pub stronghold_interval: u16,
@@ -98,6 +100,7 @@ pub static CANON: Ruleset = Ruleset {
         forgo_energy: 0,
     },
     evolve_cost: EVOLVE_COST,
+    fortify_cost: FORTIFY_COST,
     stronghold_hp: STRONGHOLD_HP,
     stronghold_damage: STRONGHOLD_DAMAGE,
     stronghold_interval: STRONGHOLD_INTERVAL,

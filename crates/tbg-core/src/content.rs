@@ -5,7 +5,7 @@
 
 use crate::arcana::ArcanaValues;
 use crate::ruleset::CANON;
-use crate::types::{Archetype, Faction, OnHit, Tick, UnitKind};
+use crate::types::{Archetype, Faction, OnHit, StrongholdKind, Tick, UnitKind};
 
 pub const TICK_HZ: u32 = 20;
 pub const LANE_LEN: i32 = 16_000;
@@ -55,6 +55,130 @@ pub const STRONGHOLD_HP: i32 = 4_500;
 pub const STRONGHOLD_DAMAGE: i32 = 53;
 pub const STRONGHOLD_INTERVAL: u16 = 20;
 pub const STRONGHOLD_RANGE: i32 = 6_000;
+
+/// Fortification price to tier 1 and to tier 2 (BR-SK05): 3 then 4 Energy.
+/// Its own price, never the unit `EVOLVE_COST` (Proposed, D-46).
+pub const FORTIFY_COST: [u32; 2] = [1_800, 2_400];
+
+/// One Fortification step of a kind's branch. Each field adds to the kind's
+/// base while the step is owned; `interval` replaces the base interval when
+/// non-zero (the highest owned step wins). `hp_bp` and `dmg_bp` are basis
+/// points of the kind's own base, so tier 2 adds to tier 1 (BR-SK06).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Fortification {
+    pub name: &'static str,
+    pub hp_bp: i32,
+    pub dmg_bp: i32,
+    pub range_add: i32,
+    pub interval: u16,
+    pub spoils_add: u32,
+    pub spoils_cap_add: u32,
+    pub aura_bp_add: i32,
+    pub aura_range_add: i32,
+}
+
+const fn fort(name: &'static str) -> Fortification {
+    Fortification {
+        name,
+        hp_bp: 0,
+        dmg_bp: 0,
+        range_add: 0,
+        interval: 0,
+        spoils_add: 0,
+        spoils_cap_add: 0,
+        aura_bp_add: 0,
+        aura_range_add: 0,
+    }
+}
+
+/// A Stronghold kind: its base relative to the Classic tower and its two
+/// exclusive branches, `branches[branch][tier - 1]` (GAME-DESIGN §10.4).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct KindDef {
+    pub kind: StrongholdKind,
+    pub name: &'static str,
+    /// Basis points of `STRONGHOLD_HP` / `STRONGHOLD_DAMAGE`.
+    pub hp_bp: i32,
+    pub dmg_bp: i32,
+    /// Spoils: sub-energy per eligible kill and per-window ceiling (BR-SK02).
+    pub spoils: u32,
+    pub spoils_cap: u32,
+    /// War Banner: damage bp and radius in milli-tiles (BR-SK04).
+    pub aura_bp: i32,
+    pub aura_range: i32,
+    pub branch_names: [&'static str; 2],
+    pub branches: [[Fortification; 2]; 2],
+}
+
+const fn kind(kind: StrongholdKind, name: &'static str, hp_bp: i32, dmg_bp: i32) -> KindDef {
+    KindDef {
+        kind,
+        name,
+        hp_bp,
+        dmg_bp,
+        spoils: 0,
+        spoils_cap: 0,
+        aura_bp: 0,
+        aura_range: 0,
+        branch_names: ["", ""],
+        branches: [[fort(""), fort("")], [fort(""), fort("")]],
+    }
+}
+
+/// Every Stronghold kind in `StrongholdKind` order. Treasury and Command
+/// keep the product hypotheses' ratios to the reference tower (4 200/60 and
+/// 4 300/60 against 4 500/65) on today's 4 500 HP / 53 damage; Artillery
+/// and Bastion moved off theirs after the lab matrix (Proposed, D-46).
+#[rustfmt::skip]
+pub const STRONGHOLD_KINDS: [KindDef; 5] = [
+    kind(StrongholdKind::Classic, "Classic", 0, 0),
+    KindDef {
+        // 0.15 Energy a kill, at most 0.6 Energy per 10 s window.
+        spoils: 90,
+        spoils_cap: 360,
+        branch_names: ["Armored Vault", "Mint"],
+        branches: [
+            [Fortification { hp_bp: 1_200, ..fort("Reinforced Vault") },
+             Fortification { hp_bp: 1_200, ..fort("Grand Vault") }],
+            [Fortification { spoils_add: 30, ..fort("Coinage") },
+             // 0.25 Energy a kill; ceiling 0.6 -> 0.9 Energy a window.
+             Fortification { spoils_add: 30, spoils_cap_add: 180, ..fort("Royal Mint") }],
+        ],
+        ..kind(StrongholdKind::Treasury, "Treasury", -700, -800)
+    },
+    KindDef {
+        branch_names: ["Fortress", "Sentinel"],
+        branches: [
+            [Fortification { hp_bp: 1_500, ..fort("Reinforced Walls") },
+             Fortification { hp_bp: 1_500, ..fort("Imperial Fortress") }],
+            [Fortification { range_add: 1_000, ..fort("Watchtower") },
+             Fortification { dmg_bp: 1_500, ..fort("Royal Sentinel") }],
+        ],
+        ..kind(StrongholdKind::Bastion, "Bastion", 1_500, -1_000)
+    },
+    KindDef {
+        branch_names: ["Heavy Cannon", "Rapid Fire"],
+        branches: [
+            [Fortification { dmg_bp: 2_000, ..fort("Heavy Shot") },
+             Fortification { dmg_bp: 2_000, ..fort("Great Cannon") }],
+            [Fortification { interval: 17, ..fort("Quick Reload") },
+             Fortification { interval: 14, ..fort("Advanced Mechanism") }],
+        ],
+        ..kind(StrongholdKind::Artillery, "Artillery", -1_500, 1_000)
+    },
+    KindDef {
+        aura_bp: 500,
+        aura_range: 4_000,
+        branch_names: ["War Standard", "Forward Banner"],
+        branches: [
+            [Fortification { aura_bp_add: 300, ..fort("War Cry") },
+             Fortification { aura_bp_add: 300, ..fort("Supreme Command") }],
+            [Fortification { aura_range_add: 1_000, ..fort("Outpost") },
+             Fortification { aura_range_add: 1_000, ..fort("High Command") }],
+        ],
+        ..kind(StrongholdKind::Command, "Command", -400, -800)
+    },
+];
 
 /// Arcanas (GAME-DESIGN §9, Proposed values active by D-40): bp per rank of
 /// the six original nodes, in serialization order Guard, Assault, Piercing,

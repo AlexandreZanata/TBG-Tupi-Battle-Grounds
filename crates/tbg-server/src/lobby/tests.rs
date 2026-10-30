@@ -55,6 +55,7 @@ fn add_session(
             ip: "127.0.0.1".parse().unwrap(),
             detached_at: None,
             arcanas: tbg_core::ArcanaPreset::DEFAULT,
+            stronghold: tbg_core::StrongholdKind::DEFAULT,
         },
     );
     rx

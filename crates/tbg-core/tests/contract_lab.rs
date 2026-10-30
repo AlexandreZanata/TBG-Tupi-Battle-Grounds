@@ -90,8 +90,10 @@ fn c2_per_tick_traces_are_frozen() {
     // (seed, per-tick trace, final hash, end combat tick): owner revision
     // 2026-10-29 (uncapped Energy, Interest as a regen boost, the Augment
     // pause with its paused steps traced, the 20 s selection window,
-    // P40's fifteen-rank Arcana state, and a full Shop redraw per
-    // purchase, BR-S04). P43: the zeroed `UnitFx` block moved the hashes
+    // P40's fifteen-rank Arcana state, a full Shop redraw per purchase,
+    // BR-S04, and the D-46 Stronghold fields: same Classic matches and end
+    // ticks, only the serialized state grew).
+    // P43: the zeroed `UnitFx` block moved the hashes
     // with tick, winner and reason identical (verified). P47:
     // `march_ignore_slow` grew `UnitFx`; hashes moved once more, behavior
     // identical (verified).
@@ -100,12 +102,14 @@ fn c2_per_tick_traces_are_frozen() {
     // P48-B: `betray_bp`/`betray_stumble` grew `UnitFx` and `cargo_rng`
     // joined `PlayerState`; hashes moved once more, behavior identical
     // (verified).
+    // Merge of the roster waves with D-46: both grew the serialized state;
+    // hashes refrozen once, tick, winner and reason identical (verified).
     let goldens = [
-        (1, 0xbf08_ca77_e13b_f05b, 0x83a5_a17a_bd03_3d93, 2_214),
-        (7, 0xd836_6bf0_ffe9_4133, 0xf888_bb06_077f_1856, 3_284),
-        (42, 0x14ad_2e7e_3455_6210, 0x3fc1_d634_494b_7736, 1_833),
-        (1000, 0x0e04_bbff_0c07_0ede, 0xd079_1d10_95d5_d965, 2_641),
-        (65535, 0xea8e_f129_d419_3753, 0xff6c_3897_2bed_89ea, 1_740),
+        (1, 0xd562_4a7f_4e1a_85ab, 0x72ab_a8ee_5567_01f3, 2_214),
+        (7, 0xaa5c_1aba_452b_6d53, 0xaea5_e367_028b_4446, 3_284),
+        (42, 0xf876_2d7c_8d79_e010, 0x3a9a_cfe5_ccf4_c056, 1_833),
+        (1000, 0x5c50_0da9_2346_8c7e, 0xf52f_db68_13a9_0435, 2_641),
+        (65535, 0x668b_70c2_62fe_fab3, 0xbdaa_dfbe_4c8e_89ba, 1_740),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

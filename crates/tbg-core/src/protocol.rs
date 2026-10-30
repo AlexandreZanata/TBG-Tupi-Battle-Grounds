@@ -7,13 +7,16 @@ use serde::{Deserialize, Serialize};
 use crate::arcana::{self, ArcanaPreset};
 use crate::intent::{PlayerIntention, Rejection};
 use crate::state::Outcome;
-use crate::types::Seat;
+use crate::types::{Seat, StrongholdKind};
 use crate::view::MatchView;
 
-/// v13: staged affliction/carrier events and `UnitView.fx` (P43); no wave is
-/// active. v12 was Interest as a regen boost; v11 the fifteen-node Arcana
-/// schema; older peers are refused.
-pub const PROTOCOL_VERSION: u16 = 13;
+/// v14: the P43 staged affliction/carrier events and `UnitView.fx` merged
+/// with the D-46 Stronghold kinds. v13 was Stronghold kinds and Fortification
+/// (D-46: `SetStronghold`, `MatchView::strongholds`, `PlayerIntention::Fortify`).
+/// v12: Interest became a regen boost (`MatchView::regen_bp` replaces the
+/// payment fields, `Event::InterestPaid` is gone). v11 was the fifteen-node
+/// Arcana schema; older peers are refused.
+pub const PROTOCOL_VERSION: u16 = 14;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a
@@ -60,6 +63,9 @@ pub enum ClientMsg {
     CreateChallenge,
     JoinChallenge { token: InviteToken },
     RequestRematch,
+    // v13 (D-46, BR-SK01): choose the Stronghold kind while idle; the
+    // server answers `StrongholdSelected` or `StrongholdRejected`.
+    SetStronghold { kind: StrongholdKind },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -172,6 +178,23 @@ pub enum ServerMsg {
     RematchClosed {
         declined: bool,
     },
+    // v13 (D-46): the authoritative Stronghold kind (also sent after login
+    // when the account has a saved kind, BR-SK01).
+    StrongholdSelected {
+        kind: StrongholdKind,
+    },
+    StrongholdRejected {
+        reason: StrongholdRejection,
+    },
+}
+
+/// v13 (D-46): why a `SetStronghold` was refused; the previous kind stays.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StrongholdRejection {
+    /// `Classic` is the lab's reference tower, never a player's (BR-SK01).
+    NotSelectable,
+    /// Queued, in a room, or in a match: the kind is frozen (BR-SK01).
+    NotIdle,
 }
 
 /// v8 (D-40): why a `SetArcanas` was refused; the previous preset stays.

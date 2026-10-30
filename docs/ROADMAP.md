@@ -136,8 +136,8 @@ Phase files are written one at a time, starting with P42.
 | P16-D | [P16D-prebalance-value-model.md](phases/P16D-prebalance-value-model.md) | Offline PVE engine: one-sided full-match value, Energy shadow price, interaction canaries, held-out validation; P16-C findings still open | engine implemented and measured; **owner balance decision pending**; P16-F1 blocked by `saver` | — |
 | P16-F1 | [P16F1-economy-and-siege.md](phases/P16F1-economy-and-siege.md) | Uncapped Energy, low-balance Interest, Siege/Collapse, no time-up decision; lab-gated switch; HUD | **owner revision D-41**: economy active, open-ended matches (no Siege/Collapse); lab gate not run; PR open from `phase/p16f-infinite-economy`, review pending | — |
 | P16-F2 | [P16F2-shop-reserve.md](phases/P16F2-shop-reserve.md) | Hold one Shop offer for 20 s; lab comparison; HUD | planned | — |
-| P16-F3 | [P16F3-stronghold-kinds-core.md](phases/P16F3-stronghold-kinds-core.md) | Per-seat Stronghold, four kinds, Bounty, Fortifications; lab matrices (offline) | planned | — |
-| P16-F4 | [P16F4-stronghold-kinds-online.md](phases/P16F4-stronghold-kinds-online.md) | Selection frozen at queue, persistence, lobby, Fortify panel, four 3D kinds | planned | — |
+| P16-F3 | [P16F3-stronghold-kinds-core.md](phases/P16F3-stronghold-kinds-core.md) | Per-seat Stronghold, four kinds, Bounty, Fortifications; lab matrices (offline) | **superseded** by the owner's 2026-10-29 spec (D-46), shipped with P16-F4 on `phase/p17-strongholds` | — |
+| P16-F4 | [P16F4-stronghold-kinds-online.md](phases/P16F4-stronghold-kinds-online.md) | Selection frozen at queue, persistence, lobby, Fortify panel, four 3D kinds | **done** as D-46 (Treasury, Bastion, Artillery, Command; kind-exclusive branches): core, server, lab matrix, lobby picker, Fortify HUD, modular 3D | — |
 | P16-F5 | [P16F5-augments-core.md](phases/P16F5-augments-core.md) | Augment rounds, mirrored draws, Forgo, the first 14 Augments; Δ value per Augment (offline) | **owner revision D-41**: infinite rounds with a battle pause, all 40 active; Δ table not measured; same PR | — |
 | P16-F6 | [P16F6-augment-catalog.md](phases/P16F6-augment-catalog.md) | All 40 Augments, adversarial triples, tuned catalog (offline) | catalog implemented (D-41); adversarial balance open | — |
 | P16-F7 | [P16F7-augments-online.md](phases/P16F7-augments-online.md) | War Council on desktop and phones, records, practice bot | **owner revision D-41**: online, modal War Council pause on desktop and phone; records open; same PR | — |
@@ -168,7 +168,7 @@ Phase files are written one at a time, starting with P42.
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
 | P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; 29 online tests and browser evidence; **owner physical-phone/PWA check pending** | PR #2 follow-up fixes pending |
 | P40 | [P40-arcana-trees.md](phases/P40-arcana-trees.md) | Fifteen-node trees, twelve points, three supremes, preset migration, editor and lab evidence | implemented; audited on `phase/p40-review` (Quickdraw cap fixed, Deadeye re-measured to +0.25 tile); War and Vitality builds trail the default, browser look check open | — |
-| P42 | [P42-roster-baseline.md](phases/P42-roster-baseline.md) | Roster canon (D-46), lab combat counters, stall and duration rows, `comp-*` policy, baseline on main | in progress | — |
+| P42 | [P42-roster-baseline.md](phases/P42-roster-baseline.md) | Roster canon (D-48), lab combat counters, stall and duration rows, `comp-*` policy, baseline on main | in progress | — |
 
 ## Pending validations (owner)
 

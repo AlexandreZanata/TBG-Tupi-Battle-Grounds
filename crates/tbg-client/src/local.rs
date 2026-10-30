@@ -4,7 +4,7 @@
 
 use tbg_core::bot::Bot;
 use tbg_core::protocol::{ClientMsg, ServerMsg};
-use tbg_core::{ArcanaPreset, Event, MatchState, PlayerIntention, Seat};
+use tbg_core::{ArcanaPreset, Event, MatchState, PlayerIntention, Seat, StrongholdKind};
 
 pub struct LocalMatch {
     state: MatchState,
@@ -16,12 +16,15 @@ pub struct LocalMatch {
 }
 
 impl LocalMatch {
-    /// Practice uses the player's saved Arcanas against a default bot (D-40).
-    /// The staging pool (P43): identical to canon until new kinds land.
-    pub fn new(seed: u64, arcanas: ArcanaPreset) -> LocalMatch {
+    /// Practice uses the player's saved Arcanas and Stronghold against a
+    /// default bot (D-40) whose kind follows the seed, so a practice match
+    /// replays exactly (BR-SK09).
+    pub fn new(seed: u64, arcanas: ArcanaPreset, stronghold: StrongholdKind) -> LocalMatch {
         let presets = [arcanas, ArcanaPreset::DEFAULT];
+        let selectable = StrongholdKind::SELECTABLE;
+        let bot_kind = selectable[(seed % selectable.len() as u64) as usize];
         LocalMatch {
-            state: MatchState::with_preview(seed, presets),
+            state: MatchState::with_preview(seed, presets).with_strongholds([stronghold, bot_kind]),
             bot: Bot::new(seed ^ 0x5eed),
             queue: Vec::new(),
             events: Vec::new(),

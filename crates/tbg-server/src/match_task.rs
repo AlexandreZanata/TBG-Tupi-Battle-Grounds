@@ -32,6 +32,8 @@ pub(crate) struct Player {
     pub account: Option<(AccountId, u16)>,
     /// D-40: the Arcanas frozen at pairing (BR-AR05).
     pub arcanas: tbg_core::ArcanaPreset,
+    /// D-46: the Stronghold kind frozen at pairing (BR-SK01).
+    pub stronghold: tbg_core::StrongholdKind,
 }
 
 pub(super) struct Match {
@@ -64,8 +66,9 @@ pub(crate) fn spawn(
         .each_ref()
         .map(|p| p.conn.is_none().then(Instant::now));
     let arcanas = players.each_ref().map(|p| p.arcanas);
+    let strongholds = players.each_ref().map(|p| p.stronghold);
     let m = Match {
-        state: MatchState::with_arcanas(seed, arcanas),
+        state: MatchState::with_arcanas(seed, arcanas).with_strongholds(strongholds),
         players,
         detached_at,
         stats: Default::default(),
@@ -76,6 +79,7 @@ pub(crate) fn spawn(
         replay: config.replays.as_ref().map(|_| Replay {
             seed,
             arcanas,
+            strongholds,
             ..Replay::default()
         }),
     };

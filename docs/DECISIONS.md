@@ -769,7 +769,39 @@ refresh-by-buying `favor` policy stay (both are lab-only).
 **Reopen when** the lab shows the Shop makes banking or one unit
 dominant, or the owner wants duplicates inside an offer set.
 
-## D-46 · Roster expansion: fifteen units, staged by ruleset pool — 2026-10-29 (owner decision)
+## D-46 · Four Stronghold kinds with kind-exclusive Fortification — 2026-10-29 (owner decision)
+
+**Decision.** The owner's product spec of 2026-10-29 makes Stronghold
+kinds and Fortification active (GAME-DESIGN §10.4–10.5, BR-SK01–SK09):
+Treasury, Bastion, Artillery and Command, chosen free before the match,
+each with its own base, passive and two exclusive branches (tier 1
+3 Energy, tier 2 4 Energy). It supersedes the earlier proposal
+(Treasury, Redoubt, Ballista, Banner on a shared Walls/Arms tree,
+BR-K01–K08 and BR-F01–F05, D-37's shared tree) and the unmerged
+`phase/p17a-strategic-strongholds` plan, whose code it reuses only as a
+reference. Default kind: Bastion.
+**How.** `tbg-core::stronghold` derives the tower's stats from
+`STRONGHOLD_KINDS` and the owned tiers; the real shot, the Treasury Spoils
+(paid from the authoritative death, per Bounty window) and the War Banner
+(read at hit time, one more term in BR-X01's bp sum) use it. The kind is
+chosen like the Arcanas: `SetStronghold` while idle, frozen at pairing,
+saved per account (schema v5 `accounts.stronghold`), recorded in
+replays; `Fortify{branch}` is a `PlayerIntention`; `MatchView.strongholds`
+makes both towers public. Protocol v13.
+**Classic stays** as the reference tower: every plain `MatchState`, the
+tests and the knob search keep it, so the lab's baselines and the
+contract matches are unchanged (same winners and end ticks; only the
+state hash moved with the new fields). The bot fortifies only a player
+kind.
+**Values are Proposed.** Treasury and Command keep the product
+hypotheses' ratios on today's 4 500 HP / 53 damage tower; Artillery
+(−1 500 HP / +1 000 damage bp) and Bastion (−1 000 damage bp) moved after
+the first `strongholds` lab matrix showed Artillery at 61–67 % against
+every kind for a near-tower army (`docs/media/p17/lab/`).
+**Reopen when** the matrix or live play shows a kind above 55 % against
+the field, or a branch that is never worth buying.
+
+## D-48 · Roster expansion: fifteen units, staged by ruleset pool — 2026-10-29 (owner decision)
 
 **Decision.** Fifteen new units enter the game in stages through phases
 P42–P53, as planned in `docs/ROSTER-EXPANSION.md` (Rotcap, Farwatch,
@@ -789,7 +821,7 @@ per unit fall from 50 % to 20 % of sets, so the threshold moves to about
 60 % of the even share and the lab watches dilution.
 **Reopen when** a wave shows a unit that numbers cannot balance.
 
-## D-47 · P43 shared foundations: ability pairs, staged pool, preview path — 2026-10-29 (executor decision, pending review)
+## D-49 · P43 shared foundations: ability pairs, staged pool, preview path — 2026-10-29 (executor decision, pending review)
 
 **Decision.** `UnitDef.abilities` is `[[Ability; 2]; 5]` (one pair per
 form slot: base, A1, A2, B1, B2), so Rotcap's Poison + Echo fits without a
@@ -808,4 +840,3 @@ cheapest shape that keeps P43 behavior-identical (gate CSV byte-identical
 to the P42 baseline on the same seeds).
 **Reopen when** a wave needs a third ability on one form, or the pool
 switch needs more than a field assignment.
-

@@ -10,4 +10,5 @@
   <symbol id="bot" viewBox="0 0 48 48"><path d="M22 3H26V13H22Z"/><circle cx="24" cy="4" r="4"/><rect x="6" y="13" width="36" height="32" rx="6"/><path d="M1 23H5V35H1ZM43 23H47V35H43Z"/><g fill="#243137"><rect x="13" y="22" width="7" height="7" rx="2"/><rect x="28" y="22" width="7" height="7" rx="2"/><path d="M16 35H32V38H16Z"/></g></symbol>
   <symbol id="sound" viewBox="0 0 48 48"><path d="M3 18H12L25 7V41L12 30H3Z"/><path d="M32 16Q41 24 32 32M38 8Q55 24 38 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></symbol>
   <symbol id="scroll" viewBox="0 0 48 48"><path d="M9 5H39L36 38H12L10 45H3L6 12Q6 5 9 5Z"/><path d="M15 13H32M14 20H31M13 27H28" stroke="#333127" stroke-width="3"/></symbol>
+  <symbol id="tower" viewBox="0 0 48 48"><path d="M8 4H14V9H19V4H29V9H34V4H40V16L36 19V44H12V19L8 16Z"/><path d="M20 44V34Q20 28 24 28 28 28 28 34V44ZM22 15H26V22H22Z" fill="#222e32"/></symbol>
 </svg>

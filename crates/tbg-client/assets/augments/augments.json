@@ -1,0 +1,442 @@
+{
+  "schema": 1,
+  "tickHz": 20,
+  "rarities": [
+    {
+      "name": "Bronze",
+      "color": "#d78969",
+      "frame": {
+        "svg": "frame-bronze.svg",
+        "display": "frame-bronze.webp"
+      }
+    },
+    {
+      "name": "Silver",
+      "color": "#8fc6e8",
+      "frame": {
+        "svg": "frame-silver.svg",
+        "display": "frame-silver.webp"
+      }
+    },
+    {
+      "name": "Gold",
+      "color": "#e8bc68",
+      "frame": {
+        "svg": "frame-gold.svg",
+        "display": "frame-gold.webp"
+      }
+    },
+    {
+      "name": "Diamond",
+      "color": "#f0dfad",
+      "frame": {
+        "svg": "frame-diamond.svg",
+        "display": "frame-diamond.webp"
+      }
+    }
+  ],
+  "augments": [
+    {
+      "id": 0,
+      "name": "Forced March",
+      "rarity": "Bronze",
+      "text": "Units you buy move +40% for 5 s",
+      "asset": {
+        "svg": "forced-march.svg",
+        "display": "forced-march.webp"
+      }
+    },
+    {
+      "id": 1,
+      "name": "Field Kit",
+      "rarity": "Bronze",
+      "text": "Conventional units +4% max HP",
+      "asset": {
+        "svg": "field-kit.svg",
+        "display": "field-kit.webp"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Sentry",
+      "rarity": "Bronze",
+      "text": "Your Stronghold +10% damage",
+      "asset": {
+        "svg": "sentry.svg",
+        "display": "sentry.webp"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Steady Aim",
+      "rarity": "Bronze",
+      "text": "Ranged +8% damage",
+      "asset": {
+        "svg": "steady-aim.svg",
+        "display": "steady-aim.webp"
+      }
+    },
+    {
+      "id": 4,
+      "name": "Reinforced Shields",
+      "rarity": "Bronze",
+      "text": "Tanks +8% max HP",
+      "asset": {
+        "svg": "reinforced-shields.svg",
+        "display": "reinforced-shields.webp"
+      }
+    },
+    {
+      "id": 5,
+      "name": "First Aid",
+      "rarity": "Silver",
+      "text": "Direct and splash heals +10%",
+      "asset": {
+        "svg": "first-aid.svg",
+        "display": "first-aid.webp"
+      }
+    },
+    {
+      "id": 6,
+      "name": "Drilled Ranks",
+      "rarity": "Silver",
+      "text": "Humans +8% damage",
+      "asset": {
+        "svg": "drilled-ranks.svg",
+        "display": "drilled-ranks.webp"
+      }
+    },
+    {
+      "id": 7,
+      "name": "Frenzied Bones",
+      "rarity": "Silver",
+      "text": "Undead +8% attack speed",
+      "asset": {
+        "svg": "frenzied-bones.svg",
+        "display": "frenzied-bones.webp"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Tuned Gears",
+      "rarity": "Silver",
+      "text": "Machines +8% attack speed",
+      "asset": {
+        "svg": "tuned-gears.svg",
+        "display": "tuned-gears.webp"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Hardy Sap",
+      "rarity": "Silver",
+      "text": "Plants +8% max HP",
+      "asset": {
+        "svg": "hardy-sap.svg",
+        "display": "hardy-sap.webp"
+      }
+    },
+    {
+      "id": 10,
+      "name": "Plunder",
+      "rarity": "Silver",
+      "text": "Bounty 0.15 Energy per kill (cap 0.45)",
+      "asset": {
+        "svg": "plunder.svg",
+        "display": "plunder.webp"
+      }
+    },
+    {
+      "id": 11,
+      "name": "Stone Mend",
+      "rarity": "Silver",
+      "text": "Stronghold heals 50 HP per kill (cap 150/30 s)",
+      "asset": {
+        "svg": "stone-mend.svg",
+        "display": "stone-mend.webp"
+      }
+    },
+    {
+      "id": 12,
+      "name": "Field Promotion",
+      "rarity": "Silver",
+      "text": "Evolutions cost 1 Energy less (minimum 1)",
+      "asset": {
+        "svg": "field-promotion.svg",
+        "display": "field-promotion.webp"
+      }
+    },
+    {
+      "id": 13,
+      "name": "Veterans",
+      "rarity": "Silver",
+      "text": "Evolved units +8% max HP, +4% damage",
+      "asset": {
+        "svg": "veterans.svg",
+        "display": "veterans.webp"
+      }
+    },
+    {
+      "id": 14,
+      "name": "Shield Wall",
+      "rarity": "Silver",
+      "text": "Units near a living Rampart take -8% damage",
+      "asset": {
+        "svg": "shield-wall.svg",
+        "display": "shield-wall.webp"
+      }
+    },
+    {
+      "id": 15,
+      "name": "Siege Arrows",
+      "rarity": "Silver",
+      "text": "Ranged +15% damage to Strongholds",
+      "asset": {
+        "svg": "siege-arrows.svg",
+        "display": "siege-arrows.webp"
+      }
+    },
+    {
+      "id": 16,
+      "name": "Armored Brood",
+      "rarity": "Silver",
+      "text": "Beetlings +25% max HP",
+      "asset": {
+        "svg": "armored-brood.svg",
+        "display": "armored-brood.webp"
+      }
+    },
+    {
+      "id": 17,
+      "name": "Triage",
+      "rarity": "Silver",
+      "text": "+25% direct heal below 40% HP",
+      "asset": {
+        "svg": "triage.svg",
+        "display": "triage.webp"
+      }
+    },
+    {
+      "id": 18,
+      "name": "Lingering Hex",
+      "rarity": "Silver",
+      "text": "Slow and root you apply last +15%",
+      "asset": {
+        "svg": "lingering-hex.svg",
+        "display": "lingering-hex.webp"
+      }
+    },
+    {
+      "id": 19,
+      "name": "Shield Step",
+      "rarity": "Silver",
+      "text": "Tanks +12% move, +5% max HP",
+      "asset": {
+        "svg": "shield-step.svg",
+        "display": "shield-step.webp"
+      }
+    },
+    {
+      "id": 20,
+      "name": "War Leech",
+      "rarity": "Gold",
+      "text": "Lifesteal 8% of HP removed",
+      "asset": {
+        "svg": "war-leech.svg",
+        "display": "war-leech.webp"
+      }
+    },
+    {
+      "id": 21,
+      "name": "Conquerors",
+      "rarity": "Gold",
+      "text": "Conventional units +12% damage to Strongholds",
+      "asset": {
+        "svg": "conquerors.svg",
+        "display": "conquerors.webp"
+      }
+    },
+    {
+      "id": 22,
+      "name": "Tower Fury",
+      "rarity": "Gold",
+      "text": "Stronghold kills: +5% damage, 3 stacks, 12 s",
+      "asset": {
+        "svg": "tower-fury.svg",
+        "display": "tower-fury.webp"
+      }
+    },
+    {
+      "id": 23,
+      "name": "Entrenched",
+      "rarity": "Gold",
+      "text": "Below 50% HP, units near it take -10% damage",
+      "asset": {
+        "svg": "entrenched.svg",
+        "display": "entrenched.webp"
+      }
+    },
+    {
+      "id": 24,
+      "name": "Grievous Wounds",
+      "rarity": "Gold",
+      "text": "Your hits cut healing 40% for 2 s",
+      "asset": {
+        "svg": "grievous-wounds.svg",
+        "display": "grievous-wounds.webp"
+      }
+    },
+    {
+      "id": 25,
+      "name": "Giant Slayer",
+      "rarity": "Gold",
+      "text": "+15% damage to enemy Tanks",
+      "asset": {
+        "svg": "giant-slayer.svg",
+        "display": "giant-slayer.webp"
+      }
+    },
+    {
+      "id": 26,
+      "name": "Executioner",
+      "rarity": "Gold",
+      "text": "+20% damage to targets below 35% HP",
+      "asset": {
+        "svg": "executioner.svg",
+        "display": "executioner.webp"
+      }
+    },
+    {
+      "id": 27,
+      "name": "Hunter's Instinct",
+      "rarity": "Gold",
+      "text": "DPS +10% attack speed, +8% move",
+      "asset": {
+        "svg": "hunter-s-instinct.svg",
+        "display": "hunter-s-instinct.webp"
+      }
+    },
+    {
+      "id": 28,
+      "name": "Iron Vanguard",
+      "rarity": "Gold",
+      "text": "Tanks +15% max HP, +10% move",
+      "asset": {
+        "svg": "iron-vanguard.svg",
+        "display": "iron-vanguard.webp"
+      }
+    },
+    {
+      "id": 29,
+      "name": "Spellweaver",
+      "rarity": "Gold",
+      "text": "Control +20% attack speed",
+      "asset": {
+        "svg": "spellweaver.svg",
+        "display": "spellweaver.webp"
+      }
+    },
+    {
+      "id": 30,
+      "name": "Last Bastion",
+      "rarity": "Diamond",
+      "text": "First time below 25% HP: shield for 15 s",
+      "asset": {
+        "svg": "last-bastion.svg",
+        "display": "last-bastion.webp"
+      }
+    },
+    {
+      "id": 31,
+      "name": "Desperate Assault",
+      "rarity": "Diamond",
+      "text": "Behind on HP: +15% damage to Strongholds",
+      "asset": {
+        "svg": "desperate-assault.svg",
+        "display": "desperate-assault.webp"
+      }
+    },
+    {
+      "id": 32,
+      "name": "Legacy",
+      "rarity": "Diamond",
+      "text": "Evolved units +15% max HP, +10% damage",
+      "asset": {
+        "svg": "legacy.svg",
+        "display": "legacy.webp"
+      }
+    },
+    {
+      "id": 33,
+      "name": "Second Wind",
+      "rarity": "Diamond",
+      "text": "Each conventional unit survives its first lethal hit",
+      "asset": {
+        "svg": "second-wind.svg",
+        "display": "second-wind.webp"
+      }
+    },
+    {
+      "id": 34,
+      "name": "Convergence",
+      "rarity": "Diamond",
+      "text": "Two active Synergies: units +8% HP and damage",
+      "asset": {
+        "svg": "convergence.svg",
+        "display": "convergence.webp"
+      }
+    },
+    {
+      "id": 35,
+      "name": "Royal Banner",
+      "rarity": "Diamond",
+      "text": "Humans +12% max HP, +10% damage",
+      "asset": {
+        "svg": "royal-banner.svg",
+        "display": "royal-banner.webp"
+      }
+    },
+    {
+      "id": 36,
+      "name": "Deathless Legion",
+      "rarity": "Diamond",
+      "text": "Undead +15% attack speed, +10% max HP",
+      "asset": {
+        "svg": "deathless-legion.svg",
+        "display": "deathless-legion.webp"
+      }
+    },
+    {
+      "id": 37,
+      "name": "Iron Legion",
+      "rarity": "Diamond",
+      "text": "Machines +15% damage, +10% attack speed",
+      "asset": {
+        "svg": "iron-legion.svg",
+        "display": "iron-legion.webp"
+      }
+    },
+    {
+      "id": 38,
+      "name": "Bountiful Harvest",
+      "rarity": "Diamond",
+      "text": "Plants +10% max HP, +15% direct heal",
+      "asset": {
+        "svg": "bountiful-harvest.svg",
+        "display": "bountiful-harvest.webp"
+      }
+    },
+    {
+      "id": 39,
+      "name": "Hive Awakening",
+      "rarity": "Diamond",
+      "text": "Beetlings +25% damage; summon limit +1",
+      "asset": {
+        "svg": "hive-awakening.svg",
+        "display": "hive-awakening.webp"
+      }
+    }
+  ],
+  "roundTicks": 400,
+  "artBudgetBytes": 4000000
+}

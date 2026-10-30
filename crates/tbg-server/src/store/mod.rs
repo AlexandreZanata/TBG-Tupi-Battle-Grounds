@@ -11,7 +11,7 @@ use serde_json::Value;
 use tokio::sync::{oneshot, watch};
 
 use tbg_core::protocol::{AccountError, Profile, RatingResults};
-use tbg_core::{ArcanaPreset, Outcome};
+use tbg_core::{ArcanaPreset, Outcome, StrongholdKind};
 
 mod accounts;
 mod arcanas;
@@ -19,6 +19,7 @@ pub mod leaderboard;
 mod matches;
 mod ranked;
 mod schema;
+mod strongholds;
 mod worker;
 
 use worker::{worker, StoreCmd};
@@ -68,6 +69,23 @@ impl Store {
     /// D-40: remember an account's preset (fire and forget, BR-AR08).
     pub fn save_arcanas(&self, account: AccountId, preset: ArcanaPreset) {
         let _ = self.tx.try_send(StoreCmd::SaveArcanas { account, preset });
+    }
+
+    /// D-46: remember the account's Stronghold kind (fire-and-forget).
+    pub fn save_stronghold(&self, account: AccountId, kind: StrongholdKind) {
+        let _ = self.tx.try_send(StoreCmd::SaveStronghold { account, kind });
+    }
+
+    /// D-46: the account's saved kind, if any and still selectable.
+    pub async fn load_stronghold(&self, account: AccountId) -> Option<StrongholdKind> {
+        let (reply_tx, reply_rx) = oneshot::channel();
+        self.tx
+            .try_send(StoreCmd::LoadStronghold {
+                account,
+                reply: reply_tx,
+            })
+            .ok()?;
+        reply_rx.await.ok()?
     }
 
     /// D-40: the account's saved preset, if any (validated on read).

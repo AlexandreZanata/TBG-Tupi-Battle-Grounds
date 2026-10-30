@@ -24,3 +24,19 @@ test('lobby text projection never targets an attribute the Arcana editor writes'
   const clashes = projected.filter(selector => written.has(selector.slice(1, -1)));
   assert.deepEqual(clashes, [], 'lobby.js would overwrite Arcana editor nodes');
 });
+
+// D-46: the Stronghold picker lives in the same `#tbg-lobby` root. Neither
+// script may write text into an element the other (or the Arcana editor)
+// marks with its own attributes.
+test('lobby and Stronghold picker projections never overlap', () => {
+  const picker = fs.readFileSync(path.join(assets, 'stronghold/picker.js'), 'utf8');
+  const writes = source => new Set([...source.matchAll(/\.dataset\.(\w+)\s*=/g)].map(match => toAttribute(match[1])));
+  const pickerWrites = writes(picker);
+  assert.ok(pickerWrites.has('data-chosen'), 'the picker is expected to mark the chosen card');
+  const projected = [...lobby.matchAll(/\bset\(\s*'([^']+)'/g)].flatMap(match => match[1].match(/\[data-[\w-]+\]/g) || []);
+  assert.deepEqual(projected.filter(selector => pickerWrites.has(selector.slice(1, -1))), [], 'lobby.js would overwrite picker cards');
+  // The picker writes text only through its own hooks.
+  const pickerTargets = [...picker.matchAll(/\[(data-[\w-]+)/g)].map(match => match[1]);
+  const foreign = new Set([...writes(editor), ...projected.map(selector => selector.slice(1, -1))]);
+  assert.deepEqual(pickerTargets.filter(name => foreign.has(name)), [], 'the picker would overwrite lobby or Arcana nodes');
+});

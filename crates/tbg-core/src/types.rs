@@ -231,3 +231,49 @@ pub enum Status {
     Slowed { bp: u16, ticks_left: u16 },
     Rooted { ticks_left: u16 },
 }
+
+/// Kind of a seat's Stronghold, chosen free before the match and frozen at
+/// pairing (GAME-DESIGN §10.4, BR-SK01). Order is a serialization contract.
+/// `Classic` is the reference tower every kind is measured against: the
+/// tests and the balance lab use it; players never pick it online.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum StrongholdKind {
+    #[default]
+    Classic,
+    Treasury,
+    Bastion,
+    Artillery,
+    Command,
+}
+
+impl StrongholdKind {
+    /// The four kinds a player can choose (BR-SK01).
+    pub const SELECTABLE: [StrongholdKind; 4] = [
+        StrongholdKind::Treasury,
+        StrongholdKind::Bastion,
+        StrongholdKind::Artillery,
+        StrongholdKind::Command,
+    ];
+    /// What a player who never chose fights with (BR-SK01).
+    pub const DEFAULT: StrongholdKind = StrongholdKind::Bastion;
+
+    pub fn index(self) -> usize {
+        self as usize
+    }
+
+    pub fn from_index(i: usize) -> Option<StrongholdKind> {
+        [
+            StrongholdKind::Classic,
+            StrongholdKind::Treasury,
+            StrongholdKind::Bastion,
+            StrongholdKind::Artillery,
+            StrongholdKind::Command,
+        ]
+        .get(i)
+        .copied()
+    }
+
+    pub fn selectable(self) -> bool {
+        self != StrongholdKind::Classic
+    }
+}

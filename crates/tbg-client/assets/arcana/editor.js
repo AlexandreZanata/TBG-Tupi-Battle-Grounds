@@ -189,7 +189,7 @@
     }
   }
   async function prepare() {
-    const response = await fetch('assets/arcana/arcana.json');
+    const response = await fetch('assets/arcana/arcana.json?art=20261030');
     if (!response.ok) throw new Error('Arcana data could not load. Close and reopen to retry.');
     data = await response.json(); load();
     data.families.forEach(familyCard);

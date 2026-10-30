@@ -1238,7 +1238,7 @@ are shared), so they run **in sequence**, never by two agents at once.
   `comp-*` policy, duel exemption for no-attack units, role-invariant
   exception for "never targets Strongholds".
 - **Files:** `docs/GAME-DESIGN.md` (§5 planned-units table, rules
-  BR-U11… marked **Proposed, not active**), `docs/DECISIONS.md` (D-46),
+  BR-U11… marked **Proposed, not active**), `docs/DECISIONS.md` (D-48),
   `crates/tbg-core/src/{hits,state}.rs` (feature-gated), `crates/tbg-balance/src/{metrics,policy,gate,duels,knobs}.rs`.
 - **Tests:** counters sum to `Hit`/`Heal` events on 100 seeds; stagnation
   detector on a synthetic stall; contract tests unchanged.

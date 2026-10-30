@@ -1246,3 +1246,95 @@ async fn expect_rejection(ws: &mut Ws, seq: u32, reason: Rejection) {
         }
     }
 }
+
+#[tokio::test]
+async fn br_sk01_kinds_freeze_at_pairing_fortify_online_and_survive_reconnect() {
+    // D-46: choose while idle (Classic refused), frozen once in a room,
+    // both towers public in every view, Fortify validated by the server,
+    // tier kept across a reconnect, and the replay records both kinds.
+    use tbg_core::protocol::StrongholdRejection;
+    use tbg_core::{Phase, StrongholdKind};
+
+    let (replay_tx, mut replays) = tokio::sync::mpsc::unbounded_channel();
+    let url = server_with(Config {
+        tick_ms: 5,
+        max_per_ip: 1_000,
+        reconnect_secs: 30,
+        replays: Some(replay_tx),
+        ..Config::default()
+    })
+    .await;
+    let (mut owner, mut guest) = (connect(&url).await, connect(&url).await);
+    hello(&mut owner).await;
+    let guest_token = hello_token(&mut guest).await;
+    send(
+        &mut owner,
+        &ClientMsg::SetStronghold {
+            kind: StrongholdKind::Classic,
+        },
+    )
+    .await;
+    assert_eq!(
+        recv(&mut owner).await,
+        Some(ServerMsg::StrongholdRejected {
+            reason: StrongholdRejection::NotSelectable
+        })
+    );
+    for (ws, kind) in [
+        (&mut owner, StrongholdKind::Artillery),
+        (&mut guest, StrongholdKind::Command),
+    ] {
+        send(ws, &ClientMsg::SetStronghold { kind }).await;
+        assert_eq!(recv(ws).await, Some(ServerMsg::StrongholdSelected { kind }));
+    }
+    let invite = create_challenge(&mut owner).await;
+    send(
+        &mut owner,
+        &ClientMsg::SetStronghold {
+            kind: StrongholdKind::Bastion,
+        },
+    )
+    .await;
+    assert_eq!(
+        recv(&mut owner).await,
+        Some(ServerMsg::StrongholdRejected {
+            reason: StrongholdRejection::NotIdle
+        })
+    );
+    send(&mut guest, &ClientMsg::JoinChallenge { token: invite }).await;
+    let (owner_seat, _) = challenge_start(&mut owner).await;
+    challenge_start(&mut guest).await;
+    let mut kinds = [StrongholdKind::Command; 2];
+    kinds[owner_seat.index()] = StrongholdKind::Artillery;
+    let running = |v: &tbg_core::MatchView| v.phase == Phase::Running;
+    let view = wait_for_view(&mut owner, running).await;
+    assert_eq!(
+        view.strongholds.map(|s| s.kind),
+        kinds,
+        "BR-SK08: both public"
+    );
+    // 5 starting Energy buys tier 1 (3 Energy) on the Rapid Fire branch.
+    let intent = PlayerIntention::Fortify { branch: 1 };
+    send(&mut owner, &ClientMsg::Intent { seq: 1, intent }).await;
+    let me = owner_seat.index();
+    let fortified = |v: &tbg_core::MatchView| v.strongholds[me].tier == 1;
+    let view = wait_for_view(&mut owner, fortified).await;
+    assert_eq!(view.strongholds[me].branch, 1);
+    // The opponent sees it too, also after a reconnect.
+    drop(guest);
+    let mut guest = connect(&url).await;
+    hello_resume(&mut guest, guest_token).await;
+    let view = wait_for_view(&mut guest, fortified).await;
+    assert_eq!(view.strongholds.map(|s| s.kind), kinds);
+    end_by_surrender(&mut owner, &mut guest).await;
+    let replay = tokio::time::timeout(Duration::from_secs(2), replays.recv())
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(replay.strongholds, kinds);
+    assert_eq!(
+        replay.run().players[me].fort_tier,
+        1,
+        "replays rebuild the tier"
+    );
+}

@@ -32,25 +32,29 @@ fn bot_matches_are_frozen() {
     // P48-B: `betray_bp`/`betray_stumble` grew `UnitFx` and `cargo_rng`
     // joined `PlayerState`; hashes moved once more, behavior identical
     // (verified).
+    // D-46 added the Stronghold kind and Fortification to the state: the
+    // Classic matches, winners and end ticks are unchanged, only the hash.
+    // Merge of the roster waves with D-46: both grew the serialized state;
+    // hashes refrozen once, tick, winner and reason identical (verified).
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0x83a5_a17a_bd03_3d93u64,
+            0x72ab_a8ee_5567_01f3u64,
             2_214,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0xf888_bb06_077f_1856,
+            0xaea5_e367_028b_4446,
             3_284,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0x3fc1_d634_494b_7736,
+            0x3a9a_cfe5_ccf4_c056,
             1_833,
             Seat::B,
             StrongholdDestroyed,
