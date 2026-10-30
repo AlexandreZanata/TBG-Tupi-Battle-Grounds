@@ -44,6 +44,11 @@ fn action(value: &str) -> Option<UiAction> {
         _ if value.starts_with("lang:") => {
             return crate::i18n::Lang::from_code(&value["lang:".len()..]).map(UiAction::SetLang);
         }
+        // ARENAS-G: the Arenas page pokes `data-action="arena:tundra"`.
+        _ if value.starts_with("arena:") => {
+            return tbg_core::Arena::from_slug(&value["arena:".len()..])
+                .map(UiAction::PreviewArena);
+        }
         _ => {
             let code = value.strip_prefix("join:")?;
             if !code

@@ -7,16 +7,18 @@ use serde::{Deserialize, Serialize};
 use crate::arcana::{self, ArcanaPreset};
 use crate::intent::{PlayerIntention, Rejection};
 use crate::state::Outcome;
-use crate::types::{Seat, StrongholdKind};
+use crate::types::{Arena, Seat, StrongholdKind};
 use crate::view::MatchView;
 
+/// v15: arenas (ARENAS-G): `MatchStart::arena` and the seat's effective
+/// Evolution prices in `MatchView::evolve_costs`.
 /// v14: the P43 staged affliction/carrier events and `UnitView.fx` merged
 /// with the D-46 Stronghold kinds. v13 was Stronghold kinds and Fortification
 /// (D-46: `SetStronghold`, `MatchView::strongholds`, `PlayerIntention::Fortify`).
 /// v12: Interest became a regen boost (`MatchView::regen_bp` replaces the
 /// payment fields, `Event::InterestPaid` is gone). v11 was the fifteen-node
 /// Arcana schema; older peers are refused.
-pub const PROTOCOL_VERSION: u16 = 14;
+pub const PROTOCOL_VERSION: u16 = 15;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a
@@ -110,6 +112,9 @@ pub enum ServerMsg {
         /// v8 (D-40): both frozen presets, indexed by `Seat::index()`;
         /// public once paired (BR-AR05, BR-AR07).
         arcanas: [ArcanaPreset; 2],
+        /// v15 (ARENAS-G): the match's arena, drawn by the server at
+        /// pairing; the same for both seats and every reconnect.
+        arena: Arena,
     },
     /// Boxed: a view is far larger than every other message.
     View(Box<MatchView>),

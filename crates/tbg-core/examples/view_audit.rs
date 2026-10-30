@@ -266,6 +266,7 @@ fn collect_shares(view: &MatchView, agg: &mut ShareAgg) {
         ("clock", field_len(&view.clock)),
         ("elapsed", field_len(&view.elapsed)),
         ("regen_bp", field_len(&view.regen_bp)),
+        ("evolve_costs", field_len(&view.evolve_costs)),
         ("stronghold_hp", field_len(&view.stronghold_hp)),
         ("strongholds", field_len(&view.strongholds)),
         ("shields", field_len(&view.shields)),
@@ -373,6 +374,7 @@ struct Extra {
     clock: Tick,
     elapsed: u32,
     regen_bp: u32,
+    evolve_costs: [u32; 2],
     strongholds: [StrongholdView; 2],
     shields: [i32; 2],
     augments: [AugmentCounts; 2],
@@ -384,6 +386,7 @@ fn extra_of(view: &MatchView) -> Extra {
         clock: view.clock,
         elapsed: view.elapsed,
         regen_bp: view.regen_bp,
+        evolve_costs: view.evolve_costs,
         strongholds: view.strongholds,
         shields: view.shields,
         augments: view.augments,
@@ -403,6 +406,7 @@ fn extra_state(state: &MatchState, seat: Seat) -> Extra {
         clock: state.clock,
         elapsed: state.tick.saturating_sub(content::RUNNING_START),
         regen_bp: state.rules().interest.regen_bp(state.player(seat).energy),
+        evolve_costs: [0, 1].map(|tier| state.evolve_price(seat, tier)),
         strongholds: Seat::BOTH.map(|s| StrongholdView {
             kind: state.player(s).stronghold,
             tier: state.player(s).fort_tier,
@@ -772,6 +776,7 @@ fn assemble_c(view: &ViewC, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Se
         clock: view.extra.clock,
         elapsed: view.extra.elapsed,
         regen_bp: view.extra.regen_bp,
+        evolve_costs: view.extra.evolve_costs,
         strongholds: view.extra.strongholds,
         shields: view.extra.shields,
         augments: view.extra.augments,
@@ -796,6 +801,7 @@ fn assemble_b(view: &ViewB, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Se
         clock: view.extra.clock,
         elapsed: view.extra.elapsed,
         regen_bp: view.extra.regen_bp,
+        evolve_costs: view.extra.evolve_costs,
         strongholds: view.extra.strongholds,
         shields: view.extra.shields,
         augments: view.extra.augments,
@@ -975,6 +981,10 @@ fn assert_same(got: &MatchView, want: &MatchView, label: &str, context: &str) {
     assert_eq!(got.clock, want.clock, "{label} clock {context}");
     assert_eq!(got.elapsed, want.elapsed, "{label} elapsed {context}");
     assert_eq!(got.regen_bp, want.regen_bp, "{label} regen_bp {context}");
+    assert_eq!(
+        got.evolve_costs, want.evolve_costs,
+        "{label} evolve_costs {context}"
+    );
     assert_eq!(
         got.strongholds, want.strongholds,
         "{label} strongholds {context}"
@@ -1400,6 +1410,7 @@ fn rebuild_a(
         clock: view.extra.clock,
         elapsed: view.extra.elapsed,
         regen_bp: view.extra.regen_bp,
+        evolve_costs: view.extra.evolve_costs,
         strongholds: view.extra.strongholds,
         shields: view.extra.shields,
         augments: view.extra.augments,
@@ -1466,6 +1477,7 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
             clock: view.extra.clock,
             elapsed: view.extra.elapsed,
             regen_bp: view.extra.regen_bp,
+            evolve_costs: view.extra.evolve_costs,
             strongholds: view.extra.strongholds,
             shields: view.extra.shields,
             augments: view.extra.augments,

@@ -232,6 +232,52 @@ pub enum Status {
     Rooted { ticks_left: u16 },
 }
 
+/// The match's arena (ARENAS-G): drawn by the server at pairing, chosen in
+/// practice, fixed for the whole match. Order is a serialization contract.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Arena {
+    /// Verdant Forest: the neutral reference.
+    #[default]
+    Forest,
+    Tundra,
+    Volcanic,
+    Ruins,
+    Storm,
+}
+
+impl Arena {
+    pub const ALL: [Arena; 5] = [
+        Arena::Forest,
+        Arena::Tundra,
+        Arena::Volcanic,
+        Arena::Ruins,
+        Arena::Storm,
+    ];
+
+    pub fn index(self) -> usize {
+        self as usize
+    }
+
+    pub fn from_index(i: usize) -> Option<Arena> {
+        Arena::ALL.get(i).copied()
+    }
+
+    /// Stable lowercase identifier for URLs, storage and catalogs.
+    pub fn slug(self) -> &'static str {
+        match self {
+            Arena::Forest => "forest",
+            Arena::Tundra => "tundra",
+            Arena::Volcanic => "volcanic",
+            Arena::Ruins => "ruins",
+            Arena::Storm => "storm",
+        }
+    }
+
+    pub fn from_slug(slug: &str) -> Option<Arena> {
+        Arena::ALL.into_iter().find(|a| a.slug() == slug)
+    }
+}
+
 /// Kind of a seat's Stronghold, chosen free before the match and frozen at
 /// pairing (GAME-DESIGN §10.4, BR-SK01). Order is a serialization contract.
 /// `Classic` is the reference tower every kind is measured against: the

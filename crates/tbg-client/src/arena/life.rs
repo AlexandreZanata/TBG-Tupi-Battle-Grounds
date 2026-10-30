@@ -85,6 +85,7 @@ pub(super) fn spawn(
     });
     for (x, z) in BRAZIERS {
         commands.spawn((
+            super::ArenaScene,
             Mesh3d(fire.clone()),
             MeshMaterial3d(fire_mat.clone()),
             Transform::from_xyz(x, 0.53, z),
@@ -134,6 +135,7 @@ fn flag(
         let m = &meshes[usize::from(!own)][usize::from(segment == 1)];
         let rest = at + Vec3::new(0.0, -0.08 - segment as f32 * 0.15, 0.0);
         let mut entity = commands.spawn((
+            super::ArenaScene,
             Mesh3d(m.clone()),
             MeshMaterial3d(mat.clone()),
             Transform::from_translation(rest),

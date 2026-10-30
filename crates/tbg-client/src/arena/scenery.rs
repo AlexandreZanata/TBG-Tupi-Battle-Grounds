@@ -154,6 +154,7 @@ pub(super) fn spawn(
     let triangles = mesh::triangles(&scenery);
     // Distant details never join the shadow pass; only the original arena casts shadows.
     commands.spawn((
+        super::ArenaScene,
         Name::new("offshore islets and landmarks"),
         Mesh3d(meshes.add(scenery)),
         MeshMaterial3d(material.clone()),

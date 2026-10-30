@@ -52,8 +52,9 @@ pub(super) struct Match {
     pub(super) replay: Option<Replay>,
 }
 
+/// `(seed, arena)` are the match's two pairing draws (ARENAS-G).
 pub(crate) fn spawn(
-    seed: u64,
+    (seed, arena): (u64, tbg_core::Arena),
     players: [Player; 2],
     mode: MatchMode,
     lobby: mpsc::Sender<LobbyCmd>,
@@ -68,7 +69,9 @@ pub(crate) fn spawn(
     let arcanas = players.each_ref().map(|p| p.arcanas);
     let strongholds = players.each_ref().map(|p| p.stronghold);
     let m = Match {
-        state: MatchState::with_arcanas(seed, arcanas).with_strongholds(strongholds),
+        state: MatchState::with_arcanas(seed, arcanas)
+            .with_strongholds(strongholds)
+            .with_arena(arena),
         players,
         detached_at,
         stats: Default::default(),
@@ -80,6 +83,7 @@ pub(crate) fn spawn(
             seed,
             arcanas,
             strongholds,
+            arena,
             ..Replay::default()
         }),
     };

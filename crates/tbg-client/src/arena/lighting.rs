@@ -1,7 +1,7 @@
 //! Warm upper-left sunlight with one focused shadow cascade and cool sky fill.
 
 use super::theme::Theme;
-use crate::config;
+use crate::{art::palette::SKY_TOP, config};
 use bevy::{
     light::{CascadeShadowConfigBuilder, DirectionalLightShadowMap},
     prelude::*,
@@ -16,11 +16,15 @@ pub(super) fn spawn(commands: &mut Commands, theme: Theme) {
     } else {
         (12_000.0, 1200.0)
     };
-    if theme != Theme::Forest {
-        commands.insert_resource(ClearColor(palette.sky));
-    }
+    // Always set: switching back to the Forest must restore its sky.
+    commands.insert_resource(ClearColor(if theme == Theme::Forest {
+        SKY_TOP
+    } else {
+        palette.sky
+    }));
     commands.insert_resource(DirectionalLightShadowMap { size: 1024 });
     commands.spawn((
+        super::ArenaScene,
         DirectionalLight {
             color: palette.key,
             illuminance: lux,

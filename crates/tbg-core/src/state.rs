@@ -7,7 +7,9 @@ use crate::augment::{AugmentCounts, AugmentState};
 use crate::content::{self, Ability, Stats, BP, MIN_INTERVAL, OFFERS};
 use crate::rng::Pcg32;
 use crate::ruleset::Ruleset;
-use crate::types::{Archetype, Faction, Seat, Status, StrongholdKind, Tick, UnitId, UnitKind};
+use crate::types::{
+    Archetype, Arena, Faction, Seat, Status, StrongholdKind, Tick, UnitId, UnitKind,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Phase {
@@ -178,6 +180,9 @@ pub struct PlayerState {
     /// Tower Fury stacks and their shared expiry tick.
     pub fury_stacks: u8,
     pub fury_until: Tick,
+    /// ARENAS-G: the arena's first-Evolution discount was spent (only set
+    /// when the arena has one, on a successful Evolution).
+    pub arena_discount_used: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -306,6 +311,8 @@ pub struct MatchState {
     pub outcome: Option<Outcome>,
     /// Augment draw, cycle and open round (BR-AG01–08).
     pub augments: AugmentState,
+    /// ARENAS-G: fixed at creation; its modifiers apply to both seats.
+    pub arena: Arena,
     /// Per-seat living role counts for conditional Arcanas; derived each
     /// tick, so it is not serialized or part of the state hash.
     #[serde(skip, default)]
@@ -398,6 +405,21 @@ impl MatchState {
             .count()
     }
 
+    /// This match's arena modifiers.
+    pub fn arena_rule(&self) -> crate::content::ArenaRule {
+        self.rules.arenas[self.arena.index()]
+    }
+
+    /// The arena's troop modifiers join a unit's Augment sums, so they share
+    /// the single truncation (BR-X01). Every unit on the field gets them,
+    /// summons and cargo included, on both seats.
+    fn arena_bonus(&self, mut bonus: crate::content::AugmentBonus) -> crate::content::AugmentBonus {
+        let a = self.arena_rule();
+        bonus.move_bp += i64::from(a.move_bp);
+        bonus.atk_bp += i64::from(a.atk_bp);
+        bonus
+    }
+
     pub fn stats_of(&self, u: &Unit) -> Stats {
         #[cfg(feature = "bench-profile")]
         crate::profiling::STATS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -417,7 +439,7 @@ impl MatchState {
                 u.branch,
                 0,
                 &ArcanaPreset::NEUTRAL,
-                &bonus,
+                &self.arena_bonus(bonus),
             );
         }
         let mut st = self.stats_for(u.seat, u.kind, u.tier, u.branch);
@@ -483,8 +505,14 @@ impl MatchState {
         let p = self.player(seat);
         let level = p.synergy[self.rules.def(kind).faction.index()];
         let bonus = crate::augment::unit_bonus(&p.augments, p.synergy, kind, tier);
-        self.rules
-            .stats_with(kind, tier, branch, level, &p.arcanas, &bonus)
+        self.rules.stats_with(
+            kind,
+            tier,
+            branch,
+            level,
+            &p.arcanas,
+            &self.arena_bonus(bonus),
+        )
     }
 
     /// Recompute max HP for every living conventional unit of a seat.

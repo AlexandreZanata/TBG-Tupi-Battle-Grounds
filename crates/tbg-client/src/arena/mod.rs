@@ -12,6 +12,7 @@ mod lighting;
 mod maritime;
 mod props;
 mod rocks;
+mod scene;
 mod scenery;
 mod strongholds;
 pub(super) mod theme;
@@ -22,8 +23,12 @@ mod water;
 
 pub(super) type Part = (Shape, Color, Transform);
 
+pub use scene::ActiveArena;
+use scene::ArenaScene;
+
 pub fn plugin(app: &mut App) {
-    app.add_systems(Startup, spawn_arena).add_systems(
+    scene::plugin(app);
+    app.add_systems(
         Update,
         (towers::damage_states, life::animate, maritime::animate),
     );
@@ -40,13 +45,14 @@ pub(super) fn painted(parts: Vec<Part>) -> Mesh {
     .unwrap_or_else(|| Cuboid::new(0.01, 0.01, 0.01).into())
 }
 
-fn spawn_arena(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut mats: ResMut<Assets<StandardMaterial>>,
+/// Builds one arena's static scene; every entity carries `ArenaScene`.
+fn build(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    mats: &mut Assets<StandardMaterial>,
+    theme: theme::Theme,
 ) {
-    let theme = theme::Theme::selected();
-    info!("arena theme: {} (visual only)", theme.name());
+    info!("arena scene: {}", theme.name());
     let kit = themes::build(theme);
     let mat = mats.add(StandardMaterial {
         base_color: Color::WHITE,
@@ -84,6 +90,7 @@ fn spawn_arena(
             continue;
         }
         let mut entity = commands.spawn((
+            ArenaScene,
             Name::new(format!("arena {name}")),
             Mesh3d(meshes.add(m)),
             MeshMaterial3d(sea_mat.clone()),
@@ -96,6 +103,7 @@ fn spawn_arena(
     }
     if let Some(terrain) = mesh::merge(terrain) {
         commands.spawn((
+            ArenaScene,
             Name::new("arena merged terrain"),
             Mesh3d(meshes.add(terrain)),
             MeshMaterial3d(mat.clone()),
@@ -113,6 +121,7 @@ fn spawn_arena(
             ..default()
         });
         commands.spawn((
+            ArenaScene,
             Name::new("arena themed accents"),
             Mesh3d(meshes.add(glow)),
             MeshMaterial3d(glow_mat),
@@ -123,13 +132,13 @@ fn spawn_arena(
     // The maritime scenery (isles, lighthouse, pier) belongs to the Forest's
     // seascape; the themed arenas have their own offshore silhouettes.
     if theme == theme::Theme::Forest {
-        total += scenery::spawn(&mut commands, &mut meshes, &mat);
+        total += scenery::spawn(commands, meshes, &mat);
     }
     // The Strongholds are the kind-based D-46 towers (owner-approved P54
     // look) in every arena: `strongholds` builds them from the views.
-    total += life::spawn(&mut commands, &mut meshes, &mut mats, &mat, theme);
+    total += life::spawn(commands, meshes, mats, &mat, theme);
     info!("arena total: {total} triangles");
-    lighting::spawn(&mut commands, theme);
+    lighting::spawn(commands, theme);
 }
 
 /// The coastal foam, plus the seascape's offshore foam in the Forest.

@@ -76,6 +76,8 @@ impl Match {
             }),
             // Owner revision 2026-10-29: economy and Augment telemetry.
             "augments": augments,
+            // ARENAS-G (D-55): the arena drawn at pairing.
+            "arena": self.state.arena.index(),
         });
         tracing::info!(target: "match_end", "{line}");
         line

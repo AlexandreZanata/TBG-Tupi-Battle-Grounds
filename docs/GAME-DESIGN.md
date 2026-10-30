@@ -41,6 +41,7 @@ evolve, and which factions you combine.
 | PlayerIntention | Client request (purchase, evolve, reposition); a request, never a state change | `PlayerIntention` |
 | AuthoritativeServer | The process that owns combat, Energy, shop timers, outcomes | — |
 | Stronghold | **Proposed (new):** each player's base at their end of the `BattleLine` | `Stronghold` |
+| Arena | **Proposed (ARENAS-G, D-55):** the battlefield of one match, one of five; the server draws it and its one small modifier applies to both sides | `Arena` |
 | Cosmetic | Visual item with no gameplay effect | `Cosmetic` |
 | Inventory | Account-bound collection of owned cosmetics | `Inventory` |
 | Commander | Player-facing name for the player (TBD by brand voice) | `Player` |
@@ -708,3 +709,37 @@ Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). S
 | Blood Furnace | Undead | DPS | 4 | 440 | 36 | 1.8 | 0.8 | 0.9 | Each hit burns 6 % max HP; damage grows up to ×4 as HP falls |
 | Bloodweaver | Undead | Support | 3 | 300 | — | 5.0 | 3.0 | 0.9 | Moves up to 120 HP from the healthiest ally to the most wounded |
 | Cargo Crab | Machines | Tank | 5 | 1 400 | 20 | 1.5 | 0.8 | 0.5 | Carries one non-Tank ally that single-target attacks cannot reach |
+
+## 12. Arenas (active, values Proposed, ARENAS-G, D-55)
+
+Every match is played in one of five `Arena`s. Each changes one small
+thing, **the same for both sides**; the Forest is the neutral reference.
+Values are **Proposed** until the balance lab confirms them (D-33).
+
+| Arena | Effect on both sides |
+|-------|----------------------|
+| Verdant Forest | None |
+| Frozen Tundra | Troop movement speed −10 % |
+| Volcanic Forge | Troop attack speed +8 % |
+| Ancient Ruins | Each player's first successful `Evolution` costs 1 `Energy` less |
+| Storm Valley | Base `Energy` regeneration +8 % |
+
+- **BR-AR01** Online, the server draws the `Arena` uniformly at pairing
+  (every mode: casual, ranked, rooms, challenges, rematches), before the
+  match starts, independently of the match seed. Both players and every
+  reconnect see the same `Arena`; each new match draws again. Clients
+  never choose an online `Arena`.
+- **BR-AR02** Practice uses the `Arena` the player chose on the Arenas
+  page (Forest by default); "Play again" keeps it.
+- **BR-AR03** Troops are every unit on the `BattleLine`, summons and
+  carried cargo included; `Stronghold`s, `Augment`s and `Arcana`s are
+  unchanged. Movement and attack-speed effects join the other basis-point
+  bonuses with one truncation (BR-X01): interval = base × 10 000 /
+  (10 000 + attack bp), then the existing caps.
+- **BR-AR04** The Ruins discount is spent only by a successful `Evolution`
+  (a rejected one keeps it), once per player, stacks with `Augment`
+  discounts, and never takes the price below 1 `Energy`. The view shows
+  each player's current `Evolution` prices.
+- **BR-AR05** The Storm bonus adds 800 bp to the base regeneration beside
+  Interest (BR-E05); the existing remainder carries the rounding.
+

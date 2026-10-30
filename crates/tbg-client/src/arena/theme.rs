@@ -38,16 +38,27 @@ pub(super) const fn rgb(hex: u32) -> Color {
     )
 }
 
+impl From<tbg_core::Arena> for Theme {
+    fn from(arena: tbg_core::Arena) -> Self {
+        match arena {
+            tbg_core::Arena::Forest => Self::Forest,
+            tbg_core::Arena::Tundra => Self::Tundra,
+            tbg_core::Arena::Volcanic => Self::Volcanic,
+            tbg_core::Arena::Ruins => Self::Ruins,
+            tbg_core::Arena::Storm => Self::Storm,
+        }
+    }
+}
+
 impl Theme {
+    /// The scene outside a match: the `?theme`/`?arena` inspection override,
+    /// else the saved Practice choice. A match always shows its own arena.
     pub fn selected() -> Self {
         let name = config::url_param("theme").or_else(|| config::url_param("arena"));
-        match name.as_deref() {
-            Some("tundra") => Self::Tundra,
-            Some("volcanic") => Self::Volcanic,
-            Some("ruins") => Self::Ruins,
-            Some("storm") => Self::Storm,
-            _ => Self::Forest,
-        }
+        name.as_deref()
+            .and_then(tbg_core::Arena::from_slug)
+            .unwrap_or_else(config::load_arena)
+            .into()
     }
 
     pub fn name(self) -> &'static str {

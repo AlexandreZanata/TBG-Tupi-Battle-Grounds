@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 14,
-        "v14: roster waves (P43 events, UnitView.fx) merged with D-46 Stronghold kinds"
+        PROTOCOL_VERSION, 15,
+        "v15: arenas (D-55): MatchStart::arena and MatchView::evolve_costs"
     );
 }
 

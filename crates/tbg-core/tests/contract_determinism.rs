@@ -38,25 +38,28 @@ fn bot_matches_are_frozen() {
     // hashes refrozen once, tick, winner and reason identical (verified).
     // D-50: the Shop draws all 25 kinds, so the bots buy differently; end
     // ticks moved, every match still ends by a destroyed Stronghold.
+    // D-55 (ARENAS-G): `MatchState::arena` and `arena_discount_used` joined
+    // the serialized state; the Forest is neutral, so hashes moved once with
+    // tick, winner and reason identical (verified on all three seeds).
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0x761f_36c9_e382_648fu64,
+            0xdf5d_547e_36e4_7845u64,
             3_336,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0x4d1d_af66_d7d2_ff79,
+            0xca17_5202_6278_78e5,
             2_286,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0xa1b4_2046_33c4_0547,
+            0x4069_7a3a_89d9_10e1,
             6_295,
             Seat::B,
             StrongholdDestroyed,

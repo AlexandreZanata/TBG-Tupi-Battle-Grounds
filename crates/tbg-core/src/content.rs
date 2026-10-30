@@ -207,6 +207,50 @@ pub const WINDUP: u16 = 6;
 pub const MIN_INTERVAL: u16 = 5;
 /// Cost of evolving to tier 1 and to tier 2 (P16-C, Proposed: tier 1 3 → 2).
 pub const EVOLVE_COST: [u32; 2] = [1_200, 2_400];
+
+/// One arena's modifiers, the same for both seats (ARENAS-G, Proposed).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ArenaRule {
+    /// Troop movement speed in bp, beside Evolution and Augments (BR-X01).
+    pub move_bp: i32,
+    /// Troop attack speed in bp, beside Evolution, Augments and Synergy.
+    pub atk_bp: i32,
+    /// Extra base Energy regeneration in bp of the base rate, beside
+    /// Interest's bp (BR-E05); the existing remainder keeps it exact.
+    pub regen_bp: u32,
+    /// Sub-Energy off each player's first successful Evolution.
+    pub first_evolve_discount: u32,
+}
+
+impl ArenaRule {
+    pub const NONE: ArenaRule = ArenaRule {
+        move_bp: 0,
+        atk_bp: 0,
+        regen_bp: 0,
+        first_evolve_discount: 0,
+    };
+}
+
+/// Indexed by `Arena::index()`: Forest, Tundra, Volcanic, Ruins, Storm.
+pub const ARENA_RULES: [ArenaRule; 5] = [
+    ArenaRule::NONE,
+    ArenaRule {
+        move_bp: -1_000,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        atk_bp: 800,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        first_evolve_discount: ENERGY_SCALE,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        regen_bp: 800,
+        ..ArenaRule::NONE
+    },
+];
 pub const BP: i64 = 10_000;
 
 /// Synergy thresholds: living units of one faction for level 1 and 2.
