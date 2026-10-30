@@ -40,6 +40,9 @@ fn matchup(kind: UnitKind) -> (&'static str, &'static str) {
         UnitKind::Shatterback => ("long fights", "burst before plates break"),
         UnitKind::BloodFurnace => ("clumped melee", "focus it early, control"),
         UnitKind::Bloodweaver => ("armies that trade HP", "burst, heal cut"),
+        // P47 wave D (staged; §11 identity lines, not in the Shop yet).
+        UnitKind::Oilpress => ("protect the line", "go around, burst it down"),
+        UnitKind::Drumguard => ("one protected carry", "kill the drummer"),
         // P43: staged kinds render as a blockout until their wave lands.
         #[allow(unreachable_patterns)]
         _ => ("a new unit", "scout it first"),

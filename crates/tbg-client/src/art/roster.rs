@@ -116,6 +116,15 @@ const WEAVER: &[(Color, Color)] = &[
     (SKIN, Color::srgb_u8(0x8A, 0x7B, 0x9B)),
     (LEATHER, Color::srgb_u8(0x4A, 0x3A, 0x5A)),
 ];
+/// P47 placeholders: recolored figures until the character phases.
+const OILPRESS: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0x3E, 0x44, 0x4C)),
+    (LEATHER, Color::srgb_u8(0x8A, 0x6B, 0x3A)),
+];
+const DRUMGUARD: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0xC9, 0x8A, 0x6B)),
+    (TRIM, Color::srgb_u8(0x7F, 0xA8, 0xC9)),
+];
 
 fn recolor(mut spec: FigureSpec, map: &[(Color, Color)]) -> FigureSpec {
     for part in &mut spec.parts {
@@ -166,6 +175,10 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::Shatterback => recolor(plants::rootcaller(f), SHATTERBACK),
         UnitKind::BloodFurnace => recolor(undead::bone_brute(f), FURNACE),
         UnitKind::Bloodweaver => recolor(undead::hexer(f), WEAVER),
+        // P47 placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Oilpress => recolor(machines::siege_walker(f), OILPRESS),
+        UnitKind::Drumguard => recolor(humans::shieldbearer(f), DRUMGUARD),
         // P43: staged kinds render as a plain gray silhouette until their
         // wave lands (art/mod.rs builds every kind in ALL_KINDS).
         #[allow(unreachable_patterns)]
