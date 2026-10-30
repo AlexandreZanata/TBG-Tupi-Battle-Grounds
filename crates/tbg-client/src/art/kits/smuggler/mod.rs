@@ -43,7 +43,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             let lean = if f.b { 14.0 } else { 9.0 };
             moves::walk(m, pose, lean, 4.0);
         }
-        Clip::Cast => moves::strike(m, pose, &p, THROW, 1.2),
+        Clip::Cast => moves::toss(m, pose, &p),
         Clip::Hit => moves::hit(m, pose, 1.0),
         Clip::Death => moves::death(m, pose, &p, Fall::Forward),
         Clip::Spawn => moves::spawn(m, pose, &p, Entry::Pop),

@@ -275,3 +275,123 @@ pub fn greaves(v: &mut Vec<PartSpec>, color: Color) {
         ));
     }
 }
+
+/// Undead anatomy: a skull with dark sockets, spine, ribs and pelvis,
+/// limb bones with knobbed joints, bony hands and feet. Kits dress it
+/// (robes, armor) and light its eyes.
+pub fn skeleton(v: &mut Vec<PartSpec>, p: &Proportions, bone: Color) {
+    let (t, h) = (p.torso, p.head);
+    v.extend([
+        part(
+            Body(Hips),
+            Box(t.x * 0.72, 0.09, t.z * 0.6),
+            bone,
+            [0.0, 0.0, 0.0],
+        ),
+        part(
+            Body(Chest),
+            Cyl(0.03, t.y * 0.55),
+            bone,
+            [0.0, t.y * 0.22, -t.z * 0.15],
+        ),
+        part(
+            Body(Chest),
+            Box(t.x * 0.95, 0.035, 0.05),
+            bone,
+            [0.0, t.y * 0.92, 0.0],
+        ),
+        part(
+            Body(Chest),
+            Box(0.045, t.y * 0.42, 0.03),
+            bone,
+            [0.0, t.y * 0.62, t.x * 0.29],
+        ),
+        part(Body(Head), Ball(h), bone, [0.0, h * 0.05, 0.0]).scale([1.0, 0.95, 1.08]),
+        part(
+            Body(Head),
+            Box(h * 1.2, h * 0.4, h * 0.85),
+            bone,
+            [0.0, -h * 0.68, h * 0.3],
+        ),
+        part(
+            Body(Head),
+            Box(h * 0.95, 0.015, 0.02),
+            DARK,
+            [0.0, -h * 0.5, h * 0.74],
+        ),
+        part(
+            Body(Head),
+            Box(h * 0.14, h * 0.2, 0.02),
+            DARK,
+            [0.0, -h * 0.2, h * 1.0],
+        ),
+    ]);
+    for s in [-1.0f32, 1.0] {
+        v.push(part(
+            Body(Head),
+            Box(h * 0.38, h * 0.34, 0.02),
+            DARK,
+            [s * h * 0.37, h * 0.1, h * 0.95],
+        ));
+    }
+    for (k, y) in [(0.0f32, 0.45f32), (0.5, 0.62), (1.0, 0.79)] {
+        let r = t.x * (0.32 + 0.1 * k);
+        v.push(
+            part(
+                Body(Chest),
+                Ring(0.017, r, 360.0),
+                bone,
+                [0.0, t.y * y, 0.0],
+            )
+            .scale([1.0, 1.0, 0.72]),
+        );
+    }
+    for (arm, fore, hand, thigh, shin, foot) in [
+        (UpperArmL, ForearmL, HandL, ThighL, ShinL, FootL),
+        (UpperArmR, ForearmR, HandR, ThighR, ShinR, FootR),
+    ] {
+        v.extend([
+            part(Body(arm), Ball(0.042), bone, [0.0, 0.0, 0.0]),
+            part(
+                Body(arm),
+                Pill(0.026, p.arm * 0.75),
+                bone,
+                [0.0, -p.arm * 0.5, 0.0],
+            ),
+            part(Body(fore), Ball(0.032), bone, [0.0, 0.0, 0.0]),
+            part(
+                Body(fore),
+                Pill(0.018, p.arm * 0.7),
+                bone,
+                [0.015, -p.arm * 0.45, 0.0],
+            ),
+            part(
+                Body(fore),
+                Pill(0.014, p.arm * 0.7),
+                bone,
+                [-0.02, -p.arm * 0.45, 0.0],
+            ),
+            part(Body(hand), Box(0.07, 0.05, 0.08), bone, [0.0, -0.02, 0.0]),
+            part(Body(thigh), Ball(0.045), bone, [0.0, 0.0, 0.0]),
+            part(
+                Body(thigh),
+                Pill(0.032, p.leg * 0.38),
+                bone,
+                [0.0, -p.leg * 0.25, 0.0],
+            ),
+            part(Body(shin), Ball(0.038), bone, [0.0, 0.0, 0.0]),
+            part(
+                Body(shin),
+                Pill(0.025, p.leg * 0.38),
+                bone,
+                [0.0, -p.leg * 0.25, 0.0],
+            ),
+            part(Body(foot), Box(0.09, 0.045, 0.16), bone, [0.0, -0.02, 0.04]),
+        ]);
+        for x in [-0.025, 0.0, 0.025] {
+            v.push(
+                part(Body(hand), Cone(0.012, 0.07), bone, [x, -0.07, 0.01]).rot([180.0, 0.0, 0.0]),
+            );
+        }
+    }
+}

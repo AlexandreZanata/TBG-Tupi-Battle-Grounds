@@ -412,3 +412,17 @@ pub fn aim_level(m: &Moment, pose: &mut Pose, height: f32, arc: f32) -> f32 {
     let need = crate::art::kits::aim::tangent(from, aim.target, arc, 0.0);
     crate::art::kits::aim::pitch(need).clamp(-0.5, 0.9) * aim.weight
 }
+
+/// The overhand `THROW` retimed so the release lands on a cast's Release
+/// (k 0.355) instead of a ranged one (k 0.29): tossed flasks, crates.
+pub fn toss(m: &Moment, pose: &mut Pose, p: &Proportions) {
+    let k = (m.t / ATTACK).clamp(0.0, 1.0);
+    let k = if k < 0.355 {
+        k * 0.29 / 0.355
+    } else {
+        0.29 + (k - 0.355) * 0.71 / 0.645
+    };
+    play(pose, THROW, k);
+    tools::face(pose, m.aim, Vec3::ZERO);
+    tools::plant(pose, p, tools::stance(p, 1.2, 0.06));
+}

@@ -4,6 +4,7 @@
 //! function pointers; units without a kit keep the shared library.
 
 pub mod aim;
+mod antidote_brewer;
 mod bombard;
 mod bone_brute;
 mod cargo_crab;
@@ -12,10 +13,13 @@ pub mod common;
 mod drumguard;
 mod farwatch;
 pub mod gait;
+mod leechroot;
 mod longaxe;
 mod oilpress;
 mod old_finn;
 mod rootcaller;
+mod rotcap;
+mod shatterback;
 mod siege_walker;
 mod smuggler;
 mod tools;
@@ -103,6 +107,10 @@ static CRATE: Kit = cargo_crate::KIT;
 static BOMBARD: Kit = bombard::KIT;
 static OILPRESS: Kit = oilpress::KIT;
 static CARGO_CRAB: Kit = cargo_crab::KIT;
+static ROTCAP: Kit = rotcap::KIT;
+static LEECHROOT: Kit = leechroot::KIT;
+static ANTIDOTE_BREWER: Kit = antidote_brewer::KIT;
+static SHATTERBACK: Kit = shatterback::KIT;
 
 /// The kit of `kind`, if it has one.
 pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
@@ -119,6 +127,10 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Bombard => Some(&BOMBARD),
         UnitKind::Oilpress => Some(&OILPRESS),
         UnitKind::CargoCrab => Some(&CARGO_CRAB),
+        UnitKind::Rotcap => Some(&ROTCAP),
+        UnitKind::Leechroot => Some(&LEECHROOT),
+        UnitKind::AntidoteBrewer => Some(&ANTIDOTE_BREWER),
+        UnitKind::Shatterback => Some(&SHATTERBACK),
         _ => None,
     }
 }
