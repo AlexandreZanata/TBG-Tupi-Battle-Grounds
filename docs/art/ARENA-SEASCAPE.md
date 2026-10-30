@@ -32,6 +32,12 @@ Implemented a seeded 88x64 irregular water grid with subtle static relief, blue 
 
 `cargo check -p tbg-client --target wasm32-unknown-unknown`: pass (2.35 s initial, 0.39 s after non-coplanar foam refinement). `cargo fmt --all`: pass. Final appearance and timing are inspected after assembly; no performance claim yet.
 
+## C — Offshore composition
+
+Added two irregular, low-poly offshore islands, eight small pines, faceted shore rocks and two skerries. The western island carries a compact stone/red-band lighthouse and a wooden pier. One ivory-sailed boat has a bounded transform-only bob/roll. A small eastern cascade and its foam pool share the existing unlit foam batch. All shore foam shares the existing cosmetic drift. Static offshore terrain/landmarks are merged into one mesh, use the existing white terrain material and do not cast shadows; the boat uses the same material and also skips the shadow pass. Two new draw batches, one new animated entity, no material/texture/particle asset added.
+
+`cargo check -p tbg-client --target wasm32-unknown-unknown`: pass (0.89 s). Workspace Clippy passes with `-D warnings` (1.40 s) after correcting a stale helper call during layout separation. Island composition stays in `scenery.rs`; landmark models and the boat's visual motion stay in `maritime.rs`.
+
 ## Remaining stages
 
-C — background; D — lighting; E — composition; F — final validation and paired measurements. In progress.
+D — lighting; E — composition; F — final validation and paired measurements. In progress.
