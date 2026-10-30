@@ -827,9 +827,11 @@ form; the D-46 contract tests are untouched.
 **Consolidation (2026-10-30).** The P54/P55 kits (D-51, D-53) came later
 and are the owner's character direction: a unit with a kit keeps its own
 aim, shots, impacts and Death clip, and A-1's aim, hit reactions and
-faction deaths apply to units without a kit (today the Archer, whose
-five native forms come from A-1). A-1's other v2 forms remain the
-fallback for a kind without a kit; death hides HP bars for every unit.
+faction deaths apply to units without a kit. On 2026-10-30 the Archer migrated
+to its own art kit (`art/kits/archer/` with five distinct forms, own projectile via
+`visuals/attacks.rs`, and side-on draw/aim/loose/recoil motion); all 27 unit kinds
+now use the art kit standard. A-1's v2 forms remain the fallback for any kind
+without a kit; death hides HP bars for every unit.
 **Reopen when** a Stronghold kind needs its own impact point or muzzle for
 unit reactions, or phone support needs lighter forms.
 

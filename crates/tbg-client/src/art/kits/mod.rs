@@ -5,6 +5,7 @@
 
 pub mod aim;
 mod antidote_brewer;
+mod archer;
 mod beetling;
 mod blood_furnace;
 mod bloodweaver;
@@ -130,11 +131,13 @@ static SAWBOT: Kit = sawbot::KIT;
 static BLOOMKEEPER: Kit = bloomkeeper::KIT;
 static NESTER: Kit = nester::KIT;
 static BEETLING: Kit = beetling::KIT;
+static ARCHER: Kit = archer::KIT;
 static RAMPART: Kit = rampart::KIT;
 
 /// The kit of `kind`, if it has one.
 pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
     match kind {
+        UnitKind::Archer => Some(&ARCHER),
         UnitKind::SiegeWalker => Some(&SIEGE_WALKER),
         UnitKind::BoneBrute => Some(&BONE_BRUTE),
         UnitKind::Rootcaller => Some(&ROOTCALLER),
@@ -161,6 +164,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Nester => Some(&NESTER),
         UnitKind::Beetling => Some(&BEETLING),
         UnitKind::Rampart => Some(&RAMPART),
+        #[allow(unreachable_patterns)]
         _ => None,
     }
 }
