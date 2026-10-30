@@ -40,6 +40,9 @@ pub(crate) async fn handler(
     let ip = client_ip(peer, &headers);
     ws.max_message_size(MAX_CLIENT_MSG_BYTES)
         .max_frame_size(MAX_CLIENT_MSG_BYTES)
+        // Inbound messages are capped at 1 KiB; the library's default
+        // 128 KiB read allocation per socket buys no larger legal frame.
+        .read_buffer_size(4096)
         // P10: small write buffer, bounded pending bytes (backpressure
         // stays visible as slow-client drops instead of memory growth).
         .write_buffer_size(4096)

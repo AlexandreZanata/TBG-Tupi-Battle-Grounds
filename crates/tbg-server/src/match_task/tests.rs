@@ -4,6 +4,87 @@ use super::*;
 use crate::chan::ConnEvent;
 use tbg_core::{ArcanaPreset, EndReason, Outcome};
 
+#[test]
+fn online_sequence_zero_cannot_reset_duplicate_protection() {
+    // ARCHITECTURE section 5: authoritative intentions are applied once;
+    // offline seq=0 must never reset an online seat's acknowledgement.
+    let players = Seat::BOTH.map(|seat| Player {
+        token: [seat.index() as u8; 16],
+        name: format!("Player {seat:?}"),
+        conn: None,
+        account: None,
+        arcanas: ArcanaPreset::NEUTRAL,
+        stronghold: tbg_core::StrongholdKind::Classic,
+    });
+    let mut state = MatchState::new(1);
+    while !state.is_live() {
+        state.step();
+    }
+    state.players[0].energy = 100_000;
+    let mut game = Match {
+        state,
+        players,
+        detached_at: [None; 2],
+        stats: Default::default(),
+        pending: Default::default(),
+        applied: [false; 2],
+        mode: MatchMode::Casual,
+        metrics: Arc::new(Metrics::default()),
+        replay: None,
+    };
+    let command = |seq| MatchCmd::Intent {
+        seat: Seat::A,
+        seq,
+        intent: tbg_core::PlayerIntention::Purchase { offer: 0 },
+    };
+    game.command(command(1));
+    let after_first = game.state.clone();
+    for sequence in [1, 0, 0, 1] {
+        game.command(command(sequence));
+        assert!(
+            game.state == after_first,
+            "replayed sequence {sequence} mutated state"
+        );
+    }
+}
+
+#[test]
+fn a_view_drains_events_and_keeps_the_buffer() {
+    // P30-D review: draining by `clear` keeps capacity for the next view;
+    // a detached seat still loses its buffered events (they are
+    // presentation-only and a reconnect gets the full state).
+    let players = Seat::BOTH.map(|seat| Player {
+        token: [seat.index() as u8; 16],
+        name: format!("Player {seat:?}"),
+        conn: None,
+        account: None,
+        arcanas: ArcanaPreset::NEUTRAL,
+        stronghold: tbg_core::StrongholdKind::Classic,
+    });
+    let mut game = Match {
+        state: MatchState::new(1),
+        players,
+        detached_at: [None; 2],
+        stats: Default::default(),
+        pending: Default::default(),
+        applied: [false; 2],
+        mode: MatchMode::Casual,
+        metrics: Arc::new(Metrics::default()),
+        replay: None,
+    };
+    for _ in 0..40 {
+        let events = game.state.step();
+        game.pending[0].extend(events);
+    }
+    game.pending[0].push(tbg_core::Event::PhaseChanged {
+        phase: tbg_core::Phase::Running,
+    });
+    let capacity = game.pending[0].capacity();
+    game.send_view(Seat::A, false);
+    assert!(game.pending[0].is_empty());
+    assert_eq!(game.pending[0].capacity(), capacity);
+}
+
 #[tokio::test]
 async fn challenge_initial_detached_forfeits() {
     // BR-M03/BR-R08: a disconnect racing pairing gets the same window as

@@ -67,10 +67,8 @@ pub(crate) fn engage(state: &MatchState, u: &Unit, st: &Stats) -> Option<Engage>
 /// attacks, Stronghold fire, echoes, betrayal, Farwatch. Area damage,
 /// cleanse, transfers, bonds (and the passenger's own actions) still
 /// reach it. Carried units are never Tanks, so Guard never sees one.
-pub(crate) fn targetable(state: &MatchState, id: UnitId) -> bool {
-    state
-        .unit_index(id)
-        .is_some_and(|i| state.units[i].fx.carrier.is_none())
+pub(crate) fn targetable(unit: &Unit) -> bool {
+    unit.fx.carrier.is_none()
 }
 
 /// Guard first: the nearest living enemy Rampart within range. Otherwise
@@ -90,9 +88,13 @@ fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
     for e in state
         .units
         .iter()
-        .filter(|e| e.seat == enemy && e.hp > 0 && targetable(state, e.id))
+        // The candidate is already borrowed from this sorted unit vector;
+        // looking its id up again adds log(n) work to every candidate.
+        .filter(|e| e.seat == enemy && e.hp > 0 && targetable(e))
     {
         let key = ((e.x - u.x).abs(), e.id);
+        #[cfg(feature = "bench-profile")]
+        crate::profiling::TARGET_CANDIDATES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         nearest = Some(nearest.map_or(key, |n| n.min(key)));
         let is_guard = state
             .rules

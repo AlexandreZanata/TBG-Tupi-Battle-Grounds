@@ -9,6 +9,9 @@ use crate::state::{stronghold_x, Event, MatchState, Target, Unit};
 use crate::targeting::{self, Engage};
 use crate::types::{Seat, Status, UnitId, UnitKind};
 
+mod formation;
+use formation::FormationIndex;
+
 /// Count down statuses and cooldowns.
 pub(crate) fn tick_timers(state: &mut MatchState) {
     for u in &mut state.units {
@@ -34,8 +37,11 @@ pub(crate) fn run_units(state: &mut MatchState, ev: &mut Vec<Event>) {
     state.refresh_army();
     // Carried passengers ride at the crab's x before anyone acts.
     sync_passengers(state);
+    // Unit indices and form parameters stay fixed during this pass: all
+    // spawns happen before it and removal happens afterwards.
+    let mut formations = FormationIndex::new();
     for idx in 0..state.units.len() {
-        advance_unit(state, idx, ev);
+        advance_unit(state, idx, ev, &mut formations);
     }
     // ...and again after everyone moved.
     sync_passengers(state);
@@ -58,7 +64,12 @@ fn sync_passengers(state: &mut MatchState) {
     }
 }
 
-fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
+fn advance_unit(
+    state: &mut MatchState,
+    idx: usize,
+    ev: &mut Vec<Event>,
+    formations: &mut FormationIndex,
+) {
     let u = state.units[idx];
     if u.hp <= 0 {
         return;
@@ -169,44 +180,10 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
                 speed = ((i64::from(speed) * (BP + bonus) / BP).min(i64::from(i32::MAX))) as i32;
             }
             let mut x = u.x + u.seat.dir() * speed;
-            x = formation_clamp(state, &u, x);
+            x = formations.clamp(state, &u, x);
             x = escort_clamp(state, &u, x);
             state.units[idx].x = x.clamp(0, LANE_LEN);
         }
-    }
-}
-
-/// Oilpress formation (P47, §C.8): while an engaged Oilpress stands ahead,
-/// allies behind it cannot move past it; they stop `gap` behind it. Only
-/// the nearest engaged one ahead applies; allies already ahead, enemies
-/// and Strongholds are unaffected.
-fn formation_clamp(state: &MatchState, u: &Unit, new_x: i32) -> i32 {
-    let dir = u.seat.dir();
-    let mut anchor: Option<(i32, i32, i32)> = None;
-    for idx in 0..state.units.len() {
-        let o = &state.units[idx];
-        if o.seat != u.seat || o.hp <= 0 || o.id == u.id {
-            continue;
-        }
-        if let Some((ox, gap)) = crate::support::engaged_oilpress(state, idx) {
-            if (ox - u.x) * dir > 0 && anchor.is_none_or(|(d, _, _)| (ox - u.x).abs() < d) {
-                anchor = Some(((ox - u.x).abs(), ox, gap));
-            }
-        }
-    }
-    let Some((_, ox, gap)) = anchor else {
-        return new_x;
-    };
-    if dir > 0 {
-        if u.x <= ox - gap && new_x > ox - gap {
-            ox - gap
-        } else {
-            new_x
-        }
-    } else if u.x >= ox + gap && new_x < ox + gap {
-        ox + gap
-    } else {
-        new_x
     }
 }
 
@@ -265,7 +242,7 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
             .filter(|u| {
                 u.seat != seat
                     && u.hp > 0
-                    && crate::targeting::targetable(state, u.id)
+                    && crate::targeting::targetable(u)
                     && (u.x - sx).abs() <= tower.range
             })
             .map(|u| {
