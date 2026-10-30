@@ -198,7 +198,7 @@ ARCHITECTURE §7 and DECISIONS (D-48). Fill in the report.
 - [x] Artillery barrel and ballista track their target; own projectiles
 - [x] Five forms per kit with the §5 Evolution reads; triangle counts logged
 - [x] Desktop screenshots in `docs/media/units/<unit>/` (≤ 300 KB each)
-- [ ] 30-unit stress FPS recorded per kit (measured under heavy load only; re-measure)
+- [x] 30-unit stress FPS recorded per kit (60 FPS each, idle machine)
 
 ## Phase report
 
@@ -273,23 +273,31 @@ machine was saturated by another session's `tbg-balance gate` and a full
 | `cargo clippy -p tbg-client -- -D warnings` | ok (no warnings) |
 | `cargo test -p tbg-client` | `60 passed; 0 failed` (new: IK reach/hinge, foot lock X/Z at three headings and both gaits, stride path, adapted legs on whole segments, shot endpoints/tangent, unit and cast shots land at 0.30 s, kit event times, kit budgets, bombard aim, off-center yaw, tower barrel aim on both sides) |
 | `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown` | ok |
-| `trunk build --release` | ok at `ecacd71` (round 1, 38 min under load); not re-run for the last fix commit, which only touched the adapter, base-body legs, effect sizes and melee placement — `trunk build` (dev) ok at `5413843` |
+| `trunk build --release` | ok at `731d07d` (final code), 1 min 05 s on an idle machine (owner ran it); earlier ok at `ecacd71` (38 min under load) |
 | Browser (headless Chrome, GPU, 1600×900) | gallery forms, `&range`, `&clip=walk`, `?gallery=strongholds` observed on the dev build |
 
 Not run: `cargo test --workspace` (no core/server/balance change), a
 Practice match and a two-client online match (no protocol or simulation
-change), a calmer FPS measurement (below).
+change).
 
 ### Performance
 
-Measured once with `?stress=30&measure&shadows=1` (1920×1080, headless
-Chrome on the Intel iGPU) while the machine sat at load 40–57 from
-another session's lab gate, so the FPS figures are not usable: 7–14 FPS
-for 30 kit units, ~470–500 WebGL draws per frame (diagnostic only,
-D-28). Cost model: a kit pose is a few dozen trig/lerp per unit and one
-aim solve; glow adds 1–3 draws per unit; each shot spawns ≤ 12 short
-effect entities. **Open:** re-measure on an idle machine against the
-same stress on `main` before owner sign-off.
+`?stress=30&measure&shadows=1`, release build at `731d07d`, 1920×1080,
+headless Chrome on the Intel iGPU (ANGLE GL), idle machine (load ≈ 4–7),
+16 s per run:
+
+| Stress (30 units) | FPS | WebGL draws / frame (max) |
+|-------------------|-----|---------------------------|
+| Mixed roster (mostly shared-library units) | 60.0 | 413.5 (419) |
+| Siege Walker, five forms cycled | 60.0 | 475.0 (481) |
+| Bone Brute, five forms cycled | 60.0 | 497.9 (502) |
+| Rootcaller, five forms cycled | 60.0 | 471.4 (476) |
+
+All runs hold the 60 FPS vsync cap. Kit units cost 14–20 % more draws
+than the mixed roster (glow layers, more jointed meshes), diagnostic only
+(D-28). An earlier run during another session's lab gate (load 40–57)
+gave 7–14 FPS and is discarded. Phone measurement is out of scope
+(desktop-only focus).
 
 ### Evidence (`docs/media/`)
 
@@ -308,6 +316,5 @@ same stress on `main` before owner sign-off.
 
 - Look and fun sign-off of the three kits and the aiming towers.
 - The Siege Walker's display name ("Ogre Archer" vs. its bombard).
-- Re-run `trunk build --release` and the FPS stress on an idle machine.
 - Next kits: Archer (target-aware arrows), then the other units.
 

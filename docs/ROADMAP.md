@@ -163,7 +163,7 @@ lobby/menu files). It gates no existing phase.
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
 | P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; 29 online tests and browser evidence; **owner physical-phone/PWA check pending** | PR #2 follow-up fixes pending |
 | P40 | [P40-arcana-trees.md](phases/P40-arcana-trees.md) | Fifteen-node trees, twelve points, three supremes, preset migration, editor and lab evidence | implemented; audited on `phase/p40-review` (Quickdraw cap fixed, Deadeye re-measured to +0.25 tile); War and Vitality builds trail the default, browser look check open | — |
-| P54 | [P54-unit-art-kits.md](phases/P54-unit-art-kits.md) | Unit art kits (own model, motion, aim, projectile per character); gait v2 for every unit; Strongholds aim and fire their own projectiles; Siege Walker, Bone Brute, Rootcaller final kits | implemented on `phase/p54-unit-art-kits`; client checks and browser review done; **owner look sign-off, idle-machine FPS and final release build pending** | — |
+| P54 | [P54-unit-art-kits.md](phases/P54-unit-art-kits.md) | Unit art kits (own model, motion, aim, projectile per character); gait v2 for every unit; Strongholds aim and fire their own projectiles; Siege Walker, Bone Brute, Rootcaller final kits | implemented on `phase/p54-unit-art-kits`; client checks, release build and browser review done; 30-unit stress at 60 FPS; **owner look sign-off pending** | — |
 
 ## Pending validations (owner)
 
