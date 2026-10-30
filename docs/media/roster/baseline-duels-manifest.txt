@@ -1,0 +1,8 @@
+command: target/release/tbg-balance duels --out target/balance/p42-duels
+git_head: a9af5dc
+ruleset_fingerprint: 98b6a2f95bde4f5e
+applied: canon
+seeds: 0..1 (1 pairs)
+threads: 16
+reaction_views: 5
+wall_s: 0.93
