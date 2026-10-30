@@ -1,0 +1,16 @@
+/* Account entry presentation shares the lobby crest; Rust still owns submission and errors. */
+.account-scrim{display:none;position:fixed;inset:0;z-index:9;background:#030c17b8;backdrop-filter:blur(7px)}
+body:has(#tbg-form:not([hidden])) .account-scrim{display:block}
+#tbg-form{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10;box-sizing:border-box;width:440px;max-width:90vw;margin:0;padding:28px 34px 22px;border:1px solid #bb9450;border-radius:6px;background:radial-gradient(ellipse at 50% 0,#28445880,transparent 65%),linear-gradient(145deg,#132838,#091723 80%);color:#eef2f0;font:15px/1.5 Camp,system-ui,sans-serif;box-shadow:inset 0 0 0 3px #08141d,inset 0 0 0 4px #d4ae6238,0 20px 90px #000a}
+#tbg-form[hidden],#tbg-form [hidden]{display:none!important}
+#tbg-form::before,#tbg-form::after{content:"";position:absolute;left:calc(50% - 5px);width:10px;height:10px;transform:rotate(45deg);background:linear-gradient(135deg,#f3da92,#95652b);border:1px solid #241e16}#tbg-form::before{top:-6px}#tbg-form::after{bottom:-6px}
+.account-header{text-align:center}.account-header img{display:block;width:82px;height:100px;object-fit:contain;margin:0 auto 6px;filter:drop-shadow(0 3px 5px #0009)}
+.account-eyebrow{margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#d7b66d}.account-header h1{margin:0;font:700 30px/1.2 Battleground,Georgia,serif;color:#f9e5b6}.account-header #account-help{margin:10px auto 22px;color:#b6c9d4;font-size:13px;max-width:29em}
+.account-fields{border-top:1px solid #a68c5345;padding-top:19px}#tbg-form-label{display:block;margin-bottom:8px;color:#e7d9b6;font-size:12px;font-weight:700}.account-entry{position:relative}
+#tbg-input{box-sizing:border-box;width:100%;height:48px;padding:0 13px;border:1px solid #536d7c;border-radius:4px;background:#07121ce6;box-shadow:inset 0 2px 4px #0006;color:#f4f0e7;font:16px Camp,system-ui,sans-serif;outline-offset:3px}#tbg-input:focus-visible{outline:2px solid #75cef4;border-color:#75cef4}
+#tbg-form[data-entry="key"] #tbg-input{padding-right:86px}.account-reveal{position:absolute;right:6px;top:7px;height:34px;padding:0 8px;background:#183241;border:1px solid #496374;border-radius:3px;color:#d6e8ee;font:12px Camp,system-ui,sans-serif;cursor:pointer}
+#tbg-form-ok,#tbg-form-cancel{box-sizing:border-box;display:block;width:100%;height:46px;border-radius:4px;font:700 16px Camp,system-ui,sans-serif;cursor:pointer;transition:filter .15s}
+#tbg-form-ok{margin-top:18px;background:linear-gradient(#247cc1,#11518a);border:1px solid #6abfe5;color:#fff7de;box-shadow:inset 0 1px 0 #bcf2ff33,0 3px 8px #0005}
+#tbg-form-cancel{margin-top:8px;background:transparent;border:1px solid #6e6c584f;color:#c3cbd0;font-size:13px;font-weight:400}#tbg-form button:hover{filter:brightness(1.14)}#tbg-form button:focus-visible{outline:2px solid #75cef4;outline-offset:3px}
+#tbg-form-error{margin:10px 0 0;padding:9px 11px;border:1px solid #b268554d;border-radius:3px;background:#602d252d;color:#ffbdac;font-size:13px}.account-footnote{margin:18px auto 0;text-align:center;color:#91a6b3;font-size:11px;max-width:29em}
+@media(prefers-reduced-motion:reduce){#tbg-form button{transition:none}}

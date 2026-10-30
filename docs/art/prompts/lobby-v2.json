@@ -1,0 +1,72 @@
+[
+  {
+    "name": "arcanas-v2",
+    "masterSize": [
+      768,
+      640
+    ],
+    "displayWidth": 235,
+    "lossless": false,
+    "prompt": "Use case: stylized-concept. Original production illustration for Tupi Battle Grounds, a medieval fantasy browser strategy game. Match a cohesive premium hand-painted game-art style: sculpted antique gold/bronze, dark forged iron, rich royal-blue or burgundy cloth, readable broad silhouettes, subtle weathering, warm upper-left highlights and cool navy shadows. Professional polished collectible-card quality matching richly painted medieval Arcana and Augment illustrations. Avoid photorealism, flat vector clipart, excessive sparkle, runes, gibberish, UI mockups or screenshot layouts. Asset: ONE rectangular feature-card illustration, ratio 6:5, opaque. Subject: two imposing silver swords crossing diagonally over a softly illuminated ivory strategy sigil, their antique-gold guards and leather grips visible, framed by deep burgundy folded battle banners. A few restrained amber embers. Bold centered crossed-blade silhouette occupies central 70%, visible at 150px. Background dark crimson/navy, edges shaded, no rectangular UI frame. No people, no words, letters, digits, logo or watermark. Only the artwork; live title will be below it."
+  },
+  {
+    "name": "strongholds-v2",
+    "masterSize": [
+      768,
+      640
+    ],
+    "displayWidth": 235,
+    "lossless": false,
+    "prompt": "Use case: stylized-concept. Original production illustration for Tupi Battle Grounds, a medieval fantasy browser strategy game. Match a cohesive premium hand-painted game-art style: sculpted antique gold/bronze, dark forged iron, rich royal-blue or burgundy cloth, readable broad silhouettes, subtle weathering, warm upper-left highlights and cool navy shadows. Professional polished collectible-card quality matching richly painted medieval Arcana and Augment illustrations. Avoid photorealism, flat vector clipart, excessive sparkle, runes, gibberish, UI mockups or screenshot layouts. Asset: ONE rectangular feature-card illustration, ratio 6:5, opaque. Subject: a proud compact medieval Stronghold, central square limestone keep with gold-trimmed crenellations and two sturdy round gate towers, cobalt-blue banners bearing simple unlettered shield marks, oak gate, green grass and a short sunlit stone path. Distant soft forest and azure sky. Three-quarter frontal view, broad well-grouped silhouette centered and fully contained within middle 80%. Rich detailed sculpted stone, stylized proportions like a high-quality strategy-game castle. No surrounding UI border, people, words, letters, digits, logos or watermark. Live title will be below."
+  },
+  {
+    "name": "troops-v2",
+    "masterSize": [
+      768,
+      640
+    ],
+    "displayWidth": 235,
+    "lossless": false,
+    "prompt": "Use case: stylized-concept. Original production illustration for Tupi Battle Grounds, a medieval fantasy browser strategy game. Match a cohesive premium hand-painted game-art style: sculpted antique gold/bronze, dark forged iron, rich royal-blue or burgundy cloth, readable broad silhouettes, subtle weathering, warm upper-left highlights and cool navy shadows. Professional polished collectible-card quality matching richly painted medieval Arcana and Augment illustrations. Avoid photorealism, flat vector clipart, excessive sparkle, runes, gibberish, UI mockups or screenshot layouts. Asset: ONE rectangular feature-card illustration, ratio 6:5, opaque. Subject: one distinctive faceted medieval closed knight helmet, brushed gold brow and nose guard, silver cheek plates, deep dark T-shaped visor, navy-blue velvet banners folded behind it and a subtle crossed spear silhouette in the rear. Heroic readable centered bustless helmet, luminous warm metal edges, dark rich blue background, no face or body, no crown, no surrounding UI frame. Entire helmet fits inside central 75%. No words, lettering, digits, logo, watermark. Only artwork, live title below."
+  },
+  {
+    "name": "ranking-v2",
+    "masterSize": [
+      768,
+      640
+    ],
+    "displayWidth": 235,
+    "lossless": false,
+    "prompt": "Use case: stylized-concept. Original production illustration for Tupi Battle Grounds, a medieval fantasy browser strategy game. Match a cohesive premium hand-painted game-art style: sculpted antique gold/bronze, dark forged iron, rich royal-blue or burgundy cloth, readable broad silhouettes, subtle weathering, warm upper-left highlights and cool navy shadows. Professional polished collectible-card quality matching richly painted medieval Arcana and Augment illustrations. Avoid photorealism, flat vector clipart, excessive sparkle, runes, gibberish, UI mockups or screenshot layouts. Asset: ONE rectangular feature-card illustration, ratio 6:5, opaque. Subject: a magnificent sculpted antique-gold championship trophy with sweeping handles and a strong embossed three-point crown on the bowl, supported by two oak-laurel branches, on a short dark stone plinth. Restrained warm light from above, rich charcoal-navy background with burgundy cloth and soft amber glow, broad instantly readable trophy silhouette centered within 75%. More elegant detailed and tactile than a generic trophy pictogram. No rectangular UI frame, people, words, letters, digits, logos or watermark. Only artwork, live title below."
+  },
+  {
+    "name": "crest-v2",
+    "masterSize": [
+      768,
+      1024
+    ],
+    "displayWidth": 156,
+    "lossless": true,
+    "prompt": "Use case: stylized-concept. Original production illustration for Tupi Battle Grounds, a medieval fantasy browser strategy game. Match a cohesive premium hand-painted game-art style: sculpted antique gold/bronze, dark forged iron, rich royal-blue or burgundy cloth, readable broad silhouettes, subtle weathering, warm upper-left highlights and cool navy shadows. Professional polished collectible-card quality matching richly painted medieval Arcana and Augment illustrations. Avoid photorealism, flat vector clipart, excessive sparkle, runes, gibberish, UI mockups or screenshot layouts. Asset: ONE original player account crest, portrait ratio 3:4 with GENUINE TRANSPARENT background and full clear 6% margins. Frontal layered shield, deep navy-blue enamel inset, substantial sculpted antique-gold bevel, a dignified closed silver-and-gold medieval knight helmet embedded at its center with bold dark T-shaped visor. Small symmetrical oak-leaf shoulders and one compact gold diamond finial below. Strong clean heraldic silhouette, detailed tactile metal, no crown or wings, no giant flame/glow, no stars suggesting an earned rank. This is a neutral player identity emblem, not a ranked tier award. Exact centered upright orthographic composition. No letters, words, digits, logo or watermark. All silhouette tips safely inside margins."
+  },
+  {
+    "name": "profile-v2",
+    "masterSize": [
+      1200,
+      640
+    ],
+    "displayWidth": 528,
+    "lossless": false,
+    "prompt": "Use case: stylized-concept. Original production illustration for Tupi Battle Grounds, a medieval fantasy browser strategy game. Match a cohesive premium hand-painted game-art style: sculpted antique gold/bronze, dark forged iron, rich royal-blue or burgundy cloth, readable broad silhouettes, subtle weathering, warm upper-left highlights and cool navy shadows. Professional polished collectible-card quality matching richly painted medieval Arcana and Augment illustrations. Avoid photorealism, flat vector clipart, excessive sparkle, runes, gibberish, UI mockups or screenshot layouts. Asset: ONE understated wide player-status panel BACKGROUND illustration, ratio 15:8, opaque. A quiet blue-hour medieval war camp landscape: distant fortified castle on the FAR RIGHT horizon, low soft tents and small banners in the bottom-right quarter, misty indigo hills, dim warm campfire glow. Very dark navy slate across the central and left 75%, where live player stats and a large separate crest will overlay. The entire top 55% remains calm very low-contrast dark blue, with only faint tonal material grain. Bottom has subtle silhouetted blades of grass and atmospheric shapes. This is a restrained premium support texture, not a busy hero scene. No foreground character, emblem, trophy, UI border, panels, lettering, digits, words, logo or watermark."
+  },
+  {
+    "name": "logo-v2",
+    "masterSize": [
+      1500,
+      600
+    ],
+    "displayWidth": 365,
+    "lossless": true,
+    "prompt": "Use case: logo-brand. Create one ORIGINAL polished medieval fantasy game wordmark logo for Tupi Battle Grounds, with genuine transparent background. Horizontal 5:2 composition, entire silhouette fits with clear 4% margins. Strong large exquisitely beveled antique-gold serif lettering exactly 'TUPI', very readable and centered, on a compact dark navy forged-metal shield plaque. Under it, a smoothly curved royal-blue ribbon with smaller warm ivory serif text exactly 'BATTLE GROUNDS'. Spelling must be exact: T U P I; B A T T L E  G R O U N D S. Restrained symmetrical pair of blue cloth pennants and two short steel spearheads rise behind the plaque; one small crown-like golden ridge above and tiny gold diamond point below. Sophisticated sculpted, hand-painted premium strategy-game material style, tactile aged gold and silver, oak-leather accents, royal cobalt blue, warm upper-left key light, deep cool shadows. Strong compact horizontal brand silhouette with generous negative space; no sprawling weapon fan, no busy landscape, no extra words, no letters besides the exact brand, no watermark, no background panel outside the logo. NOT a mockup or interface. A distinctive professional logo that belongs with painterly medieval Arcana and Augment card art."
+  }
+]

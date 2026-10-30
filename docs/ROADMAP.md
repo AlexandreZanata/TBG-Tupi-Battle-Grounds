@@ -259,6 +259,10 @@ All code for P1–P8 is implemented and validated on the development PC
 > the phase file with the real command outputs and measurements, commit
 > it, and stop.
 
+## Owner-requested art follow-ups (2026-10-30)
+
+Implemented on `codex/ranking-ui` for review: [Faction Shop molds and future Synergy emblems](art/FACTIONS.md), then [illustrated lobby and account presentation](art/LOBBY-PRESENTATION.md). Reports include asset budgets, measured fidelity, desktop galleries and verification limits. Owner requested branch commits and GitHub push only; no merge or VPS deployment. These cosmetic follow-ups do not complete or replace a planned gameplay phase.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · spectating ·

@@ -1,0 +1,12 @@
+/* Painted lobby art and account/status surfaces; the desktop layout anchors stay unchanged. */
+.player-chip{width:12%;flex:none;border-color:#b68c48;border-radius:4px;background:linear-gradient(115deg,#162b39f5,#0a1721f5);box-shadow:inset 0 0 0 2px #080f17,inset 0 0 0 3px #d8b86c32,0 4px 12px #0008}
+.player-crest{width:2.6vw;height:3vw;object-fit:contain;flex:none;filter:drop-shadow(0 2px 2px #0008)}
+.player-chip>div{min-width:0;flex:1}.player-chip strong{max-width:100%;font-family:Battleground,Georgia,serif;color:#fff1ce}.guest-links{gap:0}.guest-links button{line-height:1.3;text-decoration:none!important}.guest-links button:first-child{font-weight:700!important}.guest-links button:last-child{color:#bdd4e0!important}.guest-links button:hover{text-decoration:underline!important}
+.feature.metal-panel{border-color:#b58d4e;border-radius:4px;box-shadow:inset 0 0 0 2px #091420,0 4px 12px #0009}
+.feature::after{content:"";position:absolute;inset:3px;border:1px solid #e9c87845;border-radius:2px;pointer-events:none}
+.feature img{background:#101a25;object-position:50% 44%}.feature-copy{background:linear-gradient(#10212bee,#08141df5)}
+.profile-panel{isolation:isolate;border-color:#b58d4e;border-radius:5px;background:#0b1c2a;box-shadow:inset 0 0 0 2px #09141c,inset 0 0 0 3px #d8b86c38,0 4px 12px #0009}
+.profile-backdrop{position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px);object-fit:cover;opacity:.58;z-index:-1;border-radius:2px;pointer-events:none}
+.profile-panel::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#091a2c40,#091a2c66 70%,#091a2c22);pointer-events:none}
+.profile-summary h2{text-shadow:0 2px 3px #0009}.profile-summary>img{filter:drop-shadow(0 3px 5px #0009)}.profile-panel .record{border-color:#dbb96d50;background:#08182247}.profile-panel .record strong{color:#fff0cb}.profile-panel .stats-status{color:#dcc58a}
+.profile-panel .tower-chip{border-color:#a89161;background:linear-gradient(#1b2e3bf5,#0d1c29f5);border-radius:3px;box-shadow:inset 0 0 0 2px #08141a80}

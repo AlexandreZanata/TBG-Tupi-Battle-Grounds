@@ -16,7 +16,7 @@
     try { const response = await fetch('assets/lobby/art.json'); if (response.ok) sources = await response.json(); } catch (_) { /* SVG defaults work offline. */ }
     root.querySelectorAll('[data-art]').forEach(image => {
       const source = sources[image.dataset.art];
-      image.src = typeof source === 'string' && source.startsWith('assets/lobby/') ? source : 'assets/lobby/' + image.dataset.art + '.svg';
+      image.src = typeof source === 'string' && source.startsWith('assets/lobby/') ? source : image.dataset.art === 'profile' ? 'assets/lobby/profile-v2.webp' : 'assets/lobby/' + image.dataset.art + '.svg';
       image.decoding = 'async';
     });
     root.querySelectorAll('use[data-icon]').forEach(icon => icon.setAttribute('href', 'assets/lobby/icons.svg#' + icon.dataset.icon));
