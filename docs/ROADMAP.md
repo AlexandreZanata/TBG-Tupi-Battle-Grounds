@@ -181,6 +181,15 @@ Phase files are written one at a time, starting with P42.
 | P55 | [P55-champion-kits.md](phases/P55-champion-kits.md) | Every unrefined champion on its own art kit (fifteen new champions, the Crate, seven originals) on a shared kit library; support action cues (D-53) | done; **owner approved (2026-10-30)** | yes (owner) |
 | A-1 | [A1-visual-polish-troops-strongholds.md](phases/A1-visual-polish-troops-strongholds.md) | Troop polish: directional aim from `AttackStart`, directed melee, 55 rig-v2 forms, full animation pass (D-47). Steps 10–12 (Strongholds) **superseded by D-46** | consolidated 2026-10-30: kit units keep the P54/P55 look (owner direction); A-1 drives the Archer and any kind without a kit (D-47) | — |
 
+## Independent arena art follow-up
+
+[Arena visual variants](phases/ARENAS-visual-variants.md) adds Frozen Tundra,
+Volcanic Forge, Ancient Ruins and Storm Valley around the unchanged arena 1
+layout. The owner requested client visuals and documentation only, based on
+`main`; no gameplay modifiers or authoritative arena selection are included.
+See the [arena art catalog and preview links](ARENAS.md). Implementation and
+desktop evidence are tracked in that report; owner visual approval is pending.
+
 ## Pending validations (owner)
 
 All code for P1–P8 is implemented and validated on the development PC

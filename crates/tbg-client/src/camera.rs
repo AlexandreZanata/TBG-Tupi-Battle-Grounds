@@ -45,7 +45,7 @@ fn spawn_camera(mut commands: Commands, window: Single<&Window>) {
         Tonemapping::AcesFitted,
         // Soft haze on the far rim of the diorama; the lane stays crisp.
         DistanceFog {
-            color: crate::art::palette::SKY,
+            color: crate::arena::theme::Theme::selected().palette().sky,
             falloff: FogFalloff::Linear {
                 start: 38.0,
                 end: 95.0,

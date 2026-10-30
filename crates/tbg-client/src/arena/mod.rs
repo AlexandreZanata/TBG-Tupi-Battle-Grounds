@@ -12,6 +12,8 @@ mod lighting;
 mod props;
 mod rocks;
 mod strongholds;
+pub(super) mod theme;
+mod themes;
 mod towers;
 mod trees;
 mod water;
@@ -39,6 +41,9 @@ fn spawn_arena(
     mut meshes: ResMut<Assets<Mesh>>,
     mut mats: ResMut<Assets<StandardMaterial>>,
 ) {
+    let theme = theme::Theme::selected();
+    info!("arena theme: {} (visual only)", theme.name());
+    let kit = themes::build(theme);
     let mat = mats.add(StandardMaterial {
         base_color: Color::WHITE,
         perceptual_roughness: 1.0,
@@ -52,13 +57,20 @@ fn spawn_arena(
     let mut total = 0;
     let mut terrain = Vec::with_capacity(5);
     for (name, m) in [
-        ("meadow", ground::meadow()),
-        ("BattleLine", ground::lane()),
-        ("cliffs", cliffs::mesh()),
-        ("sea", water::sea()),
-        ("foam", water::coast()),
-        ("offshore rocks", water::rocks()),
-        ("props", painted(props::scatter())),
+        ("meadow", ground::meadow(theme)),
+        ("BattleLine", ground::lane(theme)),
+        ("cliffs", cliffs::mesh(theme)),
+        ("sea", water::sea(theme)),
+        ("foam", water::coast(theme)),
+        ("offshore rocks", water::rocks(theme)),
+        (
+            "props",
+            painted(if theme == theme::Theme::Forest {
+                props::scatter()
+            } else {
+                kit.props
+            }),
+        ),
     ] {
         let triangles = mesh::triangles(&m);
         total += triangles;
@@ -74,7 +86,7 @@ fn spawn_arena(
             Transform::default(),
             NotShadowCaster,
         ));
-        if name == "foam" {
+        if name == "foam" && theme != theme::Theme::Tundra {
             entity.insert(life::Foam);
         }
     }
@@ -86,7 +98,27 @@ fn spawn_arena(
             Transform::default(),
         ));
     }
-    total += life::spawn(&mut commands, &mut meshes, &mut mats, &mat);
+    if !kit.glow.is_empty() {
+        let glow = painted(kit.glow);
+        let triangles = mesh::triangles(&glow);
+        total += triangles;
+        info!("arena accents: {triangles} triangles");
+        let glow_mat = mats.add(StandardMaterial {
+            base_color: Color::WHITE,
+            unlit: true,
+            ..default()
+        });
+        commands.spawn((
+            Name::new("arena themed accents"),
+            Mesh3d(meshes.add(glow)),
+            MeshMaterial3d(glow_mat),
+            Transform::default(),
+            NotShadowCaster,
+        ));
+    }
+    // The Strongholds are the kind-based D-46 towers (owner-approved P54
+    // look) in every arena: `strongholds` builds them from the views.
+    total += life::spawn(&mut commands, &mut meshes, &mut mats, &mat, theme);
     info!("arena total: {total} triangles");
-    lighting::spawn(&mut commands);
+    lighting::spawn(&mut commands, theme);
 }

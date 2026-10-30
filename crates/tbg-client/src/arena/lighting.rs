@@ -1,16 +1,21 @@
 //! Warm upper-left sunlight with one tight shadow cascade and cool sky fill.
 
-use crate::{art::palette::*, config};
+use super::theme::Theme;
+use crate::config;
 use bevy::{
     light::{CascadeShadowConfigBuilder, DirectionalLightShadowMap},
     prelude::*,
 };
 
-pub(super) fn spawn(commands: &mut Commands) {
+pub(super) fn spawn(commands: &mut Commands, theme: Theme) {
+    let palette = theme.palette();
+    if theme != Theme::Forest {
+        commands.insert_resource(ClearColor(palette.sky));
+    }
     commands.insert_resource(DirectionalLightShadowMap { size: 1024 });
     commands.spawn((
         DirectionalLight {
-            color: KEY,
+            color: palette.key,
             illuminance: 12_000.0,
             shadow_maps_enabled: config::url_param("shadows").as_deref() != Some("0"),
             ..default()
@@ -24,7 +29,7 @@ pub(super) fn spawn(commands: &mut Commands) {
         .build(),
     ));
     commands.insert_resource(GlobalAmbientLight {
-        color: AMBIENT_SKY,
+        color: palette.ambient,
         brightness: 1200.0,
         ..default()
     });
