@@ -381,6 +381,8 @@ impl MatchState {
     }
 
     pub fn unit_index(&self, id: UnitId) -> Option<usize> {
+        #[cfg(feature = "bench-profile")]
+        crate::profiling::ID_SEARCHES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         self.units.binary_search_by_key(&id, |u| u.id).ok()
     }
 
@@ -397,6 +399,8 @@ impl MatchState {
     }
 
     pub fn stats_of(&self, u: &Unit) -> Stats {
+        #[cfg(feature = "bench-profile")]
+        crate::profiling::STATS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         // Summons never receive Synergy or Arcanas (BR-U08, D-40); only
         // Augments naming Beetlings reach them (BR-AG10). Cargo and crates
         // take no Augments at all (P48-B, §C.11).

@@ -16,6 +16,8 @@ mod hits;
 mod intent;
 #[cfg(feature = "lab")]
 pub mod lab;
+#[cfg(feature = "bench-profile")]
+pub mod profiling;
 pub mod protocol;
 pub mod rating;
 pub mod replay;

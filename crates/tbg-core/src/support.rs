@@ -286,6 +286,8 @@ pub(crate) fn engaged_oilpress(state: &MatchState, idx: usize) -> Option<(i32, i
     let (engage, gap) = formation?;
     let dir = u.seat.dir();
     let engaged = state.units.iter().any(|e| {
+        #[cfg(feature = "bench-profile")]
+        crate::profiling::FORMATION_CANDIDATES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         e.seat != u.seat && e.hp > 0 && (e.x - u.x) * dir > 0 && (e.x - u.x).abs() <= engage
     });
     engaged.then_some((u.x, gap))

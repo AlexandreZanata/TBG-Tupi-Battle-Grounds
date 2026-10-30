@@ -93,6 +93,8 @@ fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
         .filter(|e| e.seat == enemy && e.hp > 0 && targetable(state, e.id))
     {
         let key = ((e.x - u.x).abs(), e.id);
+        #[cfg(feature = "bench-profile")]
+        crate::profiling::TARGET_CANDIDATES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         nearest = Some(nearest.map_or(key, |n| n.min(key)));
         let is_guard = state
             .rules

@@ -16,6 +16,10 @@ path = "src/lib.rs"
 # Offline balance lab only (D-33): unit duels without the Shop. Never
 # enabled by tbg-server or tbg-client (contract C10).
 lab = []
+# Native benchmark allocator counters only; no simulation or protocol changes.
+bench-alloc = ["bench-profile"]
+# Opt-in operation counts for isolated native benchmarks, disabled online.
+bench-profile = []
 
 [dependencies]
 # Derives for state, views, and protocol messages.
