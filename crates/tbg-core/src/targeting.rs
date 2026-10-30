@@ -57,6 +57,16 @@ pub(crate) fn engage(state: &MatchState, u: &Unit, st: &Stats) -> Option<Engage>
     }
 }
 
+/// A carried unit cannot be chosen by any targeted effect (P48-A): enemy
+/// attacks, Stronghold fire, echoes, betrayal, Farwatch. Area damage,
+/// cleanse, transfers, bonds (and the passenger's own actions) still
+/// reach it. Carried units are never Tanks, so Guard never sees one.
+pub(crate) fn targetable(state: &MatchState, id: UnitId) -> bool {
+    state
+        .unit_index(id)
+        .is_some_and(|i| state.units[i].fx.carrier.is_none())
+}
+
 /// Guard first: the nearest living enemy Rampart within range. Otherwise
 /// the nearest living enemy unit by |dx| (ties: lowest id), or the enemy
 /// Stronghold when it is strictly nearer or no enemy unit exists. A unit
@@ -71,7 +81,11 @@ fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
         .contains(&Ability::NoStronghold);
     let mut nearest: Option<(i32, UnitId)> = None;
     let mut guard: Option<(i32, UnitId)> = None;
-    for e in state.units.iter().filter(|e| e.seat == enemy && e.hp > 0) {
+    for e in state
+        .units
+        .iter()
+        .filter(|e| e.seat == enemy && e.hp > 0 && targetable(state, e.id))
+    {
         let key = ((e.x - u.x).abs(), e.id);
         nearest = Some(nearest.map_or(key, |n| n.min(key)));
         let is_guard = state

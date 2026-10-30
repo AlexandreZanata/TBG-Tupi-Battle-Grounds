@@ -131,6 +131,42 @@ fn apply_types(state: &mut MatchState, attacker: &Unit, st: &Stats, id: u32, ev:
     }
 }
 
+/// Leechroot Essence (P48-A, §C.3): HP removed by hits from enemy
+/// conventional units fills Essence; the n-th stack costs `base + 2 × n`.
+/// Stacks never cap; all stacks are lost on death (fresh `UnitFx`).
+/// Not Strongholds, summons, betrayals, or poison pulses: those never pass
+/// through the primary-hit hook that calls this.
+pub(crate) fn feed_essence(state: &mut MatchState, attacker: &Unit, removed: i32) {
+    let [a, b] = abilities_of(state, attacker);
+    let essence = [a, b].into_iter().find_map(|ability| match ability {
+        Ability::Essence {
+            base,
+            step,
+            dmg: _,
+            atk_bp: _,
+        } => Some((base, step)),
+        _ => None,
+    });
+    let Some((base, step)) = essence else {
+        return;
+    };
+    let Some(ai) = state.unit_index(attacker.id) else {
+        return;
+    };
+    let mut stacks = u32::from(state.units[ai].fx.essence);
+    let mut progress =
+        state.units[ai].fx.essence_progress.saturating_add(removed.max(0) as u32);
+    // The cost rises with every stack, so the loop always terminates.
+    let mut cost = u32::from(base).saturating_add(u32::from(step).saturating_mul(stacks));
+    while progress >= cost.max(1) && stacks < u32::from(u16::MAX) {
+        progress -= cost.max(1);
+        stacks += 1;
+        cost = u32::from(base).saturating_add(u32::from(step).saturating_mul(stacks));
+    }
+    state.units[ai].fx.essence = stacks.min(u32::from(u16::MAX)) as u16;
+    state.units[ai].fx.essence_progress = progress;
+}
+
 /// Apply stacks for a primary hit, then count the attack toward the echo and
 /// fire it (Rotcap B, Old Finn B): every `every`-th attack also stacks up to
 /// `extra` nearest other enemies in range.
@@ -165,6 +201,7 @@ pub(crate) fn apply_stacks(
                 e.seat != attacker.seat
                     && e.hp > 0
                     && e.id != id
+                    && crate::targeting::targetable(state, e.id)
                     && (e.x - attacker.x).abs() <= st.range
             })
             .map(|e| ((e.x - attacker.x).abs(), e.id))

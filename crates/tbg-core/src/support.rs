@@ -4,9 +4,9 @@
 use std::cmp::Reverse;
 
 use crate::afflictions::abilities_of;
-use crate::content::Ability;
+use crate::content::{Ability, LANE_LEN};
 use crate::state::{Event, MatchState, Unit};
-use crate::types::UnitId;
+use crate::types::{Archetype, UnitId};
 
 /// The attacker's Transfer params, if any (absolute per form slot, like Brew).
 pub(crate) fn transfer_of(state: &MatchState, attacker: &Unit) -> Option<(u16, u16, bool)> {
@@ -289,4 +289,139 @@ pub(crate) fn engaged_oilpress(state: &MatchState, idx: usize) -> Option<(i32, i
         e.seat != u.seat && e.hp > 0 && (e.x - u.x) * dir > 0 && (e.x - u.x).abs() <= engage
     });
     engaged.then_some((u.x, gap))
+}
+
+/// Cargo Crab boarding (P48-A, §C.15): every tick, each crab without a
+/// passenger boards the nearest eligible ally within `board` (conventional,
+/// not a Tank, not carried, not under a re-board lock; ties lowest id).
+/// In practice the passenger is the next unit bought after the crab, so the
+/// player chooses it through purchase order. An enemy windup already
+/// targeting the passenger hits the crab instead (ally windups keep their
+/// target: heals reach carried units). B2 Overdrive re-arms 220 ticks after
+/// the surge lapses (a 15 s cooldown on a 4 s surge).
+pub(crate) fn boarding(state: &mut MatchState, ev: &mut Vec<Event>) {
+    let crabs: Vec<usize> = state
+        .units
+        .iter()
+        .enumerate()
+        .filter(|(_, u)| u.hp > 0 && u.fx.passenger.is_none() && carry_of(state, u).is_some())
+        .map(|(i, _)| i)
+        .collect();
+    for ci in crabs {
+        let crab = state.units[ci];
+        let Some((board, _lock, _, _, _, surge)) = carry_of(state, &crab) else {
+            continue;
+        };
+        let mut best: Option<(i32, UnitId)> = None;
+        for a in &state.units {
+            // Conventional non-Tanks only; summons and carried units never
+            // board, and a re-board lock is respected.
+            if a.seat != crab.seat
+                || a.hp <= 0
+                || a.id == crab.id
+                || a.is_summon()
+                || state.rules().def(a.kind).archetype == Archetype::Tank
+                || a.fx.carrier.is_some()
+                || state.tick < a.fx.board_lock
+            {
+                continue;
+            }
+            let dist = (a.x - crab.x).abs();
+            if dist <= board && best.map_or(true, |(d, id)| (dist, a.id) < (d, id)) {
+                best = Some((dist, a.id));
+            }
+        }
+        let Some((_, pid)) = best else {
+            continue;
+        };
+        let Some(pi) = state.unit_index(pid) else {
+            continue;
+        };
+        // Board: sync the passenger now (run_units syncs every tick after).
+        state.units[pi].fx.carrier = Some(crab.id);
+        state.units[pi].x = crab.x;
+        if let Some(ci) = state.unit_index(crab.id) {
+            state.units[ci].fx.passenger = Some(pid);
+        // B2 Overdrive: +40 % move for 4 s, re-armed 15 s after the
+        // previous surge started (surge lasts 80 of those ticks).
+        if surge > 0
+            && (state.units[ci].fx.surge_until == 0
+                || state.tick >= state.units[ci].fx.surge_until.saturating_sub(80) + 300)
+        {
+            state.units[ci].fx.surge_until = state.tick.saturating_add(80);
+        }
+        }
+        // Enemy windups already aimed at the passenger hit the crab instead.
+        for u in state.units.iter_mut() {
+            if let Some((target, ticks)) = u.windup {
+                if target == crate::state::Target::Unit(pid) && u.seat != crab.seat {
+                    u.windup = Some((crate::state::Target::Unit(crab.id), ticks));
+                }
+            }
+        }
+        ev.push(Event::Boarded {
+            crab: crab.id,
+            unit: pid,
+        });
+    }
+}
+
+/// The crab's Carry params, if any.
+fn carry_of(state: &MatchState, u: &Unit) -> Option<(i32, u16, u16, u16, u16, u16)> {
+    abilities_of(state, u).into_iter().find_map(|ability| match ability {
+        Ability::Carry {
+            board,
+            lock,
+            dr_bp,
+            move_bp,
+            shield_bp,
+            surge_bp,
+        } => Some((board, lock, dr_bp, move_bp, shield_bp, surge_bp)),
+        _ => None,
+    })
+}
+
+/// Crab movement bonus while carrying (B1 steady, B2 surge): basis points.
+pub(crate) fn carry_move_bp(state: &MatchState, u: &Unit) -> u16 {
+    if u.fx.passenger.is_none() {
+        return 0;
+    }
+    match carry_of(state, u) {
+        Some((_, _, _, move_bp, _, surge_bp)) => {
+            if surge_bp > 0 && state.tick < u.fx.surge_until {
+                surge_bp
+            } else {
+                move_bp
+            }
+        }
+        None => 0,
+    }
+}
+
+/// Crab damage reduction while carrying (A1, joins the BR-X05 cap).
+pub(crate) fn carry_dr_bp(state: &MatchState, u: &Unit) -> u16 {
+    if u.fx.passenger.is_none() {
+        return 0;
+    }
+    match carry_of(state, u) {
+        Some((_, _, dr_bp, _, _, _)) => dr_bp,
+        None => 0,
+    }
+}
+
+/// Dismount a passenger: 0.2 tile behind the crab (toward its own base)
+/// with a 3 s re-board lock (P48-A, §C.15). Called from `remove_dead`.
+pub(crate) fn dismount(state: &mut MatchState, crab: UnitId, passenger: UnitId, ev: &mut Vec<Event>) {
+    let Some(ci) = state.unit_index(crab) else {
+        return;
+    };
+    let seat = state.units[ci].seat;
+    let x = (state.units[ci].x - seat.dir() * 200).clamp(0, LANE_LEN);
+    state.units[ci].fx.passenger = None;
+    if let Some(pi) = state.unit_index(passenger) {
+        state.units[pi].fx.carrier = None;
+        state.units[pi].x = x;
+        state.units[pi].fx.board_lock = state.tick.saturating_add(60);
+        ev.push(Event::Dismounted { unit: passenger });
+    }
 }

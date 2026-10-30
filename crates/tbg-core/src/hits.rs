@@ -7,7 +7,7 @@ use crate::augment;
 use crate::content::{Ability, Stats, BP};
 use crate::state::{stronghold_x, Event, MatchState, Target, Unit};
 use crate::targeting;
-use crate::types::{OnHit, Seat, Status};
+use crate::types::{OnHit, Seat, Status, UnitId};
 
 pub(crate) fn resolve_hit(
     state: &mut MatchState,
@@ -84,6 +84,17 @@ pub(crate) fn resolve_hit(
             .is_some_and(|i| state.units[i].seat != attacker.seat && state.units[i].hp > 0);
         if hostile {
             crate::afflictions::apply_stacks(state, attacker, st, id, ev);
+            // P48-A: Leechroot Essence grows on HP removed from enemy
+            // conventional units (not Strongholds: not a unit target;
+            // not summons: conventional only; betrayal and poison pulses
+            // never pass through this hook).
+            let conventional = state.unit_index(id).is_some_and(|i| {
+                let u = &state.units[i];
+                !u.is_summon() && u.seat != attacker.seat
+            });
+            if conventional && removed > 0 {
+                crate::afflictions::feed_essence(state, attacker, removed);
+            }
         }
     }
     if let Target::Unit(id) = target {
@@ -98,7 +109,22 @@ pub(crate) fn resolve_hit(
             let conventional = state.unit_index(id).is_some_and(|i| {
                 !state.units[i].is_summon() && state.units[i].seat != attacker.seat
             });
-            let bp = augment::lifesteal_bp(&state.player(attacker.seat).augments);
+            // Form lifesteal (Leechroot B) joins the BR-X06 12 % cap with
+            // Augments; the highest active tier wins (upgrades replace).
+            let mut form_bp = 0;
+            for tier in (1..=attacker.tier.min(2)).rev() {
+                if let Some(f) = state.rules().form_of(attacker.kind, tier, attacker.branch) {
+                    if f.lifesteal_bp > 0 {
+                        form_bp = f.lifesteal_bp;
+                        break;
+                    }
+                }
+            }
+            let bp = if form_bp > 0 {
+                (augment::lifesteal_bp(&state.player(attacker.seat).augments) + form_bp).min(1_200)
+            } else {
+                augment::lifesteal_bp(&state.player(attacker.seat).augments)
+            };
             if conventional && bp > 0 {
                 let healed = (i64::from(removed) * i64::from(bp) / BP) as i32;
                 let _restored = heal(state, attacker.seat, attacker.id, healed, false, ev);
@@ -202,6 +228,21 @@ fn apply_heal_cut(state: &mut MatchState, attacker: Seat, id: u32) {
         state.units[i].heal_cut_until = until;
         state.units[i].heal_cut_bp = bp;
     }
+}
+
+/// Cargo Crab A2 emergency shield (P48-A): a temporary absorb pool with an
+/// expiry, on the same absorb path as Shatterback plates (before them).
+fn absorb_shield(state: &mut MatchState, id: UnitId, amount: i32) -> i32 {
+    let Some(i) = state.unit_index(id) else {
+        return amount;
+    };
+    let u = &mut state.units[i];
+    if u.fx.shield <= 0 || state.tick >= u.fx.shield_until {
+        return amount;
+    }
+    let absorb = amount.min(i32::from(u.fx.shield));
+    u.fx.shield = (u32::from(u.fx.shield).saturating_sub(absorb as u32)) as u16;
+    amount - absorb
 }
 
 /// Shatterback plates (P46): damage after reduction empties the current
@@ -434,7 +475,8 @@ pub(crate) fn damage(
             };
             let dr = (augment::damage_reduction_bp(state, &victim)
                 + arcana_dr
-                + i32::from(victim.fx.march_dr_bp))
+                + i32::from(victim.fx.march_dr_bp)
+                + i32::from(crate::support::carry_dr_bp(state, &victim)))
             .min(2_000);
             let amount = if dr > 0 {
                 let reduced = i64::from(amount) * (BP - i64::from(dr)) / BP;
@@ -446,6 +488,8 @@ pub(crate) fn damage(
             } else {
                 amount
             };
+            // P48-A: Cargo Crab A2 emergency shield absorbs before plates.
+            let amount = absorb_shield(state, id, amount);
             // P46: Shatterback plates absorb after damage reduction, before HP.
             let amount = absorb_plates(state, id, amount, ev);
             let copies = augment::second_wind_charges(&state.player(owner).augments);

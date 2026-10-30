@@ -117,6 +117,7 @@ impl MatchState {
             summon::expire(self);
             summon::hatch(self, &mut ev);
             crate::support::bonds(self);
+            crate::support::boarding(self, &mut ev);
             combat::run_units(self, &mut ev);
             combat::stronghold_fire(self, &mut ev);
             combat::remove_dead(self, &mut ev);

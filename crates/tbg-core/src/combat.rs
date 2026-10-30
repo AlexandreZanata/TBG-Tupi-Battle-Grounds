@@ -7,7 +7,7 @@ use crate::content::{Ability, BP, LANE_LEN, MIN_INTERVAL, WINDUP};
 use crate::hits::{damage, resolve_hit};
 use crate::state::{stronghold_x, Event, MatchState, Target, Unit};
 use crate::targeting::{self, Engage};
-use crate::types::{Seat, Status, UnitId};
+use crate::types::{Seat, Status, UnitId, UnitKind};
 
 /// Count down statuses and cooldowns.
 pub(crate) fn tick_timers(state: &mut MatchState) {
@@ -32,8 +32,29 @@ pub(crate) fn tick_timers(state: &mut MatchState) {
 /// Every living unit acts once, in ascending id order.
 pub(crate) fn run_units(state: &mut MatchState, ev: &mut Vec<Event>) {
     state.refresh_army();
+    // Carried passengers ride at the crab's x before anyone acts.
+    sync_passengers(state);
     for idx in 0..state.units.len() {
         advance_unit(state, idx, ev);
+    }
+    // ...and again after everyone moved.
+    sync_passengers(state);
+}
+
+/// Pin every carried passenger's x to its crab's x (P48-A, §C.15).
+fn sync_passengers(state: &mut MatchState) {
+    let pairs: Vec<(usize, i32)> = state
+        .units
+        .iter()
+        .enumerate()
+        .filter_map(|(i, u)| {
+            u.fx.carrier
+                .and_then(|c| state.unit_index(c))
+                .map(|ci| (i, state.units[ci].x))
+        })
+        .collect();
+    for (i, x) in pairs {
+        state.units[i].x = x;
     }
 }
 
@@ -92,7 +113,12 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
         }
         Some(Engage::Hold) => {}
         None => {
-            // Drumguard B2: the bonded ally ignores slows (and fish).
+            // Carried passengers never walk on their own; the crab carries
+            // them (their x stays synced around this tick).
+            if u.fx.carrier.is_some() {
+                return;
+            }
+            // Drumguard B2: the bonded ally ignores slows and fish.
             let mut speed = if u.fx.march_ignore_slow {
                 st.speed
             } else {
@@ -126,8 +152,12 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
                     army.tanks > 0,
                 );
             }
-            // Drumguard march bonus joins haste under the BR-X03 cap.
-            let bonus = (i64::from(haste) + i64::from(u.fx.march_move_bp)).min(5_000);
+            // Drumguard march bonus joins haste under the BR-X03 cap, as does
+            // the Cargo Crab's carry bonus (B1 steady, B2 surge while armed).
+            let bonus = (i64::from(haste)
+                + i64::from(u.fx.march_move_bp)
+                + i64::from(crate::support::carry_move_bp(state, &u)))
+            .min(5_000);
             if bonus > 0 {
                 speed = ((i64::from(speed) * (BP + bonus) / BP).min(i64::from(i32::MAX))) as i32;
             }
@@ -224,7 +254,9 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
         let target = state
             .units
             .iter()
-            .filter(|u| u.seat != seat && u.hp > 0 && (u.x - sx).abs() <= rules.stronghold_range)
+            .filter(|u| {
+                u.seat != seat && u.hp > 0 && crate::targeting::targetable(state, u.id) && (u.x - sx).abs() <= rules.stronghold_range
+            })
             .map(|u| {
                 let guard = rules
                     .def(u.kind)
@@ -272,6 +304,28 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
 const SHRAPNEL_RADIUS: i32 = 1_000;
 
 pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
+    // P48-A: dismount first. A dead crab drops its passenger behind it
+    // (re-board lock); a dead passenger frees its crab at once.
+    let mut drops: Vec<(UnitId, UnitId)> = Vec::new();
+    let mut freed: Vec<UnitId> = Vec::new();
+    for u in state.units.iter().filter(|u| u.hp <= 0) {
+        if u.kind == UnitKind::CargoCrab {
+            if let Some(passenger) = u.fx.passenger {
+                drops.push((u.id, passenger));
+            }
+        }
+        if let Some(carrier) = u.fx.carrier {
+            freed.push(carrier);
+        }
+    }
+    for (crab, passenger) in drops {
+        crate::support::dismount(state, crab, passenger, ev);
+    }
+    for carrier in freed {
+        if let Some(ci) = state.unit_index(carrier) {
+            state.units[ci].fx.passenger = None;
+        }
+    }
     // P46: drain the shrapnel queue before removal. Chains terminate:
     // shrapnel only spawns on plate breaks, and plates only decrease.
     while !state.shrapnel.is_empty() {
