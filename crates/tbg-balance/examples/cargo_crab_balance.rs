@@ -69,9 +69,8 @@ fn run_match(
         let elapsed = s.tick - start_tick;
 
         let crab_alive = s.unit_index(crab_id).is_some_and(|i| s.units[i].hp > 0);
-        let pass_alive = passenger_id.is_some_and(|pid| {
-            s.unit_index(pid).is_some_and(|i| s.units[i].hp > 0)
-        });
+        let pass_alive =
+            passenger_id.is_some_and(|pid| s.unit_index(pid).is_some_and(|i| s.units[i].hp > 0));
         let opp_alive = s.unit_index(opp_id).is_some_and(|i| s.units[i].hp > 0);
 
         let team_crab_alive = crab_alive || pass_alive;
