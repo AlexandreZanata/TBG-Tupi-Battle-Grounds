@@ -18,9 +18,11 @@
       "layout": {
         "portraitTop": 17,
         "portraitHeight": 47,
-        "nameY": 74,
-        "roleY": 80,
-        "costY": 85.6
+        "nameY": 71.4,
+        "roleY": 76.3,
+        "costY": 84.0,
+        "orbY": 13.1,
+        "orbSize": 15.8
       }
     },
     {
@@ -39,9 +41,11 @@
       "layout": {
         "portraitTop": 17,
         "portraitHeight": 47,
-        "nameY": 74,
-        "roleY": 80,
-        "costY": 84.3
+        "nameY": 71.4,
+        "roleY": 76.3,
+        "costY": 83.9,
+        "orbY": 11.5,
+        "orbSize": 14.2
       }
     },
     {
@@ -60,9 +64,11 @@
       "layout": {
         "portraitTop": 17,
         "portraitHeight": 47,
-        "nameY": 71.5,
-        "roleY": 77,
-        "costY": 82.9
+        "nameY": 69.6,
+        "roleY": 74.5,
+        "costY": 82.6,
+        "orbY": 12.6,
+        "orbSize": 15.8
       }
     },
     {
@@ -81,9 +87,11 @@
       "layout": {
         "portraitTop": 17,
         "portraitHeight": 47,
-        "nameY": 74,
-        "roleY": 80,
-        "costY": 85.1
+        "nameY": 72.5,
+        "roleY": 77.4,
+        "costY": 85.2,
+        "orbY": 9.6,
+        "orbSize": 13.0
       }
     }
   ]

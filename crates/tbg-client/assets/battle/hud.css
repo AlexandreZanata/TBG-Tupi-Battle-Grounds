@@ -10,15 +10,15 @@
 #tbg-battle button:disabled{cursor:default}
 .iron-frame{--cut:11px;position:relative;isolation:isolate;background:linear-gradient(135deg,#f2deb1,#95764b 38%,#d5b882 65%,#746045);border:0;clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% var(--cut),100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,var(--cut) 100%,0 calc(100% - var(--cut)),0 var(--cut))}
 .iron-frame::before{content:'';position:absolute;inset:3px;background:linear-gradient(135deg,#263440,#111e2b 48%,#0b1421);clip-path:inherit;z-index:-1;box-shadow:inset 0 0 0 2px #050b12,inset 0 4px 12px #080c18}
-.battle-shop{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
-.battle-resources{height:54px;width:calc(100% + 40px);padding:10px 24px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:16px;pointer-events:auto;white-space:nowrap}
-.resource-label{font-size:19px;font-weight:700;text-shadow:0 2px 2px #000}.resource-value{font-size:18px;font-variant-numeric:tabular-nums;min-width:58px;text-align:center;letter-spacing:.03em}
+.battle-shop{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.battle-resources{height:46px;width:100%;padding:6px 18px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:16px;pointer-events:auto;white-space:nowrap}
+.resource-label{font-size:17px;font-weight:700;text-shadow:0 2px 2px #000}.resource-value{font-size:14px;font-variant-numeric:tabular-nums;min-width:58px;text-align:center;letter-spacing:.03em}
 .resource-divider{height:27px;width:1px;background:linear-gradient(transparent,#a4afbb66,transparent);margin:0 6px}
-.energy-track{width:clamp(145px,12vw,220px);height:23px;border:2px solid #53616f;border-radius:20px;background:#0c1421;box-shadow:inset 0 2px 6px #0008;overflow:hidden}
+.energy-track{flex:1 1 auto;min-width:80px;max-width:260px;height:20px;border:2px solid #53616f;border-radius:20px;background:#0c1421;box-shadow:inset 0 2px 6px #0008;overflow:hidden}
 .energy-track>span{display:block;height:100%;width:0;background:linear-gradient(#df9cff,#b751f5 65%,#8d25d2);box-shadow:inset 0 2px 3px #fff7;border-radius:15px 0 0 15px;transition:width .12s linear}
 .army-icon{width:30px;height:27px;fill:#f2e8d5;filter:drop-shadow(0 2px 1px #0008)}
-.battle-offers{display:flex;gap:14px;pointer-events:auto}
-.battle-card{width:clamp(170px,12.25vw,235px);height:clamp(195px,24vh,260px);padding:0;text-align:left;transition:filter .15s,transform .1s}
+.battle-offers{display:flex;gap:12px;pointer-events:auto}
+.battle-card{width:clamp(128px,9.2vw,178px);height:clamp(195px,24vh,260px);padding:0;text-align:left;transition:filter .15s,transform .1s}
 .battle-card::before{inset:5px;background:radial-gradient(ellipse at 50% 25%,#344958,#172631 62%,#0a111b 85%)}
 .battle-card:hover:enabled{filter:brightness(1.12) drop-shadow(0 0 7px #f6d99c55)}
 .battle-card:active:enabled{transform:scale(.96)}
@@ -42,7 +42,7 @@
 .battle-synergy{margin:0;padding:4px 15px;border:1px solid #a8905f88;background:#132430dd;border-radius:5px;font-size:12px;color:#f2dcaa;pointer-events:auto}
 @keyframes pending-shop{from{filter:brightness(.9)}to{filter:brightness(1.25)}}
 @media(max-width:1279px),(max-height:719px),(orientation:portrait){#tbg-battle{display:none!important}}
-@media(min-width:1280px) and (max-width:1450px){.battle-score{width:min(70vw,920px);min-width:700px}.team-plate{padding:0 12px 0 8px;gap:9px}.crest{width:38px;height:44px}.battle-time{width:100px}.battle-surrender{right:12px}.battle-resources{height:48px;gap:12px;padding:8px 16px}.resource-label{font-size:16px}.resource-value{font-size:16px}.battle-shop{bottom:10px}.battle-card{--cut:10px}.champion-name{max-width:140px}}
+@media(min-width:1280px) and (max-width:1450px){.battle-score{width:min(70vw,920px);min-width:700px}.team-plate{padding:0 12px 0 8px;gap:9px}.crest{width:38px;height:44px}.battle-time{width:100px}.battle-surrender{right:12px}.battle-resources{height:40px;gap:10px;padding:5px 12px}.resource-label{font-size:14px}.resource-value{font-size:14px}.battle-shop{bottom:5px}.battle-card{--cut:10px}.champion-name{max-width:140px}}
 @media(prefers-reduced-motion:reduce){.vitality-fill,.vitality-trail,.energy-track>span,.battle-card{transition:none}.vitality.hurt,.battle-time[data-phase='overtime'],.battle-surrender[data-state='armed'],.battle-surrender[data-state='armed']:hover:enabled{animation:none}.battle-card.pending{animation:none}}
 
 /* Top bar: two heraldic team plates around a clock medallion (owner request 2026-10-29). */
