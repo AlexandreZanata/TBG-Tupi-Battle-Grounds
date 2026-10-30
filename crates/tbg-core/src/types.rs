@@ -94,6 +94,9 @@ pub enum UnitKind {
     Shatterback,
     BloodFurnace,
     Bloodweaver,
+    // P47 (Proposed, staged): wave D. Same staging rules.
+    Oilpress,
+    Drumguard,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -113,7 +116,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
 #[rustfmt::skip]
-pub const ALL_KINDS: [UnitKind; 20] = [
+pub const ALL_KINDS: [UnitKind; 22] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -134,6 +137,8 @@ pub const ALL_KINDS: [UnitKind; 20] = [
     UnitKind::Shatterback,
     UnitKind::BloodFurnace,
     UnitKind::Bloodweaver,
+    UnitKind::Oilpress,
+    UnitKind::Drumguard,
 ];
 
 impl UnitKind {
@@ -153,7 +158,7 @@ impl UnitKind {
 /// lab and the Practice preview draw from (P46: 19 kinds; grows per wave
 /// until the P53 owner switch moves it into `CANON.pool`).
 #[rustfmt::skip]
-pub const FULL_POOL: [UnitKind; 19] = [
+pub const FULL_POOL: [UnitKind; 21] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -173,6 +178,8 @@ pub const FULL_POOL: [UnitKind; 19] = [
     UnitKind::Shatterback,
     UnitKind::BloodFurnace,
     UnitKind::Bloodweaver,
+    UnitKind::Oilpress,
+    UnitKind::Drumguard,
 ];
 
 /// All playable archetypes, in glossary order.

@@ -75,6 +75,9 @@ pub struct UnitFx {
     pub plate_hp: i16,
     pub march_move_bp: u16,
     pub march_dr_bp: u16,
+    /// Drumguard B2: the bonded ally ignores slows and fish (not root).
+    /// Rewritten every tick by the bonds pass, like the march fields.
+    pub march_ignore_slow: bool,
     pub bond: Option<UnitId>,
     pub carrier: Option<UnitId>,
     pub passenger: Option<UnitId>,

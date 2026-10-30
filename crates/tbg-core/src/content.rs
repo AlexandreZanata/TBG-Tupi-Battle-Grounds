@@ -123,6 +123,9 @@ pub struct FormDef {
     pub on_hit: Option<OnHit>,
     /// Splash damage share, in basis points of the hit (10 000 = full).
     pub splash_bp: i32,
+    /// When true, the splash carries the form's on-hit effect to splashed
+    /// units (Oilpress B2 Black Mire; every other splash is damage only).
+    pub splash_hit: bool,
     /// Healing cut applied by the hit, in basis points.
     pub heal_cut_bp: i32,
     /// ticks the heal cut lasts.
@@ -150,6 +153,7 @@ const fn form(name: &'static str) -> FormDef {
         dmg_add: 0,
         on_hit: None,
         splash_bp: 10_000,
+        splash_hit: false,
         heal_cut_bp: 0,
         heal_cut_ticks: 0,
         vs_below_bp: 0,
@@ -338,7 +342,7 @@ use Faction::*;
 
 /// Every kind, in `UnitKind` (`ALL_KINDS`) order.
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 20] = [
+pub const UNITS: [UnitDef; 22] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
@@ -519,6 +523,34 @@ pub const UNITS: [UnitDef; 20] = [
         form("Last Offering"),
         FormDef { atk_bp: 2_500, ..form("Rapid Circulation") },
         form("Shared Blood"),
+    ]),
+    // P47 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave D. Not in the
+    // Shop pool until the P53 owner switch.
+    unit(UnitKind::Oilpress, "Oilpress", Machines, Tank, 4_200,
+        [3_600, 25, 50, 800, 15, 0, 0], None, [
+        [Ability::Formation { engage: 4_000, gap: 200 }, Ability::None],
+        [Ability::Formation { engage: 4_000, gap: 200 }, Ability::None],
+        [Ability::Formation { engage: 4_000, gap: 200 }, Ability::None],
+        [Ability::Formation { engage: 4_000, gap: 200 }, Ability::None],
+        [Ability::Formation { engage: 4_000, gap: 200 }, Ability::None],
+    ], [
+        FormDef { hp_bp: 35_000, ..form("Reinforced Hull") },
+        FormDef { hp_bp: 35_000, ..form("Immovable Mass") },
+        FormDef { on_hit: slow(3_000, 40), ..form("Oil Leak") },
+        FormDef { splash_add: 1_000, on_hit: slow(3_000, 40), splash_hit: true, ..form("Black Mire") },
+    ]),
+    unit(UnitKind::Drumguard, "Drumguard", Humans, Support, 1_800,
+        [260, 0, 20, 3_000, 50, 0, 0], None, [
+        [Ability::March { reach: 2_000, move_bp: 2_500, dr_bp: 1_500, hysteresis: 500, ignore_slow: false }, Ability::None],
+        [Ability::March { reach: 2_000, move_bp: 3_500, dr_bp: 1_500, hysteresis: 500, ignore_slow: false }, Ability::None],
+        [Ability::March { reach: 2_000, move_bp: 4_500, dr_bp: 1_500, hysteresis: 500, ignore_slow: false }, Ability::None],
+        [Ability::March { reach: 2_000, move_bp: 2_500, dr_bp: 1_800, hysteresis: 500, ignore_slow: false }, Ability::None],
+        [Ability::March { reach: 2_000, move_bp: 2_500, dr_bp: 1_800, hysteresis: 500, ignore_slow: true }, Ability::None],
+    ], [
+        form("War March"),
+        form("Steady Cadence"),
+        form("Iron Rhythm"),
+        form("Unbreakable Rhythm"),
     ]),
 ];
 

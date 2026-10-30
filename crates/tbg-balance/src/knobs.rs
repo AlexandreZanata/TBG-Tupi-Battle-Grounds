@@ -186,6 +186,7 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
                 on_hit: _,
                 // Untunable in P43/P44: staged hooks for later waves.
                 splash_bp: _,
+                splash_hit: _,
                 heal_cut_bp: _,
                 heal_cut_ticks: _,
                 vs_below_bp: _,

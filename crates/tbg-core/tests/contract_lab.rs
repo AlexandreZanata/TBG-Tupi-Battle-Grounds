@@ -94,11 +94,11 @@ fn c2_per_tick_traces_are_frozen() {
     // purchase, BR-S04). P43: the zeroed `UnitFx` block moved the hashes
     // with tick, winner and reason identical (verified).
     let goldens = [
-        (1, 0xd4d1_7533_ea20_cabf, 0x23e0_57af_9b0f_fc5f, 2_214),
-        (7, 0x44f3_6189_d0ae_2767, 0xc745_33b0_2893_d54d, 3_284),
-        (42, 0x069f_504c_6b6d_cbab, 0xbca2_5a25_93de_46b1, 1_833),
-        (1000, 0x952b_6552_b9dc_ecea, 0x344b_6919_239f_50e9, 2_641),
-        (65535, 0xd58b_f232_2fe6_1d43, 0xeb31_9814_0ff4_f37f, 1_740),
+        (1, 0xf89a_12cd_9f40_6df3, 0x2640_f195_cc12_a103, 2_214),
+        (7, 0x36e9_eb5a_afe8_b6b9, 0x598f_f581_edba_b4fb, 3_284),
+        (42, 0x1de6_fb32_8aa2_7f33, 0xadea_ab78_9c12_6579, 1_833),
+        (1000, 0x35ec_63d0_464d_ab8c, 0xcc9e_7b44_3710_914d, 2_641),
+        (65535, 0xb43a_f429_af3a_d693, 0x2789_7b66_a2c2_b585, 1_740),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

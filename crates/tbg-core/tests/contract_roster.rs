@@ -57,11 +57,11 @@ const ROSTER: [Row; 11] = {
     ]
 };
 
-/// P44–P46 (Proposed, staged, GAME-DESIGN §11): waves A–C in `UnitKind`
+/// P44–P47 (Proposed, staged, GAME-DESIGN §11): waves A–D in `UnitKind`
 /// order. Not in the Shop pool until the P53 owner switch; checked against
 /// the §11 starting values in the document's units.
 #[rustfmt::skip]
-const STAGED: [Row; 9] = {
+const STAGED: [Row; 11] = {
     use Archetype::*; use Faction::*; use UnitKind::*;
     #[allow(clippy::too_many_arguments)]
     const fn r(kind: UnitKind, faction: Faction, archetype: Archetype,
@@ -82,6 +82,10 @@ const STAGED: [Row; 9] = {
         r(Shatterback,  Plants,   Tank,    4,  560, 30,  0, 150, 80,  56,    0, None),
         r(BloodFurnace, Undead,   Dps,     4,  440, 36,  0, 180, 80,  90,    0, None),
         r(Bloodweaver,  Undead,   Support, 3,  300, 0,   0, 500, 300, 90,    0, None),
+        // P47: Drumguard range is the 3.0-tile hold radius (the bond reach
+        // 2.0 lives in March.reach); Oilpress Every is 2.5 s.
+        r(Oilpress,     Machines, Tank,    7, 3600, 25,  0, 250, 80,  30,    0, None),
+        r(Drumguard,    Humans,   Support, 3,  260, 0,   0, 100, 300, 100,   0, None),
     ]
 };
 
@@ -147,10 +151,10 @@ fn base_stats_match_game_design_table() {
 fn roster_composition() {
     // §5 (D-32): ten purchasable units plus the Beetling summon, in
     // `UnitKind` order; every archetype present. P44 stages three more
-    // conventional kinds, P45 another three and P46 another three (§11, not
-    // in the Shop pool until P53); the pool itself stays exactly the ten
-    // purchasable units.
-    assert_eq!(UNITS.len(), 20);
+    // conventional kinds, P45 another three, P46 another three and P47 two
+    // more (§11, not in the Shop pool until P53); the pool itself stays
+    // exactly the ten purchasable units.
+    assert_eq!(UNITS.len(), 22);
     assert_eq!(UNIT_KINDS.len(), 10);
     assert!(UNIT_KINDS.iter().all(|k| k.is_conventional()));
     assert_eq!(
@@ -158,9 +162,9 @@ fn roster_composition() {
         ALL_KINDS.to_vec()
     );
     for (f, n) in [
-        (Faction::Humans, 5),
+        (Faction::Humans, 6),
         (Faction::Undead, 4),
-        (Faction::Machines, 4),
+        (Faction::Machines, 5),
         (Faction::Plants, 6),
     ] {
         let sold = UNITS
@@ -292,7 +296,15 @@ Blood Furnace/Eternal Embers: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0
 Bloodweaver/Deep Transfer: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bloodweaver/Last Offering: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bloodweaver/Rapid Circulation: hp=0 dmg=0 atk=2500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Bloodweaver/Shared Blood: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Bloodweaver/Shared Blood: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Oilpress/Reinforced Hull: hp=35000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Oilpress/Immovable Mass: hp=35000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Oilpress/Oil Leak: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=slow 3000bp/40t
+Oilpress/Black Mire: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=1000 heal=0 dmg+=0 hit=slow 3000bp/40t
+Drumguard/War March: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drumguard/Grand March: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drumguard/Iron Rhythm: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drumguard/Unbreakable Rhythm: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {

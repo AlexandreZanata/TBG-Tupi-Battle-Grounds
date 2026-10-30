@@ -29,21 +29,21 @@ fn bot_matches_are_frozen() {
     let goldens = [
         (
             1,
-            0x23e0_57af_9b0f_fc5f_u64,
+            0x2640_f195_cc12_a103_u64,
             2_214,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0xc745_33b0_2893_d54d,
+            0x598f_f581_edba_b4fb,
             3_284,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0xbca2_5a25_93de_46b1,
+            0xadea_ab78_9c12_6579,
             1_833,
             Seat::B,
             StrongholdDestroyed,
