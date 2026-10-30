@@ -19,6 +19,9 @@ def matrix(args):
     rows = []
     metadata = []
     started = time.time()
+    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    source_diff = subprocess.check_output(["git", "diff", "HEAD", "--", "crates", "scripts", "Cargo.toml", "Cargo.lock"])
+    (output / f"{args.label}-source.patch").write_bytes(source_diff)
     for seed in args.seeds.split(","):
         command = [
             "taskset", "-c", args.cpu, str(pathlib.Path(args.binary).resolve()),
@@ -38,7 +41,9 @@ def matrix(args):
     provenance = {
         "binary": str(pathlib.Path(args.binary).resolve()),
         "binary_sha256": hashlib.sha256(pathlib.Path(args.binary).read_bytes()).hexdigest(),
-        "git_head": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        "git_head": revision,
+        "working_tree_diff_sha256": hashlib.sha256(source_diff).hexdigest(),
+        "source_capture": "Tracked source at run start; binary identity is independently hashed.",
         "arguments": vars(args), "metadata": metadata,
         "elapsed_s": round(time.time() - started, 3),
     }

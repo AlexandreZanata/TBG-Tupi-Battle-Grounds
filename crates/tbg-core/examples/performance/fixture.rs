@@ -17,7 +17,7 @@ impl Fixture {
         while state.phase != Phase::Running {
             state.step();
         }
-        if matches!(scene, "mixed" | "cargo") {
+        if matches!(scene, "mixed" | "cargo" | "splash-aura") {
             for p in &mut state.players {
                 // Synthetic late-game ownership; values are existing copies,
                 // not new balance values or a claim about normal matches.
@@ -97,6 +97,11 @@ impl Fixture {
             7_500 + seat.index() as i32 * 800
         };
         unit.x = center + (index % 11) as i32 * 50;
+        if self.scene == "splash-aura" && kind == UnitKind::Rampart {
+            // Adversarial Shield Wall miss: every splash victim searches
+            // for an allied Rampart, but all Ramparts are far from combat.
+            unit.x = if seat == Seat::A { 0 } else { 16_000 };
+        }
         if self.scene == "healing" || self.scene == "mixed" {
             unit.hp = (unit.max_hp * 2 / 3).max(1);
         }
@@ -112,6 +117,7 @@ fn kinds(scene: &str) -> &'static [UnitKind] {
         "formation" => &[Oilpress, Oilpress, Shieldbearer, Drumguard],
         "puppet" => &[Puppetmaster, Puppetmaster, Longaxe, BloodFurnace],
         "cargo" => &[CargoCrab, Smuggler, Nester, Leechroot, Archer],
+        "splash-aura" => &[SiegeWalker, Bombard, Rampart],
         "mixed" => &tbg_core::types::FULL_POOL,
         _ => panic!("unknown benchmark scene: {scene}"),
     }

@@ -132,3 +132,29 @@ pub fn trace(f: &mut Fixture, ticks: usize, out: &mut impl Write) {
         out.write_all(&payload).unwrap();
     }
 }
+
+pub fn commands(f: &mut Fixture, seed: u64, out: &mut impl Write) {
+    let (mut total, mut max, mut calls, mut bytes) = (0, 0, 0, 0);
+    for sequence in 1..=40 {
+        for seat in Seat::BOTH {
+            let (result, ns, counts) = time(|| {
+                f.state.apply_intention(
+                    seat,
+                    sequence,
+                    tbg_core::PlayerIntention::Purchase { offer: 0 },
+                )
+            });
+            result.unwrap();
+            total += ns;
+            max = max.max(ns);
+            calls += counts.calls;
+            bytes += counts.bytes;
+        }
+    }
+    writeln!(
+        out,
+        "{},{},{seed},80,{total},{max},{calls},{bytes}",
+        f.scene, f.target
+    )
+    .unwrap();
+}
