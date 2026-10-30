@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 use tbg_core::content::{
-    augment_def, def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, STRONGHOLD_HP, TICK_HZ,
+    augment_def, def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, TICK_HZ,
 };
 use tbg_core::{MatchView, Phase, FACTIONS};
 
@@ -25,8 +25,9 @@ pub(super) fn update(
     let me = v.you.index();
     for (hud, mut node) in &mut nodes {
         let fraction = match hud {
-            Hud::Hp(0) => v.stronghold_hp[me] as f32 / STRONGHOLD_HP as f32,
-            Hud::Hp(_) => v.stronghold_hp[1 - me] as f32 / STRONGHOLD_HP as f32,
+            // Kinds and Fortification give each seat its own max HP (BR-SK07).
+            Hud::Hp(0) => hp_fraction(v, me),
+            Hud::Hp(_) => hp_fraction(v, 1 - me),
             Hud::EnergyFill => {
                 let band = (INTEREST_BAND * INTEREST_MAX_BANDS) as f32;
                 (v.energy as f32 / band.max(1.0)).min(1.0)
@@ -134,6 +135,10 @@ pub(super) fn update(
             _ => continue,
         };
     }
+}
+
+fn hp_fraction(v: &MatchView, seat: usize) -> f32 {
+    v.stronghold_hp[seat] as f32 / v.strongholds[seat].max_hp.max(1) as f32
 }
 
 pub(super) fn buyable(v: &MatchView, i: usize) -> bool {

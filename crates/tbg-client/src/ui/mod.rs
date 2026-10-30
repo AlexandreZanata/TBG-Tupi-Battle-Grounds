@@ -16,6 +16,7 @@ mod desktop;
 #[cfg(target_arch = "wasm32")]
 mod desktop_actions;
 mod evolve;
+pub(crate) mod fortify;
 #[cfg(test)]
 mod glyphs;
 mod hud;
@@ -23,12 +24,16 @@ mod hud_top;
 mod hud_update;
 mod input;
 pub(crate) mod inspect;
+#[cfg(test)]
+mod json_lite;
 mod menu;
 mod queue;
 pub mod ranking;
 mod ranking_ui;
 mod result;
 mod start;
+#[cfg(test)]
+mod stronghold_data_tests;
 pub(crate) mod surrender;
 pub mod textform;
 mod tips;
@@ -90,6 +95,8 @@ pub enum UiAction {
     // Owner revision 2026-10-29: War Council actions.
     ChooseAugment(u8),
     ForgoAugment,
+    /// D-46: buy the next Fortification tier of your own tower on a branch.
+    Fortify(u8),
 }
 
 /// Shop card waiting for the view that confirms (or rejects) its purchase.
@@ -121,7 +128,7 @@ pub fn plugin(app: &mut App) {
             toast::plugin,
             tips::plugin,
         ))
-        .add_plugins((battle_hud::plugin, inspect::plugin));
+        .add_plugins((battle_hud::plugin, inspect::plugin, fortify::plugin));
 }
 
 /// Scale the whole UI with the smaller window side (phones ≈ 0.9, desktop 1.5).
@@ -138,6 +145,8 @@ pub fn rejection_text(reason: Rejection) -> String {
         Rejection::NotEvolvable => "Summons cannot evolve",
         Rejection::NotRunning => "The match is not running",
         Rejection::Paused => "Battle paused - choose an Augment",
+        Rejection::MaxTier => "Already at the highest tier",
+        Rejection::WrongBranch => "That branch is closed",
         _ => "Action not possible",
     }
     .to_string()

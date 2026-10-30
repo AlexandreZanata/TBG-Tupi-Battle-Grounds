@@ -169,6 +169,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
                             forgo_card()
                         ]
                     ),
+                    super::fortify::control(),
                     bar(
                         Hud::EnergyFill,
                         Color::srgb_u8(0xB4, 0x7C, 0xFF),

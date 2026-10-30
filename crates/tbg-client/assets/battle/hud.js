@@ -70,6 +70,86 @@
     panel.querySelector('[data-i="status"]').dataset.status = status;
     bar(panel.querySelector('.inspect-hp'), Number(hp), Number(max), name + ' HP');
   }
+  // Fortification (D-46): the tower data file supplies names and effects;
+  // `data-fortify` (from Rust) says what each branch offers right now.
+  const TS = globalThis.TbgStronghold;
+  const fortPanel = root.querySelector('[data-fort-panel]');
+  const fortOptions = [...fortPanel.querySelectorAll('[data-fort-branch]')];
+  const fort = {data: null, loading: null};
+  function fortData() {
+    fort.loading ||= fetch('assets/stronghold/strongholds.json')
+      .then(response => { if (!response.ok) throw new Error('tower data unavailable'); return response.json(); })
+      .then(data => { fort.data = data; TS.sprite(); render(); })
+      .catch(() => { fort.loading = null; });
+  }
+  const towerOf = record => { const [kind = '', tier, branch] = (record || '').split('|'); return {kind, tier: Number(tier) || 0, branch: Number(branch) || 0}; };
+  const towerLabel = (t, def) => (def ? def.name : t.kind) + ' T' + t.tier;
+  fortOptions.forEach(button => button.addEventListener('click', () => { if (button.dataset.state === 'open') send('fortify:' + button.dataset.fortBranch); }));
+  const fortToggle = root.querySelector('[data-fort-toggle]');
+  fortToggle.addEventListener('click', () => {
+    const open = fortToggle.getAttribute('aria-expanded') !== 'true';
+    fortToggle.setAttribute('aria-expanded', String(open));
+    fortToggle.setAttribute('aria-label', open ? 'Hide Fortification details' : 'Show Fortification details');
+    fortToggle.textContent = open ? '−' : '+';
+    root.querySelector('[data-fort-body]').hidden = !open;
+  });
+  function plates(you, enemy) {
+    const data = fort.data;
+    const mine = data && TS.kind(data, you.kind), theirs = data && TS.kind(data, enemy.kind);
+    const label = (side, t, def) => {
+      const node = root.querySelector('[data-plate-tower="' + side + '"]');
+      const value = t.kind ? towerLabel(t, def) : '';
+      if (node.textContent !== value) node.textContent = value;
+      node.title = def && t.tier ? value + ' · ' + def.branches[t.branch].name : value;
+      node.style.setProperty('--tower', def ? def.color : '#c9a86a');
+    };
+    label('you', you, mine); label('enemy', enemy, theirs);
+  }
+  function fortOption(button, def, you, state) {
+    const b = Number(button.dataset.fortBranch), tier = Math.min(you.tier + 1, 2);
+    const step = def.branches[b].steps[tier - 1], cost = TS.cost(fort.data, tier);
+    const closed = state === 'closed';
+    button.dataset.state = state; button.hidden = state === 'max';
+    button.disabled = state !== 'open';
+    button.querySelector('.fort-branch').textContent = def.branches[b].name;
+    button.querySelector('.fort-step').textContent = closed ? 'Closed · ' + def.branches[you.branch].name + ' chosen' : 'Tier ' + tier + ' · ' + step.name;
+    button.querySelector('.fort-effect').textContent = closed ? '' : TS.effect(fort.data, def, b, tier);
+    button.querySelector('.fort-cost b').textContent = closed ? '-' : String(cost);
+    button.setAttribute('aria-label', def.branches[b].name + (closed ? ', closed' : ', tier ' + tier + ' ' + step.name + ', ' + cost + ' Energy' + (state === 'short' ? ', not enough Energy' : '')));
+  }
+  function fortNote(states, you, def, s) {
+    const tier = Math.min(you.tier + 1, 2);
+    if (you.tier >= 2) return 'Fully fortified · ' + def.branches[you.branch].name;
+    if (states.includes('pending')) return 'Fortifying…';
+    if (states.includes('paused')) return 'Battle paused · War Council first';
+    if (states.includes('idle')) return 'Opens when the battle starts';
+    if (states.includes('short')) {
+      const have = (Number(s.energy) || 0) / Math.max(1, number('energyScale'));
+      return 'Need ' + TS.cost(fort.data, tier) + ' Energy · you have ' + (Number.isInteger(have) ? have : have.toFixed(1));
+    }
+    return you.tier ? 'Tier 2 completes the ' + def.branches[you.branch].name + ' branch' : 'Tier 1 picks a branch for the rest of the match';
+  }
+  function renderFortify(s) {
+    const you = towerOf(s.towerYou), enemy = towerOf(s.towerEnemy);
+    if (!fort.data) fortData();
+    plates(you, enemy);
+    const def = fort.data && TS.kind(fort.data, you.kind);
+    fortPanel.hidden = !def;
+    if (!def) return;
+    fortPanel.style.setProperty('--tower', def.color);
+    fortPanel.querySelector('[data-fort-icon]').setAttribute('href', TS.icon(def.kind));
+    set('[data-fort-name]', def.name);
+    set('[data-fort-tier]', 'Tier ' + you.tier + ' / 2' + (you.tier ? ' · ' + def.branches[you.branch].name : ''));
+    set('[data-fort-hp]', number('hpOwn') + ' / ' + number('hpMaxOwn'));
+    set('[data-fort-passive-name]', def.passive.name);
+    const passive = TS.fill(def.passive.text, TS.stats(def, you.tier, you.branch), fort.data);
+    set('[data-fort-passive]', passive);
+    fortPanel.querySelector('.fort-passive').title = passive; // the panel clamps it to two lines
+    const states = (s.fortify || 'idle|idle').split('|');
+    fortOptions.forEach((button, b) => fortOption(button, def, you, states[b] || 'idle'));
+    set('[data-fort-note]', fortNote(states, you, def, s));
+    fortPanel.dataset.tier = String(you.tier);
+  }
   function render() {
     const s = root.dataset;
     set('[data-battle-you]', s.you || 'You'); set('[data-battle-opponent]', s.opponent || 'Opponent');
@@ -78,8 +158,10 @@
     const [time, mode] = clock(s.clock || '3:00');
     set('[data-battle-clock]', time); set('[data-battle-mode]', mode);
     inspect();
-    health('.vitality.ally', number('hpOwn'), number('hpMax'), s.you || 'Your');
-    health('.vitality.enemy', number('hpEnemy'), number('hpMax'), s.opponent || 'Enemy');
+    // Each seat has its own max HP: kinds and Fortification differ (BR-SK07).
+    health('.vitality.ally', number('hpOwn'), number('hpMaxOwn'), s.you || 'Your');
+    health('.vitality.enemy', number('hpEnemy'), number('hpMaxEnemy'), s.opponent || 'Enemy');
+    renderFortify(s);
     const scale = Math.max(1,number('energyScale'));
     const energy = number('energy') / scale;
     const readable = value => Number.isInteger(value) ? String(value) : value.toFixed(1);
@@ -148,6 +230,6 @@
     set('[data-battle-surrender]',s.surrender === 'sent' ? 'Leaving...' : s.surrender === 'armed' ? 'Confirm?' : 'Surrender');
     surrender.title = s.surrender === 'armed' ? (s.ranked === 'true' ? 'Confirm: this counts as a Ranked loss' : 'Click again to surrender') : 'Click twice to surrender';
   }
-  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-hp-own','data-hp-enemy','data-hp-max','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-scale','data-army','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect','data-regen','data-augments-you','data-augments-enemy','data-council','data-council-options']});
+  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-hp-own','data-hp-enemy','data-hp-max-own','data-hp-max-enemy','data-tower-you','data-tower-enemy','data-fortify','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-scale','data-army','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect','data-regen','data-augments-you','data-augments-enemy','data-council','data-council-options']});
   root.dataset.ready = 'true';
 })();

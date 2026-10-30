@@ -15,7 +15,11 @@
   <link data-trunk rel="css" href="assets/arcana/editor.css" />
   <script data-trunk defer src="assets/arcana/preset.js"></script>
   <script data-trunk defer src="assets/arcana/editor.js"></script>
+  <link data-trunk rel="css" href="assets/stronghold/picker.css" />
+  <script data-trunk defer src="assets/stronghold/describe.js"></script>
+  <script data-trunk defer src="assets/stronghold/picker.js"></script>
   <link data-trunk rel="css" href="assets/battle/hud.css" />
+  <link data-trunk rel="css" href="assets/battle/fortify.css" />
   <script data-trunk defer src="assets/battle/hud.js"></script>
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2b36; touch-action: none; }
@@ -48,6 +52,7 @@
     <nav class="lobby-tabs" aria-label="Main navigation">
       <button class="active" aria-current="page" data-action="menu"><svg class="icon"><use data-icon="home"/></svg><span>Lobby</span></button>
       <button data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><svg class="icon"><use data-icon="arcana"/></svg><span>Arcanas</span></button>
+      <button data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><svg class="icon"><use data-icon="tower"/></svg><span>Stronghold</span></button>
       <button disabled title="Coming later"><svg class="icon"><use data-icon="helmet"/></svg><span>Troops <small>Locked</small></span></button>
       <button data-action="ranking"><svg class="icon"><use data-icon="trophy"/></svg><span>Ranking</span></button>
       <button data-dialog="settings"><svg class="icon"><use data-icon="settings"/></svg><span>Settings</span></button>
@@ -63,12 +68,14 @@
     <button class="mode" data-action="practice"><svg class="icon"><use data-icon="bot"/></svg><span><strong>Practice vs Bot</strong><small>Train your strategy</small></span><span class="chevron" aria-hidden="true">›</span></button>
   </main>
   <section class="profile-panel metal-panel" aria-label="Your ranked record">
+    <button class="tower-chip" data-tower-chip data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker" aria-label="Stronghold. Change tower"><svg aria-hidden="true"><use data-tower-icon href=""/></svg><span><small>Stronghold</small><b data-tower-name>Bastion</b></span></button>
     <div class="profile-summary"><img data-art="emblem" width="120" height="130" alt="Player crest"><div><h2 data-global-rank>Unranked</h2><p class="rating-line"><svg class="icon"><use data-icon="trophy"/></svg><b data-rating>—</b></p><p class="profile-note" data-record-note>Play Ranked to build your record</p></div></div>
     <div class="record"><div>Wins<strong data-wins>—</strong></div><div>Losses<strong data-losses>—</strong></div><div>Win rate<strong data-win-rate>—</strong></div></div>
     <p class="stats-status" aria-live="polite" data-stats-status>Create an account to compete</p>
   </section>
   <section class="feature-cards" aria-label="Explore the battlegrounds">
     <button class="feature metal-panel" data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><img data-art="arcanas" alt="" width="300" height="190"><span class="feature-copy"><strong>Arcanas</strong><small>Shape your strategy</small></span></button>
+    <button class="feature metal-panel" data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><img data-art="strongholds" alt="" width="300" height="190"><span class="feature-copy"><strong>Strongholds</strong><small>Choose your tower</small></span></button>
     <button class="feature metal-panel" disabled><img data-art="troops" alt="" width="300" height="190"><span class="feature-copy"><strong>Troops</strong><small>Meet the units · Coming later</small><span class="feature-lock">Locked</span></span></button>
     <button class="feature metal-panel" data-action="ranking"><img data-art="ranking" alt="" width="300" height="190"><span class="feature-copy"><strong>Ranking <i aria-hidden="true">›</i></strong><small>Find your place among the best</small></span></button>
   </section>
@@ -91,6 +98,12 @@
     </div>
     <footer class="arcana-footer"><div><p data-a="status" role="status"></p><small data-a="storage"></small><small data-a="controls"></small></div><div class="arcana-tools"><button data-a="default"></button><button data-a="reset">Reset</button></div></footer>
   </dialog>
+  <dialog id="stronghold-picker" aria-labelledby="stronghold-title" aria-describedby="stronghold-scope">
+    <header class="tower-header"><div><p class="tower-eyebrow">Choose your keep</p><h1 id="stronghold-title">Strongholds</h1><p data-s="intro"></p></div><div class="tower-scope"><span data-s="badge"></span><small id="stronghold-scope" data-s="scope"></small></div><button class="tower-close" data-close aria-label="Close Stronghold picker">×</button></header>
+    <p data-s="error" role="alert" hidden></p>
+    <div class="tower-scroll"><div class="tower-grid" data-s="grid" role="group" aria-label="Stronghold kinds"></div></div>
+    <footer class="tower-footer"><div><p data-s="status" role="status"></p><small data-s="storage"></small></div><div class="tower-notes"><small data-s="fortify"></small><small data-s="controls"></small></div></footer>
+  </dialog>
   <dialog id="lobby-friend" class="lobby-dialog metal-panel" aria-labelledby="friend-title">
     <button class="dialog-close" data-close aria-label="Close friend panel">×</button><p class="eyebrow">Casual · Private room</p><h2 id="friend-title">Gather your rival</h2><p>Share a room link, or enter a code from a friend.</p>
     <button class="dialog-primary" data-action="create">Create a room</button><div class="divider">or join an existing room</div>
@@ -110,7 +123,7 @@
     <div class="team-plate ally">
       <span class="crest" aria-hidden="true"><b data-crest-you>Y</b></span>
       <div class="plate-body">
-        <span class="battle-name" data-battle-you>You</span>
+        <span class="plate-line"><span class="battle-name" data-battle-you>You</span><span class="plate-tower" data-plate-tower="you"></span></span>
         <div class="vitality ally" role="progressbar" aria-label="Your Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-you-hp>-</strong></div>
         <small class="battle-augments" data-augments-you hidden></small>
       </div>
@@ -120,7 +133,7 @@
     </div>
     <div class="team-plate enemy">
       <div class="plate-body">
-        <span class="battle-name" data-battle-opponent>Opponent</span>
+        <span class="plate-line"><span class="plate-tower" data-plate-tower="enemy"></span><span class="battle-name" data-battle-opponent>Opponent</span></span>
         <div class="vitality enemy" role="progressbar" aria-label="Enemy Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-enemy-hp>-</strong></div>
         <small class="battle-augments" data-augments-enemy hidden></small>
       </div>
@@ -146,6 +159,22 @@
       <div><dt>Status</dt><dd data-i="status"></dd></div>
       <div class="wide"><dt>Synergy</dt><dd data-i="synergy"></dd></div>
     </dl>
+  </aside>
+  <aside class="fortify-panel" data-fort-panel hidden aria-labelledby="fort-title">
+    <header class="fort-head">
+      <svg class="fort-icon" aria-hidden="true"><use data-fort-icon href=""/></svg>
+      <div class="fort-title"><small id="fort-title">Fortification</small><strong data-fort-name>-</strong><span class="fort-tier" data-fort-tier>Tier 0 / 2</span></div>
+      <button class="fort-toggle" data-fort-toggle aria-expanded="true" aria-label="Hide Fortification details">&minus;</button>
+    </header>
+    <div class="fort-body" data-fort-body>
+      <p class="fort-hp"><span>Stronghold HP</span><b data-fort-hp>-</b></p>
+      <p class="fort-passive"><b data-fort-passive-name></b><span data-fort-passive></span></p>
+      <div class="fort-options">
+        <button class="fort-option" data-fort-branch="0"><span class="fort-letter">A</span><span class="fort-copy"><b class="fort-branch"></b><span class="fort-step"></span><span class="fort-effect"></span></span><span class="fort-cost"><i aria-hidden="true"></i><b></b></span></button>
+        <button class="fort-option" data-fort-branch="1"><span class="fort-letter">B</span><span class="fort-copy"><b class="fort-branch"></b><span class="fort-step"></span><span class="fort-effect"></span></span><span class="fort-cost"><i aria-hidden="true"></i><b></b></span></button>
+      </div>
+      <p class="fort-note" data-fort-note role="status"></p>
+    </div>
   </aside>
   <section class="battle-shop" aria-label="Shop">
     <p class="battle-synergy" data-battle-synergy hidden></p>

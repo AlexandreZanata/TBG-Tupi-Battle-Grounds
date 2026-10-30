@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="300" viewBox="0 0 480 300"><defs>
+<linearGradient id="dusk" x2="0" y2="1"><stop stop-color="#1b2c3d"/><stop offset=".55" stop-color="#5a4a3e"/><stop offset="1" stop-color="#b9824a"/></linearGradient>
+<linearGradient id="field" x2="0" y2="1"><stop stop-color="#3d5a35"/><stop offset="1" stop-color="#16231a"/></linearGradient>
+<radialGradient id="glow" cx=".5" cy=".75" r=".6"><stop stop-color="#ffd27a" stop-opacity=".45"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+</defs>
+  <defs>
+    <linearGradient id="sh-stone" x2="1"><stop stop-color="#5b5a55"/><stop offset=".35" stop-color="#9c978a"/><stop offset=".7" stop-color="#7d796e"/><stop offset="1" stop-color="#4a4944"/></linearGradient>
+    <linearGradient id="sh-stone-dark" x2="1"><stop stop-color="#3f4045"/><stop offset=".4" stop-color="#727277"/><stop offset="1" stop-color="#36373c"/></linearGradient>
+    <linearGradient id="sh-gold" x2=".7" y2="1"><stop stop-color="#fff0b0"/><stop offset=".35" stop-color="#e3b54a"/><stop offset=".7" stop-color="#9a6a22"/><stop offset="1" stop-color="#f0cf7a"/></linearGradient>
+    <linearGradient id="sh-steel" x2="1" y2="1"><stop stop-color="#e9f3fb"/><stop offset=".45" stop-color="#8fa7bb"/><stop offset=".55" stop-color="#4f6478"/><stop offset="1" stop-color="#bfd0de"/></linearGradient>
+    <linearGradient id="sh-blue" x2="0" y2="1"><stop stop-color="#6fb5f0"/><stop offset="1" stop-color="#1d4f86"/></linearGradient>
+    <linearGradient id="sh-iron" x2="0" y2="1"><stop stop-color="#7d858e"/><stop offset=".4" stop-color="#3b4249"/><stop offset="1" stop-color="#1c2126"/></linearGradient>
+    <linearGradient id="sh-red" x2="0" y2="1"><stop stop-color="#f06a5d"/><stop offset="1" stop-color="#8e1f24"/></linearGradient>
+    <linearGradient id="sh-wood" x2="0" y2="1"><stop stop-color="#7a5434"/><stop offset="1" stop-color="#3a2618"/></linearGradient>
+  </defs>
+
+  <symbol id="sh-treasury" viewBox="0 0 120 150">
+    <ellipse cx="60" cy="143" rx="50" ry="6" fill="#0007"/>
+    <path d="M30 140L34 64H86L90 140Z" fill="url(#sh-stone)" stroke="#2d2b27" stroke-width="2"/>
+    <path d="M33 84H87M32 104H88M31 124H89M48 64V84M72 64V84M42 104V124M78 104V124" stroke="#3a3833" stroke-width="1.5" opacity=".55"/>
+    <rect x="27" y="56" width="66" height="10" rx="2" fill="url(#sh-gold)" stroke="#5e4114" stroke-width="1.5"/>
+    <path d="M34 56Q34 25 60 20Q86 25 86 56Z" fill="url(#sh-gold)" stroke="#5e4114" stroke-width="2"/>
+    <path d="M47 55Q46 33 60 25M73 55Q74 33 60 25" fill="none" stroke="#fff3c4" stroke-width="2" opacity=".6"/>
+    <path d="M60 4L64 14H56Z" fill="url(#sh-gold)" stroke="#5e4114"/>
+    <circle cx="60" cy="17" r="4" fill="url(#sh-gold)" stroke="#5e4114"/>
+    <circle cx="60" cy="102" r="19" fill="#2a2116" stroke="url(#sh-gold)" stroke-width="4"/>
+    <circle cx="60" cy="102" r="11" fill="none" stroke="#e3b54a" stroke-width="2.5"/>
+    <path d="M60 89V115M47 102H73M51 93L69 111M69 93L51 111" stroke="#e3b54a" stroke-width="2"/>
+    <circle cx="60" cy="102" r="3.5" fill="#fff0b0"/>
+    <g fill="#e3b54a" stroke="#5e4114"><circle cx="45" cy="87" r="2"/><circle cx="75" cy="87" r="2"/><circle cx="45" cy="117" r="2"/><circle cx="75" cy="117" r="2"/></g>
+    <rect x="44" y="70" width="5" height="9" rx="2.5" fill="#1c1a16"/><rect x="71" y="70" width="5" height="9" rx="2.5" fill="#1c1a16"/>
+    <g fill="url(#sh-gold)" stroke="#5e4114" stroke-width="1.2">
+      <ellipse cx="18" cy="140" rx="10" ry="3.5"/><ellipse cx="18" cy="136" rx="10" ry="3.5"/><ellipse cx="18" cy="132" rx="10" ry="3.5"/><ellipse cx="19" cy="128" rx="9" ry="3.2"/>
+      <ellipse cx="102" cy="140" rx="10" ry="3.5"/><ellipse cx="102" cy="136" rx="10" ry="3.5"/><ellipse cx="101" cy="132" rx="9" ry="3.2"/>
+      <ellipse cx="88" cy="142" rx="6" ry="2.4"/><ellipse cx="32" cy="143" rx="5" ry="2"/>
+    </g>
+  </symbol>
+
+  <symbol id="sh-bastion" viewBox="0 0 120 150">
+    <ellipse cx="60" cy="143" rx="56" ry="6" fill="#0007"/>
+    <path d="M16 140V58H104V140Z" fill="url(#sh-stone)" stroke="#2d2b27" stroke-width="2"/>
+    <path d="M16 46H24V40H32V46H40V40H48V46H56V40H64V46H72V40H80V46H88V40H96V46H104V58H16Z" fill="url(#sh-stone-dark)" stroke="#2d2b27" stroke-width="2"/>
+    <path d="M4 140V36H30V140Z" fill="url(#sh-stone-dark)" stroke="#232220" stroke-width="2"/>
+    <path d="M90 140V36H116V140Z" fill="url(#sh-stone-dark)" stroke="#232220" stroke-width="2"/>
+    <path d="M2 36V26H8V30H14V26H20V30H26V26H32V36ZM88 36V26H94V30H100V26H106V30H112V26H118V36Z" fill="url(#sh-stone)" stroke="#232220" stroke-width="1.5"/>
+    <path d="M16 78H104M16 98H104M16 118H104M36 58V78M60 58V78M84 58V78M48 78V98M72 78V98M4 66H30M4 96H30M4 124H30M90 66H116M90 96H116M90 124H116" stroke="#2f2e2a" stroke-width="1.5" opacity=".5"/>
+    <path d="M44 140V112Q44 98 60 98Q76 98 76 112V140Z" fill="url(#sh-wood)" stroke="#1c140d" stroke-width="2"/>
+    <path d="M50 102V140M60 98V140M70 102V140M44 116H76M44 128H76" stroke="#8a919a" stroke-width="2"/>
+    <path d="M60 50L76 55V67Q74 79 60 85Q46 79 44 67V55Z" fill="url(#sh-steel)" stroke="#203041" stroke-width="2"/>
+    <path d="M60 55L71 59V67Q69 75 60 80Q51 75 49 67V59Z" fill="url(#sh-blue)"/>
+    <path d="M60 58V79M51 66H69" stroke="#e9f3fb" stroke-width="2.5"/>
+    <path d="M17 62L27 65V73Q26 81 17 85Q8 81 7 73V65Z" fill="url(#sh-steel)" stroke="#203041" stroke-width="1.5"/>
+    <path d="M17 66L23 68V73Q22 78 17 80Z" fill="url(#sh-blue)"/>
+    <path d="M103 62L113 65V73Q112 81 103 85Q94 81 93 73V65Z" fill="url(#sh-steel)" stroke="#203041" stroke-width="1.5"/>
+    <path d="M103 66L109 68V73Q108 78 103 80Z" fill="url(#sh-blue)"/>
+    <rect x="14" y="98" width="6" height="12" rx="3" fill="#1c1a16"/><rect x="100" y="98" width="6" height="12" rx="3" fill="#1c1a16"/>
+  </symbol>
+
+  <symbol id="sh-artillery" viewBox="0 0 120 150">
+    <ellipse cx="58" cy="143" rx="50" ry="6" fill="#0007"/>
+    <path d="M28 140L34 70H82L88 140Z" fill="url(#sh-stone)" stroke="#2d2b27" stroke-width="2"/>
+    <path d="M31 92H85M30 114H86M48 70V92M68 70V92M40 92V114M58 92V114M76 92V114" stroke="#3a3833" stroke-width="1.5" opacity=".55"/>
+    <path d="M26 72V58H34V63H42V58H50V63H66V58H74V63H82V58H90V72Z" fill="url(#sh-stone-dark)" stroke="#232220" stroke-width="2"/>
+    <rect x="52" y="104" width="12" height="16" rx="6" fill="#1c1a16"/>
+    <g transform="rotate(-24 50 54)">
+      <rect x="40" y="44" width="70" height="20" rx="6" fill="url(#sh-iron)" stroke="#111518" stroke-width="2"/>
+      <rect x="104" y="41" width="10" height="26" rx="3" fill="url(#sh-iron)" stroke="#111518" stroke-width="2"/>
+      <rect x="56" y="42" width="6" height="24" rx="2" fill="#c4823f" stroke="#5a3613"/>
+      <rect x="80" y="43" width="6" height="22" rx="2" fill="#c4823f" stroke="#5a3613"/>
+      <rect x="44" y="47" width="62" height="4" rx="2" fill="#aab3bc" opacity=".55"/>
+      <circle cx="40" cy="54" r="7" fill="url(#sh-iron)" stroke="#111518" stroke-width="2"/>
+    </g>
+    <circle cx="44" cy="62" r="11" fill="url(#sh-wood)" stroke="#1c140d" stroke-width="2"/>
+    <path d="M44 51V73M33 62H55M36 54L52 70M52 54L36 70" stroke="#c4823f" stroke-width="1.8"/>
+    <circle cx="44" cy="62" r="3" fill="#c4823f"/>
+    <g fill="#e98a4f" opacity=".85"><path d="M110 22L118 18 114 26Z"/></g>
+    <g fill="#d6d2c8" opacity=".55"><circle cx="112" cy="16" r="5"/><circle cx="106" cy="10" r="4"/><circle cx="116" cy="8" r="3"/></g>
+    <g fill="url(#sh-iron)" stroke="#111518" stroke-width="1.5"><circle cx="96" cy="139" r="6"/><circle cx="108" cy="139" r="6"/><circle cx="102" cy="129" r="6"/><circle cx="14" cy="139" r="5"/></g>
+  </symbol>
+
+  <symbol id="sh-command" viewBox="0 0 120 150">
+    <ellipse cx="60" cy="143" rx="46" ry="6" fill="#0007"/>
+    <path d="M38 140L42 52H78L82 140Z" fill="url(#sh-stone)" stroke="#2d2b27" stroke-width="2"/>
+    <path d="M41 74H79M40 98H80M40 120H80M52 52V74M68 52V74M48 98V120M72 98V120" stroke="#3a3833" stroke-width="1.5" opacity=".55"/>
+    <path d="M36 54V42H43V46H50V42H57V46H63V42H70V46H77V42H84V54Z" fill="url(#sh-stone-dark)" stroke="#232220" stroke-width="2"/>
+    <path d="M60 42V4" stroke="#3a2618" stroke-width="3"/>
+    <circle cx="60" cy="4" r="3" fill="url(#sh-gold)"/>
+    <path d="M61 5H100L92 13L100 21H61Z" fill="url(#sh-red)" stroke="#5b1013" stroke-width="1.5"/>
+    <path d="M70 9L74 13 70 17M80 9L84 13 80 17" fill="none" stroke="#f0cf7a" stroke-width="2"/>
+    <path d="M38 42V25M82 42V25" stroke="#3a2618" stroke-width="2"/>
+    <path d="M38 26L24 30 38 34Z" fill="url(#sh-red)" stroke="#5b1013"/>
+    <path d="M82 26L96 30 82 34Z" fill="url(#sh-red)" stroke="#5b1013"/>
+    <path d="M30 58H40V104L35 98 30 104Z" fill="url(#sh-red)" stroke="#5b1013" stroke-width="1.5"/>
+    <path d="M80 58H90V104L85 98 80 104Z" fill="url(#sh-red)" stroke="#5b1013" stroke-width="1.5"/>
+    <path d="M30 58H40M80 58H90" stroke="url(#sh-gold)" stroke-width="3"/>
+    <path d="M60 62L76 67V81Q74 94 60 100Q46 94 44 81V67Z" fill="url(#sh-gold)" stroke="#5e4114" stroke-width="2"/>
+    <path d="M60 67L71 71V81Q69 90 60 95Q51 90 49 81V71Z" fill="url(#sh-red)"/>
+    <path d="M60 71L62.5 78H70L64 82 66.5 89 60 85 53.5 89 56 82 50 78H57.5Z" fill="#f0cf7a"/>
+    <path d="M52 140V122Q52 112 60 112Q68 112 68 122V140Z" fill="url(#sh-wood)" stroke="#1c140d" stroke-width="2"/>
+  </symbol>
+<path fill="url(#dusk)" d="M0 0H480V300H0Z"/><path fill="url(#glow)" d="M0 0H480V300H0Z"/>
+<path fill="#2c3b3a" d="M0 196Q60 160 130 184T260 170T380 182T480 166V300H0Z"/>
+<path fill="url(#field)" d="M0 236Q120 214 240 226T480 220V300H0Z"/>
+<use href="#sh-command" x="18" y="104" width="118" height="148"/>
+<use href="#sh-artillery" x="334" y="108" width="128" height="160"/>
+<use href="#sh-treasury" x="110" y="128" width="112" height="140"/>
+<use href="#sh-bastion" x="196" y="84" width="160" height="200"/>
+</svg>
