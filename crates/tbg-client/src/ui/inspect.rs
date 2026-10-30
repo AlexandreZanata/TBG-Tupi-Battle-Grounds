@@ -51,13 +51,13 @@ pub fn report(v: &MatchView, id: UnitId, arcanas: &[ArcanaPreset; 2]) -> Option<
     let u = v.units.iter().find(|u| u.id == id)?;
     let d = def(u.kind);
     // Summons never receive Synergy (BR-U08).
-    let level = if u.kind.is_summon() {
+    let level = if u.is_summon() {
         0
     } else {
         v.synergy[u.seat.index()][d.faction.index()]
     };
     // Summons never receive Arcanas either (D-40).
-    let preset = if u.kind.is_summon() {
+    let preset = if u.is_summon() {
         ArcanaPreset::NEUTRAL
     } else {
         arcanas[u.seat.index()]

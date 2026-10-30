@@ -506,3 +506,38 @@ fn immovable_oilpress_is_never_confused() {
         assert!(s.units[i].fx.confused_until <= s.tick, "never confused");
     }
 }
+
+// Cargo is a summon by unit (BR-U08): the view says so, so the bot and the
+// Evolution panel never ask the server for an evolve it refuses.
+#[test]
+fn cargo_reads_as_a_summon_in_the_view() {
+    let cargo = (30..60u64).find_map(|seed| {
+        let mut s = state(seed);
+        s.lab_spawn_at(Seat::A, UnitKind::Smuggler, 0, 0, 1_000);
+        step_n(&mut s, 460);
+        let id = s
+            .units
+            .iter()
+            .find(|u| u.summoner.is_some() && !u.kind.is_summon())?
+            .id;
+        Some((s, id))
+    });
+    let (mut s, id) = cargo.expect("some seed opens a crate into a unit");
+    let view = s.view_for(Seat::A, &[]);
+    let unit = view
+        .units
+        .iter()
+        .find(|u| u.id == id)
+        .expect("cargo in view");
+    assert!(!unit.kind.is_summon() && unit.is_summon());
+    assert!(tbg_core::bot::army(&view) < view.units.iter().filter(|u| u.seat == Seat::A).count());
+    let refused = s.apply_intention(
+        Seat::A,
+        1,
+        tbg_core::PlayerIntention::Evolve {
+            unit: id,
+            branch: 0,
+        },
+    );
+    assert_eq!(refused, Err(tbg_core::Rejection::NotEvolvable));
+}

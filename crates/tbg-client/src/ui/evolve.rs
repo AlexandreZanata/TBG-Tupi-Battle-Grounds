@@ -126,6 +126,7 @@ fn choice_action(v: &tbg_core::MatchView, unit: UnitId, branch: u8) -> UiAction 
         u.id == unit
             && u.seat == v.you
             && u.tier < 2
+            && !u.is_summon()
             && (u.tier == 0 || u.branch == branch)
             && form_of(u.kind, u.tier + 1, branch).is_some()
             && v.energy >= EVOLVE_COST[usize::from(u.tier.min(1))]
