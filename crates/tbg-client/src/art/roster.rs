@@ -125,6 +125,15 @@ const DRUMGUARD: &[(Color, Color)] = &[
     (SKIN, Color::srgb_u8(0xC9, 0x8A, 0x6B)),
     (TRIM, Color::srgb_u8(0x7F, 0xA8, 0xC9)),
 ];
+/// P48-A placeholders: recolored figures until the character phases.
+const LEECHROOT: &[(Color, Color)] = &[
+    (BARK, Color::srgb_u8(0x2B, 0x4A, 0x2E)),
+    (LEAF, Color::srgb_u8(0x4A, 0x8A, 0x3A)),
+];
+const CRAB: &[(Color, Color)] = &[
+    (BARK, Color::srgb_u8(0x5A, 0x6B, 0x7B)),
+    (TRIM, Color::srgb_u8(0xD9, 0x5A, 0x2B)),
+];
 
 fn recolor(mut spec: FigureSpec, map: &[(Color, Color)]) -> FigureSpec {
     for part in &mut spec.parts {
@@ -177,8 +186,12 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::Bloodweaver => recolor(undead::hexer(f), WEAVER),
         // P47 placeholders (blockout recolors); final art in the wave's
         // character phase.
-        UnitKind::Oilpress => recolor(machines::siege_walker(f), OILPRESS),
-        UnitKind::Drumguard => recolor(humans::shieldbearer(f), DRUMGUARD),
+    UnitKind::Oilpress => recolor(machines::siege_walker(f), OILPRESS),
+    UnitKind::Drumguard => recolor(humans::shieldbearer(f), DRUMGUARD),
+    // P48-A placeholders (blockout recolors); final art in the wave's
+    // character phase.
+    UnitKind::Leechroot => recolor(plants::bloomkeeper(f), LEECHROOT),
+    UnitKind::CargoCrab => recolor(machines::sawbot(f), CRAB),
         // P43: staged kinds render as a plain gray silhouette until their
         // wave lands (art/mod.rs builds every kind in ALL_KINDS).
         #[allow(unreachable_patterns)]
