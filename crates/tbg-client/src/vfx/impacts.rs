@@ -27,6 +27,8 @@ pub enum Impact {
     Cannon,
     GreatCannon,
     Bolt,
+    /// Treasury: the purse bursts in a shower of gold.
+    Coins,
 }
 
 /// What the attacker brings to an impact: splash radius (tiles, 0 = none)
@@ -45,6 +47,8 @@ pub enum Muzzle {
     Cannon,
     GreatCannon,
     Bolt,
+    /// A gold glint from the Treasury's mortar.
+    Coin,
 }
 
 /// `n` unit directions around +Y, starting at `phase`.
@@ -224,6 +228,38 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
         }
         Impact::Cannon => cannon(commands, a, at, 1.0),
         Impact::GreatCannon => cannon(commands, a, at, 1.5),
+        Impact::Coins => {
+            spawn(
+                commands,
+                &a.puff,
+                &a.flash,
+                at,
+                Motion::Flash { size: 0.18 },
+                0.0,
+                0.1,
+            );
+            spawn(
+                commands,
+                &a.ring,
+                &a.gold,
+                ground,
+                Motion::Grow { radius: 0.55 },
+                0.0,
+                0.35,
+            );
+            for (i, dir) in around(9, 0.4).enumerate() {
+                let vel = dir * 1.1 + Vec3::Y * (2.2 + 0.25 * (i % 3) as f32);
+                spawn(
+                    commands,
+                    &a.chip,
+                    &a.gold,
+                    at,
+                    Motion::Debris { vel, size: 0.04 },
+                    0.0,
+                    0.6,
+                );
+            }
+        }
         Impact::Bolt => {
             dust(commands, a, ground, 3, 0.09);
             for dir in around(3, 1.0) {
@@ -423,6 +459,30 @@ pub fn muzzle(
         Muzzle::Bombard | Muzzle::Cannon => 1.0,
         Muzzle::Blunderbuss => 1.25,
         Muzzle::GreatBombard | Muzzle::GreatCannon => 1.5,
+        Muzzle::Coin => {
+            spawn(
+                commands,
+                &a.puff,
+                &a.gold,
+                at,
+                Motion::Flash { size: 0.12 },
+                0.0,
+                0.1,
+            );
+            for dir in around(4, 0.3) {
+                let d = (dir * 0.4 + Vec3::Y).normalize() * 0.5;
+                spawn(
+                    commands,
+                    &a.ball,
+                    &a.gold,
+                    at,
+                    Motion::Burst { dir: d },
+                    0.0,
+                    0.25,
+                );
+            }
+            return;
+        }
         Muzzle::Bolt => {
             spawn(
                 commands,

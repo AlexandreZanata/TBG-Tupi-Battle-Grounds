@@ -1,10 +1,10 @@
 //! Towers aim and fire their own projectiles. A shot order (the render-
-//! delayed `AttackStart` of a Stronghold) turns the Artillery carriage and
-//! barrel, or the Sentinel ballista, onto the target — yaw toward it,
-//! elevation along the launch tangent of its own shot — then fires from
-//! the real muzzle: cannonball and smoke, or a bolt. Towers without a gun
-//! loose a crossbow bolt from their top. The turret keeps tracking its
-//! target between shots and settles back when it has none.
+//! delayed `AttackStart` of a Stronghold) turns the tower's weapon onto the
+//! target — the Artillery carriage and barrel, the Sentinel ballista, or a
+//! defender (`gunners.rs`) — yaw toward it, elevation along the launch
+//! tangent of its own shot, then fires from the real muzzle. A tower whose
+//! defender fell looses a crossbow bolt from its top. The weapon keeps
+//! tracking its target between shots and settles back when it has none.
 
 use bevy::prelude::*;
 use tbg_core::StrongholdKind;
@@ -37,6 +37,10 @@ pub(crate) struct Turret {
     pub muzzle: Vec3,
     pub shot: ShotKind,
     pub flash: Muzzle,
+    /// Carried by a defender who walks round the tower's axis to face it.
+    pub orbit: bool,
+    /// Largest yaw either side of facing the enemy (a gun port's arc).
+    pub arc: f32,
 }
 
 /// The aimed gun of a look, if it has one.
@@ -47,7 +51,7 @@ pub(crate) fn turret(look: Look) -> Option<Turret> {
         StrongholdKind::Bastion if form == Form::B2 && look.damage < 1 => {
             Some(super::bastion::turret())
         }
-        _ => None,
+        kind => super::gunners::turret(kind, look.damage),
     }
 }
 
@@ -81,14 +85,31 @@ pub(super) fn gun_rotation(own: bool, yaw: f32, up: f32) -> Quat {
     Quat::from_rotation_y(yaw) * face * Quat::from_rotation_z(up)
 }
 
-/// Yaw and elevation that put a gun at `pivot` onto `target`.
-pub(super) fn solve(own: bool, t: &Turret, pivot: Vec3, target: Vec3) -> (f32, f32) {
-    let d = target - pivot;
+/// Where the weapon's pivot stands for `yaw`: a carried weapon walks
+/// round the tower's axis with its defender.
+pub(super) fn pivot_at(own: bool, t: &Turret, root: Vec3, yaw: f32) -> Vec3 {
+    let at = side(own, t.pivot);
+    root + if t.orbit {
+        Quat::from_rotation_y(yaw) * at
+    } else {
+        at
+    }
+}
+
+/// Yaw and elevation that put the weapon of a tower at `root` onto `target`.
+pub(super) fn solve(own: bool, t: &Turret, root: Vec3, target: Vec3) -> (f32, f32) {
+    // A defender stands on the ray from the axis, so aim from the axis.
+    let from = if t.orbit {
+        root + Vec3::Y * t.pivot.y
+    } else {
+        pivot_at(own, t, root, 0.0)
+    };
+    let d = target - from;
     let s = if own { 1.0 } else { -1.0 };
-    let yaw = (-d.z * s).atan2(d.x * s);
-    let muzzle = pivot + gun_rotation(own, yaw, t.rest_pitch) * t.muzzle;
+    let yaw = (-d.z * s).atan2(d.x * s).clamp(-t.arc, t.arc);
+    let muzzle = pivot_at(own, t, root, yaw) + gun_rotation(own, yaw, t.rest_pitch) * t.muzzle;
     let up = pitch(tangent(muzzle, target, shots::arc(t.shot), 0.0));
-    (yaw, up.clamp(-0.45, 0.7))
+    (yaw, up.clamp(-0.45, 1.2))
 }
 
 /// Take this frame's Stronghold shot orders.
@@ -124,7 +145,7 @@ pub(super) fn track(
         }
         let own = tower.own;
         let goal = match (tower.turret, target) {
-            (Some(t), Some(at)) => Some(solve(own, &t, root.translation + side(own, t.pivot), at)),
+            (Some(t), Some(at)) => Some(solve(own, &t, root.translation, at)),
             _ => None,
         };
         let (yaw, up) = goal.unwrap_or((0.0, tower.turret.map_or(0.0, |t| t.rest_pitch)));
@@ -164,7 +185,7 @@ fn fire(commands: &mut Commands, vfx: &VfxAssets, tower: &Tower, root: Vec3, at:
         return;
     };
     let turn = gun_rotation(tower.own, tower.yaw, tower.pitch);
-    let from = root + side(tower.own, t.pivot) + turn * t.muzzle;
+    let from = pivot_at(tower.own, &t, root, tower.yaw) + turn * t.muzzle;
     impacts::muzzle(commands, vfx, t.flash, from, turn * Vec3::X, None);
     shots::fire(commands, vfx, t.shot, from, at, area);
 }
@@ -181,6 +202,8 @@ mod tests {
             muzzle: Vec3::new(0.66, 0.0, 0.0),
             shot: ShotKind::Cannon,
             flash: Muzzle::Cannon,
+            orbit: false,
+            arc: std::f32::consts::PI,
         };
         for (own, root) in [
             (true, Vec3::new(-0.9, 0.0, 0.0)),
@@ -191,10 +214,9 @@ mod tests {
                 Vec3::new(12.0, 0.6, -0.8),
                 Vec3::new(8.0, 0.6, 0.0),
             ] {
-                let pivot = root + side(own, t.pivot);
-                let (yaw, up) = solve(own, &t, pivot, target);
+                let (yaw, up) = solve(own, &t, root, target);
                 let turn = gun_rotation(own, yaw, up);
-                let muzzle = pivot + turn * t.muzzle;
+                let muzzle = pivot_at(own, &t, root, yaw) + turn * t.muzzle;
                 let barrel = turn * Vec3::X;
                 let flight = tangent(muzzle, target, shots::arc(t.shot), 0.0);
                 assert!(

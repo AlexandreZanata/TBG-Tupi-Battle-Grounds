@@ -31,6 +31,8 @@ pub enum ShotKind {
     RapidCannon,
     Ballista,
     Crossbow,
+    /// Treasury: a spinning purse of gold lobbed high.
+    Coins,
 }
 
 #[derive(Clone, Copy)]
@@ -42,6 +44,7 @@ enum Body {
     Hammer,
     Ball,
     Bolt,
+    Purse,
 }
 
 #[derive(Clone, Copy)]
@@ -186,6 +189,14 @@ fn look(kind: ShotKind) -> Look {
             0.0,
             Impact::Bolt,
         ),
+        Coins => (
+            Some((Body::Purse, 1.0)),
+            0.28,
+            0.42,
+            Trail::Sparks,
+            14.0,
+            Impact::Coins,
+        ),
     };
     Look {
         body,
@@ -211,6 +222,7 @@ pub struct ShotMeshes {
     hammer: Handle<Mesh>,
     ball: Handle<Mesh>,
     bolt: Handle<Mesh>,
+    purse: Handle<Mesh>,
 }
 
 impl ShotMeshes {
@@ -289,6 +301,12 @@ impl ShotMeshes {
                     Transform::from_xyz(0.0, 0.0, -0.18),
                 ),
             ]),
+            purse: build(vec![
+                (Ball(0.08), LEATHER, Transform::IDENTITY),
+                (Cyl(0.035, 0.05), GOLD, along(0.07)),
+                (Cyl(0.06, 0.012), GOLD, Transform::from_xyz(0.0, 0.07, 0.0)),
+                (Ball(0.025), GOLD, Transform::from_xyz(0.05, 0.05, 0.0)),
+            ]),
         }
     }
     fn get(&self, body: Body) -> &Handle<Mesh> {
@@ -300,6 +318,7 @@ impl ShotMeshes {
             Body::Hammer => &self.hammer,
             Body::Ball => &self.ball,
             Body::Bolt => &self.bolt,
+            Body::Purse => &self.purse,
         }
     }
 }

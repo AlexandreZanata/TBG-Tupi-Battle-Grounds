@@ -96,6 +96,8 @@ pub(super) fn turret(form: Form) -> Turret {
         } else {
             Muzzle::Cannon
         },
+        orbit: false,
+        arc: std::f32::consts::PI,
     }
 }
 

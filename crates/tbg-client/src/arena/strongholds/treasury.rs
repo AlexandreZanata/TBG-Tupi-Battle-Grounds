@@ -7,6 +7,10 @@ use crate::arena::Part;
 use crate::art::{mesh::Shape::*, palette::*};
 use bevy::prelude::*;
 
+/// Terracotta roof tiles and their darker eave.
+const TILE: Color = Color::srgb(0.69, 0.35, 0.22);
+const TILE_EDGE: Color = Color::srgb(0.48, 0.24, 0.16);
+
 static HOUSE: PartDef = PartDef {
     name: "treasury house",
     build: house,
@@ -123,6 +127,58 @@ fn house(team: Color) -> Vec<Part> {
     for x in [-0.5, 0.5] {
         p.push((Cyl(0.05, 0.14), BRASS, t(x, 0.92, 0.66)));
     }
+    p.extend(trimmings(team));
+    p
+}
+
+/// The trading post's dress: gold finials and team pennants on the
+/// pillars, team banners flanking the vault, entry steps, gold-framed
+/// windows and striped market awnings over the goods.
+fn trimmings(team: Color) -> Vec<Part> {
+    let mut p = vec![
+        (Box(0.72, 0.1, 0.18), STONE, t(0.0, 0.05, 0.84)),
+        (Box(0.72, 0.04, 0.2), ROCK, t(0.0, 0.12, 0.8)),
+    ];
+    for (x, z) in [(-0.72, -0.6), (-0.72, 0.6), (0.72, -0.6), (0.72, 0.6)] {
+        p.push((Cone(0.075, 0.2), GOLD, t(x, 1.25, z)));
+        p.push((Ball(0.035), GOLD, t(x, 1.37, z)));
+    }
+    for x in [-0.72, 0.72] {
+        p.push((Cyl(0.012, 0.36), WOOD, t(x, 1.52, 0.6)));
+        p.push((
+            Box(0.17, 0.1, 0.012),
+            team,
+            t(x + 0.085 * x.signum(), 1.63, 0.6),
+        ));
+    }
+    for x in [-0.5, 0.5] {
+        p.push((Box(0.2, 0.46, 0.02), team, t(x, 0.64, 0.645)));
+        p.push((
+            Box(0.08, 0.08, 0.025),
+            GOLD,
+            t(x, 0.7, 0.655).with_rotation(Quat::from_rotation_z(0.785)),
+        ));
+        p.push((Box(0.2, 0.03, 0.025), GOLD, t(x, 0.42, 0.655)));
+    }
+    for x in [-0.755, 0.755] {
+        for z in [-0.3, 0.3] {
+            p.push((Box(0.02, 0.26, 0.2), BRASS, t(x, 0.72, z)));
+            p.push((Box(0.03, 0.2, 0.14), DARK, t(x * 1.006, 0.72, z)));
+        }
+    }
+    for x in [-0.72, 0.72] {
+        for (i, dz) in [-0.12, 0.0, 0.12].into_iter().enumerate() {
+            let stripe = if i % 2 == 0 { RED_CLOTH } else { LINEN };
+            p.push((
+                Box(0.42, 0.02, 0.13),
+                stripe,
+                t(x, 0.82, 0.92 + dz).with_rotation(Quat::from_rotation_x(0.35)),
+            ));
+        }
+        for dx in [-0.18, 0.18] {
+            p.push((Box(0.03, 0.62, 0.03), WOOD, t(x + dx, 0.5, 1.06)));
+        }
+    }
     p
 }
 
@@ -143,25 +199,37 @@ fn door(_team: Color) -> Vec<Part> {
     p
 }
 
-/// Rust-tiled gable roof with a gold-domed counting house on top.
+/// Terracotta tiles on an eight-sided hipped roof, a stone drum with
+/// windows, and a gold dome with a lantern spire (lobby portrait).
 fn roof(_team: Color) -> Vec<Part> {
-    vec![
-        (Box(1.4, 0.35, 0.5), STONE, t(0.0, 1.25, 0.0)),
+    let flat = Vec3::new(1.0, 1.0, 0.84);
+    let mut p = vec![
+        (Box(1.62, 0.08, 1.36), ROCK, t(0.0, 1.14, 0.0)),
         (
-            Box(1.7, 0.07, 0.8),
-            RUST,
-            t(0.0, 1.29, 0.34).with_rotation(Quat::from_rotation_x(0.55)),
+            Frustum(0.36, 1.05, 0.03),
+            TILE_EDGE,
+            t(0.0, 1.19, 0.0).with_scale(flat),
         ),
         (
-            Box(1.7, 0.07, 0.8),
-            RUST,
-            t(0.0, 1.29, -0.34).with_rotation(Quat::from_rotation_x(-0.55)),
+            Frustum(0.34, 1.02, 0.42),
+            TILE,
+            t(0.0, 1.39, 0.0).with_scale(flat),
         ),
-        (Box(0.45, 0.35, 0.45), STONE, t(0.0, 1.65, 0.0)),
-        (Ball(0.26), GOLD, t(0.0, 1.84, 0.0)),
-        (Cyl(0.02, 0.25), BRASS, t(0.0, 2.16, 0.0)),
-        (Cyl(0.1, 0.025), GOLD, along_z(0.0, 2.3, 0.0)),
-    ]
+        (Cyl(0.26, 0.2), STONE, t(0.0, 1.68, 0.0)),
+        (Cyl(0.28, 0.04), GOLD, t(0.0, 1.79, 0.0)),
+        (
+            Ball(0.26),
+            GOLD,
+            t(0.0, 1.8, 0.0).with_scale(Vec3::new(1.0, 0.85, 1.0)),
+        ),
+        (Cyl(0.05, 0.12), GOLD, t(0.0, 2.08, 0.0)),
+        (Cone(0.06, 0.16), GOLD, t(0.0, 2.22, 0.0)),
+    ];
+    for a in [0.4f32, 1.97, 3.54, 5.11] {
+        let at = t(a.cos() * 0.255, 1.68, a.sin() * 0.255).with_rotation(Quat::from_rotation_y(-a));
+        p.push((Box(0.02, 0.1, 0.07), DARK, at));
+    }
+    p
 }
 
 /// Crates, a coin chest and grain sacks on the plinth corners.
@@ -230,7 +298,7 @@ fn forge(_team: Color) -> Vec<Part> {
     vec![
         (Box(0.3, 0.8, 0.3), STONE, t(-0.5, 1.75, -0.3)),
         (Cyl(0.13, 0.08), GOLD, t(-0.5, 2.18, -0.3)),
-        (Box(1.74, 0.07, 0.12), GOLD, t(0.0, 1.52, 0.0)),
+        (Ring(0.03, 0.9, 360.0), GOLD, t(0.0, 1.21, 0.0)),
         (Cyl(0.03, 0.35), BRASS, t(0.0, 2.45, 0.0)),
     ]
 }

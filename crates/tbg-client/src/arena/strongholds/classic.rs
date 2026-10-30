@@ -48,11 +48,34 @@ fn base(_team: Color) -> Vec<Part> {
             at(y),
         ));
     }
+    // Steps up to the door, a lintel and iron studs.
+    parts.extend([
+        (
+            Box(0.26, 0.08, 0.44),
+            ROCK,
+            Transform::from_xyz(0.98, 0.04, 0.0),
+        ),
+        (
+            Box(0.08, 0.06, 0.44),
+            ROCK,
+            Transform::from_xyz(0.82, 0.53, 0.0),
+        ),
+        (
+            Box(0.02, 0.04, 0.3),
+            IRON,
+            Transform::from_xyz(0.815, 0.18, 0.0),
+        ),
+        (
+            Box(0.02, 0.04, 0.3),
+            IRON,
+            Transform::from_xyz(0.815, 0.36, 0.0),
+        ),
+    ]);
     parts
 }
 
 fn mid(team: Color) -> Vec<Part> {
-    vec![
+    let mut parts = vec![
         (Lathe(MID_PROFILE), STONE, at(0.0)),
         (Cyl(0.84, 0.02), ROCK, at(1.85)),
         (
@@ -60,7 +83,19 @@ fn mid(team: Color) -> Vec<Part> {
             team,
             Transform::from_xyz(0.0, 1.25, 0.77),
         ),
-    ]
+        (
+            Box(0.5, 0.035, 0.04),
+            GOLD,
+            Transform::from_xyz(0.0, 1.58, 0.775),
+        ),
+    ];
+    // Arrow slits around the drum.
+    for a in [0.5f32, -0.5, 2.6, -2.6] {
+        let at = Transform::from_xyz(a.cos() * 0.735, 1.35, a.sin() * 0.735)
+            .with_rotation(Quat::from_rotation_y(-a));
+        parts.push((Box(0.03, 0.22, 0.07), DARK, at));
+    }
+    parts
 }
 
 fn crown(_team: Color) -> Vec<Part> {

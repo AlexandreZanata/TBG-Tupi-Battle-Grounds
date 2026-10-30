@@ -29,6 +29,12 @@ pub(super) enum Motion {
     Swivel,
     /// Aimed whole about its own origin (the ballista).
     Aim,
+    /// Carried by a defender: turns round the tower's axis with the aim,
+    /// is aimed like a gun, and recoils this distance on each shot.
+    Mounted(f32),
+    /// Swings open about its local X by this angle on each shot, then
+    /// closes (shutters, trapdoors).
+    Hatch(f32),
     /// Turns around its local Y by this angle on each shot.
     Notch(f32),
     /// Turns around its local Y at this speed (rad/s), all the time.

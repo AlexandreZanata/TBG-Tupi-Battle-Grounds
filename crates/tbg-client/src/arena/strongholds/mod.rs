@@ -10,6 +10,7 @@ mod bastion;
 mod classic;
 mod command;
 mod gallery;
+mod gunners;
 mod motion;
 mod parts;
 #[cfg(test)]
@@ -94,13 +95,15 @@ pub(crate) fn damage_level(hp: i32, max_hp: i32) -> u8 {
 
 /// Every piece of a kind and form, before damage.
 fn pieces(kind: StrongholdKind, form: Form) -> Vec<Piece> {
-    match kind {
+    let mut p = match kind {
         StrongholdKind::Classic => classic::pieces(),
         StrongholdKind::Treasury => treasury::pieces(form),
         StrongholdKind::Bastion => bastion::pieces(form),
         StrongholdKind::Artillery => artillery::pieces(form),
         StrongholdKind::Command => command::pieces(form),
-    }
+    };
+    p.extend(gunners::pieces(kind));
+    p
 }
 
 /// The pieces a look shows: those its damage has not taken yet.
