@@ -32,7 +32,11 @@ fn stop() -> Counts {
     }
     #[cfg(not(feature = "bench-alloc"))]
     {
-        Counts::default()
+        Counts {
+            #[cfg(feature = "bench-profile")]
+            operations: tbg_core::profiling::snapshot(),
+            ..Counts::default()
+        }
     }
 }
 

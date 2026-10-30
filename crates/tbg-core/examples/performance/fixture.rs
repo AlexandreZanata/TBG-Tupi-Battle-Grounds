@@ -107,7 +107,7 @@ fn kinds(scene: &str) -> &'static [UnitKind] {
         "formation" => &[Oilpress, Oilpress, Shieldbearer, Drumguard],
         "puppet" => &[Puppetmaster, Puppetmaster, Longaxe, BloodFurnace],
         "cargo" => &[CargoCrab, Smuggler, Nester, Leechroot, Archer],
-        "mixed" => &tbg_core::UNIT_KINDS,
+        "mixed" => &tbg_core::types::FULL_POOL,
         _ => panic!("unknown benchmark scene: {scene}"),
     }
 }
