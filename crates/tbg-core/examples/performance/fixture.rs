@@ -38,14 +38,19 @@ impl Fixture {
 
     pub fn prepare(&mut self) {
         assert!(self.state.outcome.is_none(), "synthetic fixture ended");
-        for seat in Seat::BOTH {
-            self.state.players[seat.index()].stronghold_hp = 1_000_000;
-            if self.state.augments.selecting() {
-                let round = self.state.augments.round;
+        if self.state.augments.selecting() {
+            let round = self.state.augments.round;
+            for seat in Seat::BOTH {
                 let _ = self
                     .state
                     .apply_intention(seat, 0, PlayerIntention::Forgo { round });
             }
+            // The ordinary selection step resolves the pause. Purchases
+            // remain forbidden until that step, just as they do online.
+            return;
+        }
+        for seat in Seat::BOTH {
+            self.state.players[seat.index()].stronghold_hp = 1_000_000;
             let missing = (self.target / 2).saturating_sub(self.state.army_size(seat));
             for _ in 0..missing {
                 self.purchase(seat);
