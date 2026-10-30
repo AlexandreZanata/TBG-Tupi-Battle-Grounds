@@ -101,6 +101,17 @@ pool (`FULL_POOL`, 25 kinds).
   `wave_a.rs`, `wave_b.rs`, `wave_e1.rs` from earlier waves; the required
   clippy command is clean.
 
+## Follow-up on `release/roster-online` (D-50)
+
+Merging `origin/main` (D-46 Stronghold kinds) and putting all 25 kinds in
+the online Shop exposed one more P48-B bug: `UnitView` could not mark
+Smuggler cargo as a summon, so the bot kept sending an `Evolve` the server
+refuses and, online, drained its message bucket (`RateLimited`, seen in
+`leaderboard::br_r07_limit_clamped_to_100`). Fixed in `72ce205` with the
+spare `UnitView.fx` bit (`FX_SUMMON`) and the regression test
+`cargo_reads_as_a_summon_in_the_view`. In the same merge the War Banner
+aura and Tower Fury switched to the unit-level summon check.
+
 ## Blocked
 
 Nothing. Open: the gate and the wave-E2 lab rows (resource-heavy; P50).
