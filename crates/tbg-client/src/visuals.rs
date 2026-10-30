@@ -134,8 +134,8 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-/// The inspected unit's team ring pulses a little larger (ui/inspect.rs), so
-/// the status panel always points at a visible unit.
+/// The selected unit's ground ring pulses as a luminous base halo,
+/// and the figure receives a subtle visual elevation (+0.07 Y) to emphasize focus.
 fn highlight_inspected(
     time: Res<Time>,
     inspected: Option<Res<crate::ui::inspect::Inspected>>,
@@ -143,15 +143,22 @@ fn highlight_inspected(
     mut transforms: Query<&mut Transform>,
 ) {
     let target = inspected.and_then(|i| i.0);
-    let pulse = 1.25 + 0.07 * (time.elapsed_secs() * 6.0).sin();
+    let pulse = 1.40 + 0.08 * (time.elapsed_secs() * 5.0).sin();
     for (v, action) in &units {
         let UiAction::SelectUnit(id) = action else {
             continue;
         };
-        let scale = v.ring_base * if target == Some(*id) { pulse } else { 1.0 };
+        let is_selected = target == Some(*id);
+        let scale = v.ring_base * if is_selected { pulse } else { 1.0 };
         if let Ok(mut t) = transforms.get_mut(v.ring) {
-            if t.scale.x != scale {
+            if (t.scale.x - scale).abs() > 1e-4 {
                 t.scale = Vec3::splat(scale);
+            }
+        }
+        if let Ok(mut t) = transforms.get_mut(v.figure) {
+            let target_y = if is_selected { 0.07 } else { 0.0 };
+            if (t.translation.y - target_y).abs() > 1e-4 {
+                t.translation.y = target_y;
             }
         }
     }

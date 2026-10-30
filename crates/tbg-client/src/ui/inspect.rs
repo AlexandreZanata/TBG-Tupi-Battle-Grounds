@@ -281,4 +281,58 @@ mod tests {
         assert_eq!(record.split('|').count(), 18, "{record}");
         assert!(record.starts_with("Hexer|Hexer|Base form|Undead|Control|false|123|300|"));
     }
+
+    #[test]
+    fn selection_lifecycle_select_switch_deselect_and_unit_death() {
+        let mut app = bevy::app::App::new();
+        app.init_resource::<super::Inspected>();
+        app.init_resource::<crate::sync::LatestView>();
+
+        // 1. Initial state: nothing selected
+        assert_eq!(app.world().resource::<super::Inspected>().0, None);
+
+        // 2. Select unit 42
+        app.world_mut().resource_mut::<super::Inspected>().0 = Some(42);
+        assert_eq!(app.world().resource::<super::Inspected>().0, Some(42));
+
+        // 3. Switch selection to unit 99
+        app.world_mut().resource_mut::<super::Inspected>().0 = Some(99);
+        assert_eq!(app.world().resource::<super::Inspected>().0, Some(99));
+
+        // 4. Click outside: Deselect clears selection
+        app.world_mut().resource_mut::<super::Inspected>().0 = None;
+        assert_eq!(app.world().resource::<super::Inspected>().0, None);
+
+        // 5. Select unit 42 again and simulate death / removal from LatestView
+        app.world_mut().resource_mut::<super::Inspected>().0 = Some(42);
+        let mut s = MatchState::new(5);
+        while s.phase != Phase::Running {
+            s.step();
+        }
+        let view = s.view_for(Seat::A, &[]);
+        // LatestView has no unit 42
+        app.world_mut().resource_mut::<crate::sync::LatestView>().0 = Some(view);
+
+        // Run drop_gone system
+        let mut schedule = bevy::ecs::schedule::Schedule::default();
+        schedule.add_systems(super::drop_gone);
+        schedule.run(app.world_mut());
+
+        assert_eq!(
+            app.world().resource::<super::Inspected>().0,
+            None,
+            "unit death/removal automatically clears selection"
+        );
+
+        // 6. Test match clear
+        app.world_mut().resource_mut::<super::Inspected>().0 = Some(77);
+        let mut clear_schedule = bevy::ecs::schedule::Schedule::default();
+        clear_schedule.add_systems(super::clear);
+        clear_schedule.run(app.world_mut());
+        assert_eq!(
+            app.world().resource::<super::Inspected>().0,
+            None,
+            "match exit clears selection"
+        );
+    }
 }

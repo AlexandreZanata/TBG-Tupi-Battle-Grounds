@@ -1,15 +1,12 @@
-//! Desktop unit nameplates projected above HP bars; small screens keep their existing UI.
+//! Selective unit nameplate projection above HP bar for clicked/selected unit.
 
 use super::UnitVisual;
-use crate::{
-    art::palette::INK,
-    camera::{self, ArenaCamera},
-};
+use crate::camera::{self, ArenaCamera};
 use bevy::prelude::*;
 use tbg_core::UnitKind;
 
 #[derive(Component)]
-struct Nameplate(Entity);
+struct Nameplate(Entity, tbg_core::UnitId);
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(Update, spawn).add_systems(
@@ -18,23 +15,32 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
-fn spawn(mut commands: Commands, units: Query<(Entity, &UnitVisual), Added<UnitVisual>>) {
-    for (entity, unit) in &units {
+fn spawn(
+    mut commands: Commands,
+    units: Query<(Entity, &UnitVisual, &crate::ui::UiAction), Added<UnitVisual>>,
+) {
+    for (entity, unit, action) in &units {
+        let crate::ui::UiAction::SelectUnit(id) = action else {
+            continue;
+        };
         commands.spawn((
-            Nameplate(entity),
+            Nameplate(entity, *id),
             Text::new(name(unit.form.0)),
             TextFont {
-                font_size: FontSize::Px(9.0),
+                font_size: FontSize::Px(10.0),
                 ..default()
             },
-            TextColor(INK),
-            BackgroundColor(Color::srgba(0.94, 0.90, 0.78, 0.88)),
+            TextColor(Color::srgb(0.96, 0.94, 0.88)),
+            BackgroundColor(Color::srgba(0.06, 0.08, 0.12, 0.88)),
+            BorderColor::all(Color::srgba(0.85, 0.72, 0.38, 0.80)),
             Node {
                 position_type: PositionType::Absolute,
-                width: px(84.0),
-                height: px(13.0),
-                border_radius: BorderRadius::all(px(2.0)),
+                width: px(88.0),
+                height: px(16.0),
+                border_radius: BorderRadius::all(px(3.0)),
+                border: UiRect::all(px(1.0)),
                 justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
                 ..default()
             },
             TextLayout::justify(Justify::Center),
@@ -43,66 +49,45 @@ fn spawn(mut commands: Commands, units: Query<(Entity, &UnitVisual), Added<UnitV
     }
 }
 
-#[allow(clippy::too_many_arguments)] // Projection and a reused collision buffer share one layout pass.
 fn position(
     mut commands: Commands,
     window: Single<&Window>,
     scale: Res<UiScale>,
     camera: Single<(&Camera, &GlobalTransform), With<ArenaCamera>>,
+    inspected: Option<Res<crate::ui::inspect::Inspected>>,
     units: Query<&UnitVisual>,
     transforms: Query<&GlobalTransform>,
     mut names: Query<(Entity, &Nameplate, &mut Node, &mut Visibility)>,
-    mut placed: Local<Vec<Vec4>>,
 ) {
-    placed.clear();
     let desktop = camera::desktop(window.width(), window.height());
     let (camera, camera_transform) = *camera;
+    let selected_id = inspected.and_then(|i| i.0);
+
     for (entity, label, mut node, mut visibility) in &mut names {
         let Ok(unit) = units.get(label.0) else {
             commands.entity(entity).despawn();
             continue;
         };
-        *visibility = Visibility::Hidden;
-        if !desktop || unit.dying {
+        // Selection rule: names are hidden unless selected by click!
+        let is_selected = selected_id == Some(label.1);
+        if !is_selected || !desktop || unit.dying {
+            *visibility = Visibility::Hidden;
             continue;
         }
+
         let Some(point) = transforms.get(unit.bar).ok().and_then(|bar| {
             camera
-                .world_to_viewport(camera_transform, bar.translation() + Vec3::Y * 0.18)
+                .world_to_viewport(camera_transform, bar.translation() + Vec3::Y * 0.20)
                 .ok()
         }) else {
+            *visibility = Visibility::Hidden;
             continue;
         };
-        let rect = clear_rect(
-            Vec4::new(
-                point.x / scale.0 - 42.0,
-                point.y / scale.0 - 14.0,
-                84.0,
-                13.0,
-            ),
-            &placed,
-        );
-        placed.push(rect);
-        node.left = px(rect.x);
-        node.top = px(rect.y);
+
+        node.left = px(point.x / scale.0 - 44.0);
+        node.top = px(point.y / scale.0 - 18.0);
         *visibility = Visibility::Inherited;
     }
-}
-
-fn clear_rect(mut rect: Vec4, placed: &[Vec4]) -> Vec4 {
-    for _ in 0..12 {
-        let overlap = placed.iter().any(|r| {
-            rect.x < r.x + r.z + 2.0
-                && rect.x + rect.z + 2.0 > r.x
-                && rect.y < r.y + r.w + 2.0
-                && rect.y + rect.w + 2.0 > r.y
-        });
-        if !overlap {
-            break;
-        }
-        rect.y -= 16.0;
-    }
-    rect
 }
 
 fn name(kind: UnitKind) -> &'static str {
