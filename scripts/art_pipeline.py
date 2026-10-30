@@ -167,19 +167,14 @@ def run(args):
             records_path.write_text(json.dumps(records, indent=2)+'\n')
             manifest.write_text(json.dumps(data, indent=2, ensure_ascii=False)+'\n')
             print(name, json.dumps(measured), flush=True)
-    total = 0
-    for item in all_entries:
-        svg = out / item['ref']['svg']
-        if svg.exists():
-            total += len(gzip.compress(svg.read_bytes(), mtime=0))
-        shown = out / item['ref']['display']
-        if shown.suffix == '.webp' and shown.exists():
-            total += shown.stat().st_size
+    # Count every shipped picture, including the existing compact Stronghold sprite.
+    total = sum(len(gzip.compress(p.read_bytes(), mtime=0)) if p.suffix == '.svg' else p.stat().st_size
+                for p in out.iterdir() if p.suffix in ['.svg', '.webp'])
     print('TOTAL', args.art_set, 'gzip SVG + WebP bytes:', total, 'budget:', TOTAL_BUDGETS[args.art_set], flush=True)
-    if total > TOTAL_BUDGETS[args.art_set]:
-        raise SystemExit('Art set exceeds its total budget')
     versions = {n:importlib.metadata.version(n) for n in ['vtracer','Pillow','numpy','scipy']}
     (local / 'versions.json').write_text(json.dumps(versions, indent=2)+'\n')
+    if total > TOTAL_BUDGETS[args.art_set]:
+        raise SystemExit('Art set exceeds its total budget')
 
 
 if __name__ == '__main__':

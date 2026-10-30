@@ -4,7 +4,6 @@ import argparse
 import gzip
 import json
 from pathlib import Path
-import re
 
 
 def report(name):
@@ -37,8 +36,8 @@ def report(name):
              'weighted by reference alpha. RGB MAE is on a 0–255 scale and weighted by alpha. '
              'Both full-size and direct display-size renders are checked. A vector must reach full SSIM ≥0.95, '
              'display SSIM ≥0.97 and alpha MAE ≤1 in both renders. Otherwise the UI selects a WebP fallback '
-             'at twice the display size, quality/effort 90. Alpha-bearing icons/frames/portraits use lossless encoding; '
-             'opaque illustrations/banners use lossy quality 90. Failed vector scores below are reported honestly; '
+             'at twice the display size, quality/effort 90. Icons and tower portraits use lossless encoding; '
+             'frames and opaque illustrations/banners use lossy quality 90 with alpha preserved where present. Failed vector scores below are reported honestly; '
              'they are never substituted for the detailed game artwork.\n\n')
     text += f'**Total art, including gzip SVG plus WebP: {total:,} B.** '
     if name == 'arcana':
@@ -46,7 +45,7 @@ def report(name):
                  'unused older vectors were retuned to fit the expanded set within the same 3 MB budget. '
                  'Original approved prompts remain in `../ARCANA-UI-AND-STRATEGY.md`.\n\n')
     elif name == 'augments':
-        text += ('The budget is 4 MB. Display comparison widths are 240 px for illustrations and 300 px for frames; '
+        text += ('**BLOCKED: exceeds the 4,000,000 B budget by 67,598 B; see `../ART-ASSETS.md`.** Display comparison widths are 210 px for illustrations and 300 px for frames; '
                  'the subject is also inspected at the requested 180 px scale. Only the four current options and their frames preload '
                  'when an authoritative round opens. Names, rarities, texts and timing are checked against core by client Rust tests.\n\n')
     else:
@@ -73,7 +72,7 @@ def report(name):
         text += f"### `{job['name']}`\n\nReason: {job['reason']}\n\n```text\n{job['prompt']}\n```\n\n"
     dest = root / 'docs/art' / (name.upper() + '.md')
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(text)
+    dest.write_text(text.rstrip()+'\n')
     print(dest, total)
 
 

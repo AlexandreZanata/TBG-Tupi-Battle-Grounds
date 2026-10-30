@@ -10,6 +10,8 @@ mod account_ui;
 mod actions;
 #[cfg(test)]
 mod army_tests;
+#[cfg(test)]
+mod augment_data_tests;
 mod battle_hud;
 mod countdown;
 mod desktop;

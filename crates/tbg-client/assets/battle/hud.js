@@ -11,7 +11,8 @@
   root.querySelector('[data-battle-action="surrender"]').addEventListener('click', () => send('surrender'));
   root.querySelector('[data-battle-action="close-inspect"]').addEventListener('click', () => send('close-inspect'));
   // War Council (BR-AG12–14): pick a card, then confirm; the choice is final.
-  const council = { round: '', picked: null, sent: '' };
+  const council = { round: '', picked: null, sent: '', initialTicks: 0 };
+  const augmentArt = globalThis.TbgAugmentArt;
   const pause = root.querySelector('[data-pause]');
   const confirmButton = root.querySelector('[data-battle-action="confirm"]');
   root.querySelector('[data-battle-action="forgo"]').addEventListener('click', () => { council.sent = 'forgo'; send('forgo'); });
@@ -194,10 +195,19 @@
     });
     function renderCouncil(s) {
     const parts = (s.council || 'closed').split('|');
-    if (parts.length < 4 || parts[0] === 'closed') { pause.hidden = true; council.round = ''; council.picked = null; council.sent = ''; return; }
-    if (council.round !== parts[0]) { council.round = parts[0]; council.picked = null; council.sent = ''; }
+    if (parts.length < 4 || parts[0] === 'closed') { pause.hidden = true; council.round = ''; council.picked = null; council.sent = ''; augmentArt.close(); return; }
+    if (council.round !== parts[0]) { council.round = parts[0]; council.picked = null; council.sent = ''; council.initialTicks = Number(parts[1]); }
     pause.hidden = false;
-    const seconds = Math.ceil(Number(parts[1]) / 20);
+    const ids = parts[3].split(',').map(Number);
+    const artData = augmentArt.open(ids, render);
+    const ticks = Number(parts[1]);
+    const seconds = Math.ceil(ticks / (artData ? artData.tickHz : 20));
+    const totalTicks = artData ? artData.roundTicks : council.initialTicks;
+    root.querySelector('[data-council-progress]').style.width = percent(ticks, totalTicks) + '%';
+    const timeTrack = pause.querySelector('.council-timer-track');
+    timeTrack.setAttribute('aria-valuenow', String(ticks));
+    timeTrack.setAttribute('aria-valuemax', String(totalTicks));
+    timeTrack.setAttribute('aria-valuemin', '0');
     set('[data-council-timer]', Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2,'0'));
     root.querySelector('.council-clock').classList.toggle('urgent', seconds <= 5);
     const resolved = parts[2] === 'true';
@@ -205,6 +215,7 @@
     const scale = Math.max(1, number('energyScale'));
     pause.querySelectorAll('[data-council-option]').forEach((card, i) => {
       // `id:name:text:cost`; a text may itself contain ':'.
+      augmentArt.decorate(card, ids[i]);
       const f = (defs[i] || '').split(':'); const name = f[1], cost = f.length > 3 ? f[f.length - 1] : '', text = f.slice(2, -1).join(':');
       card.querySelector('.council-name').textContent = name || '—';
       card.querySelector('.council-text').textContent = text || '';

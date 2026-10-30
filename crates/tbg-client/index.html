@@ -20,6 +20,7 @@
   <script data-trunk defer src="assets/stronghold/picker.js"></script>
   <link data-trunk rel="css" href="assets/battle/hud.css" />
   <link data-trunk rel="css" href="assets/battle/fortify.css" />
+  <script data-trunk defer src="assets/augments/art.js"></script>
   <script data-trunk defer src="assets/battle/hud.js"></script>
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2b36; touch-action: none; }
@@ -200,15 +201,16 @@
   <div class="battle-pause" data-pause hidden>
     <section class="battle-council iron-frame" role="dialog" aria-modal="true" aria-labelledby="council-title">
       <header class="council-head">
-        <div><small class="council-paused">Battle paused</small><strong id="council-title">War Council</strong></div>
+        <div><small class="council-paused">Battle paused</small><strong id="council-title">Choose an Augment</strong></div>
         <div class="council-clock"><small>Time left</small><time data-council-timer>0:20</time></div>
       </header>
       <p class="council-help">Both players choose one Augment from the same four. The battle resumes when both confirm or time runs out.</p>
+      <div class="council-timer-track" role="progressbar" aria-label="Augment choice time remaining"><span data-council-progress></span></div>
       <div class="council-options">
-        <button class="council-card" data-council-option="0"><b class="council-name">—</b><span class="council-text"></span><span class="council-cost"></span></button>
-        <button class="council-card" data-council-option="1"><b class="council-name">—</b><span class="council-text"></span><span class="council-cost"></span></button>
-        <button class="council-card" data-council-option="2"><b class="council-name">—</b><span class="council-text"></span><span class="council-cost"></span></button>
-        <button class="council-card" data-council-option="3"><b class="council-name">—</b><span class="council-text"></span><span class="council-cost"></span></button>
+        <button class="council-card" data-council-option="0"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="1"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="2"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="3"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
       </div>
       <footer class="council-actions">
         <button class="council-forgo" data-battle-action="forgo">Forgo</button>

@@ -12,8 +12,8 @@ def entries(data, name):
         rows += [(f['banner'], 900, 400_000, 112_000, False) for f in data['families']]
         rows += [(n['asset'], 72, 150_000, 42_000, True) for n in data['nodes']]
     elif name == 'augments':
-        rows = [(r['frame'], 300, 250_000, 35_000, True) for r in data['rarities']]
-        rows += [(a['asset'], 240, 150_000, 18_000, False) for a in data['augments']]
+        rows = [(r['frame'], 300, 250_000, 35_000, False) for r in data['rarities']]
+        rows += [(a['asset'], 210, 150_000, 18_000, False) for a in data['augments']]
     else:
         rows = [(k['portrait'], 160, 250_000, 42_000, True) for k in data['kinds']]
         rows += [(k['banner'], 450, 400_000, 70_000, False) for k in data['kinds']]
