@@ -67,7 +67,12 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
     }
     for idx in 0..state.units.len() {
         let n = state.units[idx];
-        if n.hp <= 0 || !state.rules.def(n.kind).ability(n.tier, n.branch).contains(&Ability::Hatch)
+        if n.hp <= 0
+            || !state
+                .rules
+                .def(n.kind)
+                .ability(n.tier, n.branch)
+                .contains(&Ability::Hatch)
         {
             continue;
         }

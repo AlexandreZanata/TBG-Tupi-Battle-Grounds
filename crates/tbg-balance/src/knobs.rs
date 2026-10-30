@@ -97,6 +97,8 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
         // Untunable by the search: the nine conditional Arcanas are rules,
         // not per-rank percentages; the named lab builds exercise them.
         arcana: _,
+        // Untunable: staging data, not balance (ROSTER-EXPANSION §F.5).
+        pool: _,
     } = r;
     let mut v = Vec::new();
     let mut add = |k: Knob, value: i64| {
@@ -150,6 +152,8 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
             heal,
             // Untunable: slow/root rules are under review (P32).
             on_hit: _,
+            // Untunable in P43: staged abilities, read by later waves.
+            abilities: _,
             forms,
         } = u;
         // Summons are tuned through their Nester's forms only.
@@ -180,6 +184,11 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
                 heal_bp,
                 dmg_add,
                 on_hit: _,
+                // Untunable in P43: staged hooks for later waves.
+                splash_bp: _,
+                heal_cut_bp: _,
+                vs_below_bp: _,
+                vs_above_bp: _,
             } = f;
             for (field, value) in [
                 (FormField::HpBp, hp_bp),

@@ -114,6 +114,7 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::Beetling => recolor(plants::rootcaller(f), BEETLING),
         // P43: staged kinds render as a plain gray silhouette until their
         // wave lands (art/mod.rs builds every kind in ALL_KINDS).
+        #[allow(unreachable_patterns)]
         _ => {
             let plan = BodyPlan::SMALL;
             let look = Look::new(STEEL, STEEL, STEEL, FRAME);

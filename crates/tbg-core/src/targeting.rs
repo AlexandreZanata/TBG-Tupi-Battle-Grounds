@@ -4,7 +4,7 @@
 
 use crate::content::{Ability, Stats, BP};
 use crate::state::{stronghold_x, MatchState, Target, Unit};
-use crate::types::{UnitId};
+use crate::types::UnitId;
 
 pub(crate) enum Engage {
     /// Attack an enemy or heal an ally.
@@ -41,7 +41,11 @@ fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
     for e in state.units.iter().filter(|e| e.seat == enemy && e.hp > 0) {
         let key = ((e.x - u.x).abs(), e.id);
         nearest = Some(nearest.map_or(key, |n| n.min(key)));
-        let is_guard = state.rules.def(e.kind).ability(e.tier, e.branch).contains(&Ability::Guard);
+        let is_guard = state
+            .rules
+            .def(e.kind)
+            .ability(e.tier, e.branch)
+            .contains(&Ability::Guard);
         if is_guard && key.0 <= range {
             guard = Some(guard.map_or(key, |g| g.min(key)));
         }

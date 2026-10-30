@@ -119,6 +119,7 @@ fn name(kind: UnitKind) -> &'static str {
         UnitKind::Rampart => "Rampart",
         UnitKind::Beetling => "Beetling",
         // P43: staged kinds show their content name until named art lands.
+        #[allow(unreachable_patterns)]
         _ => tbg_core::content::def(kind).name,
     }
 }

@@ -382,11 +382,7 @@ impl MatchState {
     /// army. Called once per combat tick; `damage` decrements on death.
     pub(crate) fn refresh_army(&mut self) {
         let mut army = [ArmyComposition::default(); 2];
-        for u in self
-            .units
-            .iter()
-            .filter(|u| u.hp > 0 && !u.is_summon())
-        {
+        for u in self.units.iter().filter(|u| u.hp > 0 && !u.is_summon()) {
             army[u.seat.index()].add(self.rules.def(u.kind).archetype);
         }
         self.army = army;

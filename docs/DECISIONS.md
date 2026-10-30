@@ -789,3 +789,23 @@ per unit fall from 50 % to 20 % of sets, so the threshold moves to about
 60 % of the even share and the lab watches dilution.
 **Reopen when** a wave shows a unit that numbers cannot balance.
 
+## D-47 · P43 shared foundations: ability pairs, staged pool, preview path — 2026-10-29 (executor decision, pending review)
+
+**Decision.** `UnitDef.abilities` is `[[Ability; 2]; 5]` (one pair per
+form slot: base, A1, A2, B1, B2), so Rotcap's Poison + Echo fits without a
+later reshape; Hatch and Guard migrate to ability dispatch with values
+unchanged; `Unit::is_summon()` (unit-level) replaces kind checks where a
+unit is at hand; `hatch_cd` becomes `action_cd`; the Shop draws from
+`Ruleset.pool` (`CANON.pool` stays ten until the P53 owner switch);
+`Ruleset::preview()` names the full staging pool and Practice uses it;
+`UnitFx`/`Stack` land zeroed (hashes updated once); eight staged events
+and `UnitView.fx` ship under protocol v13 with the client rendering staged
+kinds as a gray silhouette. Thresholds for the conditional-damage fields
+stay pending for P44.
+**Why.** ROSTER-EXPANSION §F delegates the pair shape to P43; pairs are
+required by a known P45 unit, not speculation. Everything else is the
+cheapest shape that keeps P43 behavior-identical (gate CSV byte-identical
+to the P42 baseline on the same seeds).
+**Reopen when** a wave needs a third ability on one form, or the pool
+switch needs more than a field assignment.
+

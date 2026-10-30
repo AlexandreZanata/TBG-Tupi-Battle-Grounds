@@ -144,7 +144,10 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
             .iter()
             .filter(|u| u.seat != seat && u.hp > 0 && (u.x - sx).abs() <= rules.stronghold_range)
             .map(|u| {
-                let guard = rules.def(u.kind).ability(u.tier, u.branch).contains(&Ability::Guard);
+                let guard = rules
+                    .def(u.kind)
+                    .ability(u.tier, u.branch)
+                    .contains(&Ability::Guard);
                 (!guard, (u.x - sx).abs(), u.id)
             })
             .min();
