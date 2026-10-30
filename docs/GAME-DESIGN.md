@@ -686,3 +686,176 @@ never sufficient (§6).
 | Best Augment triple found by adversarial search, against the pool | ≤ 65 % |
 | Comebacks (behind at 2:00, then won) | not below the P16-D canon; target ≥ 20 % |
 | Nash support / largest weight | ≥ 3 / ≤ 50 % |
+
+## 11. P56 roster expansion — Proposed, inactive
+
+**Every new value and rule in this section is Proposed: an initial balance
+hypothesis, not an approved rule, measured result or active roster entry.**
+No existing section, production value, Shop pool or gate threshold is changed.
+The owner requested planning only on 2026-10-30 and specified that text,
+never image labels or statistics, controls character names and gameplay.
+Execution requires subsequent authorization and the dependencies in
+[P56](phases/P56-roster-expansion-planning.md). The [catalog](roster/P56-CATALOG.md)
+defines identity/art and the [integration contracts](roster/P56-AUDIT-AND-INTEGRATION.md#3-shared-competitive-contracts-all-proposed-inactive)
+define resolution semantics. This section is the single numerical registry.
+
+### 11.1 Proposed base forms
+
+Cost in Energy (×600 in state); interval in ticks (20/s); range in
+milli-tiles (1,000/tile); movement in milli-tiles/tick (÷50 = tiles/s).
+Draft speed conversion rounds halves upward. For example 0.55 tiles/s
+becomes 28, actually 0.56 tiles/s; 0.45 becomes 23, actually 0.46.
+HP, damage and healing are integer HP. DPS is damage ×20/interval,
+before windup interruption, Synergy, Augments, Arcanas or ability value.
+All base healing is zero; none of these texts specifies an ordinary healer.
+
+| ID | Text name | Proposed Faction / Archetype | Cost | HP | Damage | Interval | Range | Move | Base DPS |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|
+| R01 | Bastion | Machines / Tank | 6 | 1400 | 30 | 40 | 800 | 25 | 15.00 |
+| R02 | Demolidor | Machines / Tank | 6 | 1250 | 80 | 32 | 1000 | 28 | 50.00 |
+| R03 | Crowcaller | Undead / Ranged | 4 | 520 | 58 | 34 | 4800 | 31 | 34.12 |
+| R04 | Gatilho | Humans / Ranged | 4 | 230 | 25 | 17 | 3200 | 53 | 29.41 |
+| R05 | Matraca & Tico | Humans / Tank | 5 | 900 | 60 | 38 | 900 | 28 | 31.58 |
+| R06 | Capivardo | Plants / Tank | 5 | 1300 | 38 | 40 | 800 | 23 | 19.00 |
+| R07 | Tridente | Plants / Tank | 6 | 1250 | 55 | 40 | 1100 | 28 | 27.50 |
+| R08 | Grumak | Monsters / Tank | 6 | 1600 | 40 | 40 | 800 | 20 | 20.00 |
+| R09 | Rasgarr | Monsters / Dps | 4 | 310 | 48 | 24 | 800 | 58 | 40.00 |
+| R10 | Esporax | Monsters / Ranged | 4 | 260 | 42 | 36 | 4200 | 38 | 23.33 |
+| R11 | Murmúrio | Monsters / Control | 5 | 380 | 15 | 40 | 3000 | 33 | 7.50 |
+| R12 | Sentinela Solar | Celestials / Tank | 5 | 1050 | 35 | 40 | 800 | 28 | 17.50 |
+| R13 | Oráculo Luminar | Celestials / Control | 4 | 300 | 15 | 50 | 3000 | 38 | 6.00 |
+| R14 | Arqueira Celeste | Celestials / Ranged | 4 | 210 | 55 | 40 | 4000 | 43 | 27.50 |
+| R15 | Justiçar | Celestials / Control | 6 | 700 | 35 | 46 | 2500 | 28 | 15.22 |
+| R16 | Mandíbulo | Insects / Tank | 6 | 1400 | 45 | 40 | 800 | 23 | 22.50 |
+| R17 | Louva | Insects / Dps | 4 | 280 | 50 | 24 | 800 | 60 | 41.67 |
+| R18 | Vespira | Insects / Ranged | 5 | 260 | 35 | 30 | 3800 | 45 | 23.33 |
+| R19 | Fiandeira | Insects / Control | 4 | 350 | 15 | 50 | 3000 | 33 | 6.00 |
+| R20 | Crematumba | Undead / Tank | 6 | 800 | 12 | 10 | 2800 | 23 | 24.00 per eligible victim |
+| R21 | Brocatanque | Machines / Ranged | 5 | 900 | 0 | 44 | 4500 | 23 | 0; drills are its output |
+
+R01's entire base row is a completion hypothesis: T01 is incomplete.
+R20's cost/HP/movement and Tank assignment are completion hypotheses;
+damage, interval and range come from T11's flame. Other base rows preserve
+the text apart from integer speed conversion. No printed PNG number is
+used. R21's interval is its production cadence, not a zero-damage attack.
+
+### 11.2 Proposed primary abilities
+
+Times are ticks; percentages use basis points (1%=100 bp). Parameters
+absent from a text are explicitly completed here; they are not attributed
+to the owner. Common windup is the existing six ticks. Unless specified,
+special range equals base attack range and ability target is an enemy unit.
+
+| ID | Ability and complete numerical parameters |
+|---|---|
+| R01 | Muralha Viva: period 160; anchored self-reduction 1500 bp for 60; no Guard/taunt. Entire base ability is a completion hypothesis |
+| R02 | Esmagamento em Área: period 200; caster-centered radius 2500; damage 120; no displacement or true interruption |
+| R03 | Marca do Corvo: readiness every 140; next valid basic hit marks for 80; Slow 2000 bp, heal-cut 3000 bp, own basic damage vs own marked target +1500 bp |
+| R04 | Tiro Cruzado: every fourth completed enemy-unit primary hit; one additional target within 1500 of primary; secondary damage 6000 bp of current static basic damage |
+| R05 | Bagunça em Dobro: period 180; damage 60; primary-centered radius 1200; Slow 1500 bp for 30; independent of club |
+| R06 | Barrigada do Brejo: period 200; caster-centered radius 1500; damage 65; Slow 1500 bp for 40 |
+| R07 | Rasgo Sangrento: period 180; primary-centered radius 1500; damage 75; one bleed slot, 5 HP per 20 ticks, four pulses |
+| R08 | Couraça Primordial: each positive HP-damage receipt adds 300 bp reduction for subsequent hits, five stacks maximum / 1500 bp; all expire after 60 ticks without HP damage. Step size is a completion |
+| R09 | Frenesi Predatório: next consecutive hit against same unit gains 800 bp per previous hit, maximum three increments / 2400 bp; reset after 60 ticks without a valid hit |
+| R10 | Cuspe Corrosivo: every third completed enemy-unit primary hit; flat damage 18 to at most two other enemies within 1500 of primary. Radius is a completion |
+| R11 | Pulsação do Medo: period 160; Slow 2500 bp for 40 on primary; no separate ability damage |
+| R12 | Barreira Solar: period 160; lowest HP-fraction other living ally within 3000, ties distance/id; shield 100 for 80; no self-shield. Range/exclusion are completions |
+| R13 | Pulso Harmônico: period 200; weaken enemy basic damage by 1500 bp for 60, maximum weakening 2000 bp across this family; no healing pulse |
+| R14 | Flecha da Purificação: every fourth completed enemy-unit hit replaces that basic damage with 80 and removes its temporary Unit shield immediately before damage; no piercing chain |
+| R15 | Chuva Celeste: period 200; one damage pulse 65, primary-centered radius 1300; no persistent ground zone |
+| R16 | Carapaça Erguida: period 200; self-reduction 1500 bp for 60; no allied aura |
+| R17 | Golpe Preciso: fourth consecutive completed hit on same enemy unit adds 60 damage, then sequence resets; target change resets; no dash |
+| R18 | Ferrão Venenoso: every third completed enemy-unit hit applies one non-stacking poison slot, 5 HP per 20 ticks, four pulses |
+| R19 | Teia Adesiva: period 160; damage 25 plus Root 30 on primary |
+| R20 | Fogo Profano: each 10-tick basic cycle applies damage 12 to every other living unit in the forward segment of length 2800, allies and enemies equally; heal-cut 3500 bp for 40, no target cap. Self excluded. Primary enemy Stronghold may take one ordinary 12-damage hit, never collateral flame/cut; tower treatment is a completion |
+| R21 | Ninho de Brocas: every 44 ticks with a target within 4500, spawn one Microbroca at producer x; no direct damage. Eight living drills total per seat across producers/ranks; same-rank allied drills within 200 may fuse; maximum rank three. Trigger/radius are completions |
+
+### 11.3 Proposed Evolution parameters
+
+Columns are **Tier 2 / Tier 3** (stored tiers 1/2). Stat deltas accumulate
+on base; absolute ability values **replace**, not add. A Tier 3 form keeps
+its own Tier 2 benefits. Existing Energy price is 2 then 4; no new price
+curve is proposed. Names identify the original branch, not extra systems.
+Where the source gives a single unsplit benefit, intermediate values or
+an additional modest benefit below are completion hypotheses for testing.
+
+| ID | Branch A: Tier 2 → Tier 3 | Branch B: Tier 2 → Tier 3 |
+|---|---|---|
+| R01 | Fortaleza Móvel: +2000 bp HP → anchor duration 80 | Peso da Terra: +1500 bp basic damage → basic hits Slow 1500 bp for 20 |
+| R02 | Punhos Reforçados: +2000 bp special damage → radius 3000 | Sistema de Choque: period 160 → basic hits Slow 1500 bp for 40 |
+| R03 | Corvo Pestilento: cut 4000 bp → mark duration 110 | Besta da Ruína: +1500 bp basic damage → own mark bonus 2500 bp |
+| R04 | Pistoleiro Veloz: +1500 bp attack speed → +1000 bp movement | Bala Ricocheteante: secondary ratio 7500 bp → search radius 2000 |
+| R05 | Fúria do Grandão: +2000 bp HP → +2000 bp basic damage | Truques do Tico: period 150 → radius 1500, Slow 2000 bp |
+| R06 | Barriga de Pedra: +2000 bp HP → 1500 bp self-reduction for 40 after impact | Onda do Brejo: period 160 → radius 1900, Slow 2000 bp |
+| R07 | Fúria Oceânica: +2000 bp HP → bleed 7 per pulse | Maré Sangrenta: period 150 → radius 1900 |
+| R08 | Couraça Ancestral: +2000 bp HP → stack expiry 80 | Presas de Pedra: basic damage +1500 bp vs units with base range ≤1600 → replace bonus with 2500 bp |
+| R09 | Caçada Voraz: +1500 bp attack speed → +1000 bp movement | Frenesi Profundo: maximum four increments / 3200 bp → reset gap 80 |
+| R10 | Mandíbula Abissal: +1500 bp basic damage → +400 range | Salva Corrosiva: secondary damage 24 → maximum three additional targets |
+| R11 | Eco do Medo: +500 range → Slow duration 50 | Pulso Mental: period 130 → +2000 bp basic damage |
+| R12 | Fortaleza da Luz: +2000 bp HP → shield 130 | Proteção em Grupo: second distinct ally shield 50, same expiry → +500 special range |
+| R13 | Luz Restauradora: weakening duration 70 → duration 80 | Aura Sagrada: period 180 → period 160; branch names do not grant healing/aura |
+| R14 | Precisão Divina: +1000 bp basic damage → another +1000 bp basic damage | Marca Celeste: proc every third hit → empowered damage 90; no team damage mark |
+| R15 | Fúria Celeste: +2000 bp special damage → +1000 bp HP | Julgamento: radius 1600 → Slow 1500 bp for 20 on affected enemies |
+| R16 | Carapaça Reforçada: +2000 bp HP → protection duration 80 | Guarda do Enxame: next enemy-unit primary after protection ends adds 40 → +1500 bp basic damage; no area aura |
+| R17 | Caça Implacável: +1500 bp attack speed → +1000 bp movement | Lâmina Precisa: bonus 70 → bonus 85 |
+| R18 | Veneno Profundo: poison 6 per pulse → poison 7 per pulse | Revoada: +1500 bp attack speed → +400 range |
+| R19 | Rede Ampliada: period 145 → period 130 | Teia Protetora: +500 special range → Slow 1500 bp for 40 after Root ends; no shield |
+| R20 | Fornalha Fúnebre: +2500 bp HP → flame range 3360 | Chama da Pestilência: +2000 bp flame damage → cut 5000 bp; friendly damage remains identical |
+| R21 | Fábrica de Enxame: production period 38 → merged drill shield 25 for 40; merge radius remains 200 | Broca de Cerco: Duobroca damage +1500 bp → Megabroca damage +2500 bp vs units whose printed base HP ≥1000; no Stronghold bonus |
+
+Names/secondary completions for R08–R11 and unsplit R12–R19 branches are
+proposals because the texts do not define every name/step. They preserve
+the text's role rather than importing image abilities. R16's empowered
+flag stores one charge, never accumulates; consumed by next valid unit
+hit, overwritten by the next completed protection if unspent. R19 keeps
+one pending post-Root Slow; cleansing clears it and any extended Root
+delays it. R21 Evolution benefits snapshot at summon birth; merge uses the
+lowest-id parent producer's recorded branch/tier, not a stronger ally's
+current upgrades. All resulting rank stats derive from that profile.
+
+### 11.4 Proposed drill summon forms and fusion
+
+| Summon | Rank | HP | Damage | Attack ticks | Move/tick | Range | Lifetime ticks |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Microbroca | 1 | 45 | 18 | 14 | 95 | 600 | 240 |
+| Duobroca | 2 | 110 | 40 | 17 | 73 | 600 | 280 |
+| Megabroca | 3 | 260 | 90 | 22 | 50 | 600 | 320 |
+
+Rank is a summon form, not purchasable Evolution. Range and Duobroca's
+integer-rounded speed are completion hypotheses. The eight-entity cap,
+finite lives, two-equal-rank fusion and maximum rank three come from T12.
+At cap, production waits ready; no queued burst or refunded Energy.
+Fused lifetime restarts at its rank lifetime; with only two promotions
+a Microbroca lineage lives at most 240+280+320 ticks. See the catalog for
+damaged parents, control/status inheritance, ownership and merge order.
+
+### 11.5 Proposed Factions and release hypotheses
+
+Append Monsters / Celestials / Insects after the existing four Factions;
+all use the existing thresholds 2/4 living conventional units. Monsters:
+damage +500/+1000 bp (completion). Celestials: max HP +500/+1000 bp (T09).
+Insects: movement +500/+1000 bp (T10), sharing the existing +5000 bp
+movement ceiling. Bonuses replace the lower threshold, never add twice.
+No new healing, flight, armor, stealth, knockback, Augment or Arcana system.
+
+With all 21 purchases, direct-main pool would be 31; with the prior
+15-unit expansion integrated, 46. These are **models**, not a Shop change.
+Five distinct uniform offers imply per-kind probability 5/N, pair
+co-occurrence 20/[N(N−1)], and expected fresh offer sets N/5. Never call
+these expected *free rerolls*: another purchase is required to redraw.
+No global economy/Shop rule is changed to compensate.
+
+The current “every unit ≥5% of purchases” gate cannot hold for 31 or 46
+kinds; even the earlier expansion's 2.5% proposal cannot hold for 46.
+**Owner decision pending:** consider a floor of 0.6/N per kind (60% of
+uniform share), alongside conditional purchase-when-offered and enough
+observations. Do not change an existing threshold or contract to pass.
+
+Future measurement protocol (Proposed methodology, not balance proof):
+256 paired seeds for screening; 2048 disjoint confirmation pairs; reaction
+intervals 1/3/5 views; all existing Energy-equal duel budgets 20/40/60;
+candidate combos investigated above 60% score against the strategic pool;
+ability-value and Evolution buy-versus-base ablations; incomplete games
+reported as censored at the lab's own limit, never converted into gameplay
+draws. Keep pre-existing gate failures visible separately. No release
+until owner approves any new thresholds, evidence and fun/look.
