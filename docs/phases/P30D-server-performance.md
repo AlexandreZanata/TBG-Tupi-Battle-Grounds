@@ -361,3 +361,101 @@ Native per-fixture wall-clock time and allocation counts are not per-fixture pro
 ### Deviations / unresolved checks
 
 Production deployment and public 50-match load steps from older phase specs were intentionally not run: the owner's attached investigation explicitly prohibits them. Hardware PMU counters, actual minimal-VPS capacity and indefinite match memory are unmeasured. The 60-second local capacity windows are not a soak test. Snapshot deltas, SoA, static targeting caches and a new compiler profile remain unshipped experiments.
+
+## Independent review (2026-10-30)
+
+Branch `phase/p30d-review` from `feea791`. The report above was treated
+as claims to verify. Every binary was rebuilt from source in separate
+worktrees and target folders (no shared `target/`); evidence and method
+are in [p30d-review/](../performance/p30d-review/README.md). The VPS was
+observed read-only (private note); nothing was deployed, merged or pushed.
+
+### Findings, most severe first
+
+1. **C7 fails, on the baseline too (pre-existing, not P30-D).**
+   `c7_planted_imbalances_are_caught_for_every_unit` is not stuck: in a
+   release build it fails in 32–39 s with `SiegeWalker ×3 cost was not
+   caught`, identically on `ca5069e` and on this branch. In the debug
+   build CI uses it runs 242.5 s and fails the same way (single test,
+   30-minute limit). The roster now has 25
+   online kinds (the contract runs a duel matrix per kind twice), and the
+   deploy log has listed C7 as an owner decision since the D-45 Shop
+   change. No contract, golden or threshold was changed. The workspace
+   cannot be called globally green until that decision.
+2. **`two_bots_finish_a_match` is load-sensitive, not broken.** A full
+   bot match is about 8,000 ticks, about 40 s at the 5-ms test tick,
+   inside a 60-s deadline. It passed in both of this review's runs (the
+   workspace run below and the consolidation run). The deadline was not
+   changed; widening it is a calibration call for the next reviewer.
+3. **Clippy `--all-targets` findings in the roster wave tests** (unused
+   imports, a redundant guard, a collapsible match): fixed in `be4a485`
+   without touching any assertion.
+4. **Eager formation discovery cost every tick** an ability scan of all
+   units even when no unit moved. Fixed in `cba61f0` (discovered on the
+   first movement; same anchor set because indices and forms are fixed
+   during the pass).
+5. **The reported 5–8 % slowdown of 10-unit rows did not reproduce.**
+   With three interleaved repetitions × three seeds × 600 ticks, P30-D is
+   7–18 % faster than the baseline at 10 units in all seven scenes; the
+   original rows were unpaired single samples.
+6. Minor: per-connection and per-seat RTT samples grow 2 B per second
+   (about 7 KB per connection-hour); deferred. The lab report prints
+   `f64::MAX` targets as 309-digit numbers (cosmetic).
+
+### Claims re-measured
+
+| Claim | Report | Review | Verdict |
+|---|---|---|---|
+| Exact state/event/view traces | 58,800 equal | 58,800 equal (rebuilt binaries); also for the review head | confirmed |
+| Natural games unchanged | — (fixtures only) | 2,000 lab games per version, `roster.csv`/`run.txt` byte-identical | confirmed (new evidence) |
+| Formation 1,000 units | 117.4 → 6.56 ms | 122.0 → 6.41 ms (×19.0) | confirmed |
+| Melee 1,000 units | 6.64 → 2.25 ms | 6.72 → 2.12 ms (×3.17) | confirmed |
+| Formation 1,000 allocations | 2,008 → 17 / tick | 2,008 → 17 / tick | confirmed |
+| 1,000 matches, 1 CPU / 1 GiB | 0.526 → 0.297 cores, 294 → 49 MiB, p95 3 ms, 0 late | 0.531 → 0.310 cores, 294 → 49 MiB, p95 3 ms, 0 late | confirmed |
+| 2,000 matches, 60 s | 0.529 cores, 92 MiB, 0 late | not re-run | inconclusive |
+| 10-unit ranged/healing slower | 5–8 % slower | 7–11 % faster | not reproduced |
+
+### New optimizations
+
+| Change | Evidence | Result |
+|---|---|---|
+| `cba61f0` lazy formation anchors | 58,800 exact frames; 2,000 identical lab games; `timing.csv` | 3–8 % faster at 10–50 units in all 21 small rows; neutral at 200–1,000; mixed-200 allocations 21.8 → 17.9 per tick |
+| `04d8606` send_view keeps its buffer, skips detached seats | unit test; 1,000-match capacity | 0.300 vs 0.310 cores, same RSS, 0 late: inconclusive (within noise), kept as zero-risk hygiene |
+
+Not attempted or rejected: an RTT histogram (small measured growth),
+a Rampart-aura cache (no new profile beyond the report's 2.39-ms mean
+splash/aura stress), delta snapshots (outside this review; not
+integration-ready), `opt-level=3` (no changed condition since P10).
+
+### Tests actually run (review head)
+
+| Check | Result |
+|---|---|
+| `cargo fmt --all -- --check` | exit 0 |
+| `cargo clippy --workspace -- -D warnings` | exit 0 |
+| `cargo clippy --workspace --all-targets --all-features -- -D warnings` | exit 0 (after `be4a485`) |
+| `cargo clippy -p tbg-core --all-features --examples -- -D warnings` | exit 0 |
+| `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown` | exit 0 |
+| `cargo test --workspace --exclude tbg-balance --no-fail-fast` (1,200-s limit; before the two review commits) | 249 passed, 0 failed, 1 ignored (replay), `two_bots_finish_a_match` passed; 7 min 38 s with build |
+| `cargo test -p tbg-core -p tbg-server --no-fail-fast` (review head) | 201 passed, 0 failed, 1 ignored |
+| `cargo test --release -p tbg-balance --no-fail-fast` (2,700-s limit) | everything passed except C7 (finding 1); 52 s |
+| Benchmark features | `bench-alloc`/`bench-profile` are not default; the server and client depend on `tbg-core` default features only |
+
+### Recommendation per change
+
+| Commit | Change | Recommendation |
+|---|---|---|
+| `eca9346` | targeting reads the borrowed candidate | approve |
+| `f303560`, `3c00e30` | live ordered formation queries, reused storage | approve |
+| `71d74a9` | Drumguard minimum without sorting | approve |
+| `b2a6971` | 4-KiB WebSocket read buffer | approve (largest server win) |
+| `7bba85d` | reject `seq = 0` online | approve (security; the browser starts at 1) |
+| `ea20b79`, `ca5069e`, `0a5af9e`, `d41aeef` | opt-in benchmarks and fixtures | approve (never in online builds) |
+| `be4a485` | wave-test lint fixes | approve |
+| `cba61f0` | lazy formation anchors | approve |
+| `04d8606` | send_view buffer and detached seats | approve as hygiene |
+
+VPS: read-only observation only (uptime, memory, disk, vmstat, the
+`tbg-temp` deployment and metrics, service status, the public health and
+the served WASM hash, which matches the roster deploy). No write,
+restart, rollout, scale or load was sent there.

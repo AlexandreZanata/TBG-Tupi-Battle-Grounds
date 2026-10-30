@@ -1,0 +1,9 @@
+version,scene,target_units,allocs_per_tick,requested_bytes_per_tick,id_searches_per_tick
+baseline,mixed,200,54.450,25628.000,7670.00
+baseline,mixed,1000,368.800,459191.000,163166.45
+baseline,formation,200,306.000,102992.000,20397.50
+baseline,formation,1000,2008.000,2050064.000,501987.50
+review head,mixed,200,17.850,13330.400,532.85
+review head,mixed,1000,96.500,181712.600,3323.80
+review head,formation,200,13.000,7024.000,197.50
+review head,formation,1000,17.000,30384.000,987.50
