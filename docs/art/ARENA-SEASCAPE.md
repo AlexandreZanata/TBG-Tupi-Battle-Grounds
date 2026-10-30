@@ -38,6 +38,12 @@ Added two irregular, low-poly offshore islands, eight small pines, faceted shore
 
 `cargo check -p tbg-client --target wasm32-unknown-unknown`: pass (0.89 s). Workspace Clippy passes with `-D warnings` (1.40 s) after correcting a stale helper call during layout separation. Island composition stays in `scenery.rs`; landmark models and the boat's visual motion stay in `maritime.rs`.
 
+## D — Lighting
+
+Retained the original warm upper-left light direction, StandardMaterial path, camera/tonemapping/fog and 1024 shadow map. Reduced cool ambient brightness from 1200 to 950 and raised the key from 12,000 to 13,000 lux to strengthen volume without another light or post-process. The single cascade now focuses its existing map on 42 units instead of 60, covering the original arena while spending fewer texels beyond the play area. Distant terrain and the boat remain excluded from shadow casting.
+
+WASM target check: pass (0.46 s). Composition/readability and the final frame-time target remain browser gates; values may be refined in stage E.
+
 ## Remaining stages
 
-D — lighting; E — composition; F — final validation and paired measurements. In progress.
+E — composition; F — final validation and paired measurements. In progress.
