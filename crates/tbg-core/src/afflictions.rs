@@ -203,7 +203,7 @@ pub(crate) fn apply_stacks(
                 e.seat != attacker.seat
                     && e.hp > 0
                     && e.id != id
-                    && crate::targeting::targetable(state, e.id)
+                    && crate::targeting::targetable(e)
                     && (e.x - attacker.x).abs() <= st.range
             })
             .map(|e| ((e.x - attacker.x).abs(), e.id))

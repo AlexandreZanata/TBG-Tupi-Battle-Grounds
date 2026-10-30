@@ -47,7 +47,9 @@ impl Match {
                 // A replayed or out-of-order intention never mutates twice and
                 // never enters the replay log.
                 let current = self.state.player(seat).last_seq;
-                let stale = seq != 0 && seq <= current;
+                // Zero is an offline simulation sentinel, never an online
+                // sequence: accepting it resets last_seq and permits replays.
+                let stale = seq == 0 || seq <= current;
                 let result = if stale {
                     Err(tbg_core::Rejection::Stale)
                 } else {

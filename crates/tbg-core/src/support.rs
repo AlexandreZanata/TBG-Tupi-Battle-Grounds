@@ -222,15 +222,15 @@ fn march_of(state: &MatchState, u: &Unit) -> Option<(i32, u16, u16, i32, bool)> 
         })
 }
 
-/// Bonded ally candidates: living allied conventional non-Drummers in
-/// range; nearest first, ties lowest id.
-fn bond_candidates(
+/// The nearest eligible ally, ties lowest id. Only the minimum is used;
+/// sorting and allocating every candidate adds no information.
+fn bond_candidate(
     state: &MatchState,
     d: &Unit,
     reach: i32,
     exclude: Option<UnitId>,
-) -> Vec<(i32, UnitId)> {
-    let mut out: Vec<(i32, UnitId)> = state
+) -> Option<(i32, UnitId)> {
+    state
         .units
         .iter()
         .filter(|a| {
@@ -243,9 +243,7 @@ fn bond_candidates(
         })
         .filter(|a| (a.x - d.x).abs() <= reach)
         .map(|a| ((a.x - d.x).abs(), a.id))
-        .collect();
-    out.sort();
-    out
+        .min()
 }
 
 fn eval_bond(state: &MatchState, di: usize) -> Option<UnitId> {
@@ -258,9 +256,7 @@ fn eval_bond(state: &MatchState, di: usize) -> Option<UnitId> {
             let b = &state.units[bi];
             let dist = (b.x - d.x).abs();
             if b.hp > 0 && b.seat == d.seat && dist <= reach {
-                let switched = bond_candidates(state, &d, reach, Some(bid))
-                    .into_iter()
-                    .next()
+                let switched = bond_candidate(state, &d, reach, Some(bid))
                     .is_some_and(|(od, _)| od + hysteresis <= dist);
                 if !switched {
                     return Some(bid);
@@ -268,27 +264,7 @@ fn eval_bond(state: &MatchState, di: usize) -> Option<UnitId> {
             }
         }
     }
-    bond_candidates(state, &d, reach, None)
-        .into_iter()
-        .next()
-        .map(|(_, id)| id)
-}
-
-/// Oilpress formation anchor check (§C.8): an Oilpress counts as engaged
-/// while a living enemy unit stands within `engage` in front of it.
-pub(crate) fn engaged_oilpress(state: &MatchState, idx: usize) -> Option<(i32, i32)> {
-    let u = &state.units[idx];
-    let [a, b] = state.rules().def(u.kind).ability(u.tier, u.branch);
-    let formation = [a, b].into_iter().find_map(|ability| match ability {
-        Ability::Formation { engage, gap } => Some((engage, gap)),
-        _ => None,
-    });
-    let (engage, gap) = formation?;
-    let dir = u.seat.dir();
-    let engaged = state.units.iter().any(|e| {
-        e.seat != u.seat && e.hp > 0 && (e.x - u.x) * dir > 0 && (e.x - u.x).abs() <= engage
-    });
-    engaged.then_some((u.x, gap))
+    bond_candidate(state, &d, reach, None).map(|(_, id)| id)
 }
 
 /// Cargo Crab boarding (P48-A, §C.15): every tick, each crab without a
