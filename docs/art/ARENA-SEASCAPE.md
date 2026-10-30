@@ -26,6 +26,12 @@ Baseline release build passes. Raw WASM 24,923,835 bytes; gzip-9 7,768,767; Brot
 
 Before captures: [empty 1920](../media/arena-seascape/sea-empty-before-1920.jpg), [empty 1366](../media/arena-seascape/sea-empty-before-1366.jpg), [60 models 1920](../media/arena-seascape/sea-stress-before-1920.jpg), [60 models 1366](../media/arena-seascape/sea-stress-before-1366.jpg), [Practice 0:40](../media/arena-seascape/sea-practice-before-1920.jpg).
 
+## B — Ocean
+
+Implemented a seeded 88x64 irregular water grid with subtle static relief, blue depth/turquoise near-shore color variation and a coarse exterior fill, all merged into the existing sea draw. Broken white coastal arcs, shallow transition bands, foam around the ten original offshore rocks and sparse glint ribbons share the existing cosmetic Foam batch and transform drift. Removed the old torus rings from the lit terrain batch; offshore rock positions, scales and rotations remain unchanged. No texture, shader, reflection pass, new material or per-frame vertex upload. The original two sea/foam draw batches and animation entity count remain unchanged.
+
+`cargo check -p tbg-client --target wasm32-unknown-unknown`: pass (2.35 s initial, 0.39 s after non-coplanar foam refinement). `cargo fmt --all`: pass. Final appearance and timing are inspected after assembly; no performance claim yet.
+
 ## Remaining stages
 
-B — Ocean; C — background; D — lighting; E — composition; F — final validation and paired measurements. In progress; no final performance claim yet.
+C — background; D — lighting; E — composition; F — final validation and paired measurements. In progress.
