@@ -1023,3 +1023,24 @@ seat. The Forest keeps every previous number.
 policy win rates past the D-33 gate, players find a modifier unreadable,
 or the owner wants arena choice online.
 
+
+## D-58 · Live battles and spectating (P47) — 2026-10-30 (Proposed)
+
+**Decision.** Public matches (Casual quick match, Ranked) are listed in a
+lobby registry while they run, with progress and presence counts in a
+read-only `/api/live` snapshot. Any idle session may watch one; spectators
+get the public view only, at 0 s delay, through one pre-encoded frame per
+view tick shared by every spectator (protocol v17, GAME-DESIGN §13).
+`Lobby::pair` takes an explicit `Listing::{Public, Private}`, decided where
+the match is paired; the mode alone does not decide it, because rooms share
+`MatchMode::Casual` with the quick queue.
+**Contracts.** Protocol v17 appends `Spectate`, `StopSpectating` and four
+server messages; `MatchView` gains `spectators`. Protocol v16 is taken by
+the Cargo Crab branch, and D-56 by the same branch; D-57 is reserved by
+parallel work, so this decision takes D-58.
+**Why.** The owner wants to see at a glance whether the game is active and
+to watch a battle with one click. Public-only views and a 0 s delay leak
+nothing that a seat does not already see, so no delay is needed.
+**Reopen when** spectator load breaks the budgets in P47 (2 000 spectators
+at 250 matches), a listed match leaks private state, or the owner wants
+rooms, challenges or ranked watching to stay private as well.
