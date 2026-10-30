@@ -16,7 +16,7 @@
   }
   function load(update){
     if(data||loading||failed)return;
-    loading=fetch(base+'factions.json?v=factions-1')
+    loading=fetch(base+'factions.json?v=factions-2')
       .then(r=>{if(!r.ok)throw new Error('Faction art unavailable');return r.json();})
       .then(value=>{
         data=validate(value);

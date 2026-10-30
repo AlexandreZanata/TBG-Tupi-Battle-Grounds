@@ -15,8 +15,9 @@
     if (artStarted) return;
     artStarted = true;
     // This manifest lets the owner substitute WebP illustrations without changing code.
+    // Revalidate it: the server caches JSON for an hour, which kept old art after a release.
     let sources = {};
-    try { const response = await fetch('assets/lobby/art.json'); if (response.ok) sources = await response.json(); } catch (_) { /* SVG defaults work offline. */ }
+    try { const response = await fetch('assets/lobby/art.json', {cache: 'no-cache'}); if (response.ok) sources = await response.json(); } catch (_) { /* SVG defaults work offline. */ }
     root.querySelectorAll('[data-art]').forEach(image => {
       const source = sources[image.dataset.art];
       image.src = typeof source === 'string' && source.startsWith('assets/lobby/') ? source : image.dataset.art === 'profile' ? 'assets/lobby/profile-v2.webp' : 'assets/lobby/' + image.dataset.art + '.svg';
