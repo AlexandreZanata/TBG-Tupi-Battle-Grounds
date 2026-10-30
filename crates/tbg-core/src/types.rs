@@ -90,7 +90,8 @@ pub enum UnitKind {
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
 /// P53 owner switch grows it. Staged kinds exist in `ALL_KINDS` first.
-pub const UNIT_KINDS: [UnitKind; 10] = [    UnitKind::Shieldbearer,
+pub const UNIT_KINDS: [UnitKind; 10] = [
+    UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
     UnitKind::Hexer,

@@ -389,11 +389,16 @@ pub fn apply(r: &mut Ruleset, spec: &str) -> Result<(), String> {
 /// Role invariants (Proposed, GAME-DESIGN §5 note). A candidate breaking
 /// one is discarded before any match is played.
 pub fn valid(r: &Ruleset) -> Result<(), String> {
-    for k in tbg_core::ALL_KINDS.into_iter().filter(|k| k.is_conventional()) {
+    for k in tbg_core::ALL_KINDS
+        .into_iter()
+        .filter(|k| k.is_conventional())
+    {
         let d = r.def(k);
         // Farwatch never targets Strongholds, so the range cap does not
         // apply to it (ROSTER-EXPANSION §C.2 role invariant).
-        let no_stronghold = d.ability(0, 0).contains(&tbg_core::content::Ability::NoStronghold);
+        let no_stronghold = d
+            .ability(0, 0)
+            .contains(&tbg_core::content::Ability::NoStronghold);
         if !no_stronghold && d.range > r.stronghold_range {
             return Err(format!("{:?}: base range above the Stronghold's", k));
         }

@@ -4,9 +4,7 @@
 
 #![cfg(feature = "lab")]
 
-use tbg_core::{
-    headless, ArcanaPreset, Event, MatchState, Ruleset, Seat, Target, UnitKind,
-};
+use tbg_core::{headless, ArcanaPreset, Event, MatchState, Ruleset, Seat, Target, UnitKind};
 
 fn rules() -> &'static Ruleset {
     Ruleset::canon()
@@ -106,7 +104,10 @@ fn bombard_blast_hits_allies_fully() {
     let ally_hits: Vec<i32> = evs
         .iter()
         .filter_map(|e| match e {
-            Event::Hit { to: Target::Unit(id), amount } if *id == ally => Some(*amount),
+            Event::Hit {
+                to: Target::Unit(id),
+                amount,
+            } if *id == ally => Some(*amount),
             _ => None,
         })
         .collect();
@@ -170,10 +171,16 @@ fn longaxe_strikes_over_its_own_tank() {
     for _ in 0..300 {
         for e in s.step() {
             match e {
-                Event::AttackStart { from: Target::Unit(a), .. } if a == axe => {
+                Event::AttackStart {
+                    from: Target::Unit(a),
+                    ..
+                } if a == axe => {
                     saw_attack = true;
                 }
-                Event::AttackStart { from: Target::Unit(a), .. } if a == brute => {
+                Event::AttackStart {
+                    from: Target::Unit(a),
+                    ..
+                } if a == brute => {
                     tank_engaged = true;
                 }
                 _ => {}

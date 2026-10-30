@@ -121,12 +121,14 @@ fn conditional_bp(state: &MatchState, attacker: &Unit, target: Target) -> i32 {
     for tier in 1..=attacker.tier.min(2) {
         if let Some(f) = rules.form_of(attacker.kind, tier, attacker.branch) {
             if f.vs_below_bp != 0
-                && i64::from(victim.hp) * BP < i64::from(f.vs_below_hp_bp) * i64::from(victim.max_hp)
+                && i64::from(victim.hp) * BP
+                    < i64::from(f.vs_below_hp_bp) * i64::from(victim.max_hp)
             {
                 bp += f.vs_below_bp;
             }
             if f.vs_above_bp != 0
-                && i64::from(victim.hp) * BP > i64::from(f.vs_above_hp_bp) * i64::from(victim.max_hp)
+                && i64::from(victim.hp) * BP
+                    > i64::from(f.vs_above_hp_bp) * i64::from(victim.max_hp)
             {
                 bp += f.vs_above_bp;
             }

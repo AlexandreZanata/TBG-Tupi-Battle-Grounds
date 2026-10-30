@@ -231,7 +231,10 @@ fn c8_a_flat_roster_flags_nothing() {
     // roster, or their own forms and abilities would break the symmetry.
     let mut r = canon().clone();
     let template = *r.def(UnitKind::Shieldbearer);
-    for kind in tbg_core::ALL_KINDS.into_iter().filter(|k| k.is_conventional()) {
+    for kind in tbg_core::ALL_KINDS
+        .into_iter()
+        .filter(|k| k.is_conventional())
+    {
         let d = &mut r.units[kind as usize];
         *d = tbg_core::content::UnitDef {
             kind,
