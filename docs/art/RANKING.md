@@ -8,6 +8,8 @@ The first five images preserve transparency. Podiums have blank nameplates and m
 
 Total: **1,652,084 bytes**, below the **2,000,000-byte** technical budget. All pass display SSIM >= 0.97 and alpha MAE <= 1. The trophy initially measured 0.969782 at 2x; 4x lossless sampling raised SSIM to 0.979089. No gate was lowered.
 
+Measured tool versions: Pillow 12.2.0, numpy 2.4.6, scipy 1.18.0.
+
 ## Exact generation prompts and provenance
 
 ### podium-gold

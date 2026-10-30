@@ -38,3 +38,30 @@ test('all six original ranking assets are wired into both HTML hosts and stay in
  assert.ok(web.includes('ranking/controller.js'));assert.ok(!/wasm|data-trunk/.test(web));
  const game=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');assert.ok(game.includes('id="tbg-ranking"'));
 });
+
+test('BR-P05: a late public profile response cannot replace the current account record',async()=>{
+ const vm=require('node:vm');const calls=[];let mutation,resolveOld,resolveTemplate;
+ let contentReady=false;
+ const root={hidden:true,dataset:{},addEventListener(){},replaceChildren(){contentReady=true;},querySelector(){return {};},querySelectorAll(){return [];}};
+ const lobby={dataset:{player:'OldPlayer'}};
+ const make=()=>({dataset:{},setAttribute(){},append(){},className:'',textContent:''});
+ const document={getElementById:id=>id==='tbg-ranking'?root:lobby,createElement:tag=>tag==='template'?{content:{querySelector:()=>root}}:make()};
+ const profile=name=>({...row(1,name),recent:[]});
+ const fetch=async url=>{
+  if(url.includes('panel.html'))return new Promise(resolve=>{resolveTemplate=()=>resolve({ok:true,text:async()=>'<trusted template>'});});
+  if(url.includes('ranking.json'))return {ok:true,json:async()=>({assets:[]})};
+  if(url.includes('leaderboard'))return {ok:true,json:async()=>({total:0,rows:[]})};
+  if(url.endsWith('OldPlayer'))return new Promise(resolve=>{resolveOld=()=>resolve({ok:true,json:async()=>profile('OldPlayer')});});
+  return {ok:true,json:async()=>profile('NewPlayer')};
+ };
+ const render={navigation(){},text(){assert.ok(contentReady);},pager(){assert.ok(contentReady);},get:()=>({classList:{add(){}}}),podium(){},table(){},profile:(_,p)=>{if(p)calls.push(p.name);}};
+ const context=vm.createContext({document,fetch,URLSearchParams,AbortController,location:{search:''},TbgRankingData:D,TbgRankingRender:render,MutationObserver:class{constructor(fn){mutation=fn;}observe(){}}});
+ vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/ranking/controller.js'),'utf8'),context);
+ const opening=context.TbgRanking.open();
+ // Identity updates may arrive while the shared template is still in flight.
+ mutation();assert.equal(resolveOld,undefined);resolveTemplate();
+ const settle=()=>new Promise(resolve=>setImmediate(resolve));
+ await settle();assert.equal(typeof resolveOld,'function');
+ lobby.dataset.player='NewPlayer';mutation();await settle();resolveOld();await opening;await settle();
+ assert.deepEqual(calls,['NewPlayer']);context.TbgRanking.close();assert.equal(root.hidden,true);
+});
