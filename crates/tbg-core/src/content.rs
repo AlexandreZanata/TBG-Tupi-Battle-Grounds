@@ -125,10 +125,16 @@ pub struct FormDef {
     pub splash_bp: i32,
     /// Healing cut applied by the hit, in basis points.
     pub heal_cut_bp: i32,
+    /// ticks the heal cut lasts.
+    pub heal_cut_ticks: u16,
     /// Conditional damage bonus, in basis points (P44 wires the thresholds).
     pub vs_below_bp: i32,
-    /// Conditional damage bonus, in basis points (P44 wires the thresholds).
+    /// HP fraction threshold for `vs_below_bp`, in basis points of max HP.
+    pub vs_below_hp_bp: i32,
+    /// Conditional damage bonus, in basis points.
     pub vs_above_bp: i32,
+    /// HP fraction threshold for `vs_above_bp`, in basis points of max HP.
+    pub vs_above_hp_bp: i32,
 }
 
 const fn form(name: &'static str) -> FormDef {
@@ -145,8 +151,11 @@ const fn form(name: &'static str) -> FormDef {
         on_hit: None,
         splash_bp: 10_000,
         heal_cut_bp: 0,
+        heal_cut_ticks: 0,
         vs_below_bp: 0,
+        vs_below_hp_bp: 0,
         vs_above_bp: 0,
+        vs_above_hp_bp: 0,
     }
 }
 
@@ -290,6 +299,8 @@ impl UnitDef {
 const NO_ABILITIES: [[Ability; 2]; 5] = [[Ability::None; 2]; 5];
 const HATCH_ABILITIES: [[Ability; 2]; 5] = [[Ability::Hatch; 2]; 5];
 const GUARD_ABILITIES: [[Ability; 2]; 5] = [[Ability::Guard; 2]; 5];
+const NOSTRONGHOLD_ABILITIES: [[Ability; 2]; 5] = [[Ability::NoStronghold; 2]; 5];
+const BLAST_ABILITIES: [[Ability; 2]; 5] = [[Ability::Blast { friendly: true }; 2]; 5];
 
 #[allow(clippy::too_many_arguments)] // one call per roster row reads as a table
 const fn unit(
@@ -327,7 +338,7 @@ use Faction::*;
 
 /// Every kind, in `UnitKind` (`ALL_KINDS`) order.
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 11] = [
+pub const UNITS: [UnitDef; 14] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
@@ -404,6 +415,29 @@ pub const UNITS: [UnitDef; 11] = [
         FormDef { on_hit: slow(3_000, 20), ..form("Venom") },
         FormDef { hp_bp: 5_000, dmg_bp: 5_000, ..form("Blight") },
     ]),
+    // P44 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave A. Not in the
+    // Shop pool until the P53 owner switch.
+    unit(UnitKind::Longaxe, "Longaxe", Humans, Dps, 2_400,
+        [360, 100, 48, 1_600, 35, 0, 0], None, NO_ABILITIES, [
+        FormDef { dmg_bp: 3_000, ..form("Deep Cut") },
+        FormDef { dmg_bp: 3_000, vs_above_bp: 3_000, vs_above_hp_bp: 6_000, ..form("Crushing Edge") },
+        FormDef { splash_add: 800, splash_bp: 4_000, ..form("Sweeping Arc") },
+        FormDef { splash_add: 400, splash_bp: 6_000, ..form("Line Breaker") },
+    ]),
+    unit(UnitKind::Farwatch, "Farwatch", Humans, Ranged, 1_800,
+        [150, 70, 80, 12_000, 45, 0, 0], None, NOSTRONGHOLD_ABILITIES, [
+        FormDef { atk_bp: 2_500, ..form("Steady Hands") },
+        FormDef { vs_below_bp: 10_000, vs_below_hp_bp: 3_500, ..form("Finishing Shot") },
+        FormDef { on_hit: slow(2_500, 30), ..form("Crippling Arrow") },
+        FormDef { heal_cut_bp: 5_000, heal_cut_ticks: 60, ..form("Deep Wound") },
+    ]),
+    unit(UnitKind::Bombard, "Bombard", Machines, Ranged, 3_000,
+        [1_000, 24, 44, 4_000, 25, 1_000, 0], None, BLAST_ABILITIES, [
+        FormDef { splash_add: 500, ..form("Bigger Blast") },
+        FormDef { splash_add: 500, dmg_bp: 2_500, ..form("Heavy Ordnance") },
+        FormDef { hp_bp: 5_000, ..form("Reinforced Hull") },
+        FormDef { atk_bp: 4_300, ..form("Relentless Shelling") },
+    ]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).
@@ -432,6 +466,8 @@ pub struct Stats {
     pub range: i32,
     pub speed: i32,
     pub splash: i32,
+    /// Splash damage share, in basis points of the hit (P44).
+    pub splash_bp: i32,
     pub heal: i32,
     pub on_hit: Option<OnHit>,
 }

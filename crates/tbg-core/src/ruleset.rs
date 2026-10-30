@@ -229,6 +229,15 @@ impl Ruleset {
             range: d.range + sum(|f| f.range_add) as i32 + a.range_add,
             speed: scale(i64::from(d.speed), move_bp),
             splash: d.splash + sum(|f| f.splash_add) as i32,
+            // Splash share is an upgrade, not a stack: the highest active
+            // form wins (like `on_hit`); the default is a full share.
+            splash_bp: active
+                .iter()
+                .rev()
+                .flatten()
+                .map(|f| f.splash_bp)
+                .next()
+                .unwrap_or(10_000),
             heal: scale(
                 i64::from(d.heal),
                 sum(|f| f.heal_bp) + a.heal_bp + augments.heal_bp,

@@ -184,11 +184,14 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
                 heal_bp,
                 dmg_add,
                 on_hit: _,
-                // Untunable in P43: staged hooks for later waves.
+                // Untunable in P43/P44: staged hooks for later waves.
                 splash_bp: _,
                 heal_cut_bp: _,
+                heal_cut_ticks: _,
                 vs_below_bp: _,
+                vs_below_hp_bp: _,
                 vs_above_bp: _,
+                vs_above_hp_bp: _,
             } = f;
             for (field, value) in [
                 (FormField::HpBp, hp_bp),

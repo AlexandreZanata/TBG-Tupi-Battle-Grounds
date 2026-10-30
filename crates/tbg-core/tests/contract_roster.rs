@@ -57,6 +57,55 @@ const ROSTER: [Row; 11] = {
     ]
 };
 
+/// P44 (Proposed, staged, GAME-DESIGN §11): wave A in `UnitKind` order.
+/// Not in the Shop pool until the P53 owner switch; checked against the §11
+/// starting values in the document's units.
+#[rustfmt::skip]
+const STAGED: [Row; 3] = {
+    use Archetype::*; use Faction::*; use UnitKind::*;
+    #[allow(clippy::too_many_arguments)]
+    const fn r(kind: UnitKind, faction: Faction, archetype: Archetype,
+        cost: u32, hp: i32, damage: i32, heal: i32, every_cs: u32, range_ct: i32,
+        speed_ct: i32, splash_ct: i32, on_hit: Option<OnHit>) -> Row {
+        Row { kind, faction, archetype, cost, hp, damage, heal, every_cs, range_ct,
+              speed_ct, splash_ct, on_hit }
+    }
+    [
+        r(Longaxe,      Humans,   Dps,     4,  360, 100, 0, 240, 160, 70,    0, None),
+        r(Farwatch,     Humans,   Ranged,  3,  150, 70,  0, 400, 1200, 90,   0, None),
+        r(Bombard,      Machines, Ranged,  5, 1000, 24,  0, 220, 400, 50, 100, None),
+    ]
+};
+
+#[test]
+fn staged_wave_a_matches_section_11() {
+    for row in &STAGED {
+        let u: &UnitDef = def(row.kind);
+        let name = u.name;
+        assert_eq!(u.kind, row.kind, "UNITS order must follow UnitKind");
+        assert_eq!(
+            (u.faction, u.archetype),
+            (row.faction, row.archetype),
+            "{name}"
+        );
+        assert_eq!(u.cost, row.cost * ENERGY_SCALE, "{name} cost");
+        assert_eq!(
+            (u.hp, u.damage, u.heal),
+            (row.hp, row.damage, row.heal),
+            "{name} hp/dmg/heal"
+        );
+        assert_eq!(
+            u32::from(u.interval) * 100,
+            row.every_cs * TICK_HZ,
+            "{name} attack period"
+        );
+        assert_eq!(u.range, row.range_ct * 10, "{name} range");
+        assert_eq!(u.speed * TICK_HZ as i32, row.speed_ct * 10, "{name} speed");
+        assert_eq!(u.splash, row.splash_ct * 10, "{name} splash");
+        assert_eq!(u.on_hit, row.on_hit, "{name} on-hit");
+    }
+}
+
 #[test]
 fn base_stats_match_game_design_table() {
     for row in &ROSTER {
@@ -89,24 +138,25 @@ fn base_stats_match_game_design_table() {
 #[test]
 fn roster_composition() {
     // §5 (D-32): ten purchasable units plus the Beetling summon, in
-    // `UnitKind` order; every archetype present; the Shop pool is exactly the
-    // purchasable units (BR-U08: summons are never sold).
-    assert_eq!(UNITS.len(), 11);
+    // `UnitKind` order; every archetype present. P44 stages three more
+    // conventional kinds (§11, not in the Shop pool until P53); the pool
+    // itself stays exactly the ten purchasable units.
+    assert_eq!(UNITS.len(), 14);
     assert_eq!(UNIT_KINDS.len(), 10);
-    assert!(UNIT_KINDS.iter().all(|k| !k.is_summon()));
+    assert!(UNIT_KINDS.iter().all(|k| k.is_conventional()));
     assert_eq!(
         UNITS.iter().map(|u| u.kind).collect::<Vec<_>>(),
         ALL_KINDS.to_vec()
     );
     for (f, n) in [
-        (Faction::Humans, 2),
+        (Faction::Humans, 4),
         (Faction::Undead, 2),
-        (Faction::Machines, 3),
+        (Faction::Machines, 4),
         (Faction::Plants, 3),
     ] {
         let sold = UNITS
             .iter()
-            .filter(|u| u.faction == f && !u.kind.is_summon());
+            .filter(|u| u.faction == f && u.kind.is_conventional());
         assert_eq!(sold.count(), n, "{f:?}");
     }
     for a in [
@@ -197,7 +247,19 @@ Rampart/Siegebreaker: hp=0 dmg=4000 atk=0 speed=0 range+=0 splash+=1000 heal=0 d
 Beetling/Brood: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Beetling/Hive: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Beetling/Venom: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=slow 3000bp/20t
-Beetling/Blight: hp=5000 dmg=5000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Beetling/Blight: hp=5000 dmg=5000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Longaxe/Deep Cut: hp=0 dmg=3000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Longaxe/Crushing Edge: hp=0 dmg=3000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Longaxe/Sweeping Arc: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=800 heal=0 dmg+=0 hit=-
+Longaxe/Line Breaker: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=400 heal=0 dmg+=0 hit=-
+Farwatch/Steady Hands: hp=0 dmg=0 atk=2500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Farwatch/Finishing Shot: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Farwatch/Crippling Arrow: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=slow 2500bp/30t
+Farwatch/Deep Wound: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bombard/Bigger Blast: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=500 heal=0 dmg+=0 hit=-
+Bombard/Heavy Ordnance: hp=0 dmg=2500 atk=0 speed=0 range+=0 splash+=500 heal=0 dmg+=0 hit=-
+Bombard/Reinforced Hull: hp=5000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bombard/Relentless Shelling: hp=0 dmg=0 atk=4300 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {

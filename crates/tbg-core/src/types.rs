@@ -81,11 +81,16 @@ pub enum UnitKind {
     Rampart,
     /// Summon hatched by a Nester (BR-U08); never in the Shop.
     Beetling,
+    // P44 (Proposed, staged): wave A. Appended so older kinds keep their
+    // indices; not in the Shop pool until the P53 owner switch.
+    Longaxe,
+    Farwatch,
+    Bombard,
 }
 
-/// The purchasable roster: the Shop's pool (summons excluded).
-pub const UNIT_KINDS: [UnitKind; 10] = [
-    UnitKind::Shieldbearer,
+/// The staged Shop pool (summons excluded): what offers draw from until the
+/// P53 owner switch grows it. Staged kinds exist in `ALL_KINDS` first.
+pub const UNIT_KINDS: [UnitKind; 10] = [    UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
     UnitKind::Hexer,
@@ -98,7 +103,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 ];
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
-pub const ALL_KINDS: [UnitKind; 11] = [
+pub const ALL_KINDS: [UnitKind; 14] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -110,12 +115,21 @@ pub const ALL_KINDS: [UnitKind; 11] = [
     UnitKind::Nester,
     UnitKind::Rampart,
     UnitKind::Beetling,
+    UnitKind::Longaxe,
+    UnitKind::Farwatch,
+    UnitKind::Bombard,
 ];
 
 impl UnitKind {
     /// Summons are created by abilities, never bought (BR-U08).
     pub fn is_summon(self) -> bool {
         self == UnitKind::Beetling
+    }
+
+    /// Conventional units: everything the lab duels and favors (BR-U08:
+    /// summons are never bought, evolved, or counted).
+    pub fn is_conventional(self) -> bool {
+        !self.is_summon()
     }
 }
 
