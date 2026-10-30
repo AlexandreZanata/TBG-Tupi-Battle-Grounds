@@ -22,8 +22,13 @@ pub(super) struct PartDef {
 /// How a piece moves after it is placed.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(super) enum Motion {
-    /// Slides back along its local -X by this distance on each shot.
+    /// The gun barrel: aimed (yaw and elevation about its own origin) and
+    /// sliding back along its axis by this distance on each shot.
     Kick(f32),
+    /// Turns with the gun's yaw about the tower's vertical axis (carriage).
+    Swivel,
+    /// Aimed whole about its own origin (the ballista).
+    Aim,
     /// Turns around its local Y by this angle on each shot.
     Notch(f32),
     /// Turns around its local Y at this speed (rad/s), all the time.

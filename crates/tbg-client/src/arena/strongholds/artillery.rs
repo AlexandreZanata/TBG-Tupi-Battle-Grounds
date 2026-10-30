@@ -3,10 +3,12 @@
 //! with a recoil sled; branch B (Rapid Fire) adds a hopper, more gears and
 //! a shot magazine. The barrel kicks and the gears notch on every shot.
 
+use super::aim::Turret;
 use super::motion::Gun;
 use super::parts::{along_x, along_z, gear, piece, t, whole, Form, Motion, PartDef, Piece};
 use crate::arena::Part;
 use crate::art::{mesh::Shape::*, palette::*};
+use crate::vfx::{impacts::Muzzle, shots::ShotKind};
 use bevy::prelude::*;
 use tbg_core::{Ruleset, StrongholdKind};
 
@@ -68,20 +70,51 @@ const ELEVATION: f32 = 0.12;
 /// One gear tooth per shot.
 const TOOTH: f32 = std::f32::consts::TAU / 8.0;
 
+/// Barrel radius and length of a form (`barrel` builds them).
+fn bore(form: Form) -> (f32, f32) {
+    match form {
+        Form::A1 => (0.17, 1.15),
+        Form::A2 => (0.24, 1.4),
+        _ => (0.12, 1.0),
+    }
+}
+
+/// The aimed gun: trunnion, rest elevation, muzzle (barrel space), shot.
+pub(super) fn turret(form: Form) -> Turret {
+    let (r, len) = bore(form);
+    Turret {
+        pivot: Vec3::new(0.05, 1.05 + r, 0.0),
+        rest_pitch: ELEVATION,
+        muzzle: Vec3::new(len * 0.6 + r * 0.5, 0.0, 0.0),
+        shot: match form {
+            Form::A2 => ShotKind::GreatCannon,
+            Form::B1 | Form::B2 => ShotKind::RapidCannon,
+            _ => ShotKind::Cannon,
+        },
+        flash: if form == Form::A2 {
+            Muzzle::GreatCannon
+        } else {
+            Muzzle::Cannon
+        },
+    }
+}
+
 pub(super) fn pieces(form: Form) -> Vec<Piece> {
-    let (barrel, radius, carriage_width) = match form {
-        Form::A1 => (&HEAVY_BARREL, 0.17, 1.3),
-        Form::A2 => (&GREAT_BARREL, 0.24, 1.6),
-        _ => (&BARREL, 0.12, 1.0),
+    let (barrel, carriage_width) = match form {
+        Form::A1 => (&HEAVY_BARREL, 1.3),
+        Form::A2 => (&GREAT_BARREL, 1.6),
+        _ => (&BARREL, 1.0),
     };
-    let trunnion = t(0.05, 1.05 + radius, 0.0).with_rotation(Quat::from_rotation_z(ELEVATION));
+    let trunnion = Transform::from_translation(turret(form).pivot)
+        .with_rotation(Quat::from_rotation_z(ELEVATION));
     let mut p = vec![
         whole(&DECK),
         piece(
             &CARRIAGE,
             Transform::from_scale(Vec3::new(1.0, 1.0, carriage_width)),
         )
-        .aimed(),
+        .aimed()
+        .moving(Motion::Swivel),
         piece(barrel, trunnion)
             .aimed()
             .moving(Motion::Kick(gun(form).kick)),
@@ -93,11 +126,14 @@ pub(super) fn pieces(form: Form) -> Vec<Piece> {
         Form::A2 => p.extend([
             whole(&SANDBAGS).lost(2).aimed(),
             whole(&BRACING),
-            whole(&RECOIL_SLED).aimed(),
+            whole(&RECOIL_SLED).aimed().moving(Motion::Swivel),
         ]),
-        Form::B1 => p.extend([whole(&HOPPER).lost(2).aimed(), gear_at(-0.32, 1.04, -0.36)]),
+        Form::B1 => p.extend([
+            whole(&HOPPER).lost(2).aimed().moving(Motion::Swivel),
+            gear_at(-0.32, 1.04, -0.36),
+        ]),
         Form::B2 => p.extend([
-            whole(&HOPPER).lost(2).aimed(),
+            whole(&HOPPER).lost(2).aimed().moving(Motion::Swivel),
             gear_at(-0.32, 1.04, -0.36),
             whole(&MAGAZINE).lost(2).aimed(),
             piece(&FLYWHEEL, along_z(-0.62, 1.3, 0.3))

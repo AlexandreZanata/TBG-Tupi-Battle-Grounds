@@ -2,7 +2,7 @@
 //! team shields. Branch A (Fortress) adds drum towers, plates and
 //! buttresses; branch B (Sentinel) raises a watchtower and then a ballista deck on it.
 
-use super::parts::{along_x, along_z, around, piece, t, whole, Form, PartDef, Piece};
+use super::parts::{along_x, along_z, around, piece, t, whole, Form, Motion, PartDef, Piece};
 use crate::arena::Part;
 use crate::art::{mesh::Shape::*, palette::*};
 use bevy::prelude::*;
@@ -64,6 +64,17 @@ const SENTRY_Z: f32 = -0.98;
 const SENTRY_TOP: f32 = 1.95;
 const STAGE: f32 = 0.5;
 
+/// The Royal Sentinel ballista: its mount on the stage and its bolt tip.
+pub(super) fn turret() -> super::aim::Turret {
+    super::aim::Turret {
+        pivot: Vec3::new(0.0, SENTRY_TOP + STAGE + 0.22, SENTRY_Z),
+        rest_pitch: 0.0,
+        muzzle: Vec3::new(0.47, 0.24, 0.0),
+        shot: crate::vfx::shots::ShotKind::Ballista,
+        flash: crate::vfx::impacts::Muzzle::Bolt,
+    }
+}
+
 pub(super) fn pieces(form: Form) -> Vec<Piece> {
     let mut p = vec![whole(&WALLS), whole(&MERLONS).lost(1), whole(&KEEP).lost(2)];
     if form.a() {
@@ -86,12 +97,10 @@ pub(super) fn pieces(form: Form) -> Vec<Piece> {
         Form::B2 => p.extend([
             whole(&STAGE_PART).lost(1),
             piece(&DECK, staged).lost(1),
-            piece(
-                &BALLISTA,
-                staged.with_translation(staged.translation + Vec3::Y * 0.22),
-            )
-            .lost(1)
-            .aimed(),
+            piece(&BALLISTA, Transform::from_translation(turret().pivot))
+                .lost(1)
+                .aimed()
+                .moving(Motion::Aim),
         ]),
         _ => {}
     }
