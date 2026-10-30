@@ -769,7 +769,6 @@ refresh-by-buying `favor` policy stay (both are lab-only).
 **Reopen when** the lab shows the Shop makes banking or one unit
 dominant, or the owner wants duplicates inside an offer set.
 
-
 ## D-46 · Four Stronghold kinds with kind-exclusive Fortification — 2026-10-29 (owner decision)
 
 **Decision.** The owner's product spec of 2026-10-29 makes Stronghold
@@ -824,3 +823,57 @@ the 20 Hz simulation are unchanged.
 **Reopen when** the VPS shows bandwidth, not CPU, is still the first limit
 after C (then delta, with a ≥15 pp measured gain over C at 100 units), or
 C fails the 100-seed reconstruction or the 50-match reconnect chaos.
+
+## D-48 · Roster expansion: fifteen units, staged by ruleset pool — 2026-10-29 (owner decision)
+
+**Decision.** Fifteen new units enter the game in stages through phases
+P42–P53, as planned in `docs/ROSTER-EXPANSION.md` (Rotcap, Farwatch,
+Leechroot, Bombard, Old Finn, Drumguard, Longaxe, Oilpress, Antidote
+Brewer, Puppetmaster, Smuggler, Shatterback, Blood Furnace, Bloodweaver,
+Cargo Crab): both Shatterback (designed here, no draft exists) and Cargo
+Crab are in (O-R1); the roster-health gate becomes ≥ 2.5 % purchase share
+per unit (O-R2); no new unit reaches the `Shop` before its wave, and the
+pool switch is an owner decision in P53.
+**Why.** The current game already fails 12 of 39 lab rows before any new
+unit exists (median duration, three faction rows, the strongest strategic
+style, the Nash mix, duel outliers and weak Evolutions), so new units are
+judged relative to a frozen P42 baseline plus absolute rows the baseline
+already passes, with the old outliers rebalanced by numbers first; with 25
+kinds a 5 % per-unit share is impossible (even share 4.0 %) and offer odds
+per unit fall from 50 % to 20 % of sets, so the threshold moves to about
+60 % of the even share and the lab watches dilution.
+**Reopen when** a wave shows a unit that numbers cannot balance.
+
+## D-49 · P43 shared foundations: ability pairs, staged pool, preview path — 2026-10-29 (executor decision, pending review)
+
+**Decision.** `UnitDef.abilities` is `[[Ability; 2]; 5]` (one pair per
+form slot: base, A1, A2, B1, B2), so Rotcap's Poison + Echo fits without a
+later reshape; Hatch and Guard migrate to ability dispatch with values
+unchanged; `Unit::is_summon()` (unit-level) replaces kind checks where a
+unit is at hand; `hatch_cd` becomes `action_cd`; the Shop draws from
+`Ruleset.pool` (`CANON.pool` stays ten until the P53 owner switch);
+`Ruleset::preview()` names the full staging pool and Practice uses it;
+`UnitFx`/`Stack` land zeroed (hashes updated once); eight staged events
+and `UnitView.fx` ship under protocol v13 with the client rendering staged
+kinds as a gray silhouette. Thresholds for the conditional-damage fields
+stay pending for P44.
+**Why.** ROSTER-EXPANSION §F delegates the pair shape to P43; pairs are
+required by a known P45 unit, not speculation. Everything else is the
+cheapest shape that keeps P43 behavior-identical (gate CSV byte-identical
+to the P42 baseline on the same seeds).
+**Reopen when** a wave needs a third ability on one form, or the pool
+switch needs more than a field assignment.
+
+## D-50 · All fifteen new units go online before P50 tuning — 2026-10-30 (owner decision)
+
+**Decision.** The owner moves the P53 pool switch forward: `CANON.pool`
+is `FULL_POOL` (25 kinds), so online, Practice and the lab draw the same
+`Shop`. Rules from ROSTER-EXPANSION are active; every number stays
+**Proposed**. Shop portraits exist only for the ten original kinds, so
+the fifteen show an empty card until owner art lands.
+**Why.** The owner wants the full roster playable on the test server now
+and accepts untuned values; P50 tunes them with `tbg-balance` evidence.
+The P42 lab baseline on the ten-kind pool stays the reference for D-48.
+**Reopen when** live play or the lab shows a new unit that breaks
+matches (e.g. a stall or a share outside the D-48 gate), or the owner
+wants the pool back to ten.

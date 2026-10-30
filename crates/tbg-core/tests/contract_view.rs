@@ -51,7 +51,13 @@ fn derived_max_hp_matches_every_live_unit_on_100_seeds() {
                     let bonus =
                         augment::unit_bonus(&player.augments, player.synergy, u.kind, u.tier);
                     assert_eq!(
-                        rules.unit_max_hp(u.kind, u.tier, u.branch, level, &player.arcanas, &bonus),
+                        rules.unit_max_hp(
+                            (u.kind, u.tier, u.branch),
+                            u.summoner.is_some() || u.kind.is_summon(),
+                            level,
+                            &player.arcanas,
+                            &bonus,
+                        ),
                         u.max_hp,
                         "derived seed {seed} tick {} unit {} seat {:?}",
                         state.tick,

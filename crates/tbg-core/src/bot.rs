@@ -95,7 +95,7 @@ impl Bot {
         let unit = view
             .units
             .iter()
-            .filter(|u| u.seat == view.you && u.tier < 2 && !u.kind.is_summon())
+            .filter(|u| u.seat == view.you && u.tier < 2 && !u.is_summon())
             .min_by_key(|u| u.id)?;
         if view.energy < self.rules.evolve_cost[usize::from(unit.tier)] {
             return None;
@@ -137,6 +137,6 @@ impl Bot {
 pub fn army(view: &MatchView) -> usize {
     view.units
         .iter()
-        .filter(|u| u.seat == view.you && !u.kind.is_summon())
+        .filter(|u| u.seat == view.you && !u.is_summon())
         .count()
 }

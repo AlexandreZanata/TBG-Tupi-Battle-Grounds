@@ -2,6 +2,7 @@
 //! per seat, so a pair of seat-swapped games compares like with like.
 
 use tbg_core::content::{RUNNING_START, TICK_HZ};
+use tbg_core::lab::LabStats;
 use tbg_core::{EndReason, MatchState, Seat, ALL_KINDS};
 
 pub const KINDS: usize = ALL_KINDS.len();
@@ -43,6 +44,10 @@ pub struct MatchResult {
     pub sides: [Side; 2],
     /// Participant playing seat A.
     pub seat_a: usize,
+    /// Per-kind combat counters in participant order (P42).
+    pub stats: LabStats,
+    /// Longest stall including the tail, in ticks (P42).
+    pub stall: u32,
 }
 
 impl MatchResult {

@@ -33,7 +33,9 @@ struct Ctx {
 }
 
 fn ctx(a: &Args, default_pairs: u64, default_seed: u64) -> Result<Ctx, String> {
-    let mut rules = Ruleset::canon().clone();
+    // P44: the lab plays the full staging pool (ROSTER-EXPANSION §F.5);
+    // since D-50 online draws the same pool.
+    let mut rules = Ruleset::preview().clone();
     let applied = a.str("apply").unwrap_or("").to_string();
     knobs::apply(&mut rules, &applied)?;
     let cores = std::thread::available_parallelism().map_or(1, |n| n.get()) as u64;
@@ -169,6 +171,24 @@ fn run(a: &Args) -> Result<(), String> {
         e.hi * 100.0,
         e.n
     );
+    // Stagnation row for turtle comps (P47): share of games stalling 60 s
+    // with no Stronghold damage and no conventional death (P42 stall rule).
+    let games: u32 = results.values().map(|p| p.len() as u32).sum::<u32>() * 2;
+    let stalled: u32 = results
+        .values()
+        .flat_map(|p| p.iter().flat_map(|g| [&g[0], &g[1]]))
+        .filter(|r| r.stall >= 60 * tbg_core::content::TICK_HZ)
+        .count() as u32;
+    text.push_str(&format!(
+        "stalled matches (60 s): {:.1}% ({}/{})\n",
+        if games > 0 {
+            100.0 * f64::from(stalled) / f64::from(games)
+        } else {
+            0.0
+        },
+        stalled,
+        games
+    ));
     text.push_str(&report::table(&gate::rows(
         &results,
         None,
@@ -176,6 +196,9 @@ fn run(a: &Args) -> Result<(), String> {
     )));
     print!("{text}");
     c.out.write("run.txt", &text).map_err(|e| e.to_string())?;
+    c.out
+        .write("roster.csv", &report::roster_csv(&results, c.rules))
+        .map_err(|e| e.to_string())?;
     let (g, t) = games_and_ticks(&results);
     c.finish(g, t, "")
 }
@@ -256,6 +279,7 @@ fn gate_cmd(a: &Args) -> Result<(), String> {
     let w = |n: &str, s: &str| c.out.write(n, s).map_err(|e| e.to_string());
     w("gate.txt", &format!("{table}\n{meta_txt}"))?;
     w("gate.csv", &report::rows_csv(&rows))?;
+    w("roster.csv", &report::roster_csv(&results, c.rules))?;
     w("payoff.csv", &payoff)?;
     w("duels.txt", &report::duel_summary(&matrix, c.rules))?;
     w("duels.csv", &report::duels_csv(&matrix, c.rules))?;

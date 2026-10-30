@@ -6,7 +6,10 @@ use tbg_core::UnitKind;
 
 use super::legacy::{part, BodyPlan, FigureSpec, Joint::*, PartSpec};
 use super::mesh::Shape::*;
-use super::palette::{BARK, DARK, LEAF, LEAF_DARK, LEATHER, SKIN, TRIM};
+use super::palette::{
+    BARK, BONE, BRASS, DARK, FRAME, GLOW, GUNMETAL, HOOD_GREEN, IRON, LEAF, LEAF_DARK, LEATHER,
+    OAK, ORANGE, RED_CLOTH, SKIN, STEEL, TIMBER, TRIM, VIOLET,
+};
 
 pub mod blockout;
 mod body;
@@ -75,8 +78,95 @@ const RAMPART: &[(Color, Color)] = &[
 /// Beetle shell: dark lacquer instead of bark.
 const BEETLING: &[(Color, Color)] = &[
     (BARK, Color::srgb_u8(0x2B, 0x33, 0x24)),
-    (LEAF, Color::srgb_u8(0xC8, 0x8F, 0x2E)),
+    (LEAF, Color::srgb_u8(0xC8, 0x8F, 0x2A)),
 ];
+/// P44 placeholders: recolored figures until the character phases.
+const LONGAXE: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0x8A, 0x6F, 0x4D)),
+    (LEATHER, Color::srgb_u8(0x4E, 0x5A, 0x66)),
+];
+const FARWATCH: &[(Color, Color)] = &[
+    (RED_CLOTH, Color::srgb_u8(0x2E, 0x4A, 0x66)),
+    (TRIM, Color::srgb_u8(0x7F, 0xA8, 0xC9)),
+];
+const BOMBARD: &[(Color, Color)] = &[
+    (GUNMETAL, Color::srgb_u8(0x3A, 0x3F, 0x45)),
+    (BRASS, Color::srgb_u8(0xD9, 0x5A, 0x2B)),
+];
+/// P45 placeholders: recolored figures until the character phases.
+const ROTCAP: &[(Color, Color)] = &[
+    (BARK, Color::srgb_u8(0x4A, 0x2E, 0x5A)),
+    (LEAF, Color::srgb_u8(0x7F, 0xC9, 0x4A)),
+];
+const OLDFINN: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0x6B, 0x7B, 0x8A)),
+    (LEATHER, Color::srgb_u8(0x2E, 0x4A, 0x5A)),
+];
+const ANTIDOTE: &[(Color, Color)] = &[
+    (LEAF, Color::srgb_u8(0xC9, 0xB8, 0x4A)),
+    (LEAF_DARK, Color::srgb_u8(0x6B, 0x8A, 0x2E)),
+];
+/// P46 placeholders: recolored figures until the character phases.
+const SHATTERBACK: &[(Color, Color)] = &[
+    (BARK, Color::srgb_u8(0x5A, 0x4A, 0x2E)),
+    (LEAF, Color::srgb_u8(0x8A, 0x6B, 0x3A)),
+];
+const FURNACE: &[(Color, Color)] = &[
+    (BONE, Color::srgb_u8(0x3A, 0x2E, 0x2E)),
+    (VIOLET, Color::srgb_u8(0x6B, 0x2A, 0x22)),
+    (GLOW, Color::srgb_u8(0xD9, 0x5A, 0x2B)),
+];
+const WEAVER: &[(Color, Color)] = &[
+    (BONE, Color::srgb_u8(0x8A, 0x7B, 0x9B)),
+    (VIOLET, Color::srgb_u8(0x5A, 0x1E, 0x2A)),
+    (GLOW, Color::srgb_u8(0xC8, 0x3A, 0x4A)),
+];
+/// P47 placeholders: recolored figures until the character phases.
+const OILPRESS: &[(Color, Color)] = &[
+    (GUNMETAL, Color::srgb_u8(0x2E, 0x2A, 0x26)),
+    (BRASS, Color::srgb_u8(0x8A, 0x6B, 0x3A)),
+    (ORANGE, Color::srgb_u8(0xC9, 0xA1, 0x3A)),
+];
+const DRUMGUARD: &[(Color, Color)] = &[
+    (SKIN, Color::srgb_u8(0xC9, 0x8A, 0x6B)),
+    (TRIM, Color::srgb_u8(0x7F, 0xA8, 0xC9)),
+];
+/// P48-A placeholders: recolored figures until the character phases.
+const LEECHROOT: &[(Color, Color)] = &[
+    (BARK, Color::srgb_u8(0x2B, 0x4A, 0x2E)),
+    (LEAF, Color::srgb_u8(0x4A, 0x8A, 0x3A)),
+];
+const CRAB: &[(Color, Color)] = &[
+    (GUNMETAL, Color::srgb_u8(0xA8, 0x43, 0x2F)),
+    (IRON, Color::srgb_u8(0x6B, 0x2E, 0x22)),
+];
+/// P48-B placeholders: recolored figures until the character phases.
+const PUPPET: &[(Color, Color)] = &[
+    (BONE, Color::srgb_u8(0x9B, 0x7B, 0xB8)),
+    (VIOLET, Color::srgb_u8(0x2A, 0x22, 0x3A)),
+    (GLOW, Color::srgb_u8(0xE0, 0xC2, 0x4A)),
+];
+const SMUGGLER: &[(Color, Color)] = &[
+    (HOOD_GREEN, Color::srgb_u8(0x2E, 0x2A, 0x26)),
+    (RED_CLOTH, Color::srgb_u8(0x5C, 0x4A, 0x32)),
+    (TRIM, Color::srgb_u8(0xC9, 0x8A, 0x2E)),
+];
+
+/// The Smuggler's cargo crate: a banded wooden box, no body (it never
+/// moves or attacks; it must read as loot, not as a unit).
+fn supply_crate() -> FigureSpec {
+    let plan = BodyPlan::SMALL;
+    // The hips sit at leg height: the box rests on the ground below them.
+    let y = 0.21 - plan.leg;
+    let mut parts = vec![part(Hips, Box(0.5, 0.42, 0.5), TIMBER, [0.0, y, 0.0])];
+    for dy in [-0.17, 0.17] {
+        parts.push(part(Hips, Box(0.53, 0.06, 0.53), OAK, [0.0, y + dy, 0.0]));
+    }
+    for dx in [-0.16, 0.16] {
+        parts.push(part(Hips, Box(0.05, 0.43, 0.53), BRASS, [dx, y, 0.0]));
+    }
+    FigureSpec { plan, parts }
+}
 
 fn recolor(mut spec: FigureSpec, map: &[(Color, Color)]) -> FigureSpec {
     for part in &mut spec.parts {
@@ -112,6 +202,45 @@ pub fn figure_spec(kind: UnitKind, tier: u8, branch: u8) -> FigureSpec {
         UnitKind::Nester => recolor(plants::bloomkeeper(f), NESTER),
         UnitKind::Rampart => recolor(humans::shieldbearer(f), RAMPART),
         UnitKind::Beetling => recolor(plants::rootcaller(f), BEETLING),
+        // P44 placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Longaxe => recolor(humans::shieldbearer(f), LONGAXE),
+        UnitKind::Farwatch => recolor(humans::archer(f), FARWATCH),
+        UnitKind::Bombard => recolor(machines::siege_walker(f), BOMBARD),
+        // P45 placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Rotcap => recolor(plants::rootcaller(f), ROTCAP),
+        UnitKind::OldFinn => recolor(humans::shieldbearer(f), OLDFINN),
+        UnitKind::AntidoteBrewer => recolor(plants::bloomkeeper(f), ANTIDOTE),
+        // P46 placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Shatterback => recolor(plants::rootcaller(f), SHATTERBACK),
+        UnitKind::BloodFurnace => recolor(undead::bone_brute(f), FURNACE),
+        UnitKind::Bloodweaver => recolor(undead::hexer(f), WEAVER),
+        // P47 placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Oilpress => recolor(machines::siege_walker(f), OILPRESS),
+        UnitKind::Drumguard => recolor(humans::shieldbearer(f), DRUMGUARD),
+        // P48-A placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Leechroot => recolor(plants::bloomkeeper(f), LEECHROOT),
+        UnitKind::CargoCrab => recolor(machines::sawbot(f), CRAB),
+        // P48-B placeholders (blockout recolors); final art in the wave's
+        // character phase.
+        UnitKind::Puppetmaster => recolor(undead::hexer(f), PUPPET),
+        UnitKind::Smuggler => recolor(humans::archer(f), SMUGGLER),
+        UnitKind::Crate => supply_crate(),
+        // P43: staged kinds render as a plain gray silhouette until their
+        // wave lands (art/mod.rs builds every kind in ALL_KINDS).
+        #[allow(unreachable_patterns)]
+        _ => {
+            let plan = BodyPlan::SMALL;
+            let look = Look::new(STEEL, STEEL, STEEL, FRAME);
+            FigureSpec {
+                plan,
+                parts: base_body(&plan, &look),
+            }
+        }
     };
     if large(kind) {
         spec.plan.scale = spec.plan.scale.max(BodyPlan::BIG.scale);

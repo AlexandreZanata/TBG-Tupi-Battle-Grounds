@@ -31,7 +31,7 @@ impl LocalMatch {
         let selectable = StrongholdKind::SELECTABLE;
         let bot_kind = selectable[(seed % selectable.len() as u64) as usize];
         let mut state =
-            MatchState::with_arcanas(seed, presets).with_strongholds([stronghold, bot_kind]);
+            MatchState::with_preview(seed, presets).with_strongholds([stronghold, bot_kind]);
         if let Some(n) = army {
             while state.phase != Phase::Running {
                 state.step();

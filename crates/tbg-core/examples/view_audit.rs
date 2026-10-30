@@ -24,7 +24,7 @@ use tbg_core::bot::Bot;
 use tbg_core::content::{self, OFFERS};
 use tbg_core::protocol::{encode, ServerMsg};
 use tbg_core::ruleset::Ruleset;
-use tbg_core::view::RoundView;
+use tbg_core::view::{RoundView, FX_SUMMON};
 use tbg_core::{
     Event, MatchState, MatchView, Phase, PlayerIntention, Seat, Status, StrongholdView, Tick,
     UnitId, UnitKind, UnitView,
@@ -239,6 +239,14 @@ fn event_name(event: &Event) -> &'static str {
         Event::Forgone { .. } => "Forgone",
         Event::ShieldRaised { .. } => "ShieldRaised",
         Event::SecondWind { .. } => "SecondWind",
+        Event::PoisonTick { .. } => "PoisonTick",
+        Event::Betrayal { .. } => "Betrayal",
+        Event::Cleansed { .. } => "Cleansed",
+        Event::PlateBroken { .. } => "PlateBroken",
+        Event::CrateOpened { .. } => "CrateOpened",
+        Event::Transfer { .. } => "Transfer",
+        Event::Boarded { .. } => "Boarded",
+        Event::Dismounted { .. } => "Dismounted",
     }
 }
 
@@ -285,11 +293,15 @@ fn collect_shares(view: &MatchView, agg: &mut ShareAgg) {
         unit_dynamic += field_len(&unit.id)
             + field_len(&unit.x)
             + field_len(&unit.hp)
-            + field_len(&unit.status);
+            + field_len(&unit.status)
+            + field_len(&unit.fx);
         let x = u16::try_from(unit.x).expect("x must fit u16 for the tight-integer estimate");
         let hp = u16::try_from(unit.hp).expect("live hp must fit u16");
-        unit_dynamic_tight +=
-            field_len(&unit.id) + field_len(&x) + field_len(&hp) + field_len(&unit.status);
+        unit_dynamic_tight += field_len(&unit.id)
+            + field_len(&x)
+            + field_len(&hp)
+            + field_len(&unit.status)
+            + field_len(&unit.fx);
     }
     let unit_fields = unit_static + unit_max_hp + unit_dynamic;
     let unit_prefix = units_bytes - unit_fields;
@@ -335,6 +347,7 @@ struct UnitA {
     x: i32,
     hp: i32,
     status: u8,
+    fx: u16,
 }
 
 #[derive(Serialize)]
@@ -417,6 +430,7 @@ struct UnitDynamic {
     x: i32,
     hp: i32,
     status: u8,
+    fx: u16,
 }
 
 #[derive(Serialize)]
@@ -476,11 +490,23 @@ fn unit_dynamic(unit: &UnitView) -> UnitDynamic {
         x: unit.x,
         hp: unit.hp,
         status: unit.status,
+        fx: unit.fx,
+    }
+}
+
+/// `UnitView.fx` as the server packs it: the summon bit, recognized by
+/// unit (BR-U08); the other ability bits are not packed yet.
+fn fx_of(unit: &tbg_core::Unit) -> u16 {
+    if unit.summoner.is_some() || unit.kind.is_summon() {
+        FX_SUMMON
+    } else {
+        0
     }
 }
 
 fn derived_max_hp(
     unit: &UnitStatic,
+    fx: u16,
     synergy: [[u8; 4]; 2],
     arcanas: &[ArcanaPreset; 2],
     augments: &[AugmentCounts; 2],
@@ -490,9 +516,8 @@ fn derived_max_hp(
     let level = synergy[seat][content::def(unit.kind).faction.index()];
     let bonus = augment::unit_bonus(&augments[seat], synergy[seat], unit.kind, unit.tier);
     rules.unit_max_hp(
-        unit.kind,
-        unit.tier,
-        unit.branch,
+        (unit.kind, unit.tier, unit.branch),
+        unit.kind.is_summon() || fx & FX_SUMMON != 0,
         level,
         &arcanas[seat],
         &bonus,
@@ -541,6 +566,7 @@ fn state_dynamics(state: &MatchState) -> Vec<UnitDynamic> {
             x: unit.x,
             hp: unit.hp,
             status: status_code(unit.status),
+            fx: fx_of(unit),
         })
         .collect()
 }
@@ -565,6 +591,7 @@ fn build_a_state(state: &MatchState, seat: Seat, events: &[Event]) -> ViewA {
                 x: unit.x,
                 hp: unit.hp,
                 status: status_code(unit.status),
+                fx: fx_of(unit),
             })
             .collect(),
         synergy: [0, 1].map(|i| state.players[i].synergy),
@@ -726,8 +753,9 @@ fn rebuild_units(
             branch: stat.branch,
             x: dynamic.x,
             hp: dynamic.hp,
-            max_hp: derived_max_hp(stat, synergy, arcanas, augments, rules),
+            max_hp: derived_max_hp(stat, dynamic.fx, synergy, arcanas, augments, rules),
             status: dynamic.status,
+            fx: dynamic.fx,
         });
     }
     Ok(units)
@@ -1350,8 +1378,16 @@ fn rebuild_a(
             branch: unit.branch,
             x: unit.x,
             hp: unit.hp,
-            max_hp: derived_max_hp(&stat, view.synergy, arcanas, &view.extra.augments, rules),
+            max_hp: derived_max_hp(
+                &stat,
+                unit.fx,
+                view.synergy,
+                arcanas,
+                &view.extra.augments,
+                rules,
+            ),
             status: unit.status,
+            fx: unit.fx,
         });
     }
     Ok(MatchView {
@@ -1413,6 +1449,7 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
                 Status::Slowed { .. } => 1,
                 Status::Rooted { .. } => 2,
             },
+            fx: fx_of(unit),
         })
         .collect();
     let make = |you: Seat| {
@@ -1738,6 +1775,7 @@ fn integrity_tests(max_synthetic_units: usize) -> Integrity {
         x: 1_000,
         hp: 1,
         status: 0,
+        fx: 0,
     };
     let payload = ViewC {
         tick: view.tick,

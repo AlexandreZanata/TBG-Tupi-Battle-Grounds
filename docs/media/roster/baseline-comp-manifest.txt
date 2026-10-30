@@ -1,0 +1,11 @@
+command: target/release/tbg-balance run --a comp-archer-bonebrute --b bot --pairs 256 --out target/balance/p42-comp
+git_head: a9af5dc
+ruleset_fingerprint: 98b6a2f95bde4f5e
+applied: canon
+seeds: 0..256 (256 pairs)
+threads: 16
+reaction_views: 5
+wall_s: 0.16
+games: 512
+games_per_s: 3172
+game_seconds_per_wall_second: 335710
