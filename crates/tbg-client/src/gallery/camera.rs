@@ -58,6 +58,15 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
             Vec3::new(0.0, 14.0, 10.0),
         ),
         "blockout" => (Vec3::new(8.0, 0.7, 0.0), 9.0, 3.0, Vec3::new(0.0, 1.0, 1.0)),
+        _ if options.range => {
+            let gap = options.unit.map_or(4.0, super::range::reach);
+            (
+                Vec3::new(1.5 + gap * 0.5, 0.6, 0.0),
+                gap + 3.2,
+                5.6,
+                Vec3::new(0.0, 1.3, 1.0),
+            )
+        }
         _ if options.frames => sheet(options, portrait),
         _ if options.silhouette => (Vec3::new(8.0, 0.7, -2.8), 9.0, 3.0, Vec3::Z),
         _ if options.unit.is_some() => unit(portrait),

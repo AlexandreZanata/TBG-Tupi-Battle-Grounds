@@ -8,7 +8,7 @@ use super::{world_x, UnitEntities};
 use crate::art::anim::Animator;
 use crate::audio::{Sound, Sounds};
 use crate::vfx::{self, VfxAssets};
-use crate::visuals::{self, UnitVisual, VisualAssets, VisualCue};
+use crate::visuals::{self, AimTarget, TowerOrders, UnitVisual, VisualAssets, VisualCue};
 
 /// What the player did this match (result screen).
 #[derive(Resource, Default)]
@@ -34,6 +34,7 @@ pub(super) struct Fx<'a> {
     pub vfx: &'a VfxAssets,
     pub sounds: &'a mut Sounds,
     pub stats: &'a mut MatchStats,
+    pub orders: &'a mut TowerOrders,
     pub you: Seat,
 }
 
@@ -106,6 +107,14 @@ pub(super) fn apply_event(
             fx.stats.evolutions += u32::from(own);
             if let Some(p) = at(visuals, Target::Unit(unit)) {
                 vfx::evolve(commands, fx.vfx, p);
+                let kit = map
+                    .0
+                    .get(&unit)
+                    .and_then(|e| visuals.get(*e).ok())
+                    .and_then(|(v, _, _)| v.kit());
+                if let Some(kit) = kit {
+                    vfx::impacts::evolution(commands, fx.vfx, kit.evolve, p);
+                }
             }
             fx.sounds.play(Sound::Evolve);
         }
@@ -145,23 +154,40 @@ fn attack(
     to: Target,
 ) {
     let you = fx.you;
+    let target = match to {
+        Target::Unit(id) => map.0.get(&id).map(|e| AimTarget::Unit(*e)),
+        Target::Stronghold(_) => pos_of(map, visuals, you, to).map(AimTarget::Point),
+    };
     let (shoots, splash) = match from {
         Target::Unit(id) => {
             cue(map, visuals, fx.assets, id, VisualCue::AttackStart);
-            let info = map
-                .0
-                .get(&id)
-                .and_then(|e| visuals.get(*e).ok())
-                .map(|(v, _, _)| (v.archetype, v.splash));
-            let (arch, splash) = info.unwrap_or((Archetype::Tank, 0.0));
+            let info =
+                map.0
+                    .get(&id)
+                    .and_then(|e| visuals.get_mut(*e).ok())
+                    .map(|(mut v, _, _)| {
+                        if let Some(t) = target {
+                            v.engage(t);
+                        }
+                        (v.archetype, v.splash, v.has_kit())
+                    });
+            let (arch, splash, kit) = info.unwrap_or((Archetype::Tank, 0.0, false));
             fx.sounds.play(match arch {
                 Archetype::Ranged if splash > 0.0 => Sound::Cannon,
                 Archetype::Ranged | Archetype::Control | Archetype::Support => Sound::Shot,
                 Archetype::Tank | Archetype::Dps => Sound::Melee,
             });
-            (!matches!(arch, Archetype::Tank | Archetype::Dps), splash)
+            // Kit units fire their own shots and impacts (visuals/attacks.rs).
+            let ranged = !matches!(arch, Archetype::Tank | Archetype::Dps);
+            (ranged && !kit, if kit { 0.0 } else { splash })
         }
-        Target::Stronghold(_) => (true, 0.0),
+        Target::Stronghold(seat) => {
+            // Towers aim and fire their own projectiles (arena/strongholds).
+            if let Some(t) = target {
+                fx.orders.0.push((seat == you, t));
+            }
+            (false, 0.0)
+        }
     };
     let (a, b) = (
         pos_of(map, visuals, you, from),

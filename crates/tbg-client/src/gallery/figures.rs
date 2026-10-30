@@ -142,11 +142,11 @@ pub(super) fn spawn_one(
     commands: &mut Commands,
     lib: &FigureLibrary,
     kind: UnitKind,
-    form: (u8, u8),
+    (tier, branch): (u8, u8),
     pos: Vec3,
     material: &Handle<StandardMaterial>,
 ) -> (Entity, Animator) {
-    let form = lib.get(kind, form.0, form.1);
+    let form = lib.get(kind, tier, branch);
     info!("gallery {kind:?}: {} triangles", form.triangles);
     let root = commands
         .spawn((Transform::from_translation(pos), Visibility::default()))
@@ -159,9 +159,15 @@ pub(super) fn spawn_one(
         ))
         .id();
     let joints = figure::spawn_joints(commands, figure, &form.plan, &form.meshes, material);
+    if *material == lib.material {
+        figure::spawn_glow(commands, &joints, &form.glow, &lib.glow_material);
+    }
     commands.entity(root).add_child(figure);
     let mut animator = Animator::new(joints, form.plan, figure, kind, root.index_u32());
     animator.native = form.native;
+    animator.form = (tier, branch);
+    // Review figures walk in place.
+    animator.treadmill = true;
     animator.archer = form.native && kind == UnitKind::Archer;
     if animator.archer {
         crate::art::bow::attach(

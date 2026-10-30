@@ -1,6 +1,7 @@
 //! Code-built art (decision D-07): mesh builders, figurines on a shared
-//! v2 body plan with a twelve-joint compatibility adapter and shared clips.
-//! Every unit form is built once at startup into `FigureLibrary`.
+//! v2 body plan with a twelve-joint compatibility adapter and shared clips,
+//! and per-unit art kits (D-48) that own their figure, motion, aim and
+//! attack. Every unit form is built once at startup into `FigureLibrary`.
 
 use std::collections::HashMap;
 
@@ -22,11 +23,13 @@ mod clips;
 mod curves;
 mod feet;
 pub mod figure;
+pub mod ik;
+pub mod kits;
 mod legacy;
 pub mod mesh;
 pub mod palette;
 pub mod rig;
-mod roster;
+pub(crate) mod roster;
 mod springs;
 
 use rig::{Proportions as BodyPlan, NODE_COUNT};
@@ -42,6 +45,8 @@ pub struct FigureForm {
     /// Half the bow-string length for native archer forms (`bow.rs`).
     pub bow_half: f32,
     enemy_meshes: Option<[Option<Handle<Mesh>>; NODE_COUNT]>,
+    /// Unlit glow layer per joint (`figure::spawn_glow`), shared by both teams.
+    pub glow: [Option<Handle<Mesh>>; NODE_COUNT],
 }
 
 impl FigureForm {
@@ -60,6 +65,8 @@ pub struct FigureLibrary {
     blockouts: HashMap<UnitKind, FigureForm>,
     /// One shared material for every figurine (vertex colors).
     pub material: Handle<StandardMaterial>,
+    /// One shared unlit vertex-color material for every glow layer.
+    pub glow_material: Handle<StandardMaterial>,
     pub bow: bow::BowAssets,
     pub stage: Handle<Mesh>,
 }
@@ -80,7 +87,15 @@ impl FigureLibrary {
 
 pub fn plugin(app: &mut App) {
     app.add_systems(PreStartup, build_library)
-        .add_systems(Update, (anim::animate, bow::strings, arrows::fly).chain())
+        // Animation reads where every unit ended up this frame, so it runs
+        // after all Update movement and before transforms propagate.
+        .add_systems(
+            PostUpdate,
+            (anim::animate, bow::strings)
+                .chain()
+                .before(bevy::transform::TransformSystems::Propagate),
+        )
+        .add_systems(Update, arrows::fly)
         .add_systems(
             PostUpdate,
             arrows::release.after(bevy::transform::TransformSystems::Propagate),
@@ -101,11 +116,27 @@ fn build_library(
         perceptual_roughness: 0.9,
         ..default()
     });
+    let glow_material = mats.add(StandardMaterial {
+        base_color: Color::WHITE,
+        unlit: true,
+        ..default()
+    });
     let bow = bow::BowAssets::new(&mut meshes);
     let mut forms = HashMap::new();
     for kind in ALL_KINDS {
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
+            if let Some(kit) = kits::kit(kind) {
+                let form = native_form((kit.figure)(tier, branch), &mut meshes, true);
+                info!(
+                    "figure {kind:?} {tier}/{branch} (kit): {} triangles, {} glow joints",
+                    form.triangles,
+                    form.glow.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
             if kind == UnitKind::Archer && branch == 0 {
                 let mut form = native_form(roster::archer_v2(tier), &mut meshes, true);
                 form.bow_half = archer_v2::bow_half(tier);
@@ -135,6 +166,7 @@ fn build_library(
                     native: false,
                     bow_half: 0.64,
                     enemy_meshes: None,
+                    glow: Default::default(),
                 },
             );
         }
@@ -156,6 +188,7 @@ fn build_library(
         forms,
         blockouts,
         material,
+        glow_material,
         bow,
         stage,
     });
@@ -163,8 +196,15 @@ fn build_library(
 
 fn native_form(mut spec: figure::FigureSpec, meshes: &mut Assets<Mesh>, team: bool) -> FigureForm {
     let built = figure::build_joint_meshes(&spec);
-    let triangles = built.iter().flatten().map(mesh::triangles).sum();
+    let glow = figure::build_glow_meshes(&spec);
+    let triangles = built
+        .iter()
+        .chain(&glow)
+        .flatten()
+        .map(mesh::triangles)
+        .sum();
     let handles = built.map(|m| m.map(|m| meshes.add(m)));
+    let glow = glow.map(|m| m.map(|m| meshes.add(m)));
     let enemy_meshes = team.then(|| {
         for p in &mut spec.parts {
             if p.color == palette::ALLY {
@@ -180,5 +220,6 @@ fn native_form(mut spec: figure::FigureSpec, meshes: &mut Assets<Mesh>, team: bo
         native: true,
         bow_half: 0.64,
         enemy_meshes,
+        glow,
     }
 }

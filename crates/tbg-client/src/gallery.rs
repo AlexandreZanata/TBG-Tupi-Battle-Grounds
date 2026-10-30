@@ -6,6 +6,7 @@ mod figures;
 mod layout;
 mod lineup;
 mod palette;
+mod range;
 mod settings;
 mod title;
 
@@ -37,10 +38,12 @@ pub fn plugin(app: &mut App) {
         .add_systems(
             Update,
             (
-                cycle.before(crate::art::anim::animate),
+                // Animation runs in PostUpdate, after all of these.
+                cycle,
                 camera::frame,
-                layout::place.before(crate::art::anim::animate),
-                turn.after(crate::art::anim::animate),
+                layout::place,
+                turn,
+                range::fire,
             )
                 .run_if(in_state(GameState::Gallery)),
         );
@@ -55,6 +58,7 @@ fn spawn(
     mut clear: ResMut<ClearColor>,
     arena: Query<Entity, With<Mesh3d>>,
     window: Single<&Window>,
+    assets: Res<crate::visuals::VisualAssets>,
 ) {
     if options.stress {
         return;
@@ -83,6 +87,10 @@ fn spawn(
         "blockout" => blockout::spawn(&mut commands, &lib, mats, window.height() > window.width()),
         // Built by `arena::strongholds`, which owns the tower parts.
         "strongholds" => {}
+        _ if options.range => {
+            let unit = options.unit.unwrap_or(tbg_core::UnitKind::SiegeWalker);
+            range::spawn(&mut commands, &lib, &assets, unit);
+        }
         _ => figures::spawn(&mut commands, &lib, &options, mats, &window),
     }
 }
