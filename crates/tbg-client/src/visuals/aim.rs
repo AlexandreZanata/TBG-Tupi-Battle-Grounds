@@ -53,11 +53,11 @@ pub fn update_aim(
                     .and_then(|&target_e| transforms.get(target_e).ok())
                     .map(|t| t.translation),
                 AimTarget::Stronghold(seat) => {
-                    let seat_x = tbg_core::state::stronghold_x(seat);
-                    let wx = world_x(seat_x, you);
-                    // Hit point on Stronghold face directed toward attacker
-                    let hit_x = if seat == you { wx + 0.8 } else { wx - 0.8 };
-                    Some(Vec3::new(hit_x, 0.6, attacker_pos.z))
+                    // The D-46 tower stands 0.9 behind its lane x, so the core's
+                    // `stronghold_x` is its lane-side face; same point as the
+                    // shot impact in `sync/events.rs`.
+                    let wx = world_x(tbg_core::state::stronghold_x(seat), you);
+                    Some(Vec3::new(wx, 1.2, 0.0))
                 }
             };
 
