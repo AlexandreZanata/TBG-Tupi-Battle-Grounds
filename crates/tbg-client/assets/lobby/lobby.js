@@ -22,6 +22,9 @@
     root.querySelectorAll('use[data-icon]').forEach(icon => icon.setAttribute('href', 'assets/lobby/icons.svg#' + icon.dataset.icon));
   }
   const send = action => {
+    if (action === 'ranking' && globalThis.TbgRanking) { globalThis.TbgRanking.open(); return; }
+    if (action === 'menu' && globalThis.TbgRanking) { globalThis.TbgRanking.close(); return; }
+    if (!['sound','copy-key','download-key','logout'].includes(action)) globalThis.TbgRanking?.close();
     root.dataset.action = action;
     if (action !== 'sound' && action !== 'copy-key' && action !== 'download-key' && action !== 'logout') dialogs.forEach(dialog => dialog.close());
   };
@@ -41,6 +44,7 @@
     if (event.key !== 'Escape' || root.dataset.screen === 'off') return;
     const open = dialogs.find(dialog => dialog.open);
     if (open) { event.preventDefault(); open.close(); return; }
+    if (root.dataset.lobbyView === 'ranking') { event.preventDefault(); globalThis.TbgRanking.close(); return; }
     const close = {ranking:'close-ranking',key:'close-panel'}[root.dataset.screen];
     if (close) { event.preventDefault(); send(close); }
     if (root.dataset.screen === 'form') { event.preventDefault(); document.getElementById('tbg-form-cancel').click(); }
@@ -79,6 +83,15 @@
     story = (story + Number(button.dataset.news) + news.length) % news.length;
     set('[data-news-title]', news[story][0]); set('[data-news-body]', news[story][1]); set('[data-news-page]', (story + 1) + ' / ' + news.length);
   }));
+  let initialPanelOpened = false;
+  function initialPanel() {
+    if (initialPanelOpened || root.hidden || root.dataset.screen !== 'lobby') return;
+    initialPanelOpened = true;
+    const panel = new URLSearchParams(location.search).get('panel');
+    if (panel === 'ranking') { globalThis.TbgRanking?.open(); return; }
+    const selector = {arcanas:'[data-arcana-open]',stronghold:'[data-tower-open]',settings:'[data-dialog="settings"]'}[panel];
+    if (selector) root.querySelector(selector).click();
+  }
   function render() {
     const name = root.dataset.player || '';
     root.querySelectorAll('[data-member]').forEach(node => { node.hidden = !name; });
@@ -88,8 +101,8 @@
     set('[data-sound]', root.dataset.muted === 'true' ? 'OFF' : 'ON');
     set('[data-ranked-hint]', name ? 'Ranked · Compete for rating' : 'Locked · Create account to play Ranked');
     root.querySelector('[data-ranked]').dataset.action = name ? 'ranked' : 'register';
-    if (root.hidden) dialogs.forEach(dialog => dialog.close());
-    if (root.dataset.screen === 'lobby') requestAnimationFrame(loadArt);
+    if (root.hidden) { dialogs.forEach(dialog => dialog.close()); globalThis.TbgRanking?.close(); }
+    if (root.dataset.screen === 'lobby') { requestAnimationFrame(loadArt); requestAnimationFrame(initialPanel); }
     if (name !== previousPlayer || root.dataset.rating !== previousRating || (root.dataset.screen === 'lobby' && previousScreen !== 'lobby')) stats(name);
     previousPlayer = name; previousRating = root.dataset.rating; previousScreen = root.dataset.screen;
   }

@@ -11,6 +11,10 @@
   <script src="diagnostics/measure.js"></script>
   <!-- Hashed by Trunk so every deploy changes the URL (no stale CDN/browser cache). -->
   <link data-trunk rel="css" href="assets/lobby/lobby.css" />
+  <link data-trunk rel="css" href="assets/ranking/ranking.css" />
+  <script data-trunk defer src="assets/ranking/data.js"></script>
+  <script data-trunk defer src="assets/ranking/render.js"></script>
+  <script data-trunk defer src="assets/ranking/controller.js"></script>
   <script data-trunk defer src="assets/lobby/lobby.js"></script>
   <link data-trunk rel="css" href="assets/arcana/editor.css" />
   <script data-trunk defer src="assets/arcana/preset.js"></script>
@@ -60,6 +64,7 @@
     </nav>
     <button class="sound metal-panel" data-action="sound" aria-label="Toggle sound"><svg class="icon"><use data-icon="sound"/></svg><span>Sound: <b data-sound>ON</b></span></button>
   </header>
+  <section id="tbg-ranking" hidden aria-label="Global Rankings"></section>
   <main class="mode-panel wood-panel" aria-label="Choose a game mode">
     <span class="corner top-left"></span><span class="corner top-right"></span><span class="corner bottom-left"></span><span class="corner bottom-right"></span>
     <button class="mode ranked" data-ranked data-action="register"><svg class="icon"><use data-icon="swords"/></svg><span><strong>Play Online</strong><small data-ranked-hint>Create account to unlock Ranked</small></span><span class="chevron" aria-hidden="true">›</span></button>
