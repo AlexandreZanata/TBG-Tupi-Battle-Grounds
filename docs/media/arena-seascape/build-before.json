@@ -1,0 +1,9 @@
+{
+  "commit": "6ef155bc9540527c99086aee0d9726908ca6a041",
+  "wasm_file": "tbg-client-bd0f547aeb0c6c28_bg.wasm",
+  "raw_bytes": 24923835,
+  "gzip_bytes": 7768767,
+  "sha256": "af370582afe9815c26bee7a49f1e762800712d7a98cf0ce297751c88450cef57",
+  "asset_bytes": 14613050,
+  "brotli_bytes": 4855741
+}
