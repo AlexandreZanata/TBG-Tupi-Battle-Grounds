@@ -925,3 +925,21 @@ the render-delayed shot timing.
 **Reopen when** a defender reads poorly at match distance or the owner
 wants a different role animation.
 
+## D-53 · Every champion on its own art kit — 2026-10-30 (owner request)
+
+**Decision.** The P54 kits (D-51) and the Stronghold defenders (D-52) are
+the visual standard for every champion. Twenty-three champions that still
+used the shared library now have their own kit (figure with five distinct
+forms, motion for every clip, own projectile or melee impact): the
+fifteen new champions and the Smuggler's Crate, and the originals
+Shieldbearer, Hexer, Sawbot, Bloomkeeper, Nester, Beetling and Rampart.
+Kits share one library (`art/kits/common/`: anatomy, dress, gear, motion
+blocks on the fixed event times). Support actions with an `AttackStart`
+are shot kits; the crate toss, the blood transfer stream and broken
+plates are cued from their own events (`sync/actions.rs`).
+**Unchanged.** The Siege Walker, Bone Brute and Rootcaller kits, the
+towers, the Archer's approved v2 figure, all simulation values, event
+times and the protocol.
+**Reopen when** the owner rejects a kit's look, a kit reads poorly at
+match distance, or the view packs the carrier and plate bits (then the
+Cargo Crab can seat its passenger and the Shatterback can shed plates).

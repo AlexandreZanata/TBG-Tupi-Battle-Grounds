@@ -170,6 +170,7 @@ Phase files are written one at a time, starting with P42.
 | P40 | [P40-arcana-trees.md](phases/P40-arcana-trees.md) | Fifteen-node trees, twelve points, three supremes, preset migration, editor and lab evidence | implemented; audited on `phase/p40-review` (Quickdraw cap fixed, Deadeye re-measured to +0.25 tile); War and Vitality builds trail the default, browser look check open | — |
 | P42 | [P42-roster-baseline.md](phases/P42-roster-baseline.md) | Roster canon (D-48), lab combat counters, stall and duration rows, `comp-*` policy, baseline on main | in progress | — |
 | P54 | [P54-unit-art-kits.md](phases/P54-unit-art-kits.md) | Unit art kits (own model, motion, aim, projectile per character); gait v2 for every unit; Strongholds aim and fire their own projectiles; Siege Walker, Bone Brute, Rootcaller final kits | done; **owner approved (2026-10-30)**; tower defenders and lobby-faithful dress added (D-52) | yes (owner) |
+| P55 | [P55-champion-kits.md](phases/P55-champion-kits.md) | Every unrefined champion on its own art kit (fifteen new champions, the Crate, seven originals) on a shared kit library; support action cues (D-53) | implemented; **owner look review pending** | yes (owner) |
 
 ## Pending validations (owner)
 

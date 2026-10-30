@@ -127,11 +127,16 @@ arena/strongholds/aim.rs ─► orders → slew yaw/elevation → fire from muzz
 
 ## 5. How to add the next kit (checklist)
 
-1. Create `art/kits/<unit>/{mod,model,motion}.rs`. Copy the closest
-   existing kit:
-   - ranged: Siege Walker;
-   - melee: Bone Brute;
-   - cast: Rootcaller.
+1. Create `art/kits/<unit>/{mod,model}.rs` (add `motion.rs` only when
+   the pose code grows). Copy the closest existing kit:
+   - ranged: Siege Walker, or Farwatch / Bombard on the shared library;
+   - melee: Bone Brute, or Longaxe / Blood Furnace;
+   - cast: Rootcaller, or Hexer / Bloomkeeper (`moves::staff_cast`);
+   - support toss: Antidote Brewer / Nester (`moves::toss`);
+   - a body with no arms or many legs: Cargo Crab / Beetling (legs ride
+     the thighs; plant the feet upright outside the walk).
+   Build it from the shared library first (§5b); write custom parts only
+   for what makes the champion itself.
 2. In `model.rs`:
    - write `plan(tier)`, `spec(tier, branch)`, and the weapon points
      (`muzzle`/`tip` in socket space);
@@ -157,6 +162,40 @@ arena/strongholds/aim.rs ─► orders → slew yaw/elevation → fire from muzz
    - `?gallery=<unit>`, `&range`, `&range&evolve`, `&clip=<attack>&slow=0.25`;
    - `&clip=walk`, `&stress=30`;
    - fix everything in one batch, then rebuild.
+
+## 5b. The shared kit library (P55)
+
+`art/kits/common/` holds what every kit champion shares, so a new kit is
+mostly its silhouette pieces and its signature motion:
+
+- `Form::of(tier, branch)` → `a`, `b`, `t2` (which Evolution pieces).
+- `body`: `plan(large, size, tier)` (lane scale × Evolution growth),
+  `humanoid` and `skeleton` anatomies, and dress pieces (`tunic`,
+  `tabard`, `cape`, `hood`, `helmet(Helm::…)`, `pauldrons`, `beard`,
+  `glowing_eyes`, `bracers`, `greaves`).
+- `gear`: hand weapons along +Z (`sword`, `hammer`), poles along +Y
+  (`staff` + `staff_top`), `kite_shield`, `quiver`, and props (`flask`,
+  `sack`, `crate_box`, `lantern`, `bomb`); add a piece when a kit first
+  needs it;
+  `strut(at, a, b, r, color)` draws a rod between two points (legs,
+  pistons, puppet strings).
+- `moves`: `DURATIONS` and the attack tables on the fixed event times
+  (`CHOP`, `SLASH`, `THRUST`, `THROW`, `CAST`, `POINT`), played by
+  `strike`; life blocks with a style each (`death(Fall)`, `spawn(Entry)`,
+  `evolve(Power)`, `victory(Cheer)`, plus `idle`, `walk`, `hit`); grips
+  (`pole`, `shoulder_arms`, `staff`) and `aim_level` for ranged weapons;
+  `toss` (THROW retimed to the cast Release) and `staff_cast`.
+
+Rules that kept twenty-three kits consistent:
+- Five forms differ in silhouette, never only in color: A and B each add
+  their own pieces, tier 2 adds a glowing signature.
+- Every figure carries a team-colored piece (`ALLY`) that reads at match
+  distance: tabard, sash, flag, stripe, scarf.
+- Support actions with an `AttackStart` (cleanse, transfer, confuse,
+  heal) are shot kits; actions without one are cued in
+  `sync/actions.rs`.
+- Check each kit with `?gallery=<unit>&lineup` (five forms × idle, walk,
+  attack) before committing; look at `&range` for ranged kits.
 
 ## 6. How to add a tower defender
 
