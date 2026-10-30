@@ -1,5 +1,10 @@
 //! What one seat may see of a match. Opponent Energy, offers, and every
-//! RNG stay inside `MatchState` (BR-S05).
+//! RNG stay inside `MatchState` (BR-S05). The spectator's public subset
+//! lives in `public`.
+
+pub mod public;
+pub use public::{PublicRound, PublicView};
+mod visibility;
 
 use serde::{Deserialize, Serialize};
 
@@ -95,24 +100,29 @@ pub struct MatchView {
     pub last_seq: u32,
     pub events: Vec<Event>,
     pub outcome: Option<Outcome>,
+    /// BR-LV05: how many spectators watch this match. Set by the server
+    /// when it sends the view; a count, never who (`0` from `view_for`).
+    pub spectators: u16,
 }
 
 impl MatchState {
+    /// Augment prices of the open round's options (same for both seats).
+    fn round_costs(&self) -> [u32; AUGMENT_OPTIONS] {
+        self.augments.options.map(|id| {
+            crate::content::augment_def(id)
+                .map(|def| self.rules.augment.costs[def.rarity.index()])
+                .unwrap_or(0)
+        })
+    }
+
     pub fn view_for(&self, seat: Seat, events: &[Event]) -> MatchView {
         let me = self.player(seat);
-        let round = (self.is_live() && self.augments.selecting()).then(|| {
-            let costs = self.augments.options.map(|id| {
-                crate::content::augment_def(id)
-                    .map(|def| self.rules.augment.costs[def.rarity.index()])
-                    .unwrap_or(0)
-            });
-            RoundView {
-                round: self.augments.round,
-                options: self.augments.options,
-                costs,
-                ticks_left: self.augments.deadline.saturating_sub(self.clock),
-                resolved: me.augment_resolved >= self.augments.round,
-            }
+        let round = (self.is_live() && self.augments.selecting()).then(|| RoundView {
+            round: self.augments.round,
+            options: self.augments.options,
+            costs: self.round_costs(),
+            ticks_left: self.augments.deadline.saturating_sub(self.clock),
+            resolved: me.augment_resolved >= self.augments.round,
         });
         MatchView {
             tick: self.tick,
@@ -145,6 +155,7 @@ impl MatchState {
             last_seq: me.last_seq,
             events: events.to_vec(),
             outcome: self.outcome,
+            spectators: 0,
         }
     }
 }
