@@ -1,5 +1,10 @@
 //! Plants: leaf greens and bark with blossom and mushroom accents.
 
+pub mod beetling_v2;
+pub mod bloomkeeper_v2;
+pub mod nester_v2;
+pub mod rootcaller_v2;
+
 use super::super::legacy::{part, BodyPlan, FigureSpec, Joint::*};
 use super::super::mesh::Shape::*;
 use super::super::palette::*;

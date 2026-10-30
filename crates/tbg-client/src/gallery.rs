@@ -1,5 +1,6 @@
 //! Browser review tools: roster, palette, blockouts, named units, and contact sheets.
 
+pub(crate) mod aim;
 mod blockout;
 mod camera;
 mod figures;
@@ -41,8 +42,9 @@ pub fn plugin(app: &mut App) {
                 // Animation runs in PostUpdate, after all of these.
                 cycle,
                 camera::frame,
-                layout::place,
-                turn,
+                layout::place.before(crate::art::anim::animate),
+                turn.after(crate::art::anim::animate),
+                aim::update.before(crate::art::anim::animate),
                 range::fire,
             )
                 .run_if(in_state(GameState::Gallery)),
@@ -87,6 +89,7 @@ fn spawn(
         "blockout" => blockout::spawn(&mut commands, &lib, mats, window.height() > window.width()),
         // Built by `arena::strongholds`, which owns the tower parts.
         "strongholds" => {}
+        "aim" => aim::spawn(&mut commands, &lib, &options, mats, &window),
         _ if options.range => {
             let unit = options.unit.unwrap_or(tbg_core::UnitKind::SiegeWalker);
             range::spawn(&mut commands, &lib, &assets, unit);

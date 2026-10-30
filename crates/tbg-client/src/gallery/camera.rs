@@ -58,6 +58,12 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
             Vec3::new(0.0, 14.0, 10.0),
         ),
         "blockout" => (Vec3::new(8.0, 0.7, 0.0), 9.0, 3.0, Vec3::new(0.0, 1.0, 1.0)),
+        "aim" => (
+            Vec3::new(8.0, 0.7, 0.0),
+            12.0,
+            7.0,
+            Vec3::new(0.0, 9.0, 11.0),
+        ),
         _ if options.range => {
             let gap = options.unit.map_or(4.0, super::range::reach);
             (

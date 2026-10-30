@@ -966,3 +966,30 @@ times and the protocol.
 **Reopen when** the owner rejects a kit's look, a kit reads poorly at
 match distance, or the view packs the carrier and plate bits (then the
 Cargo Crab can seat its passenger and the Shatterback can shed plates).
+
+## D-47 · Troop aim and visual polish ported from A-1 onto the D-46 towers — 2026-10-29
+
+**Decision.**
+1. Directional aim for ranged, control and support units, and directed
+   strikes for melee units, are driven only by the authoritative
+   `Event::AttackStart { from, to }`. The client never pre-aims, never
+   predicts, and never changes simulation state or tick boundaries.
+2. All 11 unit kinds (55 forms) are native rig-v2 forms with faction death
+   styles, parametric idle and walk cycles, and a deferred impact ring that
+   pairs each projectile or strike with its target reaction.
+3. The A-1 Stronghold layer (`Classic`, `Treasury`, `Redoubt`, `Ballista`,
+   `Banner`, the shared Walls/Arms kit, the turret pivot and its aim
+   height) was **not** ported. The towers are the D-46 ones (Treasury,
+   Bastion, Artillery, Command, kind-exclusive Fortification). When a unit
+   attacks a Stronghold it aims at the core's `stronghold_x`, which is the
+   lane-side face of the D-46 tower (the tower stands 0.9 behind it), at the
+   same impact height as the shot in `sync/events.rs`.
+**Why.** A-1 was authored on the old `main` (`077abe7`) in parallel with
+D-46; its troop work is independent of towers, while its tower work
+duplicated and contradicted D-46. The A-1 report called its decision
+"D-41", a number already in use; this entry replaces it.
+**Guard rails.** `tbg-core`, `tbg-server`, `tbg-balance` and `Cargo.lock`
+are unchanged by the port; asset reuse stays one mesh and one material per
+form; the D-46 contract tests are untouched.
+**Reopen when** a Stronghold kind needs its own impact point or muzzle for
+unit reactions, or phone support needs lighter forms.

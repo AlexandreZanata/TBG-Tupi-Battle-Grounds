@@ -64,7 +64,16 @@ pub(crate) struct ViewBuffer {
 }
 
 #[derive(Resource, Default)]
-struct UnitEntities(HashMap<UnitId, Entity>);
+pub struct UnitEntities(pub HashMap<UnitId, Entity>);
+
+/// Everything the event pass writes besides the unit visuals.
+type FxResources<'w> = (
+    Res<'w, VfxAssets>,
+    ResMut<'w, Sounds>,
+    ResMut<'w, MatchStats>,
+    ResMut<'w, visuals::TowerOrders>,
+    ResMut<'w, crate::art::aim::ImpactRing>,
+);
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<MatchInfo>()
@@ -75,6 +84,7 @@ pub fn plugin(app: &mut App) {
         .init_resource::<RematchInfo>()
         .init_resource::<MatchStats>()
         .init_resource::<ViewGaps>()
+        .init_resource::<crate::art::aim::ImpactRing>()
         .add_systems(Update, poll_link)
         .add_systems(
             Update,
@@ -107,12 +117,7 @@ fn sync_units(
     mut buffer: ResMut<ViewBuffer>,
     mut map: ResMut<UnitEntities>,
     mut visuals: events::Visuals,
-    mut fx_res: (
-        Res<VfxAssets>,
-        ResMut<Sounds>,
-        ResMut<MatchStats>,
-        ResMut<visuals::TowerOrders>,
-    ),
+    mut fx_res: FxResources,
 ) {
     let now = time.elapsed_secs_f64();
     let mut scene = Scene {
@@ -130,7 +135,13 @@ fn sync_units(
     let Some((you, alive)) = placed else {
         return;
     };
-    let (vfx, sounds, stats, orders) = (&fx_res.0, &mut *fx_res.1, &mut *fx_res.2, &mut *fx_res.3);
+    let (vfx, sounds, stats, orders, ring) = (
+        &fx_res.0,
+        &mut *fx_res.1,
+        &mut *fx_res.2,
+        &mut *fx_res.3,
+        &mut *fx_res.4,
+    );
     let mut fx = events::Fx {
         assets: &assets,
         vfx,
@@ -138,6 +149,8 @@ fn sync_units(
         stats,
         orders,
         you,
+        time: time.elapsed_secs_f64(),
+        ring,
     };
     for ev in buffer.timeline.take_events() {
         apply_event(&mut commands, &mut fx, &map, &mut visuals, ev);

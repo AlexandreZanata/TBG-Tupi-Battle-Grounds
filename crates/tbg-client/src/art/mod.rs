@@ -9,6 +9,7 @@ use bevy::prelude::*;
 use tbg_core::{UnitKind, ALL_KINDS};
 
 mod adapter;
+pub mod aim;
 pub mod anim;
 #[cfg(test)]
 mod anim_tests;
@@ -21,11 +22,13 @@ pub mod arrows;
 pub mod bow;
 mod clips;
 mod curves;
+pub mod death;
 mod feet;
 pub mod figure;
 pub mod ik;
 pub mod kits;
 mod legacy;
+pub mod melee;
 pub mod mesh;
 pub mod palette;
 pub mod rig;
@@ -139,13 +142,167 @@ fn build_library(
                 forms.insert((kind, tier, branch), form);
                 continue;
             }
-            if kind == UnitKind::Archer && branch == 0 {
-                let mut form = native_form(roster::archer_v2(tier), &mut meshes, true);
+            if kind == UnitKind::Archer {
+                let mut form = native_form(
+                    roster::humans::archer_v2::spec_full(tier, branch),
+                    &mut meshes,
+                    true,
+                );
                 form.bow_half = archer_v2::bow_half(tier);
                 info!(
                     "figure Archer {tier}/{branch} (v2): {} triangles + {} bow/arrow triangles, {} mesh joints",
                     form.triangles,
                     bow.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Shieldbearer {
+                let form = native_form(
+                    roster::humans::shieldbearer_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Shieldbearer {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::BoneBrute {
+                let form = native_form(
+                    roster::undead::bone_brute_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure BoneBrute {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Hexer {
+                let form = native_form(
+                    roster::undead::hexer_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Hexer {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Sawbot {
+                let form = native_form(
+                    roster::machines::sawbot_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Sawbot {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::SiegeWalker {
+                let form = native_form(
+                    roster::machines::siege_walker_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure SiegeWalker {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Rampart {
+                let form = native_form(
+                    roster::machines::rampart_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Rampart {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Bloomkeeper {
+                let form = native_form(
+                    roster::plants::bloomkeeper_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Bloomkeeper {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Rootcaller {
+                let form = native_form(
+                    roster::plants::rootcaller_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Rootcaller {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Nester {
+                let form = native_form(
+                    roster::plants::nester_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Nester {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
+                    form.meshes.iter().flatten().count()
+                );
+                max_tris = max_tris.max(form.triangles);
+                forms.insert((kind, tier, branch), form);
+                continue;
+            }
+            if kind == UnitKind::Beetling {
+                let form = native_form(
+                    roster::plants::beetling_v2::spec(tier, branch),
+                    &mut meshes,
+                    true,
+                );
+                info!(
+                    "figure Beetling {tier}/{branch} (v2): {} triangles, {} mesh joints",
+                    form.triangles,
                     form.meshes.iter().flatten().count()
                 );
                 max_tris = max_tris.max(form.triangles);

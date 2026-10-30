@@ -1,0 +1,147 @@
+diff --git a/crates/tbg-client/src/art/arrows.rs b/crates/tbg-client/src/art/arrows.rs
+index 2ac3bf9..849b7f4 100644
+--- a/crates/tbg-client/src/art/arrows.rs
++++ b/crates/tbg-client/src/art/arrows.rs
+@@ -16,11 +16,11 @@ pub struct FlyingArrow {
+ pub fn release(
+     mut commands: Commands,
+     lib: Res<FigureLibrary>,
+-    figures: Query<(&Animator, &BowRig)>,
++    figures: Query<(&Animator, &BowRig, Option<&crate::ui::UiAction>)>,
+     sockets: Query<&GlobalTransform>,
+     mut logged: Local<bool>,
+ ) {
+-    for (a, bow) in &figures {
++    for (a, bow, action) in &figures {
+         if !a.archer || !a.events.contains(&ClipEvent::Release) {
+             continue;
+         }
+@@ -30,6 +30,11 @@ pub fn release(
+         let (_, rotation, _) = socket.to_scale_rotation_translation();
+         let draw = super::archer_aim::draw(a.clip_time().1);
+         let position = socket.transform_point(Vec3::new(0.0, 0.08, -0.23 - draw * 0.16));
++        if crate::config::url_param("audit").is_some() {
++            if let Some(crate::ui::UiAction::SelectUnit(id)) = action {
++                info!("A1_ARROW unit={id} position={position:?} forward={:?}", rotation * Vec3::Z);
++            }
++        }
+         let range = tbg_core::content::effective_stats(tbg_core::UnitKind::Archer, 0, 0, 0).range
+             as f32
+             / 1000.0;
+diff --git a/crates/tbg-client/src/sync.rs b/crates/tbg-client/src/sync.rs
+index bc73a16..30bed4c 100644
+--- a/crates/tbg-client/src/sync.rs
++++ b/crates/tbg-client/src/sync.rs
+@@ -6,7 +6,7 @@ use std::collections::HashMap;
+ 
+ use bevy::prelude::*;
+ use tbg_core::content::LANE_LEN;
+-use tbg_core::{Event, MatchView, Outcome, Seat, UnitId};
++use tbg_core::{Event, MatchView, Outcome, Seat, Target, UnitId, UnitKind};
+ 
+ use crate::art::FigureLibrary;
+ use crate::audio::Sounds;
+@@ -104,6 +104,7 @@ fn sync_units(
+     mut map: ResMut<UnitEntities>,
+     mut visuals: events::Visuals,
+     mut fx_res: (Res<VfxAssets>, ResMut<Sounds>, ResMut<MatchStats>),
++    mut audit: Local<Vec<(Target, Target, Option<UnitKind>, u32)>>,
+ ) {
+     let Some((last_t, last)) = buffer.last.clone() else {
+         return;
+@@ -152,6 +153,35 @@ fn sync_units(
+         you,
+     };
+     for ev in std::mem::take(&mut buffer.events) {
++        if crate::config::url_param("audit").is_some() {
++            audit.retain(|(_, _, _, tick)| last.tick.saturating_sub(*tick) <= 20);
++            match ev {
++                Event::AttackStart { from, to } => {
++                    let kind = if let Target::Unit(id) = from {
++                        last.units.iter().find(|unit| unit.id == id).map(|unit| unit.kind)
++                    } else { None };
++                    audit.push((from, to, kind, last.tick));
++                }
++                Event::Hit { .. } | Event::Heal { .. } => {
++                    let to = match ev { Event::Hit { to, .. } => to, Event::Heal { to, .. } => Target::Unit(to), _ => unreachable!() };
++                    if let Some(index) = audit.iter().position(|(_, target, kind, tick)| {
++                        *target == to && (kind.is_none() || last.tick.saturating_sub(*tick) >= 5)
++                    }) {
++                        let (from, _, kind, _) = audit.remove(index);
++                        if let (Event::Hit { .. }, Some(kind)) = (ev, kind) {
++                            if let (Some(a), Some(b)) = (
++                                events::pos_of(&map, &visuals, you, from),
++                                events::pos_of(&map, &visuals, you, to),
++                            ) {
++                                let delta = b - a;
++                                info!("A1_REACH tick={} kind={kind:?} from={from:?} to={to:?} dx={} dz={} xz={}", last.tick, delta.x, delta.z, Vec2::new(delta.x, delta.z).length());
++                            }
++                        }
++                    }
++                }
++                _ => {}
++            }
++        }
+         apply_event(&mut commands, &mut fx, &map, &mut visuals, ev);
+     }
+     map.0.retain(|id, e| {
+diff --git a/crates/tbg-client/src/sync/events.rs b/crates/tbg-client/src/sync/events.rs
+index c3ed917..631b3ee 100644
+--- a/crates/tbg-client/src/sync/events.rs
++++ b/crates/tbg-client/src/sync/events.rs
+@@ -37,7 +37,7 @@ pub(super) struct Fx<'a> {
+     pub you: Seat,
+ }
+ 
+-fn pos_of(map: &UnitEntities, visuals: &Visuals, you: Seat, t: Target) -> Option<Vec3> {
++pub(super) fn pos_of(map: &UnitEntities, visuals: &Visuals, you: Seat, t: Target) -> Option<Vec3> {
+     match t {
+         Target::Unit(id) => map
+             .0
+@@ -168,6 +168,9 @@ fn attack(
+         pos_of(map, visuals, you, to),
+     );
+     if let (true, Some(a), Some(b)) = (shoots, a, b) {
++        if crate::config::url_param("audit").is_some() {
++            info!("A1_GENERIC from={from:?} to={to:?}");
++        }
+         visuals::spawn_projectile(commands, fx.assets, a, b);
+     }
+     if let (true, Some(b)) = (splash > 0.0, b) {
+diff --git a/crates/tbg-client/src/visuals.rs b/crates/tbg-client/src/visuals.rs
+index 72f516a..6927bac 100644
+--- a/crates/tbg-client/src/visuals.rs
++++ b/crates/tbg-client/src/visuals.rs
+@@ -54,7 +54,8 @@ pub struct UnitVisual {
+ }
+ 
+ pub fn plugin(app: &mut App) {
+-    app.add_plugins(names::plugin)
++    app.add_systems(PostUpdate, audit_counts)
++        .add_plugins(names::plugin)
+         .add_systems(PreStartup, assets::init)
+         .add_systems(
+             Update,
+@@ -236,3 +237,22 @@ fn spawn_bar(
+         .id();
+     (bar, bar_fill, tiers)
+ }
++
++// Temporary step-1 probe; removed before the audit commit.
++fn audit_counts(
++    units: Query<(Entity, &UnitVisual)>,
++    children: Query<&Children>,
++    mut seen: Local<std::collections::HashSet<(UnitKind, u8, u8)>>,
++) {
++    if crate::config::url_param("audit").is_none() { return; }
++    for (entity, visual) in &units {
++        if !seen.insert(visual.form) { continue; }
++        let mut stack = vec![entity];
++        let mut count = 0;
++        while let Some(entity) = stack.pop() {
++            count += 1;
++            if let Ok(children) = children.get(entity) { stack.extend(children.iter()); }
++        }
++        info!("A1_ENTITIES form={:?} count={count}", visual.form);
++    }
++}

@@ -13,10 +13,10 @@ use super::palette::{
 
 pub mod blockout;
 pub(crate) mod body;
-mod humans;
-mod machines;
-mod plants;
-mod undead;
+pub mod humans;
+pub mod machines;
+pub mod plants;
+pub mod undead;
 
 /// Base-body colors.
 pub struct Look {
@@ -58,6 +58,7 @@ impl Form {
 }
 
 /// Default native Archer forms: 0 base, 1 Longbow, 2 Marksman.
+#[allow(dead_code)]
 pub fn archer_v2(tier: u8) -> super::figure::FigureSpec {
     humans::archer_v2::spec(tier)
 }

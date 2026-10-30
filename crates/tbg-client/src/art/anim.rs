@@ -27,6 +27,7 @@ pub struct Animator {
     pub native: bool,
     pub archer: bool,
     pub rate: f32,
+    pub hit_stop: f32,
     pub preview: Option<(Clip, f32)>,
     pub events: Vec<ClipEvent>,
     pub kit: Option<&'static Kit>,
@@ -71,6 +72,7 @@ impl Animator {
             native: false,
             archer: false,
             rate: 1.0,
+            hit_stop: 0.0,
             preview: None,
             events: Vec::new(),
             kit: kits::kit(kind),
@@ -94,6 +96,9 @@ impl Animator {
             travel: 0.0,
             heading: Vec3::Z,
         }
+    }
+    pub fn apply_hit_stop(&mut self, duration_s: f32) {
+        self.hit_stop = duration_s;
     }
     pub fn play(&mut self, clip: Clip) {
         if matches!(clip, Clip::AttackMelee | Clip::AttackRanged | Clip::Cast) {
@@ -252,6 +257,16 @@ pub fn animate(
     mut transforms: Query<&mut Transform, Without<Animator>>,
 ) {
     for (mut a, root) in &mut animators {
+        let dt = if a.hit_stop > 0.0 {
+            let stopped = (time.delta_secs() * a.rate).min(a.hit_stop);
+            a.hit_stop -= stopped;
+            (time.delta_secs() * a.rate) - stopped
+        } else {
+            time.delta_secs() * a.rate
+        };
+        if dt <= 0.0 {
+            continue;
+        }
         let dt = time.delta_secs() * a.rate;
         let figure = transforms
             .get(a.figure)

@@ -259,3 +259,44 @@ fn adapted_legs_ride_whole_segments_so_knees_bend_cleanly() {
         }
     }
 }
+
+#[test]
+fn test_attack_clips_finish_before_unit_intervals_and_events_on_time() {
+    use tbg_core::{content, ALL_KINDS};
+    for &kind in &ALL_KINDS {
+        let stats = content::effective_stats(kind, 0, 0, 0);
+        let interval_s = stats.interval as f32 / content::TICK_HZ as f32;
+        assert!(
+            Clip::AttackMelee.duration() < interval_s,
+            "{kind:?} melee {}s >= interval {}s",
+            Clip::AttackMelee.duration(),
+            interval_s
+        );
+        assert!(
+            Clip::AttackRanged.duration() < interval_s,
+            "{kind:?} ranged {}s >= interval {}s",
+            Clip::AttackRanged.duration(),
+            interval_s
+        );
+        assert!(
+            Clip::Cast.duration() < interval_s,
+            "{kind:?} cast {}s >= interval {}s",
+            Clip::Cast.duration(),
+            interval_s
+        );
+    }
+
+    // Strike at 0.30s +- 1 frame (1/60s = 0.0167s)
+    let strike_events = events_between(Clip::AttackMelee, 0.29, 0.31);
+    assert_eq!(strike_events, [ClipEvent::Strike]);
+
+    // Release at 0.18s +- 1 frame
+    let release_events = events_between(Clip::AttackRanged, 0.17, 0.19);
+    assert_eq!(release_events, [ClipEvent::Release]);
+}
+
+#[test]
+fn test_corpse_schedule_duration() {
+    let corpse_schedule = Clip::Death.duration() + crate::visuals::CORPSE_SECS;
+    assert_eq!(corpse_schedule, 1.50);
+}

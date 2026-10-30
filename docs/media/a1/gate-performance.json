@@ -1,0 +1,16 @@
+{
+  "40-per-side": {
+    "sampleCount": 9376,
+    "fps": 151.4,
+    "p50": 6.1,
+    "p95": 8.3,
+    "p99": 27.2,
+    "entities": 2933,
+    "meshes": 1100,
+    "materials": 25,
+    "draws": 451.8,
+    "jsHeapBytes": 12185095,
+    "wasmMemoryBytes": 99352576,
+    "cpuTaskSecs": 0
+  }
+}

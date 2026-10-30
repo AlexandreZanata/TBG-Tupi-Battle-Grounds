@@ -19,7 +19,7 @@ pub enum VisualCue {
 }
 
 /// How long a dead unit stays on the field after its death clip.
-const CORPSE_SECS: f32 = 0.9;
+pub const CORPSE_SECS: f32 = 0.9;
 /// A unit stops walking only after this long without moving, so a frame
 /// without a new view never flickers it into idle.
 const STOP_SECS: f32 = 0.15;
@@ -61,6 +61,22 @@ pub(super) fn animate(
         anim.aim_at = aim(&mut v, &targets, dt);
         if v.dying {
             v.dead_for += dt;
+            commands.entity(v.bar).try_insert(Visibility::Hidden);
+            commands.entity(v.ring).try_insert(Visibility::Hidden);
+            for t_cube in &v.tiers {
+                commands.entity(*t_cube).try_insert(Visibility::Hidden);
+            }
+
+            // A-1 faction deaths (D-47) for units without a kit; kits play
+            // their own Death clip (D-51, D-53).
+            if !v.has_kit() {
+                let form = lib.get(v.form.0, v.form.1, v.form.2);
+                let faction = tbg_core::content::UNITS[v.form.0 as usize].faction;
+                let death_transform =
+                    crate::art::death::evaluate(faction, v.dead_for, form.plan.scale, v.yaw);
+                commands.entity(v.figure).try_insert(death_transform);
+            }
+
             if v.dead_for > Clip::Death.duration() + CORPSE_SECS {
                 commands.entity(root).try_despawn();
             }

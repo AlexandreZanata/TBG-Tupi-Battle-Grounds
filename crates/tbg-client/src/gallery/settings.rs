@@ -19,6 +19,14 @@ pub struct Gallery {
     pub clip: Option<Clip>,
     /// `&tier=1|2`: contact sheet of an evolution (branch A) instead of the base.
     pub tier: u8,
+    /// `&branch=0|1`: branch A or B.
+    pub branch: u8,
+    /// `&angle=0..7`: target angle index in aim lab.
+    pub angle: usize,
+    /// `&far`: far target distance in aim lab.
+    pub far: bool,
+    /// `&crowd`: crowd mode in aim lab.
+    pub crowd: bool,
     /// `&lineup`: base, tier 1, and tier 2 side by side, idle and at the anchor.
     pub lineup: bool,
     /// Isolated base-form screenshot for a Shop card.
@@ -34,6 +42,7 @@ impl Gallery {
             || self.frames
             || self.mode == "blockout"
             || self.mode == "strongholds"
+            || self.mode == "aim"
     }
     pub fn hide_arena(&self) -> bool {
         self.silhouette || self.studio()
@@ -45,22 +54,10 @@ impl Gallery {
         let mode = config::url_param("gallery")
             .unwrap_or_default()
             .to_lowercase();
-        let unit = mode
-            .parse::<usize>()
-            .ok()
-            .and_then(|i| UNIT_KINDS.get(i).copied())
-            // By name, staged kinds too: their placeholders need review
-            // before the Shop pool switch (P53).
-            .or_else(|| {
-                ALL_KINDS
-                    .into_iter()
-                    .find(|kind| slug(&format!("{kind:?}")) == slug(&mode))
-            })
-            .or(match mode.as_str() {
-                "sawknight" => Some(UnitKind::Sawbot),
-                "ogrearcher" => Some(UnitKind::SiegeWalker),
-                _ => None,
-            });
+        let unit = config::url_param("unit")
+            .as_deref()
+            .and_then(parse_unit_kind)
+            .or_else(|| parse_unit_kind(&mode));
         let clip = config::url_param("clip").and_then(|s| {
             CLIPS
                 .into_iter()
@@ -85,6 +82,15 @@ impl Gallery {
                 .and_then(|s| s.parse::<u8>().ok())
                 .unwrap_or(0)
                 .min(2),
+            branch: config::url_param("branch")
+                .and_then(|s| s.parse::<u8>().ok())
+                .unwrap_or(0)
+                .min(1),
+            angle: config::url_param("angle")
+                .and_then(|s| s.parse::<usize>().ok())
+                .unwrap_or(0),
+            far: config::url_param("far").is_some(),
+            crowd: config::url_param("crowd").is_some(),
             lineup: config::url_param("lineup").is_some(),
             portrait: config::url_param("portrait").is_some(),
             range: config::url_param("range").is_some(),
@@ -94,4 +100,23 @@ impl Gallery {
 }
 fn slug(s: &str) -> String {
     s.to_ascii_lowercase().replace(['-', '_', ' '], "")
+}
+
+fn parse_unit_kind(s: &str) -> Option<UnitKind> {
+    s.parse::<usize>()
+        .ok()
+        .and_then(|i| UNIT_KINDS.get(i).copied())
+        // By name, staged kinds too: their figures need review before the
+        // Shop pool switch (P53).
+        .or_else(|| {
+            ALL_KINDS
+                .into_iter()
+                .find(|kind| slug(&format!("{kind:?}")) == slug(s))
+        })
+        .or(match s {
+            "sawknight" => Some(UnitKind::Sawbot),
+            "ogrearcher" => Some(UnitKind::SiegeWalker),
+            "beetling" => Some(UnitKind::Beetling),
+            _ => None,
+        })
 }

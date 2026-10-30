@@ -36,6 +36,8 @@ pub(super) struct Fx<'a> {
     pub stats: &'a mut MatchStats,
     pub orders: &'a mut TowerOrders,
     pub you: Seat,
+    pub time: f64,
+    pub ring: &'a mut crate::art::aim::ImpactRing,
 }
 
 fn pos_of(map: &UnitEntities, visuals: &Visuals, you: Seat, t: Target) -> Option<Vec3> {
@@ -78,7 +80,30 @@ pub(super) fn apply_event(
         Event::Hit {
             to: Target::Unit(id),
             ..
-        } => cue(map, visuals, fx.assets, id, VisualCue::Hit),
+        } => {
+            let matched_attacker = fx.ring.pop_matching(Target::Unit(id), fx.time);
+            let target_pos = at(visuals, Target::Unit(id));
+            // A-1 hit reactions (D-47) for units without a kit; a kit unit
+            // plays its own Hit clip and its attacker's impact (D-51, D-53).
+            let kitless = |e: &Entity| visuals.get(*e).is_ok_and(|(v, _, _)| !v.has_kit());
+            if let Some(&e) = map.0.get(&id).filter(|e| kitless(e)) {
+                if let Ok((_, _, mut anim)) = visuals.get_mut(e) {
+                    anim.apply_hit_stop(0.050);
+                }
+                if let (Some(attacker_target), Some(t_pos)) = (matched_attacker, target_pos) {
+                    if let Some(attacker_pos) = at(visuals, attacker_target) {
+                        let mut recoil = crate::art::melee::HitRecoil::default();
+                        recoil.trigger(attacker_pos, t_pos);
+                        commands.entity(e).insert(recoil);
+
+                        let dir = (attacker_pos - t_pos).normalize_or_zero();
+                        let contact_pt = t_pos + dir * 0.25 + Vec3::new(0.0, 0.55, 0.0);
+                        vfx::sparks(commands, fx.vfx, contact_pt);
+                    }
+                }
+            }
+            cue(map, visuals, fx.assets, id, VisualCue::Hit);
+        }
         Event::Hit {
             to: Target::Stronghold(seat),
             amount,
@@ -159,37 +184,50 @@ fn attack(
         Target::Unit(id) => map.0.get(&id).map(|e| AimTarget::Unit(*e)),
         Target::Stronghold(_) => pos_of(map, visuals, you, to).map(AimTarget::Point),
     };
-    let (shoots, splash) = match from {
-        Target::Unit(id) => {
-            cue(map, visuals, fx.assets, id, VisualCue::AttackStart);
-            let info =
-                map.0
-                    .get(&id)
-                    .and_then(|e| visuals.get_mut(*e).ok())
-                    .map(|(mut v, _, _)| {
+    let (shoots, splash) =
+        match from {
+            Target::Unit(id) => {
+                cue(map, visuals, fx.assets, id, VisualCue::AttackStart);
+                let info = map.0.get(&id).and_then(|e| visuals.get_mut(*e).ok()).map(
+                    |(mut v, _, anim)| {
                         if let Some(t) = target {
                             v.engage(t);
                         }
-                        (v.archetype, v.splash, v.has_kit())
-                    });
-            let (arch, splash, kit) = info.unwrap_or((Archetype::Tank, 0.0, false));
-            fx.sounds.play(match arch {
-                Archetype::Ranged if splash > 0.0 => Sound::Cannon,
-                Archetype::Ranged | Archetype::Control | Archetype::Support => Sound::Shot,
-                Archetype::Tank | Archetype::Dps => Sound::Melee,
-            });
-            // Kit units fire their own shots and impacts (visuals/attacks.rs).
-            let ranged = !matches!(arch, Archetype::Tank | Archetype::Dps);
-            (ranged && !kit, if kit { 0.0 } else { splash })
-        }
-        Target::Stronghold(seat) => {
-            // Towers aim and fire their own projectiles (arena/strongholds).
-            if let Some(t) = target {
-                fx.orders.0.push((seat == you, t));
+                        (v.archetype, v.splash, v.has_kit(), anim.archer, v.yaw)
+                    },
+                );
+                let (arch, splash, kit, is_archer, base_yaw) =
+                    info.unwrap_or((Archetype::Tank, 0.0, false, false, 0.0));
+                // A-1 aim (D-47) for units without a kit; kits aim themselves.
+                if let (false, Some(&e)) = (kit, map.0.get(&id)) {
+                    let hold = match arch {
+                        Archetype::Ranged => 0.18,
+                        Archetype::Support | Archetype::Control => 0.22,
+                        Archetype::Tank | Archetype::Dps => 0.30,
+                    };
+                    commands.entity(e).insert(crate::art::aim::Aim::new(
+                        to, fx.time, hold, base_yaw, base_yaw,
+                    ));
+                }
+                fx.ring.push(from, to, fx.time + 0.30);
+                fx.sounds.play(match arch {
+                    Archetype::Ranged if splash > 0.0 => Sound::Cannon,
+                    Archetype::Ranged | Archetype::Control | Archetype::Support => Sound::Shot,
+                    Archetype::Tank | Archetype::Dps => Sound::Melee,
+                });
+                // Kit units fire their own shots and impacts (visuals/attacks.rs).
+                // The native Archer fires its own arrow at Release (A-1 F5).
+                let ranged = !matches!(arch, Archetype::Tank | Archetype::Dps);
+                (ranged && !kit && !is_archer, if kit { 0.0 } else { splash })
             }
-            (false, 0.0)
-        }
-    };
+            Target::Stronghold(seat) => {
+                // Towers aim and fire their own projectiles (arena/strongholds).
+                if let Some(t) = target {
+                    fx.orders.0.push((seat == you, t));
+                }
+                (false, 0.0)
+            }
+        };
     let (a, b) = (
         pos_of(map, visuals, you, from),
         pos_of(map, visuals, you, to),

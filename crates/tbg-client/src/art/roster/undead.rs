@@ -1,5 +1,8 @@
 //! Undead: bone and dark violet with a spectral green glow.
 
+pub mod bone_brute_v2;
+pub mod hexer_v2;
+
 use super::super::legacy::{part, BodyPlan, FigureSpec, Joint::*};
 use super::super::mesh::Shape::*;
 use super::super::palette::*;
