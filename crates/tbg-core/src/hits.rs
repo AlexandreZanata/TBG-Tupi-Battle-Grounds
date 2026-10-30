@@ -361,6 +361,11 @@ fn splash(
         .def(attacker.kind)
         .ability(attacker.tier, attacker.branch)
         .contains(&Ability::Blast { friendly: true });
+    let splash_carry = st.on_hit.is_some()
+        && state
+            .rules()
+            .form_of(attacker.kind, attacker.tier, attacker.branch)
+            .is_some_and(|f| f.splash_hit);
     let amount = scale(st.damage, st.splash_bp - 10_000);
     // Index loop, no clone: dead units are only removed in `remove_dead`.
     for i in 0..state.units.len() {
@@ -373,6 +378,14 @@ fn splash(
             if !attacker.is_summon() {
                 apply_heal_cut(state, attacker.seat, e.id);
                 apply_form_heal_cut(state, attacker, e.id);
+            }
+            // Oilpress B2 (P47): the slow reaches every splashed unit.
+            if splash_carry {
+                if let Some(on_hit) = st.on_hit {
+                    let _applied = apply_on_hit(state, e.id, on_hit, attacker.seat, ev);
+                    #[cfg(feature = "lab")]
+                    crate::lab::status(state, attacker, _applied);
+                }
             }
         }
     }
@@ -419,7 +432,10 @@ pub(crate) fn damage(
             } else {
                 0
             };
-            let dr = (augment::damage_reduction_bp(state, &victim) + arcana_dr).min(2_000);
+            let dr = (augment::damage_reduction_bp(state, &victim)
+                + arcana_dr
+                + i32::from(victim.fx.march_dr_bp))
+            .min(2_000);
             let amount = if dr > 0 {
                 let reduced = i64::from(amount) * (BP - i64::from(dr)) / BP;
                 if amount >= 1 {
@@ -534,8 +550,10 @@ fn apply_on_hit(
         return 0;
     };
     // A ward ignores incoming slows, roots (and confusion): damage is not
-    // blocked (§C.9).
-    if state.tick < state.units[i].fx.ward_until {
+    // blocked (§C.9). Oilpress A2 is immune to control outright (§C.8).
+    if state.tick < state.units[i].fx.ward_until
+        || crate::afflictions::is_immune_to_control(&state.units[i])
+    {
         return 0;
     }
     let bonus = augment::status_duration_bp(&state.player(attacker).augments);

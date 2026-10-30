@@ -5,7 +5,7 @@ use crate::arcana;
 use crate::augment;
 use crate::content::{Ability, BP, LANE_LEN, MIN_INTERVAL, WINDUP};
 use crate::hits::{damage, resolve_hit};
-use crate::state::{stronghold_x, Event, MatchState, Target};
+use crate::state::{stronghold_x, Event, MatchState, Target, Unit};
 use crate::targeting::{self, Engage};
 use crate::types::{Seat, Status, UnitId};
 
@@ -92,20 +92,28 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
         }
         Some(Engage::Hold) => {}
         None => {
-            let mut speed = match u.status {
-                Status::Slowed { bp, .. } => scale_down(st.speed, bp),
-                _ => st.speed,
+            // Drumguard B2: the bonded ally ignores slows (and fish).
+            let mut speed = if u.fx.march_ignore_slow {
+                st.speed
+            } else {
+                match u.status {
+                    Status::Slowed { bp, .. } => scale_down(st.speed, bp),
+                    _ => st.speed,
+                }
             };
             // Old Finn fish (P45): movement only, multiplicative with any
             // status slow, so no combination reaches zero. Never touches
-            // the attack interval.
+            // the attack interval. Oilpress A2 immunity covers it.
             let fish_bp: i64 =
                 u.fx.fish
                     .iter()
                     .filter(|s| s.left > 0)
                     .map(|s| i64::from(s.value))
                     .sum();
-            if fish_bp > 0 {
+            if fish_bp > 0
+                && !u.fx.march_ignore_slow
+                && !crate::afflictions::is_immune_to_control(&u)
+            {
                 speed = (i64::from(speed) * (BP - fish_bp.min(BP)) / BP) as i32;
             }
             let mut haste = augment::haste_move_bp(&state.player(u.seat).augments, &u, state.tick);
@@ -118,14 +126,77 @@ fn advance_unit(state: &mut MatchState, idx: usize, ev: &mut Vec<Event>) {
                     army.tanks > 0,
                 );
             }
-            let haste = haste.min(5_000);
-            if haste > 0 {
-                speed = ((i64::from(speed) * (BP + i64::from(haste)) / BP).min(i64::from(i32::MAX)))
+            // Drumguard march bonus joins haste under the BR-X03 cap.
+            let bonus = (i64::from(haste) + i64::from(u.fx.march_move_bp)).min(5_000);
+            if bonus > 0 {
+                speed = ((i64::from(speed) * (BP + bonus) / BP).min(i64::from(i32::MAX)))
                     as i32;
             }
-            let x = u.x + u.seat.dir() * speed;
+            let mut x = u.x + u.seat.dir() * speed;
+            x = formation_clamp(state, &u, x);
+            x = escort_clamp(state, &u, x);
             state.units[idx].x = x.clamp(0, LANE_LEN);
         }
+    }
+}
+
+/// Oilpress formation (P47, §C.8): while an engaged Oilpress stands ahead,
+/// allies behind it cannot move past it; they stop `gap` behind it. Only
+/// the nearest engaged one ahead applies; allies already ahead, enemies
+/// and Strongholds are unaffected.
+fn formation_clamp(state: &MatchState, u: &Unit, new_x: i32) -> i32 {
+    let dir = u.seat.dir();
+    let mut anchor: Option<(i32, i32, i32)> = None;
+    for idx in 0..state.units.len() {
+        let o = &state.units[idx];
+        if o.seat != u.seat || o.hp <= 0 || o.id == u.id {
+            continue;
+        }
+        if let Some((ox, gap)) = crate::support::engaged_oilpress(state, idx) {
+            if (ox - u.x) * dir > 0 && anchor.map_or(true, |(d, _, _)| (ox - u.x).abs() < d) {
+                anchor = Some(((ox - u.x).abs(), ox, gap));
+            }
+        }
+    }
+    let Some((_, ox, gap)) = anchor else {
+        return new_x;
+    };
+    if dir > 0 {
+        if u.x <= ox - gap && new_x > ox - gap {
+            ox - gap
+        } else {
+            new_x
+        }
+    } else if u.x >= ox + gap && new_x < ox + gap {
+        ox + gap
+    } else {
+        new_x
+    }
+}
+
+/// Drumguard escort (P47, §C.6): a bonded drummer never walks past its ally.
+fn escort_clamp(state: &MatchState, u: &Unit, new_x: i32) -> i32 {
+    let Some(bid) = u.fx.bond else {
+        return new_x;
+    };
+    let Some(bi) = state.unit_index(bid) else {
+        return new_x;
+    };
+    if state.units[bi].hp <= 0 {
+        return new_x;
+    }
+    let ally_x = state.units[bi].x;
+    let dir = u.seat.dir();
+    if dir > 0 {
+        if u.x <= ally_x && new_x > ally_x {
+            ally_x
+        } else {
+            new_x
+        }
+    } else if u.x >= ally_x && new_x < ally_x {
+        ally_x
+    } else {
+        new_x
     }
 }
 

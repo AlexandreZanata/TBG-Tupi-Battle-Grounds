@@ -1,5 +1,5 @@
-//! Ally-support actions (P46): Bloodweaver transfers. Drumguard bonds and
-//! Cargo Crab boarding join in later waves (ROSTER-EXPANSION §F.3).
+//! Ally-support actions (P46–P47): Bloodweaver transfers, Drumguard bonds.
+//! Cargo Crab boarding joins in P48 (ROSTER-EXPANSION §F.3).
 
 use std::cmp::Reverse;
 
@@ -154,4 +154,137 @@ fn transfer_one(
         to: receiver,
         amount,
     });
+}
+
+/// Drumguard bonds (P47, §C.6): every tick, each living Drumguard bonds to
+/// the nearest allied conventional non-Drumguard within reach (ties lowest
+/// id) and keeps the bond until it is dead, out of range, or another
+/// candidate is at least `hysteresis` closer. The bonded ally's march
+/// fields are rewritten with the best value of each bonus (no stacking).
+/// Bonds are view state, not events.
+pub(crate) fn bonds(state: &mut MatchState) {
+    for u in state.units.iter_mut() {
+        u.fx.march_move_bp = 0;
+        u.fx.march_dr_bp = 0;
+        u.fx.march_ignore_slow = false;
+    }
+    let drummers: Vec<usize> = state
+        .units
+        .iter()
+        .enumerate()
+        .filter(|(_, u)| u.hp > 0 && march_of(state, u).is_some())
+        .map(|(i, _)| i)
+        .collect();
+    for di in &drummers {
+        let id = state.units[*di].id;
+        let bond = eval_bond(state, *di);
+        if let Some(i) = state.unit_index(id) {
+            state.units[i].fx.bond = bond;
+        }
+    }
+    // Best value of each bonus applies when several drummers share an ally.
+    let mut best: Vec<(u16, u16, bool)> = vec![(0, 0, false); state.units.len()];
+    for &di in &drummers {
+        let d = state.units[di];
+        let Some(bond) = d.fx.bond else {
+            continue;
+        };
+        let Some((_, move_bp, dr_bp, _, ignore)) = march_of(state, &d) else {
+            continue;
+        };
+        if let Some(bi) = state.unit_index(bond) {
+            let e = &mut best[bi];
+            e.0 = e.0.max(move_bp);
+            e.1 = e.1.max(dr_bp);
+            e.2 = e.2 || ignore;
+        }
+    }
+    for (i, (move_bp, dr_bp, ignore)) in best.into_iter().enumerate() {
+        state.units[i].fx.march_move_bp = move_bp;
+        state.units[i].fx.march_dr_bp = dr_bp;
+        state.units[i].fx.march_ignore_slow = ignore;
+    }
+}
+
+/// The drummer's March params, if any (absolute per form slot, like Brew).
+fn march_of(state: &MatchState, u: &Unit) -> Option<(i32, u16, u16, i32, bool)> {
+    abilities_of(state, u).into_iter().find_map(|ability| match ability {
+        Ability::March {
+            reach,
+            move_bp,
+            dr_bp,
+            hysteresis,
+            ignore_slow,
+        } => Some((reach, move_bp, dr_bp, hysteresis, ignore_slow)),
+        _ => None,
+    })
+}
+
+/// Bonded ally candidates: living allied conventional non-Drummers in
+/// range; nearest first, ties lowest id.
+fn bond_candidates(
+    state: &MatchState,
+    d: &Unit,
+    reach: i32,
+    exclude: Option<UnitId>,
+) -> Vec<(i32, UnitId)> {
+    let mut out: Vec<(i32, UnitId)> = state
+        .units
+        .iter()
+        .filter(|a| {
+            a.seat == d.seat
+                && a.hp > 0
+                && a.id != d.id
+                && Some(a.id) != exclude
+                && a.kind != crate::types::UnitKind::Drumguard
+                && !a.is_summon()
+        })
+        .filter(|a| (a.x - d.x).abs() <= reach)
+        .map(|a| ((a.x - d.x).abs(), a.id))
+        .collect();
+    out.sort();
+    out
+}
+
+fn eval_bond(state: &MatchState, di: usize) -> Option<UnitId> {
+    let d = state.units[di];
+    let (reach, _, _, hysteresis, _) = march_of(state, &d)?;
+    // A live bond in range holds unless another candidate is at least the
+    // hysteresis closer (deterministic: nearest, then lowest id).
+    if let Some(bid) = d.fx.bond {
+        if let Some(bi) = state.unit_index(bid) {
+            let b = &state.units[bi];
+            let dist = (b.x - d.x).abs();
+            if b.hp > 0 && b.seat == d.seat && dist <= reach {
+                let switched = bond_candidates(state, &d, reach, Some(bid))
+                    .into_iter()
+                    .next()
+                    .is_some_and(|(od, _)| od + hysteresis <= dist);
+                if !switched {
+                    return Some(bid);
+                }
+            }
+        }
+    }
+    bond_candidates(state, &d, reach, None)
+        .into_iter()
+        .next()
+        .map(|(_, id)| id)
+}
+
+/// Oilpress formation anchor check (§C.8): an Oilpress counts as engaged
+/// while a living enemy unit stands within `engage` in front of it.
+pub(crate) fn engaged_oilpress(state: &MatchState, idx: usize) -> Option<(i32, i32)> {
+    let u = &state.units[idx];
+    let [a, b] = state.rules().def(u.kind).ability(u.tier, u.branch);
+    let formation = [a, b].into_iter().find_map(|ability| match ability {
+        Ability::Formation { engage, gap } => Some((engage, gap)),
+        _ => None,
+    });
+    let (engage, gap) = formation?;
+    let dir = u.seat.dir();
+    let engaged = state.units.iter().any(|e| {
+        e.seat != u.seat && e.hp > 0 && (e.x - u.x) * dir > 0 && (e.x - u.x).abs() <= engage
+    });
+    engaged.then_some((u.x, gap))
 }

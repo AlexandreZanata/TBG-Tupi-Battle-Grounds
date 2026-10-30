@@ -7,7 +7,7 @@ use std::cmp::Reverse;
 
 use crate::content::{Ability, Stats, REGEN_PERIOD};
 use crate::state::{Event, MatchState, Stack, Target, Unit};
-use crate::types::{Status, UnitId};
+use crate::types::{Status, UnitId, UnitKind};
 
 /// Add one stack: the first empty slot, else the entry with the least time
 /// left. `cap` is the victim's shared cap for this list.
@@ -176,6 +176,13 @@ pub(crate) fn apply_stacks(
     } else {
         state.units[ai].fx.attacks = n;
     }
+}
+
+/// Oilpress A2 Immovable Mass (§C.8): cannot be slowed, rooted or
+/// confused. Poison and fish stacks still apply (fish only stops slowing
+/// it); the ward and immunity compose independently.
+pub(crate) fn is_immune_to_control(u: &Unit) -> bool {
+    u.kind == UnitKind::Oilpress && u.tier == 2 && u.branch == 0
 }
 
 /// Affliction score for the Antidote's brew choice (§C.9): Rooted or
