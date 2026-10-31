@@ -92,6 +92,11 @@ over; its technology does not.
 
 ## License
 
-No `LICENSE` file yet. MIT is the intended license; the owner adds it
-before the first public release (phase P8). Third-party notices:
+[TBG Visible Attribution License 1.0](LICENSE), selected by the owner on
+2026-10-31: use, modification and redistribution for any purpose, including
+commercial use, require readable on-screen credit to Alexandre Zanata, with
+links to [the creator](https://github.com/AlexandreZanata) and
+[the original repository](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds).
+The interface keeps those references visible during normal use. Third-party
+materials retain their own licenses; see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

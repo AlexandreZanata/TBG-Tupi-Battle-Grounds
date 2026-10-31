@@ -1063,3 +1063,43 @@ nothing that a seat does not already see, so no delay is needed.
 **Reopen when** spectator load breaks the budgets in P47 (2 000 spectators
 at 250 matches), a listed match leaks private state, or the owner wants
 rooms, challenges or ranked watching to stay private as well.
+
+## D-60 · Shared Bevy UI and Linux-first native distribution — 2026-10-31 (owner)
+
+**Decision.** Build a real native Bevy client for Linux x86_64, publish a
+versioned GitHub artifact, install that released artifact on the owner's PC,
+then finish Windows x86_64. The owner requires the full interface from the
+native plan before publication, including account, lobby, friends, settings,
+Arenas, Strongholds, Arcanas, live watching and the battle controls.
+
+**Interface.** This replaces D-27/D-29 as the target and reaffirms D-12.
+During review, native uses Bevy and the browser selects the same screens with
+`?ui=bevy`; the existing HTML path remains until visual sign-off and
+consolidation. D-21's public Ranking pages remain HTML. D-20's existing mobile
+text overlay stays available; mobile development/validation remains deferred.
+Native storage, clipboard, links and HTTP live in the client platform module.
+Server authority and protocol v17 are unchanged; `/api/version` only advertises
+client downloads. The release candidate is `0.1.0-native.1`, not a published tag.
+
+**Validation.** Follow the owner's current local validation policy. A passing
+work-front check is not release acceptance. GitHub publication and installation
+wait for the applicable consolidation and owner look approval.
+**Reopen when** Bevy visual parity cannot be achieved within measured client
+budgets, or the owner changes the distribution scope.
+
+## D-61 · Permissive reuse with visible creator attribution — 2026-10-31 (owner)
+
+**Decision.** The owner replaced the earlier MIT intention with a custom
+[TBG Visible Attribution License 1.0](../LICENSE). It permits reuse,
+modification and redistribution for any purpose, including commercial use,
+while requiring readable credit during normal on-screen use, the creator's
+GitHub link and the original repository link. It adds no royalty or source
+publication requirement. Third-party material retains its own licenses.
+
+**Credit.** Tupi Battle Grounds; Alexandre Zanata (@AlexandreZanata);
+`https://github.com/AlexandreZanata`;
+`https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds`.
+The shared Bevy interface and existing HTML pages implement these references
+in a persistent footer. This is a custom license, not a standard SPDX license;
+its identifier is `LicenseRef-TBG-Visible-Attribution-1.0`.
+**Reopen when** the owner changes the required attribution or licensing terms.

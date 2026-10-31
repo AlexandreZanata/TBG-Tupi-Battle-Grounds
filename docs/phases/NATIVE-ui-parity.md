@@ -3,6 +3,11 @@
 The owner requires complete parity before the first Linux publication.
 HTML remains available until the owner approves the Bevy screens.
 
+Apply [VALIDATION.md](../VALIDATION.md): record work-front progress here,
+consolidate the relevant checks once, and defer heavy/full-suite execution
+until explicitly requested. This acceptance checklist does not authorize
+each parallel front to repeat complete builds or browser campaigns.
+
 - [ ] Account: create/login, bounded editable name/key, mask/reveal, copy,
   save acknowledgment, logout and server errors.
 - [ ] Lobby: profile, ranked stats, feature cards, news, all play modes.
@@ -25,3 +30,14 @@ HTML remains available until the owner approves the Bevy screens.
 ## Owner review
 
 Pending concrete rendered screens. No subjective sign-off is assumed.
+
+## Implementation handoff — 2026-10-31
+
+The Bevy implementations for the listed desktop surfaces are integrated in
+`crates/tbg-client/src/ui/`. Persistent D-61 creator and origin links were
+added to the shared renderer and existing HTML pages. The unchecked boxes
+above are **acceptance**, not a claim that implementation is absent: final
+visual review and the consolidated gameplay/browser checks remain pending.
+Existing `.local/native-captures/` images are development evidence from before
+the final attribution/button changes. No new gallery campaign or mobile matrix
+was started after adoption of the minimal validation policy.

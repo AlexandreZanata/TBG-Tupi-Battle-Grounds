@@ -639,3 +639,23 @@ rules and values, D-34–D-38 the reasons, each phase file the exact steps.
 - **Budgets.** Step time ≤ +10 % at 100 units a side over P16-B; view
   growth of tens of bytes; per-match memory under 1 KB more; measured in
   every phase and re-checked under load in P16-F8.
+
+## Native client migration (D-60, work in progress)
+
+The native Linux client and opt-in browser UI (`?ui=bevy`) share the Bevy
+screens in `ui/shell`, the text editor and UI kit, and the existing UiAction
+queue. The HTML path remains available until owner visual review. The shared
+HUD renders authoritative values; spectator controls expose no seat actions.
+
+`platform/` owns private atomic preferences, process-local sessions, callback
+HTTP, clipboard/browser integration, native window controls and diagnostic
+logs. Native audio and WSS are enabled. Assets resolve beside the executable
+in a distribution, with a repository path fallback during development.
+Account keys remain local plaintext credentials; Linux preference files are
+0600 and their directory is 0700. System keyring support is deferred.
+
+The owner-selected visible-attribution license (D-61) is bundled with native
+packages. A persistent interface footer links to the creator and original
+repository. Linux packaging and a per-user installer are implemented; actual
+release artifacts, consolidated acceptance and Windows builds remain pending.
+See [NATIVE-client.md](phases/NATIVE-client.md) for evidence and deferred checks.
