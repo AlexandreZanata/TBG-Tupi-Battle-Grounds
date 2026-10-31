@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 use tokio::sync::mpsc;
 use tokio::time::MissedTickBehavior;
 
-use tbg_core::protocol::{LiveId, MatchMode, ServerMsg, Token};
+use tbg_core::protocol::{LiveId, MatchMode, Token};
 use tbg_core::replay::Replay;
 use tbg_core::{Event, MatchState, Phase, Seat};
 
@@ -18,6 +18,7 @@ use crate::ranked::{finalizer, EndDetail, MatchKey};
 use crate::store::{AccountId, Store};
 use crate::Config;
 
+mod celebration;
 mod command;
 mod live;
 mod report;
@@ -42,6 +43,7 @@ pub(crate) struct Player {
 }
 
 pub(super) struct Match {
+    pub(super) result_id: tbg_core::protocol::ResultId,
     pub(super) state: MatchState,
     pub(super) players: [Player; 2],
     pub(super) detached_at: [Option<Instant>; 2],
@@ -99,6 +101,7 @@ pub(crate) fn spawn(
     let arcanas = players.each_ref().map(|p| p.arcanas);
     let strongholds = players.each_ref().map(|p| p.stronghold);
     let m = Match {
+        result_id: crate::names::random_bytes::<16>(),
         state: MatchState::with_arcanas(seed, arcanas)
             .with_strongholds(strongholds)
             .with_arena(arena),
@@ -147,7 +150,7 @@ async fn run(
     interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
     let (mut last, mut step_ns, mut step_max, mut late, mut max_late) =
         (Instant::now(), 0u128, 0u128, 0u32, 0u128);
-    loop {
+    let finished = loop {
         interval.tick().await;
         let now = Instant::now();
         let lateness = now.duration_since(last).saturating_sub(tick).as_millis();
@@ -211,13 +214,14 @@ async fn run(
             m.send_spectator_views();
         }
         if let Some(outcome) = m.state.outcome {
+            let finished = Box::new(Seat::BOTH.map(|seat| m.completed(seat, outcome)));
             for seat in Seat::BOTH {
-                m.send(seat, ServerMsg::MatchEnd { outcome });
+                m.send(seat, finished[seat.index()].end.clone());
             }
             m.end_spectators(outcome);
-            break;
+            break finished;
         }
-    }
+    };
     if let (Some(mut replay), Some(tx)) = (m.replay.take(), &config.replays) {
         replay.final_hash = m.state.hash();
         let _ = tx.send(replay);
@@ -245,6 +249,7 @@ async fn run(
         .send(LobbyCmd::MatchEnded {
             tokens: m.players.each_ref().map(|p| p.token),
             live: m.live,
+            finished,
         })
         .await;
     let line = m.log_end(

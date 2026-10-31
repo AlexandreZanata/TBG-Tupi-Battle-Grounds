@@ -15,6 +15,7 @@ mod autoplay;
 mod camera;
 #[cfg(debug_assertions)]
 mod capture;
+mod celebration;
 mod config;
 mod crowd;
 mod gallery;
@@ -97,6 +98,7 @@ fn main() {
             sync::plugin,
             stress::plugin,
             ui::plugin,
+            celebration::plugin,
             autoplay::plugin,
             gallery::plugin,
             i18n::plugin,

@@ -428,6 +428,9 @@ pub struct MatchState {
     #[cfg(feature = "training")]
     #[serde(skip, default)]
     pub(crate) training: Option<Box<crate::training::Runtime>>,
+    /// Runtime-only historical counts; a deserialized snapshot cannot claim full history.
+    #[serde(skip, default)]
+    pub(crate) participation: crate::celebration::LifetimeCast,
 }
 
 /// x position of a seat's Stronghold.

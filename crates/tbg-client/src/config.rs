@@ -483,3 +483,41 @@ pub fn low_motion() -> bool {
     static LOW: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     *LOW.get_or_init(|| url_param("quality").as_deref() == Some("low"))
 }
+
+/// Result motion obeys explicit preference first, then the browser's OS accessibility preference.
+pub fn reduced_motion() -> bool {
+    if let Some(value) = url_param("reduced_motion") {
+        return !matches!(value.as_str(), "0" | "false" | "off");
+    }
+    if let Some(value) = preferences::get(Scope::Local, "tbg_reduced_motion") {
+        return value == "1";
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        return web_sys::window()
+            .and_then(|w| {
+                w.match_media("(prefers-reduced-motion: reduce)")
+                    .ok()
+                    .flatten()
+            })
+            .is_some_and(|m| m.matches());
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    false
+}
+pub fn save_reduced_motion(value: bool) {
+    preferences::set(
+        Scope::Local,
+        "tbg_reduced_motion",
+        if value { "1" } else { "0" },
+    );
+}
+pub fn dismissed_result() -> Option<tbg_core::protocol::ResultId> {
+    parse_hex16(&preferences::get(Scope::Session, "tbg_dismissed_result")?)
+}
+pub fn dismiss_result(id: tbg_core::protocol::ResultId) {
+    preferences::set(Scope::Session, "tbg_dismissed_result", &hex16(&id));
+}
+pub fn clear_dismissed_result() {
+    preferences::remove(Scope::Session, "tbg_dismissed_result");
+}

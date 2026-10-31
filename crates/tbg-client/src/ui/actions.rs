@@ -63,7 +63,12 @@ pub(super) fn apply(
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
     mut inspected: ResMut<super::inspect::Inspected>,
-    (mut lang_res, mut arena): (ResMut<crate::i18n::Lang>, ResMut<crate::arena::ActiveArena>),
+    (mut lang_res, mut arena, mut celebration, info): (
+        ResMut<crate::i18n::Lang>,
+        ResMut<crate::arena::ActiveArena>,
+        ResMut<crate::celebration::Presentation>,
+        Res<crate::sync::MatchInfo>,
+    ),
 ) {
     let now = time.elapsed_secs_f64();
     // BR-AG12: while an Augment selection pauses the battle, only the War
@@ -133,13 +138,24 @@ pub(super) fn apply(
             };
             // Reuse the probe socket when it is still idle and open.
             if let MatchLink::Net(n) = link {
+                if info.outcome.is_some() {
+                    if let Some(id) = info.result_id {
+                        n.discard_completed(id);
+                    }
+                }
                 if n.reuse(mode, now) {
                     *queue_info = QueueInfo::default();
                     next.set(GameState::Queue);
                     return;
                 }
             }
-            *link = MatchLink::Net(Box::new(NetLink::new(mode, now)));
+            let mut connection = NetLink::new(mode, now);
+            if info.outcome.is_some() {
+                if let Some(id) = info.result_id {
+                    connection.discard_completed(id);
+                }
+            }
+            *link = MatchLink::Net(Box::new(connection));
             *queue_info = QueueInfo::default();
             next.set(GameState::Queue);
         };
@@ -190,6 +206,14 @@ pub(super) fn apply(
                 next.set(GameState::Menu);
             }
             UiAction::Cancel | UiAction::ToMenu => {
+                if info.outcome.is_some() {
+                    if let Some(id) = info.result_id {
+                        config::dismiss_result(id);
+                        if let MatchLink::Net(n) = &mut *link {
+                            n.discard_completed(id);
+                        }
+                    }
+                }
                 link.send(ClientMsg::Cancel, now);
                 let parked = if let MatchLink::Net(n) = &mut *link {
                     n.reuse(Mode::Probe, now)
@@ -385,6 +409,12 @@ pub(super) fn apply(
             }
             UiAction::PreviewArena(a) => {
                 arena.set_if_neq(crate::arena::ActiveArena::of(a));
+            }
+            UiAction::CelebrationPrev
+            | UiAction::CelebrationNext
+            | UiAction::CelebrationHide
+            | UiAction::CelebrationMotion => {
+                crate::celebration::control(&mut celebration, &info, action)
             }
             UiAction::Disabled => {}
             UiAction::OpenRanking

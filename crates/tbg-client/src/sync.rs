@@ -19,6 +19,7 @@ mod events;
 #[cfg(target_os = "linux")]
 mod lobby_battle;
 mod messages;
+mod result;
 mod special_cues;
 mod spectate;
 mod timeline;
@@ -30,6 +31,8 @@ pub use messages::{QueueInfo, ViewGaps};
 
 #[derive(Resource, Default)]
 pub struct MatchInfo {
+    pub result_id: Option<tbg_core::protocol::ResultId>,
+    pub celebration: Option<tbg_core::celebration::CelebrationCast>,
     pub you: Option<Seat>,
     /// Post-P14: the HUD shows both names next to the HP bars.
     pub you_name: String,

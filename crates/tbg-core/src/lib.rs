@@ -14,6 +14,7 @@ pub mod bot;
 mod bot_shop;
 mod bulwark;
 mod capybara;
+pub mod celebration;
 mod celestial_archer;
 mod combat;
 pub mod content;

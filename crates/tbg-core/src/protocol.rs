@@ -21,7 +21,10 @@ use crate::view::{MatchView, PublicView};
 /// and carrier events plus `UnitView::fx`; v13: Stronghold kinds and
 /// Fortification (D-46); v12: Interest regen boost; v11: fifteen-node Arcanas.
 /// Older peers are refused by the handshake.
-pub const PROTOCOL_VERSION: u16 = 27;
+pub const PROTOCOL_VERSION: u16 = 29;
+
+/// Public result identity, independent of the combat seed and session token.
+pub type ResultId = [u8; 16];
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a
@@ -110,6 +113,7 @@ pub enum ServerMsg {
     },
     RoomNotFound,
     MatchStart {
+        result_id: ResultId,
         you: Seat,
         // Post-P14: the HUD puts a name next to each HP bar; ratings ride
         // along only in ranked matches.
@@ -134,6 +138,9 @@ pub enum ServerMsg {
         reason: Rejection,
     },
     MatchEnd {
+        result_id: ResultId,
+        last_tick: u32,
+        cast: Option<crate::celebration::CastPayload>,
         outcome: Outcome,
     },
     Ping {

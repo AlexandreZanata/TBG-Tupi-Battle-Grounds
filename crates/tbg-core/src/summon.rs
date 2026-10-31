@@ -161,6 +161,9 @@ fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
         heal_cut_bp: 0,
         second_wind_used: 0,
     });
+    state
+        .participation
+        .born(nester.seat, kind, nester.tier, nester.branch, true);
     ev.push(Event::Spawn {
         unit: id,
         seat: nester.seat,
@@ -416,6 +419,7 @@ fn spawn_cargo(
         heal_cut_bp: 0,
         second_wind_used: 0,
     });
+    state.participation.born(seat, kind, tier, branch, true);
     ev.push(Event::Spawn {
         unit: id,
         seat,

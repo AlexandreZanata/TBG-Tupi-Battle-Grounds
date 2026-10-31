@@ -97,6 +97,7 @@ pub enum LobbyCmd {
     MatchEnded {
         tokens: [Token; 2],
         live: Option<LiveId>,
+        finished: Box<[CompletedResult; 2]>,
     },
     /// P47: cosmetic progress of a listed match, sent with `try_send`.
     LiveProgress {
@@ -137,4 +138,12 @@ pub enum LobbyCmd {
         account: AccountId,
         kind: tbg_core::StrongholdKind,
     },
+}
+
+/// Compact replayable terminal delivery, retained only for the existing reconnect window.
+#[derive(Clone, Debug)]
+pub(crate) struct CompletedResult {
+    pub delivered_to: Option<u64>,
+    pub start: ServerMsg,
+    pub end: ServerMsg,
 }

@@ -2339,3 +2339,62 @@ charges/held at fields 7/8 and append localized role/Faction at fields 9/10.
 Canonical IDs remain stable and all native/web consumers are updated together.
 The owner requests complete Linux/web consolidation; native input, downloads,
 existing panel layouts and creator attribution are retained during i18n merging.
+
+## D-82 · Post-match cast and reusable celebration motion — 2026-10-31 (Proposed)
+
+**Decision.** P63 presents the winning army in its match arena during Result,
+facing the camera and looping each kit's existing Victory or signature Dance.
+Create cosmetic figures independently of simulation entities. Reuse the
+P62 preview motion resolver when integrated; add one signature pilot and
+retain explicit fallback coverage rather than claim every dance is unique.
+
+**Complete history.** Maintain runtime-only aggregate counts by seat/kind/
+last form/eligibility at authoritative spawn and successful Evolution.
+Deaths do not remove participation. This bounds memory by content slots
+instead of retaining an unbounded graveyard. Deliver the final compact cast
+through the result/reconnect route with a coordinated protocol change if
+needed. Allocate the actual next wire version on the integrated base.
+A survivor snapshot or client-observed cache cannot prove complete coverage.
+
+**Why.** Dead units are already removed before the current result screen.
+The owner explicitly wants living and dead participants. Aggregate counters
+support exact duplicate/form counts, reconnect and lazy presentation without
+replaying combat or changing its authority. Immediate result actions and
+idempotent message handling preserve rematches and late rating updates.
+
+**Pending product choices.** Recommended cast includes animated summons,
+excluding inert props; recommended large-cast presentation uses pages of 64
+after an initial 64-figure formation. Owner confirms eligibility, paging or
+all-at-once alternative, and signature pilot at P63 O01–O03. All are Proposed;
+this planning task implements neither the wire change nor the presentation.
+
+**Reopen when** the owner requires all instances simultaneously, actual
+spawn paths invalidate aggregate accounting, finalized-result reconnect
+needs new retention semantics, or visual/performance evidence rejects the
+formation/motion approach. Do not silently truncate cast or weaken results.
+
+
+### D-82 execution clarification — 2026-10-31
+
+The owner approved full animated participation and pagination through every
+logical instance, and replaced the exclusive pilot with a shared current
+Victory standard plus future per-character override seam. P63 does not
+claim all champions have unique Dance content. Protocol 28 adds a public
+random result identity and an opaque bounded cosmetic payload; decoding a
+bad cosmetic field leaves the authoritative Outcome intact. Terminal start/
+end data is retained only in its session under the existing reconnect
+window, dropped at expiry, explicit dismissal or next pairing. No database,
+match duration, rating settlement or reconnect window is extended.
+
+## Consolidated P59/P63 wire contract — 2026-10-31 (owner request)
+
+Protocol 29 combines P59's public shield/effects/special/secondary/flame/fusion
+contract through v27 with P63's result identity and bounded celebration payload
+from v28. This is an actual combined schema, never a blind version reuse.
+All client/server/local/bot consumers and guarded protocol fixtures are updated
+together. D-82 in the independent P59 and P63 fronts denotes separate source
+branch decisions; this integration preserves both decisions and resolves their
+wire compatibility here. Native storage/input/presentation and the new kit
+anatomy replace obsolete browser-only/Archer-v2 assumptions in P63. No online
+outcome moves to a client. The owner authorizes complete PR consolidation,
+release publication, scoped TBG deployment and local Linux installation.

@@ -109,6 +109,7 @@ impl MatchState {
             army: Default::default(),
             pending: Vec::new(),
             shrapnel: Vec::new(),
+            participation: crate::celebration::LifetimeCast::new(),
             rules,
             #[cfg(feature = "lab")]
             lab: crate::lab::LabStats::default(),

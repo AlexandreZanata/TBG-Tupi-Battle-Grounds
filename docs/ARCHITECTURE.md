@@ -785,3 +785,25 @@ formatting occurs only at display boundaries. Content coverage, reference,
 placeholder and glyph guards complement parity; technical/name exceptions
 are reviewed explicitly. No new translation service, gameplay rule or
 database migration is needed. See D-90 and the source audit for limitations.
+
+## 19. Victory celebration (P63, Proposed)
+
+[P63](phases/P63-victory-celebration.md), GAME-DESIGN §17 and D-82 describe a
+Result-owned cosmetic arena scene. It reuses FigureLibrary, champion kits
+and a shared celebration resolver with the P62 preview where integrated.
+Presentation figures are separate from UnitEntities and never affect combat.
+
+An authoritative runtime-only aggregate tracks all eligible participants
+by seat/kind/last form, retaining dead-unit counts without whole dead states.
+The compact final cast follows match-end/reconnect delivery, not a new
+database or HTTP service. Any new end payload needs one coordinated protocol
+revision and all consumers updated; choose its number on the real base.
+Preserve normal simulation hashes/events/RNG and avoid private-data leakage.
+
+Client modules own summary validation/lazy slots, frontal formation/camera,
+scene lifecycle and motion. Proposed pagination bounds visible figures to
+64 while exposing every participant; owner must approve that strategy or
+a measured all-at-once alternative. Result controls and network polling stay
+active. Missing/invalid cosmetics fall back to the regular result, and exit
+clears the scene before another match. Focused cast/protocol/reconnect/
+rematch/lifecycle checks and desktop visual review gate implementation.

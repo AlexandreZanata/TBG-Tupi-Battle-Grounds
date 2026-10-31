@@ -20,7 +20,7 @@ pub fn plugin(app: &mut App) {
 }
 
 #[derive(Component)]
-pub(in crate::ui) struct RatingLabel;
+struct RatingLabel;
 
 #[derive(Component)]
 struct RematchLabel;
@@ -36,113 +36,149 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, l
     let (title, reason) = match info.outcome {
         Some(o) if info.spectating => {
             let reason = match o.reason {
-                EndReason::StrongholdDestroyed => Msg::ResultReasonDestroyed,
-                EndReason::Forfeit => Msg::ResultReasonForfeitWatch,
+                EndReason::StrongholdDestroyed => lang.t(Msg::ResultTower),
+                EndReason::Forfeit => lang.t(Msg::ResultForfeit),
             };
-            (Msg::ResultMatchOver, Some(reason))
+            (lang.t(Msg::ResultOver), Some(reason))
         }
         Some(o) => {
             let title = match o.winner {
-                None => Msg::ResultDraw,
-                Some(w) if Some(w) == info.you => Msg::ResultVictory,
-                Some(_) => Msg::ResultDefeat,
+                None => lang.t(Msg::ResultDraw),
+                Some(w) if Some(w) == info.you => lang.t(Msg::ResultVictory),
+                Some(_) => lang.t(Msg::ResultDefeat),
             };
             let reason = match o.reason {
-                EndReason::StrongholdDestroyed => Msg::ResultReasonDestroyed,
+                EndReason::StrongholdDestroyed => lang.t(Msg::ResultTower),
                 // BR-M06/BR-M03: say which side gave up.
                 EndReason::Forfeit => match o.winner {
-                    Some(w) if Some(w) == info.you => Msg::ResultReasonOpponentLeft,
-                    Some(_) => Msg::ResultReasonYouSurrendered,
-                    None => Msg::ResultReasonLeft,
+                    Some(w) if Some(w) == info.you => lang.t(Msg::ResultOpponentForfeit),
+                    Some(_) => lang.t(Msg::ResultSurrendered),
+                    None => lang.t(Msg::ResultLeft),
                 },
             };
             (title, Some(reason))
         }
-        None => (Msg::ResultMatchOver, None),
+        None => (lang.t(Msg::ResultOver), None),
     };
+    let celebrating = crate::celebration::total(&info).is_some();
     let secs = info.last_tick / TICK_HZ;
-    let duration = lang.tf(
-        Msg::ResultDuration,
-        &[
-            ("time", &format!("{}:{:02}", secs / 60, secs % 60)),
-            ("opponent", &info.opponent),
-        ],
-    );
-    let summary = lang.tf(
-        Msg::ResultSummary,
-        &[
-            ("bought", &stats.bought),
-            ("evolutions", &stats.evolutions),
-            ("damage", &stats.damage_dealt),
-        ],
-    );
-    commands
-        .spawn((
-            screen(JustifyContent::Center),
-            DespawnOnExit(GameState::Result),
-        ))
-        .with_children(|root| {
-            root.spawn((
-                Node {
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    padding: UiRect::all(px(24.0)),
-                    row_gap: px(12.0),
-                    border_radius: BorderRadius::all(px(16.0)),
-                    ..default()
-                },
-                BackgroundColor(PANEL),
-            ))
-            .with_children(|panel| {
-                panel.spawn(label(lang.t(title), 40.0));
-                if let Some(reason) = reason {
-                    panel.spawn(label(lang.t(reason), 16.0));
-                    panel.spawn(label(duration, 16.0));
-                    panel.spawn(label(summary, 16.0));
-                } else if !info.opponent.is_empty() {
-                    panel.spawn(label(
-                        lang.tf(Msg::ResultVersus, &[("opponent", &info.opponent)]),
-                        16.0,
-                    ));
-                }
-                if info.spectating {
-                    panel.spawn(button(
-                        lang.t(Msg::SpectateBackToLobby),
-                        UiAction::ToMenu,
-                        220.0,
-                    ));
-                    return;
-                }
-                panel.spawn((
-                    label("", 18.0),
-                    Node::default(),
-                    RatingLabel,
-                    HideForChallenge,
-                ));
-                panel.spawn((label("", 18.0), Node::default(), RematchLabel));
-                panel.spawn((
-                    button(
-                        lang.t(Msg::ResultRequestRematch),
-                        UiAction::RequestRematch,
-                        220.0,
-                    ),
-                    RematchButton,
-                ));
-                panel.spawn((
-                    button(lang.t(Msg::ResultPlayAgain), UiAction::PlayAgain, 220.0),
-                    HideForChallenge,
-                ));
-                panel.spawn(button(lang.t(Msg::ResultMenu), UiAction::ToMenu, 220.0));
-            });
+    let duration = lang
+        .t(Msg::ResultDuration)
+        .replace("{time}", &format!("{}:{:02}", secs / 60, secs % 60))
+        .replace("{opponent}", &info.opponent);
+    let summary = lang
+        .t(Msg::ResultSummary)
+        .replace("{units}", &stats.bought.to_string())
+        .replace("{evolutions}", &stats.evolutions.to_string())
+        .replace("{damage}", &stats.damage_dealt.to_string());
+    let mut root = commands.spawn((
+        screen(if celebrating {
+            JustifyContent::FlexEnd
+        } else {
+            JustifyContent::Center
+        }),
+        DespawnOnExit(GameState::Result),
+    ));
+    if celebrating {
+        root.insert(Node {
+            width: percent(100),
+            height: percent(100),
+            position_type: PositionType::Absolute,
+            flex_direction: FlexDirection::Column,
+            justify_content: JustifyContent::FlexEnd,
+            align_items: AlignItems::Center,
+            padding: UiRect {
+                left: px(12),
+                right: px(12),
+                top: px(12),
+                bottom: px(34),
+            },
+            ..default()
         });
+    }
+    root.with_children(|root| {
+        root.spawn((
+            Node {
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                width: if celebrating { percent(96) } else { Val::Auto },
+                max_width: if celebrating { px(900) } else { Val::Auto },
+                padding: UiRect::all(px(if celebrating { 8. } else { 24. })),
+                row_gap: px(if celebrating { 3. } else { 12. }),
+                border_radius: BorderRadius::all(px(16.0)),
+                ..default()
+            },
+            BackgroundColor(PANEL),
+        ))
+        .with_children(|panel| {
+            panel.spawn(label(title, if celebrating { 24. } else { 40. }));
+            if let Some(reason) = reason {
+                panel.spawn(label(reason, if celebrating { 12. } else { 16. }));
+                panel.spawn(label(duration, if celebrating { 12. } else { 16. }));
+                panel.spawn(label(summary, if celebrating { 12. } else { 16. }));
+            } else if !info.opponent.is_empty() {
+                panel.spawn(label(format!("vs {}", info.opponent), 16.0));
+            }
+            if !info.spectating
+                && info
+                    .outcome
+                    .is_some_and(|o| o.winner.is_some() && o.winner == info.you)
+                && !celebrating
+            {
+                panel.spawn(label(lang.t(Msg::CelebrationUnavailable), 14.));
+            }
+            if info.spectating {
+                panel.spawn(button(
+                    lang.t(Msg::SpectateBackToLobby),
+                    UiAction::ToMenu,
+                    220.0,
+                ));
+                return;
+            }
+            panel.spawn((
+                label("", 18.0),
+                Node::default(),
+                RatingLabel,
+                HideForChallenge,
+            ));
+            panel.spawn((label("", 18.0), Node::default(), RematchLabel));
+            panel
+                .spawn(Node {
+                    flex_direction: if celebrating {
+                        FlexDirection::Row
+                    } else {
+                        FlexDirection::Column
+                    },
+                    flex_wrap: FlexWrap::Wrap,
+                    justify_content: JustifyContent::Center,
+                    column_gap: px(8),
+                    row_gap: px(5),
+                    ..default()
+                })
+                .with_children(|buttons| {
+                    buttons.spawn((
+                        button(lang.t(Msg::ResultRematch), UiAction::RequestRematch, 220.),
+                        RematchButton,
+                    ));
+                    buttons.spawn((
+                        button(lang.t(Msg::ResultPlay), UiAction::PlayAgain, 220.),
+                        HideForChallenge,
+                    ));
+                    buttons.spawn(button(lang.t(Msg::ResultMenu), UiAction::ToMenu, 220.));
+                });
+            if celebrating {
+                crate::celebration::ui::spawn(panel, &info, *lang);
+            }
+        });
+    });
 }
 
 /// P12: fill the rating label once `RatingChanged` lands, counting the new
 /// value up over 0.6 s. Casual matches (and unranked guests) show nothing.
 fn count_rating(
     time: Res<Time>,
-    account: Res<Account>,
     lang: Res<Lang>,
+    account: Res<Account>,
     mut text: Single<&mut Text, With<RatingLabel>>,
 ) {
     let Some((before, after, arrived)) = account.rating_change else {
@@ -151,14 +187,11 @@ fn count_rating(
     let t = ((time.elapsed_secs_f64() - arrived) / 0.6).clamp(0.0, 1.0);
     let shown = (f64::from(before) + (f64::from(after) - f64::from(before)) * t).round() as u16;
     let delta = i32::from(after) - i32::from(before);
-    text.0 = lang.tf(
-        Msg::ResultRating,
-        &[
-            ("before", &before),
-            ("shown", &shown),
-            ("delta", &format!("{delta:+}")),
-        ],
-    );
+    text.0 = lang
+        .t(Msg::ResultRating)
+        .replace("{before}", &before.to_string())
+        .replace("{after}", &shown.to_string())
+        .replace("{delta}", &format!("{delta:+}"));
 }
 
 /// Challenge matches never show the casual Play again / rating controls.
@@ -176,38 +209,32 @@ fn hide_for_challenge(info: Res<MatchInfo>, mut nodes: Query<&mut Node, With<Hid
 #[allow(clippy::type_complexity)]
 fn update_rematch(
     info: Res<MatchInfo>,
-    rematch: Res<RematchInfo>,
     lang: Res<Lang>,
+    rematch: Res<RematchInfo>,
     mut set: ParamSet<(
         Query<(&mut Text, &mut Node), With<RematchLabel>>,
         Query<(&Children, &mut Node), With<RematchButton>>,
         Query<&mut Text>,
     )>,
 ) {
-    let (label, button, button_visible) = if !info.challenge {
-        (None, None, false)
+    let (label, button_text, button_visible) = if !info.challenge {
+        ("", "", false)
     } else if !rematch.open {
         let text = match rematch.closed {
-            Some(true) => Msg::ResultRematchDeclined,
-            Some(false) => Msg::ResultRematchExpired,
-            None => Msg::ResultRematchPreparing,
+            Some(true) => lang.t(Msg::ResultDeclined),
+            Some(false) => lang.t(Msg::ResultExpired),
+            None => lang.t(Msg::ResultPreparing),
         };
-        (Some(text), None, false)
+        (text, "", false)
     } else if rematch.you_requested && rematch.opponent_requested {
-        (Some(Msg::ResultRematchStarting), None, false)
+        (lang.t(Msg::ResultStarting), "", false)
     } else if rematch.you_requested {
-        (Some(Msg::CouncilWaiting), None, false)
+        (lang.t(Msg::ResultWaiting), "", false)
     } else if rematch.opponent_requested {
-        (
-            Some(Msg::ResultRematchOffered),
-            Some(Msg::ResultAcceptRematch),
-            true,
-        )
+        (lang.t(Msg::ResultInvited), lang.t(Msg::ResultAccept), true)
     } else {
-        (None, Some(Msg::ResultRequestRematch), true)
+        ("", lang.t(Msg::ResultRematch), true)
     };
-    let label = label.map_or("", |m| lang.t(m));
-    let button_text = button.map_or("", |m| lang.t(m));
     for (mut text, mut node) in &mut set.p0() {
         text.0 = label.into();
         node.display = if info.challenge && !label.is_empty() {

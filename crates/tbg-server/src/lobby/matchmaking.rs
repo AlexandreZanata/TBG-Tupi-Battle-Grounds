@@ -76,6 +76,9 @@ impl Lobby {
 
     /// Leave queue, owned room, owned challenge, and any open rematch.
     pub(super) fn leave_waiting(&mut self, token: Token) {
+        if let Some(s) = self.session(&token) {
+            s.finished = None;
+        }
         self.leave_queue_room(token);
         self.challenges.retain(|(_, owner, _)| *owner != token);
         if let Some(s) = self.session(&token) {
@@ -190,6 +193,7 @@ impl Lobby {
         }
         for (seat, token) in Seat::BOTH.into_iter().zip(tokens) {
             if let Some(s) = self.session(&token) {
+                s.finished = None;
                 s.state = SessionState::InMatch {
                     tx: tx.clone(),
                     seat,

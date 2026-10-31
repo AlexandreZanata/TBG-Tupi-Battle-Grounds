@@ -1322,3 +1322,61 @@ All new thresholds/technical budgets below are **Proposed**:
 Full definitions, recovery details, bias qualifications and implementation
 contracts are in [P61](phases/P61-ranked-stats.md). These candidate values
 do not change existing D-33 gate thresholds or active gameplay values.
+
+## 17. Arena victory celebration (P63, Proposed)
+
+**Proposed — planning only, 2026-10-31.** See
+[P63](phases/P63-victory-celebration.md). The owner's requested outcome is
+an arena celebration with the winner's characters, alive or dead, facing
+the player and performing individual animations. No rule below is activated
+by publication of the plan.
+
+- **BR-VC01 — Result first.** Only the authoritative confirmed winner
+  triggers victory. Presentation cannot change combat, Outcome, rating,
+  rewards or duration. Draw/unknown/canceled results do not celebrate.
+- **BR-VC02 — Complete cast.** Include the winner's participating instances,
+  dead and surviving, with duplicates and each instance's last attained
+  Evolution form counted once. Recommended eligibility includes animated
+  combat summons, excluding inert Crates, Strongholds, props and training
+  dummies; confirm P63 O01. Never derive the complete cast only from survivors
+  or views observed since reconnect. A genuinely empty cast stays empty.
+- **BR-VC03 — Arena and facing.** Show intact cosmetic figures in the match
+  arena, in a spaced formation facing the camera on either seat. They are
+  presentation copies, not resurrected simulation units or targets.
+- **BR-VC04 — Current and future motion.** Reuse actual per-kit Victory
+  motions now; add a shared override seam and one owner-approved signature
+  Dance pilot. Future unique dances are authored per character. Shared or
+  arm-raising fallbacks are labeled accurately in the content inventory.
+  Loop within each figure's slot without combat events or repeated audio.
+- **BR-VC05 — Result interaction.** The winner can use Menu, retry/rematch
+  and Hide celebration immediately. Continue processing rating/rematch
+  messages. Duplicate end messages cannot replay audio or recreate the
+  scene. Proposed initial losers/spectators retain their ordinary result.
+- **BR-VC06 — Scale proposal.** Show all figures together through 64;
+  larger casts use explicit pages of at most 64, with total count and every
+  participant reachable. Confirm P63 O02 or adopt a measured all-at-once
+  alternative; no silent truncation or online army cap. Decode compact
+  counts without allocating every logical figure.
+- **BR-VC07 — Safety and preferences.** Scene ownership and cleanup isolate
+  celebration from match state. Reduced motion uses a static pose/camera;
+  existing audio preferences apply. An unusable cast summary falls back to
+  the ordinary result without invalidating the outcome.
+
+Proposed validation: desktop 1366×768 and 1920×1080; 20 lifecycle cycles;
+under the paging proposal, at most 64 visible figures and one camera
+override; p95 frame-time within +10% of a comparable same-arena/cast scene
+on the agreed desktop machine. All measurements and owner visual review
+are deferred until implementation. No phone/touch work is included.
+
+
+### P63 execution amendment — owner decisions, 2026-10-31
+
+O01 and O02 are approved for implementation: BR-VC02 includes animated
+summons, excludes inert Crates, and BR-VC06 uses complete pages of at most
+64 figures. For BR-VC04, the owner requests a shared standard using existing
+Victory motions now, with per-character overrides ready for future content;
+the exclusive pilot requirement is deferred by the owner. No unique-dance
+roster is claimed. Result identity and the exact aggregate use protocol 28
+on main's real v17 schema; unmerged v20/v27 fields are not assumed present.
+All behavioral/presentation additions remain Proposed pending the recorded
+acceptance and visual review. No combat or rating values change.

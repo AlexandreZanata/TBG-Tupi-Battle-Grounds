@@ -11,7 +11,7 @@ use tokio::sync::{mpsc, watch};
 use tbg_core::protocol::{
     ClientMsg, LiveId, LivePlayer, MatchMode, Profile, ServerMsg, SpectateRefusal,
 };
-use tbg_core::{Arena, StrongholdKind};
+use tbg_core::{Arena, Seat, StrongholdKind};
 
 use super::live::{Listing, LiveMatch};
 use super::{Lobby, RematchTicket, Session, SessionState};
@@ -68,6 +68,7 @@ fn add_session(
             arcanas: tbg_core::ArcanaPreset::DEFAULT,
             stronghold: tbg_core::StrongholdKind::DEFAULT,
             last_spectate: None,
+            finished: None,
         },
     );
     rx
@@ -407,6 +408,7 @@ async fn ranked_matches_are_listed_with_ratings_and_their_end_unlists_them() {
     lobby.handle(LobbyCmd::MatchEnded {
         tokens: [[7; 16], [8; 16]],
         live: Some(id),
+        finished: Box::new(Seat::BOTH.map(completed_fixture)),
     });
     lobby.publish_live(Instant::now());
     assert!(
@@ -555,4 +557,67 @@ fn a_watcher_returns_to_idle_on_stop_disconnect_and_match_end() {
     lobby.spectate([2; 16], 1);
     lobby.live_ended(1);
     assert!(matches!(lobby.sessions[&[2; 16]].state, SessionState::Idle));
+}
+
+fn completed_fixture(seat: Seat) -> crate::chan::CompletedResult {
+    crate::chan::CompletedResult {
+        delivered_to: None,
+        start: ServerMsg::MatchStart {
+            result_id: [63; 16],
+            you: seat,
+            you_name: "You".into(),
+            you_rating: None,
+            opponent: "Other".into(),
+            mode: tbg_core::protocol::MatchMode::Casual,
+            opponent_rating: None,
+            arcanas: [tbg_core::ArcanaPreset::DEFAULT; 2],
+            arena: tbg_core::Arena::Forest,
+        },
+        end: ServerMsg::MatchEnd {
+            result_id: [63; 16],
+            last_tick: 120,
+            cast: None,
+            outcome: tbg_core::Outcome {
+                winner: Some(Seat::A),
+                reason: tbg_core::EndReason::Forfeit,
+            },
+        },
+    }
+}
+
+#[test]
+fn celebration_terminal_replay_uses_the_existing_window_and_explicit_dismissal() {
+    let (mut lobby, _rx) = lobby();
+    let token = [63; 16];
+    let _old = add_session(&mut lobby, token, SessionState::Idle);
+    lobby.sessions.get_mut(&token).unwrap().finished = Some((
+        Instant::now() + Duration::from_secs(30),
+        Box::new(completed_fixture(Seat::A)),
+    ));
+    let (tx, mut inbox) = mpsc::channel(8);
+    let conn = ConnHandle { id: 6363, tx };
+    lobby.hello(Some(token), conn, std::net::IpAddr::from([127, 0, 0, 1]));
+    let messages: Vec<_> = std::iter::from_fn(|| inbox.try_recv().ok())
+        .filter_map(|e| {
+            if let ConnEvent::Send(m) = e {
+                Some(m)
+            } else {
+                None
+            }
+        })
+        .collect();
+    assert!(messages
+        .iter()
+        .any(|m| matches!(m,ServerMsg::MatchStart{result_id,..} if *result_id==[63;16])));
+    assert!(messages
+        .iter()
+        .any(|m| matches!(m, ServerMsg::MatchEnd { last_tick: 120, .. })));
+    lobby.leave_waiting(token);
+    assert!(lobby.sessions[&token].finished.is_none());
+    lobby.sessions.get_mut(&token).unwrap().finished = Some((
+        Instant::now() - Duration::from_secs(1),
+        Box::new(completed_fixture(Seat::A)),
+    ));
+    lobby.cleanup();
+    assert!(lobby.sessions[&token].finished.is_none());
 }

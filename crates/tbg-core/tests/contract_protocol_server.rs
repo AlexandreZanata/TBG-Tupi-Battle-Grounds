@@ -39,6 +39,7 @@ fn server_variant_order_is_frozen() {
         ServerMsg::RoomCreated { code: *b"ABCDE" },
         ServerMsg::RoomNotFound,
         ServerMsg::MatchStart {
+            result_id: [63; 16],
             you: Seat::A,
             you_name: "Ann".into(),
             you_rating: None,
@@ -53,7 +54,12 @@ fn server_variant_order_is_frozen() {
             seq: 1,
             reason: Rejection::NotEnoughEnergy,
         },
-        ServerMsg::MatchEnd { outcome },
+        ServerMsg::MatchEnd {
+            result_id: [63; 16],
+            last_tick: 0,
+            cast: None,
+            outcome,
+        },
         ServerMsg::Ping { id: 1 },
         ServerMsg::NetStats { rtt_ms: 40 },
         ServerMsg::Error {
@@ -109,10 +115,11 @@ fn server_variant_order_is_frozen() {
 
 #[test]
 fn server_bytes_are_frozen() {
-    // MatchStart field order: you, you_name, you_rating, opponent, mode,
+    // D-82/v28 prefixes a 16-byte result identity; existing field order: you, you_name, you_rating, opponent, mode,
     // opponent_rating (1000 = varint E8 07), arcanas (v11: fifteen ranks per seat),
     // arena (v15, ARENAS-G: one variant byte, Storm = 4).
     let start = ServerMsg::MatchStart {
+        result_id: [63; 16],
         you: Seat::B,
         you_name: "Ann".into(),
         you_rating: Some(1000),
@@ -128,11 +135,15 @@ fn server_bytes_are_frozen() {
     assert_eq!(
         encode(&start),
         [
-            5, 1, 3, b'A', b'n', b'n', 1, 0xE8, 0x07, 2, b'B', b'o', 1, 0, 2, 2, 2, 2, 2, 2, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4
+            5, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 1, 3, b'A', b'n',
+            b'n', 1, 0xE8, 0x07, 2, b'B', b'o', 1, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4
         ]
     );
     let end = ServerMsg::MatchEnd {
+        result_id: [63; 16],
+        last_tick: 0,
+        cast: None,
         outcome: Outcome {
             winner: Some(Seat::B),
             reason: EndReason::Forfeit,
@@ -140,7 +151,7 @@ fn server_bytes_are_frozen() {
     };
     assert_eq!(
         encode(&end),
-        [8, 1, 1, 1],
+        [8, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 0, 0, 1, 1, 1],
         "Forfeit is now EndReason index 1"
     );
     let row = LeaderRow {

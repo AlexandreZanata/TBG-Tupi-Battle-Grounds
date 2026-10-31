@@ -320,6 +320,7 @@ Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and 
 | Phase | Spec | Scope | Status | Owner checkpoints |
 |---|---|---|---|---|
 | P62 | [P62-troops-training-lab.md](phases/P62-troops-training-lab.md) | Troops catalog: lore, abilities, stats and animated model; exact-team combat laboratory, wooden dummies and Easy/Medium/Hard/Impossible practice bots | **in progress** on `phase/p62-troops-training-lab`: Step 0 recorded; Step 3 core kernel slice written (work-front checks only, tests queued); Steps 1, 2, 4, 5 pending | Integration base, proposed limits/dummy semantics, Impossible assistance, lore/look/fun |
+| P62 | [P62-troops-training-lab.md](phases/P62-troops-training-lab.md) | Troops catalog: lore, abilities, stats and animated model; exact-team combat laboratory, wooden dummies and Easy/Medium/Hard/Impossible practice bots | **planning only** on `codex/p62-troops-training-plan`; no implementation or gameplay validation | Integration base, proposed limits/dummy semantics, Impossible assistance, lore/look/fun |
 
 Read [player journeys and validation cases](planning/TROOPS-TRAINING.md).
 Execute catalog/content → model preview/Dance → safe training core/dummy →
@@ -346,6 +347,22 @@ and two-job cap; historical broad verification blocks are not authorization.
 P41's existing partial implementation remains partial until these applicable
 gaps are fixed and validated. Equal catalog key sets do not close its content
 or dynamic-view acceptance. No game code was changed by this plan.
+
+## Owner-requested victory celebration (2026-10-31)
+
+| Phase | Spec | Scope | Status | Owner checkpoints |
+|---|---|---|---|---|
+| P63 | [P63-victory-celebration.md](phases/P63-victory-celebration.md) | Winner's complete living/dead cast in the arena, facing the player; current per-kit Victory, future signature dances, reliable cast summary and accessible result controls | **implementation draft**, `codex/p63-victory-celebration`; [execution evidence](phases/P63-execution.md) | Complete animated cast and pages of 64 approved; shared existing Victory now, exclusive pilot deferred by owner; visual/performance acceptance pending |
+
+Implement cast inventory/contract → end/reconnect delivery → Result scene/
+frontal formation → shared motion and signature pilot → targeted review.
+P63 shares animation ownership with P62; the complete training laboratory
+is not a dependency. Existing animations may ship first; unique dances for
+the whole roster are a later content pass. The execution branch implements
+the aggregate, protocol 28, terminal replay and cosmetic scene against main
+`9008f11`; unrelated native/roster/training fronts remain separate. Targeted
+checks and remaining A01–A08 acceptance are recorded in the execution report.
+No full-suite or performance acceptance is claimed. See D-82 and Proposed §17.
 
 ## Later (not planned yet)
 
