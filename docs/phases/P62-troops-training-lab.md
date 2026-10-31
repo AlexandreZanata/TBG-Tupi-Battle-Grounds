@@ -605,3 +605,154 @@ The executor fills this during implementation; leave checks unclaimed here.
 
 For the planning delivery, see the actual report at the end of
 [TROOPS-TRAINING.md](../planning/TROOPS-TRAINING.md).
+
+## 9. Execution report — `phase/p62-troops-training-lab`
+
+Validation level for every entry below: **work front** (owner policy
+2026-10-31, `docs/VALIDATION.md` as it stands uncommitted in the main
+checkout; absent from this base). No full suite, benchmark, gallery or
+144-match calibration was run or is implied.
+
+### 9.1 Step 0 — integration base and inventory (2026-10-31)
+
+**Integration base.** `origin/main` = `9008f117c4289122ddff978c5d25720d2bd79687`
+(fetched 2026-10-31), identical to the plan's audited base. The execution
+branch starts at the planning commit `0249d01` (main + P62 documents only).
+
+| Front | Head | vs main | Protocol | `ALL_KINDS` / pool | Lobby shell |
+|---|---|---|---|---|---|
+| `origin/main` | `9008f11` | — | 17 | 27 / 25 | HTML `index.html` + `lobby.js` |
+| `codex/native-desktop-preview` | `e451303` | +119, unmerged | 20 | 27 / 25 | Bevy `ui/shell` |
+| `phase/native-linux-windows` | `a3ef8a8` | +12, diverged from preview | 17 | 27 / 25 | Bevy `ui/shell` |
+| `phase/p59-complete-roster` (local) | `582663b` | +73, draft PR #22 (12/21) | 25 | 27 / 25 | HTML |
+| `phase/system-champions-crowd-shop` | open PR #21 | unmerged | 20 | 27 / 25 | HTML |
+
+No native shell, P59 kit, protocol 20/25 change or PR #20/#21 content is
+merged. None is assumed by this branch. (The plan's “31-row” native figure
+refers to commit `c5c263d`; the current native head declares 27
+`ALL_KINDS`, measured by `git show <ref>:crates/tbg-core/src/types.rs`.)
+
+**Real surfaces on this base.** Browser: Troops is the disabled header
+button (`index.html:90`) and the disabled feature card (`index.html:116`).
+Lobby HTML actions reach Rust only through the allow-listed
+`data-action` attribute polled by `src/ui/desktop_actions.rs` into
+`ActionQueue`, and only in `GameState::Menu`. That idle-only gate is
+reused for R01/V01. Native client: there is no native shell on main, so
+native parity is **pending** until a shell branch merges (O01).
+
+**Active roster (core IDs, `CANON.pool` = `FULL_POOL`, 25 kinds).**
+`Shieldbearer, Archer, BoneBrute, Hexer, Sawbot, SiegeWalker, Bloomkeeper,
+Rootcaller, Nester, Rampart, Longaxe, Farwatch, Bombard, Rotcap, OldFinn,
+AntidoteBrewer, Shatterback, BloodFurnace, Bloodweaver, Oilpress,
+Drumguard, Leechroot, CargoCrab, Puppetmaster, Smuggler`. Each has five
+form slots: base plus four `FormDef`s (A1, A2, B1, B2) in `content.rs`.
+Summons: `Beetling` (parent Nester; its forms follow the Nester's) and
+`Crate` (parent Smuggler; four identical “Crate” forms). `UNIT_KINDS` is the
+legacy ten-kind list and is used only by the local debug army fill.
+
+**Coverage.** Art kits: a directory under `art/kits/` exists for 26 kinds,
+plus the Archer v2 module; owner visual verdict pending. Clips: `Idle`,
+`Walk`, `AttackMelee`, `AttackRanged`, `Cast`, `Hit`, `Death`, `Spawn`,
+`Evolve`, `Victory`; **no Dance**. Localization: `en.json`/`pt-BR.json`
+(176 lines each) contain only lobby Troops labels; unit, form and ability
+names are core English strings with no localized keys. **Lore: 0 of 25**
+kinds have authored lore. Step 1 must create all of it, and owner review
+(O04) is needed before any of it counts as done.
+
+**Reuse limits confirmed in code.**
+
+- `Ruleset::preview()` leaks a clone of `CANON` on every call. On this base
+  `CANON.pool == &FULL_POOL`, so the preview pool equals canon. Removing
+  `MatchState::with_preview` from `local.rs` is safe here. That change is
+  scheduled with the Step 4 `local.rs` edit, not made in Step 0.
+- `shop::draw_offers` requires `pool.len() >= OFFERS` (5). The laboratory
+  never builds a Shop pool from the selection. It spawns exact units and
+  skips economy entirely.
+- C10 (`tests/contract_lab.rs`) forbids `lab` in client/server manifests
+  and the words `with_rules`, `lab_spawn`, `Ruleset {`, `Box::leak` in
+  their sources. Training code keeps those words out of the client.
+- `Bot::new` callers: `local.rs`, `autoplay.rs`, server `botclient.rs`,
+  core tests (`contract_determinism`, `contract_view`, `contract_lab`,
+  `contract_strongholds`, `rules`, `arenas`, `lab_stats`) and examples.
+  All of them stay on the unchanged `Bot`.
+
+**Dummy audit (Crate carrier).** Guards required, each found in code:
+
+1. `summon::hatch → crate_tick` opens any Crate when `action_cd` reaches
+   0, and `spawn` gives a Crate `action_cd = 0`. A dummy would open on its
+   first tick. Needs an explicit dummy skip.
+2. `synergy::update` calls `refresh_max_hp` on every unit of the changed
+   Faction, and the Crate's definition Faction is Humans. That would rescale
+   a 1,000 HP dummy to the Crate's 120 HP. Needs a dummy skip in
+   `refresh_max_hp`.
+3. `combat::advance_unit` lets a Crate (damage 0, range 0, speed 0) start
+   windups. A dummy must skip its own action entirely.
+4. Already safe through `is_summon`: Synergy counts, Bounty/eligible kills,
+   lifesteal, Leechroot Essence, Arcanas, Augments, army composition.
+   `expires_at` is `None` from `spawn`, so dummies never expire.
+
+**Measurement audit.** `hits::damage` returns HP actually removed, after
+damage reduction, shield, plates, Second Wind and overkill clipping. That is
+the single point for hostile and friendly HP damage. `hits::heal` returns
+the *requested* effective amount, **not** HP restored, so overheal is
+included. `LabStats.healed` therefore overcounts, and training must record
+`hp_after − hp_before`. HP also changes outside these two functions:
+Bloodweaver transfer (`support::transfer_one`: donor loss and receiver
+gain), Blood Furnace self-burn (`hits::furnace_bonus`), Plants Synergy
+regeneration (`synergy::regenerate`), max-HP rescaling
+(`refresh_max_hp`), and summon expiry or crate opening (`hp = 0`, removal
+rather than damage). Poison pulses (`afflictions::tick`) call `damage`
+without a source, and `Stack` holds no provenance, so periodic attribution
+needs a sidecar. Shrapnel (`Shrapnel`) has no source either.
+
+**Selected architecture.** As in §4, with these concrete choices:
+
+- An optional core feature `training` (client only) adds a `#[serde(skip)]`
+  `Option<Box<TrainingRuntime>>` to `MatchState`. It is `None` in every
+  normal match, so hashes, views and wire bytes are untouched.
+- Hooks live in one always-compiled module whose bodies are empty without
+  the feature, and whose guards return `false` when the runtime is absent.
+- `MatchState::step` is split only into a shared unit pass (Synergy →
+  boarding → `run_units`) and `remove_dead`, with an identical call order.
+  Training runs unit pass → `remove_dead` and omits regen, windows,
+  Augments, tower fire and Stronghold checks.
+
+**Product decisions.**
+
+- **O01 — resolved for execution:** the plan's fallback applies. Deliver
+  on main (browser HTML adapter); native shell parity stays explicitly
+  pending until a shell branch is merged.
+- **O02 — owner decision pending.** Recommendation: approve 1–12 initial
+  units per side, 1–5 dummies, Finite/Renewable presets of 1,000/10,000 HP,
+  a 256 living-entity ceiling, 4,096 result rows and a 300 s run limit. The
+  kernel implements them as named **Proposed** constants. No player-facing
+  entry enables them before approval.
+- **O03 — owner decision pending.** Recommendation: transparent ×2 regen
+  for Impossible as specified. **Not implemented and not enabled.**
+- **O04 — owner review pending.** No lore, role text or Dance identity is
+  authored yet, and none is counted as finished.
+
+**Exact commands for this front** (shared lock, two jobs). The
+`training_*` tests below are created by Step 3:
+
+```bash
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 cargo check -p tbg-core --lib --features training
+```
+
+Queued for consolidation, not run on this front:
+
+```bash
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
+  cargo test -p tbg-core --features training --test training_session -- --test-threads=1
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
+  cargo test -p tbg-core --features training \
+  --test contract_determinism --test contract_lab --test contract_protocol -- --test-threads=1
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
+  cargo test -p tbg-core --features lab,training --test contract_lab -- --test-threads=1
+```
+
+**Client compilation is deferred.** The new worktree has no build cache,
+and the disk has about 23 GB free (95% used). A cold Bevy check is
+deferred to consolidation by policy, so Step 1/2 client code is not written
+blind on this front.
