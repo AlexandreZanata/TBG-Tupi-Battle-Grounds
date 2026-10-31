@@ -10,6 +10,8 @@
   const percent = (value, max) => Math.max(0, Math.min(100, value / Math.max(1, max) * 100));
   root.querySelector('[data-battle-action="surrender"]').addEventListener('click', () => send('surrender'));
   root.querySelector('[data-battle-action="close-inspect"]').addEventListener('click', () => send('close-inspect'));
+  // A spectator's Leave (P47): Rust stops the watch and returns to the lobby.
+  root.querySelector('[data-battle-action="leave-watch"]').addEventListener('click', () => send('leave-watch'));
   // War Council (BR-AG12–14): pick a card, then confirm; the choice is final.
   const council = { round: '', picked: null, sent: '', initialTicks: 0 };
   const augmentArt = globalThis.TbgAugmentArt;

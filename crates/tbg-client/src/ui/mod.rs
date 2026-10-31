@@ -15,6 +15,8 @@ mod army_tests;
 #[cfg(test)]
 mod augment_data_tests;
 mod battle_hud;
+#[cfg(test)]
+mod battle_wiring_tests;
 mod countdown;
 mod desktop;
 #[cfg(target_arch = "wasm32")]
