@@ -16,6 +16,8 @@ use crate::visuals::{self, UnitLook, VisualAssets};
 mod actions;
 pub(crate) mod crowd_ecs;
 mod events;
+#[cfg(target_os = "linux")]
+mod lobby_battle;
 mod messages;
 mod spectate;
 mod timeline;
@@ -82,6 +84,8 @@ type FxResources<'w> = (
 );
 
 pub fn plugin(app: &mut App) {
+    #[cfg(target_os = "linux")]
+    lobby_battle::plugin(app);
     app.init_resource::<MatchInfo>()
         .init_resource::<LatestView>()
         .init_resource::<ViewBuffer>()
@@ -93,12 +97,7 @@ pub fn plugin(app: &mut App) {
         .init_resource::<crate::art::aim::ImpactRing>()
         .init_resource::<crate::visuals::mount::Mounts>()
         .add_systems(Update, poll_link)
-        .add_systems(
-            Update,
-            sync_units
-                .after(poll_link)
-                .run_if(in_state(GameState::InMatch)),
-        )
+        .add_systems(Update, sync_units.after(poll_link).run_if(render_units))
         .add_systems(
             Update,
             crowd_ecs::update
@@ -114,6 +113,14 @@ pub fn plugin(app: &mut App) {
                 .run_if(in_state(GameState::InMatch)),
         )
         .add_systems(OnExit(GameState::InMatch), clear_units);
+}
+
+fn render_units(state: Res<State<GameState>>) -> bool {
+    #[cfg(target_os = "linux")]
+    if *state.get() == GameState::Menu {
+        return lobby_battle::enabled();
+    }
+    *state.get() == GameState::InMatch
 }
 
 /// Lane x in milli-tiles → world x, mirrored for seat B.
@@ -135,23 +142,10 @@ fn sync_units(
     mut map: ResMut<UnitEntities>,
     mut visuals: events::Visuals,
     mut fx_res: FxResources,
+    #[cfg(target_os = "linux")] state: Res<State<GameState>>,
+    #[cfg(target_os = "linux")] mut demo: ResMut<lobby_battle::Demo>,
 ) {
     let now = time.elapsed_secs_f64();
-    let mut scene = Scene {
-        commands: &mut commands,
-        assets: &assets,
-        lib: &lib,
-        map: &mut map,
-        visuals: &mut visuals,
-    };
-    // Borrowed, not cloned: the frame lives only while units are placed.
-    let placed = buffer
-        .timeline
-        .frame(now, time.delta_secs_f64())
-        .map(|f| scene.place(f.from, f.to, f.alpha));
-    let Some((you, alive)) = placed else {
-        return;
-    };
     let (vfx, sounds, stats, orders, ring) = (
         &fx_res.0,
         &mut *fx_res.1,
@@ -159,6 +153,38 @@ fn sync_units(
         &mut *fx_res.3,
         &mut *fx_res.4,
     );
+    #[cfg(target_os = "linux")]
+    let menu = *state.get() == GameState::Menu;
+    #[cfg(target_os = "linux")]
+    let (timeline, sounds, stats) = if menu {
+        let lobby_battle::Demo {
+            timeline,
+            sounds,
+            stats,
+            ..
+        } = &mut *demo;
+        (timeline, sounds, stats)
+    } else {
+        (&mut buffer.timeline, sounds, stats)
+    };
+    #[cfg(not(target_os = "linux"))]
+    let timeline = &mut buffer.timeline;
+    let mut scene = Scene {
+        commands: &mut commands,
+        assets: &assets,
+        lib: &lib,
+        map: &mut map,
+        visuals: &mut visuals,
+        #[cfg(target_os = "linux")]
+        menu,
+    };
+    // Borrowed, not cloned: the frame lives only while units are placed.
+    let placed = timeline
+        .frame(now, time.delta_secs_f64())
+        .map(|f| scene.place(f.from, f.to, f.alpha));
+    let Some((you, alive)) = placed else {
+        return;
+    };
     let mut fx = events::Fx {
         assets: &assets,
         vfx,
@@ -169,7 +195,7 @@ fn sync_units(
         time: time.elapsed_secs_f64(),
         ring,
     };
-    for ev in buffer.timeline.take_events() {
+    for ev in timeline.take_events() {
         apply_event(&mut commands, &mut fx, &map, &mut visuals, ev);
     }
     map.0.retain(|id, e| {
@@ -188,6 +214,8 @@ struct Scene<'a, 'w, 's, 'qw, 'qs> {
     lib: &'a FigureLibrary,
     map: &'a mut UnitEntities,
     visuals: &'a mut events::Visuals<'qw, 'qs>,
+    #[cfg(target_os = "linux")]
+    menu: bool,
 }
 
 impl Scene<'_, '_, '_, '_, '_> {
@@ -221,6 +249,13 @@ impl Scene<'_, '_, '_, '_, '_> {
                     };
                     let e =
                         visuals::spawn_unit_visual(self.commands, self.assets, self.lib, look, pos);
+                    #[cfg(target_os = "linux")]
+                    if self.menu {
+                        self.commands
+                            .entity(e)
+                            .remove::<crate::ui::UiAction>()
+                            .insert((lobby_battle::DemoUnit, DespawnOnExit(GameState::Menu)));
+                    }
                     self.commands
                         .entity(e)
                         .insert(crowd_ecs::CrowdState::default());
