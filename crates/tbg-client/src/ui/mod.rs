@@ -32,6 +32,8 @@ mod input;
 pub(crate) mod inspect;
 #[cfg(test)]
 mod json_lite;
+#[cfg(test)]
+mod lobby_panels_tests;
 mod menu;
 mod queue;
 pub mod ranking;
