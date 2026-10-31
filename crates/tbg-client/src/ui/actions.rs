@@ -345,7 +345,13 @@ pub(super) fn apply(
                 inspected.0 = None;
                 tower_open.0 = false;
             }
-            UiAction::CloseInspect => inspected.0 = None,
+            UiAction::CloseInspect => {
+                inspected.0 = None;
+                #[cfg(target_os = "linux")]
+                {
+                    selected.0 = None;
+                }
+            }
             UiAction::Inspect(offer) => {
                 if let Some(v) = &extra.0 .0 {
                     let kind = v.offers[usize::from(offer).min(tbg_core::content::OFFERS - 1)];

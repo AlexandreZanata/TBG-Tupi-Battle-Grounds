@@ -22,6 +22,7 @@ pub struct VisualAssets {
 }
 
 /// Faction body colors (ARCHITECTURE §7 primary palette).
+#[cfg(not(target_os = "linux"))]
 pub const FACTION_COLORS: [[u8; 3]; 4] = [
     [0x8B, 0x73, 0x55],
     [0xD8, 0xD2, 0xC0],

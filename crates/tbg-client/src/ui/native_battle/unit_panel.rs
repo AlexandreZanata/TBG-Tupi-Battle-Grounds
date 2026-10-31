@@ -169,7 +169,27 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     Upgrades,
                 ))
                 .with_children(|options| {
-                    options.spawn(kit::heading("Evolution", 12.));
+                    options
+                        .spawn(Node {
+                            width: percent(100),
+                            justify_content: JustifyContent::SpaceBetween,
+                            align_items: AlignItems::Center,
+                            ..default()
+                        })
+                        .with_children(|heading| {
+                            heading.spawn(kit::heading("Evolution", 12.));
+                            heading.spawn((
+                                Node {
+                                    width: px(20),
+                                    height: px(20),
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::Center,
+                                    ..default()
+                                },
+                                UiAction::CloseEvolve,
+                                children![kit::heading("×", 14.)],
+                            ));
+                        });
                     for branch in 0..2 {
                         options.spawn((
                             Node {
@@ -254,7 +274,7 @@ fn header(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                     justify_content: JustifyContent::Center,
                     ..default()
                 },
-                UiAction::Deselect,
+                UiAction::CloseInspect,
                 children![kit::heading("×", 16.)],
             ));
         });
