@@ -321,14 +321,17 @@ and two-job cap; historical broad verification blocks are not authorization.
 
 | Phase | Spec | Scope | Status | Owner checkpoints |
 |---|---|---|---|---|
-| P63 | [P63-victory-celebration.md](phases/P63-victory-celebration.md) | Winner's complete living/dead cast in the arena, facing the player; current per-kit Victory, future signature dances, reliable cast summary and accessible result controls | **planning only**, `codex/p63-victory-celebration-plan` | Cast eligibility; large-cast paging/all-at-once strategy; signature pilot and visual approval |
+| P63 | [P63-victory-celebration.md](phases/P63-victory-celebration.md) | Winner's complete living/dead cast in the arena, facing the player; current per-kit Victory, future signature dances, reliable cast summary and accessible result controls | **implementation draft**, `codex/p63-victory-celebration`; [execution evidence](phases/P63-execution.md) | Complete animated cast and pages of 64 approved; shared existing Victory now, exclusive pilot deferred by owner; visual/performance acceptance pending |
 
 Implement cast inventory/contract → end/reconnect delivery → Result scene/
 frontal formation → shared motion and signature pilot → targeted review.
 P63 shares animation ownership with P62; the complete training laboratory
 is not a dependency. Existing animations may ship first; unique dances for
-the whole roster are a later content pass. No game implementation or broad
-validation was performed in the planning branch. See D-82 and Proposed §17.
+the whole roster are a later content pass. The execution branch implements
+the aggregate, protocol 28, terminal replay and cosmetic scene against main
+`9008f11`; unrelated native/roster/training fronts remain separate. Targeted
+checks and remaining A01–A08 acceptance are recorded in the execution report.
+No full-suite or performance acceptance is claimed. See D-82 and Proposed §17.
 
 ## Later (not planned yet)
 

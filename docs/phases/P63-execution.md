@@ -180,3 +180,177 @@ sample 16 phases each, checking finite poses, event-free clip metadata and
 root bounds; a synthetic callback proves the override seam is executed.
 Formatting/diff checks passed. Final compilation and test execution remain
 queued with Step 5; A04 visual approval remains distinct from these checks.
+
+## Step 5 — targeted consolidation (implementation draft)
+
+Level: consolidation requested by the owner, not a full-suite run. Tests ran
+on the committed Steps 1–4 plus the acceptance fixes described below. The
+retry/dismissal fix is `644ce18`; final rendering/cleanup fixes are `2a354fd`.
+Main was fetched again before publication and remains `9008f11`. This report
+is a subsequent documentation commit. Every compiling command used:
+
+```bash
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 \
+  CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/target \
+  <command>
+```
+
+Commands actually executed successfully (all tests add `-- --test-threads=1`):
+
+```bash
+cargo test --locked -p tbg-core --test celebration_cast
+cargo test --locked -p tbg-core --test contract_determinism
+cargo test --locked -p tbg-core --test contract_protocol
+cargo test --locked -p tbg-core --test contract_protocol_server
+cargo test --locked -p tbg-server --lib celebration
+cargo test --locked -p tbg-server --test online celebration
+cargo test --locked -p tbg-server --test online rematch
+cargo test --locked -p tbg-server --test online version_mismatch_rejected
+cargo test --locked -p tbg-client celebration
+cargo test --locked -p tbg-client ui::result::tests::rematch_controls_follow_the_offer_without_query_conflicts
+cargo test --locked -p tbg-client net::socket::tests::challenge_result_reconnects_without_consuming_the_invite_again
+cargo test --locked -p tbg-client art::celebration::tests
+cargo test --locked -p tbg-client celebration::layout::tests
+cargo test --locked -p tbg-client net::socket::tests
+cargo test --locked -p tbg-client celebration::scene::tests
+cargo check --locked -p tbg-server --lib --tests --bins
+cargo build --locked -p tbg-client --bin tbg-client
+```
+
+**41 distinct tests passed**, with no failed tests in the final relevant
+runs; repeated filters above followed actual code changes or corrected
+compilation failures. Core/server account for 27, client for 14. Frozen
+determinism hashes remain unchanged. The real-WebSocket acceptance test
+uses two connections, buys a participant, disconnects the winner, confirms
+the other seat's surrender, then recovers identical result identity and cast
+twice without a live view; it exercises each winning seat. Existing rematch
+contracts pass. This is not two rendered browser clients finishing a match.
+
+Acceptance fixes: measure actual mesh boxes through 32 celebration poses,
+cache envelopes by bounded kind/form domain, stagger rows, use continuous
+presentation clocks across looping clips, keep localized controls below the
+formation and restore/clear the camera override on exit. A regression checks
+hierarchy destruction and a later ordinary Result retaining its own camera.
+An explicitly dismissed result is ignored during retry/login and across
+browser tab reload via sessionStorage, without changing account credentials.
+These fixes do not change the authoritative outcome, match duration or rating.
+
+### Focused native observations
+
+An opt-in debug-only `p63_fixture=1` creates participants using real core
+Purchase/Evolution, kills half, confirms a core forfeit outcome, then enters
+Result. It does not fake production input or run on ordinary startup. Native
+captures used Xvfb/X11, the debug client, existing host graphics driver and
+the same actual arena/models; no installed application was replaced.
+
+Representative invocation (each capture uses its own path and log):
+
+```bash
+TBG_P63_FIXTURE=1 TBG_P63_COUNT=9 TBG_P63_SEAT=A \
+TBG_P63_SIZE=1920x1080 TBG_P63_CAPTURE="$PWD/.local/p63-a9-framed.png" \
+TBG_SERVER=ws://127.0.0.1:9/ws WINIT_UNIX_BACKEND=x11 \
+timeout 50 xvfb-run -a -s '-screen 0 1920x1080x24 -nolisten tcp' \
+  env -u WAYLAND_DISPLAY \
+  /home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/target/debug/tbg-client
+```
+
+Observed captures, all with one camera and zero game-metric changes:
+
+- Seat A, 1920×1080: nine figures (594 total ECS entities), frontal intact
+  models, machine and humanoid poses; controls remain unobstructed.
+- Seat B, 1366×768, pt-BR: nine figures, same orientation/spacing contract;
+  longer translated control copy wraps without hiding Menu/retry.
+- Empty cast, 1366×768: zero figures, explicit empty message and range 0–0.
+- One figure, seat B, reduced motion, 1366×768: stable pose; 20 Result/Menu
+  cycles return owned entities to zero and total ECS count to the first
+  warmed-up Menu baseline. Final Result has 387 entities.
+- 64 figures, seat A, 1920×1080: 64 cosmetic roots, range 1–64 of 64,
+  2,022 total ECS entities; no observed overlap with result controls.
+- 65 participants, seat B, 1366×768, page 1: only the final logical figure
+  allocated, range 65–65 of 65, 385 total ECS entities. Other logical slots
+  remain available through the previous-page control.
+
+These are rendering fixtures, not ranked games or owner visual approval.
+The first PNG attempt failed because Bevy's existing PNG encoder feature was
+disabled; that zero-byte artifact is not evidence. Enabled `png` with a
+Cargo.toml reason and resolved its already cached transitive dependencies
+using `cargo build --offline -p tbg-client --bin tbg-client` (3m41s). Later
+locked builds/captures succeeded. The initial framing was visibly too small;
+the final captures above use sampled mesh envelopes. Test/capture outputs
+stay under ignored `.local/`, never in git.
+
+### Coverage limits and follow-up
+
+- A01/A06: aggregate, death/Evolution/summon, bounded wire validation,
+  lazy expansion, identity and hash/event isolation pass targeted tests.
+  Unknown enum decoding is rejected inside the cosmetic payload; malformed
+  entire frames still follow existing transport rejection rules.
+- A02: winner A/B, loss/draw/spectator/unusable-cast gating pass tests;
+  forfeit rendering and empty cast observed. A naturally completed Practice
+  win and P62 controlled drills remain unobserved; P62 drills are unmerged.
+- A03/A04: representative native formations observed at both desktop sizes;
+  130 form motions are finite/eventless in sampled tests. Full visual review
+  of every large rig/form and subjective owner approval remain
+  pending. Exclusive pilot is deferred by the owner's explicit O03 override.
+- A05: rematch server contracts, client result UI, duplicate/stale result
+  acceptance and retry/login regression pass. A rendered online
+  retry/rematch journey and delayed-rating/audio playback review remain pending.
+- A07: pure tests cover 0/1/3/64/65 and huge u64 totals/page boundaries;
+  native observations cover 0/1/9/64/65. No count-sized allocation is used.
+- A08: 20 automated native enter/exit cycles and reduced pose observed;
+  stable entity/camera assertions pass. Audio resource baseline, listening
+  with mute, native keyboard/page cycling and automatic OS preference
+  behavior require a focused interactive review. The browser controls were
+  observed as described below; tests do not substitute for listening.
+- Proposed p95 +10% budget, cold load and real-device frame comparison are
+  **not measured**. A screenshot's FPS label is not a performance result.
+  Benchmarks, release packaging, full workspace suite, extensive galleries,
+  Windows/macOS/mobile and deployment were not run or authorized here.
+- Do not deploy protocol 28 to one endpoint only. Reconcile wire changes
+  when integrating unmerged P59/native work; their missing implementations
+  are not implied by the chosen version number. Native PR #26 remains
+  separately stacked on PR #21.
+
+Browser build/observations are recorded separately below. Until the pending
+mandatory visual/performance/interactive acceptance is reviewed, publish as
+a Draft PR to main rather than declaring P63 production-ready.
+
+### Focused WebGL2 observations
+
+Ran `trunk build` in `crates/tbg-client` under the same lock/cache/two-job
+wrapper. The first attempt was interrupted with exit 143 and no compiler
+diagnostic. A cache-reusing recovery completed its Rust dev build in 54.34s;
+the final fixture-control adjustment rebuilt in 3.50s. Both finished with
+one existing WASM warning: unused `lang` at `ui/battle_hud.rs:126`, also
+present in main `9008f11`. No unrelated HUD edit was made to hide it.
+No release/WASM optimization readiness is claimed from this dev build.
+
+Served only `127.0.0.1:8016` with Python's HTTP server and opened a separate
+hidden in-app browser tab at:
+
+```text
+http://127.0.0.1:8016/?p63_fixture=1&p63_count=65&p63_seat=B&lang=pt-BR&server=ws://127.0.0.1:9/ws
+```
+
+After the debug readiness assertion (`data-p63-ready=true`), observed:
+
+- WebGL2 arena and 64 cosmetic figures at 1366×768, pt-BR; range 1–64 of 65.
+- Physical PageDown (`Next`) reaches the final figure, range 65–65 of 65.
+- M switches to the stable reduced-motion pose and updates localized copy.
+- H removes the cosmetic figure and restores the ordinary arena camera;
+  H again restores the figure. PageUp returns to 1–64; M restores motion.
+- Resizing the same live scene to 1920×1080 reflows camera/formation and
+  leaves the full result controls visible below it. Saved full-viewport
+  evidence locally as `.local/p63-web-65.jpg` (not a tracked binary).
+- Escape immediately returns to the ordinary DOM lobby. No warning/error
+  entries were captured by the browser console before or after the journey.
+
+The opt-in debug driver initially reapplied its requested page every frame;
+adjusted it to initialize once so it cannot override real UI navigation.
+Reloaded the final build before the interactive observations above. This
+fixture has no working server at port 9 and cannot validate online rendered
+retry/rematch, rating arrival or sound playback. It is separate browser
+evidence, not a claim inferred from native compilation. Closed only the
+created tab, reset the temporary viewport and stopped only this local HTTP
+process. Existing user windows, native installation and VPS were untouched.
