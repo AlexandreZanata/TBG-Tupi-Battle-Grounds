@@ -601,3 +601,30 @@ window/focus scenarios to consolidation; no account data was changed for
 this appearance-only adjustment. Full suite and other-target builds remain
 deferred without the existing explicit authorization. No game rule, web
 behavior/assets replacement, remote Git, CI or deployment belongs here.
+
+### Original crest/account-card result
+
+- Installed source: `e4513030452f3f4bc2bc822548fb58c4917c5206`.
+  `cargo build --locked -p tbg-client --bin tbg-client`, Linux packaging
+  with `--no-archive` and the generated installer passed under the shared
+  host lock/cache with `CARGO_BUILD_JOBS=2`. The command waited for the
+  active front under the owner's exception; compilation took 8.68 s with
+  no warnings or errors.
+- `cargo fmt -p tbg-client -- --check`, `git diff --check`, glyph WebP
+  decode/format inspection, `desktop-file-validate` and installed binary/
+  cache/manifest SHA-256 comparison passed. Installed metadata and the
+  local preview pointer identify this source, and all three account glyphs
+  are included in the installed assets.
+- Inspected `.local/account-header-installed.webp` at 1920x972: the lobby
+  record panel shows the original blue/gold player crest without stretching;
+  the header shows that crest inside a circular avatar, rounded gold card,
+  separated name row and aligned create-account/key actions. The previous
+  application emblem no longer appears in the Linux menu. The written Tupi
+  wordmark and window/application icon retain their intended roles.
+- The isolated capture exited successfully with only expected virtual X11
+  XSETTINGS/physical-dimension warnings. It used a localhost server override,
+  so loading/unavailable presence/live-battle text is not production data
+  evidence. Real account submission, authenticated state, hover/keyboard
+  and resize checks remain deferred as listed above. No full suite,
+  other-target build, remote Git, CI or deployment ran. Existing windows,
+  account data, preferences and unrelated policy edits were preserved.
