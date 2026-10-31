@@ -251,3 +251,35 @@ ui::fortify::tests -- --test-threads=1`, the existing
 outside click, Escape, both branch purchases, insufficient Energy,
 in-flight rejection/acknowledgment, a paused War Council and max tier.
 No full suite, WASM build or multiplayer campaign belongs to this front.
+
+### Fortification panel result
+
+- Installed source: `716f7cc9fd7a67014e3d4bb7a5f74079af92e7a1`.
+  `cargo build --locked -p tbg-client --bin tbg-client`, native packaging
+  with `--platform linux --no-archive`, and the generated installer passed
+  under the same shared host lock with `CARGO_BUILD_JOBS=2`. The first build
+  took 11.42 s; the icon correction took 3.64 s; final text clipping took
+  11.07 s. No compiler warnings or errors were recorded. Waiting for the
+  occupied slot used the owner's explicit exception for this chat.
+- `cargo fmt -p tbg-client -- --check`, `git diff --check`, desktop entry
+  validation and installed executable SHA-256/source-metadata verification
+  passed. The four existing browser Stronghold symbols were rasterized to
+  lossless 240x300 WebP (52028 bytes total); the SVG sprite is unchanged.
+- Inspected the installed panel in an isolated Command/Forest Practice
+  session at 1920x972. The normal SelectTower action opens the left panel;
+  its top aligns with the HP plate. The correct Command symbol, current
+  HP, passive, branch names, next steps, effects, costs and close control
+  are present. Final running capture shows affordable options and the
+  branch-selection note. Capture: `.local/fortification-panel-verified.webp`.
+- Initial capture review led to using the exact browser symbol instead of
+  the lobby illustration and placing passive copy inside a clipped
+  two-line parent. An early debug capture preceded 3D scene readiness; the
+  final capture at seven seconds shows the loaded arena and corrected
+  clipping. Only expected virtual X11 XSETTINGS/physical-dimension warnings
+  were recorded.
+- Actual mouse/keyboard purchases, close, outside click and Escape remain
+  deferred as listed above; queued-action visual observation does not
+  claim those scenarios passed. No full suite, web build/assets change,
+  remote push, CI wait or VPS action occurred. The owner's existing app
+  windows, real preferences and unrelated policy edits were preserved.
+  Reopen TBG to load this installation.
