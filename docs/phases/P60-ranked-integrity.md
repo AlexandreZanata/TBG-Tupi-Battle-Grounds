@@ -616,7 +616,8 @@ Branch `codex/p60-p61-ranked-implementation`, based on `origin/main`
 `9008f11` (fetched 2026-10-31) plus the planning commit `501d80c`,
 cherry-picked as `8086675`. Validation level: **targeted tests** (run on
 the owner's request, 2026-10-31). The scoped clippy and the queued tests
-pass. **P60 is incomplete:** steps 5–7 are missing.
+pass. **P60 is incomplete:** steps 6 (owner-gated UI/protocol) and 7
+(consolidation) are missing.
 
 - **Commit(s):**
   - `afb4eac`: renumber D-70–72 → D-87–89.
@@ -629,6 +630,7 @@ pass. **P60 is incomplete:** steps 5–7 are missing.
   - `e6888d9`: step 4 shadow evaluation.
   - `deeeb6f`: ranked queue wait.
   - `79b5a1d`: stale v6 schema pin in a unit test.
+  - `b112557`: step 5 correction CLI.
 - **Step 0 reconciliation.**
   - Main equals the plan's audited base, so the protocol is still v17 and
     the schema still v6. The browser HTML lobby is the only ranked
@@ -698,9 +700,23 @@ pass. **P60 is incomplete:** steps 5–7 are missing.
       at start-up (exit 2 on invalid; `enforce` rejected).
     - The policy is read once per process, so each settlement snapshots
       the process policy.
+  - *Step 5.* `tbg-ranked-admin` and `store::integrity_admin`:
+    - `list-review`, `inspect --match`, and `plan --action
+      invalidate|clear|review|restore` work on a read-only copy. A plan
+      shows old/new rating, peak and W/L/D for both accounts.
+    - `apply --plan` on the stopped server's file first writes a
+      never-overwritten `VACUUM INTO` backup. It then re-derives the plan
+      (base revision lease, current records, projection) inside one
+      immediate transaction. It updates the two accounts, the risk
+      projection and `effective_delta`, appends `ranked_decisions` and
+      bumps the revision. A repeated operation key is a no-op.
+    - Transitions follow §4: Normal/Review → Invalidated, Review → Normal,
+      Normal → Review, Invalidated → Normal. Unknown or pre-v7 matches and
+      bad input are refused.
+    - Replay starts from `ranked_baseline` with frozen first-settlement
+      deltas through `rating::apply`, and recomputes peak along the path.
+      Later opponents are never rerated.
 - **Not done.**
-  - The step 4 read-only CLI reports and the step 5 correction CLI
-    (`tbg-ranked-admin`).
   - Step 6: protocol/receipt UI (owner gate).
   - Step 7: consolidation.
   - The `EXPLAIN QUERY PLAN` evidence for the history statement.
@@ -714,7 +730,7 @@ pass. **P60 is incomplete:** steps 5–7 are missing.
   - `cargo clippy -p tbg-core --lib --test contract_ruleset_version --test contract_ranked_integrity -- -D warnings`:
     exit 0.
   - `cargo clippy -p tbg-server --lib --bins --tests -- -D warnings`:
-    exit 0 at `deeeb6f`. The first completed run, after seven exit-75
+    exit 0 at `deeeb6f` and again at `b112557`. The first completed run, after seven exit-75
     deferrals while the P59 front held the lock, found 5 errors, fixed in
     `05a1c49`.
 - **Targeted tests run** (owner request; shared lock, `CARGO_BUILD_JOBS=2`,
@@ -731,6 +747,20 @@ pass. **P60 is incomplete:** steps 5–7 are missing.
       became `>= 6`, with its arena assertions unchanged.
   - The existing ranked/accounts/leaderboard end-to-end suites now run
     through the finalizer and the v7 settlement.
+  - Step 5 (owner request "P60 Step 5 CLI"):
+    `cargo test -p tbg-server --no-fail-fast --lib --test ranked --test ranked_admin --test ranked_integrity --test ranked_recovery --test ranked_stats --test ranked_stats_recovery`
+    → 60 passed, including `ranked_admin` 4:
+    - invalidate → restore returns exactly to the original;
+    - a repeated apply is a no-op;
+    - the revision lease and transitions are enforced;
+    - the floor case (a baseline of 105 replays to 100 + gain, not a
+      subtraction);
+    - the P61 cohort follows the status.
+
+    The first run failed only because the floor test indexed the wrong
+    seat (fixed in the test). A CLI smoke run on a scratch copy covered:
+    list-review, inspect, a plan with its shown projection, apply plus
+    backup, a repeated apply (no change) and a refused transition (exit 2).
 - **Still deferred:**
   - Desktop browser checks of ordinary ranked results and reconnects.
   - `EXPLAIN QUERY PLAN` evidence for the history statement.
@@ -742,6 +772,8 @@ pass. **P60 is incomplete:** steps 5–7 are missing.
   NoChange exclusion, history-unavailable and NotStarted pass in
   `tests/ranked_integrity.rs`. The remaining catalog rows (A1, A4–A11) are
   covered only by the core contract or not yet written.
+- **Correction procedure:** see `deploy/README.md` "Ranked review and
+  corrections".
 - **Migration/recovery/rollback:** v6 → v7 twice, idempotence,
   conflict/same-account quarantine, rollback on insert failure and journal
   ordering pass in `tests/ranked_recovery.rs`. The

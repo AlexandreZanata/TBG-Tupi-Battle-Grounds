@@ -84,6 +84,29 @@ records. Never delete `ranked-pending/` by hand: each file is a finished
 match whose rating has not been applied yet. The server replays the files
 in order on start.
 
+Ranked review and corrections (P60 §7). Work on a backup copy for anything
+that reads, and on the live file only with the server stopped:
+
+```bash
+tbg-ranked-admin list-review --db /tmp/copy.sqlite3
+tbg-ranked-admin inspect --match <32-hex key> --db /tmp/copy.sqlite3
+tbg-ranked-admin plan --action invalidate --match <key> --reason "<why>" --actor <you> \
+  --db /tmp/copy.sqlite3 --out plan.json            # shows both accounts' old/new rating
+sudo systemctl stop tbg-server
+sudo -u tbg /opt/tbg/bin/tbg-ranked-admin apply --plan plan.json --db /var/lib/tbg/tbg.sqlite3
+sudo systemctl start tbg-server                      # rebuilds the leaderboard snapshot
+```
+
+The plan must be made from a copy that is current. If any settlement
+landed since the plan was made, `apply` refuses it and you make the plan
+again. `apply` writes `tbg.sqlite3.pre-<operation>.sqlite3` before it
+changes anything; running the same plan twice changes nothing. Only the
+two accounts of the match are rebuilt, from their frozen deltas;
+`restore` undoes an `invalidate`. `--actor` is a label, not
+authentication. The binary is built with
+`cargo build --release -p tbg-server --bin tbg-ranked-admin`, and
+`deploy.sh` does not install it yet.
+
 Match records:
 
 ```sql

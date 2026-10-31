@@ -307,7 +307,7 @@ WebGPU build · delta views · additional regions (ARCHITECTURE §12).
 
 | Phase | Spec | Deliverable | Status | Review |
 |---|---|---|---|---|
-| P60 | [P60-ranked-integrity.md](phases/P60-ranked-integrity.md) | Shared v7 ranked identity/recovery, shadow signals, optional whole-pair budgets, audit/correction CLI | **In progress** on `codex/p60-p61-ranked-implementation`: steps 0–4 implemented in shadow mode (no gate active), scoped clippy and targeted tests pass (core 10, server 61); steps 5–7 pending; D-87/D-89 and BR-RI Proposed | focused tests, CLI, review, owner activation pending |
+| P60 | [P60-ranked-integrity.md](phases/P60-ranked-integrity.md) | Shared v7 ranked identity/recovery, shadow signals, optional whole-pair budgets, audit/correction CLI | **In progress** on `codex/p60-p61-ranked-implementation`: steps 0–5 implemented in shadow mode (no gate active), including the `tbg-ranked-admin` correction CLI; scoped clippy and targeted tests pass; steps 6 (owner gate) and 7 pending; D-87/D-89 and BR-RI Proposed | focused tests, CLI, review, owner activation pending |
 | P61 | [P61-ranked-stats.md](phases/P61-ranked-stats.md) | v8 side summaries, internal CLI, public aggregate API/desktop lobby page, patch-note workflow | **In progress**: §3 ruleset identity, E0 (collector, v8, post-commit insert) and E1 (internal aggregation, `tbg-stats`) delivered, targeted tests pass; E2/E3 (public API, lobby page, patch workflow) not started; D-88/D-89 | implementation, review, privacy/look/publication decisions pending |
 
 Read [RANKED-PROGRAM.md](planning/RANKED-PROGRAM.md) first: audited current

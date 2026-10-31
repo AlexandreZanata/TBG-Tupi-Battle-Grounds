@@ -725,8 +725,9 @@ leave-one-account-out pending.
 - **Optional-write failure / invalidation / migration recovery evidence:**
   covered by the tests above: insert-or-verify, a failed optional write
   leaving ratings unchanged, the journal carrying the summary, and v6→v8
-  twice. Not yet covered: a review → clear → invalidate → restore rebuild
-  (needs the P60 correction CLI).
+  twice. P60's `ranked_admin` test shows that invalidate removes the match
+  from the cohort and restore brings it back. The E1 report always
+  rebuilds from stored rows, so no cache can outlive a correction yet.
 - **Desktop/i18n evidence and owner look decision:** not applicable until
   E2.
 - **Deviations.**
