@@ -31,6 +31,9 @@ pub struct Gallery {
     pub lineup: bool,
     /// Isolated base-form screenshot for a Shop card.
     pub portrait: bool,
+    /// Capture-only framing controls for figures with wide equipment.
+    pub portrait_zoom: f32,
+    pub portrait_x: f32,
     /// `&range`: the five forms attacking dummies on the BattleLine.
     pub range: bool,
     /// `&evolve` (with `&range`): every third attack is an Evolution flourish.
@@ -93,6 +96,16 @@ impl Gallery {
             crowd: config::url_param("crowd").is_some(),
             lineup: config::url_param("lineup").is_some(),
             portrait: config::url_param("portrait").is_some(),
+            portrait_zoom: config::url_param("portrait_zoom")
+                .and_then(|s| s.parse::<f32>().ok())
+                .filter(|v| v.is_finite())
+                .unwrap_or(1.0)
+                .clamp(1.0, 4.0),
+            portrait_x: config::url_param("portrait_x")
+                .and_then(|s| s.parse::<f32>().ok())
+                .filter(|v| v.is_finite())
+                .unwrap_or(0.0)
+                .clamp(-2.0, 2.0),
             range: config::url_param("range").is_some(),
             evolve: config::url_param("evolve").is_some(),
         }

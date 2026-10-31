@@ -178,6 +178,12 @@ fn spawn_towers(
                 Visibility::default(),
             ))
             .id();
+        if own {
+            // Clicking it opens the Fortification panel (ui/input.rs).
+            commands
+                .entity(root)
+                .insert(crate::ui::UiAction::SelectTower);
+        }
         dress(
             &mut commands,
             &mut art,
