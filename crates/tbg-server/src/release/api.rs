@@ -45,9 +45,9 @@ pub fn decide(
     if own.is_none() {
         return if client == own_contract {
             Decision::Admit {
-                endpoint: own.map_or("/ws".into(), |i| i.endpoint.clone()),
-                slot: own.map_or(String::new(), |i| i.slot.clone()),
-                generation: own.map_or(String::new(), |i| i.generation.clone()),
+                endpoint: "/ws".into(),
+                slot: String::new(),
+                generation: String::new(),
             }
         } else {
             Decision::UpdateRequired {

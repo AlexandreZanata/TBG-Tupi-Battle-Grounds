@@ -158,9 +158,10 @@ pub(crate) async fn run(
     // P60: one finalizer per process settles every ranked result in order;
     // its journal recovery finishes before the lobby serves any command.
     if let (Some(store), Some(db)) = (lobby.store.clone(), lobby.config.db.clone()) {
+        let dir = crate::ranked::journal::dir_for_slot(&db, lobby.release.slot());
         let handle = crate::ranked::finalizer::start(
             store,
-            db,
+            dir,
             lobby.self_tx.clone(),
             lobby.metrics.clone(),
         )

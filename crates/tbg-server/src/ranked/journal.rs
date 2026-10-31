@@ -19,10 +19,6 @@ pub const FILE_CAP: usize = 32 * 1024;
 pub const DIR_CAP: u64 = 32 * 1024 * 1024;
 const FORMAT: u64 = 1;
 
-pub fn dir_for(db: &Path) -> PathBuf {
-    dir_for_slot(db, None)
-}
-
 /// P66: each slot process keeps its own journal next to the shared
 /// database, so a restarted slot recovers exactly its own results. Slot
 /// `a` (and a single-slot server) keeps the original directory name.

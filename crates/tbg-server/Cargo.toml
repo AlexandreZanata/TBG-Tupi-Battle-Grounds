@@ -24,11 +24,13 @@ path = "src/bin/tbg-bots.rs"
 name = "tbg-ranked-admin"
 path = "src/bin/tbg-ranked-admin.rs"
 
-# P61 E1: internal ranked statistics report from a database backup.
+# P66 §6: operator control of the release directory (canary, promote,
+# drain, rollback, retirement check); never stops a process.
 [[bin]]
 name = "tbg-release-admin"
 path = "src/bin/tbg-release-admin.rs"
 
+# P61 E1: internal ranked statistics report from a database backup.
 [[bin]]
 name = "tbg-stats"
 path = "src/bin/tbg-stats.rs"
