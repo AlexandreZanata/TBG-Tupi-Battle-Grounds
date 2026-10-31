@@ -297,6 +297,19 @@ Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and 
 
 [Arena seascape](art/ARENA-SEASCAPE.md): implemented and validated on `codex/arena-seascape`, based on main `6ef155b`, then integrated into `codex/ranking-ui` for PR #14 at the owner's request to publish all changes from this chat. Owner approved the displayed design and the 12.9 ms reference p95 limit (+15.2% over its measured baseline). Report includes before/after desktop captures, performance/build measurements, local commits and the separate pre-existing online-test exclusion. Current authorization is GitHub publication only; no main merge or VPS deployment. Broader P30 status is unchanged.
 
+## Owner-requested localization completion (2026-10-31)
+
+| Phase | Spec | Scope | Status | Review |
+|---|---|---|---|---|
+| P64 | [P64-i18n-completeness.md](phases/P64-i18n-completeness.md) | Finish P41: champions/abilities, Augments, Arcanas, Strongholds, HUD/common states, API/ranking profiles, native and standalone views; shared keys and live language refresh | **audit and planning only**, `codex/p64-i18n-completeness-plan` | Translation/glossary and targeted desktop validation pending |
+
+[Audit/file inventory](planning/P64-I18N-AUDIT.md),
+[hashed source manifest](planning/P64-I18N-SOURCE-MANIFEST.csv), and
+[executor prompt with authorized PR-to-main delivery](planning/P64-EXECUTION-PROMPT.md).
+P41's existing partial implementation remains partial until these applicable
+gaps are fixed and validated. Equal catalog key sets do not close its content
+or dynamic-view acceptance. No game code was changed by this plan.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·

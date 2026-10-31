@@ -1063,3 +1063,36 @@ nothing that a seat does not already see, so no delay is needed.
 **Reopen when** spectator load breaks the budgets in P47 (2 000 spectators
 at 250 matches), a listed match leaks private state, or the owner wants
 rooms, challenges or ranked watching to stay private as well.
+## D-90 · Complete localization at the presentation boundary — 2026-10-31
+
+**Decision for planning.** P64 completes the unfinished P41 content/HUD/
+standalone migration using existing Lang/Msg/TBG_I18N and paired catalogs.
+The static audit found matching key sets (174/main-derived, 217/native)
+while gameplay text bypasses them through literal strings, raw content
+fields, Debug names, API codes and native ad hoc bilingual helpers.
+Parity is necessary but not evidence of complete product localization.
+
+**Contracts.** Preserve canonical content IDs, mechanics, usernames,
+credentials, API field names, wire/storage values and asset identities.
+Translate their presentation through exhaustive content resolvers and full
+parameterized messages. Numbers derive from canonical data; errors are
+classified semantically rather than by English prose. Locale changes
+invalidate dynamic/cached text without resetting gameplay or user drafts.
+Browser/native/standalone entry points share the same language policy.
+
+**Why.** Translating only catalogs/headings leaves Augments, abilities,
+Arcanas, tower details and API-derived profile rows mixed with English.
+Moving all prose into core/server or translating identity fields would
+break mechanics, persistence or lookups without solving the client boundary.
+Use small reviewed naming/diagnostic exclusions and content coverage guards,
+not a blanket ban on every English-looking literal.
+
+**Evidence and status.** See [audit](planning/P64-I18N-AUDIT.md), its hashed
+source manifest and [P64](phases/P64-i18n-completeness.md). Documentation
+only: no translations or code corrections implemented, no runtime coverage
+claim. No gameplay rule, database migration or new protocol is planned.
+
+**Reopen when** a new active content domain lacks stable display identity,
+an API genuinely lacks necessary semantics, a third language is requested,
+or shared runtime/font limitations prevent faithful presentation. Document
+the concrete boundary change instead of replacing the existing i18n stack.

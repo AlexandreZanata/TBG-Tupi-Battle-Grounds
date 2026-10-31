@@ -639,3 +639,20 @@ rules and values, D-34–D-38 the reasons, each phase file the exact steps.
 - **Budgets.** Step time ≤ +10 % at 100 units a side over P16-B; view
   growth of tens of bytes; per-match memory under 1 KB more; measured in
   every phase and re-checked under load in P16-F8.
+
+## 20. Localization completion (P64, planned)
+
+[P64](phases/P64-i18n-completeness.md) completes P41 using compiled client
+catalogs and the existing browser runtime. Core/server keep canonical
+identities, numeric mechanics and language-independent API/wire/storage
+data. Client resolvers map content IDs and result/status/error codes to
+localized display text and parameterized descriptions. Native bilingual
+helpers migrate into the same checked catalogs.
+
+Locale participates in report/DOM/native text invalidation; async language
+loads cannot overwrite newer selections. Standalone ranking/profile entry
+points use the same resolver/policy under their CSP. Number/date/plural
+formatting occurs only at display boundaries. Content coverage, reference,
+placeholder and glyph guards complement parity; technical/name exceptions
+are reviewed explicitly. No new translation service, gameplay rule or
+database migration is needed. See D-90 and the source audit for limitations.
