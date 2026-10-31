@@ -63,6 +63,7 @@ pub mod textform;
 mod textform_bevy;
 mod tips;
 mod toast;
+pub(crate) mod update;
 
 pub use actions::ActionQueue;
 pub use toast::{Banner, Toasts};
@@ -143,6 +144,17 @@ pub enum UiAction {
     CloseRanking,
     // BR-M06: two-tap surrender in the HUD.
     Surrender,
+    // P66: the native update overlay (ui/update), handled before `apply`.
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateNow,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateLater,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateCancel,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateRestart,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateNotesOk,
     #[cfg(target_os = "linux")]
     ShowArenaBanner,
     #[cfg(target_os = "linux")]
@@ -175,6 +187,8 @@ pub const DISABLED: Color = Color::srgb(0.30, 0.32, 0.35);
 pub const TEXT: Color = Color::srgb(0.96, 0.95, 0.90);
 
 pub fn plugin(app: &mut App) {
+    // P66: the native update overlay (no-op in the browser).
+    update::plugin(app);
     #[cfg(target_os = "linux")]
     native_battle::plugin(app);
     #[cfg(target_os = "linux")]
@@ -184,7 +198,14 @@ pub fn plugin(app: &mut App) {
     app.init_resource::<PendingBuy>()
         .add_systems(
             Update,
-            (input::taps, keyboard::navigate, actions::apply, scale_ui).chain(),
+            (
+                input::taps,
+                keyboard::navigate,
+                update::take_actions,
+                actions::apply,
+                scale_ui,
+            )
+                .chain(),
         )
         .add_plugins((
             actions::plugin,

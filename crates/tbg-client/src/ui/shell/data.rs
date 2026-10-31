@@ -148,9 +148,13 @@ pub fn poll(
     if !crate::config::bevy_ui() {
         return;
     }
+    // P66: a launcher-managed install learns about releases from the
+    // signed repository; `/api/version` only advises unmanaged installs.
     if !data.version_checked {
         data.version_checked = true;
-        data.version_request = Some(Request::get("/api/version"));
+        if std::env::var_os("TBG_UPDATE_HELPER").is_none() {
+            data.version_request = Some(Request::get("/api/version"));
+        }
     }
     if let Some(result) = data.version_request.as_ref().and_then(Request::take) {
         data.version_request = None;

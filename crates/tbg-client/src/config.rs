@@ -103,7 +103,11 @@ pub fn parse_invite_token(hex: &str) -> Option<[u8; 16]> {
 /// Per tab (`sessionStorage`): a shared token made two open tabs keep
 /// taking over each other's session.
 pub fn load_token() -> Option<[u8; 16]> {
-    parse_hex16(&preferences::get(Scope::Session, "tbg_token")?)
+    let session = preferences::get(Scope::Session, "tbg_token").and_then(|t| parse_hex16(&t));
+    // P66: after a native restart the protected resume record carries it.
+    #[cfg(not(target_arch = "wasm32"))]
+    let session = session.or_else(resume::token);
+    session
 }
 
 /// P47: the match a `?watch=<16 hex>` link names; `None` for anything else.
@@ -130,6 +134,104 @@ pub fn clear_watch() {
 
 pub fn save_token(token: &[u8; 16]) {
     preferences::set(Scope::Session, "tbg_token", &hex16(token));
+    #[cfg(not(target_arch = "wasm32"))]
+    resume::save_token(token);
+}
+
+/// P66: the slot path the current session was admitted on (`/ws/slot-a`).
+pub fn save_resume_endpoint(endpoint: &str) {
+    preferences::set(Scope::Session, "tbg_endpoint", endpoint);
+    #[cfg(not(target_arch = "wasm32"))]
+    resume::save_endpoint(endpoint);
+}
+
+/// The endpoint to resume on: this tab's (browser) or, after a native
+/// restart, the protected resume record while it is still fresh.
+pub fn load_resume_endpoint() -> Option<String> {
+    let session = preferences::get(Scope::Session, "tbg_endpoint");
+    #[cfg(not(target_arch = "wasm32"))]
+    let session = session.or_else(resume::endpoint);
+    session
+}
+
+/// P66 §4: an installation-local, nonsecret rollout bucket (0–99), never
+/// derived from accounts or addresses.
+pub fn rollout_bucket() -> u8 {
+    const KEY: &str = "tbg.bucket";
+    if let Some(n) = preferences::get(Scope::Local, KEY).and_then(|v| v.parse::<u8>().ok()) {
+        if n < 100 {
+            return n;
+        }
+    }
+    // Native: clock nanoseconds. Browser: a byte of the server-issued
+    // session token (no clock or RNG dependency on wasm); 0 before one.
+    #[cfg(not(target_arch = "wasm32"))]
+    let n = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| (d.subsec_nanos() % 100) as u8);
+    #[cfg(target_arch = "wasm32")]
+    let n = match load_token() {
+        Some(token) => token[0] % 100,
+        None => return 0,
+    };
+    preferences::set(Scope::Local, KEY, &n.to_string());
+    n
+}
+
+/// P66 §3.3: a native restart (crash, update, voluntary close) can resume
+/// the session's match on its original generation. The record lives in
+/// the private preferences file beside the account key (0600 in a 0700
+/// directory), never in arguments, URLs or logs, and expires quickly.
+#[cfg(not(target_arch = "wasm32"))]
+mod resume {
+    use super::{hex16, parse_hex16, preferences, Scope};
+
+    const KEY: &str = "tbg.resume";
+    /// The server keeps a seat 30 s; a record older than this is useless.
+    const FRESH_SECS: u64 = 120;
+
+    fn now() -> u64 {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |d| d.as_secs())
+    }
+
+    fn read() -> Option<serde_json::Value> {
+        let raw = preferences::get(Scope::Local, KEY)?;
+        let v: serde_json::Value = serde_json::from_str(&raw).ok()?;
+        let saved = v.get("saved")?.as_u64()?;
+        (now().saturating_sub(saved) <= FRESH_SECS).then_some(v)
+    }
+
+    fn write(token: Option<String>, endpoint: Option<String>) {
+        let old = read();
+        let field = |name: &str| {
+            old.as_ref()
+                .and_then(|v| v.get(name)?.as_str().map(String::from))
+        };
+        let value = serde_json::json!({
+            "token": token.or_else(|| field("token")),
+            "endpoint": endpoint.or_else(|| field("endpoint")),
+            "saved": now(),
+        });
+        preferences::set(Scope::Local, KEY, &value.to_string());
+    }
+
+    pub(super) fn save_token(token: &[u8; 16]) {
+        write(Some(hex16(token)), None);
+    }
+
+    pub(super) fn save_endpoint(endpoint: &str) {
+        write(None, Some(endpoint.to_string()));
+    }
+
+    pub(super) fn token() -> Option<[u8; 16]> {
+        parse_hex16(read()?.get("token")?.as_str()?)
+    }
+
+    pub(super) fn endpoint() -> Option<String> {
+        read()?.get("endpoint")?.as_str().map(String::from)
+    }
 }
 
 /// D-40/P40: the Arcana preset the lobby editor saved under `tbg.arcanas`

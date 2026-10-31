@@ -24,7 +24,11 @@ impl NetLink {
     pub(super) fn connect(&mut self, now: f64) {
         self.opened = false;
         self.outq.clear();
-        match ewebsock::connect(config::server_url(), ewebsock::Options::default()) {
+        // P66: no socket until admission chose the slot path.
+        let super::admission::Route::Ready { url, .. } = &self.route else {
+            return;
+        };
+        match ewebsock::connect(url.clone(), ewebsock::Options::default()) {
             Ok(pair) => self.socket = Some(pair),
             Err(_) => self.lost(now),
         }
@@ -113,6 +117,10 @@ impl NetLink {
             ServerMsg::Welcome { token, .. } => {
                 let previous = self.token;
                 config::save_token(&token);
+                // P66: remember where this session lives (its generation).
+                if let super::admission::Route::Ready { endpoint, .. } = &self.route {
+                    config::save_resume_endpoint(endpoint);
+                }
                 self.token = Some(token);
                 self.status = NetStatus::Ready;
                 self.lost_at = None;
@@ -229,6 +237,11 @@ mod tests {
             outq: Default::default(),
             inq: Default::default(),
             watching: false,
+            route: crate::net::admission::Route::Ready {
+                url: "ws://127.0.0.1:8080/ws".into(),
+                endpoint: "/ws".into(),
+                fresh: true,
+            },
         }
     }
 

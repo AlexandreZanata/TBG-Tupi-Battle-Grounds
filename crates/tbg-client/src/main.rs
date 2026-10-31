@@ -67,7 +67,7 @@ fn main() {
     let plugins = DefaultPlugins;
     #[cfg(not(target_arch = "wasm32"))]
     let plugins = plugins.set(platform::window::log_plugin());
-    App::new()
+    let exit = App::new()
         .add_plugins(
             plugins
                 .set(WindowPlugin {
@@ -110,6 +110,13 @@ fn main() {
         .add_plugins(training::plugin)
         .add_plugins(platform_plugin)
         .run();
+    // P66: the launcher reads the exit code (75 applies a staged update).
+    #[cfg(not(target_arch = "wasm32"))]
+    if let AppExit::Error(code) = exit {
+        std::process::exit(i32::from(code.get()));
+    }
+    #[cfg(target_arch = "wasm32")]
+    let _ = exit;
 }
 
 fn platform_plugin(app: &mut App) {

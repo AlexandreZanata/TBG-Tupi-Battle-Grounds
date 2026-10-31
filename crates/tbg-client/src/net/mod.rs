@@ -3,6 +3,7 @@
 //! reconnect, and the `?lag=MS` simulator (MS/2 added each way).
 
 mod ack;
+pub mod admission;
 mod login;
 mod socket;
 
@@ -74,6 +75,8 @@ pub struct NetLink {
     inq: VecDeque<(f64, ServerMsg)>,
     /// P47: a `SpectateStart` is active; this link holds no seat.
     watching: bool,
+    /// P66: the slot path this link uses, or the admission still pending.
+    route: admission::Route,
 }
 
 impl NetLink {
@@ -101,6 +104,14 @@ impl NetLink {
             outq: VecDeque::new(),
             inq: VecDeque::new(),
             watching: false,
+            // P66: a probe resumes on the endpoint its session was admitted
+            // to; every other mode asks for admission first.
+            route: admission::Route::start(
+                matches!(mode, Mode::Probe)
+                    .then(config::load_resume_endpoint)
+                    .flatten(),
+                now,
+            ),
         };
         link.connect(now);
         link
@@ -131,6 +142,11 @@ impl NetLink {
     /// Returns false when there is no usable socket; the caller then builds a fresh link.
     pub fn reuse(&mut self, mode: Mode, now: f64) -> bool {
         if self.socket.is_none() || self.in_match || !matches!(self.status, NetStatus::Ready) {
+            return false;
+        }
+        // P66: new play only on a slot admission chose; a resumed link may
+        // sit on a draining generation.
+        if !matches!(self.route, admission::Route::Ready { fresh: true, .. }) {
             return false;
         }
         self.mode = mode;
@@ -182,6 +198,19 @@ impl NetLink {
 
     /// Pump the socket, release lagged messages, reconnect when needed.
     pub fn poll(&mut self, now: f64) -> Vec<ServerMsg> {
+        if self.route.advance(now) {
+            self.connect(now);
+        }
+        if matches!(self.route, admission::Route::UpdateRequired)
+            && !matches!(self.status, NetStatus::Failed(_))
+        {
+            self.status = NetStatus::Failed(NetFailure::VersionMismatch);
+            crate::platform::storage::set(
+                crate::platform::storage::Scope::Session,
+                "update.required",
+                "1",
+            );
+        }
         self.read_socket(now);
         self.flush(now);
         self.reconnect(now);

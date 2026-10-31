@@ -1,6 +1,45 @@
 //! Platform services shared by the browser and native Bevy interface.
 
 pub mod http;
+
+/// P66 §7: what this client reports with an admission request: its
+/// installed build and the bounded outcome of the last update (the
+/// launcher passes both; a direct or browser run reports its version).
+pub struct UpdateReport {
+    pub build: String,
+    pub outcome: String,
+}
+
+/// URL-safe short slug (`[A-Za-z0-9._:-]`, at most 64 characters).
+fn slug(raw: &str) -> String {
+    raw.chars()
+        .take(64)
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || "._:-".contains(c) {
+                c
+            } else {
+                '_'
+            }
+        })
+        .collect()
+}
+
+pub fn update_report() -> UpdateReport {
+    #[cfg(not(target_arch = "wasm32"))]
+    let (build, outcome) = (
+        std::env::var("TBG_INSTALLED_BUILD").unwrap_or_else(|_| env!("CARGO_PKG_VERSION").into()),
+        std::env::var("TBG_UPDATE_OUTCOME").unwrap_or_else(|_| "none".into()),
+    );
+    #[cfg(target_arch = "wasm32")]
+    let (build, outcome) = (
+        format!("web-{}", env!("CARGO_PKG_VERSION")),
+        "none".to_string(),
+    );
+    UpdateReport {
+        build: slug(&build),
+        outcome: slug(&outcome),
+    }
+}
 pub mod storage;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod window;

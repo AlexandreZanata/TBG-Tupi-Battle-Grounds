@@ -1,0 +1,269 @@
+//! Native update driver: detects a launcher-managed install, reports the
+//! healthy boot, queues `notes` then `check`, follows `stage` progress,
+//! pauses a download when online play starts, and applies on request by
+//! exiting with the launcher's apply code. Downloads, verification and
+//! extraction run in the helper process, never here.
+
+use std::collections::VecDeque;
+use std::time::Duration;
+
+use bevy::prelude::*;
+use serde_json::Value;
+
+use super::helper::{Managed, Running};
+use super::{UiAction, UpdState, Updater};
+use crate::GameState;
+
+/// The launcher activates a staged release when the game exits with this.
+const EXIT_APPLY: u8 = 75;
+/// After the healthy report, give the launcher this long to commit.
+const NOTES_AFTER: [Duration; 2] = [Duration::from_secs(2), Duration::from_secs(6)];
+/// Idle recheck period (P66 contracts §3: at most every 6 hours).
+const RECHECK: Duration = Duration::from_secs(6 * 60 * 60);
+
+#[derive(Default)]
+pub(super) struct Inner {
+    managed: Option<Managed>,
+    running: Option<(String, Running)>,
+    queued: VecDeque<Vec<String>>,
+    reported_at: Option<f64>,
+    notes_asked: usize,
+    last_check: Option<f64>,
+}
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_systems(Startup, detect).add_systems(
+        Update,
+        (
+            report_health,
+            schedule,
+            pump,
+            pause_online_download,
+            super::view::overlay,
+        )
+            .chain(),
+    );
+}
+
+fn detect(mut updater: ResMut<Updater>) {
+    updater.inner.managed = Managed::from_env();
+    if updater.inner.managed.is_some() {
+        updater.state = UpdState::Checking;
+    }
+}
+
+/// Healthy = the menu is up and the packaged assets loaded (P66 §3.2):
+/// write `{nonce, build}` once so the launcher can commit a candidate.
+fn report_health(
+    mut updater: ResMut<Updater>,
+    state: Res<State<GameState>>,
+    status: Option<Res<crate::ui::native_loading::Status>>,
+    time: Res<Time>,
+) {
+    let inner = &mut updater.inner;
+    if inner.reported_at.is_some() || *state.get() != GameState::Menu {
+        return;
+    }
+    if !status.is_some_and(|s| s.boot_ready && s.failed == 0) {
+        return;
+    }
+    let Some(m) = inner.managed.clone() else {
+        return;
+    };
+    if let Some((path, nonce)) = &m.health {
+        let body = serde_json::json!({"nonce": nonce, "build": m.build}).to_string();
+        let temp = path.with_extension("tmp");
+        let written = std::fs::write(&temp, body).and_then(|_| std::fs::rename(&temp, path));
+        if let Err(e) = written {
+            warn!("could not report a healthy start: {e}");
+        }
+    }
+    inner.reported_at = Some(time.elapsed_secs_f64());
+}
+
+/// Queue `notes` shortly after the healthy report, then `check`; recheck
+/// while idle in the lobby every few hours.
+fn schedule(mut updater: ResMut<Updater>, state: Res<State<GameState>>, time: Res<Time>) {
+    let now = time.elapsed_secs_f64();
+    let idle = *state.get() == GameState::Menu;
+    let inner = &mut updater.inner;
+    let Some(reported) = inner.reported_at else {
+        return;
+    };
+    if let Some(after) = NOTES_AFTER.get(inner.notes_asked) {
+        if now - reported >= after.as_secs_f64() {
+            inner.notes_asked += 1;
+            inner.queued.push_back(vec!["notes".into()]);
+        }
+    }
+    let due = inner
+        .last_check
+        .is_none_or(|t| now - t >= RECHECK.as_secs_f64());
+    if idle && due && inner.notes_asked > 0 && inner.running.is_none() {
+        inner.last_check = Some(now);
+        inner.queued.push_back(vec!["check".into()]);
+    }
+    if inner.running.is_none() {
+        if let (Some(args), Some(m)) = (inner.queued.pop_front(), inner.managed.clone()) {
+            let refs: Vec<&str> = args.iter().map(String::as_str).collect();
+            match Running::start(&m, &refs) {
+                Ok(r) => inner.running = Some((args[0].clone(), r)),
+                Err(e) => warn!("update helper unavailable: {e}"),
+            }
+        }
+    }
+}
+
+/// Apply helper events to the visible state.
+fn pump(mut updater: ResMut<Updater>) {
+    let Some((command, running)) = updater.inner.running.as_mut() else {
+        return;
+    };
+    let command = command.clone();
+    let events = running.drain();
+    let done = running.finished() && events.is_empty();
+    for event in events {
+        on_event(&mut updater, &command, event);
+    }
+    if done {
+        // Drain anything the reader thread delivered after the exit.
+        let late = updater
+            .inner
+            .running
+            .as_ref()
+            .map(|(_, r)| r.drain())
+            .unwrap_or_default();
+        for event in late {
+            on_event(&mut updater, &command, event);
+        }
+        updater.inner.running = None;
+        if matches!(
+            updater.state,
+            UpdState::Checking | UpdState::Downloading { .. }
+        ) {
+            updater.state = UpdState::Error("other".into());
+        }
+    }
+}
+
+fn text(v: &Value, key: &str) -> String {
+    v.get(key)
+        .and_then(Value::as_str)
+        .unwrap_or_default()
+        .to_string()
+}
+
+fn on_event(updater: &mut Updater, command: &str, e: Value) {
+    match (command, e.get("event").and_then(Value::as_str)) {
+        ("notes", Some("notes")) => {
+            if e.get("pending").and_then(Value::as_bool) == Some(true) {
+                updater.notes = Some(e);
+            }
+        }
+        ("check", Some("status")) if text(&e, "state") == "available" => {
+            updater.state = UpdState::Available {
+                build: text(&e, "build"),
+                version: text(&e, "version"),
+                size: e.get("size").and_then(Value::as_u64).unwrap_or(0),
+                required: e.get("required").and_then(Value::as_bool).unwrap_or(false),
+            };
+        }
+        ("check", Some("status")) => updater.state = UpdState::Off,
+        ("stage", Some("progress")) => {
+            if let UpdState::Downloading { done, total, .. } = &mut updater.state {
+                *done = e.get("done").and_then(Value::as_u64).unwrap_or(*done);
+                *total = e.get("total").and_then(Value::as_u64).unwrap_or(*total);
+            }
+        }
+        ("stage", Some("staged")) => {
+            let version = match &updater.state {
+                UpdState::Downloading { version, .. } => version.clone(),
+                _ => text(&e, "build"),
+            };
+            updater.state = UpdState::Staged { version };
+        }
+        ("stage", Some("cancelled")) => updater.state = UpdState::Off,
+        (_, Some("error")) => {
+            // A failed check never invalidates the installed game.
+            updater.state = if command == "check" {
+                UpdState::Off
+            } else {
+                UpdState::Error(text(&e, "code"))
+            };
+        }
+        _ => {}
+    }
+}
+
+/// BR-UP02: a download never competes with online play. Leaving the lobby
+/// cancels it; the modal offers it again once the player is idle.
+fn pause_online_download(mut updater: ResMut<Updater>, state: Res<State<GameState>>) {
+    if *state.get() == GameState::Menu {
+        return;
+    }
+    if let Some((command, running)) = updater.inner.running.as_mut() {
+        if command == "stage" {
+            running.cancel();
+        }
+    }
+}
+
+/// Handle one of the overlay's buttons.
+pub(super) fn apply(
+    updater: &mut Updater,
+    action: UiAction,
+    state: GameState,
+    exit: &mut MessageWriter<AppExit>,
+) {
+    match action {
+        UiAction::UpdateLater => match &updater.state {
+            UpdState::Available { build, .. } => updater.snoozed = Some(build.clone()),
+            UpdState::Staged { version } => updater.snoozed = Some(version.clone()),
+            UpdState::Error(_) => updater.state = UpdState::Off,
+            _ => {}
+        },
+        UiAction::UpdateNow if state == GameState::Menu => {
+            if let UpdState::Available {
+                build,
+                version,
+                size,
+                ..
+            } = updater.state.clone()
+            {
+                updater
+                    .inner
+                    .queued
+                    .push_back(vec!["stage".into(), build.clone()]);
+                updater.state = UpdState::Downloading {
+                    build,
+                    version,
+                    done: 0,
+                    total: size,
+                };
+            }
+        }
+        UiAction::UpdateCancel => {
+            if let Some((_, running)) = updater.inner.running.as_mut() {
+                running.cancel();
+            }
+        }
+        // Only from the idle lobby; `take_actions` then drops every other
+        // queued action so no match request races the exit.
+        UiAction::UpdateRestart if state == GameState::Menu => {
+            if matches!(updater.state, UpdState::Staged { .. }) {
+                updater.state = UpdState::Applying;
+                if let Some(code) = std::num::NonZeroU8::new(EXIT_APPLY) {
+                    exit.write(AppExit::Error(code));
+                }
+            }
+        }
+        UiAction::UpdateNotesOk => {
+            let build = updater.notes.as_ref().map(|n| text(n, "build"));
+            updater.notes = None;
+            if let Some(build) = build.filter(|b| !b.is_empty()) {
+                updater.inner.queued.push_front(vec!["ack".into(), build]);
+            }
+        }
+        _ => {}
+    }
+}
