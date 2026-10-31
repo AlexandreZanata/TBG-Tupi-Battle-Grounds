@@ -261,6 +261,24 @@ fn details(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
             14.,
         ));
     }
+    let on_hit = match s.on_hit {
+        Some(tbg_core::OnHit::Slow { bp, ticks }) => lang.tf(
+            crate::i18n::Msg::InspectSlow,
+            &[
+                ("pct", &(bp / 100)),
+                ("secs", &lang.decimal(f64::from(ticks) / 20., 1)),
+            ],
+        ),
+        Some(tbg_core::OnHit::Root { ticks }) => lang.tf(
+            crate::i18n::Msg::InspectRoot,
+            &[("secs", &lang.decimal(f64::from(ticks) / 20., 1))],
+        ),
+        None => "—".into(),
+    };
+    p.spawn(kit::muted(
+        format!("{}: {on_hit}", lang.key("training.on_hit")),
+        13.,
+    ));
     if let Some(f) = form_of(c.selected, c.form.0, c.form.1) {
         p.spawn(kit::muted(crate::ui::evolve::describe(f, lang), 12.));
     }

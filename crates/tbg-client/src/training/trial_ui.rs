@@ -161,7 +161,12 @@ fn build(
             });
         });
 }
-fn update(trial: Res<Trial>, lang: Res<Lang>, mut texts: Query<(&Field, &mut Text)>) {
+fn update(
+    trial: Res<Trial>,
+    view: Res<crate::sync::LatestView>,
+    lang: Res<Lang>,
+    mut texts: Query<(&Field, &mut Text)>,
+) {
     let Some(s) = &trial.session else { return };
     let seconds = f64::from(s.active_ticks()) / f64::from(tbg_core::content::TICK_HZ);
     for (field, mut text) in &mut texts {
@@ -255,6 +260,25 @@ fn update(trial: Res<Trial>, lang: Res<Lang>, mut texts: Query<(&Field, &mut Tex
                     row.taken_unattributed
                 )
             }
+        };
+        let value = if matches!(field, Field::Selected) {
+            let effects = trial
+                .target
+                .and_then(|id| {
+                    view.0.as_ref().and_then(|v| {
+                        v.units.iter().find(|u| u.id == id).map(|u| {
+                            format!(
+                                "{}\n{}",
+                                crate::i18n::content::status(*lang, u.status),
+                                crate::ui::effect_details::describe(v, u)
+                            )
+                        })
+                    })
+                })
+                .unwrap_or_default();
+            format!("{value}\n{effects}")
+        } else {
+            value
         };
         if text.0 != value {
             text.0 = value;

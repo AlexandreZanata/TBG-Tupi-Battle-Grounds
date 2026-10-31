@@ -24,7 +24,7 @@ mod countdown;
 mod desktop;
 #[cfg(target_arch = "wasm32")]
 mod desktop_actions;
-mod effect_details;
+pub(crate) mod effect_details;
 pub(crate) mod evolve;
 pub(crate) mod fortify;
 #[cfg(test)]

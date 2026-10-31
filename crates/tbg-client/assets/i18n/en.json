@@ -1386,5 +1386,6 @@
   "training.drill.duo": "Duodrill damage +15%",
   "training.drill.micro": "Rank 1; expires after 12.0s; fuses with another Microdrill",
   "training.drill.double": "Rank 2; expires after 14.0s; fuses with another Duodrill",
-  "training.no_special": "No additional special ability in this form."
+  "training.no_special": "No additional special ability in this form.",
+  "training.on_hit": "On hit"
 }
