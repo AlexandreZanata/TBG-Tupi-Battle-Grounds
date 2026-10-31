@@ -44,6 +44,9 @@
   <script data-trunk defer src="assets/ranking/render.js"></script>
   <script data-trunk defer src="assets/ranking/controller.js"></script>
   <script data-trunk defer src="assets/lobby/lobby.js"></script>
+  <link data-trunk rel="css" href="assets/lobby/live.css" />
+  <script data-trunk defer src="assets/lobby/live-data.js"></script>
+  <script data-trunk defer src="assets/lobby/live.js"></script>
   <link data-trunk rel="css" href="assets/lobby/presentation.css" />
   <link data-trunk rel="css" href="assets/lobby/account.css" />
   <script data-trunk defer src="assets/lobby/account.js"></script>
@@ -88,6 +91,7 @@
       <button data-action="ranking"><svg class="icon"><use data-icon="trophy"/></svg><span data-i18n="lobby.tabs.ranking">Ranking</span></button>
       <button data-dialog="settings"><svg class="icon"><use data-icon="settings"/></svg><span data-i18n="lobby.tabs.settings">Settings</span></button>
     </nav>
+    <span class="live-chip metal-panel" data-live-chip>… online</span>
     <button class="sound metal-panel" data-action="sound" data-i18n-aria-label="lobby.sound.toggle" aria-label="Toggle sound"><svg class="icon"><use data-icon="sound"/></svg><span><span data-i18n="lobby.sound.label">Sound:</span> <b data-sound>ON</b></span></button>
   </header>
   <section id="tbg-ranking" hidden aria-label="Global Rankings"></section>
@@ -111,6 +115,13 @@
     <button class="feature metal-panel" data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><img data-art="strongholds" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.strongholds.title">Strongholds</strong><small data-i18n="lobby.feature.strongholds.hint">Choose your tower</small></span></button>
     <button class="feature metal-panel" disabled><img data-art="troops" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.troops.title">Troops</strong><small data-i18n="lobby.feature.troops.hint">Meet the units · Coming later</small><span class="feature-lock" data-i18n="lobby.feature.troops.locked">Locked</span></span></button>
     <button class="feature metal-panel" data-action="ranking"><img data-art="ranking" alt="" width="768" height="640"><span class="feature-copy"><strong><span data-i18n="lobby.feature.ranking.title">Ranking</span> <i aria-hidden="true">›</i></strong><small data-i18n="lobby.feature.ranking.hint">Find your place among the best</small></span></button>
+  </section>
+  <section class="live-panel metal-panel" data-live-panel aria-labelledby="live-panel-title">
+    <h2 id="live-panel-title" data-live-title>Live battles</h2>
+    <ul class="live-rows" data-live-rows></ul>
+    <p class="live-status" data-live-status role="status"></p>
+    <button class="live-play" data-live-play hidden data-i18n="live.play_casual">Play Casual</button>
+    <button class="live-see-all" data-dialog="live" data-live-see-all aria-haspopup="dialog" aria-controls="lobby-live" data-i18n="live.see_all">See all</button>
   </section>
   <aside class="news-panel metal-panel" data-i18n-aria-label="lobby.news.label">
     <h2><svg class="icon"><use data-icon="scroll"/></svg><span data-i18n="lobby.news.title">News from the grounds</span></h2>
@@ -157,6 +168,17 @@
     </div>
     <div data-member hidden><p data-i18n="lobby.settings.key_note">Your saved key gives access to your account.</p><button class="dialog-primary" data-action="copy-key" data-i18n="lobby.settings.copy">Copy account key</button><button class="dialog-primary" data-action="download-key" data-i18n="lobby.settings.download">Download account key</button><button class="dialog-primary danger" data-action="logout" data-i18n="lobby.settings.logout">Log out</button></div>
     <div data-guest><button class="dialog-primary" data-action="register" data-i18n="lobby.account.create">Create account</button><button class="dialog-primary" data-action="login" data-i18n="lobby.account.key">I have a key</button></div>
+  </dialog>
+  <dialog id="lobby-live" class="lobby-dialog live-dialog metal-panel" aria-labelledby="live-dialog-title">
+    <button class="dialog-close" data-close data-i18n-aria-label="live.close" aria-label="Close live battles">×</button>
+    <h2 id="live-dialog-title" data-i18n="live.dialog.title">Live battles</h2>
+    <ul class="live-list live-all" data-live-all></ul>
+    <p class="live-status" data-live-all-empty data-i18n="live.none">No battles right now</p>
+    <input class="live-link" data-live-link data-i18n-aria-label="live.link" aria-label="Watch link" readonly hidden>
+    <p class="live-copy-status" data-live-copy-status role="status"></p>
+    <h3 class="live-subtitle" data-live-accounts-title>Accounts online</h3>
+    <p class="live-status" data-live-accounts-status></p>
+    <ul class="live-list live-accounts" data-live-accounts></ul>
   </dialog>
 </div>
 
