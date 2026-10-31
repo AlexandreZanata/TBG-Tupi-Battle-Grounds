@@ -214,3 +214,39 @@ runtime route/state checks, browser/native language switching, API fixtures,
 font/readability evidence and PR of the future code correction. The owner
 asked for investigation/planning and an execution prompt, not implementation
 in this work front. No full-suite or release-readiness claim is made.
+
+## 7. Execution refresh (P64 Step 0, 2026-10-31)
+
+Implementation branch `codex/p64-i18n-completeness`, base `origin/main` =
+`9008f117c4289122ddff978c5d25720d2bd79687` (rechecked at Step 0: no newer
+main commit).
+
+- **Browser baseline unchanged.** All 379 main-baseline paths in the source
+  manifest match their recorded hashes; `git diff 9008f11 HEAD -- crates/`
+  was empty before implementation. Main-derived line references in §3 apply.
+- **Native shell not integrated.** The 58 native-only manifest paths
+  (`src/ui/shell/*`, `src/ui/native_battle/*`, `src/ui/native_ranking/*`,
+  `src/platform/*`) are absent on main and there is no `words(` helper on
+  main. Every native-only row in §3 (B: `native_battle/*`; C:
+  `shell/arcanas.rs`; D: `shell/strongholds.rs`, `shell/arenas.rs`,
+  `native_battle/arena.rs`; E: `native_ranking/*`, `shell/data.rs`; F:
+  `shell/mod.rs`, `shell/settings.rs`, `platform/*`) is **deferred**: an
+  explicit front for whichever change integrates the native shell, which must
+  consume the content resolvers and catalog keys added here instead of
+  `words()` pairs. No native code is written on this branch.
+- **Language switch scope.** `desktop_actions::poll` accepts `SetLang` only
+  in `GameState::Menu`, so a live switch matters in the lobby surfaces
+  (Arcanas, Strongholds, Arenas, ranking, live battles). The battle HUD must
+  render in the current language; `battle_hud::web::update` recomposes every
+  attribute each frame with compare-before-write, so localizing the Rust
+  producers refreshes it without a separate invalidation path.
+- **Abilities.** Main shows no ability text; "abilities" in the player's
+  sense are the Evolution form descriptions (`evolve::describe`) and the
+  inspect report. Those are the presentation targets for L01.
+- **Identity fields kept.** The `data-inspect` record has 18 fields; its
+  `status` field also becomes `dataset.status`, which `hud.css` matches
+  (`Slowed`/`Rooted`), so the status id stays and a localized label field is
+  added. `data-offer-N` carries the canonical `Faction` read by
+  `TbgFactionArt.decorate`, and `augments.json` `rarity` keys the frame art
+  in `augments/art.js`: both keep their ids and only the displayed label is
+  resolved from the catalog.
