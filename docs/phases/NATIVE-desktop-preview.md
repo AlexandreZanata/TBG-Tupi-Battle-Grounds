@@ -113,7 +113,7 @@ needed for the default browser's static wordmark restoration.
   account/navigation above and no central panel covering the arena. Profile
   title clears the Stronghold badge. Existing runtime data was isolated.
 - The written Tupi wordmark is lossless WebP (1024x410, 425330 bytes versus
-  the 830916-byte original asset); original artwork is retained. The desktop
+  the 831090-byte original asset); original artwork is retained. The desktop
   icon is unchanged. The browser's wordmark was also restored and observed
   loaded, using only scoped TBG static-file changes in the deployment repo.
 - Captures are `.local/lobby-final-1920.webp` and
