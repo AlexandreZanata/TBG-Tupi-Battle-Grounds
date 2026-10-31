@@ -1044,3 +1044,20 @@ uses target-conditional offensive procs, lifesteal or Essence. Surviving victims
 receive cut even if shields absorbed damage; current Ward prevents a new cut.
 The primary Stronghold takes that one basic amount, with no collateral tower/cut.
 An appended public event carries both exact authoritative segment endpoints.
+
+**Proposed R21 implementation reading (D-88):** three appended summon kinds encode
+rank; existing tier/branch and summoner record the producer's birth profile. They
+never enter Shop pools or accept purchased Evolution. Global arena modifiers still
+apply as to existing summons, with no Arcana, Synergy or general Augment inheritance.
+Fusion preserves active Ward/confusion-immunity deadlines and self-reduction
+strength/duration as well as the catalog's negative families. No haste, bond or
+carrier link survives. Parent replacement emits fusion rather than Death.
+
+**Proposed R21 external Mark reading (D-88):** hostile Crowcaller Marks follow
+the fused replacement with their existing deadlines. Offensive focus sequences
+do not transfer to the new target id. Fusion therefore never strips hostile Mark.
+
+**Proposed R21 control inheritance clarification (D-88):** choose Root over Slow
+and preserve the maximum remaining control duration across both parents. A longer
+Slow on one parent therefore extends the inherited Root; fusion cannot erase that
+parent's remaining control window.

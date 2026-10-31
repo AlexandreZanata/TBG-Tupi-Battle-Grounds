@@ -161,6 +161,11 @@ pub enum UnitKind {
     Weaver,
     /// D-87: R20, staged outside public pools.
     PyreWarden,
+    /// D-88: R21, staged outside public pools.
+    Drillnest,
+    Microdrill,
+    Duodrill,
+    Megadrill,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -214,7 +219,14 @@ impl UnitKind {
     /// Summon kinds: created by abilities, never bought (BR-U08). Beetlings
     /// hatch from Nesters; crates drop from Smugglers.
     pub fn is_summon(self) -> bool {
-        matches!(self, UnitKind::Beetling | UnitKind::Crate)
+        matches!(
+            self,
+            UnitKind::Beetling
+                | UnitKind::Crate
+                | UnitKind::Microdrill
+                | UnitKind::Duodrill
+                | UnitKind::Megadrill
+        )
     }
 
     /// Conventional units: everything the lab duels and favors (BR-U08:

@@ -370,6 +370,13 @@ pub enum Event {
         end: i32,
         tick: Tick,
     },
+    /// D-88: fusion consumes parents without Death or rewards.
+    DrillFused {
+        first: UnitId,
+        second: UnitId,
+        unit: UnitId,
+        x: i32,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

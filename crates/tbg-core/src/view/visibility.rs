@@ -36,6 +36,7 @@ pub fn is_public(event: &Event) -> bool {
         | Event::AbilityStarted { .. }
         | Event::AbilityResolved { .. }
         | Event::Crossfire { .. }
-        | Event::ProfaneFlame { .. } => true,
+        | Event::ProfaneFlame { .. }
+        | Event::DrillFused { .. } => true,
     }
 }

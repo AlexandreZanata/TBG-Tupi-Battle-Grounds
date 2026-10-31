@@ -254,3 +254,8 @@ D-87: Pyre Warden's own five-form kit, canonical ability and actual desktop line
 delivered (20 of21). The relevant combined block passed34 distinct targeted
 scenarios and the shared-lock/two-job WASM preview; protocol26. Report:
 docs/roster/p59/R20-pyre-warden.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-88: Drillnest's own five-form kit, canonical ability and actual desktop lineup
+delivered (21 of21). The relevant combined block passed34 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol27. Report:
+docs/roster/p59/R21-drillnest.md. Deferred acceptance remains as listed; no activation/deploy.

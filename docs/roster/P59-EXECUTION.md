@@ -285,7 +285,8 @@ Own library: `crates/tbg-client/src/art/kits/drillnest/`.
 
 low tracked hull, industrial honeycomb launcher, thick treads, one cannon/nozzle and forge vents; iron/brass/oak and team hull panels. A2 widens hatch rack and lightens side armor, A3 prominent twin feed housing. B2 thickens drill barrel/dark armor, B3 broad siege shroud. Microbroca is a small pointed mechanical tick, Duobroca two fused shells, Megabroca broad multi-bladed body; rank reads by silhouette, not scale alone.
 
-Status: pending. Evidence: `docs/media/p59/drillnest/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/drillnest/lineup.jpg`.
 
 ## Deferred acceptance
 

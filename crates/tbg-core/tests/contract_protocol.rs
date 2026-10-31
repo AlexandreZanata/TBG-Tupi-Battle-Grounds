@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 26,
-        "v26: exact flame segment (D-87); v25: Crossfire secondary (D-75); v24: UnitView.effects (D-74); v23: special state/cues (D-71); v22: CorrosiveSplash (D-70); v21: UnitView.reduction (D-68); v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
+        PROTOCOL_VERSION, 27,
+        "v27: non-death drill fusion (D-88); v26: exact flame segment (D-87); v25: Crossfire secondary (D-75); v24: UnitView.effects (D-74); v23: special state/cues (D-71); v22: CorrosiveSplash (D-70); v21: UnitView.reduction (D-68); v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
     );
 }
 
@@ -247,5 +247,19 @@ fn v26_profane_flame_is_appended_with_exact_endpoints() {
     };
     let bytes = encode(&event);
     assert_eq!(bytes, [27, 1, 0, 0, 7]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn v27_drill_fusion_is_appended_without_death() {
+    // D-88: old tags remain unchanged; fusion has its own public cue.
+    let event = tbg_core::Event::DrillFused {
+        first: 1,
+        second: 2,
+        unit: 3,
+        x: 0,
+    };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [28, 1, 2, 3, 0]);
     assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
 }

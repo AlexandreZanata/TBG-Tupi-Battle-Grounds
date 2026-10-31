@@ -1974,3 +1974,64 @@ A enlarges pale armor then extends nozzle/rim; B darkens canister/adds valves th
 triple shroud. Hunched drag, planted two-hand pulse and furnace-fold death are own
 tracks, with no fabricated second ability. Registry/base/form contracts append
 only §13 values. Performance/friendly-fire fun and D-33 evidence remain pending.
+
+## D-88 · Drillnest's bounded factory and non-cleansing fusion — 2026-10-31 (Proposed)
+
+R21 appends the exact §13 Machines Ranged producer and three summon rows. It has
+no basic attack/zero-damage Hit. Full44-tick readiness (A:38) requires the ordinary
+Guard-first enemy-unit/Stronghold target within4500 and six-tick windup. Root or
+dead primary cancels without retargeting; full eight-drill cap at start/resolution
+leaves one readiness, never queues bursts. Cap is shared per seat across factories
+and ranks, separate from Nester/Beetling Augments. Producer holds while engaged.
+New Microdrill starts at producer x with finite240 lifetime; source death changes
+nothing. Existing tier/branch/summoner snapshot the producer profile at birth.
+Three summon kinds, never Shop entries, encode ranks without a new state field.
+
+After movement/basic/special/tower hits and before new production, fuse living
+unexpired same-seat/same-rank pairs within200 in lowest-id/next-id order. Each
+parent is consumed once; outputs can fuse only next tick. New id, floor midpoint,
+weighted HP fraction (minimum1), larger parent cooldown clamped to new interval,
+no inherited windup/free attack, rank TTL280/320. Lower-id parent's whole profile
+wins, never fieldwise best upgrades. Rank3 never fuses. Replacement has no Death,
+Bounty, shrapnel or on-kill; protocol27 appends DrillFused tag28 for a public spark
+cue. Missing parents leave the client's view quietly under its existing path.
+
+Inheritance is a separate cohesive module: Root outranks Slow, duration maxima;
+poison/fish strength-desc/duration-desc/parent-id-slot order with existing caps;
+bleed/venom strongest value/source, earliest next pulse and longest pulse count;
+weakening, pair/ability cut and self-reduction strongest/longest active window;
+queued Slow strongest/longest. Shield takes one stronger amount with its own
+expiry (equal amounts later expiry), then A2's25/40 grant obeys strongest-wins.
+Ward/confusion/immunity deadlines take maxima. Haste/bond/carrier/positive march
+links and caster-only counters are discarded. Fusion cannot cleanse. New effects
+must define inheritance before they can be added. Global arena rules still apply;
+no Arcana/Synergy/general Augment/Beetling bonus or purchased Evolution on drills.
+B gives Duodrill1500bp damage and rank3 tier2 gives2500bp only against printed
+base HP>=1000 unit kinds, never Stronghold or merely boosted max HP.
+
+Own factory library: low tracked hull, honeycomb launcher, forge vents, team sides;
+A pale wider rack/twin feed, B dark barrel/broad siege shroud. No humanoid planting.
+Treads/feed hatch/recoil/fold tracks are local. Microdrill is one tick shell,
+Duodrill paired housings and Megadrill a broad three-blade siege body with distinct
+silhouettes, rotating tips and low leg groups. All use fixed26 nodes/shared caches,
+no projectile-generated summons, lights, textures, physics or dependencies.
+Public pools remain unchanged; D-33 and owner look/fun acceptance stay open.
+
+External hostile Crowcaller marks redirect from either consumed parent to the
+new id with their original deadline. This preserves the harmful Mark without
+inheriting a drill's caster-only focus/counter. Mantis's own sequence still resets
+when its old target id disappears. The focused external-Mark case guards this
+non-cleansing boundary without changing wire/state layout.
+
+Tiny drill portrait captures use close camera framing and a low center in the
+existing diagnostic gallery. This changes no gameplay size, stats, targeting or
+live-match camera. The generic five-form lineup remains the real scale reference.
+
+The control duration maximum applies across both parents even when their control
+types differ: Root wins priority and takes max(Root ticks, Slow ticks). This is the
+literal catalog maximum-duration/non-cleansing reading; the mixed-control case
+asserts50 inherited ticks from Root8 plus Slow50. No state or event shape changes.
+
+Connected crossmembers and overlapping leg struts keep the three rank bodies
+cohesive in close-ups. Each bore uses an existing prop socket at its own center;
+local axial rotation never orbits heads around the shared hull. No new rig nodes.

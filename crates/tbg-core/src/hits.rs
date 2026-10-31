@@ -108,6 +108,7 @@ pub(crate) fn resolve_hit(
     if purification.is_some() {
         crate::celestial_archer::strip(state, target);
     }
+    amount = crate::drillnest::bonus(state, attacker, target, amount);
     let removed = damage(state, target, amount, ev);
     crate::celestial_archer::completed(state, attacker, target, ev);
     crate::jawguard::completed(state, attacker, target);

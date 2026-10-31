@@ -22,6 +22,7 @@ mod celestial_archer;
 pub mod common;
 mod crowcaller;
 mod demolisher;
+mod drillnest;
 mod drumguard;
 mod farwatch;
 pub mod gait;
@@ -200,6 +201,10 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static DRILLNEST: Kit = drillnest::KIT;
+static MICRODRILL: Kit = drillnest::MICRO;
+static DUODRILL: Kit = drillnest::DUO;
+static MEGADRILL: Kit = drillnest::MEGA;
 static PYREWARDEN: Kit = pyre_warden::KIT;
 static WEAVER: Kit = weaver::KIT;
 static HORNET: Kit = hornet::KIT;
@@ -257,6 +262,10 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::Drillnest => Some(&DRILLNEST),
+        UnitKind::Microdrill => Some(&MICRODRILL),
+        UnitKind::Duodrill => Some(&DUODRILL),
+        UnitKind::Megadrill => Some(&MEGADRILL),
         UnitKind::PyreWarden => Some(&PYREWARDEN),
         UnitKind::Weaver => Some(&WEAVER),
         UnitKind::Hornet => Some(&HORNET),

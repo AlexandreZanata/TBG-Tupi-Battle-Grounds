@@ -355,6 +355,9 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    DrillNest {
+        period: u16,
+    },
     ProfaneFire {
         cut_bp: u16,
         cut_ticks: u16,
@@ -886,6 +889,16 @@ const PYRE_WARDEN_ABILITIES: [[Ability; 2]; 5] = [
     profane_fire(3500),
     profane_fire(5000),
 ];
+const fn drill_nest(period: u16) -> [Ability; 2] {
+    [Ability::DrillNest { period }, Ability::None]
+}
+const DRILLNEST_ABILITIES: [[Ability; 2]; 5] = [
+    drill_nest(44),
+    drill_nest(38),
+    drill_nest(38),
+    drill_nest(44),
+    drill_nest(44),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -989,7 +1002,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 47;
+pub const UNIT_KIND_COUNT: usize = 51;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1327,6 +1340,10 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::Hornet,"Hornet",Insects,Ranged,3_000,[260,35,30,3_800,45,0,0],None,HORNET_ABILITIES,[form("Deep Venom"),form("Deep Venom"),FormDef{atk_bp:1_500,..form("Swoop")},FormDef{range_add:400,..form("Swoop")}]),
     unit(UnitKind::Weaver,"Weaver",Insects,Control,2_400,[350,15,50,3_000,33,0,0],None,WEAVER_ABILITIES,[form("Extended Web"),form("Extended Web"),form("Protective Web"),form("Protective Web")]),
     unit(UnitKind::PyreWarden,"Pyre Warden",Undead,Tank,3_600,[800,12,10,2_800,23,0,0],None,PYRE_WARDEN_ABILITIES,[FormDef{hp_bp:2500,..form("Funeral Furnace")},FormDef{range_add:560,..form("Funeral Furnace")},FormDef{dmg_bp:2000,..form("Pestilence Flame")},form("Pestilence Flame")]),
+    unit(UnitKind::Drillnest,"Drillnest",Machines,Ranged,3_000,[900,0,44,4_500,23,0,0],None,DRILLNEST_ABILITIES,[form("Swarm Factory"),form("Swarm Factory"),form("Siege Drill"),form("Siege Drill")]),
+    unit(UnitKind::Microdrill,"Microdrill",Machines,Dps,0,[45,18,14,600,95,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),form("Producer B"),form("Producer B")]),
+    unit(UnitKind::Duodrill,"Duodrill",Machines,Dps,0,[110,40,17,600,73,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),FormDef{dmg_bp:1500,..form("Producer B")},form("Producer B")]),
+    unit(UnitKind::Megadrill,"Megadrill",Machines,Dps,0,[260,90,22,600,50,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),form("Producer B"),form("Producer B")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

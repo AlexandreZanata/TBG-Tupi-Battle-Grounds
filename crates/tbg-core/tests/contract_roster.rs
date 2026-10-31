@@ -161,7 +161,7 @@ fn roster_composition() {
     // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
-    assert_eq!(UNITS.len(), 47);
+    assert_eq!(UNITS.len(), 51);
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     assert_eq!(
         &kinds[ALL_KINDS.len()..],
@@ -186,6 +186,10 @@ fn roster_composition() {
             UnitKind::Hornet,
             UnitKind::Weaver,
             UnitKind::PyreWarden,
+            UnitKind::Drillnest,
+            UnitKind::Microdrill,
+            UnitKind::Duodrill,
+            UnitKind::Megadrill,
         ][..]
     );
     assert_eq!(UNIT_KINDS.len(), 10);
@@ -453,7 +457,23 @@ Weaver/Protective Web: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0
 Pyre Warden/Funeral Furnace: hp=2500 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Pyre Warden/Funeral Furnace: hp=0 dmg=0 atk=0 speed=0 range+=560 splash+=0 heal=0 dmg+=0 hit=-
 Pyre Warden/Pestilence Flame: hp=0 dmg=2000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Pyre Warden/Pestilence Flame: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Pyre Warden/Pestilence Flame: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drillnest/Swarm Factory: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drillnest/Swarm Factory: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drillnest/Siege Drill: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drillnest/Siege Drill: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Microdrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Microdrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Microdrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Microdrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Duodrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Duodrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Duodrill/Producer B: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Duodrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Megadrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Megadrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Megadrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Megadrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {
@@ -505,6 +525,7 @@ fn proposed_p59_bases_match_section_13() {
         (Hornet, Insects, Ranged, 5, [260, 35, 30, 3_800, 45]),
         (Weaver, Insects, Control, 4, [350, 15, 50, 3_000, 33]),
         (PyreWarden, Undead, Tank, 6, [800, 12, 10, 2_800, 23]),
+        (Drillnest, Machines, Ranged, 5, [900, 0, 44, 4_500, 23]),
     ];
     for (kind, faction, archetype, energy, base) in rows {
         let d = def(kind);
@@ -518,5 +539,25 @@ fn proposed_p59_bases_match_section_13() {
             "{kind:?}"
         );
         assert_eq!((d.heal, d.splash, d.on_hit), (0, 0, None));
+    }
+}
+
+#[test]
+fn proposed_drills_match_section_13_4_and_stay_outside_all_pools() {
+    // D-88/§13.4: ranks are summons; producer profiles never add Shop entries.
+    use UnitKind::*;
+    for (kind, hp, damage, interval, speed) in [
+        (Microdrill, 45, 18, 14, 95),
+        (Duodrill, 110, 40, 17, 73),
+        (Megadrill, 260, 90, 22, 50),
+    ] {
+        let d = tbg_core::content::def(kind);
+        assert_eq!(
+            (d.hp, d.damage, d.interval, d.speed, d.range),
+            (hp, damage, interval, speed, 600)
+        );
+        assert!(kind.is_summon());
+        assert!(!tbg_core::types::ALL_KINDS.contains(&kind));
+        assert!(!tbg_core::types::UNIT_KINDS.contains(&kind));
     }
 }

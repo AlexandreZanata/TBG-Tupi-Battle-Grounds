@@ -42,6 +42,15 @@ pub(super) fn cue(
                 super::world_x(end, fx.you),
             );
         }
+        Event::DrillFused { x, .. } => {
+            crate::vfx::impacts::land(
+                commands,
+                fx.vfx,
+                Impact::Sparks,
+                Vec3::new(super::world_x(x, fx.you), 0.15, 0.0),
+                Area::default(),
+            );
+        }
         Event::Crossfire { from, to } => {
             let target = chest(map, visuals, to);
             if let Some((mut v, _, mut anim)) =

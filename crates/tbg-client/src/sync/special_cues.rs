@@ -93,6 +93,7 @@ fn resolved(
         UnitKind::Jawguard => (Impact::Sparks, Some(unit), Area::default()),
         UnitKind::Mantis => (Impact::Precise, primary, Area::default()),
         UnitKind::Weaver => (Impact::Web, primary, Area::default()),
+        UnitKind::Drillnest => (Impact::Sparks, Some(unit), Area::default()),
         UnitKind::Hornet => (Impact::Venom, primary, Area::default()),
         UnitKind::Demolisher => (Impact::Piston, Some(unit), area(map, visuals, unit)),
         _ => return,

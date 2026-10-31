@@ -30,7 +30,10 @@ pub(crate) fn tick_timers(state: &mut MatchState) {
         };
         crate::roster_slots::release_queued_slow(u, before, state.tick);
         u.cooldown = u.cooldown.saturating_sub(1);
-        if !u.is_summon() && crate::specials::period(rules, u.kind, u.tier, u.branch).is_some() {
+        if !u.is_summon()
+            && (crate::specials::period(rules, u.kind, u.tier, u.branch).is_some()
+                || crate::drillnest::period(rules, u.kind, u.tier, u.branch).is_some())
+        {
             u.action_cd = u.action_cd.saturating_sub(1);
         }
     }

@@ -26,6 +26,22 @@ pub fn frame(
 }
 fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
     if options.portrait {
+        if matches!(
+            options.unit,
+            Some(
+                tbg_core::UnitKind::Microdrill
+                    | tbg_core::UnitKind::Duodrill
+                    | tbg_core::UnitKind::Megadrill
+            )
+        ) {
+            // Capture-only framing for low tiny summons; gameplay scale is untouched.
+            return (
+                Vec3::new(options.portrait_x, 0.10, 0.0),
+                0.42 * options.portrait_zoom,
+                0.35 * options.portrait_zoom,
+                Vec3::new(1.0, 1.0, 3.0),
+            );
+        }
         let large = matches!(
             options.unit,
             Some(tbg_core::UnitKind::BoneBrute | tbg_core::UnitKind::SiegeWalker)

@@ -31,7 +31,11 @@ pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> O
 }
 
 pub(crate) fn view(rules: &Ruleset, u: &Unit) -> Option<SpecialView> {
-    if u.is_summon() || period(rules, u.kind, u.tier, u.branch).is_none() {
+    if u.is_summon()
+        || period(rules, u.kind, u.tier, u.branch)
+            .or_else(|| crate::drillnest::period(rules, u.kind, u.tier, u.branch))
+            .is_none()
+    {
         return None;
     }
     Some(SpecialView {

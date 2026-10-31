@@ -18,6 +18,7 @@ mod combat;
 pub mod content;
 mod crowcaller;
 mod demolisher;
+mod drillnest;
 pub mod headless;
 mod hits;
 mod hornet;
