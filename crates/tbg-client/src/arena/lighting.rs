@@ -9,12 +9,13 @@ use bevy::{
 
 pub(super) fn spawn(commands: &mut Commands, theme: Theme) {
     let palette = theme.palette();
-    // The Forest keeps the owner-approved seascape contrast; the themed
-    // arenas keep the levels their scenes were approved with.
-    let (lux, ambient) = if theme == Theme::Forest {
-        (13_000.0, 950.0)
-    } else {
-        (12_000.0, 1200.0)
+    // Keep the approved Forest; stronger key/fill separation gives the kits relief.
+    let (lux, ambient) = match theme {
+        Theme::Forest => (13_000.0, 950.0),
+        Theme::Tundra => (13_000.0, 1000.0),
+        Theme::Ruins => (13_000.0, 900.0),
+        Theme::Volcanic => (12_000.0, 850.0),
+        Theme::Storm => (11_500.0, 1000.0),
     };
     // Always set: switching back to the Forest must restore its sky.
     commands.insert_resource(ClearColor(if theme == Theme::Forest {
