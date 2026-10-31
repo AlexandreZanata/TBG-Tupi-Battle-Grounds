@@ -1,0 +1,90 @@
+name: Native Linux release
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the validated Linux artifacts (tag required)
+        type: boolean
+        default: false
+  push:
+    tags:
+      - 'v*-native.*'
+  pull_request:
+    paths:
+      - 'crates/tbg-client/**'
+      - 'crates/tbg-core/**'
+      - 'Cargo.*'
+      - 'scripts/package-native.py'
+      - 'scripts/install-linux.sh'
+      - '.github/workflows/native-release.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-22.04
+    env:
+      CARGO_BUILD_JOBS: 2
+      TBG_DEFAULT_SERVER: wss://tbg.abastevo.com.br/ws
+      TBG_SOURCE_COMMIT: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: native-linux
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev libx11-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev pkg-config patchelf desktop-file-utils file
+      - name: Check the tag against the executable version
+        shell: bash
+        run: |
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("crates/tbg-client/Cargo.toml", "rb"))["package"]["version"])')
+          if [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo 'The release tag must match the client Cargo.toml version.' >&2
+            exit 1
+          fi
+      - name: Build and test the native client
+        run: |
+          cargo test --locked -p tbg-client --bin tbg-client -- --test-threads=1
+          cargo build --locked --release -p tbg-client
+          target/release/tbg-client --version
+      - name: Package Linux archive
+        run: python3 scripts/package-native.py --platform linux --binary target/release/tbg-client
+      - name: Package AppImage
+        run: |
+          curl --fail --location --retry 3 -o target/linuxdeploy.AppImage https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          chmod +x target/linuxdeploy.AppImage
+          bash scripts/package-appimage.sh target/linuxdeploy.AppImage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tupi-battle-grounds-linux-${{ github.sha }}
+          path: |
+            target/native/*.tar.gz
+            target/native/*.AppImage
+            target/native/*.sha256
+          if-no-files-found: error
+          retention-days: 14
+  publish:
+    needs: linux
+    if: github.ref_type == 'tag' && (github.event_name == 'push' || inputs.publish)
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: tupi-battle-grounds-linux-${{ github.sha }}
+          path: release
+      - name: Publish a versioned prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Tupi Battle Grounds $GITHUB_REF_NAME · Linux" --notes-file deploy/native/RELEASE-NOTES.md
