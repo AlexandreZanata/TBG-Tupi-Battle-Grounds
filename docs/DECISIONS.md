@@ -1299,3 +1299,35 @@ catalogue's own proposal, so no new number was invented.
 rows and kits follow in later commits, and each names this decision.
 
 **Reopen when** the balance agent changes a value above, or the owner renames a unit.
+
+## D-66 · Monsters pilot: four inactive base kinds (P59 §13.1; no protocol change) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** `UnitKind` gains `Bonehorn` (R08), `Ravager` (R09), `Acidmaw` (R10)
+and `Whisperer` (R11), appended after the summons so every existing index stays.
+Their base rows follow GAME-DESIGN §13.1: cost (Energy ×600), HP, damage,
+interval, range and movement. Their forms carry the branch names from
+`docs/roster/P59-NAMES.md`, and each branch name repeats across its two tiers.
+Abilities and Evolution deltas are not implemented (`NO_ABILITIES`); the rules
+waves own them.
+
+**Inactive.** `ALL_KINDS` (27), `FULL_POOL` and `UNIT_KINDS` do not change, so no
+Shop pool, lab table, match or Synergy count can include the new kinds. `UNITS`
+now has `UNIT_KIND_COUNT` (31) rows, because `def` indexes the table by the
+discriminant and every variant needs a row.
+
+**Contracts.** `contract_roster::roster_composition` asserts 31 rows: the first 27
+equal `ALL_KINDS`, and the four new kinds follow. `contract_roster::evolution_forms_are_frozen`
+appends their 16 form lines. Both changes land with this decision. `UNITS` stays a
+`const` under `#[allow(clippy::large_const_arrays)]`, because `CANON` copies the
+table by value (ponytail: a slice reference is the upgrade path).
+
+**Protocol.** Appending variants does not change the bytes of any existing
+message, and the new kinds never reach a view because they are never spawned, so
+there is no bump.
+
+**Why.** The pilot needs kinds to dispatch its kits (`kits::kit`) and to show them
+in the gallery, well before any rules wave.
+
+**Reopen when** a rules wave makes a kind purchasable (it then joins `ALL_KINDS`
+and `FULL_POOL` in that commit, and its contracts change with it), or when the
+table can become a static.

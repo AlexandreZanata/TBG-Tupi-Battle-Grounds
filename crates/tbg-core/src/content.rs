@@ -518,9 +518,17 @@ const fn unit(
 use Archetype::*;
 use Faction::*;
 
-/// Every kind, in `UnitKind` (`ALL_KINDS`) order.
+/// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
+/// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
+pub const UNIT_KIND_COUNT: usize = 31;
+
+/// One row per kind (see `UNIT_KIND_COUNT`).
+// ponytail: `CANON` copies this table by value, so it stays a const. The lint's
+// static suggestion needs a slice reference, which the lab's owned variant
+// rulesets cannot take yet.
+#[allow(clippy::large_const_arrays)]
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 27] = [
+pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
@@ -792,6 +800,29 @@ pub const UNITS: [UnitDef; 27] = [
     unit(UnitKind::Crate, "Crate", Humans, Support, 0,
         [120, 0, 20, 0, 0, 0, 0], None, NO_ABILITIES, [
         form("Crate"), form("Crate"), form("Crate"), form("Crate"),
+    ]),
+    // D-66: the Monsters base rows of GAME-DESIGN §13.1, English names (P59-NAMES).
+    // Abilities and Evolution deltas wait for their rules waves; the forms keep
+    // the branch names only, and a branch name repeats across its two tiers.
+    unit(UnitKind::Bonehorn, "Bonehorn", Monsters, Tank, 3_600,
+        [1_600, 40, 40, 800, 20, 0, 0], None, NO_ABILITIES, [
+        form("Ancestral Carapace"), form("Stone Fangs"),
+        form("Ancestral Carapace"), form("Stone Fangs"),
+    ]),
+    unit(UnitKind::Ravager, "Ravager", Monsters, Dps, 2_400,
+        [310, 48, 24, 800, 58, 0, 0], None, NO_ABILITIES, [
+        form("Voracious Hunt"), form("Deep Frenzy"),
+        form("Voracious Hunt"), form("Deep Frenzy"),
+    ]),
+    unit(UnitKind::Acidmaw, "Acidmaw", Monsters, Ranged, 2_400,
+        [260, 42, 36, 4_200, 38, 0, 0], None, NO_ABILITIES, [
+        form("Abyssal Jaw"), form("Corrosive Volley"),
+        form("Abyssal Jaw"), form("Corrosive Volley"),
+    ]),
+    unit(UnitKind::Whisperer, "Whisperer", Monsters, Control, 3_000,
+        [380, 15, 40, 3_000, 33, 0, 0], None, NO_ABILITIES, [
+        form("Echo of Fear"), form("Mental Pulse"),
+        form("Echo of Fear"), form("Mental Pulse"),
     ]),
 ];
 

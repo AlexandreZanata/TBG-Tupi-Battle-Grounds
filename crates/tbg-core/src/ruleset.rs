@@ -16,8 +16,9 @@ use crate::content::{
     ENERGY_START, EVOLVE_COST, FORTIFY_COST, HATCH_EVERY, HATCH_EVERY_HIVE, INTEREST_BAND,
     INTEREST_MAX_BANDS, INTEREST_PER_BAND, MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE,
     STRONGHOLD_HP, STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
+    UNIT_KIND_COUNT,
 };
-use crate::types::{Tick, UnitKind, ALL_KINDS, FACTION_COUNT, FULL_POOL};
+use crate::types::{Tick, UnitKind, FACTION_COUNT, FULL_POOL};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InterestRule {
@@ -75,7 +76,7 @@ pub struct Ruleset {
     /// All 25 kinds since the owner switch (D-50); values stay Proposed.
     pub pool: &'static [UnitKind],
     /// Every kind, in `ALL_KINDS` order.
-    pub units: [UnitDef; ALL_KINDS.len()],
+    pub units: [UnitDef; UNIT_KIND_COUNT],
     /// Arcana bp per rank of the six original nodes (GAME-DESIGN §9).
     pub arcana_bp: [i32; 6],
     /// Conditional Arcana values for the nine new nodes.

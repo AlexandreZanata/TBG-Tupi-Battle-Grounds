@@ -122,6 +122,13 @@ pub enum UnitKind {
     Smuggler,
     /// Smuggler cargo crate (BR-U08); never in the Shop.
     Crate,
+    // D-66 (P59 pilot, Proposed): the Monsters base kinds, appended so older kinds
+    // keep their indices. They are in no Shop pool, ALL_KINDS or FULL_POOL until
+    // their rules wave, so no match can buy or meet them.
+    Bonehorn,
+    Ravager,
+    Acidmaw,
+    Whisperer,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
