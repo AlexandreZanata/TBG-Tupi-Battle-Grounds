@@ -19,6 +19,11 @@ path = "src/main.rs"
 name = "tbg-bots"
 path = "src/bin/tbg-bots.rs"
 
+# P61 E1: internal ranked statistics report from a database backup.
+[[bin]]
+name = "tbg-stats"
+path = "src/bin/tbg-stats.rs"
+
 [dependencies]
 # WebSocket upgrade and routing.
 axum = { version = "0.8", features = ["ws"] }

@@ -46,3 +46,75 @@ pub(super) fn save(
             .map_err(|_| StatsWriteError::Unavailable),
     }
 }
+
+/// One post-cutover ranked match of a revision, as stored (P61 §6). The
+/// pure aggregation in `crate::stats` decides eligibility from these facts.
+#[derive(Clone, Debug, PartialEq)]
+pub struct StoredMatch {
+    pub id: i64,
+    pub accounts: [i64; 2],
+    pub winner: Option<usize>,
+    pub end_detail: String,
+    pub combat_ticks: u32,
+    pub ended_unix: i64,
+    /// Settlement-time ratings, never today's (residuals).
+    pub before: [u16; 2],
+    pub risk: u8,
+    pub disposition: u8,
+    pub reached_running: bool,
+    pub payload: Option<String>,
+}
+
+/// Bounded rebuild (P61 §5): at most this many matches per report.
+pub const COHORT_CAP: usize = 100_000;
+
+/// The stored catalog of `version` and its post-cutover matches, in
+/// completion order, read on one (read-only) connection. `Err` when the
+/// cohort exceeds `COHORT_CAP`: never publish an undocumented sample.
+pub fn read_cohort(
+    conn: &Connection,
+    version: u32,
+) -> rusqlite::Result<(Option<String>, Vec<StoredMatch>)> {
+    let catalog: Option<String> = conn
+        .query_row(
+            "SELECT catalog_json FROM ranked_rulesets WHERE version = ?1",
+            params![version],
+            |r| r.get(0),
+        )
+        .optional()?;
+    let mut stmt = conn.prepare(
+        "SELECT m.id, m.a_id, m.b_id, m.winner, m.end_detail, m.combat_ticks, m.ended_unix,
+                m.a_before, m.b_before, i.risk, i.disposition, i.facts_json, s.payload
+         FROM ranked_matches m
+         JOIN ranked_integrity i ON i.match_id = m.id
+         LEFT JOIN ranked_stats s ON s.match_id = m.id
+         WHERE m.ruleset_version = ?1 AND m.match_key IS NOT NULL
+         ORDER BY m.ended_unix, m.id LIMIT ?2",
+    )?;
+    let mut rows = stmt.query(params![version, COHORT_CAP as i64 + 1])?;
+    let mut out = Vec::new();
+    while let Some(row) = rows.next()? {
+        if out.len() == COHORT_CAP {
+            return Err(rusqlite::Error::QueryReturnedMoreThanOneRow);
+        }
+        let facts: String = row.get(11)?;
+        let reached_running = serde_json::from_str::<serde_json::Value>(&facts)
+            .ok()
+            .and_then(|f| f["reached_running"].as_bool())
+            .unwrap_or(false);
+        out.push(StoredMatch {
+            id: row.get(0)?,
+            accounts: [row.get(1)?, row.get(2)?],
+            winner: row.get::<_, Option<i64>>(3)?.map(|w| w as usize),
+            end_detail: row.get::<_, Option<String>>(4)?.unwrap_or_default(),
+            combat_ticks: row.get::<_, Option<u32>>(5)?.unwrap_or(0),
+            ended_unix: row.get::<_, Option<i64>>(6)?.unwrap_or(0),
+            before: [row.get(7)?, row.get(8)?],
+            risk: row.get(9)?,
+            disposition: row.get(10)?,
+            reached_running,
+            payload: row.get(12)?,
+        });
+    }
+    Ok((catalog, out))
+}

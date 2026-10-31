@@ -23,7 +23,7 @@ mod matches;
 mod ranked;
 mod rulesets;
 mod schema;
-mod stats;
+pub mod stats;
 mod strongholds;
 mod worker;
 
@@ -31,7 +31,7 @@ use worker::{worker, StoreCmd};
 
 pub use leaderboard::{LeaderRow, Snapshot};
 pub use ranked::{PlayerStats, RecentMatch, SettleError, POLICY_VERSION};
-pub use stats::StatsWriteError;
+pub use stats::{StatsWriteError, StoredMatch};
 
 pub type AccountId = i64;
 

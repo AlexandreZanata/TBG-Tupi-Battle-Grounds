@@ -26,6 +26,7 @@ mod match_task;
 pub mod metrics;
 mod names;
 pub mod ranked;
+pub mod stats;
 pub mod store;
 mod ws;
 
