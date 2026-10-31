@@ -1,8 +1,5 @@
-//! W0 slots of the roster expansion (P58 §3): one bounded field each for a
-//! victim's bleed, a weakening of basic attacks, a Slow queued behind a Root,
-//! a caster's mark, a timed self-reduction and an ability heal-cut. No unit
-//! uses them yet, so an empty slot changes nothing; the rules here are the
-//! contract that the unit waves build on.
+//! Bounded victim DoTs, weakening, queued Slow, caster marks, self-reduction and heal-cut.
+//! Character modules own triggers; these slots preserve stacking, expiry and cleanse contracts.
 #![allow(dead_code)] // ponytail: the appliers have no caller until the first unit that uses each slot (W2–W6); drop this allow then.
 
 use crate::hits;
@@ -135,7 +132,10 @@ pub(crate) fn tick_bleed(state: &mut MatchState, ev: &mut Vec<Event>) {
         if u.hp <= 0 || slot.left == 0 || state.tick != slot.next {
             continue;
         }
-        hits::damage(state, Target::Unit(u.id), i32::from(slot.value), ev);
+        let _removed = hits::damage(state, Target::Unit(u.id), i32::from(slot.value), ev);
+        // ponytail: Trident is the sole bleed producer; store source kind if another ships.
+        #[cfg(feature = "lab")]
+        crate::lab::dot_dealt(state, slot.source, crate::UnitKind::Trident, _removed);
         let slot = &mut state.units[i].fx.bleed;
         slot.left -= 1;
         if slot.left == 0 {

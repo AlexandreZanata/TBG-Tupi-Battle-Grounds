@@ -154,6 +154,7 @@ mod tests {
             yaw: 0.0,
             tint: None,
             dying,
+            bleed_badge: Entity::PLACEHOLDER,
             marked: false,
             secondary_shot: None,
             dead_for: 0.0,

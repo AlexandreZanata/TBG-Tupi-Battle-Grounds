@@ -79,6 +79,13 @@ pub(crate) fn dealt(state: &mut MatchState, attacker: &Unit, amount: i32) {
     }
 }
 
+/// A bounded DoT retains its owner even after the producer has died.
+pub(crate) fn dot_dealt(state: &mut MatchState, owner: Option<Seat>, kind: UnitKind, amount: i32) {
+    if let Some(owner) = owner.filter(|_| amount > 0) {
+        state.lab.dealt[owner.index()][kind as usize] += amount as u64;
+    }
+}
+
 pub(crate) fn taken(state: &mut MatchState, owner: Seat, kind: UnitKind, amount: i32) {
     if amount > 0 {
         state.lab.taken[owner.index()][kind as usize] += amount as u64;

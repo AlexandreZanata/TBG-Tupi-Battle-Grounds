@@ -45,7 +45,8 @@ fn area(map: &UnitEntities, visuals: &Visuals, id: UnitId) -> Area {
                 .ability(anim.form.0, anim.form.1)
                 .into_iter()
                 .find_map(|a| match a {
-                    Ability::SwampBelly { radius, .. }
+                    Ability::BloodyRend { radius, .. }
+                    | Ability::SwampBelly { radius, .. }
                     | Ability::AreaCrush { radius, .. }
                     | Ability::DoubleMayhem { radius, .. } => Some(radius),
                     _ => None,
@@ -83,6 +84,7 @@ fn resolved(
         UnitKind::Bulwark => (Impact::Sparks, Some(unit), Area::default()),
         UnitKind::RattleTick => (Impact::Mayhem, primary, area(map, visuals, unit)),
         UnitKind::Capybara => (Impact::Belly, Some(unit), area(map, visuals, unit)),
+        UnitKind::Trident => (Impact::Rend, primary, area(map, visuals, unit)),
         UnitKind::Demolisher => (Impact::Piston, Some(unit), area(map, visuals, unit)),
         _ => return,
     };

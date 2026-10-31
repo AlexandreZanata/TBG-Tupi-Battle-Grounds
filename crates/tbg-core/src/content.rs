@@ -355,6 +355,13 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    BloodyRend {
+        period: u16,
+        radius: i32,
+        damage: u16,
+        bleed: u16,
+        pulses: u8,
+    },
     SwampBelly {
         period: u16,
         radius: i32,
@@ -664,6 +671,25 @@ const CAPYBARA_ABILITIES: [[Ability; 2]; 5] = [
     belly(160, 1_500, 1_500, 0),
     belly(160, 1_900, 2_000, 0),
 ];
+const fn rend(period: u16, radius: i32, bleed: u16) -> [Ability; 2] {
+    [
+        Ability::BloodyRend {
+            period,
+            radius,
+            damage: 75,
+            bleed,
+            pulses: 4,
+        },
+        Ability::None,
+    ]
+}
+const TRIDENT_ABILITIES: [[Ability; 2]; 5] = [
+    rend(180, 1_500, 5),
+    rend(180, 1_500, 5),
+    rend(180, 1_500, 7),
+    rend(150, 1_500, 5),
+    rend(150, 1_900, 5),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -767,7 +793,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 37;
+pub const UNIT_KIND_COUNT: usize = 38;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1095,6 +1121,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     ]),
     unit(UnitKind::RattleTick,"Rattle & Tick",Humans,Tank,3_000,[900,60,38,900,28,0,0],None,RATTLE_TICK_ABILITIES,[FormDef{hp_bp:2_000,..form("Big Brother's Fury")},FormDef{dmg_bp:2_000,..form("Big Brother's Fury")},form("Tico's Tricks"),form("Tico's Tricks")]),
     unit(UnitKind::Capybara,"Capybara",Plants,Tank,3_000,[1_300,38,40,800,23,0,0],None,CAPYBARA_ABILITIES,[FormDef{hp_bp:2_000,..form("Stone Belly")},form("Stone Belly"),form("Swamp Wave"),form("Swamp Wave")]),
+    unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,1_100,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

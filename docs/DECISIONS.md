@@ -1686,3 +1686,34 @@ sideways settling are per-kind poses; the caster-centered ring reads actual
 server resolution/radius. No physics or extra rig node. Frozen roster/form
 contracts append the canonical Proposed values. Protocol25 and simulation layout
 stay unchanged; the shared public protection/effects facts restore after reconnect.
+
+## D-78 · Trident's Bloody Rend, bleed and persistent badge — 2026-10-31 (Proposed)
+
+R07 appends the §13 Plants Tank and four forms without public-pool activation.
+Bloody Rend waits180, locks an enemy in basic reach, then resolves75 auxiliary
+damage around that primary's current x with radius1500. Surviving enemies,
+including carried passengers/summons, receive one bleed slot:5 HP every20 ticks,
+four pulses. Ward blocks the new bleed payload but not raw damage; Oilpress's
+control immunity is not bleed immunity. No allied/tower collateral or heal-cut.
+A grants HP2000bp then pulse7; B replaces period150 then radius1900. Static caster
+damage scales the initial hit and each stored pulse amount once on application;
+thereafter pulse values survive source death/Evolution unchanged. Equal/stronger
+refresh keeps the next pulse while restarting four pulses; weaker never refreshes.
+Existing damage protection, cleanse order and combat-time pause semantics remain.
+
+The offline lab now credits bleed HP removed to its stored source seat, even
+after source death. Trident is this family's only producer; a ponytail note marks
+that source kind must be stored if another is added. This uses no extra simulation
+field, replay/hash migration or online cost. The existing optional effects view
+restores bleed value/count/next-pulse facts. A small red badge beside the HP bar
+persists independently of Root/Slow/mark ring tint, using a shared rank mesh and
+shared red material, hidden when absent. One bounded child per visual; no new
+texture, light, per-frame particle emitter or per-unit material.
+
+Own five-form shark kit: broad slate head/teeth, moving lower jaw, dorsal fin,
+chain shapes, muscular legs, rusted two-hand trident and team sash. A adds shell
+cuirass/pale belly then dorsal armor; B widens tines and adds wrap then crescent
+side tines. Short chamber/thrust, opposing fin walk, low special sweep and knee/
+side collapse are per-kind poses. Resolution reads the exact server center/radius;
+no simulated cone, water or directional displacement. Protocol25 and bounded
+simulation layout stay unchanged. Frozen base/form contracts append only §13 facts.

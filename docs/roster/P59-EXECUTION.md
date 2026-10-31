@@ -111,7 +111,8 @@ Own library: `crates/tbg-client/src/art/kits/trident/`.
 
 broad shark head, dorsal fin, muscular legs, rusted trident and large chain shapes; slate hide, bone teeth, rust/bark and team sash. A2 shell cuirass and pale belly, A3 large dorsal armor; B2 wider trident and red-brown wrap, B3 crescent side tines. Chains merge into torso mesh.
 
-Status: pending. Evidence: `docs/media/p59/trident/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/trident/lineup.jpg`.
 
 ### R08 — Bonehorn
 

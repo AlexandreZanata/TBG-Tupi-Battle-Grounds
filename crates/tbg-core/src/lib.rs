@@ -42,6 +42,7 @@ mod summon;
 mod support;
 mod synergy;
 mod targeting;
+mod trident;
 mod trigger;
 pub mod types;
 pub mod view;

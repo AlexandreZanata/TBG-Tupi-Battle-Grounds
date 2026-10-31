@@ -42,6 +42,7 @@ mod shieldbearer;
 mod siege_walker;
 mod smuggler;
 mod tools;
+mod trident;
 mod trigger;
 mod whisperer;
 
@@ -181,6 +182,7 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static TRIDENT: Kit = trident::KIT;
 static CAPYBARA: Kit = capybara::KIT;
 static RATTLETICK: Kit = rattle_tick::KIT;
 
@@ -228,6 +230,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::Trident => Some(&TRIDENT),
         UnitKind::Capybara => Some(&CAPYBARA),
         UnitKind::RattleTick => Some(&RATTLETICK),
         #[allow(unreachable_patterns)]

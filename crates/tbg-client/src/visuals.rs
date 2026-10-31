@@ -17,6 +17,7 @@ mod attacks;
 mod cues;
 pub mod mount;
 mod names;
+mod status_badges;
 mod update;
 
 pub use assets::VisualAssets;
@@ -57,6 +58,7 @@ pub struct UnitVisual {
     tiers: [Entity; 2],
     bar: Entity,
     bar_fill: Entity,
+    bleed_badge: Entity,
     pub own: bool,
     pub archetype: Archetype,
     pub faction: Faction,
@@ -217,6 +219,7 @@ pub fn spawn_unit_visual(
         .insert(NotShadowCaster)
         .id();
     let (bar, bar_fill, tiers) = spawn_bar(commands, a, height, &look);
+    let bleed_badge = status_badges::spawn_bleed(commands, a, bar);
     let glow = figure::spawn_glow(commands, &joints, &form.glow, &lib.glow_material);
     let mut visual = UnitVisual {
         figure: figure_root,
@@ -226,6 +229,7 @@ pub fn spawn_unit_visual(
         tiers,
         bar,
         bar_fill,
+        bleed_badge,
         own: look.own,
         archetype: d.archetype,
         faction: d.faction,
