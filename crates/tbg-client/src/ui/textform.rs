@@ -57,6 +57,13 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
     #[cfg(target_arch = "wasm32")]
     if let Some(dom) = &form.dom {
         dom.label.set_text_content(Some(prompt));
+        // The lobby styles the dialog by this marker, never by the
+        // (localized) label text.
+        let marker = match kind {
+            TextKind::Name => "name",
+            TextKind::Key => "key",
+        };
+        let _ = dom.form.set_attribute("data-kind", marker);
         set_error_text(dom, None);
         dom.input.set_value("");
         dom.form.set_hidden(false);

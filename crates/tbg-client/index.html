@@ -94,7 +94,7 @@
     <span class="live-chip metal-panel" data-live-chip>… online</span>
     <button class="sound metal-panel" data-action="sound" data-i18n-aria-label="lobby.sound.toggle" aria-label="Toggle sound"><svg class="icon"><use data-icon="sound"/></svg><span><span data-i18n="lobby.sound.label">Sound:</span> <b data-sound>ON</b></span></button>
   </header>
-  <section id="tbg-ranking" hidden aria-label="Global Rankings"></section>
+  <section id="tbg-ranking" hidden data-i18n-aria-label="ranking.web.title" aria-label="Global Rankings"></section>
   <main class="mode-panel wood-panel" data-i18n-aria-label="lobby.mode.choose">
     <span class="corner top-left"></span><span class="corner top-right"></span><span class="corner bottom-left"></span><span class="corner bottom-right"></span>
     <button class="mode ranked" data-ranked data-action="register"><svg class="icon"><use data-icon="swords"/></svg><span><strong data-i18n="lobby.mode.play_online">Play Online</strong><small data-ranked-hint data-i18n="lobby.mode.ranked_hint_guest">Locked · Create account to play Ranked</small></span><span class="chevron" aria-hidden="true">›</span></button>
@@ -291,14 +291,14 @@
 
 <div class="account-scrim" aria-hidden="true"></div>
 <form id="tbg-form" role="dialog" aria-modal="true" aria-labelledby="account-title" aria-describedby="account-help" hidden>
-  <header class="account-header"><img src="assets/lobby/crest-v2.webp" alt="" width="768" height="1024"><p class="account-eyebrow">Tupi Battle Grounds</p><h1 id="account-title">Enter the Grounds</h1><p id="account-help">Build your BattleLine. Make your mark.</p></header>
-  <div class="account-fields"><label id="tbg-form-label" for="tbg-input">Name</label>
-    <div class="account-entry"><input id="tbg-input" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="account-reveal" type="button" data-account-reveal aria-pressed="false" hidden>Show key</button></div>
+  <header class="account-header"><img src="assets/lobby/crest-v2.webp" alt="" width="768" height="1024"><p class="account-eyebrow" data-i18n="lobby.brand.name">Tupi Battle Grounds</p><h1 id="account-title" data-i18n="account.form.title">Enter the Grounds</h1><p id="account-help" data-i18n="account.form.tagline">Build your BattleLine. Make your mark.</p></header>
+  <div class="account-fields"><label id="tbg-form-label" for="tbg-input" data-i18n="account.form.name">Name</label>
+    <div class="account-entry"><input id="tbg-input" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="account-reveal" type="button" data-account-reveal aria-pressed="false" hidden data-i18n="account.form.show_key">Show key</button></div>
     <p id="tbg-form-error" role="alert" hidden></p>
     <button id="tbg-form-ok" type="submit">Continue</button>
-    <button id="tbg-form-cancel" type="button">Back to lobby</button>
+    <button id="tbg-form-cancel" type="button"><span data-i18n="account.form.back">Back to lobby</span></button>
   </div>
-  <p class="account-footnote">Your account uses a saved key. Keep it somewhere safe.</p>
+  <p class="account-footnote" data-i18n="account.form.footnote">Your account uses a saved key. Keep it somewhere safe.</p>
 </form>
 </body>
 </html>
