@@ -250,3 +250,37 @@ main commit).
   `TbgFactionArt.decorate`, and `augments.json` `rarity` keys the frame art
   in `augments/art.js`: both keep their ids and only the displayed label is
   resolved from the catalog.
+
+## 8. Row status after implementation (branch `codex/p64-i18n-completeness`)
+
+Status per §3 row on main-derived code. **Fixed** = presentation now resolves
+through the catalog; **support** = identity kept, unchanged on purpose;
+**deferred** = no code on main (native shell, §7).
+
+| Row | Status |
+|---|---|
+| A `tbg-core/src/content.rs`, `types.rs` | Support: untouched; EN catalog pinned to them by `i18n_content_coverage_*` |
+| A `i18n/content.rs` | Fixed: exhaustive unit/form/matchup, Faction, Archetype, status, Synergy, Augment, Stronghold kind/branch/step resolvers; `i18n/augment.rs` fills Augment templates from `AugmentEffect` |
+| A `ui/tips.rs`, `ui/inspect.rs`, `ui/evolve.rs`, `ui/hud_update.rs`, `ui/battle_hud.rs`, `ui/hud_top.rs`, `ui/hud.rs`, `visuals/names.rs` | Fixed: composed in the active `Lang`; inspect record keeps the 18 legacy fields and appends a localized status label; offers keep canonical kind/Archetype/Faction and append localized labels |
+| A `assets/battle/hud.js` | Fixed: all chrome via `TBG_I18N`; ids and offer identity unchanged |
+| A `factions/factions.json`, `factions/art.js` | Support: canonical names keep matching frames; labels come from Rust |
+| B `augments/augments.json`, `augments/art.js` | Fixed: rarity label from `rarity.<id>`; JSON rarity still keys the frame |
+| B `native_battle/*` | Deferred (§7) |
+| C `arcana/arcana.json`, `editor.js`, `preset.js` | Fixed: `arcana.family/node/copy` keys, notices as keys plus arguments, rebuild on switch; JSON keeps ids, numbers, art and the English canon its tests pin |
+| C `shell/arcanas.rs`, `tbg-core/src/arcana.rs` | Deferred (native) / support |
+| D `stronghold/strongholds.json`, `describe.js`, `picker.js`, `ui/fortify.rs` | Fixed: `stronghold.<kind>.*` prose and effect templates, locale numbers, picker rebuild on switch; `record()` keeps the canonical kind |
+| D `arenas/describe.js` | Fixed: locale-aware numbers; `hub.js`, `banner.js`, `arenas.json` already keyed (support) |
+| D `shell/strongholds.rs`, `shell/arenas.rs`, `native_battle/arena.rs` | Deferred (native) |
+| E `ranking/panel.html`, `controller.js`, `render.js`, `data.js` | Fixed: typed failure codes, W/L/D and dates/percentages localized, cached re-render on switch |
+| E `ranking/index.html`, `player.html`, `ranking.js` | Fixed: external `assets/i18n/resolve.js` + `i18n.js` under the unchanged CSP; reason/result/Faction codes mapped with safe fallbacks |
+| E `ui/ranking_ui.rs` | Fixed; `ui/ranking.rs` support (rebuild on `Lang` change) |
+| E `native_ranking/*`, `shell/data.rs` | Deferred (native; no `words()` on main) |
+| E `tbg-server/*`, `tbg-core/src/protocol.rs`, `account.rs` | Support: no server, schema or protocol change |
+| E `lobby/live-data.js`, `live.js` | Support: already keyed; status/mode labels covered by the T05 test |
+| F `index.html` battle/account/ranking/Arcana/Stronghold markup | Fixed: `data-i18n*` keys; language endonyms, `noscript` fallback and room-code placeholder are reviewed exceptions |
+| F `lobby/account.js` | Fixed: reads a Rust `data-kind` marker, never the localized prompt |
+| F `ui/account.rs`, `account_ui.rs`, `textform.rs`, `menu.rs`, `queue.rs`, `surrender.rs`, `result.rs`, `actions.rs`, `sync/messages.rs`, `net/socket.rs`, `ui/countdown.rs`, `ui/toast.rs` | Fixed: catalog toasts (`Toasts::say`), typed `NetFailure`, mapped `ErrorCode`/rejections, menu and ranking panel rebuild on switch |
+| F `local.rs` | Fixed: Practice names come from the link kind (`MatchLink::Local`), never from comparing a player's name |
+| F `shell/mod.rs`, `shell/settings.rs`, `platform/*` | Deferred (native) |
+| §4 `i18n.js` | Fixed: per-locale-and-precision number cache, generation-aware switch (bug found by test), configurable catalog base and page title, plural arguments |
+| §4 guards | Fixed: `i18n_content_coverage_*` (content ids, core canon, no literal Bevy UI text), JS T04/T05/T06/T08 tests |

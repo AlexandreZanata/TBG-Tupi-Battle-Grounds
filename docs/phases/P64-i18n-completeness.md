@@ -280,3 +280,88 @@ coverage, translation review, commit list and PR URL/base main.
 Planning validation and limitations are recorded in the audit and delivery
 report. Implementation, runtime verification and translation approval remain
 pending; this branch contains documentation only.
+
+## 7. Execution report (2026-10-31)
+
+Branch `codex/p64-i18n-completeness` from `origin/main` =
+`9008f117c4289122ddff978c5d25720d2bd79687`. Validation level: work-front
+checks plus one focused consolidation run (owner policy 2026-10-31); no
+full suite, browser build or balance run.
+
+**Delivered.** Step 0 refresh and per-row status:
+[audit §7–§8](../planning/P64-I18N-AUDIT.md#7-execution-refresh-p64-step-0-2026-10-31).
+Catalogs grew from 174 to 1013 keys each (parity, placeholders, charset and
+families checked by `build.rs`). Content covered: all 27 `UnitKind`s (name,
+four forms, matchup lines), 40 Augments (name + template filled from
+`AugmentEffect`), 4 Factions, 5 Archetypes, 4 rarities, 3 statuses, 5
+Stronghold kinds with 8 branches and 16 steps plus picker prose, 3 Arcana
+families and 15 nodes. Surfaces: battle HUD/inspect/Evolution/War Council/
+Fortification (Rust producers and `hud.js`), Shop tips, nameplates, menu,
+queue/challenge, surrender, result/rematch, account panel/dialog/toasts,
+network status and server error codes, Arcana editor, Stronghold picker,
+arena numbers, ranking panel, standalone ranking/profile pages.
+
+**Design notes / deviations.**
+- Content JSON (`strongholds.json`, `arcana.json`) keeps the English canon
+  its Rust/Node tests pin; the display resolves `stronghold.*`/`arcana.*`
+  keys and Node tests assert the English catalog equals that JSON, so the two
+  cannot drift silently. Moving prose out of the JSON entirely would break the
+  pinned contract tests for no player-visible gain.
+- Identity fields stay canonical and localized labels are appended: inspect
+  record field 19 (status label), `data-offer-N` fields 8–9 (Archetype and
+  Faction labels).
+- Toasts gained `say`/`say_with` (catalog message resolved when shown);
+  `NetStatus::Failed` carries `NetFailure` instead of English text.
+- `account.js` used to detect the key form by comparing the label with
+  English text; Rust now sets `data-kind` on `#tbg-form`.
+- Standalone ranking pages load `assets/i18n/resolve.js` (external copy of the
+  inline resolver; their CSP stays without `unsafe-inline`) and `i18n.js`,
+  which gained `data-i18n-base` and `data-i18n-page-title` hooks.
+- `arcana.json` `copy.controls` uses `-` instead of U+2212, which the D5
+  catalog charset excludes.
+- pt-BR uses **PV** for hit points, following the existing `live.hp`.
+
+**Reviewed exceptions.** Brand `Tupi Battle Grounds`; proper name `Old Finn`
+(kept in pt-BR); nameplate art names `Sawknight`/`Ogre Archer` keep their own
+keys; `DPS`, `Bronze`, `Casual`, `Global`, `Menu`, `Arena(s)`, `Lobby`,
+`Ranking` equal in both languages; language buttons are endonyms; the
+`noscript` fallback, pager/chevron/delta glyphs, developer overlay, gallery,
+logs and test text stay as they are. 33 keys have identical EN/PT values,
+all templates, numbers or the loanwords above.
+
+**Owner decisions needed.** Review every pt-BR value, especially unit/form
+names (O-P41-2 proposals such as Escudeiro, Bruto de Ossos, Serrobô, Andador
+de Cerco, Guarda-Flor, Boticário) and Augment/Arcana/Stronghold names.
+
+**Commands (consolidation, under the shared lock, 2 jobs, warm target
+`TBG-p47-wt/target` with the same `Cargo.lock`).**
+
+```text
+cargo fmt -p tbg-client --check                                  -> clean
+cargo check -p tbg-client --target wasm32-unknown-unknown        -> Finished, 0 warnings
+cargo test -p tbg-client --bin tbg-client                        -> 106 passed, 0 failed
+node --test crates/tbg-client/tests/*.test.js                    -> 49 passed, 0 failed
+git diff --check                                                 -> clean
+```
+
+New/extended tests: `i18n::content_coverage` (`i18n_content_coverage_*`:
+units/forms/Augments/Strongholds equal `tbg-core`, roles/Factions/statuses,
+rarities, no literal Bevy UI text), Portuguese assertions in `inspect`,
+`evolve`, `fortify`, `army_tests`; JS `tests/i18n.test.js` (async switch
+ordering, mixed precisions, 0/1/many plurals, API code labels, referenced
+literal keys), Stronghold and Arcana catalog parity, account `data-kind`.
+The runtime test found a real bug: switching back to the current language
+while an older load was pending let the older load win; fixed in `i18n.js`.
+
+**Deferred (not verified).**
+- Browser journeys T03/T04/T06/T07 (Trunk build, EN↔PT switching on open
+  Arcana/Stronghold/ranking views, battle in pt-BR, desktop screenshots at
+  1920×1080 and 1366×768, long-text wrapping): need a WASM/Trunk build,
+  deferred by the minimal-validation policy and disk headroom.
+- Standalone ranking/profile pages against a live API (T05 is covered by
+  fixtures only).
+- Native desktop shell rows (not on main; see audit §7).
+- `cargo clippy`, workspace tests and release builds (not requested).
+- Form descriptions still omit conditional effects and ability mechanics
+  (lifesteal, heal cut, thresholds, Poison/Echo/…) in **both** languages; main
+  never showed them, so adding them is a product/UI change, not translation.
