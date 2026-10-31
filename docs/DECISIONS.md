@@ -1129,3 +1129,36 @@ planning task or as routine validation on each front.
 challenge is too low/high, repeated exploit behavior defeats the scorer,
 or changes to the canonical game invalidate its legal-action evaluation.
 Changing online balance or granting undisclosed advantages is not a bot fix.
+
+## D-82 · Post-match cast and reusable celebration motion — 2026-10-31 (Proposed)
+
+**Decision.** P63 presents the winning army in its match arena during Result,
+facing the camera and looping each kit's existing Victory or signature Dance.
+Create cosmetic figures independently of simulation entities. Reuse the
+P62 preview motion resolver when integrated; add one signature pilot and
+retain explicit fallback coverage rather than claim every dance is unique.
+
+**Complete history.** Maintain runtime-only aggregate counts by seat/kind/
+last form/eligibility at authoritative spawn and successful Evolution.
+Deaths do not remove participation. This bounds memory by content slots
+instead of retaining an unbounded graveyard. Deliver the final compact cast
+through the result/reconnect route with a coordinated protocol change if
+needed. Allocate the actual next wire version on the integrated base.
+A survivor snapshot or client-observed cache cannot prove complete coverage.
+
+**Why.** Dead units are already removed before the current result screen.
+The owner explicitly wants living and dead participants. Aggregate counters
+support exact duplicate/form counts, reconnect and lazy presentation without
+replaying combat or changing its authority. Immediate result actions and
+idempotent message handling preserve rematches and late rating updates.
+
+**Pending product choices.** Recommended cast includes animated summons,
+excluding inert props; recommended large-cast presentation uses pages of 64
+after an initial 64-figure formation. Owner confirms eligibility, paging or
+all-at-once alternative, and signature pilot at P63 O01–O03. All are Proposed;
+this planning task implements neither the wire change nor the presentation.
+
+**Reopen when** the owner requires all instances simultaneously, actual
+spawn paths invalidate aggregate accounting, finalized-result reconnect
+needs new retention semantics, or visual/performance evidence rejects the
+formation/motion approach. Do not silently truncate cast or weaken results.
