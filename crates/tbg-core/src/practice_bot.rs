@@ -3,6 +3,7 @@ use crate::{bot::Bot, Archetype, MatchState, MatchView, Phase, PlayerIntention, 
 
 pub struct PracticeBot {
     baseline: Bot,
+    rng: crate::Pcg32,
     difficulty: u8,
     next: u32,
     regen_frac: u64,
@@ -11,6 +12,7 @@ impl PracticeBot {
     pub fn new(seed: u64, difficulty: u8) -> Self {
         Self {
             baseline: Bot::new(seed),
+            rng: crate::Pcg32::new(seed, 62),
             difficulty: difficulty.min(3),
             next: 0,
             regen_frac: 0,
@@ -24,16 +26,62 @@ impl PracticeBot {
             return None;
         }
         if let Some(r) = &v.augment_round {
-            return (!r.resolved).then_some(PlayerIntention::Forgo { round: r.round });
+            if r.resolved {
+                return None;
+            }
+            if self.difficulty >= 2 {
+                if let Some((i, _)) = r
+                    .costs
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, cost)| **cost <= v.energy)
+                    .max_by_key(|(i, cost)| (**cost, std::cmp::Reverse(*i)))
+                {
+                    return Some(PlayerIntention::ChooseAugment {
+                        round: r.round,
+                        option: i as u8,
+                    });
+                }
+            }
+            return Some(PlayerIntention::Forgo { round: r.round });
         }
         if v.tick < self.next {
             return None;
         }
-        self.next = v
-            .tick
-            .saturating_add(if self.difficulty == 0 { 40 } else { 2 });
+        self.next = v.tick.saturating_add(if self.difficulty == 0 {
+            40
+        } else if self.difficulty == 2 {
+            4
+        } else {
+            2
+        });
         if self.difficulty == 0 {
-            return self.baseline.decide(v);
+            let affordable: Vec<_> = v
+                .offers
+                .iter()
+                .enumerate()
+                .filter(|(_, k)| crate::content::def(**k).cost <= v.energy)
+                .map(|(i, _)| i)
+                .collect();
+            return (!affordable.is_empty()).then(|| PlayerIntention::Purchase {
+                offer: affordable[self.rng.below(affordable.len() as u32) as usize] as u8,
+            });
+        }
+        let own = v.strongholds[v.you.index()];
+        let threatened = v.units.iter().any(|u| {
+            u.seat != v.you
+                && if v.you == Seat::A {
+                    u.x < 4_000
+                } else {
+                    u.x > 12_000
+                }
+        });
+        if threatened
+            && own.kind != crate::StrongholdKind::Classic
+            && own.tier < 2
+            && v.energy >= crate::content::FORTIFY_COST[usize::from(own.tier)]
+        {
+            return Some(PlayerIntention::Fortify { branch: own.branch });
         }
         let tank = v
             .units
@@ -84,12 +132,7 @@ impl PracticeBot {
     /// Only a caller-owned local Practice state receives this disclosed assistance.
     /// Compute before step, apply after step: identical pre-regen Interest and arena rate.
     pub fn regen_bonus(&mut self, state: &MatchState) -> u32 {
-        if self.difficulty != 3
-            || !(state.phase == Phase::Running
-                || (state.phase == Phase::Countdown
-                    && state.tick + 1 >= crate::content::RUNNING_START))
-            || state.augments.selecting()
-        {
+        if self.difficulty != 3 || state.phase != Phase::Running || state.augments.selecting() {
             return 0;
         }
         let rules = state.rules();

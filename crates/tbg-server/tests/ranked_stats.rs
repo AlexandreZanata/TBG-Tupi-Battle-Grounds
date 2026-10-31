@@ -163,7 +163,7 @@ fn eligibility_counts_every_exclusion() {
     let good = json!({"schema": 1, "catalog_hash": "0", "arena": 0, "combat_ticks": 2000,
                       "wall_ms": 1, "sides": [side.clone(), side]})
     .to_string();
-    let newer = good.replace("\"schema\":1", "\"schema\":2");
+    let newer = good.replace("\"schema\":1", "\"schema\":99");
     let rows = [
         stored(1, 0, 0, true, Some(&good)),
         stored(2, 1, 0, true, Some(&good)),  // Review

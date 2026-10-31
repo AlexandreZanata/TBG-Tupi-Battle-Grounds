@@ -87,4 +87,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "The immutable release already exists; keeping its verified assets."
+            exit 0
+          fi
           gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Tupi Battle Grounds $GITHUB_REF_NAME · Linux" --notes-file deploy/native/RELEASE-NOTES.md

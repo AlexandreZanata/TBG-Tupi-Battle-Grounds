@@ -2425,3 +2425,13 @@ wire compatibility here. Native storage/input/presentation and the new kit
 anatomy replace obsolete browser-only/Archer-v2 assumptions in P63. No online
 outcome moves to a client. The owner authorizes complete PR consolidation,
 release publication, scoped TBG deployment and local Linux installation.
+
+## Integration of parallel decision records — 2026-10-31
+
+The consolidated candidate preserves the published decision text from every
+front. Independently authored identifiers overlap: D-67–D-71 (native/system
+and P59), D-80–D-81 (P59 and P62), D-87–D-89 (P59 and P60/P61), and D-82
+(P59 and P63). Interpret those historical references together with their
+phase/section title; do not treat a numeric collision as supersession.
+New integration behavior is documented in GAME-DESIGN's consolidated roster
+activation section and `phases/CONSOLIDATED-LINUX-RELEASE.md`.
