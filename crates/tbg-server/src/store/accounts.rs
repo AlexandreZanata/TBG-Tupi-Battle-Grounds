@@ -60,6 +60,16 @@ pub(super) fn register(
         return Err(AccountError::Unavailable);
     }
     let id = tx.last_insert_rowid();
+    // P60: every account starts its correction replay from a baseline row
+    // written in the same transaction (1000, zero games).
+    tx.execute(
+        "INSERT INTO ranked_baseline (account_id, rating, peak_rating, ranked_games,
+         wins, losses, draws, mature_games)
+         SELECT id, rating, peak_rating, ranked_games, wins, losses, draws, mature_games
+         FROM accounts WHERE id = ?1",
+        params![id],
+    )
+    .map_err(|_| AccountError::Unavailable)?;
     let row = tx
         .query_row(
             &format!("SELECT {SELECT_COLS} FROM accounts WHERE id = ?1"),

@@ -158,6 +158,8 @@ impl Lobby {
         self.queue.retain(|t| self.sessions.contains_key(t));
         self.ranked_queue.retain(|t| self.sessions.contains_key(t));
         self.queued_at.retain(|t, _| self.queue.contains(t));
+        self.ranked_queued_at
+            .retain(|t, _| self.ranked_queue.contains(t));
 
         let ttl = Duration::from_secs(self.config.challenge_ttl_secs);
         let expired: Vec<(InviteToken, Token)> = self

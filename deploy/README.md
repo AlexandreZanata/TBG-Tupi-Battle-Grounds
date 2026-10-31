@@ -62,6 +62,51 @@ ssh <host> curl -s localhost:8081/api/players/<Name>       # same rating and his
 # log in with a real account key in a browser tunnelled to :8081, then stop the scratch server and rm the copy
 ```
 
+Schema v7 (P60 ranked records). `deploy.sh` now stops the server, runs
+`backup.sh --predeploy` (an integrity-checked copy named
+`predeploy-<timestamp>.sqlite3`, never rotated, plus a copy of
+`ranked-pending/`, the journal of finished ranked results not yet settled)
+and only then installs and starts the binary, which migrates v6 to v7 in
+one transaction. Before the first v7 deploy, rehearse on a scratch copy:
+
+```bash
+ssh <host> 'sudo cp /var/backups/tbg/predeploy-<timestamp>.sqlite3 /tmp/v7.sqlite3 && sudo chown tbg /tmp/v7.sqlite3'
+ssh <host> 'sudo -u tbg env TBG_ADDR=127.0.0.1:8081 TBG_DB=/tmp/v7.sqlite3 /opt/tbg/bin/tbg-server'   # migrates the copy
+ssh <host> "sqlite3 /tmp/v7.sqlite3 'SELECT max(version) FROM schema_version; PRAGMA integrity_check; PRAGMA foreign_key_check;'"
+```
+
+Rollback: v7 is additive, and the previous v6 binary still reads the
+old columns, but it ignores and does not write the v7 records (match key,
+integrity rows, sides, journal). Restoring the pre-deploy copy after new
+ranked matches were accepted loses those matches. Treat a restore as a
+maintenance decision for the owner, with an export and replay of the newer
+records. Never delete `ranked-pending/` by hand: each file is a finished
+match whose rating has not been applied yet. The server replays the files
+in order on start.
+
+Ranked review and corrections (P60 §7). Work on a backup copy for anything
+that reads, and on the live file only with the server stopped:
+
+```bash
+tbg-ranked-admin list-review --db /tmp/copy.sqlite3
+tbg-ranked-admin inspect --match <32-hex key> --db /tmp/copy.sqlite3
+tbg-ranked-admin plan --action invalidate --match <key> --reason "<why>" --actor <you> \
+  --db /tmp/copy.sqlite3 --out plan.json            # shows both accounts' old/new rating
+sudo systemctl stop tbg-server
+sudo -u tbg /opt/tbg/bin/tbg-ranked-admin apply --plan plan.json --db /var/lib/tbg/tbg.sqlite3
+sudo systemctl start tbg-server                      # rebuilds the leaderboard snapshot
+```
+
+The plan must be made from a copy that is current. If any settlement
+landed since the plan was made, `apply` refuses it and you make the plan
+again. `apply` writes `tbg.sqlite3.pre-<operation>.sqlite3` before it
+changes anything; running the same plan twice changes nothing. Only the
+two accounts of the match are rebuilt, from their frozen deltas;
+`restore` undoes an `invalidate`. `--actor` is a label, not
+authentication. The binary is built with
+`cargo build --release -p tbg-server --bin tbg-ranked-admin`, and
+`deploy.sh` does not install it yet.
+
 Match records:
 
 ```sql

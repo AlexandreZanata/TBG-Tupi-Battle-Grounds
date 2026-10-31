@@ -8,9 +8,7 @@ use tokio::sync::{mpsc, oneshot};
 
 use axum::body::Bytes;
 
-use tbg_core::protocol::{
-    AccountError, ClientMsg, LiveId, Profile, RatingResults, ServerMsg, Token,
-};
+use tbg_core::protocol::{AccountError, ClientMsg, LiveId, Profile, ServerMsg, Token};
 use tbg_core::{PlayerIntention, Seat};
 
 use crate::live::LiveProgress;
@@ -105,10 +103,10 @@ pub enum LobbyCmd {
         id: LiveId,
         progress: LiveProgress,
     },
-    /// P12: settled ranked ratings per seat, seats A then B.
+    /// P60: a committed (or replayed) ranked settlement, delivered to the
+    /// sessions of its frozen account ids, never to whoever holds a token.
     RankedDone {
-        tokens: [Token; 2],
-        results: RatingResults,
+        receipt: Box<crate::ranked::RankedReceipt>,
     },
     /// P11: store replies arrive here so the lobby never awaits SQLite.
     /// Ignored unless `conn_id` is still the session's current connection.
@@ -120,10 +118,12 @@ pub enum LobbyCmd {
         ip: IpAddr,
         result: Result<(AccountId, Profile, String), AccountError>,
     },
+    /// The `i64` is the committed ranked high-water mark read with the
+    /// profile (P60): older settlements are already part of it.
     LoginDone {
         token: Token,
         conn_id: u64,
-        result: Result<(AccountId, Profile), AccountError>,
+        result: Result<(AccountId, Profile, i64), AccountError>,
     },
     /// D-40: an account's saved Arcana preset, loaded after login.
     ArcanasLoaded {

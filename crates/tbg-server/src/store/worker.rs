@@ -8,11 +8,13 @@ use std::time::Instant;
 use serde_json::Value;
 use tokio::sync::{oneshot, watch};
 
-use tbg_core::protocol::{AccountError, Profile, RatingResults};
-use tbg_core::{ArcanaPreset, Outcome, StrongholdKind, FACTION_COUNT};
+use tbg_core::protocol::{AccountError, Profile};
+use tbg_core::{ArcanaPreset, StrongholdKind};
+
+use crate::ranked::{JournalEntry, RankedReceipt};
 
 use super::leaderboard::{self, Snapshot};
-use super::{accounts, arcanas, matches, ranked, strongholds, AccountId};
+use super::{accounts, arcanas, matches, ranked, stats, strongholds, AccountId};
 
 type Reply<T> = oneshot::Sender<T>;
 
@@ -26,7 +28,7 @@ pub(super) enum StoreCmd {
     Login {
         name_lower: String,
         key_hash: [u8; 32],
-        reply: Reply<Result<(AccountId, Profile), AccountError>>,
+        reply: Reply<Result<(AccountId, Profile, i64), AccountError>>,
     },
     InsertMatch(Value),
     CountMatches(Reply<rusqlite::Result<i64>>),
@@ -35,14 +37,15 @@ pub(super) enum StoreCmd {
         name_lower: String,
         reply: Reply<Option<ranked::PlayerStats>>,
     },
-    RankedResult {
-        a: AccountId,
-        b: AccountId,
-        outcome: Option<Outcome>,
-        duration_s: u64,
-        factions: [[u32; FACTION_COUNT]; 2],
-        arcanas: [ArcanaPreset; 2],
-        reply: Reply<Result<RatingResults, AccountError>>,
+    Settle {
+        entry: Box<JournalEntry>,
+        reply: Reply<Result<RankedReceipt, ranked::SettleError>>,
+    },
+    HighWater(Reply<rusqlite::Result<i64>>),
+    SaveStats {
+        match_id: i64,
+        summary: Box<serde_json::Value>,
+        reply: Reply<Result<(), stats::StatsWriteError>>,
     },
     SaveArcanas {
         account: AccountId,
@@ -69,6 +72,7 @@ pub(super) fn worker(
     mut conn: rusqlite::Connection,
     rx: std::sync::mpsc::Receiver<StoreCmd>,
     snapshot_tx: watch::Sender<StdArc<Snapshot>>,
+    policy: crate::ranked::policy::RankedPolicy,
 ) {
     // Publish stragglers even when no further commands arrive.
     let mut last_build = Instant::now();
@@ -90,7 +94,13 @@ pub(super) fn worker(
                     key_hash,
                     reply,
                 } => {
-                    let _ = reply.send(accounts::login(&conn, &name_lower, &key_hash));
+                    let result =
+                        accounts::login(&conn, &name_lower, &key_hash).and_then(|(id, profile)| {
+                            ranked::high_water(&conn)
+                                .map(|seq| (id, profile, seq))
+                                .map_err(|_| AccountError::Unavailable)
+                        });
+                    let _ = reply.send(result);
                 }
                 StoreCmd::InsertMatch(m) => {
                     if let Err(e) = matches::insert(&conn, &m) {
@@ -107,23 +117,27 @@ pub(super) fn worker(
                     let stats = ranked::player_stats(&conn, &name_lower).unwrap_or(None);
                     let _ = reply.send(stats);
                 }
-                StoreCmd::RankedResult {
-                    a,
-                    b,
-                    outcome,
-                    duration_s,
-                    factions,
-                    arcanas,
-                    reply,
-                } => {
-                    let result = ranked::ranked_result(
-                        &mut conn, a, b, outcome, duration_s, factions, arcanas,
-                    )
-                    .map_err(|_| AccountError::Unavailable);
-                    if result.is_ok() {
-                        dirty = true;
+                StoreCmd::Settle { entry, reply } => {
+                    let result = ranked::settle(&mut conn, &entry, &policy);
+                    match &result {
+                        Ok(_) => dirty = true,
+                        // Full error kept internally (P60 step 2), never keys.
+                        Err(e) => tracing::error!(
+                            "ranked settlement {} failed: {e:?}",
+                            entry.completion_seq
+                        ),
                     }
                     let _ = reply.send(result);
+                }
+                StoreCmd::HighWater(reply) => {
+                    let _ = reply.send(ranked::high_water(&conn));
+                }
+                StoreCmd::SaveStats {
+                    match_id,
+                    summary,
+                    reply,
+                } => {
+                    let _ = reply.send(stats::save(&conn, match_id, &summary));
                 }
                 StoreCmd::SaveArcanas { account, preset } => {
                     if let Err(e) = arcanas::save(&conn, account, preset) {

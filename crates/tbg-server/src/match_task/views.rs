@@ -45,9 +45,18 @@ impl Match {
                         .or_default() += 1;
                     // P12: faction mix for the ranked result row.
                     stats.factions[tbg_core::content::def(u.kind).faction.index()] += 1;
+                    // P61: the validated purchase, never a generated unit.
+                    let kind = u.kind;
+                    self.summary.purchased(seat, kind, &self.state);
                 }
             }
-            tbg_core::PlayerIntention::Evolve { .. } => stats.evolutions += 1,
+            tbg_core::PlayerIntention::Evolve { unit, .. } => {
+                stats.evolutions += 1;
+                self.summary.evolved(seat, unit, &self.state);
+            }
+            tbg_core::PlayerIntention::Fortify { .. } => stats.fortifications += 1,
+            // Augment picks apply at resolution; P60 reads applied copies
+            // from the final state instead of counting hidden picks.
             tbg_core::PlayerIntention::ChooseAugment { .. }
             | tbg_core::PlayerIntention::Forgo { .. }
             | tbg_core::PlayerIntention::Fortify { .. }

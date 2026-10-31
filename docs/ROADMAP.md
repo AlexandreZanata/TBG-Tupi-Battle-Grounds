@@ -349,3 +349,25 @@ second. D-60 records scope and D-61 the owner's visible-attribution license.
 Implementation is in progress; consolidated acceptance, visual sign-off,
 GitHub publication and installation are pending. The front uses the current
 minimal validation policy and does not claim release readiness.
+## Ranked integrity and statistics program (planning, 2026-10-31)
+
+| Phase | Spec | Deliverable | Status | Review |
+|---|---|---|---|---|
+| P60 | [P60-ranked-integrity.md](phases/P60-ranked-integrity.md) | Shared v7 ranked identity/recovery, shadow signals, optional whole-pair budgets, audit/correction CLI | **In progress** on `codex/p60-p61-ranked-implementation`: steps 0–5 implemented in shadow mode (no gate active), including the `tbg-ranked-admin` correction CLI; scoped clippy and targeted tests pass; steps 6 (owner gate) and 7 pending; D-87/D-89 and BR-RI Proposed | focused tests, CLI, review, owner activation pending |
+| P61 | [P61-ranked-stats.md](phases/P61-ranked-stats.md) | v8 side summaries, internal CLI, public aggregate API/desktop lobby page, patch-note workflow | **In progress**: §3 ruleset identity, E0 (collector, v8, post-commit insert) and E1 (internal aggregation, `tbg-stats`) delivered, targeted tests pass; E2/E3 (public API, lobby page, patch workflow) not started; D-88/D-89 | implementation, review, privacy/look/publication decisions pending |
+
+Read [RANKED-PROGRAM.md](planning/RANKED-PROGRAM.md) first: audited current
+behavior, requirements, improvements, numbering reservations, execution
+order and owner decisions. P59 and D-60–69 are already used by parallel
+fronts; P60/P61 and D-87–89 must be reconciled again at merge.
+
+Recommended order: P60 foundation/shadow -> P61 collection/internal report
+-> one focused consolidation -> P61 public UI -> optional P60 enforcement
+only with owner approval and shadow evidence. Automated Elo retention is
+explicitly deferred, not part of a hidden stage activation.
+
+No production implementation, full test suite, balance lab, VPS access,
+database mutation or deployment is part of this planning delivery. Use the
+2026-10-31 minimum-validation policy recorded in the program: documentation
+checks now; exact targeted tests once at implementation consolidation;
+heavy/full-suite checks only on a separate explicit owner request.

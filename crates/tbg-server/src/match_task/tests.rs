@@ -34,6 +34,9 @@ fn online_sequence_zero_cannot_reset_duplicate_protection() {
         live: None,
         spectators: Vec::new(),
         pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
     };
     let command = |seq| MatchCmd::Intent {
         seat: Seat::A,
@@ -77,6 +80,9 @@ fn a_view_drains_events_and_keeps_the_buffer() {
         live: None,
         spectators: Vec::new(),
         pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
     };
     for _ in 0..40 {
         let events = game.state.step();
@@ -122,6 +128,9 @@ fn a_retransmitted_evolution_never_reuses_the_ruins_discount() {
         live: None,
         spectators: Vec::new(),
         pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
     };
     let intent = |seq, intent| MatchCmd::Intent {
         seat: Seat::A,
@@ -178,7 +187,7 @@ async fn challenge_initial_detached_forfeits() {
         lobby_tx,
         config,
         metrics.clone(),
-        None,
+        super::Records::default(),
     );
     let outcome = tokio::time::timeout(Duration::from_secs(3), async {
         while let Some(ConnEvent::Send(msg)) = conn_rx.recv().await {
