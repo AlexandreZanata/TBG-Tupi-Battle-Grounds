@@ -1,3 +1,8 @@
+> **Owner authorization update (2026-10-31):** implement all 21 character kits
+> and catalog abilities, one commit and real screenshot per character. Follow
+> [P59-EXECUTION](../roster/P59-EXECUTION.md). Earlier deferrals below describe
+> the previous scope.
+
 # P59 — Roster expansion: implementation (status report)
 
 Status: **W0 and W1 are done** (D-62 and D-63 for W0; D-64 for W1). The
