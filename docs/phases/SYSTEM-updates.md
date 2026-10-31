@@ -56,7 +56,7 @@ Older release/workspace jobs already active when the policy changed were
 left undisturbed. No new full suite, release build, lab campaign or gallery
 campaign was started under the new policy. Deferred checks are not passes.
 
-## Shop preview (D-62)
+## Shop preview (D-69)
 
 Practice uses Ruleset::preview with two free reservations, three new-Shop
 charges, Reroll base/step 600 sub-energy, no cap. CANON.shop remains None.
@@ -199,3 +199,50 @@ restored as a small maintained rule-update evidence tool. This was an agent
 cleanup mistake; the unrelated active front's files/builds were untouched.
 The full suite was not restarted under the new policy. Final focused tests
 and geometry assertions remain in the consolidation backlog.
+
+## PR #21 consolidation (2026-10-31)
+
+Owner requested merge to main and a TBG-only production deployment. The
+integration includes the already deployed PR #20 head `3287410`, preserving
+protocol 20, carrier identities/boarding, unit shields, seven Factions,
+arenas and spectator/ranking fixes. Independent native work is excluded.
+Decision IDs from this front are renumbered D-67/D-68/D-69 to preserve the
+existing deployed D-60 through D-66 references. Historical v17 evidence
+above describes the original front, not the integrated release.
+
+The owner chose Smuggler range **6.0**, replacing this front's 6.4 proposal
+to obey the existing Stronghold range invariant. No invariant, test gate or
+CI step is weakened. Deterministic hashes must be recorded again because
+the integrated serialized state includes both the roster slots and the
+preview-only Shop state. Shop Reserve/Reroll remains Practice-only.
+
+Validation level: targeted consolidation. The first compilation attempt
+returned exit 75 (shared validation slot busy), so it was deferred without
+retry. The owner then explicitly authorized one new attempt after the
+adjustments, under the same lock and at most two Cargo jobs.
+
+Deferred: full workspace suites and Clippy, C7/C8, repeated balance gates,
+paired 20,000-seed champion measurements, complete gallery and mobile
+device tests. These require the explicit heavy/full validation request or
+remain owner look/fun acceptance; no pass is claimed.
+
+Consolidation evidence before the deploy build:
+
+- `cargo check -p tbg-core --lib`: passed (1.92 s, reused cache).
+- `cargo run -p tbg-core --features lab --example update_probe`: five seeds
+  completed; measured traces are in `docs/media/system-updates/integration-goldens.txt`.
+- `cargo test -p tbg-core --features lab --test champion_siphon --test summoners --test shop_reserve_reroll --test contract_determinism --test contract_lab --test contract_roster --test contract_protocol --test contract_public_view --test contract_cargo_crab -- --test-threads=1`: 53 distinct final scenarios passed. The stale Smuggler 6.4 expectation was corrected to the owner-selected Stronghold range; only that target and the added public-view regression were rerun.
+- `cargo test -p tbg-balance --test contract c5_every_tunable_number_is_registered -- --test-threads=1`: passed, fixing the original CI failure without changing the invariant.
+- `cargo test -p tbg-balance --lib shop_metrics::tests -- --test-threads=1`: passed.
+- Client filters `crowd::tests` and `art::kits::`: 18 distinct scenarios
+  passed after correcting merge-only struct initializers and keeping the
+  Leechroot B branch distinct from its newly veined base. The mesh-budget
+  regression passed with the added wrist nodes; no useful test was removed.
+- `node --test crates/tbg-client/tests/lobby.test.js crates/tbg-client/tests/live.test.js crates/tbg-client/tests/portraits.test.js`: 3 files passed.
+- Server `live_api` / `spectate` tests require local TCP ports. The sandbox
+  attempt failed with `Operation not permitted`; an authorized unsandboxed
+  rerun under the same shared lock is in progress. Release builds, browser
+  observation and final remote CI are still pending at this commit.
+- `cargo fmt -p tbg-core -p tbg-client -p tbg-server -p tbg-balance` and
+  `git diff --check`: passed. All compiling commands used the shared
+  nonblocking lock, `CARGO_BUILD_JOBS=2` and serial test execution.

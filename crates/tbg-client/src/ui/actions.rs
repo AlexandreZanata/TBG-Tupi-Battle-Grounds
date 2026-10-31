@@ -54,9 +54,10 @@ pub(super) fn apply(
         ResMut<crate::sync::RematchInfo>,
     ),
     mut account: ResMut<Account>,
-    (mut surrender, mut fortifying): (
+    (mut surrender, mut fortifying, mut tower_open): (
         ResMut<super::surrender::Surrender>,
         ResMut<super::fortify::PendingFortify>,
+        ResMut<super::fortify::TowerOpen>,
     ),
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
@@ -94,6 +95,7 @@ pub(super) fn apply(
             UiAction::Disabled
                 | UiAction::CloseEvolve
                 | UiAction::SelectUnit(_)
+                | UiAction::SelectTower
                 | UiAction::Deselect
                 | UiAction::CloseInspect
         ) {
@@ -276,7 +278,14 @@ pub(super) fn apply(
                 );
                 pending.0 = Some((offer, seq.0));
             }
+            // Your Stronghold behaves like a unit: its panel replaces the other one.
+            UiAction::SelectTower => {
+                inspected.0 = None;
+                selected.0 = None;
+                tower_open.0 = true;
+            }
             UiAction::SelectUnit(id) => {
+                tower_open.0 = false;
                 inspected.0 = Some(id);
                 // Evolution only for own units; enemies just show their status.
                 let own = extra
@@ -316,6 +325,7 @@ pub(super) fn apply(
             UiAction::Deselect => {
                 selected.0 = None;
                 inspected.0 = None;
+                tower_open.0 = false;
             }
             UiAction::CloseInspect => inspected.0 = None,
             UiAction::Inspect(offer) => {

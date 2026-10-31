@@ -20,6 +20,7 @@ pub const KIT: Kit = Kit {
     pose,
     gait: Gait::LIGHT,
     attack: Attack::Shot {
+        loaded: None,
         from: Node::Body(Joint::Head),
         muzzle: |tier, _| model::mouth(&plan(tier)),
         shot: |_, _| ShotKind::Glob,

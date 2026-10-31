@@ -247,7 +247,7 @@ tables are the one allowed exception.
   browser accepts `?lag=MS` to feel added latency.
 - **Bandwidth (hypothesis):** about 400 B per view → about 4 KB/s down and
   under 0.5 KB/s up per player; about 2 MB per 4-minute match for both.
-- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §13):**
+- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §14):**
   `Spectate{id}` and `StopSpectating` (client) and `SpectateStart`,
   `SpectatorView(PublicView)`, `SpectateUnavailable{reason}`,
   `SpectateEnd{outcome}` (server) are appended to the enums. Public
@@ -641,13 +641,13 @@ rules and values, D-34–D-38 the reasons, each phase file the exact steps.
   every phase and re-checked under load in P16-F8.
 
 
-### Shop preview staging (D-62, 2026-10-31)
+### Shop preview staging (D-69, 2026-10-31)
 
 Reserve/Release/Reroll append to PlayerIntention and Rejection. CANON.shop
 is None; only local Practice and explicit lab policies enable them. Private
 Shop state is serialized inside MatchState for deterministic replay/hash
 identity. The three preview-only MatchView fields are skipped by serde,
-so the existing v17 online View layout stays intact until activation.
+so the existing v20 online View layout stays intact until activation.
 The owner checkpoint removes those skips and bumps the protocol together.
 PublicView contains no Shop fields. The desktop disables every card and
 Shop action until the previous Shop mutation is acknowledged or rejected.

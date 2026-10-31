@@ -71,6 +71,15 @@ pub const OK: Color = hex(0x3E8E41);
 pub const KEY: Color = hex(0xFFE9C7);
 pub const AMBIENT_SKY: Color = hex(0xA9C8E8);
 pub const AMBIENT_GROUND: Color = hex(0x6B5A43);
+// D-64 (P58 §13.5): Monsters (dark hide, bone, turquoise organs), Celestials
+// (ivory armor, gold halos, dark blue cloth) and Insects (moss and amber chitin).
+pub const CHARCOAL: Color = hex(0x2E3033);
+pub const TURQUOISE: Color = hex(0x2BB3A8);
+pub const IVORY: Color = hex(0xF1EBDD);
+pub const NAVY: Color = hex(0x1F2F5A);
+pub const MOSS: Color = hex(0x5C6B2E);
+pub const CHITIN: Color = hex(0x2C2A1E);
+pub const AMBER: Color = hex(0xD98E2B);
 
 #[derive(Clone, Copy, Debug)]
 pub enum PaletteSlot {
@@ -84,7 +93,7 @@ pub enum PaletteSlot {
     Glow,
 }
 
-pub const FACTIONS: [[Color; 8]; 4] = [
+pub const FACTIONS: [[Color; 8]; 7] = [
     [STEEL, OAK, GOLD, LINEN, ALLY, SKIN, STEEL, GOLD],
     [BONE, RUST, GLOW, VIOLET, ENEMY, BONE, RUST, GLOW],
     [
@@ -98,6 +107,11 @@ pub const FACTIONS: [[Color; 8]; 4] = [
         ORANGE,
     ],
     [BARK, LEAF, BLOSSOM, LEAF, ENEMY, BARK, SAP, SAP],
+    [
+        CHARCOAL, DARK, TURQUOISE, IVORY, ALLY, GUNMETAL, IVORY, TURQUOISE,
+    ],
+    [IVORY, NAVY, GOLD, NAVY, ALLY, SKIN, IVORY, GOLD],
+    [MOSS, CHITIN, AMBER, LINEN, ALLY, OGRE_SKIN, CHITIN, AMBER],
 ];
 pub const SLOTS: [PaletteSlot; 8] = [
     PaletteSlot::Base,

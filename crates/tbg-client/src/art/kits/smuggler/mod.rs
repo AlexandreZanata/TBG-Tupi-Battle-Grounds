@@ -23,6 +23,7 @@ pub const KIT: Kit = Kit {
     attack: Attack::Shot {
         from: Node::Prop(Socket::WeaponR),
         muzzle: |_, _| Vec3::new(0.0, 0.04, 0.30),
+        loaded: None,
         shot: |_, _| ShotKind::Bullet,
         flash: |_, _| Some((Muzzle::Bolt, None)),
     },

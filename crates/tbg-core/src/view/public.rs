@@ -9,7 +9,7 @@ use crate::augment::AugmentCounts;
 use crate::content::AUGMENT_OPTIONS;
 use crate::sim::phase_ticks_left;
 use crate::state::{Event, MatchState, Outcome, Phase};
-use crate::types::{Arena, Seat, Tick};
+use crate::types::{Arena, Seat, Tick, FACTION_COUNT};
 
 use super::visibility::is_public;
 use super::{StrongholdView, UnitView};
@@ -46,7 +46,7 @@ pub struct PublicView {
     pub strongholds: [StrongholdView; 2],
     pub shields: [i32; 2],
     pub units: Vec<UnitView>,
-    pub synergy: [[u8; 4]; 2],
+    pub synergy: [[u8; FACTION_COUNT]; 2],
     /// Both seats' Augment copies (public, BR-AG09).
     pub augments: [AugmentCounts; 2],
     /// Present exactly while the battle is paused for a selection.
@@ -87,7 +87,9 @@ impl MatchState {
                 .units
                 .iter()
                 .filter(|u| u.hp > 0)
-                .map(|u| super::unit_view(u, self.rules().hatch_rule(u.tier, u.branch).0))
+                .map(|u| {
+                    super::unit_view(u, self.tick, self.rules().hatch_rule(u.tier, u.branch).0)
+                })
                 .collect(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],

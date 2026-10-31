@@ -827,11 +827,19 @@ form; the D-46 contract tests are untouched.
 **Consolidation (2026-10-30).** The P54/P55 kits (D-51, D-53) came later
 and are the owner's character direction: a unit with a kit keeps its own
 aim, shots, impacts and Death clip, and A-1's aim, hit reactions and
-faction deaths apply to units without a kit (today the Archer, whose
-five native forms come from A-1). A-1's other v2 forms remain the
-fallback for a kind without a kit; death hides HP bars for every unit.
+faction deaths apply to units without a kit. On 2026-10-30 the Archer migrated
+to its own art kit (`art/kits/archer/` with five distinct forms, own projectile via
+`visuals/attacks.rs`, and side-on draw/aim/loose/recoil motion); all 27 unit kinds
+now use the art kit standard. A-1's v2 forms remain the fallback for any kind
+without a kit; death hides HP bars for every unit.
 **Reopen when** a Stronghold kind needs its own impact point or muzzle for
 unit reactions, or phone support needs lighter forms.
+
+**Update (P56 Part A, 2026-10-30).** The Archer moved to its art kit. The
+native path (`archer_v2`, `bow.rs`, `arrows.rs`, `archer_aim`) never ran with a
+kit and is removed. The kit's bow is curved and strung, with a drawable string
+and a nocked arrow that shows only until Release, so the projectile replaces it
+and there is never a second arrow. Arrow Rain (B2) fires `ShotKind::ArrowStorm`.
 
 ## D-48 · Roster expansion: fifteen units, staged by ruleset pool — 2026-10-29 (owner decision)
 
@@ -1023,6 +1031,34 @@ seat. The Forest keeps every previous number.
 policy win rates past the D-33 gate, players find a modifier unreadable,
 or the owner wants arena choice online.
 
+## D-56 · Cargo Crab rework: united pair, carried view bit, and carry speed boost — 2026-10-30 (Proposed)
+
+> **Amended by D-60 (Proposed, 2026-10-30):** the carry bonus is the larger
+> of base and branch, not their sum, and the single-target absorption and the
+> dismount below were already rules (ROSTER-EXPANSION §C.15, P48-A), not
+> changes of this decision.
+
+**Decision.** The Cargo Crab carries an eligible allied non-Tank unit as a
+united pair. The pair advances at the speed of the faster of the two
+multiplied by $(1 + \text{carry bonus})$ (starting at base +20 % / 2 000 bp).
+Single-target attacks target the crab first; area/splash damage continues reaching
+the carried passenger at distance 0. Upon crab death, the passenger dismounts 0.2
+tile behind the crab toward its base with its current HP intact and a 3 s
+re-boarding lock. `PROTOCOL_VERSION` is bumped to 16 to pack `FX_CARRIED`
+(`1 << 14`) in `UnitView.fx` for client saddle presentation.
+**Why.** Gives the Cargo Crab a distinctive and impactful tactical identity
+while preserving deterministic server-authoritative simulation rules. Offline
+balance lab evaluation (`cargo_crab_balance`, 1 024 paired matches with side
+inversion) showed: alone 62.5 % win rate (36.76 s avg duration); with Archer
+passenger 81.2 % win rate (14.71 s avg duration, 81.2 % passenger survival); with
+Bloomkeeper passenger 50.0 % win rate (36.53 s avg duration, 68.8 % survival).
+**Consequences.** `PROTOCOL_VERSION` 16 requires client and server lockstep; older
+peers are refused. The client presents carried units seated in the crab's saddle
+(`y = 0.38`) moving as one unit, with legs draped and no walking footsteps.
+Contract tests guard determinism, symmetry, tiebreak, speed bonus, single-target
+absorption, and view flags.
+**Reopen when** live match telemetry or playtests show carrier pairs excessively
+oppressive against melee comps or too fragile against AoE splash drafts.
 
 ## D-58 · C7 measures planted imbalances on the ten-kind Shop pool — 2026-10-30 (owner-authorized CI fix)
 
@@ -1049,7 +1085,7 @@ online play uses and the gate may need a sample or a row change.
 lobby registry while they run, with progress and presence counts in a
 read-only `/api/live` snapshot. Any idle session may watch one; spectators
 get the public view only, at 0 s delay, through one pre-encoded frame per
-view tick shared by every spectator (protocol v17, GAME-DESIGN §13).
+view tick shared by every spectator (protocol v17, GAME-DESIGN §14).
 `Lobby::pair` takes an explicit `Listing::{Public, Private}`, decided where
 the match is paired; the mode alone does not decide it, because rooms share
 `MatchMode::Casual` with the quick queue.
@@ -1064,8 +1100,260 @@ nothing that a seat does not already see, so no delay is needed.
 at 250 matches), a listed match leaks private state, or the owner wants
 rooms, challenges or ranked watching to stay private as well.
 
+## D-60 · Cargo Crab carry bonus is the larger of base and branch, never their sum — 2026-10-30 (Proposed)
 
-## D-60 · Crowd separation is presentation — 2026-10-31 (owner request)
+**Decision.** While a Cargo Crab carries a passenger, its move bonus is
+`max(base, branch)` instead of `base + branch` (BR-X12, GAME-DESIGN §10.7).
+The base is +20 % (2 000 bp, D-56). The branch values stay as the content
+table has them: none on A1 and A2, Faster Legs (B1) +20 %, Overdrive (B2)
++20 % steady and +40 % during its 4 s surge. So A1 = A2 = B1 = B2 = +20 %
+and a surging B2 = +40 %. The sum gave B1 and B2 +40 % and a surging B2
++60 %, which the cap clipped to +50 %. The carry bonus is one term of the
+move Σbp, so with haste and march it stays within +50 % (BR-X03, unchanged).
+**Pair speed**, as D-56 coded it and as now written down (BR-X12,
+ROSTER-EXPANSION §C.15): the pair advances at
+`max(crab speed, passenger speed) × (10 000 + Σbp) / 10 000`. Each speed is
+read after its own Slow, so a slowed passenger lowers the pair only down to
+the crab's own speed.
+**Correction to D-56.** D-56 presents the crab absorbing single-target
+attacks and the passenger's dismount on crab death as its changes. Both
+were already rules: since P48-A a carried unit cannot be chosen by a
+targeted effect (the crab is hit instead; area damage still reaches it at
+distance 0), and a dead crab drops its passenger 0.2 tile behind, HP intact,
+with a 3 s re-board lock (ROSTER-EXPANSION §C.15). D-56 changed three
+things: the pair speed (the faster of the two, where the crab used to walk
+alone at its own speed), the +20 % base carry bonus added on top of the
+branch bonuses, and the packing of the carried bit (`FX_CARRIED`, announced
+in §C.15) with `PROTOCOL_VERSION` 16.
+**Why.** The sum was never written down or tested. §C.15 gives the branch
+values as absolute (+20 %, +40 %) and D-56 stacked a base on top without
+saying so, which doubled Faster Legs and pushed Overdrive past the cap. With
+`max` every form's total is a number the docs already state (+20 %, +40 %).
+**Consequences.** The base, A1 and A2 crabs are unchanged; B1 goes from +40 %
+to +20 %, B2 steady from +40 % to +20 %, B2 in its surge from +60 % (clipped
+to +50 %) to +40 %. With the branch values kept, Faster Legs equals the base
+bonus and adds no speed over an unevolved crab, and Overdrive differs from
+it only in its surge: the P50 tuning pass decides whether to raise them.
+This commit changes the append-only `contract_cargo_crab.rs`: it adds the
+BR-X12, BR-X03 and Slow tests and removes
+`protocol_version_is_16_for_cargo_crab_carried_bit`, a duplicate of
+`contract_protocol.rs::protocol_version`, which stays the only protocol pin.
+**Limits.** D-56's lab numbers used the unevolved crab, whose bonus is the
+same under both rules, so they stand. No measurement exists for B1 or B2
+under the new rule: it is deferred by the owner's instruction, and the rule
+stays Proposed (D-33). Only the passenger's Slow is read for the pair speed;
+as coded and not tested, the passenger's Root and Old Finn fish are ignored,
+while the crab's own Root and fish apply to the pair.
+**Reopen when** the lab measures the B branch and Faster Legs is not worth
+its Energy, or the owner prefers the sum.
+
+## D-61 · The passenger's view names its carrier (protocol 18) — 2026-10-30 (Proposed, P56 Part A)
+
+**Decision.** `UnitView` gains `carrier: Option<UnitId>`: the unit a passenger
+rides. It is set only while `FX_CARRIED` is (D-56), so the value exists exactly
+when a passenger is aboard. The client seats the passenger on that carrier's
+real position (`visuals/mount.rs`) instead of guessing the nearest Cargo Crab on
+its side. `PROTOCOL_VERSION` becomes 18: 17 is reserved by the live-lobby branch
+(P47), so 18 is the next free number. The `FX_CARRIED` bit stays.
+**Why.** In a large army the lane guess could seat a passenger on the wrong crab.
+The id is the fact the server already has (`UnitFx.carrier`).
+**Consequences.** postcard encodes an `Option` as a tag byte, so every unit in
+every view pays one extra byte; the id itself travels only when carried. Peers on
+16 or 17 are refused by the handshake. A reconnect's full view carries the id, so
+a passenger already aboard appears seated with no boarding arc: the arc starts
+from `Event::Boarded`, never from a view diff. The byte cost is not measured yet.
+**Reopen when** the per-view bytes matter more than one tag byte per unit: then a
+`carried: Vec<(passenger, carrier)>` list per view costs nothing when empty.
+
+## D-62 · W0 shared slots for the roster expansion (P58 §3) — 2026-10-31 (Proposed)
+
+**Decision.** Six bounded slots join `UnitFx`. Each is zero until a unit uses it,
+so no current unit, match or view changes behaviour:
+
+1. **Bleed (R07).** One non-stacking slot per victim: value per pulse, next
+   pulse, pulses left, source seat. The first pulse is one second (20 steps)
+   after application. An equal or stronger application refreshes the count and
+   takes the stronger value without moving the next pulse; a weaker one is
+   ignored until the slot empties. Pulses go through the ordinary damage path:
+   reduction and shields apply, no on-hit effects, no lifesteal. The bleed is
+   separate from poison stacks.
+2. **Weakening (R13).** Basic attacks a unit makes lose `bp` until its timer
+   ends. Stronger replaces and restarts the timer; equal refreshes; weaker is
+   ignored until expiry. The value is clamped to the family cap of 2 000 bp.
+3. **Queued post-Root Slow (R19).** One Slow waits for the unit's Root to end.
+   A weaker queued Slow keeps the queued amount and only extends the duration,
+   as an active Slow does. It starts in `tick_timers` when the Root ends, and a
+   cleanse clears it.
+4. **Caster's mark (R03).** One mark per caster: target and deadline. A new mark
+   moves it; moving it does not strip the old target's Slow or cut. It clears
+   when the deadline passes or the target is dead.
+5. **Timed self-reduction (R01, R06, R08, R16).** Joins the damage reduction sum
+   in `hits::damage`, so it shares that sum's 2 000 bp cap.
+6. **Ability heal-cut (R03, R20).** A second bounded cut beside the existing
+   pair in `Unit`. The effective cut is the stronger of the two active cuts,
+   never a sum. The three heal paths (augment, support, synergy regeneration)
+   read the effective cut.
+
+**Cleanse order (Proposed).** A cleanse takes the bleed before any ordinary
+poison stack, and the bleed counts as one of the strip count. This reading of
+P58 §3.2 is new and has its own test.
+
+**Not in this decision.** The unit shield grant path with expiry and its view
+field (R12/R14) waits for owner decision 5 (the shield semantics, and whether
+the dormant Cargo Crab `shield_bp` is granted or removed). The view and event
+extensions for these slots also wait for the first unit wave that makes an
+effect visible: that wave changes the wire, so it carries the protocol bump.
+
+**Why.** P58 §3 lists these contracts as missing. Each unit wave builds on one
+of them, so they are defined once, here, with tests.
+
+**Consequences.** `UnitFx` grew, so the serialized state grew and the three
+golden hashes in `contract_determinism` moved. Tick, winner and reason are
+identical on all three seeds (verified before the goldens were refrozen). No
+protocol change in this decision.
+
+**Reopen when** the first unit wave needs an effect that the reconnect view must
+show (then add view fields and bump the protocol), or when owner decision 5
+settles the shield.
+
+## D-63 · W0 unit shield: grant path, expiry and view field (P58 §3, R12/R14) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** Units get a temporary shield through one path,
+`roster_slots::apply_shield`, with one amount and one expiry per unit:
+
+1. A grant stronger than the shield still standing replaces the amount and
+   sets the expiry to `now + ticks`.
+2. An equal grant refreshes the expiry only.
+3. A weaker grant, or a zero grant, is ignored, its expiry included.
+4. The shield ends at its deadline without HP loss; `shield_now` reads zero
+   from that tick on.
+5. `hits::damage` consumes a shield before HP. A shield never heals, never
+   revives and never counts as healing. Strongholds are not units and cannot
+   hold one.
+
+**View.** `UnitView.shield: u16` is the amount still standing at the view's
+tick, zero once it has expired, so a reconnecting client sees it. Protocol 19
+(v18 → v19). The other W0 slots keep waiting for the unit wave that shows them
+(D-62).
+
+**Cargo Crab `shield_bp` stays dormant.** The parsed `shield_bp` is not granted
+by this path. Granting it would change Cargo Crab's rules and goldens, so that
+waits for the balance review. Owner decision 5 is answered: one shared path,
+Cargo Crab unchanged. This settles the open item in D-62.
+
+**Why.** R12 and R14 cannot be built without a grant and a view. The audit
+(P58 §3) already planned these semantics; this records them as decided and
+tests them.
+
+**Consequences.** No unit grants a shield yet, so no match, golden hash or
+balance number moves. A zero shield costs one postcard byte per unit in each view.
+
+**Reopen when** a unit wave needs another stacking rule, or the balance review
+grants the Cargo Crab shield.
+
+## D-64 · Three new Factions: Monsters, Celestials, Insects (P58 §13.5; protocol 20) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** `Faction` gains `Monsters`, `Celestials` and `Insects` after the
+four existing Factions. `FACTIONS` lists all seven, and `FACTION_COUNT` is
+seven. Every Synergy, view and stats array is sized by that count. Faction names
+are English (`Faction::name`) and are used by the HUD, the stats API and the
+ranked JSON.
+
+Synergy keeps the existing thresholds 2 and 4. A level picks one bonus, so
+bonuses never add twice:
+
+- Monsters: `Damage` +500 / +1 000 bp (P58 §13.5, completion C11).
+- Celestials: `MaxHp` +500 / +1 000 bp.
+- Insects: `Movement` +500 / +1 000 bp, through a new `SynergyEffect::Movement`.
+  It adds to the move bonuses before their existing 5 000 bp cap.
+
+Palettes (ART-DIRECTION §3 rows follow): Monsters in charcoal, dark, turquoise
+and ivory; Celestials in ivory, navy and gold; Insects in moss, chitin and amber.
+Death styles: Monsters topple, Celestials rise and fade, Insects curl and shrink.
+
+**Protocol 20.** The Synergy and stats arrays on the wire grow from four to seven
+entries, so the bytes change (v19 → v20). Older peers are refused.
+
+**Inactive by design.** No unit belongs to the new Factions yet, and the Shop
+pool, Augments and lab tables do not change. A Faction with no living unit has
+no Synergy level, so existing matches, goldens and balance numbers do not move.
+
+**Tests.** `contract_constants::synergies` now asserts seven entries and leaves
+the first four unchanged. `contract_protocol` pins 20.
+
+**Goldens.** The state hash covers the Synergy array, so the hashes in
+`contract_determinism` and `contract_lab` moved once. Tick, winner and reason
+are identical on all five seeds, checked against the pre-W1 commit `bd9964f`
+(the trace probe gave the same ticks, winners and reasons, and it reproduced
+the old goldens exactly before the refreeze).
+
+**Reopen when** the balance review changes a Faction bonus, or a unit wave needs
+a Faction effect the synergy table cannot express.
+
+## D-65 · English names for the roster; owner items answered by the agent (P58 §13) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** Every new unit, summon, ability, Evolution branch and Faction name
+is English, as the owner asked. The names are listed in
+`docs/roster/P59-NAMES.md`, which is the source for code and docs. The source
+names from the owner's texts stay in P58 as references.
+
+Owner items (P58 §7 and the completion register), answered here:
+
+1. **Bastion.** Renamed Bulwark. The Stronghold kind keeps `Bastion` (D-46).
+2. **Crematumba (R20, Pyre Warden).** Catalogue values kept: cost 6, HP 800,
+   movement 23 (C3); 12 damage every 10 ticks over a 2 800 segment (C4).
+3. **Brocatanque (R21, Drillnest).** Catalogue values kept: trigger 4 500,
+   merge radius 200 (C8); drill range 600 and Duobroca speed 73 (C9).
+4. **Monsters Synergy damage.** 500 / 1 000 bp (D-64, C11).
+5. **Shield semantics and Cargo Crab `shield_bp`.** D-63.
+6. **R21 with no merge partner.** The drillnest keeps producing; no merge
+   happens. Implemented with R21 (C10).
+7. **Shop gate floor.** Unchanged here; the balance lab's gate belongs to the
+   balance agent.
+8. **Names.** All English, per this decision.
+
+**Why.** The owner asked for the best choice on each open item, documented, and
+for balance and rules to be left to another agent. Each value above is the
+catalogue's own proposal, so no new number was invented.
+
+**Consequences.** Names and documentation only in this decision. Kinds, content
+rows and kits follow in later commits, and each names this decision.
+
+**Reopen when** the balance agent changes a value above, or the owner renames a unit.
+
+## D-66 · Monsters pilot: four inactive base kinds (P59 §13.1; no protocol change) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** `UnitKind` gains `Bonehorn` (R08), `Ravager` (R09), `Acidmaw` (R10)
+and `Whisperer` (R11), appended after the summons so every existing index stays.
+Their base rows follow GAME-DESIGN §13.1: cost (Energy ×600), HP, damage,
+interval, range and movement. Their forms carry the branch names from
+`docs/roster/P59-NAMES.md`, and each branch name repeats across its two tiers.
+Abilities and Evolution deltas are not implemented (`NO_ABILITIES`); the rules
+waves own them.
+
+**Inactive.** `ALL_KINDS` (27), `FULL_POOL` and `UNIT_KINDS` do not change, so no
+Shop pool, lab table, match or Synergy count can include the new kinds. `UNITS`
+now has `UNIT_KIND_COUNT` (31) rows, because `def` indexes the table by the
+discriminant and every variant needs a row.
+
+**Contracts.** `contract_roster::roster_composition` asserts 31 rows: the first 27
+equal `ALL_KINDS`, and the four new kinds follow. `contract_roster::evolution_forms_are_frozen`
+appends their 16 form lines. Both changes land with this decision. `UNITS` stays a
+`const` under `#[allow(clippy::large_const_arrays)]`, because `CANON` copies the
+table by value (ponytail: a slice reference is the upgrade path).
+
+**Protocol.** Appending variants does not change the bytes of any existing
+message, and the new kinds never reach a view because they are never spawned, so
+there is no bump.
+
+**Why.** The pilot needs kinds to dispatch its kits (`kits::kit`) and to show them
+in the gallery, well before any rules wave.
+
+**Reopen when** a rules wave makes a kind purchasable (it then joins `ALL_KINDS`
+and `FULL_POOL` in that commit, and its contracts change with it), or when the
+table can become a static.
+
+## D-67 · Crowd separation is presentation — 2026-10-31 (owner request)
 
 **Decision.** Display offsets separate bodies in the desktop client. The
 simulation remains authoritative and one-dimensional; offsets never feed
@@ -1077,7 +1365,7 @@ competitive rules. **Reopen** if bounded cosmetic offsets prove misleading
 or the owner approves collision as a gameplay mechanic.
 
 
-## D-61 · Champion adjustments and offensive Bloodweaver — 2026-10-31 (Proposed)
+## D-68 · Champion adjustments and offensive Bloodweaver — 2026-10-31 (Proposed)
 
 **Decision.** Apply the owner's specified initial champion values in
 GAME-DESIGN and replace Bloodweaver's zero-sum Transfer with Siphon.
@@ -1089,7 +1377,7 @@ hashes intentionally. The balance lab must compare identical seed blocks.
 owner's look/fun review rejects the presentation. Values remain Proposed.
 
 
-## D-62 · Shop reservations by new shops and paid Reroll — 2026-10-31 (preview)
+## D-69 · Shop reservations by new shops and paid Reroll — 2026-10-31 (preview)
 
 **Decision.** Supersede the timed P16-F2 draft with GAME-DESIGN BR-S06–S14:
 two free reservations, three redraw charges, increasing paid Reroll. No bans
@@ -1097,8 +1385,14 @@ or pool restrictions. CANON stays disabled; Practice and the lab use preview.
 **Contracts.** Appended private state moves serialization hashes; the
 champion-adjusted seeds must retain all outcomes and end ticks. Intention
 and rejection variants are appended. Private MatchView fields are local preview state, skipped by serde until
-the owner checkpoint. This preserves the v17 online View layout. At
+the owner checkpoint. This preserves the v20 online View layout. At
 activation, remove those skips and bump the protocol together.
 **Reopen** when the owner reviews the lab/HUD checkpoint, roster exceeds 30
-or no-frontline Shop metrics worsen. Activation requires protocol v18,
+or no-frontline Shop metrics worsen. Activation requires a protocol bump above v20,
 updated wire contracts and explicit approval; this PR does not activate it.
+
+**D-68 consolidation correction (owner, 2026-10-31).** Smuggler range is
+6.0 tiles, not the original 6.4 proposal. Keep the Stronghold range invariant
+and C5 intact. Merging the deployed D-60–D-66 state with D-68/D-69 requires
+new deterministic state/trace hashes in the same integration commit; this
+does not activate Shop preview online or the inactive Monsters kinds.

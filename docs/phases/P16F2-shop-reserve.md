@@ -1,4 +1,4 @@
-> Superseded 2026-10-31 by the owner's new-shop-charge design (D-62, GAME-DESIGN §10.3). The implementation/report is in SYSTEM-updates.md. CANON remains disabled.
+> Superseded 2026-10-31 by the owner's new-shop-charge design (D-69, GAME-DESIGN §10.3). The implementation/report is in SYSTEM-updates.md. CANON remains disabled.
 
 # P16-F2 — Shop Reserve: hold one offer for later
 

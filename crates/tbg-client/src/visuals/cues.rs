@@ -86,7 +86,6 @@ pub(super) fn animate(
         }
         let form = lib.get(v.form.0, v.form.1, v.form.2);
         anim.native = form.native;
-        anim.archer = form.native && v.form.0 == tbg_core::UnitKind::Archer;
         anim.plan = form.plan;
         anim.form = (v.form.1, v.form.2);
         let growth = f32::from((v.fx >> 11) & 7) / 7.0;

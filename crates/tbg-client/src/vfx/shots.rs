@@ -35,6 +35,8 @@ pub enum ShotKind {
     Coins,
     /// Kit champions (P55).
     Arrow,
+    /// Archer Arrow Rain (B2): smaller, faster arrows trailing sparks.
+    ArrowStorm,
     Glob,
     Fish,
     Bomb,
@@ -249,6 +251,14 @@ fn look(kind: ShotKind) -> Look {
             Some((Body::Arrow, 1.0)),
             0.03,
             UNIT_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Bolt,
+        ),
+        ArrowStorm => (
+            Some((Body::Arrow, 0.72)),
+            0.03,
+            UNIT_FLIGHT * 0.8,
             Trail::Sparks,
             0.0,
             Impact::Bolt,

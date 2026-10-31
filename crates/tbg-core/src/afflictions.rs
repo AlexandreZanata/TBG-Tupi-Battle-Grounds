@@ -281,6 +281,13 @@ fn cleanse(
     let u = &mut state.units[i];
     u.status = Status::None;
     u.fx.confused_until = 0;
+    u.fx.queued_slow = None;
+    // P58 §3.2: the bleed goes before any ordinary poison stack, and it takes
+    // one of the strip count (a Proposed contract, see roster_slots).
+    let mut strip = strip;
+    if strip > 0 && crate::roster_slots::cleanse_bleed(&mut u.fx) {
+        strip -= 1;
+    }
     let mut order: Vec<usize> = (0..u.fx.poison.len()).collect();
     order.sort_by_key(|&k| (Reverse(u.fx.poison[k].value), u.fx.poison[k].left));
     for k in order.into_iter().take(usize::from(strip)) {

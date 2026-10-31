@@ -12,7 +12,6 @@ pub enum Easing {
     CubicIn,
     CubicOut,
     CubicInOut,
-    Hold,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ClipEvent {
@@ -31,13 +30,6 @@ impl Easing {
             Self::CubicOut => 1.0 - (1.0 - t).powi(3),
             Self::CubicInOut if t < 0.5 => 4.0 * t * t * t,
             Self::CubicInOut => 1.0 - (-2.0 * t + 2.0).powi(3) * 0.5,
-            Self::Hold => {
-                if t >= 1.0 {
-                    1.0
-                } else {
-                    0.0
-                }
-            }
         }
     }
 }

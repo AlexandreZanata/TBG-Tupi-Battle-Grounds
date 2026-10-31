@@ -659,7 +659,7 @@ range, Blood Furnace sacrifice under betrayal, reconnect/replay hash.
 
 ### C.11 Smuggler — Humans · Support — *Mystery Cargo*
 
-**Owner adjustment 2026-10-31 (Proposed).** One-handed revolver: 10 damage every 30 ticks, range 6.4 tiles. Cargo stays on its separate timer (400 ticks, B 360); crates land 400 milli-tiles behind, clamped to the lane. B1 no longer changes attack speed.
+**Owner adjustment 2026-10-31 (Proposed).** One-handed revolver: 10 damage every 30 ticks, range 6.0 tiles (owner consolidation correction: obey the Stronghold range cap). Cargo stays on its separate timer (400 ticks, B 360); crates land 400 milli-tiles behind, clamped to the lane. B1 no longer changes attack speed.
 
 **Role.** A gamble that turns Energy into a random stream of units.
 
@@ -833,7 +833,7 @@ carried:
 | Topic | Rule |
 |-------|------|
 | Position | The passenger's x is the crab's x (synced before the passenger acts and after every unit has moved); it never walks on its own; its range is measured from that x |
-| Movement | Only the crab moves, with Tank rules (stops at its own 0.8 range), so the passenger fights **at the front line** |
+| Movement | Only the crab moves, with Tank rules (stops at its own 0.8 range), so the passenger fights **at the front line**. The pair moves at `max(crab speed, passenger speed) × (1 + carry bonus)`, the bonus being the larger of a +20 % base and the branch value below, never their sum (BR-X12, D-56, D-60) |
 | Actions | The passenger attacks, heals, casts, bonds, drops crates and grows normally |
 | Targeting | **No targeted effect can choose a carried unit**: enemy attacks, Stronghold fire, Rotcap/Old Finn echoes, Puppetmaster's betrayal target, Farwatch. An attack already winding up on it when it boards hits the crab instead |
 | Area | Splash, Bombard blasts, shrapnel and poison pulses reach it normally — at distance 0 from the crab, it is inside **every** splash aimed at the crab (the draft's main counter, made automatic by geometry) |

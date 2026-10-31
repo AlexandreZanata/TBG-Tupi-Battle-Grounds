@@ -9,7 +9,7 @@ use serde_json::Value;
 use tokio::sync::{oneshot, watch};
 
 use tbg_core::protocol::{AccountError, Profile, RatingResults};
-use tbg_core::{ArcanaPreset, Outcome, StrongholdKind};
+use tbg_core::{ArcanaPreset, Outcome, StrongholdKind, FACTION_COUNT};
 
 use super::leaderboard::{self, Snapshot};
 use super::{accounts, arcanas, matches, ranked, strongholds, AccountId};
@@ -40,7 +40,7 @@ pub(super) enum StoreCmd {
         b: AccountId,
         outcome: Option<Outcome>,
         duration_s: u64,
-        factions: [[u32; 4]; 2],
+        factions: [[u32; FACTION_COUNT]; 2],
         arcanas: [ArcanaPreset; 2],
         reply: Reply<Result<RatingResults, AccountError>>,
     },

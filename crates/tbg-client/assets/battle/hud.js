@@ -37,6 +37,8 @@
   const percent = (value, max) => Math.max(0, Math.min(100, value / Math.max(1, max) * 100));
   root.querySelector('[data-battle-action="surrender"]').addEventListener('click', () => send('surrender'));
   root.querySelector('[data-battle-action="close-inspect"]').addEventListener('click', () => send('close-inspect'));
+  // A spectator's Leave (P47): Rust stops the watch and returns to the lobby.
+  root.querySelector('[data-battle-action="leave-watch"]').addEventListener('click', () => send('leave-watch'));
   // War Council (BR-AG12–14): pick a card, then confirm; the choice is final.
   const council = { round: '', picked: null, sent: '', initialTicks: 0 };
   const augmentArt = globalThis.TbgAugmentArt;
@@ -55,12 +57,15 @@
   });
   document.addEventListener('keydown', event => { if (!root.hidden && event.key === 'Escape') send('deselect'); });
   const slug = name => name.toLowerCase().replace(/[^a-z0-9]/g,'');
-  // Units without a portrait yet (P16-B Nester, Rampart, Beetling) show none.
+  // Every buyable unit ships a portrait (tests/portraits.test.js). The proxy keeps
+  // images for four hours, 404s included, so the URL carries a revision: bump
+  // PORTRAIT_REV whenever a portrait file changes (scripts/unit-portraits.cjs).
+  const PORTRAIT_REV = 'p25-1';
   const portrait = (image, kind) => {
     if (image.dataset.kind === kind) return;
     image.dataset.kind = kind; image.style.visibility = 'hidden';
     image.onload = () => { image.style.visibility = ''; };
-    image.src = 'assets/battle/portraits/' + slug(kind) + '.webp';
+    image.src = 'assets/battle/portraits/' + slug(kind) + '.webp?v=' + PORTRAIT_REV;
   };
   // Fill moves at once; the pale trail follows after a beat, so a hit reads
   // as a chunk that drains away. A drop also flashes the bar.
@@ -114,14 +119,8 @@
   const towerOf = record => { const [kind = '', tier, branch] = (record || '').split('|'); return {kind, tier: Number(tier) || 0, branch: Number(branch) || 0}; };
   const towerLabel = (t, def) => (def ? def.name : t.kind) + ' T' + t.tier;
   fortOptions.forEach(button => button.addEventListener('click', () => { if (button.dataset.state === 'open') send('fortify:' + button.dataset.fortBranch); }));
-  const fortToggle = root.querySelector('[data-fort-toggle]');
-  fortToggle.addEventListener('click', () => {
-    const open = fortToggle.getAttribute('aria-expanded') !== 'true';
-    fortToggle.setAttribute('aria-expanded', String(open));
-    fortToggle.setAttribute('aria-label', open ? 'Hide Fortification details' : 'Show Fortification details');
-    fortToggle.textContent = open ? '−' : '+';
-    root.querySelector('[data-fort-body]').hidden = !open;
-  });
+  // The panel opens on a click on your own tower and closes like a unit's panel.
+  root.querySelector('[data-fort-toggle]').addEventListener('click', () => send('deselect'));
   function plates(you, enemy) {
     const data = fort.data;
     const mine = data && TS.kind(data, you.kind), theirs = data && TS.kind(data, enemy.kind);
@@ -163,8 +162,8 @@
     if (!fort.data) fortData();
     plates(you, enemy);
     const def = fort.data && TS.kind(fort.data, you.kind);
-    fortPanel.hidden = !def;
-    if (!def) return;
+    fortPanel.hidden = !def || s.towerOpen !== 'true';
+    if (!def || fortPanel.hidden) return;
     fortPanel.style.setProperty('--tower', def.color);
     fortPanel.querySelector('[data-fort-icon]').setAttribute('href', TS.icon(def.kind));
     set('[data-fort-name]', def.name);
@@ -287,6 +286,6 @@
     set('[data-battle-surrender]',s.surrender === 'sent' ? 'Leaving...' : s.surrender === 'armed' ? 'Confirm?' : 'Surrender');
     surrender.title = s.surrender === 'armed' ? (s.ranked === 'true' ? 'Confirm: this counts as a Ranked loss' : 'Click again to surrender') : 'Click twice to surrender';
   }
-  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-reroll-cost','data-shop-pending','data-reserve-limit','data-hp-own','data-hp-enemy','data-hp-max-own','data-hp-max-enemy','data-tower-you','data-tower-enemy','data-fortify','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-scale','data-army','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect','data-regen','data-augments-you','data-augments-enemy','data-council','data-council-options']});
+  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-reroll-cost','data-shop-pending','data-reserve-limit','data-hp-own','data-hp-enemy','data-hp-max-own','data-hp-max-enemy','data-tower-you','data-tower-enemy','data-tower-open','data-fortify','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-scale','data-army','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect','data-regen','data-augments-you','data-augments-enemy','data-council','data-council-options']});
   root.dataset.ready = 'true';
 })();

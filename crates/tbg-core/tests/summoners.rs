@@ -50,7 +50,7 @@ fn crate_is_dropped_behind_without_stopping() {
         );
         assert_eq!(
             tbg_core::content::def(UnitKind::Smuggler).range,
-            tbg_core::content::LANE_LEN * 40 / 100
+            tbg_core::content::STRONGHOLD_RANGE
         );
     }
 }

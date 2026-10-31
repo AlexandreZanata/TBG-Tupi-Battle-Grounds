@@ -120,3 +120,14 @@ fn plates_do_not_feed_siphon() {
     wounded(&mut s, UnitKind::BoneBrute, 1_000, 100);
     assert!(transfers(&hit(&mut s, a, Target::Unit(b))).is_empty());
 }
+
+#[test]
+fn unit_shields_do_not_feed_siphon() {
+    // D-63 + D-68: only enemy HP removed feeds Siphon, never shield damage.
+    let (mut s, a, b) = setup(0, 0);
+    wounded(&mut s, UnitKind::BoneBrute, 1_000, 100);
+    let i = s.unit_index(b).unwrap();
+    s.units[i].fx.shield = 100;
+    s.units[i].fx.shield_until = u32::MAX;
+    assert!(transfers(&hit(&mut s, a, Target::Unit(b))).is_empty());
+}

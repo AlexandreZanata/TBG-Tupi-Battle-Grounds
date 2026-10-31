@@ -16,6 +16,7 @@ pub mod assets;
 mod attacks;
 mod cues;
 mod growth;
+pub mod mount;
 mod names;
 mod shell;
 mod update;
@@ -158,6 +159,12 @@ fn highlight_inspected(
                 t.scale = Vec3::splat(scale);
             }
         }
+        if let Ok(mut t) = transforms.get_mut(v.figure) {
+            let target_y = if is_selected { 0.07 } else { 0.0 };
+            if (t.translation.y - target_y).abs() > 1e-4 {
+                t.translation.y = target_y;
+            }
+        }
     }
 }
 
@@ -243,20 +250,8 @@ pub fn spawn_unit_visual(
     let mut animator = Animator::new(joints, form.plan, figure_root, look.kind, look.id);
     animator.native = form.native;
     animator.form = (look.tier, look.branch);
-    animator.archer = form.native && look.kind == UnitKind::Archer;
     animator.play(crate::art::anim::Clip::Spawn);
     let root = commands.spawn_empty().id();
-    if animator.archer {
-        crate::art::bow::attach(
-            commands,
-            root,
-            &animator,
-            lib,
-            &lib.material,
-            look.own,
-            form.bow_half,
-        );
-    }
     commands
         .entity(root)
         .insert((

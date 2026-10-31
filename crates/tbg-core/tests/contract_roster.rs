@@ -89,7 +89,7 @@ const STAGED: [Row; 15] = {
         r(Leechroot,    Plants,   Dps,     3,  300, 10,  0, 160, 120, 90,    0, None),
         r(CargoCrab,    Machines, Tank,    5, 1400, 20,  0, 150, 80,  50,    0, None),
         r(Puppetmaster, Undead,   Control, 4,  260, 0,   0, 800, 400, 90,    0, None),
-        r(Smuggler,     Humans,   Support, 6,  320, 10,  0, 150,  640, 60,    0, None),
+        r(Smuggler,     Humans,   Support, 6,  320, 10,  0, 150,  600, 60,    0, None),
     ]
 };
 
@@ -158,13 +158,22 @@ fn roster_composition() {
     // conventional kinds, P45 another three, P46 another three and P47 two
     // more (§11, not in the Shop pool until P53); the pool itself stays
     // exactly the ten purchasable units.
-    assert_eq!(UNITS.len(), 27);
+    // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
+    // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
+    let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
+    assert_eq!(UNITS.len(), 31);
+    assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
+    assert_eq!(
+        &kinds[ALL_KINDS.len()..],
+        &[
+            UnitKind::Bonehorn,
+            UnitKind::Ravager,
+            UnitKind::Acidmaw,
+            UnitKind::Whisperer,
+        ][..]
+    );
     assert_eq!(UNIT_KINDS.len(), 10);
     assert!(UNIT_KINDS.iter().all(|k| k.is_conventional()));
-    assert_eq!(
-        UNITS.iter().map(|u| u.kind).collect::<Vec<_>>(),
-        ALL_KINDS.to_vec()
-    );
     for (f, n) in [
         (Faction::Humans, 7),
         (Faction::Undead, 5),
@@ -346,7 +355,23 @@ Smuggler/Double Shipment: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg
 Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bonehorn/Ancestral Carapace: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bonehorn/Stone Fangs: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bonehorn/Ancestral Carapace: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bonehorn/Stone Fangs: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Ravager/Voracious Hunt: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Ravager/Deep Frenzy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Ravager/Voracious Hunt: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Ravager/Deep Frenzy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Acidmaw/Abyssal Jaw: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Acidmaw/Corrosive Volley: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Acidmaw/Abyssal Jaw: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Acidmaw/Corrosive Volley: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Whisperer/Echo of Fear: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Whisperer/Mental Pulse: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Whisperer/Echo of Fear: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Whisperer/Mental Pulse: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {

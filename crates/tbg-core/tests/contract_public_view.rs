@@ -115,3 +115,32 @@ fn the_view_carries_the_match_arena_and_the_spectator_count() {
         );
     }
 }
+
+#[cfg(feature = "lab")]
+#[test]
+fn champion_display_keeps_protocol20_carrier_and_expiring_shield() {
+    // D-61/D-63 + D-68: both views preserve carrier/shield while adding fx display bits.
+    let mut state = MatchState::lab(
+        31,
+        tbg_core::Ruleset::canon(),
+        [tbg_core::ArcanaPreset::NEUTRAL; 2],
+    );
+    let carrier = state.lab_spawn_at(Seat::A, tbg_core::UnitKind::CargoCrab, 0, 0, 4_000);
+    let rider = state.lab_spawn_at(Seat::A, tbg_core::UnitKind::Leechroot, 0, 0, 4_000);
+    let index = state.unit_index(rider).unwrap();
+    state.units[index].fx.carrier = Some(carrier);
+    state.units[index].fx.plates = 3;
+    state.units[index].fx.essence = 5;
+    state.units[index].fx.shield = 90;
+    state.units[index].fx.shield_until = 5;
+    let player = state.view_for(Seat::A, &[]);
+    let public = state.public_view(&[], 0);
+    assert_eq!(player.units, public.units);
+    let unit = player.units.iter().find(|u| u.id == rider).unwrap();
+    assert_eq!((unit.carrier, unit.shield), (Some(carrier), 90));
+    assert!(unit.is_carried());
+    assert_eq!(((unit.fx >> 8) & 7, (unit.fx >> 11) & 7), (3, 5));
+    state.tick = 5;
+    assert_eq!(state.view_for(Seat::A, &[]).units[index].shield, 0);
+    assert_eq!(state.public_view(&[], 0).units[index].shield, 0);
+}

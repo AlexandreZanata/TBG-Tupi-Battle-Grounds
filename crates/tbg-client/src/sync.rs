@@ -91,6 +91,7 @@ pub fn plugin(app: &mut App) {
         .init_resource::<MatchStats>()
         .init_resource::<ViewGaps>()
         .init_resource::<crate::art::aim::ImpactRing>()
+        .init_resource::<crate::visuals::mount::Mounts>()
         .add_systems(Update, poll_link)
         .add_systems(
             Update,
@@ -104,6 +105,13 @@ pub fn plugin(app: &mut App) {
                 .after(sync_units)
                 .after(crate::stress::walk)
                 .before(visuals::aim::update_aim),
+        )
+        .add_systems(
+            Update,
+            crate::visuals::mount::passengers
+                .after(crowd_ecs::update)
+                .before(visuals::aim::update_aim)
+                .run_if(in_state(GameState::InMatch)),
         )
         .add_systems(OnExit(GameState::InMatch), clear_units);
 }
@@ -199,7 +207,8 @@ impl Scene<'_, '_, '_, '_, '_> {
                 .get(&u.id)
                 .and_then(|e| self.visuals.get_mut(*e).ok())
             {
-                Some((mut v, _, _)) => {
+                Some((mut v, _, mut anim)) => {
+                    anim.carried = u.is_carried();
                     visuals::update_unit_visual(self.commands, self.assets, self.lib, &mut v, u);
                 }
                 None => {
@@ -228,8 +237,13 @@ impl Scene<'_, '_, '_, '_, '_> {
     }
 }
 
-fn clear_units(mut commands: Commands, mut map: ResMut<UnitEntities>) {
+fn clear_units(
+    mut commands: Commands,
+    mut map: ResMut<UnitEntities>,
+    mut mounts: ResMut<crate::visuals::mount::Mounts>,
+) {
     for (_, e) in map.0.drain() {
         commands.entity(e).try_despawn();
     }
+    mounts.clear();
 }

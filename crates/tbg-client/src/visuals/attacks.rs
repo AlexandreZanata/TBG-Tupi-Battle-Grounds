@@ -41,6 +41,7 @@ pub(super) fn release(
                 muzzle,
                 shot,
                 flash,
+                ..
             } if a.events.contains(&ClipEvent::Release) => {
                 let Ok(g) = globals.get(a.joints[from.index()]) else {
                     continue;

@@ -84,6 +84,12 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             .glow(),
         );
     }
+    if f.b {
+        // Base also has sap veins; branch B keeps its own visible wrist nodes.
+        for arm in [ForearmL, ForearmR] {
+            v.push(part(Body(arm), Ball(0.025), BLOOD, [0.04, -p.arm * 0.7, 0.05]).glow());
+        }
+    }
     if f.b && f.t2 {
         v.extend([
             part(
