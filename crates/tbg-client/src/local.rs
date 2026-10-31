@@ -55,6 +55,15 @@ impl LocalMatch {
                 }
             }
         }
+        #[cfg(all(debug_assertions, target_os = "linux"))]
+        if crate::config::url_param("capture").is_some()
+            && crate::config::url_param("capture_panel").as_deref() == Some("council")
+        {
+            // Advance the real local simulation to its first War Council for UI capture.
+            while !state.augments.selecting() && state.phase != Phase::Ended {
+                state.step();
+            }
+        }
         LocalMatch {
             state,
             bot: Bot::new(seed ^ 0x5eed),

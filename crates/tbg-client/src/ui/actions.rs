@@ -215,7 +215,10 @@ pub(super) fn apply(
             }
             // Linux presentation actions are consumed before this system.
             #[cfg(target_os = "linux")]
-            UiAction::ShowArenaBanner | UiAction::CloseArenaBanner => {}
+            UiAction::ShowArenaBanner
+            | UiAction::CloseArenaBanner
+            | UiAction::PickAugment(_)
+            | UiAction::ConfirmAugment => {}
             UiAction::CopyLink => {
                 if let Some(token) = queue_info.challenge {
                     config::copy_text(&config::challenge_link(&token));

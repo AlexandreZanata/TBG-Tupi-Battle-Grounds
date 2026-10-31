@@ -141,6 +141,10 @@ pub enum UiAction {
     PreviewArena(tbg_core::Arena),
     // Owner revision 2026-10-29: War Council actions.
     ChooseAugment(u8),
+    #[cfg(target_os = "linux")]
+    PickAugment(u8),
+    #[cfg(target_os = "linux")]
+    ConfirmAugment,
     ForgoAugment,
     /// D-46: buy the next Fortification tier of your own tower on a branch.
     Fortify(u8),

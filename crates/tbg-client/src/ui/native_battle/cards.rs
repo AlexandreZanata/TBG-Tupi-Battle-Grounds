@@ -115,6 +115,7 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
                 cost.spawn(kit::muted("Cost", 12.));
                 cost.spawn((chrome::title("", 19.), Readout::Cost(i)));
             });
+            super::reserve::spawn(card, assets, i);
         });
 }
 

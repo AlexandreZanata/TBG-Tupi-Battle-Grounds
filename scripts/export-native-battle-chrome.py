@@ -43,6 +43,13 @@ def main():
     export('flag', 17, 19, '<path d="M3 1h2v17H3zM5 2l10 2-2 5-8-2z" fill="#e45b5b"/>')
     towers()
     shop_card()
+    export('council-energy',24,20,'''<path d="M4 8V5Q4 2 8 2H16Q20 2 20 5V8" fill="none" stroke="white" stroke-width="2"/><rect x="2" y="7" width="20" height="12" rx="2" fill="white"/><path d="M7 8v10M17 8v10" stroke="#28323b" stroke-width="1.5"/><rect x="10" y="10" width="4" height="5" fill="#28323b"/>''')
+    for state, shackle in [('closed', 'M7 11V7a5 5 0 0 1 10 0v4'),
+                            ('open', 'M7 11V7a5 5 0 0 1 9-3')]:
+        export('shop-lock-' + state, 24, 26, f'''
+          <path d="{shackle}" fill="none" stroke="#f6d680" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="4" y="10" width="16" height="13" rx="2" fill="#243545" stroke="#f6d680" stroke-width="1.5"/>
+          <circle cx="12" cy="15" r="2" fill="#f6d680"/><path d="M12 16v3" stroke="#f6d680" stroke-width="2"/>''')
 
 
 def towers():

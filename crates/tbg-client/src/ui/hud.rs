@@ -4,7 +4,9 @@
 
 use bevy::prelude::*;
 
-use super::{label, screen, UiAction, BUTTON};
+#[cfg(not(target_os = "linux"))]
+use super::BUTTON;
+use super::{label, screen, UiAction};
 use crate::sync::MatchInfo;
 use crate::GameState;
 
@@ -28,14 +30,21 @@ pub(super) enum Hud {
     #[cfg(not(target_os = "linux"))]
     CardStrip(usize),
     Augments,
+    #[cfg(not(target_os = "linux"))]
     CouncilStatus,
+    #[cfg(not(target_os = "linux"))]
     CouncilRow,
+    #[cfg(not(target_os = "linux"))]
     CouncilOption(usize),
+    #[cfg(not(target_os = "linux"))]
     CouncilOptionText(usize),
+    #[cfg(not(target_os = "linux"))]
     Forgo,
+    #[cfg(not(target_os = "linux"))]
     ForgoText,
 }
 
+#[cfg(not(target_os = "linux"))]
 fn council_card(i: usize) -> impl Bundle {
     (
         Node {
@@ -53,6 +62,7 @@ fn council_card(i: usize) -> impl Bundle {
     )
 }
 
+#[cfg(not(target_os = "linux"))]
 fn forgo_card() -> impl Bundle {
     (
         Node {
@@ -159,6 +169,7 @@ fn card(i: usize, narrow: bool) -> impl Bundle {
     )
 }
 
+#[cfg(not(target_os = "linux"))]
 fn row(gap: f32) -> Node {
     Node {
         flex_direction: FlexDirection::Row,
@@ -273,24 +284,6 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>)
             .with_children(|shop| {
                 shop.spawn((label("", 11.), Hud::Augments));
                 shop.spawn((label("", 11.), Hud::Info));
-                shop.spawn((label("", 12.), Hud::CouncilStatus));
-                shop.spawn((
-                    Node {
-                        display: Display::None,
-                        flex_wrap: FlexWrap::Wrap,
-                        justify_content: JustifyContent::Center,
-                        row_gap: px(6),
-                        ..row(6.)
-                    },
-                    Hud::CouncilRow,
-                    children![
-                        council_card(0),
-                        council_card(1),
-                        council_card(2),
-                        council_card(3),
-                        forgo_card()
-                    ],
-                ));
                 shop.spawn((
                     Node {
                         width: px(862),

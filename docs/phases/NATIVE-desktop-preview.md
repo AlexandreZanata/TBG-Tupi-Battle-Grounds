@@ -342,3 +342,37 @@ on this front; these pending checks are not passing evidence.
   CI wait or VPS action occurred. Real preferences, account data, running
   app windows and unrelated policy edits were preserved. Reopen TBG to
   load the updated installation.
+
+## Linux illustrated War Council and Shop lock — 2026-10-31
+
+Owner requested the browser-reference Augment modal and the existing card
+lock in Linux. Reuse the original Augment illustrations and four rarity
+frames, including their exact caption/cost recess positions. Native cards
+pick locally and send the existing ChooseAugment only on confirmation;
+Forgo, authoritative countdown/progress, confirmation waiting, unaffordable
+states and modal keyboard scope follow the existing round. The existing
+two-step Surrender remains available during the pause (BR-M06).
+
+Shop lock sends the existing Reserve/Release actions and shows authoritative
+remaining charges. Keep existing BR-S06–S14 behavior: two simultaneous
+reservations; three Shop renewals; buying another offer or Reroll consumes
+a charge; buying the held offer ends its reservation. No simulation or
+server activation changes. Online CANON.shop remains None; the control is
+shown only when the match exposes Shop support, matching the web's current
+Practice-only availability. This limitation was stated to the owner.
+
+Level: work front. Run scoped formatting, asset format and diff checks,
+then the owner-requested native preview build/install under the shared host
+lock and existing cache. The owner's wait/job exceptions remain scoped to
+this chat. Debug-only capture support advances the real local simulation
+to its first War Council and exercises normal Reserve/Buy/Release UiActions
+in isolated Practice; no fake client-side round or reservation is used.
+
+New client regressions are written and deferred to consolidation:
+`cargo test -p tbg-client --bin tbg-client ui::native_battle::council::tests
+-- --test-threads=1` and the corresponding `ui::native_battle::reserve::tests`.
+Also defer the existing core `shop_reserve_reroll`, `augment_pause` and
+`augments_infinite` test targets and native pointer/keyboard scenarios for
+select/confirm/Forgo, reconnect/late confirmation, insufficient Energy,
+spectating and lock expiry. No full suite, WASM build, web assets, deploy or
+remote Git operation belongs to this front.

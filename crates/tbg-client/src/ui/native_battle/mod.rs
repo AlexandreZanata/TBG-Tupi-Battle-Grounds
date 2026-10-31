@@ -3,7 +3,9 @@
 mod arena;
 mod cards;
 pub(super) mod chrome;
+mod council;
 mod fortify;
+mod reserve;
 mod resources;
 mod score;
 mod unit_panel;
@@ -25,7 +27,11 @@ pub(super) fn plugin(app: &mut App) {
     fortify::plugin(app);
     cards::plugin(app);
     unit_panel::plugin(app);
+    reserve::plugin(app);
+    council::plugin(app);
 }
+
+pub(super) use council::CouncilControl;
 
 pub(super) fn auxiliary_visible(hud: &super::hud::Hud, view: &tbg_core::MatchView) -> Option<bool> {
     use super::hud::Hud;
@@ -33,7 +39,6 @@ pub(super) fn auxiliary_visible(hud: &super::hud::Hud, view: &tbg_core::MatchVie
     Some(match hud {
         Hud::Augments => view.augments[me].iter().any(|copies| *copies > 0),
         Hud::Info => view.synergy[me].iter().any(|count| *count > 0),
-        Hud::CouncilStatus => view.augment_round.is_some(),
         _ => return None,
     })
 }

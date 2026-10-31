@@ -1,14 +1,16 @@
 //! Per-frame HUD refresh from `LatestView`.
 
 use bevy::prelude::*;
-use tbg_core::content::{
-    augment_def, def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, TICK_HZ,
-};
+use tbg_core::content::{augment_def, def, INTEREST_BAND, INTEREST_MAX_BANDS};
+#[cfg(not(target_os = "linux"))]
+use tbg_core::content::{ENERGY_SCALE, TICK_HZ};
 use tbg_core::FACTIONS;
 use tbg_core::{MatchView, Phase};
 
 use super::hud::Hud;
-use super::{PendingBuy, BUTTON, DISABLED};
+use super::PendingBuy;
+#[cfg(not(target_os = "linux"))]
+use super::{BUTTON, DISABLED};
 use crate::sync::LatestView;
 #[cfg(not(target_os = "linux"))]
 use crate::visuals::assets::FACTION_COLORS;
@@ -18,7 +20,7 @@ pub(super) fn update(
     info_state: Res<crate::sync::MatchInfo>,
     mut pending: ResMut<PendingBuy>,
     mut nodes: Query<(&Hud, &mut Node)>,
-    mut colors: Query<(&Hud, &mut BackgroundColor)>,
+    #[cfg(not(target_os = "linux"))] mut colors: Query<(&Hud, &mut BackgroundColor)>,
     mut texts: Query<(&Hud, &mut Text)>,
 ) {
     let Some(v) = &view.0 else { return };
@@ -46,6 +48,7 @@ pub(super) fn update(
                 node.display = if show { Display::Flex } else { Display::None };
                 continue;
             }
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilRow => {
                 node.display = if v.augment_round.is_some() {
                     Display::Flex
@@ -58,6 +61,7 @@ pub(super) fn update(
         };
         node.width = percent(100.0 * fraction.clamp(0.0, 1.0));
     }
+    #[cfg(not(target_os = "linux"))]
     for (hud, mut color) in &mut colors {
         match hud {
             #[cfg(not(target_os = "linux"))]
@@ -77,6 +81,7 @@ pub(super) fn update(
                 let c = FACTION_COLORS[def(v.offers[*i]).faction.index()];
                 color.0 = Color::srgb_u8(c[0], c[1], c[2]);
             }
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilOption(i) => {
                 let open = v
                     .augment_round
@@ -84,6 +89,7 @@ pub(super) fn update(
                     .is_some_and(|r| !r.resolved && r.ticks_left > 0 && v.energy >= r.costs[*i]);
                 color.0 = if open { BUTTON } else { DISABLED };
             }
+            #[cfg(not(target_os = "linux"))]
             Hud::Forgo => {
                 let open = v
                     .augment_round
@@ -123,6 +129,7 @@ pub(super) fn update(
                 )
             }
             Hud::Augments => augment_list(v, v.you.index()),
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilStatus => match &v.augment_round {
                 Some(r) => {
                     let s = r.ticks_left.div_ceil(TICK_HZ);
@@ -142,6 +149,7 @@ pub(super) fn update(
                 }
                 None => "War Council every 1:00 of battle".into(),
             },
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilOptionText(i) => v
                 .augment_round
                 .as_ref()
@@ -156,6 +164,7 @@ pub(super) fn update(
                     ))
                 })
                 .unwrap_or_default(),
+            #[cfg(not(target_os = "linux"))]
             Hud::ForgoText => {
                 if v.augment_round
                     .as_ref()

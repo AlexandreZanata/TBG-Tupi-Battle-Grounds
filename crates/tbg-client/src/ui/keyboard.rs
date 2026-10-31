@@ -4,6 +4,7 @@ use super::{ActionQueue, UiAction};
 use crate::GameState;
 use bevy::prelude::*;
 
+#[cfg(not(target_os = "linux"))]
 type Buttons<'w, 's> = Query<
     'w,
     's,
@@ -17,6 +18,21 @@ type Buttons<'w, 's> = Query<
     ),
 >;
 
+#[cfg(target_os = "linux")]
+type Buttons<'w, 's> = Query<
+    'w,
+    's,
+    (
+        Entity,
+        &'static UiAction,
+        &'static ComputedNode,
+        &'static UiGlobalTransform,
+        &'static InheritedVisibility,
+        Option<&'static bevy::ui::CalculatedClip>,
+        Option<&'static super::native_battle::CouncilControl>,
+    ),
+>;
+
 pub(super) fn navigate(
     keys: Res<ButtonInput<KeyCode>>,
     state: Res<State<GameState>>,
@@ -25,6 +41,7 @@ pub(super) fn navigate(
     mut focus: Local<usize>,
     mut button_focus: ResMut<super::kit::buttons::Focus>,
     mut queue: ResMut<ActionQueue>,
+    #[cfg(target_os = "linux")] view: Res<crate::sync::LatestView>,
 ) {
     if *state.get() == GameState::Menu || super::textform::is_open(&form) {
         return;
@@ -41,14 +58,19 @@ pub(super) fn navigate(
     }
     let mut visible: Vec<_> = buttons
         .iter()
-        .filter(|(_, a, n, t, v, c)| {
+        .filter(|entry| {
+            let (_, a, n, t, v, c, ..) = entry;
+            #[cfg(target_os = "linux")]
+            if view.0.as_ref().is_some_and(|v| v.augment_round.is_some()) && entry.6.is_none() {
+                return false;
+            }
             **a != UiAction::Disabled
                 && v.get()
                 && n.size.x > 0.
                 && c.is_none_or(|c| c.contains_point(t.translation))
         })
         .collect();
-    visible.sort_by_key(|(_, _, _, t, _, _)| {
+    visible.sort_by_key(|(_, _, _, t, ..)| {
         (
             (t.translation.y * 10.) as i32,
             (t.translation.x * 10.) as i32,

@@ -5,6 +5,9 @@ use bevy::{
     render::view::screenshot::{save_to_disk, Screenshot, ScreenshotCaptured},
 };
 
+#[cfg(target_os = "linux")]
+mod reserve;
+
 pub fn plugin(app: &mut App) {
     if crate::config::url_param("capture").is_some() {
         app.add_systems(Update, capture);
@@ -24,6 +27,21 @@ pub fn plugin(app: &mut App) {
                 select_unit.run_if(in_state(crate::GameState::InMatch)),
             );
         }
+        #[cfg(target_os = "linux")]
+        if matches!(
+            crate::config::url_param("capture_panel").as_deref(),
+            Some("council" | "reserve")
+        ) {
+            app.add_systems(
+                OnEnter(crate::GameState::Menu),
+                |mut actions: ResMut<crate::ui::ActionQueue>| {
+                    actions.0.push(crate::ui::UiAction::Practice);
+                },
+            );
+            if crate::config::url_param("capture_panel").as_deref() == Some("reserve") {
+                reserve::plugin(app);
+            }
+        }
     }
 }
 
@@ -34,6 +52,7 @@ fn capture(
     #[cfg(target_os = "linux")] view: Res<crate::sync::LatestView>,
     #[cfg(target_os = "linux")] tower: Res<crate::ui::fortify::TowerOpen>,
     #[cfg(target_os = "linux")] inspected: Res<crate::ui::inspect::Inspected>,
+    #[cfg(target_os = "linux")] reserve: Option<Res<reserve::Status>>,
     mut started: Local<bool>,
 ) {
     let delay = crate::config::url_param("capture_after")
@@ -49,6 +68,16 @@ fn capture(
     }
     #[cfg(target_os = "linux")]
     {
+        if crate::config::url_param("capture_panel").as_deref() == Some("reserve")
+            && reserve.is_none_or(|status| !status.done)
+        {
+            return;
+        }
+        if crate::config::url_param("capture_panel").as_deref() == Some("council")
+            && view.0.as_ref().is_none_or(|v| v.augment_round.is_none())
+        {
+            return;
+        }
         if crate::config::url_param("capture_panel").as_deref() == Some("fortify") && !tower.0 {
             return;
         }
