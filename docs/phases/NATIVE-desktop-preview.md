@@ -541,3 +541,33 @@ live-data updates, narrow-window resizing and return from a match to
 consolidation. Full workspace tests/Clippy and other-platform builds need
 their existing explicit authorization. No game rule, web asset/behavior,
 remote Git, CI or VPS change is part of this front.
+
+### Shared menu header result
+
+- Installed source: `13682b6964164d9f519cd62d1bfcf010f1545fbf`.
+  `cargo build --locked -p tbg-client --bin tbg-client`, Linux packaging
+  with `--no-archive` and the generated installer passed under the shared
+  host lock with the existing cache and `CARGO_BUILD_JOBS=2`. Compilation
+  took 6.99 s, with no warnings or errors.
+- `cargo fmt -p tbg-client -- --check`, `git diff --check`,
+  `desktop-file-validate`, installed source metadata and binary/cache/
+  manifest SHA-256 comparison passed. The local preview pointer records
+  this installed source revision.
+- Inspected three focused installed captures at 1920x972, sequentially
+  using `TBG_PANEL=arcanas`, `TBG_PANEL=stronghold` and
+  `TBG_CAPTURE_PANEL=ranking` with `TBG_CAPTURE_AFTER=5`:
+  `.local/shared-header-arcanas.webp`,
+  `.local/shared-header-stronghold.webp` and
+  `.local/shared-header-ranking.webp`. All show the same header bounds,
+  logo/account/presence cells and the correct highlighted navigation tab.
+  Content begins below the header; long Stronghold content remains clipped
+  to its scrolling body. Ranking no longer removes the common header.
+- Captures used isolated profiles and a localhost server override and
+  exited successfully with only the expected virtual X11 XSETTINGS/
+  physical-dimension warnings. Ranking's loading state and presence's
+  loading copy do not verify production data. Actual pointer/keyboard
+  navigation and the other consolidation scenarios above remain deferred.
+- No Rust tests, full suite, WASM/Trunk build, web behavior/assets change,
+  remote Git, CI or deployment ran. Existing app windows, account data,
+  preferences and unrelated policy edits were preserved. Reopen TBG to
+  load the installed common header.
