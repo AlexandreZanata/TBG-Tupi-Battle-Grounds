@@ -1,0 +1,36 @@
+# Classification of every tbg-core/src path for the ruleset source hash
+# (P61 §3). `watch` paths feed `ruleset_source_hash`; `exclude` paths carry
+# a reason. A new .rs file fails contract_ruleset_version until listed here.
+watch afflictions.rs
+watch arcana.rs
+watch augment.rs
+watch combat.rs
+watch combat/formation.rs
+watch content.rs
+watch hits.rs
+watch intent.rs
+watch rng.rs
+watch ruleset.rs
+watch shop.rs
+watch sim.rs
+watch state.rs
+watch stronghold.rs
+watch summon.rs
+watch support.rs
+watch synergy.rs
+watch targeting.rs
+watch types.rs
+exclude account.rs account key format, no gameplay
+exclude bot.rs practice/test opponent, never authoritative
+exclude headless.rs offline harness
+exclude lab.rs offline balance lab, never online (C10)
+exclude lib.rs module exports only
+exclude profiling.rs benchmark counters only
+exclude protocol.rs wire format, versioned separately
+exclude rating.rs Elo, versioned by GAME-DESIGN §5 and contracts
+exclude ranked_integrity.rs settlement eligibility, policy-versioned
+exclude replay.rs offline replay tooling
+exclude ruleset_version.rs this identity module
+exclude view.rs per-seat presentation of authoritative state
+exclude view/public.rs spectator presentation
+exclude view/visibility.rs presentation filtering

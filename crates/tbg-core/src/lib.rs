@@ -23,6 +23,7 @@ pub mod rating;
 pub mod replay;
 pub mod rng;
 pub mod ruleset;
+pub mod ruleset_version;
 pub mod shop;
 pub mod sim;
 pub mod state;
