@@ -14,6 +14,10 @@
 | Proxy routing | Fixed slot routes installed before active migration; no routine proxy reload | Generic load balancing or socket retry cannot reconstruct in-memory matches; finite close delay cannot cover unlimited duration |
 | Data compatibility | Expand/contract and verified old/new readers/writers | Reverting the production database loses results; destructive schema changes block safe coexistence |
 | Thousands-player path | Measure overlap headroom, then scale match workers/admission/result boundaries | Kubernetes/multi-region/stream bus is not justified by a hypothetical player count |
+| Contract identity | Fingerprints computed from frozen wire bytes, content tables and determinism goldens | Hand-bumped numbers drift; an equal SemVer says nothing about rules or wire |
+| Contract transitions | One active public contract, preview-channel trial, scheduled switch | A percentage canary across contracts splits a small player pool |
+| Download size | Full archive first; per-file content-addressed reuse after measuring real deltas | Binary diff patches need the exact previous build and add a failure mode |
+| Update health signal | Aggregate (build, outcome) counters from the admission handshake | A separate analytics service or installation IDs add privacy cost without need |
 
 The recommendation accepts two constraints: retaining old builds consumes
 disk, and long-running old matches can defer the next incompatible release.
@@ -113,14 +117,24 @@ bound fails with a user-visible retry/unsupported message, not a bypass.
 - Current and previous verified build retained at minimum, plus any
   executing/resume-pinned builds. Notes acknowledgements are per installed
   build; automatic notes history highlights at most 10 releases.
-- Proposed canary steps: internal-only → 5% → 25% → 100% **new eligible
-  admissions**, with gates evaluated over meaningful samples. No automatic
+- Proposed canary steps for **same-contract** releases: internal-only → 5% →
+  25% → 100% **new eligible admissions**, with gates evaluated over meaningful
+  samples. New match contracts use the scheduled switch of P66 §6.4 instead. No automatic
   promotion from a tiny sample or a timer alone. Signed channels/builds
   cannot be cross-installed accidentally.
 - Existing-game guardrail: no routine disconnect caused by deploy/update,
   no lost/duplicated result, no p99 tick-time or view-delay regression above
   5% versus paired baseline for the agreed same-load fixture. This is an
   initial stop criterion, not an already measured SLO or capacity claim.
+
+- Prompt cadence: one startup modal per launch per build; Later keeps a
+  non-modal badge; idle rechecks never open a second modal in a session.
+- Client rollout halt: stop promoting a new client build when failed or
+  recovered outcomes reach 2% of at least 100 reports for that build.
+- Contract switch: publish the new-contract stable client at least 24 hours
+  before the switch; pre-switch rooms follow the O03 grace policy.
+- Notes: per locale at most 40 items, 280 characters per item and 80 per
+  title, inside the 512 KiB notes cap.
 
 Security failures and confirmed result loss stop rollout regardless of the
 percentage metric. If normal measurement noise exceeds the proposed threshold,
@@ -151,6 +165,10 @@ set at Step 0 from platform measurements, with no destructive automatic cleanup.
 | U16 | Old/new DB writers, partial backfill, rollback, live browser tab and immutable old bundles | Expand/contract compatibility, preserved results/assets; no database restore to undo code; no forced tab reload |
 | U17 | Proxy reload/worker SIGTERM/systemd stop path in isolation, coordinator loss or heartbeat uncertainty | Known disruptive operations gated; no routine proxy reload; safe admission refusal; no fake migration on dead worker |
 | U18 | Constrained same-host old/new overlap with controlled sample | Measured headroom/tick/view/result-queue data and rollout guardrails; no claimed thousands-player capacity from unit tests |
+| U19 | Change wire bytes, a content table or a determinism golden without a new identity; replay an old-epoch client corpus against the new server | The build or test fails on an unbumped identity; compatibility is claimed only when the recorded corpus passes |
+| U20 | Launch twice with an update available, Later, idle recheck, required update, offline start; handshake outcome reporting | One modal per launch per build, badge persists, Practice works while an update is required; the server keeps only aggregate (build, outcome) counters; rollout halts at the threshold |
+| U21 | Notes missing pt-BR, unknown field, HTML/script/remote image, non-D5 glyph, rules change without a gameplay section | The pipeline refuses before signing; the client renders plain text only |
+| U22 | Scheduled contract switch with running A matches, queued old clients, a room created before the switch, cross-contract spectate and challenge | One public contract at a time; old clients get UpdateRequired at queue time; A matches finish; cross-contract pairing and watching are refused with a localized reason |
 
 Tests use synthetic repositories/keys, temporary install/data paths, local
 listeners and process fixtures. Never update the owner's installation, sign
@@ -159,7 +177,7 @@ Fault injection uses controlled process killpoints in temporary fixtures,
 not actual power cycling or attacks on production. Windows acceptance is a
 real Windows work front; missing hardware is a recorded blocker, not a pass.
 
-U13–U17 need focused integration scenarios once at consolidation. A broad
+U13–U17 and U22 need focused integration scenarios once at consolidation. A broad
 full multiplayer run is not implicit permission on every front. Keep planned
 commands explicit and use the shared compile lock/two-job limit. Examples
 cannot reference fake existing targets: implementation report supplies the
@@ -222,3 +240,17 @@ checks, all U01–U18 cases and O01–O04 decisions present, and `git diff --che
 Source/script/deploy/workflow diff against origin/main is empty in this
 planning tree. The final staged documentation is checked before publication.
 Parallel decision reservations through D-90 were inspected; P66 uses D-91/D-92.
+
+**Planning review (2026-10-31).** Reviewed against the owner's request and
+the code it relies on (300-second `DRAIN_LIMIT`, `TimeoutStopSec=330`, manual
+`PROTOCOL_VERSION`, unsigned `/api/version`, frozen protocol bytes and
+determinism goldens). Added: requirements traceability (P66 §2.1), prompt
+cadence and offline play while an update is required (§3.1, BR-UP08), the
+notes content contract (§3.4, BR-UP10), supply-chain hardening and a
+download-size path (§4), contract transitions without split queues (§6.4,
+BR-UP09), computed contract identity (§6.5), the aggregate update-health
+signal, service indicators and host resource isolation (§7), independently
+shippable milestones M1–M4 (§8), owner decision O05 and a risk register
+(§10); U19–U22 extend the matrix. Same-contract scope was added to the
+canary steps so they cannot split the public queue. Documentation checks only;
+no code, keys, installation or deployment.

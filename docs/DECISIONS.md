@@ -1254,8 +1254,14 @@ do not supply authenticity, transaction recovery, resume persistence or
 cross-platform executable replacement. Signing and recovery are distinct
 from selecting a SemVer string or copying assets over a running application.
 
-**Status/limits.** Planning only. O01–O04 resolve platform/key/operations
-choices; no real signing, install or release is authorized. D-85–D-90 are
+**Delivery order.** The Linux updater and notes ship first as their own
+milestone (P66 M1) from a static signed repository, with no game-server
+change; backend safety (M2) runs in parallel, two-slot rollout (M3) follows
+M2 and Windows (M4) follows real-device acceptance.
+
+**Status/limits.** Planning only. O01–O05 resolve platform/key/operations/
+player-default choices; no real signing, install or release is authorized.
+D-85–D-90 are
 reserved by inspected parallel P59/P60/P61/P64 work, so P66 takes D-91/D-92.
 Reopen for system-managed packages, unsupported bootstrap ABI, richer updater
 privileges, root/certificate changes or measured resource regressions.
@@ -1275,6 +1281,13 @@ incompatible contracts receive another generation. Each replacement worker
 gets a new generation ID. Reconnect returns to its original owner; two
 independent process-local lobbies are insufficient for one active account.
 Use expand/contract DB changes and retain immutable browser/native bundles.
+
+**Identity and transitions.** Wire, ruleset and content identities are
+computed from the frozen protocol bytes, content tables and determinism
+goldens, never hand-bumped. Public matchmaking admits one active contract;
+a new contract is trialled on the preview channel and switched on schedule
+after its client is published, so the player pool never splits silently.
+Percentage canaries apply to same-contract releases.
 
 **Why.** Current server drain has a 300-second cutoff and systemd 330 seconds
 despite open-ended matches; running-match counters reach zero before pending

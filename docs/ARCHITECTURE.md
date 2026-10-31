@@ -765,4 +765,9 @@ root. CDN/static delivery avoids archive traffic through the game server.
 Measure same-host overlap before activation; scale workers/routing/durable
 coordination across hosts only when measured demand justifies it. Planned
 deployment continuity does not imply crash failover or proven capacity.
+Contract identities are computed from frozen wire bytes, content tables and
+determinism goldens; public matchmaking runs one active contract and switches
+on schedule. Delivery is split into milestones: Linux updater (M1) and
+backend release safety (M2) independently, then two-slot rollout (M3) and the
+Windows adapter (M4).
 See D-91/D-92 and the release-contract matrix for gates and primary references.

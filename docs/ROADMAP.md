@@ -365,9 +365,10 @@ and game/rating sanctions are later explicit requests, not implicit scope.
 
 [Release contracts/test matrix](planning/P66-RELEASE-CONTRACTS.md) and
 [executor prompt](planning/P66-EXECUTION-PROMPT.md). Linux managed updater
-comes first; Windows acceptance remains separate. Backend sequence is safe
-drain → shared ownership/results → measured two-slot rollout with stable
-routes. No forced in-match restart or finite match-drain cutoff. Retain
+comes first as milestone M1 (its own PR, no server change); backend safety
+M2 runs in parallel; two-slot rollout M3 follows M2; Windows M4 needs real
+devices. Backend sequence is safe drain → shared ownership/results → measured
+two-slot rollout with stable routes and one active public contract. No forced in-match restart or finite match-drain cutoff. Retain
 browser/native builds and compatible DB writers. A later multi-host capacity
 stage requires evidence and owner scope, not an assumed thousands-player SLA.
 No installed client, signed release, production proxy or server was changed.

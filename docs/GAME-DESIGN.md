@@ -996,6 +996,19 @@ installation, real signing, publication of executables or deployment.
   have explicit separate policies. Planned deployment continuity does not
   guarantee crash failover. Capacity for thousands requires measurements,
   overlap headroom and later multi-host coordination as demand grows.
+- **BR-UP08:** the startup update modal appears at most once per launch per
+  build; Later keeps a non-modal badge. A required update blocks only new
+  online admissions: Practice vs Bot, Settings and installed notes stay
+  usable offline on the installed build.
+- **BR-UP09:** public matchmaking admits one active match contract at a time.
+  A new contract is trialled on the opt-in preview channel, its client is
+  published ahead of a scheduled switch, and behind clients then receive
+  UpdateRequired at queue/room time while already-admitted matches finish on
+  their generation. Percentage canaries apply to same-contract releases only.
+  Rooms, challenges, rematches and spectating never cross contracts.
+- **BR-UP10:** every release ships EN and pt-BR notes as plain text in the
+  D5 charset. A release whose computed ruleset/content identity changed must
+  include a gameplay-changes section.
 
 Proposed initial operational values: metadata file 1 MiB, descriptor 64 KiB,
 notes 512 KiB; archive 2 GiB compressed/8 GiB extracted/100,000 entries;
@@ -1003,7 +1016,11 @@ initial attempt plus at most 2 automatic retries; discovery deadline 5 s
 and idle periodic check interval 6 hours; candidate readiness deadline 60 s;
 at least current/previous builds plus pinned builds; automatic highlights
 through 10 releases. Canary steps internal/5%/25%/100% concern new eligible
-admissions only. A 5% p99 tick/view regression is an initial stop criterion
+admissions of same-contract releases only. New-contract client published at
+least 24 h before its scheduled switch; client rollout halts at 2% failed or
+recovered outcomes over at least 100 reports; notes at most 40 items of 280
+characters per locale. A 5% p99 tick/view regression is an initial stop
+criterion
 on an agreed paired fixture, never an existing measured SLO. Security/result
 loss stops rollout independently. Final limits/OS/channel/signing/emergency/
-retention decisions O01–O04 remain owner gates before activation.
+retention/player-default decisions O01–O05 remain owner gates before activation.
