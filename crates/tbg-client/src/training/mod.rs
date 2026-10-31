@@ -100,7 +100,13 @@ impl Default for Catalog {
             dummy_hp: DummyHp::Light,
             dummy_mode: DummyMode::Finite,
             arena: crate::config::load_arena(),
-            difficulty: 1,
+            difficulty: crate::platform::storage::get(
+                crate::platform::storage::Scope::Local,
+                "practice.difficulty",
+            )
+            .and_then(|s| s.parse::<u8>().ok())
+            .unwrap_or(1)
+            .min(3),
             notice: String::new(),
         }
     }
