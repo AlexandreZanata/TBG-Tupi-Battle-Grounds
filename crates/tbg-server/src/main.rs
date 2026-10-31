@@ -11,8 +11,10 @@ const DRAIN_LIMIT: Duration = Duration::from_secs(300);
 fn main() {
     let mut config = Config::from_env();
     // P60: an invalid integrity setting is a start-up error, never a default.
-    match tbg_server::ranked::policy::RankedPolicy::from_env() {
-        Ok(policy) => config.ranked = policy,
+    let settings = tbg_server::ranked::policy::RankedPolicy::from_env()
+        .and_then(|p| tbg_server::ranked::policy::StatsMode::from_env().map(|s| (p, s)));
+    match settings {
+        Ok((policy, stats)) => (config.ranked, config.stats) = (policy, stats),
         Err(e) => {
             eprintln!("tbg-server: {e}");
             std::process::exit(2);

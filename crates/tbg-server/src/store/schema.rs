@@ -4,7 +4,8 @@
 //! leaderboard index; v4 (D-40) adds each account's saved Arcana preset
 //! and both applied presets on match rows (NULL for older rows); v5/v6 add
 //! the Stronghold kind and arena; v7 (P60) adds authoritative ranked
-//! records, integrity projections and the append-only decision log.
+//! records, integrity projections and the append-only decision log; v8
+//! (P61) adds the optional per-match statistics summary.
 //! Timestamps come from SQLite itself, except P60's frozen `ended_unix`.
 
 use rusqlite::Connection;
@@ -139,6 +140,15 @@ BEGIN SELECT RAISE(ABORT,'append-only decision log'); END;
 CREATE TRIGGER ranked_decisions_no_delete BEFORE DELETE ON ranked_decisions
 BEGIN SELECT RAISE(ABORT,'append-only decision log'); END;";
 
+/// P61 (D-88): one optional raw summary per ranked match, written after the
+/// authoritative settlement, plus the per-patch cohort index.
+const RANKED_STATS_V8: &str = "CREATE TABLE ranked_stats (
+  match_id INTEGER PRIMARY KEY REFERENCES ranked_matches(id),
+  summary_version INTEGER NOT NULL,
+  payload TEXT NOT NULL CHECK(length(payload)<=16384)
+);
+CREATE INDEX ranked_stats_cohort ON ranked_matches(ruleset_version, ended_unix, id);";
+
 /// Pragmas plus every missing migration in one transaction. Re-running on
 /// a migrated database is a no-op.
 pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
@@ -179,6 +189,10 @@ pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
     if version < 7 {
         tx.execute_batch(RANKED_V7)?;
         tx.execute("INSERT INTO schema_version(version) VALUES (7)", [])?;
+    }
+    if version < 8 {
+        tx.execute_batch(RANKED_STATS_V8)?;
+        tx.execute("INSERT INTO schema_version(version) VALUES (8)", [])?;
     }
     tx.commit()
 }

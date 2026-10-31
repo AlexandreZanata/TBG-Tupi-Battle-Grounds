@@ -90,6 +90,9 @@ pub struct RankedFinal {
     pub seats: [IntegritySeat; 2],
     pub factions: [[u32; 4]; 2],
     pub arcanas: [ArcanaPreset; 2],
+    /// P61 §4: the optional, size-bounded side summary; `None` when
+    /// collection is off or the summary was a coverage gap.
+    pub stats: Option<serde_json::Value>,
 }
 
 /// A `RankedFinal` with its completion order and frozen UTC second.

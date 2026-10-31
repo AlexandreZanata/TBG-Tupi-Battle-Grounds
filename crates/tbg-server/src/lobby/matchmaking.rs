@@ -169,6 +169,7 @@ impl Lobby {
                 ranked: self.ranked.clone(),
                 // P60: OS-random, separate from the public LiveId.
                 key: random_bytes::<16>(),
+                stats: self.config.stats == crate::ranked::policy::StatsMode::Collect,
             },
         );
         if let (Some(id), Some((seats, kinds))) = (live, listed) {

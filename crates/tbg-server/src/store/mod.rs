@@ -23,6 +23,7 @@ mod matches;
 mod ranked;
 mod rulesets;
 mod schema;
+mod stats;
 mod strongholds;
 mod worker;
 
@@ -30,6 +31,7 @@ use worker::{worker, StoreCmd};
 
 pub use leaderboard::{LeaderRow, Snapshot};
 pub use ranked::{PlayerStats, RecentMatch, SettleError, POLICY_VERSION};
+pub use stats::StatsWriteError;
 
 pub type AccountId = i64;
 
@@ -179,6 +181,23 @@ impl Store {
         reply_rx
             .await
             .map_err(|_| SettleError::Sql(rusqlite::Error::InvalidQuery))?
+    }
+
+    /// P61: store a committed match's optional summary (insert-or-verify).
+    pub async fn save_ranked_stats(
+        &self,
+        match_id: i64,
+        summary: serde_json::Value,
+    ) -> Result<(), StatsWriteError> {
+        let (reply_tx, reply_rx) = oneshot::channel();
+        self.tx
+            .try_send(StoreCmd::SaveStats {
+                match_id,
+                summary: Box::new(summary),
+                reply: reply_tx,
+            })
+            .map_err(|_| StatsWriteError::Unavailable)?;
+        reply_rx.await.map_err(|_| StatsWriteError::Unavailable)?
     }
 
     /// P60: highest committed ranked sequence (finalizer start-up mark).

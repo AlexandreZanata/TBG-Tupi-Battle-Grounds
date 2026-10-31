@@ -73,3 +73,29 @@ impl RankedPolicy {
         })
     }
 }
+
+/// P61 §10: `TBG_RANKED_STATS`. `collect` (default) stores the optional
+/// per-match summary after settlement; `off` disables only that optional
+/// collection, never P60 settlement. `public` (the E2 route) is not
+/// available yet and is rejected at start-up.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum StatsMode {
+    Off,
+    #[default]
+    Collect,
+}
+
+impl StatsMode {
+    pub fn from_env() -> Result<StatsMode, String> {
+        StatsMode::parse(std::env::var("TBG_RANKED_STATS").ok().as_deref())
+    }
+
+    pub fn parse(value: Option<&str>) -> Result<StatsMode, String> {
+        match value {
+            None | Some("collect") => Ok(StatsMode::Collect),
+            Some("off") => Ok(StatsMode::Off),
+            Some("public") => Err("TBG_RANKED_STATS=public is not available yet (P61 E2)".into()),
+            Some(other) => Err(format!("TBG_RANKED_STATS={other}: use collect or off")),
+        }
+    }
+}

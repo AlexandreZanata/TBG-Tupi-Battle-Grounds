@@ -14,7 +14,7 @@ use tbg_core::{ArcanaPreset, StrongholdKind};
 use crate::ranked::{JournalEntry, RankedReceipt};
 
 use super::leaderboard::{self, Snapshot};
-use super::{accounts, arcanas, matches, ranked, strongholds, AccountId};
+use super::{accounts, arcanas, matches, ranked, stats, strongholds, AccountId};
 
 type Reply<T> = oneshot::Sender<T>;
 
@@ -42,6 +42,11 @@ pub(super) enum StoreCmd {
         reply: Reply<Result<RankedReceipt, ranked::SettleError>>,
     },
     HighWater(Reply<rusqlite::Result<i64>>),
+    SaveStats {
+        match_id: i64,
+        summary: Box<serde_json::Value>,
+        reply: Reply<Result<(), stats::StatsWriteError>>,
+    },
     SaveArcanas {
         account: AccountId,
         preset: ArcanaPreset,
@@ -126,6 +131,13 @@ pub(super) fn worker(
                 }
                 StoreCmd::HighWater(reply) => {
                     let _ = reply.send(ranked::high_water(&conn));
+                }
+                StoreCmd::SaveStats {
+                    match_id,
+                    summary,
+                    reply,
+                } => {
+                    let _ = reply.send(stats::save(&conn, match_id, &summary));
                 }
                 StoreCmd::SaveArcanas { account, preset } => {
                     if let Err(e) = arcanas::save(&conn, account, preset) {

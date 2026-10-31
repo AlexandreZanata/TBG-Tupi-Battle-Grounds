@@ -47,6 +47,7 @@ fn final_for(key: MatchKey, accounts: [AccountId; 2], winner: Option<Seat>) -> R
         ],
         factions: [[3, 2, 2, 2], [0, 0, 0, 0]],
         arcanas: [ArcanaPreset::DEFAULT; 2],
+        stats: None,
     }
 }
 
@@ -127,7 +128,7 @@ async fn a_failed_insert_rolls_back_both_accounts() {
 }
 
 #[tokio::test]
-async fn v6_database_migrates_to_v7_twice_without_touching_history() {
+async fn v6_database_migrates_to_v8_twice_without_touching_history() {
     let dir = temp_dir("migrate");
     let path = dir.join("db.sqlite3");
     {
@@ -142,7 +143,7 @@ async fn v6_database_migrates_to_v7_twice_without_touching_history() {
     let version: i64 = conn
         .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
         .unwrap();
-    assert_eq!(version, 7);
+    assert_eq!(version, 8);
     let baseline: (i64, i64, i64) = conn
         .query_row(
             "SELECT rating, ranked_games, mature_games FROM ranked_baseline WHERE account_id = 1",

@@ -37,6 +37,8 @@ pub struct Config {
     pub replays: Option<tokio::sync::mpsc::UnboundedSender<tbg_core::replay::Replay>>,
     /// P60: shadow integrity policy (`TBG_RANKED_*`, validated in `main`).
     pub ranked: crate::ranked::policy::RankedPolicy,
+    /// P61: optional ranked statistics collection (`TBG_RANKED_STATS`).
+    pub stats: crate::ranked::policy::StatsMode,
 }
 
 impl Default for Config {
@@ -60,6 +62,7 @@ impl Default for Config {
             max_spectators: 2_000,
             replays: None,
             ranked: crate::ranked::policy::RankedPolicy::default(),
+            stats: crate::ranked::policy::StatsMode::default(),
         }
     }
 }
@@ -96,6 +99,7 @@ impl Config {
             ),
             replays: None,
             ranked: d.ranked,
+            stats: d.stats,
         }
     }
 }

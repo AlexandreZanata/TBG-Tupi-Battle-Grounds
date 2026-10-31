@@ -23,6 +23,7 @@ mod live;
 mod report;
 mod settle;
 mod spectators;
+pub(crate) mod summary;
 #[cfg(test)]
 mod tests;
 mod views;
@@ -64,6 +65,8 @@ pub(super) struct Match {
     pub(super) end_detail: Option<EndDetail>,
     /// P60: latched by `PhaseChanged { Running }`, never inferred.
     pub(super) reached_running: bool,
+    /// P61: bounded side summary (ranked matches only).
+    pub(super) summary: summary::SummaryCollector,
 }
 
 /// Where a finished match's records go: the fire-and-forget match row
@@ -74,6 +77,8 @@ pub(crate) struct Records {
     pub store: Option<Arc<Store>>,
     pub ranked: Option<finalizer::Handle>,
     pub key: MatchKey,
+    /// P61: collect the optional summary (`TBG_RANKED_STATS=collect`).
+    pub stats: bool,
 }
 
 /// `(seed, arena, live)` are the match's pairing draws (ARENAS-G) and, for a
@@ -116,6 +121,7 @@ pub(crate) fn spawn(
         pending_spectate: Vec::new(),
         end_detail: None,
         reached_running: false,
+        summary: Default::default(),
     };
     tokio::spawn(run(m, rx, lobby, config, seed, records));
     tx
@@ -169,6 +175,10 @@ async fn run(
         }) {
             m.reached_running = true;
         }
+        // P61: fold this tick's semantic events once, before fan-out.
+        if m.mode == MatchMode::Ranked {
+            m.summary.observe(&ev, &m.state);
+        }
         m.report_progress(&lobby, started);
         m.note_spectate_events(&ev);
         for p in &mut m.pending {
@@ -220,7 +230,7 @@ async fn run(
     // `RatingChanged` by frozen account id once it commits. Awaiting here
     // only delays this finished task, never a running match.
     if m.mode == MatchMode::Ranked {
-        if let Some(result) = m.ranked_final(records.key, started) {
+        if let Some(result) = m.ranked_final(records.key, started, records.stats) {
             match &records.ranked {
                 Some(handle) => {
                     if handle.tx.send(result).await.is_err() {

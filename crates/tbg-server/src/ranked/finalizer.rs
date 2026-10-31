@@ -16,7 +16,7 @@ use tokio::sync::mpsc;
 use super::{journal, JournalEntry, RankedFinal};
 use crate::chan::LobbyCmd;
 use crate::metrics::Metrics;
-use crate::store::{SettleError, Store};
+use crate::store::{SettleError, StatsWriteError, Store};
 
 /// Results waiting for a slot in the finalizer inbox; the sender awaits,
 /// so a full inbox delays a finished match task, never a running one.
@@ -199,7 +199,18 @@ impl Finalizer {
                     // The key was committed earlier (crash after commit).
                     self.metrics.ranked_duplicate_keys.fetch_add(1, Relaxed);
                 }
-                self.forget(&entry, journaled, false).await;
+                // P61: the optional summary follows the commit; a transient
+                // failure keeps the journal file (replay is idempotent) but
+                // never holds back the receipt or later settlements.
+                let keep = match entry.result.stats.clone() {
+                    None => false,
+                    Some(summary) => self.save_stats(receipt.sequence, summary).await,
+                };
+                if keep {
+                    self.pending.pop_front();
+                } else {
+                    self.forget(&entry, journaled, false).await;
+                }
                 if self
                     .lobby
                     .send(LobbyCmd::RankedDone {
@@ -225,6 +236,27 @@ impl Finalizer {
                 self.metrics
                     .ranked_settlement_failures
                     .fetch_add(1, Relaxed);
+                false
+            }
+        }
+    }
+
+    /// `true` when the summary must stay journaled for a later retry.
+    async fn save_stats(&self, match_id: i64, summary: serde_json::Value) -> bool {
+        match self.store.save_ranked_stats(match_id, summary).await {
+            Ok(()) => {
+                self.metrics.ranked_stats_saved.fetch_add(1, Relaxed);
+                false
+            }
+            Err(StatsWriteError::Unavailable) => {
+                self.metrics.ranked_stats_failures.fetch_add(1, Relaxed);
+                tracing::warn!("ranked summary {match_id} not stored; kept in the journal");
+                true
+            }
+            Err(e) => {
+                // Malformed or contradictory evidence: a gap, never retried.
+                self.metrics.ranked_stats_gaps.fetch_add(1, Relaxed);
+                tracing::warn!("ranked summary {match_id} rejected: {e:?}");
                 false
             }
         }

@@ -36,6 +36,11 @@ pub struct Metrics {
     pub ranked_key_mismatches: AtomicU64,
     pub ranked_notify_failures: AtomicU64,
     pub ranked_journal_failures: AtomicU64,
+    /// P61: optional summaries stored, omitted (coverage gaps), and failed
+    /// inserts kept in the journal for retry.
+    pub ranked_stats_saved: AtomicU64,
+    pub ranked_stats_gaps: AtomicU64,
+    pub ranked_stats_failures: AtomicU64,
     rtt: Mutex<VecDeque<(Instant, u16)>>,
     /// P9: lobby queue waits (ms) over the last 60 s.
     queue_wait: Mutex<VecDeque<(Instant, u64)>>,
@@ -68,6 +73,9 @@ impl Default for Metrics {
             ranked_key_mismatches: AtomicU64::new(0),
             ranked_notify_failures: AtomicU64::new(0),
             ranked_journal_failures: AtomicU64::new(0),
+            ranked_stats_saved: AtomicU64::new(0),
+            ranked_stats_gaps: AtomicU64::new(0),
+            ranked_stats_failures: AtomicU64::new(0),
             rtt: Mutex::new(VecDeque::new()),
             queue_wait: Mutex::new(VecDeque::new()),
             ranked_queue_wait: Mutex::new(VecDeque::new()),
@@ -154,6 +162,9 @@ impl Metrics {
             "ranked_key_mismatches": get(&self.ranked_key_mismatches),
             "ranked_notify_failures": get(&self.ranked_notify_failures),
             "ranked_journal_failures": get(&self.ranked_journal_failures),
+            "ranked_stats_saved": get(&self.ranked_stats_saved),
+            "ranked_stats_gaps": get(&self.ranked_stats_gaps),
+            "ranked_stats_failures": get(&self.ranked_stats_failures),
             "rtt_p50_ms": percentile(&rtts, 0.50),
             "rtt_p95_ms": percentile(&rtts, 0.95),
             "rtt_max_ms": rtts.last().copied().unwrap_or(0),
