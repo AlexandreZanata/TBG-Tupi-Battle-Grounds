@@ -355,6 +355,12 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    RaisedCarapace {
+        period: u16,
+        bp: u16,
+        ticks: u16,
+        retaliation: u16,
+    },
     CelestialRain {
         period: u16,
         radius: i32,
@@ -778,6 +784,24 @@ const JUSTICIAR_ABILITIES: [[Ability; 2]; 5] = [
     rain(1_600, 0, 0),
     rain(1_600, 0, 1_500),
 ];
+const fn raised_carapace(ticks: u16, retaliation: u16) -> [Ability; 2] {
+    [
+        Ability::RaisedCarapace {
+            period: 200,
+            bp: 1_500,
+            ticks,
+            retaliation,
+        },
+        Ability::None,
+    ]
+}
+const JAWGUARD_ABILITIES: [[Ability; 2]; 5] = [
+    raised_carapace(60, 0),
+    raised_carapace(60, 0),
+    raised_carapace(80, 0),
+    raised_carapace(60, 40),
+    raised_carapace(60, 40),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -881,7 +905,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 42;
+pub const UNIT_KIND_COUNT: usize = 43;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1214,6 +1238,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::LuminousOracle,"Luminous Oracle",Celestials,Control,2_400,[300,15,50,3_000,38,0,0],None,LUMINOUS_ORACLE_ABILITIES,[form("Restoring Light"),form("Restoring Light"),form("Sacred Aura"),form("Sacred Aura")]),
     unit(UnitKind::CelestialArcher,"Celestial Archer",Celestials,Ranged,2_400,[210,55,40,4_000,43,0,0],None,CELESTIAL_ARCHER_ABILITIES,[FormDef{dmg_bp:1_000,..form("Divine Precision")},FormDef{dmg_bp:1_000,..form("Divine Precision")},form("Celestial Mark"),form("Celestial Mark")]),
     unit(UnitKind::Justiciar,"Justiciar",Celestials,Control,3_600,[700,35,46,2_500,28,0,0],None,JUSTICIAR_ABILITIES,[form("Celestial Fury"),FormDef{hp_bp:1_000,..form("Celestial Fury")},form("Judgment"),form("Judgment")]),
+    unit(UnitKind::Jawguard,"Jawguard",Insects,Tank,3_600,[1_400,45,40,800,23,0,0],None,JAWGUARD_ABILITIES,[FormDef{hp_bp:2_000,..form("Reinforced Carapace")},form("Reinforced Carapace"),form("Swarm Guard"),FormDef{dmg_bp:1_500,..form("Swarm Guard")}]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

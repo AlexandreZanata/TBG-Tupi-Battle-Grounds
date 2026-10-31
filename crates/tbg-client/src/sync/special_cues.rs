@@ -90,6 +90,7 @@ fn resolved(
         UnitKind::LuminousOracle => (Impact::Harmonic, primary, Area::default()),
         UnitKind::CelestialArcher => (Impact::Purify, primary, Area::default()),
         UnitKind::Justiciar => (Impact::Judgment, primary, area(map, visuals, unit)),
+        UnitKind::Jawguard => (Impact::Sparks, Some(unit), Area::default()),
         UnitKind::Demolisher => (Impact::Piston, Some(unit), area(map, visuals, unit)),
         _ => return,
     };

@@ -1013,3 +1013,9 @@ information. Values are **Proposed** (owner defaults O-1–O-6 in
 victim's temporary Unit shield as immediate damage preprocessing. Ward's hostile
 status immunity does not block this dispel or get consumed by it. It removes no
 plate, Stronghold shield, status, HP or max-HP modifier.
+
+**R16 primary-bonus reading — Proposed (D-83):** the expiry-earned retaliation
+is added once to the next valid primary's raw basic damage, with the registry
+bonus scaled by static caster percentages. The combined primary then uses normal
+basic weakening/conditional modifiers and victim protection as one hit. A fully
+shield-absorbed valid primary still consumes the charge; no second on-hit is run.

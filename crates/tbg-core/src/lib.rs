@@ -21,6 +21,7 @@ mod demolisher;
 pub mod headless;
 mod hits;
 mod intent;
+mod jawguard;
 mod justiciar;
 #[cfg(feature = "lab")]
 pub mod lab;

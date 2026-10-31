@@ -235,7 +235,8 @@ Own library: `crates/tbg-client/src/art/kits/jawguard/`.
 
 wide beetle shield shell, prominent mandibles and horn, stout limbs; moss/amber/black with team side bands. A2 pale layered carapace, A3 large back shield ridge. B2 darker head and longer mandibles, B3 outer amber jaw blades. Reuse Large stance with local mandible props.
 
-Status: pending. Evidence: `docs/media/p59/jawguard/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/jawguard/lineup.jpg`.
 
 ### R17 — Mantis
 

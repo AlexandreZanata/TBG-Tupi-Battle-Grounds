@@ -17,6 +17,7 @@ pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> O
             Ability::FearPulse { period, .. }
             | Ability::LivingWall { period, .. }
             | Ability::AreaCrush { period, .. }
+            | Ability::RaisedCarapace { period, .. }
             | Ability::CelestialRain { period, .. }
             | Ability::HarmonicPulse { period, .. }
             | Ability::SolarBarrier { period, .. }
@@ -91,7 +92,7 @@ fn primary(state: &MatchState, u: &Unit) -> Option<u32> {
 fn center(state: &MatchState, u: &Unit, target: Option<u32>) -> i32 {
     if matches!(
         u.kind,
-        UnitKind::Bulwark | UnitKind::Demolisher | UnitKind::Capybara
+        UnitKind::Bulwark | UnitKind::Demolisher | UnitKind::Capybara | UnitKind::Jawguard
     ) {
         return u.x;
     }
@@ -144,6 +145,7 @@ fn advance_cast(
         crate::whisperer::resolve(state, u, target, ev);
         crate::bulwark::resolve(state, u);
         crate::demolisher::resolve(state, u, ev);
+        crate::jawguard::resolve(state, u);
         crate::justiciar::resolve(state, u, target, ev);
         crate::luminous_oracle::resolve(state, u, target);
         crate::solar_sentinel::resolve(state, u, target);

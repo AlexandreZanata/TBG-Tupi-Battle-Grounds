@@ -16,6 +16,7 @@ use formation::FormationIndex;
 pub(crate) fn tick_timers(state: &mut MatchState) {
     let rules = state.rules();
     for u in &mut state.units {
+        crate::jawguard::tick(rules, u, state.tick);
         let before = u.status;
         u.status = match u.status {
             Status::Slowed { bp, ticks_left } if ticks_left > 1 => Status::Slowed {

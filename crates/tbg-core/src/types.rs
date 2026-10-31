@@ -151,6 +151,8 @@ pub enum UnitKind {
     CelestialArcher,
     /// D-82: R15, staged outside public pools.
     Justiciar,
+    /// D-83: R16, staged outside public pools.
+    Jawguard,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

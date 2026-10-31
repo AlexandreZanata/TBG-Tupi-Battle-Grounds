@@ -1843,3 +1843,32 @@ release0.22/flight0.08; the special's single exact-center/radius light ring foll
 server resolution. No fake multi-meteor damage, extra rig node, physics, texture,
 light or dependency. Existing AbilityResolved/public facts suffice; protocol25 and
 simulation layout stay unchanged. Frozen base/form contracts append §13 values.
+
+## D-83 · Jawguard's carapace expiry and one retaliation charge — 2026-10-31 (Proposed)
+
+R16 appends the exact §13 Insects Tank row/four forms. Raised Carapace waits200,
+requires the shared reachable enemy-unit primary and six-tick windup, then grants
+self-reduction1500bp/60. It does not anchor, grant Guard/aura or stop basic attacks.
+Root cancels a pending activation while an applied window expires normally. A
+gains HP2000bp then duration80. B arms exactly one40-damage charge at protection
+expiry, then adds basic damage1500bp. Its next completed enemy-unit primary,
+including summon or fully shielded hit, spends the charge; Strongholds/secondary/
+DoT never spend it. New completed protection overwrites an unspent charge with
+zero until the new expiry. The combined basic uses the Proposed primary-bonus
+reading in §13: static bonus once, ordinary basic weakening/conditional modifiers
+and one victim-protection/on-hit path. No separate attack or stacked charge.
+
+Existing bounded attacks storage/public counter bits hold the charge. On the
+first effective combat tick at or after expiry, clear the expired self-window and
+arm one charge if the current form enables it. Clearing that consumed transition
+prevents repeated arming and handles a pause crossing an expiry boundary without
+adding a clock, scheduler or new state field. Existing applied duration does not
+upgrade retroactively. Protocol25/public pools/hash layout stay unchanged.
+
+Own five-form kit: low broad moss/amber beetle, shield shell, paired local mandibles,
+horn/stout limbs and team side panels. A adds pale layered carapace then a large
+ridge; B darkens the head/lengthens mandibles then adds amber jaw blades. Clicking
+idle, broad planted steps, head-retracting bite, low defensive shell and wide
+ready-charge jaws are per-kind poses. Public reduction/charge facts drive the
+stance, not animation timing. No extra rig node, physics, allied shield effect,
+texture/light/dependency. Frozen base/form contracts append only §13 facts.
