@@ -11,7 +11,9 @@ use tbg_core::ranked_integrity::{RatingDisposition, RiskState};
 use tbg_core::rating::{apply, delta, Score};
 use tbg_core::{Outcome, Seat};
 
-use super::AccountId;
+use super::{history, AccountId};
+use crate::ranked::policy::RankedPolicy;
+use crate::ranked::signals::{self, Current};
 use crate::ranked::{JournalEntry, RankedFinal, RankedReceipt};
 
 fn score_of(outcome: Option<Outcome>, seat: Seat) -> Score {
@@ -230,6 +232,7 @@ pub(super) fn high_water(conn: &Connection) -> rusqlite::Result<i64> {
 pub(super) fn settle(
     conn: &mut Connection,
     entry: &JournalEntry,
+    policy: &RankedPolicy,
 ) -> Result<RankedReceipt, SettleError> {
     let r = &entry.result;
     if r.accounts[0] == r.accounts[1] {
@@ -262,6 +265,26 @@ pub(super) fn settle(
     let mature = sides
         .each_ref()
         .map(|s| t - s.created_unix >= MATURE_AGE_SECS && s.mature_games >= MATURE_GAMES);
+    let early: [bool; 2] = r.seats.each_ref().map(|s| {
+        s.surrender_tick
+            .is_some_and(|tick| tick < EARLY_SURRENDER_TICKS)
+    });
+    // Shadow (P60 §4): one bounded history read before any write; budgets
+    // and signals are recorded as `would_*`, the baseline Elo applies.
+    let history = history::load(&tx, r.accounts, t, policy.window_secs, entry.completion_seq);
+    let eval = signals::evaluate(
+        history.as_deref(),
+        &Current {
+            accounts: r.accounts,
+            base,
+            winner: r.outcome.winner.map(|s| s.index()),
+            mature,
+            low_activity: r.seats.each_ref().map(|s| s.low_activity()),
+            early_surrender: early,
+            reached_running: r.reached_running,
+        },
+        &policy.budget(),
+    );
     let after: [u16; 2] = std::array::from_fn(|i| apply(sides[i].rating, base[i]));
     for (i, account) in r.accounts.iter().enumerate() {
         let (win, loss, draw) = match scores[i] {
@@ -318,9 +341,21 @@ pub(super) fn settle(
             "final_hp": s.final_hp, "final_max_hp": s.final_max_hp,
             "damage": null,
         })),
-        // ponytail: shadow history signals land with the P60 step 4
-        // evaluator; until then every record says so instead of guessing.
-        "history": "not_evaluated",
+        "history": history.as_ref().map_or_else(|| json!("unavailable"), |h| json!(h.len())),
+        "policy": {
+            "pair_cap": policy.pair_cap, "new_source_cap": policy.new_source_cap,
+            "window_secs": policy.window_secs, "signals": signals::SIGNAL_VERSION,
+        },
+        "budget": {
+            "pair": eval.facts.pair_positive, "immature": eval.facts.immature_positive,
+            "opponent_immature": eval.facts.opponent_immature,
+        },
+        "would": { "bits": eval.would_bits, "applied": eval.would_applied },
+        "signals": {
+            "s1": eval.signals.s1_relationship, "s2": eval.signals.s2_transfer,
+            "s3": eval.signals.s3_behavior, "s4": eval.signals.s4_newcomers,
+            "pair_games": eval.signals.pair_games, "donor_games": eval.signals.donor_games,
+        },
     })
     .to_string();
     tx.execute(
@@ -329,15 +364,12 @@ pub(super) fn settle(
         params![
             entry.completion_seq,
             POLICY_VERSION,
-            RiskState::Normal.code(),
+            eval.risk.code(),
             RatingDisposition::Applied.code(),
             facts,
         ],
     )?;
     for (i, seat) in r.seats.iter().enumerate() {
-        let early = seat
-            .surrender_tick
-            .is_some_and(|tick| tick < EARLY_SURRENDER_TICKS);
         tx.execute(
             "INSERT INTO ranked_sides (match_id, seat, account_id, opponent_id, ended_unix,
              opponent_mature, original_delta, effective_delta, low_activity, early_surrender)
@@ -351,7 +383,7 @@ pub(super) fn settle(
                 mature[1 - i],
                 base[i],
                 seat.low_activity(),
-                early,
+                early[i],
             ],
         )?;
     }
@@ -374,7 +406,7 @@ pub(super) fn settle(
             (sides[1].rating, after[1], pb),
         ],
         disposition: RatingDisposition::Applied,
-        risk: RiskState::Normal,
+        risk: eval.risk,
         reason_bits: 0,
     })
 }

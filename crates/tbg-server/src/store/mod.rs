@@ -17,6 +17,7 @@ use crate::ranked::{JournalEntry, RankedReceipt};
 
 mod accounts;
 mod arcanas;
+mod history;
 pub mod leaderboard;
 mod matches;
 mod ranked;
@@ -42,6 +43,15 @@ pub struct Store {
 
 impl Store {
     pub fn open(path: &Path) -> rusqlite::Result<Store> {
+        Store::open_with(path, crate::ranked::policy::RankedPolicy::default())
+    }
+
+    /// P60: open with the start-up integrity policy (shadow budgets and
+    /// signals are evaluated with it and recorded in every settlement).
+    pub fn open_with(
+        path: &Path,
+        policy: crate::ranked::policy::RankedPolicy,
+    ) -> rusqlite::Result<Store> {
         let mut conn = rusqlite::Connection::open(path)?;
         schema::migrate(&mut conn)?;
         // P61 §3: this binary's ruleset revision, registered once.
@@ -56,7 +66,7 @@ impl Store {
         let snapshots = snapshot_tx.clone();
         std::thread::Builder::new()
             .name("tbg-store".into())
-            .spawn(move || worker(conn, rx, snapshots))
+            .spawn(move || worker(conn, rx, snapshots, policy))
             .map_err(|_| rusqlite::Error::InvalidPath(path.to_path_buf()))?;
         Ok(Store { tx, snapshot_tx })
     }

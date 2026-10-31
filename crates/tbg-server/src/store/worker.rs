@@ -67,6 +67,7 @@ pub(super) fn worker(
     mut conn: rusqlite::Connection,
     rx: std::sync::mpsc::Receiver<StoreCmd>,
     snapshot_tx: watch::Sender<StdArc<Snapshot>>,
+    policy: crate::ranked::policy::RankedPolicy,
 ) {
     // Publish stragglers even when no further commands arrive.
     let mut last_build = Instant::now();
@@ -112,7 +113,7 @@ pub(super) fn worker(
                     let _ = reply.send(stats);
                 }
                 StoreCmd::Settle { entry, reply } => {
-                    let result = ranked::settle(&mut conn, &entry);
+                    let result = ranked::settle(&mut conn, &entry, &policy);
                     match &result {
                         Ok(_) => dirty = true,
                         // Full error kept internally (P60 step 2), never keys.

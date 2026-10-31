@@ -6,6 +6,8 @@
 pub(crate) mod catalog;
 pub(crate) mod finalizer;
 pub mod journal;
+pub mod policy;
+pub mod signals;
 
 use tbg_core::protocol::RatingResults;
 use tbg_core::ranked_integrity::{RatingDisposition, RiskState};

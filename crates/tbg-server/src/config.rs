@@ -35,6 +35,8 @@ pub struct Config {
     /// headless re-run gives the same state (D-33). Never set from the
     /// environment: the seed stays on the server (BR-S05).
     pub replays: Option<tokio::sync::mpsc::UnboundedSender<tbg_core::replay::Replay>>,
+    /// P60: shadow integrity policy (`TBG_RANKED_*`, validated in `main`).
+    pub ranked: crate::ranked::policy::RankedPolicy,
 }
 
 impl Default for Config {
@@ -57,6 +59,7 @@ impl Default for Config {
             spectators_per_match: 200,
             max_spectators: 2_000,
             replays: None,
+            ranked: crate::ranked::policy::RankedPolicy::default(),
         }
     }
 }
@@ -92,6 +95,7 @@ impl Config {
                     .map_or_else(|_| PathBuf::from("tbg.sqlite3"), PathBuf::from),
             ),
             replays: None,
+            ranked: d.ranked,
         }
     }
 }
