@@ -367,6 +367,24 @@ mod tests {
     }
 
     #[test]
+    fn spectators_and_reconnecting_seats_see_the_same_shield_and_synergy() {
+        // D-63/D-64 and BR-LV03: both public views carry the same battle facts.
+        let mut s = state_with(vec![unit(1, Seat::B)]);
+        s.tick = 100;
+        apply_shield(&mut s.units[0].fx, 300, 60, s.tick);
+        s.players[0].synergy[crate::types::Faction::Insects.index()] = 2;
+        for tick in [159, 160] {
+            s.tick = tick;
+            let public = s.public_view(&[], 1);
+            let seat = s.view_for(Seat::A, &[]);
+            assert_eq!(public.units, seat.units);
+            assert_eq!(public.synergy, seat.synergy);
+            assert_eq!(public.units[0].shield, if tick < 160 { 300 } else { 0 });
+            assert_eq!(public.synergy[0][crate::types::Faction::Insects.index()], 2);
+        }
+    }
+
+    #[test]
     fn queued_slow_starts_when_the_root_ends() {
         let mut u = unit(1, Seat::B);
         u.status = Status::Rooted { ticks_left: 2 };
