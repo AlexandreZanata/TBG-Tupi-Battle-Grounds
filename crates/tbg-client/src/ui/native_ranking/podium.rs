@@ -130,12 +130,18 @@ pub(super) fn spawn(
                                 name.spawn((
                                     kit::heading(
                                         leader.map_or_else(
-                                            || words(lang, "Open place", "Lugar disponível"),
+                                            || {
+                                                if ranking.page.is_none() {
+                                                    "—".into()
+                                                } else {
+                                                    words(lang, "Open place", "Lugar disponível")
+                                                }
+                                            },
                                             |p| p.name.clone(),
                                         ),
                                         15.,
                                     ),
-                                    TextLayout::no_wrap(),
+                                    TextLayout::no_wrap().with_justify(Justify::Center),
                                     kit::Pending(pending),
                                     Node {
                                         width: percent(100),
@@ -167,15 +173,20 @@ pub(super) fn spawn(
                                             ..default()
                                         })
                                         .with_children(|field| {
-                                            field.spawn((
-                                                text(value, 12.),
-                                                kit::Pending(pending),
-                                                Node {
-                                                    width: percent(90),
-                                                    min_height: px(15),
-                                                    ..default()
-                                                },
-                                            ));
+                                            field
+                                                .spawn((
+                                                    text(value, 12.),
+                                                    kit::Pending(pending),
+                                                    Node {
+                                                        width: percent(90),
+                                                        min_height: px(15),
+                                                        ..default()
+                                                    },
+                                                ))
+                                                .insert(
+                                                    TextLayout::no_wrap()
+                                                        .with_justify(Justify::Center),
+                                                );
                                             field.spawn(kit::muted(label, 8.));
                                         });
                                 }

@@ -176,13 +176,14 @@ fn paint_images(
 ) {
     status.images = 0;
     status.failed = 0;
+    let forced = super::forced();
     for (mut image, mut mask, pending, visible) in &mut fields {
         if image.color != mask.written {
             mask.color = image.color;
         }
         let id = image.image.id();
         let failed = matches!(server.load_state(id), LoadState::Failed(_));
-        let waiting = super::forced()
+        let waiting = forced
             || pending.is_some_and(|p| p.0)
             || id == AssetId::<Image>::default()
             || images.get(id).is_none()

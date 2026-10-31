@@ -167,7 +167,8 @@ fn record(card: &mut ChildSpawnerCommands, data: &LobbyData, lang: Lang, pending
                             min_height: px(17),
                             ..default()
                         },
-                    ));
+                    ))
+                    .insert(TextLayout::no_wrap().with_justify(Justify::Center));
                 });
         }
     });
@@ -235,7 +236,7 @@ fn centered(parent: &mut ChildSpawnerCommands, value: String, size: f32, pending
         .with_children(|row| {
             row.spawn((
                 kit::heading(value, size),
-                TextLayout::no_wrap(),
+                TextLayout::no_wrap().with_justify(Justify::Center),
                 kit::Pending(pending),
                 Node {
                     width: percent(100),

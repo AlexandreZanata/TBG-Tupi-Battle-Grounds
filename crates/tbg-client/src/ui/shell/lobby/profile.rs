@@ -158,6 +158,7 @@ pub fn spawn(
                             #[cfg(target_os = "linux")]
                             _value.insert((
                                 kit::Pending(pending),
+                                TextLayout::justify(Justify::Center),
                                 Node {
                                     width: percent(75),
                                     min_height: px(26),
