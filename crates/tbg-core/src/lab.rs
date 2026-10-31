@@ -122,8 +122,11 @@ mod tests {
     use crate::{hits, ArcanaPreset, Target};
 
     #[test]
-    fn staged_kinds_collect_lab_damage_without_public_pool_activation() {
-        let mut s = MatchState::with_arcanas(1, [ArcanaPreset::NEUTRAL; 2]);
+    fn off_pool_kinds_collect_lab_damage_without_activating_the_reference_pool() {
+        let mut reference = crate::ruleset::CANON.clone();
+        reference.pool = &crate::UNIT_KINDS;
+        let rules = Box::leak(Box::new(reference));
+        let mut s = MatchState::lab(1, rules, [ArcanaPreset::NEUTRAL; 2]);
         let a = s.lab_spawn_at(Seat::A, UnitKind::Bonehorn, 0, 0, 4_000);
         let b = s.lab_spawn_at(Seat::B, UnitKind::Archer, 0, 0, 4_500);
         let attacker = s.units[s.unit_index(a).unwrap()];

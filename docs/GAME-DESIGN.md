@@ -1401,3 +1401,8 @@ P60/P61 journal/summary Faction arrays follow FACTION_COUNT=7, preserving
 legacy four-Faction records by zero extension. P63 counts every actual drill
 spawn, including fusion outputs, without deleting consumed parents from the
 historical participant aggregate. Cosmetic figures never affect simulation.
+
+The lab off-pool instrumentation regression uses the unchanged ten-kind
+reference ruleset, so it continues verifying that spawning an off-pool kind
+never activates that kind. It no longer assumes the newly activated CANON
+pool excludes Bonehorn. Its exact damage/HP assertions are retained.
