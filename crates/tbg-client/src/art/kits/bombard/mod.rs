@@ -19,6 +19,7 @@ use crate::vfx::{
 use model::{plan, FORE};
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose,
     gait: Gait::HEAVY,

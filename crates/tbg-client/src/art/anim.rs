@@ -273,6 +273,8 @@ pub fn animate(
         let frame = root.to_matrix() * figure;
         a.observe(root.translation, &frame, dt);
         let (mut pose, walk) = a.advance(dt);
+        let anatomy = a.kit.and_then(|kit| kit.anatomy);
+        let walk = walk.filter(|_| anatomy.is_none_or(|body| body.planted_legs));
         if a.carried {
             apply_mounted(&mut pose);
             a.feet.reset();
@@ -290,10 +292,15 @@ pub fn animate(
         } else {
             a.feet.reset();
         }
-        for node in rig::nodes().filter(|n| !matches!(n, rig::Node::Secondary(_))) {
+        for node in rig::nodes().filter(|n| {
+            !matches!(n, rig::Node::Secondary(_)) || anatomy.is_some_and(|body| !body.springs)
+        }) {
             if let Ok(mut t) = transforms.get_mut(a.joints[node.index()]) {
                 let (rot, off) = pose[node.index()];
-                t.translation = rig::rest(node, &a.plan) + off;
+                t.translation = anatomy.map_or_else(
+                    || rig::rest(node, &a.plan),
+                    |body| (body.rest)(node, &a.plan),
+                ) + off;
                 t.rotation = ik::quat(rot);
             }
         }

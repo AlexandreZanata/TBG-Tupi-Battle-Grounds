@@ -48,7 +48,17 @@ use crate::vfx::{
 pub use aim::Aim;
 pub use gait::Gait;
 
+/// A character's joint placement and parenting over the fixed shared node slots.
+pub struct Anatomy {
+    pub rest: fn(Node, &super::rig::Proportions) -> Vec3,
+    pub parent: fn(Node) -> Option<Node>,
+    pub springs: bool,
+    pub planted_legs: bool,
+}
+
 pub struct Kit {
+    /// None preserves the existing humanoid rig; unusual bodies own their layout.
+    pub anatomy: Option<&'static Anatomy>,
     /// The native rig v2 figure of (tier, branch).
     pub figure: fn(u8, u8) -> FigureSpec,
     /// Signature layer written over the shared clip pose.

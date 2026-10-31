@@ -123,8 +123,11 @@ fn parse_unit_kind(s: &str) -> Option<UnitKind> {
         // By name, staged kinds too: their figures need review before the
         // Shop pool switch (P53).
         .or_else(|| {
-            ALL_KINDS
-                .into_iter()
+            tbg_core::ruleset::CANON
+                .units
+                .iter()
+                .map(|def| def.kind)
+                .filter(|kind| ALL_KINDS.contains(kind) || crate::art::kits::kit(*kind).is_some())
                 .find(|kind| slug(&format!("{kind:?}")) == slug(s))
         })
         .or(match s {

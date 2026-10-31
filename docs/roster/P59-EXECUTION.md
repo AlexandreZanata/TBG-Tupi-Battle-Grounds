@@ -28,8 +28,8 @@ phase/roster-expansion for owner consolidation. Preserve the active native front
 
 Record planning and narrowly necessary shared art-review plumbing first.
 Then finish R08, R09, R10, R11 (the existing Monsters pilot), followed by R01–R07,
-R12–R19, R20, R21. Publish one character commit and show its screenshot before
-moving on. Consolidate affected tests once after integration; full suites and
+R12–R19, R20, R21. Commit each character and show its screenshot before moving on. Push commits
+to the draft PR at useful milestones without duplicating its entire CI workload. Consolidate affected tests once after integration; full suites and
 balance matrices require an explicit owner request.
 
 ## Validation and resources
@@ -240,3 +240,16 @@ and phone layouts are not requested. Record their exact commands when relevant.
 Owner look/fun sign-off and D-33 evidence remain prerequisites for W11 activation.
 Remote CI and final PR consolidation belong to the owner; do not wait for or
 reproduce their complete workload locally.
+
+
+## Shared art plumbing — D-67
+
+Implemented optional per-kit anatomy over the existing node slots, preserving
+existing kits with anatomy=None. The named gallery and figure cache accept only
+registered staged kinds with real kits. No Shop/lab pool was changed.
+
+Work-front check: `flock -n -E 75 /tmp/tbg-validation-$(id -u).lock env
+CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/tbg-pr20-target cargo check -p tbg-client
+--bin tbg-client --target wasm32-unknown-unknown`: exit 0, 3.49 s. Package format
+and `git diff --check` pass. Existing kit regression cases are deferred to the
+single consolidation run; no tests, release build or full suite ran here.

@@ -28,6 +28,7 @@ pub fn saddle_height(tier: u8) -> f32 {
 }
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose,
     gait: SCUTTLE,

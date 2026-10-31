@@ -1352,3 +1352,23 @@ in the gallery, well before any rules wave.
 **Reopen when** a rules wave makes a kind purchasable (it then joins `ALL_KINDS`
 and `FULL_POOL` in that commit, and its contracts change with it), or when the
 table can become a static.
+
+
+## D-67 · P59 dedicated anatomy and staged art review — 2026-10-31 (owner-authorized)
+
+Each P59 kit may provide its own parent/rest layout over the existing fixed rig
+node slots, and choose rigid accessory tracks or ordinary cloth springs and
+humanoid foot planting. Existing kits use None and retain their current rig,
+springs and foot locks. This supports quadrupeds, six-legged predators, jaw
+petals, tentacles and Rattle & Tick's companion without new simulation entities
+or a global per-character bone expansion. Each custom parent precedes its child
+in the existing node order; each kit owns the actual layout and motion.
+
+The figure cache and named gallery resolve registered content kinds with a real
+kit even while those kinds are outside ALL_KINDS/FULL_POOL. Unfinished kinds are
+not accepted by the named gallery as generic fallback figures. Shop/lab pools,
+competitive rules, protocol and existing entity slot counts are unchanged.
+
+Why: the owner requested 21 individual characters and actual screenshots, while
+P59 registration intentionally remains separate from the W11 online switch.
+Rendering cost still requires measurement at consolidation; no FPS claim is made.

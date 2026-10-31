@@ -197,6 +197,7 @@ pub fn spawn_unit_visual(
     let joints = figure::spawn_joints(
         commands,
         figure_root,
+        look.kind,
         &form.plan,
         form.meshes(look.own),
         &lib.material,
