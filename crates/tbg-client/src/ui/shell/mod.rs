@@ -3,6 +3,7 @@
 mod arcanas;
 mod arenas;
 mod data;
+mod header;
 mod input;
 mod live;
 mod lobby;
@@ -84,6 +85,17 @@ struct Root;
 #[derive(Component)]
 struct Body;
 
+/// Every Linux menu page reserves the same clear region below the shared header.
+#[cfg(target_os = "linux")]
+pub(super) fn page_node() -> Node {
+    Node {
+        flex_direction: FlexDirection::Column,
+        row_gap: px(16),
+        overflow: Overflow::scroll_y(),
+        ..lobby::chrome::region(2., 17., 96., 79.)
+    }
+}
+
 pub fn plugin(app: &mut App) {
     app.init_resource::<Shell>()
         .init_resource::<data::Data>()
@@ -135,19 +147,22 @@ fn render(
     form: NonSend<ActiveForm>,
     roots: Query<Entity, With<Root>>,
     window: Single<&Window>,
-    mut hidden: Local<(bool, bool)>,
+    mut hidden: Local<(bool, bool, bool)>,
     bodies: Query<&ScrollPosition, With<Body>>,
     mut layout: Local<(Panel, Vec2)>,
 ) {
     if !crate::config::bevy_ui() || crate::config::arena_preview() {
         return;
     }
-    let modal = ranking.open || matches!(account.screen, AccountScreen::SaveKey { .. });
+    let modal = matches!(account.screen, AccountScreen::SaveKey { .. });
+    #[cfg(not(target_os = "linux"))]
+    let modal = modal || ranking.open;
     if !shell.dirty
         && !account.is_changed()
         && !lang.is_changed()
         && sounds.muted == hidden.1
         && modal == hidden.0
+        && ranking.open == hidden.2
         && layout.1 == Vec2::new(window.width(), window.height())
         && !roots.is_empty()
     {
@@ -164,7 +179,7 @@ fn render(
     };
     *layout = (shell.panel, Vec2::new(window.width(), window.height()));
     shell.dirty = false;
-    *hidden = (modal, sounds.muted);
+    *hidden = (modal, sounds.muted, ranking.open);
     for e in &roots {
         commands.entity(e).despawn();
     }
@@ -173,6 +188,8 @@ fn render(
     }
     let compact = window.width() < 900.;
     let home = shell.panel == Panel::Lobby;
+    #[cfg(target_os = "linux")]
+    let home = home && !ranking.open;
     commands
         .spawn((
             Node {
@@ -180,7 +197,7 @@ fn render(
                 width: percent(100),
                 height: percent(100),
                 flex_direction: FlexDirection::Column,
-                padding: UiRect::all(px(if home {
+                padding: UiRect::all(px(if cfg!(target_os = "linux") || home {
                     0
                 } else if compact {
                     10
@@ -199,11 +216,28 @@ fn render(
             DespawnOnExit(GameState::Menu),
         ))
         .with_children(|root| {
+            #[cfg(target_os = "linux")]
+            {
+                header::spawn(
+                    root,
+                    &data,
+                    &account,
+                    &assets,
+                    *lang,
+                    shell.panel,
+                    ranking.open,
+                );
+                if ranking.open {
+                    return;
+                }
+            }
             if home {
                 lobby::spawn(root, &shell, &data, &account, &assets, *lang);
                 return;
             }
+            #[cfg(not(target_os = "linux"))]
             navigation(root, *lang, shell.panel, &data, compact, &assets);
+            #[cfg(not(target_os = "linux"))]
             if let Some(version) = &data.update {
                 root.spawn(button(
                     format!("{} · {version}", lang.key("native.update")),
@@ -211,29 +245,39 @@ fn render(
                     320.,
                 ));
             }
-            root.spawn((
-                Node {
-                    flex_grow: 1.,
-                    min_height: px(0),
-                    width: percent(100),
-                    overflow: Overflow::scroll_y(),
-                    flex_direction: FlexDirection::Column,
-                    row_gap: px(16),
-                    ..default()
-                },
-                scroll,
-                Body,
-            ))
-            .with_children(|body| match shell.panel {
-                Panel::Lobby => {}
-                Panel::Friends => lobby::friends(body, *lang),
-                Panel::Settings => settings::spawn(body, &account, &sounds, &window, *lang),
-                Panel::Arenas => arenas::spawn(body, &assets, *lang),
-                Panel::Strongholds => strongholds::spawn(body, &assets, *lang),
-                Panel::Arcanas => arcanas::spawn(body, &shell, &assets, *lang, compact),
-                Panel::Live => live::spawn(body, &data, *lang),
-                Panel::Kit => settings::gallery(body, *lang),
+            #[cfg(not(target_os = "linux"))]
+            let body = Node {
+                flex_grow: 1.,
+                min_height: px(0),
+                width: percent(100),
+                overflow: Overflow::scroll_y(),
+                flex_direction: FlexDirection::Column,
+                row_gap: px(16),
+                ..default()
+            };
+            #[cfg(target_os = "linux")]
+            let body = page_node();
+            root.spawn((body, scroll, Body)).with_children(|body| {
+                #[cfg(target_os = "linux")]
+                if let Some(version) = &data.update {
+                    body.spawn(button(
+                        format!("{} · {version}", lang.key("native.update")),
+                        Action::Download,
+                        320.,
+                    ));
+                }
+                match shell.panel {
+                    Panel::Lobby => {}
+                    Panel::Friends => lobby::friends(body, *lang),
+                    Panel::Settings => settings::spawn(body, &account, &sounds, &window, *lang),
+                    Panel::Arenas => arenas::spawn(body, &assets, *lang),
+                    Panel::Strongholds => strongholds::spawn(body, &assets, *lang),
+                    Panel::Arcanas => arcanas::spawn(body, &shell, &assets, *lang, compact),
+                    Panel::Live => live::spawn(body, &data, *lang),
+                    Panel::Kit => settings::gallery(body, *lang),
+                }
             });
+            #[cfg(not(target_os = "linux"))]
             root.spawn(kit::muted(
                 format!(
                     "{} · v{} · {}",
@@ -247,6 +291,7 @@ fn render(
     let _ = form;
 }
 
+#[cfg(not(target_os = "linux"))]
 fn navigation(
     root: &mut ChildSpawnerCommands,
     lang: Lang,

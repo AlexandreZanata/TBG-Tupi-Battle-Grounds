@@ -1,6 +1,6 @@
-//! One native header strip with consistent account, navigation and presence blocks.
+//! Reusable menu header: one layout for account, navigation and live presence.
 
-use super::{chrome, kit, Account, Action, Data, Lang, Panel, UiAction};
+use super::{data::Data, kit, lobby::chrome, Account, Action, Lang, Panel, UiAction};
 use bevy::prelude::*;
 
 #[cfg(not(target_os = "linux"))]
@@ -51,8 +51,8 @@ pub fn spawn(
             ))
             .with_children(|blocks| {
                 account_block(blocks, account, assets, lang);
-                navigation(blocks, assets, lang);
-                presence_block(blocks, data, assets, lang);
+                navigation(blocks, assets, lang, Panel::Lobby, false);
+                presence_block(blocks, data, assets, lang, false);
             });
     });
 }
@@ -64,6 +64,8 @@ pub fn spawn(
     account: &Account,
     assets: &AssetServer,
     lang: Lang,
+    panel: Panel,
+    ranking: bool,
 ) {
     root.spawn((
         Node {
@@ -98,8 +100,8 @@ pub fn spawn(
                 ));
             });
         account_block(header, account, assets, lang);
-        navigation(header, assets, lang);
-        presence_block(header, data, assets, lang);
+        navigation(header, assets, lang, panel, ranking);
+        presence_block(header, data, assets, lang, !ranking && panel == Panel::Live);
     });
 }
 
@@ -125,7 +127,13 @@ fn block() -> Node {
     }
 }
 
-fn navigation(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) {
+fn navigation(
+    root: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    lang: Lang,
+    current: Panel,
+    ranking: bool,
+) {
     for (key, icon, panel) in [
         ("lobby", "home", Some(Panel::Lobby)),
         ("arcanas", "arcana", Some(Panel::Arcanas)),
@@ -136,9 +144,14 @@ fn navigation(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang)
         ("settings", "settings", Some(Panel::Settings)),
     ] {
         let enabled = key != "troops";
+        let active = if key == "ranking" {
+            ranking
+        } else {
+            !ranking && panel == Some(current)
+        };
         let mut tab = root.spawn((
             block(),
-            chrome::skin(chrome::METAL, enabled, key == "lobby"),
+            chrome::skin(chrome::METAL, enabled, active),
             if key == "ranking" {
                 UiAction::OpenRanking
             } else {
@@ -153,11 +166,7 @@ fn navigation(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang)
                 assets,
                 icon,
                 24.,
-                if key == "lobby" {
-                    kit::GOLD
-                } else {
-                    kit::MUTED
-                },
+                if active { kit::GOLD } else { kit::MUTED },
             ));
             t.spawn(kit::muted(
                 lang.key(&format!("lobby.tabs.{key}")).to_uppercase(),
@@ -229,7 +238,13 @@ fn account_block(
     });
 }
 
-fn presence_block(root: &mut ChildSpawnerCommands, data: &Data, assets: &AssetServer, lang: Lang) {
+fn presence_block(
+    root: &mut ChildSpawnerCommands,
+    data: &Data,
+    assets: &AssetServer,
+    lang: Lang,
+    active: bool,
+) {
     let online = data.live.as_ref().map_or_else(
         || lang.key("live.chip_loading"),
         |v| {
@@ -246,7 +261,7 @@ fn presence_block(root: &mut ChildSpawnerCommands, data: &Data, assets: &AssetSe
             padding: UiRect::horizontal(px(6)),
             ..block()
         },
-        chrome::skin(chrome::METAL, true, false),
+        chrome::skin(chrome::METAL, true, active),
         UiAction::Disabled,
         Action::Open(Panel::Live),
     ))

@@ -1,4 +1,4 @@
-//! Lobby-only frames and control skins, sharing the common input/focus pipeline.
+//! Lobby and shared menu-header skins using the common input/focus pipeline.
 
 use super::kit;
 use bevy::prelude::*;

@@ -98,6 +98,10 @@ pub fn mouse_and_keys(
         *focus = index;
         let (_, action, ui, _, _, _, _) = ordered[index];
         if let Some(action) = action {
+            #[cfg(target_os = "linux")]
+            if matches!(action, Action::Open(_)) {
+                queue.0.push(UiAction::CloseRanking);
+            }
             if let Action::Arena(arena) = action {
                 queue.0.push(UiAction::PreviewArena(*arena));
             }

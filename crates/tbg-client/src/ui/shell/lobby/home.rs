@@ -1,6 +1,8 @@
 //! Home-screen placement matches the browser and leaves the middle arena unobscured.
 
-use super::{cards, header, modes, profile, Account, Data, Lang, Shell};
+#[cfg(not(target_os = "linux"))]
+use super::super::header;
+use super::{cards, modes, profile, Account, Data, Lang, Shell};
 use bevy::prelude::*;
 
 pub fn spawn(
@@ -11,6 +13,7 @@ pub fn spawn(
     assets: &AssetServer,
     lang: Lang,
 ) {
+    #[cfg(not(target_os = "linux"))]
     header::spawn(root, data, account, assets, lang);
     modes::spawn(root, account, assets, lang);
     profile::spawn(root, data, account, assets, lang);

@@ -1,8 +1,7 @@
 //! Browser-aligned lobby entry point and private-room panel.
 
 mod cards;
-mod chrome;
-mod header;
+pub(super) mod chrome;
 mod home;
 mod modes;
 mod profile;

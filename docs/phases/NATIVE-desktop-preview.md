@@ -513,3 +513,31 @@ No game rule, web behavior, remote Git, CI or VPS change belongs here.
   remote Git, CI or deployment ran. The consolidation checks listed above
   remain deferred. Existing app windows, preferences, account data and
   unrelated policy files were preserved. Reopen TBG for this installation.
+
+## Linux shared menu header — 2026-10-31
+
+Owner requested the lobby header on every navigable Linux menu page, with
+one reusable component for future changes. Move the existing implementation
+from `ui/shell/lobby/header.rs` to `ui/shell/header.rs`; the Linux shell
+now mounts it before selecting page content. Lobby, Arcanas, Strongholds,
+Arenas, Settings, Friends, Live and UI kit share this one implementation.
+The current page controls its active tab; Ranking retains the same header
+and highlights Ranking. Logo, account controls and presence keep the lobby
+layout and dimensions. Troops remains disabled under the existing scope.
+
+Reserve the same 2–98% horizontal, 17–96% vertical content region below the
+header for internal pages and Ranking. Navigating from Ranking to a shell
+page also queues the existing CloseRanking action. Save-key dialogs keep
+their modal behavior; battle, queue and result interfaces are unchanged.
+Other targets retain their existing header/navigation behavior. Debug-only
+capture support opens Ranking through the normal OpenRanking UiAction.
+
+Level: work front. Scoped formatting and diff checks passed. Next: the
+owner-requested native preview build/install under the shared host
+lock/cache, plus focused installed Arcanas/Strongholds/Ranking captures.
+The owner's wait/job exceptions remain scoped to this chat. Defer pointer
+and keyboard navigation across pages, authenticated account refresh,
+live-data updates, narrow-window resizing and return from a match to
+consolidation. Full workspace tests/Clippy and other-platform builds need
+their existing explicit authorization. No game rule, web asset/behavior,
+remote Git, CI or VPS change is part of this front.

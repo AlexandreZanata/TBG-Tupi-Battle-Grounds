@@ -12,6 +12,15 @@ pub fn plugin(app: &mut App) {
     if crate::config::url_param("capture").is_some() {
         app.add_systems(Update, capture);
         #[cfg(target_os = "linux")]
+        if crate::config::url_param("capture_panel").as_deref() == Some("ranking") {
+            app.add_systems(
+                OnEnter(crate::GameState::Menu),
+                |mut actions: ResMut<crate::ui::ActionQueue>| {
+                    actions.0.push(crate::ui::UiAction::OpenRanking);
+                },
+            );
+        }
+        #[cfg(target_os = "linux")]
         if crate::config::url_param("capture_panel").as_deref() == Some("fortify") {
             app.add_systems(
                 OnEnter(crate::GameState::InMatch),
