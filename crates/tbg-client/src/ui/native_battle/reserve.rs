@@ -153,11 +153,7 @@ fn badges(
         };
         for child in children.iter() {
             if let Ok(mut text) = texts.get_mut(child) {
-                text.0 = format!(
-                    "{} {}",
-                    lang.key("shop.reserved"),
-                    "●".repeat(usize::from(charges))
-                );
+                text.0 = format!("{} · {}", lang.key("shop.reserved"), charges);
             }
         }
     }

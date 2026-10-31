@@ -231,6 +231,7 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
                     ..default()
                 },
                 kit::heading("", 11.),
+                TextLayout::justify(Justify::Center),
                 Field::Rarity(i),
                 ZIndex(3),
             ));
@@ -267,6 +268,11 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
             .with_children(|body| {
                 body.spawn((
                     label("", 12.),
+                    Node {
+                        width: percent(100),
+                        min_width: px(0),
+                        ..default()
+                    },
                     TextLayout::justify(Justify::Center),
                     Field::Description(i),
                 ));

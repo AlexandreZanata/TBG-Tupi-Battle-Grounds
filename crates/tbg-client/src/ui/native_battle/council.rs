@@ -342,14 +342,20 @@ fn buttons(
         &mut kit::buttons::Chrome,
         Option<&Confirm>,
         Option<&Forgo>,
+        &mut kit::buttons::Palette,
+        &Children,
     )>,
+    mut labels: Query<&mut TextColor>,
 ) {
     let Some(v) = &view.0 else { return };
     let open = v
         .augment_round
         .as_ref()
         .is_some_and(|r| !r.resolved && r.ticks_left > 0);
-    for (mut action, mut chrome, confirm, forgo) in &mut buttons {
+    for (mut action, mut chrome, confirm, forgo, mut palette, children) in &mut buttons {
+        if confirm.is_none() && forgo.is_none() {
+            continue;
+        }
         if confirm.is_some() {
             chrome.enabled = selection.picked.is_some_and(|i| affordable(v, i));
             *action = if chrome.enabled {
@@ -365,6 +371,16 @@ fn buttons(
             } else {
                 UiAction::Disabled
             };
+        }
+        palette.border = if chrome.enabled {
+            chrome::GOLD
+        } else {
+            kit::LINE
+        };
+        for child in children.iter() {
+            if let Ok(mut text) = labels.get_mut(child) {
+                text.0 = super::super::TEXT.with_alpha(if chrome.enabled { 1. } else { 0.4 });
+            }
         }
     }
 }
