@@ -2,7 +2,7 @@
 //! numbers only through `MatchState::rules()`, so the offline balance lab
 //! can play a variant; online play uses `CANON`, while local Practice
 //! uses the explicit preview (Shop features stay disabled online). CANON is
-//! which is assembled from `content.rs` (each number is still written once).
+//! assembled from `content.rs` (each number is still written once).
 //!
 //! Structural values stay `const` in `content.rs` and are never tuned:
 //! they define units of measure, protocol shapes, or array bounds
