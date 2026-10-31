@@ -18,6 +18,7 @@ mod bulwark;
 mod capybara;
 mod cargo_crab;
 mod cargo_crate;
+mod celestial_archer;
 pub mod common;
 mod crowcaller;
 mod demolisher;
@@ -94,6 +95,15 @@ pub type Loaded = (Node, fn(Clip, f32) -> bool);
 
 /// How a kit's attack reaches its target.
 pub enum Attack {
+    /// Presentation of a counted basic proc; the server still owns the completed hit.
+    CountedShot {
+        from: Node,
+        muzzle: fn(u8, u8) -> Vec3,
+        normal: ShotKind,
+        powered: ShotKind,
+        every: fn(u8, u8) -> u8,
+        loaded: Option<Loaded>,
+    },
     /// Alternating primary muzzles, with an authoritative opposite-hand secondary cue.
     TwinShot {
         hands: [Node; 2],
@@ -184,6 +194,7 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static CELESTIALARCHER: Kit = celestial_archer::KIT;
 static LUMINOUSORACLE: Kit = luminous_oracle::KIT;
 static SOLARSENTINEL: Kit = solar_sentinel::KIT;
 static TRIDENT: Kit = trident::KIT;
@@ -234,6 +245,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::CelestialArcher => Some(&CELESTIALARCHER),
         UnitKind::LuminousOracle => Some(&LUMINOUSORACLE),
         UnitKind::SolarSentinel => Some(&SOLARSENTINEL),
         UnitKind::Trident => Some(&TRIDENT),

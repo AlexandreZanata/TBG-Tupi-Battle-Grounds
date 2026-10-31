@@ -215,7 +215,8 @@ Own library: `crates/tbg-client/src/art/kits/celestial_archer/`.
 
 slim armored archer, angular gold bow, rigid feather wing motifs and narrow halo; ivory/navy, team quiver sash. A2 long bow/ivory sleeves, A3 large sight-halo. B2 pronged bow/dark cuirass, B3 three-point bow crown. Wings are short shoulder ornaments, not flight machinery.
 
-Status: pending. Evidence: `docs/media/p59/celestial_archer/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/celestial_archer/lineup.jpg`.
 
 ### R15 — Justiciar
 

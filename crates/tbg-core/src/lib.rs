@@ -13,6 +13,7 @@ mod bonehorn;
 pub mod bot;
 mod bulwark;
 mod capybara;
+mod celestial_archer;
 mod combat;
 pub mod content;
 mod crowcaller;

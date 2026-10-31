@@ -355,6 +355,10 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    PurifyingArrow {
+        every: u8,
+        damage: u16,
+    },
     HarmonicPulse {
         period: u16,
         bp: u16,
@@ -738,6 +742,16 @@ const LUMINOUS_ORACLE_ABILITIES: [[Ability; 2]; 5] = [
     harmonic(180, 60),
     harmonic(160, 60),
 ];
+const fn purification(every: u8, damage: u16) -> [Ability; 2] {
+    [Ability::PurifyingArrow { every, damage }, Ability::None]
+}
+const CELESTIAL_ARCHER_ABILITIES: [[Ability; 2]; 5] = [
+    purification(4, 80),
+    purification(4, 80),
+    purification(4, 80),
+    purification(3, 80),
+    purification(3, 90),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -841,7 +855,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 40;
+pub const UNIT_KIND_COUNT: usize = 41;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1172,6 +1186,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,1_100,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
     unit(UnitKind::SolarSentinel,"Solar Sentinel",Celestials,Tank,3_000,[1_050,35,40,800,28,0,0],None,SOLAR_SENTINEL_ABILITIES,[FormDef{hp_bp:2_000,..form("Light Fortress")},form("Light Fortress"),form("Group Protection"),form("Group Protection")]),
     unit(UnitKind::LuminousOracle,"Luminous Oracle",Celestials,Control,2_400,[300,15,50,3_000,38,0,0],None,LUMINOUS_ORACLE_ABILITIES,[form("Restoring Light"),form("Restoring Light"),form("Sacred Aura"),form("Sacred Aura")]),
+    unit(UnitKind::CelestialArcher,"Celestial Archer",Celestials,Ranged,2_400,[210,55,40,4_000,43,0,0],None,CELESTIAL_ARCHER_ABILITIES,[FormDef{dmg_bp:1_000,..form("Divine Precision")},FormDef{dmg_bp:1_000,..form("Divine Precision")},form("Celestial Mark"),form("Celestial Mark")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

@@ -59,7 +59,8 @@ pub(crate) fn resolve_hit(
         }
         return;
     }
-    let mut amount = st.damage;
+    let purification = crate::celestial_archer::empowered(state, attacker, target);
+    let mut amount = purification.map_or(st.damage, |raw| auxiliary_amount(st, raw));
     // R13: a weakened attacker's basic hit loses its weakening before any bonus.
     let weaken = crate::roster_slots::weaken_now(&attacker.fx, state.tick);
     if weaken > 0 {
@@ -93,7 +94,11 @@ pub(crate) fn resolve_hit(
                 + crate::stronghold::aura_bp(state, attacker),
         );
     }
+    if purification.is_some() {
+        crate::celestial_archer::strip(state, target);
+    }
     let removed = damage(state, target, amount, ev);
+    crate::celestial_archer::completed(state, attacker, target, ev);
     crate::ravager::completed(state, attacker, target);
     crate::acidmaw::completed(state, attacker, target, st, ev);
     crate::trigger::completed(state, attacker, target, st, ev);

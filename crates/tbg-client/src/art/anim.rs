@@ -363,11 +363,11 @@ fn show_loaded(
     a: &Animator,
     visibility: &mut Query<&mut Visibility, Without<Animator>>,
 ) {
-    let Attack::Shot {
-        loaded: Some((node, shown)),
-        ..
-    } = kit.attack
-    else {
+    let loaded = match kit.attack {
+        Attack::Shot { loaded, .. } | Attack::CountedShot { loaded, .. } => loaded,
+        _ => None,
+    };
+    let Some((node, shown)) = loaded else {
         return;
     };
     let (clip, t) = a.clip_time();

@@ -1007,3 +1007,9 @@ information. Values are **Proposed** (owner defaults O-1–O-6 in
 - **BR-LV09** Caps: 200 spectators per match and 2 000 in total. A full or
   unknown match answers `SpectateUnavailable`, never a disconnect. A slow
   spectator is dropped without ever affecting a seat.
+
+
+**R14 dispel policy — Proposed (D-81):** Arrow of Purification removes the
+victim's temporary Unit shield as immediate damage preprocessing. Ward's hostile
+status immunity does not block this dispel or get consumed by it. It removes no
+plate, Stronghold shield, status, HP or max-HP modifier.

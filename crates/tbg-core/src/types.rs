@@ -147,6 +147,8 @@ pub enum UnitKind {
     SolarSentinel,
     /// D-80: R13, staged outside public pools.
     LuminousOracle,
+    /// D-81: R14, staged outside public pools.
+    CelestialArcher,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

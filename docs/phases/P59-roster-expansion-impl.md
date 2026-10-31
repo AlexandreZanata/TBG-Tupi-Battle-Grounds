@@ -219,3 +219,8 @@ D-80: Luminous Oracle's own five-form kit, canonical ability and actual desktop 
 delivered (13 of21). The relevant combined block passed40 distinct targeted
 scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
 docs/roster/p59/R13-luminous-oracle.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-81: Celestial Archer's own five-form kit, canonical ability and actual desktop lineup
+delivered (14 of21). The relevant combined block passed40 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R14-celestial-archer.md. Deferred acceptance remains as listed; no activation/deploy.

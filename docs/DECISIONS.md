@@ -1784,3 +1784,37 @@ the active caster-owned bonus; the victim's Slow/cut expires independently. The
 old four-color native Shop accent table is extended to FACTION_COUNT with D-64's
 existing Monsters/Celestials/Insects palette, preserving all legacy entries. This
 prevents a future staged offer from indexing past the table; no offer is activated.
+
+## D-81 · Celestial Archer's pre-damage purification and counted arrow — 2026-10-31 (Proposed)
+
+R14 appends the exact §13 Celestial Ranged row/four forms. The fourth completed
+enemy-unit primary replaces its ordinary raw basic with80, scaled by current
+static damage percentages once, then keeps normal basic weakening/conditional
+modifiers. Immediately before damage it clears only that victim's temporary Unit
+shield and expiry; no plate/HP/status/Stronghold shield is removed. The dispel is
+damage preprocessing, not a new timed status: Ward neither blocks it nor gets
+consumed (§13 Proposed policy). No existing shield still yields the empowered hit.
+Kills/summons count; canceled/healing/friendly/Stronghold hits do not. Stronghold
+basics keep normal damage and retain progress. A adds1000bp basic damage twice,
+scaling the empowered shot too; B replaces frequency3 then raw90. No team Mark,
+line piercing, multi-target chain or extra competitive windup.
+
+The existing reserved public counter bits restore progress. A confirmed proc uses
+the existing AbilityResolved event, without a wire/state/hash migration; protocol25
+and public pools stay unchanged. CountedShot is a closed cosmetic kit variant:
+normal/empowered arrow style reads public progress and the already-announced Unit
+aim target. A Point/Stronghold cannot show a charged shot just because progress is
+retained. The server alone strips shields, resolves damage and confirms the halo
+at contact. Release0.18/flight0.12 remains fixed. Shot, counted and twin emitters
+share one real-joint path, preserving legacy muzzle/backblast/area semantics; loaded
+props support counted bows without modifying older kit constructors.
+
+Own five-form library: slim ivory/navy armor, angular gold bow, rigid short feather
+ornaments, narrow halo and team quiver sash. A extends the bow/adds ivory sleeves
+then sight halo; B adds dark cuirass/prongs then three-point crown. Own upright
+cheek draw/recoil, wing settling and knee/side fall. A cached ivory/gold arrow
+makes the charged release larger; the authoritative contact alone flashes full
+purification, so a canceled projectile never claims a successful dispel. No flight
+immunity, imported asset, extra rig node, light, material per unit or dependency.
+Frozen base/form contracts append these canonical Proposed facts. Native regressions
+and actual screenshot remain queued in the per-character report.
