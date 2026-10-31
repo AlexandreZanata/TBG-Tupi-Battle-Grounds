@@ -265,7 +265,8 @@ Own library: `crates/tbg-client/src/art/kits/weaver/`.
 
 large abdomen, eight clearly grouped legs, low head with green eyes, web-spinner nozzle; moss/amber/dark chitin, team back plate. A2 pale abdomen bands and wider spinner, A3 broad web-shaped back crest. B2 dark body/longer forelegs, B3 angular nozzle fork. No simulated web geometry.
 
-Status: pending. Evidence: `docs/media/p59/weaver/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/weaver/lineup.jpg`.
 
 ### R20 — Pyre Warden
 

@@ -205,13 +205,22 @@ pub(crate) fn queue_slow(fx: &mut UnitFx, bp: u16, ticks: u16) {
 /// When a Root has just ended in `tick_timers`, the queued Slow starts in its
 /// place. A Root that is still running, or one that was refreshed, releases
 /// nothing.
-pub(crate) fn release_queued_slow(u: &mut Unit, before: Status) {
+pub(crate) fn release_queued_slow(u: &mut Unit, before: Status, now: Tick) {
     let was_rooted = matches!(before, Status::Rooted { .. });
     if was_rooted && !matches!(u.status, Status::Rooted { .. }) {
         if let Some(q) = u.fx.queued_slow.take() {
-            u.status = Status::Slowed {
-                bp: q.bp,
-                ticks_left: q.ticks,
+            if now < u.fx.ward_until || crate::afflictions::is_immune_to_control(u) {
+                return;
+            }
+            u.status = match u.status {
+                Status::Slowed { bp, ticks_left } if q.bp <= bp => Status::Slowed {
+                    bp,
+                    ticks_left: ticks_left.max(q.ticks),
+                },
+                _ => Status::Slowed {
+                    bp: q.bp,
+                    ticks_left: q.ticks,
+                },
             };
         }
     }

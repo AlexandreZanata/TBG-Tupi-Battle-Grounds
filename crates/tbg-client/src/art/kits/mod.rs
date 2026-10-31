@@ -51,6 +51,7 @@ mod solar_sentinel;
 mod tools;
 mod trident;
 mod trigger;
+mod weaver;
 mod whisperer;
 
 use bevy::prelude::*;
@@ -198,6 +199,7 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static WEAVER: Kit = weaver::KIT;
 static HORNET: Kit = hornet::KIT;
 static MANTIS: Kit = mantis::KIT;
 static JAWGUARD: Kit = jawguard::KIT;
@@ -253,6 +255,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::Weaver => Some(&WEAVER),
         UnitKind::Hornet => Some(&HORNET),
         UnitKind::Mantis => Some(&MANTIS),
         UnitKind::Jawguard => Some(&JAWGUARD),

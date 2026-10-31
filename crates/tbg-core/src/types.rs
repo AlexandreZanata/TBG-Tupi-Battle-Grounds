@@ -157,6 +157,8 @@ pub enum UnitKind {
     Mantis,
     /// D-85: R18, staged outside public pools.
     Hornet,
+    /// D-86: R19, staged outside public pools.
+    Weaver,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

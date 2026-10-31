@@ -645,6 +645,29 @@ fn status_ticks(base: u16, bp: i32) -> u16 {
 /// Root replaces anything (keeping the longer root); a stronger slow
 /// replaces a slow, an equal or weaker one refreshes it; slow never
 /// replaces root. Only duration is modified by Augments (BR-X07).
+/// Duration is snapshotted once, including outgoing Augments and victim Arcana.
+pub(crate) fn status_duration(state: &MatchState, id: u32, attacker: Seat, ticks: u16) -> u16 {
+    let Some(i) = state.unit_index(id) else {
+        return 0;
+    };
+    let bonus = augment::status_duration_bp(&state.player(attacker).augments);
+    let target = state.units[i];
+    let archetype = state.rules().def(target.kind).archetype;
+    let shorten = |ticks| {
+        if target.is_summon() {
+            ticks
+        } else {
+            arcana::shorten_status(
+                &state.player(target.seat).arcanas,
+                &state.rules().arcana,
+                archetype,
+                ticks,
+            )
+        }
+    };
+    shorten(status_ticks(ticks, bonus))
+}
+
 pub(crate) fn apply_on_hit(
     state: &mut MatchState,
     id: u32,
@@ -662,28 +685,13 @@ pub(crate) fn apply_on_hit(
     {
         return 0;
     }
-    let bonus = augment::status_duration_bp(&state.player(attacker).augments);
-    let target = state.units[i];
-    let archetype = state.rules().def(target.kind).archetype;
-    let shorten = |ticks| {
-        if target.is_summon() {
-            ticks
-        } else {
-            arcana::shorten_status(
-                &state.player(target.seat).arcanas,
-                &state.rules().arcana,
-                archetype,
-                ticks,
-            )
-        }
-    };
     let on_hit = match on_hit {
         OnHit::Slow { bp, ticks } => OnHit::Slow {
             bp,
-            ticks: shorten(status_ticks(ticks, bonus)),
+            ticks: status_duration(state, id, attacker, ticks),
         },
         OnHit::Root { ticks } => OnHit::Root {
-            ticks: shorten(status_ticks(ticks, bonus)),
+            ticks: status_duration(state, id, attacker, ticks),
         },
     };
     let applied = match on_hit {

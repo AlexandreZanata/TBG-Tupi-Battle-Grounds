@@ -55,6 +55,7 @@ pub enum Impact {
     Harmonic,
     Purify,
     Judgment,
+    Web,
     Precise,
     Venom,
 }
@@ -275,6 +276,17 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
         }
         Impact::Venom => motes(commands, a, at, &a.green, (5, 0.4), 0.25),
         Impact::Precise => motes(commands, a, at, &a.green, (4, 0.35), 0.18),
+        Impact::Web => {
+            spawn(
+                commands,
+                &a.ring,
+                &a.white,
+                ground,
+                Motion::Grow { radius: 0.30 },
+                0.0,
+                0.35,
+            );
+        }
         Impact::Judgment => {
             spawn(
                 commands,

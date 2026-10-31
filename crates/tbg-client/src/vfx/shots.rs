@@ -57,6 +57,7 @@ pub enum ShotKind {
     JudgmentBolt,
     Sting,
     VenomSting,
+    WebSpit,
 }
 
 #[derive(Clone, Copy)]
@@ -269,6 +270,14 @@ fn look(kind: ShotKind) -> Look {
             Trail::Sparks,
             0.0,
             Impact::Bolt,
+        ),
+        WebSpit => (
+            Some((Body::Seed, 0.7)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
         ),
         Sting | VenomSting => (
             Some((Body::Stinger, if kind == VenomSting { 1.15 } else { 1.0 })),

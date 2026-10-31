@@ -1030,3 +1030,9 @@ bleed first, Hornet's separate venom second, then existing poison stacks in thei
 previous strongest-first order. Each removed family spends one strip. Ward blocks
 a new venom payload but never cancels an already applied DoT. Venom uses the same
 static-on-application pulse scaling and refresh phase contract as R07 bleed.
+
+**Proposed R19 implementation reading (D-86):** post-Root Slow duration snapshots
+outgoing duration Augments and victim Arcana once when the web applies. Its queued
+transition checks current Ward/control immunity and ordinary Slow priority; it
+cannot replace a refreshed Root. Brew discards the queue with the cleansed Root.
+The B range bonus affects only the independent special, never basic attack range.

@@ -53,6 +53,7 @@ mod trident;
 mod trigger;
 pub mod types;
 pub mod view;
+mod weaver;
 mod whisperer;
 
 pub use arcana::ArcanaPreset;

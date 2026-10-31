@@ -244,3 +244,8 @@ D-85: Hornet's own five-form kit, canonical ability and actual desktop lineup
 delivered (18 of21). The relevant combined block passed42 distinct targeted
 scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
 docs/roster/p59/R18-hornet.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-86: Weaver's own five-form kit, canonical ability and actual desktop lineup
+delivered (19 of21). The relevant combined block passed42 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R19-weaver.md. Deferred acceptance remains as listed; no activation/deploy.

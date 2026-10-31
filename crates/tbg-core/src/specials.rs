@@ -14,7 +14,8 @@ pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> O
         .ability(tier, branch)
         .into_iter()
         .find_map(|a| match a {
-            Ability::FearPulse { period, .. }
+            Ability::StickyWeb { period, .. }
+            | Ability::FearPulse { period, .. }
             | Ability::LivingWall { period, .. }
             | Ability::AreaCrush { period, .. }
             | Ability::RaisedCarapace { period, .. }
@@ -67,7 +68,7 @@ fn primary(state: &MatchState, u: &Unit) -> Option<u32> {
     if crate::solar_sentinel::parameters(state, u).is_some() {
         return crate::solar_sentinel::target(state, u, None);
     }
-    let range = state.stats_of(u).range;
+    let range = state.stats_of(u).range + crate::weaver::extra_range(state, u);
     state
         .units
         .iter()
@@ -142,6 +143,7 @@ fn advance_cast(
     state.units[i].fx.special = None;
     if let Some(target) = cast.target {
         // The primary stays locked: no range recheck, replacement or extra hit.
+        crate::weaver::resolve(state, u, target, ev);
         crate::whisperer::resolve(state, u, target, ev);
         crate::bulwark::resolve(state, u);
         crate::demolisher::resolve(state, u, ev);

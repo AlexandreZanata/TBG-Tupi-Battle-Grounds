@@ -1922,3 +1922,25 @@ slow decorative wing hum never imply flight immunity. One cached stinger project
 leaves the real emitter; the public third-hit counter selects its green accent.
 A lazy shared green badge shows actual venom; no custom per-unit material, light,
 texture, dependency or physics. Frozen roster contracts append only §13 values.
+
+## D-86 · Weaver's independent web and defended Slow transition — 2026-10-31 (Proposed)
+
+R19 appends the exact §13 Insects Control row/four forms. Sticky Web has period160,
+primary damage25 and Root30, separate from basic15/50. A periods145/130; B adds500
+special-only range then queues Slow1500bp/40 when Root truly ends. Shared Guard-first
+selection includes that special reach, locks one living enemy and uses six-tick
+windup/dead-primary cancellation. Root uses existing outgoing duration/victim Arcana
+rules; the pending Slow snapshots those duration modifiers once. Extended Root
+waits; Brew discards the queue. At actual transition, current Ward/control immunity
+can discard it and ordinary Slow priority applies. No second root target, ally
+shield, web zone, new state field or protocol tag. Public EffectsView already
+carries the bounded queue. Unrelated status arithmetic and all pools stay unchanged.
+
+Own low spider anatomy uses the fixed26 nodes with eight visible grouped legs,
+green eyes, large abdomen, spinner and team back plate. A pale bands/wider spinner
+then web crest; B dark chitin/long forelegs then forked nozzle. Four-leg alternate
+gait, braced spinner, abdomen curl and small pellet are own tracks. No humanoid
+pelvis planting, simulated web, extra node, per-unit material, texture or light.
+Frozen base/form contracts append §13 values. First scoped WASM check exposed
+`cannot find value CalfL/CalfR in this scope`; corrected to existing ShinL/ShinR
+and removed its unused motion import without changing the shared rig.
