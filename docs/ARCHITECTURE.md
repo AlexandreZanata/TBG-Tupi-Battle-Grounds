@@ -247,6 +247,32 @@ tables are the one allowed exception.
   browser accepts `?lag=MS` to feel added latency.
 - **Bandwidth (hypothesis):** about 400 B per view → about 4 KB/s down and
   under 0.5 KB/s up per player; about 2 MB per 4-minute match for both.
+- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §13):**
+  `Spectate{id}` and `StopSpectating` (client) and `SpectateStart`,
+  `SpectatorView(PublicView)`, `SpectateUnavailable{reason}`,
+  `SpectateEnd{outcome}` (server) are appended to the enums. Public
+  matches (quick match, ranked) register in a lobby registry
+  (`Listing::Public`, decided at pairing; rooms, challenges and rematches
+  are `Listing::Private` and never enter it). The match task sends
+  `LobbyCmd::LiveProgress` every 20 ticks with `try_send`.
+- **Spectator lifecycle:** `Idle` → `Spectate` (checks in order: rate limit
+  1/s per session, idle, live, public, caps 200 per match and 2 000 in
+  total) → `Watching{id}` and `MatchCmd::Watch`. `StopSpectating`, a
+  disconnect, or the match end returns to `Idle`. A reload never resumes
+  a watch on the server: the client asks again from `?watch=` or the
+  tab's stored id.
+- **Spectator fan-out:** the match task keeps a list of spectator
+  connections and builds one `PublicView` per view tick (10 Hz, same
+  cadence as seats), encodes it once, and sends the shared bytes as
+  `ConnEvent::Frame` with `try_send`. A full or closed queue drops that
+  spectator only; no seat is ever detached by a spectator. The view a seat
+  gets carries `spectators` (a count, never names).
+- **Presence (BR-LV06):** the lobby rebuilds a snapshot at most once a
+  second, only when something changed: online sessions (with a connection),
+  distinct accounts, seats of running matches, spectators, the featured
+  match (highest mean rating, guests at 1000, held 30 s), and the online
+  accounts. The snapshot lives on a `watch` channel; HTTP never reads lobby
+  state.
 
 ## 6. Client
 
@@ -466,6 +492,13 @@ explicit CPU/memory caps, separate generator affinity and retained samples.
 - Every message is decoded with size limits; malformed input closes the
   socket; intentions are validated against current state.
 - Rate limits, per-IP socket caps, and timeouts as in §5.
+- Live routes (P47): `GET /api/live` returns counts, the featured id and
+  up to 50 listed matches (`Cache-Control: no-cache, max-age=0`, nginx
+  caches JSON otherwise); `GET /api/online?offset&limit` pages the online
+  accounts (`max-age=5`). Both read the snapshot only, carry no ids other
+  than the shareable match ids of listed matches, and share the per-IP API
+  limit. Spectator input is refused at the boundary: a spectator has no
+  seat, so an `Intent` or `Surrender` gets `NotInMatch` (BR-LV02).
 - Read-only API (P13): `/api/*` is limited per IP (`TBG_API_PER_IP_MIN`,
   default 120 requests per minute → 429 `{"error":"rate_limited"}`); bad
   name shapes 404 before any query. Replies never carry account ids, key
