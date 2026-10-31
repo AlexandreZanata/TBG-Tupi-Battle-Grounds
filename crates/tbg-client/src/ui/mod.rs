@@ -42,8 +42,11 @@ mod lobby_panels_tests;
 mod menu;
 #[cfg(target_os = "linux")]
 mod native_battle;
+#[cfg(target_os = "linux")]
+mod native_ranking;
 mod queue;
 pub mod ranking;
+#[cfg(not(target_os = "linux"))]
 mod ranking_ui;
 mod result;
 mod shell;
@@ -162,6 +165,8 @@ pub const TEXT: Color = Color::srgb(0.96, 0.95, 0.90);
 pub fn plugin(app: &mut App) {
     #[cfg(target_os = "linux")]
     native_battle::plugin(app);
+    #[cfg(target_os = "linux")]
+    native_ranking::plugin(app);
     app.init_resource::<PendingBuy>()
         .add_systems(
             Update,

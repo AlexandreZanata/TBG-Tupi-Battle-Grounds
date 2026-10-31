@@ -628,3 +628,42 @@ behavior/assets replacement, remote Git, CI or deployment belongs here.
   and resize checks remain deferred as listed above. No full suite,
   other-target build, remote Git, CI or deployment ran. Existing windows,
   account data, preferences and unrelated policy edits were preserved.
+
+## Linux Hall of Champions and lobby battle — 2026-10-31
+
+Owner requested a browser-reference illustrated Ranking at the common
+header width, standardized podium information and a visual lobby battle.
+The Linux Ranking uses the same 2–98% horizontal and 17–96% vertical
+content region as other pages. Existing trophy, grove, player-crest and
+three podium illustrations are reused unchanged. All podiums have equal
+dimensions and shared position/name/rating/record plates. The public
+Leaderboard snapshot still owns order, ratings and records; cache its top
+three from page zero so pagination does not replace the podium. Keep
+Prev/Next, refresh and browser link, with a scrolling full-width table,
+account rank/record and recent public matches from the existing lobby data.
+No imaginary ranking results are used in normal play. An explicit
+debug-only capture flag may inject named layout fixtures for visual QA.
+
+The Linux menu diorama runs its own core MatchState and bot pair. Random
+opening lineups have a Tank, Support and Ranged unit, all recruited through
+normal Purchase intentions and real Energy costs. Warm up the opening
+before showing it, then step at the normal fixed tick. The bots continue
+the battle using core combat, healing, projectiles and Evolution. Keep a
+small presentation army budget and restart the decorative battle between
+rounds. Its render timeline, sounds and MatchStats are isolated from the
+network connection, LatestView, account and real match results. Demo units
+are not clickable and are removed when the menu exits. No competitive
+rule, cost, balance value or server behavior changes.
+
+Level: work front. Affected-package formatting and `git diff --check`
+passed before compilation. Queue the new focused opening-role regression:
+`cargo test -p tbg-client --bin tbg-client
+sync::lobby_battle::tests -- --test-threads=1` under the shared lock at
+consolidation. Next: one owner-requested native build/install using the
+existing host lock/cache, followed by focused Ranking and moving-lobby
+captures. The owner's wait/job exceptions remain scoped to this chat.
+Defer real account/recent-data refresh, pointer/keyboard paging, reconnect,
+long-running demo lifecycle and return from menu to real matches to
+consolidation. Full workspace tests/Clippy and other-target builds remain
+deferred. No web asset replacement, remote Git, CI or deployment belongs
+to this front.

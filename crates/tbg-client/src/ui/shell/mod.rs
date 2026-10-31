@@ -9,6 +9,8 @@ mod live;
 mod lobby;
 mod settings;
 mod strongholds;
+#[cfg(target_os = "linux")]
+pub(super) use data::Data as LobbyData;
 
 #[cfg(target_os = "linux")]
 pub(super) use strongholds::{branch_effect, expand, stronghold_data};

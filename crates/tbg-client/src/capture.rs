@@ -13,6 +13,9 @@ pub fn plugin(app: &mut App) {
         app.add_systems(Update, capture);
         #[cfg(target_os = "linux")]
         if crate::config::url_param("capture_panel").as_deref() == Some("ranking") {
+            if crate::config::url_param("capture_ranking_fixture").is_some() {
+                app.add_systems(Update, ranking_fixture);
+            }
             app.add_systems(
                 OnEnter(crate::GameState::Menu),
                 |mut actions: ResMut<crate::ui::ActionQueue>| {
@@ -52,6 +55,34 @@ pub fn plugin(app: &mut App) {
             }
         }
     }
+}
+
+#[cfg(target_os = "linux")]
+fn ranking_fixture(mut ranking: ResMut<crate::ui::ranking::Ranking>, mut done: Local<bool>) {
+    if *done || !ranking.open {
+        return;
+    }
+    *done = true;
+    let rows = [
+        ("CommanderOfStars", 1250, 98, 12, 3),
+        ("SilverKnight", 1180, 40, 19, 0),
+        ("BronzeGuardian", 1100, 28, 17, 2),
+    ]
+    .into_iter()
+    .enumerate()
+    .map(
+        |(i, (name, rating, wins, losses, draws))| tbg_core::protocol::LeaderRow {
+            rank: i as u32 + 1,
+            name: name.into(),
+            rating,
+            wins,
+            losses,
+            draws,
+        },
+    )
+    .collect();
+    ranking.accept(3, 0, rows, None);
+    eprintln!("Ranking capture uses explicit layout fixtures; these are not production accounts.");
 }
 
 fn capture(
