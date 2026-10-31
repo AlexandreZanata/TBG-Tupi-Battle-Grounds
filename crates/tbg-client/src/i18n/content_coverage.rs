@@ -99,3 +99,54 @@ fn i18n_content_coverage_rarities_are_paired() {
         assert!(filled(rarity(Lang::PtBr, a.rarity)));
     }
 }
+
+/// P41 step 8 / P64 L06: player-facing Bevy text and toasts come from the
+/// catalog. Developer-only overlays and the art gallery stay English, and
+/// test modules may use literals.
+#[test]
+fn i18n_content_coverage_no_literal_ui_text() {
+    fn walk(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
+        for entry in std::fs::read_dir(dir).unwrap().flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                walk(&path, out);
+            } else if path.extension().is_some_and(|e| e == "rs") {
+                out.push(path);
+            }
+        }
+    }
+    let src = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
+    let mut files = Vec::new();
+    walk(&src, &mut files);
+    let calls = [
+        "label(\"",
+        "button(\"",
+        ".push(\"",
+        "push_for(\"",
+        "Text::new(\"",
+    ];
+    let mut found = Vec::new();
+    for file in files {
+        let rel = file
+            .strip_prefix(&src)
+            .unwrap()
+            .to_string_lossy()
+            .to_string();
+        if rel.starts_with("gallery") || rel == "overlay.rs" || rel.starts_with("i18n") {
+            continue;
+        }
+        let text = std::fs::read_to_string(&file).unwrap();
+        let live = text.split("#[cfg(test)]").next().unwrap_or("");
+        for (n, line) in live.lines().enumerate() {
+            for call in calls {
+                if let Some(at) = line.find(call) {
+                    let rest = &line[at + call.len()..];
+                    if rest.starts_with(|c: char| c.is_ascii_alphabetic()) {
+                        found.push(format!("{rel}:{}: {}", n + 1, line.trim()));
+                    }
+                }
+            }
+        }
+    }
+    assert!(found.is_empty(), "literal UI text:\n{}", found.join("\n"));
+}
