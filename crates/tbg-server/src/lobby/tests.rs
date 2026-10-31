@@ -41,6 +41,8 @@ fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
             live: HashMap::new(),
             live_tx: watch::channel(Arc::default()).0,
             featured: None,
+            ranked: None,
+            ranked_seen: HashMap::new(),
         },
         self_rx,
     )

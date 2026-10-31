@@ -251,9 +251,8 @@ impl Finalizer {
                 entry.completion_seq
             );
         }
-        let _ = self
-            .metrics
-            .ranked_pending_files
-            .fetch_update(Relaxed, Relaxed, |n| Some(n.saturating_sub(1)));
+        // Only this task writes the gauge, so load-then-store cannot race.
+        let gauge = &self.metrics.ranked_pending_files;
+        gauge.store(gauge.load(Relaxed).saturating_sub(1), Relaxed);
     }
 }
