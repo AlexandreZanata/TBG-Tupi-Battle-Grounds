@@ -435,3 +435,27 @@ exceptions remain scoped to this chat. Defer native hover/focus/account/
 navigation scenarios and resize coverage to consolidation. No full suite,
 WASM build, web assets, game rules, remote Git or deployment change belongs
 to this appearance-only adjustment.
+
+### Lobby panel/header polish result
+
+- Installed source: `7b62e2f8d2b29a057c1ce53e8f8360a583e14766`.
+  Native `cargo build --locked -p tbg-client --bin tbg-client`, Linux
+  packaging with `--no-archive` and the generated installer passed using
+  the existing shared host lock/cache and `CARGO_BUILD_JOBS=2`. The command
+  waited for another front under the owner's exception for this chat;
+  compilation itself took 7.19 s, with no warnings or errors.
+- Affected-package formatting, `git diff --check`, desktop entry validation
+  and installed executable SHA-256/source-metadata comparison passed.
+- Inspected one installed lobby capture at 1920x972: modes have the same
+  metal panel geometry and dark palette as the surrounding UI; both lower
+  column gaps match; the written Tupi logo fits inside its header cell;
+  the continuous header has symmetric 2% side margins; no FPS/statistics
+  appear behind the logo. Capture: `.local/lobby-header-polish.webp`.
+- Capture used an isolated profile and localhost server override, so the
+  Live battles unavailable/loading copy is not evidence about production.
+  Only the expected virtual X11 XSETTINGS/physical-dimension warnings were
+  recorded. Actual account/hover/keyboard/navigation and resize scenarios
+  remain deferred as listed above; no tests or full suite were run.
+- Real preferences, running windows and unrelated policy edits were
+  preserved. No web source behavior/assets, remote Git, CI or VPS action
+  occurred. Reopen TBG to load this installation.
