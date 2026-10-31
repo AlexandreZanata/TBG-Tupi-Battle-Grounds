@@ -76,8 +76,7 @@ pub fn passengers(
     map: Res<UnitEntities>,
     mut mounts: ResMut<Mounts>,
     mut commands: Commands,
-    animators: Query<&Animator>,
-    mut transforms: Query<&mut Transform>,
+    mut figures: Query<(&mut Transform, &Animator)>,
     mut boarding: Query<(Entity, &mut Boarding)>,
 ) {
     let dt = time.delta_secs();
@@ -99,7 +98,7 @@ pub fn passengers(
         let (Some(&mount), Some(&entity)) = (map.0.get(&carrier), map.0.get(&u.id)) else {
             continue;
         };
-        let Ok(base) = transforms.get(mount).map(|t| t.translation) else {
+        let Ok(base) = figures.get(mount).map(|(t, _)| t.translation) else {
             continue;
         };
         let tier = view
@@ -109,12 +108,14 @@ pub fn passengers(
             .map_or(0, |c| c.tier);
         // The seat is the carrier's; the passenger's root sits one hip height below it.
         let seat = base + Vec3::Y * saddle_height(tier);
-        let hips = animators.get(entity).map_or(0.0, |a| hip_height(&a.plan));
+        let hips = figures
+            .get(entity)
+            .map_or(0.0, |(_, a)| hip_height(&a.plan));
         carried.push((u.id, entity, seat - Vec3::Y * hips));
     }
 
     for &(id, entity, saddle) in &carried {
-        let Ok(mut t) = transforms.get_mut(entity) else {
+        let Ok((mut t, _)) = figures.get_mut(entity) else {
             continue;
         };
         t.translation = match boarding.get(entity) {
@@ -148,7 +149,7 @@ pub fn passengers(
     }
 
     mounts.descents.retain_mut(|d| {
-        let Ok(mut t) = transforms.get_mut(d.entity) else {
+        let Ok((mut t, _)) = figures.get_mut(d.entity) else {
             return false;
         };
         d.age += dt;

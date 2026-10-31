@@ -65,6 +65,10 @@ pub struct Kit {
 /// A muzzle effect and the backblast point (weapon space), if any.
 pub type Flash = Option<(Muzzle, Option<Vec3>)>;
 
+/// A prop that exists only while a shot is loaded (the archer's nocked
+/// arrow): its node, and whether it shows at a clip time.
+pub type Loaded = (Node, fn(Clip, f32) -> bool);
+
 /// How a kit's attack reaches its target.
 pub enum Attack {
     /// A projectile leaves `muzzle` (a point in `from`'s space) on Release,
@@ -74,9 +78,7 @@ pub enum Attack {
         muzzle: fn(u8, u8) -> Vec3,
         shot: fn(u8, u8) -> ShotKind,
         flash: fn(u8, u8) -> Flash,
-        /// A prop that exists only while a shot is loaded (the archer's
-        /// nocked arrow): its node, and whether it shows at a clip time.
-        loaded: Option<(Node, fn(Clip, f32) -> bool)>,
+        loaded: Option<Loaded>,
     },
     /// The weapon lands on Strike; `tip` is its point in `from`'s space.
     Melee {

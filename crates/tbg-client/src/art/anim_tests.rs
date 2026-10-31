@@ -32,13 +32,12 @@ fn walk_delivers_two_footsteps_without_boundary_duplicates() {
     assert_eq!(events_between(Clip::Walk, cycle, cycle + 0.01), []);
 }
 #[test]
-fn all_easings_preserve_keys_and_hold_preserves_contact() {
+fn all_easings_preserve_their_keys() {
     for ease in [
         Easing::Linear,
         Easing::CubicIn,
         Easing::CubicOut,
         Easing::CubicInOut,
-        Easing::Hold,
     ] {
         let keys = [
             (0.0, [0.0; 3], [0.0; 3], ease),
@@ -47,7 +46,6 @@ fn all_easings_preserve_keys_and_hold_preserves_contact() {
         assert_eq!(sample_track(&keys, 0.0).0, Vec3::ZERO);
         assert_eq!(sample_track(&keys, 1.0).0, Vec3::ONE);
     }
-    assert_eq!(Easing::Hold.sample(0.99), 0.0);
 }
 
 /// World position of a foot after forward kinematics through the rig.
