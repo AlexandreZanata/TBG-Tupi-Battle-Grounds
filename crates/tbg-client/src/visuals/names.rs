@@ -154,6 +154,7 @@ mod tests {
             yaw: 0.0,
             tint: None,
             dying,
+            marked: false,
             dead_for: 0.0,
             last_x: 0.0,
             still: 0.0,

@@ -48,6 +48,7 @@ pub enum ShotKind {
     Puppet,
     Acid,
     Thought,
+    PlagueBolt,
 }
 
 #[derive(Clone, Copy)]
@@ -69,6 +70,7 @@ enum Body {
     Seed,
     Flask,
     Acid,
+    RitualBolt,
 }
 
 #[derive(Clone, Copy)]
@@ -256,6 +258,14 @@ fn look(kind: ShotKind) -> Look {
             0.0,
             Impact::Bolt,
         ),
+        PlagueBolt => (
+            Some((Body::RitualBolt, 1.0)),
+            0.03,
+            UNIT_FLIGHT,
+            Trail::Motes(Mote::Spore),
+            0.0,
+            Impact::Plague,
+        ),
         Thought => (
             Some((Body::Orb, 0.8)),
             0.04,
@@ -373,6 +383,7 @@ pub struct ShotMeshes {
     arrow: Handle<Mesh>,
     glob: Handle<Mesh>,
     acid: Handle<Mesh>,
+    ritual_bolt: Handle<Mesh>,
     fish: Handle<Mesh>,
     bomb: Handle<Mesh>,
     orb: Handle<Mesh>,
@@ -477,6 +488,11 @@ impl ShotMeshes {
                     Transform::from_xyz(0.0, 0.0, -0.26),
                 ),
             ]),
+            ritual_bolt: build(vec![
+                (Cyl(0.012, 0.28), DARK_LEATHER, along(0.0)),
+                (Cone(0.032, 0.09), BONE, along(0.18)),
+                (Ball(0.027), GLOW, Transform::from_xyz(0.0, 0.0, 0.10)),
+            ]),
             acid: build(vec![
                 (
                     Ball(0.07),
@@ -569,6 +585,7 @@ impl ShotMeshes {
             Body::Arrow => &self.arrow,
             Body::Glob => &self.glob,
             Body::Acid => &self.acid,
+            Body::RitualBolt => &self.ritual_bolt,
             Body::Fish => &self.fish,
             Body::Bomb => &self.bomb,
             Body::Orb => &self.orb,

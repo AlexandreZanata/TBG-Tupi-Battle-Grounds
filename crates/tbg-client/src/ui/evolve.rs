@@ -208,6 +208,7 @@ mod tests {
             shield: 0,
             reduction: 0,
             special: None,
+            effects: None,
         });
         let mut app = App::new();
         app.insert_resource(LatestView(Some(view)))

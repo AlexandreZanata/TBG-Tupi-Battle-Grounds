@@ -191,6 +191,11 @@ impl Scene<'_, '_, '_, '_, '_> {
     /// of the way to its position in `to`; return the seat and unit ids.
     fn place(&mut self, from: &MatchView, to: &MatchView, alpha: f32) -> (Seat, Vec<UnitId>) {
         let you = from.you;
+        let marked: std::collections::BTreeSet<_> = from
+            .units
+            .iter()
+            .filter_map(|u| u.effects.and_then(|e| e.mark).map(|m| m.target))
+            .collect();
         for u in &from.units {
             // A unit absent from the next view (it died) holds its position.
             let to_x = to.units.iter().find(|n| n.id == u.id).map_or(u.x, |n| n.x);
@@ -214,6 +219,7 @@ impl Scene<'_, '_, '_, '_, '_> {
             {
                 Some((mut v, mut t, mut anim)) => {
                     t.translation = pos;
+                    v.marked = marked.contains(&u.id);
                     anim.carried = u.is_carried();
                     anim.set_reduction(u.reduction);
                     anim.counter = u.ability_counter();

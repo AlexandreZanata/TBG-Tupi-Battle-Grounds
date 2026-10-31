@@ -1572,3 +1572,44 @@ with no airborne or stun effect. Timed cue presentation moves to its own cohesiv
 special_cues module as this family grows. Roster composition/base/form guards
 append the new kind and values with this decision. Existing protocol 23 carries
 its readiness/cast/cues; no state-layout migration or active balance change.
+
+## D-74 · Crowcaller's own mark and bounded public effects — 2026-10-31 (Proposed)
+
+R03 appends Crowcaller, keeping all prior indices and public pools. Its §13 base
+is 4 Energy, HP 520, damage 58, interval 34, range 4,800, movement 31. Readiness
+starts at a full 140 ticks, arms the next completed enemy-unit basic and is spent
+once on that hit. There is no independent special windup. Killing or warded hits
+spend readiness but place no new payload; canceled/healing/friendly/Stronghold
+actions do not spend it. On a living unwarded enemy the post-damage payload marks
+for 80, Slows 2,000 bp through ordinary control handling and applies a 3,000 bp
+ability cut. Only this caster's later basics gain its own 1,500 bp bonus. A changes
+cut to 4,000 then duration to 110; B adds 1,500 bp basic damage then replaces own
+mark bonus with 2,500. Values live in content; old target Slow/cut are not stripped
+by a later successful mark on a different target.
+
+Counter reading, also recorded Proposed in GAME-DESIGN §13: Ward blocks the entire
+new hostile payload, not damage. Oilpress's control immunity blocks Slow only.
+Brew clears the new weakening/cut slots and Crowcaller marks pointing at its target;
+it never clears Ravager's offensive prey record or old Augment/form cuts. Each
+active new harmful family counts once, like one existing affliction stack, for
+Brew eligibility. This does not change the inherited Brew target-ranking policy.
+That baseline's minimum-score ordering versus its most-afflicted comment is a
+separate known consolidation issue; no legacy ranking or balance number is changed
+here. Non-stacking venom's quota/cleanse implementation follows with R18.
+
+Protocol **24** appends optional bounded UnitView.effects with mark target/expiry,
+bleed/venom pulses, weakening/highest active cut, queued Slow, control/ward/self-
+reduction/shield expiries and summon lifetime. The same projection feeds both
+seats and spectators; no per-unit source list, Vec or new simulation field.
+Existing generic ability-resolution cues animate the marked shot's raven wing.
+Target ground-ring marking is reconstructed from public caster facts with one
+client ordered set; old rings keep their appearance when no new mark is present.
+The inspected unit has an optional effects row with readable values/times. Existing
+HTML bridge fields stay in place and append that row; empty rows stay hidden.
+
+The kit owns a plague beak/hood, torn coat/team lining, short ritual crossbow,
+relic pouch and articulated shoulder raven. A adds feathers/vials then beak/censer;
+B adds rigid bow arms/pale sleeves then a ruined sight. Its own bolt uses ordinary
+unit flight/release timing, not a tower projectile or poison ability. All nodes
+fit the fixed rig. Composition/base/forms/protocol contracts change with this
+same decision. Full local limits and deferred checks are in R03's delivery report.

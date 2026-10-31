@@ -47,6 +47,7 @@ pub enum Impact {
     Acid,
     Mind,
     Piston,
+    Plague,
 }
 
 /// What the attacker brings to an impact: splash radius (tiles, 0 = none)
@@ -246,6 +247,7 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
         }
         Impact::Cannon => cannon(commands, a, at, 1.0),
         Impact::GreatCannon => cannon(commands, a, at, 1.5),
+        Impact::Plague => motes(commands, a, at, &a.green, (4, 0.4), 0.18),
         Impact::Piston => {
             slam(commands, a, ground, area.splash.max(0.8), 6);
             spawn(

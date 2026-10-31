@@ -16,7 +16,8 @@ pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> O
         .find_map(|a| match a {
             Ability::FearPulse { period, .. }
             | Ability::LivingWall { period, .. }
-            | Ability::AreaCrush { period, .. } => Some(period.max(1)),
+            | Ability::AreaCrush { period, .. }
+            | Ability::CrowMark { period, .. } => Some(period.max(1)),
             _ => None,
         })
 }
@@ -34,6 +35,9 @@ pub(crate) fn view(rules: &Ruleset, u: &Unit) -> Option<SpecialView> {
 pub(crate) fn advance(state: &mut MatchState, i: usize, ev: &mut Vec<Event>) {
     let u = state.units[i];
     if u.hp <= 0 || u.is_summon() {
+        return;
+    }
+    if crate::crowcaller::parameters(state.rules(), &u).is_some() {
         return;
     }
     let Some(every) = period(state.rules(), u.kind, u.tier, u.branch) else {

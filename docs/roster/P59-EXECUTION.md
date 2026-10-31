@@ -71,7 +71,8 @@ Own library: `crates/tbg-client/src/art/kits/crowcaller/`.
 
 narrow plague-mask silhouette, torn coat, short ritual crossbow, one shoulder raven and relic pouch; charcoal, bone, tarnished bronze and muted plague green with team lining. A2 adds feather mantle and green vial panel, A3 a longer beak/censer. B2 adds rigid crossbow arms and pale sleeves, B3 a large ruined sight. Raven is a shoulder/back prop, not Unit.
 
-Status: pending. Evidence: `docs/media/p59/crowcaller/lineup.jpg`.
+Status: implemented; seven R03 scenarios passed in the 58-test combined block
+and actual desktop lineup observed. Evidence: `docs/media/p59/crowcaller/lineup.jpg`.
 
 ### R04 — Trigger
 

@@ -28,6 +28,7 @@ fn unit(id: u32, x: i32) -> UnitView {
         shield: 0,
         reduction: 0,
         special: None,
+        effects: None,
     }
 }
 

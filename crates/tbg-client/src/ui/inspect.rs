@@ -38,6 +38,7 @@ pub struct Report {
     pub on_hit: String,
     pub status: &'static str,
     pub synergy: String,
+    pub effects: String,
 }
 
 fn tiles(milli: i32) -> String {
@@ -111,6 +112,7 @@ pub fn report(v: &MatchView, id: UnitId, arcanas: &[ArcanaPreset; 2]) -> Option<
             }
             None => "-".into(),
         },
+        effects: super::effect_details::describe(v, u),
         status: match u.status {
             1 => "Slowed",
             2 => "Rooted",
@@ -147,6 +149,7 @@ impl Report {
             self.on_hit.clone(),
             self.status.to_string(),
             self.synergy.clone(),
+            self.effects.clone(),
         ]
         .join("|")
     }
@@ -221,6 +224,11 @@ fn fallback_panel(
         r.on_hit,
         r.status
     );
+    let text = if r.effects.is_empty() {
+        text
+    } else {
+        format!("{text}\n{}", r.effects)
+    };
     if let Ok(mut t) = texts.single_mut() {
         if t.0 != text {
             t.0 = text;
@@ -278,7 +286,7 @@ mod tests {
             "gone units close the panel"
         );
         let record = enemy.record();
-        assert_eq!(record.split('|').count(), 18, "{record}");
+        assert_eq!(record.split('|').count(), 19, "{record}");
         assert!(record.starts_with("Hexer|Hexer|Base form|Undead|Control|false|123|300|"));
     }
 

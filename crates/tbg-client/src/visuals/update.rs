@@ -62,6 +62,7 @@ pub fn update_unit_visual(
     let ring = match u.status {
         1 => &a.slowed,
         2 => &a.rooted,
+        _ if v.marked => &a.marked,
         _ => &a.team[usize::from(!v.own)],
     };
     commands

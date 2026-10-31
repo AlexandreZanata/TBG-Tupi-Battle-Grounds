@@ -767,6 +767,15 @@ outcomes. The targeted P59 pilot consolidation measured all three legacy seeds
 with identical winner/reason/tick before re-freezing their hashes (D-71).
 No expected outcome/tick changed to accommodate the layout.
 
+**Proposed counter policy (D-74):** Ward blocks a new hostile mark/Slow/ability-cut
+payload, while raw basic damage still resolves; Oilpress's control immunity blocks
+Slow, not the independent mark/cut. Brew clears new weakening and ability-cut slots
+and every Crowcaller mark on its target without clearing Ravager prey sequences or
+legacy Augment/form cuts. Each active new harmful family (mark, weakening, ability
+cut, bleed, venom) counts once for Brew eligibility, using the existing one-stack
+score unit. New one-slot DoTs still consume strip quota before ordinary poison.
+This extends only the new families; the existing Brew target-ranking policy stays.
+
 ### 13.1 Proposed base forms
 
 Cost in Energy (×600 in state); interval in ticks (20/s); range in

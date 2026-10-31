@@ -18,6 +18,7 @@ mod bulwark;
 mod cargo_crab;
 mod cargo_crate;
 pub mod common;
+mod crowcaller;
 mod demolisher;
 mod drumguard;
 mod farwatch;
@@ -168,6 +169,7 @@ static ACIDMAW: Kit = acidmaw::KIT;
 static WHISPERER: Kit = whisperer::KIT;
 static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
+static CROWCALLER: Kit = crowcaller::KIT;
 
 /// The passenger seat's height above a Cargo Crab's ground, in world units,
 /// at its tier: where a rider's hips sit (see `visuals::mount`).
@@ -211,6 +213,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Whisperer => Some(&WHISPERER),
         UnitKind::Bulwark => Some(&BULWARK),
         UnitKind::Demolisher => Some(&DEMOLISHER),
+        UnitKind::Crowcaller => Some(&CROWCALLER),
         #[allow(unreachable_patterns)]
         _ => None,
     }

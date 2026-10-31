@@ -435,6 +435,14 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
+    /// R03: readiness arms the next enemy-unit basic, never a separate cast.
+    CrowMark {
+        period: u16,
+        ticks: u16,
+        slow_bp: u16,
+        cut_bp: u16,
+        bonus_bp: u16,
+    },
     /// R02: one caster-centered damage pulse, without displacement.
     AreaCrush {
         period: u16,
@@ -582,6 +590,25 @@ const fn crush(period: u16, radius: i32, special_bp: u16) -> [Ability; 2] {
         Ability::None,
     ]
 }
+const fn crow(ticks: u16, cut_bp: u16, bonus_bp: u16) -> [Ability; 2] {
+    [
+        Ability::CrowMark {
+            period: 140,
+            ticks,
+            slow_bp: 2_000,
+            cut_bp,
+            bonus_bp,
+        },
+        Ability::None,
+    ]
+}
+const CROWCALLER_ABILITIES: [[Ability; 2]; 5] = [
+    crow(80, 3_000, 1_500),
+    crow(80, 4_000, 1_500),
+    crow(110, 4_000, 1_500),
+    crow(80, 3_000, 1_500),
+    crow(80, 3_000, 2_500),
+];
 const DEMOLISHER_ABILITIES: [[Ability; 2]; 5] = [
     crush(200, 2_500, 0),
     crush(200, 2_500, 2_000),
@@ -661,7 +688,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 33;
+pub const UNIT_KIND_COUNT: usize = 34;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -975,6 +1002,12 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         [1_250,80,32,1_000,28,0,0],None,DEMOLISHER_ABILITIES,[
         form("Reinforced Fists"),form("Reinforced Fists"),
         form("Shock System"),FormDef {on_hit:slow(1_500,40),..form("Shock System")},
+    ]),
+    // D-74 (Proposed): R03, inactive until the W11 owner switch.
+    unit(UnitKind::Crowcaller,"Crowcaller",Undead,Ranged,2_400,
+        [520,58,34,4_800,31,0,0],None,CROWCALLER_ABILITIES,[
+        form("Plague Crow"),form("Plague Crow"),
+        FormDef {dmg_bp:1_500,..form("Ruin Bow")},form("Ruin Bow"),
     ]),
 ];
 

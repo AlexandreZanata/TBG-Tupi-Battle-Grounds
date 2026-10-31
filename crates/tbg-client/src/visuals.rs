@@ -67,6 +67,8 @@ pub struct UnitVisual {
     /// Tint material, seconds left, already applied to the joints.
     tint: Option<(Handle<StandardMaterial>, f32, bool)>,
     pub dying: bool,
+    /// Derived from public caster marks; never feeds a gameplay decision.
+    pub marked: bool,
     dead_for: f32,
     last_x: f32,
     /// Seconds without moving (walk/idle hysteresis).
@@ -230,6 +232,7 @@ pub fn spawn_unit_visual(
         yaw: yaw(look.own),
         tint: None,
         dying: false,
+        marked: false,
         dead_for: 0.0,
         last_x: pos.x,
         still: 1.0,

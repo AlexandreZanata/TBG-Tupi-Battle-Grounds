@@ -76,6 +76,7 @@ fn resolved(
         anim.resolve_special();
     }
     let (impact, target, area) = match kind {
+        UnitKind::Crowcaller => (Impact::Plague, primary, Area::default()),
         UnitKind::Whisperer => (Impact::Mind, primary, Area::default()),
         UnitKind::Bulwark => (Impact::Sparks, Some(unit), Area::default()),
         UnitKind::Demolisher => (Impact::Piston, Some(unit), area(map, visuals, unit)),

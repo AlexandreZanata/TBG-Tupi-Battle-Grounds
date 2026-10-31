@@ -184,3 +184,8 @@ and subjective look/fun acceptance remain deferred; no production deployment.
 R02/D-73: Demolisher's own hydraulic five-form kit, Area Crush and real desktop
 lineup delivered (six of 21); same R01–R03 targeted evidence, no duplicated suite.
 Report: docs/roster/p59/R02-demolisher.md. Other deferred acceptance stays open.
+
+R03/D-74: Crowcaller's own five-form kit, caster-owned Mark, public effect facts,
+inspection row and actual desktop screenshot delivered (seven of 21). Seven R03
+cases passed within the same 58 distinct directed scenarios. Protocol is now24;
+see docs/roster/p59/R03-crowcaller.md for pending acceptance and known Brew ranking.

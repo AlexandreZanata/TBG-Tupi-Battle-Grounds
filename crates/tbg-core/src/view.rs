@@ -4,7 +4,9 @@
 
 pub mod public;
 pub use public::{PublicRound, PublicView};
+mod effects;
 mod visibility;
+pub use effects::{DotView, EffectsView, MarkView, TimedBp};
 
 use serde::{Deserialize, Serialize};
 
@@ -39,6 +41,8 @@ pub struct UnitView {
     pub reduction: u16,
     /// Timed-special readiness and locked windup, sufficient after reconnect.
     pub special: Option<SpecialView>,
+    /// Bounded public afflictions and durations, absent when empty.
+    pub effects: Option<EffectsView>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -223,5 +227,6 @@ fn unit_view(u: &crate::state::Unit, tick: Tick, rules: &crate::Ruleset) -> Unit
         shield: crate::roster_slots::shield_now(&u.fx, tick),
         reduction: crate::roster_slots::self_dr_now(&u.fx, tick) as u16,
         special: crate::specials::view(rules, u),
+        effects: effects::project(rules, u, tick),
     }
 }
