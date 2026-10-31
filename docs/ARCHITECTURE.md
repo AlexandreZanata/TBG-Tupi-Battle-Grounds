@@ -807,3 +807,49 @@ a measured all-at-once alternative. Result controls and network polling stay
 active. Missing/invalid cosmetics fall back to the regular result, and exit
 clears the scene before another match. Focused cast/protocol/reconnect/
 rematch/lifecycle checks and desktop visual review gate implementation.
+
+## 24. Windows native distribution and Wine acceptance (P68, planned)
+
+Section numbers 21–23 are reserved by the independent P65–P67 plans, not
+implemented dependencies on this consolidated Linux base. [P68](phases/P68-windows-native-release.md)
+and D-96 extend the existing native client, starting at the requested
+`codex/consolidated-linux-release` commit `55510c5`.
+
+- **Shared product:** Linux and Windows use the same Bevy desktop shell,
+  native HUD/loading/ranking, art inventory, training and result scene.
+  Review the [hashed platform-gate audit](planning/P68-PLATFORM-GATES.csv)
+  before enabling Windows paths. Keep real OS services in `platform/` and
+  preserve browser alternatives. No new client engine, combat authority or
+  protocol is introduced by packaging.
+- **Build:** Windows x86_64 MSVC on a pinned Windows CI image is the primary
+  release path. Pin/record Rust, SDK, installer tools and actions; use the
+  lockfile, two Cargo jobs and target-specific dependencies. Linux cross-
+  compilation is optional, subject to tooling/license review. Define CRT
+  deployment from imports and clean-user tests, not assumptions.
+- **Artifacts:** reuse the native packager for a complete portable ZIP;
+  add a per-user Inno Setup definition under `deploy/native/windows/`.
+  Both consume one clean package inventory, with assets beside the binary,
+  immutable source/protocol identity, required runtime notices and digests.
+  Development-only repository asset fallback must not conceal incomplete
+  release bundles. Windows user-data location stays stable across upgrades.
+- **Install lifecycle:** install without elevation in the agreed runtime
+  configuration; use stable product identity and user shortcuts, preserve
+  account/preferences on upgrade/uninstall, handle locked files and failures
+  safely, and never kill an online match or force a reboot. This is not a
+  substitute for P66's separately planned automatic updater.
+- **Trust and promotion:** signed public artifacts require protected
+  credentials, final-byte signature/timestamp verification and owner gates.
+  Unsigned candidates remain explicitly internal. Sign before deriving
+  embedded executable hashes; compute final archive/installer digests last.
+  Candidate jobs cannot silently skip missing Windows assets just because a
+  release already exists. Preserve existing Linux artifacts and immutable tags.
+- **Acceptance:** use downloaded final packages outside the checkout.
+  Windows CI checks identity/imports and package contracts; isolated Wine on
+  the Linux GPU checks compatibility and Linux reference parity; actual
+  Windows GPU checks consumer OS integration and drivers. Keep evidence and
+  failures separate. A build or Wine launch alone is not release acceptance.
+
+No new server service, deployment topology, updater backend, database or
+match rule is needed. Compatibility uses the existing authoritative wire
+contract; test against a compatible backend without restarting production.
+See the [acceptance matrix and official references](planning/P68-WINDOWS-ACCEPTANCE.md).

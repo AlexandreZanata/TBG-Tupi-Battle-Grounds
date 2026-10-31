@@ -2435,3 +2435,44 @@ and P59), D-80–D-81 (P59 and P62), D-87–D-89 (P59 and P60/P61), and D-82
 phase/section title; do not treat a numeric collision as supersession.
 New integration behavior is documented in GAME-DESIGN's consolidated roster
 activation section and `phases/CONSOLIDATED-LINUX-RELEASE.md`.
+
+## D-96 · Windows native packages with separate Wine and Windows evidence — 2026-10-31 (Proposed, P68)
+
+**Decision.** Extend the existing Bevy desktop client from the owner's
+requested `codex/consolidated-linux-release` base, frozen at
+`55510c5363e3f1e555fa5133208a5faf20c5825b`. First share the Linux-only native
+UI and generated art paths where appropriate, keeping browser and true OS
+services distinct. Build the primary Windows release on Windows MSVC and
+reuse the native packager for a portable ZIP plus a safe per-user installer.
+No new engine, server authority, protocol feature or gameplay value is needed.
+
+**Distribution.** Use pinned inputs and a reviewed CRT/import policy,
+complete assets, PE metadata/icons, user-local mutable data, safe upgrade/
+uninstall and final-artifact hashes. Signed public promotion is an owner-
+gated step; unsigned candidates may be tested only with truthful labeling.
+Do not replace old tags or claim a missing Windows artifact succeeded just
+because the Linux release exists. Preserve Linux release jobs/installation.
+
+**Why.** The existing Windows package option does not establish parity:
+many native interface paths and the art manifest are Linux-gated, packaging
+executes its input on the host, and the only release job is Linux. A Windows
+build without package/runtime checks could present a different interface,
+depend on the source checkout or miss runtime files on a clean computer.
+
+**Evidence boundaries.** Windows CI establishes build/package facts.
+Wine tests the exact Windows artifact on Linux in an owned isolated prefix;
+it is not a sandbox or proof of actual Windows drivers/shell behavior.
+Actual Windows GPU acceptance and owner visual review remain required for
+a public supported Windows release. Never change gameplay, disable TLS or
+silently strip graphics features to pass a Wine test.
+
+**Status and reservations.** Planning only; no compilation, Wine install,
+installer or runtime verification. P65–P67's independent plans reserve
+D-91–D-95 and architecture §§21–23; this base does not contain those plans.
+Historical overlapping identifiers remain untouched. The detailed scope,
+owner choices and validation levels live in [P68](phases/P68-windows-native-release.md).
+
+**Reopen when** clean-machine evidence rejects the CRT/installer choice,
+Windows support requirements change, Wine cannot provide the required GPU
+path, measured packaging/CI cost exceeds the indie project's needs, or the
+owner activates a future updater that changes artifact/install identity.

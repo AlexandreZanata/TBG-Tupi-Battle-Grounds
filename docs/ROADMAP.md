@@ -400,3 +400,25 @@ database mutation or deployment is part of this planning delivery. Use the
 2026-10-31 minimum-validation policy recorded in the program: documentation
 checks now; exact targeted tests once at implementation consolidation;
 heavy/full-suite checks only on a separate explicit owner request.
+
+## Windows native release (owner planning request, 2026-10-31)
+
+| Phase | Spec | Deliverable | Status | Review |
+|---|---|---|---|---|
+| P68 | [P68-windows-native-release.md](phases/P68-windows-native-release.md) | Shared desktop parity, Windows MSVC build, portable ZIP and per-user installer, immutable artifacts, isolated Wine acceptance and actual Windows GPU validation | **Planning only** on `codex/p68-windows-native-release-plan`, based on `codex/consolidated-linux-release` at `55510c5`; no executable or Wine installation performed | Support/CRT/release identity, signing, actual Windows access, owner visual sign-off |
+
+Read the [acceptance plan](planning/P68-WINDOWS-ACCEPTANCE.md),
+[hashed OS-gate inventory](planning/P68-PLATFORM-GATES.csv) and
+[execution prompt](planning/P68-EXECUTION-PROMPT.md). The source audit records
+234 conditions in 37 client/build-script files, including the Linux-only
+native interface and art-generation paths. Review their context rather
+than replacing every platform guard mechanically.
+
+P65–P67 are already reserved on their independent planning branches. Their
+absence from this consolidated Linux source base does not renumber them or
+make community, updater or commerce implementation a prerequisite for P68.
+Architecture §24 and D-96 leave those planning reservations intact.
+
+The installed native Linux release is preserved. Windows CI, Wine on Linux
+and actual Windows GPU observations remain separate acceptance records.
+Documentation validation now is not a build, installation or release claim.
