@@ -1,5 +1,9 @@
 # Commerce foundation — module boundary and documentation map
 
+Current implementation status: [offline recovery and opponent-mute execution](OFFLINE-EXECUTION.md).
+The owner deferred fiscal work and prioritized these two contracts. Runtime
+integration remains absent; payment/fiscal documents below are future gates.
+
 > **P67, planning/documentary foundation only — 2026-10-31.** These are real
 > versioned folders and contracts, not a running payment service. No Asaas
 > SDK/client, API credential, webhook route, mail transport, invoice issuer,

@@ -1,5 +1,11 @@
 # Opponent emote and cosmetic controls
 
+The current baseline has no emote/skin consumer. The executable synthetic
+contract is `crates/tbg-server/tests/p67_presentation.rs`: it validates local
+preference documents, optional-only filtering and immutable canonical view
+identity. It does not expose a functional UI switch or persist real player
+preferences. See the [execution record](../OFFLINE-EXECUTION.md).
+
 > Proposed presentation contract; no emote protocol or paid skin is added by
 > this planning branch. Existing global audio mute is not an opponent-emote mute.
 

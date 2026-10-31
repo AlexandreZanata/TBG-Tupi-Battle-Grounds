@@ -84,3 +84,23 @@ their own integration tests after those implementations are integrated.
 
 Minimum front checks: `cargo fmt -p tbg-server` and `git diff --check` passed.
 Focused tests are queued once for Step 5; no tests were run per code step.
+
+## Steps 2–3: deferred by scope steering
+
+Money/order/refund/inbox/outbox/source-grant state machines, pure Asaas mapping
+and fiscal capture are not implemented in this increment. Their contracts are
+preserved, not presented as tested code. No provider documentation was used
+to build an adapter and no API documentation Try It was invoked.
+
+## Step 4: optional presentation contract
+
+`tests/p67_presentation.rs` exercises the strict version-1 preference document,
+synthetic emote text/audio/animation classification and reviewed-baseline
+selection after authoritative identity. Both seats and canonical valid forms,
+summon/carrier metadata and Stronghold kinds remain readable and immutable.
+Without an approved baseline, the fixture retains existing readable equipment.
+
+These are isolated presentation fixtures. No actual renderer, audio path,
+settings store or UI consumer exists for opponent emotes/skins on this base.
+Persistence round-trip is a JSON contract test only. There are no new product
+strings, no translation fallback and no enabled but ineffective toggle.
