@@ -89,6 +89,41 @@ pub fn load_token() -> Option<[u8; 16]> {
     None
 }
 
+/// P47: the match a `?watch=<16 hex>` link names; `None` for anything else.
+pub fn watch_param() -> Option<u64> {
+    parse_watch_id(&url_param("watch")?)
+}
+
+fn parse_watch_id(hex: &str) -> Option<u64> {
+    (hex.len() == 16).then(|| u64::from_str_radix(hex, 16).ok())?
+}
+
+/// P47: the watch a reload of this tab resumes (`sessionStorage`).
+pub fn load_watch() -> Option<u64> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        parse_watch_id(&token_storage()?.get_item("tbg_watch").ok()??)
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    None
+}
+
+pub fn save_watch(id: u64) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(s) = token_storage() {
+        let _ = s.set_item("tbg_watch", &format!("{id:016x}"));
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = id;
+}
+
+pub fn clear_watch() {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(s) = token_storage() {
+        let _ = s.remove_item("tbg_watch");
+    }
+}
+
 pub fn save_token(token: &[u8; 16]) {
     #[cfg(target_arch = "wasm32")]
     if let Some(s) = token_storage() {

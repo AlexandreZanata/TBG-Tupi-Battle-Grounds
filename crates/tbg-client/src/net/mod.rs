@@ -10,7 +10,7 @@ use std::collections::VecDeque;
 
 pub(crate) use socket::GIVE_UP;
 use tbg_core::protocol::{
-    AccountError, ClientMsg, InviteToken, RoomCode, ServerMsg, Token, PROTOCOL_VERSION,
+    AccountError, ClientMsg, InviteToken, LiveId, RoomCode, ServerMsg, Token, PROTOCOL_VERSION,
 };
 
 use crate::config;
@@ -32,6 +32,9 @@ pub enum Mode {
     /// P9: listen-only link opened on page load; resumes a live match if
     /// the server still holds the session, asks for nothing otherwise.
     Probe,
+    /// P47: watch a listed live match (`?watch=`), listen-only. Asked again
+    /// after every reconnect, since a reload never resumes a watch.
+    Watch(LiveId),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -60,6 +63,8 @@ pub struct NetLink {
     login_deadline: Option<f64>,
     outq: VecDeque<(f64, ClientMsg)>,
     inq: VecDeque<(f64, ServerMsg)>,
+    /// P47: a `SpectateStart` is active; this link holds no seat.
+    watching: bool,
 }
 
 impl NetLink {
@@ -84,6 +89,7 @@ impl NetLink {
             login_deadline: None,
             outq: VecDeque::new(),
             inq: VecDeque::new(),
+            watching: false,
         };
         link.connect(now);
         link
@@ -112,6 +118,7 @@ impl NetLink {
             return false;
         }
         self.mode = mode;
+        self.watching = false;
         if !matches!(mode, Mode::Probe) {
             if self.login_in_flight {
                 self.held_request = true;
@@ -123,6 +130,10 @@ impl NetLink {
     }
 
     pub fn send(&mut self, msg: ClientMsg, now: f64) {
+        // P47 (BR-LV02): a spectator has no seat, so no intention leaves the client.
+        if self.watching && matches!(msg, ClientMsg::Intent { .. } | ClientMsg::Surrender) {
+            return;
+        }
         if let ClientMsg::Intent { seq, .. } = &msg {
             self.ack.sent(*seq, now);
         }
@@ -130,6 +141,10 @@ impl NetLink {
     }
 
     fn send_request(&mut self, now: f64) {
+        if let Mode::Watch(id) = self.mode {
+            self.send(ClientMsg::Spectate { id }, now);
+            return;
+        }
         let req = match self.mode {
             Mode::Quick => ClientMsg::QuickMatch,
             Mode::Ranked => ClientMsg::RankedMatch,
@@ -137,7 +152,7 @@ impl NetLink {
             Mode::Join(code) => ClientMsg::JoinRoom { code },
             Mode::CreateChallenge => ClientMsg::CreateChallenge,
             Mode::JoinChallenge(token) => ClientMsg::JoinChallenge { token },
-            Mode::Probe => return,
+            Mode::Probe | Mode::Watch(_) => return,
         };
         // D-40: the editor's latest preset, validated by the server while
         // idle and frozen by the request right behind it (same order).

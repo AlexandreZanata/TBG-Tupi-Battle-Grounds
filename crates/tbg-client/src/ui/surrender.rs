@@ -18,7 +18,7 @@ pub struct Surrender {
 }
 
 #[derive(Component)]
-struct SurrenderButton;
+pub(super) struct SurrenderButton;
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<Surrender>()
