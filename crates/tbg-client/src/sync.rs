@@ -14,7 +14,7 @@ use crate::vfx::VfxAssets;
 use crate::visuals::{self, UnitLook, VisualAssets};
 
 mod actions;
-mod crowd_ecs;
+pub(crate) mod crowd_ecs;
 mod events;
 mod messages;
 mod spectate;
@@ -102,8 +102,8 @@ pub fn plugin(app: &mut App) {
             Update,
             crowd_ecs::update
                 .after(sync_units)
-                .before(visuals::aim::update_aim)
-                .run_if(in_state(GameState::InMatch)),
+                .after(crate::stress::walk)
+                .before(visuals::aim::update_aim),
         )
         .add_systems(OnExit(GameState::InMatch), clear_units);
 }

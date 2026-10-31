@@ -6,12 +6,27 @@ use tbg_core::{Archetype, Seat, UnitView};
 use crate::{config, crowd, visuals::UnitVisual};
 
 #[derive(Component)]
-pub(super) struct LaneAnchor {
+pub(crate) struct LaneAnchor {
     pub pos: Vec3,
     pub(super) body: crowd::Body,
 }
 
 impl LaneAnchor {
+    pub fn for_stress(look: &crate::visuals::UnitLook, pos: Vec3) -> Self {
+        Self {
+            pos: pos.with_z(0.0),
+            body: crowd::Body {
+                id: look.id,
+                anchor_x: pos.x,
+                radius: radius(
+                    tbg_core::content::def(look.kind).archetype,
+                    look.kind.is_summon(),
+                ),
+                facing: if look.own { 1.0 } else { -1.0 },
+                ghost: false,
+            },
+        }
+    }
     pub fn from_view(u: &UnitView, you: Seat) -> Self {
         Self {
             pos: Vec3::ZERO,
@@ -20,8 +35,7 @@ impl LaneAnchor {
                 anchor_x: 0.0,
                 radius: radius(tbg_core::content::def(u.kind).archetype, u.is_summon()),
                 facing: if u.seat == you { 1.0 } else { -1.0 },
-                // The current view does not pack carrier state; see the phase report.
-                ghost: false,
+                ghost: u.fx & (1 << 14) != 0,
             },
         }
     }
@@ -43,7 +57,7 @@ fn is_ghost(visual: &UnitVisual, anchor: &LaneAnchor) -> bool {
 }
 
 #[derive(Component, Default)]
-pub(super) struct CrowdState(crowd::Offset);
+pub(crate) struct CrowdState(crowd::Offset);
 
 #[derive(Default)]
 pub(super) struct Scratch {
