@@ -142,3 +142,21 @@ passed before the owner-requested build/install. One installed desktop
 capture follows. Auth/presence interaction regression selection remains
 for consolidation; no full suite, WASM/browser check or multiplayer run is
 authorized or claimed for this layout-only adjustment.
+
+### Unified header result
+
+- Installed application source: `90dfb1893fa307c77cc7a7bfa105422aa7225628`.
+  The native build and installation passed under the shared nonblocking
+  validation lock with `CARGO_BUILD_JOBS=2`; compilation took 12.14 s.
+- Affected formatting, `git diff --check`, desktop entry validation and
+  installed executable SHA-256 verification passed.
+- Inspected the installed app at 1920x972 using an isolated profile and
+  virtual X11 display: account, navigation and presence occupy one strip
+  with full-height cells and dividers; the sound tag is absent. Existing
+  Settings audio controls remain in source. Capture:
+  `.local/header-blocks-1920.webp`. Only the expected virtual display
+  XSETTINGS/physical-dimension warnings were recorded.
+- The owner's running windows and real account/preferences were preserved.
+  Reopen TBG to load this installation. No web, VPS, remote Git or CI action
+  was performed. Auth/presence clicks and keyboard regression checks remain
+  deferred to consolidation; no full suite or WASM check was run.
