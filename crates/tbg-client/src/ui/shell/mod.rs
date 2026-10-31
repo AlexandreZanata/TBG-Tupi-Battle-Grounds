@@ -244,7 +244,7 @@ fn navigation(
             if compact {
                 row.spawn(kit::heading("TBG", 22.));
             } else {
-                row.spawn(kit::image(assets, "lobby/logo-v2.webp", 210., 70.));
+                row.spawn(kit::image(assets, "branding/tbg-emblem.webp", 70., 70.));
             }
             row.spawn(Node {
                 flex_grow: 1.,

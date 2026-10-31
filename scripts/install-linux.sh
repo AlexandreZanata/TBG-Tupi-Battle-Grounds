@@ -41,7 +41,7 @@ escaped = str(install / "tbg-client").replace("\\", "\\\\").replace('"', '\\"').
 (applications / "tupi-battle-grounds.desktop").write_text(
     "[Desktop Entry]\nType=Application\nName=Tupi Battle Grounds\n"
     "Comment=Real-time 1v1 strategy with browser and native cross-play\n"
-    f'Exec="{escaped}"\nIcon={install}/assets/lobby/crest-v2.svg\n'
+    f'Exec="{escaped}"\nIcon={install}/assets/branding/tbg-icon-512.png\n'
     "Terminal=false\nCategories=Game;StrategyGame;\nStartupWMClass=tupi-battle-grounds\n")
 print(f"Installed {version} at {install}")
 print(f"Launcher: {launcher}")
