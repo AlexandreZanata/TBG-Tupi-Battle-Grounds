@@ -50,7 +50,10 @@ impl Match {
             tbg_core::PlayerIntention::Evolve { .. } => stats.evolutions += 1,
             tbg_core::PlayerIntention::ChooseAugment { .. }
             | tbg_core::PlayerIntention::Forgo { .. }
-            | tbg_core::PlayerIntention::Fortify { .. } => {}
+            | tbg_core::PlayerIntention::Fortify { .. }
+            | tbg_core::PlayerIntention::Reserve { .. }
+            | tbg_core::PlayerIntention::Release { .. }
+            | tbg_core::PlayerIntention::Reroll { .. } => {}
         }
     }
 
