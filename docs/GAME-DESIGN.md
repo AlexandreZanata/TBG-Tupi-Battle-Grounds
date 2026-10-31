@@ -1406,3 +1406,12 @@ The lab off-pool instrumentation regression uses the unchanged ten-kind
 reference ruleset, so it continues verifying that spawning an off-pool kind
 never activates that kind. It no longer assumes the newly activated CANON
 pool excludes Bonehorn. Its exact damage/HP assertions are retained.
+
+### Canonical trace identity after the 46-champion activation
+
+The owner-authorized consolidated CANON pool contains 46 conventional kinds.
+The C2 per-tick trace fixtures now identify that already active revision,
+matching the final hashes in contract_determinism. The five documented seeds
+are collected by examples/trace_canon.rs with the authoritative headless
+cadence; no additional balance value, gameplay rule or time limit changes
+in this trace-identity correction. Previous traces describe the earlier pool.
