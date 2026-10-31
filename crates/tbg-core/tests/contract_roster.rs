@@ -163,35 +163,9 @@ fn roster_composition() {
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
     assert_eq!(UNITS.len(), 51);
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
-    assert_eq!(
-        &kinds[ALL_KINDS.len()..],
-        &[
-            UnitKind::Bonehorn,
-            UnitKind::Ravager,
-            UnitKind::Acidmaw,
-            UnitKind::Whisperer,
-            UnitKind::Bulwark,
-            UnitKind::Demolisher,
-            UnitKind::Crowcaller,
-            UnitKind::Trigger,
-            UnitKind::RattleTick,
-            UnitKind::Capybara,
-            UnitKind::Trident,
-            UnitKind::SolarSentinel,
-            UnitKind::LuminousOracle,
-            UnitKind::CelestialArcher,
-            UnitKind::Justiciar,
-            UnitKind::Jawguard,
-            UnitKind::Mantis,
-            UnitKind::Hornet,
-            UnitKind::Weaver,
-            UnitKind::PyreWarden,
-            UnitKind::Drillnest,
-            UnitKind::Microdrill,
-            UnitKind::Duodrill,
-            UnitKind::Megadrill,
-        ][..]
-    );
+    // Owner activation: all 51 registered kinds, 46 conventional Shop entries.
+    assert_eq!(tbg_core::FULL_POOL.len(), 46);
+    assert!(tbg_core::FULL_POOL.iter().all(|k| k.is_conventional()));
     assert_eq!(UNIT_KINDS.len(), 10);
     assert!(UNIT_KINDS.iter().all(|k| k.is_conventional()));
     for (f, n) in [
@@ -203,7 +177,7 @@ fn roster_composition() {
         // §11 composition covers the frozen legacy roster; §13 prototypes are separate.
         let sold = UNITS
             .iter()
-            .take(ALL_KINDS.len())
+            .take(27)
             .filter(|u| u.faction == f && u.kind.is_conventional());
         assert_eq!(sold.count(), n, "{f:?}");
     }
@@ -543,7 +517,7 @@ fn proposed_p59_bases_match_section_13() {
 }
 
 #[test]
-fn proposed_drills_match_section_13_4_and_stay_outside_all_pools() {
+fn proposed_drills_match_section_13_4_and_stay_outside_shop_pools() {
     // D-88/§13.4: ranks are summons; producer profiles never add Shop entries.
     use UnitKind::*;
     for (kind, hp, damage, interval, speed) in [
@@ -557,7 +531,8 @@ fn proposed_drills_match_section_13_4_and_stay_outside_all_pools() {
             (hp, damage, interval, speed, 600)
         );
         assert!(kind.is_summon());
-        assert!(!tbg_core::types::ALL_KINDS.contains(&kind));
+        assert!(tbg_core::types::ALL_KINDS.contains(&kind));
+        assert!(!tbg_core::FULL_POOL.contains(&kind));
         assert!(!tbg_core::types::UNIT_KINDS.contains(&kind));
     }
 }

@@ -146,18 +146,25 @@ fn advance_cast(
     }
     state.units[i].fx.special = None;
     if let Some(target) = cast.target {
-        // The primary stays locked: no range recheck, replacement or extra hit.
-        crate::weaver::resolve(state, u, target, ev);
-        crate::whisperer::resolve(state, u, target, ev);
-        crate::bulwark::resolve(state, u);
-        crate::demolisher::resolve(state, u, ev);
-        crate::jawguard::resolve(state, u);
-        crate::justiciar::resolve(state, u, target, ev);
-        crate::luminous_oracle::resolve(state, u, target);
-        crate::solar_sentinel::resolve(state, u, target);
-        crate::trident::resolve(state, u, target, ev);
-        crate::capybara::resolve(state, u, ev);
-        crate::rattle_tick::resolve(state, u, target, ev);
+        crate::training_hooks::scoped(
+            state,
+            crate::training_hooks::Source::Unit(u.id),
+            crate::training_hooks::Effect::Direct,
+            |state| {
+                // The primary stays locked: no range recheck, replacement or extra hit.
+                crate::weaver::resolve(state, u, target, ev);
+                crate::whisperer::resolve(state, u, target, ev);
+                crate::bulwark::resolve(state, u);
+                crate::demolisher::resolve(state, u, ev);
+                crate::jawguard::resolve(state, u);
+                crate::justiciar::resolve(state, u, target, ev);
+                crate::luminous_oracle::resolve(state, u, target);
+                crate::solar_sentinel::resolve(state, u, target);
+                crate::trident::resolve(state, u, target, ev);
+                crate::capybara::resolve(state, u, ev);
+                crate::rattle_tick::resolve(state, u, target, ev);
+            },
+        );
     }
     let center = center(state, u, cast.target);
     ev.push(Event::AbilityResolved {

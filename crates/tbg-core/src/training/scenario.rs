@@ -147,7 +147,7 @@ fn position(side: Side, index: usize, x: Option<i32>) -> Result<(), ScenarioErro
 
 /// Deterministic default spacing (**Proposed**): allies fan out behind
 /// x = 6,000, opponents behind x = 10,000, dummies from x = 9,000.
-pub(crate) fn default_x(side: Side, dummy: bool, index: usize) -> i32 {
+pub fn default_x(side: Side, dummy: bool, index: usize) -> i32 {
     let i = index as i32;
     match (side, dummy) {
         (Side::Allies, _) => 6_000 - 350 * i,

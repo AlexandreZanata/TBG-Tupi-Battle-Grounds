@@ -73,6 +73,8 @@ fn spawn(s: &mut MatchState, source: &Unit, kind: UnitKind, ev: &mut Vec<Event>)
         second_wind_used: 0,
         fx: UnitFx::default(),
     };
+    s.participation
+        .born(source.seat, kind, source.tier, source.branch, true);
     ev.push(Event::Spawn {
         unit: id,
         seat: u.seat,
@@ -113,6 +115,8 @@ pub(crate) fn fuse(s: &mut MatchState, ev: &mut Vec<Event>) {
         let Some(kind) = next(a.kind) else {
             continue;
         };
+        crate::training_hooks::vanished(s, &a);
+        crate::training_hooks::vanished(s, &b);
         used.extend([a.id, b.id]);
         let mut out = spawn(s, &a, kind, ev);
         out.x = ((i64::from(a.x) + i64::from(b.x)).div_euclid(2)) as i32;

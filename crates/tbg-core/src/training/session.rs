@@ -133,6 +133,10 @@ impl TrainingSession {
         self.active_ticks
     }
 
+    pub fn dummy_ids(&self) -> &[UnitId] {
+        &self.runtime().dummies
+    }
+
     pub fn is_dummy(&self, id: UnitId) -> bool {
         self.runtime().dummies.contains(&id)
     }
@@ -207,6 +211,8 @@ impl TrainingSession {
         let mut ev = std::mem::take(&mut self.state.pending);
         self.state.clock += 1;
         self.state.unit_pass(&mut ev);
+        crate::drillnest::fuse(&mut self.state, &mut ev);
+        crate::drillnest::produce(&mut self.state, &mut ev);
         crate::combat::remove_dead(&mut self.state, &mut ev);
         self.state.tick += 1;
         self.active_ticks += 1;

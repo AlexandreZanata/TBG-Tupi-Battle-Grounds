@@ -123,45 +123,44 @@ pub enum UnitKind {
     /// Smuggler cargo crate (BR-U08); never in the Shop.
     Crate,
     // D-66 (P59 pilot, Proposed): the Monsters base kinds, appended so older kinds
-    // keep their indices. They are in no Shop pool, ALL_KINDS or FULL_POOL until
-    // their rules wave, so no match can buy or meet them.
+    // keep their indices. Their authored kits and rules are active in the consolidated Shop roster.
     Bonehorn,
     Ravager,
     Acidmaw,
     Whisperer,
-    /// D-72: R01, staged outside public pools.
+    /// D-72: R01, active in the consolidated roster.
     Bulwark,
-    /// D-73: R02, staged outside public pools.
+    /// D-73: R02, active in the consolidated roster.
     Demolisher,
-    /// D-74: R03, staged outside public pools.
+    /// D-74: R03, active in the consolidated roster.
     Crowcaller,
-    /// D-75: R04, staged outside public pools.
+    /// D-75: R04, active in the consolidated roster.
     Trigger,
-    /// D-76: R05, staged outside public pools.
+    /// D-76: R05, active in the consolidated roster.
     RattleTick,
-    /// D-77: R06, staged outside public pools.
+    /// D-77: R06, active in the consolidated roster.
     Capybara,
-    /// D-78: R07, staged outside public pools.
+    /// D-78: R07, active in the consolidated roster.
     Trident,
-    /// D-79: R12, staged outside public pools.
+    /// D-79: R12, active in the consolidated roster.
     SolarSentinel,
-    /// D-80: R13, staged outside public pools.
+    /// D-80: R13, active in the consolidated roster.
     LuminousOracle,
-    /// D-81: R14, staged outside public pools.
+    /// D-81: R14, active in the consolidated roster.
     CelestialArcher,
-    /// D-82: R15, staged outside public pools.
+    /// D-82: R15, active in the consolidated roster.
     Justiciar,
-    /// D-83: R16, staged outside public pools.
+    /// D-83: R16, active in the consolidated roster.
     Jawguard,
-    /// D-84: R17, staged outside public pools.
+    /// D-84: R17, active in the consolidated roster.
     Mantis,
-    /// D-85: R18, staged outside public pools.
+    /// D-85: R18, active in the consolidated roster.
     Hornet,
-    /// D-86: R19, staged outside public pools.
+    /// D-86: R19, active in the consolidated roster.
     Weaver,
-    /// D-87: R20, staged outside public pools.
+    /// D-87: R20, active in the consolidated roster.
     PyreWarden,
-    /// D-88: R21, staged outside public pools.
+    /// D-88: R21, active in the consolidated roster.
     Drillnest,
     Microdrill,
     Duodrill,
@@ -185,7 +184,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
 #[rustfmt::skip]
-pub const ALL_KINDS: [UnitKind; 27] = [
+pub const ALL_KINDS: [UnitKind; 51] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -213,6 +212,30 @@ pub const ALL_KINDS: [UnitKind; 27] = [
     UnitKind::Puppetmaster,
     UnitKind::Smuggler,
     UnitKind::Crate,
+    UnitKind::Bonehorn,
+    UnitKind::Ravager,
+    UnitKind::Acidmaw,
+    UnitKind::Whisperer,
+    UnitKind::Bulwark,
+    UnitKind::Demolisher,
+    UnitKind::Crowcaller,
+    UnitKind::Trigger,
+    UnitKind::RattleTick,
+    UnitKind::Capybara,
+    UnitKind::Trident,
+    UnitKind::SolarSentinel,
+    UnitKind::LuminousOracle,
+    UnitKind::CelestialArcher,
+    UnitKind::Justiciar,
+    UnitKind::Jawguard,
+    UnitKind::Mantis,
+    UnitKind::Hornet,
+    UnitKind::Weaver,
+    UnitKind::PyreWarden,
+    UnitKind::Drillnest,
+    UnitKind::Microdrill,
+    UnitKind::Duodrill,
+    UnitKind::Megadrill,
 ];
 
 impl UnitKind {
@@ -237,10 +260,9 @@ impl UnitKind {
 }
 
 /// The full conventional roster in `UnitKind` order: the staging pool the
-/// lab and the Practice preview draw from (P46: 19 kinds; grows per wave
-/// until the P53 owner switch moves it into `CANON.pool`).
+/// laboratory, Practice and authoritative online matches draw from.
 #[rustfmt::skip]
-pub const FULL_POOL: [UnitKind; 25] = [
+pub const FULL_POOL: [UnitKind; 46] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -266,6 +288,27 @@ pub const FULL_POOL: [UnitKind; 25] = [
     UnitKind::CargoCrab,
     UnitKind::Puppetmaster,
     UnitKind::Smuggler,
+    UnitKind::Bonehorn,
+    UnitKind::Ravager,
+    UnitKind::Acidmaw,
+    UnitKind::Whisperer,
+    UnitKind::Bulwark,
+    UnitKind::Demolisher,
+    UnitKind::Crowcaller,
+    UnitKind::Trigger,
+    UnitKind::RattleTick,
+    UnitKind::Capybara,
+    UnitKind::Trident,
+    UnitKind::SolarSentinel,
+    UnitKind::LuminousOracle,
+    UnitKind::CelestialArcher,
+    UnitKind::Justiciar,
+    UnitKind::Jawguard,
+    UnitKind::Mantis,
+    UnitKind::Hornet,
+    UnitKind::Weaver,
+    UnitKind::PyreWarden,
+    UnitKind::Drillnest,
 ];
 
 /// All playable archetypes, in glossary order.

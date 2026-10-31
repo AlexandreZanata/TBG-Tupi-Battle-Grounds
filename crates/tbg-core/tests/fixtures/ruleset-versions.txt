@@ -1,3 +1,4 @@
 # Append-only (revision, source hash) registry (P61 §3). Never edit a line;
 # a rules change appends the next revision with its new hash.
 1 881301f9c2597ec3
+2 3d56156049e626c5

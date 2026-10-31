@@ -73,3 +73,5 @@ pub use ruleset::Ruleset;
 pub use state::{EndReason, Event, MatchState, Outcome, Phase, PlayerState, Target, Unit};
 pub use types::*;
 pub use view::{MatchView, PublicView, StrongholdView, UnitView};
+
+pub mod practice_bot;

@@ -32,7 +32,7 @@ fn bucket(kind: UnitKind, tier: u8, branch: u8, summoned: bool) -> Option<usize>
         || tier > 2
         || branch > 1
         || (tier == 0 && branch != 0)
-        || (kind == UnitKind::Beetling && !summoned)
+        || (kind.is_summon() && !summoned)
     {
         return None;
     }

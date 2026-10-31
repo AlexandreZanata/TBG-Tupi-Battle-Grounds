@@ -400,3 +400,20 @@ fn real_smuggler_crates_still_open_beside_dummies() {
     assert!(opened, "Smuggler cargo keeps its canonical timer");
     assert_reconciles(&s);
 }
+
+#[test]
+fn complete_roster_forms_reconcile_hp_including_specials_and_fusions() {
+    for kind in tbg_core::FULL_POOL {
+        for (tier, branch) in [(0, 0), (1, 0), (2, 0), (1, 1), (2, 1)] {
+            let mut unit = TrainingUnitSpec::base(kind);
+            unit.tier = tier;
+            unit.branch = branch;
+            unit.x = Some(7_000);
+            let mut enemy = TrainingUnitSpec::base(UnitKind::Oilpress);
+            enemy.x = Some(8_000);
+            let mut s = session(scenario(vec![unit], Opponent::Champions(vec![enemy])));
+            run(&mut s, 400);
+            assert_reconciles(&s);
+        }
+    }
+}

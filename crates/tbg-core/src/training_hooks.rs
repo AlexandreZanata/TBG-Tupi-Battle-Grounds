@@ -199,13 +199,13 @@ pub(crate) fn is_dummy(state: &MatchState, id: UnitId) -> bool {
 
 /// The attributing unit's current copy, when it still exists.
 #[cfg(feature = "training")]
-fn source_unit(units: &[Unit], source: Source) -> crate::training::Attributed {
+fn source_unit(units: &[Unit], source: Source) -> crate::training::Attributed<'_> {
     use crate::training::Attributed;
     match source {
         Source::Unit(id) => units
             .binary_search_by_key(&id, |u| u.id)
             .ok()
-            .map_or(Attributed::Gone(id), |i| Attributed::Unit(units[i])),
+            .map_or(Attributed::Gone(id), |i| Attributed::Unit(&units[i])),
         Source::Team(seat) => Attributed::Team(seat),
         Source::Unknown => Attributed::Unknown,
     }

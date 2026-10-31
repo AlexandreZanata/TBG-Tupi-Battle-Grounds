@@ -1380,3 +1380,24 @@ roster is claimed. Result identity and the exact aggregate use protocol 28
 on main's real v17 schema; unmerged v20/v27 fields are not assumed present.
 All behavioral/presentation additions remain Proposed pending the recorded
 acceptance and visual review. No combat or rating values change.
+
+
+## Consolidated roster activation — Proposed, owner 2026-10-31
+
+The owner requested all open PR work, all 21 P59 champions and their native
+compatibility in one installable/deployed candidate, explicitly rejecting a
+partial staged delivery. FULL_POOL/CANON now contain 46 conventional champions;
+ALL_KINDS contains those 46 plus Beetling, Crate and three drill ranks (51).
+All existing §13 starting stats, forms and abilities remain Proposed and
+unchanged. No summon enters the Shop and the ten-kind reference pool remains
+for existing C7 planted-imbalance contracts. This activation changes seeded
+Shop draws, so deterministic fixtures are intentionally consolidated in the
+same roster-activation commit; it never justifies weakening a balance gate.
+D-33 evidence and owner look/fun review are recorded in the consolidation report.
+Shop reservation/Reroll remains the existing Practice preview rule, not a new
+online economy change.
+
+P60/P61 journal/summary Faction arrays follow FACTION_COUNT=7, preserving
+legacy four-Faction records by zero extension. P63 counts every actual drill
+spawn, including fusion outputs, without deleting consumed parents from the
+historical participant aggregate. Cosmetic figures never affect simulation.

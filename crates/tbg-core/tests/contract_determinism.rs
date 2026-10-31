@@ -53,25 +53,26 @@ fn bot_matches_are_frozen() {
     // D-68: owner champion changes in GAME-DESIGN, collected with update_probe.
     // D-69: appended private Shop state; all D-68 outcomes and ticks identical.
     // D-68/D-69 integration: protocol-20 slots + Shop state; owner range correction.
+    // Owner 2026-10-31: activating all 46 conventional kinds changes draws and outcomes.
     let goldens = [
         (
             1,
-            0x20e6_50cc_3a03_ebbbu64,
-            3_336,
+            0x7890_8734_d3dc_7ec1u64,
+            3_844,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0x6d9a_9e6d_11d4_cfe3,
-            2_286,
-            Seat::B,
+            0x7ab5_0dfd_d573_5803,
+            15_586,
+            Seat::A,
             StrongholdDestroyed,
         ),
         (
             42,
-            0x9b18_e0f2_1e17_880f,
-            6_295,
+            0xc437_7231_f72a_0c57,
+            5_049,
             Seat::B,
             StrongholdDestroyed,
         ),

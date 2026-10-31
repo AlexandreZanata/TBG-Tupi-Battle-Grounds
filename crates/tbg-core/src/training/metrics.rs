@@ -182,7 +182,7 @@ impl TrainingMetrics {
     pub(crate) fn lost(
         &mut self,
         victim: &Unit,
-        source: Attributed,
+        source: Attributed<'_>,
         effect: Effect,
         removed: i32,
         shield: i32,
@@ -211,7 +211,7 @@ impl TrainingMetrics {
         }
     }
 
-    pub(crate) fn restored(&mut self, target: &Unit, source: Attributed, amount: i32) {
+    pub(crate) fn restored(&mut self, target: &Unit, source: Attributed<'_>, amount: i32) {
         if amount <= 0 {
             return;
         }
@@ -230,7 +230,7 @@ impl TrainingMetrics {
         }
     }
 
-    pub(crate) fn lost_tower(&mut self, seat: Seat, source: Attributed, removed: i32) {
+    pub(crate) fn lost_tower(&mut self, seat: Seat, source: Attributed<'_>, removed: i32) {
         let removed = removed.max(0) as u64;
         match self.source_row(source) {
             Some(r) => r.dealt_stronghold += removed,
@@ -265,9 +265,9 @@ impl TrainingMetrics {
         }
     }
 
-    fn source_row(&mut self, source: Attributed) -> Option<&mut InstanceRow> {
+    fn source_row(&mut self, source: Attributed<'_>) -> Option<&mut InstanceRow> {
         match source {
-            Attributed::Unit(u) => self.row_mut(&u),
+            Attributed::Unit(u) => self.row_mut(u),
             Attributed::Gone(id) => self
                 .rows
                 .binary_search_by_key(&id, |r| r.id)

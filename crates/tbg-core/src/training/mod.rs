@@ -14,8 +14,8 @@ pub use crate::training_hooks::{Effect, Source};
 pub use dummy::{DummyHp, DummyMode};
 pub use metrics::{InstanceRow, TeamTotals, TrainingMetrics, MAX_ROWS};
 pub use scenario::{
-    Opponent, ScenarioError, Side, TrainingScenario, TrainingUnitSpec, LANE_MAX, LANE_MIN,
-    MAX_DUMMIES, MAX_LIVING, MAX_UNITS_PER_SIDE, RUN_LIMIT_TICKS, SCHEMA,
+    default_x, Opponent, ScenarioError, Side, TrainingScenario, TrainingUnitSpec, LANE_MAX,
+    LANE_MIN, MAX_DUMMIES, MAX_LIVING, MAX_UNITS_PER_SIDE, RUN_LIMIT_TICKS, SCHEMA,
 };
 pub use session::{
     CommandError, Finish, Lifecycle, Pause, SessionId, TrainingCommand, TrainingSession,
@@ -36,8 +36,8 @@ pub(crate) struct Runtime {
 
 /// A hook's source, resolved against the live units.
 #[derive(Clone, Copy, Debug)]
-pub(crate) enum Attributed {
-    Unit(Unit),
+pub(crate) enum Attributed<'a> {
+    Unit(&'a Unit),
     /// The source unit already left the lane; its row still exists.
     Gone(UnitId),
     Team(Seat),
