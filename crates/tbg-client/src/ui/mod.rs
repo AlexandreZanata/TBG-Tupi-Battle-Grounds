@@ -35,7 +35,6 @@ mod queue;
 pub mod ranking;
 mod ranking_ui;
 mod result;
-mod spectate_hud;
 mod start;
 #[cfg(test)]
 mod stronghold_data_tests;
@@ -67,7 +66,9 @@ pub enum UiAction {
     ToMenu,
     /// P47: watch a listed live match from its id (`?watch=` or the lobby).
     Watch(u64),
-    /// P47: stop watching and go back to the menu.
+    /// P47: stop watching and go back to the menu. The desktop battle bridge
+    /// (wasm only) builds it, so native builds never see the constructor.
+    #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
     LeaveWatch,
     Buy(u8),
     /// Long-press on a shop card: show the unit details.
@@ -144,12 +145,7 @@ pub fn plugin(app: &mut App) {
             toast::plugin,
             tips::plugin,
         ))
-        .add_plugins((
-            battle_hud::plugin,
-            inspect::plugin,
-            fortify::plugin,
-            spectate_hud::plugin,
-        ));
+        .add_plugins((battle_hud::plugin, inspect::plugin, fortify::plugin));
 }
 
 /// Scale the whole UI with the smaller window side (phones ≈ 0.9, desktop 1.5).

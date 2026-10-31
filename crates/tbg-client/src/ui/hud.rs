@@ -26,25 +26,6 @@ pub(super) enum Hud {
     ForgoText,
 }
 
-impl Hud {
-    /// P47: controls a watcher cannot use (Shop, Energy, War Council).
-    pub(super) fn seat_only(&self) -> bool {
-        matches!(
-            self,
-            Hud::EnergyFill
-                | Hud::Card(_)
-                | Hud::CardText(_)
-                | Hud::CardStrip(_)
-                | Hud::CouncilStatus
-                | Hud::CouncilRow
-                | Hud::CouncilOption(_)
-                | Hud::CouncilOptionText(_)
-                | Hud::Forgo
-                | Hud::ForgoText
-        )
-    }
-}
-
 fn council_card(i: usize) -> impl Bundle {
     (
         Node {

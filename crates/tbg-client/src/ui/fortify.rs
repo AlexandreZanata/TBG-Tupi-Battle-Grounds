@@ -151,12 +151,8 @@ fn choice(branch: u8) -> impl Bundle {
 /// The compact phone row: your tower and the opponent's, then the next
 /// Fortification step of each open branch. It sits above the Energy bar,
 /// so it never covers the Shop.
-#[derive(Component)]
-pub(super) struct FortifyControl;
-
 pub(super) fn control() -> impl Bundle {
     (
-        FortifyControl,
         Node {
             flex_direction: FlexDirection::Row,
             column_gap: px(6.0),
