@@ -15,6 +15,7 @@ pub fn update_unit_visual(
     v: &mut UnitVisual,
     u: &UnitView,
 ) {
+    v.fx = u.fx;
     if v.form != (u.kind, u.tier, u.branch) {
         v.form = (u.kind, u.tier, u.branch);
         v.refresh_stats();

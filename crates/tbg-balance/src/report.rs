@@ -241,3 +241,47 @@ pub fn duel_summary(m: &Matrix, rules: &Ruleset) -> String {
     }
     s
 }
+
+/// Per-policy private-Shop metrics, aggregated only offline.
+pub fn shop_csv(results: &crate::gate::Results) -> String {
+    let mut out=String::from("policy,games,reservations,reserved_bought,wait_shops,rerolls,reroll_energy,total_energy_spent,max_streak,expensive_purchases,no_frontline_at_60s,reached_60s,mean_ticks,seat_a_wins\n");
+    for ((a, b), pairs) in results {
+        for (participant, policy) in [a, b].into_iter().enumerate() {
+            let (
+                mut games,
+                mut reservations,
+                mut bought,
+                mut wait,
+                mut rolls,
+                mut energy,
+                mut spent,
+                mut streak,
+                mut expensive,
+                mut no_front,
+                mut reached,
+                mut ticks,
+                mut seat_a,
+            ) = (
+                0u64, 0u64, 0u64, 0u64, 0u64, 0u64, 0u64, 0u8, 0u64, 0u64, 0u64, 0u64, 0u64,
+            );
+            for game in pairs.iter().flat_map(|p| p.iter()) {
+                let s = &game.sides[participant];
+                games += 1;
+                reservations += u64::from(s.reservations);
+                bought += u64::from(s.reserved_bought);
+                wait += u64::from(s.reserve_wait_shops);
+                rolls += u64::from(s.rerolls);
+                energy += s.reroll_energy;
+                spent += s.spent;
+                streak = streak.max(s.max_reroll_streak);
+                expensive += u64::from(s.expensive_bought);
+                no_front += u64::from(s.no_frontline_at_60s == Some(true));
+                reached += u64::from(s.no_frontline_at_60s.is_some());
+                ticks += u64::from(game.ticks);
+                seat_a += u64::from(game.winner == Some(game.seat_a));
+            }
+            let _=writeln!(out,"{},{games},{reservations},{bought},{wait},{rolls},{energy},{spent},{streak},{expensive},{no_front},{reached},{:.1},{seat_a}",policy.name(),ticks as f64/games.max(1) as f64);
+        }
+    }
+    out
+}

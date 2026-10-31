@@ -41,26 +41,22 @@ fn bot_matches_are_frozen() {
     // D-55 (ARENAS-G): `MatchState::arena` and `arena_discount_used` joined
     // the serialized state; the Forest is neutral, so hashes moved once with
     // tick, winner and reason identical (verified on all three seeds).
+    // W0 (P58 §3, D-62): the bleed, weakening, queued-Slow, mark, self-reduction
+    // and ability heal-cut slots joined `UnitFx`; hashes moved once, with tick,
+    // winner and reason identical on all three seeds (verified).
+    // W1 (P58 §13.5, D-64): the Synergy array grew from four to seven Factions;
+    // hashes moved once, with tick, winner and reason identical (verified).
     use EndReason::StrongholdDestroyed;
+    // D-68: owner champion changes in GAME-DESIGN, collected with update_probe.
+    // D-69: appended private Shop state; all D-68 outcomes and ticks identical.
+    // D-68/D-69 integration: protocol-20 slots + Shop state; owner range correction.
     let goldens = [
-        (
-            1,
-            0xdf5d_547e_36e4_7845u64,
-            3_336,
-            Seat::B,
-            StrongholdDestroyed,
-        ),
-        (
-            7,
-            0xca17_5202_6278_78e5,
-            2_286,
-            Seat::B,
-            StrongholdDestroyed,
-        ),
+        (1, 0x9615d6ececbe8b99u64, 3261, Seat::B, StrongholdDestroyed),
+        (7, 0x008b5f628ee0b6dau64, 2266, Seat::B, StrongholdDestroyed),
         (
             42,
-            0x4069_7a3a_89d9_10e1,
-            6_295,
+            0x8e40c6e671e82ee3u64,
+            7977,
             Seat::B,
             StrongholdDestroyed,
         ),

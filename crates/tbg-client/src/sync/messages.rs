@@ -52,6 +52,7 @@ pub(super) fn poll_link(
     mut ranking: ResMut<crate::ui::ranking::Ranking>,
     mut surrender: ResMut<crate::ui::surrender::Surrender>,
     lang: Res<Lang>,
+    mut shop_pending: ResMut<crate::ui::PendingBuy>,
 ) {
     let now = time.elapsed_secs_f64();
     for msg in link.poll(now) {
@@ -87,6 +88,7 @@ pub(super) fn poll_link(
                 *ui.2 = QueueInfo::default();
                 config::clear_url_param("challenge");
                 latest.0 = None;
+                shop_pending.0 = None;
                 crate::ui::surrender::reset(
                     &mut surrender,
                     mode == tbg_core::protocol::MatchMode::Ranked,
@@ -135,6 +137,7 @@ pub(super) fn poll_link(
                 *buffer = ViewBuffer::default();
                 *extra.0 = super::MatchStats::default();
                 latest.0 = None;
+                shop_pending.0 = None;
                 config::save_watch(id);
                 next.set(GameState::InMatch);
             }
@@ -162,7 +165,10 @@ pub(super) fn poll_link(
                 }));
                 next.set(GameState::Menu);
             }
-            ServerMsg::Rejected { reason, .. } => {
+            ServerMsg::Rejected { seq, reason } => {
+                if shop_pending.0.is_some_and(|(_, pending)| pending == seq) {
+                    shop_pending.0 = None;
+                }
                 ui.0.push(crate::ui::rejection_text(reason, *lang))
             }
             ServerMsg::MatchEnd { outcome } => {

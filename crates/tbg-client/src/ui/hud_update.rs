@@ -54,7 +54,11 @@ pub(super) fn update(
     for (hud, mut color) in &mut colors {
         match hud {
             Hud::Card(i) => {
-                color.0 = if buyable(v, *i) && pending.0.is_none_or(|(o, _)| usize::from(o) != *i) {
+                color.0 = if buyable(v, *i)
+                    && pending
+                        .0
+                        .is_none_or(|(o, _)| o != u8::MAX && usize::from(o) != *i)
+                {
                     BUTTON
                 } else {
                     DISABLED

@@ -11,10 +11,11 @@ pub(super) fn spawn(commands: &mut Commands, theme: Theme) {
     let palette = theme.palette();
     // The Forest keeps the owner-approved seascape contrast; the themed
     // arenas keep the levels their scenes were approved with.
-    let (lux, ambient) = if theme == Theme::Forest {
-        (13_000.0, 950.0)
-    } else {
-        (12_000.0, 1200.0)
+    let (lux, ambient) = match theme {
+        Theme::Forest => (13_000.0, 950.0),
+        // Storm Valley is the moody one: dimmer sun, darker fill.
+        Theme::Storm => (9_500.0, 950.0),
+        _ => (12_000.0, 1200.0),
     };
     // Always set: switching back to the Forest must restore its sky.
     commands.insert_resource(ClearColor(if theme == Theme::Forest {

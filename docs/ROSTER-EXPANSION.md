@@ -308,6 +308,8 @@ Guard; range at both seats (mirrored x); finisher threshold integer math.
 
 ### C.3 Leechroot — Plants · DPS — *Endless Hunger*
 
+**Owner adjustment 2026-10-31 (Proposed).** HP 300 (formerly 220).
+
 **Role.** A protected carry that becomes the biggest threat on the field
 if left alive.
 
@@ -412,6 +414,8 @@ credit; DR on allies.
 
 ### C.5 Old Finn — Humans · Control — *Fish Barrage*
 
+**Owner adjustment 2026-10-31 (Proposed).** Range 5.25 tiles (formerly 3.5); damage remains 8.
+
 **Role.** Progressive movement control that never stops attacks.
 **Differs from** Hexer (one strong slow on move *and* attack) and
 Rootcaller (full stop, short).
@@ -488,6 +492,8 @@ AoE. Useless when: alone. Domination risk: low; watched in
 `march_move_bp`/`march_dr_bp` on allies; escort clamp in movement.
 
 ### C.7 Longaxe — Humans · DPS — *Heavy Reach*
+
+**Owner adjustment 2026-10-31 (Proposed).** Range 3.0 tiles (formerly 1.6).
 
 **Role.** Second-rank heavy melee.
 
@@ -653,6 +659,8 @@ range, Blood Furnace sacrifice under betrayal, reconnect/replay hash.
 
 ### C.11 Smuggler — Humans · Support — *Mystery Cargo*
 
+**Owner adjustment 2026-10-31 (Proposed).** One-handed revolver: 10 damage every 30 ticks, range 6.0 tiles (owner consolidation correction: obey the Stronghold range cap). Cargo stays on its separate timer (400 ticks, B 360); crates land 400 milli-tiles behind, clamped to the lane. B1 no longer changes attack speed.
+
 **Role.** A gamble that turns Energy into a random stream of units.
 
 **Ability.** No attack; holds 5 tiles behind the nearest enemy. Every
@@ -741,6 +749,8 @@ it behind the wall where plates never break. Domination risk: low–medium.
 
 ### C.13 Blood Furnace — Undead · DPS — *Life for Damage* (owner addition)
 
+**Owner adjustment 2026-10-31 (Proposed).** Speed 54 (formerly 45); attack interval 30 ticks (formerly 36). The 6% burn per hit is unchanged, intentionally paid more frequently.
+
 **Role.** High-risk melee whose most dangerous hit can be its last.
 **Opposite of** Leechroot: Leechroot must survive to scale; Blood Furnace
 must approach death.
@@ -790,41 +800,21 @@ lost value), AoE, swarms (wasted big hits), Puppetmaster. Undead Synergy
 
 **Implementation: low.** Burn + multiplier at resolve.
 
-### C.14 Bloodweaver — Undead · Support — *Blood Transfer* (owner addition)
+### C.14 Bloodweaver — Undead · Support — *Siphon* (Proposed, owner 2026-10-31)
 
-**Role.** Redistributes the army's existing HP; creates none.
+Attacks the nearest enemy normally: HP 300, damage 30, interval 40 ticks,
+range 3,000, speed 45. Actual HP removed by the primary hit on an enemy
+unit (after mitigation/absorption, without overkill) heals the wounded
+conventional ally with lowest exact HP fraction anywhere in the lane,
+including itself; ties nearest then lowest id. Summons never receive it.
+No wounded ally means no heal; Stronghold hits never heal. This is Support
+healing with bonuses, heal cut and Purification, outside the lifesteal cap.
 
-**Ability.** No attack. Every 5 s, among allied **conventional** units
-within 3.0 tiles (itself included; summons excluded as donors *and*
-receivers — free units can never be a reservoir), the donor is the
-highest HP % and the receiver the lowest HP % below full; they are two
-different units and the donor's % must be higher. Amount =
-`min(120, donor.hp − 1, receiver missing HP)`: donors (itself included)
-never die from a transfer (draft). The donor loses it directly (no
-damage reduction, plates or Second Wind); the receiver gains it **minus
-heal cut** (Grievous Wounds, Deep Wound), so heal cut turns transfers
-into a net loss (draft). It is **not a heal**: no Arcana/Augment heal
-bonus, no Purification; not damage: no on-hit, lifesteal, Essence. No
-valid pair → it waits ready.
-
-**Evolutions.**
-
-| Branch | Tier 1 | Tier 2 | Choice |
-|--------|--------|--------|--------|
-| A Blood Sacrifice | Deep Transfer: 156 per cast | Last Offering: ×2 when the receiver is below 20 % | save the dying carry |
-| B Blood Circulation | Rapid Circulation: every 4 s | Shared Blood: a second transfer between the next donor and the next receiver (four distinct units) | keep many units up |
-
-B2 doubles throughput only in a larger army (four units): a real
-alternative to A2 instead of the draft's split of the same amount.
-
-**Balance.** Best with: Oilpress (reservoir), Leechroot, Rampart,
-Plants regen on donors. Anti-synergy: Blood Furnace is always the
-receiver, so it lowers its own carry's damage (draft). Counters: AoE that
-drops everyone together, heal cut, killing it. Domination risk: medium
-(strengthens Leechroot + Oilpress).
-
-**Implementation: low–medium.** One selection pass and a `Transfer
-{from, to, amount}` event.
+A1 Deep Transfer: +30% damage. A2 Last Offering: double healing below 20%
+recipient HP. B1 Rapid Circulation: +25% attack speed. B2 Shared Blood:
+120% of removed HP, divided equally among up to two lowest-percent allies.
+Event::Transfer keeps its wire variant; from = enemy, to = recipient,
+amount = HP restored. Interpretations I-1–I-8 in the owner brief are adopted.
 
 ### C.15 Cargo Crab — Machines · Tank — *Armored Taxi* (owner decision O-R1)
 
@@ -843,7 +833,7 @@ carried:
 | Topic | Rule |
 |-------|------|
 | Position | The passenger's x is the crab's x (synced before the passenger acts and after every unit has moved); it never walks on its own; its range is measured from that x |
-| Movement | Only the crab moves, with Tank rules (stops at its own 0.8 range), so the passenger fights **at the front line** |
+| Movement | Only the crab moves, with Tank rules (stops at its own 0.8 range), so the passenger fights **at the front line**. The pair moves at `max(crab speed, passenger speed) × (1 + carry bonus)`, the bonus being the larger of a +20 % base and the branch value below, never their sum (BR-X12, D-56, D-60) |
 | Actions | The passenger attacks, heals, casts, bonds, drops crates and grows normally |
 | Targeting | **No targeted effect can choose a carried unit**: enemy attacks, Stronghold fire, Rotcap/Old Finn echoes, Puppetmaster's betrayal target, Farwatch. An attack already winding up on it when it boards hits the crab instead |
 | Area | Splash, Bombard blasts, shrapnel and poison pulses reach it normally — at distance 0 from the crab, it is inside **every** splash aimed at the crab (the draft's main counter, made automatic by geometry) |

@@ -1,0 +1,16 @@
+favor-smuggler vs bot: 54.3% [52.2 – 56.4] over 2000 seed pairs
+stalled matches (60 s): 1.0% (41/4000)
+favor-smuggler vs bot (median ±10 pp)            54.3% [52.2% – 56.5%]        target 44.3% – 64.3%      PASS
+1 rows, 0 failing
+command: /tmp/tbg-baseline-bin/tbg-balance run --a favor-smuggler --b bot --pairs 2000 --threads 2 --seed-start 9000 --out /tmp/tbg-system-updates/docs/media/system-updates/lab/before-iteration-smuggler
+git_head: c9e56a1
+ruleset_fingerprint: 9fbc91c9e663502a
+applied: canon
+seeds: 9000..11000 (2000 pairs)
+threads: 2
+reaction_views: 5
+wall_s: 57.91
+games: 4000
+games_per_s: 69
+game_seconds_per_wall_second: 14619
+output: /tmp/tbg-system-updates/docs/media/system-updates/lab/before-iteration-smuggler

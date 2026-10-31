@@ -199,6 +199,9 @@ fn run(a: &Args) -> Result<(), String> {
     c.out
         .write("roster.csv", &report::roster_csv(&results, c.rules))
         .map_err(|e| e.to_string())?;
+    c.out
+        .write("shop.csv", &report::shop_csv(&results))
+        .map_err(|e| e.to_string())?;
     let (g, t) = games_and_ticks(&results);
     c.finish(g, t, "")
 }

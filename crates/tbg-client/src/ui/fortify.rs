@@ -15,6 +15,11 @@ use crate::GameState;
 #[derive(Resource, Default)]
 pub struct PendingFortify(pub Option<u32>);
 
+/// Whether the Fortification panel is open: it opens on a click on your own
+/// Stronghold and closes like a unit's panel (click elsewhere, Escape, new match).
+#[derive(Resource, Default)]
+pub struct TowerOpen(pub bool);
+
 /// One branch button's state, mirroring the server's checks in order.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Offer {
@@ -118,9 +123,13 @@ struct FortifyChoiceText(u8);
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<PendingFortify>()
+        .init_resource::<TowerOpen>()
         .add_systems(
             OnExit(GameState::InMatch),
-            |mut p: ResMut<PendingFortify>| p.0 = None,
+            |mut p: ResMut<PendingFortify>, mut open: ResMut<TowerOpen>| {
+                p.0 = None;
+                open.0 = false;
+            },
         )
         .add_systems(
             Update,

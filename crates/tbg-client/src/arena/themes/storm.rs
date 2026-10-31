@@ -1,6 +1,7 @@
-//! Wind-bent conifers, conductor stones, silver grass and low offshore squalls.
+//! Wind-bent conifers, banner-flying conductor spires, a broken dock, dead trees, floes
+//! and low offshore squalls for Storm Valley.
 
-use super::{back_row, boulder, contact, scatter, Kit};
+use super::{back_row, boulder, contact, scatter, shared, Kit};
 use crate::{
     arena::{
         theme::{rgb, Theme},
@@ -14,7 +15,10 @@ pub(super) fn build(kit: &mut Kit) {
     let p = Theme::Storm.palette();
     for (i, (at, s)) in back_row().into_iter().enumerate() {
         if i % 4 == 0 {
-            conductor(&mut kit.props, &mut kit.glow, at, s);
+            conductor(&mut kit.props, &mut kit.glow, at, s * 1.25);
+            if i % 8 == 0 {
+                banner(&mut kit.props, at, s * 1.25);
+            }
         } else {
             bent_tree(&mut kit.props, at, s);
         }
@@ -56,6 +60,52 @@ pub(super) fn build(kit: &mut Kit) {
                     0.62,
                 )),
             ));
+        }
+    }
+    // A broken dock leaves the left end; a few posts and planks remain on the right.
+    let (dock, dark) = (rgb(0x6b5a48), rgb(0x3d3430));
+    shared::walkway(
+        &mut kit.props,
+        Vec3::new(-2.5, 0.02, 2.4),
+        -1.0,
+        8,
+        0b0010_1000,
+        dock,
+        dark,
+    );
+    shared::walkway(
+        &mut kit.props,
+        Vec3::new(18.5, 0.02, -2.1),
+        1.0,
+        4,
+        0b1010,
+        dock,
+        dark,
+    );
+    for (x, z, s) in [
+        (-1.3, -3.3, 1.1),
+        (17.3, -3.4, 1.0),
+        (0.6, 3.9, 0.8),
+        (15.4, 4.0, 0.9),
+    ] {
+        shared::dead_tree(&mut kit.props, Vec3::new(x, 0.0, z), s, rgb(0x3f3a40));
+    }
+    // Pale ice floes drift in the dark water.
+    for (i, (at, size)) in shared::water_sites(0x57a0, 14, 2.4).into_iter().enumerate() {
+        shared::floe(
+            &mut kit.props,
+            at,
+            0.8 + size * 1.2,
+            rgb(0xaec0d3),
+            rgb(0xe3ecf4),
+        );
+        if i % 3 == 0 {
+            boulder(
+                &mut kit.props,
+                at + Vec3::Y * 0.2,
+                0.3 + size * 0.25,
+                p.stone,
+            );
         }
     }
     for x in [-2.1, 18.1] {
@@ -155,4 +205,14 @@ fn grass(parts: &mut Vec<Part>, at: Vec3, s: f32) {
                 .with_scale(Vec3::splat(s + 0.4)),
         ));
     }
+}
+
+/// A blue banner snapping from a conductor spire.
+fn banner(parts: &mut Vec<Part>, at: Vec3, s: f32) {
+    parts.push((
+        Box(0.36 * s, 0.55 * s, 0.03),
+        rgb(0x4f86d6),
+        Transform::from_translation(at + Vec3::new(0.32 * s, 1.2 * s, 0.1))
+            .with_rotation(Quat::from_rotation_z(-0.12)),
+    ));
 }

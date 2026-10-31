@@ -1,6 +1,6 @@
 //! Longaxe kit: a halberdier who rests his poleaxe upright, carries it on
 //! the shoulder, and brings it over his own front line in a two-handed
-//! chop (branch B sweeps it sideways on alternate swings).
+//! chop and a ground cut reaching three tiles (branch B sweeps in a fan).
 
 mod model;
 

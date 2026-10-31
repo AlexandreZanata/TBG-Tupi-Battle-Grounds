@@ -204,6 +204,8 @@ mod tests {
             max_hp: 100,
             status: 0,
             fx: 0,
+            carrier: None,
+            shield: 0,
         });
         let mut app = App::new();
         app.insert_resource(LatestView(Some(view)))

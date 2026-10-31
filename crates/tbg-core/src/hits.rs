@@ -37,11 +37,6 @@ pub(crate) fn resolve_hit(
             crate::afflictions::brew_cast(state, attacker, st.range, id, strip, ward, second, ev);
             return;
         }
-        // Bloodweavers transfer instead of healing.
-        if let Some((amount, low_bp, second)) = crate::support::transfer_of(state, attacker) {
-            crate::support::transfer_cast(state, attacker, st.range, amount, low_bp, second, ev);
-            return;
-        }
         let _restored = heal(state, attacker.seat, id, st.heal, true, ev);
         #[cfg(feature = "lab")]
         crate::lab::healed(state, attacker, _restored);
@@ -60,6 +55,11 @@ pub(crate) fn resolve_hit(
         return;
     }
     let mut amount = st.damage;
+    // R13: a weakened attacker's basic hit loses its weakening before any bonus.
+    let weaken = crate::roster_slots::weaken_now(&attacker.fx, state.tick);
+    if weaken > 0 {
+        amount = scale(amount, -weaken);
+    }
     if !attacker.is_summon() {
         let target_status = match target {
             Target::Unit(id) => state
@@ -89,6 +89,9 @@ pub(crate) fn resolve_hit(
     #[cfg(feature = "lab")]
     if let Target::Unit(_) = target {
         crate::lab::dealt(state, attacker, removed);
+    }
+    if let Target::Unit(id) = target {
+        crate::siphon::apply(state, attacker, id, removed, ev);
     }
     if let Target::Unit(id) = target {
         let hostile = state
@@ -488,7 +491,8 @@ pub(crate) fn damage(
             let dr = (augment::damage_reduction_bp(state, &victim)
                 + arcana_dr
                 + i32::from(victim.fx.march_dr_bp)
-                + i32::from(crate::support::carry_dr_bp(state, &victim)))
+                + i32::from(crate::support::carry_dr_bp(state, &victim))
+                + crate::roster_slots::self_dr_now(&victim.fx, state.tick))
             .min(2_000);
             let amount = if dr > 0 {
                 let reduced = i64::from(amount) * (BP - i64::from(dr)) / BP;
@@ -551,7 +555,7 @@ pub(crate) fn damage(
     }
 }
 
-fn heal(
+pub(crate) fn heal(
     state: &mut MatchState,
     healer: Seat,
     id: u32,

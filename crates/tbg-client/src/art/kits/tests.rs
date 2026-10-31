@@ -40,7 +40,25 @@ fn every_kit_form_builds_within_the_doubled_budget() {
                 "{kind:?} {tier}/{branch}: {tris} triangles, scale {:.2}",
                 spec.plan.scale
             );
-            assert!(tris <= 6_000, "{kind:?} {tier}/{branch}: {tris}");
+            let detached: usize = if kind == UnitKind::Shatterback {
+                (0..4)
+                    .map(|i| {
+                        let plate = super::shatterback::model::plate(tier, branch, i);
+                        figure::build_joint_meshes(&plate)
+                            .iter()
+                            .flatten()
+                            .map(mesh::triangles)
+                            .sum::<usize>()
+                    })
+                    .sum()
+            } else {
+                0
+            };
+            assert!(
+                tris + detached <= 6_000,
+                "{kind:?} {tier}/{branch}: {} including detachable plates",
+                tris + detached
+            );
         }
         // Each tier reads bigger (ART-DIRECTION §5).
         let scale = |t| (k.figure)(t, 0).plan.scale;
@@ -133,6 +151,8 @@ fn the_bombard_points_along_its_shells_flight() {
                 variant: 0,
                 clock: 3.0,
                 walk: None,
+                gesture: 1e6,
+                growth: 0.0,
             };
             let mut pose = sample(Clip::Idle, 0.4);
             (k.pose)(&m, &mut pose);

@@ -107,9 +107,9 @@ fn forgo_discount_and_convergence_are_dynamic() {
     let mut s = running(4);
     s.players[0].augments.add(12); // Field Promotion
     s.players[0].augments.add(34); // Convergence
-    s.players[0].synergy = [1, 1, 0, 0];
+    s.players[0].synergy = [1, 1, 0, 0, 0, 0, 0];
     let with = stats(&s, Seat::A, UnitKind::Shieldbearer, 0);
-    s.players[0].synergy = [1, 0, 0, 0];
+    s.players[0].synergy = [1, 0, 0, 0, 0, 0, 0];
     let without = stats(&s, Seat::A, UnitKind::Shieldbearer, 0);
     assert!(with.max_hp > without.max_hp);
     assert!(with.damage > without.damage);

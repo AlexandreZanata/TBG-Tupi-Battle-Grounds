@@ -8,7 +8,7 @@ use crate::content::{BOUNTY_WINDOW_TICKS, RUNNING_START};
 use crate::rng::Pcg32;
 use crate::ruleset::{Ruleset, CANON};
 use crate::state::{EndReason, Event, MatchState, Outcome, Phase, PlayerState};
-use crate::types::{Arena, Seat, StrongholdKind};
+use crate::types::{Arena, Seat, StrongholdKind, FACTION_COUNT};
 use crate::{combat, shop, summon, synergy};
 
 impl MatchState {
@@ -65,7 +65,7 @@ impl MatchState {
                 fort_tier: 0,
                 fort_branch: 0,
                 spoils_window: 0,
-                synergy: [0; 4],
+                synergy: [0; FACTION_COUNT],
                 last_seq: 0,
                 rng,
                 // Cargo streams 11/12: distinct from the Shop streams 1/2.
@@ -83,6 +83,9 @@ impl MatchState {
                 fury_stacks: 0,
                 fury_until: 0,
                 arena_discount_used: false,
+                reserve: [0; crate::content::OFFERS],
+                held_mask: 0,
+                reroll_streak: 0,
             }
         };
         let first_round = if rules.augment.round_ticks == 0 {
@@ -139,7 +142,9 @@ impl MatchState {
             }
             synergy::update(self, &mut ev);
             combat::tick_timers(self);
+            crate::roster_slots::tick_marks(self);
             crate::afflictions::tick(self, &mut ev);
+            crate::roster_slots::tick_bleed(self, &mut ev);
             summon::expire(self);
             summon::hatch(self, &mut ev);
             crate::support::bonds(self);

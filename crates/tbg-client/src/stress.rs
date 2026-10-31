@@ -3,7 +3,7 @@
 //! unit, cycling its five forms; each attacks a point ahead every 1.4 s.
 
 use bevy::prelude::*;
-use tbg_core::UNIT_KINDS;
+use tbg_core::FULL_POOL;
 
 use crate::art::{FigureLibrary, FORMS};
 use crate::config;
@@ -12,7 +12,7 @@ use crate::visuals::{
 };
 
 #[derive(Component)]
-struct StressWalker {
+pub(crate) struct StressWalker {
     speed: f32,
     next_attack: f32,
 }
@@ -24,20 +24,26 @@ pub fn plugin(app: &mut App) {
 }
 
 fn spawn(mut commands: Commands, assets: Res<VisualAssets>, lib: Res<FigureLibrary>) {
-    let n: usize = config::url_param("stress")
+    let n: usize = config::url_param("bench")
+        .or_else(|| config::url_param("stress"))
         .and_then(|v| v.parse().ok())
-        .unwrap_or(0);
+        .unwrap_or(0)
+        .min(200);
     if n == 0 {
         return;
     }
     let only = config::url_param("gallery").and_then(|m| {
-        UNIT_KINDS
+        FULL_POOL
             .into_iter()
             .find(|k| format!("{k:?}").eq_ignore_ascii_case(&m))
     });
     for i in 0..n {
-        let kind = only.unwrap_or(UNIT_KINDS[i % UNIT_KINDS.len()]);
-        let (tier, branch) = if only.is_some() { FORMS[i % 5] } else { (0, 0) };
+        let kind = only.unwrap_or(FULL_POOL[i % FULL_POOL.len()]);
+        let (tier, branch) = if only.is_some() || config::url_param("bench").is_some() {
+            FORMS[i % 5]
+        } else {
+            (0, 0)
+        };
         let look = UnitLook {
             id: i as u32,
             kind,
@@ -50,7 +56,11 @@ fn spawn(mut commands: Commands, assets: Res<VisualAssets>, lib: Res<FigureLibra
             0.0,
             [-0.8, 0.0, 0.8][i % 3],
         );
+        let anchor = crate::sync::crowd_ecs::LaneAnchor::for_stress(&look, pos);
         let e = spawn_unit_visual(&mut commands, &assets, &lib, look, pos);
+        commands
+            .entity(e)
+            .insert((anchor, crate::sync::crowd_ecs::CrowdState::default()));
         commands.entity(e).insert(StressWalker {
             speed: tbg_core::content::effective_stats(kind, 0, 0, 0).speed as f32 / 1000.0
                 * if i % 2 == 0 { 1.0 } else { -1.0 },
@@ -59,23 +69,24 @@ fn spawn(mut commands: Commands, assets: Res<VisualAssets>, lib: Res<FigureLibra
     }
 }
 
-fn walk(
+pub(crate) fn walk(
     time: Res<Time>,
     assets: Res<VisualAssets>,
     mut q: Query<(
-        &mut Transform,
+        &Transform,
+        &mut crate::sync::crowd_ecs::LaneAnchor,
         &mut crate::art::anim::Animator,
         &mut UnitVisual,
         &mut StressWalker,
     )>,
 ) {
-    for (mut t, mut animator, mut visual, mut walker) in &mut q {
-        t.translation.x += time.delta_secs() * walker.speed;
-        if t.translation.x > 15.5 {
-            t.translation.x = 0.5;
+    for (t, mut anchor, mut animator, mut visual, mut walker) in &mut q {
+        anchor.pos.x += time.delta_secs() * walker.speed;
+        if anchor.pos.x > 15.5 {
+            anchor.pos.x = 0.5;
         }
-        if t.translation.x < 0.5 {
-            t.translation.x = 15.5;
+        if anchor.pos.x < 0.5 {
+            anchor.pos.x = 15.5;
         }
         if time.elapsed_secs() >= walker.next_attack {
             let ahead = Vec3::new(walker.speed.signum() * 3.0, 0.6, 0.0);

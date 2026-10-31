@@ -80,7 +80,7 @@ AGENTS.md and the validation documentation are preserved.
   checksums, exact executable/source identity checks, a per-user installer
   and a Linux-only GitHub release workflow. Windows follows Linux acceptance.
 - Owner-selected custom visible-attribution LICENSE and persistent creator/
-  repository links in Bevy and the existing HTML game/Ranking pages (D-61).
+  repository links in Bevy and the existing HTML game/Ranking pages (D-71).
 
 ### Minimal checks completed on this front
 
@@ -169,3 +169,13 @@ production deployment or real installation has happened in this front.
 - Native keys are plaintext with local permissions; system keyrings deferred.
 - Mobile work, PWA, itch.io setup, Windows packaging/signing and device QA are
   deferred. No Steam or paid infrastructure is introduced.
+
+## Desktop preview integration — 2026-10-31
+
+Owner requested a locally installed app named TBG, reinstallation after each
+requested adjustment, and a local commit for every change. This preview
+installation precedes public release acceptance; no GitHub publication or
+Windows completion is claimed. PR21 head 0047830 is integrated to preserve
+protocol 20 and the current server rules while retaining the Bevy desktop
+interface. D-70/D-71 identify the native and license decisions after merging
+the already deployed D-60 through D-69. Other active work is preserved.

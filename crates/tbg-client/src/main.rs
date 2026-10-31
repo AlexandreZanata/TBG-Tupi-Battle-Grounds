@@ -16,6 +16,7 @@ mod camera;
 #[cfg(debug_assertions)]
 mod capture;
 mod config;
+mod crowd;
 mod gallery;
 mod i18n;
 mod link;

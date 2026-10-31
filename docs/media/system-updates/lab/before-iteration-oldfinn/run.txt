@@ -1,0 +1,4 @@
+favor-oldfinn vs bot: 49.7% [47.6 – 51.8] over 2000 seed pairs
+stalled matches (60 s): 0.9% (38/4000)
+favor-oldfinn vs bot (median ±10 pp)             49.7% [47.6% – 51.8%]        target 39.7% – 59.7%      PASS
+1 rows, 0 failing

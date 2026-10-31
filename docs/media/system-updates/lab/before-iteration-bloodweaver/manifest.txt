@@ -1,0 +1,11 @@
+command: /tmp/tbg-baseline-bin/tbg-balance run --a favor-bloodweaver --b bot --pairs 2000 --threads 2 --seed-start 9000 --out /tmp/tbg-system-updates/docs/media/system-updates/lab/before-iteration-bloodweaver
+git_head: c9e56a1
+ruleset_fingerprint: 9fbc91c9e663502a
+applied: canon
+seeds: 9000..11000 (2000 pairs)
+threads: 2
+reaction_views: 5
+wall_s: 67.81
+games: 4000
+games_per_s: 59
+game_seconds_per_wall_second: 12987

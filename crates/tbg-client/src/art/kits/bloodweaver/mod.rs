@@ -1,7 +1,6 @@
 //! Bloodweaver kit: she idles weaving slow circles with her free hand,
-//! glides on the walk, and raises both hands to hook the donor with a
-//! blood thread from her spindle (the transfer is her attack); the blood
-//! then streams to the receiver (`sync/actions.rs`). She rises out of the
+//! glides on the walk, and strikes the enemy with a blood spindle; stolen
+//! vitality streams from that enemy to the wounded ally (`sync/actions.rs`). She rises out of the
 //! ground and sinks back into it.
 
 mod model;
@@ -22,9 +21,10 @@ pub const KIT: Kit = Kit {
     pose,
     gait: Gait::LIGHT,
     attack: Attack::Shot {
+        loaded: None,
         from: Node::Prop(Socket::WeaponR),
         muzzle: |_, _| model::spindle_top(),
-        shot: |_, _| ShotKind::Blood,
+        shot: |_, _| ShotKind::BloodBolt,
         flash: |_, _| None,
     },
     evolve: Burst::Soul,

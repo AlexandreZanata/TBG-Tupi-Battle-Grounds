@@ -247,7 +247,7 @@ tables are the one allowed exception.
   browser accepts `?lag=MS` to feel added latency.
 - **Bandwidth (hypothesis):** about 400 B per view → about 4 KB/s down and
   under 0.5 KB/s up per player; about 2 MB per 4-minute match for both.
-- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §13):**
+- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §14):**
   `Spectate{id}` and `StopSpectating` (client) and `SpectateStart`,
   `SpectatorView(PublicView)`, `SpectateUnavailable{reason}`,
   `SpectateEnd{outcome}` (server) are appended to the enums. Public
@@ -640,7 +640,29 @@ rules and values, D-34–D-38 the reasons, each phase file the exact steps.
   growth of tens of bytes; per-match memory under 1 KB more; measured in
   every phase and re-checked under load in P16-F8.
 
-## Native client migration (D-60, work in progress)
+
+### Shop preview staging (D-69, 2026-10-31)
+
+Reserve/Release/Reroll append to PlayerIntention and Rejection. CANON.shop
+is None; only local Practice and explicit lab policies enable them. Private
+Shop state is serialized inside MatchState for deterministic replay/hash
+identity. The three preview-only MatchView fields are skipped by serde,
+so the existing v20 online View layout stays intact until activation.
+The owner checkpoint removes those skips and bumps the protocol together.
+PublicView contains no Shop fields. The desktop disables every card and
+Shop action until the previous Shop mutation is acknowledged or rejected.
+
+
+### Ability display follow-up (champion adjustments, 2026-10-31)
+
+UnitView keeps its existing shape; fx now packs the preallocated plate,
+growth and carrier display bits. Nester uses the growth field for timer
+maturity; Leechroot saturates its visible stack display at seven without
+capping simulation Essence. Shatterback's four outer plates are cached per
+form and rendered as separate children so one can detach without replacing
+the whole model. Crowd reads carrier state and remains presentation only.
+
+## Native client migration (D-70, work in progress)
 
 The native Linux client and opt-in browser UI (`?ui=bevy`) share the Bevy
 screens in `ui/shell`, the text editor and UI kit, and the existing UiAction
@@ -654,7 +676,7 @@ in a distribution, with a repository path fallback during development.
 Account keys remain local plaintext credentials; Linux preference files are
 0600 and their directory is 0700. System keyring support is deferred.
 
-The owner-selected visible-attribution license (D-61) is bundled with native
+The owner-selected visible-attribution license (D-71) is bundled with native
 packages. A persistent interface footer links to the creator and original
 repository. Linux packaging and a per-user installer are implemented; actual
 release artifacts, consolidated acceptance and Windows builds remain pending.

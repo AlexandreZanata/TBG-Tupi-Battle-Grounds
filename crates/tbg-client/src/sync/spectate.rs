@@ -10,6 +10,9 @@ use tbg_core::{MatchView, PublicView, Seat, UnitKind};
 
 pub fn match_view(view: &PublicView) -> MatchView {
     MatchView {
+        reserve: [0; tbg_core::content::OFFERS],
+        held_mask: 0,
+        reroll_cost: None,
         tick: view.tick,
         clock: view.clock,
         elapsed: view.elapsed,
