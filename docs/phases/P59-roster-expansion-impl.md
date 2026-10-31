@@ -7,10 +7,10 @@
 
 Status: **W0 and W1 are done** (D-62 and D-63 for W0; D-64 for W1).
 The owner-authorized complete roster front is active in draft PR #22, stacked on
-PR #20. Shared anatomy/gallery support is implemented (D-67). Bonehorn R08 and Ravager R09 now
-have dedicated five-form kits and authoritative abilities (D-68/D-69), with
+PR #20. Shared anatomy/gallery support is implemented (D-67). Bonehorn R08, Ravager R09 and Acidmaw R10 now
+have dedicated five-form kits and authoritative abilities (D-68–D-70), with
 screenshot/minimum validation evidence in [P59-EXECUTION](../roster/P59-EXECUTION.md).
-The other 19 character deliveries remain pending. No new kind is in a public Shop/lab pool;
+The other 18 character deliveries remain pending. No new kind is in a public Shop/lab pool;
 this is an implementation report, not W10 balance acceptance or W11 release.
 
 ## What is in place
@@ -45,8 +45,8 @@ current value is 21 (D-68). Update the audit at consolidation.
   death styles and gallery rows cover the seven Factions. ART-DIRECTION §3 and
   §11.2 have rows for the three new Factions (Proposed).
 - **Pilot: Monsters R08 Bonehorn, R09 Ravager, R10 Acidmaw, R11 Whisperer. Kinds done (D-66).**
-  Inactive kinds and base rows from GAME-DESIGN §13.1 are registered. Bonehorn and Ravager
-  now own their kits, animation and abilities; Acidmaw and Whisperer follow.
+  Inactive kinds and base rows from GAME-DESIGN §13.1 are registered. Bonehorn, Ravager and Acidmaw
+  now own their kits, animation and abilities; Whisperer follows.
   Per-character evidence is recorded in P59-EXECUTION before each next delivery.
 - **W2–W6: rules for the other 17 units** (timers, counted strikers, area pulses,
   shield pair, fusion). The 2026-10-31 owner update authorizes implementing

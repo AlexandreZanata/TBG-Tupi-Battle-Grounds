@@ -44,6 +44,7 @@ pub struct VfxAssets {
     pub(super) violet: Handle<StandardMaterial>,
     pub(super) blood: Handle<StandardMaterial>,
     pub(super) water: Handle<StandardMaterial>,
+    pub(super) turquoise: Handle<StandardMaterial>,
     pub(super) petal: Handle<StandardMaterial>,
     pub(super) oil: Handle<StandardMaterial>,
     /// Lit vertex colors, for painted projectile meshes.
@@ -113,6 +114,7 @@ fn init(
     let blood = glow(Color::srgb_u8(0xC8, 0x1E, 0x32));
     let water = glow(Color::srgb_u8(0x8C, 0xD8, 0xFF));
     let petal = glow(BLOSSOM);
+    let turquoise = glow(TURQUOISE);
     let mut lit = |c: Color| {
         mats.add(StandardMaterial {
             base_color: c,
@@ -176,6 +178,7 @@ fn init(
         blood,
         water,
         petal,
+        turquoise,
         oil,
         painted,
         shots,

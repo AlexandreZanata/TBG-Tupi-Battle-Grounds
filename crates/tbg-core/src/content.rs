@@ -435,6 +435,13 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
+    /// R10: each nth completed enemy-unit primary adds bounded flat splash.
+    CorrosiveSpit {
+        every: u8,
+        damage: u16,
+        radius: i32,
+        targets: u8,
+    },
     /// R09: previous completed hits on the same enemy unit ramp the next basic.
     PredatoryFrenzy {
         step_bp: u16,
@@ -514,6 +521,24 @@ const fn frenzy(increments: u8, gap: u16) -> [Ability; 2] {
         Ability::None,
     ]
 }
+const fn corrosive(damage: u16, targets: u8) -> [Ability; 2] {
+    [
+        Ability::CorrosiveSpit {
+            every: 3,
+            damage,
+            radius: 1_500,
+            targets,
+        },
+        Ability::None,
+    ]
+}
+const ACIDMAW_ABILITIES: [[Ability; 2]; 5] = [
+    corrosive(18, 2),
+    corrosive(18, 2),
+    corrosive(18, 2),
+    corrosive(24, 2),
+    corrosive(24, 3),
+];
 const RAVAGER_ABILITIES: [[Ability; 2]; 5] = [
     frenzy(3, 60),
     frenzy(3, 60),
@@ -866,9 +891,9 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         form("Deep Frenzy"), form("Deep Frenzy"),
     ]),
     unit(UnitKind::Acidmaw, "Acidmaw", Monsters, Ranged, 2_400,
-        [260, 42, 36, 4_200, 38, 0, 0], None, NO_ABILITIES, [
-        form("Abyssal Jaw"), form("Corrosive Volley"),
-        form("Abyssal Jaw"), form("Corrosive Volley"),
+        [260, 42, 36, 4_200, 38, 0, 0], None, ACIDMAW_ABILITIES, [
+        FormDef { dmg_bp: 1_500, ..form("Abyssal Jaw") }, FormDef { range_add: 400, ..form("Abyssal Jaw") },
+        form("Corrosive Volley"), form("Corrosive Volley"),
     ]),
     unit(UnitKind::Whisperer, "Whisperer", Monsters, Control, 3_000,
         [380, 15, 40, 3_000, 33, 0, 0], None, NO_ABILITIES, [
@@ -897,6 +922,8 @@ pub fn form_of(kind: UnitKind, tier: u8, branch: u8) -> Option<&'static FormDef>
 pub struct Stats {
     pub max_hp: i32,
     pub damage: i32,
+    /// Static damage percentages, retained before truncation for registry auxiliary damage.
+    pub damage_bp: i64,
     /// Static attack-speed basis points already folded into `interval`.
     pub atk_bp: i32,
     pub interval: u16,

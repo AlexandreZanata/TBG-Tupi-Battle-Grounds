@@ -257,6 +257,7 @@ impl Ruleset {
         Stats {
             max_hp: scale(i64::from(d.hp), hp_bp),
             damage: scale(i64::from(d.damage) + sum(|f| f.dmg_add), dmg_bp),
+            damage_bp: dmg_bp,
             atk_bp: atk_bp.clamp(0, 10_000) as i32,
             interval: (interval as u16).max(MIN_INTERVAL),
             range: d.range + sum(|f| f.range_add) as i32 + a.range_add,

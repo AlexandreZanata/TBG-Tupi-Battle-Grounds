@@ -46,6 +46,7 @@ pub enum ShotKind {
     Flask,
     Blood,
     Puppet,
+    Acid,
 }
 
 #[derive(Clone, Copy)]
@@ -66,6 +67,7 @@ enum Body {
     Petal,
     Seed,
     Flask,
+    Acid,
 }
 
 #[derive(Clone, Copy)]
@@ -103,6 +105,7 @@ enum Mote {
     Violet,
     Petal,
     Blood,
+    Turquoise,
 }
 
 /// Seconds a unit shot flies: Release at 0.18 s plus this lands at the
@@ -252,6 +255,14 @@ fn look(kind: ShotKind) -> Look {
             0.0,
             Impact::Bolt,
         ),
+        Acid => (
+            Some((Body::Acid, 1.0)),
+            0.06,
+            UNIT_FLIGHT,
+            Trail::Motes(Mote::Turquoise),
+            2.0,
+            Impact::Acid,
+        ),
         Glob => (
             Some((Body::Glob, 1.0)),
             0.12,
@@ -352,6 +363,7 @@ pub struct ShotMeshes {
     purse: Handle<Mesh>,
     arrow: Handle<Mesh>,
     glob: Handle<Mesh>,
+    acid: Handle<Mesh>,
     fish: Handle<Mesh>,
     bomb: Handle<Mesh>,
     orb: Handle<Mesh>,
@@ -456,6 +468,14 @@ impl ShotMeshes {
                     Transform::from_xyz(0.0, 0.0, -0.26),
                 ),
             ]),
+            acid: build(vec![
+                (
+                    Ball(0.07),
+                    TURQUOISE,
+                    Transform::from_scale(Vec3::new(0.8, 0.8, 1.5)),
+                ),
+                (Ball(0.035), IVORY, Transform::from_xyz(0.0, 0.025, 0.06)),
+            ]),
             glob: build(vec![
                 (
                     Ball(0.075),
@@ -539,6 +559,7 @@ impl ShotMeshes {
             Body::Purse => &self.purse,
             Body::Arrow => &self.arrow,
             Body::Glob => &self.glob,
+            Body::Acid => &self.acid,
             Body::Fish => &self.fish,
             Body::Bomb => &self.bomb,
             Body::Orb => &self.orb,
@@ -635,6 +656,7 @@ fn trail(commands: &mut Commands, a: &VfxAssets, trail: Trail, at: Vec3, dir: Ve
     match trail {
         Trail::Motes(mote) => {
             let mat = match mote {
+                Mote::Turquoise => &a.turquoise,
                 Mote::Spore => &a.spore,
                 Mote::Water => &a.water,
                 Mote::Violet => &a.violet,

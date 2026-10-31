@@ -5,6 +5,7 @@
 //! floats in simulation state, and unseeded randomness (docs/ARCHITECTURE.md §4).
 
 pub mod account;
+mod acidmaw;
 mod afflictions;
 pub mod arcana;
 pub mod augment;

@@ -31,6 +31,11 @@ pub(super) fn cue(
                 shots::fire(commands, fx.vfx, ShotKind::Blood, a, b, Area::default());
             }
         }
+        Event::CorrosiveSplash { primary, to, .. } => {
+            if let (Some(a), Some(b)) = (chest(map, visuals, primary), chest(map, visuals, to)) {
+                shots::fire(commands, fx.vfx, ShotKind::Acid, a, b, Area::default());
+            }
+        }
         Event::PlateBroken { unit } => {
             if let Some(at) = chest(map, visuals, unit) {
                 impacts::land(commands, fx.vfx, Impact::Shards, at, Area::default());

@@ -94,6 +94,7 @@ pub(crate) fn resolve_hit(
     }
     let removed = damage(state, target, amount, ev);
     crate::ravager::completed(state, attacker, target);
+    crate::acidmaw::completed(state, attacker, target, st, ev);
     #[cfg(feature = "lab")]
     if let Target::Unit(_) = target {
         crate::lab::dealt(state, attacker, removed);
@@ -172,6 +173,26 @@ pub(crate) fn resolve_hit(
             splash(state, attacker, target, tx, &ramped, ev);
         }
     }
+}
+
+/// Registry auxiliary damage takes static caster percentages once, no basic-hit hooks.
+pub(crate) fn auxiliary_amount(st: &Stats, value: u16) -> i32 {
+    (i64::from(value).saturating_mul(BP.saturating_add(st.damage_bp)) / BP)
+        .clamp(0, i64::from(i32::MAX)) as i32
+}
+
+pub(crate) fn auxiliary_hit(
+    state: &mut MatchState,
+    attacker: &Unit,
+    id: UnitId,
+    amount: i32,
+    ev: &mut Vec<Event>,
+) {
+    let _removed = damage(state, Target::Unit(id), amount, ev);
+    #[cfg(feature = "lab")]
+    crate::lab::dealt(state, attacker, _removed);
+    #[cfg(not(feature = "lab"))]
+    let _ = attacker;
 }
 
 pub(crate) fn scale(value: i32, bp: i32) -> i32 {

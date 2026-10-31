@@ -364,9 +364,9 @@ Ravager/Voracious Hunt: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dm
 Ravager/Voracious Hunt: hp=0 dmg=0 atk=0 speed=1000 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Ravager/Deep Frenzy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Ravager/Deep Frenzy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Acidmaw/Abyssal Jaw: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Acidmaw/Abyssal Jaw: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Acidmaw/Abyssal Jaw: hp=0 dmg=0 atk=0 speed=0 range+=400 splash+=0 heal=0 dmg+=0 hit=-
 Acidmaw/Corrosive Volley: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Acidmaw/Abyssal Jaw: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Acidmaw/Corrosive Volley: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Whisperer/Echo of Fear: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Whisperer/Mental Pulse: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-

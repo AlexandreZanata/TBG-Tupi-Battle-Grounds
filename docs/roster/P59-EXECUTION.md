@@ -166,7 +166,9 @@ Own library: `crates/tbg-client/src/art/kits/acidmaw/`.
 
 tall thin neck, four-part jaw, glowing sac at throat and slender legs; muted hide, bone braces, turquoise sacs, team shoulder cloth. A2 elongates throat guard and lightens neck, A3 long sight-like horn. B2 widens sac shell and darkens torso, B3 three-lobed throat collar.
 
-Status: pending. Evidence: `docs/media/p59/acidmaw/lineup.jpg`.
+Status: implemented; four native regression scenarios passed and desktop lineup
+observed. [Delivery and limits](p59/R10-acidmaw.md).
+![Acidmaw five-form lineup](../media/p59/acidmaw/lineup.jpg)
 
 ### R11 — Whisperer
 

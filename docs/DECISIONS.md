@@ -1431,3 +1431,34 @@ emitter. A adds light leg guards/trailing crest; B thickens scythes and adds a
 serrated jaw shield. Contract form order/deltas change with this decision; other
 characters' frozen forms stay unchanged. Screenshot evidence and deferred focused
 checks are in P59-EXECUTION. No balance acceptance or public activation is claimed.
+
+## D-70 · Acidmaw's split jaw and bounded corrosive secondary hit — 2026-10-31 (Proposed)
+
+R10 uses GAME-DESIGN §13 values: every third completed enemy-unit primary retains
+its ordinary basic damage, then deals flat 18 damage to at most two other enemies
+within 1,500 of that primary. B replaces that damage with 24 then raises the maximum
+to three; A grants +1,500 bp basic damage then +400 range. Content owns all values.
+Its existing attack-count slot advances only at primary resolution; Strongholds,
+friendly/healing actions, canceled windups and auxiliary hits cannot advance it.
+A killing primary may still emit its secondary hit from its last position.
+
+A single fixed best-three pass sorts secondaries by distance from primary then id,
+excluding the primary, allies, dead units and carried passengers. Enemy summons
+are eligible. No unbounded target list or recursion. `Stats.damage_bp` retains
+already-computed static percentages before truncation; auxiliary registry amounts
+use them once, then the shared victim damage path. They never inherit basic-only
+weakening, situational bonuses, lifesteal, on-hit or counter hooks. This transient
+Stats field is neither state nor wire data; legacy base damage is unchanged.
+
+Protocol **22** appends the public `CorrosiveSplash { from, primary, to }` event
+(tag 23), with no reordering. The client sends short turquoise drops from the
+primary to each chosen secondary. Its own jaw-space basic emitter, Acid mesh,
+trail and small impact replace misleading poison art: no poison or persistent
+puddle is granted. Reserved progress bits expose the bounded shot counter to
+both audiences and restore sac readiness on reconnect. Contract protocol/version
+and Acidmaw form changes land with this decision.
+
+The art owns four rigid jaw petals, a long braced neck, throat sac, thin legs,
+high-kneed motion and a four-way jaw fan. A gains throat guards/sight horn; B widens
+the sac shell and adds a three-lobed collar. No public Shop/lab activation or
+balance acceptance. Deferred checks and real screenshots are recorded per character.

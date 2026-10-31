@@ -44,6 +44,7 @@ pub enum Impact {
     Shards,
     Sparks,
     Bite,
+    Acid,
 }
 
 /// What the attacker brings to an impact: splash radius (tiles, 0 = none)
@@ -243,6 +244,7 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
         }
         Impact::Cannon => cannon(commands, a, at, 1.0),
         Impact::GreatCannon => cannon(commands, a, at, 1.5),
+        Impact::Acid => motes(commands, a, at, &a.turquoise, (6, 0.6), 0.35),
         Impact::Poison => motes(commands, a, at, &a.spore, (7, 0.9), area.splash.max(0.5)),
         Impact::Splash => {
             motes(commands, a, at, &a.water, (9, 1.4), 0.6);

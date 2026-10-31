@@ -3,6 +3,7 @@
 //! projectile or melee impact), registered by `UnitKind`. Plain data and
 //! function pointers; units without a kit keep the shared library.
 
+mod acidmaw;
 pub mod aim;
 mod antidote_brewer;
 mod archer;
@@ -157,6 +158,7 @@ static BEETLING: Kit = beetling::KIT;
 static ARCHER: Kit = archer::KIT;
 static RAMPART: Kit = rampart::KIT;
 static RAVAGER: Kit = ravager::KIT;
+static ACIDMAW: Kit = acidmaw::KIT;
 
 /// The passenger seat's height above a Cargo Crab's ground, in world units,
 /// at its tier: where a rider's hips sit (see `visuals::mount`).
@@ -196,6 +198,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Beetling => Some(&BEETLING),
         UnitKind::Rampart => Some(&RAMPART),
         UnitKind::Ravager => Some(&RAVAGER),
+        UnitKind::Acidmaw => Some(&ACIDMAW),
         #[allow(unreachable_patterns)]
         _ => None,
     }

@@ -326,6 +326,12 @@ pub enum Event {
     Dismounted {
         unit: UnitId,
     },
+    /// R10: cosmetic connection from the struck primary to one secondary.
+    CorrosiveSplash {
+        from: UnitId,
+        primary: UnitId,
+        to: UnitId,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

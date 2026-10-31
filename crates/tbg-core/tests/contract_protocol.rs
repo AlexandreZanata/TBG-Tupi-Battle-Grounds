@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 21,
-        "v21: UnitView.reduction (D-68); v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
+        PROTOCOL_VERSION, 22,
+        "v22: CorrosiveSplash (D-70); v21: UnitView.reduction (D-68); v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
     );
 }
 
@@ -186,4 +186,17 @@ fn v17_spectating_messages_are_appended() {
         tbg_core::protocol::decode_server(&bytes),
         Ok(ServerMsg::SpectatorView(Box::new(view)))
     );
+}
+
+#[test]
+fn v22_corrosive_splash_is_appended_and_round_trips() {
+    // D-70: existing Event tags stay fixed; only tag 23 is appended.
+    let event = tbg_core::Event::CorrosiveSplash {
+        from: 1,
+        primary: 2,
+        to: 3,
+    };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [23, 1, 2, 3]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
 }
