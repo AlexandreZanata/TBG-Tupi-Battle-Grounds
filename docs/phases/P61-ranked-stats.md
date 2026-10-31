@@ -650,7 +650,7 @@ seasons, warehouse, dashboards, offline lab execution and actual tuning.
   shared with P60 step 3; `ranked_rulesets` registration in `9b5dea7`).
   E0–E3 (collector, v8 schema, internal report, public API, lobby page,
   patch-note workflow) **not started**. `contract_ruleset_version` passes
-  clippy but has not run.
+  (2 tests).
 - Adopted owner decisions / configuration / ruleset identity:
 - Validation level and commands/results:
 - Coverage and known-data metric evidence:

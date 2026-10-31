@@ -614,9 +614,9 @@ correct terminal reason, privacy and unchanged FIFO. Deferred = unverified.
 
 Branch `codex/p60-p61-ranked-implementation`, based on `origin/main`
 `9008f11` (fetched 2026-10-31) plus the planning commit `501d80c`,
-cherry-picked as `8086675`. Validation level: **work front**. The scoped
-clippy passes; the tests are written but not run. **P60 is incomplete:**
-steps 5–7 are missing.
+cherry-picked as `8086675`. Validation level: **targeted tests** (run on
+the owner's request, 2026-10-31). The scoped clippy and the queued tests
+pass. **P60 is incomplete:** steps 5–7 are missing.
 
 - **Commit(s):**
   - `afb4eac`: renumber D-70–72 → D-87–89.
@@ -628,6 +628,7 @@ steps 5–7 are missing.
   - `05a1c49`: first-compile fixes.
   - `e6888d9`: step 4 shadow evaluation.
   - `deeeb6f`: ranked queue wait.
+  - `79b5a1d`: stale v6 schema pin in a unit test.
 - **Step 0 reconciliation.**
   - Main equals the plan's audited base, so the protocol is still v17 and
     the schema still v6. The browser HTML lobby is the only ranked
@@ -717,28 +718,34 @@ steps 5–7 are missing.
     exit 0 at `deeeb6f`. The first completed run, after seven exit-75
     deferrals while the P59 front held the lock, found 5 errors, fixed in
     `05a1c49`.
-- **Deferred (exact, not run):**
-
-  ```bash
-  flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
-    cargo test -p tbg-core --test rating --test contract_ranked_integrity --test contract_ruleset_version -- --test-threads=1
-  flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
-    cargo test -p tbg-server --test ranked --test ranked_integrity --test ranked_recovery \
-    --test accounts --test leaderboard --test contract_challenge --lib -- --test-threads=1
-  ```
-
-  The existing `ranked`/`accounts` targets exercise the new settlement
-  path end to end. Desktop browser checks of ordinary ranked results and
-  reconnects are also deferred.
+- **Targeted tests run** (owner request; shared lock, `CARGO_BUILD_JOBS=2`,
+  `--test-threads=1`, at `deeeb6f` + `79b5a1d`):
+  - `cargo test -p tbg-core --test rating --test contract_ranked_integrity --test contract_ruleset_version`:
+    10 passed, exit 0. The hash computed in Python matches Rust's.
+  - `cargo test -p tbg-server --no-fail-fast --test ranked --test ranked_integrity --test ranked_recovery --test accounts --test leaderboard --test contract_challenge --lib`:
+    61 passed, exit 0.
+    - lib 26, accounts 12, contract_challenge 2, leaderboard 4, ranked 6,
+      ranked_integrity 7, ranked_recovery 4.
+    - The first run failed one lib test,
+      `store::matches::tests::the_arena_is_recorded_and_older_rows_stay_null`:
+      it pinned `MAX(schema_version) == 6` (left 7, right 6). The pin
+      became `>= 6`, with its arena assertions unchanged.
+  - The existing ranked/accounts/leaderboard end-to-end suites now run
+    through the finalizer and the v7 settlement.
+- **Still deferred:**
+  - Desktop browser checks of ordinary ranked results and reconnects.
+  - `EXPLAIN QUERY PLAN` evidence for the history statement.
+  - The protocol contracts (no wire change was made).
+  - The full suite (not requested).
 - **Measurements:** none yet (no query plans, storage, CPU or latency
   figures).
 - **Attack fixtures:** A2/A3/A12, the exact limit, invalidated and
-  NoChange exclusion, history-unavailable and NotStarted are written in
-  `tests/ranked_integrity.rs`, **not run**. The other catalog rows are
-  covered by the core contract or not yet written.
+  NoChange exclusion, history-unavailable and NotStarted pass in
+  `tests/ranked_integrity.rs`. The remaining catalog rows (A1, A4–A11) are
+  covered only by the core contract or not yet written.
 - **Migration/recovery/rollback:** v6 → v7 twice, idempotence,
   conflict/same-account quarantine, rollback on insert failure and journal
-  ordering are written in `tests/ranked_recovery.rs`, **not run**. The
+  ordering pass in `tests/ranked_recovery.rs`. The
   deploy now takes an integrity-checked pre-migration backup with the
   server stopped; rollback limits are in `deploy/README.md`. Nothing was
   run against production.
