@@ -20,10 +20,18 @@ Part A the value is 18 (D-61). Update the audit when the next session starts.
 
 ## Waves (from P58; none started)
 
-- **W0 — shared contracts.** The reaudit reduced this to the missing slot kinds
-  and the shield grant path. The unit shield has no grant path today (UnitFx
-  `shield` exists, the Cargo Crab `shield_bp` is parsed and ignored).
-- **W1 — factions.** Append `Monsters`, `Celestials`, `Insects` after the four
+- **W0 — shared contracts. Not started.** P58 §W0 lists seven missing pieces:
+  the per-victim bleed slot, the temporary attack-weakening slot (R13), the
+  queued post-Root Slow (R19), per-caster mark state (R03), a bounded heal-cut
+  slot beside the existing pair, timed self-reduction under the existing 2 000 bp
+  cap, and the unit shield grant path with expiry and a view field (R12/R14),
+  plus the view and event extensions they need. Six of these are specified in
+  P58 §3 and do not wait for the owner. **The shield grant waits on owner
+  decision 5** (R12/R14 semantics, and whether the dormant Cargo Crab
+  `shield_bp` is granted or removed). Any view extension changes the wire, so
+  W0 must settle whether it shares the next protocol bump; the plan says W1 adds
+  no second bump unless its wire changes again.
+- **W1 — factions. Not started;** it waits for W0 to be green. Append `Monsters`, `Celestials`, `Insects` after the four
   existing factions. Generalise every fixed-size-4 array (the reaudit lists ten:
   `FACTIONS`, `counts`, `SYNERGIES`, palette `FACTIONS: [[Color; 8]; 4]`, …).
   Synergies at 2 and 4. Bump the protocol to the next free number (19 at the
