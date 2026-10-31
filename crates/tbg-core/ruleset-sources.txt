@@ -48,6 +48,7 @@ exclude account.rs account key format, no gameplay
 exclude bot.rs practice/test opponent, never authoritative
 exclude bot_shop.rs cosmetic metadata, tests or read-only presentation
 exclude celebration.rs cosmetic metadata, tests or read-only presentation
+exclude contract.rs release identity composition (P66), hashes the watched sources, no gameplay
 exclude drillnest/tests.rs cosmetic metadata, tests or read-only presentation
 exclude headless.rs offline harness
 exclude lab.rs offline balance lab, never online (C10)
