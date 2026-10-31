@@ -20,9 +20,11 @@ impl Match {
     pub(super) fn watch(&mut self, conn: ConnHandle) {
         let Some(id) = self.live else {
             let refusal = SpectateRefusal::NotWatchable;
-            let _ = conn.tx.try_send(ConnEvent::Send(ServerMsg::SpectateUnavailable {
-                reason: refusal,
-            }));
+            let _ = conn
+                .tx
+                .try_send(ConnEvent::Send(ServerMsg::SpectateUnavailable {
+                    reason: refusal,
+                }));
             return;
         };
         let start = ServerMsg::SpectateStart {

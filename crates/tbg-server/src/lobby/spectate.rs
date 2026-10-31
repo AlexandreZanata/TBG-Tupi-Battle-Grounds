@@ -30,7 +30,9 @@ impl Lobby {
             .sessions
             .get_mut(&token)
             .ok_or(SpectateRefusal::NotIdle)?;
-        if s.last_spectate.is_some_and(|t| now.duration_since(t) < SPECTATE_EVERY) {
+        if s.last_spectate
+            .is_some_and(|t| now.duration_since(t) < SPECTATE_EVERY)
+        {
             return Err(SpectateRefusal::RateLimited);
         }
         s.last_spectate = Some(now);

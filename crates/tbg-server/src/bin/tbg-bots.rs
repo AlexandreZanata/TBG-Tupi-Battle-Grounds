@@ -9,9 +9,9 @@
 
 use std::time::Duration;
 
-use tbg_core::Pcg32;
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use tbg_core::Pcg32;
 
 use tbg_server::botclient::spectators;
 use tbg_server::botclient::{play_one, BotOpts, BotResult};

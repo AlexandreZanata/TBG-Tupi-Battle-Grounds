@@ -21,9 +21,15 @@ impl Lobby {
     /// Publish a new snapshot if anything changed since the last one.
     pub(super) fn publish_live(&mut self, now: Instant) {
         let snapshot = self.live_snapshot(now);
-        self.metrics.spectators.store(u64::from(snapshot.counts.watching), Relaxed);
-        self.metrics.online_players.store(u64::from(snapshot.counts.players), Relaxed);
-        self.metrics.live_matches.store(self.live.len() as u64, Relaxed);
+        self.metrics
+            .spectators
+            .store(u64::from(snapshot.counts.watching), Relaxed);
+        self.metrics
+            .online_players
+            .store(u64::from(snapshot.counts.players), Relaxed);
+        self.metrics
+            .live_matches
+            .store(self.live.len() as u64, Relaxed);
         if **self.live_tx.borrow() != snapshot {
             self.live_tx.send_replace(Arc::new(snapshot));
         }

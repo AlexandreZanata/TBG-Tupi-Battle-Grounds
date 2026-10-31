@@ -16,10 +16,10 @@ use tbg_core::{Arena, StrongholdKind};
 use super::live::{Listing, LiveMatch};
 use super::{Lobby, RematchTicket, Session, SessionState};
 use crate::chan::{ConnEvent, ConnHandle, LobbyCmd, MatchCmd};
-use crate::Config;
 use crate::limits::Limits;
 use crate::live::{LiveProgress, LiveSnapshot};
 use crate::metrics::Metrics;
+use crate::Config;
 
 fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
     let (self_tx, self_rx) = mpsc::channel(8);
@@ -476,16 +476,41 @@ fn watch_refusals_follow_the_spec_order() {
     assert_eq!(lobby.live[&1].watchers, vec![[1; 16]]);
 
     lobby.spectate([1; 16], 1);
-    expect(&mut w, ServerMsg::SpectateUnavailable { reason: SpectateRefusal::RateLimited });
+    expect(
+        &mut w,
+        ServerMsg::SpectateUnavailable {
+            reason: SpectateRefusal::RateLimited,
+        },
+    );
     lobby.spectate([2; 16], 1);
-    expect(&mut q, ServerMsg::SpectateUnavailable { reason: SpectateRefusal::NotIdle });
+    expect(
+        &mut q,
+        ServerMsg::SpectateUnavailable {
+            reason: SpectateRefusal::NotIdle,
+        },
+    );
     lobby.spectate([3; 16], 99);
-    expect(&mut w2, ServerMsg::SpectateUnavailable { reason: SpectateRefusal::NotFound });
+    expect(
+        &mut w2,
+        ServerMsg::SpectateUnavailable {
+            reason: SpectateRefusal::NotFound,
+        },
+    );
     lobby.spectate([3; 16], 2);
-    expect(&mut w2, ServerMsg::SpectateUnavailable { reason: SpectateRefusal::RateLimited });
+    expect(
+        &mut w2,
+        ServerMsg::SpectateUnavailable {
+            reason: SpectateRefusal::RateLimited,
+        },
+    );
     lobby.sessions.get_mut(&[3; 16]).unwrap().last_spectate = None;
     lobby.spectate([3; 16], 2);
-    expect(&mut w2, ServerMsg::SpectateUnavailable { reason: SpectateRefusal::NotWatchable });
+    expect(
+        &mut w2,
+        ServerMsg::SpectateUnavailable {
+            reason: SpectateRefusal::NotWatchable,
+        },
+    );
 
     lobby.config = Arc::new(Config {
         spectators_per_match: 1,
@@ -493,7 +518,12 @@ fn watch_refusals_follow_the_spec_order() {
     });
     lobby.sessions.get_mut(&[3; 16]).unwrap().last_spectate = None;
     lobby.spectate([3; 16], 1);
-    expect(&mut w2, ServerMsg::SpectateUnavailable { reason: SpectateRefusal::Full });
+    expect(
+        &mut w2,
+        ServerMsg::SpectateUnavailable {
+            reason: SpectateRefusal::Full,
+        },
+    );
 }
 
 #[test]
@@ -523,4 +553,3 @@ fn a_watcher_returns_to_idle_on_stop_disconnect_and_match_end() {
     lobby.live_ended(1);
     assert!(matches!(lobby.sessions[&[2; 16]].state, SessionState::Idle));
 }
-
