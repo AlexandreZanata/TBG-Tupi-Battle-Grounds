@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "notes": [
+    {
+      "id": "native-3-competitive-audit",
+      "version": "0.1.0-native.3",
+      "date": "2026-10-31",
+      "status": "preview",
+      "kind": "maintenance",
+      "ruleset_version": 2,
+      "ruleset_hash": "3d56156049e626c5",
+      "title": {
+        "en": "Competitive balance audit and field reports",
+        "pt-BR": "Auditoria competitiva e notícias dos campos"
+      },
+      "summary": {
+        "en": "Reliable CANON measurements, compact simulations and transparent patch history. Gameplay numbers are preserved; competitive failures remain visible.",
+        "pt-BR": "Medições confiáveis das regras online, simulações compactas e histórico transparente. Os números do jogo foram preservados; as reprovações competitivas ficam registradas."
+      },
+      "changes": [
+        {
+          "category": "lab",
+          "subject": {
+            "en": "Canonical rules",
+            "pt-BR": "Regras online"
+          },
+          "field": {
+            "en": "default ruleset",
+            "pt-BR": "regras de referência"
+          },
+          "before": {
+            "en": "Practice preview",
+            "pt-BR": "Prévia de treino"
+          },
+          "after": {
+            "en": "Online CANON",
+            "pt-BR": "Regras online CANON"
+          },
+          "reason": {
+            "en": "Competitive measurements must use the same rules as the authoritative server.",
+            "pt-BR": "As medições competitivas precisam usar as mesmas regras do servidor autoritativo."
+          }
+        },
+        {
+          "category": "lab",
+          "subject": {
+            "en": "Champion cost coverage",
+            "pt-BR": "Cobertura de custos dos campeões"
+          },
+          "field": {
+            "en": "searchable costs",
+            "pt-BR": "custos analisados"
+          },
+          "before": 10,
+          "after": 46,
+          "reason": {
+            "en": "Every active conventional champion now participates in cost screening.",
+            "pt-BR": "Todos os campeões convencionais ativos passam a participar da análise de custo."
+          }
+        },
+        {
+          "category": "lab",
+          "subject": {
+            "en": "Roster-health criterion",
+            "pt-BR": "Critério de saúde do elenco"
+          },
+          "field": {
+            "en": "minimum purchase share per kind",
+            "pt-BR": "participação mínima nas compras por campeão"
+          },
+          "before": {
+            "en": "2.5% fixed (115% total for 46 kinds)",
+            "pt-BR": "2,5% fixos (115% no total com 46 campeões)"
+          },
+          "after": {
+            "en": "0.625 / N active kinds (about 1.36% at 46)",
+            "pt-BR": "0,625 / N campeões ativos (cerca de 1,36% com 46)"
+          },
+          "reason": {
+            "en": "Owner-approved normalization preserves the rigor used at 25 kinds while removing an impossible total. Other limits are unchanged.",
+            "pt-BR": "A normalização aprovada pelo dono preserva o rigor usado com 25 campeões e remove uma soma impossível. Os outros limites permanecem iguais."
+          }
+        },
+        {
+          "category": "performance",
+          "subject": {
+            "en": "Simulation results",
+            "pt-BR": "Resultados das simulações"
+          },
+          "field": {
+            "en": "retained combat arrays",
+            "pt-BR": "contadores de combate retidos"
+          },
+          "before": {
+            "en": "one per game",
+            "pt-BR": "um por partida"
+          },
+          "after": {
+            "en": "lossless aggregate per evaluation",
+            "pt-BR": "agregado por avaliação, sem perda"
+          },
+          "reason": {
+            "en": "Paired observations remain available; combat totals no longer occupy memory per finished game.",
+            "pt-BR": "As observações pareadas são preservadas; totais de combate deixam de ocupar memória por partida concluída."
+          }
+        },
+        {
+          "category": "interface",
+          "subject": {
+            "en": "Field news",
+            "pt-BR": "Notícias dos campos"
+          },
+          "field": {
+            "en": "public patch history",
+            "pt-BR": "histórico público de atualizações"
+          },
+          "before": {
+            "en": "static welcome message",
+            "pt-BR": "mensagem estática de boas-vindas"
+          },
+          "after": {
+            "en": "read-only API and shared patch page",
+            "pt-BR": "API de consulta e página compartilhada"
+          },
+          "reason": {
+            "en": "Changes and their evidence can be reviewed from the lobby.",
+            "pt-BR": "Mudanças e suas evidências podem ser consultadas pelo lobby."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Competitive evidence",
+            "body": "Discovery simulated 211,712 complete matches. Machines dominated, heavy/cheap spam exceeded limits, 13 base forms were oppressive and the Nash mix concentrated on one strategy. Controlled numeric candidates were not accepted. The owner chose to preserve gameplay values and address concentration in a separate rule-design phase. Independent confirmation completed another 423,424 matches; the strict required gate also failed. No numeric changes are shipped."
+          },
+          {
+            "title": "Interface and compatibility",
+            "body": "New patch notes, forum and game-news artwork. Existing matches remain authoritative and protocol 29 is unchanged."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Evidência competitiva",
+            "body": "A descoberta simulou 211.712 partidas completas. A facção Máquinas dominou, compras repetidas caras e baratas excederam os limites, 13 formas base foram dominantes e a análise de Nash se concentrou em uma estratégia. Os candidatos numéricos não foram aceitos. O dono escolheu preservar os valores e tratar a concentração de tropas em uma fase própria de regras. A confirmação independente concluiu mais 423.424 partidas; o gate obrigatório também reprovou. Nenhuma mudança numérica foi publicada."
+          },
+          {
+            "title": "Interface e compatibilidade",
+            "body": "Novas artes de patch notes, fórum e notícias do jogo. As partidas continuam autoritativas e o protocolo 29 permanece igual."
+          }
+        ]
+      },
+      "evidence": {
+        "report": "docs/phases/COMPETITIVE-BALANCE-PATCH-NOTES.md",
+        "accepted": false,
+        "seed_blocks": {
+          "discovery": "0..64",
+          "screening": "200000..200256; 25 control/candidate runs, 12,800 games",
+          "confirmation": "1000000..1000128; 423424 games; strict required gate FAILED; no accepted numeric candidate"
+        }
+      },
+      "document": "docs/patches/2026-10-31-native-3.md"
+    },
+    {
+      "id": "native-2-consolidation",
+      "version": "0.1.0-native.2",
+      "date": "2026-10-31",
+      "status": "preview",
+      "kind": "content",
+      "ruleset_version": 2,
+      "ruleset_hash": "3d56156049e626c5",
+      "title": {
+        "en": "Complete roster and Linux consolidation",
+        "pt-BR": "Elenco completo e consolidação Linux"
+      },
+      "summary": {
+        "en": "46 champions, five refined arenas, the training laboratory and victory celebrations.",
+        "pt-BR": "46 campeões, cinco arenas refinadas, laboratório de treino e celebrações de vitória."
+      },
+      "changes": [
+        {
+          "category": "content",
+          "subject": {
+            "en": "Conventional roster",
+            "pt-BR": "Elenco convencional"
+          },
+          "field": {
+            "en": "Shop pool",
+            "pt-BR": "elenco da Loja"
+          },
+          "before": 25,
+          "after": 46,
+          "reason": {
+            "en": "Owner-requested activation of the complete authored roster. Values remain Proposed for competitive acceptance.",
+            "pt-BR": "Ativação do elenco completo solicitada pelo dono. Os valores continuam Propostos para aceitação competitiva."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Delivered",
+            "body": "Shared Linux navigation, fifty actual-model portraits, training with exact teams and targets, and complete lifetime winner celebrations. Protocol 29 requires client and server updates together."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Entregue",
+            "body": "Navegação compartilhada no Linux, cinquenta retratos dos modelos reais, treino com equipes exatas e alvos, e celebrações com todos os participantes vencedores. O protocolo 29 exige atualizar cliente e servidor juntos."
+          }
+        ]
+      },
+      "evidence": {
+        "report": "docs/phases/CONSOLIDATED-LINUX-RELEASE.md",
+        "accepted": false,
+        "seed_blocks": {
+          "discovery": "not a balance acceptance",
+          "confirmation": "pending"
+        }
+      },
+      "document": "docs/patches/2026-10-31-native-2.md"
+    }
+  ]
+}

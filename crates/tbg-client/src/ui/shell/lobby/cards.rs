@@ -68,7 +68,12 @@ pub fn news(root: &mut ChildSpawnerCommands, page: usize, assets: &AssetServer, 
                 lang.key("lobby.news.title").to_uppercase(),
                 14.,
             ));
-            p.spawn(chrome::image(assets, "lobby/news.webp", 32.));
+            let art = ["patch-notes", "forum", "game-news"][page % 3];
+            p.spawn(chrome::image(
+                assets,
+                &format!("lobby/news/{art}.webp"),
+                38.,
+            ));
             p.spawn((
                 kit::muted(lang.key(&format!("lobby.news.{page}.title")), 13.),
                 Node {
@@ -92,7 +97,25 @@ pub fn news(root: &mut ChildSpawnerCommands, page: usize, assets: &AssetServer, 
             })
             .with_children(|r| {
                 r.spawn(news_arrow("<", -1));
-                r.spawn(kit::muted(format!("{} / 3", page + 1), 12.));
+                if page == 0 {
+                    r.spawn(super::super::button(
+                        lang.key("patches.read"),
+                        Action::Open(super::super::Panel::PatchNotes),
+                        140.,
+                    ))
+                    .insert(Node {
+                        height: px(28),
+                        width: px(140),
+                        min_height: px(28),
+                        padding: UiRect::axes(px(6), px(2)),
+                        border: UiRect::all(px(1)),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    });
+                } else {
+                    r.spawn(kit::muted(format!("{} / 3", page + 1), 12.));
+                }
                 r.spawn(news_arrow(">", 1));
             });
         });

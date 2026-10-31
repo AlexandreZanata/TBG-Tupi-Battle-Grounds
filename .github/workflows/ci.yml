@@ -16,6 +16,21 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Install Bevy system dependencies
         run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+      - name: Fetch the patch comparison base
+        env:
+          PATCH_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -n "$PATCH_BASE" && "$PATCH_BASE" != 0000000000000000000000000000000000000000 ]]; then
+            git fetch --no-tags --depth=1 origin "$PATCH_BASE"
+            echo "PATCH_BASE=$PATCH_BASE" >> "$GITHUB_ENV"
+          else
+            git fetch --no-tags --depth=1 origin main
+            echo "PATCH_BASE=origin/main" >> "$GITHUB_ENV"
+          fi
+      - name: Mandatory gameplay patch notes
+        run: |
+          python3 scripts/test-patch-notes.py
+          python3 scripts/check-patch-notes.py --base "$PATCH_BASE"
       - name: fmt
         run: cargo fmt --all -- --check
       - name: clippy

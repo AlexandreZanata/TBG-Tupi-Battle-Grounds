@@ -9,6 +9,7 @@ mod header;
 mod input;
 mod live;
 mod lobby;
+mod patch_notes;
 mod settings;
 mod strongholds;
 #[cfg(target_os = "linux")]
@@ -39,6 +40,7 @@ pub enum Panel {
     Live,
     Kit,
     Troops,
+    PatchNotes,
 }
 #[derive(Component, Clone, Copy, Debug)]
 pub enum Action {
@@ -70,6 +72,7 @@ impl Default for Shell {
     fn default() -> Self {
         let panel = match crate::config::url_param("panel").as_deref() {
             Some("troops") => Panel::Troops,
+            Some("patch-notes") => Panel::PatchNotes,
             Some("arcanas") => Panel::Arcanas,
             Some("stronghold") => Panel::Strongholds,
             Some("arenas") => Panel::Arenas,
@@ -316,6 +319,7 @@ fn render(
                             positions
                         })
                     }
+                    Panel::PatchNotes => patch_notes::spawn(body, &data, &assets, *lang),
                     Panel::Kit => settings::gallery(body, *lang),
                 }
             });

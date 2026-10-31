@@ -86,8 +86,16 @@
   const newsTitle = i => T('lobby.news.' + i + '.title');
   const newsBody = i => T('lobby.news.' + i + '.body');
   let story = 0;
+  const newsArt = ['patch-notes', 'forum', 'game-news'];
+  function renderNewsArt() {
+    const image = root.querySelector('[data-art="news"]');
+    if (image) image.src = 'assets/lobby/news/' + newsArt[story] + '.webp';
+    const link = root.querySelector('[data-patch-notes]');
+    if (link) link.hidden = story !== 0;
+  }
   root.querySelectorAll('[data-news]').forEach(button => button.addEventListener('click', () => {
     story = (story + Number(button.dataset.news) + NEWS_COUNT) % NEWS_COUNT;
+    renderNewsArt();
     set('[data-news-title]', newsTitle(story)); set('[data-news-body]', newsBody(story)); set('[data-news-page]', (story + 1) + ' / ' + NEWS_COUNT);
   }));
   let initialPanelOpened = false;
@@ -100,6 +108,7 @@
     if (selector) root.querySelector(selector).click();
   }
   function render() {
+    renderNewsArt();
     const name = root.dataset.player || '';
     root.querySelectorAll('[data-member]').forEach(node => { node.hidden = !name; });
     root.querySelectorAll('[data-guest]').forEach(node => { node.hidden = Boolean(name); });
