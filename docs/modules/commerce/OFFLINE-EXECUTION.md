@@ -59,3 +59,28 @@ mail custody, runtime revocation delivery, P65/P66 integration and owner gates.
 This is an offline foundation, not working email delivery or a playable mute
 feature. The synthetic mail capture retains temporary tokens only in memory;
 no permanent key is mailed, logged, or stored for later retrieval.
+
+## Step 1: offline identity implementation
+
+`store/recovery` installs fixture-only identity/challenge/admission/audit/
+revocation tables on a disposable database already migrated by the existing
+account schema. It uses the real account register/login implementation.
+Enrollment proves the current key against the authenticated AccountId.
+Verified email is private; pending/billing addresses cannot recover an account.
+The capture holds only temporary proofs; token digests alone persist in SQL.
+
+Protected confirmation fixtures validate POST, fixed synthetic origin and a
+separate browser nonce. GET only previews. An immediate SQLite transaction
+consumes all old challenges, replaces the existing key hash, advances the auth
+epoch, appends audit and durable revocation intent. Profile and account-linked
+purchase fixture rows stay untouched. Permanent keys are returned once only;
+losing that response requires a fresh recovery. Mail/audit failures roll back.
+
+Two stamped lobby fixtures exercise real Close/Detach/reconnect queues,
+bounded delivery failure and replay without revoking fresh-epoch sessions.
+The epoch stamps are a modeled future admission boundary, not an integrated
+runtime solution. P65 community sessions and P66 generation admission need
+their own integration tests after those implementations are integrated.
+
+Minimum front checks: `cargo fmt -p tbg-server` and `git diff --check` passed.
+Focused tests are queued once for Step 5; no tests were run per code step.

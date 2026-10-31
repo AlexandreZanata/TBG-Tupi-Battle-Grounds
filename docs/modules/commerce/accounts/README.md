@@ -1,5 +1,10 @@
 # Account recovery — verified email and replacement account key
 
+The [offline execution record](../OFFLINE-EXECUTION.md) supersedes documentary
+status for the executable `cfg(test)` recovery fixture. It uses the actual
+account schema plus isolated identity tables. Runtime email/confirmation,
+trusted email change and P65/P66 session integration remain blocked.
+
 > Design contract, no email sent or account changed. Recovery is a prerequisite
 > for paid cosmetics, reopening D-17 without replacing stable account identity.
 

@@ -1458,3 +1458,9 @@ cosmetic lines, quantity 1 each; fixture SKU/2,000-cent value is illustrative,
 not an approved catalog/price. Opponent mute/hide defaults false pending
 younger-player policy. Schema version 1 is local to documents, not a game
 protocol or DB version. O01–O05 confirm real policies before activation.
+
+Offline execution fixtures additionally propose 128 outstanding challenges,
+64 captured mail messages, 256 sliding-window admission records and 12
+requests/hour per synthetic source IP. These are test resource bounds only,
+not approved live operational limits. The owner deferred fiscal work and
+prioritized recovery and opponent mute; no commercial launch is approved.
