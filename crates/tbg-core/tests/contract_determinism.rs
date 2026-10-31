@@ -42,28 +42,11 @@ fn bot_matches_are_frozen() {
     // the serialized state; the Forest is neutral, so hashes moved once with
     // tick, winner and reason identical (verified on all three seeds).
     use EndReason::StrongholdDestroyed;
+    // D-61: owner champion changes in GAME-DESIGN, collected with update_probe.
     let goldens = [
-        (
-            1,
-            0xdf5d_547e_36e4_7845u64,
-            3_336,
-            Seat::B,
-            StrongholdDestroyed,
-        ),
-        (
-            7,
-            0xca17_5202_6278_78e5,
-            2_286,
-            Seat::B,
-            StrongholdDestroyed,
-        ),
-        (
-            42,
-            0x4069_7a3a_89d9_10e1,
-            6_295,
-            Seat::B,
-            StrongholdDestroyed,
-        ),
+        (1, 0xb4806525738e9a73u64, 3261, Seat::B, StrongholdDestroyed),
+        (7, 0x456ea62950c21c8c, 2266, Seat::B, StrongholdDestroyed),
+        (42, 0xf774cd8cd87dca2f, 7649, Seat::B, StrongholdDestroyed),
     ];
     for (seed, hash, tick, winner, reason) in goldens {
         let s = bot_match(seed);

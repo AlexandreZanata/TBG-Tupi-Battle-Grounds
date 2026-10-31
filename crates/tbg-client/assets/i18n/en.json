@@ -28,6 +28,8 @@
   "arenas.tundra.theme": "Snow, ice floes and frozen pines",
   "arenas.volcanic.name": "Volcanic Forge",
   "arenas.volcanic.theme": "Basalt, embers and molten currents",
+  "champion.bloodweaver.siphon": "Primary enemy-unit damage heals the wounded conventional ally with the lowest HP percentage anywhere in the lane.",
+  "champion.smuggler.revolver": "Revolver: 10 damage every 1.5 s, range 6.4. Crates every 20 s, placed behind.",
   "common.close": "Close",
   "live.accounts": "Accounts online · {count}",
   "live.accounts_none": "No accounts online right now",

@@ -281,6 +281,7 @@ pub enum Event {
         unit: UnitId,
         opened: Option<UnitId>,
     },
+    /// Siphon: from is the enemy struck, to the ally healed, amount actual HP restored.
     Transfer {
         from: UnitId,
         to: UnitId,

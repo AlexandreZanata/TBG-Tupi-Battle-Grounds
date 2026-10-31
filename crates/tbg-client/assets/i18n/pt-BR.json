@@ -28,6 +28,8 @@
   "arenas.tundra.theme": "Neve, blocos de gelo e pinheiros congelados",
   "arenas.volcanic.name": "Forja Vulcânica",
   "arenas.volcanic.theme": "Basalto, brasas e correntes de lava",
+  "champion.bloodweaver.siphon": "O dano primário a unidades inimigas cura o aliado convencional ferido com a menor porcentagem de vida em qualquer ponto da BattleLine.",
+  "champion.smuggler.revolver": "Revólver: 10 de dano a cada 1,5 s, alcance 6,4. Caixas a cada 20 s, colocadas atrás.",
   "common.close": "Fechar",
   "live.accounts": "Contas online · {count}",
   "live.accounts_none": "Nenhuma conta online agora",

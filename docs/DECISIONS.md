@@ -1075,3 +1075,15 @@ a separate owner decision and a preview balance gate.
 **Why.** Improve readable formations without adding server work or changing
 competitive rules. **Reopen** if bounded cosmetic offsets prove misleading
 or the owner approves collision as a gameplay mechanic.
+
+
+## D-61 · Champion adjustments and offensive Bloodweaver — 2026-10-31 (Proposed)
+
+**Decision.** Apply the owner's specified initial champion values in
+GAME-DESIGN and replace Bloodweaver's zero-sum Transfer with Siphon.
+Summoners already act on independent timers (BR-U08a); Smuggler's revolver
+and rear crate placement correct the misleading stationary behavior.
+**Contracts.** GAME-DESIGN changes roster/form contracts and determinism
+hashes intentionally. The balance lab must compare identical seed blocks.
+**Reopen** if changed champions dominate, existing gates regress or the
+owner's look/fun review rejects the presentation. Values remain Proposed.

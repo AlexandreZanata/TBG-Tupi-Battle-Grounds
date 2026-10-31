@@ -163,7 +163,7 @@ fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
 }
 
 /// Smuggler cargo (P48-B, §C.11): every `every` ticks the Smuggler drops a
-/// Crate (120 HP, no attack, no movement, targetable) at its own x. The
+/// Crate (120 HP, no attack, no movement, targetable) behind its carrier. The
 /// first crate comes after a full interval.
 fn cargo_tick(state: &mut MatchState, idx: usize, smuggler: &Unit) {
     let cd = smuggler.action_cd.saturating_sub(1);
@@ -208,7 +208,8 @@ fn cargo_tick(state: &mut MatchState, idx: usize, smuggler: &Unit) {
         kind: UnitKind::Crate,
         tier: 0,
         branch: 0,
-        x: smuggler.x,
+        x: (smuggler.x - smuggler.seat.dir() * crate::content::CRATE_DROP_BACK)
+            .clamp(0, crate::content::LANE_LEN),
         hp: state.rules().def(UnitKind::Crate).hp,
         max_hp: state.rules().def(UnitKind::Crate).hp,
         cooldown: 0,

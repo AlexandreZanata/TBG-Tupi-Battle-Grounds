@@ -1,0 +1,8 @@
+   Compiling tbg-core v0.1.0 (/tmp/tbg-system-updates/crates/tbg-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 11.53s
+     Running `/tmp/tbg-core-target/debug/examples/update_probe`
+1 0xefb0ee3248ebd94b 0xb4806525738e9a73 3261 Some(Outcome { winner: Some(B), reason: StrongholdDestroyed })
+7 0x40241ecd5f228c07 0x456ea62950c21c8c 2266 Some(Outcome { winner: Some(B), reason: StrongholdDestroyed })
+42 0xcc7dbcf702137deb 0xf774cd8cd87dca2f 7649 Some(Outcome { winner: Some(B), reason: StrongholdDestroyed })
+1000 0x263114a996466dfe 0x513b306c53a1e8bb 2785 Some(Outcome { winner: Some(B), reason: StrongholdDestroyed })
+65535 0x03e9889b2c1c0d13 0xa46b5c3f1b9e1fa4 24689 Some(Outcome { winner: Some(A), reason: StrongholdDestroyed })

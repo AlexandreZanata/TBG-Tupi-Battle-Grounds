@@ -37,11 +37,6 @@ pub(crate) fn resolve_hit(
             crate::afflictions::brew_cast(state, attacker, st.range, id, strip, ward, second, ev);
             return;
         }
-        // Bloodweavers transfer instead of healing.
-        if let Some((amount, low_bp, second)) = crate::support::transfer_of(state, attacker) {
-            crate::support::transfer_cast(state, attacker, st.range, amount, low_bp, second, ev);
-            return;
-        }
         let _restored = heal(state, attacker.seat, id, st.heal, true, ev);
         #[cfg(feature = "lab")]
         crate::lab::healed(state, attacker, _restored);
@@ -89,6 +84,9 @@ pub(crate) fn resolve_hit(
     #[cfg(feature = "lab")]
     if let Target::Unit(_) = target {
         crate::lab::dealt(state, attacker, removed);
+    }
+    if let Target::Unit(id) = target {
+        crate::siphon::apply(state, attacker, id, removed, ev);
     }
     if let Target::Unit(id) = target {
         let hostile = state
@@ -551,7 +549,7 @@ pub(crate) fn damage(
     }
 }
 
-fn heal(
+pub(crate) fn heal(
     state: &mut MatchState,
     healer: Seat,
     id: u32,

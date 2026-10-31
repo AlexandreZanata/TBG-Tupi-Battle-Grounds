@@ -50,7 +50,7 @@ const ROSTER: [Row; 11] = {
         r(Rootcaller,   Plants,   Control, 4,  300, 20,  0, 160, 300, 90,   0,
           Some(OnHit::Root { ticks: 16 })),
         // P16-B (D-32, Proposed): Hatch every 4 s; Guard (BR-U09).
-        r(Nester,       Plants,   Support, 4,  300, 15,  0, 150, 250, 80,   0, None),
+        r(Nester,       Plants,   Support, 4,  300, 15,  0, 150, 300, 80,   0, None),
         r(Rampart,      Machines, Tank,    6, 1500, 35,  0, 150, 80,  50,   0, None),
         // summon (BR-U08): never sold, lifetime 10 s
         r(Beetling,     Plants,   Dps,     0,   90, 18,  0, 80,  60,  140,  0, None),
@@ -71,25 +71,25 @@ const STAGED: [Row; 15] = {
               speed_ct, splash_ct, on_hit }
     }
     [
-        r(Longaxe,      Humans,   Dps,     4,  360, 100, 0, 240, 160, 70,    0, None),
+        r(Longaxe,      Humans,   Dps,     4,  360, 100, 0, 240, 300, 70,    0, None),
         r(Farwatch,     Humans,   Ranged,  3,  150, 70,  0, 400, 1200, 90,   0, None),
         r(Bombard,      Machines, Ranged,  5, 1000, 24,  0, 220, 400, 50, 100, None),
         r(Rotcap,       Plants,   Ranged,  3,  200, 12,  0, 150, 350, 90,    0, None),
-        r(OldFinn,      Humans,   Control, 3,  240, 8,   0, 200, 350, 90,    0, None),
+        r(OldFinn,      Humans,   Control, 3,  240, 8,   0, 200, 525, 90,    0, None),
         r(AntidoteBrewer, Plants, Support, 3,  260, 0,   0, 400, 300, 90,    0, None),
         // P46: speed 28 (0.56 t/s) stands in for the model's 0.55: milli-tiles
         // are integers, and ±0.01 t/s is model noise.
         r(Shatterback,  Plants,   Tank,    4,  560, 30,  0, 150, 80,  56,    0, None),
-        r(BloodFurnace, Undead,   Dps,     4,  440, 36,  0, 180, 80,  90,    0, None),
-        r(Bloodweaver,  Undead,   Support, 3,  300, 0,   0, 500, 300, 90,    0, None),
+        r(BloodFurnace, Undead,   Dps,     4,  440, 36,  0, 150, 80,  108,    0, None),
+        r(Bloodweaver,  Undead,   Support, 3,  300, 30,  0, 200, 300, 90,    0, None),
         // P47: Drumguard range is the 3.0-tile hold radius (the bond reach
         // 2.0 lives in March.reach); Oilpress Every is 2.5 s.
         r(Oilpress,     Machines, Tank,    7, 3600, 25,  0, 250, 80,  30,    0, None),
         r(Drumguard,    Humans,   Support, 3,  260, 0,   0, 100, 300, 100,   0, None),
-        r(Leechroot,    Plants,   Dps,     3,  220, 10,  0, 160, 120, 90,    0, None),
+        r(Leechroot,    Plants,   Dps,     3,  300, 10,  0, 160, 120, 90,    0, None),
         r(CargoCrab,    Machines, Tank,    5, 1400, 20,  0, 150, 80,  50,    0, None),
         r(Puppetmaster, Undead,   Control, 4,  260, 0,   0, 800, 400, 90,    0, None),
-        r(Smuggler,     Humans,   Support, 6,  320, 0,   0, 2000, 500, 60,    0, None),
+        r(Smuggler,     Humans,   Support, 6,  320, 10,  0, 150,  640, 60,    0, None),
     ]
 };
 
@@ -315,7 +315,7 @@ Blood Furnace/Infernal Core: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 
 Blood Furnace/Dying Sun: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Blood Furnace/Efficient Combustion: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Blood Furnace/Eternal Embers: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Bloodweaver/Deep Transfer: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bloodweaver/Deep Transfer: hp=0 dmg=3000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bloodweaver/Last Offering: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bloodweaver/Rapid Circulation: hp=0 dmg=0 atk=2500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bloodweaver/Shared Blood: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
@@ -341,7 +341,7 @@ Puppetmaster/Faster Strings: hp=0 dmg=0 atk=3333 speed=0 range+=0 splash+=0 heal
 Puppetmaster/Double Puppet: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Smuggler/Better Connections: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Smuggler/Black Market: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Smuggler/Faster Deliveries: hp=0 dmg=0 atk=1100 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Smuggler/Faster Deliveries: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Smuggler/Double Shipment: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-

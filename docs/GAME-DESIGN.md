@@ -100,6 +100,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-U05 | Cosmetics never change stats, hitboxes, or behavior | Confirmed | S1 |
 | BR-U06 | ~~A player's living units may occupy at most `SLOT_CAP` slots~~ | **Removed — D-32** | — |
 | BR-U07 | There is no limit on how many conventional units a player may own; only `Energy` gates purchases | Proposed (D-32) | — |
+| BR-U08a | Summoners (Nester, Smuggler and future summoners) act on their own timers, independently of visible enemies, range or enemies being present in the lane | Confirmed (owner 2026-10-31) | — |
 | BR-U08 | A summon is a temporary unit created by a unit's ability: it costs no `Energy`, is never sold, never evolves, never summons, neither counts toward nor receives `Synergy`, is not part of the army count, and disappears when its lifetime ends | Proposed (D-32) | — |
 | BR-U09 | Guard: an enemy unit or `Stronghold` whose attack range reaches a living Rampart must target the nearest such Rampart | Proposed (D-32) | — |
 | BR-U10 | A server-protection entity limit, if ever needed, is documented as server protection with measured evidence (ARCHITECTURE), never as an army rule | Proposed (D-32) | — |
@@ -220,7 +221,7 @@ Bone Brute, Siege Walker, and Rampart are drawn with the large body plan
 | Siege Walker | Machines | Ranged | 5 | 700 | 85 | 2.5 | 6.0 | 0.66 | splash 1.5 |
 | Bloomkeeper | Plants | Support | 3 | 280 | heal 40 | 1.5 | 3.0 | 0.9 | heals instead of attacking |
 | Rootcaller | Plants | Control | 4 | 300 | 20 | 1.6 | 3.0 | 0.9 | root 0.8 s |
-| Nester | Plants | Support | 4 | 300 | 15 | 1.5 | 2.5 | 0.8 | Hatch: every 4.0 s a Beetling; ≤ 2 alive per Nester, ≤ 6 per player |
+| Nester | Plants | Support | 4 | 300 | 15 | 1.5 | 3.0 | 0.8 | Hatch: every 4.0 s a Beetling; ≤ 2 alive per Nester, ≤ 6 per player |
 | Rampart | Machines | Tank | 6 | 1500 | 35 | 1.5 | 0.8 | 0.5 | Guard (BR-U09) |
 | *Beetling (summon)* | Plants | DPS | — | 90 | 18 | 0.8 | 0.6 | 1.4 | lifetime 10 s; inherits the Nester's tier and branch at hatch |
 
@@ -696,18 +697,18 @@ Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). S
 |------|---------|-------|------|----|-----|-------|-------|-------|----------------------|
 | Rotcap | Plants | Ranged | 3 | 200 | 12 | 1.5 | 3.5 | 0.9 | Each hit adds a poison stack (6/s, 10 s, ≤ 6 per victim) that outlives it |
 | Farwatch | Humans | Ranged | 3 | 150 | 70 | 4.0 | 12.0 | 0.9 | Shoots units across most of the lane; never targets Strongholds |
-| Leechroot | Plants | DPS | 3 | 220 | 10 | 1.6 | 1.2 | 0.9 | Damage dealt to enemy units becomes permanent stacks, no maximum; lost on death |
+| Leechroot | Plants | DPS | 3 | 300 | 10 | 1.6 | 1.2 | 0.9 | Damage dealt to enemy units becomes permanent stacks, no maximum; lost on death |
 | Bombard | Machines | Ranged | 5 | 1 000 | 24 | 2.2 | 4.0 | 0.5 | Blast radius 1.0 hits every unit, both sides and itself |
-| Old Finn | Humans | Control | 3 | 240 | 8 | 2.0 | 3.5 | 0.9 | Fish: −15 % move each, ≤ 3, 5 s; never slows attacks |
+| Old Finn | Humans | Control | 3 | 240 | 8 | 2.0 | 5.25 | 0.9 | Fish: −15 % move each, ≤ 3, 5 s; never slows attacks |
 | Drumguard | Humans | Support | 3 | 260 | — | — | 2.0 | 1.0 | Bond to the nearest ally: +25 % move, −15 % damage taken |
-| Longaxe | Humans | DPS | 4 | 360 | 100 | 2.4 | 1.6 | 0.7 | Heavy melee that strikes over its own front line |
+| Longaxe | Humans | DPS | 4 | 360 | 100 | 2.4 | 3.0 | 0.7 | Heavy melee that strikes over its own front line |
 | Oilpress | Machines | Tank | 7 | 3 600 | 25 | 2.5 | 0.8 | 0.3 | Most HP in the game; while engaged, own units cannot walk past it |
 | Antidote Brewer | Plants | Support | 3 | 260 | — | 4.0 | 3.0 | 0.9 | Cleanses the most afflicted ally and wards it 1 s |
 | Puppetmaster | Undead | Control | 4 | 260 | — | 8.0 | 4.0 | 0.9 | The hardest-hitting enemy in range strikes its own ally once |
-| Smuggler | Humans | Support | 6 | 320 | — | 20.0 | 5.0 | 0.6 | Every 20 s a crate opens into a random unit — or nothing |
+| Smuggler | Humans | Support | 6 | 320 | 10 | 1.5 | 6.4 | 0.6 | Revolver; drops crates 0.4 tile behind; every 20 s a crate opens into a random unit — or nothing |
 | Shatterback | Plants | Tank | 4 | 560 + 4 × 100 plates | 30 | 1.5 | 0.8 | 0.55 | Each broken plate: permanently faster moves and attacks |
-| Blood Furnace | Undead | DPS | 4 | 440 | 36 | 1.8 | 0.8 | 0.9 | Each hit burns 6 % max HP; damage grows up to ×4 as HP falls |
-| Bloodweaver | Undead | Support | 3 | 300 | — | 5.0 | 3.0 | 0.9 | Moves up to 120 HP from the healthiest ally to the most wounded |
+| Blood Furnace | Undead | DPS | 4 | 440 | 36 | 1.5 | 0.8 | 1.08 | Each hit burns 6 % max HP; damage grows up to ×4 as HP falls |
+| Bloodweaver | Undead | Support | 3 | 300 | 30 | 2.0 | 3.0 | 0.9 | Siphon: actual enemy-unit HP removed heals the lowest-percent wounded conventional ally anywhere in the lane |
 | Cargo Crab | Machines | Tank | 5 | 1 400 | 20 | 1.5 | 0.8 | 0.5 | Carries one non-Tank ally that single-target attacks cannot reach |
 
 ## 12. Arenas (active, values Proposed, ARENAS-G, D-55)
@@ -779,3 +780,19 @@ information. Values are **Proposed** (owner defaults O-1–O-6 in
 - **BR-LV09** Caps: 200 spectators per match and 2 000 in total. A full or
   unknown match answers `SpectateUnavailable`, never a disconnect. A slow
   spectator is dropped without ever affecting a seat.
+
+Champion adjustments (owner 2026-10-31, **Proposed**): Longaxe range 3.0,
+Old Finn range 5.25, Leechroot HP 300, Blood Furnace interval 30 ticks and
+speed 54, Nester range 3.0, Smuggler damage 10 / interval 30 / range 6.4.
+Cargo remains every 400 ticks (branch B 360); Faster Deliveries no longer
+modifies attack speed. CRATE_DROP_BACK = 400 milli-tiles, clamped to the lane.
+
+Bloodweaver Siphon (**Proposed**, owner 2026-10-31): attacks normally;
+primary damage to enemy units heals the lowest exact HP fraction among
+living wounded allied conventional units (self included), ties nearest then
+lowest id. No Stronghold healing trigger; no overkill or shield/plate damage
+counts. Healing uses Support bonuses, heal cut and Purification, separately
+from the BR-X06 lifesteal cap. Base heal_bp 10,000; A1 adds 3,000 damage bp;
+A2 doubles healing below 20% HP. B1 adds 2,500 attack bp; B2 replaces Siphon
+with heal_bp 12,000 split equally across up to two recipients chosen before
+healing. Event::Transfer now means enemy-to-recipient, actual HP restored.

@@ -25,6 +25,7 @@ pub mod rng;
 pub mod ruleset;
 pub mod shop;
 pub mod sim;
+mod siphon;
 pub mod state;
 pub mod stronghold;
 mod summon;

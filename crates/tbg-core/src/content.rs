@@ -8,6 +8,9 @@ use crate::ruleset::CANON;
 use crate::types::{Archetype, Faction, OnHit, StrongholdKind, Tick, UnitKind};
 
 pub const TICK_HZ: u32 = 20;
+/// Proposed: crates are placed 0.4 tile behind their carrier.
+pub const CRATE_DROP_BACK: i32 = 400;
+
 pub const LANE_LEN: i32 = 16_000;
 pub const SPAWN_OFFSET: i32 = 500;
 
@@ -429,10 +432,10 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
-    Transfer {
-        amount: u16,
+    Siphon {
+        heal_bp: u16,
         low_bp: u16,
-        second: bool,
+        split: bool,
     },
 }
 
@@ -573,7 +576,7 @@ pub const UNITS: [UnitDef; 27] = [
     ]),
     // P16-B (D-32, Proposed). Nester forms only change Hatch (`hatch_rule`).
     unit(UnitKind::Nester, "Nester", Plants, Support, 2_400,
-        [300, 15, 30, 2_500, 40, 0, 0], None, HATCH_ABILITIES, [
+        [300, 15, 30, 3_000, 40, 0, 0], None, HATCH_ABILITIES, [
         form("Brood"), form("Hive"), form("Venom"), form("Blight"),
     ]),
     unit(UnitKind::Rampart, "Rampart", Machines, Tank, 3_600,
@@ -594,7 +597,7 @@ pub const UNITS: [UnitDef; 27] = [
     // P44 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave A. Not in the
     // Shop pool until the P53 owner switch.
     unit(UnitKind::Longaxe, "Longaxe", Humans, Dps, 2_400,
-        [360, 100, 48, 1_600, 35, 0, 0], None, NO_ABILITIES, [
+        [360, 100, 48, 3_000, 35, 0, 0], None, NO_ABILITIES, [
         FormDef { dmg_bp: 3_000, ..form("Deep Cut") },
         FormDef { dmg_bp: 3_000, vs_above_bp: 3_000, vs_above_hp_bp: 6_000, ..form("Crushing Edge") },
         FormDef { splash_add: 800, splash_bp: 4_000, ..form("Sweeping Arc") },
@@ -630,7 +633,7 @@ pub const UNITS: [UnitDef; 27] = [
         form("Toxic Rain"),
     ]),
     unit(UnitKind::OldFinn, "Old Finn", Humans, Control, 1_800,
-        [240, 8, 40, 3_500, 45, 0, 0], None, [
+        [240, 8, 40, 5_250, 45, 0, 0], None, [
         [Ability::Fish { bp: 1_500, ticks: 100, cap: 3, per_hit: 1 }, Ability::None],
         [Ability::Fish { bp: 2_000, ticks: 100, cap: 3, per_hit: 1 }, Ability::None],
         [Ability::Fish { bp: 2_000, ticks: 100, cap: 3, per_hit: 2 }, Ability::None],
@@ -671,7 +674,7 @@ pub const UNITS: [UnitDef; 27] = [
         form("Rampage"),
     ]),
     unit(UnitKind::BloodFurnace, "Blood Furnace", Undead, Dps, 2_400,
-        [440, 36, 36, 800, 45, 0, 0], None, [
+        [440, 36, 30, 800, 54, 0, 0], None, [
         [Ability::Furnace { burn_bp: 600, max_bp: 30_000 }, Ability::None],
         [Ability::Furnace { burn_bp: 600, max_bp: 35_000 }, Ability::None],
         [Ability::Furnace { burn_bp: 600, max_bp: 45_000 }, Ability::None],
@@ -684,14 +687,14 @@ pub const UNITS: [UnitDef; 27] = [
         form("Eternal Embers"),
     ]),
     unit(UnitKind::Bloodweaver, "Bloodweaver", Undead, Support, 1_800,
-        [300, 0, 100, 3_000, 45, 0, 0], None, [
-        [Ability::Transfer { amount: 120, low_bp: 0, second: false }, Ability::None],
-        [Ability::Transfer { amount: 156, low_bp: 0, second: false }, Ability::None],
-        [Ability::Transfer { amount: 156, low_bp: 2_000, second: false }, Ability::None],
-        [Ability::Transfer { amount: 120, low_bp: 0, second: false }, Ability::None],
-        [Ability::Transfer { amount: 120, low_bp: 0, second: true }, Ability::None],
+        [300, 30, 40, 3_000, 45, 0, 0], None, [
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 0, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 0, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 2_000, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 0, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 12_000, low_bp: 0, split: true }, Ability::None],
     ], [
-        form("Deep Transfer"),
+        FormDef { dmg_bp: 3_000, ..form("Deep Transfer") },
         form("Last Offering"),
         FormDef { atk_bp: 2_500, ..form("Rapid Circulation") },
         form("Shared Blood"),
@@ -727,7 +730,7 @@ pub const UNITS: [UnitDef; 27] = [
     // P48-A (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave E1. Not in the
     // Shop pool until the P53 owner switch.
     unit(UnitKind::Leechroot, "Leechroot", Plants, Dps, 1_800,
-        [220, 10, 32, 1_200, 45, 0, 0], None, [
+        [300, 10, 32, 1_200, 45, 0, 0], None, [
         [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
         [Ability::Essence { base: 30, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
         [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 300 }, Ability::None],
@@ -768,7 +771,7 @@ pub const UNITS: [UnitDef; 27] = [
         form("Double Puppet"),
     ]),
     unit(UnitKind::Smuggler, "Smuggler", Humans, Support, 3_600,
-        [320, 0, 400, 5_000, 30, 0, 0], None, [
+        [320, 10, 30, 6_400, 30, 0, 0], None, [
         [Ability::Cargo { every: 400, open: 40, table: [20, 42, 28, 8, 2], double_every: 0 }, Ability::None],
         [Ability::Cargo { every: 400, open: 40, table: [10, 40, 34, 12, 4], double_every: 0 }, Ability::None],
         [Ability::Cargo { every: 400, open: 40, table: [6, 28, 38, 20, 8], double_every: 0 }, Ability::None],
@@ -778,8 +781,8 @@ pub const UNITS: [UnitDef; 27] = [
     ], [
         form("Better Connections"),
         form("Black Market"),
-        // 400 ticks → 360 (18 s): any atk_bp in 1081..=1111 lands exactly.
-        FormDef { atk_bp: 1_100, ..form("Faster Deliveries") },
+        // Cargo cadence is independent of the revolver attack interval.
+        form("Faster Deliveries"),
         form("Double Shipment"),
     ]),
     // Cargo crate: 120 HP, no attack, no movement (speed 0), targetable.
