@@ -667,3 +667,49 @@ long-running demo lifecycle and return from menu to real matches to
 consolidation. Full workspace tests/Clippy and other-target builds remain
 deferred. No web asset replacement, remote Git, CI or deployment belongs
 to this front.
+
+### Hall of Champions and lobby battle result
+
+- Local implementation commits: `c8b7c30` (isolated lobby battle),
+  `3f4b9f3` (illustrated Ranking), `926b0c9` (stage cover and preserved
+  table scroll). Installed source:
+  `926b0c9ab82cb2a7532fffb68d6ea3299c664ef4`.
+- Native `cargo build --locked -p tbg-client --bin tbg-client`, Linux
+  packaging with `--no-archive` and the generated installer passed under
+  the shared host lock/cache with `CARGO_BUILD_JOBS=2`. Initial compilation
+  took 12.48 s and warned `constant BUTTON is never used`; reusing the
+  shared own-row color removed that warning. After the relevant visual
+  corrections, final compilation took 9.50 s with no warnings or errors.
+- `cargo fmt -p tbg-client -- --check`, `git diff --check`, reused WebP
+  metadata inspection, `desktop-file-validate`, installed source metadata
+  and binary/cache/manifest SHA-256 comparison passed. Updated the local
+  preview pointer to the installed revision. No original illustration
+  was modified or regenerated.
+- Inspected `.local/ranking-redesign-final.webp` at 1920x972: the panel
+  matches the common header width, fills the available height above the
+  attribution, and preserves standard page margins. The three equally
+  sized podiums have aligned number/name/rating/result plates, including
+  a long player name, and the grove now uses an aspect-preserving cover
+  crop across the entire stage. The table and sidebar remain readable.
+  This capture explicitly used `TBG_CAPTURE_RANKING_FIXTURE=1`; its three
+  accounts/results are layout fixtures, not production evidence.
+- Inspected `.local/lobby-battle-final.webp`: the menu remains visible
+  over a real core skirmish, with HP changes and combat animation. Capture
+  log: `live units=[BoneBrute, Rampart, Drumguard, Drumguard, Rotcap,
+  SiegeWalker, Farwatch, BoneBrute, Archer]; real LatestView present=false;
+  real match purchases=0, evolutions=0, damage=0`. The isolated demo does
+  not publish a real match view or contaminate result counters.
+- `.local/lobby-transition.webp` observed five seconds of the demo,
+  queued the normal Practice UiAction, and captured the actual Running
+  phase. Demo units were absent; the new player's Army was zero and the
+  opponent had only its newly purchased unit. No full match, online
+  reconnect or long lifecycle claim is made from this focused smoke check.
+- Final captures exited successfully with only expected virtual X11
+  XSETTINGS/physical-dimension warnings. They used isolated profiles and a
+  localhost server override; production ranking/account/recent-data
+  behavior remains unobserved. The focused Rust regression and other
+  consolidation checks listed above remain deferred; the single observed
+  demo-to-Practice transition is the exception now completed. No full
+  suite, other-target build, web behavior/assets replacement, remote Git,
+  CI or deployment ran. Existing windows, preferences, account data and
+  unrelated policy edits were preserved. Reopen TBG for this installation.
