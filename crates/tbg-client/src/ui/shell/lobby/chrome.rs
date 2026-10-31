@@ -20,17 +20,21 @@ pub fn region(x: f32, y: f32, w: f32, h: f32) -> Node {
     }
 }
 
-pub fn panel(rect: [f32; 4]) -> impl Bundle {
+pub fn panel_node(rect: [f32; 4]) -> Node {
     let [x, y, w, h] = rect;
+    Node {
+        flex_direction: FlexDirection::Column,
+        padding: UiRect::all(px(12)),
+        border: UiRect::all(px(2)),
+        border_radius: BorderRadius::all(px(4)),
+        overflow: Overflow::clip(),
+        ..region(x, y, w, h)
+    }
+}
+
+pub fn panel(rect: [f32; 4]) -> impl Bundle {
     (
-        Node {
-            flex_direction: FlexDirection::Column,
-            padding: UiRect::all(px(12)),
-            border: UiRect::all(px(2)),
-            border_radius: BorderRadius::all(px(4)),
-            overflow: Overflow::clip(),
-            ..region(x, y, w, h)
-        },
+        panel_node(rect),
         BackgroundColor(METAL),
         BorderColor::all(EDGE),
         BoxShadow(vec![ShadowStyle {

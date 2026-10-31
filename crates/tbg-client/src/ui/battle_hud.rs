@@ -33,12 +33,14 @@ fn hide_fallback(
         };
     }
     let debug = crate::config::url_param("measure").is_some();
+    let native_menu = cfg!(target_os = "linux") && *state.get() == crate::GameState::Menu;
     for mut visibility in &mut stats {
-        *visibility = if *state.get() == crate::GameState::Gallery || (desktop.0 && !debug) {
-            Visibility::Hidden
-        } else {
-            Visibility::Inherited
-        };
+        *visibility =
+            if native_menu || *state.get() == crate::GameState::Gallery || (desktop.0 && !debug) {
+                Visibility::Hidden
+            } else {
+                Visibility::Inherited
+            };
     }
 }
 

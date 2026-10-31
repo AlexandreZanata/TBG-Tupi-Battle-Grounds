@@ -3,6 +3,7 @@
 use super::{chrome, kit, Account, Action, Data, Lang, Panel, UiAction};
 use bevy::prelude::*;
 
+#[cfg(not(target_os = "linux"))]
 pub fn spawn(
     root: &mut ChildSpawnerCommands,
     data: &Data,
@@ -53,6 +54,52 @@ pub fn spawn(
                 navigation(blocks, assets, lang);
                 presence_block(blocks, data, assets, lang);
             });
+    });
+}
+
+#[cfg(target_os = "linux")]
+pub fn spawn(
+    root: &mut ChildSpawnerCommands,
+    data: &Data,
+    account: &Account,
+    assets: &AssetServer,
+    lang: Lang,
+) {
+    root.spawn((
+        Node {
+            align_items: AlignItems::Center,
+            border: UiRect::bottom(px(3)),
+            ..chrome::region(2., 2.4, 96., 10.4)
+        },
+        BackgroundColor(chrome::METAL),
+        BorderColor::all(chrome::EDGE),
+    ))
+    .with_children(|header| {
+        header
+            .spawn((
+                Node {
+                    width: percent(13),
+                    flex_grow: 0.,
+                    flex_basis: Val::Auto,
+                    padding: UiRect::axes(px(8), px(6)),
+                    ..block()
+                },
+                BackgroundColor(chrome::METAL),
+                BorderColor::all(chrome::EDGE),
+            ))
+            .with_children(|logo| {
+                logo.spawn((
+                    ImageNode::new(assets.load("lobby/wordmark.webp")),
+                    Node {
+                        width: percent(100),
+                        height: percent(100),
+                        ..default()
+                    },
+                ));
+            });
+        account_block(header, account, assets, lang);
+        navigation(header, assets, lang);
+        presence_block(header, data, assets, lang);
     });
 }
 

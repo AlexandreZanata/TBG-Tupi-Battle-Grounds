@@ -415,3 +415,23 @@ remote Git operation belongs to this front.
   and unrelated owner policy edits were preserved. Reopen TBG to load the
   updated installation. Shop lock remains Practice-only under the current
   server configuration; this front does not activate online CANON.shop.
+
+## Linux lobby panel and unified header polish — 2026-10-31
+
+Owner requested consistent lobby panel colors/frames, a slightly taller
+mode panel, no diagnostics behind the logo, and a smaller written Tupi logo
+inside its own header division. Linux modes now use the shared metal panel
+geometry and dark control palette. Modes and Live battles both occupy
+17–67% vertically; Profile and News begin at 68%, leaving the same 1% gap.
+The header spans 2–98% horizontally, with the logo contained in its first
+full-height cell. Account, navigation and presence remain in the same bar.
+Linux menu diagnostics are hidden; battle diagnostics retain their prior
+behavior. Other targets keep their existing header and mode presentation.
+
+Level: work front. Run affected-package formatting and diff inspection,
+then the owner-requested native preview build/install under the shared host
+lock/cache and one focused desktop lobby capture. The owner's wait/job
+exceptions remain scoped to this chat. Defer native hover/focus/account/
+navigation scenarios and resize coverage to consolidation. No full suite,
+WASM build, web assets, game rules, remote Git or deployment change belongs
+to this appearance-only adjustment.
