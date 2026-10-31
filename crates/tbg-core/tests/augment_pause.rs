@@ -5,6 +5,7 @@
 
 use tbg_core::content::{
     augment_def, AUGMENT_COST, AUGMENT_ROUND_TICKS, AUGMENT_WINDOW_TICKS, ENERGY_SCALE,
+    RUNNING_START, TICK_HZ,
 };
 use tbg_core::replay::Replay;
 use tbg_core::{
@@ -232,10 +233,13 @@ fn br_ag13_a_replay_keeps_paused_choices_in_order() {
     let mut act = |s: &mut MatchState, seat: Seat, intent: PlayerIntention| {
         seq += 1;
         replay.record(s, seat, Some((seq, intent)));
-        let _ = s.apply_intention(seat, seq, intent);
+        assert_eq!(s.apply_intention(seat, seq, intent), Ok(()));
     };
     while s.augments.round < 3 && s.phase != Phase::Ended {
-        if s.clock.is_multiple_of(400) {
+        // This checks pause/replay ordering, not combat balance. Keep both
+        // Strongholds safe until one second before the third round so roster
+        // additions cannot end the fixture before both pauses were exercised.
+        if s.tick == RUNNING_START + 3 * AUGMENT_ROUND_TICKS - TICK_HZ {
             act(&mut s, Seat::A, PlayerIntention::Purchase { offer: 1 });
             act(&mut s, Seat::B, PlayerIntention::Purchase { offer: 0 });
         }
