@@ -61,6 +61,7 @@ pub fn update_unit_visual(
         .try_insert((t, MeshMaterial3d(fill.clone())));
     super::status_badges::bleed(commands, v.bleed_badge, u);
     super::status_badges::shield(commands, a, v, u);
+    super::status_badges::hostile(commands, a, v, u);
     let ring = match u.status {
         1 => &a.slowed,
         2 => &a.rooted,

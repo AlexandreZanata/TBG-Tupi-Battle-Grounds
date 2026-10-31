@@ -355,6 +355,11 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    HarmonicPulse {
+        period: u16,
+        bp: u16,
+        ticks: u16,
+    },
     SolarBarrier {
         period: u16,
         range: i32,
@@ -716,6 +721,23 @@ const SOLAR_SENTINEL_ABILITIES: [[Ability; 2]; 5] = [
     barrier(3_000, 100, 50),
     barrier(3_500, 100, 50),
 ];
+const fn harmonic(period: u16, ticks: u16) -> [Ability; 2] {
+    [
+        Ability::HarmonicPulse {
+            period,
+            bp: 1_500,
+            ticks,
+        },
+        Ability::None,
+    ]
+}
+const LUMINOUS_ORACLE_ABILITIES: [[Ability; 2]; 5] = [
+    harmonic(200, 60),
+    harmonic(200, 70),
+    harmonic(200, 80),
+    harmonic(180, 60),
+    harmonic(160, 60),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -819,7 +841,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 39;
+pub const UNIT_KIND_COUNT: usize = 40;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1149,6 +1171,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::Capybara,"Capybara",Plants,Tank,3_000,[1_300,38,40,800,23,0,0],None,CAPYBARA_ABILITIES,[FormDef{hp_bp:2_000,..form("Stone Belly")},form("Stone Belly"),form("Swamp Wave"),form("Swamp Wave")]),
     unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,1_100,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
     unit(UnitKind::SolarSentinel,"Solar Sentinel",Celestials,Tank,3_000,[1_050,35,40,800,28,0,0],None,SOLAR_SENTINEL_ABILITIES,[FormDef{hp_bp:2_000,..form("Light Fortress")},form("Light Fortress"),form("Group Protection"),form("Group Protection")]),
+    unit(UnitKind::LuminousOracle,"Luminous Oracle",Celestials,Control,2_400,[300,15,50,3_000,38,0,0],None,LUMINOUS_ORACLE_ABILITIES,[form("Restoring Light"),form("Restoring Light"),form("Sacred Aura"),form("Sacred Aura")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

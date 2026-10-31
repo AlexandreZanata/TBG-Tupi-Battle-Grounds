@@ -51,6 +51,7 @@ pub enum ShotKind {
     PlagueBolt,
     Bullet,
     CrossBullet,
+    SunSpark,
 }
 
 #[derive(Clone, Copy)]
@@ -73,6 +74,7 @@ enum Body {
     Flask,
     Acid,
     RitualBolt,
+    SunMote,
 }
 
 #[derive(Clone, Copy)]
@@ -260,6 +262,14 @@ fn look(kind: ShotKind) -> Look {
             0.0,
             Impact::Bolt,
         ),
+        SunSpark => (
+            Some((Body::SunMote, 1.0)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Sparks,
+            1.0,
+            Impact::Harmonic,
+        ),
         Bullet | CrossBullet => (
             Some((Body::Bolt, 0.24)),
             0.0,
@@ -398,6 +408,7 @@ pub struct ShotMeshes {
     glob: Handle<Mesh>,
     acid: Handle<Mesh>,
     ritual_bolt: Handle<Mesh>,
+    sun_mote: Handle<Mesh>,
     fish: Handle<Mesh>,
     bomb: Handle<Mesh>,
     orb: Handle<Mesh>,
@@ -502,6 +513,10 @@ impl ShotMeshes {
                     Transform::from_xyz(0.0, 0.0, -0.26),
                 ),
             ]),
+            sun_mote: build(vec![
+                (Ball(0.04), IVORY, Transform::IDENTITY),
+                (Ring(0.009, 0.06, 360.0), GOLD, Transform::IDENTITY),
+            ]),
             ritual_bolt: build(vec![
                 (Cyl(0.012, 0.28), DARK_LEATHER, along(0.0)),
                 (Cone(0.032, 0.09), BONE, along(0.18)),
@@ -600,6 +615,7 @@ impl ShotMeshes {
             Body::Glob => &self.glob,
             Body::Acid => &self.acid,
             Body::RitualBolt => &self.ritual_bolt,
+            Body::SunMote => &self.sun_mote,
             Body::Fish => &self.fish,
             Body::Bomb => &self.bomb,
             Body::Orb => &self.orb,

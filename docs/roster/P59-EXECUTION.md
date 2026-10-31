@@ -205,7 +205,8 @@ Own library: `crates/tbg-client/src/art/kits/luminous_oracle/`.
 
 long robe, staff sun-ring, hooded empty face and geometric cape; ivory/gold/navy, team lining. A2 wider pale stole, A3 tall staff ring. B2 short dark over-robe with side fins, B3 paired staff-ring struts.
 
-Status: pending. Evidence: `docs/media/p59/luminous_oracle/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/luminous_oracle/lineup.jpg`.
 
 ### R14 — Celestial Archer
 

@@ -1747,3 +1747,40 @@ adds tall shield crest; B adds shoulder disks/dark cloth then wide halo/side pan
 Controlled thrust, shield-leading gait, kneel and independent shield extension
 keep the basic and grant gestures distinct. Frozen base/form contracts append
 only §13 values. Owner visual/fun and heavy acceptance remain before activation.
+
+## D-80 · Luminous Oracle's single-target weakening and status badges — 2026-10-31 (Proposed)
+
+Actual desktop review found the sun ring attached to the figure root because
+its requested staff parent occupies a later node slot. Joint spawning now allocates
+all fixed-slot entities before resolving any parent, preserving legacy node IDs/
+parents while allowing the already-supported custom hierarchy. A reproduction test
+checks the Oracle ring's real ChildOf relationship; native execution is deferred
+when the existing client-test cache is cold. Corrected browser evidence is required
+before this character's delivery. No gameplay or node-count change.
+
+R13 appends the exact §13 Celestial Control row/four forms without pool activation.
+Harmonic Pulse uses the shared enemy-unit windup, period200, weakening1500bp/60
+in the existing bounded family (global cap2000). It changes future basic damage
+at hit resolution, including a basic already winding, with no healing, aura,
+auxiliary damage change or stacking between Oracles. Ward blocks its payload;
+control-only Oilpress immunity does not. Brew already clears this family. A
+replaces duration70 then80; B replaces period180 then160. No new simulation field,
+protocol25 layout/event or replay hash change. Frozen base/form contracts append
+these canonical Proposed facts.
+
+Own library: long geometric robe/cape, empty ivory hood/navy face, gold sun-ring
+staff and team lining. A widens the pale stole then raises/grows the staff ring;
+B darkens the over-robe/adds fins then adds paired ring struts. Small planted steps,
+upright staff alignment, closing offhand and knee/cape collapse are per-kind
+motions. The basic SunSpark uses its own cached ivory/gold projectile and the
+Control release0.22/flight0.08 timing. A single authoritative weakening pulse
+has its own subdued contact cue; no restorative or persistent ground effect.
+
+Persistent weakness and caster-owned target marks now have separate lazy badges
+beside HP, so Slow/Root ring priority cannot hide them. All badges read public
+snapshot presence, use shared geometry/materials and hide with the bar/death;
+no target decision or private source list is introduced. A mark badge reflects
+the active caster-owned bonus; the victim's Slow/cut expires independently. The
+old four-color native Shop accent table is extended to FACTION_COUNT with D-64's
+existing Monsters/Celestials/Insects palette, preserving all legacy entries. This
+prevents a future staged offer from indexing past the table; no offer is activated.

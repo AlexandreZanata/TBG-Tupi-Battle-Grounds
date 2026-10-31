@@ -79,12 +79,18 @@ pub fn spawn_joints(
     material: &Handle<StandardMaterial>,
 ) -> [Entity; NODE_COUNT] {
     let anatomy = super::kits::kit(kind).and_then(|kit| kit.anatomy);
-    let mut ids = [root; NODE_COUNT];
+    // A custom parent may occupy a later slot, so allocate every entity first.
+    let ids = std::array::from_fn(|_| {
+        commands
+            .spawn((Transform::IDENTITY, Visibility::default()))
+            .id()
+    });
     for node in rig::nodes() {
         let parent = anatomy
             .map_or_else(|| node.parent(), |a| (a.parent)(node))
             .map_or(root, |p| ids[p.index()]);
-        let mut e = commands.spawn((
+        let mut e = commands.entity(ids[node.index()]);
+        e.insert((
             Transform::from_translation(
                 anatomy.map_or_else(|| rig::rest(node, plan), |a| (a.rest)(node, plan)),
             ),
@@ -103,7 +109,6 @@ pub fn spawn_joints(
         }
         let id = e.id();
         commands.entity(parent).add_child(id);
-        ids[node.index()] = id;
     }
     ids
 }
@@ -132,4 +137,42 @@ pub fn spawn_glow(
             Some(id)
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::art::{
+        kits,
+        rig::{Socket, Spring},
+    };
+    #[derive(Resource)]
+    struct Nodes([Entity; NODE_COUNT]);
+    #[test]
+    fn custom_ring_follows_its_later_weapon_parent() {
+        // D-80: the Oracle staff is later than its ring in the fixed node array.
+        let mut app = App::new();
+        app.add_systems(Startup, |mut commands: Commands| {
+            let kind = tbg_core::UnitKind::LuminousOracle;
+            let plan = (kits::kit(kind).unwrap().figure)(0, 0).plan;
+            let root = commands
+                .spawn((Transform::IDENTITY, Visibility::default()))
+                .id();
+            let meshes = std::array::from_fn(|_| None);
+            let ids = spawn_joints(
+                &mut commands,
+                root,
+                kind,
+                &plan,
+                &meshes,
+                &Handle::default(),
+            );
+            commands.insert_resource(Nodes(ids));
+        });
+        app.update();
+        let ids = app.world().resource::<Nodes>().0;
+        let ring = ids[Node::Secondary(Spring::HeadGear).index()];
+        let staff = ids[Node::Prop(Socket::WeaponR).index()];
+        assert_eq!(app.world().get::<ChildOf>(ring).unwrap().parent(), staff);
+    }
 }

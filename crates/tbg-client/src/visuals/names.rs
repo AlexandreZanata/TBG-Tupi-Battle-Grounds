@@ -156,6 +156,8 @@ mod tests {
             dying,
             bleed_badge: Entity::PLACEHOLDER,
             shield_outline: None,
+            mark_badge: None,
+            weaken_badge: None,
             marked: false,
             secondary_shot: None,
             dead_for: 0.0,

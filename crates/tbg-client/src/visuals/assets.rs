@@ -24,11 +24,14 @@ pub struct VisualAssets {
 }
 
 /// Faction body colors (ARCHITECTURE §7 primary palette).
-pub const FACTION_COLORS: [[u8; 3]; 4] = [
+pub const FACTION_COLORS: [[u8; 3]; tbg_core::FACTION_COUNT] = [
     [0x8B, 0x73, 0x55],
     [0xD8, 0xD2, 0xC0],
     [0x4A, 0x50, 0x58],
     [0x4E, 0x9F, 0x3D],
+    [0x2E, 0x30, 0x33],
+    [0xF1, 0xEB, 0xDD],
+    [0x5C, 0x6B, 0x2E],
 ];
 
 pub(super) fn init(

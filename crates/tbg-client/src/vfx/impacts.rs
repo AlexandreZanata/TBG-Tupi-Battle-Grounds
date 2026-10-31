@@ -52,6 +52,7 @@ pub enum Impact {
     Belly,
     Rend,
     Solar,
+    Harmonic,
 }
 
 /// What the attacker brings to an impact: splash radius (tiles, 0 = none)
@@ -266,6 +267,18 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
                 },
                 0.0,
                 0.22,
+            );
+        }
+        Impact::Harmonic => {
+            motes(commands, a, at, &a.gold, (4, 0.35), 0.25);
+            spawn(
+                commands,
+                &a.puff,
+                &a.flash,
+                at,
+                Motion::Flash { size: 0.12 },
+                0.0,
+                0.12,
             );
         }
         Impact::Solar => {

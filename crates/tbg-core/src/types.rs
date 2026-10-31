@@ -145,6 +145,8 @@ pub enum UnitKind {
     Trident,
     /// D-79: R12, staged outside public pools.
     SolarSentinel,
+    /// D-80: R13, staged outside public pools.
+    LuminousOracle,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

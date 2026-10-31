@@ -22,6 +22,7 @@ mod hits;
 mod intent;
 #[cfg(feature = "lab")]
 pub mod lab;
+mod luminous_oracle;
 #[cfg(feature = "bench-profile")]
 pub mod profiling;
 pub mod protocol;

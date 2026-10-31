@@ -27,6 +27,7 @@ pub mod gait;
 mod hexer;
 mod leechroot;
 mod longaxe;
+mod luminous_oracle;
 mod nester;
 mod oilpress;
 mod old_finn;
@@ -183,6 +184,7 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static LUMINOUSORACLE: Kit = luminous_oracle::KIT;
 static SOLARSENTINEL: Kit = solar_sentinel::KIT;
 static TRIDENT: Kit = trident::KIT;
 static CAPYBARA: Kit = capybara::KIT;
@@ -232,6 +234,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::LuminousOracle => Some(&LUMINOUSORACLE),
         UnitKind::SolarSentinel => Some(&SOLARSENTINEL),
         UnitKind::Trident => Some(&TRIDENT),
         UnitKind::Capybara => Some(&CAPYBARA),

@@ -54,3 +54,54 @@ pub(super) fn shield(
     });
     commands.entity(e).try_insert(Visibility::Inherited);
 }
+
+/// Marks and weakening keep their own badges when a control ring has priority.
+pub(super) fn hostile(
+    commands: &mut Commands,
+    a: &VisualAssets,
+    v: &mut super::UnitVisual,
+    u: &tbg_core::UnitView,
+) {
+    let alive = u.hp > 0;
+    badge(
+        commands,
+        &mut v.mark_badge,
+        (v.bar, &a.tier_cube, &a.marked, -0.55),
+        alive && v.marked,
+    );
+    badge(
+        commands,
+        &mut v.weaken_badge,
+        (v.bar, &a.tier_cube, &a.gold, 0.68),
+        alive && u.effects.and_then(|e| e.weaken).is_some(),
+    );
+}
+fn badge(
+    commands: &mut Commands,
+    slot: &mut Option<Entity>,
+    look: (Entity, &Handle<Mesh>, &Handle<StandardMaterial>, f32),
+    visible: bool,
+) {
+    if !visible {
+        if let Some(e) = *slot {
+            commands.entity(e).try_insert(Visibility::Hidden);
+        }
+        return;
+    }
+    let (parent, mesh, material, x) = look;
+    let e = *slot.get_or_insert_with(|| {
+        commands
+            .spawn((
+                Mesh3d(mesh.clone()),
+                MeshMaterial3d(material.clone()),
+                Transform::from_xyz(x, 0.0, 0.02)
+                    .with_rotation(Quat::from_rotation_z(std::f32::consts::FRAC_PI_4))
+                    .with_scale(Vec3::splat(0.7)),
+                Visibility::Inherited,
+                NotShadowCaster,
+                ChildOf(parent),
+            ))
+            .id()
+    });
+    commands.entity(e).try_insert(Visibility::Inherited);
+}
