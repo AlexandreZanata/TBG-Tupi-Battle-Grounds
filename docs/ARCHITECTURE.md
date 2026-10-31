@@ -807,3 +807,30 @@ a measured all-at-once alternative. Result controls and network polling stay
 active. Missing/invalid cosmetics fall back to the regular result, and exit
 clears the scene before another match. Focused cast/protocol/reconnect/
 rematch/lifecycle checks and desktop visual review gate implementation.
+## 22. Native updates and release safety (P66, Proposed)
+
+[P66](phases/P66-native-updates-and-release-safety.md) separates signed
+artifact discovery, per-user transactional install, presentation/notes,
+admission compatibility and worker retirement. A small native launcher/helper
+owns trusted metadata/staging/journal/health rollback; Bevy gets asynchronous
+status and safe idle controls, not network/file work in the render loop.
+Linux managed installs come first; Windows has a real platform adapter and
+acceptance gate. User data and protected resume credentials live outside
+versioned release directories. Native restart resumes the owning generation
+before applying a new incompatible build.
+
+Each match pins generation/rules/content/features/wire. Initial safe drain
+may pause admission; two preconfigured slots later preserve existing sockets
+while new compatible admissions move to a ready generation. Durable shared
+ownership/fencing and idempotent result finalization precede coexistence.
+Retirement includes pending results/reconnect delivery, not just match count
+or a finite SIGTERM timer. No routine proxy reload or live simulation migration.
+
+Keep immutable browser/native assets, compatible DB readers/writers and
+expand/contract migration. Sign release metadata through a distinct protected
+release authority; P65 news/admin is not an executable distribution trust
+root. CDN/static delivery avoids archive traffic through the game server.
+Measure same-host overlap before activation; scale workers/routing/durable
+coordination across hosts only when measured demand justifies it. Planned
+deployment continuity does not imply crash failover or proven capacity.
+See D-91/D-92 and the release-contract matrix for gates and primary references.

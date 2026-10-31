@@ -364,6 +364,21 @@ the aggregate, protocol 28, terminal replay and cosmetic scene against main
 checks and remaining A01–A08 acceptance are recorded in the execution report.
 No full-suite or performance acceptance is claimed. See D-82 and Proposed §17.
 
+## Owner-requested native updater and safe releases (2026-10-31)
+
+| Phase | Spec | Scope | Status | Owner gates |
+|---|---|---|---|---|
+| P66 | [P66-native-updates-and-release-safety.md](phases/P66-native-updates-and-release-safety.md) | Signed recoverable Linux updates, Windows adapter, startup/post-update modals, protected reconnect and generation-pinned backend rollout | **planning only**, `codex/p66-native-updates-release-safety-plan` | Install modes, trust/signing, emergency/version policy, measured overlap/retention and real platform evidence |
+
+[Release contracts/test matrix](planning/P66-RELEASE-CONTRACTS.md) and
+[executor prompt](planning/P66-EXECUTION-PROMPT.md). Linux managed updater
+comes first; Windows acceptance remains separate. Backend sequence is safe
+drain → shared ownership/results → measured two-slot rollout with stable
+routes. No forced in-match restart or finite match-drain cutoff. Retain
+browser/native builds and compatible DB writers. A later multi-host capacity
+stage requires evidence and owner scope, not an assumed thousands-player SLA.
+No installed client, signed release, production proxy or server was changed.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·
