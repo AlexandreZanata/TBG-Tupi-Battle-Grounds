@@ -11,7 +11,12 @@
   let generation = 0;
   const formats = {};
 
-  const url = code => new URL('assets/i18n/' + code + '.json', document.baseURI).toString();
+  // Standalone pages (ranking/) set `data-i18n-base` through resolve.js;
+  // the game serves the catalogs next to its own page.
+  const base = () => document.documentElement.dataset?.i18nBase || 'assets/i18n/';
+  const url = code => new URL(base() + code + '.json', document.baseURI).toString();
+  // A page may name its own `<title>` key (`data-i18n-page-title`).
+  const pageTitle = () => t(document.documentElement.dataset?.i18nPageTitle || 'meta.title');
 
   async function load(code) {
     try {
@@ -47,10 +52,10 @@
   const has = key => lookup(key, catalog) !== undefined || lookup(key, fallback) !== undefined;
 
   // pt-BR uses `one` for 0 and 1 (CLDR i = 0,1); English for 1 only.
-  // `shown` replaces `{n}` when the count is displayed formatted.
-  function plural(base, n, shown) {
+  // `args` may override `{n}` with the formatted count and add placeholders.
+  function plural(key, n, args) {
     const one = lang === 'pt-BR' ? n === 0 || n === 1 : n === 1;
-    return t(base + (one ? '.one' : '.other'), { n: shown ?? n });
+    return t(key + (one ? '.one' : '.other'), Object.assign({ n }, args));
   }
 
   // Locale-aware number with `minPlaces`..`places` decimals; one formatter
@@ -93,8 +98,10 @@
 
   async function setLang(code) {
     if (!MAP[code]) return;
+    // Every call is the newest choice, even one that keeps the current
+    // language while an older switch is still loading.
+    const mine = ++generation;
     if (code !== lang) {
-      const mine = ++generation;
       const next = code === 'en' ? fallback : await load(code);
       if (mine !== generation) return;
       lang = code;
@@ -102,7 +109,7 @@
       try { localStorage.setItem('tbg.lang', code); } catch (_) { /* private mode */ }
       document.documentElement.lang = code;
       apply(document);
-      document.title = t('meta.title');
+      document.title = pageTitle();
     }
     refreshSelector();
     document.dispatchEvent(new CustomEvent('tbg:lang', { detail: { lang } }));
@@ -121,7 +128,7 @@
     fallback = await load('en');
     catalog = lang === 'en' ? fallback : await load(lang);
     apply(document);
-    document.title = t('meta.title');
+    document.title = pageTitle();
     refreshSelector();
   })();
 

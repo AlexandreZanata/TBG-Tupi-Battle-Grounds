@@ -9,7 +9,7 @@
   const t = (key, args) => I().t(key, args);
   const num = value => I().number(value, 2, 0);
   const energy = (sub, data) => num(sub / data.energyScale);
-  const tiles = milli => { const n = milli / 1000; return I().plural('stronghold.tiles', n, num(n)); };
+  const tiles = milli => { const n = milli / 1000; return I().plural('stronghold.tiles', n, {n: num(n)}); };
   const seconds = (ticks, data) => t('stronghold.seconds', {n: I().number(ticks / data.tickHz, 2)});
   const percent = bp => num(bp / 100) + '%';
   const kind = (data, name) => data.kinds.find(def => def.kind === name);
