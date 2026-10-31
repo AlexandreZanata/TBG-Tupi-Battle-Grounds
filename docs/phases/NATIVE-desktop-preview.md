@@ -309,3 +309,36 @@ enemy/dead/summoned/evolved units, Evolution affordability and War Council,
 card buy/hold interactions under the scaled transform, Reroll, and resize
 at the supported desktop sizes. No full suite or other-target build runs
 on this front; these pending checks are not passing evidence.
+
+### Champion panel and compact Shop result
+
+- Installed source: `8066717506463318ed38ace69697d28efdf4d182`.
+  `cargo build --locked -p tbg-client --bin tbg-client`, Linux packaging
+  with `--no-archive` and the generated installer passed using the existing
+  cache and shared host lock with `CARGO_BUILD_JOBS=2`. Waiting for the
+  occupied slot used the owner's exception for this chat. Compilation took
+  9.27 s initially and 5.62 s for the final close-control update.
+- `cargo fmt -p tbg-client -- --check`, `git diff --check`, the native frame
+  exporter, WebP format/dimension verification (332x448, 7410 bytes), desktop
+  entry validation and installed executable SHA-256/source-metadata checks
+  passed. Initial unused close-action/legacy-palette warnings were resolved
+  by wiring both close controls and keeping the legacy palette on its
+  remaining targets. The final compilation has no warnings or errors.
+- Inspected the installed app at 1920x972 in isolated local Practice with
+  an actual own Shatterback selected through the existing SelectUnit action.
+  The status panel is at the bottom left on the same side margin as the
+  Stronghold panel, with portrait, live HP, effective statistics and own
+  Evolution choices. Separate close controls retain the existing inspection
+  and Evolution actions. No old central native Evolution panel remains.
+- All five Shop cards have uniform gold frames, separate title/role lines
+  and coin/cost slots. The Energy strip and cards share one 0.9 transform
+  and bottom-center anchor; fonts, gaps and controls scale together.
+  Their common bottom aligns with the champion panel. Capture:
+  `.local/champion-shop-final.webp`. Only the expected virtual X11
+  XSETTINGS/physical-dimension warnings were recorded.
+- The capture verifies presentation and queued selection; actual pointer,
+  keyboard, purchases and other unit states remain deferred as listed
+  above. No Rust tests, full suite, web build/assets changes, remote Git,
+  CI wait or VPS action occurred. Real preferences, account data, running
+  app windows and unrelated policy edits were preserved. Reopen TBG to
+  load the updated installation.
