@@ -103,19 +103,19 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, l
                 align_items: AlignItems::Center,
                 width: if celebrating { percent(96) } else { Val::Auto },
                 max_width: if celebrating { px(900) } else { Val::Auto },
-                padding: UiRect::all(px(if celebrating { 12. } else { 24. })),
-                row_gap: px(if celebrating { 5. } else { 12. }),
+                padding: UiRect::all(px(if celebrating { 8. } else { 24. })),
+                row_gap: px(if celebrating { 3. } else { 12. }),
                 border_radius: BorderRadius::all(px(16.0)),
                 ..default()
             },
             BackgroundColor(PANEL),
         ))
         .with_children(|panel| {
-            panel.spawn(label(title, if celebrating { 28. } else { 40. }));
+            panel.spawn(label(title, if celebrating { 24. } else { 40. }));
             if let Some(reason) = reason {
-                panel.spawn(label(reason, 16.0));
-                panel.spawn(label(duration, 16.0));
-                panel.spawn(label(summary, 16.0));
+                panel.spawn(label(reason, if celebrating { 12. } else { 16. }));
+                panel.spawn(label(duration, if celebrating { 12. } else { 16. }));
+                panel.spawn(label(summary, if celebrating { 12. } else { 16. }));
             } else if !info.opponent.is_empty() {
                 panel.spawn(label(format!("vs {}", info.opponent), 16.0));
             }

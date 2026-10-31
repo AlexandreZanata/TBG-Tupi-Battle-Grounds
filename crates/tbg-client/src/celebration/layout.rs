@@ -1,38 +1,7 @@
 //! Conservative rig envelopes, staggered slots and a seat-aware frontal camera with UI safe space.
 
-use crate::art::{rig, FigureForm};
-use bevy::{mesh::VertexAttributeValues, prelude::*};
+use bevy::prelude::*;
 use tbg_core::Seat;
-
-pub(super) fn radius(form: &FigureForm, meshes: &Assets<Mesh>) -> f32 {
-    let mut radius = 0.8f32;
-    for (index, handle) in form
-        .meshes
-        .iter()
-        .enumerate()
-        .filter_map(|(i, h)| h.as_ref().map(|h| (i, h)))
-    {
-        let Some(VertexAttributeValues::Float32x3(vertices)) = meshes
-            .get(handle)
-            .and_then(|m| m.attribute(Mesh::ATTRIBUTE_POSITION))
-        else {
-            continue;
-        };
-        let Some(mut node) = rig::nodes().find(|n| n.index() == index) else {
-            continue;
-        };
-        let mut chain = rig::rest(node, &form.plan).length();
-        while let Some(parent) = node.parent() {
-            chain += rig::rest(parent, &form.plan).length();
-            node = parent;
-        }
-        for vertex in vertices {
-            radius = radius.max(chain + Vec3::from(*vertex).length());
-        }
-    }
-    // Includes the bounded root sway and the separately attached Archer bow.
-    (radius + 0.8) * form.plan.scale
-}
 
 pub(super) struct Formation {
     pub positions: Vec<Vec3>,
@@ -40,7 +9,7 @@ pub(super) struct Formation {
     pub camera: Transform,
 }
 
-pub(super) fn formation(n: usize, radius: f32, aspect: f32, seat: Seat) -> Formation {
+pub(super) fn formation(n: usize, radius: f32, height: f32, aspect: f32, seat: Seat) -> Formation {
     let cols = ((n.max(1) as f32 * 2.).sqrt().ceil() as usize).min(n.max(1));
     let rows = n.max(1).div_ceil(cols);
     let gap = 2. * radius + 0.25;
@@ -53,7 +22,7 @@ pub(super) fn formation(n: usize, radius: f32, aspect: f32, seat: Seat) -> Forma
         let col = i % cols;
         let width = cols.min(n - row * cols);
         positions.push(Vec3::new(
-            8. + (col as f32 - (width - 1) as f32 * 0.5 + (row % 2) as f32 * 0.12) * gap * scale,
+            8. + (col as f32 - (width - 1) as f32 * 0.5 + (row % 2) as f32 * 0.5) * gap * scale,
             0.12,
             (row as f32 - (rows - 1) as f32 * 0.5) * gap * scale,
         ));
@@ -61,13 +30,13 @@ pub(super) fn formation(n: usize, radius: f32, aspect: f32, seat: Seat) -> Forma
     let dir = Vec3::new(if seat == Seat::A { -0.15 } else { 0.15 }, 0.55, 1.).normalize();
     let right = Vec3::Y.cross(dir).normalize();
     let up = dir.cross(right).normalize();
-    let centre = Vec3::new(8., radius * scale * 0.5 + 0.12, 0.);
+    let centre = Vec3::new(8., height * scale * 0.5 + 0.12, 0.);
     let mut horizontal = 0.5f32;
     let mut vertical = 0.5f32;
     let mut depth = 0.5f32;
     for p in &positions {
         for x in [-radius, radius] {
-            for y in [0., radius * 1.5] {
+            for y in [0., height] {
                 for z in [-radius, radius] {
                     let v = *p + Vec3::new(x, y, z) * scale - centre;
                     horizontal = horizontal.max(v.dot(right).abs());
@@ -102,7 +71,7 @@ mod tests {
         for n in [0, 1, 3, 64] {
             for seat in Seat::BOTH {
                 for aspect in [1366. / 768., 1920. / 1080.] {
-                    let f = formation(n, 1.6, aspect, seat);
+                    let f = formation(n, 1.6, 3.0, aspect, seat);
                     assert!(f.scale > 0. && f.scale <= 1.);
                     for (i, p) in f.positions.iter().enumerate() {
                         let forward = facing(*p, f.camera.translation) * Vec3::Z;

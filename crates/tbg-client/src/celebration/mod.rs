@@ -1,5 +1,7 @@
 //! Result-owned cosmetic formation, independent of simulation, combat entities and match metrics.
 
+#[cfg(debug_assertions)]
+mod capture;
 mod layout;
 mod scene;
 pub(crate) mod ui;
@@ -43,6 +45,8 @@ pub fn plugin(app: &mut App) {
     app.init_resource::<Presentation>();
     scene::plugin(app);
     ui::plugin(app);
+    #[cfg(debug_assertions)]
+    capture::plugin(app);
     app.add_systems(Update, keys.run_if(in_state(GameState::Result)));
 }
 
@@ -97,7 +101,7 @@ mod tests {
     use super::*;
     #[test]
     fn celebration_pages_cover_every_logical_slot_without_eager_expansion() {
-        for n in [0, 1, 3, 64, 65, 128, 129] {
+        for n in [0u64, 1, 3, 64, 65, 128, 129] {
             let mut next = 0;
             for p in 0..=(n.saturating_sub(1) / PAGE_SIZE) {
                 let (a, b) = range(n, p);

@@ -57,6 +57,7 @@ fn build(
     window: Single<&Window>,
     mut cameras: Query<(Entity, &mut Transform, &mut Projection), With<ArenaCamera>>,
     owned: Query<Entity, With<Owned>>,
+    mut bounds: Local<std::collections::HashMap<(tbg_core::UnitKind, u8, u8), (f32, f32)>>,
 ) {
     let Some(total) = total(&info) else {
         return;
@@ -89,11 +90,27 @@ fn build(
     let entries: Vec<_> = (first..last)
         .filter_map(|i| cast.at(i).map(|e| (i, e)))
         .collect();
-    let radius = entries
-        .iter()
-        .map(|(_, e)| layout::radius(lib.get(e.kind, e.tier, e.branch), &meshes))
-        .fold(0.8f32, f32::max);
-    let formation = layout::formation(entries.len(), radius, size.x / size.y.max(1.), cast.winner);
+    let (mut radius, mut height) = (0.2f32, 0.5f32);
+    for (_, e) in &entries {
+        let envelope = bounds.entry((e.kind, e.tier, e.branch)).or_insert_with(|| {
+            crate::art::celebration::bounds::envelope(
+                lib.get(e.kind, e.tier, e.branch),
+                &meshes,
+                e.kind,
+                e.tier,
+                e.branch,
+            )
+        });
+        radius = radius.max(envelope.0);
+        height = height.max(envelope.1);
+    }
+    let formation = layout::formation(
+        entries.len(),
+        radius,
+        height,
+        size.x / size.y.max(1.),
+        cast.winner,
+    );
     if let Ok((entity, mut transform, mut projection)) = cameras.single_mut() {
         scene.camera = Some((entity, *transform, projection.clone(), size));
         *transform = formation.camera;
@@ -171,7 +188,11 @@ fn animate(
         let t = if state.reduced {
             duration * 0.4
         } else {
-            (time.elapsed_secs() + phase * duration).rem_euclid(duration)
+            if motion.looping {
+                time.elapsed_secs() + phase * duration
+            } else {
+                time.elapsed_secs().min(duration)
+            }
         };
         animator.celebrate(motion, t);
     }
@@ -209,6 +230,7 @@ fn exit(
         Vec2::new(window.width(), window.height()),
     );
     scene.built = None;
+    scene.view = None;
 }
 
 fn aim(scene: Res<Scene>, mut camera: Query<&mut Transform, With<ArenaCamera>>) {
@@ -216,5 +238,41 @@ fn aim(scene: Res<Scene>, mut camera: Query<&mut Transform, With<ArenaCamera>>) 
         if let Ok(mut transform) = camera.single_mut() {
             *transform = view;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::ecs::system::RunSystemOnce;
+
+    #[test]
+    fn celebration_exit_restores_camera_and_removes_the_whole_page() {
+        let mut world = World::new();
+        let window = Window::default();
+        let size = Vec2::new(window.width(), window.height());
+        world.spawn(window);
+        let original = Transform::from_xyz(8., 20., 10.);
+        let camera = world
+            .spawn((ArenaCamera, Transform::default(), Projection::default()))
+            .id();
+        let child = world.spawn_empty().id();
+        let root = world.spawn((Owned, Transform::default())).id();
+        world.entity_mut(root).add_child(child);
+        world.insert_resource(Scene {
+            built: Some(([63; 16], 1, false, false, size)),
+            camera: Some((camera, original, Projection::default(), size)),
+            view: Some(Transform::from_xyz(8., 2., 5.)),
+        });
+
+        world.run_system_once(exit).unwrap();
+
+        assert_eq!(*world.get::<Transform>(camera).unwrap(), original);
+        assert!(world.get_entity(root).is_err() && world.get_entity(child).is_err());
+        let scene = world.resource::<Scene>();
+        assert!(scene.camera.is_none() && scene.built.is_none() && scene.view.is_none());
+        // A later nonwinning Result must not inherit the winner's camera override.
+        world.run_system_once(aim).unwrap();
+        assert_eq!(*world.get::<Transform>(camera).unwrap(), original);
     }
 }

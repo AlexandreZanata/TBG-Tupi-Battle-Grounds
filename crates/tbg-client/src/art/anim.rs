@@ -110,7 +110,14 @@ impl Animator {
     /// Preview sampling bypasses attack/action event delivery and carries no target or hit-stop.
     pub fn celebrate(&mut self, motion: super::celebration::CelebrationMotion, t: f32) {
         self.celebration = Some(motion);
-        self.preview = Some((motion.clip, t));
+        self.preview = Some((
+            motion.clip,
+            if motion.looping {
+                t.rem_euclid(motion.duration)
+            } else {
+                t.min(motion.duration)
+            },
+        ));
         self.presentation_clock = Some(t);
         self.clock = t;
         self.action = None;
@@ -222,7 +229,7 @@ impl Animator {
         };
         cycles * Clip::Walk.duration()
     }
-    fn advance(&mut self, dt: f32) -> (Pose, Option<f32>) {
+    pub(super) fn advance(&mut self, dt: f32) -> (Pose, Option<f32>) {
         self.events.clear();
         self.since_attack = (self.since_attack + dt).min(1e6);
         self.clock = self.presentation_clock.unwrap_or(self.clock + dt);

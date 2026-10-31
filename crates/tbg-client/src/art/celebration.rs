@@ -1,5 +1,7 @@
 //! One rig-aware celebration resolver for Result and future P62 Dance previews.
 
+pub mod bounds;
+
 use super::{
     anim::{Clip, Pose},
     kits::{self, Moment},
@@ -109,5 +111,28 @@ mod tests {
         let pose = a.pose(motion.clip, 0.2);
         assert_eq!(pose[Joint::Chest.index()].0.z, 13.);
         assert_eq!(pose[Joint::Root.index()].1.x, 0.15);
+    }
+    #[test]
+    fn celebration_reduced_pose_is_static_and_attack_events_are_never_delivered() {
+        let kind = UnitKind::BoneBrute;
+        let plan = BodyPlan::Large.proportions();
+        let mut a = Animator::new(
+            [Entity::PLACEHOLDER; NODE_COUNT],
+            plan,
+            Entity::PLACEHOLDER,
+            kind,
+            1,
+        );
+        a.play(Clip::AttackMelee);
+        a.apply_hit_stop(0.3);
+        a.aim_at = Some(Vec3::X);
+        a.celebrate(celebration_for(kind, 0, 0), 0.3);
+        let first = a.advance(0.016).0;
+        for dt in [0.033, 0.1, 1., 2.] {
+            assert_eq!(a.advance(dt).0, first);
+            assert!(a.events.is_empty());
+        }
+        assert!(a.aim_at.is_none());
+        assert_eq!(a.hit_stop, 0.);
     }
 }

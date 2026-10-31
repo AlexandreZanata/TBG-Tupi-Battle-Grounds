@@ -4,7 +4,7 @@ use super::{range, total, Presentation};
 use crate::{
     i18n::{Lang, Msg},
     sync::MatchInfo,
-    ui::{button, label, UiAction},
+    ui::{label, UiAction},
     GameState,
 };
 use bevy::prelude::*;
@@ -125,4 +125,22 @@ fn update(
         // Controls always stay clickable; their bounded actions are no-ops at the ends.
         let _ = &mut action;
     }
+}
+
+fn button(text: &str, action: UiAction, width: f32) -> impl Bundle + use<> {
+    let text = text.to_owned();
+    (
+        Node {
+            width: px(width),
+            min_height: px(30),
+            padding: UiRect::axes(px(6), px(4)),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            border_radius: BorderRadius::all(px(5)),
+            ..default()
+        },
+        BackgroundColor(crate::ui::BUTTON),
+        action,
+        children![label(text, 13.)],
+    )
 }

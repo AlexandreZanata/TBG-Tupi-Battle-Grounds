@@ -23,7 +23,9 @@ bevy = { version = "0.20", default-features = false, features = [
     "bevy_winit", "bevy_window", "multi_threaded", "webgl2", "x11", "wayland",
     # 3D rendering
     "bevy_render", "bevy_core_pipeline", "bevy_pbr", "bevy_light", "bevy_camera",
-    "bevy_color", "bevy_mesh", "bevy_image", "bevy_shader", "bevy_material",
+    "bevy_color", "bevy_mesh", "bevy_image", "bevy_shader",
+    # PNG encodes opt-in visual acceptance captures with the existing Bevy image dependency.
+    "png", "bevy_material",
     # UI and text (taps are hit-tested in ui/input.rs, no picking needed)
     "bevy_ui", "bevy_ui_render", "bevy_text", "bevy_input_focus",
 ] }
