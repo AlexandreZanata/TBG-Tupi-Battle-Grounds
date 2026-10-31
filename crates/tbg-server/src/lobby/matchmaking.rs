@@ -157,7 +157,12 @@ impl Lobby {
             self.self_tx.clone(),
             self.config.clone(),
             self.metrics.clone(),
-            self.store.clone(),
+            match_task::Records {
+                store: self.store.clone(),
+                ranked: self.ranked.clone(),
+                // P60: OS-random, separate from the public LiveId.
+                key: random_bytes::<16>(),
+            },
         );
         if let (Some(id), Some((seats, kinds))) = (live, listed) {
             self.register_live(

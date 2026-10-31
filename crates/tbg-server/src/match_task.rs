@@ -10,16 +10,18 @@ use tokio::time::MissedTickBehavior;
 
 use tbg_core::protocol::{LiveId, MatchMode, ServerMsg, Token};
 use tbg_core::replay::Replay;
-use tbg_core::{Event, MatchState, Seat};
+use tbg_core::{Event, MatchState, Phase, Seat};
 
 use crate::chan::{ConnHandle, LobbyCmd, MatchCmd, MATCH_QUEUE};
 use crate::metrics::Metrics;
+use crate::ranked::{finalizer, EndDetail, MatchKey};
 use crate::store::{AccountId, Store};
 use crate::Config;
 
 mod command;
 mod live;
 mod report;
+mod settle;
 mod spectators;
 #[cfg(test)]
 mod tests;
@@ -58,6 +60,20 @@ pub(super) struct Match {
     pub(super) spectators: Vec<ConnHandle>,
     /// P47: public events since the last spectator view.
     pub(super) pending_spectate: Vec<Event>,
+    /// P60: the first cause that actually ended the match.
+    pub(super) end_detail: Option<EndDetail>,
+    /// P60: latched by `PhaseChanged { Running }`, never inferred.
+    pub(super) reached_running: bool,
+}
+
+/// Where a finished match's records go: the fire-and-forget match row
+/// (P11) and, for ranked play, the ordered finalizer (P60) under the
+/// match's OS-random key drawn at pairing.
+#[derive(Clone, Default)]
+pub(crate) struct Records {
+    pub store: Option<Arc<Store>>,
+    pub ranked: Option<finalizer::Handle>,
+    pub key: MatchKey,
 }
 
 /// `(seed, arena, live)` are the match's pairing draws (ARENAS-G) and, for a
@@ -69,7 +85,7 @@ pub(crate) fn spawn(
     lobby: mpsc::Sender<LobbyCmd>,
     config: Arc<Config>,
     metrics: Arc<Metrics>,
-    store: Option<Arc<Store>>,
+    records: Records,
 ) -> mpsc::Sender<MatchCmd> {
     let (tx, rx) = mpsc::channel(MATCH_QUEUE);
     let detached_at = players
@@ -98,8 +114,10 @@ pub(crate) fn spawn(
         live,
         spectators: Vec::new(),
         pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
     };
-    tokio::spawn(run(m, rx, lobby, config, seed, store));
+    tokio::spawn(run(m, rx, lobby, config, seed, records));
     tx
 }
 
@@ -109,7 +127,7 @@ async fn run(
     lobby: mpsc::Sender<LobbyCmd>,
     config: Arc<Config>,
     seed: u64,
-    store: Option<Arc<Store>>,
+    records: Records,
 ) {
     m.metrics.matches_running.fetch_add(1, Relaxed);
     let started = Instant::now();
@@ -141,6 +159,16 @@ async fn run(
         let ev = m.state.step();
         let ns = t0.elapsed().as_nanos();
         (step_ns, step_max) = (step_ns + ns, step_max.max(ns));
+        if ev.iter().any(|e| {
+            matches!(
+                e,
+                Event::PhaseChanged {
+                    phase: Phase::Running
+                }
+            )
+        }) {
+            m.reached_running = true;
+        }
         m.report_progress(&lobby, started);
         m.note_spectate_events(&ev);
         for p in &mut m.pending {
@@ -150,7 +178,11 @@ async fn run(
         for seat in Seat::BOTH {
             if m.detached_at[seat.index()].is_some_and(|t| t.elapsed() > window) {
                 m.record(seat, None);
+                let unfinished = m.state.outcome.is_none();
                 m.state.forfeit(seat);
+                if unfinished && m.state.outcome.is_some() {
+                    m.end_detail.get_or_insert(EndDetail::Disconnect);
+                }
             }
         }
         // 10 Hz views, plus an ack view to a seat whose intention was processed.
@@ -183,30 +215,19 @@ async fn run(
     let ticks = u128::from(m.state.clock.max(1));
     m.metrics.matches_running.fetch_sub(1, Relaxed);
     m.metrics.matches_finished.fetch_add(1, Relaxed);
-    // P12: ranked results settle in one store transaction; the lobby
-    // delivers `RatingChanged` when it lands (after `MatchEnded` below).
-    // A store failure logs inside and sends nothing — the match already
-    // ended normally.
+    // P60: a ranked result goes to the single finalizer, which journals it
+    // durably and settles results in completion order; the lobby delivers
+    // `RatingChanged` by frozen account id once it commits. Awaiting here
+    // only delays this finished task, never a running match.
     if m.mode == MatchMode::Ranked {
-        if let (Some((a_id, _)), Some((b_id, _))) = (m.players[0].account, m.players[1].account) {
-            if let Some(db) = store.clone() {
-                let outcome = m.state.outcome;
-                let tokens = m.players.each_ref().map(|p| p.token);
-                let duration_s = started.elapsed().as_secs();
-                let factions = [m.stats[0].factions, m.stats[1].factions];
-                let arcanas = m.state.players.each_ref().map(|p| p.arcanas);
-                let tx = lobby.clone();
-                tokio::spawn(async move {
-                    match db
-                        .ranked_result(a_id, b_id, outcome, duration_s, factions, arcanas)
-                        .await
-                    {
-                        Ok(results) => {
-                            let _ = tx.send(LobbyCmd::RankedDone { tokens, results }).await;
-                        }
-                        Err(e) => tracing::error!("ranked result failed: {e:?}"),
+        if let Some(result) = m.ranked_final(records.key, started) {
+            match &records.ranked {
+                Some(handle) => {
+                    if handle.tx.send(result).await.is_err() {
+                        tracing::error!("ranked finalizer stopped; result not settled");
                     }
-                });
+                }
+                None => tracing::error!("ranked match ended without a ranked store"),
             }
         }
     }
@@ -225,7 +246,7 @@ async fn run(
         max_late as u64,
     );
     // P11: fire-and-forget over the store channel; never blocks the loop.
-    if let Some(db) = store {
+    if let Some(db) = records.store {
         db.insert_match(&line);
     }
 }

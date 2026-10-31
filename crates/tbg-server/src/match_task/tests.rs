@@ -178,7 +178,7 @@ async fn challenge_initial_detached_forfeits() {
         lobby_tx,
         config,
         metrics.clone(),
-        None,
+        super::Records::default(),
     );
     let outcome = tokio::time::timeout(Duration::from_secs(3), async {
         while let Some(ConnEvent::Send(msg)) = conn_rx.recv().await {

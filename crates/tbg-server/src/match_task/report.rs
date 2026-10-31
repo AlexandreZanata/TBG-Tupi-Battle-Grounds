@@ -17,6 +17,10 @@ pub(crate) struct SeatStats {
     pub(super) factions: [u32; 4],
     /// BR-M06: this seat tapped Surrender (additive report key).
     pub(super) surrendered: bool,
+    /// P60: combat-relative tick of the Surrender that ended the match.
+    pub(super) surrender_tick: Option<u32>,
+    /// P60: successful Fortifications.
+    pub(super) fortifications: u32,
     /// P30-A view observability (never read by gameplay).
     pub(super) views: u32,
     pub(super) ack_views: u32,

@@ -102,6 +102,11 @@ pub(super) struct Lobby {
     pub(super) live_tx: watch::Sender<Arc<LiveSnapshot>>,
     /// P47 (BR-LV07): the featured match and when it got the spot.
     pub(super) featured: Option<(LiveId, Instant)>,
+    /// P60: the ranked finalizer (only with a database).
+    pub(super) ranked: Option<crate::ranked::finalizer::Handle>,
+    /// P60: per account, the newest settlement sequence its cached profile
+    /// already contains; an older receipt never regresses it.
+    pub(super) ranked_seen: HashMap<AccountId, i64>,
 }
 
 /// P39: a rematch offer between the two sessions of a challenge match.
@@ -139,7 +144,21 @@ pub(crate) async fn run(
         live: HashMap::new(),
         live_tx,
         featured: None,
+        ranked: None,
+        ranked_seen: HashMap::new(),
     };
+    // P60: one finalizer per process settles every ranked result in order;
+    // its journal recovery finishes before the lobby serves any command.
+    if let (Some(store), Some(db)) = (lobby.store.clone(), lobby.config.db.clone()) {
+        let handle = crate::ranked::finalizer::start(
+            store,
+            db,
+            lobby.self_tx.clone(),
+            lobby.metrics.clone(),
+        )
+        .await;
+        lobby.ranked = Some(handle);
+    }
     let mut cleanup = tokio::time::interval(Duration::from_secs(10));
     let mut publish = tokio::time::interval(PUBLISH_EVERY);
     loop {
@@ -225,9 +244,7 @@ impl Lobby {
                     }
                 }
             }
-            LobbyCmd::RankedDone { tokens, results } => {
-                self.ranked_done(tokens, results);
-            }
+            LobbyCmd::RankedDone { receipt } => self.ranked_done(*receipt),
             LobbyCmd::RegisterDone {
                 token,
                 conn_id,
