@@ -11,18 +11,20 @@ use bevy::prelude::*;
 use tbg_core::Pcg32;
 
 mod ice;
+pub(super) mod material;
 mod themed;
 
 pub(super) const LEVEL: f32 = -1.40;
-const DEEP: Color = Color::srgb(0.045, 0.51, 0.75);
+const DEEP: Color = Color::srgb(0.045, 0.55, 0.75);
 const FOAM: Color = Color::srgb(0.82, 0.96, 0.94);
 
 pub(super) fn sea(theme: Theme) -> Mesh {
-    if theme == Theme::Forest {
+    let mesh = if theme == Theme::Forest {
         forest_sea()
     } else {
         themed::sea(theme)
-    }
+    };
+    material::surface(mesh, theme)
 }
 
 pub(super) fn coast(theme: Theme) -> Mesh {
@@ -71,7 +73,7 @@ fn forest_sea() -> Mesh {
             let color = |shade: f32| {
                 Color::srgb(
                     0.045 + near * 0.025 + swell * 0.3,
-                    0.51 + near * 0.15 + swell + shade,
+                    0.55 + near * 0.15 + swell + shade,
                     0.75 + near * 0.065 + swell * 0.7 + shade,
                 )
             };
@@ -79,7 +81,7 @@ fn forest_sea() -> Mesh {
             water.triangle(a, c, d, color(0.012));
         }
     }
-    // The coarse exterior only fills views beyond the detailed patch; no texture or shader pass.
+    // The coarse exterior only fills views beyond the detailed patch; the generated surface tile is shared with the detailed patch.
     mesh::merge(vec![
         (
             painted(vec![(
@@ -151,33 +153,43 @@ fn forest_coast() -> Mesh {
 }
 
 pub(super) fn foam_ring(surface: &mut Surface, center: Vec3, radius: Vec2) {
-    for i in 0..20 {
-        let a = i as f32 * std::f32::consts::TAU / 20.0;
-        let b = (i + 1) as f32 * std::f32::consts::TAU / 20.0;
+    for i in 0..28 {
+        let a = i as f32 * std::f32::consts::TAU / 28.0;
+        let b = (i + 1) as f32 * std::f32::consts::TAU / 28.0;
         let point = |angle: f32, scale: f32| {
+            let r = scale * (1.0 + (angle * 5.0 + center.x).sin() * 0.022);
             Vec3::new(
-                center.x + angle.cos() * radius.x * scale,
+                center.x + angle.cos() * radius.x * r,
                 LEVEL + 0.035,
-                center.z + angle.sin() * radius.y * scale,
+                center.z + angle.sin() * radius.y * r,
             )
         };
         surface.quad(
             [
-                point(a, 0.95),
-                point(b, 0.95),
-                point(b, 1.28),
-                point(a, 1.28),
+                point(a, 0.96),
+                point(b, 0.96),
+                point(b, 1.18),
+                point(a, 1.18),
             ],
-            Color::srgb(0.11, 0.67, 0.77),
+            Color::srgb(0.10, 0.67, 0.77),
         );
-        if i % 5 != 2 {
+        if i % 7 != 2 && i % 7 != 3 {
+            let width = 0.042 + (a * 3.0).sin().abs() * 0.025;
             surface.quad(
                 [
-                    point(a, 1.12) + Vec3::Y * 0.008,
-                    point(b, 1.12) + Vec3::Y * 0.008,
-                    point(b, 1.22) + Vec3::Y * 0.008,
-                    point(a, 1.22) + Vec3::Y * 0.008,
+                    point(a, 1.025) + Vec3::Y * 0.008,
+                    point(b, 1.025) + Vec3::Y * 0.008,
+                    point(b, 1.025 + width) + Vec3::Y * 0.008,
+                    point(a, 1.025 + width) + Vec3::Y * 0.008,
                 ],
+                FOAM,
+            );
+        }
+        if i % 5 == 0 {
+            surface.triangle(
+                point(a, 1.08) + Vec3::Y * 0.009,
+                point((a + b) * 0.5, 1.15) + Vec3::Y * 0.009,
+                point(b, 1.07) + Vec3::Y * 0.009,
                 FOAM,
             );
         }

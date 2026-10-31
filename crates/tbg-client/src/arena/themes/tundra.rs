@@ -99,12 +99,16 @@ fn fir(parts: &mut Vec<Part>, at: Vec3, s: f32) {
     ));
     for (r, h, y) in [(0.69, 1.08, 0.92), (0.54, 0.96, 1.46), (0.35, 0.85, 1.96)] {
         parts.push((
-            Cone(r * s, h * s),
+            Canopy(r * s, h * s, at.x.to_bits() ^ (at.z + y).to_bits()),
             p.plant,
             Transform::from_translation(at + Vec3::Y * y * s),
         ));
         parts.push((
-            Cone(r * s * 0.94, h * s * 0.76),
+            Canopy(
+                r * s * 0.94,
+                h * s * 0.76,
+                at.x.to_bits() ^ (at.z + y).to_bits(),
+            ),
             rgb(0xf0f8ff),
             Transform::from_translation(at + Vec3::Y * (y + h * 0.15) * s),
         ));
@@ -113,13 +117,12 @@ fn fir(parts: &mut Vec<Part>, at: Vec3, s: f32) {
 
 fn snow_rock(parts: &mut Vec<Part>, at: Vec3, s: f32) {
     contact(parts, at, s * 0.8, rgb(0x91b0c1));
-    boulder(parts, at, s, rgb(0x6d8b9e));
-    parts.push((
-        Ball(1.0),
-        rgb(0xeaf5fc),
-        Transform::from_translation(at + Vec3::Y * s * 0.59)
-            .with_scale(Vec3::new(0.78, 0.21, 0.65) * s),
-    ));
+    let seed = at.x.to_bits() ^ at.z.to_bits().rotate_left(13);
+    let transform = Transform::from_translation(at + Vec3::Y * s * 0.32)
+        .with_scale(Vec3::new(0.95, 0.85, 0.80) * s)
+        .with_rotation(Quat::from_rotation_y(at.x));
+    parts.push((Rock(1.0, seed), rgb(0x6d8b9e), transform));
+    parts.push((SnowCap(1.0, seed), rgb(0xeaf5fc), transform));
 }
 
 pub(super) fn crystal(parts: &mut Vec<Part>, at: Vec3, s: f32, color: Color) {
@@ -154,7 +157,7 @@ fn frost_grass(parts: &mut Vec<Part>, at: Vec3) {
     }
 }
 
-/// Broad faceted peaks, with snow following the upper rock rather than round caps.
+/// A common mineral silhouette keeps the fitted snow crust attached to every ridge.
 fn ridge(parts: &mut Vec<Part>, at: Vec3, s: f32) {
     for (dx, dz, h, r) in [
         (0.0, 0.0, 2.1, 0.9),
@@ -162,21 +165,12 @@ fn ridge(parts: &mut Vec<Part>, at: Vec3, s: f32) {
         (0.7, 0.15, 1.6, 0.7),
     ] {
         let base = at + Vec3::new(dx, 0.0, dz) * s;
-        let yaw = Quat::from_rotation_y(dx * 0.8);
-        parts.push((
-            Frustum(r * 0.15, r, h),
-            rgb(0x6f94b0),
-            Transform::from_translation(base + Vec3::Y * h * s * 0.5)
-                .with_scale(Vec3::new(s, s, s * 0.78))
-                .with_rotation(yaw),
-        ));
-        parts.push((
-            Frustum(r * 0.14, r * 0.53, h * 0.45),
-            rgb(0xdeedf9),
-            Transform::from_translation(base + Vec3::Y * h * s * 0.80)
-                .with_scale(Vec3::new(s, s, s * 0.78))
-                .with_rotation(yaw),
-        ));
+        let seed = base.x.to_bits() ^ base.z.to_bits().rotate_left(13);
+        let transform = Transform::from_translation(base + Vec3::Y * h * s * 0.44)
+            .with_scale(Vec3::new(r, h * 0.9, r * 0.8) * s)
+            .with_rotation(Quat::from_rotation_y(dx * 0.8));
+        parts.push((Rock(1.0, seed), rgb(0x6f94b0), transform));
+        parts.push((SnowCap(1.0, seed), rgb(0xdeedf9), transform));
     }
     crystal(
         parts,

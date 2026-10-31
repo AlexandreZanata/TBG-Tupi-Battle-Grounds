@@ -39,9 +39,10 @@ fn spawn(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut mats: ResMut<Assets<StandardMaterial>>,
+    mut images: ResMut<Assets<Image>>,
     built: Res<Built>,
 ) {
-    super::build(&mut commands, &mut meshes, &mut mats, built.0);
+    super::build(&mut commands, &mut meshes, &mut mats, &mut images, built.0);
 }
 
 fn preview(mut active: ResMut<ActiveArena>) {
@@ -60,6 +61,7 @@ fn switch(
     mut fog: Query<&mut DistanceFog>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut mats: ResMut<Assets<StandardMaterial>>,
+    mut images: ResMut<Assets<Image>>,
 ) {
     if active.0 == built.0 {
         return;
@@ -67,9 +69,10 @@ fn switch(
     for entity in &scene {
         commands.entity(entity).despawn();
     }
-    super::build(&mut commands, &mut meshes, &mut mats, active.0);
+    super::build(&mut commands, &mut meshes, &mut mats, &mut images, active.0);
     for mut fog in &mut fog {
         fog.color = active.0.palette().sky;
+        fog.falloff = active.0.fog();
     }
     built.0 = active.0;
 }
@@ -89,6 +92,7 @@ mod tests {
         app.add_plugins((MinimalPlugins, AssetPlugin::default()))
             .init_asset::<Mesh>()
             .init_asset::<StandardMaterial>()
+            .init_asset::<Image>()
             .insert_resource(ActiveArena(Theme::Forest))
             .insert_resource(Built(Theme::Forest))
             .add_systems(Startup, spawn)

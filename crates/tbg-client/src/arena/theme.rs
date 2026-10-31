@@ -71,6 +71,17 @@ impl Theme {
         }
     }
 
+    pub fn fog(self) -> FogFalloff {
+        let (start, end) = match self {
+            Self::Storm => (28.0, 52.0),
+            Self::Volcanic => (30.0, 64.0),
+            Self::Tundra => (34.0, 85.0),
+            Self::Ruins => (36.0, 90.0),
+            Self::Forest => (38.0, 95.0),
+        };
+        FogFalloff::Linear { start, end }
+    }
+
     pub fn palette(self) -> Palette {
         match self {
             Self::Forest => Palette {

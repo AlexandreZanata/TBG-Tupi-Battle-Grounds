@@ -50,9 +50,7 @@ pub(super) fn sea(theme: Theme) -> Mesh {
             surface.triangle(a, c, d, color(0.014));
         }
     }
-    if theme == Theme::Volcanic {
-        molten_channels(&mut surface);
-    }
+
     mesh::merge(vec![
         (
             painted(vec![(
@@ -106,7 +104,7 @@ pub(super) fn coast(theme: Theme) -> Mesh {
                         point(i, 1.012) + Vec3::Y * 0.012,
                         point(j, 1.015) + Vec3::Y * 0.012,
                         point(j, 1.024) + Vec3::Y * 0.012,
-                        point(i, 1.022) + Vec3::Y * 0.012,
+                        point(i, 1.022 + (i % 3) as f32 * 0.004) + Vec3::Y * 0.012,
                     ],
                     p.shore[0],
                 );
@@ -117,7 +115,7 @@ pub(super) fn coast(theme: Theme) -> Mesh {
         ripple(
             &mut surface,
             at,
-            Vec2::new(r * 1.35, r * 0.95),
+            Vec2::new(r * 1.16, r * 0.88),
             p.shore[0],
             i,
         );
@@ -151,6 +149,7 @@ fn ripple(s: &mut Surface, at: Vec3, r: Vec2, color: Color, phase: usize) {
         }
         let point = |j: usize, k: f32| {
             let a = j as f32 * std::f32::consts::TAU / 18.0;
+            let k = k * (1.0 + (a * 5.0 + phase as f32).sin() * 0.035);
             at + Vec3::new(a.cos() * r.x * k, 0.035, a.sin() * r.y * k)
         };
         s.quad(
@@ -205,14 +204,14 @@ pub(super) fn rocks(theme: Theme) -> Mesh {
                 );
                 let h = 0.65 + (i % 4) as f32 * 0.5;
                 parts.push((
-                    Box(r * 0.65, h, r * 0.62),
+                    Bevel(r * 0.65, h, r * 0.62, 0.05),
                     p.stone,
                     Transform::from_translation(at + Vec3::Y * (h * 0.5 + 0.15)).with_rotation(
                         yaw * Quat::from_rotation_z(if i % 3 == 0 { 0.22 } else { 0.0 }),
                     ),
                 ));
                 parts.push((
-                    Box(r * 1.05, 0.19, r * 0.85),
+                    Bevel(r * 1.05, 0.19, r * 0.85, 0.06),
                     rgb(0xeee3c7),
                     Transform::from_translation(at + Vec3::Y * (h + 0.19)).with_rotation(yaw),
                 ));
@@ -244,7 +243,7 @@ pub(super) fn rocks(theme: Theme) -> Mesh {
 
 fn rock(parts: &mut Vec<Part>, at: Vec3, scale: Vec3, color: Color) {
     parts.push((
-        Ball(1.0),
+        Rock(1.0, at.x.to_bits() ^ at.z.to_bits().rotate_left(13)),
         color,
         Transform::from_translation(at)
             .with_scale(scale)
@@ -266,37 +265,4 @@ fn sites() -> Vec<(Vec3, f32)> {
             )
         })
         .collect()
-}
-
-fn molten_channels(surface: &mut Surface) {
-    let mut rng = Pcg32::new(0x1a7a_7e17, 13);
-    for _ in 0..85 {
-        let x = -15.0 + rng.below(4500) as f32 * 0.01;
-        let z = -18.0 + rng.below(2900) as f32 * 0.01;
-        if shore_distance(x, z) < 1.05 {
-            continue;
-        }
-        let angle = rng.below(628) as f32 * 0.01;
-        let mut a = Vec3::new(x, LEVEL + 0.026, z);
-        for j in 0..5 {
-            let angle = angle + (j as f32 * 1.8).sin() * 0.42;
-            let length = 0.6 + rng.below(70) as f32 * 0.01;
-            let b = a + Vec3::new(angle.cos() * length, 0.0, angle.sin() * length);
-            let d = (b - a).normalize_or_zero();
-            let n = Vec3::new(-d.z, 0.0, d.x);
-            for (w, lift, color) in [(0.13, 0.0, rgb(0xf59625)), (0.045, 0.004, rgb(0xffd464))] {
-                let up = Vec3::Y * lift;
-                surface.quad(
-                    [
-                        a + n * w + up,
-                        b + n * w + up,
-                        b - n * w + up,
-                        a - n * w + up,
-                    ],
-                    color,
-                );
-            }
-            a = b;
-        }
-    }
 }

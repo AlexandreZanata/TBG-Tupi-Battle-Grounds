@@ -13,12 +13,29 @@ pub(super) fn meadow(theme: Theme) -> Mesh {
     let center = Vec3::new(8.0, -0.04, 0.0);
     let mut surface = Surface::default();
     let greens = theme.palette().ground;
-    for i in 0..SEGMENTS {
-        let j = (i + 1) % SEGMENTS;
-        let inner = center.lerp(rim[i], 0.56);
-        let next = center.lerp(rim[j], 0.56);
-        surface.triangle(center, next, inner, greens[(i / 5) % 2]);
-        surface.quad([inner, next, rim[j], rim[i]], greens[(i / 3 + 1) % 2]);
+    for band in 0..3 {
+        for i in 0..SEGMENTS {
+            let j = (i + 1) % SEGMENTS;
+            let ring = |k: usize, r: f32| {
+                let mut at = center.lerp(rim[k], r);
+                if r < 0.99 {
+                    at.y += (k as f32 * 2.3 + r * 4.0).sin() * 0.007;
+                }
+                at
+            };
+            let lo = [0.0, 0.56, 0.80][band];
+            let hi = [0.56, 0.80, 1.0][band];
+            let a = ring(i, lo);
+            let b = ring(j, lo);
+            let c = ring(j, hi);
+            let d = ring(i, hi);
+            let col = greens[(i / 4 + band) % 2];
+            if band == 0 {
+                surface.triangle(center, c, d, col);
+            } else {
+                surface.quad([a, b, c, d], col);
+            }
+        }
     }
     surface.finish()
 }

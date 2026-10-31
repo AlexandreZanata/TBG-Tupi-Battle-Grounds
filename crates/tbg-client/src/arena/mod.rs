@@ -5,6 +5,7 @@ use bevy::{light::NotShadowCaster, prelude::*};
 
 mod camp;
 mod cliffs;
+mod clouds;
 mod geometry;
 mod ground;
 mod life;
@@ -50,6 +51,7 @@ fn build(
     commands: &mut Commands,
     meshes: &mut Assets<Mesh>,
     mats: &mut Assets<StandardMaterial>,
+    images: &mut Assets<Image>,
     theme: theme::Theme,
 ) {
     info!("arena scene: {}", theme.name());
@@ -59,6 +61,7 @@ fn build(
         perceptual_roughness: 1.0,
         ..default()
     });
+    let water_mat = mats.add(water::material::create(theme, images));
     let sea_mat = mats.add(StandardMaterial {
         base_color: Color::WHITE,
         unlit: true,
@@ -93,7 +96,11 @@ fn build(
             ArenaScene,
             Name::new(format!("arena {name}")),
             Mesh3d(meshes.add(m)),
-            MeshMaterial3d(sea_mat.clone()),
+            MeshMaterial3d(if name == "sea" {
+                water_mat.clone()
+            } else {
+                sea_mat.clone()
+            }),
             Transform::default(),
             NotShadowCaster,
         ));
@@ -125,6 +132,26 @@ fn build(
             Name::new("arena themed accents"),
             Mesh3d(meshes.add(glow)),
             MeshMaterial3d(glow_mat),
+            Transform::default(),
+            NotShadowCaster,
+        ));
+    }
+    if theme == theme::Theme::Storm {
+        let cloud = clouds::mesh();
+        let triangles = mesh::triangles(&cloud);
+        total += triangles;
+        info!("arena squalls: {triangles} triangles");
+        commands.spawn((
+            ArenaScene,
+            Name::new("arena distant squalls"),
+            Mesh3d(meshes.add(cloud)),
+            MeshMaterial3d(mats.add(StandardMaterial {
+                base_color: Color::WHITE,
+                unlit: true,
+                alpha_mode: AlphaMode::Blend,
+                cull_mode: None,
+                ..default()
+            })),
             Transform::default(),
             NotShadowCaster,
         ));

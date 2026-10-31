@@ -51,26 +51,6 @@ pub(super) fn build(kit: &mut Kit) {
     ] {
         conductor(&mut kit.props, &mut kit.glow, Vec3::new(x, 0.0, z), s);
     }
-    // Overlapping dark banks form a distant horizon, outside the playable footprint.
-    for layer in 0..2 {
-        for i in 0..10 {
-            let x = -6.0 + i as f32 * 3.0;
-            let z = -10.8 - layer as f32 * 2.4 - (i % 3) as f32 * 0.55;
-            kit.props.push((
-                Ball(1.0),
-                if (i + layer) % 2 == 0 {
-                    rgb(0x263b53)
-                } else {
-                    rgb(0x1e3049)
-                },
-                Transform::from_xyz(x, -0.25 + layer as f32 * 0.45, z).with_scale(Vec3::new(
-                    2.55,
-                    0.45 + (i % 3) as f32 * 0.14,
-                    1.2,
-                )),
-            ));
-        }
-    }
     // A broken dock leaves the left end; a few posts and planks remain on the right.
     let (dock, dark) = (rgb(0x6b5a48), rgb(0x3d3430));
     shared::walkway(
@@ -141,14 +121,14 @@ fn bent_tree(parts: &mut Vec<Part>, at: Vec3, s: f32) {
     ));
     for (r, h, y) in [(0.64, 0.85, 0.9), (0.48, 0.78, 1.4), (0.3, 0.7, 1.85)] {
         parts.push((
-            Cone(r, h),
+            Canopy(r, h, at.x.to_bits() ^ (at.z + y).to_bits()),
             p.plant,
             Transform::from_translation(at + Vec3::new(y * 0.23, y, 0.0) * s)
                 .with_rotation(Quat::from_rotation_z(-0.24))
                 .with_scale(Vec3::new(1.2, 1.0, 0.8) * s),
         ));
         parts.push((
-            Cone(r * 0.83, h * 0.45),
+            Canopy(r * 0.83, h * 0.45, at.x.to_bits() ^ (at.z + y).to_bits()),
             rgb(0xb0c1d1),
             Transform::from_translation(at + Vec3::new(y * 0.23 + 0.1, y + h * 0.21, 0.0) * s)
                 .with_rotation(Quat::from_rotation_z(-0.24))
