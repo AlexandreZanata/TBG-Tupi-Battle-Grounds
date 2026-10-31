@@ -29,7 +29,7 @@ pub(crate) fn describe(kind: UnitKind, tier: u8, branch: u8, lang: crate::i18n::
                 out.push(lang.key("training.drill.duo"));
                 if tier == 2 {
                     out.push(
-                        "Megadrill +25% damage vs printed base HP ≥1000 units; no tower bonus"
+                        "Megadrill +25% damage vs printed base HP >=1000 units; no tower bonus"
                             .into(),
                     );
                 }
@@ -39,7 +39,7 @@ pub(crate) fn describe(kind: UnitKind, tier: u8, branch: u8, lang: crate::i18n::
         UnitKind::Duodrill => out.push(lang.key("training.drill.double")),
         UnitKind::Megadrill => out.push(
             if tier == 2 && branch == 1 {
-                "Rank 3; expires after 16.0s; +25% damage vs printed base HP ≥1000 units"
+                "Rank 3; expires after 16.0s; +25% damage vs printed base HP >=1000 units"
             } else {
                 "Rank 3; expires after 16.0s; final fusion rank"
             }

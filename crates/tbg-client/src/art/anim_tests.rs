@@ -221,22 +221,25 @@ fn test_attack_clips_finish_before_unit_intervals_and_events_on_time() {
     for &kind in &ALL_KINDS {
         let stats = content::effective_stats(kind, 0, 0, 0);
         let interval_s = stats.interval as f32 / content::TICK_HZ as f32;
+        let duration = |clip: Clip| {
+            super::kits::kit(kind).map_or_else(|| clip.duration(), |kit| kit.duration(clip))
+        };
         assert!(
-            Clip::AttackMelee.duration() < interval_s,
+            duration(Clip::AttackMelee) < interval_s,
             "{kind:?} melee {}s >= interval {}s",
-            Clip::AttackMelee.duration(),
+            duration(Clip::AttackMelee),
             interval_s
         );
         assert!(
-            Clip::AttackRanged.duration() < interval_s,
+            duration(Clip::AttackRanged) < interval_s,
             "{kind:?} ranged {}s >= interval {}s",
-            Clip::AttackRanged.duration(),
+            duration(Clip::AttackRanged),
             interval_s
         );
         assert!(
-            Clip::Cast.duration() < interval_s,
+            duration(Clip::Cast) < interval_s,
             "{kind:?} cast {}s >= interval {}s",
-            Clip::Cast.duration(),
+            duration(Clip::Cast),
             interval_s
         );
     }

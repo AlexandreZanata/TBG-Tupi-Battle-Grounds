@@ -19,7 +19,15 @@ pub const KIT: Kit = Kit {
     gait: Gait::HEAVY,
     attack: Attack::None,
     evolve: Burst::Forge,
-    durations: moves::DURATIONS,
+    // Its canonical basic repeats every 0.50s; preserve release timing and shorten only recovery.
+    durations: &[
+        (Clip::AttackMelee, 0.48),
+        (Clip::AttackRanged, 0.48),
+        (Clip::Cast, 0.48),
+        (Clip::Spawn, 0.6),
+        (Clip::Evolve, 0.9),
+        (Clip::Death, 0.9),
+    ],
 };
 fn pose(m: &Moment, p: &mut Pose) {
     let body = model::plan(m.tier);

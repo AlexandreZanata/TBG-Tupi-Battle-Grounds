@@ -60,9 +60,13 @@ fn every_kit_form_builds_within_the_doubled_budget() {
                 tris + detached
             );
         }
-        // Each tier reads bigger (ART-DIRECTION §5).
+        // ART-DIRECTION §5 applies to legal player Evolutions; summon ranks have fixed sizes.
         let scale = |t| (k.figure)(t, 0).plan.scale;
-        assert!(scale(0) < scale(1) && scale(1) < scale(2));
+        if kind.is_conventional() {
+            assert!(scale(0) < scale(1) && scale(1) < scale(2));
+        } else {
+            assert!(scale(0).is_finite() && scale(0) > 0.);
+        }
     }
 }
 
@@ -96,7 +100,7 @@ fn every_kit_has_five_distinct_forms() {
         v.sort();
         v
     };
-    for kind in kits() {
+    for kind in kits().into_iter().filter(|kind| kind.is_conventional()) {
         let k = kit(kind).expect("kit");
         for (i, a) in FORMS.iter().enumerate() {
             for b in &FORMS[i + 1..] {
@@ -179,5 +183,28 @@ fn the_bombard_points_along_its_shells_flight() {
                 "{tier}/{branch} {target:?}: elevation off by {lift}"
             );
         }
+    }
+}
+
+#[test]
+fn drill_summon_ranks_have_distinct_base_silhouettes_without_player_evolution() {
+    let mut signatures = Vec::new();
+    for kind in [
+        UnitKind::Microdrill,
+        UnitKind::Duodrill,
+        UnitKind::Megadrill,
+    ] {
+        assert!(kind.is_summon());
+        let spec = (kit(kind).expect("drill kit").figure)(0, 0);
+        let signature: Vec<_> = spec
+            .parts
+            .iter()
+            .map(|p| format!("{:?}/{:?}", p.shape, p.at))
+            .collect();
+        assert!(
+            !signatures.contains(&signature),
+            "each fusion rank must read differently"
+        );
+        signatures.push(signature);
     }
 }

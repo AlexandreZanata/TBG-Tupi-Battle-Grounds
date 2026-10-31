@@ -131,3 +131,15 @@ builds did not discover it there. The release command now prepends the verified
 cached wasm-bindgen and wasm-opt directories to PATH; no system tool is replaced.
 The online build completed before this resolver diagnosis. Final artifacts use
 the final source tree and the explicit local tool paths.
+
+The affected core library target exposed a stale lab-test assumption that
+CANON excludes Bonehorn. The test now explicitly uses the original ten-kind
+reference pool and retains its exact off-pool damage/accounting assertions;
+all 100 core library tests then passed. The native client target found four
+integration issues: Pyre Warden recovery exceeded its 0.50s basic interval,
+two kit tests applied player-Evolution constraints to fixed-rank summons,
+and a literal >= symbol was missing from the font subset. Pyre recovery is
+0.48s with event times unchanged; timing tests inspect actual kit durations;
+every form retains the same geometry budget, conventional Evolutions retain
+growth/distinctness guards, and a separate guard covers distinct drill ranks.
+The unsupported symbol is rendered with ASCII >=. Final re-run follows.
