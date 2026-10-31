@@ -37,7 +37,11 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                 align_items: AlignItems::Center,
                 ..default()
             },
-            ImageNode::new(assets.load("battle/native/resources.webp")),
+            ImageNode {
+                image_mode: NodeImageMode::Stretch,
+                visual_box: bevy::ui::VisualBox::BorderBox,
+                ..ImageNode::new(assets.load("battle/native/resources.webp"))
+            },
         ))
         .with_children(|bar| {
             bar.spawn(chrome::title("Energy", 17.));

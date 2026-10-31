@@ -20,8 +20,9 @@ pub(super) enum Hud {
     WatchControls,
     Portrait(usize),
     EnergyFill,
-    #[cfg(not(target_os = "linux"))]
     Info,
+    #[cfg(target_os = "linux")]
+    FortifyRow,
     Card(usize),
     CardText(usize),
     CardStrip(usize),
@@ -269,6 +270,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>)
             ))
             .with_children(|shop| {
                 shop.spawn((label("", 11.), Hud::Augments));
+                shop.spawn((label("", 11.), Hud::Info));
                 shop.spawn((label("", 12.), Hud::CouncilStatus));
                 shop.spawn((
                     Node {
@@ -287,7 +289,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>)
                         forgo_card()
                     ],
                 ));
-                shop.spawn(super::fortify::control());
+                shop.spawn((super::fortify::control(), Hud::FortifyRow));
                 shop.spawn(Node {
                     flex_direction: FlexDirection::Column,
                     row_gap: px(10),

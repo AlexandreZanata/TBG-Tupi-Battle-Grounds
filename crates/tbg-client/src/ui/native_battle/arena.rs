@@ -84,7 +84,7 @@ fn spawn(
                 UiAction::ShowArenaBanner,
             ))
             .with_children(|chip| {
-                chip.spawn(chrome::icon(&assets, "arenas", 14., accent));
+                chip.spawn(chrome::icon(&assets, "island", 14., accent));
                 chip.spawn(label(name.clone(), 14.));
             });
         });

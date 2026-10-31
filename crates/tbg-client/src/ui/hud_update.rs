@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use tbg_core::content::{
     augment_def, def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, TICK_HZ,
 };
-#[cfg(not(target_os = "linux"))]
 use tbg_core::FACTIONS;
 use tbg_core::{MatchView, Phase};
 
@@ -20,6 +19,7 @@ pub(super) fn update(
     mut nodes: Query<(&Hud, &mut Node)>,
     mut colors: Query<(&Hud, &mut BackgroundColor)>,
     mut texts: Query<(&Hud, &mut Text)>,
+    #[cfg(target_os = "linux")] tower_open: Res<super::fortify::TowerOpen>,
 ) {
     let Some(v) = &view.0 else { return };
     if pending.0.is_some_and(|(_, seq)| v.last_seq >= seq) {
@@ -27,6 +27,11 @@ pub(super) fn update(
     }
     let me = v.you.index();
     for (hud, mut node) in &mut nodes {
+        #[cfg(target_os = "linux")]
+        if let Some(show) = super::native_battle::auxiliary_visible(hud, v, tower_open.0) {
+            node.display = if show { Display::Flex } else { Display::None };
+            continue;
+        }
         let fraction = match hud {
             // Kinds and Fortification give each seat its own max HP (BR-SK07).
             Hud::Hp(0) => hp_fraction(v, me),
@@ -104,7 +109,6 @@ pub(super) fn update(
                 "{} vs {} · {} spectators",
                 info_state.you_name, info_state.opponent, v.spectators
             ),
-            #[cfg(not(target_os = "linux"))]
             Hud::Info => info(v),
             Hud::CardText(i) => {
                 let d = def(v.offers[*i]);
@@ -184,20 +188,26 @@ pub(super) fn clock(v: &MatchView) -> String {
     format!("{}:{:02}", s / 60, s % 60)
 }
 
-#[cfg(not(target_os = "linux"))]
 fn info(v: &MatchView) -> String {
     let synergies: Vec<String> = FACTIONS
         .iter()
         .filter(|f| v.synergy[v.you.index()][f.index()] > 0)
         .map(|f| format!("{f:?} {}/2", v.synergy[v.you.index()][f.index()]))
         .collect();
-    let energy = v.energy as f32 / ENERGY_SCALE as f32;
-    let regen = v.regen_bp as f32 / 10_000.0;
-    format!(
-        "Energy {energy:.1} | Regen x{regen:.2} | {} | {}",
-        army_label(v),
+    #[cfg(target_os = "linux")]
+    {
         synergies.join("  ")
-    )
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let energy = v.energy as f32 / ENERGY_SCALE as f32;
+        let regen = v.regen_bp as f32 / 10_000.0;
+        format!(
+            "Energy {energy:.1} | Regen x{regen:.2} | {} | {}",
+            army_label(v),
+            synergies.join("  ")
+        )
+    }
 }
 
 fn augment_list(v: &MatchView, seat: usize) -> String {
