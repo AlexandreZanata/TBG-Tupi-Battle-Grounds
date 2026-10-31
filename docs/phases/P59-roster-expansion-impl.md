@@ -61,18 +61,29 @@ From the reaudit (P58 §7 and the completion register):
 
 ## Not measured, not verified
 
-- No cargo run in this branch: `UnitFx` size, state hash and view bytes are unmeasured.
+- `UnitFx` size is not measured. The state hash moved once when the six W0 slots were added (goldens refrozen, D-62). W0 adds no field to any view.
 - The carrier id from Part A costs one postcard tag byte per unit per view (D-61).
 - PR #11 and #15 states were not re-checked (no network).
 - Audit §1 and §6 were not reaudited; the "reviewed #16" daggers in §6 are stale.
 - Left alone by the docs agent (code, not docs): `crates/tbg-core/src/view.rs` lines 24–26 describe unfinished fx packing, and `crates/tbg-core/tests/contract_roster.rs:162` asserts `UNIT_KINDS.len() == 10`.
 
-## Verification to run in the next session
+## Verification for W0
 
-```bash
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test -p tbg-core --features lab
-cargo test -p tbg-client --bin tbg-client
-cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
-```
+Run on the code of `a0c71b9`, the W0 core commit. Later commits on this branch change only docs.
+
+| Command | Result |
+|---|---|
+| `cargo fmt --all -- --check` | exit 0 |
+| `cargo clippy --workspace --all-targets -- -D warnings` | exit 0, no warnings; test code of every crate compiled, not run |
+| `cargo test -p tbg-core --features lab --no-fail-fast` | exit 0; 212 passed, 0 failed |
+| `cargo test -p tbg-balance --test contract` | exit 0; 7 passed, 0 failed; the binary took 530 s in a debug build |
+| `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown` | exit 0 |
+
+## Not run
+
+- `cargo test -p tbg-client --bin tbg-client`: the client tests were compiled by clippy, not executed. W0 adds no field to any view.
+- `cargo test -p tbg-server`, the other `tbg-balance` test files, and `cargo test --workspace`: not run in W0.
+
+## Before W1 starts
+
+Run every row above, plus `cargo test -p tbg-client --bin tbg-client`, `cargo test -p tbg-server`, and the other `tbg-balance` test files. The shield item (decision 5) still blocks W0 from being green.
