@@ -330,6 +330,19 @@ is not a dependency. Existing animations may ship first; unique dances for
 the whole roster are a later content pass. No game implementation or broad
 validation was performed in the planning branch. See D-82 and Proposed §17.
 
+## Owner-requested localization completion (2026-10-31)
+
+| Phase | Spec | Scope | Status | Review |
+|---|---|---|---|---|
+| P64 | [P64-i18n-completeness.md](phases/P64-i18n-completeness.md) | Finish P41: champions/abilities, Augments, Arcanas, Strongholds, HUD/common states, API/ranking profiles, native and standalone views; shared keys and live language refresh | **audit and planning only**, `codex/p64-i18n-completeness-plan` | Translation/glossary and targeted desktop validation pending |
+
+[Audit/file inventory](planning/P64-I18N-AUDIT.md),
+[hashed source manifest](planning/P64-I18N-SOURCE-MANIFEST.csv), and
+[executor prompt with authorized PR-to-main delivery](planning/P64-EXECUTION-PROMPT.md).
+P41's existing partial implementation remains partial until these applicable
+gaps are fixed and validated. Equal catalog key sets do not close its content
+or dynamic-view acceptance. No game code was changed by this plan.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·
