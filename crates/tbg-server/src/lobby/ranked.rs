@@ -59,6 +59,8 @@ impl Lobby {
             ),
             None => {
                 self.ranked_queue.push_back(token);
+                self.ranked_queued_at
+                    .insert(token, std::time::Instant::now());
                 if let Some(s) = self.session(&token) {
                     s.state = SessionState::Queued;
                     send(&s.conn, ConnEvent::Send(ServerMsg::Queued));

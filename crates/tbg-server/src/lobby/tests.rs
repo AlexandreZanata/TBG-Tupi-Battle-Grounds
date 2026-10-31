@@ -29,6 +29,7 @@ fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
             queue: VecDeque::new(),
             ranked_queue: VecDeque::new(),
             queued_at: HashMap::new(),
+            ranked_queued_at: HashMap::new(),
             rooms: Vec::new(),
             challenges: Vec::new(),
             rematches: Vec::new(),

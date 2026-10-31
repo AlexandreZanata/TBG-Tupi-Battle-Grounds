@@ -84,6 +84,9 @@ pub(super) struct Lobby {
     pub(super) ranked_queue: VecDeque<Token>,
     /// P9: when each queued session sent `QuickMatch` (for `queue_wait`).
     pub(super) queued_at: HashMap<Token, Instant>,
+    /// P60: when each ranked waiter sent `RankedMatch`; never read by the
+    /// Casual queue or its fallbacks.
+    pub(super) ranked_queued_at: HashMap<Token, Instant>,
     pub(super) rooms: Vec<(RoomCode, Token, Instant)>,
     /// P39: single-use Quick Challenge invitations.
     pub(super) challenges: Vec<(InviteToken, Token, Instant)>,
@@ -132,6 +135,7 @@ pub(crate) async fn run(
         queue: VecDeque::new(),
         ranked_queue: VecDeque::new(),
         queued_at: HashMap::new(),
+        ranked_queued_at: HashMap::new(),
         rooms: Vec::new(),
         challenges: Vec::new(),
         rematches: Vec::new(),
