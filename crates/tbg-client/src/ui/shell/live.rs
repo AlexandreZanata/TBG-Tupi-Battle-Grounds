@@ -66,10 +66,19 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                 });
             });
         }
-        p.spawn(kit::heading(
+        let mut _accounts = p.spawn(kit::heading(
             lang.key("live.accounts")
                 .replace("{count}", &data.online_total.to_string()),
             24.,
+        ));
+        #[cfg(target_os = "linux")]
+        _accounts.insert((
+            kit::Pending(data.online_pending()),
+            Node {
+                width: percent(100),
+                min_height: px(29),
+                ..default()
+            },
         ));
         #[cfg(target_os = "linux")]
         if data.online_pending() {

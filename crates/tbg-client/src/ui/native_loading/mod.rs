@@ -3,6 +3,7 @@
 mod assets;
 mod fields;
 mod gpu;
+mod result;
 mod scene;
 
 use bevy::prelude::*;
@@ -25,6 +26,7 @@ pub fn plugin(app: &mut App) {
     gpu::plugin(app);
     scene::plugin(app);
     fields::plugin(app);
+    result::plugin(app);
 }
 
 fn forced() -> bool {
