@@ -142,31 +142,30 @@ fn serve(
             key_hash,
             reply,
         } => {
-            let result =
-                accounts::login(&conn, &name_lower, &key_hash).and_then(|(id, profile)| {
-                    ranked::high_water(&conn)
-                        .map(|seq| (id, profile, seq))
-                        .map_err(|_| AccountError::Unavailable)
-                });
+            let result = accounts::login(conn, &name_lower, &key_hash).and_then(|(id, profile)| {
+                ranked::high_water(conn)
+                    .map(|seq| (id, profile, seq))
+                    .map_err(|_| AccountError::Unavailable)
+            });
             let _ = reply.send(result);
         }
         StoreCmd::InsertMatch(m) => {
-            if let Err(e) = matches::insert(&conn, &m) {
+            if let Err(e) = matches::insert(conn, &m) {
                 tracing::error!("match record insert failed: {e}");
             }
         }
         StoreCmd::CountMatches(reply) => {
-            let _ = reply.send(matches::count(&conn));
+            let _ = reply.send(matches::count(conn));
         }
         StoreCmd::CountRanked(reply) => {
-            let _ = reply.send(ranked::count(&conn));
+            let _ = reply.send(ranked::count(conn));
         }
         StoreCmd::PlayerStats { name_lower, reply } => {
-            let stats = ranked::player_stats(&conn, &name_lower).unwrap_or(None);
+            let stats = ranked::player_stats(conn, &name_lower).unwrap_or(None);
             let _ = reply.send(stats);
         }
         StoreCmd::Settle { entry, reply } => {
-            let result = ranked::settle(conn, &entry, &policy);
+            let result = ranked::settle(conn, &entry, policy);
             match &result {
                 Ok(_) => *dirty = true,
                 // Full error kept internally (P60 step 2), never keys.
@@ -177,25 +176,25 @@ fn serve(
             let _ = reply.send(result);
         }
         StoreCmd::HighWater(reply) => {
-            let _ = reply.send(ranked::high_water(&conn));
+            let _ = reply.send(ranked::high_water(conn));
         }
         StoreCmd::SaveStats {
             match_id,
             summary,
             reply,
         } => {
-            let _ = reply.send(stats::save(&conn, match_id, &summary));
+            let _ = reply.send(stats::save(conn, match_id, &summary));
         }
         StoreCmd::SaveArcanas { account, preset } => {
-            if let Err(e) = arcanas::save(&conn, account, preset) {
+            if let Err(e) = arcanas::save(conn, account, preset) {
                 tracing::error!("arcana preset save failed: {e}");
             }
         }
         StoreCmd::LoadArcanas { account, reply } => {
-            let _ = reply.send(arcanas::load(&conn, account));
+            let _ = reply.send(arcanas::load(conn, account));
         }
         StoreCmd::SaveStronghold { account, kind } => {
-            if let Err(e) = strongholds::save(&conn, account, kind) {
+            if let Err(e) = strongholds::save(conn, account, kind) {
                 tracing::error!("stronghold kind save failed: {e}");
             }
         }

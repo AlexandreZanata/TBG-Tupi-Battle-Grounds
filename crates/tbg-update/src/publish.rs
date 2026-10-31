@@ -197,7 +197,8 @@ pub async fn publish(keys: &Path, repo: &Path, r: &Release) -> Result<(), String
     let when = expires(r.metadata_days)?;
     editor
         .targets_version(version)
-        .and_then(|e| e.targets_expires(when))
+        .map_err(|e| e.to_string())?
+        .targets_expires(when)
         .map_err(|e| e.to_string())?;
     editor
         .snapshot_version(version)

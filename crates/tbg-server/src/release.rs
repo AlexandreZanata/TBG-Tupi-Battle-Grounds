@@ -123,7 +123,7 @@ pub async fn run(runtime: Arc<Runtime>, store: Arc<Store>, metrics: Arc<Metrics>
     loop {
         ticks.tick().await;
         n += 1;
-        tick(&runtime, &store, &metrics, &id, n % 5 == 0).await;
+        tick(&runtime, &store, &metrics, &id, n.is_multiple_of(5)).await;
     }
 }
 

@@ -8,6 +8,7 @@
 
 use bevy::prelude::*;
 
+#[cfg(not(target_arch = "wasm32"))]
 use super::{ActionQueue, UiAction};
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -18,6 +19,7 @@ mod native;
 mod view;
 
 /// What the update overlay currently says.
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Clone, Debug, PartialEq, Default)]
 pub enum UpdState {
     /// Not managed by the launcher, or nothing to say.
@@ -45,6 +47,7 @@ pub enum UpdState {
 }
 
 /// The update UI state shared by its systems.
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Resource, Default)]
 pub struct Updater {
     pub state: UpdState,
@@ -52,10 +55,10 @@ pub struct Updater {
     pub snoozed: Option<String>,
     /// The pending notes receipt to present, as the helper reported it.
     pub notes: Option<serde_json::Value>,
-    #[cfg(not(target_arch = "wasm32"))]
     inner: native::Inner,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 impl Updater {
     /// An update is being applied: no new play may start (U09).
     pub fn applying(&self) -> bool {
@@ -64,6 +67,7 @@ impl Updater {
 }
 
 /// Is `action` one of the update overlay's own buttons?
+#[cfg(not(target_arch = "wasm32"))]
 fn ours(action: &UiAction) -> bool {
     matches!(
         action,
@@ -77,27 +81,33 @@ fn ours(action: &UiAction) -> bool {
 
 /// Runs before `actions::apply`: handles the update buttons and, while an
 /// update is applying, drops every other action (the Update/Play race).
+#[cfg(not(target_arch = "wasm32"))]
 pub(super) fn take_actions(
     mut queue: ResMut<ActionQueue>,
     mut updater: ResMut<Updater>,
     state: Res<State<crate::GameState>>,
-    #[cfg(not(target_arch = "wasm32"))] mut exit: MessageWriter<AppExit>,
+    mut exit: MessageWriter<AppExit>,
 ) {
     let mine: Vec<UiAction> = queue.0.iter().copied().filter(ours).collect();
     queue.0.retain(|a| !ours(a));
-    #[cfg(not(target_arch = "wasm32"))]
     for action in mine {
         native::apply(&mut updater, action, *state.get(), &mut exit);
     }
-    #[cfg(target_arch = "wasm32")]
-    let _ = (mine, &state);
     if updater.applying() {
         queue.0.clear();
     }
 }
 
+/// The browser has no installer to drive (new builds arrive on reload).
+#[cfg(target_arch = "wasm32")]
+pub(super) fn take_actions() {}
+
 pub fn plugin(app: &mut App) {
-    app.init_resource::<Updater>();
     #[cfg(not(target_arch = "wasm32"))]
-    native::plugin(app);
+    {
+        app.init_resource::<Updater>();
+        native::plugin(app);
+    }
+    #[cfg(target_arch = "wasm32")]
+    let _ = app;
 }

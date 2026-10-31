@@ -26,7 +26,7 @@ fn mib(bytes: u64) -> String {
 }
 
 /// Locale field of a notes value (`{"en": .., "pt-BR": ..}`).
-fn localized<'a>(v: &'a Value, lang: Lang) -> Option<&'a Value> {
+fn localized(v: &Value, lang: Lang) -> Option<&Value> {
     let code = if lang == Lang::PtBr { "pt-BR" } else { "en" };
     v.get(code).or_else(|| v.get("en"))
 }
