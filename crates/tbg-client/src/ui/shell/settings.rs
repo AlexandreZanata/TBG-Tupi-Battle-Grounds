@@ -1,6 +1,8 @@
 //! User-visible audio, language, video and account preferences, plus kit review.
 
-use super::{button, kit, Account, Action, Lang, Panel, Sounds, UiAction};
+#[cfg(not(target_os = "linux"))]
+use super::button;
+use super::{kit, Account, Action, Lang, Panel, Sounds, UiAction};
 use bevy::prelude::*;
 
 #[cfg(target_os = "linux")]
