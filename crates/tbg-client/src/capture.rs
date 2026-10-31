@@ -12,6 +12,25 @@ pub fn plugin(app: &mut App) {
     if crate::config::url_param("capture").is_some() {
         app.add_systems(Update, capture);
         #[cfg(target_os = "linux")]
+        if crate::config::url_param("capture_panel").as_deref() == Some("demo_transition") {
+            app.add_systems(
+                Update,
+                |time: Res<Time>,
+                 state: Res<State<crate::GameState>>,
+                 mut actions: ResMut<crate::ui::ActionQueue>,
+                 mut done: Local<bool>| {
+                    if !*done && time.elapsed_secs() > 5. && *state.get() == crate::GameState::Menu
+                    {
+                        *done = true;
+                        actions.0.push(crate::ui::UiAction::Practice);
+                        eprintln!(
+                            "Lobby demo transition: starting Practice through the normal UiAction."
+                        );
+                    }
+                },
+            );
+        }
+        #[cfg(target_os = "linux")]
         if crate::config::url_param("capture_panel").as_deref() == Some("ranking") {
             if crate::config::url_param("capture_ranking_fixture").is_some() {
                 app.add_systems(Update, ranking_fixture);
@@ -93,6 +112,8 @@ fn capture(
     #[cfg(target_os = "linux")] tower: Res<crate::ui::fortify::TowerOpen>,
     #[cfg(target_os = "linux")] inspected: Res<crate::ui::inspect::Inspected>,
     #[cfg(target_os = "linux")] reserve: Option<Res<reserve::Status>>,
+    #[cfg(target_os = "linux")] units: Query<&crate::visuals::UnitVisual>,
+    #[cfg(target_os = "linux")] stats: Res<crate::sync::MatchStats>,
     mut started: Local<bool>,
 ) {
     let delay = crate::config::url_param("capture_after")
@@ -140,6 +161,15 @@ fn capture(
         return;
     };
     *started = true;
+    #[cfg(target_os = "linux")]
+    if *state.get() == crate::GameState::Menu {
+        let kinds: Vec<_> = units
+            .iter()
+            .filter(|v| !v.dying)
+            .map(|v| v.kind())
+            .collect();
+        eprintln!("Lobby capture: live units={kinds:?}; real LatestView present={}; real match purchases={}, evolutions={}, damage={}", view.0.is_some(), stats.bought, stats.evolutions, stats.damage_dealt);
+    }
     commands
         .spawn(Screenshot::primary_window())
         .observe(save_to_disk(path))

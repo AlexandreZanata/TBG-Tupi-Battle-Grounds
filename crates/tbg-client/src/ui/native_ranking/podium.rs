@@ -2,6 +2,31 @@
 
 use super::*;
 
+#[derive(Component)]
+pub(super) struct Grove;
+
+pub(super) fn cover(
+    images: Res<Assets<Image>>,
+    mut groves: Query<(&ComputedNode, &mut ImageNode), With<Grove>>,
+) {
+    for (node, mut image) in &mut groves {
+        let Some(source) = images.get(&image.image) else {
+            continue;
+        };
+        if node.size.y <= 0. {
+            continue;
+        }
+        let size = source.size().as_vec2();
+        let ratio = node.size.x / node.size.y;
+        let crop = if size.x / size.y > ratio {
+            Vec2::new(size.y * ratio, size.y)
+        } else {
+            Vec2::new(size.x, size.x / ratio)
+        };
+        image.rect = Some(Rect::from_center_size(size * 0.5, crop));
+    }
+}
+
 pub(super) fn spawn(
     parent: &mut ChildSpawnerCommands,
     ranking: &Ranking,
@@ -24,15 +49,19 @@ pub(super) fn spawn(
         .with_children(|stage| {
             stage.spawn((
                 ImageNode {
+                    image_mode: NodeImageMode::Stretch,
                     color: Color::WHITE.with_alpha(0.65),
                     ..ImageNode::new(assets.load("ranking/podium-grove.webp"))
                 },
                 Node {
                     position_type: PositionType::Absolute,
+                    left: px(0),
+                    top: px(0),
                     width: percent(100),
                     height: percent(100),
                     ..default()
                 },
+                Grove,
             ));
             for (rank, art) in [(2, "silver"), (1, "gold"), (3, "bronze")] {
                 let leader = ranking.leaders[rank - 1].as_ref();

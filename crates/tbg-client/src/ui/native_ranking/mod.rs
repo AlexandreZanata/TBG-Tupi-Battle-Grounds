@@ -16,7 +16,8 @@ const EDGE: Color = Color::srgb_u8(151, 118, 65);
 struct Root;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, render.run_if(in_state(GameState::Menu)));
+    app.add_systems(Update, render.run_if(in_state(GameState::Menu)))
+        .add_systems(PostUpdate, podium::cover.after(bevy::ui::UiSystems::Layout));
 }
 
 fn words(lang: Lang, en: &str, pt: &str) -> String {
@@ -44,6 +45,8 @@ fn render(
     assets: Res<AssetServer>,
     lang: Res<Lang>,
     roots: Query<Entity, With<Root>>,
+    positions: Query<&ScrollPosition, With<table::List>>,
+    mut page_at: Local<u16>,
 ) {
     if !crate::config::bevy_ui() {
         return;
@@ -62,6 +65,13 @@ fn render(
     if !ranking.open {
         return;
     }
+    let offset = ranking.page.as_ref().map_or(0, |p| p.offset);
+    let scroll = if offset == *page_at && !roots.is_empty() {
+        positions.iter().next().cloned().unwrap_or_default()
+    } else {
+        ScrollPosition::default()
+    };
+    *page_at = offset;
     commands
         .spawn((
             Node {
@@ -98,7 +108,7 @@ fn render(
                 })
                 .with_children(|board| {
                     podium::spawn(board, &ranking, &assets, *lang);
-                    table::spawn(board, &ranking, &account, *lang);
+                    table::spawn(board, &ranking, &account, *lang, scroll);
                 });
                 profile::spawn(body, &ranking, &account, &data, &assets, *lang);
             });

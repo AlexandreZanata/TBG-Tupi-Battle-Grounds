@@ -2,11 +2,15 @@
 
 use super::*;
 
+#[derive(Component)]
+pub(super) struct List;
+
 pub(super) fn spawn(
     parent: &mut ChildSpawnerCommands,
     ranking: &Ranking,
     account: &Account,
     lang: Lang,
+    scroll: ScrollPosition,
 ) {
     let page = ranking.page.as_ref();
     let status = if ranking.want.is_some() {
@@ -27,13 +31,13 @@ pub(super) fn spawn(
         },
         children![kit::muted(status, 12.)],
     ));
-    parent.spawn(Node{width:percent(100),flex_grow:1.,min_height:px(0),flex_direction:FlexDirection::Column,overflow:Overflow::scroll_y(),row_gap:px(3),..default()}).with_children(|list| {
+    parent.spawn((Node{width:percent(100),flex_grow:1.,min_height:px(0),flex_direction:FlexDirection::Column,overflow:Overflow::scroll_y(),row_gap:px(3),..default()}, scroll, List)).with_children(|list| {
         let headings=["#".into(),words(lang,"Player","Jogador"),words(lang,"Rating","Pontuação"),words(lang,"Wins","Vitórias"),words(lang,"Losses","Derrotas"),words(lang,"Draws","Empates"),words(lang,"Win rate","Taxa de vitória")];
         row(list,headings,Color::srgb_u8(17,43,49),true);
         if let Some(page)=page {
             for player in &page.rows {
                 let mine=account.profile.as_ref().is_some_and(|p|p.name==player.name);
-                let color=if mine{Color::srgb_u8(45,70,70)}else{match player.rank{1=>Color::srgb_u8(66,58,33),2=>Color::srgb_u8(21,55,67),3=>Color::srgb_u8(28,49,43),_=>Color::srgb_u8(18,38,44)}};
+                let color=if mine{super::super::BUTTON}else{match player.rank{1=>Color::srgb_u8(66,58,33),2=>Color::srgb_u8(21,55,67),3=>Color::srgb_u8(28,49,43),_=>Color::srgb_u8(18,38,44)}};
                 row(list,[player.rank.to_string(),player.name.clone(),player.rating.to_string(),player.wins.to_string(),player.losses.to_string(),player.draws.to_string(),rate(player)],color,false);
             }
             if page.rows.is_empty(){list.spawn(kit::muted(words(lang,"No ranked players yet. Play Ranked to earn a place.","Ainda não há jogadores classificados. Jogue Ranqueada para conquistar seu lugar."),13.));}
