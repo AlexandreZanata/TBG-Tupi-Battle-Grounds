@@ -124,7 +124,7 @@ mod web {
         if !desktop.0 {
             return;
         }
-        let (info, pending, surrender, fortifying, lang) = details;
+        let (info, pending, surrender, fortifying, _) = details;
         let Some(v) = &view.0 else {
             return;
         };
