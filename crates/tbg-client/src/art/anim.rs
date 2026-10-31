@@ -38,6 +38,8 @@ pub struct Animator {
     /// Walk in place at content speed (review tools): feet are not planted.
     pub treadmill: bool,
     pub gait: Gait,
+    pub gesture: f32,
+    pub growth: f32,
     base: Clip,
     base_t: f32,
     action: Option<(Clip, f32)>,
@@ -80,6 +82,8 @@ impl Animator {
             aim_at: None,
             treadmill: false,
             gait,
+            gesture: 1e6,
+            growth: 0.0,
             base: Clip::Idle,
             base_t: phase * Clip::Idle.duration(),
             action: None,
@@ -160,6 +164,8 @@ impl Animator {
                 variant: self.variant,
                 clock: self.clock,
                 walk,
+                gesture: self.gesture,
+                growth: self.growth,
             };
             (kit.pose)(&moment, &mut pose);
         }
@@ -195,6 +201,7 @@ impl Animator {
         self.events.clear();
         self.since_attack = (self.since_attack + dt).min(1e6);
         self.clock += dt;
+        self.gesture = (self.gesture + dt).min(1e6);
         if let Some((clip, t)) = self.preview {
             return (
                 self.pose(clip, t),

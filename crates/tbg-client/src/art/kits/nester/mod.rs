@@ -50,4 +50,9 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         Clip::Victory => moves::victory(m, pose, &p, Cheer::Both),
         _ => {}
     }
+    let hatch = tools::hold(m.gesture, [0.0, 0.06, 0.18, 0.42]);
+    tools::add(pose, Joint::Chest, [12.0 * hatch, 0.0, 0.0]);
+    tools::add(pose, Joint::UpperArmL, [-20.0 * hatch, 0.0, 0.0]);
+    // The existing back nest swells as the authoritative timer matures.
+    tools::shift(pose, Joint::Chest, [0.0, 0.015 * m.growth, 0.0]);
 }

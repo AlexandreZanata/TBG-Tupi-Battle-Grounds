@@ -28,7 +28,7 @@ mod rampart;
 mod rootcaller;
 mod rotcap;
 mod sawbot;
-mod shatterback;
+pub(crate) mod shatterback;
 mod shieldbearer;
 mod siege_walker;
 mod smuggler;
@@ -103,6 +103,8 @@ pub struct Moment {
     pub clock: f32,
     /// Walk cycle phase (0..1 per two steps) while walking.
     pub walk: Option<f32>,
+    pub gesture: f32,
+    pub growth: f32,
 }
 
 static SIEGE_WALKER: Kit = siege_walker::KIT;

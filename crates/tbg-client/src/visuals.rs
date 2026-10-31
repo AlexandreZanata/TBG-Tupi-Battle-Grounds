@@ -15,7 +15,9 @@ pub mod aim;
 pub mod assets;
 mod attacks;
 mod cues;
+mod growth;
 mod names;
+mod shell;
 mod update;
 
 pub use assets::VisualAssets;
@@ -66,6 +68,7 @@ pub struct UnitVisual {
     /// Tint material, seconds left, already applied to the joints.
     tint: Option<(Handle<StandardMaterial>, f32, bool)>,
     pub dying: bool,
+    fx: u16,
     dead_for: f32,
     last_x: f32,
     /// Seconds without moving (walk/idle hysteresis).
@@ -115,7 +118,7 @@ impl UnitVisual {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(names::plugin)
+    app.add_plugins((names::plugin, shell::plugin, growth::plugin))
         .init_resource::<TowerOrders>()
         .add_systems(PreStartup, assets::init)
         .add_systems(
@@ -222,6 +225,11 @@ pub fn spawn_unit_visual(
         yaw: yaw(look.own),
         tint: None,
         dying: false,
+        fx: if look.kind == UnitKind::Shatterback {
+            4 << 8
+        } else {
+            0
+        },
         dead_for: 0.0,
         last_x: pos.x,
         still: 1.0,

@@ -22,6 +22,8 @@ const BLOOD: Color = Color::srgb(0.85, 0.1, 0.12);
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 0.98, tier);
     p.arm *= 1.3;
+    p.torso.x *= 1.22;
+    p.torso.z *= 1.15;
     p
 }
 
@@ -59,7 +61,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             v.push(part(b, Ball(r), BLOOD, [x, y, -0.06]).glow());
         }
     }
-    if f.b {
+    {
         for arm in [UpperArmL, UpperArmR, ForearmL, ForearmR] {
             v.push(
                 part(

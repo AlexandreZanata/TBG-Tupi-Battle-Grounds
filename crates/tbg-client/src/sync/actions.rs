@@ -1,6 +1,6 @@
 //! Support actions the core announces as their own events rather than as an
-//! `AttackStart`: the Smuggler tosses each crate it drops, a Bloodweaver's
-//! transfer streams from donor to receiver, a Shatterback plate breaks.
+//! `AttackStart`: the Smuggler places each crate it drops, a Bloodweaver's
+//! transfer streams from enemy to ally, a Shatterback plate breaks.
 
 use bevy::prelude::*;
 use tbg_core::{Event, Seat, UnitId, UnitKind};
@@ -57,6 +57,6 @@ fn toss(fx: &Fx, map: &UnitEntities, visuals: &mut Visuals, seat: Seat, crate_id
         .filter(|(v, _, _)| v.own == own && v.kind() == UnitKind::Smuggler && !v.dying)
         .min_by(|a, b| gap(&a.1).total_cmp(&gap(&b.1)));
     if let Some((mut v, _, mut anim)) = smuggler {
-        visuals::play_cue(&mut v, &mut anim, fx.assets, VisualCue::AttackStart);
+        visuals::play_cue(&mut v, &mut anim, fx.assets, VisualCue::CargoDrop);
     }
 }

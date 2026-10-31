@@ -44,6 +44,10 @@ fn crate_is_dropped_behind_without_stopping() {
         let krate = s.units.iter().find(|u| u.kind == UnitKind::Crate).unwrap();
         assert_eq!(krate.x, x - seat.dir() * 400);
         assert_eq!(s.units[s.unit_index(id).unwrap()].action_cd, 400);
+        assert!(
+            (s.units[s.unit_index(id).unwrap()].x - x) * seat.dir() > 0,
+            "dropping cargo must not stop movement"
+        );
         assert_eq!(
             tbg_core::content::def(UnitKind::Smuggler).range,
             tbg_core::content::LANE_LEN * 40 / 100

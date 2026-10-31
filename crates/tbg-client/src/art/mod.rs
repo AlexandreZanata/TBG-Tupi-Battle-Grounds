@@ -74,6 +74,7 @@ pub struct FigureLibrary {
     pub glow_material: Handle<StandardMaterial>,
     pub bow: bow::BowAssets,
     pub stage: Handle<Mesh>,
+    pub shells: HashMap<(u8, u8), [Handle<Mesh>; 4]>,
 }
 
 impl FigureLibrary {
@@ -343,7 +344,21 @@ fn build_library(
         mesh::build(mesh::Shape::Box(1.3, 0.05, 1.3)),
         palette::PARCHMENT,
     ));
+    let shells = FORMS
+        .into_iter()
+        .map(|(t, b)| {
+            let parts = std::array::from_fn(|i| {
+                let spec = kits::shatterback::model::plate(t, b, i);
+                let mesh = figure::build_joint_meshes(&spec)[rig::Joint::Chest.index()]
+                    .take()
+                    .unwrap_or_else(|| Cuboid::new(0.1, 0.1, 0.1).into());
+                meshes.add(mesh)
+            });
+            ((t, b), parts)
+        })
+        .collect();
     commands.insert_resource(FigureLibrary {
+        shells,
         forms,
         blockouts,
         material,

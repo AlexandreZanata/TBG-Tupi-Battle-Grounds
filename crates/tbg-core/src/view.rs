@@ -157,7 +157,7 @@ impl MatchState {
                 .units
                 .iter()
                 .filter(|u| u.hp > 0)
-                .map(unit_view)
+                .map(|u| unit_view(u, self.rules().hatch_rule(u.tier, u.branch).0))
                 .collect(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],
@@ -170,7 +170,13 @@ impl MatchState {
     }
 }
 
-fn unit_view(u: &crate::state::Unit) -> UnitView {
+fn unit_view(u: &crate::state::Unit, hatch_every: u16) -> UnitView {
+    let growth = if u.kind == UnitKind::Nester {
+        (u32::from(hatch_every.saturating_sub(u.action_cd)) * 7 / u32::from(hatch_every.max(1)))
+            as u16
+    } else {
+        u.fx.essence.min(7)
+    };
     UnitView {
         id: u.id,
         seat: u.seat,
@@ -185,7 +191,11 @@ fn unit_view(u: &crate::state::Unit) -> UnitView {
             Status::Slowed { .. } => 1,
             Status::Rooted { .. } => 2,
         },
-        // P43: affliction and carrier bits are not packed yet.
-        fx: if u.is_summon() { FX_SUMMON } else { 0 },
+        // Existing fx layout: plates 8..10, Essence (saturated display) 11..13,
+        // carried 14, summon 15. No gameplay data returns from the client.
+        fx: (u16::from(u.fx.plates.min(7)) << 8)
+            | (growth << 11)
+            | (u16::from(u.fx.carrier.is_some()) << 14)
+            | if u.is_summon() { FX_SUMMON } else { 0 },
     }
 }

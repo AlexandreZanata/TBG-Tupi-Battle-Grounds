@@ -23,7 +23,12 @@ pub const KIT: Kit = Kit {
         impact: |_, _| Impact::Burn,
     },
     evolve: Burst::Soul,
-    durations: moves::DURATIONS,
+    durations: &[
+        (Clip::AttackMelee, 0.52),
+        (Clip::Spawn, 0.6),
+        (Clip::Evolve, 0.9),
+        (Clip::Death, 0.9),
+    ],
 };
 
 pub fn pose(m: &Moment, pose: &mut Pose) {

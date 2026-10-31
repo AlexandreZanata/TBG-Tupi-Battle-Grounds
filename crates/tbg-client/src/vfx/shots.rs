@@ -44,6 +44,9 @@ pub enum ShotKind {
     Flask,
     Blood,
     Puppet,
+    Bullet,
+    SlashWave,
+    BloodBolt,
 }
 
 #[derive(Clone, Copy)]
@@ -108,6 +111,14 @@ enum Mote {
 pub const UNIT_FLIGHT: f32 = 0.12;
 /// A cast's root ridge: Release at 0.22 s plus this lands at 0.30 s.
 pub const CAST_FLIGHT: f32 = 0.08;
+/// Old Finn releases at 0.22 s and lands at the authoritative Hit at 0.30 s.
+pub const FISH_FLIGHT: f32 = 0.08;
+pub const FISH_MIN_APEX: f32 = 2.0;
+
+pub fn fish_arc(from: Vec3, to: Vec3) -> f32 {
+    let horizontal = (to - from).xz().length();
+    (horizontal * 0.5).max(FISH_MIN_APEX) / from.distance(to).max(0.001)
+}
 
 fn look(kind: ShotKind) -> Look {
     use ShotKind::*;
@@ -252,8 +263,8 @@ fn look(kind: ShotKind) -> Look {
         ),
         Fish => (
             Some((Body::Fish, 1.0)),
-            0.35,
-            CAST_FLIGHT,
+            0.5,
+            FISH_FLIGHT,
             Trail::Motes(Mote::Water),
             22.0,
             Impact::Splash,
@@ -298,6 +309,14 @@ fn look(kind: ShotKind) -> Look {
             14.0,
             Impact::Cleanse,
         ),
+        BloodBolt => (
+            Some((Body::Orb, 0.6)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Motes(Mote::Blood),
+            0.0,
+            Impact::Blood,
+        ),
         Blood => (
             Some((Body::Orb, 1.0)),
             0.15,
@@ -305,6 +324,25 @@ fn look(kind: ShotKind) -> Look {
             Trail::Motes(Mote::Blood),
             0.0,
             Impact::Blood,
+        ),
+        Bullet => (
+            Some((Body::Bolt, 0.20)),
+            0.0,
+            CAST_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Bolt,
+        ),
+        SlashWave => (
+            None,
+            0.0,
+            0.08,
+            Trail::Ridge {
+                every: 0.012,
+                size: 0.7,
+            },
+            0.0,
+            Impact::Cleave,
         ),
         Puppet => (
             Some((Body::Orb, 0.8)),
@@ -594,12 +632,17 @@ pub(super) fn fly(
         s.age += dt;
         s.t = (s.t + dt / l.secs).min(1.0);
         let ground = l.body.is_none();
+        let arc = if s.kind == ShotKind::Fish {
+            fish_arc(s.from, s.to)
+        } else {
+            l.arc
+        };
         let at = if ground {
             s.from.lerp(s.to, s.t).with_y(0.02)
         } else {
-            flight(s.from, s.to, l.arc, s.t)
+            flight(s.from, s.to, arc, s.t)
         };
-        let dir = tangent(s.from, s.to, l.arc, s.t);
+        let dir = tangent(s.from, s.to, arc, s.t);
         t.translation = at;
         t.rotation = Quat::from_rotation_arc(Vec3::Z, dir) * Quat::from_rotation_z(l.roll * s.age);
         s.trail += dt;
@@ -728,5 +771,21 @@ mod tests {
         for kind in [ShotKind::Roots, ShotKind::Strangle, ShotKind::Spores] {
             assert!((0.22 + look(kind).secs - 0.30).abs() < 1e-6, "{kind:?}");
         }
+    }
+}
+
+#[cfg(test)]
+mod fish_tests {
+    use super::*;
+    #[test]
+    fn fish_lands_at_hit_and_clears_allies() {
+        for distance in [0.1, 1.0, 5.25] {
+            let from = Vec3::new(0.0, 1.0, 0.0);
+            let to = Vec3::new(distance, 0.6, 0.0);
+            let arc = fish_arc(from, to);
+            assert!(flight(from, to, arc, 0.5).y >= from.lerp(to, 0.5).y + FISH_MIN_APEX - 1e-5);
+            assert_eq!(flight(from, to, arc, 1.0), to);
+        }
+        assert!((0.22 + look(ShotKind::Fish).secs - 0.30).abs() < 1e-5);
     }
 }

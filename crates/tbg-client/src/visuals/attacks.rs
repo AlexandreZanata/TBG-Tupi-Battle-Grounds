@@ -18,7 +18,7 @@ use crate::vfx::{
 
 /// How far a melee target may stand from the attacker and still take the
 /// impact (the blade may be behind it mid-combo, e.g. a shield bash).
-const REACH: f32 = 2.6;
+const REACH: f32 = 3.5;
 
 pub(super) fn release(
     mut commands: Commands,
@@ -66,6 +66,26 @@ pub(super) fn release(
                     .filter(|t| t.xz().distance(root.translation.xz()) < REACH)
                     .unwrap_or(blade);
                 let kind = impact(tier, branch);
+                if v.kind() == tbg_core::UnitKind::Longaxe {
+                    shots::fire(
+                        &mut commands,
+                        &vfx,
+                        shots::ShotKind::SlashWave,
+                        root.translation.with_y(0.05),
+                        at.with_y(0.05),
+                        area,
+                    );
+                    if branch == 1 && tier > 0 {
+                        impacts::sweep(
+                            &mut commands,
+                            &vfx,
+                            root.translation.with_y(0.15),
+                            v.yaw,
+                            v.range,
+                            true,
+                        );
+                    }
+                }
                 impacts::land(&mut commands, &vfx, kind, at.with_y(0.3), area);
                 if kind == Impact::Reap {
                     let to = at - root.translation;
