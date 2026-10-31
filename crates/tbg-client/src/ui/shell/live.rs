@@ -66,6 +66,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                 });
             });
         }
+        #[cfg_attr(not(target_os = "linux"), allow(unused_mut))]
         let mut _accounts = p.spawn(kit::heading(
             lang.key("live.accounts")
                 .replace("{count}", &data.online_total.to_string()),

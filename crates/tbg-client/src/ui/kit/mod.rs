@@ -13,6 +13,7 @@ pub const LINE: Color = Color::srgb_u8(74, 88, 94);
 pub const BLUE: Color = Color::srgb_u8(47, 88, 110);
 
 /// A server-backed field has not received its first value; Linux paints its reserved slot.
+#[cfg(target_os = "linux")]
 #[derive(Component)]
 pub struct Pending(pub bool);
 

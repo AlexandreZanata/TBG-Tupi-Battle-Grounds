@@ -97,6 +97,7 @@ pub fn spawn(
                         ..default()
                     },
                 ));
+                #[cfg_attr(not(target_os = "linux"), allow(unused_mut))]
                 let mut _rating = info.spawn(kit::heading(
                     account
                         .profile
@@ -154,6 +155,7 @@ pub fn spawn(
                         })
                         .with_children(|stat| {
                             stat.spawn(kit::muted(lang.key(&format!("lobby.profile.{key}")), 12.));
+                            #[cfg_attr(not(target_os = "linux"), allow(unused_mut))]
                             let mut _value = stat.spawn(kit::heading(value, 21.));
                             #[cfg(target_os = "linux")]
                             _value.insert((
