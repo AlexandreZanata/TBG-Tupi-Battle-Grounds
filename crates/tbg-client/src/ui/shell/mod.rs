@@ -169,6 +169,7 @@ fn render(
         return;
     }
     let compact = window.width() < 900.;
+    let home = shell.panel == Panel::Lobby;
     commands
         .spawn((
             Node {
@@ -176,15 +177,29 @@ fn render(
                 width: percent(100),
                 height: percent(100),
                 flex_direction: FlexDirection::Column,
-                padding: UiRect::all(px(if compact { 10 } else { 24 })),
+                padding: UiRect::all(px(if home {
+                    0
+                } else if compact {
+                    10
+                } else {
+                    24
+                })),
                 row_gap: px(16),
                 ..default()
             },
-            BackgroundColor(Color::srgba(0.02, 0.035, 0.045, 0.72)),
+            BackgroundColor(if home {
+                Color::NONE
+            } else {
+                Color::srgba(0.02, 0.035, 0.045, 0.72)
+            }),
             Root,
             DespawnOnExit(GameState::Menu),
         ))
         .with_children(|root| {
+            if home {
+                lobby::spawn(root, &shell, &data, &account, &assets, *lang, sounds.muted);
+                return;
+            }
             navigation(root, *lang, shell.panel, &data, compact, &assets);
             if let Some(version) = &data.update {
                 root.spawn(button(
@@ -207,9 +222,7 @@ fn render(
                 Body,
             ))
             .with_children(|body| match shell.panel {
-                Panel::Lobby => {
-                    lobby::spawn(body, &shell, &data, &account, &assets, *lang, compact)
-                }
+                Panel::Lobby => {}
                 Panel::Friends => lobby::friends(body, *lang),
                 Panel::Settings => settings::spawn(body, &account, &sounds, &window, *lang),
                 Panel::Arenas => arenas::spawn(body, &assets, *lang),
@@ -244,7 +257,7 @@ fn navigation(
             if compact {
                 row.spawn(kit::heading("TBG", 22.));
             } else {
-                row.spawn(kit::image(assets, "branding/tbg-emblem.webp", 70., 70.));
+                row.spawn(kit::image(assets, "lobby/wordmark.webp", 210., 84.));
             }
             row.spawn(Node {
                 flex_grow: 1.,

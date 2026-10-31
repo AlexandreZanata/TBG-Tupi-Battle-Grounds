@@ -76,3 +76,23 @@ this new native combination.
   preserve them and never include them in an application-change commit.
 - Only local commits were created. No push, CI wait, VPS change or public
   release occurred. Deferred checks above remain pending for consolidation.
+
+## Browser-aligned lobby adjustment — 2026-10-31
+
+Owner supplied Linux/browser screenshots and requested matching visual
+positions: modes left, account/presence/navigation above, ranked record
+bottom left, four feature cards below the clear center, live battles/news
+right. Restore the written Tupi wordmark; keep the new emblem as the app
+icon/profile badge. No game rules, server authority or account gates change.
+
+Implemented as lobby-only modules and optional control palette tokens.
+Other native panels retain their existing layout. Existing browser vector
+UI symbols/news are rasterized to lossless WebP for the existing native
+image loader; the written logo is an optimized WebP, never an SVG conversion.
+
+Work-front checks: formatting, diff checks, asset format inspection and the
+existing focused lobby-art JavaScript scenario. The owner-requested native
+build/reinstallation and concrete desktop capture follow the source commit.
+Defer the WASM opt-in Bevy UI check, interaction regression selection and
+full suites to consolidation/explicit owner request; no browser build is
+needed for the default browser's static wordmark restoration.
