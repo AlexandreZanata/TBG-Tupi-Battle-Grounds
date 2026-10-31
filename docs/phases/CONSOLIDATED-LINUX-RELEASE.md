@@ -64,3 +64,41 @@ and a persistence test that incorrectly depended on bot combat ending within
 Deferred unless explicitly requested: full workspace suite, long balance
 gates/benchmarks, full animation gallery and extensive multiplayer matrix.
 Native validation alone never establishes browser compatibility.
+
+## Targeted evidence collected
+
+- Native Clippy: `cargo clippy --offline -p tbg-client -p tbg-core -p tbg-server
+  --bins -- -D warnings` passed on the integrated runtime.
+- Core targeted binaries: celebration_cast (6), champion_siphon (10),
+  contract_protocol (13), contract_protocol_server (2), contract_ranked_integrity
+  (3), shop_reserve_reroll (9), training_isolation (1), training_session (9),
+  contract_determinism (2), contract_roster (7), contract_ruleset_version (2),
+  practice_bot (2): passed. Training includes all 46 kinds in all five forms;
+  its complete-roster HP reconciliation also passed after integrating P59
+  Drillnest production/fusion into the training pass.
+- Server targeted binaries: ranked_integrity (7), ranked_recovery (4),
+  ranked_stats (6), ranked_stats_recovery (2): passed. The specific
+  `online records_insert_and_count` case passed over real local sockets (0.31s).
+  Its first sandboxed attempt was denied socket creation; the authorized
+  host execution passed. Unknown summary schema test now uses 99 because
+  schema 2 is intentionally supported.
+- Client filtered tests: `i18n` (16) and `celebration` (9): passed. A test-only
+  unused P57 reference `Layout::clear` warning remains outside production.
+- `cargo check --offline -p tbg-client --target wasm32-unknown-unknown`: passed.
+- Server production binary: `cargo build --offline --release -p tbg-server
+  --bin tbg-server`: passed (18.40s).
+- Native laboratory journey observed running, paused, single-stepped, reset,
+  rejecting an old-session action, resumed, with a wooden target and HP
+  meters independent of competitive state. Initial desktop captures were
+  constrained to 1280x636 by inherited Wayland. The exporter now removes
+  WAYLAND_DISPLAY/WAYLAND_SOCKET; the final catalog capture is actual
+  1440x900 on Xvfb, with zero missing images and settled loading masks.
+- 50 actual-model portraits exported: all 400x400 WebP under 40 KiB (largest
+  initial export 6,320 bytes), covering every conventional Shop kind plus
+  animated summons. Longaxe uses a body-focused high-resolution crop so its
+  tall weapon does not make the body unreadable. All five arena thumbnails
+  were captured from the refined scenes and encoded at 768x432.
+
+Local logs/captures, databases, packages and build directories are ignored;
+they are not part of the PR. Final browser, native package and deployment
+observations are appended after the remaining release checks.
