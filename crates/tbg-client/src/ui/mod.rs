@@ -28,6 +28,7 @@ pub(crate) mod fortify;
 mod glyphs;
 mod hud;
 mod hud_portraits;
+#[cfg(not(target_os = "linux"))]
 mod hud_top;
 mod hud_update;
 mod input;
@@ -39,6 +40,8 @@ pub(crate) mod kit;
 #[cfg(test)]
 mod lobby_panels_tests;
 mod menu;
+#[cfg(target_os = "linux")]
+mod native_battle;
 mod queue;
 pub mod ranking;
 mod ranking_ui;
@@ -125,6 +128,10 @@ pub enum UiAction {
     CloseRanking,
     // BR-M06: two-tap surrender in the HUD.
     Surrender,
+    #[cfg(target_os = "linux")]
+    ShowArenaBanner,
+    #[cfg(target_os = "linux")]
+    CloseArenaBanner,
     // P41: lobby Settings language switch (DOM selector via data-action).
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))] // built from DOM strings on the web
     SetLang(crate::i18n::Lang),
@@ -149,6 +156,8 @@ pub const DISABLED: Color = Color::srgb(0.30, 0.32, 0.35);
 pub const TEXT: Color = Color::srgb(0.96, 0.95, 0.90);
 
 pub fn plugin(app: &mut App) {
+    #[cfg(target_os = "linux")]
+    native_battle::plugin(app);
     app.init_resource::<PendingBuy>()
         .add_systems(
             Update,

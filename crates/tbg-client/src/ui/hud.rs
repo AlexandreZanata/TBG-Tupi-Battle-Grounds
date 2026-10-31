@@ -1,6 +1,6 @@
 //! In-match HUD: clock, Stronghold HP, Energy, army size, synergies,
 //! and the five shop cards. Reads only `LatestView`.
-//! The top line (names, bars, clock) lives in `hud_top`.
+//! Linux presentation lives in `native_battle`; other targets keep `hud_top`.
 
 use bevy::prelude::*;
 
@@ -10,14 +10,17 @@ use crate::GameState;
 
 #[derive(Component)]
 pub(super) enum Hud {
+    #[cfg(not(target_os = "linux"))]
     Clock,
     Hp(usize),
+    #[cfg(not(target_os = "linux"))]
     HpLabel(usize),
     Spectators,
     PrivateControls,
     WatchControls,
     Portrait(usize),
     EnergyFill,
+    #[cfg(not(target_os = "linux"))]
     Info,
     Card(usize),
     CardText(usize),
@@ -78,6 +81,7 @@ pub fn plugin(app: &mut App) {
         );
 }
 
+#[cfg(not(target_os = "linux"))]
 pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bundle {
     (
         Node {
@@ -103,7 +107,13 @@ pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bund
 fn card(i: usize, narrow: bool) -> impl Bundle {
     (
         Node {
-            width: px(if narrow { 82.0 } else { 154.0 }),
+            width: px(if narrow {
+                82.0
+            } else if cfg!(target_os = "linux") {
+                166.0
+            } else {
+                154.0
+            }),
             flex_direction: FlexDirection::Column,
             padding: UiRect::all(px(6.0)),
             row_gap: px(4.0),
@@ -127,7 +137,13 @@ fn card(i: usize, narrow: bool) -> impl Bundle {
                 ImageNode::default(),
                 Node {
                     width: percent(100),
-                    height: px(if narrow { 52 } else { 76 }),
+                    height: px(if narrow {
+                        52
+                    } else if cfg!(target_os = "linux") {
+                        145
+                    } else {
+                        76
+                    }),
                     ..default()
                 },
                 Hud::Portrait(i)
@@ -149,6 +165,7 @@ fn row(gap: f32) -> Node {
     }
 }
 
+#[cfg(not(target_os = "linux"))]
 fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) {
     let narrow = window.width() < 600.0;
     commands
@@ -221,6 +238,89 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
                 children![
                     (label("", 16.0), Hud::Spectators),
                     super::kit::button("Leave battle", UiAction::LeaveWatch, 220.0)
+                ],
+            ));
+        });
+}
+
+#[cfg(target_os = "linux")]
+fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>) {
+    commands
+        .spawn((
+            screen(JustifyContent::SpaceBetween),
+            HudRoot,
+            DespawnOnExit(GameState::InMatch),
+        ))
+        .with_children(|root| {
+            super::native_battle::score(root, &info, &assets);
+            if !info.spectating {
+                root.spawn(super::surrender::linux_button(&assets));
+            }
+            root.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    bottom: px(36),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    row_gap: px(6),
+                    ..default()
+                },
+                Hud::PrivateControls,
+            ))
+            .with_children(|shop| {
+                shop.spawn((label("", 11.), Hud::Augments));
+                shop.spawn((label("", 12.), Hud::CouncilStatus));
+                shop.spawn((
+                    Node {
+                        display: Display::None,
+                        flex_wrap: FlexWrap::Wrap,
+                        justify_content: JustifyContent::Center,
+                        row_gap: px(6),
+                        ..row(6.)
+                    },
+                    Hud::CouncilRow,
+                    children![
+                        council_card(0),
+                        council_card(1),
+                        council_card(2),
+                        council_card(3),
+                        forgo_card()
+                    ],
+                ));
+                shop.spawn(super::fortify::control());
+                shop.spawn(Node {
+                    flex_direction: FlexDirection::Column,
+                    row_gap: px(10),
+                    ..default()
+                })
+                .with_children(|bottom| {
+                    super::native_battle::resources(bottom, &assets);
+                    bottom.spawn((
+                        row(8.),
+                        children![
+                            card(0, false),
+                            card(1, false),
+                            card(2, false),
+                            card(3, false),
+                            card(4, false)
+                        ],
+                    ));
+                });
+            });
+            root.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    bottom: px(36),
+                    display: Display::None,
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    row_gap: px(8),
+                    ..default()
+                },
+                Hud::WatchControls,
+                children![
+                    (label("", 16.), Hud::Spectators),
+                    super::kit::button("Leave battle", UiAction::LeaveWatch, 220.)
                 ],
             ));
         });

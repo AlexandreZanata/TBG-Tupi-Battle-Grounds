@@ -160,3 +160,21 @@ authorized or claimed for this layout-only adjustment.
   Reopen TBG to load this installation. No web, VPS, remote Git or CI action
   was performed. Auth/presence clicks and keyboard regression checks remain
   deferred to consolidation; no full suite or WASM check was run.
+
+## Linux battle HUD reference adjustment — 2026-10-31
+
+Owner requested browser-reference presentation for Linux only: heraldic
+Stronghold HP plates and central clock above, Energy/interest/Army strip
+above the Shop, Surrender at the upper right, a centered starting countdown
+and a persistent arena chip. The larger arena introduction lasts five
+seconds of real presentation time and has a close button; the chip can
+show it again for five seconds. Presentation reads existing MatchInfo and
+LatestView values; no simulation, economy, countdown duration or surrender
+confirmation rules change. Other targets retain their prior HUD path.
+
+Level: work front. Affected formatting, asset export and diff inspection
+precede the owner-requested native preview build/install using the shared
+nonblocking host lock and two Cargo jobs. Phase-specific debug captures
+avoid racing startup when inspecting Countdown and Running. Queue manual
+click/keyboard checks for Surrender confirmation, arena close/reopen and
+Reroll gating for consolidation; do not run a full suite or any web build.

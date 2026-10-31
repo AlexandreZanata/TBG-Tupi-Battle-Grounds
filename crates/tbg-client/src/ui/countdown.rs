@@ -35,19 +35,50 @@ fn spawn(mut commands: Commands) {
         .with_children(|root| {
             root.spawn((
                 Node {
+                    width: if cfg!(target_os = "linux") {
+                        px(208)
+                    } else {
+                        Val::Auto
+                    },
+                    height: if cfg!(target_os = "linux") {
+                        px(186)
+                    } else {
+                        Val::Auto
+                    },
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
+                    justify_content: if cfg!(target_os = "linux") {
+                        JustifyContent::Center
+                    } else {
+                        JustifyContent::FlexStart
+                    },
                     padding: UiRect::axes(px(28), px(12)),
                     border_radius: BorderRadius::all(px(14)),
                     ..default()
                 },
-                BackgroundColor(Color::srgba(0.04, 0.08, 0.12, 0.88)),
+                BackgroundColor(if cfg!(target_os = "linux") {
+                    Color::srgba(0.12, 0.11, 0.08, 0.73)
+                } else {
+                    Color::srgba(0.04, 0.08, 0.12, 0.88)
+                }),
                 children![
-                    super::label("STARTING", 20.0),
+                    super::label(
+                        "STARTING",
+                        if cfg!(target_os = "linux") { 28. } else { 20. }
+                    ),
                     (
                         Text::new(""),
                         TextFont {
-                            font_size: FontSize::Px(72.0),
+                            font: if cfg!(target_os = "linux") {
+                                super::kit::display_font()
+                            } else {
+                                default()
+                            },
+                            font_size: FontSize::Px(if cfg!(target_os = "linux") {
+                                100.
+                            } else {
+                                72.
+                            }),
                             ..default()
                         },
                         TextColor(Color::srgb_u8(0xF5, 0xDF, 0xB6)),

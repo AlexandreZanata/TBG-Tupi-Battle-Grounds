@@ -4,7 +4,9 @@ use bevy::prelude::*;
 use tbg_core::content::{
     augment_def, def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, TICK_HZ,
 };
-use tbg_core::{MatchView, Phase, FACTIONS};
+#[cfg(not(target_os = "linux"))]
+use tbg_core::FACTIONS;
+use tbg_core::{MatchView, Phase};
 
 use super::hud::Hud;
 use super::{PendingBuy, BUTTON, DISABLED};
@@ -87,7 +89,9 @@ pub(super) fn update(
     }
     for (hud, mut text) in &mut texts {
         text.0 = match hud {
+            #[cfg(not(target_os = "linux"))]
             Hud::Clock => clock(v),
+            #[cfg(not(target_os = "linux"))]
             Hud::HpLabel(relative) => {
                 let seat = if *relative == 0 { me } else { 1 - me };
                 format!(
@@ -100,6 +104,7 @@ pub(super) fn update(
                 "{} vs {} · {} spectators",
                 info_state.you_name, info_state.opponent, v.spectators
             ),
+            #[cfg(not(target_os = "linux"))]
             Hud::Info => info(v),
             Hud::CardText(i) => {
                 let d = def(v.offers[*i]);
@@ -170,6 +175,7 @@ pub(super) fn buyable(v: &MatchView, i: usize) -> bool {
     v.energy >= d.cost && v.phase == Phase::Running && v.augment_round.is_none()
 }
 
+#[cfg(not(target_os = "linux"))]
 pub(super) fn clock(v: &MatchView) -> String {
     if v.phase == Phase::Countdown {
         return "STARTING".into();
@@ -178,6 +184,7 @@ pub(super) fn clock(v: &MatchView) -> String {
     format!("{}:{:02}", s / 60, s % 60)
 }
 
+#[cfg(not(target_os = "linux"))]
 fn info(v: &MatchView) -> String {
     let synergies: Vec<String> = FACTIONS
         .iter()

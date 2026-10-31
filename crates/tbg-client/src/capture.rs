@@ -15,6 +15,7 @@ fn capture(
     mut commands: Commands,
     time: Res<Time>,
     state: Res<State<crate::GameState>>,
+    #[cfg(target_os = "linux")] view: Res<crate::sync::LatestView>,
     mut started: Local<bool>,
 ) {
     let delay = crate::config::url_param("capture_after")
@@ -27,6 +28,18 @@ fn capture(
         || (result_only && *state.get() != crate::GameState::Result)
     {
         return;
+    }
+    #[cfg(target_os = "linux")]
+    {
+        // Capture actual match phases instead of racing startup/loading time.
+        let wanted = match crate::config::url_param("capture_on").as_deref() {
+            Some("countdown") => Some(tbg_core::Phase::Countdown),
+            Some("running") => Some(tbg_core::Phase::Running),
+            _ => None,
+        };
+        if wanted.is_some_and(|phase| view.0.as_ref().is_none_or(|v| v.phase != phase)) {
+            return;
+        }
     }
     let Some(path) = crate::config::url_param("capture") else {
         return;
