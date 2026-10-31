@@ -96,3 +96,29 @@ build/reinstallation and concrete desktop capture follow the source commit.
 Defer the WASM opt-in Bevy UI check, interaction regression selection and
 full suites to consolidation/explicit owner request; no browser build is
 needed for the default browser's static wordmark restoration.
+
+### Browser-aligned lobby result
+
+- Installed source: `c172713`; branding restoration: `8b01391`; layout:
+  `18c6b53`; profile clearance/presentation: `cdbd097`.
+- The owner-requested build/install under the shared nonblocking lock and
+  `CARGO_BUILD_JOBS=2` passed. Initial layout compilation took 19.03 s;
+  final corrected build 7.71 s. `desktop-file-validate`, formatting and diff
+  checks passed. The existing lobby-art JavaScript scenario passed.
+- Intermediate failure: E0700 in the news-arrow bundle's borrowed label.
+  Owning its text fixed the error; only the relevant native build was
+  repeated. No test or compiler gate was weakened.
+- Final installed app captures at 1920x972 and 1280x720 were inspected:
+  modes left, profile bottom left, four feature cards below, live/news right,
+  account/navigation above and no central panel covering the arena. Profile
+  title clears the Stronghold badge. Existing runtime data was isolated.
+- The written Tupi wordmark is lossless WebP (1024x410, 425330 bytes versus
+  the 830916-byte original asset); original artwork is retained. The desktop
+  icon is unchanged. The browser's wordmark was also restored and observed
+  loaded, using only scoped TBG static-file changes in the deployment repo.
+- Captures are `.local/lobby-final-1920.webp` and
+  `.local/lobby-final-1280.webp`. Only expected virtual X11 display warnings
+  were recorded. Existing windows were left running; reopen TBG to use the
+  updated installation, and reload an already-open browser page.
+- No full suite, extra gallery/multiplayer campaign, WASM rebuild, remote
+  push or CI wait. Deferred interaction/WASM consolidation remains as above.
