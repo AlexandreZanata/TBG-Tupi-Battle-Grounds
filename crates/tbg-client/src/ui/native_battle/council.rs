@@ -200,6 +200,7 @@ fn pictures(
     view: Res<LatestView>,
     selection: Res<Selection>,
     assets: Res<AssetServer>,
+    images: Res<Assets<Image>>,
     mut pictures: Query<(&Picture, &mut ImageNode)>,
 ) {
     if !view.is_changed() && !selection.is_changed() {
@@ -221,6 +222,10 @@ fn pictures(
         if let Some(filename) = filename {
             image.image = assets.load(format!("augments/{filename}"));
         }
+        image.rect = match picture {
+            Picture::Illustration(_) => images.get(&image.image).map(cover_rect),
+            Picture::Frame(_) => None,
+        };
         image.color = if (!r.resolved && v.energy < r.costs[*i])
             || (r.resolved && selection.picked != Some(*i as u8))
         {
@@ -229,6 +234,17 @@ fn pictures(
             Color::WHITE
         };
     }
+}
+
+fn cover_rect(image: &Image) -> Rect {
+    let size = image.size().as_vec2();
+    let ratio = (CARD_W * 0.8) / (CARD_H * 0.45);
+    let crop = if size.x / size.y > ratio {
+        Vec2::new(size.y * ratio, size.y)
+    } else {
+        Vec2::new(size.x, size.x / ratio)
+    };
+    Rect::from_center_size(size * 0.5, crop)
 }
 
 fn texts(

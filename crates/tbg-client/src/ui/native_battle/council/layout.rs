@@ -22,10 +22,7 @@ pub(super) fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         ))
         .with_children(|backdrop| {
             // Keep the existing two-step surrender available during the pause (BR-M06).
-            backdrop.spawn((
-                super::super::surrender::linux_button(&assets),
-                CouncilControl,
-            ));
+            backdrop.spawn((crate::ui::surrender::linux_button(&assets), CouncilControl));
             backdrop
                 .spawn((
                     Node {
