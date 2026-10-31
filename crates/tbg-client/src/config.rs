@@ -515,3 +515,9 @@ mod tests {
         );
     }
 }
+
+/// Low freezes decorative kit noise while action and authoritative status timing stay live.
+pub fn low_motion() -> bool {
+    static LOW: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *LOW.get_or_init(|| url_param("quality").as_deref() == Some("low"))
+}

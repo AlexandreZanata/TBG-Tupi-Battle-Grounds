@@ -87,7 +87,7 @@ impl MatchState {
                 .units
                 .iter()
                 .filter(|u| u.hp > 0)
-                .map(|u| super::unit_view(u, self.tick))
+                .map(|u| super::unit_view(u, self.tick, self.rules))
                 .collect(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],

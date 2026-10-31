@@ -25,6 +25,7 @@ const SCUTTLE: Gait = Gait {
 };
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose,
     gait: SCUTTLE,

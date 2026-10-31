@@ -142,12 +142,15 @@ impl MatchState {
             crate::roster_slots::tick_marks(self);
             crate::afflictions::tick(self, &mut ev);
             crate::roster_slots::tick_bleed(self, &mut ev);
+            crate::roster_slots::tick_venom(self, &mut ev);
             summon::expire(self);
             summon::hatch(self, &mut ev);
             crate::support::bonds(self);
             crate::support::boarding(self, &mut ev);
             combat::run_units(self, &mut ev);
             combat::stronghold_fire(self, &mut ev);
+            crate::drillnest::fuse(self, &mut ev);
+            crate::drillnest::produce(self, &mut ev);
             combat::remove_dead(self, &mut ev);
             self.check_strongholds(&mut ev);
         }

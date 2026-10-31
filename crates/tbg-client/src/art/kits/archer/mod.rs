@@ -25,6 +25,7 @@ use model::{half_len, plan, MUZZLE};
 const RELEASE: f32 = 0.18;
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose,
     gait: Gait::LIGHT,

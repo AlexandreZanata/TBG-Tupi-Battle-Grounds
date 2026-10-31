@@ -149,7 +149,14 @@ fn options(u: &UnitView) -> Vec<(u8, String)> {
     branches
         .into_iter()
         .filter_map(|b| {
-            form_of(u.kind, u.tier + 1, b).map(|f| (b, format!("{}: {}", f.name, describe(f))))
+            form_of(u.kind, u.tier + 1, b).map(|f| {
+                let mut facts = vec![
+                    describe(f),
+                    super::ability_details::describe(u.kind, u.tier + 1, b),
+                ];
+                facts.retain(|s| !s.is_empty());
+                (b, format!("{}: {}", f.name, facts.join("; ")))
+            })
         })
         .collect()
 }
@@ -206,6 +213,9 @@ mod tests {
             fx: 0,
             carrier: None,
             shield: 0,
+            reduction: 0,
+            special: None,
+            effects: None,
         });
         let mut app = App::new();
         app.insert_resource(LatestView(Some(view)))

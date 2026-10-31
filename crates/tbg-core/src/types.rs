@@ -129,6 +129,43 @@ pub enum UnitKind {
     Ravager,
     Acidmaw,
     Whisperer,
+    /// D-72: R01, staged outside public pools.
+    Bulwark,
+    /// D-73: R02, staged outside public pools.
+    Demolisher,
+    /// D-74: R03, staged outside public pools.
+    Crowcaller,
+    /// D-75: R04, staged outside public pools.
+    Trigger,
+    /// D-76: R05, staged outside public pools.
+    RattleTick,
+    /// D-77: R06, staged outside public pools.
+    Capybara,
+    /// D-78: R07, staged outside public pools.
+    Trident,
+    /// D-79: R12, staged outside public pools.
+    SolarSentinel,
+    /// D-80: R13, staged outside public pools.
+    LuminousOracle,
+    /// D-81: R14, staged outside public pools.
+    CelestialArcher,
+    /// D-82: R15, staged outside public pools.
+    Justiciar,
+    /// D-83: R16, staged outside public pools.
+    Jawguard,
+    /// D-84: R17, staged outside public pools.
+    Mantis,
+    /// D-85: R18, staged outside public pools.
+    Hornet,
+    /// D-86: R19, staged outside public pools.
+    Weaver,
+    /// D-87: R20, staged outside public pools.
+    PyreWarden,
+    /// D-88: R21, staged outside public pools.
+    Drillnest,
+    Microdrill,
+    Duodrill,
+    Megadrill,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -182,7 +219,14 @@ impl UnitKind {
     /// Summon kinds: created by abilities, never bought (BR-U08). Beetlings
     /// hatch from Nesters; crates drop from Smugglers.
     pub fn is_summon(self) -> bool {
-        matches!(self, UnitKind::Beetling | UnitKind::Crate)
+        matches!(
+            self,
+            UnitKind::Beetling
+                | UnitKind::Crate
+                | UnitKind::Microdrill
+                | UnitKind::Duodrill
+                | UnitKind::Megadrill
+        )
     }
 
     /// Conventional units: everything the lab duels and favors (BR-U08:

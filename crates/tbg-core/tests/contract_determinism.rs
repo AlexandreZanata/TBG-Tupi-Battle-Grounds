@@ -46,30 +46,35 @@ fn bot_matches_are_frozen() {
     // winner and reason identical on all three seeds (verified).
     // W1 (P58 §13.5, D-64): the Synergy array grew from four to seven Factions;
     // hashes moved once, with tick, winner and reason identical (verified).
+    // D-71: serialized pending-special/venom slots are empty on legacy kinds.
+    // The consolidated three-seed comparison confirmed all ticks/winners/reasons
+    // unchanged before re-freezing these hashes (D-71).
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0x5179_ac0a_c414_6409u64,
+            0x20e6_50cc_3a03_ebbbu64,
             3_336,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0xd9a7_27fc_c92d_bfdb,
+            0x6d9a_9e6d_11d4_cfe3,
             2_286,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0xb202_0ad9_8ef8_03ed,
+            0x9b18_e0f2_1e17_880f,
             6_295,
             Seat::B,
             StrongholdDestroyed,
         ),
     ];
+    let mut observed = Vec::with_capacity(goldens.len());
+    let mut expected = Vec::with_capacity(goldens.len());
     for (seed, hash, tick, winner, reason) in goldens {
         let s = bot_match(seed);
         let o = s.outcome.expect("bot match must end");
@@ -78,12 +83,12 @@ fn bot_matches_are_frozen() {
             (Some(winner), reason, tick),
             "seed {seed}"
         );
-        assert_eq!(
-            s.hash(),
-            hash,
-            "seed {seed}: simulation changed (see module docs)"
-        );
+        observed.push((seed, s.hash()));
+        expected.push((seed, hash));
     }
+    // Compare all three only after their outcome/tick guards passed. A layout
+    // migration reports every checksum without weakening any frozen behavior.
+    assert_eq!(observed, expected, "simulation changed (see module docs)");
 }
 
 #[test]

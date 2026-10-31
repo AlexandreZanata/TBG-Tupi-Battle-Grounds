@@ -247,6 +247,12 @@ fn event_name(event: &Event) -> &'static str {
         Event::Transfer { .. } => "Transfer",
         Event::Boarded { .. } => "Boarded",
         Event::Dismounted { .. } => "Dismounted",
+        Event::CorrosiveSplash { .. } => "CorrosiveSplash",
+        Event::AbilityStarted { .. } => "AbilityStarted",
+        Event::AbilityResolved { .. } => "AbilityResolved",
+        Event::Crossfire { .. } => "Crossfire",
+        Event::ProfaneFlame { .. } => "ProfaneFlame",
+        Event::DrillFused { .. } => "DrillFused",
     }
 }
 
@@ -762,6 +768,9 @@ fn rebuild_units(
             fx: dynamic.fx,
             carrier: None,
             shield: 0,
+            reduction: 0,
+            special: None,
+            effects: None,
         });
     }
     Ok(units)
@@ -1414,6 +1423,9 @@ fn rebuild_a(
             fx: unit.fx,
             carrier: None,
             shield: 0,
+            reduction: 0,
+            special: None,
+            effects: None,
         });
     }
     Ok(MatchView {
@@ -1480,6 +1492,9 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
             fx: fx_of(unit),
             carrier: None,
             shield: 0,
+            reduction: 0,
+            special: None,
+            effects: None,
         })
         .collect();
     let make = |you: Seat| {

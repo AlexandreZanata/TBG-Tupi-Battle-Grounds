@@ -44,6 +44,7 @@ pub struct VfxAssets {
     pub(super) violet: Handle<StandardMaterial>,
     pub(super) blood: Handle<StandardMaterial>,
     pub(super) water: Handle<StandardMaterial>,
+    pub(super) turquoise: Handle<StandardMaterial>,
     pub(super) petal: Handle<StandardMaterial>,
     pub(super) oil: Handle<StandardMaterial>,
     /// Lit vertex colors, for painted projectile meshes.
@@ -63,6 +64,8 @@ pub(super) enum Motion {
     Puff { vel: Vec3, size: f32 },
     /// Thrown with `vel` under gravity, tumbling, resting on the ground.
     Debris { vel: Vec3, size: f32 },
+    /// Keeps the exact segment length while its thickness fades.
+    Segment { size: Vec3 },
     /// Pops to `size` and vanishes (muzzle flashes, blast cores).
     Flash { size: f32 },
     /// Grows out of the ground to `size` (its own +Y), holds, sinks back.
@@ -113,6 +116,7 @@ fn init(
     let blood = glow(Color::srgb_u8(0xC8, 0x1E, 0x32));
     let water = glow(Color::srgb_u8(0x8C, 0xD8, 0xFF));
     let petal = glow(BLOSSOM);
+    let turquoise = glow(TURQUOISE);
     let mut lit = |c: Color| {
         mats.add(StandardMaterial {
             base_color: c,
@@ -176,6 +180,7 @@ fn init(
         blood,
         water,
         petal,
+        turquoise,
         oil,
         painted,
         shots,
@@ -279,6 +284,7 @@ fn pose(v: &Vfx, k: f32) -> Transform {
                 .with_rotation(spin * v.rotation)
                 .with_scale(Vec3::splat(size * (fade * 2.0).min(1.0)))
         }
+        Motion::Segment { size } => at.with_scale(Vec3::new(size.x, size.y, size.z * fade)),
         Motion::Flash { size } => {
             let pop = (k / 0.25).min(1.0);
             at.with_scale(Vec3::splat(
@@ -302,4 +308,34 @@ fn pose(v: &Vfx, k: f32) -> Transform {
                 .with_scale(Vec3::new(size, size * (0.3 + fade), size))
         }
     }
+}
+
+/// One cheap tapered flame plus an exact ground danger strip, including on Low.
+pub fn profane_flame(commands: &mut Commands, a: &VfxAssets, start: f32, end: f32) {
+    let length = (end - start).abs();
+    let dir = if end >= start { Vec3::X } else { -Vec3::X };
+    spawn_turned(
+        commands,
+        &a.spike,
+        &a.green,
+        (
+            Vec3::new(start, 0.55, 0.0),
+            Quat::from_rotation_arc(Vec3::Y, dir),
+        ),
+        Motion::Segment {
+            size: Vec3::new(0.20, length, 0.22),
+        },
+        (0.0, 0.20),
+    );
+    spawn(
+        commands,
+        &a.chip,
+        &a.green,
+        Vec3::new((start + end) * 0.5, 0.025, 0.0),
+        Motion::Segment {
+            size: Vec3::new(length, 0.018, 0.12),
+        },
+        0.0,
+        0.28,
+    );
 }

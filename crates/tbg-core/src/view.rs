@@ -4,7 +4,9 @@
 
 pub mod public;
 pub use public::{PublicRound, PublicView};
+mod effects;
 mod visibility;
+pub use effects::{DotView, EffectsView, MarkView, TimedBp};
 
 use serde::{Deserialize, Serialize};
 
@@ -27,14 +29,26 @@ pub struct UnitView {
     /// 0 none, 1 slowed, 2 rooted.
     pub status: u8,
     /// Packed ability state (ROSTER-EXPANSION §F.4): poison 3 bits, fish 2,
-    /// confused 1, ward 1, bonded 1, plates 3, growth 3, carried 1, 1 spare.
-    /// Zero until the waves land, except the spare top bit: `FX_SUMMON`.
+    /// confused 1, ward 1, bonded 1, plates 3, per-kind progress 3, carried 1, 1 spare.
+    /// R09 uses progress; carry/summon bits are live. Other affliction bits await their waves.
     pub fx: u16,
     /// The carrier this unit rides (D-61), set only while `FX_CARRIED` is:
     /// the client seats the passenger on that unit, not on a lane guess.
     pub carrier: Option<UnitId>,
     /// The unit shield still standing at the view's tick (D-63); zero once expired.
     pub shield: u16,
+    /// Active self damage reduction in basis points (P59 R08, D-68).
+    pub reduction: u16,
+    /// Timed-special readiness and locked windup, sufficient after reconnect.
+    pub special: Option<SpecialView>,
+    /// Bounded public afflictions and durations, absent when empty.
+    pub effects: Option<EffectsView>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SpecialView {
+    pub ready_in: u16,
+    pub cast: Option<crate::state::PendingCast>,
 }
 
 /// `UnitView.fx` bit for a summon by unit, e.g. Smuggler cargo (BR-U08):
@@ -43,11 +57,19 @@ pub const FX_SUMMON: u16 = 1 << 15;
 
 /// `UnitView.fx` bit for a carried passenger, e.g. riding a Cargo Crab (D-56, §C.15).
 pub const FX_CARRIED: u16 = 1 << 14;
+/// Per-kind ability progress occupies the reserved growth bits (D-69).
+pub const FX_COUNTER_SHIFT: u16 = 11;
+pub const FX_COUNTER_MASK: u16 = 7 << FX_COUNTER_SHIFT;
 
 impl UnitView {
     /// Summoned by kind (Beetling, Crate) or by unit (Smuggler cargo).
     pub fn is_summon(&self) -> bool {
         self.kind.is_summon() || self.fx & FX_SUMMON != 0
+    }
+
+    /// The public completed-hit counter for this kind, not a combat decision.
+    pub fn ability_counter(&self) -> u8 {
+        ((self.fx & FX_COUNTER_MASK) >> FX_COUNTER_SHIFT) as u8
     }
 
     /// Carried by a carrier (e.g. riding a Cargo Crab).
@@ -160,7 +182,7 @@ impl MatchState {
                 .units
                 .iter()
                 .filter(|u| u.hp > 0)
-                .map(|u| unit_view(u, self.tick))
+                .map(|u| unit_view(u, self.tick, self.rules))
                 .collect(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],
@@ -173,7 +195,7 @@ impl MatchState {
     }
 }
 
-fn unit_view(u: &crate::state::Unit, tick: Tick) -> UnitView {
+fn unit_view(u: &crate::state::Unit, tick: Tick, rules: &crate::Ruleset) -> UnitView {
     UnitView {
         id: u.id,
         seat: u.seat,
@@ -188,9 +210,17 @@ fn unit_view(u: &crate::state::Unit, tick: Tick) -> UnitView {
             Status::Slowed { .. } => 1,
             Status::Rooted { .. } => 2,
         },
-        // D-56: carried bit packed for passenger presentation; other affliction bits pending.
+        // D-69: per-kind progress shares the reserved growth bits; carry/summon stay intact.
         fx: {
-            let mut fx = 0;
+            let mut fx = u16::from(
+                crate::ravager::counter(u, tick)
+                    .max(crate::acidmaw::counter(u))
+                    .max(crate::trigger::counter(u))
+                    .max(crate::celestial_archer::counter(u))
+                    .max(crate::jawguard::counter(u))
+                    .max(crate::mantis::counter(u))
+                    .max(crate::hornet::counter(u)),
+            ) << FX_COUNTER_SHIFT;
             if u.is_summon() {
                 fx |= FX_SUMMON;
             }
@@ -201,5 +231,8 @@ fn unit_view(u: &crate::state::Unit, tick: Tick) -> UnitView {
         },
         carrier: u.fx.carrier,
         shield: crate::roster_slots::shield_now(&u.fx, tick),
+        reduction: crate::roster_slots::self_dr_now(&u.fx, tick) as u16,
+        special: crate::specials::view(rules, u),
+        effects: effects::project(rules, u, tick),
     }
 }

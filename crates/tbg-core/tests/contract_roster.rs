@@ -161,7 +161,7 @@ fn roster_composition() {
     // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
-    assert_eq!(UNITS.len(), 31);
+    assert_eq!(UNITS.len(), 51);
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     assert_eq!(
         &kinds[ALL_KINDS.len()..],
@@ -170,6 +170,26 @@ fn roster_composition() {
             UnitKind::Ravager,
             UnitKind::Acidmaw,
             UnitKind::Whisperer,
+            UnitKind::Bulwark,
+            UnitKind::Demolisher,
+            UnitKind::Crowcaller,
+            UnitKind::Trigger,
+            UnitKind::RattleTick,
+            UnitKind::Capybara,
+            UnitKind::Trident,
+            UnitKind::SolarSentinel,
+            UnitKind::LuminousOracle,
+            UnitKind::CelestialArcher,
+            UnitKind::Justiciar,
+            UnitKind::Jawguard,
+            UnitKind::Mantis,
+            UnitKind::Hornet,
+            UnitKind::Weaver,
+            UnitKind::PyreWarden,
+            UnitKind::Drillnest,
+            UnitKind::Microdrill,
+            UnitKind::Duodrill,
+            UnitKind::Megadrill,
         ][..]
     );
     assert_eq!(UNIT_KINDS.len(), 10);
@@ -180,8 +200,10 @@ fn roster_composition() {
         (Faction::Machines, 6),
         (Faction::Plants, 7),
     ] {
+        // §11 composition covers the frozen legacy roster; §13 prototypes are separate.
         let sold = UNITS
             .iter()
+            .take(ALL_KINDS.len())
             .filter(|u| u.faction == f && u.kind.is_conventional());
         assert_eq!(sold.count(), n, "{f:?}");
     }
@@ -356,22 +378,102 @@ Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Crate/Crate: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bonehorn/Ancestral Carapace: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bonehorn/Ancestral Carapace: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bonehorn/Stone Fangs: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Bonehorn/Ancestral Carapace: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bonehorn/Stone Fangs: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Ravager/Voracious Hunt: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Ravager/Voracious Hunt: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Ravager/Voracious Hunt: hp=0 dmg=0 atk=0 speed=1000 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Ravager/Deep Frenzy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Ravager/Voracious Hunt: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Ravager/Deep Frenzy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Acidmaw/Abyssal Jaw: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Acidmaw/Abyssal Jaw: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Acidmaw/Abyssal Jaw: hp=0 dmg=0 atk=0 speed=0 range+=400 splash+=0 heal=0 dmg+=0 hit=-
 Acidmaw/Corrosive Volley: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Acidmaw/Abyssal Jaw: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Acidmaw/Corrosive Volley: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Whisperer/Echo of Fear: hp=0 dmg=0 atk=0 speed=0 range+=500 splash+=0 heal=0 dmg+=0 hit=-
 Whisperer/Echo of Fear: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Whisperer/Mental Pulse: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Whisperer/Echo of Fear: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Whisperer/Mental Pulse: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Whisperer/Mental Pulse: hp=0 dmg=2000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bulwark/Mobile Fortress: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bulwark/Mobile Fortress: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bulwark/Earth Weight: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Bulwark/Earth Weight: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=slow 1500bp/20t
+Demolisher/Reinforced Fists: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Demolisher/Reinforced Fists: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Demolisher/Shock System: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Demolisher/Shock System: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=slow 1500bp/40t
+Crowcaller/Plague Crow: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Crowcaller/Plague Crow: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Crowcaller/Ruin Bow: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Crowcaller/Ruin Bow: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Trigger/Swift Gunman: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Trigger/Swift Gunman: hp=0 dmg=0 atk=0 speed=1000 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Trigger/Ricochet Bullet: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Trigger/Ricochet Bullet: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rattle & Tick/Big Brother's Fury: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rattle & Tick/Big Brother's Fury: hp=0 dmg=2000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rattle & Tick/Tico's Tricks: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rattle & Tick/Tico's Tricks: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Capybara/Stone Belly: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Capybara/Stone Belly: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Capybara/Swamp Wave: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Capybara/Swamp Wave: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Trident/Ocean Fury: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Trident/Ocean Fury: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Trident/Bloody Tide: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Trident/Bloody Tide: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Solar Sentinel/Light Fortress: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Solar Sentinel/Light Fortress: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Solar Sentinel/Group Protection: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Solar Sentinel/Group Protection: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Luminous Oracle/Restoring Light: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Luminous Oracle/Restoring Light: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Luminous Oracle/Sacred Aura: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Luminous Oracle/Sacred Aura: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Celestial Archer/Divine Precision: hp=0 dmg=1000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Celestial Archer/Divine Precision: hp=0 dmg=1000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Celestial Archer/Celestial Mark: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Celestial Archer/Celestial Mark: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Justiciar/Celestial Fury: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Justiciar/Celestial Fury: hp=1000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Justiciar/Judgment: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Justiciar/Judgment: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Jawguard/Reinforced Carapace: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Jawguard/Reinforced Carapace: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Jawguard/Swarm Guard: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Jawguard/Swarm Guard: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Mantis/Relentless Hunt: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Mantis/Relentless Hunt: hp=0 dmg=0 atk=0 speed=1000 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Mantis/Precise Blade: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Mantis/Precise Blade: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hornet/Deep Venom: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hornet/Deep Venom: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hornet/Swoop: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hornet/Swoop: hp=0 dmg=0 atk=0 speed=0 range+=400 splash+=0 heal=0 dmg+=0 hit=-
+Weaver/Extended Web: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Weaver/Extended Web: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Weaver/Protective Web: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Weaver/Protective Web: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pyre Warden/Funeral Furnace: hp=2500 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pyre Warden/Funeral Furnace: hp=0 dmg=0 atk=0 speed=0 range+=560 splash+=0 heal=0 dmg+=0 hit=-
+Pyre Warden/Pestilence Flame: hp=0 dmg=2000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pyre Warden/Pestilence Flame: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drillnest/Swarm Factory: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drillnest/Swarm Factory: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drillnest/Siege Drill: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Drillnest/Siege Drill: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Microdrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Microdrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Microdrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Microdrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Duodrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Duodrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Duodrill/Producer B: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Duodrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Megadrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Megadrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Megadrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Megadrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {
@@ -383,5 +485,79 @@ fn evolution_forms_are_frozen() {
     assert_eq!(shipped.len(), frozen.len(), "form count changed");
     for (got, want) in shipped.iter().zip(frozen) {
         assert_eq!(got, want);
+    }
+}
+
+#[test]
+fn proposed_p59_bases_match_section_13() {
+    // D-72: native simulation units, avoiding conversion/rounding ambiguity.
+    use {Archetype::*, Faction::*, UnitKind::*};
+    let rows = [
+        (Bonehorn, Monsters, Tank, 6, [1_600, 40, 40, 800, 20]),
+        (Ravager, Monsters, Dps, 4, [310, 48, 24, 800, 58]),
+        (Acidmaw, Monsters, Ranged, 4, [260, 42, 36, 4_200, 38]),
+        (Whisperer, Monsters, Control, 5, [380, 15, 40, 3_000, 33]),
+        (Bulwark, Machines, Tank, 6, [1_400, 30, 40, 800, 25]),
+        (Demolisher, Machines, Tank, 6, [1_250, 80, 32, 1_000, 28]),
+        (Crowcaller, Undead, Ranged, 4, [520, 58, 34, 4_800, 31]),
+        (Trigger, Humans, Ranged, 4, [230, 25, 17, 3_200, 53]),
+        (RattleTick, Humans, Tank, 5, [900, 60, 38, 900, 28]),
+        (Capybara, Plants, Tank, 5, [1300, 38, 40, 800, 23]),
+        (Trident, Plants, Tank, 6, [1250, 55, 40, 1_100, 28]),
+        (SolarSentinel, Celestials, Tank, 5, [1050, 35, 40, 800, 28]),
+        (
+            LuminousOracle,
+            Celestials,
+            Control,
+            4,
+            [300, 15, 50, 3_000, 38],
+        ),
+        (
+            CelestialArcher,
+            Celestials,
+            Ranged,
+            4,
+            [210, 55, 40, 4_000, 43],
+        ),
+        (Justiciar, Celestials, Control, 6, [700, 35, 46, 2_500, 28]),
+        (Jawguard, Insects, Tank, 6, [1400, 45, 40, 800, 23]),
+        (Mantis, Insects, Dps, 4, [280, 50, 24, 800, 60]),
+        (Hornet, Insects, Ranged, 5, [260, 35, 30, 3_800, 45]),
+        (Weaver, Insects, Control, 4, [350, 15, 50, 3_000, 33]),
+        (PyreWarden, Undead, Tank, 6, [800, 12, 10, 2_800, 23]),
+        (Drillnest, Machines, Ranged, 5, [900, 0, 44, 4_500, 23]),
+    ];
+    for (kind, faction, archetype, energy, base) in rows {
+        let d = def(kind);
+        assert_eq!(
+            (d.faction, d.archetype, d.cost),
+            (faction, archetype, energy * ENERGY_SCALE)
+        );
+        assert_eq!(
+            [d.hp, d.damage, i32::from(d.interval), d.range, d.speed],
+            base,
+            "{kind:?}"
+        );
+        assert_eq!((d.heal, d.splash, d.on_hit), (0, 0, None));
+    }
+}
+
+#[test]
+fn proposed_drills_match_section_13_4_and_stay_outside_all_pools() {
+    // D-88/§13.4: ranks are summons; producer profiles never add Shop entries.
+    use UnitKind::*;
+    for (kind, hp, damage, interval, speed) in [
+        (Microdrill, 45, 18, 14, 95),
+        (Duodrill, 110, 40, 17, 73),
+        (Megadrill, 260, 90, 22, 50),
+    ] {
+        let d = tbg_core::content::def(kind);
+        assert_eq!(
+            (d.hp, d.damage, d.interval, d.speed, d.range),
+            (hp, damage, interval, speed, 600)
+        );
+        assert!(kind.is_summon());
+        assert!(!tbg_core::types::ALL_KINDS.contains(&kind));
+        assert!(!tbg_core::types::UNIT_KINDS.contains(&kind));
     }
 }

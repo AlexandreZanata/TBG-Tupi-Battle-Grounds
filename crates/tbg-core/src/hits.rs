@@ -23,6 +23,9 @@ pub(crate) fn resolve_hit(
         crate::support::betray_resolve(state, attacker, target, st, ev);
         return;
     }
+    if crate::pyre_warden::resolve(state, attacker, target, st, ev) {
+        return;
+    }
     // Puppetmasters confuse instead of dealing damage (§C.10).
     if crate::support::puppet_of(state, attacker).is_some() {
         crate::support::puppet_cast(state, attacker, target, st.range, ev);
@@ -59,7 +62,16 @@ pub(crate) fn resolve_hit(
         }
         return;
     }
-    let mut amount = st.damage;
+    let purification = crate::celestial_archer::empowered(state, attacker, target);
+    let mut amount = purification.map_or(st.damage, |raw| auxiliary_amount(st, raw));
+    amount = amount.saturating_add(auxiliary_amount(
+        st,
+        crate::jawguard::bonus(state, attacker, target),
+    ));
+    amount = amount.saturating_add(auxiliary_amount(
+        st,
+        crate::mantis::bonus(state, attacker, target),
+    ));
     // R13: a weakened attacker's basic hit loses its weakening before any bonus.
     let weaken = crate::roster_slots::weaken_now(&attacker.fx, state.tick);
     if weaken > 0 {
@@ -85,12 +97,27 @@ pub(crate) fn resolve_hit(
             augment::situational_bp(state, attacker, target)
                 + arcana_bp
                 + conditional_bp(state, attacker, target)
+                + crate::bonehorn::short_range_bonus(state, attacker, target)
+                + crate::ravager::bonus(state, attacker, target)
+                + crate::crowcaller::bonus(state, attacker, target)
                 + furnace_bonus(state, attacker, target)
                 + plates_bonus(state, attacker)
                 + crate::stronghold::aura_bp(state, attacker),
         );
     }
+    if purification.is_some() {
+        crate::celestial_archer::strip(state, target);
+    }
+    amount = crate::drillnest::bonus(state, attacker, target, amount);
     let removed = damage(state, target, amount, ev);
+    crate::celestial_archer::completed(state, attacker, target, ev);
+    crate::jawguard::completed(state, attacker, target);
+    crate::mantis::completed(state, attacker, target, ev);
+    crate::ravager::completed(state, attacker, target);
+    crate::acidmaw::completed(state, attacker, target, st, ev);
+    crate::trigger::completed(state, attacker, target, st, ev);
+    crate::crowcaller::completed(state, attacker, target, ev);
+    crate::hornet::completed(state, attacker, target, st, ev);
     #[cfg(feature = "lab")]
     if let Target::Unit(_) = target {
         crate::lab::dealt(state, attacker, removed);
@@ -169,6 +196,26 @@ pub(crate) fn resolve_hit(
             splash(state, attacker, target, tx, &ramped, ev);
         }
     }
+}
+
+/// Registry auxiliary damage takes static caster percentages once, no basic-hit hooks.
+pub(crate) fn auxiliary_amount(st: &Stats, value: u16) -> i32 {
+    (i64::from(value).saturating_mul(BP.saturating_add(st.damage_bp)) / BP)
+        .clamp(0, i64::from(i32::MAX)) as i32
+}
+
+pub(crate) fn auxiliary_hit(
+    state: &mut MatchState,
+    attacker: &Unit,
+    id: UnitId,
+    amount: i32,
+    ev: &mut Vec<Event>,
+) {
+    let _removed = damage(state, Target::Unit(id), amount, ev);
+    #[cfg(feature = "lab")]
+    crate::lab::dealt(state, attacker, _removed);
+    #[cfg(not(feature = "lab"))]
+    let _ = attacker;
 }
 
 pub(crate) fn scale(value: i32, bp: i32) -> i32 {
@@ -528,6 +575,7 @@ pub(crate) fn damage(
             if removed > 0 && u.hp <= 0 && conventional {
                 state.army[owner.index()].remove(archetype);
             }
+            crate::bonehorn::after_hp_damage(state, id, removed);
             #[cfg(feature = "lab")]
             crate::lab::taken(state, owner, victim.kind, removed);
             removed
@@ -601,6 +649,29 @@ fn status_ticks(base: u16, bp: i32) -> u16 {
 /// Root replaces anything (keeping the longer root); a stronger slow
 /// replaces a slow, an equal or weaker one refreshes it; slow never
 /// replaces root. Only duration is modified by Augments (BR-X07).
+/// Duration is snapshotted once, including outgoing Augments and victim Arcana.
+pub(crate) fn status_duration(state: &MatchState, id: u32, attacker: Seat, ticks: u16) -> u16 {
+    let Some(i) = state.unit_index(id) else {
+        return 0;
+    };
+    let bonus = augment::status_duration_bp(&state.player(attacker).augments);
+    let target = state.units[i];
+    let archetype = state.rules().def(target.kind).archetype;
+    let shorten = |ticks| {
+        if target.is_summon() {
+            ticks
+        } else {
+            arcana::shorten_status(
+                &state.player(target.seat).arcanas,
+                &state.rules().arcana,
+                archetype,
+                ticks,
+            )
+        }
+    };
+    shorten(status_ticks(ticks, bonus))
+}
+
 pub(crate) fn apply_on_hit(
     state: &mut MatchState,
     id: u32,
@@ -618,28 +689,13 @@ pub(crate) fn apply_on_hit(
     {
         return 0;
     }
-    let bonus = augment::status_duration_bp(&state.player(attacker).augments);
-    let target = state.units[i];
-    let archetype = state.rules().def(target.kind).archetype;
-    let shorten = |ticks| {
-        if target.is_summon() {
-            ticks
-        } else {
-            arcana::shorten_status(
-                &state.player(target.seat).arcanas,
-                &state.rules().arcana,
-                archetype,
-                ticks,
-            )
-        }
-    };
     let on_hit = match on_hit {
         OnHit::Slow { bp, ticks } => OnHit::Slow {
             bp,
-            ticks: shorten(status_ticks(ticks, bonus)),
+            ticks: status_duration(state, id, attacker, ticks),
         },
         OnHit::Root { ticks } => OnHit::Root {
-            ticks: shorten(status_ticks(ticks, bonus)),
+            ticks: status_duration(state, id, attacker, ticks),
         },
     };
     let applied = match on_hit {

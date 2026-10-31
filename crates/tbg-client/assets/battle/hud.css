@@ -103,6 +103,7 @@
 .inspect-stats{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}
 .inspect-stats>div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #ffffff10;padding-bottom:2px}
 .inspect-stats>div.wide{grid-column:1/-1}
+.inspect-stats>[hidden]{display:none}.inspect-effects{align-items:flex-start}.inspect-effects dd{white-space:normal;line-height:1.4;max-width:220px}
 .inspect-stats dt{color:#9fb0b4;font-size:11px}
 .inspect-stats dd{margin:0;font-weight:700;font-size:12px;font-variant-numeric:tabular-nums;color:#f3ead6;text-align:right}
 .inspect-stats dd[data-status='Slowed']{color:#86d4ff}.inspect-stats dd[data-status='Rooted']{color:#a9e36d}

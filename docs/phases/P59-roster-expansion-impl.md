@@ -1,9 +1,17 @@
+> **Owner authorization update (2026-10-31):** implement all 21 character kits
+> and catalog abilities, one commit and real screenshot per character. Follow
+> [P59-EXECUTION](../roster/P59-EXECUTION.md). Earlier deferrals below describe
+> the previous scope.
+
 # P59 — Roster expansion: implementation (status report)
 
-Status: **W0 and W1 are done** (D-62 and D-63 for W0; D-64 for W1). The
-Monsters pilot has four inactive base kinds (D-66, commit `2b28591`); its kits
-and animations are next. No unit of the expansion (R01–R21) has a kit yet. This file records what is done and what comes next. It is
-a status report, not a finished wave.
+Status: **W0 and W1 are done** (D-62 and D-63 for W0; D-64 for W1).
+The owner-authorized complete roster front is active in draft PR #22, stacked on
+PR #20. Shared anatomy/gallery support is implemented (D-67). The four Monsters (R08–R11) now
+have dedicated five-form kits and authoritative abilities (D-68–D-71), with
+screenshot/minimum validation evidence in [P59-EXECUTION](../roster/P59-EXECUTION.md).
+The other 17 character deliveries remain pending. No new kind is in a public Shop/lab pool;
+this is an implementation report, not W10 balance acceptance or W11 release.
 
 ## What is in place
 
@@ -18,11 +26,12 @@ a status report, not a finished wave.
 | English names for the roster (D-65) | `docs/roster/P59-NAMES.md` | decided |
 
 **Protocol numbers.** The shield took 19 (D-63) and the Factions took 20 (D-64).
-The plan said 19 for the Factions. The shield changed the wire first, so the
+R08 self-reduction took 21 (D-68), R10 cue 22 (D-70), and independent special
+snapshots/cues took 23 (D-71). The plan said 19 for the Factions. The shield changed the wire first, so the
 Factions take the next number; this deviation is recorded here.
 
 **The audit's protocol number is stale.** P58 §2 reads "protocol 16". The
-current value is 20. Update the audit in the next docs pass.
+current value is 23 (D-71). Update the audit at consolidation.
 
 ## Waves
 
@@ -37,12 +46,12 @@ current value is 20. Update the audit in the next docs pass.
   death styles and gallery rows cover the seven Factions. ART-DIRECTION §3 and
   §11.2 have rows for the three new Factions (Proposed).
 - **Pilot: Monsters R08 Bonehorn, R09 Ravager, R10 Acidmaw, R11 Whisperer. Kinds done (D-66).**
-  Inactive kinds and base rows from GAME-DESIGN §13.1 are registered. Next:
-  kits under `crates/tbg-client/src/art/kits/`, animations and gallery review. The
-  pilot's report goes here before the next wave starts.
+  Inactive kinds and base rows from GAME-DESIGN §13.1 are registered. All four
+  now own their kits, animation and abilities; their first desktop lineups were observed.
+  Per-character evidence is recorded in P59-EXECUTION before each next delivery.
 - **W2–W6: rules for the other 17 units** (timers, counted strikers, area pulses,
-  shield pair, fusion). The owner asked for balance and rules to be left to
-  another agent, so these waves stay open until that agent runs.
+  shield pair, fusion). The 2026-10-31 owner update authorizes implementing
+  the catalog abilities on this front; balance evidence remains deferred.
 - **W7–W9: evolution visuals, models, animation profiles** for all 21 units and
   the three drills. This is the visual part of the mission, unit by unit after
   the pilot.
@@ -161,3 +170,92 @@ the server watcher count from 1 to 0. Desktop palette captures were inspected at
 ability waves, or online-pool expansion. GitHub CI and the production rollout
 are separate release gates; this report does not claim either has completed.
 Owner look and fun sign-off remain open.
+
+
+## Complete-kit extension — R01, 2026-10-31
+
+Bulwark delivered with D-72, own five-form kit and actual desktop screenshot.
+Combined R01–R03 consolidation passed 58 distinct focused core/contract scenarios;
+shared-lock two-job Trunk preview passed. See docs/roster/p59/R01-bulwark.md.
+This extends the prior four pilot deliveries to five of the owner's 21. Public
+pool activation, full suites, balance gates, full-clip/live reconnect/performance
+and subjective look/fun acceptance remain deferred; no production deployment.
+
+R02/D-73: Demolisher's own hydraulic five-form kit, Area Crush and real desktop
+lineup delivered (six of 21); same R01–R03 targeted evidence, no duplicated suite.
+Report: docs/roster/p59/R02-demolisher.md. Other deferred acceptance stays open.
+
+R03/D-74: Crowcaller's own five-form kit, caster-owned Mark, public effect facts,
+inspection row and actual desktop screenshot delivered (seven of 21). Seven R03
+cases passed within the same 58 distinct directed scenarios. Protocol is now24;
+see docs/roster/p59/R03-crowcaller.md for pending acceptance and known Brew ranking.
+
+D-75: Trigger's own five-form kit, canonical ability and actual desktop lineup
+delivered (8 of21). The combined R04–R07 block passed75 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R04-trigger.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-76: Rattle & Tick's own five-form kit, canonical ability and actual desktop lineup
+delivered (9 of21). The combined R04–R07 block passed75 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R05-rattle-tick.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-77: Capybara's own five-form kit, canonical ability and actual desktop lineup
+delivered (10 of21). The relevant combined block passed75 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R06-capybara.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-78: Trident's own five-form kit, canonical ability and actual desktop lineup
+delivered (11 of21). The relevant combined block passed75 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R07-trident.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-79: Solar Sentinel's own five-form kit, canonical ability and actual desktop lineup
+delivered (12 of21). The relevant combined block passed15 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R12-solar-sentinel.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-80: Luminous Oracle's own five-form kit, canonical ability and actual desktop lineup
+delivered (13 of21). The relevant combined block passed40 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R13-luminous-oracle.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-81: Celestial Archer's own five-form kit, canonical ability and actual desktop lineup
+delivered (14 of21). The relevant combined block passed40 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R14-celestial-archer.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-82: Justiciar's own five-form kit, canonical ability and actual desktop lineup
+delivered (15 of21). The relevant combined block passed40 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R15-justiciar.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-83: Jawguard's own five-form kit, canonical ability and actual desktop lineup
+delivered (16 of21). The relevant combined block passed30 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R16-jawguard.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-84: Mantis's own five-form kit, canonical ability and actual desktop lineup
+delivered (17 of21). The relevant combined block passed30 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R17-mantis.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-85: Hornet's own five-form kit, canonical ability and actual desktop lineup
+delivered (18 of21). The relevant combined block passed42 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R18-hornet.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-86: Weaver's own five-form kit, canonical ability and actual desktop lineup
+delivered (19 of21). The relevant combined block passed42 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R19-weaver.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-87: Pyre Warden's own five-form kit, canonical ability and actual desktop lineup
+delivered (20 of21). The relevant combined block passed34 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol26. Report:
+docs/roster/p59/R20-pyre-warden.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-88: Drillnest's own five-form kit, canonical ability and actual desktop lineup
+delivered (21 of21). The relevant combined block passed34 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol27. Report:
+docs/roster/p59/R21-drillnest.md. Deferred acceptance remains as listed; no activation/deploy.

@@ -14,7 +14,9 @@ use formation::FormationIndex;
 
 /// Count down statuses and cooldowns.
 pub(crate) fn tick_timers(state: &mut MatchState) {
+    let rules = state.rules();
     for u in &mut state.units {
+        crate::jawguard::tick(rules, u, state.tick);
         let before = u.status;
         u.status = match u.status {
             Status::Slowed { bp, ticks_left } if ticks_left > 1 => Status::Slowed {
@@ -26,8 +28,14 @@ pub(crate) fn tick_timers(state: &mut MatchState) {
             },
             _ => Status::None,
         };
-        crate::roster_slots::release_queued_slow(u, before);
+        crate::roster_slots::release_queued_slow(u, before, state.tick);
         u.cooldown = u.cooldown.saturating_sub(1);
+        if !u.is_summon()
+            && (crate::specials::period(rules, u.kind, u.tier, u.branch).is_some()
+                || crate::drillnest::period(rules, u.kind, u.tier, u.branch).is_some())
+        {
+            u.action_cd = u.action_cd.saturating_sub(1);
+        }
     }
     for p in &mut state.players {
         p.stronghold_cooldown = p.stronghold_cooldown.saturating_sub(1);
@@ -44,6 +52,7 @@ pub(crate) fn run_units(state: &mut MatchState, ev: &mut Vec<Event>) {
     let mut formations = FormationIndex::new();
     for idx in 0..state.units.len() {
         advance_unit(state, idx, ev, &mut formations);
+        crate::specials::advance(state, idx, ev);
     }
     // ...and again after everyone moved.
     sync_passengers(state);
@@ -123,6 +132,8 @@ fn advance_unit(
                 // decided at windup start, so AttackStart already shows it.
                 // Root cancels the windup and the betrayal with it.
                 let (target, betrayed) = crate::support::betray_windup(state, &u, st.range, target);
+                crate::ravager::retarget(state, idx, target);
+                crate::mantis::retarget(state, idx, target);
                 state.units[idx].windup = Some((target, WINDUP));
                 state.units[idx].fx.betray = betrayed;
                 ev.push(Event::AttackStart {
@@ -135,7 +146,7 @@ fn advance_unit(
         None => {
             // Carried passengers never walk on their own; the crab carries
             // them (their x stays synced around this tick).
-            if u.fx.carrier.is_some() {
+            if u.fx.carrier.is_some() || crate::bulwark::anchored(state, &u) {
                 return;
             }
             // Drumguard B2: the bonded ally ignores slows and fish.
@@ -359,6 +370,9 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
         }
     }
     state.units.retain(|u| u.hp > 0);
+    // Clear a dead prey before projecting counters in this tick's views.
+    crate::roster_slots::tick_marks(state);
+    crate::specials::cancel_gone(state);
     #[cfg(feature = "lab")]
     if dead[0] + dead[1] > 0 {
         crate::lab::progress(state);

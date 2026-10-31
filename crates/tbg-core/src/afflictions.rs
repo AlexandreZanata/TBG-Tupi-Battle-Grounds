@@ -238,6 +238,11 @@ pub(crate) fn affliction_score(state: &MatchState, idx: usize) -> u32 {
     }
     score += u.fx.poison.iter().filter(|s| s.left > 0).count() as u32;
     score += u.fx.fish.iter().filter(|s| s.left > 0).count() as u32;
+    // Proposed P58 family eligibility: each bounded harmful family counts once.
+    score += u32::from(u.fx.bleed.left > 0) + u32::from(u.fx.venom.left > 0);
+    score += u32::from(crate::roster_slots::weaken_now(&u.fx, state.tick) > 0);
+    score += u32::from(u.fx.ability_cut_bp > 0 && state.tick < u.fx.ability_cut_until);
+    score += u32::from(crate::crowcaller::marked(state, u.id));
     score
 }
 
@@ -282,10 +287,17 @@ fn cleanse(
     u.status = Status::None;
     u.fx.confused_until = 0;
     u.fx.queued_slow = None;
+    u.fx.weaken_bp = 0;
+    u.fx.weaken_until = 0;
+    u.fx.ability_cut_bp = 0;
+    u.fx.ability_cut_until = 0;
     // P58 §3.2: the bleed goes before any ordinary poison stack, and it takes
     // one of the strip count (a Proposed contract, see roster_slots).
     let mut strip = strip;
     if strip > 0 && crate::roster_slots::cleanse_bleed(&mut u.fx) {
+        strip -= 1;
+    }
+    if strip > 0 && crate::roster_slots::cleanse_venom(&mut u.fx) {
         strip -= 1;
     }
     let mut order: Vec<usize> = (0..u.fx.poison.len()).collect();
@@ -299,6 +311,7 @@ fn cleanse(
     if ward {
         u.fx.ward_until = until;
     }
+    crate::crowcaller::clear_marks_on(state, id);
     ev.push(Event::Cleansed { unit: id });
 }
 

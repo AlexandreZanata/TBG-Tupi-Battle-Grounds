@@ -1,8 +1,5 @@
-//! W0 slots of the roster expansion (P58 §3): one bounded field each for a
-//! victim's bleed, a weakening of basic attacks, a Slow queued behind a Root,
-//! a caster's mark, a timed self-reduction and an ability heal-cut. No unit
-//! uses them yet, so an empty slot changes nothing; the rules here are the
-//! contract that the unit waves build on.
+//! Bounded victim DoTs, weakening, queued Slow, caster marks, self-reduction and heal-cut.
+//! Character modules own triggers; these slots preserve stacking, expiry and cleanse contracts.
 #![allow(dead_code)] // ponytail: the appliers have no caller until the first unit that uses each slot (W2–W6); drop this allow then.
 
 use crate::hits;
@@ -110,7 +107,13 @@ pub(crate) fn heal_cut_now(u: &Unit, now: Tick) -> i32 {
 /// application. An active slot takes an equal or stronger value and restarts
 /// its count without moving the next pulse; a weaker value is ignored.
 pub(crate) fn apply_bleed(fx: &mut UnitFx, value: u16, pulses: u8, source: Seat, now: Tick) {
-    let slot = &mut fx.bleed;
+    apply_dot(&mut fx.bleed, value, pulses, source, now);
+}
+/// R18: its own family, never an entry in Rotcap's stack array.
+pub(crate) fn apply_venom(fx: &mut UnitFx, value: u16, pulses: u8, source: Seat, now: Tick) {
+    apply_dot(&mut fx.venom, value, pulses, source, now);
+}
+fn apply_dot(slot: &mut Bleed, value: u16, pulses: u8, source: Seat, now: Tick) {
     if slot.left == 0 {
         *slot = Bleed {
             value,
@@ -129,14 +132,36 @@ pub(crate) fn apply_bleed(fx: &mut UnitFx, value: u16, pulses: u8, source: Seat,
 /// ordinary damage path (reduction and shields apply; no on-hit effects, no
 /// lifesteal), then counts down. The source's death changes nothing.
 pub(crate) fn tick_bleed(state: &mut MatchState, ev: &mut Vec<Event>) {
+    tick_dot(state, ev, false);
+}
+pub(crate) fn tick_venom(state: &mut MatchState, ev: &mut Vec<Event>) {
+    tick_dot(state, ev, true);
+}
+fn tick_dot(state: &mut MatchState, ev: &mut Vec<Event>, venom: bool) {
     for i in 0..state.units.len() {
         let u = state.units[i];
-        let slot = u.fx.bleed;
+        let slot = if venom { u.fx.venom } else { u.fx.bleed };
         if u.hp <= 0 || slot.left == 0 || state.tick != slot.next {
             continue;
         }
-        hits::damage(state, Target::Unit(u.id), i32::from(slot.value), ev);
-        let slot = &mut state.units[i].fx.bleed;
+        let _removed = hits::damage(state, Target::Unit(u.id), i32::from(slot.value), ev);
+        // ponytail: each family has one producer; store kind if another producer ships.
+        #[cfg(feature = "lab")]
+        crate::lab::dot_dealt(
+            state,
+            slot.source,
+            if venom {
+                crate::UnitKind::Hornet
+            } else {
+                crate::UnitKind::Trident
+            },
+            _removed,
+        );
+        let slot = if venom {
+            &mut state.units[i].fx.venom
+        } else {
+            &mut state.units[i].fx.bleed
+        };
         slot.left -= 1;
         if slot.left == 0 {
             *slot = Bleed::default();
@@ -156,6 +181,15 @@ pub(crate) fn cleanse_bleed(fx: &mut UnitFx) -> bool {
     true
 }
 
+/// The second new DoT family consumes one remaining cleanse strip after bleed.
+pub(crate) fn cleanse_venom(fx: &mut UnitFx) -> bool {
+    if fx.venom.left == 0 {
+        return false;
+    }
+    fx.venom = Bleed::default();
+    true
+}
+
 /// R19: one Slow waiting for the victim's Root to end. As with an active Slow,
 /// a weaker one keeps the queued amount and only extends the duration.
 pub(crate) fn queue_slow(fx: &mut UnitFx, bp: u16, ticks: u16) {
@@ -171,13 +205,22 @@ pub(crate) fn queue_slow(fx: &mut UnitFx, bp: u16, ticks: u16) {
 /// When a Root has just ended in `tick_timers`, the queued Slow starts in its
 /// place. A Root that is still running, or one that was refreshed, releases
 /// nothing.
-pub(crate) fn release_queued_slow(u: &mut Unit, before: Status) {
+pub(crate) fn release_queued_slow(u: &mut Unit, before: Status, now: Tick) {
     let was_rooted = matches!(before, Status::Rooted { .. });
     if was_rooted && !matches!(u.status, Status::Rooted { .. }) {
         if let Some(q) = u.fx.queued_slow.take() {
-            u.status = Status::Slowed {
-                bp: q.bp,
-                ticks_left: q.ticks,
+            if now < u.fx.ward_until || crate::afflictions::is_immune_to_control(u) {
+                return;
+            }
+            u.status = match u.status {
+                Status::Slowed { bp, ticks_left } if q.bp <= bp => Status::Slowed {
+                    bp,
+                    ticks_left: ticks_left.max(q.ticks),
+                },
+                _ => Status::Slowed {
+                    bp: q.bp,
+                    ticks_left: q.ticks,
+                },
             };
         }
     }
@@ -200,10 +243,17 @@ pub(crate) fn tick_marks(state: &mut MatchState) {
         let alive = state
             .unit_index(target)
             .is_some_and(|t| state.units[t].hp > 0);
-        if state.tick >= fx.mark_until || !alive {
+        let no_deadline = state.units[i].kind == crate::types::UnitKind::Mantis;
+        if (!no_deadline && state.tick >= fx.mark_until) || !alive {
             let fx = &mut state.units[i].fx;
             fx.mark_target = None;
             fx.mark_until = 0;
+            if matches!(
+                state.units[i].kind,
+                crate::types::UnitKind::Ravager | crate::types::UnitKind::Mantis
+            ) {
+                state.units[i].fx.attacks = 0;
+            }
         }
     }
 }

@@ -2,9 +2,9 @@
 //! The server and the client never enable it (contract C10): online, units
 //! enter the lane only through a validated purchase (BR-B02).
 
-use crate::content::{LANE_LEN, RUNNING_START};
+use crate::content::{LANE_LEN, RUNNING_START, UNIT_KIND_COUNT};
 use crate::state::{MatchState, Unit};
-use crate::types::{Seat, Tick, UnitId, UnitKind, ALL_KINDS};
+use crate::types::{Seat, Tick, UnitId, UnitKind};
 
 impl MatchState {
     /// Place a unit of any form without the Shop or Energy, for unit duels.
@@ -31,18 +31,18 @@ impl MatchState {
     }
 }
 
-/// Per-seat, per-kind combat totals for the balance lab (P42). Never
+/// Per-seat totals for every registered kind, including inactive prototypes. Never
 /// serialized, so it is not part of `hash()`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LabStats {
     /// HP removed by hits of this seat's units of each kind (primary and splash).
-    pub dealt: [[u64; ALL_KINDS.len()]; 2],
+    pub dealt: [[u64; UNIT_KIND_COUNT]; 2],
     /// HP removed from this seat's units of each kind, by any source.
-    pub taken: [[u64; ALL_KINDS.len()]; 2],
+    pub taken: [[u64; UNIT_KIND_COUNT]; 2],
     /// HP restored by this seat's units of each kind (direct, splash, lifesteal).
-    pub healed: [[u64; ALL_KINDS.len()]; 2],
+    pub healed: [[u64; UNIT_KIND_COUNT]; 2],
     /// Status ticks (slow or root) applied by this seat's units of each kind.
-    pub status_ticks: [[u64; ALL_KINDS.len()]; 2],
+    pub status_ticks: [[u64; UNIT_KIND_COUNT]; 2],
     /// HP removed from units by each seat's Stronghold.
     pub stronghold_dealt: [u64; 2],
     /// Last combat tick with Stronghold damage or a conventional death.
@@ -54,10 +54,10 @@ pub struct LabStats {
 impl Default for LabStats {
     fn default() -> LabStats {
         LabStats {
-            dealt: [[0; ALL_KINDS.len()]; 2],
-            taken: [[0; ALL_KINDS.len()]; 2],
-            healed: [[0; ALL_KINDS.len()]; 2],
-            status_ticks: [[0; ALL_KINDS.len()]; 2],
+            dealt: [[0; UNIT_KIND_COUNT]; 2],
+            taken: [[0; UNIT_KIND_COUNT]; 2],
+            healed: [[0; UNIT_KIND_COUNT]; 2],
+            status_ticks: [[0; UNIT_KIND_COUNT]; 2],
             stronghold_dealt: [0; 2],
             last_progress: RUNNING_START,
             longest_stall: 0,
@@ -76,6 +76,13 @@ impl LabStats {
 pub(crate) fn dealt(state: &mut MatchState, attacker: &Unit, amount: i32) {
     if amount > 0 {
         state.lab.dealt[attacker.seat.index()][attacker.kind as usize] += amount as u64;
+    }
+}
+
+/// A bounded DoT retains its owner even after the producer has died.
+pub(crate) fn dot_dealt(state: &mut MatchState, owner: Option<Seat>, kind: UnitKind, amount: i32) {
+    if let Some(owner) = owner.filter(|_| amount > 0) {
+        state.lab.dealt[owner.index()][kind as usize] += amount as u64;
     }
 }
 
@@ -107,4 +114,30 @@ pub(crate) fn progress(state: &mut MatchState) {
     let gap = state.tick.saturating_sub(state.lab.last_progress);
     state.lab.longest_stall = state.lab.longest_stall.max(gap);
     state.lab.last_progress = state.tick;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{hits, ArcanaPreset, Target};
+
+    #[test]
+    fn staged_kinds_collect_lab_damage_without_public_pool_activation() {
+        let mut s = MatchState::with_arcanas(1, [ArcanaPreset::NEUTRAL; 2]);
+        let a = s.lab_spawn_at(Seat::A, UnitKind::Bonehorn, 0, 0, 4_000);
+        let b = s.lab_spawn_at(Seat::B, UnitKind::Archer, 0, 0, 4_500);
+        let attacker = s.units[s.unit_index(a).unwrap()];
+        let stats = s.stats_of(&attacker);
+        hits::resolve_hit(&mut s, &attacker, Target::Unit(b), &stats, &mut Vec::new());
+        assert_eq!(
+            s.lab.dealt[Seat::A.index()][UnitKind::Bonehorn as usize],
+            40
+        );
+        hits::damage(&mut s, Target::Unit(a), 100, &mut Vec::new());
+        assert_eq!(
+            s.lab.taken[Seat::A.index()][UnitKind::Bonehorn as usize],
+            100
+        );
+        assert!(!s.rules().pool.contains(&UnitKind::Bonehorn));
+    }
 }

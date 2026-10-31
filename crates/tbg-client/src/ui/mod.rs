@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use tbg_core::protocol::{InviteToken, RoomCode};
 use tbg_core::{Rejection, UnitId};
 
+mod ability_details;
 pub mod account;
 mod account_ui;
 mod actions;
@@ -21,6 +22,7 @@ mod countdown;
 mod desktop;
 #[cfg(target_arch = "wasm32")]
 mod desktop_actions;
+mod effect_details;
 mod evolve;
 pub(crate) mod fortify;
 #[cfg(test)]
