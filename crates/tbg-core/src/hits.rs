@@ -7,6 +7,7 @@ use crate::augment;
 use crate::content::{Ability, Stats, BP};
 use crate::state::{stronghold_x, Event, MatchState, Target, Unit};
 use crate::targeting;
+use crate::training_hooks::{self, Effect, Source};
 use crate::types::{OnHit, Seat, Status, UnitId};
 
 pub(crate) fn resolve_hit(
@@ -39,7 +40,9 @@ pub(crate) fn resolve_hit(
         }
         // Bloodweavers transfer instead of healing.
         if let Some((amount, low_bp, second)) = crate::support::transfer_of(state, attacker) {
-            crate::support::transfer_cast(state, attacker, st.range, amount, low_bp, second, ev);
+            training_hooks::scoped(state, Source::Unit(attacker.id), Effect::Transfer, |s| {
+                crate::support::transfer_cast(s, attacker, st.range, amount, low_bp, second, ev)
+            });
             return;
         }
         let _restored = heal(state, attacker.seat, id, st.heal, true, ev);
@@ -51,7 +54,12 @@ pub(crate) fn resolve_hit(
                 let a = state.units[i];
                 let near = (a.x - tx).abs() <= st.splash;
                 if a.seat == attacker.seat && a.id != id && a.hp > 0 && a.hp < a.max_hp && near {
-                    let _restored = heal(state, attacker.seat, a.id, st.heal, true, ev);
+                    let _restored = training_hooks::scoped(
+                        state,
+                        Source::Unit(attacker.id),
+                        Effect::Splash,
+                        |s| heal(s, attacker.seat, a.id, st.heal, true, ev),
+                    );
                     #[cfg(feature = "lab")]
                     crate::lab::healed(state, attacker, _restored);
                 }
@@ -139,7 +147,12 @@ pub(crate) fn resolve_hit(
             };
             if conventional && bp > 0 {
                 let healed = (i64::from(removed) * i64::from(bp) / BP) as i32;
-                let _restored = heal(state, attacker.seat, attacker.id, healed, false, ev);
+                let _restored = training_hooks::scoped(
+                    state,
+                    Source::Unit(attacker.id),
+                    Effect::Lifesteal,
+                    |s| heal(s, attacker.seat, attacker.id, healed, false, ev),
+                );
                 #[cfg(feature = "lab")]
                 crate::lab::healed(state, attacker, _restored);
             }
@@ -347,7 +360,16 @@ pub(crate) fn furnace_bonus(state: &mut MatchState, attacker: &Unit, target: Tar
     let max_hp = attacker.max_hp.max(1);
     let burn = (i64::from(max_hp) * i64::from(burn_bp) / 10_000).max(1) as i32;
     if let Some(ai) = state.unit_index(attacker.id) {
-        state.units[ai].hp = (state.units[ai].hp - burn).max(0);
+        let before = state.units[ai];
+        state.units[ai].hp = (before.hp - burn).max(0);
+        let lost = before.hp - state.units[ai].hp;
+        training_hooks::lost_by(
+            state,
+            &before,
+            lost,
+            Source::Unit(before.id),
+            Effect::SelfBurn,
+        );
     }
     if matches!(target, Target::Stronghold(_)) {
         return 0;
@@ -425,7 +447,10 @@ fn splash(
         let e = state.units[i];
         let near = (e.x - tx).abs() <= st.splash;
         if e.hp > 0 && near && primary != Target::Unit(e.id) && (friendly || e.seat == enemy) {
-            let _removed = damage(state, Target::Unit(e.id), amount, ev);
+            let _removed =
+                training_hooks::scoped(state, Source::Unit(attacker.id), Effect::Splash, |s| {
+                    damage(s, Target::Unit(e.id), amount, ev)
+                });
             #[cfg(feature = "lab")]
             crate::lab::dealt(state, attacker, _removed);
             if !attacker.is_summon() {
@@ -445,13 +470,17 @@ fn splash(
     if friendly {
         let base = Target::Stronghold(enemy);
         if primary != base && (stronghold_x(enemy) - tx).abs() <= st.splash {
-            damage(state, base, amount, ev);
+            training_hooks::scoped(state, Source::Unit(attacker.id), Effect::Splash, |s| {
+                damage(s, base, amount, ev)
+            });
         }
         return;
     }
     let base = Target::Stronghold(enemy);
     if primary != base && (stronghold_x(enemy) - tx).abs() <= st.splash {
-        damage(state, base, amount, ev);
+        training_hooks::scoped(state, Source::Unit(attacker.id), Effect::Splash, |s| {
+            damage(s, base, amount, ev)
+        });
     }
 }
 
@@ -501,7 +530,9 @@ pub(crate) fn damage(
                 amount
             };
             // P48-A: Cargo Crab A2 emergency shield absorbs before plates.
+            let reduced = amount;
             let amount = absorb_shield(state, id, amount);
+            let after_shield = amount;
             // P46: Shatterback plates absorb after damage reduction, before HP.
             let amount = absorb_plates(state, id, amount, ev);
             let copies = augment::second_wind_charges(&state.player(owner).augments);
@@ -524,6 +555,13 @@ pub(crate) fn damage(
             }
             #[cfg(feature = "lab")]
             crate::lab::taken(state, owner, victim.kind, removed);
+            training_hooks::lost(
+                state,
+                &victim,
+                removed,
+                reduced - after_shield,
+                after_shield - amount,
+            );
             removed
         }
         Target::Stronghold(seat) => {
@@ -542,6 +580,7 @@ pub(crate) fn damage(
             if removed > 0 {
                 augment::after_stronghold_damage(state, seat, ev);
             }
+            training_hooks::lost_tower(state, seat, removed);
             #[cfg(feature = "lab")]
             if removed > 0 {
                 crate::lab::progress(state);
@@ -569,6 +608,8 @@ fn heal(
     }
     let u = &mut state.units[i];
     u.hp = (u.hp + effective).min(u.max_hp);
+    let gained = u.hp - target.hp;
+    training_hooks::restored(state, &target, gained);
     ev.push(Event::Heal {
         to: id,
         amount: effective,

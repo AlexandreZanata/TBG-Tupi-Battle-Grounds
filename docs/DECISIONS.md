@@ -1063,3 +1063,69 @@ nothing that a seat does not already see, so no delay is needed.
 **Reopen when** spectator load breaks the budgets in P47 (2 000 spectators
 at 250 matches), a listed match leaks private state, or the owner wants
 rooms, challenges or ranked watching to stay private as well.
+
+## D-80 · Troops uses canonical content and a local training boundary — 2026-10-31 (Proposed)
+
+**Decision.** Plan P62 as a shared roster/details/model presentation and a
+local-only combat laboratory. Exact compositions are initialized through
+validated core training APIs; they never shrink the normal Shop below five
+distinct offers. Reuse canonical combat helpers and champion art kits, and
+keep the offline `lab` feature forbidden in client/server under C10. A
+separate optional `training` feature exposes a private local session and
+bounded runtime observation, not network controls or arbitrary Rulesets.
+Feature flags alone are not the isolation boundary: ordinary matches have
+no active training runtime, and server code never constructs one.
+
+**Dummy tradeoff.** The initial inert dummy can use a runtime-tagged Crate
+carrier with an explicit hatch/open guard and HP/view override. It retains
+summon-like target eligibility and never claims to model a conventional
+enemy. Chosen champion opponents cover those interactions. No new wire kind
+or global Crate behavior is warranted. Required regressions protect real
+cargo and validate statuses, measurements, renewable respawn and cleanup.
+
+**Why.** The player needs real stats/combat and an exact three-champion
+experiment, while current Shop assumptions, debug army filling, gallery
+tools and offline LabStats are insufficient product interfaces. Typed local
+controls, per-mutation metrics and stable content IDs avoid wrong numbers,
+competitive leakage and duplicated balance logic. A canonical constructor
+also avoids repeatedly leaking preview Rulesets on reset.
+
+**Scope/status.** Documentation only; no API, feature flag or product rule
+has been implemented. See [P62](phases/P62-troops-training-lab.md) and
+GAME-DESIGN §16. D-73–D-79 are already reserved in the parallel P59 branch,
+so this plan starts at D-80. Resolve branch/content integration before code.
+
+**Reopen when** the tagged inert target cannot preserve normal Crate
+behavior, a required training capability demands a wire change, the owner
+requests conventional-target dummies, or measurements show the hooks alter
+normal simulation behavior/cost. Stop the dependent step and revise the
+design; do not bypass C10 or silently change target eligibility.
+
+## D-81 · Practice difficulty preserves a fair baseline and discloses assistance — 2026-10-31 (Proposed)
+
+**Decision.** Preserve `Bot::new` and its existing callers. Add bounded,
+seeded practice profiles consuming legal own-seat views and producing
+ordinary PlayerIntentions. Easy, Medium and Hard use normal resources;
+Hard improves visible-state decisions, including Augments. Recommended
+Impossible combines Hard policy, shorter decision spacing and a clearly
+displayed local 2x ordinary regen advantage, pending owner decision O03.
+No hidden opponent information, HP/damage cheat or fabricated victory.
+
+**Why.** A nearly unbeatable label cannot be justified by faster random
+buys. Small heuristic policies plus explicit local assistance are feasible
+for this MVP and understandable to players. They avoid external inference
+cost and avoid changing the bot baseline used by offline balance and other
+callers. Champion-vs-champion drills remain deterministic combat experiments;
+their difficulty is the selected composition, not a nonexistent Shop bot.
+
+**Validation.** Check information boundaries, cadence, legality, normal
+resources, exact regen accounting and unchanged baseline behavior. Run
+only an explicitly authorized bounded paired-seed calibration and owner
+playtests; describe uncertainty and unresolved difficulty goals honestly.
+The named 144-match proposal is not authorization to run it in this
+planning task or as routine validation on each front.
+
+**Reopen when** owner chooses a fair-only Impossible profile, measured
+challenge is too low/high, repeated exploit behavior defeats the scorer,
+or changes to the canonical game invalidate its legal-action evaluation.
+Changing online balance or granting undisclosed advantages is not a bot fix.

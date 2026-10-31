@@ -53,7 +53,14 @@ pub(crate) fn tick(state: &mut MatchState, ev: &mut Vec<Event>) {
         }
     }
     for (id, total) in pulses {
-        let removed = crate::hits::damage(state, Target::Unit(id), total, ev);
+        // ponytail: stacks keep no source, so training reports poison as
+        // unattributed periodic damage; a per-slot source sidecar upgrades it.
+        let removed = crate::training_hooks::scoped(
+            state,
+            crate::training_hooks::Source::Unknown,
+            crate::training_hooks::Effect::Periodic,
+            |s| crate::hits::damage(s, Target::Unit(id), total, ev),
+        );
         ev.push(Event::PoisonTick {
             unit: id,
             amount: removed,

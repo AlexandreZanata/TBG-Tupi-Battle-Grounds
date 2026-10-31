@@ -83,5 +83,12 @@ fn regenerate(state: &mut MatchState) {
         }
         let unit = &mut state.units[idx];
         unit.hp = (unit.hp + heal).min(unit.max_hp);
+        let restored = unit.hp - u.hp;
+        crate::training_hooks::scoped(
+            state,
+            crate::training_hooks::Source::Team(u.seat),
+            crate::training_hooks::Effect::Regen,
+            |s| crate::training_hooks::restored(s, &u, restored),
+        );
     }
 }
