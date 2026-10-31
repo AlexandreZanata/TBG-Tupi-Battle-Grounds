@@ -115,6 +115,9 @@ impl Animator {
         }
         self.reduction = bp;
     }
+    pub fn attack_variant(&self) -> usize {
+        usize::from(self.variant & 1)
+    }
     pub fn start_special(&mut self) {
         self.special = Some(0.0);
     }

@@ -4,7 +4,6 @@ use crate::{
     content::{Ability, Stats},
     hits,
     state::{Event, MatchState, Target, Unit},
-    targeting,
     types::{UnitId, UnitKind},
 };
 
@@ -14,33 +13,6 @@ pub(crate) fn counter(u: &Unit) -> u8 {
     } else {
         0
     }
-}
-
-/// Three is the structural maximum of the approved roster, not a target cap knob.
-fn secondary_ids(
-    state: &MatchState,
-    attacker: &Unit,
-    primary: UnitId,
-    center: i32,
-    radius: i32,
-) -> [UnitId; 3] {
-    let mut best = [(i32::MAX, UnitId::MAX); 3];
-    for u in &state.units {
-        if u.id == primary || u.hp <= 0 || u.seat == attacker.seat || !targeting::targetable(u) {
-            continue;
-        }
-        let key = ((u.x - center).abs(), u.id);
-        if key.0 > radius {
-            continue;
-        }
-        if let Some(at) = best.iter().position(|&current| key < current) {
-            for j in (at + 1..best.len()).rev() {
-                best[j] = best[j - 1];
-            }
-            best[at] = key;
-        }
-    }
-    best.map(|(_, id)| id)
 }
 
 pub(crate) fn completed(
@@ -89,7 +61,7 @@ pub(crate) fn completed(
     }
     state.units[i].fx.attacks = 0;
     let center = state.units[pi].x;
-    let ids = secondary_ids(state, a, primary, center, radius);
+    let ids = crate::secondary_targets::nearest(state, a, primary, center, radius);
     let amount = hits::auxiliary_amount(st, damage);
     for id in ids
         .into_iter()
@@ -197,7 +169,7 @@ mod tests {
         assert_eq!(s.units[3].hp, 1_000);
         assert_eq!([s.units[5].hp, s.units[6].hp], [976, 976]);
         assert_eq!(
-            secondary_ids(&s, &s.units[0], 2, 1_000, 150),
+            crate::secondary_targets::nearest(&s, &s.units[0], 2, 1_000, 150),
             [UnitId::MAX; 3]
         );
     }

@@ -34,6 +34,7 @@ pub fn is_public(event: &Event) -> bool {
         | Event::Dismounted { .. }
         | Event::CorrosiveSplash { .. }
         | Event::AbilityStarted { .. }
-        | Event::AbilityResolved { .. } => true,
+        | Event::AbilityResolved { .. }
+        | Event::Crossfire { .. } => true,
     }
 }

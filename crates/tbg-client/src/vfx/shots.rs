@@ -49,6 +49,8 @@ pub enum ShotKind {
     Acid,
     Thought,
     PlagueBolt,
+    Bullet,
+    CrossBullet,
 }
 
 #[derive(Clone, Copy)]
@@ -257,6 +259,18 @@ fn look(kind: ShotKind) -> Look {
             Trail::Sparks,
             0.0,
             Impact::Bolt,
+        ),
+        Bullet | CrossBullet => (
+            Some((Body::Bolt, 0.24)),
+            0.0,
+            if kind == CrossBullet {
+                0.04
+            } else {
+                UNIT_FLIGHT
+            },
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
         ),
         PlagueBolt => (
             Some((Body::RitualBolt, 1.0)),

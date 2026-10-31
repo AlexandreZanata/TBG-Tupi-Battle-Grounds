@@ -23,11 +23,11 @@ const REACH: f32 = 2.6;
 pub(super) fn release(
     mut commands: Commands,
     vfx: Res<VfxAssets>,
-    units: Query<(&Animator, &UnitVisual, &Transform)>,
+    mut units: Query<(&Animator, &mut UnitVisual, &Transform)>,
     globals: Query<&GlobalTransform>,
 ) {
-    for (a, v, root) in &units {
-        let Some(kit) = a.kit.filter(|_| !v.dying && !a.events.is_empty()) else {
+    for (a, mut v, root) in &mut units {
+        let Some(kit) = a.kit.filter(|_| !v.dying) else {
             continue;
         };
         let (tier, branch) = a.form;
@@ -35,6 +35,43 @@ pub(super) fn release(
             splash: v.splash,
             hold: v.hold,
         };
+        if let Attack::TwinShot {
+            hands,
+            muzzle,
+            shot,
+            flash,
+        } = kit.attack
+        {
+            let primary = a.attack_variant();
+            if let Some(to) = v.secondary_shot.take() {
+                twin_fire(
+                    &mut commands,
+                    &vfx,
+                    &globals,
+                    a,
+                    (
+                        hands[1 - primary],
+                        muzzle,
+                        shots::ShotKind::CrossBullet,
+                        flash,
+                    ),
+                    to,
+                );
+            }
+            if a.events.contains(&ClipEvent::Release) {
+                let ahead = Quat::from_rotation_y(v.yaw) * Vec3::Z * v.range;
+                let to = a.aim_at.unwrap_or(root.translation + ahead + Vec3::Y * 0.4);
+                twin_fire(
+                    &mut commands,
+                    &vfx,
+                    &globals,
+                    a,
+                    (hands[primary], muzzle, shot, flash),
+                    to,
+                );
+            }
+            continue;
+        }
         match kit.attack {
             Attack::Shot {
                 from,
@@ -98,4 +135,29 @@ pub(super) fn stomp(
         let size = a.plan.scale / 1.6;
         impacts::stomp(&mut commands, &vfx, g.translation(), size);
     }
+}
+
+/// Both muzzles use the same world-joint path; the client never chooses a victim.
+fn twin_fire(
+    commands: &mut Commands,
+    vfx: &VfxAssets,
+    globals: &Query<&GlobalTransform>,
+    a: &Animator,
+    emission: (Node, Vec3, shots::ShotKind, impacts::Muzzle),
+    to: Vec3,
+) {
+    let (from, muzzle, shot, flash) = emission;
+    let Ok(g) = globals.get(a.joints[from.index()]) else {
+        return;
+    };
+    let start = g.transform_point(muzzle);
+    shots::fire(commands, vfx, shot, start, to, Area::default());
+    impacts::muzzle(
+        commands,
+        vfx,
+        flash,
+        start,
+        (to - start).normalize_or(Vec3::Z),
+        None,
+    );
 }

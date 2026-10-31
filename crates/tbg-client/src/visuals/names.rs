@@ -155,6 +155,7 @@ mod tests {
             tint: None,
             dying,
             marked: false,
+            secondary_shot: None,
             dead_for: 0.0,
             last_x: 0.0,
             still: 0.0,

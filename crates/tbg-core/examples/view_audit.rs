@@ -247,6 +247,10 @@ fn event_name(event: &Event) -> &'static str {
         Event::Transfer { .. } => "Transfer",
         Event::Boarded { .. } => "Boarded",
         Event::Dismounted { .. } => "Dismounted",
+        Event::CorrosiveSplash { .. } => "CorrosiveSplash",
+        Event::AbilityStarted { .. } => "AbilityStarted",
+        Event::AbilityResolved { .. } => "AbilityResolved",
+        Event::Crossfire { .. } => "Crossfire",
     }
 }
 

@@ -358,6 +358,11 @@ pub enum Event {
         center: i32,
         tick: Tick,
     },
+    /// D-75: the server-selected fourth-shot secondary.
+    Crossfire {
+        from: UnitId,
+        to: UnitId,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

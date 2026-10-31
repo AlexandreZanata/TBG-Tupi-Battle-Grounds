@@ -135,6 +135,8 @@ pub enum UnitKind {
     Demolisher,
     /// D-74: R03, staged outside public pools.
     Crowcaller,
+    /// D-75: R04, staged outside public pools.
+    Trigger,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

@@ -81,7 +81,8 @@ Own library: `crates/tbg-client/src/art/kits/trigger/`.
 
 small orange feline, huge hat, two revolvers, booted legs and curved tail; leather/oak/iron and Human gold, team neckerchief. A2 raises hat brim and adds blue/red long coat, A3 swept tail guard/spurs. B2 adds wide brass barrel collars and dark vest, B3 twin angular sights. Keep weapons in this supplied mercenary fantasy; no imported protected asset.
 
-Status: pending. Evidence: `docs/media/p59/trigger/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/trigger/lineup.jpg`.
 
 ### R05 — Rattle & Tick
 

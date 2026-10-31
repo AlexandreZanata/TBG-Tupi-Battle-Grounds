@@ -69,6 +69,8 @@ pub struct UnitVisual {
     pub dying: bool,
     /// Derived from public caster marks; never feeds a gameplay decision.
     pub marked: bool,
+    /// One server-selected cosmetic offhand destination, consumed by the real joint emitter.
+    pub secondary_shot: Option<Vec3>,
     dead_for: f32,
     last_x: f32,
     /// Seconds without moving (walk/idle hysteresis).
@@ -233,6 +235,7 @@ pub fn spawn_unit_visual(
         tint: None,
         dying: false,
         marked: false,
+        secondary_shot: None,
         dead_for: 0.0,
         last_x: pos.x,
         still: 1.0,

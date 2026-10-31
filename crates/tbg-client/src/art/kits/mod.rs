@@ -40,6 +40,7 @@ mod shieldbearer;
 mod siege_walker;
 mod smuggler;
 mod tools;
+mod trigger;
 mod whisperer;
 
 use bevy::prelude::*;
@@ -88,6 +89,13 @@ pub type Loaded = (Node, fn(Clip, f32) -> bool);
 
 /// How a kit's attack reaches its target.
 pub enum Attack {
+    /// Alternating primary muzzles, with an authoritative opposite-hand secondary cue.
+    TwinShot {
+        hands: [Node; 2],
+        muzzle: Vec3,
+        shot: ShotKind,
+        flash: Muzzle,
+    },
     /// A projectile leaves `muzzle` (a point in `from`'s space) on Release,
     /// with an optional muzzle effect and backblast point (same space).
     Shot {
@@ -170,6 +178,7 @@ static WHISPERER: Kit = whisperer::KIT;
 static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
+static TRIGGER: Kit = trigger::KIT;
 
 /// The passenger seat's height above a Cargo Crab's ground, in world units,
 /// at its tier: where a rider's hips sit (see `visuals::mount`).
@@ -214,6 +223,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Bulwark => Some(&BULWARK),
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
+        UnitKind::Trigger => Some(&TRIGGER),
         #[allow(unreachable_patterns)]
         _ => None,
     }

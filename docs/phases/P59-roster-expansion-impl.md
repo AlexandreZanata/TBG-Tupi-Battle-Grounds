@@ -189,3 +189,8 @@ R03/D-74: Crowcaller's own five-form kit, caster-owned Mark, public effect facts
 inspection row and actual desktop screenshot delivered (seven of 21). Seven R03
 cases passed within the same 58 distinct directed scenarios. Protocol is now24;
 see docs/roster/p59/R03-crowcaller.md for pending acceptance and known Brew ranking.
+
+D-75: Trigger's own five-form kit, canonical ability and actual desktop lineup
+delivered (8 of21). The combined R04–R07 block passed75 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R04-trigger.md. Deferred acceptance remains as listed; no activation/deploy.

@@ -212,9 +212,11 @@ fn unit_view(u: &crate::state::Unit, tick: Tick, rules: &crate::Ruleset) -> Unit
         },
         // D-69: per-kind progress shares the reserved growth bits; carry/summon stay intact.
         fx: {
-            let mut fx =
-                u16::from(crate::ravager::counter(u, tick).max(crate::acidmaw::counter(u)))
-                    << FX_COUNTER_SHIFT;
+            let mut fx = u16::from(
+                crate::ravager::counter(u, tick)
+                    .max(crate::acidmaw::counter(u))
+                    .max(crate::trigger::counter(u)),
+            ) << FX_COUNTER_SHIFT;
             if u.is_summon() {
                 fx |= FX_SUMMON;
             }

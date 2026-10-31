@@ -60,6 +60,7 @@ pub struct Area {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Muzzle {
+    Pistol,
     Bombard,
     GreatBombard,
     Blunderbuss,
@@ -705,6 +706,7 @@ pub fn muzzle(
     back: Option<Vec3>,
 ) {
     let size = match kind {
+        Muzzle::Pistol => 0.35,
         Muzzle::Bombard | Muzzle::Cannon => 1.0,
         Muzzle::Blunderbuss => 1.25,
         Muzzle::GreatBombard | Muzzle::GreatCannon => 1.5,

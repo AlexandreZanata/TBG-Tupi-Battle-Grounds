@@ -435,6 +435,12 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
+    /// R04: a fourth completed enemy-unit primary also hits one other enemy.
+    Crossfire {
+        every: u8,
+        ratio: u16,
+        radius: i32,
+    },
     /// R03: readiness arms the next enemy-unit basic, never a separate cast.
     CrowMark {
         period: u16,
@@ -602,6 +608,23 @@ const fn crow(ticks: u16, cut_bp: u16, bonus_bp: u16) -> [Ability; 2] {
         Ability::None,
     ]
 }
+const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
+    [
+        Ability::Crossfire {
+            every: 4,
+            ratio,
+            radius,
+        },
+        Ability::None,
+    ]
+}
+const TRIGGER_ABILITIES: [[Ability; 2]; 5] = [
+    crossfire(6_000, 1_500),
+    crossfire(6_000, 1_500),
+    crossfire(6_000, 1_500),
+    crossfire(7_500, 1_500),
+    crossfire(7_500, 2_000),
+];
 const CROWCALLER_ABILITIES: [[Ability; 2]; 5] = [
     crow(80, 3_000, 1_500),
     crow(80, 4_000, 1_500),
@@ -688,7 +711,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 34;
+pub const UNIT_KIND_COUNT: usize = 35;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1008,6 +1031,11 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         [520,58,34,4_800,31,0,0],None,CROWCALLER_ABILITIES,[
         form("Plague Crow"),form("Plague Crow"),
         FormDef {dmg_bp:1_500,..form("Ruin Bow")},form("Ruin Bow"),
+    ]),
+    unit(UnitKind::Trigger,"Trigger",Humans,Ranged,2_400,
+        [230,25,17,3_200,53,0,0],None,TRIGGER_ABILITIES,[
+        FormDef {atk_bp:1_500,..form("Swift Gunman")},FormDef {speed_bp:1_000,..form("Swift Gunman")},
+        form("Ricochet Bullet"),form("Ricochet Bullet"),
     ]),
 ];
 

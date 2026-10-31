@@ -34,6 +34,15 @@ pub(super) fn cue(
         Event::AbilityStarted { .. } | Event::AbilityResolved { .. } => {
             super::special_cues::cue(commands, fx, map, visuals, ev);
         }
+        Event::Crossfire { from, to } => {
+            let target = chest(map, visuals, to);
+            if let Some((mut v, _, mut anim)) =
+                map.0.get(&from).and_then(|e| visuals.get_mut(*e).ok())
+            {
+                v.secondary_shot = target;
+                anim.resolve_special();
+            }
+        }
         Event::CorrosiveSplash { primary, to, .. } => {
             if let (Some(a), Some(b)) = (chest(map, visuals, primary), chest(map, visuals, to)) {
                 shots::fire(commands, fx.vfx, ShotKind::Acid, a, b, Area::default());

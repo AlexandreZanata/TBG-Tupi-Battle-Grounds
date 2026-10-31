@@ -1613,3 +1613,33 @@ B adds rigid bow arms/pale sleeves then a ruined sight. Its own bolt uses ordina
 unit flight/release timing, not a tower projectile or poison ability. All nodes
 fit the fixed rig. Composition/base/forms/protocol contracts change with this
 same decision. Full local limits and deferred checks are in R03's delivery report.
+
+## D-75 · Trigger's alternating pistols and completed-hit Crossfire — 2026-10-31 (Proposed)
+
+R04 appends Trigger without activating any public pool or changing prior kind
+indices. GAME-DESIGN §13 owns its base row and every ability/form value. A fourth
+completed enemy-unit primary, including a killing hit or summon, spends its
+counter and selects one distinct living target by primary-centered distance,
+then UnitId. Carried targets, allies and Strongholds are excluded. No candidate
+still spends the proc. Stronghold shots and canceled windups never advance it.
+Secondary damage is floor(current static basic damage × ratio / 10,000), with
+normal victim protection but no situational basic bonuses, lifesteal, on-hit or
+recursive counters. A improves attack speed then movement; B replaces ratio then
+radius. The fixed best-three selector is shared with Acidmaw without changing
+that character's ordering or cap.
+
+Protocol 25 appends Event::Crossfire at tag 26, preserving all prior tags and
+simulation layout. The bounded public counter uses the existing reserved bits.
+The server sends the chosen secondary; the client queues one cosmetic destination
+and emits from the opposite real hand joint. The normal .18-second release uses
+the alternating primary's actual muzzle and .12-second flight; the already-decided
+secondary has a brief .04-second cosmetic trace after contact, with no extra
+simulation windup. This presentation latency does not change combat timing.
+
+The own kit has orange feline face/ears, oversized leather hat with Human gold,
+team scarf, oak/iron revolvers, booted legs and a curved jointed tail. A adds long
+team coat, raised brim, tail guard and spurs; B adds brass collars, dark vest and
+angular sights. Alternating recoil and offhand fourth-hit pose share the same
+variant as the emitters. No imported asset, dependency, new Unit, dash or flanking.
+The frozen roster/form/protocol contracts append only this decision's facts;
+legacy composition and pools stay unchanged. Focused scenarios are queued in R04.
