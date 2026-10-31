@@ -165,12 +165,14 @@ fn gate(kit: &mut Kit) {
     kit.glow.push((
         Ring(0.07, 1.1, 360.0),
         rgb(0xffa23a),
-        Transform::from_xyz(8.0, 1.55, -3.95).with_rotation(Quat::from_rotation_x(1.5708)),
+        Transform::from_xyz(8.0, 1.55, -3.95)
+            .with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
     ));
     kit.glow.push((
         Cyl(1.0, 0.02),
         rgb(0xff7a26),
-        Transform::from_xyz(8.0, 1.55, -4.2).with_rotation(Quat::from_rotation_x(1.5708)),
+        Transform::from_xyz(8.0, 1.55, -4.2)
+            .with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
     ));
 }
 
