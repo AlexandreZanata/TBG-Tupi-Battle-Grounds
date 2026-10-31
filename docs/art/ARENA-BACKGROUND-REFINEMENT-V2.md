@@ -46,7 +46,7 @@ Static comparison confirms no changes to core/server logic, UI, runtime asset fi
 
 ### Publication CI follow-up
 
-The first publication's [remote CI run](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/actions/runs/41207367636) passed formatting but failed Clippy on `arena/scene.rs`: `this function has too many arguments (8/7)`. Grouping the mesh, material and image resources into one Bevy system-parameter tuple brings the arena-switch signature below the limit. It preserves the resources and build calls; no geometry, palette or material generation changed, so the existing visual evidence is reused.
+The first publication's [remote CI run](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/actions/runs/41207367636) passed formatting but failed Clippy on `arena/scene.rs`: `this function has too many arguments (8/7)`. Grouping the mesh/material pair into a Bevy system-parameter tuple, while keeping the image resource separate, brings the arena-switch signature down to seven parameters. An intermediate three-resource tuple removed the argument warning but hit `type_complexity` in [the next CI run](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/actions/runs/41207567313); the final pair avoids that complexity warning. It preserves the resources and build calls; no geometry, palette or material generation changed, so the existing visual evidence is reused.
 
 Focused validation of that correction: `cargo fmt -p tbg-client -- --check` and `git diff --check` exit 0. The following command also exited 0 in **4.63 seconds**, with only the existing `unused lang` warning:
 
@@ -56,6 +56,18 @@ flock -n -E 75 /tmp/tbg-validation-1000.lock \
   CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-deploy-art-wt/target \
   cargo check -p tbg-client --bin tbg-client --target wasm32-unknown-unknown --offline
 ```
+
+A final focused lint command checked the two reported lints on the browser target:
+
+```bash
+flock -n -E 75 /tmp/tbg-validation-1000.lock \
+  env CARGO_BUILD_JOBS=2 \
+  CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-deploy-art-wt/target \
+  cargo clippy -p tbg-client --bin tbg-client --target wasm32-unknown-unknown --offline \
+  -- -D clippy::too_many_arguments -D clippy::type_complexity
+```
+
+**Exit 101**, not a pass: no arena diagnostic remained, but Clippy reported the existing five-resource HUD tuple at `ui/battle_hud.rs:88` as `type_complexity` on WASM. That UI file is byte-for-byte unchanged from main; it was not changed to broaden this art publication. The existing `unused lang` warning also remained. This local lint step stopped at the unrelated error. The configured remote CI uses its native Clippy target and reruns after the corrective push; its outcome is separate from this failed local WASM lint check.
 
 The corrective push schedules remote CI again. Its result is reported in PR #23; this local check is not a workspace Clippy/test pass. The focused lifecycle scenario and performance acceptance remain deferred.
 

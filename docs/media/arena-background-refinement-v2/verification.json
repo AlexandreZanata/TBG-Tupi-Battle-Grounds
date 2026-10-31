@@ -186,7 +186,7 @@
   "publication_followup": {
     "first_ci_run": "https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/actions/runs/41207367636",
     "failure": "Clippy: arena::scene::switch has too many arguments (8/7)",
-    "fix": "Group Mesh/StandardMaterial/Image assets in one Bevy system-parameter tuple; visual generation unchanged.",
+    "fix": "Pair Mesh/StandardMaterial resources in a Bevy system-parameter tuple and keep Image separate; seven parameters, visual generation unchanged.",
     "validation": {
       "format": "pass",
       "diff_check": "pass",
@@ -195,6 +195,13 @@
       "seconds": 4.63
     },
     "evidence_reuse": "No geometry/palette/material-builder change; existing screenshots retained.",
-    "remote_ci_result": "See current PR #23 checks; local validation does not claim workspace-suite success."
+    "remote_ci_result": "See current PR #23 checks; local validation does not claim workspace-suite success.",
+    "second_ci_run": "https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/actions/runs/41207567313",
+    "second_failure": "Intermediate three-resource tuple triggered type_complexity in arena/scene.rs.",
+    "final_focused_clippy": {
+      "command": "flock -n -E 75 /tmp/tbg-validation-1000.lock env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-deploy-art-wt/target cargo clippy -p tbg-client --bin tbg-client --target wasm32-unknown-unknown --offline -- -D clippy::too_many_arguments -D clippy::type_complexity",
+      "exit": 101,
+      "result": "No arena diagnostic; unrelated existing WASM HUD tuple triggers type_complexity at ui/battle_hud.rs:88. UI file unchanged from main. Stopped local lint step; no pass claimed."
+    }
   }
 }

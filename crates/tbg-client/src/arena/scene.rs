@@ -59,16 +59,13 @@ fn switch(
     mut built: ResMut<Built>,
     scene: Query<Entity, With<ArenaScene>>,
     mut fog: Query<&mut DistanceFog>,
-    assets: (
-        ResMut<Assets<Mesh>>,
-        ResMut<Assets<StandardMaterial>>,
-        ResMut<Assets<Image>>,
-    ),
+    assets: (ResMut<Assets<Mesh>>, ResMut<Assets<StandardMaterial>>),
+    mut images: ResMut<Assets<Image>>,
 ) {
     if active.0 == built.0 {
         return;
     }
-    let (mut meshes, mut mats, mut images) = assets;
+    let (mut meshes, mut mats) = assets;
     for entity in &scene {
         commands.entity(entity).despawn();
     }
