@@ -43,3 +43,36 @@ release packaging/publication and Windows. Workspace tests/Clippy and
 balance gates require an explicit full/heavy request. No passing result is
 claimed for deferred checks; prior PR21 browser evidence does not validate
 this new native combination.
+
+## Installed result — 2026-10-31
+
+- Local integration commit: `60ea1cb`. Installer/feedback-loop commit:
+  `97b3aa4`. Installed source commit: `b96d8fab77c96c2aad642617a876a1bc81bbc650`.
+- Version `0.1.0-native.1`, protocol 20. Application-menu name **TBG**;
+  command `~/.local/bin/tbg`; native window title starts with TBG.
+- `scripts/install-native-preview.sh` passed twice after relevant changes,
+  with the shared nonblocking lock and two Cargo jobs. Initial native build
+  completed in 13.53 s; the endpoint-default update completed in 3.30 s.
+  Installed previews explicitly default to `wss://tbg.abastevo.com.br/ws`;
+  direct developer Cargo builds may still use localhost unless overridden.
+- Both commit-specific installations were retained, proving updates can
+  replace the active launcher without deleting the older build or user data.
+  The installer checks executable SHA-256 before copying. Installed metadata,
+  assets, protocol and runtime shared libraries were checked successfully.
+- `desktop-file-validate ~/.local/share/applications/tupi-battle-grounds.desktop`:
+  passed. The desktop entry points to the current executable and PNG icon.
+- Installed executable launched from `/tmp`, outside the source tree, using
+  executable-relative assets. Native capture exited successfully. A fresh,
+  isolated X11 capture showed the Portuguese lobby and complete creator
+  footer at 1440x900. Its only warnings concern the virtual display's
+  XSETTINGS and reported physical dimensions. The earlier Wayland capture
+  showed the Ranking panel; no controlled input scenario is claimed for it.
+- Captures and isolated profiles are under this worktree's ignored `.local/`;
+  the owner's real preferences and account data were not used for smoke tests.
+- Active persistent worktree is `.local/native-desktop` inside the original
+  checkout. `.local/native-preview.json` in that checkout records its path,
+  existing Cargo cache/dependency environment and installed commit. The
+  owner's current AGENTS.md/VALIDATION.md are copied here **unstaged**;
+  preserve them and never include them in an application-change commit.
+- Only local commits were created. No push, CI wait, VPS change or public
+  release occurred. Deferred checks above remain pending for consolidation.
