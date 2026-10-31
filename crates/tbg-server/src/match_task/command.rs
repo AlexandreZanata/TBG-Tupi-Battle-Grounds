@@ -104,6 +104,8 @@ impl Match {
                 self.send_view(seat, false);
             }
             MatchCmd::Rtt { seat, ms } => self.stats[seat.index()].rtts.push(ms),
+            MatchCmd::Watch { conn } => self.watch(conn),
+            MatchCmd::Unwatch { conn_id } => self.spectators.retain(|c| c.id != conn_id),
         }
     }
 }

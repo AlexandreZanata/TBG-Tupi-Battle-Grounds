@@ -1,0 +1,39 @@
+/* Lobby live surfaces (P47): header chip, Live battles panel, See-all dialog. Loaded after lobby.css and reuses its metal and wood styles. */
+.live-chip{display:flex;align-items:center;gap:.45em;white-space:nowrap;padding:.6em .8em;font-size:.8em;color:#dff5d5;pointer-events:auto}
+/* The live dot is drawn, not typed: the catalog font has no U+25CF. */
+.live-chip::before{content:"";width:.55em;height:.55em;border-radius:50%;background:#83d58d;box-shadow:0 0 6px #83d58d;flex-shrink:0}
+/* Right side of the arena, above the news panel: same left edge as the news card and below the header. */
+.live-panel{position:absolute;right:2%;top:17%;bottom:33%;width:23%;box-sizing:border-box;padding:.7vw;display:flex;flex-direction:column;gap:.4em;overflow:hidden;pointer-events:auto}
+.live-panel h2{font-size:.8em;text-transform:uppercase;letter-spacing:.045em;margin:0 0 .2em}
+.live-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.45em;flex:1;min-height:0;overflow:hidden}
+.live-status{font-size:.72em;color:#c4b58f;margin:.2em 0;min-height:1em}
+.live-play,.live-see-all,.live-watch,.live-copy{background:linear-gradient(#36556b,#1d3446);border:1px solid #8c997c;border-radius:4px;color:#f6f1e4;padding:.35em .7em;font-size:.74em;white-space:nowrap}
+.live-play{width:100%;padding:.5em;font-size:.8em;margin-top:.2em}
+.live-see-all{align-self:flex-end;margin-top:auto}
+.live-row{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"names actions" "meta actions" "hp actions";column-gap:.5em;row-gap:.25em;padding:.4em .55em;border:1px solid #9c7950;border-radius:5px;background:linear-gradient(135deg,#3a2d20e0,#1c1a16ec);box-shadow:inset 0 1px 2px #ffdda233}
+.live-row.is-featured{border-color:var(--gold);box-shadow:inset 0 0 0 1px #dfba7455,0 0 10px #dfba7433}
+.live-names{grid-area:names;display:flex;flex-wrap:wrap;align-items:center;gap:.25em .45em;min-width:0;font-size:.74em}
+.live-seat{display:flex;align-items:baseline;gap:.3em;min-width:0}
+.live-seat strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:7em}
+.live-seat small{white-space:nowrap}
+.live-rating::before{content:'◆ ';color:var(--gold)}
+.live-guest{color:#c4b58f;font-style:italic}
+.live-badge{font-size:.62em;text-transform:uppercase;letter-spacing:.06em;padding:.15em .45em;border-radius:3px;border:1px solid #9c7950;background:#2a2016;color:#f0d7a2}
+.live-badge.live-ranked{border-color:#29c8ff;background:#1257a1;color:#e6f7ff}
+.live-meta{grid-area:meta;font-size:.66em;color:#c9c5b4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.live-hp{grid-area:hp;display:flex;gap:.3em;min-width:0}
+.live-bar{flex:1;height:5px;background:#000b;border:1px solid #0009;border-radius:3px;overflow:hidden}
+.live-bar i{display:block;height:100%;background:var(--gold)}
+.live-bar-b i{background:#e0765f}
+.live-actions{grid-area:actions;display:flex;flex-direction:column;justify-content:center;gap:.3em}
+/* Dialog: the lobby dialog frame, sized for a list of up to 50 battles. */
+.live-dialog{min-width:min(440px,90vw);max-width:min(720px,92vw);max-height:86vh;overflow:auto;box-sizing:border-box}
+.live-list{list-style:none;margin:0 0 .6em;padding:0;display:flex;flex-direction:column;gap:.5em}
+.live-all .live-row{grid-template-columns:minmax(0,1fr) auto}
+.live-all .live-actions{gap:.4em}
+.live-account{display:flex;align-items:baseline;gap:.6em;padding:.35em .5em;border-bottom:1px solid #bb9b5530;font-size:.85em}
+.live-account strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.live-state{color:#c9c5b4;font-size:.85em;white-space:nowrap}
+.live-subtitle{font-size:.85em;text-transform:uppercase;letter-spacing:.05em;color:var(--gold);margin:.8em 0 .3em}
+.live-link{width:100%;box-sizing:border-box;margin:.4em 0;padding:.5em;background:#101c23;color:#fff;border:1px solid #806b47;border-radius:4px;font:inherit;font-size:.8em;letter-spacing:0;text-transform:none}
+.live-copy-status{font-size:.8em;color:#c4b58f;min-height:1em;margin:.2em 0}

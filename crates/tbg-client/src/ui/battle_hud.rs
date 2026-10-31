@@ -61,6 +61,7 @@ fn relative_max(view: &tbg_core::MatchView) -> [i32; 2] {
 #[cfg(target_arch = "wasm32")]
 mod web {
     use super::*;
+    use crate::i18n::{Lang, Msg};
     use crate::ui::{surrender::Surrender, ActionQueue, PendingBuy, UiAction};
     use crate::{
         camera,
@@ -89,6 +90,7 @@ mod web {
             Res<PendingBuy>,
             Res<Surrender>,
             Res<crate::ui::fortify::PendingFortify>,
+            Res<Lang>,
         ),
         inspected: Res<crate::ui::inspect::Inspected>,
         mut queue: ResMut<ActionQueue>,
@@ -107,6 +109,9 @@ mod web {
             && view.0.is_some()
             && root.get_attribute("data-ready").as_deref() == Some("true");
         root.set_hidden(!desktop.0);
+        if desktop.0 {
+            spectator_chrome(&root, &details.0, &view, *details.4);
+        }
         if let Some(value) = root.get_attribute("data-action") {
             let _ = root.remove_attribute("data-action");
             if desktop.0 {
@@ -118,7 +123,7 @@ mod web {
         if !desktop.0 {
             return;
         }
-        let (info, pending, surrender, fortifying) = details;
+        let (info, pending, surrender, fortifying, lang) = details;
         let Some(v) = &view.0 else {
             return;
         };
@@ -254,9 +259,61 @@ mod web {
         attr(root, "data-fortify", &offers);
     }
 
+    /// P47: a watcher gets the live badge and a Leave button; players see the
+    /// watcher count only (BR-LV05). The CSS hides the seat controls.
+    fn spectator_chrome(
+        root: &web_sys::HtmlElement,
+        info: &MatchInfo,
+        view: &LatestView,
+        lang: Lang,
+    ) {
+        attr(
+            root,
+            "data-spectating",
+            if info.spectating { "true" } else { "false" },
+        );
+        let watchers = view.0.as_ref().map_or(0, |v| v.spectators);
+        let choosing = view.0.as_ref().is_some_and(|v| v.augment_round.is_some());
+        let mut text = if info.spectating {
+            lang.tf(
+                Msg::SpectateLive,
+                &[("count", &watchers as &dyn std::fmt::Display)],
+            )
+        } else {
+            lang.tf(
+                Msg::SpectateWatchingBadge,
+                &[("count", &watchers as &dyn std::fmt::Display)],
+            )
+        };
+        if info.spectating && choosing {
+            text.push_str(" · ");
+            text.push_str(lang.t(Msg::SpectatePlayersChoosing));
+        }
+        let badge = root
+            .query_selector("[data-battle-live]")
+            .ok()
+            .flatten()
+            .and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok());
+        if let Some(badge) = badge {
+            badge.set_text_content(Some(&text));
+            badge.set_hidden(!info.spectating && watchers == 0);
+        }
+        let leave = root
+            .query_selector(".battle-leave")
+            .ok()
+            .flatten()
+            .and_then(|e| e.dyn_into::<web_sys::HtmlElement>().ok());
+        if let Some(leave) = leave {
+            leave.set_hidden(!info.spectating);
+        }
+    }
+
     fn action(value: &str) -> Option<UiAction> {
         if value == "surrender" {
             return Some(UiAction::Surrender);
+        }
+        if value == "leave-watch" {
+            return Some(UiAction::LeaveWatch);
         }
         if value == "deselect" {
             return Some(UiAction::Deselect);

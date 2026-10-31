@@ -4,6 +4,7 @@
 
 use tbg_core::protocol::{AccountError, ErrorCode, RatingResults, ServerMsg, Token};
 
+use super::live::Listing;
 use super::{send, Lobby, SessionState};
 use crate::chan::ConnEvent;
 
@@ -35,7 +36,12 @@ impl Lobby {
         }
         self.leave_waiting(token);
         match self.ranked_queue.pop_front() {
-            Some(other) => self.pair([other, token], tbg_core::protocol::MatchMode::Ranked, false),
+            Some(other) => self.pair(
+                [other, token],
+                tbg_core::protocol::MatchMode::Ranked,
+                false,
+                Listing::Public,
+            ),
             None => {
                 self.ranked_queue.push_back(token);
                 if let Some(s) = self.session(&token) {

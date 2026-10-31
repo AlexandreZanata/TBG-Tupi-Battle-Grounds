@@ -142,6 +142,25 @@ pub(super) fn apply(
                 }
             }
             UiAction::RequestRematch => link.send(ClientMsg::RequestRematch, now),
+            UiAction::Watch(id) => {
+                config::save_watch(id);
+                *queue_info = QueueInfo::default();
+                *link = MatchLink::Net(Box::new(NetLink::new(Mode::Watch(id), now)));
+            }
+            UiAction::LeaveWatch => {
+                link.send(ClientMsg::StopSpectating, now);
+                let parked = if let MatchLink::Net(n) = &mut *link {
+                    n.reuse(Mode::Probe, now)
+                } else {
+                    false
+                };
+                if !parked {
+                    *link = MatchLink::Idle;
+                }
+                config::clear_watch();
+                config::clear_url_param("watch");
+                next.set(GameState::Menu);
+            }
             UiAction::Cancel | UiAction::ToMenu => {
                 link.send(ClientMsg::Cancel, now);
                 let parked = if let MatchLink::Net(n) = &mut *link {

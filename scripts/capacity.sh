@@ -8,6 +8,8 @@
 #   PROFILE=release LIMIT_CPU=200% LIMIT_MEM=1G TBG_WORKERS=2 \
 #     LEVELS="250 500" WINDOW=40 bash scripts/capacity.sh
 #
+# P47: SPECTATORS=N adds N anonymous spectators (tbg-bots --spectators N).
+#
 # LIMIT_CPU is a systemd CPUQuota (100% = one CPU, 200% = two). LIMIT_MEM is
 # a systemd MemoryMax (e.g. 1G). When systemd-run --user --scope is
 # unavailable the script falls back to taskset (whole cores only) and
@@ -111,7 +113,8 @@ for level in $LEVELS; do
 		tail -20 "$WORK/server.log" >&2 || true
 		exit 1
 	fi
-	"$BIN/tbg-bots" --url "ws://$ADDR/ws" --matches "$level" --ramp-ms 5 >"$WORK/bots.log" 2>&1 &
+	"$BIN/tbg-bots" --url "ws://$ADDR/ws" --matches "$level" --ramp-ms 5 \
+		--spectators "${SPECTATORS:-0}" >"$WORK/bots.log" 2>&1 &
 	BOTS=$!
 	for _ in $(seq 1 120); do
 		[ "$(metric matches_running)" -ge $((level * 95 / 100)) ] && break

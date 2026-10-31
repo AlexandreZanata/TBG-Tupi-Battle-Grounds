@@ -6,9 +6,14 @@ use std::net::IpAddr;
 
 use tokio::sync::{mpsc, oneshot};
 
-use tbg_core::protocol::{AccountError, ClientMsg, Profile, RatingResults, ServerMsg, Token};
+use axum::body::Bytes;
+
+use tbg_core::protocol::{
+    AccountError, ClientMsg, LiveId, Profile, RatingResults, ServerMsg, Token,
+};
 use tbg_core::{PlayerIntention, Seat};
 
+use crate::live::LiveProgress;
 use crate::store::AccountId;
 
 // P10: 32 measured against 64 below (kept only with no slow-client drops).
@@ -25,6 +30,8 @@ pub struct ConnHandle {
 
 pub enum ConnEvent {
     Send(ServerMsg),
+    /// P47: a pre-encoded message shared by every spectator of a match.
+    Frame(Bytes),
     EnterMatch {
         seat: Seat,
         tx: mpsc::Sender<MatchCmd>,
@@ -60,6 +67,15 @@ pub enum MatchCmd {
         seat: Seat,
         ms: u16,
     },
+    /// P47 (BR-LV02): a listen-only connection. The match sends it frames and
+    /// never reads intentions from it; no seat is involved.
+    Watch {
+        conn: ConnHandle,
+    },
+    /// P47: forget a spectator's connection (`StopSpectating`, disconnect).
+    Unwatch {
+        conn_id: u64,
+    },
 }
 
 pub enum LobbyCmd {
@@ -79,8 +95,15 @@ pub enum LobbyCmd {
         token: Token,
         conn_id: u64,
     },
+    /// `live` is set only for a public match (P47): its registry entry goes.
     MatchEnded {
         tokens: [Token; 2],
+        live: Option<LiveId>,
+    },
+    /// P47: cosmetic progress of a listed match, sent with `try_send`.
+    LiveProgress {
+        id: LiveId,
+        progress: LiveProgress,
     },
     /// P12: settled ranked ratings per seat, seats A then B.
     RankedDone {

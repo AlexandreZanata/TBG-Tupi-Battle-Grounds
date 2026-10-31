@@ -7,6 +7,7 @@ use tbg_core::EndReason;
 
 use super::account::Account;
 use super::{button, label, screen, UiAction, PANEL};
+use crate::i18n::{Lang, Msg};
 use crate::sync::{MatchInfo, MatchStats, RematchInfo};
 use crate::GameState;
 
@@ -30,8 +31,16 @@ struct RematchButton;
 #[derive(Component)]
 struct HideForChallenge;
 
-fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>) {
+fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, lang: Res<Lang>) {
+    // P47: a watcher reads the result as a bystander, not as a seat.
     let (title, reason) = match info.outcome {
+        Some(o) if info.spectating => {
+            let reason = match o.reason {
+                EndReason::StrongholdDestroyed => "A Stronghold was destroyed",
+                EndReason::Forfeit => "A player surrendered or left the match",
+            };
+            ("MATCH OVER", Some(reason))
+        }
         Some(o) => {
             let title = match o.winner {
                 None => "DRAW",
@@ -87,6 +96,14 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>) {
                     panel.spawn(label(summary, 16.0));
                 } else if !info.opponent.is_empty() {
                     panel.spawn(label(format!("vs {}", info.opponent), 16.0));
+                }
+                if info.spectating {
+                    panel.spawn(button(
+                        lang.t(Msg::SpectateBackToLobby),
+                        UiAction::ToMenu,
+                        220.0,
+                    ));
+                    return;
                 }
                 panel.spawn((
                     label("", 18.0),
@@ -203,6 +220,7 @@ mod tests {
         .init_resource::<MatchStats>()
         .init_resource::<RematchInfo>()
         .init_resource::<Account>()
+        .init_resource::<crate::i18n::Lang>()
         .insert_resource(Time::<()>::default())
         .add_systems(Startup, spawn)
         .add_systems(Update, (count_rating, hide_for_challenge, update_rematch));

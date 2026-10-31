@@ -31,6 +31,9 @@ fn online_sequence_zero_cannot_reset_duplicate_protection() {
         mode: MatchMode::Casual,
         metrics: Arc::new(Metrics::default()),
         replay: None,
+        live: None,
+        spectators: Vec::new(),
+        pending_spectate: Vec::new(),
     };
     let command = |seq| MatchCmd::Intent {
         seat: Seat::A,
@@ -71,6 +74,9 @@ fn a_view_drains_events_and_keeps_the_buffer() {
         mode: MatchMode::Casual,
         metrics: Arc::new(Metrics::default()),
         replay: None,
+        live: None,
+        spectators: Vec::new(),
+        pending_spectate: Vec::new(),
     };
     for _ in 0..40 {
         let events = game.state.step();
@@ -113,6 +119,9 @@ fn a_retransmitted_evolution_never_reuses_the_ruins_discount() {
         mode: MatchMode::Casual,
         metrics: Arc::new(Metrics::default()),
         replay: None,
+        live: None,
+        spectators: Vec::new(),
+        pending_spectate: Vec::new(),
     };
     let intent = |seq, intent| MatchCmd::Intent {
         seat: Seat::A,
@@ -163,7 +172,7 @@ async fn challenge_initial_detached_forfeits() {
     let metrics = Arc::new(Metrics::default());
     let started = Instant::now();
     let _match_tx = spawn(
-        (1, tbg_core::Arena::Forest),
+        (1, tbg_core::Arena::Forest, None),
         players,
         MatchMode::Challenge,
         lobby_tx,

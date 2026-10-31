@@ -953,3 +953,40 @@ confirm that every unmarked value is in the owner's text.
   (D-64).
 - **Names and owner items 1–8:** English names and the values in D-65 and
   `docs/roster/P59-NAMES.md`.
+
+
+## 14. Live battles and spectating (P47, Proposed)
+
+Anyone may watch a match that is being played from the public queues, in
+real time, from the lobby. Watching is listen-only and shows only public
+information. Values are **Proposed** (owner defaults O-1–O-6 in
+`docs/phases/P47-live-spectate-and-presence.md`).
+
+- **BR-LV01** Only live matches paired from the **public queues** (Casual
+  quick match, Ranked) are listed and watchable. Private rooms, challenges,
+  rematches and practice never are.
+- **BR-LV02** Any session (guest or account) may watch while **idle**.
+  Watching is listen-only: a spectator has no seat, and any `Intent` or
+  `Surrender` from it is refused like `NotInMatch`.
+- **BR-LV03** A spectator receives only the public view: no Energy, regen,
+  Shop offers, `last_seq`, Evolution prices, RNG, or a pending Augment
+  pick (BR-S05, BR-AG14). Augment options of an open round are public; each
+  seat's *resolved* flag is public, its choice only after resolution.
+- **BR-LV04** The spectator view has no delay (0 s).
+- **BR-LV05** Both players see the number of spectators, never who.
+- **BR-LV06** Presence: `online` counts sessions with an attached
+  connection, accounts once; `in_battle` counts the seats of running
+  listed matches. Online accounts are listed with name, rating and status
+  (`idle`, `queued`, `playing`, `watching`). Guests are counted, never
+  listed. No ids, IPs, tokens or `LiveId` of a private match leave the
+  server.
+- **BR-LV07** The featured battle is the listed match with the highest
+  mean rating (a guest counts as 1000), ties broken by the longest running
+  and then the lowest `LiveId`. Once featured it stays featured for at least
+  30 s unless it ends.
+- **BR-LV08** A listed match has a random, non-sequential 64-bit `LiveId`
+  drawn from the OS RNG. It is valid only while the match is live and is
+  shareable as `?watch=<16 hex>`.
+- **BR-LV09** Caps: 200 spectators per match and 2 000 in total. A full or
+  unknown match answers `SpectateUnavailable`, never a disconnect. A slow
+  spectator is dropped without ever affecting a seat.

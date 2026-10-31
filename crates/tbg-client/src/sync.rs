@@ -16,6 +16,7 @@ use crate::visuals::{self, UnitLook, VisualAssets};
 mod actions;
 mod events;
 mod messages;
+mod spectate;
 mod timeline;
 use crate::GameState;
 use events::apply_event;
@@ -41,6 +42,8 @@ pub struct MatchInfo {
     pub arena: tbg_core::Arena,
     /// P39: the result screen offers a rematch only for a Challenge match.
     pub challenge: bool,
+    /// P47: a watcher, not a seat: no seat controls, a Leave button instead.
+    pub spectating: bool,
 }
 
 /// P39: the result-screen rematch offer and its request state.

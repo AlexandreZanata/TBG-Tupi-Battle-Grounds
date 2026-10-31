@@ -8,8 +8,11 @@ use crate::arcana::{self, ArcanaPreset};
 use crate::intent::{PlayerIntention, Rejection};
 use crate::state::Outcome;
 use crate::types::{Arena, Seat, StrongholdKind};
-use crate::view::MatchView;
+use crate::view::{MatchView, PublicView};
 
+/// v17: live spectating (P47, BR-LV01–LV09): `Spectate`, `StopSpectating`,
+/// the `Spectate*` server messages, and `MatchView::spectators`. v16 is the
+/// Cargo Crab branch's bump, not on `main`, so the next free number is 17.
 /// v15: arenas (ARENAS-G): `MatchStart::arena` and the seat's effective
 /// Evolution prices in `MatchView::evolve_costs`.
 /// v14: the P43 staged affliction/carrier events and `UnitView.fx` merged
@@ -72,7 +75,15 @@ pub enum ClientMsg {
     // v13 (D-46, BR-SK01): choose the Stronghold kind while idle; the
     // server answers `StrongholdSelected` or `StrongholdRejected`.
     SetStronghold { kind: StrongholdKind },
+    // v17 (P47, BR-LV02): watch a listed live match while idle; the server
+    // answers `SpectateStart` or `SpectateUnavailable`.
+    Spectate { id: LiveId },
+    StopSpectating,
 }
+
+/// v17 (P47, BR-LV06/BR-LV08): the id of a listed live match. Random per
+/// match, valid only while it is live; shared as `?watch=<16 hex>`.
+pub type LiveId = u64;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ErrorCode {
@@ -195,6 +206,43 @@ pub enum ServerMsg {
     StrongholdRejected {
         reason: StrongholdRejection,
     },
+    // v17 (P47, BR-LV02–LV05): a spectator gets the match's identity once,
+    // then one `SpectatorView` per view tick (pre-encoded, shared by all).
+    SpectateStart {
+        id: LiveId,
+        mode: MatchMode,
+        arena: Arena,
+        players: [LivePlayer; 2],
+        arcanas: [ArcanaPreset; 2],
+    },
+    SpectatorView(Box<PublicView>),
+    SpectateUnavailable {
+        reason: SpectateRefusal,
+    },
+    /// Sent when the watched match ends. `None` only if the match stops
+    /// without an outcome (server shutdown); the match is no longer listed.
+    SpectateEnd {
+        outcome: Option<Outcome>,
+    },
+}
+
+/// v17 (P47, BR-LV06): a seat's public identity in a listed match. Guests
+/// have no rating; no account id ever leaves the server.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LivePlayer {
+    pub name: String,
+    pub rating: Option<u16>,
+}
+
+/// v17 (P47, BR-LV09): why a `Spectate` was refused. The checks run in this
+/// order: rate limit, idle, live, public, caps.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum SpectateRefusal {
+    NotFound,
+    NotWatchable,
+    Full,
+    NotIdle,
+    RateLimited,
 }
 
 /// v13 (D-46): why a `SetStronghold` was refused; the previous kind stays.
