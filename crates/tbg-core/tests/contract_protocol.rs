@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 20,
-        "v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
+        PROTOCOL_VERSION, 27,
+        "v27: non-death drill fusion (D-88); v26: exact flame segment (D-87); v25: Crossfire secondary (D-75); v24: UnitView.effects (D-74); v23: special state/cues (D-71); v22: CorrosiveSplash (D-70); v21: UnitView.reduction (D-68); v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
     );
 }
 
@@ -186,4 +186,80 @@ fn v17_spectating_messages_are_appended() {
         tbg_core::protocol::decode_server(&bytes),
         Ok(ServerMsg::SpectatorView(Box::new(view)))
     );
+}
+
+#[test]
+fn v22_corrosive_splash_is_appended_and_round_trips() {
+    // D-70: existing Event tags stay fixed; only tag 23 is appended.
+    let event = tbg_core::Event::CorrosiveSplash {
+        from: 1,
+        primary: 2,
+        to: 3,
+    };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [23, 1, 2, 3]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn v23_independent_ability_cues_are_appended() {
+    // D-71: caster kind is the discriminator; primary/center/tick are public facts.
+    let events = [
+        tbg_core::Event::AbilityStarted {
+            unit: 1,
+            kind: tbg_core::UnitKind::Whisperer,
+            primary: Some(2),
+            center: 0,
+            tick: 7,
+        },
+        tbg_core::Event::AbilityResolved {
+            unit: 1,
+            kind: tbg_core::UnitKind::Whisperer,
+            primary: Some(2),
+            center: 0,
+            tick: 7,
+        },
+    ];
+    for (event, tag) in events.into_iter().zip([24, 25]) {
+        let bytes = encode(&event);
+        assert_eq!(bytes, [tag, 1, 30, 1, 2, 0, 7]);
+        assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+    }
+}
+
+#[test]
+fn v25_crossfire_is_appended() {
+    // D-75: preserve all previous event tags and expose only the chosen secondary.
+    let event = tbg_core::Event::Crossfire { from: 1, to: 3 };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [26, 1, 3]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn v26_profane_flame_is_appended_with_exact_endpoints() {
+    // D-87 appends tag27 and preserves every earlier byte contract.
+    let event = tbg_core::Event::ProfaneFlame {
+        unit: 1,
+        start: 0,
+        end: 0,
+        tick: 7,
+    };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [27, 1, 0, 0, 7]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn v27_drill_fusion_is_appended_without_death() {
+    // D-88: old tags remain unchanged; fusion has its own public cue.
+    let event = tbg_core::Event::DrillFused {
+        first: 1,
+        second: 2,
+        unit: 3,
+        x: 0,
+    };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [28, 1, 2, 3, 0]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
 }

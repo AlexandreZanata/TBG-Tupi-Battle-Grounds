@@ -108,6 +108,7 @@ pub fn rows_csv(rows: &[Row]) -> String {
 /// The per-Energy columns divide by `purchases × cost` and stay empty when
 /// that is 0; summons have no cost, so theirs are always empty.
 pub fn roster_csv(results: &crate::gate::Results, rules: &Ruleset) -> String {
+    // Combat storage also covers staged prototypes; this CSV keeps its active legend.
     let n = tbg_core::ALL_KINDS.len();
     let mut purchases = vec![0u64; n];
     let mut dealt = vec![0u64; n];
@@ -120,16 +121,16 @@ pub fn roster_csv(results: &crate::gate::Results, rules: &Ruleset) -> String {
                 for (k, &count) in game.sides[p].purchases.iter().enumerate() {
                     purchases[k] += u64::from(count);
                 }
-                for (k, &total) in game.stats.dealt[p].iter().enumerate() {
+                for (k, &total) in game.stats.dealt[p].iter().take(n).enumerate() {
                     dealt[k] += total;
                 }
-                for (k, &total) in game.stats.taken[p].iter().enumerate() {
+                for (k, &total) in game.stats.taken[p].iter().take(n).enumerate() {
                     taken[k] += total;
                 }
-                for (k, &total) in game.stats.healed[p].iter().enumerate() {
+                for (k, &total) in game.stats.healed[p].iter().take(n).enumerate() {
                     healed[k] += total;
                 }
-                for (k, &total) in game.stats.status_ticks[p].iter().enumerate() {
+                for (k, &total) in game.stats.status_ticks[p].iter().take(n).enumerate() {
                     status[k] += total;
                 }
             }

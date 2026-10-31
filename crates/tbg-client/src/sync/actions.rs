@@ -31,6 +31,40 @@ pub(super) fn cue(
                 shots::fire(commands, fx.vfx, ShotKind::Blood, a, b, Area::default());
             }
         }
+        Event::AbilityStarted { .. } | Event::AbilityResolved { .. } => {
+            super::special_cues::cue(commands, fx, map, visuals, ev);
+        }
+        Event::ProfaneFlame { start, end, .. } => {
+            crate::vfx::profane_flame(
+                commands,
+                fx.vfx,
+                super::world_x(start, fx.you),
+                super::world_x(end, fx.you),
+            );
+        }
+        Event::DrillFused { x, .. } => {
+            crate::vfx::impacts::land(
+                commands,
+                fx.vfx,
+                Impact::Sparks,
+                Vec3::new(super::world_x(x, fx.you), 0.15, 0.0),
+                Area::default(),
+            );
+        }
+        Event::Crossfire { from, to } => {
+            let target = chest(map, visuals, to);
+            if let Some((mut v, _, mut anim)) =
+                map.0.get(&from).and_then(|e| visuals.get_mut(*e).ok())
+            {
+                v.secondary_shot = target;
+                anim.resolve_special();
+            }
+        }
+        Event::CorrosiveSplash { primary, to, .. } => {
+            if let (Some(a), Some(b)) = (chest(map, visuals, primary), chest(map, visuals, to)) {
+                shots::fire(commands, fx.vfx, ShotKind::Acid, a, b, Area::default());
+            }
+        }
         Event::PlateBroken { unit } => {
             if let Some(at) = chest(map, visuals, unit) {
                 impacts::land(commands, fx.vfx, Impact::Shards, at, Area::default());

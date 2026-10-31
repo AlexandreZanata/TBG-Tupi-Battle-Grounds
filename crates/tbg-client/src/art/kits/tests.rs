@@ -139,6 +139,11 @@ fn the_bombard_points_along_its_shells_flight() {
             Vec3::new(1.6, 0.6, 4.4),
         ] {
             let m = Moment {
+                reduction: 0,
+                counter: 0,
+                armor_flash: 0.0,
+                special: None,
+                special_ready: false,
                 clip: Clip::Idle,
                 t: 0.4,
                 tier,

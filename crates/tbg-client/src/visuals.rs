@@ -19,6 +19,7 @@ mod growth;
 pub mod mount;
 mod names;
 mod shell;
+mod status_badges;
 mod update;
 
 pub use assets::VisualAssets;
@@ -59,6 +60,11 @@ pub struct UnitVisual {
     tiers: [Entity; 2],
     bar: Entity,
     bar_fill: Entity,
+    bleed_badge: Entity,
+    shield_outline: Option<Entity>,
+    mark_badge: Option<Entity>,
+    weaken_badge: Option<Entity>,
+    venom_badge: Option<Entity>,
     pub own: bool,
     pub archetype: Archetype,
     pub faction: Faction,
@@ -70,6 +76,10 @@ pub struct UnitVisual {
     tint: Option<(Handle<StandardMaterial>, f32, bool)>,
     pub dying: bool,
     fx: u16,
+    /// Derived from public caster marks; never feeds a gameplay decision.
+    pub marked: bool,
+    /// One server-selected cosmetic offhand destination, consumed by the real joint emitter.
+    pub secondary_shot: Option<Vec3>,
     dead_for: f32,
     last_x: f32,
     /// Seconds without moving (walk/idle hysteresis).
@@ -200,6 +210,7 @@ pub fn spawn_unit_visual(
     let joints = figure::spawn_joints(
         commands,
         figure_root,
+        look.kind,
         &form.plan,
         form.meshes(look.own),
         &lib.material,
@@ -215,6 +226,7 @@ pub fn spawn_unit_visual(
         .insert(NotShadowCaster)
         .id();
     let (bar, bar_fill, tiers) = spawn_bar(commands, a, height, &look);
+    let bleed_badge = status_badges::spawn_bleed(commands, a, bar);
     let glow = figure::spawn_glow(commands, &joints, &form.glow, &lib.glow_material);
     let mut visual = UnitVisual {
         figure: figure_root,
@@ -224,6 +236,11 @@ pub fn spawn_unit_visual(
         tiers,
         bar,
         bar_fill,
+        bleed_badge,
+        shield_outline: None,
+        mark_badge: None,
+        weaken_badge: None,
+        venom_badge: None,
         own: look.own,
         archetype: d.archetype,
         faction: d.faction,
@@ -237,6 +254,8 @@ pub fn spawn_unit_visual(
         } else {
             0
         },
+        marked: false,
+        secondary_shot: None,
         dead_for: 0.0,
         last_x: pos.x,
         still: 1.0,

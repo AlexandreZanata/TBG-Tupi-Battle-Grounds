@@ -477,3 +477,9 @@ pub fn save_arena(arena: tbg_core::Arena) {
 pub fn bevy_ui() -> bool {
     cfg!(not(target_arch = "wasm32")) || url_param("ui").as_deref() == Some("bevy")
 }
+
+/// Low freezes decorative kit noise while action and authoritative status timing stay live.
+pub fn low_motion() -> bool {
+    static LOW: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *LOW.get_or_init(|| url_param("quality").as_deref() == Some("low"))
+}

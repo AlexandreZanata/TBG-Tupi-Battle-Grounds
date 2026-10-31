@@ -31,6 +31,12 @@ pub fn is_public(event: &Event) -> bool {
         | Event::CrateOpened { .. }
         | Event::Transfer { .. }
         | Event::Boarded { .. }
-        | Event::Dismounted { .. } => true,
+        | Event::Dismounted { .. }
+        | Event::CorrosiveSplash { .. }
+        | Event::AbilityStarted { .. }
+        | Event::AbilityResolved { .. }
+        | Event::Crossfire { .. }
+        | Event::ProfaneFlame { .. }
+        | Event::DrillFused { .. } => true,
     }
 }

@@ -19,6 +19,7 @@ mod events;
 #[cfg(target_os = "linux")]
 mod lobby_battle;
 mod messages;
+mod special_cues;
 mod spectate;
 mod timeline;
 use crate::GameState;
@@ -223,6 +224,12 @@ impl Scene<'_, '_, '_, '_, '_> {
     /// of the way to its position in `to`; return the seat and unit ids.
     fn place(&mut self, from: &MatchView, to: &MatchView, alpha: f32) -> (Seat, Vec<UnitId>) {
         let you = from.you;
+        let marked: std::collections::BTreeSet<_> = from
+            .units
+            .iter()
+            .filter(|u| u.kind == tbg_core::UnitKind::Crowcaller)
+            .filter_map(|u| u.effects.and_then(|e| e.mark).map(|m| m.target))
+            .collect();
         for u in &from.units {
             let anchor = crowd_ecs::LaneAnchor::from_view(u, you);
             // A unit absent from the next view (it died) holds its position.
@@ -236,7 +243,15 @@ impl Scene<'_, '_, '_, '_, '_> {
                 .and_then(|e| self.visuals.get_mut(*e).ok())
             {
                 Some((mut v, _, mut anim)) => {
+                    v.marked = marked.contains(&u.id);
                     anim.carried = u.is_carried();
+                    anim.set_reduction(u.reduction);
+                    anim.counter = u.ability_counter();
+                    anim.observe_special(
+                        u.special.is_some_and(|s| s.ready_in == 0),
+                        u.special.and_then(|s| s.cast).map(|c| c.left),
+                        u.status == 2,
+                    );
                     visuals::update_unit_visual(self.commands, self.assets, self.lib, &mut v, u);
                 }
                 None => {

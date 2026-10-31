@@ -111,7 +111,12 @@ fn build_library(
         ..default()
     });
     let mut forms = HashMap::new();
-    for kind in ALL_KINDS {
+    for kind in tbg_core::ruleset::CANON
+        .units
+        .iter()
+        .map(|def| def.kind)
+        .filter(|kind| ALL_KINDS.contains(kind) || kits::kit(*kind).is_some())
+    {
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
             if let Some(kit) = kits::kit(kind) {

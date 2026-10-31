@@ -764,6 +764,23 @@ define resolution semantics. This section is the single numerical registry.
 A value marked **completion** is not stated by the owner's text. It is
 Proposed for review and listed, with its owner decision, in 13.6.
 
+**Proposed implementation state (D-71, 2026-10-31):** the shared independent
+six-tick special windup and the separate non-stacking venom family are bounded,
+serialized UnitFx slots. Both start empty on legacy units. This extends replay
+state bytes without changing their rules, numbers, Shop pools or expected match
+outcomes. The targeted P59 pilot consolidation measured all three legacy seeds
+with identical winner/reason/tick before re-freezing their hashes (D-71).
+No expected outcome/tick changed to accommodate the layout.
+
+**Proposed counter policy (D-74):** Ward blocks a new hostile mark/Slow/ability-cut
+payload, while raw basic damage still resolves; Oilpress's control immunity blocks
+Slow, not the independent mark/cut. Brew clears new weakening and ability-cut slots
+and every Crowcaller mark on its target without clearing Ravager prey sequences or
+legacy Augment/form cuts. Each active new harmful family (mark, weakening, ability
+cut, bleed, venom) counts once for Brew eligibility, using the existing one-stack
+score unit. New one-slot DoTs still consume strip quota before ordinary poison.
+This extends only the new families; the existing Brew target-ranking policy stays.
+
 ### 13.1 Proposed base forms
 
 Cost in Energy (×600 in state); interval in ticks (20/s); range in
@@ -1017,3 +1034,56 @@ Smuggler attack range is 6.0 tiles, obeying the existing Stronghold range
 cap. Protocol-20 roster slots and preview-only Shop state coexist in the
 deterministic state; hash goldens are recorded for that integrated schema.
 Reserve/Reroll stays disabled online pending its separate owner checkpoint.
+
+**R14 dispel policy — Proposed (D-81):** Arrow of Purification removes the
+victim's temporary Unit shield as immediate damage preprocessing. Ward's hostile
+status immunity does not block this dispel or get consumed by it. It removes no
+plate, Stronghold shield, status, HP or max-HP modifier.
+
+**R16 primary-bonus reading — Proposed (D-83):** the expiry-earned retaliation
+is added once to the next valid primary's raw basic damage, with the registry
+bonus scaled by static caster percentages. The combined primary then uses normal
+basic weakening/conditional modifiers and victim protection as one hit. A fully
+shield-absorbed valid primary still consumes the charge; no second on-hit is run.
+
+**R17 sequence reading — Proposed (D-84):** the fourth-hit bonus joins one
+primary under the R16 primary-bonus reading. Changing target, including changing
+to a Stronghold, clears the sequence; a canceled same-target windup never advances
+or clears it. Idle time alone never expires it. Target death clears it.
+
+**R18 cleanse order — Proposed (D-85):** a Brew's limited DoT strip budget takes
+bleed first, Hornet's separate venom second, then existing poison stacks in their
+previous strongest-first order. Each removed family spends one strip. Ward blocks
+a new venom payload but never cancels an already applied DoT. Venom uses the same
+static-on-application pulse scaling and refresh phase contract as R07 bleed.
+
+**Proposed R19 implementation reading (D-86):** post-Root Slow duration snapshots
+outgoing duration Augments and victim Arcana once when the web applies. Its queued
+transition checks current Ward/control immunity and ordinary Slow priority; it
+cannot replace a refreshed Root. Brew discards the queue with the cleansed Root.
+The B range bonus affects only the independent special, never basic attack range.
+
+**Proposed R20 implementation reading (D-87):** Profane Fire replaces the ordinary
+basic output after common betrayal handling. Static basic damage (including B)
+and current weakening apply once and identically to every eligible unit; it never
+uses target-conditional offensive procs, lifesteal or Essence. Surviving victims
+receive cut even if shields absorbed damage; current Ward prevents a new cut.
+The primary Stronghold takes that one basic amount, with no collateral tower/cut.
+An appended public event carries both exact authoritative segment endpoints.
+
+**Proposed R21 implementation reading (D-88):** three appended summon kinds encode
+rank; existing tier/branch and summoner record the producer's birth profile. They
+never enter Shop pools or accept purchased Evolution. Global arena modifiers still
+apply as to existing summons, with no Arcana, Synergy or general Augment inheritance.
+Fusion preserves active Ward/confusion-immunity deadlines and self-reduction
+strength/duration as well as the catalog's negative families. No haste, bond or
+carrier link survives. Parent replacement emits fusion rather than Death.
+
+**Proposed R21 external Mark reading (D-88):** hostile Crowcaller Marks follow
+the fused replacement with their existing deadlines. Offensive focus sequences
+do not transfer to the new target id. Fusion therefore never strips hostile Mark.
+
+**Proposed R21 control inheritance clarification (D-88):** choose Root over Slow
+and preserve the maximum remaining control duration across both parents. A longer
+Slow on one parent therefore extends the inherited Root; fusion cannot erase that
+parent's remaining control window.

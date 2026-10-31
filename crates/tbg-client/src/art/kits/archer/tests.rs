@@ -24,6 +24,11 @@ const GAP: f32 = 0.03;
 fn posed(clip: Clip, t: f32, tier: u8, branch: u8) -> Pose {
     let mut p = [(Vec3::ZERO, Vec3::ZERO); NODE_COUNT];
     let m = Moment {
+        reduction: 0,
+        counter: 0,
+        armor_flash: 0.0,
+        special: None,
+        special_ready: false,
         clip,
         t,
         tier,

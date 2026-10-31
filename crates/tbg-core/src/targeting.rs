@@ -68,7 +68,7 @@ pub(crate) fn targetable(unit: &Unit) -> bool {
 /// Stronghold when it is strictly nearer or no enemy unit exists. A unit
 /// that never targets Strongholds (Farwatch) takes the nearest enemy unit
 /// in range instead, and holds when there is none.
-fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
+pub(crate) fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
     let enemy = u.seat.other();
     let no_stronghold = state
         .rules()

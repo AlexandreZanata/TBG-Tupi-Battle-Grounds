@@ -41,6 +41,11 @@ pub struct Animator {
     pub growth: f32,
     /// When carried by a carrier (e.g. riding a Cargo Crab), sits mounted in saddle.
     pub carried: bool,
+    pub reduction: u16,
+    pub counter: u8,
+    special: Option<f32>,
+    special_ready: bool,
+    armor_flash: f32,
     base: Clip,
     base_t: f32,
     action: Option<(Clip, f32)>,
@@ -85,6 +90,11 @@ impl Animator {
             gesture: 1e6,
             growth: 0.0,
             carried: false,
+            reduction: 0,
+            counter: 0,
+            special: None,
+            special_ready: false,
+            armor_flash: 0.0,
             base: Clip::Idle,
             base_t: phase * Clip::Idle.duration(),
             action: None,
@@ -100,6 +110,35 @@ impl Animator {
             last_root: None,
             travel: 0.0,
             heading: Vec3::Z,
+        }
+    }
+    /// Snapshots restore persistent armor; only an increase squeezes the plates.
+    pub fn set_reduction(&mut self, bp: u16) {
+        if bp > self.reduction {
+            self.armor_flash = 1.0;
+        }
+        self.reduction = bp;
+    }
+    pub fn attack_variant(&self) -> usize {
+        usize::from(self.variant & 1)
+    }
+    pub fn start_special(&mut self) {
+        self.special = Some(0.0);
+    }
+    pub fn resolve_special(&mut self) {
+        let contact = f32::from(tbg_core::content::WINDUP) / tbg_core::content::TICK_HZ as f32;
+        self.special = Some(self.special.unwrap_or(0.0).max(contact));
+    }
+    pub fn observe_special(&mut self, ready: bool, left: Option<u16>, rooted: bool) {
+        self.special_ready = ready;
+        if rooted {
+            self.special = None;
+            return;
+        }
+        if let Some(left) = left {
+            let elapsed = f32::from(tbg_core::content::WINDUP.saturating_sub(left))
+                / tbg_core::content::TICK_HZ as f32;
+            self.special = Some(self.special.unwrap_or(0.0).max(elapsed));
         }
     }
     pub fn apply_hit_stop(&mut self, duration_s: f32) {
@@ -160,10 +199,19 @@ impl Animator {
                 aim: self.aim,
                 since_attack: self.since_attack,
                 variant: self.variant,
-                clock: self.clock,
+                clock: if crate::config::low_motion() {
+                    0.0
+                } else {
+                    self.clock
+                },
                 walk,
                 gesture: self.gesture,
                 growth: self.growth,
+                reduction: self.reduction,
+                counter: self.counter,
+                armor_flash: self.armor_flash,
+                special: self.special,
+                special_ready: self.special_ready,
             };
             (kit.pose)(&moment, &mut pose);
         }
@@ -197,6 +245,8 @@ impl Animator {
     }
     fn advance(&mut self, dt: f32) -> (Pose, Option<f32>) {
         self.events.clear();
+        self.armor_flash = (self.armor_flash - dt * 4.0).max(0.0);
+        self.special = self.special.map(|t| t + dt).filter(|&t| t < 0.9);
         self.since_attack = (self.since_attack + dt).min(1e6);
         self.clock += dt;
         self.gesture = (self.gesture + dt).min(1e6);
@@ -280,6 +330,8 @@ pub fn animate(
         let frame = root.to_matrix() * figure;
         a.observe(root.translation, &frame, dt);
         let (mut pose, walk) = a.advance(dt);
+        let anatomy = a.kit.and_then(|kit| kit.anatomy);
+        let walk = walk.filter(|_| anatomy.is_none_or(|body| body.planted_legs));
         if a.carried {
             apply_mounted(&mut pose);
             a.feet.reset();
@@ -297,10 +349,15 @@ pub fn animate(
         } else {
             a.feet.reset();
         }
-        for node in rig::nodes().filter(|n| !matches!(n, rig::Node::Secondary(_))) {
+        for node in rig::nodes().filter(|n| {
+            !matches!(n, rig::Node::Secondary(_)) || anatomy.is_some_and(|body| !body.springs)
+        }) {
             if let Ok(mut t) = transforms.get_mut(a.joints[node.index()]) {
                 let (rot, off) = pose[node.index()];
-                t.translation = rig::rest(node, &a.plan) + off;
+                t.translation = anatomy.map_or_else(
+                    || rig::rest(node, &a.plan),
+                    |body| (body.rest)(node, &a.plan),
+                ) + off;
                 t.rotation = ik::quat(rot);
             }
         }
@@ -317,11 +374,11 @@ fn show_loaded(
     a: &Animator,
     visibility: &mut Query<&mut Visibility, Without<Animator>>,
 ) {
-    let Attack::Shot {
-        loaded: Some((node, shown)),
-        ..
-    } = kit.attack
-    else {
+    let loaded = match kit.attack {
+        Attack::Shot { loaded, .. } | Attack::CountedShot { loaded, .. } => loaded,
+        _ => None,
+    };
+    let Some((node, shown)) = loaded else {
         return;
     };
     let (clip, t) = a.clip_time();

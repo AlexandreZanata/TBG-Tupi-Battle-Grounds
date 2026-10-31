@@ -46,7 +46,18 @@ pub enum ShotKind {
     Flask,
     Blood,
     Puppet,
+    Acid,
+    Thought,
+    PlagueBolt,
     Bullet,
+    CrossBullet,
+    SunSpark,
+    CelestialArrow,
+    PurifyingArrow,
+    JudgmentBolt,
+    Sting,
+    VenomSting,
+    WebSpit,
     SlashWave,
     BloodBolt,
 }
@@ -69,6 +80,12 @@ enum Body {
     Petal,
     Seed,
     Flask,
+    Acid,
+    RitualBolt,
+    SunMote,
+    RadiantArrow,
+    Stamp,
+    Stinger,
 }
 
 #[derive(Clone, Copy)]
@@ -106,6 +123,7 @@ enum Mote {
     Violet,
     Petal,
     Blood,
+    Turquoise,
 }
 
 /// Seconds a unit shot flies: Release at 0.18 s plus this lands at the
@@ -263,6 +281,89 @@ fn look(kind: ShotKind) -> Look {
             0.0,
             Impact::Bolt,
         ),
+        WebSpit => (
+            Some((Body::Seed, 0.7)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
+        ),
+        Sting | VenomSting => (
+            Some((Body::Stinger, if kind == VenomSting { 1.15 } else { 1.0 })),
+            0.03,
+            UNIT_FLIGHT,
+            if kind == VenomSting {
+                Trail::Motes(Mote::Spore)
+            } else {
+                Trail::Sparks
+            },
+            0.0,
+            Impact::Sparks,
+        ),
+        JudgmentBolt => (
+            Some((Body::Stamp, 1.0)),
+            0.0,
+            CAST_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
+        ),
+        CelestialArrow | PurifyingArrow => (
+            Some((
+                Body::RadiantArrow,
+                if kind == PurifyingArrow { 1.3 } else { 1.0 },
+            )),
+            0.03,
+            UNIT_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
+        ),
+        SunSpark => (
+            Some((Body::SunMote, 1.0)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Sparks,
+            1.0,
+            Impact::Harmonic,
+        ),
+        Bullet | CrossBullet => (
+            Some((Body::Bolt, 0.24)),
+            0.0,
+            if kind == CrossBullet {
+                0.04
+            } else {
+                UNIT_FLIGHT
+            },
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
+        ),
+        PlagueBolt => (
+            Some((Body::RitualBolt, 1.0)),
+            0.03,
+            UNIT_FLIGHT,
+            Trail::Motes(Mote::Spore),
+            0.0,
+            Impact::Plague,
+        ),
+        Thought => (
+            Some((Body::Orb, 0.8)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Motes(Mote::Turquoise),
+            0.0,
+            Impact::Mind,
+        ),
+        Acid => (
+            Some((Body::Acid, 1.0)),
+            0.06,
+            UNIT_FLIGHT,
+            Trail::Motes(Mote::Turquoise),
+            2.0,
+            Impact::Acid,
+        ),
         Glob => (
             Some((Body::Glob, 1.0)),
             0.12,
@@ -390,6 +491,12 @@ pub struct ShotMeshes {
     purse: Handle<Mesh>,
     arrow: Handle<Mesh>,
     glob: Handle<Mesh>,
+    acid: Handle<Mesh>,
+    ritual_bolt: Handle<Mesh>,
+    sun_mote: Handle<Mesh>,
+    radiant_arrow: Handle<Mesh>,
+    stamp: Handle<Mesh>,
+    stinger: Handle<Mesh>,
     fish: Handle<Mesh>,
     bomb: Handle<Mesh>,
     orb: Handle<Mesh>,
@@ -494,6 +601,40 @@ impl ShotMeshes {
                     Transform::from_xyz(0.0, 0.0, -0.26),
                 ),
             ]),
+            stinger: build(vec![
+                (Cyl(0.012, 0.12), AMBER, along(0.0)),
+                (Cone(0.025, 0.10), CHITIN, along(0.11)),
+            ]),
+            stamp: build(vec![
+                (Box(0.07, 0.07, 0.12), GOLD, Transform::IDENTITY),
+                (Box(0.035, 0.035, 0.13), IVORY, Transform::IDENTITY),
+            ]),
+            radiant_arrow: build(vec![
+                (Cyl(0.007, 0.40), IVORY, along(0.0)),
+                (Cone(0.028, 0.08), GOLD, along(0.23)),
+                (
+                    Box(0.07, 0.012, 0.07),
+                    NAVY,
+                    Transform::from_xyz(0.0, 0.0, -0.17),
+                ),
+            ]),
+            sun_mote: build(vec![
+                (Ball(0.04), IVORY, Transform::IDENTITY),
+                (Ring(0.009, 0.06, 360.0), GOLD, Transform::IDENTITY),
+            ]),
+            ritual_bolt: build(vec![
+                (Cyl(0.012, 0.28), DARK_LEATHER, along(0.0)),
+                (Cone(0.032, 0.09), BONE, along(0.18)),
+                (Ball(0.027), GLOW, Transform::from_xyz(0.0, 0.0, 0.10)),
+            ]),
+            acid: build(vec![
+                (
+                    Ball(0.07),
+                    TURQUOISE,
+                    Transform::from_scale(Vec3::new(0.8, 0.8, 1.5)),
+                ),
+                (Ball(0.035), IVORY, Transform::from_xyz(0.0, 0.025, 0.06)),
+            ]),
             glob: build(vec![
                 (
                     Ball(0.075),
@@ -577,6 +718,12 @@ impl ShotMeshes {
             Body::Purse => &self.purse,
             Body::Arrow => &self.arrow,
             Body::Glob => &self.glob,
+            Body::Acid => &self.acid,
+            Body::RitualBolt => &self.ritual_bolt,
+            Body::SunMote => &self.sun_mote,
+            Body::RadiantArrow => &self.radiant_arrow,
+            Body::Stamp => &self.stamp,
+            Body::Stinger => &self.stinger,
             Body::Fish => &self.fish,
             Body::Bomb => &self.bomb,
             Body::Orb => &self.orb,
@@ -678,6 +825,7 @@ fn trail(commands: &mut Commands, a: &VfxAssets, trail: Trail, at: Vec3, dir: Ve
     match trail {
         Trail::Motes(mote) => {
             let mat = match mote {
+                Mote::Turquoise => &a.turquoise,
                 Mote::Spore => &a.spore,
                 Mote::Water => &a.water,
                 Mote::Violet => &a.violet,
