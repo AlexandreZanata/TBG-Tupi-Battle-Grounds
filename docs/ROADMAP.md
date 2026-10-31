@@ -302,3 +302,26 @@ Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·
 rating-based matchmaking and seasons (D-18) · `Reposition`/bench design ·
 WebGPU build · delta views · additional regions (ARCHITECTURE §12).
+
+## Ranked integrity and statistics program (planning, 2026-10-31)
+
+| Phase | Spec | Deliverable | Status | Review |
+|---|---|---|---|---|
+| P60 | [P60-ranked-integrity.md](phases/P60-ranked-integrity.md) | Shared v7 ranked identity/recovery, shadow signals, optional whole-pair budgets, audit/correction CLI | **Planned only**; D-70/D-72 and BR-RI rules Proposed; no runtime change | implementation review and owner activation pending |
+| P61 | [P61-ranked-stats.md](phases/P61-ranked-stats.md) | v8 side summaries, internal CLI, public aggregate API/desktop lobby page, patch-note workflow | **Planned only**; depends on P60 record foundation, not gate activation; D-71/D-72 | implementation review, privacy/look/publication decisions pending |
+
+Read [RANKED-PROGRAM.md](planning/RANKED-PROGRAM.md) first: audited current
+behavior, requirements, improvements, numbering reservations, execution
+order and owner decisions. P59 and D-60–69 are already used by parallel
+fronts; P60/P61 and D-70–72 must be reconciled again at merge.
+
+Recommended order: P60 foundation/shadow -> P61 collection/internal report
+-> one focused consolidation -> P61 public UI -> optional P60 enforcement
+only with owner approval and shadow evidence. Automated Elo retention is
+explicitly deferred, not part of a hidden stage activation.
+
+No production implementation, full test suite, balance lab, VPS access,
+database mutation or deployment is part of this planning delivery. Use the
+2026-10-31 minimum-validation policy recorded in the program: documentation
+checks now; exact targeted tests once at implementation consolidation;
+heavy/full-suite checks only on a separate explicit owner request.
