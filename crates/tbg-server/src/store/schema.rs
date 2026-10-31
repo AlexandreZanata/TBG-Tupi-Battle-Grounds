@@ -185,6 +185,29 @@ CREATE INDEX account_owner_by_slot ON account_owner(slot);";
 /// Pragmas plus every missing migration in one transaction. Re-running on
 /// a migrated database is a no-op.
 pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
+    // P66: two slots may create the same new file at once. Switching it to
+    // WAL can then lose a lock race that SQLite reports at once, without
+    // consulting the busy handler; the migration is idempotent, so retry
+    // briefly (about 5 s in total) instead of opening without a store.
+    let mut attempt: u64 = 0;
+    loop {
+        match migrate_once(conn) {
+            Err(rusqlite::Error::SqliteFailure(e, _))
+                if attempt < 30
+                    && matches!(
+                        e.code,
+                        rusqlite::ErrorCode::DatabaseBusy | rusqlite::ErrorCode::DatabaseLocked
+                    ) =>
+            {
+                attempt += 1;
+                std::thread::sleep(std::time::Duration::from_millis(20 + 10 * attempt));
+            }
+            other => return other,
+        }
+    }
+}
+
+fn migrate_once(conn: &mut Connection) -> rusqlite::Result<()> {
     // P66: two slot processes may share this file; wait for the other
     // writer instead of failing, and migrate under one write lock so both
     // read the same starting version.

@@ -262,31 +262,24 @@ async fn u13_u15_a_running_match_survives_promotion_and_rollback() {
     assert_eq!(matches, 2, "each finished match recorded exactly once");
 }
 
-#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
-async fn u13_a_signed_in_account_holds_one_live_session_across_slots() {
-    let (db, a, b) = two_ready_slots().await;
-    let (mut on_a, _) = join(&a.url("a"), None).await;
-    send(
-        &mut on_a,
-        &ClientMsg::Register {
-            name: "SlotUser".into(),
-        },
-    )
-    .await;
+/// U13: an account signed up through A cannot sign in through B while A
+/// holds its live session; once that idle session leaves, B may take it.
+async fn one_live_session(a_url: &str, b_url: &str, name: &str) -> Ws {
+    let (mut on_a, _) = join(a_url, None).await;
+    send(&mut on_a, &ClientMsg::Register { name: name.into() }).await;
     let key = match expect(&mut on_a, |m| matches!(m, ServerMsg::Registered { .. })).await {
         Some(ServerMsg::Registered { key, .. }) => key,
         other => panic!("not registered: {other:?}"),
     };
-    // Signing in through B while A holds a live session is refused.
-    let (mut on_b, _) = join(&b.url("b"), None).await;
-    send(&mut on_b, &ClientMsg::Login { key: key.clone() }).await;
-    let refused = expect(&mut on_b, |m| {
+    let (mut on_b, _) = join(b_url, None).await;
+    let answer = |m: &ServerMsg| {
         matches!(
             m,
             ServerMsg::AccountError { .. } | ServerMsg::LoggedIn { .. }
         )
-    })
-    .await;
+    };
+    send(&mut on_b, &ClientMsg::Login { key: key.clone() }).await;
+    let refused = expect(&mut on_b, answer).await;
     assert!(
         matches!(
             refused,
@@ -296,22 +289,47 @@ async fn u13_a_signed_in_account_holds_one_live_session_across_slots() {
         ),
         "{refused:?}"
     );
-    // Once the idle session on A disconnects, B may take the account.
+    // The release of A's hold is asynchronous: retry briefly.
     drop(on_a);
-    tokio::time::sleep(Duration::from_millis(800)).await;
-    send(&mut on_b, &ClientMsg::Login { key }).await;
-    let ok = expect(&mut on_b, |m| {
-        matches!(
-            m,
-            ServerMsg::AccountError { .. } | ServerMsg::LoggedIn { .. }
-        )
-    })
-    .await;
-    assert!(matches!(ok, Some(ServerMsg::LoggedIn { .. })), "{ok:?}");
+    for _ in 0..20 {
+        tokio::time::sleep(Duration::from_millis(400)).await;
+        send(&mut on_b, &ClientMsg::Login { key: key.clone() }).await;
+        if matches!(
+            expect(&mut on_b, answer).await,
+            Some(ServerMsg::LoggedIn { .. })
+        ) {
+            return on_b;
+        }
+    }
+    panic!("B never took the account after A's session left");
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn u13_a_signed_in_account_holds_one_live_session_across_slots() {
+    let (db, a, b) = two_ready_slots().await;
+    // B's live session keeps holding the account while it is read.
+    let _on_b = one_live_session(&a.url("a"), &b.url("b"), "SlotUser").await;
     let owner: String = admin_conn(&db)
         .query_row("SELECT slot FROM account_owner", [], |r| r.get(0))
         .unwrap();
     assert_eq!(owner, "b");
+}
+
+/// Operator probe of two deployed slots (P66 VPS evidence); it registers
+/// one account there. `TBG_P66_PROBE_A=ws://…/ws/slot-a?contract=…
+/// TBG_P66_PROBE_B=ws://…/ws/slot-b?contract=… cargo test -p tbg-server
+/// --test release_slots -- --ignored probe`
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+#[ignore = "needs two deployed release slots"]
+async fn probe_one_live_session_on_deployed_slots() {
+    let (Ok(a), Ok(b)) = (
+        std::env::var("TBG_P66_PROBE_A"),
+        std::env::var("TBG_P66_PROBE_B"),
+    ) else {
+        panic!("set TBG_P66_PROBE_A and TBG_P66_PROBE_B");
+    };
+    let name = format!("Probe{}", std::process::id() % 100_000);
+    one_live_session(&a, &b, &name).await;
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
@@ -440,5 +458,29 @@ async fn u15_ranked_results_from_two_generations_settle_exactly_once() {
             .map(|d| d.count())
             .unwrap_or(0);
         assert_eq!(left, 0, "{name} still holds results");
+    }
+}
+
+/// U16/U17: two slot processes may start against a database that does not
+/// exist yet; both must open it (a lost lock race must not leave a slot
+/// without its store, which would keep it from ever admitting).
+#[test]
+fn two_slots_opening_a_new_database_at_once_both_succeed() {
+    for round in 0..40 {
+        let path = db();
+        let barrier = std::sync::Arc::new(std::sync::Barrier::new(2));
+        let opens: Vec<_> = (0..2)
+            .map(|_| {
+                let (path, barrier) = (path.clone(), barrier.clone());
+                std::thread::spawn(move || {
+                    barrier.wait();
+                    tbg_server::store::Store::open(&path).map(|_| ())
+                })
+            })
+            .collect();
+        for open in opens {
+            let result = open.join().unwrap();
+            assert!(result.is_ok(), "round {round}: {result:?}");
+        }
     }
 }
