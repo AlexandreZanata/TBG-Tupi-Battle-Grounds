@@ -1,5 +1,11 @@
 # P67 — Commerce, account recovery and Zaflas fiscal foundation
 
+> **Execution update, 2026-10-31:** the owner deferred fiscal work and
+> prioritized offline email recovery and opponent mute. See the
+> [execution report](../modules/commerce/OFFLINE-EXECUTION.md) for the actual
+> consolidated base, executable fixtures, validation deferrals and remaining
+> activation gates. The original plan below is not a claim of implementation.
+
 > **Planning and documentary foundation — 2026-10-31.** Owner requested a
 > separate initial module/folder structure, current official Asaas research,
 > complete payment validation/antifraud flows, recovery email/replacement

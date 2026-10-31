@@ -400,3 +400,17 @@ database mutation or deployment is part of this planning delivery. Use the
 2026-10-31 minimum-validation policy recorded in the program: documentation
 checks now; exact targeted tests once at implementation consolidation;
 heavy/full-suite checks only on a separate explicit owner request.
+
+## Offline recovery and opponent mute (P67, 2026-10-31)
+
+[P67](phases/P67-commerce-recovery-foundation.md) now has executable offline
+recovery and presentation fixtures on `codex/p67-commerce-recovery-base`,
+based on the owner's consolidated `55510c5`. The owner deferred fiscal work
+and prioritized recovery/mute. Payment/provider/fiscal implementation is
+pending. Runtime email and opponent-mute activation remain unavailable.
+
+Status: **Draft, validation deferred**. Formatting, schema/example and SQL DDL
+checks passed; the targeted Rust batch did not start because the shared
+nonblocking validation lock returned 75. No full suite ran. See the
+[execution report](modules/commerce/OFFLINE-EXECUTION.md) for C01–C20 scope,
+queued commands, security/integration limits and later owner gates.

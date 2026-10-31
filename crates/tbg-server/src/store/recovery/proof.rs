@@ -11,7 +11,10 @@ pub(crate) fn digest(bytes: &[u8]) -> [u8; 32] {
 pub(crate) fn equal(a: &[u8], b: &[u8]) -> bool {
     let a = digest(a);
     let b = digest(b);
-    a.iter().zip(b).fold(0u8, |diff, (a, b)| diff | (a ^ b)) == 0
+    a.into_iter()
+        .zip(b)
+        .fold(0u8, |diff, (a, b)| diff | (a ^ b))
+        == 0
 }
 
 pub(super) fn random_hex() -> Result<String, Error> {

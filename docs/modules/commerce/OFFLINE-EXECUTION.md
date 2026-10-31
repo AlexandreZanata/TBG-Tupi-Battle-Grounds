@@ -104,3 +104,94 @@ These are isolated presentation fixtures. No actual renderer, audio path,
 settings store or UI consumer exists for opponent emotes/skins on this base.
 Persistence round-trip is a JSON contract test only. There are no new product
 strings, no translation fallback and no enabled but ineffective toggle.
+
+## Step 5: targeted consolidation
+
+Validation level: targeted consolidation of the P67 increment above `55510c5`.
+Implemented commits before consolidation: `307facb`, `e736d62`, `e9f6db7`;
+the consolidation diff also covers base-form presentation and safer secret
+assertions. Rust 1.99.0 is installed. No full suite was requested or run.
+
+### Commands actually run
+
+- `cargo fmt -p tbg-server` and `cargo fmt -p tbg-server -- --check`: pass.
+- `git diff --check`: pass on the consolidated increment.
+- Python with the already installed `jsonschema.Draft202012Validator`:
+  all 4 schema definitions and 4 examples validate; 8 extra/missing-field
+  negative cases reject. No packages installed.
+- Python `sqlite3` parsed the actual `schema.rs` v1–v8 SQL constants and the
+  exact recovery fixture DDL on an in-memory DB: pass, no FK violations.
+  This checks SQL/schema compatibility, not Rust transaction execution.
+- Relative-link inspection: 11 P67 module/phase/prompt documents, zero
+  missing local targets. Source review confirmed no new route, Config flag,
+  live migration, dependency, protocol, match-result handler or network call.
+- The following Rust batch returned **75 before Cargo started**. It acquired
+  no compilation slot. No Rust compile/test result exists. Neither command
+  below ran; there was no retry, wait, extra target directory or lock bypass.
+
+```bash
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 \
+  CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/target \
+  bash -eu -o pipefail -c '
+    cargo test --offline --locked -p tbg-server --lib p67_ -- --test-threads=1
+    cargo test --offline --locked -p tbg-server --test p67_presentation -- --test-threads=1
+  '
+```
+
+The attempt used the existing repository target cache because the new isolated
+worktree had none. The shared host lock was unchanged. The invocation teed
+output to `/tmp/tbg-p67-{recovery,presentation}-tests.log`, but Cargo never
+started, so no test logs were created. These exact two commands remain queued
+for the next authorized consolidation; unrelated tests/builds remain outside
+scope. Formatting and structural checks do not establish Rust compilation.
+
+### Case-by-case acceptance status
+
+- C01–C11: payment, ledger, provider, fiscal fixtures are **deferred by owner
+  scope steering**, not implemented or run. The original contracts remain.
+- C12: fresh key/account binding, pending-email exclusion and normalization
+  fixtures written; **execution deferred: shared validation slot busy**.
+- C13: generic bounded dispatch, expiry, wrong purpose and replay fixtures
+  written; **execution deferred**. HTTP timing equality remains untested.
+- C14: inert preview, method/origin/browser-nonce rejection, parallel confirms
+  and lost-response/restart fixtures written; **execution deferred**.
+- C15: same account/rating/synthetic source ownership, committed epoch and
+  two independently stamped real-lobby queue fixtures written; **execution
+  deferred**. Production community/coexisting-generation integration is absent.
+- C16: established-address replacement, billing-email substitution and
+  suspected-compromise rejection fixtures written; **execution deferred**.
+  There is no staff override or trusted-email-change implementation.
+- C17: mail/audit/authority failures, bounded queue reservation, generic
+  errors and digest-only secret storage fixtures written; **execution
+  deferred**. Real mail secret custody/public HTTP DTO review is a later gate.
+- C18: optional-opponent-only filtering and local JSON round-trip fixture
+  written; **execution deferred**. Real persistence/UI/emotes do not exist.
+- C19: base plus four forms of all 51 canonical kinds, both seats, summon/
+  carried metadata and all five Stronghold kinds in immutable-view fixtures;
+  **execution deferred**. Renderer/animation readability is not verified.
+- C20: cross-channel claims and fiscal/legal approval remain **deferred**.
+  No receipt claim endpoint, fiscal classification or live checkout exists.
+
+### Remaining mandatory gates and delivery status
+
+Draft delivery: Rust fixtures have not compiled or run. Future activation
+must supply trusted runtime key/email/epoch authority; revoke stale sockets,
+resume credentials and delayed login replies on every actual generation;
+preserve frozen match/account ownership; integrate real P65/P66 boundaries;
+review protected confirmation and one-time display; approve O02 email/change/
+retention policy and protected real mail delivery. No current runtime recovery
+claim is made. A newly verified or billing mailbox never bypasses established
+proof, and loss of both key and trusted mailbox has no support shortcut.
+
+Mute activation separately needs a real optional-emote consumer, reviewed
+baselines, persisted browser/native preferences, paired i18n/accessibility and
+desktop visual/audio evidence preserving all combat cues. No client behavior
+or user labels changed in this increment.
+
+Fiscal/payment/accounting/product decisions are still owner gates. The P67
+increment contains no real/Sandbox Asaas client, credentials, checkout,
+webhook registration/ingress, SMTP, invoice, production migration, installation
+or deploy action. `cfg(test)` makes the new recovery implementation unreachable
+from the ordinary server binary; there is no configuration switch to activate
+it. Publishing this Draft PR does not authorize or enable any integration.

@@ -482,7 +482,7 @@ fn p67_c17_mail_and_audit_failures_roll_back_without_secret_leakage() {
         )
         .unwrap();
     assert_eq!(stored.len(), 32);
-    assert_ne!(stored, done.key.as_bytes());
+    assert!(stored != done.key.as_bytes());
     let mut stmt = f
         .recovery
         .conn
@@ -493,7 +493,7 @@ fn p67_c17_mail_and_audit_failures_roll_back_without_secret_leakage() {
         .unwrap()
     {
         let (stored, purpose) = row.unwrap();
-        assert_ne!(stored.to_lowercase(), token);
+        assert!(stored.to_lowercase() != token);
         assert_eq!(purpose, "rotate");
     }
     assert!(matches!(
@@ -553,4 +553,65 @@ fn p67_c17_storage_and_mail_backpressure_are_bounded_and_non_enumerating() {
         Err(Error::Unavailable)
     ));
     assert!(f.login(&f.key));
+}
+
+#[test]
+fn p67_c17_global_admission_capacity_does_not_invalidate_existing_proofs() {
+    let mut f = Fixture::new();
+    f.verify();
+    let token = f.request(NOW + 2);
+    for index in 0..200 {
+        let name = format!("Unknown{index}");
+        let email = format!("unknown{index}@example.invalid");
+        let ip = format!("127.1.0.{}", index + 1).parse().unwrap();
+        assert_eq!(f.recovery.request(&name, &email, ip, NOW + 3), Accepted);
+    }
+    let count: i64 = f
+        .recovery
+        .conn
+        .query_row("SELECT COUNT(*) FROM recovery_dispatch_limits", [], |row| {
+            row.get(0)
+        })
+        .unwrap();
+    assert_eq!(count, 255);
+    assert_eq!(f.recovery.mail.messages.len(), 2);
+    let browser = ConfirmationBrowser::new().unwrap();
+    let done = f
+        .recovery
+        .rotate(&token, &browser, &browser.form(), NOW + 4)
+        .unwrap();
+    assert!(f.login(&done.key));
+}
+
+#[test]
+fn p67_c17_full_capture_rejects_mutation_until_delivery_capacity_returns() {
+    let mut f = Fixture::new();
+    f.verify();
+    let mut token = String::new();
+    let mut now = NOW;
+    for _ in 0..63 {
+        now += 3601;
+        token = f.request(now);
+    }
+    assert_eq!(f.recovery.mail.messages.len(), 64);
+    let browser = ConfirmationBrowser::new().unwrap();
+    assert!(matches!(
+        f.recovery
+            .rotate(&token, &browser, &browser.form(), now + 1),
+        Err(Error::Unavailable)
+    ));
+    assert!(f.login(&f.key));
+    assert_eq!(
+        f.recovery
+            .request("Keeper", EMAIL, "127.0.0.1".parse().unwrap(), now + 1),
+        Accepted
+    );
+    assert_eq!(f.recovery.mail.messages.len(), 64);
+    f.recovery.mail.messages.clear();
+    let done = f
+        .recovery
+        .rotate(&token, &browser, &browser.form(), now + 2)
+        .unwrap();
+    assert_eq!(done.account, f.account);
+    assert!(f.login(&done.key));
 }

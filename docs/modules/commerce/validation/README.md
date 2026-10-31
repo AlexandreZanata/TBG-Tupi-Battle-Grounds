@@ -1,5 +1,11 @@
 # Business/security validation backlog
 
+Execution evidence is recorded separately in the
+[offline report](../OFFLINE-EXECUTION.md#step-5-targeted-consolidation).
+C01–C11/C20 were deferred after owner steering. C12–C19 have executable
+synthetic fixtures, but the Rust batch was deferred on shared-lock exit 75.
+No C01–C20 pass is claimed by this delivery.
+
 > Future offline execution cases, not provider test results. This planning
 > branch validates documentary schemas/examples only and invokes no real API.
 

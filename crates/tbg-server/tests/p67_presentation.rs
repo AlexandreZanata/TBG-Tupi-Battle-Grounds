@@ -105,7 +105,7 @@ fn p67_c19_all_canonical_forms_and_stronghold_kinds_keep_mechanical_identity() {
     for viewer in Seat::BOTH {
         for kind in ALL_KINDS {
             for (tier, branch) in [(0, 0), (1, 0), (1, 1), (2, 0), (2, 1)] {
-                if content::form_of(kind, tier, branch).is_none() {
+                if tier != 0 && content::form_of(kind, tier, branch).is_none() {
                     continue;
                 }
                 forms += 1;
@@ -175,5 +175,5 @@ fn p67_c19_all_canonical_forms_and_stronghold_kinds_keep_mechanical_identity() {
             assert_eq!(stronghold, before);
         }
     }
-    assert!(forms >= ALL_KINDS.len() * 2);
+    assert_eq!(forms, ALL_KINDS.len() * 5 * Seat::BOTH.len());
 }
