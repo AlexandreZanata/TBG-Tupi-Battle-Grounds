@@ -95,8 +95,8 @@ impl BudgetDecision {
 /// when only their own budget is exhausted and their delta is negative.
 pub fn gate(base: [i32; 2], facts: &BudgetFacts, policy: &BudgetPolicy) -> BudgetDecision {
     let mut reason_bits = 0;
-    for seat in 0..2 {
-        let gain = match u32::try_from(base[seat]) {
+    for (seat, &delta) in base.iter().enumerate() {
+        let gain = match u32::try_from(delta) {
             Ok(g) if g > 0 => g,
             _ => continue,
         };
