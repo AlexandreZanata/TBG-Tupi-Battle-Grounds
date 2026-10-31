@@ -19,10 +19,12 @@ pub mod lab;
 #[cfg(feature = "bench-profile")]
 pub mod profiling;
 pub mod protocol;
+pub mod ranked_integrity;
 pub mod rating;
 pub mod replay;
 pub mod rng;
 pub mod ruleset;
+pub mod ruleset_version;
 pub mod shop;
 pub mod sim;
 pub mod state;

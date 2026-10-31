@@ -1,16 +1,20 @@
-//! Ranked results (BR-R03–BR-R06): one transaction reads both ratings,
-//! applies the Elo update with each player's own K, bumps the counters,
-//! and inserts the `ranked_matches` row. Rating changes happen only here.
+//! Ranked results (BR-R03–BR-R06, P60): one transaction reads both
+//! ratings, applies the unchanged Elo update with each player's own K,
+//! bumps the counters and writes the authoritative v7 record. Rating
+//! changes happen only here; a repeated match key never applies twice.
 
 use rusqlite::{params, Connection, OptionalExtension};
 use serde_json::json;
 
-use tbg_core::protocol::{Profile, RatingResults};
+use tbg_core::protocol::Profile;
+use tbg_core::ranked_integrity::{RatingDisposition, RiskState};
 use tbg_core::rating::{apply, delta, Score};
-use tbg_core::ArcanaPreset;
 use tbg_core::{Outcome, Seat};
 
-use super::AccountId;
+use super::{history, AccountId};
+use crate::ranked::policy::RankedPolicy;
+use crate::ranked::signals::{self, Current};
+use crate::ranked::{JournalEntry, RankedFinal, RankedReceipt};
 
 fn score_of(outcome: Option<Outcome>, seat: Seat) -> Score {
     match outcome.and_then(|o| o.winner) {
@@ -148,86 +152,319 @@ pub(super) fn player_stats(
     Ok(Some(stats))
 }
 
-/// Settle a ranked match. Returns per-seat `(before, after, profile)`.
-pub(super) fn ranked_result(
+/// Why a settlement did not commit. `Sql` is retried by the finalizer;
+/// the others are quarantined: retrying cannot change them.
+#[derive(Debug)]
+pub enum SettleError {
+    Sql(rusqlite::Error),
+    /// Same match key, different envelope.
+    ConflictingDuplicate,
+    /// Both seats froze the same account: an internal invariant failure.
+    SameAccount,
+}
+
+impl From<rusqlite::Error> for SettleError {
+    fn from(e: rusqlite::Error) -> SettleError {
+        SettleError::Sql(e)
+    }
+}
+
+/// Integrity policy revision written with every record (P60 §4).
+pub const POLICY_VERSION: i64 = 1;
+/// Maturity (P60 §2): account age and previously Applied results.
+const MATURE_AGE_SECS: i64 = 7 * 24 * 3600;
+const MATURE_GAMES: u32 = 20;
+/// An early voluntary Surrender (S3): before 15 combat seconds.
+const EARLY_SURRENDER_TICKS: u32 = 15 * tbg_core::content::TICK_HZ;
+
+struct Side {
+    rating: u16,
+    games: u32,
+    mature_games: u32,
+    created_unix: i64,
+}
+
+fn read_side(tx: &rusqlite::Transaction, id: AccountId) -> rusqlite::Result<Side> {
+    tx.query_row(
+        "SELECT rating, ranked_games, mature_games,
+                CAST(strftime('%s', created_at) AS INTEGER) FROM accounts WHERE id = ?1",
+        params![id],
+        |row| {
+            Ok(Side {
+                rating: row.get(0)?,
+                games: row.get(1)?,
+                mature_games: row.get(2)?,
+                created_unix: row.get(3)?,
+            })
+        },
+    )
+}
+
+fn read_profile(tx: &rusqlite::Transaction, id: AccountId) -> rusqlite::Result<Profile> {
+    tx.query_row(
+        "SELECT name, rating, ranked_games, wins, losses, draws FROM accounts WHERE id = ?1",
+        params![id],
+        |row| {
+            Ok(Profile {
+                name: row.get(0)?,
+                rating: row.get(1)?,
+                ranked_games: row.get(2)?,
+                wins: row.get(3)?,
+                losses: row.get(4)?,
+                draws: row.get(5)?,
+            })
+        },
+    )
+}
+
+/// Highest committed ranked sequence (0 when none): the finalizer's
+/// startup high-water mark and the login freshness stamp.
+pub(super) fn high_water(conn: &Connection) -> rusqlite::Result<i64> {
+    conn.query_row("SELECT COALESCE(MAX(id), 0) FROM ranked_matches", [], |r| {
+        r.get(0)
+    })
+}
+
+/// Settle one journaled ranked result (BR-R03–R06, P60 §6/§7) in one
+/// transaction: match, integrity and two side rows, both accounts and the
+/// metadata row. A repeated key returns the committed receipt unchanged.
+/// Shadow mode: the existing Elo always applies; nothing is gated yet.
+pub(super) fn settle(
     conn: &mut Connection,
-    a: AccountId,
-    b: AccountId,
-    outcome: Option<Outcome>,
-    duration_s: u64,
-    factions: [[u32; 4]; 2],
-    arcanas: [ArcanaPreset; 2],
-) -> Result<RatingResults, rusqlite::Error> {
+    entry: &JournalEntry,
+    policy: &RankedPolicy,
+) -> Result<RankedReceipt, SettleError> {
+    let r = &entry.result;
+    if r.accounts[0] == r.accounts[1] {
+        return Err(SettleError::SameAccount);
+    }
     let tx = conn.transaction()?;
-    let read = |id: AccountId| -> rusqlite::Result<(u16, u32)> {
-        tx.query_row(
-            "SELECT rating, ranked_games FROM accounts WHERE id = ?1",
-            params![id],
-            |row| Ok((row.get(0)?, row.get(1)?)),
-        )
-    };
-    let ((a_rating, a_games), (b_rating, b_games)) = (read(a)?, read(b)?);
-    let a_delta = delta(a_rating, b_rating, a_games, score_of(outcome, Seat::A));
-    let b_delta = delta(b_rating, a_rating, b_games, score_of(outcome, Seat::B));
-    let (a_after, b_after) = (apply(a_rating, a_delta), apply(b_rating, b_delta));
-    let bump = |id: AccountId, after: u16, score: Score| -> rusqlite::Result<Profile> {
-        let (win, loss, draw) = match score {
+    if let Some(receipt) = existing(&tx, r)? {
+        return Ok(receipt);
+    }
+    let (last_utc, revision): (i64, i64) = tx.query_row(
+        "SELECT last_utc, revision FROM ranked_meta WHERE singleton = 1",
+        [],
+        |row| Ok((row.get(0)?, row.get(1)?)),
+    )?;
+    // Clock rollback never moves the record clock backwards (P60 §2).
+    let t = entry.ended_unix.max(last_utc);
+    let sides = [
+        read_side(&tx, r.accounts[0])?,
+        read_side(&tx, r.accounts[1])?,
+    ];
+    let scores = [
+        score_of(Some(r.outcome), Seat::A),
+        score_of(Some(r.outcome), Seat::B),
+    ];
+    let base: [i32; 2] = std::array::from_fn(|i| {
+        let (own, opp) = (&sides[i], &sides[1 - i]);
+        let d = delta(own.rating, opp.rating, own.games, scores[i]);
+        i32::from(apply(own.rating, d)) - i32::from(own.rating)
+    });
+    let mature = sides
+        .each_ref()
+        .map(|s| t - s.created_unix >= MATURE_AGE_SECS && s.mature_games >= MATURE_GAMES);
+    let early: [bool; 2] = r.seats.each_ref().map(|s| {
+        s.surrender_tick
+            .is_some_and(|tick| tick < EARLY_SURRENDER_TICKS)
+    });
+    // Shadow (P60 §4): one bounded history read before any write; budgets
+    // and signals are recorded as `would_*`, the baseline Elo applies.
+    let history = history::load(&tx, r.accounts, t, policy.window_secs, entry.completion_seq);
+    let eval = signals::evaluate(
+        history.as_deref(),
+        &Current {
+            accounts: r.accounts,
+            base,
+            winner: r.outcome.winner.map(|s| s.index()),
+            mature,
+            low_activity: r.seats.each_ref().map(|s| s.low_activity()),
+            early_surrender: early,
+            reached_running: r.reached_running,
+        },
+        &policy.budget(),
+    );
+    let after: [u16; 2] = std::array::from_fn(|i| apply(sides[i].rating, base[i]));
+    for (i, account) in r.accounts.iter().enumerate() {
+        let (win, loss, draw) = match scores[i] {
             Score::Win => (1, 0, 0),
             Score::Loss => (0, 1, 0),
             Score::Draw => (0, 0, 1),
         };
         tx.execute(
-            "UPDATE accounts SET rating = ?1,
-             peak_rating = max(peak_rating, ?1), ranked_games = ranked_games + 1,
+            "UPDATE accounts SET rating = ?1, peak_rating = max(peak_rating, ?1),
+             ranked_games = ranked_games + 1, mature_games = mature_games + 1,
              wins = wins + ?2, losses = losses + ?3, draws = draws + ?4 WHERE id = ?5",
-            params![after, win, loss, draw, id],
+            params![after[i], win, loss, draw, account],
         )?;
-        tx.query_row(
-            "SELECT name, rating, ranked_games, wins, losses, draws FROM accounts WHERE id = ?1",
-            params![id],
-            |row| {
-                Ok(Profile {
-                    name: row.get(0)?,
-                    rating: row.get(1)?,
-                    ranked_games: row.get(2)?,
-                    wins: row.get(3)?,
-                    losses: row.get(4)?,
-                    draws: row.get(5)?,
-                })
-            },
-        )
-    };
-    let a_profile = bump(a, a_after, score_of(outcome, Seat::A))?;
-    let b_profile = bump(b, b_after, score_of(outcome, Seat::B))?;
-    let winner: Option<i64> = outcome.and_then(|o| o.winner).map(|s| s.index() as i64);
-    let reason = outcome
-        .map(|o| format!("{:?}", o.reason))
-        .unwrap_or_default();
+    }
+    let winner: Option<i64> = r.outcome.winner.map(|s| s.index() as i64);
     tx.execute(
-        "INSERT INTO ranked_matches (ended_at, a_id, b_id, winner, reason, duration_s,
-         a_before, a_after, b_before, b_after, a_factions, b_factions, a_arcanas, b_arcanas)
-         VALUES (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), ?1, ?2, ?3, ?4, ?5,
-         ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
+        "INSERT INTO ranked_matches (id, ended_at, a_id, b_id, winner, reason, duration_s,
+         a_before, a_after, b_before, b_after, a_factions, b_factions, a_arcanas, b_arcanas,
+         match_key, ruleset_version, ruleset_source_hash, ended_unix, end_detail, combat_ticks)
+         VALUES (?1, strftime('%Y-%m-%dT%H:%M:%SZ', ?2, 'unixepoch'), ?3, ?4, ?5, ?6, ?7,
+         ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?2, ?19, ?20)",
         params![
-            a,
-            b,
+            entry.completion_seq,
+            t,
+            r.accounts[0],
+            r.accounts[1],
             winner,
-            reason,
-            duration_s as i64,
-            a_rating,
-            a_after,
-            b_rating,
-            b_after,
-            factions_json(factions[0]),
-            factions_json(factions[1]),
-            // D-40/P40 (BR-AR07): the presets the match applied, fifteen bytes each.
-            arcanas[0].ranks.as_slice(),
-            arcanas[1].ranks.as_slice(),
+            format!("{:?}", r.outcome.reason),
+            (r.wall_ms / 1000) as i64,
+            sides[0].rating,
+            after[0],
+            sides[1].rating,
+            after[1],
+            factions_json(r.factions[0]),
+            factions_json(r.factions[1]),
+            r.arcanas[0].ranks.as_slice(),
+            r.arcanas[1].ranks.as_slice(),
+            r.key.as_slice(),
+            r.ruleset_version,
+            format!("{:016x}", r.ruleset_source_hash),
+            r.end_detail.as_str(),
+            r.combat_ticks,
         ],
     )?;
+    let facts = json!({
+        "v": 1,
+        "base": base,
+        "mature": mature,
+        "reached_running": r.reached_running,
+        "seats": r.seats.each_ref().map(|s| json!({
+            "purchases": s.purchases, "evolutions": s.evolutions,
+            "fortifications": s.fortifications, "augments": s.augments_applied,
+            "reconnects": s.reconnects, "surrender_tick": s.surrender_tick,
+            "final_hp": s.final_hp, "final_max_hp": s.final_max_hp,
+            "damage": null,
+        })),
+        "history": history.as_ref().map_or_else(|| json!("unavailable"), |h| json!(h.len())),
+        "policy": {
+            "pair_cap": policy.pair_cap, "new_source_cap": policy.new_source_cap,
+            "window_secs": policy.window_secs, "signals": signals::SIGNAL_VERSION,
+        },
+        "budget": {
+            "pair": eval.facts.pair_positive, "immature": eval.facts.immature_positive,
+            "opponent_immature": eval.facts.opponent_immature,
+        },
+        "would": { "bits": eval.would_bits, "applied": eval.would_applied },
+        "signals": {
+            "s1": eval.signals.s1_relationship, "s2": eval.signals.s2_transfer,
+            "s3": eval.signals.s3_behavior, "s4": eval.signals.s4_newcomers,
+            "pair_games": eval.signals.pair_games, "donor_games": eval.signals.donor_games,
+        },
+    })
+    .to_string();
+    tx.execute(
+        "INSERT INTO ranked_integrity (match_id, policy_version, mode, risk, disposition,
+         reason_bits, facts_json) VALUES (?1, ?2, 'shadow', ?3, ?4, 0, ?5)",
+        params![
+            entry.completion_seq,
+            POLICY_VERSION,
+            eval.risk.code(),
+            RatingDisposition::Applied.code(),
+            facts,
+        ],
+    )?;
+    for (i, seat) in r.seats.iter().enumerate() {
+        tx.execute(
+            "INSERT INTO ranked_sides (match_id, seat, account_id, opponent_id, ended_unix,
+             opponent_mature, original_delta, effective_delta, low_activity, early_surrender)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?7, ?8, ?9)",
+            params![
+                entry.completion_seq,
+                i as i64,
+                r.accounts[i],
+                r.accounts[1 - i],
+                t,
+                mature[1 - i],
+                base[i],
+                seat.low_activity(),
+                early[i],
+            ],
+        )?;
+    }
+    tx.execute(
+        "UPDATE ranked_meta SET last_utc = ?1, revision = ?2 WHERE singleton = 1",
+        params![t, revision + 1],
+    )?;
+    let profiles = [
+        read_profile(&tx, r.accounts[0])?,
+        read_profile(&tx, r.accounts[1])?,
+    ];
     tx.commit()?;
-    Ok([
-        (a_rating, a_after, a_profile),
-        (b_rating, b_after, b_profile),
-    ])
+    let [pa, pb] = profiles;
+    Ok(RankedReceipt {
+        key: r.key,
+        sequence: entry.completion_seq,
+        accounts: r.accounts,
+        results: [
+            (sides[0].rating, after[0], pa),
+            (sides[1].rating, after[1], pb),
+        ],
+        disposition: RatingDisposition::Applied,
+        risk: eval.risk,
+        reason_bits: 0,
+    })
+}
+
+/// The committed receipt for this key, or a conflict when the stored
+/// envelope differs. `None` when the key is new.
+fn existing(
+    tx: &rusqlite::Transaction,
+    r: &RankedFinal,
+) -> Result<Option<RankedReceipt>, SettleError> {
+    let row = tx
+        .query_row(
+            "SELECT m.id, m.a_id, m.b_id, m.winner, m.end_detail, m.combat_ticks,
+                    m.a_before, m.a_after, m.b_before, m.b_after,
+                    i.risk, i.disposition, i.reason_bits
+             FROM ranked_matches m JOIN ranked_integrity i ON i.match_id = m.id
+             WHERE m.match_key = ?1",
+            params![r.key.as_slice()],
+            |row| {
+                Ok((
+                    row.get::<_, i64>(0)?,
+                    [row.get::<_, AccountId>(1)?, row.get::<_, AccountId>(2)?],
+                    row.get::<_, Option<i64>>(3)?,
+                    row.get::<_, Option<String>>(4)?,
+                    row.get::<_, Option<u32>>(5)?,
+                    [row.get::<_, u16>(6)?, row.get::<_, u16>(7)?],
+                    [row.get::<_, u16>(8)?, row.get::<_, u16>(9)?],
+                    (
+                        row.get::<_, u8>(10)?,
+                        row.get::<_, u8>(11)?,
+                        row.get::<_, u32>(12)?,
+                    ),
+                ))
+            },
+        )
+        .optional()?;
+    let Some((id, accounts, winner, detail, ticks, a, b, (risk, disp, bits))) = row else {
+        return Ok(None);
+    };
+    let same = accounts == r.accounts
+        && winner == r.outcome.winner.map(|s| s.index() as i64)
+        && detail.as_deref() == Some(r.end_detail.as_str())
+        && ticks == Some(r.combat_ticks);
+    if !same {
+        return Err(SettleError::ConflictingDuplicate);
+    }
+    let profiles = [
+        read_profile(tx, accounts[0])?,
+        read_profile(tx, accounts[1])?,
+    ];
+    let [pa, pb] = profiles;
+    Ok(Some(RankedReceipt {
+        key: r.key,
+        sequence: id,
+        accounts,
+        results: [(a[0], a[1], pa), (b[0], b[1], pb)],
+        disposition: RatingDisposition::from_code(disp).unwrap_or(RatingDisposition::Applied),
+        risk: RiskState::from_code(risk).unwrap_or(RiskState::Normal),
+        reason_bits: bits,
+    }))
 }

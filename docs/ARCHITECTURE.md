@@ -639,3 +639,54 @@ rules and values, D-34–D-38 the reasons, each phase file the exact steps.
 - **Budgets.** Step time ≤ +10 % at 100 units a side over P16-B; view
   growth of tens of bytes; per-match memory under 1 KB more; measured in
   every phase and re-checked under load in P16-F8.
+
+## 17. Planned ranked record foundation and statistics (P60/P61)
+
+**Proposed, not implemented.** [The joint program](planning/RANKED-PROGRAM.md)
+audits main `9008f11` and separates actual behavior from historical plans.
+In particular, §16's `matches.ruleset_fp` and expanded strategic seat
+records are not current schema v6. Today's default per-IP socket cap is
+8 in `Config::default`; deployed overrides/proxy configuration were not
+inspected. The checked-in deploy script installs but does not invoke the
+backup script before migration.
+
+- **Authority and identity (D-87/D-89).** Frozen connection-bound accounts
+  plus a separate random match key identify a final result. The single
+  writer commits both ratings and the authoritative record atomically;
+  a small private completion journal supports idempotent restart recovery.
+  Notifications validate account identity and sequence, including takeover.
+  FIFO and combat have no risk query or new pairing wait.
+- **Crate boundaries.** Pure eligibility math over copied facts lives in
+  core alongside rating math, outside simulation state. Server collectors
+  use successful commands and existing events; no extra core tick work,
+  I/O, per-tick scans or event history. Event bookkeeping still has a small
+  measurable server cost. Exact damage attribution is not claimed.
+- **Schema ownership.** P60 v7: match key/version, integrity facts/status,
+  indexed participant history, baseline, revision and append-only decisions.
+  P61 v8: one optional bounded raw JSON summary per match. Stats write only
+  after authoritative commit; failed optional data creates a coverage gap.
+  No legacy backfill or fuzzy join between `matches` and `ranked_matches`.
+- **Corrections.** A local admin CLI previews and applies a revision-leased
+  decision on a stopped server with a backup. It replays frozen deltas for
+  affected accounts; original history remains and later opponents are not
+  rerated. Snapshot rebuild follows the same committed revision.
+- **Statistics (D-88).** A low-priority, read-only SQLite connection inside
+  `store/` streams eligible patch rows into bounded discardable aggregates.
+  API requests only read privacy-filtered snapshots; no request-time SQL.
+  Versions, missing data and independent risk/settlement states define the
+  cohort. Shared/private cache TTL is 60 seconds, every error is no-store;
+  actual external cache rules require verification before publication.
+- **Client.** Seven localized Statistics tabs reuse desktop lobby/Ranking
+  panels with a single active view. HTTP JSON has its own schema; collection,
+  CLI and statistics UI need no postcard change. Only P60 enforcement
+  receipts take a new wire version and corresponding contract update.
+- **Operations.** No new service/dependency. Implement a real pre-migration
+  backup/scratch restore gate. Flags disable public statistics or reward
+  restrictions while retaining records. Do not downgrade to a pre-integrity
+  binary against enforced records or erase newer games during rollback.
+
+GAME-DESIGN §§14/15 own every proposed threshold and budget. Detailed SQL,
+types, rollout gates, failure modes and focused validation commands belong
+to [P60](phases/P60-ranked-integrity.md) and [P61](phases/P61-ranked-stats.md).
+The owner's minimal-validation policy applies; this documentation is not
+evidence that the planned runtime behavior has been verified.

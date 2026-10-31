@@ -100,7 +100,7 @@ impl Lobby {
         let tx = self.self_tx.clone();
         tokio::spawn(async move {
             let name_lower = name.to_ascii_lowercase();
-            let result = store.login(name_lower, sha256(&secret)).await;
+            let result = store.login_fresh(name_lower, sha256(&secret)).await;
             let _ = tx
                 .send(LobbyCmd::LoginDone {
                     token,

@@ -9,7 +9,17 @@ use tbg_server::{Config, Shared};
 const DRAIN_LIMIT: Duration = Duration::from_secs(300);
 
 fn main() {
-    let config = Config::from_env();
+    let mut config = Config::from_env();
+    // P60: an invalid integrity setting is a start-up error, never a default.
+    let settings = tbg_server::ranked::policy::RankedPolicy::from_env()
+        .and_then(|p| tbg_server::ranked::policy::StatsMode::from_env().map(|s| (p, s)));
+    match settings {
+        Ok((policy, stats)) => (config.ranked, config.stats) = (policy, stats),
+        Err(e) => {
+            eprintln!("tbg-server: {e}");
+            std::process::exit(2);
+        }
+    }
     // P10: worker count from `TBG_WORKERS` (0 = all cores); the runtime is
     // built by hand instead of `#[tokio::main]` so the count applies.
     let mut rt = tokio::runtime::Builder::new_multi_thread();

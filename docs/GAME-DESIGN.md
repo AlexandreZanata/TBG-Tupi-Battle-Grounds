@@ -779,3 +779,149 @@ information. Values are **Proposed** (owner defaults O-1–O-6 in
 - **BR-LV09** Caps: 200 spectators per match and 2 000 in total. A full or
   unknown match answers `SpectateUnavailable`, never a disconnect. A slow
   spectator is dropped without ever affecting a seat.
+
+## 14. Ranked integrity — Proposed, inactive (P60, D-87/D-89)
+
+Planning only. These candidate rules do not amend active BR-R03–05 until
+the owner adopts enforcement. Shadow collection preserves existing Elo.
+See [P60](phases/P60-ranked-integrity.md) and the
+[joint execution program](planning/RANKED-PROGRAM.md).
+
+- **BR-RI01 — Proposed.** Ranked remains one open account-only FIFO queue,
+  with no rating bands, bots, selectable opponents or integrity delays.
+- **BR-RI02 — Proposed.** A repeat/source budget either accepts both
+  existing applied Elo deltas intact or applies zero to both; it never
+  clips just a winner, changes K or asserts baseline Elo is zero-sum.
+- **BR-RI03 — Proposed.** Only authoritative public ranked outcomes with
+  two distinct connection-bound accounts enter settlement. A unique match
+  key settles once. Private, Challenge, rematch and Practice never rate.
+- **BR-RI04 — Proposed.** Optional pair budgets count the sum of positive
+  points per beneficiary/opponent in a rolling window. Losses do not refund
+  allowance. Test a prospective full award; equality is allowed, exceeding
+  a limit makes both deltas zero. Matches remain playable and recorded.
+- **BR-RI05 — Proposed.** Optional global source budgets count positive
+  inflow to a beneficiary from all immature opponents. Maturity uses age
+  and previously Applied games. On adoption of enforcement, NoChange games
+  do not advance competitive W/L/D/game counts, placement or maturity;
+  they stay in result history. Shadow preserves current BR-R05 behavior.
+- **BR-RI06 — Proposed.** Normal/Review/Invalidated describes evidence,
+  separately from Applied/NoChange rating. Isolated IP, short duration,
+  Surrender, new account, reconnect or repeated friends never proves fraud.
+  Only the specified relationship-plus-behavior combination flags Review.
+- **BR-RI07 — Proposed.** Review settles normally and is excluded from
+  balance statistics until cleared. Automatic holds are not enabled by
+  this proposal. Ranking contains committed applied rating only.
+- **BR-RI08 — Proposed.** A proposed pre-Running forfeit rule awards zero
+  to both without implying misconduct; ordinary Surrender/disconnect after
+  Running remain outcomes under BR-M03/M06. There is no gameplay timeout.
+- **BR-RI09 — Proposed.** Adjudication is append-only, attributable and
+  reversible. Human invalidation/restore replays frozen original deltas
+  from a cutover baseline for affected accounts; later opponents are not
+  counterfactually rerated. Original results and decisions remain intact.
+- **BR-RI10 — Proposed.** Pre-cutover matches are not retrospectively
+  investigated or invalidated by this feature. New policy versions do not
+  retroactively change old eligibility decisions.
+- **BR-RI11 — Proposed.** No automatic account bans, suspensions,
+  fingerprinting or ML. Do not persist IP derivatives in the MVP. A neutral
+  private receipt and an owner-provided appeal contact accompany enforcement.
+- **BR-RI12 — Proposed.** Rating updates and authoritative result records
+  commit atomically. Durable retry is idempotent; unavailable storage is
+  visible and cannot fabricate an outcome. Optional analytics never rolls
+  back a committed rating. No client-supplied statistics are accepted.
+
+All following new policy/acceptance values are **Proposed**, not measured
+production facts or automatic activation authority:
+
+| Parameter | Proposed value / decision |
+|---|---|
+| Default integrity mode | Shadow; no reward restriction |
+| Pair positive-inflow budget | 120 points per beneficiary/opponent per rolling 7 days (604800 seconds); 40/7 rejected as too restrictive |
+| Immature-opponent global inflow budget | 120 points per beneficiary per the same rolling 7 days |
+| Mature source | Age at least 7 days and at least 20 previously Applied, non-Invalidated results |
+| Review relationship | At least 5 pair games/7 days; at least 80% of donor games against recipient; at least 80% losses and net recipient gain at least 40 |
+| Independent behavior evidence | At least 3 such losses with no purchases/Evolutions/Fortifications/applied Augments, or voluntary Surrender before 15 combat seconds |
+| Supporting newcomer concentration | At least 80% of positive inflow from immature sources and at least 5 source accounts; never sufficient for Review |
+| Context windows | 1 hour and 7 days; active distinct accounts cached every 10 minutes |
+| Shadow evidence before gate consideration | At least 7 days, 50 games, 5 accounts; review all flags and legitimate would-limit matches; owner decision still required |
+| Automated hold | Disabled; 24-hour auto-release is an unelected future candidate requiring a separate design/decision |
+| Optional future IP pseudonym retention | At most 7 days, daily key rotation; no collection in this MVP |
+| Integrity collector / facts / history budget | At most 4 KiB extra per match / 8 KiB facts / 10000 streamed history rows; one additional indexed history query per completion |
+| Integrity end-of-match latency targets | Evaluator CPU p95 <=5 ms; storage/journal p95 <=20 ms; queue-wait p95 delta <=5 ms at equal local load; no new pairing await |
+| Durable final journal | At most 32 KiB per file, 32 MiB total; one retry worker at 1/5/30-second delays, then operator-visible pending state |
+
+## 15. Ranked statistics — Proposed, inactive (P61, D-88/D-89)
+
+- **BR-ST01 — Proposed.** Main statistics include only complete,
+  post-collection public Ranked matches that reached Running, with two
+  distinct authoritative accounts, Normal risk and Applied settlement.
+  A valid zero-delta draw is included; Review, Invalidated, NoChange and
+  missing/overflowed summaries are excluded with recorded coverage gaps.
+- **BR-ST02 — Proposed.** Every record has immutable ruleset revision,
+  source hash and summary schema. Gameplay/content changes, including
+  mid-patch fixes, receive a new revision. Different revisions/hashes never
+  mix; old missing telemetry is not reconstructed by guesswork.
+- **BR-ST03 — Proposed.** A match contributes two sides to feature metrics
+  and one match to duration/end/Arena metrics. A purchased feature is
+  present once per side regardless of copies. Generated units are not
+  purchases. Faction/Archetype/Arcana exposures may overlap.
+- **BR-ST04 — Proposed.** Binary win rate is wins/exposed sides; draws
+  remain in the denominator. Score rate is (wins+half draws)/exposed sides
+  and is named separately. Buyer/nonbuyer deltas are associations, not
+  causal effects. Every displayed rate identifies its denominator.
+- **BR-ST05 — Proposed.** Evolution records historical side-level reach by
+  kind/form and successful transitions per tier, including dead units.
+  Side-level reach and purchased-copy conversion have distinct denominators.
+  Synergy records real activation/time. Augment conditional pick uses
+  completed offered seat-rounds, distinguishing unresolved cancellations.
+- **BR-ST06 — Proposed.** Arena frequency is assigned frequency, not a
+  player choice; compare seat-A score and match metrics, not pooled
+  two-sided win rate. Matchup matrices count each match once.
+- **BR-ST07 — Proposed.** Public small/concentrated cohorts are suppressed,
+  including complements and comparisons that could reveal a small group.
+  No account IDs/names/keys/IPs, raw match IDs, seeds, risk facts or fine
+  timestamps enter the public aggregate API. Safeguards reduce disclosure
+  risk but are not a guarantee of anonymity.
+- **BR-ST08 — Proposed.** Raw summaries are authoritative and aggregates
+  are disposable. Review/clear/invalidate/restore changes eligibility and
+  forces a coherent rebuild; incomplete or stale generations are not
+  silently presented as complete current data.
+- **BR-ST09 — Proposed.** All ratings view is primary; public bands,
+  per-player analysis and arbitrary query cuts are deferred. Desktop
+  Statistics uses the existing lobby and both supported languages.
+- **BR-ST10 — Proposed.** Online data produces investigation candidates;
+  D-33 lab confirmation and owner approval precede balance changes. Patch
+  notes cite online sample/uncertainty and lab evidence, with before/after
+  values and a new revision. No automatic buff or nerf from popularity.
+- **BR-ST11 — Proposed.** Collection uses bounded command/event counters
+  outside the simulation; no per-tick scan/log/SQL or extra simulation-state
+  fields. This has small nonzero bookkeeping cost. Exact damage attribution
+  is deferred, not replaced with false zeros.
+- **BR-ST12 — Proposed.** Optional summary persistence follows authoritative
+  settlement and never changes its outcome/rating. Recovery uses match-key
+  idempotency; irrecoverable missing data is an explicit coverage gap.
+
+All new thresholds/technical budgets below are **Proposed**:
+
+| Parameter | Proposed value / decision |
+|---|---|
+| Ruleset / summary / public API initial revision | 1 each, independent of postcard version |
+| Main internal landmark | 60 combat seconds (1200 ticks); keep both sides of matches reaching it; early finishes reported separately |
+| Public feature row | >=50 exposed sides, >=5 accounts, >=3 pairs; largest account <=40% of exposures; complement qualifies separately |
+| Public match-level row | >=25 matches, same account/pair/concentration protections |
+| Public Augment conditional pick | >=50 offered seat-round opportunities from >=25 matches; same account/pair protections |
+| Public matchup matrix cell | >=100 matches, >=10 accounts, >=5 pairs; largest account <=40% |
+| Interval | Wilson 95%, z=1.96 for binary proportions; descriptive under repeated-player/match clustering |
+| Public rounding / release batch | Approximate n rounded down to tens; percentage/CI to whole percentage points; at least 10 new eligible matches between numeric publications, except immediate withdrawal |
+| Public time and cohort cuts | Fixed ruleset only, All rating; daily-precision update labels |
+| Candidate investigation | >=200 exposed sides, >=10 accounts, >=5 pairs, largest account <=25%; Wilson wholly below 45% or above 55%, or unit presence below 2% / above 60% with >=1000 denominator sides; descriptive, not automatic tuning |
+| Future dynamic bands | Consider at >=300 accounts and >=1000 matches/patch; tertiles of per-account first-match ratings, avoid splitting ties, collapse when data is insufficient |
+| Collector / summary / API/cache sizes | <=8 KiB extra collector, <=16 KiB JSON summary, <=64 KiB immutable ruleset catalog, <=64 KiB uncompressed API response, <=128 rows, <=1 MiB aggregate cache |
+| Summary CPU / optional DB target | Encode p95 <=1 ms; optional insert p95 <=5 ms; one optional row insert per match |
+| Rebuild budget | At most once per 300 s when dirty; one worker; <=100000 matches / <=2 s per snapshot, otherwise unavailable and an operator diagnostic |
+| Public cache | 60-second browser/shared cache; no stale-while-revalidate; current and immediately previous ruleset, All band, seven dimensions |
+| Query/error bounds | <=256 query bytes; Retry-After 5 s for unavailable; existing API 120/IP/min applies; every error no-store |
+| E1->E2 quality gate | >=99% complete summaries over at least 50 eligible completions, privacy and desktop acceptance; sparse public rows remain suppressed |
+
+Full definitions, recovery details, bias qualifications and implementation
+contracts are in [P61](phases/P61-ranked-stats.md). These candidate values
+do not change existing D-33 gate thresholds or active gameplay values.
