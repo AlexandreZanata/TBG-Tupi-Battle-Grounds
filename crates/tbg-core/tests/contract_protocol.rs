@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 18,
-        "v18: UnitView.carrier names a passenger's carrier (D-61); v16 packed the passenger bit (D-56)"
+        PROTOCOL_VERSION, 19,
+        "v19: UnitView.shield is the unit shield still standing (D-63); v18: UnitView.carrier names a passenger's carrier (D-61)"
     );
 }
 

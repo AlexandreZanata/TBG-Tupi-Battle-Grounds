@@ -25,6 +25,7 @@ fn unit(id: u32, x: i32) -> UnitView {
         status: 0,
         fx: 0,
         carrier: None,
+        shield: 0,
     }
 }
 

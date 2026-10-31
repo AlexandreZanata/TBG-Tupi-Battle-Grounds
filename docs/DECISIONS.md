@@ -1194,3 +1194,38 @@ protocol change in this decision.
 **Reopen when** the first unit wave needs an effect that the reconnect view must
 show (then add view fields and bump the protocol), or when owner decision 5
 settles the shield.
+
+## D-63 · W0 unit shield: grant path, expiry and view field (P58 §3, R12/R14) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** Units get a temporary shield through one path,
+`roster_slots::apply_shield`, with one amount and one expiry per unit:
+
+1. A grant stronger than the shield still standing replaces the amount and
+   sets the expiry to `now + ticks`.
+2. An equal grant refreshes the expiry only.
+3. A weaker grant, or a zero grant, is ignored, its expiry included.
+4. The shield ends at its deadline without HP loss; `shield_now` reads zero
+   from that tick on.
+5. `hits::damage` consumes a shield before HP. A shield never heals, never
+   revives and never counts as healing. Strongholds are not units and cannot
+   hold one.
+
+**View.** `UnitView.shield: u16` is the amount still standing at the view's
+tick, zero once it has expired, so a reconnecting client sees it. Protocol 19
+(v18 → v19). The other W0 slots keep waiting for the unit wave that shows them
+(D-62).
+
+**Cargo Crab `shield_bp` stays dormant.** The parsed `shield_bp` is not granted
+by this path. Granting it would change Cargo Crab's rules and goldens, so that
+waits for the balance review. Owner decision 5 is answered: one shared path,
+Cargo Crab unchanged. This settles the open item in D-62.
+
+**Why.** R12 and R14 cannot be built without a grant and a view. The audit
+(P58 §3) already planned these semantics; this records them as decided and
+tests them.
+
+**Consequences.** No unit grants a shield yet, so no match, golden hash or
+balance number moves. A zero shield costs one postcard byte per unit in each view.
+
+**Reopen when** a unit wave needs another stacking rule, or the balance review
+grants the Cargo Crab shield.

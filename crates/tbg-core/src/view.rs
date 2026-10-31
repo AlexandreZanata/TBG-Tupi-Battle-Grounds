@@ -28,6 +28,8 @@ pub struct UnitView {
     /// The carrier this unit rides (D-61), set only while `FX_CARRIED` is:
     /// the client seats the passenger on that unit, not on a lane guess.
     pub carrier: Option<UnitId>,
+    /// The unit shield still standing at the view's tick (D-63); zero once expired.
+    pub shield: u16,
 }
 
 /// `UnitView.fx` bit for a summon by unit, e.g. Smuggler cargo (BR-U08):
@@ -148,7 +150,7 @@ impl MatchState {
                 .units
                 .iter()
                 .filter(|u| u.hp > 0)
-                .map(unit_view)
+                .map(|u| unit_view(u, self.tick))
                 .collect(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],
@@ -160,7 +162,7 @@ impl MatchState {
     }
 }
 
-fn unit_view(u: &crate::state::Unit) -> UnitView {
+fn unit_view(u: &crate::state::Unit, tick: Tick) -> UnitView {
     UnitView {
         id: u.id,
         seat: u.seat,
@@ -187,5 +189,6 @@ fn unit_view(u: &crate::state::Unit) -> UnitView {
             fx
         },
         carrier: u.fx.carrier,
+        shield: crate::roster_slots::shield_now(&u.fx, tick),
     }
 }

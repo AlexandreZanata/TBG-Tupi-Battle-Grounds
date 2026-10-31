@@ -61,6 +61,27 @@ pub(crate) fn self_dr_now(fx: &UnitFx, now: Tick) -> i32 {
     i32::from(timed_now(fx.self_dr_bp, fx.self_dr_until, now))
 }
 
+/// The unit shield (R12, R14; D-63): one amount and one expiry per unit. A
+/// stronger grant replaces the amount, an equal one refreshes the expiry, and a
+/// weaker one is ignored until the held shield runs out. A shield never heals
+/// or revives; `hits::damage` consumes it before HP.
+pub(crate) fn apply_shield(fx: &mut UnitFx, amount: u16, ticks: u16, now: Tick) {
+    if amount == 0 || amount < shield_now(fx, now) {
+        return;
+    }
+    fx.shield = amount;
+    fx.shield_until = now.saturating_add(Tick::from(ticks));
+}
+
+/// The shield still standing at `now`; an expired one counts as none.
+pub(crate) fn shield_now(fx: &UnitFx, now: Tick) -> u16 {
+    if now < fx.shield_until {
+        fx.shield
+    } else {
+        0
+    }
+}
+
 /// The ability heal-cut slot (R03, R20): a second, bounded cut beside the pair
 /// that lives in `Unit`.
 pub(crate) fn apply_ability_cut(fx: &mut UnitFx, bp: u16, ticks: u16, now: Tick) {
@@ -298,6 +319,51 @@ mod tests {
         // 1 000 less 20 % (the sum is 2 500 bp, capped at 2 000 bp), not 25 %.
         hits::damage(&mut s, Target::Unit(1), 1_000, &mut ev);
         assert_eq!(s.units[0].hp, 1_000 - 800);
+    }
+
+    #[test]
+    fn a_stronger_shield_replaces_an_equal_one_refreshes_and_a_weaker_one_is_ignored() {
+        let mut fx = UnitFx::default();
+        apply_shield(&mut fx, 300, 60, 100);
+        assert_eq!((fx.shield, fx.shield_until), (300, 160));
+        // A weaker grant is ignored, its expiry included.
+        apply_shield(&mut fx, 200, 60, 110);
+        assert_eq!((fx.shield, fx.shield_until), (300, 160));
+        // An equal one refreshes the expiry only.
+        apply_shield(&mut fx, 300, 60, 120);
+        assert_eq!((fx.shield, fx.shield_until), (300, 180));
+        // A stronger one takes the amount.
+        apply_shield(&mut fx, 500, 60, 130);
+        assert_eq!((fx.shield, fx.shield_until), (500, 190));
+    }
+
+    #[test]
+    fn an_expired_shield_counts_as_none_and_a_zero_grant_does_nothing() {
+        let mut fx = UnitFx::default();
+        apply_shield(&mut fx, 300, 60, 100);
+        assert_eq!(shield_now(&fx, 159), 300);
+        assert_eq!(shield_now(&fx, 160), 0);
+        apply_shield(&mut fx, 0, 60, 200);
+        assert_eq!(shield_now(&fx, 200), 0);
+        // After expiry any grant starts from zero, even a weaker one.
+        apply_shield(&mut fx, 100, 60, 200);
+        assert_eq!((fx.shield, fx.shield_until), (100, 260));
+    }
+
+    #[test]
+    fn a_shield_takes_damage_before_hp_and_is_gone_at_its_expiry() {
+        let mut s = state_with(vec![unit(1, Seat::B)]);
+        s.tick = 100;
+        apply_shield(&mut s.units[0].fx, 300, 60, 100);
+        let mut ev = Vec::new();
+        // The shield takes 300 of 500; HP takes the other 200.
+        hits::damage(&mut s, Target::Unit(1), 500, &mut ev);
+        assert_eq!((s.units[0].hp, s.units[0].fx.shield), (800, 0));
+        // A shield that expires at tick 210 absorbs nothing at tick 210.
+        apply_shield(&mut s.units[0].fx, 300, 10, 200);
+        s.tick = 210;
+        hits::damage(&mut s, Target::Unit(1), 100, &mut ev);
+        assert_eq!(s.units[0].hp, 700);
     }
 
     #[test]
