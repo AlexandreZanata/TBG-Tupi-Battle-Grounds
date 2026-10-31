@@ -167,7 +167,7 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
             abilities: _,
             forms,
         } = u;
-        // Summons are tuned through their Nester's forms only.
+        // Summons have no purchase cost; their existing combat-stat knobs remain searchable.
         let shop = u.kind.is_conventional() && r.pool.contains(&u.kind);
         for (field, value) in [
             (UnitField::Cost, i64::from(*cost)),

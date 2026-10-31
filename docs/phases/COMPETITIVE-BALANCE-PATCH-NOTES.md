@@ -62,10 +62,11 @@ before delivery. GitHub CI will not be awaited; the owner merges manually.
   the actual profile, Shop availability, fingerprint and pool size.
 - All 46 active costs are registered; two-kind policy keys no longer collide
   beyond the old twelve-digit encoding (1,035 distinct pairs covered).
-- Retained MatchResult is 760 bytes rather than 760 + 3,288 combat bytes:
+- Retained MatchResult is 760 bytes; its removed inline combat payload was
+  3,288 bytes (the replacement optional Box occupies eight bytes):
   combat totals are aggregated losslessly in batches of eight matchups.
   At 1,000 pairs / 1,654 matchups, observations retain about 2.52 GB instead
-  of about 13.39 GB before allocator overhead. This is an estimate from
+  of about 13.36 GB before allocator overhead. This is an estimate from
   measured struct sizes, not an observed peak-RSS measurement.
 - Workers write indexed slots; bootstrap streams are independent and parallel.
   Missing observations now have infinite loss rather than rewarding NaN.
@@ -103,3 +104,107 @@ and tooling (2026-10-31). No candidate is accepted; no numeric balance patch,
 new mechanic, rating change, protocol bump or ruleset revision is shipped.
 The banked-wave / concentration finding needs a separate rule proposal and
 owner decision. Existing required gate thresholds are not weakened.
+
+## Independent confirmation and owner decision
+
+Runtime source: 8614fc6 (later audit test/comment additions do not alter the
+simulation or runner). Command:
+
+`.local/validate.sh .local/balance-final/tbg-balance gate --pairs 128
+--seed-start 1000000 --threads 16 --strict
+--out .local/balance-final/confirmation`
+
+Actual result: **exit 1**, 423,424 complete games / 1,654 policy matchups,
+1,029.85 s, 411 games/s. CANON fingerprint d365d09fafcb66a4, 46 kinds,
+preview Shop disabled, reaction 5 views, neutral Arcanas, Classic Strongholds,
+Forest. All 230 conventional forms were included in the duel matrix at
+20/40/60 Energy, with both seat orders. This is offline evidence, not a
+sample of human ranked matches or a claim about every arena/tower/build.
+
+118 reported rows, 18 failing. Required failures: heavy vs Bot 68.75%
+[60.55–76.56], cheap vs Bot 68.36% [60.55–76.17], 13 oppressive bases,
+Nash support 1 and largest weight 0.999985. Machines-majority score was
+77.10% [75.45–78.74]. Seat A point score 51.17% [48.05–54.30] is within
+the unchanged point band, but this interval is too wide to certify a
+1.5-point bias bound. Median duration 169.55 s; comebacks 23.81%
+[22.42–25.23]. 82.07% of evolved forms lost their Energy-equal base duel.
+Intervals are 95% paired-cluster bootstrap intervals, not human causal data.
+
+Total execution here: 211,712 discovery + 12,800 diagnostic screening +
+423,424 confirmation = **647,936 complete matches**, plus throughput runs
+and deterministic Energy-equal duels. No confirmation seed selected a value.
+The owner explicitly chose: preserve numbers and publish audit/tooling.
+No candidate was accepted. Gameplay, rating, rewards, protocol 29,
+RulesetVersion 2/source hash 3d56156049e626c5 and DB schema 8 are unchanged.
+
+Committed safe aggregates are in docs/media/competitive-audit-20261031.
+The original discovery CSV retains the former 2.5% classification; its
+separate normalized CSV derives only the owner-approved 0.625/46 band from
+identical observations. Confirmation uses the normalized criterion directly.
+
+## Deferred competitive acceptance
+
+`gate --pairs 1000 --seed-start 1000000 --strict`, a frozen numeric
+candidate's multi-reaction confirmation, broader arena/Stronghold/Arcana
+experiments and human playtests remain pending a separate rule-design phase.
+No number is being accepted here, and a larger sample cannot turn the clear
+required failures above into acceptance. Historical P16-C already identified
+banked waves/concentration as a mechanic-level concern; this task does not
+invent a deploy cooldown, cap or scaling cost without the owner's decision.
+The owner's request authorizes this audit execution, not a full workspace
+suite, extensive visual gallery or unrelated performance benchmarks.
+
+## Focused integration checks
+
+Level: targeted consolidation plus the owner's explicitly requested balance
+and throughput runs. All Rust commands use `.local/validate.sh` (shared host
+lock, CARGO_BUILD_JOBS=2); tests use --test-threads=1.
+
+- `cargo clippy --offline -p tbg-client -p tbg-server -p tbg-balance --bins
+  -- -D warnings`: passed (4.78 s on the final interface working-tree diff).
+- `cargo test --offline -p tbg-balance --test audit`: 7 passed, 1.06 s;
+  includes expanded-roster real-simulation HP, 1,035 composition identities,
+  compaction/worker parity, normalized floor, missing-data rejection and
+  rejection of strict acceptance on partial screening.
+- `cargo test --offline -p tbg-balance --test contract
+  c5_every_tunable_number_is_registered -- --exact --test-threads=1`:
+  1 passed, 0.08 s.
+- `cargo test --offline -p tbg-server --lib patch_notes::`: 1 passed.
+- `cargo test --offline -p tbg-server --test patch_notes`: 1 passed; actual
+  HTTP collection/detail, caching, unknown-id 404 and POST 405. Initial
+  sandbox execution could not bind loopback: `Operation not permitted`;
+  rerunning only this check with the required sandbox permission passed.
+- `cargo test --offline -p tbg-server --lib version::`: 1 passed.
+- `cargo test --offline -p tbg-client --bin tbg-client
+  ui::shell::patch_notes::`: 1 passed (snapshot and malformed/duplicate/
+  oversized-field feed rejection).
+- `cargo test --offline -p tbg-client --bin tbg-client
+  ui::glyphs::tests::ui_strings_are_drawable -- --exact --test-threads=1`:
+  1 passed, including the public catalog's player-visible strings.
+- `python3 scripts/test-patch-notes.py`: 5 passed; valid revisions plus
+  missing notes, missing bump, duplicate IDs, unsafe document paths and
+  unaccepted numeric evidence are covered.
+- `python3 scripts/check-patch-notes.py --base origin/main`: passed,
+  two bilingual notes matching current revision 2 / 3d56156049e626c5.
+- `cargo fmt --all -- --check`, `git diff --check` and
+  `node --check crates/tbg-client/assets/lobby/lobby.js`: passed.
+
+No new dependency was introduced. The existing test-only Layout::clear
+unused-code warning remains; production scoped Clippy has no warnings.
+Native/server production, WASM/browser observations, package verification,
+TBG-only deployment and local installation are recorded below when executed.
+Full workspace tests/Clippy, the unrelated layout timing benchmark and broad
+multiplayer/audio/reduced-motion galleries remain deferred by owner policy.
+
+## Native visual review
+
+`cargo build --offline -p tbg-client --bin tbg-client` passed (13.47 s).
+The frozen debug binary captured the patch page at 1440x900 and lobby at
+1280x720 under Xvfb, with Wayland variables removed and isolated data folders.
+Both exited successfully through the opt-in capture plugin. Logs reported
+boot_ready=true, scene_waiting=false, zero pending images/texts and zero failed
+images. The patch hero preserves its 3:1 artwork ratio; the five change panels
+use common dark metal/gold tokens and scroll below the shared header. At the
+minimum desktop size, the news banner and patch CTA remain inside their panel.
+No owner window was closed or preference directory modified by these captures.
+The offline snapshot was observed with the server deliberately unavailable.

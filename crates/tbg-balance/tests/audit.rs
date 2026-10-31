@@ -94,3 +94,34 @@ fn roster_health_retains_the_owner_approved_normalized_floor() {
     assert!((gate::purchase_share_floor(46) * 46.0 - 0.625).abs() < 1e-12);
     assert!(gate::purchase_share_floor(46) < 1.0 / 46.0);
 }
+
+#[test]
+fn partial_screening_cannot_claim_strict_gate_acceptance() {
+    let args = tbg_balance::cli::parse(
+        ["gate", "--scope", "suite", "--strict"]
+            .into_iter()
+            .map(str::to_owned),
+    )
+    .unwrap();
+    let error = tbg_balance::commands::dispatch(&args).unwrap_err();
+    assert!(error.contains("full pool"), "{error}");
+}
+
+#[test]
+fn every_active_kind_receives_experimental_hp_in_the_real_simulation() {
+    // D-33: expanded content must read the supplied Ruleset, not hidden CANON values.
+    for &kind in Ruleset::canon().pool {
+        let mut changed = Ruleset::canon().clone();
+        let expected = changed.def(kind).hp * 3;
+        knobs::set(
+            &mut changed,
+            Knob::Unit(kind as usize, UnitField::Hp),
+            i64::from(expected),
+        );
+        let rules = Box::leak(Box::new(changed));
+        let mut game = tbg_core::MatchState::with_rules(7, rules);
+        let id = game.lab_spawn(tbg_core::Seat::A, kind, 0, 0);
+        let spawned = game.units.iter().find(|unit| unit.id == id).unwrap();
+        assert_eq!(spawned.hp, expected, "{kind:?}: ignored experimental HP");
+    }
+}

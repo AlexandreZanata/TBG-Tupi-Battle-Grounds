@@ -1,0 +1,15 @@
+command: .local/balance-final/tbg-balance gate --pairs 128 --seed-start 1000000 --threads 16 --strict --out .local/balance-final/confirmation
+git_head: 8614fc6
+ruleset_fingerprint: d365d09fafcb66a4
+applied: none
+seeds: 1000000..1000128 (128 pairs)
+scope: Full
+ruleset_base: canon
+shop_preview: false
+pool_kinds: 46
+threads: 16
+reaction_views: 5
+wall_s: 1029.85
+games: 423424
+games_per_s: 411
+game_seconds_per_wall_second: 80909
