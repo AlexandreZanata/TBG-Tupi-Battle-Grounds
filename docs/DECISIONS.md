@@ -835,6 +835,12 @@ without a kit; death hides HP bars for every unit.
 **Reopen when** a Stronghold kind needs its own impact point or muzzle for
 unit reactions, or phone support needs lighter forms.
 
+**Update (P56 Part A, 2026-10-30).** The Archer moved to its art kit. The
+native path (`archer_v2`, `bow.rs`, `arrows.rs`, `archer_aim`) never ran with a
+kit and is removed. The kit's bow is curved and strung, with a drawable string
+and a nocked arrow that shows only until Release, so the projectile replaces it
+and there is never a second arrow. Arrow Rain (B2) fires `ShotKind::ArrowStorm`.
+
 ## D-48 · Roster expansion: fifteen units, staged by ruleset pool — 2026-10-29 (owner decision)
 
 **Decision.** Fifteen new units enter the game in stages through phases
@@ -1119,3 +1125,21 @@ as coded and not tested, the passenger's Root and Old Finn fish are ignored,
 while the crab's own Root and fish apply to the pair.
 **Reopen when** the lab measures the B branch and Faster Legs is not worth
 its Energy, or the owner prefers the sum.
+
+## D-61 · The passenger's view names its carrier (protocol 18) — 2026-10-30 (Proposed, P56 Part A)
+
+**Decision.** `UnitView` gains `carrier: Option<UnitId>`: the unit a passenger
+rides. It is set only while `FX_CARRIED` is (D-56), so the value exists exactly
+when a passenger is aboard. The client seats the passenger on that carrier's
+real position (`visuals/mount.rs`) instead of guessing the nearest Cargo Crab on
+its side. `PROTOCOL_VERSION` becomes 18: 17 is reserved by the live-lobby branch
+(P47), so 18 is the next free number. The `FX_CARRIED` bit stays.
+**Why.** In a large army the lane guess could seat a passenger on the wrong crab.
+The id is the fact the server already has (`UnitFx.carrier`).
+**Consequences.** postcard encodes an `Option` as a tag byte, so every unit in
+every view pays one extra byte; the id itself travels only when carried. Peers on
+16 or 17 are refused by the handshake. A reconnect's full view carries the id, so
+a passenger already aboard appears seated with no boarding arc: the arc starts
+from `Event::Boarded`, never from a view diff. The byte cost is not measured yet.
+**Reopen when** the per-view bytes matter more than one tag byte per unit: then a
+`carried: Vec<(passenger, carrier)>` list per view costs nothing when empty.
