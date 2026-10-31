@@ -108,3 +108,12 @@ applied after the canonical step. The Countdown-to-Running transition receives
 its matching credit only when core regeneration begins; prior Countdown ticks
 and Council selection produce none. A dedicated regression compares every
 credit with actual canonical Energy gains through that transition.
+
+> blocked (capture harness, initial A/B cycle attempt): both seats reported
+> `celebration leaked entities across Menu cycles`, left 396 / right 398.
+> The assertion counted the entire application, including asynchronous native
+> loading/menu entities, so a decrease was incorrectly classified as a leak.
+> The independent capture harness now records every cosmetic root and descendant
+> before exit and asserts each exact entity identity is absent afterwards;
+> camera uniqueness and zero gameplay-metric checks remain. Re-run evidence
+> follows below. The original invariant was not a reliable native leak measure.

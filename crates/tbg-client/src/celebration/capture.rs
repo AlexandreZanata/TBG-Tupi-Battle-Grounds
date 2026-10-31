@@ -9,7 +9,7 @@ struct Probe {
     started: bool,
     cycled: u32,
     frames: u32,
-    baseline: Option<usize>,
+    tracked: Vec<Entity>,
     ready: bool,
 }
 
@@ -112,6 +112,7 @@ fn drive(
     owned: Query<Entity, With<Owned>>,
     all: Query<Entity>,
     cameras: Query<Entity, With<ArenaCamera>>,
+    children: Query<&Children>,
     stats: Res<crate::sync::MatchStats>,
 ) {
     if time.elapsed_secs() < 1. {
@@ -127,15 +128,11 @@ fn drive(
     if *state.get() == GameState::Menu && probe.cycled > 0 {
         assert!(owned.is_empty());
         assert_eq!(cameras.iter().count(), 1);
-        let entities = all.iter().count();
-        if let Some(baseline) = probe.baseline {
-            assert_eq!(
-                entities, baseline,
-                "celebration leaked entities across Menu cycles"
-            );
-        } else {
-            probe.baseline = Some(entities);
-        }
+        assert!(
+            probe.tracked.iter().all(|e| !all.contains(*e)),
+            "a tracked celebration descendant survived exit"
+        );
+        probe.tracked.clear();
         *info = fixture(probe.cycled);
         next.set(GameState::Result);
         probe.frames = 0;
@@ -146,6 +143,17 @@ fn drive(
     }
     probe.frames += 1;
     if probe.cycled < cycles && probe.frames > 4 {
+        let mut pending: Vec<Entity> = owned.iter().collect();
+        while let Some(entity) = pending.pop() {
+            probe.tracked.push(entity);
+            if let Ok(kids) = children.get(entity) {
+                pending.extend(kids.iter());
+            }
+        }
+        assert!(
+            !probe.tracked.is_empty(),
+            "cycle must exercise actual cosmetic figures"
+        );
         probe.cycled += 1;
         next.set(GameState::Menu);
         return;
