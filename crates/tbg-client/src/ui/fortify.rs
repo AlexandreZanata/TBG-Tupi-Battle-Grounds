@@ -4,10 +4,11 @@
 //! sent `Fortify` only blocks a second click until the view covers it.
 
 use bevy::prelude::*;
-use tbg_core::content::{ENERGY_SCALE, FORTIFY_COST, STRONGHOLD_KINDS};
+use tbg_core::content::{ENERGY_SCALE, FORTIFY_COST};
 use tbg_core::{MatchView, Phase, StrongholdView};
 
 use super::{label, UiAction, BUTTON, DISABLED};
+use crate::i18n::{content, Lang, Msg};
 use crate::sync::LatestView;
 use crate::GameState;
 
@@ -84,26 +85,32 @@ pub(crate) fn record(tower: StrongholdView) -> String {
 }
 
 /// `Bastion T1 Fortress`: kind, tier and, once chosen, the branch.
-fn title(tower: StrongholdView) -> String {
-    let def = &STRONGHOLD_KINDS[tower.kind.index()];
+fn title(tower: StrongholdView, lang: Lang) -> String {
+    let name = content::stronghold_name(lang, tower.kind);
     if tower.tier == 0 {
-        format!("{} T0", def.name)
+        lang.tf(Msg::FortifyTitleBase, &[("name", &name)])
     } else {
-        let branch = def.branch_names[usize::from(tower.branch.min(1))];
-        format!("{} T{} {branch}", def.name, tower.tier)
+        let branch = content::stronghold_branch(lang, tower.kind, tower.branch);
+        lang.tf(
+            Msg::FortifyTitleBranch,
+            &[("name", &name), ("tier", &tower.tier), ("branch", &branch)],
+        )
     }
 }
 
 /// Phone button text for `branch`: the next step's name and its price.
-fn choice_text(v: &MatchView, branch: u8) -> String {
+fn choice_text(v: &MatchView, branch: u8, lang: Lang) -> String {
     let tower = own(v);
-    let tier = usize::from(tower.tier.min(1));
-    let step = STRONGHOLD_KINDS[tower.kind.index()].branches[usize::from(branch.min(1))][tier];
+    let tier = tower.tier.min(1);
+    let step = content::stronghold_step(lang, tower.kind, branch, tier + 1);
     let letter = if branch == 0 { "A" } else { "B" };
-    format!(
-        "{letter} {} | {} Energy",
-        step.name,
-        FORTIFY_COST[tier] / ENERGY_SCALE
+    lang.tf(
+        Msg::FortifyChoice,
+        &[
+            ("letter", &letter),
+            ("step", &step),
+            ("cost", &(FORTIFY_COST[usize::from(tier)] / ENERGY_SCALE)),
+        ],
     )
 }
 
@@ -188,18 +195,24 @@ type ChoiceQuery<'w, 's> = Query<
 fn refresh(
     view: Res<LatestView>,
     pending: Res<PendingFortify>,
+    lang: Res<Lang>,
     mut titles: Query<&mut Text, (With<FortifyTitle>, Without<FortifyChoiceText>)>,
     mut choices: ChoiceQuery,
     mut texts: Query<(&FortifyChoiceText, &mut Text), Without<FortifyTitle>>,
 ) {
     let Some(v) = &view.0 else { return };
+    let lang = *lang;
     let enemy = v.strongholds[v.you.other().index()];
     let mine = if own(v).tier >= 2 {
-        format!("{} | Max", title(own(v)))
+        lang.tf(Msg::FortifyMax, &[("title", &title(own(v), lang))])
     } else {
-        title(own(v))
+        title(own(v), lang)
     };
-    let summary = format!("Fortify: {mine}\nFoe: {}", title(enemy));
+    let summary = [
+        lang.tf(Msg::FortifySummaryOwn, &[("title", &mine)]),
+        lang.tf(Msg::FortifySummaryFoe, &[("title", &title(enemy, lang))]),
+    ]
+    .join("\n");
     for mut text in &mut titles {
         if text.0 != summary {
             text.0 = summary.clone();
@@ -221,7 +234,7 @@ fn refresh(
         };
     }
     for (choice, mut text) in &mut texts {
-        let next = choice_text(v, choice.0);
+        let next = choice_text(v, choice.0, lang);
         if text.0 != next {
             text.0 = next;
         }
@@ -266,8 +279,17 @@ mod tests {
     #[test]
     fn phone_text_names_the_next_step_and_its_price() {
         let v = view(1, 0, 0);
-        assert_eq!(choice_text(&v, 0), "A Great Cannon | 4 Energy");
-        assert_eq!(title(own(&v)), "Artillery T1 Heavy Cannon");
+        assert_eq!(choice_text(&v, 0, Lang::En), "A Great Cannon | 4 Energy");
+        assert_eq!(title(own(&v), Lang::En), "Artillery T1 Heavy Cannon");
+        // P64: same tier and price in Portuguese; the record keeps the id.
+        assert_eq!(
+            choice_text(&v, 0, Lang::PtBr),
+            "A Grande Canh\u{E3}o | 4 de Energia"
+        );
+        assert_eq!(
+            title(own(&v), Lang::PtBr),
+            "Artilharia T1 Canh\u{E3}o Pesado"
+        );
         assert_eq!(record(own(&v)), "Artillery|1|0");
         assert_eq!(offer(&v, 1, false).code(), "closed");
     }

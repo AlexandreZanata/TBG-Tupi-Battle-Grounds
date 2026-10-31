@@ -16,7 +16,7 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(Update, update.run_if(in_state(GameState::InMatch)));
 }
 
-fn spawn(mut commands: Commands) {
+fn spawn(mut commands: Commands, lang: Res<crate::i18n::Lang>) {
     commands
         .spawn((
             Node {
@@ -43,7 +43,7 @@ fn spawn(mut commands: Commands) {
                 },
                 BackgroundColor(Color::srgba(0.04, 0.08, 0.12, 0.88)),
                 children![
-                    super::label("STARTING", 20.0),
+                    super::label(lang.t(crate::i18n::Msg::HudStarting), 20.0),
                     (
                         Text::new(""),
                         TextFont {

@@ -2,11 +2,12 @@
 
 use super::UnitVisual;
 use crate::camera::{self, ArenaCamera};
+use crate::i18n::{content, Lang, Msg};
 use bevy::prelude::*;
 use tbg_core::UnitKind;
 
-/// Wide enough for the longest name ("Antidote Brewer") at 12 px.
-const TAG_W: f32 = 124.0;
+/// Wide enough for the longest name ("Mestre das Marionetes") at 12 px.
+const TAG_W: f32 = 156.0;
 
 #[derive(Component)]
 struct Nameplate(Entity, tbg_core::UnitId);
@@ -21,6 +22,7 @@ pub(super) fn plugin(app: &mut App) {
 fn spawn(
     mut commands: Commands,
     units: Query<(Entity, &UnitVisual, &crate::ui::UiAction), Added<UnitVisual>>,
+    lang: Res<Lang>,
 ) {
     for (entity, unit, action) in &units {
         let crate::ui::UiAction::SelectUnit(id) = action else {
@@ -28,7 +30,7 @@ fn spawn(
         };
         commands.spawn((
             Nameplate(entity, *id),
-            Text::new(name(unit.form.0)),
+            Text::new(name(unit.form.0, *lang)),
             TextFont {
                 font_size: FontSize::Px(12.0),
                 ..default()
@@ -92,21 +94,12 @@ fn position(
     }
 }
 
-fn name(kind: UnitKind) -> &'static str {
+/// Nameplate text: the catalog name, except the two kinds whose art shows
+/// a different figure (Sawknight, Ogre Archer) and keeps that name.
+fn name(kind: UnitKind, lang: Lang) -> &'static str {
     match kind {
-        UnitKind::Shieldbearer => "Shieldbearer",
-        UnitKind::Archer => "Archer",
-        UnitKind::BoneBrute => "Bone Brute",
-        UnitKind::Hexer => "Hexer",
-        UnitKind::Sawbot => "Sawknight",
-        UnitKind::SiegeWalker => "Ogre Archer",
-        UnitKind::Bloomkeeper => "Bloomkeeper",
-        UnitKind::Rootcaller => "Rootcaller",
-        UnitKind::Nester => "Nester",
-        UnitKind::Rampart => "Rampart",
-        UnitKind::Beetling => "Beetling",
-        // P43: staged kinds show their content name until named art lands.
-        #[allow(unreachable_patterns)]
-        _ => tbg_core::content::def(kind).name,
+        UnitKind::Sawbot => lang.t(Msg::NameplateSawbot),
+        UnitKind::SiegeWalker => lang.t(Msg::NameplateSiegeWalker),
+        _ => content::unit_name(lang, kind),
     }
 }

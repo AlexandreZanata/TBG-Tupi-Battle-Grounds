@@ -175,7 +175,7 @@ Phase files are written one at a time, starting with P42.
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
 | P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; 29 online tests and browser evidence; **owner physical-phone/PWA check pending** | PR #2 follow-up fixes pending |
 | P40 | [P40-arcana-trees.md](phases/P40-arcana-trees.md) | Fifteen-node trees, twelve points, three supremes, preset migration, editor and lab evidence | implemented; audited on `phase/p40-review` (Quickdraw cap fixed, Deadeye re-measured to +0.25 tile); War and Vitality builds trail the default, browser look check open | — |
-| P41 | [P41-i18n-pt-br.md](phases/P41-i18n-pt-br.md) | Client-only English + Brazilian Portuguese: compiled catalogs, lobby language selector, Latin-1 fonts, zero per-frame cost | steps 0–5 implemented (catalogs, fonts, resolver, lobby; PR #9); steps 6–8 and owner decisions O-P41-1…5 open | — |
+| P41 | [P41-i18n-pt-br.md](phases/P41-i18n-pt-br.md) | Client-only English + Brazilian Portuguese: compiled catalogs, lobby language selector, Latin-1 fonts, zero per-frame cost | steps 0–5 implemented (PR #9); browser-client steps 6–9 and 11 completed by P64 (`codex/p64-i18n-completeness`); step 10 pt-BR values proposed, owner review O-P41-1/2 open | — |
 | P42 | [P42-roster-baseline.md](phases/P42-roster-baseline.md) | Roster canon (D-48), lab combat counters, stall and duration rows, `comp-*` policy, baseline on main | in progress | — |
 | P47 | [P47-live-spectate-and-presence.md](phases/P47-live-spectate-and-presence.md) | Lobby: players online and in battle always visible, Live battles panel (public Casual + Ranked), real-time spectating for guests and accounts | implemented on `phase/p47-live-lobby` (protocol v17, GAME-DESIGN §13, D-59); not merged, not deployed; owner look pending | yes (owner: look) |
 | P54 | [P54-unit-art-kits.md](phases/P54-unit-art-kits.md) | Unit art kits (own model, motion, aim, projectile per character); gait v2 for every unit; Strongholds aim and fire their own projectiles; Siege Walker, Bone Brute, Rootcaller final kits | done; **owner approved (2026-10-30)**; tower defenders and lobby-faithful dress added (D-52) | yes (owner) |
@@ -296,6 +296,19 @@ Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and 
 ## Owner-requested seascape follow-up (2026-10-30)
 
 [Arena seascape](art/ARENA-SEASCAPE.md): implemented and validated on `codex/arena-seascape`, based on main `6ef155b`, then integrated into `codex/ranking-ui` for PR #14 at the owner's request to publish all changes from this chat. Owner approved the displayed design and the 12.9 ms reference p95 limit (+15.2% over its measured baseline). Report includes before/after desktop captures, performance/build measurements, local commits and the separate pre-existing online-test exclusion. Current authorization is GitHub publication only; no main merge or VPS deployment. Broader P30 status is unchanged.
+
+## Owner-requested localization completion (2026-10-31)
+
+| Phase | Spec | Scope | Status | Review |
+|---|---|---|---|---|
+| P64 | [P64-i18n-completeness.md](phases/P64-i18n-completeness.md) | Finish P41: champions/abilities, Augments, Arcanas, Strongholds, HUD/common states, API/ranking profiles, native and standalone views; shared keys and live language refresh | **implemented on main's browser client** (`codex/p64-i18n-completeness`, Draft PR); native shell rows deferred (not on main) | Browser journeys/screenshots and owner translation review pending |
+
+[Audit/file inventory](planning/P64-I18N-AUDIT.md),
+[hashed source manifest](planning/P64-I18N-SOURCE-MANIFEST.csv), and
+[executor prompt with authorized PR-to-main delivery](planning/P64-EXECUTION-PROMPT.md).
+P41's existing partial implementation remains partial until these applicable
+gaps are fixed and validated. Equal catalog key sets do not close its content
+or dynamic-view acceptance. No game code was changed by this plan.
 
 ## Later (not planned yet)
 

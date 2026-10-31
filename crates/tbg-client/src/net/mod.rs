@@ -42,7 +42,14 @@ pub enum NetStatus {
     Connecting,
     Ready,
     Reconnecting { since: f64 },
-    Failed(String),
+    Failed(NetFailure),
+}
+
+/// Why a link gave up; the UI maps it to a catalog message (P64).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NetFailure {
+    ConnectionLost,
+    VersionMismatch,
 }
 
 pub struct NetLink {
