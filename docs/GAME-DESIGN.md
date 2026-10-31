@@ -942,3 +942,14 @@ C1–C4 come from the audit's missing-information note (audit §1) and the
 prose above the tables. C5–C12 are marked in the prose of 13.1–13.5. The
 source texts T01–T12 were not re-read for this register, so a reviewer should
 confirm that every unmarked value is in the owner's text.
+
+### 13.7 Decisions taken by the agent (Proposed)
+
+- **Unit shield (R12, R14):** one amount and one expiry per unit; a stronger
+  grant replaces, an equal one refreshes, a weaker one is ignored. The Cargo
+  Crab `shield_bp` stays dormant (D-63).
+- **Factions (§13.5):** Monsters, Celestials and Insects are appended. Their
+  Synergy is 500 / 1 000 bp, and Insects movement shares the 5 000 bp move cap
+  (D-64).
+- **Names and owner items 1–8:** English names and the values in D-65 and
+  `docs/roster/P59-NAMES.md`.

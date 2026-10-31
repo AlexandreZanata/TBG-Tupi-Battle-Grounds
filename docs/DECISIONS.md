@@ -1268,3 +1268,34 @@ the old goldens exactly before the refreeze).
 
 **Reopen when** the balance review changes a Faction bonus, or a unit wave needs
 a Faction effect the synergy table cannot express.
+
+## D-65 · English names for the roster; owner items answered by the agent (P58 §13) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** Every new unit, summon, ability, Evolution branch and Faction name
+is English, as the owner asked. The names are listed in
+`docs/roster/P59-NAMES.md`, which is the source for code and docs. The source
+names from the owner's texts stay in P58 as references.
+
+Owner items (P58 §7 and the completion register), answered here:
+
+1. **Bastion.** Renamed Bulwark. The Stronghold kind keeps `Bastion` (D-46).
+2. **Crematumba (R20, Pyre Warden).** Catalogue values kept: cost 6, HP 800,
+   movement 23 (C3); 12 damage every 10 ticks over a 2 800 segment (C4).
+3. **Brocatanque (R21, Drillnest).** Catalogue values kept: trigger 4 500,
+   merge radius 200 (C8); drill range 600 and Duobroca speed 73 (C9).
+4. **Monsters Synergy damage.** 500 / 1 000 bp (D-64, C11).
+5. **Shield semantics and Cargo Crab `shield_bp`.** D-63.
+6. **R21 with no merge partner.** The drillnest keeps producing; no merge
+   happens. Implemented with R21 (C10).
+7. **Shop gate floor.** Unchanged here; the balance lab's gate belongs to the
+   balance agent.
+8. **Names.** All English, per this decision.
+
+**Why.** The owner asked for the best choice on each open item, documented, and
+for balance and rules to be left to another agent. Each value above is the
+catalogue's own proposal, so no new number was invented.
+
+**Consequences.** Names and documentation only in this decision. Kinds, content
+rows and kits follow in later commits, and each names this decision.
+
+**Reopen when** the balance agent changes a value above, or the owner renames a unit.
