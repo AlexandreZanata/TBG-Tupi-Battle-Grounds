@@ -168,3 +168,11 @@ preserves all counters and covers every kind. After the fix,
 `cargo test --offline -p tbg-balance --test contract
 c5_every_tunable_number_is_registered -- --exact --test-threads=1` passed
 (the contract took 0.07s). No balance gate or simulation benchmark ran.
+
+Package preflight generated both Linux formats. Inspection found linuxdeploy
+patches the executable's ELF library paths, so the original portable checksum
+must not be presented as the bundled executable's checksum. AppImage packaging
+now deploys libraries first, retains the unbundled digest, calculates the actual
+bundled digest, and invokes the official bundled appimagetool with two squashfs
+processors. The final AppDir executable matched its embedded digest. ShellCheck
+and shell syntax checks passed. Both launchers are named TBG.
