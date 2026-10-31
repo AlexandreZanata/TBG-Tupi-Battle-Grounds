@@ -19,10 +19,12 @@ fn escape(value: &str) -> String {
 }
 
 fn main() {
-    println!("cargo:rerun-if-changed=assets/i18n/en.json");
-    println!("cargo:rerun-if-changed=assets/i18n/pt-BR.json");
     let dir =
         std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("assets/i18n");
+    // Absolute paths keep generated catalogs correct across worktree caches.
+    for name in ["en.json", "pt-BR.json"] {
+        println!("cargo:rerun-if-changed={}", dir.join(name).display());
+    }
     let read = |name: &str| {
         let raw = std::fs::read_to_string(dir.join(name))
             .unwrap_or_else(|e| panic!("i18n: cannot read {name}: {e}"));
