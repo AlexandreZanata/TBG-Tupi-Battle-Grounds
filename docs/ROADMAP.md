@@ -343,6 +343,20 @@ P41's existing partial implementation remains partial until these applicable
 gaps are fixed and validated. Equal catalog key sets do not close its content
 or dynamic-view acceptance. No game code was changed by this plan.
 
+## Owner-requested secure community foundation (2026-10-31)
+
+| Phase | Spec | Scope | Status | Owner gates |
+|---|---|---|---|---|
+| P65 | [P65-community-admin-foundation.md](phases/P65-community-admin-foundation.md) | Initial news/community APIs, private operator console, named staff permissions, moderation/reports/support, audit and recovery before full game pages | **planning only**, `codex/p65-community-admin-foundation-plan` | Private access/bootstrap; quotas/retention; moderation policy; security acceptance before activation |
+
+[Security contracts](planning/P65-SECURITY-CONTRACTS.md) and
+[executor prompt/PR-to-main delivery](planning/P65-EXECUTION-PROMPT.md).
+Sequence: policy and boundaries → persistence/audit → identities/permissions →
+news/community primitives → moderation/support → restricted console and
+operations → targeted security consolidation. New feature flags stay off
+until acceptance. Full in-game news/forum UI, uploads/rich text, public admin
+and game/rating sanctions are later explicit requests, not implicit scope.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·

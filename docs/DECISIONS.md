@@ -1196,3 +1196,39 @@ claim. No gameplay rule, database migration or new protocol is planned.
 an API genuinely lacks necessary semantics, a third language is requested,
 or shared runtime/font limitations prevent faithful presentation. Document
 the concrete boundary change instead of replacing the existing i18n stack.
+
+## D-84 · Private administration and text-only community foundation — 2026-10-31 (Proposed)
+
+**Decision.** P65 establishes versioned news/community/support services and a
+small restricted operator console before a full in-game forum/news UI.
+Separate named operators and granular capabilities from game accounts.
+Default admin exposure is private listener/origin over reviewed TLS/tunnel,
+with local CLI bootstrap/grant/revoke and independent opaque HTTP sessions.
+Public authoring remains off pending acceptance. No public staff endpoint
+or shared superuser key is introduced by default.
+
+**Boundary.** Existing game keys may authenticate a player HTTP session through
+a narrow verifier without lobby takeover. Admin credentials never reuse them.
+Enforce CSRF/origin/object policy per request, plain-text rendering, bounded
+inputs/queues and atomic privileged writes plus audit. Keep community SQLite
+and its worker separate from the match-result writer, recognizing that this
+does not isolate a compromised host/process. Private case projections and
+retention/redaction/restore have explicit contracts.
+
+**Scope.** News revisions/publication, premoderated community primitives,
+reports/reversible community restrictions and private support resolution.
+No arbitrary SQL/shell, account-key recovery, game bans or Elo edits through
+generic admin tools. Paid services, public admin/MFA integration, uploads,
+rich text, remote integrations and full in-game pages are later decisions.
+
+**Why.** Read-only public game APIs and WS accounts do not provide staff
+authorization or object privacy. Building pages first would expose stored
+content and privileged actions before these contracts exist. Private ingress,
+specific capabilities, minimal text and focused denial/recovery evidence are
+appropriate initial controls without constructing an enterprise platform.
+
+**Status/reopen.** Planning only; O01–O03, security cases and activation remain
+pending. Reopen for public admin, media/rich text, new recovery powers, native
+authenticated UI, account model changes or measured interference with matches.
+See [P65](phases/P65-community-admin-foundation.md) and primary references in
+its security companion. No guarantee of a vulnerability-free future system.

@@ -717,3 +717,24 @@ formatting occurs only at display boundaries. Content coverage, reference,
 placeholder and glyph guards complement parity; technical/name exceptions
 are reviewed explicitly. No new translation service, gameplay rule or
 database migration is needed. See D-83 and the source audit for limitations.
+
+## 21. News/community/admin foundation (P65, Proposed)
+
+[P65](phases/P65-community-admin-foundation.md) adds server modules for
+revisioned news, premoderated text community, private reports/support and
+restricted operator administration. A separate bounded SQLite worker/database
+keeps community jobs out of the match-result writer. Authentication verifies
+existing player credentials without changing WS seats; named operator
+credentials/grants and HTTP sessions are independent.
+
+Public/player APIs and private admin listener/origin have explicit policy,
+safe DTO projections, CSRF/origin/session checks and bounded requests. The
+operator console cannot mutate simulation, rating or credentials through
+generic commands. Privileged state/audit commit atomically; plain text,
+feature gates, retention, revocation and isolated backup/restore reduce the
+initial surface. No core simulation or Bevy dependency enters the server.
+
+Future game pages consume these contracts after reviewed activation, using
+P64 localization and safe rendering. Public admin, media, rich text and native
+authenticated authoring require separate review. See D-84 and the security
+matrix; this architecture is planned, not implemented or security-certified.

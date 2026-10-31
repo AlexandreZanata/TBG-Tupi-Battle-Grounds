@@ -915,3 +915,48 @@ under the paging proposal, at most 64 visible figures and one camera
 override; p95 frame-time within +10% of a comparable same-arena/cast scene
 on the agreed desktop machine. All measurements and owner visual review
 are deferred until implementation. No phone/touch work is included.
+
+## 18. News, community and administration foundation (P65, Proposed)
+
+**Proposed — planning only, 2026-10-31.** See
+[P65](phases/P65-community-admin-foundation.md) and its
+[security contracts](planning/P65-SECURITY-CONTRACTS.md). This creates the
+initial backend and restricted console before full in-game news/forum pages;
+publication of this document does not activate community writes or staff.
+
+- **BR-NC01:** anonymous players read only published news and approved
+  public community text. Drafts/pending/hidden revisions and private cases
+  are never public through lists, detail, metadata or caches.
+- **BR-NC02:** account-authenticated authors submit plain-text topics/replies
+  for premoderation; edits create a pending revision. No rich text, upload,
+  remote content fetch, private messaging or automated translation initially.
+- **BR-NC03:** news uses revisioned EN/pt-BR authoring, explicit publication/
+  withdrawal and clear locale fallback. UI/codes use shared P64 localization;
+  content IDs and game account identities stay language-independent.
+- **BR-NC04:** separate named operators receive explicit Editor/Publisher/
+  Moderator/Support capabilities. Privileges are server-enforced per request
+  and object; game account names, seats and client flags confer none.
+  Initial administration is private, with independent app authentication.
+- **BR-NC05:** reports and support tickets are private. Staff assignment,
+  internal notes, resolution/reopen and reasoned actions are audited.
+  Moderation restrictions are reversible, expiring and scoped to community
+  posting. No game ban, Elo repair, match manipulation or key recovery is
+  implied; competitive disputes use a separately reviewed P60 workflow.
+- **BR-NC06:** initial new-feature flags are off. Retention, staffing,
+  moderation reasons, exposure and quotas require owner decisions O01–O03.
+  Failed auth/permissions/audit/storage deny writes while preserving the
+  game's authority and available published reads. No mandatory collection
+  of account secrets in reports or support conversations.
+
+**Proposed starting configuration:** 64 KiB request cap; title 160 scalars/
+640 UTF-8 bytes, news 16 KiB, post 8 KiB, ticket/report reply 4 KiB; page
+default 20/max 50. Community write budget 5/min/account and 20/hour/IP;
+reports/tickets 5/hour/account; login 5/min/IP and 20/hour/principal.
+Player HTTP session idle/absolute 30 minutes/24 hours, operator 15 minutes/
+8 hours, sensitive-action reauth within 5 minutes; at most 3 active sessions
+per identity/type. New worker queue 128 and DB busy deadline 2 seconds.
+Retention proposal: closed private bodies 30 days, audit metadata 180 days,
+backups 30 days; reviewed expiry/redaction/restore procedures are required
+before collection. These values are initial proposals, not approved policy
+or a legal-compliance claim. Host capacity determines additional active
+object/disk quotas before activation. No online balance value changes.
