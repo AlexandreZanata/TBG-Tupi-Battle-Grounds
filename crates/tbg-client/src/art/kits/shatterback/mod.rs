@@ -1,8 +1,7 @@
-//! Shatterback kit: a lumbering plated beast. Heavy breaths heave the
-//! plates on its back; it hammers its target with both stone fists, rises
-//! out of the ground and drops to its knees when it falls.
+//! Shatterback: a heavy terrestrial turtle with a domed segmented shell,
+//! grounded paw strikes and a retreat into its shell on death.
 
-mod model;
+pub(crate) mod model;
 
 use super::common::{moves, moves::*, Form};
 use super::{tools, Attack, Gait, Kit, Moment};
@@ -14,6 +13,7 @@ use crate::vfx::impacts::{Burst, Impact};
 use model::plan;
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose,
     gait: Gait::HEAVY,
@@ -45,7 +45,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             moves::walk(m, pose, 10.0, 6.0);
             stoop(pose, 0.6);
         }
-        Clip::AttackMelee => moves::strike(m, pose, &p, CHOP, 1.5),
+        Clip::AttackMelee => moves::strike(m, pose, &p, THRUST, 1.1),
         Clip::Hit => {
             moves::hit(m, pose, 0.45);
             stoop(pose, 0.8);
@@ -58,7 +58,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
     }
 }
 
-/// A gorilla stoop: shoulders forward, fists hanging low and wide.
+/// A low turtle stance keeps the domed shell above its short legs.
 fn stoop(pose: &mut Pose, w: f32) {
     tools::add(pose, Joint::Spine, [14.0 * w, 0.0, 0.0]);
     tools::add(pose, Joint::Head, [-12.0 * w, 0.0, 0.0]);

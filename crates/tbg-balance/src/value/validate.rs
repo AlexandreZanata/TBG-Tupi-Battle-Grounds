@@ -28,6 +28,8 @@ pub fn static_power(c: &Candidate) -> f64 {
 fn ratio(knob: Knob, base: i64, next: i64) -> f64 {
     let positive = |v: i64| v.max(1) as f64;
     match knob {
+        // The static combat estimator has no Shop value; full-match experiments measure it.
+        Knob::Shop(_) => 1.0,
         Knob::Unit(_, UnitField::Interval) | Knob::StrongholdInterval => {
             positive(base) / positive(next)
         }

@@ -2,8 +2,11 @@
 //! (kept byte-compatible so old databases keep their rows); v2 adds the
 //! P11 `accounts` table; v3 adds P12 `ranked_matches` plus the rating
 //! leaderboard index; v4 (D-40) adds each account's saved Arcana preset
-//! and both applied presets on match rows (NULL for older rows).
-//! Timestamps come from SQLite itself.
+//! and both applied presets on match rows (NULL for older rows); v5/v6 add
+//! the Stronghold kind and arena; v7 (P60) adds authoritative ranked
+//! records, integrity projections and the append-only decision log; v8
+//! (P61) adds the optional per-match statistics summary.
+//! Timestamps come from SQLite itself, except P60's frozen `ended_unix`.
 
 use rusqlite::Connection;
 
@@ -66,6 +69,86 @@ const STRONGHOLD_V5: &str = "ALTER TABLE accounts ADD COLUMN stronghold INTEGER;
 /// D-55: the match's arena (`Arena::index`); NULL on rows from before arenas.
 const ARENA_V6: &str = "ALTER TABLE matches ADD COLUMN arena INTEGER;";
 
+/// P60 (D-87): authoritative ranked records. Additive only: original
+/// before/after columns never change; old rows keep NULL keys and stay out
+/// of new analyses. The integrity tables are append/projection records of
+/// the same settlement transaction; `ranked_decisions` is append-only.
+const RANKED_V7: &str = "CREATE TABLE ranked_rulesets (
+  version INTEGER PRIMARY KEY,
+  source_hash TEXT NOT NULL UNIQUE,
+  catalog_json TEXT NOT NULL CHECK(length(catalog_json)<=65536)
+);
+ALTER TABLE ranked_matches ADD COLUMN match_key BLOB;
+ALTER TABLE ranked_matches ADD COLUMN ruleset_version INTEGER REFERENCES ranked_rulesets(version);
+ALTER TABLE ranked_matches ADD COLUMN ruleset_source_hash TEXT;
+ALTER TABLE ranked_matches ADD COLUMN ended_unix INTEGER;
+ALTER TABLE ranked_matches ADD COLUMN end_detail TEXT;
+ALTER TABLE ranked_matches ADD COLUMN combat_ticks INTEGER;
+CREATE UNIQUE INDEX ranked_match_key ON ranked_matches(match_key)
+  WHERE match_key IS NOT NULL;
+CREATE TABLE ranked_integrity (
+  match_id INTEGER PRIMARY KEY REFERENCES ranked_matches(id),
+  policy_version INTEGER NOT NULL,
+  mode TEXT NOT NULL CHECK(mode IN ('shadow','enforce')),
+  risk INTEGER NOT NULL CHECK(risk IN (0,1,2)),
+  disposition INTEGER NOT NULL CHECK(disposition IN (0,1)),
+  reason_bits INTEGER NOT NULL,
+  facts_json TEXT NOT NULL CHECK(length(facts_json) <= 8192)
+);
+CREATE TABLE ranked_sides (
+  match_id INTEGER NOT NULL REFERENCES ranked_matches(id),
+  seat INTEGER NOT NULL CHECK(seat IN (0,1)),
+  account_id INTEGER NOT NULL REFERENCES accounts(id),
+  opponent_id INTEGER NOT NULL REFERENCES accounts(id),
+  ended_unix INTEGER NOT NULL,
+  opponent_mature INTEGER NOT NULL CHECK(opponent_mature IN (0,1)),
+  original_delta INTEGER NOT NULL,
+  effective_delta INTEGER NOT NULL,
+  low_activity INTEGER NOT NULL CHECK(low_activity IN (0,1)),
+  early_surrender INTEGER NOT NULL CHECK(early_surrender IN (0,1)),
+  PRIMARY KEY(match_id, seat), CHECK(account_id <> opponent_id)
+);
+CREATE INDEX ranked_side_history ON ranked_sides(account_id, ended_unix, match_id);
+CREATE TABLE ranked_baseline (
+  account_id INTEGER PRIMARY KEY REFERENCES accounts(id),
+  rating INTEGER NOT NULL, peak_rating INTEGER NOT NULL,
+  ranked_games INTEGER NOT NULL, wins INTEGER NOT NULL,
+  losses INTEGER NOT NULL, draws INTEGER NOT NULL,
+  mature_games INTEGER NOT NULL
+);
+INSERT INTO ranked_baseline
+  SELECT id,rating,peak_rating,ranked_games,wins,losses,draws,ranked_games FROM accounts;
+ALTER TABLE accounts ADD COLUMN mature_games INTEGER NOT NULL DEFAULT 0;
+UPDATE accounts SET mature_games=ranked_games;
+CREATE TABLE ranked_meta (
+  singleton INTEGER PRIMARY KEY CHECK(singleton=1),
+  last_utc INTEGER NOT NULL, revision INTEGER NOT NULL
+);
+INSERT INTO ranked_meta VALUES(1,0,0);
+CREATE TABLE ranked_decisions (
+  id INTEGER PRIMARY KEY,
+  operation_key TEXT NOT NULL UNIQUE,
+  match_id INTEGER NOT NULL REFERENCES ranked_matches(id),
+  decided_unix INTEGER NOT NULL, actor TEXT NOT NULL,
+  action TEXT NOT NULL CHECK(action IN ('invalidate','clear','review','restore')),
+  reason TEXT NOT NULL CHECK(length(reason) BETWEEN 1 AND 512),
+  before_json TEXT NOT NULL CHECK(length(before_json)<=4096),
+  after_json TEXT NOT NULL CHECK(length(after_json)<=4096)
+);
+CREATE TRIGGER ranked_decisions_no_update BEFORE UPDATE ON ranked_decisions
+BEGIN SELECT RAISE(ABORT,'append-only decision log'); END;
+CREATE TRIGGER ranked_decisions_no_delete BEFORE DELETE ON ranked_decisions
+BEGIN SELECT RAISE(ABORT,'append-only decision log'); END;";
+
+/// P61 (D-88): one optional raw summary per ranked match, written after the
+/// authoritative settlement, plus the per-patch cohort index.
+const RANKED_STATS_V8: &str = "CREATE TABLE ranked_stats (
+  match_id INTEGER PRIMARY KEY REFERENCES ranked_matches(id),
+  summary_version INTEGER NOT NULL,
+  payload TEXT NOT NULL CHECK(length(payload)<=16384)
+);
+CREATE INDEX ranked_stats_cohort ON ranked_matches(ruleset_version, ended_unix, id);";
+
 /// Pragmas plus every missing migration in one transaction. Re-running on
 /// a migrated database is a no-op.
 pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
@@ -102,6 +185,14 @@ pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
     if version < 6 {
         tx.execute_batch(ARENA_V6)?;
         tx.execute("INSERT INTO schema_version(version) VALUES (6)", [])?;
+    }
+    if version < 7 {
+        tx.execute_batch(RANKED_V7)?;
+        tx.execute("INSERT INTO schema_version(version) VALUES (7)", [])?;
+    }
+    if version < 8 {
+        tx.execute_batch(RANKED_STATS_V8)?;
+        tx.execute("INSERT INTO schema_version(version) VALUES (8)", [])?;
     }
     tx.commit()
 }

@@ -7,11 +7,13 @@ use bevy::prelude::*;
 pub struct VisualAssets {
     pub ring: Handle<Mesh>,
     pub tier_cube: Handle<Mesh>,
+    pub shield_outline: Handle<Mesh>,
     pub bar: Handle<Mesh>,
     pub projectile: Handle<Mesh>,
     pub team: [Handle<StandardMaterial>; 2],
     pub slowed: Handle<StandardMaterial>,
     pub rooted: Handle<StandardMaterial>,
+    pub marked: Handle<StandardMaterial>,
     pub gold: Handle<StandardMaterial>,
     pub silver: Handle<StandardMaterial>,
     pub flash: Handle<StandardMaterial>,
@@ -22,11 +24,15 @@ pub struct VisualAssets {
 }
 
 /// Faction body colors (ARCHITECTURE §7 primary palette).
-pub const FACTION_COLORS: [[u8; 3]; 4] = [
+#[cfg(not(target_os = "linux"))]
+pub const FACTION_COLORS: [[u8; 3]; tbg_core::FACTION_COUNT] = [
     [0x8B, 0x73, 0x55],
     [0xD8, 0xD2, 0xC0],
     [0x4A, 0x50, 0x58],
     [0x4E, 0x9F, 0x3D],
+    [0x2E, 0x30, 0x33],
+    [0xF1, 0xEB, 0xDD],
+    [0x5C, 0x6B, 0x2E],
 ];
 
 pub(super) fn init(
@@ -45,6 +51,7 @@ pub(super) fn init(
     let team = [lit(rgb([0x3F, 0xA9, 0xF5])), lit(rgb([0xF2, 0x54, 0x5B]))];
     let slowed = lit(rgb([0x4C, 0x7D, 0xFF]));
     let rooted = lit(rgb([0x7A, 0x4E, 0x22]));
+    let marked = lit(crate::art::palette::GLOW);
     let gold = lit(rgb([0xD9, 0xB4, 0x4A]));
     let silver = lit(rgb([0xC8, 0xD0, 0xD8]));
     let projectile_mat = lit(rgb([0xFF, 0xF3, 0xB0]));
@@ -66,12 +73,16 @@ pub(super) fn init(
     .map(&mut unlit);
     commands.insert_resource(VisualAssets {
         ring: meshes.add(Cylinder::new(0.42, 0.03).mesh().resolution(16)),
+        shield_outline: meshes.add(crate::art::mesh::build(crate::art::mesh::Shape::Ring(
+            0.012, 0.52, 360.0,
+        ))),
         tier_cube: meshes.add(Cuboid::new(0.12, 0.12, 0.12)),
         bar: meshes.add(Rectangle::new(0.8, 0.08)),
         projectile: meshes.add(Sphere::new(0.09)),
         team,
         slowed,
         rooted,
+        marked,
         gold,
         silver,
         flash,

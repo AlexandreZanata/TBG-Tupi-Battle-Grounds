@@ -141,7 +141,7 @@ fn nest(v: &mut Vec<PartSpec>, f: Form) {
     let (shell, lit) = match (f.b, f.t2) {
         (true, true) => (BLIGHT, true),
         (true, false) => (VENOM, true),
-        _ => (LINEN, false),
+        _ => (LINEN, true),
     };
     for &(x, z) in eggs {
         let egg = part(b, Ball(0.065), shell, [x, 0.1, z]).scale([0.85, 1.15, 0.85]);

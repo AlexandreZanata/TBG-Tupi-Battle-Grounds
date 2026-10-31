@@ -28,11 +28,27 @@ pub struct Ranking {
     /// Page offset waiting for a reply.
     pub(super) want: Option<u16>,
     pub(super) page: Option<Page>,
+    #[cfg(target_os = "linux")]
+    pub(super) leaders: [Option<LeaderRow>; 3],
+    #[cfg(target_os = "linux")]
+    pub(super) failed: bool,
+    #[cfg(target_os = "linux")]
+    waiting_since: Option<f64>,
 }
 
 impl Ranking {
     /// A `ServerMsg::Leaderboard` reply (routed by `sync::messages`).
     pub fn accept(&mut self, total: u32, offset: u16, rows: Vec<LeaderRow>, you: Option<u32>) {
+        #[cfg(target_os = "linux")]
+        {
+            self.failed = false;
+            self.waiting_since = None;
+        }
+        #[cfg(target_os = "linux")]
+        if offset == 0 {
+            self.leaders =
+                std::array::from_fn(|i| rows.iter().find(|row| row.rank == i as u32 + 1).cloned());
+        }
         if self.want == Some(offset) {
             self.want = None;
         }
@@ -46,20 +62,28 @@ impl Ranking {
 }
 
 pub fn plugin(app: &mut App) {
+    #[cfg(not(target_os = "linux"))]
+    app.add_systems(
+        Update,
+        super::ranking_ui::panel
+            .run_if(resource_changed::<Ranking>)
+            .run_if(in_state(GameState::Menu)),
+    );
     app.init_resource::<Ranking>()
         .add_systems(OnExit(GameState::Menu), close)
-        .add_systems(
-            Update,
-            (
-                request,
-                super::ranking_ui::panel.run_if(resource_changed::<Ranking>),
-            )
-                .run_if(in_state(GameState::Menu)),
-        );
+        .add_systems(Update, request.run_if(in_state(GameState::Menu)));
 }
 
 /// Apply the P13 ranking buttons (called from `actions::apply`).
 pub(super) fn apply_action(action: UiAction, ranking: &mut Ranking) {
+    #[cfg(target_os = "linux")]
+    if matches!(
+        action,
+        UiAction::OpenRanking | UiAction::RankingPrev | UiAction::RankingNext
+    ) {
+        ranking.failed = false;
+        ranking.waiting_since = None;
+    }
     let at = ranking.page.as_ref().map_or(0, |p| p.offset);
     match action {
         UiAction::OpenRanking => {
@@ -84,7 +108,8 @@ fn close(mut ranking: ResMut<Ranking>) {
 }
 
 fn request(
-    ranking: Res<Ranking>,
+    #[cfg(target_os = "linux")] mut ranking: ResMut<Ranking>,
+    #[cfg(not(target_os = "linux"))] ranking: Res<Ranking>,
     mut link: NonSendMut<MatchLink>,
     time: Res<Time>,
     mut sent_at: Local<Option<f64>>,
@@ -93,6 +118,18 @@ fn request(
         return;
     };
     let now = time.elapsed_secs_f64();
+    #[cfg(target_os = "linux")]
+    {
+        if ranking.waiting_since.is_none() {
+            ranking.waiting_since = Some(now);
+        }
+        let since = ranking.waiting_since.unwrap_or(now);
+        if now - since >= crate::net::GIVE_UP {
+            ranking.failed = true;
+            ranking.want = None;
+            return;
+        }
+    }
     if sent_at.is_some_and(|t| now - t < RESEND) {
         return;
     }

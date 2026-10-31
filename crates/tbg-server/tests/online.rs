@@ -203,7 +203,9 @@ async fn end_by_surrender(ws: &mut Ws, other: &mut Ws) {
 
 fn fast(url: &str) -> BotOpts {
     BotOpts {
-        timeout: Duration::from_secs(60),
+        // Full-roster battles can exceed 60s at the accelerated 5ms test tick.
+        // This bounds the harness; authoritative outcomes and reconnect assertions stay unchanged.
+        timeout: Duration::from_secs(180),
         ..BotOpts::new(url)
     }
 }
@@ -499,8 +501,15 @@ async fn records_insert_and_count() {
         ..Config::default()
     };
     tokio::spawn(tbg_server::run(config, listener));
-    let (a, b) = tokio::join!(play_one(fast(&url), 11), play_one(fast(&url), 12));
-    assert!(a.completed && b.completed);
+    // Persistence is independent of combat duration and roster composition.
+    // Finish through the real authoritative surrender path instead of a 60s bot timeout.
+    let (mut a, mut b) = (connect(&url).await, connect(&url).await);
+    hello(&mut a).await;
+    hello(&mut b).await;
+    send(&mut a, &ClientMsg::QuickMatch).await;
+    send(&mut b, &ClientMsg::QuickMatch).await;
+    let _ = tokio::join!(challenge_start(&mut a), challenge_start(&mut b));
+    end_by_surrender(&mut a, &mut b).await;
     tokio::time::sleep(Duration::from_millis(300)).await;
     let store = tbg_server::store::Store::open(&db).unwrap();
     assert_eq!(store.match_count().await.unwrap(), 1);
@@ -545,7 +554,7 @@ async fn await_seat(ws: &mut Ws) -> Seat {
 async fn await_end(ws: &mut Ws) -> tbg_core::Outcome {
     loop {
         match recv(ws).await {
-            Some(ServerMsg::MatchEnd { outcome }) => return outcome,
+            Some(ServerMsg::MatchEnd { outcome, .. }) => return outcome,
             Some(_) => {}
             None => panic!("socket closed before MatchEnd"),
         }
@@ -1337,4 +1346,93 @@ async fn br_sk01_kinds_freeze_at_pairing_fortify_online_and_survive_reconnect() 
         1,
         "replays rebuild the tier"
     );
+}
+
+#[tokio::test]
+async fn celebration_finished_result_replays_to_either_seat_without_a_live_view() {
+    // BR-VC02/05: the disconnected winner receives the frozen aggregate, not a survivor reconstruction.
+    for owner_wins in [true, false] {
+        let url = server(3).await;
+        let (owner, guest, owner_token, guest_token, owner_start, guest_start) =
+            start_challenge(&url).await;
+        let (mut winner, mut loser, token, seat) = if owner_wins {
+            (owner, guest, owner_token, owner_start.0)
+        } else {
+            (guest, owner, guest_token, guest_start.0)
+        };
+        let offer = loop {
+            if let Some(ServerMsg::View(view)) = recv(&mut winner).await {
+                if view.phase == tbg_core::Phase::Running {
+                    if let Some(i) = view
+                        .offers
+                        .iter()
+                        .position(|k| tbg_core::ruleset::CANON.def(*k).cost <= view.energy)
+                    {
+                        break i as u8;
+                    }
+                }
+            }
+        };
+        send(
+            &mut winner,
+            &ClientMsg::Intent {
+                seq: 1,
+                intent: PlayerIntention::Purchase { offer },
+            },
+        )
+        .await;
+        loop {
+            if let Some(ServerMsg::View(v)) = recv(&mut winner).await {
+                if v.last_seq == 1 {
+                    break;
+                }
+            }
+        }
+        winner.close(None).await.unwrap();
+        send(&mut loser, &ClientMsg::Surrender).await;
+        loop {
+            if let Some(ServerMsg::MatchEnd { outcome, cast, .. }) = recv(&mut loser).await {
+                assert_eq!(outcome.winner, Some(seat));
+                assert!(cast.is_none());
+                break;
+            }
+        }
+        let mut recovered = connect(&url).await;
+        hello_resume(&mut recovered, token).await;
+        let mut started = None;
+        let frozen = loop {
+            match recv(&mut recovered).await {
+                Some(ServerMsg::MatchStart { result_id, you, .. }) => {
+                    assert_eq!(you, seat);
+                    started = Some(result_id);
+                }
+                Some(ServerMsg::MatchEnd {
+                    result_id,
+                    cast,
+                    outcome,
+                    ..
+                }) => {
+                    assert_eq!(Some(result_id), started);
+                    let cast = cast.unwrap();
+                    assert_eq!(cast.decode(seat).unwrap().total(seat), Some(1));
+                    assert_eq!(outcome.winner, Some(seat));
+                    break (result_id, cast);
+                }
+                Some(_) => {}
+                None => panic!("completed result was lost"),
+            }
+        };
+        recovered.close(None).await.unwrap();
+        let mut again = connect(&url).await;
+        hello_resume(&mut again, token).await;
+        loop {
+            if let Some(ServerMsg::MatchEnd {
+                result_id, cast, ..
+            }) = recv(&mut again).await
+            {
+                assert_eq!((result_id, cast.unwrap()), frozen);
+                break;
+            }
+        }
+    }
 }

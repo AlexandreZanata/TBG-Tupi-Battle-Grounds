@@ -1,7 +1,8 @@
 //! Every tunable balance number as one value (D-33). The simulation reads
 //! numbers only through `MatchState::rules()`, so the offline balance lab
-//! can play a variant; the server and the client only ever use `CANON`,
-//! which is assembled from `content.rs` (each number is still written once).
+//! can play a variant; online play uses `CANON`, while local Practice
+//! uses the explicit preview (Shop features stay disabled online). CANON is
+//! assembled from `content.rs` (each number is still written once).
 //!
 //! Structural values stay `const` in `content.rs` and are never tuned:
 //! they define units of measure, protocol shapes, or array bounds
@@ -16,8 +17,9 @@ use crate::content::{
     ENERGY_START, EVOLVE_COST, FORTIFY_COST, HATCH_EVERY, HATCH_EVERY_HIVE, INTEREST_BAND,
     INTEREST_MAX_BANDS, INTEREST_PER_BAND, MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE,
     STRONGHOLD_HP, STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
+    UNIT_KIND_COUNT,
 };
-use crate::types::{Tick, UnitKind, ALL_KINDS, FULL_POOL};
+use crate::types::{Tick, UnitKind, FACTION_COUNT, FULL_POOL};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InterestRule {
@@ -49,8 +51,30 @@ pub struct AugmentRule {
     pub forgo_energy: u32,
 }
 
+/// Proposed Shop Reserve and paid Reroll; disabled in online CANON.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ShopRule {
+    pub reserve_slots: u8,
+    pub reserve_shops: u8,
+    pub reroll_base: u32,
+    pub reroll_step: u32,
+    pub reroll_max: Option<u32>,
+}
+impl Default for ShopRule {
+    fn default() -> Self {
+        Self {
+            reserve_slots: 2,
+            reserve_shops: 3,
+            reroll_base: 600,
+            reroll_step: 600,
+            reroll_max: None,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Ruleset {
+    pub shop: Option<ShopRule>,
     pub energy_start: u32,
     /// `None` = no gameplay cap (canon); `Some` is a lab comparison only.
     pub energy_cap: Option<u32>,
@@ -66,7 +90,7 @@ pub struct Ruleset {
     pub stronghold_interval: u16,
     pub stronghold_range: i32,
     pub synergy_thresholds: [u8; 2],
-    pub synergies: [(SynergyEffect, [i32; 2]); 4],
+    pub synergies: [(SynergyEffect, [i32; 2]); FACTION_COUNT],
     pub hatch_every: u16,
     pub hatch_every_hive: u16,
     pub beetles_per_nester: [usize; 2],
@@ -75,7 +99,7 @@ pub struct Ruleset {
     /// All 25 kinds since the owner switch (D-50); values stay Proposed.
     pub pool: &'static [UnitKind],
     /// Every kind, in `ALL_KINDS` order.
-    pub units: [UnitDef; ALL_KINDS.len()],
+    pub units: [UnitDef; UNIT_KIND_COUNT],
     /// Arcana bp per rank of the six original nodes (GAME-DESIGN §9).
     pub arcana_bp: [i32; 6],
     /// Conditional Arcana values for the nine new nodes.
@@ -84,8 +108,9 @@ pub struct Ruleset {
     pub arenas: [ArenaRule; 5],
 }
 
-/// The only ruleset the server and the client use.
+/// The only ruleset used online.
 pub static CANON: Ruleset = Ruleset {
+    shop: None,
     energy_start: ENERGY_START,
     energy_cap: None,
     regen_running: REGEN_RUNNING,
@@ -124,12 +149,13 @@ impl Ruleset {
         &CANON
     }
 
-    /// The full roster as the Shop pool (ROSTER-EXPANSION §F.5): equal to
-    /// canon since D-50; the lab and Practice keep calling it by name.
+    /// Full roster and Shop preview for the lab and local Practice.
+    /// Online CANON keeps Shop disabled until the owner checkpoint (D-62).
     /// Leaked once (a few KB, freed at exit).
     pub fn preview() -> &'static Ruleset {
         Box::leak(Box::new(Ruleset {
             pool: &FULL_POOL,
+            shop: Some(ShopRule::default()),
             ..CANON.clone()
         }))
     }
@@ -234,7 +260,7 @@ impl Ruleset {
         hp_bp += a.hp_bp + augments.hp_bp;
         dmg_bp += a.dmg_bp + augments.dmg_bp;
         atk_bp += augments.atk_bp;
-        let move_bp = augments.move_bp;
+        let mut move_bp = augments.move_bp;
         if synergy_level > 0 {
             let (effect, bps) = self.synergies[d.faction.index()];
             let bp = i64::from(bps[usize::from(synergy_level.min(2)) - 1]);
@@ -242,6 +268,7 @@ impl Ruleset {
                 SynergyEffect::MaxHp => hp_bp += bp,
                 SynergyEffect::AttackSpeed => atk_bp += bp,
                 SynergyEffect::Damage => dmg_bp += bp,
+                SynergyEffect::Movement => move_bp += bp,
                 SynergyEffect::Regen => {}
             }
         }
@@ -255,6 +282,7 @@ impl Ruleset {
         Stats {
             max_hp: scale(i64::from(d.hp), hp_bp),
             damage: scale(i64::from(d.damage) + sum(|f| f.dmg_add), dmg_bp),
+            damage_bp: dmg_bp,
             atk_bp: atk_bp.clamp(0, 10_000) as i32,
             interval: (interval as u16).max(MIN_INTERVAL),
             range: d.range + sum(|f| f.range_add) as i32 + a.range_add,

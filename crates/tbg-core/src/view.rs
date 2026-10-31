@@ -4,7 +4,9 @@
 
 pub mod public;
 pub use public::{PublicRound, PublicView};
+mod effects;
 mod visibility;
+pub use effects::{DotView, EffectsView, MarkView, TimedBp};
 
 use serde::{Deserialize, Serialize};
 
@@ -12,7 +14,7 @@ use crate::augment::AugmentCounts;
 use crate::content::{AUGMENT_OPTIONS, OFFERS, RUNNING_START};
 use crate::sim::phase_ticks_left;
 use crate::state::{Event, MatchState, Outcome, Phase};
-use crate::types::{Seat, Status, StrongholdKind, Tick, UnitId, UnitKind};
+use crate::types::{Seat, Status, StrongholdKind, Tick, UnitId, UnitKind, FACTION_COUNT};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UnitView {
@@ -27,19 +29,52 @@ pub struct UnitView {
     /// 0 none, 1 slowed, 2 rooted.
     pub status: u8,
     /// Packed ability state (ROSTER-EXPANSION §F.4): poison 3 bits, fish 2,
-    /// confused 1, ward 1, bonded 1, plates 3, growth 3, carried 1, 1 spare.
-    /// Zero until the waves land, except the spare top bit: `FX_SUMMON`.
+    /// confused 1, ward 1, bonded 1, plates 3, per-kind progress 3, carried 1, 1 spare.
+    /// R09 uses progress; carry/summon bits are live. Other affliction bits await their waves.
     pub fx: u16,
+    /// The carrier this unit rides (D-61), set only while `FX_CARRIED` is:
+    /// the client seats the passenger on that unit, not on a lane guess.
+    pub carrier: Option<UnitId>,
+    /// The unit shield still standing at the view's tick (D-63); zero once expired.
+    pub shield: u16,
+    /// Active self damage reduction in basis points (P59 R08, D-68).
+    pub reduction: u16,
+    /// Timed-special readiness and locked windup, sufficient after reconnect.
+    pub special: Option<SpecialView>,
+    /// Bounded public afflictions and durations, absent when empty.
+    pub effects: Option<EffectsView>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SpecialView {
+    pub ready_in: u16,
+    pub cast: Option<crate::state::PendingCast>,
 }
 
 /// `UnitView.fx` bit for a summon by unit, e.g. Smuggler cargo (BR-U08):
 /// its kind alone cannot tell, and the server refuses to evolve it.
 pub const FX_SUMMON: u16 = 1 << 15;
 
+/// `UnitView.fx` bit for a carried passenger, e.g. riding a Cargo Crab (D-56, §C.15).
+pub const FX_CARRIED: u16 = 1 << 14;
+/// Per-kind ability progress occupies the reserved growth bits (D-69).
+pub const FX_COUNTER_SHIFT: u16 = 11;
+pub const FX_COUNTER_MASK: u16 = 7 << FX_COUNTER_SHIFT;
+
 impl UnitView {
     /// Summoned by kind (Beetling, Crate) or by unit (Smuggler cargo).
     pub fn is_summon(&self) -> bool {
         self.kind.is_summon() || self.fx & FX_SUMMON != 0
+    }
+
+    /// The public completed-hit counter for this kind, not a combat decision.
+    pub fn ability_counter(&self) -> u8 {
+        ((self.fx & FX_COUNTER_MASK) >> FX_COUNTER_SHIFT) as u8
+    }
+
+    /// Carried by a carrier (e.g. riding a Cargo Crab).
+    pub fn is_carried(&self) -> bool {
+        self.fx & FX_CARRIED != 0
     }
 }
 
@@ -91,7 +126,7 @@ pub struct MatchView {
     pub strongholds: [StrongholdView; 2],
     pub shields: [i32; 2],
     pub units: Vec<UnitView>,
-    pub synergy: [[u8; 4]; 2],
+    pub synergy: [[u8; FACTION_COUNT]; 2],
     /// Both seats' Augment copies (public, BR-AG09).
     pub augments: [AugmentCounts; 2],
     /// Present exactly while the battle is paused for a selection; both
@@ -103,6 +138,13 @@ pub struct MatchView {
     /// BR-LV05: how many spectators watch this match. Set by the server
     /// when it sends the view; a count, never who (`0` from `view_for`).
     pub spectators: u16,
+    /// BR-S13: the viewing seat only, never the opponent or PublicView.
+    #[serde(skip)]
+    pub reserve: [u8; OFFERS],
+    #[serde(skip)]
+    pub held_mask: u8,
+    #[serde(skip)]
+    pub reroll_cost: Option<u32>,
 }
 
 impl MatchState {
@@ -135,6 +177,9 @@ impl MatchState {
             regen_bp: self.rules.interest.regen_bp(me.energy),
             evolve_costs: [0, 1].map(|tier| self.evolve_price(seat, tier)),
             offers: me.offers,
+            reserve: me.reserve,
+            held_mask: me.held_mask,
+            reroll_cost: crate::shop::reroll_cost(self, seat),
             stronghold_hp: [0, 1].map(|i| self.players[i].stronghold_hp),
             strongholds: Seat::BOTH.map(|s| StrongholdView {
                 kind: self.player(s).stronghold,
@@ -147,7 +192,7 @@ impl MatchState {
                 .units
                 .iter()
                 .filter(|u| u.hp > 0)
-                .map(unit_view)
+                .map(|u| unit_view(u, self.tick, self.rules))
                 .collect(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],
@@ -160,7 +205,14 @@ impl MatchState {
     }
 }
 
-fn unit_view(u: &crate::state::Unit) -> UnitView {
+fn unit_view(u: &crate::state::Unit, tick: Tick, rules: &crate::Ruleset) -> UnitView {
+    let hatch_every = rules.hatch_rule(u.tier, u.branch).0;
+    let growth = if u.kind == UnitKind::Nester {
+        (u32::from(hatch_every.saturating_sub(u.action_cd)) * 7 / u32::from(hatch_every.max(1)))
+            as u16
+    } else {
+        u.fx.essence.min(7)
+    };
     UnitView {
         id: u.id,
         seat: u.seat,
@@ -175,7 +227,31 @@ fn unit_view(u: &crate::state::Unit) -> UnitView {
             Status::Slowed { .. } => 1,
             Status::Rooted { .. } => 2,
         },
-        // P43: affliction and carrier bits are not packed yet.
-        fx: if u.is_summon() { FX_SUMMON } else { 0 },
+        // D-69: per-kind progress shares the reserved growth bits; carry/summon stay intact.
+        fx: {
+            let mut fx = (u16::from(u.fx.plates.min(7)) << 8)
+                | u16::from(
+                    (growth as u8)
+                        .max(crate::ravager::counter(u, tick))
+                        .max(crate::acidmaw::counter(u))
+                        .max(crate::trigger::counter(u))
+                        .max(crate::celestial_archer::counter(u))
+                        .max(crate::jawguard::counter(u))
+                        .max(crate::mantis::counter(u))
+                        .max(crate::hornet::counter(u)),
+                ) << FX_COUNTER_SHIFT;
+            if u.is_summon() {
+                fx |= FX_SUMMON;
+            }
+            if u.fx.carrier.is_some() {
+                fx |= FX_CARRIED;
+            }
+            fx
+        },
+        carrier: u.fx.carrier,
+        shield: crate::roster_slots::shield_now(&u.fx, tick),
+        reduction: crate::roster_slots::self_dr_now(&u.fx, tick) as u16,
+        special: crate::specials::view(rules, u),
+        effects: effects::project(rules, u, tick),
     }
 }

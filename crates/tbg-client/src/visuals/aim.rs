@@ -2,6 +2,7 @@
 
 use bevy::prelude::*;
 
+use super::attacks::REACH;
 use super::UnitVisual;
 use crate::art::aim::{Aim, AimTarget};
 use crate::art::melee::{lunge_distance, strike_profile_for_unit, HitRecoil};
@@ -65,7 +66,13 @@ pub fn update_aim(
 
             let profile = strike_profile_for_unit(v.form.0, v.form.1, v.form.2);
             let elapsed = (now - aim.started) as f32;
-            let lunge_dist = lunge_distance(elapsed, 0.30, 0.50, profile.lunge);
+            // A target beyond melee reach on screen (a displaced back rank) gets no lunge.
+            let in_reach = target_pos.is_none_or(|p| p.xz().distance(attacker_pos.xz()) < REACH);
+            let lunge_dist = if in_reach {
+                lunge_distance(elapsed, 0.30, 0.50, profile.lunge)
+            } else {
+                0.0
+            };
             let lunge_offset = Vec3::new(
                 aim.current_yaw.sin() * lunge_dist,
                 0.0,

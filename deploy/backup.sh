@@ -2,6 +2,9 @@
 # Nightly SQLite backup on the VPS (cron: /etc/cron.d/tbg-backup).
 # Keeps the 7 newest copies. Optional weekly off-site copy (Sundays) to
 # TBG_BACKUP_REMOTE, an rsync/scp target set in /etc/default/tbg-backup.
+#   backup.sh --predeploy   P60: a pre-migration copy taken by deploy.sh with
+#                           the server stopped; never rotated, integrity-checked,
+#                           and including pending ranked results.
 set -euo pipefail
 # P14: backups hold names, ratings, and key hashes; owner-only.
 umask 077
@@ -12,6 +15,23 @@ DIR="${TBG_BACKUP_DIR:-/var/backups/tbg}"
 [ -f /etc/default/tbg-backup ] && . /etc/default/tbg-backup
 
 mkdir -p "$DIR"
+if [ "${1:-}" = "--predeploy" ]; then
+	# Separate prefix: the nightly rotation below never deletes these.
+	out="$DIR/predeploy-$(date +%Y%m%dT%H%M%S).sqlite3"
+	sqlite3 "$DB" ".backup '$out'"
+	check="$(sqlite3 "$out" 'PRAGMA integrity_check;')"
+	if [ "$check" != "ok" ]; then
+		echo "pre-deploy backup failed integrity_check: $check" >&2
+		exit 1
+	fi
+	# P60: journaled ranked results not yet settled travel with the copy.
+	pending="$(dirname "$DB")/ranked-pending"
+	if [ -d "$pending" ]; then
+		cp -a "$pending" "${out%.sqlite3}-ranked-pending"
+	fi
+	echo "pre-deploy backup ok: $out"
+	exit 0
+fi
 out="$DIR/tbg-$(date +%F).sqlite3"
 sqlite3 "$DB" ".backup '$out'"
 # Dated names sort chronologically; keep the 7 newest.

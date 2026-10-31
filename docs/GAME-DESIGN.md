@@ -100,6 +100,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-U05 | Cosmetics never change stats, hitboxes, or behavior | Confirmed | S1 |
 | BR-U06 | ~~A player's living units may occupy at most `SLOT_CAP` slots~~ | **Removed — D-32** | — |
 | BR-U07 | There is no limit on how many conventional units a player may own; only `Energy` gates purchases | Proposed (D-32) | — |
+| BR-U08a | Summoners (Nester, Smuggler and future summoners) act on their own timers, independently of visible enemies, range or enemies being present in the lane | Confirmed (owner 2026-10-31) | — |
 | BR-U08 | A summon is a temporary unit created by a unit's ability: it costs no `Energy`, is never sold, never evolves, never summons, neither counts toward nor receives `Synergy`, is not part of the army count, and disappears when its lifetime ends | Proposed (D-32) | — |
 | BR-U09 | Guard: an enemy unit or `Stronghold` whose attack range reaches a living Rampart must target the nearest such Rampart | Proposed (D-32) | — |
 | BR-U10 | A server-protection entity limit, if ever needed, is documented as server protection with measured evidence (ARCHITECTURE), never as an army rule | Proposed (D-32) | — |
@@ -220,7 +221,7 @@ Bone Brute, Siege Walker, and Rampart are drawn with the large body plan
 | Siege Walker | Machines | Ranged | 5 | 700 | 85 | 2.5 | 6.0 | 0.66 | splash 1.5 |
 | Bloomkeeper | Plants | Support | 3 | 280 | heal 40 | 1.5 | 3.0 | 0.9 | heals instead of attacking |
 | Rootcaller | Plants | Control | 4 | 300 | 20 | 1.6 | 3.0 | 0.9 | root 0.8 s |
-| Nester | Plants | Support | 4 | 300 | 15 | 1.5 | 2.5 | 0.8 | Hatch: every 4.0 s a Beetling; ≤ 2 alive per Nester, ≤ 6 per player |
+| Nester | Plants | Support | 4 | 300 | 15 | 1.5 | 3.0 | 0.8 | Hatch: every 4.0 s a Beetling; ≤ 2 alive per Nester, ≤ 6 per player |
 | Rampart | Machines | Tank | 6 | 1500 | 35 | 1.5 | 0.8 | 0.5 | Guard (BR-U09) |
 | *Beetling (summon)* | Plants | DPS | — | 90 | 18 | 0.8 | 0.6 | 1.4 | lifetime 10 s; inherits the Nester's tier and branch at hatch |
 
@@ -497,19 +498,23 @@ Interest boost read from that balance, then the Bounty window reset every
 `StrongholdDestroyed` or `Forfeit`. Forfeit, surrender, reconnect
 windows, ranked Elo (draw ½) and result persistence are unchanged.
 
-### 10.3 Shop Reserve (P16-F2)
+### 10.3 Shop Reserve and paid Reroll (preview, Proposed)
 
-> Written for a rotating Shop. Since the owner revision of 2026-10-29
-> every purchase redraws all five offers (BR-S04), so a hold would have nothing to
-> protect against; F2 needs a new design before it is scheduled.
+CANON.shop remains None until the owner's explicit checkpoint. Preview uses
+2 reserve slots, 3 new-shop charges, reroll_base 600 sub-energy (1 Energy),
+reroll_step 600, no maximum. FULL_POOL and five distinct offers remain.
 
 | ID | Proposed rule |
 |----|---------------|
-| BR-S06 | A player may hold one visible offer (`Reserve{offer, kind}`), free, for 20 s (400 ticks); `kind` must match the offer or the intention is rejected as stale |
-| BR-S07 | A held offer is skipped by rotation; refills and rotations never show a duplicate of it (BR-S01 still holds for all five) |
-| BR-S08 | Buying the held offer consumes the hold and refills the slot normally; `Release` ends the hold early |
-| BR-S09 | When a hold ends (expiry or `Release`) the card stays as a normal offer until the next rotation; an offer that has been held cannot be held again until its slot is redrawn |
-| BR-S10 | Same-tick order: intentions first (a purchase or hold at an expiry or rotation tick sees the offers before the Shop step), then hold expiry, then rotation |
+| BR-S06 | Reserve a visible matching kind for free; at most reserve_slots active; stale kind is rejected |
+| BR-S07 | Reserved cards stay in the same slot at every new Shop; other slots draw distinctly excluding held kinds |
+| BR-S08 | Each purchase or Reroll consumes one charge of every kept reservation; at zero the card stays visible until the next new Shop |
+| BR-S09 | Buying a reserved card ends its reservation and redraws its slot immediately; Release leaves the card visible until the next new Shop |
+| BR-S10 | An expired or released reservation cannot be renewed before its slot is redrawn |
+| BR-S11 | Reroll pays base + step × consecutive rerolls, optionally capped; buying a unit resets the streak; stale displayed price or insufficient Energy spends nothing |
+| BR-S12 | Reserve, Release and Reroll require Running and are Paused during Augment selection |
+| BR-S13 | Reservations, charges and Reroll price/streak are private to their player, excluded from opponent and spectator views |
+| BR-S14 | Intentions apply in player sequence order before step; each sees the preceding intention's Shop |
 
 ### 10.4 Stronghold kinds — active (owner decision 2026-10-29, D-46)
 
@@ -604,6 +609,7 @@ the product spec asks for none unless evidence needs it.
 | BR-X09 | Revised by the owner (2026-10-29): Augment copies are unlimited, so max-HP, damage and Stronghold-damage percentages from copies grow linearly without a cap (saturating `i64`/`u16` arithmetic). Attributes with a cap keep it: attack speed (BR-X02), move (BR-X03), damage reduction (BR-X05), lifesteal (BR-X06), status duration (BR-X07), heal bonus and heal cut ≤ 100 %, Bounty ceiling (BR-E08); every timed effect keeps its cooldown or window |
 | BR-X10 | Stronghold healing exists only through named effects with a per-window cap and never exceeds max HP; at most one Stronghold shield exists at a time and it absorbs unit and Stronghold damage only |
 | BR-X11 | Conditional effects read the state when they apply — position and HP-fraction conditions at hit resolution, Synergy-count conditions after that tick's Synergy update — in the simulation's fixed seat and unit-id order; nothing caches a condition across ticks |
+| BR-X12 | **Proposed (D-60).** A Cargo Crab's carry bonus is one move source, `max(base, branch)`, never their sum. Base +2 000 bp; branch none on A1 and A2, +2 000 on B1 (Faster Legs), +2 000 on B2 steady and +4 000 on B2 during its 4 s Overdrive surge. So A1 = A2 = B1 = B2 = +2 000 bp and a surging B2 = +4 000 bp. It joins the other move bonuses in Σbp under BR-X03 (≤ +5 000). A crab that carries moves at `max(crab speed, passenger speed) × (10 000 + Σbp) / 10 000`; each speed is read after its own Slow, so a slowed passenger lowers the pair only down to the crab's own speed |
 
 ### 10.8 Augment catalog (40, Proposed)
 
@@ -696,19 +702,19 @@ Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). S
 |------|---------|-------|------|----|-----|-------|-------|-------|----------------------|
 | Rotcap | Plants | Ranged | 3 | 200 | 12 | 1.5 | 3.5 | 0.9 | Each hit adds a poison stack (6/s, 10 s, ≤ 6 per victim) that outlives it |
 | Farwatch | Humans | Ranged | 3 | 150 | 70 | 4.0 | 12.0 | 0.9 | Shoots units across most of the lane; never targets Strongholds |
-| Leechroot | Plants | DPS | 3 | 220 | 10 | 1.6 | 1.2 | 0.9 | Damage dealt to enemy units becomes permanent stacks, no maximum; lost on death |
+| Leechroot | Plants | DPS | 3 | 300 | 10 | 1.6 | 1.2 | 0.9 | Damage dealt to enemy units becomes permanent stacks, no maximum; lost on death |
 | Bombard | Machines | Ranged | 5 | 1 000 | 24 | 2.2 | 4.0 | 0.5 | Blast radius 1.0 hits every unit, both sides and itself |
-| Old Finn | Humans | Control | 3 | 240 | 8 | 2.0 | 3.5 | 0.9 | Fish: −15 % move each, ≤ 3, 5 s; never slows attacks |
+| Old Finn | Humans | Control | 3 | 240 | 8 | 2.0 | 5.25 | 0.9 | Fish: −15 % move each, ≤ 3, 5 s; never slows attacks |
 | Drumguard | Humans | Support | 3 | 260 | — | — | 2.0 | 1.0 | Bond to the nearest ally: +25 % move, −15 % damage taken |
-| Longaxe | Humans | DPS | 4 | 360 | 100 | 2.4 | 1.6 | 0.7 | Heavy melee that strikes over its own front line |
+| Longaxe | Humans | DPS | 4 | 360 | 100 | 2.4 | 3.0 | 0.7 | Heavy melee that strikes over its own front line |
 | Oilpress | Machines | Tank | 7 | 3 600 | 25 | 2.5 | 0.8 | 0.3 | Most HP in the game; while engaged, own units cannot walk past it |
 | Antidote Brewer | Plants | Support | 3 | 260 | — | 4.0 | 3.0 | 0.9 | Cleanses the most afflicted ally and wards it 1 s |
 | Puppetmaster | Undead | Control | 4 | 260 | — | 8.0 | 4.0 | 0.9 | The hardest-hitting enemy in range strikes its own ally once |
-| Smuggler | Humans | Support | 6 | 320 | — | 20.0 | 5.0 | 0.6 | Every 20 s a crate opens into a random unit — or nothing |
+| Smuggler | Humans | Support | 6 | 320 | 10 | 1.5 | 6.0 | 0.6 | Revolver; drops crates 0.4 tile behind; every 20 s a crate opens into a random unit — or nothing |
 | Shatterback | Plants | Tank | 4 | 560 + 4 × 100 plates | 30 | 1.5 | 0.8 | 0.55 | Each broken plate: permanently faster moves and attacks |
-| Blood Furnace | Undead | DPS | 4 | 440 | 36 | 1.8 | 0.8 | 0.9 | Each hit burns 6 % max HP; damage grows up to ×4 as HP falls |
-| Bloodweaver | Undead | Support | 3 | 300 | — | 5.0 | 3.0 | 0.9 | Moves up to 120 HP from the healthiest ally to the most wounded |
-| Cargo Crab | Machines | Tank | 5 | 1 400 | 20 | 1.5 | 0.8 | 0.5 | Carries one non-Tank ally that single-target attacks cannot reach |
+| Blood Furnace | Undead | DPS | 4 | 440 | 36 | 1.5 | 0.8 | 1.08 | Each hit burns 6 % max HP; damage grows up to ×4 as HP falls |
+| Bloodweaver | Undead | Support | 3 | 300 | 30 | 2.0 | 3.0 | 0.9 | Siphon: actual enemy-unit HP removed heals the lowest-percent wounded conventional ally anywhere in the lane |
+| Cargo Crab | Machines | Tank | 5 | 1 400 | 20 | 1.5 | 0.8 | 0.5 | Carries one non-Tank ally: pair moves at max(crab, passenger) × (1 + carry bonus), the bonus being max(+20 % base, branch), BR-X12; single-target attacks hit crab first; dismounts on death with intact HP and 3 s lock (§C.15 of ROSTER-EXPANSION; D-56, D-60, Proposed) |
 
 ## 12. Arenas (active, values Proposed, ARENAS-G, D-55)
 
@@ -743,8 +749,235 @@ Values are **Proposed** until the balance lab confirms them (D-33).
 - **BR-AR05** The Storm bonus adds 800 bp to the base regeneration beside
   Interest (BR-E05); the existing remainder carries the rounding.
 
+## 13. P58 roster expansion — Proposed, inactive
 
-## 13. Live battles and spectating (P47, Proposed)
+**Every new value and rule in this section is Proposed: an initial balance
+hypothesis, not an approved rule, measured result or active roster entry.**
+No existing section, production value, Shop pool or gate threshold is changed.
+The owner requested planning only on 2026-10-30 and specified that text,
+never image labels or statistics, controls character names and gameplay.
+Execution requires subsequent authorization and the dependencies in
+[P58](phases/P58-roster-expansion-planning.md). The [catalog](roster/P58-CATALOG.md)
+defines identity/art and the [integration contracts](roster/P58-AUDIT-AND-INTEGRATION.md#3-shared-competitive-contracts-all-proposed-inactive)
+define resolution semantics. This section is the single numerical registry.
+
+A value marked **completion** is not stated by the owner's text. It is
+Proposed for review and listed, with its owner decision, in 13.6.
+
+**Proposed implementation state (D-71, 2026-10-31):** the shared independent
+six-tick special windup and the separate non-stacking venom family are bounded,
+serialized UnitFx slots. Both start empty on legacy units. This extends replay
+state bytes without changing their rules, numbers, Shop pools or expected match
+outcomes. The targeted P59 pilot consolidation measured all three legacy seeds
+with identical winner/reason/tick before re-freezing their hashes (D-71).
+No expected outcome/tick changed to accommodate the layout.
+
+**Proposed counter policy (D-74):** Ward blocks a new hostile mark/Slow/ability-cut
+payload, while raw basic damage still resolves; Oilpress's control immunity blocks
+Slow, not the independent mark/cut. Brew clears new weakening and ability-cut slots
+and every Crowcaller mark on its target without clearing Ravager prey sequences or
+legacy Augment/form cuts. Each active new harmful family (mark, weakening, ability
+cut, bleed, venom) counts once for Brew eligibility, using the existing one-stack
+score unit. New one-slot DoTs still consume strip quota before ordinary poison.
+This extends only the new families; the existing Brew target-ranking policy stays.
+
+### 13.1 Proposed base forms
+
+Cost in Energy (×600 in state); interval in ticks (20/s); range in
+milli-tiles (1,000/tile); movement in milli-tiles/tick (÷50 = tiles/s).
+Draft speed conversion rounds halves upward. For example 0.55 tiles/s
+becomes 28, actually 0.56 tiles/s; 0.45 becomes 23, actually 0.46.
+HP, damage and healing are integer HP. DPS is damage ×20/interval,
+before windup interruption, Synergy, Augments, Arcanas or ability value.
+All base healing is zero; none of these texts specifies an ordinary healer.
+
+| ID | Text name | Proposed Faction / Archetype | Cost | HP | Damage | Interval | Range | Move | Base DPS |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|
+| R01 | Bastion | Machines / Tank | 6 | 1400 | 30 | 40 | 800 | 25 | 15.00 |
+| R02 | Demolidor | Machines / Tank | 6 | 1250 | 80 | 32 | 1000 | 28 | 50.00 |
+| R03 | Crowcaller | Undead / Ranged | 4 | 520 | 58 | 34 | 4800 | 31 | 34.12 |
+| R04 | Gatilho | Humans / Ranged | 4 | 230 | 25 | 17 | 3200 | 53 | 29.41 |
+| R05 | Matraca & Tico | Humans / Tank | 5 | 900 | 60 | 38 | 900 | 28 | 31.58 |
+| R06 | Capivardo | Plants / Tank | 5 | 1300 | 38 | 40 | 800 | 23 | 19.00 |
+| R07 | Tridente | Plants / Tank | 6 | 1250 | 55 | 40 | 1100 | 28 | 27.50 |
+| R08 | Grumak | Monsters / Tank | 6 | 1600 | 40 | 40 | 800 | 20 | 20.00 |
+| R09 | Rasgarr | Monsters / Dps | 4 | 310 | 48 | 24 | 800 | 58 | 40.00 |
+| R10 | Esporax | Monsters / Ranged | 4 | 260 | 42 | 36 | 4200 | 38 | 23.33 |
+| R11 | Murmúrio | Monsters / Control | 5 | 380 | 15 | 40 | 3000 | 33 | 7.50 |
+| R12 | Sentinela Solar | Celestials / Tank | 5 | 1050 | 35 | 40 | 800 | 28 | 17.50 |
+| R13 | Oráculo Luminar | Celestials / Control | 4 | 300 | 15 | 50 | 3000 | 38 | 6.00 |
+| R14 | Arqueira Celeste | Celestials / Ranged | 4 | 210 | 55 | 40 | 4000 | 43 | 27.50 |
+| R15 | Justiçar | Celestials / Control | 6 | 700 | 35 | 46 | 2500 | 28 | 15.22 |
+| R16 | Mandíbulo | Insects / Tank | 6 | 1400 | 45 | 40 | 800 | 23 | 22.50 |
+| R17 | Louva | Insects / Dps | 4 | 280 | 50 | 24 | 800 | 60 | 41.67 |
+| R18 | Vespira | Insects / Ranged | 5 | 260 | 35 | 30 | 3800 | 45 | 23.33 |
+| R19 | Fiandeira | Insects / Control | 4 | 350 | 15 | 50 | 3000 | 33 | 6.00 |
+| R20 | Crematumba | Undead / Tank | 6 | 800 | 12 | 10 | 2800 | 23 | 24.00 per eligible victim |
+| R21 | Brocatanque | Machines / Ranged | 5 | 900 | 0 | 44 | 4500 | 23 | 0; drills are its output |
+
+R01's entire base row is a completion hypothesis: T01 is incomplete.
+R20's cost/HP/movement and Tank assignment are completion hypotheses;
+damage, interval and range come from T11's flame. Other base rows preserve
+the text apart from integer speed conversion. No printed PNG number is
+used. R21's interval is its production cadence, not a zero-damage attack.
+
+### 13.2 Proposed primary abilities
+
+Times are ticks; percentages use basis points (1%=100 bp). Parameters
+absent from a text are explicitly completed here; they are not attributed
+to the owner. Common windup is the existing six ticks. Unless specified,
+special range equals base attack range and ability target is an enemy unit.
+
+| ID | Ability and complete numerical parameters |
+|---|---|
+| R01 | Muralha Viva: period 160; anchored self-reduction 1500 bp for 60; no Guard/taunt. Entire base ability is a completion hypothesis |
+| R02 | Esmagamento em Área: period 200; caster-centered radius 2500; damage 120; no displacement or true interruption |
+| R03 | Marca do Corvo: readiness every 140; next valid basic hit marks for 80; Slow 2000 bp, heal-cut 3000 bp, own basic damage vs own marked target +1500 bp |
+| R04 | Tiro Cruzado: every fourth completed enemy-unit primary hit; one additional target within 1500 of primary; secondary damage 6000 bp of current static basic damage |
+| R05 | Bagunça em Dobro: period 180; damage 60; primary-centered radius 1200; Slow 1500 bp for 30; independent of club |
+| R06 | Barrigada do Brejo: period 200; caster-centered radius 1500; damage 65; Slow 1500 bp for 40 |
+| R07 | Rasgo Sangrento: period 180; primary-centered radius 1500; damage 75; one bleed slot, 5 HP per 20 ticks, four pulses |
+| R08 | Couraça Primordial: each positive HP-damage receipt adds 300 bp reduction for subsequent hits, five stacks maximum / 1500 bp; all expire after 60 ticks without HP damage. Step size is a completion |
+| R09 | Frenesi Predatório: next consecutive hit against same unit gains 800 bp per previous hit, maximum three increments / 2400 bp; reset after 60 ticks without a valid hit |
+| R10 | Cuspe Corrosivo: every third completed enemy-unit primary hit; flat damage 18 to at most two other enemies within 1500 of primary. Radius is a completion |
+| R11 | Pulsação do Medo: period 160; Slow 2500 bp for 40 on primary; no separate ability damage |
+| R12 | Barreira Solar: period 160; lowest HP-fraction other living ally within 3000, ties distance/id; shield 100 for 80; no self-shield. Range/exclusion are completions |
+| R13 | Pulso Harmônico: period 200; weaken enemy basic damage by 1500 bp for 60, maximum weakening 2000 bp across this family; no healing pulse |
+| R14 | Flecha da Purificação: every fourth completed enemy-unit hit replaces that basic damage with 80 and removes its temporary Unit shield immediately before damage; no piercing chain |
+| R15 | Chuva Celeste: period 200; one damage pulse 65, primary-centered radius 1300; no persistent ground zone |
+| R16 | Carapaça Erguida: period 200; self-reduction 1500 bp for 60; no allied aura |
+| R17 | Golpe Preciso: fourth consecutive completed hit on same enemy unit adds 60 damage, then sequence resets; target change resets; no dash |
+| R18 | Ferrão Venenoso: every third completed enemy-unit hit applies one non-stacking poison slot, 5 HP per 20 ticks, four pulses |
+| R19 | Teia Adesiva: period 160; damage 25 plus Root 30 on primary |
+| R20 | Fogo Profano: each 10-tick basic cycle applies damage 12 to every other living unit in the forward segment of length 2800, allies and enemies equally; heal-cut 3500 bp for 40, no target cap. Self excluded. Primary enemy Stronghold may take one ordinary 12-damage hit, never collateral flame/cut; tower treatment is a completion |
+| R21 | Ninho de Brocas: every 44 ticks with a target within 4500, spawn one Microbroca at producer x; no direct damage. Eight living drills total per seat across producers/ranks; same-rank allied drills within 200 may fuse; maximum rank three. Trigger/radius are completions |
+
+### 13.3 Proposed Evolution parameters
+
+Columns are **Tier 2 / Tier 3** (stored tiers 1/2). Stat deltas accumulate
+on base; absolute ability values **replace**, not add. A Tier 3 form keeps
+its own Tier 2 benefits. Existing Energy price is 2 then 4; no new price
+curve is proposed. Names identify the original branch, not extra systems.
+Where the source gives a single unsplit benefit, intermediate values or
+an additional modest benefit below are completion hypotheses for testing.
+
+| ID | Branch A: Tier 2 → Tier 3 | Branch B: Tier 2 → Tier 3 |
+|---|---|---|
+| R01 | Fortaleza Móvel: +2000 bp HP → anchor duration 80 | Peso da Terra: +1500 bp basic damage → basic hits Slow 1500 bp for 20 |
+| R02 | Punhos Reforçados: +2000 bp special damage → radius 3000 | Sistema de Choque: period 160 → basic hits Slow 1500 bp for 40 |
+| R03 | Corvo Pestilento: cut 4000 bp → mark duration 110 | Besta da Ruína: +1500 bp basic damage → own mark bonus 2500 bp |
+| R04 | Pistoleiro Veloz: +1500 bp attack speed → +1000 bp movement | Bala Ricocheteante: secondary ratio 7500 bp → search radius 2000 |
+| R05 | Fúria do Grandão: +2000 bp HP → +2000 bp basic damage | Truques do Tico: period 150 → radius 1500, Slow 2000 bp |
+| R06 | Barriga de Pedra: +2000 bp HP → 1500 bp self-reduction for 40 after impact | Onda do Brejo: period 160 → radius 1900, Slow 2000 bp |
+| R07 | Fúria Oceânica: +2000 bp HP → bleed 7 per pulse | Maré Sangrenta: period 150 → radius 1900 |
+| R08 | Couraça Ancestral: +2000 bp HP → stack expiry 80 | Presas de Pedra: basic damage +1500 bp vs units with base range ≤1600 → replace bonus with 2500 bp |
+| R09 | Caçada Voraz: +1500 bp attack speed → +1000 bp movement | Frenesi Profundo: maximum four increments / 3200 bp → reset gap 80 |
+| R10 | Mandíbula Abissal: +1500 bp basic damage → +400 range | Salva Corrosiva: secondary damage 24 → maximum three additional targets |
+| R11 | Eco do Medo: +500 range → Slow duration 50 | Pulso Mental: period 130 → +2000 bp basic damage |
+| R12 | Fortaleza da Luz: +2000 bp HP → shield 130 | Proteção em Grupo: second distinct ally shield 50, same expiry → +500 special range |
+| R13 | Luz Restauradora: weakening duration 70 → duration 80 | Aura Sagrada: period 180 → period 160; branch names do not grant healing/aura |
+| R14 | Precisão Divina: +1000 bp basic damage → another +1000 bp basic damage | Marca Celeste: proc every third hit → empowered damage 90; no team damage mark |
+| R15 | Fúria Celeste: +2000 bp special damage → +1000 bp HP | Julgamento: radius 1600 → Slow 1500 bp for 20 on affected enemies |
+| R16 | Carapaça Reforçada: +2000 bp HP → protection duration 80 | Guarda do Enxame: next enemy-unit primary after protection ends adds 40 → +1500 bp basic damage; no area aura |
+| R17 | Caça Implacável: +1500 bp attack speed → +1000 bp movement | Lâmina Precisa: bonus 70 → bonus 85 |
+| R18 | Veneno Profundo: poison 6 per pulse → poison 7 per pulse | Revoada: +1500 bp attack speed → +400 range |
+| R19 | Rede Ampliada: period 145 → period 130 | Teia Protetora: +500 special range → Slow 1500 bp for 40 after Root ends; no shield |
+| R20 | Fornalha Fúnebre: +2500 bp HP → flame range 3360 | Chama da Pestilência: +2000 bp flame damage → cut 5000 bp; friendly damage remains identical |
+| R21 | Fábrica de Enxame: production period 38 → merged drill shield 25 for 40; merge radius remains 200 | Broca de Cerco: Duobroca damage +1500 bp → Megabroca damage +2500 bp vs units whose printed base HP ≥1000; no Stronghold bonus |
+
+Names/secondary completions for R08–R11 and unsplit R12–R19 branches are
+proposals because the texts do not define every name/step. They preserve
+the text's role rather than importing image abilities. R16's empowered
+flag stores one charge, never accumulates; consumed by next valid unit
+hit, overwritten by the next completed protection if unspent. R19 keeps
+one pending post-Root Slow; cleansing clears it and any extended Root
+delays it. R21 Evolution benefits snapshot at summon birth; merge uses the
+lowest-id parent producer's recorded branch/tier, not a stronger ally's
+current upgrades. All resulting rank stats derive from that profile.
+
+### 13.4 Proposed drill summon forms and fusion
+
+| Summon | Rank | HP | Damage | Attack ticks | Move/tick | Range | Lifetime ticks |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Microbroca | 1 | 45 | 18 | 14 | 95 | 600 | 240 |
+| Duobroca | 2 | 110 | 40 | 17 | 73 | 600 | 280 |
+| Megabroca | 3 | 260 | 90 | 22 | 50 | 600 | 320 |
+
+Rank is a summon form, not purchasable Evolution. Range and Duobroca's
+integer-rounded speed are completion hypotheses. The eight-entity cap,
+finite lives, two-equal-rank fusion and maximum rank three come from T12.
+At cap, production waits ready; no queued burst or refunded Energy.
+Fused lifetime restarts at its rank lifetime; with only two promotions
+a Microbroca lineage lives at most 240+280+320 ticks. See the catalog for
+damaged parents, control/status inheritance, ownership and merge order.
+
+### 13.5 Proposed Factions and release hypotheses
+
+Append Monsters / Celestials / Insects after the existing four Factions;
+all use the existing thresholds 2/4 living conventional units. Monsters:
+damage +500/+1000 bp (completion). Celestials: max HP +500/+1000 bp (T09).
+Insects: movement +500/+1000 bp (T10), sharing the existing +5000 bp
+movement ceiling. Bonuses replace the lower threshold, never add twice.
+No new healing, flight, armor, stealth, knockback, Augment or Arcana system.
+
+The online Shop pool is 25 kinds today (D-50, `CANON.pool`). With all 21
+purchases it would be 46 (25 + 21). These are **models**, not a Shop change.
+Five distinct uniform offers imply per-kind probability 5/N, pair
+co-occurrence 20/[N(N−1)], and expected fresh offer sets N/5. Never call
+these expected *free rerolls*: another purchase is required to redraw.
+No global economy/Shop rule is changed to compensate.
+
+The current purchase-share gate is 2.5 % per kind (`tbg-balance/src/gate.rs`,
+O-R2), chosen for 25 kinds. The even share at 46 kinds is 2.17 %, so 2.5 %
+cannot hold there; 0.6/N gives 1.30 % at 46 kinds (2.4 % at 25).
+**Owner decision pending:** consider a floor of 0.6/N per kind (60% of
+uniform share), alongside conditional purchase-when-offered and enough
+observations. Do not change an existing threshold or contract to pass.
+
+Future measurement protocol (Proposed methodology, not balance proof):
+256 paired seeds for screening; 2048 disjoint confirmation pairs; reaction
+intervals 1/3/5 views; all existing Energy-equal duel budgets 20/40/60;
+candidate combos investigated above 60% score against the strategic pool;
+ability-value and Evolution buy-versus-base ablations; incomplete games
+reported as censored at the lab's own limit, never converted into gameplay
+draws. Keep pre-existing gate failures visible separately. No release
+until owner approves any new thresholds, evidence and fun/look.
+
+### 13.6 Completion register (Proposed, for owner review)
+
+| ID | Completed value | Where | Owner decision |
+|---|---|---|---|
+| C1 | R01 base row: Machines / Tank, cost 6, HP 1 400, damage 30, interval 40, range 800, move 25 | 13.1 | Bastion base completion (T01 is a fragment) |
+| C2 | R01 Muralha Viva, whole ability: period 160, 1 500 bp for 60, no Guard or taunt | 13.2 | Bastion base completion |
+| C3 | R20 cost 6, HP 800, movement 23, and the Tank assignment | 13.1 | Crematumba cost, HP and movement |
+| C4 | R20 basic-attack treatment (12 damage every 10 ticks over a 2 800 segment) and the Stronghold rule (one ordinary 12-damage hit, no collateral) | 13.2 | Crematumba |
+| C5 | R08 step size: 300 bp per stack | 13.2 | Review only |
+| C6 | R10 secondary radius: 1 500 | 13.2 | Review only |
+| C7 | R12 range 3 000, and the no-self-shield exclusion | 13.2 | Shield semantics (R12/R14) |
+| C8 | R21 trigger (target within 4 500) and radii (4 500 trigger, 200 merge) | 13.2 | Brocatanque production and radius |
+| C9 | Drill summon Range 600 (all three forms); Duobroca speed 73 (integer-rounded) | 13.4 | Brocatanque |
+| C10 | R21 merge resolution (lowest-id parent's branch and tier, snapshot at birth) and the two-step Evolution (gaps in T12) | 13.3, 13.4 | Brocatanque; no-fusion fallback |
+| C11 | Monsters Synergy damage +500 / +1 000 bp | 13.5 | Monsters damage Synergy |
+| C12 | Evolution names and secondary values for R08–R11 and the unsplit R12–R19 branches; names the texts do not define are Portuguese placeholders | 13.3 | Owner naming; English-only rule |
+
+C1–C4 come from the audit's missing-information note (audit §1) and the
+prose above the tables. C5–C12 are marked in the prose of 13.1–13.5. The
+source texts T01–T12 were not re-read for this register, so a reviewer should
+confirm that every unmarked value is in the owner's text.
+
+### 13.7 Decisions taken by the agent (Proposed)
+
+- **Unit shield (R12, R14):** one amount and one expiry per unit; a stronger
+  grant replaces, an equal one refreshes, a weaker one is ignored. The Cargo
+  Crab `shield_bp` stays dormant (D-63).
+- **Factions (§13.5):** Monsters, Celestials and Insects are appended. Their
+  Synergy is 500 / 1 000 bp, and Insects movement shares the 5 000 bp move cap
+  (D-64).
+- **Names and owner items 1–8:** English names and the values in D-65 and
+  `docs/roster/P59-NAMES.md`.
+
+
+## 14. Live battles and spectating (P47, Proposed)
 
 Anyone may watch a match that is being played from the public queues, in
 real time, from the lobby. Watching is listen-only and shows only public
@@ -779,3 +1012,392 @@ information. Values are **Proposed** (owner defaults O-1–O-6 in
 - **BR-LV09** Caps: 200 spectators per match and 2 000 in total. A full or
   unknown match answers `SpectateUnavailable`, never a disconnect. A slow
   spectator is dropped without ever affecting a seat.
+
+Champion adjustments (owner 2026-10-31, **Proposed**): Longaxe range 3.0,
+Old Finn range 5.25, Leechroot HP 300, Blood Furnace interval 30 ticks and
+speed 54, Nester range 3.0, Smuggler damage 10 / interval 30 / range 6.0.
+Cargo remains every 400 ticks (branch B 360); Faster Deliveries no longer
+modifies attack speed. CRATE_DROP_BACK = 400 milli-tiles, clamped to the lane.
+
+Bloodweaver Siphon (**Proposed**, owner 2026-10-31): attacks normally;
+primary damage to enemy units heals the lowest exact HP fraction among
+living wounded allied conventional units (self included), ties nearest then
+lowest id. No Stronghold healing trigger; no overkill or shield/plate damage
+counts. Healing uses Support bonuses, heal cut and Purification, separately
+from the BR-X06 lifesteal cap. Base heal_bp 10,000; A1 adds 3,000 damage bp;
+A2 doubles healing below 20% HP. B1 adds 2,500 attack bp; B2 replaces Siphon
+with heal_bp 12,000 split equally across up to two recipients chosen before
+healing. Event::Transfer now means enemy-to-recipient, actual HP restored.
+
+PR #21 consolidation correction (owner 2026-10-31, **Proposed**, D-68):
+Smuggler attack range is 6.0 tiles, obeying the existing Stronghold range
+cap. Protocol-20 roster slots and preview-only Shop state coexist in the
+deterministic state; hash goldens are recorded for that integrated schema.
+Reserve/Reroll stays disabled online pending its separate owner checkpoint.
+
+**R14 dispel policy — Proposed (D-81):** Arrow of Purification removes the
+victim's temporary Unit shield as immediate damage preprocessing. Ward's hostile
+status immunity does not block this dispel or get consumed by it. It removes no
+plate, Stronghold shield, status, HP or max-HP modifier.
+
+**R16 primary-bonus reading — Proposed (D-83):** the expiry-earned retaliation
+is added once to the next valid primary's raw basic damage, with the registry
+bonus scaled by static caster percentages. The combined primary then uses normal
+basic weakening/conditional modifiers and victim protection as one hit. A fully
+shield-absorbed valid primary still consumes the charge; no second on-hit is run.
+
+**R17 sequence reading — Proposed (D-84):** the fourth-hit bonus joins one
+primary under the R16 primary-bonus reading. Changing target, including changing
+to a Stronghold, clears the sequence; a canceled same-target windup never advances
+or clears it. Idle time alone never expires it. Target death clears it.
+
+**R18 cleanse order — Proposed (D-85):** a Brew's limited DoT strip budget takes
+bleed first, Hornet's separate venom second, then existing poison stacks in their
+previous strongest-first order. Each removed family spends one strip. Ward blocks
+a new venom payload but never cancels an already applied DoT. Venom uses the same
+static-on-application pulse scaling and refresh phase contract as R07 bleed.
+
+**Proposed R19 implementation reading (D-86):** post-Root Slow duration snapshots
+outgoing duration Augments and victim Arcana once when the web applies. Its queued
+transition checks current Ward/control immunity and ordinary Slow priority; it
+cannot replace a refreshed Root. Brew discards the queue with the cleansed Root.
+The B range bonus affects only the independent special, never basic attack range.
+
+**Proposed R20 implementation reading (D-87):** Profane Fire replaces the ordinary
+basic output after common betrayal handling. Static basic damage (including B)
+and current weakening apply once and identically to every eligible unit; it never
+uses target-conditional offensive procs, lifesteal or Essence. Surviving victims
+receive cut even if shields absorbed damage; current Ward prevents a new cut.
+The primary Stronghold takes that one basic amount, with no collateral tower/cut.
+An appended public event carries both exact authoritative segment endpoints.
+
+**Proposed R21 implementation reading (D-88):** three appended summon kinds encode
+rank; existing tier/branch and summoner record the producer's birth profile. They
+never enter Shop pools or accept purchased Evolution. Global arena modifiers still
+apply as to existing summons, with no Arcana, Synergy or general Augment inheritance.
+Fusion preserves active Ward/confusion-immunity deadlines and self-reduction
+strength/duration as well as the catalog's negative families. No haste, bond or
+carrier link survives. Parent replacement emits fusion rather than Death.
+
+**Proposed R21 external Mark reading (D-88):** hostile Crowcaller Marks follow
+the fused replacement with their existing deadlines. Offensive focus sequences
+do not transfer to the new target id. Fusion therefore never strips hostile Mark.
+
+**Proposed R21 control inheritance clarification (D-88):** choose Root over Slow
+and preserve the maximum remaining control duration across both parents. A longer
+Slow on one parent therefore extends the inherited Root; fusion cannot erase that
+parent's remaining control window.
+## 16. Troops and local training (P62, Proposed)
+
+**Proposed — planning only, 2026-10-31.** The owner requested a Troops
+catalog, champion animation/lore/stats, exact-team training against chosen
+champions or dummies, and Easy/Medium/Hard/Impossible bots. Publication of
+this plan does not activate these rules. See
+[P62](phases/P62-troops-training-lab.md) and its
+[acceptance cases](planning/TROOPS-TRAINING.md). Sections 14–15 are reserved
+by the separate P60/P61 planning branch; this gap is intentional.
+
+- **BR-TR01 — Access and roster.** The top Troops icon and lower card open
+  one catalog for guests and accounts while idle. Playable entries come
+  from the reviewed active roster, not every declared kind. Staged kinds
+  are labeled In development; summons are subordinate entries. Reading
+  does not unlock content or alter a ranked roster.
+- **BR-TR02 — Complete champion information.** Every active champion has
+  reviewed lore, Faction, Archetype, abilities, conditional effects and all
+  available Evolution forms. Numeric stats derive from canonical content
+  and effective-stat functions with explicit neutral/scenario/live context;
+  no second balance table. Show costs, HP, damage, interval, range, speed,
+  splash, healing, statuses and ability-specific parameters with units.
+- **BR-TR03 — Preview.** Idle, Walk, Attack/Action and Dance use the actual
+  champion/form and appropriate rig. Passive supports show a real action.
+  Preview motion has no combat or economy effect; Dance requires reviewed
+  animation and is not a hidden gameplay action.
+- **BR-TR04 — Exact teams.** The combat laboratory accepts 1–12 initial
+  units per side, including duplicates and valid form/position choices,
+  or 1–5 dummies on the target side. Three selected units means exactly
+  those three at Start. Ability summons obey normal rules and do not count
+  as selected slots. The limits are local safety limits, not online caps.
+- **BR-TR05 — Controlled combat.** Laboratory teams use the canonical combat
+  order and abilities, with Shop, Energy spending, councils, tower fire and
+  Stronghold auras disabled. Defaults are neutral Arcanas/Augments, Forest
+  and automatic Synergy from real champions; advanced supported modifiers
+  are explicit in setup/results. A chosen three-kind team never replaces
+  the five-distinct-offer Shop pool. Full practice retains canonical match
+  rules and the normal Shop; exact enemy selection is a laboratory option.
+- **BR-TR06 — Dummy semantics.** Wooden dummies are inert summon-like
+  targets: no attacks, movement, cargo, Bounty, Synergy contribution,
+  Evolution or expiry; zero innate damage reduction. HP presets: 1,000 or
+  10,000. Finite targets die normally. Renewable targets die, then respawn
+  cleanly next tick with a new ID; counters retain the trial history.
+  Effects requiring conventional enemies do not trigger; explain this and
+  offer chosen champion opponents. Do not imply universal target eligibility.
+  An empty renewable target side awaiting respawn does not end the trial;
+  elimination of all attacking units still does.
+- **BR-TR07 — Control and limits.** Start, Pause, Resume, one-tick Step,
+  Reset, edit setup and Exit are local controls. Config edits apply to a
+  new trial; same seed/config/commands/content reproduce it. Speed is 1x.
+  Focus loss pauses the laboratory. Side elimination ends finite combat;
+  mutual elimination draws. At 300 active seconds, 256 living entities,
+  or 4,096 retained instance-result rows, pause and preserve the trial
+  rather than fabricate a winner, lose counters or delete units silently.
+- **BR-TR08 — Measurements.** Count actual HP removed/restored, excluding
+  overkill/overheal; report shields/plates separately. Attribute direct,
+  periodic, splash, friendly and summon effects by actual source. Team
+  totals count each mutation once. DPS is HP damage times TICK_HZ divided
+  by active ticks since Start/reset; paused time is excluded and zero time
+  shows no rate. Finite kill time and per-life renewable kill times are
+  distinct. Nominal basic-attack DPS is labeled as an estimate.
+- **BR-TR09 — Fair profiles.** Easy/Medium/Hard bots consume their own legal
+  view and send ordinary PlayerIntentions, with no hidden opponent data or
+  resource/stat advantages. At a 10 Hz view cadence, proposed decision
+  spacing is Easy 15–25 steps, Medium the existing roughly 4–9-step Bot,
+  Hard 2–4 steps. Hard uses a bounded deterministic legal-action scorer;
+  the existing generic Bot remains the baseline for other callers.
+- **BR-TR10 — Impossible proposal.** Recommended: Hard policy at 1–2 view
+  steps plus a visible 2x ordinary Energy regeneration advantage for the
+  bot, practice-only. No starting-Energy, Bounty, combat-stat or hidden-data
+  advantage; no extra regen during countdown, council or pause. The owner
+  must select this assisted proposal or fair-only alternative before its
+  activation (P62 O03). The label does not guarantee an unbeatable bot.
+- **BR-TR11 — Isolation.** All experiments and practice results stay local.
+  They cannot affect rating, ranked stats, account records, rewards,
+  integrity decisions or public spectating. Training controls are not wire
+  messages. Starting training cannot silently abandon an online session.
+- **BR-TR12 — Desktop completeness.** Validate both active desktop entry
+  points, English/pt-BR, keyboard/mouse, state cleanup and supported forms.
+  The initial visual matrix is 1366×768 and 1920×1080. Native coverage is
+  recorded per actual OS; phone layouts/touch are outside P62.
+
+**Proposed validation budgets, not gameplay guarantees:** one active preview
+figure; warm interaction p95 below 100 ms and frame-time p95 within +10% of
+the comparable baseline on the agreed desktop machine; 20 open/reset/exit
+cycles for lifecycle inspection. Named bot calibration, if explicitly
+authorized: 24 seeds with swapped seats for each of three adjacent pairs
+(144 matches), at most 6,000 ticks per experimental game; report truncation
+separately. A 60% stronger-profile score is a screening goal with paired
+uncertainty, not a human win-rate claim. All validation remains deferred
+until implementation; owner look/fun/lore decisions remain open.
+## 14. Ranked integrity — Proposed, inactive (P60, D-87/D-89)
+
+Planning only. These candidate rules do not amend active BR-R03–05 until
+the owner adopts enforcement. Shadow collection preserves existing Elo.
+See [P60](phases/P60-ranked-integrity.md) and the
+[joint execution program](planning/RANKED-PROGRAM.md).
+
+- **BR-RI01 — Proposed.** Ranked remains one open account-only FIFO queue,
+  with no rating bands, bots, selectable opponents or integrity delays.
+- **BR-RI02 — Proposed.** A repeat/source budget either accepts both
+  existing applied Elo deltas intact or applies zero to both; it never
+  clips just a winner, changes K or asserts baseline Elo is zero-sum.
+- **BR-RI03 — Proposed.** Only authoritative public ranked outcomes with
+  two distinct connection-bound accounts enter settlement. A unique match
+  key settles once. Private, Challenge, rematch and Practice never rate.
+- **BR-RI04 — Proposed.** Optional pair budgets count the sum of positive
+  points per beneficiary/opponent in a rolling window. Losses do not refund
+  allowance. Test a prospective full award; equality is allowed, exceeding
+  a limit makes both deltas zero. Matches remain playable and recorded.
+- **BR-RI05 — Proposed.** Optional global source budgets count positive
+  inflow to a beneficiary from all immature opponents. Maturity uses age
+  and previously Applied games. On adoption of enforcement, NoChange games
+  do not advance competitive W/L/D/game counts, placement or maturity;
+  they stay in result history. Shadow preserves current BR-R05 behavior.
+- **BR-RI06 — Proposed.** Normal/Review/Invalidated describes evidence,
+  separately from Applied/NoChange rating. Isolated IP, short duration,
+  Surrender, new account, reconnect or repeated friends never proves fraud.
+  Only the specified relationship-plus-behavior combination flags Review.
+- **BR-RI07 — Proposed.** Review settles normally and is excluded from
+  balance statistics until cleared. Automatic holds are not enabled by
+  this proposal. Ranking contains committed applied rating only.
+- **BR-RI08 — Proposed.** A proposed pre-Running forfeit rule awards zero
+  to both without implying misconduct; ordinary Surrender/disconnect after
+  Running remain outcomes under BR-M03/M06. There is no gameplay timeout.
+- **BR-RI09 — Proposed.** Adjudication is append-only, attributable and
+  reversible. Human invalidation/restore replays frozen original deltas
+  from a cutover baseline for affected accounts; later opponents are not
+  counterfactually rerated. Original results and decisions remain intact.
+- **BR-RI10 — Proposed.** Pre-cutover matches are not retrospectively
+  investigated or invalidated by this feature. New policy versions do not
+  retroactively change old eligibility decisions.
+- **BR-RI11 — Proposed.** No automatic account bans, suspensions,
+  fingerprinting or ML. Do not persist IP derivatives in the MVP. A neutral
+  private receipt and an owner-provided appeal contact accompany enforcement.
+- **BR-RI12 — Proposed.** Rating updates and authoritative result records
+  commit atomically. Durable retry is idempotent; unavailable storage is
+  visible and cannot fabricate an outcome. Optional analytics never rolls
+  back a committed rating. No client-supplied statistics are accepted.
+
+All following new policy/acceptance values are **Proposed**, not measured
+production facts or automatic activation authority:
+
+| Parameter | Proposed value / decision |
+|---|---|
+| Default integrity mode | Shadow; no reward restriction |
+| Pair positive-inflow budget | 120 points per beneficiary/opponent per rolling 7 days (604800 seconds); 40/7 rejected as too restrictive |
+| Immature-opponent global inflow budget | 120 points per beneficiary per the same rolling 7 days |
+| Mature source | Age at least 7 days and at least 20 previously Applied, non-Invalidated results |
+| Review relationship | At least 5 pair games/7 days; at least 80% of donor games against recipient; at least 80% losses and net recipient gain at least 40 |
+| Independent behavior evidence | At least 3 such losses with no purchases/Evolutions/Fortifications/applied Augments, or voluntary Surrender before 15 combat seconds |
+| Supporting newcomer concentration | At least 80% of positive inflow from immature sources and at least 5 source accounts; never sufficient for Review |
+| Context windows | 1 hour and 7 days; active distinct accounts cached every 10 minutes |
+| Shadow evidence before gate consideration | At least 7 days, 50 games, 5 accounts; review all flags and legitimate would-limit matches; owner decision still required |
+| Automated hold | Disabled; 24-hour auto-release is an unelected future candidate requiring a separate design/decision |
+| Optional future IP pseudonym retention | At most 7 days, daily key rotation; no collection in this MVP |
+| Integrity collector / facts / history budget | At most 4 KiB extra per match / 8 KiB facts / 10000 streamed history rows; one additional indexed history query per completion |
+| Integrity end-of-match latency targets | Evaluator CPU p95 <=5 ms; storage/journal p95 <=20 ms; queue-wait p95 delta <=5 ms at equal local load; no new pairing await |
+| Durable final journal | At most 32 KiB per file, 32 MiB total; one retry worker at 1/5/30-second delays, then operator-visible pending state |
+
+## 15. Ranked statistics — Proposed, inactive (P61, D-88/D-89)
+
+- **BR-ST01 — Proposed.** Main statistics include only complete,
+  post-collection public Ranked matches that reached Running, with two
+  distinct authoritative accounts, Normal risk and Applied settlement.
+  A valid zero-delta draw is included; Review, Invalidated, NoChange and
+  missing/overflowed summaries are excluded with recorded coverage gaps.
+- **BR-ST02 — Proposed.** Every record has immutable ruleset revision,
+  source hash and summary schema. Gameplay/content changes, including
+  mid-patch fixes, receive a new revision. Different revisions/hashes never
+  mix; old missing telemetry is not reconstructed by guesswork.
+- **BR-ST03 — Proposed.** A match contributes two sides to feature metrics
+  and one match to duration/end/Arena metrics. A purchased feature is
+  present once per side regardless of copies. Generated units are not
+  purchases. Faction/Archetype/Arcana exposures may overlap.
+- **BR-ST04 — Proposed.** Binary win rate is wins/exposed sides; draws
+  remain in the denominator. Score rate is (wins+half draws)/exposed sides
+  and is named separately. Buyer/nonbuyer deltas are associations, not
+  causal effects. Every displayed rate identifies its denominator.
+- **BR-ST05 — Proposed.** Evolution records historical side-level reach by
+  kind/form and successful transitions per tier, including dead units.
+  Side-level reach and purchased-copy conversion have distinct denominators.
+  Synergy records real activation/time. Augment conditional pick uses
+  completed offered seat-rounds, distinguishing unresolved cancellations.
+- **BR-ST06 — Proposed.** Arena frequency is assigned frequency, not a
+  player choice; compare seat-A score and match metrics, not pooled
+  two-sided win rate. Matchup matrices count each match once.
+- **BR-ST07 — Proposed.** Public small/concentrated cohorts are suppressed,
+  including complements and comparisons that could reveal a small group.
+  No account IDs/names/keys/IPs, raw match IDs, seeds, risk facts or fine
+  timestamps enter the public aggregate API. Safeguards reduce disclosure
+  risk but are not a guarantee of anonymity.
+- **BR-ST08 — Proposed.** Raw summaries are authoritative and aggregates
+  are disposable. Review/clear/invalidate/restore changes eligibility and
+  forces a coherent rebuild; incomplete or stale generations are not
+  silently presented as complete current data.
+- **BR-ST09 — Proposed.** All ratings view is primary; public bands,
+  per-player analysis and arbitrary query cuts are deferred. Desktop
+  Statistics uses the existing lobby and both supported languages.
+- **BR-ST10 — Proposed.** Online data produces investigation candidates;
+  D-33 lab confirmation and owner approval precede balance changes. Patch
+  notes cite online sample/uncertainty and lab evidence, with before/after
+  values and a new revision. No automatic buff or nerf from popularity.
+- **BR-ST11 — Proposed.** Collection uses bounded command/event counters
+  outside the simulation; no per-tick scan/log/SQL or extra simulation-state
+  fields. This has small nonzero bookkeeping cost. Exact damage attribution
+  is deferred, not replaced with false zeros.
+- **BR-ST12 — Proposed.** Optional summary persistence follows authoritative
+  settlement and never changes its outcome/rating. Recovery uses match-key
+  idempotency; irrecoverable missing data is an explicit coverage gap.
+
+All new thresholds/technical budgets below are **Proposed**:
+
+| Parameter | Proposed value / decision |
+|---|---|
+| Ruleset / summary / public API initial revision | 1 each, independent of postcard version |
+| Main internal landmark | 60 combat seconds (1200 ticks); keep both sides of matches reaching it; early finishes reported separately |
+| Public feature row | >=50 exposed sides, >=5 accounts, >=3 pairs; largest account <=40% of exposures; complement qualifies separately |
+| Public match-level row | >=25 matches, same account/pair/concentration protections |
+| Public Augment conditional pick | >=50 offered seat-round opportunities from >=25 matches; same account/pair protections |
+| Public matchup matrix cell | >=100 matches, >=10 accounts, >=5 pairs; largest account <=40% |
+| Interval | Wilson 95%, z=1.96 for binary proportions; descriptive under repeated-player/match clustering |
+| Public rounding / release batch | Approximate n rounded down to tens; percentage/CI to whole percentage points; at least 10 new eligible matches between numeric publications, except immediate withdrawal |
+| Public time and cohort cuts | Fixed ruleset only, All rating; daily-precision update labels |
+| Candidate investigation | >=200 exposed sides, >=10 accounts, >=5 pairs, largest account <=25%; Wilson wholly below 45% or above 55%, or unit presence below 2% / above 60% with >=1000 denominator sides; descriptive, not automatic tuning |
+| Future dynamic bands | Consider at >=300 accounts and >=1000 matches/patch; tertiles of per-account first-match ratings, avoid splitting ties, collapse when data is insufficient |
+| Collector / summary / API/cache sizes | <=8 KiB extra collector, <=16 KiB JSON summary, <=64 KiB immutable ruleset catalog, <=64 KiB uncompressed API response, <=128 rows, <=1 MiB aggregate cache |
+| Summary CPU / optional DB target | Encode p95 <=1 ms; optional insert p95 <=5 ms; one optional row insert per match |
+| Rebuild budget | At most once per 300 s when dirty; one worker; <=100000 matches / <=2 s per snapshot, otherwise unavailable and an operator diagnostic |
+| Public cache | 60-second browser/shared cache; no stale-while-revalidate; current and immediately previous ruleset, All band, seven dimensions |
+| Query/error bounds | <=256 query bytes; Retry-After 5 s for unavailable; existing API 120/IP/min applies; every error no-store |
+| E1->E2 quality gate | >=99% complete summaries over at least 50 eligible completions, privacy and desktop acceptance; sparse public rows remain suppressed |
+
+Full definitions, recovery details, bias qualifications and implementation
+contracts are in [P61](phases/P61-ranked-stats.md). These candidate values
+do not change existing D-33 gate thresholds or active gameplay values.
+
+## 17. Arena victory celebration (P63, Proposed)
+
+**Proposed — planning only, 2026-10-31.** See
+[P63](phases/P63-victory-celebration.md). The owner's requested outcome is
+an arena celebration with the winner's characters, alive or dead, facing
+the player and performing individual animations. No rule below is activated
+by publication of the plan.
+
+- **BR-VC01 — Result first.** Only the authoritative confirmed winner
+  triggers victory. Presentation cannot change combat, Outcome, rating,
+  rewards or duration. Draw/unknown/canceled results do not celebrate.
+- **BR-VC02 — Complete cast.** Include the winner's participating instances,
+  dead and surviving, with duplicates and each instance's last attained
+  Evolution form counted once. Recommended eligibility includes animated
+  combat summons, excluding inert Crates, Strongholds, props and training
+  dummies; confirm P63 O01. Never derive the complete cast only from survivors
+  or views observed since reconnect. A genuinely empty cast stays empty.
+- **BR-VC03 — Arena and facing.** Show intact cosmetic figures in the match
+  arena, in a spaced formation facing the camera on either seat. They are
+  presentation copies, not resurrected simulation units or targets.
+- **BR-VC04 — Current and future motion.** Reuse actual per-kit Victory
+  motions now; add a shared override seam and one owner-approved signature
+  Dance pilot. Future unique dances are authored per character. Shared or
+  arm-raising fallbacks are labeled accurately in the content inventory.
+  Loop within each figure's slot without combat events or repeated audio.
+- **BR-VC05 — Result interaction.** The winner can use Menu, retry/rematch
+  and Hide celebration immediately. Continue processing rating/rematch
+  messages. Duplicate end messages cannot replay audio or recreate the
+  scene. Proposed initial losers/spectators retain their ordinary result.
+- **BR-VC06 — Scale proposal.** Show all figures together through 64;
+  larger casts use explicit pages of at most 64, with total count and every
+  participant reachable. Confirm P63 O02 or adopt a measured all-at-once
+  alternative; no silent truncation or online army cap. Decode compact
+  counts without allocating every logical figure.
+- **BR-VC07 — Safety and preferences.** Scene ownership and cleanup isolate
+  celebration from match state. Reduced motion uses a static pose/camera;
+  existing audio preferences apply. An unusable cast summary falls back to
+  the ordinary result without invalidating the outcome.
+
+Proposed validation: desktop 1366×768 and 1920×1080; 20 lifecycle cycles;
+under the paging proposal, at most 64 visible figures and one camera
+override; p95 frame-time within +10% of a comparable same-arena/cast scene
+on the agreed desktop machine. All measurements and owner visual review
+are deferred until implementation. No phone/touch work is included.
+
+
+### P63 execution amendment — owner decisions, 2026-10-31
+
+O01 and O02 are approved for implementation: BR-VC02 includes animated
+summons, excludes inert Crates, and BR-VC06 uses complete pages of at most
+64 figures. For BR-VC04, the owner requests a shared standard using existing
+Victory motions now, with per-character overrides ready for future content;
+the exclusive pilot requirement is deferred by the owner. No unique-dance
+roster is claimed. Result identity and the exact aggregate use protocol 28
+on main's real v17 schema; unmerged v20/v27 fields are not assumed present.
+All behavioral/presentation additions remain Proposed pending the recorded
+acceptance and visual review. No combat or rating values change.
+
+
+## Consolidated roster activation — Proposed, owner 2026-10-31
+
+The owner requested all open PR work, all 21 P59 champions and their native
+compatibility in one installable/deployed candidate, explicitly rejecting a
+partial staged delivery. FULL_POOL/CANON now contain 46 conventional champions;
+ALL_KINDS contains those 46 plus Beetling, Crate and three drill ranks (51).
+All existing §13 starting stats, forms and abilities remain Proposed and
+unchanged. No summon enters the Shop and the ten-kind reference pool remains
+for existing C7 planted-imbalance contracts. This activation changes seeded
+Shop draws, so deterministic fixtures are intentionally consolidated in the
+same roster-activation commit; it never justifies weakening a balance gate.
+D-33 evidence and owner look/fun review are recorded in the consolidation report.
+Shop reservation/Reroll remains the existing Practice preview rule, not a new
+online economy change.
+
+P60/P61 journal/summary Faction arrays follow FACTION_COUNT=7, preserving
+legacy four-Faction records by zero extension. P63 counts every actual drill
+spawn, including fusion outputs, without deleting consumed parents from the
+historical participant aggregate. Cosmetic figures never affect simulation.

@@ -24,6 +24,11 @@ fn unit(id: u32, x: i32) -> UnitView {
         max_hp: 100,
         status: 0,
         fx: 0,
+        carrier: None,
+        shield: 0,
+        reduction: 0,
+        special: None,
+        effects: None,
     }
 }
 

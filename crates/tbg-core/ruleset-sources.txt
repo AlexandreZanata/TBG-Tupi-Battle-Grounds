@@ -1,0 +1,71 @@
+# Every core source is classified; watched gameplay changes require a new revision.
+watch acidmaw.rs
+watch afflictions.rs
+watch arcana.rs
+watch augment.rs
+watch bonehorn.rs
+watch bulwark.rs
+watch capybara.rs
+watch celestial_archer.rs
+watch combat.rs
+watch combat/formation.rs
+watch content.rs
+watch crowcaller.rs
+watch demolisher.rs
+watch drillnest/effects.rs
+watch drillnest/mod.rs
+watch hits.rs
+watch hornet.rs
+watch intent.rs
+watch jawguard.rs
+watch justiciar.rs
+watch luminous_oracle.rs
+watch mantis.rs
+watch pyre_warden.rs
+watch rattle_tick.rs
+watch ravager.rs
+watch rng.rs
+watch roster_slots.rs
+watch ruleset.rs
+watch secondary_targets.rs
+watch shop.rs
+watch sim.rs
+watch siphon.rs
+watch solar_sentinel.rs
+watch specials.rs
+watch state.rs
+watch stronghold.rs
+watch summon.rs
+watch support.rs
+watch synergy.rs
+watch targeting.rs
+watch trident.rs
+watch trigger.rs
+watch types.rs
+watch weaver.rs
+watch whisperer.rs
+exclude account.rs account key format, no gameplay
+exclude bot.rs practice/test opponent, never authoritative
+exclude bot_shop.rs cosmetic metadata, tests or read-only presentation
+exclude celebration.rs cosmetic metadata, tests or read-only presentation
+exclude drillnest/tests.rs cosmetic metadata, tests or read-only presentation
+exclude headless.rs offline harness
+exclude lab.rs offline balance lab, never online (C10)
+exclude lib.rs module exports only
+exclude practice_bot.rs local tools and observational hooks, no normal-match outcome changes
+exclude profiling.rs benchmark counters only
+exclude protocol.rs wire format, versioned separately
+exclude ranked_integrity.rs settlement eligibility, policy-versioned
+exclude rating.rs Elo, versioned by GAME-DESIGN §5 and contracts
+exclude replay.rs offline replay tooling
+exclude ruleset_version.rs this identity module
+exclude training/dummy.rs local tools and observational hooks, no normal-match outcome changes
+exclude training/metrics.rs local tools and observational hooks, no normal-match outcome changes
+exclude training/mod.rs local tools and observational hooks, no normal-match outcome changes
+exclude training/scenario.rs local tools and observational hooks, no normal-match outcome changes
+exclude training/session.rs local tools and observational hooks, no normal-match outcome changes
+exclude training_hooks.rs local tools and observational hooks, no normal-match outcome changes
+exclude view.rs per-seat presentation of authoritative state
+exclude view/effects.rs cosmetic metadata, tests or read-only presentation
+exclude view/public.rs spectator presentation
+exclude view/visibility.rs presentation filtering

@@ -4,7 +4,10 @@
 use std::collections::VecDeque;
 
 use bevy::prelude::*;
-use tbg_core::protocol::{ErrorCode, InviteToken, MatchMode, RoomCode, ServerMsg, SpectateRefusal};
+use tbg_core::protocol::{
+    ArcanaRejection, ErrorCode, InviteToken, MatchMode, RoomCode, ServerMsg, SpectateRefusal,
+    StrongholdRejection,
+};
 use tbg_core::{MatchView, Seat};
 
 use super::{spectate, LatestView, MatchInfo, RematchInfo, ViewBuffer};
@@ -12,7 +15,7 @@ use crate::audio::{Sound, Sounds};
 use crate::config;
 use crate::i18n::{Lang, Msg};
 use crate::link::MatchLink;
-use crate::net::{NetStatus, GIVE_UP};
+use crate::net::{NetFailure, NetStatus, GIVE_UP};
 use crate::overlay::OverlayStats;
 use crate::ui::{
     account::{Account, AccountInbox},
@@ -51,12 +54,19 @@ pub(super) fn poll_link(
     mut account: ResMut<Account>,
     mut ranking: ResMut<crate::ui::ranking::Ranking>,
     mut surrender: ResMut<crate::ui::surrender::Surrender>,
-    lang: Res<Lang>,
+    presentation: (
+        Res<Lang>,
+        ResMut<crate::ui::PendingBuy>,
+        Res<State<GameState>>,
+    ),
 ) {
+    let (lang, mut shop_pending, state) = presentation;
     let now = time.elapsed_secs_f64();
+    let mut started = false;
     for msg in link.poll(now) {
         match msg {
             ServerMsg::MatchStart {
+                result_id,
                 you,
                 you_name,
                 you_rating,
@@ -66,8 +76,23 @@ pub(super) fn poll_link(
                 arcanas,
                 arena,
             } => {
+                if info.result_id == Some(result_id) && info.outcome.is_some() {
+                    continue;
+                }
+                started = true;
                 info!("match arena: {}", arena.slug());
+                // Practice names are built-in identities, not player data:
+                // the link kind (never the name text) selects the label.
+                let (you_name, opponent) = if matches!(*link, MatchLink::Local(_)) {
+                    (
+                        lang.t(Msg::BattleYou).to_string(),
+                        lang.t(Msg::LocalTrainingBot).to_string(),
+                    )
+                } else {
+                    (you_name, opponent)
+                };
                 *info = MatchInfo {
+                    result_id: Some(result_id),
                     you: Some(you),
                     you_name,
                     you_rating,
@@ -87,6 +112,7 @@ pub(super) fn poll_link(
                 *ui.2 = QueueInfo::default();
                 config::clear_url_param("challenge");
                 latest.0 = None;
+                shop_pending.0 = None;
                 crate::ui::surrender::reset(
                     &mut surrender,
                     mode == tbg_core::protocol::MatchMode::Ranked,
@@ -135,6 +161,7 @@ pub(super) fn poll_link(
                 *buffer = ViewBuffer::default();
                 *extra.0 = super::MatchStats::default();
                 latest.0 = None;
+                shop_pending.0 = None;
                 config::save_watch(id);
                 next.set(GameState::InMatch);
             }
@@ -162,15 +189,31 @@ pub(super) fn poll_link(
                 }));
                 next.set(GameState::Menu);
             }
-            ServerMsg::Rejected { reason, .. } => {
+            ServerMsg::Rejected { seq, reason } => {
+                if shop_pending.0.is_some_and(|(_, pending)| pending == seq) {
+                    shop_pending.0 = None;
+                }
                 ui.0.push(crate::ui::rejection_text(reason, *lang))
             }
-            ServerMsg::MatchEnd { outcome } => {
+            ServerMsg::MatchEnd {
+                result_id,
+                outcome,
+                last_tick,
+                cast,
+            } => {
+                if !started && !matches!(*state.get(), GameState::InMatch | GameState::Result) {
+                    continue;
+                }
+                if !info.accept_result(result_id, last_tick, outcome, cast.as_ref()) {
+                    continue;
+                }
                 let won = outcome.winner.is_some() && outcome.winner == info.you;
+                if won && info.celebration.is_none() {
+                    warn!("P63: invalid/missing cosmetics; preserving confirmed result");
+                }
                 extra
                     .1
                     .play(if won { Sound::Victory } else { Sound::Defeat });
-                info.outcome = Some(outcome);
                 next.set(GameState::Result);
             }
             ServerMsg::Queued => {
@@ -193,12 +236,14 @@ pub(super) fn poll_link(
                 next.set(GameState::Queue);
             }
             ServerMsg::ChallengeUnavailable => {
-                ui.0.push("Challenge expired or unavailable");
+                ui.0.say(Msg::ChallengeUnavailable);
                 *link = MatchLink::Idle;
                 *ui.2 = QueueInfo::default();
                 next.set(GameState::Menu);
             }
             ServerMsg::RematchOpen { .. } if rematch.dismissed => {}
+            ServerMsg::RematchOpen { .. } if info.result_id.is_some() && info.outcome.is_none() => {
+            }
             ServerMsg::RematchOpen { opponent } => {
                 rematch.open = true;
                 rematch.closed = None;
@@ -206,7 +251,9 @@ pub(super) fn poll_link(
                 if info.opponent.is_empty() {
                     info.opponent = opponent;
                 }
-                next.set(GameState::Result);
+                if *state.get() != GameState::Result {
+                    next.set(GameState::Result);
+                }
             }
             ServerMsg::RematchState {
                 you_requested,
@@ -220,7 +267,7 @@ pub(super) fn poll_link(
                 rematch.closed = Some(declined);
             }
             ServerMsg::RoomNotFound => {
-                ui.0.push("Room not found");
+                ui.0.say(Msg::RoomNotFound);
                 *link = MatchLink::Idle;
                 *ui.2 = QueueInfo::default();
                 next.set(GameState::Menu);
@@ -232,7 +279,7 @@ pub(super) fn poll_link(
             ServerMsg::Error {
                 code: ErrorCode::SessionTakenOver,
             } => {
-                ui.0.push("Your account signed in on another device");
+                ui.0.say(Msg::AccountTakenOver);
                 account.profile = None;
                 *link = MatchLink::Idle;
                 next.set(GameState::Menu);
@@ -243,18 +290,18 @@ pub(super) fn poll_link(
                 code: ErrorCode::LoginRequired,
             } => {
                 account.profile = None;
-                ui.0.push("Log in to play ranked");
+                ui.0.say(Msg::AccountLoginRanked);
                 *link = MatchLink::Idle;
                 next.set(GameState::Menu);
             }
             ServerMsg::Error { code } => {
                 if code == ErrorCode::RateLimited && ui.2.joining_challenge {
-                    ui.0.push("Too many challenge attempts, try again later");
+                    ui.0.say(Msg::ChallengeRateLimited);
                     *link = MatchLink::Idle;
                     *ui.2 = QueueInfo::default();
                     next.set(GameState::Menu);
                 } else {
-                    ui.0.push(format!("Server: {code:?}"));
+                    ui.0.say(error_msg(code));
                 }
             }
             ServerMsg::Leaderboard {
@@ -272,14 +319,16 @@ pub(super) fn poll_link(
             // D-40: the server's word on the preset (after a change or a
             // login) becomes what the editor shows and the next match uses.
             ServerMsg::ArcanasSelected { preset } => crate::config::save_arcanas(preset),
-            ServerMsg::ArcanasRejected { reason } => {
-                ui.0.push(format!("Arcanas not changed: {reason:?}"))
-            }
+            ServerMsg::ArcanasRejected { reason } => ui.0.say(match reason {
+                ArcanaRejection::BadRanks => Msg::ArcanaRejectedBadRanks,
+                ArcanaRejection::NotIdle => Msg::ArcanaRejectedNotIdle,
+            }),
             // D-46: same for the Stronghold kind.
             ServerMsg::StrongholdSelected { kind } => crate::config::save_stronghold(kind),
-            ServerMsg::StrongholdRejected { reason } => {
-                ui.0.push(format!("Stronghold not changed: {reason:?}"))
-            }
+            ServerMsg::StrongholdRejected { reason } => ui.0.say(match reason {
+                StrongholdRejection::NotSelectable => Msg::StrongholdRejectedNotSelectable,
+                StrongholdRejection::NotIdle => Msg::StrongholdRejectedNotIdle,
+            }),
             _ => {}
         }
     }
@@ -290,18 +339,40 @@ pub(super) fn poll_link(
         _ if quiet => None,
         Some(NetStatus::Reconnecting { since }) => {
             let left = (GIVE_UP - (now - since)).max(0.0);
-            Some(format!("Reconnecting... {left:.0} s"))
+            Some(lang.tf(Msg::NetReconnecting, &[("secs", &format!("{left:.0}"))]))
         }
-        Some(NetStatus::Connecting) => Some("Connecting...".into()),
+        Some(NetStatus::Connecting) => Some(lang.t(Msg::QueueConnecting).into()),
         _ => None,
     };
     if let Some(NetStatus::Failed(why)) = link.status() {
+        #[cfg(target_os = "linux")]
+        {
+            account.auto_login = false;
+            account.pending = None;
+        }
         // A failed load-time probe is silent; the menu just stays usable.
         if !quiet {
-            ui.0.push(why.clone());
+            ui.0.say(match why {
+                NetFailure::ConnectionLost => Msg::NetConnectionLost,
+                NetFailure::VersionMismatch => Msg::NetVersion,
+            });
             next.set(GameState::Menu);
         }
         *link = MatchLink::Idle;
+    }
+}
+
+/// Player-facing text for a server error code; the two codes with their
+/// own flows above (`SessionTakenOver`, `LoginRequired`) reuse those texts.
+fn error_msg(code: ErrorCode) -> Msg {
+    match code {
+        ErrorCode::BadMessage => Msg::NetErrorBadMessage,
+        ErrorCode::RateLimited => Msg::NetErrorRateLimited,
+        ErrorCode::TooManyConnections => Msg::NetErrorTooManyConnections,
+        ErrorCode::NotInMatch => Msg::NetErrorNotInMatch,
+        ErrorCode::ServerFull => Msg::NetErrorServerFull,
+        ErrorCode::LoginRequired => Msg::AccountLoginRanked,
+        ErrorCode::SessionTakenOver => Msg::AccountTakenOver,
     }
 }
 

@@ -7,6 +7,7 @@ use super::account::{Account, AccountScreen};
 use super::ranking::Ranking;
 use super::{button, label, screen, UiAction, PANEL};
 use crate::audio::Sounds;
+use crate::i18n::{Lang, Msg};
 use crate::GameState;
 
 /// The mute toggle; its label follows `Sounds.muted`.
@@ -23,21 +24,26 @@ pub fn plugin(app: &mut App) {
             (
                 sound_label,
                 hide_under_panels,
-                refresh.run_if(resource_changed::<Account>),
+                refresh.run_if(resource_changed::<Account>.or_eager(resource_changed::<Lang>)),
             )
                 .run_if(in_state(GameState::Menu)),
         );
 }
 
-/// Rebuild the menu when the profile arrives or leaves mid-menu.
-fn refresh(mut commands: Commands, account: Res<Account>, roots: Query<Entity, With<MenuRoot>>) {
+/// Rebuild the menu when the profile or the language changes mid-menu.
+fn refresh(
+    mut commands: Commands,
+    account: Res<Account>,
+    lang: Res<Lang>,
+    roots: Query<Entity, With<MenuRoot>>,
+) {
     if roots.is_empty() {
         return;
     }
     for e in &roots {
         commands.entity(e).despawn();
     }
-    build(&mut commands, &account);
+    build(&mut commands, &account, *lang);
 }
 
 /// Modal panels (ranking, save your key) hide the menu: taps hit-test the
@@ -64,17 +70,18 @@ fn hide_under_panels(
 
 fn sound_label(
     sounds: Res<Sounds>,
+    lang: Res<Lang>,
     buttons: Query<&Children, With<SoundButton>>,
     mut texts: Query<&mut Text>,
 ) {
     for children in &buttons {
         for child in children.iter() {
             if let Ok(mut t) = texts.get_mut(child) {
-                let want = if sounds.muted {
-                    "Sound: off"
+                let want = lang.t(if sounds.muted {
+                    Msg::MenuSoundOff
                 } else {
-                    "Sound: on"
-                };
+                    Msg::MenuSoundOn
+                });
                 if t.0 != want {
                     t.0 = want.into();
                 }
@@ -83,8 +90,8 @@ fn sound_label(
     }
 }
 
-fn spawn(mut commands: Commands, account: Res<Account>) {
-    build(&mut commands, &account);
+fn spawn(mut commands: Commands, account: Res<Account>, lang: Res<Lang>) {
+    build(&mut commands, &account, *lang);
 }
 
 fn panel() -> impl Bundle {
@@ -113,8 +120,8 @@ fn pair(a: impl Bundle, b: impl Bundle) -> impl Bundle {
     )
 }
 
-fn build(commands: &mut Commands, account: &Account) {
-    if crate::config::arena_preview() {
+fn build(commands: &mut Commands, account: &Account, lang: Lang) {
+    if crate::config::bevy_ui() || crate::config::arena_preview() {
         return;
     }
     // P11 profile chip: guest actions, or name · rating plus log out.
@@ -130,48 +137,60 @@ fn build(commands: &mut Commands, account: &Account) {
             format!("{} ({})", p.name, p.rating),
             None,
             button(
-                &format!("Ranked Match ({})", p.rating),
+                &lang.tf(Msg::MenuRankedMatch, &[("rating", &p.rating)]),
                 UiAction::Ranked,
                 260.0,
             ),
         ),
         None => (
-            "Guest".to_string(),
+            lang.t(Msg::LobbyGuestName).to_string(),
             Some(()),
-            button(
-                "Create an account to play ranked",
-                UiAction::Disabled,
-                260.0,
-            ),
+            button(lang.t(Msg::MenuRankedLocked), UiAction::Disabled, 260.0),
         ),
     };
     root.with_children(|root| {
         root.spawn(panel()).with_children(|p| {
-            p.spawn(label("Tupi Battle Grounds", 34.0));
-            p.spawn(label("Real-time 1v1 lane strategy", 16.0));
+            p.spawn(label(lang.t(Msg::LobbyBrandName), 34.0));
+            p.spawn(label(lang.t(Msg::MenuTagline), 16.0));
             p.spawn(label(chip, 14.0));
             match actions {
                 Some(()) => p.spawn(pair(
-                    button("Create account", UiAction::CreateAccount, 180.0),
-                    button("I have a key", UiAction::HaveKey, 180.0),
+                    button(
+                        lang.t(Msg::LobbyAccountCreate),
+                        UiAction::CreateAccount,
+                        180.0,
+                    ),
+                    button(lang.t(Msg::MenuHaveKey), UiAction::HaveKey, 180.0),
                 )),
-                None => p.spawn(button("Log out", UiAction::Logout, 200.0)),
+                None => p.spawn(button(
+                    lang.t(Msg::LobbySettingsLogout),
+                    UiAction::Logout,
+                    200.0,
+                )),
             };
-            p.spawn(label("Casual", 20.0));
-            p.spawn(button("Practice vs Bot", UiAction::Practice, 260.0));
-            p.spawn(button("Quick Match", UiAction::Quick, 260.0));
+            p.spawn(label(lang.t(Msg::LobbyModeCasualTitle), 20.0));
             p.spawn(button(
-                "Challenge a friend",
+                lang.t(Msg::LobbyModePracticeTitle),
+                UiAction::PracticeSetup,
+                260.0,
+            ));
+            p.spawn(button(lang.t(Msg::MenuQuick), UiAction::Quick, 260.0));
+            p.spawn(button(
+                lang.t(Msg::MenuChallenge),
                 UiAction::CreateChallenge,
                 260.0,
             ));
-            p.spawn(button("Private room", UiAction::CreateRoom, 260.0));
-            p.spawn(label("Ranked", 20.0));
+            p.spawn(button(
+                lang.t(Msg::MenuPrivateRoom),
+                UiAction::CreateRoom,
+                260.0,
+            ));
+            p.spawn(label(lang.t(Msg::LobbyModeRankedTitle), 20.0));
             p.spawn(ranked);
             p.spawn(pair(
-                button("Ranking", UiAction::OpenRanking, 124.0),
+                button(lang.t(Msg::LobbyTabsRanking), UiAction::OpenRanking, 124.0),
                 (
-                    button("Sound: on", UiAction::ToggleSound, 124.0),
+                    button(lang.t(Msg::MenuSoundOn), UiAction::ToggleSound, 124.0),
                     SoundButton,
                 ),
             ));

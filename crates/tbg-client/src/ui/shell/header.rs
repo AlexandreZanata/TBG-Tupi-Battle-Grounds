@@ -1,0 +1,294 @@
+//! Reusable menu header: one layout for account, navigation and live presence.
+
+use super::{data::Data, kit, lobby::chrome, Account, Action, Lang, Panel, UiAction};
+use bevy::prelude::*;
+
+#[cfg(target_os = "linux")]
+mod account;
+#[cfg(target_os = "linux")]
+use account::spawn as account_block;
+
+#[cfg(not(target_os = "linux"))]
+pub fn spawn(
+    root: &mut ChildSpawnerCommands,
+    data: &Data,
+    account: &Account,
+    assets: &AssetServer,
+    lang: Lang,
+) {
+    root.spawn(Node {
+        align_items: AlignItems::Center,
+        column_gap: px(10),
+        ..chrome::region(2., 2.4, 96., 10.4)
+    })
+    .with_children(|header| {
+        header
+            .spawn(Node {
+                width: percent(18),
+                height: percent(130),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..default()
+            })
+            .with_children(|logo| {
+                logo.spawn((
+                    ImageNode::new(assets.load("lobby/wordmark.webp")),
+                    Node {
+                        width: percent(100),
+                        height: Val::Auto,
+                        aspect_ratio: Some(2.5),
+                        ..default()
+                    },
+                ));
+            });
+        header
+            .spawn((
+                Node {
+                    height: percent(100),
+                    flex_grow: 1.,
+                    flex_basis: px(0),
+                    min_width: px(0),
+                    border: UiRect::bottom(px(3)),
+                    ..default()
+                },
+                BackgroundColor(chrome::METAL),
+                BorderColor::all(chrome::EDGE),
+            ))
+            .with_children(|blocks| {
+                account_block(blocks, account, assets, lang);
+                navigation(blocks, assets, lang, Panel::Lobby, false);
+                presence_block(blocks, data, assets, lang, false);
+            });
+    });
+}
+
+#[cfg(target_os = "linux")]
+pub fn spawn(
+    root: &mut ChildSpawnerCommands,
+    data: &Data,
+    account: &Account,
+    assets: &AssetServer,
+    lang: Lang,
+    panel: Panel,
+    ranking: bool,
+) {
+    root.spawn((
+        Node {
+            align_items: AlignItems::Center,
+            border: UiRect::bottom(px(3)),
+            ..chrome::region(2., 2.4, 96., 10.4)
+        },
+        BackgroundColor(chrome::METAL),
+        BorderColor::all(chrome::EDGE),
+    ))
+    .with_children(|header| {
+        header
+            .spawn((
+                Node {
+                    width: percent(13),
+                    flex_grow: 0.,
+                    flex_basis: Val::Auto,
+                    padding: UiRect::axes(px(8), px(6)),
+                    ..block()
+                },
+                chrome::skin(chrome::METAL, true, false),
+                UiAction::Disabled,
+                Action::Open(Panel::Lobby),
+            ))
+            .with_children(|logo| {
+                logo.spawn((
+                    ImageNode::new(assets.load("lobby/wordmark.webp")),
+                    Node {
+                        width: percent(100),
+                        height: percent(100),
+                        ..default()
+                    },
+                ));
+            });
+        account_block(header, account, assets, lang);
+        navigation(header, assets, lang, panel, ranking);
+        presence_block(header, data, assets, lang, !ranking && panel == Panel::Live);
+    });
+}
+
+/// Shared dimensions and dividers keep every header cell in the same strip.
+fn block() -> Node {
+    Node {
+        flex_direction: FlexDirection::Column,
+        align_items: AlignItems::Center,
+        justify_content: JustifyContent::Center,
+        height: percent(100),
+        flex_grow: 1.,
+        flex_basis: px(0),
+        min_width: px(0),
+        min_height: px(0),
+        row_gap: px(5),
+        border: UiRect {
+            right: px(1),
+            bottom: px(2),
+            ..default()
+        },
+        overflow: Overflow::clip(),
+        ..default()
+    }
+}
+
+fn navigation(
+    root: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    lang: Lang,
+    current: Panel,
+    ranking: bool,
+) {
+    for (key, icon, panel) in [
+        ("lobby", "home", Some(Panel::Lobby)),
+        ("arcanas", "arcana", Some(Panel::Arcanas)),
+        ("stronghold", "tower", Some(Panel::Strongholds)),
+        ("arenas", "island", Some(Panel::Arenas)),
+        ("troops", "helmet", Some(Panel::Troops)),
+        ("ranking", "trophy", None),
+        ("settings", "settings", Some(Panel::Settings)),
+    ] {
+        let enabled = true;
+        let active = if key == "ranking" {
+            ranking
+        } else {
+            !ranking && panel == Some(current)
+        };
+        let mut tab = root.spawn((
+            block(),
+            chrome::skin(chrome::METAL, enabled, active),
+            if key == "ranking" {
+                UiAction::OpenRanking
+            } else {
+                UiAction::Disabled
+            },
+        ));
+        if let Some(panel) = panel {
+            tab.insert(Action::Open(panel));
+        }
+        tab.with_children(|t| {
+            t.spawn(chrome::icon(
+                assets,
+                icon,
+                24.,
+                if active { kit::GOLD } else { kit::MUTED },
+            ));
+            t.spawn(kit::muted(
+                lang.key(&format!("lobby.tabs.{key}")).to_uppercase(),
+                11.,
+            ));
+        });
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn account_block(
+    root: &mut ChildSpawnerCommands,
+    account: &Account,
+    assets: &AssetServer,
+    lang: Lang,
+) {
+    root.spawn((
+        Node {
+            width: percent(16),
+            flex_grow: 0.,
+            flex_basis: Val::Auto,
+            flex_direction: FlexDirection::Row,
+            column_gap: px(8),
+            padding: UiRect::all(px(8)),
+            ..block()
+        },
+        BackgroundColor(chrome::METAL),
+        BorderColor::all(chrome::EDGE),
+    ))
+    .with_children(|account_cell| {
+        account_cell.spawn(kit::image(assets, "branding/tbg-emblem.webp", 32., 32.));
+        account_cell
+            .spawn(Node {
+                flex_grow: 1.,
+                flex_basis: px(0),
+                ..chrome::column()
+            })
+            .with_children(|copy| {
+                copy.spawn(kit::heading(
+                    account
+                        .profile
+                        .as_ref()
+                        .map_or_else(|| lang.key("lobby.guest.name"), |p| p.name.clone()),
+                    16.,
+                ));
+                if account.profile.is_none() {
+                    for (key, action) in [
+                        ("create", UiAction::CreateAccount),
+                        ("key", UiAction::HaveKey),
+                    ] {
+                        copy.spawn((
+                            Node {
+                                padding: UiRect::vertical(px(1)),
+                                ..default()
+                            },
+                            action,
+                            children![kit::muted(lang.key(&format!("lobby.account.{key}")), 11.)],
+                        ));
+                    }
+                } else {
+                    copy.spawn(kit::muted(
+                        account.profile.as_ref().map_or(0, |p| p.rating).to_string(),
+                        12.,
+                    ));
+                }
+            });
+    });
+}
+
+fn presence_block(
+    root: &mut ChildSpawnerCommands,
+    data: &Data,
+    assets: &AssetServer,
+    lang: Lang,
+    active: bool,
+) {
+    let online = data.live.as_ref().map_or_else(
+        || lang.key("live.chip_loading"),
+        |v| {
+            lang.key("live.chip")
+                .replace("{online}", &v.players.to_string())
+                .replace("{battle}", &v.battle.to_string())
+        },
+    );
+    #[cfg(target_os = "linux")]
+    let online = if data.live.is_none() && data.unavailable {
+        lang.key("live.unavailable")
+    } else {
+        online
+    };
+    root.spawn((
+        Node {
+            width: percent(16),
+            flex_grow: 0.,
+            flex_basis: Val::Auto,
+            padding: UiRect::horizontal(px(6)),
+            ..block()
+        },
+        chrome::skin(chrome::METAL, true, active),
+        UiAction::Disabled,
+        Action::Open(Panel::Live),
+    ))
+    .with_children(|presence| {
+        presence.spawn(chrome::icon(assets, "friends", 24., kit::MUTED));
+        #[cfg(not(target_os = "linux"))]
+        presence.spawn(kit::muted(online, 11.));
+        #[cfg(target_os = "linux")]
+        presence.spawn((
+            kit::muted(online, 11.),
+            kit::Pending(data.live.is_none() && !data.unavailable),
+            Node {
+                width: percent(100),
+                min_height: px(14),
+                ..default()
+            },
+            TextLayout::justify(Justify::Center),
+        ));
+    });
+}

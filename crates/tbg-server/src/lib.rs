@@ -25,7 +25,10 @@ mod lobby;
 mod match_task;
 pub mod metrics;
 mod names;
+pub mod ranked;
+pub mod stats;
 pub mod store;
+mod version;
 mod ws;
 
 pub use config::Config;
@@ -65,19 +68,20 @@ pub async fn run_with(
     shared: Shared,
 ) -> std::io::Result<()> {
     let metrics = shared.metrics.clone();
-    let store = config
-        .db
-        .as_ref()
-        .and_then(|path| match store::Store::open(path) {
-            Ok(r) => Some(Arc::new(r)),
-            Err(e) => {
-                tracing::error!(
-                    "match records disabled, cannot open {}: {e}",
-                    path.display()
-                );
-                None
-            }
-        });
+    let store =
+        config
+            .db
+            .as_ref()
+            .and_then(|path| match store::Store::open_with(path, config.ranked) {
+                Ok(r) => Some(Arc::new(r)),
+                Err(e) => {
+                    tracing::error!(
+                        "match records disabled, cannot open {}: {e}",
+                        path.display()
+                    );
+                    None
+                }
+            });
     let config = Arc::new(config);
     let (lobby_tx, lobby_rx) = mpsc::channel(chan::LOBBY_QUEUE);
     // P47: the lobby publishes the live snapshot; the API only reads it.
@@ -108,6 +112,7 @@ pub async fn run_with(
         .route("/api/leaderboard", get(api::leaderboard))
         .route("/api/players/{name}", get(api::player))
         .route("/api/live", get(api::live))
+        .route("/api/version", get(version::get))
         .route("/api/online", get(api::online))
         .with_state(state);
     if let Some(dir) = &config.static_dir {

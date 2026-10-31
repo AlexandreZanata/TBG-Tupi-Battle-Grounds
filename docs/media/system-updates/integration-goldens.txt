@@ -1,0 +1,6 @@
+PR21 4661247 + deployed 3287410; owner Smuggler range 6.0; D-68/D-69
+1 0xd49f972e62beed89 0x9615d6ececbe8b99 3261 Some(Outcome { winner: Some(B), reason: StrongholdDestroyed })
+7 0x3517b9f6a318432d 0x008b5f628ee0b6da 2266 Some(Outcome { winner: Some(B), reason: StrongholdDestroyed })
+42 0x1fbd0fe2fb20af2f 0x8e40c6e671e82ee3 7977 Some(Outcome { winner: Some(B), reason: StrongholdDestroyed })
+1000 0x5d27e06131f397d6 0x5d6d037d5a3b9b7f 2829 Some(Outcome { winner: Some(B), reason: StrongholdDestroyed })
+65535 0x9a9d2278592c64a2 0x101623bd7c0478e6 13886 Some(Outcome { winner: Some(A), reason: StrongholdDestroyed })

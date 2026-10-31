@@ -827,11 +827,19 @@ form; the D-46 contract tests are untouched.
 **Consolidation (2026-10-30).** The P54/P55 kits (D-51, D-53) came later
 and are the owner's character direction: a unit with a kit keeps its own
 aim, shots, impacts and Death clip, and A-1's aim, hit reactions and
-faction deaths apply to units without a kit (today the Archer, whose
-five native forms come from A-1). A-1's other v2 forms remain the
-fallback for a kind without a kit; death hides HP bars for every unit.
+faction deaths apply to units without a kit. On 2026-10-30 the Archer migrated
+to its own art kit (`art/kits/archer/` with five distinct forms, own projectile via
+`visuals/attacks.rs`, and side-on draw/aim/loose/recoil motion); all 27 unit kinds
+now use the art kit standard. A-1's v2 forms remain the fallback for any kind
+without a kit; death hides HP bars for every unit.
 **Reopen when** a Stronghold kind needs its own impact point or muzzle for
 unit reactions, or phone support needs lighter forms.
+
+**Update (P56 Part A, 2026-10-30).** The Archer moved to its art kit. The
+native path (`archer_v2`, `bow.rs`, `arrows.rs`, `archer_aim`) never ran with a
+kit and is removed. The kit's bow is curved and strung, with a drawable string
+and a nocked arrow that shows only until Release, so the projectile replaces it
+and there is never a second arrow. Arrow Rain (B2) fires `ShotKind::ArrowStorm`.
 
 ## D-48 · Roster expansion: fifteen units, staged by ruleset pool — 2026-10-29 (owner decision)
 
@@ -1023,6 +1031,61 @@ seat. The Forest keeps every previous number.
 policy win rates past the D-33 gate, players find a modifier unreadable,
 or the owner wants arena choice online.
 
+## D-56 · Cargo Crab rework: united pair, carried view bit, and carry speed boost — 2026-10-30 (Proposed)
+
+> **Amended by D-60 (Proposed, 2026-10-30):** the carry bonus is the larger
+> of base and branch, not their sum, and the single-target absorption and the
+> dismount below were already rules (ROSTER-EXPANSION §C.15, P48-A), not
+> changes of this decision.
+
+**Decision.** The Cargo Crab carries an eligible allied non-Tank unit as a
+united pair. The pair advances at the speed of the faster of the two
+multiplied by $(1 + \text{carry bonus})$ (starting at base +20 % / 2 000 bp).
+Single-target attacks target the crab first; area/splash damage continues reaching
+the carried passenger at distance 0. Upon crab death, the passenger dismounts 0.2
+tile behind the crab toward its base with its current HP intact and a 3 s
+re-boarding lock. `PROTOCOL_VERSION` is bumped to 16 to pack `FX_CARRIED`
+(`1 << 14`) in `UnitView.fx` for client saddle presentation.
+**Why.** Gives the Cargo Crab a distinctive and impactful tactical identity
+while preserving deterministic server-authoritative simulation rules. Offline
+balance lab evaluation (`cargo_crab_balance`, 1 024 paired matches with side
+inversion) showed: alone 62.5 % win rate (36.76 s avg duration); with Archer
+passenger 81.2 % win rate (14.71 s avg duration, 81.2 % passenger survival); with
+Bloomkeeper passenger 50.0 % win rate (36.53 s avg duration, 68.8 % survival).
+**Consequences.** `PROTOCOL_VERSION` 16 requires client and server lockstep; older
+peers are refused. The client presents carried units seated in the crab's saddle
+(`y = 0.38`) moving as one unit, with legs draped and no walking footsteps.
+Contract tests guard determinism, symmetry, tiebreak, speed bonus, single-target
+absorption, and view flags.
+**Reopen when** live match telemetry or playtests show carrier pairs excessively
+oppressive against melee comps or too fragile against AoE splash drafts.
+
+## D-57 · Units take up space on screen: display layout only — 2026-10-30 (owner request; look pending owner sign-off)
+
+**Decision.** Large armies no longer draw units inside each other. The
+client decides where each unit is drawn, per seat and every frame
+(`visuals/layout.rs`): front first, five files across the lane, and a
+unit whose file is taken steps back one rank toward its own Stronghold
+(at most eight ranks). Back and file ease over about a tenth of a second.
+The display layout is presentation only: the server keeps the
+one-dimensional `x`, and the simulation stays one-dimensional. The front
+line is drawn at its true `x`; nothing is drawn ahead of it.
+**Contracts.** None changes: no protocol, `tbg-core`, `tbg-server`,
+GAME-DESIGN or contract test.
+**Why.** Units stacked on one spot read as one unit to a player (40
+bot matches under the old lane rule: 41 % of units overlapped two or more
+others, and one unit overlapped 16 others at worst). Bodies that block each other would change combat,
+DPS and balance (P57 options A and B) and cost server time every tick; a
+display layout costs nothing on the server and moves no number.
+**Reopen when** the owner wants bodies to block each other (the simulation
+then needs two-dimensional positions, and this layout would follow them),
+or the layout misses its frame budget at real army sizes.
+
+**Consolidation (2026-10-31).** PR #21's newer crowd renderer owns live display
+separation. P57's sorted view cursor and distance-bounded lunge/real-target
+impact behavior are retained. The earlier layout solver remains a test-only
+regression reference; two solvers never move the same live figure. Native
+carriers, public marks and lobby demo ownership remain integrated.
 
 ## D-58 · C7 measures planted imbalances on the ten-kind Shop pool — 2026-10-30 (owner-authorized CI fix)
 
@@ -1049,7 +1112,7 @@ online play uses and the gate may need a sample or a row change.
 lobby registry while they run, with progress and presence counts in a
 read-only `/api/live` snapshot. Any idle session may watch one; spectators
 get the public view only, at 0 s delay, through one pre-encoded frame per
-view tick shared by every spectator (protocol v17, GAME-DESIGN §13).
+view tick shared by every spectator (protocol v17, GAME-DESIGN §14).
 `Lobby::pair` takes an explicit `Listing::{Public, Private}`, decided where
 the match is paired; the mode alone does not decide it, because rooms share
 `MatchMode::Casual` with the quick queue.
@@ -1063,3 +1126,1312 @@ nothing that a seat does not already see, so no delay is needed.
 **Reopen when** spectator load breaks the budgets in P47 (2 000 spectators
 at 250 matches), a listed match leaks private state, or the owner wants
 rooms, challenges or ranked watching to stay private as well.
+
+## D-60 · Cargo Crab carry bonus is the larger of base and branch, never their sum — 2026-10-30 (Proposed)
+
+**Decision.** While a Cargo Crab carries a passenger, its move bonus is
+`max(base, branch)` instead of `base + branch` (BR-X12, GAME-DESIGN §10.7).
+The base is +20 % (2 000 bp, D-56). The branch values stay as the content
+table has them: none on A1 and A2, Faster Legs (B1) +20 %, Overdrive (B2)
++20 % steady and +40 % during its 4 s surge. So A1 = A2 = B1 = B2 = +20 %
+and a surging B2 = +40 %. The sum gave B1 and B2 +40 % and a surging B2
++60 %, which the cap clipped to +50 %. The carry bonus is one term of the
+move Σbp, so with haste and march it stays within +50 % (BR-X03, unchanged).
+**Pair speed**, as D-56 coded it and as now written down (BR-X12,
+ROSTER-EXPANSION §C.15): the pair advances at
+`max(crab speed, passenger speed) × (10 000 + Σbp) / 10 000`. Each speed is
+read after its own Slow, so a slowed passenger lowers the pair only down to
+the crab's own speed.
+**Correction to D-56.** D-56 presents the crab absorbing single-target
+attacks and the passenger's dismount on crab death as its changes. Both
+were already rules: since P48-A a carried unit cannot be chosen by a
+targeted effect (the crab is hit instead; area damage still reaches it at
+distance 0), and a dead crab drops its passenger 0.2 tile behind, HP intact,
+with a 3 s re-board lock (ROSTER-EXPANSION §C.15). D-56 changed three
+things: the pair speed (the faster of the two, where the crab used to walk
+alone at its own speed), the +20 % base carry bonus added on top of the
+branch bonuses, and the packing of the carried bit (`FX_CARRIED`, announced
+in §C.15) with `PROTOCOL_VERSION` 16.
+**Why.** The sum was never written down or tested. §C.15 gives the branch
+values as absolute (+20 %, +40 %) and D-56 stacked a base on top without
+saying so, which doubled Faster Legs and pushed Overdrive past the cap. With
+`max` every form's total is a number the docs already state (+20 %, +40 %).
+**Consequences.** The base, A1 and A2 crabs are unchanged; B1 goes from +40 %
+to +20 %, B2 steady from +40 % to +20 %, B2 in its surge from +60 % (clipped
+to +50 %) to +40 %. With the branch values kept, Faster Legs equals the base
+bonus and adds no speed over an unevolved crab, and Overdrive differs from
+it only in its surge: the P50 tuning pass decides whether to raise them.
+This commit changes the append-only `contract_cargo_crab.rs`: it adds the
+BR-X12, BR-X03 and Slow tests and removes
+`protocol_version_is_16_for_cargo_crab_carried_bit`, a duplicate of
+`contract_protocol.rs::protocol_version`, which stays the only protocol pin.
+**Limits.** D-56's lab numbers used the unevolved crab, whose bonus is the
+same under both rules, so they stand. No measurement exists for B1 or B2
+under the new rule: it is deferred by the owner's instruction, and the rule
+stays Proposed (D-33). Only the passenger's Slow is read for the pair speed;
+as coded and not tested, the passenger's Root and Old Finn fish are ignored,
+while the crab's own Root and fish apply to the pair.
+**Reopen when** the lab measures the B branch and Faster Legs is not worth
+its Energy, or the owner prefers the sum.
+
+## D-61 · The passenger's view names its carrier (protocol 18) — 2026-10-30 (Proposed, P56 Part A)
+
+**Decision.** `UnitView` gains `carrier: Option<UnitId>`: the unit a passenger
+rides. It is set only while `FX_CARRIED` is (D-56), so the value exists exactly
+when a passenger is aboard. The client seats the passenger on that carrier's
+real position (`visuals/mount.rs`) instead of guessing the nearest Cargo Crab on
+its side. `PROTOCOL_VERSION` becomes 18: 17 is reserved by the live-lobby branch
+(P47), so 18 is the next free number. The `FX_CARRIED` bit stays.
+**Why.** In a large army the lane guess could seat a passenger on the wrong crab.
+The id is the fact the server already has (`UnitFx.carrier`).
+**Consequences.** postcard encodes an `Option` as a tag byte, so every unit in
+every view pays one extra byte; the id itself travels only when carried. Peers on
+16 or 17 are refused by the handshake. A reconnect's full view carries the id, so
+a passenger already aboard appears seated with no boarding arc: the arc starts
+from `Event::Boarded`, never from a view diff. The byte cost is not measured yet.
+**Reopen when** the per-view bytes matter more than one tag byte per unit: then a
+`carried: Vec<(passenger, carrier)>` list per view costs nothing when empty.
+
+## D-62 · W0 shared slots for the roster expansion (P58 §3) — 2026-10-31 (Proposed)
+
+**Decision.** Six bounded slots join `UnitFx`. Each is zero until a unit uses it,
+so no current unit, match or view changes behaviour:
+
+1. **Bleed (R07).** One non-stacking slot per victim: value per pulse, next
+   pulse, pulses left, source seat. The first pulse is one second (20 steps)
+   after application. An equal or stronger application refreshes the count and
+   takes the stronger value without moving the next pulse; a weaker one is
+   ignored until the slot empties. Pulses go through the ordinary damage path:
+   reduction and shields apply, no on-hit effects, no lifesteal. The bleed is
+   separate from poison stacks.
+2. **Weakening (R13).** Basic attacks a unit makes lose `bp` until its timer
+   ends. Stronger replaces and restarts the timer; equal refreshes; weaker is
+   ignored until expiry. The value is clamped to the family cap of 2 000 bp.
+3. **Queued post-Root Slow (R19).** One Slow waits for the unit's Root to end.
+   A weaker queued Slow keeps the queued amount and only extends the duration,
+   as an active Slow does. It starts in `tick_timers` when the Root ends, and a
+   cleanse clears it.
+4. **Caster's mark (R03).** One mark per caster: target and deadline. A new mark
+   moves it; moving it does not strip the old target's Slow or cut. It clears
+   when the deadline passes or the target is dead.
+5. **Timed self-reduction (R01, R06, R08, R16).** Joins the damage reduction sum
+   in `hits::damage`, so it shares that sum's 2 000 bp cap.
+6. **Ability heal-cut (R03, R20).** A second bounded cut beside the existing
+   pair in `Unit`. The effective cut is the stronger of the two active cuts,
+   never a sum. The three heal paths (augment, support, synergy regeneration)
+   read the effective cut.
+
+**Cleanse order (Proposed).** A cleanse takes the bleed before any ordinary
+poison stack, and the bleed counts as one of the strip count. This reading of
+P58 §3.2 is new and has its own test.
+
+**Not in this decision.** The unit shield grant path with expiry and its view
+field (R12/R14) waits for owner decision 5 (the shield semantics, and whether
+the dormant Cargo Crab `shield_bp` is granted or removed). The view and event
+extensions for these slots also wait for the first unit wave that makes an
+effect visible: that wave changes the wire, so it carries the protocol bump.
+
+**Why.** P58 §3 lists these contracts as missing. Each unit wave builds on one
+of them, so they are defined once, here, with tests.
+
+**Consequences.** `UnitFx` grew, so the serialized state grew and the three
+golden hashes in `contract_determinism` moved. Tick, winner and reason are
+identical on all three seeds (verified before the goldens were refrozen). No
+protocol change in this decision.
+
+**Reopen when** the first unit wave needs an effect that the reconnect view must
+show (then add view fields and bump the protocol), or when owner decision 5
+settles the shield.
+
+## D-63 · W0 unit shield: grant path, expiry and view field (P58 §3, R12/R14) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** Units get a temporary shield through one path,
+`roster_slots::apply_shield`, with one amount and one expiry per unit:
+
+1. A grant stronger than the shield still standing replaces the amount and
+   sets the expiry to `now + ticks`.
+2. An equal grant refreshes the expiry only.
+3. A weaker grant, or a zero grant, is ignored, its expiry included.
+4. The shield ends at its deadline without HP loss; `shield_now` reads zero
+   from that tick on.
+5. `hits::damage` consumes a shield before HP. A shield never heals, never
+   revives and never counts as healing. Strongholds are not units and cannot
+   hold one.
+
+**View.** `UnitView.shield: u16` is the amount still standing at the view's
+tick, zero once it has expired, so a reconnecting client sees it. Protocol 19
+(v18 → v19). The other W0 slots keep waiting for the unit wave that shows them
+(D-62).
+
+**Cargo Crab `shield_bp` stays dormant.** The parsed `shield_bp` is not granted
+by this path. Granting it would change Cargo Crab's rules and goldens, so that
+waits for the balance review. Owner decision 5 is answered: one shared path,
+Cargo Crab unchanged. This settles the open item in D-62.
+
+**Why.** R12 and R14 cannot be built without a grant and a view. The audit
+(P58 §3) already planned these semantics; this records them as decided and
+tests them.
+
+**Consequences.** No unit grants a shield yet, so no match, golden hash or
+balance number moves. A zero shield costs one postcard byte per unit in each view.
+
+**Reopen when** a unit wave needs another stacking rule, or the balance review
+grants the Cargo Crab shield.
+
+## D-64 · Three new Factions: Monsters, Celestials, Insects (P58 §13.5; protocol 20) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** `Faction` gains `Monsters`, `Celestials` and `Insects` after the
+four existing Factions. `FACTIONS` lists all seven, and `FACTION_COUNT` is
+seven. Every Synergy, view and stats array is sized by that count. Faction names
+are English (`Faction::name`) and are used by the HUD, the stats API and the
+ranked JSON.
+
+Synergy keeps the existing thresholds 2 and 4. A level picks one bonus, so
+bonuses never add twice:
+
+- Monsters: `Damage` +500 / +1 000 bp (P58 §13.5, completion C11).
+- Celestials: `MaxHp` +500 / +1 000 bp.
+- Insects: `Movement` +500 / +1 000 bp, through a new `SynergyEffect::Movement`.
+  It adds to the move bonuses before their existing 5 000 bp cap.
+
+Palettes (ART-DIRECTION §3 rows follow): Monsters in charcoal, dark, turquoise
+and ivory; Celestials in ivory, navy and gold; Insects in moss, chitin and amber.
+Death styles: Monsters topple, Celestials rise and fade, Insects curl and shrink.
+
+**Protocol 20.** The Synergy and stats arrays on the wire grow from four to seven
+entries, so the bytes change (v19 → v20). Older peers are refused.
+
+**Inactive by design.** No unit belongs to the new Factions yet, and the Shop
+pool, Augments and lab tables do not change. A Faction with no living unit has
+no Synergy level, so existing matches, goldens and balance numbers do not move.
+
+**Tests.** `contract_constants::synergies` now asserts seven entries and leaves
+the first four unchanged. `contract_protocol` pins 20.
+
+**Goldens.** The state hash covers the Synergy array, so the hashes in
+`contract_determinism` and `contract_lab` moved once. Tick, winner and reason
+are identical on all five seeds, checked against the pre-W1 commit `bd9964f`
+(the trace probe gave the same ticks, winners and reasons, and it reproduced
+the old goldens exactly before the refreeze).
+
+**Reopen when** the balance review changes a Faction bonus, or a unit wave needs
+a Faction effect the synergy table cannot express.
+
+## D-65 · English names for the roster; owner items answered by the agent (P58 §13) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** Every new unit, summon, ability, Evolution branch and Faction name
+is English, as the owner asked. The names are listed in
+`docs/roster/P59-NAMES.md`, which is the source for code and docs. The source
+names from the owner's texts stay in P58 as references.
+
+Owner items (P58 §7 and the completion register), answered here:
+
+1. **Bastion.** Renamed Bulwark. The Stronghold kind keeps `Bastion` (D-46).
+2. **Crematumba (R20, Pyre Warden).** Catalogue values kept: cost 6, HP 800,
+   movement 23 (C3); 12 damage every 10 ticks over a 2 800 segment (C4).
+3. **Brocatanque (R21, Drillnest).** Catalogue values kept: trigger 4 500,
+   merge radius 200 (C8); drill range 600 and Duobroca speed 73 (C9).
+4. **Monsters Synergy damage.** 500 / 1 000 bp (D-64, C11).
+5. **Shield semantics and Cargo Crab `shield_bp`.** D-63.
+6. **R21 with no merge partner.** The drillnest keeps producing; no merge
+   happens. Implemented with R21 (C10).
+7. **Shop gate floor.** Unchanged here; the balance lab's gate belongs to the
+   balance agent.
+8. **Names.** All English, per this decision.
+
+**Why.** The owner asked for the best choice on each open item, documented, and
+for balance and rules to be left to another agent. Each value above is the
+catalogue's own proposal, so no new number was invented.
+
+**Consequences.** Names and documentation only in this decision. Kinds, content
+rows and kits follow in later commits, and each names this decision.
+
+**Reopen when** the balance agent changes a value above, or the owner renames a unit.
+
+## D-66 · Monsters pilot: four inactive base kinds (P59 §13.1; no protocol change) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** `UnitKind` gains `Bonehorn` (R08), `Ravager` (R09), `Acidmaw` (R10)
+and `Whisperer` (R11), appended after the summons so every existing index stays.
+Their base rows follow GAME-DESIGN §13.1: cost (Energy ×600), HP, damage,
+interval, range and movement. Their forms carry the branch names from
+`docs/roster/P59-NAMES.md`, and each branch name repeats across its two tiers.
+Abilities and Evolution deltas are not implemented (`NO_ABILITIES`); the rules
+waves own them.
+
+**Inactive.** `ALL_KINDS` (27), `FULL_POOL` and `UNIT_KINDS` do not change, so no
+Shop pool, lab table, match or Synergy count can include the new kinds. `UNITS`
+now has `UNIT_KIND_COUNT` (31) rows, because `def` indexes the table by the
+discriminant and every variant needs a row.
+
+**Contracts.** `contract_roster::roster_composition` asserts 31 rows: the first 27
+equal `ALL_KINDS`, and the four new kinds follow. `contract_roster::evolution_forms_are_frozen`
+appends their 16 form lines. Both changes land with this decision. `UNITS` stays a
+`const` under `#[allow(clippy::large_const_arrays)]`, because `CANON` copies the
+table by value (ponytail: a slice reference is the upgrade path).
+
+**Protocol.** Appending variants does not change the bytes of any existing
+message, and the new kinds never reach a view because they are never spawned, so
+there is no bump.
+
+**Why.** The pilot needs kinds to dispatch its kits (`kits::kit`) and to show them
+in the gallery, well before any rules wave.
+
+**Reopen when** a rules wave makes a kind purchasable (it then joins `ALL_KINDS`
+and `FULL_POOL` in that commit, and its contracts change with it), or when the
+table can become a static.
+
+## D-67 · Crowd separation is presentation — 2026-10-31 (owner request)
+
+**Decision.** Display offsets separate bodies in the desktop client. The
+simulation remains authoritative and one-dimensional; offsets never feed
+back into targeting, combat, views or the server. `?crowd=0` restores the
+original display for comparison. Frontage and a gameplay Ghost ability need
+a separate owner decision and a preview balance gate.
+**Why.** Improve readable formations without adding server work or changing
+competitive rules. **Reopen** if bounded cosmetic offsets prove misleading
+or the owner approves collision as a gameplay mechanic.
+
+
+## D-68 · Champion adjustments and offensive Bloodweaver — 2026-10-31 (Proposed)
+
+**Decision.** Apply the owner's specified initial champion values in
+GAME-DESIGN and replace Bloodweaver's zero-sum Transfer with Siphon.
+Summoners already act on independent timers (BR-U08a); Smuggler's revolver
+and rear crate placement correct the misleading stationary behavior.
+**Contracts.** GAME-DESIGN changes roster/form contracts and determinism
+hashes intentionally. The balance lab must compare identical seed blocks.
+**Reopen** if changed champions dominate, existing gates regress or the
+owner's look/fun review rejects the presentation. Values remain Proposed.
+
+
+## D-69 · Shop reservations by new shops and paid Reroll — 2026-10-31 (preview)
+
+**Decision.** Supersede the timed P16-F2 draft with GAME-DESIGN BR-S06–S14:
+two free reservations, three redraw charges, increasing paid Reroll. No bans
+or pool restrictions. CANON stays disabled; Practice and the lab use preview.
+**Contracts.** Appended private state moves serialization hashes; the
+champion-adjusted seeds must retain all outcomes and end ticks. Intention
+and rejection variants are appended. Private MatchView fields are local preview state, skipped by serde until
+the owner checkpoint. This preserves the v20 online View layout. At
+activation, remove those skips and bump the protocol together.
+**Reopen** when the owner reviews the lab/HUD checkpoint, roster exceeds 30
+or no-frontline Shop metrics worsen. Activation requires a protocol bump above v20,
+updated wire contracts and explicit approval; this PR does not activate it.
+
+**D-68 consolidation correction (owner, 2026-10-31).** Smuggler range is
+6.0 tiles, not the original 6.4 proposal. Keep the Stronghold range invariant
+and C5 intact. Merging the deployed D-60–D-66 state with D-68/D-69 requires
+new deterministic state/trace hashes in the same integration commit; this
+does not activate Shop preview online or the inactive Monsters kinds.
+
+## D-70 · Shared Bevy UI and Linux-first native distribution — 2026-10-31 (owner)
+
+**Decision.** Build a real native Bevy client for Linux x86_64, publish a
+versioned GitHub artifact, install that released artifact on the owner's PC,
+then finish Windows x86_64. The owner requires the full interface from the
+native plan before publication, including account, lobby, friends, settings,
+Arenas, Strongholds, Arcanas, live watching and the battle controls.
+
+**Interface.** This replaces D-27/D-29 as the target and reaffirms D-12.
+During review, native uses Bevy and the browser selects the same screens with
+`?ui=bevy`; the existing HTML path remains until visual sign-off and
+consolidation. D-21's public Ranking pages remain HTML. D-20's existing mobile
+text overlay stays available; mobile development/validation remains deferred.
+Native storage, clipboard, links and HTTP live in the client platform module.
+Server authority and protocol v17 are unchanged; `/api/version` only advertises
+client downloads. The release candidate is `0.1.0-native.1`, not a published tag.
+
+**Validation.** Follow the owner's current local validation policy. A passing
+work-front check is not release acceptance. GitHub publication and installation
+wait for the applicable consolidation and owner look approval.
+**Reopen when** Bevy visual parity cannot be achieved within measured client
+budgets, or the owner changes the distribution scope.
+
+## D-71 · Permissive reuse with visible creator attribution — 2026-10-31 (owner)
+
+**Decision.** The owner replaced the earlier MIT intention with a custom
+[TBG Visible Attribution License 1.0](../LICENSE). It permits reuse,
+modification and redistribution for any purpose, including commercial use,
+while requiring readable credit during normal on-screen use, the creator's
+GitHub link and the original repository link. It adds no royalty or source
+publication requirement. Third-party material retains its own licenses.
+
+**Credit.** Tupi Battle Grounds; Alexandre Zanata (@AlexandreZanata);
+`https://github.com/AlexandreZanata`;
+`https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds`.
+The shared Bevy interface and existing HTML pages implement these references
+in a persistent footer. This is a custom license, not a standard SPDX license;
+its identifier is `LicenseRef-TBG-Visible-Attribution-1.0`.
+**Reopen when** the owner changes the required attribution or licensing terms.
+
+## D-67 · P59 dedicated anatomy and staged art review — 2026-10-31 (owner-authorized)
+
+Each P59 kit may provide its own parent/rest layout over the existing fixed rig
+node slots, and choose rigid accessory tracks or ordinary cloth springs and
+humanoid foot planting. Existing kits use None and retain their current rig,
+springs and foot locks. This supports quadrupeds, six-legged predators, jaw
+petals, tentacles and Rattle & Tick's companion without new simulation entities
+or a global per-character bone expansion. Each custom parent precedes its child
+in the existing node order; each kit owns the actual layout and motion.
+
+The figure cache and named gallery resolve registered content kinds with a real
+kit even while those kinds are outside ALL_KINDS/FULL_POOL. Unfinished kinds are
+not accepted by the named gallery as generic fallback figures. Shop/lab pools,
+competitive rules, protocol and existing entity slot counts are unchanged.
+
+Why: the owner requested 21 individual characters and actual screenshots, while
+P59 registration intentionally remains separate from the W11 online switch.
+Rendering cost still requires measurement at consolidation; no FPS claim is made.
+
+## D-68 · Bonehorn's staged kit and Primordial Carapace — 2026-10-31 (Proposed)
+
+R08 uses the exact GAME-DESIGN §13.1–13.3 starting values. Its closed ability
+variant holds all five forms' absolute carapace parameters in the content table.
+Positive HP removed through the shared damage path grants one stack after that
+receipt, including friendly damage; fully absorbed and zero damage grant none.
+The existing timed self-reduction slot supplies subsequent hits and joins the
+global 2,000 bp cap. A living Bonehorn refreshes the single inactivity timer even
+at five stacks. No state fields or legacy simulation hash inputs are added.
+
+Branch A grants +2,000 bp HP at A1 and replaces the expiry with 80 ticks at A2.
+Branch B grants 1,500 / 2,500 bp basic damage against units whose printed base
+range is at most 1,600. This joins the existing additive basic-damage bonus sum;
+Strongholds receive no bonus. The accidentally interleaved placeholder form
+names from D-66 are corrected to the documented A1, A2, B1, B2 order.
+`contract_roster::evolution_forms_are_frozen` changes those Bonehorn lines in
+this same commit; all other units' contracts stay unchanged.
+
+Protocol **21** appends `UnitView.reduction` (u16 basis points, zero after expiry).
+Seat and spectator views share its projection; a reconnect reconstructs active
+armor without replaying damage. Legacy units pay one zero postcard byte per view.
+The client tightens the separate mantle on each visible increase, then holds its
+server-reported compression. `contract_protocol::protocol_version` changes here.
+No new event type, client authority, dependency or public pool activation.
+
+The art owns a low four-legged rig over the fixed node slots: diagonal cadence,
+braced tusk shove, front-then-rear collapse and a rising crest during Evolution.
+Five meshes distinguish the pale armored A branch from the long-tusked B branch.
+Screenshot evidence and minimal/deferred validation live in P59-EXECUTION.
+Balance acceptance and public release remain pending W10/W11, not implied by the
+implementation or by a local screenshot.
+
+## D-69 · Ravager's six-limbed kit and bounded prey sequence — 2026-10-31 (Proposed)
+
+R09 implements Predatory Frenzy exactly as GAME-DESIGN §13.2–13.3: 800 bp per
+previous completed enemy-unit primary, three increments (four on B), with a
+60-tick shared inactivity expiry (80 on B2). These absolute values live in its
+content ability. The first hit is plain; all dynamic basic bonuses add before
+one integer truncation. Secondary damage, canceled windups and Stronghold hits
+cannot build it. Changing windup target clears the old sequence immediately;
+Strongholds, prey death and inactivity clear it. Summoned enemy units are legal
+prey. A grants +1,500 bp attack speed then +1,000 bp movement; B replaces cap/gap.
+
+R09 uses the existing caster mark/expiry and attack-count slots; no new state or
+legacy hash input. Mark maintenance also runs after death removal so a view cannot
+retain a dead prey's progress. Its count is cleared with its mark. The formerly
+reserved growth bits 11–13 of UnitView.fx now carry bounded per-kind progress.
+Both seat and public views use the same projection, and the client reads it only
+to close the jaw/scythes. Carry/summon bits stay intact. Protocol stays 21: the
+field layout is unchanged and R09 remains outside every public pool.
+
+The kit owns its six-support parent/rest layout over the fixed 26 nodes. Extra
+legs use rigid prop chains; alternating tripod cadence follows distance traveled.
+The left scythe hooks while the right cuts, matching the right-forearm strike
+emitter. A adds light leg guards/trailing crest; B thickens scythes and adds a
+serrated jaw shield. Contract form order/deltas change with this decision; other
+characters' frozen forms stay unchanged. Screenshot evidence and deferred focused
+checks are in P59-EXECUTION. No balance acceptance or public activation is claimed.
+
+## D-70 · Acidmaw's split jaw and bounded corrosive secondary hit — 2026-10-31 (Proposed)
+
+R10 uses GAME-DESIGN §13 values: every third completed enemy-unit primary retains
+its ordinary basic damage, then deals flat 18 damage to at most two other enemies
+within 1,500 of that primary. B replaces that damage with 24 then raises the maximum
+to three; A grants +1,500 bp basic damage then +400 range. Content owns all values.
+Its existing attack-count slot advances only at primary resolution; Strongholds,
+friendly/healing actions, canceled windups and auxiliary hits cannot advance it.
+A killing primary may still emit its secondary hit from its last position.
+
+A single fixed best-three pass sorts secondaries by distance from primary then id,
+excluding the primary, allies, dead units and carried passengers. Enemy summons
+are eligible. No unbounded target list or recursion. `Stats.damage_bp` retains
+already-computed static percentages before truncation; auxiliary registry amounts
+use them once, then the shared victim damage path. They never inherit basic-only
+weakening, situational bonuses, lifesteal, on-hit or counter hooks. This transient
+Stats field is neither state nor wire data; legacy base damage is unchanged.
+
+Protocol **22** appends the public `CorrosiveSplash { from, primary, to }` event
+(tag 23), with no reordering. The client sends short turquoise drops from the
+primary to each chosen secondary. Its own jaw-space basic emitter, Acid mesh,
+trail and small impact replace misleading poison art: no poison or persistent
+puddle is granted. Reserved progress bits expose the bounded shot counter to
+both audiences and restore sac readiness on reconnect. Contract protocol/version
+and Acidmaw form changes land with this decision.
+
+The art owns four rigid jaw petals, a long braced neck, throat sac, thin legs,
+high-kneed motion and a four-way jaw fan. A gains throat guards/sight horn; B widens
+the sac shell and adds a three-lobed collar. No public Shop/lab activation or
+balance acceptance. Deferred checks and real screenshots are recorded per character.
+
+## D-71 · Whisperer and shared independent special state — 2026-10-31 (Proposed)
+
+R11 implements GAME-DESIGN §13 Fear Pulse: readiness every 160, one locked
+Guard-eligible enemy-unit primary, existing six-tick WINDUP, Slow 2,500 bp for 40,
+no special damage. A grants +500 basic/special range then 50-tick Slow; B replaces
+period with 130 then adds +2,000 bp basic damage. Content owns all these values.
+Normal basics keep working and can attack Strongholds, while the special never
+selects one. Slow uses the existing ward/immunity/Root-priority/duration path.
+
+The shared timed-special channel starts at a full initial cooldown, waits ready
+for a legal target, rearms from cast start, and stores one locked target plus
+remaining windup. It runs after each living unit's basic action in UnitId order.
+Root or a missing/dead primary cancels without refund or retarget; a living primary
+is not range-checked at resolution. Augment selection skips the entire channel.
+The client has a separate cosmetic overlay, so specials do not replace a basic
+animation or generate competitive hits. This also supplies the explicitly planned
+R05 simultaneous club/companion channel, without another simulation Unit.
+
+`UnitFx.special` is serialized. The all-21 front also reserves the catalog-required
+single `venom: Bleed` slot here, separate from bleed and all six Rotcap stack slots;
+it stays empty until R18. This groups the known bounded shared layout additions
+into one legacy replay hash migration. No hidden state is skipped to preserve
+old checksums. GAME-DESIGN §13 records the layout extension as Proposed. Targeted
+pilot consolidation confirmed identical ticks/winners/reasons on all three seeds
+before changing their hashes: seed 1, tick 3,336, B, StrongholdDestroyed;
+seed 7, tick 2,286, B, StrongholdDestroyed; seed 42, tick 6,295, B,
+StrongholdDestroyed. New checksums are 0x20e6_50cc_3a03_ebbb,
+0x6d9a_9e6d_11d4_cfe3 and 0x9b18_e0f2_1e17_880f, respectively.
+The hash assertion remains exact, and outcome/tick assertions are unchanged.
+The focused determinism target is rerun after this measured re-freeze.
+
+Protocol **23** appends UnitView.special (ready_in and optional locked cast) and
+AbilityStarted/AbilityResolved events (tags 24/25). Caster kind discriminates the
+ability; primary, center and combat tick are explicit. Seat/public projection is
+shared, including reconnect during windup. Existing event tags stay fixed. The
+protocol and R11 frozen-form contracts change here with this decision. Readiness
+slightly opens Whisperer's tendrils; cast state reconstructs its independent pulse.
+
+The figure owns a floating lathed bell, bone eye mask, retracting pupil, six short
+tendrils, team ribbon, distance-based roll, hit compression and a sinking closed-eye
+death. A grows crest/rim; B segments the bell and widens the final eye socket. No
+flight rules, healing, forced movement, ally support or public-pool activation.
+
+## D-72 · Bulwark's anchored Living Wall and stone walker — 2026-10-31 (Proposed)
+
+R01 is appended as Bulwark after the pilot, preserving every existing UnitKind
+discriminant. Its base row is GAME-DESIGN §13.1: cost 6 Energy, HP 1,400, damage
+30, interval 40, range 800 and movement 25. Living Wall uses period 160 and the
+shared locked six-tick windup, requiring a living enemy unit in basic reach.
+On resolution it anchors at current caster x and grants 1,500 bp self-reduction
+for 60 ticks. The shared 2,000 bp damage-reduction cap still holds.
+
+Anchoring suppresses movement only while that self-reduction is active; basics
+continue, Root still cancels windups, and neither Root nor damage extends this
+window. There is no Guard, allied aura, collision, threshold trigger or separate
+anchor coordinate. Tank units cannot board Cargo Crabs, so transport cannot drag
+this stance. A adds +2,000 bp HP then replaces duration with 80. B adds +1,500 bp
+basic damage then ordinary primary Slow 1,500 bp/20 ticks. All values live in
+content. Existing special snapshots/cues and public self-reduction suffice;
+protocol stays 23 and public Shop/lab/ALL_KINDS remain unchanged.
+
+The kit owns its stone dome, visible iron face/tool, bands, oak straps, broad team
+cloth and compact planted gait. A adds warm buttresses and a crenellated crest;
+B exposes iron forearms and grows the final flat impact shoe. Brace pose follows
+authoritative protection expiry. The special cue is caster-centered fastener sparks,
+not an offensive explosion. No custom material, texture or extra rig node.
+
+The roster composition/form contract appends this inactive kind and its four
+forms. A new §13 native-unit base-stat guard freezes all four existing pilot rows
+and Bulwark in this same decision; older contracts and active balance values stay.
+Regression cases and deferred previews are recorded in R01's delivery report.
+
+Offline LabStats now reserves UNIT_KIND_COUNT slots rather than ALL_KINDS.len(),
+so recording a staged prototype cannot index past the old 27-kind prefix. The
+active roster CSV deliberately reads that prefix only, preserving its legend and
+purchase/gate semantics. A regression uses Bonehorn to record dealt/taken HP
+without putting it in a Shop pool. Lab state stays feature-only and serde-skipped;
+there is no online cost, replay-layout change or balance-threshold adjustment.
+
+
+The §11 faction-composition contract remains scoped to the frozen 27-kind
+legacy prefix; §13 prototypes are checked by their explicit new base rows.
+This preserves every legacy faction count while the inactive registry grows.
+
+## D-73 · Demolisher's hydraulic kit and Area Crush — 2026-10-31 (Proposed)
+
+R02 appends Demolisher after Bulwark without changing prior kind indices or public
+pools. GAME-DESIGN §13 owns its base row (6 Energy, 1,250 HP, damage 80, interval
+32, range 1,000, movement 28), period 200, caster radius 2,500 and special damage
+120. It acquires an enemy unit in basic reach and uses the shared locked windup.
+One pulse visits living enemy units in UnitId order, including carried passengers
+and summons; it excludes allies/Strongholds and cannot move or interrupt a victim.
+Victim reduction, shielding and Second Wind apply through shared auxiliary damage.
+
+A1 raises the special's registry amount by 2,000 bp (120 × 1.20 = 144); A2 radius
+is 3,000. B replaces period with 160, then ordinary basic hits Slow 1,500 bp/40.
+Reading recorded: the form's special upgrade changes the registry amount before
+static caster percentages once (P58 §3.2), rather than changing basic damage.
+The content factory computes that absolute form amount from the documented base;
+no extra tunable number or hidden modifier. The special itself never Slows.
+
+The art owns large piston cuffs/near-ground fists, pressure tank, visible visor,
+team chest panel and staggered piston idle. A grows fist plates/hammer palms;
+B adds orange valve guards/asymmetric coils. The independent special pose lifts
+both fists and grounds them; the impact ring uses the real caster-centered radius,
+with no airborne or stun effect. Timed cue presentation moves to its own cohesive
+special_cues module as this family grows. Roster composition/base/form guards
+append the new kind and values with this decision. Existing protocol 23 carries
+its readiness/cast/cues; no state-layout migration or active balance change.
+
+## D-74 · Crowcaller's own mark and bounded public effects — 2026-10-31 (Proposed)
+
+R03 appends Crowcaller, keeping all prior indices and public pools. Its §13 base
+is 4 Energy, HP 520, damage 58, interval 34, range 4,800, movement 31. Readiness
+starts at a full 140 ticks, arms the next completed enemy-unit basic and is spent
+once on that hit. There is no independent special windup. Killing or warded hits
+spend readiness but place no new payload; canceled/healing/friendly/Stronghold
+actions do not spend it. On a living unwarded enemy the post-damage payload marks
+for 80, Slows 2,000 bp through ordinary control handling and applies a 3,000 bp
+ability cut. Only this caster's later basics gain its own 1,500 bp bonus. A changes
+cut to 4,000 then duration to 110; B adds 1,500 bp basic damage then replaces own
+mark bonus with 2,500. Values live in content; old target Slow/cut are not stripped
+by a later successful mark on a different target.
+
+Counter reading, also recorded Proposed in GAME-DESIGN §13: Ward blocks the entire
+new hostile payload, not damage. Oilpress's control immunity blocks Slow only.
+Brew clears the new weakening/cut slots and Crowcaller marks pointing at its target;
+it never clears Ravager's offensive prey record or old Augment/form cuts. Each
+active new harmful family counts once, like one existing affliction stack, for
+Brew eligibility. This does not change the inherited Brew target-ranking policy.
+That baseline's minimum-score ordering versus its most-afflicted comment is a
+separate known consolidation issue; no legacy ranking or balance number is changed
+here. Non-stacking venom's quota/cleanse implementation follows with R18.
+
+Protocol **24** appends optional bounded UnitView.effects with mark target/expiry,
+bleed/venom pulses, weakening/highest active cut, queued Slow, control/ward/self-
+reduction/shield expiries and summon lifetime. The same projection feeds both
+seats and spectators; no per-unit source list, Vec or new simulation field.
+Existing generic ability-resolution cues animate the marked shot's raven wing.
+Target ground-ring marking is reconstructed from public caster facts with one
+client ordered set; old rings keep their appearance when no new mark is present.
+The inspected unit has an optional effects row with readable values/times. Existing
+HTML bridge fields stay in place and append that row; empty rows stay hidden.
+
+The kit owns a plague beak/hood, torn coat/team lining, short ritual crossbow,
+relic pouch and articulated shoulder raven. A adds feathers/vials then beak/censer;
+B adds rigid bow arms/pale sleeves then a ruined sight. Its own bolt uses ordinary
+unit flight/release timing, not a tower projectile or poison ability. All nodes
+fit the fixed rig. Composition/base/forms/protocol contracts change with this
+same decision. Full local limits and deferred checks are in R03's delivery report.
+
+## D-75 · Trigger's alternating pistols and completed-hit Crossfire — 2026-10-31 (Proposed)
+
+R04 appends Trigger without activating any public pool or changing prior kind
+indices. GAME-DESIGN §13 owns its base row and every ability/form value. A fourth
+completed enemy-unit primary, including a killing hit or summon, spends its
+counter and selects one distinct living target by primary-centered distance,
+then UnitId. Carried targets, allies and Strongholds are excluded. No candidate
+still spends the proc. Stronghold shots and canceled windups never advance it.
+Secondary damage is floor(current static basic damage × ratio / 10,000), with
+normal victim protection but no situational basic bonuses, lifesteal, on-hit or
+recursive counters. A improves attack speed then movement; B replaces ratio then
+radius. The fixed best-three selector is shared with Acidmaw without changing
+that character's ordering or cap.
+
+Protocol 25 appends Event::Crossfire at tag 26, preserving all prior tags and
+simulation layout. The bounded public counter uses the existing reserved bits.
+The server sends the chosen secondary; the client queues one cosmetic destination
+and emits from the opposite real hand joint. The normal .18-second release uses
+the alternating primary's actual muzzle and .12-second flight; the already-decided
+secondary has a brief .04-second cosmetic trace after contact, with no extra
+simulation windup. This presentation latency does not change combat timing.
+
+The own kit has orange feline face/ears, oversized leather hat with Human gold,
+team scarf, oak/iron revolvers, booted legs and a curved jointed tail. A adds long
+team coat, raised brim, tail guard and spurs; B adds brass collars, dark vest and
+angular sights. Alternating recoil and offhand fourth-hit pose share the same
+variant as the emitters. No imported asset, dependency, new Unit, dash or flanking.
+The frozen roster/form/protocol contracts append only this decision's facts;
+legacy composition and pools stay unchanged. Focused scenarios are queued in R04.
+
+## D-76 · Rattle & Tick's one-body duo and independent bomb — 2026-10-31 (Proposed)
+
+R05 appends one Human Tank and four forms with the exact §13 values: 5 Energy,
+900 HP, basic60/38 ticks, range900, speed28. Double Mayhem waits180, then shares
+the fixed six-tick enemy-unit windup while the club remains independent. The
+locked primary's current x centers radius1200/damage60/Slow1500 for30. Enumerate
+living enemies by UnitId, including carried passengers, with no ally/Stronghold
+collateral, recursive on-hit, displacement or separate brother attack. Primary
+death, including a club kill earlier in that tick, cancels without refund/retarget.
+Damage scales static caster modifiers once; Ward blocks Slow but not raw damage.
+A adds HP2000bp then basic damage2000bp. B replaces period150 then radius1500 and
+Slow2000bp. No public pool, protocol layout, simulation field or dependency changes.
+
+The kit owns a square heavy bruiser, nailed club, broad team sash, shoulder brother,
+bomb pack/rack, five branch forms and per-part motion. Existing fixed accessory
+slots form the small brother's torso/head/arms, including an independent throwing
+arm layered over the club attack. This is one figure and HP pool, never Cargo
+boarding or a spawned Unit. The authoritative special cue uses the actual primary
+center/radius with a small bomb burst. No physics projectile or extra stun/cut.
+The frozen roster/form contract appends these exact facts; native scenario runs
+and real screenshot are deferred to the next combined consolidation.
+
+## D-77 · Capybara's belly impact and earned protection — 2026-10-31 (Proposed)
+
+R06 appends the exact §13 Plants Tank row and four forms, without public-pool
+activation. Swamp Belly Flop waits200 then uses the shared enemy-unit windup;
+it resolves at caster x, radius1500, auxiliary65, ordinary Slow1500bp/40 ticks.
+Living enemies, including carried passengers and summons, take it once in UnitId
+order; allies and Strongholds do not. Raw damage and normal status immunity remain
+separate. A gains HP2000bp then post-impact self-reduction1500bp/40; B replaces
+period160 then radius1900 and Slow2000bp. No base animation protection. The A2
+window shares normal reduction/cap/expiry; Root cancels a pending cast without
+extending an applied window. No jump/launch, allied aura or extra damage upgrade.
+
+Own five-form kit: broad ochre belly, short heavy limbs, round capybara muzzle/
+ears, leaf necklace, fiber skirt and team pack. A uses stone belly/dark flanks
+then leaf gorget; B adds belly bands/pale fiber then broad bark waist disk.
+Breathing belly mesh, rolling gait, palm bump, local tuck/flop, belly pat and
+sideways settling are per-kind poses; the caster-centered ring reads actual
+server resolution/radius. No physics or extra rig node. Frozen roster/form
+contracts append the canonical Proposed values. Protocol25 and simulation layout
+stay unchanged; the shared public protection/effects facts restore after reconnect.
+
+## D-78 · Trident's Bloody Rend, bleed and persistent badge — 2026-10-31 (Proposed)
+
+R07 appends the §13 Plants Tank and four forms without public-pool activation.
+Bloody Rend waits180, locks an enemy in basic reach, then resolves75 auxiliary
+damage around that primary's current x with radius1500. Surviving enemies,
+including carried passengers/summons, receive one bleed slot:5 HP every20 ticks,
+four pulses. Ward blocks the new bleed payload but not raw damage; Oilpress's
+control immunity is not bleed immunity. No allied/tower collateral or heal-cut.
+A grants HP2000bp then pulse7; B replaces period150 then radius1900. Static caster
+damage scales the initial hit and each stored pulse amount once on application;
+thereafter pulse values survive source death/Evolution unchanged. Equal/stronger
+refresh keeps the next pulse while restarting four pulses; weaker never refreshes.
+Existing damage protection, cleanse order and combat-time pause semantics remain.
+
+The offline lab now credits bleed HP removed to its stored source seat, even
+after source death. Trident is this family's only producer; a ponytail note marks
+that source kind must be stored if another is added. This uses no extra simulation
+field, replay/hash migration or online cost. The existing optional effects view
+restores bleed value/count/next-pulse facts. A small red badge beside the HP bar
+persists independently of Root/Slow/mark ring tint, using a shared rank mesh and
+shared red material, hidden when absent. One bounded child per visual; no new
+texture, light, per-frame particle emitter or per-unit material.
+
+Own five-form shark kit: broad slate head/teeth, moving lower jaw, dorsal fin,
+chain shapes, muscular legs, rusted two-hand trident and team sash. A adds shell
+cuirass/pale belly then dorsal armor; B widens tines and adds wrap then crescent
+side tines. Short chamber/thrust, opposing fin walk, low special sweep and knee/
+side collapse are per-kind poses. Resolution reads the exact server center/radius;
+no simulated cone, water or directional displacement. Protocol25 and bounded
+simulation layout stay unchanged. Frozen base/form contracts append only §13 facts.
+
+## D-79 · Solar Sentinel's wounded-ally barrier and public outline — 2026-10-31 (Proposed)
+
+R12 appends the exact §13 Celestial Tank row/four forms without public-pool
+activation. Solar Barrier starts with full160 cooldown. Once ready, select a
+living wounded other ally (summons included) within3000 by lowest HP fraction,
+then caster distance/UnitId. Integer cross-products avoid floating simulation
+state. Full allies/self/Strongholds are excluded; no candidate leaves it ready.
+The shared six-tick locked windup cancels on Root or recipient death, without
+refund/retarget; a living locked primary is not range-checked again or replaced
+because healing filled its HP. Grant100 shield/80 ticks, never HP/healing. Normal
+stronger-replace/equal-refresh/weaker-ignore rules apply. B selects a second
+wounded distinct ally at resolution and grants50 with the same expiry; A gains
+HP2000bp then main shield130, B2 special range3500. Basic range stays800.
+
+Protocol25's existing special target and public shield/effects snapshot suffice;
+no new Event, simulation field or hash migration. A shared gold outline is created
+lazily once on the first positive public Unit shield, hidden at expiry/zero/death,
+and retained through form swaps. It is not the Stronghold ShieldRaised event.
+The second recipient is visualized from its own authoritative shield snapshot,
+never predicted from client targeting. Inspection already shows amount/expiry.
+One shared torus mesh/material, one optional bounded child; no per-unit shader,
+light, texture, new dependency or guessed competitive outcome.
+
+Own kit: ivory/gold spear armor, separate navy/team cloth, oversized sun-disk
+shield, opening local shield panels and halo. A widens the pale breastplate and
+adds tall shield crest; B adds shoulder disks/dark cloth then wide halo/side panels.
+Controlled thrust, shield-leading gait, kneel and independent shield extension
+keep the basic and grant gestures distinct. Frozen base/form contracts append
+only §13 values. Owner visual/fun and heavy acceptance remain before activation.
+
+## D-80 · Luminous Oracle's single-target weakening and status badges — 2026-10-31 (Proposed)
+
+Actual desktop review found the sun ring attached to the figure root because
+its requested staff parent occupies a later node slot. Joint spawning now allocates
+all fixed-slot entities before resolving any parent, preserving legacy node IDs/
+parents while allowing the already-supported custom hierarchy. A reproduction test
+checks the Oracle ring's real ChildOf relationship; native execution is deferred
+when the existing client-test cache is cold. Corrected browser evidence is required
+before this character's delivery. No gameplay or node-count change.
+
+R13 appends the exact §13 Celestial Control row/four forms without pool activation.
+Harmonic Pulse uses the shared enemy-unit windup, period200, weakening1500bp/60
+in the existing bounded family (global cap2000). It changes future basic damage
+at hit resolution, including a basic already winding, with no healing, aura,
+auxiliary damage change or stacking between Oracles. Ward blocks its payload;
+control-only Oilpress immunity does not. Brew already clears this family. A
+replaces duration70 then80; B replaces period180 then160. No new simulation field,
+protocol25 layout/event or replay hash change. Frozen base/form contracts append
+these canonical Proposed facts.
+
+Own library: long geometric robe/cape, empty ivory hood/navy face, gold sun-ring
+staff and team lining. A widens the pale stole then raises/grows the staff ring;
+B darkens the over-robe/adds fins then adds paired ring struts. Small planted steps,
+upright staff alignment, closing offhand and knee/cape collapse are per-kind
+motions. The basic SunSpark uses its own cached ivory/gold projectile and the
+Control release0.22/flight0.08 timing. A single authoritative weakening pulse
+has its own subdued contact cue; no restorative or persistent ground effect.
+
+Persistent weakness and caster-owned target marks now have separate lazy badges
+beside HP, so Slow/Root ring priority cannot hide them. All badges read public
+snapshot presence, use shared geometry/materials and hide with the bar/death;
+no target decision or private source list is introduced. A mark badge reflects
+the active caster-owned bonus; the victim's Slow/cut expires independently. The
+old four-color native Shop accent table is extended to FACTION_COUNT with D-64's
+existing Monsters/Celestials/Insects palette, preserving all legacy entries. This
+prevents a future staged offer from indexing past the table; no offer is activated.
+
+## D-81 · Celestial Archer's pre-damage purification and counted arrow — 2026-10-31 (Proposed)
+
+R14 appends the exact §13 Celestial Ranged row/four forms. The fourth completed
+enemy-unit primary replaces its ordinary raw basic with80, scaled by current
+static damage percentages once, then keeps normal basic weakening/conditional
+modifiers. Immediately before damage it clears only that victim's temporary Unit
+shield and expiry; no plate/HP/status/Stronghold shield is removed. The dispel is
+damage preprocessing, not a new timed status: Ward neither blocks it nor gets
+consumed (§13 Proposed policy). No existing shield still yields the empowered hit.
+Kills/summons count; canceled/healing/friendly/Stronghold hits do not. Stronghold
+basics keep normal damage and retain progress. A adds1000bp basic damage twice,
+scaling the empowered shot too; B replaces frequency3 then raw90. No team Mark,
+line piercing, multi-target chain or extra competitive windup.
+
+The existing reserved public counter bits restore progress. A confirmed proc uses
+the existing AbilityResolved event, without a wire/state/hash migration; protocol25
+and public pools stay unchanged. CountedShot is a closed cosmetic kit variant:
+normal/empowered arrow style reads public progress and the already-announced Unit
+aim target. A Point/Stronghold cannot show a charged shot just because progress is
+retained. The server alone strips shields, resolves damage and confirms the halo
+at contact. Release0.18/flight0.12 remains fixed. Shot, counted and twin emitters
+share one real-joint path, preserving legacy muzzle/backblast/area semantics; loaded
+props support counted bows without modifying older kit constructors.
+
+Own five-form library: slim ivory/navy armor, angular gold bow, rigid short feather
+ornaments, narrow halo and team quiver sash. A extends the bow/adds ivory sleeves
+then sight halo; B adds dark cuirass/prongs then three-point crown. Own upright
+cheek draw/recoil, wing settling and knee/side fall. A cached ivory/gold arrow
+makes the charged release larger; the authoritative contact alone flashes full
+purification, so a canceled projectile never claims a successful dispel. No flight
+immunity, imported asset, extra rig node, light, material per unit or dependency.
+Frozen base/form contracts append these canonical Proposed facts. Native regressions
+and actual screenshot remain queued in the per-character report.
+
+## D-82 · Justiciar's single light stamp and connected construct — 2026-10-31 (Proposed)
+
+R15 appends the exact §13 Celestial Control row/four forms without public-pool
+activation. Celestial Rain waits200 and uses the shared locked six-tick enemy-unit
+windup. Resolve one65-damage pulse around the primary's current x, radius1300;
+living enemies, including summons/carried passengers, take it once in UnitId order.
+No allied/Stronghold collateral, delayed repeats, burning zone, launch or interrupt.
+A replaces registry special damage with78 (65×1.20) then grants own HP1000bp; B
+replaces radius1600 then adds ordinary Slow1500bp/20 to affected surviving enemies.
+Ward blocks that Slow, not raw damage. Static caster damage scales the registry
+amount once; basics remain35 and receive no special-only bonus. Primary death
+cancels the entire pending pulse without refund/retarget, including a prior basic
+kill that tick. Existing basic and special channels stay independent.
+
+Own five-form kit: broad ivory/gold segmented construct, compact moving chest sun,
+navy underlayers/team shoulder panel and rigid hidden forearm supports. A broadens
+bright chest armor then adds large sun collar; B darkens arm segments then adds
+angular side fins. Deliberate flat-foot gait, cocked gauntlet, compressing impact,
+powering-down crouch and independent two-palm stamp are per-kind motion. Its
+Control basic sends one small cached geometric bolt from the real right hand at
+release0.22/flight0.08; the special's single exact-center/radius light ring follows
+server resolution. No fake multi-meteor damage, extra rig node, physics, texture,
+light or dependency. Existing AbilityResolved/public facts suffice; protocol25 and
+simulation layout stay unchanged. Frozen base/form contracts append §13 values.
+
+## D-83 · Jawguard's carapace expiry and one retaliation charge — 2026-10-31 (Proposed)
+
+R16 appends the exact §13 Insects Tank row/four forms. Raised Carapace waits200,
+requires the shared reachable enemy-unit primary and six-tick windup, then grants
+self-reduction1500bp/60. It does not anchor, grant Guard/aura or stop basic attacks.
+Root cancels a pending activation while an applied window expires normally. A
+gains HP2000bp then duration80. B arms exactly one40-damage charge at protection
+expiry, then adds basic damage1500bp. Its next completed enemy-unit primary,
+including summon or fully shielded hit, spends the charge; Strongholds/secondary/
+DoT never spend it. New completed protection overwrites an unspent charge with
+zero until the new expiry. The combined basic uses the Proposed primary-bonus
+reading in §13: static bonus once, ordinary basic weakening/conditional modifiers
+and one victim-protection/on-hit path. No separate attack or stacked charge.
+
+Existing bounded attacks storage/public counter bits hold the charge. On the
+first effective combat tick at or after expiry, clear the expired self-window and
+arm one charge if the current form enables it. Clearing that consumed transition
+prevents repeated arming and handles a pause crossing an expiry boundary without
+adding a clock, scheduler or new state field. Existing applied duration does not
+upgrade retroactively. Protocol25/public pools/hash layout stay unchanged.
+
+Own five-form kit: low broad moss/amber beetle, shield shell, paired local mandibles,
+horn/stout limbs and team side panels. A adds pale layered carapace then a large
+ridge; B darkens the head/lengthens mandibles then adds amber jaw blades. Clicking
+idle, broad planted steps, head-retracting bite, low defensive shell and wide
+ready-charge jaws are per-kind poses. Public reduction/charge facts drive the
+stance, not animation timing. No extra rig node, physics, allied shield effect,
+texture/light/dependency. Frozen base/form contracts append only §13 facts.
+
+## D-84 · Mantis's no-timeout fourth strike and public focus — 2026-10-31 (Proposed)
+
+R17 appends the exact §13 Insects Dps row/four forms. Precise Strike counts completed
+primaries against one enemy unit; the fourth adds60 and resets. B replaces bonus70
+then85; A grants attack speed1500bp then movement1000bp. The bonus uses D-83's
+single-primary reading: static bonus once, normal basic modifiers/protection/on-hit
+once. It cannot double-trigger Second Wind. Target change/death clears the sequence;
+changing to a Stronghold also clears it, without tower bonus/count. Root cancellation
+against the same living enemy adds no hit and keeps progress. Idle time alone never
+expires it; no extra timeout, dash, stealth, haste or weakness is invented.
+
+Existing attacks/mark_target storage holds progress/focus; mark_until0 means no
+deadline for this kind only. Shared cleanup still clears a dead target and leaves
+all other kinds' expiry rules unchanged. The bounded public MarkView encodes Mantis
+focus with ticks0; this is sequence information, not Crowcaller's hostile Mark.
+Client incoming-mark sets/badges explicitly filter Crowcaller; own Mantis inspection
+says Focus without a fake zero-second expiry. Brew does not cleanse an enemy's
+ordinary focus sequence. Confirmed fourth contact uses existing AbilityResolved;
+protocol25/wire shape/hash layout/public pools stay unchanged.
+
+Own five-form kit: tall narrow moss/amber mantis, inverted triangular face, antennae,
+folded scythes and team abdomen band. A adds pale swept leg guards then long crest;
+B thickens/darkens blades then adds serrated elbows. Prayer idle, planted high-knee
+steps, alternate opposing cuts, confirmed crossed fourth stroke and folded death
+are per-kind motion over the fixed26 nodes. No simulated leap or invulnerability,
+new light, texture, per-unit material or dependency. Frozen base/form contracts
+append only §13 values. Source and public focus survive a reconnect snapshot.
+
+## D-85 · Hornet's separate third-sting venom — 2026-10-31 (Proposed)
+
+R18 appends the exact §13 Insects Ranged row and four forms. Every third completed
+enemy-unit primary spends its counter and applies one separate venom slot (5/6/7
+per pulse, four pulses20 ticks apart). Stronghold hits do not count or reset it;
+canceled windups do not count. Ward blocks a fresh application, not existing DoT;
+control immunity is unrelated. Equal/stronger refresh preserves the next pulse,
+restarts the count and records its source. Weaker refresh is ignored. Static
+source damage scales the pulse once at application; source death does not cancel
+it. Existing damage/reduction/shield handling applies without recursive on-hit.
+B adds attack speed1500bp then range400. Brew consumes bleed, then venom, then
+legacy stacks. The shared DoT helper preserves the existing bleed phase contract.
+No new simulation field, protocol tag, pool activation or balance gate change.
+
+Own five-form kit: banded wasp abdomen, opaque wing pairs, antennae, team back
+plate and aligned right-hand stinger. A adds luminous green sacs/pale thorax then
+long casing; B darkens the thorax/sweeps wings then adds fins. Ground movement and
+slow decorative wing hum never imply flight immunity. One cached stinger projectile
+leaves the real emitter; the public third-hit counter selects its green accent.
+A lazy shared green badge shows actual venom; no custom per-unit material, light,
+texture, dependency or physics. Frozen roster contracts append only §13 values.
+
+## D-86 · Weaver's independent web and defended Slow transition — 2026-10-31 (Proposed)
+
+R19 appends the exact §13 Insects Control row/four forms. Sticky Web has period160,
+primary damage25 and Root30, separate from basic15/50. A periods145/130; B adds500
+special-only range then queues Slow1500bp/40 when Root truly ends. Shared Guard-first
+selection includes that special reach, locks one living enemy and uses six-tick
+windup/dead-primary cancellation. Root uses existing outgoing duration/victim Arcana
+rules; the pending Slow snapshots those duration modifiers once. Extended Root
+waits; Brew discards the queue. At actual transition, current Ward/control immunity
+can discard it and ordinary Slow priority applies. No second root target, ally
+shield, web zone, new state field or protocol tag. Public EffectsView already
+carries the bounded queue. Unrelated status arithmetic and all pools stay unchanged.
+
+Own low spider anatomy uses the fixed26 nodes with eight visible grouped legs,
+green eyes, large abdomen, spinner and team back plate. A pale bands/wider spinner
+then web crest; B dark chitin/long forelegs then forked nozzle. Four-leg alternate
+gait, braced spinner, abdomen curl and small pellet are own tracks. No humanoid
+pelvis planting, simulated web, extra node, per-unit material, texture or light.
+Frozen base/form contracts append §13 values. First scoped WASM check exposed
+`cannot find value CalfL/CalfR in this scope`; corrected to existing ShinL/ShinR
+and removed its unused motion import without changing the shared rig.
+
+## D-87 · Pyre Warden's symmetric friendly fire and exact segment cue — 2026-10-31 (Proposed)
+
+R20 appends §13's Undead Tank row/four forms. Every normal basic cycle uses the
+existing six-tick windup and replaces hit output with one scan: all other living
+units in the inclusive forward range, including same-x units, allies, summons and
+carried passengers. Self/behind/out-of-range are excluded. Static basic damage and
+current weakening apply once, equally to both teams; no target-conditional outgoing
+proc, lifesteal, Essence or recursive on-hit. Ordinary victim protection, shields,
+Second Wind, HP-damage hooks and death-owner rewards stay authoritative. Surviving
+victims get cut3500bp/40 (B2:5000), independently of positive HP removal; Ward blocks
+new cut, not raw damage. Only a selected enemy Stronghold takes one basic hit,
+never collateral/cut. Common Root/dead-target cancellation and existing betrayal
+handling remain in front of this replacement. A HP2500bp then range3360; B basic
+flame damage2000bp then stronger cut. No team exclusion or friendly-fire opt-out.
+
+Protocol26 appends Event::ProfaneFlame at tag27, retaining all prior tag bytes.
+Both integer endpoints and combat tick are server facts. Client draws one cheap
+cached tapered green flame and exact ground segment, without reconstructing reach
+from interpolated positions or predicting victims. Its thickness fades; length
+stays exact. This also retains the danger strip on Low. No dynamic light, texture,
+fluid simulation, collision or new dependency. Simulation state layout/pools stay
+unchanged; the protocol contract is updated with this decision only.
+
+Own five-form skeleton burner library has coffin furnace, team chest strap,
+rigid segmented hose, braced nozzle, funerary shoulder armor and green vent slits.
+A enlarges pale armor then extends nozzle/rim; B darkens canister/adds valves then
+triple shroud. Hunched drag, planted two-hand pulse and furnace-fold death are own
+tracks, with no fabricated second ability. Registry/base/form contracts append
+only §13 values. Performance/friendly-fire fun and D-33 evidence remain pending.
+
+## D-88 · Drillnest's bounded factory and non-cleansing fusion — 2026-10-31 (Proposed)
+
+R21 appends the exact §13 Machines Ranged producer and three summon rows. It has
+no basic attack/zero-damage Hit. Full44-tick readiness (A:38) requires the ordinary
+Guard-first enemy-unit/Stronghold target within4500 and six-tick windup. Root or
+dead primary cancels without retargeting; full eight-drill cap at start/resolution
+leaves one readiness, never queues bursts. Cap is shared per seat across factories
+and ranks, separate from Nester/Beetling Augments. Producer holds while engaged.
+New Microdrill starts at producer x with finite240 lifetime; source death changes
+nothing. Existing tier/branch/summoner snapshot the producer profile at birth.
+Three summon kinds, never Shop entries, encode ranks without a new state field.
+
+After movement/basic/special/tower hits and before new production, fuse living
+unexpired same-seat/same-rank pairs within200 in lowest-id/next-id order. Each
+parent is consumed once; outputs can fuse only next tick. New id, floor midpoint,
+weighted HP fraction (minimum1), larger parent cooldown clamped to new interval,
+no inherited windup/free attack, rank TTL280/320. Lower-id parent's whole profile
+wins, never fieldwise best upgrades. Rank3 never fuses. Replacement has no Death,
+Bounty, shrapnel or on-kill; protocol27 appends DrillFused tag28 for a public spark
+cue. Missing parents leave the client's view quietly under its existing path.
+
+Inheritance is a separate cohesive module: Root outranks Slow, duration maxima;
+poison/fish strength-desc/duration-desc/parent-id-slot order with existing caps;
+bleed/venom strongest value/source, earliest next pulse and longest pulse count;
+weakening, pair/ability cut and self-reduction strongest/longest active window;
+queued Slow strongest/longest. Shield takes one stronger amount with its own
+expiry (equal amounts later expiry), then A2's25/40 grant obeys strongest-wins.
+Ward/confusion/immunity deadlines take maxima. Haste/bond/carrier/positive march
+links and caster-only counters are discarded. Fusion cannot cleanse. New effects
+must define inheritance before they can be added. Global arena rules still apply;
+no Arcana/Synergy/general Augment/Beetling bonus or purchased Evolution on drills.
+B gives Duodrill1500bp damage and rank3 tier2 gives2500bp only against printed
+base HP>=1000 unit kinds, never Stronghold or merely boosted max HP.
+
+Own factory library: low tracked hull, honeycomb launcher, forge vents, team sides;
+A pale wider rack/twin feed, B dark barrel/broad siege shroud. No humanoid planting.
+Treads/feed hatch/recoil/fold tracks are local. Microdrill is one tick shell,
+Duodrill paired housings and Megadrill a broad three-blade siege body with distinct
+silhouettes, rotating tips and low leg groups. All use fixed26 nodes/shared caches,
+no projectile-generated summons, lights, textures, physics or dependencies.
+Public pools remain unchanged; D-33 and owner look/fun acceptance stay open.
+
+External hostile Crowcaller marks redirect from either consumed parent to the
+new id with their original deadline. This preserves the harmful Mark without
+inheriting a drill's caster-only focus/counter. Mantis's own sequence still resets
+when its old target id disappears. The focused external-Mark case guards this
+non-cleansing boundary without changing wire/state layout.
+
+Tiny drill portrait captures use close camera framing and a low center in the
+existing diagnostic gallery. This changes no gameplay size, stats, targeting or
+live-match camera. The generic five-form lineup remains the real scale reference.
+
+The control duration maximum applies across both parents even when their control
+types differ: Root wins priority and takes max(Root ticks, Slow ticks). This is the
+literal catalog maximum-duration/non-cleansing reading; the mixed-control case
+asserts50 inherited ticks from Root8 plus Slow50. No state or event shape changes.
+
+Connected crossmembers and overlapping leg struts keep the three rank bodies
+cohesive in close-ups. Each bore uses an existing prop socket at its own center;
+local axial rotation never orbits heads around the shared hull. No new rig nodes.
+
+## D-89 · Form ability text and bounded Low motion — 2026-10-31 (Proposed presentation)
+
+A cohesive client formatter reads P59's actual absolute Ability/form parameters
+for Evolution choices and inspection. Ability-only upgrades no longer show an
+empty stat description. Static/raw values are labeled base; live counters,
+charges, focus and cooldown/effects come only from public snapshots. The HTML
+record appends optional field20 after the19 existing fields; legacy18/19 input
+still parses. Evolved form text uses a middle dot so it cannot inject the record's
+pipe delimiter. No combat rule, network payload, pool or dependency changes.
+
+The existing URL configuration accepts quality=low (native TBG_QUALITY=low).
+It freezes only decorative Moment.clock noise, retaining actual clip/walk/special,
+protection/charge and public status/event timing. No new settings screen or global
+rig pause. Exact flame danger strip and shared status badges remain. Native UI
+execution, full clip/Low comparison and performance claims require their recorded
+acceptance; target typechecking is not execution or a performance measurement.
+## D-80 · Troops uses canonical content and a local training boundary — 2026-10-31 (Proposed)
+
+**Decision.** Plan P62 as a shared roster/details/model presentation and a
+local-only combat laboratory. Exact compositions are initialized through
+validated core training APIs; they never shrink the normal Shop below five
+distinct offers. Reuse canonical combat helpers and champion art kits, and
+keep the offline `lab` feature forbidden in client/server under C10. A
+separate optional `training` feature exposes a private local session and
+bounded runtime observation, not network controls or arbitrary Rulesets.
+Feature flags alone are not the isolation boundary: ordinary matches have
+no active training runtime, and server code never constructs one.
+
+**Dummy tradeoff.** The initial inert dummy can use a runtime-tagged Crate
+carrier with an explicit hatch/open guard and HP/view override. It retains
+summon-like target eligibility and never claims to model a conventional
+enemy. Chosen champion opponents cover those interactions. No new wire kind
+or global Crate behavior is warranted. Required regressions protect real
+cargo and validate statuses, measurements, renewable respawn and cleanup.
+
+**Why.** The player needs real stats/combat and an exact three-champion
+experiment, while current Shop assumptions, debug army filling, gallery
+tools and offline LabStats are insufficient product interfaces. Typed local
+controls, per-mutation metrics and stable content IDs avoid wrong numbers,
+competitive leakage and duplicated balance logic. A canonical constructor
+also avoids repeatedly leaking preview Rulesets on reset.
+
+**Scope/status.** Documentation only; no API, feature flag or product rule
+has been implemented. See [P62](phases/P62-troops-training-lab.md) and
+GAME-DESIGN §16. D-73–D-79 are already reserved in the parallel P59 branch,
+so this plan starts at D-80. Resolve branch/content integration before code.
+
+**Reopen when** the tagged inert target cannot preserve normal Crate
+behavior, a required training capability demands a wire change, the owner
+requests conventional-target dummies, or measurements show the hooks alter
+normal simulation behavior/cost. Stop the dependent step and revise the
+design; do not bypass C10 or silently change target eligibility.
+
+## D-81 · Practice difficulty preserves a fair baseline and discloses assistance — 2026-10-31 (Proposed)
+
+**Decision.** Preserve `Bot::new` and its existing callers. Add bounded,
+seeded practice profiles consuming legal own-seat views and producing
+ordinary PlayerIntentions. Easy, Medium and Hard use normal resources;
+Hard improves visible-state decisions, including Augments. Recommended
+Impossible combines Hard policy, shorter decision spacing and a clearly
+displayed local 2x ordinary regen advantage, pending owner decision O03.
+No hidden opponent information, HP/damage cheat or fabricated victory.
+
+**Why.** A nearly unbeatable label cannot be justified by faster random
+buys. Small heuristic policies plus explicit local assistance are feasible
+for this MVP and understandable to players. They avoid external inference
+cost and avoid changing the bot baseline used by offline balance and other
+callers. Champion-vs-champion drills remain deterministic combat experiments;
+their difficulty is the selected composition, not a nonexistent Shop bot.
+
+**Validation.** Check information boundaries, cadence, legality, normal
+resources, exact regen accounting and unchanged baseline behavior. Run
+only an explicitly authorized bounded paired-seed calibration and owner
+playtests; describe uncertainty and unresolved difficulty goals honestly.
+The named 144-match proposal is not authorization to run it in this
+planning task or as routine validation on each front.
+
+**Reopen when** owner chooses a fair-only Impossible profile, measured
+challenge is too low/high, repeated exploit behavior defeats the scorer,
+or changes to the canonical game invalidate its legal-action evaluation.
+Changing online balance or granting undisclosed advantages is not a bot fix.
+## D-87 · Ranked integrity preserves FIFO and baseline Elo — 2026-10-31 (Proposed, P60)
+
+**Decision.** Start with authoritative completion summaries and shadow
+signals, not automatic punishment. Optional positive-inflow budgets accept
+both existing applied Elo deltas intact or replace both with zero. Keep
+one open ranked FIFO, unchanged K/floor/starting rating and no ranked bots.
+Risk state is separate from settlement: combined relationship and behavior
+evidence requests human review; Review initially settles rating normally.
+No automatic holds, bans, IP inference, fingerprinting or ML.
+
+**Why.** `rating::{delta,apply}` is not zero-sum with unequal placement Ks
+or boundaries. Clipping just the winner invents a new rating policy.
+40 points/7 days stops an equal-rating new-account winning streak after
+two wins; the small community needs measured false-positive/restriction
+cost before any gate. Pair caps alone do not stop disposable donors;
+an optional global immature-source budget addresses that route, with
+explicit remaining mature-Sybil risk. All values are Proposed in
+GAME-DESIGN §14; [P60](phases/P60-ranked-integrity.md) defines exact math,
+attacks, signals, eligibility, rollout and contracts.
+
+**Owner gate.** Activate restrictions only after shadow evidence and
+explicit acceptance of the legitimate-friends tradeoff. Retention of Elo
+requires a separately approved extension: ordering, expiry and budget
+reservation cannot be hidden inside the one-query completion budget.
+Shadow is protocol-neutral; enforcement receipts append a message and
+take the next free postcard version with same-commit protocol contracts.
+
+**Reopen when** legitimate capped results exceed the owner's accepted
+burden, mature collusion dominates, history queries exceed budget, queue
+latency changes, or staffed review makes pending settlement worthwhile.
+Anonymous open registration cannot guarantee unique humans.
+
+## D-88 · Ranked summaries inform, but do not replace, balance evidence — 2026-10-31 (Proposed, P61)
+
+**Decision.** Capture bounded authoritative side summaries, stamp each
+with a monotonic gameplay revision/source hash, retain raw facts and
+rebuild disposable statistics after adjudication. Publish only qualified
+aggregates through a small cached HTTP API and the desktop lobby; ship
+All ratings first. No account-level statistics dashboard or new service.
+Optional statistics writes follow the committed rating transaction.
+
+**Why.** Current telemetry lacks reliable joins, patch identity and choice
+histories. Survival, selection, repeated-player dependence and small
+samples make raw win rate unsuitable for direct tuning. Exposed/nonexposed
+deltas are associations, not isolated unit effects; early-purchase cohorts,
+expected-score residuals and concentration checks inform investigation.
+GAME-DESIGN §15 owns proposed definitions and thresholds; [P61](phases/P61-ranked-stats.md)
+defines collectors, SQL, API, privacy, UI and verification.
+
+**D-33 relationship.** Online data identifies hypotheses and human-play
+patterns; `tbg-balance` tests controlled candidates and held-out seeds
+before any number change. The owner then decides and patch notes record
+both forms of evidence. This decision neither runs the lab nor alters its
+gate thresholds. Every gameplay fix gets its own revision, including one
+within a marketing patch; differing revisions never silently mix.
+
+**Reopen when** clustering/privacy makes public rows misleading, collection
+cost exceeds measured budgets, new mechanics need richer summaries, public
+bands have enough players, or online and offline evidence persistently
+disagree. Exact damage instrumentation is a separate measured scope.
+
+## D-89 · One ranked record foundation and reversible corrections — 2026-10-31 (Proposed, P60/P61)
+
+**Decision.** P60 owns migration v7, match identity, atomic authoritative
+settlement, durable idempotent final-result recovery, cutover baselines
+and append-only adjudication. P61 owns additive v8 raw statistics.
+No timestamp-based legacy joins or retroactive investigation/backfill.
+Source-stamping work is implemented once in P60 for both phases.
+
+**Correction policy.** Freeze original effective deltas. Human invalidation
+or restoration replays these entries for affected accounts from the
+baseline, respecting rating floor/ceiling, recomputing projections and
+competitive records atomically. Later opponents' deltas remain fixed.
+This avoids cascading re-rating but is explicitly not exact counterfactual
+Elo. Dry-run CLI output, backup, revision lease and immutable old/new audit
+entries precede application; no web admin. No automatic account punishment.
+
+**Why.** Two independent v7 proposals would conflict; analytics and integrity
+need one match identity/status/revision. Current result persistence has
+no deduplication/recovery key and a delayed token-only profile reply can
+attach to the wrong account. Optional analytics failure must not undo rating.
+
+**Operating limits.** No result can survive failure of every durable
+medium; report unavailable instead of inventing success. Journal and DB
+operations occur after combat. Pre-migration backup must actually run;
+the current deploy script only installs the backup script. Rollback cannot
+discard newer games by blindly restoring an older backup.
+
+**Number reservation.** D-60–69 are already used by local/fetched parallel
+fronts; P59 is reserved by roster work. This program reserves P60/P61 and
+D-87–89, rechecked before merge. No existing entry is renumbered here.
+
+**Reopen when** exact counterfactual Elo is a product requirement, storage
+recovery exceeds the single-server model, multi-server settlement is needed,
+or journal/SQL budgets fail. The executable handoff and validation tiers are
+in [the program](planning/RANKED-PROGRAM.md).
+## D-90 · Complete localization at the presentation boundary — 2026-10-31
+
+**Decision for planning.** P64 completes the unfinished P41 content/HUD/
+standalone migration using existing Lang/Msg/TBG_I18N and paired catalogs.
+The static audit found matching key sets (174/main-derived, 217/native)
+while gameplay text bypasses them through literal strings, raw content
+fields, Debug names, API codes and native ad hoc bilingual helpers.
+Parity is necessary but not evidence of complete product localization.
+
+**Contracts.** Preserve canonical content IDs, mechanics, usernames,
+credentials, API field names, wire/storage values and asset identities.
+Translate their presentation through exhaustive content resolvers and full
+parameterized messages. Numbers derive from canonical data; errors are
+classified semantically rather than by English prose. Locale changes
+invalidate dynamic/cached text without resetting gameplay or user drafts.
+Browser/native/standalone entry points share the same language policy.
+
+**Why.** Translating only catalogs/headings leaves Augments, abilities,
+Arcanas, tower details and API-derived profile rows mixed with English.
+Moving all prose into core/server or translating identity fields would
+break mechanics, persistence or lookups without solving the client boundary.
+Use small reviewed naming/diagnostic exclusions and content coverage guards,
+not a blanket ban on every English-looking literal.
+
+**Evidence and status.** See [audit](planning/P64-I18N-AUDIT.md), its hashed
+source manifest and [P64](phases/P64-i18n-completeness.md). Documentation
+only: no translations or code corrections implemented, no runtime coverage
+claim. No gameplay rule, database migration or new protocol is planned.
+
+**Reopen when** a new active content domain lacks stable display identity,
+an API genuinely lacks necessary semantics, a third language is requested,
+or shared runtime/font limitations prevent faithful presentation. Document
+the concrete boundary change instead of replacing the existing i18n stack.
+
+
+### D-89 consolidation with P64 (2026-10-31)
+
+The localized inspection record preserves P59 effects/ability at fields 18/19
+and appends localized status at field 20. Shop records preserve reservation
+charges/held at fields 7/8 and append localized role/Faction at fields 9/10.
+Canonical IDs remain stable and all native/web consumers are updated together.
+The owner requests complete Linux/web consolidation; native input, downloads,
+existing panel layouts and creator attribution are retained during i18n merging.
+
+## D-82 · Post-match cast and reusable celebration motion — 2026-10-31 (Proposed)
+
+**Decision.** P63 presents the winning army in its match arena during Result,
+facing the camera and looping each kit's existing Victory or signature Dance.
+Create cosmetic figures independently of simulation entities. Reuse the
+P62 preview motion resolver when integrated; add one signature pilot and
+retain explicit fallback coverage rather than claim every dance is unique.
+
+**Complete history.** Maintain runtime-only aggregate counts by seat/kind/
+last form/eligibility at authoritative spawn and successful Evolution.
+Deaths do not remove participation. This bounds memory by content slots
+instead of retaining an unbounded graveyard. Deliver the final compact cast
+through the result/reconnect route with a coordinated protocol change if
+needed. Allocate the actual next wire version on the integrated base.
+A survivor snapshot or client-observed cache cannot prove complete coverage.
+
+**Why.** Dead units are already removed before the current result screen.
+The owner explicitly wants living and dead participants. Aggregate counters
+support exact duplicate/form counts, reconnect and lazy presentation without
+replaying combat or changing its authority. Immediate result actions and
+idempotent message handling preserve rematches and late rating updates.
+
+**Pending product choices.** Recommended cast includes animated summons,
+excluding inert props; recommended large-cast presentation uses pages of 64
+after an initial 64-figure formation. Owner confirms eligibility, paging or
+all-at-once alternative, and signature pilot at P63 O01–O03. All are Proposed;
+this planning task implements neither the wire change nor the presentation.
+
+**Reopen when** the owner requires all instances simultaneously, actual
+spawn paths invalidate aggregate accounting, finalized-result reconnect
+needs new retention semantics, or visual/performance evidence rejects the
+formation/motion approach. Do not silently truncate cast or weaken results.
+
+
+### D-82 execution clarification — 2026-10-31
+
+The owner approved full animated participation and pagination through every
+logical instance, and replaced the exclusive pilot with a shared current
+Victory standard plus future per-character override seam. P63 does not
+claim all champions have unique Dance content. Protocol 28 adds a public
+random result identity and an opaque bounded cosmetic payload; decoding a
+bad cosmetic field leaves the authoritative Outcome intact. Terminal start/
+end data is retained only in its session under the existing reconnect
+window, dropped at expiry, explicit dismissal or next pairing. No database,
+match duration, rating settlement or reconnect window is extended.
+
+## Consolidated P59/P63 wire contract — 2026-10-31 (owner request)
+
+Protocol 29 combines P59's public shield/effects/special/secondary/flame/fusion
+contract through v27 with P63's result identity and bounded celebration payload
+from v28. This is an actual combined schema, never a blind version reuse.
+All client/server/local/bot consumers and guarded protocol fixtures are updated
+together. D-82 in the independent P59 and P63 fronts denotes separate source
+branch decisions; this integration preserves both decisions and resolves their
+wire compatibility here. Native storage/input/presentation and the new kit
+anatomy replace obsolete browser-only/Archer-v2 assumptions in P63. No online
+outcome moves to a client. The owner authorizes complete PR consolidation,
+release publication, scoped TBG deployment and local Linux installation.
+
+## Integration of parallel decision records — 2026-10-31
+
+The consolidated candidate preserves the published decision text from every
+front. Independently authored identifiers overlap: D-67–D-71 (native/system
+and P59), D-80–D-81 (P59 and P62), D-87–D-89 (P59 and P60/P61), and D-82
+(P59 and P63). Interpret those historical references together with their
+phase/section title; do not treat a numeric collision as supersession.
+New integration behavior is documented in GAME-DESIGN's consolidated roster
+activation section and `phases/CONSOLIDATED-LINUX-RELEASE.md`.

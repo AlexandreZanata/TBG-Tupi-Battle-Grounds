@@ -15,22 +15,40 @@ struct Islet {
     seed: u64,
 }
 
-const ISLETS: [Islet; 2] = [
+const ISLETS: [Islet; 5] = [
     Islet {
         at: Vec2::new(-4.0, -6.7),
         radius: Vec2::new(2.0, 1.5),
-        height: 0.20,
+        height: 1.10,
         seed: 0xfa10,
     },
     Islet {
         at: Vec2::new(20.8, -7.6),
-        radius: Vec2::new(2.35, 1.75),
-        height: 0.95,
+        radius: Vec2::new(2.55, 1.95),
+        height: 2.0,
         seed: 0xc11f,
+    },
+    Islet {
+        at: Vec2::new(-0.6, -9.4),
+        radius: Vec2::new(1.05, 0.72),
+        height: -0.10,
+        seed: 0x10e7,
+    },
+    Islet {
+        at: Vec2::new(-6.0, 2.8),
+        radius: Vec2::new(1.35, 0.95),
+        height: -0.20,
+        seed: 0x20e7,
+    },
+    Islet {
+        at: Vec2::new(22.6, 5.8),
+        radius: Vec2::new(2.0, 1.4),
+        height: 0.10,
+        seed: 0x30e7,
     },
 ];
 
-const BOAT: Vec3 = Vec3::new(17.8, water::LEVEL + 0.08, 5.1);
+const BOAT: Vec3 = Vec3::new(-4.8, water::LEVEL + 0.08, -3.2);
 
 fn island(def: &Islet) -> Mesh {
     const SIDES: usize = 14;
@@ -103,7 +121,20 @@ fn dressing(parts: &mut Vec<Part>, def: &Islet, index: usize) {
             def.height,
             def.at.y + z * def.radius.y,
         );
-        trees::pine(parts, at, scale);
+        trees::pine(parts, at, scale * if index == 1 { 1.3 } else { 1.0 });
+    }
+    if index == 1 {
+        for (x, z, s) in [(-0.12, 0.12, 0.75), (0.48, 0.35, 0.58), (-0.5, -0.08, 0.56)] {
+            trees::pine(
+                parts,
+                Vec3::new(
+                    def.at.x + x * def.radius.x,
+                    def.height,
+                    def.at.y + z * def.radius.y,
+                ),
+                s,
+            );
+        }
     }
     if index == 0 {
         maritime::lighthouse(
@@ -115,7 +146,7 @@ fn dressing(parts: &mut Vec<Part>, def: &Islet, index: usize) {
     for i in 0..5 {
         let angle = (i as f32 + 0.25) * 1.2;
         parts.push((
-            Ball(1.0),
+            Rock(1.0, def.seed as u32 + i as u32),
             ROCK,
             Transform::from_xyz(
                 def.at.x + angle.cos() * def.radius.x * 0.87,
@@ -138,9 +169,9 @@ pub(super) fn spawn(
         chunks.push((island(def), Transform::default()));
         dressing(&mut parts, def, index);
     }
-    for (x, z, scale) in [(-0.4, -8.5, 0.48), (17.2, -8.8, 0.60)] {
+    for (x, z, scale) in [(-0.4_f32, -8.5_f32, 0.48), (17.2, -8.8, 0.60)] {
         parts.push((
-            Ball(1.0),
+            Rock(1.0, x.to_bits() ^ z.to_bits()),
             ROCK,
             Transform::from_xyz(x, water::LEVEL + 0.22, z).with_scale(Vec3::new(
                 scale,
@@ -162,7 +193,7 @@ pub(super) fn spawn(
         NotShadowCaster,
         NotShadowReceiver,
     ));
-    let boat = maritime::spawn_boat(commands, meshes, material, BOAT, 0.68);
+    let boat = maritime::spawn_boat(commands, meshes, material, BOAT, 1.0);
     info!("arena offshore scenery: {triangles} triangles, boat: {boat} triangles; 2 draw batches");
     triangles + boat
 }
@@ -176,14 +207,14 @@ pub(super) fn foam() -> Mesh {
             def.radius,
         );
     }
-    for (x, z, scale) in [(-0.4, -8.5, 0.48), (17.2, -8.8, 0.60)] {
+    for (x, z, scale) in [(-0.4_f32, -8.5_f32, 0.48), (17.2, -8.8, 0.60)] {
         water::foam_ring(
             &mut surface,
             Vec3::new(x, water::LEVEL, z),
             Vec2::new(scale, scale * 0.8),
         );
     }
-    water::foam_ring(&mut surface, BOAT, Vec2::new(0.68, 0.26));
+    water::foam_ring(&mut surface, BOAT, Vec2::new(0.96, 0.34));
     waterfall(&mut surface);
     surface.finish()
 }
@@ -191,9 +222,9 @@ pub(super) fn foam() -> Mesh {
 fn waterfall(surface: &mut Surface) {
     // Follow the cliff's protruding ledge so the sheet remains attached and visible.
     let points = [
-        Vec3::new(21.15, 0.98, -6.26),
-        Vec3::new(21.15, 0.98, -5.96),
-        Vec3::new(21.15, 0.48, -5.48),
+        Vec3::new(21.15, 2.03, -6.26),
+        Vec3::new(21.15, 2.03, -5.96),
+        Vec3::new(21.15, 1.53, -5.48),
         Vec3::new(21.15, water::LEVEL + 0.08, -5.08),
     ];
     for (index, (offset, width, color)) in [
@@ -223,5 +254,5 @@ fn waterfall(surface: &mut Surface) {
             );
         }
     }
-    water::foam_ring(surface, points[3], Vec2::new(0.46, 0.30));
+    water::foam_ring(surface, points[3], Vec2::new(0.70, 0.46));
 }

@@ -46,10 +46,7 @@ fn spawn_camera(mut commands: Commands, window: Single<&Window>) {
         // Soft haze on the far rim of the diorama; the lane stays crisp.
         DistanceFog {
             color: crate::arena::theme::Theme::selected().palette().sky,
-            falloff: FogFalloff::Linear {
-                start: 38.0,
-                end: 95.0,
-            },
+            falloff: crate::arena::theme::Theme::selected().fog(),
             ..default()
         },
         transform,
@@ -71,7 +68,8 @@ fn reframe_on_resize(
     let resized = resize.read().count() > 0;
     let orbit = desktop(size.x, size.y)
         && *state.get() == crate::GameState::Menu
-        && !crate::config::arena_preview();
+        && !crate::config::arena_preview()
+        && crate::config::url_param("bench").is_none();
     if !resized && size == *last && !orbit && !state.is_changed() {
         return;
     }
@@ -87,7 +85,7 @@ fn reframe_on_resize(
     }
 }
 
-fn frame(transform: &mut Transform, projection: &mut Projection, w: f32, h: f32) {
+pub(crate) fn frame(transform: &mut Transform, projection: &mut Projection, w: f32, h: f32) {
     if let Projection::Perspective(p) = projection {
         p.fov = FOV_Y;
     }

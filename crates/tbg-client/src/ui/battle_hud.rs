@@ -33,12 +33,14 @@ fn hide_fallback(
         };
     }
     let debug = crate::config::url_param("measure").is_some();
+    let native_menu = cfg!(target_os = "linux") && *state.get() == crate::GameState::Menu;
     for mut visibility in &mut stats {
-        *visibility = if *state.get() == crate::GameState::Gallery || (desktop.0 && !debug) {
-            Visibility::Hidden
-        } else {
-            Visibility::Inherited
-        };
+        *visibility =
+            if native_menu || *state.get() == crate::GameState::Gallery || (desktop.0 && !debug) {
+                Visibility::Hidden
+            } else {
+                Visibility::Inherited
+            };
     }
 }
 
@@ -61,18 +63,15 @@ fn relative_max(view: &tbg_core::MatchView) -> [i32; 2] {
 #[cfg(target_arch = "wasm32")]
 mod web {
     use super::*;
-    use crate::i18n::{Lang, Msg};
+    use crate::i18n::{augment, content, Lang, Msg};
+    use crate::ui::hud_update;
     use crate::ui::{surrender::Surrender, ActionQueue, PendingBuy, UiAction};
     use crate::{
         camera,
         sync::{LatestView, MatchInfo},
         GameState,
     };
-    use tbg_core::{
-        augment::AugmentCounts,
-        content::{augment_def, def, ENERGY_SCALE, OFFERS},
-        FACTIONS,
-    };
+    use tbg_core::content::{augment_def, def, ENERGY_SCALE, OFFERS};
     use wasm_bindgen::JsCast;
 
     fn attr(root: &web_sys::HtmlElement, name: &str, value: &str) {
@@ -93,6 +92,7 @@ mod web {
             Res<Lang>,
         ),
         inspected: Res<crate::ui::inspect::Inspected>,
+        tower_open: Res<crate::ui::fortify::TowerOpen>,
         mut queue: ResMut<ActionQueue>,
         mut desktop: ResMut<DesktopBattle>,
     ) {
@@ -104,7 +104,8 @@ mod web {
             desktop.0 = false;
             return;
         };
-        desktop.0 = camera::desktop(window.width(), window.height())
+        desktop.0 = !crate::config::bevy_ui()
+            && camera::desktop(window.width(), window.height())
             && *state.get() == GameState::InMatch
             && view.0.is_some()
             && root.get_attribute("data-ready").as_deref() == Some("true");
@@ -123,7 +124,7 @@ mod web {
         if !desktop.0 {
             return;
         }
-        let (info, pending, surrender, fortifying, lang) = details;
+        let (info, pending, surrender, fortifying, _lang) = details;
         let Some(v) = &view.0 else {
             return;
         };
@@ -134,6 +135,11 @@ mod web {
         attr(&root, "data-hp-max-own", &max[0].to_string());
         attr(&root, "data-hp-max-enemy", &max[1].to_string());
         tower(&root, v, fortifying.0.is_some());
+        attr(
+            &root,
+            "data-tower-open",
+            if tower_open.0 { "true" } else { "false" },
+        );
         attr(&root, "data-you", &info.you_name);
         // ARENAS-G: the match's arena for the start banner and info chip.
         attr(&root, "data-arena", info.arena.slug());
@@ -143,10 +149,11 @@ mod web {
             "data-ranked",
             if info.ranked { "true" } else { "false" },
         );
-        attr(&root, "data-clock", &super::super::hud_update::clock(v));
+        attr(&root, "data-clock", &hud_update::clock(v));
+        let lang = *_lang;
         let unit = inspected
             .0
-            .and_then(|id| crate::ui::inspect::report(v, id, &info.arcanas))
+            .and_then(|id| crate::ui::inspect::report(v, id, &info.arcanas, lang))
             .map(|r| r.record())
             .unwrap_or_default();
         attr(&root, "data-inspect", &unit);
@@ -156,12 +163,12 @@ mod web {
         attr(
             &root,
             "data-augments-you",
-            &augment_label(&v.augments[v.you.index()]),
+            &hud_update::augment_names(&v.augments[v.you.index()], lang),
         );
         attr(
             &root,
             "data-augments-enemy",
-            &augment_label(&v.augments[v.you.other().index()]),
+            &hud_update::augment_names(&v.augments[v.you.other().index()], lang),
         );
         let (council, options) = match &v.augment_round {
             Some(round) if round.ticks_left > 0 => {
@@ -176,12 +183,14 @@ mod web {
                     .iter()
                     .enumerate()
                     .filter_map(|(i, id)| {
+                        // `id:name:text:cost`; names never hold ':' (hud.js
+                        // rejoins a text that does).
                         let def = augment_def(*id)?;
                         Some(format!(
                             "{}:{}:{}:{}",
                             def.id,
-                            def.name,
-                            def.text,
+                            content::augment_name(lang, def.id)?,
+                            augment::text(lang, def),
                             round.costs[i] / ENERGY_SCALE
                         ))
                     })
@@ -199,19 +208,19 @@ mod web {
         };
         attr(&root, "data-council", &council);
         attr(&root, "data-council-options", &options);
+        // `N` (BR-U07), plus `| Brood M` while summons live (BR-U08).
+        let (army, brood) = hud_update::army_counts(v);
+        let army = if brood > 0 {
+            format!("{army} | {}", lang.tf(Msg::HudBrood, &[("brood", &brood)]))
+        } else {
+            army.to_string()
+        };
+        attr(&root, "data-army", &army);
         attr(
             &root,
-            "data-army",
-            // `Army N` (BR-U07), plus `| Brood M` while summons live (BR-U08).
-            super::super::hud_update::army_label(v).trim_start_matches("Army "),
+            "data-synergy",
+            &hud_update::synergy_list(v, lang, " | "),
         );
-        let synergies = FACTIONS
-            .iter()
-            .filter(|f| v.synergy[v.you.index()][f.index()] > 0)
-            .map(|f| format!("{f:?} {}/2", v.synergy[v.you.index()][f.index()]))
-            .collect::<Vec<_>>()
-            .join(" | ");
-        attr(&root, "data-synergy", &synergies);
         attr(
             &root,
             "data-surrender",
@@ -223,19 +232,38 @@ mod web {
                 "ready"
             },
         );
+        let shop_pending = pending.0.is_some();
+        attr(
+            &root,
+            "data-shop-pending",
+            if shop_pending { "true" } else { "false" },
+        );
+        attr(
+            &root,
+            "data-reroll-cost",
+            &v.reroll_cost.map(|c| c.to_string()).unwrap_or_default(),
+        );
+        attr(&root, "data-reserve-limit", "2");
         for i in 0..OFFERS {
             let d = def(v.offers[i]);
-            let pending = pending.0.is_some_and(|(offer, _)| usize::from(offer) == i);
+            let pending =
+                shop_pending || pending.0.is_some_and(|(offer, _)| usize::from(offer) == i);
             let available = super::super::hud_update::buyable(v, i) && !pending;
+            // Kind, archetype and Faction stay canonical ids (portrait,
+            // frame art); the last two fields are their localized labels.
             let data = format!(
-                "{:?}|{}|{:?}|{}|{:?}|{}|{}",
+                "{:?}|{}|{:?}|{}|{:?}|{}|{}|{}|{}|{}|{}",
                 v.offers[i],
-                d.name,
+                content::unit_name(lang, d.kind),
                 d.archetype,
                 d.cost / ENERGY_SCALE,
                 d.faction,
                 available,
-                pending
+                pending,
+                v.reserve[i],
+                v.held_mask & (1 << i) != 0,
+                content::archetype(lang, d.archetype),
+                content::faction(lang, d.faction)
             );
             attr(&root, &format!("data-offer-{i}"), &data);
         }
@@ -309,6 +337,20 @@ mod web {
     }
 
     fn action(value: &str) -> Option<UiAction> {
+        if value == "reroll" {
+            return Some(UiAction::Reroll);
+        }
+        if let Some(record) = value.strip_prefix("reserve:") {
+            let (slot, kind) = record.split_once(':')?;
+            let offer = slot
+                .parse::<u8>()
+                .ok()
+                .filter(|i| usize::from(*i) < OFFERS)?;
+            let kind = tbg_core::ALL_KINDS
+                .into_iter()
+                .find(|k| format!("{k:?}") == kind)?;
+            return Some(UiAction::Reserve { offer, kind });
+        }
         if value == "surrender" {
             return Some(UiAction::Surrender);
         }
@@ -327,6 +369,7 @@ mod web {
         let (kind, index) = value.split_once(':')?;
         let index = index.parse::<u8>().ok()?;
         match kind {
+            "release" => (usize::from(index) < OFFERS).then_some(UiAction::Release(index)),
             "buy" => (usize::from(index) < OFFERS).then_some(UiAction::Buy(index)),
             "fortify" => (index <= 1).then_some(UiAction::Fortify(index)),
             "inspect" => (usize::from(index) < OFFERS).then_some(UiAction::Inspect(index)),
@@ -334,23 +377,6 @@ mod web {
                 .then_some(UiAction::ChooseAugment(index)),
             _ => None,
         }
-    }
-
-    fn augment_label(counts: &AugmentCounts) -> String {
-        counts
-            .iter()
-            .enumerate()
-            .filter(|(_, copies)| **copies > 0)
-            .filter_map(|(id, copies)| {
-                let def = augment_def(id as u8)?;
-                Some(if *copies > 1 {
-                    format!("{} x{copies}", def.name)
-                } else {
-                    def.name.to_string()
-                })
-            })
-            .collect::<Vec<_>>()
-            .join(" | ")
     }
 }
 

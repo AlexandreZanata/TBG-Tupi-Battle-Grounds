@@ -1,21 +1,29 @@
 //! Per-frame HUD refresh from `LatestView`.
 
 use bevy::prelude::*;
-use tbg_core::content::{
-    augment_def, def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, TICK_HZ,
-};
+use tbg_core::content::{def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS};
 use tbg_core::{MatchView, Phase, FACTIONS};
 
 use super::hud::Hud;
-use super::{PendingBuy, BUTTON, DISABLED};
+use super::PendingBuy;
+#[cfg(not(target_os = "linux"))]
+use super::{BUTTON, DISABLED};
+#[cfg(not(target_os = "linux"))]
+use crate::i18n::augment;
+use crate::i18n::{content, Lang, Msg};
 use crate::sync::LatestView;
+#[cfg(not(target_os = "linux"))]
 use crate::visuals::assets::FACTION_COLORS;
+#[cfg(not(target_os = "linux"))]
+use tbg_core::content::augment_def;
 
 pub(super) fn update(
     view: Res<LatestView>,
+    info_state: Res<crate::sync::MatchInfo>,
+    lang: Res<Lang>,
     mut pending: ResMut<PendingBuy>,
     mut nodes: Query<(&Hud, &mut Node)>,
-    mut colors: Query<(&Hud, &mut BackgroundColor)>,
+    #[cfg(not(target_os = "linux"))] mut colors: Query<(&Hud, &mut BackgroundColor)>,
     mut texts: Query<(&Hud, &mut Text)>,
 ) {
     let Some(v) = &view.0 else { return };
@@ -23,7 +31,13 @@ pub(super) fn update(
         pending.0 = None;
     }
     let me = v.you.index();
+    let lang = *lang;
     for (hud, mut node) in &mut nodes {
+        #[cfg(target_os = "linux")]
+        if let Some(show) = super::native_battle::auxiliary_visible(hud, v) {
+            node.display = if show { Display::Flex } else { Display::None };
+            continue;
+        }
         let fraction = match hud {
             // Kinds and Fortification give each seat its own max HP (BR-SK07).
             Hud::Hp(0) => hp_fraction(v, me),
@@ -33,6 +47,12 @@ pub(super) fn update(
                 (v.energy as f32 / band.max(1.0)).min(1.0)
             }
             // The War Council row exists only while the battle is paused.
+            Hud::PrivateControls | Hud::WatchControls => {
+                let show = matches!(hud, Hud::WatchControls) == info_state.spectating;
+                node.display = if show { Display::Flex } else { Display::None };
+                continue;
+            }
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilRow => {
                 node.display = if v.augment_round.is_some() {
                     Display::Flex
@@ -45,19 +65,27 @@ pub(super) fn update(
         };
         node.width = percent(100.0 * fraction.clamp(0.0, 1.0));
     }
+    #[cfg(not(target_os = "linux"))]
     for (hud, mut color) in &mut colors {
         match hud {
+            #[cfg(not(target_os = "linux"))]
             Hud::Card(i) => {
-                color.0 = if buyable(v, *i) && pending.0.is_none_or(|(o, _)| usize::from(o) != *i) {
+                color.0 = if buyable(v, *i)
+                    && pending
+                        .0
+                        .is_none_or(|(o, _)| o != u8::MAX && usize::from(o) != *i)
+                {
                     BUTTON
                 } else {
                     DISABLED
                 }
             }
+            #[cfg(not(target_os = "linux"))]
             Hud::CardStrip(i) => {
                 let c = FACTION_COLORS[def(v.offers[*i]).faction.index()];
                 color.0 = Color::srgb_u8(c[0], c[1], c[2]);
             }
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilOption(i) => {
                 let open = v
                     .augment_round
@@ -65,6 +93,7 @@ pub(super) fn update(
                     .is_some_and(|r| !r.resolved && r.ticks_left > 0 && v.energy >= r.costs[*i]);
                 color.0 = if open { BUTTON } else { DISABLED };
             }
+            #[cfg(not(target_os = "linux"))]
             Hud::Forgo => {
                 let open = v
                     .augment_round
@@ -77,63 +106,93 @@ pub(super) fn update(
     }
     for (hud, mut text) in &mut texts {
         text.0 = match hud {
-            Hud::Clock => clock(v),
-            Hud::Info => info(v),
-            Hud::CardText(i) => {
-                let d = def(v.offers[*i]);
+            #[cfg(not(target_os = "linux"))]
+            Hud::Clock => match v.phase {
+                Phase::Countdown => lang.t(Msg::HudStarting).into(),
+                _ => clock(v),
+            },
+            Hud::Info => info(v, lang),
+            #[cfg(not(target_os = "linux"))]
+            Hud::HpLabel(relative) => {
+                let seat = if *relative == 0 { me } else { 1 - me };
                 format!(
-                    "{}\n{:?}\nCost {}",
-                    d.name,
-                    d.archetype,
-                    d.cost / ENERGY_SCALE
+                    "{} / {} HP",
+                    v.stronghold_hp[seat].max(0),
+                    v.strongholds[seat].max_hp
                 )
             }
-            Hud::Augments => augment_list(v, v.you.index()),
-            Hud::CouncilStatus => match &v.augment_round {
-                Some(r) => {
-                    let s = r.ticks_left.div_ceil(TICK_HZ);
-                    if r.resolved {
-                        format!(
-                            "Augment selected! Waiting for opponent... {}:{:02}",
-                            s / 60,
-                            s % 60
-                        )
-                    } else {
-                        format!(
-                            "BATTLE PAUSED - War Council {}:{:02} left\nChoose one Augment",
-                            s / 60,
-                            s % 60
-                        )
-                    }
-                }
-                None => "War Council every 1:00 of battle".into(),
-            },
+            Hud::Spectators => format!(
+                "{} vs {} · {} spectators",
+                info_state.you_name, info_state.opponent, v.spectators
+            ),
+            #[cfg(not(target_os = "linux"))]
+            Hud::CardText(i) => {
+                let d = def(v.offers[*i]);
+                [
+                    content::unit_name(lang, d.kind).to_string(),
+                    content::archetype(lang, d.archetype).to_string(),
+                    lang.tf(Msg::HudCost, &[("cost", &(d.cost / ENERGY_SCALE))]),
+                ]
+                .join("\n")
+            }
+            Hud::Augments => augment_list(v, v.you.index(), lang),
+            #[cfg(not(target_os = "linux"))]
+            Hud::CouncilStatus => council_status(v, lang),
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilOptionText(i) => v
                 .augment_round
                 .as_ref()
                 .and_then(|r| {
                     let id = *r.options.get(*i)?;
                     let d = augment_def(id)?;
-                    Some(format!(
-                        "{}\n{} Energy\n{}",
-                        d.name,
-                        r.costs[*i] / ENERGY_SCALE,
-                        d.text
-                    ))
+                    Some(
+                        [
+                            content::augment_name(lang, id)?.to_string(),
+                            lang.tf(
+                                Msg::CommonEnergyAmount,
+                                &[("cost", &(r.costs[*i] / ENERGY_SCALE))],
+                            ),
+                            augment::text(lang, d),
+                        ]
+                        .join("\n"),
+                    )
                 })
                 .unwrap_or_default(),
+            #[cfg(not(target_os = "linux"))]
             Hud::ForgoText => {
                 if v.augment_round
                     .as_ref()
                     .is_some_and(|r| r.resolved && r.ticks_left > 0)
                 {
-                    "Chosen".into()
+                    lang.t(Msg::CouncilChosen).into()
                 } else {
-                    "Forgo".into()
+                    lang.t(Msg::CouncilForgo).into()
                 }
             }
             _ => continue,
         };
+    }
+}
+
+/// `m:ss` for a tick count, rounded up to whole seconds.
+#[cfg(not(target_os = "linux"))]
+fn mmss(ticks: u32) -> String {
+    let s = ticks.div_ceil(TICK_HZ);
+    format!("{}:{:02}", s / 60, s % 60)
+}
+
+#[cfg(not(target_os = "linux"))]
+fn council_status(v: &MatchView, lang: Lang) -> String {
+    match &v.augment_round {
+        Some(r) if r.resolved => {
+            lang.tf(Msg::CouncilSelectedWait, &[("time", &mmss(r.ticks_left))])
+        }
+        Some(r) => [
+            lang.tf(Msg::CouncilPaused, &[("time", &mmss(r.ticks_left))]),
+            lang.t(Msg::CouncilChoose).to_string(),
+        ]
+        .join("\n"),
+        None => lang.tf(Msg::CouncilEvery, &[("time", &mmss(AUGMENT_ROUND_TICKS))]),
     }
 }
 
@@ -148,6 +207,7 @@ pub(super) fn buyable(v: &MatchView, i: usize) -> bool {
     v.energy >= d.cost && v.phase == Phase::Running && v.augment_round.is_none()
 }
 
+#[cfg(not(target_os = "linux"))]
 pub(super) fn clock(v: &MatchView) -> String {
     if v.phase == Phase::Countdown {
         return "STARTING".into();
@@ -156,54 +216,78 @@ pub(super) fn clock(v: &MatchView) -> String {
     format!("{}:{:02}", s / 60, s % 60)
 }
 
-fn info(v: &MatchView) -> String {
-    let synergies: Vec<String> = FACTIONS
+/// The seat's active Synergies, `Humans 1/2  Plants 2/2`, joined by `sep`.
+pub(crate) fn synergy_list(v: &MatchView, lang: Lang, sep: &str) -> String {
+    FACTIONS
         .iter()
         .filter(|f| v.synergy[v.you.index()][f.index()] > 0)
-        .map(|f| format!("{f:?} {}/2", v.synergy[v.you.index()][f.index()]))
-        .collect();
-    let energy = v.energy as f32 / ENERGY_SCALE as f32;
-    let regen = v.regen_bp as f32 / 10_000.0;
-    format!(
-        "Energy {energy:.1} | Regen x{regen:.2} | {} | {}",
-        army_label(v),
-        synergies.join("  ")
+        .map(|f| content::synergy(lang, *f, v.synergy[v.you.index()][f.index()]))
+        .collect::<Vec<_>>()
+        .join(sep)
+}
+
+fn info(v: &MatchView, lang: Lang) -> String {
+    let energy = f64::from(v.energy) / f64::from(ENERGY_SCALE);
+    let regen = f64::from(v.regen_bp) / 10_000.0;
+    lang.tf(
+        Msg::HudInfo,
+        &[
+            ("energy", &lang.decimal(energy, 1)),
+            ("regen", &lang.decimal(regen, 2)),
+            ("army", &army_label(v, lang)),
+            ("synergy", &synergy_list(v, lang, "  ")),
+        ],
     )
 }
 
-fn augment_list(v: &MatchView, seat: usize) -> String {
-    let list = v.augments[seat]
+/// Owned Augment names, `Sentry | Legacy x2`, in `lang`.
+pub(crate) fn augment_names(counts: &tbg_core::augment::AugmentCounts, lang: Lang) -> String {
+    counts
         .iter()
         .enumerate()
         .filter(|(_, copies)| **copies > 0)
         .filter_map(|(id, copies)| {
-            let def = augment_def(id as u8)?;
+            let name = content::augment_name(lang, id as u8)?;
             Some(if *copies > 1 {
-                format!("{} x{copies}", def.name)
+                format!("{name} x{copies}")
             } else {
-                def.name.to_string()
+                name.to_string()
             })
         })
         .collect::<Vec<_>>()
-        .join(" | ");
+        .join(" | ")
+}
+
+fn augment_list(v: &MatchView, seat: usize, lang: Lang) -> String {
+    let list = augment_names(&v.augments[seat], lang);
     if list.is_empty() {
-        "Augments: none".into()
+        lang.t(Msg::HudAugmentsNone).into()
     } else {
-        format!("Augments: {list}")
+        lang.tf(Msg::HudAugments, &[("list", &list)])
     }
 }
 
-/// `Army N`, plus `Brood M` while the seat has summons (BR-U07, BR-U08).
-pub(crate) fn army_label(v: &MatchView) -> String {
+/// Living conventional units and summons of the viewing seat (BR-U07, BR-U08).
+pub(crate) fn army_counts(v: &MatchView) -> (usize, usize) {
     let army = tbg_core::bot::army(v);
     let brood = v
         .units
         .iter()
         .filter(|u| u.seat == v.you && u.is_summon())
         .count();
+    (army, brood)
+}
+
+/// `Army N`, plus `Brood M` while the seat has summons.
+pub(crate) fn army_label(v: &MatchView, lang: Lang) -> String {
+    let (army, brood) = army_counts(v);
+    let label = lang.tf(Msg::HudArmy, &[("army", &army)]);
     if brood > 0 {
-        format!("Army {army} | Brood {brood}")
+        format!("{label} | {}", lang.tf(Msg::HudBrood, &[("brood", &brood)]))
     } else {
-        format!("Army {army}")
+        label
     }
 }
+
+#[cfg(not(target_os = "linux"))]
+use tbg_core::content::{AUGMENT_ROUND_TICKS, TICK_HZ};

@@ -14,8 +14,13 @@ use crate::vfx::VfxAssets;
 use crate::visuals::{self, UnitLook, VisualAssets};
 
 mod actions;
+pub(crate) mod crowd_ecs;
 mod events;
+#[cfg(target_os = "linux")]
+pub(crate) mod lobby_battle;
 mod messages;
+mod result;
+mod special_cues;
 mod spectate;
 mod timeline;
 use crate::GameState;
@@ -26,6 +31,8 @@ pub use messages::{QueueInfo, ViewGaps};
 
 #[derive(Resource, Default)]
 pub struct MatchInfo {
+    pub result_id: Option<tbg_core::protocol::ResultId>,
+    pub celebration: Option<tbg_core::celebration::CelebrationCast>,
     pub you: Option<Seat>,
     /// Post-P14: the HUD shows both names next to the HP bars.
     pub you_name: String,
@@ -81,6 +88,8 @@ type FxResources<'w> = (
 );
 
 pub fn plugin(app: &mut App) {
+    #[cfg(target_os = "linux")]
+    lobby_battle::plugin(app);
     app.init_resource::<MatchInfo>()
         .init_resource::<LatestView>()
         .init_resource::<ViewBuffer>()
@@ -90,31 +99,60 @@ pub fn plugin(app: &mut App) {
         .init_resource::<MatchStats>()
         .init_resource::<ViewGaps>()
         .init_resource::<crate::art::aim::ImpactRing>()
+        .init_resource::<crate::visuals::mount::Mounts>()
         .add_systems(Update, poll_link)
         .add_systems(
             Update,
             sync_units
                 .after(poll_link)
-                .run_if(in_state(GameState::InMatch)),
+                .after(crate::training::runtime::feed)
+                .run_if(render_units),
+        )
+        .add_systems(
+            Update,
+            crowd_ecs::update
+                .after(sync_units)
+                .after(crate::stress::walk)
+                .before(visuals::aim::update_aim),
+        )
+        .add_systems(
+            Update,
+            crate::visuals::mount::passengers
+                .after(crowd_ecs::update)
+                .before(visuals::aim::update_aim)
+                .run_if(|s: Res<State<GameState>>| {
+                    matches!(*s.get(), GameState::InMatch | GameState::Training)
+                }),
         )
         .add_systems(OnExit(GameState::InMatch), clear_units);
 }
 
+fn render_units(state: Res<State<GameState>>, shell: Res<crate::ui::shell::Shell>) -> bool {
+    if shell.panel == crate::ui::shell::Panel::Troops && *state.get() == GameState::Menu {
+        return false;
+    }
+    #[cfg(target_os = "linux")]
+    if *state.get() == GameState::Menu {
+        return lobby_battle::enabled();
+    }
+    matches!(*state.get(), GameState::InMatch | GameState::Training)
+}
+
 /// Lane x in milli-tiles → world x, mirrored for seat B.
 pub fn world_x(x: i32, you: Seat) -> f32 {
-    let t = x as f32 / 1000.0;
+    world_tile(x as f32 / 1000.0, you)
+}
+
+/// Lane x in tiles → world x, mirrored for seat B.
+pub fn world_tile(t: f32, you: Seat) -> f32 {
     match you {
         Seat::A => t,
         Seat::B => LANE_LEN as f32 / 1000.0 - t,
     }
 }
 
-fn lane_z(id: UnitId) -> f32 {
-    [-0.8, 0.0, 0.8][(id % 3) as usize]
-}
-
 #[allow(clippy::too_many_arguments)] // the one system that turns views into the scene
-fn sync_units(
+pub(crate) fn sync_units(
     mut commands: Commands,
     time: Res<Time>,
     assets: Res<VisualAssets>,
@@ -123,23 +161,16 @@ fn sync_units(
     mut map: ResMut<UnitEntities>,
     mut visuals: events::Visuals,
     mut fx_res: FxResources,
+    mut training: ResMut<crate::training::Trial>,
+    state: Res<State<GameState>>,
+    #[cfg(target_os = "linux")] mut demo: ResMut<lobby_battle::Demo>,
 ) {
     let now = time.elapsed_secs_f64();
-    let mut scene = Scene {
-        commands: &mut commands,
-        assets: &assets,
-        lib: &lib,
-        map: &mut map,
-        visuals: &mut visuals,
-    };
-    // Borrowed, not cloned: the frame lives only while units are placed.
-    let placed = buffer
-        .timeline
-        .frame(now, time.delta_secs_f64())
-        .map(|f| scene.place(f.from, f.to, f.alpha));
-    let Some((you, alive)) = placed else {
-        return;
-    };
+    let dummies = training
+        .session
+        .as_ref()
+        .map(|s| s.dummy_ids().to_vec())
+        .unwrap_or_default();
     let (vfx, sounds, stats, orders, ring) = (
         &fx_res.0,
         &mut *fx_res.1,
@@ -147,6 +178,44 @@ fn sync_units(
         &mut *fx_res.3,
         &mut *fx_res.4,
     );
+    #[cfg(target_os = "linux")]
+    let menu = *state.get() == GameState::Menu;
+    #[cfg(target_os = "linux")]
+    let (timeline, sounds, stats) = if menu {
+        let lobby_battle::Demo {
+            timeline,
+            sounds,
+            stats,
+            ..
+        } = &mut *demo;
+        (timeline, sounds, stats)
+    } else {
+        (&mut buffer.timeline, sounds, stats)
+    };
+    #[cfg(not(target_os = "linux"))]
+    let timeline = &mut buffer.timeline;
+    let stats = if *state.get() == GameState::Training {
+        &mut training.stats
+    } else {
+        stats
+    };
+    let mut scene = Scene {
+        commands: &mut commands,
+        assets: &assets,
+        lib: &lib,
+        map: &mut map,
+        visuals: &mut visuals,
+        #[cfg(target_os = "linux")]
+        menu,
+        dummies: &dummies,
+    };
+    // Borrowed, not cloned: the frame lives only while units are placed.
+    let placed = timeline
+        .frame(now, time.delta_secs_f64())
+        .map(|f| scene.place(f.from, f.to, f.alpha));
+    let Some((you, alive)) = placed else {
+        return;
+    };
     let mut fx = events::Fx {
         assets: &assets,
         vfx,
@@ -157,7 +226,7 @@ fn sync_units(
         time: time.elapsed_secs_f64(),
         ring,
     };
-    for ev in buffer.timeline.take_events() {
+    for ev in timeline.take_events() {
         apply_event(&mut commands, &mut fx, &map, &mut visuals, ev);
     }
     map.0.retain(|id, e| {
@@ -176,6 +245,9 @@ struct Scene<'a, 'w, 's, 'qw, 'qs> {
     lib: &'a FigureLibrary,
     map: &'a mut UnitEntities,
     visuals: &'a mut events::Visuals<'qw, 'qs>,
+    dummies: &'a [UnitId],
+    #[cfg(target_os = "linux")]
+    menu: bool,
 }
 
 impl Scene<'_, '_, '_, '_, '_> {
@@ -183,19 +255,42 @@ impl Scene<'_, '_, '_, '_, '_> {
     /// of the way to its position in `to`; return the seat and unit ids.
     fn place(&mut self, from: &MatchView, to: &MatchView, alpha: f32) -> (Seat, Vec<UnitId>) {
         let you = from.you;
+        let marked: std::collections::BTreeSet<_> = from
+            .units
+            .iter()
+            .filter(|u| u.kind == tbg_core::UnitKind::Crowcaller)
+            .filter_map(|u| u.effects.and_then(|e| e.mark).map(|m| m.target))
+            .collect();
+        // Both views list units by id, so one cursor walks `to` with `from`.
+        let mut next = 0;
         for u in &from.units {
+            let anchor = crowd_ecs::LaneAnchor::from_view(u, you);
+            while to.units.get(next).is_some_and(|n| n.id < u.id) {
+                next += 1;
+            }
             // A unit absent from the next view (it died) holds its position.
-            let to_x = to.units.iter().find(|n| n.id == u.id).map_or(u.x, |n| n.x);
+            let to_x = match to.units.get(next) {
+                Some(n) if n.id == u.id => n.x,
+                _ => u.x,
+            };
             let x = u.x as f32 + (to_x - u.x) as f32 * alpha;
-            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, lane_z(u.id));
+            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, 0.0);
             match self
                 .map
                 .0
                 .get(&u.id)
                 .and_then(|e| self.visuals.get_mut(*e).ok())
             {
-                Some((mut v, mut t, _)) => {
-                    t.translation = pos;
+                Some((mut v, _, mut anim)) => {
+                    v.marked = marked.contains(&u.id);
+                    anim.carried = u.is_carried();
+                    anim.set_reduction(u.reduction);
+                    anim.counter = u.ability_counter();
+                    anim.observe_special(
+                        u.special.is_some_and(|s| s.ready_in == 0),
+                        u.special.and_then(|s| s.cast).map(|c| c.left),
+                        u.status == 2,
+                    );
                     visuals::update_unit_visual(self.commands, self.assets, self.lib, &mut v, u);
                 }
                 None => {
@@ -206,18 +301,47 @@ impl Scene<'_, '_, '_, '_, '_> {
                         branch: u.branch,
                         own: u.seat == you,
                     };
-                    let e =
-                        visuals::spawn_unit_visual(self.commands, self.assets, self.lib, look, pos);
+                    let e = if self.dummies.contains(&u.id) {
+                        visuals::spawn_training_dummy(
+                            self.commands,
+                            self.assets,
+                            self.lib,
+                            look,
+                            pos,
+                        )
+                    } else {
+                        visuals::spawn_unit_visual(self.commands, self.assets, self.lib, look, pos)
+                    };
+                    #[cfg(target_os = "linux")]
+                    if self.menu {
+                        self.commands
+                            .entity(e)
+                            .remove::<crate::ui::UiAction>()
+                            .insert((lobby_battle::DemoUnit, DespawnOnExit(GameState::Menu)));
+                    }
+                    self.commands
+                        .entity(e)
+                        .insert(crowd_ecs::CrowdState::default());
                     self.map.0.insert(u.id, e);
                 }
+            }
+            if let Some(e) = self.map.0.get(&u.id) {
+                self.commands
+                    .entity(*e)
+                    .insert(crowd_ecs::LaneAnchor { pos, ..anchor });
             }
         }
         (you, from.units.iter().map(|u| u.id).collect())
     }
 }
 
-fn clear_units(mut commands: Commands, mut map: ResMut<UnitEntities>) {
+fn clear_units(
+    mut commands: Commands,
+    mut map: ResMut<UnitEntities>,
+    mut mounts: ResMut<crate::visuals::mount::Mounts>,
+) {
     for (_, e) in map.0.drain() {
         commands.entity(e).try_despawn();
     }
+    mounts.clear();
 }

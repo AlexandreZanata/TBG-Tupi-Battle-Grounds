@@ -57,12 +57,6 @@ impl Form {
     }
 }
 
-/// Default native Archer forms: 0 base, 1 Longbow, 2 Marksman.
-#[allow(dead_code)]
-pub fn archer_v2(tier: u8) -> super::figure::FigureSpec {
-    humans::archer_v2::spec(tier)
-}
-
 // ponytail: P16-B placeholder looks, recolored so the new units read as
 // their own units on the lane and in Shop portraits until their final art.
 /// Hive druid: honey and amber instead of leaf green.

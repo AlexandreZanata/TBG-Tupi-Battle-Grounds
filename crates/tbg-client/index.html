@@ -31,6 +31,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Tupi Battle Grounds</title>
+  <link rel="icon" href="assets/branding/tbg.ico?v=fortress-2" sizes="any">
+  <link rel="icon" type="image/png" href="assets/branding/tbg-icon-512.png?v=fortress-2" sizes="512x512">
+  <link rel="apple-touch-icon" href="assets/branding/apple-touch-icon.png?v=fortress-2">
   <link data-trunk rel="rust" data-bin="tbg-client" data-wasm-opt="z" />
   <link data-trunk rel="copy-dir" href="assets" />
   <link data-trunk rel="copy-dir" href="ranking" />
@@ -76,7 +79,7 @@
 
  <div id="tbg-lobby" hidden data-ready="false" data-screen="off" data-i18n-aria-label="lobby.label">
   <header class="lobby-header">
-    <div class="brand" data-i18n-aria-label="lobby.brand.name"><img data-art="logo" data-i18n-alt="lobby.brand.name" alt="Tupi Battle Grounds" width="1500" height="600"></div>
+    <div class="brand" data-i18n-aria-label="lobby.brand.name"><img data-art="logo" data-i18n-alt="lobby.brand.name" alt="Tupi Battle Grounds" width="1024" height="410"></div>
     <div class="player-chip metal-panel">
       <img class="player-crest" data-art="emblem" alt="" width="768" height="1024">
       <div><strong data-player-name data-i18n="lobby.guest.name">Guest</strong><span data-member hidden><i class="gold">◆</i> <b data-rating>1000</b></span>
@@ -87,14 +90,14 @@
       <button data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><svg class="icon"><use data-icon="arcana"/></svg><span data-i18n="lobby.tabs.arcanas">Arcanas</span></button>
       <button data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><svg class="icon"><use data-icon="tower"/></svg><span data-i18n="lobby.tabs.stronghold">Stronghold</span></button>
       <button data-arena-open aria-haspopup="dialog" aria-controls="arena-hub"><svg class="icon"><use data-icon="island"/></svg><span data-i18n="lobby.tabs.arenas">Arenas</span></button>
-      <button disabled data-i18n-title="lobby.tabs.coming" title="Coming later"><svg class="icon"><use data-icon="helmet"/></svg><span><span data-i18n="lobby.tabs.troops">Troops</span> <small data-i18n="lobby.tabs.locked">Locked</small></span></button>
+      <button onclick="location.href='?ui=bevy&amp;panel=troops'"><svg class="icon"><use data-icon="helmet"/></svg><span><span data-i18n="lobby.tabs.troops">Troops</span> </span></button>
       <button data-action="ranking"><svg class="icon"><use data-icon="trophy"/></svg><span data-i18n="lobby.tabs.ranking">Ranking</span></button>
       <button data-dialog="settings"><svg class="icon"><use data-icon="settings"/></svg><span data-i18n="lobby.tabs.settings">Settings</span></button>
     </nav>
     <span class="live-chip metal-panel" data-live-chip>… online</span>
     <button class="sound metal-panel" data-action="sound" data-i18n-aria-label="lobby.sound.toggle" aria-label="Toggle sound"><svg class="icon"><use data-icon="sound"/></svg><span><span data-i18n="lobby.sound.label">Sound:</span> <b data-sound>ON</b></span></button>
   </header>
-  <section id="tbg-ranking" hidden aria-label="Global Rankings"></section>
+  <section id="tbg-ranking" hidden data-i18n-aria-label="ranking.web.title" aria-label="Global Rankings"></section>
   <main class="mode-panel wood-panel" data-i18n-aria-label="lobby.mode.choose">
     <span class="corner top-left"></span><span class="corner top-right"></span><span class="corner bottom-left"></span><span class="corner bottom-right"></span>
     <button class="mode ranked" data-ranked data-action="register"><svg class="icon"><use data-icon="swords"/></svg><span><strong data-i18n="lobby.mode.play_online">Play Online</strong><small data-ranked-hint data-i18n="lobby.mode.ranked_hint_guest">Locked · Create account to play Ranked</small></span><span class="chevron" aria-hidden="true">›</span></button>
@@ -113,7 +116,7 @@
   <section class="feature-cards" data-i18n-aria-label="lobby.feature.explore">
     <button class="feature metal-panel" data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><img data-art="arcanas" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.arcanas.title">Arcanas</strong><small data-i18n="lobby.feature.arcanas.hint">Shape your strategy</small></span></button>
     <button class="feature metal-panel" data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><img data-art="strongholds" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.strongholds.title">Strongholds</strong><small data-i18n="lobby.feature.strongholds.hint">Choose your tower</small></span></button>
-    <button class="feature metal-panel" disabled><img data-art="troops" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.troops.title">Troops</strong><small data-i18n="lobby.feature.troops.hint">Meet the units · Coming later</small><span class="feature-lock" data-i18n="lobby.feature.troops.locked">Locked</span></span></button>
+    <button class="feature metal-panel" onclick="location.href='?ui=bevy&amp;panel=troops'"><img data-art="troops" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.troops.title">Troops</strong><small data-i18n="lobby.feature.troops.hint">Meet the units · Coming later</small></span></button>
     <button class="feature metal-panel" data-action="ranking"><img data-art="ranking" alt="" width="768" height="640"><span class="feature-copy"><strong><span data-i18n="lobby.feature.ranking.title">Ranking</span> <i aria-hidden="true">›</i></strong><small data-i18n="lobby.feature.ranking.hint">Find your place among the best</small></span></button>
   </section>
   <section class="live-panel metal-panel" data-live-panel aria-labelledby="live-panel-title">
@@ -130,12 +133,12 @@
     <div class="news-controls"><button data-news="-1" data-i18n-aria-label="lobby.news.prev" aria-label="Previous news">‹</button><span data-news-page aria-live="polite">1 / 3</span><button data-news="1" data-i18n-aria-label="lobby.news.next" aria-label="Next news">›</button></div>
   </aside>
   <dialog id="arcana-editor" aria-labelledby="arcana-title" aria-describedby="arcana-badge">
-    <header class="arcana-header"><div><p class="arcana-eyebrow">The art of preparation</p><h1 id="arcana-title">Arcanas</h1><p data-a="intro"></p></div><div class="arcana-preview"><span id="arcana-badge">Active in every mode</span><small data-a="scope"></small></div><button class="arcana-close" data-close aria-label="Close Arcana editor">×</button></header>
+    <header class="arcana-header"><div><p class="arcana-eyebrow" data-i18n="arcana.eyebrow">The art of preparation</p><h1 id="arcana-title" data-i18n="arcana.title">Arcanas</h1><p data-a="intro"></p></div><div class="arcana-preview"><span id="arcana-badge">Active in every mode</span><small data-a="scope"></small></div><button class="arcana-close" data-close data-i18n-aria-label="arcana.close" aria-label="Close Arcana editor">×</button></header>
     <p data-a="error" role="alert" hidden></p>
     <div class="arcana-scroll">
       <div class="arcana-map">
         <svg class="arcana-connections" aria-hidden="true"><g data-a="lines"></g></svg>
-        <div class="arcana-center" data-a="center"><span aria-hidden="true">✦</span><strong>Arcanas</strong><p data-a="points" aria-live="polite"></p></div>
+        <div class="arcana-center" data-a="center"><span aria-hidden="true">✦</span><strong data-i18n="arcana.title">Arcanas</strong><p data-a="points" aria-live="polite"></p></div>
         <div class="arcana-families" data-a="families"></div>
       </div>
       <p class="arcana-exclusion" data-a="summon"></p><p class="arcana-eligibility" data-a="eligibility"></p>
@@ -143,9 +146,9 @@
     <footer class="arcana-footer"><div><p data-a="status" role="status"></p><small data-a="storage"></small><small data-a="controls"></small></div><div class="arcana-tools"><button data-a="default"></button><button data-a="reset">Reset</button></div></footer>
   </dialog>
   <dialog id="stronghold-picker" aria-labelledby="stronghold-title" aria-describedby="stronghold-scope">
-    <header class="tower-header"><div><p class="tower-eyebrow">Choose your keep</p><h1 id="stronghold-title">Strongholds</h1><p data-s="intro"></p></div><div class="tower-scope"><span data-s="badge"></span><small id="stronghold-scope" data-s="scope"></small></div><button class="tower-close" data-close aria-label="Close Stronghold picker">×</button></header>
+    <header class="tower-header"><div><p class="tower-eyebrow" data-i18n="stronghold.eyebrow">Choose your keep</p><h1 id="stronghold-title" data-i18n="stronghold.title">Strongholds</h1><p data-s="intro"></p></div><div class="tower-scope"><span data-s="badge"></span><small id="stronghold-scope" data-s="scope"></small></div><button class="tower-close" data-close data-i18n-aria-label="stronghold.close" aria-label="Close Stronghold picker">×</button></header>
     <p data-s="error" role="alert" hidden></p>
-    <div class="tower-scroll"><div class="tower-grid" data-s="grid" role="group" aria-label="Stronghold kinds"></div></div>
+    <div class="tower-scroll"><div class="tower-grid" data-s="grid" role="group" data-i18n-aria-label="stronghold.kinds" aria-label="Stronghold kinds"></div></div>
     <footer class="tower-footer"><div><p data-s="status" role="status"></p><small data-s="storage"></small></div><div class="tower-notes"><small data-s="fortify"></small><small data-s="controls"></small></div></footer>
   </dialog>
   <dialog id="arena-hub" aria-labelledby="arena-title">
@@ -183,13 +186,13 @@
 </div>
 
 
-<div id="tbg-battle" hidden data-ready="false" aria-label="Battle controls">
-  <header class="battle-score" aria-label="Stronghold health and match clock">
+<div id="tbg-battle" hidden data-ready="false" data-i18n-aria-label="battle.label" aria-label="Battle controls">
+  <header class="battle-score" data-i18n-aria-label="battle.score" aria-label="Stronghold health and match clock">
     <div class="team-plate ally">
       <span class="crest" aria-hidden="true"><b data-crest-you>Y</b></span>
       <div class="plate-body">
         <span class="plate-line"><span class="battle-name" data-battle-you>You</span><span class="plate-tower" data-plate-tower="you"></span></span>
-        <div class="vitality ally" role="progressbar" aria-label="Your Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-you-hp>-</strong></div>
+        <div class="vitality ally" role="progressbar" data-i18n-aria-label="battle.your_hp" aria-label="Your Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-you-hp>-</strong></div>
         <small class="battle-augments" data-augments-you hidden></small>
       </div>
     </div>
@@ -200,43 +203,45 @@
     <div class="team-plate enemy">
       <div class="plate-body">
         <span class="plate-line"><span class="plate-tower" data-plate-tower="enemy"></span><span class="battle-name" data-battle-opponent>Opponent</span></span>
-        <div class="vitality enemy" role="progressbar" aria-label="Enemy Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-enemy-hp>-</strong></div>
+        <div class="vitality enemy" role="progressbar" data-i18n-aria-label="battle.enemy_hp" aria-label="Enemy Stronghold HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-battle-enemy-hp>-</strong></div>
         <small class="battle-augments" data-augments-enemy hidden></small>
       </div>
       <span class="crest" aria-hidden="true"><b data-crest-opponent>O</b></span>
     </div>
   </header>
-  <div class="arena-banner" data-arena-banner hidden aria-live="polite"><small data-arena-label>Arena</small><strong data-arena-name></strong><span data-arena-effect></span><em data-arena-fair></em></div>
+  <div class="arena-banner" data-arena-banner hidden aria-live="polite"><small data-arena-label data-i18n="arenas.banner.label">Arena</small><strong data-arena-name></strong><span data-arena-effect></span><em data-arena-fair></em></div>
   <button class="battle-surrender" data-battle-action="surrender" data-state="ready"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 4H9V30H6ZM10 5L27 9 25 20 10 17Z"/></svg><span data-battle-surrender>Surrender</span></button>
   <p class="battle-live" data-battle-live role="status" hidden></p>
   <button class="battle-leave" data-battle-action="leave-watch" data-i18n="spectate.leave" hidden>Leave</button>
-  <aside class="unit-inspect" data-inspect-panel hidden aria-label="Unit status">
-    <button class="inspect-close" data-battle-action="close-inspect" aria-label="Close unit status">&times;</button>
+  <aside class="unit-inspect" data-inspect-panel hidden data-i18n-aria-label="inspect.label" aria-label="Unit status">
+    <button class="inspect-close" data-battle-action="close-inspect" data-i18n-aria-label="inspect.close" aria-label="Close unit status">&times;</button>
     <div class="inspect-head">
       <img class="inspect-portrait" alt="" decoding="async">
       <div class="inspect-title"><strong data-i="name">-</strong><small data-i="form"></small><small class="inspect-tags"><span data-i="owner"></span> &middot; <span data-i="faction"></span> &middot; <span data-i="role"></span></small></div>
     </div>
-    <div class="vitality inspect-hp" role="progressbar" aria-label="Unit HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-i="hp">-</strong></div>
+    <div class="vitality inspect-hp" role="progressbar" data-i18n-aria-label="inspect.unit_hp" aria-label="Unit HP"><span class="vitality-trail"></span><span class="vitality-fill"></span><strong data-i="hp">-</strong></div>
     <dl class="inspect-stats">
       <div><dt data-i="attack-label">Damage</dt><dd data-i="attack"></dd></div>
-      <div><dt>Per second</dt><dd data-i="dps"></dd></div>
-      <div><dt>Attack every</dt><dd data-i="every"></dd></div>
-      <div><dt>Range</dt><dd data-i="range"></dd></div>
-      <div><dt>Speed</dt><dd data-i="speed"></dd></div>
-      <div><dt>Splash</dt><dd data-i="splash"></dd></div>
-      <div><dt>On hit</dt><dd data-i="onhit"></dd></div>
-      <div><dt>Status</dt><dd data-i="status"></dd></div>
-      <div class="wide"><dt>Synergy</dt><dd data-i="synergy"></dd></div>
+      <div><dt data-i18n="inspect.per_second">Per second</dt><dd data-i="dps"></dd></div>
+      <div><dt data-i18n="inspect.every">Attack every</dt><dd data-i="every"></dd></div>
+      <div><dt data-i18n="inspect.range">Range</dt><dd data-i="range"></dd></div>
+      <div><dt data-i18n="inspect.speed">Speed</dt><dd data-i="speed"></dd></div>
+      <div><dt data-i18n="inspect.splash">Splash</dt><dd data-i="splash"></dd></div>
+      <div><dt data-i18n="inspect.on_hit">On hit</dt><dd data-i="onhit"></dd></div>
+      <div><dt data-i18n="inspect.status">Status</dt><dd data-i="status"></dd></div>
+      <div class="wide"><dt data-i18n="inspect.synergy">Synergy</dt><dd data-i="synergy"></dd></div>
+      <div class="wide inspect-effects" data-inspect-ability hidden><dt>Ability</dt><dd data-i="ability"></dd></div>
+      <div class="wide inspect-effects" data-inspect-effects hidden><dt>Effects</dt><dd data-i="effects"></dd></div>
     </dl>
   </aside>
   <aside class="fortify-panel" data-fort-panel hidden aria-labelledby="fort-title">
     <header class="fort-head">
       <svg class="fort-icon" aria-hidden="true"><use data-fort-icon href=""/></svg>
-      <div class="fort-title"><small id="fort-title">Fortification</small><strong data-fort-name>-</strong><span class="fort-tier" data-fort-tier>Tier 0 / 2</span></div>
-      <button class="fort-toggle" data-fort-toggle aria-expanded="true" aria-label="Hide Fortification details">&minus;</button>
+      <div class="fort-title"><small id="fort-title" data-i18n="fortify.heading">Fortification</small><strong data-fort-name>-</strong><span class="fort-tier" data-fort-tier>Tier 0 / 2</span></div>
+      <button class="fort-toggle" data-fort-toggle aria-label="Close Fortification">&times;</button>
     </header>
     <div class="fort-body" data-fort-body>
-      <p class="fort-hp"><span>Stronghold HP</span><b data-fort-hp>-</b></p>
+      <p class="fort-hp"><span data-i18n="fortify.hp">Stronghold HP</span><b data-fort-hp>-</b></p>
       <p class="fort-passive"><b data-fort-passive-name></b><span data-fort-passive></span></p>
       <div class="fort-options">
         <button class="fort-option" data-fort-branch="0"><span class="fort-letter">A</span><span class="fort-copy"><b class="fort-branch"></b><span class="fort-step"></span><span class="fort-effect"></span></span><span class="fort-cost"><i aria-hidden="true"></i><b></b></span></button>
@@ -245,35 +250,35 @@
       <p class="fort-note" data-fort-note role="status"></p>
     </div>
   </aside>
-  <section class="battle-shop" aria-label="Shop">
+  <section class="battle-shop" data-i18n-aria-label="battle.shop" aria-label="Shop">
     <p class="battle-synergy" data-battle-synergy hidden></p>
     <div class="battle-resources iron-frame">
-      <span class="resource-label">Energy</span>
-      <div class="energy-track" role="progressbar" aria-label="Energy"><span data-battle-energy-fill></span></div>
+      <span class="resource-label" data-i18n="battle.energy">Energy</span>
+      <div class="energy-track" role="progressbar" data-i18n-aria-label="battle.energy" aria-label="Energy"><span data-battle-energy-fill></span></div>
       <strong class="resource-value" data-battle-energy>—</strong>
       <span class="resource-divider"></span>
-      <span class="resource-label" title="Every 5 Energy you hold adds 25% to your Energy regeneration, up to 25 Energy">Interest</span><strong class="resource-value interest-value" data-battle-interest>×1.00</strong><small class="interest-next" data-battle-interest-in>0/5</small>
+      <span class="resource-label" data-i18n="battle.interest" data-i18n-title="battle.interest_help" title="Every 5 Energy you hold adds 25% to your Energy regeneration, up to 25 Energy">Interest</span><strong class="resource-value interest-value" data-battle-interest>×1.00</strong><small class="interest-next" data-battle-interest-in>0/5</small>
       <span class="resource-divider"></span>
       <svg class="army-icon" viewBox="0 0 36 30" aria-hidden="true"><circle cx="18" cy="7" r="6"/><circle cx="5" cy="9" r="4"/><circle cx="31" cy="9" r="4"/><path d="M10 30V20Q10 14 18 14T26 20V30ZM0 28V19Q0 15 7 15L9 16Q6 20 6 24V28ZM36 28V19Q36 15 29 15L27 16Q30 20 30 24V28Z"/></svg>
-      <span class="resource-label">Army</span><strong class="resource-value" data-battle-army>0</strong>
+      <span class="resource-label" data-i18n="battle.army">Army</span><strong class="resource-value" data-battle-army>0</strong>
     </div>
     <div class="battle-offers">
-      <button class="battle-card iron-frame" data-offer="0" aria-label="Shop offer one"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
-      <button class="battle-card iron-frame" data-offer="1" aria-label="Shop offer two"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
-      <button class="battle-card iron-frame" data-offer="2" aria-label="Shop offer three"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
-      <button class="battle-card iron-frame" data-offer="3" aria-label="Shop offer four"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
-      <button class="battle-card iron-frame" data-offer="4" aria-label="Shop offer five"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="0" data-i18n-aria-label="battle.offer.0" aria-label="Shop offer one"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="1" data-i18n-aria-label="battle.offer.1" aria-label="Shop offer two"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="2" data-i18n-aria-label="battle.offer.2" aria-label="Shop offer three"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="3" data-i18n-aria-label="battle.offer.3" aria-label="Shop offer four"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="4" data-i18n-aria-label="battle.offer.4" aria-label="Shop offer five"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
     </div>
-    <p class="shop-help">Click to recruit · Hold or right-click for details</p>
+    <p class="shop-help" data-i18n="battle.shop_help">Click to recruit · Hold or right-click for details</p>
   </section>
   <div class="battle-pause" data-pause hidden>
     <section class="battle-council iron-frame" role="dialog" aria-modal="true" aria-labelledby="council-title">
       <header class="council-head">
-        <div><small class="council-paused">Battle paused</small><strong id="council-title">Choose an Augment</strong></div>
-        <div class="council-clock"><small>Time left</small><time data-council-timer>0:20</time></div>
+        <div><small class="council-paused" data-i18n="council.battle_paused">Battle paused</small><strong id="council-title" data-i18n="council.title">Choose an Augment</strong></div>
+        <div class="council-clock"><small data-i18n="council.time_left">Time left</small><time data-council-timer>0:20</time></div>
       </header>
-      <p class="council-help">Both players choose one Augment from the same four. The battle resumes when both confirm or time runs out.</p>
-      <div class="council-timer-track" role="progressbar" aria-label="Augment choice time remaining"><span data-council-progress></span></div>
+      <p class="council-help" data-i18n="council.help">Both players choose one Augment from the same four. The battle resumes when both confirm or time runs out.</p>
+      <div class="council-timer-track" role="progressbar" data-i18n-aria-label="council.timer" aria-label="Augment choice time remaining"><span data-council-progress></span></div>
       <div class="council-options">
         <button class="council-card" data-council-option="0"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
         <button class="council-card" data-council-option="1"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
@@ -281,24 +286,27 @@
         <button class="council-card" data-council-option="3"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
       </div>
       <footer class="council-actions">
-        <button class="council-forgo" data-battle-action="forgo">Forgo</button>
-        <button class="council-confirm" data-battle-action="confirm" disabled>Confirm choice</button>
+        <button class="council-forgo" data-battle-action="forgo" data-i18n="council.forgo">Forgo</button>
+        <button class="council-confirm" data-battle-action="confirm" disabled data-i18n="council.confirm">Confirm choice</button>
       </footer>
-      <div class="council-wait" data-council-wait hidden role="status" aria-live="polite"><strong data-council-wait-title>Augment selected!</strong><span>Waiting for opponent...</span></div>
+      <div class="council-wait" data-council-wait hidden role="status" aria-live="polite"><strong data-council-wait-title>Augment selected!</strong><span data-i18n="council.waiting">Waiting for opponent...</span></div>
     </section>
   </div>
 </div>
 
 <div class="account-scrim" aria-hidden="true"></div>
 <form id="tbg-form" role="dialog" aria-modal="true" aria-labelledby="account-title" aria-describedby="account-help" hidden>
-  <header class="account-header"><img src="assets/lobby/crest-v2.webp" alt="" width="768" height="1024"><p class="account-eyebrow">Tupi Battle Grounds</p><h1 id="account-title">Enter the Grounds</h1><p id="account-help">Build your BattleLine. Make your mark.</p></header>
-  <div class="account-fields"><label id="tbg-form-label" for="tbg-input">Name</label>
-    <div class="account-entry"><input id="tbg-input" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="account-reveal" type="button" data-account-reveal aria-pressed="false" hidden>Show key</button></div>
+  <header class="account-header"><img src="assets/lobby/crest-v2.webp" alt="" width="768" height="1024"><p class="account-eyebrow" data-i18n="lobby.brand.name">Tupi Battle Grounds</p><h1 id="account-title" data-i18n="account.form.title">Enter the Grounds</h1><p id="account-help" data-i18n="account.form.tagline">Build your BattleLine. Make your mark.</p></header>
+  <div class="account-fields"><label id="tbg-form-label" for="tbg-input" data-i18n="account.form.name">Name</label>
+    <div class="account-entry"><input id="tbg-input" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="account-reveal" type="button" data-account-reveal aria-pressed="false" hidden data-i18n="account.form.show_key">Show key</button></div>
     <p id="tbg-form-error" role="alert" hidden></p>
     <button id="tbg-form-ok" type="submit">Continue</button>
-    <button id="tbg-form-cancel" type="button">Back to lobby</button>
+    <button id="tbg-form-cancel" type="button"><span data-i18n="account.form.back">Back to lobby</span></button>
   </div>
-  <p class="account-footnote">Your account uses a saved key. Keep it somewhere safe.</p>
+  <p class="account-footnote" data-i18n="account.form.footnote">Your account uses a saved key. Keep it somewhere safe.</p>
 </form>
+<footer id="tbg-attribution" style="position:fixed;inset:auto 0 0;z-index:120;min-height:24px;text-align:center;background:#071115f5;color:#dce4e8;font:12px/24px system-ui,sans-serif">
+  Tupi Battle Grounds · Created by <a href="https://github.com/AlexandreZanata" target="_blank" rel="noopener noreferrer" style="color:#dfba74">Alexandre Zanata (@AlexandreZanata)</a> · <a href="https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds" target="_blank" rel="noopener noreferrer" style="color:#dfba74">Original repository</a>
+</footer>
 </body>
 </html>

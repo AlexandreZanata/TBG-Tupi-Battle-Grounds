@@ -33,6 +33,7 @@ pub fn reset(state: &mut Surrender, ranked: bool) {
     };
 }
 
+#[cfg(not(target_os = "linux"))]
 pub(super) fn button() -> impl Bundle {
     (
         Node {
@@ -46,13 +47,42 @@ pub(super) fn button() -> impl Bundle {
         BackgroundColor(SURRENDER_BG),
         UiAction::Surrender,
         SurrenderButton,
-        children![label("Surrender", 12.0)],
+        children![label("", 12.0)],
+    )
+}
+
+#[cfg(target_os = "linux")]
+pub(super) fn linux_button(assets: &AssetServer, lang: crate::i18n::Lang) -> impl Bundle {
+    (
+        Node {
+            position_type: PositionType::Absolute,
+            top: px(18),
+            right: px(18),
+            min_width: px(120),
+            height: px(40),
+            padding: UiRect::axes(px(12), px(0)),
+            column_gap: px(7),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            border: UiRect::all(px(2)),
+            border_radius: BorderRadius::all(px(7)),
+            ..default()
+        },
+        BackgroundColor(super::kit::INK),
+        BorderColor::all(super::kit::GOLD),
+        UiAction::Surrender,
+        SurrenderButton,
+        children![
+            super::kit::image(assets, "battle/native/flag.webp", 16., 18.),
+            label(lang.key("battle.surrender"), 12.)
+        ],
     )
 }
 
 fn refresh(
     time: Res<Time>,
     mut state: ResMut<Surrender>,
+    lang: Res<crate::i18n::Lang>,
     mut buttons: Query<(&mut UiAction, &mut BackgroundColor, &Children), With<SurrenderButton>>,
     mut texts: Query<&mut Text>,
 ) {
@@ -60,18 +90,25 @@ fn refresh(
     if state.armed_until.is_some_and(|until| now >= until) {
         state.armed_until = None;
     }
-    let want = if state.sent {
-        "Surrender sent"
+    use crate::i18n::Msg;
+    let want = lang.t(if state.sent {
+        Msg::SurrenderSent
     } else if state.armed_until.is_some() {
         if state.ranked {
-            "Tap again - counts as a loss"
+            Msg::SurrenderAgainLoss
         } else {
-            "Tap again to surrender"
+            Msg::SurrenderAgain
         }
     } else {
-        "Surrender"
+        Msg::BattleSurrender
+    });
+    let bg = if state.sent {
+        DISABLED
+    } else if cfg!(target_os = "linux") && state.armed_until.is_none() {
+        super::kit::INK
+    } else {
+        SURRENDER_BG
     };
-    let bg = if state.sent { DISABLED } else { SURRENDER_BG };
     for (mut action, mut color, children) in &mut buttons {
         let target = if state.sent {
             UiAction::Disabled

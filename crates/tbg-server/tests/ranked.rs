@@ -105,7 +105,7 @@ async fn login_as(ws: &mut Ws, key: &str) -> Profile {
 async fn play_idle(ws: &mut Ws) -> tbg_core::Outcome {
     loop {
         match recv(ws).await {
-            Some(ServerMsg::MatchEnd { outcome }) => return outcome,
+            Some(ServerMsg::MatchEnd { outcome, .. }) => return outcome,
             Some(_) => continue,
             None => panic!("socket closed mid-match"),
         }
@@ -337,7 +337,7 @@ async fn await_seat(ws: &mut Ws) -> tbg_core::Seat {
 async fn await_end(ws: &mut Ws) -> tbg_core::Outcome {
     loop {
         match recv(ws).await {
-            Some(ServerMsg::MatchEnd { outcome }) => return outcome,
+            Some(ServerMsg::MatchEnd { outcome, .. }) => return outcome,
             Some(_) => {}
             None => panic!("socket closed before MatchEnd"),
         }

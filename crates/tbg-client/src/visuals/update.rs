@@ -15,6 +15,7 @@ pub fn update_unit_visual(
     v: &mut UnitVisual,
     u: &UnitView,
 ) {
+    v.fx = u.fx;
     if v.form != (u.kind, u.tier, u.branch) {
         v.form = (u.kind, u.tier, u.branch);
         v.refresh_stats();
@@ -59,9 +60,13 @@ pub fn update_unit_visual(
     commands
         .entity(v.bar_fill)
         .try_insert((t, MeshMaterial3d(fill.clone())));
+    super::status_badges::bleed(commands, v.bleed_badge, u);
+    super::status_badges::shield(commands, a, v, u);
+    super::status_badges::hostile(commands, a, v, u);
     let ring = match u.status {
         1 => &a.slowed,
         2 => &a.rooted,
+        _ if v.marked => &a.marked,
         _ => &a.team[usize::from(!v.own)],
     };
     commands

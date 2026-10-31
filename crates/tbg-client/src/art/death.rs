@@ -1,5 +1,6 @@
 //! Faction death styles (Humans fall, Undead collapse into the ground,
-//! Machines spark and power down, Plants wilt and sink).
+//! Machines spark and power down, Plants wilt and sink, Monsters topple,
+//! Celestials rise and fade, Insects curl and shrink).
 
 use bevy::prelude::*;
 use tbg_core::Faction;
@@ -46,6 +47,30 @@ pub fn profile_for_faction(faction: Faction) -> DeathProfile {
             sink_depth: -0.40,
             wilt_scale_y: 0.30,
             pitch_deg: -10.0,
+            jitter_amplitude: 0.0,
+        },
+        Faction::Monsters => DeathProfile {
+            faction,
+            duration: 0.70,
+            sink_depth: -0.25,
+            wilt_scale_y: 1.0,
+            pitch_deg: -70.0,
+            jitter_amplitude: 0.02,
+        },
+        Faction::Celestials => DeathProfile {
+            faction,
+            duration: 0.80,
+            sink_depth: 0.12,
+            wilt_scale_y: 0.85,
+            pitch_deg: -15.0,
+            jitter_amplitude: 0.0,
+        },
+        Faction::Insects => DeathProfile {
+            faction,
+            duration: 0.65,
+            sink_depth: -0.30,
+            wilt_scale_y: 0.60,
+            pitch_deg: -55.0,
             jitter_amplitude: 0.0,
         },
     }
@@ -96,6 +121,19 @@ pub fn evaluate(faction: Faction, dead_for: f32, base_scale: f32, base_yaw: f32)
             );
             (pos, rot, sc)
         }
+        Faction::Monsters => {
+            let rot = Quat::from_rotation_y(base_yaw)
+                * Quat::from_rotation_x(p.pitch_deg.to_radians() * e);
+            let pos = Vec3::new(0.0, p.sink_depth * e, 0.0);
+            (pos, rot, Vec3::ONE)
+        }
+        Faction::Celestials | Faction::Insects => {
+            let rot = Quat::from_rotation_y(base_yaw)
+                * Quat::from_rotation_x(p.pitch_deg.to_radians() * e);
+            let pos = Vec3::new(0.0, p.sink_depth * e, 0.0);
+            let sc = Vec3::splat(1.0 - (1.0 - p.wilt_scale_y) * e);
+            (pos, rot, sc)
+        }
     };
 
     Transform {
@@ -116,6 +154,9 @@ mod tests {
             Faction::Undead,
             Faction::Machines,
             Faction::Plants,
+            Faction::Monsters,
+            Faction::Celestials,
+            Faction::Insects,
         ] {
             let p = profile_for_faction(f);
             assert_eq!(p.faction, f);
@@ -130,6 +171,9 @@ mod tests {
                 Faction::Undead => assert!(fallen.translation.y <= p.sink_depth),
                 Faction::Machines => assert!(fallen.rotation != Quat::IDENTITY),
                 Faction::Plants => assert!(fallen.scale.y < 0.5),
+                Faction::Monsters => assert!(fallen.rotation != Quat::IDENTITY),
+                Faction::Celestials => assert!(fallen.translation.y > 0.0),
+                Faction::Insects => assert!(fallen.scale.y < 0.7),
             }
         }
     }

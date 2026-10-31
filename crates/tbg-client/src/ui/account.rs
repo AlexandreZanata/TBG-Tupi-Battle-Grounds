@@ -8,6 +8,7 @@ use tbg_core::protocol::{AccountError, ClientMsg, Profile, ServerMsg};
 use super::textform::{self, ActiveForm, TextCancelled, TextEntered, TextKind};
 use super::Toasts;
 use crate::config;
+use crate::i18n::{Lang, Msg};
 use crate::link::MatchLink;
 use crate::net::{Mode, NetLink};
 
@@ -46,13 +47,13 @@ pub fn plugin(app: &mut App) {
         .add_systems(Update, (watch_text, text_cancelled, drain_inbox));
 }
 
-fn error_text(code: AccountError) -> &'static str {
+fn error_msg(code: AccountError) -> Msg {
     match code {
-        AccountError::NameTaken => "That name is taken",
-        AccountError::NameInvalid => "3-16 letters, digits or _; start with a letter",
-        AccountError::RateLimited => "Too many tries, wait a bit",
-        AccountError::Unavailable => "Finish your match first",
-        AccountError::BadKey => "That key didn't work",
+        AccountError::NameTaken => Msg::AccountErrorNameTaken,
+        AccountError::NameInvalid => Msg::AccountErrorNameInvalid,
+        AccountError::RateLimited => Msg::AccountErrorRateLimited,
+        AccountError::Unavailable => Msg::AccountErrorUnavailable,
+        AccountError::BadKey => Msg::AccountErrorBadKey,
     }
 }
 
@@ -83,9 +84,11 @@ fn watch_text(
     for ev in events.read() {
         let now = time.elapsed_secs_f64();
         let req = match ev.kind {
+            TextKind::CatalogSearch => continue,
             TextKind::Name => ClientMsg::Register {
                 name: ev.value.clone(),
             },
+            TextKind::Room => continue,
             TextKind::Key => ClientMsg::Login {
                 key: ev.value.clone(),
             },
@@ -108,6 +111,7 @@ fn drain_inbox(
     mut form: NonSendMut<ActiveForm>,
     mut toasts: ResMut<Toasts>,
     time: Res<Time>,
+    lang: Res<Lang>,
 ) {
     for msg in std::mem::take(&mut inbox.0) {
         match msg {
@@ -128,7 +132,7 @@ fn drain_inbox(
                 account.auto_login = false;
                 textform::close(&mut form);
                 if !was_auto {
-                    toasts.push(format!("Logged in as {}", profile.name));
+                    toasts.say_with(Msg::AccountLoggedIn, &[("name", profile.name.clone())]);
                 }
             }
             ServerMsg::LoggedOut => {
@@ -137,7 +141,7 @@ fn drain_inbox(
                 account.logout_armed = false;
                 account.rating_change = None;
                 config::delete_account_key();
-                toasts.push("Logged out");
+                toasts.say(Msg::AccountLoggedOut);
             }
             // P12: settled by the store after `MatchEnd`; the result screen
             // counts it up. The menu chip refreshes from the new profile.
@@ -157,16 +161,16 @@ fn drain_inbox(
                     // Post-P14: a stored key failed (or timed out); the
                     // player continues as guest and the UI says so.
                     account.profile = None;
-                    toasts.push("Saved key didn't work - playing as guest");
+                    toasts.say(Msg::AccountSavedKeyFailed);
                 } else if code == AccountError::Unavailable
                     && (was_auto || account.profile.is_some())
                 {
                     // P14: the auto-login raced a resumed match; the server
                     // already sent `LoggedIn` for the session. Stay quiet.
                 } else if textform::is_open(&form) {
-                    textform::set_error(&form, error_text(code));
+                    textform::set_error(&form, lang.t(error_msg(code)));
                 } else {
-                    toasts.push(error_text(code));
+                    toasts.say(error_msg(code));
                 }
             }
             _ => {}
@@ -196,4 +200,24 @@ pub(crate) fn download_key(name: &str, key: &str) {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn download_key(_name: &str, _key: &str) {}
+pub(crate) fn download_key(name: &str, key: &str) {
+    if let Some(dir) = crate::platform::storage::data_dir() {
+        // Account names are server-validated; still restrict the filename locally.
+        let safe: String = name
+            .chars()
+            .filter(|c| c.is_ascii_alphanumeric() || *c == '_')
+            .collect();
+        let path = dir.join(format!("{safe}-tbg-key.txt"));
+        let mut options = std::fs::OpenOptions::new();
+        options.create(true).truncate(true).write(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        use std::io::Write;
+        if let Ok(mut file) = options.open(path) {
+            let _ = file.write_all(key.as_bytes());
+        }
+    }
+}

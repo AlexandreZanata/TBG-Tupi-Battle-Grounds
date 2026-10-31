@@ -13,10 +13,12 @@ use crate::vfx::{impacts::Muzzle, shots::ShotKind};
 use model::{bombard, Form};
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose: motion::pose,
     gait: Gait::HEAVY,
     attack: Attack::Shot {
+        loaded: None,
         from: Node::Prop(Socket::WeaponR),
         muzzle: |tier, branch| bombard(Form::of(tier, branch)).muzzle,
         shot,

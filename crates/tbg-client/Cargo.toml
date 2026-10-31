@@ -3,9 +3,10 @@
 
 [package]
 name = "tbg-client"
-version.workspace = true
+version = "0.1.0-native.2"
 edition.workspace = true
 rust-version.workspace = true
+license-file = "../../LICENSE"
 
 [[bin]]
 name = "tbg-client"
@@ -23,23 +24,40 @@ bevy = { version = "0.20", default-features = false, features = [
     "bevy_winit", "bevy_window", "multi_threaded", "webgl2", "x11", "wayland",
     # 3D rendering
     "bevy_render", "bevy_core_pipeline", "bevy_pbr", "bevy_light", "bevy_camera",
-    "bevy_color", "bevy_mesh", "bevy_image", "bevy_shader", "bevy_material",
+    "bevy_color", "bevy_mesh", "bevy_image", "bevy_shader",
+    # PNG encodes opt-in visual acceptance captures with the existing Bevy image dependency.
+    "png", "bevy_material",
     # UI and text (taps are hit-tested in ui/input.rs, no picking needed)
-    "bevy_ui", "bevy_ui_render", "bevy_text", "bevy_input_focus",
+    "bevy_ui", "bevy_ui_render", "bevy_text", "bevy_input_focus", "webp",
+    "bevy_audio", "wav",
 ] }
 # WebSocket client with the same API on wasm and native (P1). Reason: RTT ping.
-ewebsock = "0.8"
-tbg-core = { path = "../tbg-core" }
+ewebsock = { version = "0.8", features = ["tls"] }
+tbg-core = { path = "../tbg-core", features = ["training"] }
+# Shared JSON catalogs and bounded HTTP response decoding for native/web UI.
+serde_json = "1"
+# Callback HTTP works on native and WASM without adding an async runtime.
+ehttp = "0.7"
+# Compare release versions using SemVer, including native prerelease identifiers.
+semver = "1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# OS-standard user data directory for native preferences and account credentials.
+directories = "6"
+# Retained system clipboard ownership for copying keys/links and pasting input.
+arboard = { version = "3.7", default-features = false, features = ["wayland-data-control"] }
+# Open public ranking/download pages using the OS default browser.
+open = "5"
+# Additional Bevy log layer writes native diagnostic logs to the user data directory.
+tracing-subscriber = { version = "0.3", features = ["fmt"] }
 
 [build-dependencies]
 # Build-time only: parse assets/i18n/*.json in build.rs (P41, D2).
 serde_json = "1"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-# Audio only in the browser build: native bevy_audio needs ALSA (P7).
-bevy = { version = "0.20", default-features = false, features = ["bevy_audio", "wav"] }
 # Page URL params, session token in localStorage, room/challenge links,
 # the native share sheet, URL cleanup, and the account text-entry overlay.
-web-sys = { version = "0.3", features = ["Window", "Location", "Storage", "Navigator", "Clipboard", "Document", "Element", "HtmlElement", "HtmlInputElement", "HtmlAnchorElement", "History"] }
+web-sys = { version = "0.3", features = ["Window", "Location", "Storage", "Navigator", "MediaQueryList", "Clipboard", "Document", "Element", "HtmlElement", "HtmlInputElement", "HtmlAnchorElement", "History"] }
 # P11: JS closures for the overlay listeners (companion of web-sys).
 wasm-bindgen = "0.2"

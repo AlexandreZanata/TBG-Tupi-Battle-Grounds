@@ -10,22 +10,29 @@ use std::sync::Arc as StdArc;
 use serde_json::Value;
 use tokio::sync::{oneshot, watch};
 
-use tbg_core::protocol::{AccountError, Profile, RatingResults};
-use tbg_core::{ArcanaPreset, Outcome, StrongholdKind};
+use tbg_core::protocol::{AccountError, Profile};
+use tbg_core::{ArcanaPreset, StrongholdKind};
+
+use crate::ranked::{JournalEntry, RankedReceipt};
 
 mod accounts;
 mod arcanas;
+mod history;
+pub mod integrity_admin;
 pub mod leaderboard;
 mod matches;
 mod ranked;
+mod rulesets;
 mod schema;
+pub mod stats;
 mod strongholds;
 mod worker;
 
 use worker::{worker, StoreCmd};
 
 pub use leaderboard::{LeaderRow, Snapshot};
-pub use ranked::{PlayerStats, RecentMatch};
+pub use ranked::{PlayerStats, RecentMatch, SettleError, POLICY_VERSION};
+pub use stats::{StatsWriteError, StoredMatch};
 
 pub type AccountId = i64;
 
@@ -39,14 +46,30 @@ pub struct Store {
 
 impl Store {
     pub fn open(path: &Path) -> rusqlite::Result<Store> {
+        Store::open_with(path, crate::ranked::policy::RankedPolicy::default())
+    }
+
+    /// P60: open with the start-up integrity policy (shadow budgets and
+    /// signals are evaluated with it and recorded in every settlement).
+    pub fn open_with(
+        path: &Path,
+        policy: crate::ranked::policy::RankedPolicy,
+    ) -> rusqlite::Result<Store> {
         let mut conn = rusqlite::Connection::open(path)?;
         schema::migrate(&mut conn)?;
+        // P61 §3: this binary's ruleset revision, registered once.
+        rulesets::register(
+            &conn,
+            tbg_core::ruleset_version::RULESET_VERSION,
+            &format!("{:016x}", crate::ranked::source_hash()),
+            &crate::ranked::catalog::catalog_json(),
+        )?;
         let (tx, rx) = sync_channel::<StoreCmd>(1024);
         let (snapshot_tx, _) = watch::channel(StdArc::new(leaderboard::build(&conn)?));
         let snapshots = snapshot_tx.clone();
         std::thread::Builder::new()
             .name("tbg-store".into())
-            .spawn(move || worker(conn, rx, snapshots))
+            .spawn(move || worker(conn, rx, snapshots, policy))
             .map_err(|_| rusqlite::Error::InvalidPath(path.to_path_buf()))?;
         Ok(Store { tx, snapshot_tx })
     }
@@ -123,6 +146,18 @@ impl Store {
         name_lower: String,
         key_hash: [u8; 32],
     ) -> Result<(AccountId, Profile), AccountError> {
+        self.login_fresh(name_lower, key_hash)
+            .await
+            .map(|(id, profile, _)| (id, profile))
+    }
+
+    /// Login plus the committed ranked high-water mark read in the same
+    /// worker turn: any settlement at or below it is already in `Profile`.
+    pub async fn login_fresh(
+        &self,
+        name_lower: String,
+        key_hash: [u8; 32],
+    ) -> Result<(AccountId, Profile, i64), AccountError> {
         let (reply_tx, reply_rx) = oneshot::channel();
         self.tx
             .try_send(StoreCmd::Login {
@@ -134,31 +169,45 @@ impl Store {
         reply_rx.await.map_err(|_| AccountError::Unavailable)?
     }
 
-    /// Settle a ranked match in one transaction: both Elo updates plus the
-    /// `ranked_matches` row. Returns per-seat `(before, after, profile)`.
-    /// Only [`Outcome`]-level failures surface as `Unavailable`.
-    pub async fn ranked_result(
-        &self,
-        a: AccountId,
-        b: AccountId,
-        outcome: Option<Outcome>,
-        duration_s: u64,
-        factions: [[u32; 4]; 2],
-        arcanas: [ArcanaPreset; 2],
-    ) -> Result<RatingResults, AccountError> {
+    /// P60: settle one journaled ranked result (or return its committed
+    /// receipt again). Only the finalizer calls this, in completion order.
+    pub async fn settle_ranked(&self, entry: JournalEntry) -> Result<RankedReceipt, SettleError> {
         let (reply_tx, reply_rx) = oneshot::channel();
         self.tx
-            .try_send(StoreCmd::RankedResult {
-                a,
-                b,
-                outcome,
-                duration_s,
-                factions,
-                arcanas,
+            .try_send(StoreCmd::Settle {
+                entry: Box::new(entry),
                 reply: reply_tx,
             })
-            .map_err(|_| AccountError::Unavailable)?;
-        reply_rx.await.map_err(|_| AccountError::Unavailable)?
+            .map_err(|_| SettleError::Sql(rusqlite::Error::InvalidQuery))?;
+        reply_rx
+            .await
+            .map_err(|_| SettleError::Sql(rusqlite::Error::InvalidQuery))?
+    }
+
+    /// P61: store a committed match's optional summary (insert-or-verify).
+    pub async fn save_ranked_stats(
+        &self,
+        match_id: i64,
+        summary: serde_json::Value,
+    ) -> Result<(), StatsWriteError> {
+        let (reply_tx, reply_rx) = oneshot::channel();
+        self.tx
+            .try_send(StoreCmd::SaveStats {
+                match_id,
+                summary: Box::new(summary),
+                reply: reply_tx,
+            })
+            .map_err(|_| StatsWriteError::Unavailable)?;
+        reply_rx.await.map_err(|_| StatsWriteError::Unavailable)?
+    }
+
+    /// P60: highest committed ranked sequence (finalizer start-up mark).
+    pub async fn ranked_high_water(&self) -> rusqlite::Result<i64> {
+        let (reply_tx, reply_rx) = oneshot::channel();
+        self.tx
+            .try_send(StoreCmd::HighWater(reply_tx))
+            .map_err(|_| rusqlite::Error::InvalidQuery)?;
+        reply_rx.await.map_err(|_| rusqlite::Error::InvalidQuery)?
     }
 
     /// Public profile for `/api/players/{name}` (`None` when unknown).

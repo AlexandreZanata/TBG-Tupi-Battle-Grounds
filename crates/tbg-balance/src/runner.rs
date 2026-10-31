@@ -123,6 +123,7 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
     });
     let mut sides: [Side; 2] = Default::default();
     let mut hp = None;
+    let mut shop_journals: [crate::shop_metrics::Journal; 2] = Default::default();
     let ended = headless::play_with(
         &mut state,
         |state| setup.apply(state),
@@ -134,19 +135,44 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
                 intent,
                 result: Ok(()),
             } => {
-                let side = &mut sides[participant(seat, seat_a)];
+                let index = participant(seat, seat_a);
+                let side = &mut sides[index];
+                shop_journals[index].record(side, view, intent);
                 match intent {
                     PlayerIntention::Purchase { offer } => {
-                        side.purchases[view.offers[usize::from(offer)] as usize] += 1;
+                        let i = usize::from(offer);
+                        let cost = m.rules.def(view.offers[i]).cost;
+                        side.purchases[view.offers[i] as usize] += 1;
+                        side.spent += u64::from(cost);
+                        side.expensive_bought += u32::from(
+                            (6 * tbg_core::content::ENERGY_SCALE
+                                ..=7 * tbg_core::content::ENERGY_SCALE)
+                                .contains(&cost),
+                        );
                     }
                     PlayerIntention::Evolve { unit, branch } => {
                         if let Some(u) = view.units.iter().find(|u| u.id == unit) {
                             side.evolutions[u.kind as usize][usize::from(branch.min(1))] += 1;
+                            side.spent += u64::from(view.evolve_costs[usize::from(u.tier.min(1))]);
                         }
                     }
-                    PlayerIntention::ChooseAugment { .. }
-                    | PlayerIntention::Forgo { .. }
-                    | PlayerIntention::Fortify { .. } => {}
+                    PlayerIntention::ChooseAugment { option, .. } => {
+                        side.spent += u64::from(
+                            view.augment_round
+                                .as_ref()
+                                .and_then(|r| r.costs.get(usize::from(option)))
+                                .copied()
+                                .unwrap_or(0),
+                        );
+                    }
+                    PlayerIntention::Fortify { .. } => {
+                        let tier = usize::from(view.strongholds[seat.index()].tier.min(1));
+                        side.spent += u64::from(m.rules.fortify_cost[tier]);
+                    }
+                    PlayerIntention::Reserve { .. }
+                    | PlayerIntention::Release { .. }
+                    | PlayerIntention::Reroll { .. }
+                    | PlayerIntention::Forgo { .. } => {}
                 }
             }
             Moment::Intention { .. } => {}

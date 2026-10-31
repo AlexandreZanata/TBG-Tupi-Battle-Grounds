@@ -14,7 +14,7 @@ use crate::art::{
 };
 
 /// The poleaxe's haft length (socket +Y) and where its head sits.
-pub const HAFT: f32 = 1.45;
+pub const HAFT: f32 = 2.40;
 pub const HEAD_Y: f32 = HAFT * 0.72;
 
 pub fn plan(tier: u8) -> Proportions {
@@ -117,7 +117,7 @@ fn poleaxe(v: &mut Vec<PartSpec>, f: Form) {
         (true, _, true) => {
             v.push(part(
                 w,
-                Box(0.03, 0.42, 0.2),
+                Box(0.045, 0.55, 0.28),
                 STEEL,
                 [0.0, top - 0.04, 0.14],
             ));

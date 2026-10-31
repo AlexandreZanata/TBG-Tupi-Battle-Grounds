@@ -16,8 +16,8 @@ use tbg_core::*;
 struct Totals {
     durations: Vec<u32>,
     reasons: [u32; 3],
-    faction_wins: [u32; 4],
-    faction_games: [u32; 4],
+    faction_wins: [u32; tbg_core::FACTION_COUNT],
+    faction_games: [u32; tbg_core::FACTION_COUNT],
     purchases: [u32; 10],
     /// Per kind: (games a seat bought it, games that seat won).
     bought_won: [(u32, u32); 10],
@@ -74,7 +74,7 @@ fn spam(view: &MatchView, policy: Policy) -> Option<PlayerIntention> {
 fn play(seed: u64, policy: Policy, t: &mut Totals) -> bool {
     let mut s = MatchState::new(seed);
     let mut bots = [Bot::new(2 * seed + 1), Bot::new(2 * seed + 2)];
-    let mut bought = [[0u32; 4]; 2];
+    let mut bought = [[0u32; tbg_core::FACTION_COUNT]; 2];
     let mut kinds = [[false; 10]; 2];
     let mut hp_at_2min = None;
     let mut last = Instant::now();
@@ -101,7 +101,10 @@ fn play(seed: u64, policy: Policy, t: &mut Totals) -> bool {
             PlayerIntention::Evolve { .. } => t.evolutions += 1,
             PlayerIntention::ChooseAugment { .. }
             | PlayerIntention::Forgo { .. }
-            | PlayerIntention::Fortify { .. } => {}
+            | PlayerIntention::Fortify { .. }
+            | PlayerIntention::Reserve { .. }
+            | PlayerIntention::Release { .. }
+            | PlayerIntention::Reroll { .. } => {}
         },
         Moment::Intention { .. } => {}
         Moment::Stepped { state } => {

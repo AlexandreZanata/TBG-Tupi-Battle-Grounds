@@ -247,6 +247,12 @@ fn event_name(event: &Event) -> &'static str {
         Event::Transfer { .. } => "Transfer",
         Event::Boarded { .. } => "Boarded",
         Event::Dismounted { .. } => "Dismounted",
+        Event::CorrosiveSplash { .. } => "CorrosiveSplash",
+        Event::AbilityStarted { .. } => "AbilityStarted",
+        Event::AbilityResolved { .. } => "AbilityResolved",
+        Event::Crossfire { .. } => "Crossfire",
+        Event::ProfaneFlame { .. } => "ProfaneFlame",
+        Event::DrillFused { .. } => "DrillFused",
     }
 }
 
@@ -360,7 +366,7 @@ struct ViewA {
     offers: [UnitKind; OFFERS],
     stronghold_hp: [i32; 2],
     units: Vec<UnitA>,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
     last_seq: u32,
     events: Vec<Event>,
     outcome: Option<tbg_core::Outcome>,
@@ -448,7 +454,7 @@ struct ViewC {
     full: bool,
     static_units: Vec<UnitStatic>,
     units: Vec<UnitDynamic>,
-    synergy: Option<[[u8; 4]; 2]>,
+    synergy: Option<[[u8; tbg_core::FACTION_COUNT]; 2]>,
     last_seq: u32,
     events: Vec<Event>,
     outcome: Option<tbg_core::Outcome>,
@@ -466,7 +472,7 @@ struct ViewB {
     static_units: Vec<UnitStatic>,
     units: Vec<UnitDynamic>,
     removed: Vec<UnitId>,
-    synergy: Option<[[u8; 4]; 2]>,
+    synergy: Option<[[u8; tbg_core::FACTION_COUNT]; 2]>,
     last_seq: u32,
     events: Vec<Event>,
     outcome: Option<tbg_core::Outcome>,
@@ -511,7 +517,7 @@ fn fx_of(unit: &tbg_core::Unit) -> u16 {
 fn derived_max_hp(
     unit: &UnitStatic,
     fx: u16,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
     arcanas: &[ArcanaPreset; 2],
     augments: &[AugmentCounts; 2],
     rules: &Ruleset,
@@ -608,22 +614,22 @@ fn build_a_state(state: &MatchState, seat: Seat, events: &[Event]) -> ViewA {
 #[derive(Default, Clone)]
 struct StaticTracker {
     units: Vec<UnitStatic>,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
 }
 
 #[derive(Default, Clone)]
 struct StaticCache {
     units: BTreeMap<UnitId, UnitStatic>,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
 }
 
 /// Sorted merge: both lists are sorted by `UnitId` (ids only grow).
 fn update_statics(
     current: &[UnitStatic],
     tracker: &mut StaticTracker,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
     full: bool,
-) -> (Vec<UnitStatic>, Option<[[u8; 4]; 2]>) {
+) -> (Vec<UnitStatic>, Option<[[u8; tbg_core::FACTION_COUNT]; 2]>) {
     let mut statics = Vec::new();
     if full {
         statics.extend_from_slice(current);
@@ -739,7 +745,7 @@ fn rebuild_c(
 fn rebuild_units(
     dynamics: &[UnitDynamic],
     statics: &BTreeMap<UnitId, UnitStatic>,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
     arcanas: &[ArcanaPreset; 2],
     augments: &[AugmentCounts; 2],
     rules: &Ruleset,
@@ -760,13 +766,26 @@ fn rebuild_units(
             max_hp: derived_max_hp(stat, dynamic.fx, synergy, arcanas, augments, rules),
             status: dynamic.status,
             fx: dynamic.fx,
+            carrier: None,
+            shield: 0,
+            reduction: 0,
+            special: None,
+            effects: None,
         });
     }
     Ok(units)
 }
 
-fn assemble_c(view: &ViewC, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Seat) -> MatchView {
+fn assemble_c(
+    view: &ViewC,
+    units: Vec<UnitView>,
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
+    you: Seat,
+) -> MatchView {
     MatchView {
+        reserve: [0; tbg_core::content::OFFERS],
+        held_mask: 0,
+        reroll_cost: None,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -791,8 +810,16 @@ fn assemble_c(view: &ViewC, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Se
     }
 }
 
-fn assemble_b(view: &ViewB, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Seat) -> MatchView {
+fn assemble_b(
+    view: &ViewB,
+    units: Vec<UnitView>,
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
+    you: Seat,
+) -> MatchView {
     MatchView {
+        reserve: [0; tbg_core::content::OFFERS],
+        held_mask: 0,
+        reroll_cost: None,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -1400,9 +1427,17 @@ fn rebuild_a(
             ),
             status: unit.status,
             fx: unit.fx,
+            carrier: None,
+            shield: 0,
+            reduction: 0,
+            special: None,
+            effects: None,
         });
     }
     Ok(MatchView {
+        reserve: [0; tbg_core::content::OFFERS],
+        held_mask: 0,
+        reroll_cost: None,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -1464,6 +1499,11 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
                 Status::Rooted { .. } => 2,
             },
             fx: fx_of(unit),
+            carrier: None,
+            shield: 0,
+            reduction: 0,
+            special: None,
+            effects: None,
         })
         .collect();
     let make = |you: Seat| {
@@ -1471,6 +1511,9 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
             extra: extra_state(state, you),
         };
         MatchView {
+            reserve: [0; tbg_core::content::OFFERS],
+            held_mask: 0,
+            reroll_cost: None,
             tick: state.tick,
             phase: state.phase,
             phase_ticks_left: phase_ticks_left_at(state.tick, state.phase),

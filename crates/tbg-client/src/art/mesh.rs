@@ -7,11 +7,20 @@ use bevy::mesh::{Indices, VertexAttributeValues};
 use bevy::prelude::*;
 use bevy::render::render_resource::PrimitiveTopology;
 
+mod scenery;
+
 /// A part's shape in its own space (Y up, centered unless noted).
 #[derive(Clone, Copy, Debug)]
 pub enum Shape {
     Box(f32, f32, f32),
     Ball(f32),
+    /// Beveled scenery block: dimensions and edge width.
+    Bevel(f32, f32, f32, f32),
+    /// Irregular mineral silhouette and its fitted snow shell, sharing a seed.
+    Rock(f32, u32),
+    SnowCap(f32, u32),
+    /// Faceted conifer crown with uneven, drooping lower edges.
+    Canopy(f32, f32, u32),
     /// Radius, cylinder length (total height = length + 2 * radius).
     Pill(f32, f32),
     Cyl(f32, f32),
@@ -27,6 +36,10 @@ pub enum Shape {
 pub fn build(shape: Shape) -> Mesh {
     match shape {
         Shape::Box(x, y, z) => Cuboid::new(x, y, z).into(),
+        Shape::Bevel(x, y, z, b) => scenery::bevel(Vec3::new(x, y, z), b),
+        Shape::Rock(r, seed) => scenery::rock(r, seed, false),
+        Shape::SnowCap(r, seed) => scenery::rock(r, seed, true),
+        Shape::Canopy(r, h, seed) => scenery::canopy(r, h, seed),
         Shape::Ball(r) => Sphere::new(r)
             .mesh()
             .ico(1)

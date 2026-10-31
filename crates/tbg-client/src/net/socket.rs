@@ -5,7 +5,7 @@
 use ewebsock::{WsEvent, WsMessage};
 use tbg_core::protocol::{self, ClientMsg, ServerMsg};
 
-use super::{NetLink, NetStatus};
+use super::{NetFailure, NetLink, NetStatus};
 use crate::config;
 
 /// Give up reconnecting after this long (server window is 30 s).
@@ -91,7 +91,7 @@ impl NetLink {
             return;
         }
         if now - lost > GIVE_UP {
-            self.status = NetStatus::Failed("Connection lost".into());
+            self.status = NetStatus::Failed(NetFailure::ConnectionLost);
         } else if now >= self.next_try {
             self.connect(now);
             self.tries += 1;
@@ -102,6 +102,14 @@ impl NetLink {
     /// Protocol housekeeping stays here; everything else goes to the game.
     pub(super) fn handle(&mut self, msg: ServerMsg, now: f64) -> Option<ServerMsg> {
         match msg {
+            ServerMsg::MatchStart { result_id, .. } | ServerMsg::MatchEnd { result_id, .. }
+                if self.discarded_result == Some(result_id) =>
+            {
+                None
+            }
+            ServerMsg::RematchOpen { .. } if self.discarded_result.is_some() && !self.in_match => {
+                None
+            }
             ServerMsg::Welcome { token, .. } => {
                 let previous = self.token;
                 config::save_token(&token);
@@ -143,8 +151,12 @@ impl NetLink {
                 None
             }
             ServerMsg::VersionMismatch { .. } => {
-                self.status =
-                    NetStatus::Failed("A new version is available - reload the page".into());
+                self.status = NetStatus::Failed(NetFailure::VersionMismatch);
+                crate::platform::storage::set(
+                    crate::platform::storage::Scope::Session,
+                    "update.required",
+                    "1",
+                );
                 None
             }
             ServerMsg::View(view) => {
@@ -163,14 +175,19 @@ impl NetLink {
                     ServerMsg::ChallengeWaiting { .. } | ServerMsg::RematchOpen { .. } => {
                         self.mode = super::Mode::Probe;
                     }
-                    ServerMsg::MatchStart { .. } => {
+                    ServerMsg::MatchStart { result_id, .. } => {
+                        self.discarded_result = None;
+                        config::clear_dismissed_result();
+                        self.result_id = Some(result_id);
                         self.mode = super::Mode::Probe;
                         self.in_match = true;
                         self.login_in_flight = false;
                         self.held_request = false;
                         self.login_deadline = None;
                     }
-                    ServerMsg::MatchEnd { .. } => self.in_match = false,
+                    ServerMsg::MatchEnd { result_id, .. } if self.result_id == Some(result_id) => {
+                        self.in_match = false
+                    }
                     // P47: a watch starts a listen-only link; the end or a refusal
                     // leaves a probe that never asks for the watch again.
                     ServerMsg::SpectateStart { .. } => self.watching = true,
@@ -198,6 +215,8 @@ mod tests {
             opened: false,
             token: Some([1; 16]),
             in_match: false,
+            result_id: None,
+            discarded_result: None,
             status: NetStatus::Ready,
             lost_at: None,
             tries: 0,
@@ -237,6 +256,7 @@ mod tests {
             let mut net = link(mode);
             net.handle(
                 ServerMsg::MatchStart {
+                    result_id: [63; 16],
                     you: tbg_core::Seat::A,
                     you_name: "A".into(),
                     you_rating: None,
@@ -250,6 +270,9 @@ mod tests {
             );
             net.handle(
                 ServerMsg::MatchEnd {
+                    result_id: [63; 16],
+                    last_tick: 0,
+                    cast: None,
                     outcome: tbg_core::Outcome {
                         winner: Some(tbg_core::Seat::B),
                         reason: tbg_core::EndReason::Forfeit,
@@ -327,5 +350,55 @@ mod tests {
             net.outq.front().map(|(_, m)| m.clone()),
             Some(ClientMsg::Spectate { id: 7 })
         );
+    }
+    #[test]
+    fn celebration_retry_ignores_terminal_replay_without_canceling_the_new_request() {
+        for mode in [Mode::Quick, Mode::Ranked] {
+            let mut net = link(mode);
+            net.discard_completed([63; 16]);
+            net.login_in_flight = true;
+            net.held_request = true;
+            let old = ServerMsg::MatchStart {
+                result_id: [63; 16],
+                you: tbg_core::Seat::A,
+                you_name: "A".into(),
+                you_rating: None,
+                opponent: "B".into(),
+                mode: protocol::MatchMode::Casual,
+                opponent_rating: None,
+                arcanas: [tbg_core::ArcanaPreset::DEFAULT; 2],
+                arena: tbg_core::Arena::Forest,
+            };
+            assert!(net.handle(old, 0.).is_none());
+            assert!(net
+                .handle(
+                    ServerMsg::MatchEnd {
+                        result_id: [63; 16],
+                        last_tick: 100,
+                        cast: None,
+                        outcome: tbg_core::Outcome {
+                            winner: Some(tbg_core::Seat::A),
+                            reason: tbg_core::EndReason::Forfeit
+                        }
+                    },
+                    0.
+                )
+                .is_none());
+            assert_eq!(net.mode, mode);
+            assert!(net.login_in_flight && net.held_request);
+            let profile = protocol::Profile {
+                name: "A".into(),
+                rating: 1000,
+                ranked_games: 0,
+                wins: 0,
+                losses: 0,
+                draws: 0,
+            };
+            net.handle(ServerMsg::LoggedIn { profile }, 1.);
+            assert!(net.outq.iter().any(|(_, m)| matches!(
+                (mode, m),
+                (Mode::Quick, ClientMsg::QuickMatch) | (Mode::Ranked, ClientMsg::RankedMatch)
+            )));
+        }
     }
 }

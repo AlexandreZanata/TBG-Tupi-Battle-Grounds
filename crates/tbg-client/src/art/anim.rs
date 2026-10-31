@@ -9,7 +9,7 @@ pub use super::{
 use super::{
     feet::{FootLocks, Stride},
     ik,
-    kits::{self, Aim, Gait, Kit, Moment},
+    kits::{self, Aim, Attack, Gait, Kit, Moment},
     rig::{self, Joint, Proportions, NODE_COUNT},
 };
 use bevy::prelude::*;
@@ -25,12 +25,15 @@ pub struct Animator {
     pub plan: Proportions,
     pub figure: Entity,
     pub native: bool,
-    pub archer: bool,
     pub rate: f32,
     pub hit_stop: f32,
     pub preview: Option<(Clip, f32)>,
+    /// Explicit event-free presentation time; independent of combat/action clocks.
+    pub presentation_clock: Option<f32>,
     pub events: Vec<ClipEvent>,
     pub kit: Option<&'static Kit>,
+    kind: UnitKind,
+    celebration: Option<super::celebration::CelebrationMotion>,
     /// (tier, branch) of the shown form, for kit layers.
     pub form: (u8, u8),
     /// The engaged target in world space; visuals refresh it every frame.
@@ -38,6 +41,15 @@ pub struct Animator {
     /// Walk in place at content speed (review tools): feet are not planted.
     pub treadmill: bool,
     pub gait: Gait,
+    pub gesture: f32,
+    pub growth: f32,
+    /// When carried by a carrier (e.g. riding a Cargo Crab), sits mounted in saddle.
+    pub carried: bool,
+    pub reduction: u16,
+    pub counter: u8,
+    special: Option<f32>,
+    special_ready: bool,
+    armor_flash: f32,
     base: Clip,
     base_t: f32,
     action: Option<(Clip, f32)>,
@@ -70,16 +82,26 @@ impl Animator {
             plan,
             figure,
             native: false,
-            archer: false,
             rate: 1.0,
             hit_stop: 0.0,
             preview: None,
+            presentation_clock: None,
             events: Vec::new(),
             kit: kits::kit(kind),
+            kind,
+            celebration: None,
             form: (0, 0),
             aim_at: None,
             treadmill: false,
             gait,
+            gesture: 1e6,
+            growth: 0.0,
+            carried: false,
+            reduction: 0,
+            counter: 0,
+            special: None,
+            special_ready: false,
+            armor_flash: 0.0,
             base: Clip::Idle,
             base_t: phase * Clip::Idle.duration(),
             action: None,
@@ -96,6 +118,94 @@ impl Animator {
             travel: 0.0,
             heading: Vec3::Z,
         }
+    }
+    /// Snapshots restore persistent armor; only an increase squeezes the plates.
+    pub fn set_reduction(&mut self, bp: u16) {
+        if bp > self.reduction {
+            self.armor_flash = 1.0;
+        }
+        self.reduction = bp;
+    }
+    pub fn attack_variant(&self) -> usize {
+        usize::from(self.variant & 1)
+    }
+    pub fn start_special(&mut self) {
+        self.special = Some(0.0);
+    }
+    pub fn resolve_special(&mut self) {
+        let contact = f32::from(tbg_core::content::WINDUP) / tbg_core::content::TICK_HZ as f32;
+        self.special = Some(self.special.unwrap_or(0.0).max(contact));
+    }
+    pub fn observe_special(&mut self, ready: bool, left: Option<u16>, rooted: bool) {
+        self.special_ready = ready;
+        if rooted {
+            self.special = None;
+            return;
+        }
+        if let Some(left) = left {
+            let elapsed = f32::from(tbg_core::content::WINDUP.saturating_sub(left))
+                / tbg_core::content::TICK_HZ as f32;
+            self.special = Some(self.special.unwrap_or(0.0).max(elapsed));
+        }
+    }
+    pub fn kind(&self) -> UnitKind {
+        self.kind
+    }
+    /// Catalog and Result sample the same kit pipeline without emitting combat events.
+    pub fn present(&mut self, clip: Clip, t: f32) {
+        if clip == Clip::Victory {
+            self.celebrate(
+                super::celebration::celebration_for(self.kind, self.form.0, self.form.1),
+                t,
+            );
+            return;
+        }
+        self.celebration = None;
+        let duration = self.duration(clip);
+        self.preview = Some((
+            clip,
+            if clip.looping() {
+                t.rem_euclid(duration)
+            } else {
+                t.min(duration)
+            },
+        ));
+        self.presentation_clock = Some(t);
+        self.clock = t;
+        self.action = None;
+        self.fade = None;
+        self.aim = None;
+        self.aim_at = None;
+        self.hit_stop = 0.;
+        self.carried = false;
+        self.events.clear();
+        self.special = (clip == Clip::Cast).then_some(t);
+        self.special_ready = false;
+    }
+    /// Preview sampling bypasses attack/action event delivery and carries no target or hit-stop.
+    pub fn celebrate(&mut self, motion: super::celebration::CelebrationMotion, t: f32) {
+        self.celebration = Some(motion);
+        self.preview = Some((
+            motion.clip,
+            if motion.looping {
+                t.rem_euclid(motion.duration)
+            } else {
+                t.min(motion.duration)
+            },
+        ));
+        self.presentation_clock = Some(t);
+        self.clock = t;
+        self.action = None;
+        self.fade = None;
+        self.aim = None;
+        self.aim_at = None;
+        self.special = None;
+        self.special_ready = false;
+        self.armor_flash = 0.;
+        self.carried = false;
+        self.hit_stop = 0.;
+        self.rate = 1.;
+        self.events.clear();
     }
     pub fn apply_hit_stop(&mut self, duration_s: f32) {
         self.hit_stop = duration_s;
@@ -140,28 +250,43 @@ impl Animator {
     }
     /// Length of `clip` for this figure (kits may lengthen recoveries).
     pub fn duration(&self, clip: Clip) -> f32 {
+        if clip == Clip::Victory {
+            return super::celebration::celebration_for(self.kind, self.form.0, self.form.1)
+                .duration;
+        }
         self.kit
             .map_or_else(|| clip.duration(), |k| k.duration(clip))
     }
-    fn pose(&self, clip: Clip, t: f32) -> Pose {
+    pub(super) fn pose(&self, clip: Clip, t: f32) -> Pose {
         let mut pose = sample(clip, t);
-        if self.archer {
-            super::archer_v2_clips::apply(clip, t, &mut pose);
-        }
+        let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.0));
+        let moment = Moment {
+            clip,
+            t,
+            tier: self.form.0,
+            branch: self.form.1,
+            aim: self.aim,
+            since_attack: self.since_attack,
+            variant: self.variant,
+            clock: if crate::config::low_motion() {
+                0.0
+            } else {
+                self.clock
+            },
+            walk,
+            gesture: self.gesture,
+            growth: self.growth,
+            reduction: self.reduction,
+            counter: self.counter,
+            armor_flash: self.armor_flash,
+            special: self.special,
+            special_ready: self.special_ready,
+        };
         if let Some(kit) = self.kit {
-            let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.0));
-            let moment = Moment {
-                clip,
-                t,
-                tier: self.form.0,
-                branch: self.form.1,
-                aim: self.aim,
-                since_attack: self.since_attack,
-                variant: self.variant,
-                clock: self.clock,
-                walk,
-            };
             (kit.pose)(&moment, &mut pose);
+        }
+        if let Some(motion) = self.celebration {
+            super::celebration::finish(motion, &moment, &mut pose);
         }
         pose
     }
@@ -191,10 +316,13 @@ impl Animator {
         };
         cycles * Clip::Walk.duration()
     }
-    fn advance(&mut self, dt: f32) -> (Pose, Option<f32>) {
+    pub(super) fn advance(&mut self, dt: f32) -> (Pose, Option<f32>) {
         self.events.clear();
+        self.armor_flash = (self.armor_flash - dt * 4.0).max(0.0);
+        self.special = self.special.map(|t| t + dt).filter(|&t| t < 0.9);
         self.since_attack = (self.since_attack + dt).min(1e6);
-        self.clock += dt;
+        self.clock = self.presentation_clock.unwrap_or(self.clock + dt);
+        self.gesture = (self.gesture + dt).min(1e6);
         if let Some((clip, t)) = self.preview {
             return (
                 self.pose(clip, t),
@@ -255,6 +383,7 @@ pub fn animate(
     time: Res<Time>,
     mut animators: Query<(&mut Animator, &Transform)>,
     mut transforms: Query<&mut Transform, Without<Animator>>,
+    mut visibility: Query<&mut Visibility, Without<Animator>>,
 ) {
     for (mut a, root) in &mut animators {
         let dt = if a.hit_stop > 0.0 {
@@ -274,7 +403,12 @@ pub fn animate(
         let frame = root.to_matrix() * figure;
         a.observe(root.translation, &frame, dt);
         let (mut pose, walk) = a.advance(dt);
-        if let Some(phase) = walk {
+        let anatomy = a.kit.and_then(|kit| kit.anatomy);
+        let walk = walk.filter(|_| anatomy.is_none_or(|body| body.planted_legs));
+        if a.carried {
+            apply_mounted(&mut pose);
+            a.feet.reset();
+        } else if let Some(phase) = walk {
             let (r, o) = pose[Joint::Root.index()];
             let root_joint = Mat4::from_rotation_translation(ik::quat(r), o);
             let stride = Stride {
@@ -288,12 +422,55 @@ pub fn animate(
         } else {
             a.feet.reset();
         }
-        for node in rig::nodes().filter(|n| !matches!(n, rig::Node::Secondary(_))) {
+        for node in rig::nodes().filter(|n| {
+            !matches!(n, rig::Node::Secondary(_)) || anatomy.is_some_and(|body| !body.springs)
+        }) {
             if let Ok(mut t) = transforms.get_mut(a.joints[node.index()]) {
                 let (rot, off) = pose[node.index()];
-                t.translation = rig::rest(node, &a.plan) + off;
+                t.translation = anatomy.map_or_else(
+                    || rig::rest(node, &a.plan),
+                    |body| (body.rest)(node, &a.plan),
+                ) + off;
                 t.rotation = ik::quat(rot);
             }
         }
+        if let Some(kit) = a.kit {
+            show_loaded(kit, &a, &mut visibility);
+        }
     }
+}
+
+/// Shows a kit's loaded prop (an archer's nocked arrow) only while its shot
+/// is loaded, so it leaves the bow at Release instead of staying there.
+fn show_loaded(
+    kit: &Kit,
+    a: &Animator,
+    visibility: &mut Query<&mut Visibility, Without<Animator>>,
+) {
+    let loaded = match kit.attack {
+        Attack::Shot { loaded, .. } | Attack::CountedShot { loaded, .. } => loaded,
+        _ => None,
+    };
+    let Some((node, shown)) = loaded else {
+        return;
+    };
+    let (clip, t) = a.clip_time();
+    if let Ok(mut v) = visibility.get_mut(a.joints[node.index()]) {
+        *v = if shown(clip, t) {
+            Visibility::Inherited
+        } else {
+            Visibility::Hidden
+        };
+    }
+}
+
+/// Seated saddle posture for units riding a carrier (e.g. Cargo Crab).
+fn apply_mounted(pose: &mut Pose) {
+    pose[Joint::ThighL.index()].0 = Vec3::new(65.0, -12.0, -14.0);
+    pose[Joint::ThighR.index()].0 = Vec3::new(65.0, 12.0, 14.0);
+    pose[Joint::ShinL.index()].0 = Vec3::new(-75.0, 0.0, 0.0);
+    pose[Joint::ShinR.index()].0 = Vec3::new(-75.0, 0.0, 0.0);
+    pose[Joint::FootL.index()].0 = Vec3::new(15.0, 0.0, 0.0);
+    pose[Joint::FootR.index()].0 = Vec3::new(15.0, 0.0, 0.0);
+    pose[Joint::Hips.index()].1[1] -= 0.05;
 }

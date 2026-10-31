@@ -57,14 +57,14 @@
     {
       "id": "crest-v2",
       "masterSize": [
-        768,
-        1024
+        1254,
+        1254
       ],
       "displayWidth": 156,
       "lossless": true,
       "asset": {
         "svg": "crest-v2.svg",
-        "display": "crest-v2.webp"
+        "display": "../branding/tbg-emblem.webp"
       }
     },
     {
@@ -90,7 +90,7 @@
       "lossless": true,
       "asset": {
         "svg": "logo-v2.svg",
-        "display": "logo-v2.webp"
+        "display": "wordmark.webp"
       }
     }
   ]

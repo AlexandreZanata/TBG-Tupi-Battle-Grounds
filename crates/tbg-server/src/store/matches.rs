@@ -79,6 +79,7 @@ mod tests {
         let version: i64 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .expect("version");
-        assert_eq!(version, 6);
+        // Later migrations (v7, P60) build on v6; the arena column stays.
+        assert!(version >= 6, "schema at least v6, got {version}");
     }
 }

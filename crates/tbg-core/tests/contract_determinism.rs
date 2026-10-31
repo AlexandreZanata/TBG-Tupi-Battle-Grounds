@@ -41,30 +41,44 @@ fn bot_matches_are_frozen() {
     // D-55 (ARENAS-G): `MatchState::arena` and `arena_discount_used` joined
     // the serialized state; the Forest is neutral, so hashes moved once with
     // tick, winner and reason identical (verified on all three seeds).
+    // W0 (P58 §3, D-62): the bleed, weakening, queued-Slow, mark, self-reduction
+    // and ability heal-cut slots joined `UnitFx`; hashes moved once, with tick,
+    // winner and reason identical on all three seeds (verified).
+    // W1 (P58 §13.5, D-64): the Synergy array grew from four to seven Factions;
+    // hashes moved once, with tick, winner and reason identical (verified).
+    // D-71: serialized pending-special/venom slots are empty on legacy kinds.
+    // The consolidated three-seed comparison confirmed all ticks/winners/reasons
+    // unchanged before re-freezing these hashes (D-71).
     use EndReason::StrongholdDestroyed;
+    // D-68: owner champion changes in GAME-DESIGN, collected with update_probe.
+    // D-69: appended private Shop state; all D-68 outcomes and ticks identical.
+    // D-68/D-69 integration: protocol-20 slots + Shop state; owner range correction.
+    // Owner 2026-10-31: activating all 46 conventional kinds changes draws and outcomes.
     let goldens = [
         (
             1,
-            0xdf5d_547e_36e4_7845u64,
-            3_336,
+            0x7890_8734_d3dc_7ec1u64,
+            3_844,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0xca17_5202_6278_78e5,
-            2_286,
-            Seat::B,
+            0x7ab5_0dfd_d573_5803,
+            15_586,
+            Seat::A,
             StrongholdDestroyed,
         ),
         (
             42,
-            0x4069_7a3a_89d9_10e1,
-            6_295,
+            0xc437_7231_f72a_0c57,
+            5_049,
             Seat::B,
             StrongholdDestroyed,
         ),
     ];
+    let mut observed = Vec::with_capacity(goldens.len());
+    let mut expected = Vec::with_capacity(goldens.len());
     for (seed, hash, tick, winner, reason) in goldens {
         let s = bot_match(seed);
         let o = s.outcome.expect("bot match must end");
@@ -73,12 +87,12 @@ fn bot_matches_are_frozen() {
             (Some(winner), reason, tick),
             "seed {seed}"
         );
-        assert_eq!(
-            s.hash(),
-            hash,
-            "seed {seed}: simulation changed (see module docs)"
-        );
+        observed.push((seed, s.hash()));
+        expected.push((seed, hash));
     }
+    // Compare all three only after their outcome/tick guards passed. A layout
+    // migration reports every checksum without weakening any frozen behavior.
+    assert_eq!(observed, expected, "simulation changed (see module docs)");
 }
 
 #[test]

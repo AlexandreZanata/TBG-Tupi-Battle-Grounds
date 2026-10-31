@@ -3,7 +3,7 @@
 
 use tbg_core::content::{RUNNING_START, TICK_HZ};
 use tbg_core::lab::LabStats;
-use tbg_core::{EndReason, MatchState, Seat, ALL_KINDS};
+use tbg_core::{EndReason, MatchState, Seat, ALL_KINDS, FACTION_COUNT};
 
 pub const KINDS: usize = ALL_KINDS.len();
 /// The comeback checkpoint: 2:00 of play (GAME-DESIGN §6).
@@ -15,13 +15,22 @@ pub struct Side {
     /// Evolutions per kind and branch (both tiers).
     pub evolutions: [[u16; 2]; KINDS],
     pub max_army: u16,
+    pub reservations: u32,
+    pub reserved_bought: u32,
+    pub reserve_wait_shops: u32,
+    pub rerolls: u32,
+    pub reroll_energy: u64,
+    pub spent: u64,
+    pub max_reroll_streak: u8,
+    pub expensive_bought: u32,
+    pub no_frontline_at_60s: Option<bool>,
 }
 
 impl Side {
     /// Strict purchase-majority faction index, if any (ties are mixed).
     /// Factions are identity, never tuned, so the canonical table is right.
     pub fn majority(&self) -> Option<usize> {
-        let mut counts = [0u32; 4];
+        let mut counts = [0u32; FACTION_COUNT];
         for k in ALL_KINDS {
             counts[tbg_core::content::def(k).faction.index()] +=
                 u32::from(self.purchases[k as usize]);
@@ -86,6 +95,17 @@ pub fn observe_tick(
     for seat in Seat::BOTH {
         let p = participant(seat, seat_a);
         let army = state.army_size(seat).min(usize::from(u16::MAX)) as u16;
+        if state.tick == RUNNING_START + 60 * TICK_HZ {
+            sides[p].no_frontline_at_60s = Some(!state.units.iter().any(|u| {
+                u.seat == seat
+                    && !u.kind.is_summon()
+                    && u.summoner.is_none()
+                    && matches!(
+                        state.rules().def(u.kind).archetype,
+                        tbg_core::Archetype::Tank | tbg_core::Archetype::Dps
+                    )
+            }));
+        }
         sides[p].max_army = sides[p].max_army.max(army);
     }
     if state.tick == CHECKPOINT {

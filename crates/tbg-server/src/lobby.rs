@@ -74,6 +74,7 @@ pub(super) struct Session {
     pub(super) stronghold: tbg_core::StrongholdKind,
     /// P47 (BR-LV09): when this session last sent `Spectate` (one per second).
     pub(super) last_spectate: Option<Instant>,
+    pub(super) finished: Option<(Instant, Box<crate::chan::CompletedResult>)>,
 }
 
 pub(super) struct Lobby {
@@ -84,6 +85,9 @@ pub(super) struct Lobby {
     pub(super) ranked_queue: VecDeque<Token>,
     /// P9: when each queued session sent `QuickMatch` (for `queue_wait`).
     pub(super) queued_at: HashMap<Token, Instant>,
+    /// P60: when each ranked waiter sent `RankedMatch`; never read by the
+    /// Casual queue or its fallbacks.
+    pub(super) ranked_queued_at: HashMap<Token, Instant>,
     pub(super) rooms: Vec<(RoomCode, Token, Instant)>,
     /// P39: single-use Quick Challenge invitations.
     pub(super) challenges: Vec<(InviteToken, Token, Instant)>,
@@ -102,6 +106,11 @@ pub(super) struct Lobby {
     pub(super) live_tx: watch::Sender<Arc<LiveSnapshot>>,
     /// P47 (BR-LV07): the featured match and when it got the spot.
     pub(super) featured: Option<(LiveId, Instant)>,
+    /// P60: the ranked finalizer (only with a database).
+    pub(super) ranked: Option<crate::ranked::finalizer::Handle>,
+    /// P60: per account, the newest settlement sequence its cached profile
+    /// already contains; an older receipt never regresses it.
+    pub(super) ranked_seen: HashMap<AccountId, i64>,
 }
 
 /// P39: a rematch offer between the two sessions of a challenge match.
@@ -127,6 +136,7 @@ pub(crate) async fn run(
         queue: VecDeque::new(),
         ranked_queue: VecDeque::new(),
         queued_at: HashMap::new(),
+        ranked_queued_at: HashMap::new(),
         rooms: Vec::new(),
         challenges: Vec::new(),
         rematches: Vec::new(),
@@ -139,7 +149,21 @@ pub(crate) async fn run(
         live: HashMap::new(),
         live_tx,
         featured: None,
+        ranked: None,
+        ranked_seen: HashMap::new(),
     };
+    // P60: one finalizer per process settles every ranked result in order;
+    // its journal recovery finishes before the lobby serves any command.
+    if let (Some(store), Some(db)) = (lobby.store.clone(), lobby.config.db.clone()) {
+        let handle = crate::ranked::finalizer::start(
+            store,
+            db,
+            lobby.self_tx.clone(),
+            lobby.metrics.clone(),
+        )
+        .await;
+        lobby.ranked = Some(handle);
+    }
     let mut cleanup = tokio::time::interval(Duration::from_secs(10));
     let mut publish = tokio::time::interval(PUBLISH_EVERY);
     loop {
@@ -192,7 +216,11 @@ impl Lobby {
             LobbyCmd::Client { token, msg } => self.client(token, msg),
             LobbyCmd::Disconnected { token, conn_id } => self.disconnected(token, conn_id),
             LobbyCmd::LiveProgress { id, progress } => self.live_progress(id, progress),
-            LobbyCmd::MatchEnded { tokens, live } => {
+            LobbyCmd::MatchEnded {
+                tokens,
+                live,
+                finished,
+            } => {
                 if let Some(id) = live {
                     self.live_ended(id);
                 }
@@ -201,9 +229,16 @@ impl Lobby {
                         .get(&t)
                         .map_or_else(String::new, |s| s.name.clone())
                 });
-                for t in tokens {
+                let until = Instant::now() + Duration::from_secs(self.config.reconnect_secs);
+                for (t, result) in tokens.into_iter().zip(*finished) {
                     if let Some(s) = self.session(&t) {
                         s.state = SessionState::Idle;
+                        // Also covers a reconnect racing the final match-task tick.
+                        if s.conn.as_ref().map(|c| c.id) != result.delivered_to {
+                            send(&s.conn, ConnEvent::Send(result.start.clone()));
+                            send(&s.conn, ConnEvent::Send(result.end.clone()));
+                        }
+                        s.finished = Some((until, Box::new(result)));
                         send(&s.conn, ConnEvent::LeaveMatch);
                     }
                 }
@@ -225,9 +260,7 @@ impl Lobby {
                     }
                 }
             }
-            LobbyCmd::RankedDone { tokens, results } => {
-                self.ranked_done(tokens, results);
-            }
+            LobbyCmd::RankedDone { receipt } => self.ranked_done(*receipt),
             LobbyCmd::RegisterDone {
                 token,
                 conn_id,

@@ -12,6 +12,7 @@ use crate::camera::ArenaCamera;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VisualCue {
     AttackStart,
+    CargoDrop,
     Hit,
     Heal,
     Evolved,
@@ -31,6 +32,7 @@ pub fn play_cue(v: &mut UnitVisual, anim: &mut Animator, a: &VisualAssets, cue: 
         return;
     }
     match cue {
+        VisualCue::CargoDrop => anim.gesture = 0.0,
         VisualCue::AttackStart => anim.play(match v.archetype {
             Archetype::Ranged => Clip::AttackRanged,
             Archetype::Support | Archetype::Control => Clip::Cast,
@@ -62,6 +64,9 @@ pub(super) fn animate(
         if v.dying {
             v.dead_for += dt;
             commands.entity(v.bar).try_insert(Visibility::Hidden);
+            if let Some(e) = v.shield_outline {
+                commands.entity(e).try_insert(Visibility::Hidden);
+            }
             commands.entity(v.ring).try_insert(Visibility::Hidden);
             for t_cube in &v.tiers {
                 commands.entity(*t_cube).try_insert(Visibility::Hidden);
@@ -84,9 +89,13 @@ pub(super) fn animate(
         }
         let form = lib.get(v.form.0, v.form.1, v.form.2);
         anim.native = form.native;
-        anim.archer = form.native && v.form.0 == tbg_core::UnitKind::Archer;
         anim.plan = form.plan;
         anim.form = (v.form.1, v.form.2);
+        let growth = f32::from((v.fx >> 11) & 7) / 7.0;
+        if v.kind() == tbg_core::UnitKind::Nester && growth < anim.growth {
+            anim.gesture = 0.0;
+        }
+        anim.growth = growth;
         let moving = (t.translation.x - v.last_x).abs() > 0.0004;
         v.last_x = t.translation.x;
         v.still = if moving { 0.0 } else { v.still + dt };

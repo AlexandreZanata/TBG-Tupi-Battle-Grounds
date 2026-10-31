@@ -5,9 +5,12 @@
 
 use crate::arcana::ArcanaValues;
 use crate::ruleset::CANON;
-use crate::types::{Archetype, Faction, OnHit, StrongholdKind, Tick, UnitKind};
+use crate::types::{Archetype, Faction, OnHit, StrongholdKind, Tick, UnitKind, FACTION_COUNT};
 
 pub const TICK_HZ: u32 = 20;
+/// Proposed: crates are placed 0.4 tile behind their carrier.
+pub const CRATE_DROP_BACK: i32 = 400;
+
 pub const LANE_LEN: i32 = 16_000;
 pub const SPAWN_OFFSET: i32 = 500;
 
@@ -265,14 +268,20 @@ pub enum SynergyEffect {
     Damage,
     /// Heal this many bp of max HP every `REGEN_PERIOD` ticks.
     Regen,
+    /// Move speed in bp; it joins the move bonuses under their 5 000 bp cap (D-64).
+    Movement,
 }
 
 /// Per faction (index order): the effect and its bp at level 1 and 2.
-pub const SYNERGIES: [(SynergyEffect, [i32; 2]); 4] = [
+pub const SYNERGIES: [(SynergyEffect, [i32; 2]); FACTION_COUNT] = [
     (SynergyEffect::MaxHp, [2_000, 4_000]),
     (SynergyEffect::AttackSpeed, [2_000, 4_000]),
     (SynergyEffect::Damage, [500, 2_000]),
     (SynergyEffect::Regen, [75, 200]),
+    // D-64 (P58 §13.5): Monsters damage, Celestials max HP, Insects movement.
+    (SynergyEffect::Damage, [500, 1_000]),
+    (SynergyEffect::MaxHp, [500, 1_000]),
+    (SynergyEffect::Movement, [500, 1_000]),
 ];
 
 /// One evolution form: additive modifiers on the base unit, plus the shared
@@ -349,6 +358,82 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    DrillNest {
+        period: u16,
+    },
+    ProfaneFire {
+        cut_bp: u16,
+        cut_ticks: u16,
+    },
+    StickyWeb {
+        period: u16,
+        damage: u16,
+        root: u16,
+        range_add: i32,
+        slow_bp: u16,
+        slow_ticks: u16,
+    },
+    VenomousSting {
+        every: u8,
+        damage: u16,
+        pulses: u8,
+    },
+    PreciseStrike {
+        every: u8,
+        damage: u16,
+    },
+    RaisedCarapace {
+        period: u16,
+        bp: u16,
+        ticks: u16,
+        retaliation: u16,
+    },
+    CelestialRain {
+        period: u16,
+        radius: i32,
+        damage: u16,
+        bp: u16,
+        ticks: u16,
+    },
+    PurifyingArrow {
+        every: u8,
+        damage: u16,
+    },
+    HarmonicPulse {
+        period: u16,
+        bp: u16,
+        ticks: u16,
+    },
+    SolarBarrier {
+        period: u16,
+        range: i32,
+        amount: u16,
+        ticks: u16,
+        second: u16,
+    },
+    BloodyRend {
+        period: u16,
+        radius: i32,
+        damage: u16,
+        bleed: u16,
+        pulses: u8,
+    },
+    SwampBelly {
+        period: u16,
+        radius: i32,
+        damage: u16,
+        bp: u16,
+        ticks: u16,
+        protection: u16,
+        protection_ticks: u16,
+    },
+    DoubleMayhem {
+        period: u16,
+        radius: i32,
+        damage: u16,
+        bp: u16,
+        ticks: u16,
+    },
     None,
     /// Nester Hatch (values unchanged, still from the Hatch rule).
     Hatch,
@@ -429,10 +514,63 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
-    Transfer {
-        amount: u16,
+    Siphon {
+        heal_bp: u16,
         low_bp: u16,
-        second: bool,
+        split: bool,
+    },
+    /// R04: a fourth completed enemy-unit primary also hits one other enemy.
+    Crossfire {
+        every: u8,
+        ratio: u16,
+        radius: i32,
+    },
+    /// R03: readiness arms the next enemy-unit basic, never a separate cast.
+    CrowMark {
+        period: u16,
+        ticks: u16,
+        slow_bp: u16,
+        cut_bp: u16,
+        bonus_bp: u16,
+    },
+    /// R02: one caster-centered damage pulse, without displacement.
+    AreaCrush {
+        period: u16,
+        radius: i32,
+        damage: u16,
+    },
+    /// R01: a timed self-reduction that anchors movement, never targeting.
+    LivingWall {
+        period: u16,
+        bp: u16,
+        ticks: u16,
+    },
+    /// R11: independent timed Slow, without auxiliary damage.
+    FearPulse {
+        period: u16,
+        bp: u16,
+        ticks: u16,
+    },
+    /// R10: each nth completed enemy-unit primary adds bounded flat splash.
+    CorrosiveSpit {
+        every: u8,
+        damage: u16,
+        radius: i32,
+        targets: u8,
+    },
+    /// R09: previous completed hits on the same enemy unit ramp the next basic.
+    PredatoryFrenzy {
+        step_bp: u16,
+        increments: u8,
+        gap: u16,
+    },
+    /// R08: actual HP damage builds reduction for subsequent receipts.
+    PrimordialCarapace {
+        step_bp: u16,
+        cap_bp: u16,
+        gap: u16,
+        short_range: i32,
+        short_bonus_bp: u16,
     },
 }
 
@@ -471,6 +609,359 @@ impl UnitDef {
         }]
     }
 }
+
+const fn carapace(gap: u16, short_bonus_bp: u16) -> [Ability; 2] {
+    [
+        Ability::PrimordialCarapace {
+            step_bp: 300,
+            cap_bp: 1_500,
+            gap,
+            short_range: 1_600,
+            short_bonus_bp,
+        },
+        Ability::None,
+    ]
+}
+const fn frenzy(increments: u8, gap: u16) -> [Ability; 2] {
+    [
+        Ability::PredatoryFrenzy {
+            step_bp: 800,
+            increments,
+            gap,
+        },
+        Ability::None,
+    ]
+}
+const fn corrosive(damage: u16, targets: u8) -> [Ability; 2] {
+    [
+        Ability::CorrosiveSpit {
+            every: 3,
+            damage,
+            radius: 1_500,
+            targets,
+        },
+        Ability::None,
+    ]
+}
+const fn fear(period: u16, ticks: u16) -> [Ability; 2] {
+    [
+        Ability::FearPulse {
+            period,
+            bp: 2_500,
+            ticks,
+        },
+        Ability::None,
+    ]
+}
+const fn wall(ticks: u16) -> [Ability; 2] {
+    [
+        Ability::LivingWall {
+            period: 160,
+            bp: 1_500,
+            ticks,
+        },
+        Ability::None,
+    ]
+}
+const fn crush(period: u16, radius: i32, special_bp: u16) -> [Ability; 2] {
+    // The form changes the registry amount before static caster percentages.
+    let damage = (120_u32 * (10_000 + special_bp as u32) / 10_000) as u16;
+    [
+        Ability::AreaCrush {
+            period,
+            radius,
+            damage,
+        },
+        Ability::None,
+    ]
+}
+const fn crow(ticks: u16, cut_bp: u16, bonus_bp: u16) -> [Ability; 2] {
+    [
+        Ability::CrowMark {
+            period: 140,
+            ticks,
+            slow_bp: 2_000,
+            cut_bp,
+            bonus_bp,
+        },
+        Ability::None,
+    ]
+}
+const fn mayhem(period: u16, radius: i32, bp: u16) -> [Ability; 2] {
+    [
+        Ability::DoubleMayhem {
+            period,
+            radius,
+            damage: 60,
+            bp,
+            ticks: 30,
+        },
+        Ability::None,
+    ]
+}
+const RATTLE_TICK_ABILITIES: [[Ability; 2]; 5] = [
+    mayhem(180, 1_200, 1_500),
+    mayhem(180, 1_200, 1_500),
+    mayhem(180, 1_200, 1_500),
+    mayhem(150, 1_200, 1_500),
+    mayhem(150, 1_500, 2_000),
+];
+const fn belly(period: u16, radius: i32, bp: u16, protection: u16) -> [Ability; 2] {
+    [
+        Ability::SwampBelly {
+            period,
+            radius,
+            damage: 65,
+            bp,
+            ticks: 40,
+            protection,
+            protection_ticks: 40,
+        },
+        Ability::None,
+    ]
+}
+const CAPYBARA_ABILITIES: [[Ability; 2]; 5] = [
+    belly(200, 1_500, 1_500, 0),
+    belly(200, 1_500, 1_500, 0),
+    belly(200, 1_500, 1_500, 1_500),
+    belly(160, 1_500, 1_500, 0),
+    belly(160, 1_900, 2_000, 0),
+];
+const fn rend(period: u16, radius: i32, bleed: u16) -> [Ability; 2] {
+    [
+        Ability::BloodyRend {
+            period,
+            radius,
+            damage: 75,
+            bleed,
+            pulses: 4,
+        },
+        Ability::None,
+    ]
+}
+const TRIDENT_ABILITIES: [[Ability; 2]; 5] = [
+    rend(180, 1_500, 5),
+    rend(180, 1_500, 5),
+    rend(180, 1_500, 7),
+    rend(150, 1_500, 5),
+    rend(150, 1_900, 5),
+];
+const fn barrier(range: i32, amount: u16, second: u16) -> [Ability; 2] {
+    [
+        Ability::SolarBarrier {
+            period: 160,
+            range,
+            amount,
+            ticks: 80,
+            second,
+        },
+        Ability::None,
+    ]
+}
+const SOLAR_SENTINEL_ABILITIES: [[Ability; 2]; 5] = [
+    barrier(3_000, 100, 0),
+    barrier(3_000, 100, 0),
+    barrier(3_000, 130, 0),
+    barrier(3_000, 100, 50),
+    barrier(3_500, 100, 50),
+];
+const fn harmonic(period: u16, ticks: u16) -> [Ability; 2] {
+    [
+        Ability::HarmonicPulse {
+            period,
+            bp: 1_500,
+            ticks,
+        },
+        Ability::None,
+    ]
+}
+const LUMINOUS_ORACLE_ABILITIES: [[Ability; 2]; 5] = [
+    harmonic(200, 60),
+    harmonic(200, 70),
+    harmonic(200, 80),
+    harmonic(180, 60),
+    harmonic(160, 60),
+];
+const fn purification(every: u8, damage: u16) -> [Ability; 2] {
+    [Ability::PurifyingArrow { every, damage }, Ability::None]
+}
+const CELESTIAL_ARCHER_ABILITIES: [[Ability; 2]; 5] = [
+    purification(4, 80),
+    purification(4, 80),
+    purification(4, 80),
+    purification(3, 80),
+    purification(3, 90),
+];
+const fn rain(radius: i32, special_bp: u16, bp: u16) -> [Ability; 2] {
+    [
+        Ability::CelestialRain {
+            period: 200,
+            radius,
+            damage: (65_u32 * (10_000 + special_bp as u32) / 10_000) as u16,
+            bp,
+            ticks: 20,
+        },
+        Ability::None,
+    ]
+}
+const JUSTICIAR_ABILITIES: [[Ability; 2]; 5] = [
+    rain(1_300, 0, 0),
+    rain(1_300, 2_000, 0),
+    rain(1_300, 2_000, 0),
+    rain(1_600, 0, 0),
+    rain(1_600, 0, 1_500),
+];
+const fn raised_carapace(ticks: u16, retaliation: u16) -> [Ability; 2] {
+    [
+        Ability::RaisedCarapace {
+            period: 200,
+            bp: 1_500,
+            ticks,
+            retaliation,
+        },
+        Ability::None,
+    ]
+}
+const JAWGUARD_ABILITIES: [[Ability; 2]; 5] = [
+    raised_carapace(60, 0),
+    raised_carapace(60, 0),
+    raised_carapace(80, 0),
+    raised_carapace(60, 40),
+    raised_carapace(60, 40),
+];
+const fn mantis_strike(damage: u16) -> [Ability; 2] {
+    [Ability::PreciseStrike { every: 4, damage }, Ability::None]
+}
+const MANTIS_ABILITIES: [[Ability; 2]; 5] = [
+    mantis_strike(60),
+    mantis_strike(60),
+    mantis_strike(60),
+    mantis_strike(70),
+    mantis_strike(85),
+];
+const fn hornet_venom(damage: u16) -> [Ability; 2] {
+    [
+        Ability::VenomousSting {
+            every: 3,
+            damage,
+            pulses: 4,
+        },
+        Ability::None,
+    ]
+}
+const HORNET_ABILITIES: [[Ability; 2]; 5] = [
+    hornet_venom(5),
+    hornet_venom(6),
+    hornet_venom(7),
+    hornet_venom(5),
+    hornet_venom(5),
+];
+const fn sticky_web(period: u16, range_add: i32, slow_bp: u16) -> [Ability; 2] {
+    [
+        Ability::StickyWeb {
+            period,
+            damage: 25,
+            root: 30,
+            range_add,
+            slow_bp,
+            slow_ticks: 40,
+        },
+        Ability::None,
+    ]
+}
+const WEAVER_ABILITIES: [[Ability; 2]; 5] = [
+    sticky_web(160, 0, 0),
+    sticky_web(145, 0, 0),
+    sticky_web(130, 0, 0),
+    sticky_web(160, 500, 0),
+    sticky_web(160, 500, 1500),
+];
+const fn profane_fire(bp: u16) -> [Ability; 2] {
+    [
+        Ability::ProfaneFire {
+            cut_bp: bp,
+            cut_ticks: 40,
+        },
+        Ability::None,
+    ]
+}
+const PYRE_WARDEN_ABILITIES: [[Ability; 2]; 5] = [
+    profane_fire(3500),
+    profane_fire(3500),
+    profane_fire(3500),
+    profane_fire(3500),
+    profane_fire(5000),
+];
+const fn drill_nest(period: u16) -> [Ability; 2] {
+    [Ability::DrillNest { period }, Ability::None]
+}
+const DRILLNEST_ABILITIES: [[Ability; 2]; 5] = [
+    drill_nest(44),
+    drill_nest(38),
+    drill_nest(38),
+    drill_nest(44),
+    drill_nest(44),
+];
+const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
+    [
+        Ability::Crossfire {
+            every: 4,
+            ratio,
+            radius,
+        },
+        Ability::None,
+    ]
+}
+const TRIGGER_ABILITIES: [[Ability; 2]; 5] = [
+    crossfire(6_000, 1_500),
+    crossfire(6_000, 1_500),
+    crossfire(6_000, 1_500),
+    crossfire(7_500, 1_500),
+    crossfire(7_500, 2_000),
+];
+const CROWCALLER_ABILITIES: [[Ability; 2]; 5] = [
+    crow(80, 3_000, 1_500),
+    crow(80, 4_000, 1_500),
+    crow(110, 4_000, 1_500),
+    crow(80, 3_000, 1_500),
+    crow(80, 3_000, 2_500),
+];
+const DEMOLISHER_ABILITIES: [[Ability; 2]; 5] = [
+    crush(200, 2_500, 0),
+    crush(200, 2_500, 2_000),
+    crush(200, 3_000, 2_000),
+    crush(160, 2_500, 0),
+    crush(160, 2_500, 0),
+];
+const BULWARK_ABILITIES: [[Ability; 2]; 5] = [wall(60), wall(60), wall(80), wall(60), wall(60)];
+const WHISPERER_ABILITIES: [[Ability; 2]; 5] = [
+    fear(160, 40),
+    fear(160, 40),
+    fear(160, 50),
+    fear(130, 40),
+    fear(130, 40),
+];
+const ACIDMAW_ABILITIES: [[Ability; 2]; 5] = [
+    corrosive(18, 2),
+    corrosive(18, 2),
+    corrosive(18, 2),
+    corrosive(24, 2),
+    corrosive(24, 3),
+];
+const RAVAGER_ABILITIES: [[Ability; 2]; 5] = [
+    frenzy(3, 60),
+    frenzy(3, 60),
+    frenzy(3, 60),
+    frenzy(4, 60),
+    frenzy(4, 80),
+];
+const BONEHORN_ABILITIES: [[Ability; 2]; 5] = [
+    carapace(60, 0),
+    carapace(60, 0),
+    carapace(80, 0),
+    carapace(60, 1_500),
+    carapace(60, 2_500),
+];
 
 const NO_ABILITIES: [[Ability; 2]; 5] = [[Ability::None; 2]; 5];
 const HATCH_ABILITIES: [[Ability; 2]; 5] = [[Ability::Hatch; 2]; 5];
@@ -512,9 +1003,17 @@ const fn unit(
 use Archetype::*;
 use Faction::*;
 
-/// Every kind, in `UnitKind` (`ALL_KINDS`) order.
+/// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
+/// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
+pub const UNIT_KIND_COUNT: usize = 51;
+
+/// One row per kind (see `UNIT_KIND_COUNT`).
+// ponytail: `CANON` copies this table by value, so it stays a const. The lint's
+// static suggestion needs a slice reference, which the lab's owned variant
+// rulesets cannot take yet.
+#[allow(clippy::large_const_arrays)]
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 27] = [
+pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
@@ -573,7 +1072,7 @@ pub const UNITS: [UnitDef; 27] = [
     ]),
     // P16-B (D-32, Proposed). Nester forms only change Hatch (`hatch_rule`).
     unit(UnitKind::Nester, "Nester", Plants, Support, 2_400,
-        [300, 15, 30, 2_500, 40, 0, 0], None, HATCH_ABILITIES, [
+        [300, 15, 30, 3_000, 40, 0, 0], None, HATCH_ABILITIES, [
         form("Brood"), form("Hive"), form("Venom"), form("Blight"),
     ]),
     unit(UnitKind::Rampart, "Rampart", Machines, Tank, 3_600,
@@ -594,7 +1093,7 @@ pub const UNITS: [UnitDef; 27] = [
     // P44 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave A. Not in the
     // Shop pool until the P53 owner switch.
     unit(UnitKind::Longaxe, "Longaxe", Humans, Dps, 2_400,
-        [360, 100, 48, 1_600, 35, 0, 0], None, NO_ABILITIES, [
+        [360, 100, 48, 3_000, 35, 0, 0], None, NO_ABILITIES, [
         FormDef { dmg_bp: 3_000, ..form("Deep Cut") },
         FormDef { dmg_bp: 3_000, vs_above_bp: 3_000, vs_above_hp_bp: 6_000, ..form("Crushing Edge") },
         FormDef { splash_add: 800, splash_bp: 4_000, ..form("Sweeping Arc") },
@@ -630,7 +1129,7 @@ pub const UNITS: [UnitDef; 27] = [
         form("Toxic Rain"),
     ]),
     unit(UnitKind::OldFinn, "Old Finn", Humans, Control, 1_800,
-        [240, 8, 40, 3_500, 45, 0, 0], None, [
+        [240, 8, 40, 5_250, 45, 0, 0], None, [
         [Ability::Fish { bp: 1_500, ticks: 100, cap: 3, per_hit: 1 }, Ability::None],
         [Ability::Fish { bp: 2_000, ticks: 100, cap: 3, per_hit: 1 }, Ability::None],
         [Ability::Fish { bp: 2_000, ticks: 100, cap: 3, per_hit: 2 }, Ability::None],
@@ -671,7 +1170,7 @@ pub const UNITS: [UnitDef; 27] = [
         form("Rampage"),
     ]),
     unit(UnitKind::BloodFurnace, "Blood Furnace", Undead, Dps, 2_400,
-        [440, 36, 36, 800, 45, 0, 0], None, [
+        [440, 36, 30, 800, 54, 0, 0], None, [
         [Ability::Furnace { burn_bp: 600, max_bp: 30_000 }, Ability::None],
         [Ability::Furnace { burn_bp: 600, max_bp: 35_000 }, Ability::None],
         [Ability::Furnace { burn_bp: 600, max_bp: 45_000 }, Ability::None],
@@ -684,14 +1183,14 @@ pub const UNITS: [UnitDef; 27] = [
         form("Eternal Embers"),
     ]),
     unit(UnitKind::Bloodweaver, "Bloodweaver", Undead, Support, 1_800,
-        [300, 0, 100, 3_000, 45, 0, 0], None, [
-        [Ability::Transfer { amount: 120, low_bp: 0, second: false }, Ability::None],
-        [Ability::Transfer { amount: 156, low_bp: 0, second: false }, Ability::None],
-        [Ability::Transfer { amount: 156, low_bp: 2_000, second: false }, Ability::None],
-        [Ability::Transfer { amount: 120, low_bp: 0, second: false }, Ability::None],
-        [Ability::Transfer { amount: 120, low_bp: 0, second: true }, Ability::None],
+        [300, 30, 40, 3_000, 45, 0, 0], None, [
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 0, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 0, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 2_000, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 0, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 12_000, low_bp: 0, split: true }, Ability::None],
     ], [
-        form("Deep Transfer"),
+        FormDef { dmg_bp: 3_000, ..form("Deep Transfer") },
         form("Last Offering"),
         FormDef { atk_bp: 2_500, ..form("Rapid Circulation") },
         form("Shared Blood"),
@@ -727,7 +1226,7 @@ pub const UNITS: [UnitDef; 27] = [
     // P48-A (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave E1. Not in the
     // Shop pool until the P53 owner switch.
     unit(UnitKind::Leechroot, "Leechroot", Plants, Dps, 1_800,
-        [220, 10, 32, 1_200, 45, 0, 0], None, [
+        [300, 10, 32, 1_200, 45, 0, 0], None, [
         [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
         [Ability::Essence { base: 30, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
         [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 300 }, Ability::None],
@@ -768,7 +1267,7 @@ pub const UNITS: [UnitDef; 27] = [
         form("Double Puppet"),
     ]),
     unit(UnitKind::Smuggler, "Smuggler", Humans, Support, 3_600,
-        [320, 0, 400, 5_000, 30, 0, 0], None, [
+        [320, 10, 30, 6_000, 30, 0, 0], None, [
         [Ability::Cargo { every: 400, open: 40, table: [20, 42, 28, 8, 2], double_every: 0 }, Ability::None],
         [Ability::Cargo { every: 400, open: 40, table: [10, 40, 34, 12, 4], double_every: 0 }, Ability::None],
         [Ability::Cargo { every: 400, open: 40, table: [6, 28, 38, 20, 8], double_every: 0 }, Ability::None],
@@ -778,8 +1277,8 @@ pub const UNITS: [UnitDef; 27] = [
     ], [
         form("Better Connections"),
         form("Black Market"),
-        // 400 ticks → 360 (18 s): any atk_bp in 1081..=1111 lands exactly.
-        FormDef { atk_bp: 1_100, ..form("Faster Deliveries") },
+        // Cargo cadence is independent of the revolver attack interval.
+        form("Faster Deliveries"),
         form("Double Shipment"),
     ]),
     // Cargo crate: 120 HP, no attack, no movement (speed 0), targetable.
@@ -787,6 +1286,67 @@ pub const UNITS: [UnitDef; 27] = [
         [120, 0, 20, 0, 0, 0, 0], None, NO_ABILITIES, [
         form("Crate"), form("Crate"), form("Crate"), form("Crate"),
     ]),
+    // D-66: the Monsters base rows of GAME-DESIGN §13.1, English names (P59-NAMES).
+    // D-68–D-71 implement this pilot. Branch names repeat across their two tiers.
+    unit(UnitKind::Bonehorn, "Bonehorn", Monsters, Tank, 3_600,
+        [1_600, 40, 40, 800, 20, 0, 0], None, BONEHORN_ABILITIES, [
+        FormDef { hp_bp: 2_000, ..form("Ancestral Carapace") }, form("Ancestral Carapace"),
+        form("Stone Fangs"), form("Stone Fangs"),
+    ]),
+    unit(UnitKind::Ravager, "Ravager", Monsters, Dps, 2_400,
+        [310, 48, 24, 800, 58, 0, 0], None, RAVAGER_ABILITIES, [
+        FormDef { atk_bp: 1_500, ..form("Voracious Hunt") }, FormDef { speed_bp: 1_000, ..form("Voracious Hunt") },
+        form("Deep Frenzy"), form("Deep Frenzy"),
+    ]),
+    unit(UnitKind::Acidmaw, "Acidmaw", Monsters, Ranged, 2_400,
+        [260, 42, 36, 4_200, 38, 0, 0], None, ACIDMAW_ABILITIES, [
+        FormDef { dmg_bp: 1_500, ..form("Abyssal Jaw") }, FormDef { range_add: 400, ..form("Abyssal Jaw") },
+        form("Corrosive Volley"), form("Corrosive Volley"),
+    ]),
+    unit(UnitKind::Whisperer, "Whisperer", Monsters, Control, 3_000,
+        [380, 15, 40, 3_000, 33, 0, 0], None, WHISPERER_ABILITIES, [
+        FormDef { range_add: 500, ..form("Echo of Fear") }, form("Echo of Fear"),
+        form("Mental Pulse"), FormDef { dmg_bp: 2_000, ..form("Mental Pulse") },
+    ]),
+    // D-72 (Proposed): R01, inactive until the W11 owner switch.
+    unit(UnitKind::Bulwark, "Bulwark", Machines, Tank, 3_600,
+        [1_400, 30, 40, 800, 25, 0, 0], None, BULWARK_ABILITIES, [
+        FormDef { hp_bp: 2_000, ..form("Mobile Fortress") }, form("Mobile Fortress"),
+        FormDef { dmg_bp: 1_500, ..form("Earth Weight") }, FormDef { on_hit: slow(1_500, 20), ..form("Earth Weight") },
+    ]),
+    // D-73 (Proposed): R02, inactive until the W11 owner switch.
+    unit(UnitKind::Demolisher,"Demolisher",Machines,Tank,3_600,
+        [1_250,80,32,1_000,28,0,0],None,DEMOLISHER_ABILITIES,[
+        form("Reinforced Fists"),form("Reinforced Fists"),
+        form("Shock System"),FormDef {on_hit:slow(1_500,40),..form("Shock System")},
+    ]),
+    // D-74 (Proposed): R03, inactive until the W11 owner switch.
+    unit(UnitKind::Crowcaller,"Crowcaller",Undead,Ranged,2_400,
+        [520,58,34,4_800,31,0,0],None,CROWCALLER_ABILITIES,[
+        form("Plague Crow"),form("Plague Crow"),
+        FormDef {dmg_bp:1_500,..form("Ruin Bow")},form("Ruin Bow"),
+    ]),
+    unit(UnitKind::Trigger,"Trigger",Humans,Ranged,2_400,
+        [230,25,17,3_200,53,0,0],None,TRIGGER_ABILITIES,[
+        FormDef {atk_bp:1_500,..form("Swift Gunman")},FormDef {speed_bp:1_000,..form("Swift Gunman")},
+        form("Ricochet Bullet"),form("Ricochet Bullet"),
+    ]),
+    unit(UnitKind::RattleTick,"Rattle & Tick",Humans,Tank,3_000,[900,60,38,900,28,0,0],None,RATTLE_TICK_ABILITIES,[FormDef{hp_bp:2_000,..form("Big Brother's Fury")},FormDef{dmg_bp:2_000,..form("Big Brother's Fury")},form("Tico's Tricks"),form("Tico's Tricks")]),
+    unit(UnitKind::Capybara,"Capybara",Plants,Tank,3_000,[1_300,38,40,800,23,0,0],None,CAPYBARA_ABILITIES,[FormDef{hp_bp:2_000,..form("Stone Belly")},form("Stone Belly"),form("Swamp Wave"),form("Swamp Wave")]),
+    unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,1_100,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
+    unit(UnitKind::SolarSentinel,"Solar Sentinel",Celestials,Tank,3_000,[1_050,35,40,800,28,0,0],None,SOLAR_SENTINEL_ABILITIES,[FormDef{hp_bp:2_000,..form("Light Fortress")},form("Light Fortress"),form("Group Protection"),form("Group Protection")]),
+    unit(UnitKind::LuminousOracle,"Luminous Oracle",Celestials,Control,2_400,[300,15,50,3_000,38,0,0],None,LUMINOUS_ORACLE_ABILITIES,[form("Restoring Light"),form("Restoring Light"),form("Sacred Aura"),form("Sacred Aura")]),
+    unit(UnitKind::CelestialArcher,"Celestial Archer",Celestials,Ranged,2_400,[210,55,40,4_000,43,0,0],None,CELESTIAL_ARCHER_ABILITIES,[FormDef{dmg_bp:1_000,..form("Divine Precision")},FormDef{dmg_bp:1_000,..form("Divine Precision")},form("Celestial Mark"),form("Celestial Mark")]),
+    unit(UnitKind::Justiciar,"Justiciar",Celestials,Control,3_600,[700,35,46,2_500,28,0,0],None,JUSTICIAR_ABILITIES,[form("Celestial Fury"),FormDef{hp_bp:1_000,..form("Celestial Fury")},form("Judgment"),form("Judgment")]),
+    unit(UnitKind::Jawguard,"Jawguard",Insects,Tank,3_600,[1_400,45,40,800,23,0,0],None,JAWGUARD_ABILITIES,[FormDef{hp_bp:2_000,..form("Reinforced Carapace")},form("Reinforced Carapace"),form("Swarm Guard"),FormDef{dmg_bp:1_500,..form("Swarm Guard")}]),
+    unit(UnitKind::Mantis,"Mantis",Insects,Dps,2_400,[280,50,24,800,60,0,0],None,MANTIS_ABILITIES,[FormDef{atk_bp:1_500,..form("Relentless Hunt")},FormDef{speed_bp:1_000,..form("Relentless Hunt")},form("Precise Blade"),form("Precise Blade")]),
+    unit(UnitKind::Hornet,"Hornet",Insects,Ranged,3_000,[260,35,30,3_800,45,0,0],None,HORNET_ABILITIES,[form("Deep Venom"),form("Deep Venom"),FormDef{atk_bp:1_500,..form("Swoop")},FormDef{range_add:400,..form("Swoop")}]),
+    unit(UnitKind::Weaver,"Weaver",Insects,Control,2_400,[350,15,50,3_000,33,0,0],None,WEAVER_ABILITIES,[form("Extended Web"),form("Extended Web"),form("Protective Web"),form("Protective Web")]),
+    unit(UnitKind::PyreWarden,"Pyre Warden",Undead,Tank,3_600,[800,12,10,2_800,23,0,0],None,PYRE_WARDEN_ABILITIES,[FormDef{hp_bp:2500,..form("Funeral Furnace")},FormDef{range_add:560,..form("Funeral Furnace")},FormDef{dmg_bp:2000,..form("Pestilence Flame")},form("Pestilence Flame")]),
+    unit(UnitKind::Drillnest,"Drillnest",Machines,Ranged,3_000,[900,0,44,4_500,23,0,0],None,DRILLNEST_ABILITIES,[form("Swarm Factory"),form("Swarm Factory"),form("Siege Drill"),form("Siege Drill")]),
+    unit(UnitKind::Microdrill,"Microdrill",Machines,Dps,0,[45,18,14,600,95,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),form("Producer B"),form("Producer B")]),
+    unit(UnitKind::Duodrill,"Duodrill",Machines,Dps,0,[110,40,17,600,73,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),FormDef{dmg_bp:1500,..form("Producer B")},form("Producer B")]),
+    unit(UnitKind::Megadrill,"Megadrill",Machines,Dps,0,[260,90,22,600,50,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),form("Producer B"),form("Producer B")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).
@@ -809,6 +1369,8 @@ pub fn form_of(kind: UnitKind, tier: u8, branch: u8) -> Option<&'static FormDef>
 pub struct Stats {
     pub max_hp: i32,
     pub damage: i32,
+    /// Static damage percentages, retained before truncation for registry auxiliary damage.
+    pub damage_bp: i64,
     /// Static attack-speed basis points already folded into `interval`.
     pub atk_bp: i32,
     pub interval: u16,

@@ -37,6 +37,7 @@ pub fn plugin(app: &mut App) {
 }
 
 #[allow(clippy::too_many_arguments)] // the one place every action is applied
+#[allow(clippy::type_complexity)] // Bevy declares independent resources and component filters in the system signature.
 pub(super) fn apply(
     mut queue: ResMut<ActionQueue>,
     mut link: NonSendMut<MatchLink>,
@@ -52,16 +53,24 @@ pub(super) fn apply(
         ResMut<super::Toasts>,
         ResMut<Sounds>,
         ResMut<crate::sync::RematchInfo>,
+        Res<crate::sync::MatchInfo>,
     ),
     mut account: ResMut<Account>,
-    (mut surrender, mut fortifying): (
+    (mut surrender, mut fortifying, mut tower_open): (
         ResMut<super::surrender::Surrender>,
         ResMut<super::fortify::PendingFortify>,
+        ResMut<super::fortify::TowerOpen>,
     ),
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
     mut inspected: ResMut<super::inspect::Inspected>,
-    (mut lang_res, mut arena): (ResMut<crate::i18n::Lang>, ResMut<crate::arena::ActiveArena>),
+    (mut lang_res, mut arena, mut celebration, info, mut training): (
+        ResMut<crate::i18n::Lang>,
+        ResMut<crate::arena::ActiveArena>,
+        ResMut<crate::celebration::Presentation>,
+        Res<crate::sync::MatchInfo>,
+        ResMut<crate::training::Requests>,
+    ),
 ) {
     let now = time.elapsed_secs_f64();
     // BR-AG12: while an Augment selection pauses the battle, only the War
@@ -75,10 +84,35 @@ pub(super) fn apply(
         selected.0 = None;
     }
     for action in std::mem::take(&mut queue.0) {
-        if paused
+        #[cfg(target_os = "linux")]
+        let action = match action {
+            UiAction::PracticeArena(arena) => {
+                config::save_arena(arena);
+                UiAction::PracticeSetup
+            }
+            other => other,
+        };
+        // BR-LV03: watchers have public inspection, never seat controls.
+        if extra.4.spectating
             && matches!(
                 action,
                 UiAction::Buy(_)
+                    | UiAction::Evolve { .. }
+                    | UiAction::Fortify(_)
+                    | UiAction::ChooseAugment(_)
+                    | UiAction::ForgoAugment
+                    | UiAction::Surrender
+            )
+        {
+            continue;
+        }
+        if paused
+            && matches!(
+                action,
+                UiAction::Reserve { .. }
+                    | UiAction::Release(_)
+                    | UiAction::Reroll
+                    | UiAction::Buy(_)
                     | UiAction::Evolve { .. }
                     | UiAction::SelectUnit(_)
                     | UiAction::Fortify(_)
@@ -91,6 +125,7 @@ pub(super) fn apply(
             UiAction::Disabled
                 | UiAction::CloseEvolve
                 | UiAction::SelectUnit(_)
+                | UiAction::SelectTower
                 | UiAction::Deselect
                 | UiAction::CloseInspect
         ) {
@@ -105,17 +140,33 @@ pub(super) fn apply(
             };
             // Reuse the probe socket when it is still idle and open.
             if let MatchLink::Net(n) = link {
+                if info.outcome.is_some() {
+                    if let Some(id) = info.result_id {
+                        n.discard_completed(id);
+                    }
+                }
                 if n.reuse(mode, now) {
                     *queue_info = QueueInfo::default();
                     next.set(GameState::Queue);
                     return;
                 }
             }
-            *link = MatchLink::Net(Box::new(NetLink::new(mode, now)));
+            let mut connection = NetLink::new(mode, now);
+            if info.outcome.is_some() {
+                if let Some(id) = info.result_id {
+                    connection.discard_completed(id);
+                }
+            }
+            *link = MatchLink::Net(Box::new(connection));
             *queue_info = QueueInfo::default();
             next.set(GameState::Queue);
         };
         match action {
+            UiAction::PracticeSetup => {
+                training.0.push(crate::training::Action::Open(
+                    crate::training::Tab::Practice,
+                ));
+            }
             UiAction::Practice => {
                 *last = LastMode::Practice;
                 start_practice(&mut link, now)
@@ -134,11 +185,11 @@ pub(super) fn apply(
                 online(Mode::JoinChallenge(token), &mut link, &mut last);
                 queue_info.joining_challenge = true;
             }
-            UiAction::ChallengeInvalid => extra.1.push("Challenge link invalid"),
+            UiAction::ChallengeInvalid => extra.1.say(crate::i18n::Msg::ChallengeInvalid),
             UiAction::ShareChallenge => {
                 if let Some(token) = queue_info.challenge {
                     let url = config::challenge_link(&token);
-                    config::share_text("Join my TBG challenge", &url);
+                    config::share_text(lang_res.t(crate::i18n::Msg::ChallengeShareText), &url);
                 }
             }
             UiAction::RequestRematch => link.send(ClientMsg::RequestRematch, now),
@@ -162,6 +213,14 @@ pub(super) fn apply(
                 next.set(GameState::Menu);
             }
             UiAction::Cancel | UiAction::ToMenu => {
+                if info.outcome.is_some() {
+                    if let Some(id) = info.result_id {
+                        config::dismiss_result(id);
+                        if let MatchLink::Net(n) = &mut *link {
+                            n.discard_completed(id);
+                        }
+                    }
+                }
                 link.send(ClientMsg::Cancel, now);
                 let parked = if let MatchLink::Net(n) = &mut *link {
                     n.reuse(Mode::Probe, now)
@@ -193,6 +252,12 @@ pub(super) fn apply(
                     }
                 }
             }
+            // Linux presentation actions are consumed before this system.
+            #[cfg(target_os = "linux")]
+            UiAction::ShowArenaBanner
+            | UiAction::CloseArenaBanner
+            | UiAction::PickAugment(_)
+            | UiAction::ConfirmAugment => {}
             UiAction::CopyLink => {
                 if let Some(token) = queue_info.challenge {
                     config::copy_text(&config::challenge_link(&token));
@@ -231,7 +296,38 @@ pub(super) fn apply(
                     }
                 }
             }
+            UiAction::Reserve { offer, .. } | UiAction::Release(offer) => {
+                if pending.0.is_some() {
+                    continue;
+                }
+                let intent = match action {
+                    UiAction::Reserve { kind, .. } => PlayerIntention::Reserve { offer, kind },
+                    _ => PlayerIntention::Release { offer },
+                };
+                seq.0 += 1;
+                link.send(ClientMsg::Intent { seq: seq.0, intent }, now);
+                pending.0 = Some((u8::MAX, seq.0));
+            }
+            UiAction::Reroll => {
+                if pending.0.is_some() {
+                    continue;
+                }
+                if let Some(cost) = extra.0 .0.as_ref().and_then(|v| v.reroll_cost) {
+                    seq.0 += 1;
+                    link.send(
+                        ClientMsg::Intent {
+                            seq: seq.0,
+                            intent: PlayerIntention::Reroll { cost },
+                        },
+                        now,
+                    );
+                    pending.0 = Some((u8::MAX, seq.0));
+                }
+            }
             UiAction::Buy(offer) => {
+                if pending.0.is_some_and(|(slot, _)| slot == u8::MAX) {
+                    continue;
+                }
                 seq.0 += 1;
                 link.send(
                     ClientMsg::Intent {
@@ -242,7 +338,14 @@ pub(super) fn apply(
                 );
                 pending.0 = Some((offer, seq.0));
             }
+            // Your Stronghold behaves like a unit: its panel replaces the other one.
+            UiAction::SelectTower => {
+                inspected.0 = None;
+                selected.0 = None;
+                tower_open.0 = true;
+            }
             UiAction::SelectUnit(id) => {
+                tower_open.0 = false;
                 inspected.0 = Some(id);
                 // Evolution only for own units; enemies just show their status.
                 let own = extra
@@ -250,7 +353,7 @@ pub(super) fn apply(
                      .0
                     .as_ref()
                     .is_some_and(|v| v.units.iter().any(|u| u.id == id && u.seat == v.you));
-                selected.0 = own.then_some(id);
+                selected.0 = (own && !extra.4.spectating).then_some(id);
             }
             UiAction::Evolve { unit, branch } => {
                 seq.0 += 1;
@@ -282,19 +385,43 @@ pub(super) fn apply(
             UiAction::Deselect => {
                 selected.0 = None;
                 inspected.0 = None;
+                tower_open.0 = false;
             }
-            UiAction::CloseInspect => inspected.0 = None,
+            UiAction::CloseInspect => {
+                inspected.0 = None;
+                #[cfg(target_os = "linux")]
+                {
+                    selected.0 = None;
+                }
+            }
             UiAction::Inspect(offer) => {
                 if let Some(v) = &extra.0 .0 {
                     let kind = v.offers[usize::from(offer).min(tbg_core::content::OFFERS - 1)];
-                    extra.1.push_for(super::tips::unit_details(kind), 4.5);
+                    extra
+                        .1
+                        .push_for(super::tips::unit_details(kind, *lang_res), 4.5);
                 }
             }
+            UiAction::OpenCreator => config::open_url(super::attribution::CREATOR_URL),
+            UiAction::OpenRepository => config::open_url(super::attribution::REPOSITORY_URL),
             UiAction::ToggleSound => extra.2.toggle_mute(),
             // P41: menu-only switch (the Settings dialog lives in the menu).
-            UiAction::SetLang(lang) => *lang_res = lang,
+            UiAction::SetLang(lang) => {
+                *lang_res = lang;
+                crate::platform::storage::set(
+                    crate::platform::storage::Scope::Local,
+                    "tbg.lang",
+                    lang.code(),
+                );
+            }
             UiAction::PreviewArena(a) => {
                 arena.set_if_neq(crate::arena::ActiveArena::of(a));
+            }
+            UiAction::CelebrationPrev
+            | UiAction::CelebrationNext
+            | UiAction::CelebrationHide
+            | UiAction::CelebrationMotion => {
+                crate::celebration::control(&mut celebration, &info, action)
             }
             UiAction::Disabled => {}
             UiAction::OpenRanking
@@ -310,6 +437,7 @@ pub(super) fn apply(
                     &mut account,
                     &mut form,
                     &mut extra.1,
+                    *lang_res,
                     now,
                 );
             }

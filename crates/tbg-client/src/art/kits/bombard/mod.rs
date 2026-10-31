@@ -19,10 +19,12 @@ use crate::vfx::{
 use model::{plan, FORE};
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose,
     gait: Gait::HEAVY,
     attack: Attack::Shot {
+        loaded: None,
         from: Node::Prop(Socket::WeaponR),
         muzzle: |tier, branch| model::muzzle(Form::of(tier, branch)),
         shot: |_, _| ShotKind::Bomb,

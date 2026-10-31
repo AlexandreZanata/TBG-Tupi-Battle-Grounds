@@ -2,6 +2,7 @@
 
 use super::*;
 use crate::chan::ConnEvent;
+use tbg_core::protocol::ServerMsg;
 use tbg_core::{ArcanaPreset, EndReason, Outcome};
 
 #[test]
@@ -22,6 +23,7 @@ fn online_sequence_zero_cannot_reset_duplicate_protection() {
     }
     state.players[0].energy = 100_000;
     let mut game = Match {
+        result_id: [63; 16],
         state,
         players,
         detached_at: [None; 2],
@@ -34,6 +36,9 @@ fn online_sequence_zero_cannot_reset_duplicate_protection() {
         live: None,
         spectators: Vec::new(),
         pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
     };
     let command = |seq| MatchCmd::Intent {
         seat: Seat::A,
@@ -65,6 +70,7 @@ fn a_view_drains_events_and_keeps_the_buffer() {
         stronghold: tbg_core::StrongholdKind::Classic,
     });
     let mut game = Match {
+        result_id: [63; 16],
         state: MatchState::new(1),
         players,
         detached_at: [None; 2],
@@ -77,6 +83,9 @@ fn a_view_drains_events_and_keeps_the_buffer() {
         live: None,
         spectators: Vec::new(),
         pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
     };
     for _ in 0..40 {
         let events = game.state.step();
@@ -110,6 +119,7 @@ fn a_retransmitted_evolution_never_reuses_the_ruins_discount() {
     state.players[0].offers[0] = tbg_core::UnitKind::Shieldbearer;
     state.players[0].energy = 100_000;
     let mut game = Match {
+        result_id: [63; 16],
         state,
         players,
         detached_at: [None; 2],
@@ -122,6 +132,9 @@ fn a_retransmitted_evolution_never_reuses_the_ruins_discount() {
         live: None,
         spectators: Vec::new(),
         pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
     };
     let intent = |seq, intent| MatchCmd::Intent {
         seat: Seat::A,
@@ -178,11 +191,11 @@ async fn challenge_initial_detached_forfeits() {
         lobby_tx,
         config,
         metrics.clone(),
-        None,
+        super::Records::default(),
     );
     let outcome = tokio::time::timeout(Duration::from_secs(3), async {
         while let Some(ConnEvent::Send(msg)) = conn_rx.recv().await {
-            if let ServerMsg::MatchEnd { outcome } = msg {
+            if let ServerMsg::MatchEnd { outcome, .. } = msg {
                 return outcome;
             }
         }

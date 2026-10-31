@@ -52,9 +52,9 @@ impl Lobby {
         &mut self,
         token: Token,
         conn_id: u64,
-        result: Result<(AccountId, Profile), AccountError>,
+        result: Result<(AccountId, Profile, i64), AccountError>,
     ) {
-        let Ok((id, profile)) = result else {
+        let Ok((id, profile, settled)) = result else {
             let code = result.unwrap_err();
             if let Some(s) = self.session(&token) {
                 if s.conn.as_ref().is_some_and(|c| c.id == conn_id) {
@@ -119,6 +119,13 @@ impl Lobby {
         };
         s.account = Some((id, profile.clone()));
         s.name = profile.name.clone();
+        // P60: this profile already contains every settlement up to
+        // `settled`; a delayed older receipt must not overwrite it.
+        let seen = self.ranked_seen.entry(id).or_insert(0);
+        *seen = (*seen).max(settled);
+        let Some(s) = self.session(&token) else {
+            return;
+        };
         if let Some((tx, seat)) = stolen {
             s.state = SessionState::InMatch { tx, seat };
         }

@@ -4,6 +4,7 @@
 
 use bevy::prelude::*;
 
+use crate::i18n::{Lang, Localized, Msg};
 use crate::sync::MatchInfo;
 
 use super::hud::{bar, Hud};
@@ -12,8 +13,8 @@ use super::{label, PANEL};
 const YOU: Color = Color::srgb_u8(0x9C, 0xD2, 0xFF);
 const ENEMY: Color = Color::srgb_u8(0xFF, 0xB4, 0xB4);
 
-pub(super) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, narrow: bool) {
-    let bar_w = if narrow { 70.0 } else { 110.0 };
+pub(super) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, lang: Lang, narrow: bool) {
+    let bar_w = if narrow { 85.0 } else { 240.0 };
     let font = if narrow { 12.0 } else { 14.0 };
     let name_w = if narrow { 96.0 } else { 190.0 };
     let max_chars = if narrow { 14 } else { 23 };
@@ -37,12 +38,20 @@ pub(super) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, narrow:
                 name_w,
                 YOU,
             ));
-            row.spawn(bar(
-                Hud::Hp(0),
-                Color::srgb_u8(0x3F, 0xA9, 0xF5),
-                bar_w,
-                12.0,
-            ));
+            row.spawn(Node {
+                flex_direction: FlexDirection::Column,
+                row_gap: px(4),
+                ..default()
+            })
+            .with_children(|p| {
+                p.spawn(bar(
+                    Hud::Hp(0),
+                    Color::srgb_u8(0x3F, 0xA9, 0xF5),
+                    bar_w,
+                    16.0,
+                ));
+                p.spawn((label("", 12.0), Hud::HpLabel(0)));
+            });
             row.spawn(Node {
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
@@ -51,15 +60,26 @@ pub(super) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, narrow:
             .with_children(|mid| {
                 mid.spawn((label("3:00", clock), Hud::Clock));
                 if info.ranked {
-                    mid.spawn(label("RANKED", 9.0));
+                    mid.spawn((
+                        label(lang.t(Msg::HudRankedBadge), 9.0),
+                        Localized(Msg::HudRankedBadge),
+                    ));
                 }
             });
-            row.spawn(bar(
-                Hud::Hp(1),
-                Color::srgb_u8(0xF2, 0x54, 0x5B),
-                bar_w,
-                12.0,
-            ));
+            row.spawn(Node {
+                flex_direction: FlexDirection::Column,
+                row_gap: px(4),
+                ..default()
+            })
+            .with_children(|p| {
+                p.spawn(bar(
+                    Hud::Hp(1),
+                    Color::srgb_u8(0xF2, 0x54, 0x5B),
+                    bar_w,
+                    16.0,
+                ));
+                p.spawn((label("", 12.0), Hud::HpLabel(1)));
+            });
             row.spawn(name(
                 &fit(&info.opponent, info.opponent_rating, max_chars),
                 font,

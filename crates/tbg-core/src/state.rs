@@ -8,7 +8,7 @@ use crate::content::{self, Ability, Stats, BP, MIN_INTERVAL, OFFERS};
 use crate::rng::Pcg32;
 use crate::ruleset::Ruleset;
 use crate::types::{
-    Archetype, Arena, Faction, Seat, Status, StrongholdKind, Tick, UnitId, UnitKind,
+    Archetype, Arena, Faction, Seat, Status, StrongholdKind, Tick, UnitId, UnitKind, FACTION_COUNT,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -94,6 +94,50 @@ pub struct UnitFx {
     pub board_lock: Tick,
     pub shield: u16,
     pub shield_until: Tick,
+    /// W0 (P58 §3.2): the bleed slot of R07, one per victim, not stacked.
+    pub bleed: Bleed,
+    /// W0 (R13): basic attacks this unit makes lose `weaken_bp` until `weaken_until`.
+    pub weaken_bp: u16,
+    pub weaken_until: Tick,
+    /// W0 (R19): a Slow that starts when this unit's Root ends.
+    pub queued_slow: Option<QueuedSlow>,
+    /// W0 (R03): this caster's one mark, its target and deadline.
+    pub mark_target: Option<UnitId>,
+    pub mark_until: Tick,
+    /// W0: a timed self-reduction; it joins the damage reduction sum and its cap.
+    pub self_dr_bp: u16,
+    pub self_dr_until: Tick,
+    /// W0 (R03, R20): the ability heal-cut slot, beside the pair in `Unit`.
+    pub ability_cut_bp: u16,
+    pub ability_cut_until: Tick,
+    /// Independent bounded special windup; serialized for deterministic replay.
+    pub special: Option<PendingCast>,
+    /// R18/P58 §3.2: one venom family, separate from bleed and Rotcap stacks.
+    pub venom: Bleed,
+}
+
+/// One special locked at start; the ordinary basic windup stays independent.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PendingCast {
+    pub target: Option<UnitId>,
+    pub left: u16,
+}
+
+/// The bleed slot (R07): `value` HP per pulse, `left` pulses still to come,
+/// `next` the tick of the next one. An empty slot has `left == 0`.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Bleed {
+    pub value: u16,
+    pub next: Tick,
+    pub left: u8,
+    pub source: Option<Seat>,
+}
+
+/// A Slow queued behind a Root (R19).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct QueuedSlow {
+    pub bp: u16,
+    pub ticks: u16,
 }
 
 /// Queued A2 Shatterback shrapnel (P46): processed in `remove_dead` before
@@ -153,7 +197,7 @@ pub struct PlayerState {
     /// Treasury Spoils earned in the current Bounty window (BR-SK02).
     pub spoils_window: u32,
     /// Synergy level (0..=2) per `Faction` index.
-    pub synergy: [u8; 4],
+    pub synergy: [u8; FACTION_COUNT],
     pub last_seq: u32,
     pub rng: Pcg32,
     /// Smuggler cargo stream (P48-B): a new hidden stream per seat, never
@@ -183,6 +227,10 @@ pub struct PlayerState {
     /// ARENAS-G: the arena's first-Evolution discount was spent (only set
     /// when the arena has one, on a successful Evolution).
     pub arena_discount_used: bool,
+    /// BR-S06–S13: private Shop state, counted in new shops rather than ticks.
+    pub reserve: [u8; OFFERS],
+    pub held_mask: u8,
+    pub reroll_streak: u8,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -281,6 +329,7 @@ pub enum Event {
         unit: UnitId,
         opened: Option<UnitId>,
     },
+    /// Siphon: from is the enemy struck, to the ally healed, amount actual HP restored.
     Transfer {
         from: UnitId,
         to: UnitId,
@@ -292,6 +341,46 @@ pub enum Event {
     },
     Dismounted {
         unit: UnitId,
+    },
+    /// R10: cosmetic connection from the struck primary to one secondary.
+    CorrosiveSplash {
+        from: UnitId,
+        primary: UnitId,
+        to: UnitId,
+    },
+    /// P58: one server-authoritative special, discriminated by caster kind.
+    AbilityStarted {
+        unit: UnitId,
+        kind: UnitKind,
+        primary: Option<UnitId>,
+        center: i32,
+        tick: Tick,
+    },
+    AbilityResolved {
+        unit: UnitId,
+        kind: UnitKind,
+        primary: Option<UnitId>,
+        center: i32,
+        tick: Tick,
+    },
+    /// D-75: the server-selected fourth-shot secondary.
+    Crossfire {
+        from: UnitId,
+        to: UnitId,
+    },
+    /// D-87: exact authoritative one-dimensional friendly-fire extent.
+    ProfaneFlame {
+        unit: UnitId,
+        start: i32,
+        end: i32,
+        tick: Tick,
+    },
+    /// D-88: fusion consumes parents without Death or rewards.
+    DrillFused {
+        first: UnitId,
+        second: UnitId,
+        unit: UnitId,
+        x: i32,
     },
 }
 
@@ -333,6 +422,15 @@ pub struct MatchState {
     /// Runtime-only, like `pending`.
     #[serde(skip)]
     pub(crate) shrapnel: Vec<Shrapnel>,
+    /// Local training runtime (P62): dummy tags and attributed meters.
+    /// `None` in every normal match; never serialized, so hashes, views and
+    /// wire bytes are unchanged even in a build with the feature.
+    #[cfg(feature = "training")]
+    #[serde(skip, default)]
+    pub(crate) training: Option<Box<crate::training::Runtime>>,
+    /// Runtime-only historical counts; a deserialized snapshot cannot claim full history.
+    #[serde(skip, default)]
+    pub(crate) participation: crate::celebration::LifetimeCast,
 }
 
 /// x position of a seat's Stronghold.
@@ -526,12 +624,20 @@ impl MatchState {
 
     /// Recompute a unit's max HP, keeping its HP ratio (GAME-DESIGN §4).
     pub(crate) fn refresh_max_hp(&mut self, idx: usize) {
+        // P62: a training dummy keeps its own max HP (a Crate carrier whose
+        // definition Faction would otherwise rescale it to the Crate's).
+        if crate::training_hooks::is_dummy(self, self.units[idx].id) {
+            return;
+        }
         let new_max = self.stats_of(&self.units[idx]).max_hp;
+        let before = self.units[idx];
         let u = &mut self.units[idx];
         if new_max != u.max_hp && u.hp > 0 {
             let hp = i64::from(u.hp) * i64::from(new_max) / i64::from(u.max_hp);
             u.hp = (hp as i32).max(1);
             u.max_hp = new_max;
+            let delta = u.hp - before.hp;
+            crate::training_hooks::rescaled(self, &before, delta);
         }
     }
 }

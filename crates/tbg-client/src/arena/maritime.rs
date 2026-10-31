@@ -9,7 +9,8 @@ use bevy::{
 
 pub(super) fn lighthouse(parts: &mut Vec<Part>, at: Vec3) {
     for (shape, color, y) in [
-        (Cyl(0.54, 0.18), ROCK, 0.09),
+        (Bevel(1.22, 0.12, 1.18, 0.06), ROCK, 0.06),
+        (Cyl(0.54, 0.18), ROCK, 0.19),
         (Frustum(0.29, 0.43, 2.10), LINEN, 1.14),
         (Frustum(0.415, 0.435, 0.28), RED_CLOTH, 0.66),
         (Frustum(0.365, 0.385, 0.28), RED_CLOTH, 1.39),
@@ -32,6 +33,18 @@ pub(super) fn lighthouse(parts: &mut Vec<Part>, at: Vec3) {
             Transform::from_translation(at + offset),
         ));
     }
+    for (x, z, angle) in [
+        (0.33, 0.0, std::f32::consts::FRAC_PI_2),
+        (-0.33, 0.0, std::f32::consts::FRAC_PI_2),
+        (0.0, -0.33, 0.0),
+    ] {
+        parts.push((
+            Bevel(0.12, 0.20, 0.03, 0.01),
+            DARK,
+            Transform::from_translation(at + Vec3::new(x, 1.75, z))
+                .with_rotation(Quat::from_rotation_y(angle)),
+        ));
+    }
     parts.push((
         Box(0.19, 0.36, 0.025),
         DARK_LEATHER,
@@ -47,7 +60,7 @@ pub(super) fn lighthouse(parts: &mut Vec<Part>, at: Vec3) {
 pub(super) fn pier(parts: &mut Vec<Part>, at: Vec3) {
     for plank in 0..7 {
         parts.push((
-            Box(0.76, 0.07, 0.21),
+            Bevel(0.76, 0.07, 0.21, 0.02),
             if plank % 2 == 0 { TIMBER } else { WOOD },
             Transform::from_translation(at + Vec3::Z * plank as f32 * 0.23),
         ));
