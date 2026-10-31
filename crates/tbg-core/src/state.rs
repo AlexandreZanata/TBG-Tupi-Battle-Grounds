@@ -183,6 +183,10 @@ pub struct PlayerState {
     /// ARENAS-G: the arena's first-Evolution discount was spent (only set
     /// when the arena has one, on a successful Evolution).
     pub arena_discount_used: bool,
+    /// BR-S06–S13: private Shop state, counted in new shops rather than ticks.
+    pub reserve: [u8; OFFERS],
+    pub held_mask: u8,
+    pub reroll_streak: u8,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

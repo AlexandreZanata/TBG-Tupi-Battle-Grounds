@@ -767,6 +767,9 @@ fn rebuild_units(
 
 fn assemble_c(view: &ViewC, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Seat) -> MatchView {
     MatchView {
+        reserve: [0; tbg_core::content::OFFERS],
+        held_mask: 0,
+        reroll_cost: None,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -793,6 +796,9 @@ fn assemble_c(view: &ViewC, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Se
 
 fn assemble_b(view: &ViewB, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Seat) -> MatchView {
     MatchView {
+        reserve: [0; tbg_core::content::OFFERS],
+        held_mask: 0,
+        reroll_cost: None,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -1403,6 +1409,9 @@ fn rebuild_a(
         });
     }
     Ok(MatchView {
+        reserve: [0; tbg_core::content::OFFERS],
+        held_mask: 0,
+        reroll_cost: None,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -1471,6 +1480,9 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
             extra: extra_state(state, you),
         };
         MatchView {
+            reserve: [0; tbg_core::content::OFFERS],
+            held_mask: 0,
+            reroll_cost: None,
             tick: state.tick,
             phase: state.phase,
             phase_ticks_left: phase_ticks_left_at(state.tick, state.phase),

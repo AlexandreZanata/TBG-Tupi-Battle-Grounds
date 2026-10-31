@@ -43,10 +43,11 @@ fn bot_matches_are_frozen() {
     // tick, winner and reason identical (verified on all three seeds).
     use EndReason::StrongholdDestroyed;
     // D-61: owner champion changes in GAME-DESIGN, collected with update_probe.
+    // D-62: appended private Shop state; all D-61 outcomes and ticks identical.
     let goldens = [
-        (1, 0xb4806525738e9a73u64, 3261, Seat::B, StrongholdDestroyed),
-        (7, 0x456ea62950c21c8c, 2266, Seat::B, StrongholdDestroyed),
-        (42, 0xf774cd8cd87dca2f, 7649, Seat::B, StrongholdDestroyed),
+        (1, 0xd1f60c61474b2943u64, 3261, Seat::B, StrongholdDestroyed),
+        (7, 0xcd7b2a582eb3c66e, 2266, Seat::B, StrongholdDestroyed),
+        (42, 0xea2647f9858901db, 7649, Seat::B, StrongholdDestroyed),
     ];
     for (seed, hash, tick, winner, reason) in goldens {
         let s = bot_match(seed);

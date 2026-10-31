@@ -103,6 +103,13 @@ pub struct MatchView {
     /// BR-LV05: how many spectators watch this match. Set by the server
     /// when it sends the view; a count, never who (`0` from `view_for`).
     pub spectators: u16,
+    /// BR-S13: the viewing seat only, never the opponent or PublicView.
+    #[serde(skip)]
+    pub reserve: [u8; OFFERS],
+    #[serde(skip)]
+    pub held_mask: u8,
+    #[serde(skip)]
+    pub reroll_cost: Option<u32>,
 }
 
 impl MatchState {
@@ -135,6 +142,9 @@ impl MatchState {
             regen_bp: self.rules.interest.regen_bp(me.energy),
             evolve_costs: [0, 1].map(|tier| self.evolve_price(seat, tier)),
             offers: me.offers,
+            reserve: me.reserve,
+            held_mask: me.held_mask,
+            reroll_cost: crate::shop::reroll_cost(self, seat),
             stronghold_hp: [0, 1].map(|i| self.players[i].stronghold_hp),
             strongholds: Seat::BOTH.map(|s| StrongholdView {
                 kind: self.player(s).stronghold,

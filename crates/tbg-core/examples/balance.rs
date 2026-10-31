@@ -101,7 +101,10 @@ fn play(seed: u64, policy: Policy, t: &mut Totals) -> bool {
             PlayerIntention::Evolve { .. } => t.evolutions += 1,
             PlayerIntention::ChooseAugment { .. }
             | PlayerIntention::Forgo { .. }
-            | PlayerIntention::Fortify { .. } => {}
+            | PlayerIntention::Fortify { .. }
+            | PlayerIntention::Reserve { .. }
+            | PlayerIntention::Release { .. }
+            | PlayerIntention::Reroll { .. } => {}
         },
         Moment::Intention { .. } => {}
         Moment::Stepped { state } => {

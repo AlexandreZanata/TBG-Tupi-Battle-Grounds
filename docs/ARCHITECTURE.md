@@ -639,3 +639,15 @@ rules and values, D-34–D-38 the reasons, each phase file the exact steps.
 - **Budgets.** Step time ≤ +10 % at 100 units a side over P16-B; view
   growth of tens of bytes; per-match memory under 1 KB more; measured in
   every phase and re-checked under load in P16-F8.
+
+
+### Shop preview staging (D-62, 2026-10-31)
+
+Reserve/Release/Reroll append to PlayerIntention and Rejection. CANON.shop
+is None; only local Practice and explicit lab policies enable them. Private
+Shop state is serialized inside MatchState for deterministic replay/hash
+identity. The three preview-only MatchView fields are skipped by serde,
+so the existing v17 online View layout stays intact until activation.
+The owner checkpoint removes those skips and bumps the protocol together.
+PublicView contains no Shop fields. The desktop disables every card and
+Shop action until the previous Shop mutation is acknowledged or rejected.

@@ -71,6 +71,15 @@ pub enum UiAction {
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
     LeaveWatch,
     Buy(u8),
+    #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
+    Reserve {
+        offer: u8,
+        kind: tbg_core::UnitKind,
+    },
+    #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
+    Release(u8),
+    #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
+    Reroll,
     /// Long-press on a shop card: show the unit details.
     Inspect(u8),
     ToggleSound,

@@ -28,3 +28,29 @@ state; no phantom protocol bit is invented. Dying units are nonblocking.
 Baseline core tests: `/tmp/tbg-baseline-tests.log` (record final counts below).
 Reference crowd tests: 5 passed; extended crowd tests: 7 passed.
 Full build, browser evidence, lab comparisons and outstanding checks follow.
+
+## Shop preview (D-62)
+
+Practice uses Ruleset::preview with two free reservations, three new-Shop
+charges, Reroll base/step 600 sub-energy, no cap. CANON.shop remains None.
+Online controls remain hidden and the v17 View bytes keep their old shape:
+preview MatchView fields use serde(skip), intentionally removed only with
+the owner-approved activation/version bump. New intention indices append.
+
+Nine Shop integration scenarios passed, plus 10,000 kept-slot redraws per
+mask and exact RNG equivalence for keep=0. The appended private state moved
+hash bytes; all five champion-adjusted outcomes/end ticks remained identical
+before refreezing (3261, 2266, 7649, 2785, 24689). Preview-but-unused also
+matches CANON offers, RNG, players, units and final state hash directly.
+
+The lab accepts reserve-bot/reroll-bot/shop-bot and corresponding favor/faction
+policies; defaults remain the prior control policies. Five Shop knobs are
+registered; shop.csv reports reservations/conversions/wait, Reroll Energy,
+streak, expensive purchases and the 60-second frontline checkpoint.
+HUD locks carry the visible kind; Reroll carries the displayed price.
+Rust and the HTML controls both guard pending mutations; rejection clears
+pending state. R is the Reroll shortcut. Phone controls remain unchanged.
+
+Deviation: Shop fields stay local-only on the wire until activation instead
+of silently changing v17 with no protocol bump. This is necessary to keep
+main-client compatibility while honoring the explicit checkpoint.

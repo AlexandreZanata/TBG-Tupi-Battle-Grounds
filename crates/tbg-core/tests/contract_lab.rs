@@ -108,12 +108,13 @@ fn c2_per_tick_traces_are_frozen() {
     // D-55 (ARENAS-G): the arena fields joined the serialized state; the
     // Forest is neutral: traces and hashes moved, end ticks identical.
     // D-61: owner champion changes in GAME-DESIGN, collected with update_probe.
+    // D-62: appended private Shop state; all D-61 outcomes and ticks identical.
     let goldens = [
-        (1, 0xefb0ee3248ebd94b, 0xb4806525738e9a73, 3261),
-        (7, 0x40241ecd5f228c07, 0x456ea62950c21c8c, 2266),
-        (42, 0xcc7dbcf702137deb, 0xf774cd8cd87dca2f, 7649),
-        (1000, 0x263114a996466dfe, 0x513b306c53a1e8bb, 2785),
-        (65535, 0x03e9889b2c1c0d13, 0xa46b5c3f1b9e1fa4, 24689),
+        (1, 0x137ba196499b9fd3, 0xd1f60c61474b2943, 3261),
+        (7, 0x12325849b163a8d5, 0xcd7b2a582eb3c66e, 2266),
+        (42, 0x6914ae824a07eedb, 0xea2647f9858901db, 7649),
+        (1000, 0x83c06a0ce27f85f0, 0xf04f3e9c0b378329, 2785),
+        (65535, 0x1a9ce86813cc7537, 0x158e83da030a7e26, 24689),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

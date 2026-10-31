@@ -15,6 +15,15 @@ pub struct Side {
     /// Evolutions per kind and branch (both tiers).
     pub evolutions: [[u16; 2]; KINDS],
     pub max_army: u16,
+    pub reservations: u32,
+    pub reserved_bought: u32,
+    pub reserve_wait_shops: u32,
+    pub rerolls: u32,
+    pub reroll_energy: u64,
+    pub spent: u64,
+    pub max_reroll_streak: u8,
+    pub expensive_bought: u32,
+    pub no_frontline_at_60s: Option<bool>,
 }
 
 impl Side {
@@ -86,6 +95,17 @@ pub fn observe_tick(
     for seat in Seat::BOTH {
         let p = participant(seat, seat_a);
         let army = state.army_size(seat).min(usize::from(u16::MAX)) as u16;
+        if state.tick == RUNNING_START + 60 * TICK_HZ {
+            sides[p].no_frontline_at_60s = Some(!state.units.iter().any(|u| {
+                u.seat == seat
+                    && !u.kind.is_summon()
+                    && u.summoner.is_none()
+                    && matches!(
+                        state.rules().def(u.kind).archetype,
+                        tbg_core::Archetype::Tank | tbg_core::Archetype::Dps
+                    )
+            }));
+        }
         sides[p].max_army = sides[p].max_army.max(army);
     }
     if state.tick == CHECKPOINT {

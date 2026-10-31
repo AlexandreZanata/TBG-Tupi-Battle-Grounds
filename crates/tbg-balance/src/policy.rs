@@ -44,6 +44,27 @@ pub enum Policy {
     Comp([Option<UnitKind>; 3]),
     /// Uniformly random legal action (sanity floor).
     Random,
+    Shop {
+        base: ShopBase,
+        reserve: bool,
+        reroll: bool,
+    },
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ShopBase {
+    Bot,
+    Favor(UnitKind),
+    Faction(Faction),
+}
+impl ShopBase {
+    fn policy(self) -> Policy {
+        match self {
+            Self::Bot => Policy::Bot,
+            Self::Favor(k) => Policy::Favor(k),
+            Self::Faction(f) => Policy::Faction(f),
+        }
+    }
 }
 
 impl Ord for Policy {
@@ -62,6 +83,14 @@ impl Policy {
     /// Stable order for result maps: variant, then faction or kind index.
     fn key(self) -> (u8, usize) {
         match self {
+            Policy::Shop {
+                base,
+                reserve,
+                reroll,
+            } => (10, {
+                let (a, b) = base.policy().key();
+                (usize::from(a) * 100 + b) * 4 + usize::from(reserve) * 2 + usize::from(reroll)
+            }),
             Policy::Bot => (0, 0),
             Policy::Heavy => (1, 0),
             Policy::Cheap => (2, 0),
@@ -102,6 +131,21 @@ impl Policy {
 
     pub fn name(self) -> String {
         match self {
+            Policy::Shop {
+                base,
+                reserve,
+                reroll,
+            } => format!(
+                "{}-{}",
+                if reserve && reroll {
+                    "shop"
+                } else if reserve {
+                    "reserve"
+                } else {
+                    "reroll"
+                },
+                base.policy().name()
+            ),
             Policy::Faction(f) => format!("faction-{f:?}").to_lowercase(),
             Policy::Favor(k) => format!("favor-{k:?}").to_lowercase(),
             Policy::BotAvoid(k) => format!("avoid-{k:?}").to_lowercase(),
@@ -118,6 +162,25 @@ impl Policy {
 
     pub fn parse(s: &str) -> Option<Policy> {
         let s = s.to_lowercase();
+        for (prefix, reserve, reroll) in [
+            ("shop-", true, true),
+            ("reserve-", true, false),
+            ("reroll-", false, true),
+        ] {
+            if let Some(rest) = s.strip_prefix(prefix) {
+                let base = match Self::parse(rest)? {
+                    Self::Bot => ShopBase::Bot,
+                    Self::Favor(k) => ShopBase::Favor(k),
+                    Self::Faction(f) => ShopBase::Faction(f),
+                    _ => return None,
+                };
+                return Some(Self::Shop {
+                    base,
+                    reserve,
+                    reroll,
+                });
+            }
+        }
         if let Some(rest) = s.strip_prefix("comp-") {
             return Self::parse_comp(rest);
         }
@@ -158,6 +221,8 @@ impl Policy {
 
 /// One participant: a policy with its own seeded state.
 pub struct Controller {
+    shop: (bool, bool),
+    rolls: u8,
     policy: Policy,
     rules: &'static Ruleset,
     rng: Pcg32,
@@ -170,11 +235,24 @@ pub struct Controller {
 
 impl Controller {
     pub fn new(policy: Policy, rules: &'static Ruleset, seed: u64, reaction: u32) -> Controller {
+        let (policy, shop) = match policy {
+            Policy::Shop {
+                base,
+                reserve,
+                reroll,
+            } => (base.policy(), (reserve, reroll)),
+            other => (other, (false, false)),
+        };
         Controller {
+            shop,
+            rolls: 0,
             policy,
             rules,
             rng: Pcg32::new(seed, 11),
-            bot: Bot::with_rules(seed, rules),
+            bot: Bot::with_rules(seed, rules).shop_options(
+                shop.0 && policy == Policy::Bot,
+                shop.1 && policy == Policy::Bot,
+            ),
             reaction: reaction.max(1),
             wait: 0,
             spending: false,
@@ -198,7 +276,21 @@ impl Controller {
             };
         }
         self.wait = self.reaction - 1;
-        match self.policy {
+        let wanted = |k| match self.policy {
+            Policy::Favor(w) => k == w,
+            Policy::Faction(f) => self.rules.def(k).faction == f,
+            _ => true,
+        };
+        let action = tbg_core::bot::shop_decision(
+            view,
+            self.rules,
+            self.shop.0,
+            self.shop.1,
+            self.rolls,
+            wanted,
+        )
+        .or_else(|| match self.policy {
+            Policy::Shop { .. } => None,
             Policy::Bot => self.bot.decide(view),
             Policy::Heavy => self.buy_by(view, i64::from),
             Policy::Cheap => self.buy_by(view, |cost| -i64::from(cost)),
@@ -209,7 +301,13 @@ impl Controller {
             Policy::Comp(kinds) => self.comp(view, &kinds),
             Policy::BotAvoid(k) => self.avoid(view, k),
             Policy::Random => self.random(view),
+        });
+        match action {
+            Some(PlayerIntention::Purchase { .. }) => self.rolls = 0,
+            Some(PlayerIntention::Reroll { .. }) => self.rolls = self.rolls.saturating_add(1),
+            _ => {}
         }
+        action
     }
 
     fn cost(&self, view: &MatchView, offer: usize) -> u32 {

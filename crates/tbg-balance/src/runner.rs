@@ -123,6 +123,7 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
     });
     let mut sides: [Side; 2] = Default::default();
     let mut hp = None;
+    let mut reroll_streak = [0u8; 2];
     let ended = headless::play_with(
         &mut state,
         |state| setup.apply(state),
@@ -134,15 +135,41 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
                 intent,
                 result: Ok(()),
             } => {
-                let side = &mut sides[participant(seat, seat_a)];
+                let index = participant(seat, seat_a);
+                let side = &mut sides[index];
                 match intent {
                     PlayerIntention::Purchase { offer } => {
-                        side.purchases[view.offers[usize::from(offer)] as usize] += 1;
+                        reroll_streak[index] = 0;
+                        let i = usize::from(offer);
+                        let cost = m.rules.def(view.offers[i]).cost;
+                        side.purchases[view.offers[i] as usize] += 1;
+                        side.spent += u64::from(cost);
+                        // The maximum streak is updated from the displayed price below.
+                        side.expensive_bought +=
+                            u32::from(cost >= 6 * tbg_core::content::ENERGY_SCALE);
+                        if view.reserve[i] > 0 {
+                            side.reserved_bought += 1;
+                            side.reserve_wait_shops += u32::from(
+                                m.rules
+                                    .shop
+                                    .map_or(0, |r| r.reserve_shops)
+                                    .saturating_sub(view.reserve[i]),
+                            );
+                        }
                     }
                     PlayerIntention::Evolve { unit, branch } => {
                         if let Some(u) = view.units.iter().find(|u| u.id == unit) {
                             side.evolutions[u.kind as usize][usize::from(branch.min(1))] += 1;
                         }
+                    }
+                    PlayerIntention::Reserve { .. } => side.reservations += 1,
+                    PlayerIntention::Release { .. } => {}
+                    PlayerIntention::Reroll { cost } => {
+                        side.rerolls += 1;
+                        side.reroll_energy += u64::from(cost);
+                        side.spent += u64::from(cost);
+                        reroll_streak[index] = reroll_streak[index].saturating_add(1);
+                        side.max_reroll_streak = side.max_reroll_streak.max(reroll_streak[index]);
                     }
                     PlayerIntention::ChooseAugment { .. }
                     | PlayerIntention::Forgo { .. }

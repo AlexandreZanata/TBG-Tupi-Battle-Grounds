@@ -83,6 +83,9 @@ impl MatchState {
                 fury_stacks: 0,
                 fury_until: 0,
                 arena_discount_used: false,
+                reserve: [0; crate::content::OFFERS],
+                held_mask: 0,
+                reroll_streak: 0,
             }
         };
         let first_round = if rules.augment.round_ticks == 0 {

@@ -1087,3 +1087,18 @@ and rear crate placement correct the misleading stationary behavior.
 hashes intentionally. The balance lab must compare identical seed blocks.
 **Reopen** if changed champions dominate, existing gates regress or the
 owner's look/fun review rejects the presentation. Values remain Proposed.
+
+
+## D-62 · Shop reservations by new shops and paid Reroll — 2026-10-31 (preview)
+
+**Decision.** Supersede the timed P16-F2 draft with GAME-DESIGN BR-S06–S14:
+two free reservations, three redraw charges, increasing paid Reroll. No bans
+or pool restrictions. CANON stays disabled; Practice and the lab use preview.
+**Contracts.** Appended private state moves serialization hashes; the
+champion-adjusted seeds must retain all outcomes and end ticks. Intention
+and rejection variants are appended. Private MatchView fields are local preview state, skipped by serde until
+the owner checkpoint. This preserves the v17 online View layout. At
+activation, remove those skips and bump the protocol together.
+**Reopen** when the owner reviews the lab/HUD checkpoint, roster exceeds 30
+or no-frontline Shop metrics worsen. Activation requires protocol v18,
+updated wire contracts and explicit approval; this PR does not activate it.

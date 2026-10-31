@@ -123,7 +123,7 @@ mod web {
         if !desktop.0 {
             return;
         }
-        let (info, pending, surrender, fortifying, lang) = details;
+        let (info, pending, surrender, fortifying, _lang) = details;
         let Some(v) = &view.0 else {
             return;
         };
@@ -223,19 +223,34 @@ mod web {
                 "ready"
             },
         );
+        let shop_pending = pending.0.is_some();
+        attr(
+            &root,
+            "data-shop-pending",
+            if shop_pending { "true" } else { "false" },
+        );
+        attr(
+            &root,
+            "data-reroll-cost",
+            &v.reroll_cost.map(|c| c.to_string()).unwrap_or_default(),
+        );
+        attr(&root, "data-reserve-limit", "2");
         for i in 0..OFFERS {
             let d = def(v.offers[i]);
-            let pending = pending.0.is_some_and(|(offer, _)| usize::from(offer) == i);
+            let pending =
+                shop_pending || pending.0.is_some_and(|(offer, _)| usize::from(offer) == i);
             let available = super::super::hud_update::buyable(v, i) && !pending;
             let data = format!(
-                "{:?}|{}|{:?}|{}|{:?}|{}|{}",
+                "{:?}|{}|{:?}|{}|{:?}|{}|{}|{}|{}",
                 v.offers[i],
                 d.name,
                 d.archetype,
                 d.cost / ENERGY_SCALE,
                 d.faction,
                 available,
-                pending
+                pending,
+                v.reserve[i],
+                v.held_mask & (1 << i) != 0,
             );
             attr(&root, &format!("data-offer-{i}"), &data);
         }
@@ -309,6 +324,20 @@ mod web {
     }
 
     fn action(value: &str) -> Option<UiAction> {
+        if value == "reroll" {
+            return Some(UiAction::Reroll);
+        }
+        if let Some(record) = value.strip_prefix("reserve:") {
+            let (slot, kind) = record.split_once(':')?;
+            let offer = slot
+                .parse::<u8>()
+                .ok()
+                .filter(|i| usize::from(*i) < OFFERS)?;
+            let kind = tbg_core::ALL_KINDS
+                .into_iter()
+                .find(|k| format!("{k:?}") == kind)?;
+            return Some(UiAction::Reserve { offer, kind });
+        }
         if value == "surrender" {
             return Some(UiAction::Surrender);
         }
@@ -327,6 +356,7 @@ mod web {
         let (kind, index) = value.split_once(':')?;
         let index = index.parse::<u8>().ok()?;
         match kind {
+            "release" => (usize::from(index) < OFFERS).then_some(UiAction::Release(index)),
             "buy" => (usize::from(index) < OFFERS).then_some(UiAction::Buy(index)),
             "fortify" => (index <= 1).then_some(UiAction::Fortify(index)),
             "inspect" => (usize::from(index) < OFFERS).then_some(UiAction::Inspect(index)),

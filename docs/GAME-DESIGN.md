@@ -498,19 +498,23 @@ Interest boost read from that balance, then the Bounty window reset every
 `StrongholdDestroyed` or `Forfeit`. Forfeit, surrender, reconnect
 windows, ranked Elo (draw ½) and result persistence are unchanged.
 
-### 10.3 Shop Reserve (P16-F2)
+### 10.3 Shop Reserve and paid Reroll (preview, Proposed)
 
-> Written for a rotating Shop. Since the owner revision of 2026-10-29
-> every purchase redraws all five offers (BR-S04), so a hold would have nothing to
-> protect against; F2 needs a new design before it is scheduled.
+CANON.shop remains None until the owner's explicit checkpoint. Preview uses
+2 reserve slots, 3 new-shop charges, reroll_base 600 sub-energy (1 Energy),
+reroll_step 600, no maximum. FULL_POOL and five distinct offers remain.
 
 | ID | Proposed rule |
 |----|---------------|
-| BR-S06 | A player may hold one visible offer (`Reserve{offer, kind}`), free, for 20 s (400 ticks); `kind` must match the offer or the intention is rejected as stale |
-| BR-S07 | A held offer is skipped by rotation; refills and rotations never show a duplicate of it (BR-S01 still holds for all five) |
-| BR-S08 | Buying the held offer consumes the hold and refills the slot normally; `Release` ends the hold early |
-| BR-S09 | When a hold ends (expiry or `Release`) the card stays as a normal offer until the next rotation; an offer that has been held cannot be held again until its slot is redrawn |
-| BR-S10 | Same-tick order: intentions first (a purchase or hold at an expiry or rotation tick sees the offers before the Shop step), then hold expiry, then rotation |
+| BR-S06 | Reserve a visible matching kind for free; at most reserve_slots active; stale kind is rejected |
+| BR-S07 | Reserved cards stay in the same slot at every new Shop; other slots draw distinctly excluding held kinds |
+| BR-S08 | Each purchase or Reroll consumes one charge of every kept reservation; at zero the card stays visible until the next new Shop |
+| BR-S09 | Buying a reserved card ends its reservation and redraws its slot immediately; Release leaves the card visible until the next new Shop |
+| BR-S10 | An expired or released reservation cannot be renewed before its slot is redrawn |
+| BR-S11 | Reroll pays base + step × consecutive rerolls, optionally capped; buying a unit resets the streak; stale displayed price or insufficient Energy spends nothing |
+| BR-S12 | Reserve, Release and Reroll require Running and are Paused during Augment selection |
+| BR-S13 | Reservations, charges and Reroll price/streak are private to their player, excluded from opponent and spectator views |
+| BR-S14 | Intentions apply in player sequence order before step; each sees the preceding intention's Shop |
 
 ### 10.4 Stronghold kinds — active (owner decision 2026-10-29, D-46)
 

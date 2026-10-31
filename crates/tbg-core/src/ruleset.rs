@@ -49,8 +49,30 @@ pub struct AugmentRule {
     pub forgo_energy: u32,
 }
 
+/// Proposed Shop Reserve and paid Reroll; disabled in online CANON.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ShopRule {
+    pub reserve_slots: u8,
+    pub reserve_shops: u8,
+    pub reroll_base: u32,
+    pub reroll_step: u32,
+    pub reroll_max: Option<u32>,
+}
+impl Default for ShopRule {
+    fn default() -> Self {
+        Self {
+            reserve_slots: 2,
+            reserve_shops: 3,
+            reroll_base: 600,
+            reroll_step: 600,
+            reroll_max: None,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Ruleset {
+    pub shop: Option<ShopRule>,
     pub energy_start: u32,
     /// `None` = no gameplay cap (canon); `Some` is a lab comparison only.
     pub energy_cap: Option<u32>,
@@ -86,6 +108,7 @@ pub struct Ruleset {
 
 /// The only ruleset the server and the client use.
 pub static CANON: Ruleset = Ruleset {
+    shop: None,
     energy_start: ENERGY_START,
     energy_cap: None,
     regen_running: REGEN_RUNNING,
@@ -130,6 +153,7 @@ impl Ruleset {
     pub fn preview() -> &'static Ruleset {
         Box::leak(Box::new(Ruleset {
             pool: &FULL_POOL,
+            shop: Some(ShopRule::default()),
             ..CANON.clone()
         }))
     }

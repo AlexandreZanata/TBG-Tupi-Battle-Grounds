@@ -33,6 +33,7 @@ pub enum FormField {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Knob {
+    Shop(usize),
     EnergyStart,
     RegenRunning,
     InterestBand,
@@ -73,6 +74,7 @@ const ARCANA_NAMES: [&str; 6] = [
 /// Every knob whose canonical value is non-zero.
 pub fn all(r: &Ruleset) -> Vec<Knob> {
     let Ruleset {
+        shop,
         energy_start,
         // Untunable: no gameplay cap. The lab builds `Some(cap)` directly.
         energy_cap: _,
@@ -107,6 +109,9 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
         arenas: _,
     } = r;
     let mut v = Vec::new();
+    if shop.is_some() {
+        v.extend((0..5).map(Knob::Shop));
+    }
     let mut add = |k: Knob, value: i64| {
         if value != 0 {
             v.push(k);
@@ -258,10 +263,32 @@ macro_rules! field {
         }
     )*};
 }
-field!(u16, u32, i32);
+field!(u8, u16, u32, i32);
+impl Field for Option<u32> {
+    fn get(&self) -> i64 {
+        i64::from(self.unwrap_or(0))
+    }
+    fn set(&mut self, v: i64) {
+        *self = if v <= 0 {
+            None
+        } else {
+            Some(v.min(i64::from(u32::MAX)) as u32)
+        };
+    }
+}
 
 fn slot(r: &mut Ruleset, k: Knob) -> &mut dyn Field {
     match k {
+        Knob::Shop(i) => {
+            let shop = r.shop.get_or_insert_default();
+            match i {
+                0 => &mut shop.reserve_slots,
+                1 => &mut shop.reserve_shops,
+                2 => &mut shop.reroll_base,
+                3 => &mut shop.reroll_step,
+                _ => &mut shop.reroll_max,
+            }
+        }
         Knob::EnergyStart => &mut r.energy_start,
         Knob::RegenRunning => &mut r.regen_running,
         Knob::InterestBand => &mut r.interest.band,
@@ -292,6 +319,13 @@ pub fn get(r: &Ruleset, k: Knob) -> i64 {
 }
 
 pub fn set(r: &mut Ruleset, k: Knob, v: i64) {
+    let v = match k {
+        Knob::Shop(0) => v.clamp(0, 3),
+        Knob::Shop(1) => v.clamp(1, 5),
+        Knob::Shop(2) => v.clamp(300, 1800),
+        Knob::Shop(3) => v.clamp(0, 1200),
+        _ => v,
+    };
     slot(r, k).set(v);
 }
 
@@ -341,6 +375,16 @@ pub fn moved(k: Knob, canon: i64, steps: i64) -> i64 {
 pub fn name(r: &Ruleset, k: Knob) -> String {
     let unit = |i: usize| format!("{:?}", r.units[i].kind);
     match k {
+        Knob::Shop(i) => format!(
+            "shop.{}",
+            [
+                "reserve_slots",
+                "reserve_shops",
+                "reroll_base",
+                "reroll_step",
+                "reroll_max"
+            ][i]
+        ),
         Knob::EvolveCost(i) => format!("evolve_cost.{i}"),
         Knob::AugmentCost(i) => format!("augment_cost.{i}"),
         Knob::InterestBand => "interest.band".into(),

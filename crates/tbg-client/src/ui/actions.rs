@@ -78,7 +78,10 @@ pub(super) fn apply(
         if paused
             && matches!(
                 action,
-                UiAction::Buy(_)
+                UiAction::Reserve { .. }
+                    | UiAction::Release(_)
+                    | UiAction::Reroll
+                    | UiAction::Buy(_)
                     | UiAction::Evolve { .. }
                     | UiAction::SelectUnit(_)
                     | UiAction::Fortify(_)
@@ -231,7 +234,38 @@ pub(super) fn apply(
                     }
                 }
             }
+            UiAction::Reserve { offer, .. } | UiAction::Release(offer) => {
+                if pending.0.is_some() {
+                    continue;
+                }
+                let intent = match action {
+                    UiAction::Reserve { kind, .. } => PlayerIntention::Reserve { offer, kind },
+                    _ => PlayerIntention::Release { offer },
+                };
+                seq.0 += 1;
+                link.send(ClientMsg::Intent { seq: seq.0, intent }, now);
+                pending.0 = Some((u8::MAX, seq.0));
+            }
+            UiAction::Reroll => {
+                if pending.0.is_some() {
+                    continue;
+                }
+                if let Some(cost) = extra.0 .0.as_ref().and_then(|v| v.reroll_cost) {
+                    seq.0 += 1;
+                    link.send(
+                        ClientMsg::Intent {
+                            seq: seq.0,
+                            intent: PlayerIntention::Reroll { cost },
+                        },
+                        now,
+                    );
+                    pending.0 = Some((u8::MAX, seq.0));
+                }
+            }
             UiAction::Buy(offer) => {
+                if pending.0.is_some_and(|(slot, _)| slot == u8::MAX) {
+                    continue;
+                }
                 seq.0 += 1;
                 link.send(
                     ClientMsg::Intent {
