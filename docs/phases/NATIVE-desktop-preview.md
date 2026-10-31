@@ -376,3 +376,42 @@ Also defer the existing core `shop_reserve_reroll`, `augment_pause` and
 select/confirm/Forgo, reconnect/late confirmation, insufficient Energy,
 spectating and lock expiry. No full suite, WASM build, web assets, deploy or
 remote Git operation belongs to this front.
+
+### War Council and Shop lock result
+
+- Installed source: `43d3fa1748db124af827dbbfcc31d7fccb8bc9df`.
+  Native `cargo build --locked -p tbg-client --bin tbg-client`, Linux
+  packaging with `--no-archive` and the generated installer passed using
+  the existing shared host lock/cache and `CARGO_BUILD_JOBS=2`. The initial
+  successful build took 19.07 s; final polish took 7.21 s. No final compiler
+  warnings or errors were recorded. The owner's wait exception applies.
+- `cargo fmt -p tbg-client -- --check`, `git diff --check`, native glyph
+  export/WebP format validation, desktop entry validation and installed
+  executable SHA-256/source-metadata checks passed. Only three small native
+  UI glyphs were added (1352 bytes); original Augment art/frames are reused
+  unchanged. Illustrations use a centered cover crop to retain proportions.
+- Initial compilation reported `E0433: cannot find surrender in super`
+  after splitting the layout module. The corrected crate-qualified path
+  compiled successfully. Capture review then centered rarity labels,
+  constrained description wrapping, clarified disabled confirmation and
+  replaced reservation dot glyphs with a readable numeric charge count.
+- Inspected the final installed War Council at 1920x972 using the actual
+  first local simulation round: four correct illustrations and rarity
+  frames, descriptions and costs, paused arena, countdown/progress, Forgo
+  and disabled confirmation before selection. The existing two-step
+  Surrender is still accessible. Capture: `.local/council-final.webp`.
+- The normal UiAction/LocalMatch path verified keeping one offer through
+  three purchases of other offers, charge expiry and nonrenewable marker,
+  Release acknowledgment, and then reserving a different card. Log:
+  `Reserve smoke passed: held slot survived three purchases (3 -> 2 -> 1
+  -> 0); release acknowledged; another card is locked with 3 charges.`
+  `.local/reserve-final.webp` shows the closed padlock, highlight and
+  `Reservada · 3` badge. Real preferences/account data were isolated.
+- Captures exited successfully with only expected virtual X11 XSETTINGS
+  and physical-dimension warnings. Pointer/keyboard confirmations, network
+  reconnects and the deferred Rust regressions remain unverified; no full
+  suite or other-target build was run. No web assets, online activation,
+  deployment, remote Git or CI operation occurred. Existing app windows
+  and unrelated owner policy edits were preserved. Reopen TBG to load the
+  updated installation. Shop lock remains Practice-only under the current
+  server configuration; this front does not activate online CANON.shop.
