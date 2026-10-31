@@ -317,6 +317,19 @@ D-80/D-81 avoid the inspected P59 decision reservations through D-79.
 Use the current owner's minimal-validation policy, including shared lock
 and two-job cap; historical broad verification blocks are not authorization.
 
+## Owner-requested victory celebration (2026-10-31)
+
+| Phase | Spec | Scope | Status | Owner checkpoints |
+|---|---|---|---|---|
+| P63 | [P63-victory-celebration.md](phases/P63-victory-celebration.md) | Winner's complete living/dead cast in the arena, facing the player; current per-kit Victory, future signature dances, reliable cast summary and accessible result controls | **planning only**, `codex/p63-victory-celebration-plan` | Cast eligibility; large-cast paging/all-at-once strategy; signature pilot and visual approval |
+
+Implement cast inventory/contract → end/reconnect delivery → Result scene/
+frontal formation → shared motion and signature pilot → targeted review.
+P63 shares animation ownership with P62; the complete training laboratory
+is not a dependency. Existing animations may ship first; unique dances for
+the whole roster are a later content pass. No game implementation or broad
+validation was performed in the planning branch. See D-82 and Proposed §17.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·
