@@ -4,7 +4,7 @@
   "arcanas": "assets/lobby/arcanas-v2.webp",
   "troops": "assets/lobby/troops-v2.webp",
   "ranking": "assets/lobby/ranking-v2.webp",
-  "news": "assets/lobby/news.svg",
+  "news": "assets/lobby/news/patch-notes.webp",
   "strongholds": "assets/lobby/strongholds-v2.webp",
   "profile": "assets/lobby/profile-v2.webp"
 }

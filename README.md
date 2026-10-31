@@ -75,6 +75,12 @@ server only.
 Global ranking and player stats: the **Ranking** button in the menu, or
 the public page at `http://localhost:8080/ranking/` (JSON API:
 `/api/leaderboard`, `/api/players/{name}`).
+Field news opens the shared **Patch notes** page in Linux and the browser
+(`?ui=bevy&panel=patch-notes`). The read-only public feed is
+`/api/patch-notes`, with details at `/api/patch-notes/{id}`. Every gameplay
+revision needs [documented patch notes and evidence](docs/patches/README.md);
+CI rejects missing revision notes. Linux also includes an offline snapshot.
+
 Deploying to a VPS: [deploy/README.md](deploy/README.md).
 
 ## Contributing

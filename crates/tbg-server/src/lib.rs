@@ -25,6 +25,7 @@ mod lobby;
 mod match_task;
 pub mod metrics;
 mod names;
+mod patch_notes;
 pub mod ranked;
 pub mod stats;
 pub mod store;
@@ -113,6 +114,8 @@ pub async fn run_with(
         .route("/api/players/{name}", get(api::player))
         .route("/api/live", get(api::live))
         .route("/api/version", get(version::get))
+        .route("/api/patch-notes", get(patch_notes::list))
+        .route("/api/patch-notes/{id}", get(patch_notes::detail))
         .route("/api/online", get(api::online))
         .with_state(state);
     if let Some(dir) = &config.static_dir {

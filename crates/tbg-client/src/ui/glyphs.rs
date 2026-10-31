@@ -67,6 +67,7 @@ mod tests {
         sources(&manifest.join("src"), &mut files);
         files.push(manifest.join("assets/i18n/en.json"));
         files.push(manifest.join("assets/i18n/pt-BR.json"));
+        files.push(manifest.join("../../docs/patches/catalog.json"));
         let mut found = Vec::new();
         for file in files {
             let text = std::fs::read_to_string(&file).unwrap();

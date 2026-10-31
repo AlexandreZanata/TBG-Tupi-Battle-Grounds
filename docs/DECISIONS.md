@@ -2529,3 +2529,10 @@ implementation, schema migration, credentials or production change here.
 measured store/access-cache pressure requires a different cap, native vault
 providers cannot meet deployment constraints, a new recovery method changes
 AccountKey policy, or owner-approved security policy changes token lifetimes.
+## D-48 amendment · Normalize roster health by active roster size — 2026-10-31 (owner-approved)
+
+The owner approved a minimum purchase share of 62.5% of the uniform share,
+0.625 / N for each of the N active conventional kinds. This preserves the
+original 2.5% floor at 25 kinds and yields approximately 1.36% at 46 kinds.
+The old fixed floor would require 115% total participation at 46 kinds.
+No other balance target or gameplay number changes in this amendment.

@@ -2,7 +2,6 @@
 //! matchups to play and the rows they are judged by, with targets in one
 //! table. Tuning a threshold is a product decision, never a test fix.
 
-use std::collections::BTreeMap;
 use std::ops::Range;
 
 use tbg_core::content::TICK_HZ;
@@ -31,7 +30,7 @@ pub enum Scope {
     Full,
 }
 
-pub type Results = BTreeMap<(Policy, Policy), Vec<[MatchResult; 2]>>;
+pub use crate::results::Results;
 
 pub fn matchups(scope: Scope) -> Vec<(Policy, Policy)> {
     let list = match scope {
@@ -61,6 +60,27 @@ pub fn run(
     reaction: u32,
     threads: usize,
 ) -> Results {
+    run_inner(rules, scope, seeds, reaction, threads, false)
+}
+
+pub fn run_reported(
+    rules: &'static Ruleset,
+    scope: Scope,
+    seeds: Range<u64>,
+    reaction: u32,
+    threads: usize,
+) -> Results {
+    run_inner(rules, scope, seeds, reaction, threads, true)
+}
+
+fn run_inner(
+    rules: &'static Ruleset,
+    scope: Scope,
+    seeds: Range<u64>,
+    reaction: u32,
+    threads: usize,
+    progress: bool,
+) -> Results {
     let list = matchups(scope);
     let ms: Vec<Matchup> = list
         .iter()
@@ -72,14 +92,28 @@ pub fn run(
             arcanas: [ArcanaPreset::NEUTRAL; 2],
         })
         .collect();
-    list.into_iter()
-        .zip(run_pairs(&ms, seeds, threads))
-        .collect()
+    let mut results = Results::default();
+    // At most eight matchups retain full per-game combat arrays at once.
+    for (batch, (keys, matchups)) in list.chunks(8).zip(ms.chunks(8)).enumerate() {
+        if progress {
+            eprintln!(
+                "Gate matchups {}..{} / {} ({} seed pairs each)",
+                batch * 8 + 1,
+                (batch * 8 + keys.len()).min(list.len()),
+                list.len(),
+                seeds.end - seeds.start
+            );
+        }
+        for (&key, pairs) in keys.iter().zip(run_pairs(matchups, seeds.clone(), threads)) {
+            results.insert(key, pairs);
+        }
+    }
+    results
 }
 
 /// Per-pair scores of `a` against `b`, whichever way the matchup was stored.
 pub fn scores(results: &Results, a: Policy, b: Policy) -> Option<Vec<f64>> {
-    if let Some(pairs) = results.get(&(a, b)) {
+    if let Some(pairs) = results.pairs.get(&(a, b)) {
         return Some(
             pairs
                 .iter()
@@ -87,7 +121,7 @@ pub fn scores(results: &Results, a: Policy, b: Policy) -> Option<Vec<f64>> {
                 .collect(),
         );
     }
-    let pairs = results.get(&(b, a))?;
+    let pairs = results.pairs.get(&(b, a))?;
     Some(
         pairs
             .iter()
@@ -123,7 +157,7 @@ impl Row {
     /// or 5 per flagged item.
     pub fn distance(&self) -> f64 {
         if !self.value.is_finite() {
-            return 0.0;
+            return f64::INFINITY;
         }
         let d = (self.band.0 - self.value)
             .max(self.value - self.band.1)
@@ -162,6 +196,7 @@ fn count(name: &str, n: usize, max: usize, searched: bool) -> Row {
 fn strategic(results: &Results) -> Vec<&[MatchResult; 2]> {
     let s = Policy::strategic();
     results
+        .pairs
         .iter()
         .filter(|((a, b), _)| s.contains(a) && s.contains(b))
         .flat_map(|(_, pairs)| pairs.iter())
@@ -180,8 +215,17 @@ fn cluster(pairs: &[&[MatchResult; 2]], f: impl Fn(&MatchResult) -> (f64, f64)) 
 
 /// Every gate row; `resamples` 0 skips intervals (the search's fast path).
 pub fn rows(results: &Results, duels: Option<(&Matrix, &Ruleset)>, resamples: u32) -> Vec<Row> {
+    rows_with_threads(results, duels, resamples, 1)
+}
+
+pub fn rows_with_threads(
+    results: &Results,
+    duels: Option<(&Matrix, &Ruleset)>,
+    resamples: u32,
+    threads: usize,
+) -> Vec<Row> {
     let mut rows = Vec::new();
-    if let Some(pairs) = results.get(&(Policy::Bot, Policy::Bot)) {
+    if let Some(pairs) = results.pairs.get(&(Policy::Bot, Policy::Bot)) {
         let a_wins: Vec<f64> = pairs
             .iter()
             .map(|p| (p[0].score(p[0].seat_a) + p[1].score(p[1].seat_a)) / 2.0)
@@ -192,7 +236,7 @@ pub fn rows(results: &Results, duels: Option<(&Matrix, &Ruleset)>, resamples: u3
             (0.485, 0.515),
         ));
     }
-    rows.extend(fun_rows(results, resamples));
+    rows.extend(fun_rows(results, resamples, threads));
     rows.extend(dominant_style(results));
     for (p, stream) in [(Policy::Heavy, 30), (Policy::Cheap, 31)] {
         if let Some(s) = scores(results, p, Policy::Bot) {
@@ -300,7 +344,7 @@ fn dominant_style(results: &Results) -> Option<Row> {
 }
 
 /// GAME-DESIGN §6 harness rows over strategic games.
-fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
+fn fun_rows(results: &Results, resamples: u32, threads: usize) -> Vec<Row> {
     let games = strategic(results);
     if games.is_empty() {
         return Vec::new();
@@ -354,19 +398,23 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
     ));
     let draws = cluster(&games, |r| (f64::from(u8::from(r.winner.is_none())), 1.0));
     rows.push(pct("draws", est(&draws, 4), (0.0, 0.02)));
-    for f in FACTIONS {
+    rows.extend(crate::runner::parallel_map(&FACTIONS, threads, |&f| {
         let c = cluster(&games, |r| {
             (0..2)
                 .filter(|&p| r.sides[p].majority() == Some(f.index()))
                 .fold((0.0, 0.0), |(n, d), p| (n + r.score(p), d + 1.0))
         });
-        rows.push(pct(
+        pct(
             format!("faction-majority {f:?} score"),
             est(&c, 10 + f.index() as u64),
             (0.45, 0.55),
-        ));
-    }
-    for k in ALL_KINDS.into_iter().filter(|k| k.is_conventional()) {
+        )
+    }));
+    let kinds: Vec<_> = ALL_KINDS
+        .into_iter()
+        .filter(|k| k.is_conventional())
+        .collect();
+    rows.extend(crate::runner::parallel_map(&kinds, threads, |&k| {
         let c = cluster(&games, |r| {
             let all: u32 = r
                 .sides
@@ -381,13 +429,13 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
                 .sum();
             (f64::from(mine), f64::from(all))
         });
-        rows.push(pct(
+        pct(
             format!("purchase share {k:?}"),
             est(&c, 20 + k as u64),
-            // O-R2: 2.5 % (about 60 % of the even share at 25 kinds).
-            (0.025, 1.0),
-        ));
-    }
+            // Owner D-48 amendment: retain 62.5% of uniform share as the roster grows.
+            (purchase_share_floor(kinds.len()), 1.0),
+        )
+    }));
     let comebacks = cluster(&games, |r| match r.comeback() {
         Some(c) => (f64::from(u8::from(c)), 1.0),
         None => (0.0, 0.0),
@@ -475,4 +523,9 @@ pub fn loss(rows: &[Row]) -> f64 {
         .filter(|r| r.searched)
         .map(|r| r.distance().powi(2))
         .sum()
+}
+
+/// Owner-approved D-48 amendment: equivalent to 2.5% at 25 active kinds.
+pub fn purchase_share_floor(active_kinds: usize) -> f64 {
+    0.625 / active_kinds.max(1) as f64
 }
