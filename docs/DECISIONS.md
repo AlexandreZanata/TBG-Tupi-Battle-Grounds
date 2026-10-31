@@ -2035,3 +2035,20 @@ asserts50 inherited ticks from Root8 plus Slow50. No state or event shape change
 Connected crossmembers and overlapping leg struts keep the three rank bodies
 cohesive in close-ups. Each bore uses an existing prop socket at its own center;
 local axial rotation never orbits heads around the shared hull. No new rig nodes.
+
+## D-89 · Form ability text and bounded Low motion — 2026-10-31 (Proposed presentation)
+
+A cohesive client formatter reads P59's actual absolute Ability/form parameters
+for Evolution choices and inspection. Ability-only upgrades no longer show an
+empty stat description. Static/raw values are labeled base; live counters,
+charges, focus and cooldown/effects come only from public snapshots. The HTML
+record appends optional field20 after the19 existing fields; legacy18/19 input
+still parses. Evolved form text uses a middle dot so it cannot inject the record's
+pipe delimiter. No combat rule, network payload, pool or dependency changes.
+
+The existing URL configuration accepts quality=low (native TBG_QUALITY=low).
+It freezes only decorative Moment.clock noise, retaining actual clip/walk/special,
+protection/charge and public status/event timing. No new settings screen or global
+rig pause. Exact flame danger strip and shared status badges remain. Native UI
+execution, full clip/Low comparison and performance claims require their recorded
+acceptance; target typechecking is not execution or a performance measurement.

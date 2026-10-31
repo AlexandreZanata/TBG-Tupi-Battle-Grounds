@@ -195,7 +195,11 @@ impl Animator {
                 aim: self.aim,
                 since_attack: self.since_attack,
                 variant: self.variant,
-                clock: self.clock,
+                clock: if crate::config::low_motion() {
+                    0.0
+                } else {
+                    self.clock
+                },
                 walk,
                 reduction: self.reduction,
                 counter: self.counter,

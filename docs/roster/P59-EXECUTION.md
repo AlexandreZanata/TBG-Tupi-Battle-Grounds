@@ -308,3 +308,29 @@ CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/tbg-pr20-target cargo check -p tbg-clie
 --bin tbg-client --target wasm32-unknown-unknown`: exit 0, 3.49 s. Package format
 and `git diff --check` pass. Existing kit regression cases are deferred to the
 single consolidation run; no tests, release build or full suite ran here.
+
+## Shared final integration — D-89
+
+Ability/form text now reads all21 Proposed kits and the three summon profiles in
+Evolution choices and the selected-unit inspector. Optional HTML field20 follows
+the19 existing fields; evolved form text avoids the wire delimiter. Public-only
+sequence/charge/cooldown/focus facts remain separate from static descriptions.
+quality=low freezes decorative kit clock, preserving real walk/clip/special timing
+and danger/status cues. JavaScript syntax and diff inspection passed. Rust/WASM
+and focused core tests await one final combined consolidation slot; no full suite,
+balance gate, native Bevy execution, full multiplayer matrix or CI wait is implied.
+
+Final consolidation first round passed33 distinct core cases (R20four/R21seven,
+roster7/protocol13/determinism2). Client WASM test-target check failed exactly with
+`expected Option<String>, found Ability` in ability_details.rs: `use Ability::*`
+shadowed Option::None. Qualified the return as Option::None. Split factory
+start/cast advancement and flame eligibility/burn responsibilities without changing
+the contracts; only their affected cases resume, then the same WASM target/build.
+
+All21 character fronts are delivered in individual commits through6d65ee6, with
+105 form variants and three finite drill summon rank libraries. Actual desktop
+captures are indexed in P59-GALLERY.md; final evidence/commands/explicit deferrals
+are in P59-VALIDATION.md. D-89's client/test WASM target check passed2.34s, JavaScript
+syntax passed, and the final corrected art/shared UI WASM artifact was observed.
+The final block covers34 distinct core scenarios; only changed cases resumed
+following fixes. Deferred full-suite/W10/W11/owner acceptance never becomes a pass.

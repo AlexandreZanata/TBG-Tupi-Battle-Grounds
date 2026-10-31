@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use tbg_core::protocol::{InviteToken, RoomCode};
 use tbg_core::{Rejection, UnitId};
 
+mod ability_details;
 pub mod account;
 mod account_ui;
 mod actions;

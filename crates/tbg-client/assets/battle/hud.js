@@ -65,7 +65,7 @@
   function inspect() {
     const f = (root.dataset.inspect || '').split('|');
     if (f.length < 18) { panel.hidden = true; delete panel.querySelector('.inspect-hp').dataset.hp; return; }
-    const [kind,name,form,faction,role,own,hp,max,attackLabel,attack,every,dps,range,speed,splash,onhit,status,synergy,effects = ''] = f;
+    const [kind,name,form,faction,role,own,hp,max,attackLabel,attack,every,dps,range,speed,splash,onhit,status,synergy,effects = '',ability = ''] = f;
     panel.hidden = false;
     panel.dataset.team = own === 'true' ? 'ally' : 'enemy';
     const image = panel.querySelector('img');
@@ -75,6 +75,8 @@
     put('attack-label', attackLabel); put('attack', attack); put('dps', dps); put('every', every); put('range', range + ' tiles');
     put('speed', speed + ' tiles/s'); put('splash', splash === '-' ? '-' : splash + ' tiles'); put('onhit', onhit); put('status', status); put('synergy', synergy);
     panel.querySelector('[data-i="status"]').dataset.status = status;
+    put('ability', ability);
+    panel.querySelector('[data-inspect-ability]').hidden = !ability;
     put('effects', effects);
     panel.querySelector('[data-inspect-effects]').hidden = !effects;
     bar(panel.querySelector('.inspect-hp'), Number(hp), Number(max), name + ' HP');
