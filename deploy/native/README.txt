@@ -1,7 +1,9 @@
-Tupi Battle Grounds — native preview
+TBG (Tupi Battle Grounds) — native preview
 
 Linux: extract the tar.gz, then run ./tbg-client from its folder or any other
-working directory. Run ./install.sh for a per-user application-menu launcher.
+working directory. Run ./install.sh for the TBG application-menu launcher.
+The installed command is ~/.local/bin/tbg. Updates keep preferences, account
+keys and older builds. Each source commit has its own installation folder.
 No Rust installation or administrator access is required for the game.
 The optional installer uses Python 3 (included on common Linux desktops).
 

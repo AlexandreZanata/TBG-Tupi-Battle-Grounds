@@ -19,7 +19,7 @@ pub fn settings() -> Window {
         })
         .unwrap_or((width, height));
     Window {
-        title: format!("Tupi Battle Grounds · {}", env!("CARGO_PKG_VERSION")),
+        title: format!("TBG · {}", env!("CARGO_PKG_VERSION")),
         name: Some("tupi-battle-grounds".into()),
         resolution: (width, height).into(),
         resize_constraints: WindowResizeConstraints {

@@ -20,6 +20,8 @@ def main():
     parser.add_argument("--platform", choices=["linux", "windows"], required=True)
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=ROOT / "target/native")
+    parser.add_argument("--no-archive", action="store_true",
+                        help="Prepare a commit-specific local preview directory without compression")
     args = parser.parse_args()
     version = tomllib.loads((ROOT / "crates/tbg-client/Cargo.toml").read_text())["package"]["version"]
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
@@ -27,6 +29,8 @@ def main():
     if f" {version} ·" not in identity or f"source {commit}" not in identity:
         raise SystemExit("Build with TBG_SOURCE_COMMIT=$(git rev-parse HEAD); executable and source must match")
     name = f"tupi-battle-grounds-{version}-{args.platform}-x86_64"
+    if args.no_archive:
+        name += f"-dev-{commit[:12]}"
     package = args.output / name
     package.mkdir(parents=True, exist_ok=True)
     binary_name = "tbg-client.exe" if args.platform == "windows" else "tbg-client"
@@ -51,6 +55,9 @@ def main():
         "architecture": "x86_64", "protocol": int(re.search(r"PROTOCOL_VERSION: u16 = (\d+)", (ROOT / "crates/tbg-core/src/protocol.rs").read_text()).group(1)),
         "binary_sha256": hashlib.sha256((package / binary_name).read_bytes()).hexdigest(),
     }, indent=2) + "\n")
+    if args.no_archive:
+        print(package.resolve())
+        return
     if args.platform == "linux":
         archive = args.output / f"{name}.tar.gz"
         with tarfile.open(archive, "w:gz") as dest:
