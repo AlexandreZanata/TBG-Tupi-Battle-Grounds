@@ -105,3 +105,29 @@ in 1.35 s. New `celebration_cast` regressions cover early deaths, duplicate
 champions, Evolution, expiry/cargo, hash/event/outcome parity against an
 untracked deserialized state, invalid buckets/overflow and huge logical
 counts. Their execution is queued once for Step 5, not claimed here.
+
+## Step 2 — authoritative end and bounded reconnect replay (D-82)
+
+Protocol 28 binds MatchStart/MatchEnd to a random public identity and sends
+last_tick plus an opaque, size-bounded CastPayload. Corrupt, duplicate,
+wrong-winner/form or oversized cosmetic content decodes to ordinary Result
+without discarding a well-framed Outcome. The server sends the cast only to
+the winner. All core/client/server/bot/test consumers are adjusted together;
+existing guarded protocol fixtures change with the D-82 canon amendment.
+
+Session-local CompletedResult retains only compact start/end data for the
+existing reconnect window. It is cleared by explicit dismissal, next
+pairing and expiry. The terminal-delivery race also handles a new connection
+that attached as the match task finished. Ordinary healthy connections are
+not sent a second Start. No DB, rating path or TTL change. Local Practice
+uses the same summary and a distinct local identity. Client acceptance
+rejects stale/duplicate end records before playing sound or entering Result;
+rematch messages cannot reenter the same Result or interrupt a live match.
+
+Formatting/diff checks passed. Focused server consumer checks exposed and
+fixed exhaustive MatchEnd in botclient, a test's inherited ServerMsg import,
+and exhaustive MatchStart in contract_challenge. The latter check stopped
+with `error[E0027]: pattern does not mention field result_id`; corrected
+consumers and new regressions are queued for Step 5 rather than claiming a
+pass. Tests cover replay/expiry/dismissal, either-seat real WebSocket result
+recovery, idempotent client acceptance and malformed cosmetic isolation.

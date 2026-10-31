@@ -219,3 +219,31 @@ fn celebration_decoder_bounds_buckets_before_allocating_from_a_length_hint() {
     let mut empty = running(0);
     assert_eq!(finish(&mut empty).total(Seat::A), Some(0));
 }
+
+#[test]
+fn celebration_bad_cosmetic_bytes_preserve_a_well_framed_match_end() {
+    use tbg_core::protocol::{decode_server, encode, ServerMsg};
+    let bad: CastPayload = postcard::from_bytes(&encode(&vec![255u8; 32])).unwrap();
+    let outcome = Outcome {
+        winner: Some(Seat::A),
+        reason: EndReason::Forfeit,
+    };
+    let msg = ServerMsg::MatchEnd {
+        result_id: [63; 16],
+        last_tick: 321,
+        cast: Some(bad),
+        outcome,
+    };
+    let ServerMsg::MatchEnd {
+        outcome: received,
+        cast,
+        last_tick,
+        ..
+    } = decode_server(&encode(&msg)).unwrap()
+    else {
+        panic!("expected terminal result")
+    };
+    assert_eq!(received, outcome);
+    assert_eq!(last_tick, 321);
+    assert!(cast.unwrap().decode(Seat::A).is_none());
+}

@@ -1162,3 +1162,16 @@ this planning task implements neither the wire change nor the presentation.
 spawn paths invalidate aggregate accounting, finalized-result reconnect
 needs new retention semantics, or visual/performance evidence rejects the
 formation/motion approach. Do not silently truncate cast or weaken results.
+
+
+### D-82 execution clarification — 2026-10-31
+
+The owner approved full animated participation and pagination through every
+logical instance, and replaced the exclusive pilot with a shared current
+Victory standard plus future per-character override seam. P63 does not
+claim all champions have unique Dance content. Protocol 28 adds a public
+random result identity and an opaque bounded cosmetic payload; decoding a
+bad cosmetic field leaves the authoritative Outcome intact. Terminal start/
+end data is retained only in its session under the existing reconnect
+window, dropped at expiry, explicit dismissal or next pairing. No database,
+match duration, rating settlement or reconnect window is extended.

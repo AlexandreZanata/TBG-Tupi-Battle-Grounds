@@ -74,6 +74,7 @@ pub(super) struct Session {
     pub(super) stronghold: tbg_core::StrongholdKind,
     /// P47 (BR-LV09): when this session last sent `Spectate` (one per second).
     pub(super) last_spectate: Option<Instant>,
+    pub(super) finished: Option<(Instant, Box<crate::chan::CompletedResult>)>,
 }
 
 pub(super) struct Lobby {
@@ -192,7 +193,11 @@ impl Lobby {
             LobbyCmd::Client { token, msg } => self.client(token, msg),
             LobbyCmd::Disconnected { token, conn_id } => self.disconnected(token, conn_id),
             LobbyCmd::LiveProgress { id, progress } => self.live_progress(id, progress),
-            LobbyCmd::MatchEnded { tokens, live } => {
+            LobbyCmd::MatchEnded {
+                tokens,
+                live,
+                finished,
+            } => {
                 if let Some(id) = live {
                     self.live_ended(id);
                 }
@@ -201,9 +206,16 @@ impl Lobby {
                         .get(&t)
                         .map_or_else(String::new, |s| s.name.clone())
                 });
-                for t in tokens {
+                let until = Instant::now() + Duration::from_secs(self.config.reconnect_secs);
+                for (t, result) in tokens.into_iter().zip(*finished) {
                     if let Some(s) = self.session(&t) {
                         s.state = SessionState::Idle;
+                        // Also covers a reconnect racing the final match-task tick.
+                        if s.conn.as_ref().map(|c| c.id) != result.delivered_to {
+                            send(&s.conn, ConnEvent::Send(result.start.clone()));
+                            send(&s.conn, ConnEvent::Send(result.end.clone()));
+                        }
+                        s.finished = Some((until, Box::new(result)));
                         send(&s.conn, ConnEvent::LeaveMatch);
                     }
                 }

@@ -345,6 +345,14 @@ overrides and motion review, reusing the same preview/result resolver.
 Dance purchases, emote chat, taunts, loot, unlock progression and replay
 services are separate product requests and are unnecessary for this phase.
 
+## Execution amendment (owner, 2026-10-31)
+
+O01 and O02 recommendations are approved. O03 now requires a shared standard
+with existing Victory motions and future per-character overrides; the owner
+explicitly defers an exclusive pilot. Apply this amendment to Steps 0/4 and
+A04 rather than inventing an unapproved signature dance. See
+[P63-execution.md](P63-execution.md) for actual implementation and evidence.
+
 ## 8. Planning report
 
 Documentation only. The plan records existing Victory support, result-unit

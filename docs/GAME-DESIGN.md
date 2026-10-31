@@ -915,3 +915,16 @@ under the paging proposal, at most 64 visible figures and one camera
 override; p95 frame-time within +10% of a comparable same-arena/cast scene
 on the agreed desktop machine. All measurements and owner visual review
 are deferred until implementation. No phone/touch work is included.
+
+
+### P63 execution amendment — owner decisions, 2026-10-31
+
+O01 and O02 are approved for implementation: BR-VC02 includes animated
+summons, excludes inert Crates, and BR-VC06 uses complete pages of at most
+64 figures. For BR-VC04, the owner requests a shared standard using existing
+Victory motions now, with per-character overrides ready for future content;
+the exclusive pilot requirement is deferred by the owner. No unique-dance
+roster is claimed. Result identity and the exact aggregate use protocol 28
+on main's real v17 schema; unmerged v20/v27 fields are not assumed present.
+All behavioral/presentation additions remain Proposed pending the recorded
+acceptance and visual review. No combat or rating values change.

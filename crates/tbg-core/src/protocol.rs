@@ -21,7 +21,12 @@ use crate::view::{MatchView, PublicView};
 /// v12: Interest became a regen boost (`MatchView::regen_bp` replaces the
 /// payment fields, `Event::InterestPaid` is gone). v11 was the fifteen-node
 /// Arcana schema; older peers are refused.
-pub const PROTOCOL_VERSION: u16 = 17;
+/// v28 (D-82): result identity and bounded lifetime celebration payload.
+/// Unmerged v18–20/v27 fronts remain separate schemas, not implied dependencies.
+pub const PROTOCOL_VERSION: u16 = 28;
+
+/// Public random match identity, independent of the secret combat seed/session token.
+pub type ResultId = [u8; 16];
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a
@@ -110,6 +115,7 @@ pub enum ServerMsg {
     },
     RoomNotFound,
     MatchStart {
+        result_id: ResultId,
         you: Seat,
         // Post-P14: the HUD puts a name next to each HP bar; ratings ride
         // along only in ranked matches.
@@ -134,6 +140,9 @@ pub enum ServerMsg {
         reason: Rejection,
     },
     MatchEnd {
+        result_id: ResultId,
+        last_tick: u32,
+        cast: Option<crate::celebration::CastPayload>,
         outcome: Outcome,
     },
     Ping {

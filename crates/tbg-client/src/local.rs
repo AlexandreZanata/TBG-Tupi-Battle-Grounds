@@ -7,6 +7,7 @@ use tbg_core::protocol::{ClientMsg, ServerMsg};
 use tbg_core::{ArcanaPreset, Event, MatchState, Phase, PlayerIntention, Seat, StrongholdKind};
 
 pub struct LocalMatch {
+    result_id: tbg_core::protocol::ResultId,
     state: MatchState,
     bot: Bot,
     queue: Vec<(u32, PlayerIntention)>,
@@ -55,12 +56,22 @@ impl LocalMatch {
                 }
             }
         }
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        let mut result_id = [0u8; 16];
+        result_id[..8].copy_from_slice(
+            &NEXT
+                .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+                .to_le_bytes(),
+        );
+        result_id[15] = 1;
         LocalMatch {
+            result_id,
             state,
             bot: Bot::new(seed ^ 0x5eed),
             queue: Vec::new(),
             events: Vec::new(),
             outbox: vec![ServerMsg::MatchStart {
+                result_id,
                 you: Seat::A,
                 you_name: "You".into(),
                 you_rating: None,
@@ -109,7 +120,16 @@ impl LocalMatch {
             self.events.clear();
         }
         if let Some(outcome) = self.state.outcome {
-            self.outbox.push(ServerMsg::MatchEnd { outcome });
+            self.outbox.push(ServerMsg::MatchEnd {
+                result_id: self.result_id,
+                last_tick: self.state.tick,
+                cast: self
+                    .state
+                    .celebration_cast()
+                    .as_ref()
+                    .and_then(tbg_core::celebration::CastPayload::new),
+                outcome,
+            });
             self.ended = true;
         }
     }

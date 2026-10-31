@@ -91,7 +91,7 @@ pub(super) fn handle(
             r.rejections += 1;
             resolve_ack(s, r, seq, Instant::now());
         }
-        ServerMsg::MatchEnd { outcome } => {
+        ServerMsg::MatchEnd { outcome, .. } => {
             r.outcome = Some(outcome);
             r.completed = true;
             return Ok(Some(Step::Done));

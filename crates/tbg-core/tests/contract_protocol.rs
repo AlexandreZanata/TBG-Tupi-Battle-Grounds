@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 17,
-        "v17: live spectating (P47): Spectate, StopSpectating, Spectate* replies"
+        PROTOCOL_VERSION, 28,
+        "v28/D-82: result identity and bounded lifetime celebration payload"
     );
 }
 

@@ -52,11 +52,14 @@ pub(super) fn poll_link(
     mut ranking: ResMut<crate::ui::ranking::Ranking>,
     mut surrender: ResMut<crate::ui::surrender::Surrender>,
     lang: Res<Lang>,
+    state: Res<State<GameState>>,
 ) {
     let now = time.elapsed_secs_f64();
+    let mut started = false;
     for msg in link.poll(now) {
         match msg {
             ServerMsg::MatchStart {
+                result_id,
                 you,
                 you_name,
                 you_rating,
@@ -66,8 +69,13 @@ pub(super) fn poll_link(
                 arcanas,
                 arena,
             } => {
+                if info.result_id == Some(result_id) && info.outcome.is_some() {
+                    continue;
+                }
+                started = true;
                 info!("match arena: {}", arena.slug());
                 *info = MatchInfo {
+                    result_id: Some(result_id),
                     you: Some(you),
                     you_name,
                     you_rating,
@@ -165,12 +173,25 @@ pub(super) fn poll_link(
             ServerMsg::Rejected { reason, .. } => {
                 ui.0.push(crate::ui::rejection_text(reason, *lang))
             }
-            ServerMsg::MatchEnd { outcome } => {
+            ServerMsg::MatchEnd {
+                result_id,
+                outcome,
+                last_tick,
+                cast,
+            } => {
+                if !started && !matches!(*state.get(), GameState::InMatch | GameState::Result) {
+                    continue;
+                }
+                if !info.accept_result(result_id, last_tick, outcome, cast.as_ref()) {
+                    continue;
+                }
                 let won = outcome.winner.is_some() && outcome.winner == info.you;
+                if won && info.celebration.is_none() {
+                    warn!("P63: invalid/missing cosmetics; preserving confirmed result");
+                }
                 extra
                     .1
                     .play(if won { Sound::Victory } else { Sound::Defeat });
-                info.outcome = Some(outcome);
                 next.set(GameState::Result);
             }
             ServerMsg::Queued => {
@@ -199,6 +220,8 @@ pub(super) fn poll_link(
                 next.set(GameState::Menu);
             }
             ServerMsg::RematchOpen { .. } if rematch.dismissed => {}
+            ServerMsg::RematchOpen { .. } if info.result_id.is_some() && info.outcome.is_none() => {
+            }
             ServerMsg::RematchOpen { opponent } => {
                 rematch.open = true;
                 rematch.closed = None;
@@ -206,7 +229,9 @@ pub(super) fn poll_link(
                 if info.opponent.is_empty() {
                     info.opponent = opponent;
                 }
-                next.set(GameState::Result);
+                if *state.get() != GameState::Result {
+                    next.set(GameState::Result);
+                }
             }
             ServerMsg::RematchState {
                 you_requested,

@@ -163,14 +163,17 @@ impl NetLink {
                     ServerMsg::ChallengeWaiting { .. } | ServerMsg::RematchOpen { .. } => {
                         self.mode = super::Mode::Probe;
                     }
-                    ServerMsg::MatchStart { .. } => {
+                    ServerMsg::MatchStart { result_id, .. } => {
+                        self.result_id = Some(result_id);
                         self.mode = super::Mode::Probe;
                         self.in_match = true;
                         self.login_in_flight = false;
                         self.held_request = false;
                         self.login_deadline = None;
                     }
-                    ServerMsg::MatchEnd { .. } => self.in_match = false,
+                    ServerMsg::MatchEnd { result_id, .. } if self.result_id == Some(result_id) => {
+                        self.in_match = false
+                    }
                     // P47: a watch starts a listen-only link; the end or a refusal
                     // leaves a probe that never asks for the watch again.
                     ServerMsg::SpectateStart { .. } => self.watching = true,
@@ -237,6 +240,7 @@ mod tests {
             let mut net = link(mode);
             net.handle(
                 ServerMsg::MatchStart {
+                    result_id: [63; 16],
                     you: tbg_core::Seat::A,
                     you_name: "A".into(),
                     you_rating: None,
@@ -250,6 +254,9 @@ mod tests {
             );
             net.handle(
                 ServerMsg::MatchEnd {
+                    result_id: [63; 16],
+                    last_tick: 0,
+                    cast: None,
                     outcome: tbg_core::Outcome {
                         winner: Some(tbg_core::Seat::B),
                         reason: tbg_core::EndReason::Forfeit,

@@ -16,6 +16,7 @@ use crate::visuals::{self, UnitLook, VisualAssets};
 mod actions;
 mod events;
 mod messages;
+mod result;
 mod spectate;
 mod timeline;
 use crate::GameState;
@@ -26,6 +27,8 @@ pub use messages::{QueueInfo, ViewGaps};
 
 #[derive(Resource, Default)]
 pub struct MatchInfo {
+    pub result_id: Option<tbg_core::protocol::ResultId>,
+    pub celebration: Option<tbg_core::celebration::CelebrationCast>,
     pub you: Option<Seat>,
     /// Post-P14: the HUD shows both names next to the HP bars.
     pub you_name: String,
