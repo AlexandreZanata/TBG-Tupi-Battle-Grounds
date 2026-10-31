@@ -1,6 +1,9 @@
 # P69 — Independent native Android landscape prototype
 
-**Status:** planning only, owner request 2026-10-31.
+**Status:** partial execution, 2026-10-31. Independent Kotlin host and
+package tooling prepared; shared client edits wait for P68 file release
+at the owner's explicit request. No playable APK/device-gameplay acceptance.
+See [execution evidence](P69-execution.md).
 **Planning branch:** `codex/p69-android-landscape-plan`.
 **Execution branch:** `codex/p69-android-native-prototype`.
 **Reviewed Linux base:** `014b0e0c046b38c551ee24534ee00709cde0e493`
