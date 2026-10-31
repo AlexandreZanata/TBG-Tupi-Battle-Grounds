@@ -17,9 +17,13 @@ pub fn update_unit_visual(
 ) {
     if v.form != (u.kind, u.tier, u.branch) {
         v.form = (u.kind, u.tier, u.branch);
-        v.splash =
-            tbg_core::content::effective_stats(u.kind, u.tier, u.branch, 0).splash as f32 / 1000.0;
+        v.refresh_stats();
         let form = lib.get(u.kind, u.tier, u.branch);
+        for e in v.glow.drain(..) {
+            commands.entity(e).try_despawn();
+        }
+        v.glow =
+            crate::art::figure::spawn_glow(commands, &v.joints, &form.glow, &lib.glow_material);
         for (joint, m) in v.joints.iter().zip(form.meshes(v.own)) {
             match m {
                 Some(m) => commands

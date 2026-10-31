@@ -1,12 +1,15 @@
 //! `?stress=N`: N unit visuals walking the lane in the menu, for FPS checks
-//! on phones without playing a match.
+//! on phones without playing a match. `&gallery=<unit>` makes them all that
+//! unit, cycling its five forms; each attacks a point ahead every 1.4 s.
 
 use bevy::prelude::*;
-use tbg_core::{UnitKind, UNIT_KINDS};
+use tbg_core::UNIT_KINDS;
 
-use crate::art::FigureLibrary;
+use crate::art::{FigureLibrary, FORMS};
 use crate::config;
-use crate::visuals::{spawn_unit_visual, UnitLook, VisualAssets};
+use crate::visuals::{
+    play_cue, spawn_unit_visual, AimTarget, UnitLook, UnitVisual, VisualAssets, VisualCue,
+};
 
 #[derive(Component)]
 struct StressWalker {
@@ -27,17 +30,19 @@ fn spawn(mut commands: Commands, assets: Res<VisualAssets>, lib: Res<FigureLibra
     if n == 0 {
         return;
     }
+    let only = config::url_param("gallery").and_then(|m| {
+        UNIT_KINDS
+            .into_iter()
+            .find(|k| format!("{k:?}").eq_ignore_ascii_case(&m))
+    });
     for i in 0..n {
-        let kind = if config::url_param("gallery").as_deref() == Some("archer") {
-            UnitKind::Archer
-        } else {
-            UNIT_KINDS[i % UNIT_KINDS.len()]
-        };
+        let kind = only.unwrap_or(UNIT_KINDS[i % UNIT_KINDS.len()]);
+        let (tier, branch) = if only.is_some() { FORMS[i % 5] } else { (0, 0) };
         let look = UnitLook {
             id: i as u32,
             kind,
-            tier: 0,
-            branch: 0,
+            tier,
+            branch,
             own: i % 2 == 0,
         };
         let pos = Vec3::new(
@@ -56,13 +61,15 @@ fn spawn(mut commands: Commands, assets: Res<VisualAssets>, lib: Res<FigureLibra
 
 fn walk(
     time: Res<Time>,
+    assets: Res<VisualAssets>,
     mut q: Query<(
         &mut Transform,
         &mut crate::art::anim::Animator,
+        &mut UnitVisual,
         &mut StressWalker,
     )>,
 ) {
-    for (mut t, mut animator, mut walker) in &mut q {
+    for (mut t, mut animator, mut visual, mut walker) in &mut q {
         t.translation.x += time.delta_secs() * walker.speed;
         if t.translation.x > 15.5 {
             t.translation.x = 0.5;
@@ -71,7 +78,9 @@ fn walk(
             t.translation.x = 15.5;
         }
         if time.elapsed_secs() >= walker.next_attack {
-            animator.play(crate::art::anim::Clip::AttackRanged);
+            let ahead = Vec3::new(walker.speed.signum() * 3.0, 0.6, 0.0);
+            visual.engage(AimTarget::Point(t.translation + ahead));
+            play_cue(&mut visual, &mut animator, &assets, VisualCue::AttackStart);
             walker.next_attack = time.elapsed_secs() + 1.4;
         }
     }

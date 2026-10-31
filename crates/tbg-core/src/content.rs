@@ -207,6 +207,50 @@ pub const WINDUP: u16 = 6;
 pub const MIN_INTERVAL: u16 = 5;
 /// Cost of evolving to tier 1 and to tier 2 (P16-C, Proposed: tier 1 3 → 2).
 pub const EVOLVE_COST: [u32; 2] = [1_200, 2_400];
+
+/// One arena's modifiers, the same for both seats (ARENAS-G, Proposed).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ArenaRule {
+    /// Troop movement speed in bp, beside Evolution and Augments (BR-X01).
+    pub move_bp: i32,
+    /// Troop attack speed in bp, beside Evolution, Augments and Synergy.
+    pub atk_bp: i32,
+    /// Extra base Energy regeneration in bp of the base rate, beside
+    /// Interest's bp (BR-E05); the existing remainder keeps it exact.
+    pub regen_bp: u32,
+    /// Sub-Energy off each player's first successful Evolution.
+    pub first_evolve_discount: u32,
+}
+
+impl ArenaRule {
+    pub const NONE: ArenaRule = ArenaRule {
+        move_bp: 0,
+        atk_bp: 0,
+        regen_bp: 0,
+        first_evolve_discount: 0,
+    };
+}
+
+/// Indexed by `Arena::index()`: Forest, Tundra, Volcanic, Ruins, Storm.
+pub const ARENA_RULES: [ArenaRule; 5] = [
+    ArenaRule::NONE,
+    ArenaRule {
+        move_bp: -1_000,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        atk_bp: 800,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        first_evolve_discount: ENERGY_SCALE,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        regen_bp: 800,
+        ..ArenaRule::NONE
+    },
+];
 pub const BP: i64 = 10_000;
 
 /// Synergy thresholds: living units of one faction for level 1 and 2.
@@ -231,7 +275,8 @@ pub const SYNERGIES: [(SynergyEffect, [i32; 2]); 4] = [
     (SynergyEffect::Regen, [75, 200]),
 ];
 
-/// One evolution form: additive modifiers on the base unit.
+/// One evolution form: additive modifiers on the base unit, plus the shared
+/// hooks later waves read (P43: defaults keep today's behavior exactly).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FormDef {
     pub name: &'static str,
@@ -244,6 +289,26 @@ pub struct FormDef {
     pub heal_bp: i32,
     pub dmg_add: i32,
     pub on_hit: Option<OnHit>,
+    /// Splash damage share, in basis points of the hit (10 000 = full).
+    pub splash_bp: i32,
+    /// When true, the splash carries the form's on-hit effect to splashed
+    /// units (Oilpress B2 Black Mire; every other splash is damage only).
+    pub splash_hit: bool,
+    /// Healing cut applied by the hit, in basis points.
+    pub heal_cut_bp: i32,
+    /// ticks the heal cut lasts.
+    pub heal_cut_ticks: u16,
+    /// Lifesteal of the hit, in basis points (Leechroot B1/B2 only; highest
+    /// tier wins, joining the BR-X06 12 % cap with Augments).
+    pub lifesteal_bp: i32,
+    /// Conditional damage bonus, in basis points (P44 wires the thresholds).
+    pub vs_below_bp: i32,
+    /// HP fraction threshold for `vs_below_bp`, in basis points of max HP.
+    pub vs_below_hp_bp: i32,
+    /// Conditional damage bonus, in basis points.
+    pub vs_above_bp: i32,
+    /// HP fraction threshold for `vs_above_bp`, in basis points of max HP.
+    pub vs_above_hp_bp: i32,
 }
 
 const fn form(name: &'static str) -> FormDef {
@@ -258,6 +323,15 @@ const fn form(name: &'static str) -> FormDef {
         heal_bp: 0,
         dmg_add: 0,
         on_hit: None,
+        splash_bp: 10_000,
+        splash_hit: false,
+        heal_cut_bp: 0,
+        heal_cut_ticks: 0,
+        lifesteal_bp: 0,
+        vs_below_bp: 0,
+        vs_below_hp_bp: 0,
+        vs_above_bp: 0,
+        vs_above_hp_bp: 0,
     }
 }
 
@@ -267,6 +341,99 @@ const fn slow(bp: u16, ticks: u16) -> Option<OnHit> {
 
 const fn root(ticks: u16) -> Option<OnHit> {
     Some(OnHit::Root { ticks })
+}
+
+/// Closed ability list (ROSTER-EXPANSION §F.1, Proposed): one variant per
+/// future mechanic, read at fixed hooks of `step()`. Only `Hatch` and
+/// `Guard` are migrated in P43; every new kind ships `None` until its wave.
+/// Fields are integers in simulation units.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Ability {
+    None,
+    /// Nester Hatch (values unchanged, still from the Hatch rule).
+    Hatch,
+    /// Rampart Guard (BR-U09).
+    Guard,
+    Poison {
+        dps: u16,
+        pulses: u8,
+        cap: u8,
+    },
+    Fish {
+        bp: u16,
+        ticks: u16,
+        cap: u8,
+        per_hit: u8,
+    },
+    Echo {
+        every: u8,
+        extra: u8,
+    },
+    Blast {
+        friendly: bool,
+    },
+    NoStronghold,
+    Essence {
+        base: u16,
+        step: u16,
+        dmg: u16,
+        atk_bp: u16,
+    },
+    Formation {
+        engage: i32,
+        gap: i32,
+    },
+    March {
+        reach: i32,
+        move_bp: u16,
+        dr_bp: u16,
+        hysteresis: i32,
+        ignore_slow: bool,
+    },
+    Brew {
+        strip_poison: u8,
+        ward: u16,
+        second: bool,
+    },
+    Puppet {
+        window: u16,
+        immune: u16,
+        bonus_bp: u16,
+        targets: u8,
+        stumble: bool,
+    },
+    Cargo {
+        every: u16,
+        open: u16,
+        table: [u16; 5],
+        double_every: u8,
+    },
+    Plates {
+        count: u8,
+        hp: u16,
+        move_bp: u16,
+        atk_bp: u16,
+        dmg_bp: u16,
+        shrapnel: u16,
+        rampage: i32,
+    },
+    Carry {
+        board: i32,
+        lock: u16,
+        dr_bp: u16,
+        move_bp: u16,
+        shield_bp: u16,
+        surge_bp: u16,
+    },
+    Furnace {
+        burn_bp: u16,
+        max_bp: u16,
+    },
+    Transfer {
+        amount: u16,
+        low_bp: u16,
+        second: bool,
+    },
 }
 
 /// Base stats of a unit kind plus its forms `[A1, A2, B1, B2]`.
@@ -285,8 +452,31 @@ pub struct UnitDef {
     pub splash: i32,
     pub heal: i32,
     pub on_hit: Option<OnHit>,
+    /// Absolute abilities per form slot (base, A1, A2, B1, B2); a slot holds
+    /// up to two variants (Rotcap needs Poison + Echo in P45).
+    pub abilities: [[Ability; 2]; 5],
     pub forms: [FormDef; 4],
 }
+
+impl UnitDef {
+    /// The ability pair of a form: base is slot 0, tier 1/2 on branch A/B
+    /// are slots 1–4. Out-of-range tiers read the base slot.
+    pub const fn ability(&self, tier: u8, branch: u8) -> [Ability; 2] {
+        self.abilities[match (tier, branch) {
+            (1, 0) => 1,
+            (2, 0) => 2,
+            (1, 1) => 3,
+            (2, 1) => 4,
+            _ => 0,
+        }]
+    }
+}
+
+const NO_ABILITIES: [[Ability; 2]; 5] = [[Ability::None; 2]; 5];
+const HATCH_ABILITIES: [[Ability; 2]; 5] = [[Ability::Hatch; 2]; 5];
+const GUARD_ABILITIES: [[Ability; 2]; 5] = [[Ability::Guard; 2]; 5];
+const NOSTRONGHOLD_ABILITIES: [[Ability; 2]; 5] = [[Ability::NoStronghold; 2]; 5];
+const BLAST_ABILITIES: [[Ability; 2]; 5] = [[Ability::Blast { friendly: true }; 2]; 5];
 
 #[allow(clippy::too_many_arguments)] // one call per roster row reads as a table
 const fn unit(
@@ -297,6 +487,7 @@ const fn unit(
     cost: u32,
     stats: [i32; 7], // hp, damage, interval, range, speed, splash, heal
     on_hit: Option<OnHit>,
+    abilities: [[Ability; 2]; 5],
     forms: [FormDef; 4],
 ) -> UnitDef {
     UnitDef {
@@ -313,6 +504,7 @@ const fn unit(
         splash: stats[5],
         heal: stats[6],
         on_hit,
+        abilities,
         forms,
     }
 }
@@ -322,58 +514,58 @@ use Faction::*;
 
 /// Every kind, in `UnitKind` (`ALL_KINDS`) order.
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 11] = [
+pub const UNITS: [UnitDef; 27] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
-        [650, 30, 24, 800, 40, 0, 0], None, [
+        [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Fortress") },
         FormDef { dmg_bp: 4_000, speed_bp: 2_000, ..form("Vanguard") },
         FormDef { dmg_bp: 4_000, splash_add: 1_000, ..form("Champion") },
     ]),
     unit(UnitKind::Archer, "Archer", Humans, Ranged, 1_800,
-        [220, 45, 20, 4_500, 50, 0, 0], None, [
+        [220, 45, 20, 4_500, 50, 0, 0], None, NO_ABILITIES, [
         FormDef { range_add: 1_500, dmg_bp: 2_000, ..form("Longbow") },
         FormDef { dmg_bp: 6_000, ..form("Marksman") },
         FormDef { atk_bp: 4_000, ..form("Volley") },
         FormDef { splash_add: 1_000, ..form("Arrow Rain") },
     ]),
     unit(UnitKind::BoneBrute, "Bone Brute", Undead, Tank, 2_400,
-        [1_300, 75, 30, 1_000, 30, 0, 0], None, [
+        [1_300, 75, 30, 1_000, 30, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Ossified") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Bone Wall") },
         FormDef { dmg_bp: 5_000, ..form("Butcher") },
         FormDef { dmg_bp: 3_000, splash_add: 1_200, ..form("Reaper") },
     ]),
     unit(UnitKind::Hexer, "Hexer", Undead, Control, 2_400,
-        [300, 29, 28, 3_500, 50, 0, 0], slow(4_000, 40), [
+        [300, 29, 28, 3_500, 50, 0, 0], slow(4_000, 40), NO_ABILITIES, [
         FormDef { on_hit: slow(6_000, 40), ..form("Withering") },
         FormDef { dmg_bp: 6_000, ..form("Doom") },
         FormDef { splash_add: 1_000, ..form("Plague") },
         FormDef { dmg_bp: 4_000, splash_add: 500, ..form("Pestilence") },
     ]),
     unit(UnitKind::Sawbot, "Sawbot", Machines, Dps, 2_400,
-        [231, 55, 21, 800, 65, 0, 0], None, [
+        [231, 55, 21, 800, 65, 0, 0], None, NO_ABILITIES, [
         FormDef { atk_bp: 4_000, ..form("Overclock") },
         FormDef { atk_bp: 4_000, speed_bp: 3_000, ..form("Shredder") },
         FormDef { hp_bp: 6_000, ..form("Plating") },
         FormDef { hp_bp: 6_000, splash_add: 800, ..form("Juggernaut") },
     ]),
     unit(UnitKind::SiegeWalker, "Siege Walker", Machines, Ranged, 3_000,
-        [700, 85, 50, 6_000, 33, 1_500, 0], None, [
+        [700, 85, 50, 6_000, 33, 1_500, 0], None, NO_ABILITIES, [
         FormDef { range_add: 2_000, ..form("Longshot") },
         FormDef { dmg_bp: 5_000, ..form("Artillery") },
         FormDef { splash_add: 1_000, ..form("Shrapnel") },
         FormDef { on_hit: root(16), ..form("Concussion") },
     ]),
     unit(UnitKind::Bloomkeeper, "Bloomkeeper", Plants, Support, 1_800,
-        [280, 0, 30, 3_000, 45, 0, 40], None, [
+        [280, 0, 30, 3_000, 45, 0, 40], None, NO_ABILITIES, [
         FormDef { heal_bp: 5_000, ..form("Blossom") },
         FormDef { splash_add: 1_500, ..form("Grove") },
         FormDef { hp_bp: 5_000, dmg_add: 25, ..form("Bramble") },
         FormDef { on_hit: root(12), ..form("Thornwarden") },
     ]),
     unit(UnitKind::Rootcaller, "Rootcaller", Plants, Control, 2_400,
-        [300, 20, 32, 3_000, 45, 0, 0], root(16), [
+        [300, 20, 32, 3_000, 45, 0, 0], root(16), NO_ABILITIES, [
         FormDef { on_hit: root(32), ..form("Deep Roots") },
         FormDef { dmg_bp: 8_000, ..form("Strangle") },
         FormDef { splash_add: 1_000, ..form("Spores") },
@@ -381,11 +573,11 @@ pub const UNITS: [UnitDef; 11] = [
     ]),
     // P16-B (D-32, Proposed). Nester forms only change Hatch (`hatch_rule`).
     unit(UnitKind::Nester, "Nester", Plants, Support, 2_400,
-        [300, 15, 30, 2_500, 40, 0, 0], None, [
+        [300, 15, 30, 2_500, 40, 0, 0], None, HATCH_ABILITIES, [
         form("Brood"), form("Hive"), form("Venom"), form("Blight"),
     ]),
     unit(UnitKind::Rampart, "Rampart", Machines, Tank, 3_600,
-        [1_500, 35, 30, 800, 25, 0, 0], None, [
+        [1_500, 35, 30, 800, 25, 0, 0], None, GUARD_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bastion") },
         FormDef { hp_bp: 5_000, on_hit: slow(3_000, 30), ..form("Citadel") },
         FormDef { dmg_bp: 6_000, ..form("Spiked") },
@@ -394,10 +586,206 @@ pub const UNITS: [UnitDef; 11] = [
     // Summon: hatched with its Nester's tier and branch, so these forms are
     // the Nester's Beetling upgrades (Venom slows, Blight +50 % HP and dmg).
     unit(UnitKind::Beetling, "Beetling", Plants, Dps, 0,
-        [90, 18, 16, 600, 70, 0, 0], None, [
+        [90, 18, 16, 600, 70, 0, 0], None, NO_ABILITIES, [
         form("Brood"), form("Hive"),
         FormDef { on_hit: slow(3_000, 20), ..form("Venom") },
         FormDef { hp_bp: 5_000, dmg_bp: 5_000, ..form("Blight") },
+    ]),
+    // P44 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave A. Not in the
+    // Shop pool until the P53 owner switch.
+    unit(UnitKind::Longaxe, "Longaxe", Humans, Dps, 2_400,
+        [360, 100, 48, 1_600, 35, 0, 0], None, NO_ABILITIES, [
+        FormDef { dmg_bp: 3_000, ..form("Deep Cut") },
+        FormDef { dmg_bp: 3_000, vs_above_bp: 3_000, vs_above_hp_bp: 6_000, ..form("Crushing Edge") },
+        FormDef { splash_add: 800, splash_bp: 4_000, ..form("Sweeping Arc") },
+        FormDef { splash_add: 400, splash_bp: 6_000, ..form("Line Breaker") },
+    ]),
+    unit(UnitKind::Farwatch, "Farwatch", Humans, Ranged, 1_800,
+        [150, 70, 80, 12_000, 45, 0, 0], None, NOSTRONGHOLD_ABILITIES, [
+        FormDef { atk_bp: 2_500, ..form("Steady Hands") },
+        FormDef { vs_below_bp: 10_000, vs_below_hp_bp: 3_500, ..form("Finishing Shot") },
+        FormDef { on_hit: slow(2_500, 30), ..form("Crippling Arrow") },
+        FormDef { heal_cut_bp: 5_000, heal_cut_ticks: 60, ..form("Deep Wound") },
+    ]),
+    unit(UnitKind::Bombard, "Bombard", Machines, Ranged, 3_000,
+        [1_000, 24, 44, 4_000, 25, 1_000, 0], None, BLAST_ABILITIES, [
+        FormDef { splash_add: 500, ..form("Bigger Blast") },
+        FormDef { splash_add: 500, dmg_bp: 2_500, ..form("Heavy Ordnance") },
+        FormDef { hp_bp: 5_000, ..form("Reinforced Hull") },
+        FormDef { atk_bp: 4_300, ..form("Relentless Shelling") },
+    ]),
+    // P45 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave B. Not in the
+    // Shop pool until the P53 owner switch.
+    unit(UnitKind::Rotcap, "Rotcap", Plants, Ranged, 1_800,
+        [200, 12, 30, 3_500, 45, 0, 0], None, [
+        [Ability::Poison { dps: 6, pulses: 10, cap: 6 }, Ability::None],
+        [Ability::Poison { dps: 8, pulses: 10, cap: 6 }, Ability::None],
+        [Ability::Poison { dps: 10, pulses: 10, cap: 6 }, Ability::None],
+        [Ability::Poison { dps: 6, pulses: 10, cap: 6 }, Ability::Echo { every: 3, extra: 1 }],
+        [Ability::Poison { dps: 6, pulses: 10, cap: 6 }, Ability::Echo { every: 2, extra: 1 }],
+    ], [
+        form("Potent Toxin"),
+        form("Deadly Venom"),
+        form("Spore Split"),
+        form("Toxic Rain"),
+    ]),
+    unit(UnitKind::OldFinn, "Old Finn", Humans, Control, 1_800,
+        [240, 8, 40, 3_500, 45, 0, 0], None, [
+        [Ability::Fish { bp: 1_500, ticks: 100, cap: 3, per_hit: 1 }, Ability::None],
+        [Ability::Fish { bp: 2_000, ticks: 100, cap: 3, per_hit: 1 }, Ability::None],
+        [Ability::Fish { bp: 2_000, ticks: 100, cap: 3, per_hit: 2 }, Ability::None],
+        [Ability::Fish { bp: 1_500, ticks: 100, cap: 3, per_hit: 1 }, Ability::Echo { every: 3, extra: 1 }],
+        [Ability::Fish { bp: 1_500, ticks: 100, cap: 3, per_hit: 1 }, Ability::Echo { every: 3, extra: 2 }],
+    ], [
+        form("Big Catch"),
+        form("Giant Catfish"),
+        form("Double Catch"),
+        form("Fish Shower"),
+    ]),
+    unit(UnitKind::AntidoteBrewer, "Antidote Brewer", Plants, Support, 1_800,
+        [260, 0, 80, 3_000, 45, 0, 0], None, [
+        [Ability::Brew { strip_poison: 3, ward: 20, second: false }, Ability::None],
+        [Ability::Brew { strip_poison: 6, ward: 40, second: false }, Ability::None],
+        [Ability::Brew { strip_poison: 6, ward: 70, second: false }, Ability::None],
+        [Ability::Brew { strip_poison: 3, ward: 20, second: false }, Ability::None],
+        [Ability::Brew { strip_poison: 3, ward: 20, second: true }, Ability::None],
+    ], [
+        form("Master Antidote"),
+        form("Perfect Remedy"),
+        FormDef { atk_bp: 3_333, ..form("Quick Mixing") },
+        form("Double Flask"),
+    ]),
+    // P46 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave C. Not in the
+    // Shop pool until the P53 owner switch.
+    unit(UnitKind::Shatterback, "Shatterback", Plants, Tank, 2_400,
+        [560, 30, 30, 800, 28, 0, 0], None, [
+        [Ability::Plates { count: 4, hp: 100, move_bp: 1_250, atk_bp: 1_000, dmg_bp: 0, shrapnel: 0, rampage: 0 }, Ability::None],
+        [Ability::Plates { count: 4, hp: 150, move_bp: 1_250, atk_bp: 1_000, dmg_bp: 0, shrapnel: 0, rampage: 0 }, Ability::None],
+        [Ability::Plates { count: 4, hp: 150, move_bp: 1_250, atk_bp: 1_000, dmg_bp: 0, shrapnel: 50, rampage: 0 }, Ability::None],
+        [Ability::Plates { count: 4, hp: 100, move_bp: 1_250, atk_bp: 1_000, dmg_bp: 800, shrapnel: 0, rampage: 0 }, Ability::None],
+        [Ability::Plates { count: 4, hp: 100, move_bp: 1_250, atk_bp: 1_000, dmg_bp: 800, shrapnel: 0, rampage: 800 }, Ability::None],
+    ], [
+        form("Thornplates"),
+        form("Thorn Shrapnel"),
+        form("Unleashed"),
+        form("Rampage"),
+    ]),
+    unit(UnitKind::BloodFurnace, "Blood Furnace", Undead, Dps, 2_400,
+        [440, 36, 36, 800, 45, 0, 0], None, [
+        [Ability::Furnace { burn_bp: 600, max_bp: 30_000 }, Ability::None],
+        [Ability::Furnace { burn_bp: 600, max_bp: 35_000 }, Ability::None],
+        [Ability::Furnace { burn_bp: 600, max_bp: 45_000 }, Ability::None],
+        [Ability::Furnace { burn_bp: 500, max_bp: 30_000 }, Ability::None],
+        [Ability::Furnace { burn_bp: 400, max_bp: 30_000 }, Ability::None],
+    ], [
+        form("Infernal Core"),
+        form("Dying Sun"),
+        form("Efficient Combustion"),
+        form("Eternal Embers"),
+    ]),
+    unit(UnitKind::Bloodweaver, "Bloodweaver", Undead, Support, 1_800,
+        [300, 0, 100, 3_000, 45, 0, 0], None, [
+        [Ability::Transfer { amount: 120, low_bp: 0, second: false }, Ability::None],
+        [Ability::Transfer { amount: 156, low_bp: 0, second: false }, Ability::None],
+        [Ability::Transfer { amount: 156, low_bp: 2_000, second: false }, Ability::None],
+        [Ability::Transfer { amount: 120, low_bp: 0, second: false }, Ability::None],
+        [Ability::Transfer { amount: 120, low_bp: 0, second: true }, Ability::None],
+    ], [
+        form("Deep Transfer"),
+        form("Last Offering"),
+        FormDef { atk_bp: 2_500, ..form("Rapid Circulation") },
+        form("Shared Blood"),
+    ]),
+    // P47 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave D. Not in the
+    // Shop pool until the P53 owner switch.
+    unit(UnitKind::Oilpress, "Oilpress", Machines, Tank, 4_200,
+        [3_600, 25, 50, 800, 15, 0, 0], None, [
+        [Ability::Formation { engage: 4_000, gap: 200 }, Ability::None],
+        [Ability::Formation { engage: 4_000, gap: 200 }, Ability::None],
+        [Ability::Formation { engage: 4_000, gap: 200 }, Ability::None],
+        [Ability::Formation { engage: 4_000, gap: 200 }, Ability::None],
+        [Ability::Formation { engage: 4_000, gap: 200 }, Ability::None],
+    ], [
+        FormDef { hp_bp: 35_000, ..form("Reinforced Hull") },
+        FormDef { hp_bp: 35_000, ..form("Immovable Mass") },
+        FormDef { on_hit: slow(3_000, 40), ..form("Oil Leak") },
+        FormDef { splash_add: 1_000, on_hit: slow(3_000, 40), splash_hit: true, ..form("Black Mire") },
+    ]),
+    unit(UnitKind::Drumguard, "Drumguard", Humans, Support, 1_800,
+        [260, 0, 20, 3_000, 50, 0, 0], None, [
+        [Ability::March { reach: 2_000, move_bp: 2_500, dr_bp: 1_500, hysteresis: 500, ignore_slow: false }, Ability::None],
+        [Ability::March { reach: 2_000, move_bp: 3_500, dr_bp: 1_500, hysteresis: 500, ignore_slow: false }, Ability::None],
+        [Ability::March { reach: 2_000, move_bp: 4_500, dr_bp: 1_500, hysteresis: 500, ignore_slow: false }, Ability::None],
+        [Ability::March { reach: 2_000, move_bp: 2_500, dr_bp: 1_800, hysteresis: 500, ignore_slow: false }, Ability::None],
+        [Ability::March { reach: 2_000, move_bp: 2_500, dr_bp: 1_800, hysteresis: 500, ignore_slow: true }, Ability::None],
+    ], [
+        form("War March"),
+        form("Grand March"),
+        form("Iron Rhythm"),
+        form("Unbreakable Rhythm"),
+    ]),
+    // P48-A (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave E1. Not in the
+    // Shop pool until the P53 owner switch.
+    unit(UnitKind::Leechroot, "Leechroot", Plants, Dps, 1_800,
+        [220, 10, 32, 1_200, 45, 0, 0], None, [
+        [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
+        [Ability::Essence { base: 30, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
+        [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 300 }, Ability::None],
+        [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
+        [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
+    ], [
+        form("Faster Feeding"),
+        form("Endless Growth"),
+        FormDef { lifesteal_bp: 600, ..form("Life Drain") },
+        FormDef { lifesteal_bp: 1_200, ..form("Blood Hunger") },
+    ]),
+    unit(UnitKind::CargoCrab, "Cargo Crab", Machines, Tank, 3_000,
+        [1_400, 20, 30, 800, 25, 0, 0], None, [
+        [Ability::Carry { board: 500, lock: 60, dr_bp: 0, move_bp: 0, shield_bp: 0, surge_bp: 0 }, Ability::None],
+        [Ability::Carry { board: 500, lock: 60, dr_bp: 1_500, move_bp: 0, shield_bp: 0, surge_bp: 0 }, Ability::None],
+        [Ability::Carry { board: 500, lock: 60, dr_bp: 1_500, move_bp: 0, shield_bp: 2_000, surge_bp: 0 }, Ability::None],
+        [Ability::Carry { board: 500, lock: 60, dr_bp: 0, move_bp: 2_000, shield_bp: 0, surge_bp: 0 }, Ability::None],
+        [Ability::Carry { board: 500, lock: 60, dr_bp: 0, move_bp: 2_000, shield_bp: 0, surge_bp: 4_000 }, Ability::None],
+    ], [
+        form("Reinforced Shell"),
+        form("Emergency Shield"),
+        form("Faster Legs"),
+        form("Overdrive"),
+    ]),
+    // P48-B (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave E2, plus the
+    // Cargo Crate summon kind. Not in the Shop pool until the P53 owner switch.
+    unit(UnitKind::Puppetmaster, "Puppetmaster", Undead, Control, 2_400,
+        [260, 0, 160, 4_000, 45, 0, 0], None, [
+        [Ability::Puppet { window: 100, immune: 240, bonus_bp: 0, targets: 1, stumble: false }, Ability::None],
+        [Ability::Puppet { window: 100, immune: 240, bonus_bp: 2_500, targets: 1, stumble: false }, Ability::None],
+        [Ability::Puppet { window: 100, immune: 240, bonus_bp: 5_000, targets: 1, stumble: true }, Ability::None],
+        [Ability::Puppet { window: 100, immune: 240, bonus_bp: 0, targets: 1, stumble: false }, Ability::None],
+        [Ability::Puppet { window: 100, immune: 240, bonus_bp: 0, targets: 2, stumble: false }, Ability::None],
+    ], [
+        form("Painful Betrayal"),
+        form("Cruel Stumble"),
+        FormDef { atk_bp: 3_333, ..form("Faster Strings") },
+        form("Double Puppet"),
+    ]),
+    unit(UnitKind::Smuggler, "Smuggler", Humans, Support, 3_600,
+        [320, 0, 400, 5_000, 30, 0, 0], None, [
+        [Ability::Cargo { every: 400, open: 40, table: [20, 42, 28, 8, 2], double_every: 0 }, Ability::None],
+        [Ability::Cargo { every: 400, open: 40, table: [10, 40, 34, 12, 4], double_every: 0 }, Ability::None],
+        [Ability::Cargo { every: 400, open: 40, table: [6, 28, 38, 20, 8], double_every: 0 }, Ability::None],
+        [Ability::Cargo { every: 360, open: 40, table: [20, 42, 28, 8, 2], double_every: 0 }, Ability::None],
+        // B2 keeps B1's 18 s: rows are absolute per slot (§C.11: +48 %/min).
+        [Ability::Cargo { every: 360, open: 40, table: [20, 42, 28, 8, 2], double_every: 3 }, Ability::None],
+    ], [
+        form("Better Connections"),
+        form("Black Market"),
+        // 400 ticks → 360 (18 s): any atk_bp in 1081..=1111 lands exactly.
+        FormDef { atk_bp: 1_100, ..form("Faster Deliveries") },
+        form("Double Shipment"),
+    ]),
+    // Cargo crate: 120 HP, no attack, no movement (speed 0), targetable.
+    unit(UnitKind::Crate, "Crate", Humans, Support, 0,
+        [120, 0, 20, 0, 0, 0, 0], None, NO_ABILITIES, [
+        form("Crate"), form("Crate"), form("Crate"), form("Crate"),
     ]),
 ];
 
@@ -427,6 +815,8 @@ pub struct Stats {
     pub range: i32,
     pub speed: i32,
     pub splash: i32,
+    /// Splash damage share, in basis points of the hit (P44).
+    pub splash_bp: i32,
     pub heal: i32,
     pub on_hit: Option<OnHit>,
 }

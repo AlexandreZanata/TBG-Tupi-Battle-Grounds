@@ -52,8 +52,9 @@ pub(super) struct Match {
     pub(super) replay: Option<Replay>,
 }
 
+/// `(seed, arena)` are the match's two pairing draws (ARENAS-G).
 pub(crate) fn spawn(
-    seed: u64,
+    (seed, arena): (u64, tbg_core::Arena),
     players: [Player; 2],
     mode: MatchMode,
     lobby: mpsc::Sender<LobbyCmd>,
@@ -68,7 +69,9 @@ pub(crate) fn spawn(
     let arcanas = players.each_ref().map(|p| p.arcanas);
     let strongholds = players.each_ref().map(|p| p.stronghold);
     let m = Match {
-        state: MatchState::with_arcanas(seed, arcanas).with_strongholds(strongholds),
+        state: MatchState::with_arcanas(seed, arcanas)
+            .with_strongholds(strongholds)
+            .with_arena(arena),
         players,
         detached_at,
         stats: Default::default(),
@@ -80,6 +83,7 @@ pub(crate) fn spawn(
             seed,
             arcanas,
             strongholds,
+            arena,
             ..Replay::default()
         }),
     };
@@ -137,11 +141,13 @@ async fn run(
         }
         // 10 Hz views, plus an ack view to a seat whose intention was processed.
         let ended = m.state.outcome.is_some();
+        // The selection clock keeps 10 Hz views flowing during an Augment
+        // pause, when the combat tick is frozen (BR-AG13).
+        let regular = m.state.clock.is_multiple_of(2) || ended;
         for seat in Seat::BOTH {
-            // The selection clock keeps 10 Hz views flowing during an
-            // Augment pause, when the combat tick is frozen (BR-AG13).
-            if m.state.clock.is_multiple_of(2) || ended || m.applied[seat.index()] {
-                m.send_view(seat);
+            let ack = m.applied[seat.index()] && !regular;
+            if regular || m.applied[seat.index()] {
+                m.send_view(seat, ack);
             }
         }
         m.applied = [false; 2];

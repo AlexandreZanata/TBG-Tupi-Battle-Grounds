@@ -103,6 +103,18 @@ fn tower(team: Color) -> Vec<Part> {
     for at in around(3, 0.61, 1.0).skip(1) {
         p.push((Box(0.07, 0.24, 0.04), DARK, at));
     }
+    // Masonry courses, an arched door up two steps (lobby portrait).
+    let up = Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2);
+    p.extend([
+        (Ring(0.018, 0.655, 360.0), ROCK, t(0.0, 0.55, 0.0)),
+        (Ring(0.018, 0.63, 360.0), ROCK, t(0.0, 1.0, 0.0)),
+        (
+            Ring(0.035, 0.16, 180.0),
+            ROCK,
+            t(0.0, 0.51, 0.7).with_rotation(up),
+        ),
+        (Box(0.44, 0.08, 0.22), ROCK, t(0.0, 0.04, 0.86)),
+    ]);
     p
 }
 
@@ -122,6 +134,34 @@ fn platform(team: Color) -> Vec<Part> {
         let lean = at.rotation * Quat::from_rotation_z(-0.6);
         p.push((Box(0.06, 0.5, 0.06), TIMBER, at.with_rotation(lean)));
     }
+    // Cloth panels between the rail posts, team and linen in turn.
+    for i in 0..10 {
+        let a = (i as f32 + 0.5) / 10.0 * std::f32::consts::TAU;
+        let at =
+            t(a.cos() * 0.92, DECK + 0.17, a.sin() * 0.92).with_rotation(Quat::from_rotation_y(-a));
+        let cloth = if i % 2 == 0 { team } else { LINEN };
+        p.push((Box(0.015, 0.2, 0.5), cloth, at));
+    }
+    // A heraldic banner hanging from the deck over the door.
+    p.extend([
+        (Box(0.44, 0.03, 0.03), GOLD, t(0.0, DECK - 0.07, 0.93)),
+        (Box(0.34, 0.36, 0.02), team, t(0.0, DECK - 0.25, 0.93)),
+        (
+            Box(0.13, 0.13, 0.025),
+            GOLD,
+            t(0.0, DECK - 0.24, 0.945).with_rotation(Quat::from_rotation_z(0.785)),
+        ),
+        (
+            Box(0.12, 0.12, 0.02),
+            team,
+            t(-0.09, DECK - 0.44, 0.93).with_rotation(Quat::from_rotation_z(0.785)),
+        ),
+        (
+            Box(0.12, 0.12, 0.02),
+            team,
+            t(0.09, DECK - 0.44, 0.93).with_rotation(Quat::from_rotation_z(0.785)),
+        ),
+    ]);
     p
 }
 

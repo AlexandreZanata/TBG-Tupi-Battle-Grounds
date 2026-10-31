@@ -81,9 +81,34 @@ pub enum UnitKind {
     Rampart,
     /// Summon hatched by a Nester (BR-U08); never in the Shop.
     Beetling,
+    // P44 (Proposed, staged): wave A. Appended so older kinds keep their
+    // indices; not in the Shop pool until the P53 owner switch.
+    Longaxe,
+    Farwatch,
+    Bombard,
+    // P45 (Proposed, staged): wave B. Same staging rules.
+    Rotcap,
+    OldFinn,
+    AntidoteBrewer,
+    // P46 (Proposed, staged): wave C. Same staging rules.
+    Shatterback,
+    BloodFurnace,
+    Bloodweaver,
+    // P47 (Proposed, staged): wave D. Same staging rules.
+    Oilpress,
+    Drumguard,
+    // P48-A (Proposed, staged): wave E1. Same staging rules.
+    Leechroot,
+    CargoCrab,
+    // P48-B (Proposed, staged): wave E2. Same staging rules.
+    Puppetmaster,
+    Smuggler,
+    /// Smuggler cargo crate (BR-U08); never in the Shop.
+    Crate,
 }
 
-/// The purchasable roster: the Shop's pool (summons excluded).
+/// The staged Shop pool (summons excluded): what offers draw from until the
+/// P53 owner switch grows it. Staged kinds exist in `ALL_KINDS` first.
 pub const UNIT_KINDS: [UnitKind; 10] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
@@ -98,7 +123,8 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 ];
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
-pub const ALL_KINDS: [UnitKind; 11] = [
+#[rustfmt::skip]
+pub const ALL_KINDS: [UnitKind; 27] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -110,14 +136,69 @@ pub const ALL_KINDS: [UnitKind; 11] = [
     UnitKind::Nester,
     UnitKind::Rampart,
     UnitKind::Beetling,
+    UnitKind::Longaxe,
+    UnitKind::Farwatch,
+    UnitKind::Bombard,
+    UnitKind::Rotcap,
+    UnitKind::OldFinn,
+    UnitKind::AntidoteBrewer,
+    UnitKind::Shatterback,
+    UnitKind::BloodFurnace,
+    UnitKind::Bloodweaver,
+    UnitKind::Oilpress,
+    UnitKind::Drumguard,
+    UnitKind::Leechroot,
+    UnitKind::CargoCrab,
+    UnitKind::Puppetmaster,
+    UnitKind::Smuggler,
+    UnitKind::Crate,
 ];
 
 impl UnitKind {
-    /// Summons are created by abilities, never bought (BR-U08).
+    /// Summon kinds: created by abilities, never bought (BR-U08). Beetlings
+    /// hatch from Nesters; crates drop from Smugglers.
     pub fn is_summon(self) -> bool {
-        self == UnitKind::Beetling
+        matches!(self, UnitKind::Beetling | UnitKind::Crate)
+    }
+
+    /// Conventional units: everything the lab duels and favors (BR-U08:
+    /// summons are never bought, evolved, or counted).
+    pub fn is_conventional(self) -> bool {
+        !self.is_summon()
     }
 }
+
+/// The full conventional roster in `UnitKind` order: the staging pool the
+/// lab and the Practice preview draw from (P46: 19 kinds; grows per wave
+/// until the P53 owner switch moves it into `CANON.pool`).
+#[rustfmt::skip]
+pub const FULL_POOL: [UnitKind; 25] = [
+    UnitKind::Shieldbearer,
+    UnitKind::Archer,
+    UnitKind::BoneBrute,
+    UnitKind::Hexer,
+    UnitKind::Sawbot,
+    UnitKind::SiegeWalker,
+    UnitKind::Bloomkeeper,
+    UnitKind::Rootcaller,
+    UnitKind::Nester,
+    UnitKind::Rampart,
+    UnitKind::Longaxe,
+    UnitKind::Farwatch,
+    UnitKind::Bombard,
+    UnitKind::Rotcap,
+    UnitKind::OldFinn,
+    UnitKind::AntidoteBrewer,
+    UnitKind::Shatterback,
+    UnitKind::BloodFurnace,
+    UnitKind::Bloodweaver,
+    UnitKind::Oilpress,
+    UnitKind::Drumguard,
+    UnitKind::Leechroot,
+    UnitKind::CargoCrab,
+    UnitKind::Puppetmaster,
+    UnitKind::Smuggler,
+];
 
 /// All playable archetypes, in glossary order.
 pub const ARCHETYPES: [Archetype; 5] = [
@@ -149,6 +230,52 @@ pub enum Status {
     None,
     Slowed { bp: u16, ticks_left: u16 },
     Rooted { ticks_left: u16 },
+}
+
+/// The match's arena (ARENAS-G): drawn by the server at pairing, chosen in
+/// practice, fixed for the whole match. Order is a serialization contract.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Arena {
+    /// Verdant Forest: the neutral reference.
+    #[default]
+    Forest,
+    Tundra,
+    Volcanic,
+    Ruins,
+    Storm,
+}
+
+impl Arena {
+    pub const ALL: [Arena; 5] = [
+        Arena::Forest,
+        Arena::Tundra,
+        Arena::Volcanic,
+        Arena::Ruins,
+        Arena::Storm,
+    ];
+
+    pub fn index(self) -> usize {
+        self as usize
+    }
+
+    pub fn from_index(i: usize) -> Option<Arena> {
+        Arena::ALL.get(i).copied()
+    }
+
+    /// Stable lowercase identifier for URLs, storage and catalogs.
+    pub fn slug(self) -> &'static str {
+        match self {
+            Arena::Forest => "forest",
+            Arena::Tundra => "tundra",
+            Arena::Volcanic => "volcanic",
+            Arena::Ruins => "ruins",
+            Arena::Storm => "storm",
+        }
+    }
+
+    pub fn from_slug(slug: &str) -> Option<Arena> {
+        Arena::ALL.into_iter().find(|a| a.slug() == slug)
+    }
 }
 
 /// Kind of a seat's Stronghold, chosen free before the match and frozen at

@@ -21,6 +21,21 @@ pub struct UnitView {
     pub max_hp: i32,
     /// 0 none, 1 slowed, 2 rooted.
     pub status: u8,
+    /// Packed ability state (ROSTER-EXPANSION §F.4): poison 3 bits, fish 2,
+    /// confused 1, ward 1, bonded 1, plates 3, growth 3, carried 1, 1 spare.
+    /// Zero until the waves land, except the spare top bit: `FX_SUMMON`.
+    pub fx: u16,
+}
+
+/// `UnitView.fx` bit for a summon by unit, e.g. Smuggler cargo (BR-U08):
+/// its kind alone cannot tell, and the server refuses to evolve it.
+pub const FX_SUMMON: u16 = 1 << 15;
+
+impl UnitView {
+    /// Summoned by kind (Beetling, Crate) or by unit (Smuggler cargo).
+    pub fn is_summon(&self) -> bool {
+        self.kind.is_summon() || self.fx & FX_SUMMON != 0
+    }
 }
 
 /// One open Augment round, identical options for both seats.
@@ -61,6 +76,9 @@ pub struct MatchView {
     /// Energy regeneration now, in basis points of the base rate: 10 000
     /// plus 2 500 per full 5 Energy held, at most 22 500 (BR-E05).
     pub regen_bp: u32,
+    /// v15 (ARENAS-G): what evolving a tier-0 and a tier-1 unit costs this
+    /// seat now (Augment and arena discounts applied).
+    pub evolve_costs: [u32; 2],
     pub offers: [UnitKind; OFFERS],
     /// Indexed by `Seat::index()`.
     pub stronghold_hp: [i32; 2],
@@ -105,6 +123,7 @@ impl MatchState {
             you: seat,
             energy: me.energy,
             regen_bp: self.rules.interest.regen_bp(me.energy),
+            evolve_costs: [0, 1].map(|tier| self.evolve_price(seat, tier)),
             offers: me.offers,
             stronghold_hp: [0, 1].map(|i| self.players[i].stronghold_hp),
             strongholds: Seat::BOTH.map(|s| StrongholdView {
@@ -145,5 +164,7 @@ fn unit_view(u: &crate::state::Unit) -> UnitView {
             Status::Slowed { .. } => 1,
             Status::Rooted { .. } => 2,
         },
+        // P43: affliction and carrier bits are not packed yet.
+        fx: if u.is_summon() { FX_SUMMON } else { 0 },
     }
 }

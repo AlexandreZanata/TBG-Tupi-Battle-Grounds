@@ -1,0 +1,53 @@
+{
+  "artBudgetBytes": 2000000,
+  "assets": [
+    {
+      "id": "podium-gold",
+      "asset": {
+        "display": "podium-gold.webp"
+      },
+      "displayWidth": 320,
+      "lossless": false
+    },
+    {
+      "id": "podium-silver",
+      "asset": {
+        "display": "podium-silver.webp"
+      },
+      "displayWidth": 320,
+      "lossless": false
+    },
+    {
+      "id": "podium-bronze",
+      "asset": {
+        "display": "podium-bronze.webp"
+      },
+      "displayWidth": 320,
+      "lossless": false
+    },
+    {
+      "id": "champions-trophy",
+      "asset": {
+        "display": "champions-trophy.webp"
+      },
+      "displayWidth": 100,
+      "lossless": true
+    },
+    {
+      "id": "player-crest",
+      "asset": {
+        "display": "player-crest.webp"
+      },
+      "displayWidth": 150,
+      "lossless": true
+    },
+    {
+      "id": "podium-grove",
+      "asset": {
+        "display": "podium-grove.webp"
+      },
+      "displayWidth": 1440,
+      "lossless": false
+    }
+  ]
+}

@@ -13,6 +13,7 @@ mod autoplay;
 mod camera;
 mod config;
 mod gallery;
+mod i18n;
 mod link;
 mod local;
 mod net;
@@ -69,6 +70,7 @@ fn main() {
             ui::plugin,
             autoplay::plugin,
             gallery::plugin,
+            i18n::plugin,
             vfx::plugin,
             audio::plugin,
         ))

@@ -11,12 +11,16 @@ use crate::art::anim::Animator;
 use crate::art::{figure, FigureLibrary};
 use crate::ui::UiAction;
 
+pub mod aim;
 pub mod assets;
+mod attacks;
 mod cues;
 mod names;
 mod update;
 
 pub use assets::VisualAssets;
+#[cfg(test)]
+pub use cues::CORPSE_SECS;
 pub use cues::{play_cue, spawn_projectile, VisualCue};
 pub use update::update_unit_visual;
 
@@ -28,10 +32,23 @@ pub struct UnitLook {
     pub own: bool,
 }
 
+/// What a unit aims at: another unit's visual, or a fixed point (a
+/// Stronghold, a review dummy).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum AimTarget {
+    Unit(Entity),
+    Point(Vec3),
+}
+
+/// Stronghold shots of this frame, (own tower, target), for the towers to
+/// aim and fire their own projectiles (`arena::strongholds`).
+#[derive(Resource, Default)]
+pub struct TowerOrders(pub Vec<(bool, AimTarget)>);
+
 /// Root of one unit's visual; child entities are listed for updates.
 #[derive(Component)]
 pub struct UnitVisual {
-    figure: Entity,
+    pub figure: Entity,
     joints: [Entity; crate::art::rig::NODE_COUNT],
     ring: Entity,
     /// Rest scale of the team ring (the inspected unit's ring pulses above it).
@@ -45,30 +62,80 @@ pub struct UnitVisual {
     /// Splash radius in tiles (0 = none), for the splash-ring effect.
     pub splash: f32,
     form: (UnitKind, u8, u8),
-    yaw: f32,
+    pub yaw: f32,
     /// Tint material, seconds left, already applied to the joints.
     tint: Option<(Handle<StandardMaterial>, f32, bool)>,
     pub dying: bool,
     dead_for: f32,
     last_x: f32,
+    /// Seconds without moving (walk/idle hysteresis).
+    still: f32,
+    /// Unlit glow children of the current form.
+    glow: Vec<Entity>,
+    /// The engaged target and seconds left before the aim lets go.
+    aim: Option<(AimTarget, f32)>,
+    /// Seconds between attacks, root duration, and range (tiles) of the form.
+    interval: f32,
+    pub hold: f32,
+    pub range: f32,
+}
+
+/// Seconds a unit keeps aiming after its last attack started, beyond its
+/// attack interval.
+const AIM_GRACE: f32 = 0.7;
+
+impl UnitVisual {
+    /// Turn toward `target` until the next attack interval has passed.
+    pub fn engage(&mut self, target: AimTarget) {
+        self.aim = Some((target, self.interval + AIM_GRACE));
+    }
+    pub fn kind(&self) -> UnitKind {
+        self.form.0
+    }
+    /// The unit fires or strikes through its own art kit.
+    pub fn has_kit(&self) -> bool {
+        self.kit().is_some()
+    }
+    pub fn kit(&self) -> Option<&'static crate::art::kits::Kit> {
+        crate::art::kits::kit(self.form.0)
+    }
+    fn refresh_stats(&mut self) {
+        let (kind, tier, branch) = self.form;
+        let s = effective_stats(kind, tier, branch, 0);
+        self.splash = s.splash as f32 / 1000.0;
+        self.interval = f32::from(s.interval) / tbg_core::content::TICK_HZ as f32;
+        self.range = s.range as f32 / 1000.0;
+        self.hold = match s.on_hit {
+            Some(tbg_core::OnHit::Root { ticks }) => {
+                f32::from(ticks) / tbg_core::content::TICK_HZ as f32
+            }
+            _ => 0.0,
+        };
+    }
 }
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(names::plugin)
+        .init_resource::<TowerOrders>()
         .add_systems(PreStartup, assets::init)
         .add_systems(
             Update,
             (
+                aim::update_aim,
                 cues::animate,
                 cues::billboards,
                 cues::fly,
                 highlight_inspected,
             ),
+        )
+        .add_systems(
+            PostUpdate,
+            (attacks::release, attacks::stomp).after(bevy::transform::TransformSystems::Propagate),
         );
 }
 
-/// The inspected unit's team ring pulses a little larger (ui/inspect.rs), so
-/// the status panel always points at a visible unit.
+/// The selected unit's ground ring pulses as a luminous base halo. The
+/// figure itself is not lifted: `aim` owns its translation every frame.
 fn highlight_inspected(
     time: Res<Time>,
     inspected: Option<Res<crate::ui::inspect::Inspected>>,
@@ -76,14 +143,15 @@ fn highlight_inspected(
     mut transforms: Query<&mut Transform>,
 ) {
     let target = inspected.and_then(|i| i.0);
-    let pulse = 1.25 + 0.07 * (time.elapsed_secs() * 6.0).sin();
+    let pulse = 1.40 + 0.08 * (time.elapsed_secs() * 5.0).sin();
     for (v, action) in &units {
         let UiAction::SelectUnit(id) = action else {
             continue;
         };
-        let scale = v.ring_base * if target == Some(*id) { pulse } else { 1.0 };
+        let is_selected = target == Some(*id);
+        let scale = v.ring_base * if is_selected { pulse } else { 1.0 };
         if let Ok(mut t) = transforms.get_mut(v.ring) {
-            if t.scale.x != scale {
+            if (t.scale.x - scale).abs() > 1e-4 {
                 t.scale = Vec3::splat(scale);
             }
         }
@@ -137,7 +205,8 @@ pub fn spawn_unit_visual(
         .insert(NotShadowCaster)
         .id();
     let (bar, bar_fill, tiers) = spawn_bar(commands, a, height, &look);
-    let visual = UnitVisual {
+    let glow = figure::spawn_glow(commands, &joints, &form.glow, &lib.glow_material);
+    let mut visual = UnitVisual {
         figure: figure_root,
         joints,
         ring,
@@ -148,16 +217,24 @@ pub fn spawn_unit_visual(
         own: look.own,
         archetype: d.archetype,
         faction: d.faction,
-        splash: effective_stats(look.kind, look.tier, look.branch, 0).splash as f32 / 1000.0,
+        splash: 0.0,
         form: (look.kind, look.tier, look.branch),
         yaw: yaw(look.own),
         tint: None,
         dying: false,
         dead_for: 0.0,
         last_x: pos.x,
+        still: 1.0,
+        glow,
+        aim: None,
+        interval: 1.0,
+        hold: 0.0,
+        range: 1.0,
     };
+    visual.refresh_stats();
     let mut animator = Animator::new(joints, form.plan, figure_root, look.kind, look.id);
     animator.native = form.native;
+    animator.form = (look.tier, look.branch);
     animator.archer = form.native && look.kind == UnitKind::Archer;
     animator.play(crate::art::anim::Clip::Spawn);
     let root = commands.spawn_empty().id();

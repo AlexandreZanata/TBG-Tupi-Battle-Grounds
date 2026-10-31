@@ -1,0 +1,426 @@
+{
+  "frame-humans": {
+    "full": {
+      "ssim": 0.373255,
+      "mae": 25.593376,
+      "alpha_mae": 30.962458
+    },
+    "display": {
+      "ssim": 0.524655,
+      "mae": 21.791612,
+      "alpha_mae": 31.56762
+    },
+    "baseline": {
+      "trace_width": 720,
+      "raw": 3340606,
+      "gzip": 1037126,
+      "ssim": 0.795145,
+      "mae": 9.670351,
+      "alpha_mae": 13.057586
+    },
+    "svg": {
+      "trace_width": 112,
+      "raw": 103190,
+      "gzip": 31060
+    },
+    "budget": 250000,
+    "display_size": [
+      260,
+      370
+    ],
+    "fallback": true,
+    "webp_bytes": 98528,
+    "webp_display": {
+      "ssim": 0.976823,
+      "mae": 2.290427,
+      "alpha_mae": 0.062017
+    },
+    "webp_lossless": false,
+    "settings": {
+      "colormode": "color",
+      "hierarchical": "stacked",
+      "mode": "spline",
+      "filter_speckle": 2,
+      "color_precision": 8,
+      "layer_difference": 8,
+      "corner_threshold": 60,
+      "length_threshold": 4.0,
+      "splice_threshold": 45,
+      "path_precision": 3
+    },
+    "seconds": 8.85,
+    "served_sha256": "155d579fa517054ec9a920d60454d6b66fdd79f38d06a66284577e27eb43fc5a",
+    "master_sha256": "b523e08060c76153f582392944e2f7223bd15219b8162e7d6d6586abbd5eaa5d"
+  },
+  "emblem-humans": {
+    "full": {
+      "ssim": 0.19164,
+      "mae": 32.087535,
+      "alpha_mae": 18.805348
+    },
+    "display": {
+      "ssim": 0.757099,
+      "mae": 16.325242,
+      "alpha_mae": 22.100502
+    },
+    "baseline": {
+      "trace_width": 1024,
+      "raw": 7055654,
+      "gzip": 2131152,
+      "ssim": 0.718544,
+      "mae": 13.626039,
+      "alpha_mae": 8.186
+    },
+    "svg": {
+      "trace_width": 128,
+      "raw": 120113,
+      "gzip": 32780
+    },
+    "budget": 150000,
+    "display_size": [
+      72,
+      72
+    ],
+    "fallback": true,
+    "webp_bytes": 91418,
+    "webp_display": {
+      "ssim": 0.988093,
+      "mae": 0.490981,
+      "alpha_mae": 0.132909
+    },
+    "webp_lossless": true,
+    "settings": {
+      "colormode": "color",
+      "hierarchical": "stacked",
+      "mode": "spline",
+      "filter_speckle": 2,
+      "color_precision": 8,
+      "layer_difference": 8,
+      "corner_threshold": 60,
+      "length_threshold": 4.0,
+      "splice_threshold": 45,
+      "path_precision": 3
+    },
+    "seconds": 7.12,
+    "served_sha256": "fdbba55f4ca7a941a1118ade01fa756218e08b2326ff25a66c99668866f3c262",
+    "master_sha256": "08077f6f5f28076470f6c006429afb94de23a8483eaf45453d9ee159c0a2a085"
+  },
+  "frame-undead": {
+    "full": {
+      "ssim": 0.38364,
+      "mae": 19.150894,
+      "alpha_mae": 32.196799
+    },
+    "display": {
+      "ssim": 0.482193,
+      "mae": 16.551883,
+      "alpha_mae": 32.823015
+    },
+    "baseline": {
+      "trace_width": 720,
+      "raw": 3336503,
+      "gzip": 1046124,
+      "ssim": 0.80344,
+      "mae": 8.170492,
+      "alpha_mae": 13.588879
+    },
+    "svg": {
+      "trace_width": 112,
+      "raw": 106356,
+      "gzip": 30016
+    },
+    "budget": 250000,
+    "display_size": [
+      260,
+      370
+    ],
+    "fallback": true,
+    "webp_bytes": 97244,
+    "webp_display": {
+      "ssim": 0.97606,
+      "mae": 1.679927,
+      "alpha_mae": 0.081289
+    },
+    "webp_lossless": false,
+    "settings": {
+      "colormode": "color",
+      "hierarchical": "stacked",
+      "mode": "spline",
+      "filter_speckle": 2,
+      "color_precision": 8,
+      "layer_difference": 8,
+      "corner_threshold": 60,
+      "length_threshold": 4.0,
+      "splice_threshold": 45,
+      "path_precision": 3
+    },
+    "seconds": 7.8,
+    "served_sha256": "108e1c975c4f9615ba5c9eaaa1fe4372938d6b7ef2e2d19f91ec614d779bf278",
+    "master_sha256": "327b042d84117d5a2a8e7cd7f5f320c94545876c29b72da854bed2f2921bac67"
+  },
+  "emblem-undead": {
+    "full": {
+      "ssim": 0.214526,
+      "mae": 28.11482,
+      "alpha_mae": 28.59115
+    },
+    "display": {
+      "ssim": 0.777076,
+      "mae": 15.688447,
+      "alpha_mae": 31.639468
+    },
+    "baseline": {
+      "trace_width": 1024,
+      "raw": 7789871,
+      "gzip": 2345331,
+      "ssim": 0.760595,
+      "mae": 10.789085,
+      "alpha_mae": 13.229345
+    },
+    "svg": {
+      "trace_width": 128,
+      "raw": 136706,
+      "gzip": 37514
+    },
+    "budget": 150000,
+    "display_size": [
+      72,
+      72
+    ],
+    "fallback": true,
+    "webp_bytes": 94652,
+    "webp_display": {
+      "ssim": 0.99333,
+      "mae": 0.542503,
+      "alpha_mae": 0.182099
+    },
+    "webp_lossless": true,
+    "settings": {
+      "colormode": "color",
+      "hierarchical": "stacked",
+      "mode": "spline",
+      "filter_speckle": 2,
+      "color_precision": 8,
+      "layer_difference": 8,
+      "corner_threshold": 60,
+      "length_threshold": 4.0,
+      "splice_threshold": 45,
+      "path_precision": 3
+    },
+    "seconds": 7.41,
+    "served_sha256": "2e7c2dd2c51e47ac3d865fc49d57929dce85f9550c702dc800eac053ae543155",
+    "master_sha256": "74d989658684ace132e50c133e34af18f72c1b7e74dcfcc03cfb22b4a2c0f4ef"
+  },
+  "frame-machines": {
+    "full": {
+      "ssim": 0.355746,
+      "mae": 21.735747,
+      "alpha_mae": 26.288242
+    },
+    "display": {
+      "ssim": 0.508014,
+      "mae": 19.08792,
+      "alpha_mae": 26.799324
+    },
+    "baseline": {
+      "trace_width": 720,
+      "raw": 3664984,
+      "gzip": 1122382,
+      "ssim": 0.799559,
+      "mae": 8.706123,
+      "alpha_mae": 9.894984
+    },
+    "svg": {
+      "trace_width": 112,
+      "raw": 109680,
+      "gzip": 32271
+    },
+    "budget": 250000,
+    "display_size": [
+      260,
+      370
+    ],
+    "fallback": true,
+    "webp_bytes": 94788,
+    "webp_display": {
+      "ssim": 0.983453,
+      "mae": 2.058882,
+      "alpha_mae": 0.062349
+    },
+    "webp_lossless": false,
+    "settings": {
+      "colormode": "color",
+      "hierarchical": "stacked",
+      "mode": "spline",
+      "filter_speckle": 2,
+      "color_precision": 8,
+      "layer_difference": 8,
+      "corner_threshold": 60,
+      "length_threshold": 4.0,
+      "splice_threshold": 45,
+      "path_precision": 3
+    },
+    "seconds": 8.83,
+    "served_sha256": "0f670168a038c9a089fdf54af900e38e331493ea4666603a1f53e5c9699dd5fd",
+    "master_sha256": "ca095879e3bffe2dfac9dab549924d411585eaa5cfef7bcaf02b16e75689c694"
+  },
+  "emblem-machines": {
+    "full": {
+      "ssim": 0.256386,
+      "mae": 25.507631,
+      "alpha_mae": 17.772877
+    },
+    "display": {
+      "ssim": 0.784159,
+      "mae": 13.36138,
+      "alpha_mae": 20.834877
+    },
+    "baseline": {
+      "trace_width": 1024,
+      "raw": 8461532,
+      "gzip": 2527255,
+      "ssim": 0.766241,
+      "mae": 10.551819,
+      "alpha_mae": 6.06615
+    },
+    "svg": {
+      "trace_width": 128,
+      "raw": 150981,
+      "gzip": 40025
+    },
+    "budget": 150000,
+    "display_size": [
+      72,
+      72
+    ],
+    "fallback": true,
+    "webp_bytes": 96602,
+    "webp_display": {
+      "ssim": 0.995101,
+      "mae": 0.447524,
+      "alpha_mae": 0.110147
+    },
+    "webp_lossless": true,
+    "settings": {
+      "colormode": "color",
+      "hierarchical": "stacked",
+      "mode": "spline",
+      "filter_speckle": 2,
+      "color_precision": 8,
+      "layer_difference": 8,
+      "corner_threshold": 60,
+      "length_threshold": 4.0,
+      "splice_threshold": 45,
+      "path_precision": 3
+    },
+    "seconds": 8.03,
+    "served_sha256": "8e90b425e99875895913823efcebeb5ff3d16162ac8725813bff80153a455c37",
+    "master_sha256": "799634465bd6257b1d57c23815433305b88ceda66f918c853222c2c5e47fa52f"
+  },
+  "frame-plants": {
+    "full": {
+      "ssim": 0.33349,
+      "mae": 22.539522,
+      "alpha_mae": 33.682756
+    },
+    "display": {
+      "ssim": 0.451707,
+      "mae": 19.191349,
+      "alpha_mae": 34.196528
+    },
+    "baseline": {
+      "trace_width": 720,
+      "raw": 5074132,
+      "gzip": 1430174,
+      "ssim": 0.774838,
+      "mae": 9.936758,
+      "alpha_mae": 21.41693
+    },
+    "svg": {
+      "trace_width": 96,
+      "raw": 103119,
+      "gzip": 28779
+    },
+    "budget": 250000,
+    "display_size": [
+      260,
+      370
+    ],
+    "fallback": true,
+    "webp_bytes": 125286,
+    "webp_display": {
+      "ssim": 0.978036,
+      "mae": 2.113234,
+      "alpha_mae": 0.0892
+    },
+    "webp_lossless": false,
+    "settings": {
+      "colormode": "color",
+      "hierarchical": "stacked",
+      "mode": "spline",
+      "filter_speckle": 2,
+      "color_precision": 8,
+      "layer_difference": 8,
+      "corner_threshold": 60,
+      "length_threshold": 4.0,
+      "splice_threshold": 45,
+      "path_precision": 3
+    },
+    "seconds": 9.94,
+    "served_sha256": "05ab4814ee22990335993b99f2cf43467ba6508dfc9730f2a8effba6e4527942",
+    "master_sha256": "93bbf75a3c1880ec3cc53ba20b835a2146dfe24477515bf20615fa663997cd2c"
+  },
+  "emblem-plants": {
+    "full": {
+      "ssim": 0.223668,
+      "mae": 26.283305,
+      "alpha_mae": 19.431715
+    },
+    "display": {
+      "ssim": 0.768855,
+      "mae": 13.226851,
+      "alpha_mae": 22.192515
+    },
+    "baseline": {
+      "trace_width": 1024,
+      "raw": 6355083,
+      "gzip": 1945289,
+      "ssim": 0.764641,
+      "mae": 10.897826,
+      "alpha_mae": 7.279684
+    },
+    "svg": {
+      "trace_width": 128,
+      "raw": 107816,
+      "gzip": 30627
+    },
+    "budget": 150000,
+    "display_size": [
+      72,
+      72
+    ],
+    "fallback": true,
+    "webp_bytes": 79576,
+    "webp_display": {
+      "ssim": 0.992588,
+      "mae": 0.438824,
+      "alpha_mae": 0.107639
+    },
+    "webp_lossless": true,
+    "settings": {
+      "colormode": "color",
+      "hierarchical": "stacked",
+      "mode": "spline",
+      "filter_speckle": 2,
+      "color_precision": 8,
+      "layer_difference": 8,
+      "corner_threshold": 60,
+      "length_threshold": 4.0,
+      "splice_threshold": 45,
+      "path_precision": 3
+    },
+    "seconds": 5.96,
+    "served_sha256": "4e759d4eac5f210f5707943c5275da220e073af703287216ab3dcff8cfb1492d",
+    "master_sha256": "479c4708fe28738a25f8cf76af3123b1aadb83d00eaa7fb3497aee105a30fe0d"
+  }
+}

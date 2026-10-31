@@ -7,7 +7,7 @@ use std::ops::Range;
 
 use tbg_core::content::TICK_HZ;
 use tbg_core::ArcanaPreset;
-use tbg_core::{EndReason, Ruleset, FACTIONS, UNIT_KINDS};
+use tbg_core::{EndReason, Ruleset, ALL_KINDS, FACTIONS};
 
 use crate::duels::Matrix;
 use crate::meta;
@@ -44,7 +44,12 @@ pub fn matchups(scope: Scope) -> Vec<(Policy, Policy)> {
     }
     if scope == Scope::Suite {
         v.extend([Policy::Heavy, Policy::Cheap].map(|p| (p, Policy::Bot)));
-        v.extend(UNIT_KINDS.map(|k| (Policy::Favor(k), Policy::Bot)));
+        v.extend(
+            ALL_KINDS
+                .into_iter()
+                .filter(|k| k.is_conventional())
+                .map(|k| (Policy::Favor(k), Policy::Bot)),
+        );
     }
     v
 }
@@ -198,9 +203,10 @@ pub fn rows(results: &Results, duels: Option<(&Matrix, &Ruleset)>, resamples: u3
             ));
         }
     }
-    let favor: Vec<(Policy, Vec<f64>)> = UNIT_KINDS
-        .iter()
-        .filter_map(|&k| {
+    let favor: Vec<(Policy, Vec<f64>)> = ALL_KINDS
+        .into_iter()
+        .filter(|k| k.is_conventional())
+        .filter_map(|k| {
             Some((
                 Policy::Favor(k),
                 scores(results, Policy::Favor(k), Policy::Bot)?,
@@ -314,6 +320,28 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
         unit: Unit::Seconds,
         searched: true,
     }];
+    // Reference rows (P42): they never fail; later phases compare against
+    // them (ROSTER-EXPANSION §I).
+    let quantile = |q: usize| {
+        f64::from(ticks[(ticks.len() * q / 100).min(ticks.len() - 1)]) / f64::from(TICK_HZ)
+    };
+    for (name, value) in [
+        ("p90 duration (s)", quantile(90)),
+        ("p99 duration (s)", quantile(99)),
+        (
+            "max duration (s)",
+            f64::from(ticks[ticks.len() - 1]) / f64::from(TICK_HZ),
+        ),
+    ] {
+        rows.push(Row {
+            name: name.into(),
+            value,
+            interval: None,
+            band: (0.0, f64::MAX),
+            unit: Unit::Seconds,
+            searched: false,
+        });
+    }
     let share = |reason: EndReason| {
         cluster(&games, move |r| {
             (f64::from(u8::from(r.reason == reason)), 1.0)
@@ -338,7 +366,7 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
             (0.45, 0.55),
         ));
     }
-    for k in UNIT_KINDS {
+    for k in ALL_KINDS.into_iter().filter(|k| k.is_conventional()) {
         let c = cluster(&games, |r| {
             let all: u32 = r
                 .sides
@@ -356,7 +384,8 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
         rows.push(pct(
             format!("purchase share {k:?}"),
             est(&c, 20 + k as u64),
-            (0.05, 1.0),
+            // O-R2: 2.5 % (about 60 % of the even share at 25 kinds).
+            (0.025, 1.0),
         ));
     }
     let comebacks = cluster(&games, |r| match r.comeback() {
@@ -367,6 +396,14 @@ fn fun_rows(results: &Results, resamples: u32) -> Vec<Row> {
         "comebacks (behind at 2:00, won)",
         est(&comebacks, 5),
         (0.20, 1.0),
+    ));
+    let stalls = cluster(&games, |r| {
+        (f64::from(u8::from(r.stall >= 60 * TICK_HZ)), 1.0)
+    });
+    rows.push(pct(
+        "matches with a 60 s stall",
+        est(&stalls, 6),
+        (0.0, 0.01),
     ));
     rows
 }

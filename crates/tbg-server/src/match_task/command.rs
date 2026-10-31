@@ -35,6 +35,8 @@ impl Match {
                 .flatten(),
             // D-40: both frozen presets on every (re)attach (BR-AR05).
             arcanas: self.state.players.each_ref().map(|p| p.arcanas),
+            // ARENAS-G: the arena drawn at pairing, on every (re)attach.
+            arena: self.state.arena,
         }
     }
 
@@ -47,7 +49,9 @@ impl Match {
                 // A replayed or out-of-order intention never mutates twice and
                 // never enters the replay log.
                 let current = self.state.player(seat).last_seq;
-                let stale = seq != 0 && seq <= current;
+                // Zero is an offline simulation sentinel, never an online
+                // sequence: accepting it resets last_seq and permits replays.
+                let stale = seq == 0 || seq <= current;
                 let result = if stale {
                     Err(tbg_core::Rejection::Stale)
                 } else {
@@ -97,7 +101,7 @@ impl Match {
                 let start = self.match_start(seat);
                 self.send(seat, start);
                 // Catch up on events buffered while detached.
-                self.send_view(seat);
+                self.send_view(seat, false);
             }
             MatchCmd::Rtt { seat, ms } => self.stats[seat.index()].rtts.push(ms),
         }

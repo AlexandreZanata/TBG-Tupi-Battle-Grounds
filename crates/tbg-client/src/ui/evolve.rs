@@ -3,7 +3,7 @@
 //! unit is gone.
 
 use bevy::prelude::*;
-use tbg_core::content::{def, form_of, FormDef, ENERGY_SCALE, EVOLVE_COST};
+use tbg_core::content::{def, form_of, FormDef, ENERGY_SCALE};
 use tbg_core::{OnHit, Phase, UnitId, UnitView};
 
 use super::{button, label, UiAction, BUTTON, DISABLED, PANEL};
@@ -80,7 +80,8 @@ fn rebuild(
     let title = format!("{} | tier {}", def(u.kind).name, u.tier);
     let mut children = vec![commands.spawn(label(title, 20.0)).id()];
     for (branch, text) in options(u) {
-        let cost = EVOLVE_COST[usize::from(u.tier.min(1))];
+        // The seat's real price (Augment and arena discounts, D-55).
+        let cost = v.evolve_costs[usize::from(u.tier.min(1))];
         children.push(
             commands
                 .spawn((
@@ -126,9 +127,10 @@ fn choice_action(v: &tbg_core::MatchView, unit: UnitId, branch: u8) -> UiAction 
         u.id == unit
             && u.seat == v.you
             && u.tier < 2
+            && !u.is_summon()
             && (u.tier == 0 || u.branch == branch)
             && form_of(u.kind, u.tier + 1, branch).is_some()
-            && v.energy >= EVOLVE_COST[usize::from(u.tier.min(1))]
+            && v.energy >= v.evolve_costs[usize::from(u.tier.min(1))]
     }) && v.phase == Phase::Running;
     if available {
         UiAction::Evolve { unit, branch }
@@ -183,6 +185,7 @@ pub fn describe(f: &FormDef) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tbg_core::content::EVOLVE_COST;
 
     #[test]
     fn open_panel_tracks_energy_without_reopening_or_replacing_buttons() {
@@ -200,6 +203,7 @@ mod tests {
             hp: 100,
             max_hp: 100,
             status: 0,
+            fx: 0,
         });
         let mut app = App::new();
         app.insert_resource(LatestView(Some(view)))

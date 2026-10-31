@@ -38,8 +38,13 @@ P9  Real-time fast path + reconnect    P15 Art direction, rig v2, style lock (Ar
          └► P12 Ranked + Elo rating             └► P30 Fluidity + performance (client)
              └► P13 Global ranking + stats          └► P31 Consistency, playtest, v0.2.0
                  └► P14 Real-env validation (GATE)
-                     └► P30-B Server capacity on minimal hardware (tbg-server only;
-                          may run between character phases)
+                     └► P30-A Network/view audit (measurement only)
+                          └► P30-B Server capacity (applies P30-A's decision;
+                               may run between character phases)
+
+P30-A measures the current snapshot, event, WebSocket, and client paths
+and decides whether P30-B should change the wire format. It does not ship
+a production optimization. P30-B reads its report before starting.
 
 Archived 2026-10-28 by the owner (D-31): P17 arena for every ratio, P18
 Stronghold styles, P19 UI kit + cards, P20 lobby restyle, P21 effects kit.
@@ -107,6 +112,11 @@ the result screen. They add no queue and no second server. P39 may run
 after P14; do not run it concurrently with P16-F4/F7 or P16-A/P16-B (same
 lobby/menu files). It gates no existing phase.
 
+**Roster expansion — planned (P42–P53).** Fifteen new units, their
+shared systems, lab gates and release criteria are planned in
+[ROSTER-EXPANSION.md](ROSTER-EXPANSION.md) (Proposed; nothing active).
+Phase files are written one at a time, starting with P42.
+
 | Phase | File | Milestone at the end | Status | Reviewed |
 |-------|------|----------------------|--------|----------|
 | P0 | — | Lean repository, plan | done | yes |
@@ -152,7 +162,9 @@ lobby/menu files). It gates no existing phase.
 | P28 | [P28-unit-bloomkeeper.md](phases/P28-unit-bloomkeeper.md) | Bloomkeeper final | planned | — |
 | P29 | [P29-unit-rootcaller.md](phases/P29-unit-rootcaller.md) | Rootcaller final | planned | — |
 | P30 | [P30-fluidity-and-performance.md](phases/P30-fluidity-and-performance.md) | Auto quality, no hitches, device matrix met | planned | — |
-| P30-B | [P30B-server-capacity.md](phases/P30B-server-capacity.md) | Most players per minimal server; measured before/after on 1 vCPU / 1 GB | planned | — |
+| P30-A | [P30A-network-performance-audit.md](phases/P30A-network-performance-audit.md) | Evidence-based view/network decision; no production wire change; gates P30-B | implemented on `phase/p30a-network-audit`: decision **A + C**, capacity/reconnect/frequency measured, report and raw evidence committed; reviewer audit done 2026-10-29 (gaps closed in the report); merge pending owner | — |
+| P30-B | [P30B-server-capacity.md](phases/P30B-server-capacity.md) | Most players per minimal server; applies the P30-A decision; measured before/after on 1 vCPU / 1 GB | planned | — |
+| P30-D | [P30D-server-performance.md](phases/P30D-server-performance.md) | Current-roster audit, exact-behavior core optimizations, smaller socket buffers, local constrained capacity; no production changes | experimental implementation and measured report complete; **review pending, full-workspace C7 exceeded 300 s** | — |
 | P31 | [P31-consistency-and-release.md](phases/P31-consistency-and-release.md) | One visual family; playtest; tag `v0.2.0` | planned | — |
 | P32 | [P32-arcana-baseline-and-combat-contracts.md](phases/P32-arcana-baseline-and-combat-contracts.md) | Refreshed baseline, reproduced combat risks, explicit rule decisions | planned (extra after P31) | — |
 | P33 | [P33-arcana-deterministic-core.md](phases/P33-arcana-deterministic-core.md) | Six bounded options, deterministic modifiers, offline experiment only | planned | — |
@@ -163,6 +175,24 @@ lobby/menu files). It gates no existing phase.
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
 | P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; 29 online tests and browser evidence; **owner physical-phone/PWA check pending** | PR #2 follow-up fixes pending |
 | P40 | [P40-arcana-trees.md](phases/P40-arcana-trees.md) | Fifteen-node trees, twelve points, three supremes, preset migration, editor and lab evidence | implemented; audited on `phase/p40-review` (Quickdraw cap fixed, Deadeye re-measured to +0.25 tile); War and Vitality builds trail the default, browser look check open | — |
+| P41 | [P41-i18n-pt-br.md](phases/P41-i18n-pt-br.md) | Client-only English + Brazilian Portuguese: compiled catalogs, lobby language selector, Latin-1 fonts, zero per-frame cost | steps 0–5 implemented (catalogs, fonts, resolver, lobby; PR #9); steps 6–8 and owner decisions O-P41-1…5 open | — |
+| P42 | [P42-roster-baseline.md](phases/P42-roster-baseline.md) | Roster canon (D-48), lab combat counters, stall and duration rows, `comp-*` policy, baseline on main | in progress | — |
+| P47 | [P47-live-spectate-and-presence.md](phases/P47-live-spectate-and-presence.md) | Lobby: players online and in battle always visible, Live battles panel (public Casual + Ranked), real-time spectating for guests and accounts | planned; revised 2026-10-30 (owner lobby request, protocol after v15, arenas, i18n, desktop only) | yes (owner: look) |
+| P54 | [P54-unit-art-kits.md](phases/P54-unit-art-kits.md) | Unit art kits (own model, motion, aim, projectile per character); gait v2 for every unit; Strongholds aim and fire their own projectiles; Siege Walker, Bone Brute, Rootcaller final kits | done; **owner approved (2026-10-30)**; tower defenders and lobby-faithful dress added (D-52) | yes (owner) |
+| P55 | [P55-champion-kits.md](phases/P55-champion-kits.md) | Every unrefined champion on its own art kit (fifteen new champions, the Crate, seven originals) on a shared kit library; support action cues (D-53) | done; **owner approved (2026-10-30)** | yes (owner) |
+| A-1 | [A1-visual-polish-troops-strongholds.md](phases/A1-visual-polish-troops-strongholds.md) | Troop polish: directional aim from `AttackStart`, directed melee, 55 rig-v2 forms, full animation pass (D-47). Steps 10–12 (Strongholds) **superseded by D-46** | consolidated 2026-10-30: kit units keep the P54/P55 look (owner direction); A-1 drives the Archer and any kind without a kit (D-47) | — |
+| ARENAS-G | [ARENAS-gameplay.md](phases/ARENAS-gameplay.md) | Arenas in the real game: server draw at pairing, symmetric modifiers (Proposed), practice choice, scene switching, Arenas lobby page; lab measurement deferred by the owner | implemented, awaiting owner look | yes (owner: look, fun, values) |
+| P57 | [P57-unit-spacing.md](phases/P57-unit-spacing.md) | Units take up space on screen: client display layout (five files, ranks behind the front, smoothing); server and protocol unchanged | planned | yes (owner: look) |
+
+## Independent arena art follow-up
+
+[Arena visual variants](phases/ARENAS-visual-variants.md) adds Frozen Tundra,
+Volcanic Forge, Ancient Ruins and Storm Valley around the unchanged arena 1
+layout. The owner requested client visuals and documentation only, based on
+`main`; no gameplay modifiers or authoritative arena selection are included.
+See the [arena art catalog and preview links](ARENAS.md). Implementation and
+desktop evidence are tracked in that report; owner visual approval is pending.
+The gameplay integration is [ARENAS-G](phases/ARENAS-gameplay.md).
 
 ## Pending validations (owner)
 
@@ -259,8 +289,16 @@ All code for P1–P8 is implemented and validated on the development PC
 > the phase file with the real command outputs and measurements, commit
 > it, and stop.
 
+## Owner-requested art follow-ups (2026-10-30)
+
+Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and future Synergy emblems](art/FACTIONS.md), then [illustrated lobby and account presentation](art/LOBBY-PRESENTATION.md). Reports include asset budgets, measured fidelity, desktop galleries and verification limits. These cosmetic follow-ups do not complete or replace a planned gameplay phase.
+
+## Owner-requested seascape follow-up (2026-10-30)
+
+[Arena seascape](art/ARENA-SEASCAPE.md): implemented and validated on `codex/arena-seascape`, based on main `6ef155b`, then integrated into `codex/ranking-ui` for PR #14 at the owner's request to publish all changes from this chat. Owner approved the displayed design and the 12.9 ms reference p95 limit (+15.2% over its measured baseline). Report includes before/after desktop captures, performance/build measurements, local commits and the separate pre-existing online-test exclusion. Current authorization is GitHub publication only; no main merge or VPS deployment. Broader P30 status is unchanged.
+
 ## Later (not planned yet)
 
-`Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · spectating ·
+`Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·
 rating-based matchmaking and seasons (D-18) · `Reposition`/bench design ·
 WebGPU build · delta views · additional regions (ARCHITECTURE §12).

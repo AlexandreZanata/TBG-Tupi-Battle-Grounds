@@ -167,6 +167,9 @@ tables are the one allowed exception.
   all `MatchStart` fields; `MatchMode::Challenge` is appended after Ranked.
   Peers older than v11 are rejected at the handshake.
   Intentions carry no seat: the server derives the seat from the connection.
+  Online intention sequences are positive and strictly increasing per
+  seat. Zero is reserved for offline simulation calls; rejecting it before
+  core application prevents resetting `last_seq` and replaying purchases.
 - **Rates:** simulation 20 Hz; views every second tick (10 Hz) per seat,
   plus an immediate acknowledgement view to the seat whose intention was
   applied or rejected that tick (P9).
@@ -301,15 +304,38 @@ its owner decision is recorded in the P15 report.
   key, sky ambient, and soft distance fog. No textures or custom unit shader.
 - **Animation:** keys select Linear/CubicIn/CubicOut/CubicInOut/Hold;
   clip metadata delivers Strike, Release, and Footstep events. Crossfade
-  remains 0.1 s. V2 Walk uses content speed for cadence, two-bone legs,
-  and world-X contact anchors; phase offsets are decorrelated by visual id.
-  Archer draw/anchor releases at 0.18 s and recovers by 0.50 s. Cosmetic
-  arrows follow facing for 0.12 s; target-aware VFX are deferred to P21.
+  remains 0.1 s. Walk (gait v2, D-51) advances by the distance the figure
+  travels over its stride, on two-bone legs for every figure, with feet
+  locked in world X and Z while planted and a 0.15 s stop hysteresis;
+  animation runs in `PostUpdate` after all movement. Phase offsets are
+  decorrelated by visual id. Archer draw/anchor releases at 0.18 s and
+  recovers by 0.50 s; its cosmetic arrows still follow facing for 0.12 s.
   Simulation events still decide damage and outcomes.
+- **Unit art kits (D-51, P54):** `art/kits/<unit>/` owns a unit's five
+  rig-v2 forms (`model.rs`), its signature pose layer over the shared
+  clips (`motion.rs`: keyframe tables and procedural IK), gait, aim and
+  attack (`mod.rs`: its own `ShotKind` from a muzzle socket, or a melee
+  `Impact` at the blade). Kits aim with the body (an off-center weapon is
+  lined up exactly) and raise the weapon to the launch tangent of their
+  own shot (`kits::aim`); `visuals/attacks.rs` fires on Release / Strike
+  from the real joint transforms. Glow parts merge into one unlit layer
+  per joint. Shots (`vfx/shots.rs`) fly a parabola in fixed times that
+  keep ART-DIRECTION §4's 0.30 s impact; impacts and muzzles
+  (`vfx/impacts.rs`) use shared meshes and materials only.
+- **Aiming Strongholds:** the render-delayed `AttackStart` of a tower
+  becomes a `TowerOrders` entry; the Artillery carriage and barrel and the
+  Sentinel ballista slew onto the target (yaw, elevation along their own
+  shot) and fire cannonball or bolt from the muzzle. The other kinds have
+  animated defenders (D-52, `arena/strongholds/gunners.rs`): Classic
+  crossbowman, Bastion gun port and falconet, Treasury roof mortar lobbing
+  gold, Command archer; a fallen defender leaves a bolt from the top.
+  Guide: [art/UNIT-ART-KITS.md](art/UNIT-ART-KITS.md).
 - **Arena/readability:** the existing generated arena, Stronghold damage
   states, team rings, HP bars, and hit/spawn/death feedback remain integrated.
 - **Review tools:** `?gallery=palette`, `?gallery=blockout&silhouette`, and
-  `?gallery=<unit>`; `&slow=0.25`, `&turn`, and `&frames`. Named unit views
+  `?gallery=<unit>`; `&slow=0.25`, `&turn`, and `&frames`;
+  `?gallery=<unit>&range` (five forms attacking dummies on the BattleLine)
+  and `?gallery=<unit>&stress=N` (N walking, attacking copies of its forms). Named unit views
   show five forms; contact sheets show the selected base form at four
   quarters of every clip (`&clip=attackranged` can narrow the sheet).
   Neutral studio floors prevent arena props from obscuring review figures;
@@ -403,20 +429,30 @@ buying.
 | Triangles | Measured and reported per unit form and arena layer; no fixed maximum (D-30) — the frame-rate and memory targets decide | P6 · P16-A |
 | Browser memory | ≤ 300 MB | P7 |
 | Sim step, 30 units (release) | ≤ 50 µs | P2 · measured: 0.44 µs harness, 4–6 µs in server |
-| Sim step, large armies (release) | measured, no fixed cap (D-32) | P16-B: 200 units 45 µs mean / 54 µs p99; full views 28.6 KB/s per player at 100 a side (delta views recommended, P30-B) |
-| Server memory | ≤ 100 KB per match + about 64 KB per socket | P10 local: ~300 KB per running match (target missed — sockets and per-connection queues dominate; worst case is bounded by `CONN_QUEUE` and the 64 KiB write cap) |
+| Sim step, large armies (release) | measured, no fixed cap (D-32) | Historical P16-B: about 200 units 45 µs mean / 54 µs p99. P30-D experimental 25-kind fixtures: mixed 200 units 225→130 µs mean; adversarial formation 1,000 units 117→6.56 ms. Different workloads; full data and exact-state validation in P30-D. |
+| Server memory | ≤ 100 KB per match + about 64 KB per socket | Historical P10: ~300 KB/match. P30-D local experimental read buffer 128→4 KiB: 1,000 matches 294→49 MiB RSS (~50 KiB/match including two sockets); repeated, 60-second windows. Long-session growth is not a soak-tested bound. |
 | Bandwidth per player | ≤ 6 KB/s down, ≤ 0.5 KB/s up | P4 local: 1.46 KB/s down, 3 B/s up · P10 local: 1.29 KB/s down at 250 matches |
 | View-gap p95 under 40 ± 20 ms added latency | ≤ 150 ms | P4 local: 128 ms |
 | Ack latency p95 (tap to first covering view) | ≤ RTT p95 + 60 ms | P9: measured in the phase report · P10 local: 50 ms at 250 matches, no added delay |
-| Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | P10 local: 1000 matches ≈ 1 core, 1500 matches ≈ 1.5 cores, 0 late ticks (16-core dev PC; steady-state `scripts/capacity.sh`) |
-| Tokio workers on a 2 vCPU VPS | — | P10: `TBG_WORKERS=2` (one per core); 1 worker also held 1500 matches with 0 late ticks, but 2 leaves headroom for bursts |
+| Concurrent matches on 2 vCPU / 4 GB | ≥ 500 | Historical P10: 1,500 matches ≈ 1.5 cores. P30-D local 1-CPU/1-GiB cgroup: 2,000 matches, 0 late ticks for 60 s, 0.529 busy cores and 92 MiB RSS. Development hardware, not a production-VPS capacity guarantee or a measured maximum. |
+| Tokio workers on a 2 vCPU VPS | — | Historical P10 recommendation: 2. P30-D local 1,000-match points: 1 worker 0.297 cores / RTT p95 3 ms; 2 workers 0.413 cores / 2 ms, both 0 late ticks. More workers did not minimize CPU in this workload; live configuration unchanged. |
 
-**Capacity reasoning.** Simulation CPU is tiny (about 20 units, integer
-math). The first limits are socket fan-out and bandwidth: 500 matches ≈
-1 000 players × 1.3 KB/s ≈ 10 Mbit/s. Measure with `tbg-bots` (P4 locally, P5 on the VPS)
+**Capacity reasoning.** Keep typical-match throughput separate from dense
+army simulation. P30-D removed redundant targeting searches, cubic
+formation engagement and temporary sorting, but those core changes alone
+did not materially improve ordinary 1,000-match CPU. Right-sizing the
+socket read buffer did: about 43% less CPU and 83% less RSS in repeated
+local 1-CPU/1-GiB runs. Full snapshots still scale with visible units;
+the measured lossless-delta prototype is not part of the wire protocol.
+See [P30-D](phases/P30D-server-performance.md) for workloads, raw evidence,
+known test limits and unshipped experiments. Public hardware, shared
+services, long matches, TLS and real-network capacity remain separate
+validation. Measure with `tbg-bots` (P4 locally, P5 on the VPS)
 (bot clients over real WebSockets) at 100/250/500 matches while watching
 CPU, RSS, and bytes/s; `scripts/capacity.sh` (P10) automates the steady-state
-table at 250/500/1000/1500 concurrent matches.
+table at 250/500/1000/1500 concurrent matches. P30-D adds
+`scripts/performance_capacity.py`: localhost-only disposable cgroups,
+explicit CPU/memory caps, separate generator affinity and retained samples.
 
 ## 11. Security baseline
 

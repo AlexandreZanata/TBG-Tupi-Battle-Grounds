@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 13,
-        "v13: Stronghold kinds and Fortification (D-46); v12 was Interest as a regen boost"
+        PROTOCOL_VERSION, 15,
+        "v15: arenas (D-55): MatchStart::arena and MatchView::evolve_costs"
     );
 }
 

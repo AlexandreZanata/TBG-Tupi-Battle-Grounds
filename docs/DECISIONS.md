@@ -769,7 +769,6 @@ refresh-by-buying `favor` policy stay (both are lab-only).
 **Reopen when** the lab shows the Shop makes banking or one unit
 dominant, or the owner wants duplicates inside an offer set.
 
-
 ## D-46 · Four Stronghold kinds with kind-exclusive Fortification — 2026-10-29 (owner decision)
 
 **Decision.** The owner's product spec of 2026-10-29 makes Stronghold
@@ -801,3 +800,244 @@ the first `strongholds` lab matrix showed Artillery at 61–67 % against
 every kind for a near-tower army (`docs/media/p17/lab/`).
 **Reopen when** the matrix or live play shows a kind above 55 % against
 the field, or a branch that is never worth buying.
+## D-47 · Troop aim and visual polish ported from A-1 onto the D-46 towers — 2026-10-29
+
+**Decision.**
+1. Directional aim for ranged, control and support units, and directed
+   strikes for melee units, are driven only by the authoritative
+   `Event::AttackStart { from, to }`. The client never pre-aims, never
+   predicts, and never changes simulation state or tick boundaries.
+2. All 11 unit kinds (55 forms) are native rig-v2 forms with faction death
+   styles, parametric idle and walk cycles, and a deferred impact ring that
+   pairs each projectile or strike with its target reaction.
+3. The A-1 Stronghold layer (`Classic`, `Treasury`, `Redoubt`, `Ballista`,
+   `Banner`, the shared Walls/Arms kit, the turret pivot and its aim
+   height) was **not** ported. The towers are the D-46 ones (Treasury,
+   Bastion, Artillery, Command, kind-exclusive Fortification). When a unit
+   attacks a Stronghold it aims at the core's `stronghold_x`, which is the
+   lane-side face of the D-46 tower (the tower stands 0.9 behind it), at the
+   same impact height as the shot in `sync/events.rs`.
+**Why.** A-1 was authored on the old `main` (`077abe7`) in parallel with
+D-46; its troop work is independent of towers, while its tower work
+duplicated and contradicted D-46. The A-1 report called its decision
+"D-41", a number already in use; this entry replaces it.
+**Guard rails.** `tbg-core`, `tbg-server`, `tbg-balance` and `Cargo.lock`
+are unchanged by the port; asset reuse stays one mesh and one material per
+form; the D-46 contract tests are untouched.
+**Consolidation (2026-10-30).** The P54/P55 kits (D-51, D-53) came later
+and are the owner's character direction: a unit with a kit keeps its own
+aim, shots, impacts and Death clip, and A-1's aim, hit reactions and
+faction deaths apply to units without a kit (today the Archer, whose
+five native forms come from A-1). A-1's other v2 forms remain the
+fallback for a kind without a kit; death hides HP bars for every unit.
+**Reopen when** a Stronghold kind needs its own impact point or muzzle for
+unit reactions, or phone support needs lighter forms.
+
+## D-48 · Roster expansion: fifteen units, staged by ruleset pool — 2026-10-29 (owner decision)
+
+**Decision.** Fifteen new units enter the game in stages through phases
+P42–P53, as planned in `docs/ROSTER-EXPANSION.md` (Rotcap, Farwatch,
+Leechroot, Bombard, Old Finn, Drumguard, Longaxe, Oilpress, Antidote
+Brewer, Puppetmaster, Smuggler, Shatterback, Blood Furnace, Bloodweaver,
+Cargo Crab): both Shatterback (designed here, no draft exists) and Cargo
+Crab are in (O-R1); the roster-health gate becomes ≥ 2.5 % purchase share
+per unit (O-R2); no new unit reaches the `Shop` before its wave, and the
+pool switch is an owner decision in P53.
+**Why.** The current game already fails 12 of 39 lab rows before any new
+unit exists (median duration, three faction rows, the strongest strategic
+style, the Nash mix, duel outliers and weak Evolutions), so new units are
+judged relative to a frozen P42 baseline plus absolute rows the baseline
+already passes, with the old outliers rebalanced by numbers first; with 25
+kinds a 5 % per-unit share is impossible (even share 4.0 %) and offer odds
+per unit fall from 50 % to 20 % of sets, so the threshold moves to about
+60 % of the even share and the lab watches dilution.
+**Reopen when** a wave shows a unit that numbers cannot balance.
+
+## D-49 · P43 shared foundations: ability pairs, staged pool, preview path — 2026-10-29 (executor decision, pending review)
+
+**Decision.** `UnitDef.abilities` is `[[Ability; 2]; 5]` (one pair per
+form slot: base, A1, A2, B1, B2), so Rotcap's Poison + Echo fits without a
+later reshape; Hatch and Guard migrate to ability dispatch with values
+unchanged; `Unit::is_summon()` (unit-level) replaces kind checks where a
+unit is at hand; `hatch_cd` becomes `action_cd`; the Shop draws from
+`Ruleset.pool` (`CANON.pool` stays ten until the P53 owner switch);
+`Ruleset::preview()` names the full staging pool and Practice uses it;
+`UnitFx`/`Stack` land zeroed (hashes updated once); eight staged events
+and `UnitView.fx` ship under protocol v13 with the client rendering staged
+kinds as a gray silhouette. Thresholds for the conditional-damage fields
+stay pending for P44.
+**Why.** ROSTER-EXPANSION §F delegates the pair shape to P43; pairs are
+required by a known P45 unit, not speculation. Everything else is the
+cheapest shape that keeps P43 behavior-identical (gate CSV byte-identical
+to the P42 baseline on the same seeds).
+**Reopen when** a wave needs a third ability on one form, or the pool
+switch needs more than a field assignment.
+
+## D-50 · All fifteen new units go online before P50 tuning — 2026-10-30 (owner decision)
+
+**Decision.** The owner moves the P53 pool switch forward: `CANON.pool`
+is `FULL_POOL` (25 kinds), so online, Practice and the lab draw the same
+`Shop`. Rules from ROSTER-EXPANSION are active; every number stays
+**Proposed**. Shop portraits exist only for the ten original kinds, so
+the fifteen show an empty card until owner art lands.
+**Why.** The owner wants the full roster playable on the test server now
+and accepts untuned values; P50 tunes them with `tbg-balance` evidence.
+The P42 lab baseline on the ten-kind pool stays the reference for D-48.
+**Reopen when** live play or the lab shows a new unit that breaks
+matches (e.g. a stall or a share outside the D-48 gate), or the owner
+wants the pool back to ten.
+
+## D-51 · Per-unit art kits; distance-driven gait; aiming Strongholds — 2026-10-30 (owner request; approved)
+
+**Decision.** Each character owns a code-built *art kit*
+(`crates/tbg-client/src/art/kits/<unit>/`): its five-form figure on rig v2,
+a signature pose layer over the shared clip library, its gait, its aim
+and its attack style — its own projectile, muzzle effect and impact, or
+its own melee impact. Kits are plain data and function pointers in a
+static registry (`kits::kit(UnitKind)`), like the Stronghold `PartDef`s;
+no trait, no engine layer, no assets. First kits: Siege Walker, Bone
+Brute, Rootcaller (P54). Units without a kit keep the shared library and
+the generic projectile until their own phase.
+**Gait v2 (all units).** Walk cadence is the distance the figure actually
+travels divided by its stride, so feet never slide at any speed, slow or
+Evolution bonus; planted feet lock in world X and Z; every figure
+(native or adapted) walks on two-bone legs; walk/idle has a 0.15 s stop
+hysteresis. Animation runs in `PostUpdate` after all movement.
+**Aim.** A unit that attacks keeps its target for one interval plus
+0.7 s; kits turn the body (an off-center weapon is lined up exactly) and
+raise the weapon to the launch tangent of their own shot, which leaves
+the real muzzle. Strongholds aim their gun (Artillery carriage and
+barrel, Sentinel ballista) the same way and fire their own cannonball or
+bolt from it on the render-delayed `AttackStart`; gunless towers loose a
+crossbow bolt from their top.
+**Unchanged.** All of this is cosmetic: no simulation value, event,
+timing or protocol changed; ART-DIRECTION §4's 0.30 / 0.18 / 0.22 s event
+times hold (kits only lengthen recoveries). The Siege Walker is drawn
+with a shoulder bombard ("bazooka", owner 2026-10-30), not the P24
+arbalest; its "Ogre Archer" display name is an open owner decision.
+**Reopen when** a kit's pose cost shows up in the 30-unit stress
+measurement, or skinned glTF replaces code-built figures (D-22).
+**Approved (owner, 2026-10-30).** After reviewing the build at
+`localhost` (gallery forms, `&range`, `&evolve`, walking, aiming towers)
+the owner approved the three kits, gait v2 and the Artillery's aim and
+projectiles as they stand; the Artillery's animation is frozen. The
+Siege Walker's display name stays an open owner decision.
+
+## D-52 · Defenders and lobby-faithful dress for the gunless Strongholds — 2026-10-30 (owner request)
+
+**Decision.** Every Stronghold kind now shows who fires its shot, animated
+for its role, and is dressed after its lobby portrait
+(`assets/stronghold/<kind>.webp`, GPT-generated, D-46) in the same
+low-poly vertex-color style as the kits:
+- **Classic:** a crossbowman in a team tabard and kettle hat walks round
+  the crown to face the target, aims, recoils (`gunners.rs`); steps,
+  lintel, door studs, arrow slits and a gold band.
+- **Bastion:** a gun port in the wall facing the enemy; its shutter flies
+  open on every shot and a swivel falconet runs out through it, fires and
+  runs back (Sentinel's ballista keeps firing on Royal Sentinel); an
+  arched gate up a flight of steps, four round corner turrets with
+  conical roofs and team pennants, a crenellated keep with its flag.
+- **Treasury:** a stone dormer on an eight-sided terracotta roof whose
+  trapdoors open for a brass mortar that lobs a purse of gold (its own
+  `ShotKind::Coins` and gold impact); a gold dome with a lantern spire,
+  gold finials and team pennants on the pillars, team banners beside the
+  vault, entry steps, gold-framed windows, striped market awnings.
+- **Command:** an archer on the observation platform turns, draws and
+  looses; cloth panels on the rail, a heraldic banner over an arched
+  door, masonry courses and entry steps.
+**How.** Defenders are ordinary tower pieces: `Motion::Swivel` (walks
+round the tower's axis with the aim), `Motion::Mounted` (a carried
+weapon: orbits, aims, recoils), `Motion::Kick` (a fixed gun: aims,
+recoils; negative recoil runs it out of a port), `Motion::Hatch` (swings
+open on a shot, then shuts). `aim::Turret` gained `orbit` (aim from the
+tower axis) and `arc` (a port's yaw limit). A tower whose defender fell
+with its damage state still looses a bolt from its top.
+**Unchanged.** The Artillery (approved, D-51), all simulation values and
+the render-delayed shot timing.
+**Reopen when** a defender reads poorly at match distance or the owner
+wants a different role animation.
+
+## D-53 · Every champion on its own art kit — 2026-10-30 (owner request)
+
+**Decision.** The P54 kits (D-51) and the Stronghold defenders (D-52) are
+the visual standard for every champion. Twenty-three champions that still
+used the shared library now have their own kit (figure with five distinct
+forms, motion for every clip, own projectile or melee impact): the
+fifteen new champions and the Smuggler's Crate, and the originals
+Shieldbearer, Hexer, Sawbot, Bloomkeeper, Nester, Beetling and Rampart.
+Kits share one library (`art/kits/common/`: anatomy, dress, gear, motion
+blocks on the fixed event times). Support actions with an `AttackStart`
+are shot kits; the crate toss, the blood transfer stream and broken
+plates are cued from their own events (`sync/actions.rs`).
+**Unchanged.** The Siege Walker, Bone Brute and Rootcaller kits, the
+towers, the Archer's approved v2 figure, all simulation values, event
+times and the protocol.
+**Reopen when** the owner rejects a kit's look, a kit reads poorly at
+match distance, or the view packs the carrier and plate bits (then the
+Cargo Crab can seat its passenger and the Shatterback can shed plates).
+
+## D-54 · View wire: derive four fields and split static unit identity (A + C) — 2026-10-29 (Proposed, P30-A; numbered D-41 on its branch, renumbered at consolidation)
+
+**Decision.** P30-A measured the full-snapshot `MatchView` and chose to
+(A) stop sending what the client computes exactly (`max_hp`,
+`phase_ticks_left`, `next_rotation_in`, `you`) and (C) send unit static
+identity (`seat`, `kind`, `tier`, `branch`) only on spawn, evolution, and
+full views (reconnect), with a complete dynamic list (`id`, `x`, `hp`,
+`status`) every view. Measured payload: −41.6 % natural, −44.7 % at 20
+units/side, −42.5 % at 100, with build+encode CPU not higher. Delta views,
+compression, 5/8 Hz, and a client rewrite were measured and rejected or
+deferred. P30-B applies it as the next `PROTOCOL_VERSION` (v10 unless P17-A
+takes it first); that commit changes the append-only protocol contract
+tests and must name this decision.
+**Why.** Static identity plus `max_hp` is 35 % of every view and is
+repeated 10×/s; the split keeps one lost view from leaving a stale
+position or HP and needs no keyframe state machine.
+**Guard rails.** Server authority is unchanged (the client derives
+presentation values, never outcomes); a decode error or an unknown static
+id forces the existing reconnect; events stay presentation-only; 10 Hz and
+the 20 Hz simulation are unchanged.
+**Reopen when** the VPS shows bandwidth, not CPU, is still the first limit
+after C (then delta, with a ≥15 pp measured gain over C at 100 units), or
+C fails the 100-seed reconstruction or the 50-match reconnect chaos.
+
+## D-55 · Themed arenas are part of the match — 2026-10-30 (owner request; values Proposed)
+
+**Decision.** The five visual arenas (Forest, Tundra, Volcanic, Ruins,
+Storm) become a match property. The server draws one uniformly at pairing
+from the OS RNG (never the match seed or a simulation stream) and sends it
+in `MatchStart` (protocol v15); reconnects get the same one; replays and
+match rows record it (SQLite v6, nullable column). Each non-neutral arena
+applies one symmetric modifier (GAME-DESIGN §12): Tundra −10 % movement,
+Volcanic +8 % attack speed, Ruins −1 Energy on each player's first
+successful Evolution, Storm +8 % base regeneration. `MatchState::arena`
+is fixed at creation; `PlayerState::arena_discount_used` tracks the Ruins
+discount; the view carries both effective Evolution prices.
+**Contracts.** This commit changes the append-only contracts: the
+protocol version and `MatchStart` bytes (arena field), and the
+determinism and lab hashes (the state serializes the arena and the
+discount flag; ticks, winners and reasons are unchanged in the Forest).
+**Why.** The owner wants the arenas in the real game; one small,
+symmetric, readable change per arena adds variety without favouring a
+seat. The Forest keeps every previous number.
+**Reopen when** the balance lab shows an arena moving the seat or
+policy win rates past the D-33 gate, players find a modifier unreadable,
+or the owner wants arena choice online.
+
+## D-58 · C7 measures planted imbalances on the ten-kind Shop pool — 2026-10-30 (owner-authorized CI fix)
+
+**Decision.** C7 (`c7_planted_imbalances_are_caught_for_every_unit`)
+builds its detection rulesets on the original ten-kind Shop pool
+(`UNIT_KINDS`) instead of the full 25-kind pool that `CANON` carries since
+D-50. Duels, match rows, planted ×2 and ×3 values and all thresholds stay
+as they were; only the pool the Shop draws from changes for C7.
+**Why.** With the full pool a unit is offered much less often, so the
+`favor-<unit>` row does not buy the planted unit often enough and the ×3
+cost of the Siege Walker moves that row by less than the 0.10 gate. In a
+release build C7 failed with `SiegeWalker ×3 cost was not caught` on
+`15e4792` and passed after the change (all seven contracts green). The
+failure was the test's sensitivity under the wider pool, not a balance
+result; the thresholds are a product decision and were not touched.
+**Limit.** C7 no longer exercises the 25-kind pool that online play draws
+from. Balance of the fifteen new units is still unmeasured.
+**Reopen at P50 tuning**, when the lab must measure every unit on the pool
+online play uses and the gate may need a sample or a row change.

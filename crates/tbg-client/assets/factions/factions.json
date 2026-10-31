@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "artBudgetBytes": 2000000,
+  "factions": [
+    {
+      "name": "Humans",
+      "identity": "The Crown",
+      "color": "#2F6DC3",
+      "secondary": "#D9B44A",
+      "frame": {
+        "svg": "frame-humans.svg",
+        "display": "frame-humans.webp"
+      },
+      "emblem": {
+        "svg": "emblem-humans.svg",
+        "display": "emblem-humans.webp"
+      },
+      "layout": {
+        "portraitTop": 17,
+        "portraitHeight": 47,
+        "nameY": 71.4,
+        "roleY": 76.3,
+        "costY": 84.0,
+        "orbY": 13.1,
+        "orbSize": 15.8
+      }
+    },
+    {
+      "name": "Undead",
+      "identity": "The Barrow",
+      "color": "#76519D",
+      "secondary": "#D8D2C0",
+      "frame": {
+        "svg": "frame-undead.svg",
+        "display": "frame-undead.webp"
+      },
+      "emblem": {
+        "svg": "emblem-undead.svg",
+        "display": "emblem-undead.webp"
+      },
+      "layout": {
+        "portraitTop": 17,
+        "portraitHeight": 47,
+        "nameY": 71.4,
+        "roleY": 76.3,
+        "costY": 83.9,
+        "orbY": 11.5,
+        "orbSize": 14.2
+      }
+    },
+    {
+      "name": "Machines",
+      "identity": "The Ironworks",
+      "color": "#D47A36",
+      "secondary": "#4A5058",
+      "frame": {
+        "svg": "frame-machines.svg",
+        "display": "frame-machines.webp"
+      },
+      "emblem": {
+        "svg": "emblem-machines.svg",
+        "display": "emblem-machines.webp"
+      },
+      "layout": {
+        "portraitTop": 17,
+        "portraitHeight": 47,
+        "nameY": 69.6,
+        "roleY": 74.5,
+        "costY": 82.6,
+        "orbY": 12.6,
+        "orbSize": 15.8
+      }
+    },
+    {
+      "name": "Plants",
+      "identity": "The Wildwood",
+      "color": "#3F8C50",
+      "secondary": "#6B4F2E",
+      "frame": {
+        "svg": "frame-plants.svg",
+        "display": "frame-plants.webp"
+      },
+      "emblem": {
+        "svg": "emblem-plants.svg",
+        "display": "emblem-plants.webp"
+      },
+      "layout": {
+        "portraitTop": 17,
+        "portraitHeight": 47,
+        "nameY": 72.5,
+        "roleY": 77.4,
+        "costY": 85.2,
+        "orbY": 9.6,
+        "orbSize": 13.0
+      }
+    }
+  ]
+}

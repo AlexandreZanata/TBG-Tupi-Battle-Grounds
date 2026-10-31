@@ -1,0 +1,11 @@
+command: target/release/tbg-balance gate --pairs 1024 --out target/balance/p42-gate
+git_head: a9af5dc
+ruleset_fingerprint: 98b6a2f95bde4f5e
+applied: canon
+seeds: 1000000..1001024 (1024 pairs)
+threads: 16
+reaction_views: 5
+wall_s: 164.50
+games: 352256
+games_per_s: 2141
+game_seconds_per_wall_second: 223910

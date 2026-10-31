@@ -5,6 +5,7 @@
 //! floats in simulation state, and unseeded randomness (docs/ARCHITECTURE.md §4).
 
 pub mod account;
+mod afflictions;
 pub mod arcana;
 pub mod augment;
 pub mod bot;
@@ -14,7 +15,9 @@ pub mod headless;
 mod hits;
 mod intent;
 #[cfg(feature = "lab")]
-mod lab;
+pub mod lab;
+#[cfg(feature = "bench-profile")]
+pub mod profiling;
 pub mod protocol;
 pub mod rating;
 pub mod replay;
@@ -25,6 +28,7 @@ pub mod sim;
 pub mod state;
 pub mod stronghold;
 mod summon;
+mod support;
 mod synergy;
 mod targeting;
 pub mod types;

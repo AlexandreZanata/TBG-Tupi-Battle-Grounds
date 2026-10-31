@@ -19,9 +19,9 @@ pub(super) fn insert(conn: &Connection, m: &Value) -> rusqlite::Result<()> {
     };
     conn.execute(
         "INSERT INTO matches (ended_at, duration_s, winner, reason, seed, seat_a, seat_b,
-            step_us_mean, step_us_max, late_ticks, max_lateness_ms, a_arcanas, b_arcanas)
+            step_us_mean, step_us_max, late_ticks, max_lateness_ms, a_arcanas, b_arcanas, arena)
          VALUES (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10,
-            ?11, ?12)",
+            ?11, ?12, ?13)",
         params![
             int("duration_s"),
             text("winner"),
@@ -36,6 +36,8 @@ pub(super) fn insert(conn: &Connection, m: &Value) -> rusqlite::Result<()> {
             int("max_lateness_ms"),
             arcanas(0),
             arcanas(1),
+            // D-55: `Arena::index`, NULL when absent.
+            m["arena"].as_i64(),
         ],
     )?;
     Ok(())
@@ -43,4 +45,40 @@ pub(super) fn insert(conn: &Connection, m: &Value) -> rusqlite::Result<()> {
 
 pub(super) fn count(conn: &Connection) -> rusqlite::Result<i64> {
     conn.query_row("SELECT count(*) FROM matches", [], |r| r.get(0))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_arena_is_recorded_and_older_rows_stay_null() {
+        // D-55: schema v6 adds a nullable `matches.arena`.
+        let mut conn = Connection::open_in_memory().expect("memory db");
+        super::super::schema::migrate(&mut conn).expect("migrate");
+        let row = |arena: Option<u64>| {
+            let mut m = serde_json::json!({
+                "duration_s": 10, "winner": "A", "reason": "StrongholdDestroyed",
+                "seed": 7, "seats": [{}, {}],
+            });
+            if let Some(a) = arena {
+                m["arena"] = a.into();
+            }
+            m
+        };
+        insert(&conn, &row(Some(3))).expect("insert with arena");
+        insert(&conn, &row(None)).expect("insert without");
+        let arenas: Vec<Option<i64>> = conn
+            .prepare("SELECT arena FROM matches ORDER BY id")
+            .expect("query")
+            .query_map([], |r| r.get(0))
+            .expect("rows")
+            .map(|r| r.expect("row"))
+            .collect();
+        assert_eq!(arenas, [Some(3), None]);
+        let version: i64 = conn
+            .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
+            .expect("version");
+        assert_eq!(version, 6);
+    }
 }

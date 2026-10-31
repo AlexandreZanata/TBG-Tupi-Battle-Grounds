@@ -8,7 +8,7 @@ use crate::content::{BOUNTY_WINDOW_TICKS, RUNNING_START};
 use crate::rng::Pcg32;
 use crate::ruleset::{Ruleset, CANON};
 use crate::state::{EndReason, Event, MatchState, Outcome, Phase, PlayerState};
-use crate::types::{Seat, StrongholdKind};
+use crate::types::{Arena, Seat, StrongholdKind};
 use crate::{combat, shop, summon, synergy};
 
 impl MatchState {
@@ -20,6 +20,12 @@ impl MatchState {
     /// The online match: each seat's frozen, validated preset (BR-AR05).
     pub fn with_arcanas(seed: u64, arcanas: [ArcanaPreset; 2]) -> MatchState {
         MatchState::lab(seed, &CANON, arcanas)
+    }
+
+    /// Practice preview (ROSTER-EXPANSION §F.5): the full staging pool,
+    /// offline only. Identical to canon until P44 adds new kinds.
+    pub fn with_preview(seed: u64, arcanas: [ArcanaPreset; 2]) -> MatchState {
+        MatchState::lab(seed, Ruleset::preview(), arcanas)
     }
 
     /// A match on another ruleset: the offline balance lab only (D-33).
@@ -38,6 +44,13 @@ impl MatchState {
         self
     }
 
+    /// The match's arena (ARENAS-G), set before the first tick and fixed
+    /// for the match; the Forest is neutral.
+    pub fn with_arena(mut self, arena: Arena) -> MatchState {
+        self.arena = arena;
+        self
+    }
+
     /// Any ruleset and presets: the lab's Arcana experiments (D-33, D-40).
     pub fn lab(seed: u64, rules: &'static Ruleset, arcanas: [ArcanaPreset; 2]) -> MatchState {
         let player = |stream: u64| {
@@ -45,7 +58,7 @@ impl MatchState {
             PlayerState {
                 energy: rules.energy_start,
                 regen_frac: 0,
-                offers: shop::draw_offers(&mut rng),
+                offers: shop::draw_offers(&mut rng, rules.pool),
                 stronghold_hp: rules.stronghold_hp,
                 stronghold_cooldown: 0,
                 stronghold: StrongholdKind::Classic,
@@ -55,6 +68,8 @@ impl MatchState {
                 synergy: [0; 4],
                 last_seq: 0,
                 rng,
+                // Cargo streams 11/12: distinct from the Shop streams 1/2.
+                cargo_rng: Pcg32::new(seed, stream + 10),
                 arcanas: ArcanaPreset::NEUTRAL,
                 augments: Default::default(),
                 augment_resolved: 0,
@@ -67,6 +82,7 @@ impl MatchState {
                 last_stand_used: false,
                 fury_stacks: 0,
                 fury_until: 0,
+                arena_discount_used: false,
             }
         };
         let first_round = if rules.augment.round_ticks == 0 {
@@ -86,9 +102,13 @@ impl MatchState {
             next_unit_id: 1,
             outcome: None,
             augments: AugmentState::new(seed, first_round),
+            arena: Arena::Forest,
             army: Default::default(),
             pending: Vec::new(),
+            shrapnel: Vec::new(),
             rules,
+            #[cfg(feature = "lab")]
+            lab: crate::lab::LabStats::default(),
         }
     }
 
@@ -119,8 +139,11 @@ impl MatchState {
             }
             synergy::update(self, &mut ev);
             combat::tick_timers(self);
+            crate::afflictions::tick(self, &mut ev);
             summon::expire(self);
             summon::hatch(self, &mut ev);
+            crate::support::bonds(self);
+            crate::support::boarding(self, &mut ev);
             combat::run_units(self, &mut ev);
             combat::stronghold_fire(self, &mut ev);
             combat::remove_dead(self, &mut ev);
@@ -161,10 +184,14 @@ impl MatchState {
         let regen = u64::from(self.rules.regen_running);
         let rule = self.rules.interest;
         let cap = self.rules.energy_cap;
+        // ARENAS-G: the arena adds bp of the base rate beside Interest's, so
+        // Interest itself is untouched and the remainder keeps both exact.
+        let arena_bp = self.arena_rule().regen_bp;
         for p in &mut self.players {
             // Interest (BR-E05–E07): the more Energy is held, the faster it
             // grows; the remainder carries over so the rate stays exact.
-            let scaled = regen * u64::from(rule.regen_bp(p.energy)) + u64::from(p.regen_frac);
+            let bp = rule.regen_bp(p.energy) + arena_bp;
+            let scaled = regen * u64::from(bp) + u64::from(p.regen_frac);
             p.regen_frac = (scaled % 10_000) as u32;
             let gain = u32::try_from(scaled / 10_000).unwrap_or(u32::MAX);
             p.energy = p.energy.saturating_add(gain);

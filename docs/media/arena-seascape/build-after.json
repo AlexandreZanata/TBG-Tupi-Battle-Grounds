@@ -1,0 +1,35 @@
+{
+  "source_commit": "9b55932",
+  "wasm_file": "tbg-client-5483b09f70ff659c_bg.wasm",
+  "raw_bytes": 24949503,
+  "gzip_bytes": 7779439,
+  "brotli_bytes": 4862886,
+  "sha256": "50426c57cb645409d6284ae6eb86472d96192915d07469eaeccd0de8d8157748",
+  "asset_bytes": 14613050,
+  "identical_to_measured_approved_wasm": true,
+  "delta": {
+    "raw_bytes": 25668,
+    "gzip_bytes": 10672,
+    "brotli_bytes": 7145,
+    "asset_bytes": 0
+  },
+  "delta_percent": {
+    "raw_bytes": 0.10298575640546037,
+    "gzip_bytes": 0.13737057630895944,
+    "brotli_bytes": 0.14714540993845393,
+    "asset_bytes": 0.0
+  },
+  "diagnostics_js": {
+    "before_bytes": 1660,
+    "after_bytes": 2140,
+    "delta_bytes": 480,
+    "gzip_delta_bytes": 185,
+    "brotli_delta_bytes": 162
+  },
+  "built_tree_raw": {
+    "before_bytes": 39811438,
+    "after_bytes": 39837104,
+    "note": "The baseline tree includes the same diagnostic instrumentation used by both measurements.",
+    "delta_bytes": 25666
+  }
+}

@@ -93,12 +93,26 @@ fn c2_per_tick_traces_are_frozen() {
     // P40's fifteen-rank Arcana state, a full Shop redraw per purchase,
     // BR-S04, and the D-46 Stronghold fields: same Classic matches and end
     // ticks, only the serialized state grew).
+    // P43: the zeroed `UnitFx` block moved the hashes
+    // with tick, winner and reason identical (verified). P47:
+    // `march_ignore_slow` grew `UnitFx`; hashes moved once more, behavior
+    // identical (verified).
+    // P48-A: `surge_until` grew `UnitFx`; hashes moved once more,
+    // behavior identical (verified).
+    // P48-B: `betray_bp`/`betray_stumble` grew `UnitFx` and `cargo_rng`
+    // joined `PlayerState`; hashes moved once more, behavior identical
+    // (verified).
+    // Merge of the roster waves with D-46: both grew the serialized state;
+    // hashes refrozen once, tick, winner and reason identical (verified).
+    // D-50: the Shop draws all 25 kinds; traces and end ticks moved.
+    // D-55 (ARENAS-G): the arena fields joined the serialized state; the
+    // Forest is neutral: traces and hashes moved, end ticks identical.
     let goldens = [
-        (1, 0x8a75_6b3a_3e26_38c3, 0x002a_6144_d3ae_b8f3, 2_214),
-        (7, 0x1144_9ef1_cb17_bdc9, 0x11ce_a806_1a70_15db, 3_284),
-        (42, 0xde18_bddc_8ae6_1c03, 0xbf9b_d770_b820_9249, 1_833),
-        (1000, 0x7695_62f8_9e14_07dc, 0xd27a_de45_0381_f79d, 2_641),
-        (65535, 0x8263_e7d0_69de_33d3, 0xf4d7_b131_bc48_6a05, 1_740),
+        (1, 0x5609_ff29_778f_5630, 0xdf5d_547e_36e4_7845, 3_336),
+        (7, 0xd331_26a2_2fa9_245e, 0xca17_5202_6278_78e5, 2_286),
+        (42, 0xb138_5327_fc8e_9dfc, 0x4069_7a3a_89d9_10e1, 6_295),
+        (1000, 0x3f3e_9285_2ce7_ec9f, 0x840b_4353_126f_d199, 6_683),
+        (65535, 0x9243_c0ae_0f2f_5803, 0x4726_93d6_139e_6d32, 5_531),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

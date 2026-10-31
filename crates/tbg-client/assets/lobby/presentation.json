@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "artBudgetBytes": 3000000,
+  "assets": [
+    {
+      "id": "arcanas-v2",
+      "masterSize": [
+        768,
+        640
+      ],
+      "displayWidth": 235,
+      "lossless": false,
+      "asset": {
+        "svg": "arcanas-v2.svg",
+        "display": "arcanas-v2.webp"
+      }
+    },
+    {
+      "id": "strongholds-v2",
+      "masterSize": [
+        768,
+        640
+      ],
+      "displayWidth": 235,
+      "lossless": false,
+      "asset": {
+        "svg": "strongholds-v2.svg",
+        "display": "strongholds-v2.webp"
+      }
+    },
+    {
+      "id": "troops-v2",
+      "masterSize": [
+        768,
+        640
+      ],
+      "displayWidth": 235,
+      "lossless": false,
+      "asset": {
+        "svg": "troops-v2.svg",
+        "display": "troops-v2.webp"
+      }
+    },
+    {
+      "id": "ranking-v2",
+      "masterSize": [
+        768,
+        640
+      ],
+      "displayWidth": 235,
+      "lossless": false,
+      "asset": {
+        "svg": "ranking-v2.svg",
+        "display": "ranking-v2.webp"
+      }
+    },
+    {
+      "id": "crest-v2",
+      "masterSize": [
+        768,
+        1024
+      ],
+      "displayWidth": 156,
+      "lossless": true,
+      "asset": {
+        "svg": "crest-v2.svg",
+        "display": "crest-v2.webp"
+      }
+    },
+    {
+      "id": "profile-v2",
+      "masterSize": [
+        1200,
+        640
+      ],
+      "displayWidth": 528,
+      "lossless": false,
+      "asset": {
+        "svg": "profile-v2.svg",
+        "display": "profile-v2.webp"
+      }
+    },
+    {
+      "id": "logo-v2",
+      "masterSize": [
+        1500,
+        600
+      ],
+      "displayWidth": 365,
+      "lossless": true,
+      "asset": {
+        "svg": "logo-v2.svg",
+        "display": "logo-v2.webp"
+      }
+    }
+  ]
+}

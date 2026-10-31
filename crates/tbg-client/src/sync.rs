@@ -13,6 +13,7 @@ use crate::audio::Sounds;
 use crate::vfx::VfxAssets;
 use crate::visuals::{self, UnitLook, VisualAssets};
 
+mod actions;
 mod events;
 mod messages;
 mod timeline;
@@ -36,6 +37,8 @@ pub struct MatchInfo {
     pub opponent_rating: Option<u16>,
     /// D-40: both frozen Arcana presets, indexed by `Seat::index()`.
     pub arcanas: [tbg_core::ArcanaPreset; 2],
+    /// ARENAS-G: the match's arena, from `MatchStart` (never from the URL).
+    pub arena: tbg_core::Arena,
     /// P39: the result screen offers a rematch only for a Challenge match.
     pub challenge: bool,
 }
@@ -63,7 +66,16 @@ pub(crate) struct ViewBuffer {
 }
 
 #[derive(Resource, Default)]
-struct UnitEntities(HashMap<UnitId, Entity>);
+pub struct UnitEntities(pub HashMap<UnitId, Entity>);
+
+/// Everything the event pass writes besides the unit visuals.
+type FxResources<'w> = (
+    Res<'w, VfxAssets>,
+    ResMut<'w, Sounds>,
+    ResMut<'w, MatchStats>,
+    ResMut<'w, visuals::TowerOrders>,
+    ResMut<'w, crate::art::aim::ImpactRing>,
+);
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<MatchInfo>()
@@ -74,6 +86,7 @@ pub fn plugin(app: &mut App) {
         .init_resource::<RematchInfo>()
         .init_resource::<MatchStats>()
         .init_resource::<ViewGaps>()
+        .init_resource::<crate::art::aim::ImpactRing>()
         .add_systems(Update, poll_link)
         .add_systems(
             Update,
@@ -106,7 +119,7 @@ fn sync_units(
     mut buffer: ResMut<ViewBuffer>,
     mut map: ResMut<UnitEntities>,
     mut visuals: events::Visuals,
-    mut fx_res: (Res<VfxAssets>, ResMut<Sounds>, ResMut<MatchStats>),
+    mut fx_res: FxResources,
 ) {
     let now = time.elapsed_secs_f64();
     let mut scene = Scene {
@@ -124,13 +137,22 @@ fn sync_units(
     let Some((you, alive)) = placed else {
         return;
     };
-    let (vfx, sounds, stats) = (&fx_res.0, &mut *fx_res.1, &mut *fx_res.2);
+    let (vfx, sounds, stats, orders, ring) = (
+        &fx_res.0,
+        &mut *fx_res.1,
+        &mut *fx_res.2,
+        &mut *fx_res.3,
+        &mut *fx_res.4,
+    );
     let mut fx = events::Fx {
         assets: &assets,
         vfx,
         sounds,
         stats,
+        orders,
         you,
+        time: time.elapsed_secs_f64(),
+        ring,
     };
     for ev in buffer.timeline.take_events() {
         apply_event(&mut commands, &mut fx, &map, &mut visuals, ev);

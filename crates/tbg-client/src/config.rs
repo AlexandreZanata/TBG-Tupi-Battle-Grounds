@@ -157,6 +157,22 @@ pub fn save_stronghold(kind: tbg_core::StrongholdKind) {
 #[cfg(target_arch = "wasm32")]
 const STRONGHOLD_KEY: &str = "tbg.stronghold";
 
+/// ARENAS-G: the arena Practice uses, chosen in the Arenas page (the page
+/// writes the slug; Rust reads it). Online matches never read it.
+#[cfg(target_arch = "wasm32")]
+const ARENA_KEY: &str = "tbg.arena";
+
+/// The Practice arena: the saved choice, else the neutral Forest.
+pub fn load_arena() -> tbg_core::Arena {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(raw) = storage().and_then(|s| s.get_item(ARENA_KEY).ok().flatten()) {
+        if let Some(arena) = tbg_core::Arena::from_slug(raw.trim()) {
+            return arena;
+        }
+    }
+    tbg_core::Arena::Forest
+}
+
 /// A selectable kind by name; anything else (Classic, junk) is `None`.
 #[cfg(any(target_arch = "wasm32", test))]
 pub fn parse_stronghold(raw: &str) -> Option<tbg_core::StrongholdKind> {

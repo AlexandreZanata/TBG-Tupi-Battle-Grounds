@@ -2,7 +2,7 @@
 //! team shields. Branch A (Fortress) adds drum towers, plates and
 //! buttresses; branch B (Sentinel) raises a watchtower and then a ballista deck on it.
 
-use super::parts::{along_x, along_z, around, piece, t, whole, Form, PartDef, Piece};
+use super::parts::{along_x, along_z, around, piece, t, whole, Form, Motion, PartDef, Piece};
 use crate::arena::Part;
 use crate::art::{mesh::Shape::*, palette::*};
 use bevy::prelude::*;
@@ -64,6 +64,19 @@ const SENTRY_Z: f32 = -0.98;
 const SENTRY_TOP: f32 = 1.95;
 const STAGE: f32 = 0.5;
 
+/// The Royal Sentinel ballista: its mount on the stage and its bolt tip.
+pub(super) fn turret() -> super::aim::Turret {
+    super::aim::Turret {
+        pivot: Vec3::new(0.0, SENTRY_TOP + STAGE + 0.22, SENTRY_Z),
+        rest_pitch: 0.0,
+        muzzle: Vec3::new(0.47, 0.24, 0.0),
+        shot: crate::vfx::shots::ShotKind::Ballista,
+        flash: crate::vfx::impacts::Muzzle::Bolt,
+        orbit: false,
+        arc: std::f32::consts::PI,
+    }
+}
+
 pub(super) fn pieces(form: Form) -> Vec<Piece> {
     let mut p = vec![whole(&WALLS), whole(&MERLONS).lost(1), whole(&KEEP).lost(2)];
     if form.a() {
@@ -86,12 +99,10 @@ pub(super) fn pieces(form: Form) -> Vec<Piece> {
         Form::B2 => p.extend([
             whole(&STAGE_PART).lost(1),
             piece(&DECK, staged).lost(1),
-            piece(
-                &BALLISTA,
-                staged.with_translation(staged.translation + Vec3::Y * 0.22),
-            )
-            .lost(1)
-            .aimed(),
+            piece(&BALLISTA, Transform::from_translation(turret().pivot))
+                .lost(1)
+                .aimed()
+                .moving(Motion::Aim),
         ]),
         _ => {}
     }
@@ -118,6 +129,34 @@ fn walls(team: Color) -> Vec<Part> {
     }
     for x in [-0.5, 0.5] {
         p.extend(shield(team, t(x, 0.88, 1.12)));
+    }
+    p.extend(gatehouse(team));
+    p
+}
+
+/// The lobby portrait's dress: an arched gate up a flight of steps, and
+/// round corner turrets with conical roofs and team pennants.
+fn gatehouse(team: Color) -> Vec<Part> {
+    let up = Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2);
+    let mut p = vec![
+        (Box(0.72, 0.1, 0.3), ROCK, t(0.0, 0.05, 1.4)),
+        (Box(0.72, 0.2, 0.14), ROCK, t(0.0, 0.1, 1.3)),
+        (
+            Ring(0.045, 0.27, 180.0),
+            ROCK,
+            t(0.0, 0.9, 1.12).with_rotation(up),
+        ),
+        (Box(0.08, 0.6, 0.08), ROCK, t(-0.29, 0.6, 1.13)),
+        (Box(0.08, 0.6, 0.08), ROCK, t(0.29, 0.6, 1.13)),
+    ];
+    for (x, z) in [(-0.78, -1.08), (-0.78, 1.08), (0.78, -1.08), (0.78, 1.08)] {
+        p.push((Cyl(0.16, 0.5), STONE, t(x, 1.55, z)));
+        p.push((Cyl(0.18, 0.05), ROCK, t(x, 1.8, z)));
+        p.push((Cone(0.21, 0.34), RUST, t(x, 1.99, z)));
+        if z > 0.0 {
+            p.push((Cyl(0.012, 0.3), WOOD, t(x, 2.26, z)));
+            p.push((Box(0.15, 0.09, 0.012), team, t(x + 0.075, 2.34, z)));
+        }
     }
     p
 }
@@ -151,13 +190,21 @@ fn merlons(_team: Color) -> Vec<Part> {
     p
 }
 
-fn keep(_team: Color) -> Vec<Part> {
-    vec![
+/// The central keep, crenellated, its team flag flying.
+fn keep(team: Color) -> Vec<Part> {
+    let mut p = vec![
         (Box(0.9, 0.62, 1.0), STONE, t(0.0, 1.66, 0.0)),
         (Box(1.0, 0.08, 1.1), ROCK, t(0.0, KEEP_TOP, 0.0)),
         (Box(0.08, 0.22, 0.04), DARK, t(-0.2, 1.7, 0.51)),
         (Box(0.08, 0.22, 0.04), DARK, t(0.2, 1.7, 0.51)),
-    ]
+        (Cyl(0.02, 0.6), WOOD, t(-0.25, KEEP_TOP + 0.3, -0.3)),
+        (Box(0.3, 0.18, 0.015), team, t(-0.1, KEEP_TOP + 0.5, -0.3)),
+        (Ball(0.03), GOLD, t(-0.25, KEEP_TOP + 0.62, -0.3)),
+    ];
+    for (x, z) in [(-0.4, -0.45), (-0.4, 0.45), (0.4, -0.45), (0.4, 0.45)] {
+        p.push((Box(0.17, 0.17, 0.17), STONE, t(x, KEEP_TOP + 0.12, z)));
+    }
+    p
 }
 
 /// Fortress: drum towers closing both ends of the wall and iron plates.

@@ -100,6 +100,11 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
         // Untunable by the search: the nine conditional Arcanas are rules,
         // not per-rank percentages; the named lab builds exercise them.
         arcana: _,
+        // Untunable: staging data, not balance (ROSTER-EXPANSION §F.5).
+        pool: _,
+        // Untunable by the global search: arenas are compared one by one
+        // against the Forest (the `arenas` command, D-55).
+        arenas: _,
     } = r;
     let mut v = Vec::new();
     let mut add = |k: Knob, value: i64| {
@@ -153,6 +158,8 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
             heal,
             // Untunable: slow/root rules are under review (P32).
             on_hit: _,
+            // Untunable in P43: staged abilities, read by later waves.
+            abilities: _,
             forms,
         } = u;
         // Summons are tuned through their Nester's forms only.
@@ -183,6 +190,16 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
                 heal_bp,
                 dmg_add,
                 on_hit: _,
+                // Untunable in P43/P44: staged hooks for later waves.
+                splash_bp: _,
+                splash_hit: _,
+                heal_cut_bp: _,
+                heal_cut_ticks: _,
+                lifesteal_bp: _,
+                vs_below_bp: _,
+                vs_below_hp_bp: _,
+                vs_above_bp: _,
+                vs_above_hp_bp: _,
             } = f;
             for (field, value) in [
                 (FormField::HpBp, hp_bp),
@@ -380,9 +397,17 @@ pub fn apply(r: &mut Ruleset, spec: &str) -> Result<(), String> {
 /// Role invariants (Proposed, GAME-DESIGN §5 note). A candidate breaking
 /// one is discarded before any match is played.
 pub fn valid(r: &Ruleset) -> Result<(), String> {
-    for k in UNIT_KINDS {
+    for k in tbg_core::ALL_KINDS
+        .into_iter()
+        .filter(|k| k.is_conventional())
+    {
         let d = r.def(k);
-        if d.range > r.stronghold_range {
+        // Farwatch never targets Strongholds, so the range cap does not
+        // apply to it (ROSTER-EXPANSION §C.2 role invariant).
+        let no_stronghold = d
+            .ability(0, 0)
+            .contains(&tbg_core::content::Ability::NoStronghold);
+        if !no_stronghold && d.range > r.stronghold_range {
             return Err(format!("{:?}: base range above the Stronghold's", k));
         }
         let cap = r.energy_cap.unwrap_or(u32::MAX);
@@ -401,9 +426,10 @@ pub fn valid(r: &Ruleset) -> Result<(), String> {
         return Err("Evolution cost or start Energy above the cap".into());
     }
     for f in FACTIONS {
-        let units: Vec<&UnitDef> = UNIT_KINDS
-            .iter()
-            .map(|&k| r.def(k))
+        let units: Vec<&UnitDef> = tbg_core::ALL_KINDS
+            .into_iter()
+            .filter(|k| k.is_conventional())
+            .map(|k| r.def(k))
             .filter(|d| d.faction == f)
             .collect();
         // The faction's best unit by `key` belongs to the Archetype, if any.

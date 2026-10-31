@@ -11,13 +11,13 @@
 
 use crate::arcana::{self, ArcanaPreset, ArcanaValues};
 use crate::content::{
-    AugmentBonus, FormDef, Stats, SynergyEffect, UnitDef, ARCANA_BP, ARCANA_VALUES, AUGMENT_COST,
-    AUGMENT_WINDOW_TICKS, BEETLES_PER_NESTER, BEETLE_LIFETIME, BP, ENERGY_START, EVOLVE_COST,
-    FORTIFY_COST, HATCH_EVERY, HATCH_EVERY_HIVE, INTEREST_BAND, INTEREST_MAX_BANDS,
-    INTEREST_PER_BAND, MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE, STRONGHOLD_HP,
-    STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
+    ArenaRule, AugmentBonus, FormDef, Stats, SynergyEffect, UnitDef, ARCANA_BP, ARCANA_VALUES,
+    ARENA_RULES, AUGMENT_COST, AUGMENT_WINDOW_TICKS, BEETLES_PER_NESTER, BEETLE_LIFETIME, BP,
+    ENERGY_START, EVOLVE_COST, FORTIFY_COST, HATCH_EVERY, HATCH_EVERY_HIVE, INTEREST_BAND,
+    INTEREST_MAX_BANDS, INTEREST_PER_BAND, MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE,
+    STRONGHOLD_HP, STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
 };
-use crate::types::{Tick, UnitKind, ALL_KINDS};
+use crate::types::{Tick, UnitKind, ALL_KINDS, FULL_POOL};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InterestRule {
@@ -71,12 +71,17 @@ pub struct Ruleset {
     pub hatch_every_hive: u16,
     pub beetles_per_nester: [usize; 2],
     pub beetle_lifetime: Tick,
+    /// The Shop pool: which kinds offers draw from (ROSTER-EXPANSION §F.5).
+    /// All 25 kinds since the owner switch (D-50); values stay Proposed.
+    pub pool: &'static [UnitKind],
     /// Every kind, in `ALL_KINDS` order.
     pub units: [UnitDef; ALL_KINDS.len()],
     /// Arcana bp per rank of the six original nodes (GAME-DESIGN §9).
     pub arcana_bp: [i32; 6],
     /// Conditional Arcana values for the nine new nodes.
     pub arcana: ArcanaValues,
+    /// Arena modifiers by `Arena::index()` (ARENAS-G).
+    pub arenas: [ArenaRule; 5],
 }
 
 /// The only ruleset the server and the client use.
@@ -107,14 +112,26 @@ pub static CANON: Ruleset = Ruleset {
     hatch_every_hive: HATCH_EVERY_HIVE,
     beetles_per_nester: BEETLES_PER_NESTER,
     beetle_lifetime: BEETLE_LIFETIME,
+    pool: &FULL_POOL,
     units: UNITS,
     arcana_bp: ARCANA_BP,
     arcana: ARCANA_VALUES,
+    arenas: ARENA_RULES,
 };
 
 impl Ruleset {
     pub fn canon() -> &'static Ruleset {
         &CANON
+    }
+
+    /// The full roster as the Shop pool (ROSTER-EXPANSION §F.5): equal to
+    /// canon since D-50; the lab and Practice keep calling it by name.
+    /// Leaked once (a few KB, freed at exit).
+    pub fn preview() -> &'static Ruleset {
+        Box::leak(Box::new(Ruleset {
+            pool: &FULL_POOL,
+            ..CANON.clone()
+        }))
     }
 
     pub fn def(&self, kind: UnitKind) -> &UnitDef {
@@ -158,6 +175,33 @@ impl Ruleset {
             &ArcanaPreset::NEUTRAL,
             &AugmentBonus::default(),
         )
+    }
+
+    /// Max HP a client can derive from the view alone (P30-A H8): the same
+    /// inputs as `MatchState::stats_of`. `summon` is the view's summon flag
+    /// (`UnitView::is_summon`): summons take no Synergy or Arcanas, and of
+    /// the Augments only those naming Beetlings (BR-U08, D-40, BR-AG10,
+    /// §C.11); the view carries both seats' Augment counts.
+    pub fn unit_max_hp(
+        &self,
+        (kind, tier, branch): (UnitKind, u8, u8),
+        summon: bool,
+        synergy_level: u8,
+        arcanas: &ArcanaPreset,
+        augments: &AugmentBonus,
+    ) -> i32 {
+        if summon {
+            let bonus = if kind == UnitKind::Beetling {
+                *augments
+            } else {
+                AugmentBonus::default()
+            };
+            return self
+                .stats_with(kind, tier, branch, 0, &ArcanaPreset::NEUTRAL, &bonus)
+                .max_hp;
+        }
+        self.stats_with(kind, tier, branch, synergy_level, arcanas, augments)
+            .max_hp
     }
 
     /// Effective stats with the seat's Arcanas and Augments: every source
@@ -216,6 +260,15 @@ impl Ruleset {
             range: d.range + sum(|f| f.range_add) as i32 + a.range_add,
             speed: scale(i64::from(d.speed), move_bp),
             splash: d.splash + sum(|f| f.splash_add) as i32,
+            // Splash share is an upgrade, not a stack: the highest active
+            // form wins (like `on_hit`); the default is a full share.
+            splash_bp: active
+                .iter()
+                .rev()
+                .flatten()
+                .map(|f| f.splash_bp)
+                .next()
+                .unwrap_or(10_000),
             heal: scale(
                 i64::from(d.heal),
                 sum(|f| f.heal_bp) + a.heal_bp + augments.heal_bp,

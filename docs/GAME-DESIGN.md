@@ -41,6 +41,7 @@ evolve, and which factions you combine.
 | PlayerIntention | Client request (purchase, evolve, reposition); a request, never a state change | `PlayerIntention` |
 | AuthoritativeServer | The process that owns combat, Energy, shop timers, outcomes | — |
 | Stronghold | **Proposed (new):** each player's base at their end of the `BattleLine` | `Stronghold` |
+| Arena | **Proposed (ARENAS-G, D-55):** the battlefield of one match, one of five; the server draws it and its one small modifier applies to both sides | `Arena` |
 | Cosmetic | Visual item with no gameplay effect | `Cosmetic` |
 | Inventory | Account-bound collection of owned cosmetics | `Inventory` |
 | Commander | Player-facing name for the player (TBD by brand voice) | `Player` |
@@ -272,7 +273,7 @@ human playtests. Targets are starting hypotheses.
 | Decisive play | Matches decided by Stronghold kill / overtime / draw | ≥ 60% / ≤ 30% / ≤ 2% |
 | Decision frequency | Intentions per player per match | ≥ 25 (one every 4–7 s) |
 | Strategic variety | Win rate of any faction-majority army (harness + humans) | 45–55% |
-| Roster health | Purchase share of each unit | ≥ 5% |
+| Roster health | Purchase share of each unit | ≥ 2.5 % (owner decision O-R2, 2026-10-29: 5 % is impossible with 25 units, whose even share is 4.0 %) |
 | Counterplay | Every unit has a documented counter in the roster | 100% |
 | Comebacks | Wins by the player behind in Stronghold HP at 2:00 | ≥ 20% |
 | Readability | Testers can explain why they lost | ≥ 4 of 5 testers |
@@ -686,3 +687,59 @@ never sufficient (§6).
 | Best Augment triple found by adversarial search, against the pool | ≤ 65 % |
 | Comebacks (behind at 2:00, then won) | not below the P16-D canon; target ≥ 20 % |
 | Nash support / largest weight | ≥ 3 / ≤ 50 % |
+
+## 11. Roster expansion (active, values Proposed)
+
+Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). Since the owner switch of 2026-10-30 (D-50) all fifteen are in the `Shop` online, ahead of the P50 tuning and P53 plan: their rules are active and every number stays **Proposed** until the balance lab confirms it (D-33).
+
+| Unit | Faction | Class | Cost | HP | Dmg | Every | Range | Speed | Identity in one line |
+|------|---------|-------|------|----|-----|-------|-------|-------|----------------------|
+| Rotcap | Plants | Ranged | 3 | 200 | 12 | 1.5 | 3.5 | 0.9 | Each hit adds a poison stack (6/s, 10 s, ≤ 6 per victim) that outlives it |
+| Farwatch | Humans | Ranged | 3 | 150 | 70 | 4.0 | 12.0 | 0.9 | Shoots units across most of the lane; never targets Strongholds |
+| Leechroot | Plants | DPS | 3 | 220 | 10 | 1.6 | 1.2 | 0.9 | Damage dealt to enemy units becomes permanent stacks, no maximum; lost on death |
+| Bombard | Machines | Ranged | 5 | 1 000 | 24 | 2.2 | 4.0 | 0.5 | Blast radius 1.0 hits every unit, both sides and itself |
+| Old Finn | Humans | Control | 3 | 240 | 8 | 2.0 | 3.5 | 0.9 | Fish: −15 % move each, ≤ 3, 5 s; never slows attacks |
+| Drumguard | Humans | Support | 3 | 260 | — | — | 2.0 | 1.0 | Bond to the nearest ally: +25 % move, −15 % damage taken |
+| Longaxe | Humans | DPS | 4 | 360 | 100 | 2.4 | 1.6 | 0.7 | Heavy melee that strikes over its own front line |
+| Oilpress | Machines | Tank | 7 | 3 600 | 25 | 2.5 | 0.8 | 0.3 | Most HP in the game; while engaged, own units cannot walk past it |
+| Antidote Brewer | Plants | Support | 3 | 260 | — | 4.0 | 3.0 | 0.9 | Cleanses the most afflicted ally and wards it 1 s |
+| Puppetmaster | Undead | Control | 4 | 260 | — | 8.0 | 4.0 | 0.9 | The hardest-hitting enemy in range strikes its own ally once |
+| Smuggler | Humans | Support | 6 | 320 | — | 20.0 | 5.0 | 0.6 | Every 20 s a crate opens into a random unit — or nothing |
+| Shatterback | Plants | Tank | 4 | 560 + 4 × 100 plates | 30 | 1.5 | 0.8 | 0.55 | Each broken plate: permanently faster moves and attacks |
+| Blood Furnace | Undead | DPS | 4 | 440 | 36 | 1.8 | 0.8 | 0.9 | Each hit burns 6 % max HP; damage grows up to ×4 as HP falls |
+| Bloodweaver | Undead | Support | 3 | 300 | — | 5.0 | 3.0 | 0.9 | Moves up to 120 HP from the healthiest ally to the most wounded |
+| Cargo Crab | Machines | Tank | 5 | 1 400 | 20 | 1.5 | 0.8 | 0.5 | Carries one non-Tank ally that single-target attacks cannot reach |
+
+## 12. Arenas (active, values Proposed, ARENAS-G, D-55)
+
+Every match is played in one of five `Arena`s. Each changes one small
+thing, **the same for both sides**; the Forest is the neutral reference.
+Values are **Proposed** until the balance lab confirms them (D-33).
+
+| Arena | Effect on both sides |
+|-------|----------------------|
+| Verdant Forest | None |
+| Frozen Tundra | Troop movement speed −10 % |
+| Volcanic Forge | Troop attack speed +8 % |
+| Ancient Ruins | Each player's first successful `Evolution` costs 1 `Energy` less |
+| Storm Valley | Base `Energy` regeneration +8 % |
+
+- **BR-AR01** Online, the server draws the `Arena` uniformly at pairing
+  (every mode: casual, ranked, rooms, challenges, rematches), before the
+  match starts, independently of the match seed. Both players and every
+  reconnect see the same `Arena`; each new match draws again. Clients
+  never choose an online `Arena`.
+- **BR-AR02** Practice uses the `Arena` the player chose on the Arenas
+  page (Forest by default); "Play again" keeps it.
+- **BR-AR03** Troops are every unit on the `BattleLine`, summons and
+  carried cargo included; `Stronghold`s, `Augment`s and `Arcana`s are
+  unchanged. Movement and attack-speed effects join the other basis-point
+  bonuses with one truncation (BR-X01): interval = base × 10 000 /
+  (10 000 + attack bp), then the existing caps.
+- **BR-AR04** The Ruins discount is spent only by a successful `Evolution`
+  (a rejected one keeps it), once per player, stacks with `Augment`
+  discounts, and never takes the price below 1 `Energy`. The view shows
+  each player's current `Evolution` prices.
+- **BR-AR05** The Storm bonus adds 800 bp to the base regeneration beside
+  Interest (BR-E05); the existing remainder carries the rounding.
+

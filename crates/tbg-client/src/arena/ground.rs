@@ -3,15 +3,16 @@
 use super::{
     geometry::{outline, Surface, SEGMENTS},
     painted,
+    theme::Theme,
 };
-use crate::art::{mesh::Shape::*, palette::*};
+use crate::art::mesh::Shape::*;
 use bevy::prelude::*;
 
-pub(super) fn meadow() -> Mesh {
+pub(super) fn meadow(theme: Theme) -> Mesh {
     let rim = outline();
     let center = Vec3::new(8.0, -0.04, 0.0);
     let mut surface = Surface::default();
-    let greens = [Color::srgb(0.47, 0.65, 0.20), Color::srgb(0.53, 0.70, 0.24)];
+    let greens = theme.palette().ground;
     for i in 0..SEGMENTS {
         let j = (i + 1) % SEGMENTS;
         let inner = center.lerp(rim[i], 0.56);
@@ -22,19 +23,16 @@ pub(super) fn meadow() -> Mesh {
     surface.finish()
 }
 
-pub(super) fn lane() -> Mesh {
+pub(super) fn lane(theme: Theme) -> Mesh {
+    let [border, tile_color, variation, lip] = theme.palette().lane;
     let mut parts = vec![(
         Box(18.2, 0.035, 3.34),
-        LANE_DARK,
+        border,
         Transform::from_xyz(8.0, -0.012, 0.0),
     )];
     for tile in 0..18 {
         let x = -0.5 + tile as f32;
-        let sand = if tile % 3 == 0 {
-            Color::srgb(0.82, 0.64, 0.37)
-        } else {
-            LANE
-        };
+        let sand = if tile % 3 == 0 { variation } else { tile_color };
         parts.push((
             Box(0.974, 0.036, 3.08),
             sand,
@@ -43,7 +41,7 @@ pub(super) fn lane() -> Mesh {
         // A thin sunlit lip makes each seam legible without a texture.
         parts.push((
             Box(0.025, 0.038, 3.04),
-            Color::srgb(0.89, 0.73, 0.46),
+            lip,
             Transform::from_xyz(x - 0.47, 0.003, 0.0),
         ));
     }

@@ -1,0 +1,8 @@
+bots 500 | completed 500 | failed 0 | elapsed 245s
+outcomes (per bot): {"StrongholdDestroyed": 472, "TimeUp": 28}
+rtt ms p50 2 p95 2 max 9
+view gap ms p50 99 p95 100 max 121
+ack ms p50 49 p95 50 max 63
+queue wait ms p50 2 p95 9 max 21
+reconnects attempted 0 | succeeded 0
+{"matches":250,"bots":500,"completed":500,"failed":0,"rtt_p50":2,"rtt_p95":2,"gap_p95":100,"gap_max":121,"ack_p50":49,"ack_p95":50,"queue_p95":9,"reconnects":0,"reconnects_ok":0,"delay_ms":0,"jitter_ms":0}

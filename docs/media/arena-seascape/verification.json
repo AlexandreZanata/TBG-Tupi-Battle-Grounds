@@ -1,0 +1,67 @@
+{
+  "source_commit": "9b55932",
+  "protected_paths_unchanged_from_main_base": [
+    "crates/tbg-core",
+    "crates/tbg-server",
+    "crates/tbg-client/src/camera.rs",
+    "crates/tbg-client/src/arena/geometry.rs",
+    "crates/tbg-client/src/arena/ground.rs",
+    "crates/tbg-client/src/arena/strongholds",
+    "crates/tbg-client/src/art",
+    "crates/tbg-client/assets",
+    "crates/tbg-client/index.html",
+    "Cargo.toml",
+    "Cargo.lock"
+  ],
+  "checks": [
+    {
+      "command": "cargo fmt --all -- --check",
+      "result": "passed"
+    },
+    {
+      "command": "cargo clippy --workspace -- -D warnings",
+      "result": "passed",
+      "seconds": 0.59
+    },
+    {
+      "command": "cargo test --workspace -- --skip records_insert_and_count --test-threads=1",
+      "result": "passed for all executed cases",
+      "passed": 266,
+      "ignored": 1,
+      "filtered": 1,
+      "note": "The previously stopped online persistence case was not re-run."
+    },
+    {
+      "command": "cargo test -p tbg-client",
+      "result": "passed after final visual changes",
+      "passed": 48,
+      "failed": 0,
+      "seconds": 0.26
+    },
+    {
+      "command": "cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown",
+      "result": "passed",
+      "seconds": 0.47
+    },
+    {
+      "command": "node --test --test-isolation=none --test-reporter=tap crates/tbg-client/tests/*.test.js",
+      "result": "passed",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "command": "node --check crates/tbg-client/diagnostics/measure.js",
+      "result": "passed"
+    },
+    {
+      "command": "trunk build --release",
+      "result": "passed",
+      "rust_release_seconds": 61.0,
+      "measured_wasm_sha256": "50426c57cb645409d6284ae6eb86472d96192915d07469eaeccd0de8d8157748"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ]
+}

@@ -25,6 +25,8 @@ struct Args {
     accounts: bool,
     /// P12: ranked queue (implies `--accounts`).
     ranked: bool,
+    /// Per-bot match deadline; 25-kind bot matches outlast the 360 s default (D-50).
+    timeout_s: Option<u64>,
 }
 
 fn args() -> Args {
@@ -38,6 +40,7 @@ fn args() -> Args {
         bots: None,
         accounts: false,
         ranked: false,
+        timeout_s: None,
     };
     let raw: Vec<String> = std::env::args().skip(1).collect();
     // Bare flags take no value; everything else comes in key/value pairs.
@@ -74,6 +77,7 @@ fn args() -> Args {
             "--chaos-pct" => a.chaos_pct = num() as u32,
             "--ramp-ms" => a.ramp_ms = num(),
             "--bots" => a.bots = Some(num()),
+            "--timeout-s" => a.timeout_s = Some(num()),
             other => panic!("unknown argument {other}"),
         }
     }
@@ -94,6 +98,9 @@ async fn main() {
         opts.jitter_ms = a.jitter_ms;
         opts.accounts = a.accounts;
         opts.ranked = a.ranked;
+        if let Some(s) = a.timeout_s {
+            opts.timeout = Duration::from_secs(s);
+        }
         if rng.below(100) < a.chaos_pct {
             opts.drop_after = Some(Duration::from_secs(u64::from(20 + rng.below(41))));
             opts.rejoin_after = Some(Duration::from_secs(5));

@@ -13,6 +13,7 @@
   // War Council (BR-AG12–14): pick a card, then confirm; the choice is final.
   const council = { round: '', picked: null, sent: '', initialTicks: 0 };
   const augmentArt = globalThis.TbgAugmentArt;
+  const factionArt = globalThis.TbgFactionArt;
   const pause = root.querySelector('[data-pause]');
   const confirmButton = root.querySelector('[data-battle-action="confirm"]');
   root.querySelector('[data-battle-action="forgo"]').addEventListener('click', () => { council.sent = 'forgo'; send('forgo'); });
@@ -183,6 +184,7 @@
     cards.forEach((card,i) => {
       const [kind,name,role,cost,faction,available,pending] = (root.getAttribute('data-offer-'+i) || '').split('|');
       if (!kind) return;
+      factionArt?.decorate(card, faction, render);
       const image = card.querySelector('img');
       portrait(image, kind);
       card.querySelector('.champion-name').textContent = name;
@@ -220,7 +222,7 @@
       card.querySelector('.council-name').textContent = name || '—';
       card.querySelector('.council-text').textContent = text || '';
       const affordable = Number(cost) * scale <= Number(s.energy);
-      card.querySelector('.council-cost').textContent = cost ? cost + ' Energy' + (affordable || resolved ? '' : ' · not enough') : '';
+      card.querySelector('.council-cost').textContent = cost;
       const available = !resolved && affordable;
       if (!available && council.picked === i && !resolved) council.picked = null;
       card.dataset.available = available ? 'true' : 'false';
@@ -229,7 +231,7 @@
       // Short of Energy: grey, like an unaffordable Shop card.
       card.classList.toggle('unaffordable', !resolved && !affordable);
       card.setAttribute('aria-pressed', council.picked === i ? 'true' : 'false');
-      card.setAttribute('aria-label', (name || 'Augment') + ', ' + (text || '') + ', ' + (cost || '0') + ' Energy');
+      card.setAttribute('aria-label', (name || 'Augment') + ', ' + (text || '') + ', ' + (cost || '0') + ' Energy' + (!resolved && !affordable ? ', not enough Energy' : ''));
     });
     confirmButton.disabled = resolved || council.picked === null;
     pause.querySelector('.council-forgo').disabled = resolved;

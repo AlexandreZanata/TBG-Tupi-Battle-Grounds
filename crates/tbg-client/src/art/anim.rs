@@ -1,4 +1,5 @@
-//! Per-instance eased clips, crossfades, event delivery, and foot-locked v2 walking.
+//! Per-instance eased clips, crossfades, event delivery, kit layers, aim
+//! blending, and two-bone walking whose cadence is the distance travelled.
 
 use super::curves::{blend, events_between};
 pub use super::{
@@ -6,12 +7,17 @@ pub use super::{
     curves::{sample, ClipEvent, Easing, Pose},
 };
 use super::{
-    feet::FootLocks,
-    rig::{self, Proportions, NODE_COUNT},
+    feet::{FootLocks, Stride},
+    ik,
+    kits::{self, Aim, Gait, Kit, Moment},
+    rig::{self, Joint, Proportions, NODE_COUNT},
 };
 use bevy::prelude::*;
 use tbg_core::UnitKind;
 const FADE: f32 = 0.1;
+/// Seconds for the aim to swing fully in, and to let go.
+const AIM_IN: f32 = 0.15;
+const AIM_OUT: f32 = 0.3;
 
 #[derive(Component)]
 pub struct Animator {
@@ -21,8 +27,17 @@ pub struct Animator {
     pub native: bool,
     pub archer: bool,
     pub rate: f32,
+    pub hit_stop: f32,
     pub preview: Option<(Clip, f32)>,
     pub events: Vec<ClipEvent>,
+    pub kit: Option<&'static Kit>,
+    /// (tier, branch) of the shown form, for kit layers.
+    pub form: (u8, u8),
+    /// The engaged target in world space; visuals refresh it every frame.
+    pub aim_at: Option<Vec3>,
+    /// Walk in place at content speed (review tools): feet are not planted.
+    pub treadmill: bool,
+    pub gait: Gait,
     base: Clip,
     base_t: f32,
     action: Option<(Clip, f32)>,
@@ -31,6 +46,13 @@ pub struct Animator {
     walk_period: f32,
     phase: f32,
     feet: FootLocks,
+    aim: Option<Aim>,
+    since_attack: f32,
+    variant: u8,
+    clock: f32,
+    last_root: Option<Vec3>,
+    travel: f32,
+    heading: Vec3,
 }
 impl Animator {
     pub fn new(
@@ -42,6 +64,7 @@ impl Animator {
     ) -> Self {
         let speed = tbg_core::content::effective_stats(kind, 0, 0, 0).speed as f32 / 1000.0;
         let phase = id.wrapping_mul(2654435761) as f32 / u32::MAX as f32;
+        let gait = Gait::of(kind);
         Self {
             joints,
             plan,
@@ -49,19 +72,39 @@ impl Animator {
             native: false,
             archer: false,
             rate: 1.0,
+            hit_stop: 0.0,
             preview: None,
             events: Vec::new(),
+            kit: kits::kit(kind),
+            form: (0, 0),
+            aim_at: None,
+            treadmill: false,
+            gait,
             base: Clip::Idle,
             base_t: phase * Clip::Idle.duration(),
             action: None,
             fade: None,
             last: sample(Clip::Idle, 0.0),
-            walk_period: plan.leg * 0.8 * plan.scale / speed.max(0.01),
+            walk_period: gait.cycle(plan.leg) * plan.scale / speed.max(0.01),
             phase,
             feet: FootLocks::default(),
+            aim: None,
+            since_attack: 1e6,
+            variant: 0,
+            clock: phase * 100.0,
+            last_root: None,
+            travel: 0.0,
+            heading: Vec3::Z,
         }
     }
+    pub fn apply_hit_stop(&mut self, duration_s: f32) {
+        self.hit_stop = duration_s;
+    }
     pub fn play(&mut self, clip: Clip) {
+        if matches!(clip, Clip::AttackMelee | Clip::AttackRanged | Clip::Cast) {
+            self.since_attack = 0.0;
+            self.variant ^= 1;
+        }
         self.fade = Some((self.last, FADE));
         self.action = Some((clip, 0.0));
     }
@@ -85,45 +128,81 @@ impl Animator {
             .or(self.action)
             .unwrap_or((self.base, self.base_t))
     }
+    /// The foot the latest footstep put down: phase 0 lands the left foot,
+    /// phase 0.5 the right one.
+    pub fn stepping_foot(&self) -> Joint {
+        let k = (self.base_t / Clip::Walk.duration()).rem_euclid(1.0);
+        if (0.25..0.75).contains(&k) {
+            Joint::FootR
+        } else {
+            Joint::FootL
+        }
+    }
+    /// Length of `clip` for this figure (kits may lengthen recoveries).
+    pub fn duration(&self, clip: Clip) -> f32 {
+        self.kit
+            .map_or_else(|| clip.duration(), |k| k.duration(clip))
+    }
     fn pose(&self, clip: Clip, t: f32) -> Pose {
         let mut pose = sample(clip, t);
         if self.archer {
             super::archer_v2_clips::apply(clip, t, &mut pose);
         }
+        if let Some(kit) = self.kit {
+            let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.0));
+            let moment = Moment {
+                clip,
+                t,
+                tier: self.form.0,
+                branch: self.form.1,
+                aim: self.aim,
+                since_attack: self.since_attack,
+                variant: self.variant,
+                clock: self.clock,
+                walk,
+            };
+            (kit.pose)(&moment, &mut pose);
+        }
         pose
     }
     fn action_pose(&mut self, dt: f32) -> Pose {
         let mut pose = self.last;
-        let archer = self.archer;
-        if let Some((clip, t)) = &mut self.action {
-            self.events = events_between(*clip, *t, *t + dt);
-            *t += dt;
-            pose = sample(*clip, *t);
-            if archer {
-                super::archer_v2_clips::apply(*clip, *t, &mut pose);
-            }
-            if !clip.looping() && *t >= clip.duration() && *clip != Clip::Death {
+        if let Some((clip, t)) = self.action {
+            self.events = events_between(clip, t, t + dt);
+            let t = t + dt;
+            self.action = Some((clip, t));
+            pose = self.pose(clip, t);
+            if !clip.looping() && t >= self.duration(clip) && clip != Clip::Death {
                 self.action = None;
                 self.fade = Some((pose, FADE));
             }
         }
         pose
     }
+    /// Seconds of base-clip time this frame: walking advances by distance.
+    fn base_step(&self, dt: f32) -> f32 {
+        if self.base != Clip::Walk {
+            return dt;
+        }
+        let cycles = if self.treadmill {
+            dt / self.walk_period
+        } else {
+            self.travel / (self.gait.cycle(self.plan.leg) * self.plan.scale).max(1e-3)
+        };
+        cycles * Clip::Walk.duration()
+    }
     fn advance(&mut self, dt: f32) -> (Pose, Option<f32>) {
         self.events.clear();
+        self.since_attack = (self.since_attack + dt).min(1e6);
+        self.clock += dt;
         if let Some((clip, t)) = self.preview {
             return (
                 self.pose(clip, t),
                 (clip == Clip::Walk).then_some(t / clip.duration()),
             );
         }
-        let step = if self.base == Clip::Walk {
-            dt * Clip::Walk.duration() / self.walk_period
-        } else {
-            dt
-        };
         let previous = self.base_t;
-        self.base_t += step;
+        self.base_t += self.base_step(dt);
         let mut pose = self.pose(self.base, self.base_t);
         let mut walk = (self.base == Clip::Walk && self.action.is_none())
             .then_some(self.base_t / Clip::Walk.duration());
@@ -143,6 +222,34 @@ impl Animator {
         self.last = pose;
         (pose, walk)
     }
+    /// Distance and direction travelled since the last frame, and the aim
+    /// target in figure space with its eased weight.
+    fn observe(&mut self, at: Vec3, frame: &Mat4, dt: f32) {
+        let moved = self.last_root.map_or(Vec3::ZERO, |p| (at - p).with_y(0.0));
+        self.last_root = Some(at);
+        // A jump of a whole tile is a spawn or a reconnect, not a step.
+        self.travel = if moved.length() < 1.0 {
+            moved.length()
+        } else {
+            0.0
+        };
+        if self.travel > 1e-5 {
+            let local = frame.inverse().transform_vector3(moved).with_y(0.0);
+            self.heading = local.normalize_or(Vec3::Z);
+        }
+        let engaged = self.aim_at.is_some() && self.base != Clip::Walk;
+        let goal = if engaged { 1.0 } else { 0.0 };
+        let rate = dt / if engaged { AIM_IN } else { AIM_OUT };
+        let weight = self.aim.map_or(0.0, |a| a.weight);
+        let weight = weight + (goal - weight).clamp(-rate, rate);
+        let target = self
+            .aim_at
+            .map(|w| frame.inverse().transform_point3(w))
+            .or(self.aim.map(|a| a.target));
+        self.aim = target
+            .filter(|_| weight > 0.0)
+            .map(|target| Aim { target, weight });
+    }
 }
 pub fn animate(
     time: Res<Time>,
@@ -150,23 +257,42 @@ pub fn animate(
     mut transforms: Query<&mut Transform, Without<Animator>>,
 ) {
     for (mut a, root) in &mut animators {
+        let dt = if a.hit_stop > 0.0 {
+            let stopped = (time.delta_secs() * a.rate).min(a.hit_stop);
+            a.hit_stop -= stopped;
+            (time.delta_secs() * a.rate) - stopped
+        } else {
+            time.delta_secs() * a.rate
+        };
+        if dt <= 0.0 {
+            continue;
+        }
         let dt = time.delta_secs() * a.rate;
+        let figure = transforms
+            .get(a.figure)
+            .map_or(Mat4::IDENTITY, |t| t.to_matrix());
+        let frame = root.to_matrix() * figure;
+        a.observe(root.translation, &frame, dt);
         let (mut pose, walk) = a.advance(dt);
-        if let Some(phase) = walk.filter(|_| a.native) {
-            if let Ok(figure) = transforms.get(a.figure) {
-                let frame = root.to_matrix() * figure.to_matrix();
-                let plan = a.plan;
-                a.feet.apply(&mut pose, phase, frame, &plan);
-            }
+        if let Some(phase) = walk {
+            let (r, o) = pose[Joint::Root.index()];
+            let root_joint = Mat4::from_rotation_translation(ik::quat(r), o);
+            let stride = Stride {
+                phase,
+                dir: a.heading,
+                lock: !a.treadmill,
+            };
+            let (plan, gait) = (a.plan, a.gait);
+            a.feet
+                .apply(&mut pose, &stride, frame * root_joint, &plan, &gait);
         } else {
             a.feet.reset();
         }
         for node in rig::nodes().filter(|n| !matches!(n, rig::Node::Secondary(_))) {
             if let Ok(mut t) = transforms.get_mut(a.joints[node.index()]) {
                 let (rot, off) = pose[node.index()];
-                let r = rot * std::f32::consts::PI / 180.0;
                 t.translation = rig::rest(node, &a.plan) + off;
-                t.rotation = Quat::from_euler(EulerRot::XYZ, r.x, r.y, r.z);
+                t.rotation = ik::quat(rot);
             }
         }
     }

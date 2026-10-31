@@ -95,9 +95,10 @@ impl Bot {
         let unit = view
             .units
             .iter()
-            .filter(|u| u.seat == view.you && u.tier < 2 && !u.kind.is_summon())
+            .filter(|u| u.seat == view.you && u.tier < 2 && !u.is_summon())
             .min_by_key(|u| u.id)?;
-        if view.energy < self.rules.evolve_cost[usize::from(unit.tier)] {
+        // The seat's real price (Augment and arena discounts, ARENAS-G).
+        if view.energy < view.evolve_costs[usize::from(unit.tier.min(1))] {
             return None;
         }
         let branch = if unit.tier == 0 {
@@ -137,6 +138,6 @@ impl Bot {
 pub fn army(view: &MatchView) -> usize {
     view.units
         .iter()
-        .filter(|u| u.seat == view.you && !u.kind.is_summon())
+        .filter(|u| u.seat == view.you && !u.is_summon())
         .count()
 }

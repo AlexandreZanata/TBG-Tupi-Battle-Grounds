@@ -1,0 +1,122 @@
+[
+  {
+    "set": "factions",
+    "name": "frame-humans",
+    "faction": "Humans",
+    "kind": "frame",
+    "prompt": "Use case: stylized-concept. Create ONE original premium painterly medieval fantasy game UI CARD FRAME, not a card illustration. Style matches sculpted weathered bronze, dark hammered iron and tactile carved materials of a high quality medieval Augment card set. Fine crafted bevels with warm upper-left light, restrained wear, bold readable silhouette, rich faction accents. Asset: upright portrait PNG, desired master 720x1024, genuine transparent alpha outside the frame AND throughout the large portrait window. Complete frame fits inside x4%..96%, y2%..98%, no clipping. Straight front orthographic, perfectly centered and symmetrical layout. Shared precise layout: modest top centerpiece centered x50% y7%, blank inset seal without an emblem, never hanging below y14%; decorative sides approximately x5%..12% and x88%..95%. The large portrait window x14%..86%, y14%..61% is completely EMPTY and TRANSPARENT for a separately rendered 3D troop. Slim divider at y63%. The lower caption area x14%..86%, y66%..84% is quiet, flat dark navy iron, empty and unlettered for live unit name and role; no decorations intrude on it. Small empty dark cost plaque centered at x50% y90%, x34%..66%, y86%..94%, bordered by sculpted metal. Small centered bottom ornament at y96%. This is only the empty decorative mold: NO character, face, unit, creature, landscape, baked painting, icon inside the top seal, text, lettering, numbers, words, logo or watermark. Preserve transparent portrait and surrounding alpha. Faction treatment: Humans, The Crown: royal cobalt-blue enamel and woven blue tabards on burnished antique gold borders, disciplined knightly heraldic geometry, small steel rivets and restrained laurel carving. Frame side motifs recall a protected royal shield without depicting a shield emblem in the empty top seal. Warm regal gold, deep blue and steel; no teal, skulls or vegetation.",
+    "masterSize": [
+      720,
+      1024
+    ],
+    "displayWidth": 260,
+    "budget": 250000,
+    "target": 35000,
+    "lossless": false
+  },
+  {
+    "set": "factions",
+    "name": "emblem-humans",
+    "faction": "Humans",
+    "kind": "emblem",
+    "prompt": "Use case: stylized-concept. Create ONE original distinctive medieval fantasy FACTION EMBLEM, isolated on genuine transparent alpha, square 1024x1024 PNG. Same premium sculpted weathered bronze, hammered iron and painterly hand-crafted material detail as medieval Arcana skill icons. Clear bold instantly recognizable silhouette, nearly frontal orthographic, upper-left warm key light, cool deep shadows, tightly grouped main shapes, no thin scattered particles. Entire emblem including all tips fits inside central 82% of square with fully clear margins. No surrounding rectangular card frame, background panel, landscape, lettering, numbers, words, watermark or extra badges. This must look memorable and unique at 72 pixels rather than like an ordinary interface pictogram. Faction identity and subject: Humans, The Crown, protective Max HP Synergy. A strong royal kite shield, deep cobalt-blue enamel, with a single imposing three-point antique-gold crown forming its top silhouette; small oak-laurel relief supports the lower sides. One clean raised gold vertical sunburst forms the shield's heart. Substantial steel bevel and weathered gold, clearly a crowned shield rather than a generic crown. Rich cobalt blue and gold; no words, no letters.",
+    "masterSize": [
+      1024,
+      1024
+    ],
+    "displayWidth": 72,
+    "budget": 150000,
+    "target": 42000,
+    "lossless": true
+  },
+  {
+    "set": "factions",
+    "name": "frame-undead",
+    "faction": "Undead",
+    "kind": "frame",
+    "prompt": "Use case: stylized-concept. Create ONE original premium painterly medieval fantasy game UI CARD FRAME, not a card illustration. Style matches sculpted weathered bronze, dark hammered iron and tactile carved materials of a high quality medieval Augment card set. Fine crafted bevels with warm upper-left light, restrained wear, bold readable silhouette, rich faction accents. Asset: upright portrait PNG, desired master 720x1024, genuine transparent alpha outside the frame AND throughout the large portrait window. Complete frame fits inside x4%..96%, y2%..98%, no clipping. Straight front orthographic, perfectly centered and symmetrical layout. Shared precise layout: modest top centerpiece centered x50% y7%, blank inset seal without an emblem, never hanging below y14%; decorative sides approximately x5%..12% and x88%..95%. The large portrait window x14%..86%, y14%..61% is completely EMPTY and TRANSPARENT for a separately rendered 3D troop. Slim divider at y63%. The lower caption area x14%..86%, y66%..84% is quiet, flat dark navy iron, empty and unlettered for live unit name and role; no decorations intrude on it. Small empty dark cost plaque centered at x50% y90%, x34%..66%, y86%..94%, bordered by sculpted metal. Small centered bottom ornament at y96%. This is only the empty decorative mold: NO character, face, unit, creature, landscape, baked painting, icon inside the top seal, text, lettering, numbers, words, logo or watermark. Preserve transparent portrait and surrounding alpha. Faction treatment: Undead, The Barrow: deep amethyst-violet enamel and tattered violet cloth on rusted bronze and dark iron, pale carved bone corners, restrained thin soul-green inlays. Angular gothic side ribs and sharp bone-like bevels create a haunted ceremonial border. Keep the top inset seal entirely blank; NO skull or creature baked into it. Violet and bone dominate, small soul-green accents only; no blood or gore.",
+    "masterSize": [
+      720,
+      1024
+    ],
+    "displayWidth": 260,
+    "budget": 250000,
+    "target": 35000,
+    "lossless": false
+  },
+  {
+    "set": "factions",
+    "name": "emblem-undead",
+    "faction": "Undead",
+    "kind": "emblem",
+    "prompt": "Use case: stylized-concept. Create ONE original distinctive medieval fantasy FACTION EMBLEM, isolated on genuine transparent alpha, square 1024x1024 PNG. Same premium sculpted weathered bronze, hammered iron and painterly hand-crafted material detail as medieval Arcana skill icons. Clear bold instantly recognizable silhouette, nearly frontal orthographic, upper-left warm key light, cool deep shadows, tightly grouped main shapes, no thin scattered particles. Entire emblem including all tips fits inside central 82% of square with fully clear margins. No surrounding rectangular card frame, background panel, landscape, lettering, numbers, words, watermark or extra badges. This must look memorable and unique at 72 pixels rather than like an ordinary interface pictogram. Faction identity and subject: Undead, The Barrow, spectral Attack Speed Synergy. One bold ivory barrow skull with a distinctive split crown-like ridge of bone, set within a compact crescent of dark violet iron and two broad swept soul-flame shapes. Hollow eyes with restrained pale green soul light, sculpted weathered bone and bronze, sharp silhouette suggesting restless haste. A clean ceremonial skull, no gore, no body, no background.",
+    "masterSize": [
+      1024,
+      1024
+    ],
+    "displayWidth": 72,
+    "budget": 150000,
+    "target": 42000,
+    "lossless": true
+  },
+  {
+    "set": "factions",
+    "name": "frame-machines",
+    "faction": "Machines",
+    "kind": "frame",
+    "prompt": "Use case: stylized-concept. Create ONE original premium painterly medieval fantasy game UI CARD FRAME, not a card illustration. Style matches sculpted weathered bronze, dark hammered iron and tactile carved materials of a high quality medieval Augment card set. Fine crafted bevels with warm upper-left light, restrained wear, bold readable silhouette, rich faction accents. Asset: upright portrait PNG, desired master 720x1024, genuine transparent alpha outside the frame AND throughout the large portrait window. Complete frame fits inside x4%..96%, y2%..98%, no clipping. Straight front orthographic, perfectly centered and symmetrical layout. Shared precise layout: modest top centerpiece centered x50% y7%, blank inset seal without an emblem, never hanging below y14%; decorative sides approximately x5%..12% and x88%..95%. The large portrait window x14%..86%, y14%..61% is completely EMPTY and TRANSPARENT for a separately rendered 3D troop. Slim divider at y63%. The lower caption area x14%..86%, y66%..84% is quiet, flat dark navy iron, empty and unlettered for live unit name and role; no decorations intrude on it. Small empty dark cost plaque centered at x50% y90%, x34%..66%, y86%..94%, bordered by sculpted metal. Small centered bottom ornament at y96%. This is only the empty decorative mold: NO character, face, unit, creature, landscape, baked painting, icon inside the top seal, text, lettering, numbers, words, logo or watermark. Preserve transparent portrait and surrounding alpha. Faction treatment: Machines, The Ironworks: heavy cold charcoal steel and brass armor with bold burnt-orange forge enamel and small ember inlays. Broad interlocking metal plates, thick riveted corners, six-tooth gear-like side joins and practical forged precision. Dark iron stays readable around bright copper-orange accents. Keep the top inset seal blank, NO gear emblem or machine inside the portrait window. No electrical blue or teal; forge orange, brass and cold iron dominate.",
+    "masterSize": [
+      720,
+      1024
+    ],
+    "displayWidth": 260,
+    "budget": 250000,
+    "target": 35000,
+    "lossless": false
+  },
+  {
+    "set": "factions",
+    "name": "emblem-machines",
+    "faction": "Machines",
+    "kind": "emblem",
+    "prompt": "Use case: stylized-concept. Create ONE original distinctive medieval fantasy FACTION EMBLEM, isolated on genuine transparent alpha, square 1024x1024 PNG. Same premium sculpted weathered bronze, hammered iron and painterly hand-crafted material detail as medieval Arcana skill icons. Clear bold instantly recognizable silhouette, nearly frontal orthographic, upper-left warm key light, cool deep shadows, tightly grouped main shapes, no thin scattered particles. Entire emblem including all tips fits inside central 82% of square with fully clear margins. No surrounding rectangular card frame, background panel, landscape, lettering, numbers, words, watermark or extra badges. This must look memorable and unique at 72 pixels rather than like an ordinary interface pictogram. Faction identity and subject: Machines, The Ironworks, Damage Synergy. One massive six-tooth dark iron cog with burnished brass bevels, encircling a chunky miniature blacksmith anvil with a bright copper-orange ember in its center. Two compact forge-hammer shapes merge into the lower cog silhouette, restrained orange furnace glow in the negative spaces. Unmistakable industrial war-forge heraldry, more unique than a settings gear; solid tactile metal, no robot, no background.",
+    "masterSize": [
+      1024,
+      1024
+    ],
+    "displayWidth": 72,
+    "budget": 150000,
+    "target": 42000,
+    "lossless": true
+  },
+  {
+    "set": "factions",
+    "name": "frame-plants",
+    "faction": "Plants",
+    "kind": "frame",
+    "prompt": "Use case: stylized-concept. Create ONE original premium painterly medieval fantasy game UI CARD FRAME, not a card illustration. Style matches sculpted weathered bronze, dark hammered iron and tactile carved materials of a high quality medieval Augment card set. Fine crafted bevels with warm upper-left light, restrained wear, bold readable silhouette, rich faction accents. Asset: upright portrait PNG, desired master 720x1024, genuine transparent alpha outside the frame AND throughout the large portrait window. Complete frame fits inside x4%..96%, y2%..98%, no clipping. Straight front orthographic, perfectly centered and symmetrical layout. Shared precise layout: modest top centerpiece centered x50% y7%, blank inset seal without an emblem, never hanging below y14%; decorative sides approximately x5%..12% and x88%..95%. The large portrait window x14%..86%, y14%..61% is completely EMPTY and TRANSPARENT for a separately rendered 3D troop. Slim divider at y63%. The lower caption area x14%..86%, y66%..84% is quiet, flat dark navy iron, empty and unlettered for live unit name and role; no decorations intrude on it. Small empty dark cost plaque centered at x50% y90%, x34%..66%, y86%..94%, bordered by sculpted metal. Small centered bottom ornament at y96%. This is only the empty decorative mold: NO character, face, unit, creature, landscape, baked painting, icon inside the top seal, text, lettering, numbers, words, logo or watermark. Preserve transparent portrait and surrounding alpha. Faction treatment: Plants, The Wildwood: living emerald-green enamel and moss over sculpted dark oak roots, warm antique brass edge highlights, curling leaf-shaped corner brackets and a few tiny soft rose-pink blossoms. Strong broad woven root border, symmetrical and clean; avoid thin busy vines across the window or caption. Top inset seal remains blank, no leaf emblem baked in. Forest green and rich wood dominate, amber sap details and tiny pink accents.",
+    "masterSize": [
+      720,
+      1024
+    ],
+    "displayWidth": 260,
+    "budget": 250000,
+    "target": 35000,
+    "lossless": false
+  },
+  {
+    "set": "factions",
+    "name": "emblem-plants",
+    "faction": "Plants",
+    "kind": "emblem",
+    "prompt": "Use case: stylized-concept. Create ONE original distinctive medieval fantasy FACTION EMBLEM, isolated on genuine transparent alpha, square 1024x1024 PNG. Same premium sculpted weathered bronze, hammered iron and painterly hand-crafted material detail as medieval Arcana skill icons. Clear bold instantly recognizable silhouette, nearly frontal orthographic, upper-left warm key light, cool deep shadows, tightly grouped main shapes, no thin scattered particles. Entire emblem including all tips fits inside central 82% of square with fully clear margins. No surrounding rectangular card frame, background panel, landscape, lettering, numbers, words, watermark or extra badges. This must look memorable and unique at 72 pixels rather than like an ordinary interface pictogram. Faction identity and subject: Plants, The Wildwood, Regeneration Synergy. A luminous emerald seed held by three broad sculpted leaves, emerging from one compact root spiral shaped like a protective heart. Warm amber sap glows along the central leaf vein, a single small pale-rose bud tucked at the base. Rich green, dark carved bark and bronze edges; strong clear sprouting silhouette, no pot, tree landscape, rectangular background or ordinary recycling symbol.",
+    "masterSize": [
+      1024,
+      1024
+    ],
+    "displayWidth": 72,
+    "budget": 150000,
+    "target": 42000,
+    "lossless": true
+  }
+]

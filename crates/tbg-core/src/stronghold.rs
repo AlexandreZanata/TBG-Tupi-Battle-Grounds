@@ -121,7 +121,7 @@ pub fn rescale_hp(hp: i32, old_max: i32, new_max: i32) -> i32 {
 /// position, never stored on the unit, so it ends the moment the unit
 /// leaves and cannot stack across ticks.
 pub(crate) fn aura_bp(state: &MatchState, attacker: &Unit) -> i32 {
-    if attacker.kind.is_summon() {
+    if attacker.is_summon() {
         return 0;
     }
     let s = state.stronghold(attacker.seat);

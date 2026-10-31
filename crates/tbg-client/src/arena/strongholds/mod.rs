@@ -3,12 +3,14 @@
 //! only when one of those four changes, always from the current view, so a
 //! new tier never brings back parts that damage already took.
 
+mod aim;
 mod artillery;
 mod aura;
 mod bastion;
 mod classic;
 mod command;
 mod gallery;
+mod gunners;
 mod motion;
 mod parts;
 #[cfg(test)]
@@ -20,6 +22,7 @@ use tbg_core::content::LANE_LEN;
 use tbg_core::{StrongholdKind, StrongholdView};
 
 use crate::sync::LatestView;
+use crate::visuals::AimTarget;
 use motion::{Gun, Moving};
 use parts::{Form, Piece, StrongholdArt};
 
@@ -33,8 +36,9 @@ pub(super) fn plugin(app: &mut App) {
             Update,
             (
                 sync_looks,
-                motion::queue_shots,
+                aim::orders,
                 motion::fire,
+                aim::track,
                 motion::animate,
             )
                 .chain(),
@@ -91,13 +95,15 @@ pub(crate) fn damage_level(hp: i32, max_hp: i32) -> u8 {
 
 /// Every piece of a kind and form, before damage.
 fn pieces(kind: StrongholdKind, form: Form) -> Vec<Piece> {
-    match kind {
+    let mut p = match kind {
         StrongholdKind::Classic => classic::pieces(),
         StrongholdKind::Treasury => treasury::pieces(form),
         StrongholdKind::Bastion => bastion::pieces(form),
         StrongholdKind::Artillery => artillery::pieces(form),
         StrongholdKind::Command => command::pieces(form),
-    }
+    };
+    p.extend(gunners::pieces(kind));
+    p
 }
 
 /// The pieces a look shows: those its damage has not taken yet.
@@ -115,10 +121,19 @@ pub(crate) struct Tower {
     live: bool,
     look: Option<Look>,
     gun: Option<Gun>,
-    /// Seconds since the last shot, shots so far, and queued shot times.
+    /// The aimed gun of the look, if any (`aim.rs`).
+    turret: Option<aim::Turret>,
+    /// Seconds since the last shot, and shots so far.
     since: f32,
     shots: u32,
-    due: Vec<f64>,
+    /// What the tower aims at, seconds since its last order, and how long
+    /// an ordered shot has waited for the turret.
+    target: Option<AimTarget>,
+    idle: f32,
+    pending: Option<f32>,
+    /// Current turret yaw and absolute elevation (radians).
+    yaw: f32,
+    pitch: f32,
 }
 
 impl Tower {
@@ -128,10 +143,19 @@ impl Tower {
             live,
             look: None,
             gun: None,
+            turret: None,
             since: f32::MAX,
             shots: 0,
-            due: Vec::new(),
+            target: None,
+            idle: 0.0,
+            pending: None,
+            yaw: 0.0,
+            pitch: 0.0,
         }
+    }
+
+    fn kind(&self) -> StrongholdKind {
+        self.look.map_or(StrongholdKind::Classic, |l| l.kind)
     }
 }
 
@@ -217,4 +241,8 @@ fn dress(
     }
     tower.look = Some(look);
     tower.gun = (look.kind == StrongholdKind::Artillery).then(|| artillery::gun(look.form()));
+    tower.turret = aim::turret(look);
+    if let Some(t) = tower.turret.filter(|_| tower.target.is_none()) {
+        tower.pitch = t.rest_pitch;
+    }
 }

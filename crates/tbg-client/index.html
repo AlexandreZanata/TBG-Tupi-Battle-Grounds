@@ -1,6 +1,33 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script>
+  // P41 language resolver: ?lang=, then tbg.lang, then the browser, else en.
+  // Runs before anything else; Rust and i18n.js read documentElement.lang.
+  (function () {
+    try {
+      var asked = new URLSearchParams(location.search).get('lang');
+      var code = null;
+      if (asked) code = /^pt/i.test(asked) ? 'pt-BR' : (/^en/i.test(asked) ? 'en' : null);
+      if (!code) { try { code = localStorage.getItem('tbg.lang'); } catch (e) {} }
+      if (code !== 'pt-BR' && code !== 'en') {
+        var list = (navigator.languages && navigator.languages.length)
+          ? navigator.languages : (navigator.language ? [navigator.language] : []);
+        code = 'en';
+        for (var i = 0; i < list.length; i++) {
+          if (/^pt/i.test(list[i])) { code = 'pt-BR'; break; }
+          if (/^en/i.test(list[i])) { code = 'en'; break; }
+        }
+      }
+      document.documentElement.lang = code;
+      // Start the catalog fetch early; i18n.js awaits the same URL (cache hit).
+      var preload = document.createElement('link');
+      preload.rel = 'preload'; preload.as = 'fetch'; preload.crossOrigin = 'anonymous';
+      preload.href = 'assets/i18n/' + code + '.json';
+      document.head.appendChild(preload);
+    } catch (e) { document.documentElement.lang = 'en'; }
+  })();
+  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Tupi Battle Grounds</title>
@@ -11,80 +38,85 @@
   <script src="diagnostics/measure.js"></script>
   <!-- Hashed by Trunk so every deploy changes the URL (no stale CDN/browser cache). -->
   <link data-trunk rel="css" href="assets/lobby/lobby.css" />
+  <script data-trunk defer src="assets/i18n/i18n.js"></script>
+  <link data-trunk rel="css" href="assets/ranking/ranking.css" />
+  <script data-trunk defer src="assets/ranking/data.js"></script>
+  <script data-trunk defer src="assets/ranking/render.js"></script>
+  <script data-trunk defer src="assets/ranking/controller.js"></script>
   <script data-trunk defer src="assets/lobby/lobby.js"></script>
+  <link data-trunk rel="css" href="assets/lobby/presentation.css" />
+  <link data-trunk rel="css" href="assets/lobby/account.css" />
+  <script data-trunk defer src="assets/lobby/account.js"></script>
   <link data-trunk rel="css" href="assets/arcana/editor.css" />
   <script data-trunk defer src="assets/arcana/preset.js"></script>
   <script data-trunk defer src="assets/arcana/editor.js"></script>
   <link data-trunk rel="css" href="assets/stronghold/picker.css" />
   <script data-trunk defer src="assets/stronghold/describe.js"></script>
   <script data-trunk defer src="assets/stronghold/picker.js"></script>
+  <link data-trunk rel="css" href="assets/arenas/arenas.css" />
+  <script data-trunk defer src="assets/arenas/describe.js"></script>
+  <script data-trunk defer src="assets/arenas/hub.js"></script>
   <link data-trunk rel="css" href="assets/battle/hud.css" />
   <link data-trunk rel="css" href="assets/battle/fortify.css" />
+  <link data-trunk rel="css" href="assets/factions/shop.css" />
+  <script data-trunk defer src="assets/factions/art.js"></script>
   <script data-trunk defer src="assets/augments/art.js"></script>
   <script data-trunk defer src="assets/battle/hud.js"></script>
+  <script data-trunk defer src="assets/arenas/banner.js"></script>
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2b36; touch-action: none; }
     canvas#bevy { display: block; width: 100%; height: 100%; outline: none; }
-    #tbg-form {
-      position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10;
-      background: #20242c; color: #f0ead8; border: 1px solid #4a5058; border-radius: 12px;
-      padding: 20px; font: 18px system-ui, sans-serif; display: flex; flex-direction: column; gap: 12px;
-      min-width: min(320px, 86vw);
-    }
-    #tbg-form[hidden] { display: none; }
-    #tbg-form input, #tbg-form button { height: 48px; font-size: 18px; border-radius: 8px; border: none; }
-    #tbg-form input { padding: 0 12px; background: #12151b; color: #f0ead8; }
-    #tbg-form button { background: #2e6b9e; color: #fff; }
-    #tbg-form-error { color: #f26d5f; margin: 0; }
-    #tbg-form-error[hidden] { display: none; }
   </style>
 </head>
 <body>
 <canvas id="bevy"></canvas>
 
-<div id="tbg-lobby" hidden data-ready="false" data-screen="off" aria-label="Tupi Battle Grounds lobby">
+ <div id="tbg-lobby" hidden data-ready="false" data-screen="off" data-i18n-aria-label="lobby.label">
   <header class="lobby-header">
-    <div class="brand" aria-label="Tupi Battle Grounds"><img data-art="logo" alt="Tupi Battle Grounds" width="300" height="120"></div>
+    <div class="brand" data-i18n-aria-label="lobby.brand.name"><img data-art="logo" data-i18n-alt="lobby.brand.name" alt="Tupi Battle Grounds" width="1500" height="600"></div>
     <div class="player-chip metal-panel">
-      <svg class="icon"><use data-icon="shield"/></svg>
-      <div><strong data-player-name>Guest</strong><span data-member hidden><i class="gold">◆</i> <b data-rating>1000</b></span>
-        <span data-guest class="guest-links"><button data-action="register">Create account</button><button data-action="login">I have a key</button></span></div>
+      <img class="player-crest" data-art="emblem" alt="" width="768" height="1024">
+      <div><strong data-player-name data-i18n="lobby.guest.name">Guest</strong><span data-member hidden><i class="gold">◆</i> <b data-rating>1000</b></span>
+        <span data-guest class="guest-links"><button data-action="register" data-i18n="lobby.account.create">Create account</button><button data-action="login" data-i18n="lobby.account.key">Sign in with key</button></span></div>
     </div>
-    <nav class="lobby-tabs" aria-label="Main navigation">
-      <button class="active" aria-current="page" data-action="menu"><svg class="icon"><use data-icon="home"/></svg><span>Lobby</span></button>
-      <button data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><svg class="icon"><use data-icon="arcana"/></svg><span>Arcanas</span></button>
-      <button data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><svg class="icon"><use data-icon="tower"/></svg><span>Stronghold</span></button>
-      <button disabled title="Coming later"><svg class="icon"><use data-icon="helmet"/></svg><span>Troops <small>Locked</small></span></button>
-      <button data-action="ranking"><svg class="icon"><use data-icon="trophy"/></svg><span>Ranking</span></button>
-      <button data-dialog="settings"><svg class="icon"><use data-icon="settings"/></svg><span>Settings</span></button>
+    <nav class="lobby-tabs" data-i18n-aria-label="lobby.nav.main">
+      <button class="active" aria-current="page" data-action="menu"><svg class="icon"><use data-icon="home"/></svg><span data-i18n="lobby.tabs.lobby">Lobby</span></button>
+      <button data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><svg class="icon"><use data-icon="arcana"/></svg><span data-i18n="lobby.tabs.arcanas">Arcanas</span></button>
+      <button data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><svg class="icon"><use data-icon="tower"/></svg><span data-i18n="lobby.tabs.stronghold">Stronghold</span></button>
+      <button data-arena-open aria-haspopup="dialog" aria-controls="arena-hub"><svg class="icon"><use data-icon="island"/></svg><span data-i18n="lobby.tabs.arenas">Arenas</span></button>
+      <button disabled data-i18n-title="lobby.tabs.coming" title="Coming later"><svg class="icon"><use data-icon="helmet"/></svg><span><span data-i18n="lobby.tabs.troops">Troops</span> <small data-i18n="lobby.tabs.locked">Locked</small></span></button>
+      <button data-action="ranking"><svg class="icon"><use data-icon="trophy"/></svg><span data-i18n="lobby.tabs.ranking">Ranking</span></button>
+      <button data-dialog="settings"><svg class="icon"><use data-icon="settings"/></svg><span data-i18n="lobby.tabs.settings">Settings</span></button>
     </nav>
-    <button class="sound metal-panel" data-action="sound" aria-label="Toggle sound"><svg class="icon"><use data-icon="sound"/></svg><span>Sound: <b data-sound>ON</b></span></button>
+    <button class="sound metal-panel" data-action="sound" data-i18n-aria-label="lobby.sound.toggle" aria-label="Toggle sound"><svg class="icon"><use data-icon="sound"/></svg><span><span data-i18n="lobby.sound.label">Sound:</span> <b data-sound>ON</b></span></button>
   </header>
-  <main class="mode-panel wood-panel" aria-label="Choose a game mode">
+  <section id="tbg-ranking" hidden aria-label="Global Rankings"></section>
+  <main class="mode-panel wood-panel" data-i18n-aria-label="lobby.mode.choose">
     <span class="corner top-left"></span><span class="corner top-right"></span><span class="corner bottom-left"></span><span class="corner bottom-right"></span>
-    <button class="mode ranked" data-ranked data-action="register"><svg class="icon"><use data-icon="swords"/></svg><span><strong>Play Online</strong><small data-ranked-hint>Create account to unlock Ranked</small></span><span class="chevron" aria-hidden="true">›</span></button>
-    <button class="mode" data-action="quick"><svg class="icon"><use data-icon="shield"/></svg><span><strong>Casual</strong><small>Quick Match</small></span><span class="chevron" aria-hidden="true">›</span></button>
-    <button class="mode" data-action="challenge"><svg class="icon"><use data-icon="friends"/></svg><span><strong>Challenge a Friend</strong><small>One-click link · No code</small></span><span class="chevron" aria-hidden="true">›</span></button>
-    <button class="mode" data-dialog="friend"><svg class="icon"><use data-icon="friends"/></svg><span><strong>Private Room</strong><small>Create or join a room</small></span><span class="chevron" aria-hidden="true">›</span></button>
-    <button class="mode" data-action="practice"><svg class="icon"><use data-icon="bot"/></svg><span><strong>Practice vs Bot</strong><small>Train your strategy</small></span><span class="chevron" aria-hidden="true">›</span></button>
+    <button class="mode ranked" data-ranked data-action="register"><svg class="icon"><use data-icon="swords"/></svg><span><strong data-i18n="lobby.mode.play_online">Play Online</strong><small data-ranked-hint data-i18n="lobby.mode.ranked_hint_guest">Locked · Create account to play Ranked</small></span><span class="chevron" aria-hidden="true">›</span></button>
+    <button class="mode" data-action="quick"><svg class="icon"><use data-icon="shield"/></svg><span><strong data-i18n="lobby.mode.casual.title">Casual</strong><small data-i18n="lobby.mode.casual.hint">Quick Match</small></span><span class="chevron" aria-hidden="true">›</span></button>
+    <button class="mode" data-action="challenge"><svg class="icon"><use data-icon="friends"/></svg><span><strong data-i18n="lobby.mode.challenge.title">Challenge a Friend</strong><small data-i18n="lobby.mode.challenge.hint">One-click link · No code</small></span><span class="chevron" aria-hidden="true">›</span></button>
+    <button class="mode" data-dialog="friend"><svg class="icon"><use data-icon="friends"/></svg><span><strong data-i18n="lobby.mode.room.title">Private Room</strong><small data-i18n="lobby.mode.room.hint">Create or join a room</small></span><span class="chevron" aria-hidden="true">›</span></button>
+    <button class="mode" data-action="practice"><svg class="icon"><use data-icon="bot"/></svg><span><strong data-i18n="lobby.mode.practice.title">Practice vs Bot</strong><small data-i18n="lobby.mode.practice.hint">Train your strategy</small></span><span class="chevron" aria-hidden="true">›</span></button>
   </main>
-  <section class="profile-panel metal-panel" aria-label="Your ranked record">
-    <button class="tower-chip" data-tower-chip data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker" aria-label="Stronghold. Change tower"><svg aria-hidden="true"><use data-tower-icon href=""/></svg><span><small>Stronghold</small><b data-tower-name>Bastion</b></span></button>
-    <div class="profile-summary"><img data-art="emblem" width="120" height="130" alt="Player crest"><div><h2 data-global-rank>Unranked</h2><p class="rating-line"><svg class="icon"><use data-icon="trophy"/></svg><b data-rating>—</b></p><p class="profile-note" data-record-note>Play Ranked to build your record</p></div></div>
-    <div class="record"><div>Wins<strong data-wins>—</strong></div><div>Losses<strong data-losses>—</strong></div><div>Win rate<strong data-win-rate>—</strong></div></div>
-    <p class="stats-status" aria-live="polite" data-stats-status>Create an account to compete</p>
+  <section class="profile-panel metal-panel" data-i18n-aria-label="lobby.profile.record">
+    <img class="profile-backdrop" data-art="profile" alt="" width="1200" height="640">
+    <button class="tower-chip" data-tower-chip data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker" data-i18n-aria-label="lobby.profile.tower_change" aria-label="Stronghold. Change tower"><svg aria-hidden="true"><use data-tower-icon href=""/></svg><span><small data-i18n="lobby.profile.tower">Stronghold</small><b data-tower-name>Bastion</b></span></button>
+    <div class="profile-summary"><img data-art="emblem" width="120" height="130" data-i18n-alt="lobby.profile.crest" alt="Player crest"><div><h2 data-global-rank data-i18n="lobby.profile.unranked">Unranked</h2><p class="rating-line"><svg class="icon"><use data-icon="trophy"/></svg><b data-rating>—</b></p><p class="profile-note" data-record-note data-i18n="lobby.profile.ranked_note_guest">Play Ranked to build your record</p></div></div>
+    <div class="record"><div><span data-i18n="lobby.profile.wins">Wins</span><strong data-wins>—</strong></div><div><span data-i18n="lobby.profile.losses">Losses</span><strong data-losses>—</strong></div><div><span data-i18n="lobby.profile.winrate">Win rate</span><strong data-win-rate>—</strong></div></div>
+    <p class="stats-status" aria-live="polite" data-stats-status data-i18n="lobby.profile.stats_guest">Create an account to compete</p>
   </section>
-  <section class="feature-cards" aria-label="Explore the battlegrounds">
-    <button class="feature metal-panel" data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><img data-art="arcanas" alt="" width="300" height="190"><span class="feature-copy"><strong>Arcanas</strong><small>Shape your strategy</small></span></button>
-    <button class="feature metal-panel" data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><img data-art="strongholds" alt="" width="300" height="190"><span class="feature-copy"><strong>Strongholds</strong><small>Choose your tower</small></span></button>
-    <button class="feature metal-panel" disabled><img data-art="troops" alt="" width="300" height="190"><span class="feature-copy"><strong>Troops</strong><small>Meet the units · Coming later</small><span class="feature-lock">Locked</span></span></button>
-    <button class="feature metal-panel" data-action="ranking"><img data-art="ranking" alt="" width="300" height="190"><span class="feature-copy"><strong>Ranking <i aria-hidden="true">›</i></strong><small>Find your place among the best</small></span></button>
+  <section class="feature-cards" data-i18n-aria-label="lobby.feature.explore">
+    <button class="feature metal-panel" data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><img data-art="arcanas" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.arcanas.title">Arcanas</strong><small data-i18n="lobby.feature.arcanas.hint">Shape your strategy</small></span></button>
+    <button class="feature metal-panel" data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><img data-art="strongholds" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.strongholds.title">Strongholds</strong><small data-i18n="lobby.feature.strongholds.hint">Choose your tower</small></span></button>
+    <button class="feature metal-panel" disabled><img data-art="troops" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.troops.title">Troops</strong><small data-i18n="lobby.feature.troops.hint">Meet the units · Coming later</small><span class="feature-lock" data-i18n="lobby.feature.troops.locked">Locked</span></span></button>
+    <button class="feature metal-panel" data-action="ranking"><img data-art="ranking" alt="" width="768" height="640"><span class="feature-copy"><strong><span data-i18n="lobby.feature.ranking.title">Ranking</span> <i aria-hidden="true">›</i></strong><small data-i18n="lobby.feature.ranking.hint">Find your place among the best</small></span></button>
   </section>
-  <aside class="news-panel metal-panel" aria-label="News">
-    <h2><svg class="icon"><use data-icon="scroll"/></svg>News from the grounds</h2>
-    <img data-art="news" alt="A medieval battleground" width="500" height="135">
-    <h3 data-news-title>Welcome to Tupi Battle Grounds!</h3><p data-news-body>Real-time 1v1 strategy. Build your BattleLine, evolve your units, and destroy the enemy Stronghold.</p>
-    <div class="news-controls"><button data-news="-1" aria-label="Previous news">‹</button><span data-news-page aria-live="polite">1 / 3</span><button data-news="1" aria-label="Next news">›</button></div>
+  <aside class="news-panel metal-panel" data-i18n-aria-label="lobby.news.label">
+    <h2><svg class="icon"><use data-icon="scroll"/></svg><span data-i18n="lobby.news.title">News from the grounds</span></h2>
+    <img data-art="news" data-i18n-alt="lobby.news.art" alt="A medieval battleground" width="500" height="135">
+    <h3 data-news-title data-i18n="lobby.news.0.title">Welcome to Tupi Battle Grounds!</h3><p data-news-body data-i18n="lobby.news.0.body">Real-time 1v1 strategy. Build your BattleLine, evolve your units, and destroy the enemy Stronghold.</p>
+    <div class="news-controls"><button data-news="-1" data-i18n-aria-label="lobby.news.prev" aria-label="Previous news">‹</button><span data-news-page aria-live="polite">1 / 3</span><button data-news="1" data-i18n-aria-label="lobby.news.next" aria-label="Next news">›</button></div>
   </aside>
   <dialog id="arcana-editor" aria-labelledby="arcana-title" aria-describedby="arcana-badge">
     <header class="arcana-header"><div><p class="arcana-eyebrow">The art of preparation</p><h1 id="arcana-title">Arcanas</h1><p data-a="intro"></p></div><div class="arcana-preview"><span id="arcana-badge">Active in every mode</span><small data-a="scope"></small></div><button class="arcana-close" data-close aria-label="Close Arcana editor">×</button></header>
@@ -105,16 +137,26 @@
     <div class="tower-scroll"><div class="tower-grid" data-s="grid" role="group" aria-label="Stronghold kinds"></div></div>
     <footer class="tower-footer"><div><p data-s="status" role="status"></p><small data-s="storage"></small></div><div class="tower-notes"><small data-s="fortify"></small><small data-s="controls"></small></div></footer>
   </dialog>
+  <dialog id="arena-hub" aria-labelledby="arena-title">
+    <header class="arena-header"><div><p class="arena-eyebrow" data-i18n="arenas.eyebrow">Choose the battlefield</p><h1 id="arena-title" data-i18n="arenas.title">Arenas</h1><p data-i18n="arenas.intro">Five battlefields, one small rule each. Both sides always play under the same rule.</p></div><div class="arena-scope"><span data-i18n="arenas.online">Online, the server draws the arena for every match</span><small data-i18n="arenas.practice">Your choice is your Practice arena</small></div><button class="arena-close" data-i18n-aria-label="arenas.close" aria-label="Close Arenas">×</button></header>
+    <p data-ar="error" role="alert" hidden></p>
+    <div class="arena-scroll"><div class="arena-grid" data-ar="grid" role="group" data-i18n-aria-label="arenas.title" aria-label="Arenas"></div></div>
+    <footer class="arena-footer"><p data-ar="status" role="status"></p></footer>
+  </dialog>
   <dialog id="lobby-friend" class="lobby-dialog metal-panel" aria-labelledby="friend-title">
-    <button class="dialog-close" data-close aria-label="Close friend panel">×</button><p class="eyebrow">Casual · Private room</p><h2 id="friend-title">Gather your rival</h2><p>Share a room link, or enter a code from a friend.</p>
-    <button class="dialog-primary" data-action="create">Create a room</button><div class="divider">or join an existing room</div>
-    <form id="lobby-join"><label for="lobby-room">Room code</label><input id="lobby-room" required minlength="5" maxlength="5" pattern="[A-Za-z0-9]{5}" placeholder="ABCDE" autocomplete="off" spellcheck="false"><button class="dialog-primary" type="submit">Join room</button></form>
+    <button class="dialog-close" data-close data-i18n-aria-label="lobby.friend.close" aria-label="Close friend panel">×</button><p class="eyebrow" data-i18n="lobby.friend.eyebrow">Casual · Private room</p><h2 id="friend-title" data-i18n="lobby.friend.title">Gather your rival</h2><p data-i18n="lobby.friend.body">Share a room link, or enter a code from a friend.</p>
+    <button class="dialog-primary" data-action="create" data-i18n="lobby.friend.create">Create a room</button><div class="divider" data-i18n="lobby.friend.join_label">or join an existing room</div>
+    <form id="lobby-join"><label for="lobby-room" data-i18n="lobby.friend.room_code">Room code</label><input id="lobby-room" required minlength="5" maxlength="5" pattern="[A-Za-z0-9]{5}" placeholder="ABCDE" autocomplete="off" spellcheck="false"><button class="dialog-primary" type="submit" data-i18n="lobby.friend.join">Join room</button></form>
   </dialog>
   <dialog id="lobby-settings" class="lobby-dialog metal-panel" aria-labelledby="settings-title">
-    <button class="dialog-close" data-close aria-label="Close settings">×</button><p class="eyebrow">Your camp</p><h2 id="settings-title">Settings</h2>
-    <button class="dialog-primary" data-action="sound">Sound: <b data-sound>ON</b></button>
-    <div data-member hidden><p>Your saved key gives access to your account.</p><button class="dialog-primary" data-action="copy-key">Copy account key</button><button class="dialog-primary" data-action="download-key">Download account key</button><button class="dialog-primary danger" data-action="logout">Log out</button></div>
-    <div data-guest><button class="dialog-primary" data-action="register">Create account</button><button class="dialog-primary" data-action="login">I have a key</button></div>
+    <button class="dialog-close" data-close data-i18n-aria-label="lobby.settings.close" aria-label="Close settings">×</button><p class="eyebrow" data-i18n="lobby.settings.eyebrow">Your camp</p><h2 id="settings-title" data-i18n="lobby.settings.title">Settings</h2>
+    <button class="dialog-primary" data-action="sound"><span data-i18n="lobby.sound.label">Sound:</span> <b data-sound>ON</b></button>
+    <div class="lang-switch" role="group" data-i18n-aria-label="lobby.settings.language" aria-label="Language">
+      <button data-lang="en" aria-pressed="true">English</button>
+      <button data-lang="pt-BR" aria-pressed="false">Português (Brasil)</button>
+    </div>
+    <div data-member hidden><p data-i18n="lobby.settings.key_note">Your saved key gives access to your account.</p><button class="dialog-primary" data-action="copy-key" data-i18n="lobby.settings.copy">Copy account key</button><button class="dialog-primary" data-action="download-key" data-i18n="lobby.settings.download">Download account key</button><button class="dialog-primary danger" data-action="logout" data-i18n="lobby.settings.logout">Log out</button></div>
+    <div data-guest><button class="dialog-primary" data-action="register" data-i18n="lobby.account.create">Create account</button><button class="dialog-primary" data-action="login" data-i18n="lobby.account.key">I have a key</button></div>
   </dialog>
 </div>
 
@@ -132,6 +174,7 @@
     <div class="battle-time" data-phase="running">
       <strong data-battle-clock>3:00</strong><small data-battle-mode>Casual</small>
     </div>
+    <button class="arena-chip" data-arena-chip hidden type="button"><svg aria-hidden="true"><use href="assets/lobby/icons.svg#island"/></svg><b></b></button>
     <div class="team-plate enemy">
       <div class="plate-body">
         <span class="plate-line"><span class="plate-tower" data-plate-tower="enemy"></span><span class="battle-name" data-battle-opponent>Opponent</span></span>
@@ -141,6 +184,7 @@
       <span class="crest" aria-hidden="true"><b data-crest-opponent>O</b></span>
     </div>
   </header>
+  <div class="arena-banner" data-arena-banner hidden aria-live="polite"><small data-arena-label>Arena</small><strong data-arena-name></strong><span data-arena-effect></span><em data-arena-fair></em></div>
   <button class="battle-surrender" data-battle-action="surrender" data-state="ready"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 4H9V30H6ZM10 5L27 9 25 20 10 17Z"/></svg><span data-battle-surrender>Surrender</span></button>
   <aside class="unit-inspect" data-inspect-panel hidden aria-label="Unit status">
     <button class="inspect-close" data-battle-action="close-inspect" aria-label="Close unit status">&times;</button>
@@ -190,11 +234,11 @@
       <span class="resource-label">Army</span><strong class="resource-value" data-battle-army>0</strong>
     </div>
     <div class="battle-offers">
-      <button class="battle-card iron-frame" data-offer="0" aria-label="Shop offer one"><img class="champion-portrait" alt="" decoding="async"><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
-      <button class="battle-card iron-frame" data-offer="1" aria-label="Shop offer two"><img class="champion-portrait" alt="" decoding="async"><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
-      <button class="battle-card iron-frame" data-offer="2" aria-label="Shop offer three"><img class="champion-portrait" alt="" decoding="async"><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
-      <button class="battle-card iron-frame" data-offer="3" aria-label="Shop offer four"><img class="champion-portrait" alt="" decoding="async"><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
-      <button class="battle-card iron-frame" data-offer="4" aria-label="Shop offer five"><img class="champion-portrait" alt="" decoding="async"><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="0" aria-label="Shop offer one"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="1" aria-label="Shop offer two"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="2" aria-label="Shop offer three"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="3" aria-label="Shop offer four"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
+      <button class="battle-card iron-frame" data-offer="4" aria-label="Shop offer five"><img class="champion-portrait" alt="" decoding="async"><img class="champion-frame" alt="" hidden><img class="champion-emblem" alt="" hidden><span class="card-caption"><strong class="champion-name">—</strong><span class="champion-role"></span></span><span class="champion-tier">T1</span><span class="card-cost"><i aria-hidden="true"></i><b>—</b></span><span class="card-slots"></span></button>
     </div>
     <p class="shop-help">Click to recruit · Hold or right-click for details</p>
   </section>
@@ -207,10 +251,10 @@
       <p class="council-help">Both players choose one Augment from the same four. The battle resumes when both confirm or time runs out.</p>
       <div class="council-timer-track" role="progressbar" aria-label="Augment choice time remaining"><span data-council-progress></span></div>
       <div class="council-options">
-        <button class="council-card" data-council-option="0"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
-        <button class="council-card" data-council-option="1"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
-        <button class="council-card" data-council-option="2"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
-        <button class="council-card" data-council-option="3"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true">◆</span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="0"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="1"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="2"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
+        <button class="council-card" data-council-option="3"><img class="council-illustration" alt=""><img class="council-frame" alt=""><span class="council-rarity"></span><b class="council-name">—</b><span class="council-text"></span><span class="council-price"><span class="council-energy" aria-hidden="true"></span><span class="council-cost"></span></span></button>
       </div>
       <footer class="council-actions">
         <button class="council-forgo" data-battle-action="forgo">Forgo</button>
@@ -221,12 +265,16 @@
   </div>
 </div>
 
-<form id="tbg-form" hidden>
-  <label id="tbg-form-label" for="tbg-input">Name</label>
-  <input id="tbg-input" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false">
-  <p id="tbg-form-error" hidden></p>
-  <button id="tbg-form-ok" type="submit">OK</button>
-  <button id="tbg-form-cancel" type="button">Cancel</button>
+<div class="account-scrim" aria-hidden="true"></div>
+<form id="tbg-form" role="dialog" aria-modal="true" aria-labelledby="account-title" aria-describedby="account-help" hidden>
+  <header class="account-header"><img src="assets/lobby/crest-v2.webp" alt="" width="768" height="1024"><p class="account-eyebrow">Tupi Battle Grounds</p><h1 id="account-title">Enter the Grounds</h1><p id="account-help">Build your BattleLine. Make your mark.</p></header>
+  <div class="account-fields"><label id="tbg-form-label" for="tbg-input">Name</label>
+    <div class="account-entry"><input id="tbg-input" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="account-reveal" type="button" data-account-reveal aria-pressed="false" hidden>Show key</button></div>
+    <p id="tbg-form-error" role="alert" hidden></p>
+    <button id="tbg-form-ok" type="submit">Continue</button>
+    <button id="tbg-form-cancel" type="button">Back to lobby</button>
+  </div>
+  <p class="account-footnote">Your account uses a saved key. Keep it somewhere safe.</p>
 </form>
 </body>
 </html>
