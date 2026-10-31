@@ -91,7 +91,8 @@ Own library: `crates/tbg-client/src/art/kits/rattle_tick/`.
 
 square heavy torso, oversized nailed club, small thin brother above one shoulder, bomb backpack; leather/linen/iron with broad Human team sash. A2 expands chest straps and club head, A3 iron shoulder guard. B2 enlarges Tico's satchel and striped coat, B3 adds visible bomb rack. Do not reuse Cargo Crab boarding or add another Unit.
 
-Status: pending. Evidence: `docs/media/p59/rattle_tick/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/rattle_tick/lineup.jpg`.
 
 ### R06 — Capybara
 

@@ -25,6 +25,7 @@ pub mod lab;
 pub mod profiling;
 pub mod protocol;
 pub mod rating;
+mod rattle_tick;
 mod ravager;
 pub mod replay;
 pub mod rng;

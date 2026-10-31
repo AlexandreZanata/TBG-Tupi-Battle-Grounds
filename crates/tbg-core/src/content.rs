@@ -355,6 +355,13 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    DoubleMayhem {
+        period: u16,
+        radius: i32,
+        damage: u16,
+        bp: u16,
+        ticks: u16,
+    },
     None,
     /// Nester Hatch (values unchanged, still from the Hatch rule).
     Hatch,
@@ -608,6 +615,25 @@ const fn crow(ticks: u16, cut_bp: u16, bonus_bp: u16) -> [Ability; 2] {
         Ability::None,
     ]
 }
+const fn mayhem(period: u16, radius: i32, bp: u16) -> [Ability; 2] {
+    [
+        Ability::DoubleMayhem {
+            period,
+            radius,
+            damage: 60,
+            bp,
+            ticks: 30,
+        },
+        Ability::None,
+    ]
+}
+const RATTLE_TICK_ABILITIES: [[Ability; 2]; 5] = [
+    mayhem(180, 1_200, 1_500),
+    mayhem(180, 1_200, 1_500),
+    mayhem(180, 1_200, 1_500),
+    mayhem(150, 1_200, 1_500),
+    mayhem(150, 1_500, 2_000),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -711,7 +737,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 35;
+pub const UNIT_KIND_COUNT: usize = 36;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1037,6 +1063,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         FormDef {atk_bp:1_500,..form("Swift Gunman")},FormDef {speed_bp:1_000,..form("Swift Gunman")},
         form("Ricochet Bullet"),form("Ricochet Bullet"),
     ]),
+    unit(UnitKind::RattleTick,"Rattle & Tick",Humans,Tank,3_000,[900,60,38,900,28,0,0],None,RATTLE_TICK_ABILITIES,[FormDef{hp_bp:2_000,..form("Big Brother's Fury")},FormDef{dmg_bp:2_000,..form("Big Brother's Fury")},form("Tico's Tricks"),form("Tico's Tricks")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

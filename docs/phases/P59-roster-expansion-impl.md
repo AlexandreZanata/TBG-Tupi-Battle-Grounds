@@ -194,3 +194,8 @@ D-75: Trigger's own five-form kit, canonical ability and actual desktop lineup
 delivered (8 of21). The combined R04–R07 block passed75 distinct targeted
 scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
 docs/roster/p59/R04-trigger.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-76: Rattle & Tick's own five-form kit, canonical ability and actual desktop lineup
+delivered (9 of21). The combined R04–R07 block passed75 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R05-rattle-tick.md. Deferred acceptance remains as listed; no activation/deploy.

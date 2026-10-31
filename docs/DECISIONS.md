@@ -1643,3 +1643,25 @@ angular sights. Alternating recoil and offhand fourth-hit pose share the same
 variant as the emitters. No imported asset, dependency, new Unit, dash or flanking.
 The frozen roster/form/protocol contracts append only this decision's facts;
 legacy composition and pools stay unchanged. Focused scenarios are queued in R04.
+
+## D-76 · Rattle & Tick's one-body duo and independent bomb — 2026-10-31 (Proposed)
+
+R05 appends one Human Tank and four forms with the exact §13 values: 5 Energy,
+900 HP, basic60/38 ticks, range900, speed28. Double Mayhem waits180, then shares
+the fixed six-tick enemy-unit windup while the club remains independent. The
+locked primary's current x centers radius1200/damage60/Slow1500 for30. Enumerate
+living enemies by UnitId, including carried passengers, with no ally/Stronghold
+collateral, recursive on-hit, displacement or separate brother attack. Primary
+death, including a club kill earlier in that tick, cancels without refund/retarget.
+Damage scales static caster modifiers once; Ward blocks Slow but not raw damage.
+A adds HP2000bp then basic damage2000bp. B replaces period150 then radius1500 and
+Slow2000bp. No public pool, protocol layout, simulation field or dependency changes.
+
+The kit owns a square heavy bruiser, nailed club, broad team sash, shoulder brother,
+bomb pack/rack, five branch forms and per-part motion. Existing fixed accessory
+slots form the small brother's torso/head/arms, including an independent throwing
+arm layered over the club attack. This is one figure and HP pool, never Cargo
+boarding or a spawned Unit. The authoritative special cue uses the actual primary
+center/radius with a small bomb burst. No physics projectile or extra stun/cut.
+The frozen roster/form contract appends these exact facts; native scenario runs
+and real screenshot are deferred to the next combined consolidation.

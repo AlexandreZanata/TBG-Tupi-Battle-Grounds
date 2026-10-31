@@ -31,6 +31,7 @@ mod oilpress;
 mod old_finn;
 mod puppetmaster;
 mod rampart;
+mod rattle_tick;
 mod ravager;
 mod rootcaller;
 mod rotcap;
@@ -179,6 +180,7 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static RATTLETICK: Kit = rattle_tick::KIT;
 
 /// The passenger seat's height above a Cargo Crab's ground, in world units,
 /// at its tier: where a rider's hips sit (see `visuals::mount`).
@@ -224,6 +226,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::RattleTick => Some(&RATTLETICK),
         #[allow(unreachable_patterns)]
         _ => None,
     }

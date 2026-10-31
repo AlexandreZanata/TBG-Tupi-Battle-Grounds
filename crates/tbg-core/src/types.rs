@@ -137,6 +137,8 @@ pub enum UnitKind {
     Crowcaller,
     /// D-75: R04, staged outside public pools.
     Trigger,
+    /// D-76: R05, staged outside public pools.
+    RattleTick,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
