@@ -15,6 +15,7 @@ use formation::FormationIndex;
 /// Count down statuses and cooldowns.
 pub(crate) fn tick_timers(state: &mut MatchState) {
     for u in &mut state.units {
+        let before = u.status;
         u.status = match u.status {
             Status::Slowed { bp, ticks_left } if ticks_left > 1 => Status::Slowed {
                 bp,
@@ -25,6 +26,7 @@ pub(crate) fn tick_timers(state: &mut MatchState) {
             },
             _ => Status::None,
         };
+        crate::roster_slots::release_queued_slow(u, before);
         u.cooldown = u.cooldown.saturating_sub(1);
     }
     for p in &mut state.players {

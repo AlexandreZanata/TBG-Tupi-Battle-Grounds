@@ -75,8 +75,9 @@ fn regenerate(state: &mut MatchState) {
         }
         let bp = i64::from(bps[usize::from(level) - 1]);
         let mut heal = (i64::from(u.max_hp) * bp / BP) as i32;
-        if state.tick < u.heal_cut_until {
-            heal = (i64::from(heal) * i64::from(10_000 - u.heal_cut_bp).max(0) / 10_000) as i32;
+        let cut = crate::roster_slots::heal_cut_now(&u, state.tick);
+        if cut > 0 {
+            heal = (i64::from(heal) * i64::from(10_000 - cut).max(0) / 10_000) as i32;
         }
         if heal <= 0 {
             continue;

@@ -107,12 +107,15 @@ fn c2_per_tick_traces_are_frozen() {
     // D-50: the Shop draws all 25 kinds; traces and end ticks moved.
     // D-55 (ARENAS-G): the arena fields joined the serialized state; the
     // Forest is neutral: traces and hashes moved, end ticks identical.
+    // W0 (D-62): `UnitFx` grew with the bleed, weakening, queued-Slow, mark,
+    // self-reduction and ability heal-cut slots; traces and hashes moved, with
+    // end ticks, winners and reasons identical on all five seeds (verified).
     let goldens = [
-        (1, 0x5609_ff29_778f_5630, 0xdf5d_547e_36e4_7845, 3_336),
-        (7, 0xd331_26a2_2fa9_245e, 0xca17_5202_6278_78e5, 2_286),
-        (42, 0xb138_5327_fc8e_9dfc, 0x4069_7a3a_89d9_10e1, 6_295),
-        (1000, 0x3f3e_9285_2ce7_ec9f, 0x840b_4353_126f_d199, 6_683),
-        (65535, 0x9243_c0ae_0f2f_5803, 0x4726_93d6_139e_6d32, 5_531),
+        (1, 0x7317_ff9f_8a61_6844, 0x046f_0593_dbe8_feeb, 3_336),
+        (7, 0x8ae3_8286_6f70_c512, 0x04db_679e_2b2c_b681, 2_286),
+        (42, 0x3f47_3df1_225c_ff3e, 0x21bf_5451_a254_9287, 6_295),
+        (1000, 0x7431_6d35_e3b4_2ac1, 0x995f_ae37_3f64_74e3, 6_683),
+        (65535, 0xc2f5_9c31_a8d0_0c73, 0x752d_d5aa_92df_6c32, 5_531),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

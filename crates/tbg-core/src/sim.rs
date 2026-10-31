@@ -139,7 +139,9 @@ impl MatchState {
             }
             synergy::update(self, &mut ev);
             combat::tick_timers(self);
+            crate::roster_slots::tick_marks(self);
             crate::afflictions::tick(self, &mut ev);
+            crate::roster_slots::tick_bleed(self, &mut ev);
             summon::expire(self);
             summon::hatch(self, &mut ev);
             crate::support::bonds(self);

@@ -41,25 +41,28 @@ fn bot_matches_are_frozen() {
     // D-55 (ARENAS-G): `MatchState::arena` and `arena_discount_used` joined
     // the serialized state; the Forest is neutral, so hashes moved once with
     // tick, winner and reason identical (verified on all three seeds).
+    // W0 (P58 §3, D-62): the bleed, weakening, queued-Slow, mark, self-reduction
+    // and ability heal-cut slots joined `UnitFx`; hashes moved once, with tick,
+    // winner and reason identical on all three seeds (verified).
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0xdf5d_547e_36e4_7845u64,
+            0x046f_0593_dbe8_feebu64,
             3_336,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0xca17_5202_6278_78e5,
+            0x04db_679e_2b2c_b681,
             2_286,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0x4069_7a3a_89d9_10e1,
+            0x21bf_5451_a254_9287,
             6_295,
             Seat::B,
             StrongholdDestroyed,

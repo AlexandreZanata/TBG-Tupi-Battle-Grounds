@@ -731,11 +731,7 @@ pub fn heal_amount(
         );
     }
     let bonus = bonus.clamp(0, 10_000);
-    let cut = if state.tick < target.heal_cut_until {
-        target.heal_cut_bp
-    } else {
-        0
-    };
+    let cut = crate::roster_slots::heal_cut_now(target, state.tick);
     let scaled = i64::from(base) * i64::from(10_000 + bonus) / BP;
     let after_cut = scaled * i64::from(10_000 - cut).max(0) / 10_000;
     (target.max_hp - target.hp).min(after_cut.max(0).min(i64::from(i32::MAX)) as i32)

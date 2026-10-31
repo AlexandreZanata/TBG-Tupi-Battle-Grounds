@@ -1143,3 +1143,54 @@ a passenger already aboard appears seated with no boarding arc: the arc starts
 from `Event::Boarded`, never from a view diff. The byte cost is not measured yet.
 **Reopen when** the per-view bytes matter more than one tag byte per unit: then a
 `carried: Vec<(passenger, carrier)>` list per view costs nothing when empty.
+
+## D-62 · W0 shared slots for the roster expansion (P58 §3) — 2026-10-31 (Proposed)
+
+**Decision.** Six bounded slots join `UnitFx`. Each is zero until a unit uses it,
+so no current unit, match or view changes behaviour:
+
+1. **Bleed (R07).** One non-stacking slot per victim: value per pulse, next
+   pulse, pulses left, source seat. The first pulse is one second (20 steps)
+   after application. An equal or stronger application refreshes the count and
+   takes the stronger value without moving the next pulse; a weaker one is
+   ignored until the slot empties. Pulses go through the ordinary damage path:
+   reduction and shields apply, no on-hit effects, no lifesteal. The bleed is
+   separate from poison stacks.
+2. **Weakening (R13).** Basic attacks a unit makes lose `bp` until its timer
+   ends. Stronger replaces and restarts the timer; equal refreshes; weaker is
+   ignored until expiry. The value is clamped to the family cap of 2 000 bp.
+3. **Queued post-Root Slow (R19).** One Slow waits for the unit's Root to end.
+   A weaker queued Slow keeps the queued amount and only extends the duration,
+   as an active Slow does. It starts in `tick_timers` when the Root ends, and a
+   cleanse clears it.
+4. **Caster's mark (R03).** One mark per caster: target and deadline. A new mark
+   moves it; moving it does not strip the old target's Slow or cut. It clears
+   when the deadline passes or the target is dead.
+5. **Timed self-reduction (R01, R06, R08, R16).** Joins the damage reduction sum
+   in `hits::damage`, so it shares that sum's 2 000 bp cap.
+6. **Ability heal-cut (R03, R20).** A second bounded cut beside the existing
+   pair in `Unit`. The effective cut is the stronger of the two active cuts,
+   never a sum. The three heal paths (augment, support, synergy regeneration)
+   read the effective cut.
+
+**Cleanse order (Proposed).** A cleanse takes the bleed before any ordinary
+poison stack, and the bleed counts as one of the strip count. This reading of
+P58 §3.2 is new and has its own test.
+
+**Not in this decision.** The unit shield grant path with expiry and its view
+field (R12/R14) waits for owner decision 5 (the shield semantics, and whether
+the dormant Cargo Crab `shield_bp` is granted or removed). The view and event
+extensions for these slots also wait for the first unit wave that makes an
+effect visible: that wave changes the wire, so it carries the protocol bump.
+
+**Why.** P58 §3 lists these contracts as missing. Each unit wave builds on one
+of them, so they are defined once, here, with tests.
+
+**Consequences.** `UnitFx` grew, so the serialized state grew and the three
+golden hashes in `contract_determinism` moved. Tick, winner and reason are
+identical on all three seeds (verified before the goldens were refrozen). No
+protocol change in this decision.
+
+**Reopen when** the first unit wave needs an effect that the reconnect view must
+show (then add view fields and bump the protocol), or when owner decision 5
+settles the shield.

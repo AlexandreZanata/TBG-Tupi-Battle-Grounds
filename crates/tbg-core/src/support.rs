@@ -141,11 +141,7 @@ fn transfer_one(
         return;
     }
     state.units[di].hp -= amount;
-    let cut = if state.tick < state.units[ri].heal_cut_until {
-        state.units[ri].heal_cut_bp
-    } else {
-        0
-    };
+    let cut = crate::roster_slots::heal_cut_now(&state.units[ri], state.tick);
     let gain = amount - amount * cut.min(10_000) / 10_000;
     let u = &mut state.units[ri];
     u.hp = (u.hp + gain).min(u.max_hp);

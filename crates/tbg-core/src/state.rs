@@ -94,6 +94,39 @@ pub struct UnitFx {
     pub board_lock: Tick,
     pub shield: u16,
     pub shield_until: Tick,
+    /// W0 (P58 §3.2): the bleed slot of R07, one per victim, not stacked.
+    pub bleed: Bleed,
+    /// W0 (R13): basic attacks this unit makes lose `weaken_bp` until `weaken_until`.
+    pub weaken_bp: u16,
+    pub weaken_until: Tick,
+    /// W0 (R19): a Slow that starts when this unit's Root ends.
+    pub queued_slow: Option<QueuedSlow>,
+    /// W0 (R03): this caster's one mark, its target and deadline.
+    pub mark_target: Option<UnitId>,
+    pub mark_until: Tick,
+    /// W0: a timed self-reduction; it joins the damage reduction sum and its cap.
+    pub self_dr_bp: u16,
+    pub self_dr_until: Tick,
+    /// W0 (R03, R20): the ability heal-cut slot, beside the pair in `Unit`.
+    pub ability_cut_bp: u16,
+    pub ability_cut_until: Tick,
+}
+
+/// The bleed slot (R07): `value` HP per pulse, `left` pulses still to come,
+/// `next` the tick of the next one. An empty slot has `left == 0`.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Bleed {
+    pub value: u16,
+    pub next: Tick,
+    pub left: u8,
+    pub source: Option<Seat>,
+}
+
+/// A Slow queued behind a Root (R19).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct QueuedSlow {
+    pub bp: u16,
+    pub ticks: u16,
 }
 
 /// Queued A2 Shatterback shrapnel (P46): processed in `remove_dead` before
