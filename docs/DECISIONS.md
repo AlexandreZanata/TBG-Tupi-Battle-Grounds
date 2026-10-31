@@ -1547,3 +1547,28 @@ The §11 faction-composition contract remains scoped to the frozen 27-kind
 legacy prefix; §13 prototypes are checked by their explicit new base rows.
 This preserves every legacy faction count while the inactive registry grows.
 
+## D-73 · Demolisher's hydraulic kit and Area Crush — 2026-10-31 (Proposed)
+
+R02 appends Demolisher after Bulwark without changing prior kind indices or public
+pools. GAME-DESIGN §13 owns its base row (6 Energy, 1,250 HP, damage 80, interval
+32, range 1,000, movement 28), period 200, caster radius 2,500 and special damage
+120. It acquires an enemy unit in basic reach and uses the shared locked windup.
+One pulse visits living enemy units in UnitId order, including carried passengers
+and summons; it excludes allies/Strongholds and cannot move or interrupt a victim.
+Victim reduction, shielding and Second Wind apply through shared auxiliary damage.
+
+A1 raises the special's registry amount by 2,000 bp (120 × 1.20 = 144); A2 radius
+is 3,000. B replaces period with 160, then ordinary basic hits Slow 1,500 bp/40.
+Reading recorded: the form's special upgrade changes the registry amount before
+static caster percentages once (P58 §3.2), rather than changing basic damage.
+The content factory computes that absolute form amount from the documented base;
+no extra tunable number or hidden modifier. The special itself never Slows.
+
+The art owns large piston cuffs/near-ground fists, pressure tank, visible visor,
+team chest panel and staggered piston idle. A grows fist plates/hammer palms;
+B adds orange valve guards/asymmetric coils. The independent special pose lifts
+both fists and grounds them; the impact ring uses the real caster-centered radius,
+with no airborne or stun effect. Timed cue presentation moves to its own cohesive
+special_cues module as this family grows. Roster composition/base/form guards
+append the new kind and values with this decision. Existing protocol 23 carries
+its readiness/cast/cues; no state-layout migration or active balance change.

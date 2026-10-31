@@ -14,6 +14,7 @@ pub mod bot;
 mod bulwark;
 mod combat;
 pub mod content;
+mod demolisher;
 pub mod headless;
 mod hits;
 mod intent;

@@ -31,32 +31,8 @@ pub(super) fn cue(
                 shots::fire(commands, fx.vfx, ShotKind::Blood, a, b, Area::default());
             }
         }
-        Event::AbilityStarted { unit, .. } => {
-            if let Some((_, _, mut anim)) = map.0.get(&unit).and_then(|e| visuals.get_mut(*e).ok())
-            {
-                anim.start_special();
-            }
-        }
-        Event::AbilityResolved {
-            unit,
-            kind,
-            primary,
-            ..
-        } => {
-            if let Some((_, _, mut anim)) = map.0.get(&unit).and_then(|e| visuals.get_mut(*e).ok())
-            {
-                anim.resolve_special();
-            }
-            if kind == UnitKind::Bulwark {
-                if let Some(at) = chest(map, visuals, unit) {
-                    impacts::land(commands, fx.vfx, Impact::Sparks, at, Area::default());
-                }
-            }
-            if kind == UnitKind::Whisperer {
-                if let Some(at) = primary.and_then(|id| chest(map, visuals, id)) {
-                    impacts::land(commands, fx.vfx, Impact::Mind, at, Area::default());
-                }
-            }
+        Event::AbilityStarted { .. } | Event::AbilityResolved { .. } => {
+            super::special_cues::cue(commands, fx, map, visuals, ev);
         }
         Event::CorrosiveSplash { primary, to, .. } => {
             if let (Some(a), Some(b)) = (chest(map, visuals, primary), chest(map, visuals, to)) {

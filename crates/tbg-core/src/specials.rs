@@ -14,9 +14,9 @@ pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> O
         .ability(tier, branch)
         .into_iter()
         .find_map(|a| match a {
-            Ability::FearPulse { period, .. } | Ability::LivingWall { period, .. } => {
-                Some(period.max(1))
-            }
+            Ability::FearPulse { period, .. }
+            | Ability::LivingWall { period, .. }
+            | Ability::AreaCrush { period, .. } => Some(period.max(1)),
             _ => None,
         })
 }
@@ -76,7 +76,7 @@ fn primary(state: &MatchState, u: &Unit) -> Option<u32> {
 }
 
 fn center(state: &MatchState, u: &Unit, target: Option<u32>) -> i32 {
-    if u.kind == UnitKind::Bulwark {
+    if matches!(u.kind, UnitKind::Bulwark | UnitKind::Demolisher) {
         return u.x;
     }
     target
@@ -127,6 +127,7 @@ fn advance_cast(
         // The primary stays locked: no range recheck, replacement or extra hit.
         crate::whisperer::resolve(state, u, target, ev);
         crate::bulwark::resolve(state, u);
+        crate::demolisher::resolve(state, u, ev);
     }
     let center = center(state, u, cast.target);
     ev.push(Event::AbilityResolved {
@@ -298,6 +299,22 @@ mod tests {
             "ward blocks Slow but not ordinary damage"
         );
     }
+    #[test]
+    fn r02_dead_caster_cannot_finish_an_independent_special() {
+        let mut s = arena();
+        s.units[0].kind = UnitKind::Demolisher;
+        s.units[0].action_cd = 0;
+        advance(&mut s, 0, &mut Vec::new());
+        assert!(s.units[0].fx.special.is_some());
+        s.units[0].hp = 0;
+        let mut events = Vec::new();
+        for _ in 0..=WINDUP {
+            advance(&mut s, 0, &mut events);
+        }
+        assert!(events.is_empty());
+        assert_eq!(s.units[1].hp, 1_000);
+    }
+
     #[test]
     fn r11_pause_freezes_cast_cooldown_and_public_reconnect_facts() {
         let mut s = arena();

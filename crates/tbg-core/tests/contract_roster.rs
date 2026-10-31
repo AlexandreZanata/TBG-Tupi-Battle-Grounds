@@ -161,7 +161,7 @@ fn roster_composition() {
     // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
-    assert_eq!(UNITS.len(), 32);
+    assert_eq!(UNITS.len(), 33);
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     assert_eq!(
         &kinds[ALL_KINDS.len()..],
@@ -171,6 +171,7 @@ fn roster_composition() {
             UnitKind::Acidmaw,
             UnitKind::Whisperer,
             UnitKind::Bulwark,
+            UnitKind::Demolisher,
         ][..]
     );
     assert_eq!(UNIT_KINDS.len(), 10);
@@ -378,7 +379,11 @@ Whisperer/Mental Pulse: hp=0 dmg=2000 atk=0 speed=0 range+=0 splash+=0 heal=0 dm
 Bulwark/Mobile Fortress: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bulwark/Mobile Fortress: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bulwark/Earth Weight: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Bulwark/Earth Weight: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=slow 1500bp/20t";
+Bulwark/Earth Weight: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=slow 1500bp/20t
+Demolisher/Reinforced Fists: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Demolisher/Reinforced Fists: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Demolisher/Shock System: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Demolisher/Shock System: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=slow 1500bp/40t";
 
 #[test]
 fn evolution_forms_are_frozen() {
@@ -403,6 +408,7 @@ fn proposed_p59_bases_match_section_13() {
         (Acidmaw, Monsters, Ranged, 4, [260, 42, 36, 4_200, 38]),
         (Whisperer, Monsters, Control, 5, [380, 15, 40, 3_000, 33]),
         (Bulwark, Machines, Tank, 6, [1_400, 30, 40, 800, 25]),
+        (Demolisher, Machines, Tank, 6, [1_250, 80, 32, 1_000, 28]),
     ];
     for (kind, faction, archetype, energy, base) in rows {
         let d = def(kind);

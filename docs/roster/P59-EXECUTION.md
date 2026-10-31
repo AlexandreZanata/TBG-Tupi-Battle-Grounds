@@ -61,7 +61,8 @@ Own library: `crates/tbg-client/src/art/kits/demolisher/`.
 
 squat broad humanoid, fists almost ground-sized, two piston cuffs and a compact pressure tank; iron/brass/rust, team cloth at waist/back. A2 thickens fist plates, A3 adds broad hammer palms; B2 exposes cyan-free forge-orange valve guards, B3 adds asymmetric shock coils. Reuse Large limbs and mechanical mesh parts; valves are rigid props.
 
-Status: pending. Evidence: `docs/media/p59/demolisher/lineup.jpg`.
+Status: implemented; directed core consolidation passed and real desktop lineup
+observed. Evidence: `docs/media/p59/demolisher/lineup.jpg`.
 
 ### R03 — Crowcaller
 

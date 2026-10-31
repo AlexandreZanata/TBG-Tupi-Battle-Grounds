@@ -435,6 +435,12 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
+    /// R02: one caster-centered damage pulse, without displacement.
+    AreaCrush {
+        period: u16,
+        radius: i32,
+        damage: u16,
+    },
     /// R01: a timed self-reduction that anchors movement, never targeting.
     LivingWall {
         period: u16,
@@ -564,6 +570,25 @@ const fn wall(ticks: u16) -> [Ability; 2] {
         Ability::None,
     ]
 }
+const fn crush(period: u16, radius: i32, special_bp: u16) -> [Ability; 2] {
+    // The form changes the registry amount before static caster percentages.
+    let damage = (120_u32 * (10_000 + special_bp as u32) / 10_000) as u16;
+    [
+        Ability::AreaCrush {
+            period,
+            radius,
+            damage,
+        },
+        Ability::None,
+    ]
+}
+const DEMOLISHER_ABILITIES: [[Ability; 2]; 5] = [
+    crush(200, 2_500, 0),
+    crush(200, 2_500, 2_000),
+    crush(200, 3_000, 2_000),
+    crush(160, 2_500, 0),
+    crush(160, 2_500, 0),
+];
 const BULWARK_ABILITIES: [[Ability; 2]; 5] = [wall(60), wall(60), wall(80), wall(60), wall(60)];
 const WHISPERER_ABILITIES: [[Ability; 2]; 5] = [
     fear(160, 40),
@@ -636,7 +661,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 32;
+pub const UNIT_KIND_COUNT: usize = 33;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -944,6 +969,12 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         [1_400, 30, 40, 800, 25, 0, 0], None, BULWARK_ABILITIES, [
         FormDef { hp_bp: 2_000, ..form("Mobile Fortress") }, form("Mobile Fortress"),
         FormDef { dmg_bp: 1_500, ..form("Earth Weight") }, FormDef { on_hit: slow(1_500, 20), ..form("Earth Weight") },
+    ]),
+    // D-73 (Proposed): R02, inactive until the W11 owner switch.
+    unit(UnitKind::Demolisher,"Demolisher",Machines,Tank,3_600,
+        [1_250,80,32,1_000,28,0,0],None,DEMOLISHER_ABILITIES,[
+        form("Reinforced Fists"),form("Reinforced Fists"),
+        form("Shock System"),FormDef {on_hit:slow(1_500,40),..form("Shock System")},
     ]),
 ];
 

@@ -180,3 +180,7 @@ shared-lock two-job Trunk preview passed. See docs/roster/p59/R01-bulwark.md.
 This extends the prior four pilot deliveries to five of the owner's 21. Public
 pool activation, full suites, balance gates, full-clip/live reconnect/performance
 and subjective look/fun acceptance remain deferred; no production deployment.
+
+R02/D-73: Demolisher's own hydraulic five-form kit, Area Crush and real desktop
+lineup delivered (six of 21); same R01–R03 targeted evidence, no duplicated suite.
+Report: docs/roster/p59/R02-demolisher.md. Other deferred acceptance stays open.

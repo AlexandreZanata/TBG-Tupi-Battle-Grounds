@@ -16,6 +16,7 @@ use crate::visuals::{self, UnitLook, VisualAssets};
 mod actions;
 mod events;
 mod messages;
+mod special_cues;
 mod spectate;
 mod timeline;
 use crate::GameState;
