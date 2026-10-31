@@ -7,7 +7,6 @@ use tbg_core::protocol::{InviteToken, ServerMsg, Token};
 
 use super::{send, Lobby, Session, SessionState, ROOM_TTL};
 use crate::chan::{ConnEvent, ConnHandle, MatchCmd};
-use crate::names::{display_name, random_bytes};
 
 impl Lobby {
     /// Resume a known session (taking over any older socket) or create one.
@@ -16,12 +15,42 @@ impl Lobby {
         resume: Option<Token>,
         conn: ConnHandle,
         ip: IpAddr,
-    ) -> (Token, String) {
+    ) -> Option<(Token, String)> {
+        let reserved = resume.is_some_and(|t| {
+            self.sessions
+                .get(&t)
+                .is_some_and(|s| s.account.is_some() || s.auth_binding.is_some())
+        });
+        let resume = if reserved {
+            let _ = conn.tx.try_send(ConnEvent::Send(ServerMsg::AuthRequired {
+                reason: tbg_core::protocol::AuthRefusal::Invalid,
+            }));
+            None
+        } else {
+            resume
+        };
+        self.hello_bound(resume, conn, ip)
+    }
+
+    pub(super) fn hello_bound(
+        &mut self,
+        resume: Option<Token>,
+        conn: ConnHandle,
+        ip: IpAddr,
+    ) -> Option<(Token, String)> {
         // A reload does not resume a watch: the new socket starts `Idle` (BR-LV02).
         if let Some(t) = resume {
             self.end_watch(t);
         }
         if let Some(s) = resume.and_then(|t| self.sessions.get_mut(&t)) {
+            if let Some(old) = &s.conn {
+                old.active
+                    .store(false, std::sync::atomic::Ordering::Release);
+            }
+            if s.account.is_some() {
+                conn.active
+                    .store(true, std::sync::atomic::Ordering::Release);
+            }
             send(&s.conn, ConnEvent::Close);
             if let SessionState::InMatch { tx, seat } = &s.state {
                 let _ = tx.try_send(MatchCmd::Attach {
@@ -75,11 +104,13 @@ impl Lobby {
             } else if idle {
                 self.resume_rematch(token);
             }
-            return (token, name);
+            return Some((token, name));
         }
+        let (token, name) = crate::names::session_identity()?;
         let session = Session {
-            token: random_bytes::<16>(),
-            name: display_name(),
+            auth_binding: None,
+            token,
+            name,
             conn: Some(conn),
             state: SessionState::Idle,
             account: None,
@@ -92,7 +123,7 @@ impl Lobby {
         };
         let pair = (session.token, session.name.clone());
         self.sessions.insert(session.token, session);
-        pair
+        Some(pair)
     }
 
     pub(super) fn disconnected(&mut self, token: Token, conn_id: u64) {

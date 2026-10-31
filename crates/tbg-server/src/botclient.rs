@@ -15,6 +15,7 @@ use tbg_core::{Outcome, Pcg32, Seat};
 
 mod handle;
 use handle::handle;
+pub mod native_auth;
 pub mod spectators;
 
 #[derive(Clone, Debug)]
@@ -77,8 +78,9 @@ pub(super) struct Session {
     pub(super) pending: Vec<(u32, Instant)>,
     /// P9: when `QuickMatch` was sent for the current match.
     pub(super) queue_start: Option<Instant>,
-    /// P11: a `Register` was sent for this connection (awaiting the key).
-    pub(super) registering: bool,
+    pub(super) auth: Option<native_auth::Grant>,
+    pub(super) auth_received: Instant,
+    pub(super) auth_retry_at: Instant,
 }
 
 pub(super) enum Step {
@@ -98,8 +100,33 @@ pub async fn play_one(opts: BotOpts, seed: u64) -> BotResult {
         drop_at: None,
         pending: Vec::new(),
         queue_start: None,
-        registering: false,
+        auth: None,
+        auth_received: Instant::now(),
+        auth_retry_at: Instant::now(),
     };
+    if opts.accounts || opts.ranked {
+        let mut registered = false;
+        for _ in 0..10 {
+            let name = handle::bot_name(&mut s);
+            match native_auth::register(&opts.url, &name).await {
+                Ok(grant) => {
+                    s.auth = Some(grant);
+                    s.auth_received = Instant::now();
+                    registered = true;
+                    break;
+                }
+                Err("name_taken") => continue,
+                Err(error) => {
+                    r.error = Some(error.into());
+                    return r;
+                }
+            }
+        }
+        if !registered {
+            r.error = Some("registration attempts exhausted".into());
+            return r;
+        }
+    }
     loop {
         match connect_and_play(&opts, &mut s, &mut r, deadline).await {
             Ok(Step::Done) => return r,
@@ -162,13 +189,19 @@ async fn connect_and_play(
         let at = Instant::now() + jitter(opts, &mut s.rng);
         let _ = out_tx.send((at, protocol::encode(&msg)));
     };
-    send(
-        s,
+    let hello = if let Some(auth) = &s.auth {
+        ClientMsg::AuthenticatedHello {
+            version: PROTOCOL_VERSION,
+            resume: s.token,
+            access: auth.access,
+        }
+    } else {
         ClientMsg::Hello {
             version: PROTOCOL_VERSION,
             resume: s.token,
-        },
-    );
+        }
+    };
+    send(s, hello);
     let result = loop {
         let drop_at = s.drop_at.unwrap_or(deadline + Duration::from_secs(3600));
         tokio::select! {
@@ -176,6 +209,17 @@ async fn connect_and_play(
                 let Some((arrived, bytes)) = got else { break Err("connection closed".to_string()) };
                 sleep_until(arrived + jitter(opts, &mut s.rng)).await;
                 let msg = protocol::decode_server(&bytes).map_err(|_| "bad server message".to_string())?;
+                let refused=matches!(msg,protocol::ServerMsg::AuthRequired{..});
+                let due=s.auth.as_ref().is_some_and(|a|s.auth_received.elapsed().as_secs()>=a.expires_at.saturating_sub(a.server_time+60).max(0) as u64);
+                if s.auth.is_some() && (refused || due) && Instant::now()>=s.auth_retry_at {
+                    let auth=s.auth.as_ref().ok_or("missing auth session")?;
+                    match native_auth::refresh(&opts.url,auth).await {
+                        Ok(grant)=> {let access=grant.access;s.auth=Some(grant);s.auth_received=Instant::now();send(s,ClientMsg::Reauthenticate{access});}
+                        Err(error) if r.seat.is_none()=>break Err(error.into()),
+                        Err(_)=> {s.auth_retry_at=Instant::now()+Duration::from_secs(60);}
+                    }
+                    if refused {continue;}
+                } else if refused && r.seat.is_some() {continue;}
                 if let Some(step) = handle(msg, opts, s, r, &mut send)? {
                     break Ok(step);
                 }

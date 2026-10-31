@@ -24,6 +24,17 @@ pub const MATCH_QUEUE: usize = 256;
 pub struct ConnHandle {
     pub id: u64,
     pub tx: mpsc::Sender<ConnEvent>,
+    pub active: std::sync::Arc<std::sync::atomic::AtomicBool>,
+}
+
+impl ConnHandle {
+    pub fn new(id: u64, tx: mpsc::Sender<ConnEvent>) -> Self {
+        Self {
+            id,
+            tx,
+            active: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true)),
+        }
+    }
 }
 
 pub enum ConnEvent {
@@ -41,12 +52,14 @@ pub enum ConnEvent {
 pub enum MatchCmd {
     /// `seat` is stamped by the connection task, never read from the client.
     Intent {
+        conn_id: u64,
         seat: Seat,
         seq: u32,
         intent: PlayerIntention,
     },
     /// BR-M06 (Proposed): `seat` gives up; the other seat wins (BR-M03).
     Surrender {
+        conn_id: u64,
         seat: Seat,
     },
     /// Ignored unless `conn_id` is the seat's current connection.
@@ -77,12 +90,33 @@ pub enum MatchCmd {
 }
 
 pub enum LobbyCmd {
+    AuthenticatedHello {
+        resume: Option<Token>,
+        conn: ConnHandle,
+        ip: IpAddr,
+        binding: crate::auth::Binding,
+        reply: oneshot::Sender<Option<(Token, String)>>,
+    },
+    AuthClaim {
+        token: Token,
+        conn_id: u64,
+        binding: crate::auth::Binding,
+        take_over: bool,
+    },
+    AuthIdle {
+        families: Vec<crate::store::auth_sessions::FamilyId>,
+        reply: oneshot::Sender<bool>,
+    },
+    AuthRevoke {
+        scope: crate::auth::RevocationScope,
+        reply: oneshot::Sender<bool>,
+    },
     Hello {
         resume: Option<Token>,
         conn: ConnHandle,
         /// P11: memory-only, for account rate limits; never stored or logged.
         ip: IpAddr,
-        reply: oneshot::Sender<(Token, String)>,
+        reply: oneshot::Sender<Option<(Token, String)>>,
     },
     Client {
         token: Token,

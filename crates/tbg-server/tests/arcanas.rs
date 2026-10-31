@@ -2,6 +2,9 @@
 //! selection, presets frozen at pairing and shown in `MatchStart`, saved
 //! per account and restored at login. Append-only.
 
+#[path = "common/auth.rs"]
+mod auth;
+
 use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
@@ -50,7 +53,7 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
         };
         match protocol::decode_server(&b).unwrap() {
             ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
-            ServerMsg::NetStats { .. } | ServerMsg::View(_) => {}
+            ServerMsg::NetStats { .. } | ServerMsg::View(_) | ServerMsg::AuthState { .. } => {}
             other => return Some(other),
         }
     }
@@ -155,16 +158,13 @@ async fn br_ar05_presets_are_frozen_at_pairing_and_public_in_match_start() {
 async fn br_ar08_an_account_keeps_its_preset_across_devices() {
     let url = server("account").await;
     let mut first = connect(&url).await;
-    send(
-        &mut first,
-        &ClientMsg::Register {
-            name: "Arcanist".into(),
-        },
-    )
-    .await;
-    let Some(ServerMsg::Registered { key, .. }) = recv(&mut first).await else {
-        panic!("not registered");
-    };
+    let grant = auth::register(&first, "Arcanist").await.unwrap();
+    auth::attach(&mut first, &grant, false).await;
+    assert!(matches!(
+        recv(&mut first).await,
+        Some(ServerMsg::LoggedIn { .. })
+    ));
+    let key = grant.account_key.unwrap();
     let ranged = ArcanaPreset::complete([2, 2, 2, 2, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0]).unwrap();
     assert!(matches!(
         select(&mut first, ranged.ranks).await,
@@ -172,7 +172,8 @@ async fn br_ar08_an_account_keeps_its_preset_across_devices() {
     ));
     // Another device logs in: the saved preset comes back after LoggedIn.
     let mut second = connect(&url).await;
-    send(&mut second, &ClientMsg::Login { key }).await;
+    let grant = auth::login(&second, &key).await.unwrap();
+    auth::attach(&mut second, &grant, true).await;
     assert!(matches!(
         recv(&mut second).await,
         Some(ServerMsg::LoggedIn { .. })

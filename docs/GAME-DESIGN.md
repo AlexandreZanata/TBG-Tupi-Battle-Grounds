@@ -1460,3 +1460,19 @@ location or new persistent IP/UA history. Family limits and rate refusals
 must have localized actionable states. Offline logout is marked pending
 until server revocation is acknowledged; no restored login while pending.
 No combat, Energy, Shop, Rating or balance number changes in this extension.
+
+### P68-A implementation contract activation (D-97)
+
+The Linux-first candidate activates protocol **30**, appending client tags
+20–22 (`AuthenticatedHello`, `Reauthenticate`, `ClaimAccount`) and server
+tags 31–32 (`AuthState`, `AuthRequired`). Tags 0–19 / 0–30 retain their wire
+shapes. Legacy WS account variants remain decodable but are refused; account
+issuance moves to isolated auth HTTP routes. Existing manual AccountKeys
+remain valid. The server schema advances from 8 to additive schema 9.
+
+This replaces transport assumptions in BR-P01–BR-P04 and registration test
+fixtures, preserving name validation, failed-attempt refunds, ranked data,
+explicit takeover and refusal of account changes during an admitted match.
+The revision adds no simulation, balance or outcome change. Browser JSON
+includes the server issuance time so clients can schedule renewal using a
+monotonic duration instead of trusting the device's wall clock.

@@ -1,6 +1,9 @@
 //! Read-only ranking API (GAME-DESIGN BR-R07, BR-P05). Each test names
 //! the rule it protects. HTTP goes over raw TCP (no client dependency).
 
+#[path = "common/auth.rs"]
+mod auth;
+
 use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
@@ -66,7 +69,7 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
         };
         match protocol::decode_server(&b).unwrap() {
             ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
-            ServerMsg::NetStats { .. } => {}
+            ServerMsg::NetStats { .. } | ServerMsg::AuthState { .. } => {}
             other => return Some(other),
         }
     }
@@ -85,11 +88,10 @@ async fn hello(ws: &mut Ws) {
 }
 
 async fn register_as(ws: &mut Ws, name: &str) -> String {
-    send(ws, &ClientMsg::Register { name: name.into() }).await;
-    match recv(ws).await {
-        Some(ServerMsg::Registered { key, .. }) => key,
-        other => panic!("expected Registered, got {other:?}"),
-    }
+    let grant = auth::register(ws, name).await.unwrap();
+    auth::attach(ws, &grant, false).await;
+    assert!(matches!(recv(ws).await, Some(ServerMsg::LoggedIn { .. })));
+    grant.account_key.unwrap()
 }
 
 /// Minimal HTTP/1.0 GET over TCP. Returns (status, headers, body).
@@ -277,7 +279,8 @@ async fn br_r07_in_game_leaderboard_matches_api() {
     let board = wait_total(&base, 2).await;
     let mut ws = connect(&url).await;
     hello(&mut ws).await;
-    send(&mut ws, &ClientMsg::Login { key }).await;
+    let grant = auth::login(&ws, &key).await.unwrap();
+    auth::attach(&mut ws, &grant, true).await;
     assert!(matches!(
         recv(&mut ws).await,
         Some(ServerMsg::LoggedIn { .. })

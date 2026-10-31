@@ -21,6 +21,7 @@ fn issue(register: bool, family: u8, hash: u8, now: i64) -> Request {
         family: [family; 16],
         device: [3; 16],
         channel: Channel::Native,
+        persistent: true,
         refresh_hash: [hash; 32],
         now,
     })

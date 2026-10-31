@@ -2536,3 +2536,14 @@ The owner approved a minimum purchase share of 62.5% of the uniform share,
 original 2.5% floor at 25 kinds and yields approximately 1.36% at 46 kinds.
 The old fixed floor would require 115% total participation at 46 kinds.
 No other balance target or gameplay number changes in this amendment.
+
+### D-97 implementation note: coordinated auth wire activation
+
+P68's isolated Linux-first candidate uses protocol 30 and schema 9, chosen
+from the actual integrated protocol-29/schema-8 base. Registration/account
+contract fixtures now issue over the native HTTP channel and authenticate
+the real WebSocket rather than sending legacy WS credentials. Rule checks
+remain unchanged; new auth/rotation/controller checks extend them. Passive
+same-family resume also preserves a still-attached controller; explicit
+Continue here alone authorizes displacement. Production protocol 29 is not
+compatible, and no production activation is implied by the candidate.

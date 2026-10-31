@@ -11,8 +11,9 @@ the direct request, superseding the attached handoff's default prohibition
 on automatic public promotion. No production deployment, main merge,
 certificate purchase or change to another front is authorized here.
 
-Status: Step 0/base audit complete; authentication implementation pending.
-No new build, release, vault migration or installed application change yet.
+Status: transactional storage and auth/wire integration implemented; directed
+auth consolidation in progress. No new release, real-user vault migration or
+installed application change yet.
 
 ## Step 0: reviewed source and ownership
 
@@ -105,3 +106,57 @@ Formatting applied to the affected package. The new named store regression
 scenarios in `tests/auth_sessions.rs` are queued for the single targeted
 consolidation, not claimed as executed yet. HTTP/WS/vault wiring is next;
 this storage step alone does not enable or establish complete P68 auth.
+
+### P68-A coordinated wire and authority consolidation
+
+Implemented protocol 30 (new appended tags only), hash-only schema 9 families,
+900-second Access grants, absolute 30-day families, bounded 30-second retry
+caches with monotonic deadlines, separate IP/family budgets, registration
+retry proof, indexed bounded cleanup and fail-closed capacity handling.
+Browser/native routes enforce strict DTOs, 4 KiB/5-second bounds, no-store,
+exact configured Origin/custom headers, duplicate-header rejection, cookie
+isolation and Secure/HttpOnly/SameSite=Strict host cookies. Browser cookie
+persistence choice survives rotation/restart. Logout-all never clears an
+unrelated account's cookie. Revocation uses one account/family barrier before
+acknowledgment, including naturally expired admitted-match leases.
+
+Sockets authenticate account/family before attaching a resume handle. Passive
+same-family restore cannot displace an attached controller. Explicit claim
+alone authorizes takeover. Renewal uses the current socket; natural Access
+expiry preserves only the admitted match lease. Queued intentions/surrender
+carry the server connection ID and are rejected before state/stats/replay when
+that controller has been replaced or revoked. Bots now issue over the native
+HTTP channel and keep credentials in process memory. No combat/rating value
+or deterministic simulation state changed.
+
+Directed consolidation executed on this worktree diff (shared lock, two jobs,
+serial test execution):
+
+- `cargo test --offline --locked -p tbg-server --test auth_sessions --test auth_http --test accounts --test contract_registration --test arcanas --test ranked --test leaderboard --test contract -- --test-threads=1`:
+  first sandbox execution could not bind loopback (`Operation not permitted`).
+  Repeated with the normal host authorization for synthetic 127.0.0.1 servers;
+  accounts 12 and Arcanas 3 passed. New HTTP tests exposed duplicate Origin
+  acceptance and a test-only IP-budget collision. Reject ambiguous duplicate
+  auth headers; isolate the family-cap test with a larger *fixture* IP budget,
+  leaving production defaults unchanged.
+- Remaining HTTP/store/registration/queue/ranking targets after those fixes:
+  22 passed (HTTP 4, store 3, queue contract 3, registration 2, leaderboard 4,
+  ranked 6). Leaderboard target took 67.38 s; no rerun or benchmark followed.
+- `cargo test --offline --locked -p tbg-server --test auth_websocket -- --test-threads=1`:
+  3 passed, including same-family passive conflict, natural-expiry/same-socket
+  renewal and logout-all of an expired admitted-match lease (0.08 s).
+- `cargo test --offline --locked -p tbg-core --test contract_protocol -- --test-threads=1`:
+  14 passed, old tags retained and new credential/debug bounds covered.
+- `cargo test --offline --locked -p tbg-server --lib match_task::tests -- --test-threads=1`:
+  4 passed, including stale/revoked controller frames before state/metrics.
+- `cargo test --offline --locked -p tbg-server --lib lobby::tests -- --test-threads=1`:
+  16 passed; synthetic ranked fixtures now include a valid auth binding.
+
+Client auth/net targeted tests also passed (3 + 6); native and WASM checks
+passed. Initial client integration exceeded Bevy's plugin tuple size; the
+additional plugin is in the second existing tuple. The deprecated Interaction
+approach was replaced with the project's existing hit-test pattern before
+acceptance. Browser check warnings and pre-existing test-only `Layout::clear`
+warning are recorded for scoped cleanup. Real vault/browser journeys,
+migration cancellation/offline cases, package evidence and Windows visual
+gates remain separate acceptance work. These checks are not a full suite.

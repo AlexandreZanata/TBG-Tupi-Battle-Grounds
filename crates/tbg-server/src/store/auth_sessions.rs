@@ -15,6 +15,7 @@ CREATE TABLE auth_sessions (
  account_id INTEGER NOT NULL REFERENCES accounts(id),
  device_id BLOB NOT NULL CHECK(length(device_id)=16),
  client_kind TEXT NOT NULL CHECK(client_kind IN ('browser','native')),
+ keep_signed_in INTEGER NOT NULL CHECK(keep_signed_in IN (0,1)),
  created_at INTEGER NOT NULL CHECK(created_at>=0), expires_at INTEGER NOT NULL CHECK(expires_at>created_at),
  last_used_at INTEGER, revoked_at INTEGER, revoke_reason TEXT
 );
@@ -54,6 +55,7 @@ pub struct Family {
     pub account: AccountId,
     pub device: FamilyId,
     pub channel: Channel,
+    pub persistent: bool,
     pub created_at: i64,
     pub expires_at: i64,
 }
@@ -65,6 +67,7 @@ pub struct Issuance {
     pub family: FamilyId,
     pub device: FamilyId,
     pub channel: Channel,
+    pub persistent: bool,
     pub refresh_hash: CredentialHash,
     pub now: i64,
 }
@@ -83,6 +86,15 @@ pub enum Request {
         channel: Channel,
         now: i64,
     },
+    LogoutFamily {
+        hash: CredentialHash,
+        channel: Channel,
+    },
+    Inspect {
+        hash: CredentialHash,
+        channel: Channel,
+        now: i64,
+    },
     Families {
         name: String,
         key_hash: CredentialHash,
@@ -93,12 +105,17 @@ pub enum Request {
         now: i64,
         reason: &'static str,
     },
+    RevokeAccount {
+        account: AccountId,
+        now: i64,
+    },
     Cleanup {
         now: i64,
     },
 }
 
 pub enum Reply {
+    LogoutFamily(Family),
     Grant {
         family: Family,
         profile: Profile,
@@ -166,6 +183,15 @@ pub(super) fn apply(conn: &mut Connection, request: Request) -> Result<Reply, Er
             }
             grant(conn, row.family)
         }
+        Request::LogoutFamily { hash, channel } => logout_family(conn, hash, channel),
+        Request::Inspect { hash, channel, now } => {
+            let row = lookup(conn, hash, channel, now)?;
+            if let Some(at) = row.consumed {
+                consumed(conn, row, at, None)
+            } else {
+                grant(conn, row.family)
+            }
+        }
         Request::Families {
             name,
             key_hash,
@@ -196,6 +222,10 @@ pub(super) fn apply(conn: &mut Connection, request: Request) -> Result<Reply, Er
             Ok(Reply::Done)
         }
         Request::Cleanup { now } => cleanup(conn, now),
+        Request::RevokeAccount { account, now } => {
+            conn.execute("UPDATE auth_sessions SET revoked_at=?1,revoke_reason='logout_all' WHERE account_id=?2 AND revoked_at IS NULL",params![now,account])?;
+            Ok(Reply::Done)
+        }
     }
 }
 
@@ -215,7 +245,7 @@ fn issue_family(conn: &mut Connection, issue: Issuance) -> Result<Reply, Error> 
         .now
         .checked_add(FAMILY_SECONDS)
         .ok_or(Error::Unavailable)?;
-    tx.execute("INSERT INTO auth_sessions(id,account_id,device_id,client_kind,created_at,expires_at,last_used_at) VALUES(?1,?2,?3,?4,?5,?6,?5)",params![issue.family.as_slice(),account,issue.device.as_slice(),issue.channel.as_str(),issue.now,expires])?;
+    tx.execute("INSERT INTO auth_sessions(id,account_id,device_id,client_kind,created_at,expires_at,last_used_at,keep_signed_in) VALUES(?1,?2,?3,?4,?5,?6,?5,?7)",params![issue.family.as_slice(),account,issue.device.as_slice(),issue.channel.as_str(),issue.now,expires,issue.persistent])?;
     tx.execute("INSERT INTO auth_refresh_tokens(token_hash,session_id,generation,issued_at) VALUES(?1,?2,0,?3)",params![issue.refresh_hash.as_slice(),issue.family.as_slice(),issue.now])?;
     let high_water = ranked::high_water(&tx)?;
     tx.commit()?;
@@ -225,6 +255,7 @@ fn issue_family(conn: &mut Connection, issue: Issuance) -> Result<Reply, Error> 
             account,
             device: issue.device,
             channel: issue.channel,
+            persistent: issue.persistent,
             created_at: issue.now,
             expires_at: expires,
         },
@@ -246,8 +277,8 @@ fn lookup(
     channel: Channel,
     now: i64,
 ) -> Result<Row, Error> {
-    let row=conn.query_row("SELECT s.id,s.account_id,s.device_id,s.created_at,s.expires_at,t.generation,t.consumed_at,t.operation_hash FROM auth_refresh_tokens t JOIN auth_sessions s ON s.id=t.session_id WHERE t.token_hash=?1 AND s.client_kind=?2 AND s.revoked_at IS NULL AND s.expires_at>?3",params![hash.as_slice(),channel.as_str(),now],|r| {
-        Ok((r.get::<_,Vec<u8>>(0)?,r.get(1)?,r.get::<_,Vec<u8>>(2)?,r.get(3)?,r.get(4)?,r.get(5)?,r.get(6)?,r.get::<_,Option<Vec<u8>>>(7)?))
+    let row=conn.query_row("SELECT s.id,s.account_id,s.device_id,s.created_at,s.expires_at,t.generation,t.consumed_at,t.operation_hash,s.keep_signed_in FROM auth_refresh_tokens t JOIN auth_sessions s ON s.id=t.session_id WHERE t.token_hash=?1 AND s.client_kind=?2 AND s.revoked_at IS NULL AND s.expires_at>?3",params![hash.as_slice(),channel.as_str(),now],|r| {
+        Ok((r.get::<_,Vec<u8>>(0)?,r.get(1)?,r.get::<_,Vec<u8>>(2)?,r.get(3)?,r.get(4)?,r.get(5)?,r.get(6)?,r.get::<_,Option<Vec<u8>>>(7)?,r.get::<_,bool>(8)?))
     }).optional()?.ok_or(Error::Unauthorized)?;
     Ok(Row {
         family: Family {
@@ -255,6 +286,7 @@ fn lookup(
             account: row.1,
             device: row.2.try_into().map_err(|_| Error::Unavailable)?,
             channel,
+            persistent: row.8,
             created_at: row.3,
             expires_at: row.4,
         },
@@ -281,6 +313,25 @@ fn grant(conn: &Connection, family: Family) -> Result<Reply, Error> {
     })
 }
 
+fn consumed(
+    conn: &Connection,
+    row: Row,
+    at: i64,
+    operation: Option<CredentialHash>,
+) -> Result<Reply, Error> {
+    let successor: Vec<u8> = conn.query_row(
+        "SELECT token_hash FROM auth_refresh_tokens WHERE session_id=?1 AND consumed_at IS NULL",
+        params![row.family.id.as_slice()],
+        |r| r.get(0),
+    )?;
+    Ok(Reply::Consumed {
+        family: row.family,
+        at,
+        operation_matches: row.operation == operation,
+        successor: successor.try_into().map_err(|_| Error::Unavailable)?,
+    })
+}
+
 fn rotate(
     conn: &mut Connection,
     old_hash: CredentialHash,
@@ -292,13 +343,7 @@ fn rotate(
     let tx = conn.transaction()?;
     let row = lookup(&tx, old_hash, channel, now)?;
     if let Some(at) = row.consumed {
-        let successor:Vec<u8>=tx.query_row("SELECT token_hash FROM auth_refresh_tokens WHERE session_id=?1 AND consumed_at IS NULL",params![row.family.id.as_slice()],|r|r.get(0))?;
-        return Ok(Reply::Consumed {
-            family: row.family,
-            at,
-            operation_matches: row.operation == Some(operation_hash),
-            successor: successor.try_into().map_err(|_| Error::Unavailable)?,
-        });
+        return consumed(&tx, row, at, Some(operation_hash));
     }
     let changed=tx.execute("UPDATE auth_refresh_tokens SET consumed_at=?1,operation_hash=?2 WHERE token_hash=?3 AND consumed_at IS NULL",params![now,operation_hash.as_slice(),old_hash.as_slice()])?;
     if changed != 1 {
@@ -320,4 +365,23 @@ fn cleanup(conn: &mut Connection, now: i64) -> Result<Reply, Error> {
     tx.execute("DELETE FROM auth_sessions WHERE id IN (SELECT s.id FROM auth_sessions s WHERE s.expires_at<=?1 AND NOT EXISTS (SELECT 1 FROM auth_refresh_tokens t WHERE t.session_id=s.id) LIMIT ?2)",params![now,i64::try_from(256_usize.saturating_sub(removed)).map_err(|_| Error::Unavailable)?])?;
     tx.commit()?;
     Ok(Reply::Done)
+}
+
+/// A current hash proves only its own logout retry, even after revocation.
+/// This path never returns a profile, Access or a renewable grant.
+fn logout_family(
+    conn: &Connection,
+    hash: CredentialHash,
+    channel: Channel,
+) -> Result<Reply, Error> {
+    let row=conn.query_row("SELECT s.id,s.account_id,s.device_id,s.created_at,s.expires_at,s.keep_signed_in FROM auth_refresh_tokens t JOIN auth_sessions s ON s.id=t.session_id WHERE t.token_hash=?1 AND t.consumed_at IS NULL AND s.client_kind=?2",params![hash.as_slice(),channel.as_str()],|r|Ok((r.get::<_,Vec<u8>>(0)?,r.get(1)?,r.get::<_,Vec<u8>>(2)?,r.get(3)?,r.get(4)?,r.get(5)?))).optional()?.ok_or(Error::Unauthorized)?;
+    Ok(Reply::LogoutFamily(Family {
+        id: row.0.try_into().map_err(|_| Error::Unavailable)?,
+        account: row.1,
+        device: row.2.try_into().map_err(|_| Error::Unavailable)?,
+        channel,
+        created_at: row.3,
+        expires_at: row.4,
+        persistent: row.5,
+    }))
 }

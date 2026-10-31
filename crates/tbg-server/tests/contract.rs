@@ -3,6 +3,9 @@
 //! queues never mix, ratings ignored). A failure means a documented limit
 //! or the matchmaking rule changed: update the docs in the same commit.
 
+#[path = "common/auth.rs"]
+mod auth;
+
 use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
@@ -66,7 +69,7 @@ async fn recv_within(ws: &mut Ws, wait: Duration) -> Option<ServerMsg> {
         };
         match protocol::decode_server(&b).unwrap() {
             ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
-            ServerMsg::NetStats { .. } | ServerMsg::View(_) => {}
+            ServerMsg::NetStats { .. } | ServerMsg::View(_) | ServerMsg::AuthState { .. } => {}
             other => return Some(other),
         }
     }
@@ -82,12 +85,13 @@ async fn player(url: &str, account: Option<&str>) -> Ws {
     let welcome = recv_within(&mut ws, Duration::from_secs(5)).await;
     assert!(matches!(welcome, Some(ServerMsg::Welcome { .. })));
     if let Some(name) = account {
-        send(&mut ws, &ClientMsg::Register { name: name.into() }).await;
-        let reply = recv_within(&mut ws, Duration::from_secs(5)).await;
-        assert!(
-            matches!(reply, Some(ServerMsg::Registered { .. })),
-            "{reply:?}"
-        );
+        // D-97 changes transport, not ranked/queue contracts.
+        let grant = auth::register(&ws, name).await.unwrap();
+        auth::attach(&mut ws, &grant, false).await;
+        assert!(matches!(
+            recv_within(&mut ws, Duration::from_secs(5)).await,
+            Some(ServerMsg::LoggedIn { .. })
+        ));
     }
     ws
 }

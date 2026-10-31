@@ -21,7 +21,6 @@ impl Lobby {
         // the longest-waiting other session.
         match self.queue.pop_front() {
             Some(other) => {
-                self.queued_at.remove(&other);
                 self.pair([other, token], MatchMode::Casual, false, Listing::Public);
             }
             None => {
@@ -114,6 +113,9 @@ impl Lobby {
         rematchable: bool,
         listing: Listing,
     ) {
+        if self.refuse_expired_pair(tokens, mode, listing) {
+            return;
+        }
         // P9: queue wait per paired session (the joiner waited ~0 ms).
         for t in tokens {
             if let Some(t0) = self.queued_at.remove(&t) {

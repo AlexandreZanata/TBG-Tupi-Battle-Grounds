@@ -8,8 +8,8 @@ use std::time::{Duration, Instant};
 use axum::body::Bytes;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::{ConnectInfo, State};
-use axum::http::HeaderMap;
-use axum::response::Response;
+use axum::http::{HeaderMap, StatusCode};
+use axum::response::{IntoResponse, Response};
 use tokio::sync::{mpsc, oneshot};
 use tokio::time::{sleep, timeout};
 
@@ -37,6 +37,9 @@ pub(crate) async fn handler(
     headers: HeaderMap,
     State(app): State<AppState>,
 ) -> Response {
+    if !crate::auth::websocket_origin(&headers, &app.config.auth_origins) {
+        return StatusCode::FORBIDDEN.into_response();
+    }
     let ip = client_ip(peer, &headers);
     ws.max_message_size(MAX_CLIENT_MSG_BYTES)
         .max_frame_size(MAX_CLIENT_MSG_BYTES)
@@ -51,6 +54,10 @@ pub(crate) async fn handler(
 }
 
 pub(super) struct Conn {
+    pub(super) id: u64,
+    pub(super) binding: Option<crate::auth::Binding>,
+    pub(super) active: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    pub(super) expired_notified: bool,
     pub(super) token: Token,
     pub(super) matched: Option<(Seat, mpsc::Sender<MatchCmd>)>,
     pub(super) tokens: f64,
@@ -77,10 +84,16 @@ async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
     };
     let id = app.next_conn_id.fetch_add(1, Relaxed);
     let (tx, mut rx) = mpsc::channel(CONN_QUEUE);
-    let Some(token) = handshake(&mut socket, &app, ConnHandle { id, tx }, ip).await else {
+    let handle = ConnHandle::new(id, tx);
+    let active = handle.active.clone();
+    let Some((token, binding)) = handshake(&mut socket, &app, handle, ip).await else {
         return;
     };
     let mut c = Conn {
+        id,
+        binding,
+        active,
+        expired_notified: false,
         token,
         matched: None,
         tokens: BUCKET_CAP,
@@ -125,45 +138,92 @@ async fn handshake(
     app: &AppState,
     conn: ConnHandle,
     ip: IpAddr,
-) -> Option<Token> {
+) -> Option<(Token, Option<crate::auth::Binding>)> {
     let first = timeout(HANDSHAKE, socket.recv()).await.ok()??.ok()?;
     let Message::Binary(bytes) = first else {
         return None;
     };
-    let Ok(ClientMsg::Hello { version, resume }) = protocol::decode_client(&bytes) else {
+    let (version, resume, access) = match protocol::decode_client(&bytes) {
+        Ok(ClientMsg::Hello { version, resume }) => (version, resume, None),
+        Ok(ClientMsg::AuthenticatedHello {
+            version,
+            resume,
+            access,
+        }) => (version, resume, Some(access)),
+        _ => {
+            let _ = send(
+                socket,
+                &app.metrics,
+                &ServerMsg::Error {
+                    code: ErrorCode::BadMessage,
+                },
+            )
+            .await;
+            return None;
+        }
+    };
+    // Version is checked before Access lookup or any resume/profile/seat side effect.
+    if version != protocol::PROTOCOL_VERSION {
         let _ = send(
             socket,
             &app.metrics,
-            &ServerMsg::Error {
-                code: ErrorCode::BadMessage,
+            &ServerMsg::VersionMismatch {
+                server: protocol::PROTOCOL_VERSION,
+            },
+        )
+        .await;
+        return None;
+    }
+    let binding = match access {
+        Some(access) => match app.auth.authenticate(access.0) {
+            Ok(binding) => Some(binding),
+            Err(_) => {
+                let _ = send(
+                    socket,
+                    &app.metrics,
+                    &ServerMsg::AuthRequired {
+                        reason: protocol::AuthRefusal::Invalid,
+                    },
+                )
+                .await;
+                return None;
+            }
+        },
+        None => None,
+    };
+    let (reply, rx) = oneshot::channel();
+    let command = if let Some(binding) = binding.clone() {
+        LobbyCmd::AuthenticatedHello {
+            resume,
+            conn,
+            ip,
+            binding,
+            reply,
+        }
+    } else {
+        LobbyCmd::Hello {
+            resume,
+            conn,
+            ip,
+            reply,
+        }
+    };
+    app.lobby.send(command).await.ok()?;
+    let Some((token, name)) = rx.await.ok()? else {
+        let _ = send(
+            socket,
+            &app.metrics,
+            &ServerMsg::AuthRequired {
+                reason: protocol::AuthRefusal::Invalid,
             },
         )
         .await;
         return None;
     };
-    if version != protocol::PROTOCOL_VERSION {
-        let reply = ServerMsg::VersionMismatch {
-            server: protocol::PROTOCOL_VERSION,
-        };
-        let _ = send(socket, &app.metrics, &reply).await;
-        return None;
-    }
-    let (reply, rx) = oneshot::channel();
-    app.lobby
-        .send(LobbyCmd::Hello {
-            resume,
-            conn,
-            // P11: memory-only, for account rate limits; never stored/logged.
-            ip,
-            reply,
-        })
-        .await
-        .ok()?;
-    let (token, name) = rx.await.ok()?;
     send(socket, &app.metrics, &ServerMsg::Welcome { token, name })
         .await
         .ok()?;
-    Some(token)
+    Some((token, binding))
 }
 
 async fn run_loop(
@@ -179,6 +239,17 @@ async fn run_loop(
     let idle = sleep(IDLE);
     tokio::pin!(idle);
     loop {
+        if c.binding.as_ref().is_some_and(|b| b.revoked()) {
+            let _ = send(
+                socket,
+                &app.metrics,
+                &ServerMsg::AuthRequired {
+                    reason: protocol::AuthRefusal::Revoked,
+                },
+            )
+            .await;
+            return "auth_revoked";
+        }
         let reply = tokio::select! {
             msg = socket.recv() => match msg {
                 Some(Ok(Message::Binary(bytes))) => {
@@ -223,6 +294,10 @@ async fn run_loop(
                 Some(ConnEvent::Close) | None => return "server_closed",
             },
             _ = ping.tick() => {
+                if !c.expired_notified && c.binding.as_ref().is_some_and(|b|!app.auth.now().is_ok_and(|now|b.valid(now))) {
+                    c.expired_notified=true;
+                    let _=send(socket,&app.metrics,&ServerMsg::AuthRequired{reason:protocol::AuthRefusal::Expired}).await;
+                }
                 c.next_ping += 1;
                 c.pings.push((c.next_ping, Instant::now()));
                 if c.pings.len() > 8 { c.pings.remove(0); }

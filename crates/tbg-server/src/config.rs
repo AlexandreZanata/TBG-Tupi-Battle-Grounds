@@ -4,6 +4,10 @@ use std::path::PathBuf;
 
 #[derive(Clone, Debug)]
 pub struct Config {
+    /// Programmatic synthetic test clock; never configurable over HTTP or environment.
+    pub auth_clock: crate::auth::Clock,
+    /// Exact reviewed browser origins; never derive cookie authority from Host.
+    pub auth_origins: Vec<String>,
     pub addr: String,
     pub max_connections: usize,
     pub max_per_ip: usize,
@@ -44,6 +48,8 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Config {
+            auth_clock: crate::auth::Clock::default(),
+            auth_origins: vec!["https://tbg.abastevo.com.br".into()],
             addr: "0.0.0.0:8080".into(),
             max_connections: 2_000,
             max_per_ip: 8,
@@ -77,6 +83,11 @@ impl Config {
                 .unwrap_or(default)
         };
         Config {
+            auth_clock: d.auth_clock,
+            auth_origins: std::env::var("TBG_AUTH_ORIGINS")
+                .ok()
+                .map(|v| v.split(',').map(|s| s.trim().to_owned()).collect())
+                .unwrap_or(d.auth_origins),
             addr: std::env::var("TBG_ADDR").unwrap_or(d.addr),
             max_connections: num("TBG_MAX_CONNECTIONS", d.max_connections as u64) as usize,
             max_per_ip: num("TBG_MAX_PER_IP", d.max_per_ip as u64) as usize,
