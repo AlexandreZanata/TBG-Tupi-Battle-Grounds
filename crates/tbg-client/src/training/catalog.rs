@@ -265,8 +265,13 @@ fn details(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
         p.spawn(kit::muted(crate::ui::evolve::describe(f, lang), 12.));
     }
     p.spawn(kit::heading(lang.key("training.ability"), 18.));
+    let ability = crate::ui::ability_details::describe(c.selected, c.form.0, c.form.1, lang);
     p.spawn(crate::ui::label(
-        crate::ui::ability_details::describe(c.selected, c.form.0, c.form.1, lang),
+        if ability.is_empty() {
+            lang.key("training.no_special")
+        } else {
+            ability
+        },
         13.,
     ));
     let (good, weak) = content::matchup(lang, c.selected);

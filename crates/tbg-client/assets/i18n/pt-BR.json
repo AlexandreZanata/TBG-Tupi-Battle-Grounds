@@ -1385,5 +1385,6 @@
   "training.drill.merged": "Escudo do drill fundido: 25 por 2,0s",
   "training.drill.duo": "Dano do Duodrill +15%",
   "training.drill.micro": "Grau 1; expira após 12,0s; funde com outro Microdrill",
-  "training.drill.double": "Grau 2; expira após 14,0s; funde com outro Duodrill"
+  "training.drill.double": "Grau 2; expira após 14,0s; funde com outro Duodrill",
+  "training.no_special": "Sem habilidade especial adicional nesta forma."
 }

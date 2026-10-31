@@ -30,13 +30,16 @@ def main():
                'TBG_DATA_DIR': str((args.scratch / 'data').resolve()),
                'TBG_GALLERY': kind, 'TBG_PORTRAIT': '1', 'TBG_CAPTURE': str(png),
                'TBG_CAPTURE_SIZE': '1024x1024' if kind == 'Longaxe' else '400x400', 'TBG_CAPTURE_AFTER': '2'}
+        env.pop('WAYLAND_DISPLAY', None)
+        env.pop('WAYLAND_SOCKET', None)
         with (args.scratch / f'{kind}.log').open('w') as log:
             subprocess.run(['xvfb-run', '-a', '-s', '-screen 0 1024x1024x24' if kind == 'Longaxe' else '-screen 0 400x400x24',
                             str(args.binary.resolve())], env=env, stdout=log,
                            stderr=log, timeout=60, check=True)
         dest = assets / (kind.lower() + '.webp')
         # Longaxe's unusually tall weapon would make the body unreadable in a small Shop card.
-        crop = ['-crop', '308x384+358+601', '+repage'] if kind == 'Longaxe' else []
+        width, height = map(int, subprocess.check_output(['identify', '-format', '%w %h', str(png)], text=True).split())
+        crop = ['-crop', f'{int(height*.26)}x{int(height*.38)}+{int(width/2-height*.13)}+{int(height*.60)}', '+repage'] if kind == 'Longaxe' else []
         subprocess.run(['convert', str(png), *crop, '-fuzz', '4%', '-trim', '+repage',
                         '-resize', '340x340', '-gravity', 'center', '-background',
                         '#14202a', '-extent', '400x400', '-quality', '85', str(dest)],
