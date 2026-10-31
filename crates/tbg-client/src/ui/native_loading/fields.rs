@@ -4,7 +4,7 @@ use super::{gpu::Prepared, Decoration, Status};
 use bevy::{
     asset::{AssetId, LoadState},
     prelude::*,
-    text::TextLayoutInfo,
+    text::{FontSource, TextLayoutInfo},
 };
 
 #[derive(Component)]
@@ -257,9 +257,10 @@ fn paint_text(
         });
         // Never replace a ready battle clock/choice with a startup animation.
         let boot_wait = !status.boot_ready && *state.get() != crate::GameState::InMatch;
+        let font_missing =
+            matches!(&font.font, FontSource::Handle(handle) if fonts.get(handle.id()).is_none());
         let waiting = pending.is_some_and(|p| p.0)
-            || (!text.0.trim().is_empty()
-                && (boot_wait || fonts.get(font.font.id()).is_none() || !gpu_ready));
+            || (!text.0.trim().is_empty() && (boot_wait || font_missing || !gpu_ready));
         if waiting {
             mask.fade = 0.;
         } else {
