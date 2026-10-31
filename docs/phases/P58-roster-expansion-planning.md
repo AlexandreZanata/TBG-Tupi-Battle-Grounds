@@ -331,7 +331,7 @@ with `git merge-base --is-ancestor`, grep and file reads against base
 - `release/roster-online` (`d06279a`) is an ancestor of `origin/main`: PR #16 is integrated.
 - `PROTOCOL_VERSION` is 16 (`protocol.rs`).
 - `CANON.pool` is `&FULL_POOL` (25 kinds); `UNIT_KINDS` has 10 kinds and is no longer the Shop pool.
-- `UnitFx.shield` is read by `hits.rs::absorb_shield` and never written; `Ability::Carry.shield_bp` is ignored by its callers.
+- `UnitFx.shield` is read and decremented by `hits.rs::absorb_shield`, but nothing grants a positive amount; `Ability::Carry.shield_bp` is ignored by its callers.
 - `FX_CARRIED` is bit 14 and `FX_SUMMON` is bit 15 in `UnitView.fx`.
 - `FACTIONS`, `SYNERGIES`, `counts` and `PlayerState.synergy` are four-entry arrays.
 - The purchase-share gate is 2.5 % per kind (`tbg-balance/src/gate.rs`, O-R2).
