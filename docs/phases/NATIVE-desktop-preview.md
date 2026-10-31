@@ -988,3 +988,32 @@ require the owner's explicit scope. No CI wait, remote Git or deployment.
   target/browser build, multiplayer/reconnect campaign, remote Git, CI wait
   or deployment ran. Owner policy files remain unstaged. Reopen TBG to use
   the new installed Linux presentation.
+
+## GitHub consolidation (2026-10-31)
+
+Owner explicitly authorized normal publication of this chat's visual work,
+followed by isolated P63 implementation; no force-push, merge, installation
+or deployment. The fetched main is still `9008f11` (protocol 17). PR #21
+remains open at `0047830` (protocol 20), so this native PR targets its branch
+`phase/system-champions-crowd-shop`, keeping that front out of this review's
+diff. Retarget to main after the owner integrates the prerequisite. All
+native feedback commits are retained, including raster art, shared header,
+lobby demo, catalogs, ranking, Settings, battle/Shop/Augment panels, loading
+and platform services. No unrelated dirty policy/document files are staged.
+
+Level: targeted consolidation. Under the shared nonblocking lock, existing
+cache, two Cargo jobs and one test thread, these passed:
+
+- `cargo test --locked -p tbg-client ui::result::tests::rematch_controls_follow_the_offer_without_query_conflicts -- --test-threads=1`: 1 passed.
+- `cargo test --locked -p tbg-client ui::shell::data::tests -- --test-threads=1`: 2 passed.
+- `cargo test --locked -p tbg-client platform:: -- --test-threads=1`: 2 passed.
+- `node --test tests/lobby-art.test.js tests/lobby.test.js` in
+  `crates/tbg-client`: 2 files passed.
+- Existing installed-build and visual evidence above remains applicable;
+  no duplicate gallery, installation or full-suite run was performed.
+
+The first test compilation took 6.74 s, the following filtered invocations
+reused it. Exact output is in ignored `.local/native-consolidation.log`.
+Browser target, cold-device coverage and previously listed deferred cases
+remain pending; native tests do not prove browser behavior. CI is left to
+the owner, with no CI wait, automatic merge or deployment.
