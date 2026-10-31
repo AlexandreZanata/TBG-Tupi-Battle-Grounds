@@ -487,3 +487,29 @@ resize/hover/keyboard/selection coverage and the already listed targeted
 Council regressions to consolidation. Full suite, WASM/Trunk builds and
 other-platform acceptance remain deferred without an explicit request.
 No game rule, web behavior, remote Git, CI or VPS change belongs here.
+
+### Uniform Augment price plate result
+
+- Installed source: `ba0335724dfb75936bbdeba29f68f22902b2e8a0`.
+  `cargo build --locked -p tbg-client --bin tbg-client`, Linux packaging
+  with `--no-archive` and the generated installer passed using the existing
+  shared host lock/cache and `CARGO_BUILD_JOBS=2`. The command waited for
+  the active front under the owner's exception; compilation took 5.92 s
+  with no warnings or errors.
+- `cargo fmt -p tbg-client -- --check`, `git diff --check`, new WebP
+  decode/format inspection, `desktop-file-validate`, installed source
+  metadata and executable/cache SHA-256 comparison passed. The installed
+  assets contain the new price plate, and the local preview pointer records
+  the installed source revision.
+- Inspected `.local/council-price-comparison.png` with all four original
+  rarity frames plus the native plate and prices 3/6/10/15. This is an
+  internal asset-layout comparison, not a gameplay screenshot. Inspected
+  `.local/council-price-installed.webp` from the installed application at
+  1920x972: the real first Practice Council offered Diamond and Silver
+  cards, with aligned plates/icons and correctly fitting 15/6 prices.
+  The isolated capture exited successfully with only the expected virtual
+  X11 XSETTINGS/physical-dimension warnings. Original frames remain intact.
+- No Rust tests, full suite, other-target build, web source/assets change,
+  remote Git, CI or deployment ran. The consolidation checks listed above
+  remain deferred. Existing app windows, preferences, account data and
+  unrelated policy files were preserved. Reopen TBG for this installation.
