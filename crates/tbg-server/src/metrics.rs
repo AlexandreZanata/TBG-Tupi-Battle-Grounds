@@ -22,6 +22,11 @@ pub struct Metrics {
     pub rejections: AtomicU64,
     /// P10: worst lobby inbox backlog seen (join bursts must not pile up).
     pub lobby_inbox_max: AtomicU64,
+    /// P47: spectators now, listed matches now, sessions online now (the
+    /// lobby sets these once a second, with the live snapshot).
+    pub spectators: AtomicU64,
+    pub live_matches: AtomicU64,
+    pub online_players: AtomicU64,
     rtt: Mutex<VecDeque<(Instant, u16)>>,
     /// P9: lobby queue waits (ms) over the last 60 s.
     queue_wait: Mutex<VecDeque<(Instant, u64)>>,
@@ -43,6 +48,9 @@ impl Default for Metrics {
             ticks: AtomicU64::new(0),
             rejections: AtomicU64::new(0),
             lobby_inbox_max: AtomicU64::new(0),
+            spectators: AtomicU64::new(0),
+            live_matches: AtomicU64::new(0),
+            online_players: AtomicU64::new(0),
             rtt: Mutex::new(VecDeque::new()),
             queue_wait: Mutex::new(VecDeque::new()),
             started: Instant::now(),
@@ -103,6 +111,9 @@ impl Metrics {
             "ticks": get(&self.ticks),
             "late_ticks": get(&self.late_ticks),
             "lobby_inbox_max": get(&self.lobby_inbox_max),
+            "spectators": get(&self.spectators),
+            "live_matches": get(&self.live_matches),
+            "online_players": get(&self.online_players),
             "rejections": get(&self.rejections),
             "rtt_p50_ms": percentile(&rtts, 0.50),
             "rtt_p95_ms": percentile(&rtts, 0.95),

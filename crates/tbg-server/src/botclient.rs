@@ -15,6 +15,7 @@ use tbg_core::{Outcome, Pcg32, Seat};
 
 mod handle;
 use handle::handle;
+pub mod spectators;
 
 #[derive(Clone, Debug)]
 pub struct BotOpts {

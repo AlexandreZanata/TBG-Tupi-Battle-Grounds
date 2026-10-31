@@ -3,12 +3,17 @@
 //!
 //! `tbg-bots --url ws://127.0.0.1:8080/ws --matches N [--delay-ms D]
 //!   [--jitter-ms J] [--chaos-pct P] [--ramp-ms R] [--bots B] [--accounts]
-//!   [--ranked]`
+//!   [--ranked] [--spectators S]`
+//! `--spectators S` runs S anonymous spectators beside the bots (P47).
 //! Exit code 1 if any bot failed.
 
 use std::time::Duration;
 
+use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
 use tbg_core::Pcg32;
+
+use tbg_server::botclient::spectators;
 use tbg_server::botclient::{play_one, BotOpts, BotResult};
 use tbg_server::metrics::percentile;
 
@@ -27,6 +32,8 @@ struct Args {
     ranked: bool,
     /// Per-bot match deadline; 25-kind bot matches outlast the 360 s default (D-50).
     timeout_s: Option<u64>,
+    /// P47: anonymous spectators watching listed matches while the bots play.
+    spectators: u64,
 }
 
 fn args() -> Args {
@@ -41,6 +48,7 @@ fn args() -> Args {
         accounts: false,
         ranked: false,
         timeout_s: None,
+        spectators: 0,
     };
     let raw: Vec<String> = std::env::args().skip(1).collect();
     // Bare flags take no value; everything else comes in key/value pairs.
@@ -78,6 +86,7 @@ fn args() -> Args {
             "--ramp-ms" => a.ramp_ms = num(),
             "--bots" => a.bots = Some(num()),
             "--timeout-s" => a.timeout_s = Some(num()),
+            "--spectators" => a.spectators = num(),
             other => panic!("unknown argument {other}"),
         }
     }
@@ -108,12 +117,23 @@ async fn main() {
         tasks.push(tokio::spawn(play_one(opts, i + 1)));
         tokio::time::sleep(Duration::from_millis(a.ramp_ms)).await;
     }
+    // P47: spectators watch while the bots play, then stop with them.
+    let stop = Arc::new(AtomicBool::new(false));
+    let watchers = tokio::spawn(spectators::run(a.url.clone(), a.spectators, stop.clone()));
     let mut results = Vec::new();
     for t in tasks {
         results.push(t.await.unwrap_or_else(|e| BotResult {
             error: Some(format!("task: {e}")),
             ..Default::default()
         }));
+    }
+    stop.store(true, std::sync::atomic::Ordering::Relaxed);
+    if a.spectators > 0 {
+        let s = watchers.await.unwrap_or_default();
+        println!(
+            "spectators {} | watch starts {} | refused {} | views {} | ended {} | errors {} | bytes {}",
+            a.spectators, s.watch_starts, s.refused, s.views, s.ended, s.errors, s.bytes
+        );
     }
     let ok = report(&a, &results, started.elapsed());
     std::process::exit(if ok { 0 } else { 1 });

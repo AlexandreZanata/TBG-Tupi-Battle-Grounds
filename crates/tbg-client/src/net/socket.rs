@@ -171,6 +171,13 @@ impl NetLink {
                         self.login_deadline = None;
                     }
                     ServerMsg::MatchEnd { .. } => self.in_match = false,
+                    // P47: a watch starts a listen-only link; the end or a refusal
+                    // leaves a probe that never asks for the watch again.
+                    ServerMsg::SpectateStart { .. } => self.watching = true,
+                    ServerMsg::SpectateEnd { .. } | ServerMsg::SpectateUnavailable { .. } => {
+                        self.watching = false;
+                        self.mode = super::Mode::Probe;
+                    }
                     _ => {}
                 }
                 Some(other)
@@ -202,6 +209,7 @@ mod tests {
             login_deadline: None,
             outq: Default::default(),
             inq: Default::default(),
+            watching: false,
         }
     }
 
@@ -266,5 +274,58 @@ mod tests {
             assert_eq!(net.mode, Mode::Probe);
             assert!(net.outq.is_empty());
         }
+    }
+
+    #[test]
+    fn a_spectator_sends_no_intention_but_can_leave() {
+        // BR-LV02: the seat-only messages never leave a spectator's client.
+        let mut net = link(Mode::Watch(7));
+        net.handle(
+            ServerMsg::SpectateStart {
+                id: 7,
+                mode: protocol::MatchMode::Casual,
+                arena: tbg_core::Arena::Forest,
+                players: [
+                    protocol::LivePlayer {
+                        name: "A".into(),
+                        rating: None,
+                    },
+                    protocol::LivePlayer {
+                        name: "B".into(),
+                        rating: None,
+                    },
+                ],
+                arcanas: [tbg_core::ArcanaPreset::DEFAULT; 2],
+            },
+            0.0,
+        );
+        net.send(
+            ClientMsg::Intent {
+                seq: 1,
+                intent: tbg_core::PlayerIntention::Purchase { offer: 0 },
+            },
+            0.0,
+        );
+        net.send(ClientMsg::Surrender, 0.0);
+        assert!(net.outq.is_empty(), "no seat message leaves a spectator");
+        net.send(ClientMsg::StopSpectating, 0.0);
+        assert_eq!(net.outq.len(), 1, "leaving the watch is still sent");
+    }
+
+    #[test]
+    fn a_reconnected_watch_asks_for_the_match_again() {
+        // A reload never resumes a watch on the server: the client asks again.
+        let mut net = link(Mode::Watch(7));
+        net.handle(
+            ServerMsg::Welcome {
+                token: [1; 16],
+                name: "A".into(),
+            },
+            0.0,
+        );
+        assert_eq!(
+            net.outq.front().map(|(_, m)| m.clone()),
+            Some(ClientMsg::Spectate { id: 7 })
+        );
     }
 }

@@ -27,6 +27,10 @@ pub struct Config {
     pub rematch_ttl_secs: u64,
     /// P39: `JoinChallenge` attempts allowed per IP per minute.
     pub invite_per_ip_min: u64,
+    /// P47 (BR-LV09, O-3): spectators allowed in one listed match.
+    pub spectators_per_match: usize,
+    /// P47 (BR-LV09, O-3): spectators allowed on the whole server.
+    pub max_spectators: usize,
     /// P16-C: tests receive every finished match's replay here, to prove a
     /// headless re-run gives the same state (D-33). Never set from the
     /// environment: the seed stays on the server (BR-S05).
@@ -50,6 +54,8 @@ impl Default for Config {
             challenge_ttl_secs: 600,
             rematch_ttl_secs: 120,
             invite_per_ip_min: 30,
+            spectators_per_match: 200,
+            max_spectators: 2_000,
             replays: None,
         }
     }
@@ -77,6 +83,9 @@ impl Config {
             challenge_ttl_secs: d.challenge_ttl_secs,
             rematch_ttl_secs: d.rematch_ttl_secs,
             invite_per_ip_min: d.invite_per_ip_min,
+            spectators_per_match: num("TBG_SPECTATORS_PER_MATCH", d.spectators_per_match as u64)
+                as usize,
+            max_spectators: num("TBG_MAX_SPECTATORS", d.max_spectators as u64) as usize,
             static_dir: std::env::var("TBG_STATIC_DIR").ok().map(PathBuf::from),
             db: Some(
                 std::env::var("TBG_DB")
