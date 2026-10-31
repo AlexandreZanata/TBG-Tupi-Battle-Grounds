@@ -787,6 +787,7 @@ fn assemble_c(view: &ViewC, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Se
         last_seq: view.last_seq,
         events: view.events.clone(),
         outcome: view.outcome,
+        spectators: 0,
     }
 }
 
@@ -812,6 +813,7 @@ fn assemble_b(view: &ViewB, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Se
         last_seq: view.last_seq,
         events: view.events.clone(),
         outcome: view.outcome,
+        spectators: 0,
     }
 }
 
@@ -1421,6 +1423,7 @@ fn rebuild_a(
         last_seq: view.last_seq,
         events: view.events.clone(),
         outcome: view.outcome,
+        spectators: 0,
     })
 }
 
@@ -1488,6 +1491,7 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
             last_seq: state.player(you).last_seq,
             events: events.to_vec(),
             outcome: state.outcome,
+            spectators: 0,
         }
     };
     (make(Seat::A), make(Seat::B))

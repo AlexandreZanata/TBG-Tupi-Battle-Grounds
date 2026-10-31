@@ -64,6 +64,12 @@ pub enum UiAction {
     CopyLink,
     PlayAgain,
     ToMenu,
+    /// P47: watch a listed live match from its id (`?watch=` or the lobby).
+    Watch(u64),
+    /// P47: stop watching and go back to the menu. The desktop battle bridge
+    /// (wasm only) builds it, so native builds never see the constructor.
+    #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
+    LeaveWatch,
     Buy(u8),
     /// Long-press on a shop card: show the unit details.
     Inspect(u8),

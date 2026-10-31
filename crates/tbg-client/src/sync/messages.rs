@@ -4,11 +4,13 @@
 use std::collections::VecDeque;
 
 use bevy::prelude::*;
-use tbg_core::protocol::{ErrorCode, InviteToken, RoomCode, ServerMsg};
+use tbg_core::protocol::{ErrorCode, InviteToken, MatchMode, RoomCode, ServerMsg, SpectateRefusal};
+use tbg_core::{MatchView, Seat};
 
-use super::{LatestView, MatchInfo, RematchInfo, ViewBuffer};
+use super::{spectate, LatestView, MatchInfo, RematchInfo, ViewBuffer};
 use crate::audio::{Sound, Sounds};
 use crate::config;
+use crate::i18n::{Lang, Msg};
 use crate::link::MatchLink;
 use crate::net::{NetStatus, GIVE_UP};
 use crate::overlay::OverlayStats;
@@ -49,7 +51,7 @@ pub(super) fn poll_link(
     mut account: ResMut<Account>,
     mut ranking: ResMut<crate::ui::ranking::Ranking>,
     mut surrender: ResMut<crate::ui::surrender::Surrender>,
-    lang: Res<crate::i18n::Lang>,
+    lang: Res<Lang>,
 ) {
     let now = time.elapsed_secs_f64();
     for msg in link.poll(now) {
@@ -91,17 +93,74 @@ pub(super) fn poll_link(
                 );
                 next.set(GameState::InMatch);
             }
-            ServerMsg::View(view) => {
-                if let Some(t) = buffer.last_arrival.replace(now) {
-                    let gaps = &mut stats.1 .0;
-                    gaps.push_back(((now - t) * 1000.0) as f32);
-                    if gaps.len() > 200 {
-                        gaps.pop_front();
+            ServerMsg::View(view) => accept_view(
+                *view,
+                now,
+                &mut info,
+                &mut latest,
+                &mut buffer,
+                &mut stats.1 .0,
+            ),
+            // P47: a watcher's view, drawn like a seat's (see `sync::spectate`).
+            ServerMsg::SpectatorView(view) => accept_view(
+                spectate::match_view(&view),
+                now,
+                &mut info,
+                &mut latest,
+                &mut buffer,
+                &mut stats.1 .0,
+            ),
+            ServerMsg::SpectateStart {
+                id,
+                mode,
+                arena,
+                players,
+                arcanas,
+            } => {
+                // Seat A is "you" so the scene keeps its neutral camera.
+                let [me, them] = players;
+                info!("watching arena: {}", arena.slug());
+                *info = MatchInfo {
+                    you: Some(Seat::A),
+                    you_name: me.name,
+                    you_rating: me.rating,
+                    opponent: them.name,
+                    opponent_rating: them.rating,
+                    ranked: mode == MatchMode::Ranked,
+                    arcanas,
+                    arena,
+                    spectating: true,
+                    ..default()
+                };
+                *buffer = ViewBuffer::default();
+                *extra.0 = super::MatchStats::default();
+                latest.0 = None;
+                config::save_watch(id);
+                next.set(GameState::InMatch);
+            }
+            ServerMsg::SpectateEnd { outcome } => {
+                config::clear_watch();
+                config::clear_url_param("watch");
+                match outcome {
+                    Some(outcome) => {
+                        info.outcome = Some(outcome);
+                        next.set(GameState::Result);
+                    }
+                    None => {
+                        ui.0.push(lang.t(Msg::SpectateUnavailable));
+                        next.set(GameState::Menu);
                     }
                 }
-                info.last_tick = view.tick;
-                latest.0 = Some((*view).clone());
-                buffer.timeline.push(now, *view);
+            }
+            ServerMsg::SpectateUnavailable { reason } => {
+                config::clear_watch();
+                config::clear_url_param("watch");
+                ui.0.push(lang.t(match reason {
+                    SpectateRefusal::Full => Msg::SpectateFull,
+                    SpectateRefusal::NotFound => Msg::SpectateNotFound,
+                    _ => Msg::SpectateUnavailable,
+                }));
+                next.set(GameState::Menu);
             }
             ServerMsg::Rejected { reason, .. } => {
                 ui.0.push(crate::ui::rejection_text(reason, *lang))
@@ -244,4 +303,24 @@ pub(super) fn poll_link(
         }
         *link = MatchLink::Idle;
     }
+}
+
+/// A view from a seat or a watcher: the gap stats, the live view, the timeline.
+fn accept_view(
+    view: MatchView,
+    now: f64,
+    info: &mut MatchInfo,
+    latest: &mut LatestView,
+    buffer: &mut ViewBuffer,
+    gaps: &mut VecDeque<f32>,
+) {
+    if let Some(t) = buffer.last_arrival.replace(now) {
+        gaps.push_back(((now - t) * 1000.0) as f32);
+        if gaps.len() > 200 {
+            gaps.pop_front();
+        }
+    }
+    info.last_tick = view.tick;
+    latest.0 = Some(view.clone());
+    buffer.timeline.push(now, view);
 }

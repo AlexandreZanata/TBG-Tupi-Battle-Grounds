@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 15,
-        "v15: arenas (D-55): MatchStart::arena and MatchView::evolve_costs"
+        PROTOCOL_VERSION, 17,
+        "v17: live spectating (P47): Spectate, StopSpectating, Spectate* replies"
     );
 }
 
@@ -163,4 +163,27 @@ fn error_code_order_is_frozen() {
             "{code:?}"
         );
     }
+}
+
+#[test]
+fn v17_spectating_messages_are_appended() {
+    // P47 (BR-LV02): tags 18–19 on the client, 27–30 on the server, after
+    // every earlier variant. A `LiveId` is a varint (258 = [0x82, 0x02]).
+    assert_eq!(encode(&ClientMsg::Spectate { id: 258 }), [18, 0x82, 0x02]);
+    assert_eq!(encode(&ClientMsg::StopSpectating), [19]);
+    assert_eq!(
+        encode(&ServerMsg::SpectateUnavailable {
+            reason: tbg_core::protocol::SpectateRefusal::Full,
+        }),
+        [29, 2]
+    );
+    assert_eq!(encode(&ServerMsg::SpectateEnd { outcome: None }), [30, 0]);
+    let view = tbg_core::MatchState::with_arcanas(1, [tbg_core::ArcanaPreset::NEUTRAL; 2])
+        .public_view(&[], 5);
+    let bytes = encode(&ServerMsg::SpectatorView(Box::new(view.clone())));
+    assert_eq!(bytes[0], 28, "SpectatorView is the 28th server variant");
+    assert_eq!(
+        tbg_core::protocol::decode_server(&bytes),
+        Ok(ServerMsg::SpectatorView(Box::new(view)))
+    );
 }

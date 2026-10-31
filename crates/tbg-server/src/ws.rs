@@ -208,6 +208,16 @@ async fn run_loop(
             },
             ev = rx.recv() => match ev {
                 Some(ConnEvent::Send(msg)) => Some(msg),
+                // P47: a shared, pre-encoded spectator view; never re-encoded.
+                Some(ConnEvent::Frame(bytes)) => {
+                    let n = bytes.len() as u64;
+                    if socket.send(Message::Binary(bytes)).await.is_err() {
+                        return "send_failed";
+                    }
+                    c.bytes_out += n;
+                    Metrics::add(&app.metrics.bytes_out, n);
+                    None
+                }
                 Some(ConnEvent::EnterMatch { seat, tx }) => { c.matched = Some((seat, tx)); None }
                 Some(ConnEvent::LeaveMatch) => { c.matched = None; None }
                 Some(ConnEvent::Close) | None => return "server_closed",

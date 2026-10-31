@@ -19,7 +19,9 @@ impl Match {
         // A detached seat would have the view dropped by `send`: skip
         // building (and counting) it. Its events are drained either way.
         if self.players[i].conn.is_some() {
-            let view = self.state.view_for(seat, &self.pending[i]);
+            let mut view = self.state.view_for(seat, &self.pending[i]);
+            // BR-LV05: a count of watchers, shown to both seats.
+            view.spectators = self.spectators.len() as u16;
             let stats = &mut self.stats[i];
             stats.views += 1;
             stats.ack_views += u32::from(ack);

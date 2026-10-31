@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 use tokio::sync::mpsc;
 use tokio::time::MissedTickBehavior;
 
-use tbg_core::protocol::{MatchMode, ServerMsg, Token};
+use tbg_core::protocol::{LiveId, MatchMode, ServerMsg, Token};
 use tbg_core::replay::Replay;
 use tbg_core::{Event, MatchState, Seat};
 
@@ -18,7 +18,9 @@ use crate::store::{AccountId, Store};
 use crate::Config;
 
 mod command;
+mod live;
 mod report;
+mod spectators;
 #[cfg(test)]
 mod tests;
 mod views;
@@ -50,11 +52,18 @@ pub(super) struct Match {
     pub(super) metrics: Arc<Metrics>,
     /// P16-C: recorded only when a test asked for replays (`Config::replays`).
     pub(super) replay: Option<Replay>,
+    /// P47: the listed-match id; `None` for a private match, which reports nothing.
+    pub(super) live: Option<LiveId>,
+    /// P47 (BR-LV02): listen-only connections; frames only, never a seat.
+    pub(super) spectators: Vec<ConnHandle>,
+    /// P47: public events since the last spectator view.
+    pub(super) pending_spectate: Vec<Event>,
 }
 
-/// `(seed, arena)` are the match's two pairing draws (ARENAS-G).
+/// `(seed, arena, live)` are the match's pairing draws (ARENAS-G) and, for a
+/// public match, its listed id (P47).
 pub(crate) fn spawn(
-    (seed, arena): (u64, tbg_core::Arena),
+    (seed, arena, live): (u64, tbg_core::Arena, Option<LiveId>),
     players: [Player; 2],
     mode: MatchMode,
     lobby: mpsc::Sender<LobbyCmd>,
@@ -86,6 +95,9 @@ pub(crate) fn spawn(
             arena,
             ..Replay::default()
         }),
+        live,
+        spectators: Vec::new(),
+        pending_spectate: Vec::new(),
     };
     tokio::spawn(run(m, rx, lobby, config, seed, store));
     tx
@@ -129,6 +141,8 @@ async fn run(
         let ev = m.state.step();
         let ns = t0.elapsed().as_nanos();
         (step_ns, step_max) = (step_ns + ns, step_max.max(ns));
+        m.report_progress(&lobby, started);
+        m.note_spectate_events(&ev);
         for p in &mut m.pending {
             p.extend(ev.iter().cloned());
         }
@@ -151,10 +165,14 @@ async fn run(
             }
         }
         m.applied = [false; 2];
+        if regular {
+            m.send_spectator_views();
+        }
         if let Some(outcome) = m.state.outcome {
             for seat in Seat::BOTH {
                 m.send(seat, ServerMsg::MatchEnd { outcome });
             }
+            m.end_spectators(outcome);
             break;
         }
     }
@@ -195,6 +213,7 @@ async fn run(
     let _ = lobby
         .send(LobbyCmd::MatchEnded {
             tokens: m.players.each_ref().map(|p| p.token),
+            live: m.live,
         })
         .await;
     let line = m.log_end(

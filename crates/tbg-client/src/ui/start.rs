@@ -25,6 +25,11 @@ fn join_from_url(mut queue: ResMut<ActionQueue>) {
         }
         return;
     }
+    // P47: a watch link (or the tab's own watch, after a reload) spectates.
+    if let Some(id) = config::watch_param().or_else(config::load_watch) {
+        queue.0.push(super::UiAction::Watch(id));
+        return;
+    }
     let Some(code) = config::url_param("room") else {
         return;
     };

@@ -1,0 +1,9 @@
+spectators 3 | watch starts 64 | refused 3 | views 12217 | ended 3 | errors 0 | bytes 3903468
+bots 8 | completed 8 | failed 0 | elapsed 408s
+outcomes (per bot): {"StrongholdDestroyed": 8}
+rtt ms p50 2 p95 3 max 9
+view gap ms p50 99 p95 100 max 116
+ack ms p50 49 p95 51 max 52
+queue wait ms p50 202 p95 209 max 209
+reconnects attempted 0 | succeeded 0
+{"matches":4,"bots":8,"completed":8,"failed":0,"rtt_p50":2,"rtt_p95":3,"gap_p95":100,"gap_max":116,"ack_p50":49,"ack_p95":51,"queue_p95":209,"reconnects":0,"reconnects_ok":0,"delay_ms":0,"jitter_ms":0}

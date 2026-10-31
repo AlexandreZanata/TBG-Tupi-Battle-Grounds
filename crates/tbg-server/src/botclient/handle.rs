@@ -125,7 +125,11 @@ pub(super) fn handle(
         | ServerMsg::ChallengeUnavailable
         | ServerMsg::RematchOpen { .. }
         | ServerMsg::RematchState { .. }
-        | ServerMsg::RematchClosed { .. } => {}
+        | ServerMsg::RematchClosed { .. }
+        | ServerMsg::SpectateStart { .. }
+        | ServerMsg::SpectatorView(_)
+        | ServerMsg::SpectateUnavailable { .. }
+        | ServerMsg::SpectateEnd { .. } => {}
     }
     Ok(None)
 }

@@ -2,11 +2,15 @@
 
 use std::time::Instant;
 
-use tbg_core::protocol::{valid_room_code, MatchMode, RoomCode, ServerMsg, Token, ROOM_ALPHABET};
+use tbg_core::protocol::{
+    valid_room_code, LivePlayer, MatchMode, RoomCode, ServerMsg, Token, ROOM_ALPHABET,
+};
 use tbg_core::Seat;
 
+use super::live::{Listing, LiveMatch};
 use super::{send, Lobby, RematchTicket, SessionState};
 use crate::chan::ConnEvent;
+use crate::live::LiveProgress;
 use crate::match_task::{self, Player};
 use crate::names::random_bytes;
 
@@ -18,7 +22,7 @@ impl Lobby {
         match self.queue.pop_front() {
             Some(other) => {
                 self.queued_at.remove(&other);
-                self.pair([other, token], MatchMode::Casual, false);
+                self.pair([other, token], MatchMode::Casual, false, Listing::Public);
             }
             None => {
                 self.queue.push_back(token);
@@ -59,8 +63,8 @@ impl Lobby {
             Some(i) => {
                 let (_, owner, _) = self.rooms.remove(i);
                 self.leave_waiting(token);
-                // Private rooms are always casual (BR-R01).
-                self.pair([owner, token], MatchMode::Casual, false);
+                // Private rooms are always casual (BR-R01), and never listed (BR-LV01).
+                self.pair([owner, token], MatchMode::Casual, false, Listing::Private);
             }
             None => {
                 if let Some(s) = self.session(&token) {
@@ -97,7 +101,15 @@ impl Lobby {
         }
     }
 
-    pub(super) fn pair(&mut self, tokens: [Token; 2], mode: MatchMode, rematchable: bool) {
+    /// Start a match. `listing` decides visibility (BR-LV01): only the public
+    /// queues pass `Listing::Public`; never infer it from `mode`.
+    pub(super) fn pair(
+        &mut self,
+        tokens: [Token; 2],
+        mode: MatchMode,
+        rematchable: bool,
+        listing: Listing,
+    ) {
         // P9: queue wait per paired session (the joiner waited ~0 ms).
         for t in tokens {
             if let Some(t0) = self.queued_at.remove(&t) {
@@ -131,8 +143,15 @@ impl Lobby {
         // ARENAS-G (D-55): a fresh draw for every match, rematches
         // included, from the OS RNG: never the seed or a simulation stream.
         let arena = draw_arena();
+        let live = (listing == Listing::Public).then(|| self.fresh_live_id());
+        let listed = live.map(|_| {
+            (
+                live_seats(&players),
+                players.each_ref().map(|p| p.stronghold),
+            )
+        });
         let tx = match_task::spawn(
-            (seed, arena),
+            (seed, arena, live),
             players,
             mode,
             self.self_tx.clone(),
@@ -140,6 +159,22 @@ impl Lobby {
             self.metrics.clone(),
             self.store.clone(),
         );
+        if let (Some(id), Some((seats, kinds))) = (live, listed) {
+            self.register_live(
+                id,
+                LiveMatch {
+                    tx: tx.clone(),
+                    listing,
+                    mode,
+                    arena,
+                    players: seats,
+                    kinds,
+                    started: Instant::now(),
+                    progress: LiveProgress::default(),
+                    watchers: Vec::new(),
+                },
+            );
+        }
         for (seat, token) in Seat::BOTH.into_iter().zip(tokens) {
             if let Some(s) = self.session(&token) {
                 s.state = SessionState::InMatch {
@@ -156,6 +191,14 @@ impl Lobby {
             }
         }
     }
+}
+
+/// What a listed match shows per seat: the name, and the rating for an account.
+fn live_seats(players: &[Player; 2]) -> [LivePlayer; 2] {
+    players.each_ref().map(|p| LivePlayer {
+        name: p.name.clone(),
+        rating: p.account.map(|(_, rating)| rating),
+    })
 }
 
 /// Uniform over the five arenas: one OS-random byte, rejecting 255 so the
