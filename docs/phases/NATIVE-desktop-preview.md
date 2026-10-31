@@ -178,3 +178,50 @@ nonblocking host lock and two Cargo jobs. Phase-specific debug captures
 avoid racing startup when inspecting Countdown and Running. Queue manual
 click/keyboard checks for Surrender confirmation, arena close/reopen and
 Reroll gating for consolidation; do not run a full suite or any web build.
+
+### Battle HUD result
+
+- Installed source: `b007f2eb96d9452e746966c4ef395c9f543ba607`.
+  `cargo build --locked -p tbg-client --bin tbg-client` and
+  `python3 scripts/package-native.py --platform linux --binary
+  "$CARGO_TARGET_DIR/debug/tbg-client" --output
+  "$CARGO_TARGET_DIR/native-preview" --no-archive`, followed by the
+  generated `install.sh`, passed. The existing cache was reused. Successful
+  initial compilation took 13.21 s; final visual correction took 7.02 s.
+- The shared nonblocking slot returned 75 once. The owner then explicitly
+  authorized waiting/retrying in this chat and later waived the two-job
+  limit for this chat. The completed builds waited under the same shared
+  host lock and still used `CARGO_BUILD_JOBS=2`; no active build was stopped.
+- `cargo fmt -p tbg-client -- --check`, `git diff --check`, Python AST
+  inspection, lossless WebP format/dimension verification,
+  `desktop-file-validate` and installed executable SHA-256 comparison with
+  `build-info.json` passed. Native shape assets total 9942 bytes.
+- Initial compiler errors were `E0308: expected FontSource, found
+  Handle<Font>`, `E0599: no associated function or constant named
+  new_with_justify` and then `type score::Readout is private`. Corrected
+  the Bevy 0.20 text APIs and registered readout systems within their own
+  modules. The final build has no compiler warnings.
+- Installed app captures at 1920x972 were inspected in isolated X11/local
+  Practice sessions: `.local/battle-hud-final-countdown.webp` shows the
+  heraldic HP plates, clock, upper-right Surrender, centered countdown,
+  arena introduction with close control, and a complete Energy frame.
+  `.local/battle-hud-final-running.webp` shows the running clock, updated
+  Energy/interest/Army values and persistent arena chip with the larger
+  introduction gone. Countdown timing and combat rules are unchanged.
+- The first capture exposed a missing `native-icons/arenas.webp` path and
+  an image-fit issue in the Energy frame. Using the existing `island.webp`
+  and stretching the frame over its border box fixed both. Final captures
+  contain only expected virtual X11 XSETTINGS/physical-dimension warnings.
+  Empty auxiliary labels are hidden, Synergy information is retained and
+  Fortification controls follow the existing Stronghold selection state.
+- The owner's running app, real preferences/account data and unrelated
+  policy edits were preserved. Reopen TBG to load the new installation.
+  No web source/assets, VPS, remote Git or CI operation was performed.
+
+Deferred to consolidation: native mouse/keyboard scenarios for closing and
+reopening the arena banner (each opening expires after five real seconds),
+the two-step Surrender confirmation, Reroll availability across Energy and
+War Council states, Stronghold inspection/Fortification and long player
+names/ratings. Full suites, other targets and multiplayer campaigns were
+not run; they remain outside this work-front validation. These are pending
+checks, not passing evidence.
