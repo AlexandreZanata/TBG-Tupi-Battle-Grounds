@@ -29,7 +29,8 @@ pub(super) fn spawn(commands: &mut Commands, theme: Theme) {
         DirectionalLight {
             color: palette.key,
             illuminance: lux,
-            shadow_maps_enabled: config::url_param("shadows").as_deref() != Some("0"),
+            shadow_maps_enabled: config::url_param("shadows").as_deref() != Some("0")
+                && !config::load_flag("video.low"),
             ..default()
         },
         Transform::from_xyz(-4.0, 18.0, 10.0).looking_at(Vec3::new(8.0, 0.0, 0.0), Vec3::Y),

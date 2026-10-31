@@ -19,6 +19,9 @@ fn escape(value: &str) -> String {
 }
 
 fn main() {
+    native_art_manifest();
+    println!("cargo:rerun-if-env-changed=TBG_DEFAULT_SERVER");
+    println!("cargo:rerun-if-env-changed=TBG_SOURCE_COMMIT");
     let dir =
         std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("assets/i18n");
     // Absolute paths keep generated catalogs correct across worktree caches.
@@ -71,6 +74,11 @@ fn main() {
         code.push_str(&format!("    {v} = {i},\n"));
     }
     code.push_str("}\n");
+    code.push_str("pub(super) static KEYS: [&str; MSG_COUNT] = [\n");
+    for key in &keys {
+        code.push_str(&format!("    \"{}\",\n", escape(key)));
+    }
+    code.push_str("];\n");
     let table = |name: &str, map: &std::collections::HashMap<&str, &str>| {
         let mut s = format!("pub(super) static {name}: [&str; MSG_COUNT] = [\n");
         for key in &keys {
@@ -114,4 +122,39 @@ fn main() {
     }
     let out = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("catalog.rs");
     std::fs::write(out, code).unwrap();
+}
+
+fn native_art_manifest() {
+    if !std::env::var("TARGET")
+        .unwrap_or_default()
+        .contains("linux")
+    {
+        return;
+    }
+    let root = std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("assets");
+    println!("cargo:rerun-if-changed={}", root.display());
+    fn collect(root: &std::path::Path, dir: &std::path::Path, paths: &mut Vec<String>) {
+        for entry in std::fs::read_dir(dir).unwrap().map(Result::unwrap) {
+            let path = entry.path();
+            if path.is_dir() {
+                collect(root, &path, paths);
+            } else if path.extension().is_some_and(|s| s == "webp") {
+                paths.push(
+                    path.strip_prefix(root)
+                        .unwrap()
+                        .to_string_lossy()
+                        .replace('\\', "/"),
+                );
+            }
+        }
+    }
+    let mut paths = Vec::new();
+    collect(&root, &root, &mut paths);
+    paths.sort();
+    let values = paths
+        .iter()
+        .map(|p| format!("{p:?},\n"))
+        .collect::<String>();
+    let output = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("native_art.rs");
+    std::fs::write(output, format!("pub const ART: &[&str] = &[\n{values}];\n")).unwrap();
 }

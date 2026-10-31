@@ -143,8 +143,16 @@ impl NetLink {
                 None
             }
             ServerMsg::VersionMismatch { .. } => {
-                self.status =
-                    NetStatus::Failed("A new version is available - reload the page".into());
+                self.status = NetStatus::Failed(if cfg!(target_arch = "wasm32") {
+                    "A new version is available - reload the page".into()
+                } else {
+                    "A new version is available - open Downloads in Settings".into()
+                });
+                crate::platform::storage::set(
+                    crate::platform::storage::Scope::Session,
+                    "update.required",
+                    "1",
+                );
                 None
             }
             ServerMsg::View(view) => {

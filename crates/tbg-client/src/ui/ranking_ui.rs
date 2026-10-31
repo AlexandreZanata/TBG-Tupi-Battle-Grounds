@@ -6,7 +6,9 @@ use bevy::prelude::*;
 use tbg_core::protocol::LeaderRow;
 
 use super::ranking::{Ranking, PAGE};
-use super::{button, label, screen, UiAction, BUTTON, PANEL};
+#[cfg(not(target_os = "linux"))]
+use super::screen;
+use super::{button, label, UiAction, BUTTON, PANEL};
 use crate::GameState;
 
 #[derive(Component)]
@@ -155,9 +157,16 @@ pub(super) fn panel(
     }
     let (prev, next) = nav(&ranking);
     let two = window.width() / scale.0 >= TWO_COLUMNS_WIDTH;
+    #[cfg(not(target_os = "linux"))]
+    let root = screen(JustifyContent::Center);
+    #[cfg(target_os = "linux")]
+    let root = Node {
+        align_items: AlignItems::Center,
+        ..super::shell::page_node()
+    };
     commands
         .spawn((
-            screen(JustifyContent::Center),
+            root,
             DespawnOnExit(GameState::Menu),
             RankingRoot,
             GlobalZIndex(10),

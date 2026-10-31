@@ -1,21 +1,26 @@
 //! Per-frame HUD refresh from `LatestView`.
 
 use bevy::prelude::*;
-use tbg_core::content::{
-    augment_def, def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, TICK_HZ,
-};
-use tbg_core::{MatchView, Phase, FACTIONS};
+use tbg_core::content::{augment_def, def, INTEREST_BAND, INTEREST_MAX_BANDS};
+#[cfg(not(target_os = "linux"))]
+use tbg_core::content::{ENERGY_SCALE, TICK_HZ};
+use tbg_core::FACTIONS;
+use tbg_core::{MatchView, Phase};
 
 use super::hud::Hud;
-use super::{PendingBuy, BUTTON, DISABLED};
+use super::PendingBuy;
+#[cfg(not(target_os = "linux"))]
+use super::{BUTTON, DISABLED};
 use crate::sync::LatestView;
+#[cfg(not(target_os = "linux"))]
 use crate::visuals::assets::FACTION_COLORS;
 
 pub(super) fn update(
     view: Res<LatestView>,
+    info_state: Res<crate::sync::MatchInfo>,
     mut pending: ResMut<PendingBuy>,
     mut nodes: Query<(&Hud, &mut Node)>,
-    mut colors: Query<(&Hud, &mut BackgroundColor)>,
+    #[cfg(not(target_os = "linux"))] mut colors: Query<(&Hud, &mut BackgroundColor)>,
     mut texts: Query<(&Hud, &mut Text)>,
 ) {
     let Some(v) = &view.0 else { return };
@@ -24,6 +29,11 @@ pub(super) fn update(
     }
     let me = v.you.index();
     for (hud, mut node) in &mut nodes {
+        #[cfg(target_os = "linux")]
+        if let Some(show) = super::native_battle::auxiliary_visible(hud, v) {
+            node.display = if show { Display::Flex } else { Display::None };
+            continue;
+        }
         let fraction = match hud {
             // Kinds and Fortification give each seat its own max HP (BR-SK07).
             Hud::Hp(0) => hp_fraction(v, me),
@@ -33,6 +43,12 @@ pub(super) fn update(
                 (v.energy as f32 / band.max(1.0)).min(1.0)
             }
             // The War Council row exists only while the battle is paused.
+            Hud::PrivateControls | Hud::WatchControls => {
+                let show = matches!(hud, Hud::WatchControls) == info_state.spectating;
+                node.display = if show { Display::Flex } else { Display::None };
+                continue;
+            }
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilRow => {
                 node.display = if v.augment_round.is_some() {
                     Display::Flex
@@ -45,8 +61,10 @@ pub(super) fn update(
         };
         node.width = percent(100.0 * fraction.clamp(0.0, 1.0));
     }
+    #[cfg(not(target_os = "linux"))]
     for (hud, mut color) in &mut colors {
         match hud {
+            #[cfg(not(target_os = "linux"))]
             Hud::Card(i) => {
                 color.0 = if buyable(v, *i)
                     && pending
@@ -58,10 +76,12 @@ pub(super) fn update(
                     DISABLED
                 }
             }
+            #[cfg(not(target_os = "linux"))]
             Hud::CardStrip(i) => {
                 let c = FACTION_COLORS[def(v.offers[*i]).faction.index()];
                 color.0 = Color::srgb_u8(c[0], c[1], c[2]);
             }
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilOption(i) => {
                 let open = v
                     .augment_round
@@ -69,6 +89,7 @@ pub(super) fn update(
                     .is_some_and(|r| !r.resolved && r.ticks_left > 0 && v.energy >= r.costs[*i]);
                 color.0 = if open { BUTTON } else { DISABLED };
             }
+            #[cfg(not(target_os = "linux"))]
             Hud::Forgo => {
                 let open = v
                     .augment_round
@@ -81,8 +102,23 @@ pub(super) fn update(
     }
     for (hud, mut text) in &mut texts {
         text.0 = match hud {
+            #[cfg(not(target_os = "linux"))]
             Hud::Clock => clock(v),
+            #[cfg(not(target_os = "linux"))]
+            Hud::HpLabel(relative) => {
+                let seat = if *relative == 0 { me } else { 1 - me };
+                format!(
+                    "{} / {} HP",
+                    v.stronghold_hp[seat].max(0),
+                    v.strongholds[seat].max_hp
+                )
+            }
+            Hud::Spectators => format!(
+                "{} vs {} · {} spectators",
+                info_state.you_name, info_state.opponent, v.spectators
+            ),
             Hud::Info => info(v),
+            #[cfg(not(target_os = "linux"))]
             Hud::CardText(i) => {
                 let d = def(v.offers[*i]);
                 format!(
@@ -93,6 +129,7 @@ pub(super) fn update(
                 )
             }
             Hud::Augments => augment_list(v, v.you.index()),
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilStatus => match &v.augment_round {
                 Some(r) => {
                     let s = r.ticks_left.div_ceil(TICK_HZ);
@@ -112,6 +149,7 @@ pub(super) fn update(
                 }
                 None => "War Council every 1:00 of battle".into(),
             },
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilOptionText(i) => v
                 .augment_round
                 .as_ref()
@@ -126,6 +164,7 @@ pub(super) fn update(
                     ))
                 })
                 .unwrap_or_default(),
+            #[cfg(not(target_os = "linux"))]
             Hud::ForgoText => {
                 if v.augment_round
                     .as_ref()
@@ -152,6 +191,7 @@ pub(super) fn buyable(v: &MatchView, i: usize) -> bool {
     v.energy >= d.cost && v.phase == Phase::Running && v.augment_round.is_none()
 }
 
+#[cfg(not(target_os = "linux"))]
 pub(super) fn clock(v: &MatchView) -> String {
     if v.phase == Phase::Countdown {
         return "STARTING".into();
@@ -166,13 +206,20 @@ fn info(v: &MatchView) -> String {
         .filter(|f| v.synergy[v.you.index()][f.index()] > 0)
         .map(|f| format!("{f:?} {}/2", v.synergy[v.you.index()][f.index()]))
         .collect();
-    let energy = v.energy as f32 / ENERGY_SCALE as f32;
-    let regen = v.regen_bp as f32 / 10_000.0;
-    format!(
-        "Energy {energy:.1} | Regen x{regen:.2} | {} | {}",
-        army_label(v),
+    #[cfg(target_os = "linux")]
+    {
         synergies.join("  ")
-    )
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let energy = v.energy as f32 / ENERGY_SCALE as f32;
+        let regen = v.regen_bp as f32 / 10_000.0;
+        format!(
+            "Energy {energy:.1} | Regen x{regen:.2} | {} | {}",
+            army_label(v),
+            synergies.join("  ")
+        )
+    }
 }
 
 fn augment_list(v: &MatchView, seat: usize) -> String {

@@ -114,7 +114,7 @@ fn pair(a: impl Bundle, b: impl Bundle) -> impl Bundle {
 }
 
 fn build(commands: &mut Commands, account: &Account) {
-    if crate::config::arena_preview() {
+    if crate::config::bevy_ui() || crate::config::arena_preview() {
         return;
     }
     // P11 profile chip: guest actions, or name · rating plus log out.

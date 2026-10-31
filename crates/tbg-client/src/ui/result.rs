@@ -20,7 +20,7 @@ pub fn plugin(app: &mut App) {
 }
 
 #[derive(Component)]
-struct RatingLabel;
+pub(in crate::ui) struct RatingLabel;
 
 #[derive(Component)]
 struct RematchLabel;

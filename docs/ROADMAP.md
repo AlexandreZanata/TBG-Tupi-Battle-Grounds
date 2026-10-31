@@ -316,3 +316,12 @@ Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·
 rating-based matchmaking and seasons (D-18) · `Reposition`/bench design ·
 WebGPU build · delta views · additional regions (ARCHITECTURE §12).
+
+## Native distribution (owner request, 2026-10-31)
+
+[NATIVE-client.md](phases/NATIVE-client.md) tracks `phase/native-linux-windows`:
+full shared Bevy interface, Linux release and installation first, Windows
+second. D-60 records scope and D-61 the owner's visible-attribution license.
+Implementation is in progress; consolidated acceptance, visual sign-off,
+GitHub publication and installation are pending. The front uses the current
+minimal validation policy and does not claim release readiness.

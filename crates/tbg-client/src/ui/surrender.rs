@@ -33,6 +33,7 @@ pub fn reset(state: &mut Surrender, ranked: bool) {
     };
 }
 
+#[cfg(not(target_os = "linux"))]
 pub(super) fn button() -> impl Bundle {
     (
         Node {
@@ -47,6 +48,34 @@ pub(super) fn button() -> impl Bundle {
         UiAction::Surrender,
         SurrenderButton,
         children![label("Surrender", 12.0)],
+    )
+}
+
+#[cfg(target_os = "linux")]
+pub(super) fn linux_button(assets: &AssetServer) -> impl Bundle {
+    (
+        Node {
+            position_type: PositionType::Absolute,
+            top: px(18),
+            right: px(18),
+            min_width: px(120),
+            height: px(40),
+            padding: UiRect::axes(px(12), px(0)),
+            column_gap: px(7),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            border: UiRect::all(px(2)),
+            border_radius: BorderRadius::all(px(7)),
+            ..default()
+        },
+        BackgroundColor(super::kit::INK),
+        BorderColor::all(super::kit::GOLD),
+        UiAction::Surrender,
+        SurrenderButton,
+        children![
+            super::kit::image(assets, "battle/native/flag.webp", 16., 18.),
+            label("Surrender", 12.)
+        ],
     )
 }
 
@@ -71,7 +100,13 @@ fn refresh(
     } else {
         "Surrender"
     };
-    let bg = if state.sent { DISABLED } else { SURRENDER_BG };
+    let bg = if state.sent {
+        DISABLED
+    } else if cfg!(target_os = "linux") && state.armed_until.is_none() {
+        super::kit::INK
+    } else {
+        SURRENDER_BG
+    };
     for (mut action, mut color, children) in &mut buttons {
         let target = if state.sent {
             UiAction::Disabled

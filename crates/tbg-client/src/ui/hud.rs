@@ -1,31 +1,50 @@
 //! In-match HUD: clock, Stronghold HP, Energy, army size, synergies,
 //! and the five shop cards. Reads only `LatestView`.
-//! The top line (names, bars, clock) lives in `hud_top`.
+//! Linux presentation lives in `native_battle`; other targets keep `hud_top`.
 
 use bevy::prelude::*;
 
-use super::{label, screen, UiAction, BUTTON};
+#[cfg(not(target_os = "linux"))]
+use super::BUTTON;
+use super::{label, screen, UiAction};
 use crate::sync::MatchInfo;
 use crate::GameState;
 
 #[derive(Component)]
 pub(super) enum Hud {
+    #[cfg(not(target_os = "linux"))]
     Clock,
     Hp(usize),
+    #[cfg(not(target_os = "linux"))]
+    HpLabel(usize),
+    Spectators,
+    PrivateControls,
+    WatchControls,
+    Portrait(usize),
     EnergyFill,
     Info,
+    #[cfg(not(target_os = "linux"))]
     Card(usize),
+    #[cfg(not(target_os = "linux"))]
     CardText(usize),
+    #[cfg(not(target_os = "linux"))]
     CardStrip(usize),
     Augments,
+    #[cfg(not(target_os = "linux"))]
     CouncilStatus,
+    #[cfg(not(target_os = "linux"))]
     CouncilRow,
+    #[cfg(not(target_os = "linux"))]
     CouncilOption(usize),
+    #[cfg(not(target_os = "linux"))]
     CouncilOptionText(usize),
+    #[cfg(not(target_os = "linux"))]
     Forgo,
+    #[cfg(not(target_os = "linux"))]
     ForgoText,
 }
 
+#[cfg(not(target_os = "linux"))]
 fn council_card(i: usize) -> impl Bundle {
     (
         Node {
@@ -43,6 +62,7 @@ fn council_card(i: usize) -> impl Bundle {
     )
 }
 
+#[cfg(not(target_os = "linux"))]
 fn forgo_card() -> impl Bundle {
     (
         Node {
@@ -68,10 +88,12 @@ pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::InMatch), spawn)
         .add_systems(
             Update,
-            super::hud_update::update.run_if(in_state(GameState::InMatch)),
+            (super::hud_update::update, super::hud_portraits::update)
+                .run_if(in_state(GameState::InMatch)),
         );
 }
 
+#[cfg(not(target_os = "linux"))]
 pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bundle {
     (
         Node {
@@ -94,10 +116,17 @@ pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bund
     )
 }
 
-fn card(i: usize) -> impl Bundle {
+#[cfg(not(target_os = "linux"))]
+fn card(i: usize, narrow: bool) -> impl Bundle {
     (
         Node {
-            width: px(112.0),
+            width: px(if narrow {
+                82.0
+            } else if cfg!(target_os = "linux") {
+                166.0
+            } else {
+                154.0
+            }),
             flex_direction: FlexDirection::Column,
             padding: UiRect::all(px(6.0)),
             row_gap: px(4.0),
@@ -117,11 +146,30 @@ fn card(i: usize) -> impl Bundle {
                 BackgroundColor(Color::WHITE),
                 Hud::CardStrip(i)
             ),
-            (label("", 15.0), Hud::CardText(i)),
+            (
+                ImageNode::default(),
+                Node {
+                    width: percent(100),
+                    height: px(if narrow {
+                        52
+                    } else if cfg!(target_os = "linux") {
+                        145
+                    } else {
+                        76
+                    }),
+                    ..default()
+                },
+                Hud::Portrait(i)
+            ),
+            (
+                label("", if narrow { 11.0 } else { 15.0 }),
+                Hud::CardText(i)
+            ),
         ],
     )
 }
 
+#[cfg(not(target_os = "linux"))]
 fn row(gap: f32) -> Node {
     Node {
         flex_direction: FlexDirection::Row,
@@ -131,6 +179,7 @@ fn row(gap: f32) -> Node {
     }
 }
 
+#[cfg(not(target_os = "linux"))]
 fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) {
     let narrow = window.width() < 600.0;
     commands
@@ -149,6 +198,8 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
                     ..default()
                 },
                 children![
+                    Hud::PrivateControls,
+                    BackgroundColor(super::kit::PANEL),
                     (label("", 13.0), Hud::Augments),
                     (label("", 15.0), Hud::Info),
                     (label("", 12.0), Hud::CouncilStatus),
@@ -178,9 +229,96 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
                     ),
                     (
                         row(8.0),
-                        children![card(0), card(1), card(2), card(3), card(4)]
+                        children![
+                            card(0, narrow),
+                            card(1, narrow),
+                            card(2, narrow),
+                            card(3, narrow),
+                            card(4, narrow)
+                        ]
                     ),
                     super::surrender::button(),
+                ],
+            ));
+            root.spawn((
+                Node {
+                    display: Display::None,
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    row_gap: px(8),
+                    ..default()
+                },
+                Hud::WatchControls,
+                children![
+                    (label("", 16.0), Hud::Spectators),
+                    super::kit::button("Leave battle", UiAction::LeaveWatch, 220.0)
+                ],
+            ));
+        });
+}
+
+#[cfg(target_os = "linux")]
+fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>) {
+    commands
+        .spawn((
+            screen(JustifyContent::SpaceBetween),
+            HudRoot,
+            DespawnOnExit(GameState::InMatch),
+        ))
+        .with_children(|root| {
+            super::native_battle::score(root, &info, &assets);
+            if !info.spectating {
+                root.spawn(super::surrender::linux_button(&assets));
+            }
+            root.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    bottom: px(super::native_battle::SHOP_BOTTOM),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    row_gap: px(6),
+                    ..default()
+                },
+                Hud::PrivateControls,
+            ))
+            .with_children(|shop| {
+                shop.spawn((label("", 11.), Hud::Augments));
+                shop.spawn((label("", 11.), Hud::Info));
+                shop.spawn((
+                    Node {
+                        width: px(862),
+                        flex_direction: FlexDirection::Column,
+                        row_gap: px(10),
+                        ..default()
+                    },
+                    UiTransform {
+                        scale: Vec2::splat(super::native_battle::SHOP_SCALE),
+                        translation: Val2::percent(
+                            0.,
+                            (1. - super::native_battle::SHOP_SCALE) * 50.,
+                        ),
+                        ..default()
+                    },
+                ))
+                .with_children(|bottom| {
+                    super::native_battle::resources(bottom, &assets);
+                    super::native_battle::cards(bottom, &assets);
+                });
+            });
+            root.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    bottom: px(36),
+                    display: Display::None,
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    row_gap: px(8),
+                    ..default()
+                },
+                Hud::WatchControls,
+                children![
+                    (label("", 16.), Hud::Spectators),
+                    super::kit::button("Leave battle", UiAction::LeaveWatch, 220.)
                 ],
             ));
         });

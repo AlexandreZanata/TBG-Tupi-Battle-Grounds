@@ -34,6 +34,19 @@ impl Lang {
         }
     }
 
+    /// Dynamic catalog families resolve once while constructing a screen.
+    pub fn key(self, key: &str) -> String {
+        KEYS.binary_search(&key)
+            .map(|i| {
+                match self {
+                    Self::En => EN[i],
+                    Self::PtBr => PT_BR[i],
+                }
+                .to_string()
+            })
+            .unwrap_or_else(|_| key.to_string())
+    }
+
     /// Re-text a static label only when the language changes.
     pub fn retext_system(lang: Res<Lang>, mut labels: Query<(&Localized, &mut Text)>) {
         let lang = *lang;
@@ -133,6 +146,9 @@ fn startup_lang() -> Lang {
     #[cfg(not(target_arch = "wasm32"))]
     {
         crate::config::url_param("lang")
+            .or_else(|| {
+                crate::platform::storage::get(crate::platform::storage::Scope::Local, "tbg.lang")
+            })
             .and_then(|code| Lang::from_code(&code))
             .unwrap_or_default()
     }
@@ -146,4 +162,12 @@ pub fn plugin(app: &mut App) {
     let mut fonts = app.world_mut().resource_mut::<Assets<Font>>();
     let font = Font::from_bytes(UI_FONT.to_vec());
     fonts.insert(AssetId::default(), font).unwrap();
+    fonts
+        .insert(
+            crate::ui::kit::display_font().id(),
+            Font::from_bytes(
+                include_bytes!("../../assets/fonts/BattlegroundDisplayUi.ttf").to_vec(),
+            ),
+        )
+        .unwrap();
 }

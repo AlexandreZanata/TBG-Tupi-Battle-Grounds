@@ -83,14 +83,14 @@
     {
       "id": "logo-v2",
       "masterSize": [
-        1254,
-        1254
+        1500,
+        600
       ],
       "displayWidth": 365,
       "lossless": true,
       "asset": {
         "svg": "logo-v2.svg",
-        "display": "../branding/tbg-emblem.webp"
+        "display": "wordmark.webp"
       }
     }
   ]

@@ -50,7 +50,10 @@ fn probe_on_load(mut link: NonSendMut<MatchLink>, mut account: ResMut<Account>) 
     if config::url_param("room").is_some() || config::url_param("challenge").is_some() {
         return;
     }
-    if config::load_token().is_some() || config::load_account_key().is_some() {
+    if config::load_token().is_some()
+        || config::load_account_key().is_some()
+        || config::url_param("probe").is_some()
+    {
         *link = MatchLink::Net(Box::new(NetLink::new(Mode::Probe, 0.0)));
         account.auto_login = config::load_account_key().is_some();
     }

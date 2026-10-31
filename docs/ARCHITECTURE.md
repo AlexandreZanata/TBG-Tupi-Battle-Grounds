@@ -661,3 +661,23 @@ maturity; Leechroot saturates its visible stack display at seven without
 capping simulation Essence. Shatterback's four outer plates are cached per
 form and rendered as separate children so one can detach without replacing
 the whole model. Crowd reads carrier state and remains presentation only.
+
+## Native client migration (D-70, work in progress)
+
+The native Linux client and opt-in browser UI (`?ui=bevy`) share the Bevy
+screens in `ui/shell`, the text editor and UI kit, and the existing UiAction
+queue. The HTML path remains available until owner visual review. The shared
+HUD renders authoritative values; spectator controls expose no seat actions.
+
+`platform/` owns private atomic preferences, process-local sessions, callback
+HTTP, clipboard/browser integration, native window controls and diagnostic
+logs. Native audio and WSS are enabled. Assets resolve beside the executable
+in a distribution, with a repository path fallback during development.
+Account keys remain local plaintext credentials; Linux preference files are
+0600 and their directory is 0700. System keyring support is deferred.
+
+The owner-selected visible-attribution license (D-71) is bundled with native
+packages. A persistent interface footer links to the creator and original
+repository. Linux packaging and a per-user installer are implemented; actual
+release artifacts, consolidated acceptance and Windows builds remain pending.
+See [NATIVE-client.md](phases/NATIVE-client.md) for evidence and deferred checks.

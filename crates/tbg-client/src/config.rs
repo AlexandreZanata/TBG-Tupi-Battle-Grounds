@@ -1,7 +1,9 @@
-//! Page config: URL params on wasm32, env vars on native.
+//! Launch parameters, server selection and persisted client preferences.
 //!
 //! Single helper so later phases read `?room=`, `?server=`, `?lag=` the
 //! same way.
+
+use crate::platform::storage::{self as preferences, Scope};
 
 /// Read parameter `name`: on wasm32 from the page query string
 /// (`?name=value`), on native from `TBG_<NAME>` (uppercased).
@@ -19,7 +21,21 @@ pub fn url_param(name: &str) -> Option<String> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        std::env::var(format!("TBG_{}", name.to_uppercase())).ok()
+        let flag = format!("--{name}");
+        let args: Vec<String> = std::env::args().skip(1).collect();
+        args.iter()
+            .position(|a| a == &flag)
+            .map(|at| {
+                args.get(at + 1)
+                    .filter(|a| !a.starts_with("--"))
+                    .cloned()
+                    .unwrap_or_default()
+            })
+            .or_else(|| {
+                args.iter()
+                    .find_map(|a| a.strip_prefix(&format!("{flag}=")).map(str::to_owned))
+            })
+            .or_else(|| std::env::var(format!("TBG_{}", name.to_uppercase())).ok())
     }
 }
 
@@ -27,7 +43,7 @@ pub fn url_param(name: &str) -> Option<String> {
 /// 1. `?server=<url>` when present;
 /// 2. on wasm with `https:` page → `wss://<host>/ws`;
 /// 3. on wasm otherwise → `ws://<hostname>:8080/ws`;
-/// 4. native → `ws://127.0.0.1:8080/ws`.
+/// 4. native: compile-time production override; localhost in development.
 pub fn server_url() -> String {
     if let Some(url) = url_param("server") {
         return url;
@@ -48,7 +64,13 @@ pub fn server_url() -> String {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        "ws://127.0.0.1:8080/ws".into()
+        option_env!("TBG_DEFAULT_SERVER")
+            .unwrap_or(if cfg!(debug_assertions) {
+                "ws://127.0.0.1:8080/ws"
+            } else {
+                "wss://tbg.abastevo.com.br/ws"
+            })
+            .into()
     }
 }
 
@@ -81,12 +103,7 @@ pub fn parse_invite_token(hex: &str) -> Option<[u8; 16]> {
 /// Per tab (`sessionStorage`): a shared token made two open tabs keep
 /// taking over each other's session.
 pub fn load_token() -> Option<[u8; 16]> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        parse_hex16(&token_storage()?.get_item("tbg_token").ok()??)
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    None
+    parse_hex16(&preferences::get(Scope::Session, "tbg_token")?)
 }
 
 /// P47: the match a `?watch=<16 hex>` link names; `None` for anything else.
@@ -100,37 +117,19 @@ fn parse_watch_id(hex: &str) -> Option<u64> {
 
 /// P47: the watch a reload of this tab resumes (`sessionStorage`).
 pub fn load_watch() -> Option<u64> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        parse_watch_id(&token_storage()?.get_item("tbg_watch").ok()??)
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    None
+    parse_watch_id(&preferences::get(Scope::Session, "tbg_watch")?)
 }
 
 pub fn save_watch(id: u64) {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(s) = token_storage() {
-        let _ = s.set_item("tbg_watch", &format!("{id:016x}"));
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    let _ = id;
+    preferences::set(Scope::Session, "tbg_watch", &format!("{id:016x}"));
 }
 
 pub fn clear_watch() {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(s) = token_storage() {
-        let _ = s.remove_item("tbg_watch");
-    }
+    preferences::remove(Scope::Session, "tbg_watch");
 }
 
 pub fn save_token(token: &[u8; 16]) {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(s) = token_storage() {
-        let _ = s.set_item("tbg_token", &hex16(token));
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    let _ = token;
+    preferences::set(Scope::Session, "tbg_token", &hex16(token));
 }
 
 /// D-40/P40: the Arcana preset the lobby editor saved under `tbg.arcanas`
@@ -138,8 +137,7 @@ pub fn save_token(token: &[u8; 16]) {
 /// and the default is used when absent, partial or invalid, so every match
 /// always gets a complete preset.
 pub fn load_arcanas() -> tbg_core::ArcanaPreset {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(raw) = storage().and_then(|s| s.get_item(ARCANAS_KEY).ok().flatten()) {
+    if let Some(raw) = preferences::get(Scope::Local, ARCANAS_KEY) {
         if let Some(p) = parse_arcanas(&raw) {
             // Persist the migrated/completed schema so the next load is direct.
             save_arcanas(p);
@@ -151,27 +149,21 @@ pub fn load_arcanas() -> tbg_core::ArcanaPreset {
 
 /// D-40: keep the server's selection (e.g. an account's saved preset).
 pub fn save_arcanas(preset: tbg_core::ArcanaPreset) {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(s) = storage() {
-        let ranks: Vec<String> = preset.ranks.iter().map(u8::to_string).collect();
-        let _ = s.set_item(
-            ARCANAS_KEY,
-            &format!("{{\"schema\":2,\"ranks\":[{}]}}", ranks.join(",")),
-        );
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    let _ = preset;
+    let ranks: Vec<String> = preset.ranks.iter().map(u8::to_string).collect();
+    preferences::set(
+        Scope::Local,
+        ARCANAS_KEY,
+        &format!("{{\"schema\":2,\"ranks\":[{}]}}", ranks.join(",")),
+    );
 }
 
-#[cfg(target_arch = "wasm32")]
 const ARCANAS_KEY: &str = "tbg.arcanas";
 
 /// D-46: the Stronghold kind the lobby picker saved under `tbg.stronghold`
 /// (the kind's name, e.g. `Artillery`); Bastion when absent or invalid
 /// (BR-SK01).
 pub fn load_stronghold() -> tbg_core::StrongholdKind {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(raw) = storage().and_then(|s| s.get_item(STRONGHOLD_KEY).ok().flatten()) {
+    if let Some(raw) = preferences::get(Scope::Local, STRONGHOLD_KEY) {
         if let Some(kind) = parse_stronghold(&raw) {
             return kind;
         }
@@ -181,26 +173,18 @@ pub fn load_stronghold() -> tbg_core::StrongholdKind {
 
 /// D-46: keep the server's selection (e.g. an account's saved kind).
 pub fn save_stronghold(kind: tbg_core::StrongholdKind) {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(s) = storage() {
-        let _ = s.set_item(STRONGHOLD_KEY, &format!("{kind:?}"));
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    let _ = kind;
+    preferences::set(Scope::Local, STRONGHOLD_KEY, &format!("{kind:?}"));
 }
 
-#[cfg(target_arch = "wasm32")]
 const STRONGHOLD_KEY: &str = "tbg.stronghold";
 
 /// ARENAS-G: the arena Practice uses, chosen in the Arenas page (the page
 /// writes the slug; Rust reads it). Online matches never read it.
-#[cfg(target_arch = "wasm32")]
 const ARENA_KEY: &str = "tbg.arena";
 
 /// The Practice arena: the saved choice, else the neutral Forest.
 pub fn load_arena() -> tbg_core::Arena {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(raw) = storage().and_then(|s| s.get_item(ARENA_KEY).ok().flatten()) {
+    if let Some(raw) = preferences::get(Scope::Local, ARENA_KEY) {
         if let Some(arena) = tbg_core::Arena::from_slug(raw.trim()) {
             return arena;
         }
@@ -209,7 +193,6 @@ pub fn load_arena() -> tbg_core::Arena {
 }
 
 /// A selectable kind by name; anything else (Classic, junk) is `None`.
-#[cfg(any(target_arch = "wasm32", test))]
 pub fn parse_stronghold(raw: &str) -> Option<tbg_core::StrongholdKind> {
     tbg_core::StrongholdKind::SELECTABLE
         .into_iter()
@@ -218,7 +201,6 @@ pub fn parse_stronghold(raw: &str) -> Option<tbg_core::StrongholdKind> {
 
 /// The numbers after `"ranks":[`, as a complete preset. Six values are a
 /// schema-1 tree and migrate; fifteen are validated as the current schema.
-#[cfg(any(target_arch = "wasm32", test))]
 pub fn parse_arcanas(raw: &str) -> Option<tbg_core::ArcanaPreset> {
     if raw.len() > 4096 {
         return None;
@@ -237,16 +219,6 @@ pub fn parse_arcanas(raw: &str) -> Option<tbg_core::ArcanaPreset> {
     tbg_core::ArcanaPreset::complete(ranks.try_into().ok()?).ok()
 }
 
-#[cfg(target_arch = "wasm32")]
-fn storage() -> Option<web_sys::Storage> {
-    web_sys::window()?.local_storage().ok()?
-}
-
-#[cfg(target_arch = "wasm32")]
-fn token_storage() -> Option<web_sys::Storage> {
-    web_sys::window()?.session_storage().ok()?
-}
-
 /// Shareable link that auto-joins a private room.
 pub fn room_link(code: &str) -> String {
     #[cfg(target_arch = "wasm32")]
@@ -255,7 +227,7 @@ pub fn room_link(code: &str) -> String {
         let path = loc.pathname().unwrap_or_default();
         return format!("{origin}{path}?room={code}");
     }
-    format!("?room={code}")
+    crate::platform::page_url(&format!("/?room={code}")).unwrap_or_default()
 }
 
 /// P39: shareable link that auto-joins a Quick Challenge.
@@ -268,7 +240,7 @@ pub fn challenge_link(token: &[u8; 16]) -> String {
         let server = url_param("server").map_or_else(String::new, |s| format!("&server={s}"));
         return format!("{origin}{path}?challenge={hex}{server}");
     }
-    format!("?challenge={hex}")
+    crate::platform::page_url(&format!("/?challenge={hex}")).unwrap_or_default()
 }
 
 // Browser support varies, and dismissing the share sheet rejects its Promise.
@@ -304,7 +276,10 @@ pub fn share_text(title: &str, url: &str) {
     #[cfg(target_arch = "wasm32")]
     browser_share_text(title, url);
     #[cfg(not(target_arch = "wasm32"))]
-    let _ = (title, url);
+    {
+        let _ = title;
+        crate::platform::copy(url);
+    }
 }
 
 #[cfg(any(target_arch = "wasm32", test))]
@@ -350,65 +325,38 @@ pub fn open_url(path: &str) {
         let _ = w.open_with_url_and_target(path, "_blank");
     }
     #[cfg(not(target_arch = "wasm32"))]
-    let _ = path;
+    crate::platform::open_page(path);
 }
 
 pub fn copy_text(text: &str) {
     #[cfg(target_arch = "wasm32")]
     browser_copy_text(text);
     #[cfg(not(target_arch = "wasm32"))]
-    let _ = text;
+    {
+        crate::platform::copy(text);
+    }
 }
 
-/// P11: the player's own account key (`None` on native). Anyone with it
-/// can play as the account; it lives only in `localStorage`.
+/// The player's account credential, in browser storage or private native preferences.
 pub fn load_account_key() -> Option<String> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        storage()?.get_item("tbg_account_key").ok()?
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    None
+    preferences::get(Scope::Local, "tbg_account_key")
 }
 
 pub fn save_account_key(key: &str) {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(s) = storage() {
-        let _ = s.set_item("tbg_account_key", key);
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    let _ = key;
+    preferences::set(Scope::Local, "tbg_account_key", key);
 }
 
 pub fn delete_account_key() {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(s) = storage() {
-        let _ = s.remove_item("tbg_account_key");
-    }
+    preferences::remove(Scope::Local, "tbg_account_key");
 }
 
 /// A boolean preference in `localStorage` (false when unavailable).
 pub fn load_flag(key: &str) -> bool {
-    #[cfg(target_arch = "wasm32")]
-    {
-        storage()
-            .and_then(|s| s.get_item(key).ok().flatten())
-            .is_some_and(|v| v == "1")
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let _ = key;
-        false
-    }
+    preferences::get(Scope::Local, key).is_some_and(|v| v == "1")
 }
 
 pub fn save_flag(key: &str, value: bool) {
-    #[cfg(target_arch = "wasm32")]
-    if let Some(s) = storage() {
-        let _ = s.set_item(key, if value { "1" } else { "0" });
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    let _ = (key, value);
+    preferences::set(Scope::Local, key, if value { "1" } else { "0" });
 }
 
 /// Presentation-only arena inspection for P16-A captures, without the menu or orbit.
@@ -511,7 +459,21 @@ mod tests {
     fn native_challenge_link_contains_the_token() {
         assert_eq!(
             challenge_link(&[0x0F; 16]),
-            format!("?challenge={}", "0f".repeat(16))
+            format!(
+                "{}/?challenge={}",
+                crate::platform::http::origin(&server_url()).unwrap(),
+                "0f".repeat(16)
+            )
         );
     }
+}
+
+/// Practice arena selection never changes an online match (D-55).
+pub fn save_arena(arena: tbg_core::Arena) {
+    preferences::set(Scope::Local, ARENA_KEY, arena.slug());
+}
+
+/// Keep the HTML path until the owner approves the migrated screens.
+pub fn bevy_ui() -> bool {
+    cfg!(not(target_arch = "wasm32")) || url_param("ui").as_deref() == Some("bevy")
 }

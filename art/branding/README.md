@@ -52,3 +52,12 @@ Runtime web references use `?v=fortress-2` to refresh cached icons.
 ```text
 Use the attached image as the exact approved game emblem. Perform a faithful high-resolution restoration / super-resolution edit, not a redesign. Reproduce the emblem EXACTLY: identical silhouette, proportions, position and perspective of every element; left sapphire-blue fortress with its blue waving banner, right ruby-red fortress and its red banner, central tall silver spearhead framed in gold with a golden diamond inset, dark metal shaft with golden bands, gold ornamental swept base and the bright cyan-blue diamond jewel centered at the bottom, steel-gray angular leaves/blades behind it, all existing gold trim. Preserve the same polished faceted low-poly fantasy game rendering, the exact relative sizes and color placement, asymmetrical details and geometry. Do not add, remove, simplify, reinterpret, mirror or change any ornament. Increase edge clarity and material detail cleanly without changing shapes or colors. Remove only the nearly black blurred screenshot background and tiny edge debris outside the emblem to create a clean fully transparent alpha background. No black rectangle, no text, no watermarks, no shadows outside the emblem. Center the complete unchanged emblem on a square high-resolution transparent canvas with a small clear margin, including its full top spear tip and bottom point. Highest available resolution and professional icon quality. The reference is the design authority; preserve its exact appearance.
 ```
+
+## Wordmark versus application icon
+
+Owner correction, 2026-10-31: the fortress/spear emblem is the application
+icon and profile badge. The lobby brand must use the earlier written
+**Tupi Battle Grounds** logo on Linux and in the browser. The optimized
+`assets/lobby/wordmark.webp` is a 1024x410 lossless derivative of the existing
+1500x600 `logo-v2.webp`; the source artwork is preserved. No SVG conversion
+or new artwork is involved in restoring this wordmark.

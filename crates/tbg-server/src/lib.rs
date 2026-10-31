@@ -26,6 +26,7 @@ mod match_task;
 pub mod metrics;
 mod names;
 pub mod store;
+mod version;
 mod ws;
 
 pub use config::Config;
@@ -108,6 +109,7 @@ pub async fn run_with(
         .route("/api/leaderboard", get(api::leaderboard))
         .route("/api/players/{name}", get(api::player))
         .route("/api/live", get(api::live))
+        .route("/api/version", get(version::get))
         .route("/api/online", get(api::online))
         .with_state(state);
     if let Some(dir) = &config.static_dir {

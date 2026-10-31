@@ -52,6 +52,7 @@ pub(super) fn apply(
         ResMut<super::Toasts>,
         ResMut<Sounds>,
         ResMut<crate::sync::RematchInfo>,
+        Res<crate::sync::MatchInfo>,
     ),
     mut account: ResMut<Account>,
     (mut surrender, mut fortifying, mut tower_open): (
@@ -76,6 +77,28 @@ pub(super) fn apply(
         selected.0 = None;
     }
     for action in std::mem::take(&mut queue.0) {
+        #[cfg(target_os = "linux")]
+        let action = match action {
+            UiAction::PracticeArena(arena) => {
+                config::save_arena(arena);
+                UiAction::Practice
+            }
+            other => other,
+        };
+        // BR-LV03: watchers have public inspection, never seat controls.
+        if extra.4.spectating
+            && matches!(
+                action,
+                UiAction::Buy(_)
+                    | UiAction::Evolve { .. }
+                    | UiAction::Fortify(_)
+                    | UiAction::ChooseAugment(_)
+                    | UiAction::ForgoAugment
+                    | UiAction::Surrender
+            )
+        {
+            continue;
+        }
         if paused
             && matches!(
                 action,
@@ -198,6 +221,12 @@ pub(super) fn apply(
                     }
                 }
             }
+            // Linux presentation actions are consumed before this system.
+            #[cfg(target_os = "linux")]
+            UiAction::ShowArenaBanner
+            | UiAction::CloseArenaBanner
+            | UiAction::PickAugment(_)
+            | UiAction::ConfirmAugment => {}
             UiAction::CopyLink => {
                 if let Some(token) = queue_info.challenge {
                     config::copy_text(&config::challenge_link(&token));
@@ -293,7 +322,7 @@ pub(super) fn apply(
                      .0
                     .as_ref()
                     .is_some_and(|v| v.units.iter().any(|u| u.id == id && u.seat == v.you));
-                selected.0 = own.then_some(id);
+                selected.0 = (own && !extra.4.spectating).then_some(id);
             }
             UiAction::Evolve { unit, branch } => {
                 seq.0 += 1;
@@ -327,16 +356,31 @@ pub(super) fn apply(
                 inspected.0 = None;
                 tower_open.0 = false;
             }
-            UiAction::CloseInspect => inspected.0 = None,
+            UiAction::CloseInspect => {
+                inspected.0 = None;
+                #[cfg(target_os = "linux")]
+                {
+                    selected.0 = None;
+                }
+            }
             UiAction::Inspect(offer) => {
                 if let Some(v) = &extra.0 .0 {
                     let kind = v.offers[usize::from(offer).min(tbg_core::content::OFFERS - 1)];
                     extra.1.push_for(super::tips::unit_details(kind), 4.5);
                 }
             }
+            UiAction::OpenCreator => config::open_url(super::attribution::CREATOR_URL),
+            UiAction::OpenRepository => config::open_url(super::attribution::REPOSITORY_URL),
             UiAction::ToggleSound => extra.2.toggle_mute(),
             // P41: menu-only switch (the Settings dialog lives in the menu).
-            UiAction::SetLang(lang) => *lang_res = lang,
+            UiAction::SetLang(lang) => {
+                *lang_res = lang;
+                crate::platform::storage::set(
+                    crate::platform::storage::Scope::Local,
+                    "tbg.lang",
+                    lang.code(),
+                );
+            }
             UiAction::PreviewArena(a) => {
                 arena.set_if_neq(crate::arena::ActiveArena::of(a));
             }

@@ -86,6 +86,7 @@ fn watch_text(
             TextKind::Name => ClientMsg::Register {
                 name: ev.value.clone(),
             },
+            TextKind::Room => continue,
             TextKind::Key => ClientMsg::Login {
                 key: ev.value.clone(),
             },
@@ -196,4 +197,24 @@ pub(crate) fn download_key(name: &str, key: &str) {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn download_key(_name: &str, _key: &str) {}
+pub(crate) fn download_key(name: &str, key: &str) {
+    if let Some(dir) = crate::platform::storage::data_dir() {
+        // Account names are server-validated; still restrict the filename locally.
+        let safe: String = name
+            .chars()
+            .filter(|c| c.is_ascii_alphanumeric() || *c == '_')
+            .collect();
+        let path = dir.join(format!("{safe}-tbg-key.txt"));
+        let mut options = std::fs::OpenOptions::new();
+        options.create(true).truncate(true).write(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        use std::io::Write;
+        if let Ok(mut file) = options.open(path) {
+            let _ = file.write_all(key.as_bytes());
+        }
+    }
+}
