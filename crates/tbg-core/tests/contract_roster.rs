@@ -161,7 +161,7 @@ fn roster_composition() {
     // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
-    assert_eq!(UNITS.len(), 41);
+    assert_eq!(UNITS.len(), 42);
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     assert_eq!(
         &kinds[ALL_KINDS.len()..],
@@ -180,6 +180,7 @@ fn roster_composition() {
             UnitKind::SolarSentinel,
             UnitKind::LuminousOracle,
             UnitKind::CelestialArcher,
+            UnitKind::Justiciar,
         ][..]
     );
     assert_eq!(UNIT_KINDS.len(), 10);
@@ -423,7 +424,11 @@ Luminous Oracle/Sacred Aura: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 
 Celestial Archer/Divine Precision: hp=0 dmg=1000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Celestial Archer/Divine Precision: hp=0 dmg=1000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Celestial Archer/Celestial Mark: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Celestial Archer/Celestial Mark: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Celestial Archer/Celestial Mark: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Justiciar/Celestial Fury: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Justiciar/Celestial Fury: hp=1000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Justiciar/Judgment: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Justiciar/Judgment: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {
@@ -469,6 +474,7 @@ fn proposed_p59_bases_match_section_13() {
             4,
             [210, 55, 40, 4_000, 43],
         ),
+        (Justiciar, Celestials, Control, 6, [700, 35, 46, 2_500, 28]),
     ];
     for (kind, faction, archetype, energy, base) in rows {
         let d = def(kind);

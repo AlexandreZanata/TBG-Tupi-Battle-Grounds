@@ -1818,3 +1818,28 @@ purification, so a canceled projectile never claims a successful dispel. No flig
 immunity, imported asset, extra rig node, light, material per unit or dependency.
 Frozen base/form contracts append these canonical Proposed facts. Native regressions
 and actual screenshot remain queued in the per-character report.
+
+## D-82 · Justiciar's single light stamp and connected construct — 2026-10-31 (Proposed)
+
+R15 appends the exact §13 Celestial Control row/four forms without public-pool
+activation. Celestial Rain waits200 and uses the shared locked six-tick enemy-unit
+windup. Resolve one65-damage pulse around the primary's current x, radius1300;
+living enemies, including summons/carried passengers, take it once in UnitId order.
+No allied/Stronghold collateral, delayed repeats, burning zone, launch or interrupt.
+A replaces registry special damage with78 (65×1.20) then grants own HP1000bp; B
+replaces radius1600 then adds ordinary Slow1500bp/20 to affected surviving enemies.
+Ward blocks that Slow, not raw damage. Static caster damage scales the registry
+amount once; basics remain35 and receive no special-only bonus. Primary death
+cancels the entire pending pulse without refund/retarget, including a prior basic
+kill that tick. Existing basic and special channels stay independent.
+
+Own five-form kit: broad ivory/gold segmented construct, compact moving chest sun,
+navy underlayers/team shoulder panel and rigid hidden forearm supports. A broadens
+bright chest armor then adds large sun collar; B darkens arm segments then adds
+angular side fins. Deliberate flat-foot gait, cocked gauntlet, compressing impact,
+powering-down crouch and independent two-palm stamp are per-kind motion. Its
+Control basic sends one small cached geometric bolt from the real right hand at
+release0.22/flight0.08; the special's single exact-center/radius light ring follows
+server resolution. No fake multi-meteor damage, extra rig node, physics, texture,
+light or dependency. Existing AbilityResolved/public facts suffice; protocol25 and
+simulation layout stay unchanged. Frozen base/form contracts append §13 values.

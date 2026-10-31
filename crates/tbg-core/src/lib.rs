@@ -21,6 +21,7 @@ mod demolisher;
 pub mod headless;
 mod hits;
 mod intent;
+mod justiciar;
 #[cfg(feature = "lab")]
 pub mod lab;
 mod luminous_oracle;

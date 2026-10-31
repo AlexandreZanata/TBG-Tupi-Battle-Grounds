@@ -45,7 +45,8 @@ fn area(map: &UnitEntities, visuals: &Visuals, id: UnitId) -> Area {
                 .ability(anim.form.0, anim.form.1)
                 .into_iter()
                 .find_map(|a| match a {
-                    Ability::BloodyRend { radius, .. }
+                    Ability::CelestialRain { radius, .. }
+                    | Ability::BloodyRend { radius, .. }
                     | Ability::SwampBelly { radius, .. }
                     | Ability::AreaCrush { radius, .. }
                     | Ability::DoubleMayhem { radius, .. } => Some(radius),
@@ -88,6 +89,7 @@ fn resolved(
         UnitKind::SolarSentinel => (Impact::Solar, primary, Area::default()),
         UnitKind::LuminousOracle => (Impact::Harmonic, primary, Area::default()),
         UnitKind::CelestialArcher => (Impact::Purify, primary, Area::default()),
+        UnitKind::Justiciar => (Impact::Judgment, primary, area(map, visuals, unit)),
         UnitKind::Demolisher => (Impact::Piston, Some(unit), area(map, visuals, unit)),
         _ => return,
     };

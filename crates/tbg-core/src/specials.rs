@@ -17,6 +17,7 @@ pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> O
             Ability::FearPulse { period, .. }
             | Ability::LivingWall { period, .. }
             | Ability::AreaCrush { period, .. }
+            | Ability::CelestialRain { period, .. }
             | Ability::HarmonicPulse { period, .. }
             | Ability::SolarBarrier { period, .. }
             | Ability::BloodyRend { period, .. }
@@ -143,6 +144,7 @@ fn advance_cast(
         crate::whisperer::resolve(state, u, target, ev);
         crate::bulwark::resolve(state, u);
         crate::demolisher::resolve(state, u, ev);
+        crate::justiciar::resolve(state, u, target, ev);
         crate::luminous_oracle::resolve(state, u, target);
         crate::solar_sentinel::resolve(state, u, target);
         crate::trident::resolve(state, u, target, ev);

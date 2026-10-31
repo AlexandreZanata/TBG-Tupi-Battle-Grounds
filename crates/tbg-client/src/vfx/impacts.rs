@@ -54,6 +54,7 @@ pub enum Impact {
     Solar,
     Harmonic,
     Purify,
+    Judgment,
 }
 
 /// What the attacker brings to an impact: splash radius (tiles, 0 = none)
@@ -269,6 +270,20 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
                 0.0,
                 0.22,
             );
+        }
+        Impact::Judgment => {
+            spawn(
+                commands,
+                &a.ring,
+                &a.gold,
+                ground,
+                Motion::Grow {
+                    radius: area.splash.max(0.3),
+                },
+                0.0,
+                0.3,
+            );
+            motes(commands, a, at, &a.gold, (6, 0.6), 0.25);
         }
         Impact::Purify => {
             motes(commands, a, at, &a.gold, (7, 0.7), 0.22);

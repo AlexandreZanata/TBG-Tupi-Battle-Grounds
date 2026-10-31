@@ -26,6 +26,7 @@ mod drumguard;
 mod farwatch;
 pub mod gait;
 mod hexer;
+mod justiciar;
 mod leechroot;
 mod longaxe;
 mod luminous_oracle;
@@ -194,6 +195,7 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static JUSTICIAR: Kit = justiciar::KIT;
 static CELESTIALARCHER: Kit = celestial_archer::KIT;
 static LUMINOUSORACLE: Kit = luminous_oracle::KIT;
 static SOLARSENTINEL: Kit = solar_sentinel::KIT;
@@ -245,6 +247,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::Justiciar => Some(&JUSTICIAR),
         UnitKind::CelestialArcher => Some(&CELESTIALARCHER),
         UnitKind::LuminousOracle => Some(&LUMINOUSORACLE),
         UnitKind::SolarSentinel => Some(&SOLARSENTINEL),

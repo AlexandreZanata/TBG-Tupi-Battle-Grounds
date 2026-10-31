@@ -54,6 +54,7 @@ pub enum ShotKind {
     SunSpark,
     CelestialArrow,
     PurifyingArrow,
+    JudgmentBolt,
 }
 
 #[derive(Clone, Copy)]
@@ -78,6 +79,7 @@ enum Body {
     RitualBolt,
     SunMote,
     RadiantArrow,
+    Stamp,
 }
 
 #[derive(Clone, Copy)]
@@ -265,6 +267,14 @@ fn look(kind: ShotKind) -> Look {
             0.0,
             Impact::Bolt,
         ),
+        JudgmentBolt => (
+            Some((Body::Stamp, 1.0)),
+            0.0,
+            CAST_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
+        ),
         CelestialArrow | PurifyingArrow => (
             Some((
                 Body::RadiantArrow,
@@ -424,6 +434,7 @@ pub struct ShotMeshes {
     ritual_bolt: Handle<Mesh>,
     sun_mote: Handle<Mesh>,
     radiant_arrow: Handle<Mesh>,
+    stamp: Handle<Mesh>,
     fish: Handle<Mesh>,
     bomb: Handle<Mesh>,
     orb: Handle<Mesh>,
@@ -527,6 +538,10 @@ impl ShotMeshes {
                     LINEN,
                     Transform::from_xyz(0.0, 0.0, -0.26),
                 ),
+            ]),
+            stamp: build(vec![
+                (Box(0.07, 0.07, 0.12), GOLD, Transform::IDENTITY),
+                (Box(0.035, 0.035, 0.13), IVORY, Transform::IDENTITY),
             ]),
             radiant_arrow: build(vec![
                 (Cyl(0.007, 0.40), IVORY, along(0.0)),
@@ -641,6 +656,7 @@ impl ShotMeshes {
             Body::RitualBolt => &self.ritual_bolt,
             Body::SunMote => &self.sun_mote,
             Body::RadiantArrow => &self.radiant_arrow,
+            Body::Stamp => &self.stamp,
             Body::Fish => &self.fish,
             Body::Bomb => &self.bomb,
             Body::Orb => &self.orb,

@@ -149,6 +149,8 @@ pub enum UnitKind {
     LuminousOracle,
     /// D-81: R14, staged outside public pools.
     CelestialArcher,
+    /// D-82: R15, staged outside public pools.
+    Justiciar,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

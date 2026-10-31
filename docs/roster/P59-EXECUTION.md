@@ -225,7 +225,8 @@ Own library: `crates/tbg-client/src/art/kits/justiciar/`.
 
 broad segmented construct, compact gold chest sun, floating-looking but rigid connected forearms, ivory stone/gold/navy and team shoulder panel. A2 wide bright chest plates, A3 large sun collar; B2 dark segmented arms, B3 angular side fins. Visual gaps use short hidden rigid supports.
 
-Status: pending. Evidence: `docs/media/p59/justiciar/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/justiciar/lineup.jpg`.
 
 ### R16 — Jawguard
 

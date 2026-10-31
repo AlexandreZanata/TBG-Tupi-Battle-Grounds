@@ -355,6 +355,13 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    CelestialRain {
+        period: u16,
+        radius: i32,
+        damage: u16,
+        bp: u16,
+        ticks: u16,
+    },
     PurifyingArrow {
         every: u8,
         damage: u16,
@@ -752,6 +759,25 @@ const CELESTIAL_ARCHER_ABILITIES: [[Ability; 2]; 5] = [
     purification(3, 80),
     purification(3, 90),
 ];
+const fn rain(radius: i32, special_bp: u16, bp: u16) -> [Ability; 2] {
+    [
+        Ability::CelestialRain {
+            period: 200,
+            radius,
+            damage: (65_u32 * (10_000 + special_bp as u32) / 10_000) as u16,
+            bp,
+            ticks: 20,
+        },
+        Ability::None,
+    ]
+}
+const JUSTICIAR_ABILITIES: [[Ability; 2]; 5] = [
+    rain(1_300, 0, 0),
+    rain(1_300, 2_000, 0),
+    rain(1_300, 2_000, 0),
+    rain(1_600, 0, 0),
+    rain(1_600, 0, 1_500),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -855,7 +881,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 41;
+pub const UNIT_KIND_COUNT: usize = 42;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1187,6 +1213,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::SolarSentinel,"Solar Sentinel",Celestials,Tank,3_000,[1_050,35,40,800,28,0,0],None,SOLAR_SENTINEL_ABILITIES,[FormDef{hp_bp:2_000,..form("Light Fortress")},form("Light Fortress"),form("Group Protection"),form("Group Protection")]),
     unit(UnitKind::LuminousOracle,"Luminous Oracle",Celestials,Control,2_400,[300,15,50,3_000,38,0,0],None,LUMINOUS_ORACLE_ABILITIES,[form("Restoring Light"),form("Restoring Light"),form("Sacred Aura"),form("Sacred Aura")]),
     unit(UnitKind::CelestialArcher,"Celestial Archer",Celestials,Ranged,2_400,[210,55,40,4_000,43,0,0],None,CELESTIAL_ARCHER_ABILITIES,[FormDef{dmg_bp:1_000,..form("Divine Precision")},FormDef{dmg_bp:1_000,..form("Divine Precision")},form("Celestial Mark"),form("Celestial Mark")]),
+    unit(UnitKind::Justiciar,"Justiciar",Celestials,Control,3_600,[700,35,46,2_500,28,0,0],None,JUSTICIAR_ABILITIES,[form("Celestial Fury"),FormDef{hp_bp:1_000,..form("Celestial Fury")},form("Judgment"),form("Judgment")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).
