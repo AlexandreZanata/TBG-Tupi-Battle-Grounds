@@ -858,7 +858,48 @@ captures and review of every screen, including 3D presentation and motion.
   Windows GPU checks consumer OS integration and drivers. Keep evidence and
   failures separate. A build or Wine launch alone is not release acceptance.
 
-No new server service, deployment topology, updater backend, database or
-match rule is needed. Compatibility uses the existing authoritative wire
-contract; test against a compatible backend without restarting production.
+The Windows packaging work needs no separate backend or deployment topology.
+The owner's P68-A extension below adds authentication modules/tables to the
+existing server and coordinates its wire update; it changes no combat rule.
+Test against a compatible backend without restarting production.
 See the [acceptance matrix and official references](planning/P68-WINDOWS-ACCEPTANCE.md).
+
+### 24.1 Persistent authentication on Linux, Windows and web (P68-A, planned)
+
+The owner added [P68-A](planning/P68-PERSISTENT-AUTH.md) to P68 on 2026-10-31.
+GAME-DESIGN §21 and D-97 define opaque 15-minute Access Tokens and rotating
+Refresh Tokens with a 30-day absolute device-family lifetime. The existing
+AccountKey stays valid for manual login; normal automatic login uses tokens.
+This explicitly extends the earlier packaging-only backend/wire scope.
+
+The Axum server owns a small `auth/` module and a bounded volatile Access
+index/short retry cache. Its existing SQLite writer owns additive family/
+refresh-history tables, atomic rotation and revocation/cleanup. Store only
+refresh hashes, never bearer secrets in SQL, journals, outboxes or logs.
+No new service, Redis, JWT infrastructure or cryptography in simulation ticks.
+
+Client `auth/` coordinates one state machine. Native `platform/credentials/`
+uses Linux Secret Service or Windows Credential Manager with Local
+persistence; Access remains in memory and ordinary preferences hold no new
+secrets. Web uses one cookie-backed fetch/coordinator shared by HTML and
+Bevy paths, with an HttpOnly/Secure/SameSite=Strict host cookie and Web Locks.
+OS/browser failures yield explicit safe temporary modes, not plaintext files.
+Exact Linux/Windows frontend appearance remains a required contract.
+
+Separate browser/native auth route groups prevent cookie credentials from
+being echoed into JS. Apply strict origin/custom-header CSRF checks, bounds,
+no-store responses and redaction. Origin is not account identity. Verify
+Access/family before WS account resume; add coordinated authenticated-handshake controls
+and explicit takeover without background refresh stealing the match.
+
+Natural Access expiry gates new account operations but an admitted match
+may finish under its seat-only lease; refresh updates the same socket.
+Revocation invalidates that lease; valid-auth reconnect preserves the
+existing 30-second window. Old resume handles alone cannot assume an account.
+Legacy migration confirms secure persistence and manual-key backup before
+removing the existing plaintext key. Track incomplete migration honestly.
+
+Complete A01–A14 along with the Windows acceptance matrix before claiming
+P68 done. Real Linux/Windows vault security and web cookie behavior require
+separate evidence; Wine proves only compatibility. Deployment/rollback
+preserves data and existing matches, and remains under the owner's rules.

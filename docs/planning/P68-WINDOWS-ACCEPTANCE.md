@@ -11,11 +11,18 @@ look exactly the same. Platform-specific implementation adjustments are
 authorized where needed to achieve identical presentation. A merely similar
 interface, shared source code or a successful launch is insufficient.
 
+The owner's auth extension is also mandatory: execute
+[P68-A](P68-PERSISTENT-AUTH.md) and record A01–A14 alongside W01–W18.
+Access lasts 15 minutes; refresh families have a 30-day absolute deadline.
+Wine checks Windows credential API compatibility only; real Linux Secret
+Service, real Windows Credential Manager and browser cookie paths each need
+their own evidence. A deferred auth security check is not a completed P68.
+
 ## 1. Evidence matrix
 
 | ID | Contract | Evidence required at consolidation |
 |---|---|---|
-| W01 | Correct base and content | Requested base SHA, final SHA, protocol/version/46-kind baseline reconciliation, reviewed OS-gate dispositions |
+| W01 | Correct base and content | Requested base SHA, final SHA, coordinated P68-A wire version/client/server identity, version/46-kind baseline reconciliation, reviewed OS-gate dispositions |
 | W02 | Actual Windows binary | PE x86_64/MSVC identity, subsystem/import/resource inspection, pre-graphics identity command and source match |
 | W03 | Complete independent package | Fresh staging, asset inventory, ZIP installed outside checkout with unrelated CWD; missing-assets negative case; no repository fallback |
 | W04 | Per-user installation | Final installer on clean Windows user and Wine prefix; no admin prompt in the chosen supported runtime configuration; shortcuts/uninstall entry and icons |
@@ -104,13 +111,13 @@ observed failures. This does not authorize a repeated full gallery.
 | Troops | Existing catalog, lore/abilities/form stats, preview walk/attack/Victory motion, selection and return navigation |
 | Training | Existing exact-team/three-champion selection, enemy choices, dummy and bot difficulties; reset/exit and offline behavior, without expanding P62 rules |
 | Settings | Sound/volume, language, window/fullscreen, VSync, shadows/Low motion and persistence, including change during an active screen |
-| Account flows | Create/sign in with name/key, visible text editing, copy/paste key/challenge link and return states; no invented recovery/payment module |
+| Account flows | Create/manual sign-in, safe old-key migration/backup, restore/refresh/logout, persistence unavailable, expired/revoked session and explicit Continue here conflict; copy/paste without new key persistence; no recovery/payment module |
 | Online entry | Existing casual/private/challenge/spectator flows, server unavailable, connection/loading/cancel/error and mismatched-version states |
 | Battle HUD | Native top/bottom areas, BattleLine, Energy, Shop, affordability, reserve and any Reroll controls only in modes where this base enables them |
 | Details/actions | Champion inspection, abilities/statuses, Evolution, Stronghold/Fortification, surrender, keyboard shortcuts and overlays |
 | War Council | Paused state, Augment details, selection/confirmation, localized labels and resume according to the current authoritative rules |
 | Result and celebration | Winner's living/dead cast facing the camera, individual existing Victory, pagination where applicable, result actions/rematch and clean exit |
-| Reconnect/next match | UI reconstruction, late outcome/rating behavior, no duplicate results or stale training/result figures |
+| Reconnect/next match | Bound Access/family/resume, mid-match refresh, unchanged reconnect window, explicit takeover, late outcome/rating behavior, no duplicate results or stale training/result figures |
 
 A known unfinished feature in the consolidated base remains a documented
 baseline limitation. Windows must not silently lose an implemented Linux

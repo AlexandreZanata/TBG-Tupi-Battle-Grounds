@@ -1,4 +1,4 @@
-# P68 — Native Windows release and Wine acceptance
+# P68 — Windows release, persistent authentication and Wine acceptance
 
 **Status:** planning only, 2026-10-31. No Windows executable, installer,
 Wine installation or runtime acceptance is delivered by this document.
@@ -7,7 +7,9 @@ Wine installation or runtime acceptance is delivered by this document.
 `55510c5363e3f1e555fa5133208a5faf20c5825b`.
 **Planning branch:** `codex/p68-windows-native-release-plan`.
 **Implementation branch:** `codex/p68-windows-native-release`.
-**Decision:** D-96. **Architecture:** §24. No gameplay changes.
+**Decisions:** D-96/D-97. **Architecture:** §24/§24.1.
+**Owner extension:** persistent auth on Linux, Windows and web; GAME-DESIGN
+§21 updates the account/session contract. No combat or balance changes.
 
 ## Read first
 
@@ -16,6 +18,10 @@ Wine installation or runtime acceptance is delivered by this document.
   not part of the frozen base. Do not copy unrelated dirty files into P68.
 - This phase, [acceptance plan](../planning/P68-WINDOWS-ACCEPTANCE.md) and
   [platform-gate manifest](../planning/P68-PLATFORM-GATES.csv).
+- [P68-A persistent authentication](../planning/P68-PERSISTENT-AUTH.md),
+  its [source manifest](../planning/P68-AUTH-SOURCE-MANIFEST.csv), GAME-DESIGN
+  §21 and D-97; inspect its named auth files before implementing
+  the token lifecycle, storage or wire changes.
 - `docs/phases/CONSOLIDATED-LINUX-RELEASE.md`, `NATIVE-client.md` and the
   native distribution sections of `docs/ARCHITECTURE.md` / `DECISIONS.md`.
 - Only the source, packaging and workflow files identified below, followed
@@ -53,9 +59,13 @@ three. Pending real-Windows acceptance means a candidate, not a certified
 public Windows release.
 
 The scope includes necessary shared-desktop UI corrections, packaging,
-installer lifecycle, provenance, diagnostics and focused validation. It
-excludes a new engine, combat/balance changes, new protocol features,
-production deployment, a new updater service, paid infrastructure, macOS,
+installer lifecycle, provenance, diagnostics and focused validation. The
+owner additionally requests P68-A: 15-minute Access and 30-day Refresh Tokens
+on Linux, Windows and web, with rotation/revocation, platform-secure storage,
+legacy migration and one coordinated authentication protocol update. Complete
+this module before final packages and validate its A01–A14 acceptance set.
+The scope excludes a new engine, combat/balance changes, unrelated protocol
+features, production deployment, a new updater service, paid infrastructure, macOS,
 ARM64, 32-bit Windows and mobile work. P65–P67 are reserved plans on other
 branches, not prerequisites or implemented features of this base. P66's
 future updater must not be claimed as delivered by an installer upgrade.
@@ -66,6 +76,9 @@ At the frozen base, the client is `0.1.0-native.2`, protocol is **29**, and
 the active roster has **46** champion kinds. Treat these as provenance, not
 values to hardcode in new release scripts. Extract identity from the actual
 reviewed source/binary. Reconcile any intervening changes explicitly.
+Protocol 29 describes the starting source only: P68-A changes account handshake/auth
+control messages and needs the actual next coordinated wire version on the
+integrated source, updated clients/bots and compatible test backend.
 
 | Finding | Evidence / affected files | Required treatment |
 |---|---|---|
@@ -283,9 +296,12 @@ Use the Python standard library for packaging contract tests at
 `scripts/tests/test_package_native.py`; run the named checks at consolidation.
 Any different dependency or tool choice needs a concrete reason in Deviations.
 
-Core/server/balance code is not expected to change. A genuine compatibility
-defect there must be reported and reviewed before widening P68. Existing
-append-only contract tests and historical decision records retain their rules.
+The owner-authorized P68-A module also changes client auth/platform/UI code,
+core bounded wire types and server auth/store/lobby/WS modules exactly as
+specified in its file map. It does not put clocks/I/O into core simulation
+or change balance code. Other compatibility defects must be reported before
+widening scope. Existing append-only contract tests and historical decision
+records retain their rules; auth contract updates cite D-97/GAME-DESIGN §21.
 
 ## 4. Ordered implementation steps
 
@@ -293,26 +309,33 @@ append-only contract tests and historical decision records retain their rules.
    base; capture dirty state elsewhere without copying it. Record package,
    wire, roster, Linux reference and source ancestry. Refresh the manifest,
    classify every condition, resolve O01–O03 as needed. Commit the report.
-2. **Desktop parity.** Correct shared/native UI routing and art generation,
+2. **P68-A authentication.** Execute the linked auth module in order:
+   canonical contracts, additive SQLite/history, HTTP protections, coordinated
+   WS auth/reauth/revocation, native vaults, web cookies/coordinator and safe
+   key migration. Write focused regressions; queue A01–A14 for consolidation.
+   Preserve existing matches/authority and exact desktop visual requirements.
+   Commit coherent steps; do not deploy or mutate production data.
+3. **Desktop parity.** Correct shared/native UI routing and art generation,
    preserve Unix/browser services, cover missing-assets and Windows storage
    replacement semantics, and implement necessary platform-specific visual
    adjustments to preserve the exact same frontend. Write narrow regressions;
    minimum front checks only. No combat rule or contract-fixture rewrite. Commit.
-3. **Windows identity/runtime.** Establish MSVC target, CRT/import policy,
+4. **Windows identity/runtime.** Establish MSVC target, CRT/import policy,
    PE metadata, diagnostic identity/error behavior and complete assets.
    Add only necessary packaging/resource dependencies with rationale. Commit.
-4. **ZIP and installer.** Reuse the packager, add clean staging/inventory,
+5. **ZIP and installer.** Reuse the packager, add clean staging/inventory,
    safe per-user install/upgrade/uninstall and Windows instructions. Write
    focused packaging failure-path checks. Commit.
-5. **CI and candidate.** Produce an immutable Windows candidate and Linux
+6. **CI and candidate.** Produce an immutable Windows candidate and Linux
    comparison artifact from the same reviewed revision, recording actual
    toolchain/signature status and hashes. Fix publication's false-success
    path; keep public promotion gated. Commit.
-6. **One acceptance consolidation.** Run scoped checks once; obtain Linux
+7. **One acceptance consolidation.** Run scoped auth/packaging checks once,
+   including the browser cookie and real native vault paths; obtain Linux
    reference captures, install Wine, test the downloaded ZIP and installer,
    then test the same candidate on actual Windows. Group journeys to reuse
    evidence. Record all unavailable environments as deferred, never passed.
-7. **Delivery.** Address concrete defects, repeat only affected checks,
+8. **Delivery.** Address concrete defects, repeat only affected checks,
    update the report/roadmap and open a PR to `main` when the execution
    prompt authorizes publication. No automatic merge, VPS deploy or release
    promotion. Provide artifact links, acceptance status and remaining gates.
@@ -327,7 +350,8 @@ workspace tests, balance runs, repeated galleries or capacity benchmarks.
 
 An owner request to execute the attached prompt specifically requests the
 Windows release packaging, one Linux reference package, Wine installation
-and the focused acceptance journeys. It does not request the full suite.
+and the focused acceptance journeys, including P68-A auth tests, one browser
+build/journey and the real platform vault checks. It does not request the full suite.
 On Linux every compilation/packaging validation takes the shared nonblocking
 `/tmp/tbg-validation-$(id -u).lock` with `CARGO_BUILD_JOBS=2`. Exit 75 means
 deferred; no wait/poll/cache deletion or alternate worktree to bypass it.
@@ -336,7 +360,8 @@ host-wide lock equivalent, documented in the execution report; a local
 Windows build without that agreed equivalent remains deferred. CI's
 isolated runner is not a reason to bypass contention on the Linux host.
 
-See W01–W18 in the acceptance plan. **Implementation done** means code,
+See W01–W18 in the acceptance plan and A01–A14 in P68-A.
+**Implementation done** means code,
 focused regression coverage, docs and explicit evidence/deferred checks.
 **Windows release accepted** additionally needs packaged Wine and real
 Windows GPU acceptance, reference parity and owner visual sign-off.
@@ -350,6 +375,8 @@ files, commands and exit status, artifact hashes, OS/tool versions, manifest
 dispositions, screenshots/videos, installer lifecycle evidence, performance
 observations, exact failures/deferred checks and their next action. Redact
 account keys, tokens, usernames in public logs and machine-specific secrets.
+Include A01–A14 status, secure-store mode, migration/expiry/revocation cases
+and exact client/server protocol/schema identities without real credentials.
 
 ## 6. Owner decisions and practical limits
 

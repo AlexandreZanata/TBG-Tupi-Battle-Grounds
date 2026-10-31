@@ -2484,3 +2484,48 @@ owner choices and validation levels live in [P68](phases/P68-windows-native-rele
 Windows support requirements change, Wine cannot provide the required GPU
 path, measured packaging/CI cost exceeds the indie project's needs, or the
 owner activates a future updater that changes artifact/install identity.
+
+## D-97 · Short Access, rotating absolute-lifetime refresh and platform vaults — 2026-10-31 (Proposed, P68-A)
+
+**Owner extension.** Add persistent authentication to P68 for Linux, Windows
+and web: 15-minute Access Tokens and 30-day Refresh Tokens. The attached
+observations are design input; source inspection confirms that automatic
+login exists but currently reuses a plaintext-persisted AccountKey. This
+decision explicitly extends D-96's original packaging-only backend/wire scope.
+
+**Decision.** Use opaque CSPRNG tokens, an in-memory Access index, and
+additive SQLite family/consumed-refresh history through the existing writer.
+Rotate atomically without extending the initial family's 30-day expiry;
+make bounded retry/conflict handling explicit and revoke on replay outside
+that policy. No JWT/OAuth/Redis service or combat-tick auth work is needed.
+GAME-DESIGN §21 owns new lifetimes, limits and revised account contracts.
+
+Native refresh uses Linux Secret Service or Windows Credential Manager
+Local persistence; Access stays in memory. Browser refresh uses a Secure/
+HttpOnly/SameSite=Strict host cookie with strict origin/CSRF controls and
+separate routes from native token-body responses. Coordinate refresh across
+tabs/processes; unavailable vaults/cookies never trigger plaintext fallback.
+Use the current explicit keyring provider APIs, not old sample assumptions.
+
+**Authority.** One active account controller, multiple durable families.
+Background refresh/passive restoration cannot take over. Authenticate the
+account/family before resume; keep the 128-bit match handle separate. Renew
+the current socket. Natural Access expiry does not forfeit an admitted
+match, but revocation invalidates its lease. New account operations require
+valid auth and reconnect keeps its existing deadline/seat checks.
+
+**Migration and limits.** Existing AccountKeys remain valid for manual
+login; remove a stored legacy key only after secure persistence/confirmation
+and backup acknowledgment. Report an incomplete migration or an unrecoverable
+lost issuance honestly; no fake success or silent new account. Keep exact
+Linux/Windows frontend visuals and compiled English/pt-BR states. Real vault,
+browser, replay/revocation and match tests are separate required evidence.
+
+**Status.** Planning only; [P68-A](planning/P68-PERSISTENT-AUTH.md) contains
+contracts, module map, proposed SQL, rollout and A01–A14 acceptance. No auth
+implementation, schema migration, credentials or production change here.
+
+**Reopen when** multiple server processes need shared auth validation,
+measured store/access-cache pressure requires a different cap, native vault
+providers cannot meet deployment constraints, a new recovery method changes
+AccountKey policy, or owner-approved security policy changes token lifetimes.

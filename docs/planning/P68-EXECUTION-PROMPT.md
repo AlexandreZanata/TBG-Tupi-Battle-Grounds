@@ -7,11 +7,14 @@ decision with the owner while completing all independent work first.
 
 ---
 
-Implement **P68 — Native Windows release and Wine acceptance** completely,
+Implement **P68 — Windows release, persistent authentication and Wine acceptance** completely,
 using the existing native Bevy client. Read AGENTS.md, the current owner
 validation policy and docs/phases/P68-windows-native-release.md, then its
 acceptance plan and hashed platform-gate inventory. Follow the phase's
 read-first scope and report format; do not inspect or edit archive/.
+Also read docs/planning/P68-PERSISTENT-AUTH.md, GAME-DESIGN §21 and D-97.
+The owner explicitly added persistent authentication for Windows, Linux
+and web to this phase; A01–A14 are required alongside W01–W18.
 
 The required source base is codex/consolidated-linux-release, inspected at
 55510c5363e3f1e555fa5133208a5faf20c5825b. Use the P68 planning commit on
@@ -27,7 +30,40 @@ safe per-user installer, complete assets, Windows instructions, PE icon and
 version metadata, useful startup diagnostics, file manifests/checksums and
 reproducible-input CI configuration. Reuse the current engine, platform
 module and packager. Do not introduce an Electron/Tauri wrapper, new combat
-rules, a new protocol or an updater service.
+rules or an updater service. P68-A needs one coordinated auth wire revision;
+update every consumer and package/server identity together, without unrelated
+protocol changes or assuming that protocol 29 remains compatible.
+
+Implement the auth module before final packages: opaque random 256-bit
+Access Tokens (15 minutes) and rotating Refresh Tokens (30 days absolute
+from initial login, never reset by rotation). Persist hashes/history in the
+existing SQLite writer, keep Access only in memory, use Linux Secret Service
+and Windows Credential Manager Local persistence for native refresh, and
+HttpOnly/Secure/SameSite=Strict host cookies for web. Follow current explicit
+keyring providers in the plan, not an outdated sample or plaintext fallback.
+Use memory-only/session fallback visibly when secure persistence fails.
+
+Implement the specified HTTP route isolation, exact Origin/custom-header
+CSRF checks, Web Locks/native process coordination, bounded idempotent
+rotation/replay handling, revocation barriers and safe legacy migration.
+Remove the old stored AccountKey only after new persistence/confirmation and
+backup acknowledgment. Keep valid existing keys/manual recovery and all
+account/ranked data. No new automatic key/token storage in preferences,
+localStorage/sessionStorage, URLs, logs or caches. A scoped bound reconnect
+handle is distinct from account credentials; no secret goes into HTML or
+cross-tab notifications.
+
+Preserve one active account controller with separate persistent device
+families. Refresh/passive startup never steals another match; explicit login/
+Continue here alone authorizes takeover. Reauthenticate an existing socket
+without pausing combat. Natural Access expiry must not forfeit an admitted
+match; use the specified match-only lease and unchanged reconnect window.
+Security revocation invalidates the lease. Test concurrency, lost replies,
+restart, expiry, logout/offline pending state, legacy failures, wrong-family
+resume and real platform vault/cookie behavior using synthetic accounts and
+injected clocks. Do not introduce Redis/JWT/OAuth infrastructure or P67 email/
+commerce features. Server/core changes are limited to the named auth, store,
+lobby/connection and bounded wire responsibilities; simulation stays intact.
 
 The owner explicitly requires EXACTLY THE SAME FRONTEND APPEARANCE on Linux
 and Windows. Match every game screen's layout, sizes, spacing, fonts/text

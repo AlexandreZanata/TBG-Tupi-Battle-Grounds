@@ -405,7 +405,7 @@ heavy/full-suite checks only on a separate explicit owner request.
 
 | Phase | Spec | Deliverable | Status | Review |
 |---|---|---|---|---|
-| P68 | [P68-windows-native-release.md](phases/P68-windows-native-release.md) | Shared desktop parity, Windows MSVC build, portable ZIP and per-user installer, immutable artifacts, isolated Wine acceptance and actual Windows GPU validation | **Planning only** on `codex/p68-windows-native-release-plan`, based on `codex/consolidated-linux-release` at `55510c5`; no executable or Wine installation performed | Support/CRT/release identity, signing, actual Windows access, owner visual sign-off |
+| P68 | [P68-windows-native-release.md](phases/P68-windows-native-release.md) | Exact desktop visuals, Windows MSVC ZIP/installer, Wine/real Windows acceptance; P68-A adds Linux/Windows/web persistent auth, 15-minute Access and rotating 30-day Refresh | **Planning only** on `codex/p68-windows-native-release-plan`, based on `codex/consolidated-linux-release` at `55510c5`; no executable, auth implementation or Wine installation | A01–A14/W01–W18, coordinated wire/schema, real vaults/browser, support/CRT/signing and owner visual sign-off |
 
 Read the [acceptance plan](planning/P68-WINDOWS-ACCEPTANCE.md),
 [hashed OS-gate inventory](planning/P68-PLATFORM-GATES.csv) and
@@ -428,3 +428,12 @@ frontend appearance. P68 includes platform-specific corrections wherever
 needed while preserving the approved Linux quality. W07/W08 and phase visual
 acceptance remain blocked by any unresolved visible difference; validate
 with matched packaged captures, not merely shared code or similar styling.
+
+**Owner auth extension:** execute [P68-A](planning/P68-PERSISTENT-AUTH.md)
+before final release packages and complete A01–A14 with W01–W18. Access is
+15 minutes; refresh families expire 30 days from login and rotate without
+extending that deadline. Linux/Windows use real user vaults, web uses protected
+cookies, and legacy keys migrate safely. D-97/GAME-DESIGN §21 authorize the
+account/wire changes without a combat change or automatic production deploy.
+The [auth source manifest](planning/P68-AUTH-SOURCE-MANIFEST.csv) records
+34 relevant baseline files for migration and consumer review.
