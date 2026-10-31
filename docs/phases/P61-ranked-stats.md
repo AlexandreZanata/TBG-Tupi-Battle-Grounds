@@ -646,7 +646,11 @@ seasons, warehouse, dashboards, offline lab execution and actual tuning.
 
 ## Phase report (executor fills after implementation)
 
-- Commits and stages implemented:
+- Commits and stages implemented: only §3 ruleset identity (`e71a814`,
+  shared with P60 step 3; `ranked_rulesets` registration in `9b5dea7`).
+  E0–E3 (collector, v8 schema, internal report, public API, lobby page,
+  patch-note workflow) **not started**. Not compiled yet: see the P60
+  report's blocked-validation entry.
 - Adopted owner decisions / configuration / ruleset identity:
 - Validation level and commands/results:
 - Coverage and known-data metric evidence:

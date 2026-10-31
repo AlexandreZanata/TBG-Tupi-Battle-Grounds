@@ -307,8 +307,8 @@ WebGPU build · delta views · additional regions (ARCHITECTURE §12).
 
 | Phase | Spec | Deliverable | Status | Review |
 |---|---|---|---|---|
-| P60 | [P60-ranked-integrity.md](phases/P60-ranked-integrity.md) | Shared v7 ranked identity/recovery, shadow signals, optional whole-pair budgets, audit/correction CLI | **Planned only**; D-87/D-89 and BR-RI rules Proposed; no runtime change | implementation review and owner activation pending |
-| P61 | [P61-ranked-stats.md](phases/P61-ranked-stats.md) | v8 side summaries, internal CLI, public aggregate API/desktop lobby page, patch-note workflow | **Planned only**; depends on P60 record foundation, not gate activation; D-88/D-89 | implementation review, privacy/look/publication decisions pending |
+| P60 | [P60-ranked-integrity.md](phases/P60-ranked-integrity.md) | Shared v7 ranked identity/recovery, shadow signals, optional whole-pair budgets, audit/correction CLI | **In progress** on `codex/p60-p61-ranked-implementation`: steps 0–2 written, step 3/4 partial (shadow only, no gate active); **not compiled yet** (shared validation slot busy); D-87/D-89 and BR-RI Proposed | compilation, focused tests, review, owner activation pending |
+| P61 | [P61-ranked-stats.md](phases/P61-ranked-stats.md) | v8 side summaries, internal CLI, public aggregate API/desktop lobby page, patch-note workflow | **In progress**: only §3 ruleset identity delivered (shared with P60); E0–E3 (collector, v8, API, lobby page) not started; D-88/D-89 | implementation, review, privacy/look/publication decisions pending |
 
 Read [RANKED-PROGRAM.md](planning/RANKED-PROGRAM.md) first: audited current
 behavior, requirements, improvements, numbering reservations, execution
