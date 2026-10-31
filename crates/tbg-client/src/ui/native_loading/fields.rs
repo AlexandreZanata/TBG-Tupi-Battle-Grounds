@@ -17,7 +17,7 @@ struct ImageMask {
 }
 #[derive(Component)]
 struct TextMask {
-    overlay: Entity,
+    gradient: BackgroundGradient,
     color: Color,
     written: Color,
     fade: f32,
@@ -47,7 +47,7 @@ fn register(
     mut commands: Commands,
     images: Query<(Entity, &ImageNode), (With<Node>, Without<ImageMask>, Without<Decoration>)>,
     texts: Query<
-        (Entity, &TextColor),
+        (Entity, &TextColor, Option<&BackgroundGradient>),
         (
             With<Node>,
             With<Text>,
@@ -59,7 +59,7 @@ fn register(
     credits: Query<(), With<super::super::attribution::Credit>>,
 ) {
     for (entity, image) in &images {
-        let (overlay, error) = mask(&mut commands, entity, false);
+        let (overlay, error) = mask(&mut commands, entity);
         commands.entity(entity).insert(ImageMask {
             overlay,
             error,
@@ -68,7 +68,7 @@ fn register(
             fade: 1.,
         });
     }
-    for (entity, color) in &texts {
+    for (entity, color, gradient) in &texts {
         let mut ancestor = entity;
         while let Ok(parent) = parents.get(ancestor) {
             ancestor = parent.parent();
@@ -76,17 +76,21 @@ fn register(
         if credits.contains(ancestor) {
             continue;
         }
-        let (overlay, _) = mask(&mut commands, entity, true);
-        commands.entity(entity).insert(TextMask {
-            overlay,
-            color: color.0,
-            written: color.0,
-            fade: 1.,
-        });
+        let gradient = gradient.cloned().unwrap_or_default();
+        // Text must stay a layout leaf: a child UI box removes its intrinsic measurement.
+        commands.entity(entity).insert((
+            TextMask {
+                gradient: gradient.clone(),
+                color: color.0,
+                written: color.0,
+                fade: 1.,
+            },
+            gradient,
+        ));
     }
 }
 
-fn mask(commands: &mut Commands, parent: Entity, text: bool) -> (Entity, Entity) {
+fn mask(commands: &mut Commands, parent: Entity) -> (Entity, Entity) {
     let overlay = commands
         .spawn((
             Node {
@@ -95,7 +99,7 @@ fn mask(commands: &mut Commands, parent: Entity, text: bool) -> (Entity, Entity)
                 top: px(0),
                 width: percent(100),
                 height: percent(100),
-                border_radius: BorderRadius::all(px(if text { 3 } else { 6 })),
+                border_radius: BorderRadius::all(px(6)),
                 overflow: Overflow::clip(),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
@@ -104,23 +108,19 @@ fn mask(commands: &mut Commands, parent: Entity, text: bool) -> (Entity, Entity)
             BackgroundColor(super::ink(1.)),
             Visibility::Hidden,
             Decoration,
-            ZIndex(if text { 2 } else { -1 }),
+            ZIndex(-1),
         ))
         .id();
     commands.entity(parent).add_child(overlay);
     commands.entity(overlay).with_children(|block| {
-        for (width, top) in if text {
-            vec![(78., 44.)]
-        } else {
-            vec![(70., 72.), (45., 84.)]
-        } {
+        for (width, top) in [(70., 72.), (45., 84.)] {
             block.spawn((
                 Node {
                     position_type: PositionType::Absolute,
                     left: percent(10),
                     top: percent(top),
                     width: percent(width),
-                    height: px(if text { 5 } else { 6 }),
+                    height: px(6),
                     border_radius: BorderRadius::MAX,
                     ..default()
                 },
@@ -240,13 +240,13 @@ fn paint_text(
         Option<&TextLayoutInfo>,
         &mut TextColor,
         &mut TextMask,
+        &mut BackgroundGradient,
         Option<&super::super::kit::Pending>,
         &InheritedVisibility,
     )>,
-    mut masks: Query<(&mut Visibility, &mut BackgroundColor), With<Decoration>>,
 ) {
     status.texts = 0;
-    for (text, font, layout, mut color, mut mask, pending, visible) in &mut fields {
+    for (text, font, layout, mut color, mut mask, mut gradient, pending, visible) in &mut fields {
         if color.0 != mask.written {
             mask.color = color.0;
         }
@@ -271,13 +271,19 @@ fn paint_text(
             color.0 = want;
         }
         mask.written = want;
-        if let Ok((mut visibility, mut background)) = masks.get_mut(mask.overlay) {
-            *visibility = if mask.fade < 1. {
-                Visibility::Inherited
-            } else {
-                Visibility::Hidden
-            };
-            background.0 = super::ink(1. - mask.fade);
+        let want = if mask.fade < 1. {
+            let bar = Color::srgba(0.24, 0.32, 0.36, 1. - mask.fade);
+            BackgroundGradient::from(LinearGradient::to_bottom(vec![
+                ColorStop::percent(Color::NONE, 38),
+                ColorStop::percent(bar, 38),
+                ColorStop::percent(bar, 62),
+                ColorStop::percent(Color::NONE, 62),
+            ]))
+        } else {
+            mask.gradient.clone()
+        };
+        if *gradient != want {
+            *gradient = want;
         }
         if visible.get() && waiting {
             status.texts += 1;
