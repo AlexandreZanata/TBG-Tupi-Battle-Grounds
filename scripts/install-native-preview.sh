@@ -8,6 +8,7 @@ git diff --quiet HEAD -- Cargo.toml Cargo.lock crates scripts deploy/native LICE
     exit 1
 }
 export TBG_SOURCE_COMMIT="$(git rev-parse HEAD)"
+export TBG_DEFAULT_SERVER="${TBG_DEFAULT_SERVER:-wss://tbg.abastevo.com.br/ws}"
 export CARGO_BUILD_JOBS=2
 export CARGO_TARGET_DIR="$(realpath -m -- "${CARGO_TARGET_DIR:-$project_dir/target}")"
 flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" bash -eu -c '
