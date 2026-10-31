@@ -25,6 +25,9 @@ pub struct UnitView {
     /// confused 1, ward 1, bonded 1, plates 3, growth 3, carried 1, 1 spare.
     /// Zero until the waves land, except the spare top bit: `FX_SUMMON`.
     pub fx: u16,
+    /// The carrier this unit rides (D-61), set only while `FX_CARRIED` is:
+    /// the client seats the passenger on that unit, not on a lane guess.
+    pub carrier: Option<UnitId>,
 }
 
 /// `UnitView.fx` bit for a summon by unit, e.g. Smuggler cargo (BR-U08):
@@ -183,5 +186,6 @@ fn unit_view(u: &crate::state::Unit) -> UnitView {
             }
             fx
         },
+        carrier: u.fx.carrier,
     }
 }
