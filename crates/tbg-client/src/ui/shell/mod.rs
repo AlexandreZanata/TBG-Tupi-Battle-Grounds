@@ -145,7 +145,7 @@ fn room_text(
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::type_complexity)] // Explicit Bevy resources and independent scroll queries.
 fn render(
     mut commands: Commands,
     mut shell: ResMut<Shell>,
@@ -161,7 +161,10 @@ fn render(
     roots: Query<Entity, With<Root>>,
     window: Single<&Window>,
     mut hidden: Local<(bool, bool, bool)>,
-    bodies: Query<&ScrollPosition, With<Body>>,
+    bodies: (
+        Query<&ScrollPosition, With<Body>>,
+        Query<(&crate::training::catalog::Pane, &ScrollPosition)>,
+    ),
     mut layout: Local<(Panel, Vec2)>,
 ) {
     if !crate::config::bevy_ui() || crate::config::arena_preview() {
@@ -188,6 +191,7 @@ fn render(
     }
     let scroll = if layout.0 == shell.panel {
         bodies
+            .0
             .iter()
             .next()
             .map(|p| ScrollPosition(p.0))
@@ -304,7 +308,13 @@ fn render(
                     Panel::Arcanas => arcanas::spawn(body, &shell, &assets, *lang, compact),
                     Panel::Live => live::spawn(body, &data, *lang),
                     Panel::Troops => {
-                        crate::training::catalog::spawn(body, &catalog, &assets, *lang)
+                        crate::training::catalog::spawn(body, &catalog, &assets, *lang, {
+                            let mut positions = [Vec2::ZERO; 2];
+                            for (pane, position) in &bodies.1 {
+                                positions[pane.0] = position.0;
+                            }
+                            positions
+                        })
                     }
                     Panel::Kit => settings::gallery(body, *lang),
                 }

@@ -203,7 +203,9 @@ async fn end_by_surrender(ws: &mut Ws, other: &mut Ws) {
 
 fn fast(url: &str) -> BotOpts {
     BotOpts {
-        timeout: Duration::from_secs(60),
+        // Full-roster battles can exceed 60s at the accelerated 5ms test tick.
+        // This bounds the harness; authoritative outcomes and reconnect assertions stay unchanged.
+        timeout: Duration::from_secs(180),
         ..BotOpts::new(url)
     }
 }

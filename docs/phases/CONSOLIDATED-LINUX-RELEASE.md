@@ -117,3 +117,10 @@ credit with actual canonical Energy gains through that transition.
 > before exit and asserts each exact entity identity is absent afterwards;
 > camera uniqueness and zero gameplay-metric checks remain. Re-run evidence
 > follows below. The original invariant was not a reliable native leak measure.
+
+Browser observation found nested training panes lacked ScrollPosition, leaving
+controls below the fold unreachable. Each pane now owns its scroll position,
+preserved across catalog rebuilds independently of the page scroll.
+The full-roster two-bot WebSocket match passed in 36.25s. The separate
+reconnect journey hit the inherited 60s test-client deadline; its test harness
+now allows 180s while preserving every outcome and reconnect assertion.

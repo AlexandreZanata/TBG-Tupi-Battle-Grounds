@@ -15,7 +15,16 @@ use tbg_core::{
 pub fn button(text: impl Into<String>, action: Action, width: f32) -> impl Bundle {
     shell::button(text, shell::Action::Catalog(action), width)
 }
-pub fn spawn(parent: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: Lang) {
+#[derive(Component)]
+pub(crate) struct Pane(pub usize);
+
+pub fn spawn(
+    parent: &mut ChildSpawnerCommands,
+    c: &Catalog,
+    assets: &AssetServer,
+    lang: Lang,
+    scroll: [Vec2; 2],
+) {
     parent.spawn(kit::row()).with_children(|row| {
         for (key, tab) in [
             ("catalog", Tab::Catalog),
@@ -46,7 +55,7 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServe
             ..default()
         })
         .with_children(|row| {
-            row.spawn(panel(28.))
+            row.spawn((panel(28.), ScrollPosition(scroll[0]), Pane(0)))
                 .with_children(|p| list(p, c, assets, lang));
             row.spawn(Node {
                 width: percent(35),
@@ -56,11 +65,12 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServe
                 ..default()
             })
             .with_children(|p| controls(p, c, lang));
-            row.spawn(panel(35.)).with_children(|p| match c.tab {
-                Tab::Catalog => details(p, c, lang),
-                Tab::Editor => editor(p, c, lang),
-                Tab::Practice => practice(p, c, lang),
-            });
+            row.spawn((panel(35.), ScrollPosition(scroll[1]), Pane(1)))
+                .with_children(|p| match c.tab {
+                    Tab::Catalog => details(p, c, lang),
+                    Tab::Editor => editor(p, c, lang),
+                    Tab::Practice => practice(p, c, lang),
+                });
         });
 }
 fn panel(width: f32) -> impl Bundle {

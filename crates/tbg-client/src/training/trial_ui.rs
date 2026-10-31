@@ -49,6 +49,7 @@ fn panel(left: f32, top: f32, width: f32, height: f32) -> impl Bundle {
         },
         BackgroundColor(kit::PANEL),
         BorderColor::all(kit::GOLD),
+        ScrollPosition::default(),
     )
 }
 fn build(
