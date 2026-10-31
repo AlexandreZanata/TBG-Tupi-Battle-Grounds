@@ -113,3 +113,51 @@ exactly before the refreeze.
 
 - `cargo test -p tbg-server` as a whole (the online and integration suites), and `cargo test --workspace`.
 - `c7_planted_imbalances_are_caught_for_every_unit` in W1 (about nine minutes in a debug build). It passed in the W0 contract run.
+
+
+## Integration review — 2026-10-31
+
+Merged `main` (P47) and `release/p47-arenas` (`92829e8`) into the candidate,
+retaining live battles, spectating, arena scenery, Shop portraits, tower-click
+Fortification, and the Leave/Ranking fixes. Protocol stays 20. Roster values,
+`ALL_KINDS`, `FULL_POOL`, `UNIT_KINDS`, deferred kits and dormant effects stay as
+D-60–D-66 define them. No dependency was added.
+
+The merge exposed a spectator integration error: `PublicView` still used four
+Factions and called the old unit serializer. It now uses `FACTION_COUNT` and the
+battle tick for shield expiry. A non-contract regression test checks that seats
+and spectators agree on shields and Synergy, including the expiry tick. The
+palette labels now name all seven Factions; its camera frames nine rows and its
+existing studio floor keeps arena scenery from obscuring the swatches.
+
+| Command | Observed result |
+|---|---|
+| `cargo fmt --all -- --check` | exit 0 |
+| `cargo clippy --workspace --all-targets -- -D warnings` | exit 0, no warnings |
+| `cargo test -p tbg-core --features lab --no-fail-fast` | exit 0; 220 passed |
+| `cargo test -p tbg-client --bin tbg-client` | exit 0; 106 passed |
+| `cargo test -p tbg-balance -- --skip c7_planted` | exit 0; 26 passed; 216.6 s |
+| `cargo test -p tbg-server --test ranked --test leaderboard --test spectate --test live_api` | exit 0; 19 passed |
+| `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown` | exit 0, no warnings |
+| `node --test crates/tbg-client/tests/*.test.js` | exit 0; 11 test files passed |
+| `trunk build --release` in the client crate | exit 0; a WASM-only unused binding found in the first build was fixed |
+| `cargo build --release -p tbg-server --bins` | exit 0; 30.97 s |
+| `cargo audit --json` | exit 0; 0 vulnerabilities; informational unmaintained `ttf-parser` advisory RUSTSEC-2026-0192 |
+
+The first server-test attempt was denied loopback sockets by the execution
+sandbox (`Operation not permitted`); the same command passed with local
+networking enabled. Tests and limits were not weakened.
+
+**Observed browser behavior (desktop Chrome).** Two independent browser contexts
+clicked Casual, played to Stronghold destruction, and received identical
+`MatchEnd` bytes. One connection was closed during play and resumed with a
+second `MatchStart`; every handshake used protocol 20. No page error. Ranking
+hid every home panel and its close control was clickable. Watch followed by
+Leave returned to the lobby, removed `?watch=`, cleared `tbg_watch`, and reduced
+the server watcher count from 1 to 0. Desktop palette captures were inspected at
+1920×1080 and 1280×800; the final camera review remains part of release validation.
+
+**Limits.** No phone testing, full local workspace run, repeated C7 run, new kits,
+ability waves, or online-pool expansion. GitHub CI and the production rollout
+are separate release gates; this report does not claim either has completed.
+Owner look and fun sign-off remain open.
