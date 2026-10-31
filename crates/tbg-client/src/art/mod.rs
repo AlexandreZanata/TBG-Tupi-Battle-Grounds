@@ -35,7 +35,7 @@ pub mod rig;
 pub(crate) mod roster;
 #[cfg(test)]
 mod roster_tests;
-mod springs;
+pub(crate) mod springs;
 
 use rig::{Proportions as BodyPlan, NODE_COUNT};
 

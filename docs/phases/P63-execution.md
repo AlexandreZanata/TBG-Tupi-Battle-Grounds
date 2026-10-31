@@ -131,3 +131,30 @@ with `error[E0027]: pattern does not mention field result_id`; corrected
 consumers and new regressions are queued for Step 5 rather than claiming a
 pass. Tests cover replay/expiry/dismissal, either-seat real WebSocket result
 recovery, idempotent client acceptance and malformed cosmetic isolation.
+
+## Step 3 — cosmetic Result scene and immediate controls
+
+Added separate celebration layout/scene/UI modules. Only an eligible,
+validated winning cast is expanded, with at most 64 actual figures and lazy
+logical indexing. Reuses FigureLibrary meshes, glow and Archer bow, without
+UnitVisual, UnitEntities, combat intents or metric hooks. Conservative rig
+chain/mesh envelopes and deterministic staggered slots size the formation;
+yaw derives from each slot's direction to the seat-aware camera. One camera
+override reserves upper-screen space; compact localized Result controls,
+page ranges and keyboard shortcuts remain active below it. Empty casts are
+explicit; unusable cosmetics get an ordinary-result diagnostic.
+
+Hide/exit despawns the page hierarchy and restores the camera/projection;
+resizing reflows the page. Reduced motion freezes the sampled celebration,
+removes secondary springs and keeps a static camera. Browser preference
+uses explicit persisted choice, then prefers-reduced-motion; native supports
+the explicit environment preference and the in-session M/control toggle.
+No audio behavior or timing is added here. UI calls use main's actual
+compiled Msg IDs, not the unmerged native Lang::key helper.
+
+Focused client check passed in 2.49 s after correcting that i18n API
+assumption. Subsequent localized Result copy is syntax/key-checked and its
+final compilation is queued with Step 5. Added pure page/formation/facing
+regressions for zero/1/3/64/65 and huge totals, both seats and desktop aspects.
+Actual rendering, lifecycle, spacing and browser evidence remain pending;
+no visual or frame-time acceptance is claimed from compilation.

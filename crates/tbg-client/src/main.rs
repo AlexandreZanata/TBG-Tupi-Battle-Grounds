@@ -11,6 +11,7 @@ mod art;
 mod audio;
 mod autoplay;
 mod camera;
+mod celebration;
 mod config;
 mod gallery;
 mod i18n;
@@ -68,6 +69,7 @@ fn main() {
             sync::plugin,
             stress::plugin,
             ui::plugin,
+            celebration::plugin,
             autoplay::plugin,
             gallery::plugin,
             i18n::plugin,

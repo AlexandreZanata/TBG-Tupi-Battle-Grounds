@@ -515,3 +515,30 @@ mod tests {
         );
     }
 }
+
+/// Result motion obeys explicit preference first, then the browser's OS accessibility preference.
+pub fn reduced_motion() -> bool {
+    if let Some(value) = url_param("reduced_motion") {
+        return !matches!(value.as_str(), "0" | "false" | "off");
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        if let Some(value) = storage().and_then(|s| s.get_item("tbg_reduced_motion").ok().flatten())
+        {
+            return value == "1";
+        }
+        return web_sys::window()
+            .and_then(|w| {
+                w.match_media("(prefers-reduced-motion: reduce)")
+                    .ok()
+                    .flatten()
+            })
+            .is_some_and(|m| m.matches());
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    false
+}
+
+pub fn save_reduced_motion(value: bool) {
+    save_flag("tbg_reduced_motion", value);
+}

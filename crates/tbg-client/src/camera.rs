@@ -87,7 +87,7 @@ fn reframe_on_resize(
     }
 }
 
-fn frame(transform: &mut Transform, projection: &mut Projection, w: f32, h: f32) {
+pub(crate) fn frame(transform: &mut Transform, projection: &mut Projection, w: f32, h: f32) {
     if let Projection::Perspective(p) = projection {
         p.fov = FOV_Y;
     }

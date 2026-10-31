@@ -29,6 +29,8 @@ pub struct Animator {
     pub rate: f32,
     pub hit_stop: f32,
     pub preview: Option<(Clip, f32)>,
+    /// Explicit event-free presentation time; independent of combat/action clocks.
+    pub presentation_clock: Option<f32>,
     pub events: Vec<ClipEvent>,
     pub kit: Option<&'static Kit>,
     /// (tier, branch) of the shown form, for kit layers.
@@ -74,6 +76,7 @@ impl Animator {
             rate: 1.0,
             hit_stop: 0.0,
             preview: None,
+            presentation_clock: None,
             events: Vec::new(),
             kit: kits::kit(kind),
             form: (0, 0),
@@ -194,7 +197,7 @@ impl Animator {
     fn advance(&mut self, dt: f32) -> (Pose, Option<f32>) {
         self.events.clear();
         self.since_attack = (self.since_attack + dt).min(1e6);
-        self.clock += dt;
+        self.clock = self.presentation_clock.unwrap_or(self.clock + dt);
         if let Some((clip, t)) = self.preview {
             return (
                 self.pose(clip, t),

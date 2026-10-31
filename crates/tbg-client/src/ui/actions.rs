@@ -61,7 +61,12 @@ pub(super) fn apply(
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
     mut inspected: ResMut<super::inspect::Inspected>,
-    (mut lang_res, mut arena): (ResMut<crate::i18n::Lang>, ResMut<crate::arena::ActiveArena>),
+    (mut lang_res, mut arena, mut celebration, info): (
+        ResMut<crate::i18n::Lang>,
+        ResMut<crate::arena::ActiveArena>,
+        ResMut<crate::celebration::Presentation>,
+        Res<crate::sync::MatchInfo>,
+    ),
 ) {
     let now = time.elapsed_secs_f64();
     // BR-AG12: while an Augment selection pauses the battle, only the War
@@ -295,6 +300,12 @@ pub(super) fn apply(
             UiAction::SetLang(lang) => *lang_res = lang,
             UiAction::PreviewArena(a) => {
                 arena.set_if_neq(crate::arena::ActiveArena::of(a));
+            }
+            UiAction::CelebrationPrev
+            | UiAction::CelebrationNext
+            | UiAction::CelebrationHide
+            | UiAction::CelebrationMotion => {
+                crate::celebration::control(&mut celebration, &info, action)
             }
             UiAction::Disabled => {}
             UiAction::OpenRanking
