@@ -459,3 +459,31 @@ to this appearance-only adjustment.
 - Real preferences, running windows and unrelated policy edits were
   preserved. No web source behavior/assets, remote Git, CI or VPS action
   occurred. Reopen TBG to load this installation.
+
+## Linux uniform Augment price plates — 2026-10-31
+
+Owner requested inspection of every rarity frame and consistent price
+recesses, icons and text. Inspected Bronze, Silver, Gold and Diamond
+originals individually (all 600x864 RGBA): their illustrated price housings
+differ in width and vertical placement. Preserve those detailed originals
+and place one native-only metal price plate over each housing instead of
+regenerating or enlarging the entire illustration. The common 136x36 UI
+plate is centered at the same height on every card, covering the old
+recesses while retaining the surrounding ornaments. The Energy icon has
+one 18x15 size, and a fixed 26-unit number column keeps both one- and
+two-digit prices aligned. Remove the rarity-specific vertical offsets.
+Prices still come directly from the authoritative RoundView.
+
+Level: work front. `cargo fmt -p tbg-client -- --check` and
+`git diff --check` passed. Exported and decoded the new 272x72 RGBA WebP
+(4898 bytes). Inspected an internal four-frame comparison with prices
+3/6/10/15 at native card proportions; every price plate covers its original
+recess. No original Augment frame or illustration was modified.
+
+Next: owner-requested native preview build/install using the existing
+shared host lock/cache and one focused installed War Council capture.
+The owner's wait/job exceptions remain scoped to this chat. Defer native
+resize/hover/keyboard/selection coverage and the already listed targeted
+Council regressions to consolidation. Full suite, WASM/Trunk builds and
+other-platform acceptance remain deferred without an explicit request.
+No game rule, web behavior, remote Git, CI or VPS change belongs here.

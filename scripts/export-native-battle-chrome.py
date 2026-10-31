@@ -43,6 +43,7 @@ def main():
     export('flag', 17, 19, '<path d="M3 1h2v17H3zM5 2l10 2-2 5-8-2z" fill="#e45b5b"/>')
     towers()
     shop_card()
+    council_price()
     export('council-energy',24,20,'''<path d="M4 8V5Q4 2 8 2H16Q20 2 20 5V8" fill="none" stroke="white" stroke-width="2"/><rect x="2" y="7" width="20" height="12" rx="2" fill="white"/><path d="M7 8v10M17 8v10" stroke="#28323b" stroke-width="1.5"/><rect x="10" y="10" width="4" height="5" fill="#28323b"/>''')
     for state, shackle in [('closed', 'M7 11V7a5 5 0 0 1 10 0v4'),
                             ('open', 'M7 11V7a5 5 0 0 1 9-3')]:
@@ -73,6 +74,23 @@ def shop_card():
       <path d="M10 190H156L160 195V211L153 218H13L6 211V195Z" fill="url(#cost)" stroke="#c8a66a" stroke-width="1"/>
       <path d="M11 187H155" stroke="#597586" stroke-opacity=".5"/>
       <path d="M10 20L76 9H151L10 153Z" fill="#456780" opacity=".07"/>''')
+
+
+def council_price():
+    # Cover every original rarity recess with one native-only, readable price plate.
+    export('council-price', 136, 36, '''
+      <defs>
+        <linearGradient id="rim" x2=".3" y2="1"><stop stop-color="#fff0b5"/><stop offset=".25" stop-color="#c99a50"/><stop offset=".5" stop-color="#71502d"/><stop offset=".75" stop-color="#e5bd72"/><stop offset="1" stop-color="#82572b"/></linearGradient>
+        <linearGradient id="face" x2=".2" y2="1"><stop stop-color="#26333b"/><stop offset=".48" stop-color="#131e25"/><stop offset="1" stop-color="#090f15"/></linearGradient>
+      </defs>
+      <path d="M13 1H123L135 13V23L123 35H13L1 23V13Z" fill="#090b0d" stroke="#392619" stroke-width="2"/>
+      <path d="M14 3H122L133 14V22L122 33H14L3 22V14Z" fill="url(#rim)"/>
+      <path d="M17 6H119L130 16V20L119 30H17L6 20V16Z" fill="#3b291a"/>
+      <path d="M18 7H118L128 16V20L118 29H18L8 20V16Z" fill="url(#face)" stroke="#d2ac68" stroke-width=".7"/>
+      <path d="M19 9H117M19 27H117" stroke="#e4cd97" stroke-opacity=".15" stroke-width=".6"/>
+      <path d="M4 18L12 11L18 18L12 25ZM132 18L124 11L118 18L124 25Z" fill="url(#rim)" stroke="#3b291a" stroke-width=".8"/>
+      <path d="M10 18L12 15L14 18L12 21ZM122 18L124 15L126 18L124 21Z" fill="#243744"/>
+    ''')
 
 
 if __name__ == '__main__':

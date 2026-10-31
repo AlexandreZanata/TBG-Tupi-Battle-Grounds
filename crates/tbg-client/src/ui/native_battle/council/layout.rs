@@ -280,25 +280,45 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
             card.spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    top: percent(88.2),
-                    height: percent(5),
-                    width: percent(100),
+                    top: percent(85.5),
+                    left: percent(50),
+                    margin: UiRect::left(px(-68)),
+                    height: px(36),
+                    width: px(136),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
-                    column_gap: px(4),
                     ..default()
                 },
-                Layout::Price(i),
-                ZIndex(3),
+                ImageNode {
+                    image: assets.load("battle/native/council-price.webp"),
+                    image_mode: NodeImageMode::Stretch,
+                    ..default()
+                },
+                ZIndex(4),
             ))
             .with_children(|cost| {
-                cost.spawn(kit::image(
-                    assets,
-                    "battle/native/council-energy.webp",
-                    14.,
-                    13.,
-                ));
-                cost.spawn((label("", 14.), Field::Cost(i)));
+                cost.spawn(Node {
+                    column_gap: px(6),
+                    align_items: AlignItems::Center,
+                    ..default()
+                })
+                .with_children(|price| {
+                    price.spawn(kit::image(
+                        assets,
+                        "battle/native/council-energy.webp",
+                        18.,
+                        15.,
+                    ));
+                    price.spawn((
+                        Node {
+                            width: px(26),
+                            ..default()
+                        },
+                        chrome::title("", 17.),
+                        TextLayout::justify(Justify::Center),
+                        Field::Cost(i),
+                    ));
+                });
             });
         });
 }

@@ -52,7 +52,6 @@ enum Field {
 #[derive(Component)]
 enum Layout {
     Timer,
-    Price(usize),
     Actions,
     Waiting,
 }
@@ -319,16 +318,6 @@ fn update_layout(view: Res<LatestView>, mut nodes: Query<(&Layout, &mut Node)>) 
             Layout::Actions | Layout::Waiting => {
                 let show = matches!(part, Layout::Waiting) == r.resolved;
                 node.display = if show { Display::Flex } else { Display::None };
-            }
-            Layout::Price(i) => {
-                if let Some(def) = augment_def(r.options[*i]) {
-                    let center = match def.rarity {
-                        AugmentRarity::Bronze => 90.2,
-                        AugmentRarity::Silver | AugmentRarity::Diamond => 92.1,
-                        AugmentRarity::Gold => 90.7,
-                    };
-                    node.top = percent(center - 2.5);
-                }
             }
         }
     }
