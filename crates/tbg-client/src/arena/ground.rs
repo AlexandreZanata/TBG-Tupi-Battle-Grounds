@@ -38,6 +38,16 @@ pub(super) fn lane(theme: Theme) -> Mesh {
             sand,
             Transform::from_xyz(x, 0.0, 0.0),
         ));
+        if theme == Theme::Volcanic && tile % 3 == 1 {
+            for (z, angle) in [(-0.65, 0.6), (0.15, -0.35), (0.85, 0.3)] {
+                parts.push((
+                    Box(0.016, 0.003, 0.85),
+                    super::theme::rgb(0x645a65),
+                    Transform::from_xyz(x + 0.1, 0.020, z)
+                        .with_rotation(Quat::from_rotation_y(angle)),
+                ));
+            }
+        }
         // A thin sunlit lip makes each seam legible without a texture.
         parts.push((
             Box(0.025, 0.038, 3.04),
