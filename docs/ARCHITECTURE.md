@@ -807,3 +807,25 @@ a measured all-at-once alternative. Result controls and network polling stay
 active. Missing/invalid cosmetics fall back to the regular result, and exit
 clears the scene before another match. Focused cast/protocol/reconnect/
 rematch/lifecycle checks and desktop visual review gate implementation.
+
+## 23. Commerce and recovery foundation (P67, Proposed)
+
+[P67](phases/P67-commerce-recovery-foundation.md) and its
+[module map](modules/commerce/README.md) establish separate documented folders
+for accounts/recovery, payments/ledger, Asaas mapping, Zaflas fiscal policy,
+presentation and validation, plus initial JSON contracts/synthetic examples.
+This is documentary scaffolding; no running integration or new crate exists.
+
+Future server commerce modules own exact money, quotes/orders, authenticated
+provider evidence, bounded inbox/outbox/reconciliation and source grants.
+Keep worker/persistence separate from match-result work. Identity recovery
+uses the authoritative account store and stable AccountId, preserving paid
+Inventory while rotating credentials and invalidating stale sessions. Neither
+domain introduces PII/provider I/O into core simulation or cash into Shop Energy.
+
+Asaas is the only initial provider and Pix the initial method; external calls
+remain disabled pending separate authorization. Fiscal issuance is independent
+and Zaflas-specific company/accounting setup is an input, not guessed data.
+Client cosmetic preferences resolve presentation only, preserving mechanical
+identity and gameplay. P64 i18n/P65 permissions/P66 generation security are
+integrated according to their actual merged contracts. See D-93–D-95.

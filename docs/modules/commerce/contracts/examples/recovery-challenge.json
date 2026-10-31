@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "accountId": "fixture-account-one",
+  "purpose": "rotate_account_key",
+  "tokenDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "state": "active",
+  "issuedAt": "2026-10-31T12:00:00Z",
+  "expiresAt": "2026-10-31T12:15:00Z"
+}

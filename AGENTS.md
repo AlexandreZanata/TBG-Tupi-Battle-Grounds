@@ -16,6 +16,12 @@ now.** Mobile is a later maturity stage of the game. Do not design,
 verify, or fix phone layouts or touch input unless a task explicitly asks;
 keep existing phone code compiling, but spend no effort on it.
 
+**Local validation (owner rule, 2026-10-31): minimum per work front;
+targeted tests once at consolidation; full suite only on an explicit owner
+request.** This policy overrides older phase verification blocks and
+per-step demands for broad checks. See *Verification* below and
+`docs/VALIDATION.md`.
+
 ## Map
 
 | Path | Contents |
@@ -25,6 +31,7 @@ keep existing phone code compiling, but spend no effort on it.
 | `docs/ROADMAP.md` | Phase index, order, status, executor and reviewer workflow |
 | `docs/phases/PN-*.md` | One executable spec per phase: steps, exact types, commands, acceptance, report |
 | `docs/DECISIONS.md` | Why the big choices were made and what reopens them |
+| `docs/VALIDATION.md` | Minimal local checks, shared resource lock, consolidation, explicit full-suite procedure |
 | `docs/ART-DIRECTION.md` | Medieval style guide, rig and motion rules, character procedure (visual phases P15+) |
 | `crates/tbg-core` | Deterministic rules, content tables, bot, protocol (shared) |
 | `crates/tbg-client` | Bevy client → WASM/WebGL2 |
@@ -59,9 +66,11 @@ keep existing phone code compiling, but spend no effort on it.
 1. Open the phase file named in `docs/ROADMAP.md`. Read only what its
    "Read first" list names — not the whole repository, and not
    `archive/` unless the phase says so.
-2. Work on branch `phase/<pN-name>`. Do the steps in order; run each
-   step's check before the next; commit after each step; never push.
-3. The phase file is the spec. Do not invent rules, numbers, message
+2. Work on branch `phase/<pN-name>`. Do the steps in order; apply the
+   minimal validation policy to each step, queue broader checks for
+   consolidation, commit after each step, and never push.
+3. The phase file is the implementation spec; *Verification* below governs
+   when its checks run. Do not invent rules, numbers, message
    types, dependencies, or architecture it does not name. If something is
    ambiguous, take the simplest reading and record it under *Deviations*.
 4. Climb the YAGNI ladder (adapted from Ponytail, MIT) and stop at the
@@ -74,8 +83,9 @@ keep existing phone code compiling, but spend no effort on it.
 6. Same error twice → stop that step, write a `> blocked:` note in the
    phase report (tried / exact error / suspected cause), continue only
    with steps that do not depend on it.
-7. Finish by filling in the phase report with real command output and
-   measurements, commit it, and stop for review.
+7. Finish the phase report with the validation level, real command output,
+   measurements, and exact deferred checks with reasons. Commit it and stop
+   for review; deferred validation is never a pass.
 
 ## Autonomy
 
@@ -89,11 +99,11 @@ look and fun, or requirements that genuinely conflict.
 
 | Role | Model | Does |
 |------|-------|------|
-| Executor | cheaper model (e.g. DeepSeek) | Implements one phase file, runs every check, writes the phase report |
-| Reviewer | strong model (e.g. Claude, Codex) | Re-runs acceptance checks, reviews the diff, fixes or returns issues, merges, updates the roadmap status; writes new phase specs |
+| Executor | cheaper model (e.g. DeepSeek) | Implements one phase file, runs minimal scoped checks, queues tests, writes the phase report |
+| Reviewer | strong model (e.g. Claude, Codex) | Reviews the diff; owns deduplicated targeted validation at consolidation; fixes or returns issues, merges, updates the roadmap status; writes new phase specs |
 | Owner | human | Devices, VPS/domain, look and fun sign-off, product decisions, license |
 
-Spend tokens on running the compiler and tests, not on re-reading files.
+Choose the smallest useful check and reuse valid evidence for the same code.
 Never run two agents on the same files at the same time.
 
 ## Code standards
@@ -120,6 +130,8 @@ Write tests where competitive correctness is at stake: determinism,
 ownership. Assert the documented contract (cite the rule ID), not the
 implementation. One meaningful scenario beats ten trivial assertions. No
 coverage targets. Never delete a useful test to make a change pass.
+Writing a regression test does not require running a crate or workspace
+suite on that work front; queue its exact command for consolidation.
 
 Contract tests (`tests/contract_*.rs`, `tbg-balance/tests/contract.rs`)
 are append-only: change one only in the same commit as the GAME-DESIGN or
@@ -129,24 +141,55 @@ thresholds are product decisions, never test fixes.
 
 ## Verification
 
+Follow `docs/VALIDATION.md`. Local work defaults to **work-front mode**:
+
+- Docs/comments/assets only: inspect the diff and relevant links or file
+  formats; run `git diff --check`. No Cargo, Trunk, or browser build.
+- Rust changes: formatting for the affected package and, if the existing
+  cache makes it inexpensive, one `cargo check -p <crate>` narrowed to
+  `--lib`, `--bin <name>`, or the actual target. Defer cold Bevy builds or
+  additional target builds. Do not check native and WASM by habit.
+- Do not run `cargo test` by default on individual fronts. Write needed
+  regression tests and hand their exact commands to consolidation. An
+  explicit request for a particular test authorizes only that scope.
+- No automatic workspace check/clippy/test, release or packaging builds,
+  balance gates, benchmarks, ignored tests, repeated galleries, or full
+  multiplayer scenarios. Older phase acceptance lists are a backlog for
+  consolidation, not permission to start these on every front.
+
+Every Rust/Trunk validation that compiles must use the same nonblocking
+host lock across worktrees, with at most **2 Cargo build jobs**. Example:
+
 ```bash
-cargo fmt --all -- --check
-cargo clippy --workspace -- -D warnings
-cargo test --workspace
-cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 cargo check -p tbg-core --lib
 ```
 
-Add per change type: client change → `trunk build --release` in
-`crates/tbg-client/` and look at the page in a browser; visual change →
-gallery screenshots at desktop size (phone only when a task asks, see
-*Platform focus*); multiplayer change → two
-clients finish a match, including a reconnect. A native build never
-proves browser compatibility. Never claim a check you did not run; quote
-failures exactly.
+Lock busy (exit 75), missing lock support, or unavailable cache → record
+the check as deferred and continue independent work. Do not wait, poll,
+bypass the lock, raise parallelism, run `cargo clean`, or create a fresh
+target directory to evade contention. Preserve active sessions and builds.
+
+**Consolidation:** one designated reviewer integrates the fronts and runs
+the union of affected tests once, under that lock, with required focused
+target/browser/multiplayer checks. A consolidation or review request does
+not authorize the full suite; defer unrelated or expensive acceptance work.
+
+**Full suite:** only an explicit owner request for the full suite (or named
+heavy checks) authorizes that scope. Run it once on the consolidated tree,
+sequentially under the lock, using the reference commands in
+`docs/VALIDATION.md`. Do not infer permission from "finish", "review",
+"merge", a phase checklist, or a failed focused check.
+
+Report commands, results, and deferred checks separately. Re-run only after
+relevant code changes or unresolved failures. A native build never proves
+browser compatibility; deferred checks never support a verified claim.
 
 ## Definition of done
 
-Implemented · compiles (native and WASM where relevant) · verification
-passes · behavior observed working · integrated (no orphaned code) · docs
-updated when a rule, architecture choice, or decision changed · roadmap
-report filled in · limitations reported.
+Work-front delivery: implemented · minimal validation passed or explicitly
+deferred · relevant tests written · no orphaned code · docs/report updated ·
+limitations and consolidation checks listed. Consolidation records the
+targeted checks actually completed on the integrated tree. Do not claim full
+verification or release readiness while applicable acceptance is deferred;
+the owner controls when the full suite runs.
