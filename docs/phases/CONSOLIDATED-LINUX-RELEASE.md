@@ -151,3 +151,20 @@ dead actors had already left the live-id map. Match/session boundary cleanup
 now queries all actor/corpse roots plus transient Vfx/projectiles and resets
 the impact FIFO; it is shared by ordinary match exit and laboratory reset/exit.
 Training's private presentation counters also reset with the new session.
+
+Final client consolidation: 147 tests passed, zero failed, one performance test
+remained ignored. The final runtime change (8873422) passed scoped native
+Clippy and native/server production builds. Its browser build completed and
+WebGL2 repeated finite-target completion (8.70s, 1000 HP), Reset (0.00s,
+zero meters, no previous corpse) and exactly one tick (0.05s, Paused).
+The A/B P63 captures each passed 64 figures, two Menu cleanup cycles,
+zero gameplay metrics and a single camera. The reconnect re-run passed in
+19.03s; finished-result reconnect recovery passed for both seats.
+
+The additional affected balance-library check found that Default cannot be
+derived for the new 51-entry metric arrays. Explicit zero initialization
+preserves all counters and covers every kind. After the fix,
+`cargo clippy --offline -p tbg-balance --lib -- -D warnings` and
+`cargo test --offline -p tbg-balance --test contract
+c5_every_tunable_number_is_registered -- --exact --test-threads=1` passed
+(the contract took 0.07s). No balance gate or simulation benchmark ran.

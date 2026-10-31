@@ -9,7 +9,7 @@ pub const KINDS: usize = ALL_KINDS.len();
 /// The comeback checkpoint: 2:00 of play (GAME-DESIGN §6).
 pub const CHECKPOINT: u32 = RUNNING_START + 120 * TICK_HZ;
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Side {
     pub purchases: [u16; KINDS],
     /// Evolutions per kind and branch (both tiers).
@@ -24,6 +24,25 @@ pub struct Side {
     pub max_reroll_streak: u8,
     pub expensive_bought: u32,
     pub no_frontline_at_60s: Option<bool>,
+}
+
+impl Default for Side {
+    fn default() -> Self {
+        Self {
+            purchases: [0; KINDS],
+            evolutions: [[0; 2]; KINDS],
+            max_army: 0,
+            reservations: 0,
+            reserved_bought: 0,
+            reserve_wait_shops: 0,
+            rerolls: 0,
+            reroll_energy: 0,
+            spent: 0,
+            max_reroll_streak: 0,
+            expensive_bought: 0,
+            no_frontline_at_60s: None,
+        }
+    }
 }
 
 impl Side {
