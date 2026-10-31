@@ -165,16 +165,20 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 })
                 .with_children(|passive| {
                     passive.spawn((kit::heading("", 10.), Field::PassiveName));
-                    passive.spawn((
-                        kit::muted("", 10.),
-                        Node {
+                    passive
+                        .spawn(Node {
                             width: percent(100),
                             height: px(24),
                             overflow: Overflow::clip(),
                             ..default()
-                        },
-                        Field::Passive,
-                    ));
+                        })
+                        .with_children(|clip| {
+                            clip.spawn((
+                                kit::muted("", 10.),
+                                bevy::text::LineHeight::Px(12.),
+                                Field::Passive,
+                            ));
+                        });
                 });
             option(panel, 0);
             option(panel, 1);
