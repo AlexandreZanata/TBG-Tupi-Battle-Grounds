@@ -5,7 +5,7 @@
 use ewebsock::{WsEvent, WsMessage};
 use tbg_core::protocol::{self, ClientMsg, ServerMsg};
 
-use super::{NetLink, NetStatus};
+use super::{NetFailure, NetLink, NetStatus};
 use crate::config;
 
 /// Give up reconnecting after this long (server window is 30 s).
@@ -91,7 +91,7 @@ impl NetLink {
             return;
         }
         if now - lost > GIVE_UP {
-            self.status = NetStatus::Failed("Connection lost".into());
+            self.status = NetStatus::Failed(NetFailure::ConnectionLost);
         } else if now >= self.next_try {
             self.connect(now);
             self.tries += 1;
@@ -143,11 +143,7 @@ impl NetLink {
                 None
             }
             ServerMsg::VersionMismatch { .. } => {
-                self.status = NetStatus::Failed(if cfg!(target_arch = "wasm32") {
-                    "A new version is available - reload the page".into()
-                } else {
-                    "A new version is available - open Downloads in Settings".into()
-                });
+                self.status = NetStatus::Failed(NetFailure::VersionMismatch);
                 crate::platform::storage::set(
                     crate::platform::storage::Scope::Session,
                     "update.required",

@@ -1,30 +1,32 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-i18n-page-title="ranking.web.page_title">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Tupi Battle Grounds Global Rankings: the champions, live ranked records and recent results.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; object-src 'none'">
+  <script src="/assets/i18n/resolve.js"></script>
   <title>Global Rankings — Tupi Battle Grounds</title>
   <link rel="icon" href="/assets/branding/tbg.ico?v=fortress-2">
   <link rel="stylesheet" href="/assets/ranking/ranking.css?v=ranking-1">
+  <script src="/assets/i18n/i18n.js?v=ranking-1" defer></script>
   <script src="/assets/ranking/data.js?v=ranking-1" defer></script>
   <script src="/assets/ranking/render.js?v=ranking-1" defer></script>
   <script src="/assets/ranking/controller.js?v=ranking-1" defer></script>
 </head>
 <body class="ranking-standalone">
 <header class="ranking-web-header">
-  <a class="ranking-web-brand" href="/" aria-label="Tupi Battle Grounds lobby"><img src="/assets/branding/tbg-emblem.webp?v=fortress-2" alt="Tupi Battle Grounds" width="300" height="120"></a>
-  <nav aria-label="Main navigation">
-    <a href="/"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#home"/></svg>Lobby</a>
-    <a href="/?panel=arcanas"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#arcana"/></svg>Arcanas</a>
-    <a href="/?panel=stronghold"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#tower"/></svg>Stronghold</a>
-    <span aria-disabled="true"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#helmet"/></svg>Troops <small>Locked</small></span>
-    <a href="/ranking/" aria-current="page"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#trophy"/></svg>Ranking</a>
-    <a href="/?panel=settings"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#settings"/></svg>Settings</a>
+  <a class="ranking-web-brand" href="/" data-i18n-aria-label="ranking.web.brand_label" aria-label="Tupi Battle Grounds lobby"><img src="/assets/lobby/logo.svg" alt="Tupi Battle Grounds" width="300" height="120"></a>
+  <nav data-i18n-aria-label="ranking.web.nav_main" aria-label="Main navigation">
+    <a href="/"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#home"/></svg><span data-i18n="lobby.tabs.lobby">Lobby</span></a>
+    <a href="/?panel=arcanas"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#arcana"/></svg><span data-i18n="lobby.tabs.arcanas">Arcanas</span></a>
+    <a href="/?panel=stronghold"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#tower"/></svg><span data-i18n="lobby.tabs.stronghold">Stronghold</span></a>
+    <span aria-disabled="true"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#helmet"/></svg><span data-i18n="ranking.web.troops">Troops</span> <small data-i18n="ranking.web.locked">Locked</small></span>
+    <a href="/ranking/" aria-current="page"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#trophy"/></svg><span data-i18n="lobby.tabs.ranking">Ranking</span></a>
+    <a href="/?panel=settings"><svg aria-hidden="true"><use href="/assets/lobby/icons.svg#settings"/></svg><span data-i18n="lobby.tabs.settings">Settings</span></a>
   </nav>
 </header>
-<main id="tbg-ranking" aria-label="Global Rankings"></main>
+<main id="tbg-ranking" data-i18n-aria-label="ranking.web.title" aria-label="Global Rankings"></main>
 <noscript><p>This ranking needs JavaScript to load the public leaderboard.</p><a href="/">Back to the game</a></noscript>
 <footer style="position:fixed;inset:auto 0 0;z-index:120;min-height:24px;text-align:center;background:#071115f5;color:#dce4e8;font:12px/24px system-ui,sans-serif">
   Tupi Battle Grounds · Created by <a href="https://github.com/AlexandreZanata" target="_blank" rel="noopener noreferrer" style="color:#dfba74">Alexandre Zanata (@AlexandreZanata)</a> · <a href="https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds" target="_blank" rel="noopener noreferrer" style="color:#dfba74">Original repository</a>

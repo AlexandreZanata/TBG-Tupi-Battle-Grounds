@@ -4,6 +4,7 @@
 
 use bevy::prelude::*;
 
+use crate::i18n::{Lang, Localized, Msg};
 use crate::sync::MatchInfo;
 
 use super::hud::{bar, Hud};
@@ -12,7 +13,7 @@ use super::{label, PANEL};
 const YOU: Color = Color::srgb_u8(0x9C, 0xD2, 0xFF);
 const ENEMY: Color = Color::srgb_u8(0xFF, 0xB4, 0xB4);
 
-pub(super) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, narrow: bool) {
+pub(super) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, lang: Lang, narrow: bool) {
     let bar_w = if narrow { 85.0 } else { 240.0 };
     let font = if narrow { 12.0 } else { 14.0 };
     let name_w = if narrow { 96.0 } else { 190.0 };
@@ -59,7 +60,10 @@ pub(super) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, narrow:
             .with_children(|mid| {
                 mid.spawn((label("3:00", clock), Hud::Clock));
                 if info.ranked {
-                    mid.spawn(label("RANKED", 9.0));
+                    mid.spawn((
+                        label(lang.t(Msg::HudRankedBadge), 9.0),
+                        Localized(Msg::HudRankedBadge),
+                    ));
                 }
             });
             row.spawn(Node {

@@ -1,5 +1,6 @@
 //! The HUD army count matches the living conventional units (D-32 test 5).
 
+use crate::i18n::Lang;
 use tbg_core::content::HATCH_EVERY;
 use tbg_core::{MatchState, Phase, PlayerIntention, Seat, UnitKind};
 
@@ -19,12 +20,19 @@ fn army_label_counts_living_units_and_summons_apart() {
             .unwrap();
     }
     assert_eq!(
-        super::hud_update::army_label(&s.view_for(Seat::A, &[])),
+        super::hud_update::army_label(&s.view_for(Seat::A, &[]), Lang::En),
         "Army 12"
     );
     for _ in 0..HATCH_EVERY {
         s.step();
     }
     let view = s.view_for(Seat::A, &[]);
-    assert_eq!(super::hud_update::army_label(&view), "Army 12 | Brood 1");
+    assert_eq!(
+        super::hud_update::army_label(&view, Lang::En),
+        "Army 12 | Brood 1"
+    );
+    assert_eq!(
+        super::hud_update::army_label(&view, Lang::PtBr),
+        "Ex\u{E9}rcito 12 | Ninhada 1"
+    );
 }

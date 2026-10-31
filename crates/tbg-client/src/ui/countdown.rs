@@ -16,7 +16,7 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(Update, update.run_if(in_state(GameState::InMatch)));
 }
 
-fn spawn(mut commands: Commands) {
+fn spawn(mut commands: Commands, lang: Res<crate::i18n::Lang>) {
     commands
         .spawn((
             Node {
@@ -63,7 +63,7 @@ fn spawn(mut commands: Commands) {
                 }),
                 children![
                     super::label(
-                        "STARTING",
+                        lang.t(crate::i18n::Msg::HudStarting),
                         if cfg!(target_os = "linux") { 28. } else { 20. }
                     ),
                     (

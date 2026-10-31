@@ -2296,3 +2296,46 @@ D-87–89, rechecked before merge. No existing entry is renumbered here.
 recovery exceeds the single-server model, multi-server settlement is needed,
 or journal/SQL budgets fail. The executable handoff and validation tiers are
 in [the program](planning/RANKED-PROGRAM.md).
+## D-90 · Complete localization at the presentation boundary — 2026-10-31
+
+**Decision for planning.** P64 completes the unfinished P41 content/HUD/
+standalone migration using existing Lang/Msg/TBG_I18N and paired catalogs.
+The static audit found matching key sets (174/main-derived, 217/native)
+while gameplay text bypasses them through literal strings, raw content
+fields, Debug names, API codes and native ad hoc bilingual helpers.
+Parity is necessary but not evidence of complete product localization.
+
+**Contracts.** Preserve canonical content IDs, mechanics, usernames,
+credentials, API field names, wire/storage values and asset identities.
+Translate their presentation through exhaustive content resolvers and full
+parameterized messages. Numbers derive from canonical data; errors are
+classified semantically rather than by English prose. Locale changes
+invalidate dynamic/cached text without resetting gameplay or user drafts.
+Browser/native/standalone entry points share the same language policy.
+
+**Why.** Translating only catalogs/headings leaves Augments, abilities,
+Arcanas, tower details and API-derived profile rows mixed with English.
+Moving all prose into core/server or translating identity fields would
+break mechanics, persistence or lookups without solving the client boundary.
+Use small reviewed naming/diagnostic exclusions and content coverage guards,
+not a blanket ban on every English-looking literal.
+
+**Evidence and status.** See [audit](planning/P64-I18N-AUDIT.md), its hashed
+source manifest and [P64](phases/P64-i18n-completeness.md). Documentation
+only: no translations or code corrections implemented, no runtime coverage
+claim. No gameplay rule, database migration or new protocol is planned.
+
+**Reopen when** a new active content domain lacks stable display identity,
+an API genuinely lacks necessary semantics, a third language is requested,
+or shared runtime/font limitations prevent faithful presentation. Document
+the concrete boundary change instead of replacing the existing i18n stack.
+
+
+### D-89 consolidation with P64 (2026-10-31)
+
+The localized inspection record preserves P59 effects/ability at fields 18/19
+and appends localized status at field 20. Shop records preserve reservation
+charges/held at fields 7/8 and append localized role/Faction at fields 9/10.
+Canonical IDs remain stable and all native/web consumers are updated together.
+The owner requests complete Linux/web consolidation; native input, downloads,
+existing panel layouts and creator attribution are retained during i18n merging.

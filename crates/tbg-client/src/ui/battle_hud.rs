@@ -63,18 +63,15 @@ fn relative_max(view: &tbg_core::MatchView) -> [i32; 2] {
 #[cfg(target_arch = "wasm32")]
 mod web {
     use super::*;
-    use crate::i18n::{Lang, Msg};
+    use crate::i18n::{augment, content, Lang, Msg};
+    use crate::ui::hud_update;
     use crate::ui::{surrender::Surrender, ActionQueue, PendingBuy, UiAction};
     use crate::{
         camera,
         sync::{LatestView, MatchInfo},
         GameState,
     };
-    use tbg_core::{
-        augment::AugmentCounts,
-        content::{augment_def, def, ENERGY_SCALE, OFFERS},
-        FACTIONS,
-    };
+    use tbg_core::content::{augment_def, def, ENERGY_SCALE, OFFERS};
     use wasm_bindgen::JsCast;
 
     fn attr(root: &web_sys::HtmlElement, name: &str, value: &str) {
@@ -152,10 +149,11 @@ mod web {
             "data-ranked",
             if info.ranked { "true" } else { "false" },
         );
-        attr(&root, "data-clock", &super::super::hud_update::clock(v));
+        attr(&root, "data-clock", &hud_update::clock(v));
+        let lang = *lang;
         let unit = inspected
             .0
-            .and_then(|id| crate::ui::inspect::report(v, id, &info.arcanas))
+            .and_then(|id| crate::ui::inspect::report(v, id, &info.arcanas, lang))
             .map(|r| r.record())
             .unwrap_or_default();
         attr(&root, "data-inspect", &unit);
@@ -165,12 +163,12 @@ mod web {
         attr(
             &root,
             "data-augments-you",
-            &augment_label(&v.augments[v.you.index()]),
+            &hud_update::augment_names(&v.augments[v.you.index()], lang),
         );
         attr(
             &root,
             "data-augments-enemy",
-            &augment_label(&v.augments[v.you.other().index()]),
+            &hud_update::augment_names(&v.augments[v.you.other().index()], lang),
         );
         let (council, options) = match &v.augment_round {
             Some(round) if round.ticks_left > 0 => {
@@ -185,12 +183,14 @@ mod web {
                     .iter()
                     .enumerate()
                     .filter_map(|(i, id)| {
+                        // `id:name:text:cost`; names never hold ':' (hud.js
+                        // rejoins a text that does).
                         let def = augment_def(*id)?;
                         Some(format!(
                             "{}:{}:{}:{}",
                             def.id,
-                            def.name,
-                            def.text,
+                            content::augment_name(lang, def.id)?,
+                            augment::text(lang, def),
                             round.costs[i] / ENERGY_SCALE
                         ))
                     })
@@ -208,19 +208,19 @@ mod web {
         };
         attr(&root, "data-council", &council);
         attr(&root, "data-council-options", &options);
+        // `N` (BR-U07), plus `| Brood M` while summons live (BR-U08).
+        let (army, brood) = hud_update::army_counts(v);
+        let army = if brood > 0 {
+            format!("{army} | {}", lang.tf(Msg::HudBrood, &[("brood", &brood)]))
+        } else {
+            army.to_string()
+        };
+        attr(&root, "data-army", &army);
         attr(
             &root,
-            "data-army",
-            // `Army N` (BR-U07), plus `| Brood M` while summons live (BR-U08).
-            super::super::hud_update::army_label(v).trim_start_matches("Army "),
+            "data-synergy",
+            &hud_update::synergy_list(v, lang, " | "),
         );
-        let synergies = FACTIONS
-            .iter()
-            .filter(|f| v.synergy[v.you.index()][f.index()] > 0)
-            .map(|f| format!("{f:?} {}/2", v.synergy[v.you.index()][f.index()]))
-            .collect::<Vec<_>>()
-            .join(" | ");
-        attr(&root, "data-synergy", &synergies);
         attr(
             &root,
             "data-surrender",
@@ -249,10 +249,12 @@ mod web {
             let pending =
                 shop_pending || pending.0.is_some_and(|(offer, _)| usize::from(offer) == i);
             let available = super::super::hud_update::buyable(v, i) && !pending;
+            // Kind, archetype and Faction stay canonical ids (portrait,
+            // frame art); the last two fields are their localized labels.
             let data = format!(
-                "{:?}|{}|{:?}|{}|{:?}|{}|{}|{}|{}",
+                "{:?}|{}|{:?}|{}|{:?}|{}|{}|{}|{}|{}|{}",
                 v.offers[i],
-                d.name,
+                content::unit_name(lang, d.kind),
                 d.archetype,
                 d.cost / ENERGY_SCALE,
                 d.faction,
@@ -260,6 +262,8 @@ mod web {
                 pending,
                 v.reserve[i],
                 v.held_mask & (1 << i) != 0,
+                content::archetype(lang, d.archetype),
+                content::faction(lang, d.faction)
             );
             attr(&root, &format!("data-offer-{i}"), &data);
         }
@@ -373,23 +377,6 @@ mod web {
                 .then_some(UiAction::ChooseAugment(index)),
             _ => None,
         }
-    }
-
-    fn augment_label(counts: &AugmentCounts) -> String {
-        counts
-            .iter()
-            .enumerate()
-            .filter(|(_, copies)| **copies > 0)
-            .filter_map(|(id, copies)| {
-                let def = augment_def(id as u8)?;
-                Some(if *copies > 1 {
-                    format!("{} x{copies}", def.name)
-                } else {
-                    def.name.to_string()
-                })
-            })
-            .collect::<Vec<_>>()
-            .join(" | ")
     }
 }
 

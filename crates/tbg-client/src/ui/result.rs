@@ -36,40 +36,45 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, l
     let (title, reason) = match info.outcome {
         Some(o) if info.spectating => {
             let reason = match o.reason {
-                EndReason::StrongholdDestroyed => "A Stronghold was destroyed",
-                EndReason::Forfeit => "A player surrendered or left the match",
+                EndReason::StrongholdDestroyed => Msg::ResultReasonDestroyed,
+                EndReason::Forfeit => Msg::ResultReasonForfeitWatch,
             };
-            ("MATCH OVER", Some(reason))
+            (Msg::ResultMatchOver, Some(reason))
         }
         Some(o) => {
             let title = match o.winner {
-                None => "DRAW",
-                Some(w) if Some(w) == info.you => "VICTORY",
-                Some(_) => "DEFEAT",
+                None => Msg::ResultDraw,
+                Some(w) if Some(w) == info.you => Msg::ResultVictory,
+                Some(_) => Msg::ResultDefeat,
             };
             let reason = match o.reason {
-                EndReason::StrongholdDestroyed => "A Stronghold was destroyed",
+                EndReason::StrongholdDestroyed => Msg::ResultReasonDestroyed,
                 // BR-M06/BR-M03: say which side gave up.
                 EndReason::Forfeit => match o.winner {
-                    Some(w) if Some(w) == info.you => "Your opponent surrendered or disconnected",
-                    Some(_) => "You surrendered",
-                    None => "A player left the match",
+                    Some(w) if Some(w) == info.you => Msg::ResultReasonOpponentLeft,
+                    Some(_) => Msg::ResultReasonYouSurrendered,
+                    None => Msg::ResultReasonLeft,
                 },
             };
             (title, Some(reason))
         }
-        None => ("MATCH OVER", None),
+        None => (Msg::ResultMatchOver, None),
     };
     let secs = info.last_tick / TICK_HZ;
-    let duration = format!(
-        "Duration {}:{:02} vs {}",
-        secs / 60,
-        secs % 60,
-        info.opponent
+    let duration = lang.tf(
+        Msg::ResultDuration,
+        &[
+            ("time", &format!("{}:{:02}", secs / 60, secs % 60)),
+            ("opponent", &info.opponent),
+        ],
     );
-    let summary = format!(
-        "Units deployed {} | Evolutions {} | Damage to enemy Stronghold {}",
-        stats.bought, stats.evolutions, stats.damage_dealt
+    let summary = lang.tf(
+        Msg::ResultSummary,
+        &[
+            ("bought", &stats.bought),
+            ("evolutions", &stats.evolutions),
+            ("damage", &stats.damage_dealt),
+        ],
     );
     commands
         .spawn((
@@ -89,13 +94,16 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, l
                 BackgroundColor(PANEL),
             ))
             .with_children(|panel| {
-                panel.spawn(label(title, 40.0));
+                panel.spawn(label(lang.t(title), 40.0));
                 if let Some(reason) = reason {
-                    panel.spawn(label(reason, 16.0));
+                    panel.spawn(label(lang.t(reason), 16.0));
                     panel.spawn(label(duration, 16.0));
                     panel.spawn(label(summary, 16.0));
                 } else if !info.opponent.is_empty() {
-                    panel.spawn(label(format!("vs {}", info.opponent), 16.0));
+                    panel.spawn(label(
+                        lang.tf(Msg::ResultVersus, &[("opponent", &info.opponent)]),
+                        16.0,
+                    ));
                 }
                 if info.spectating {
                     panel.spawn(button(
@@ -113,14 +121,18 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, l
                 ));
                 panel.spawn((label("", 18.0), Node::default(), RematchLabel));
                 panel.spawn((
-                    button("Request rematch", UiAction::RequestRematch, 220.0),
+                    button(
+                        lang.t(Msg::ResultRequestRematch),
+                        UiAction::RequestRematch,
+                        220.0,
+                    ),
                     RematchButton,
                 ));
                 panel.spawn((
-                    button("Play again", UiAction::PlayAgain, 220.0),
+                    button(lang.t(Msg::ResultPlayAgain), UiAction::PlayAgain, 220.0),
                     HideForChallenge,
                 ));
-                panel.spawn(button("Menu", UiAction::ToMenu, 220.0));
+                panel.spawn(button(lang.t(Msg::ResultMenu), UiAction::ToMenu, 220.0));
             });
         });
 }
@@ -130,6 +142,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, l
 fn count_rating(
     time: Res<Time>,
     account: Res<Account>,
+    lang: Res<Lang>,
     mut text: Single<&mut Text, With<RatingLabel>>,
 ) {
     let Some((before, after, arrived)) = account.rating_change else {
@@ -138,7 +151,14 @@ fn count_rating(
     let t = ((time.elapsed_secs_f64() - arrived) / 0.6).clamp(0.0, 1.0);
     let shown = (f64::from(before) + (f64::from(after) - f64::from(before)) * t).round() as u16;
     let delta = i32::from(after) - i32::from(before);
-    text.0 = format!("Rating {before} -> {shown} ({delta:+})");
+    text.0 = lang.tf(
+        Msg::ResultRating,
+        &[
+            ("before", &before),
+            ("shown", &shown),
+            ("delta", &format!("{delta:+}")),
+        ],
+    );
 }
 
 /// Challenge matches never show the casual Play again / rating controls.
@@ -157,30 +177,37 @@ fn hide_for_challenge(info: Res<MatchInfo>, mut nodes: Query<&mut Node, With<Hid
 fn update_rematch(
     info: Res<MatchInfo>,
     rematch: Res<RematchInfo>,
+    lang: Res<Lang>,
     mut set: ParamSet<(
         Query<(&mut Text, &mut Node), With<RematchLabel>>,
         Query<(&Children, &mut Node), With<RematchButton>>,
         Query<&mut Text>,
     )>,
 ) {
-    let (label, button_text, button_visible) = if !info.challenge {
-        ("", "", false)
+    let (label, button, button_visible) = if !info.challenge {
+        (None, None, false)
     } else if !rematch.open {
         let text = match rematch.closed {
-            Some(true) => "Opponent declined the rematch",
-            Some(false) => "Rematch expired",
-            None => "Preparing rematch...",
+            Some(true) => Msg::ResultRematchDeclined,
+            Some(false) => Msg::ResultRematchExpired,
+            None => Msg::ResultRematchPreparing,
         };
-        (text, "", false)
+        (Some(text), None, false)
     } else if rematch.you_requested && rematch.opponent_requested {
-        ("Starting rematch...", "", false)
+        (Some(Msg::ResultRematchStarting), None, false)
     } else if rematch.you_requested {
-        ("Waiting for opponent...", "", false)
+        (Some(Msg::CouncilWaiting), None, false)
     } else if rematch.opponent_requested {
-        ("Opponent wants a rematch", "Accept rematch", true)
+        (
+            Some(Msg::ResultRematchOffered),
+            Some(Msg::ResultAcceptRematch),
+            true,
+        )
     } else {
-        ("", "Request rematch", true)
+        (None, Some(Msg::ResultRequestRematch), true)
     };
+    let label = label.map_or("", |m| lang.t(m));
+    let button_text = button.map_or("", |m| lang.t(m));
     for (mut text, mut node) in &mut set.p0() {
         text.0 = label.into();
         node.display = if info.challenge && !label.is_empty() {

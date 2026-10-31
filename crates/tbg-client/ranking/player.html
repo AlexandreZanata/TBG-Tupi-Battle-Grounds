@@ -1,48 +1,50 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-i18n-page-title="profile.default_title">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Tupi Battle Grounds player profile: rating, rank, record, faction shares, and recent ranked matches.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; object-src 'none'">
+  <script src="/assets/i18n/resolve.js"></script>
   <title>Player — Tupi Battle Grounds</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="ranking.css">
+  <script src="/assets/i18n/i18n.js" defer></script>
   <script src="ranking.js" defer></script>
 </head>
 <body data-page="player">
 <header class="top">
-  <h1 id="title">Player profile</h1>
-  <a class="play" href="./">Back to ranking</a>
+  <h1 id="title" data-i18n="profile.heading">Player profile</h1>
+  <a class="play" href="./" data-i18n="profile.back">Back to ranking</a>
 </header>
 <main>
-  <p id="status" class="status" role="status">Loading…</p>
+  <p id="status" class="status" role="status" data-i18n="ranking.web.loading_profile">Loading…</p>
   <section id="card" class="card" aria-labelledby="title" hidden>
     <dl class="stats">
-      <div><dt>Rank</dt><dd id="rank"></dd></div>
-      <div><dt>Rating</dt><dd id="rating"></dd></div>
-      <div><dt>Peak</dt><dd id="peak"></dd></div>
-      <div><dt>Record (W/L/D)</dt><dd id="record"></dd></div>
-      <div><dt>Win rate</dt><dd id="winrate"></dd></div>
-      <div><dt>Joined</dt><dd id="joined"></dd></div>
+      <div><dt data-i18n="profile.rank">Rank</dt><dd id="rank"></dd></div>
+      <div><dt data-i18n="ranking.web.rating">Rating</dt><dd id="rating"></dd></div>
+      <div><dt data-i18n="profile.peak">Peak</dt><dd id="peak"></dd></div>
+      <div><dt data-i18n="profile.record">Record (W/L/D)</dt><dd id="record"></dd></div>
+      <div><dt data-i18n="ranking.web.win_rate">Win rate</dt><dd id="winrate"></dd></div>
+      <div><dt data-i18n="profile.joined">Joined</dt><dd id="joined"></dd></div>
     </dl>
   </section>
   <section id="factions-box" class="card" aria-labelledby="factions-title" hidden>
-    <h2 id="factions-title">Faction shares</h2>
+    <h2 id="factions-title" data-i18n="profile.factions">Faction shares</h2>
     <ul id="factions" class="bars"></ul>
   </section>
   <section id="recent-box" class="card" aria-labelledby="recent-title" hidden>
-    <h2 id="recent-title">Last 10 ranked matches</h2>
+    <h2 id="recent-title" data-i18n="profile.last_ten">Last 10 ranked matches</h2>
     <div class="table-wrap">
       <table id="recent">
         <thead>
           <tr>
-            <th scope="col">Date</th>
-            <th scope="col">Opponent</th>
-            <th scope="col">Result</th>
-            <th scope="col" class="num">Rating</th>
-            <th scope="col">How</th>
-            <th scope="col" class="num">Time</th>
+            <th scope="col" data-i18n="profile.date">Date</th>
+            <th scope="col" data-i18n="profile.opponent">Opponent</th>
+            <th scope="col" data-i18n="profile.result">Result</th>
+            <th scope="col" class="num" data-i18n="ranking.web.rating">Rating</th>
+            <th scope="col" data-i18n="profile.how">How</th>
+            <th scope="col" class="num" data-i18n="profile.time">Time</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -50,7 +52,7 @@
     </div>
   </section>
 </main>
-<footer class="foot"><a href="/">Play now</a></footer>
+<footer class="foot"><a href="/" data-i18n="profile.play_now">Play now</a></footer>
 <footer style="position:fixed;inset:auto 0 0;z-index:120;min-height:24px;text-align:center;background:#071115f5;color:#dce4e8;font:12px/24px system-ui,sans-serif">
   Tupi Battle Grounds · Created by <a href="https://github.com/AlexandreZanata" target="_blank" rel="noopener noreferrer" style="color:#dfba74">Alexandre Zanata (@AlexandreZanata)</a> · <a href="https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds" target="_blank" rel="noopener noreferrer" style="color:#dfba74">Original repository</a>
 </footer>

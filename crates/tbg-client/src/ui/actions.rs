@@ -162,11 +162,11 @@ pub(super) fn apply(
                 online(Mode::JoinChallenge(token), &mut link, &mut last);
                 queue_info.joining_challenge = true;
             }
-            UiAction::ChallengeInvalid => extra.1.push("Challenge link invalid"),
+            UiAction::ChallengeInvalid => extra.1.say(crate::i18n::Msg::ChallengeInvalid),
             UiAction::ShareChallenge => {
                 if let Some(token) = queue_info.challenge {
                     let url = config::challenge_link(&token);
-                    config::share_text("Join my TBG challenge", &url);
+                    config::share_text(lang_res.t(crate::i18n::Msg::ChallengeShareText), &url);
                 }
             }
             UiAction::RequestRematch => link.send(ClientMsg::RequestRematch, now),
@@ -366,7 +366,9 @@ pub(super) fn apply(
             UiAction::Inspect(offer) => {
                 if let Some(v) = &extra.0 .0 {
                     let kind = v.offers[usize::from(offer).min(tbg_core::content::OFFERS - 1)];
-                    extra.1.push_for(super::tips::unit_details(kind), 4.5);
+                    extra
+                        .1
+                        .push_for(super::tips::unit_details(kind, *lang_res), 4.5);
                 }
             }
             UiAction::OpenCreator => config::open_url(super::attribution::CREATOR_URL),
@@ -398,6 +400,7 @@ pub(super) fn apply(
                     &mut account,
                     &mut form,
                     &mut extra.1,
+                    *lang_res,
                     now,
                 );
             }

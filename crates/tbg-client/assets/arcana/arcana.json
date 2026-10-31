@@ -575,7 +575,7 @@
     "intro": "Three families. Five choices each. Twelve points and a supreme to earn.",
     "complete": "Complete build · your next match uses it.",
     "partial": "Incomplete build · spend exactly {budget} points. Until then matches use the default.",
-    "controls": "Click / Enter / Space / + to add · right-click / − to remove · Esc to close",
+    "controls": "Click / Enter / Space / + to add · right-click / - to remove · Esc to close",
     "eligibility": "Eligibility follows base Archetype through every Evolution. Summons receive no Arcana bonus. Deadeye affects conventional Ranged only.",
     "scope": "Proposed values (P40) · locked when you queue, join a room or start Practice."
   },

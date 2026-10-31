@@ -4,7 +4,10 @@
 (() => {
   'use strict';
   const t = (key, args) => globalThis.TBG_I18N ? globalThis.TBG_I18N.t(key, args) : key;
-  const signed = bp => (bp > 0 ? '+' : '−') + String(Math.abs(bp) / 100) + '%';
+  // Locale-aware decimals when the runtime offers them (P64); Node tests
+  // without it read the plain number.
+  const num = value => globalThis.TBG_I18N?.number ? globalThis.TBG_I18N.number(value, 2, 0) : String(value);
+  const signed = bp => (bp > 0 ? '+' : '−') + num(Math.abs(bp) / 100) + '%';
   let loading;
   function load() {
     loading ||= fetch('assets/arenas/arenas.json?v=20261030')
@@ -16,7 +19,7 @@
   function effect(def, data) {
     if (def.moveBp) return t('arenas.effect.move', { value: signed(def.moveBp) });
     if (def.attackBp) return t('arenas.effect.attack', { value: signed(def.attackBp) });
-    if (def.firstEvolveDiscount) return t('arenas.effect.evolve', { value: String(def.firstEvolveDiscount / data.energyScale) });
+    if (def.firstEvolveDiscount) return t('arenas.effect.evolve', { value: num(def.firstEvolveDiscount / data.energyScale) });
     if (def.regenBp) return t('arenas.effect.regen', { value: signed(def.regenBp) });
     return t('arenas.effect.none');
   }

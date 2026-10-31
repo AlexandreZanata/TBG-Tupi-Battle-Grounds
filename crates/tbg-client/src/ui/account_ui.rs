@@ -8,6 +8,7 @@ use tbg_core::protocol::ClientMsg;
 use super::account::{download_key, Account, AccountScreen};
 use super::textform::{self, ActiveForm, TextKind};
 use super::{button, label, screen, Toasts, UiAction};
+use crate::i18n::{Lang, Msg};
 use crate::link::MatchLink;
 use crate::{config, GameState};
 
@@ -25,30 +26,27 @@ pub fn apply_action(
     account: &mut Account,
     form: &mut ActiveForm,
     toasts: &mut Toasts,
+    lang: Lang,
     now: f64,
 ) {
     match action {
         UiAction::CreateAccount => {
-            textform::open(
-                form,
-                TextKind::Name,
-                "Choose a name (3-16 letters, digits, _)",
-            );
+            textform::open(form, TextKind::Name, lang.t(Msg::AccountPromptName));
         }
         UiAction::HaveKey => {
-            textform::open(form, TextKind::Key, "Paste your account key");
+            textform::open(form, TextKind::Key, lang.t(Msg::AccountPromptKey));
         }
         UiAction::CopyKey => {
             if let AccountScreen::SaveKey { key, saved, .. } = &mut account.screen {
                 config::copy_text(key);
                 *saved = true;
-                toasts.push("Key copied - store it somewhere safe");
+                toasts.say(Msg::AccountKeyCopied);
             } else if account.profile.is_some() {
                 if let Some(key) = config::load_account_key() {
                     config::copy_text(&key);
-                    toasts.push("Key copied - store it somewhere safe");
+                    toasts.say(Msg::AccountKeyCopied);
                 } else {
-                    toasts.push("No saved key on this device");
+                    toasts.say(Msg::AccountNoKey);
                 }
             }
         }
@@ -56,14 +54,14 @@ pub fn apply_action(
             if let AccountScreen::SaveKey { key, name, saved } = &mut account.screen {
                 download_key(name, key);
                 *saved = true;
-                toasts.push("Key downloaded");
+                toasts.say(Msg::AccountKeyDownloaded);
             } else if let Some((profile, key)) =
                 account.profile.as_ref().zip(config::load_account_key())
             {
                 download_key(&profile.name, &key);
-                toasts.push("Key downloaded to the game data directory");
+                toasts.say(Msg::AccountKeyDownloaded);
             } else {
-                toasts.push("No saved key on this device");
+                toasts.say(Msg::AccountNoKey);
             }
         }
         UiAction::KeySaved => {
@@ -73,9 +71,9 @@ pub fn apply_action(
             {
                 config::save_account_key(key);
                 account.screen = AccountScreen::None;
-                toasts.push("Account ready on this device");
+                toasts.say(Msg::AccountReady);
             } else {
-                toasts.push("Copy or download your key first");
+                toasts.say(Msg::AccountSaveFirst);
             }
         }
         UiAction::ClosePanel => {
@@ -84,12 +82,12 @@ pub fn apply_action(
         UiAction::Logout => {
             if !account.logout_armed {
                 account.logout_armed = true;
-                toasts.push("Tap Log out again - did you save your key?");
+                toasts.say(Msg::AccountLogoutConfirm);
             } else {
                 account.logout_armed = false;
                 match link {
                     MatchLink::Net(n) => n.send(ClientMsg::Logout, now),
-                    _ => toasts.push("No connection - try again"),
+                    _ => toasts.say(Msg::AccountNoConnection),
                 }
             }
         }
@@ -101,6 +99,7 @@ pub fn apply_action(
 fn panel(
     mut commands: Commands,
     account: Res<Account>,
+    lang: Res<Lang>,
     roots: Query<Entity, With<SavePanel>>,
     mut shown: Local<bool>,
 ) {
@@ -134,15 +133,15 @@ fn panel(
                 },
                 BackgroundColor(super::PANEL),
                 children![
-                    label("Save your key", 26.0),
+                    label(lang.t(Msg::AccountSaveTitle), 26.0),
                     label(key, 22.0),
-                    label("This key is your account.", 14.0),
-                    label("Anyone with it can play as you.", 14.0),
-                    label("It cannot be recovered.", 14.0),
-                    button("Copy", UiAction::CopyKey, 260.0),
-                    button("Download", UiAction::DownloadKey, 260.0),
-                    button("I saved it", UiAction::KeySaved, 260.0),
-                    button("Close", UiAction::ClosePanel, 260.0),
+                    label(lang.t(Msg::AccountSaveLine1), 14.0),
+                    label(lang.t(Msg::AccountSaveLine2), 14.0),
+                    label(lang.t(Msg::AccountSaveLine3), 14.0),
+                    button(lang.t(Msg::AccountCopy), UiAction::CopyKey, 260.0),
+                    button(lang.t(Msg::AccountDownload), UiAction::DownloadKey, 260.0),
+                    button(lang.t(Msg::AccountSavedIt), UiAction::KeySaved, 260.0),
+                    button(lang.t(Msg::CommonClose), UiAction::ClosePanel, 260.0),
                     label(format!("{name}-tbg-key.txt"), 12.0),
                 ],
             ));

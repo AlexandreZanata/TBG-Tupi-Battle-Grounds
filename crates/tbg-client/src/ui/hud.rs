@@ -76,7 +76,7 @@ fn forgo_card() -> impl Bundle {
         BackgroundColor(BUTTON),
         UiAction::ForgoAugment,
         Hud::Forgo,
-        children![(label("Forgo", 12.0), Hud::ForgoText)],
+        children![(label("", 12.0), Hud::ForgoText)],
     )
 }
 
@@ -180,7 +180,12 @@ fn row(gap: f32) -> Node {
 }
 
 #[cfg(not(target_os = "linux"))]
-fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) {
+fn spawn(
+    mut commands: Commands,
+    info: Res<MatchInfo>,
+    lang: Res<crate::i18n::Lang>,
+    window: Single<&Window>,
+) {
     let narrow = window.width() < 600.0;
     commands
         .spawn((
@@ -189,7 +194,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
             DespawnOnExit(GameState::InMatch),
         ))
         .with_children(|root| {
-            super::hud_top::spawn(root, &info, narrow);
+            super::hud_top::spawn(root, &info, *lang, narrow);
             root.spawn((
                 Node {
                     flex_direction: FlexDirection::Column,

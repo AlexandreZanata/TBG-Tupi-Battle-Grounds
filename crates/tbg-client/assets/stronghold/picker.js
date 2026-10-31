@@ -8,9 +8,11 @@
   const panel = document.getElementById('stronghold-picker');
   if (!root || !panel) return;
   const tower = globalThis.TbgStronghold;
+  const t = (key, args) => globalThis.TBG_I18N.t(key, args);
   const get = name => panel.querySelector('[data-s="' + name + '"]');
   const text = (name, value) => { get(name).textContent = value; };
-  let data, loading, chosen = '', storageNote = '', opener, cards = [];
+  // `storageNote` is a key plus arguments, so a language switch re-reads it.
+  let data, loading, chosen = '', storageNote = ['', {}], opener, cards = [];
   function element(tag, className, content) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -35,43 +37,43 @@
     chosen = data.defaultKind;
     try {
       const raw = localStorage.getItem(data.storageKey);
-      if (raw === null) { storageNote = 'Default tower · pick one to keep it'; return; }
+      if (raw === null) { storageNote = ['stronghold.storage.default', {}]; return; }
       if (!tower.kind(data, raw.trim())) throw new Error('invalid');
-      chosen = raw.trim(); storageNote = 'Saved in this browser · accounts keep it on every device';
-    } catch (_) { storageNote = 'Saved tower unavailable or invalid · default restored'; }
+      chosen = raw.trim(); storageNote = ['stronghold.storage.saved', {}];
+    } catch (_) { storageNote = ['stronghold.storage.invalid', {}]; }
   }
   function choose(name) {
     if (locked() || !tower.kind(data, name)) return;
     chosen = name;
-    try { localStorage.setItem(data.storageKey, name); storageNote = 'Saved · your next match uses ' + name; } catch (_) {
-      storageNote = 'Browser storage unavailable · this choice lasts for this visit only';
+    try { localStorage.setItem(data.storageKey, name); storageNote = ['stronghold.storage.chosen', {kind: name}]; } catch (_) {
+      storageNote = ['stronghold.storage.off', {}];
     }
     render();
   }
   function statList(s) {
     const list = element('dl', 'tower-stats');
-    for (const [label, value] of [['HP', s.maxHp], ['Damage', s.damage], ['Attack every', tower.seconds(s.interval, data)], ['Range', tower.tiles(s.range)]]) {
-      const row = element('div'); row.append(element('dt', '', label), element('dd', '', String(value))); list.append(row);
+    for (const [label, value] of [['stronghold.stat.hp', s.maxHp], ['stronghold.stat.damage', s.damage], ['stronghold.stat.every', tower.seconds(s.interval, data)], ['stronghold.stat.range', tower.tiles(s.range)]]) {
+      const row = element('div'); row.append(element('dt', '', t(label)), element('dd', '', String(value))); list.append(row);
     }
     return list;
   }
-  function bullets(className, title, lines, def) {
+  function bullets(className, title, field, def) {
     const box = element('div', className);
     const list = element('ul');
-    lines.forEach(line => list.append(element('li', '', tower.fill(line, def.stats, data))));
+    def[field + 's'].forEach((_, i) => list.append(element('li', '', tower.fill(tower.text(def, field + '.' + i), def.stats, data))));
     box.append(element('h4', '', title), list);
     return box;
   }
   function branchBlock(def, branch) {
     const block = element('section', 'tower-branch');
     const heading = element('h4');
-    heading.append(artImage(def.branches[branch].asset, 'tower-branch-art', ''), element('span', '', (branch ? 'B · ' : 'A · ') + def.branches[branch].name));
+    heading.append(artImage(def.branches[branch].asset, 'tower-branch-art', ''), element('span', '', t('stronghold.branch_label', {letter: branch ? 'B' : 'A', name: tower.branchName(def, branch)})));
     block.append(heading);
     const steps = element('ol');
-    def.branches[branch].steps.forEach((step, i) => {
+    def.branches[branch].steps.forEach((_, i) => {
       const item = element('li');
       const head = element('span', 'tower-step');
-      head.append(element('b', '', 'Tier ' + (i + 1) + ' · ' + step.name), element('span', 'tower-cost', tower.cost(data, i + 1) + ' Energy'));
+      head.append(element('b', '', t('fortify.step', {tier: i + 1, step: tower.stepName(def, branch, i)})), element('span', 'tower-cost', t('common.energy_amount', {cost: tower.cost(data, i + 1)})));
       item.append(head, element('span', 'tower-effect', tower.effect(data, def, branch, i + 1)));
       steps.append(item);
     });
@@ -81,16 +83,17 @@
   function card(def) {
     const article = element('article', 'tower-card');
     article.dataset.towerKind = def.kind; article.style.setProperty('--tower', def.color);
-    article.setAttribute('aria-label', def.name + ' Stronghold');
-    const art = element('div', 'tower-art'); art.append(artImage(def.banner, 'tower-banner', ''), artImage(def.portrait, 'tower-drawing tower-portrait', def.name + ' Stronghold'), element('span', 'tower-flag', 'Selected'));
+    const label = t('stronghold.card_label', {name: tower.name(def)});
+    article.setAttribute('aria-label', label);
+    const art = element('div', 'tower-art'); art.append(artImage(def.banner, 'tower-banner', ''), artImage(def.portrait, 'tower-drawing tower-portrait', label), element('span', 'tower-flag', t('stronghold.selected')));
     const head = element('header', 'tower-head');
-    head.append(element('h2', '', def.name), element('p', 'tower-specialty', def.specialty), element('p', 'tower-summary', def.summary));
+    head.append(element('h2', '', tower.name(def)), element('p', 'tower-specialty', tower.text(def, 'specialty')), element('p', 'tower-summary', tower.text(def, 'summary')));
     const passive = element('section', 'tower-passive');
-    passive.append(element('h3', '', 'Passive · ' + def.passive.name), element('p', '', tower.fill(def.passive.text, def.stats, data)));
+    passive.append(element('h3', '', t('stronghold.passive', {name: tower.text(def, 'passive.name')})), element('p', '', tower.fill(tower.text(def, 'passive.text'), def.stats, data)));
     const traits = element('div', 'tower-traits');
-    traits.append(bullets('tower-pros', 'Advantages', def.advantages, def), bullets('tower-cons', 'Disadvantages', def.disadvantages, def));
+    traits.append(bullets('tower-pros', t('stronghold.advantages'), 'advantage', def), bullets('tower-cons', t('stronghold.disadvantages'), 'disadvantage', def));
     const fort = element('section', 'tower-fortify');
-    fort.append(element('h3', '', 'Fortification · choose one branch'), branchBlock(def, 0), branchBlock(def, 1));
+    fort.append(element('h3', '', t('stronghold.fortify_heading')), branchBlock(def, 0), branchBlock(def, 1));
     const select = element('button', 'tower-select');
     select.type = 'button';
     select.addEventListener('click', () => choose(def.kind));
@@ -105,34 +108,47 @@
     for (const {def, article, select} of cards) {
       const on = def.kind === chosen;
       article.dataset.chosen = String(on);
-      select.textContent = on ? 'Selected' : 'Select ' + def.name;
+      select.textContent = on ? t('stronghold.selected') : t('stronghold.select', {name: tower.name(def)});
       select.setAttribute('aria-pressed', String(on));
       select.disabled = isLocked;
     }
     const current = data ? tower.kind(data, chosen) : undefined;
-    text('status', isLocked ? data.copy.locked : current ? 'Your tower: ' + current.name + ' · ' + current.specialty : '');
-    text('storage', storageNote);
+    text('status', isLocked ? tower.copy(data, 'locked') : current ? t('stronghold.status', {name: tower.name(current), specialty: tower.text(current, 'specialty')}) : '');
+    const [noteKey, noteArgs] = storageNote;
+    const chosenDef = noteArgs.kind && tower.kind(data, noteArgs.kind);
+    text('storage', noteKey ? t(noteKey, {name: chosenDef ? tower.name(chosenDef) : noteArgs.kind}) : '');
     chip();
   }
   // The profile panel shows the current tower at every visit to the lobby.
   function chip() {
     if (!data) return;
     const def = tower.kind(data, chosen) || tower.kind(data, data.defaultKind);
-    root.querySelectorAll('[data-tower-name]').forEach(node => { if (node.textContent !== def.name) node.textContent = def.name; });
+    const shown = tower.name(def);
+    root.querySelectorAll('[data-tower-name]').forEach(node => { if (node.textContent !== shown) node.textContent = shown; });
     root.querySelectorAll('[data-tower-icon]').forEach(node => node.setAttribute('href', tower.icon(def.kind)));
     root.querySelectorAll('[data-tower-chip]').forEach(node => {
       node.style.setProperty('--tower', def.color);
-      node.setAttribute('aria-label', 'Stronghold: ' + def.name + '. Change tower');
+      node.setAttribute('aria-label', t('stronghold.chip_label', {name: shown}));
     });
   }
   async function prepare() {
     const response = await fetch('assets/stronghold/strongholds.json?art=20261030');
-    if (!response.ok) throw new Error('Stronghold data could not load. Close and reopen to retry.');
+    if (!response.ok) throw new Error('stronghold.error');
     data = await response.json();
     tower.sprite();
-    data.kinds.forEach(def => get('grid').append(card(def)));
-    ['intro', 'scope', 'fortify', 'controls', 'badge'].forEach(key => text(key, data.copy[key]));
+    build();
   }
+  // Cards hold composed text; a language switch rebuilds them in place and
+  // keeps the choice, the storage note and the scroll position.
+  function build() {
+    const scroller = panel.querySelector('.tower-scroll'), top = scroller ? scroller.scrollTop : 0;
+    cards = [];
+    get('grid').replaceChildren(...data.kinds.map(card));
+    ['intro', 'scope', 'fortify', 'controls', 'badge'].forEach(key => text(key, tower.copy(data, key)));
+    if (scroller) scroller.scrollTop = top;
+    loadArt();
+  }
+  document.addEventListener('tbg:lang', () => { if (data) { build(); render(); } });
   const ready = () => (loading ||= prepare().catch(error => { loading = undefined; throw error; }));
   root.querySelectorAll('[data-tower-open]').forEach(button => button.addEventListener('click', async () => {
     if (locked()) return;
@@ -142,7 +158,7 @@
     try {
       await ready(); load(); loadArt();
       if (panel.open) { render(); panel.querySelector('.tower-close').focus(); }
-    } catch (error) { text('error', error.message); get('error').hidden = false; }
+    } catch (_) { text('error', t('stronghold.error')); get('error').hidden = false; }
   }));
   panel.addEventListener('close', () => { if (!root.hidden) opener?.focus(); });
   // The server may answer with an account's saved kind while the lobby is

@@ -10,19 +10,22 @@
     && ranks.every((rank, i) => integer(rank) && rank <= maxRank(i, data))
     && prerequisites(ranks, data) && spent(ranks, data) <= data.pointBudget;
   const complete = (ranks, data) => editable(ranks, data) && spent(ranks, data) === data.pointBudget;
-  const missing = (ranks, data, node) => node.requires
+  // `describe` lets the editor localize each unmet requirement; the default
+  // is the English canon the Node tests read.
+  const english = (node, rank, now) => node.name + ' rank ' + rank + ' (now ' + now + ')';
+  const missing = (ranks, data, node, describe = english) => node.requires
     .filter(([index, rank]) => ranks[index] < rank)
-    .map(([index, rank]) => data.nodes[index].name + ' rank ' + rank + ' (now ' + ranks[index] + ')');
+    .map(([index, rank]) => describe(data.nodes[index], rank, ranks[index]));
   const canAdd = (ranks, data, index) => {
     const node = data.nodes[index];
     return ranks[index] < node.maxRank
       && spent(ranks, data) + node.cost <= data.pointBudget
       && node.requires.every(([i, rank]) => ranks[i] >= rank);
   };
-  const dependents = (ranks, data, index, nextRank) => data.nodes
+  const dependents = (ranks, data, index, nextRank, name = node => node.name) => data.nodes
     .filter(node => ranks[node.index] > 0
       && node.requires.some(([i, rank]) => i === index && nextRank < rank))
-    .map(node => node.name);
+    .map(name);
   const canRemove = (ranks, data, index) => ranks[index] > 0
     && dependents(ranks, data, index, ranks[index] - 1).length === 0;
   const migrate = (old, data) => {

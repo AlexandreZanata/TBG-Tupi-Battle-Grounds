@@ -14,8 +14,10 @@ use tbg_core::{OnHit, Phase, UnitId};
 use super::UiAction;
 #[cfg(any(not(target_os = "linux"), test))]
 use super::{button, label, BUTTON, DISABLED, PANEL};
+use crate::i18n::{content, Lang, Msg};
 use crate::sync::LatestView;
 use crate::GameState;
+use tbg_core::content::TICK_HZ;
 
 #[derive(Resource, Default)]
 pub struct Selected(pub Option<UnitId>);
@@ -61,8 +63,10 @@ fn rebuild(
     mut commands: Commands,
     selected: Res<Selected>,
     view: Res<LatestView>,
+    lang: Res<Lang>,
     panels: Query<Entity, With<EvolvePanel>>,
 ) {
+    let lang = *lang;
     for e in &panels {
         commands.entity(e).despawn();
     }
@@ -90,16 +94,29 @@ fn rebuild(
             DespawnOnExit(GameState::InMatch),
         ))
         .id();
-    let title = format!("{} | tier {}", def(u.kind).name, u.tier);
+    let title = lang.tf(
+        Msg::EvolveTitle,
+        &[
+            ("name", &content::unit_name(lang, u.kind)),
+            ("tier", &u.tier),
+        ],
+    );
     let mut children = vec![commands.spawn(label(title, 20.0)).id()];
-    for (branch, text) in options(u) {
+    for (branch, form, effects) in options(u, lang) {
         // The seat's real price (Augment and arena discounts, D-55).
         let cost = v.evolve_costs[usize::from(u.tier.min(1))];
         children.push(
             commands
                 .spawn((
                     button(
-                        &format!("{text} ({})", cost / ENERGY_SCALE),
+                        &lang.tf(
+                            Msg::EvolveOption,
+                            &[
+                                ("form", &form),
+                                ("effects", &effects),
+                                ("cost", &(cost / ENERGY_SCALE)),
+                            ],
+                        ),
                         choice_action(v, id, branch),
                         300.0,
                     ),
@@ -109,11 +126,15 @@ fn rebuild(
         );
     }
     if u.tier >= 2 {
-        children.push(commands.spawn(label("Fully evolved", 16.0)).id());
+        children.push(commands.spawn(label(lang.t(Msg::EvolveFully), 16.0)).id());
     }
     children.push(
         commands
-            .spawn(button("Close", UiAction::CloseEvolve, 140.0))
+            .spawn(button(
+                lang.t(Msg::CommonClose),
+                UiAction::CloseEvolve,
+                140.0,
+            ))
             .id(),
     );
     commands.entity(panel).add_children(&children);
@@ -155,7 +176,7 @@ pub(in crate::ui) fn choice_action(v: &tbg_core::MatchView, unit: UnitId, branch
 
 /// Branch choices: tier 0 → A and B; tier 1 → next form of its branch.
 #[cfg(any(not(target_os = "linux"), test))]
-fn options(u: &UnitView) -> Vec<(u8, String)> {
+fn options(u: &UnitView, lang: Lang) -> Vec<(u8, &'static str, String)> {
     let branches: Vec<u8> = match u.tier {
         0 => vec![0, 1],
         1 => vec![u.branch],
@@ -164,40 +185,46 @@ fn options(u: &UnitView) -> Vec<(u8, String)> {
     branches
         .into_iter()
         .filter_map(|b| {
-            form_of(u.kind, u.tier + 1, b).map(|f| {
-                let mut facts = vec![
-                    describe(f),
+            let form = form_of(u.kind, u.tier + 1, b)?;
+            let name = content::form_name(lang, u.kind, u.tier + 1, b)?;
+            Some((
+                b,
+                name,
+                [
+                    describe(form, lang),
                     super::ability_details::describe(u.kind, u.tier + 1, b),
-                ];
-                facts.retain(|s| !s.is_empty());
-                (b, format!("{}: {}", f.name, facts.join("; ")))
-            })
+                ]
+                .join("; "),
+            ))
         })
         .collect()
 }
 
-pub fn describe(f: &FormDef) -> String {
+/// The form's modifiers as one localized line (`+50% HP, hits slow 30% 1.5s`).
+pub fn describe(f: &FormDef, lang: Lang) -> String {
     let mut parts = Vec::new();
-    let pct = |v: i32, what: &str| (v != 0).then(|| format!("+{}% {what}", v / 100));
-    parts.extend(pct(f.hp_bp, "HP"));
-    parts.extend(pct(f.dmg_bp, "dmg"));
-    parts.extend(pct(f.atk_bp, "attack speed"));
-    parts.extend(pct(f.speed_bp, "speed"));
-    parts.extend(pct(f.heal_bp, "heal"));
-    let tiles = |v: i32, what: &str| (v != 0).then(|| format!("+{:.1} {what}", v as f32 / 1000.0));
-    parts.extend(tiles(f.range_add, "range"));
-    parts.extend(tiles(f.splash_add, "splash"));
+    let pct = |v: i32, msg: Msg| (v != 0).then(|| lang.tf(msg, &[("value", &(v / 100))]));
+    parts.extend(pct(f.hp_bp, Msg::EvolveEffectHp));
+    parts.extend(pct(f.dmg_bp, Msg::EvolveEffectDmg));
+    parts.extend(pct(f.atk_bp, Msg::EvolveEffectAtk));
+    parts.extend(pct(f.speed_bp, Msg::EvolveEffectSpeed));
+    parts.extend(pct(f.heal_bp, Msg::EvolveEffectHeal));
+    let tiles = |v: i32, msg: Msg| {
+        (v != 0).then(|| lang.tf(msg, &[("value", &lang.decimal(f64::from(v) / 1000.0, 1))]))
+    };
+    parts.extend(tiles(f.range_add, Msg::EvolveEffectRange));
+    parts.extend(tiles(f.splash_add, Msg::EvolveEffectSplash));
     if f.dmg_add != 0 {
-        parts.push(format!("+{} dmg attack", f.dmg_add));
+        parts.push(lang.tf(Msg::EvolveEffectDmgAdd, &[("value", &f.dmg_add)]));
     }
+    let secs = |ticks: u16| lang.decimal(f64::from(ticks) / f64::from(TICK_HZ), 1);
     match f.on_hit {
-        Some(OnHit::Slow { bp, ticks }) => parts.push(format!(
-            "hits slow {}% {:.1}s",
-            bp / 100,
-            f32::from(ticks) / 20.0
+        Some(OnHit::Slow { bp, ticks }) => parts.push(lang.tf(
+            Msg::EvolveEffectSlow,
+            &[("pct", &(bp / 100)), ("secs", &secs(ticks))],
         )),
         Some(OnHit::Root { ticks }) => {
-            parts.push(format!("hits root {:.1}s", f32::from(ticks) / 20.0))
+            parts.push(lang.tf(Msg::EvolveEffectRoot, &[("secs", &secs(ticks))]))
         }
         None => {}
     }
@@ -208,6 +235,17 @@ pub fn describe(f: &FormDef) -> String {
 mod tests {
     use super::*;
     use tbg_core::content::EVOLVE_COST;
+
+    #[test]
+    fn describe_keeps_core_numbers_in_both_languages() {
+        // P64 T02: Fortress (Shieldbearer A2) = +50% HP and a 30% slow for 1.5 s.
+        let fortress = form_of(tbg_core::UnitKind::Shieldbearer, 2, 0).unwrap();
+        assert_eq!(describe(fortress, Lang::En), "+50% HP, hits slow 30% 1.5s");
+        assert_eq!(
+            describe(fortress, Lang::PtBr),
+            "+50% PV, golpes causam lentid\u{E3}o de 30% por 1,5s"
+        );
+    }
 
     #[test]
     fn open_panel_tracks_energy_without_reopening_or_replacing_buttons() {
@@ -235,6 +273,7 @@ mod tests {
         let mut app = App::new();
         app.insert_resource(LatestView(Some(view)))
             .insert_resource(Selected(Some(7)))
+            .init_resource::<Lang>()
             .add_systems(
                 Update,
                 (

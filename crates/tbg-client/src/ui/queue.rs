@@ -6,6 +6,7 @@ use bevy::text::LineBreak;
 
 use super::{button, label, screen, UiAction, PANEL};
 use crate::config;
+use crate::i18n::{Lang, Msg};
 use crate::sync::QueueInfo;
 use crate::GameState;
 
@@ -30,7 +31,7 @@ pub fn plugin(app: &mut App) {
         .add_systems(Update, update.run_if(in_state(GameState::Queue)));
 }
 
-fn spawn(mut commands: Commands, time: Res<Time>) {
+fn spawn(mut commands: Commands, time: Res<Time>, lang: Res<Lang>) {
     commands.insert_resource(Entered(time.elapsed_secs_f64()));
     commands.spawn((
         screen(JustifyContent::Center),
@@ -46,7 +47,7 @@ fn spawn(mut commands: Commands, time: Res<Time>) {
             },
             BackgroundColor(PANEL),
             children![
-                (label("Connecting...", 22.0), StatusText),
+                (label(lang.t(Msg::QueueConnecting), 22.0), StatusText),
                 (
                     label("", 12.0),
                     TextLayout::new(Justify::Left, LineBreak::AnyCharacter),
@@ -63,20 +64,20 @@ fn spawn(mut commands: Commands, time: Res<Time>) {
                     },
                     children![
                         (
-                            button("Copy link", UiAction::CopyLink, 150.0),
+                            button(lang.t(Msg::QueueCopyLink), UiAction::CopyLink, 150.0),
                             QueueButton::Copy
                         ),
                         (
-                            button("Share", UiAction::ShareChallenge, 120.0),
+                            button(lang.t(Msg::QueueShare), UiAction::ShareChallenge, 120.0),
                             QueueButton::Share
                         ),
                         (
-                            button("Practice while you wait", UiAction::Practice, 220.0),
+                            button(lang.t(Msg::QueuePractice), UiAction::Practice, 220.0),
                             QueueButton::Practice
                         ),
                     ],
                 ),
-                button("Cancel", UiAction::Cancel, 220.0),
+                button(lang.t(Msg::QueueCancel), UiAction::Cancel, 220.0),
             ],
         )],
     ));
@@ -86,6 +87,7 @@ fn update(
     time: Res<Time>,
     entered: Res<Entered>,
     info: Res<QueueInfo>,
+    lang: Res<Lang>,
     mut text: Single<&mut Text, (With<StatusText>, Without<LinkText>)>,
     mut link_text: Single<&mut Text, (With<LinkText>, Without<StatusText>)>,
     mut buttons: Query<(&QueueButton, &mut Node)>,
@@ -94,7 +96,11 @@ fn update(
     let clock = format!("{}:{:02}", waited / 60, waited % 60);
     let (status, link, copy, share, practice) = if let Some(token) = info.challenge {
         (
-            format!("Challenge created\nWaiting for your friend {clock}"),
+            [
+                lang.t(Msg::QueueChallengeCreated).to_string(),
+                lang.tf(Msg::QueueWaitingFriend, &[("clock", &clock)]),
+            ]
+            .join("\n"),
             config::challenge_link(&token),
             true,
             true,
@@ -102,7 +108,7 @@ fn update(
         )
     } else if info.joining_challenge {
         (
-            "Joining challenge...".into(),
+            lang.t(Msg::QueueJoining).into(),
             String::new(),
             false,
             false,
@@ -110,10 +116,12 @@ fn update(
         )
     } else if let Some(code) = info.room {
         (
-            format!(
-                "Room {}\nShare the link with a friend\nWaiting {clock}",
-                String::from_utf8_lossy(&code)
-            ),
+            [
+                lang.tf(Msg::QueueRoom, &[("code", &String::from_utf8_lossy(&code))]),
+                lang.t(Msg::QueueShareLink).to_string(),
+                lang.tf(Msg::QueueWaiting, &[("clock", &clock)]),
+            ]
+            .join("\n"),
             config::room_link(&String::from_utf8_lossy(&code)),
             true,
             false,
@@ -121,14 +129,20 @@ fn update(
         )
     } else if info.searching {
         (
-            format!("Searching for an opponent... {clock}"),
+            lang.tf(Msg::QueueSearching, &[("clock", &clock)]),
             String::new(),
             false,
             false,
             waited >= 30,
         )
     } else {
-        ("Connecting...".into(), String::new(), false, false, false)
+        (
+            lang.t(Msg::QueueConnecting).into(),
+            String::new(),
+            false,
+            false,
+            false,
+        )
     };
     text.0 = status;
     link_text.0 = link;
@@ -154,6 +168,7 @@ mod tests {
     fn challenge_waiting_queries_and_copy_share_controls_work_together() {
         let mut app = App::new();
         app.insert_resource(Time::<()>::default())
+            .init_resource::<Lang>()
             .insert_resource(QueueInfo {
                 challenge: Some([7; 16]),
                 ..default()
