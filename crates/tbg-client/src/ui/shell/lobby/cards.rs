@@ -107,9 +107,9 @@ pub fn news(root: &mut ChildSpawnerCommands, page: usize, assets: &AssetServer, 
                 ..default()
             })
             .with_children(|r| {
-                r.spawn(button("<", Action::News(-1), 30.));
+                r.spawn(news_arrow("<", -1));
                 r.spawn(kit::muted(format!("{} / 3", page + 1), 12.));
-                r.spawn(button(">", Action::News(1), 30.));
+                r.spawn(news_arrow(">", 1));
             });
         });
 }
@@ -211,4 +211,19 @@ pub fn live(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                 ));
             });
         });
+}
+
+fn news_arrow(text: &str, direction: i8) -> impl Bundle {
+    (
+        Node {
+            width: px(32),
+            height: px(30),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        UiAction::Disabled,
+        Action::News(direction),
+        children![kit::heading(text, 26.)],
+    )
 }

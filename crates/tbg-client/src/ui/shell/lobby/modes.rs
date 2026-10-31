@@ -87,7 +87,8 @@ pub fn spawn(root: &mut ChildSpawnerCommands, account: &Account, assets: &AssetS
                         ..chrome::column()
                     })
                     .with_children(|copy| {
-                        copy.spawn(kit::heading(title, 21.));
+                        copy.spawn(kit::heading(title, 21.))
+                            .insert(TextColor(Color::srgb_u8(245, 240, 224)));
                         copy.spawn(kit::muted(hint, 13.));
                     });
                     r.spawn(kit::muted(">", 28.));

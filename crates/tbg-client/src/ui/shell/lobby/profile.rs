@@ -51,7 +51,7 @@ pub fn spawn(
             p.spawn(Node {
                 flex_direction: FlexDirection::Column,
                 row_gap: px(5),
-                padding: UiRect::top(px(30)),
+                padding: UiRect::top(px(44)),
                 ..chrome::region(34., 4., 62., 59.)
             })
             .with_children(|info| {
@@ -66,7 +66,8 @@ pub fn spawn(
                                 .replace("{rank}", &rank.to_string())
                         },
                     );
-                info.spawn(kit::heading(title, 20.));
+                info.spawn(kit::heading(title, 20.))
+                    .insert(TextColor(Color::srgb_u8(245, 240, 224)));
                 info.spawn(kit::heading(
                     account
                         .profile
