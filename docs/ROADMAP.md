@@ -372,6 +372,20 @@ browser/native builds and compatible DB writers. A later multi-host capacity
 stage requires evidence and owner scope, not an assumed thousands-player SLA.
 No installed client, signed release, production proxy or server was changed.
 
+## Owner-requested commerce and recovery foundation (2026-10-31)
+
+| Phase | Spec | Scope | Status | Gates |
+|---|---|---|---|---|
+| P67 | [P67-commerce-recovery-foundation.md](phases/P67-commerce-recovery-foundation.md) | Separate module folders/contracts, official Asaas Pix research, recovery email/key rotation, order/Inventory/refund antifraud, Zaflas fiscal/legal and opponent cosmetic controls | **planning/documentary foundation only**, `codex/p67-commerce-recovery-foundation-plan` | Verified recovery before paid checkout; legal/accounting/product approval; external integration separately authorized |
+
+[Module map](modules/commerce/README.md) and
+[offline-base executor prompt](planning/P67-EXECUTION-PROMPT.md).
+Sequence: recovery/identity → offline commerce ledger/grants → synthetic
+provider/fiscal mappings → presentation contracts → targeted consolidation.
+No Sandbox/Production calls, real email, payment, invoice or DB migration is
+performed by this branch. D-17's recovery reopen condition is addressed by
+Proposed D-94, not claimed as implemented. Paid integration follows later scope.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·

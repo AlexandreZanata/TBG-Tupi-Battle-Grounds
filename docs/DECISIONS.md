@@ -1287,3 +1287,65 @@ of players require capacity evidence and later multi-host routing/store
 choices, not an immediate orchestration platform. Arbitrary worker crash
 failover/checkpointing and emergency security shutdown are separate policies.
 See [P66](phases/P66-native-updates-and-release-safety.md).
+
+## D-93 · Isolated offline commerce foundation, Asaas Pix first — 2026-10-31 (Proposed)
+
+**Decision.** P67 creates module documentation folders, initial schemas and
+synthetic examples for server-owned orders, exact BRL money, durable event/
+outbox processing and source-specific Inventory grants/refunds. Future code
+fits cohesive modules in the current server/client crates, not tbg-core or
+an immediate multi-provider framework. Only Asaas/Pix is in initial scope.
+
+**Evidence.** Current official provider documentation was checked on
+2026-10-31: API auth versus callback auth, Pix RECEIVED, HTTP 200 acknowledgement,
+unknown create outcomes, partial refund and MED/fiscal states. Record facts
+and source links in the Asaas dossier; recheck before live integration.
+Local idempotence and validation are mandatory; externalReference alone is
+not a guarantee, nor is a redirect proof of payment. Exactly-once business
+effects use durable unique grants, not exactly-once transport claims.
+
+**Status.** Documentary foundation only, no SDK/dependency/route/migration or
+real provider call. Offline implementation, Sandbox and production are
+separate gates. Reopen for subscriptions, cards, tradable goods, gifting,
+new currencies/providers or measured deployment boundaries. No pay-to-win.
+
+## D-94 · Verified recovery email before paid ownership — 2026-10-31 (Proposed)
+
+**Decision.** D-17's recovery reopen condition is met by planned purchases.
+Preserve name/key login and stable AccountId while adding verified recovery
+email enrollment and a temporary-link flow that rotates the key in place.
+No permanent key in email or recoverable plaintext storage; fresh key proof
+for enrollment/change, established mailbox safeguards, one-time confirmation
+and stale-session revocation across integrated game/community generations.
+
+**Why.** Losing a key must not inevitably strand paid ownership. Verifying
+a payer/billing email or producing a receipt does not prove game-account
+ownership. Account recovery must not create a replacement account, expose
+email publicly or let a recently attached hostile factor seize purchases.
+
+**Status.** P67 plans/reviews this amendment; current deployed authentication
+does not change in this branch. Lost key plus lost verified mailbox remains
+an unresolved exceptional-proof case, not a promised support override.
+Reopen for federation/MFA, changed assurance requirements or real recovery
+incidents; Google/Discord integration is unnecessary for this initial design.
+
+## D-95 · Zaflas fiscal authority and opponent presentation rights — 2026-10-31 (Proposed)
+
+**Decision.** Zaflas is the owner's intended selling/issuing company, not a
+fabricated integration service. Fiscal classification, company/merchant
+setup, tax regime and issuance adapter require owner/accountant approval.
+Asaas NFS-e is a documented option, not a conclusion about the proper document
+for every sale. Payment, entitlement, refund and fiscal authorization have
+separate linked lifecycles. Legal/privacy/refund/age policy gates precede sales.
+
+**Presentation.** Players may independently mute opponents' cosmetic emotes
+and render their optional cosmetics with reviewed neutral baselines. Preserve
+real kind/form/Stronghold mechanics, cues, timing and server equipment rights.
+These preferences cannot change combat or be overridden by paid ownership.
+
+**Status/reopen.** Plan and synthetic contracts only; legal drafts are not
+final advice, real documents are not issued and no skins/emotes are activated.
+Reopen for different sales channels/issuer, new tax requirements or content
+that cannot preserve tactical readability. itch.io download purchases remain
+their configured platform channel, with no automatic Asaas or Inventory link.
+See [P67](phases/P67-commerce-recovery-foundation.md).

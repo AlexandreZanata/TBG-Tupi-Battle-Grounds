@@ -1007,3 +1007,46 @@ admissions only. A 5% p99 tick/view regression is an initial stop criterion
 on an agreed paired fixture, never an existing measured SLO. Security/result
 loss stops rollout independently. Final limits/OS/channel/signing/emergency/
 retention decisions O01–O04 remain owner gates before activation.
+
+## 20. Commerce, recovery and opponent preferences (P67, Proposed)
+
+**Proposed — planning/documentary base only, 2026-10-31.** See
+[P67](phases/P67-commerce-recovery-foundation.md) and the
+[new module folders](modules/commerce/README.md). No real payment, email,
+invoice, item catalog or authentication change is activated in this branch.
+
+- **BR-CO01:** preserve BR-C01–C03: paid items are cosmetic/account-bound,
+  with validated server evidence. Cash checkout is separate from core Shop/
+  Energy. Existing free cosmetics are not made paid implicitly.
+- **BR-CO02:** verified recovery email is a prerequisite for paid checkout;
+  name/key play and guests remain available. Enrollment/change needs trusted
+  proof. Recovery rotates the key on the same AccountId, preserves purchases
+  and ranking, consumes a temporary challenge and revokes stale sessions.
+  Email receives a temporary link, not the permanent account key.
+- **BR-CO03:** initial payment scope is Asaas Pix and fixed nontransferable
+  cosmetic items. No subscriptions, wallet, gift transfers, paid randomized
+  rewards or competitive advantage. Orders freeze server prices/legal terms;
+  integer BRL minor units are authoritative.
+- **BR-CO04:** normal grant follows verified matching PIX receipt and unique
+  source entitlement application. Client return/screenshot/QR creation is
+  insufficient. Duplicate/late/out-of-order facts and unknown outcomes are
+  reconciled; refunds/holds compensate specific sources without gameplay bans.
+- **BR-CO05:** Zaflas is intended fiscal issuer, pending real legal/company/
+  accounting setup. Invoice authorization, payment and item delivery remain
+  distinct linked records. Fiscal document type/rates and consumer/privacy/
+  younger-player policy require appropriate review before sales.
+- **BR-CO06:** opponent emotes may be locally muted, and optional opponent
+  cosmetics replaced by approved baselines. Preserve actual kind/form,
+  StrongholdKind, timing, team/status/projectile readability and equipment
+  ownership. Paid ownership cannot override the viewer's preference.
+- **BR-CO07:** itch.io package transactions remain a separate platform
+  channel; they do not automatically become Asaas charges or cosmetic grants.
+  Provider/email/fiscal integrations remain off until explicitly authorized.
+
+Proposed initial recovery limits: temporary recovery link 15 minutes,
+verification 24 hours, three dispatches/hour/account/destination with bounded
+IP controls. Initial documentary order schema permits up to 20 distinct
+cosmetic lines, quantity 1 each; fixture SKU/2,000-cent value is illustrative,
+not an approved catalog/price. Opponent mute/hide defaults false pending
+younger-player policy. Schema version 1 is local to documents, not a game
+protocol or DB version. O01–O05 confirm real policies before activation.

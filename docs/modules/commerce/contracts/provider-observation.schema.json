@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "provider": {
+      "const": "asaas"
+    },
+    "environment": {
+      "const": "synthetic"
+    },
+    "eventId": {
+      "type": "string",
+      "pattern": "^fixture-event-[a-z0-9-]+$"
+    },
+    "merchantId": {
+      "const": "fixture-merchant"
+    },
+    "paymentId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^fixture-payment-[a-z0-9-]+$"
+    },
+    "orderId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^fixture-order-[a-z0-9-]+$"
+    },
+    "kind": {
+      "enum": [
+        "received",
+        "refund",
+        "hold",
+        "unhold"
+      ]
+    },
+    "amountMinor": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "provider",
+    "environment",
+    "eventId",
+    "merchantId",
+    "paymentId",
+    "orderId",
+    "kind",
+    "amountMinor"
+  ]
+}
