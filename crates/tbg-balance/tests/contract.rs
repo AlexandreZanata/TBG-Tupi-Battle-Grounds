@@ -22,6 +22,16 @@ fn canon() -> &'static Ruleset {
     Ruleset::canon()
 }
 
+/// Canon with the original ten kinds as the Shop pool. C7 measures on it
+/// (D-58): on the full pool each unit is offered rarely, which dilutes the
+/// `favor-<unit>` row below its gate.
+fn ten_kind_pool(r: &Ruleset) -> &'static Ruleset {
+    leak(Ruleset {
+        pool: &UNIT_KINDS,
+        ..r.clone()
+    })
+}
+
 /// Seed pairs for match canaries (healers, duel fallbacks): the opponent plays
 /// the same ruleset, so the shift is diluted and needs a larger sample.
 const MATCH_PAIRS: u64 = 256;
@@ -49,7 +59,11 @@ fn favor_vs(rules: &'static Ruleset, k: UnitKind, pairs: u64, opponent: Policy) 
 
 /// Scale one kind's base stats (and every form's flat additions stay).
 fn scaled(kind: UnitKind, hp: i64, out: i64, cost: i64) -> &'static Ruleset {
-    let mut r = canon().clone();
+    scaled_on(canon(), kind, hp, out, cost)
+}
+
+fn scaled_on(base: &Ruleset, kind: UnitKind, hp: i64, out: i64, cost: i64) -> &'static Ruleset {
+    let mut r = base.clone();
     let d = &mut r.units[kind as usize];
     d.hp = (i64::from(d.hp) * hp) as i32;
     d.damage = (i64::from(d.damage) * out) as i32;
@@ -176,7 +190,9 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             })
             .unwrap()
     };
-    let plain = duels::matrix_of(canon(), forms.clone(), 4);
+    // Detection runs on the ten-kind pool (D-58); the thresholds do not move.
+    let lab = ten_kind_pool(canon());
+    let plain = duels::matrix_of(lab, forms.clone(), 4);
     for kind in UNIT_KINDS {
         if canon().def(kind).damage > 0 {
             let i = base(kind);
@@ -187,7 +203,7 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             let moved = |shift: f64, room: f64| shift >= 0.20f64.min(room / 2.0);
             // Doubled HP and damage: flagged oppressive, or clearly stronger
             // against the other base forms at every budget.
-            let strong = duels::matrix_of(scaled(kind, 2, 2, 1), forms.clone(), 4);
+            let strong = duels::matrix_of(scaled_on(lab, kind, 2, 2, 1), forms.clone(), 4);
             let caught = strong.flags(canon()).oppressive.contains(&i)
                 || budgets
                     .clone()
@@ -195,27 +211,35 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             // Duels alone may miss it (a tank still loses to range): then
             // the match row must move (`favor-<unit>` vs `bot`).
             let caught = caught
-                || favor_vs_bot(scaled(kind, 2, 2, 1), kind, MATCH_PAIRS)
-                    >= favor_vs_bot(canon(), kind, MATCH_PAIRS) + 0.10
-                || favor_vs(scaled(kind, 2, 2, 1), kind, MATCH_PAIRS, Policy::Cheap)
-                    >= favor_vs(canon(), kind, MATCH_PAIRS, Policy::Cheap) + 0.10;
+                || favor_vs_bot(scaled_on(lab, kind, 2, 2, 1), kind, MATCH_PAIRS)
+                    >= favor_vs_bot(lab, kind, MATCH_PAIRS) + 0.10
+                || favor_vs(
+                    scaled_on(lab, kind, 2, 2, 1),
+                    kind,
+                    MATCH_PAIRS,
+                    Policy::Cheap,
+                ) >= favor_vs(lab, kind, MATCH_PAIRS, Policy::Cheap) + 0.10;
             assert!(caught, "{kind:?} ×2 HP and damage was not caught");
             // A tripled cost: flagged weak, or clearly weaker everywhere.
-            let dear = duels::matrix_of(scaled(kind, 1, 1, 3), forms.clone(), 4);
+            let dear = duels::matrix_of(scaled_on(lab, kind, 1, 1, 3), forms.clone(), 4);
             let caught = dear.flags(canon()).weak.contains(&i)
                 || budgets
                     .clone()
                     .all(|b| moved(avg(&plain, b) - avg(&dear, b), avg(&plain, b)));
             let caught = caught
-                || favor_vs_bot(scaled(kind, 1, 1, 3), kind, MATCH_PAIRS)
-                    <= favor_vs_bot(canon(), kind, MATCH_PAIRS) - 0.10
-                || favor_vs(scaled(kind, 1, 1, 3), kind, MATCH_PAIRS, Policy::Cheap)
-                    <= favor_vs(canon(), kind, MATCH_PAIRS, Policy::Cheap) - 0.10;
+                || favor_vs_bot(scaled_on(lab, kind, 1, 1, 3), kind, MATCH_PAIRS)
+                    <= favor_vs_bot(lab, kind, MATCH_PAIRS) - 0.10
+                || favor_vs(
+                    scaled_on(lab, kind, 1, 1, 3),
+                    kind,
+                    MATCH_PAIRS,
+                    Policy::Cheap,
+                ) <= favor_vs(lab, kind, MATCH_PAIRS, Policy::Cheap) - 0.10;
             assert!(caught, "{kind:?} ×3 cost was not caught");
         } else {
             // A pure healer cannot win a duel: measured in matches instead.
-            let canon_score = favor_vs_bot(canon(), kind, MATCH_PAIRS);
-            let strong = favor_vs_bot(scaled(kind, 2, 2, 1), kind, MATCH_PAIRS);
+            let canon_score = favor_vs_bot(lab, kind, MATCH_PAIRS);
+            let strong = favor_vs_bot(scaled_on(lab, kind, 2, 2, 1), kind, MATCH_PAIRS);
             assert!(
                 strong >= canon_score + 0.10,
                 "{kind:?} ×2 HP and heal: {canon_score:.2} -> {strong:.2}"
