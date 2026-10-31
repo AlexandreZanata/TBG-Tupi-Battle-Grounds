@@ -77,8 +77,8 @@ pub struct UnitRow {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct SideData {
     pub units: Vec<UnitRow>,
-    pub synergy_max: [u8; 4],
-    pub synergy_ticks: [[u32; 2]; 4],
+    pub synergy_max: [u8; tbg_core::FACTION_COUNT],
+    pub synergy_ticks: [[u32; 2]; tbg_core::FACTION_COUNT],
     pub offered: Vec<(usize, u32)>,
     pub chosen: Vec<(usize, u32)>,
     pub stronghold: usize,
@@ -141,7 +141,7 @@ pub fn eligible(matches: &[StoredMatch], catalog: &Catalog) -> (Vec<MatchObs>, C
 /// An unknown schema or an incomplete side is a coverage gap, never zeros.
 fn decode(m: &StoredMatch, payload: &str, catalog: &Catalog) -> Option<MatchObs> {
     let v: Value = serde_json::from_str(payload).ok()?;
-    if v["schema"].as_u64()? != 1 {
+    if !matches!(v["schema"].as_u64()?, 1 | 2) {
         return None;
     }
     let side = |i: usize| -> Option<SideData> {
@@ -174,9 +174,16 @@ fn decode(m: &StoredMatch, payload: &str, catalog: &Catalog) -> Option<MatchObs>
                 .map(|p| Some((usize::try_from(p.get(0)?.as_u64()?).ok()?, n(p.get(1)?)?)))
                 .collect()
         };
-        let mut synergy_max = [0u8; 4];
-        let mut synergy_ticks = [[0u32; 2]; 4];
-        for f in 0..4 {
+        let mut synergy_max = [0u8; tbg_core::FACTION_COUNT];
+        let mut synergy_ticks = [[0u32; 2]; tbg_core::FACTION_COUNT];
+        let factions = s["synergy_max"].as_array()?.len();
+        if factions != 4 && factions != tbg_core::FACTION_COUNT {
+            return None;
+        }
+        if s["synergy_ticks"].as_array()?.len() != factions {
+            return None;
+        }
+        for f in 0..factions {
             synergy_max[f] = u8::try_from(s["synergy_max"].get(f)?.as_u64()?).ok()?;
             for (lvl, slot) in synergy_ticks[f].iter_mut().enumerate() {
                 *slot = n(s["synergy_ticks"].get(f)?.get(lvl)?)?;

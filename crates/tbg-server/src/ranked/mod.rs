@@ -88,7 +88,7 @@ pub struct RankedFinal {
     pub ruleset_version: u32,
     pub ruleset_source_hash: u64,
     pub seats: [IntegritySeat; 2],
-    pub factions: [[u32; 4]; 2],
+    pub factions: [[u32; tbg_core::FACTION_COUNT]; 2],
     pub arcanas: [ArcanaPreset; 2],
     /// P61 §4: the optional, size-bounded side summary; `None` when
     /// collection is off or the summary was a coverage gap.

@@ -499,8 +499,15 @@ async fn records_insert_and_count() {
         ..Config::default()
     };
     tokio::spawn(tbg_server::run(config, listener));
-    let (a, b) = tokio::join!(play_one(fast(&url), 11), play_one(fast(&url), 12));
-    assert!(a.completed && b.completed);
+    // Persistence is independent of combat duration and roster composition.
+    // Finish through the real authoritative surrender path instead of a 60s bot timeout.
+    let (mut a, mut b) = (connect(&url).await, connect(&url).await);
+    hello(&mut a).await;
+    hello(&mut b).await;
+    send(&mut a, &ClientMsg::QuickMatch).await;
+    send(&mut b, &ClientMsg::QuickMatch).await;
+    let _ = tokio::join!(challenge_start(&mut a), challenge_start(&mut b));
+    end_by_surrender(&mut a, &mut b).await;
     tokio::time::sleep(Duration::from_millis(300)).await;
     let store = tbg_server::store::Store::open(&db).unwrap();
     assert_eq!(store.match_count().await.unwrap(), 1);

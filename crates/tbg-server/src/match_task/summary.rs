@@ -29,30 +29,30 @@ pub struct UnitSummary {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SideSummary {
     pub units: [UnitSummary; ALL_KINDS.len()],
-    pub synergy_max: [u8; 4],
+    pub synergy_max: [u8; tbg_core::FACTION_COUNT],
     /// Combat ticks at level >= 1 and >= 2, per Faction.
-    pub synergy_ticks: [[u32; 2]; 4],
+    pub synergy_ticks: [[u32; 2]; tbg_core::FACTION_COUNT],
     pub augment_offered: [u32; AUGMENT_CATALOG],
     pub augment_chosen: [u32; AUGMENT_CATALOG],
     pub closed_rounds: u32,
     pub cancelled_rounds: u32,
     /// Current Synergy level and the combat tick it started.
-    level: [u8; 4],
-    since: [u32; 4],
+    level: [u8; tbg_core::FACTION_COUNT],
+    since: [u32; tbg_core::FACTION_COUNT],
 }
 
 impl Default for SideSummary {
     fn default() -> SideSummary {
         SideSummary {
             units: [UnitSummary::default(); ALL_KINDS.len()],
-            synergy_max: [0; 4],
-            synergy_ticks: [[0; 2]; 4],
+            synergy_max: [0; tbg_core::FACTION_COUNT],
+            synergy_ticks: [[0; 2]; tbg_core::FACTION_COUNT],
             augment_offered: [0; AUGMENT_CATALOG],
             augment_chosen: [0; AUGMENT_CATALOG],
             closed_rounds: 0,
             cancelled_rounds: 0,
-            level: [0; 4],
-            since: [0; 4],
+            level: [0; tbg_core::FACTION_COUNT],
+            since: [0; tbg_core::FACTION_COUNT],
         }
     }
 }
@@ -212,7 +212,7 @@ impl SummaryCollector {
             .iter()
             .map(|&seat| {
                 let side = &mut self.sides[seat.index()];
-                for f in 0..4 {
+                for f in 0..tbg_core::FACTION_COUNT {
                     side.close(f, end);
                 }
                 encode_side(side, state, seat)

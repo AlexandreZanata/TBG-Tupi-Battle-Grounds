@@ -9,7 +9,7 @@ use serde_json::json;
 use tbg_core::protocol::Profile;
 use tbg_core::ranked_integrity::{RatingDisposition, RiskState};
 use tbg_core::rating::{apply, delta, Score};
-use tbg_core::{Outcome, Seat};
+use tbg_core::{Outcome, Seat, FACTIONS, FACTION_COUNT};
 
 use super::{history, AccountId};
 use crate::ranked::policy::RankedPolicy;

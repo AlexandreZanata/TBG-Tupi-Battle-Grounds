@@ -49,7 +49,7 @@ fn entry(accounts: [i64; 2], stats: Option<serde_json::Value>) -> JournalEntry {
             ruleset_version: tbg_core::ruleset_version::RULESET_VERSION,
             ruleset_source_hash: tbg_server::ranked::source_hash(),
             seats: [IntegritySeat::default(); 2],
-            factions: [[1, 0, 0, 0], [0; 4]],
+            factions: [[1, 0, 0, 0, 0, 0, 0], [0; 7]],
             arcanas: [ArcanaPreset::DEFAULT; 2],
             stats,
         },

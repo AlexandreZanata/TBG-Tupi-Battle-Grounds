@@ -167,10 +167,15 @@ pub fn decode(v: &Value) -> Option<JournalEntry> {
             final_max_hp: hp(7)?,
         })
     };
-    let quad = |x: &Value| -> Option<[u32; 4]> {
-        let mut out = [0u32; 4];
-        for (i, slot) in out.iter_mut().enumerate() {
-            *slot = u32::try_from(x.get(i)?.as_u64()?).ok()?;
+    // Older journals had four Factions; append the new Factions as zero without truncation.
+    let quad = |x: &Value| -> Option<[u32; tbg_core::FACTION_COUNT]> {
+        let values = x.as_array()?;
+        if values.len() != 4 && values.len() != tbg_core::FACTION_COUNT {
+            return None;
+        }
+        let mut out = [0; tbg_core::FACTION_COUNT];
+        for (slot, value) in out.iter_mut().zip(values) {
+            *slot = u32::try_from(value.as_u64()?).ok()?;
         }
         Some(out)
     };
