@@ -651,3 +651,13 @@ so the existing v17 online View layout stays intact until activation.
 The owner checkpoint removes those skips and bumps the protocol together.
 PublicView contains no Shop fields. The desktop disables every card and
 Shop action until the previous Shop mutation is acknowledged or rejected.
+
+
+### Ability display follow-up (champion adjustments, 2026-10-31)
+
+UnitView keeps its existing shape; fx now packs the preallocated plate,
+growth and carrier display bits. Nester uses the growth field for timer
+maturity; Leechroot saturates its visible stack display at seven without
+capping simulation Essence. Shatterback's four outer plates are cached per
+form and rendered as separate children so one can detach without replacing
+the whole model. Crowd reads carrier state and remains presentation only.

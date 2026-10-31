@@ -1,6 +1,7 @@
 //! Every tunable balance number as one value (D-33). The simulation reads
 //! numbers only through `MatchState::rules()`, so the offline balance lab
-//! can play a variant; the server and the client only ever use `CANON`,
+//! can play a variant; online play uses `CANON`, while local Practice
+//! uses the explicit preview (Shop features stay disabled online). CANON is
 //! which is assembled from `content.rs` (each number is still written once).
 //!
 //! Structural values stay `const` in `content.rs` and are never tuned:
@@ -106,7 +107,7 @@ pub struct Ruleset {
     pub arenas: [ArenaRule; 5],
 }
 
-/// The only ruleset the server and the client use.
+/// The only ruleset used online.
 pub static CANON: Ruleset = Ruleset {
     shop: None,
     energy_start: ENERGY_START,
@@ -147,8 +148,8 @@ impl Ruleset {
         &CANON
     }
 
-    /// The full roster as the Shop pool (ROSTER-EXPANSION §F.5): equal to
-    /// canon since D-50; the lab and Practice keep calling it by name.
+    /// Full roster and Shop preview for the lab and local Practice.
+    /// Online CANON keeps Shop disabled until the owner checkpoint (D-62).
     /// Leaked once (a few KB, freed at exit).
     pub fn preview() -> &'static Ruleset {
         Box::leak(Box::new(Ruleset {

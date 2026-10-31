@@ -1,0 +1,16 @@
+favor-leechroot vs bot: 46.4% [44.2 – 48.4] over 2000 seed pairs
+stalled matches (60 s): 0.8% (32/4000)
+favor-leechroot vs bot (median ±10 pp)           46.4% [44.3% – 48.5%]        target 36.4% – 56.4%      PASS
+1 rows, 0 failing
+command: /tmp/tbg-baseline-bin/tbg-balance run --a favor-leechroot --b bot --pairs 2000 --threads 2 --seed-start 9000 --out /tmp/tbg-system-updates/docs/media/system-updates/lab/before-iteration-leechroot
+git_head: c9e56a1
+ruleset_fingerprint: 9fbc91c9e663502a
+applied: canon
+seeds: 9000..11000 (2000 pairs)
+threads: 2
+reaction_views: 5
+wall_s: 58.32
+games: 4000
+games_per_s: 69
+game_seconds_per_wall_second: 14624
+output: /tmp/tbg-system-updates/docs/media/system-updates/lab/before-iteration-leechroot

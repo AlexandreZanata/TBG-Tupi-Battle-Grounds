@@ -194,6 +194,16 @@ See the [arena art catalog and preview links](ARENAS.md). Implementation and
 desktop evidence are tracked in that report; owner visual approval is pending.
 The gameplay integration is [ARENAS-G](phases/ARENAS-gameplay.md).
 
+## Independent system update front (2026-10-31)
+
+[SYSTEM-updates](phases/SYSTEM-updates.md) implements the owner's champion
+adjustments, client crowd, local Shop Reserve/Reroll preview and repeatable
+performance scenes on `phase/system-champions-crowd-shop`, based on main
+`9008f11`. Work-front validation follows the owner's updated minimal policy.
+Balance confirmation, visual approval and measurement-dependent optimizations
+remain pending. CANON Shop stays disabled; no Frontage or gameplay Ghost.
+Draft PR delivery is for consolidation; it is not a release approval.
+
 ## Pending validations (owner)
 
 All code for P1–P8 is implemented and validated on the development PC

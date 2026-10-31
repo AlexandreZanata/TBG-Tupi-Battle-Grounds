@@ -26,9 +26,9 @@ pub struct UnitView {
     pub max_hp: i32,
     /// 0 none, 1 slowed, 2 rooted.
     pub status: u8,
-    /// Packed ability state (ROSTER-EXPANSION §F.4): poison 3 bits, fish 2,
-    /// confused 1, ward 1, bonded 1, plates 3, growth 3, carried 1, 1 spare.
-    /// Zero until the waves land, except the spare top bit: `FX_SUMMON`.
+    /// Ability display layout: lower 8 bits reserved for afflictions/bonds;
+    /// plates 3 bits, growth/maturity 3, carried 1, FX_SUMMON 1.
+    /// Growth is a saturated presentation value, never a simulation cap.
     pub fx: u16,
 }
 

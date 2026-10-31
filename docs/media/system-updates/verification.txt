@@ -1,0 +1,43 @@
+Validation evidence — 2026-10-31
+Delivery level: work front. No full verification claim.
+
+COMMAND: cargo test -p tbg-core --tests
+Historical baseline 9008f11, before champion edits.
+Completed targets: 28; passed tests: 135; failed tests: 0
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.02s
+
+COMMAND: cargo test -p tbg-core --features lab
+Historical in-progress combined tree; later test assertions and presentation edits are deferred.
+Completed targets: 32; passed tests: 215; failed tests: 0
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.59s
+
+COMMAND: cargo clippy --workspace -- -D warnings
+Historical intermediate tree before final refinements; not repeated after owner policy update.
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 11.13s
+
+COMMAND: flock -n -E 75 /tmp/tbg-validation-$(id -u).lock env CARGO_BUILD_JOBS=2 cargo check -p tbg-core --lib
+Passed using existing /tmp/tbg-shop-target cache.
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.65s
+
+COMMAND: flock -n -E 75 /tmp/tbg-validation-$(id -u).lock env CARGO_BUILD_JOBS=2 cargo check -p tbg-balance --lib
+Passed on final Journal implementation, existing cache.
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.75s
+
+COMMAND: flock -n -E 75 /tmp/tbg-validation-$(id -u).lock env CARGO_BUILD_JOBS=2 cargo check -p tbg-client --bin tbg-client --target wasm32-unknown-unknown
+Passed on final client Rust changes; existing hot cache, nonblocking cache guards.
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.30s
+
+COMMAND: trunk build --release
+Legacy release job started before the owner addendum; failed at artifact request. Not retried under the new policy.
+    Finished `release` profile [optimized] target(s) in 4m 23s
+error: could not compile `tbg-client` (bin "tbg-client") due to 15 previous errors
+2026-10-31T12:07:46.668824Z ERROR ❌ error
+2026-10-31T12:07:46.668870Z ERROR error from build pipeline
+
+COMMAND: cargo test --workspace
+Legacy job started before addendum; failed when its temporary example was removed during compilation. The example is restored as the maintained update_probe tool. Not rerun; no workspace-pass claim.
+error: couldn't find file `crates/tbg-core/examples/update_probe.rs`
+error: could not compile `tbg-core` (example "update_probe") due to 1 previous error
+
+Static checks on the delivery tree: affected package formatting, node --check for hud.js and diagnostics/measure.js, i18n JSON/key parity, git diff --check: passed.
+New/updated targeted tests, final release/gallery, 20,000-pair comparisons, capacity/CPU/GPU/size gates: deferred as detailed in SYSTEM-updates.md.
