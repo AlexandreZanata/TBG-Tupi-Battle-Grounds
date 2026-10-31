@@ -756,3 +756,97 @@ flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
 and the disk has about 23 GB free (95% used). A cold Bevy check is
 deferred to consolidation by policy, so Step 1/2 client code is not written
 blind on this front.
+
+### 9.2 Step 3 — training kernel, first slice (2026-10-31)
+
+**Order deviation.** Steps 1 and 2 are not started. Both are client work
+that needs a cold Bevy build (deferred, §9.1) and owner review of lore,
+look and Dance (O04). The core kernel does not depend on them, so it went
+first, as the owner instructed (“advance independent tasks while
+waiting”). The catalog must still be reviewed before Step 4 adds the UI.
+
+**Delivered (`tbg-core`, feature `training`).**
+
+- `MatchState::unit_pass` is the shared unit half of a tick (Synergy →
+  timers → afflictions → expiry → hatch → bonds → boarding → `run_units`).
+  `step` calls it, then tower fire, `remove_dead` and Stronghold checks, in
+  the same order as before. The training step runs only `unit_pass` and
+  `remove_dead`.
+- `training_hooks` (always compiled, inert without the feature or without
+  a runtime) reports actual HP mutations at the mutation points:
+  - `damage` records HP removed, with shield and plate absorption kept
+    separate.
+  - `heal` records HP restored (`hp_after − hp_before`, overheal excluded).
+  - Transfer donor and receiver, Furnace self-burn, Plants regeneration,
+    max-HP rescaling, and summon expiry or spent crates are each recorded.
+
+  Attribution is scoped at the call site: Direct, Splash, Betrayal,
+  Lifesteal, Transfer, SelfBurn, Regen. Without a scope, a change is
+  `Unknown`. Event amounts, `LabStats` and every return value are unchanged.
+- Dummy guards: a tagged Crate never opens (`summon::hatch`), never acts
+  (`advance_unit`) and never rescales (`refresh_max_hp`). Real Smuggler
+  crates are untouched.
+- `training::{TrainingScenario, TrainingUnitSpec, Opponent}` validates the
+  whole draft before allocating: schema, 1–12 playable units per side,
+  form (tier ≤ 2; branch ≤ 1; branch 0 at base), lane bounds, 1–5 dummies.
+  It spawns exact instances through the canonical `spawn`, so duplicates
+  are distinct ids. No Shop pool is built from the selection.
+- `TrainingSession` provides:
+  - Commands: Start, Pause, Resume, one-tick Step, Reset (same seed, new
+    session id) and ReplaceDraft (atomic). Stale ids are rejected.
+  - Finite and Renewable dummies; a Renewable dummy respawns on the next
+    tick with a new id.
+  - End rules: side elimination, draw, targets destroyed, allies
+    eliminated.
+  - Terminal pauses for the run limit, the entity ceiling and the row cap.
+  - Read-only `state()` and `metrics()` access.
+- `TrainingMetrics` keeps per-instance integer rows (dead instances, summon
+  parent, spawn and death ticks), seat totals, and unattributed buckets.
+  Each row's `expected_hp()` must equal the actual HP.
+
+**Known limits (recorded, not hidden).**
+
+- Poison pulses and Shatterback shrapnel carry no source in core state, so
+  they are counted as unattributed (`Periodic`/`Shrapnel`). A per-slot
+  provenance sidecar is still required before V08's “two periodic sources /
+  dead source” fixture can pass. R09 stays partial.
+- Windups aimed at a dead dummy are not cleared. They resolve as a normal
+  canonical miss. A respawned dummy always has a new id, so a stale windup
+  can never hit it. This deviates from §3.4's wording and is kept because
+  it preserves canonical attack timing.
+- Advanced context (Arcana and Augment presets) is not exposed yet: neutral
+  only, plus the arena. The content/rules fingerprint is not yet part of
+  scenario identity (schema + seed + scenario only so far).
+- The client does not enable `training` yet; that happens in Step 4.
+  `Ruleset::preview` removal stays scheduled with the `local.rs` edit.
+
+**Checks actually run** (work front, shared lock free, `CARGO_BUILD_JOBS=2`,
+uncommitted tree on top of `309b1cf`):
+
+```bash
+cargo fmt -p tbg-core                                           # ok
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
+  cargo clippy -p tbg-core --lib -- -D warnings                 # exit 0
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
+  cargo clippy -p tbg-core --features training --lib \
+  --test training_session --test training_isolation -- -D warnings  # exit 0
+```
+
+**Written but not run (queued for consolidation):**
+`tests/training_session.rs` covers:
+
+- the exact three-champion journey;
+- duplicates;
+- atomic validation of every invalid case;
+- pause, step, resume and stale ids;
+- same-seed replay and Reset;
+- the finite dummy (inert, exact 1,000 HP taken, never opens or attacks);
+- the renewable respawn on the next tick;
+- real Smuggler crates still opening;
+- HP and booking reconciliation for every row.
+
+`tests/training_isolation.rs` checks that the server never enables or uses
+`training`. Run these, together with the §9.1 contract commands with
+`--features training` and `--features lab,training`, so that normal hashes
+and C10 are shown to be unchanged in a feature build. No result is claimed
+until they run.

@@ -301,7 +301,7 @@ Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and 
 
 | Phase | Spec | Scope | Status | Owner checkpoints |
 |---|---|---|---|---|
-| P62 | [P62-troops-training-lab.md](phases/P62-troops-training-lab.md) | Troops catalog: lore, abilities, stats and animated model; exact-team combat laboratory, wooden dummies and Easy/Medium/Hard/Impossible practice bots | **planning only** on `codex/p62-troops-training-plan`; no implementation or gameplay validation | Integration base, proposed limits/dummy semantics, Impossible assistance, lore/look/fun |
+| P62 | [P62-troops-training-lab.md](phases/P62-troops-training-lab.md) | Troops catalog: lore, abilities, stats and animated model; exact-team combat laboratory, wooden dummies and Easy/Medium/Hard/Impossible practice bots | **in progress** on `phase/p62-troops-training-lab`: Step 0 recorded; Step 3 core kernel slice written (work-front checks only, tests queued); Steps 1, 2, 4, 5 pending | Integration base, proposed limits/dummy semantics, Impossible assistance, lore/look/fun |
 
 Read [player journeys and validation cases](planning/TROOPS-TRAINING.md).
 Execute catalog/content → model preview/Dance → safe training core/dummy →
