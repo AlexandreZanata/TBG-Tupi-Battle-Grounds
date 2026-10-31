@@ -35,25 +35,6 @@ fn yaw(at: Vec3) -> Quat {
     Quat::from_rotation_y(at.x * 1.3 + at.z * 0.7)
 }
 
-/// A flat ice slab with a pale top, `r` across.
-pub(super) fn floe(parts: &mut Vec<Part>, at: Vec3, r: f32, body: Color, top: Color) {
-    let flat = Vec3::new(1.0, 1.0, 0.74);
-    parts.push((
-        Cyl(r, 0.24),
-        body,
-        Transform::from_translation(at + Vec3::Y * 0.05)
-            .with_scale(flat)
-            .with_rotation(yaw(at)),
-    ));
-    parts.push((
-        Cyl(r * 0.9, 0.06),
-        top,
-        Transform::from_translation(at + Vec3::Y * 0.19)
-            .with_scale(flat)
-            .with_rotation(yaw(at)),
-    ));
-}
-
 /// A floating leaf, with an optional pale bloom.
 pub(super) fn lily_pad(parts: &mut Vec<Part>, at: Vec3, r: f32, leaf: Color, bloom: Option<Color>) {
     parts.push((

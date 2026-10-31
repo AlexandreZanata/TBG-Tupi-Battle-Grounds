@@ -1,0 +1,202 @@
+{
+  "base": "9008f117c4289122ddff978c5d25720d2bd79687",
+  "source_commit": "687049d41b66fa89cdc31c06e5cd55a7ac88bef2",
+  "validation_level": "focused visual work front; owner-requested gallery",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "build_jobs": 2,
+  "lock": "/tmp/tbg-validation-1000.lock",
+  "builds": {
+    "before": {
+      "profile": "dev",
+      "file": "tbg-client-1a62e576a5d6266a_bg.wasm",
+      "bytes": 129380992,
+      "sha256": "7c9013f4a8a81158e8d86e27e75b88f53219847add7fcca59c0552cb56a36a3b"
+    },
+    "after": {
+      "profile": "dev",
+      "file": "tbg-client-d7a597daa4486947_bg.wasm",
+      "bytes": 129455656,
+      "sha256": "30f1e3f40584485268c1da2462bad6bad32cb4cc850eab9c91f67a7f9ce0b95b"
+    }
+  },
+  "scenes": {
+    "ruins": {
+      "before": {
+        "layers": {
+          "meadow": 192,
+          "BattleLine": 444,
+          "cliffs": 384,
+          "sea": 12,
+          "foam": 384,
+          "offshore rocks": 3288,
+          "props": 15866,
+          "life": 624,
+          "total": 21194
+        },
+        "observed_empty_draws": "37.0",
+        "browser_errors": 0
+      },
+      "after": {
+        "layers": {
+          "meadow": 192,
+          "BattleLine": 444,
+          "cliffs": 384,
+          "sea": 5518,
+          "foam": 1018,
+          "offshore rocks": 3312,
+          "props": 22648,
+          "accents": 12,
+          "life": 624,
+          "total": 34152
+        },
+        "observed_empty_draws": "39.0",
+        "browser_errors": 0
+      }
+    },
+    "tundra": {
+      "before": {
+        "layers": {
+          "meadow": 192,
+          "BattleLine": 444,
+          "cliffs": 384,
+          "sea": 12,
+          "foam": 384,
+          "offshore rocks": 1484,
+          "props": 13702,
+          "life": 624,
+          "total": 17226
+        },
+        "observed_empty_draws": "37.0",
+        "browser_errors": 0
+      },
+      "after": {
+        "layers": {
+          "meadow": 192,
+          "BattleLine": 444,
+          "cliffs": 384,
+          "sea": 5518,
+          "foam": 1018,
+          "offshore rocks": 810,
+          "props": 13072,
+          "life": 624,
+          "total": 22062
+        },
+        "observed_empty_draws": "37.0",
+        "browser_errors": 0
+      }
+    },
+    "volcanic": {
+      "before": {
+        "layers": {
+          "meadow": 192,
+          "BattleLine": 444,
+          "cliffs": 384,
+          "sea": 384,
+          "foam": 384,
+          "offshore rocks": 1680,
+          "props": 12884,
+          "accents": 640,
+          "life": 624,
+          "total": 17616
+        },
+        "observed_empty_draws": "39.0",
+        "browser_errors": 0
+      },
+      "after": {
+        "layers": {
+          "meadow": 192,
+          "BattleLine": 660,
+          "cliffs": 384,
+          "sea": 6918,
+          "foam": 1018,
+          "offshore rocks": 1440,
+          "props": 18796,
+          "accents": 2252,
+          "life": 624,
+          "total": 32284
+        },
+        "observed_empty_draws": "39.0",
+        "browser_errors": 0
+      }
+    },
+    "storm": {
+      "before": {
+        "layers": {
+          "meadow": 192,
+          "BattleLine": 444,
+          "cliffs": 384,
+          "sea": 12,
+          "foam": 384,
+          "offshore rocks": 916,
+          "props": 13806,
+          "accents": 396,
+          "life": 624,
+          "total": 17158
+        },
+        "observed_empty_draws": "39.0",
+        "browser_errors": 0
+      },
+      "after": {
+        "layers": {
+          "meadow": 192,
+          "BattleLine": 444,
+          "cliffs": 384,
+          "sea": 5518,
+          "foam": 1018,
+          "offshore rocks": 2880,
+          "props": 15612,
+          "accents": 288,
+          "life": 624,
+          "total": 26960
+        },
+        "observed_empty_draws": "39.0",
+        "browser_errors": 0
+      }
+    },
+    "forest": {
+      "before": {
+        "layers": {
+          "meadow": 192,
+          "BattleLine": 444,
+          "cliffs": 384,
+          "sea": 5516,
+          "foam": 2090,
+          "offshore rocks": 800,
+          "props": 31828,
+          "life": 624,
+          "total": 44430
+        },
+        "observed_empty_draws": "40.0",
+        "browser_errors": 0
+      },
+      "after": {
+        "layers": {
+          "meadow": 192,
+          "BattleLine": 444,
+          "cliffs": 384,
+          "sea": 5516,
+          "foam": 2090,
+          "offshore rocks": 800,
+          "props": 31828,
+          "life": 624,
+          "total": 44430
+        },
+        "observed_empty_draws": "40.0",
+        "browser_errors": 0
+      }
+    }
+  },
+  "screenshots": {
+    "individual": 10,
+    "comparisons": 5,
+    "overview": 1
+  },
+  "limits": [
+    "Development build and opportunistic draw observations, not release profiling or a controlled FPS comparison.",
+    "No native or workspace tests, Clippy, release build, multiplayer matrix or hardware-wide acceptance.",
+    "Existing unused lang warning in ui/battle_hud.rs:126 is present in both builds."
+  ]
+}

@@ -303,6 +303,10 @@ All code for P1–P8 is implemented and validated on the development PC
 > the phase file with the real command outputs and measurements, commit
 > it, and stop.
 
+## Owner-requested arena reference refinement (2026-10-31)
+
+[Visual refinement](art/ARENA-REFERENCE-REFINEMENT.md) of the four themed arenas from main `9008f11`, following the supplied temple, snow, lava and storm references. Forest remains the approved reference. Empty before/after captures are requested; local validation is scoped to formatting, static checks and the necessary development WASM builds/browser gallery. Full suite, release profiling and subjective approval are deferred. Publication is authorized as a new visual PR; no merge or deploy.
+
 ## Owner-requested art follow-ups (2026-10-30)
 
 Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and future Synergy emblems](art/FACTIONS.md), then [illustrated lobby and account presentation](art/LOBBY-PRESENTATION.md). Reports include asset budgets, measured fidelity, desktop galleries and verification limits. These cosmetic follow-ups do not complete or replace a planned gameplay phase.

@@ -38,11 +38,11 @@ pub(super) fn build(kit: &mut Kit) {
     ]);
     kit.glow.push((
         Cyl(0.65, 0.015),
-        rgb(0xffba57),
+        rgb(0xffc95a),
         Transform::from_translation(at + Vec3::Y * 2.085),
     ));
-    gate(kit);
-    for (i, at, s) in scatter(0xf04e) {
+    crater_rim(kit);
+    for (i, at, s) in scatter(0xf04e).into_iter().filter(|(i, _, _)| i % 3 != 1) {
         if i % 3 == 0 {
             basalt(&mut kit.props, at, s * 0.65);
         } else {
@@ -148,32 +148,74 @@ pub(super) fn build(kit: &mut Kit) {
     }
 }
 
-/// Two basalt pillars and a lintel frame a ring of molten light in front of the crater.
-fn gate(kit: &mut Kit) {
+/// Uneven basalt teeth surround the molten crater; no straight architectural portal.
+fn crater_rim(kit: &mut Kit) {
     let p = Theme::Volcanic.palette();
-    for x in [6.4, 9.6] {
-        kit.props
-            .push((Cyl(0.46, 3.0), p.dark, Transform::from_xyz(x, 1.5, -4.0)));
-        kit.props
-            .push((Cyl(0.5, 0.1), p.stone, Transform::from_xyz(x, 3.02, -4.0)));
+    for (i, (x, z, s)) in [
+        (3.6, -4.7, 1.25),
+        (5.1, -4.8, 1.7),
+        (10.9, -4.8, 1.7),
+        (12.4, -4.7, 1.25),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        basalt(&mut kit.props, Vec3::new(x, 0.0, z), s);
+        kit.glow.push((
+            Box(0.065, s * 1.2, 0.035),
+            rgb(0xffa52e),
+            Transform::from_xyz(x + 0.15, s * 0.65, z + 0.34),
+        ));
+        shared::crystal(
+            &mut kit.glow,
+            Vec3::new(x, 0.0, z + 0.8),
+            0.50 + i as f32 * 0.06,
+            rgb(0xf98122),
+            rgb(0xffcf61),
+        );
     }
-    kit.props.push((
-        Box(4.2, 0.55, 0.9),
-        p.stone,
-        Transform::from_xyz(8.0, 3.3, -4.0),
-    ));
-    kit.glow.push((
-        Ring(0.07, 1.1, 360.0),
-        rgb(0xffa23a),
-        Transform::from_xyz(8.0, 1.55, -3.95)
-            .with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
-    ));
-    kit.glow.push((
-        Cyl(1.0, 0.02),
-        rgb(0xff7a26),
-        Transform::from_xyz(8.0, 1.55, -4.2)
-            .with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
-    ));
+    for i in 0..7 {
+        let a = i as f32 * std::f32::consts::TAU / 7.0;
+        kit.props.push((
+            Frustum(0.24, 0.39, 0.55),
+            p.dark,
+            Transform::from_xyz(
+                8.0 + a.cos() * 0.88,
+                2.05 + (i % 3) as f32 * 0.12,
+                -5.0 + a.sin() * 0.62,
+            )
+            .with_rotation(Quat::from_rotation_z(a.cos() * 0.22)),
+        ));
+    }
+    for (from, to) in [
+        (Vec3::new(-2.8, 1.5, -3.0), Vec3::new(-5.2, 0.4, -5.3)),
+        (Vec3::new(18.8, 1.5, -3.0), Vec3::new(21.2, 0.4, -5.3)),
+    ] {
+        kit.props.push((
+            Frustum(0.36, 0.65, 3.1),
+            p.dark,
+            Transform::from_xyz(from.x, 0.05, from.z),
+        ));
+        kit.props.push((
+            Frustum(0.50, 0.80, 1.9),
+            p.dark,
+            Transform::from_xyz(to.x, -0.45, to.z),
+        ));
+        for i in 0..13 {
+            let t = i as f32 / 12.0;
+            let at = from.lerp(to, t) - Vec3::Y * (t * (1.0 - t) * 1.1);
+            kit.props.push((
+                Ring(0.025, 0.12, 360.0),
+                rgb(0x554753),
+                Transform::from_translation(at).with_rotation(Quat::from_euler(
+                    EulerRot::XYZ,
+                    std::f32::consts::FRAC_PI_2,
+                    (i % 2) as f32 * std::f32::consts::FRAC_PI_2,
+                    -0.6,
+                )),
+            ));
+        }
+    }
 }
 
 /// A rock that carries the end of a bridge, with a glowing lava halo.
@@ -207,19 +249,21 @@ fn lava_veins(glow: &mut Vec<Part>) {
         ((13.6, -3.9), (16.2, -3.3)),
     ] {
         let (a, b) = (Vec2::new(a.0, a.1), Vec2::new(b.0, b.1));
-        for i in 0..4 {
-            let t0 = a.lerp(b, i as f32 / 4.0);
-            let t1 = a.lerp(b, (i + 1) as f32 / 4.0);
-            // Zig-zag a little so the vein reads as a crack, not a ruler line.
-            let kink = if i % 2 == 0 { 0.12 } else { -0.12 };
-            let mid = (t0 + t1) * 0.5 + Vec2::new(0.0, kink);
-            let d = t1 - t0;
-            glow.push((
-                Box(d.length() * 1.05, 0.012, 0.075),
-                rgb(0xff9a3c),
-                Transform::from_xyz(mid.x, -0.014, mid.y)
-                    .with_rotation(Quat::from_rotation_y(-d.y.atan2(d.x))),
-            ));
+        let points: [Vec2; 5] = std::array::from_fn(|i| {
+            a.lerp(b, i as f32 / 4.0)
+                + Vec2::new(
+                    0.0,
+                    if i == 0 || i == 4 {
+                        0.0
+                    } else if i % 2 == 0 {
+                        0.11
+                    } else {
+                        -0.11
+                    },
+                )
+        });
+        for pair in points.windows(2) {
+            vein(glow, pair[0], pair[1], 0.055);
         }
     }
 }
@@ -243,18 +287,24 @@ fn basalt(parts: &mut Vec<Part>, at: Vec3, s: f32) {
 }
 
 fn fissure(parts: &mut Vec<Part>, at: Vec3, s: f32) {
-    for i in 0..3 {
-        parts.push((
-            Box(0.55 * s, 0.012, 0.055),
-            rgb(0xffa947),
-            Transform::from_translation(
-                at + Vec3::new((i as f32 - 1.0) * s * 0.4, -0.018, (i % 2) as f32 * 0.1),
-            )
-            .with_rotation(Quat::from_rotation_y(if i % 2 == 0 {
-                0.35
-            } else {
-                -0.35
-            })),
-        ));
+    let points: [Vec2; 4] = std::array::from_fn(|i| {
+        Vec2::new(
+            at.x + (i as f32 - 1.5) * 0.4 * s,
+            at.z + (i % 2) as f32 * 0.12,
+        )
+    });
+    for pair in points.windows(2) {
+        vein(parts, pair[0], pair[1], 0.04);
     }
+}
+
+fn vein(parts: &mut Vec<Part>, a: Vec2, b: Vec2, width: f32) {
+    let mid = (a + b) * 0.5;
+    let d = b - a;
+    parts.push((
+        Box(d.length() + 0.025, 0.012, width),
+        rgb(0xf49c33),
+        Transform::from_xyz(mid.x, -0.014, mid.y)
+            .with_rotation(Quat::from_rotation_y(-d.y.atan2(d.x))),
+    ));
 }

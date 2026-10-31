@@ -3,9 +3,11 @@
 The four environments below extend the P16-A arena with original procedural
 assets. All five arenas use the same island outline, camera, Stronghold
 positions and BattleLine dimensions. Verdant Forest is the unchanged default.
-This is an art delivery: every arena has identical gameplay.
+This catalog describes presentation. Current arena assignment and modifiers belong to [ARENAS-G](phases/ARENAS-gameplay.md); the visual refinement changes none of those rules.
 
-![The four new arena environments](media/arenas/overview.jpg)
+The [2026-10-31 reference refinement report](art/ARENA-REFERENCE-REFINEMENT.md) contains the current before/after desktop captures, exact main base and scoped validation limits.
+
+![Current arena environments](media/arena-reference-refinement/overview-after.jpg)
 
 ## Open the scenes
 
@@ -34,16 +36,14 @@ separate rules/protocol phase.
 
 Snow replaces the meadow; compact blue-gray paving keeps white troops
 separate from the BattleLine. Ice-colored cliff strata meet a cold sea with
-a frozen coastal shelf, polygonal ice floes and pointed icebergs. The shelf
+a frozen coastal shelf, chipped ice slabs with irregular beveled edges and pointed icebergs. The shelf
 is static rather than using the forest's foam animation.
 
 Its kit contains snow-loaded firs with separate snow caps, capped boulders,
 faceted crystal clusters, snowdrifts, frost grass, stacked cairns,
-ice-and-snow railings and frost lanterns. The Strongholds have octagonal
-stone drums and wide snow-covered conical roofs. Cool daylight, blue-white
-fog and cyan lanterns complete the scene.
+ice-and-snow railings, angular snowy ridges and cliff icicles. Cool daylight and blue-white fog contrast with warm orange braziers. Strongholds retain their selected kind, position and damage behavior in every arena.
 
-![Frozen Tundra](media/arenas/tundra-empty-1920x1080.jpg)
+![Frozen Tundra](media/arena-reference-refinement/tundra-after-1920.jpg)
 
 ## Volcanic Forge
 
@@ -54,44 +54,38 @@ Lava fissures remain outside the BattleLine.
 
 Its kit contains clustered basalt organ pipes with exposed caps, a rear
 volcanic crater with a bright inset, charred branch silhouettes, slag
-boulders, low fissures, anvils, iron rails and forge bowls. Angular
-Strongholds carry twin chimneys and a broad forge crown. Peach daylight
+boulders, low fissures, anvils, iron rails and forge bowls. Chained outcrops and plank bridges dress the offshore rock. Selected kind-based Strongholds stay unchanged. Peach daylight
 and a muted mauve atmosphere preserve legibility without a post-processing
 pass, bloom, lava damage, smoke simulation or particle emitters.
 
-![Volcanic Forge](media/arenas/volcanic-empty-1920x1080.jpg)
+![Volcanic Forge](media/arena-reference-refinement/volcanic-after-1920.jpg)
 
 ## Ancient Ruins
 
 Dry moss and muted earth replace the meadow; worn limestone tiles define
-the BattleLine. Sedimentary walls meet a green still-water basin with
-submerged column remnants and low aquatic growth.
+the BattleLine. Pale sedimentary walls meet a faceted turquoise basin with submerged column remnants, mossy islets and lily pads.
 
 Its kit contains octagonal columns with capitals and inset grooves, a rear
 colonnade and crest-bearing lintel, fallen column drums, broken masonry,
-small guardian statues, urn planters, moss shrubs, reeds, stone balustrades
-and jade ritual bowls. The Strongholds become stepped temple watchposts
-with corner columns. Warm ivory light and green-gray ambient tones keep
-the scene in the same miniature family as arena 1.
+moss shrubs, conifers, flowers, a stepped water entrance, stone balustrades and turquoise ritual flames. The grouped temple arch carries a pale turquoise keystone. Selected kind-based Strongholds stay unchanged. Ivory sunlight and cooler fill keep stone distinct from vegetation.
 
-![Ancient Ruins](media/arenas/ruins-empty-1920x1080.jpg)
+![Ancient Ruins](media/arena-reference-refinement/ruins-after-1920.jpg)
 
 ## Storm Valley
 
 Slate-colored heath and silver-blue paving replace the green island.
 Blue-gray cliffs fall to dark open water, low linear whitecaps and jagged
-offshore rocks. Flattened polygonal cloud banks sit beyond the island,
-below the combat silhouettes.
+offshore rocks. Overlapping dark polygonal cloud banks form the distant horizon beyond the island.
 
 Its kit contains wind-bent conifers with windward highlights, ring-crowned
 conductor obelisks with static lightning inlays, silver grass swept in one
 direction, slate boulders, coil fixtures, narrow metal railings and electric
-lanterns. The Strongholds become banded storm watchtowers with ring finials.
+fixtures, broken docks and slate islets. Selected kind-based Strongholds stay unchanged; orange braziers provide warm accents.
 Flags sway more strongly using the existing rigid-cloth animation. Cool
 overcast light replaces the warm forest key. There are no lightning
 flashes, screen shake, rain particles or dynamic weather simulation.
 
-![Storm Valley](media/arenas/storm-empty-1920x1080.jpg)
+![Storm Valley](media/arena-reference-refinement/storm-after-1920.jpg)
 
 ## Asset production and integration
 

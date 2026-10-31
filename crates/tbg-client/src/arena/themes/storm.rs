@@ -14,16 +14,29 @@ use bevy::prelude::*;
 pub(super) fn build(kit: &mut Kit) {
     let p = Theme::Storm.palette();
     for (i, (at, s)) in back_row().into_iter().enumerate() {
-        if i % 4 == 0 {
-            conductor(&mut kit.props, &mut kit.glow, at, s * 1.25);
-            if i % 8 == 0 {
-                banner(&mut kit.props, at, s * 1.25);
-            }
+        if i % 7 == 0 {
+            shared::dead_tree(&mut kit.props, at, s, rgb(0x454552));
         } else {
-            bent_tree(&mut kit.props, at, s);
+            bent_tree(&mut kit.props, at, s * 0.83);
         }
     }
-    for (i, at, s) in scatter(0x5704) {
+    for (x, z, s) in [
+        (0.6, -3.6, 1.35),
+        (4.9, -4.5, 1.65),
+        (11.1, -4.5, 1.65),
+        (15.4, -3.6, 1.35),
+    ] {
+        let at = Vec3::new(x, 0.0, z);
+        conductor(&mut kit.props, &mut kit.glow, at, s);
+        banner(&mut kit.props, at, s);
+    }
+    shared::dead_tree(
+        &mut kit.props,
+        Vec3::new(8.0, 0.0, -3.8),
+        1.55,
+        rgb(0x4a4245),
+    );
+    for (i, at, s) in scatter(0x5704).into_iter().filter(|(i, _, _)| i % 4 != 1) {
         match i % 3 {
             0 => boulder(&mut kit.props, at, s, p.stone),
             1 => grass(&mut kit.props, at, s),
@@ -38,28 +51,45 @@ pub(super) fn build(kit: &mut Kit) {
     ] {
         conductor(&mut kit.props, &mut kit.glow, Vec3::new(x, 0.0, z), s);
     }
-    // Low, opaque cloud banks stay beyond the island, below the BattleLine.
-    for (x, z) in [
-        (0.5, -7.8),
-        (8.0, -8.8),
-        (15.8, -7.8),
-        (4.0, 8.5),
-        (13.0, 8.6),
+    // A broken dock leaves the left end; a few posts and planks remain on the right.
+    let (dock, dark) = (rgb(0x6b5a48), rgb(0x3d3430));
+    shared::walkway(
+        &mut kit.props,
+        Vec3::new(-2.5, 0.02, 2.4),
+        -1.0,
+        8,
+        0b0010_1000,
+        dock,
+        dark,
+    );
+    shared::walkway(
+        &mut kit.props,
+        Vec3::new(18.5, 0.02, -2.1),
+        1.0,
+        4,
+        0b1010,
+        dock,
+        dark,
+    );
+    for (x, z, s) in [
+        (-1.3, -3.3, 1.1),
+        (17.3, -3.4, 1.0),
+        (0.6, 3.9, 0.8),
+        (15.4, 4.0, 0.9),
     ] {
-        for i in 0..4 {
-            kit.props.push((
-                Ball(1.0),
-                if i % 2 == 0 {
-                    rgb(0x8599b5)
-                } else {
-                    rgb(0xa4b6cb)
-                },
-                Transform::from_xyz(x + (i as f32 - 1.5) * 0.75, -1.05, z).with_scale(Vec3::new(
-                    1.1,
-                    0.38 + (i % 2) as f32 * 0.16,
-                    0.62,
-                )),
-            ));
+        shared::dead_tree(&mut kit.props, Vec3::new(x, 0.0, z), s, rgb(0x3f3a40));
+    }
+    // Slate islets belong to the storm coast; white ice slabs remain a Tundra motif.
+    for (i, (at, size)) in shared::water_sites(0x57a0, 10, 3.0).into_iter().enumerate() {
+        boulder(&mut kit.props, at, 0.9 + size, rgb(0x698298));
+        kit.props.push((
+            Frustum(0.09, 0.42, 1.3),
+            rgb(0x7d94a8),
+            Transform::from_translation(at + Vec3::new(0.1, 0.5, 0.0))
+                .with_rotation(Quat::from_rotation_z(-0.18)),
+        ));
+        if i % 3 == 0 {
+            shared::dead_tree(&mut kit.props, at + Vec3::Y * 0.75, 0.65, rgb(0x414553));
         }
     }
     // A broken dock leaves the left end; a few posts and planks remain on the right.
@@ -137,15 +167,15 @@ fn bent_tree(parts: &mut Vec<Part>, at: Vec3, s: f32) {
     ));
     for (r, h, y) in [(0.64, 0.85, 0.9), (0.48, 0.78, 1.4), (0.3, 0.7, 1.85)] {
         parts.push((
-            Cone(r, h),
+            Canopy(r, h, at.x.to_bits() ^ (at.z + y).to_bits()),
             p.plant,
             Transform::from_translation(at + Vec3::new(y * 0.23, y, 0.0) * s)
                 .with_rotation(Quat::from_rotation_z(-0.24))
                 .with_scale(Vec3::new(1.2, 1.0, 0.8) * s),
         ));
         parts.push((
-            Cone(r * 0.83, h * 0.45),
-            rgb(0x8095a4),
+            Canopy(r * 0.83, h * 0.45, at.x.to_bits() ^ (at.z + y).to_bits()),
+            rgb(0xb0c1d1),
             Transform::from_translation(at + Vec3::new(y * 0.23 + 0.1, y + h * 0.21, 0.0) * s)
                 .with_rotation(Quat::from_rotation_z(-0.24))
                 .with_scale(Vec3::new(1.2, 1.0, 0.8) * s),
@@ -171,7 +201,7 @@ fn conductor(parts: &mut Vec<Part>, glow: &mut Vec<Part>, at: Vec3, s: f32) {
             Ring(0.055, 0.37, 360.0),
             p.accent,
             Transform::from_translation(at + Vec3::Y * 1.8 * s)
-                .with_rotation(Quat::from_rotation_x(1.57))
+                .with_rotation(Quat::from_rotation_x(std::f32::consts::FRAC_PI_2))
                 .with_scale(Vec3::splat(s)),
         ),
         (
