@@ -5,7 +5,7 @@ all PNGs to visual reference. No image name, statistic, ability, evolution,
 flight or apparent physical action defines gameplay. Sources T/V refer to
 the [inventory](P58-AUDIT-AND-INTEGRATION.md#1-source-authority-and-inventory).
 Every stat, ability parameter and Evolution value is an initial **Proposed**
-balance hypothesis in [GAME-DESIGN §11](../GAME-DESIGN.md#11-p56-roster-expansion--proposed-inactive).
+balance hypothesis in [GAME-DESIGN §13](../GAME-DESIGN.md#13-p58-roster-expansion--proposed-inactive).
 Those tables are part of each sheet; they are not duplicated here.
 
 All sheets inherit the exact [competitive contracts](P58-AUDIT-AND-INTEGRATION.md#3-shared-competitive-contracts-all-proposed-inactive),
@@ -808,7 +808,7 @@ idle drill rotation, preserving movement, rank, TTL and HP indicators.
 
 ## Comparative value worksheet (models, not measured balance)
 
-These arithmetic ratios use §11 base stats only, without effective HP,
+These arithmetic ratios use §13 base stats only, without effective HP,
 Synergy, DR, target uptime, summons, specials or modifiers. They expose
 weak hypotheses and are not a universal balance formula. “DPS/E” is raw
 basic DPS per Energy; R20 is per victim and R21 has no direct DPS.

@@ -743,7 +743,7 @@ Values are **Proposed** until the balance lab confirms them (D-33).
 - **BR-AR05** The Storm bonus adds 800 bp to the base regeneration beside
   Interest (BR-E05); the existing remainder carries the rounding.
 
-## 11. P58 roster expansion — Proposed, inactive
+## 13. P58 roster expansion — Proposed, inactive
 
 **Every new value and rule in this section is Proposed: an initial balance
 hypothesis, not an approved rule, measured result or active roster entry.**
@@ -755,7 +755,7 @@ Execution requires subsequent authorization and the dependencies in
 defines identity/art and the [integration contracts](roster/P58-AUDIT-AND-INTEGRATION.md#3-shared-competitive-contracts-all-proposed-inactive)
 define resolution semantics. This section is the single numerical registry.
 
-### 11.1 Proposed base forms
+### 13.1 Proposed base forms
 
 Cost in Energy (×600 in state); interval in ticks (20/s); range in
 milli-tiles (1,000/tile); movement in milli-tiles/tick (÷50 = tiles/s).
@@ -795,7 +795,7 @@ damage, interval and range come from T11's flame. Other base rows preserve
 the text apart from integer speed conversion. No printed PNG number is
 used. R21's interval is its production cadence, not a zero-damage attack.
 
-### 11.2 Proposed primary abilities
+### 13.2 Proposed primary abilities
 
 Times are ticks; percentages use basis points (1%=100 bp). Parameters
 absent from a text are explicitly completed here; they are not attributed
@@ -826,7 +826,7 @@ special range equals base attack range and ability target is an enemy unit.
 | R20 | Fogo Profano: each 10-tick basic cycle applies damage 12 to every other living unit in the forward segment of length 2800, allies and enemies equally; heal-cut 3500 bp for 40, no target cap. Self excluded. Primary enemy Stronghold may take one ordinary 12-damage hit, never collateral flame/cut; tower treatment is a completion |
 | R21 | Ninho de Brocas: every 44 ticks with a target within 4500, spawn one Microbroca at producer x; no direct damage. Eight living drills total per seat across producers/ranks; same-rank allied drills within 200 may fuse; maximum rank three. Trigger/radius are completions |
 
-### 11.3 Proposed Evolution parameters
+### 13.3 Proposed Evolution parameters
 
 Columns are **Tier 2 / Tier 3** (stored tiers 1/2). Stat deltas accumulate
 on base; absolute ability values **replace**, not add. A Tier 3 form keeps
@@ -869,7 +869,7 @@ delays it. R21 Evolution benefits snapshot at summon birth; merge uses the
 lowest-id parent producer's recorded branch/tier, not a stronger ally's
 current upgrades. All resulting rank stats derive from that profile.
 
-### 11.4 Proposed drill summon forms and fusion
+### 13.4 Proposed drill summon forms and fusion
 
 | Summon | Rank | HP | Damage | Attack ticks | Move/tick | Range | Lifetime ticks |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -885,7 +885,7 @@ Fused lifetime restarts at its rank lifetime; with only two promotions
 a Microbroca lineage lives at most 240+280+320 ticks. See the catalog for
 damaged parents, control/status inheritance, ownership and merge order.
 
-### 11.5 Proposed Factions and release hypotheses
+### 13.5 Proposed Factions and release hypotheses
 
 Append Monsters / Celestials / Insects after the existing four Factions;
 all use the existing thresholds 2/4 living conventional units. Monsters:

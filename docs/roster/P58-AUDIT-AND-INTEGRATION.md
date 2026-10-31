@@ -3,7 +3,7 @@
 **Planning only.** Audited on 2026-10-30 against remote `main`
 `6ef155bc9540527c99086aee0d9726908ca6a041`. Nothing in this document
 authorizes implementation. Read with the [phase](../phases/P58-roster-expansion-planning.md),
-[catalog](P58-CATALOG.md) and inactive [numerical registry](../GAME-DESIGN.md#11-p56-roster-expansion--proposed-inactive).
+[catalog](P58-CATALOG.md) and inactive [numerical registry](../GAME-DESIGN.md#13-p58-roster-expansion--proposed-inactive).
 
 ## 1. Source authority and inventory
 
@@ -136,7 +136,7 @@ reuse for final art, not independent offline combat work.
 ## 3. Shared competitive contracts (all Proposed, inactive)
 
 These close ambiguities for future execution; they do not change main.
-Every numerical hypothesis lives in GAME-DESIGN §11.
+Every numerical hypothesis lives in GAME-DESIGN §13.
 
 ### 3.1 Units, timing and target selection
 

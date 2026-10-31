@@ -19,7 +19,7 @@ owner authorization.
 ## Read first
 
 - `AGENTS.md`
-- `docs/GAME-DESIGN.md` §11 (inactive numerical registry, Proposed)
+- `docs/GAME-DESIGN.md` §13 (inactive numerical registry, Proposed)
 - `docs/roster/P58-AUDIT-AND-INTEGRATION.md` (inventory, main audit,
   shared competitive contracts, integration matrix, Factions, interactions,
   performance reasoning)
@@ -94,7 +94,7 @@ New Factions: Monsters (damage +5/+10%, completion hypothesis), Celestials
 (max HP +5/+10%, T09), Insects (movement +5/+10% within the +50% cap,
 T10); all use the existing 2/4 living-conventional thresholds. Full
 sheets, art/animation briefs and numbers live in the catalog and
-GAME-DESIGN §11; they are not duplicated here.
+GAME-DESIGN §13; they are not duplicated here.
 
 ## Proposed architecture (future implementation only)
 
@@ -194,7 +194,7 @@ never tune gates to pass.
 9. Performance section names scans, caps, view/event costs and required
    before/after workloads.
 10. No code, asset, animation, protocol, balance or migration changed.
-11. Links resolve; phase/catalog/audit/GAME-DESIGN §11 agree on names,
+11. Links resolve; phase/catalog/audit/GAME-DESIGN §13 agree on names,
     counts and categories.
 12. Roadmap updated; report records real command output.
 
@@ -244,7 +244,7 @@ device or VPS check is claimed.
   texts govern, images are reference only.
 - [ ] 0 A / 18 B / 3 C classification and shared dependencies match the
   audit matrix.
-- [ ] GAME-DESIGN §11 values are all marked Proposed/inactive; no live
+- [ ] GAME-DESIGN §13 values are all marked Proposed/inactive; no live
   rule, pool or gate changed.
 - [ ] Roadmap entry added; links resolve; English prose (proper names
   excepted).

@@ -184,7 +184,7 @@ Phase files are written one at a time, starting with P42.
 | ARENAS-G | [ARENAS-gameplay.md](phases/ARENAS-gameplay.md) | Arenas in the real game: server draw at pairing, symmetric modifiers (Proposed), practice choice, scene switching, Arenas lobby page; lab measurement deferred by the owner | implemented, awaiting owner look | yes (owner: look, fun, values) |
 | P56 | [P56-archer-crab-selection.md](phases/P56-archer-crab-selection.md) | Archer standard art kit, Cargo Crab rework (orange machine visual, united boarding logic, carry boost, D-56), and clean unit selection with selective nameplates | implemented; verification and tests passing | yes (owner) |
 | P57 | [P57-unit-spacing.md](phases/P57-unit-spacing.md) | Units take up space on screen: client display layout (five files, ranks behind the front, smoothing); server and protocol unchanged | planned | yes (owner: look) |
-| P58 | [P58-roster-expansion-planning.md](phases/P58-roster-expansion-planning.md) | Docs-only plan for 21 units + Monsters/Celestials/Insects: catalog, audit, GAME-DESIGN §11 registry, future waves | planned (planning only; implementation gated on PR #16 integration and owner authorization) | — |
+| P58 | [P58-roster-expansion-planning.md](phases/P58-roster-expansion-planning.md) | Docs-only plan for 21 units + Monsters/Celestials/Insects: catalog, audit, GAME-DESIGN §13 registry, future waves | planned (planning only; implementation gated on PR #16 integration and owner authorization) | — |
 
 ## Independent arena art follow-up
 
