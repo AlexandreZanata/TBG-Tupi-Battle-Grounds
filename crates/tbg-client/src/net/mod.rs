@@ -51,6 +51,8 @@ pub struct NetLink {
     opened: bool,
     token: Option<Token>,
     in_match: bool,
+    result_id: Option<tbg_core::protocol::ResultId>,
+    discarded_result: Option<tbg_core::protocol::ResultId>,
     pub status: NetStatus,
     lost_at: Option<f64>,
     tries: u32,
@@ -78,6 +80,8 @@ impl NetLink {
             opened: false,
             token: config::load_token(),
             in_match: false,
+            result_id: None,
+            discarded_result: config::dismissed_result(),
             status: NetStatus::Connecting,
             lost_at: None,
             tries: 0,
@@ -110,9 +114,14 @@ impl NetLink {
         self.ack.ms()
     }
 
+    /// Explicit navigation must not recover the dismissed result on a fresh connection.
+    pub fn discard_completed(&mut self, id: tbg_core::protocol::ResultId) {
+        self.discarded_result = Some(id);
+        config::dismiss_result(id);
+    }
+
     /// Reuse an idle open socket for a new mode request (probe upgrade).
-    /// Returns false when there is no usable socket; the caller then
-    /// builds a fresh link.
+    /// Returns false when there is no usable socket; the caller then builds a fresh link.
     pub fn reuse(&mut self, mode: Mode, now: f64) -> bool {
         if self.socket.is_none() || self.in_match || !matches!(self.status, NetStatus::Ready) {
             return false;

@@ -23,6 +23,7 @@ impl Match {
         let other = &self.players[seat.other().index()];
         let ranked = self.mode == MatchMode::Ranked;
         ServerMsg::MatchStart {
+            result_id: self.result_id,
             you: seat,
             you_name: me.name.clone(),
             you_rating: ranked

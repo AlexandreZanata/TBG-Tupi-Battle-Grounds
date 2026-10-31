@@ -333,6 +333,9 @@ pub struct MatchState {
     /// Runtime-only, like `pending`.
     #[serde(skip)]
     pub(crate) shrapnel: Vec<Shrapnel>,
+    /// Runtime-only historical counts; a deserialized snapshot cannot claim full history.
+    #[serde(skip, default)]
+    pub(crate) participation: crate::celebration::LifetimeCast,
 }
 
 /// x position of a seat's Stronghold.

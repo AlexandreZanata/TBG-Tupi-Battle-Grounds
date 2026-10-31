@@ -50,6 +50,10 @@ pub use toast::{Banner, Toasts};
 pub enum UiAction {
     /// Greyed-out button: clicks do nothing.
     Disabled,
+    CelebrationPrev,
+    CelebrationNext,
+    CelebrationHide,
+    CelebrationMotion,
     Practice,
     Quick,
     CreateRoom,

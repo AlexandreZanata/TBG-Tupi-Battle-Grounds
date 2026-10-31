@@ -20,6 +20,7 @@ mod archer_v2_clips;
 mod archer_v2_tests;
 pub mod arrows;
 pub mod bow;
+pub mod celebration;
 mod clips;
 mod curves;
 pub mod death;
@@ -35,7 +36,7 @@ pub mod rig;
 pub(crate) mod roster;
 #[cfg(test)]
 mod roster_tests;
-mod springs;
+pub(crate) mod springs;
 
 use rig::{Proportions as BodyPlan, NODE_COUNT};
 

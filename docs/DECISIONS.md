@@ -1063,3 +1063,115 @@ nothing that a seat does not already see, so no delay is needed.
 **Reopen when** spectator load breaks the budgets in P47 (2 000 spectators
 at 250 matches), a listed match leaks private state, or the owner wants
 rooms, challenges or ranked watching to stay private as well.
+
+## D-80 · Troops uses canonical content and a local training boundary — 2026-10-31 (Proposed)
+
+**Decision.** Plan P62 as a shared roster/details/model presentation and a
+local-only combat laboratory. Exact compositions are initialized through
+validated core training APIs; they never shrink the normal Shop below five
+distinct offers. Reuse canonical combat helpers and champion art kits, and
+keep the offline `lab` feature forbidden in client/server under C10. A
+separate optional `training` feature exposes a private local session and
+bounded runtime observation, not network controls or arbitrary Rulesets.
+Feature flags alone are not the isolation boundary: ordinary matches have
+no active training runtime, and server code never constructs one.
+
+**Dummy tradeoff.** The initial inert dummy can use a runtime-tagged Crate
+carrier with an explicit hatch/open guard and HP/view override. It retains
+summon-like target eligibility and never claims to model a conventional
+enemy. Chosen champion opponents cover those interactions. No new wire kind
+or global Crate behavior is warranted. Required regressions protect real
+cargo and validate statuses, measurements, renewable respawn and cleanup.
+
+**Why.** The player needs real stats/combat and an exact three-champion
+experiment, while current Shop assumptions, debug army filling, gallery
+tools and offline LabStats are insufficient product interfaces. Typed local
+controls, per-mutation metrics and stable content IDs avoid wrong numbers,
+competitive leakage and duplicated balance logic. A canonical constructor
+also avoids repeatedly leaking preview Rulesets on reset.
+
+**Scope/status.** Documentation only; no API, feature flag or product rule
+has been implemented. See [P62](phases/P62-troops-training-lab.md) and
+GAME-DESIGN §16. D-73–D-79 are already reserved in the parallel P59 branch,
+so this plan starts at D-80. Resolve branch/content integration before code.
+
+**Reopen when** the tagged inert target cannot preserve normal Crate
+behavior, a required training capability demands a wire change, the owner
+requests conventional-target dummies, or measurements show the hooks alter
+normal simulation behavior/cost. Stop the dependent step and revise the
+design; do not bypass C10 or silently change target eligibility.
+
+## D-81 · Practice difficulty preserves a fair baseline and discloses assistance — 2026-10-31 (Proposed)
+
+**Decision.** Preserve `Bot::new` and its existing callers. Add bounded,
+seeded practice profiles consuming legal own-seat views and producing
+ordinary PlayerIntentions. Easy, Medium and Hard use normal resources;
+Hard improves visible-state decisions, including Augments. Recommended
+Impossible combines Hard policy, shorter decision spacing and a clearly
+displayed local 2x ordinary regen advantage, pending owner decision O03.
+No hidden opponent information, HP/damage cheat or fabricated victory.
+
+**Why.** A nearly unbeatable label cannot be justified by faster random
+buys. Small heuristic policies plus explicit local assistance are feasible
+for this MVP and understandable to players. They avoid external inference
+cost and avoid changing the bot baseline used by offline balance and other
+callers. Champion-vs-champion drills remain deterministic combat experiments;
+their difficulty is the selected composition, not a nonexistent Shop bot.
+
+**Validation.** Check information boundaries, cadence, legality, normal
+resources, exact regen accounting and unchanged baseline behavior. Run
+only an explicitly authorized bounded paired-seed calibration and owner
+playtests; describe uncertainty and unresolved difficulty goals honestly.
+The named 144-match proposal is not authorization to run it in this
+planning task or as routine validation on each front.
+
+**Reopen when** owner chooses a fair-only Impossible profile, measured
+challenge is too low/high, repeated exploit behavior defeats the scorer,
+or changes to the canonical game invalidate its legal-action evaluation.
+Changing online balance or granting undisclosed advantages is not a bot fix.
+
+## D-82 · Post-match cast and reusable celebration motion — 2026-10-31 (Proposed)
+
+**Decision.** P63 presents the winning army in its match arena during Result,
+facing the camera and looping each kit's existing Victory or signature Dance.
+Create cosmetic figures independently of simulation entities. Reuse the
+P62 preview motion resolver when integrated; add one signature pilot and
+retain explicit fallback coverage rather than claim every dance is unique.
+
+**Complete history.** Maintain runtime-only aggregate counts by seat/kind/
+last form/eligibility at authoritative spawn and successful Evolution.
+Deaths do not remove participation. This bounds memory by content slots
+instead of retaining an unbounded graveyard. Deliver the final compact cast
+through the result/reconnect route with a coordinated protocol change if
+needed. Allocate the actual next wire version on the integrated base.
+A survivor snapshot or client-observed cache cannot prove complete coverage.
+
+**Why.** Dead units are already removed before the current result screen.
+The owner explicitly wants living and dead participants. Aggregate counters
+support exact duplicate/form counts, reconnect and lazy presentation without
+replaying combat or changing its authority. Immediate result actions and
+idempotent message handling preserve rematches and late rating updates.
+
+**Pending product choices.** Recommended cast includes animated summons,
+excluding inert props; recommended large-cast presentation uses pages of 64
+after an initial 64-figure formation. Owner confirms eligibility, paging or
+all-at-once alternative, and signature pilot at P63 O01–O03. All are Proposed;
+this planning task implements neither the wire change nor the presentation.
+
+**Reopen when** the owner requires all instances simultaneously, actual
+spawn paths invalidate aggregate accounting, finalized-result reconnect
+needs new retention semantics, or visual/performance evidence rejects the
+formation/motion approach. Do not silently truncate cast or weaken results.
+
+
+### D-82 execution clarification — 2026-10-31
+
+The owner approved full animated participation and pagination through every
+logical instance, and replaced the exclusive pilot with a shared current
+Victory standard plus future per-character override seam. P63 does not
+claim all champions have unique Dance content. Protocol 28 adds a public
+random result identity and an opaque bounded cosmetic payload; decoding a
+bad cosmetic field leaves the authoritative Outcome intact. Terminal start/
+end data is retained only in its session under the existing reconnect
+window, dropped at expiry, explicit dismissal or next pairing. No database,
+match duration, rating settlement or reconnect window is extended.

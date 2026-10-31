@@ -156,6 +156,7 @@ impl MatchState {
             },
             fx: crate::state::UnitFx::default(),
         });
+        self.participation.born(seat, kind, tier, branch, false);
         // P46: Shatterback plates start full (never restored afterwards).
         let [a, b] = self.rules.def(kind).ability(0, 0);
         for ability in [a, b] {
@@ -221,6 +222,8 @@ impl MatchState {
         if self.arena_rule().first_evolve_discount > 0 {
             self.player_mut(seat).arena_discount_used = true;
         }
+        self.participation
+            .evolved(seat, u.kind, u.tier, u.branch, branch);
         let unit = &mut self.units[idx];
         unit.tier += 1;
         unit.branch = branch;

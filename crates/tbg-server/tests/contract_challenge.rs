@@ -106,6 +106,7 @@ async fn start(ws: &mut Ws) -> Start {
                 arcanas,
                 // D-55: checked by tests/arenas.rs (same arena both seats).
                 arena: _,
+                result_id: _,
             }) => {
                 assert_eq!(
                     arcanas,

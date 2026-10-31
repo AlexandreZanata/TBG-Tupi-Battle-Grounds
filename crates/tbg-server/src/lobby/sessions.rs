@@ -49,6 +49,14 @@ impl Lobby {
                 _ => None,
             };
             let idle = matches!(s.state, SessionState::Idle);
+            if idle {
+                if let Some((until, result)) = &s.finished {
+                    if Instant::now() < *until {
+                        send(&Some(conn.clone()), ConnEvent::Send(result.start.clone()));
+                        send(&Some(conn.clone()), ConnEvent::Send(result.end.clone()));
+                    }
+                }
+            }
             s.conn = Some(conn);
             s.ip = ip;
             s.detached_at = None;
@@ -80,6 +88,7 @@ impl Lobby {
             arcanas: tbg_core::ArcanaPreset::DEFAULT,
             stronghold: tbg_core::StrongholdKind::DEFAULT,
             last_spectate: None,
+            finished: None,
         };
         let pair = (session.token, session.name.clone());
         self.sessions.insert(session.token, session);
@@ -152,6 +161,9 @@ impl Lobby {
         self.rooms.retain(|(.., created)| now - *created < ROOM_TTL);
         let window = Duration::from_secs(self.config.reconnect_secs);
         self.sessions.retain(|_, s| {
+            if s.finished.as_ref().is_some_and(|(until, _)| now >= *until) {
+                s.finished = None;
+            }
             let gone = s.detached_at.is_some_and(|t| now - t > window);
             !gone || matches!(s.state, SessionState::InMatch { .. })
         });
