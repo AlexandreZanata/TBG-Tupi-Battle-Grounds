@@ -100,7 +100,7 @@ fn poll(
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        toasts.push("Accounts need the web build");
+        toasts.say(crate::i18n::Msg::AccountWebOnly);
         form.kind = None;
     }
     #[cfg(target_arch = "wasm32")]

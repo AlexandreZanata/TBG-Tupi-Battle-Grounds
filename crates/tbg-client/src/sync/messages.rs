@@ -4,7 +4,10 @@
 use std::collections::VecDeque;
 
 use bevy::prelude::*;
-use tbg_core::protocol::{ErrorCode, InviteToken, MatchMode, RoomCode, ServerMsg, SpectateRefusal};
+use tbg_core::protocol::{
+    ArcanaRejection, ErrorCode, InviteToken, MatchMode, RoomCode, ServerMsg, SpectateRefusal,
+    StrongholdRejection,
+};
 use tbg_core::{MatchView, Seat};
 
 use super::{spectate, LatestView, MatchInfo, RematchInfo, ViewBuffer};
@@ -12,7 +15,7 @@ use crate::audio::{Sound, Sounds};
 use crate::config;
 use crate::i18n::{Lang, Msg};
 use crate::link::MatchLink;
-use crate::net::{NetStatus, GIVE_UP};
+use crate::net::{NetFailure, NetStatus, GIVE_UP};
 use crate::overlay::OverlayStats;
 use crate::ui::{
     account::{Account, AccountInbox},
@@ -67,6 +70,16 @@ pub(super) fn poll_link(
                 arena,
             } => {
                 info!("match arena: {}", arena.slug());
+                // Practice names are built-in identities, not player data:
+                // the link kind (never the name text) selects the label.
+                let (you_name, opponent) = if matches!(*link, MatchLink::Local(_)) {
+                    (
+                        lang.t(Msg::BattleYou).to_string(),
+                        lang.t(Msg::LocalTrainingBot).to_string(),
+                    )
+                } else {
+                    (you_name, opponent)
+                };
                 *info = MatchInfo {
                     you: Some(you),
                     you_name,
@@ -193,7 +206,7 @@ pub(super) fn poll_link(
                 next.set(GameState::Queue);
             }
             ServerMsg::ChallengeUnavailable => {
-                ui.0.push("Challenge expired or unavailable");
+                ui.0.say(Msg::ChallengeUnavailable);
                 *link = MatchLink::Idle;
                 *ui.2 = QueueInfo::default();
                 next.set(GameState::Menu);
@@ -220,7 +233,7 @@ pub(super) fn poll_link(
                 rematch.closed = Some(declined);
             }
             ServerMsg::RoomNotFound => {
-                ui.0.push("Room not found");
+                ui.0.say(Msg::RoomNotFound);
                 *link = MatchLink::Idle;
                 *ui.2 = QueueInfo::default();
                 next.set(GameState::Menu);
@@ -232,7 +245,7 @@ pub(super) fn poll_link(
             ServerMsg::Error {
                 code: ErrorCode::SessionTakenOver,
             } => {
-                ui.0.push("Your account signed in on another device");
+                ui.0.say(Msg::AccountTakenOver);
                 account.profile = None;
                 *link = MatchLink::Idle;
                 next.set(GameState::Menu);
@@ -243,18 +256,18 @@ pub(super) fn poll_link(
                 code: ErrorCode::LoginRequired,
             } => {
                 account.profile = None;
-                ui.0.push("Log in to play ranked");
+                ui.0.say(Msg::AccountLoginRanked);
                 *link = MatchLink::Idle;
                 next.set(GameState::Menu);
             }
             ServerMsg::Error { code } => {
                 if code == ErrorCode::RateLimited && ui.2.joining_challenge {
-                    ui.0.push("Too many challenge attempts, try again later");
+                    ui.0.say(Msg::ChallengeRateLimited);
                     *link = MatchLink::Idle;
                     *ui.2 = QueueInfo::default();
                     next.set(GameState::Menu);
                 } else {
-                    ui.0.push(format!("Server: {code:?}"));
+                    ui.0.say(error_msg(code));
                 }
             }
             ServerMsg::Leaderboard {
@@ -272,14 +285,16 @@ pub(super) fn poll_link(
             // D-40: the server's word on the preset (after a change or a
             // login) becomes what the editor shows and the next match uses.
             ServerMsg::ArcanasSelected { preset } => crate::config::save_arcanas(preset),
-            ServerMsg::ArcanasRejected { reason } => {
-                ui.0.push(format!("Arcanas not changed: {reason:?}"))
-            }
+            ServerMsg::ArcanasRejected { reason } => ui.0.say(match reason {
+                ArcanaRejection::BadRanks => Msg::ArcanaRejectedBadRanks,
+                ArcanaRejection::NotIdle => Msg::ArcanaRejectedNotIdle,
+            }),
             // D-46: same for the Stronghold kind.
             ServerMsg::StrongholdSelected { kind } => crate::config::save_stronghold(kind),
-            ServerMsg::StrongholdRejected { reason } => {
-                ui.0.push(format!("Stronghold not changed: {reason:?}"))
-            }
+            ServerMsg::StrongholdRejected { reason } => ui.0.say(match reason {
+                StrongholdRejection::NotSelectable => Msg::StrongholdRejectedNotSelectable,
+                StrongholdRejection::NotIdle => Msg::StrongholdRejectedNotIdle,
+            }),
             _ => {}
         }
     }
@@ -290,18 +305,35 @@ pub(super) fn poll_link(
         _ if quiet => None,
         Some(NetStatus::Reconnecting { since }) => {
             let left = (GIVE_UP - (now - since)).max(0.0);
-            Some(format!("Reconnecting... {left:.0} s"))
+            Some(lang.tf(Msg::NetReconnecting, &[("secs", &format!("{left:.0}"))]))
         }
-        Some(NetStatus::Connecting) => Some("Connecting...".into()),
+        Some(NetStatus::Connecting) => Some(lang.t(Msg::QueueConnecting).into()),
         _ => None,
     };
     if let Some(NetStatus::Failed(why)) = link.status() {
         // A failed load-time probe is silent; the menu just stays usable.
         if !quiet {
-            ui.0.push(why.clone());
+            ui.0.say(match why {
+                NetFailure::ConnectionLost => Msg::NetConnectionLost,
+                NetFailure::VersionMismatch => Msg::NetVersion,
+            });
             next.set(GameState::Menu);
         }
         *link = MatchLink::Idle;
+    }
+}
+
+/// Player-facing text for a server error code; the two codes with their
+/// own flows above (`SessionTakenOver`, `LoginRequired`) reuse those texts.
+fn error_msg(code: ErrorCode) -> Msg {
+    match code {
+        ErrorCode::BadMessage => Msg::NetErrorBadMessage,
+        ErrorCode::RateLimited => Msg::NetErrorRateLimited,
+        ErrorCode::TooManyConnections => Msg::NetErrorTooManyConnections,
+        ErrorCode::NotInMatch => Msg::NetErrorNotInMatch,
+        ErrorCode::ServerFull => Msg::NetErrorServerFull,
+        ErrorCode::LoginRequired => Msg::AccountLoginRanked,
+        ErrorCode::SessionTakenOver => Msg::AccountTakenOver,
     }
 }
 

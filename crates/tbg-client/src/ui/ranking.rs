@@ -52,7 +52,9 @@ pub fn plugin(app: &mut App) {
             Update,
             (
                 request,
-                super::ranking_ui::panel.run_if(resource_changed::<Ranking>),
+                super::ranking_ui::panel.run_if(
+                    resource_changed::<Ranking>.or_eager(resource_changed::<crate::i18n::Lang>),
+                ),
             )
                 .run_if(in_state(GameState::Menu)),
         );

@@ -7,6 +7,7 @@ use tbg_core::protocol::LeaderRow;
 
 use super::ranking::{Ranking, PAGE};
 use super::{button, label, screen, UiAction, BUTTON, PANEL};
+use crate::i18n::{Lang, Msg};
 use crate::GameState;
 
 #[derive(Component)]
@@ -89,20 +90,27 @@ fn nav(ranking: &Ranking) -> (UiAction, UiAction) {
     (prev, next)
 }
 
-fn status_text(ranking: &Ranking) -> String {
+fn status_text(ranking: &Ranking, lang: Lang) -> String {
     match (&ranking.page, ranking.want) {
-        (_, Some(_)) => "Loading...".into(),
-        (Some(p), None) if p.rows.is_empty() => "No ranked players yet".into(),
-        (Some(p), None) => match p.you {
-            Some(you) => format!("{} ranked players - you are #{you}", p.total),
-            None => format!("{} ranked players", p.total),
-        },
+        (_, Some(_)) => lang.t(Msg::RankingLoading).into(),
+        (Some(p), None) if p.rows.is_empty() => lang.t(Msg::RankingEmpty).into(),
+        (Some(p), None) => {
+            let n = i64::from(p.total);
+            let total = lang.tf(
+                lang.plural(Msg::RankingTotalOne, Msg::RankingTotalOther, n),
+                &[("n", &p.total)],
+            );
+            match p.you {
+                Some(rank) => lang.tf(Msg::RankingYouAre, &[("total", &total), ("rank", &rank)]),
+                None => total,
+            }
+        }
         (None, None) => String::new(),
     }
 }
 
 /// The page's rows under a header, in one or two columns.
-fn table(p: &mut ChildSpawnerCommands, ranking: &Ranking, two: bool) {
+fn table(p: &mut ChildSpawnerCommands, ranking: &Ranking, two: bool, lang: Lang) {
     let rows = ranking.page.as_ref().map_or(&[][..], |p| &p.rows);
     let you = ranking.page.as_ref().and_then(|p| p.you);
     p.spawn(Node {
@@ -118,7 +126,13 @@ fn table(p: &mut ChildSpawnerCommands, ranking: &Ranking, two: bool) {
             })
             .with_children(|c| {
                 c.spawn(row(
-                    ["Rank", "Name", "Rating", "W-L-D"].map(String::from),
+                    [
+                        Msg::RankingColRank,
+                        Msg::RankingColName,
+                        Msg::RankingColRating,
+                        Msg::RankingColRecord,
+                    ]
+                    .map(|m| lang.t(m).to_string()),
                     false,
                 ));
                 for r in col {
@@ -143,6 +157,7 @@ fn button_row(a: impl Bundle, b: impl Bundle) -> impl Bundle {
 pub(super) fn panel(
     mut commands: Commands,
     ranking: Res<Ranking>,
+    lang: Res<Lang>,
     roots: Query<Entity, With<RankingRoot>>,
     window: Single<&Window>,
     scale: Res<UiScale>,
@@ -154,6 +169,7 @@ pub(super) fn panel(
         return;
     }
     let (prev, next) = nav(&ranking);
+    let lang = *lang;
     let two = window.width() / scale.0 >= TWO_COLUMNS_WIDTH;
     commands
         .spawn((
@@ -175,16 +191,20 @@ pub(super) fn panel(
                 BackgroundColor(PANEL),
             ))
             .with_children(|p| {
-                p.spawn(label("Global Ranking", 26.0));
-                p.spawn(label(status_text(&ranking), 14.0));
-                table(p, &ranking, two);
+                p.spawn(label(lang.t(Msg::RankingTitle), 26.0));
+                p.spawn(label(status_text(&ranking, lang), 14.0));
+                table(p, &ranking, two, lang);
                 p.spawn(button_row(
-                    button("Prev", prev, 124.0),
-                    button("Next", next, 124.0),
+                    button(lang.t(Msg::RankingPrev), prev, 124.0),
+                    button(lang.t(Msg::RankingNext), next, 124.0),
                 ));
                 p.spawn(button_row(
-                    button("Open full ranking", UiAction::OpenFullRanking, 220.0),
-                    button("Close", UiAction::CloseRanking, 124.0),
+                    button(
+                        lang.t(Msg::RankingOpenFull),
+                        UiAction::OpenFullRanking,
+                        220.0,
+                    ),
+                    button(lang.t(Msg::CommonClose), UiAction::CloseRanking, 124.0),
                 ));
             });
         });

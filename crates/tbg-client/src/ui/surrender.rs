@@ -46,13 +46,14 @@ pub(super) fn button() -> impl Bundle {
         BackgroundColor(SURRENDER_BG),
         UiAction::Surrender,
         SurrenderButton,
-        children![label("Surrender", 12.0)],
+        children![label("", 12.0)],
     )
 }
 
 fn refresh(
     time: Res<Time>,
     mut state: ResMut<Surrender>,
+    lang: Res<crate::i18n::Lang>,
     mut buttons: Query<(&mut UiAction, &mut BackgroundColor, &Children), With<SurrenderButton>>,
     mut texts: Query<&mut Text>,
 ) {
@@ -60,17 +61,18 @@ fn refresh(
     if state.armed_until.is_some_and(|until| now >= until) {
         state.armed_until = None;
     }
-    let want = if state.sent {
-        "Surrender sent"
+    use crate::i18n::Msg;
+    let want = lang.t(if state.sent {
+        Msg::SurrenderSent
     } else if state.armed_until.is_some() {
         if state.ranked {
-            "Tap again - counts as a loss"
+            Msg::SurrenderAgainLoss
         } else {
-            "Tap again to surrender"
+            Msg::SurrenderAgain
         }
     } else {
-        "Surrender"
-    };
+        Msg::BattleSurrender
+    });
     let bg = if state.sent { DISABLED } else { SURRENDER_BG };
     for (mut action, mut color, children) in &mut buttons {
         let target = if state.sent {
