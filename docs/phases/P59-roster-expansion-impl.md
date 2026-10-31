@@ -1,8 +1,8 @@
 # P59 — Roster expansion: implementation (status report)
 
 Status: **W0 and W1 are done** (D-62 and D-63 for W0; D-64 for W1). The
-Monsters pilot is next. No unit of the expansion (R01–R21) has a kit or a
-registered kind yet. This file records what is done and what comes next. It is
+Monsters pilot has four inactive base kinds (D-66, commit `2b28591`); its kits
+and animations are next. No unit of the expansion (R01–R21) has a kit yet. This file records what is done and what comes next. It is
 a status report, not a finished wave.
 
 ## What is in place
@@ -14,6 +14,7 @@ a status report, not a finished wave.
 | Part A: archer kit, carrier id (protocol 18, D-61), passengers, crab rule (D-60), name tags | `phase/units-fixes` | merged here |
 | W0: six shared slots and the unit shield grant path (D-62, D-63) | `crates/tbg-core/src/roster_slots.rs`, `UnitFx`, `UnitView.shield` | commits `a0c71b9`, `bd9964f` |
 | W1: three Factions, arrays sized by `FACTION_COUNT`, Insects movement synergy (D-64) | `crates/tbg-core/src/types.rs`, `content.rs`, `ruleset.rs`; palette, death styles, gallery | commit `c968b2c` |
+| Monsters pilot: four inactive base kinds, no abilities or kits (D-66) | `UnitKind`, `UNITS`; outside every pool | commit `2b28591` |
 | English names for the roster (D-65) | `docs/roster/P59-NAMES.md` | decided |
 
 **Protocol numbers.** The shield took 19 (D-63) and the Factions took 20 (D-64).
@@ -35,8 +36,8 @@ current value is 20. Update the audit in the next docs pass.
   appended. `FACTION_COUNT` sizes every array. Synergy at 500 / 1 000 bp. Palettes,
   death styles and gallery rows cover the seven Factions. ART-DIRECTION §3 and
   §11.2 have rows for the three new Factions (Proposed).
-- **Pilot: Monsters R08 Bonehorn, R09 Ravager, R10 Acidmaw, R11 Whisperer. Next.**
-  Kinds registered as inactive (not in any pool), base rows from GAME-DESIGN §13.1,
+- **Pilot: Monsters R08 Bonehorn, R09 Ravager, R10 Acidmaw, R11 Whisperer. Kinds done (D-66).**
+  Inactive kinds and base rows from GAME-DESIGN §13.1 are registered. Next:
   kits under `crates/tbg-client/src/art/kits/`, animations and gallery review. The
   pilot's report goes here before the next wave starts.
 - **W2–W6: rules for the other 17 units** (timers, counted strikers, area pulses,

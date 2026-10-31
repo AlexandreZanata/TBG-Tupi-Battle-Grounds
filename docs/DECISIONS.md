@@ -1085,7 +1085,7 @@ online play uses and the gate may need a sample or a row change.
 lobby registry while they run, with progress and presence counts in a
 read-only `/api/live` snapshot. Any idle session may watch one; spectators
 get the public view only, at 0 s delay, through one pre-encoded frame per
-view tick shared by every spectator (protocol v17, GAME-DESIGN §13).
+view tick shared by every spectator (protocol v17, GAME-DESIGN §14).
 `Lobby::pair` takes an explicit `Listing::{Public, Private}`, decided where
 the match is paired; the mode alone does not decide it, because rooms share
 `MatchMode::Casual` with the quick queue.
