@@ -123,7 +123,7 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
     });
     let mut sides: [Side; 2] = Default::default();
     let mut hp = None;
-    let mut reroll_streak = [0u8; 2];
+    let mut shop_journals: [crate::shop_metrics::Journal; 2] = Default::default();
     let ended = headless::play_with(
         &mut state,
         |state| setup.apply(state),
@@ -137,43 +137,42 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
             } => {
                 let index = participant(seat, seat_a);
                 let side = &mut sides[index];
+                shop_journals[index].record(side, view, intent);
                 match intent {
                     PlayerIntention::Purchase { offer } => {
-                        reroll_streak[index] = 0;
                         let i = usize::from(offer);
                         let cost = m.rules.def(view.offers[i]).cost;
                         side.purchases[view.offers[i] as usize] += 1;
                         side.spent += u64::from(cost);
-                        // The maximum streak is updated from the displayed price below.
-                        side.expensive_bought +=
-                            u32::from(cost >= 6 * tbg_core::content::ENERGY_SCALE);
-                        if view.reserve[i] > 0 {
-                            side.reserved_bought += 1;
-                            side.reserve_wait_shops += u32::from(
-                                m.rules
-                                    .shop
-                                    .map_or(0, |r| r.reserve_shops)
-                                    .saturating_sub(view.reserve[i]),
-                            );
-                        }
+                        side.expensive_bought += u32::from(
+                            (6 * tbg_core::content::ENERGY_SCALE
+                                ..=7 * tbg_core::content::ENERGY_SCALE)
+                                .contains(&cost),
+                        );
                     }
                     PlayerIntention::Evolve { unit, branch } => {
                         if let Some(u) = view.units.iter().find(|u| u.id == unit) {
                             side.evolutions[u.kind as usize][usize::from(branch.min(1))] += 1;
+                            side.spent += u64::from(view.evolve_costs[usize::from(u.tier.min(1))]);
                         }
                     }
-                    PlayerIntention::Reserve { .. } => side.reservations += 1,
-                    PlayerIntention::Release { .. } => {}
-                    PlayerIntention::Reroll { cost } => {
-                        side.rerolls += 1;
-                        side.reroll_energy += u64::from(cost);
-                        side.spent += u64::from(cost);
-                        reroll_streak[index] = reroll_streak[index].saturating_add(1);
-                        side.max_reroll_streak = side.max_reroll_streak.max(reroll_streak[index]);
+                    PlayerIntention::ChooseAugment { option, .. } => {
+                        side.spent += u64::from(
+                            view.augment_round
+                                .as_ref()
+                                .and_then(|r| r.costs.get(usize::from(option)))
+                                .copied()
+                                .unwrap_or(0),
+                        );
                     }
-                    PlayerIntention::ChooseAugment { .. }
-                    | PlayerIntention::Forgo { .. }
-                    | PlayerIntention::Fortify { .. } => {}
+                    PlayerIntention::Fortify { .. } => {
+                        let tier = usize::from(view.strongholds[seat.index()].tier.min(1));
+                        side.spent += u64::from(m.rules.fortify_cost[tier]);
+                    }
+                    PlayerIntention::Reserve { .. }
+                    | PlayerIntention::Release { .. }
+                    | PlayerIntention::Reroll { .. }
+                    | PlayerIntention::Forgo { .. } => {}
                 }
             }
             Moment::Intention { .. } => {}
