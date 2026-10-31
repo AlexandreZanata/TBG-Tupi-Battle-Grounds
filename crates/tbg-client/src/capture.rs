@@ -8,6 +8,15 @@ use bevy::{
 pub fn plugin(app: &mut App) {
     if crate::config::url_param("capture").is_some() {
         app.add_systems(Update, capture);
+        #[cfg(target_os = "linux")]
+        if crate::config::url_param("capture_panel").as_deref() == Some("fortify") {
+            app.add_systems(
+                OnEnter(crate::GameState::InMatch),
+                |mut actions: ResMut<crate::ui::ActionQueue>| {
+                    actions.0.push(crate::ui::UiAction::SelectTower);
+                },
+            );
+        }
     }
 }
 
@@ -16,6 +25,7 @@ fn capture(
     time: Res<Time>,
     state: Res<State<crate::GameState>>,
     #[cfg(target_os = "linux")] view: Res<crate::sync::LatestView>,
+    #[cfg(target_os = "linux")] tower: Res<crate::ui::fortify::TowerOpen>,
     mut started: Local<bool>,
 ) {
     let delay = crate::config::url_param("capture_after")
@@ -31,6 +41,9 @@ fn capture(
     }
     #[cfg(target_os = "linux")]
     {
+        if crate::config::url_param("capture_panel").as_deref() == Some("fortify") && !tower.0 {
+            return;
+        }
         // Capture actual match phases instead of racing startup/loading time.
         let wanted = match crate::config::url_param("capture_on").as_deref() {
             Some("countdown") => Some(tbg_core::Phase::Countdown),

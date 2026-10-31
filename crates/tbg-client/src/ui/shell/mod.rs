@@ -9,6 +9,9 @@ mod lobby;
 mod settings;
 mod strongholds;
 
+#[cfg(target_os = "linux")]
+pub(super) use strongholds::{branch_effect, expand, stronghold_data};
+
 use super::{
     account::{Account, AccountScreen},
     kit,

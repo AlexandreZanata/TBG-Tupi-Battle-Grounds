@@ -21,8 +21,6 @@ pub(super) enum Hud {
     Portrait(usize),
     EnergyFill,
     Info,
-    #[cfg(target_os = "linux")]
-    FortifyRow,
     Card(usize),
     CardText(usize),
     CardStrip(usize),
@@ -289,7 +287,6 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>)
                         forgo_card()
                     ],
                 ));
-                shop.spawn((super::fortify::control(), Hud::FortifyRow));
                 shop.spawn(Node {
                     flex_direction: FlexDirection::Column,
                     row_gap: px(10),

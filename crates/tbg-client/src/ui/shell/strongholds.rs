@@ -131,7 +131,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) 
         }
     });
 }
-fn expand(raw: &str, stats: &Value) -> String {
+pub(in crate::ui) fn expand(raw: &str, stats: &Value) -> String {
     let data = stronghold_data();
     let seconds =
         data["windowTicks"].as_f64().unwrap_or(0.) / data["tickHz"].as_f64().unwrap_or(20.);
@@ -173,7 +173,7 @@ mod tests {
     }
 }
 
-fn branch_effect(step: &Value) -> String {
+pub(in crate::ui) fn branch_effect(step: &Value) -> String {
     let stats = &step["stats"];
     let delta = &step["delta"];
     let mut parts = Vec::new();

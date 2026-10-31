@@ -4,9 +4,12 @@
 //! sent `Fortify` only blocks a second click until the view covers it.
 
 use bevy::prelude::*;
-use tbg_core::content::{ENERGY_SCALE, FORTIFY_COST, STRONGHOLD_KINDS};
+use tbg_core::content::FORTIFY_COST;
+#[cfg(any(not(target_os = "linux"), test))]
+use tbg_core::content::{ENERGY_SCALE, STRONGHOLD_KINDS};
 use tbg_core::{MatchView, Phase, StrongholdView};
 
+#[cfg(not(target_os = "linux"))]
 use super::{label, UiAction, BUTTON, DISABLED};
 use crate::sync::LatestView;
 use crate::GameState;
@@ -89,6 +92,7 @@ pub(crate) fn record(tower: StrongholdView) -> String {
 }
 
 /// `Bastion T1 Fortress`: kind, tier and, once chosen, the branch.
+#[cfg(any(not(target_os = "linux"), test))]
 fn title(tower: StrongholdView) -> String {
     let def = &STRONGHOLD_KINDS[tower.kind.index()];
     if tower.tier == 0 {
@@ -100,6 +104,7 @@ fn title(tower: StrongholdView) -> String {
 }
 
 /// Phone button text for `branch`: the next step's name and its price.
+#[cfg(any(not(target_os = "linux"), test))]
 fn choice_text(v: &MatchView, branch: u8) -> String {
     let tower = own(v);
     let tier = usize::from(tower.tier.min(1));
@@ -113,12 +118,15 @@ fn choice_text(v: &MatchView, branch: u8) -> String {
 }
 
 #[derive(Component)]
+#[cfg(not(target_os = "linux"))]
 struct FortifyTitle;
 
 #[derive(Component)]
+#[cfg(not(target_os = "linux"))]
 struct FortifyChoice(u8);
 
 #[derive(Component)]
+#[cfg(not(target_os = "linux"))]
 struct FortifyChoiceText(u8);
 
 pub fn plugin(app: &mut App) {
@@ -131,14 +139,17 @@ pub fn plugin(app: &mut App) {
                 open.0 = false;
             },
         )
-        .add_systems(
-            Update,
-            (clear_answered, refresh)
-                .chain()
-                .run_if(in_state(GameState::InMatch)),
-        );
+        .add_systems(Update, clear_answered.run_if(in_state(GameState::InMatch)));
+    #[cfg(not(target_os = "linux"))]
+    app.add_systems(
+        Update,
+        refresh
+            .after(clear_answered)
+            .run_if(in_state(GameState::InMatch)),
+    );
 }
 
+#[cfg(not(target_os = "linux"))]
 fn choice(branch: u8) -> impl Bundle {
     (
         Node {
@@ -160,6 +171,7 @@ fn choice(branch: u8) -> impl Bundle {
 /// The compact phone row: your tower and the opponent's, then the next
 /// Fortification step of each open branch. It sits above the Energy bar,
 /// so it never covers the Shop.
+#[cfg(not(target_os = "linux"))]
 pub(super) fn control() -> impl Bundle {
     (
         Node {
@@ -183,6 +195,7 @@ fn clear_answered(view: Res<LatestView>, mut pending: ResMut<PendingFortify>) {
     }
 }
 
+#[cfg(not(target_os = "linux"))]
 type ChoiceQuery<'w, 's> = Query<
     'w,
     's,
@@ -194,6 +207,7 @@ type ChoiceQuery<'w, 's> = Query<
     ),
 >;
 
+#[cfg(not(target_os = "linux"))]
 fn refresh(
     view: Res<LatestView>,
     pending: Res<PendingFortify>,

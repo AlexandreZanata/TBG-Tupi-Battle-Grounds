@@ -225,3 +225,29 @@ War Council states, Stronghold inspection/Fortification and long player
 names/ratings. Full suites, other targets and multiplayer campaigns were
 not run; they remain outside this work-front validation. These are pending
 checks, not passing evidence.
+
+## Linux Stronghold Fortification panel — 2026-10-31
+
+Owner requested the browser-reference Fortification panel in the Linux
+client, at the left edge with its top aligned to the player's HP plate.
+Both use the same score geometry constants so their alignment follows UI
+scaling. The panel replaces the compact row above the Shop and opens via
+the existing own-Stronghold selection action. It shows the existing icon,
+HP, passive, branch/step/effect/cost details and availability note; close,
+outside click and Escape use the existing deselection action. The panel
+never predicts a Fortification result or changes prices/branch rules.
+
+The existing Stronghold catalog formatting is shared with this Linux
+panel; no web assets or behavior are changed. A debug capture option queues
+the normal SelectTower action in an isolated Practice match for visual
+inspection. Level: work front. Run formatting/diff inspection followed by
+the owner-requested native preview build/install and one focused panel
+capture. The owner permits waiting for the shared lock and waives the job
+limit in this chat; reuse the existing cache and preserve active work.
+
+Deferred to consolidation: `cargo test -p tbg-client --bin tbg-client
+ui::fortify::tests -- --test-threads=1`, the existing
+`ui::stronghold_data_tests` scenarios, and mouse/keyboard checks for close,
+outside click, Escape, both branch purchases, insufficient Energy,
+in-flight rejection/acknowledgment, a paused War Council and max tier.
+No full suite, WASM build or multiplayer campaign belongs to this front.

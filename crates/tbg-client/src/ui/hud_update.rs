@@ -19,7 +19,6 @@ pub(super) fn update(
     mut nodes: Query<(&Hud, &mut Node)>,
     mut colors: Query<(&Hud, &mut BackgroundColor)>,
     mut texts: Query<(&Hud, &mut Text)>,
-    #[cfg(target_os = "linux")] tower_open: Res<super::fortify::TowerOpen>,
 ) {
     let Some(v) = &view.0 else { return };
     if pending.0.is_some_and(|(_, seq)| v.last_seq >= seq) {
@@ -28,7 +27,7 @@ pub(super) fn update(
     let me = v.you.index();
     for (hud, mut node) in &mut nodes {
         #[cfg(target_os = "linux")]
-        if let Some(show) = super::native_battle::auxiliary_visible(hud, v, tower_open.0) {
+        if let Some(show) = super::native_battle::auxiliary_visible(hud, v) {
             node.display = if show { Display::Flex } else { Display::None };
             continue;
         }

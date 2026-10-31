@@ -8,6 +8,11 @@ use crate::sync::{LatestView, MatchInfo};
 use bevy::prelude::*;
 use tbg_core::{content::TICK_HZ, Phase};
 
+const SCORE_TOP: f32 = 12.;
+const CLOCK_HEIGHT: f32 = 76.;
+const PLATE_HEIGHT: f32 = 55.;
+pub(super) const PLATE_TOP: f32 = SCORE_TOP + (CLOCK_HEIGHT - PLATE_HEIGHT) / 2.;
+
 #[derive(Component)]
 enum Readout {
     Clock,
@@ -24,10 +29,10 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, assets: &Asset
     parent
         .spawn(Node {
             position_type: PositionType::Absolute,
-            top: px(12),
+            top: px(SCORE_TOP),
             left: percent(22),
             width: percent(56),
-            height: px(76),
+            height: px(CLOCK_HEIGHT),
             align_items: AlignItems::Center,
             ..default()
         })
@@ -36,7 +41,7 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, assets: &Asset
             row.spawn((
                 Node {
                     width: px(116),
-                    height: px(76),
+                    height: px(CLOCK_HEIGHT),
                     flex_shrink: 0.,
                     border: UiRect::all(px(3)),
                     border_radius: BorderRadius::all(percent(50)),
@@ -70,7 +75,7 @@ fn plate(
                 flex_grow: 1.,
                 flex_basis: px(0),
                 min_width: px(0),
-                height: px(55),
+                height: px(PLATE_HEIGHT),
                 padding: UiRect::axes(px(8), px(4)),
                 border: UiRect::all(px(2)),
                 border_radius: BorderRadius::all(px(7)),
