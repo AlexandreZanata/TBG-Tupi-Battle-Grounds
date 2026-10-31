@@ -273,12 +273,21 @@ pub(crate) fn feed(
     mut mounts: ResMut<crate::visuals::mount::Mounts>,
     mut info: ResMut<MatchInfo>,
     mut arena: ResMut<crate::arena::ActiveArena>,
+    roots: Query<Entity, crate::sync::cleanup::BattleVisuals>,
+    mut impacts: ResMut<crate::art::aim::ImpactRing>,
 ) {
     if !trial.dirty {
         return;
     }
     if trial.reset {
-        clear(&mut commands, &mut entities, &mut mounts);
+        crate::sync::cleanup::clear(
+            &mut commands,
+            &mut entities,
+            &mut mounts,
+            &roots,
+            &mut impacts,
+        );
+        trial.stats = default();
         *buffer = default();
         trial.reset = false;
     }
@@ -299,16 +308,7 @@ pub(crate) fn feed(
     latest.0 = Some(view.clone());
     buffer.timeline.push(time.elapsed_secs_f64(), view);
 }
-fn clear(
-    commands: &mut Commands,
-    entities: &mut UnitEntities,
-    mounts: &mut crate::visuals::mount::Mounts,
-) {
-    for (_, e) in entities.0.drain() {
-        commands.entity(e).try_despawn();
-    }
-    mounts.clear();
-}
+#[allow(clippy::too_many_arguments)] // Session-owned render resources are reset together.
 fn cleanup(
     mut commands: Commands,
     mut trial: ResMut<Trial>,
@@ -316,8 +316,16 @@ fn cleanup(
     mut mounts: ResMut<crate::visuals::mount::Mounts>,
     mut buffer: ResMut<ViewBuffer>,
     mut latest: ResMut<LatestView>,
+    roots: Query<Entity, crate::sync::cleanup::BattleVisuals>,
+    mut impacts: ResMut<crate::art::aim::ImpactRing>,
 ) {
-    clear(&mut commands, &mut entities, &mut mounts);
+    crate::sync::cleanup::clear(
+        &mut commands,
+        &mut entities,
+        &mut mounts,
+        &roots,
+        &mut impacts,
+    );
     *trial = default();
     *buffer = default();
     latest.0 = None;

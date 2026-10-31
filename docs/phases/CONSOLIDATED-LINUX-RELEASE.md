@@ -143,3 +143,11 @@ and a literal >= symbol was missing from the font subset. Pyre recovery is
 every form retains the same geometry budget, conventional Evolutions retain
 growth/distinctness guards, and a separate guard covers distinct drill ranks.
 The unsupported symbol is rendered with ASCII >=. Final re-run follows.
+
+Browser WebGL2 verification exercised nested-pane scrolling, Start, finite
+wooden-target completion, Reset and an exact one-tick advance (0.05s, Paused).
+The reset observation exposed a fading corpse from the previous session:
+dead actors had already left the live-id map. Match/session boundary cleanup
+now queries all actor/corpse roots plus transient Vfx/projectiles and resets
+the impact FIFO; it is shared by ordinary match exit and laboratory reset/exit.
+Training's private presentation counters also reset with the new session.

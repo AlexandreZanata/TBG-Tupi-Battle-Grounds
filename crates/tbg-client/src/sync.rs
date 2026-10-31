@@ -339,9 +339,10 @@ fn clear_units(
     mut commands: Commands,
     mut map: ResMut<UnitEntities>,
     mut mounts: ResMut<crate::visuals::mount::Mounts>,
+    roots: Query<Entity, cleanup::BattleVisuals>,
+    mut impacts: ResMut<crate::art::aim::ImpactRing>,
 ) {
-    for (_, e) in map.0.drain() {
-        commands.entity(e).try_despawn();
-    }
-    mounts.clear();
+    cleanup::clear(&mut commands, &mut map, &mut mounts, &roots, &mut impacts);
 }
+
+pub(crate) mod cleanup;

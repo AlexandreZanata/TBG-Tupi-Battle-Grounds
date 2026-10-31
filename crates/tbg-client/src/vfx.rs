@@ -75,7 +75,7 @@ pub(super) enum Motion {
 }
 
 #[derive(Component)]
-struct Vfx {
+pub(crate) struct Vfx {
     motion: Motion,
     origin: Vec3,
     rotation: Quat,
