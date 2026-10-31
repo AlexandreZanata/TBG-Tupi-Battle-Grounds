@@ -39,6 +39,16 @@ pub struct Config {
     pub ranked: crate::ranked::policy::RankedPolicy,
     /// P61: optional ranked statistics collection (`TBG_RANKED_STATS`).
     pub stats: crate::ranked::policy::StatsMode,
+    /// P66: fixed release slot (`TBG_SLOT`, `a`–`z`); `None` keeps the
+    /// single-process behavior with no release directory.
+    pub slot: Option<String>,
+    /// P66: this process's generation id (`TBG_GENERATION`); every
+    /// replacement build gets a new one.
+    pub generation: String,
+    /// P66: immutable server build label (`TBG_SERVER_BUILD`).
+    pub server_build: String,
+    /// P66: the fixed proxy path of this slot (`TBG_WS_ENDPOINT`).
+    pub ws_endpoint: String,
 }
 
 impl Default for Config {
@@ -63,8 +73,27 @@ impl Default for Config {
             replays: None,
             ranked: crate::ranked::policy::RankedPolicy::default(),
             stats: crate::ranked::policy::StatsMode::default(),
+            slot: None,
+            generation: default_build(),
+            server_build: default_build(),
+            ws_endpoint: "/ws".into(),
         }
     }
+}
+
+/// `<package version>+<source commit>` (commit from the build env).
+fn default_build() -> String {
+    format!(
+        "{}+{}",
+        env!("CARGO_PKG_VERSION"),
+        option_env!("TBG_SOURCE_COMMIT").unwrap_or("dev")
+    )
+}
+
+/// A slot name: one lowercase ASCII letter.
+fn slot_name(raw: &str) -> Option<String> {
+    let ok = raw.len() == 1 && raw.bytes().all(|b| b.is_ascii_lowercase());
+    ok.then(|| raw.to_string())
 }
 
 impl Config {
@@ -100,6 +129,10 @@ impl Config {
             replays: None,
             ranked: d.ranked,
             stats: d.stats,
+            slot: std::env::var("TBG_SLOT").ok().and_then(|s| slot_name(&s)),
+            generation: std::env::var("TBG_GENERATION").unwrap_or(d.generation),
+            server_build: std::env::var("TBG_SERVER_BUILD").unwrap_or(d.server_build),
+            ws_endpoint: std::env::var("TBG_WS_ENDPOINT").unwrap_or(d.ws_endpoint),
         }
     }
 }

@@ -167,6 +167,7 @@ async fn run(
         let t0 = Instant::now();
         let ev = m.state.step();
         let ns = t0.elapsed().as_nanos();
+        m.metrics.record_step((ns / 1_000) as u64);
         (step_ns, step_max) = (step_ns + ns, step_max.max(ns));
         if ev.iter().any(|e| {
             matches!(
@@ -227,7 +228,6 @@ async fn run(
         let _ = tx.send(replay);
     }
     let ticks = u128::from(m.state.clock.max(1));
-    m.metrics.matches_running.fetch_sub(1, Relaxed);
     m.metrics.matches_finished.fetch_add(1, Relaxed);
     // P60: a ranked result goes to the single finalizer, which journals it
     // durably and settles results in completion order; the lobby delivers
@@ -237,7 +237,11 @@ async fn run(
         if let Some(result) = m.ranked_final(records.key, started, records.stats) {
             match &records.ranked {
                 Some(handle) => {
+                    // P66: counted before the hand-off so retirement never
+                    // sees a gap between "match ended" and "result queued".
+                    m.metrics.ranked_inflight.fetch_add(1, Relaxed);
                     if handle.tx.send(result).await.is_err() {
+                        m.metrics.ranked_inflight.fetch_sub(1, Relaxed);
                         tracing::error!("ranked finalizer stopped; result not settled");
                     }
                 }
@@ -264,4 +268,8 @@ async fn run(
     if let Some(db) = records.store {
         db.insert_match(&line);
     }
+    // P66: "running" ends only once the ranked result and the match record
+    // are queued (both counted as pending), so the retirement gate never
+    // sees an idle slot while a result is between the two.
+    m.metrics.matches_running.fetch_sub(1, Relaxed);
 }

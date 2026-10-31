@@ -43,7 +43,9 @@ pub(super) fn register(
     name_lower: &str,
     key_hash: &[u8; 32],
 ) -> Result<(AccountId, Profile), AccountError> {
-    let tx = conn.transaction().map_err(|_| AccountError::Unavailable)?;
+    let tx = conn
+        .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
+        .map_err(|_| AccountError::Unavailable)?;
     let taken = tx
         .execute(
             "INSERT INTO accounts (name, name_lower, key_hash, created_at, last_login_at)

@@ -44,7 +44,7 @@ struct Pending {
 /// serves commands, so ranked admission is never offered on a stale view.
 pub(crate) async fn start(
     store: Arc<Store>,
-    db: PathBuf,
+    dir: PathBuf,
     lobby: mpsc::Sender<LobbyCmd>,
     metrics: Arc<Metrics>,
 ) -> Handle {
@@ -52,7 +52,7 @@ pub(crate) async fn start(
     let unavailable = Arc::new(AtomicBool::new(true));
     let mut worker = Finalizer {
         store,
-        dir: journal::dir_for(&db),
+        dir,
         lobby,
         metrics,
         unavailable: unavailable.clone(),
@@ -140,6 +140,10 @@ impl Finalizer {
         }
         let loaded = loaded.unwrap_or_default();
         self.high_water = committed.unwrap_or(0);
+        // P66: recovered results count as in flight until they settle.
+        self.metrics
+            .ranked_inflight
+            .fetch_add(loaded.len() as u64, Relaxed);
         for entry in loaded {
             self.high_water = self.high_water.max(entry.completion_seq);
             self.last_unix = self.last_unix.max(entry.ended_unix);
@@ -157,6 +161,11 @@ impl Finalizer {
     /// Freeze sequence and completion second, then journal before any
     /// settlement attempt. A journal failure keeps the entry in memory.
     async fn accept(&mut self, result: RankedFinal) {
+        // P66: another slot may have settled since this one started (ranked
+        // authority moves between slots), so re-read the committed mark.
+        if let Ok(committed) = self.store.ranked_high_water().await {
+            self.high_water = self.high_water.max(committed);
+        }
         self.high_water += 1;
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -208,6 +217,7 @@ impl Finalizer {
                 };
                 if keep {
                     self.pending.pop_front();
+                    self.left_flight();
                 } else {
                     self.forget(&entry, journaled, false).await;
                 }
@@ -232,11 +242,63 @@ impl Finalizer {
                 self.forget(&entry, journaled, true).await;
                 true
             }
+            Err(SettleError::SequenceTaken) => {
+                self.resequence_head().await;
+                false
+            }
             Err(SettleError::Sql(_)) => {
                 self.metrics
                     .ranked_settlement_failures
                     .fetch_add(1, Relaxed);
                 false
+            }
+        }
+    }
+
+    /// P66: the head's sequence was committed by another slot's finalizer
+    /// (a crash recovery overlapping the ranked authority). Give it the next
+    /// free sequence and rewrite its journal file before the retry.
+    async fn resequence_head(&mut self) {
+        let Ok(committed) = self.store.ranked_high_water().await else {
+            return;
+        };
+        self.high_water = self.high_water.max(committed);
+        let Some(head) = self.pending.front_mut() else {
+            return;
+        };
+        let old = head.entry.clone();
+        self.high_water += 1;
+        head.entry.completion_seq = self.high_water;
+        self.metrics.ranked_resequenced.fetch_add(1, Relaxed);
+        tracing::warn!(
+            "ranked sequence {} taken by another slot; re-sequenced as {}",
+            old.completion_seq,
+            head.entry.completion_seq
+        );
+        if !head.journaled {
+            return;
+        }
+        let (dir, new) = (self.dir.clone(), head.entry.clone());
+        let moved = tokio::task::spawn_blocking(move || {
+            journal::write(&dir, &new)?;
+            journal::remove(&dir, &old)
+        })
+        .await;
+        if !matches!(moved, Ok(Ok(()))) {
+            tracing::error!(
+                "ranked journal re-sequencing failed; the old file replays idempotently"
+            );
+        }
+    }
+
+    /// A result left the queue (settled, replayed or quarantined).
+    fn left_flight(&self) {
+        let gauge = &self.metrics.ranked_inflight;
+        let mut n = gauge.load(Relaxed);
+        while n > 0 {
+            match gauge.compare_exchange_weak(n, n - 1, Relaxed, Relaxed) {
+                Ok(_) => break,
+                Err(seen) => n = seen,
             }
         }
     }
@@ -264,6 +326,7 @@ impl Finalizer {
 
     async fn forget(&mut self, entry: &JournalEntry, journaled: bool, quarantine: bool) {
         self.pending.pop_front();
+        self.left_flight();
         if !journaled {
             return;
         }

@@ -22,6 +22,8 @@ pub mod integrity_admin;
 pub mod leaderboard;
 mod matches;
 mod ranked;
+pub mod release;
+pub mod release_admin;
 mod rulesets;
 mod schema;
 pub mod stats;
@@ -36,10 +38,30 @@ pub use stats::{StatsWriteError, StoredMatch};
 
 pub type AccountId = i64;
 
+/// The writer's inbox plus a count of commands not yet served (P66: the
+/// retirement gate waits for queued match records too).
+#[derive(Clone)]
+struct Inbox {
+    tx: SyncSender<StoreCmd>,
+    pending: StdArc<std::sync::atomic::AtomicU64>,
+}
+
+impl Inbox {
+    fn try_send(&self, cmd: StoreCmd) -> Result<(), std::sync::mpsc::TrySendError<StoreCmd>> {
+        use std::sync::atomic::Ordering::Relaxed;
+        self.pending.fetch_add(1, Relaxed);
+        let sent = self.tx.try_send(cmd);
+        if sent.is_err() {
+            self.pending.fetch_sub(1, Relaxed);
+        }
+        sent
+    }
+}
+
 /// Handle to the single writer thread.
 #[derive(Clone)]
 pub struct Store {
-    tx: SyncSender<StoreCmd>,
+    tx: Inbox,
     /// P13: published leaderboard; readers clone the `Arc`, never query.
     snapshot_tx: watch::Sender<StdArc<Snapshot>>,
 }
@@ -67,11 +89,34 @@ impl Store {
         let (tx, rx) = sync_channel::<StoreCmd>(1024);
         let (snapshot_tx, _) = watch::channel(StdArc::new(leaderboard::build(&conn)?));
         let snapshots = snapshot_tx.clone();
+        let pending = StdArc::new(std::sync::atomic::AtomicU64::new(0));
+        let served = pending.clone();
         std::thread::Builder::new()
             .name("tbg-store".into())
-            .spawn(move || worker(conn, rx, snapshots, policy))
+            .spawn(move || worker(conn, rx, snapshots, policy, served))
             .map_err(|_| rusqlite::Error::InvalidPath(path.to_path_buf()))?;
-        Ok(Store { tx, snapshot_tx })
+        Ok(Store {
+            tx: Inbox { tx, pending },
+            snapshot_tx,
+        })
+    }
+
+    /// P66: commands queued or being served (match records included).
+    pub fn jobs_pending(&self) -> u64 {
+        self.tx.pending.load(std::sync::atomic::Ordering::Relaxed)
+    }
+
+    /// P66: run one release-directory job on the writer thread.
+    pub async fn release<T: Send + 'static>(
+        &self,
+        job: impl FnOnce(&mut rusqlite::Connection) -> T + Send + 'static,
+    ) -> Option<T> {
+        let (reply_tx, reply_rx) = oneshot::channel();
+        let run: worker::Job = Box::new(move |conn| {
+            let _ = reply_tx.send(job(conn));
+        });
+        self.tx.try_send(StoreCmd::Release(run)).ok()?;
+        reply_rx.await.ok()
     }
 
     /// Current leaderboard snapshot (no SQL on this path).

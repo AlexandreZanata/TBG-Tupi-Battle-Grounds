@@ -20,9 +20,18 @@ pub const DIR_CAP: u64 = 32 * 1024 * 1024;
 const FORMAT: u64 = 1;
 
 pub fn dir_for(db: &Path) -> PathBuf {
-    db.parent()
-        .unwrap_or_else(|| Path::new("."))
-        .join("ranked-pending")
+    dir_for_slot(db, None)
+}
+
+/// P66: each slot process keeps its own journal next to the shared
+/// database, so a restarted slot recovers exactly its own results. Slot
+/// `a` (and a single-slot server) keeps the original directory name.
+pub fn dir_for_slot(db: &Path, slot: Option<&str>) -> PathBuf {
+    let name = match slot {
+        None | Some("a") => "ranked-pending".to_string(),
+        Some(slot) => format!("ranked-pending-{slot}"),
+    };
+    db.parent().unwrap_or_else(|| Path::new(".")).join(name)
 }
 
 fn file_name(entry: &JournalEntry) -> String {

@@ -7,8 +7,9 @@ use std::time::{Duration, Instant};
 
 use axum::body::Bytes;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::{ConnectInfo, State};
+use axum::extract::{ConnectInfo, Path, RawQuery, State};
 use axum::http::HeaderMap;
+use axum::response::IntoResponse;
 use axum::response::Response;
 use tokio::sync::{mpsc, oneshot};
 use tokio::time::{sleep, timeout};
@@ -36,7 +37,50 @@ pub(crate) async fn handler(
     ConnectInfo(peer): ConnectInfo<SocketAddr>,
     headers: HeaderMap,
     State(app): State<AppState>,
+    RawQuery(query): RawQuery,
 ) -> Response {
+    upgrade(ws, peer, headers, app, query)
+}
+
+/// P66: the fixed path of one release slot (`/ws/slot-a`). A request for
+/// another slot's path never reaches a match here (proxy misrouting).
+pub(crate) async fn slot_handler(
+    ws: WebSocketUpgrade,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    State(app): State<AppState>,
+    Path(slot): Path<String>,
+    RawQuery(query): RawQuery,
+) -> Response {
+    let mine = app
+        .release
+        .slot()
+        .is_some_and(|s| slot.strip_prefix("slot-") == Some(s));
+    if !mine {
+        return axum::http::StatusCode::NOT_FOUND.into_response();
+    }
+    upgrade(ws, peer, headers, app, query)
+}
+
+/// P66 §6.5: a client that names its match contract must match this
+/// process exactly; a client that names none is a legacy build and keeps
+/// the protocol-version check of the handshake.
+fn contract_mismatch(app: &AppState, query: Option<&str>) -> bool {
+    let named = query
+        .unwrap_or_default()
+        .split('&')
+        .find_map(|pair| pair.strip_prefix("contract="));
+    named.is_some_and(|c| c != app.release.contract.id())
+}
+
+fn upgrade(
+    ws: WebSocketUpgrade,
+    peer: SocketAddr,
+    headers: HeaderMap,
+    app: AppState,
+    query: Option<String>,
+) -> Response {
+    let mismatch = contract_mismatch(&app, query.as_deref());
     let ip = client_ip(peer, &headers);
     ws.max_message_size(MAX_CLIENT_MSG_BYTES)
         .max_frame_size(MAX_CLIENT_MSG_BYTES)
@@ -47,7 +91,23 @@ pub(crate) async fn handler(
         // stays visible as slow-client drops instead of memory growth).
         .write_buffer_size(4096)
         .max_write_buffer_size(64 * 1024)
-        .on_upgrade(move |socket| connection(socket, ip, app))
+        .on_upgrade(move |socket| async move {
+            if mismatch {
+                refuse_contract(socket, &app).await;
+            } else {
+                connection(socket, ip, app).await;
+            }
+        })
+}
+
+/// Reply like an incompatible protocol so every client build shows its
+/// update path, then close before any session or seat exists.
+async fn refuse_contract(mut socket: WebSocket, app: &AppState) {
+    let reply = ServerMsg::VersionMismatch {
+        server: protocol::PROTOCOL_VERSION,
+    };
+    let _ = send(&mut socket, &app.metrics, &reply).await;
+    app.metrics.admit_update_required.fetch_add(1, Relaxed);
 }
 
 pub(super) struct Conn {

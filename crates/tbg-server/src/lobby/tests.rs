@@ -38,7 +38,7 @@ fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
             metrics: Arc::new(Metrics::default()),
             store: None,
             limits: Limits::default(),
-            draining: Arc::new(AtomicBool::new(false)),
+            release: crate::release::Runtime::new(&Config::default()),
             live: HashMap::new(),
             live_tx: watch::channel(Arc::default()).0,
             featured: None,
@@ -223,7 +223,9 @@ fn reconnect_during_drain_keeps_rematch_from_starting() {
         expires: Some(Instant::now() + Duration::from_secs(60)),
     });
     lobby
-        .draining
+        .release
+        .gate
+        .shutdown
         .store(true, std::sync::atomic::Ordering::Relaxed);
     lobby.try_start_rematch([a, b]);
     assert_eq!(lobby.rematches.len(), 1);

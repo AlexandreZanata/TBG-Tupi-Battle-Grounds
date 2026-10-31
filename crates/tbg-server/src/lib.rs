@@ -3,8 +3,8 @@
 
 use std::collections::HashMap;
 use std::net::{IpAddr, SocketAddr};
-use std::sync::atomic::{AtomicBool, AtomicU64};
-use std::sync::{Arc, Mutex};
+use std::sync::atomic::AtomicU64;
+use std::sync::{Arc, Mutex, OnceLock};
 
 use axum::extract::{ConnectInfo, State};
 use axum::http::{HeaderMap, StatusCode};
@@ -26,6 +26,7 @@ mod match_task;
 pub mod metrics;
 mod names;
 pub mod ranked;
+pub mod release;
 pub mod stats;
 pub mod store;
 mod version;
@@ -47,14 +48,18 @@ pub(crate) struct AppState {
     pub api_limits: Arc<Mutex<limits::Limits>>,
     /// P47: the lobby's live snapshot, read-only (`/api/live`, `/api/online`).
     pub live: watch::Receiver<Arc<live::LiveSnapshot>>,
+    /// P66: slot identity, admission gate and release directory.
+    pub release: Arc<release::Runtime>,
 }
 
 /// Handles the binary keeps to drive graceful shutdown.
 #[derive(Clone, Default)]
 pub struct Shared {
     pub metrics: Arc<Metrics>,
-    /// When set, no new matches start; running ones finish.
-    pub draining: Arc<AtomicBool>,
+    /// P66: set by `run_with`; the shutdown drain reads its gate and load.
+    pub release: Arc<OnceLock<Arc<release::Runtime>>>,
+    /// P66: the opened store, so shutdown waits for queued records too.
+    pub store: Arc<OnceLock<Arc<store::Store>>>,
 }
 
 /// Serve until the listener fails. Tests bind `127.0.0.1:0` and call this.
@@ -83,6 +88,20 @@ pub async fn run_with(
                 }
             });
     let config = Arc::new(config);
+    let release = shared
+        .release
+        .get_or_init(|| release::Runtime::new(&config))
+        .clone();
+    if let Some(store) = &store {
+        let _ = shared.store.set(store.clone());
+        tokio::spawn(release::run(
+            release.clone(),
+            store.clone(),
+            metrics.clone(),
+        ));
+    } else if release.identity.is_some() {
+        tracing::error!("a release slot needs TBG_DB; it will never admit new matches");
+    }
     let (lobby_tx, lobby_rx) = mpsc::channel(chan::LOBBY_QUEUE);
     // P47: the lobby publishes the live snapshot; the API only reads it.
     let (live_tx, live_rx) = watch::channel(Arc::default());
@@ -92,7 +111,7 @@ pub async fn run_with(
         config.clone(),
         metrics.clone(),
         store.clone(),
-        shared.draining.clone(),
+        release.clone(),
         live_tx,
     ));
     let state = AppState {
@@ -104,10 +123,15 @@ pub async fn run_with(
         store,
         api_limits: Arc::default(),
         live: live_rx,
+        release,
     };
     let mut app = Router::new()
         .route("/health", get(|| async { "ok" }))
         .route("/ws", get(ws::handler))
+        .route("/ws/{slot}", get(ws::slot_handler))
+        .route("/ready", get(release::api::ready))
+        .route("/api/admission", get(release::api::admission))
+        .route("/api/release", get(release::api::status))
         .route("/metrics", get(metrics_handler))
         .route("/api/leaderboard", get(api::leaderboard))
         .route("/api/players/{name}", get(api::player))

@@ -3,7 +3,7 @@
 
 use std::collections::{HashMap, VecDeque};
 use std::net::IpAddr;
-use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
+use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -28,6 +28,7 @@ mod challenge;
 mod leaderboard;
 mod live;
 mod matchmaking;
+mod ownership;
 mod presence;
 mod ranked;
 mod rematch;
@@ -99,7 +100,9 @@ pub(super) struct Lobby {
     pub(super) store: Option<Arc<Store>>,
     /// P11: per-IP account rate limits.
     pub(super) limits: Limits,
-    pub(super) draining: Arc<AtomicBool>,
+    /// P66: the admission gate (shutdown drain and release directory) and
+    /// the slot identity used for cross-slot account ownership.
+    pub(super) release: Arc<crate::release::Runtime>,
     /// P47: public matches running now (BR-LV01); private ones never enter.
     pub(super) live: HashMap<LiveId, live::LiveMatch>,
     /// P47: the snapshot `/api/live` and `/api/online` read.
@@ -128,7 +131,7 @@ pub(crate) async fn run(
     config: Arc<Config>,
     metrics: Arc<Metrics>,
     store: Option<Arc<Store>>,
-    draining: Arc<AtomicBool>,
+    release: Arc<crate::release::Runtime>,
     live_tx: watch::Sender<Arc<LiveSnapshot>>,
 ) {
     let mut lobby = Lobby {
@@ -145,7 +148,7 @@ pub(crate) async fn run(
         metrics,
         store,
         limits: Limits::default(),
-        draining,
+        release,
         live: HashMap::new(),
         live_tx,
         featured: None,
@@ -164,6 +167,8 @@ pub(crate) async fn run(
         .await;
         lobby.ranked = Some(handle);
     }
+    // P66: recovery is done; the release task may now report `ready`.
+    lobby.release.gate.serving.store(true, Relaxed);
     let mut cleanup = tokio::time::interval(Duration::from_secs(10));
     let mut publish = tokio::time::interval(PUBLISH_EVERY);
     loop {
@@ -261,6 +266,7 @@ impl Lobby {
                 }
             }
             LobbyCmd::RankedDone { receipt } => self.ranked_done(*receipt),
+            LobbyCmd::OwnerLost { token, account } => self.owner_lost(token, account),
             LobbyCmd::RegisterDone {
                 token,
                 conn_id,
@@ -305,7 +311,7 @@ impl Lobby {
         }
         // Any other lobby request ends a watch first (BR-LV02).
         self.end_watch(token);
-        let draining = self.draining.load(Relaxed);
+        let draining = !self.release.gate.admits();
         let Some(s) = self.session(&token) else {
             return;
         };

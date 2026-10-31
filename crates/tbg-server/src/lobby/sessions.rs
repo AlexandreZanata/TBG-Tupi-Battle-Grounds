@@ -34,6 +34,8 @@ impl Lobby {
                     tx: tx.clone(),
                 });
             }
+            // P66: a resumed signed-in session claims its account again.
+            let reclaim = s.account.as_ref().map(|(id, _)| (s.token, *id));
             // P14: a resumed session that holds an account tells the new
             // socket (a reload keeps the token but not the client's profile).
             if let Some((_, profile)) = &s.account {
@@ -75,6 +77,9 @@ impl Lobby {
             } else if idle {
                 self.resume_rematch(token);
             }
+            if let Some((t, id)) = reclaim {
+                self.reclaim(t, id);
+            }
             return (token, name);
         }
         let session = Session {
@@ -109,7 +114,15 @@ impl Lobby {
         };
         s.conn = None;
         s.detached_at = Some(Instant::now());
+        // P66: an idle signed-in session frees its account for other slots;
+        // a resume re-claims it. A seat in a match keeps it.
+        let idle_account = matches!(s.state, SessionState::Idle)
+            .then(|| s.account.as_ref().map(|(id, _)| *id))
+            .flatten();
         self.leave_queue_room(token);
+        if let Some(id) = idle_account {
+            self.release_owner(id);
+        }
     }
 
     /// A reload on the result screen recovers the open rematch offer.
@@ -160,13 +173,21 @@ impl Lobby {
         self.limits.sweep(now);
         self.rooms.retain(|(.., created)| now - *created < ROOM_TTL);
         let window = Duration::from_secs(self.config.reconnect_secs);
+        let mut released = Vec::new();
         self.sessions.retain(|_, s| {
             if s.finished.as_ref().is_some_and(|(until, _)| now >= *until) {
                 s.finished = None;
             }
             let gone = s.detached_at.is_some_and(|t| now - t > window);
-            !gone || matches!(s.state, SessionState::InMatch { .. })
+            let keep = !gone || matches!(s.state, SessionState::InMatch { .. });
+            if !keep {
+                released.extend(s.account.as_ref().map(|(id, _)| *id));
+            }
+            keep
         });
+        for id in released {
+            self.release_owner(id);
+        }
         self.queue.retain(|t| self.sessions.contains_key(t));
         self.ranked_queue.retain(|t| self.sessions.contains_key(t));
         self.queued_at.retain(|t, _| self.queue.contains(t));

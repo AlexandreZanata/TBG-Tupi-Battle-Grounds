@@ -77,6 +77,11 @@ pub enum MatchCmd {
 }
 
 pub enum LobbyCmd {
+    /// P66: another slot claimed this session's account (cross-slot BR-P03).
+    OwnerLost {
+        token: Token,
+        account: crate::store::AccountId,
+    },
     Hello {
         resume: Option<Token>,
         conn: ConnHandle,

@@ -5,7 +5,8 @@
 //! and both applied presets on match rows (NULL for older rows); v5/v6 add
 //! the Stronghold kind and arena; v7 (P60) adds authoritative ranked
 //! records, integrity projections and the append-only decision log; v8
-//! (P61) adds the optional per-match statistics summary.
+//! (P61) adds the optional per-match statistics summary; v9 (P66) adds the
+//! release directory, its audit log and cross-slot account ownership.
 //! Timestamps come from SQLite itself, except P60's frozen `ended_unix`.
 
 use rusqlite::Connection;
@@ -149,19 +150,55 @@ const RANKED_STATS_V8: &str = "CREATE TABLE ranked_stats (
 );
 CREATE INDEX ranked_stats_cohort ON ranked_matches(ruleset_version, ended_unix, id);";
 
+const RELEASE_V9: &str = "CREATE TABLE release_slots (
+  slot TEXT PRIMARY KEY,
+  generation TEXT NOT NULL,
+  server_build TEXT NOT NULL,
+  contract TEXT NOT NULL,
+  endpoint TEXT NOT NULL,
+  state TEXT NOT NULL,
+  canary_pct INTEGER NOT NULL DEFAULT 0,
+  ranked_authority INTEGER NOT NULL DEFAULT 0,
+  matches_running INTEGER NOT NULL DEFAULT 0,
+  results_pending INTEGER NOT NULL DEFAULT 0,
+  ranked_inflight INTEGER NOT NULL DEFAULT 0,
+  heartbeat_unix INTEGER NOT NULL,
+  version INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE release_audit (
+  id INTEGER PRIMARY KEY,
+  at_unix INTEGER NOT NULL,
+  actor TEXT NOT NULL,
+  action TEXT NOT NULL,
+  slot TEXT NOT NULL,
+  detail TEXT NOT NULL
+);
+CREATE TABLE account_owner (
+  account_id INTEGER PRIMARY KEY REFERENCES accounts(id),
+  slot TEXT NOT NULL,
+  generation TEXT NOT NULL,
+  epoch INTEGER NOT NULL,
+  heartbeat_unix INTEGER NOT NULL
+);
+CREATE INDEX account_owner_by_slot ON account_owner(slot);";
+
 /// Pragmas plus every missing migration in one transaction. Re-running on
 /// a migrated database is a no-op.
 pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
+    // P66: two slot processes may share this file; wait for the other
+    // writer instead of failing, and migrate under one write lock so both
+    // read the same starting version.
+    conn.busy_timeout(std::time::Duration::from_secs(5))?;
     conn.pragma_update(None, "journal_mode", "WAL")?;
     conn.pragma_update(None, "synchronous", "NORMAL")?;
     conn.pragma_update(None, "foreign_keys", "ON")?;
     conn.execute_batch("CREATE TABLE IF NOT EXISTS schema_version(version INTEGER NOT NULL)")?;
-    let version: i64 = conn.query_row(
+    let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+    let version: i64 = tx.query_row(
         "SELECT COALESCE(MAX(version), 0) FROM schema_version",
         [],
         |r| r.get(0),
     )?;
-    let tx = conn.transaction()?;
     if version < 1 {
         tx.execute_batch(MATCHES_V1)?;
         tx.execute("INSERT INTO schema_version(version) VALUES (1)", [])?;
@@ -193,6 +230,10 @@ pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
     if version < 8 {
         tx.execute_batch(RANKED_STATS_V8)?;
         tx.execute("INSERT INTO schema_version(version) VALUES (8)", [])?;
+    }
+    if version < 9 {
+        tx.execute_batch(RELEASE_V9)?;
+        tx.execute("INSERT INTO schema_version(version) VALUES (9)", [])?;
     }
     tx.commit()
 }

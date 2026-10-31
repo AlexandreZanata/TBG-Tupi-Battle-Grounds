@@ -63,7 +63,12 @@ pub(super) enum StoreCmd {
         account: AccountId,
         reply: Reply<Option<StrongholdKind>>,
     },
+    /// P66: release directory and ownership work (`store::release`).
+    Release(Job),
 }
+
+/// A closure run on the writer thread with its connection.
+pub(super) type Job = Box<dyn FnOnce(&mut rusqlite::Connection) + Send>;
 
 /// Rebuild the leaderboard at most this often.
 pub(super) const SNAPSHOT_EVERY: std::time::Duration = std::time::Duration::from_secs(10);
@@ -73,91 +78,27 @@ pub(super) fn worker(
     rx: std::sync::mpsc::Receiver<StoreCmd>,
     snapshot_tx: watch::Sender<StdArc<Snapshot>>,
     policy: crate::ranked::policy::RankedPolicy,
+    pending: StdArc<std::sync::atomic::AtomicU64>,
 ) {
     // Publish stragglers even when no further commands arrive.
     let mut last_build = Instant::now();
     let mut dirty = false;
+    // P66: another slot process writing the same file bumps `data_version`;
+    // its ranked results must reach this process's leaderboard too.
+    let mut seen_version = data_version(&conn);
     loop {
         match rx.recv_timeout(SNAPSHOT_EVERY) {
-            Ok(cmd) => match cmd {
-                StoreCmd::Register {
-                    name,
-                    name_lower,
-                    key_hash,
-                    reply,
-                } => {
-                    let _ =
-                        reply.send(accounts::register(&mut conn, &name, &name_lower, &key_hash));
-                }
-                StoreCmd::Login {
-                    name_lower,
-                    key_hash,
-                    reply,
-                } => {
-                    let result =
-                        accounts::login(&conn, &name_lower, &key_hash).and_then(|(id, profile)| {
-                            ranked::high_water(&conn)
-                                .map(|seq| (id, profile, seq))
-                                .map_err(|_| AccountError::Unavailable)
-                        });
-                    let _ = reply.send(result);
-                }
-                StoreCmd::InsertMatch(m) => {
-                    if let Err(e) = matches::insert(&conn, &m) {
-                        tracing::error!("match record insert failed: {e}");
-                    }
-                }
-                StoreCmd::CountMatches(reply) => {
-                    let _ = reply.send(matches::count(&conn));
-                }
-                StoreCmd::CountRanked(reply) => {
-                    let _ = reply.send(ranked::count(&conn));
-                }
-                StoreCmd::PlayerStats { name_lower, reply } => {
-                    let stats = ranked::player_stats(&conn, &name_lower).unwrap_or(None);
-                    let _ = reply.send(stats);
-                }
-                StoreCmd::Settle { entry, reply } => {
-                    let result = ranked::settle(&mut conn, &entry, &policy);
-                    match &result {
-                        Ok(_) => dirty = true,
-                        // Full error kept internally (P60 step 2), never keys.
-                        Err(e) => tracing::error!(
-                            "ranked settlement {} failed: {e:?}",
-                            entry.completion_seq
-                        ),
-                    }
-                    let _ = reply.send(result);
-                }
-                StoreCmd::HighWater(reply) => {
-                    let _ = reply.send(ranked::high_water(&conn));
-                }
-                StoreCmd::SaveStats {
-                    match_id,
-                    summary,
-                    reply,
-                } => {
-                    let _ = reply.send(stats::save(&conn, match_id, &summary));
-                }
-                StoreCmd::SaveArcanas { account, preset } => {
-                    if let Err(e) = arcanas::save(&conn, account, preset) {
-                        tracing::error!("arcana preset save failed: {e}");
-                    }
-                }
-                StoreCmd::LoadArcanas { account, reply } => {
-                    let _ = reply.send(arcanas::load(&conn, account));
-                }
-                StoreCmd::SaveStronghold { account, kind } => {
-                    if let Err(e) = strongholds::save(&conn, account, kind) {
-                        tracing::error!("stronghold kind save failed: {e}");
-                    }
-                }
-                StoreCmd::LoadStronghold { account, reply } => {
-                    let _ = reply.send(strongholds::load(&conn, account));
-                }
-            },
+            Ok(cmd) => {
+                serve(&mut conn, cmd, &policy, &mut dirty);
+                pending.fetch_sub(1, std::sync::atomic::Ordering::Relaxed);
+            }
             Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}
             Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => return,
+        }
+        let version = data_version(&conn);
+        if version != seen_version {
+            seen_version = version;
+            dirty = true;
         }
         if dirty && last_build.elapsed() >= SNAPSHOT_EVERY {
             match leaderboard::build(&conn) {
@@ -171,5 +112,96 @@ pub(super) fn worker(
                 Err(e) => tracing::error!("leaderboard rebuild failed: {e}"),
             }
         }
+    }
+}
+
+/// `PRAGMA data_version`: changes when another connection commits.
+fn data_version(conn: &rusqlite::Connection) -> i64 {
+    conn.query_row("PRAGMA data_version", [], |r| r.get(0))
+        .unwrap_or(0)
+}
+
+/// Serve one command; `dirty` marks the leaderboard for a rebuild.
+fn serve(
+    conn: &mut rusqlite::Connection,
+    cmd: StoreCmd,
+    policy: &crate::ranked::policy::RankedPolicy,
+    dirty: &mut bool,
+) {
+    match cmd {
+        StoreCmd::Register {
+            name,
+            name_lower,
+            key_hash,
+            reply,
+        } => {
+            let _ = reply.send(accounts::register(conn, &name, &name_lower, &key_hash));
+        }
+        StoreCmd::Login {
+            name_lower,
+            key_hash,
+            reply,
+        } => {
+            let result =
+                accounts::login(&conn, &name_lower, &key_hash).and_then(|(id, profile)| {
+                    ranked::high_water(&conn)
+                        .map(|seq| (id, profile, seq))
+                        .map_err(|_| AccountError::Unavailable)
+                });
+            let _ = reply.send(result);
+        }
+        StoreCmd::InsertMatch(m) => {
+            if let Err(e) = matches::insert(&conn, &m) {
+                tracing::error!("match record insert failed: {e}");
+            }
+        }
+        StoreCmd::CountMatches(reply) => {
+            let _ = reply.send(matches::count(&conn));
+        }
+        StoreCmd::CountRanked(reply) => {
+            let _ = reply.send(ranked::count(&conn));
+        }
+        StoreCmd::PlayerStats { name_lower, reply } => {
+            let stats = ranked::player_stats(&conn, &name_lower).unwrap_or(None);
+            let _ = reply.send(stats);
+        }
+        StoreCmd::Settle { entry, reply } => {
+            let result = ranked::settle(conn, &entry, &policy);
+            match &result {
+                Ok(_) => *dirty = true,
+                // Full error kept internally (P60 step 2), never keys.
+                Err(e) => {
+                    tracing::error!("ranked settlement {} failed: {e:?}", entry.completion_seq)
+                }
+            }
+            let _ = reply.send(result);
+        }
+        StoreCmd::HighWater(reply) => {
+            let _ = reply.send(ranked::high_water(&conn));
+        }
+        StoreCmd::SaveStats {
+            match_id,
+            summary,
+            reply,
+        } => {
+            let _ = reply.send(stats::save(&conn, match_id, &summary));
+        }
+        StoreCmd::SaveArcanas { account, preset } => {
+            if let Err(e) = arcanas::save(&conn, account, preset) {
+                tracing::error!("arcana preset save failed: {e}");
+            }
+        }
+        StoreCmd::LoadArcanas { account, reply } => {
+            let _ = reply.send(arcanas::load(&conn, account));
+        }
+        StoreCmd::SaveStronghold { account, kind } => {
+            if let Err(e) = strongholds::save(&conn, account, kind) {
+                tracing::error!("stronghold kind save failed: {e}");
+            }
+        }
+        StoreCmd::LoadStronghold { account, reply } => {
+            let _ = reply.send(strongholds::load(conn, account));
+        }
+        StoreCmd::Release(job) => job(conn),
     }
 }
