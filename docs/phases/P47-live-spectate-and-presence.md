@@ -338,7 +338,7 @@ browser watching a live bot match. Log the entry with the rollback.
 ## Phase report
 
 Filled by the executor on 2026-10-30 on `phase/p47-live-lobby`. Protocol
-v17, D-58, GAME-DESIGN §13 (BR-LV01–LV09, Proposed). Owner visual sign-off
+v17, D-59, GAME-DESIGN §13 (BR-LV01–LV09, Proposed). Owner visual sign-off
 is still open; nothing is merged, pushed to `main`, or deployed by this
 report.
 
@@ -347,7 +347,7 @@ report.
 | Commit | Scope |
 |--------|-------|
 | `7ee2834` | step 1: `PublicView`, event visibility, contract test |
-| `47813d8` | step 2: protocol v17 messages, contract bytes, GAME-DESIGN §13, D-58 |
+| `47813d8` | step 2: protocol v17 messages, contract bytes, GAME-DESIGN §13, D-59 |
 | `d75559a` | steps 3–4: lobby registry, snapshot, progress, fan-out, watch lifecycle |
 | `0fc762d` | step 5: `/api/live`, `/api/online`, integration tests |
 | `f37eae4` | step 6: `/metrics` gauges, `tbg-bots --spectators N`, capacity script |
@@ -436,8 +436,9 @@ in `docs/media/p47/` (JPG). Language: EN only.
 
 - **Protocol v17, not v16.** v16 belongs to the Cargo Crab branch (not
   merged). The spec's "next free version" is 17 in this tree.
-- **Decision D-58.** D-56 is the Cargo Crab branch's; D-57 was reserved by
-  parallel work per the brief, and no branch has it in this checkout.
+- **Decision D-59.** D-56 is the Cargo Crab branch's; D-57 was reserved by
+  parallel work per the brief; D-58 went to the C7 balance fix on `main`
+  while this branch was in review, so the entry was renumbered.
 - **Steps 3–4 and steps 7–8 each landed as one commit** (the step-3 and
   step-4 changes were interleaved in the same files). Steps 1, 2, 5, 6 and
   9 are separate.

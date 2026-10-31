@@ -1024,7 +1024,26 @@ policy win rates past the D-33 gate, players find a modifier unreadable,
 or the owner wants arena choice online.
 
 
-## D-58 · Live battles and spectating (P47) — 2026-10-30 (Proposed)
+## D-58 · C7 measures planted imbalances on the ten-kind Shop pool — 2026-10-30 (owner-authorized CI fix)
+
+**Decision.** C7 (`c7_planted_imbalances_are_caught_for_every_unit`)
+builds its detection rulesets on the original ten-kind Shop pool
+(`UNIT_KINDS`) instead of the full 25-kind pool that `CANON` carries since
+D-50. Duels, match rows, planted ×2 and ×3 values and all thresholds stay
+as they were; only the pool the Shop draws from changes for C7.
+**Why.** With the full pool a unit is offered much less often, so the
+`favor-<unit>` row does not buy the planted unit often enough and the ×3
+cost of the Siege Walker moves that row by less than the 0.10 gate. In a
+release build C7 failed with `SiegeWalker ×3 cost was not caught` on
+`15e4792` and passed after the change (all seven contracts green). The
+failure was the test's sensitivity under the wider pool, not a balance
+result; the thresholds are a product decision and were not touched.
+**Limit.** C7 no longer exercises the 25-kind pool that online play draws
+from. Balance of the fifteen new units is still unmeasured.
+**Reopen at P50 tuning**, when the lab must measure every unit on the pool
+online play uses and the gate may need a sample or a row change.
+
+## D-59 · Live battles and spectating (P47) — 2026-10-30 (Proposed)
 
 **Decision.** Public matches (Casual quick match, Ranked) are listed in a
 lobby registry while they run, with progress and presence counts in a
@@ -1037,7 +1056,7 @@ the match is paired; the mode alone does not decide it, because rooms share
 **Contracts.** Protocol v17 appends `Spectate`, `StopSpectating` and four
 server messages; `MatchView` gains `spectators`. Protocol v16 is taken by
 the Cargo Crab branch, and D-56 by the same branch; D-57 is reserved by
-parallel work, so this decision takes D-58.
+parallel work. D-58 later went to the C7 balance fix on main, so this decision takes D-59.
 **Why.** The owner wants to see at a glance whether the game is active and
 to watch a battle with one click. Public-only views and a 0 s delay leak
 nothing that a seat does not already see, so no delay is needed.
