@@ -437,7 +437,7 @@ No actual flight, vertical hitbox or destination displacement.
 The text selects lowest HP fraction, not the nearest healthy ally; there
 is no taunt or self shield from the picture.
 
-**Barreira Solar (C on main):** shared windup targets the lowest-fraction
+**Barreira Solar (B on the reaudited base; grant path needed):** shared windup targets the lowest-fraction
 other allied unit in special range, including allied summons; ties
 distance then id. If all other allies are full HP, remain ready (completion
 to avoid random idle shielding). At resolution add/replace its temporary
@@ -503,7 +503,7 @@ Low removes ring rotation and stray shards, not weakening badge/expiry.
 No line piercing, multiple targets or team damage-amplification mark from
 the image. The text's shield counter is the strategic differentiator.
 
-**Flecha da Purificação (C dependency on main):** every fourth valid
+**Flecha da Purificação (B; reads R12's shield field):** every fourth valid
 enemy-unit primary shot strips that unit's temporary shield **before**
 replacing ordinary shot damage with the empowered amount. Does not remove
 plates, HP, max HP, Synergy, Evolution, statuses or Stronghold shields.
@@ -516,7 +516,7 @@ Archer has greater basic DPS/range for less Energy, so Arqueira must
 earn a niche through shield counterplay. She should not become mandatory
 when no shield unit is present; test both ablations. Frontline protection
 helps her, fast melee and Siege Walker counter her. No “holy damage”
-resistance bypass. Shield stripping shares one future resource with R12.
+resistance bypass. Shield stripping uses the existing `UnitFx.shield` field, which R12 must make grantable first.
 
 **Art:** slim armored archer, angular gold bow, rigid feather wing motifs
 and narrow halo; ivory/navy, team quiver sash. A2 long bow/ivory sleeves,
@@ -707,7 +707,7 @@ existing death-owner rule, never the caster. No free Bounty farming.
 A increases HP/range and therefore friendly-fire reach; B increases damage/
 cut on **both** sides. Neither removes friendly fire. Bloomkeeper behind
 it may support it; a Tank placed ahead is endangered. Compare Hexer/
-Siege Walker on main, Bombard† and Blood Furnace† after integration.
+Siege Walker, Bombard† and Blood Furnace† are all on the integrated base.
 Automatic positioning makes this a serious fun/product test; the client
 must show the actual forward danger segment. No manual facing/reposition
 system is introduced to make the concept easier to play.

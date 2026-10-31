@@ -1,13 +1,17 @@
 # P58 — Roster expansion planning (21 units, 3 Factions)
 
 **Planning only — no gameplay code, assets, animations or production behavior were changed.**
-**Depends on:** remote `main` at `6ef155b`; reviewed integration of
-`release/roster-online` (PR #16) before any implementation; conditional
-reuse of P54/P55 art kits after their own integration and re-audit.
-**Branch:** `phase/p56-roster-expansion-planning` (from freshly fetched
-`origin/main` at `6ef155b`).
+**Depends on:** `origin/main` `e3b977f`, which already contains
+`release/roster-online` (PR #16; verified in the 2026-10-30 reaudit); the
+review of that integration and a re-audit on the implementation base before
+any implementation; conditional reuse of P54/P55 art kits after their own
+integration and re-audit.
+**Branch:** `phase/p56-roster-expansion-planning` (planned from freshly
+fetched `origin/main` at `6ef155b`; the branch name is kept, the phase is
+P58, and the reaudit ran on `phase/roster-expansion`).
 **Status:** planning documents only; implementation requires separate
-owner authorization.
+owner authorization and will be phase P59 (`docs/phases/P59-roster-expansion-impl.md`,
+not yet written).
 **Difficulty:** medium. Audit, modeling and documentation; no code.
 
 > Owner directive 2026-10-30 is binding: **text controls names, Faction,
@@ -45,18 +49,20 @@ change, no new Faction integration, no Shop pool update, no production
 migration, no new dependency, no deploy, no merge, no change to `main`.
 The only permitted change in this phase is documentation.
 
-## Diagnosis (audited main)
+## Diagnosis (reaudited on origin/main e3b977f)
 
-Remote `main` `6ef155b` is an integer, deterministic, authoritative
+`origin/main` `e3b977f` is an integer, deterministic, authoritative
 1v1 engine: 20 Hz, 16,000 milli-tile BattleLine, six-tick windups,
 single Slow/Root slot, Guard-first targeting, five distinct uniform Shop
-offers over ten purchased kinds, four Factions, forty Augments, fifteen
-Arcana nodes, selectable Stronghold kinds, versioned binary protocol.
-Unit absorption shields, per-victim heal-cut/poison/bleed/mark slots,
-drill fusion, seven-Faction arrays and UnitFx shields exist only in
-unintegrated branches (notably PR #16) or not at all. Full evidence is
-in the audit §2; document drift in older prose does not override the
-code table there.
+offers over the 25 purchasable kinds of `CANON.pool` (D-50), four
+Factions, forty Augments, fifteen Arcana nodes, selectable Stronghold
+kinds, Arenas (D-55), Cargo Crab carry (D-56) and a versioned binary
+protocol (version 16). PR #16 is integrated, so `UnitFx` carries poison,
+fish, plates, bonds, carrier/passenger and a unit shield field. The unit
+shield has no grant path yet. Still missing: per-victim bleed, temporary
+weakening and mark slots, the queued post-Root Slow, drill fusion and
+seven-Faction arrays. Full evidence is in the audit §2; document drift in
+older prose does not override the code table there.
 
 ## Roster (21 purchased concepts, 3 drill summons, 3 new Factions)
 
@@ -76,9 +82,9 @@ Text sources T01–T12; images V01–V10 are visual reference only.
 | R09 | Rasgarr | Monsters / Dps | Frenesi Predatório (same-target ramp, bounded) | B |
 | R10 | Esporax | Monsters / Ranged | Cuspe Corrosivo (third-shot flat secondaries) | B |
 | R11 | Murmúrio | Monsters / Control | Pulsação do Medo (ordinary Slow, no displacement) | B |
-| R12 | Sentinela Solar | Celestials / Tank | Barreira Solar (ally Unit shield; dep. on new resource) | C |
+| R12 | Sentinela Solar | Celestials / Tank | Barreira Solar (ally Unit shield; needs the grant path) | B |
 | R13 | Oráculo Luminar | Celestials / Control | Pulso Harmônico (basic-damage weakening slot) | B |
-| R14 | Arqueira Celeste | Celestials / Ranged | Flecha da Purificação (strip Unit shield, empowered hit) | C |
+| R14 | Arqueira Celeste | Celestials / Ranged | Flecha da Purificação (strip Unit shield, empowered hit) | B |
 | R15 | Justiçar | Celestials / Control | Chuva Celeste (single area pulse, B3 Slow) | B |
 | R16 | Mandíbulo | Insects / Tank | Carapaça Erguida (timed self-reduction + B retaliation) | B |
 | R17 | Louva | Insects / Dps | Golpe Preciso (fourth same-target bonus) | B |
@@ -87,7 +93,7 @@ Text sources T01–T12; images V01–V10 are visual reference only.
 | R20 | Crematumba | Undead / Tank | Fogo Profano (forward friendly-fire flame + cut) | B |
 | R21 | Brocatanque | M. / Ranged | Ninho de Brocas (capped drills + deterministic fusion) | C |
 
-Result: **0 A, 18 B, 3 C** against audited main (Faction infrastructure
+Result: **0 A, 20 B, 1 C** against the reaudited base (R12 and R14 moved from C to B, audit §4; Faction infrastructure
 is a shared dependency, not a fourth C). Three drill forms (Microbroca,
 Duobroca, Megabroca) are summons, never Shop purchases or Evolutions.
 New Factions: Monsters (damage +5/+10%, completion hypothesis), Celestials
@@ -106,32 +112,42 @@ GAME-DESIGN §13; they are not duplicated here.
   (timers/counters), `roster_marks.rs` (marks/cuts), `drill.rs` (fusion
   lifecycle). Split further only for cohesion; no generic ability
   framework, physics, stealth, flight, armor or aura systems.
-- Reuse reviewed PR #16 semantics once integrated: UnitFx shield
-  (R12/R14), poison/cleanse/ward ordering (R18), friendly-damage reward
-  path (R20), summon-family separation (R21). Do not reimplement them in
+- Reuse the integrated PR #16 semantics: UnitFx shield fields and absorb
+  path (R12/R14; the grant path is still to add), poison/cleanse/ward
+  ordering (R18), the friendly-damage path (R20), and the summon kinds
+  Beetling and Crate (R21 adds the drill family). Do not reimplement them in
   parallel.
 - One appended ability-start/resolution cue plus shield/fusion cues for
   reconnect completeness; no protocol version reserved now.
 
 ## Dependencies
 
-1. PR #16 reviewed, integrated and re-audited on a new main SHA
-   (mandatory gate; if it does not integrate, stop and revise this plan).
+1. PR #16 integrated (verified in `origin/main` `e3b977f`), reviewed and
+   re-audited on the implementation base (mandatory gate; if the reviewed code
+   changes or is reverted, stop and revise this plan).
 2. P54/P55 art-kit integration for final kit dispatch (offline combat
    work does not wait for it).
-3. Owner approvals: Bastion base completion, R20/R21 completion values,
-   Monsters damage Synergy numbers, R12/R14 shield-vs-simplification
-   choice, R21 no-fusion fallback, 0.6/N Shop-gate floor, any threshold or
-   economy change.
+3. Owner approvals: Bastion base completion, Bastion name collision,
+   R20/R21 completion values, Monsters damage Synergy numbers, R12/R14 shield
+   semantics and the dormant Cargo Crab shield value, R21 no-fusion fallback,
+   0.6/N Shop-gate floor, any threshold or economy change.
 4. No new dependency, migration or deploy in this phase.
 
 ## Future execution waves (require authorization; each wave is test-gated)
 
-- W0 — Shared contracts: heal-cut/weakening/poison/bleed/mark slots,
-  timed self-reduction cap accounting, counted/cadence helpers, queued
-  post-Root Slow, per-caster mark state, view/event extensions planned.
+- W0 — Missing shared contracts only (reaudit): per-victim bleed slot,
+  temporary attack-weakening slot (R13), queued post-Root Slow (R19),
+  per-caster mark state (R03), a bounded heal-cut slot beside the existing
+  pair, timed self-reduction accounting under the existing 2 000 bp cap, the
+  unit shield grant path with expiry and a view field (R12/R14), and the
+  view/event extensions they need. Already present, not W0: UnitFx poison,
+  fish, ward, plates, bond and carrier fields; poison cleanse; the
+  friendly-damage path; summon kinds; and the `UnitFx.attacks` counter
+  (reuse only after checking the R04/R10/R17 semantics).
 - W1 — Faction contract change (seven Factions, Synergy tables, views,
-  lab parsing, fixtures, protocol bump with old-peer rejection).
+  lab parsing, fixtures, generalized arrays per audit §5). The protocol bump
+  is the lead's Part A (D-61, from 16); W1 adds no second bump unless its
+  wire changes again.
 - W2 — Timer/control core: R11, R13, R19, R16, R01, R06 (reuse Slow/Root/
   reduction primitives; `dr-cap`, `web-fear`, `bastion-wall` cases).
 - W3 — Counted strikers: R04, R10, R17, R09, R03, R18 (counter discipline,
@@ -139,7 +155,7 @@ GAME-DESIGN §13; they are not duplicated here.
 - W4 — Area pulses: R02, R05, R07, R15, R20 (unit-only enumeration,
   friendly-fire reward rules, `pulse-summons`, `crema-friendly`,
   `friendly-plates` cases).
-- W5 — Shield pair R12/R14 on the integrated resource (replace/refresh/
+- W5 — Shield pair R12/R14 on the existing `UnitFx.shield` field (replace/refresh/
   weaker-ignored, strip-before-damage, Stronghold exclusion,
   `purification-boundary`, `celestial-loop` cases).
 - W6 — Fusion line R21 (ownership/TTL, eight-cap, pair ordering, damaged
@@ -175,6 +191,14 @@ and 2048 disjoint confirmation pairs, Energy-equal duel budgets
 at the lab limit, never scored as draws. Thresholds need owner approval;
 never tune gates to pass.
 
+Reaudit additions (2026-10-30): `shield-grant` (strongest replaces, equal
+refreshes, weaker ignored, expiry without HP loss, shield amount present in
+reconnect views, never counted as healing); `strip-order` (R14 strips the unit
+shield before empowered damage, never HP, plates or a Stronghold shield);
+`cargo-shield` (the dormant Cargo Crab `shield_bp` is granted once through the
+same path or removed, per the owner decision); `insect-move-synergy` (the new
+Synergy effect keeps the 2/4 thresholds and the 150 % speed cap in `state.rs`).
+
 ## Acceptance criteria (this planning phase)
 
 1. All 12 text sources and 9 PNGs inventoried with SHA-256 prefixes.
@@ -203,23 +227,36 @@ never tune gates to pass.
 - Balance: shield/heal stall loops (R01/R12/R13, celestial-loop),
   anti-heal density (R03/R20), summon-group value (R02/R05/R06/R15),
   same-target dominance (R09 vs R17), fusion scaling (R21), Shop dilution
-  at 31/46 kinds. All are Proposed hypotheses with lab cases, never
+  at 25 kinds today and 46 after the 21 units (the old audit's 31 assumed
+  the 10-kind pool). All are Proposed hypotheses with lab cases, never
   proven balance.
-- Technical: R12/R14 need the Unit shield resource; R21 needs the fusion
-  lifecycle; Crematumba is O(n) per 10-tick pulse and its online wave
-  needs benchmarks before authorization.
+- Technical: R12/R14 need the unit shield grant path (the field exists); R21
+  needs the fusion lifecycle (no drill code exists); Crematumba is O(n) per
+  10-tick pulse and its online wave needs benchmarks before authorization.
 - Product: friendly fire (R20) may read as griefing despite being the
   text identity; Murmúrio/Justiçar/Oráculo sheets look weak in isolation
   and must prove a compositional niche or return to the owner.
 
 ## Pending owner decisions
 
-Base completion for Bastion; cost/HP/movement for Crematumba;
-production/radius completions for Brocatanque; Monsters damage Synergy
-values; shield-vs-simplification for R12/R14; no-fusion fallback for
-R21; Shop-gate floor (proposed 0.6/N per kind); any threshold, economy
-or release approval. Structural simplifications that would erase an
-identity are recommendations, not approvals.
+1. Bastion: base completion (R01; T01 is a fragment) and the name collision
+   with the existing Stronghold kind `Bastion` (D-46). Not renamed here.
+2. Crematumba: cost, HP and movement completions (R20).
+3. Brocatanque: production and radius completions, merge details (R21).
+4. Monsters: damage Synergy values (+5/+10 %, completion).
+5. R12/R14: shield semantics, and whether the dormant Cargo Crab `shield_bp`
+   is granted or removed. The timed-damage-reduction substitute is not needed
+   for the resource.
+6. R21: no-fusion fallback (a recommendation, not approved).
+7. Shop-gate floor: today's gate is 2.5 % per kind (`tbg-balance/src/gate.rs`,
+   O-R2); the proposal is 0.6/N per kind.
+8. Evolution branch names for R08–R11 and unsplit R12–R19 are Portuguese
+   placeholders (GAME-DESIGN §13.3); the English-only rule needs an owner
+   naming decision.
+9. Any threshold, economy or release approval.
+
+Structural simplifications that would erase an identity are recommendations,
+not approvals.
 
 ## Verification (this phase; docs only)
 
@@ -238,11 +275,11 @@ device or VPS check is claimed.
 
 ## Reviewer checklist
 
-- [ ] Branch is from `origin/main` at `6ef155b`; no code/asset/config
+- [ ] Branch is from `origin/main` (reaudited at `e3b977f`); no code/asset/config
   change in the diff.
 - [ ] 21 sheets present; Monsters are Grumak, Rasgarr, Esporax, Murmúrio;
   texts govern, images are reference only.
-- [ ] 0 A / 18 B / 3 C classification and shared dependencies match the
+- [ ] 0 A / 20 B / 1 C classification and shared dependencies match the
   audit matrix.
 - [ ] GAME-DESIGN §13 values are all marked Proposed/inactive; no live
   rule, pool or gate changed.
@@ -284,6 +321,22 @@ cargo test --workspace (regression context; tree is docs-only):
   /tmp/tbg-p56-tests-network.log, /tmp/tbg-p56-clippy.log,
   /tmp/tbg-p56-wasm.log, /tmp/tbg-p56-army-load.log.
 ```
+
+### Reaudit 2026-10-30 (docs only, branch `phase/roster-expansion`)
+
+No cargo command was run for this reaudit (task rule). Facts were checked
+with `git merge-base --is-ancestor`, grep and file reads against base
+`e2cc2b1`, which contains `origin/main` `e3b977f`:
+
+- `release/roster-online` (`d06279a`) is an ancestor of `origin/main`: PR #16 is integrated.
+- `PROTOCOL_VERSION` is 16 (`protocol.rs`).
+- `CANON.pool` is `&FULL_POOL` (25 kinds); `UNIT_KINDS` has 10 kinds and is no longer the Shop pool.
+- `UnitFx.shield` is read by `hits.rs::absorb_shield` and never written; `Ability::Carry.shield_bp` is ignored by its callers.
+- `FX_CARRIED` is bit 14 and `FX_SUMMON` is bit 15 in `UnitView.fx`.
+- `FACTIONS`, `SYNERGIES`, `counts` and `PlayerState.synergy` are four-entry arrays.
+- The purchase-share gate is 2.5 % per kind (`tbg-balance/src/gate.rs`, O-R2).
+
+Changes are in audit §2.2 and §4 and in the catalog's R12/R14 notes.
 
 ### Deviations and limits
 

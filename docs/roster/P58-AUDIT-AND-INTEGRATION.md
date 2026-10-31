@@ -1,7 +1,10 @@
 # P58 — Source inventory, engine audit and integration contracts
 
 **Planning only.** Audited on 2026-10-30 against remote `main`
-`6ef155bc9540527c99086aee0d9726908ca6a041`. Nothing in this document
+`6ef155bc9540527c99086aee0d9726908ca6a041`; **reaudited on 2026-10-30 against
+`origin/main` `e3b977f`** (this branch, `phase/roster-expansion`, is based on
+`phase/units-fixes` `e2cc2b1`, which contains `origin/main`). Sections 2, 3, 4,
+5 and 7 were reaudited; section 2.2 lists what changed. Nothing in this document
 authorizes implementation. Read with the [phase](../phases/P58-roster-expansion-planning.md),
 [catalog](P58-CATALOG.md) and inactive [numerical registry](../GAME-DESIGN.md#13-p58-roster-expansion--proposed-inactive).
 
@@ -73,7 +76,8 @@ does not silently vendor multi-megabyte PNGs.
 
 ## 2. Main audit: behavior actually present
 
-Paths below are relative to the audited `main`, unless labelled branch.
+Paths below are relative to the reaudited `origin/main` (`e3b977f`), unless
+labelled branch. Rows changed by the 2026-10-30 reaudit are listed in §2.2.
 
 | System | Confirmed implementation and practical consequence | Evidence |
 |---|---|---|
@@ -81,26 +85,29 @@ Paths below are relative to the audited `main`, unless labelled branch.
 | Movement | Speed is milli-tiles **per tick**; allies overlap. A nearby enemy causes the unit to stop, not circle or flank | `combat.rs::advance_unit`, `targeting.rs::engage` |
 | Targeting | Guard prioritizes Rampart in range, then nearest enemy by absolute x distance/id; Stronghold only when strictly nearer. “Priority hunter” does not mean backline selection | `targeting.rs::enemy_in_range` |
 | Attacks | Six-tick windup, locked target, alive check at resolution without another range check. Root clears windup and prevents movement/attacks | `combat.rs::advance_unit` |
-| Status | One Slow/Root slot. Slow affects movement **and attack cadence**; Root has priority. There is no independent stun, airborne or movement-only slow | `types.rs::Status`, `hits.rs::apply_on_hit` |
+| Status | One Slow/Root slot. Slow affects movement **and attack cadence**; Root has priority. There is no independent stun or airborne status. Old Finn fish is a movement-only slow stack list in `UnitFx` (`combat.rs`), outside this slot | `types.rs::Status`, `hits.rs::apply_on_hit`, `combat.rs` |
 | Area damage | Radius on x around primary; ordinary splash hits enemy units and potentially the Stronghold. Secondary targets do not automatically receive primary on-hit status or conditional bonuses | `hits.rs::splash` |
 | Healing | Lowest injured HP fraction in range, including self/summons; friendly target in `resolve_hit` means healing, not damage. Direct heals may purify Slow/Root via Arcana | `targeting.rs::most_damaged_ally`, `hits.rs::{resolve_hit,heal}` |
-| Damage | Damage reduction from Augments/Arcanas capped at 20%, then Second Wind then HP. Unit absorption shield does **not** exist on main; Stronghold shield does | `hits.rs::damage`, `state.rs::{Unit,PlayerState}` |
-| Heal reduction | Existing per-victim heal-cut fields, applied by Augments; no poison/bleed list, no individual mark or per-hit counter | `hits.rs`, `augment.rs`, `state.rs::Unit` |
+| Damage | Damage reduction from Augments/Arcanas capped at 20% (`hits.rs` `.min(2_000)`, `augment.rs` `bp.min(2_000)`), then Second Wind then HP. Unit absorption: `UnitFx.shield`/`shield_until` exist and `hits.rs::absorb_shield` consumes them, but **no code writes them**, so no unit shield is ever granted. Stronghold shield exists (`PlayerState.shield`, LastStand) | `hits.rs::{damage,absorb_shield}`, `augment.rs`, `state.rs::{UnitFx,PlayerState}` |
+| Heal reduction | One per-victim heal-cut pair (`Unit.heal_cut_until`/`heal_cut_bp`), written by the Augment heal cut (`hits.rs::apply_heal_cut`) and the Deep Wound form (`apply_form_heal_cut`), read by heal paths (`augment.rs`, `support.rs`) and Plants regeneration (`synergy.rs`). Afflictions now exist: poison stacks (`UnitFx.poison: [Stack; 6]`, Rotcap) and cleanse/brew (`afflictions.rs::cleanse`). No bleed slot, no temporary attack-weakening slot, no per-caster mark | `hits.rs`, `augment.rs`, `synergy.rs`, `afflictions.rs`, `state.rs` |
 | Death attribution | Every conventional death feeds the opposite seat's eligible-kill hooks; no killer/source on Hit. Friendly damage needs deliberate reward rules | `combat.rs::remove_dead`, `state.rs::Event` |
-| Summons | Only Beetling recognized by kind; lifetime, owner limits and per-Nester limits. No merging, drill rank or separation of summon families | `summon.rs`, `types.rs::is_summon` |
+| Summons | Two summon kinds: Beetling (hatched by a Nester; per-Nester and per-seat caps; lifetime) and Crate (Smuggler cargo; uncapped; BR-U08). `UnitKind::is_summon` covers both; `FX_SUMMON` marks them in views. No drill, merge or summon-family code exists (no `drill` or `fusion` symbols in `tbg-core`) | `summon.rs`, `types.rs::is_summon`, `view.rs` |
 | Evolution | Base is stored tier 0; two branch-locked purchases become tiers 1/2, preserving HP fraction. Forms accumulate base-relative stat deltas | `intent.rs::evolve`, `ruleset.rs::form_of`, `state.rs::refresh_max_hp` |
 | Factions | Exactly four enum values and fixed arrays of four. Two/four living conventional units, duplicates count; faction-only bonuses | `types.rs`, `synergy.rs`, `ruleset.rs`, `view.rs` |
 | Economy | Start 5 Energy; 17/600 Energy per tick; +25% regeneration per full 5 banked, max multiplier 2.25; no gameplay cap, no clock-decided victory | `content.rs`, `sim.rs::regen_energy`, D-41/D-43 |
-| Shop | Ten purchased kinds, five distinct uniform offers; each purchase redraws all five, including purchased kind. No timed rotation or active Reserve | `types.rs::UNIT_KINDS`, `shop.rs`, `intent.rs::purchase` |
+| Shop | 25 purchasable kinds: 10 original plus 15 expansion kinds (D-50); `CANON.pool = &FULL_POOL`. Five distinct uniform offers (`content.rs` `OFFERS = 5`); each purchase redraws all five, including the bought kind (BR-S04). `UNIT_KINDS` (10 kinds) is a legacy constant still used by tests, lab knobs and the client gallery, not by the Shop. No timed rotation or active Reserve | `types.rs::{FULL_POOL,UNIT_KINDS}`, `ruleset.rs`, `shop.rs`, `intent.rs::purchase` |
 | Augments | Forty definitions, repeated 60-second rounds, paused combat, four options; bounded stat formulas, factions/archetypes/kinds as filters | `augment.rs`, `content.rs`, `sim.rs::step` |
 | Arcanas | Fifteen nodes, twelve-point preset; conditional roles and hit-time bonuses; summons excluded | `arcana.rs`, `ruleset.rs`, `state.rs::stats_of` |
-| Strongholds | Classic reference plus four selectable kinds, individual Fortifications and Command aura; Bastion kind is unrelated to new Bastion unit | `stronghold.rs`, `content.rs`, `intent.rs::Fortify` |
-| Authority and network | Version 13 handshake, binary postcard, max client frame 1,024 bytes; seat stamped by connection. Per-seat 10 Hz views plus acknowledgments and reconnect catch-up | `protocol.rs`, `server/src/ws.rs`, `ws/client_msg.rs`, `match_task/{command,views}.rs` |
-| Wire/state | UnitView has kind/form/x/HP and a 0/1/2 status byte. Hit lacks source. MatchView has fixed four-Faction arrays. Full state is serialized into hash | `view.rs`, `state.rs::Event`, `sim.rs::hash` |
-| Replay | Seed/presets/Stronghold kinds plus intentions keyed by selection clock, not paused combat tick; runs on compiled CANON, not an arbitrary historical ruleset | `replay.rs` |
+| Strongholds | Classic reference plus four selectable kinds (Treasury, Bastion, Artillery, Command; default Bastion), individual Fortifications and Command aura. **Name collision:** the Stronghold kind `Bastion` (D-46) and planned unit R01 Bastion share a name; see the owner decisions in the phase | `stronghold.rs`, `content.rs`, `types.rs`, `intent.rs::Fortify` |
+| UnitFx (integrated #16) | Per-unit `Copy` block of fixed arrays, no allocation: `poison: [Stack; 6]`, `fish: [Stack; 3]`, `confused_until`, `immune_until`, `ward_until`, `betray`, `attacks: u8`, `essence`, `essence_progress`, `plates`, `plate_hp`, `march_move_bp`, `march_dr_bp`, `march_ignore_slow`, `surge_until`, `betray_bp`, `betray_stumble`, `bond`, `carrier`, `passenger`, `board_lock`, `shield: u16`, `shield_until`. Stored in `Unit.fx`; views expose only the `FX_CARRIED` and `FX_SUMMON` bits | `state.rs` (`UnitFx` at line 66, `Unit.fx` at line 136), `view.rs` |
+| Arenas (D-55) | `Arena` enum: Forest (neutral), Tundra, Volcanic, Ruins, Storm (`types.rs`); drawn by the server at pairing; `MatchView.evolve_costs`; replay stores the arena (`replay.rs`) | `types.rs`, `replay.rs`, `protocol.rs` (v15) |
+| Cargo Crab (D-56) | `Ability::Carry { board, lock, dr_bp, move_bp, shield_bp, surge_bp }` (`content.rs`, branch rows near line 744); carrier and passenger in `UnitFx`; carried units are not targetable by targeted effects (`targeting.rs`); `FX_CARRIED` (bit 14) in `UnitView.fx`; base carry speed boost 2 000 bp and Overdrive surge (`support.rs::carry_move_bp`). `shield_bp` is parsed by `support.rs::carry_of` and **ignored by both callers**. The carry bonus rule is D-60 (in progress, another branch) | `support.rs`, `content.rs`, `targeting.rs`, `view.rs` |
+| Authority and network | `PROTOCOL_VERSION` 16 (`protocol.rs`; v15 arenas, v16 `FX_CARRIED`). Postcard over WebSocket binary frames; `MAX_CLIENT_MSG_BYTES` 1,024 (`protocol.rs`) set as the ws max message and frame size (`tbg-server/src/ws.rs`); seat stamped by connection. Per-seat 10 Hz views (`match_task.rs`) plus acknowledgments and reconnect catch-up | `protocol.rs`, `tbg-server/src/ws.rs`, `match_task.rs` |
+| Wire/state | `UnitView`: id, seat, kind, tier and branch (form), x, hp, max_hp, a 0/1/2 status byte, and `fx: u16` (only `FX_CARRIED` bit 14 and `FX_SUMMON` bit 15 are set). No unit shield amount, poison, fish or bond in views. `Event::Hit` has no source. `MatchView` has fixed four-Faction arrays (`synergy: [[u8; 4]; 2]`). Full state is hashed by `sim.rs::hash` | `view.rs`, `state.rs::Event`, `sim.rs::hash` |
+| Replay | Seed, presets, Stronghold kinds, arena (`replay.rs`) and intentions keyed by selection clock, not paused combat tick; runs on compiled CANON, not an arbitrary historical ruleset | `replay.rs` |
 | Rendering | Bevy 0.20 WebGL2; code-built low-poly parts, vertex colors, shared material, mesh per joint, Humanoid/Large plans. No enabled glTF/skeletal animation import pipeline | `client/Cargo.toml`, `art/{mesh,rig,figure,roster}.rs` |
 | Motion and effects | Seventeen body joints plus secondary/prop nodes, procedural pose sampling and clips. Main cues choose shared Archetype clips, with special Archer tuning; AttackStart/Hit/Heal/Evolved/Death drive cues and simple projectiles | `art/{rig,anim,clips,archer_v2_clips}.rs`, `visuals/cues.rs` |
-| Lab | Ruleset variants, duels, policy matches, paired seat swaps, meta/search/confirm, value model, Arcana/Stronghold studies; not human fun evidence | `balance/src/{cli,duels,runner,gate,search,value}*` |
+| Lab | Ruleset variants, duels, policy matches, paired seat swaps, meta/search/confirm, value model, Arcana/Stronghold studies. Purchase-share gate: 2.5 % per kind (`gate.rs`, O-R2). Not human fun evidence | `tbg-balance/src/{cli,duels,runner,gate,search,value}*` |
 | Tests/benchmarks | Main has rules, protocol, determinism, economy, Augment/Arcana/Stronghold, open-army and lab contracts; `examples/army_load.rs` and `scripts/capacity.sh` exist | `core/tests/`, `balance/tests/contract.rs`, `.github/workflows/ci.yml` |
 
 **Document drift is real.** Main's glossary still calls several live
@@ -118,20 +125,42 @@ no existing worktree or branch was overwritten.
 
 | State | Inspected evidence | Consequence |
 |---|---|---|
-| Non-integrated roster | `release/roster-online` at `d06279aa5287b67efb24e224c4710db55a8ca739`, open [PR #16](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/16) | Fifteen additional purchased kinds, Ability pairs, UnitFx, poison/fish, friendly blasts, formation, bonds, cleanse, transport, crates and transfers are code on that branch, not main capabilities |
+| Integrated roster (was non-integrated) | `release/roster-online` at `d06279aa5287b67efb24e224c4710db55a8ca739` (PR #16) is an ancestor of `origin/main` `e3b977f` (checked 2026-10-30). Local `main` `077abe7` does not contain it | Fifteen purchased kinds, Ability pairs, UnitFx, poison/fish, friendly blasts, formation, bonds, cleanse, transport, crates and transfers are on the reaudited base. The review and re-audit gate is still open (see the dependency below) |
 | Earlier plan | `docs/ROSTER-EXPANSION.md` on that same ref; P42–P48B reports | Reuse its foundations after integration/review; P49–P53 are reserved follow-up milestones, not fresh numbers |
 | Troop polish | `phase/a1-troops-port` at `e820ebc`, open [PR #11](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/11) | Directional aim/death styles are not baseline assumptions |
-| Art kits | `phase/p54-unit-art-kits` at `d78143e`, open [PR #15](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/15) | Per-kind kit dispatch is a conditional reuse target |
-| Champion kits | local `phase/p55-champion-kits` at `201ffc087f1719047ecedaaf68a747c1faccf8b1` | P55 exists and is reserved; do not assume merged, checked or owner-approved |
+| Art kits | P54 is marked done and owner-approved (2026-10-30) in ROADMAP. The old branch `phase/p54-unit-art-kits` and PR #15 were not re-checked | Per-kind kits are in the tree (`tbg-client/src/art/kits/`) |
+| Champion kits | P55 is marked done and owner-approved (2026-10-30) in ROADMAP; the local branch `phase/p55-champion-kits` was not re-checked | Champion kits share the kit library (`tbg-client/src/art/kits/`) |
 | Other planning | P41 i18n and P47 spectating PRs; local themed-arena branch | Preserve their work. Existing P47 numbering collision is outside this change; no new P42–P55 allocation |
 
 **Chosen dependency:** implementation starts only after the roster
-foundations in #16 are reviewed and integrated, then re-audited on a new
-main SHA. Do not reimplement its Ability/UnitFx/Shop-pool/poison/cleanse
-systems in parallel. The plan remains reviewable today on main. If #16
-does not integrate, stop before implementation and revise this dependency;
-the task does not authorize porting it. P54/P55 integration gates their
-reuse for final art, not independent offline combat work.
+foundations in #16 are reviewed and re-audited on the implementation base.
+Reaudit finding: #16 is already in `origin/main` (`e3b977f`), so the
+integration step is done; the review and the implementation-base re-audit
+are not. Do not reimplement its Ability/UnitFx/Shop-pool/poison/cleanse
+systems in parallel. If the reviewed #16 code later changes or is reverted,
+stop before implementation and revise this dependency; the task does not
+authorize porting it. P54/P55 integration gates their reuse for final art,
+not independent offline combat work.
+
+### 2.2 Reaudit changes (2026-10-30)
+
+| Item | Old (6ef155b audit) | Reaudited fact | Evidence |
+|---|---|---|---|
+| Shop kinds | Ten purchased kinds | 25 (`CANON.pool = &FULL_POOL`); the 10-kind `UNIT_KINDS` is legacy | `ruleset.rs`, `types.rs` |
+| Protocol | Version 13 | `PROTOCOL_VERSION` 16; the lead's Part A (D-61) bumps it before Part C; no further number reserved | `protocol.rs` |
+| Unit shield | Does not exist on main | Field and absorb path exist; no writer; Cargo Crab `shield_bp` ignored | `state.rs`, `hits.rs`, `support.rs` |
+| PR #16 | Open, not integrated | In `origin/main` | `git merge-base --is-ancestor` |
+| Fixed-size-4 Faction arrays | Not listed | Ten sites, listed in §5 | grep of `tbg-core` and `tbg-client` |
+| Summon kinds | Beetling only | Beetling and Crate | `types.rs::is_summon` |
+| Heal cut | Augment-only fields | Augment and Deep Wound write one pair; plus Plants regeneration reads it | `hits.rs`, `synergy.rs` |
+| Status | No movement-only slow | Old Finn fish is one (`UnitFx`) | `combat.rs` |
+| UnitView | kind/form/x/HP/status | Adds tier, branch, max_hp, fx bits 14 and 15 | `view.rs` |
+| Arenas and Cargo Crab | Absent | D-55 and D-56 present; D-60 (in progress) on another branch | `types.rs`, `content.rs` |
+
+Rows not listed were checked by grep for the named symbols and are
+unchanged. Movement, Attacks, Area damage and Death attribution were not
+re-read line by line. PR states for #11 and #15 were not re-checked (no
+network check in this docs-only task).
 
 ## 3. Shared competitive contracts (all Proposed, inactive)
 
@@ -187,15 +216,16 @@ Every numerical hypothesis lives in GAME-DESIGN §13.
 - Timer/secondary area attacks hit enemy summons and conventional units,
   not allies or Strongholds unless a sheet explicitly says otherwise.
   Normal basic attacks still damage Strongholds. Area damage includes a
-  transported passenger if #16 integrates that rule; single-target
-  secondaries respect `targetable`, excluding protected passengers.
+  transported passenger (integrated #16 rule); single-target secondaries
+  respect `targetable` (`targeting.rs`), which excludes carried units.
 - Slow/Root reuse the existing single-slot priority, duration modifiers,
   Unshaken/Purification and control immunity once available. Every Slow
   below affects attack cadence too. No animation cancels enemy attacks.
   Debuff immunity/ward from the integrated baseline is checked for each
   new hostile status; raw damage is still taken.
 - Added heal-cut uses its own bounded ability slot alongside the existing
-  Augment slot: take the highest **active** cut, never sum them. Across
+  single heal-cut pair (`Unit.heal_cut_*`, written by the Augment and Deep
+  Wound effects): take the highest **active** cut, never sum them. Across
   applications of that ability slot, stronger replaces and restarts its
   timer; equal refreshes; weaker is ignored until expiry. Never extend a
   strong cut by repeatedly applying a weaker one. It affects direct heals,
@@ -214,9 +244,9 @@ Every numerical hypothesis lives in GAME-DESIGN §13.
   and bleed have separate slots and never take Rotcap's stack capacity.
   Pulse before decrement/removal of its last due pulse; no on-hit effects,
   lifesteal or Stronghold damage. Healing coexists normally, subject only
-  to an explicitly applied heal-cut. Brew cleanses the new poison/bleed
-  slot before ordinary poison stacks; this is a Proposed integration
-  contract requiring a new test, not a claim about #16 today.
+  to an explicitly applied heal-cut. `afflictions.rs::cleanse` already strips
+  existing poison stacks; cleansing the new one-slot DoT before ordinary
+  poison stacks is a Proposed contract that needs a new test.
 - Per-caster Crowcaller marks store one target and deadline on the caster,
   preventing unbounded source lists on victims. Only that caster gains
   its bonus; expired/dead target clears the mark. Casting on another unit
@@ -231,20 +261,23 @@ Every numerical hypothesis lives in GAME-DESIGN §13.
   appended ability-start/resolution cue carrying caster, primary/center,
   ability discriminator and combat tick, plus shield/fusion cues where
   applicable. Existing Hit/Heal/Death/Evolved remain; the client never
-  derives a competitive hit from animation timing. No protocol version
-  number is reserved now: choose the next unused version at integration.
+  derives a competitive hit from animation timing. `PROTOCOL_VERSION` is 16
+  (`protocol.rs`); the lead's Part A (D-61) bumps it before Part C, and this
+  plan reserves no number beyond that.
 
 ## 4. Integration matrix
 
-Category is for the **chosen primary ability relative to audited main**:
+Category is for the **chosen primary ability relative to the reaudited base (`origin/main` `e3b977f`)**:
 A = existing data only; B = bounded, localized hooks/state using existing
 primitives; C = structural dependency. New Faction infrastructure is an
 additional shared dependency, not counted as an extra ability. Thus **0 A,
-18 B, 3 C**. C units may be downgraded after re-auditing merged #16 shields;
-they are not called main-compatible today. All 21 reuse some primitives;
+20 B, 1 C**. Reaudit: R12 and R14 move from C to B, because the unit shield
+fields and absorb path are already in the tree (only the grant path, expiry
+and view field remain). R21 stays C. The 18 B / 3 C count of the 6ef155b audit
+is superseded. All 21 reuse some primitives;
 that overlap is not another disjoint category count.
 
-Module names below are future destinations; they do not exist on main:
+Module names below are future destinations; they do not exist in the reaudited base:
 `roster_actions.rs` (timers/counters), `roster_marks.rs` (marks/cuts),
 `drill.rs` (summon fusion). Add only those responsibilities actually needed,
 splitting if cohesion requires; do not build a generic ability framework.
@@ -262,15 +295,15 @@ splitting if cohesion requires; do not build a generic ability framework.
 | R09 Rasgarr | B | Primary-hit damage modifier | last target/count/last-hit tick; O(1) | Fourth-hit cap and target reset; damage growth bounded |
 | R10 Esporax | B | Counted secondary strikes | count, fixed best-three selector O(n) on proc | Tie and radius; not a cheaper Siege Walker |
 | R11 Murmúrio | B | Ordinary Slow | special timer; standard target scan | Slow refresh vs Root; control saturation |
-| R12 Sentinela Solar | C | Allied target selection; **unit** shield resource/damage path absent on main | shield/expiry and timer; O(n) select | No shield accumulation, transfer or healing classification |
+| R12 Sentinela Solar | B | Allied target selection; grant path for the existing `UnitFx.shield` field (absorb path exists, no writer) | shield/expiry and timer; O(n) select; shield amount needs a view field | No shield accumulation, transfer or healing classification |
 | R13 Oráculo Luminar | B | Enemy target + damage-debuff hit hook | victim weakening slot + timer | Overlap/expiry/cancel; output debuff + shields stall |
-| R14 Arqueira Celeste | C | Counted empowered primary; shield removal depends on R12 resource | counter, inspect shield once | Strip before hit; never strip HP/plates/Stronghold shield |
+| R14 Arqueira Celeste | B | Counted empowered primary; the strip reads the existing `UnitFx.shield`, so it needs R12's grant path | counter, inspect shield once | Strip before hit; never strip HP/plates/Stronghold shield |
 | R15 Justiçar | B | Single area pulse, not simulated meteors | timer; O(n) per cast | One hit per victim; no triple image explosion |
 | R16 Mandíbulo | B | Capped self-reduction + optional empowered next hit | timer/expiry/one ready flag; O(1) | Cap shared with Arcana; no protective aura from image |
 | R17 Louva | B | Same-target counted bonus | target/count; O(1) | Fourth-hit reset vs Rasgarr's continuing ramp |
-| R18 Vespira | B | Counted hit + non-stacking poison, conditional reuse #16 | counter + poison slot; O(n) pulse pass | No Rotcap-stack multiplication; Brew counter |
+| R18 Vespira | B | Counted hit + non-stacking poison; reuse integrated poison stacks and cleanse order | counter + poison slot; O(n) pulse pass | No Rotcap-stack multiplication; Brew counter |
 | R19 Fiandeira | B | Root + damage; post-Root Slow only on B3 | timer + one queued Slow per victim | Queued Slow clears on cleanse; longer Root delays transition |
-| R20 Crematumba | B | Direct damage/cut; conditional reuse friendly damage from #16 | normal attack cadence; O(n) each pulse | Same-damage friendly fire, no heal dispatch/reward exploit |
+| R20 Crematumba | B | Direct damage/cut; reuse the integrated friendly-damage path | normal attack cadence; O(n) each pulse | Same-damage friendly fire, no heal dispatch/reward exploit |
 | R21 Brocatanque | C | Summon ownership/TTL; new deterministic capped rank-fusion lifecycle | per-owner fixed eight-id candidate list, rank/kind, merge cues | Full-cap production ordering, damaged merge, no recursive summon |
 
 **Shared files:** `core/src/{content,ruleset,types,state,sim,combat,hits,
@@ -281,17 +314,20 @@ metadata tests. This is an impact map, not permission to edit them now.
 
 ### 4.1 Structural alternatives and decisions
 
-- **Unit shields (R12/R14):** main's Stronghold shield cannot be attached to
-  Unit by merely setting HP. Prefer reusing reviewed #16 UnitFx shield
-  semantics after integration, exposing absorption/removal in views. One
-  amount and expiry per victim, strongest replaces, equal refreshes,
-  weaker ignored; expires without HP loss, consumes before HP, cannot
-  revive and does not count as healing. Shielding a lower shield with a
-  stronger shield replaces the amount, never adds it. Sentinel A/B
-  shielding and Arqueira stripping use this same resource once. A simpler
-  main-only substitute is timed capped damage reduction for Sentinel and
-  empowered damage for Arqueira; that removes their shield/counter pairing
-  and **requires product approval**, so it is not silently selected.
+- **Unit shields (R12/R14):** the integrated #16 `UnitFx.shield` and
+  `shield_until` fields and `hits.rs::absorb_shield` exist, so the resource
+  is no longer new. Nothing grants a unit shield yet: the grant path, the
+  expiry sweep and the view field are the missing pieces. The Cargo Crab
+  `shield_bp` (`content.rs`, P48-A design) is parsed and ignored. Planned
+  semantics: one amount and expiry per victim, strongest replaces, equal
+  refreshes, weaker ignored; expires without HP loss, consumes before HP,
+  cannot revive and does not count as healing. Shielding a lower shield with
+  a stronger shield replaces the amount, never adds it. Sentinel A/B
+  shielding and Arqueira stripping use this same field once. The timed
+  damage-reduction substitute from the 6ef155b audit is no longer needed for
+  the resource and stays unselected. **Owner decision:** confirm these
+  semantics, and whether the dormant Cargo Crab `shield_bp` is granted by the
+  same path or removed.
 - **Brocatanque:** fusion is its central fantasy; a no-fusion capped
   temporary drill producer is the small alternative, but removes that
   identity. Retain the structural proposal for a separately authorized
@@ -313,6 +349,33 @@ FACTIONS, Synergy tables, Ruleset, PlayerState, MatchView, client icons/
 labels/selection, lab faction-policy parsing and results, Augment filters,
 Convergence and serialization fixtures together in the future contract
 change. One derived count from FACTIONS is enough; no registry framework.
+
+**Reaudit (2026-10-30) of the arrays that W1 must generalize.** Grep of
+`crates/tbg-core/src` and `crates/tbg-client/src` for fixed arrays of four:
+
+- Faction arrays: `types.rs` `FACTIONS: [Faction; 4]` (line 213);
+  `synergy.rs` `counts = [0u32; 4]` (line 13); `content.rs`
+  `SYNERGIES: [(SynergyEffect, [i32; 2]); 4]` (line 271); `ruleset.rs`
+  `Ruleset.synergies` (line 69); `state.rs` `PlayerState.synergy: [u8; 4]`
+  (line 156); `augment.rs` `unit_bonus` parameter `synergy: [u8; 4]` (line 288);
+  `view.rs` `MatchView.synergy: [[u8; 4]; 2]` (line 97); `sim.rs` synergy
+  initializer `[0; 4]` (line 68); client `visuals/assets.rs`
+  `FACTION_COLORS: [[u8; 3]; 4]` (line 25); client `art/palette.rs`
+  `FACTIONS: [[Color; 8]; 4]` (line 87).
+- Not Faction arrays, leave as they are: `AugmentRule.costs` and
+  `AUGMENT_COST: [u32; 4]` (Augment prices, `ruleset.rs` line 47,
+  `content.rs` line 38); `StrongholdKind::SELECTABLE` (`types.rs`);
+  `forms: [FormDef; 4]` (`content.rs` lines 458 and 491); the
+  `profiling::snapshot` result; the Synergy level thresholds
+  `synergy_thresholds: [u8; 2]`.
+- `SynergyEffect` has four variants, `MaxHp`, `AttackSpeed`, `Damage` and
+  `Regen` (`content.rs` line 262). Insects' movement Synergy needs a new
+  variant. Movement is already capped at 150 % of base speed (`state.rs`).
+- Magnitudes differ. Existing level 1/2 values are MaxHp 20/40 %,
+  AttackSpeed 20/40 %, Damage 5/20 % and Regen 75/200 bp. The planned
+  Monsters damage, Celestials max HP and Insects movement use 5/10 %; that
+  is the owner decision in the phase doc.
+- `tbg-balance/src/knobs.rs` imports `FACTIONS` for faction-policy parsing.
 
 | Proposed Faction | Narrative / visual | Archetype distribution | Proposed Synergy and constraints |
 |---|---|---|---|
@@ -398,6 +461,12 @@ shield, target, flame danger interval or drill rank. Desktop checks only,
 following the current owner platform rule. No fixed triangle/draw-call
 ceiling overrides D-28/D-30; measure those diagnostics and enforce existing
 frame/memory/download contracts.
+
+Reaudit note (2026-10-30): `UnitFx` is a `Copy` block of fixed arrays and
+scalars (`state.rs`), so its size is fixed by construction. Its size, the
+serialized hash bytes and the view bytes were not measured in this
+docs-only task (no cargo run); the measurement rule above still applies
+before any wave is authorized.
 
 No new performance measurement in this plan proves the unimplemented
 roster fast or balanced. The phase specifies baseline and before/after
