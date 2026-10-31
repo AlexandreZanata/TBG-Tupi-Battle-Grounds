@@ -114,7 +114,38 @@ Own library: `crates/tbg-client/src/art/kits/bonehorn/`.
 
 low, wide quadruped, heavy rhino muzzle, oversized tusks, separate bone dorsal plates; charcoal hide, ivory, turquoise eye grooves and team cloth across flank. A2 adds overlapping pale shoulder plates, A3 broad back ridge. B2 darkens neck and lengthens tusks, B3 adds an outer jaw guard. No direct one-to-one V08 panel match is asserted.
 
-Status: pending. Evidence: `docs/media/p59/bonehorn/lineup.jpg`.
+Status: implemented and desktop lineup observed. Evidence:
+![Bonehorn five-form lineup](../media/p59/bonehorn/lineup.jpg)
+
+R08 owns its quadruped layout, five meshes, diagonal gait, braced tusk shove,
+shoulder hit compression, front/rear collapse, Evolution rise and reactive mantle.
+Primordial Carapace uses positive HP receipts after damage; its absolute branch
+parameters live in content. D-68 documents the corrected Evolution form order and
+protocol 21 public reduction snapshot. Online pools remain unchanged.
+
+Work-front checks: affected-package formatting and `git diff --check` passed.
+The owner-requested preview passed (exit 0) with:
+`flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/tbg-pr20-web-target PATH="/home/iiii/.cache/trunk/wasm-bindgen-0.2.129:/home/iiii/.cache/trunk/wasm-opt-version_131/bin:$PATH" trunk build --release --offline --locked`
+in `crates/tbg-client`. The initial packaging attempt failed after Rust compilation
+with `couldn't find application wasm-bindgen (version: 0.2.129), unable to download in offline mode`.
+The matching existing cached binaries were then exposed through this command's
+PATH; no download, dependency change, fresh target directory or cache deletion.
+The successful retry reused the compiled WASM (`Finished release ... in 0.16s`).
+
+Observed at 1280×720 in the actual local browser: all five forms, idle, diagonal
+walk key pose and attack anticipation fit the lineup. A adds shoulder/back armor;
+B lengthens tusks and adds the final jaw guard. Logged triangles, Base/A1/A2/B1/B2:
+2,124 / 2,764 / 2,876 / 2,124 / 2,148. Screenshot is the actual rendered page,
+not concept art. This is no FPS, balance or full-clip verification claim.
+
+Deferred to the combined consolidation, not run per character:
+`cargo test -p tbg-core --lib bonehorn::tests -- --test-threads=1` and
+`cargo test -p tbg-core --test contract_roster --test contract_protocol -- --test-threads=1`,
+inside the shared lock with two jobs. These cover HP-only stacking, first/subsequent
+hits, cap refresh, expiration, shield overflow, global reduction cap, printed-range
+bonus/Stronghold exclusion, A2 expiry/HP, and matching seat/public snapshots.
+Gameplay animation/VFX observation and live reconnect with this protocol remain
+consolidation scenarios. No full suite or balance gate was run.
 
 ### R09 — Ravager
 

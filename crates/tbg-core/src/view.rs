@@ -35,6 +35,8 @@ pub struct UnitView {
     pub carrier: Option<UnitId>,
     /// The unit shield still standing at the view's tick (D-63); zero once expired.
     pub shield: u16,
+    /// Active self damage reduction in basis points (P59 R08, D-68).
+    pub reduction: u16,
 }
 
 /// `UnitView.fx` bit for a summon by unit, e.g. Smuggler cargo (BR-U08):
@@ -201,5 +203,6 @@ fn unit_view(u: &crate::state::Unit, tick: Tick) -> UnitView {
         },
         carrier: u.fx.carrier,
         shield: crate::roster_slots::shield_now(&u.fx, tick),
+        reduction: crate::roster_slots::self_dr_now(&u.fx, tick) as u16,
     }
 }

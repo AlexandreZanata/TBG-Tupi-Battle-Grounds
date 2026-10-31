@@ -5,10 +5,13 @@
 
 # P59 — Roster expansion: implementation (status report)
 
-Status: **W0 and W1 are done** (D-62 and D-63 for W0; D-64 for W1). The
-Monsters pilot has four inactive base kinds (D-66, commit `2b28591`); its kits
-and animations are next. No unit of the expansion (R01–R21) has a kit yet. This file records what is done and what comes next. It is
-a status report, not a finished wave.
+Status: **W0 and W1 are done** (D-62 and D-63 for W0; D-64 for W1).
+The owner-authorized complete roster front is active in draft PR #22, stacked on
+PR #20. Shared anatomy/gallery support is implemented (D-67). Bonehorn R08 now
+has its dedicated five-form quadruped kit and authoritative ability (D-68), with
+screenshot/minimum validation evidence in [P59-EXECUTION](../roster/P59-EXECUTION.md).
+The other 20 characters remain pending. No new kind is in a public Shop/lab pool;
+this is an implementation report, not W10 balance acceptance or W11 release.
 
 ## What is in place
 
@@ -27,7 +30,7 @@ The plan said 19 for the Factions. The shield changed the wire first, so the
 Factions take the next number; this deviation is recorded here.
 
 **The audit's protocol number is stale.** P58 §2 reads "protocol 16". The
-current value is 20. Update the audit in the next docs pass.
+current value is 21 (D-68). Update the audit at consolidation.
 
 ## Waves
 
@@ -42,12 +45,12 @@ current value is 20. Update the audit in the next docs pass.
   death styles and gallery rows cover the seven Factions. ART-DIRECTION §3 and
   §11.2 have rows for the three new Factions (Proposed).
 - **Pilot: Monsters R08 Bonehorn, R09 Ravager, R10 Acidmaw, R11 Whisperer. Kinds done (D-66).**
-  Inactive kinds and base rows from GAME-DESIGN §13.1 are registered. Next:
-  kits under `crates/tbg-client/src/art/kits/`, animations and gallery review. The
-  pilot's report goes here before the next wave starts.
+  Inactive kinds and base rows from GAME-DESIGN §13.1 are registered. Bonehorn
+  now owns its kit, animation and ability; Ravager, Acidmaw and Whisperer follow.
+  Per-character evidence is recorded in P59-EXECUTION before each next delivery.
 - **W2–W6: rules for the other 17 units** (timers, counted strikers, area pulses,
-  shield pair, fusion). The owner asked for balance and rules to be left to
-  another agent, so these waves stay open until that agent runs.
+  shield pair, fusion). The 2026-10-31 owner update authorizes implementing
+  the catalog abilities on this front; balance evidence remains deferred.
 - **W7–W9: evolution visuals, models, animation profiles** for all 21 units and
   the three drills. This is the visual part of the mission, unit by unit after
   the pilot.

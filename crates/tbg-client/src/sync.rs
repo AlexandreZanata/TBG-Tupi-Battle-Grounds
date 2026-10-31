@@ -214,6 +214,7 @@ impl Scene<'_, '_, '_, '_, '_> {
                 Some((mut v, mut t, mut anim)) => {
                     t.translation = pos;
                     anim.carried = u.is_carried();
+                    anim.set_reduction(u.reduction);
                     visuals::update_unit_visual(self.commands, self.assets, self.lib, &mut v, u);
                 }
                 None => {

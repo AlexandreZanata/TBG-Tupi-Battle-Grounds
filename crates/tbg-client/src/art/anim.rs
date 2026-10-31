@@ -39,6 +39,8 @@ pub struct Animator {
     pub gait: Gait,
     /// When carried by a carrier (e.g. riding a Cargo Crab), sits mounted in saddle.
     pub carried: bool,
+    pub reduction: u16,
+    armor_flash: f32,
     base: Clip,
     base_t: f32,
     action: Option<(Clip, f32)>,
@@ -81,6 +83,8 @@ impl Animator {
             treadmill: false,
             gait,
             carried: false,
+            reduction: 0,
+            armor_flash: 0.0,
             base: Clip::Idle,
             base_t: phase * Clip::Idle.duration(),
             action: None,
@@ -97,6 +101,13 @@ impl Animator {
             travel: 0.0,
             heading: Vec3::Z,
         }
+    }
+    /// Snapshots restore persistent armor; only an increase squeezes the plates.
+    pub fn set_reduction(&mut self, bp: u16) {
+        if bp > self.reduction {
+            self.armor_flash = 1.0;
+        }
+        self.reduction = bp;
     }
     pub fn apply_hit_stop(&mut self, duration_s: f32) {
         self.hit_stop = duration_s;
@@ -158,6 +169,8 @@ impl Animator {
                 variant: self.variant,
                 clock: self.clock,
                 walk,
+                reduction: self.reduction,
+                armor_flash: self.armor_flash,
             };
             (kit.pose)(&moment, &mut pose);
         }
@@ -191,6 +204,7 @@ impl Animator {
     }
     fn advance(&mut self, dt: f32) -> (Pose, Option<f32>) {
         self.events.clear();
+        self.armor_flash = (self.armor_flash - dt * 4.0).max(0.0);
         self.since_attack = (self.since_attack + dt).min(1e6);
         self.clock += dt;
         if let Some((clip, t)) = self.preview {

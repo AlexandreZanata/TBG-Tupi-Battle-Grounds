@@ -85,6 +85,7 @@ pub(crate) fn resolve_hit(
             augment::situational_bp(state, attacker, target)
                 + arcana_bp
                 + conditional_bp(state, attacker, target)
+                + crate::bonehorn::short_range_bonus(state, attacker, target)
                 + furnace_bonus(state, attacker, target)
                 + plates_bonus(state, attacker)
                 + crate::stronghold::aura_bp(state, attacker),
@@ -528,6 +529,7 @@ pub(crate) fn damage(
             if removed > 0 && u.hp <= 0 && conventional {
                 state.army[owner.index()].remove(archetype);
             }
+            crate::bonehorn::after_hp_damage(state, id, removed);
             #[cfg(feature = "lab")]
             crate::lab::taken(state, owner, victim.kind, removed);
             removed

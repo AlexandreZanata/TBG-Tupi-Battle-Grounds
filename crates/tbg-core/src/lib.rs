@@ -8,6 +8,7 @@ pub mod account;
 mod afflictions;
 pub mod arcana;
 pub mod augment;
+mod bonehorn;
 pub mod bot;
 mod combat;
 pub mod content;

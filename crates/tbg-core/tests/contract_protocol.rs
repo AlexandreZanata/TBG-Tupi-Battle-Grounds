@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 20,
-        "v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
+        PROTOCOL_VERSION, 21,
+        "v21: UnitView.reduction (D-68); v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
     );
 }
 

@@ -1372,3 +1372,35 @@ competitive rules, protocol and existing entity slot counts are unchanged.
 Why: the owner requested 21 individual characters and actual screenshots, while
 P59 registration intentionally remains separate from the W11 online switch.
 Rendering cost still requires measurement at consolidation; no FPS claim is made.
+
+## D-68 · Bonehorn's staged kit and Primordial Carapace — 2026-10-31 (Proposed)
+
+R08 uses the exact GAME-DESIGN §13.1–13.3 starting values. Its closed ability
+variant holds all five forms' absolute carapace parameters in the content table.
+Positive HP removed through the shared damage path grants one stack after that
+receipt, including friendly damage; fully absorbed and zero damage grant none.
+The existing timed self-reduction slot supplies subsequent hits and joins the
+global 2,000 bp cap. A living Bonehorn refreshes the single inactivity timer even
+at five stacks. No state fields or legacy simulation hash inputs are added.
+
+Branch A grants +2,000 bp HP at A1 and replaces the expiry with 80 ticks at A2.
+Branch B grants 1,500 / 2,500 bp basic damage against units whose printed base
+range is at most 1,600. This joins the existing additive basic-damage bonus sum;
+Strongholds receive no bonus. The accidentally interleaved placeholder form
+names from D-66 are corrected to the documented A1, A2, B1, B2 order.
+`contract_roster::evolution_forms_are_frozen` changes those Bonehorn lines in
+this same commit; all other units' contracts stay unchanged.
+
+Protocol **21** appends `UnitView.reduction` (u16 basis points, zero after expiry).
+Seat and spectator views share its projection; a reconnect reconstructs active
+armor without replaying damage. Legacy units pay one zero postcard byte per view.
+The client tightens the separate mantle on each visible increase, then holds its
+server-reported compression. `contract_protocol::protocol_version` changes here.
+No new event type, client authority, dependency or public pool activation.
+
+The art owns a low four-legged rig over the fixed node slots: diagonal cadence,
+braced tusk shove, front-then-rear collapse and a rising crest during Evolution.
+Five meshes distinguish the pale armored A branch from the long-tusked B branch.
+Screenshot evidence and minimal/deferred validation live in P59-EXECUTION.
+Balance acceptance and public release remain pending W10/W11, not implied by the
+implementation or by a local screenshot.

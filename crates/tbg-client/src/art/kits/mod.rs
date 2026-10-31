@@ -12,6 +12,7 @@ mod bloodweaver;
 mod bloomkeeper;
 mod bombard;
 mod bone_brute;
+mod bonehorn;
 mod cargo_crab;
 mod cargo_crate;
 pub mod common;
@@ -119,10 +120,14 @@ pub struct Moment {
     pub clock: f32,
     /// Walk cycle phase (0..1 per two steps) while walking.
     pub walk: Option<f32>,
+    /// Authoritative active self-reduction and a brief increase cue.
+    pub reduction: u16,
+    pub armor_flash: f32,
 }
 
 static SIEGE_WALKER: Kit = siege_walker::KIT;
 static BONE_BRUTE: Kit = bone_brute::KIT;
+static BONEHORN: Kit = bonehorn::KIT;
 static ROOTCALLER: Kit = rootcaller::KIT;
 static LONGAXE: Kit = longaxe::KIT;
 static FARWATCH: Kit = farwatch::KIT;
@@ -161,6 +166,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Archer => Some(&ARCHER),
         UnitKind::SiegeWalker => Some(&SIEGE_WALKER),
         UnitKind::BoneBrute => Some(&BONE_BRUTE),
+        UnitKind::Bonehorn => Some(&BONEHORN),
         UnitKind::Rootcaller => Some(&ROOTCALLER),
         UnitKind::Longaxe => Some(&LONGAXE),
         UnitKind::Farwatch => Some(&FARWATCH),

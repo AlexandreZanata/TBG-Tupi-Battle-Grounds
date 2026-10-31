@@ -435,6 +435,14 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
+    /// R08: actual HP damage builds reduction for subsequent receipts.
+    PrimordialCarapace {
+        step_bp: u16,
+        cap_bp: u16,
+        gap: u16,
+        short_range: i32,
+        short_bonus_bp: u16,
+    },
     Transfer {
         amount: u16,
         low_bp: u16,
@@ -477,6 +485,26 @@ impl UnitDef {
         }]
     }
 }
+
+const fn carapace(gap: u16, short_bonus_bp: u16) -> [Ability; 2] {
+    [
+        Ability::PrimordialCarapace {
+            step_bp: 300,
+            cap_bp: 1_500,
+            gap,
+            short_range: 1_600,
+            short_bonus_bp,
+        },
+        Ability::None,
+    ]
+}
+const BONEHORN_ABILITIES: [[Ability; 2]; 5] = [
+    carapace(60, 0),
+    carapace(60, 0),
+    carapace(80, 0),
+    carapace(60, 1_500),
+    carapace(60, 2_500),
+];
 
 const NO_ABILITIES: [[Ability; 2]; 5] = [[Ability::None; 2]; 5];
 const HATCH_ABILITIES: [[Ability; 2]; 5] = [[Ability::Hatch; 2]; 5];
@@ -802,12 +830,12 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         form("Crate"), form("Crate"), form("Crate"), form("Crate"),
     ]),
     // D-66: the Monsters base rows of GAME-DESIGN §13.1, English names (P59-NAMES).
-    // Abilities and Evolution deltas wait for their rules waves; the forms keep
-    // the branch names only, and a branch name repeats across its two tiers.
+    // D-68 implements R08; the remaining rows keep placeholder abilities/deltas
+    // until their character commits. Branch names repeat across their two tiers.
     unit(UnitKind::Bonehorn, "Bonehorn", Monsters, Tank, 3_600,
-        [1_600, 40, 40, 800, 20, 0, 0], None, NO_ABILITIES, [
-        form("Ancestral Carapace"), form("Stone Fangs"),
-        form("Ancestral Carapace"), form("Stone Fangs"),
+        [1_600, 40, 40, 800, 20, 0, 0], None, BONEHORN_ABILITIES, [
+        FormDef { hp_bp: 2_000, ..form("Ancestral Carapace") }, form("Ancestral Carapace"),
+        form("Stone Fangs"), form("Stone Fangs"),
     ]),
     unit(UnitKind::Ravager, "Ravager", Monsters, Dps, 2_400,
         [310, 48, 24, 800, 58, 0, 0], None, NO_ABILITIES, [
