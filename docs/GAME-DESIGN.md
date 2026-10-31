@@ -960,3 +960,50 @@ backups 30 days; reviewed expiry/redaction/restore procedures are required
 before collection. These values are initial proposals, not approved policy
 or a legal-compliance claim. Host capacity determines additional active
 object/disk quotas before activation. No online balance value changes.
+
+## 19. Native updates and match continuity (P66, Proposed)
+
+**Proposed — planning only, 2026-10-31.** See
+[P66](phases/P66-native-updates-and-release-safety.md) and
+[release contracts](planning/P66-RELEASE-CONTRACTS.md). This does not authorize
+installation, real signing, publication of executables or deployment.
+
+- **BR-UP01:** Linux managed installs check for updates asynchronously at
+  startup and show localized availability at a safe idle point. Windows
+  follows the same contract after native platform verification. Updates
+  preserve user data and require no uninstall/reinstall after trusted adoption.
+- **BR-UP02:** routine update prompts/application do not interrupt playing,
+  reconnecting or time-sensitive session state. No forced client restart,
+  expensive extraction or default update download during online matches.
+  Incompatible minimum builds restrict new admissions, not current combat.
+- **BR-UP03:** signed verified complete releases activate transactionally.
+  Candidate health and permitted fallback are explicit; no partial/mixed
+  assets. Reopen recovers journal state and retains original-generation
+  resume capability. Existing unsigned installs need a trusted bootstrap.
+- **BR-UP04:** after healthy activation show exact installed-version notes
+  until durable acknowledgement, even after closing/reopening. A rollback
+  reports recovery, not successful installation. EN/pt-BR and offline notes
+  are part of the initial contract.
+- **BR-UP05:** each online match retains its admitted generation/rules/
+  content/features/wire. Compatible client/backend-only patches can release
+  independently; incompatible generations coexist or wait for safe drain.
+  No new match-duration cap, live balance swap or forced migration is added.
+- **BR-UP06:** old workers retire only after matches, durable results and
+  protected reconnect/delivery state settle. Long drain defers promotion;
+  no routine 300/330-second cutoff. Rollback redirects new admission without
+  terminating existing matches on either generation.
+- **BR-UP07:** emergency security containment and arbitrary machine failure
+  have explicit separate policies. Planned deployment continuity does not
+  guarantee crash failover. Capacity for thousands requires measurements,
+  overlap headroom and later multi-host coordination as demand grows.
+
+Proposed initial operational values: metadata file 1 MiB, descriptor 64 KiB,
+notes 512 KiB; archive 2 GiB compressed/8 GiB extracted/100,000 entries;
+initial attempt plus at most 2 automatic retries; discovery deadline 5 s
+and idle periodic check interval 6 hours; candidate readiness deadline 60 s;
+at least current/previous builds plus pinned builds; automatic highlights
+through 10 releases. Canary steps internal/5%/25%/100% concern new eligible
+admissions only. A 5% p99 tick/view regression is an initial stop criterion
+on an agreed paired fixture, never an existing measured SLO. Security/result
+loss stops rollout independently. Final limits/OS/channel/signing/emergency/
+retention decisions O01–O04 remain owner gates before activation.

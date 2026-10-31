@@ -1232,3 +1232,58 @@ pending. Reopen for public admin, media/rich text, new recovery powers, native
 authenticated UI, account model changes or measured interference with matches.
 See [P65](phases/P65-community-admin-foundation.md) and primary references in
 its security companion. No guarantee of a vulnerability-free future system.
+
+## D-91 · Signed recoverable native updates — 2026-10-31 (Proposed)
+
+**Decision.** P66 starts with per-user managed Linux installs, stable launcher/
+versioned helper, immutable releases and a durable activation/health/notes
+journal. Use a maintained TUF implementation with bundled root trust,
+protected signing and verified targets; unsigned adjacent checksums are not
+publisher authentication. Windows follows the same contract with real native
+file/shortcut/locking acceptance and a code-signing decision.
+
+**Player contract.** Startup discovery is asynchronous; update prompts/apply
+wait for idle and respect reconnect/online play. Preserve data and compatible
+fallback, protect resume credentials and show exact installed-build notes
+after healthy activation until acknowledged, including reopen after a crash.
+Initial legacy unsigned installations require a trusted bootstrap adoption;
+future updates do not require uninstall/reinstall.
+
+**Why.** Existing version discovery/download links and version directories
+do not supply authenticity, transaction recovery, resume persistence or
+cross-platform executable replacement. Signing and recovery are distinct
+from selecting a SemVer string or copying assets over a running application.
+
+**Status/limits.** Planning only. O01–O04 resolve platform/key/operations
+choices; no real signing, install or release is authorized. D-85–D-90 are
+reserved by inspected parallel P59/P60/P61/P64 work, so P66 takes D-91/D-92.
+Reopen for system-managed packages, unsupported bootstrap ABI, richer updater
+privileges, root/certificate changes or measured resource regressions.
+
+## D-92 · Generation-pinned matches and staged release retirement — 2026-10-31 (Proposed)
+
+**Decision.** Preserve match generation/rules/content/wire across planned
+deployments. Use safe admission-pausing drain initially, then a measured
+two-slot rollout with stable preconfigured routes, durable shared account/
+session ownership, idempotent finalization and complete retirement gates.
+No routine proxy reload, forced client restart, finite match-drain timeout
+or destructive asset/database replacement under live matches.
+
+**Compatibility.** Builds/artifact digests and tested match contracts are
+different identities. Compatible UI-only/backend-only releases coexist;
+incompatible contracts receive another generation. Each replacement worker
+gets a new generation ID. Reconnect returns to its original owner; two
+independent process-local lobbies are insufficient for one active account.
+Use expand/contract DB changes and retain immutable browser/native bundles.
+
+**Why.** Current server drain has a 300-second cutoff and systemd 330 seconds
+despite open-ended matches; running-match counters reach zero before pending
+ranked settlement completes. These are not safe retirement signals. Proxy
+reloads also need an explicit WebSocket lifecycle, not only upstream health.
+
+**Cost/limits.** Two occupied slots defer further incompatible promotion.
+Single-host overlap needs measured headroom; it is not host HA. Thousands
+of players require capacity evidence and later multi-host routing/store
+choices, not an immediate orchestration platform. Arbitrary worker crash
+failover/checkpointing and emergency security shutdown are separate policies.
+See [P66](phases/P66-native-updates-and-release-safety.md).
