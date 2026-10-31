@@ -1,0 +1,182 @@
+{
+  "source_commit": "8bfe6770aed14ffc18ff5f84139b9b6ee0899619",
+  "baseline_commit": "2e4cbb981a0b277db6cc6dc87f0783621bb3b4c7",
+  "baseline_render_commit": "687049d",
+  "validation_level": "work front; owner-requested empty desktop comparisons",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "source_set_sha256": "e1d9ae1eca6c6c33df9eec07a832bf485d8f5fe4fcf4710df116f274edad32b4",
+  "builds": {
+    "captured_all_themes": {
+      "command": "trunk build --offline --skip-version-check --dist /tmp/tbg-arena-background-v2",
+      "profile": "dev",
+      "exit": 0,
+      "seconds": 23.9,
+      "jobs": 2,
+      "shared_lock": "/tmp/tbg-validation-1000.lock",
+      "wasm": "tbg-client-b24d96406f6b8e0a_bg.wasm",
+      "wasm_bytes": 129548196,
+      "wasm_sha256": "d44aac988ff2d74a2190bcd4d655f7a0b21cf12f1810748ae6eebe96630e45fc"
+    },
+    "final_ruins_and_storm": {
+      "command": "trunk build --offline --skip-version-check --dist /tmp/tbg-arena-background-v2",
+      "profile": "dev",
+      "exit": 0,
+      "seconds": 37.4,
+      "jobs": 2,
+      "shared_lock": "/tmp/tbg-validation-1000.lock",
+      "wasm": "tbg-client-57d4267d04b61bb4_bg.wasm",
+      "wasm_bytes": 129558258,
+      "wasm_sha256": "aeb69ef8fb5c11291528ca9ee5de3abb3fd06aa9746ab59d2782e44678402afd"
+    }
+  },
+  "scenes": {
+    "forest": {
+      "baseline": {
+        "path": "../arena-reference-refinement/forest-after-1920.jpg",
+        "sha256": "8ba84b3642665948e3713166c107ad2e2095fb8f3a4fb0c711bb97fc586b9334",
+        "environment_triangles": 44430,
+        "observed_empty_draws": "40.0"
+      },
+      "after": {
+        "path": "forest-after-1920.jpg",
+        "sha256": "f9874c5c3ca8a5edcdadd90b673e9ce0cd0127cb0f8f656d9c6cbba2504896c0",
+        "layers": {
+          "meadow": 320,
+          "BattleLine": 444,
+          "cliffs": 512,
+          "sea": 5516,
+          "foam": 2876,
+          "offshore rocks": 800,
+          "props": 25750,
+          "offshore scenery": 7132,
+          "life": 624,
+          "total": 44060
+        },
+        "observed_empty_draws": "40.0",
+        "browser_errors": 0,
+        "wasm_sha256": "d44aac988ff2d74a2190bcd4d655f7a0b21cf12f1810748ae6eebe96630e45fc"
+      }
+    },
+    "ruins": {
+      "baseline": {
+        "path": "../arena-reference-refinement/ruins-after-1920.jpg",
+        "sha256": "a14a4ef19aba140efbb229a1fb2c5b21d8a8045789093cfdbde9cc928c70dc05",
+        "environment_triangles": 34152,
+        "observed_empty_draws": "39.0"
+      },
+      "after": {
+        "path": "ruins-after-1920.jpg",
+        "sha256": "1c90dbcf459403c5f757fc38353bf3ffc94b4ca717350f007d4fe937f488e59b",
+        "layers": {
+          "meadow": 320,
+          "BattleLine": 444,
+          "cliffs": 512,
+          "sea": 5518,
+          "foam": 1018,
+          "offshore rocks": 4176,
+          "props": 28944,
+          "accents": 44,
+          "life": 624,
+          "total": 41600
+        },
+        "observed_empty_draws": "39.0",
+        "browser_errors": 0,
+        "wasm_sha256": "aeb69ef8fb5c11291528ca9ee5de3abb3fd06aa9746ab59d2782e44678402afd"
+      }
+    },
+    "tundra": {
+      "baseline": {
+        "path": "../arena-reference-refinement/tundra-after-1920.jpg",
+        "sha256": "afe235c7cc74293f4f7d869c07b427a040a392bc2db4e67dda827072bdcc7c2f",
+        "environment_triangles": 22062,
+        "observed_empty_draws": "37.0"
+      },
+      "after": {
+        "path": "tundra-after-1920.jpg",
+        "sha256": "e28f1c1a206ef33edf0697ba7de849fd9e6dd05c3d17c8d243fa812a673721b7",
+        "layers": {
+          "meadow": 320,
+          "BattleLine": 444,
+          "cliffs": 512,
+          "sea": 5518,
+          "foam": 1018,
+          "offshore rocks": 810,
+          "props": 19111,
+          "life": 624,
+          "total": 28357
+        },
+        "observed_empty_draws": "37.0",
+        "browser_errors": 0,
+        "wasm_sha256": "d44aac988ff2d74a2190bcd4d655f7a0b21cf12f1810748ae6eebe96630e45fc"
+      }
+    },
+    "volcanic": {
+      "baseline": {
+        "path": "../arena-reference-refinement/volcanic-after-1920.jpg",
+        "sha256": "611734b489cbc87c4439e0599b21493b69f66d64d287f947a6aba9e5b9844e87",
+        "environment_triangles": 32284,
+        "observed_empty_draws": "39.0"
+      },
+      "after": {
+        "path": "volcanic-after-1920.jpg",
+        "sha256": "a82bec3454f0f20cbc65791995efcb18139c07c3601e6c5012ea0adadeeda938",
+        "layers": {
+          "meadow": 320,
+          "BattleLine": 660,
+          "cliffs": 512,
+          "sea": 5518,
+          "foam": 1018,
+          "offshore rocks": 1440,
+          "props": 20372,
+          "accents": 2252,
+          "life": 624,
+          "total": 32716
+        },
+        "observed_empty_draws": "39.0",
+        "browser_errors": 0,
+        "wasm_sha256": "d44aac988ff2d74a2190bcd4d655f7a0b21cf12f1810748ae6eebe96630e45fc"
+      }
+    },
+    "storm": {
+      "baseline": {
+        "path": "../arena-reference-refinement/storm-after-1920.jpg",
+        "sha256": "19902a8c04b0d6c74be9268f26fcc1d528db836ef6fcaac33e365a94df44d507",
+        "environment_triangles": 26960,
+        "observed_empty_draws": "39.0"
+      },
+      "after": {
+        "path": "storm-after-1920.jpg",
+        "sha256": "e78550215f35b4338eef9f586e5c0d511ceaca6b9d7223b4971765f573d09801",
+        "layers": {
+          "meadow": 320,
+          "BattleLine": 444,
+          "cliffs": 512,
+          "sea": 5518,
+          "foam": 1018,
+          "offshore rocks": 2592,
+          "props": 19272,
+          "accents": 288,
+          "squalls": 2640,
+          "life": 624,
+          "total": 33228
+        },
+        "observed_empty_draws": "40.0",
+        "browser_errors": 0,
+        "wasm_sha256": "aeb69ef8fb5c11291528ca9ee5de3abb3fd06aa9746ab59d2782e44678402afd"
+      }
+    }
+  },
+  "private_reference_storage": ".local/art-references/arena-backgrounds-v2-20261031/ (ignored; five originals and five immutable prior screenshots)",
+  "screenshot_policy": "Before is exactly the previous final after. Five original PNG references are excluded. Arena content in screenshots is unedited; comparisons resize and label game screenshots only.",
+  "evidence_reuse": "Forest, Tundra and Volcanic captures retained after final changes restricted to Ruins vegetation and Storm squalls; the relevant theme output is unchanged. Ruins and Storm were recaptured on the final build.",
+  "limits": [
+    "Dev build and opportunistic empty draw observations; not a controlled performance comparison.",
+    "The approved old 12.9 ms Forest reference bound is not claimed for V2.",
+    "No native/workspace suite, release packaging, controlled benchmark or multiplayer matrix.",
+    "Existing unused lang warning in ui/battle_hud.rs:126.",
+    "Exact photographic parity and owner visual approval remain open."
+  ]
+}
