@@ -3,6 +3,12 @@
 use super::{button, kit, Account, Action, Lang, Panel, Sounds, UiAction};
 use bevy::prelude::*;
 
+#[cfg(target_os = "linux")]
+mod native;
+#[cfg(target_os = "linux")]
+pub use native::spawn;
+
+#[cfg(not(target_os = "linux"))]
 pub fn spawn(
     root: &mut ChildSpawnerCommands,
     account: &Account,

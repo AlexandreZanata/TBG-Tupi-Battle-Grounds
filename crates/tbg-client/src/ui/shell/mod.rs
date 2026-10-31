@@ -148,6 +148,7 @@ fn render(
     ranking: Res<Ranking>,
     lang: Res<Lang>,
     sounds: Res<Sounds>,
+    #[cfg(target_os = "linux")] volume: Res<bevy::audio::GlobalVolume>,
     form: NonSend<ActiveForm>,
     roots: Query<Entity, With<Root>>,
     window: Single<&Window>,
@@ -161,7 +162,12 @@ fn render(
     let modal = matches!(account.screen, AccountScreen::SaveKey { .. });
     #[cfg(not(target_os = "linux"))]
     let modal = modal || ranking.open;
+    #[cfg(target_os = "linux")]
+    let volume_changed = shell.panel == Panel::Settings && volume.is_changed();
+    #[cfg(not(target_os = "linux"))]
+    let volume_changed = false;
     if !shell.dirty
+        && !volume_changed
         && !account.is_changed()
         && !lang.is_changed()
         && sounds.muted == hidden.1
@@ -273,7 +279,18 @@ fn render(
                 match shell.panel {
                     Panel::Lobby => {}
                     Panel::Friends => lobby::friends(body, *lang),
+                    #[cfg(not(target_os = "linux"))]
                     Panel::Settings => settings::spawn(body, &account, &sounds, &window, *lang),
+                    #[cfg(target_os = "linux")]
+                    Panel::Settings => settings::spawn(
+                        body,
+                        &account,
+                        &sounds,
+                        &window,
+                        *lang,
+                        volume.volume.to_linear(),
+                        &assets,
+                    ),
                     Panel::Arenas => arenas::spawn(body, &assets, *lang),
                     Panel::Strongholds => strongholds::spawn(body, &assets, *lang),
                     Panel::Arcanas => arcanas::spawn(body, &shell, &assets, *lang, compact),

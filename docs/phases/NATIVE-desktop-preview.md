@@ -789,3 +789,33 @@ is requested for this front.
   restart persistence, all five completed Practice matches and resize
   coverage remain unverified. No Rust test suite or other-target build
   was run on this front. Reopen TBG to load the installed catalog changes.
+
+## Linux settings panel polish — 2026-10-31
+
+Owner requested a more professional, consistent and efficient Settings
+page. Linux preferences now use four metal/gold sections in a two-column
+grid: language, audio, display/performance, and account/application. Keep
+the common header/page margins and reuse existing icons, panel colors and
+button focus/hover behavior. Compact grouped controls replace full-screen
+width buttons. Selected language, volume and toggle states are visible;
+the volume meter reads the existing live GlobalVolume resource instead of
+reloading persisted volume for display. A volume change refreshes Settings
+only while that page is open. VSync uses human-readable on/off copy.
+
+Preserve all existing language, mute, volume, fullscreen, VSync, shadows,
+key copy/download, two-step logout, releases and interface-gallery actions.
+Guests can access the existing create-account/key-entry actions from the
+account section. The authenticated view preserves key privacy and marks
+the existing armed logout as Confirm log out. Other targets retain the
+prior Settings implementation. No simulation, networking, dependency or
+artwork change is involved.
+
+Level: work front. Run affected-package formatting and diff checks, then
+the owner-requested native build/install under the shared lock/cache and
+focused desktop Settings captures for default and alternate preferences.
+Use isolated profiles and a localhost server override. The owner's
+wait/job exceptions remain scoped to this chat. Defer pointer/keyboard
+interaction, fullscreen transitions, authenticated key/logout actions,
+settings persistence after real interactions and resize coverage to
+consolidation. No Rust suite, full workspace validation, other-target
+build, web assets change, remote Git, CI or deployment is requested.
