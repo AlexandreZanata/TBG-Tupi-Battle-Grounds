@@ -542,3 +542,27 @@ pub fn reduced_motion() -> bool {
 pub fn save_reduced_motion(value: bool) {
     save_flag("tbg_reduced_motion", value);
 }
+
+/// One tab-local cosmetic dismissal; no account key or session token is removed.
+pub fn dismissed_result() -> Option<tbg_core::protocol::ResultId> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        parse_hex16(&token_storage()?.get_item("tbg_dismissed_result").ok()??)
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    None
+}
+pub fn dismiss_result(id: tbg_core::protocol::ResultId) {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(s) = token_storage() {
+        let _ = s.set_item("tbg_dismissed_result", &hex16(&id));
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = id;
+}
+pub fn clear_dismissed_result() {
+    #[cfg(target_arch = "wasm32")]
+    if let Some(s) = token_storage() {
+        let _ = s.remove_item("tbg_dismissed_result");
+    }
+}
