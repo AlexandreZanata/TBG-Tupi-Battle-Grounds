@@ -755,6 +755,9 @@ Execution requires subsequent authorization and the dependencies in
 defines identity/art and the [integration contracts](roster/P58-AUDIT-AND-INTEGRATION.md#3-shared-competitive-contracts-all-proposed-inactive)
 define resolution semantics. This section is the single numerical registry.
 
+A value marked **completion** is not stated by the owner's text. It is
+Proposed for review and listed, with its owner decision, in 13.6.
+
 ### 13.1 Proposed base forms
 
 Cost in Energy (×600 in state); interval in ticks (20/s); range in
@@ -894,15 +897,16 @@ Insects: movement +500/+1000 bp (T10), sharing the existing +5000 bp
 movement ceiling. Bonuses replace the lower threshold, never add twice.
 No new healing, flight, armor, stealth, knockback, Augment or Arcana system.
 
-With all 21 purchases, direct-main pool would be 31; with the prior
-15-unit expansion integrated, 46. These are **models**, not a Shop change.
+The online Shop pool is 25 kinds today (D-50, `CANON.pool`). With all 21
+purchases it would be 46 (25 + 21). These are **models**, not a Shop change.
 Five distinct uniform offers imply per-kind probability 5/N, pair
 co-occurrence 20/[N(N−1)], and expected fresh offer sets N/5. Never call
 these expected *free rerolls*: another purchase is required to redraw.
 No global economy/Shop rule is changed to compensate.
 
-The current “every unit ≥5% of purchases” gate cannot hold for 31 or 46
-kinds; even the earlier expansion's 2.5% proposal cannot hold for 46.
+The current purchase-share gate is 2.5 % per kind (`tbg-balance/src/gate.rs`,
+O-R2), chosen for 25 kinds. The even share at 46 kinds is 2.17 %, so 2.5 %
+cannot hold there; 0.6/N gives 1.30 % at 46 kinds (2.4 % at 25).
 **Owner decision pending:** consider a floor of 0.6/N per kind (60% of
 uniform share), alongside conditional purchase-when-offered and enough
 observations. Do not change an existing threshold or contract to pass.
@@ -915,3 +919,25 @@ ability-value and Evolution buy-versus-base ablations; incomplete games
 reported as censored at the lab's own limit, never converted into gameplay
 draws. Keep pre-existing gate failures visible separately. No release
 until owner approves any new thresholds, evidence and fun/look.
+
+### 13.6 Completion register (Proposed, for owner review)
+
+| ID | Completed value | Where | Owner decision |
+|---|---|---|---|
+| C1 | R01 base row: Machines / Tank, cost 6, HP 1 400, damage 30, interval 40, range 800, move 25 | 13.1 | Bastion base completion (T01 is a fragment) |
+| C2 | R01 Muralha Viva, whole ability: period 160, 1 500 bp for 60, no Guard or taunt | 13.2 | Bastion base completion |
+| C3 | R20 cost 6, HP 800, movement 23, and the Tank assignment | 13.1 | Crematumba cost, HP and movement |
+| C4 | R20 basic-attack treatment (12 damage every 10 ticks over a 2 800 segment) and the Stronghold rule (one ordinary 12-damage hit, no collateral) | 13.2 | Crematumba |
+| C5 | R08 step size: 300 bp per stack | 13.2 | Review only |
+| C6 | R10 secondary radius: 1 500 | 13.2 | Review only |
+| C7 | R12 range 3 000, and the no-self-shield exclusion | 13.2 | Shield semantics (R12/R14) |
+| C8 | R21 trigger (target within 4 500) and radii (4 500 trigger, 200 merge) | 13.2 | Brocatanque production and radius |
+| C9 | Drill summon Range 600 (all three forms); Duobroca speed 73 (integer-rounded) | 13.4 | Brocatanque |
+| C10 | R21 merge resolution (lowest-id parent's branch and tier, snapshot at birth) and the two-step Evolution (gaps in T12) | 13.3, 13.4 | Brocatanque; no-fusion fallback |
+| C11 | Monsters Synergy damage +500 / +1 000 bp | 13.5 | Monsters damage Synergy |
+| C12 | Evolution names and secondary values for R08–R11 and the unsplit R12–R19 branches; names the texts do not define are Portuguese placeholders | 13.3 | Owner naming; English-only rule |
+
+C1–C4 come from the audit's missing-information note (audit §1) and the
+prose above the tables. C5–C12 are marked in the prose of 13.1–13.5. The
+source texts T01–T12 were not re-read for this register, so a reviewer should
+confirm that every unmarked value is in the owner's text.
