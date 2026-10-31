@@ -110,12 +110,14 @@ fn c2_per_tick_traces_are_frozen() {
     // D-68: owner champion changes in GAME-DESIGN, collected with update_probe.
     // D-69: appended private Shop state; all D-68 outcomes and ticks identical.
     // D-68/D-69 integration: protocol-20 slots + Shop state; owner range correction.
+    // 46-kind CANON activation (GAME-DESIGN consolidation amendment);
+    // collected with examples/trace_canon.rs, same server cadence and Bot.
     let goldens = [
-        (1, 0xd49f972e62beed89u64, 0x9615d6ececbe8b99u64, 3261),
-        (7, 0x3517b9f6a318432du64, 0x008b5f628ee0b6dau64, 2266),
-        (42, 0x1fbd0fe2fb20af2fu64, 0x8e40c6e671e82ee3u64, 7977),
-        (1000, 0x5d27e06131f397d6u64, 0x5d6d037d5a3b9b7fu64, 2829),
-        (65535, 0x9a9d2278592c64a2u64, 0x101623bd7c0478e6u64, 13886),
+        (1, 0x77fd9e4abe880db1u64, 0x78908734d3dc7ec1u64, 3844),
+        (7, 0xca07e68322bdf61fu64, 0x7ab50dfdd5735803u64, 15586),
+        (42, 0x5af8901a3d72b530u64, 0xc4377231f72a0c57u64, 5049),
+        (1000, 0x8423d39086a7e075u64, 0x74b875d065a507a1u64, 7559),
+        (65535, 0x2c3c3a735f7b3712u64, 0x528f18fd57983ffau64, 7737),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

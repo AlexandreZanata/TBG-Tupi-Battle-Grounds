@@ -284,3 +284,10 @@ reproducibility, preserved identities, finite coordinates and valid file/back
 offsets in ordinary CI. Focused layout validation passed: 5 passed, 2 ignored,
 zero failed. The two ignored probes were not executed. Latest workflows were
 still running when inspected, so no new remote pass is claimed.
+
+The requested balance audit then exercised contract_lab directly and found
+C2 still pinned to pre-46-kind traces. The actual canonical collector printed
+all five current traces; final hashes agree with contract_determinism. This
+follow-up records the already documented pool activation in GAME-DESIGN and
+refreshes C2 in the same commit, with no new simulation change. The full
+contract_lab target passed: C1, C2 and C10 (3 passed, 0 failed, 2.17s).
