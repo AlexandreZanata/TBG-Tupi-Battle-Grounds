@@ -31,9 +31,9 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
             Some(tbg_core::UnitKind::BoneBrute | tbg_core::UnitKind::SiegeWalker)
         );
         return (
-            Vec3::new(0.0, if large { 1.05 } else { 0.78 }, 0.0),
-            if large { 1.6 } else { 1.05 },
-            if large { 1.35 } else { 1.05 },
+            Vec3::new(options.portrait_x, if large { 1.05 } else { 0.78 }, 0.0),
+            (if large { 1.6 } else { 1.05 }) * options.portrait_zoom,
+            (if large { 1.35 } else { 1.05 }) * options.portrait_zoom,
             Vec3::new(0.0, 1.2, 10.0),
         );
     }
