@@ -333,6 +333,12 @@ pub struct MatchState {
     /// Runtime-only, like `pending`.
     #[serde(skip)]
     pub(crate) shrapnel: Vec<Shrapnel>,
+    /// Local training runtime (P62): dummy tags and attributed meters.
+    /// `None` in every normal match; never serialized, so hashes, views and
+    /// wire bytes are unchanged even in a build with the feature.
+    #[cfg(feature = "training")]
+    #[serde(skip, default)]
+    pub(crate) training: Option<Box<crate::training::Runtime>>,
 }
 
 /// x position of a seat's Stronghold.
@@ -526,12 +532,20 @@ impl MatchState {
 
     /// Recompute a unit's max HP, keeping its HP ratio (GAME-DESIGN §4).
     pub(crate) fn refresh_max_hp(&mut self, idx: usize) {
+        // P62: a training dummy keeps its own max HP (a Crate carrier whose
+        // definition Faction would otherwise rescale it to the Crate's).
+        if crate::training_hooks::is_dummy(self, self.units[idx].id) {
+            return;
+        }
         let new_max = self.stats_of(&self.units[idx]).max_hp;
+        let before = self.units[idx];
         let u = &mut self.units[idx];
         if new_max != u.max_hp && u.hp > 0 {
             let hp = i64::from(u.hp) * i64::from(new_max) / i64::from(u.max_hp);
             u.hp = (hp as i32).max(1);
             u.max_hp = new_max;
+            let delta = u.hp - before.hp;
+            crate::training_hooks::rescaled(self, &before, delta);
         }
     }
 }

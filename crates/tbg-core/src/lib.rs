@@ -31,6 +31,9 @@ mod summon;
 mod support;
 mod synergy;
 mod targeting;
+#[cfg(feature = "training")]
+pub mod training;
+mod training_hooks;
 pub mod types;
 pub mod view;
 

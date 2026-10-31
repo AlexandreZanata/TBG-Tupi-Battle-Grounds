@@ -10,9 +10,11 @@ use crate::types::{Seat, Status, UnitId, UnitKind};
 /// Summons whose lifetime ended drop to 0 HP; `remove_dead` reports them.
 pub(crate) fn expire(state: &mut MatchState) {
     let tick = state.tick;
-    for u in &mut state.units {
-        if u.expires_at.is_some_and(|end| tick >= end) {
-            u.hp = 0;
+    for idx in 0..state.units.len() {
+        let u = state.units[idx];
+        if u.hp > 0 && u.expires_at.is_some_and(|end| tick >= end) {
+            state.units[idx].hp = 0;
+            crate::training_hooks::vanished(state, &u);
         }
     }
 }
@@ -82,7 +84,11 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
             continue;
         }
         if n.kind == UnitKind::Crate {
-            crate_tick(state, idx, &n, ev);
+            // P62: a training dummy is carried by an inert Crate; it never
+            // opens. Real Smuggler crates keep their timer.
+            if !crate::training_hooks::is_dummy(state, n.id) {
+                crate_tick(state, idx, &n, ev);
+            }
             continue;
         }
         if !state
@@ -256,7 +262,9 @@ fn crate_tick(state: &mut MatchState, idx: usize, krate: &Unit, ev: &mut Vec<Eve
     });
     // The open crate is spent.
     if let Some(i) = state.unit_index(krate.id) {
+        let spent = state.units[i];
         state.units[i].hp = 0;
+        crate::training_hooks::vanished(state, &spent);
     }
 }
 
