@@ -14,6 +14,7 @@ mod bloomkeeper;
 mod bombard;
 mod bone_brute;
 mod bonehorn;
+mod bulwark;
 mod cargo_crab;
 mod cargo_crate;
 pub mod common;
@@ -164,6 +165,7 @@ static RAMPART: Kit = rampart::KIT;
 static RAVAGER: Kit = ravager::KIT;
 static ACIDMAW: Kit = acidmaw::KIT;
 static WHISPERER: Kit = whisperer::KIT;
+static BULWARK: Kit = bulwark::KIT;
 
 /// The passenger seat's height above a Cargo Crab's ground, in world units,
 /// at its tier: where a rider's hips sit (see `visuals::mount`).
@@ -205,6 +207,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Ravager => Some(&RAVAGER),
         UnitKind::Acidmaw => Some(&ACIDMAW),
         UnitKind::Whisperer => Some(&WHISPERER),
+        UnitKind::Bulwark => Some(&BULWARK),
         #[allow(unreachable_patterns)]
         _ => None,
     }

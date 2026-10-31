@@ -141,7 +141,7 @@ fn advance_unit(
         None => {
             // Carried passengers never walk on their own; the crab carries
             // them (their x stays synced around this tick).
-            if u.fx.carrier.is_some() {
+            if u.fx.carrier.is_some() || crate::bulwark::anchored(state, &u) {
                 return;
             }
             // Drumguard B2: the bonded ally ignores slows and fish.

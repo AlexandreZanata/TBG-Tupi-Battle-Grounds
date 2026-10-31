@@ -51,7 +51,8 @@ Own library: `crates/tbg-client/src/art/kits/bulwark/`.
 
 broad stone dome over compact humanoid legs, visible face/tool, iron bands, oak straps and brass Machines fasteners. Use a large team-colored cloth panel on the shell. A2 adds shell buttresses and warmer stone; A3 adds a crenellated back crest. B2 exposes iron forearms and a larger tool; B3 adds a flat stone impact shoe. Reuse Large anatomy, stone/metal palette and weapon socket; no walkable Stronghold on its back.
 
-Status: pending. Evidence: `docs/media/p59/bulwark/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop five-form
+lineup observed. Evidence: `docs/media/p59/bulwark/lineup.jpg`.
 
 ### R02 — Demolisher
 

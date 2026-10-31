@@ -47,6 +47,11 @@ pub(super) fn cue(
             {
                 anim.resolve_special();
             }
+            if kind == UnitKind::Bulwark {
+                if let Some(at) = chest(map, visuals, unit) {
+                    impacts::land(commands, fx.vfx, Impact::Sparks, at, Area::default());
+                }
+            }
             if kind == UnitKind::Whisperer {
                 if let Some(at) = primary.and_then(|id| chest(map, visuals, id)) {
                     impacts::land(commands, fx.vfx, Impact::Mind, at, Area::default());

@@ -14,7 +14,9 @@ pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> O
         .ability(tier, branch)
         .into_iter()
         .find_map(|a| match a {
-            Ability::FearPulse { period, .. } => Some(period.max(1)),
+            Ability::FearPulse { period, .. } | Ability::LivingWall { period, .. } => {
+                Some(period.max(1))
+            }
             _ => None,
         })
 }
@@ -73,11 +75,20 @@ fn primary(state: &MatchState, u: &Unit) -> Option<u32> {
         .map(|(_, _, id)| id)
 }
 
+fn center(state: &MatchState, u: &Unit, target: Option<u32>) -> i32 {
+    if u.kind == UnitKind::Bulwark {
+        return u.x;
+    }
+    target
+        .and_then(|id| state.unit_index(id))
+        .map_or(u.x, |t| state.units[t].x)
+}
+
 fn start(state: &mut MatchState, i: usize, u: &Unit, every: u16, ev: &mut Vec<Event>) {
     let Some(target) = primary(state, u) else {
         return;
     };
-    let center = state.unit_index(target).map_or(u.x, |t| state.units[t].x);
+    let center = center(state, u, Some(target));
     state.units[i].fx.special = Some(PendingCast {
         target: Some(target),
         left: WINDUP,
@@ -115,11 +126,9 @@ fn advance_cast(
     if let Some(target) = cast.target {
         // The primary stays locked: no range recheck, replacement or extra hit.
         crate::whisperer::resolve(state, u, target, ev);
+        crate::bulwark::resolve(state, u);
     }
-    let center = cast
-        .target
-        .and_then(|id| state.unit_index(id))
-        .map_or(u.x, |t| state.units[t].x);
+    let center = center(state, u, cast.target);
     ev.push(Event::AbilityResolved {
         unit: u.id,
         kind: u.kind,

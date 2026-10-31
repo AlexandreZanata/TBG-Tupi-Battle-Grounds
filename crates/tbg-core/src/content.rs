@@ -435,6 +435,12 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
+    /// R01: a timed self-reduction that anchors movement, never targeting.
+    LivingWall {
+        period: u16,
+        bp: u16,
+        ticks: u16,
+    },
     /// R11: independent timed Slow, without auxiliary damage.
     FearPulse {
         period: u16,
@@ -548,6 +554,17 @@ const fn fear(period: u16, ticks: u16) -> [Ability; 2] {
         Ability::None,
     ]
 }
+const fn wall(ticks: u16) -> [Ability; 2] {
+    [
+        Ability::LivingWall {
+            period: 160,
+            bp: 1_500,
+            ticks,
+        },
+        Ability::None,
+    ]
+}
+const BULWARK_ABILITIES: [[Ability; 2]; 5] = [wall(60), wall(60), wall(80), wall(60), wall(60)];
 const WHISPERER_ABILITIES: [[Ability; 2]; 5] = [
     fear(160, 40),
     fear(160, 40),
@@ -619,7 +636,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 31;
+pub const UNIT_KIND_COUNT: usize = 32;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -901,8 +918,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         form("Crate"), form("Crate"), form("Crate"), form("Crate"),
     ]),
     // D-66: the Monsters base rows of GAME-DESIGN §13.1, English names (P59-NAMES).
-    // D-68 implements R08; the remaining rows keep placeholder abilities/deltas
-    // until their character commits. Branch names repeat across their two tiers.
+    // D-68–D-71 implement this pilot. Branch names repeat across their two tiers.
     unit(UnitKind::Bonehorn, "Bonehorn", Monsters, Tank, 3_600,
         [1_600, 40, 40, 800, 20, 0, 0], None, BONEHORN_ABILITIES, [
         FormDef { hp_bp: 2_000, ..form("Ancestral Carapace") }, form("Ancestral Carapace"),
@@ -922,6 +938,12 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         [380, 15, 40, 3_000, 33, 0, 0], None, WHISPERER_ABILITIES, [
         FormDef { range_add: 500, ..form("Echo of Fear") }, form("Echo of Fear"),
         form("Mental Pulse"), FormDef { dmg_bp: 2_000, ..form("Mental Pulse") },
+    ]),
+    // D-72 (Proposed): R01, inactive until the W11 owner switch.
+    unit(UnitKind::Bulwark, "Bulwark", Machines, Tank, 3_600,
+        [1_400, 30, 40, 800, 25, 0, 0], None, BULWARK_ABILITIES, [
+        FormDef { hp_bp: 2_000, ..form("Mobile Fortress") }, form("Mobile Fortress"),
+        FormDef { dmg_bp: 1_500, ..form("Earth Weight") }, FormDef { on_hit: slow(1_500, 20), ..form("Earth Weight") },
     ]),
 ];
 

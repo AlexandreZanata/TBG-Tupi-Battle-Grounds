@@ -1505,3 +1505,45 @@ The figure owns a floating lathed bell, bone eye mask, retracting pupil, six sho
 tendrils, team ribbon, distance-based roll, hit compression and a sinking closed-eye
 death. A grows crest/rim; B segments the bell and widens the final eye socket. No
 flight rules, healing, forced movement, ally support or public-pool activation.
+
+## D-72 · Bulwark's anchored Living Wall and stone walker — 2026-10-31 (Proposed)
+
+R01 is appended as Bulwark after the pilot, preserving every existing UnitKind
+discriminant. Its base row is GAME-DESIGN §13.1: cost 6 Energy, HP 1,400, damage
+30, interval 40, range 800 and movement 25. Living Wall uses period 160 and the
+shared locked six-tick windup, requiring a living enemy unit in basic reach.
+On resolution it anchors at current caster x and grants 1,500 bp self-reduction
+for 60 ticks. The shared 2,000 bp damage-reduction cap still holds.
+
+Anchoring suppresses movement only while that self-reduction is active; basics
+continue, Root still cancels windups, and neither Root nor damage extends this
+window. There is no Guard, allied aura, collision, threshold trigger or separate
+anchor coordinate. Tank units cannot board Cargo Crabs, so transport cannot drag
+this stance. A adds +2,000 bp HP then replaces duration with 80. B adds +1,500 bp
+basic damage then ordinary primary Slow 1,500 bp/20 ticks. All values live in
+content. Existing special snapshots/cues and public self-reduction suffice;
+protocol stays 23 and public Shop/lab/ALL_KINDS remain unchanged.
+
+The kit owns its stone dome, visible iron face/tool, bands, oak straps, broad team
+cloth and compact planted gait. A adds warm buttresses and a crenellated crest;
+B exposes iron forearms and grows the final flat impact shoe. Brace pose follows
+authoritative protection expiry. The special cue is caster-centered fastener sparks,
+not an offensive explosion. No custom material, texture or extra rig node.
+
+The roster composition/form contract appends this inactive kind and its four
+forms. A new §13 native-unit base-stat guard freezes all four existing pilot rows
+and Bulwark in this same decision; older contracts and active balance values stay.
+Regression cases and deferred previews are recorded in R01's delivery report.
+
+Offline LabStats now reserves UNIT_KIND_COUNT slots rather than ALL_KINDS.len(),
+so recording a staged prototype cannot index past the old 27-kind prefix. The
+active roster CSV deliberately reads that prefix only, preserving its legend and
+purchase/gate semantics. A regression uses Bonehorn to record dealt/taken HP
+without putting it in a Shop pool. Lab state stays feature-only and serde-skipped;
+there is no online cost, replay-layout change or balance-threshold adjustment.
+
+
+The §11 faction-composition contract remains scoped to the frozen 27-kind
+legacy prefix; §13 prototypes are checked by their explicit new base rows.
+This preserves every legacy faction count while the inactive registry grows.
+

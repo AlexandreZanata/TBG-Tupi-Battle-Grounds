@@ -170,3 +170,13 @@ the server watcher count from 1 to 0. Desktop palette captures were inspected at
 ability waves, or online-pool expansion. GitHub CI and the production rollout
 are separate release gates; this report does not claim either has completed.
 Owner look and fun sign-off remain open.
+
+
+## Complete-kit extension — R01, 2026-10-31
+
+Bulwark delivered with D-72, own five-form kit and actual desktop screenshot.
+Combined R01–R03 consolidation passed 58 distinct focused core/contract scenarios;
+shared-lock two-job Trunk preview passed. See docs/roster/p59/R01-bulwark.md.
+This extends the prior four pilot deliveries to five of the owner's 21. Public
+pool activation, full suites, balance gates, full-clip/live reconnect/performance
+and subjective look/fun acceptance remain deferred; no production deployment.

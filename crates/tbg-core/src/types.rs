@@ -129,6 +129,8 @@ pub enum UnitKind {
     Ravager,
     Acidmaw,
     Whisperer,
+    /// D-72: R01, staged outside public pools.
+    Bulwark,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

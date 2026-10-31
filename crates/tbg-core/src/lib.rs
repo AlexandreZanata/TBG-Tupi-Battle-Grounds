@@ -11,6 +11,7 @@ pub mod arcana;
 pub mod augment;
 mod bonehorn;
 pub mod bot;
+mod bulwark;
 mod combat;
 pub mod content;
 pub mod headless;
