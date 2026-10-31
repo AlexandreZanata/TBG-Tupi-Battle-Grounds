@@ -1,0 +1,38 @@
+path,source_sha256,lines,responsibility
+Cargo.toml,6fa2635778545071a4b76b4d2a24755b046e80f6c7dc900fc8f5798d2b071158,26,Shared workspace and Rust build profiles
+Cargo.lock,cfc946f395e7d5a2249bee2bbd7c9f304c82bac6b8a845616c7f3ff196b8f94b,7195,"Exact engine, Android glue and JNI dependency lineage"
+rust-toolchain.toml,55759668bdf041ef55e0d5e05aa459ad3b9aeeb391e9bb48db1c7d26dc121a63,4,Current toolchain and target setup
+crates/tbg-client/Cargo.toml,a5c606206664a2e2de356f9acdad41ea4b77503c285ef1bdfea525010f4f03ce,63,"Binary entry, renderer features and desktop/WASM dependencies"
+crates/tbg-client/build.rs,b93be4627f45806deeeffa980151ab4500095db49ae0b7ef573f681881fbf623,160,Compiled catalogs and native art path generation
+crates/tbg-client/src/main.rs,be3c3e733fb1731f075a61176fa4672dee605180e530f4221171849a1aeefe38,122,Current application/plugin bootstrap
+crates/tbg-client/src/platform/mod.rs,eebc20bdac78c19190b6f2e9617c3111c50835923dbb1781b36440474309ba0f,48,Native clipboard and public browser operations
+crates/tbg-client/src/platform/window.rs,e887d605ce88680e3abe37f85abbbf0bd2cae2de17731593b414749c8589d472,135,"Desktop size, logs and executable-relative asset path"
+crates/tbg-client/src/platform/storage.rs,03c6b52c70b6286875044c412cdec2c9cf9fb694b67d4945e282143b9cede540,185,Preferences and browser/session persistence
+crates/tbg-client/src/config.rs,92d5d6064bf4f962b9cc8d04f55138391a90819a09f015159da0c329012685e6,523,"Parameters, account-key storage and preferences"
+crates/tbg-client/src/net/mod.rs,1f7b3d8771604510821f1cfdf2fb91e24f08f4905377a25c606b11a8dfbbd792,211,Shared client network state/actions
+crates/tbg-client/src/net/socket.rs,28632fb6938922a8f5cb61628bcc3f4a68b15c08288e6d0a1f19534c1f205cc1,404,"Protocol handshake, auth reuse and reconnect"
+crates/tbg-client/src/local.rs,1a9ac0a15750a4e96ca249281c7af281f21b9c1baafb52a327e14d98f8b7477e,161,Existing local match stepping and bot integration
+crates/tbg-client/src/ui/mod.rs,9ad95cb5d551b806bf0e0fc41f075e654d297f1fd897ccfe747a1afc3cb130ae,265,"Plugins, actions and Linux-only presentation routing"
+crates/tbg-client/src/ui/input.rs,3cd15dcd65c09eed762aca6a8e1aec503e4dc4897618d551a6d992fa5e7503e4,107,"Touch release, long-press and hit testing"
+crates/tbg-client/src/ui/keyboard.rs,b31c05ac8636b83b5a17c89fc4cbf3fa5af2333ef6c34f71ef92361d643e6982,95,Desktop keyboard action mapping
+crates/tbg-client/src/ui/actions.rs,41f03a0157b4c00d867ad26ccdc33f98e2e9f4d1791d65ed15a839750a41986e,464,Existing UI action dispatch
+crates/tbg-client/src/ui/textform.rs,310d8595627a00d91f942b2e864e389dfcd65781f6276f26c4a69d459823ee11,246,Shared account/room form entry
+crates/tbg-client/src/ui/textform_bevy.rs,4769ddfcf44c20227075ab458b597c11429de850d8910eef9953367698c00769,288,"Native editing, keyboard and paste path"
+crates/tbg-client/src/ui/kit/mod.rs,f5ff228a45abf0568f61ae14e44c1f543d9d41258f0e0f64409cb63a814fb7c4,132,"Medieval colors, fonts and control sizing"
+crates/tbg-client/src/ui/shell/mod.rs,3bb7fc1fcf1e683818a5e552b2d5eb9f84b12d96f88bc9214c650f64f3d99aba,386,Native shell layout and platform guards
+crates/tbg-client/src/ui/shell/input.rs,cd6230d98288349454024bf206b5f552d12b1af031a036da1612403fcb9d09b1,254,Shell pointer/keyboard behavior
+crates/tbg-client/src/ui/native_loading/assets.rs,99e802605180a20fa75e50314490d66d6f156eeabf00a1d4c3eea877f5cf6c14,30,Generated asset list and AssetServer preload
+crates/tbg-client/src/ui/native_battle/mod.rs,f49ce55061037a7660454a4bf9816ca1a65fb3c5736b116dd9f872e24c6da316,44,Native battle frontend entry
+crates/tbg-client/src/ui/native_ranking/mod.rs,626e7058172d056fb3ffe5dc3302966ece4a0168f1c76ad9e90a80a367b1f37c,203,Existing native ranking presentation
+crates/tbg-client/src/training/mod.rs,4da93c3f040af7960820078ec32c7563897f262e3ab03cd721ca7ee82eba8f4e,164,"Troops catalog, preview and training actions"
+crates/tbg-client/src/visuals/assets.rs,5d43744c895a08439eec949ffe75f141d3a42aa182c563f6c27b06215ea0ee9a,94,Visual assets and platform conditions
+crates/tbg-client/src/audio.rs,1c9f1b6b900f49a737ed0e894e7b14d88686a7e19c078ad371d08e6de75a427e,117,Shared sound/volume settings
+crates/tbg-core/src/account.rs,8f54d6b15af0482b635187beee92ef9b0b4b29dd9b4ce7ddcd19e17b71e382d7,186,Existing manual credential contract
+crates/tbg-core/src/protocol.rs,3fec4c6a4dec701f756bfede4d7178befde0826b3fc7e428027504fb82ae82db,340,Shared wire/seat/intention contract
+crates/tbg-core/src/ruleset.rs,97e2920c92f8cb84509ed821989053004748c3a2b8ac03b8507b83ec1a314f34,312,Canonical and preview mode ruleset boundaries
+crates/tbg-core/src/ruleset_version.rs,892928141f73010f5b4378a129ad3f9c3edca8ba2c1efee83ab12eb4ebfaea9b,77,Shared RulesetVersion identity
+crates/tbg-core/src/content.rs,6df66afa9f6e7c92a9cbaab822e9e2644ad7acec4d061d4cdbfa693d79dc1b03,1707,Canonical content/stat tables
+crates/tbg-core/src/types.rs,4a2d29990539356147693d5e2bf243780378bb23048cf0d0bca956a29445a6b5,442,Roster and presentation identities
+crates/tbg-core/examples/trace_canon.rs,6728d1a4fe4f863a6c83b3b7dba6c70bdcc88220495b8ab8f6c8c7f66966f117,27,Existing five-seed native deterministic trace probe
+art/branding/README.md,448f58c344c5b833a1ae9d513bb19be5626bc0bce97bc1331d6eefa930db34c7,63,Prepared Android icons and brand identity
+art/branding/android/res/mipmap-anydpi-v26/ic_launcher.xml,76c3eefb14a9810cccc772fa4400694f51b00fadf4620cec6c14702309c7aaae,5,Existing adaptive Android launcher resource
