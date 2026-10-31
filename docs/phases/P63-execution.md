@@ -88,3 +88,20 @@ planning links, current refs/PR metadata and `git diff --check`; no gameplay
 check is claimed. Step 1–4 implementation and A01–A08 evidence follow below.
 All compiling checks use the host lock, existing cache and two Cargo jobs.
 No full suite, benchmark, broad gallery, install, deploy or main merge.
+
+## Step 1 — exact lifetime roster
+
+Implemented `celebration.rs` with fixed-capacity bucket domains, checked u64
+counts, last-form moves, canonical ordering, lazy index lookup and bounded
+cosmetic decoding. Attached one runtime-only ledger to MatchState, skipped
+by serde/hash. New matches start exact; deserialized snapshots deliberately
+cannot claim missing history. Purchases, lab placement, hatching and cargo
+record actual initial forms. Death/expiry never decrements participation;
+inert Crates are excluded. Counter inconsistency invalidates cosmetics only.
+
+`cargo fmt -p tbg-core` and `git diff --check` passed. Under the shared lock,
+existing cache and two jobs, `cargo check --locked -p tbg-core --lib` passed
+in 1.35 s. New `celebration_cast` regressions cover early deaths, duplicate
+champions, Evolution, expiry/cargo, hash/event/outcome parity against an
+untracked deserialized state, invalid buckets/overflow and huge logical
+counts. Their execution is queued once for Step 5, not claimed here.

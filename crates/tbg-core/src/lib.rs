@@ -9,6 +9,7 @@ mod afflictions;
 pub mod arcana;
 pub mod augment;
 pub mod bot;
+pub mod celebration;
 mod combat;
 pub mod content;
 pub mod headless;
