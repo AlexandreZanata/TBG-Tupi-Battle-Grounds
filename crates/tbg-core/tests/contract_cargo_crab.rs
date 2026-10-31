@@ -6,14 +6,20 @@
 //! - Crab death dismounts the passenger behind it with intact HP and 3s re-board lock.
 //! - `UnitView.fx` packs `FX_CARRIED` (`is_carried()`) for the passenger.
 //! - Symmetrical and deterministic across seeds and seats.
+//! - The carry bonus is the larger of the +20 % base and the branch bonus,
+//!   never their sum, and shares the +50 % move cap with every other move
+//!   bonus (D-60, BR-X12, BR-X03).
+//! - A Slow on the passenger lowers the pair only down to the crab's own
+//!   speed (D-60).
+//!
+//! The `PROTOCOL_VERSION` pin lives only in `contract_protocol.rs`.
 
 #![cfg(feature = "lab")]
 
 use tbg_core::content::TICK_HZ;
-use tbg_core::protocol::PROTOCOL_VERSION;
 use tbg_core::state::Target;
 use tbg_core::view::{FX_CARRIED, FX_SUMMON};
-use tbg_core::{ArcanaPreset, Event, MatchState, Ruleset, Seat, UnitKind};
+use tbg_core::{ArcanaPreset, Event, MatchState, Ruleset, Seat, Status, UnitId, UnitKind};
 
 fn rules() -> &'static Ruleset {
     Ruleset::canon()
@@ -27,14 +33,6 @@ fn step_n(s: &mut MatchState, n: u32) {
     for _ in 0..n {
         s.step();
     }
-}
-
-#[test]
-fn protocol_version_is_16_for_cargo_crab_carried_bit() {
-    assert_eq!(
-        PROTOCOL_VERSION, 16,
-        "D-56: PROTOCOL_VERSION bumped to 16 for FX_CARRIED bit in UnitView.fx"
-    );
 }
 
 #[test]
@@ -272,5 +270,95 @@ fn cargo_crab_determinism_and_symmetry() {
                 assert_eq!(u1.fx.passenger, u2.fx.passenger);
             }
         }
+    }
+}
+
+/// A crab of the given form that has just boarded an Archer on an empty
+/// lane. The Archer's speed 50 is above the crab's 25, so the pair moves at
+/// 50 and every percentage below is exact: 50 × (10 000 + bp) / 10 000.
+fn boarded_pair(seed: u64, tier: u8, branch: u8) -> (MatchState, UnitId) {
+    let mut s = state(seed);
+    let archer = s.lab_spawn_at(Seat::A, UnitKind::Archer, 0, 0, 1_000);
+    let crab = s.lab_spawn_at(Seat::A, UnitKind::CargoCrab, tier, branch, 1_050);
+    s.step(); // boarding runs before movement
+    let ci = s.unit_index(crab).expect("crab lives");
+    assert_eq!(s.units[ci].fx.passenger, Some(archer), "crab boarded");
+    (s, crab)
+}
+
+/// How far the crab walks in the next step.
+fn crab_dx(s: &mut MatchState, crab: UnitId) -> i32 {
+    let before = s.units[s.unit_index(crab).expect("crab lives")].x;
+    s.step();
+    s.units[s.unit_index(crab).expect("crab lives")].x - before
+}
+
+#[test]
+fn carry_bonus_is_the_larger_of_base_and_branch_for_every_form() {
+    // BR-X12 (D-60, Proposed): the +20 % base and a branch bonus never add, so
+    // base, A1, A2, B1 and B2 all move at +20 % (50 -> 60). The old sum made
+    // B1 and B2 +40 % (70). B2's Overdrive surge has lapsed after 80 ticks.
+    for (tier, branch, form) in [
+        (0, 0, "base"),
+        (1, 0, "A1"),
+        (2, 0, "A2"),
+        (1, 1, "B1"),
+        (2, 1, "B2"),
+    ] {
+        let (mut s, crab) = boarded_pair(60, tier, branch);
+        step_n(&mut s, 80);
+        assert_eq!(crab_dx(&mut s, crab), 60, "{form}: max(+20 %, branch)");
+    }
+}
+
+#[test]
+fn overdrive_surge_replaces_the_base_bonus_for_four_seconds() {
+    // BR-X12 (D-60, Proposed), ROSTER-EXPANSION §C.15: B2 Overdrive is +40 %
+    // for 4 s from boarding, then the steady +20 %. The surge is
+    // max(+20 %, +40 %) = +40 % (50 -> 70); the old sum was +60 %, which the
+    // +50 % cap clipped to 75.
+    let (mut s, crab) = boarded_pair(61, 2, 1);
+    let ci = s.unit_index(crab).expect("crab lives");
+    assert!(
+        s.tick < s.units[ci].fx.surge_until,
+        "surge armed at boarding"
+    );
+    assert_eq!(crab_dx(&mut s, crab), 70, "surge: 50 x 1.40");
+    step_n(&mut s, 80);
+    assert_eq!(crab_dx(&mut s, crab), 60, "steady: 50 x 1.20");
+}
+
+#[test]
+fn carry_bonus_shares_the_plus_50_percent_move_cap() {
+    // BR-X03: haste, march and carry bonuses add up to at most +50 %.
+    // Forced March (Augment 0, +40 %) plus the base carry +20 % is +60 %, and
+    // plus a surging B2's +40 % is +80 %: both clip to +50 % (50 -> 75; the
+    // uncapped sums would be 80 and 90).
+    for (tier, branch, form) in [(0, 0, "base crab"), (2, 1, "B2 in surge")] {
+        let (mut s, crab) = boarded_pair(62, tier, branch);
+        s.players[0].augments.add(0);
+        let ci = s.unit_index(crab).expect("crab lives");
+        s.units[ci].haste_until = s.tick + 1_000;
+        assert_eq!(crab_dx(&mut s, crab), 75, "{form} + Forced March");
+    }
+}
+
+#[test]
+fn slowed_passenger_only_drags_the_pair_down_to_the_crab_own_speed() {
+    // D-60, as coded since D-56: each unit's speed is read after its own
+    // Slow and the pair takes the larger (a crab Slow, Root or fish is not
+    // part of this test). Slowed Archer 50 -> 40 still beats the crab's 25
+    // (x1.20 = 48); at 80 % it is 10, so the crab's own 25 wins (x1.20 = 30).
+    let (mut s, crab) = boarded_pair(63, 0, 0);
+    let ci = s.unit_index(crab).expect("crab lives");
+    let archer = s.units[ci].fx.passenger.expect("boarded");
+    assert_eq!(crab_dx(&mut s, crab), 60, "no Slow: 50 x 1.20");
+    for (bp, expected) in [(2_000, 48), (8_000, 30)] {
+        let pi = s.unit_index(archer).expect("passenger lives");
+        s.units[pi].status = Status::Slowed {
+            bp,
+            ticks_left: 1_000,
+        };
+        assert_eq!(crab_dx(&mut s, crab), expected, "passenger slowed {bp} bp");
     }
 }
