@@ -177,6 +177,10 @@
     "The approved old 12.9 ms Forest reference bound is not claimed for V2.",
     "No native/workspace suite, release packaging, controlled benchmark or multiplayer matrix.",
     "Existing unused lang warning in ui/battle_hud.rs:126.",
-    "Exact photographic parity and owner visual approval remain open."
-  ]
+    "Exact photographic parity is not claimed; owner approved all five visual references and authorized publication."
+  ],
+  "owner_approval": {
+    "date": "2026-10-31",
+    "scope": "All five visual references approved; GitHub publication of V2 authorized after the comparison delivery. Deferred technical validation is unchanged."
+  }
 }

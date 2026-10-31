@@ -2,7 +2,7 @@
 
 ## Request and private references
 
-Owner request, 2026-10-31: keep the five supplied arena reference PNGs locally outside Git, refine all five backgrounds toward them, and compare against the previous update's final screenshots. This round is local on `codex/arena-background-refinement-v2`, based on `2e4cbb981a0b277db6cc6dc87f0783621bb3b4c7`. Rendering source: `8bfe677`.
+Owner request, 2026-10-31: keep the five supplied arena reference PNGs locally outside Git, refine all five backgrounds toward them, and compare against the previous update's final screenshots. This round was developed on `codex/arena-background-refinement-v2`, based on `2e4cbb981a0b277db6cc6dc87f0783621bb3b4c7`. Rendering source: `8bfe677`.
 
 The permanent private folder is `.local/art-references/arena-backgrounds-v2-20261031/` in the owner's primary `TBG-Tupi-Battle-Grounds` checkout. A working copy also exists in `TBG-ranking-wt`. Each contains five unchanged reference PNGs, five immutable baseline JPEGs, `manifest.json` with SHA-256 hashes, and a README. All twelve files in each location are ignored by the existing `.local/` rule; none is tracked. The source PNGs are not embedded in runtime assets or the comparison gallery.
 
@@ -73,6 +73,6 @@ flock -n -E 75 /tmp/tbg-validation-1000.lock \
 
 Consolidation should also observe Practice -> alternate arena -> Forest in one browser session to check image/material teardown and fog restoration. The isolated empty previews verify rendering, not that full runtime transition scenario. No additional competitive regression test is introduced because simulation rules are untouched.
 
-Release size/performance, controlled reference-case p95, loaded-match/multiplayer checks and hardware-wide acceptance are deferred; request the relevant heavy scope explicitly before running it. No workspace suite, Clippy campaign or full suite ran. The images are an incremental procedural 3D interpretation: exact parity with the references' dense scenery, rich lighting and surface detail is not claimed, and owner visual sign-off remains open.
+Release size/performance, controlled reference-case p95, loaded-match/multiplayer checks and hardware-wide acceptance are deferred; request the relevant heavy scope explicitly before running it. No workspace suite, Clippy campaign or full suite ran. The images are an incremental procedural 3D interpretation: exact parity with the references' dense scenery, rich lighting and surface detail is not claimed. After the comparison delivery, the owner approved all five visual references and authorized GitHub publication on 2026-10-31; the deferred technical checks remain pending.
 
-This V2 delivery is committed locally for review. It does not update PR #23, merge main or deploy the VPS.
+The owner-authorized publication includes the V2 source, reports and game screenshot comparisons in existing PR #23, with `codex/arena-background-refinement-v2` retained as the round branch. Original reference PNGs remain exclusively in the ignored local folders. Publication does not merge main or deploy the VPS.
