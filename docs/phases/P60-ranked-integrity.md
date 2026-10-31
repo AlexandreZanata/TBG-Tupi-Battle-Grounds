@@ -614,8 +614,9 @@ correct terminal reason, privacy and unchanged FIFO. Deferred = unverified.
 
 Branch `codex/p60-p61-ranked-implementation`, based on `origin/main`
 `9008f11` (fetched 2026-10-31) plus the planning commit `501d80c`,
-cherry-picked as `8086675`. Validation level: **work front**, and
-compilation is **blocked** (see below). **P60 is incomplete.**
+cherry-picked as `8086675`. Validation level: **work front**. The scoped
+clippy passes; the tests are written but not run. **P60 is incomplete:**
+steps 5–7 are missing.
 
 - **Commit(s):**
   - `afb4eac`: renumber D-70–72 → D-87–89.
@@ -624,6 +625,9 @@ compilation is **blocked** (see below). **P60 is incomplete.**
   - `9b5dea7`: steps 1–2 settlement pipeline.
   - `61872f7`: recovery tests.
   - `aceb76d`: pre-deploy backup.
+  - `05a1c49`: first-compile fixes.
+  - `e6888d9`: step 4 shadow evaluation.
+  - `deeeb6f`: ranked queue wait.
 - **Step 0 reconciliation.**
   - Main equals the plan's audited base, so the protocol is still v17 and
     the schema still v6. The browser HTML lobby is the only ranked
@@ -634,8 +638,8 @@ compilation is **blocked** (see below). **P60 is incomplete.**
       together, as the program requires.
     - (b) Other fronts insert a GAME-DESIGN §13 (P58 roster), so §14/§15
       here must be renumbered positionally at merge.
-    - (c) The ranked queue-wait gap is confirmed unchanged: `ranked()`
-      still does not set `queued_at`.
+    - (c) The ranked queue-wait gap was confirmed (`ranked()` never set
+      `queued_at`) and is fixed in step 3.
 - **Implemented (shadow only; nothing gates, holds or sanctions).**
   - *Step 1.* A 16-byte OS-random `MatchKey` is drawn at pairing,
     separate from `LiveId`. `RankedDone` now carries the receipt (frozen
@@ -648,9 +652,10 @@ compilation is **blocked** (see below). **P60 is incomplete.**
     Wire protocol unchanged (v17).
   - *Step 2.* The v7 SQL is exactly as in §6. New registrations get a
     baseline row in their transaction. `settle` writes match + integrity +
-    two sides, two accounts and meta in one transaction, with `ended_unix`
-    clamped to `ranked_meta.last_utc` and the existing Elo unchanged. Each
-    finished ranked result goes to one finalizer, which:
+    two sides, two accounts and meta in one transaction (7 row mutations
+    plus one history read), with `ended_unix` clamped to
+    `ranked_meta.last_utc`. Each finished ranked result goes to one
+    finalizer, which:
     - assigns the completion sequence (= row id);
     - journals the result to `ranked-pending/` (temp, `sync_all`, rename,
       directory sync; caps 32 KiB per file, 32 MiB total);
@@ -663,7 +668,7 @@ compilation is **blocked** (see below). **P60 is incomplete.**
     `ranked_settlement_failures`, `ranked_pending_files`,
     `ranked_duplicate_keys`, `ranked_key_mismatches`,
     `ranked_notify_failures`, `ranked_journal_failures`.
-  - *Step 3 (partial).*
+  - *Step 3.*
     - `ruleset_version` (RULESET_VERSION 1, hash `881301f9c2597ec3`) and
       the catalog are registered once at start; a mismatch is a startup
       error.
@@ -674,50 +679,63 @@ compilation is **blocked** (see below). **P60 is incomplete.**
     - Fixed counters: purchases, Evolutions, Fortifications, applied
       Augment copies, reconnects, surrender tick, terminal Stronghold HP.
       Damage stays `null`.
-  - *Step 4 (partial).* The pure `ranked_integrity::gate` (whole-pair
-    binary choice, exact limit allowed, positive-only) exists in core, but
-    **nothing calls it**. `facts_json` records `"history":"not_evaluated"`.
+    - Ranked queue waits use their own timestamp map, cleared on cancel and
+      cleanup, and the `ranked_queue_wait_{n,p50,p95}` metrics. Casual
+      state is untouched.
+  - *Step 4.*
+    - The pure `ranked_integrity::gate` (core).
+    - The plan's single history statement (two indexed arms, 10001-row
+      bound, fail-open as `history_unavailable`).
+    - `ranked::signals::evaluate`: budget facts, would-be bits/applied
+      deltas, S1–S4 including the current match. Review only for
+      S1 ∧ S2 ∧ S3.
+    - `facts_json` records the policy snapshot, budget facts, `would_*` and
+      the signals. The `risk` column records Review; `reason_bits` stays 0
+      because nothing is applied.
+    - `TBG_RANKED_INTEGRITY` (only `shadow`), `TBG_RANKED_PAIR_CAP`,
+      `TBG_RANKED_NEW_SOURCE_CAP`, `TBG_RANKED_WINDOW_SECS` are validated
+      at start-up (exit 2 on invalid; `enforce` rejected).
+    - The policy is read once per process, so each settlement snapshots
+      the process policy.
 - **Not done.**
-  - Step 3: ranked queue-wait instrumentation.
-  - Step 4: one-query history read, S1–S4 signals, Review state,
-    `TBG_RANKED_*` configuration.
-  - Step 5: correction CLI (`tbg-ranked-admin`).
+  - The step 4 read-only CLI reports and the step 5 correction CLI
+    (`tbg-ranked-admin`).
   - Step 6: protocol/receipt UI (owner gate).
   - Step 7: consolidation.
+  - The `EXPLAIN QUERY PLAN` evidence for the history statement.
   - All of P61 except §3 (collector, v8, report, API, lobby page,
     patch-note workflow).
-- **Validation actually run.**
+- **Validation actually run** (shared lock, `CARGO_BUILD_JOBS=2`, reusing
+  the merged P47 worktree's target with an identical `Cargo.lock`; no new
+  target directory, nothing cleaned):
   - `cargo fmt -p tbg-core -p tbg-server`: ok.
   - `bash -n deploy/backup.sh deploy/deploy.sh`: ok.
   - `git diff --check`: ok.
-  - Every compiling command (`cargo check`/`clippy` for `tbg-core` and
-    `tbg-server`) returned **75 (shared validation slot busy)**, on 7
-    attempts over the session. The P59 front was holding the lock for
-    release `trunk build`s. No Rust compilation of this branch's changes
-    has completed, and the code was checked by manual review only. Treat
-    it as unverified.
-- **Cache note.** Checks were to reuse the merged P47 worktree's existing
-  target (identical `Cargo.lock`) through `CARGO_TARGET_DIR`. No new target
-  directory was created and nothing was cleaned.
-- **Deferred (exact, for the consolidation reviewer, after the lock frees):**
+  - `cargo clippy -p tbg-core --lib --test contract_ruleset_version --test contract_ranked_integrity -- -D warnings`:
+    exit 0.
+  - `cargo clippy -p tbg-server --lib --bins --tests -- -D warnings`:
+    exit 0 at `deeeb6f`. The first completed run, after seven exit-75
+    deferrals while the P59 front held the lock, found 5 errors, fixed in
+    `05a1c49`.
+- **Deferred (exact, not run):**
 
   ```bash
   flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
-    cargo clippy -p tbg-core --lib --test contract_ruleset_version --test contract_ranked_integrity -- -D warnings
-  flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
-    cargo clippy -p tbg-server --lib --tests -- -D warnings
-  flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
     cargo test -p tbg-core --test rating --test contract_ranked_integrity --test contract_ruleset_version -- --test-threads=1
   flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 \
-    cargo test -p tbg-server --test ranked --test ranked_recovery --test accounts \
-    --test leaderboard --test contract_challenge --lib -- --test-threads=1
+    cargo test -p tbg-server --test ranked --test ranked_integrity --test ranked_recovery \
+    --test accounts --test leaderboard --test contract_challenge --lib -- --test-threads=1
   ```
 
-  These must pass before review. The existing `ranked`/`accounts` targets
-  exercise the new settlement path end to end. Desktop browser checks of
-  ordinary ranked results and reconnects are also deferred.
+  The existing `ranked`/`accounts` targets exercise the new settlement
+  path end to end. Desktop browser checks of ordinary ranked results and
+  reconnects are also deferred.
 - **Measurements:** none yet (no query plans, storage, CPU or latency
   figures).
+- **Attack fixtures:** A2/A3/A12, the exact limit, invalidated and
+  NoChange exclusion, history-unavailable and NotStarted are written in
+  `tests/ranked_integrity.rs`, **not run**. The other catalog rows are
+  covered by the core contract or not yet written.
 - **Migration/recovery/rollback:** v6 → v7 twice, idempotence,
   conflict/same-account quarantine, rollback on insert failure and journal
   ordering are written in `tests/ranked_recovery.rs`, **not run**. The
@@ -727,11 +745,11 @@ compilation is **blocked** (see below). **P60 is incomplete.**
 - **Deviations.**
   - Recovery is awaited before the lobby loop, so ranked is never offered
     before the journal has drained.
-  - A stuck head keeps retrying every 30 s instead of stopping, so a
-    transient failure can recover without a restart.
-  - A failed start-up read keeps ranked unavailable (fail-closed) rather
-    than guessing a sequence.
+  - A stuck head keeps retrying every 30 s instead of stopping.
+  - A failed start-up read keeps ranked unavailable (fail-closed).
   - `ranked_seen` keeps one entry per account seen in the process.
+  - The policy is a per-process snapshot (recorded in every record), not
+    stored per match in the journal.
 - **Owner decisions:** none adopted. O1–O6 remain as recommended in the
   program: shadow first, no automatic hold, frozen-delta corrections, the
   O4 publication floor, bounded bookkeeping, no IP persistence.
