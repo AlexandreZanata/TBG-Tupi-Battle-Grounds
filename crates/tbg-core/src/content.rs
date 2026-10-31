@@ -435,6 +435,12 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
+    /// R11: independent timed Slow, without auxiliary damage.
+    FearPulse {
+        period: u16,
+        bp: u16,
+        ticks: u16,
+    },
     /// R10: each nth completed enemy-unit primary adds bounded flat splash.
     CorrosiveSpit {
         every: u8,
@@ -532,6 +538,23 @@ const fn corrosive(damage: u16, targets: u8) -> [Ability; 2] {
         Ability::None,
     ]
 }
+const fn fear(period: u16, ticks: u16) -> [Ability; 2] {
+    [
+        Ability::FearPulse {
+            period,
+            bp: 2_500,
+            ticks,
+        },
+        Ability::None,
+    ]
+}
+const WHISPERER_ABILITIES: [[Ability; 2]; 5] = [
+    fear(160, 40),
+    fear(160, 40),
+    fear(160, 50),
+    fear(130, 40),
+    fear(130, 40),
+];
 const ACIDMAW_ABILITIES: [[Ability; 2]; 5] = [
     corrosive(18, 2),
     corrosive(18, 2),
@@ -896,9 +919,9 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         form("Corrosive Volley"), form("Corrosive Volley"),
     ]),
     unit(UnitKind::Whisperer, "Whisperer", Monsters, Control, 3_000,
-        [380, 15, 40, 3_000, 33, 0, 0], None, NO_ABILITIES, [
-        form("Echo of Fear"), form("Mental Pulse"),
-        form("Echo of Fear"), form("Mental Pulse"),
+        [380, 15, 40, 3_000, 33, 0, 0], None, WHISPERER_ABILITIES, [
+        FormDef { range_add: 500, ..form("Echo of Fear") }, form("Echo of Fear"),
+        form("Mental Pulse"), FormDef { dmg_bp: 2_000, ..form("Mental Pulse") },
     ]),
 ];
 

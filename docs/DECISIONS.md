@@ -1462,3 +1462,46 @@ The art owns four rigid jaw petals, a long braced neck, throat sac, thin legs,
 high-kneed motion and a four-way jaw fan. A gains throat guards/sight horn; B widens
 the sac shell and adds a three-lobed collar. No public Shop/lab activation or
 balance acceptance. Deferred checks and real screenshots are recorded per character.
+
+## D-71 · Whisperer and shared independent special state — 2026-10-31 (Proposed)
+
+R11 implements GAME-DESIGN §13 Fear Pulse: readiness every 160, one locked
+Guard-eligible enemy-unit primary, existing six-tick WINDUP, Slow 2,500 bp for 40,
+no special damage. A grants +500 basic/special range then 50-tick Slow; B replaces
+period with 130 then adds +2,000 bp basic damage. Content owns all these values.
+Normal basics keep working and can attack Strongholds, while the special never
+selects one. Slow uses the existing ward/immunity/Root-priority/duration path.
+
+The shared timed-special channel starts at a full initial cooldown, waits ready
+for a legal target, rearms from cast start, and stores one locked target plus
+remaining windup. It runs after each living unit's basic action in UnitId order.
+Root or a missing/dead primary cancels without refund or retarget; a living primary
+is not range-checked at resolution. Augment selection skips the entire channel.
+The client has a separate cosmetic overlay, so specials do not replace a basic
+animation or generate competitive hits. This also supplies the explicitly planned
+R05 simultaneous club/companion channel, without another simulation Unit.
+
+`UnitFx.special` is serialized. The all-21 front also reserves the catalog-required
+single `venom: Bleed` slot here, separate from bleed and all six Rotcap stack slots;
+it stays empty until R18. This groups the known bounded shared layout additions
+into one legacy replay hash migration. No hidden state is skipped to preserve
+old checksums. GAME-DESIGN §13 records the layout extension as Proposed. Targeted
+pilot consolidation confirmed identical ticks/winners/reasons on all three seeds
+before changing their hashes: seed 1, tick 3,336, B, StrongholdDestroyed;
+seed 7, tick 2,286, B, StrongholdDestroyed; seed 42, tick 6,295, B,
+StrongholdDestroyed. New checksums are 0x20e6_50cc_3a03_ebbb,
+0x6d9a_9e6d_11d4_cfe3 and 0x9b18_e0f2_1e17_880f, respectively.
+The hash assertion remains exact, and outcome/tick assertions are unchanged.
+The focused determinism target is rerun after this measured re-freeze.
+
+Protocol **23** appends UnitView.special (ready_in and optional locked cast) and
+AbilityStarted/AbilityResolved events (tags 24/25). Caster kind discriminates the
+ability; primary, center and combat tick are explicit. Seat/public projection is
+shared, including reconnect during windup. Existing event tags stay fixed. The
+protocol and R11 frozen-form contracts change here with this decision. Readiness
+slightly opens Whisperer's tendrils; cast state reconstructs its independent pulse.
+
+The figure owns a floating lathed bell, bone eye mask, retracting pupil, six short
+tendrils, team ribbon, distance-based roll, hit compression and a sinking closed-eye
+death. A grows crest/rim; B segments the bell and widens the final eye socket. No
+flight rules, healing, forced movement, ally support or public-pool activation.

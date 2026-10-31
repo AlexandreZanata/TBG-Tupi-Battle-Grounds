@@ -32,6 +32,8 @@ pub fn is_public(event: &Event) -> bool {
         | Event::Transfer { .. }
         | Event::Boarded { .. }
         | Event::Dismounted { .. }
-        | Event::CorrosiveSplash { .. } => true,
+        | Event::CorrosiveSplash { .. }
+        | Event::AbilityStarted { .. }
+        | Event::AbilityResolved { .. } => true,
     }
 }

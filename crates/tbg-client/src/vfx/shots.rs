@@ -47,6 +47,7 @@ pub enum ShotKind {
     Blood,
     Puppet,
     Acid,
+    Thought,
 }
 
 #[derive(Clone, Copy)]
@@ -254,6 +255,14 @@ fn look(kind: ShotKind) -> Look {
             Trail::Sparks,
             0.0,
             Impact::Bolt,
+        ),
+        Thought => (
+            Some((Body::Orb, 0.8)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Motes(Mote::Turquoise),
+            0.0,
+            Impact::Mind,
         ),
         Acid => (
             Some((Body::Acid, 1.0)),

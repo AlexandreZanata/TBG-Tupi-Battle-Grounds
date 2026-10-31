@@ -177,7 +177,9 @@ Own library: `crates/tbg-client/src/art/kits/whisperer/`.
 
 floating bell shape, one luminous eye/bone mask and short tapered tentacles; charcoal/ivory/turquoise, team ribbon underneath. A2 taller eye crest and pale bell, A3 wide mask rim; B2 dark segmented bell and paired forehead ridges, B3 prominent eye socket. Reuse primitive lathe.
 
-Status: pending. Evidence: `docs/media/p59/whisperer/lineup.jpg`.
+Status: implemented; five timing/status scenarios passed, 34 targeted pilot tests
+passed, and desktop lineup observed. [Delivery and limits](p59/R11-whisperer.md).
+![Whisperer five-form lineup](../media/p59/whisperer/lineup.jpg)
 
 ### R12 — Solar Sentinel
 

@@ -29,6 +29,7 @@ mod roster_slots;
 pub mod ruleset;
 pub mod shop;
 pub mod sim;
+mod specials;
 pub mod state;
 pub mod stronghold;
 mod summon;
@@ -37,6 +38,7 @@ mod synergy;
 mod targeting;
 pub mod types;
 pub mod view;
+mod whisperer;
 
 pub use arcana::ArcanaPreset;
 pub use intent::{PlayerIntention, Rejection};

@@ -368,10 +368,10 @@ Acidmaw/Abyssal Jaw: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=
 Acidmaw/Abyssal Jaw: hp=0 dmg=0 atk=0 speed=0 range+=400 splash+=0 heal=0 dmg+=0 hit=-
 Acidmaw/Corrosive Volley: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Acidmaw/Corrosive Volley: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Whisperer/Echo of Fear: hp=0 dmg=0 atk=0 speed=0 range+=500 splash+=0 heal=0 dmg+=0 hit=-
 Whisperer/Echo of Fear: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Whisperer/Mental Pulse: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Whisperer/Echo of Fear: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Whisperer/Mental Pulse: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Whisperer/Mental Pulse: hp=0 dmg=2000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {

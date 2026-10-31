@@ -37,6 +37,14 @@ pub struct UnitView {
     pub shield: u16,
     /// Active self damage reduction in basis points (P59 R08, D-68).
     pub reduction: u16,
+    /// Timed-special readiness and locked windup, sufficient after reconnect.
+    pub special: Option<SpecialView>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SpecialView {
+    pub ready_in: u16,
+    pub cast: Option<crate::state::PendingCast>,
 }
 
 /// `UnitView.fx` bit for a summon by unit, e.g. Smuggler cargo (BR-U08):
@@ -170,7 +178,7 @@ impl MatchState {
                 .units
                 .iter()
                 .filter(|u| u.hp > 0)
-                .map(|u| unit_view(u, self.tick))
+                .map(|u| unit_view(u, self.tick, self.rules))
                 .collect(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],
@@ -183,7 +191,7 @@ impl MatchState {
     }
 }
 
-fn unit_view(u: &crate::state::Unit, tick: Tick) -> UnitView {
+fn unit_view(u: &crate::state::Unit, tick: Tick, rules: &crate::Ruleset) -> UnitView {
     UnitView {
         id: u.id,
         seat: u.seat,
@@ -214,5 +222,6 @@ fn unit_view(u: &crate::state::Unit, tick: Tick) -> UnitView {
         carrier: u.fx.carrier,
         shield: crate::roster_slots::shield_now(&u.fx, tick),
         reduction: crate::roster_slots::self_dr_now(&u.fx, tick) as u16,
+        special: crate::specials::view(rules, u),
     }
 }

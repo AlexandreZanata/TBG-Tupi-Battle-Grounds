@@ -763,6 +763,7 @@ fn rebuild_units(
             carrier: None,
             shield: 0,
             reduction: 0,
+            special: None,
         });
     }
     Ok(units)
@@ -1416,6 +1417,7 @@ fn rebuild_a(
             carrier: None,
             shield: 0,
             reduction: 0,
+            special: None,
         });
     }
     Ok(MatchView {
@@ -1483,6 +1485,7 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
             carrier: None,
             shield: 0,
             reduction: 0,
+            special: None,
         })
         .collect();
     let make = |you: Seat| {

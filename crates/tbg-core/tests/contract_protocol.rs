@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 22,
-        "v22: CorrosiveSplash (D-70); v21: UnitView.reduction (D-68); v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
+        PROTOCOL_VERSION, 23,
+        "v23: special state/cues (D-71); v22: CorrosiveSplash (D-70); v21: UnitView.reduction (D-68); v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
     );
 }
 
@@ -199,4 +199,30 @@ fn v22_corrosive_splash_is_appended_and_round_trips() {
     let bytes = encode(&event);
     assert_eq!(bytes, [23, 1, 2, 3]);
     assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn v23_independent_ability_cues_are_appended() {
+    // D-71: caster kind is the discriminator; primary/center/tick are public facts.
+    let events = [
+        tbg_core::Event::AbilityStarted {
+            unit: 1,
+            kind: tbg_core::UnitKind::Whisperer,
+            primary: Some(2),
+            center: 0,
+            tick: 7,
+        },
+        tbg_core::Event::AbilityResolved {
+            unit: 1,
+            kind: tbg_core::UnitKind::Whisperer,
+            primary: Some(2),
+            center: 0,
+            tick: 7,
+        },
+    ];
+    for (event, tag) in events.into_iter().zip([24, 25]) {
+        let bytes = encode(&event);
+        assert_eq!(bytes, [tag, 1, 30, 1, 2, 0, 7]);
+        assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+    }
 }

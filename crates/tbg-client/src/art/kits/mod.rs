@@ -37,6 +37,7 @@ mod shieldbearer;
 mod siege_walker;
 mod smuggler;
 mod tools;
+mod whisperer;
 
 use bevy::prelude::*;
 use tbg_core::UnitKind;
@@ -127,6 +128,9 @@ pub struct Moment {
     /// Per-kind completed-hit progress from the public snapshot.
     pub counter: u8,
     pub armor_flash: f32,
+    /// Independent special cast channel, in seconds from server windup start.
+    pub special: Option<f32>,
+    pub special_ready: bool,
 }
 
 static SIEGE_WALKER: Kit = siege_walker::KIT;
@@ -159,6 +163,7 @@ static ARCHER: Kit = archer::KIT;
 static RAMPART: Kit = rampart::KIT;
 static RAVAGER: Kit = ravager::KIT;
 static ACIDMAW: Kit = acidmaw::KIT;
+static WHISPERER: Kit = whisperer::KIT;
 
 /// The passenger seat's height above a Cargo Crab's ground, in world units,
 /// at its tier: where a rider's hips sit (see `visuals::mount`).
@@ -199,6 +204,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Rampart => Some(&RAMPART),
         UnitKind::Ravager => Some(&RAVAGER),
         UnitKind::Acidmaw => Some(&ACIDMAW),
+        UnitKind::Whisperer => Some(&WHISPERER),
         #[allow(unreachable_patterns)]
         _ => None,
     }

@@ -10,6 +10,7 @@ use crate::state::Outcome;
 use crate::types::{Arena, Seat, StrongholdKind};
 use crate::view::{MatchView, PublicView};
 
+/// v23: independent cast/readiness snapshot and cues (D-71);
 /// v22: staged CorrosiveSplash cue (D-70);
 /// v21: public self-reduction for staged R08 (D-68);
 /// v20: seven-Faction Synergy arrays (D-64); v19: `UnitView::shield` (D-63);
@@ -19,7 +20,7 @@ use crate::view::{MatchView, PublicView};
 /// and carrier events plus `UnitView::fx`; v13: Stronghold kinds and
 /// Fortification (D-46); v12: Interest regen boost; v11: fifteen-node Arcanas.
 /// Older peers are refused by the handshake.
-pub const PROTOCOL_VERSION: u16 = 22;
+pub const PROTOCOL_VERSION: u16 = 23;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a

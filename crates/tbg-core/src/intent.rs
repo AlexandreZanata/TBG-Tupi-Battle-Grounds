@@ -152,7 +152,7 @@ impl MatchState {
                 // Smugglers drop the first crate after a full interval.
                 every.max(1)
             } else {
-                0
+                crate::specials::period(self.rules, kind, tier, branch).unwrap_or(0)
             },
             fx: crate::state::UnitFx::default(),
         });

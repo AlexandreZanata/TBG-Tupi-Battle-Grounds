@@ -41,6 +41,8 @@ pub struct Animator {
     pub carried: bool,
     pub reduction: u16,
     pub counter: u8,
+    special: Option<f32>,
+    special_ready: bool,
     armor_flash: f32,
     base: Clip,
     base_t: f32,
@@ -86,6 +88,8 @@ impl Animator {
             carried: false,
             reduction: 0,
             counter: 0,
+            special: None,
+            special_ready: false,
             armor_flash: 0.0,
             base: Clip::Idle,
             base_t: phase * Clip::Idle.duration(),
@@ -110,6 +114,25 @@ impl Animator {
             self.armor_flash = 1.0;
         }
         self.reduction = bp;
+    }
+    pub fn start_special(&mut self) {
+        self.special = Some(0.0);
+    }
+    pub fn resolve_special(&mut self) {
+        let contact = f32::from(tbg_core::content::WINDUP) / tbg_core::content::TICK_HZ as f32;
+        self.special = Some(self.special.unwrap_or(0.0).max(contact));
+    }
+    pub fn observe_special(&mut self, ready: bool, left: Option<u16>, rooted: bool) {
+        self.special_ready = ready;
+        if rooted {
+            self.special = None;
+            return;
+        }
+        if let Some(left) = left {
+            let elapsed = f32::from(tbg_core::content::WINDUP.saturating_sub(left))
+                / tbg_core::content::TICK_HZ as f32;
+            self.special = Some(self.special.unwrap_or(0.0).max(elapsed));
+        }
     }
     pub fn apply_hit_stop(&mut self, duration_s: f32) {
         self.hit_stop = duration_s;
@@ -174,6 +197,8 @@ impl Animator {
                 reduction: self.reduction,
                 counter: self.counter,
                 armor_flash: self.armor_flash,
+                special: self.special,
+                special_ready: self.special_ready,
             };
             (kit.pose)(&moment, &mut pose);
         }
@@ -208,6 +233,7 @@ impl Animator {
     fn advance(&mut self, dt: f32) -> (Pose, Option<f32>) {
         self.events.clear();
         self.armor_flash = (self.armor_flash - dt * 4.0).max(0.0);
+        self.special = self.special.map(|t| t + dt).filter(|&t| t < 0.9);
         self.since_attack = (self.since_attack + dt).min(1e6);
         self.clock += dt;
         if let Some((clip, t)) = self.preview {

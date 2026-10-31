@@ -110,6 +110,17 @@ pub struct UnitFx {
     /// W0 (R03, R20): the ability heal-cut slot, beside the pair in `Unit`.
     pub ability_cut_bp: u16,
     pub ability_cut_until: Tick,
+    /// Independent bounded special windup; serialized for deterministic replay.
+    pub special: Option<PendingCast>,
+    /// R18/P58 §3.2: one venom family, separate from bleed and Rotcap stacks.
+    pub venom: Bleed,
+}
+
+/// One special locked at start; the ordinary basic windup stays independent.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PendingCast {
+    pub target: Option<UnitId>,
+    pub left: u16,
 }
 
 /// The bleed slot (R07): `value` HP per pulse, `left` pulses still to come,
@@ -331,6 +342,21 @@ pub enum Event {
         from: UnitId,
         primary: UnitId,
         to: UnitId,
+    },
+    /// P58: one server-authoritative special, discriminated by caster kind.
+    AbilityStarted {
+        unit: UnitId,
+        kind: UnitKind,
+        primary: Option<UnitId>,
+        center: i32,
+        tick: Tick,
+    },
+    AbilityResolved {
+        unit: UnitId,
+        kind: UnitKind,
+        primary: Option<UnitId>,
+        center: i32,
+        tick: Tick,
     },
 }
 

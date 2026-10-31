@@ -14,6 +14,7 @@ use formation::FormationIndex;
 
 /// Count down statuses and cooldowns.
 pub(crate) fn tick_timers(state: &mut MatchState) {
+    let rules = state.rules();
     for u in &mut state.units {
         let before = u.status;
         u.status = match u.status {
@@ -28,6 +29,9 @@ pub(crate) fn tick_timers(state: &mut MatchState) {
         };
         crate::roster_slots::release_queued_slow(u, before);
         u.cooldown = u.cooldown.saturating_sub(1);
+        if !u.is_summon() && crate::specials::period(rules, u.kind, u.tier, u.branch).is_some() {
+            u.action_cd = u.action_cd.saturating_sub(1);
+        }
     }
     for p in &mut state.players {
         p.stronghold_cooldown = p.stronghold_cooldown.saturating_sub(1);
@@ -44,6 +48,7 @@ pub(crate) fn run_units(state: &mut MatchState, ev: &mut Vec<Event>) {
     let mut formations = FormationIndex::new();
     for idx in 0..state.units.len() {
         advance_unit(state, idx, ev, &mut formations);
+        crate::specials::advance(state, idx, ev);
     }
     // ...and again after everyone moved.
     sync_passengers(state);
@@ -362,6 +367,7 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
     state.units.retain(|u| u.hp > 0);
     // Clear a dead prey before projecting counters in this tick's views.
     crate::roster_slots::tick_marks(state);
+    crate::specials::cancel_gone(state);
     #[cfg(feature = "lab")]
     if dead[0] + dead[1] > 0 {
         crate::lab::progress(state);

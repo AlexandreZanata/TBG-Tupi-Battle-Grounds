@@ -759,6 +759,14 @@ define resolution semantics. This section is the single numerical registry.
 A value marked **completion** is not stated by the owner's text. It is
 Proposed for review and listed, with its owner decision, in 13.6.
 
+**Proposed implementation state (D-71, 2026-10-31):** the shared independent
+six-tick special windup and the separate non-stacking venom family are bounded,
+serialized UnitFx slots. Both start empty on legacy units. This extends replay
+state bytes without changing their rules, numbers, Shop pools or expected match
+outcomes. The targeted P59 pilot consolidation measured all three legacy seeds
+with identical winner/reason/tick before re-freezing their hashes (D-71).
+No expected outcome/tick changed to accommodate the layout.
+
 ### 13.1 Proposed base forms
 
 Cost in Energy (×600 in state); interval in ticks (20/s); range in

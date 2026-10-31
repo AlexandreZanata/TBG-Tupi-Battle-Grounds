@@ -7,10 +7,10 @@
 
 Status: **W0 and W1 are done** (D-62 and D-63 for W0; D-64 for W1).
 The owner-authorized complete roster front is active in draft PR #22, stacked on
-PR #20. Shared anatomy/gallery support is implemented (D-67). Bonehorn R08, Ravager R09 and Acidmaw R10 now
-have dedicated five-form kits and authoritative abilities (D-68–D-70), with
+PR #20. Shared anatomy/gallery support is implemented (D-67). The four Monsters (R08–R11) now
+have dedicated five-form kits and authoritative abilities (D-68–D-71), with
 screenshot/minimum validation evidence in [P59-EXECUTION](../roster/P59-EXECUTION.md).
-The other 18 character deliveries remain pending. No new kind is in a public Shop/lab pool;
+The other 17 character deliveries remain pending. No new kind is in a public Shop/lab pool;
 this is an implementation report, not W10 balance acceptance or W11 release.
 
 ## What is in place
@@ -26,11 +26,12 @@ this is an implementation report, not W10 balance acceptance or W11 release.
 | English names for the roster (D-65) | `docs/roster/P59-NAMES.md` | decided |
 
 **Protocol numbers.** The shield took 19 (D-63) and the Factions took 20 (D-64).
-The plan said 19 for the Factions. The shield changed the wire first, so the
+R08 self-reduction took 21 (D-68), R10 cue 22 (D-70), and independent special
+snapshots/cues took 23 (D-71). The plan said 19 for the Factions. The shield changed the wire first, so the
 Factions take the next number; this deviation is recorded here.
 
 **The audit's protocol number is stale.** P58 §2 reads "protocol 16". The
-current value is 21 (D-68). Update the audit at consolidation.
+current value is 23 (D-71). Update the audit at consolidation.
 
 ## Waves
 
@@ -45,8 +46,8 @@ current value is 21 (D-68). Update the audit at consolidation.
   death styles and gallery rows cover the seven Factions. ART-DIRECTION §3 and
   §11.2 have rows for the three new Factions (Proposed).
 - **Pilot: Monsters R08 Bonehorn, R09 Ravager, R10 Acidmaw, R11 Whisperer. Kinds done (D-66).**
-  Inactive kinds and base rows from GAME-DESIGN §13.1 are registered. Bonehorn, Ravager and Acidmaw
-  now own their kits, animation and abilities; Whisperer follows.
+  Inactive kinds and base rows from GAME-DESIGN §13.1 are registered. All four
+  now own their kits, animation and abilities; their first desktop lineups were observed.
   Per-character evidence is recorded in P59-EXECUTION before each next delivery.
 - **W2–W6: rules for the other 17 units** (timers, counted strikers, area pulses,
   shield pair, fusion). The 2026-10-31 owner update authorizes implementing
