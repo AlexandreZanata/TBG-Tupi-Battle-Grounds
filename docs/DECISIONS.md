@@ -1665,3 +1665,24 @@ boarding or a spawned Unit. The authoritative special cue uses the actual primar
 center/radius with a small bomb burst. No physics projectile or extra stun/cut.
 The frozen roster/form contract appends these exact facts; native scenario runs
 and real screenshot are deferred to the next combined consolidation.
+
+## D-77 · Capybara's belly impact and earned protection — 2026-10-31 (Proposed)
+
+R06 appends the exact §13 Plants Tank row and four forms, without public-pool
+activation. Swamp Belly Flop waits200 then uses the shared enemy-unit windup;
+it resolves at caster x, radius1500, auxiliary65, ordinary Slow1500bp/40 ticks.
+Living enemies, including carried passengers and summons, take it once in UnitId
+order; allies and Strongholds do not. Raw damage and normal status immunity remain
+separate. A gains HP2000bp then post-impact self-reduction1500bp/40; B replaces
+period160 then radius1900 and Slow2000bp. No base animation protection. The A2
+window shares normal reduction/cap/expiry; Root cancels a pending cast without
+extending an applied window. No jump/launch, allied aura or extra damage upgrade.
+
+Own five-form kit: broad ochre belly, short heavy limbs, round capybara muzzle/
+ears, leaf necklace, fiber skirt and team pack. A uses stone belly/dark flanks
+then leaf gorget; B adds belly bands/pale fiber then broad bark waist disk.
+Breathing belly mesh, rolling gait, palm bump, local tuck/flop, belly pat and
+sideways settling are per-kind poses; the caster-centered ring reads actual
+server resolution/radius. No physics or extra rig node. Frozen roster/form
+contracts append the canonical Proposed values. Protocol25 and simulation layout
+stay unchanged; the shared public protection/effects facts restore after reconnect.

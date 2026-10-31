@@ -161,7 +161,7 @@ fn roster_composition() {
     // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
-    assert_eq!(UNITS.len(), 36);
+    assert_eq!(UNITS.len(), 37);
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     assert_eq!(
         &kinds[ALL_KINDS.len()..],
@@ -175,6 +175,7 @@ fn roster_composition() {
             UnitKind::Crowcaller,
             UnitKind::Trigger,
             UnitKind::RattleTick,
+            UnitKind::Capybara,
         ][..]
     );
     assert_eq!(UNIT_KINDS.len(), 10);
@@ -398,7 +399,11 @@ Trigger/Ricochet Bullet: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+
 Rattle & Tick/Big Brother's Fury: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Rattle & Tick/Big Brother's Fury: hp=0 dmg=2000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Rattle & Tick/Tico's Tricks: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Rattle & Tick/Tico's Tricks: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Rattle & Tick/Tico's Tricks: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Capybara/Stone Belly: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Capybara/Stone Belly: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Capybara/Swamp Wave: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Capybara/Swamp Wave: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {
@@ -427,6 +432,7 @@ fn proposed_p59_bases_match_section_13() {
         (Crowcaller, Undead, Ranged, 4, [520, 58, 34, 4_800, 31]),
         (Trigger, Humans, Ranged, 4, [230, 25, 17, 3_200, 53]),
         (RattleTick, Humans, Tank, 5, [900, 60, 38, 900, 28]),
+        (Capybara, Plants, Tank, 5, [1300, 38, 40, 800, 23]),
     ];
     for (kind, faction, archetype, energy, base) in rows {
         let d = def(kind);

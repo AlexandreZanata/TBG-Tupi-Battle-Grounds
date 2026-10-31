@@ -17,6 +17,7 @@ pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> O
             Ability::FearPulse { period, .. }
             | Ability::LivingWall { period, .. }
             | Ability::AreaCrush { period, .. }
+            | Ability::SwampBelly { period, .. }
             | Ability::DoubleMayhem { period, .. }
             | Ability::CrowMark { period, .. } => Some(period.max(1)),
             _ => None,
@@ -81,7 +82,10 @@ fn primary(state: &MatchState, u: &Unit) -> Option<u32> {
 }
 
 fn center(state: &MatchState, u: &Unit, target: Option<u32>) -> i32 {
-    if matches!(u.kind, UnitKind::Bulwark | UnitKind::Demolisher) {
+    if matches!(
+        u.kind,
+        UnitKind::Bulwark | UnitKind::Demolisher | UnitKind::Capybara
+    ) {
         return u.x;
     }
     target
@@ -133,6 +137,7 @@ fn advance_cast(
         crate::whisperer::resolve(state, u, target, ev);
         crate::bulwark::resolve(state, u);
         crate::demolisher::resolve(state, u, ev);
+        crate::capybara::resolve(state, u, ev);
         crate::rattle_tick::resolve(state, u, target, ev);
     }
     let center = center(state, u, cast.target);

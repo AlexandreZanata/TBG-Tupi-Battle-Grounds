@@ -101,7 +101,8 @@ Own library: `crates/tbg-client/src/art/kits/capybara/`.
 
 huge rounded belly, short thick limbs, capybara muzzle/ears, leaf necklace and fiber skirt; warm ochre hide, bark/moss, team cloth on pack. A2 stone-like belly guard and darker flanks, A3 broad leaf gorget. B2 visible belly bands and pale fiber skirt, B3 a wide bark waist disk. Rounded low-poly volumes can reuse Large torso/limb primitives.
 
-Status: pending. Evidence: `docs/media/p59/capybara/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/capybara/lineup.jpg`.
 
 ### R07 — Trident
 

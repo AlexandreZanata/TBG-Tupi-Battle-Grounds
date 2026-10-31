@@ -139,6 +139,8 @@ pub enum UnitKind {
     Trigger,
     /// D-76: R05, staged outside public pools.
     RattleTick,
+    /// D-77: R06, staged outside public pools.
+    Capybara,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

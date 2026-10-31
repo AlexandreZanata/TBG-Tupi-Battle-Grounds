@@ -36,21 +36,22 @@ fn position(map: &UnitEntities, visuals: &Visuals, id: UnitId) -> Option<Vec3> {
         .map(|(_, t, _)| t.translation + Vec3::Y * 0.6)
 }
 fn area(map: &UnitEntities, visuals: &Visuals, id: UnitId) -> Area {
-    let radius =
-        map.0
-            .get(&id)
-            .and_then(|e| visuals.get(*e).ok())
-            .and_then(|(v, _, anim)| {
-                content::def(v.kind())
-                    .ability(anim.form.0, anim.form.1)
-                    .into_iter()
-                    .find_map(|a| match a {
-                        Ability::AreaCrush { radius, .. }
-                        | Ability::DoubleMayhem { radius, .. } => Some(radius),
-                        _ => None,
-                    })
-            })
-            .unwrap_or(0);
+    let radius = map
+        .0
+        .get(&id)
+        .and_then(|e| visuals.get(*e).ok())
+        .and_then(|(v, _, anim)| {
+            content::def(v.kind())
+                .ability(anim.form.0, anim.form.1)
+                .into_iter()
+                .find_map(|a| match a {
+                    Ability::SwampBelly { radius, .. }
+                    | Ability::AreaCrush { radius, .. }
+                    | Ability::DoubleMayhem { radius, .. } => Some(radius),
+                    _ => None,
+                })
+        })
+        .unwrap_or(0);
     Area {
         splash: radius as f32 / 1_000.0,
         ..default()
@@ -81,6 +82,7 @@ fn resolved(
         UnitKind::Whisperer => (Impact::Mind, primary, Area::default()),
         UnitKind::Bulwark => (Impact::Sparks, Some(unit), Area::default()),
         UnitKind::RattleTick => (Impact::Mayhem, primary, area(map, visuals, unit)),
+        UnitKind::Capybara => (Impact::Belly, Some(unit), area(map, visuals, unit)),
         UnitKind::Demolisher => (Impact::Piston, Some(unit), area(map, visuals, unit)),
         _ => return,
     };

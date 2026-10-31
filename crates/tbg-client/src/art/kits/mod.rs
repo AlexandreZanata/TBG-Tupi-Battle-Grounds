@@ -15,6 +15,7 @@ mod bombard;
 mod bone_brute;
 mod bonehorn;
 mod bulwark;
+mod capybara;
 mod cargo_crab;
 mod cargo_crate;
 pub mod common;
@@ -180,6 +181,7 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static CAPYBARA: Kit = capybara::KIT;
 static RATTLETICK: Kit = rattle_tick::KIT;
 
 /// The passenger seat's height above a Cargo Crab's ground, in world units,
@@ -226,6 +228,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::Capybara => Some(&CAPYBARA),
         UnitKind::RattleTick => Some(&RATTLETICK),
         #[allow(unreachable_patterns)]
         _ => None,

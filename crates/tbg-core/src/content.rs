@@ -355,6 +355,15 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    SwampBelly {
+        period: u16,
+        radius: i32,
+        damage: u16,
+        bp: u16,
+        ticks: u16,
+        protection: u16,
+        protection_ticks: u16,
+    },
     DoubleMayhem {
         period: u16,
         radius: i32,
@@ -634,6 +643,27 @@ const RATTLE_TICK_ABILITIES: [[Ability; 2]; 5] = [
     mayhem(150, 1_200, 1_500),
     mayhem(150, 1_500, 2_000),
 ];
+const fn belly(period: u16, radius: i32, bp: u16, protection: u16) -> [Ability; 2] {
+    [
+        Ability::SwampBelly {
+            period,
+            radius,
+            damage: 65,
+            bp,
+            ticks: 40,
+            protection,
+            protection_ticks: 40,
+        },
+        Ability::None,
+    ]
+}
+const CAPYBARA_ABILITIES: [[Ability; 2]; 5] = [
+    belly(200, 1_500, 1_500, 0),
+    belly(200, 1_500, 1_500, 0),
+    belly(200, 1_500, 1_500, 1_500),
+    belly(160, 1_500, 1_500, 0),
+    belly(160, 1_900, 2_000, 0),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -737,7 +767,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 36;
+pub const UNIT_KIND_COUNT: usize = 37;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1064,6 +1094,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         form("Ricochet Bullet"),form("Ricochet Bullet"),
     ]),
     unit(UnitKind::RattleTick,"Rattle & Tick",Humans,Tank,3_000,[900,60,38,900,28,0,0],None,RATTLE_TICK_ABILITIES,[FormDef{hp_bp:2_000,..form("Big Brother's Fury")},FormDef{dmg_bp:2_000,..form("Big Brother's Fury")},form("Tico's Tricks"),form("Tico's Tricks")]),
+    unit(UnitKind::Capybara,"Capybara",Plants,Tank,3_000,[1_300,38,40,800,23,0,0],None,CAPYBARA_ABILITIES,[FormDef{hp_bp:2_000,..form("Stone Belly")},form("Stone Belly"),form("Swamp Wave"),form("Swamp Wave")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).
