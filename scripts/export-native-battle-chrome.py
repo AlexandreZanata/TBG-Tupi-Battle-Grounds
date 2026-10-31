@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Export small Linux HUD shapes matching the existing browser CSS geometry."""
+"""Export Linux HUD shapes and the existing browser Stronghold symbols."""
 
 from pathlib import Path
 import subprocess
 import tempfile
+import xml.etree.ElementTree as ET
 
 from PIL import Image
 
@@ -40,6 +41,16 @@ def main():
       <path d="M12 3H848L857 12V32L848 41H12L3 32V12Z" fill="#050b12"/>
       <path d="M14 5H846L855 14V30L846 39H14L5 30V14Z" fill="url(#b)"/>''')
     export('flag', 17, 19, '<path d="M3 1h2v17H3zM5 2l10 2-2 5-8-2z" fill="#e45b5b"/>')
+    towers()
+
+
+def towers():
+    sprite = ET.parse(ROOT / 'crates/tbg-client/assets/stronghold/towers.svg').getroot()
+    ns = '{http://www.w3.org/2000/svg}'
+    definitions = ET.tostring(sprite.find(ns + 'defs'), encoding='unicode')
+    for symbol in sprite.findall(ns + 'symbol'):
+        body = definitions + ''.join(ET.tostring(child, encoding='unicode') for child in symbol)
+        export('tower-' + symbol.attrib['id'].removeprefix('sh-'), 120, 150, body)
 
 
 if __name__ == '__main__':

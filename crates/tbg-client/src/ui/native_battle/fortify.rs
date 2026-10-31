@@ -89,7 +89,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 })
                 .with_children(|head| {
                     head.spawn((
-                        kit::image(&assets, "stronghold/bastion.webp", 40., 50.),
+                        kit::image(&assets, "battle/native/tower-bastion.webp", 40., 50.),
                         Icon,
                     ));
                     head.spawn(Node {
@@ -169,7 +169,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                         kit::muted("", 10.),
                         Node {
                             width: percent(100),
-                            max_height: px(28),
+                            height: px(24),
                             overflow: Overflow::clip(),
                             ..default()
                         },
@@ -333,7 +333,7 @@ fn readouts(
         tint.0 = field_color(field, v, pending.0.is_some(), color);
     }
     let path = format!(
-        "stronghold/{}.webp",
+        "battle/native/tower-{}.webp",
         STRONGHOLD_KINDS[fortify::own(v).kind.index()]
             .name
             .to_ascii_lowercase()
