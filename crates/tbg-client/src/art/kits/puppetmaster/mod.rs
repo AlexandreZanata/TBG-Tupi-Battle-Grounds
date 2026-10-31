@@ -22,6 +22,7 @@ pub const KIT: Kit = Kit {
     pose,
     gait: Gait::LIGHT,
     attack: Attack::Shot {
+        loaded: None,
         from: Node::Prop(Socket::WeaponR),
         muzzle: |_, _| model::CROSS,
         shot: |_, _| ShotKind::Puppet,

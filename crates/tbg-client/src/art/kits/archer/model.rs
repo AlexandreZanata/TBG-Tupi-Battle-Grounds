@@ -25,8 +25,23 @@ pub fn plan(tier: u8) -> Proportions {
     p
 }
 
-/// The arrow launch point in `Socket::OffhandL` space (ahead of the grip/shelf).
-pub const MUZZLE: Vec3 = Vec3::new(0.0, 0.08, 0.32);
+/// The arrow's point in `Socket::OffhandL` space: a braced arrow's head.
+pub const MUZZLE: Vec3 = Vec3::new(0.0, 0.0, gear::BOW_TIP_Z + gear::ARROW_LEN);
+
+/// Half the bow's length, grip to limb tip, by form.
+pub fn half_len(f: Form) -> f32 {
+    if f.a && f.t2 {
+        0.70
+    } else if f.a {
+        0.74
+    } else if f.b && f.t2 {
+        0.68
+    } else if f.b {
+        0.65
+    } else {
+        0.64
+    }
+}
 
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
@@ -151,88 +166,51 @@ fn quivers(v: &mut Vec<PartSpec>, f: Form) {
     }
 }
 
+/// The bow on the left hand: a curved, strung longbow (see `gear::bow`), with
+/// each form's own trim on top of it.
 fn bow(v: &mut Vec<PartSpec>, f: Form) {
-    let at = Prop(Socket::OffhandL);
-    let (wood, tip, half_len) = if f.a && f.t2 {
-        (RUST, GOLD, 0.70)
+    let (wood, tip) = if f.a && f.t2 {
+        (RUST, GOLD)
     } else if f.a {
-        (TIMBER, BONE, 0.74)
+        (TIMBER, BONE)
     } else if f.b && f.t2 {
-        (GUNMETAL, STEEL, 0.68)
+        (GUNMETAL, STEEL)
     } else if f.b {
-        (IRON, DARK_LEATHER, 0.65)
+        (IRON, DARK_LEATHER)
     } else {
-        (OAK, TRIM, 0.64)
+        (OAK, TRIM)
     };
+    let style = gear::BowStyle {
+        wood,
+        tip,
+        grip: DARK_LEATHER,
+        string: if f.t2 { GOLD } else { LINEN },
+        shaft: TIMBER,
+        head: STEEL,
+        fletch: if f.a { ALLY } else { LINEN },
+    };
+    let half = half_len(f);
+    v.extend(gear::bow(half, style));
 
-    // Grip
-    v.push(part(
-        at,
-        Box(0.045, 0.14, 0.05),
-        DARK_LEATHER,
-        [0.0, 0.08, 0.0],
-    ));
-
-    // Upper limb
-    v.push(
-        part(
-            at,
-            Cyl(0.018, half_len * 0.95),
-            wood,
-            [0.0, 0.08 + half_len * 0.45, 0.06],
-        )
-        .rot([-14.0, 0.0, 0.0]),
-    );
-    // Lower limb
-    v.push(
-        part(
-            at,
-            Cyl(0.018, half_len * 0.95),
-            wood,
-            [0.0, 0.08 - half_len * 0.45, 0.06],
-        )
-        .rot([14.0, 0.0, 0.0]),
-    );
-
-    // Limb tips & nocks
-    for s in [1.0f32, -1.0] {
-        v.push(part(
-            at,
-            Box(0.026, 0.06, 0.026),
-            tip,
-            [0.0, 0.08 + s * half_len, 0.12],
-        ));
-    }
-
+    let at = Prop(Socket::OffhandL);
     if f.a && f.t2 {
-        // Marksman: Recurve tips curling away, brass sight pin
+        // Marksman: recurve tips curling away, brass sight pin
         for s in [1.0f32, -1.0] {
             v.push(
                 part(
                     at,
                     Box(0.02, 0.10, 0.02),
                     GOLD,
-                    [0.0, 0.08 + s * (half_len + 0.04), 0.16],
+                    [0.0, s * (half + 0.04), gear::BOW_TIP_Z + 0.03],
                 )
                 .rot([-s * 35.0, 0.0, 0.0]),
             );
         }
-        // Sight pin
-        v.push(part(at, Cone(0.012, 0.06), BRASS, [0.03, 0.12, 0.02]).rot([0.0, 0.0, -90.0]));
+        v.push(part(at, Cone(0.012, 0.06), BRASS, [0.03, 0.04, 0.02]).rot([0.0, 0.0, -90.0]));
     }
-
     if f.b && f.t2 {
-        // Arrow Rain: Heavy reinforced riser plates and glowing center core
-        v.push(part(at, Box(0.055, 0.18, 0.065), STEEL, [0.0, 0.08, 0.0]));
-        v.push(part(at, Ball(0.025), HOT, [0.0, 0.08, 0.04]).glow());
+        // Arrow Rain: heavy reinforced riser plates and glowing center core
+        v.push(part(at, Box(0.055, 0.18, 0.065), STEEL, [0.0, 0.0, 0.0]));
+        v.push(part(at, Ball(0.025), HOT, [0.0, 0.0, 0.04]).glow());
     }
-
-    // Bowstring connecting tips
-    let string_color = if f.t2 { GOLD } else { LINEN };
-    v.push(part(
-        at,
-        Cyl(0.005, half_len * 2.0),
-        string_color,
-        [0.0, 0.08, -0.02],
-    ));
 }
