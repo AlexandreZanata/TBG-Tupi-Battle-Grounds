@@ -14,7 +14,11 @@ pub(super) fn spawn(
 ) {
     let page = ranking.page.as_ref();
     let status = if ranking.failed {
-        lang.key("live.unavailable")
+        words(
+            lang,
+            "Rankings unavailable. Try Refresh.",
+            "Ranking indisponível. Tente Atualizar.",
+        )
     } else if ranking.want.is_some() {
         words(lang, "Loading rankings…", "Carregando ranking…")
     } else {
