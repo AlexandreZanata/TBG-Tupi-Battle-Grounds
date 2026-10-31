@@ -43,6 +43,7 @@ impl Gallery {
     pub fn studio(&self) -> bool {
         (self.unit.is_some() && !self.range)
             || self.frames
+            || self.mode == "palette"
             || self.mode == "blockout"
             || self.mode == "strongholds"
             || self.mode == "aim"
