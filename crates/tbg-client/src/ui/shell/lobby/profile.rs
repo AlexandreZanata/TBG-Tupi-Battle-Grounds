@@ -19,6 +19,7 @@ pub fn spawn(
                 },
                 chrome::region(0., 0., 100., 100.),
             ));
+            #[cfg(not(target_os = "linux"))]
             p.spawn((
                 ImageNode::new(assets.load("branding/tbg-emblem.webp")),
                 Node {
@@ -27,6 +28,23 @@ pub fn spawn(
                     ..chrome::region(2., 6., 27., 60.)
                 },
             ));
+            #[cfg(target_os = "linux")]
+            p.spawn(Node {
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..chrome::region(2., 6., 27., 60.)
+            })
+            .with_children(|crest| {
+                crest.spawn((
+                    ImageNode::new(assets.load("lobby/crest-v2.webp")),
+                    Node {
+                        height: percent(100),
+                        width: Val::Auto,
+                        aspect_ratio: Some(0.75),
+                        ..default()
+                    },
+                ));
+            });
             p.spawn(button(
                 format!(
                     "{}\n{:?}",

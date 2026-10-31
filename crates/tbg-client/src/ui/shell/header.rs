@@ -3,6 +3,11 @@
 use super::{data::Data, kit, lobby::chrome, Account, Action, Lang, Panel, UiAction};
 use bevy::prelude::*;
 
+#[cfg(target_os = "linux")]
+mod account;
+#[cfg(target_os = "linux")]
+use account::spawn as account_block;
+
 #[cfg(not(target_os = "linux"))]
 pub fn spawn(
     root: &mut ChildSpawnerCommands,
@@ -179,6 +184,7 @@ fn navigation(
     }
 }
 
+#[cfg(not(target_os = "linux"))]
 fn account_block(
     root: &mut ChildSpawnerCommands,
     account: &Account,

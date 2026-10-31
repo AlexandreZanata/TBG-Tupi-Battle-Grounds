@@ -571,3 +571,33 @@ remote Git, CI or VPS change is part of this front.
   remote Git, CI or deployment ran. Existing app windows, account data,
   preferences and unrelated policy edits were preserved. Reopen TBG to
   load the installed common header.
+
+## Linux original player crest and account-card polish — 2026-10-31
+
+Owner requested restoring the previous ranked-status artwork and using
+the new game emblem only for the computer application/window icon. The
+historical lobby art catalog at `120fa72` identifies `lobby/crest-v2.webp`
+as the original player crest. Restore that existing blue/gold helmet crest
+in the Linux lobby record panel with its original 3:4 proportions, and use
+it as the circular account avatar. Linux UI no longer loads the application
+emblem for either placement; the installed application/window icon remains
+the owner's selected emblem. Other targets and web catalogs are unchanged.
+
+Extract the Linux account card into `ui/shell/header/account.rs`, reused
+through the common header on every menu page. Match the owner's reference
+with an inset rounded gold frame, subtle dark gradient, circular portrait,
+name separator and aligned account/key actions. Preserve the existing
+CreateAccount/HaveKey actions and authenticated name/rating behavior.
+Add three small code-native glyphs to the existing native export script;
+no generated illustration or new dependency is needed.
+
+Level: work front. Affected formatting and `git diff --check` passed.
+Exported/decoded the three 96x96 RGBA glyphs (1690 bytes total); inspected
+the existing player crest and historical catalog. Next: owner-requested
+native build/install under the shared host lock/cache, then one installed
+lobby capture. The owner's wait/job exceptions remain scoped to this chat.
+Defer real account login/key submission, authenticated refresh and narrow
+window/focus scenarios to consolidation; no account data was changed for
+this appearance-only adjustment. Full suite and other-target builds remain
+deferred without the existing explicit authorization. No game rule, web
+behavior/assets replacement, remote Git, CI or deployment belongs here.
