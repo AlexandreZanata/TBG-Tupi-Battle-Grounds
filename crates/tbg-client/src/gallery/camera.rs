@@ -39,9 +39,9 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
     }
     match options.mode.as_str() {
         "palette" => (
-            Vec3::new(8.0, 0.5, 0.0),
+            Vec3::new(8.0, 0.5, 1.8),
             5.8,
-            4.0,
+            5.8,
             Vec3::new(0.0, 11.0, 14.0),
         ),
         // Four rows of five forms, 3.2 apart in x and 3.6 back in z.

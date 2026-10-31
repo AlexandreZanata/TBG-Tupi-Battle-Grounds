@@ -23,9 +23,10 @@ pub fn spawn(
         }
     }
     let slots = SLOTS.map(|s| format!("{s:?}")).join(" / ");
+    let factions = tbg_core::FACTIONS.map(|f| f.name()).join(" / ");
     commands.spawn((
         Text::new(format!(
-            "P15 PALETTE | {slots}\nCrown / Barrow / Ironworks / Wildwood / Environment / UI"
+            "P15 PALETTE | {slots}\n{factions} / Environment / UI"
         )),
         TextFont {
             font_size: FontSize::Px(16.0),
