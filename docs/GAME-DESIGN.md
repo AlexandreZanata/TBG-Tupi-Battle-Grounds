@@ -604,6 +604,7 @@ the product spec asks for none unless evidence needs it.
 | BR-X09 | Revised by the owner (2026-10-29): Augment copies are unlimited, so max-HP, damage and Stronghold-damage percentages from copies grow linearly without a cap (saturating `i64`/`u16` arithmetic). Attributes with a cap keep it: attack speed (BR-X02), move (BR-X03), damage reduction (BR-X05), lifesteal (BR-X06), status duration (BR-X07), heal bonus and heal cut ≤ 100 %, Bounty ceiling (BR-E08); every timed effect keeps its cooldown or window |
 | BR-X10 | Stronghold healing exists only through named effects with a per-window cap and never exceeds max HP; at most one Stronghold shield exists at a time and it absorbs unit and Stronghold damage only |
 | BR-X11 | Conditional effects read the state when they apply — position and HP-fraction conditions at hit resolution, Synergy-count conditions after that tick's Synergy update — in the simulation's fixed seat and unit-id order; nothing caches a condition across ticks |
+| BR-X12 | **Proposed (D-60).** A Cargo Crab's carry bonus is one move source, `max(base, branch)`, never their sum. Base +2 000 bp; branch none on A1 and A2, +2 000 on B1 (Faster Legs), +2 000 on B2 steady and +4 000 on B2 during its 4 s Overdrive surge. So A1 = A2 = B1 = B2 = +2 000 bp and a surging B2 = +4 000 bp. It joins the other move bonuses in Σbp under BR-X03 (≤ +5 000). A crab that carries moves at `max(crab speed, passenger speed) × (10 000 + Σbp) / 10 000`; each speed is read after its own Slow, so a slowed passenger lowers the pair only down to the crab's own speed |
 
 ### 10.8 Augment catalog (40, Proposed)
 
@@ -708,7 +709,7 @@ Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). S
 | Shatterback | Plants | Tank | 4 | 560 + 4 × 100 plates | 30 | 1.5 | 0.8 | 0.55 | Each broken plate: permanently faster moves and attacks |
 | Blood Furnace | Undead | DPS | 4 | 440 | 36 | 1.8 | 0.8 | 0.9 | Each hit burns 6 % max HP; damage grows up to ×4 as HP falls |
 | Bloodweaver | Undead | Support | 3 | 300 | — | 5.0 | 3.0 | 0.9 | Moves up to 120 HP from the healthiest ally to the most wounded |
-| Cargo Crab | Machines | Tank | 5 | 1 400 | 20 | 1.5 | 0.8 | 0.5 | Carries one non-Tank ally: pair moves at max(crab, passenger) × 1.20; single-target attacks hit crab first; dismounts on death with intact HP and 3 s lock (D-56, Proposed) |
+| Cargo Crab | Machines | Tank | 5 | 1 400 | 20 | 1.5 | 0.8 | 0.5 | Carries one non-Tank ally: pair moves at max(crab, passenger) × (1 + carry bonus), the bonus being max(+20 % base, branch), BR-X12; single-target attacks hit crab first; dismounts on death with intact HP and 3 s lock (§C.15 of ROSTER-EXPANSION; D-56, D-60, Proposed) |
 
 ## 12. Arenas (active, values Proposed, ARENAS-G, D-55)
 

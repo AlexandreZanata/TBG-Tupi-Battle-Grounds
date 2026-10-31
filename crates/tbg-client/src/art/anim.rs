@@ -9,7 +9,7 @@ pub use super::{
 use super::{
     feet::{FootLocks, Stride},
     ik,
-    kits::{self, Aim, Gait, Kit, Moment},
+    kits::{self, Aim, Attack, Gait, Kit, Moment},
     rig::{self, Joint, Proportions, NODE_COUNT},
 };
 use bevy::prelude::*;
@@ -25,7 +25,6 @@ pub struct Animator {
     pub plan: Proportions,
     pub figure: Entity,
     pub native: bool,
-    pub archer: bool,
     pub rate: f32,
     pub hit_stop: f32,
     pub preview: Option<(Clip, f32)>,
@@ -72,7 +71,6 @@ impl Animator {
             plan,
             figure,
             native: false,
-            archer: false,
             rate: 1.0,
             hit_stop: 0.0,
             preview: None,
@@ -148,9 +146,6 @@ impl Animator {
     }
     fn pose(&self, clip: Clip, t: f32) -> Pose {
         let mut pose = sample(clip, t);
-        if self.archer {
-            super::archer_v2_clips::apply(clip, t, &mut pose);
-        }
         if let Some(kit) = self.kit {
             let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.0));
             let moment = Moment {
@@ -258,6 +253,7 @@ pub fn animate(
     time: Res<Time>,
     mut animators: Query<(&mut Animator, &Transform)>,
     mut transforms: Query<&mut Transform, Without<Animator>>,
+    mut visibility: Query<&mut Visibility, Without<Animator>>,
 ) {
     for (mut a, root) in &mut animators {
         let dt = if a.hit_stop > 0.0 {
@@ -301,6 +297,33 @@ pub fn animate(
                 t.rotation = ik::quat(rot);
             }
         }
+        if let Some(kit) = a.kit {
+            show_loaded(kit, &a, &mut visibility);
+        }
+    }
+}
+
+/// Shows a kit's loaded prop (an archer's nocked arrow) only while its shot
+/// is loaded, so it leaves the bow at Release instead of staying there.
+fn show_loaded(
+    kit: &Kit,
+    a: &Animator,
+    visibility: &mut Query<&mut Visibility, Without<Animator>>,
+) {
+    let Attack::Shot {
+        loaded: Some((node, shown)),
+        ..
+    } = kit.attack
+    else {
+        return;
+    };
+    let (clip, t) = a.clip_time();
+    if let Ok(mut v) = visibility.get_mut(a.joints[node.index()]) {
+        *v = if shown(clip, t) {
+            Visibility::Inherited
+        } else {
+            Visibility::Hidden
+        };
     }
 }
 

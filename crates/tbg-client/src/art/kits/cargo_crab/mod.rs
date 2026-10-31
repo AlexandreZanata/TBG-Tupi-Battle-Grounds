@@ -22,6 +22,11 @@ const SCUTTLE: Gait = Gait {
     stomp: false,
 };
 
+/// The passenger seat's height above the crab's ground, in world units.
+pub fn saddle_height(tier: u8) -> f32 {
+    model::seat(tier)
+}
+
 pub const KIT: Kit = Kit {
     figure: model::spec,
     pose,

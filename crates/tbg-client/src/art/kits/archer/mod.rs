@@ -4,10 +4,12 @@
 //! the next shot.
 
 mod model;
+#[cfg(test)]
+mod tests;
 
 use bevy::prelude::*;
 
-use super::common::{moves, moves::*};
+use super::common::{gear, moves, moves::*, Form};
 use super::{tools, Attack, Gait, Kit, Moment};
 use crate::art::{
     anim::{Clip, Pose},
@@ -17,7 +19,10 @@ use crate::vfx::{
     impacts::{Burst, Muzzle},
     shots::{self, ShotKind},
 };
-use model::{plan, MUZZLE};
+use model::{half_len, plan, MUZZLE};
+
+/// When the shared Archer clip releases its arrow (`clips.rs`).
+const RELEASE: f32 = 0.18;
 
 pub const KIT: Kit = Kit {
     figure: model::spec,
@@ -25,8 +30,15 @@ pub const KIT: Kit = Kit {
     gait: Gait::LIGHT,
     attack: Attack::Shot {
         from: Node::Prop(Socket::OffhandL),
+        loaded: Some((Node::Prop(Socket::Nock), nocked)),
         muzzle: |_, _| MUZZLE,
-        shot: |_, _| ShotKind::Arrow,
+        shot: |tier, branch| {
+            if Form::of(tier, branch).b && tier >= 2 {
+                ShotKind::ArrowStorm
+            } else {
+                ShotKind::Arrow
+            }
+        },
         flash: |tier, _| {
             if tier >= 1 {
                 Some((Muzzle::Bolt, None))
@@ -39,8 +51,16 @@ pub const KIT: Kit = Kit {
     durations: moves::DURATIONS,
 };
 
+/// The arrow is nocked from the start of the shot until Release.
+fn nocked(clip: Clip, t: f32) -> bool {
+    clip == Clip::AttackRanged && t < RELEASE
+}
+
 pub fn pose(m: &Moment, pose: &mut Pose) {
     let p = plan(m.tier);
+    let half = half_len(Form::of(m.tier, m.branch));
+    gear::bow_rest(pose, half);
+    let mut lift = 0.0;
     match m.clip {
         Clip::Idle => {
             moves::idle(m, pose, &p, 0.2);
@@ -65,7 +85,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             tools::set(pose, Joint::UpperArmL, [-28.0, 0.0, -8.0]);
             tools::set(pose, Joint::ForearmL, [-60.0, 0.0, 0.0]);
         }
-        Clip::AttackRanged => aim(m, pose, &p),
+        Clip::AttackRanged => lift = aim(m, pose, &p, half),
         Clip::Hit => {
             moves::hit(m, pose, 0.8);
             tools::set(pose, Joint::UpperArmL, [-30.0, 0.0, -5.0]);
@@ -99,15 +119,20 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             moves::idle(m, pose, &p, 0.2);
         }
     }
+    gear::bow_upright(pose, lift);
 }
 
 /// Side-on archer draw (0–0.12 s), aim elevation along arc (to 0.18 s), Release
-/// with recoil at 0.18 s, and reach back to the quiver (0.28–0.62 s).
-fn aim(m: &Moment, pose: &mut Pose, p: &Proportions) {
+/// with recoil at 0.18 s, and reach back to the quiver (0.28–0.62 s). Returns
+/// the elevation the bow is tilted up by, in degrees.
+fn aim(m: &Moment, pose: &mut Pose, p: &Proportions, half: f32) -> f32 {
     let draw_k = tools::window(m.t, 0.0, 0.12);
     let recover_k = tools::window(m.t, 0.45, 0.62);
-    let kick = tools::snap(m.t, 0.18, 0.21) * (1.0 - tools::window(m.t, 0.22, 0.32));
+    let kick = tools::snap(m.t, RELEASE, 0.21) * (1.0 - tools::window(m.t, 0.22, 0.32));
     let reach = tools::window(m.t, 0.30, 0.44) * (1.0 - tools::window(m.t, 0.48, 0.60));
+    // The string is drawn with the hand, and springs forward at Release.
+    let pull = draw_k * (1.0 - tools::snap(m.t, RELEASE, 0.21));
+    gear::bow_string(pose, half, pull, m.t - RELEASE);
 
     // Turn body side-on to face target
     tools::face(pose, m.aim, Vec3::ZERO);
@@ -191,4 +216,5 @@ fn aim(m: &Moment, pose: &mut Pose, p: &Proportions) {
         p,
         tools::stance(p, 1.25, 0.14 * draw_k * (1.0 - recover_k)),
     );
+    up_deg
 }

@@ -34,6 +34,11 @@ pub enum Socket {
     WeaponR,
     OffhandL,
     Back,
+    /// Bow string halves: children of the bow, pivoting on each limb tip.
+    StringTop,
+    StringBottom,
+    /// The nocked arrow: a child of the bow that slides back along the string.
+    Nock,
 }
 #[derive(Clone, Copy, Debug)]
 pub enum BodyPlan {
@@ -48,7 +53,7 @@ pub enum Node {
 }
 
 pub const BODY_COUNT: usize = 17;
-pub const NODE_COUNT: usize = BODY_COUNT + 3 + 3;
+pub const NODE_COUNT: usize = BODY_COUNT + 3 + 6;
 pub const JOINTS: [Joint; BODY_COUNT] = [
     Joint::Root,
     Joint::Hips,
@@ -69,7 +74,14 @@ pub const JOINTS: [Joint; BODY_COUNT] = [
     Joint::FootR,
 ];
 pub const SPRINGS: [Spring; 3] = [Spring::Back, Spring::HeadGear, Spring::Tabard];
-pub const SOCKETS: [Socket; 3] = [Socket::WeaponR, Socket::OffhandL, Socket::Back];
+pub const SOCKETS: [Socket; 6] = [
+    Socket::WeaponR,
+    Socket::OffhandL,
+    Socket::Back,
+    Socket::StringTop,
+    Socket::StringBottom,
+    Socket::Nock,
+];
 
 impl Joint {
     pub const fn index(self) -> usize {
@@ -113,6 +125,9 @@ impl Node {
                     Self::Body(HandR),
                     Self::Body(HandL),
                     Self::Secondary(Spring::Back),
+                    Self::Prop(Socket::OffhandL),
+                    Self::Prop(Socket::OffhandL),
+                    Self::Prop(Socket::OffhandL),
                 ][s as usize],
             ),
         }

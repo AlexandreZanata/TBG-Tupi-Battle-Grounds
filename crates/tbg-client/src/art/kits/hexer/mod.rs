@@ -18,6 +18,7 @@ pub const KIT: Kit = Kit {
     pose,
     gait: Gait::LIGHT,
     attack: Attack::Shot {
+        loaded: None,
         from: Node::Prop(Socket::WeaponR),
         muzzle: |_, _| model::muzzle(),
         shot: |_, _| ShotKind::Hex,

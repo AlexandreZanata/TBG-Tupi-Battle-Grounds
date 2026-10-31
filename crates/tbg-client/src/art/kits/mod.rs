@@ -65,6 +65,10 @@ pub struct Kit {
 /// A muzzle effect and the backblast point (weapon space), if any.
 pub type Flash = Option<(Muzzle, Option<Vec3>)>;
 
+/// A prop that exists only while a shot is loaded (the archer's nocked
+/// arrow): its node, and whether it shows at a clip time.
+pub type Loaded = (Node, fn(Clip, f32) -> bool);
+
 /// How a kit's attack reaches its target.
 pub enum Attack {
     /// A projectile leaves `muzzle` (a point in `from`'s space) on Release,
@@ -74,6 +78,7 @@ pub enum Attack {
         muzzle: fn(u8, u8) -> Vec3,
         shot: fn(u8, u8) -> ShotKind,
         flash: fn(u8, u8) -> Flash,
+        loaded: Option<Loaded>,
     },
     /// The weapon lands on Strike; `tip` is its point in `from`'s space.
     Melee {
@@ -133,6 +138,12 @@ static NESTER: Kit = nester::KIT;
 static BEETLING: Kit = beetling::KIT;
 static ARCHER: Kit = archer::KIT;
 static RAMPART: Kit = rampart::KIT;
+
+/// The passenger seat's height above a Cargo Crab's ground, in world units,
+/// at its tier: where a rider's hips sit (see `visuals::mount`).
+pub fn saddle_height(tier: u8) -> f32 {
+    cargo_crab::saddle_height(tier)
+}
 
 /// The kit of `kind`, if it has one.
 pub fn kit(kind: UnitKind) -> Option<&'static Kit> {

@@ -107,3 +107,63 @@ cd crates/tbg-client && trunk build --release
 
 1. **Balance Lab:** Measured in headless duels with paired seeds and side inversion. It models unit-to-unit interactions and speed dynamics accurately, but does not capture late-game 15-node Arcana synergies, tower aura combinations, or shop cycling economics.
 2. **Subjective Approval:** Visual styling of the orange machine crab and Archer kit aesthetics require human review by the owner.
+
+> **Read this first.** Sections above this one describe P56 as it stood before Part A. Where they disagree with this report (protocol 16, the selection test, the Cargo Crab carry bonus), this report, D-60 and D-61 are the record.
+
+## Part A report: units fixes (branch `phase/units-fixes`, 2026-10-30)
+
+Part A is integrable alone. It is built on `origin/main` (merged at `e3b977f`, which carries PR #17), with the Cargo Crab rule branch `phase/crab-rules` merged in. Nothing is pushed, merged into `main`, or deployed.
+
+### Commits (oldest first)
+
+| Commit | Item | Subject |
+|---|---|---|
+| `dc4f9a9` | A1, A2 | The Archer runs on its kit with a curved, drawable longbow (native path removed) |
+| `69e0802` | A4 | `UnitView.carrier` names a passenger's carrier (protocol 18) |
+| `d8d8eef` | A4, A5 | Passengers sit on their carrier's saddle and board with an arc; crab visual rebuilt |
+| `231c667` | A6 | A selected unit's name is the only one shown, and it follows |
+| `99dfc65` | A3 | Merge of `phase/crab-rules`: carry bonus is the larger of base and branch (D-60) |
+| `3a632af` | fix | Clippy clean-up after the archer and passenger changes |
+| (docs commit) | | D-61, D-47 update, this report, ROADMAP row |
+
+### What was fixed
+
+- **A1, Archer bow.** The old bow was two straight cylinders and a fixed string. Now each limb is four segments ending exactly on its tip (`gear::limb_points`), so the bow is an arc. The string's two halves pivot on the limb tips and turn toward the nock on draw (`gear::bow_string`), forming a V, snap at Release (0.18 s) and wobble after it. The nocked arrow shows only from the start of the shot until Release (`Attack::Shot.loaded`), so the projectile replaces it and no second arrow appears. The bow is held upright in idle, walk, aim and hit (`gear::bow_upright`), so its long axis is vertical and the shot runs level. Arrow Rain (B2) fires its own `ShotKind::ArrowStorm`: smaller, faster arrows with a spark trail. Rig: `Socket` gains `StringTop`, `StringBottom` and `Nock` as children of the bow socket.
+- **A2, native Archer path removed.** `archer_v2`, `archer_v2_clips`, `archer_v2_tests`, `archer_aim`, `bow.rs`, `arrows.rs`, `roster::humans::archer_v2` and its gear, `roster::archer_v2`, `Animator.archer`, the `bow_half` field, and the native branch in `build_library`. `Easing::Hold` went with them (its only callers were the native poses). `sync/events.rs` no longer needs `is_archer`. Kept: the Shieldbearer native figure (`roster::humans::shieldbearer_v2`), `legacy.rs` and `adapter.rs` (the 12-joint compatibility layer that the other native figures still use), and `roster::blockout` (review blockouts for every kind).
+- **A3, Cargo Crab rule (D-60, merged).** The carry bonus is `max(base, branch)`, not `base + branch`. Base +20 %; B1 +20 %; B2 +20 % and +40 % during its surge; cap +50 % (BR-X03). Contract tests cover A1, A2, B1, B2 with and without surge, the cap, and a slowed passenger. The old test that pinned `PROTOCOL_VERSION == 16` is gone; `contract_protocol` pins 18. The balance measurement (`cargo_crab_balance`, 128 pairs with a baseline) is **not run**: the owner postponed balancing. The rule is Proposed.
+- **A4, carrier id and mount.** `UnitView.carrier: Option<UnitId>` (D-61, protocol 18). `visuals/mount.rs` seats a passenger on its carrier's real `x, z`, at the saddle height from the kit (`cargo_crab::model::seat`, scaled by the form's growth), with its hips on the seat (`hip_height` from the passenger's own plan). It runs after `sync_units`. `Scene::place` is not edited (the P57 branch edits it). Its carried-passenger block still sets `pos.z = lane_z(crab.id)`, but `mount` overwrites that position each frame; **delete that block once P57 lands**.
+- **A5, boarding and visual.** `Event::Boarded` inserts `Boarding` on the passenger: a 0.5 s arc from its place into the saddle, while the crab plays `Cast`. A view that stops carrying a passenger starts `Descent`: a 0.4 s step back to the ground. A reconnect sends the full view with the carrier, so passengers appear seated with no arc, because the arc only starts from the event. The Cargo Crab is rebuilt: a saturated forge-orange carapace on a deeper belly; thick piston legs in place of rods; broad plated and toothed pincers in place of thin cones; the saddle keeps its height.
+- **A6, selection.** `visuals/names.rs` splits the rule from the projection: `show` (the inspected unit, while alive; orphan labels despawn) and `position` (desktop only; off-screen hides). The old `ui/inspect.rs` test that only wrote and read the resource now runs the death and match-end systems. `names.rs` has four system tests on two units: selecting shows one name, switching moves it, deselect hides it, a dying unit hides it, and match end despawns the names with their units.
+
+### Verification run (exact results)
+
+- `cargo fmt --all -- --check`: exit 0.
+- `cargo clippy --workspace --all-targets -- -D warnings`: exit 0.
+- `cargo test -p tbg-client --bin tbg-client`: 100 passed, 0 failed (this includes the four archer geometry tests, the four name-tag tests, the selection and kit tests, and `every_kit_form_builds_within_the_doubled_budget`).
+- `cargo test -p tbg-core --features lab`: every test binary `ok`, 0 failed (includes `contract_protocol`, `contract_cargo_crab` (10 passed), `contract_determinism`).
+- `cargo test --workspace --exclude tbg-balance`: `cargo test --workspace --exclude tbg-balance`: 44 test binaries, **316 passed, 0 failed, 1 ignored** (the ignored test is a full 1x match that takes 2 to 4 minutes; the code marks it for manual runs).
+- `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown`: `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown`: exit 0.
+- `trunk build --release` in `crates/tbg-client`: `trunk build --release` in `crates/tbg-client`: success, built from the final sources (a forced rebuild after the last edit).
+- `node --test tests/*.test.js` in `crates/tbg-client`: `node --test tests/*.test.js` in `crates/tbg-client`: 30 passed, 0 failed.
+
+Not run, by choice: `cargo test -p tbg-balance --test contract` (the owner asked for minimal tests; C7 is fixed on `main` by D-58, so it can run later) and the balance lab matrices.
+
+### Visual evidence (`docs/media/p56/`)
+
+Captured in the gallery at 1920×1080 with headless Chrome (GPU flags), from the release build:
+
+- `archer-lineup-before.jpg` / `archer-lineup-after.jpg` (`?gallery=archer&lineup`). Before: the bow is a straight stick pointing forward. After: the bow is a curved longbow, vertical in idle and walk, and in the attack row the string is drawn in a V with the arrow nocked.
+- `archer-range-before.jpg` / `archer-range-after.jpg` (`?gallery=archer&range`).
+- `cargo-crab-lineup-before.jpg` / `cargo-crab-lineup-after.jpg` (`?gallery=cargocrab&lineup`). Before: thin rod legs and thin cone pincers. After: thick piston legs, plated blocky pincers, a more saturated forge-orange carapace and a darker belly. The saddle cushion is visible in both.
+- `cargo-crab-cast-after.jpg` (`?gallery=cargocrab&frames&clip=Cast`): contact sheet of the boarding gesture at 0, 25, 50 and 75 %.
+- `unit-selection-before.jpg`: the P56 selection capture. No after capture was made.
+
+**Not captured:** a 1920×1080 match-camera close-up, the boarding arc inside a live match, the mounted pair walking and attacking, the dismount, and a click-through selection. Practice does not force a crab to board, so these need a scripted match before they can be captured. The gallery shows the animations, not the match behaviour.
+
+### Limitations
+
+- **Look sign-off is the owner's.** The crab and the bow are built to the style guide, but approval is a human decision.
+- **The mounted pair and the boarding arc are not captured in a live match.** A practice match does not force a crab to board, so the arc is covered by reasoning and by the event path, not by a screenshot.
+- **The carrier id costs one postcard tag byte per unit per view.** Not measured yet; if the bytes matter, a per-view `carried` list costs nothing when empty (D-61 reopen condition).
+- **Selection in a live match** is covered by the system tests and the browser gallery only; a click-through capture was not made.
+- **Balance** of the carry rule is deferred by the owner. The Shop and online pools are unchanged.

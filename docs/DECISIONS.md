@@ -835,6 +835,12 @@ without a kit; death hides HP bars for every unit.
 **Reopen when** a Stronghold kind needs its own impact point or muzzle for
 unit reactions, or phone support needs lighter forms.
 
+**Update (P56 Part A, 2026-10-30).** The Archer moved to its art kit. The
+native path (`archer_v2`, `bow.rs`, `arrows.rs`, `archer_aim`) never ran with a
+kit and is removed. The kit's bow is curved and strung, with a drawable string
+and a nocked arrow that shows only until Release, so the projectile replaces it
+and there is never a second arrow. Arrow Rain (B2) fires `ShotKind::ArrowStorm`.
+
 ## D-48 · Roster expansion: fifteen units, staged by ruleset pool — 2026-10-29 (owner decision)
 
 **Decision.** Fifteen new units enter the game in stages through phases
@@ -1027,6 +1033,11 @@ or the owner wants arena choice online.
 
 ## D-56 · Cargo Crab rework: united pair, carried view bit, and carry speed boost — 2026-10-30 (Proposed)
 
+> **Amended by D-60 (Proposed, 2026-10-30):** the carry bonus is the larger
+> of base and branch, not their sum, and the single-target absorption and the
+> dismount below were already rules (ROSTER-EXPANSION §C.15, P48-A), not
+> changes of this decision.
+
 **Decision.** The Cargo Crab carries an eligible allied non-Tank unit as a
 united pair. The pair advances at the speed of the faster of the two
 multiplied by $(1 + \text{carry bonus})$ (starting at base +20 % / 2 000 bp).
@@ -1067,3 +1078,68 @@ result; the thresholds are a product decision and were not touched.
 from. Balance of the fifteen new units is still unmeasured.
 **Reopen at P50 tuning**, when the lab must measure every unit on the pool
 online play uses and the gate may need a sample or a row change.
+
+## D-60 · Cargo Crab carry bonus is the larger of base and branch, never their sum — 2026-10-30 (Proposed)
+
+**Decision.** While a Cargo Crab carries a passenger, its move bonus is
+`max(base, branch)` instead of `base + branch` (BR-X12, GAME-DESIGN §10.7).
+The base is +20 % (2 000 bp, D-56). The branch values stay as the content
+table has them: none on A1 and A2, Faster Legs (B1) +20 %, Overdrive (B2)
++20 % steady and +40 % during its 4 s surge. So A1 = A2 = B1 = B2 = +20 %
+and a surging B2 = +40 %. The sum gave B1 and B2 +40 % and a surging B2
++60 %, which the cap clipped to +50 %. The carry bonus is one term of the
+move Σbp, so with haste and march it stays within +50 % (BR-X03, unchanged).
+**Pair speed**, as D-56 coded it and as now written down (BR-X12,
+ROSTER-EXPANSION §C.15): the pair advances at
+`max(crab speed, passenger speed) × (10 000 + Σbp) / 10 000`. Each speed is
+read after its own Slow, so a slowed passenger lowers the pair only down to
+the crab's own speed.
+**Correction to D-56.** D-56 presents the crab absorbing single-target
+attacks and the passenger's dismount on crab death as its changes. Both
+were already rules: since P48-A a carried unit cannot be chosen by a
+targeted effect (the crab is hit instead; area damage still reaches it at
+distance 0), and a dead crab drops its passenger 0.2 tile behind, HP intact,
+with a 3 s re-board lock (ROSTER-EXPANSION §C.15). D-56 changed three
+things: the pair speed (the faster of the two, where the crab used to walk
+alone at its own speed), the +20 % base carry bonus added on top of the
+branch bonuses, and the packing of the carried bit (`FX_CARRIED`, announced
+in §C.15) with `PROTOCOL_VERSION` 16.
+**Why.** The sum was never written down or tested. §C.15 gives the branch
+values as absolute (+20 %, +40 %) and D-56 stacked a base on top without
+saying so, which doubled Faster Legs and pushed Overdrive past the cap. With
+`max` every form's total is a number the docs already state (+20 %, +40 %).
+**Consequences.** The base, A1 and A2 crabs are unchanged; B1 goes from +40 %
+to +20 %, B2 steady from +40 % to +20 %, B2 in its surge from +60 % (clipped
+to +50 %) to +40 %. With the branch values kept, Faster Legs equals the base
+bonus and adds no speed over an unevolved crab, and Overdrive differs from
+it only in its surge: the P50 tuning pass decides whether to raise them.
+This commit changes the append-only `contract_cargo_crab.rs`: it adds the
+BR-X12, BR-X03 and Slow tests and removes
+`protocol_version_is_16_for_cargo_crab_carried_bit`, a duplicate of
+`contract_protocol.rs::protocol_version`, which stays the only protocol pin.
+**Limits.** D-56's lab numbers used the unevolved crab, whose bonus is the
+same under both rules, so they stand. No measurement exists for B1 or B2
+under the new rule: it is deferred by the owner's instruction, and the rule
+stays Proposed (D-33). Only the passenger's Slow is read for the pair speed;
+as coded and not tested, the passenger's Root and Old Finn fish are ignored,
+while the crab's own Root and fish apply to the pair.
+**Reopen when** the lab measures the B branch and Faster Legs is not worth
+its Energy, or the owner prefers the sum.
+
+## D-61 · The passenger's view names its carrier (protocol 18) — 2026-10-30 (Proposed, P56 Part A)
+
+**Decision.** `UnitView` gains `carrier: Option<UnitId>`: the unit a passenger
+rides. It is set only while `FX_CARRIED` is (D-56), so the value exists exactly
+when a passenger is aboard. The client seats the passenger on that carrier's
+real position (`visuals/mount.rs`) instead of guessing the nearest Cargo Crab on
+its side. `PROTOCOL_VERSION` becomes 18: 17 is reserved by the live-lobby branch
+(P47), so 18 is the next free number. The `FX_CARRIED` bit stays.
+**Why.** In a large army the lane guess could seat a passenger on the wrong crab.
+The id is the fact the server already has (`UnitFx.carrier`).
+**Consequences.** postcard encodes an `Option` as a tag byte, so every unit in
+every view pays one extra byte; the id itself travels only when carried. Peers on
+16 or 17 are refused by the handshake. A reconnect's full view carries the id, so
+a passenger already aboard appears seated with no boarding arc: the arc starts
+from `Event::Boarded`, never from a view diff. The byte cost is not measured yet.
+**Reopen when** the per-view bytes matter more than one tag byte per unit: then a
+`carried: Vec<(passenger, carrier)>` list per view costs nothing when empty.

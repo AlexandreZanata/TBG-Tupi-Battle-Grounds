@@ -6,10 +6,12 @@
 use bevy::prelude::*;
 
 use crate::art::{
+    anim::Pose,
     figure::{part, PartSpec},
+    ik,
     mesh::Shape::*,
     palette::*,
-    rig::Node,
+    rig::{Joint, Node, Socket},
 };
 
 const X90: [f32; 3] = [90.0, 0.0, 0.0];
@@ -212,4 +214,171 @@ pub fn bomb(at: Node, at_xyz: [f32; 3], size: f32) -> Vec<PartSpec> {
             [x, y + 0.08 * size, z],
         ),
     ]
+}
+
+// Bow space: the grip sits on the origin, the long axis runs along +Y and the
+// shot along +Z. The string lies behind the grip, on the archer's side.
+/// Z of the limb tips and of the string when braced.
+pub const BOW_TIP_Z: f32 = -0.10;
+/// How far the nock travels back from brace to full draw.
+pub const BOW_DRAW: f32 = 0.20;
+/// Nock to arrowhead, so the head sits at the bow's muzzle when braced.
+pub const ARROW_LEN: f32 = 0.42;
+const LIMB_SEGMENTS: usize = 4;
+/// How far the limb arcs forward of its chord: the curve that makes a bow.
+const LIMB_BULGE: f32 = 0.22;
+const LIMB_RADIUS: f32 = 0.018;
+const STRING_RADIUS: f32 = 0.005;
+/// String wobble after Release, as (degrees, decay per second, hertz).
+const WOBBLE: (f32, f32, f32) = (7.0, 9.0, 16.0);
+
+/// The colors a bow takes from its kit: staves, tips, grip and string, and
+/// the arrow it holds.
+pub struct BowStyle {
+    pub wood: Color,
+    pub tip: Color,
+    pub grip: Color,
+    pub string: Color,
+    pub shaft: Color,
+    pub head: Color,
+    pub fletch: Color,
+}
+
+/// The string's half length: from a limb tip to the nock at full draw.
+pub fn string_half(half: f32) -> f32 {
+    half.hypot(BOW_DRAW)
+}
+
+/// Points along one limb from the grip to its tip (`sign` picks the upper or
+/// lower limb). A quadratic curve bulging toward the target: the limb is an
+/// arc, not a stick, and it ends exactly on its tip.
+pub fn limb_points(half: f32, sign: f32) -> [Vec3; LIMB_SEGMENTS + 1] {
+    let tip = Vec3::new(0.0, sign * half, BOW_TIP_Z);
+    let control = tip * 0.5 + Vec3::Z * LIMB_BULGE;
+    std::array::from_fn(|i| {
+        let s = i as f32 / LIMB_SEGMENTS as f32;
+        control * (2.0 * s * (1.0 - s)) + tip * (s * s)
+    })
+}
+
+/// A strung bow on the bow socket: grip, two curved limbs with their tip
+/// nocks, and the arrow on its own socket. The string halves and the arrow
+/// are sockets of their own, so `bow_string` can draw them.
+pub fn bow(half: f32, style: BowStyle) -> Vec<PartSpec> {
+    let bow = Node::Prop(Socket::OffhandL);
+    let mut v = vec![part(bow, Box(0.045, 0.14, 0.05), style.grip, [0.0; 3])];
+    for sign in [1.0, -1.0] {
+        let pts = limb_points(half, sign);
+        for pair in pts.windows(2) {
+            v.push(strut(
+                bow,
+                pair[0].to_array(),
+                pair[1].to_array(),
+                LIMB_RADIUS,
+                style.wood,
+            ));
+        }
+        for p in &pts[1..] {
+            v.push(part(bow, Ball(LIMB_RADIUS), style.wood, p.to_array()));
+        }
+        v.push(part(
+            bow,
+            Box(0.026, 0.05, 0.026),
+            style.tip,
+            pts[LIMB_SEGMENTS].to_array(),
+        ));
+    }
+
+    // Each string half hangs from its limb tip: the mesh runs from the pivot.
+    let string = string_half(half);
+    v.push(part(
+        Node::Prop(Socket::StringTop),
+        Cyl(STRING_RADIUS, string),
+        style.string,
+        [0.0, -string * 0.5, 0.0],
+    ));
+    v.push(part(
+        Node::Prop(Socket::StringBottom),
+        Cyl(STRING_RADIUS, string),
+        style.string,
+        [0.0, string * 0.5, 0.0],
+    ));
+
+    // The nocked arrow: its nock on the string, its head ahead along +Z.
+    let nock = Node::Prop(Socket::Nock);
+    v.push(
+        part(
+            nock,
+            Cyl(0.006, ARROW_LEN),
+            style.shaft,
+            [0.0, 0.0, ARROW_LEN * 0.5],
+        )
+        .rot(X90),
+    );
+    v.push(
+        part(
+            nock,
+            Cone(0.018, 0.05),
+            style.head,
+            [0.0, 0.0, ARROW_LEN - 0.025],
+        )
+        .rot(X90),
+    );
+    v.push(part(
+        nock,
+        Box(0.045, 0.006, 0.06),
+        style.fletch,
+        [0.0, 0.0, 0.03],
+    ));
+    v
+}
+
+/// The bow and string at rest: the string runs straight from tip to tip.
+pub fn bow_rest(pose: &mut Pose, half: f32) {
+    bow_string(pose, half, 0.0, 0.0);
+}
+
+/// Draws the string: `draw` (0..1) brings the nock back to full draw, and
+/// `since` seconds after Release the string wobbles and settles. Each half
+/// pivots on its limb tip and turns toward the nock.
+pub fn bow_string(pose: &mut Pose, half: f32, draw: f32, since: f32) {
+    let (amp, decay, hz) = WOBBLE;
+    let wobble = if since > 0.0 {
+        amp * (-decay * since).exp() * (std::f32::consts::TAU * hz * since).sin()
+    } else {
+        0.0
+    };
+    let pull = (BOW_DRAW * draw).atan2(half).to_degrees();
+    pose[Node::Prop(Socket::StringTop).index()] = (
+        Vec3::new(pull + wobble, 0.0, 0.0),
+        Vec3::new(0.0, half, BOW_TIP_Z),
+    );
+    pose[Node::Prop(Socket::StringBottom).index()] = (
+        Vec3::new(-pull - wobble, 0.0, 0.0),
+        Vec3::new(0.0, -half, BOW_TIP_Z),
+    );
+    pose[Node::Prop(Socket::Nock).index()] =
+        (Vec3::ZERO, Vec3::new(0.0, 0.0, BOW_TIP_Z - BOW_DRAW * draw));
+}
+
+/// Holds the bow upright whatever the arm does: its rotation cancels the
+/// rotation of the arm and hand, so the long axis stays vertical and the shot
+/// runs level, tilted up by `lift` degrees for high targets.
+pub fn bow_upright(pose: &mut Pose, lift: f32) {
+    let held = [
+        Joint::Hips,
+        Joint::Spine,
+        Joint::Chest,
+        Joint::UpperArmL,
+        Joint::ForearmL,
+        Joint::HandL,
+    ]
+    .into_iter()
+    .fold(Quat::IDENTITY, |q, j| {
+        q * ik::quat(pose[Node::Body(j).index()].0)
+    });
+    let want = Quat::from_rotation_x((-lift).to_radians());
+    let (x, y, z) = (held.inverse() * want).to_euler(EulerRot::XYZ);
+    pose[Node::Prop(Socket::OffhandL).index()].0 =
+        Vec3::new(x.to_degrees(), y.to_degrees(), z.to_degrees());
 }

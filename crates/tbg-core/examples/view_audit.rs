@@ -760,6 +760,7 @@ fn rebuild_units(
             max_hp: derived_max_hp(stat, dynamic.fx, synergy, arcanas, augments, rules),
             status: dynamic.status,
             fx: dynamic.fx,
+            carrier: None,
         });
     }
     Ok(units)
@@ -1398,6 +1399,7 @@ fn rebuild_a(
             ),
             status: unit.status,
             fx: unit.fx,
+            carrier: None,
         });
     }
     Ok(MatchView {
@@ -1461,6 +1463,7 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
                 Status::Rooted { .. } => 2,
             },
             fx: fx_of(unit),
+            carrier: None,
         })
         .collect();
     let make = |you: Seat| {

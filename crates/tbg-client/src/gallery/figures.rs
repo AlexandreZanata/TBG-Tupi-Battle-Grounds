@@ -168,19 +168,6 @@ pub(super) fn spawn_one(
     animator.form = (tier, branch);
     // Review figures walk in place.
     animator.treadmill = true;
-    animator.archer =
-        form.native && kind == UnitKind::Archer && crate::art::kits::kit(kind).is_none();
-    if animator.archer {
-        crate::art::bow::attach(
-            commands,
-            root,
-            &animator,
-            lib,
-            material,
-            true,
-            form.bow_half,
-        );
-    }
     (root, animator)
 }
 

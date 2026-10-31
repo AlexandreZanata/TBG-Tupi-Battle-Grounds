@@ -15,6 +15,7 @@ pub mod aim;
 pub mod assets;
 mod attacks;
 mod cues;
+pub mod mount;
 mod names;
 mod update;
 
@@ -241,21 +242,8 @@ pub fn spawn_unit_visual(
     let mut animator = Animator::new(joints, form.plan, figure_root, look.kind, look.id);
     animator.native = form.native;
     animator.form = (look.tier, look.branch);
-    animator.archer =
-        form.native && look.kind == UnitKind::Archer && crate::art::kits::kit(look.kind).is_none();
     animator.play(crate::art::anim::Clip::Spawn);
     let root = commands.spawn_empty().id();
-    if animator.archer {
-        crate::art::bow::attach(
-            commands,
-            root,
-            &animator,
-            lib,
-            &lib.material,
-            look.own,
-            form.bow_half,
-        );
-    }
     commands
         .entity(root)
         .insert((
