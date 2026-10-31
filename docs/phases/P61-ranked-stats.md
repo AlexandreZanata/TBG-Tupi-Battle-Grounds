@@ -646,16 +646,97 @@ seasons, warehouse, dashboards, offline lab execution and actual tuning.
 
 ## Phase report (executor fills after implementation)
 
-- Commits and stages implemented: only §3 ruleset identity (`e71a814`,
-  shared with P60 step 3; `ranked_rulesets` registration in `9b5dea7`).
-  E0–E3 (collector, v8 schema, internal report, public API, lobby page,
-  patch-note workflow) **not started**. `contract_ruleset_version` passes
-  (2 tests).
-- Adopted owner decisions / configuration / ruleset identity:
-- Validation level and commands/results:
-- Coverage and known-data metric evidence:
-- Storage/CPU/query/API byte measurements:
-- Optional-write failure / invalidation / migration recovery evidence:
-- Desktop/i18n evidence and owner look decision:
-- Deviations, blocked items and exact deferred checks with reasons:
-- Reviewer conclusion / owner publication decision:
+Branch `codex/p60-p61-ranked-implementation` (see the P60 report for base,
+renumbering and shared steps). Validation level: **targeted tests** on the
+owner's requests. **P61 is incomplete:** E0/E1 delivered; E2/E3 and
+leave-one-account-out pending.
+
+- **Commits and stages implemented:**
+  - `e71a814`: §3 ruleset identity.
+  - `97d6af5`: **E0** collector and persistence.
+  - `0b07563`: **E1** aggregation and CLI.
+- **E0 collector** (`match_task/summary.rs`): fixed arrays indexed by
+  catalog IDs, which never inspect survivors.
+  - Updated by successful purchases (kind captured from the validated
+    result) and Evolutions (resulting tier/branch → form bits, max tier,
+    copy transitions).
+  - Folded once per tick from `SynergyChanged` (integrated
+    `[change, next)` combat-tick intervals),
+    `RoundOpened`/`AugmentChosen`/`Forgone` (one opportunity per offered id
+    per completed seat-round; duplicates ignored) and cancelled rounds.
+  - Saturation drops the whole match from denominators (coverage gap).
+  - JSON v1 exactly as in §4, validated (catalog bounds, form bits,
+    `tier2 ≤ tier1 ≤ bought`, choices ≤ offers, two seats, 15 Arcana ranks)
+    and capped at 16 KiB.
+  - `MatchState::step`, state hashes and the wire are unchanged.
+- **E0 persistence:**
+  - v8 `ranked_stats` plus the `ranked_stats_cohort` index, as in §5.
+  - The summary travels inside the P60 journal entry; after the
+    authoritative commit the finalizer runs an insert-or-verify.
+  - On a transient failure the journal file is kept (replay is
+    idempotent) without holding back the receipt or later settlements.
+  - Malformed or conflicting evidence becomes a counted gap and is never
+    retried.
+  - `/metrics`: `ranked_stats_saved`, `ranked_stats_gaps`,
+    `ranked_stats_failures`.
+  - `TBG_RANKED_STATS=collect` (default) or `off`; `public` is rejected
+    until E2.
+- **E1 aggregation** (`stats/`, `store::stats::read_cohort`,
+  `bin/tbg-stats.rs`):
+  - Old rows are decoded with their **stored** revision catalog.
+  - §6 eligibility with every exclusion counted: invalidated, review,
+    no-change, not-started, missing and unreadable/unknown-schema
+    summaries.
+  - Dimensions: units (all-match and the 60 s landmark with
+    excluded-early counts), Evolution reach and copy conversion,
+    Faction/Archetype, Synergy presence and uptime, Augment applied-WR and
+    conditional pick with opportunity/match counts, Arcana nodes,
+    Strongholds, Arenas (seat-A rates, forfeit rate, duration), and general
+    figures.
+  - Metrics: binary WR, draw, score, Wilson 95%, complement delta in pp,
+    and the expected-score residual from settlement-time ratings.
+  - §7 gates are evaluated internally for each exposure and its complement.
+  - The cohort read is capped at 100000 matches and errors over the cap.
+  - `tbg-stats report --db BACKUP --patch N [--compare M] --out FILE` opens
+    the file read-only. `--compare` gives a unit WR delta only when both
+    rows pass the gate, and otherwise reports "absent".
+- **Adopted owner decisions / configuration / ruleset identity:** none
+  adopted; O4/O5 remain recommendations. Revision 1, hash
+  `881301f9c2597ec3`.
+- **Validation level and commands/results** (shared lock, two jobs, one
+  test thread):
+  - `cargo clippy -p tbg-server --lib --bins --tests -- -D warnings`:
+    exit 0.
+  - `cargo test -p tbg-server --no-fail-fast --lib --test ranked --test accounts --test ranked_recovery --test ranked_integrity --test ranked_stats --test ranked_stats_recovery`:
+    **68 passed** (lib 31 including 5 collector tests; accounts 12;
+    ranked 6; ranked_integrity 7; ranked_recovery 4; ranked_stats 6;
+    ranked_stats_recovery 2).
+  - CLI smoke run on a test database: report written, exit 0. An
+    unregistered revision exits 2; a comparison with no data says "absent".
+- **Coverage and known-data metric evidence:** the §11 synthetic fixture
+  is reproduced exactly:
+  - 4 sides, W/L/D 1/1/2, WR 25%, score 50%, seat A 50%/75%;
+  - feature presence 25%, 0.5 copies per side, 2 per buyer, WR 100%,
+    gated out.
+  - Also covered: mirror counting, the Wilson examples (40.4–59.6%,
+    46.2–72.4%), gate edges (50 vs 49 sides, 40% share), every exclusion,
+    and an end-to-end store → cohort → real catalog round trip.
+- **Storage/CPU/query/API byte measurements:** not measured yet.
+- **Optional-write failure / invalidation / migration recovery evidence:**
+  covered by the tests above: insert-or-verify, a failed optional write
+  leaving ratings unchanged, the journal carrying the summary, and v6→v8
+  twice. Not yet covered: a review → clear → invalidate → restore rebuild
+  (needs the P60 correction CLI).
+- **Desktop/i18n evidence and owner look decision:** not applicable until
+  E2.
+- **Deviations.**
+  - Per-exposure account concentration uses an exact in-memory map in the
+    offline CLI, bounded by the 100000-match cap. The E2 public cache must
+    use the §5 SQL group-by or a bounded iteration instead.
+  - Leave-one-account-out (§7/§9), the Faction×Faction and
+    Stronghold×Stronghold matrices, Fortification exposures, exact Arcana
+    rank exposures and the candidate list are not implemented yet.
+- **Exact deferred checks:** the E2 `stats_api` and client tests (not
+  written: E2 not started), `contract_ranked_stats` (not written), and
+  `EXPLAIN QUERY PLAN` of the cohort read.
+- **Reviewer conclusion / owner publication decision:** pending.

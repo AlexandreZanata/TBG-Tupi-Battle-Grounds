@@ -704,8 +704,7 @@ pass. **P60 is incomplete:** steps 5–7 are missing.
   - Step 6: protocol/receipt UI (owner gate).
   - Step 7: consolidation.
   - The `EXPLAIN QUERY PLAN` evidence for the history statement.
-  - All of P61 except §3 (collector, v8, report, API, lobby page,
-    patch-note workflow).
+  - P61 E2/E3 (see the P61 report; E0/E1 are delivered).
 - **Validation actually run** (shared lock, `CARGO_BUILD_JOBS=2`, reusing
   the merged P47 worktree's target with an identical `Cargo.lock`; no new
   target directory, nothing cleaned):
