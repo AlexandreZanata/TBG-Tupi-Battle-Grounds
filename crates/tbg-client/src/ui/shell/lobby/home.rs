@@ -10,9 +10,8 @@ pub fn spawn(
     account: &Account,
     assets: &AssetServer,
     lang: Lang,
-    muted: bool,
 ) {
-    header::spawn(root, data, account, assets, lang, muted);
+    header::spawn(root, data, account, assets, lang);
     modes::spawn(root, account, assets, lang);
     profile::spawn(root, data, account, assets, lang);
     cards::features(root, assets, lang);

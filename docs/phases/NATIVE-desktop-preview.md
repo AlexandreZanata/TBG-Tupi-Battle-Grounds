@@ -122,3 +122,23 @@ needed for the default browser's static wordmark restoration.
   updated installation, and reload an already-open browser page.
 - No full suite, extra gallery/multiplayer campaign, WASM rebuild, remote
   push or CI wait. Deferred interaction/WASM consolidation remains as above.
+
+## Unified Linux header blocks — 2026-10-31
+
+Owner scope from this point: **Linux only; change the web version only on
+an explicit request.** Keep native preview changes local and reinstall each
+requested application adjustment. No web assets, browser build, deploy or
+remote push belongs to this adjustment.
+
+The account/login block and online-player block now sit inside the same
+full-height navigation strip as Arcanas/Arenas, using common cell dimensions
+and dividers. The account still exposes the existing create/sign-in actions;
+presence still opens Live battles and uses the existing public counts.
+The redundant sound tag is removed from the header; audio controls remain
+in Settings. Other screens and game rules are outside this change.
+
+Validation level: work front. Affected formatting and `git diff --check`
+passed before the owner-requested build/install. One installed desktop
+capture follows. Auth/presence interaction regression selection remains
+for consolidation; no full suite, WASM/browser check or multiplayer run is
+authorized or claimed for this layout-only adjustment.

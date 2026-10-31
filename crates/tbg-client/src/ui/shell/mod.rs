@@ -197,7 +197,7 @@ fn render(
         ))
         .with_children(|root| {
             if home {
-                lobby::spawn(root, &shell, &data, &account, &assets, *lang, sounds.muted);
+                lobby::spawn(root, &shell, &data, &account, &assets, *lang);
                 return;
             }
             navigation(root, *lang, shell.panel, &data, compact, &assets);
