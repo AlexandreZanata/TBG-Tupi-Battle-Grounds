@@ -10,7 +10,8 @@ use crate::vfx::{
     shots, VfxAssets,
 };
 use bevy::prelude::*;
-const REACH: f32 = 3.5;
+/// Cosmetic lunge bound; impacts still reach the authoritative selected target.
+pub(super) const REACH: f32 = 3.5;
 type Emission = (Node, Vec3, shots::ShotKind, Flash);
 pub(super) fn release(
     mut commands: Commands,
@@ -175,10 +176,7 @@ fn melee(
         return;
     };
     let blade = g.transform_point(tip(t, b));
-    let at = a
-        .aim_at
-        .filter(|p| p.xz().distance(root.translation.xz()) < REACH)
-        .unwrap_or(blade);
+    let at = a.aim_at.unwrap_or(blade);
     let kind = impact(t, b);
     let area = Area {
         splash: v.splash,

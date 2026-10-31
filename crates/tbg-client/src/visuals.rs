@@ -16,6 +16,8 @@ pub mod assets;
 mod attacks;
 mod cues;
 mod growth;
+#[cfg(test)]
+pub mod layout;
 pub mod mount;
 mod names;
 mod shell;

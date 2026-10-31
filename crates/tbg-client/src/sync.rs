@@ -129,7 +129,11 @@ fn render_units(state: Res<State<GameState>>) -> bool {
 
 /// Lane x in milli-tiles → world x, mirrored for seat B.
 pub fn world_x(x: i32, you: Seat) -> f32 {
-    let t = x as f32 / 1000.0;
+    world_tile(x as f32 / 1000.0, you)
+}
+
+/// Lane x in tiles → world x, mirrored for seat B.
+pub fn world_tile(t: f32, you: Seat) -> f32 {
     match you {
         Seat::A => t,
         Seat::B => LANE_LEN as f32 / 1000.0 - t,
@@ -233,10 +237,18 @@ impl Scene<'_, '_, '_, '_, '_> {
             .filter(|u| u.kind == tbg_core::UnitKind::Crowcaller)
             .filter_map(|u| u.effects.and_then(|e| e.mark).map(|m| m.target))
             .collect();
+        // Both views list units by id, so one cursor walks `to` with `from`.
+        let mut next = 0;
         for u in &from.units {
             let anchor = crowd_ecs::LaneAnchor::from_view(u, you);
+            while to.units.get(next).is_some_and(|n| n.id < u.id) {
+                next += 1;
+            }
             // A unit absent from the next view (it died) holds its position.
-            let to_x = to.units.iter().find(|n| n.id == u.id).map_or(u.x, |n| n.x);
+            let to_x = match to.units.get(next) {
+                Some(n) if n.id == u.id => n.x,
+                _ => u.x,
+            };
             let x = u.x as f32 + (to_x - u.x) as f32 * alpha;
             let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, 0.0);
             match self
