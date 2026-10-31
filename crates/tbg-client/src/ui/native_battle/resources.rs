@@ -22,6 +22,10 @@ enum Readout {
 #[derive(Component)]
 struct Reroll;
 
+pub fn plugin(app: &mut App) {
+    app.add_systems(Update, update.run_if(in_state(crate::GameState::InMatch)));
+}
+
 pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
     parent
         .spawn((
@@ -126,7 +130,7 @@ fn divider(parent: &mut ChildSpawnerCommands) {
     ));
 }
 
-pub fn update(
+fn update(
     view: Res<LatestView>,
     pending: Res<PendingBuy>,
     lang: Res<Lang>,

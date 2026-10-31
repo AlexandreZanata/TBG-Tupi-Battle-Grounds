@@ -16,6 +16,10 @@ enum Readout {
     Tower(usize),
 }
 
+pub fn plugin(app: &mut App) {
+    app.add_systems(Update, update.run_if(in_state(crate::GameState::InMatch)));
+}
+
 pub fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, assets: &AssetServer) {
     parent
         .spawn(Node {
@@ -130,13 +134,20 @@ fn plate(
                         ..default()
                     })
                     .with_children(|line| {
+                        let rating = if own {
+                            info.you_rating
+                        } else {
+                            info.opponent_rating
+                        };
+                        let display_name = rating
+                            .map_or_else(|| name.clone(), |rating| format!("{name} ({rating})"));
                         line.spawn((
                             Node {
                                 max_width: percent(68),
                                 overflow: Overflow::clip(),
                                 ..default()
                             },
-                            chrome::title(name.clone(), 14.),
+                            chrome::title(display_name, 14.),
                             TextLayout::no_wrap(),
                         ));
                         line.spawn((kit::muted("", 9.), Readout::Tower(relative)));
@@ -204,11 +215,7 @@ fn vitality(parent: &mut ChildSpawnerCommands, relative: usize) {
         });
 }
 
-pub fn update(
-    view: Res<LatestView>,
-    info: Res<MatchInfo>,
-    mut texts: Query<(&Readout, &mut Text)>,
-) {
+fn update(view: Res<LatestView>, info: Res<MatchInfo>, mut texts: Query<(&Readout, &mut Text)>) {
     let Some(v) = &view.0 else { return };
     for (kind, mut text) in &mut texts {
         let seat = |relative| {
