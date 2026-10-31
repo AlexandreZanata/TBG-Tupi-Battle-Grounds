@@ -97,7 +97,7 @@ Native validation alone never establishes browser compatibility.
   initial export 6,320 bytes), covering every conventional Shop kind plus
   animated summons. Longaxe uses a body-focused high-resolution crop so its
   tall weapon does not make the body unreadable. All five arena thumbnails
-  were captured from the refined scenes and encoded at 768x432.
+  were captured from the refined scenes and encoded at 768x382 (decoded dimensions).
 
 Local logs/captures, databases, packages and build directories are ignored;
 they are not part of the PR. Final browser, native package and deployment
@@ -176,3 +176,94 @@ now deploys libraries first, retains the unbundled digest, calculates the actual
 bundled digest, and invokes the official bundled appimagetool with two squashfs
 processors. The final AppDir executable matched its embedded digest. ShellCheck
 and shell syntax checks passed. Both launchers are named TBG.
+
+
+## Published candidate and deployment
+
+Release: [v0.1.0-native.2](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.0-native.2),
+source 1815eb70c691e36b39b6995e6f62e8e135334e3e, protocol 29.
+The tar.gz and AppImage plus their SHA-256 files were published, downloaded
+back from GitHub, and both archive digests passed. The actual extracted
+AppImage executable matched its embedded digest and source identity.
+Native production build passed in 4m28s; the server build reused its valid
+cache (0.21s). Packaging ran under the shared lock; Cargo and squashfs
+parallelism were limited to two.
+
+The final WASM build was produced at 8873422. The following commits change
+only the separate balance library, packaging and reports: an explicit
+`git diff --exit-code 8873422..1815eb7 -- crates/tbg-server crates/tbg-core
+crates/tbg-client Cargo.toml Cargo.lock` passed. The unchanged browser/server
+runtime evidence was reused rather than recompiling those targets by habit.
+The final server binary digest also matched the binary deployed below.
+
+The portable client ran from /tmp for 18 seconds with isolated preferences,
+created window preferences, and emitted no panic or missing-asset errors.
+Only its own process group was stopped. Its first harness incorrectly
+expected an INFO window line filtered by the logger; the subsequent artifact,
+private-window-state and runtime-log checks passed. AppImage --version worked
+without FUSE via --appimage-extract-and-run.
+
+TBG-only deployment used the VPS control repository's ignored task directory
+`.local/tbg-temp/consolidated-linux-20261031`. No application source, secrets
+or deployment dumps were committed there. Script syntax/ShellCheck and
+`npm run verify` passed; the latter explicitly skipped unavailable yamllint.
+Image `docker.io/library/tbg-server:linux2-1815eb70c691` replaced only the
+`tbg-temp/tbg-server` Deployment. Its Recreate strategy restarted only TBG.
+The old `pr21-8d2c48efd43b` image remains available.
+
+Before migration, SQLite backup integrity was verified and the recovery
+folder made private (0700, database 0600). Backup and previous web files remain
+under `/opt/tbg-temp/backups/linux2-1815eb70c691/`; versioned web assets are under
+`/opt/tbg-temp/releases/linux2-1815eb70c691/web`. Schema migrated 6 -> 8 with
+quick_check=ok and the same 5 accounts, 40 matches and 9 ranked_matches.
+The before/after image inventory for every unrelated Deployment was identical.
+No image pruning, other namespace change, ingress reload or VPS reboot ran.
+The task-specific ROLLBACK.md explains restoring TBG without discarding data.
+
+Public HTTPS health and /api/version passed, reporting client native.2 and
+protocol 29. The public 3D catalog rendered in WebGL2 at the deployed domain.
+All five arena images and the Pyre Warden/Longaxe portrait sentinels matched
+local hashes through HTTPS with the browser's same-origin Referer. A bare
+urllib image request returned 403; adding the normal Referer through curl
+worked without changing the site's image protection. The initial asset probe
+omitted the assets/ prefix and reached the existing SPA fallback; corrected
+paths came from the actual dist inventory.
+
+Deployed server SHA-256:
+`7941d2fd92276061a7e9309015eda5c72df5eb353eec8f327ddea76d612f6ca1`.
+Deployed WASM SHA-256:
+`7ac0fcd1b7108d6718b7ca1faad9f09e01b249b9506043525bb6fc68552e7209`.
+
+The downloaded tar.gz was safely extracted, its binary digest verified, and
+its included installer installed TBG into
+`~/.local/opt/tupi-battle-grounds/0.1.0-native.2-1815eb70c691`.
+`~/.local/bin/tbg --version` reported native.2, protocol 29 and the exact source
+commit. The desktop entry is named TBG. Byte-for-byte preference preservation
+and preservation of every earlier installation directory were verified.
+Existing user windows and sessions were not terminated.
+
+## Review status and deferred acceptance
+
+[Consolidation PR #29](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/29)
+contains all ten original PR tips; the final GitHub inventory still showed the
+same heads and main 9008f117c4289122ddff978c5d25720d2bd79687. Original PRs,
+worktrees and owner policy edits were preserved. Normal pushes and an additive
+release tag were used; no force-push, history rewrite or merge ran.
+
+Implementation/package/deploy/install delivery is complete. The PR remains a
+Draft for explicit competitive/content acceptance: P59 W10 balance evidence,
+owner look/fun acceptance and measured Practice difficulty ordering are not
+claimed. Shop reserve/reroll remains the original labeled Practice preview;
+no additional online economy rule was activated. Existing Victory motions
+are standard fallbacks with future per-kind/form hooks, not exclusive dances.
+
+Deferred commands/scenarios: full workspace check/clippy/test and unrelated
+acceptance targets (explicit full-suite request required); D-33 long balance
+gate and benchmarks (explicit heavy-run request required); extensive full
+animation/audio/reduced-motion galleries and multiplayer matrices (broader
+manual/targeted acceptance, not repeated automatically). Windows/macOS/mobile
+builds are outside this Linux release. The native binary's maximum observed
+GLIBC symbol is 2.39, reflected in the published requirements.
+GitHub CI was not awaited; local targeted evidence is not a claim that every
+unexecuted remote job will pass. No known executed targeted check remains
+failing after the recorded fixes.
