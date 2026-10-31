@@ -12,6 +12,7 @@ mod actions;
 mod arena_data_tests;
 #[cfg(test)]
 mod army_tests;
+mod attribution;
 #[cfg(test)]
 mod augment_data_tests;
 mod battle_hud;
@@ -24,22 +25,27 @@ pub(crate) mod fortify;
 #[cfg(test)]
 mod glyphs;
 mod hud;
+mod hud_portraits;
 mod hud_top;
 mod hud_update;
 mod input;
 pub(crate) mod inspect;
 #[cfg(test)]
 mod json_lite;
+mod keyboard;
+pub(crate) mod kit;
 mod menu;
 mod queue;
 pub mod ranking;
 mod ranking_ui;
 mod result;
+mod shell;
 mod start;
 #[cfg(test)]
 mod stronghold_data_tests;
 pub(crate) mod surrender;
 pub mod textform;
+mod textform_bevy;
 mod tips;
 mod toast;
 
@@ -99,6 +105,8 @@ pub enum UiAction {
     RankingPrev,
     RankingNext,
     OpenFullRanking,
+    OpenCreator,
+    OpenRepository,
     CloseRanking,
     // BR-M06: two-tap surrender in the HUD.
     Surrender,
@@ -127,7 +135,10 @@ pub const TEXT: Color = Color::srgb(0.96, 0.95, 0.90);
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<PendingBuy>()
-        .add_systems(Update, (input::taps, actions::apply, scale_ui).chain())
+        .add_systems(
+            Update,
+            (input::taps, keyboard::navigate, actions::apply, scale_ui).chain(),
+        )
         .add_plugins((
             actions::plugin,
             account::plugin,
@@ -145,12 +156,23 @@ pub fn plugin(app: &mut App) {
             toast::plugin,
             tips::plugin,
         ))
-        .add_plugins((battle_hud::plugin, inspect::plugin, fortify::plugin));
+        .add_plugins((
+            battle_hud::plugin,
+            inspect::plugin,
+            fortify::plugin,
+            shell::plugin,
+            kit::plugin,
+            attribution::plugin,
+        ));
 }
 
 /// Scale the whole UI with the smaller window side (phones ≈ 0.9, desktop 1.5).
 fn scale_ui(window: Single<&Window>, mut scale: ResMut<UiScale>) {
-    let s = (window.width().min(window.height()) / 420.0).clamp(0.75, 1.5);
+    let s = if crate::config::bevy_ui() {
+        kit::scale(window.width(), window.height())
+    } else {
+        (window.width().min(window.height()) / 420.0).clamp(0.75, 1.5)
+    };
     if (scale.0 - s).abs() > 0.01 {
         scale.0 = s;
     }
@@ -174,25 +196,7 @@ pub fn label(text: impl Into<String>, size: f32) -> impl Bundle {
 
 /// A clickable button; `UiAction::Disabled` greys it out.
 pub fn button(text: &str, action: UiAction, width: f32) -> impl Bundle + use<> {
-    let text = text.to_string();
-    let color = if action == UiAction::Disabled {
-        DISABLED
-    } else {
-        BUTTON
-    };
-    (
-        Node {
-            width: px(width),
-            padding: UiRect::axes(px(12.0), px(10.0)),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            border_radius: BorderRadius::all(px(10.0)),
-            ..default()
-        },
-        BackgroundColor(color),
-        action,
-        children![label(text, 18.0)],
-    )
+    kit::button(text.to_owned(), action, width)
 }
 
 /// Full-screen container that lets clicks pass through to the arena.
@@ -204,7 +208,10 @@ pub fn screen(justify: JustifyContent) -> impl Bundle {
         flex_direction: FlexDirection::Column,
         justify_content: justify,
         align_items: AlignItems::Center,
-        padding: UiRect::all(px(12.0)),
+        padding: UiRect {
+            bottom: px(40.0),
+            ..UiRect::all(px(12.0))
+        },
         row_gap: px(12.0),
         ..default()
     },)

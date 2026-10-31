@@ -12,6 +12,11 @@ use crate::GameState;
 pub(super) enum Hud {
     Clock,
     Hp(usize),
+    HpLabel(usize),
+    Spectators,
+    PrivateControls,
+    WatchControls,
+    Portrait(usize),
     EnergyFill,
     Info,
     Card(usize),
@@ -68,7 +73,8 @@ pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::InMatch), spawn)
         .add_systems(
             Update,
-            super::hud_update::update.run_if(in_state(GameState::InMatch)),
+            (super::hud_update::update, super::hud_portraits::update)
+                .run_if(in_state(GameState::InMatch)),
         );
 }
 
@@ -94,10 +100,10 @@ pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bund
     )
 }
 
-fn card(i: usize) -> impl Bundle {
+fn card(i: usize, narrow: bool) -> impl Bundle {
     (
         Node {
-            width: px(112.0),
+            width: px(if narrow { 82.0 } else { 154.0 }),
             flex_direction: FlexDirection::Column,
             padding: UiRect::all(px(6.0)),
             row_gap: px(4.0),
@@ -117,7 +123,19 @@ fn card(i: usize) -> impl Bundle {
                 BackgroundColor(Color::WHITE),
                 Hud::CardStrip(i)
             ),
-            (label("", 15.0), Hud::CardText(i)),
+            (
+                ImageNode::default(),
+                Node {
+                    width: percent(100),
+                    height: px(if narrow { 52 } else { 76 }),
+                    ..default()
+                },
+                Hud::Portrait(i)
+            ),
+            (
+                label("", if narrow { 11.0 } else { 15.0 }),
+                Hud::CardText(i)
+            ),
         ],
     )
 }
@@ -149,6 +167,8 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
                     ..default()
                 },
                 children![
+                    Hud::PrivateControls,
+                    BackgroundColor(super::kit::PANEL),
                     (label("", 13.0), Hud::Augments),
                     (label("", 15.0), Hud::Info),
                     (label("", 12.0), Hud::CouncilStatus),
@@ -178,9 +198,29 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, window: Single<&Window>) 
                     ),
                     (
                         row(8.0),
-                        children![card(0), card(1), card(2), card(3), card(4)]
+                        children![
+                            card(0, narrow),
+                            card(1, narrow),
+                            card(2, narrow),
+                            card(3, narrow),
+                            card(4, narrow)
+                        ]
                     ),
                     super::surrender::button(),
+                ],
+            ));
+            root.spawn((
+                Node {
+                    display: Display::None,
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    row_gap: px(8),
+                    ..default()
+                },
+                Hud::WatchControls,
+                children![
+                    (label("", 16.0), Hud::Spectators),
+                    super::kit::button("Leave battle", UiAction::LeaveWatch, 220.0)
                 ],
             ));
         });

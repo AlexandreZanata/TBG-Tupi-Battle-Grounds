@@ -19,6 +19,8 @@ fn escape(value: &str) -> String {
 }
 
 fn main() {
+    println!("cargo:rerun-if-env-changed=TBG_DEFAULT_SERVER");
+    println!("cargo:rerun-if-env-changed=TBG_SOURCE_COMMIT");
     println!("cargo:rerun-if-changed=assets/i18n/en.json");
     println!("cargo:rerun-if-changed=assets/i18n/pt-BR.json");
     let dir =
@@ -69,6 +71,11 @@ fn main() {
         code.push_str(&format!("    {v} = {i},\n"));
     }
     code.push_str("}\n");
+    code.push_str("pub(super) static KEYS: [&str; MSG_COUNT] = [\n");
+    for key in &keys {
+        code.push_str(&format!("    \"{}\",\n", escape(key)));
+    }
+    code.push_str("];\n");
     let table = |name: &str, map: &std::collections::HashMap<&str, &str>| {
         let mut s = format!("pub(super) static {name}: [&str; MSG_COUNT] = [\n");
         for key in &keys {

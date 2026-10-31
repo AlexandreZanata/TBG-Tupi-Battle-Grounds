@@ -104,7 +104,8 @@ mod web {
             desktop.0 = false;
             return;
         };
-        desktop.0 = camera::desktop(window.width(), window.height())
+        desktop.0 = !crate::config::bevy_ui()
+            && camera::desktop(window.width(), window.height())
             && *state.get() == GameState::InMatch
             && view.0.is_some()
             && root.get_attribute("data-ready").as_deref() == Some("true");
@@ -123,7 +124,7 @@ mod web {
         if !desktop.0 {
             return;
         }
-        let (info, pending, surrender, fortifying, lang) = details;
+        let (info, pending, surrender, fortifying, _lang) = details;
         let Some(v) = &view.0 else {
             return;
         };

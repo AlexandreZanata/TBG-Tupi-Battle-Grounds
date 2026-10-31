@@ -7,8 +7,6 @@
 use bevy::prelude::*;
 use std::sync::{Arc, Mutex};
 
-#[cfg(not(target_arch = "wasm32"))]
-use super::Toasts;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::JsCast;
 
@@ -17,6 +15,7 @@ use wasm_bindgen::JsCast;
 pub enum TextKind {
     Name,
     Key,
+    Room,
 }
 
 /// A submitted value; the opener stays open until it calls `close` (so a
@@ -34,7 +33,12 @@ pub struct TextCancelled;
 /// `insert_non_send`, touch through `NonSendMut`). Slots bridge to `poll`.
 #[derive(Default)]
 pub struct ActiveForm {
-    kind: Option<TextKind>,
+    pub(super) kind: Option<TextKind>,
+    pub(super) edit: super::kit::edit::Edit,
+    pub(super) masked: bool,
+    pub(super) focus: usize,
+    pub(super) prompt: String,
+    pub(super) error: Arc<Mutex<String>>,
     submitted: Arc<Mutex<Option<String>>>,
     cancelled: Arc<Mutex<bool>>,
     #[cfg(target_arch = "wasm32")]
@@ -46,24 +50,31 @@ pub fn plugin(app: &mut App) {
         .add_message::<TextCancelled>()
         .insert_non_send(ActiveForm::default())
         .add_systems(Startup, wire_dom)
-        .add_systems(Update, poll);
+        .add_systems(Update, poll)
+        .add_plugins(super::textform_bevy::plugin);
 }
 
 /// Show the form for `kind` with `prompt` as its label.
 pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
     form.kind = Some(kind);
+    form.edit = Default::default();
+    form.focus = 0;
+    form.masked = kind == TextKind::Key;
+    form.prompt = prompt.into();
+    *form.error.lock().unwrap_or_else(|e| e.into_inner()) = String::new();
     *form.submitted.lock().unwrap_or_else(|e| e.into_inner()) = None;
     *form.cancelled.lock().unwrap_or_else(|e| e.into_inner()) = false;
     #[cfg(target_arch = "wasm32")]
     if let Some(dom) = &form.dom {
+        if bevy_form() {
+            return;
+        }
         dom.label.set_text_content(Some(prompt));
         set_error_text(dom, None);
         dom.input.set_value("");
         dom.form.set_hidden(false);
         let _ = dom.input.focus();
     }
-    #[cfg(not(target_arch = "wasm32"))]
-    let _ = prompt;
 }
 
 pub fn is_open(form: &ActiveForm) -> bool {
@@ -81,6 +92,7 @@ pub fn close(form: &mut ActiveForm) {
 
 /// Show a server-side refusal inside the open form; the form stays open.
 pub fn set_error(form: &ActiveForm, msg: &str) {
+    *form.error.lock().unwrap_or_else(|e| e.into_inner()) = msg.into();
     #[cfg(target_arch = "wasm32")]
     if let Some(dom) = &form.dom {
         set_error_text(dom, Some(msg));
@@ -91,38 +103,35 @@ pub fn set_error(form: &ActiveForm, msg: &str) {
 
 fn poll(
     mut form: NonSendMut<ActiveForm>,
-    #[cfg(target_arch = "wasm32")] mut entered: MessageWriter<TextEntered>,
-    #[cfg(target_arch = "wasm32")] mut cancelled: MessageWriter<TextCancelled>,
-    #[cfg(not(target_arch = "wasm32"))] mut toasts: ResMut<Toasts>,
+    mut entered: MessageWriter<TextEntered>,
+    mut cancelled: MessageWriter<TextCancelled>,
 ) {
     if form.kind.is_none() {
         return;
     }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        toasts.push("Accounts need the web build");
-        form.kind = None;
+    let cancel = std::mem::take(&mut *form.cancelled.lock().unwrap_or_else(|e| e.into_inner()));
+    if cancel {
+        close(&mut form);
+        cancelled.write(TextCancelled);
+        return;
     }
-    #[cfg(target_arch = "wasm32")]
-    {
-        if *form.cancelled.lock().unwrap_or_else(|e| e.into_inner()) {
-            *form.cancelled.lock().unwrap_or_else(|e| e.into_inner()) = false;
-            let kind = form.kind.take();
-            if let Some(dom) = &form.dom {
-                dom.form.set_hidden(true);
-            }
-            if kind.is_some() {
-                cancelled.write(TextCancelled);
-            }
-            return;
-        }
-        let mut slot = form.submitted.lock().unwrap_or_else(|e| e.into_inner());
-        if let Some(value) = slot.take() {
-            if let Some(kind) = form.kind {
-                entered.write(TextEntered { kind, value });
-            }
-        }
+    let submitted = form
+        .submitted
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .take();
+    if let (Some(value), Some(kind)) = (submitted, form.kind) {
+        entered.write(TextEntered { kind, value });
     }
+}
+
+pub(super) fn submit(form: &ActiveForm) {
+    *form.submitted.lock().unwrap_or_else(|e| e.into_inner()) =
+        Some(form.edit.text.trim().to_string());
+}
+
+pub(super) fn cancel(form: &ActiveForm) {
+    *form.cancelled.lock().unwrap_or_else(|e| e.into_inner()) = true;
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -207,3 +216,21 @@ fn wire_dom(mut form: NonSendMut<ActiveForm>) {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn wire_dom() {}
+
+/// Mobile web keeps the existing DOM input so its virtual keyboard opens (D-20).
+pub(super) fn bevy_form() -> bool {
+    if !crate::config::bevy_ui() {
+        return false;
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        return web_sys::window()
+            .and_then(|w| w.inner_width().ok())
+            .and_then(|v| v.as_f64())
+            .is_some_and(|width| width >= 900.0);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        true
+    }
+}

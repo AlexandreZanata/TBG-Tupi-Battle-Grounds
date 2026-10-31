@@ -1,0 +1,61 @@
+TBG Visible Attribution License 1.0
+License identifier: LicenseRef-TBG-Visible-Attribution-1.0
+
+Copyright (c) 2026 Alexandre Zanata de Oliveira Vasconcelos
+GitHub account: AlexandreZanata
+
+1. Permission
+
+You may use this software and the project materials covered by this license
+for any purpose, including commercial activities. You may copy, study,
+modify, combine, host, redistribute, sublicense and sell them, in source
+or executable form, subject to the attribution conditions below. There is
+no requirement to publish your source code or to pay a royalty.
+
+2. Attribution visible on screen
+
+When this software, a modified version, or a product incorporating a
+substantial part of it is presented to users on a screen, the normal
+interface must visibly credit the original game and creator and provide
+these references:
+
+  Original game: Tupi Battle Grounds (TBG)
+  Creator credit: Alexandre Zanata (@AlexandreZanata)
+  Creator's GitHub: https://github.com/AlexandreZanata
+  Original repository:
+    https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds
+
+The credit must remain readable during normal use, including gameplay.
+A footer or comparable persistent credit is acceptable. It must not be
+removed, made illegible, covered, or confined to source code, documentation,
+an optional credits screen or an acknowledgment shown only at first launch.
+The creator and repository references must be clearly labeled clickable
+links. If an interface cannot offer clickable links, display the full URLs
+as readable text with the credit instead. You may translate or restyle the
+credit while retaining the game's identity, the creator's identity and both
+original destinations.
+
+3. Copies and downstream use
+
+Keep this license and its copyright notice with redistributed copies and
+substantial portions of the covered material. You may choose additional
+terms for your own contributions, but must preserve the permissions and
+visible-attribution obligations for the material covered here. Passing a
+copy to another party does not remove that party's attribution obligations.
+Credit identifies the original author; it must not imply that the author
+endorses your changes or business.
+
+4. Third-party material
+
+This license applies only to material for which the project owner can grant
+these rights. Third-party code, fonts and other materials retain their own
+licenses and notices. Consult THIRD_PARTY_NOTICES.md and the notices shipped
+with those materials.
+
+5. Warranty and liability
+
+The material is supplied without promises about its quality, reliability,
+suitability for a particular use, or freedom from defects. You are responsible
+for your use and modifications. To the extent the law permits, the authors
+and contributors accept no liability for claims, losses or damages arising
+from the material or its use.

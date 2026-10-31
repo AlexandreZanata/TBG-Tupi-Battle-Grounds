@@ -57,6 +57,11 @@ pub fn apply_action(
                 download_key(name, key);
                 *saved = true;
                 toasts.push("Key downloaded");
+            } else if let Some((profile, key)) =
+                account.profile.as_ref().zip(config::load_account_key())
+            {
+                download_key(&profile.name, &key);
+                toasts.push("Key downloaded to the game data directory");
             } else {
                 toasts.push("No saved key on this device");
             }

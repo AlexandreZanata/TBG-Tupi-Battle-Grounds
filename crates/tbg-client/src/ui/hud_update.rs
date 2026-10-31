@@ -13,6 +13,7 @@ use crate::visuals::assets::FACTION_COLORS;
 
 pub(super) fn update(
     view: Res<LatestView>,
+    info_state: Res<crate::sync::MatchInfo>,
     mut pending: ResMut<PendingBuy>,
     mut nodes: Query<(&Hud, &mut Node)>,
     mut colors: Query<(&Hud, &mut BackgroundColor)>,
@@ -33,6 +34,11 @@ pub(super) fn update(
                 (v.energy as f32 / band.max(1.0)).min(1.0)
             }
             // The War Council row exists only while the battle is paused.
+            Hud::PrivateControls | Hud::WatchControls => {
+                let show = matches!(hud, Hud::WatchControls) == info_state.spectating;
+                node.display = if show { Display::Flex } else { Display::None };
+                continue;
+            }
             Hud::CouncilRow => {
                 node.display = if v.augment_round.is_some() {
                     Display::Flex
@@ -78,6 +84,18 @@ pub(super) fn update(
     for (hud, mut text) in &mut texts {
         text.0 = match hud {
             Hud::Clock => clock(v),
+            Hud::HpLabel(relative) => {
+                let seat = if *relative == 0 { me } else { 1 - me };
+                format!(
+                    "{} / {} HP",
+                    v.stronghold_hp[seat].max(0),
+                    v.strongholds[seat].max_hp
+                )
+            }
+            Hud::Spectators => format!(
+                "{} vs {} · {} spectators",
+                info_state.you_name, info_state.opponent, v.spectators
+            ),
             Hud::Info => info(v),
             Hud::CardText(i) => {
                 let d = def(v.offers[*i]);
