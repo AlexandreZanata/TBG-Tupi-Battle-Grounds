@@ -748,3 +748,44 @@ other-target acceptance to consolidation. Existing focused Arcana and
 Stronghold regression tests remain queued; no competitive rule or protocol
 changed. No full suite, web assets replacement, remote Git, CI or deployment
 is requested for this front.
+
+### Four-column catalog result
+
+- Installed source: `c58d237e5829ee3a3dd10e03e1d07a0285470796`.
+  `cargo build --locked -p tbg-client --bin tbg-client`, Linux packaging
+  with `--no-archive` and the generated installer passed under the shared
+  host lock/cache and `CARGO_BUILD_JOBS=2`. The command waited for the
+  active front under the owner's chat exception. Compilation took 14.96 s
+  with no warnings or errors.
+- Affected-package formatting, `git diff --check`, original image metadata,
+  `desktop-file-validate` and installed binary/cache/manifest SHA-256
+  comparison passed. Installed metadata and the local preview pointer
+  identify this source revision. Original artwork remains unchanged.
+- Inspected `.local/catalog-arenas.webp`,
+  `.local/catalog-stronghold.webp` and `.local/catalog-arcanas.webp` at
+  1920x972. Arenas and Strongholds have four equal columns reaching the
+  common right margin; their images fill the card width without distortion.
+  Arena controls align across the row and all first-row cards show Train
+  here. The fifth card occupies the first column of the next row. All three
+  Arcana family banners now fill their inner width at 5:2; editor columns
+  and controls retain their previous arrangement.
+- The focused debug scenario found five distinct constructed training
+  controls: `[Forest, Tundra, Volcanic, Ruins, Storm]`. It queued the actual
+  fifth card's PracticeArena action with the isolated saved choice still
+  `forest`. Log: `saved before=forest; choosing=storm`, followed by
+  `actual Practice arena=storm`. `.local/catalog-arena-training.webp`
+  confirms the Running match shows Vale da Tempestade and the Storm scene.
+  This validates direct Arena selection through the normal Practice path;
+  it does not claim a physical pointer or completed-match scenario.
+- All four captures exited successfully with only expected virtual X11
+  XSETTINGS/physical-dimension warnings. Profiles and the localhost server
+  override were isolated from the user's account/preferences. Existing
+  windows and unrelated policy edits were preserved. No web source
+  behavior/assets replacement, remote Git, CI or deployment occurred.
+- Deferred to consolidation under the shared lock:
+  `cargo test -p tbg-client --bin tbg-client ui::shell::arcanas::tests
+  -- --test-threads=1` and the corresponding
+  `ui::shell::strongholds::tests` filter; actual pointer/keyboard behavior,
+  restart persistence, all five completed Practice matches and resize
+  coverage remain unverified. No Rust test suite or other-target build
+  was run on this front. Reopen TBG to load the installed catalog changes.
