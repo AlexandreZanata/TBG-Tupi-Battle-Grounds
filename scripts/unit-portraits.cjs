@@ -9,6 +9,8 @@
 // name or path, default 'playwright'), TBG_CHROME_CHANNEL (default 'chrome'), and
 // TBG_UNITS_URL (optional: a separate build to shoot Archer and Cargo Crab from,
 // e.g. after their kits change; by default every unit comes from TBG_PREVIEW_URL).
+// After changing any portrait, bump PORTRAIT_REV in assets/battle/hud.js: the proxy
+// caches images (and 404s) for four hours, so the URL needs a new revision.
 // Usage: node scripts/unit-portraits.cjs [Kind ...]   (no kinds: all 25 buyable units)
 const fs = require('node:fs/promises');
 const path = require('node:path');

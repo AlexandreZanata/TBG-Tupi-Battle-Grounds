@@ -28,12 +28,15 @@
   });
   document.addEventListener('keydown', event => { if (!root.hidden && event.key === 'Escape') send('deselect'); });
   const slug = name => name.toLowerCase().replace(/[^a-z0-9]/g,'');
-  // Units without a portrait yet (P16-B Nester, Rampart, Beetling) show none.
+  // Every buyable unit ships a portrait (tests/portraits.test.js). The proxy keeps
+  // images for four hours, 404s included, so the URL carries a revision: bump
+  // PORTRAIT_REV whenever a portrait file changes (scripts/unit-portraits.cjs).
+  const PORTRAIT_REV = 'p25-1';
   const portrait = (image, kind) => {
     if (image.dataset.kind === kind) return;
     image.dataset.kind = kind; image.style.visibility = 'hidden';
     image.onload = () => { image.style.visibility = ''; };
-    image.src = 'assets/battle/portraits/' + slug(kind) + '.webp';
+    image.src = 'assets/battle/portraits/' + slug(kind) + '.webp?v=' + PORTRAIT_REV;
   };
   // Fill moves at once; the pale trail follows after a beat, so a hit reads
   // as a chunk that drains away. A drop also flashes the bar.

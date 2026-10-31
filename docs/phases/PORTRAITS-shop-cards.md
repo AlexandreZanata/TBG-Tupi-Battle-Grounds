@@ -104,6 +104,18 @@ TBG_UNITS_URL=http://127.0.0.1:<port> node scripts/unit-portraits.cjs Archer Car
   colour portraits). In a Practice match at 1920 x 1080 and 1280 x 800, 14 different
   kinds rotated through the Shop and every portrait request answered 200.
 
+## Caching (found on the first deploy)
+
+The proxy in front of the site (Cloudflare) caches static files for four hours
+(`cache-control: public, max-age=14400`), **404 responses included**. Earlier live
+checks had made it cache 404s for the units that had no portrait and the old images
+of the others, so the first deploy left the Shop showing stale pictures although
+the files on the VPS were correct (file hashes equal, `cf-cache-status: HIT` with an
+old `age`). A URL with a version query bypasses the cache (`MISS`, 200), so the Shop
+now loads `<slug>.webp?v=<PORTRAIT_REV>` (`assets/battle/hud.js`, covered by a test).
+**Bump `PORTRAIT_REV` whenever a portrait file changes.** Nginx and the proxy
+configuration are untouched.
+
 ## Limitations
 
 - Portraits are single idle poses of the base form; they do not follow Evolution.

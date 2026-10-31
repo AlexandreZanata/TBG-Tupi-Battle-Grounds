@@ -46,3 +46,9 @@ test('every buyable unit has a 400x400 Shop portrait within 40 KB', () => {
     assert.ok(buffer.length <= BUDGET, kind + ': ' + buffer.length + ' B > ' + BUDGET + ' B');
   }
 });
+
+test('the Shop loads portraits with a revision so cached 404s and old images cannot hide them', () => {
+  const hud = fs.readFileSync(path.resolve(__dirname, '../assets/battle/hud.js'), 'utf8');
+  assert.match(hud, /const PORTRAIT_REV = '[^']+';/);
+  assert.match(hud, /slug\(kind\) \+ '\.webp\?v=' \+ PORTRAIT_REV/);
+});
