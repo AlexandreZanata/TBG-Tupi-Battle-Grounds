@@ -435,6 +435,12 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
+    /// R09: previous completed hits on the same enemy unit ramp the next basic.
+    PredatoryFrenzy {
+        step_bp: u16,
+        increments: u8,
+        gap: u16,
+    },
     /// R08: actual HP damage builds reduction for subsequent receipts.
     PrimordialCarapace {
         step_bp: u16,
@@ -498,6 +504,23 @@ const fn carapace(gap: u16, short_bonus_bp: u16) -> [Ability; 2] {
         Ability::None,
     ]
 }
+const fn frenzy(increments: u8, gap: u16) -> [Ability; 2] {
+    [
+        Ability::PredatoryFrenzy {
+            step_bp: 800,
+            increments,
+            gap,
+        },
+        Ability::None,
+    ]
+}
+const RAVAGER_ABILITIES: [[Ability; 2]; 5] = [
+    frenzy(3, 60),
+    frenzy(3, 60),
+    frenzy(3, 60),
+    frenzy(4, 60),
+    frenzy(4, 80),
+];
 const BONEHORN_ABILITIES: [[Ability; 2]; 5] = [
     carapace(60, 0),
     carapace(60, 0),
@@ -838,9 +861,9 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         form("Stone Fangs"), form("Stone Fangs"),
     ]),
     unit(UnitKind::Ravager, "Ravager", Monsters, Dps, 2_400,
-        [310, 48, 24, 800, 58, 0, 0], None, NO_ABILITIES, [
-        form("Voracious Hunt"), form("Deep Frenzy"),
-        form("Voracious Hunt"), form("Deep Frenzy"),
+        [310, 48, 24, 800, 58, 0, 0], None, RAVAGER_ABILITIES, [
+        FormDef { atk_bp: 1_500, ..form("Voracious Hunt") }, FormDef { speed_bp: 1_000, ..form("Voracious Hunt") },
+        form("Deep Frenzy"), form("Deep Frenzy"),
     ]),
     unit(UnitKind::Acidmaw, "Acidmaw", Monsters, Ranged, 2_400,
         [260, 42, 36, 4_200, 38, 0, 0], None, NO_ABILITIES, [

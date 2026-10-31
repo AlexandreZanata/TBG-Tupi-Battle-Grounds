@@ -21,6 +21,7 @@ pub mod lab;
 pub mod profiling;
 pub mod protocol;
 pub mod rating;
+mod ravager;
 pub mod replay;
 pub mod rng;
 mod roster_slots;

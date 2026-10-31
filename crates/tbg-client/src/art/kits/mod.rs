@@ -27,6 +27,7 @@ mod oilpress;
 mod old_finn;
 mod puppetmaster;
 mod rampart;
+mod ravager;
 mod rootcaller;
 mod rotcap;
 mod sawbot;
@@ -122,6 +123,8 @@ pub struct Moment {
     pub walk: Option<f32>,
     /// Authoritative active self-reduction and a brief increase cue.
     pub reduction: u16,
+    /// Per-kind completed-hit progress from the public snapshot.
+    pub counter: u8,
     pub armor_flash: f32,
 }
 
@@ -153,6 +156,7 @@ static NESTER: Kit = nester::KIT;
 static BEETLING: Kit = beetling::KIT;
 static ARCHER: Kit = archer::KIT;
 static RAMPART: Kit = rampart::KIT;
+static RAVAGER: Kit = ravager::KIT;
 
 /// The passenger seat's height above a Cargo Crab's ground, in world units,
 /// at its tier: where a rider's hips sit (see `visuals::mount`).
@@ -191,6 +195,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Nester => Some(&NESTER),
         UnitKind::Beetling => Some(&BEETLING),
         UnitKind::Rampart => Some(&RAMPART),
+        UnitKind::Ravager => Some(&RAVAGER),
         #[allow(unreachable_patterns)]
         _ => None,
     }

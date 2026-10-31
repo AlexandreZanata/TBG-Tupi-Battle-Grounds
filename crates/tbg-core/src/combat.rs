@@ -123,6 +123,7 @@ fn advance_unit(
                 // decided at windup start, so AttackStart already shows it.
                 // Root cancels the windup and the betrayal with it.
                 let (target, betrayed) = crate::support::betray_windup(state, &u, st.range, target);
+                crate::ravager::retarget(state, idx, target);
                 state.units[idx].windup = Some((target, WINDUP));
                 state.units[idx].fx.betray = betrayed;
                 ev.push(Event::AttackStart {
@@ -359,6 +360,8 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
         }
     }
     state.units.retain(|u| u.hp > 0);
+    // Clear a dead prey before projecting counters in this tick's views.
+    crate::roster_slots::tick_marks(state);
     #[cfg(feature = "lab")]
     if dead[0] + dead[1] > 0 {
         crate::lab::progress(state);

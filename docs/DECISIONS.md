@@ -1404,3 +1404,30 @@ Five meshes distinguish the pale armored A branch from the long-tusked B branch.
 Screenshot evidence and minimal/deferred validation live in P59-EXECUTION.
 Balance acceptance and public release remain pending W10/W11, not implied by the
 implementation or by a local screenshot.
+
+## D-69 · Ravager's six-limbed kit and bounded prey sequence — 2026-10-31 (Proposed)
+
+R09 implements Predatory Frenzy exactly as GAME-DESIGN §13.2–13.3: 800 bp per
+previous completed enemy-unit primary, three increments (four on B), with a
+60-tick shared inactivity expiry (80 on B2). These absolute values live in its
+content ability. The first hit is plain; all dynamic basic bonuses add before
+one integer truncation. Secondary damage, canceled windups and Stronghold hits
+cannot build it. Changing windup target clears the old sequence immediately;
+Strongholds, prey death and inactivity clear it. Summoned enemy units are legal
+prey. A grants +1,500 bp attack speed then +1,000 bp movement; B replaces cap/gap.
+
+R09 uses the existing caster mark/expiry and attack-count slots; no new state or
+legacy hash input. Mark maintenance also runs after death removal so a view cannot
+retain a dead prey's progress. Its count is cleared with its mark. The formerly
+reserved growth bits 11–13 of UnitView.fx now carry bounded per-kind progress.
+Both seat and public views use the same projection, and the client reads it only
+to close the jaw/scythes. Carry/summon bits stay intact. Protocol stays 21: the
+field layout is unchanged and R09 remains outside every public pool.
+
+The kit owns its six-support parent/rest layout over the fixed 26 nodes. Extra
+legs use rigid prop chains; alternating tripod cadence follows distance traveled.
+The left scythe hooks while the right cuts, matching the right-forearm strike
+emitter. A adds light leg guards/trailing crest; B thickens scythes and adds a
+serrated jaw shield. Contract form order/deltas change with this decision; other
+characters' frozen forms stay unchanged. Screenshot evidence and deferred focused
+checks are in P59-EXECUTION. No balance acceptance or public activation is claimed.

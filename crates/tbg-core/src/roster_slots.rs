@@ -204,6 +204,9 @@ pub(crate) fn tick_marks(state: &mut MatchState) {
             let fx = &mut state.units[i].fx;
             fx.mark_target = None;
             fx.mark_until = 0;
+            if state.units[i].kind == crate::types::UnitKind::Ravager {
+                state.units[i].fx.attacks = 0;
+            }
         }
     }
 }

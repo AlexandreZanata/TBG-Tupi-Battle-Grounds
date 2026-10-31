@@ -27,8 +27,8 @@ pub struct UnitView {
     /// 0 none, 1 slowed, 2 rooted.
     pub status: u8,
     /// Packed ability state (ROSTER-EXPANSION §F.4): poison 3 bits, fish 2,
-    /// confused 1, ward 1, bonded 1, plates 3, growth 3, carried 1, 1 spare.
-    /// Zero until the waves land, except the spare top bit: `FX_SUMMON`.
+    /// confused 1, ward 1, bonded 1, plates 3, per-kind progress 3, carried 1, 1 spare.
+    /// R09 uses progress; carry/summon bits are live. Other affliction bits await their waves.
     pub fx: u16,
     /// The carrier this unit rides (D-61), set only while `FX_CARRIED` is:
     /// the client seats the passenger on that unit, not on a lane guess.
@@ -45,11 +45,19 @@ pub const FX_SUMMON: u16 = 1 << 15;
 
 /// `UnitView.fx` bit for a carried passenger, e.g. riding a Cargo Crab (D-56, §C.15).
 pub const FX_CARRIED: u16 = 1 << 14;
+/// Per-kind ability progress occupies the reserved growth bits (D-69).
+pub const FX_COUNTER_SHIFT: u16 = 11;
+pub const FX_COUNTER_MASK: u16 = 7 << FX_COUNTER_SHIFT;
 
 impl UnitView {
     /// Summoned by kind (Beetling, Crate) or by unit (Smuggler cargo).
     pub fn is_summon(&self) -> bool {
         self.kind.is_summon() || self.fx & FX_SUMMON != 0
+    }
+
+    /// The public completed-hit counter for this kind, not a combat decision.
+    pub fn ability_counter(&self) -> u8 {
+        ((self.fx & FX_COUNTER_MASK) >> FX_COUNTER_SHIFT) as u8
     }
 
     /// Carried by a carrier (e.g. riding a Cargo Crab).
@@ -190,9 +198,9 @@ fn unit_view(u: &crate::state::Unit, tick: Tick) -> UnitView {
             Status::Slowed { .. } => 1,
             Status::Rooted { .. } => 2,
         },
-        // D-56: carried bit packed for passenger presentation; other affliction bits pending.
+        // D-69: per-kind progress shares the reserved growth bits; carry/summon stay intact.
         fx: {
-            let mut fx = 0;
+            let mut fx = u16::from(crate::ravager::counter(u, tick)) << FX_COUNTER_SHIFT;
             if u.is_summon() {
                 fx |= FX_SUMMON;
             }

@@ -40,6 +40,7 @@ pub struct Animator {
     /// When carried by a carrier (e.g. riding a Cargo Crab), sits mounted in saddle.
     pub carried: bool,
     pub reduction: u16,
+    pub counter: u8,
     armor_flash: f32,
     base: Clip,
     base_t: f32,
@@ -84,6 +85,7 @@ impl Animator {
             gait,
             carried: false,
             reduction: 0,
+            counter: 0,
             armor_flash: 0.0,
             base: Clip::Idle,
             base_t: phase * Clip::Idle.duration(),
@@ -170,6 +172,7 @@ impl Animator {
                 clock: self.clock,
                 walk,
                 reduction: self.reduction,
+                counter: self.counter,
                 armor_flash: self.armor_flash,
             };
             (kit.pose)(&moment, &mut pose);

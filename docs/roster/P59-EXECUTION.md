@@ -144,6 +144,7 @@ Deferred to the combined consolidation, not run per character:
 inside the shared lock with two jobs. These cover HP-only stacking, first/subsequent
 hits, cap refresh, expiration, shield overflow, global reduction cap, printed-range
 bonus/Stronghold exclusion, A2 expiry/HP, and matching seat/public snapshots.
+Pilot consolidation subsequently passed all five Bonehorn scenarios through the r0 filter.
 Gameplay animation/VFX observation and live reconnect with this protocol remain
 consolidation scenarios. No full suite or balance gate was run.
 
@@ -154,7 +155,9 @@ Own library: `crates/tbg-client/src/art/kits/ravager/`.
 
 low head, six planted limbs, massive anterior scythe limbs and lean abdomen; dark hide/bone with turquoise eyes and team dorsal sash. A2 swept lighter leg guards, A3 long trailing crest; B2 thick scythes and dark chest, B3 serrated jaw shield. No Sombrajaré image anatomy import.
 
-Status: pending. Evidence: `docs/media/p59/ravager/lineup.jpg`.
+Status: implemented; native scenarios passed in pilot consolidation and actual
+desktop lineup observed. [Delivery and limits](p59/R09-ravager.md).
+![Ravager five-form lineup](../media/p59/ravager/lineup.jpg)
 
 ### R10 — Acidmaw
 

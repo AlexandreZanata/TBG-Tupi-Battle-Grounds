@@ -360,9 +360,9 @@ Bonehorn/Ancestral Carapace: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal
 Bonehorn/Ancestral Carapace: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bonehorn/Stone Fangs: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Bonehorn/Stone Fangs: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Ravager/Voracious Hunt: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Ravager/Voracious Hunt: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Ravager/Voracious Hunt: hp=0 dmg=0 atk=0 speed=1000 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Ravager/Deep Frenzy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Ravager/Voracious Hunt: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Ravager/Deep Frenzy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Acidmaw/Abyssal Jaw: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Acidmaw/Corrosive Volley: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-

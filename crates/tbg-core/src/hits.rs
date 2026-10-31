@@ -86,12 +86,14 @@ pub(crate) fn resolve_hit(
                 + arcana_bp
                 + conditional_bp(state, attacker, target)
                 + crate::bonehorn::short_range_bonus(state, attacker, target)
+                + crate::ravager::bonus(state, attacker, target)
                 + furnace_bonus(state, attacker, target)
                 + plates_bonus(state, attacker)
                 + crate::stronghold::aura_bp(state, attacker),
         );
     }
     let removed = damage(state, target, amount, ev);
+    crate::ravager::completed(state, attacker, target);
     #[cfg(feature = "lab")]
     if let Target::Unit(_) = target {
         crate::lab::dealt(state, attacker, removed);
