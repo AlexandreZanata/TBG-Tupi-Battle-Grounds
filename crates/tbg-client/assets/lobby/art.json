@@ -1,6 +1,6 @@
 {
-  "logo": "assets/branding/tbg-emblem.webp",
-  "emblem": "assets/branding/tbg-emblem.webp",
+  "logo": "assets/branding/tbg-emblem.webp?v=fortress-2",
+  "emblem": "assets/branding/tbg-emblem.webp?v=fortress-2",
   "arcanas": "assets/lobby/arcanas-v2.webp",
   "troops": "assets/lobby/troops-v2.webp",
   "ranking": "assets/lobby/ranking-v2.webp",
