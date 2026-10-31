@@ -1063,3 +1063,100 @@ nothing that a seat does not already see, so no delay is needed.
 **Reopen when** spectator load breaks the budgets in P47 (2 000 spectators
 at 250 matches), a listed match leaks private state, or the owner wants
 rooms, challenges or ranked watching to stay private as well.
+
+## D-70 · Ranked integrity preserves FIFO and baseline Elo — 2026-10-31 (Proposed, P60)
+
+**Decision.** Start with authoritative completion summaries and shadow
+signals, not automatic punishment. Optional positive-inflow budgets accept
+both existing applied Elo deltas intact or replace both with zero. Keep
+one open ranked FIFO, unchanged K/floor/starting rating and no ranked bots.
+Risk state is separate from settlement: combined relationship and behavior
+evidence requests human review; Review initially settles rating normally.
+No automatic holds, bans, IP inference, fingerprinting or ML.
+
+**Why.** `rating::{delta,apply}` is not zero-sum with unequal placement Ks
+or boundaries. Clipping just the winner invents a new rating policy.
+40 points/7 days stops an equal-rating new-account winning streak after
+two wins; the small community needs measured false-positive/restriction
+cost before any gate. Pair caps alone do not stop disposable donors;
+an optional global immature-source budget addresses that route, with
+explicit remaining mature-Sybil risk. All values are Proposed in
+GAME-DESIGN §14; [P60](phases/P60-ranked-integrity.md) defines exact math,
+attacks, signals, eligibility, rollout and contracts.
+
+**Owner gate.** Activate restrictions only after shadow evidence and
+explicit acceptance of the legitimate-friends tradeoff. Retention of Elo
+requires a separately approved extension: ordering, expiry and budget
+reservation cannot be hidden inside the one-query completion budget.
+Shadow is protocol-neutral; enforcement receipts append a message and
+take the next free postcard version with same-commit protocol contracts.
+
+**Reopen when** legitimate capped results exceed the owner's accepted
+burden, mature collusion dominates, history queries exceed budget, queue
+latency changes, or staffed review makes pending settlement worthwhile.
+Anonymous open registration cannot guarantee unique humans.
+
+## D-71 · Ranked summaries inform, but do not replace, balance evidence — 2026-10-31 (Proposed, P61)
+
+**Decision.** Capture bounded authoritative side summaries, stamp each
+with a monotonic gameplay revision/source hash, retain raw facts and
+rebuild disposable statistics after adjudication. Publish only qualified
+aggregates through a small cached HTTP API and the desktop lobby; ship
+All ratings first. No account-level statistics dashboard or new service.
+Optional statistics writes follow the committed rating transaction.
+
+**Why.** Current telemetry lacks reliable joins, patch identity and choice
+histories. Survival, selection, repeated-player dependence and small
+samples make raw win rate unsuitable for direct tuning. Exposed/nonexposed
+deltas are associations, not isolated unit effects; early-purchase cohorts,
+expected-score residuals and concentration checks inform investigation.
+GAME-DESIGN §15 owns proposed definitions and thresholds; [P61](phases/P61-ranked-stats.md)
+defines collectors, SQL, API, privacy, UI and verification.
+
+**D-33 relationship.** Online data identifies hypotheses and human-play
+patterns; `tbg-balance` tests controlled candidates and held-out seeds
+before any number change. The owner then decides and patch notes record
+both forms of evidence. This decision neither runs the lab nor alters its
+gate thresholds. Every gameplay fix gets its own revision, including one
+within a marketing patch; differing revisions never silently mix.
+
+**Reopen when** clustering/privacy makes public rows misleading, collection
+cost exceeds measured budgets, new mechanics need richer summaries, public
+bands have enough players, or online and offline evidence persistently
+disagree. Exact damage instrumentation is a separate measured scope.
+
+## D-72 · One ranked record foundation and reversible corrections — 2026-10-31 (Proposed, P60/P61)
+
+**Decision.** P60 owns migration v7, match identity, atomic authoritative
+settlement, durable idempotent final-result recovery, cutover baselines
+and append-only adjudication. P61 owns additive v8 raw statistics.
+No timestamp-based legacy joins or retroactive investigation/backfill.
+Source-stamping work is implemented once in P60 for both phases.
+
+**Correction policy.** Freeze original effective deltas. Human invalidation
+or restoration replays these entries for affected accounts from the
+baseline, respecting rating floor/ceiling, recomputing projections and
+competitive records atomically. Later opponents' deltas remain fixed.
+This avoids cascading re-rating but is explicitly not exact counterfactual
+Elo. Dry-run CLI output, backup, revision lease and immutable old/new audit
+entries precede application; no web admin. No automatic account punishment.
+
+**Why.** Two independent v7 proposals would conflict; analytics and integrity
+need one match identity/status/revision. Current result persistence has
+no deduplication/recovery key and a delayed token-only profile reply can
+attach to the wrong account. Optional analytics failure must not undo rating.
+
+**Operating limits.** No result can survive failure of every durable
+medium; report unavailable instead of inventing success. Journal and DB
+operations occur after combat. Pre-migration backup must actually run;
+the current deploy script only installs the backup script. Rollback cannot
+discard newer games by blindly restoring an older backup.
+
+**Number reservation.** D-60–69 are already used by local/fetched parallel
+fronts; P59 is reserved by roster work. This program reserves P60/P61 and
+D-70–72, rechecked before merge. No existing entry is renumbered here.
+
+**Reopen when** exact counterfactual Elo is a product requirement, storage
+recovery exceeds the single-server model, multi-server settlement is needed,
+or journal/SQL budgets fail. The executable handoff and validation tiers are
+in [the program](planning/RANKED-PROGRAM.md).
