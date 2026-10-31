@@ -86,3 +86,22 @@ A01–A14 and W01–W18: implementation acceptance pending except the recorded
 source/ownership inventory portion of W01. Commands, outcomes, artifacts,
 secure-store modes, exact failures and remaining gates will be appended as
 they actually execute. No deferred platform check is a pass.
+
+### P68-A durable storage front
+
+Added schema 9 after checking the integrated schema 8 and the unmerged
+P67 source, which reserves no implemented schema 9 migration. The bounded
+existing writer now owns hash-only family creation, atomic refresh history,
+confirmation, scoped revocation and indexed cleanup (256 rows total per
+turn). Registration, ranked baseline and initial family share a transaction;
+existing registration reuses that same helper. No production database is
+opened or migrated by this front.
+
+Minimum check: `cargo check --offline --locked -p tbg-server --lib`, through
+the shared lock/two-job helper, passed (0.92 s final check). Initial compile
+reported `u64: ToSql/FromSql` and `usize: ToSql`; auth storage now uses
+checked nonnegative SQLite i64 timestamps and a checked bounded batch limit.
+Formatting applied to the affected package. The new named store regression
+scenarios in `tests/auth_sessions.rs` are queued for the single targeted
+consolidation, not claimed as executed yet. HTTP/WS/vault wiring is next;
+this storage step alone does not enable or establish complete P68 auth.

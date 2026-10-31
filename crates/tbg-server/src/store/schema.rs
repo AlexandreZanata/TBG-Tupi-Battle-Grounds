@@ -194,5 +194,9 @@ pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
         tx.execute_batch(RANKED_STATS_V8)?;
         tx.execute("INSERT INTO schema_version(version) VALUES (8)", [])?;
     }
+    if version < 9 {
+        tx.execute_batch(super::auth_sessions::SCHEMA)?;
+        tx.execute("INSERT INTO schema_version(version) VALUES (9)", [])?;
+    }
     tx.commit()
 }
