@@ -13,7 +13,10 @@ ExecStart=/opt/tbg/bin/tbg-server
 Restart=always
 RestartSec=2
 KillSignal=SIGTERM
-TimeoutStopSec=330
+# P66 (BR-UP06): SIGTERM stops new admissions and waits, without a time
+# limit, until running matches end and their results are stored. A stop
+# that never finishes is an operator decision, not a timeout.
+TimeoutStopSec=infinity
 LimitNOFILE=65536
 NoNewPrivileges=true
 # P14: files the server creates (database, WAL) are private to `tbg`.

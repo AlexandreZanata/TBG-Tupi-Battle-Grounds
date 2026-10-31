@@ -25,7 +25,7 @@ if [ "$(awk '/MemTotal/ {print $2}' /proc/meminfo)" -lt 3000000 ] && ! swapon --
 fi
 
 id -u tbg >/dev/null 2>&1 || useradd --system --home /var/lib/tbg --shell /usr/sbin/nologin tbg
-install -d -o root -g root /opt/tbg/bin /srv/tbg/web
+install -d -o root -g root /opt/tbg/bin /srv/tbg/web /srv/tbg/updates /etc/tbg
 # P14: the database and its backups hold names, ratings, and key hashes.
 install -d -m 700 -o root -g root /var/backups/tbg
 install -d -m 700 -o tbg -g tbg /var/lib/tbg
@@ -39,6 +39,8 @@ ufw allow 80,443/tcp
 ufw --force enable
 
 install -m 644 "$HERE/tbg-server.service" /etc/systemd/system/tbg-server.service
+# P66: the two-slot template stays disabled until README "Releases".
+install -m 644 "$HERE/tbg-server@.service" /etc/systemd/system/tbg-server@.service
 systemctl daemon-reload
 systemctl enable tbg-server
 
