@@ -121,6 +121,7 @@ fn capture(
     #[cfg(target_os = "linux")] units: Query<&crate::visuals::UnitVisual>,
     #[cfg(target_os = "linux")] stats: Res<crate::sync::MatchStats>,
     #[cfg(target_os = "linux")] match_info: Res<crate::sync::MatchInfo>,
+    #[cfg(target_os = "linux")] loading: Res<crate::ui::native_loading::Status>,
     mut started: Local<bool>,
 ) {
     let delay = crate::config::url_param("capture_after")
@@ -168,6 +169,8 @@ fn capture(
         return;
     };
     *started = true;
+    #[cfg(target_os = "linux")]
+    eprintln!("Loading capture: boot_ready={}, scene_waiting={}, pending_images={}, pending_texts={}, failed_images={}", loading.boot_ready, loading.scene_waiting, loading.images, loading.texts, loading.failed);
     #[cfg(target_os = "linux")]
     if crate::config::url_param("capture_panel").as_deref() == Some("arena_train") {
         let expected = crate::config::url_param("capture_arena").unwrap_or("storm".into());

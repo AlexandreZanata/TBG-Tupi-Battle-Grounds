@@ -49,6 +49,7 @@ fn summary(
             frame(),
         ))
         .with_children(|card| {
+            let pending = account.auto_login || account.pending.is_some() || data.stats_pending();
             card.spawn(kit::heading(
                 words(lang, "Your Rank", "Sua classificação"),
                 20.,
@@ -68,6 +69,7 @@ fn summary(
                     .as_ref()
                     .map_or_else(|| lang.key("lobby.guest.name"), |p| p.name.clone()),
                 12.,
+                pending,
             );
             let rank = data
                 .stats
@@ -81,6 +83,7 @@ fn summary(
                     |r| format!("#{r} Global"),
                 ),
                 24.,
+                pending,
             );
             centered(
                 card,
@@ -89,6 +92,7 @@ fn summary(
                     .as_ref()
                     .map_or("—".into(), |p| p.rating.to_string()),
                 20.,
+                pending,
             );
             card.spawn(kit::muted(
                 words(
@@ -98,7 +102,7 @@ fn summary(
                 ),
                 11.,
             ));
-            record(card, data, lang);
+            record(card, data, lang, pending);
             card.spawn(kit::button(
                 words(
                     lang,
@@ -123,7 +127,7 @@ fn summary(
         });
 }
 
-fn record(card: &mut ChildSpawnerCommands, data: &LobbyData, lang: Lang) {
+fn record(card: &mut ChildSpawnerCommands, data: &LobbyData, lang: Lang, pending: bool) {
     card.spawn(Node {
         width: percent(100),
         ..default()
@@ -155,7 +159,15 @@ fn record(card: &mut ChildSpawnerCommands, data: &LobbyData, lang: Lang) {
                 })
                 .with_children(|stat| {
                     stat.spawn(kit::muted(label, 9.));
-                    stat.spawn(text(value, 14.));
+                    stat.spawn((
+                        text(value, 14.),
+                        kit::Pending(pending),
+                        Node {
+                            width: percent(80),
+                            min_height: px(17),
+                            ..default()
+                        },
+                    ));
                 });
         }
     });
@@ -166,6 +178,10 @@ fn recent(sidebar: &mut ChildSpawnerCommands, account: &Account, data: &LobbyDat
         words(lang, "Recent Matches", "Partidas recentes"),
         18.,
     ));
+    if account.auto_login || account.pending.is_some() || data.stats_pending() {
+        super::super::native_loading::rows(sidebar, 3);
+        return;
+    }
     let recent = data.stats.as_ref().and_then(|s| s["recent"].as_array());
     let mut shown = 0;
     for value in recent.into_iter().flatten().take(5) {
@@ -208,7 +224,7 @@ fn recent(sidebar: &mut ChildSpawnerCommands, account: &Account, data: &LobbyDat
     }
 }
 
-fn centered(parent: &mut ChildSpawnerCommands, value: String, size: f32) {
+fn centered(parent: &mut ChildSpawnerCommands, value: String, size: f32, pending: bool) {
     parent
         .spawn(Node {
             width: percent(100),
@@ -217,6 +233,15 @@ fn centered(parent: &mut ChildSpawnerCommands, value: String, size: f32) {
             ..default()
         })
         .with_children(|row| {
-            row.spawn((kit::heading(value, size), TextLayout::no_wrap()));
+            row.spawn((
+                kit::heading(value, size),
+                TextLayout::no_wrap(),
+                kit::Pending(pending),
+                Node {
+                    width: percent(100),
+                    min_height: px(size * 1.2),
+                    ..default()
+                },
+            ));
         });
 }

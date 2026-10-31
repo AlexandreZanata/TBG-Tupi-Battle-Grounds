@@ -13,7 +13,9 @@ pub(super) fn spawn(
     scroll: ScrollPosition,
 ) {
     let page = ranking.page.as_ref();
-    let status = if ranking.want.is_some() {
+    let status = if ranking.failed {
+        lang.key("live.unavailable")
+    } else if ranking.want.is_some() {
         words(lang, "Loading rankings…", "Carregando ranking…")
     } else {
         format!(
@@ -34,6 +36,9 @@ pub(super) fn spawn(
     parent.spawn((Node{width:percent(100),flex_grow:1.,min_height:px(0),flex_direction:FlexDirection::Column,overflow:Overflow::scroll_y(),row_gap:px(3),..default()}, scroll, List)).with_children(|list| {
         let headings=["#".into(),words(lang,"Player","Jogador"),words(lang,"Rating","Pontuação"),words(lang,"Wins","Vitórias"),words(lang,"Losses","Derrotas"),words(lang,"Draws","Empates"),words(lang,"Win rate","Taxa de vitória")];
         row(list,headings,Color::srgb_u8(17,43,49),true);
+        if page.is_none() && ranking.want.is_some() {
+            super::super::native_loading::rows(list, 6);
+        }
         if let Some(page)=page {
             for player in &page.rows {
                 let mine=account.profile.as_ref().is_some_and(|p|p.name==player.name);

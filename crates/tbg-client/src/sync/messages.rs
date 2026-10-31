@@ -302,6 +302,11 @@ pub(super) fn poll_link(
         _ => None,
     };
     if let Some(NetStatus::Failed(why)) = link.status() {
+        #[cfg(target_os = "linux")]
+        {
+            account.auto_login = false;
+            account.pending = None;
+        }
         // A failed load-time probe is silent; the menu just stays usable.
         if !quiet {
             ui.0.push(why.clone());

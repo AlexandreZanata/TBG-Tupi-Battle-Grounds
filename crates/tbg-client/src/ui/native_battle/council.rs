@@ -202,7 +202,7 @@ fn pictures(
     images: Res<Assets<Image>>,
     mut pictures: Query<(&Picture, &mut ImageNode)>,
 ) {
-    if !view.is_changed() && !selection.is_changed() {
+    if !view.is_changed() && !selection.is_changed() && !images.is_changed() {
         return;
     }
     let Some(v) = &view.0 else { return };

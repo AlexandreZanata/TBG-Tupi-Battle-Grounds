@@ -10,6 +10,8 @@ pub fn spawn(
     assets: &AssetServer,
     lang: Lang,
 ) {
+    #[cfg(target_os = "linux")]
+    let pending = account.auto_login || account.pending.is_some() || data.stats_pending();
     root.spawn(chrome::panel([2., 68., 27.5, 27.]))
         .with_children(|p| {
             p.spawn((
@@ -84,14 +86,32 @@ pub fn spawn(
                                 .replace("{rank}", &rank.to_string())
                         },
                     );
-                info.spawn(kit::heading(title, 20.))
-                    .insert(TextColor(Color::srgb_u8(245, 240, 224)));
-                info.spawn(kit::heading(
+                let mut title = info.spawn(kit::heading(title, 20.));
+                title.insert(TextColor(Color::srgb_u8(245, 240, 224)));
+                #[cfg(target_os = "linux")]
+                title.insert((
+                    kit::Pending(pending),
+                    Node {
+                        width: percent(100),
+                        min_height: px(24),
+                        ..default()
+                    },
+                ));
+                let mut _rating = info.spawn(kit::heading(
                     account
                         .profile
                         .as_ref()
                         .map_or_else(|| "—".into(), |p| format!("{}", p.rating)),
                     18.,
+                ));
+                #[cfg(target_os = "linux")]
+                _rating.insert((
+                    kit::Pending(pending),
+                    Node {
+                        width: percent(65),
+                        min_height: px(22),
+                        ..default()
+                    },
                 ));
                 info.spawn(kit::muted(
                     lang.key(if account.profile.is_some() {
@@ -134,7 +154,16 @@ pub fn spawn(
                         })
                         .with_children(|stat| {
                             stat.spawn(kit::muted(lang.key(&format!("lobby.profile.{key}")), 12.));
-                            stat.spawn(kit::heading(value, 21.));
+                            let mut _value = stat.spawn(kit::heading(value, 21.));
+                            #[cfg(target_os = "linux")]
+                            _value.insert((
+                                kit::Pending(pending),
+                                Node {
+                                    width: percent(75),
+                                    min_height: px(26),
+                                    ..default()
+                                },
+                            ));
                         });
                 }
             });

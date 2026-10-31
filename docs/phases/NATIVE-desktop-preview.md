@@ -854,3 +854,67 @@ build, web assets change, remote Git, CI or deployment is requested.
   workspace validation, WASM/Trunk build, web behavior/assets replacement,
   remote Git, CI wait or deployment ran. Unrelated policy files remain
   unstaged. Reopen TBG to load the installed Settings redesign.
+
+## Linux loading continuity and logo navigation (2026-10-31)
+
+Owner request: make the header wordmark behave like Lobby and inventory,
+then smooth every Linux entry/page/modal without visual loading flashes.
+Continue local commits and reinstall TBG; no web changes or remote Git.
+
+### Loading inventory and implementation
+
+- Startup: embedded fonts exist synchronously, but glyph atlases, raster
+  uploads, arena meshes and render pipelines can lag behind their UI/world
+  entities. Start against a dark backdrop, show noninteractive skeletons
+  in existing slots and reveal the arena after three prepared render
+  frames. Preparation is observed through Bevy's RenderApp/MainWorld
+  loading-screen pattern; there is no fixed startup sleep.
+- Artwork: the Linux build generates a sorted manifest of all 164 WebP
+  assets (about 120 MiB of raw RGBA pixels, excluding mipmaps, renderer
+  overhead and possible CPU/GPU copies). Strong image handles pin the
+  packaged art once. Covers startup, wordmark, header icons, lobby cards,
+  Strongholds, Arenas, Arcana banners/icons, ranking, units, Shop cards,
+  Evolution, fortification and all 44 Augment illustrations/frames.
+  File additions are included automatically on the next build.
+- Every Linux UI ImageNode and Text gets an in-place, geometry-preserving
+  placeholder while its image/glyph atlas is unavailable. Cached content
+  appears immediately; only content that actually waited gets a short
+  reveal. Existing image tint/affordability is preserved. Failed artwork
+  resolves to a stable marked fallback instead of an endless skeleton.
+- Login recovery/account requests, presence, live matches, online players,
+  player statistics, ranking podium values, table and recent matches use
+  explicit pending fields/rows. Existing data stays visible during refresh.
+  The ranking's initial request uses the existing 30-second network give-up
+  budget and existing Refresh action rather than remaining pending forever.
+  Network failure releases the account's presentation busy state without
+  deleting a saved key.
+- Queue, countdown, battle clock, HP, Energy, reserve, Shop, Augments,
+  inspection, fortification, Evolution, result/rematch, Settings and static
+  catalog pages inherit the same text/image readiness behavior. Actual
+  authoritative countdowns, choices, actions and network/simulation work
+  continue; skeletons never capture input. A ready arena stays visible when
+  a new troop/effect appears. A different Arena starts a new world reveal.
+- The persistent creator attribution remains visible and is exempt from
+  placeholders. No game rules, clocks, protocol messages or server outcomes
+  change. No dependencies or new artwork. Linux-only presentation plugins
+  leave browser rendering behavior intact.
+- The header wordmark dispatches the same Open(Lobby) shell action as the
+  Lobby tab, including closing Ranking through the existing navigation path.
+
+### Validation plan and deferred checks
+
+Level: work front. Format the affected client and inspect the diff; perform
+the owner-requested native build/package/install under the shared host lock
+and existing cache with two Cargo jobs. The owner's chat exception permits
+waiting. Inspect focused captures for normal/forced loading, pending/error
+ranking, Augments and a real Practice Arena transition with isolated data.
+Capture diagnostics report actual preparation state; a forced-loading
+fixture is explicitly opt-in and debug-only.
+
+Defer physical pointer/keyboard navigation, saved-key recovery against a
+live server, server-delayed statistics/rating/rematch, all 44 randomized
+Augment choices, GPU-driver/cold-disk and resize coverage to consolidation.
+Deferred targeted command: `cargo test -p tbg-client ui::result::tests::rematch_controls_follow_the_offer_without_query_conflicts -- --test-threads=1`
+under the shared host lock/cache. Full workspace tests/clippy, WASM/Trunk,
+multiplayer/reconnect and release builds remain unrun; broad/full checks
+require the owner's explicit scope. No CI wait, remote Git or deployment.

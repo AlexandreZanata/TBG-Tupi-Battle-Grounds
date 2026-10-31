@@ -65,6 +65,7 @@ pub(super) fn spawn(
             ));
             for (rank, art) in [(2, "silver"), (1, "gold"), (3, "bronze")] {
                 let leader = ranking.leaders[rank - 1].as_ref();
+                let pending = ranking.page.is_none() && ranking.want.is_some();
                 stage
                     .spawn(Node {
                         width: percent(100. / 3.),
@@ -135,6 +136,12 @@ pub(super) fn spawn(
                                         15.,
                                     ),
                                     TextLayout::no_wrap(),
+                                    kit::Pending(pending),
+                                    Node {
+                                        width: percent(100),
+                                        min_height: px(19),
+                                        ..default()
+                                    },
                                 ));
                             });
                             plate(card, 12., 82., 76., 16., |stats| {
@@ -160,7 +167,15 @@ pub(super) fn spawn(
                                             ..default()
                                         })
                                         .with_children(|field| {
-                                            field.spawn(text(value, 12.));
+                                            field.spawn((
+                                                text(value, 12.),
+                                                kit::Pending(pending),
+                                                Node {
+                                                    width: percent(90),
+                                                    min_height: px(15),
+                                                    ..default()
+                                                },
+                                            ));
                                             field.spawn(kit::muted(label, 8.));
                                         });
                                 }

@@ -91,8 +91,9 @@ pub fn spawn(
                     padding: UiRect::axes(px(8), px(6)),
                     ..block()
                 },
-                BackgroundColor(chrome::METAL),
-                BorderColor::all(chrome::EDGE),
+                chrome::skin(chrome::METAL, true, false),
+                UiAction::Disabled,
+                Action::Open(Panel::Lobby),
             ))
             .with_children(|logo| {
                 logo.spawn((
@@ -259,6 +260,12 @@ fn presence_block(
                 .replace("{battle}", &v.battle.to_string())
         },
     );
+    #[cfg(target_os = "linux")]
+    let online = if data.live.is_none() && data.unavailable {
+        lang.key("live.unavailable")
+    } else {
+        online
+    };
     root.spawn((
         Node {
             width: percent(16),
@@ -273,6 +280,18 @@ fn presence_block(
     ))
     .with_children(|presence| {
         presence.spawn(chrome::icon(assets, "friends", 24., kit::MUTED));
+        #[cfg(not(target_os = "linux"))]
         presence.spawn(kit::muted(online, 11.));
+        #[cfg(target_os = "linux")]
+        presence.spawn((
+            kit::muted(online, 11.),
+            kit::Pending(data.live.is_none() && !data.unavailable),
+            Node {
+                width: percent(100),
+                min_height: px(14),
+                ..default()
+            },
+            TextLayout::justify(Justify::Center),
+        ));
     });
 }

@@ -42,6 +42,21 @@ pub struct Data {
     stats_request: Option<Request>,
     next: f64,
     player: String,
+    #[cfg(target_os = "linux")]
+    online_loaded: bool,
+}
+
+#[cfg(target_os = "linux")]
+impl Data {
+    pub fn live_pending(&self) -> bool {
+        self.live.is_none() && !self.unavailable
+    }
+    pub fn stats_pending(&self) -> bool {
+        self.stats.is_none() && self.stats_request.is_some()
+    }
+    pub fn online_pending(&self) -> bool {
+        !self.online_loaded && self.online_request.is_some()
+    }
 }
 
 fn name(value: &Value) -> Option<String> {
@@ -172,6 +187,10 @@ pub fn poll(
         shell.dirty = true;
     }
     if let Some(result) = data.online_request.as_ref().and_then(Request::take) {
+        #[cfg(target_os = "linux")]
+        {
+            data.online_loaded = true;
+        }
         data.online_request = None;
         if let Some((total, rows)) = result.ok().and_then(|v| parse_online(&v)) {
             data.online = rows;

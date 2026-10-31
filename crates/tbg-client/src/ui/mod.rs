@@ -43,6 +43,8 @@ mod menu;
 #[cfg(target_os = "linux")]
 mod native_battle;
 #[cfg(target_os = "linux")]
+pub(crate) mod native_loading;
+#[cfg(target_os = "linux")]
 mod native_ranking;
 mod queue;
 pub mod ranking;
@@ -169,6 +171,8 @@ pub fn plugin(app: &mut App) {
     native_battle::plugin(app);
     #[cfg(target_os = "linux")]
     native_ranking::plugin(app);
+    #[cfg(target_os = "linux")]
+    native_loading::plugin(app);
     app.init_resource::<PendingBuy>()
         .add_systems(
             Update,

@@ -80,7 +80,11 @@ fn main() {
                     ..default()
                 }),
         )
-        .insert_resource(ClearColor(art::palette::SKY_TOP))
+        .insert_resource(ClearColor(if cfg!(target_os = "linux") {
+            Color::srgb_u8(7, 15, 22)
+        } else {
+            art::palette::SKY_TOP
+        }))
         .insert_resource(Time::<Fixed>::from_hz(20.0))
         .init_state::<GameState>()
         .add_plugins((

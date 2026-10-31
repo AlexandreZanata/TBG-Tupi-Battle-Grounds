@@ -118,11 +118,20 @@ pub fn live(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
     root.spawn(chrome::panel([75., 17., 23., 50.]))
         .with_children(|p| {
             let count = data.live.as_ref().map_or(0, |v| v.matches.len());
-            p.spawn(kit::heading(
+            let mut _title = p.spawn(kit::heading(
                 lang.key("live.panel.title")
                     .replace("{n}", &count.to_string())
                     .to_uppercase(),
                 14.,
+            ));
+            #[cfg(target_os = "linux")]
+            _title.insert((
+                kit::Pending(data.live_pending()),
+                Node {
+                    width: percent(100),
+                    min_height: px(18),
+                    ..default()
+                },
             ));
             p.spawn(Node {
                 flex_grow: 1.,
@@ -132,6 +141,10 @@ pub fn live(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                 ..chrome::column()
             })
             .with_children(|rows| {
+                #[cfg(target_os = "linux")]
+                if data.live_pending() {
+                    crate::ui::native_loading::rows(rows, 3);
+                }
                 for battle in data
                     .live
                     .as_ref()

@@ -9,7 +9,7 @@ pub const CREATOR_URL: &str = "https://github.com/AlexandreZanata";
 pub const REPOSITORY_URL: &str = "https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds";
 
 #[derive(Component)]
-struct Credit;
+pub(in crate::ui) struct Credit;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(Startup, spawn)

@@ -10,8 +10,18 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
             p.spawn(kit::muted(lang.key("live.unavailable"), 16.));
         }
         let Some(live) = &data.live else {
-            p.spawn(kit::muted(lang.key("live.loading"), 18.));
-            return;
+            #[cfg(target_os = "linux")]
+            {
+                if data.live_pending() {
+                    crate::ui::native_loading::rows(p, 3);
+                }
+                return;
+            }
+            #[cfg(not(target_os = "linux"))]
+            {
+                p.spawn(kit::muted(lang.key("live.loading"), 18.));
+                return;
+            }
         };
         p.spawn(kit::muted(
             format!("{} · {} · {}", live.players, live.battle, live.watching),
@@ -61,6 +71,11 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                 .replace("{count}", &data.online_total.to_string()),
             24.,
         ));
+        #[cfg(target_os = "linux")]
+        if data.online_pending() {
+            crate::ui::native_loading::rows(p, 3);
+            return;
+        }
         if data.online.is_empty() {
             p.spawn(kit::muted(lang.key("live.accounts_none"), 16.));
         }

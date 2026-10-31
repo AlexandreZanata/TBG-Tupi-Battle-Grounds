@@ -52,9 +52,24 @@ pub(super) fn spawn(
                 flex_grow: 1.,
                 flex_basis: px(0),
                 row_gap: px(1),
+                height: px(62),
                 ..chrome::column()
             })
             .with_children(|copy| {
+                if account.auto_login || account.pending.is_some() {
+                    for height in [24, 18] {
+                        copy.spawn((
+                            kit::muted("…", 12.),
+                            Node {
+                                width: percent(100),
+                                height: px(height),
+                                ..default()
+                            },
+                            kit::Pending(true),
+                        ));
+                    }
+                    return;
+                }
                 name(copy, account, assets, lang);
                 if let Some(profile) = &account.profile {
                     copy.spawn(Node {
