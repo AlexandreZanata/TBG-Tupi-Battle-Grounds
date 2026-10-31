@@ -275,7 +275,8 @@ Own library: `crates/tbg-client/src/art/kits/pyre_warden/`.
 
 Follow this character's catalog sheet.
 
-Status: pending. Evidence: `docs/media/p59/pyre_warden/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/pyre_warden/lineup.jpg`.
 
 ### R21 — Drillnest
 

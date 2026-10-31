@@ -31,6 +31,7 @@ mod mantis;
 #[cfg(feature = "bench-profile")]
 pub mod profiling;
 pub mod protocol;
+mod pyre_warden;
 pub mod rating;
 mod rattle_tick;
 mod ravager;

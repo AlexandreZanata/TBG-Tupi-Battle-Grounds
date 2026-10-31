@@ -355,6 +355,10 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    ProfaneFire {
+        cut_bp: u16,
+        cut_ticks: u16,
+    },
     StickyWeb {
         period: u16,
         damage: u16,
@@ -866,6 +870,22 @@ const WEAVER_ABILITIES: [[Ability; 2]; 5] = [
     sticky_web(160, 500, 0),
     sticky_web(160, 500, 1500),
 ];
+const fn profane_fire(bp: u16) -> [Ability; 2] {
+    [
+        Ability::ProfaneFire {
+            cut_bp: bp,
+            cut_ticks: 40,
+        },
+        Ability::None,
+    ]
+}
+const PYRE_WARDEN_ABILITIES: [[Ability; 2]; 5] = [
+    profane_fire(3500),
+    profane_fire(3500),
+    profane_fire(3500),
+    profane_fire(3500),
+    profane_fire(5000),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -969,7 +989,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 46;
+pub const UNIT_KIND_COUNT: usize = 47;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1306,6 +1326,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::Mantis,"Mantis",Insects,Dps,2_400,[280,50,24,800,60,0,0],None,MANTIS_ABILITIES,[FormDef{atk_bp:1_500,..form("Relentless Hunt")},FormDef{speed_bp:1_000,..form("Relentless Hunt")},form("Precise Blade"),form("Precise Blade")]),
     unit(UnitKind::Hornet,"Hornet",Insects,Ranged,3_000,[260,35,30,3_800,45,0,0],None,HORNET_ABILITIES,[form("Deep Venom"),form("Deep Venom"),FormDef{atk_bp:1_500,..form("Swoop")},FormDef{range_add:400,..form("Swoop")}]),
     unit(UnitKind::Weaver,"Weaver",Insects,Control,2_400,[350,15,50,3_000,33,0,0],None,WEAVER_ABILITIES,[form("Extended Web"),form("Extended Web"),form("Protective Web"),form("Protective Web")]),
+    unit(UnitKind::PyreWarden,"Pyre Warden",Undead,Tank,3_600,[800,12,10,2_800,23,0,0],None,PYRE_WARDEN_ABILITIES,[FormDef{hp_bp:2500,..form("Funeral Furnace")},FormDef{range_add:560,..form("Funeral Furnace")},FormDef{dmg_bp:2000,..form("Pestilence Flame")},form("Pestilence Flame")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

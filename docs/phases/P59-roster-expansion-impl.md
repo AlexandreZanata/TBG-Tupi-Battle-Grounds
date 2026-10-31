@@ -249,3 +249,8 @@ D-86: Weaver's own five-form kit, canonical ability and actual desktop lineup
 delivered (19 of21). The relevant combined block passed42 distinct targeted
 scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
 docs/roster/p59/R19-weaver.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-87: Pyre Warden's own five-form kit, canonical ability and actual desktop lineup
+delivered (20 of21). The relevant combined block passed34 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol26. Report:
+docs/roster/p59/R20-pyre-warden.md. Deferred acceptance remains as listed; no activation/deploy.

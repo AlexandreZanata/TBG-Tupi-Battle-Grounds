@@ -159,6 +159,8 @@ pub enum UnitKind {
     Hornet,
     /// D-86: R19, staged outside public pools.
     Weaver,
+    /// D-87: R20, staged outside public pools.
+    PyreWarden,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

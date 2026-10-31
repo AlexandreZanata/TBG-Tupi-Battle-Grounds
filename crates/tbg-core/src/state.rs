@@ -363,6 +363,13 @@ pub enum Event {
         from: UnitId,
         to: UnitId,
     },
+    /// D-87: exact authoritative one-dimensional friendly-fire extent.
+    ProfaneFlame {
+        unit: UnitId,
+        start: i32,
+        end: i32,
+        tick: Tick,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

@@ -35,6 +35,7 @@ pub fn is_public(event: &Event) -> bool {
         | Event::CorrosiveSplash { .. }
         | Event::AbilityStarted { .. }
         | Event::AbilityResolved { .. }
-        | Event::Crossfire { .. } => true,
+        | Event::Crossfire { .. }
+        | Event::ProfaneFlame { .. } => true,
     }
 }

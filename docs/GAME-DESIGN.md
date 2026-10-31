@@ -1036,3 +1036,11 @@ outgoing duration Augments and victim Arcana once when the web applies. Its queu
 transition checks current Ward/control immunity and ordinary Slow priority; it
 cannot replace a refreshed Root. Brew discards the queue with the cleansed Root.
 The B range bonus affects only the independent special, never basic attack range.
+
+**Proposed R20 implementation reading (D-87):** Profane Fire replaces the ordinary
+basic output after common betrayal handling. Static basic damage (including B)
+and current weakening apply once and identically to every eligible unit; it never
+uses target-conditional offensive procs, lifesteal or Essence. Surviving victims
+receive cut even if shields absorbed damage; current Ward prevents a new cut.
+The primary Stronghold takes that one basic amount, with no collateral tower/cut.
+An appended public event carries both exact authoritative segment endpoints.

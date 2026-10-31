@@ -34,6 +34,14 @@ pub(super) fn cue(
         Event::AbilityStarted { .. } | Event::AbilityResolved { .. } => {
             super::special_cues::cue(commands, fx, map, visuals, ev);
         }
+        Event::ProfaneFlame { start, end, .. } => {
+            crate::vfx::profane_flame(
+                commands,
+                fx.vfx,
+                super::world_x(start, fx.you),
+                super::world_x(end, fx.you),
+            );
+        }
         Event::Crossfire { from, to } => {
             let target = chest(map, visuals, to);
             if let Some((mut v, _, mut anim)) =

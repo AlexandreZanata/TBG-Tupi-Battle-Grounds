@@ -251,6 +251,7 @@ fn event_name(event: &Event) -> &'static str {
         Event::AbilityStarted { .. } => "AbilityStarted",
         Event::AbilityResolved { .. } => "AbilityResolved",
         Event::Crossfire { .. } => "Crossfire",
+        Event::ProfaneFlame { .. } => "ProfaneFlame",
     }
 }
 

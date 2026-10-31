@@ -1944,3 +1944,33 @@ pelvis planting, simulated web, extra node, per-unit material, texture or light.
 Frozen base/form contracts append §13 values. First scoped WASM check exposed
 `cannot find value CalfL/CalfR in this scope`; corrected to existing ShinL/ShinR
 and removed its unused motion import without changing the shared rig.
+
+## D-87 · Pyre Warden's symmetric friendly fire and exact segment cue — 2026-10-31 (Proposed)
+
+R20 appends §13's Undead Tank row/four forms. Every normal basic cycle uses the
+existing six-tick windup and replaces hit output with one scan: all other living
+units in the inclusive forward range, including same-x units, allies, summons and
+carried passengers. Self/behind/out-of-range are excluded. Static basic damage and
+current weakening apply once, equally to both teams; no target-conditional outgoing
+proc, lifesteal, Essence or recursive on-hit. Ordinary victim protection, shields,
+Second Wind, HP-damage hooks and death-owner rewards stay authoritative. Surviving
+victims get cut3500bp/40 (B2:5000), independently of positive HP removal; Ward blocks
+new cut, not raw damage. Only a selected enemy Stronghold takes one basic hit,
+never collateral/cut. Common Root/dead-target cancellation and existing betrayal
+handling remain in front of this replacement. A HP2500bp then range3360; B basic
+flame damage2000bp then stronger cut. No team exclusion or friendly-fire opt-out.
+
+Protocol26 appends Event::ProfaneFlame at tag27, retaining all prior tag bytes.
+Both integer endpoints and combat tick are server facts. Client draws one cheap
+cached tapered green flame and exact ground segment, without reconstructing reach
+from interpolated positions or predicting victims. Its thickness fades; length
+stays exact. This also retains the danger strip on Low. No dynamic light, texture,
+fluid simulation, collision or new dependency. Simulation state layout/pools stay
+unchanged; the protocol contract is updated with this decision only.
+
+Own five-form skeleton burner library has coffin furnace, team chest strap,
+rigid segmented hose, braced nozzle, funerary shoulder armor and green vent slits.
+A enlarges pale armor then extends nozzle/rim; B darkens canister/adds valves then
+triple shroud. Hunched drag, planted two-hand pulse and furnace-fold death are own
+tracks, with no fabricated second ability. Registry/base/form contracts append
+only §13 values. Performance/friendly-fire fun and D-33 evidence remain pending.

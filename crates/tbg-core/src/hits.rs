@@ -23,6 +23,9 @@ pub(crate) fn resolve_hit(
         crate::support::betray_resolve(state, attacker, target, st, ev);
         return;
     }
+    if crate::pyre_warden::resolve(state, attacker, target, st, ev) {
+        return;
+    }
     // Puppetmasters confuse instead of dealing damage (§C.10).
     if crate::support::puppet_of(state, attacker).is_some() {
         crate::support::puppet_cast(state, attacker, target, st.range, ev);

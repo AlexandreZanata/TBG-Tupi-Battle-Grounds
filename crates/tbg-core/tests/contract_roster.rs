@@ -161,7 +161,7 @@ fn roster_composition() {
     // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
-    assert_eq!(UNITS.len(), 46);
+    assert_eq!(UNITS.len(), 47);
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     assert_eq!(
         &kinds[ALL_KINDS.len()..],
@@ -185,6 +185,7 @@ fn roster_composition() {
             UnitKind::Mantis,
             UnitKind::Hornet,
             UnitKind::Weaver,
+            UnitKind::PyreWarden,
         ][..]
     );
     assert_eq!(UNIT_KINDS.len(), 10);
@@ -448,7 +449,11 @@ Hornet/Swoop: hp=0 dmg=0 atk=0 speed=0 range+=400 splash+=0 heal=0 dmg+=0 hit=-
 Weaver/Extended Web: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Weaver/Extended Web: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Weaver/Protective Web: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Weaver/Protective Web: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Weaver/Protective Web: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pyre Warden/Funeral Furnace: hp=2500 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pyre Warden/Funeral Furnace: hp=0 dmg=0 atk=0 speed=0 range+=560 splash+=0 heal=0 dmg+=0 hit=-
+Pyre Warden/Pestilence Flame: hp=0 dmg=2000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pyre Warden/Pestilence Flame: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {
@@ -499,6 +504,7 @@ fn proposed_p59_bases_match_section_13() {
         (Mantis, Insects, Dps, 4, [280, 50, 24, 800, 60]),
         (Hornet, Insects, Ranged, 5, [260, 35, 30, 3_800, 45]),
         (Weaver, Insects, Control, 4, [350, 15, 50, 3_000, 33]),
+        (PyreWarden, Undead, Tank, 6, [800, 12, 10, 2_800, 23]),
     ];
     for (kind, faction, archetype, energy, base) in rows {
         let d = def(kind);

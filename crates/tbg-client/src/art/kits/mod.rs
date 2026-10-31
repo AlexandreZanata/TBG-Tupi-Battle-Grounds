@@ -37,6 +37,7 @@ mod nester;
 mod oilpress;
 mod old_finn;
 mod puppetmaster;
+mod pyre_warden;
 mod rampart;
 mod rattle_tick;
 mod ravager;
@@ -199,6 +200,7 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static PYREWARDEN: Kit = pyre_warden::KIT;
 static WEAVER: Kit = weaver::KIT;
 static HORNET: Kit = hornet::KIT;
 static MANTIS: Kit = mantis::KIT;
@@ -255,6 +257,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::PyreWarden => Some(&PYREWARDEN),
         UnitKind::Weaver => Some(&WEAVER),
         UnitKind::Hornet => Some(&HORNET),
         UnitKind::Mantis => Some(&MANTIS),

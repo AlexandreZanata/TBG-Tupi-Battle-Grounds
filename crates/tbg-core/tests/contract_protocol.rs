@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 25,
-        "v25: Crossfire secondary (D-75); v24: UnitView.effects (D-74); v23: special state/cues (D-71); v22: CorrosiveSplash (D-70); v21: UnitView.reduction (D-68); v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
+        PROTOCOL_VERSION, 26,
+        "v26: exact flame segment (D-87); v25: Crossfire secondary (D-75); v24: UnitView.effects (D-74); v23: special state/cues (D-71); v22: CorrosiveSplash (D-70); v21: UnitView.reduction (D-68); v20: seven Factions widen the Synergy arrays (D-64); v19: UnitView.shield (D-63); v18: UnitView.carrier (D-61)"
     );
 }
 
@@ -233,5 +233,19 @@ fn v25_crossfire_is_appended() {
     let event = tbg_core::Event::Crossfire { from: 1, to: 3 };
     let bytes = encode(&event);
     assert_eq!(bytes, [26, 1, 3]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn v26_profane_flame_is_appended_with_exact_endpoints() {
+    // D-87 appends tag27 and preserves every earlier byte contract.
+    let event = tbg_core::Event::ProfaneFlame {
+        unit: 1,
+        start: 0,
+        end: 0,
+        tick: 7,
+    };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [27, 1, 0, 0, 7]);
     assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
 }
