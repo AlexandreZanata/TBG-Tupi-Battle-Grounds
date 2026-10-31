@@ -1,6 +1,6 @@
 # P59 — Roster expansion: implementation (status report)
 
-Status: **not started**. This branch holds the planning (P58, Part B) and the
+Status: **W0 partly done** (six of its seven contracts, D-62). W1 and the pilot have not started. This branch holds the planning (P58, Part B) and the
 Part A units fixes (`phase/units-fixes`, merged on 2026-10-30). No unit of the
 expansion (R01–R21) exists in code yet. This file records where the work stands
 and what the next session must do. It is a status report, not a finished wave.
@@ -20,18 +20,16 @@ Part A the value is 18 (D-61). Update the audit when the next session starts.
 
 ## Waves (from P58; none started)
 
-- **W0 — shared contracts. Not started.** P58 §W0 lists seven missing pieces:
-  the per-victim bleed slot, the temporary attack-weakening slot (R13), the
-  queued post-Root Slow (R19), per-caster mark state (R03), a bounded heal-cut
-  slot beside the existing pair, timed self-reduction under the existing 2 000 bp
-  cap, and the unit shield grant path with expiry and a view field (R12/R14),
-  plus the view and event extensions they need. Six of these are specified in
-  P58 §3 and do not wait for the owner. **The shield grant waits on owner
-  decision 5** (R12/R14 semantics, and whether the dormant Cargo Crab
-  `shield_bp` is granted or removed). Any view extension changes the wire, so
-  W0 must settle whether it shares the next protocol bump; the plan says W1 adds
-  no second bump unless its wire changes again.
-- **W1 — factions. Not started;** it waits for W0 to be green. Append `Monsters`, `Celestials`, `Insects` after the four
+- **W0 — shared contracts. Six of seven in (D-62); not green.** The six slots are
+  in `UnitFx`: the bleed (R07), the weakening (R13), the Slow queued behind a
+  Root (R19), the caster's mark (R03), the timed self-reduction, and the ability
+  heal-cut beside the pair. Each is inert until a unit uses it. Tick, winner and
+  reason are identical on all five golden seeds; the hashes moved once and were
+  refrozen. **Not done:** the unit shield grant path with expiry and its view field
+  (R12/R14), blocked on owner decision 5; and the view and event extensions for the
+  six slots, deferred to the first unit wave that shows an effect (that wave
+  carries the protocol bump). Because W0 is not green, W1 has not started.
+- **W1 — factions. Not started;** it waits for W0 to be green (the shield item is the blocker). Append `Monsters`, `Celestials`, `Insects` after the four
   existing factions. Generalise every fixed-size-4 array (the reaudit lists ten:
   `FACTIONS`, `counts`, `SYNERGIES`, palette `FACTIONS: [[Color; 8]; 4]`, …).
   Synergies at 2 and 4. Bump the protocol to the next free number (19 at the
