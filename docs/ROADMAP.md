@@ -297,6 +297,26 @@ Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and 
 
 [Arena seascape](art/ARENA-SEASCAPE.md): implemented and validated on `codex/arena-seascape`, based on main `6ef155b`, then integrated into `codex/ranking-ui` for PR #14 at the owner's request to publish all changes from this chat. Owner approved the displayed design and the 12.9 ms reference p95 limit (+15.2% over its measured baseline). Report includes before/after desktop captures, performance/build measurements, local commits and the separate pre-existing online-test exclusion. Current authorization is GitHub publication only; no main merge or VPS deployment. Broader P30 status is unchanged.
 
+## Owner-requested Troops and training phase (2026-10-31)
+
+| Phase | Spec | Scope | Status | Owner checkpoints |
+|---|---|---|---|---|
+| P62 | [P62-troops-training-lab.md](phases/P62-troops-training-lab.md) | Troops catalog: lore, abilities, stats and animated model; exact-team combat laboratory, wooden dummies and Easy/Medium/Hard/Impossible practice bots | **planning only** on `codex/p62-troops-training-plan`; no implementation or gameplay validation | Integration base, proposed limits/dummy semantics, Impossible assistance, lore/look/fun |
+
+Read [player journeys and validation cases](planning/TROOPS-TRAINING.md).
+Execute catalog/content → model preview/Dance → safe training core/dummy →
+team editor/measurement → practice profiles → targeted consolidation.
+Preserve the existing Bot baseline, canonical combat, online outcomes and
+offline balance-lab boundary. No mobile work or full-suite run is included.
+
+P60/P61 were planned on `docs/p60-p61-ranked-integrity-stats`; their IDs
+remain reserved and they are not dependencies of P62. P59 roster expansion
+and the native desktop shell have separate branches: freeze their actual
+merged state before execution. No staged champion is enabled by this plan.
+D-80/D-81 avoid the inspected P59 decision reservations through D-79.
+Use the current owner's minimal-validation policy, including shared lock
+and two-job cap; historical broad verification blocks are not authorization.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·
