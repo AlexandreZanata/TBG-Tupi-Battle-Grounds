@@ -12,7 +12,7 @@ use crate::augment::AugmentCounts;
 use crate::content::{AUGMENT_OPTIONS, OFFERS, RUNNING_START};
 use crate::sim::phase_ticks_left;
 use crate::state::{Event, MatchState, Outcome, Phase};
-use crate::types::{Seat, Status, StrongholdKind, Tick, UnitId, UnitKind};
+use crate::types::{Seat, Status, StrongholdKind, Tick, UnitId, UnitKind, FACTION_COUNT};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UnitView {
@@ -30,16 +30,29 @@ pub struct UnitView {
     /// confused 1, ward 1, bonded 1, plates 3, growth 3, carried 1, 1 spare.
     /// Zero until the waves land, except the spare top bit: `FX_SUMMON`.
     pub fx: u16,
+    /// The carrier this unit rides (D-61), set only while `FX_CARRIED` is:
+    /// the client seats the passenger on that unit, not on a lane guess.
+    pub carrier: Option<UnitId>,
+    /// The unit shield still standing at the view's tick (D-63); zero once expired.
+    pub shield: u16,
 }
 
 /// `UnitView.fx` bit for a summon by unit, e.g. Smuggler cargo (BR-U08):
 /// its kind alone cannot tell, and the server refuses to evolve it.
 pub const FX_SUMMON: u16 = 1 << 15;
 
+/// `UnitView.fx` bit for a carried passenger, e.g. riding a Cargo Crab (D-56, §C.15).
+pub const FX_CARRIED: u16 = 1 << 14;
+
 impl UnitView {
     /// Summoned by kind (Beetling, Crate) or by unit (Smuggler cargo).
     pub fn is_summon(&self) -> bool {
         self.kind.is_summon() || self.fx & FX_SUMMON != 0
+    }
+
+    /// Carried by a carrier (e.g. riding a Cargo Crab).
+    pub fn is_carried(&self) -> bool {
+        self.fx & FX_CARRIED != 0
     }
 }
 
@@ -91,7 +104,7 @@ pub struct MatchView {
     pub strongholds: [StrongholdView; 2],
     pub shields: [i32; 2],
     pub units: Vec<UnitView>,
-    pub synergy: [[u8; 4]; 2],
+    pub synergy: [[u8; FACTION_COUNT]; 2],
     /// Both seats' Augment copies (public, BR-AG09).
     pub augments: [AugmentCounts; 2],
     /// Present exactly while the battle is paused for a selection; both
@@ -147,7 +160,7 @@ impl MatchState {
                 .units
                 .iter()
                 .filter(|u| u.hp > 0)
-                .map(unit_view)
+                .map(|u| unit_view(u, self.tick))
                 .collect(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],
@@ -160,7 +173,7 @@ impl MatchState {
     }
 }
 
-fn unit_view(u: &crate::state::Unit) -> UnitView {
+fn unit_view(u: &crate::state::Unit, tick: Tick) -> UnitView {
     UnitView {
         id: u.id,
         seat: u.seat,
@@ -175,7 +188,18 @@ fn unit_view(u: &crate::state::Unit) -> UnitView {
             Status::Slowed { .. } => 1,
             Status::Rooted { .. } => 2,
         },
-        // P43: affliction and carrier bits are not packed yet.
-        fx: if u.is_summon() { FX_SUMMON } else { 0 },
+        // D-56: carried bit packed for passenger presentation; other affliction bits pending.
+        fx: {
+            let mut fx = 0;
+            if u.is_summon() {
+                fx |= FX_SUMMON;
+            }
+            if u.fx.carrier.is_some() {
+                fx |= FX_CARRIED;
+            }
+            fx
+        },
+        carrier: u.fx.carrier,
+        shield: crate::roster_slots::shield_now(&u.fx, tick),
     }
 }

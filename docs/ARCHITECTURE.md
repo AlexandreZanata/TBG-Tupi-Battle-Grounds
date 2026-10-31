@@ -247,7 +247,7 @@ tables are the one allowed exception.
   browser accepts `?lag=MS` to feel added latency.
 - **Bandwidth (hypothesis):** about 400 B per view → about 4 KB/s down and
   under 0.5 KB/s up per player; about 2 MB per 4-minute match for both.
-- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §13):**
+- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §14):**
   `Spectate{id}` and `StopSpectating` (client) and `SpectateStart`,
   `SpectatorView(PublicView)`, `SpectateUnavailable{reason}`,
   `SpectateEnd{outcome}` (server) are appended to the enums. Public

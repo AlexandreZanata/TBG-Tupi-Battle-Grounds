@@ -90,11 +90,18 @@ pub fn plugin(app: &mut App) {
         .init_resource::<MatchStats>()
         .init_resource::<ViewGaps>()
         .init_resource::<crate::art::aim::ImpactRing>()
+        .init_resource::<crate::visuals::mount::Mounts>()
         .add_systems(Update, poll_link)
         .add_systems(
             Update,
             sync_units
                 .after(poll_link)
+                .run_if(in_state(GameState::InMatch)),
+        )
+        .add_systems(
+            Update,
+            crate::visuals::mount::passengers
+                .after(sync_units)
                 .run_if(in_state(GameState::InMatch)),
         )
         .add_systems(OnExit(GameState::InMatch), clear_units);
@@ -187,15 +194,26 @@ impl Scene<'_, '_, '_, '_, '_> {
             // A unit absent from the next view (it died) holds its position.
             let to_x = to.units.iter().find(|n| n.id == u.id).map_or(u.x, |n| n.x);
             let x = u.x as f32 + (to_x - u.x) as f32 * alpha;
-            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, lane_z(u.id));
+            let mut pos = Vec3::new(world_x(x.round() as i32, you), 0.0, lane_z(u.id));
+            if u.is_carried() {
+                if let Some(crab) = from.units.iter().find(|c| {
+                    c.seat == u.seat
+                        && c.kind == tbg_core::UnitKind::CargoCrab
+                        && (c.x - u.x).abs() <= 600
+                }) {
+                    pos.z = lane_z(crab.id);
+                }
+                pos.y = 0.38;
+            }
             match self
                 .map
                 .0
                 .get(&u.id)
                 .and_then(|e| self.visuals.get_mut(*e).ok())
             {
-                Some((mut v, mut t, _)) => {
+                Some((mut v, mut t, mut anim)) => {
                     t.translation = pos;
+                    anim.carried = u.is_carried();
                     visuals::update_unit_visual(self.commands, self.assets, self.lib, &mut v, u);
                 }
                 None => {
@@ -208,6 +226,11 @@ impl Scene<'_, '_, '_, '_, '_> {
                     };
                     let e =
                         visuals::spawn_unit_visual(self.commands, self.assets, self.lib, look, pos);
+                    if u.is_carried() {
+                        if let Ok((_, _, mut anim)) = self.visuals.get_mut(e) {
+                            anim.carried = true;
+                        }
+                    }
                     self.map.0.insert(u.id, e);
                 }
             }
@@ -216,8 +239,13 @@ impl Scene<'_, '_, '_, '_, '_> {
     }
 }
 
-fn clear_units(mut commands: Commands, mut map: ResMut<UnitEntities>) {
+fn clear_units(
+    mut commands: Commands,
+    mut map: ResMut<UnitEntities>,
+    mut mounts: ResMut<crate::visuals::mount::Mounts>,
+) {
     for (_, e) in map.0.drain() {
         commands.entity(e).try_despawn();
     }
+    mounts.clear();
 }

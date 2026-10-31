@@ -141,11 +141,7 @@ fn transfer_one(
         return;
     }
     state.units[di].hp -= amount;
-    let cut = if state.tick < state.units[ri].heal_cut_until {
-        state.units[ri].heal_cut_bp
-    } else {
-        0
-    };
+    let cut = crate::roster_slots::heal_cut_now(&state.units[ri], state.tick);
     let gain = amount - amount * cut.min(10_000) / 10_000;
     let u = &mut state.units[ri];
     u.hp = (u.hp + gain).min(u.max_hp);
@@ -361,20 +357,24 @@ fn carry_of(state: &MatchState, u: &Unit) -> Option<(i32, u16, u16, u16, u16, u1
         })
 }
 
-/// Crab movement bonus while carrying (B1 steady, B2 surge): basis points.
+/// Crab movement bonus while carrying, in basis points (BR-X12, D-60): the
+/// larger of the +20 % base (D-56) and the branch bonus (B1 steady, B2 surge
+/// while armed), never their sum, so a branch keeps its documented value.
 pub(crate) fn carry_move_bp(state: &MatchState, u: &Unit) -> u16 {
     if u.fx.passenger.is_none() {
         return 0;
     }
+    const BASE_CARRY_MOVE_BP: u16 = 2_000;
     match carry_of(state, u) {
         Some((_, _, _, move_bp, _, surge_bp)) => {
-            if surge_bp > 0 && state.tick < u.fx.surge_until {
+            let branch = if surge_bp > 0 && state.tick < u.fx.surge_until {
                 surge_bp
             } else {
                 move_bp
-            }
+            };
+            BASE_CARRY_MOVE_BP.max(branch)
         }
-        None => 0,
+        None => BASE_CARRY_MOVE_BP,
     }
 }
 

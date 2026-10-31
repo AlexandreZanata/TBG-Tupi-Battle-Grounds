@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use tbg_core::Pcg32;
 
 mod ruins;
+mod shared;
 mod storm;
 pub(super) mod structures;
 mod tundra;

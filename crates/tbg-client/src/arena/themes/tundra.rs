@@ -1,8 +1,9 @@
-//! Snow-loaded firs, ice shards, snowdrifts and Nordic cairns for Frozen Tundra.
+//! Snow-loaded firs, ice spires, glowing crystals, floes and Nordic cairns for Frozen Tundra.
 
-use super::{back_row, boulder, contact, scatter, Kit};
+use super::{back_row, boulder, contact, scatter, shared, Kit};
 use crate::{
     arena::{
+        camp::BRAZIERS,
         theme::{rgb, Theme},
         Part,
     },
@@ -17,11 +18,11 @@ pub(super) fn build(kit: &mut Kit) {
     }
     for (i, at, s) in scatter(0x1ce) {
         match i % 5 {
-            0 => crystal(&mut kit.props, at, s, p.accent),
+            0 => shared::crystal(&mut kit.props, at, s, p.accent, TIP),
             1 => snow_rock(&mut kit.props, at, s),
             2 => boulder(&mut kit.props, at, s, rgb(0xe9f3f3)),
             3 => frost_grass(&mut kit.props, at),
-            _ => crystal(&mut kit.props, at, s * 0.5, rgb(0xc7e9f1)),
+            _ => shared::crystal(&mut kit.props, at, s * 0.5, rgb(0xc7e9f1), TIP),
         }
     }
     for (x, z, s) in [
@@ -31,11 +32,12 @@ pub(super) fn build(kit: &mut Kit) {
         (16.7, 3.5, 0.9),
     ] {
         snow_rock(&mut kit.props, Vec3::new(x, 0.0, z), s);
-        crystal(
+        shared::crystal(
             &mut kit.props,
             Vec3::new(x + 0.5, 0.0, z - 0.3),
             s * 0.65,
             p.accent,
+            TIP,
         );
     }
     for x in [-2.1, 18.1] {
@@ -53,6 +55,73 @@ pub(super) fn build(kit: &mut Kit) {
         ));
         frost_grass(&mut kit.props, Vec3::new(x, 0.0, -1.2));
     }
+    // Pale rock spires rise between the back firs.
+    for (x, z, h) in [
+        (1.8, -3.7, 2.4),
+        (5.0, -4.8, 3.2),
+        (11.2, -4.8, 3.0),
+        (14.4, -3.8, 2.3),
+    ] {
+        spire(&mut kit.props, Vec3::new(x, 0.0, z), h);
+    }
+    // Lit crystal clusters by the braziers and the front corners.
+    for (i, (x, z)) in BRAZIERS.into_iter().take(4).enumerate() {
+        let side = if z > 0.0 { 0.55 } else { -0.55 };
+        let at = Vec3::new(x + 0.5, 0.0, z + side);
+        shared::crystal(
+            &mut kit.glow,
+            at,
+            0.5 + (i % 2) as f32 * 0.2,
+            GLOW,
+            GLOW_TIP,
+        );
+    }
+    for (x, z, s) in [(-1.0, 3.7, 1.0), (17.2, 3.8, 1.1), (8.0, 4.4, 0.7)] {
+        shared::crystal(&mut kit.glow, Vec3::new(x, 0.0, z), s, GLOW, GLOW_TIP);
+    }
+    // Ice floes drift around the island, some carrying crystals or snowy rock.
+    for (i, (at, size)) in shared::water_sites(0x1ce5, 15, 2.4).into_iter().enumerate() {
+        shared::floe(
+            &mut kit.props,
+            at,
+            0.8 + size * 1.3,
+            rgb(0xcde4ee),
+            rgb(0xf1fafc),
+        );
+        let top = at + Vec3::Y * 0.22;
+        match i % 4 {
+            0 => shared::crystal(&mut kit.props, top, 0.45 * size + 0.2, p.accent, TIP),
+            2 => snow_rock(&mut kit.props, top, 0.35 * size + 0.2),
+            _ => {}
+        }
+    }
+}
+
+/// Crystal point colors: lit prisms and the unlit glowing ones.
+const TIP: Color = Color::srgb(0.78, 0.93, 0.96);
+const GLOW: Color = Color::srgb(0.45, 0.85, 0.95);
+const GLOW_TIP: Color = Color::srgb(0.88, 0.98, 1.0);
+
+/// A snow-capped column of pale blue rock.
+fn spire(parts: &mut Vec<Part>, at: Vec3, h: f32) {
+    let p = Theme::Tundra.palette();
+    contact(parts, at, 0.9, rgb(0x9cb9c8));
+    parts.push((
+        Frustum(0.4, 0.85, h * 0.62),
+        p.stone,
+        Transform::from_translation(at + Vec3::Y * h * 0.31),
+    ));
+    parts.push((
+        Frustum(0.1, 0.42, h * 0.5),
+        rgb(0xb9d4e2),
+        Transform::from_translation(at + Vec3::Y * h * 0.8)
+            .with_rotation(Quat::from_rotation_z(0.06)),
+    ));
+    parts.push((
+        Cone(0.34, 0.5),
+        rgb(0xeef8fa),
+        Transform::from_translation(at + Vec3::Y * (h * 1.05 + 0.05)),
+    ));
 }
 
 fn fir(parts: &mut Vec<Part>, at: Vec3, s: f32) {
@@ -86,27 +155,6 @@ fn snow_rock(parts: &mut Vec<Part>, at: Vec3, s: f32) {
         Transform::from_translation(at + Vec3::Y * s * 0.59)
             .with_scale(Vec3::new(0.78, 0.21, 0.65) * s),
     ));
-}
-
-pub(super) fn crystal(parts: &mut Vec<Part>, at: Vec3, s: f32, color: Color) {
-    for (dx, dz, h, tilt) in [
-        (0.0, 0.0, 1.0, 0.12),
-        (0.23, 0.08, 0.65, -0.28),
-        (-0.2, 0.1, 0.5, 0.3),
-    ] {
-        let rot = Quat::from_rotation_z(tilt);
-        let origin = at + Vec3::new(dx * s, 0.0, dz * s);
-        parts.push((
-            Cyl(0.16 * s, h * s * 0.6),
-            color,
-            Transform::from_translation(origin + rot * Vec3::Y * h * s * 0.3).with_rotation(rot),
-        ));
-        parts.push((
-            Cone(0.16 * s, h * s * 0.4),
-            rgb(0xc8edf5),
-            Transform::from_translation(origin + rot * Vec3::Y * h * s * 0.8).with_rotation(rot),
-        ));
-    }
 }
 
 fn frost_grass(parts: &mut Vec<Part>, at: Vec3) {

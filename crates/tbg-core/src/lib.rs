@@ -22,6 +22,7 @@ pub mod protocol;
 pub mod rating;
 pub mod replay;
 pub mod rng;
+mod roster_slots;
 pub mod ruleset;
 pub mod shop;
 pub mod sim;

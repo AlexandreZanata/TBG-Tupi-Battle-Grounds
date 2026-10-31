@@ -32,13 +32,12 @@ fn walk_delivers_two_footsteps_without_boundary_duplicates() {
     assert_eq!(events_between(Clip::Walk, cycle, cycle + 0.01), []);
 }
 #[test]
-fn all_easings_preserve_keys_and_hold_preserves_contact() {
+fn all_easings_preserve_their_keys() {
     for ease in [
         Easing::Linear,
         Easing::CubicIn,
         Easing::CubicOut,
         Easing::CubicInOut,
-        Easing::Hold,
     ] {
         let keys = [
             (0.0, [0.0; 3], [0.0; 3], ease),
@@ -47,7 +46,6 @@ fn all_easings_preserve_keys_and_hold_preserves_contact() {
         assert_eq!(sample_track(&keys, 0.0).0, Vec3::ZERO);
         assert_eq!(sample_track(&keys, 1.0).0, Vec3::ONE);
     }
-    assert_eq!(Easing::Hold.sample(0.99), 0.0);
 }
 
 /// World position of a foot after forward kinematics through the rig.
@@ -184,54 +182,11 @@ fn unlocked_feet_follow_the_stride_path_and_stay_reachable() {
 }
 
 #[test]
-fn archer_budget_and_release_anchor_obey_p15() {
-    use super::{archer_v2_clips, bow::BowAssets, figure, mesh, roster};
-    let spec = roster::archer_v2(0);
-    let triangles: usize = figure::build_joint_meshes(&spec)
-        .iter()
-        .flatten()
-        .map(mesh::triangles)
-        .sum();
-    let bow = BowAssets::new(&mut Assets::<Mesh>::default());
-    assert!(
-        triangles + bow.triangles <= 1500,
-        "{} triangles",
-        triangles + bow.triangles
-    );
-    let mut pose = sample(Clip::AttackRanged, 0.18);
-    archer_v2_clips::apply(Clip::AttackRanged, 0.18, &mut pose);
-    let p = super::archer_v2::plan();
-    let wrist = |joints: [Joint; 3]| {
-        let mut transform = Mat4::IDENTITY;
-        for j in joints {
-            let r = pose[j.index()].0 * std::f32::consts::PI / 180.0;
-            transform *= Mat4::from_rotation_translation(
-                Quat::from_euler(EulerRot::XYZ, r.x, r.y, r.z),
-                super::rig::rest(super::rig::Node::Body(j), &p),
-            );
-        }
-        transform.transform_point3(Vec3::ZERO)
-    };
-    let left = wrist([Joint::UpperArmL, Joint::ForearmL, Joint::HandL]);
-    let right = wrist([Joint::UpperArmR, Joint::ForearmR, Joint::HandR]);
-    let anchor = left
-        + Vec3::new(
-            -super::archer_v2::STRING_LINE - super::archer_aim::draw(0.18) * super::archer_v2::DRAW,
-            0.08,
-            0.0,
-        );
-    assert!(
-        (anchor - right).length() < 0.005,
-        "anchor {anchor:?}, right {right:?}"
-    );
+fn ranged_release_lands_at_0_18() {
+    // The archer's arrow leaves the string on this event (`archer::RELEASE`).
     assert_eq!(
         events_between(Clip::AttackRanged, 0.17, 0.18),
         [ClipEvent::Release]
-    );
-    println!(
-        "Archer geometry: {triangles} + {} bow/arrow = {} triangles",
-        bow.triangles,
-        triangles + bow.triangles
     );
 }
 

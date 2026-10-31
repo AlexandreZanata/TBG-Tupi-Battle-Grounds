@@ -31,18 +31,18 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
             Some(tbg_core::UnitKind::BoneBrute | tbg_core::UnitKind::SiegeWalker)
         );
         return (
-            Vec3::new(0.0, if large { 1.05 } else { 0.78 }, 0.0),
-            if large { 1.6 } else { 1.05 },
-            if large { 1.35 } else { 1.05 },
+            Vec3::new(options.portrait_x, if large { 1.05 } else { 0.78 }, 0.0),
+            (if large { 1.6 } else { 1.05 }) * options.portrait_zoom,
+            (if large { 1.35 } else { 1.05 }) * options.portrait_zoom,
             Vec3::new(0.0, 1.2, 10.0),
         );
     }
     match options.mode.as_str() {
         "palette" => (
-            Vec3::new(8.0, 0.5, 0.0),
+            Vec3::new(8.0, 0.5, 1.8),
             5.8,
-            4.0,
-            Vec3::new(0.0, 11.0, 14.0),
+            5.8,
+            Vec3::new(0.0, 18.0, 14.0),
         ),
         // Four rows of five forms, 3.2 apart in x and 3.6 back in z.
         "strongholds" => (
