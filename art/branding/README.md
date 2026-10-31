@@ -12,7 +12,7 @@ a multi-resolution Windows ICO. Run it with the project's local image-tools
 Python or another Pillow installation. Exporting adds transparent padding
 and downsamples with Lanczos; it does not invent extra source detail.
 
-- `desktop/`: transparent PNGs from 16 to 1024 px.
+- `desktop/`: transparent PNGs from 16 to 1024 px and a macOS ICNS.
 - `../../crates/tbg-client/assets/branding/tbg.ico`: Windows/browser ICO,
   containing 16, 24, 32, 48, 64, 128 and 256 px images.
 - Runtime `tbg-icon-512.png`: Linux launchers and AppImage.

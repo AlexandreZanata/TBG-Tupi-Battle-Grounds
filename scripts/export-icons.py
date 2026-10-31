@@ -36,6 +36,7 @@ def main():
     source = source.crop(box)
     for size in SIZES:
         save(fit(source, size), ART / f"desktop/tbg-{size}.png")
+    fit(source, 1024).save(ART / "desktop/tbg.icns", format="ICNS")
     RUNTIME.mkdir(parents=True, exist_ok=True)
     save(fit(source, 512), RUNTIME / "tbg-icon-512.png")
     fit(source, 512).save(RUNTIME / "tbg-emblem.webp", lossless=True, method=6)
