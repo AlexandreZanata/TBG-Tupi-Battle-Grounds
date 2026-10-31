@@ -681,3 +681,41 @@ packages. A persistent interface footer links to the creator and original
 repository. Linux packaging and a per-user installer are implemented; actual
 release artifacts, consolidated acceptance and Windows builds remain pending.
 See [NATIVE-client.md](phases/NATIVE-client.md) for evidence and deferred checks.
+## 18. Troops and local training (P62, Proposed)
+
+**Planning only.** See [P62](phases/P62-troops-training-lab.md), D-80/D-81
+and GAME-DESIGN §16. Section 17 is reserved by the separate P60/P61 plan.
+
+- **Content/presentation.** One catalog model resolves active core IDs,
+  available forms and effective stats; authored lore and localized ability
+  text live in client presentation catalogs. Preview reuses champion kits
+  with one owned scene/camera and explicit lifecycle. Browser/native lobby
+  adapters route to the same state; record the actual integrated shell.
+- **Core training.** Optional `training` support owns a private canonical
+  MatchState plus deterministic runtime-only scenario/target/metrics data.
+  Factor combat stepping only as needed; preserve the normal path's event
+  order, hashes and RNG. Exact teams do not modify the canonical Shop pool.
+  C10's offline `lab` restriction remains. A training runtime must be
+  explicitly constructed even when Cargo unifies features.
+- **Dummy.** Runtime-tagged inert Crate carrier, with explicit cargo/hatch
+  suppression, HP/view override and dummy rendering. No global Crate or
+  wire enum change. Its summon-like eligibility is visible to the player;
+  selected champion opponents model conventional-unit interactions.
+- **Observation.** Record effective damage/healing at mutation points with
+  per-instance/effect provenance, including periodic and summon sources.
+  Counters and IDs are bounded; no inference from rendered numbers or
+  unattributed Hit messages. Existing network event schemas stay unchanged.
+- **Client route.** Dedicated local training session/commands alongside
+  normal practice and Net. Entry requires idle state; stale commands are
+  session-bound. Exit removes scene resources, counters and pending actions
+  before normal play resumes. Existing idle presence may remain but cannot
+  advertise or persist a training match.
+- **Bots.** Separate practice profiles preserve the existing Bot baseline.
+  Fair profiles consume legal own-seat views only. Proposed Impossible
+  assistance is a disclosed local controller credit, never a CANON or
+  server change. No network inference service or new database is required.
+- **Verification/cost.** Focused training fixtures plus unchanged normal
+  behavior, C10/protocol contracts and desktop journeys at consolidation.
+  Minimal per-front checks use the shared nonblocking host lock and at most
+  two Cargo jobs. No full suite, bot calibration, benchmark, build or deploy
+  is authorized by this documentation-only task.

@@ -1087,3 +1087,93 @@ do not transfer to the new target id. Fusion therefore never strips hostile Mark
 and preserve the maximum remaining control duration across both parents. A longer
 Slow on one parent therefore extends the inherited Root; fusion cannot erase that
 parent's remaining control window.
+## 16. Troops and local training (P62, Proposed)
+
+**Proposed — planning only, 2026-10-31.** The owner requested a Troops
+catalog, champion animation/lore/stats, exact-team training against chosen
+champions or dummies, and Easy/Medium/Hard/Impossible bots. Publication of
+this plan does not activate these rules. See
+[P62](phases/P62-troops-training-lab.md) and its
+[acceptance cases](planning/TROOPS-TRAINING.md). Sections 14–15 are reserved
+by the separate P60/P61 planning branch; this gap is intentional.
+
+- **BR-TR01 — Access and roster.** The top Troops icon and lower card open
+  one catalog for guests and accounts while idle. Playable entries come
+  from the reviewed active roster, not every declared kind. Staged kinds
+  are labeled In development; summons are subordinate entries. Reading
+  does not unlock content or alter a ranked roster.
+- **BR-TR02 — Complete champion information.** Every active champion has
+  reviewed lore, Faction, Archetype, abilities, conditional effects and all
+  available Evolution forms. Numeric stats derive from canonical content
+  and effective-stat functions with explicit neutral/scenario/live context;
+  no second balance table. Show costs, HP, damage, interval, range, speed,
+  splash, healing, statuses and ability-specific parameters with units.
+- **BR-TR03 — Preview.** Idle, Walk, Attack/Action and Dance use the actual
+  champion/form and appropriate rig. Passive supports show a real action.
+  Preview motion has no combat or economy effect; Dance requires reviewed
+  animation and is not a hidden gameplay action.
+- **BR-TR04 — Exact teams.** The combat laboratory accepts 1–12 initial
+  units per side, including duplicates and valid form/position choices,
+  or 1–5 dummies on the target side. Three selected units means exactly
+  those three at Start. Ability summons obey normal rules and do not count
+  as selected slots. The limits are local safety limits, not online caps.
+- **BR-TR05 — Controlled combat.** Laboratory teams use the canonical combat
+  order and abilities, with Shop, Energy spending, councils, tower fire and
+  Stronghold auras disabled. Defaults are neutral Arcanas/Augments, Forest
+  and automatic Synergy from real champions; advanced supported modifiers
+  are explicit in setup/results. A chosen three-kind team never replaces
+  the five-distinct-offer Shop pool. Full practice retains canonical match
+  rules and the normal Shop; exact enemy selection is a laboratory option.
+- **BR-TR06 — Dummy semantics.** Wooden dummies are inert summon-like
+  targets: no attacks, movement, cargo, Bounty, Synergy contribution,
+  Evolution or expiry; zero innate damage reduction. HP presets: 1,000 or
+  10,000. Finite targets die normally. Renewable targets die, then respawn
+  cleanly next tick with a new ID; counters retain the trial history.
+  Effects requiring conventional enemies do not trigger; explain this and
+  offer chosen champion opponents. Do not imply universal target eligibility.
+  An empty renewable target side awaiting respawn does not end the trial;
+  elimination of all attacking units still does.
+- **BR-TR07 — Control and limits.** Start, Pause, Resume, one-tick Step,
+  Reset, edit setup and Exit are local controls. Config edits apply to a
+  new trial; same seed/config/commands/content reproduce it. Speed is 1x.
+  Focus loss pauses the laboratory. Side elimination ends finite combat;
+  mutual elimination draws. At 300 active seconds, 256 living entities,
+  or 4,096 retained instance-result rows, pause and preserve the trial
+  rather than fabricate a winner, lose counters or delete units silently.
+- **BR-TR08 — Measurements.** Count actual HP removed/restored, excluding
+  overkill/overheal; report shields/plates separately. Attribute direct,
+  periodic, splash, friendly and summon effects by actual source. Team
+  totals count each mutation once. DPS is HP damage times TICK_HZ divided
+  by active ticks since Start/reset; paused time is excluded and zero time
+  shows no rate. Finite kill time and per-life renewable kill times are
+  distinct. Nominal basic-attack DPS is labeled as an estimate.
+- **BR-TR09 — Fair profiles.** Easy/Medium/Hard bots consume their own legal
+  view and send ordinary PlayerIntentions, with no hidden opponent data or
+  resource/stat advantages. At a 10 Hz view cadence, proposed decision
+  spacing is Easy 15–25 steps, Medium the existing roughly 4–9-step Bot,
+  Hard 2–4 steps. Hard uses a bounded deterministic legal-action scorer;
+  the existing generic Bot remains the baseline for other callers.
+- **BR-TR10 — Impossible proposal.** Recommended: Hard policy at 1–2 view
+  steps plus a visible 2x ordinary Energy regeneration advantage for the
+  bot, practice-only. No starting-Energy, Bounty, combat-stat or hidden-data
+  advantage; no extra regen during countdown, council or pause. The owner
+  must select this assisted proposal or fair-only alternative before its
+  activation (P62 O03). The label does not guarantee an unbeatable bot.
+- **BR-TR11 — Isolation.** All experiments and practice results stay local.
+  They cannot affect rating, ranked stats, account records, rewards,
+  integrity decisions or public spectating. Training controls are not wire
+  messages. Starting training cannot silently abandon an online session.
+- **BR-TR12 — Desktop completeness.** Validate both active desktop entry
+  points, English/pt-BR, keyboard/mouse, state cleanup and supported forms.
+  The initial visual matrix is 1366×768 and 1920×1080. Native coverage is
+  recorded per actual OS; phone layouts/touch are outside P62.
+
+**Proposed validation budgets, not gameplay guarantees:** one active preview
+figure; warm interaction p95 below 100 ms and frame-time p95 within +10% of
+the comparable baseline on the agreed desktop machine; 20 open/reset/exit
+cycles for lifecycle inspection. Named bot calibration, if explicitly
+authorized: 24 seeds with swapped seats for each of three adjacent pairs
+(144 matches), at most 6,000 ticks per experimental game; report truncation
+separately. A 60% stronger-profile score is a screening goal with paired
+uncertainty, not a human win-rate claim. All validation remains deferred
+until implementation; owner look/fun/lore decisions remain open.

@@ -420,7 +420,12 @@ pub(crate) fn betray_resolve(
         fur.saturating_add(plates)
             .saturating_add(i32::from(attacker.fx.betray_bp)),
     );
-    let _removed = crate::hits::damage(state, target, amount.max(1), ev);
+    let _removed = crate::training_hooks::scoped(
+        state,
+        crate::training_hooks::Source::Unit(attacker.id),
+        crate::training_hooks::Effect::Betrayal,
+        |s| crate::hits::damage(s, target, amount.max(1), ev),
+    );
     // A2 Stumble: the betrayer is slowed 30 % for 2 s (ward-aware).
     if attacker.fx.betray_stumble {
         let _applied = crate::hits::apply_on_hit(

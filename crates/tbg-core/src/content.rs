@@ -572,11 +572,6 @@ pub enum Ability {
         short_range: i32,
         short_bonus_bp: u16,
     },
-    Transfer {
-        amount: u16,
-        low_bp: u16,
-        split: bool,
-    },
 }
 
 /// Base stats of a unit kind plus its forms `[A1, A2, B1, B2]`.

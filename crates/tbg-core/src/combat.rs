@@ -7,6 +7,7 @@ use crate::content::{Ability, BP, LANE_LEN, MIN_INTERVAL, WINDUP};
 use crate::hits::{damage, resolve_hit};
 use crate::state::{stronghold_x, Event, MatchState, Target, Unit};
 use crate::targeting::{self, Engage};
+use crate::training_hooks::{self, Effect, Source};
 use crate::types::{Seat, Status, UnitId, UnitKind};
 
 mod formation;
@@ -82,7 +83,8 @@ fn advance_unit(
     formations: &mut FormationIndex,
 ) {
     let u = state.units[idx];
-    if u.hp <= 0 {
+    // P62: a training dummy is an inert target; it never starts a windup.
+    if u.hp <= 0 || training_hooks::is_dummy(state, u.id) {
         return;
     }
     if let Status::Rooted { .. } = u.status {
@@ -98,7 +100,9 @@ fn advance_unit(
             return;
         }
         if targeting::alive(state, target) {
-            resolve_hit(state, &u, target, &st, ev);
+            training_hooks::scoped(state, Source::Unit(u.id), Effect::Direct, |s| {
+                resolve_hit(s, &u, target, &st, ev)
+            });
         }
         let distance = (targeting::target_x(state, target) - u.x).abs();
         let quickdraw = if u.is_summon() {
@@ -358,7 +362,11 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
                 .map(|u| u.id)
                 .collect();
             for id in victims {
-                crate::hits::damage(state, Target::Unit(id), s.amount, ev);
+                // ponytail: `Shrapnel` keeps no plate owner, so the lab shows
+                // this as unattributed; add a source id to attribute it.
+                training_hooks::scoped(state, Source::Unknown, Effect::Shrapnel, |st| {
+                    crate::hits::damage(st, Target::Unit(id), s.amount, ev)
+                });
             }
         }
     }

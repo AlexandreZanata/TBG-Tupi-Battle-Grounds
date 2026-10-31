@@ -112,6 +112,8 @@ impl MatchState {
             rules,
             #[cfg(feature = "lab")]
             lab: crate::lab::LabStats::default(),
+            #[cfg(feature = "training")]
+            training: None,
         }
     }
 
@@ -140,17 +142,7 @@ impl MatchState {
                 augment::tick(self, &mut ev);
                 self.expire_shields();
             }
-            synergy::update(self, &mut ev);
-            combat::tick_timers(self);
-            crate::roster_slots::tick_marks(self);
-            crate::afflictions::tick(self, &mut ev);
-            crate::roster_slots::tick_bleed(self, &mut ev);
-            crate::roster_slots::tick_venom(self, &mut ev);
-            summon::expire(self);
-            summon::hatch(self, &mut ev);
-            crate::support::bonds(self);
-            crate::support::boarding(self, &mut ev);
-            combat::run_units(self, &mut ev);
+            self.unit_pass(&mut ev);
             combat::stronghold_fire(self, &mut ev);
             crate::drillnest::fuse(self, &mut ev);
             crate::drillnest::produce(self, &mut ev);
@@ -159,6 +151,24 @@ impl MatchState {
         }
         self.tick += 1;
         ev
+    }
+
+    /// The unit half of a combat tick, shared by `step` and the local
+    /// training laboratory (P62) so neither copies the combat order:
+    /// Synergy, timers, afflictions, summons, bonds, boarding, then every
+    /// unit acts. Tower fire and deaths follow in the caller.
+    pub(crate) fn unit_pass(&mut self, ev: &mut Vec<Event>) {
+        synergy::update(self, ev);
+        combat::tick_timers(self);
+        crate::roster_slots::tick_marks(self);
+        crate::afflictions::tick(self, ev);
+        crate::roster_slots::tick_bleed(self, ev);
+        crate::roster_slots::tick_venom(self, ev);
+        summon::expire(self);
+        summon::hatch(self, ev);
+        crate::support::bonds(self);
+        crate::support::boarding(self, ev);
+        combat::run_units(self, ev);
     }
 
     /// The seat gives up (or its reconnect window expired): the other wins.
