@@ -22,7 +22,17 @@ def main():
     parser.add_argument("--output", type=Path, default=ROOT / "target/native")
     parser.add_argument("--no-archive", action="store_true",
                         help="Prepare a commit-specific local preview directory without compression")
+    parser.add_argument("--managed", action="store_true",
+                        help="P66: build a managed-update release target (flat archive + descriptor)")
+    parser.add_argument("--build-id", help="P66 managed: release build id ([a-z0-9._-])")
+    parser.add_argument("--sequence", type=int, help="P66 managed: monotonic release sequence")
+    parser.add_argument("--notes", type=Path, help="P66 managed: release-notes JSON (EN + pt-BR)")
+    parser.add_argument("--channel", default="stable", help="P66 managed: release channel")
+    parser.add_argument("--security-floor", type=int, default=0,
+                        help="P66 managed: lowest release sequence still allowed to run")
     args = parser.parse_args()
+    if args.managed:
+        return managed(args)
     version = tomllib.loads((ROOT / "crates/tbg-client/Cargo.toml").read_text())["package"]["version"]
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     identity = subprocess.check_output([str(args.binary.resolve()), "--version"], text=True).strip()
@@ -70,6 +80,63 @@ def main():
                     dest.write(path, Path(name) / path.relative_to(package))
     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
     archive.with_name(archive.name + ".sha256").write_text(f"{digest}  {archive.name}\n")
+    print(archive.resolve())
+
+
+def managed(args):
+    """P66: a flat release archive (files at its root, as the launcher
+    extracts them) plus the descriptor `tbg-release publish` signs."""
+    if args.platform != "linux":
+        raise SystemExit("managed packages are Linux-only until Windows acceptance (P66 M4)")
+    if not (args.build_id and args.sequence and args.notes):
+        raise SystemExit("--managed needs --build-id, --sequence and --notes")
+    if not re.fullmatch(r"[a-z0-9._-]{1,80}", args.build_id) or args.build_id in (".", ".."):
+        raise SystemExit("invalid --build-id")
+    version = tomllib.loads((ROOT / "crates/tbg-client/Cargo.toml").read_text())["package"]["version"]
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    binary = args.binary.resolve()
+    identity = subprocess.check_output([str(binary), "--version"], text=True).strip()
+    if f"source {commit}" not in identity:
+        raise SystemExit("Build with TBG_SOURCE_COMMIT=$(git rev-parse HEAD); executable and source must match")
+    contract = subprocess.check_output([str(binary), "--contract"], text=True).strip()
+    notes = json.loads(args.notes.read_text())
+    if notes.get("build_id") != args.build_id:
+        raise SystemExit("the notes name another build id")
+    stage = args.output / f"managed-{args.build_id}"
+    if stage.exists():
+        shutil.rmtree(stage)
+    stage.mkdir(parents=True)
+    shutil.copy2(binary, stage / "tbg-client")
+    (stage / "tbg-client").chmod(0o755)
+    shutil.copytree(ROOT / "crates/tbg-client/assets", stage / "assets",
+                    ignore=shutil.ignore_patterns("*.js", "*.css", "*.html"))
+    shutil.copy2(ROOT / "THIRD_PARTY_NOTICES.md", stage)
+    if (ROOT / "LICENSE").exists():
+        shutil.copy2(ROOT / "LICENSE", stage)
+    (stage / "release-notes.json").write_text(json.dumps(notes, ensure_ascii=False, indent=2) + "\n")
+    (stage / "build-info.json").write_text(json.dumps({
+        "build_id": args.build_id, "version": version, "commit": commit, "platform": "linux",
+        "architecture": "x86_64", "contract": contract,
+        "binary_sha256": hashlib.sha256((stage / "tbg-client").read_bytes()).hexdigest(),
+    }, indent=2) + "\n")
+    archive = args.output / f"package-{args.build_id}.tar.gz"
+    with tarfile.open(archive, "w:gz") as dest:
+        for path in sorted(stage.rglob("*")):
+            dest.add(path, arcname=str(path.relative_to(stage)), recursive=False)
+    descriptor = {
+        "schema": 1, "build_id": args.build_id, "release_sequence": args.sequence,
+        "display_version": version, "channel": args.channel, "platform": "linux",
+        "architecture": "x86_64", "install_mode": "managed",
+        "package_target": f"package-{args.build_id}.tar.gz",
+        "notes_target": f"notes-{args.build_id}.json",
+        "compatibility": {"match_contract": contract, "presentation": f"p-{commit[:12]}"},
+        "updater_abi": 1, "minimum_bootstrap": 1,
+        "security_floor_sequence": args.security_floor,
+        "local_state_reader": [1], "local_state_writer": 1, "minimum_glibc": "2.39",
+    }
+    (args.output / f"descriptor-{args.build_id}.json").write_text(json.dumps(descriptor, indent=2) + "\n")
+    (args.output / f"notes-{args.build_id}.json").write_text(json.dumps(notes, ensure_ascii=False, indent=2) + "\n")
+    shutil.rmtree(stage)
     print(archive.resolve())
 
 

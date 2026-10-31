@@ -45,6 +45,12 @@ pub enum GameState {
 }
 
 fn main() {
+    // P66: the release tooling stamps descriptors with the exact contract.
+    #[cfg(not(target_arch = "wasm32"))]
+    if std::env::args().any(|arg| arg == "--contract") {
+        println!("{}", net::admission::contract_id());
+        return;
+    }
     #[cfg(not(target_arch = "wasm32"))]
     if std::env::args().any(|arg| arg == "--version") {
         println!(
