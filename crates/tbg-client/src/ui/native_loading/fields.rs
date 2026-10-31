@@ -37,7 +37,7 @@ pub(super) fn plugin(app: &mut App) {
         PostUpdate,
         (paint_images, paint_text, fade_bars)
             .chain()
-            .after(super::scene::update)
+            .after(super::scene::Prepare)
             .after(bevy::ui::UiSystems::Layout)
             .before(bevy::ui::UiSystems::Stack),
     );

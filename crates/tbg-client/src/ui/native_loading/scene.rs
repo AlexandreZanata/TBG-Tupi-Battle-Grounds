@@ -7,6 +7,8 @@ use bevy::prelude::*;
 struct Veil;
 #[derive(Component)]
 struct Piece(Color);
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub(super) struct Prepare;
 #[derive(Resource)]
 struct Reveal {
     frames: u8,
@@ -24,6 +26,7 @@ pub(super) fn plugin(app: &mut App) {
     .add_systems(
         PostUpdate,
         update
+            .in_set(Prepare)
             .after(bevy::ui::UiSystems::Layout)
             .before(bevy::ui::UiSystems::Stack),
     );
@@ -71,7 +74,7 @@ fn spawn(mut commands: Commands) {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub(super) fn update(
+fn update(
     time: Res<Time>,
     server: Res<AssetServer>,
     cache: Res<Cache>,
