@@ -23,11 +23,17 @@ if [ "${1:-}" = "--provision" ]; then
 	"${SSH[@]}" "sudo bash ~/tbg-src/deploy/provision.sh '$TBG_DOMAIN' '$TBG_SSH_USER'"
 fi
 
+# P60: the new binary migrates the database on start, so stop the old one,
+# take an integrity-checked pre-migration backup, and only then install and
+# start. A failed backup aborts the deploy with the old binary stopped:
+# start it again by hand after fixing storage (README "Restore drill").
 "${SSH[@]}" "bash -lc 'cd ~/tbg-src && cargo build --release -p tbg-server --bin tbg-server' \
-	&& sudo install -m 755 ~/tbg-src/target/release/tbg-server /opt/tbg/bin/ \
 	&& sudo install -m 755 ~/tbg-src/deploy/backup.sh /opt/tbg/bin/ \
+	&& sudo systemctl stop tbg-server \
+	&& sudo /opt/tbg/bin/backup.sh --predeploy \
+	&& sudo install -m 755 ~/tbg-src/target/release/tbg-server /opt/tbg/bin/ \
 	&& sudo rsync -a --delete ~/tbg-web/ /srv/tbg/web/ \
-	&& sudo systemctl restart tbg-server"
+	&& sudo systemctl start tbg-server"
 
 for _ in $(seq 1 30); do
 	if curl -fsS "https://$TBG_DOMAIN/health" | grep -q ok; then
