@@ -1,0 +1,52 @@
+[package]
+name = "tbg-update"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license-file = "../../LICENSE"
+description = "P66 native launcher, transactional updater and release tooling (never linked into the game)."
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "tbg-launcher"
+path = "src/bin/tbg-launcher.rs"
+
+[[bin]]
+name = "tbg-release"
+path = "src/bin/tbg-release.rs"
+
+[dependencies]
+# P66 D-91: maintained TUF client/editor (roles, rollback/freeze, root rotation); no custom crypto.
+tough = { version = "0.24", default-features = false }
+# tough's API is async; one small current-thread runtime runs it in the helper.
+tokio = { version = "1", features = ["rt", "fs", "io-util", "macros", "time"] }
+# Stream combinators for tough's target streams and our transport.
+futures = "0.3"
+# tough's `Transport` is an async-trait trait.
+async-trait = "0.1"
+# Byte buffers in tough's `Transport` stream type.
+bytes = "1"
+# Descriptor, notes, journal and receipt documents.
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Repository and target URLs (tough's types).
+url = "2"
+# Release archives: one gzip-compressed tar per release.
+tar = "0.4"
+flate2 = "1"
+# Archive digest recorded in the journal and receipts.
+sha2 = "0.10"
+# Blocking HTTPS for the TUF transport (already used by the client's ehttp).
+ureq = { version = "3", default-features = false, features = ["rustls"] }
+# Ed25519 key generation for test/staging repositories (tough's own crypto backend).
+aws-lc-rs = "1"
+# Metadata expiry timestamps in tough's editor API.
+jiff = "0.2"
+# Scratch space while publishing (tough already depends on it).
+tempfile = "3"
+
+[target.'cfg(unix)'.dependencies]
+# statvfs for the free-space preflight before staging a release.
+libc = "0.2"
