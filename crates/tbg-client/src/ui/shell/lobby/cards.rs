@@ -224,6 +224,6 @@ fn news_arrow(text: &str, direction: i8) -> impl Bundle {
         },
         UiAction::Disabled,
         Action::News(direction),
-        children![kit::heading(text, 26.)],
+        children![kit::heading(text.to_owned(), 26.)],
     )
 }
