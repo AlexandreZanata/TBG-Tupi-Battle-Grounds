@@ -6,6 +6,11 @@ implementation order and owner gates. Every result is tied to the exact
 downloaded artifact digest and source SHA. Do not check items as passed
 from a source inspection or a different debug build.
 
+**Mandatory owner requirement:** the Linux and Windows game frontends must
+look exactly the same. Platform-specific implementation adjustments are
+authorized where needed to achieve identical presentation. A merely similar
+interface, shared source code or a successful launch is insufficient.
+
 ## 1. Evidence matrix
 
 | ID | Contract | Evidence required at consolidation |
@@ -16,8 +21,8 @@ from a source inspection or a different debug build.
 | W04 | Per-user installation | Final installer on clean Windows user and Wine prefix; no admin prompt in the chosen supported runtime configuration; shortcuts/uninstall entry and icons |
 | W05 | Upgrade/reinstall safety | Synthetic account/preferences retained, locked running app handled without killing it, interrupted/error path preserves a working install; no forced reboot |
 | W06 | Portable/uninstall boundaries | Moved ZIP works, no writes to program files, uninstall keeps user data; optional purge never implicit; unrelated files untouched |
-| W07 | Shared desktop interface | Screen matrix below on Linux reference, Windows GPU and Wine; classify every remaining OS gate |
-| W08 | Graphics and animation | Arena/character assets, forms, VFX, camera, loading, training and full result cast; default renderer first, no silent feature removal |
+| W07 | Exactly identical frontend | Every screen below matches the Linux reference in layout, dimensions, spacing, font/glyphs/wrapping, colors, icons and assets at matched conditions; document OS-specific fixes and close all visible differences |
+| W08 | Exactly identical scene presentation | Matching arenas/characters/forms, lighting, shadows, VFX, camera, loading, training and full result cast at matched scene/time/settings; default renderer first, no visual downgrade or feature removal |
 | W09 | Platform integration | Audio/input/focus/DPI/clipboard/browser links/preferences/TLS/logging cases below; no key leakage |
 | W10 | Authoritative online parity | Focused cross-platform match/reconnect/result scenario against the compatible test backend; rejection for mismatch; no protocol shortcut |
 | W11 | Offline boundary | Launch/practice/training without network according to existing behavior; online errors recover without hang or false login |
@@ -72,12 +77,20 @@ thresholds without an owner decision and canonical documentation.
 ## 3. Screen and journey coverage
 
 Capture comparable stable states using the same arena, scene/seed, unit
-kind/form, language, UI scale and window settings. Visually review layout,
-readability, art completeness, input targets, clipping and animations.
-Pixel equality across drivers is not required. Reuse a small coherent
-capture set across journeys; all 46 champions and five auxiliary presentation
-kinds need manifest/resolver coverage,
-while expensive animation recordings focus on distinct art/rig paths and
+kind/form, animation time, language, effective UI scale, graphics settings
+and game viewport. Capture the game client area consistently, keeping
+unrelated desktop/window-manager decorations outside the frontend comparison.
+Use side-by-side captures and image overlays/diffs to identify differences
+in geometry, text, art, colors, lighting, shadows, effects and motion.
+All visible frontend differences must be corrected, including those caused
+by DPI, fonts or renderer/driver behavior. There is no blanket driver-based
+visual tolerance or automatic acceptance of a Windows-specific appearance.
+If a difference cannot be resolved, document it as a failed/pending visual
+gate for the owner; do not mark W07/W08 or P68 visual acceptance as passed.
+Keep the approved Linux appearance and quality throughout these corrections.
+Reuse a small coherent capture set across journeys; all 46 champions and
+five auxiliary presentation kinds need manifest/resolver coverage, while
+expensive animation recordings focus on distinct art/rig paths and
 observed failures. This does not authorize a repeated full gallery.
 
 | Surface | Required parity/behavior |
@@ -103,6 +116,10 @@ A known unfinished feature in the consolidated base remains a documented
 baseline limitation. Windows must not silently lose an implemented Linux
 surface or claim completion of another phase. New defects caused by P68 are
 fixed here; unrelated feature expansion returns to its owning phase.
+Any Linux/Windows frontend discrepancy remains in P68's scope even when
+correcting it requires platform-specific rendering or UI code. Record its
+screen, before/after evidence, cause, correction and verification on both
+platforms; do not defer it to another phase as an unrelated feature.
 
 ## 4. Native platform and installation checks
 

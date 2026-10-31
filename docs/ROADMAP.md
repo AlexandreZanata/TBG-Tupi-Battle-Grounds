@@ -422,3 +422,9 @@ Architecture §24 and D-96 leave those planning reservations intact.
 The installed native Linux release is preserved. Windows CI, Wine on Linux
 and actual Windows GPU observations remain separate acceptance records.
 Documentation validation now is not a build, installation or release claim.
+
+**Owner visual requirement:** Linux and Windows must have exactly the same
+frontend appearance. P68 includes platform-specific corrections wherever
+needed while preserving the approved Linux quality. W07/W08 and phase visual
+acceptance remain blocked by any unresolved visible difference; validate
+with matched packaged captures, not merely shared code or similar styling.

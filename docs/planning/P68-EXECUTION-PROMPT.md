@@ -29,6 +29,19 @@ reproducible-input CI configuration. Reuse the current engine, platform
 module and packager. Do not introduce an Electron/Tauri wrapper, new combat
 rules, a new protocol or an updater service.
 
+The owner explicitly requires EXACTLY THE SAME FRONTEND APPEARANCE on Linux
+and Windows. Match every game screen's layout, sizes, spacing, fonts/text
+wrapping, colors, icons/images, models, lighting/shadows, VFX, camera and
+animations at equivalent viewport, effective UI scale, language, graphics
+settings and scene/time. Similar styling or shared code alone is not enough.
+Make platform-specific adjustments where necessary, including DPI/fonts,
+assets, renderer configuration or shaders, while keeping shared design and
+preserving the approved Linux appearance/quality. Do not downgrade Linux to
+match Windows or accept visible differences as normal OS/driver behavior.
+Compare packaged builds with matched captures and overlays/diffs. Every
+unresolved visible frontend difference blocks W07/W08 and P68 visual
+acceptance; document failures honestly instead of waiving this requirement.
+
 Start with the audit blockers: Linux-only guards currently control native
 HUD/loading/ranking, many actions, shell pages and art generation. Inspect
 both branches of every condition, imports/plugins/resources and build.rs.

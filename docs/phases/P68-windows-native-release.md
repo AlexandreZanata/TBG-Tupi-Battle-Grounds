@@ -29,6 +29,22 @@ authoritative multiplayer contract as native Linux. A player needs neither
 Rust nor the source checkout. Running a browser wrapper or renaming a Linux
 binary does not meet this requirement.
 
+**Owner requirement — exact frontend appearance (2026-10-31): Linux and
+Windows must have exactly the same visual frontend.** At the same viewport,
+effective UI scale, language, graphics settings and scene/animation state,
+both platforms must present the same layout, dimensions, spacing, fonts,
+text wrapping, colors, icons, images, models, lighting, shadows, effects,
+camera framing and animations on every game screen. Similar styling or
+feature availability alone does not satisfy this requirement.
+
+Platform-specific adjustments are explicitly in scope when necessary to
+achieve that identical result, including DPI/font handling, asset loading,
+renderer configuration and shaders. Prefer shared components/styles/assets;
+isolate necessary OS adjustments without creating different product designs.
+Preserve the approved Linux appearance; do not reduce its quality or remove
+features to make Windows match. Every unresolved visible frontend difference
+is an acceptance defect and blocks W07/W08 and P68 visual acceptance.
+
 Then install Wine on the owner's Linux host from a reviewed official
 distribution source, install the exact Windows candidate in an isolated
 prefix and compare it with the Linux reference. Windows CI, Wine and a real
@@ -88,6 +104,9 @@ training preview and result presentation to the shared native path where
 appropriate. Inspect paired imports, resources, plugin registration and
 system parameters together so the Windows path is not only syntactically
 enabled but complete.
+Shared code alone does not prove exact visual appearance. Apply and document
+the smallest necessary Linux- or Windows-specific correction wherever the
+same shared code renders differently, then compare both packaged builds.
 
 Keep platform implementations under the existing `platform/` module.
 Do not introduce a trait/framework for each service or split the game into
@@ -276,8 +295,9 @@ append-only contract tests and historical decision records retain their rules.
    classify every condition, resolve O01–O03 as needed. Commit the report.
 2. **Desktop parity.** Correct shared/native UI routing and art generation,
    preserve Unix/browser services, cover missing-assets and Windows storage
-   replacement semantics. Write narrow regressions; minimum front checks
-   only. No combat rule or contract-fixture rewrite. Commit.
+   replacement semantics, and implement necessary platform-specific visual
+   adjustments to preserve the exact same frontend. Write narrow regressions;
+   minimum front checks only. No combat rule or contract-fixture rewrite. Commit.
 3. **Windows identity/runtime.** Establish MSVC target, CRT/import policy,
    PE metadata, diagnostic identity/error behavior and complete assets.
    Add only necessary packaging/resource dependencies with rationale. Commit.
@@ -320,6 +340,8 @@ See W01–W18 in the acceptance plan. **Implementation done** means code,
 focused regression coverage, docs and explicit evidence/deferred checks.
 **Windows release accepted** additionally needs packaged Wine and real
 Windows GPU acceptance, reference parity and owner visual sign-off.
+Exact frontend appearance is mandatory; no remaining visible difference
+may be marked acceptable merely because the platforms or drivers differ.
 **Public release ready** additionally needs signing/support/promotion gates.
 These statuses must not be collapsed into a single green checkbox.
 

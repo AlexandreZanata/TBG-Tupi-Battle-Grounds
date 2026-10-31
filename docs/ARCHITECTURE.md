@@ -815,6 +815,15 @@ implemented dependencies on this consolidated Linux base. [P68](phases/P68-windo
 and D-96 extend the existing native client, starting at the requested
 `codex/consolidated-linux-release` commit `55510c5`.
 
+**Owner clarification (2026-10-31):** Linux and Windows must have exactly the
+same frontend appearance at equivalent viewport/UI scale, locale, quality
+and scene/time. Shared design/assets/components remain the default, with
+platform-specific DPI/font/rendering/shader adjustments wherever needed to
+produce identical visuals. Preserve the approved Linux appearance and
+quality. Visible differences block P68 visual acceptance; platform or driver
+differences are not an automatic waiver. W07/W08 require matched packaged
+captures and review of every screen, including 3D presentation and motion.
+
 - **Shared product:** Linux and Windows use the same Bevy desktop shell,
   native HUD/loading/ranking, art inventory, training and result scene.
   Review the [hashed platform-gate audit](planning/P68-PLATFORM-GATES.csv)

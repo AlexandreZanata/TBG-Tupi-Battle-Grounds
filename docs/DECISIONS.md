@@ -2446,6 +2446,14 @@ services distinct. Build the primary Windows release on Windows MSVC and
 reuse the native packager for a portable ZIP plus a safe per-user installer.
 No new engine, server authority, protocol feature or gameplay value is needed.
 
+**Owner visual requirement (2026-10-31).** Linux and Windows must have
+exactly the same frontend appearance, including UI layout/typography/art and
+3D lighting/effects/animation at matched conditions. Platform-specific
+adjustments are explicitly authorized to achieve that result; shared code
+alone is not acceptance evidence. Preserve the approved Linux quality and
+close every visible discrepancy before W07/W08 or P68 visual acceptance.
+No blanket OS/driver tolerance or platform-specific redesign is permitted.
+
 **Distribution.** Use pinned inputs and a reviewed CRT/import policy,
 complete assets, PE metadata/icons, user-local mutable data, safe upgrade/
 uninstall and final-artifact hashes. Signed public promotion is an owner-
