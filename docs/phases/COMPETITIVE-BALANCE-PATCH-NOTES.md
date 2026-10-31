@@ -208,3 +208,92 @@ use common dark metal/gold tokens and scroll below the shared header. At the
 minimum desktop size, the news banner and patch CTA remain inside their panel.
 No owner window was closed or preference directory modified by these captures.
 The offline snapshot was observed with the server deliberately unavailable.
+
+## Production artifacts and browser observation
+
+Runtime source: 50619e743e6ad5ee876c5726d94ae1b5c6c106db. The production
+native client built in 3m18s and server in 16.98s, then were copied out of the
+shared target immediately. Trunk release/offline passed with the cached
+wasm-bindgen 0.2.129 and wasm-opt version_131 on PATH; BINARYEN_CORES=2.
+The WASM Rust compilation took 2m22s; no total optimizer timing is claimed.
+Native and server binaries identify native.3 / protocol 29 as intended.
+
+A real browser loaded the new release build against an isolated loopback
+server and database. The three news slides changed title/body/art correctly;
+forum and game-news images decoded at 1200x400. The news link opened the
+shared patch page, scrolling reached the complete native.2 history and the
+common Lobby action returned to the menu. Local custom-port navigation
+exercised the compiled snapshot; online feed consumption is checked separately
+on the deployed HTTPS origin. No browser proof is inferred from native builds.
+
+Both Linux tar.gz and AppImage were packaged with source/version/protocol
+metadata and verified SHA-256 files. AppImage extraction verified the actual
+bundled binary digest after linuxdeploy ELF patching, source commit, protocol
+and all three new banners. The official AppImage runtime download was blocked
+inside the sandbox (`server returned status code 0`); finishing the official
+tool with network permission succeeded. Another front acquired the shared
+host slot meanwhile (exit 75). The owner's explicit chat exception permitting
+waiting was used without bypassing the lock or increasing Cargo jobs.
+
+Release: https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.0-native.3.
+The finite fictitious-play Nash mix is an empirical diagnostic, not proof of
+a unique human equilibrium; deterministic lowest-index tie handling can select
+one mix among alternatives. The observed Machines dominance is also supported
+by direct matchup and faction-majority evidence, not by the Nash row alone.
+
+## TBG-only rollout and local installation — completed
+
+PR: https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/31
+(base main). PR #29 separately contains the requested CI corrections; no
+running GitHub workflow was awaited and no main merge occurred.
+
+The deploy ran through the requested VPS control repository's ignored
+`.local/tbg-temp/competitive-audit-20261031/deploy.sh`. Its harness checks
+passed; yamllint was unavailable and explicitly skipped. Immediately before
+rollout, the expected native.2 image was confirmed and live counts were zero.
+The verified private SQLite backup, prior Deployment and web release are under
+`/opt/tbg-temp/backups/linux3-50619e743e6a/`. Current TBG image is
+`docker.io/library/tbg-server:linux3-50619e743e6a`; previous
+`docker.io/library/tbg-server:linux2-1815eb70c691` is retained for rollback.
+All unrelated Deployment images matched before/after. No other namespace,
+ingress reload, VPS reboot, prune or unrelated data deletion occurred.
+
+Post-rollout SQLite integrity and foreign-key checks passed; 5 accounts,
+40 matches, 9 ranked records and schema 8 were retained. Public /health,
+/api/version (native.3/protocol 29), patch collection/detail, unknown-id 404
+and all three art digests passed. The public server binary matched the frozen
+artifact, and public WASM matched the local Trunk output byte for byte:
+
+- Server SHA-256: 74cf06a840c0ee7646d453749de4535dc1079c440151d208d45713534b046066.
+- WASM SHA-256: e8ef3d74102906f30c46d76fc9035451193d21f8bbab9e226f377999b73aea75.
+- tar.gz SHA-256: ed3b303f8f5f43a132befc25f219e5429aaf448a822e831ee692e562938eecbc.
+- AppImage SHA-256: 92d1e2b116710ea820e1da4be3a7d2370f5a78204f5e3d253a82bcce573b6e28.
+
+The existing edge filter rejected Python urllib's request (403); curl with
+the normal same-origin Referer and the real browser passed. No edge/security
+policy was weakened. The deployed HTTPS patch page visibly displayed the
+online-feed introduction, native.3 metadata and the new panels/banner.
+
+Both release formats were downloaded back from GitHub and checksum-verified.
+The downloaded tar's source, executable digest and three banner bytes matched.
+Its portable executable ran from /tmp for a bounded 18 s on isolated Xvfb,
+created 1440x900 window preferences and logged no panic/asset errors. The
+initial diagnostic expected an INFO-only window log despite an inherited WARN
+filter; the persisted window state verified startup instead. Only that owned
+process group was stopped. Release pixels were not independently captured;
+the native debug captures and real production WASM observations above cover
+visual behavior without claiming an unexecuted release gallery.
+
+The downloaded installer installed **TBG** at
+`/home/iiii/.local/opt/tupi-battle-grounds/0.1.0-native.3-50619e743e6a`.
+The launcher reports native.3 / protocol 29 / source 50619e7. The existing
+preference JSON was byte-for-byte unchanged and all 31 earlier installed
+versions (including the former executable) remain. No owner app window was
+terminated. Restarting the existing TBG window selects the new installed build.
+
+The release/tag identifies runtime source 50619e7; subsequent report-only
+commits document delivery and do not change those artifacts. Owner policy
+edits, active worktrees and VPS unrelated working files remain untouched.
+Competitive acceptance remains failed and disclosed; the owner approved this
+maintenance/audit release with gameplay numbers preserved. CI review/merge,
+owner look/fun acceptance and the deferred checks remain owner-controlled.
