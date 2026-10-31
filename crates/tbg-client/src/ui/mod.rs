@@ -79,6 +79,8 @@ pub enum UiAction {
     ClosePanel,
     Logout,
     SelectUnit(UnitId),
+    /// Click on your own Stronghold: opens its Fortification panel (like a unit's Evolution).
+    SelectTower,
     Evolve {
         unit: UnitId,
         branch: u8,

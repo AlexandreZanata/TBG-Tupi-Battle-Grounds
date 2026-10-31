@@ -91,6 +91,7 @@ mod web {
             Res<crate::ui::fortify::PendingFortify>,
         ),
         inspected: Res<crate::ui::inspect::Inspected>,
+        tower_open: Res<crate::ui::fortify::TowerOpen>,
         mut queue: ResMut<ActionQueue>,
         mut desktop: ResMut<DesktopBattle>,
     ) {
@@ -129,6 +130,11 @@ mod web {
         attr(&root, "data-hp-max-own", &max[0].to_string());
         attr(&root, "data-hp-max-enemy", &max[1].to_string());
         tower(&root, v, fortifying.0.is_some());
+        attr(
+            &root,
+            "data-tower-open",
+            if tower_open.0 { "true" } else { "false" },
+        );
         attr(&root, "data-you", &info.you_name);
         // ARENAS-G: the match's arena for the start banner and info chip.
         attr(&root, "data-arena", info.arena.slug());

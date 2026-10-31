@@ -90,14 +90,8 @@
   const towerOf = record => { const [kind = '', tier, branch] = (record || '').split('|'); return {kind, tier: Number(tier) || 0, branch: Number(branch) || 0}; };
   const towerLabel = (t, def) => (def ? def.name : t.kind) + ' T' + t.tier;
   fortOptions.forEach(button => button.addEventListener('click', () => { if (button.dataset.state === 'open') send('fortify:' + button.dataset.fortBranch); }));
-  const fortToggle = root.querySelector('[data-fort-toggle]');
-  fortToggle.addEventListener('click', () => {
-    const open = fortToggle.getAttribute('aria-expanded') !== 'true';
-    fortToggle.setAttribute('aria-expanded', String(open));
-    fortToggle.setAttribute('aria-label', open ? 'Hide Fortification details' : 'Show Fortification details');
-    fortToggle.textContent = open ? '−' : '+';
-    root.querySelector('[data-fort-body]').hidden = !open;
-  });
+  // The panel opens on a click on your own tower and closes like a unit's panel.
+  root.querySelector('[data-fort-toggle]').addEventListener('click', () => send('deselect'));
   function plates(you, enemy) {
     const data = fort.data;
     const mine = data && TS.kind(data, you.kind), theirs = data && TS.kind(data, enemy.kind);
@@ -139,8 +133,8 @@
     if (!fort.data) fortData();
     plates(you, enemy);
     const def = fort.data && TS.kind(fort.data, you.kind);
-    fortPanel.hidden = !def;
-    if (!def) return;
+    fortPanel.hidden = !def || s.towerOpen !== 'true';
+    if (!def || fortPanel.hidden) return;
     fortPanel.style.setProperty('--tower', def.color);
     fortPanel.querySelector('[data-fort-icon]').setAttribute('href', TS.icon(def.kind));
     set('[data-fort-name]', def.name);
@@ -246,6 +240,6 @@
     set('[data-battle-surrender]',s.surrender === 'sent' ? 'Leaving...' : s.surrender === 'armed' ? 'Confirm?' : 'Surrender');
     surrender.title = s.surrender === 'armed' ? (s.ranked === 'true' ? 'Confirm: this counts as a Ranked loss' : 'Click again to surrender') : 'Click twice to surrender';
   }
-  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-hp-own','data-hp-enemy','data-hp-max-own','data-hp-max-enemy','data-tower-you','data-tower-enemy','data-fortify','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-scale','data-army','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect','data-regen','data-augments-you','data-augments-enemy','data-council','data-council-options']});
+  new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-hp-own','data-hp-enemy','data-hp-max-own','data-hp-max-enemy','data-tower-you','data-tower-enemy','data-tower-open','data-fortify','data-you','data-opponent','data-ranked','data-clock','data-energy','data-energy-scale','data-army','data-synergy','data-surrender','data-offer-0','data-offer-1','data-offer-2','data-offer-3','data-offer-4','data-inspect','data-regen','data-augments-you','data-augments-enemy','data-council','data-council-options']});
   root.dataset.ready = 'true';
 })();
