@@ -150,7 +150,7 @@ mod web {
             if info.ranked { "true" } else { "false" },
         );
         attr(&root, "data-clock", &hud_update::clock(v));
-        let lang = *lang;
+        let lang = *_lang;
         let unit = inspected
             .0
             .and_then(|id| crate::ui::inspect::report(v, id, &info.arcanas, lang))

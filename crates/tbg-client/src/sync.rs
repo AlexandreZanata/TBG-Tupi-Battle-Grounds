@@ -17,7 +17,7 @@ mod actions;
 pub(crate) mod crowd_ecs;
 mod events;
 #[cfg(target_os = "linux")]
-mod lobby_battle;
+pub(crate) mod lobby_battle;
 mod messages;
 mod result;
 mod special_cues;
@@ -101,7 +101,13 @@ pub fn plugin(app: &mut App) {
         .init_resource::<crate::art::aim::ImpactRing>()
         .init_resource::<crate::visuals::mount::Mounts>()
         .add_systems(Update, poll_link)
-        .add_systems(Update, sync_units.after(poll_link).run_if(render_units))
+        .add_systems(
+            Update,
+            sync_units
+                .after(poll_link)
+                .after(crate::training::runtime::feed)
+                .run_if(render_units),
+        )
         .add_systems(
             Update,
             crowd_ecs::update
@@ -114,17 +120,22 @@ pub fn plugin(app: &mut App) {
             crate::visuals::mount::passengers
                 .after(crowd_ecs::update)
                 .before(visuals::aim::update_aim)
-                .run_if(in_state(GameState::InMatch)),
+                .run_if(|s: Res<State<GameState>>| {
+                    matches!(*s.get(), GameState::InMatch | GameState::Training)
+                }),
         )
         .add_systems(OnExit(GameState::InMatch), clear_units);
 }
 
-fn render_units(state: Res<State<GameState>>) -> bool {
+fn render_units(state: Res<State<GameState>>, shell: Res<crate::ui::shell::Shell>) -> bool {
+    if shell.panel == crate::ui::shell::Panel::Troops && *state.get() == GameState::Menu {
+        return false;
+    }
     #[cfg(target_os = "linux")]
     if *state.get() == GameState::Menu {
         return lobby_battle::enabled();
     }
-    *state.get() == GameState::InMatch
+    matches!(*state.get(), GameState::InMatch | GameState::Training)
 }
 
 /// Lane x in milli-tiles → world x, mirrored for seat B.
@@ -141,7 +152,7 @@ pub fn world_tile(t: f32, you: Seat) -> f32 {
 }
 
 #[allow(clippy::too_many_arguments)] // the one system that turns views into the scene
-fn sync_units(
+pub(crate) fn sync_units(
     mut commands: Commands,
     time: Res<Time>,
     assets: Res<VisualAssets>,
@@ -150,10 +161,16 @@ fn sync_units(
     mut map: ResMut<UnitEntities>,
     mut visuals: events::Visuals,
     mut fx_res: FxResources,
-    #[cfg(target_os = "linux")] state: Res<State<GameState>>,
+    mut training: ResMut<crate::training::Trial>,
+    state: Res<State<GameState>>,
     #[cfg(target_os = "linux")] mut demo: ResMut<lobby_battle::Demo>,
 ) {
     let now = time.elapsed_secs_f64();
+    let dummies = training
+        .session
+        .as_ref()
+        .map(|s| s.dummy_ids().to_vec())
+        .unwrap_or_default();
     let (vfx, sounds, stats, orders, ring) = (
         &fx_res.0,
         &mut *fx_res.1,
@@ -177,6 +194,11 @@ fn sync_units(
     };
     #[cfg(not(target_os = "linux"))]
     let timeline = &mut buffer.timeline;
+    let stats = if *state.get() == GameState::Training {
+        &mut training.stats
+    } else {
+        stats
+    };
     let mut scene = Scene {
         commands: &mut commands,
         assets: &assets,
@@ -185,6 +207,7 @@ fn sync_units(
         visuals: &mut visuals,
         #[cfg(target_os = "linux")]
         menu,
+        dummies: &dummies,
     };
     // Borrowed, not cloned: the frame lives only while units are placed.
     let placed = timeline
@@ -222,6 +245,7 @@ struct Scene<'a, 'w, 's, 'qw, 'qs> {
     lib: &'a FigureLibrary,
     map: &'a mut UnitEntities,
     visuals: &'a mut events::Visuals<'qw, 'qs>,
+    dummies: &'a [UnitId],
     #[cfg(target_os = "linux")]
     menu: bool,
 }
@@ -277,8 +301,17 @@ impl Scene<'_, '_, '_, '_, '_> {
                         branch: u.branch,
                         own: u.seat == you,
                     };
-                    let e =
-                        visuals::spawn_unit_visual(self.commands, self.assets, self.lib, look, pos);
+                    let e = if self.dummies.contains(&u.id) {
+                        visuals::spawn_training_dummy(
+                            self.commands,
+                            self.assets,
+                            self.lib,
+                            look,
+                            pos,
+                        )
+                    } else {
+                        visuals::spawn_unit_visual(self.commands, self.assets, self.lib, look, pos)
+                    };
                     #[cfg(target_os = "linux")]
                     if self.menu {
                         self.commands

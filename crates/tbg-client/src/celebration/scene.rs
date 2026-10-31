@@ -2,7 +2,7 @@
 
 use super::{layout, range, total, Presentation};
 use crate::{
-    art::{anim::Animator, figure, FigureLibrary},
+    art::{anim::Animator, FigureLibrary},
     camera::ArenaCamera,
     sync::MatchInfo,
     GameState,
@@ -122,44 +122,19 @@ fn build(
     }
     scene.view = Some(formation.camera);
     for ((index, entry), position) in entries.into_iter().zip(formation.positions) {
-        let form = lib.get(entry.kind, entry.tier, entry.branch);
-        let root = commands
-            .spawn((
-                Transform::from_translation(position),
-                Visibility::Inherited,
-                Owned,
-                Dancer(index),
-            ))
-            .id();
-        let figure = commands
-            .spawn((
-                Transform::from_rotation(layout::facing(position, formation.camera.translation))
-                    .with_scale(Vec3::splat(form.plan.scale * formation.scale)),
-                Visibility::Inherited,
-            ))
-            .id();
-        commands.entity(root).add_child(figure);
-        let joints = figure::spawn_joints(
+        let transform = Transform::from_translation(position)
+            .with_rotation(layout::facing(position, formation.camera.translation))
+            .with_scale(Vec3::splat(formation.scale));
+        let root = crate::art::presentation::spawn(
             &mut commands,
-            figure,
+            &lib,
             entry.kind,
-            &form.plan,
-            form.meshes(true),
-            &lib.material,
+            (entry.tier, entry.branch),
+            transform,
+            index as u32,
+            state.reduced,
         );
-        figure::spawn_glow(&mut commands, &joints, &form.glow, &lib.glow_material);
-        let mut animator = Animator::new(joints, form.plan, figure, entry.kind, index as u32);
-        animator.native = form.native;
-        animator.form = (entry.tier, entry.branch);
-        animator.treadmill = true;
-        if state.reduced {
-            for joint in joints {
-                commands
-                    .entity(joint)
-                    .remove::<crate::art::springs::SpringJoint>();
-            }
-        }
-        commands.entity(root).insert(animator);
+        commands.entity(root).insert((Owned, Dancer(index)));
     }
 }
 

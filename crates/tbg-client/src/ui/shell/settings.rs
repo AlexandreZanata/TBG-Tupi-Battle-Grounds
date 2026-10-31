@@ -22,7 +22,11 @@ pub fn spawn(
         p.spawn(kit::heading(lang.key("lobby.settings.title"), 32.));
         p.spawn(kit::heading(lang.key("lobby.settings.language"), 20.));
         p.spawn(kit::row()).with_children(|r| {
-            r.spawn(kit::button("English", UiAction::SetLang(Lang::En), 180.));
+            r.spawn(kit::button(
+                lang.key("training.language_en"),
+                UiAction::SetLang(Lang::En),
+                180.,
+            ));
             r.spawn(kit::button(
                 "Português (Brasil)",
                 UiAction::SetLang(Lang::PtBr),

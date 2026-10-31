@@ -151,6 +151,37 @@ impl Animator {
     pub fn kind(&self) -> UnitKind {
         self.kind
     }
+    /// Catalog and Result sample the same kit pipeline without emitting combat events.
+    pub fn present(&mut self, clip: Clip, t: f32) {
+        if clip == Clip::Victory {
+            self.celebrate(
+                super::celebration::celebration_for(self.kind, self.form.0, self.form.1),
+                t,
+            );
+            return;
+        }
+        self.celebration = None;
+        let duration = self.duration(clip);
+        self.preview = Some((
+            clip,
+            if clip.looping() {
+                t.rem_euclid(duration)
+            } else {
+                t.min(duration)
+            },
+        ));
+        self.presentation_clock = Some(t);
+        self.clock = t;
+        self.action = None;
+        self.fade = None;
+        self.aim = None;
+        self.aim_at = None;
+        self.hit_stop = 0.;
+        self.carried = false;
+        self.events.clear();
+        self.special = (clip == Clip::Cast).then_some(t);
+        self.special_ready = false;
+    }
     /// Preview sampling bypasses attack/action event delivery and carries no target or hit-stop.
     pub fn celebrate(&mut self, motion: super::celebration::CelebrationMotion, t: f32) {
         self.celebration = Some(motion);
@@ -168,6 +199,10 @@ impl Animator {
         self.fade = None;
         self.aim = None;
         self.aim_at = None;
+        self.special = None;
+        self.special_ready = false;
+        self.armor_flash = 0.;
+        self.carried = false;
         self.hit_stop = 0.;
         self.rate = 1.;
         self.events.clear();

@@ -145,11 +145,11 @@ fn navigation(
         ("arcanas", "arcana", Some(Panel::Arcanas)),
         ("stronghold", "tower", Some(Panel::Strongholds)),
         ("arenas", "island", Some(Panel::Arenas)),
-        ("troops", "helmet", None),
+        ("troops", "helmet", Some(Panel::Troops)),
         ("ranking", "trophy", None),
         ("settings", "settings", Some(Panel::Settings)),
     ] {
-        let enabled = key != "troops";
+        let enabled = true;
         let active = if key == "ranking" {
             ranking
         } else {
@@ -178,9 +178,6 @@ fn navigation(
                 lang.key(&format!("lobby.tabs.{key}")).to_uppercase(),
                 11.,
             ));
-            if !enabled {
-                t.spawn(kit::muted(lang.key("lobby.tabs.locked"), 8.));
-            }
         });
     }
 }

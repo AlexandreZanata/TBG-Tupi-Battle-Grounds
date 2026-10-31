@@ -54,7 +54,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) 
                 if chosen {
                     p.spawn(kit::button(
                         lang.key("arenas.train"),
-                        UiAction::Practice,
+                        UiAction::PracticeSetup,
                         280.,
                     ));
                 }

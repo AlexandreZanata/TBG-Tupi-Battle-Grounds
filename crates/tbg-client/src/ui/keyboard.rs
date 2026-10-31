@@ -33,6 +33,7 @@ type Buttons<'w, 's> = Query<
     ),
 >;
 
+#[allow(clippy::too_many_arguments)] // Bevy declares independent resources and component filters in the system signature.
 pub(super) fn navigate(
     keys: Res<ButtonInput<KeyCode>>,
     state: Res<State<GameState>>,

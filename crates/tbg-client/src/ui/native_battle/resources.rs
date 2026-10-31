@@ -151,7 +151,7 @@ fn update(
                 (v.energy / INTEREST_BAND).min(INTEREST_MAX_BANDS),
                 INTEREST_MAX_BANDS
             ),
-            Readout::Army => army_label(v),
+            Readout::Army => army_label(v, *lang),
             Readout::Reroll => match v.reroll_cost {
                 Some(cost) => format!(
                     "{} · {} Energy",

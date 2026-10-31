@@ -84,6 +84,7 @@ fn watch_text(
     for ev in events.read() {
         let now = time.elapsed_secs_f64();
         let req = match ev.kind {
+            TextKind::CatalogSearch => continue,
             TextKind::Name => ClientMsg::Register {
                 name: ev.value.clone(),
             },

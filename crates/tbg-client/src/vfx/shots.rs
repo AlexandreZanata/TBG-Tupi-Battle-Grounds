@@ -436,14 +436,6 @@ fn look(kind: ShotKind) -> Look {
             0.0,
             Impact::Blood,
         ),
-        Bullet => (
-            Some((Body::Bolt, 0.20)),
-            0.0,
-            CAST_FLIGHT,
-            Trail::Sparks,
-            0.0,
-            Impact::Bolt,
-        ),
         SlashWave => (
             None,
             0.0,

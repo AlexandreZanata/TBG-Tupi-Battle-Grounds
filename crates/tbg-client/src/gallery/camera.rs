@@ -4,8 +4,12 @@ use super::settings::Gallery;
 use crate::{art::anim::CLIPS, camera::ArenaCamera};
 use bevy::prelude::*;
 
+#[allow(clippy::too_many_arguments)] // Bevy keeps content, mesh cache and camera resources explicit.
 pub fn frame(
     options: Res<Gallery>,
+    lib: Res<crate::art::FigureLibrary>,
+    meshes: Res<Assets<Mesh>>,
+    mut cached: Local<Option<(tbg_core::UnitKind, (f32, f32))>>,
     window: Single<&Window>,
     camera: Single<(&mut Transform, &mut DistanceFog), With<ArenaCamera>>,
 ) {
@@ -13,7 +17,31 @@ pub fn frame(
         return;
     }
     let aspect = window.width() / window.height();
-    let (center, width, height, offset) = target(&options, aspect < 1.0);
+    let (center, width, height, offset) = if options.portrait {
+        let kind = options.unit.unwrap_or(tbg_core::UnitKind::Archer);
+        let (radius, h) = cached
+            .get_or_insert_with(|| {
+                (
+                    kind,
+                    crate::art::celebration::bounds::envelope(
+                        lib.get(kind, 0, 0),
+                        &meshes,
+                        kind,
+                        0,
+                        0,
+                    ),
+                )
+            })
+            .1;
+        (
+            Vec3::new(options.portrait_x, h * 0.45, 0.),
+            radius * options.portrait_zoom,
+            h * 0.57 * options.portrait_zoom,
+            Vec3::new(0., 0.6, 10.),
+        )
+    } else {
+        target(&options, aspect < 1.0)
+    };
     let distance = (width / (0.315 * aspect)).max(height / 0.315);
     let offset = if options.silhouette { Vec3::Z } else { offset };
     let (mut t, mut fog) = camera.into_inner();

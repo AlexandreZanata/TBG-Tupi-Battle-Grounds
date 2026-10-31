@@ -54,10 +54,13 @@ pub(super) fn poll_link(
     mut account: ResMut<Account>,
     mut ranking: ResMut<crate::ui::ranking::Ranking>,
     mut surrender: ResMut<crate::ui::surrender::Surrender>,
-    lang: Res<Lang>,
-    mut shop_pending: ResMut<crate::ui::PendingBuy>,
-    state: Res<State<GameState>>,
+    presentation: (
+        Res<Lang>,
+        ResMut<crate::ui::PendingBuy>,
+        Res<State<GameState>>,
+    ),
 ) {
+    let (lang, mut shop_pending, state) = presentation;
     let now = time.elapsed_secs_f64();
     let mut started = false;
     for msg in link.poll(now) {

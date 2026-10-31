@@ -33,6 +33,7 @@ pub fn mouse_and_keys(
     mut shell: ResMut<Shell>,
     mut form: NonSendMut<super::ActiveForm>,
     mut queue: ResMut<super::super::ActionQueue>,
+    mut training: ResMut<crate::training::Requests>,
     mut focus: Local<usize>,
     mut button_focus: ResMut<super::kit::buttons::Focus>,
     lang: Res<Lang>,
@@ -97,6 +98,10 @@ pub fn mouse_and_keys(
     if let Some(index) = selected {
         *focus = index;
         let (_, action, ui, _, _, _, _) = ordered[index];
+        if let Some(Action::Catalog(action)) = action {
+            training.0.push(*action);
+            return;
+        }
         if let Some(action) = action {
             #[cfg(target_os = "linux")]
             if matches!(action, Action::Open(_)) {

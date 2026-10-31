@@ -9,10 +9,16 @@ use bevy::{
 mod arenas;
 #[cfg(target_os = "linux")]
 mod reserve;
+#[cfg(target_os = "linux")]
+mod training;
 
 pub fn plugin(app: &mut App) {
     if crate::config::url_param("capture").is_some() {
         app.add_systems(Update, capture);
+        #[cfg(target_os = "linux")]
+        if crate::config::url_param("capture_panel").as_deref() == Some("training") {
+            training::plugin(app);
+        }
         #[cfg(target_os = "linux")]
         if crate::config::url_param("capture_panel").as_deref() == Some("arena_train") {
             arenas::plugin(app);
@@ -110,6 +116,7 @@ fn ranking_fixture(mut ranking: ResMut<crate::ui::ranking::Ranking>, mut done: L
     eprintln!("Ranking capture uses explicit layout fixtures; these are not production accounts.");
 }
 
+#[allow(clippy::too_many_arguments)] // Bevy declares independent resources and component filters in the system signature.
 fn capture(
     mut commands: Commands,
     time: Res<Time>,

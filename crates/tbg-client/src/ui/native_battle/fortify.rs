@@ -317,6 +317,7 @@ fn visibility(
 }
 
 fn readouts(
+    lang: Res<crate::i18n::Lang>,
     view: Res<LatestView>,
     pending: Res<PendingFortify>,
     assets: Res<AssetServer>,
@@ -330,7 +331,7 @@ fn readouts(
     let Some(def) = definition(v) else { return };
     let color = accent(v);
     for (field, mut text, mut tint) in &mut texts {
-        let want = field_text(field, v, def, pending.0.is_some());
+        let want = field_text(field, v, def, pending.0.is_some(), *lang);
         if text.0 != want {
             text.0 = want;
         }
@@ -347,7 +348,13 @@ fn readouts(
     }
 }
 
-fn field_text(field: &Field, v: &MatchView, def: &Value, pending: bool) -> String {
+fn field_text(
+    field: &Field,
+    v: &MatchView,
+    def: &Value,
+    pending: bool,
+    lang: crate::i18n::Lang,
+) -> String {
     let tower = fortify::own(v);
     let branch = usize::from(tower.branch.min(1));
     let tier = usize::from(tower.tier.saturating_sub(1).min(1));
@@ -357,14 +364,17 @@ fn field_text(field: &Field, v: &MatchView, def: &Value, pending: bool) -> Strin
         &def["branches"][branch]["steps"][tier]["stats"]
     };
     match field {
-        Field::Name => STRONGHOLD_KINDS[tower.kind.index()].name.into(),
+        Field::Name => crate::i18n::content::stronghold_name(lang, tower.kind).into(),
         Field::Tier => format!(
             "Tier {} / 2{}",
             tower.tier,
             if tower.tier == 0 {
                 String::new()
             } else {
-                format!(" · {}", value(&def["branches"][branch], "name"))
+                format!(
+                    " · {}",
+                    crate::i18n::content::stronghold_branch(lang, tower.kind, branch as u8)
+                )
             }
         ),
         Field::Hp => format!(
@@ -375,11 +385,17 @@ fn field_text(field: &Field, v: &MatchView, def: &Value, pending: bool) -> Strin
         Field::PassiveName => value(&def["passive"], "name"),
         Field::Passive => shell::expand(&value(&def["passive"], "text"), stats),
         Field::Note => note(v, pending),
-        _ => option_text(field, v, def, pending),
+        _ => option_text(field, v, def, pending, lang),
     }
 }
 
-fn option_text(field: &Field, v: &MatchView, def: &Value, pending: bool) -> String {
+fn option_text(
+    field: &Field,
+    v: &MatchView,
+    def: &Value,
+    pending: bool,
+    lang: crate::i18n::Lang,
+) -> String {
     let (Field::Branch(branch) | Field::Step(branch) | Field::Effect(branch) | Field::Cost(branch)) =
         field
     else {
@@ -391,12 +407,18 @@ fn option_text(field: &Field, v: &MatchView, def: &Value, pending: bool) -> Stri
     let step = &path["steps"][tier];
     let closed = fortify::offer(v, *branch, pending) == Offer::Closed;
     match field {
-        Field::Branch(_) => value(path, "name"),
+        Field::Branch(_) => {
+            crate::i18n::content::stronghold_branch(lang, tower.kind, *branch).into()
+        }
         Field::Step(_) if closed => format!(
             "Closed · {} chosen",
             value(&def["branches"][usize::from(tower.branch.min(1))], "name")
         ),
-        Field::Step(_) => format!("Tier {} · {}", tier + 1, value(step, "name")),
+        Field::Step(_) => format!(
+            "Tier {} · {}",
+            tier + 1,
+            crate::i18n::content::stronghold_step(lang, tower.kind, *branch, (tier + 1) as u8)
+        ),
         Field::Effect(_) if !closed => shell::branch_effect(step),
         Field::Cost(_) if !closed => (FORTIFY_COST[tier] / ENERGY_SCALE).to_string(),
         Field::Cost(_) => "–".into(),

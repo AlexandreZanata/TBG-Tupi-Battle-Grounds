@@ -131,7 +131,7 @@ pub fn report(
             None => "-".into(),
         },
         effects: super::effect_details::describe(v, u),
-        ability: super::ability_details::live(u),
+        ability: super::ability_details::live(u, lang),
         status: content::status_id(u.status),
         status_label: content::status(lang, u.status),
         synergy: if level > 0 {

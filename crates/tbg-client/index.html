@@ -90,7 +90,7 @@
       <button data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><svg class="icon"><use data-icon="arcana"/></svg><span data-i18n="lobby.tabs.arcanas">Arcanas</span></button>
       <button data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><svg class="icon"><use data-icon="tower"/></svg><span data-i18n="lobby.tabs.stronghold">Stronghold</span></button>
       <button data-arena-open aria-haspopup="dialog" aria-controls="arena-hub"><svg class="icon"><use data-icon="island"/></svg><span data-i18n="lobby.tabs.arenas">Arenas</span></button>
-      <button disabled data-i18n-title="lobby.tabs.coming" title="Coming later"><svg class="icon"><use data-icon="helmet"/></svg><span><span data-i18n="lobby.tabs.troops">Troops</span> <small data-i18n="lobby.tabs.locked">Locked</small></span></button>
+      <button onclick="location.href='?ui=bevy&amp;panel=troops'"><svg class="icon"><use data-icon="helmet"/></svg><span><span data-i18n="lobby.tabs.troops">Troops</span> </span></button>
       <button data-action="ranking"><svg class="icon"><use data-icon="trophy"/></svg><span data-i18n="lobby.tabs.ranking">Ranking</span></button>
       <button data-dialog="settings"><svg class="icon"><use data-icon="settings"/></svg><span data-i18n="lobby.tabs.settings">Settings</span></button>
     </nav>
@@ -116,7 +116,7 @@
   <section class="feature-cards" data-i18n-aria-label="lobby.feature.explore">
     <button class="feature metal-panel" data-arcana-open aria-haspopup="dialog" aria-controls="arcana-editor"><img data-art="arcanas" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.arcanas.title">Arcanas</strong><small data-i18n="lobby.feature.arcanas.hint">Shape your strategy</small></span></button>
     <button class="feature metal-panel" data-tower-open aria-haspopup="dialog" aria-controls="stronghold-picker"><img data-art="strongholds" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.strongholds.title">Strongholds</strong><small data-i18n="lobby.feature.strongholds.hint">Choose your tower</small></span></button>
-    <button class="feature metal-panel" disabled><img data-art="troops" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.troops.title">Troops</strong><small data-i18n="lobby.feature.troops.hint">Meet the units · Coming later</small><span class="feature-lock" data-i18n="lobby.feature.troops.locked">Locked</span></span></button>
+    <button class="feature metal-panel" onclick="location.href='?ui=bevy&amp;panel=troops'"><img data-art="troops" alt="" width="768" height="640"><span class="feature-copy"><strong data-i18n="lobby.feature.troops.title">Troops</strong><small data-i18n="lobby.feature.troops.hint">Meet the units · Coming later</small></span></button>
     <button class="feature metal-panel" data-action="ranking"><img data-art="ranking" alt="" width="768" height="640"><span class="feature-copy"><strong><span data-i18n="lobby.feature.ranking.title">Ranking</span> <i aria-hidden="true">›</i></strong><small data-i18n="lobby.feature.ranking.hint">Find your place among the best</small></span></button>
   </section>
   <section class="live-panel metal-panel" data-live-panel aria-labelledby="live-panel-title">

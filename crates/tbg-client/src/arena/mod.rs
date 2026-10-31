@@ -25,7 +25,7 @@ mod water;
 pub(super) type Part = (Shape, Color, Transform);
 
 pub use scene::ActiveArena;
-use scene::ArenaScene;
+pub(crate) use scene::ArenaScene;
 
 pub fn plugin(app: &mut App) {
     scene::plugin(app);

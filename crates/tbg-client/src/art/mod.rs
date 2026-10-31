@@ -25,11 +25,13 @@ mod legacy;
 pub mod melee;
 pub mod mesh;
 pub mod palette;
+pub mod presentation;
 pub mod rig;
 pub(crate) mod roster;
 #[cfg(test)]
 mod roster_tests;
 pub(crate) mod springs;
+mod training_dummy;
 
 use rig::{Proportions as BodyPlan, NODE_COUNT};
 
@@ -58,6 +60,7 @@ impl FigureForm {
 
 #[derive(Resource)]
 pub struct FigureLibrary {
+    pub training_dummy: FigureForm,
     forms: HashMap<(UnitKind, u8, u8), FigureForm>,
     blockouts: HashMap<UnitKind, FigureForm>,
     /// One shared material for every figurine (vertex colors).
@@ -327,7 +330,9 @@ fn build_library(
             ((t, b), parts)
         })
         .collect();
+    let training_dummy = native_form(training_dummy::spec(), &mut meshes, false);
     commands.insert_resource(FigureLibrary {
+        training_dummy,
         shells,
         forms,
         blockouts,

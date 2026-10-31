@@ -5,16 +5,15 @@
 use bevy::prelude::*;
 use tbg_core::content::{form_of, FormDef};
 #[cfg(any(not(target_os = "linux"), test))]
-use tbg_core::{
-    content::{def, ENERGY_SCALE},
-    UnitView,
-};
+use tbg_core::{content::ENERGY_SCALE, UnitView};
 use tbg_core::{OnHit, Phase, UnitId};
 
 use super::UiAction;
 #[cfg(any(not(target_os = "linux"), test))]
 use super::{button, label, BUTTON, DISABLED, PANEL};
-use crate::i18n::{content, Lang, Msg};
+#[cfg(any(not(target_os = "linux"), test))]
+use crate::i18n::content;
+use crate::i18n::{Lang, Msg};
 use crate::sync::LatestView;
 use crate::GameState;
 use tbg_core::content::TICK_HZ;
@@ -192,7 +191,7 @@ fn options(u: &UnitView, lang: Lang) -> Vec<(u8, &'static str, String)> {
                 name,
                 [
                     describe(form, lang),
-                    super::ability_details::describe(u.kind, u.tier + 1, b),
+                    super::ability_details::describe(u.kind, u.tier + 1, b, lang),
                 ]
                 .join("; "),
             ))

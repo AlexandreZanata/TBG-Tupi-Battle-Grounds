@@ -247,6 +247,7 @@ fn cover_rect(image: &Image) -> Rect {
 }
 
 fn texts(
+    lang: Res<crate::i18n::Lang>,
     view: Res<LatestView>,
     selection: Res<Selection>,
     mut texts: Query<(&Field, &mut Text, &mut TextColor)>,
@@ -265,7 +266,7 @@ fn texts(
                 "Augment selected! Waiting for opponent…"
             }
             .into(),
-            _ => card_text(field, r),
+            _ => card_text(field, r, *lang),
         };
         if text.0 != want {
             text.0 = want;
@@ -278,7 +279,7 @@ fn texts(
     }
 }
 
-fn card_text(field: &Field, r: &RoundView) -> String {
+fn card_text(field: &Field, r: &RoundView, lang: crate::i18n::Lang) -> String {
     let (Field::Rarity(i) | Field::Name(i) | Field::Description(i) | Field::Cost(i)) = field else {
         return String::new();
     };
@@ -287,8 +288,10 @@ fn card_text(field: &Field, r: &RoundView) -> String {
     };
     match field {
         Field::Rarity(_) => format!("{:?}", def.rarity).to_uppercase(),
-        Field::Name(_) => def.name.into(),
-        Field::Description(_) => def.text.into(),
+        Field::Name(_) => crate::i18n::content::augment_name(lang, def.id)
+            .unwrap_or(def.name)
+            .into(),
+        Field::Description(_) => crate::i18n::augment::text(lang, def),
         Field::Cost(_) => (r.costs[*i] / ENERGY_SCALE).to_string(),
         _ => String::new(),
     }
@@ -323,6 +326,7 @@ fn update_layout(view: Res<LatestView>, mut nodes: Query<(&Layout, &mut Node)>) 
     }
 }
 
+#[allow(clippy::type_complexity)] // Bevy declares independent resources and component filters in the system signature.
 fn buttons(
     view: Res<LatestView>,
     selection: Res<Selection>,

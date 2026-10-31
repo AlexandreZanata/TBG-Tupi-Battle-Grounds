@@ -196,9 +196,34 @@ pub fn spawn_unit_visual(
     look: UnitLook,
     pos: Vec3,
 ) -> Entity {
+    spawn_form_visual(commands, a, lib, look, pos, false)
+}
+
+pub fn spawn_training_dummy(
+    commands: &mut Commands,
+    a: &VisualAssets,
+    lib: &FigureLibrary,
+    look: UnitLook,
+    pos: Vec3,
+) -> Entity {
+    spawn_form_visual(commands, a, lib, look, pos, true)
+}
+
+fn spawn_form_visual(
+    commands: &mut Commands,
+    a: &VisualAssets,
+    lib: &FigureLibrary,
+    look: UnitLook,
+    pos: Vec3,
+    dummy: bool,
+) -> Entity {
     let d = def(look.kind);
-    let form = lib.get(look.kind, look.tier, look.branch);
-    let height = 1.05 * form.plan.scale;
+    let form = if dummy {
+        &lib.training_dummy
+    } else {
+        lib.get(look.kind, look.tier, look.branch)
+    };
+    let height = (if dummy { 1.75 } else { 1.05 }) * form.plan.scale;
     let mesh = |m: &Handle<Mesh>, mat: &Handle<StandardMaterial>, t: Transform| {
         (Mesh3d(m.clone()), MeshMaterial3d(mat.clone()), t)
     };
@@ -271,7 +296,12 @@ pub fn spawn_unit_visual(
     let mut animator = Animator::new(joints, form.plan, figure_root, look.kind, look.id);
     animator.native = form.native;
     animator.form = (look.tier, look.branch);
-    animator.play(crate::art::anim::Clip::Spawn);
+    if dummy {
+        animator.kit = None;
+        animator.preview = Some((crate::art::anim::Clip::Idle, 0.));
+    } else {
+        animator.play(crate::art::anim::Clip::Spawn);
+    }
     let root = commands.spawn_empty().id();
     commands
         .entity(root)

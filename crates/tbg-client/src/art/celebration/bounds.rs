@@ -1,11 +1,6 @@
 //! Cache-friendly mesh-box sampling through the actual celebration pose pipeline.
 
-use crate::art::{
-    anim::Animator,
-    ik,
-    rig::{self, NODE_COUNT},
-    FigureForm,
-};
+use crate::art::{anim::Animator, rig::NODE_COUNT, FigureForm};
 use bevy::{mesh::VertexAttributeValues, prelude::*};
 use tbg_core::UnitKind;
 
@@ -47,21 +42,14 @@ pub fn envelope(
         0,
     );
     animator.form = (tier, branch);
+    animator.native = form.native;
     let motion = super::celebration_for(kind, tier, branch);
     let (mut radius, mut height) = (0.15f32, 0.3f32);
     for phase in 0..32 {
         let t = phase as f32 * 0.257;
         animator.celebrate(motion, t);
         let pose = animator.pose(motion.clip, t.rem_euclid(motion.duration));
-        let mut world = [Mat4::IDENTITY; NODE_COUNT];
-        for node in rig::nodes() {
-            let (rot, offset) = pose[node.index()];
-            let local = Mat4::from_rotation_translation(
-                ik::quat(rot),
-                rig::rest(node, &form.plan) + offset,
-            );
-            world[node.index()] = node.parent().map_or(local, |p| world[p.index()] * local);
-        }
+        let world = crate::art::presentation::pose_world(kind, &form.plan, &pose);
         for (index, low, high) in &boxes {
             for x in [low.x, high.x] {
                 for y in [low.y, high.y] {

@@ -5,7 +5,8 @@ use bevy::prelude::*;
 use tbg_core::protocol::{InviteToken, RoomCode};
 use tbg_core::{Rejection, UnitId};
 
-mod ability_details;
+pub(crate) mod ability_details;
+mod ability_legacy;
 pub mod account;
 mod account_ui;
 mod actions;
@@ -24,7 +25,7 @@ mod desktop;
 #[cfg(target_arch = "wasm32")]
 mod desktop_actions;
 mod effect_details;
-mod evolve;
+pub(crate) mod evolve;
 pub(crate) mod fortify;
 #[cfg(test)]
 mod glyphs;
@@ -53,7 +54,7 @@ pub mod ranking;
 #[cfg(not(target_os = "linux"))]
 mod ranking_ui;
 mod result;
-mod shell;
+pub(crate) mod shell;
 mod start;
 #[cfg(test)]
 mod stronghold_data_tests;
@@ -75,6 +76,7 @@ pub enum UiAction {
     CelebrationHide,
     CelebrationMotion,
     Practice,
+    PracticeSetup,
     #[cfg(target_os = "linux")]
     PracticeArena(tbg_core::Arena),
     Quick,

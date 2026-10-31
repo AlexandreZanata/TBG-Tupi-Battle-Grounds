@@ -1,17 +1,21 @@
 //! Per-frame HUD refresh from `LatestView`.
 
 use bevy::prelude::*;
-use tbg_core::content::{
-    augment_def, def, AUGMENT_ROUND_TICKS, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS, TICK_HZ,
-};
+use tbg_core::content::{def, ENERGY_SCALE, INTEREST_BAND, INTEREST_MAX_BANDS};
 use tbg_core::{MatchView, Phase, FACTIONS};
 
 use super::hud::Hud;
-use super::{PendingBuy, BUTTON, DISABLED};
-use crate::i18n::{augment, content, Lang, Msg};
+use super::PendingBuy;
+#[cfg(not(target_os = "linux"))]
+use super::{BUTTON, DISABLED};
+#[cfg(not(target_os = "linux"))]
+use crate::i18n::augment;
+use crate::i18n::{content, Lang, Msg};
 use crate::sync::LatestView;
 #[cfg(not(target_os = "linux"))]
 use crate::visuals::assets::FACTION_COLORS;
+#[cfg(not(target_os = "linux"))]
+use tbg_core::content::augment_def;
 
 pub(super) fn update(
     view: Res<LatestView>,
@@ -121,6 +125,7 @@ pub(super) fn update(
                 "{} vs {} · {} spectators",
                 info_state.you_name, info_state.opponent, v.spectators
             ),
+            #[cfg(not(target_os = "linux"))]
             Hud::CardText(i) => {
                 let d = def(v.offers[*i]);
                 [
@@ -131,7 +136,9 @@ pub(super) fn update(
                 .join("\n")
             }
             Hud::Augments => augment_list(v, v.you.index(), lang),
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilStatus => council_status(v, lang),
+            #[cfg(not(target_os = "linux"))]
             Hud::CouncilOptionText(i) => v
                 .augment_round
                 .as_ref()
@@ -168,11 +175,13 @@ pub(super) fn update(
 }
 
 /// `m:ss` for a tick count, rounded up to whole seconds.
+#[cfg(not(target_os = "linux"))]
 fn mmss(ticks: u32) -> String {
     let s = ticks.div_ceil(TICK_HZ);
     format!("{}:{:02}", s / 60, s % 60)
 }
 
+#[cfg(not(target_os = "linux"))]
 fn council_status(v: &MatchView, lang: Lang) -> String {
     match &v.augment_round {
         Some(r) if r.resolved => {
@@ -279,3 +288,6 @@ pub(crate) fn army_label(v: &MatchView, lang: Lang) -> String {
         label
     }
 }
+
+#[cfg(not(target_os = "linux"))]
+use tbg_core::content::{AUGMENT_ROUND_TICKS, TICK_HZ};

@@ -6,6 +6,7 @@ use super::super::{
     kit, label, UiAction,
 };
 use super::{chrome, SHOP_BOTTOM, SIDE_LEFT};
+use crate::i18n::Lang;
 use crate::{
     sync::{LatestView, MatchInfo},
     GameState,
@@ -306,14 +307,21 @@ fn stat(parent: &mut ChildSpawnerCommands, name: &str, kind: Stat) {
         });
 }
 
-fn current(view: &LatestView, inspected: &Inspected, info: &MatchInfo) -> Option<Report> {
-    inspect::report(view.0.as_ref()?, inspected.0?, &info.arcanas)
+fn current(
+    view: &LatestView,
+    inspected: &Inspected,
+    info: &MatchInfo,
+    lang: Lang,
+) -> Option<Report> {
+    inspect::report(view.0.as_ref()?, inspected.0?, &info.arcanas, lang)
 }
 
+#[allow(clippy::too_many_arguments)] // Bevy declares independent resources and component filters in the system signature.
 fn update(
     view: Res<LatestView>,
     inspected: Res<Inspected>,
     info: Res<MatchInfo>,
+    lang: Res<Lang>,
     assets: Res<AssetServer>,
     mut panels: Query<&mut Visibility, With<Panel>>,
     mut texts: Query<(&Field, &mut Text)>,
@@ -321,7 +329,7 @@ fn update(
     mut portraits: Query<&mut ImageNode, With<Portrait>>,
     mut accents: Query<&mut BackgroundColor, With<Accent>>,
 ) {
-    let report = current(&view, &inspected, &info);
+    let report = current(&view, &inspected, &info, *lang);
     for mut visible in &mut panels {
         *visible = if report.is_some() {
             Visibility::Inherited
@@ -331,7 +339,7 @@ fn update(
     }
     let Some(r) = report else { return };
     for (field, mut text) in &mut texts {
-        text.0 = field_text(field, &r, view.0.as_ref(), inspected.0);
+        text.0 = field_text(field, &r, view.0.as_ref(), inspected.0, *lang);
     }
     let (top, bottom) = if r.own {
         (Color::srgb_u8(95, 212, 255), Color::srgb_u8(10, 111, 180))
@@ -362,6 +370,7 @@ fn field_text(
     r: &Report,
     view: Option<&MatchView>,
     id: Option<tbg_core::UnitId>,
+    lang: Lang,
 ) -> String {
     match field {
         Field::Name => r.name.into(),
@@ -375,7 +384,7 @@ fn field_text(
         Field::Hp => format!("{} / {}", r.hp, r.max_hp),
         Field::AttackLabel => r.attack.0.into(),
         Field::Stat(kind) => stat_text(*kind, r),
-        Field::Evolution(branch) => evolution_text(view, id, *branch),
+        Field::Evolution(branch) => evolution_text(view, id, *branch, lang),
     }
 }
 
@@ -394,12 +403,17 @@ fn stat_text(kind: Stat, r: &Report) -> String {
             }
         }
         Stat::OnHit => r.on_hit.clone(),
-        Stat::Status => r.status.into(),
+        Stat::Status => r.status_label.into(),
         Stat::Synergy => r.synergy.clone(),
     }
 }
 
-fn evolution_text(view: Option<&MatchView>, id: Option<tbg_core::UnitId>, branch: u8) -> String {
+fn evolution_text(
+    view: Option<&MatchView>,
+    id: Option<tbg_core::UnitId>,
+    branch: u8,
+    lang: Lang,
+) -> String {
     let Some((v, u)) = view.and_then(|v| Some((v, v.units.iter().find(|u| Some(u.id) == id)?)))
     else {
         return String::new();
@@ -411,7 +425,7 @@ fn evolution_text(view: Option<&MatchView>, id: Option<tbg_core::UnitId>, branch
         "{} · {} Energy\n{}",
         form.name,
         v.evolve_costs[usize::from(u.tier.min(1))] / ENERGY_SCALE,
-        evolve::describe(form)
+        evolve::describe(form, lang)
     )
 }
 

@@ -27,6 +27,7 @@ mod overlay;
 mod platform;
 mod stress;
 mod sync;
+mod training;
 mod ui;
 mod vfx;
 mod visuals;
@@ -37,6 +38,7 @@ pub enum GameState {
     Menu,
     Queue,
     InMatch,
+    Training,
     Result,
     /// `?gallery`: art review scene.
     Gallery,
@@ -105,6 +107,7 @@ fn main() {
             vfx::plugin,
             audio::plugin,
         ))
+        .add_plugins(training::plugin)
         .add_plugins(platform_plugin)
         .run();
 }

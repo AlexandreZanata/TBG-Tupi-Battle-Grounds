@@ -256,14 +256,23 @@ fn spawn(
                 Hud::WatchControls,
                 children![
                     (label("", 16.0), Hud::Spectators),
-                    super::kit::button("Leave battle", UiAction::LeaveWatch, 220.0)
+                    super::kit::button(
+                        lang.key("training.leave_battle"),
+                        UiAction::LeaveWatch,
+                        220.0
+                    )
                 ],
             ));
         });
 }
 
 #[cfg(target_os = "linux")]
-fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>) {
+fn spawn(
+    mut commands: Commands,
+    info: Res<MatchInfo>,
+    assets: Res<AssetServer>,
+    lang: Res<crate::i18n::Lang>,
+) {
     commands
         .spawn((
             screen(JustifyContent::SpaceBetween),
@@ -273,7 +282,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>)
         .with_children(|root| {
             super::native_battle::score(root, &info, &assets);
             if !info.spectating {
-                root.spawn(super::surrender::linux_button(&assets));
+                root.spawn(super::surrender::linux_button(&assets, *lang));
             }
             root.spawn((
                 Node {
@@ -323,7 +332,11 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>)
                 Hud::WatchControls,
                 children![
                     (label("", 16.), Hud::Spectators),
-                    super::kit::button("Leave battle", UiAction::LeaveWatch, 220.)
+                    super::kit::button(
+                        lang.key("training.leave_battle"),
+                        UiAction::LeaveWatch,
+                        220.
+                    )
                 ],
             ));
         });

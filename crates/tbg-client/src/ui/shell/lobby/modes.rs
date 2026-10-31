@@ -42,7 +42,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, account: &Account, assets: &AssetS
             ("casual", "shield", UiAction::Quick),
             ("challenge", "friends", UiAction::CreateChallenge),
             ("room", "friends", UiAction::Disabled),
-            ("practice", "bot", UiAction::Practice),
+            ("practice", "bot", UiAction::PracticeSetup),
         ] {
             let ranked = key == "ranked";
             let title = if ranked {

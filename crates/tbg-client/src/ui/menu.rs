@@ -171,7 +171,7 @@ fn build(commands: &mut Commands, account: &Account, lang: Lang) {
             p.spawn(label(lang.t(Msg::LobbyModeCasualTitle), 20.0));
             p.spawn(button(
                 lang.t(Msg::LobbyModePracticeTitle),
-                UiAction::Practice,
+                UiAction::PracticeSetup,
                 260.0,
             ));
             p.spawn(button(lang.t(Msg::MenuQuick), UiAction::Quick, 260.0));

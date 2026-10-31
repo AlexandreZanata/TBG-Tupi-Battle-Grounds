@@ -43,6 +43,7 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
+#[allow(clippy::type_complexity)] // Bevy declares independent resources and component filters in the system signature.
 fn register(
     mut commands: Commands,
     images: Query<(Entity, &ImageNode), (With<Node>, Without<ImageMask>, Without<Decoration>)>,

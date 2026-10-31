@@ -113,7 +113,11 @@ fn update(
     let waiting = !reveal.settled;
     if !waiting {
         status.boot_ready = true;
-        clear.0 = crate::art::palette::SKY_TOP;
+        clear.0 = if crate::config::url_param("portrait").is_some() {
+            Color::srgb_u8(20, 32, 42)
+        } else {
+            crate::art::palette::SKY_TOP
+        };
     }
     status.scene_waiting = waiting;
     reveal.alpha = if waiting {

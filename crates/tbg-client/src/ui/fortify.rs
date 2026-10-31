@@ -4,13 +4,14 @@
 //! sent `Fortify` only blocks a second click until the view covers it.
 
 use bevy::prelude::*;
-use tbg_core::content::FORTIFY_COST;
 #[cfg(any(not(target_os = "linux"), test))]
-use tbg_core::content::{ENERGY_SCALE, STRONGHOLD_KINDS};
+use tbg_core::content::ENERGY_SCALE;
+use tbg_core::content::FORTIFY_COST;
 use tbg_core::{MatchView, Phase, StrongholdView};
 
 #[cfg(not(target_os = "linux"))]
 use super::{label, UiAction, BUTTON, DISABLED};
+#[cfg(any(not(target_os = "linux"), test))]
 use crate::i18n::{content, Lang, Msg};
 use crate::sync::LatestView;
 use crate::GameState;

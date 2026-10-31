@@ -6,10 +6,10 @@ use bevy::prelude::*;
 use tbg_core::{bot::Bot, ArcanaPreset, MatchState, Pcg32, Phase, PlayerIntention, Seat, UnitKind};
 
 #[derive(Component)]
-pub(super) struct DemoUnit;
+pub(crate) struct DemoUnit;
 
 #[derive(Resource)]
-pub(super) struct Demo {
+pub(crate) struct Demo {
     pub timeline: Timeline,
     pub stats: MatchStats,
     pub sounds: Sounds,
@@ -143,9 +143,10 @@ fn tick(
     mut demo: ResMut<Demo>,
     mut commands: Commands,
     units: Query<Entity, With<DemoUnit>>,
+    shell: Res<crate::ui::shell::Shell>,
     mut map: ResMut<UnitEntities>,
 ) {
-    if !enabled() {
+    if !enabled() || shell.panel == crate::ui::shell::Panel::Troops {
         return;
     }
     let restart = demo

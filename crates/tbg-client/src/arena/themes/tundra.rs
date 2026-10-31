@@ -1,5 +1,6 @@
 //! Snow-loaded firs, ice spires, glowing crystals, floes and Nordic cairns for Frozen Tundra.
 
+use super::shared::crystal;
 use super::{back_row, boulder, contact, scatter, shared, Kit};
 use crate::{
     arena::{
@@ -62,6 +63,7 @@ pub(super) fn build(kit: &mut Kit) {
             Vec3::new(x + 0.7, 0.0, z + 0.1),
             s,
             rgb(0x36aad5),
+            rgb(0xc7f3fb),
         );
     }
     for (i, at) in crate::arena::geometry::outline().into_iter().enumerate() {
@@ -225,5 +227,6 @@ fn ridge(parts: &mut Vec<Part>, at: Vec3, s: f32) {
         at + Vec3::new(0.6, 0.0, 0.55) * s,
         0.75 * s,
         rgb(0x46abd1),
+        rgb(0xc7f3fb),
     );
 }

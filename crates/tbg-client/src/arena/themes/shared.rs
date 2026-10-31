@@ -8,6 +8,20 @@ use crate::art::mesh::Shape::*;
 use bevy::prelude::*;
 use tbg_core::Pcg32;
 
+/// Pale two-layer ice shared by the refined cold arenas.
+pub(super) fn floe(parts: &mut Vec<Part>, at: Vec3, r: f32, body: Color, top: Color) {
+    let flat = Vec3::new(1.0, 1.0, 0.74);
+    for (radius, height, y, color) in [(r, 0.24, 0.05, body), (r * 0.9, 0.06, 0.19, top)] {
+        parts.push((
+            Cyl(radius, height),
+            color,
+            Transform::from_translation(at + Vec3::Y * y)
+                .with_scale(flat)
+                .with_rotation(yaw(at)),
+        ));
+    }
+}
+
 /// Deterministic open-water sites around the island that stay inside the camera
 /// frame: `(position at the water level, size 0.5..1.0)`, at least `gap` apart.
 pub(super) fn water_sites(seed: u64, count: usize, gap: f32) -> Vec<(Vec3, f32)> {

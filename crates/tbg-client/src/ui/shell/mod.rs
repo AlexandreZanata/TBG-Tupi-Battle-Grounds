@@ -38,10 +38,12 @@ pub enum Panel {
     Arcanas,
     Live,
     Kit,
+    Troops,
 }
 #[derive(Component, Clone, Copy, Debug)]
 pub enum Action {
     Open(Panel),
+    Catalog(crate::training::Action),
     RoomInput,
     Stronghold(tbg_core::StrongholdKind),
     Arena(tbg_core::Arena),
@@ -67,6 +69,7 @@ pub struct Shell {
 impl Default for Shell {
     fn default() -> Self {
         let panel = match crate::config::url_param("panel").as_deref() {
+            Some("troops") => Panel::Troops,
             Some("arcanas") => Panel::Arcanas,
             Some("stronghold") => Panel::Strongholds,
             Some("arenas") => Panel::Arenas,
@@ -109,6 +112,10 @@ pub fn plugin(app: &mut App) {
                 .chain()
                 .run_if(in_state(GameState::Menu)),
         )
+        .add_systems(
+            Update,
+            input::mouse_and_keys.run_if(in_state(GameState::Training)),
+        )
         .add_systems(OnEnter(GameState::Menu), enter)
         .add_systems(Update, input::scroll);
 }
@@ -147,6 +154,7 @@ fn render(
     account: Res<Account>,
     ranking: Res<Ranking>,
     lang: Res<Lang>,
+    catalog: Res<crate::training::Catalog>,
     sounds: Res<Sounds>,
     #[cfg(target_os = "linux")] volume: Res<bevy::audio::GlobalVolume>,
     form: NonSend<ActiveForm>,
@@ -217,7 +225,7 @@ fn render(
                 row_gap: px(16),
                 ..default()
             },
-            BackgroundColor(if home {
+            BackgroundColor(if home || shell.panel == Panel::Troops {
                 Color::NONE
             } else {
                 Color::srgba(0.02, 0.035, 0.045, 0.72)
@@ -295,6 +303,9 @@ fn render(
                     Panel::Strongholds => strongholds::spawn(body, &assets, *lang),
                     Panel::Arcanas => arcanas::spawn(body, &shell, &assets, *lang, compact),
                     Panel::Live => live::spawn(body, &data, *lang),
+                    Panel::Troops => {
+                        crate::training::catalog::spawn(body, &catalog, &assets, *lang)
+                    }
                     Panel::Kit => settings::gallery(body, *lang),
                 }
             });

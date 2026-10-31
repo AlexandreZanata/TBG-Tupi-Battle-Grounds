@@ -52,7 +52,7 @@ pub(super) fn button() -> impl Bundle {
 }
 
 #[cfg(target_os = "linux")]
-pub(super) fn linux_button(assets: &AssetServer) -> impl Bundle {
+pub(super) fn linux_button(assets: &AssetServer, lang: crate::i18n::Lang) -> impl Bundle {
     (
         Node {
             position_type: PositionType::Absolute,
@@ -74,7 +74,7 @@ pub(super) fn linux_button(assets: &AssetServer) -> impl Bundle {
         SurrenderButton,
         children![
             super::kit::image(assets, "battle/native/flag.webp", 16., 18.),
-            label("Surrender", 12.)
+            label(lang.key("battle.surrender"), 12.)
         ],
     )
 }

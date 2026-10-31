@@ -3,7 +3,7 @@
 
 [package]
 name = "tbg-client"
-version = "0.1.0-native.1"
+version = "0.1.0-native.2"
 edition.workspace = true
 rust-version.workspace = true
 license-file = "../../LICENSE"
@@ -33,7 +33,7 @@ bevy = { version = "0.20", default-features = false, features = [
 ] }
 # WebSocket client with the same API on wasm and native (P1). Reason: RTT ping.
 ewebsock = { version = "0.8", features = ["tls"] }
-tbg-core = { path = "../tbg-core" }
+tbg-core = { path = "../tbg-core", features = ["training"] }
 # Shared JSON catalogs and bounded HTTP response decoding for native/web UI.
 serde_json = "1"
 # Callback HTTP works on native and WASM without adding an async runtime.

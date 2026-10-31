@@ -12,10 +12,10 @@ pub fn features(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lan
         for (key, panel) in [
             ("arcanas", Some(Panel::Arcanas)),
             ("strongholds", Some(Panel::Strongholds)),
-            ("troops", None),
+            ("troops", Some(Panel::Troops)),
             ("ranking", None),
         ] {
-            let enabled = key != "troops";
+            let enabled = true;
             let mut card = cards.spawn((
                 Node {
                     flex_direction: FlexDirection::Column,
@@ -56,22 +56,6 @@ pub fn features(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lan
                         12.,
                     ));
                 });
-                if !enabled {
-                    p.spawn((
-                        Node {
-                            position_type: PositionType::Absolute,
-                            top: px(5),
-                            right: px(5),
-                            padding: UiRect::all(px(4)),
-                            ..default()
-                        },
-                        BackgroundColor(chrome::METAL),
-                        children![kit::muted(
-                            lang.key("lobby.feature.troops.locked").to_uppercase(),
-                            9.
-                        )],
-                    ));
-                }
             });
         }
     });

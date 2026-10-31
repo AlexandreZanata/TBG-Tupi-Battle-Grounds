@@ -37,6 +37,7 @@ pub fn plugin(app: &mut App) {
 }
 
 #[allow(clippy::too_many_arguments)] // the one place every action is applied
+#[allow(clippy::type_complexity)] // Bevy declares independent resources and component filters in the system signature.
 pub(super) fn apply(
     mut queue: ResMut<ActionQueue>,
     mut link: NonSendMut<MatchLink>,
@@ -63,11 +64,12 @@ pub(super) fn apply(
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
     mut inspected: ResMut<super::inspect::Inspected>,
-    (mut lang_res, mut arena, mut celebration, info): (
+    (mut lang_res, mut arena, mut celebration, info, mut training): (
         ResMut<crate::i18n::Lang>,
         ResMut<crate::arena::ActiveArena>,
         ResMut<crate::celebration::Presentation>,
         Res<crate::sync::MatchInfo>,
+        ResMut<crate::training::Requests>,
     ),
 ) {
     let now = time.elapsed_secs_f64();
@@ -86,7 +88,7 @@ pub(super) fn apply(
         let action = match action {
             UiAction::PracticeArena(arena) => {
                 config::save_arena(arena);
-                UiAction::Practice
+                UiAction::PracticeSetup
             }
             other => other,
         };
@@ -160,6 +162,11 @@ pub(super) fn apply(
             next.set(GameState::Queue);
         };
         match action {
+            UiAction::PracticeSetup => {
+                training.0.push(crate::training::Action::Open(
+                    crate::training::Tab::Practice,
+                ));
+            }
             UiAction::Practice => {
                 *last = LastMode::Practice;
                 start_practice(&mut link, now)

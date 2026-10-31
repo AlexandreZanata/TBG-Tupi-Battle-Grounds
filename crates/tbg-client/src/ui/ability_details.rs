@@ -13,7 +13,7 @@ fn pct(bp: u16) -> String {
     format!("{:.0}%", f32::from(bp) / 100.0)
 }
 /// Full next-form facts also cover branches whose Evolution changes no basic stat.
-pub(super) fn describe(kind: UnitKind, tier: u8, branch: u8) -> String {
+pub(crate) fn describe(kind: UnitKind, tier: u8, branch: u8, lang: crate::i18n::Lang) -> String {
     let mut out: Vec<String> = content::def(kind)
         .ability(tier, branch)
         .into_iter()
@@ -23,10 +23,10 @@ pub(super) fn describe(kind: UnitKind, tier: u8, branch: u8) -> String {
         UnitKind::Drillnest => {
             out.push("8 living drills per player; equal ranks fuse within 0.2 tiles; HP and harmful effects survive fusion".into());
             if tier == 2 && branch == 0 {
-                out.push("Merged drill shield 25 for 2.0s".into());
+                out.push(lang.key("training.drill.merged"));
             }
             if tier > 0 && branch == 1 {
-                out.push("Duodrill damage +15%".into());
+                out.push(lang.key("training.drill.duo"));
                 if tier == 2 {
                     out.push(
                         "Megadrill +25% damage vs printed base HP ≥1000 units; no tower bonus"
@@ -35,12 +35,8 @@ pub(super) fn describe(kind: UnitKind, tier: u8, branch: u8) -> String {
                 }
             }
         }
-        UnitKind::Microdrill => {
-            out.push("Rank 1; expires after 12.0s; fuses with another Microdrill".into())
-        }
-        UnitKind::Duodrill => {
-            out.push("Rank 2; expires after 14.0s; fuses with another Duodrill".into())
-        }
+        UnitKind::Microdrill => out.push(lang.key("training.drill.micro")),
+        UnitKind::Duodrill => out.push(lang.key("training.drill.double")),
         UnitKind::Megadrill => out.push(
             if tier == 2 && branch == 1 {
                 "Rank 3; expires after 16.0s; +25% damage vs printed base HP ≥1000 units"
@@ -74,14 +70,15 @@ fn ability(a: Ability) -> Option<String> {
  RaisedCarapace{period,bp,ticks,retaliation}=>{let mut s=format!("Raised Carapace every {}: self reduction {} for {}",secs(period),pct(bp),secs(ticks));if retaliation>0{s+=&format!("; next unit hit after expiry adds {retaliation} base damage once");}s},
  PreciseStrike{every,damage}=>format!("Precise Strike: every {every}th consecutive hit on the same enemy adds {damage} base damage; no idle timeout"),
  VenomousSting{every,damage,pulses}=>format!("Venomous Sting: every {every}rd unit hit applies venom {damage} ×{pulses}, one pulse each second; refreshes one slot"),
- StickyWeb{period,damage,root,range_add,slow_bp,slow_ticks}=>{let mut s=format!("Sticky Web every {}: {damage} base damage and Root {}",secs(period),secs(root));if range_add>0{s+=&format!("; +{} special range",tiles(range_add));}if slow_bp>0{s+=&format!("; Slow {} for {} after Root ends; cleanse discards it",pct(slow_bp),secs(slow_ticks));}s},
+ StickyWeb{period,damage,root,range_add,slow_bp,slow_ticks}=>{let mut s=format!("Sticky Web every {}: {damage} base damage and Root {}",secs(period),secs(root));if range_add>0{s+=&format!("; +{} special range",tiles(range_add));}
+if slow_bp>0{s+=&format!("; Slow {} for {} after Root ends; cleanse discards it",pct(slow_bp),secs(slow_ticks));}s},
  ProfaneFire{cut_bp,cut_ticks}=>format!("Profane Fire: every basic burns ALL units ahead, including allies; healing -{} for {}; self excluded",pct(cut_bp),secs(cut_ticks)),
  DrillNest{period}=>format!("Drill Nest: Microdrill every {} with an enemy target; no direct damage",secs(period)),
- _=>return Option::None,
+ other=>return super::ability_legacy::text(other),
  })
 }
-pub(super) fn live(u: &UnitView) -> String {
-    let mut text = describe(u.kind, u.tier, u.branch);
+pub(super) fn live(u: &UnitView, lang: crate::i18n::Lang) -> String {
+    let mut text = describe(u.kind, u.tier, u.branch, lang);
     let n = u.ability_counter();
     let suffix = match u.kind {
         UnitKind::Trigger | UnitKind::CelestialArcher | UnitKind::Mantis => {
@@ -105,11 +102,15 @@ mod tests {
     use super::*;
     #[test]
     fn ability_only_evolutions_report_their_actual_new_contract() {
-        assert!(describe(UnitKind::Weaver, 2, 1).contains("after Root ends"));
-        assert!(describe(UnitKind::Hornet, 2, 0).contains("venom 7 ×4"));
-        assert!(describe(UnitKind::Jawguard, 1, 1).contains("adds 40"));
-        assert!(describe(UnitKind::PyreWarden, 2, 1).contains("including allies"));
-        assert!(describe(UnitKind::Drillnest, 2, 0).contains("shield 25 for 2.0s"));
-        assert!(describe(UnitKind::Drillnest, 2, 1).contains("no tower bonus"));
+        assert!(describe(UnitKind::Weaver, 2, 1, crate::i18n::Lang::En).contains("after Root ends"));
+        assert!(describe(UnitKind::Hornet, 2, 0, crate::i18n::Lang::En).contains("venom 7 ×4"));
+        assert!(describe(UnitKind::Jawguard, 1, 1, crate::i18n::Lang::En).contains("adds 40"));
+        assert!(describe(UnitKind::PyreWarden, 2, 1, crate::i18n::Lang::En)
+            .contains("including allies"));
+        assert!(describe(UnitKind::Drillnest, 2, 0, crate::i18n::Lang::En)
+            .contains("shield 25 for 2.0s"));
+        assert!(
+            describe(UnitKind::Drillnest, 2, 1, crate::i18n::Lang::En).contains("no tower bonus")
+        );
     }
 }
