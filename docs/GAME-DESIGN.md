@@ -780,7 +780,7 @@ information. Values are **Proposed** (owner defaults O-1–O-6 in
   unknown match answers `SpectateUnavailable`, never a disconnect. A slow
   spectator is dropped without ever affecting a seat.
 
-## 14. Ranked integrity — Proposed, inactive (P60, D-70/D-72)
+## 14. Ranked integrity — Proposed, inactive (P60, D-87/D-89)
 
 Planning only. These candidate rules do not amend active BR-R03–05 until
 the owner adopts enforcement. Shadow collection preserves existing Elo.
@@ -849,7 +849,7 @@ production facts or automatic activation authority:
 | Integrity end-of-match latency targets | Evaluator CPU p95 <=5 ms; storage/journal p95 <=20 ms; queue-wait p95 delta <=5 ms at equal local load; no new pairing await |
 | Durable final journal | At most 32 KiB per file, 32 MiB total; one retry worker at 1/5/30-second delays, then operator-visible pending state |
 
-## 15. Ranked statistics — Proposed, inactive (P61, D-71/D-72)
+## 15. Ranked statistics — Proposed, inactive (P61, D-88/D-89)
 
 - **BR-ST01 — Proposed.** Main statistics include only complete,
   post-collection public Ranked matches that reached Running, with two

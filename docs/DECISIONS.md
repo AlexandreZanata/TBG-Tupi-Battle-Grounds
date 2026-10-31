@@ -1064,7 +1064,7 @@ nothing that a seat does not already see, so no delay is needed.
 at 250 matches), a listed match leaks private state, or the owner wants
 rooms, challenges or ranked watching to stay private as well.
 
-## D-70 · Ranked integrity preserves FIFO and baseline Elo — 2026-10-31 (Proposed, P60)
+## D-87 · Ranked integrity preserves FIFO and baseline Elo — 2026-10-31 (Proposed, P60)
 
 **Decision.** Start with authoritative completion summaries and shadow
 signals, not automatic punishment. Optional positive-inflow budgets accept
@@ -1096,7 +1096,7 @@ burden, mature collusion dominates, history queries exceed budget, queue
 latency changes, or staffed review makes pending settlement worthwhile.
 Anonymous open registration cannot guarantee unique humans.
 
-## D-71 · Ranked summaries inform, but do not replace, balance evidence — 2026-10-31 (Proposed, P61)
+## D-88 · Ranked summaries inform, but do not replace, balance evidence — 2026-10-31 (Proposed, P61)
 
 **Decision.** Capture bounded authoritative side summaries, stamp each
 with a monotonic gameplay revision/source hash, retain raw facts and
@@ -1125,7 +1125,7 @@ cost exceeds measured budgets, new mechanics need richer summaries, public
 bands have enough players, or online and offline evidence persistently
 disagree. Exact damage instrumentation is a separate measured scope.
 
-## D-72 · One ranked record foundation and reversible corrections — 2026-10-31 (Proposed, P60/P61)
+## D-89 · One ranked record foundation and reversible corrections — 2026-10-31 (Proposed, P60/P61)
 
 **Decision.** P60 owns migration v7, match identity, atomic authoritative
 settlement, durable idempotent final-result recovery, cutover baselines
@@ -1154,7 +1154,7 @@ discard newer games by blindly restoring an older backup.
 
 **Number reservation.** D-60–69 are already used by local/fetched parallel
 fronts; P59 is reserved by roster work. This program reserves P60/P61 and
-D-70–72, rechecked before merge. No existing entry is renumbered here.
+D-87–89, rechecked before merge. No existing entry is renumbered here.
 
 **Reopen when** exact counterfactual Elo is a product requirement, storage
 recovery exceeds the single-server model, multi-server settlement is needed,

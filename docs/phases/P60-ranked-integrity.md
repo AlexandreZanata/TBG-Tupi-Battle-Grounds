@@ -3,7 +3,7 @@
 **Status:** executable proposal; implementation has not started.
 **Base:** main `9008f11`; reconcile newer main before execution.
 **Branch for execution:** `phase/p60-ranked-integrity`.
-**Decisions:** D-70/D-72. **Rules:** GAME-DESIGN §14, BR-RI01–12.
+**Decisions:** D-87/D-89. **Rules:** GAME-DESIGN §14, BR-RI01–12.
 **Scope:** desktop browsers, server records and minimal local admin CLI.
 No balance change, bots, rating-based matchmaking, new service or web admin.
 
@@ -11,7 +11,7 @@ No balance change, bots, rating-based matchmaking, new service or web admin.
 
 - `AGENTS.md`; [program, audit and validation policy](../planning/RANKED-PROGRAM.md).
 - GAME-DESIGN §§2, 5 (Elo), 10.2/10.6, 13/14; DECISIONS D-18/D-19,
-  D-33/D-41/D-59/D-70/D-72; ARCHITECTURE §§3/5/8/9/11 and ranked addendum.
+  D-33/D-41/D-59/D-87/D-89; ARCHITECTURE §§3/5/8/9/11 and ranked addendum.
 - Core `rating.rs`, `state.rs`, `sim.rs`, `protocol.rs`; server
   `lobby/{ranked,matchmaking,sessions,accounts,account_done}.rs`,
   `match_task.rs`, `match_task/{command,report,views}.rs`, `store/*`,
@@ -505,7 +505,7 @@ account-linked records; do not claim IP-free data is anonymous.
    Do not expose internal signal flags. Keep existing RatingChanged for
    applied profile refresh. Bump protocol from 17 to the next free version
    (18 only if still free), update version/append-index contracts in the
-   same commit as D-70 and BR-RI adoption. Older clients fail the existing
+   same commit as D-87 and BR-RI adoption. Older clients fail the existing
    version handshake; ship client/server together before enforce. Provide
    en/pt-BR keys and browser result/history rendering; rule text explains
    limits, no accusation or thresholds for behavioral evasion. Translation
@@ -591,7 +591,7 @@ per the program. **Do not run these tests per step.** New named targets:
   ranked insert fails, not merely mock an early return.
 - `tbg-server/tests/contract_ranked_integrity.rs`: BR-RI03/06/09 authority,
   private isolation, immutable originals and append-only decisions. Couple
-  new contracts to D-70/D-72 in the implementation commit.
+  new contracts to D-87/D-89 in the implementation commit.
 
 Reviewer runs once under the shared lock, jobs=2, test threads=1:
 

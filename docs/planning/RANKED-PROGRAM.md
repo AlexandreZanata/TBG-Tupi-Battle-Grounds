@@ -37,10 +37,11 @@ documentation; they were not incorporated into this branch.
 Main's roadmap ends at P57, but the existing roster front reserves P59.
 Use P60/P61. Main's highest decision is D-59; local and fetched fronts
 already use D-60 through D-69, including `origin/phase/system-champions-crowd-shop`.
-Use D-70/D-71/D-72. These reservations were checked against local branch
-refs and the connected GitHub branch inventory, not an assumed global lock.
-Recheck before implementation/merge; renumber these new entries together
-if another front has subsequently claimed them. Do not renumber old rules.
+Use D-87/D-88/D-89. The plan originally reserved D-70/D-71/D-72. At
+implementation (2026-10-31) `phase/p59-complete-roster` (PR #22) used
+D-70–D-86, the native preview used D-70/D-71, and the P62–P64 plans used
+D-80–D-82. All three entries were therefore renumbered together, as this
+paragraph required. Recheck before merge. Do not renumber old rules.
 
 ## Verified current behavior
 
@@ -190,7 +191,7 @@ Completed documentation checks:
 
 - `git diff --check`: exit 0, no whitespace errors.
 - Python stdlib document inspection: 101 relative Markdown links resolve;
-  code fences balance; both JSON examples parse; D-70–72 are unique;
+  code fences balance; both JSON examples parse; D-87–89 are unique;
   BR-RI01–12 and BR-ST01–12 are complete and nonduplicated in the new sections.
 - Python `sqlite3` using **only a synthetic in-memory v6 schema**: the
   proposed v7/v8 SQL parses/applies, baseline copies preserve the fixture,

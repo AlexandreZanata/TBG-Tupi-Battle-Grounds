@@ -3,7 +3,7 @@
 **Status:** executable proposal; no implementation or online data collected.
 **Base:** P60 steps 0–4 integrated on main; no dependency on cap activation.
 **Branch for execution:** `phase/p61-ranked-stats`.
-**Decisions:** D-71/D-72. **Rules:** GAME-DESIGN §15, BR-ST01–12.
+**Decisions:** D-88/D-89. **Rules:** GAME-DESIGN §15, BR-ST01–12.
 **Platform:** desktop browser lobby. No player leaderboard, new service,
 analytics vendor, ML, mobile work or automatic balance changes.
 
@@ -12,7 +12,7 @@ analytics vendor, ML, mobile work or automatic balance changes.
 - `AGENTS.md`; [program and code audit](../planning/RANKED-PROGRAM.md);
   [P60](P60-ranked-integrity.md) §§5–7 (shared records and status semantics).
 - GAME-DESIGN §§2/5/6/9/10/11/12/14/15; DECISIONS D-33/D-41/D-46/D-55,
-  D-70–72; ARCHITECTURE §§3/8/9/11 and ranked addendum.
+  D-87–89; ARCHITECTURE §§3/8/9/11 and ranked addendum.
 - Core `types.rs`, `state.rs`, `intent.rs`, `augment.rs`, `synergy.rs`,
   `ruleset.rs`, `content.rs`, `rating.rs`, `summon.rs`; server
   `match_task/{command,report,views}.rs`, `store/{mod,worker,matches,ranked,schema}.rs`,
@@ -545,7 +545,7 @@ report, never an alternative source of rules. No balance lab run here.
 
 0. **Integrate contracts.** Confirm P60 shared key, v7, status/revision,
    source stamp and journal. Record any newer roster/UI change. Commit
-   adopted BR-ST rules and new tests together with D-71/D-72.
+   adopted BR-ST rules and new tests together with D-88/D-89.
 1. **E0 collector.** Add fixed command/event counters and decoder fixtures.
    Test destroyed units, cancelled Augment round, duplicate commands,
    generated units, pause-clock invariants and saturation. No UI/wire change.
@@ -599,7 +599,7 @@ and run once by the consolidation reviewer, not on each step. New targets:
   migrate twice, review->clear->invalidate->restore yields a full rebuild
   equal to a clean scan; no rating mutation by aggregation.
 - `tbg-server/tests/contract_ranked_stats.rs`: append-only contracts for
-  source authority, privacy gating and no old-data backfill (D-71/D-72).
+  source authority, privacy gating and no old-data backfill (D-88/D-89).
 - `tbg-server/tests/stats_api.rs`: all valid dimensions; malicious/long/duplicate
   filters, body bound, every error header, 304, rate limit, no account data,
   suppressed complements, fixed generation threshold and invalidation race.

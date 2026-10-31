@@ -650,7 +650,7 @@ records are not current schema v6. Today's default per-IP socket cap is
 inspected. The checked-in deploy script installs but does not invoke the
 backup script before migration.
 
-- **Authority and identity (D-70/D-72).** Frozen connection-bound accounts
+- **Authority and identity (D-87/D-89).** Frozen connection-bound accounts
   plus a separate random match key identify a final result. The single
   writer commits both ratings and the authoritative record atomically;
   a small private completion journal supports idempotent restart recovery.
@@ -670,7 +670,7 @@ backup script before migration.
   decision on a stopped server with a backup. It replays frozen deltas for
   affected accounts; original history remains and later opponents are not
   rerated. Snapshot rebuild follows the same committed revision.
-- **Statistics (D-71).** A low-priority, read-only SQLite connection inside
+- **Statistics (D-88).** A low-priority, read-only SQLite connection inside
   `store/` streams eligible patch rows into bounded discardable aggregates.
   API requests only read privacy-filtered snapshots; no request-time SQL.
   Versions, missing data and independent risk/settlement states define the
