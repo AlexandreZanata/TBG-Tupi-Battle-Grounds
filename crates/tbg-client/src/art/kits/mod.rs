@@ -137,6 +137,12 @@ static BEETLING: Kit = beetling::KIT;
 static ARCHER: Kit = archer::KIT;
 static RAMPART: Kit = rampart::KIT;
 
+/// The passenger seat's height above a Cargo Crab's ground, in world units,
+/// at its tier: where a rider's hips sit (see `visuals::mount`).
+pub fn saddle_height(tier: u8) -> f32 {
+    cargo_crab::saddle_height(tier)
+}
+
 /// The kit of `kind`, if it has one.
 pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
     match kind {

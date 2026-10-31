@@ -36,10 +36,18 @@ pub(super) fn cue(
                 impacts::land(commands, fx.vfx, Impact::Shards, at, Area::default());
             }
         }
-        Event::Boarded { crab, .. } => {
+        Event::Boarded { crab, unit } => {
             if let Some((_, _, mut anim)) = map.0.get(&crab).and_then(|e| visuals.get_mut(*e).ok())
             {
                 anim.play(crate::art::anim::Clip::Cast);
+            }
+            // The passenger climbs into the saddle as the crab lifts it.
+            if let Some(&e) = map.0.get(&unit) {
+                if let Ok((_, t, _)) = visuals.get(e) {
+                    commands
+                        .entity(e)
+                        .insert(visuals::mount::Boarding::new(t.translation));
+                }
             }
         }
         _ => {}

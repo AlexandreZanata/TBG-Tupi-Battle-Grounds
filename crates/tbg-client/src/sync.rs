@@ -87,11 +87,18 @@ pub fn plugin(app: &mut App) {
         .init_resource::<MatchStats>()
         .init_resource::<ViewGaps>()
         .init_resource::<crate::art::aim::ImpactRing>()
+        .init_resource::<crate::visuals::mount::Mounts>()
         .add_systems(Update, poll_link)
         .add_systems(
             Update,
             sync_units
                 .after(poll_link)
+                .run_if(in_state(GameState::InMatch)),
+        )
+        .add_systems(
+            Update,
+            crate::visuals::mount::passengers
+                .after(sync_units)
                 .run_if(in_state(GameState::InMatch)),
         )
         .add_systems(OnExit(GameState::InMatch), clear_units);
@@ -229,8 +236,13 @@ impl Scene<'_, '_, '_, '_, '_> {
     }
 }
 
-fn clear_units(mut commands: Commands, mut map: ResMut<UnitEntities>) {
+fn clear_units(
+    mut commands: Commands,
+    mut map: ResMut<UnitEntities>,
+    mut mounts: ResMut<crate::visuals::mount::Mounts>,
+) {
     for (_, e) in map.0.drain() {
         commands.entity(e).try_despawn();
     }
+    mounts.clear();
 }

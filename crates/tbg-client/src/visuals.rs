@@ -15,6 +15,7 @@ pub mod aim;
 pub mod assets;
 mod attacks;
 mod cues;
+pub mod mount;
 mod names;
 mod update;
 
