@@ -73,7 +73,7 @@ pub struct MatchResult {
     /// Participant playing seat A.
     pub seat_a: usize,
     /// Per-kind combat counters in participant order (P42).
-    pub stats: LabStats,
+    pub stats: Option<Box<LabStats>>,
     /// Longest stall including the tail, in ticks (P42).
     pub stall: u32,
 }

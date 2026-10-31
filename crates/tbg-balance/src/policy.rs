@@ -101,9 +101,10 @@ impl Policy {
             Policy::Random => (7, 0),
             Policy::BotAvoid(k) => (8, k as usize),
             Policy::Comp(kinds) => {
-                // Three kind indices packed into one number (`None` is 11).
-                let idx = |o: Option<UnitKind>| o.map_or(11, |k| k as usize);
-                let packed = (idx(kinds[0]) * 12 + idx(kinds[1])) * 12 + idx(kinds[2]);
+                // Three kind indices packed with a sentinel outside the full roster.
+                let base = ALL_KINDS.len() + 1;
+                let idx = |o: Option<UnitKind>| o.map_or(ALL_KINDS.len(), |k| k as usize);
+                let packed = (idx(kinds[0]) * base + idx(kinds[1])) * base + idx(kinds[2]);
                 (9, packed)
             }
         }

@@ -26,7 +26,8 @@ COMMANDS
 FLAGS
   --pairs N         seed pairs per matchup (each pair = 2 seat-swapped games)
   --confirm-pairs N held-out pairs `arcana` uses to confirm its best and worst (2048)
-  --threads N       worker threads (default: all cores)
+  --ruleset NAME    canon (default, actual online rules) or explicit preview
+  --threads N       simulation workers (default: available CPUs; not Cargo jobs)
   --seed-start S    first seed of the block (screen and search use fixed blocks)
   --reaction R      views between decisions for non-bot policies (default 5)
   --apply SPEC      ruleset changes: name=value,... (knob names from `screen`)
@@ -37,12 +38,17 @@ FLAGS
   --lambda L        children per generation (default 16)
   --top K           knobs searched, best screened first (default 24)
   --search-seed S   search randomness (default 1)
+  --scope NAME      gate: full (default) or suite for screening without Nash
+  --base-only       duels: base-form screening only; not a release gate
   --strict          gate exits non-zero when a required row fails
   --mode NAME       value mode: reference (default), shadow, interactions,
                     scenarios
 ";
 
-const FLAGS: [&str; 15] = [
+const FLAGS: [&str; 18] = [
+    "scope",
+    "base-only",
+    "ruleset",
     "pairs",
     "confirm-pairs",
     "threads",
@@ -82,7 +88,7 @@ pub fn parse(args: impl Iterator<Item = String>) -> Result<Args, String> {
         if !FLAGS.contains(&name) {
             return Err(format!("unknown flag `--{name}` (see --help)"));
         }
-        let value = if name == "strict" {
+        let value = if name == "strict" || name == "base-only" {
             "true".to_string()
         } else {
             it.next().ok_or(format!("`--{name}` needs a value"))?

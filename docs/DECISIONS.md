@@ -2435,3 +2435,11 @@ and P59), D-80–D-81 (P59 and P62), D-87–D-89 (P59 and P60/P61), and D-82
 phase/section title; do not treat a numeric collision as supersession.
 New integration behavior is documented in GAME-DESIGN's consolidated roster
 activation section and `phases/CONSOLIDATED-LINUX-RELEASE.md`.
+
+## D-48 amendment · Normalize roster health by active roster size — 2026-10-31 (owner-approved)
+
+The owner approved a minimum purchase share of 62.5% of the uniform share,
+0.625 / N for each of the N active conventional kinds. This preserves the
+original 2.5% floor at 25 kinds and yields approximately 1.36% at 46 kinds.
+The old fixed floor would require 115% total participation at 46 kinds.
+No other balance target or gameplay number changes in this amendment.

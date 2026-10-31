@@ -3,6 +3,7 @@
 //! output is byte-identical for any thread count (contract C3).
 
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::OnceLock;
 
 use tbg_core::headless::{self, Moment};
 use tbg_core::{ArcanaPreset, MatchState, PlayerIntention, Ruleset, Seat, StrongholdKind};
@@ -57,36 +58,30 @@ pub struct Matchup {
 }
 
 /// Map `f` over `items` on `threads` workers; results in item order.
-pub fn parallel_map<T: Sync, R: Send>(
+pub fn parallel_map<T: Sync, R: Send + Sync>(
     items: &[T],
     threads: usize,
     f: impl Fn(&T) -> R + Sync,
 ) -> Vec<R> {
     let next = AtomicUsize::new(0);
-    let mut out: Vec<(usize, R)> = std::thread::scope(|scope| {
-        let workers: Vec<_> = (0..threads.max(1))
-            .map(|_| {
-                scope.spawn(|| {
-                    let mut local = Vec::new();
-                    loop {
-                        let i = next.fetch_add(1, Ordering::Relaxed);
-                        let Some(item) = items.get(i) else { break };
-                        local.push((i, f(item)));
-                    }
-                    local
-                })
-            })
-            .collect();
-        workers
-            .into_iter()
-            .flat_map(|w| {
-                // A panicking job must fail the run, never shift results.
-                w.join().unwrap_or_else(|e| std::panic::resume_unwind(e))
-            })
-            .collect()
+    let slots: Vec<OnceLock<R>> = (0..items.len()).map(|_| OnceLock::new()).collect();
+    std::thread::scope(|scope| {
+        for _ in 0..threads.max(1).min(items.len()) {
+            let slots = &slots;
+            let next = &next;
+            let f = &f;
+            scope.spawn(move || loop {
+                let index = next.fetch_add(1, Ordering::Relaxed);
+                let Some(item) = items.get(index) else { break };
+                assert!(slots[index].set(f(item)).is_ok(), "duplicate job index");
+            });
+        }
     });
-    out.sort_unstable_by_key(|(i, _)| *i);
-    out.into_iter().map(|(_, r)| r).collect()
+    // Each job owns exactly one slot; no completion-order sort or clone is needed.
+    slots
+        .into_iter()
+        .map(|slot| slot.into_inner().expect("worker completed"))
+        .collect()
 }
 
 /// One game. `swapped` puts participant 1 on seat A; each participant keeps
@@ -200,7 +195,7 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
         hp_at_checkpoint: hp,
         sides,
         seat_a,
-        stats,
+        stats: Some(Box::new(stats)),
         stall: state.lab.stall_at_end(state.tick),
     }
 }
