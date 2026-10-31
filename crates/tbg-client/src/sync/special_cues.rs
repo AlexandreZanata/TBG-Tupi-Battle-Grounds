@@ -91,6 +91,7 @@ fn resolved(
         UnitKind::CelestialArcher => (Impact::Purify, primary, Area::default()),
         UnitKind::Justiciar => (Impact::Judgment, primary, area(map, visuals, unit)),
         UnitKind::Jawguard => (Impact::Sparks, Some(unit), Area::default()),
+        UnitKind::Mantis => (Impact::Precise, primary, Area::default()),
         UnitKind::Demolisher => (Impact::Piston, Some(unit), area(map, visuals, unit)),
         _ => return,
     };

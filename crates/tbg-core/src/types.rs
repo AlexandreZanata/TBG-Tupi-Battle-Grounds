@@ -153,6 +153,8 @@ pub enum UnitKind {
     Justiciar,
     /// D-83: R16, staged outside public pools.
     Jawguard,
+    /// D-84: R17, staged outside public pools.
+    Mantis,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

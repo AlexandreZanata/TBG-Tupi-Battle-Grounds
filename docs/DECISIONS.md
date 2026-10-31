@@ -1872,3 +1872,31 @@ idle, broad planted steps, head-retracting bite, low defensive shell and wide
 ready-charge jaws are per-kind poses. Public reduction/charge facts drive the
 stance, not animation timing. No extra rig node, physics, allied shield effect,
 texture/light/dependency. Frozen base/form contracts append only §13 facts.
+
+## D-84 · Mantis's no-timeout fourth strike and public focus — 2026-10-31 (Proposed)
+
+R17 appends the exact §13 Insects Dps row/four forms. Precise Strike counts completed
+primaries against one enemy unit; the fourth adds60 and resets. B replaces bonus70
+then85; A grants attack speed1500bp then movement1000bp. The bonus uses D-83's
+single-primary reading: static bonus once, normal basic modifiers/protection/on-hit
+once. It cannot double-trigger Second Wind. Target change/death clears the sequence;
+changing to a Stronghold also clears it, without tower bonus/count. Root cancellation
+against the same living enemy adds no hit and keeps progress. Idle time alone never
+expires it; no extra timeout, dash, stealth, haste or weakness is invented.
+
+Existing attacks/mark_target storage holds progress/focus; mark_until0 means no
+deadline for this kind only. Shared cleanup still clears a dead target and leaves
+all other kinds' expiry rules unchanged. The bounded public MarkView encodes Mantis
+focus with ticks0; this is sequence information, not Crowcaller's hostile Mark.
+Client incoming-mark sets/badges explicitly filter Crowcaller; own Mantis inspection
+says Focus without a fake zero-second expiry. Brew does not cleanse an enemy's
+ordinary focus sequence. Confirmed fourth contact uses existing AbilityResolved;
+protocol25/wire shape/hash layout/public pools stay unchanged.
+
+Own five-form kit: tall narrow moss/amber mantis, inverted triangular face, antennae,
+folded scythes and team abdomen band. A adds pale swept leg guards then long crest;
+B thickens/darkens blades then adds serrated elbows. Prayer idle, planted high-knee
+steps, alternate opposing cuts, confirmed crossed fourth stroke and folded death
+are per-kind motion over the fixed26 nodes. No simulated leap or invulnerability,
+new light, texture, per-unit material or dependency. Frozen base/form contracts
+append only §13 values. Source and public focus survive a reconnect snapshot.

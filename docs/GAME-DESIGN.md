@@ -1019,3 +1019,8 @@ is added once to the next valid primary's raw basic damage, with the registry
 bonus scaled by static caster percentages. The combined primary then uses normal
 basic weakening/conditional modifiers and victim protection as one hit. A fully
 shield-absorbed valid primary still consumes the charge; no second on-hit is run.
+
+**R17 sequence reading — Proposed (D-84):** the fourth-hit bonus joins one
+primary under the R16 primary-bonus reading. Changing target, including changing
+to a Stronghold, clears the sequence; a canceled same-target windup never advances
+or clears it. Idle time alone never expires it. Target death clears it.

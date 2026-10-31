@@ -194,6 +194,7 @@ impl Scene<'_, '_, '_, '_, '_> {
         let marked: std::collections::BTreeSet<_> = from
             .units
             .iter()
+            .filter(|u| u.kind == tbg_core::UnitKind::Crowcaller)
             .filter_map(|u| u.effects.and_then(|e| e.mark).map(|m| m.target))
             .collect();
         for u in &from.units {

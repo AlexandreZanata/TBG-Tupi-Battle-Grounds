@@ -26,6 +26,7 @@ mod justiciar;
 #[cfg(feature = "lab")]
 pub mod lab;
 mod luminous_oracle;
+mod mantis;
 #[cfg(feature = "bench-profile")]
 pub mod profiling;
 pub mod protocol;

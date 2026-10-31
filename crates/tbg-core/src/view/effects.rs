@@ -25,6 +25,7 @@ pub struct MarkView {
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EffectsView {
+    /// Crowcaller timed mark, or Mantis sequence focus (ticks=0: no deadline).
     pub mark: Option<MarkView>,
     pub bleed: Option<DotView>,
     pub venom: Option<DotView>,
@@ -77,7 +78,9 @@ pub(super) fn project(rules: &Ruleset, u: &Unit, now: Tick) -> Option<EffectsVie
         Status::Rooted { ticks_left } => (0, ticks_left),
         Status::None => (0, 0),
     };
-    let mark = if crate::crowcaller::parameters(rules, u).is_some() && now < u.fx.mark_until {
+    let mark = if u.kind == crate::types::UnitKind::Mantis {
+        u.fx.mark_target.map(|target| MarkView { target, ticks: 0 })
+    } else if crate::crowcaller::parameters(rules, u).is_some() && now < u.fx.mark_until {
         u.fx.mark_target.map(|target| MarkView {
             target,
             ticks: left(u.fx.mark_until, now),

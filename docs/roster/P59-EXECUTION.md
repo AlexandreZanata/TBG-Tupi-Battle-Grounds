@@ -245,7 +245,8 @@ Own library: `crates/tbg-client/src/art/kits/mantis/`.
 
 tall narrow mantis, folded scythe forearms, triangular face and antennae; moss/amber/black, team abdomen band. A2 swept pale leg guards, A3 long antenna crest; B2 dark thick blades, B3 broad serrated elbows. Humanoid joints can drive bent insect legs without adding six limbs.
 
-Status: pending. Evidence: `docs/media/p59/mantis/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/mantis/lineup.jpg`.
 
 ### R18 — Hornet
 

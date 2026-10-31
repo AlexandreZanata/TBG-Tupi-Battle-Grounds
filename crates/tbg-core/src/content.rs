@@ -355,6 +355,10 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    PreciseStrike {
+        every: u8,
+        damage: u16,
+    },
     RaisedCarapace {
         period: u16,
         bp: u16,
@@ -802,6 +806,16 @@ const JAWGUARD_ABILITIES: [[Ability; 2]; 5] = [
     raised_carapace(60, 40),
     raised_carapace(60, 40),
 ];
+const fn mantis_strike(damage: u16) -> [Ability; 2] {
+    [Ability::PreciseStrike { every: 4, damage }, Ability::None]
+}
+const MANTIS_ABILITIES: [[Ability; 2]; 5] = [
+    mantis_strike(60),
+    mantis_strike(60),
+    mantis_strike(60),
+    mantis_strike(70),
+    mantis_strike(85),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -905,7 +919,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 43;
+pub const UNIT_KIND_COUNT: usize = 44;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1239,6 +1253,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::CelestialArcher,"Celestial Archer",Celestials,Ranged,2_400,[210,55,40,4_000,43,0,0],None,CELESTIAL_ARCHER_ABILITIES,[FormDef{dmg_bp:1_000,..form("Divine Precision")},FormDef{dmg_bp:1_000,..form("Divine Precision")},form("Celestial Mark"),form("Celestial Mark")]),
     unit(UnitKind::Justiciar,"Justiciar",Celestials,Control,3_600,[700,35,46,2_500,28,0,0],None,JUSTICIAR_ABILITIES,[form("Celestial Fury"),FormDef{hp_bp:1_000,..form("Celestial Fury")},form("Judgment"),form("Judgment")]),
     unit(UnitKind::Jawguard,"Jawguard",Insects,Tank,3_600,[1_400,45,40,800,23,0,0],None,JAWGUARD_ABILITIES,[FormDef{hp_bp:2_000,..form("Reinforced Carapace")},form("Reinforced Carapace"),form("Swarm Guard"),FormDef{dmg_bp:1_500,..form("Swarm Guard")}]),
+    unit(UnitKind::Mantis,"Mantis",Insects,Dps,2_400,[280,50,24,800,60,0,0],None,MANTIS_ABILITIES,[FormDef{atk_bp:1_500,..form("Relentless Hunt")},FormDef{speed_bp:1_000,..form("Relentless Hunt")},form("Precise Blade"),form("Precise Blade")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

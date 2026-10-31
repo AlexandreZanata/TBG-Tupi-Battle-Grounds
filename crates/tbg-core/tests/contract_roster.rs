@@ -161,7 +161,7 @@ fn roster_composition() {
     // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
-    assert_eq!(UNITS.len(), 43);
+    assert_eq!(UNITS.len(), 44);
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     assert_eq!(
         &kinds[ALL_KINDS.len()..],
@@ -182,6 +182,7 @@ fn roster_composition() {
             UnitKind::CelestialArcher,
             UnitKind::Justiciar,
             UnitKind::Jawguard,
+            UnitKind::Mantis,
         ][..]
     );
     assert_eq!(UNIT_KINDS.len(), 10);
@@ -433,7 +434,11 @@ Justiciar/Judgment: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hi
 Jawguard/Reinforced Carapace: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Jawguard/Reinforced Carapace: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Jawguard/Swarm Guard: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Jawguard/Swarm Guard: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Jawguard/Swarm Guard: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Mantis/Relentless Hunt: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Mantis/Relentless Hunt: hp=0 dmg=0 atk=0 speed=1000 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Mantis/Precise Blade: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Mantis/Precise Blade: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {
@@ -481,6 +486,7 @@ fn proposed_p59_bases_match_section_13() {
         ),
         (Justiciar, Celestials, Control, 6, [700, 35, 46, 2_500, 28]),
         (Jawguard, Insects, Tank, 6, [1400, 45, 40, 800, 23]),
+        (Mantis, Insects, Dps, 4, [280, 50, 24, 800, 60]),
     ];
     for (kind, faction, archetype, energy, base) in rows {
         let d = def(kind);

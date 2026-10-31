@@ -130,6 +130,7 @@ fn advance_unit(
                 // Root cancels the windup and the betrayal with it.
                 let (target, betrayed) = crate::support::betray_windup(state, &u, st.range, target);
                 crate::ravager::retarget(state, idx, target);
+                crate::mantis::retarget(state, idx, target);
                 state.units[idx].windup = Some((target, WINDUP));
                 state.units[idx].fx.betray = betrayed;
                 ev.push(Event::AttackStart {

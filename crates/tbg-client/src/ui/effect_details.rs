@@ -14,6 +14,7 @@ pub(super) fn describe(v: &MatchView, u: &UnitView) -> String {
     let marked = v
         .units
         .iter()
+        .filter(|a| a.kind == tbg_core::UnitKind::Crowcaller)
         .filter_map(|a| a.effects.and_then(|e| e.mark))
         .filter(|m| m.target == u.id)
         .map(|m| m.ticks)
@@ -32,7 +33,11 @@ pub(super) fn describe(v: &MatchView, u: &UnitView) -> String {
                 .find(|a| a.id == m.target)
                 .map(|a| tbg_core::content::def(a.kind).name)
                 .unwrap_or("target");
-            parts.push(format!("Mark on {name} {}", seconds(m.ticks)));
+            parts.push(if u.kind == tbg_core::UnitKind::Mantis {
+                format!("Focus on {name}")
+            } else {
+                format!("Mark on {name} {}", seconds(m.ticks))
+            });
         }
     }
     if let Some(s) = u.special {
