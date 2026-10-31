@@ -124,3 +124,10 @@ preserved across catalog rebuilds independently of the page scroll.
 The full-roster two-bot WebSocket match passed in 36.25s. The separate
 reconnect journey hit the inherited 60s test-client deadline; its test harness
 now allows 180s while preserving every outcome and reconnect assertion.
+
+The local Trunk 0.22.1 offline resolver checks PATH before its download cache.
+The required wasm-bindgen 0.2.129 already existed in the cache, but offline
+builds did not discover it there. The release command now prepends the verified
+cached wasm-bindgen and wasm-opt directories to PATH; no system tool is replaced.
+The online build completed before this resolver diagnosis. Final artifacts use
+the final source tree and the explicit local tool paths.
