@@ -287,7 +287,9 @@ pub(super) fn apply(
             UiAction::Inspect(offer) => {
                 if let Some(v) = &extra.0 .0 {
                     let kind = v.offers[usize::from(offer).min(tbg_core::content::OFFERS - 1)];
-                    extra.1.push_for(super::tips::unit_details(kind), 4.5);
+                    extra
+                        .1
+                        .push_for(super::tips::unit_details(kind, *lang_res), 4.5);
                 }
             }
             UiAction::ToggleSound => extra.2.toggle_mute(),

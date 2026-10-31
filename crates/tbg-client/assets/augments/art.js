@@ -41,7 +41,8 @@
     if (!rarity) return;
     card.dataset.rarity = def.rarity.toLowerCase();
     card.style.setProperty('--rarity', rarity.color);
-    card.querySelector('.council-rarity').textContent = def.rarity;
+    // `def.rarity` keys the frame art; only the shown label is translated.
+    card.querySelector('.council-rarity').textContent = globalThis.TBG_I18N.t('rarity.' + def.rarity.toLowerCase());
     picture(card.querySelector('.council-illustration'), def.asset.display);
     picture(card.querySelector('.council-frame'), rarity.frame.display);
   }

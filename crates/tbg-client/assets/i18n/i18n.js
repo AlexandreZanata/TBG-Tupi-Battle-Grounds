@@ -7,6 +7,8 @@
   let lang = document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en';
   let catalog = {};
   let fallback = {};
+  // Async switches may finish out of order; only the newest one applies.
+  let generation = 0;
   const formats = {};
 
   const url = code => new URL('assets/i18n/' + code + '.json', document.baseURI).toString();
@@ -42,19 +44,25 @@
     return text;
   }
 
+  const has = key => lookup(key, catalog) !== undefined || lookup(key, fallback) !== undefined;
+
   // pt-BR uses `one` for 0 and 1 (CLDR i = 0,1); English for 1 only.
-  function plural(base, n) {
+  // `shown` replaces `{n}` when the count is displayed formatted.
+  function plural(base, n, shown) {
     const one = lang === 'pt-BR' ? n === 0 || n === 1 : n === 1;
-    return t(base + (one ? '.one' : '.other'), { n });
+    return t(base + (one ? '.one' : '.other'), { n: shown ?? n });
   }
 
-  function number(value, places) {
+  // Locale-aware number with `minPlaces`..`places` decimals; one formatter
+  // per locale and precision, so mixed precisions never share a cache slot.
+  function number(value, places = 0, minPlaces = places) {
     const tag = lang === 'pt-BR' ? 'pt-BR' : 'en';
-    formats[tag] ??= new Intl.NumberFormat(tag, {
-      minimumFractionDigits: places,
+    const id = tag + '|' + minPlaces + '|' + places;
+    formats[id] ??= new Intl.NumberFormat(tag, {
+      minimumFractionDigits: minPlaces,
       maximumFractionDigits: places,
     });
-    return formats[tag].format(value);
+    return formats[id].format(value);
   }
 
   // One pass over ~200 nodes; text writes only land when the value differs.
@@ -86,10 +94,13 @@
   async function setLang(code) {
     if (!MAP[code]) return;
     if (code !== lang) {
+      const mine = ++generation;
+      const next = code === 'en' ? fallback : await load(code);
+      if (mine !== generation) return;
       lang = code;
+      catalog = next;
       try { localStorage.setItem('tbg.lang', code); } catch (_) { /* private mode */ }
       document.documentElement.lang = code;
-      catalog = await load(code);
       apply(document);
       document.title = t('meta.title');
     }
@@ -114,5 +125,5 @@
     refreshSelector();
   })();
 
-  window.TBG_I18N = { get lang() { return lang; }, t, plural, number, apply, ready, setLang };
+  window.TBG_I18N = { get lang() { return lang; }, t, has, plural, number, apply, ready, setLang };
 })();

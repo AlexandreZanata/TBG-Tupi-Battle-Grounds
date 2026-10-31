@@ -5,11 +5,12 @@
 //! layer (`battle_hud`); smaller screens get the Bevy text panel below.
 
 use bevy::prelude::*;
-use tbg_core::content::{def, form_of, TICK_HZ};
+use tbg_core::content::{def, TICK_HZ};
 use tbg_core::{ArcanaPreset, Ruleset};
 use tbg_core::{MatchView, OnHit, UnitId};
 
 use super::{label, UiAction, PANEL};
+use crate::i18n::{content, Lang, Msg};
 use crate::sync::LatestView;
 use crate::GameState;
 
@@ -36,18 +37,33 @@ pub struct Report {
     pub speed: String,
     pub splash: String,
     pub on_hit: String,
+    /// Canonical status id (`Slowed`, `Rooted`, `Ready`): the battle layer
+    /// styles by it, so the localized text travels in `status_label`.
     pub status: &'static str,
+    pub status_label: &'static str,
     pub synergy: String,
 }
 
-fn tiles(milli: i32) -> String {
-    format!("{:.1}", milli as f32 / 1000.0)
+fn tiles(lang: Lang, milli: i32) -> String {
+    lang.decimal(f64::from(milli) / 1000.0, 1)
+}
+
+fn seconds(lang: Lang, value: f64, places: usize) -> String {
+    lang.tf(
+        Msg::CommonSeconds,
+        &[("value", &lang.decimal(value, places))],
+    )
 }
 
 /// `None` once the unit has left the view (dead or gone). `arcanas` are
 /// both frozen presets from `MatchStart` (D-40), so damage and healing
-/// match what the server applies.
-pub fn report(v: &MatchView, id: UnitId, arcanas: &[ArcanaPreset; 2]) -> Option<Report> {
+/// match what the server applies. Text is composed in `lang` (P64 D6).
+pub fn report(
+    v: &MatchView,
+    id: UnitId,
+    arcanas: &[ArcanaPreset; 2],
+    lang: Lang,
+) -> Option<Report> {
     let u = v.units.iter().find(|u| u.id == id)?;
     let d = def(u.kind);
     // Summons never receive Synergy (BR-U08).
@@ -69,55 +85,52 @@ pub fn report(v: &MatchView, id: UnitId, arcanas: &[ArcanaPreset; 2]) -> Option<
         u.tier,
     );
     let st = Ruleset::canon().stats_with(u.kind, u.tier, u.branch, level, &preset, &bonus);
-    let seconds = f32::from(st.interval) / TICK_HZ as f32;
+    let interval = f64::from(st.interval) / f64::from(TICK_HZ);
     let attack = if st.heal > 0 && st.damage == 0 {
-        ("Heal", st.heal)
+        (lang.t(Msg::InspectHeal), st.heal)
     } else {
-        ("Damage", st.damage)
+        (lang.t(Msg::InspectDamage), st.damage)
     };
+    let tick = |ticks: u16| f64::from(ticks) / f64::from(TICK_HZ);
     Some(Report {
         kind: format!("{:?}", u.kind),
-        name: d.name,
-        form: match form_of(u.kind, u.tier, u.branch) {
-            Some(f) => format!("{} | tier {}", f.name, u.tier),
-            None => "Base form".into(),
+        name: content::unit_name(lang, u.kind),
+        form: match content::form_name(lang, u.kind, u.tier, u.branch) {
+            Some(form) => lang.tf(Msg::InspectFormTier, &[("form", &form), ("tier", &u.tier)]),
+            None => lang.t(Msg::InspectBaseForm).into(),
         },
-        faction: format!("{:?}", d.faction),
-        role: match d.archetype {
-            tbg_core::Archetype::Dps => "DPS".into(),
-            a => format!("{a:?}"),
-        },
+        faction: content::faction(lang, d.faction).into(),
+        role: content::archetype(lang, d.archetype).into(),
         own: u.seat == v.you,
         hp: u.hp.max(0),
         max_hp: u.max_hp.max(1),
         attack,
-        every: format!("{seconds:.2} s"),
-        per_second: format!("{:.0}", attack.1 as f32 / seconds.max(0.05)),
-        range: tiles(st.range),
-        speed: tiles(st.speed * TICK_HZ as i32),
+        every: seconds(lang, interval, 2),
+        per_second: format!("{:.0}", f64::from(attack.1) / interval.max(0.05)),
+        range: tiles(lang, st.range),
+        speed: tiles(lang, st.speed * TICK_HZ as i32),
         splash: if st.splash > 0 {
-            tiles(st.splash)
+            tiles(lang, st.splash)
         } else {
             "-".into()
         },
         on_hit: match st.on_hit {
-            Some(OnHit::Slow { bp, ticks }) => format!(
-                "Slow {}% {:.1} s",
-                bp / 100,
-                f32::from(ticks) / TICK_HZ as f32
+            Some(OnHit::Slow { bp, ticks }) => lang.tf(
+                Msg::InspectSlow,
+                &[
+                    ("pct", &(bp / 100)),
+                    ("secs", &lang.decimal(tick(ticks), 1)),
+                ],
             ),
             Some(OnHit::Root { ticks }) => {
-                format!("Root {:.1} s", f32::from(ticks) / TICK_HZ as f32)
+                lang.tf(Msg::InspectRoot, &[("secs", &lang.decimal(tick(ticks), 1))])
             }
             None => "-".into(),
         },
-        status: match u.status {
-            1 => "Slowed",
-            2 => "Rooted",
-            _ => "Ready",
-        },
+        status: content::status_id(u.status),
+        status_label: content::status(lang, u.status),
         synergy: if level > 0 {
-            format!("{:?} {level}/2", d.faction)
+            content::synergy(lang, d.faction, level)
         } else {
             "-".into()
         },
@@ -126,7 +139,8 @@ pub fn report(v: &MatchView, id: UnitId, arcanas: &[ArcanaPreset; 2]) -> Option<
 
 #[cfg(any(target_arch = "wasm32", test))]
 impl Report {
-    /// One `|`-separated record for the HTML battle layer (no field holds `|`).
+    /// One `|`-separated record for the HTML battle layer (no field holds `|`):
+    /// 18 legacy fields, then the localized status label (P64).
     pub fn record(&self) -> String {
         [
             self.kind.clone(),
@@ -147,6 +161,7 @@ impl Report {
             self.on_hit.clone(),
             self.status.to_string(),
             self.synergy.clone(),
+            self.status_label.to_string(),
         ]
         .join("|")
     }
@@ -189,12 +204,13 @@ fn fallback_panel(
     inspected: Res<Inspected>,
     view: Res<LatestView>,
     info: Res<crate::sync::MatchInfo>,
+    lang: Res<Lang>,
     desktop: Res<super::battle_hud::DesktopBattle>,
     panels: Query<Entity, With<InspectPanel>>,
     mut texts: Query<&mut Text, With<InspectText>>,
 ) {
     let report = match (inspected.0, &view.0) {
-        (Some(id), Some(v)) if !desktop.0 => report(v, id, &info.arcanas),
+        (Some(id), Some(v)) if !desktop.0 => report(v, id, &info.arcanas, *lang),
         _ => None,
     };
     let Some(r) = report else {
@@ -203,24 +219,36 @@ fn fallback_panel(
         }
         return;
     };
-    let text = format!(
-        "{} ({})\n{} | {} {}\nHP {} / {}\n{} {} every {} | range {}\nspeed {} | splash {} | {}\n{}",
-        r.name,
-        if r.own { "yours" } else { "enemy" },
-        r.form,
-        r.faction,
-        r.role,
-        r.hp,
-        r.max_hp,
-        r.attack.0,
-        r.attack.1,
-        r.every,
-        r.range,
-        r.speed,
-        r.splash,
-        r.on_hit,
-        r.status
-    );
+    let lang = *lang;
+    let owner = if r.own {
+        Msg::InspectOwnerYours
+    } else {
+        Msg::InspectOwnerEnemy
+    };
+    let text = [
+        format!("{} ({})", r.name, lang.t(owner)),
+        format!("{} | {} {}", r.form, r.faction, r.role),
+        lang.tf(Msg::InspectHp, &[("hp", &r.hp), ("max", &r.max_hp)]),
+        lang.tf(
+            Msg::InspectLineAttack,
+            &[
+                ("attack", &r.attack.0),
+                ("value", &r.attack.1),
+                ("every", &r.every),
+                ("range", &r.range),
+            ],
+        ),
+        lang.tf(
+            Msg::InspectLineMove,
+            &[
+                ("speed", &r.speed),
+                ("splash", &r.splash),
+                ("onhit", &r.on_hit),
+            ],
+        ),
+        r.status_label.to_string(),
+    ]
+    .join("\n");
     if let Ok(mut t) = texts.single_mut() {
         if t.0 != text {
             t.0 = text;
@@ -264,8 +292,9 @@ mod tests {
         s.units[1].hp = 123;
         let v = s.view_for(Seat::A, &[]);
         let neutral = [tbg_core::ArcanaPreset::NEUTRAL; 2];
-        let own = super::report(&v, mine, &neutral).unwrap();
-        let enemy = super::report(&v, theirs, &neutral).unwrap();
+        let en = crate::i18n::Lang::En;
+        let own = super::report(&v, mine, &neutral, en).unwrap();
+        let enemy = super::report(&v, theirs, &neutral, en).unwrap();
         assert!(own.own && !enemy.own);
         assert_eq!((enemy.hp, enemy.max_hp), (123, 300));
         // The canonical value, so a balance pass (D-33) does not break the UI test.
@@ -274,12 +303,24 @@ mod tests {
         assert_eq!(own.on_hit, "Slow 40% 2.0 s");
         assert_eq!((own.every.as_str(), own.range.as_str()), ("1.40 s", "3.5"));
         assert!(
-            super::report(&v, 999, &neutral).is_none(),
+            super::report(&v, 999, &neutral, en).is_none(),
             "gone units close the panel"
         );
         let record = enemy.record();
-        assert_eq!(record.split('|').count(), 18, "{record}");
+        assert_eq!(record.split('|').count(), 19, "{record}");
         assert!(record.starts_with("Hexer|Hexer|Base form|Undead|Control|false|123|300|"));
+        // P64 T02/T03: Portuguese text, same numbers, canonical ids kept.
+        let pt = super::report(&v, theirs, &neutral, crate::i18n::Lang::PtBr).unwrap();
+        assert_eq!(
+            (pt.hp, pt.max_hp, pt.attack.1),
+            (enemy.hp, enemy.max_hp, enemy.attack.1)
+        );
+        assert_eq!((pt.kind.as_str(), pt.status), ("Hexer", "Ready"));
+        assert_eq!(pt.on_hit, "Lentid\u{E3}o 40% 2,0 s");
+        assert_eq!((pt.every.as_str(), pt.range.as_str()), ("1,40 s", "3,5"));
+        let record = pt.record();
+        assert!(record.contains("|Mortos-Vivos|Controle|"), "{record}");
+        assert!(record.ends_with("|Pronto"), "{record}");
     }
 
     #[test]

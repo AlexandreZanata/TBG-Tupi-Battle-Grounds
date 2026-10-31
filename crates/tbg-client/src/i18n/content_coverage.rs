@@ -5,7 +5,8 @@
 use tbg_core::content::{def, AUGMENTS, STRONGHOLD_KINDS};
 use tbg_core::{ALL_KINDS, ARCHETYPES, FACTIONS};
 
-use super::{augment, content, Lang};
+use super::{augment, content, Lang, Msg};
+use tbg_core::content::AugmentRarity;
 
 fn filled(text: &str) -> bool {
     !text.is_empty() && !text.contains('{') && !text.contains('}')
@@ -78,4 +79,23 @@ fn i18n_content_coverage_roles_factions_and_statuses() {
         content::synergy(Lang::PtBr, tbg_core::Faction::Undead, 2),
         "Mortos-Vivos 2/2"
     );
+}
+
+/// Rarity labels are shown by `augments/art.js` (`rarity.<id>`); this match
+/// makes a new core rarity fail here until its keys exist.
+fn rarity(lang: Lang, rarity: AugmentRarity) -> &'static str {
+    lang.t(match rarity {
+        AugmentRarity::Bronze => Msg::RarityBronze,
+        AugmentRarity::Silver => Msg::RaritySilver,
+        AugmentRarity::Gold => Msg::RarityGold,
+        AugmentRarity::Diamond => Msg::RarityDiamond,
+    })
+}
+
+#[test]
+fn i18n_content_coverage_rarities_are_paired() {
+    for a in AUGMENTS {
+        assert_eq!(rarity(Lang::En, a.rarity), format!("{:?}", a.rarity));
+        assert!(filled(rarity(Lang::PtBr, a.rarity)));
+    }
 }

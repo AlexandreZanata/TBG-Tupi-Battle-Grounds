@@ -4,7 +4,6 @@
 //! compile error naming the catalog key to add (P64 L06). Ids, numbers and
 //! core names stay canonical; only their presentation is resolved here.
 
-use tbg_core::content::AugmentRarity;
 use tbg_core::{Archetype, Faction, StrongholdKind, UnitKind};
 
 use super::*;
@@ -116,15 +115,6 @@ pub fn archetype(lang: Lang, archetype: Archetype) -> &'static str {
         Archetype::Support => Msg::ArchetypeSupport,
         Archetype::Ranged => Msg::ArchetypeRanged,
         Archetype::Control => Msg::ArchetypeControl,
-    })
-}
-
-pub fn rarity(lang: Lang, rarity: AugmentRarity) -> &'static str {
-    lang.t(match rarity {
-        AugmentRarity::Bronze => Msg::RarityBronze,
-        AugmentRarity::Silver => Msg::RaritySilver,
-        AugmentRarity::Gold => Msg::RarityGold,
-        AugmentRarity::Diamond => Msg::RarityDiamond,
     })
 }
 
