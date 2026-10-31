@@ -182,5 +182,19 @@
   "owner_approval": {
     "date": "2026-10-31",
     "scope": "All five visual references approved; GitHub publication of V2 authorized after the comparison delivery. Deferred technical validation is unchanged."
+  },
+  "publication_followup": {
+    "first_ci_run": "https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/actions/runs/41207367636",
+    "failure": "Clippy: arena::scene::switch has too many arguments (8/7)",
+    "fix": "Group Mesh/StandardMaterial/Image assets in one Bevy system-parameter tuple; visual generation unchanged.",
+    "validation": {
+      "format": "pass",
+      "diff_check": "pass",
+      "command": "flock -n -E 75 /tmp/tbg-validation-1000.lock env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-deploy-art-wt/target cargo check -p tbg-client --bin tbg-client --target wasm32-unknown-unknown --offline",
+      "exit": 0,
+      "seconds": 4.63
+    },
+    "evidence_reuse": "No geometry/palette/material-builder change; existing screenshots retained.",
+    "remote_ci_result": "See current PR #23 checks; local validation does not claim workspace-suite success."
   }
 }

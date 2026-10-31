@@ -38,11 +38,26 @@ The local wrapper runs `trunk build --offline --skip-version-check --dist /tmp/t
 
 The only compiler warning is the existing `unused variable: lang` at `ui/battle_hud.rs:126:52`, also present in the baseline.
 
-Final development WASM: **129,558,258 bytes**, SHA-256 `aeb69ef8fb5c11291528ca9ee5de3abb3fd06aa9746ab59d2782e44678402afd`. This is a debug artifact, not a release download-size measurement, and is not committed.
+Captured development WASM: **129,558,258 bytes**, SHA-256 `aeb69ef8fb5c11291528ca9ee5de3abb3fd06aa9746ab59d2782e44678402afd`. This is a debug artifact, not a release download-size measurement, and is not committed.
 
 All five captures are actual local desktop Chromium/WebGL renders, with a **1920x1080 canvas**, an empty arena and **zero error-level console logs**. Forest, Tundra and Volcanic captures reuse the preceding successful build (SHA-256 `d44aac988ff2d74a2190bcd4d655f7a0b21cf12f1810748ae6eebe96630e45fc`); the final source changes affect only Ruins vegetation and the Storm-only squall branch, so their relevant visual evidence remains valid. Ruins and Storm were recaptured on the final build. The per-capture artifact hash and raw observations are recorded below. Diagnostic overlays remain visible; arena content was not painted or composited into screenshots.
 
 Static comparison confirms no changes to core/server logic, UI, runtime asset files, Cargo manifests/lockfile, Stronghold/tower implementation or island outline. The complete BattleLine generation function is byte-for-byte identical to the previous round. Camera changes only select the theme's fog falloff, without changing FOV, target, projection or framing logic. Both private reference copies passed hash/ignore checks.
+
+### Publication CI follow-up
+
+The first publication's [remote CI run](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/actions/runs/41207367636) passed formatting but failed Clippy on `arena/scene.rs`: `this function has too many arguments (8/7)`. Grouping the mesh, material and image resources into one Bevy system-parameter tuple brings the arena-switch signature below the limit. It preserves the resources and build calls; no geometry, palette or material generation changed, so the existing visual evidence is reused.
+
+Focused validation of that correction: `cargo fmt -p tbg-client -- --check` and `git diff --check` exit 0. The following command also exited 0 in **4.63 seconds**, with only the existing `unused lang` warning:
+
+```bash
+flock -n -E 75 /tmp/tbg-validation-1000.lock \
+  env CARGO_BUILD_JOBS=2 \
+  CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-deploy-art-wt/target \
+  cargo check -p tbg-client --bin tbg-client --target wasm32-unknown-unknown --offline
+```
+
+The corrective push schedules remote CI again. Its result is reported in PR #23; this local check is not a workspace Clippy/test pass. The focused lifecycle scenario and performance acceptance remain deferred.
 
 ## Comparison gallery
 
