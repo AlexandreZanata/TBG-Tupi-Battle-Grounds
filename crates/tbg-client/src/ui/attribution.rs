@@ -17,7 +17,7 @@ pub fn plugin(app: &mut App) {
 }
 
 fn retranslate(mut commands: Commands, roots: Query<Entity, With<Credit>>, lang: Res<Lang>) {
-    if crate::config::url_param("portrait").is_some() {
+    if crate::config::url_param("portrait").is_some() || crate::config::arena_preview() {
         return;
     }
     if !crate::config::bevy_ui() {
@@ -31,7 +31,7 @@ fn retranslate(mut commands: Commands, roots: Query<Entity, With<Credit>>, lang:
 
 fn spawn(mut commands: Commands, lang: Res<Lang>) {
     // Offline artwork exports carry attribution in the distribution, not inside each portrait.
-    if crate::config::url_param("portrait").is_some() {
+    if crate::config::url_param("portrait").is_some() || crate::config::arena_preview() {
         return;
     }
     #[cfg(target_arch = "wasm32")]

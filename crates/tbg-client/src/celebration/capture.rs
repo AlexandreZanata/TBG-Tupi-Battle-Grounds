@@ -42,7 +42,7 @@ fn size(mut window: Single<&mut Window>) {
 }
 
 fn fixture(cycle: u32) -> MatchInfo {
-    use tbg_core::{MatchState, Phase, PlayerIntention, Seat, UnitKind};
+    use tbg_core::{MatchState, Phase, PlayerIntention, Seat};
     let seat = if crate::config::url_param("p63_seat").as_deref() == Some("B") {
         Seat::B
     } else {
@@ -54,20 +54,7 @@ fn fixture(cycle: u32) -> MatchInfo {
         state.step();
     }
     state.players[seat.index()].energy = 10_000_000;
-    let kinds = [
-        UnitKind::BoneBrute,
-        UnitKind::CargoCrab,
-        UnitKind::Rootcaller,
-        UnitKind::Archer,
-        UnitKind::Shieldbearer,
-        UnitKind::Smuggler,
-        UnitKind::Drumguard,
-        UnitKind::Rotcap,
-        UnitKind::Puppetmaster,
-        UnitKind::Longaxe,
-        UnitKind::Farwatch,
-        UnitKind::Bombard,
-    ];
+    let kinds = tbg_core::FULL_POOL;
     for i in 0..count {
         state.players[seat.index()].offers[0] = kinds[i as usize % kinds.len()];
         state
