@@ -70,7 +70,7 @@ fn spawn(mut commands: Commands) {
                         Text::new(""),
                         TextFont {
                             font: if cfg!(target_os = "linux") {
-                                super::kit::display_font()
+                                super::kit::display_font().into()
                             } else {
                                 default()
                             },

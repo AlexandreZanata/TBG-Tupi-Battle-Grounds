@@ -129,7 +129,7 @@ fn spawn(
                 ));
                 banner.spawn((
                     label(effect(*lang, info.arena), 13.),
-                    TextLayout::new_with_justify(Justify::Center),
+                    TextLayout::justify(Justify::Center),
                 ));
                 banner.spawn(kit::muted(lang.key("arenas.symmetric"), 10.));
                 banner.spawn((
