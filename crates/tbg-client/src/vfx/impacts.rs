@@ -51,6 +51,7 @@ pub enum Impact {
     Mayhem,
     Belly,
     Rend,
+    Solar,
 }
 
 /// What the attacker brings to an impact: splash radius (tiles, 0 = none)
@@ -265,6 +266,18 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
                 },
                 0.0,
                 0.22,
+            );
+        }
+        Impact::Solar => {
+            motes(commands, a, at, &a.gold, (5, 0.5), 0.3);
+            spawn(
+                commands,
+                &a.ring,
+                &a.gold,
+                ground,
+                Motion::Grow { radius: 0.45 },
+                0.0,
+                0.3,
             );
         }
         Impact::Belly => {

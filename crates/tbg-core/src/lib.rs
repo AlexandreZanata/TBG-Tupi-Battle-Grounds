@@ -35,6 +35,7 @@ pub mod ruleset;
 mod secondary_targets;
 pub mod shop;
 pub mod sim;
+mod solar_sentinel;
 mod specials;
 pub mod state;
 pub mod stronghold;

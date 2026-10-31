@@ -7,6 +7,7 @@ use bevy::prelude::*;
 pub struct VisualAssets {
     pub ring: Handle<Mesh>,
     pub tier_cube: Handle<Mesh>,
+    pub shield_outline: Handle<Mesh>,
     pub bar: Handle<Mesh>,
     pub projectile: Handle<Mesh>,
     pub team: [Handle<StandardMaterial>; 2],
@@ -68,6 +69,9 @@ pub(super) fn init(
     .map(&mut unlit);
     commands.insert_resource(VisualAssets {
         ring: meshes.add(Cylinder::new(0.42, 0.03).mesh().resolution(16)),
+        shield_outline: meshes.add(crate::art::mesh::build(crate::art::mesh::Shape::Ring(
+            0.012, 0.52, 360.0,
+        ))),
         tier_cube: meshes.add(Cuboid::new(0.12, 0.12, 0.12)),
         bar: meshes.add(Rectangle::new(0.8, 0.08)),
         projectile: meshes.add(Sphere::new(0.09)),

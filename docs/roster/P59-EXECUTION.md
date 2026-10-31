@@ -195,7 +195,8 @@ Own library: `crates/tbg-client/src/art/kits/solar_sentinel/`.
 
 upright spear/shield guardian, oversized sun disk, ivory/gold plates, dark blue cloth and team tabard separate from gold. A2 broad pale breastplate, A3 taller disk shield crest. B2 paired shoulder disks/darker cloth, B3 wide halo with side panels. Reuse humanoid spear/shield parts.
 
-Status: pending. Evidence: `docs/media/p59/solar_sentinel/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/solar_sentinel/lineup.jpg`.
 
 ### R13 — Luminous Oracle
 

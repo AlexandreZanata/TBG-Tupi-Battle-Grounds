@@ -17,6 +17,7 @@ pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> O
             Ability::FearPulse { period, .. }
             | Ability::LivingWall { period, .. }
             | Ability::AreaCrush { period, .. }
+            | Ability::SolarBarrier { period, .. }
             | Ability::BloodyRend { period, .. }
             | Ability::SwampBelly { period, .. }
             | Ability::DoubleMayhem { period, .. }
@@ -60,6 +61,9 @@ pub(crate) fn advance(state: &mut MatchState, i: usize, ev: &mut Vec<Event>) {
 }
 
 fn primary(state: &MatchState, u: &Unit) -> Option<u32> {
+    if crate::solar_sentinel::parameters(state, u).is_some() {
+        return crate::solar_sentinel::target(state, u, None);
+    }
     let range = state.stats_of(u).range;
     state
         .units
@@ -138,6 +142,7 @@ fn advance_cast(
         crate::whisperer::resolve(state, u, target, ev);
         crate::bulwark::resolve(state, u);
         crate::demolisher::resolve(state, u, ev);
+        crate::solar_sentinel::resolve(state, u, target);
         crate::trident::resolve(state, u, target, ev);
         crate::capybara::resolve(state, u, ev);
         crate::rattle_tick::resolve(state, u, target, ev);

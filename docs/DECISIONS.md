@@ -1717,3 +1717,33 @@ side tines. Short chamber/thrust, opposing fin walk, low special sweep and knee/
 side collapse are per-kind poses. Resolution reads the exact server center/radius;
 no simulated cone, water or directional displacement. Protocol25 and bounded
 simulation layout stay unchanged. Frozen base/form contracts append only §13 facts.
+
+## D-79 · Solar Sentinel's wounded-ally barrier and public outline — 2026-10-31 (Proposed)
+
+R12 appends the exact §13 Celestial Tank row/four forms without public-pool
+activation. Solar Barrier starts with full160 cooldown. Once ready, select a
+living wounded other ally (summons included) within3000 by lowest HP fraction,
+then caster distance/UnitId. Integer cross-products avoid floating simulation
+state. Full allies/self/Strongholds are excluded; no candidate leaves it ready.
+The shared six-tick locked windup cancels on Root or recipient death, without
+refund/retarget; a living locked primary is not range-checked again or replaced
+because healing filled its HP. Grant100 shield/80 ticks, never HP/healing. Normal
+stronger-replace/equal-refresh/weaker-ignore rules apply. B selects a second
+wounded distinct ally at resolution and grants50 with the same expiry; A gains
+HP2000bp then main shield130, B2 special range3500. Basic range stays800.
+
+Protocol25's existing special target and public shield/effects snapshot suffice;
+no new Event, simulation field or hash migration. A shared gold outline is created
+lazily once on the first positive public Unit shield, hidden at expiry/zero/death,
+and retained through form swaps. It is not the Stronghold ShieldRaised event.
+The second recipient is visualized from its own authoritative shield snapshot,
+never predicted from client targeting. Inspection already shows amount/expiry.
+One shared torus mesh/material, one optional bounded child; no per-unit shader,
+light, texture, new dependency or guessed competitive outcome.
+
+Own kit: ivory/gold spear armor, separate navy/team cloth, oversized sun-disk
+shield, opening local shield panels and halo. A widens the pale breastplate and
+adds tall shield crest; B adds shoulder disks/dark cloth then wide halo/side panels.
+Controlled thrust, shield-leading gait, kneel and independent shield extension
+keep the basic and grant gestures distinct. Frozen base/form contracts append
+only §13 values. Owner visual/fun and heavy acceptance remain before activation.

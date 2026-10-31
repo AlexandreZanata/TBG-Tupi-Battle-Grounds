@@ -355,6 +355,13 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    SolarBarrier {
+        period: u16,
+        range: i32,
+        amount: u16,
+        ticks: u16,
+        second: u16,
+    },
     BloodyRend {
         period: u16,
         radius: i32,
@@ -690,6 +697,25 @@ const TRIDENT_ABILITIES: [[Ability; 2]; 5] = [
     rend(150, 1_500, 5),
     rend(150, 1_900, 5),
 ];
+const fn barrier(range: i32, amount: u16, second: u16) -> [Ability; 2] {
+    [
+        Ability::SolarBarrier {
+            period: 160,
+            range,
+            amount,
+            ticks: 80,
+            second,
+        },
+        Ability::None,
+    ]
+}
+const SOLAR_SENTINEL_ABILITIES: [[Ability; 2]; 5] = [
+    barrier(3_000, 100, 0),
+    barrier(3_000, 100, 0),
+    barrier(3_000, 130, 0),
+    barrier(3_000, 100, 50),
+    barrier(3_500, 100, 50),
+];
 const fn crossfire(ratio: u16, radius: i32) -> [Ability; 2] {
     [
         Ability::Crossfire {
@@ -793,7 +819,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 38;
+pub const UNIT_KIND_COUNT: usize = 39;
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1122,6 +1148,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::RattleTick,"Rattle & Tick",Humans,Tank,3_000,[900,60,38,900,28,0,0],None,RATTLE_TICK_ABILITIES,[FormDef{hp_bp:2_000,..form("Big Brother's Fury")},FormDef{dmg_bp:2_000,..form("Big Brother's Fury")},form("Tico's Tricks"),form("Tico's Tricks")]),
     unit(UnitKind::Capybara,"Capybara",Plants,Tank,3_000,[1_300,38,40,800,23,0,0],None,CAPYBARA_ABILITIES,[FormDef{hp_bp:2_000,..form("Stone Belly")},form("Stone Belly"),form("Swamp Wave"),form("Swamp Wave")]),
     unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,1_100,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
+    unit(UnitKind::SolarSentinel,"Solar Sentinel",Celestials,Tank,3_000,[1_050,35,40,800,28,0,0],None,SOLAR_SENTINEL_ABILITIES,[FormDef{hp_bp:2_000,..form("Light Fortress")},form("Light Fortress"),form("Group Protection"),form("Group Protection")]),
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

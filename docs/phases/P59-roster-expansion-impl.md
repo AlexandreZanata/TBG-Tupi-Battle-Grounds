@@ -209,3 +209,8 @@ D-78: Trident's own five-form kit, canonical ability and actual desktop lineup
 delivered (11 of21). The relevant combined block passed75 distinct targeted
 scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
 docs/roster/p59/R07-trident.md. Deferred acceptance remains as listed; no activation/deploy.
+
+D-79: Solar Sentinel's own five-form kit, canonical ability and actual desktop lineup
+delivered (12 of21). The relevant combined block passed15 distinct targeted
+scenarios and the shared-lock/two-job WASM preview; protocol25. Report:
+docs/roster/p59/R12-solar-sentinel.md. Deferred acceptance remains as listed; no activation/deploy.

@@ -143,6 +143,8 @@ pub enum UnitKind {
     Capybara,
     /// D-78: R07, staged outside public pools.
     Trident,
+    /// D-79: R12, staged outside public pools.
+    SolarSentinel,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

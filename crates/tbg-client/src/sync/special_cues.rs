@@ -85,6 +85,7 @@ fn resolved(
         UnitKind::RattleTick => (Impact::Mayhem, primary, area(map, visuals, unit)),
         UnitKind::Capybara => (Impact::Belly, Some(unit), area(map, visuals, unit)),
         UnitKind::Trident => (Impact::Rend, primary, area(map, visuals, unit)),
+        UnitKind::SolarSentinel => (Impact::Solar, primary, Area::default()),
         UnitKind::Demolisher => (Impact::Piston, Some(unit), area(map, visuals, unit)),
         _ => return,
     };

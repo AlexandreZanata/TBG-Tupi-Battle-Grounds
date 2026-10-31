@@ -62,6 +62,9 @@ pub(super) fn animate(
         if v.dying {
             v.dead_for += dt;
             commands.entity(v.bar).try_insert(Visibility::Hidden);
+            if let Some(e) = v.shield_outline {
+                commands.entity(e).try_insert(Visibility::Hidden);
+            }
             commands.entity(v.ring).try_insert(Visibility::Hidden);
             for t_cube in &v.tiers {
                 commands.entity(*t_cube).try_insert(Visibility::Hidden);

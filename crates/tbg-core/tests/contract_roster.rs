@@ -161,7 +161,7 @@ fn roster_composition() {
     // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
-    assert_eq!(UNITS.len(), 38);
+    assert_eq!(UNITS.len(), 39);
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     assert_eq!(
         &kinds[ALL_KINDS.len()..],
@@ -177,6 +177,7 @@ fn roster_composition() {
             UnitKind::RattleTick,
             UnitKind::Capybara,
             UnitKind::Trident,
+            UnitKind::SolarSentinel,
         ][..]
     );
     assert_eq!(UNIT_KINDS.len(), 10);
@@ -408,7 +409,11 @@ Capybara/Swamp Wave: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 h
 Trident/Ocean Fury: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Trident/Ocean Fury: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Trident/Bloody Tide: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Trident/Bloody Tide: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Trident/Bloody Tide: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Solar Sentinel/Light Fortress: hp=2000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Solar Sentinel/Light Fortress: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Solar Sentinel/Group Protection: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Solar Sentinel/Group Protection: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {
@@ -439,6 +444,7 @@ fn proposed_p59_bases_match_section_13() {
         (RattleTick, Humans, Tank, 5, [900, 60, 38, 900, 28]),
         (Capybara, Plants, Tank, 5, [1300, 38, 40, 800, 23]),
         (Trident, Plants, Tank, 6, [1250, 55, 40, 1_100, 28]),
+        (SolarSentinel, Celestials, Tank, 5, [1050, 35, 40, 800, 28]),
     ];
     for (kind, faction, archetype, energy, base) in rows {
         let d = def(kind);

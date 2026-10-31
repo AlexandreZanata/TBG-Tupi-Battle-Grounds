@@ -41,6 +41,7 @@ mod shatterback;
 mod shieldbearer;
 mod siege_walker;
 mod smuggler;
+mod solar_sentinel;
 mod tools;
 mod trident;
 mod trigger;
@@ -182,6 +183,7 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static SOLARSENTINEL: Kit = solar_sentinel::KIT;
 static TRIDENT: Kit = trident::KIT;
 static CAPYBARA: Kit = capybara::KIT;
 static RATTLETICK: Kit = rattle_tick::KIT;
@@ -230,6 +232,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::SolarSentinel => Some(&SOLARSENTINEL),
         UnitKind::Trident => Some(&TRIDENT),
         UnitKind::Capybara => Some(&CAPYBARA),
         UnitKind::RattleTick => Some(&RATTLETICK),
