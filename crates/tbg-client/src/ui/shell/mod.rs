@@ -2,6 +2,8 @@
 
 mod arcanas;
 mod arenas;
+#[cfg(target_os = "linux")]
+mod catalog;
 mod data;
 mod header;
 mod input;

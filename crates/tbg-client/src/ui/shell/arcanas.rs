@@ -87,6 +87,16 @@ pub fn spawn(
                 })
                 .with_children(|col| {
                     col.spawn(kit::panel()).with_children(|p| {
+                        #[cfg(target_os = "linux")]
+                        p.spawn(super::catalog::banner(
+                            assets,
+                            format!(
+                                "arcana/{}",
+                                family["banner"]["display"].as_str().unwrap_or_default()
+                            ),
+                            2.5,
+                        ));
+                        #[cfg(not(target_os = "linux"))]
                         p.spawn((
                             ImageNode::new(assets.load(format!(
                                 "arcana/{}",

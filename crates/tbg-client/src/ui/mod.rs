@@ -67,6 +67,8 @@ pub enum UiAction {
     /// Greyed-out button: clicks do nothing.
     Disabled,
     Practice,
+    #[cfg(target_os = "linux")]
+    PracticeArena(tbg_core::Arena),
     Quick,
     CreateRoom,
     JoinRoom(RoomCode),

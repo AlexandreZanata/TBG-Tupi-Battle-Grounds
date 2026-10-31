@@ -77,6 +77,14 @@ pub(super) fn apply(
         selected.0 = None;
     }
     for action in std::mem::take(&mut queue.0) {
+        #[cfg(target_os = "linux")]
+        let action = match action {
+            UiAction::PracticeArena(arena) => {
+                config::save_arena(arena);
+                UiAction::Practice
+            }
+            other => other,
+        };
         // BR-LV03: watchers have public inspection, never seat controls.
         if extra.4.spectating
             && matches!(

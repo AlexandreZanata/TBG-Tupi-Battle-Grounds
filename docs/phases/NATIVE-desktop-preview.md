@@ -713,3 +713,38 @@ to this front.
   suite, other-target build, web behavior/assets replacement, remote Git,
   CI or deployment ran. Existing windows, preferences, account data and
   unrelated policy edits were preserved. Reopen TBG for this installation.
+
+## Linux four-column catalogs and larger family banners — 2026-10-31
+
+Owner requested four Arenas/Strongholds per row using the full page width,
+larger images without unused side space, consistent cards and a Train here
+action on every Arena. Linux catalogs now share a four-column CSS grid,
+metal panel geometry, edge-to-edge proportional images, padded content and
+full-width controls. The fifth Arena keeps the same column width on the
+next row. Arena illustrations retain 16:9; Stronghold banners retain 5:2.
+Stronghold descriptions use the available card width instead of a fixed
+310-unit text column. Canonical statistics and modifiers are unchanged.
+
+Every Linux Arena card queues PracticeArena with its own Arena. The normal
+action pipeline saves that choice and handles it as the existing Practice
+action, preserving mode/reset behavior and actual core Arena modifiers.
+Users can start in any Arena directly without first pressing Choose.
+Arcanas retain their existing columns, editor controls and node layout;
+only family banners expand to the column's inner width at their original
+5:2 proportions. Other targets retain the prior layouts and behavior.
+
+Level: work front. Affected formatting and `git diff --check` passed.
+Inspected source art dimensions: Arenas 640x360, Strongholds 900x360,
+Arcana family banners 1800x720. No illustration was changed or regenerated.
+Next: owner-requested native build/install under the shared host lock/cache,
+focused captures of the three pages, and a debug-only smoke scenario that
+checks five distinct Arena training controls and queues the actual fifth
+card's action before observing the Practice match Arena. The owner's
+wait/job exceptions remain scoped to this chat.
+
+Defer real pointer/keyboard navigation, all five full Practice matches,
+selection persistence across app restarts, nondefault window sizes and
+other-target acceptance to consolidation. Existing focused Arcana and
+Stronghold regression tests remain queued; no competitive rule or protocol
+changed. No full suite, web assets replacement, remote Git, CI or deployment
+is requested for this front.

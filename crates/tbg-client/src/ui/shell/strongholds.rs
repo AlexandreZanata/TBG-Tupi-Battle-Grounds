@@ -5,6 +5,11 @@ use bevy::prelude::*;
 use serde_json::Value;
 use std::sync::OnceLock;
 
+#[cfg(target_os = "linux")]
+mod native;
+#[cfg(target_os = "linux")]
+pub use native::spawn;
+
 pub fn stronghold_data() -> &'static Value {
     static DATA: OnceLock<Value> = OnceLock::new();
     DATA.get_or_init(|| {
@@ -16,6 +21,7 @@ fn text(v: &Value, key: &str) -> String {
     v[key].as_str().unwrap_or_default().into()
 }
 
+#[cfg(not(target_os = "linux"))]
 pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) {
     let data = stronghold_data();
     root.spawn(kit::panel()).with_children(|p| {
@@ -41,95 +47,110 @@ pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) 
                     310.,
                     150.,
                 ));
-                p.spawn(kit::heading(text(v, "name"), 26.));
-                p.spawn(kit::muted(text(v, "specialty"), 16.));
-                p.spawn((
-                    super::super::label(text(v, "summary"), 15.),
-                    Node {
-                        max_width: px(310),
-                        ..default()
-                    },
-                ));
-                let stats = &v["stats"];
-                p.spawn(super::super::label(
-                    format!(
-                        "HP {} · {} {} · {} {}",
-                        stats["maxHp"],
-                        lang.key("native.damage"),
-                        stats["damage"],
-                        lang.key("native.range"),
-                        stats["range"].as_u64().unwrap_or(0) / 1000
-                    ),
-                    15.,
-                ));
-                p.spawn(kit::heading(text(&v["passive"], "name"), 17.));
-                p.spawn((
-                    kit::muted(expand(&text(&v["passive"], "text"), stats), 14.),
-                    Node {
-                        max_width: px(310),
-                        ..default()
-                    },
-                ));
-                for (heading, field) in [("+", "advantages"), ("-", "disadvantages")] {
-                    for line in v[field]
-                        .as_array()
-                        .into_iter()
-                        .flatten()
-                        .filter_map(Value::as_str)
-                    {
-                        p.spawn((
-                            kit::muted(format!("{heading} {}", expand(line, stats)), 13.),
-                            Node {
-                                max_width: px(310),
-                                ..default()
-                            },
-                        ));
-                    }
-                }
-                for branch in v["branches"].as_array().into_iter().flatten() {
-                    p.spawn(kit::heading(text(branch, "name"), 17.));
-                    for (i, step) in branch["steps"].as_array().into_iter().flatten().enumerate() {
-                        let s = &step["stats"];
-                        p.spawn((
-                            kit::muted(
-                                format!(
-                                    "{} · {} Energy · HP {} · {} {}",
-                                    text(step, "name"),
-                                    data["fortifyCost"][i.min(1)].as_u64().unwrap_or(0)
-                                        / data["energyScale"].as_u64().unwrap_or(600),
-                                    s["maxHp"],
-                                    lang.key("native.damage"),
-                                    s["damage"]
-                                ),
-                                13.,
-                            ),
-                            Node {
-                                max_width: px(310),
-                                ..default()
-                            },
-                        ));
-                        p.spawn((
-                            kit::muted(branch_effect(step), 13.),
-                            Node {
-                                max_width: px(310),
-                                ..default()
-                            },
-                        ));
-                    }
-                }
-                let chosen = crate::config::load_stronghold() == kind;
-                p.spawn(button(
-                    lang.key(if chosen {
-                        "arenas.chosen"
-                    } else {
-                        "arenas.choose"
-                    }),
-                    Action::Stronghold(kind),
-                    290.,
-                ));
+                details(p, v, data, kind, lang);
             });
         }
     });
+}
+
+fn details(
+    p: &mut ChildSpawnerCommands,
+    v: &Value,
+    data: &Value,
+    kind: tbg_core::StrongholdKind,
+    lang: Lang,
+) {
+    p.spawn(kit::heading(text(v, "name"), 26.));
+    p.spawn(kit::muted(text(v, "specialty"), 16.));
+    p.spawn((super::super::label(text(v, "summary"), 15.), detail_node()));
+    let stats = &v["stats"];
+    p.spawn(super::super::label(
+        format!(
+            "HP {} · {} {} · {} {}",
+            stats["maxHp"],
+            lang.key("native.damage"),
+            stats["damage"],
+            lang.key("native.range"),
+            stats["range"].as_u64().unwrap_or(0) / 1000
+        ),
+        15.,
+    ));
+    p.spawn(kit::heading(text(&v["passive"], "name"), 17.));
+    p.spawn((
+        kit::muted(expand(&text(&v["passive"], "text"), stats), 14.),
+        detail_node(),
+    ));
+    for (heading, field) in [("+", "advantages"), ("-", "disadvantages")] {
+        for line in v[field]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+        {
+            p.spawn((
+                kit::muted(format!("{heading} {}", expand(line, stats)), 13.),
+                detail_node(),
+            ));
+        }
+    }
+    for branch in v["branches"].as_array().into_iter().flatten() {
+        p.spawn(kit::heading(text(branch, "name"), 17.));
+        for (i, step) in branch["steps"].as_array().into_iter().flatten().enumerate() {
+            let s = &step["stats"];
+            p.spawn((
+                kit::muted(
+                    format!(
+                        "{} · {} Energy · HP {} · {} {}",
+                        text(step, "name"),
+                        data["fortifyCost"][i.min(1)].as_u64().unwrap_or(0)
+                            / data["energyScale"].as_u64().unwrap_or(600),
+                        s["maxHp"],
+                        lang.key("native.damage"),
+                        s["damage"]
+                    ),
+                    13.,
+                ),
+                detail_node(),
+            ));
+            p.spawn((kit::muted(branch_effect(step), 13.), detail_node()));
+        }
+    }
+    #[cfg(target_os = "linux")]
+    p.spawn(Node {
+        flex_grow: 1.,
+        min_height: px(8),
+        ..default()
+    });
+    let chosen = crate::config::load_stronghold() == kind;
+    let control = button(
+        lang.key(if chosen {
+            "arenas.chosen"
+        } else {
+            "arenas.choose"
+        }),
+        Action::Stronghold(kind),
+        290.,
+    );
+    #[cfg(target_os = "linux")]
+    p.spawn(control).insert(super::catalog::button_node());
+    #[cfg(not(target_os = "linux"))]
+    p.spawn(control);
+}
+
+fn detail_node() -> Node {
+    Node {
+        width: if cfg!(target_os = "linux") {
+            percent(100)
+        } else {
+            Val::Auto
+        },
+        max_width: if cfg!(target_os = "linux") {
+            percent(100)
+        } else {
+            px(310)
+        },
+        ..default()
+    }
 }
 pub(in crate::ui) fn expand(raw: &str, stats: &Value) -> String {
     let data = stronghold_data();

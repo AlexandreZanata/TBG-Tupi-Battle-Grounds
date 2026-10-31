@@ -6,11 +6,17 @@ use bevy::{
 };
 
 #[cfg(target_os = "linux")]
+mod arenas;
+#[cfg(target_os = "linux")]
 mod reserve;
 
 pub fn plugin(app: &mut App) {
     if crate::config::url_param("capture").is_some() {
         app.add_systems(Update, capture);
+        #[cfg(target_os = "linux")]
+        if crate::config::url_param("capture_panel").as_deref() == Some("arena_train") {
+            arenas::plugin(app);
+        }
         #[cfg(target_os = "linux")]
         if crate::config::url_param("capture_panel").as_deref() == Some("demo_transition") {
             app.add_systems(
@@ -114,6 +120,7 @@ fn capture(
     #[cfg(target_os = "linux")] reserve: Option<Res<reserve::Status>>,
     #[cfg(target_os = "linux")] units: Query<&crate::visuals::UnitVisual>,
     #[cfg(target_os = "linux")] stats: Res<crate::sync::MatchStats>,
+    #[cfg(target_os = "linux")] match_info: Res<crate::sync::MatchInfo>,
     mut started: Local<bool>,
 ) {
     let delay = crate::config::url_param("capture_after")
@@ -161,6 +168,19 @@ fn capture(
         return;
     };
     *started = true;
+    #[cfg(target_os = "linux")]
+    if crate::config::url_param("capture_panel").as_deref() == Some("arena_train") {
+        let expected = crate::config::url_param("capture_arena").unwrap_or("storm".into());
+        assert_eq!(
+            match_info.arena.slug(),
+            expected,
+            "Practice must start in the clicked Arena"
+        );
+        eprintln!(
+            "Arena training capture: actual Practice arena={}",
+            match_info.arena.slug()
+        );
+    }
     #[cfg(target_os = "linux")]
     if *state.get() == crate::GameState::Menu {
         let kinds: Vec<_> = units
