@@ -33,6 +33,8 @@ pub struct Animator {
     pub presentation_clock: Option<f32>,
     pub events: Vec<ClipEvent>,
     pub kit: Option<&'static Kit>,
+    kind: UnitKind,
+    celebration: Option<super::celebration::CelebrationMotion>,
     /// (tier, branch) of the shown form, for kit layers.
     pub form: (u8, u8),
     /// The engaged target in world space; visuals refresh it every frame.
@@ -79,6 +81,8 @@ impl Animator {
             presentation_clock: None,
             events: Vec::new(),
             kit: kits::kit(kind),
+            kind,
+            celebration: None,
             form: (0, 0),
             aim_at: None,
             treadmill: false,
@@ -99,6 +103,23 @@ impl Animator {
             travel: 0.0,
             heading: Vec3::Z,
         }
+    }
+    pub fn kind(&self) -> UnitKind {
+        self.kind
+    }
+    /// Preview sampling bypasses attack/action event delivery and carries no target or hit-stop.
+    pub fn celebrate(&mut self, motion: super::celebration::CelebrationMotion, t: f32) {
+        self.celebration = Some(motion);
+        self.preview = Some((motion.clip, t));
+        self.presentation_clock = Some(t);
+        self.clock = t;
+        self.action = None;
+        self.fade = None;
+        self.aim = None;
+        self.aim_at = None;
+        self.hit_stop = 0.;
+        self.rate = 1.;
+        self.events.clear();
     }
     pub fn apply_hit_stop(&mut self, duration_s: f32) {
         self.hit_stop = duration_s;
@@ -143,28 +164,35 @@ impl Animator {
     }
     /// Length of `clip` for this figure (kits may lengthen recoveries).
     pub fn duration(&self, clip: Clip) -> f32 {
+        if clip == Clip::Victory {
+            return super::celebration::celebration_for(self.kind, self.form.0, self.form.1)
+                .duration;
+        }
         self.kit
             .map_or_else(|| clip.duration(), |k| k.duration(clip))
     }
-    fn pose(&self, clip: Clip, t: f32) -> Pose {
+    pub(super) fn pose(&self, clip: Clip, t: f32) -> Pose {
         let mut pose = sample(clip, t);
         if self.archer {
             super::archer_v2_clips::apply(clip, t, &mut pose);
         }
+        let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.));
+        let moment = Moment {
+            clip,
+            t,
+            tier: self.form.0,
+            branch: self.form.1,
+            aim: self.aim,
+            since_attack: self.since_attack,
+            variant: self.variant,
+            clock: self.clock,
+            walk,
+        };
         if let Some(kit) = self.kit {
-            let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.0));
-            let moment = Moment {
-                clip,
-                t,
-                tier: self.form.0,
-                branch: self.form.1,
-                aim: self.aim,
-                since_attack: self.since_attack,
-                variant: self.variant,
-                clock: self.clock,
-                walk,
-            };
             (kit.pose)(&moment, &mut pose);
+        }
+        if let Some(motion) = self.celebration {
+            super::celebration::finish(motion, &moment, &mut pose);
         }
         pose
     }

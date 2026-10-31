@@ -20,6 +20,7 @@ mod archer_v2_clips;
 mod archer_v2_tests;
 pub mod arrows;
 pub mod bow;
+pub mod celebration;
 mod clips;
 mod curves;
 pub mod death;

@@ -55,7 +55,7 @@ There are no newly authored exclusive dances. Future signatures are a
 content backlog, registered once in the shared resolver.
 
 - `Shieldbearer`: Base, A1, A2, B1, B2; Raise; `art/kits/shieldbearer/mod.rs`.
-- `Archer`: Base, A1, A2, B1, B2; shared Victory fallback; legacy Archer; shared clip with native-Archer layer when selected.
+- `Archer`: Base, A1, A2, B1, B2; shared Victory fallback; Native Archer v2 model/layer; shared Victory fallback without a kit-specific override.
 - `BoneBrute`: Base, A1, A2, B1, B2; shared Victory fallback; `art/kits/bone_brute/mod.rs`.
 - `Hexer`: Base, A1, A2, B1, B2; Dance; `art/kits/hexer/mod.rs`.
 - `Sawbot`: Base, A1, A2, B1, B2; Dance; `art/kits/sawbot/mod.rs`.
@@ -158,3 +158,25 @@ final compilation is queued with Step 5. Added pure page/formation/facing
 regressions for zero/1/3/64/65 and huge totals, both seats and desktop aspects.
 Actual rendering, lifecycle, spacing and browser evidence remain pending;
 no visual or frame-time acceptance is claimed from compilation.
+
+
+## Step 4 — one motion resolver and future signatures
+
+Added `art::celebration::celebration_for(kind,tier,branch)`: one current
+Victory clip, real kit duration, loop metadata and optional per-kind/form
+signature callback. Scene and ordinary Victory duration lookup use it; P62
+has no integrated Dance preview to adapt yet and must call this API when
+its viewer lands. No second animation library or new attack clip is created.
+Animator keeps its existing native/kit pose layers, then applies the optional
+signature and root/facing bounds for cosmetic playback only. Explicit
+presentation clocks and preview sampling clear actions, aim, hit-stop and
+events; reduced motion samples a stable pose rather than freezing a corpse.
+
+The owner explicitly chose the shared standard now, so no exclusive pilot
+or newly unique dance is claimed. Existing Raise/Both/Dance and kit-specific
+Victory content remains; all future signatures are still a content backlog.
+Regressions enumerate all 130 current eligible kind/form combinations and
+sample 16 phases each, checking finite poses, event-free clip metadata and
+root bounds; a synthetic callback proves the override seam is executed.
+Formatting/diff checks passed. Final compilation and test execution remain
+queued with Step 5; A04 visual approval remains distinct from these checks.

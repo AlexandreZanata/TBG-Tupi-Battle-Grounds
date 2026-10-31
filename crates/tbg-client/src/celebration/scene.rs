@@ -2,10 +2,7 @@
 
 use super::{layout, range, total, Presentation};
 use crate::{
-    art::{
-        anim::{Animator, Clip},
-        figure, FigureLibrary,
-    },
+    art::{anim::Animator, figure, FigureLibrary},
     camera::ArenaCamera,
     sync::MatchInfo,
     GameState,
@@ -165,15 +162,18 @@ fn animate(
 ) {
     for (slot, mut animator) in &mut dancers {
         let phase = (slot.0.wrapping_mul(2654435761) % 997) as f32 / 997.;
-        let duration = animator.duration(Clip::Victory);
+        let motion = crate::art::celebration::celebration_for(
+            animator.kind(),
+            animator.form.0,
+            animator.form.1,
+        );
+        let duration = motion.duration;
         let t = if state.reduced {
             duration * 0.4
         } else {
             (time.elapsed_secs() + phase * duration).rem_euclid(duration)
         };
-        animator.preview = Some((Clip::Victory, t));
-        animator.presentation_clock = Some(t);
-        animator.rate = 1.;
+        animator.celebrate(motion, t);
     }
 }
 
