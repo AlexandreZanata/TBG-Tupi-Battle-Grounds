@@ -185,7 +185,7 @@ Phase files are written one at a time, starting with P42.
 | P56 | [P56-archer-crab-selection.md](phases/P56-archer-crab-selection.md) | Part A fixes: Archer bow on its kit (curved, drawable string, native path removed), Cargo Crab carry rule (D-60), carrier id in the view (D-61, protocol 18), passengers seated on their carrier with a boarding arc, crab visual rebuilt, selective name tags | Part A implemented and verified; balance deferred by owner; look sign-off pending | yes (owner: look) |
 | P57 | [P57-unit-spacing.md](phases/P57-unit-spacing.md) | Units take up space on screen: client display layout (five files, ranks behind the front, smoothing); server and protocol unchanged | planned | yes (owner: look) |
 | P58 | [P58-roster-expansion-planning.md](phases/P58-roster-expansion-planning.md) | Docs-only plan for 21 units + Monsters/Celestials/Insects: catalog, audit, GAME-DESIGN §13 registry, future waves | planned; reaudited | — |
-| P59 | P59-roster-expansion-impl.md (to be written by the lead; not created by P58) | Roster expansion implementation (21 units, 3 Factions) in waves W0 to W11, per P58 | planned; waves W0–W11 | yes (owner: P58 decisions) |
+| P59 | [P59-roster-expansion-impl.md](phases/P59-roster-expansion-impl.md) | Roster expansion implementation (21 units, 3 Factions) in waves W0 to W11, per P58; status report lists what is open | not started; W0–W11 open; Part A merged | yes (owner: P58 decisions) |
 
 ## Independent arena art follow-up
 
