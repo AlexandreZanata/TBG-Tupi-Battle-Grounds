@@ -267,3 +267,20 @@ GLIBC symbol is 2.39, reflected in the published requirements.
 GitHub CI was not awaited; local targeted evidence is not a claim that every
 unexecuted remote job will pass. No known executed targeted check remains
 failing after the recorded fixes.
+
+## CI follow-up (owner request, 2026-10-31)
+
+Fetched completed job logs without waiting for any running workflow:
+124630974233 (8873422) failed on Default for [u16; 51] and [[u16; 2]; 51],
+already fixed by b181a12. Job 124626194278 (3aeff7d) reported the four art/font
+failures fixed by 10cd8cf plus one shared-runner timing failure:
+`visuals::layout::tests::three_hundred_units_within_budget` measured
+`2.412043ms per frame`, above its unchanged 2ms limit. This test exercises the
+legacy P57 reference implementation, not the active runtime crowd solver.
+
+The timing probe remains intact as an explicitly ignored release benchmark;
+no threshold changed. A deterministic 300-actor regression now checks exact
+reproducibility, preserved identities, finite coordinates and valid file/back
+offsets in ordinary CI. Focused layout validation passed: 5 passed, 2 ignored,
+zero failed. The two ignored probes were not executed. Latest workflows were
+still running when inspected, so no new remote pass is claimed.

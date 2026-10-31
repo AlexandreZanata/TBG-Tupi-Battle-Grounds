@@ -382,6 +382,31 @@ mod tests {
     }
 
     #[test]
+    fn three_hundred_units_are_finite_and_reproducible() {
+        let bodies = army(9, 150);
+        let run = || {
+            let mut layout = Layout::default();
+            for _ in 0..3 {
+                layout.begin();
+                bodies.iter().for_each(|&b| layout.push(b));
+                layout.solve(1.0 / 60.0);
+            }
+            (0..bodies.len())
+                .map(|i| layout.slot(i))
+                .collect::<Vec<_>>()
+        };
+        let slots = run();
+        assert_eq!(slots, run());
+        for (body, slot) in bodies.iter().zip(slots) {
+            assert_eq!(body.id, slot.id);
+            assert!(slot.x.is_finite() && slot.z.is_finite());
+            assert!((0..FILES.len()).contains(&slot.file));
+            assert!(slot.back >= 0.0);
+        }
+    }
+
+    #[test]
+    #[ignore = "Explicit release performance probe; shared CI wall time is not deterministic"]
     fn three_hundred_units_within_budget() {
         let bodies = army(9, 150);
         let mut layout = Layout::default();
