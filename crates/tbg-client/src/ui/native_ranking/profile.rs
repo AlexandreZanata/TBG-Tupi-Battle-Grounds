@@ -163,7 +163,7 @@ fn record(card: &mut ChildSpawnerCommands, data: &LobbyData, lang: Lang, pending
                         text(value, 14.),
                         kit::Pending(pending),
                         Node {
-                            width: percent(80),
+                            width: if pending { percent(80) } else { Val::Auto },
                             min_height: px(17),
                             ..default()
                         },
@@ -239,7 +239,7 @@ fn centered(parent: &mut ChildSpawnerCommands, value: String, size: f32, pending
                 TextLayout::no_wrap().with_justify(Justify::Center),
                 kit::Pending(pending),
                 Node {
-                    width: percent(100),
+                    width: if pending { percent(100) } else { Val::Auto },
                     min_height: px(size * 1.2),
                     ..default()
                 },

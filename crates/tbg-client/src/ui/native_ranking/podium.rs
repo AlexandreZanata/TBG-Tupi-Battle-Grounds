@@ -144,7 +144,7 @@ pub(super) fn spawn(
                                     TextLayout::no_wrap().with_justify(Justify::Center),
                                     kit::Pending(pending),
                                     Node {
-                                        width: percent(100),
+                                        width: if pending { percent(100) } else { Val::Auto },
                                         min_height: px(19),
                                         ..default()
                                     },
@@ -178,7 +178,11 @@ pub(super) fn spawn(
                                                     text(value, 12.),
                                                     kit::Pending(pending),
                                                     Node {
-                                                        width: percent(90),
+                                                        width: if pending {
+                                                            percent(90)
+                                                        } else {
+                                                            Val::Auto
+                                                        },
                                                         min_height: px(15),
                                                         ..default()
                                                     },

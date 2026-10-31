@@ -160,7 +160,7 @@ pub fn spawn(
                                 kit::Pending(pending),
                                 TextLayout::justify(Justify::Center),
                                 Node {
-                                    width: percent(75),
+                                    width: if pending { percent(75) } else { Val::Auto },
                                     min_height: px(26),
                                     ..default()
                                 },
