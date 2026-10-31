@@ -337,6 +337,142 @@ browser watching a live bot match. Log the entry with the rollback.
 
 ## Phase report
 
-_Executor fills in: baseline and after numbers, every command with its real
-output, desktop browser observations at both sizes, the capacity table with
-spectators, deviations, owner decisions taken._
+Filled by the executor on 2026-10-30 on `phase/p47-live-lobby`. Protocol
+v17, D-58, GAME-DESIGN §13 (BR-LV01–LV09, Proposed). Owner visual sign-off
+is still open; nothing is merged, pushed to `main`, or deployed by this
+report.
+
+### Commits (oldest first, one per logical step or step pair)
+
+| Commit | Scope |
+|--------|-------|
+| `7ee2834` | step 1: `PublicView`, event visibility, contract test |
+| `47813d8` | step 2: protocol v17 messages, contract bytes, GAME-DESIGN §13, D-58 |
+| `d75559a` | steps 3–4: lobby registry, snapshot, progress, fan-out, watch lifecycle |
+| `0fc762d` | step 5: `/api/live`, `/api/online`, integration tests |
+| `f37eae4` | step 6: `/metrics` gauges, `tbg-bots --spectators N`, capacity script |
+| `736775a` | style: rustfmt of the server files |
+| `f9a6139` | steps 7–8: client watch transport and spectator render mode |
+| `f422e04` | step 9: lobby chip, Live battles panel, See all, JS tests |
+| `9dfbfb2` | fix: clippy findings in the spectator client |
+| `29558c1` | docs: ARCHITECTURE §5/§11 and ROADMAP |
+
+### Commands and real output
+
+Run on the worktree with `CARGO_TARGET_DIR=$PWD/target CARGO_BUILD_JOBS=6`
+under `nice -n 10`. Final tree (after the last client change):
+
+- `cargo fmt --all -- --check`: exit 0.
+- `cargo clippy --workspace --all-targets -- -D warnings`: exit 0.
+- `cargo test --workspace --exclude tbg-balance`: exit 0; 335 passed, 0 failed (all test binaries, lib, integration and doc tests).
+- `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown`: exit 0.
+- `(cd crates/tbg-client && node --test tests/*.test.js)`: exit 0; all tests pass (live tests included).
+- `(cd crates/tbg-client && trunk build --release)`: exit 0 (final client build, `dist/` is gitignored).
+- Balance lab (`tbg-balance`): not run, as the owner asked.
+
+
+### Capacity (250 matches, release, 40 s window, same host)
+
+Source: `scripts/capacity.sh`, output in `docs/media/p47/`. Baseline is the
+pre-P47 commit `13bb789` (run in a detached worktree).
+
+| Run | Server cores | RSS MB | KB/s out | Views/s | Late ticks | RTT p95 ms | Lobby inbox max | Connections |
+|-----|--------------|--------|----------|---------|------------|------------|-----------------|-------------|
+| Baseline (`13bb789`) | 0.22 | 18.3 | 1171.3 | 5094 | 0 | 2 | 2 | 500 |
+| P47, 0 spectators | 0.24 | 19.5 | 1171.7 | 5107 | 0 | 3 | 3 | 500 |
+| P47, 500 spectators | 0.33 | 30.2 | 2269.7 | 5093 | 0 | 2 | 29 | 1000 |
+| P47, 2000 spectators | 0.57 | 55.3 | 5654.8 | 5094 | 0 | 2 | 74 | 2500 |
+
+Budget check (`Budget` table in the spec):
+
+- Server CPU ≤ baseline +15 % (0.253 cores): **met at 0 spectators** (+9 %),
+  **not met at 500 (+50 %) or 2000 (+159 %)**. This is the main open item;
+  the cause is not profiled. Suspects: one socket write per spectator per
+  view tick, and the spectator frames themselves. The reviewer should decide
+  whether to lower the spectator view rate or batch the writes before
+  approving.
+- Spectator download ≤ 6 KB/s: about 2.2 KB/s per spectator at 2000
+  ((5654.8 − 1171.7) / 2000 KB/s). Met.
+- 0 late ticks at 250 matches + 2000 spectators: met.
+- Encodes per match per view tick = 1: met by construction (one
+  `public_view` and one `encode` per tick in `send_spectator_views`); not
+  separately instrumented.
+- Lobby snapshot ≤ 1 ms at 5000 sessions and `/api/live` ≤ 16 KB: **not
+  measured**. A 50-row snapshot is estimated at about 12 KB, not checked.
+
+Spectator load-tool smoke (`tbg-bots --matches 4 --spectators 3`, release,
+`docs/media/p47/tbg-bots-spectators-3.txt`): `watch starts 64 | refused 3 |
+views 12217 | ended 3 | errors 0`; all 8 bots completed. The capacity script
+does not print the spectator summary (its bot log is removed), so the
+capacity table has no spectator-side numbers.
+
+### Desktop browser observations (Playwright, Chrome headless, release build)
+
+Server `TBG_STATIC_DIR` = the trunk build, bot matches running. Screenshots
+in `docs/media/p47/` (JPG). Language: EN only.
+
+- Anonymous visitor, no clicks: header chip reads `6 online · 6 in battle`
+  at 1920×1080 and 1280×800. Live battles panel lists 3 matches with names,
+  Guest, Casual, arena, time, `0 watching`, HP bars and **Watch**, above the
+  news panel, and does not cover the mode panel or the arena centre (see
+  `en-lobby-1920.jpg`, `en-lobby-1280.jpg`).
+- Watch (`?server=…&watch=<featured id>`): the watched match loads in the
+  right arena (`storm`, `ruins`, `forest` seen in the console as
+  `watching arena: …`), the names and HP show, the seat controls are hidden
+  (no Shop, Energy, Fortify or War Council on the desktop HUD), a
+  `LIVE · 1 watching` badge is at the bottom, and **Leave** is top-right
+  (`en-watch-1920.jpg`, `en-watch-1280.jpg`).
+- Not verified in the browser: two players seeing `1 watching` (covered by
+  the socket-level test `players_see_the_watcher_count_and_the_match_arena`);
+  reload with `?watch=` after a watch (the sessionStorage path is unit
+  tested only); the result overlay and "Back to lobby" at the end of a
+  watched match (socket-level `SpectateEnd` test only); Portuguese (the
+  catalog parity is checked by the build, but no PT page was looked at);
+  rooms and challenges in the browser (socket-level and lobby unit tests).
+- Console: one `Failed to load resource: 404` on every page. Not
+  investigated; it predates P47's code paths as far as I can tell.
+
+### Deviations (and why)
+
+- **Protocol v17, not v16.** v16 belongs to the Cargo Crab branch (not
+  merged). The spec's "next free version" is 17 in this tree.
+- **Decision D-58.** D-56 is the Cargo Crab branch's; D-57 was reserved by
+  parallel work per the brief, and no branch has it in this checkout.
+- **Steps 3–4 and steps 7–8 each landed as one commit** (the step-3 and
+  step-4 changes were interleaved in the same files). Steps 1, 2, 5, 6 and
+  9 are separate.
+- **The spectator chrome lives in the HTML battle HUD, not in Bevy.** On
+  desktop, the visible battle controls are the `#tbg-battle` DOM overlay
+  (`battle_hud.rs` → `index.html`, `assets/battle/hud.css`). The first
+  attempt hid Bevy nodes, which were not the visible controls. The Bevy
+  spectator overlay was removed.
+- **Phone fallback HUD is not spectator-aware.** Desktop only (the spec
+  says so); a watcher on a narrow window would still see the seat HUD.
+- **`LobbyCmd::LiveProgress` carries a nested `LiveProgress`** instead of
+  flattened fields; same content.
+- **Chip numbers.** `N online` = sessions with a connection (O-6); `M in
+  battle` = seats of running matches (the spec's `in_battle`).
+- **Ranking "Live now" section (optional) not done.**
+- **Spectator frames are a new `ConnEvent::Frame`** (pre-encoded bytes). The
+  spec named it; no deviation, listed for review.
+
+### Decisions taken without the owner
+
+- Listed matches are both casual quick matches and ranked (O-5).
+- Caps: 200 spectators per match, 2000 in total (O-3). Env:
+  `TBG_SPECTATORS_PER_MATCH`, `TBG_MAX_SPECTATORS`.
+- Featured battle holds 30 s, guests count as 1000 (BR-LV07).
+- Spectator refusals return `SpectateUnavailable` and never disconnect.
+
+### Limitations
+
+- CPU budget not met at 500 and 2000 spectators (see the table).
+- Snapshot build time and `/api/live` size are not measured.
+- Browser checks are partial (see the list above).
+- Open, not root-caused: in a debug smoke run with 20 spectators, two
+  connections closed with `bad_message`. The current release run with 3
+  spectators showed `errors 0`, but the 20-spectator case was never
+  reproduced or explained.
+- `tbg-bots` process: the spectator counts in the capacity script are not
+  printed.
+- Nothing deployed. The VPS deploy follows owner sign-off of the look.
