@@ -107,7 +107,13 @@ pub(crate) fn heal_cut_now(u: &Unit, now: Tick) -> i32 {
 /// application. An active slot takes an equal or stronger value and restarts
 /// its count without moving the next pulse; a weaker value is ignored.
 pub(crate) fn apply_bleed(fx: &mut UnitFx, value: u16, pulses: u8, source: Seat, now: Tick) {
-    let slot = &mut fx.bleed;
+    apply_dot(&mut fx.bleed, value, pulses, source, now);
+}
+/// R18: its own family, never an entry in Rotcap's stack array.
+pub(crate) fn apply_venom(fx: &mut UnitFx, value: u16, pulses: u8, source: Seat, now: Tick) {
+    apply_dot(&mut fx.venom, value, pulses, source, now);
+}
+fn apply_dot(slot: &mut Bleed, value: u16, pulses: u8, source: Seat, now: Tick) {
     if slot.left == 0 {
         *slot = Bleed {
             value,
@@ -126,17 +132,36 @@ pub(crate) fn apply_bleed(fx: &mut UnitFx, value: u16, pulses: u8, source: Seat,
 /// ordinary damage path (reduction and shields apply; no on-hit effects, no
 /// lifesteal), then counts down. The source's death changes nothing.
 pub(crate) fn tick_bleed(state: &mut MatchState, ev: &mut Vec<Event>) {
+    tick_dot(state, ev, false);
+}
+pub(crate) fn tick_venom(state: &mut MatchState, ev: &mut Vec<Event>) {
+    tick_dot(state, ev, true);
+}
+fn tick_dot(state: &mut MatchState, ev: &mut Vec<Event>, venom: bool) {
     for i in 0..state.units.len() {
         let u = state.units[i];
-        let slot = u.fx.bleed;
+        let slot = if venom { u.fx.venom } else { u.fx.bleed };
         if u.hp <= 0 || slot.left == 0 || state.tick != slot.next {
             continue;
         }
         let _removed = hits::damage(state, Target::Unit(u.id), i32::from(slot.value), ev);
-        // ponytail: Trident is the sole bleed producer; store source kind if another ships.
+        // ponytail: each family has one producer; store kind if another producer ships.
         #[cfg(feature = "lab")]
-        crate::lab::dot_dealt(state, slot.source, crate::UnitKind::Trident, _removed);
-        let slot = &mut state.units[i].fx.bleed;
+        crate::lab::dot_dealt(
+            state,
+            slot.source,
+            if venom {
+                crate::UnitKind::Hornet
+            } else {
+                crate::UnitKind::Trident
+            },
+            _removed,
+        );
+        let slot = if venom {
+            &mut state.units[i].fx.venom
+        } else {
+            &mut state.units[i].fx.bleed
+        };
         slot.left -= 1;
         if slot.left == 0 {
             *slot = Bleed::default();
@@ -153,6 +178,15 @@ pub(crate) fn cleanse_bleed(fx: &mut UnitFx) -> bool {
         return false;
     }
     fx.bleed = Bleed::default();
+    true
+}
+
+/// The second new DoT family consumes one remaining cleanse strip after bleed.
+pub(crate) fn cleanse_venom(fx: &mut UnitFx) -> bool {
+    if fx.venom.left == 0 {
+        return false;
+    }
+    fx.venom = Bleed::default();
     true
 }
 

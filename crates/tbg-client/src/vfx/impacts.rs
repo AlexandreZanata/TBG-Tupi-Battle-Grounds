@@ -56,6 +56,7 @@ pub enum Impact {
     Purify,
     Judgment,
     Precise,
+    Venom,
 }
 
 /// What the attacker brings to an impact: splash radius (tiles, 0 = none)
@@ -272,6 +273,7 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
                 0.22,
             );
         }
+        Impact::Venom => motes(commands, a, at, &a.green, (5, 0.4), 0.25),
         Impact::Precise => motes(commands, a, at, &a.green, (4, 0.35), 0.18),
         Impact::Judgment => {
             spawn(

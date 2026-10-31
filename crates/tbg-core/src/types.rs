@@ -155,6 +155,8 @@ pub enum UnitKind {
     Jawguard,
     /// D-84: R17, staged outside public pools.
     Mantis,
+    /// D-85: R18, staged outside public pools.
+    Hornet,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the

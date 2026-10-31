@@ -26,6 +26,7 @@ mod drumguard;
 mod farwatch;
 pub mod gait;
 mod hexer;
+mod hornet;
 mod jawguard;
 mod justiciar;
 mod leechroot;
@@ -197,6 +198,7 @@ static BULWARK: Kit = bulwark::KIT;
 static DEMOLISHER: Kit = demolisher::KIT;
 static CROWCALLER: Kit = crowcaller::KIT;
 static TRIGGER: Kit = trigger::KIT;
+static HORNET: Kit = hornet::KIT;
 static MANTIS: Kit = mantis::KIT;
 static JAWGUARD: Kit = jawguard::KIT;
 static JUSTICIAR: Kit = justiciar::KIT;
@@ -251,6 +253,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Demolisher => Some(&DEMOLISHER),
         UnitKind::Crowcaller => Some(&CROWCALLER),
         UnitKind::Trigger => Some(&TRIGGER),
+        UnitKind::Hornet => Some(&HORNET),
         UnitKind::Mantis => Some(&MANTIS),
         UnitKind::Jawguard => Some(&JAWGUARD),
         UnitKind::Justiciar => Some(&JUSTICIAR),

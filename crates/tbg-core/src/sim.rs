@@ -142,6 +142,7 @@ impl MatchState {
             crate::roster_slots::tick_marks(self);
             crate::afflictions::tick(self, &mut ev);
             crate::roster_slots::tick_bleed(self, &mut ev);
+            crate::roster_slots::tick_venom(self, &mut ev);
             summon::expire(self);
             summon::hatch(self, &mut ev);
             crate::support::bonds(self);

@@ -297,6 +297,9 @@ fn cleanse(
     if strip > 0 && crate::roster_slots::cleanse_bleed(&mut u.fx) {
         strip -= 1;
     }
+    if strip > 0 && crate::roster_slots::cleanse_venom(&mut u.fx) {
+        strip -= 1;
+    }
     let mut order: Vec<usize> = (0..u.fx.poison.len()).collect();
     order.sort_by_key(|&k| (Reverse(u.fx.poison[k].value), u.fx.poison[k].left));
     for k in order.into_iter().take(usize::from(strip)) {

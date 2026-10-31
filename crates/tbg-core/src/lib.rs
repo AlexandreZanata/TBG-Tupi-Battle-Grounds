@@ -20,6 +20,7 @@ mod crowcaller;
 mod demolisher;
 pub mod headless;
 mod hits;
+mod hornet;
 mod intent;
 mod jawguard;
 mod justiciar;

@@ -113,6 +113,7 @@ pub(crate) fn resolve_hit(
     crate::acidmaw::completed(state, attacker, target, st, ev);
     crate::trigger::completed(state, attacker, target, st, ev);
     crate::crowcaller::completed(state, attacker, target, ev);
+    crate::hornet::completed(state, attacker, target, st, ev);
     #[cfg(feature = "lab")]
     if let Target::Unit(_) = target {
         crate::lab::dealt(state, attacker, removed);

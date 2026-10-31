@@ -65,6 +65,12 @@ pub(super) fn hostile(
     let alive = u.hp > 0;
     badge(
         commands,
+        &mut v.venom_badge,
+        (v.bar, &a.tier_cube, &a.marked, 0.81),
+        alive && u.effects.and_then(|e| e.venom).is_some(),
+    );
+    badge(
+        commands,
         &mut v.mark_badge,
         (v.bar, &a.tier_cube, &a.marked, -0.55),
         alive && v.marked,

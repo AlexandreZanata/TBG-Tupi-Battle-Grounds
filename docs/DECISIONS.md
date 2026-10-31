@@ -1900,3 +1900,25 @@ steps, alternate opposing cuts, confirmed crossed fourth stroke and folded death
 are per-kind motion over the fixed26 nodes. No simulated leap or invulnerability,
 new light, texture, per-unit material or dependency. Frozen base/form contracts
 append only §13 values. Source and public focus survive a reconnect snapshot.
+
+## D-85 · Hornet's separate third-sting venom — 2026-10-31 (Proposed)
+
+R18 appends the exact §13 Insects Ranged row and four forms. Every third completed
+enemy-unit primary spends its counter and applies one separate venom slot (5/6/7
+per pulse, four pulses20 ticks apart). Stronghold hits do not count or reset it;
+canceled windups do not count. Ward blocks a fresh application, not existing DoT;
+control immunity is unrelated. Equal/stronger refresh preserves the next pulse,
+restarts the count and records its source. Weaker refresh is ignored. Static
+source damage scales the pulse once at application; source death does not cancel
+it. Existing damage/reduction/shield handling applies without recursive on-hit.
+B adds attack speed1500bp then range400. Brew consumes bleed, then venom, then
+legacy stacks. The shared DoT helper preserves the existing bleed phase contract.
+No new simulation field, protocol tag, pool activation or balance gate change.
+
+Own five-form kit: banded wasp abdomen, opaque wing pairs, antennae, team back
+plate and aligned right-hand stinger. A adds luminous green sacs/pale thorax then
+long casing; B darkens the thorax/sweeps wings then adds fins. Ground movement and
+slow decorative wing hum never imply flight immunity. One cached stinger projectile
+leaves the real emitter; the public third-hit counter selects its green accent.
+A lazy shared green badge shows actual venom; no custom per-unit material, light,
+texture, dependency or physics. Frozen roster contracts append only §13 values.

@@ -255,7 +255,8 @@ Own library: `crates/tbg-client/src/art/kits/hornet/`.
 
 slender wasp abdomen, stinger-like ranged weapon, opaque faceted wing pairs and antennae; amber/black/moss with team abdomen plate. A2 green venom sacs and pale thorax, A3 long stinger casing. B2 swept wings/ dark thorax, B3 tall fin pair. Use painted thin geometry, no transparency or wing shadow light.
 
-Status: pending. Evidence: `docs/media/p59/hornet/lineup.jpg`.
+Status: implemented; targeted consolidation passed and actual desktop lineup
+observed. Evidence: `docs/media/p59/hornet/lineup.jpg`.
 
 ### R19 — Weaver
 

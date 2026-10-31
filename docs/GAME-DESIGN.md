@@ -1024,3 +1024,9 @@ shield-absorbed valid primary still consumes the charge; no second on-hit is run
 primary under the R16 primary-bonus reading. Changing target, including changing
 to a Stronghold, clears the sequence; a canceled same-target windup never advances
 or clears it. Idle time alone never expires it. Target death clears it.
+
+**R18 cleanse order — Proposed (D-85):** a Brew's limited DoT strip budget takes
+bleed first, Hornet's separate venom second, then existing poison stacks in their
+previous strongest-first order. Each removed family spends one strip. Ward blocks
+a new venom payload but never cancels an already applied DoT. Venom uses the same
+static-on-application pulse scaling and refresh phase contract as R07 bleed.
