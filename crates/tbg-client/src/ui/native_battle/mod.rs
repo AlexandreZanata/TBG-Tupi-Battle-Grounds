@@ -1,11 +1,18 @@
 //! Linux battle presentation, using the browser reference and authoritative views.
 
 mod arena;
+mod cards;
 pub(super) mod chrome;
 mod fortify;
 mod resources;
 mod score;
+mod unit_panel;
 
+pub(super) const SIDE_LEFT: f32 = 16.;
+pub(super) const SHOP_BOTTOM: f32 = 36.;
+pub(super) const SHOP_SCALE: f32 = 0.9;
+
+pub(super) use cards::spawn as cards;
 pub(super) use resources::spawn as resources;
 pub(super) use score::spawn as score;
 
@@ -16,6 +23,8 @@ pub(super) fn plugin(app: &mut App) {
     score::plugin(app);
     resources::plugin(app);
     fortify::plugin(app);
+    cards::plugin(app);
+    unit_panel::plugin(app);
 }
 
 pub(super) fn auxiliary_visible(hud: &super::hud::Hud, view: &tbg_core::MatchView) -> Option<bool> {

@@ -51,7 +51,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         .spawn((
             Node {
                 position_type: PositionType::Absolute,
-                left: px(16),
+                left: px(super::SIDE_LEFT),
                 top: px(PLATE_TOP),
                 width: px(252),
                 padding: UiRect::all(px(10)),

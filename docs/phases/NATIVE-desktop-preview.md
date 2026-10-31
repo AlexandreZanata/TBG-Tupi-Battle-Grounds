@@ -283,3 +283,29 @@ No full suite, WASM build or multiplayer campaign belongs to this front.
   remote push, CI wait or VPS action occurred. The owner's existing app
   windows, real preferences and unrelated policy edits were preserved.
   Reopen TBG to load this installation.
+
+## Linux champion inspection and compact Shop — 2026-10-31
+
+Owner requested the reference champion status design at the bottom left,
+sharing the Stronghold panel's left edge, and uniform gold Shop frames and
+coin/cost slots following the second reference. The Energy strip and all
+five cards use one 0.9 transform, including fonts and spacing; a matching
+translation keeps their previous bottom center anchor. The unscaled Shop
+width remains 862 units and card height 225 units. Champion inspection
+shares the side/bottom layout constants and keeps live Report statistics.
+The own-unit Evolution choices move into the same styled panel, preserving
+existing actions, costs and guards instead of leaving the old central UI.
+
+Level: work front. Affected formatting, frame export/format and diff checks,
+then the owner-requested native build/install under the existing shared
+lock/cache. The owner's wait/job-limit exceptions remain scoped to this
+chat. A debug unit-capture option queues the normal SelectUnit action for
+an actual own unit. No web assets or rule changes belong to this request.
+
+Deferred to consolidation: `cargo test -p tbg-client --bin tbg-client
+ui::inspect::tests -- --test-threads=1` and the existing `ui::evolve::tests`
+regressions. Native mouse/keyboard scenarios: champion selection/close,
+enemy/dead/summoned/evolved units, Evolution affordability and War Council,
+card buy/hold interactions under the scaled transform, Reroll, and resize
+at the supported desktop sizes. No full suite or other-target build runs
+on this front; these pending checks are not passing evidence.

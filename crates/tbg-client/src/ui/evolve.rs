@@ -3,10 +3,17 @@
 //! unit is gone.
 
 use bevy::prelude::*;
-use tbg_core::content::{def, form_of, FormDef, ENERGY_SCALE};
-use tbg_core::{OnHit, Phase, UnitId, UnitView};
+use tbg_core::content::{form_of, FormDef};
+#[cfg(any(not(target_os = "linux"), test))]
+use tbg_core::{
+    content::{def, ENERGY_SCALE},
+    UnitView,
+};
+use tbg_core::{OnHit, Phase, UnitId};
 
-use super::{button, label, UiAction, BUTTON, DISABLED, PANEL};
+use super::UiAction;
+#[cfg(any(not(target_os = "linux"), test))]
+use super::{button, label, BUTTON, DISABLED, PANEL};
 use crate::sync::LatestView;
 use crate::GameState;
 
@@ -14,23 +21,28 @@ use crate::GameState;
 pub struct Selected(pub Option<UnitId>);
 
 #[derive(Component)]
+#[cfg(any(not(target_os = "linux"), test))]
 struct EvolvePanel;
 
 #[derive(Component)]
+#[cfg(any(not(target_os = "linux"), test))]
 struct EvolutionChoice {
     unit: UnitId,
     branch: u8,
 }
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<Selected>().add_systems(
+    app.init_resource::<Selected>()
+        .add_systems(Update, drop_gone.run_if(in_state(GameState::InMatch)));
+    #[cfg(not(target_os = "linux"))]
+    app.add_systems(
         Update,
         (
-            drop_gone,
             rebuild.run_if(resource_changed::<Selected>),
             refresh_choices.run_if(resource_changed::<LatestView>),
         )
             .chain()
+            .after(drop_gone)
             .run_if(in_state(GameState::InMatch)),
     );
 }
@@ -44,6 +56,7 @@ fn drop_gone(mut selected: ResMut<Selected>, view: Res<LatestView>) {
     }
 }
 
+#[cfg(any(not(target_os = "linux"), test))]
 fn rebuild(
     mut commands: Commands,
     selected: Res<Selected>,
@@ -107,6 +120,7 @@ fn rebuild(
 }
 
 // Keep the same buttons while Energy regenerates or is spent in the Shop.
+#[cfg(any(not(target_os = "linux"), test))]
 fn refresh_choices(
     view: Res<LatestView>,
     mut choices: Query<(&EvolutionChoice, &mut UiAction, &mut BackgroundColor)>,
@@ -122,7 +136,7 @@ fn refresh_choices(
     }
 }
 
-fn choice_action(v: &tbg_core::MatchView, unit: UnitId, branch: u8) -> UiAction {
+pub(in crate::ui) fn choice_action(v: &tbg_core::MatchView, unit: UnitId, branch: u8) -> UiAction {
     let available = v.units.iter().any(|u| {
         u.id == unit
             && u.seat == v.you
@@ -140,6 +154,7 @@ fn choice_action(v: &tbg_core::MatchView, unit: UnitId, branch: u8) -> UiAction 
 }
 
 /// Branch choices: tier 0 → A and B; tier 1 → next form of its branch.
+#[cfg(any(not(target_os = "linux"), test))]
 fn options(u: &UnitView) -> Vec<(u8, String)> {
     let branches: Vec<u8> = match u.tier {
         0 => vec![0, 1],

@@ -42,6 +42,7 @@ def main():
       <path d="M14 5H846L855 14V30L846 39H14L5 30V14Z" fill="url(#b)"/>''')
     export('flag', 17, 19, '<path d="M3 1h2v17H3zM5 2l10 2-2 5-8-2z" fill="#e45b5b"/>')
     towers()
+    shop_card()
 
 
 def towers():
@@ -51,6 +52,20 @@ def towers():
     for symbol in sprite.findall(ns + 'symbol'):
         body = definitions + ''.join(ET.tostring(child, encoding='unicode') for child in symbol)
         export('tower-' + symbol.attrib['id'].removeprefix('sh-'), 120, 150, body)
+
+
+def shop_card():
+    export('shop-card', 166, 224, '''
+      <defs><linearGradient id="card" x2=".7" y2="1"><stop stop-color="#203647"/><stop offset=".5" stop-color="#142029"/><stop offset="1" stop-color="#091522"/></linearGradient>
+      <linearGradient id="gold" x2="1" y2="1"><stop stop-color="#f7da87"/><stop offset=".5" stop-color="#c79d43"/><stop offset="1" stop-color="#f6d878"/></linearGradient>
+      <linearGradient id="cost" x2="0" y2="1"><stop stop-color="#1e3244"/><stop offset="1" stop-color="#07111c"/></linearGradient></defs>
+      <rect x="2" y="2" width="162" height="220" rx="10" fill="url(#card)" stroke="#07101a" stroke-width="4"/>
+      <path d="M4 8L10 3H156L163 10V214L156 221H10L3 214V10Z" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+      <path d="M7 17L17 7H149L159 17V207L149 217H17L7 207Z" fill="none" stroke="#e4bc57" stroke-width="1"/>
+      <path d="M9 9h10L9 19ZM157 9h-10l10 10ZM9 215h10L9 205ZM157 215h-10l10-10Z" fill="none" stroke="#e4bc57" stroke-width="1"/>
+      <path d="M10 190H156L160 195V211L153 218H13L6 211V195Z" fill="url(#cost)" stroke="#c8a66a" stroke-width="1"/>
+      <path d="M11 187H155" stroke="#597586" stroke-opacity=".5"/>
+      <path d="M10 20L76 9H151L10 153Z" fill="#456780" opacity=".07"/>''')
 
 
 if __name__ == '__main__':

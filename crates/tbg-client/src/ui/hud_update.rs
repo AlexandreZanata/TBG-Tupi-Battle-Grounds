@@ -10,6 +10,7 @@ use tbg_core::{MatchView, Phase};
 use super::hud::Hud;
 use super::{PendingBuy, BUTTON, DISABLED};
 use crate::sync::LatestView;
+#[cfg(not(target_os = "linux"))]
 use crate::visuals::assets::FACTION_COLORS;
 
 pub(super) fn update(
@@ -59,6 +60,7 @@ pub(super) fn update(
     }
     for (hud, mut color) in &mut colors {
         match hud {
+            #[cfg(not(target_os = "linux"))]
             Hud::Card(i) => {
                 color.0 = if buyable(v, *i)
                     && pending
@@ -70,6 +72,7 @@ pub(super) fn update(
                     DISABLED
                 }
             }
+            #[cfg(not(target_os = "linux"))]
             Hud::CardStrip(i) => {
                 let c = FACTION_COLORS[def(v.offers[*i]).faction.index()];
                 color.0 = Color::srgb_u8(c[0], c[1], c[2]);
@@ -109,6 +112,7 @@ pub(super) fn update(
                 info_state.you_name, info_state.opponent, v.spectators
             ),
             Hud::Info => info(v),
+            #[cfg(not(target_os = "linux"))]
             Hud::CardText(i) => {
                 let d = def(v.offers[*i]);
                 format!(

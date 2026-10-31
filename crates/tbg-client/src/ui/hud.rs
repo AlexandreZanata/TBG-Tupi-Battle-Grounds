@@ -21,8 +21,11 @@ pub(super) enum Hud {
     Portrait(usize),
     EnergyFill,
     Info,
+    #[cfg(not(target_os = "linux"))]
     Card(usize),
+    #[cfg(not(target_os = "linux"))]
     CardText(usize),
+    #[cfg(not(target_os = "linux"))]
     CardStrip(usize),
     Augments,
     CouncilStatus,
@@ -103,6 +106,7 @@ pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bund
     )
 }
 
+#[cfg(not(target_os = "linux"))]
 fn card(i: usize, narrow: bool) -> impl Bundle {
     (
         Node {
@@ -258,7 +262,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>)
             root.spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    bottom: px(36),
+                    bottom: px(super::native_battle::SHOP_BOTTOM),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     row_gap: px(6),
@@ -287,23 +291,25 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, assets: Res<AssetServer>)
                         forgo_card()
                     ],
                 ));
-                shop.spawn(Node {
-                    flex_direction: FlexDirection::Column,
-                    row_gap: px(10),
-                    ..default()
-                })
+                shop.spawn((
+                    Node {
+                        width: px(862),
+                        flex_direction: FlexDirection::Column,
+                        row_gap: px(10),
+                        ..default()
+                    },
+                    UiTransform {
+                        scale: Vec2::splat(super::native_battle::SHOP_SCALE),
+                        translation: Val2::percent(
+                            0.,
+                            (1. - super::native_battle::SHOP_SCALE) * 50.,
+                        ),
+                        ..default()
+                    },
+                ))
                 .with_children(|bottom| {
                     super::native_battle::resources(bottom, &assets);
-                    bottom.spawn((
-                        row(8.),
-                        children![
-                            card(0, false),
-                            card(1, false),
-                            card(2, false),
-                            card(3, false),
-                            card(4, false)
-                        ],
-                    ));
+                    super::native_battle::cards(bottom, &assets);
                 });
             });
             root.spawn((

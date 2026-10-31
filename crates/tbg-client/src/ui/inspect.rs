@@ -9,6 +9,7 @@ use tbg_core::content::{def, form_of, TICK_HZ};
 use tbg_core::{ArcanaPreset, Ruleset};
 use tbg_core::{MatchView, OnHit, UnitId};
 
+#[cfg(not(target_os = "linux"))]
 use super::{label, UiAction, PANEL};
 use crate::sync::LatestView;
 use crate::GameState;
@@ -153,20 +154,24 @@ impl Report {
 }
 
 #[derive(Component)]
+#[cfg(not(target_os = "linux"))]
 struct InspectPanel;
 
 #[derive(Component)]
+#[cfg(not(target_os = "linux"))]
 struct InspectText;
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<Inspected>()
         .add_systems(OnExit(GameState::InMatch), clear)
-        .add_systems(
-            Update,
-            (drop_gone, fallback_panel)
-                .chain()
-                .run_if(in_state(GameState::InMatch)),
-        );
+        .add_systems(Update, drop_gone.run_if(in_state(GameState::InMatch)));
+    #[cfg(not(target_os = "linux"))]
+    app.add_systems(
+        Update,
+        fallback_panel
+            .after(drop_gone)
+            .run_if(in_state(GameState::InMatch)),
+    );
 }
 
 fn clear(mut inspected: ResMut<Inspected>) {
@@ -184,6 +189,7 @@ fn drop_gone(mut inspected: ResMut<Inspected>, view: Res<LatestView>) {
 }
 
 /// Text panel for screens without the HTML battle layer (phones, native).
+#[cfg(not(target_os = "linux"))]
 fn fallback_panel(
     mut commands: Commands,
     inspected: Res<Inspected>,

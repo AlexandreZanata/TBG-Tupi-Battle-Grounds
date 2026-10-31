@@ -17,6 +17,13 @@ pub fn plugin(app: &mut App) {
                 },
             );
         }
+        #[cfg(target_os = "linux")]
+        if crate::config::url_param("capture_panel").as_deref() == Some("unit") {
+            app.add_systems(
+                Update,
+                select_unit.run_if(in_state(crate::GameState::InMatch)),
+            );
+        }
     }
 }
 
@@ -26,6 +33,7 @@ fn capture(
     state: Res<State<crate::GameState>>,
     #[cfg(target_os = "linux")] view: Res<crate::sync::LatestView>,
     #[cfg(target_os = "linux")] tower: Res<crate::ui::fortify::TowerOpen>,
+    #[cfg(target_os = "linux")] inspected: Res<crate::ui::inspect::Inspected>,
     mut started: Local<bool>,
 ) {
     let delay = crate::config::url_param("capture_after")
@@ -42,6 +50,11 @@ fn capture(
     #[cfg(target_os = "linux")]
     {
         if crate::config::url_param("capture_panel").as_deref() == Some("fortify") && !tower.0 {
+            return;
+        }
+        if crate::config::url_param("capture_panel").as_deref() == Some("unit")
+            && inspected.0.is_none()
+        {
             return;
         }
         // Capture actual match phases instead of racing startup/loading time.
@@ -66,4 +79,24 @@ fn capture(
                 exit.write(AppExit::Success);
             },
         );
+}
+
+#[cfg(target_os = "linux")]
+fn select_unit(
+    view: Res<crate::sync::LatestView>,
+    mut actions: ResMut<crate::ui::ActionQueue>,
+    mut done: Local<bool>,
+) {
+    if *done {
+        return;
+    }
+    let Some(v) = &view.0 else { return };
+    if let Some(unit) = v
+        .units
+        .iter()
+        .find(|unit| unit.seat == v.you && !unit.is_summon())
+    {
+        actions.0.push(crate::ui::UiAction::SelectUnit(unit.id));
+        *done = true;
+    }
 }
