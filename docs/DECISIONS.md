@@ -1063,3 +1063,15 @@ nothing that a seat does not already see, so no delay is needed.
 **Reopen when** spectator load breaks the budgets in P47 (2 000 spectators
 at 250 matches), a listed match leaks private state, or the owner wants
 rooms, challenges or ranked watching to stay private as well.
+
+
+## D-60 · Crowd separation is presentation — 2026-10-31 (owner request)
+
+**Decision.** Display offsets separate bodies in the desktop client. The
+simulation remains authoritative and one-dimensional; offsets never feed
+back into targeting, combat, views or the server. `?crowd=0` restores the
+original display for comparison. Frontage and a gameplay Ghost ability need
+a separate owner decision and a preview balance gate.
+**Why.** Improve readable formations without adding server work or changing
+competitive rules. **Reopen** if bounded cosmetic offsets prove misleading
+or the owner approves collision as a gameplay mechanic.
