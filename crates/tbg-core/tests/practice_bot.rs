@@ -41,3 +41,15 @@ fn assistance_is_local_exact_and_frozen_during_selection() {
         );
     }
 }
+
+#[test]
+fn impossible_matches_each_actual_regen_gain_including_the_running_transition() {
+    let mut state = MatchState::new(13).with_arena(tbg_core::Arena::Storm);
+    let mut bot = PracticeBot::new(13, 3);
+    for _ in 0..300 {
+        let energy = state.players[1].energy;
+        let bonus = bot.regen_bonus(&state);
+        state.step();
+        assert_eq!(bonus, state.players[1].energy - energy);
+    }
+}

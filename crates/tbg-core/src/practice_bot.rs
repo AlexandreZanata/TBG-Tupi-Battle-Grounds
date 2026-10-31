@@ -132,7 +132,9 @@ impl PracticeBot {
     /// Only a caller-owned local Practice state receives this disclosed assistance.
     /// Compute before step, apply after step: identical pre-regen Interest and arena rate.
     pub fn regen_bonus(&mut self, state: &MatchState) -> u32 {
-        if self.difficulty != 3 || state.phase != Phase::Running || state.augments.selecting() {
+        let regenerates = state.phase == Phase::Running
+            || (state.phase == Phase::Countdown && state.tick == crate::content::RUNNING_START);
+        if self.difficulty != 3 || !regenerates || state.augments.selecting() {
             return 0;
         }
         let rules = state.rules();

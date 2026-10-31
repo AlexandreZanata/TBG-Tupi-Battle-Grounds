@@ -102,3 +102,9 @@ Native validation alone never establishes browser compatibility.
 Local logs/captures, databases, packages and build directories are ignored;
 they are not part of the PR. Final browser, native package and deployment
 observations are appended after the remaining release checks.
+
+The Impossible credit is calculated from the pre-step Interest/arena rate and
+applied after the canonical step. The Countdown-to-Running transition receives
+its matching credit only when core regeneration begins; prior Countdown ticks
+and Council selection produce none. A dedicated regression compares every
+credit with actual canonical Energy gains through that transition.
