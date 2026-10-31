@@ -819,3 +819,38 @@ interaction, fullscreen transitions, authenticated key/logout actions,
 settings persistence after real interactions and resize coverage to
 consolidation. No Rust suite, full workspace validation, other-target
 build, web assets change, remote Git, CI or deployment is requested.
+
+### Settings polish result
+
+- Installed source: `c46496a956fe34ef73baa90f8d02add13ead360d`;
+  UI implementation: `101a52f`. Native
+  `cargo build --locked -p tbg-client --bin tbg-client`, Linux packaging
+  with `--no-archive` and the generated installer passed under the shared
+  host lock/cache and `CARGO_BUILD_JOBS=2`. Initial compilation took 6.48 s
+  and warned ``unused import: `button` ``; scoping the legacy import to
+  other targets removed it. Final compilation took 1.99 s with no warnings
+  or errors. Waiting for the active front used the owner's chat exception.
+- Affected-package formatting, `git diff --check`,
+  `desktop-file-validate`, installed source metadata and executable/cache/
+  manifest SHA-256 comparison passed. The local preview pointer now records
+  the installed source. No images, dependencies or game rules changed.
+- Inspected `.local/settings-polish-default.webp` at 1920x972 in
+  Portuguese: four aligned sections, compact controls, visible selected
+  language, enabled sound/VSync/shadows and the 100% volume meter. Inspected
+  `.local/settings-polish-alternate.webp` in English with an isolated
+  preference file: selected English and 50% preset, half-filled volume
+  meter, and sound/VSync/shadows OFF all match the actual loaded settings.
+  Both views retain the common header and footer; labels fit their controls.
+- Captures were produced from `101a52f`; the final source changes only
+  import configuration, so this visual evidence was reused without another
+  gallery run. Captures exited successfully with expected virtual X11
+  XSETTINGS/physical-dimension warnings only. The localhost server override
+  and separate data directories preserved the owner's real preferences,
+  account data and existing app windows.
+- These are visual/state-loading checks, not physical input or persistence
+  interaction tests. Pointer/keyboard toggles, authenticated key/logout
+  actions, fullscreen changes, persistence after interactions and window
+  resizing remain deferred to consolidation. No Rust test suite, full
+  workspace validation, WASM/Trunk build, web behavior/assets replacement,
+  remote Git, CI wait or deployment ran. Unrelated policy files remain
+  unstaged. Reopen TBG to load the installed Settings redesign.
