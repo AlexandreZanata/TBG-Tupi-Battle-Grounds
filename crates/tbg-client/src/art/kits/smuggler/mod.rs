@@ -1,7 +1,4 @@
-//! Smuggler kit: no basic attack; a shifty idle with darting glances, a
-//! sneaking walk, and a toss whenever one of his crates lands (`Cast`,
-//! cued from the crate's spawn in `sync/actions.rs`). He pops in as if out
-//! of a crate.
+//! Smuggler: a one-handed revolver, a shoulder crate and a torso-only rear placement gesture.
 
 mod model;
 
@@ -11,16 +8,25 @@ use super::common::{moves, moves::*, Form};
 use super::{tools, Attack, Gait, Kit, Moment};
 use crate::art::{
     anim::{Clip, Pose},
-    rig::{Joint, Proportions},
+    rig::{Joint, Node, Socket},
 };
-use crate::vfx::impacts::Burst;
+use crate::vfx::{
+    impacts::{Burst, Muzzle},
+    shots::ShotKind,
+};
 use model::plan;
 
 pub const KIT: Kit = Kit {
     figure: model::spec,
     pose,
     gait: Gait::LIGHT,
-    attack: Attack::None,
+    attack: Attack::Shot {
+        from: Node::Prop(Socket::WeaponR),
+        muzzle: |_, _| Vec3::new(0.0, 0.04, 0.30),
+        loaded: None,
+        shot: |_, _| ShotKind::Bullet,
+        flash: |_, _| Some((Muzzle::Bolt, None)),
+    },
     evolve: Burst::Valor,
     durations: moves::DURATIONS,
 };
@@ -31,20 +37,28 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
     match m.clip {
         Clip::Idle => {
             moves::idle(m, pose, &p, 0.1);
-            // Darting glances and a coin flipped in the right hand.
+            // Darting glances; the pistol rests near the holster.
             let glance = (m.clock * 0.9).sin().signum() * tools::wave(m.clock, 0.5, 3.0).abs();
             tools::add(pose, Joint::Head, [0.0, 35.0 * glance, 0.0]);
-            let flip = ((m.clock * 2.0).sin() * 0.5 + 0.5).powi(3);
-            tools::set(pose, Joint::UpperArmR, [-25.0, 0.0, -10.0]);
-            tools::set(pose, Joint::ForearmR, [-80.0 - 20.0 * flip, 0.0, 0.0]);
-            hands_on_hip(pose, &p);
+            tools::set(pose, Joint::UpperArmR, [5.0, 0.0, -10.0]);
+            tools::set(pose, Joint::ForearmR, [-15.0, 0.0, 0.0]);
         }
         Clip::Walk => {
             // A sneaking lean; the runner branch leans harder.
             let lean = if f.b { 14.0 } else { 9.0 };
             moves::walk(m, pose, lean, 4.0);
         }
-        Clip::Cast => moves::toss(m, pose, &p),
+        Clip::Cast => {
+            let recoil = tools::hold(m.t, [0.20, 0.22, 0.25, 0.32]);
+            tools::reach(
+                pose,
+                false,
+                Vec3::new(-0.18, 0.20, 0.42 - recoil * 0.06),
+                Some(Quat::from_rotation_x((-8.0 * recoil).to_radians())),
+                (&p, Vec3::new(-1.0, -0.4, -0.4)),
+            );
+            tools::face(pose, m.aim, Vec3::ZERO);
+        }
         Clip::Hit => moves::hit(m, pose, 1.0),
         Clip::Death => moves::death(m, pose, &p, Fall::Forward),
         Clip::Spawn => moves::spawn(m, pose, &p, Entry::Pop),
@@ -52,15 +66,14 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         Clip::Victory => moves::victory(m, pose, &p, Cheer::Dance),
         _ => {}
     }
-}
-
-/// Left fist on the hip.
-fn hands_on_hip(pose: &mut Pose, p: &Proportions) {
+    // Carry and lower with the free arm: the leg walk and pistol arm remain independent.
+    let drop = tools::hold(m.gesture, [0.0, 0.14, 0.35, 0.6]);
     tools::reach(
         pose,
         true,
-        Vec3::new(0.2, -0.02, 0.04),
+        Vec3::new(0.20, 0.30 - 0.50 * drop, -0.12 - 0.18 * drop),
         None,
-        (p, Vec3::new(1.0, 0.0, -0.5)),
+        (&p, Vec3::new(1.0, -0.6, -0.6)),
     );
+    tools::add(pose, Joint::Chest, [10.0 * drop, -12.0 * drop, 0.0]);
 }

@@ -54,9 +54,10 @@ pub(super) fn apply(
         ResMut<crate::sync::RematchInfo>,
     ),
     mut account: ResMut<Account>,
-    (mut surrender, mut fortifying): (
+    (mut surrender, mut fortifying, mut tower_open): (
         ResMut<super::surrender::Surrender>,
         ResMut<super::fortify::PendingFortify>,
+        ResMut<super::fortify::TowerOpen>,
     ),
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
@@ -78,7 +79,10 @@ pub(super) fn apply(
         if paused
             && matches!(
                 action,
-                UiAction::Buy(_)
+                UiAction::Reserve { .. }
+                    | UiAction::Release(_)
+                    | UiAction::Reroll
+                    | UiAction::Buy(_)
                     | UiAction::Evolve { .. }
                     | UiAction::SelectUnit(_)
                     | UiAction::Fortify(_)
@@ -91,6 +95,7 @@ pub(super) fn apply(
             UiAction::Disabled
                 | UiAction::CloseEvolve
                 | UiAction::SelectUnit(_)
+                | UiAction::SelectTower
                 | UiAction::Deselect
                 | UiAction::CloseInspect
         ) {
@@ -231,7 +236,38 @@ pub(super) fn apply(
                     }
                 }
             }
+            UiAction::Reserve { offer, .. } | UiAction::Release(offer) => {
+                if pending.0.is_some() {
+                    continue;
+                }
+                let intent = match action {
+                    UiAction::Reserve { kind, .. } => PlayerIntention::Reserve { offer, kind },
+                    _ => PlayerIntention::Release { offer },
+                };
+                seq.0 += 1;
+                link.send(ClientMsg::Intent { seq: seq.0, intent }, now);
+                pending.0 = Some((u8::MAX, seq.0));
+            }
+            UiAction::Reroll => {
+                if pending.0.is_some() {
+                    continue;
+                }
+                if let Some(cost) = extra.0 .0.as_ref().and_then(|v| v.reroll_cost) {
+                    seq.0 += 1;
+                    link.send(
+                        ClientMsg::Intent {
+                            seq: seq.0,
+                            intent: PlayerIntention::Reroll { cost },
+                        },
+                        now,
+                    );
+                    pending.0 = Some((u8::MAX, seq.0));
+                }
+            }
             UiAction::Buy(offer) => {
+                if pending.0.is_some_and(|(slot, _)| slot == u8::MAX) {
+                    continue;
+                }
                 seq.0 += 1;
                 link.send(
                     ClientMsg::Intent {
@@ -242,7 +278,14 @@ pub(super) fn apply(
                 );
                 pending.0 = Some((offer, seq.0));
             }
+            // Your Stronghold behaves like a unit: its panel replaces the other one.
+            UiAction::SelectTower => {
+                inspected.0 = None;
+                selected.0 = None;
+                tower_open.0 = true;
+            }
             UiAction::SelectUnit(id) => {
+                tower_open.0 = false;
                 inspected.0 = Some(id);
                 // Evolution only for own units; enemies just show their status.
                 let own = extra
@@ -282,6 +325,7 @@ pub(super) fn apply(
             UiAction::Deselect => {
                 selected.0 = None;
                 inspected.0 = None;
+                tower_open.0 = false;
             }
             UiAction::CloseInspect => inspected.0 = None,
             UiAction::Inspect(offer) => {

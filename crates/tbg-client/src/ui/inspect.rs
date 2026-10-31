@@ -283,27 +283,12 @@ mod tests {
     }
 
     #[test]
-    fn selection_lifecycle_select_switch_deselect_and_unit_death() {
+    fn selection_clears_when_the_unit_dies_and_when_the_match_ends() {
         let mut app = bevy::app::App::new();
         app.init_resource::<super::Inspected>();
         app.init_resource::<crate::sync::LatestView>();
 
-        // 1. Initial state: nothing selected
-        assert_eq!(app.world().resource::<super::Inspected>().0, None);
-
-        // 2. Select unit 42
-        app.world_mut().resource_mut::<super::Inspected>().0 = Some(42);
-        assert_eq!(app.world().resource::<super::Inspected>().0, Some(42));
-
-        // 3. Switch selection to unit 99
-        app.world_mut().resource_mut::<super::Inspected>().0 = Some(99);
-        assert_eq!(app.world().resource::<super::Inspected>().0, Some(99));
-
-        // 4. Click outside: Deselect clears selection
-        app.world_mut().resource_mut::<super::Inspected>().0 = None;
-        assert_eq!(app.world().resource::<super::Inspected>().0, None);
-
-        // 5. Select unit 42 again and simulate death / removal from LatestView
+        // Select unit 42, then simulate its death / removal from LatestView
         app.world_mut().resource_mut::<super::Inspected>().0 = Some(42);
         let mut s = MatchState::new(5);
         while s.phase != Phase::Running {

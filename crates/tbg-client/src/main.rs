@@ -12,6 +12,7 @@ mod audio;
 mod autoplay;
 mod camera;
 mod config;
+mod crowd;
 mod gallery;
 mod i18n;
 mod link;

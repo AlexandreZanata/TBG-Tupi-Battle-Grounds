@@ -22,5 +22,10 @@ pub fn rejection(lang: Lang, reason: tbg_core::Rejection) -> &'static str {
         tbg_core::Rejection::BadOption => Msg::RejectionBadOption,
         tbg_core::Rejection::Unavailable => Msg::RejectionUnavailable,
         tbg_core::Rejection::Paused => Msg::RejectionPaused,
+        tbg_core::Rejection::StaleOffer => Msg::RejectionStaleOffer,
+        tbg_core::Rejection::ReserveFull => Msg::RejectionReserveFull,
+        tbg_core::Rejection::AlreadyHeld => Msg::RejectionAlreadyHeld,
+        tbg_core::Rejection::NoReserve => Msg::RejectionNoReserve,
+        tbg_core::Rejection::StalePrice => Msg::RejectionStalePrice,
     })
 }

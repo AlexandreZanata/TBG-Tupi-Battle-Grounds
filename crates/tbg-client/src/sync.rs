@@ -14,6 +14,7 @@ use crate::vfx::VfxAssets;
 use crate::visuals::{self, UnitLook, VisualAssets};
 
 mod actions;
+pub(crate) mod crowd_ecs;
 mod events;
 mod messages;
 mod spectate;
@@ -90,11 +91,26 @@ pub fn plugin(app: &mut App) {
         .init_resource::<MatchStats>()
         .init_resource::<ViewGaps>()
         .init_resource::<crate::art::aim::ImpactRing>()
+        .init_resource::<crate::visuals::mount::Mounts>()
         .add_systems(Update, poll_link)
         .add_systems(
             Update,
             sync_units
                 .after(poll_link)
+                .run_if(in_state(GameState::InMatch)),
+        )
+        .add_systems(
+            Update,
+            crowd_ecs::update
+                .after(sync_units)
+                .after(crate::stress::walk)
+                .before(visuals::aim::update_aim),
+        )
+        .add_systems(
+            Update,
+            crate::visuals::mount::passengers
+                .after(crowd_ecs::update)
+                .before(visuals::aim::update_aim)
                 .run_if(in_state(GameState::InMatch)),
         )
         .add_systems(OnExit(GameState::InMatch), clear_units);
@@ -107,10 +123,6 @@ pub fn world_x(x: i32, you: Seat) -> f32 {
         Seat::A => t,
         Seat::B => LANE_LEN as f32 / 1000.0 - t,
     }
-}
-
-fn lane_z(id: UnitId) -> f32 {
-    [-0.8, 0.0, 0.8][(id % 3) as usize]
 }
 
 #[allow(clippy::too_many_arguments)] // the one system that turns views into the scene
@@ -184,18 +196,19 @@ impl Scene<'_, '_, '_, '_, '_> {
     fn place(&mut self, from: &MatchView, to: &MatchView, alpha: f32) -> (Seat, Vec<UnitId>) {
         let you = from.you;
         for u in &from.units {
+            let anchor = crowd_ecs::LaneAnchor::from_view(u, you);
             // A unit absent from the next view (it died) holds its position.
             let to_x = to.units.iter().find(|n| n.id == u.id).map_or(u.x, |n| n.x);
             let x = u.x as f32 + (to_x - u.x) as f32 * alpha;
-            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, lane_z(u.id));
+            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, 0.0);
             match self
                 .map
                 .0
                 .get(&u.id)
                 .and_then(|e| self.visuals.get_mut(*e).ok())
             {
-                Some((mut v, mut t, _)) => {
-                    t.translation = pos;
+                Some((mut v, _, mut anim)) => {
+                    anim.carried = u.is_carried();
                     visuals::update_unit_visual(self.commands, self.assets, self.lib, &mut v, u);
                 }
                 None => {
@@ -208,16 +221,29 @@ impl Scene<'_, '_, '_, '_, '_> {
                     };
                     let e =
                         visuals::spawn_unit_visual(self.commands, self.assets, self.lib, look, pos);
+                    self.commands
+                        .entity(e)
+                        .insert(crowd_ecs::CrowdState::default());
                     self.map.0.insert(u.id, e);
                 }
+            }
+            if let Some(e) = self.map.0.get(&u.id) {
+                self.commands
+                    .entity(*e)
+                    .insert(crowd_ecs::LaneAnchor { pos, ..anchor });
             }
         }
         (you, from.units.iter().map(|u| u.id).collect())
     }
 }
 
-fn clear_units(mut commands: Commands, mut map: ResMut<UnitEntities>) {
+fn clear_units(
+    mut commands: Commands,
+    mut map: ResMut<UnitEntities>,
+    mut mounts: ResMut<crate::visuals::mount::Mounts>,
+) {
     for (_, e) in map.0.drain() {
         commands.entity(e).try_despawn();
     }
+    mounts.clear();
 }

@@ -247,7 +247,7 @@ tables are the one allowed exception.
   browser accepts `?lag=MS` to feel added latency.
 - **Bandwidth (hypothesis):** about 400 B per view → about 4 KB/s down and
   under 0.5 KB/s up per player; about 2 MB per 4-minute match for both.
-- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §13):**
+- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §14):**
   `Spectate{id}` and `StopSpectating` (client) and `SpectateStart`,
   `SpectatorView(PublicView)`, `SpectateUnavailable{reason}`,
   `SpectateEnd{outcome}` (server) are appended to the enums. Public
@@ -639,3 +639,25 @@ rules and values, D-34–D-38 the reasons, each phase file the exact steps.
 - **Budgets.** Step time ≤ +10 % at 100 units a side over P16-B; view
   growth of tens of bytes; per-match memory under 1 KB more; measured in
   every phase and re-checked under load in P16-F8.
+
+
+### Shop preview staging (D-69, 2026-10-31)
+
+Reserve/Release/Reroll append to PlayerIntention and Rejection. CANON.shop
+is None; only local Practice and explicit lab policies enable them. Private
+Shop state is serialized inside MatchState for deterministic replay/hash
+identity. The three preview-only MatchView fields are skipped by serde,
+so the existing v20 online View layout stays intact until activation.
+The owner checkpoint removes those skips and bumps the protocol together.
+PublicView contains no Shop fields. The desktop disables every card and
+Shop action until the previous Shop mutation is acknowledged or rejected.
+
+
+### Ability display follow-up (champion adjustments, 2026-10-31)
+
+UnitView keeps its existing shape; fx now packs the preallocated plate,
+growth and carrier display bits. Nester uses the growth field for timer
+maturity; Leechroot saturates its visible stack display at seven without
+capping simulation Essence. Shatterback's four outer plates are cached per
+form and rendered as separate children so one can detach without replacing
+the whole model. Crowd reads carrier state and remains presentation only.

@@ -5,9 +5,12 @@
 
 use crate::arcana::ArcanaValues;
 use crate::ruleset::CANON;
-use crate::types::{Archetype, Faction, OnHit, StrongholdKind, Tick, UnitKind};
+use crate::types::{Archetype, Faction, OnHit, StrongholdKind, Tick, UnitKind, FACTION_COUNT};
 
 pub const TICK_HZ: u32 = 20;
+/// Proposed: crates are placed 0.4 tile behind their carrier.
+pub const CRATE_DROP_BACK: i32 = 400;
+
 pub const LANE_LEN: i32 = 16_000;
 pub const SPAWN_OFFSET: i32 = 500;
 
@@ -265,14 +268,20 @@ pub enum SynergyEffect {
     Damage,
     /// Heal this many bp of max HP every `REGEN_PERIOD` ticks.
     Regen,
+    /// Move speed in bp; it joins the move bonuses under their 5 000 bp cap (D-64).
+    Movement,
 }
 
 /// Per faction (index order): the effect and its bp at level 1 and 2.
-pub const SYNERGIES: [(SynergyEffect, [i32; 2]); 4] = [
+pub const SYNERGIES: [(SynergyEffect, [i32; 2]); FACTION_COUNT] = [
     (SynergyEffect::MaxHp, [2_000, 4_000]),
     (SynergyEffect::AttackSpeed, [2_000, 4_000]),
     (SynergyEffect::Damage, [500, 2_000]),
     (SynergyEffect::Regen, [75, 200]),
+    // D-64 (P58 §13.5): Monsters damage, Celestials max HP, Insects movement.
+    (SynergyEffect::Damage, [500, 1_000]),
+    (SynergyEffect::MaxHp, [500, 1_000]),
+    (SynergyEffect::Movement, [500, 1_000]),
 ];
 
 /// One evolution form: additive modifiers on the base unit, plus the shared
@@ -429,10 +438,10 @@ pub enum Ability {
         burn_bp: u16,
         max_bp: u16,
     },
-    Transfer {
-        amount: u16,
+    Siphon {
+        heal_bp: u16,
         low_bp: u16,
-        second: bool,
+        split: bool,
     },
 }
 
@@ -512,9 +521,17 @@ const fn unit(
 use Archetype::*;
 use Faction::*;
 
-/// Every kind, in `UnitKind` (`ALL_KINDS`) order.
+/// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
+/// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
+pub const UNIT_KIND_COUNT: usize = 31;
+
+/// One row per kind (see `UNIT_KIND_COUNT`).
+// ponytail: `CANON` copies this table by value, so it stays a const. The lint's
+// static suggestion needs a slice reference, which the lab's owned variant
+// rulesets cannot take yet.
+#[allow(clippy::large_const_arrays)]
 #[rustfmt::skip]
-pub const UNITS: [UnitDef; 27] = [
+pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::Shieldbearer, "Shieldbearer", Humans, Tank, 2_400,
         [650, 30, 24, 800, 40, 0, 0], None, NO_ABILITIES, [
         FormDef { hp_bp: 5_000, ..form("Bulwark") },
@@ -573,7 +590,7 @@ pub const UNITS: [UnitDef; 27] = [
     ]),
     // P16-B (D-32, Proposed). Nester forms only change Hatch (`hatch_rule`).
     unit(UnitKind::Nester, "Nester", Plants, Support, 2_400,
-        [300, 15, 30, 2_500, 40, 0, 0], None, HATCH_ABILITIES, [
+        [300, 15, 30, 3_000, 40, 0, 0], None, HATCH_ABILITIES, [
         form("Brood"), form("Hive"), form("Venom"), form("Blight"),
     ]),
     unit(UnitKind::Rampart, "Rampart", Machines, Tank, 3_600,
@@ -594,7 +611,7 @@ pub const UNITS: [UnitDef; 27] = [
     // P44 (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave A. Not in the
     // Shop pool until the P53 owner switch.
     unit(UnitKind::Longaxe, "Longaxe", Humans, Dps, 2_400,
-        [360, 100, 48, 1_600, 35, 0, 0], None, NO_ABILITIES, [
+        [360, 100, 48, 3_000, 35, 0, 0], None, NO_ABILITIES, [
         FormDef { dmg_bp: 3_000, ..form("Deep Cut") },
         FormDef { dmg_bp: 3_000, vs_above_bp: 3_000, vs_above_hp_bp: 6_000, ..form("Crushing Edge") },
         FormDef { splash_add: 800, splash_bp: 4_000, ..form("Sweeping Arc") },
@@ -630,7 +647,7 @@ pub const UNITS: [UnitDef; 27] = [
         form("Toxic Rain"),
     ]),
     unit(UnitKind::OldFinn, "Old Finn", Humans, Control, 1_800,
-        [240, 8, 40, 3_500, 45, 0, 0], None, [
+        [240, 8, 40, 5_250, 45, 0, 0], None, [
         [Ability::Fish { bp: 1_500, ticks: 100, cap: 3, per_hit: 1 }, Ability::None],
         [Ability::Fish { bp: 2_000, ticks: 100, cap: 3, per_hit: 1 }, Ability::None],
         [Ability::Fish { bp: 2_000, ticks: 100, cap: 3, per_hit: 2 }, Ability::None],
@@ -671,7 +688,7 @@ pub const UNITS: [UnitDef; 27] = [
         form("Rampage"),
     ]),
     unit(UnitKind::BloodFurnace, "Blood Furnace", Undead, Dps, 2_400,
-        [440, 36, 36, 800, 45, 0, 0], None, [
+        [440, 36, 30, 800, 54, 0, 0], None, [
         [Ability::Furnace { burn_bp: 600, max_bp: 30_000 }, Ability::None],
         [Ability::Furnace { burn_bp: 600, max_bp: 35_000 }, Ability::None],
         [Ability::Furnace { burn_bp: 600, max_bp: 45_000 }, Ability::None],
@@ -684,14 +701,14 @@ pub const UNITS: [UnitDef; 27] = [
         form("Eternal Embers"),
     ]),
     unit(UnitKind::Bloodweaver, "Bloodweaver", Undead, Support, 1_800,
-        [300, 0, 100, 3_000, 45, 0, 0], None, [
-        [Ability::Transfer { amount: 120, low_bp: 0, second: false }, Ability::None],
-        [Ability::Transfer { amount: 156, low_bp: 0, second: false }, Ability::None],
-        [Ability::Transfer { amount: 156, low_bp: 2_000, second: false }, Ability::None],
-        [Ability::Transfer { amount: 120, low_bp: 0, second: false }, Ability::None],
-        [Ability::Transfer { amount: 120, low_bp: 0, second: true }, Ability::None],
+        [300, 30, 40, 3_000, 45, 0, 0], None, [
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 0, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 0, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 2_000, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 10_000, low_bp: 0, split: false }, Ability::None],
+        [Ability::Siphon { heal_bp: 12_000, low_bp: 0, split: true }, Ability::None],
     ], [
-        form("Deep Transfer"),
+        FormDef { dmg_bp: 3_000, ..form("Deep Transfer") },
         form("Last Offering"),
         FormDef { atk_bp: 2_500, ..form("Rapid Circulation") },
         form("Shared Blood"),
@@ -727,7 +744,7 @@ pub const UNITS: [UnitDef; 27] = [
     // P48-A (Proposed, staged, ROSTER-EXPANSION §B.3/§C): wave E1. Not in the
     // Shop pool until the P53 owner switch.
     unit(UnitKind::Leechroot, "Leechroot", Plants, Dps, 1_800,
-        [220, 10, 32, 1_200, 45, 0, 0], None, [
+        [300, 10, 32, 1_200, 45, 0, 0], None, [
         [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
         [Ability::Essence { base: 30, step: 2, dmg: 1, atk_bp: 200 }, Ability::None],
         [Ability::Essence { base: 40, step: 2, dmg: 1, atk_bp: 300 }, Ability::None],
@@ -768,7 +785,7 @@ pub const UNITS: [UnitDef; 27] = [
         form("Double Puppet"),
     ]),
     unit(UnitKind::Smuggler, "Smuggler", Humans, Support, 3_600,
-        [320, 0, 400, 5_000, 30, 0, 0], None, [
+        [320, 10, 30, 6_000, 30, 0, 0], None, [
         [Ability::Cargo { every: 400, open: 40, table: [20, 42, 28, 8, 2], double_every: 0 }, Ability::None],
         [Ability::Cargo { every: 400, open: 40, table: [10, 40, 34, 12, 4], double_every: 0 }, Ability::None],
         [Ability::Cargo { every: 400, open: 40, table: [6, 28, 38, 20, 8], double_every: 0 }, Ability::None],
@@ -778,14 +795,37 @@ pub const UNITS: [UnitDef; 27] = [
     ], [
         form("Better Connections"),
         form("Black Market"),
-        // 400 ticks → 360 (18 s): any atk_bp in 1081..=1111 lands exactly.
-        FormDef { atk_bp: 1_100, ..form("Faster Deliveries") },
+        // Cargo cadence is independent of the revolver attack interval.
+        form("Faster Deliveries"),
         form("Double Shipment"),
     ]),
     // Cargo crate: 120 HP, no attack, no movement (speed 0), targetable.
     unit(UnitKind::Crate, "Crate", Humans, Support, 0,
         [120, 0, 20, 0, 0, 0, 0], None, NO_ABILITIES, [
         form("Crate"), form("Crate"), form("Crate"), form("Crate"),
+    ]),
+    // D-66: the Monsters base rows of GAME-DESIGN §13.1, English names (P59-NAMES).
+    // Abilities and Evolution deltas wait for their rules waves; the forms keep
+    // the branch names only, and a branch name repeats across its two tiers.
+    unit(UnitKind::Bonehorn, "Bonehorn", Monsters, Tank, 3_600,
+        [1_600, 40, 40, 800, 20, 0, 0], None, NO_ABILITIES, [
+        form("Ancestral Carapace"), form("Stone Fangs"),
+        form("Ancestral Carapace"), form("Stone Fangs"),
+    ]),
+    unit(UnitKind::Ravager, "Ravager", Monsters, Dps, 2_400,
+        [310, 48, 24, 800, 58, 0, 0], None, NO_ABILITIES, [
+        form("Voracious Hunt"), form("Deep Frenzy"),
+        form("Voracious Hunt"), form("Deep Frenzy"),
+    ]),
+    unit(UnitKind::Acidmaw, "Acidmaw", Monsters, Ranged, 2_400,
+        [260, 42, 36, 4_200, 38, 0, 0], None, NO_ABILITIES, [
+        form("Abyssal Jaw"), form("Corrosive Volley"),
+        form("Abyssal Jaw"), form("Corrosive Volley"),
+    ]),
+    unit(UnitKind::Whisperer, "Whisperer", Monsters, Control, 3_000,
+        [380, 15, 40, 3_000, 33, 0, 0], None, NO_ABILITIES, [
+        form("Echo of Fear"), form("Mental Pulse"),
+        form("Echo of Fear"), form("Mental Pulse"),
     ]),
 ];
 

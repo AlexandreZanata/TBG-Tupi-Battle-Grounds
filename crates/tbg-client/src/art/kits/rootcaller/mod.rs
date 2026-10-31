@@ -18,6 +18,7 @@ pub const KIT: Kit = Kit {
     pose: motion::pose,
     gait: Gait::LIGHT,
     attack: Attack::Shot {
+        loaded: None,
         from: Node::Prop(Socket::WeaponR),
         muzzle: |tier, branch| model::tips(Form::of(tier, branch)),
         shot,

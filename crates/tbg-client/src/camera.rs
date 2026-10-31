@@ -71,7 +71,8 @@ fn reframe_on_resize(
     let resized = resize.read().count() > 0;
     let orbit = desktop(size.x, size.y)
         && *state.get() == crate::GameState::Menu
-        && !crate::config::arena_preview();
+        && !crate::config::arena_preview()
+        && crate::config::url_param("bench").is_none();
     if !resized && size == *last && !orbit && !state.is_changed() {
         return;
     }

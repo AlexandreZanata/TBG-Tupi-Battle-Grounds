@@ -29,6 +29,16 @@ pub enum PlayerIntention {
     Fortify {
         branch: u8,
     },
+    Reserve {
+        offer: u8,
+        kind: UnitKind,
+    },
+    Release {
+        offer: u8,
+    },
+    Reroll {
+        cost: u32,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -52,6 +62,11 @@ pub enum Rejection {
     /// An Augment selection pauses the battle: only `ChooseAugment` and
     /// `Forgo` are accepted until it resolves (BR-AG12).
     Paused,
+    StaleOffer,
+    ReserveFull,
+    AlreadyHeld,
+    NoReserve,
+    StalePrice,
 }
 
 impl MatchState {
@@ -70,10 +85,18 @@ impl MatchState {
             PlayerIntention::Purchase { .. }
             | PlayerIntention::Evolve { .. }
             | PlayerIntention::Fortify { .. }
+            | PlayerIntention::Reserve { .. }
+            | PlayerIntention::Release { .. }
+            | PlayerIntention::Reroll { .. }
                 if paused =>
             {
                 Err(Rejection::Paused)
             }
+            PlayerIntention::Reserve { offer, kind } => {
+                crate::shop::reserve(self, seat, offer, kind)
+            }
+            PlayerIntention::Release { offer } => crate::shop::release(self, seat, offer),
+            PlayerIntention::Reroll { cost } => crate::shop::reroll(self, seat, cost),
             PlayerIntention::Purchase { offer } => self.purchase(seat, offer),
             PlayerIntention::Evolve { unit, branch } => self.evolve(seat, unit, branch),
             PlayerIntention::ChooseAugment { round, option } => {
@@ -105,7 +128,8 @@ impl MatchState {
         // BR-S04: every purchase redraws all five offers, the bought one too.
         let pool = self.rules.pool;
         let p = self.player_mut(seat);
-        p.offers = shop::draw_offers(&mut p.rng, pool);
+        shop::new_shop(p, pool, Some(slot));
+        p.reroll_streak = 0;
         Ok(())
     }
 

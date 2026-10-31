@@ -10,18 +10,14 @@ use crate::state::Outcome;
 use crate::types::{Arena, Seat, StrongholdKind};
 use crate::view::{MatchView, PublicView};
 
-/// v17: live spectating (P47, BR-LV01–LV09): `Spectate`, `StopSpectating`,
-/// the `Spectate*` server messages, and `MatchView::spectators`. v16 is the
-/// Cargo Crab branch's bump, not on `main`, so the next free number is 17.
-/// v15: arenas (ARENAS-G): `MatchStart::arena` and the seat's effective
-/// Evolution prices in `MatchView::evolve_costs`.
-/// v14: the P43 staged affliction/carrier events and `UnitView.fx` merged
-/// with the D-46 Stronghold kinds. v13 was Stronghold kinds and Fortification
-/// (D-46: `SetStronghold`, `MatchView::strongholds`, `PlayerIntention::Fortify`).
-/// v12: Interest became a regen boost (`MatchView::regen_bp` replaces the
-/// payment fields, `Event::InterestPaid` is gone). v11 was the fifteen-node
-/// Arcana schema; older peers are refused.
-pub const PROTOCOL_VERSION: u16 = 17;
+/// v20: seven-Faction Synergy arrays (D-64); v19: `UnitView::shield` (D-63);
+/// v18: `UnitView::carrier` (D-61); v17: live spectating and
+/// `MatchView::spectators` (P47, D-59); v16: `FX_CARRIED` (D-56).
+/// v15: arenas and effective Evolution prices (D-55); v14: staged affliction
+/// and carrier events plus `UnitView::fx`; v13: Stronghold kinds and
+/// Fortification (D-46); v12: Interest regen boost; v11: fifteen-node Arcanas.
+/// Older peers are refused by the handshake.
+pub const PROTOCOL_VERSION: u16 = 20;
 
 /// P12 (BR-R01): casual and ranked play are the same simulation; only the
 /// queue and the rating change differ. P39 (BR-R08): `Challenge` is a

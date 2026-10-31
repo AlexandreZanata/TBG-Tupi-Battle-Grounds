@@ -9,7 +9,7 @@ pub use super::{
 use super::{
     feet::{FootLocks, Stride},
     ik,
-    kits::{self, Aim, Gait, Kit, Moment},
+    kits::{self, Aim, Attack, Gait, Kit, Moment},
     rig::{self, Joint, Proportions, NODE_COUNT},
 };
 use bevy::prelude::*;
@@ -25,7 +25,6 @@ pub struct Animator {
     pub plan: Proportions,
     pub figure: Entity,
     pub native: bool,
-    pub archer: bool,
     pub rate: f32,
     pub hit_stop: f32,
     pub preview: Option<(Clip, f32)>,
@@ -38,6 +37,10 @@ pub struct Animator {
     /// Walk in place at content speed (review tools): feet are not planted.
     pub treadmill: bool,
     pub gait: Gait,
+    pub gesture: f32,
+    pub growth: f32,
+    /// When carried by a carrier (e.g. riding a Cargo Crab), sits mounted in saddle.
+    pub carried: bool,
     base: Clip,
     base_t: f32,
     action: Option<(Clip, f32)>,
@@ -70,7 +73,6 @@ impl Animator {
             plan,
             figure,
             native: false,
-            archer: false,
             rate: 1.0,
             hit_stop: 0.0,
             preview: None,
@@ -80,6 +82,9 @@ impl Animator {
             aim_at: None,
             treadmill: false,
             gait,
+            gesture: 1e6,
+            growth: 0.0,
+            carried: false,
             base: Clip::Idle,
             base_t: phase * Clip::Idle.duration(),
             action: None,
@@ -145,9 +150,6 @@ impl Animator {
     }
     fn pose(&self, clip: Clip, t: f32) -> Pose {
         let mut pose = sample(clip, t);
-        if self.archer {
-            super::archer_v2_clips::apply(clip, t, &mut pose);
-        }
         if let Some(kit) = self.kit {
             let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.0));
             let moment = Moment {
@@ -160,6 +162,8 @@ impl Animator {
                 variant: self.variant,
                 clock: self.clock,
                 walk,
+                gesture: self.gesture,
+                growth: self.growth,
             };
             (kit.pose)(&moment, &mut pose);
         }
@@ -195,6 +199,7 @@ impl Animator {
         self.events.clear();
         self.since_attack = (self.since_attack + dt).min(1e6);
         self.clock += dt;
+        self.gesture = (self.gesture + dt).min(1e6);
         if let Some((clip, t)) = self.preview {
             return (
                 self.pose(clip, t),
@@ -255,6 +260,7 @@ pub fn animate(
     time: Res<Time>,
     mut animators: Query<(&mut Animator, &Transform)>,
     mut transforms: Query<&mut Transform, Without<Animator>>,
+    mut visibility: Query<&mut Visibility, Without<Animator>>,
 ) {
     for (mut a, root) in &mut animators {
         let dt = if a.hit_stop > 0.0 {
@@ -274,7 +280,10 @@ pub fn animate(
         let frame = root.to_matrix() * figure;
         a.observe(root.translation, &frame, dt);
         let (mut pose, walk) = a.advance(dt);
-        if let Some(phase) = walk {
+        if a.carried {
+            apply_mounted(&mut pose);
+            a.feet.reset();
+        } else if let Some(phase) = walk {
             let (r, o) = pose[Joint::Root.index()];
             let root_joint = Mat4::from_rotation_translation(ik::quat(r), o);
             let stride = Stride {
@@ -295,5 +304,43 @@ pub fn animate(
                 t.rotation = ik::quat(rot);
             }
         }
+        if let Some(kit) = a.kit {
+            show_loaded(kit, &a, &mut visibility);
+        }
     }
+}
+
+/// Shows a kit's loaded prop (an archer's nocked arrow) only while its shot
+/// is loaded, so it leaves the bow at Release instead of staying there.
+fn show_loaded(
+    kit: &Kit,
+    a: &Animator,
+    visibility: &mut Query<&mut Visibility, Without<Animator>>,
+) {
+    let Attack::Shot {
+        loaded: Some((node, shown)),
+        ..
+    } = kit.attack
+    else {
+        return;
+    };
+    let (clip, t) = a.clip_time();
+    if let Ok(mut v) = visibility.get_mut(a.joints[node.index()]) {
+        *v = if shown(clip, t) {
+            Visibility::Inherited
+        } else {
+            Visibility::Hidden
+        };
+    }
+}
+
+/// Seated saddle posture for units riding a carrier (e.g. Cargo Crab).
+fn apply_mounted(pose: &mut Pose) {
+    pose[Joint::ThighL.index()].0 = Vec3::new(65.0, -12.0, -14.0);
+    pose[Joint::ThighR.index()].0 = Vec3::new(65.0, 12.0, 14.0);
+    pose[Joint::ShinL.index()].0 = Vec3::new(-75.0, 0.0, 0.0);
+    pose[Joint::ShinR.index()].0 = Vec3::new(-75.0, 0.0, 0.0);
+    pose[Joint::FootL.index()].0 = Vec3::new(15.0, 0.0, 0.0);
+    pose[Joint::FootR.index()].0 = Vec3::new(15.0, 0.0, 0.0);
+    pose[Joint::Hips.index()].1[1] -= 0.05;
 }

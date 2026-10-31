@@ -1,0 +1,4 @@
+favor-nester vs bot: 53.8% [51.7 – 56.0] over 2000 seed pairs
+stalled matches (60 s): 1.2% (47/4000)
+favor-nester vs bot (median ±10 pp)              53.8% [51.7% – 56.0%]        target 43.8% – 63.8%      PASS
+1 rows, 0 failing

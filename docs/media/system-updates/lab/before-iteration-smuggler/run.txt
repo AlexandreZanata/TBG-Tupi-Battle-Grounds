@@ -1,0 +1,4 @@
+favor-smuggler vs bot: 54.3% [52.2 – 56.4] over 2000 seed pairs
+stalled matches (60 s): 1.0% (41/4000)
+favor-smuggler vs bot (median ±10 pp)            54.3% [52.2% – 56.5%]        target 44.3% – 64.3%      PASS
+1 rows, 0 failing

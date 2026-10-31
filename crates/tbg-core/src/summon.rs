@@ -78,7 +78,7 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
             continue;
         }
         if n.kind == UnitKind::Smuggler {
-            cargo_tick(state, idx, &n);
+            cargo_tick(state, idx, &n, ev);
             continue;
         }
         if n.kind == UnitKind::Crate {
@@ -163,9 +163,9 @@ fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
 }
 
 /// Smuggler cargo (P48-B, §C.11): every `every` ticks the Smuggler drops a
-/// Crate (120 HP, no attack, no movement, targetable) at its own x. The
+/// Crate (120 HP, no attack, no movement, targetable) behind its carrier. The
 /// first crate comes after a full interval.
-fn cargo_tick(state: &mut MatchState, idx: usize, smuggler: &Unit) {
+fn cargo_tick(state: &mut MatchState, idx: usize, smuggler: &Unit, ev: &mut Vec<Event>) {
     let cd = smuggler.action_cd.saturating_sub(1);
     state.units[idx].action_cd = cd;
     if cd > 0 {
@@ -202,13 +202,19 @@ fn cargo_tick(state: &mut MatchState, idx: usize, smuggler: &Unit) {
     }
     let id = state.next_unit_id;
     state.next_unit_id += 1;
+    ev.push(Event::Spawn {
+        unit: id,
+        seat: smuggler.seat,
+        kind: UnitKind::Crate,
+    });
     state.units.push(Unit {
         id,
         seat: smuggler.seat,
         kind: UnitKind::Crate,
         tier: 0,
         branch: 0,
-        x: smuggler.x,
+        x: (smuggler.x - smuggler.seat.dir() * crate::content::CRATE_DROP_BACK)
+            .clamp(0, crate::content::LANE_LEN),
         hp: state.rules().def(UnitKind::Crate).hp,
         max_hp: state.rules().def(UnitKind::Crate).hp,
         cooldown: 0,

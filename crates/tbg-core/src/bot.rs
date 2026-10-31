@@ -15,6 +15,8 @@ const EVOLVE_AT: u32 = 8 * ENERGY_SCALE;
 const EVOLVE_ARMY: usize = 6;
 
 pub struct Bot {
+    shop: (bool, bool),
+    rolls: u8,
     rng: Pcg32,
     wait: u32,
     rules: &'static Ruleset,
@@ -28,10 +30,18 @@ impl Bot {
     /// A bot reading costs from another ruleset: the balance lab only (D-33).
     pub fn with_rules(seed: u64, rules: &'static Ruleset) -> Bot {
         Bot {
+            shop: (true, true),
+            rolls: 0,
             rng: Pcg32::new(seed, 7),
             wait: 0,
             rules,
         }
+    }
+
+    /// Independent controls for paired lab experiments; practice enables both.
+    pub fn shop_options(mut self, reserve: bool, reroll: bool) -> Self {
+        self.shop = (reserve, reroll);
+        self
     }
 
     /// Called once per view (10 per second).
@@ -51,11 +61,27 @@ impl Bot {
         }
         self.wait = 3 + self.rng.below(6);
         let big_army = army(view) >= EVOLVE_ARMY;
-        self.buy_tank(view)
-            .or_else(|| big_army.then(|| self.fortify(view)).flatten())
-            .or_else(|| big_army.then(|| self.evolve(view, 0)).flatten())
-            .or_else(|| self.buy_best(view))
-            .or_else(|| self.evolve(view, EVOLVE_AT))
+        let shop = crate::bot_shop::decide(
+            view,
+            self.rules,
+            self.shop.0,
+            self.shop.1,
+            self.rolls,
+            |_| true,
+        );
+        let action = shop.or_else(|| {
+            self.buy_tank(view)
+                .or_else(|| big_army.then(|| self.fortify(view)).flatten())
+                .or_else(|| big_army.then(|| self.evolve(view, 0)).flatten())
+                .or_else(|| self.buy_best(view))
+                .or_else(|| self.evolve(view, EVOLVE_AT))
+        });
+        match action {
+            Some(PlayerIntention::Purchase { .. }) => self.rolls = 0,
+            Some(PlayerIntention::Reroll { .. }) => self.rolls = self.rolls.saturating_add(1),
+            _ => {}
+        }
+        action
     }
 
     /// Energy is the only purchase condition (BR-U07).
@@ -140,4 +166,16 @@ pub fn army(view: &MatchView) -> usize {
         .iter()
         .filter(|u| u.seat == view.you && !u.is_summon())
         .count()
+}
+
+/// Shared conservative Shop policy for offline preference experiments.
+pub fn shop_decision(
+    view: &MatchView,
+    rules: &Ruleset,
+    reserve: bool,
+    reroll: bool,
+    rolls: u8,
+    wanted: impl Fn(crate::UnitKind) -> bool,
+) -> Option<PlayerIntention> {
+    crate::bot_shop::decide(view, rules, reserve, reroll, rolls, wanted)
 }

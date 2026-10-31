@@ -15,6 +15,7 @@ use formation::FormationIndex;
 /// Count down statuses and cooldowns.
 pub(crate) fn tick_timers(state: &mut MatchState) {
     for u in &mut state.units {
+        let before = u.status;
         u.status = match u.status {
             Status::Slowed { bp, ticks_left } if ticks_left > 1 => Status::Slowed {
                 bp,
@@ -25,6 +26,7 @@ pub(crate) fn tick_timers(state: &mut MatchState) {
             },
             _ => Status::None,
         };
+        crate::roster_slots::release_queued_slow(u, before);
         u.cooldown = u.cooldown.saturating_sub(1);
     }
     for p in &mut state.players {
@@ -145,6 +147,23 @@ fn advance_unit(
                     _ => st.speed,
                 }
             };
+            // D-56: a Cargo Crab carrying a passenger moves at the speed of the
+            // faster of the two units before carry bonuses are applied.
+            if let Some(pid) = u.fx.passenger {
+                if let Some(pi) = state.unit_index(pid) {
+                    let pu = &state.units[pi];
+                    let pst = state.stats_of(pu);
+                    let pass_speed = if pu.fx.march_ignore_slow {
+                        pst.speed
+                    } else {
+                        match pu.status {
+                            Status::Slowed { bp, .. } => scale_down(pst.speed, bp),
+                            _ => pst.speed,
+                        }
+                    };
+                    speed = speed.max(pass_speed);
+                }
+            }
             // Old Finn fish (P45): movement only, multiplicative with any
             // status slow, so no combination reaches zero. Never touches
             // the attack interval. Oilpress A2 immunity covers it.

@@ -35,6 +35,13 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     body::tunic(&mut v, &p, COAT, DARK_LEATHER, RED_CLOTH);
     head(&mut v, &p, f);
     pack(&mut v, f);
+    let gun = Prop(Socket::WeaponR);
+    v.extend([
+        part(gun, Box(0.06, 0.09, 0.12), IRON, [0.0, 0.02, 0.08]),
+        part(gun, Cyl(0.025, 0.22), STEEL, [0.0, 0.04, 0.18]).rot([90.0, 0.0, 0.0]),
+        part(gun, Cyl(0.04, 0.07), BRASS, [0.0, 0.04, 0.08]).rot([90.0, 0.0, 0.0]),
+        part(gun, Box(0.045, 0.10, 0.05), WOOD, [0.0, -0.06, 0.02]).rot([15.0, 0.0, 0.0]),
+    ]);
     // Lantern at the belt, team kerchief at the neck.
     v.extend(gear::lantern(Body(Hips), [0.19, -0.08, 0.06], 1.1));
     v.extend([part(
@@ -171,6 +178,7 @@ fn pack(v: &mut Vec<PartSpec>, f: Form) {
             )
             .rot([0.0, 0.0, -35.0]),
         );
+        v.extend(gear::crate_box(b, [0.0, 0.0, -0.13], 0.20));
         return;
     }
     v.extend([

@@ -177,12 +177,16 @@ Phase files are written one at a time, starting with P42.
 | P40 | [P40-arcana-trees.md](phases/P40-arcana-trees.md) | Fifteen-node trees, twelve points, three supremes, preset migration, editor and lab evidence | implemented; audited on `phase/p40-review` (Quickdraw cap fixed, Deadeye re-measured to +0.25 tile); War and Vitality builds trail the default, browser look check open | — |
 | P41 | [P41-i18n-pt-br.md](phases/P41-i18n-pt-br.md) | Client-only English + Brazilian Portuguese: compiled catalogs, lobby language selector, Latin-1 fonts, zero per-frame cost | steps 0–5 implemented (catalogs, fonts, resolver, lobby; PR #9); steps 6–8 and owner decisions O-P41-1…5 open | — |
 | P42 | [P42-roster-baseline.md](phases/P42-roster-baseline.md) | Roster canon (D-48), lab combat counters, stall and duration rows, `comp-*` policy, baseline on main | in progress | — |
-| P47 | [P47-live-spectate-and-presence.md](phases/P47-live-spectate-and-presence.md) | Lobby: players online and in battle always visible, Live battles panel (public Casual + Ranked), real-time spectating for guests and accounts | implemented on `phase/p47-live-lobby` (protocol v17, GAME-DESIGN §13, D-59); not merged, not deployed; owner look pending | yes (owner: look) |
+| P47 | [P47-live-spectate-and-presence.md](phases/P47-live-spectate-and-presence.md) | Lobby: players online and in battle always visible, Live battles panel (public Casual + Ranked), real-time spectating for guests and accounts | merged in PR #19; deployed with arena visuals and Leave/Ranking fixes (D-59, GAME-DESIGN §14); owner look pending | yes (owner: look) |
 | P54 | [P54-unit-art-kits.md](phases/P54-unit-art-kits.md) | Unit art kits (own model, motion, aim, projectile per character); gait v2 for every unit; Strongholds aim and fire their own projectiles; Siege Walker, Bone Brute, Rootcaller final kits | done; **owner approved (2026-10-30)**; tower defenders and lobby-faithful dress added (D-52) | yes (owner) |
 | P55 | [P55-champion-kits.md](phases/P55-champion-kits.md) | Every unrefined champion on its own art kit (fifteen new champions, the Crate, seven originals) on a shared kit library; support action cues (D-53) | done; **owner approved (2026-10-30)** | yes (owner) |
+| PORTRAITS | [PORTRAITS-shop-cards.md](phases/PORTRAITS-shop-cards.md) | Shop card portraits for all 25 buyable units from the current 3D models, same framing as the original set; capture tool and test | implemented, awaiting owner look | yes (owner: look) |
 | A-1 | [A1-visual-polish-troops-strongholds.md](phases/A1-visual-polish-troops-strongholds.md) | Troop polish: directional aim from `AttackStart`, directed melee, 55 rig-v2 forms, full animation pass (D-47). Steps 10–12 (Strongholds) **superseded by D-46** | consolidated 2026-10-30: kit units keep the P54/P55 look (owner direction); A-1 drives the Archer and any kind without a kit (D-47) | — |
 | ARENAS-G | [ARENAS-gameplay.md](phases/ARENAS-gameplay.md) | Arenas in the real game: server draw at pairing, symmetric modifiers (Proposed), practice choice, scene switching, Arenas lobby page; lab measurement deferred by the owner | implemented, awaiting owner look | yes (owner: look, fun, values) |
+| P56 | [P56-archer-crab-selection.md](phases/P56-archer-crab-selection.md) | Part A fixes: Archer bow on its kit (curved, drawable string, native path removed), Cargo Crab carry rule (D-60), carrier id in the view (D-61, protocol 18), passengers seated on their carrier with a boarding arc, crab visual rebuilt, selective name tags | Part A implemented and verified; balance deferred by owner; look sign-off pending | yes (owner: look) |
 | P57 | [P57-unit-spacing.md](phases/P57-unit-spacing.md) | Units take up space on screen: client display layout (five files, ranks behind the front, smoothing); server and protocol unchanged | planned | yes (owner: look) |
+| P58 | [P58-roster-expansion-planning.md](phases/P58-roster-expansion-planning.md) | Docs-only plan for 21 units + Monsters/Celestials/Insects: catalog, audit, GAME-DESIGN §13 registry, future waves | planned; reaudited | — |
+| P59 | [P59-roster-expansion-impl.md](phases/P59-roster-expansion-impl.md) | Roster expansion implementation (21 units, 3 Factions) in waves W0 to W11, per P58; status report lists what is open | W0/W1 and four inactive Monsters kinds implemented (D-62–D-66); integration reviewed; kits and W2–W11 open; owner look pending | yes (owner: P58 decisions) |
 
 ## Independent arena art follow-up
 
@@ -193,6 +197,16 @@ layout. The owner requested client visuals and documentation only, based on
 See the [arena art catalog and preview links](ARENAS.md). Implementation and
 desktop evidence are tracked in that report; owner visual approval is pending.
 The gameplay integration is [ARENAS-G](phases/ARENAS-gameplay.md).
+
+## Independent system update front (2026-10-31)
+
+[SYSTEM-updates](phases/SYSTEM-updates.md) implements the owner's champion
+adjustments, client crowd, local Shop Reserve/Reroll preview and repeatable
+performance scenes on `phase/system-champions-crowd-shop`, based on main
+`9008f11`. Work-front validation follows the owner's updated minimal policy.
+Balance confirmation, visual approval and measurement-dependent optimizations
+remain pending. CANON Shop stays disabled; no Frontage or gameplay Ghost.
+Draft PR delivery is for consolidation; it is not a release approval.
 
 ## Pending validations (owner)
 

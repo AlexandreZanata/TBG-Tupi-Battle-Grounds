@@ -15,7 +15,10 @@ pub mod aim;
 pub mod assets;
 mod attacks;
 mod cues;
+mod growth;
+pub mod mount;
 mod names;
+mod shell;
 mod update;
 
 pub use assets::VisualAssets;
@@ -66,6 +69,7 @@ pub struct UnitVisual {
     /// Tint material, seconds left, already applied to the joints.
     tint: Option<(Handle<StandardMaterial>, f32, bool)>,
     pub dying: bool,
+    fx: u16,
     dead_for: f32,
     last_x: f32,
     /// Seconds without moving (walk/idle hysteresis).
@@ -115,7 +119,7 @@ impl UnitVisual {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(names::plugin)
+    app.add_plugins((names::plugin, shell::plugin, growth::plugin))
         .init_resource::<TowerOrders>()
         .add_systems(PreStartup, assets::init)
         .add_systems(
@@ -153,6 +157,12 @@ fn highlight_inspected(
         if let Ok(mut t) = transforms.get_mut(v.ring) {
             if (t.scale.x - scale).abs() > 1e-4 {
                 t.scale = Vec3::splat(scale);
+            }
+        }
+        if let Ok(mut t) = transforms.get_mut(v.figure) {
+            let target_y = if is_selected { 0.07 } else { 0.0 };
+            if (t.translation.y - target_y).abs() > 1e-4 {
+                t.translation.y = target_y;
             }
         }
     }
@@ -222,6 +232,11 @@ pub fn spawn_unit_visual(
         yaw: yaw(look.own),
         tint: None,
         dying: false,
+        fx: if look.kind == UnitKind::Shatterback {
+            4 << 8
+        } else {
+            0
+        },
         dead_for: 0.0,
         last_x: pos.x,
         still: 1.0,
@@ -235,20 +250,8 @@ pub fn spawn_unit_visual(
     let mut animator = Animator::new(joints, form.plan, figure_root, look.kind, look.id);
     animator.native = form.native;
     animator.form = (look.tier, look.branch);
-    animator.archer = form.native && look.kind == UnitKind::Archer;
     animator.play(crate::art::anim::Clip::Spawn);
     let root = commands.spawn_empty().id();
-    if animator.archer {
-        crate::art::bow::attach(
-            commands,
-            root,
-            &animator,
-            lib,
-            &lib.material,
-            look.own,
-            form.bow_half,
-        );
-    }
     commands
         .entity(root)
         .insert((
