@@ -68,6 +68,7 @@ fn spawn(mut commands: Commands, lang: Res<Lang>) {
 
 /// Hide what a watcher cannot use. The Energy bar, Shop cards and War Council
 /// sit on the same column as the badge; hiding each one keeps the layout.
+#[allow(clippy::type_complexity)] // Bevy queries; one system reads them together
 fn hide_seat_controls(
     info: Res<MatchInfo>,
     mut hud: Query<(&Hud, &mut Visibility), Without<LeaveWatch>>,
@@ -95,6 +96,7 @@ fn hide_seat_controls(
     }
 }
 
+#[allow(clippy::type_complexity)] // Bevy queries; one system reads them together
 fn badge(
     info: Res<MatchInfo>,
     latest: Res<LatestView>,
