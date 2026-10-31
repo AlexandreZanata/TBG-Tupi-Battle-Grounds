@@ -9,7 +9,7 @@ fn seconds(t: u16) -> String {
     format!("{:.1}s", f32::from(t) / TICK_HZ as f32)
 }
 
-pub(super) fn describe(v: &MatchView, u: &UnitView) -> String {
+pub(crate) fn describe(v: &MatchView, u: &UnitView) -> String {
     let mut parts = Vec::new();
     let marked = v
         .units
