@@ -19,10 +19,13 @@ version/protocol, account/result schema and proxy before implementation.
 Preserve active installations and unrelated fronts. Native snapshots and
 planning branches are not automatically merged dependencies.
 
-Implement in phase order: contracts/trust/journal; Linux stable launcher and
-transactional updater; startup modal/idle guard/resume/post-update notes;
-Windows adapter; backend ownership/durable results/drain; fixed-slot rollout
-and immutable browser assets; protected release pipeline and consolidation.
+Deliver the P66 §8 milestones as separate branches and PRs, M1 first:
+M1 Linux self-update and notes (contracts/trust/journal, stable launcher and
+transactional updater, startup modal/idle guard/resume/post-update notes,
+test-key static repository); M2 backend release safety (computed contract
+identity, structured admission, durable results, truthful retirement) can
+run in parallel; M3 two-slot rollout and scheduled contract switch after M2;
+M4 Windows adapter on real Windows. Each milestone has its own exit gate.
 
 Use a maintained TUF implementation; no custom crypto or unsigned checksum
 trust. Stage full immutable releases, verify before execution, atomically
@@ -49,14 +52,14 @@ thousands-player capacity. Measure overlap headroom and queue/tick/view
 guardrails; defer expensive capacity runs until explicitly authorized.
 Use safe drain with a declared admission pause until full coexistence passes.
 
-Resolve O01-O04 when needed. Routine engineering choices are autonomous;
+Resolve O01-O05 when needed. Routine engineering choices are autonomous;
 owner decisions on keys/certificates, install support, emergency policy,
 capacity/retention or paid resources cannot be silently approved. Continue
 independent work while needed answers are pending.
 
 Follow minimal per-front validation and one deduplicated targeted
 consolidation, shared nonblocking host lock and max two compile jobs.
-Run U01-U18 in isolated synthetic fixtures as scope/cache permit. Record
+Run U01-U22 in isolated synthetic fixtures as scope/cache permit. Record
 actual commands and deferred gates honestly. No full suite, broad packaging,
 large benchmark or production scenario is automatically authorized. Missing
 Windows hardware/test evidence keeps Windows pending, not verified by Linux.
@@ -65,9 +68,9 @@ No real installation, OS changes, key generation/production signing, public
 artifact release, infrastructure provisioning or deployment is authorized.
 The actual game installation and production services must remain untouched.
 
-Explicit GitHub authorization: normal push of the implementation branch and
-open/update a PR with base main, overriding the general AGENTS no-push rule
-for this delivery. No force-push, history rewrite, merge or deploy. Include
+Explicit GitHub authorization: normal push of each milestone branch and
+open/update its PR with base main, overriding the general AGENTS no-push
+rule for this delivery. No force-push, history rewrite, merge or deploy. Include
 only pertinent code/tests/docs, never secrets, build outputs or other fronts.
 If mandatory trust/recovery/compatibility/OS gates remain blocked, deliver a
 Draft PR with affected activation disabled and precise pending work.

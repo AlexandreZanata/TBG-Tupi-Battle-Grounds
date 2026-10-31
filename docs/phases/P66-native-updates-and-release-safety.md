@@ -6,6 +6,10 @@
 > preserve running matches. No code, key generation, installation, signing,
 > deployment or capacity experiment is executed by this document.
 > New product policies/limits are **Proposed** in GAME-DESIGN §19.
+> Planning review (2026-10-31) added requirements traceability (§2.1),
+> prompt cadence and the notes content contract (§3.1, §3.4), contract
+> transitions and computed contract identity (§6.4–§6.5), independently
+> shippable milestones (§8) and a risk register (§10).
 
 Planning branch: `codex/p66-native-updates-release-safety-plan`.
 Execution branch: `codex/p66-native-updates-release-safety`.
@@ -82,6 +86,30 @@ compatibility, reliable results, observable drain and measured capacity.
 Do not introduce Kubernetes, service mesh, Kafka, global Redis or multi-region
 operation just to serve the initial game. Prepare boundaries that can scale.
 
+### 2.1 Requirements and traceability
+
+The owner's requirements (R) and the quality attributes (Q) below are the
+acceptance contract. Each row names where the design answers it and which
+cases of the [release contracts](../planning/P66-RELEASE-CONTRACTS.md#4-focused-verification-matrix)
+prove it. A row without passing evidence keeps its milestone open.
+
+| ID | Requirement | Design | Rule | Evidence |
+|---|---|---|---|---|
+| R1 | Opening the Linux game shows an in-game update modal automatically when a newer eligible build exists | §3.1 | BR-UP01, BR-UP08 | U01, U09, U20 |
+| R2 | Update in place: no uninstall/reinstall, no sudo, user data kept | §5.1–§5.2 | BR-UP01, BR-UP03 | U05–U07 |
+| R3 | After updating, and again after a close or crash before acknowledgement, a "what's new" modal shows the installed release's notes | §3.2, §3.4 | BR-UP04, BR-UP10 | U10, U21 |
+| R4 | Windows gets the same experience once verified on real Windows | §5.3 | BR-UP01 | U08 |
+| R5 | Client-only and backend-only releases ship independently | §6.1, §6.5 | BR-UP05 | U12, U19 |
+| R6 | No planned client or backend release disconnects, re-rules or slows a running online match | §3.1, §6.2–§6.3, §7 | BR-UP02, BR-UP05, BR-UP06 | U09, U11, U13–U16, U18 |
+| R7 | Public matchmaking never splits silently across incompatible builds | §6.4 | BR-UP09 | U22 |
+| R8 | The infrastructure can grow toward thousands of players in measured steps | §7 | BR-UP07 | U18 |
+| Q1 | Integrity: only publisher-signed releases execute; the version API cannot grant trust | §4 | BR-UP03 | U02–U04 |
+| Q2 | Recoverability: any interruption lands on a complete known-good build | §5.1 | BR-UP03 | U05, U06 |
+| Q3 | Performance: no update network/disk work in the render loop or during online play | §3.1 | BR-UP02 | U01, U09 |
+| Q4 | Privacy: no secrets in URLs, arguments or logs; aggregate-only update telemetry | §3.3, §7 | — | U11, U20 |
+| Q5 | Operability: observable rollout, drain and update health; rollback without killing matches | §6.2, §7 | BR-UP06 | U14, U15, U17, U20 |
+| Q6 | EN/pt-BR, accessibility and D5 glyphs on every updater and notes surface | §3.2, §3.4 | BR-UP04, BR-UP10 | U10, U21 |
+
 ## 3. Player flow and updater lifecycle
 
 ### 3.1 Startup and in-game modal
@@ -115,6 +143,17 @@ A required newer build blocks **new** incompatible admission with explanation,
 not existing match completion. Release policy must define exceptional security
 revocation separately (O03); do not hide forced disconnects as normal updates.
 
+Prompt cadence (Proposed, BR-UP08): the startup modal appears at most once
+per launch for a given build. **Later** leaves a persistent non-modal badge
+in the lobby and Settings; idle rechecks may refresh the badge or show a
+short toast, never a second modal in the same session. A *required* update
+(a new public match contract, §6.4, or a raised security floor) blocks only
+new online admissions: Practice vs Bot, Settings, installed notes and other
+offline surfaces keep working on the installed build, and every online entry
+point shows the localized reason next to the Update action. Whether eligible
+updates download automatically while idle in the lobby is an owner default
+(O05); verification, extraction and activation always wait for idle.
+
 ### 3.2 Update applied and “what changed”
 
 Receipt fields include transaction ID, old/new build IDs, platform/install
@@ -135,6 +174,7 @@ or mandatory availability dependency. Show skipped-release highlights in a
 bounded history, with full installed-release notes accessible in Settings.
 Do not display whatever a mutable latest URL says if another release has
 arrived since this installation. Preserve locale and reduced-motion settings.
+The notes themselves follow the content contract in §3.4.
 
 ### 3.3 Resume after crash or voluntary close
 
@@ -151,6 +191,28 @@ An expired/finished match clears the resume record safely; result receipts
 and pending notes remain available. A staged update cannot erase the old
 client needed for reconnect. Exercise account takeover/second-device behavior
 with the server's single-session policy and generation ownership checks.
+
+### 3.4 Release notes content contract
+
+Notes are authored in the repository next to the release (path fixed at
+Step 0, for example `release-notes/<release_sequence>.json`) and reviewed in
+the same PR as the change they describe. The pipeline turns them into the
+signed notes target; nobody edits notes on a server.
+
+- One structured file per release: `title`, UTC date and ordered sections
+  (`highlights`, `gameplay`, `fixes`, `known_issues`) of short plain-text
+  items. No HTML, Markdown, images, scripts or remote resources; the client
+  renders text nodes or Bevy `Text` only. Links, if any, are limited to
+  allowlisted project HTTPS URLs and open in the system browser on click.
+- English and pt-BR are both mandatory with matching section/item counts,
+  and every value passes the P41 D5 charset check used for the catalogs (the
+  native UI font has no other glyphs). A missing locale, an oversize file or
+  an unknown field fails the release build before signing, like catalog parity.
+- When the computed ruleset/content identity (§6.5) differs from the previous
+  stable release, a non-empty `gameplay` section is mandatory, so balance and
+  rule changes are never silent to players.
+- Skipped releases contribute their `highlights` to the bounded history; the
+  full notes of the installed build stay available in Settings.
 
 ## 4. Artifact trust and release metadata
 
@@ -175,6 +237,16 @@ reviewed commit, create immutable artifacts/provenance, then sign and promote
 metadata atomically after all targets/notes are available. Use channel
 permissions, protected environments and least-privilege release jobs.
 
+Harden the build that feeds signing: pin actions and tools by commit or
+digest, build with `--locked`, gate on dependency advisories and licenses
+(`cargo deny`/`cargo audit`), embed the dependency list (`cargo auditable`)
+and publish an SBOM plus build provenance (for example SLSA/GitHub artifact
+attestations) as additional signed targets. Aim for reproducible builds:
+rebuild each release in a second clean job and compare digests; Step 0
+measures whether bit-for-bit equality is achievable and records the causes
+of any difference instead of silently ignoring them. These are pipeline
+tools, not runtime dependencies of the game.
+
 Release descriptor is itself a signed target. It names build ID/sequence,
 human version, channel, OS/architecture/package, OS/runtime minima, archive
 length/hash, content/asset IDs, compatibility tuple, updater ABI, state schema,
@@ -195,6 +267,15 @@ request or a game-server archive stream per player launch. Bound startup
 conditional fetches and jitter subsequent checks/retries; signing/expiration
 checks still apply to cached data. Artifact egress must not consume the
 match server's bandwidth budget when thousands of installations check in.
+
+Download size: start with one full compressed archive per release (simple
+and always valid). Measure what actually changes between real releases;
+when most bytes are unchanged assets, move to per-file content-addressed
+targets listed by the signed descriptor, reusing unchanged files from the
+verified current release after hash checks and downloading only the rest.
+The full archive stays the fallback and the repair path. Binary diff patches
+are deferred: they need the exact previous build and add a second failure
+mode for little gain over file-level reuse.
 
 Authorized operational rollback uses a newer metadata version pointing at
 a known retained artifact, respecting the signed security floor. Local boot
@@ -361,8 +442,10 @@ Routine rollout:
 1. Build/sign/verify artifacts outside the live host; expand DB compatibly.
 2. Start B as Warming, not ready for matchmaking; verify dependencies,
    contract, assets, schema and capacity on the same constrained host.
-3. Allow a measured canary of **new compatible** admissions on B. Existing
-   A sockets, players and matchmaking partitions retain their contract.
+3. For a **same-contract** release, allow a measured canary of new
+   compatible admissions on B. A release with a new match contract follows
+   §6.4 instead, because a percentage canary would split the public queue.
+   Existing A sockets, players and matchmaking partitions keep their contract.
 4. Promote B and mark A Draining: no new ordinary queues/rooms on A, but
    existing reconnects/active match interactions continue. Decide invitation/
    rematch policy explicitly, and show a localized reason for denied new play.
@@ -408,6 +491,51 @@ their own authority. No account secrets or private route registry in the
 update/CDN feed. Readiness differs from liveness; a Draining process is alive
 for existing matches but unavailable for new admissions.
 
+### 6.4 Contract transitions and matchmaking
+
+Two releases with different match contracts cannot share a match, so a
+percentage canary of a new contract splits the public queue. With a small
+population that lengthens waits for both halves and pairs players by rating
+less precisely. Proposed policy (BR-UP09):
+
+- Public matchmaking (Casual, Ranked) admits exactly one **active** contract.
+  Same-contract client/backend builds mix freely and may canary by percentage.
+- A new contract is first exercised on the opt-in preview channel with its
+  own queue. Its stable client build is then published ahead of the switch
+  (lead time Proposed 24 h, O03) so idle clients stage it in advance.
+- At the scheduled switch, generation B becomes the active public contract in
+  one step; A stops new public admissions and drains its running matches.
+  Clients still on the old contract get UpdateRequired at queue or room time,
+  with the update usually already staged.
+- Private rooms, challenges, rematches and spectating are contract-scoped:
+  pairing or watching across contracts is refused with a localized reason,
+  and the P47 live list shows only matches the viewer's build can watch.
+  Rooms created on A before the switch follow the O03 grace policy.
+- Batch rule and balance changes into scheduled contract releases; most
+  releases should be same-contract and need no switch at all.
+
+### 6.5 Computed contract identity
+
+Compatibility must not depend on someone remembering to bump a number. The
+repository already freezes wire bytes (`tbg-core/tests/contract_protocol.rs`)
+and simulation outcomes (`contract_determinism.rs` golden hashes); P66 binds
+the contract identities to them:
+
+- `wire_epoch` records a digest of the frozen message corpus. A test fails
+  when the corpus digest changes without a new epoch (and the matching
+  `PROTOCOL_VERSION` handling), and when the epoch changes without new bytes.
+- `ruleset_fingerprint` and `content_manifest` are computed at build time
+  from a canonical encoding of the ruleset and content tables (encoding chosen
+  at Step 0) plus the determinism goldens; they are never typed by hand. A
+  changed fingerprint makes the release a new contract (§6.4) and requires a
+  `gameplay` notes section (§3.4).
+- A compatibility claim between two epochs needs evidence: keep a recorded
+  client message corpus per supported epoch and replay it against the new
+  server's decoder and admission in tests (consumer-driven contract tests).
+  No release marks two contracts compatible without that corpus passing.
+- Durable match/result records store the admitted contract identity, so P60
+  audits and any future replay viewer know which rules produced a result.
+
 ## 7. Capacity path and observability
 
 Stage A: managed Linux updater, safe single-host drain and proven two-slot
@@ -433,7 +561,43 @@ by account/session/token, installation ID or arbitrary build download URL.
 Aggregate by bounded release/channel/platform. Local logs redact secrets;
 release metrics must not create a surveillance or unbounded-cardinality system.
 
-## 8. Execution sequence
+Update health without an analytics system: the client's next admission
+handshake carries its signed `build_id` and a bounded last-update outcome
+(`none`, `updated`, `recovered`, `failed:<stage>`), added additively at the
+next planned wire epoch. The server only increments aggregate counters by
+(build, outcome); nothing is stored per player or installation. A new client
+build's rollout halts automatically when failed/recovered outcomes reach the
+Proposed threshold (2% of at least 100 reports), pending owner review.
+
+Report these indicators per release: planned-release disconnects of running
+matches (target 0), lost or duplicated results (target 0), update success and
+recovery rates, time from availability to staged and to applied, admissions
+by build, drain age and admission refusals by reason. Targets for the
+non-zero indicators come from measurements (O04), not from this plan.
+
+On a shared host, run slots and maintenance work in separate systemd units or
+slices: live match workers get the higher `CPUWeight`/`IOWeight`, while
+warming, backfills, migrations and artifact preparation run at a lower weight
+so they cannot take tick time from running matches.
+
+## 8. Delivery milestones and execution steps
+
+Ship in four milestones, each with its own branch, PR and exit gate, so the
+Linux updater the owner needs first never waits for backend coexistence or
+Windows hardware. M1 and M2 touch different crates and can run in parallel;
+M3 needs M2; M4 needs M1's contracts and real Windows devices. Step 0 runs at
+the start of every milestone against its real integration SHA.
+
+| Milestone | Steps | Exit gate | Depends on |
+|---|---|---|---|
+| **M1 — Linux self-update and notes** (`codex/p66-m1-linux-updater`) | 1, 2, 3 and the part of 7 needed to build, sign with test keys and publish a static TUF repository plus notes | Isolated install: one trusted bootstrap adoption, then in-app N → N+1 → N+2, each showing its notes after reopen; journal killpoints recover; U01–U07, U09–U11, U19 (identity computation), U20, U21 pass. No game-server change. Real activation stays off until O02 | — |
+| **M2 — Backend release safety** (`codex/p66-m2-backend-release-safety`) | 5 and §6.5 | Isolated scenario: a planned backend restart never ends or reroutes a running match and every result lands exactly once; U12, U14, U15, U16 (database part), U17, U19 pass | — |
+| **M3 — Two-slot rollout and contract switch** (`codex/p66-m3-two-slot-rollout`) | 6 and §6.4 | U13, U15, U16, U18, U22 evidence on isolated listeners; owner approval before any proxy bootstrap | M2 |
+| **M4 — Windows adapter** (`codex/p66-m4-windows`) | 4 and the Authenticode decision | U08 plus the U01–U07/U10 subset on real supported Windows; missing hardware keeps M4 pending | M1 |
+
+Release activation (rest of Step 7) is per platform: protected signing,
+metadata promotion and rotation/repair runbooks go live only after O02 and
+the platform's milestone exit.
 
 **Step 0 — freeze decisions/inventory.** Record integrated SHA, install modes,
 paths, launcher/storage behavior, schemas, proxy version/config and result
@@ -474,7 +638,7 @@ do not merge, install, sign a real release or deploy automatically.
 
 ## 9. Verification and decisions
 
-Execute U01–U18 in the companion on synthetic roots and isolated listeners.
+Execute U01–U22 in the companion on synthetic roots and isolated listeners.
 Planned test targets: updater `update_trust`, `update_transaction`,
 `update_receipts`; server `release_admission`, `release_drain`,
 `release_compatibility`; client focused `native_update_flow`. Exact crate/
@@ -494,14 +658,35 @@ release-ready just because normal compilation passed.
 - **O02 trust/signing:** approve root threshold/custody/rotation, protected
   signer/channel process and Windows signing budget before real publication.
 - **O03 availability:** approve new-admission version floor, emergency
-  containment policy, pending-room/rematch behavior and maintenance messaging.
-  Routine updates never force a running match to end.
+  containment policy, pending-room/rematch behavior and maintenance messaging,
+  plus the contract-switch cadence, client lead time (Proposed 24 h) and
+  pre-switch room grace of §6.4. Routine updates never force a running match
+  to end.
 - **O04 capacity/retention:** measure overlap headroom, set disk/download/
   metadata/time limits, rollout cohorts and retained-build/result windows.
   A single-host bottleneck blocks promotion; don't invent player capacity.
+- **O05 player-facing defaults:** automatic idle download on or off by
+  default, prompt cadence (BR-UP08) and notes history length.
 
 Executor report: baseline and actual artifact hashes, compatibility matrix,
 install/OS coverage, test commands/results and deferred gates, journal fault
 injection, keyless test trust setup, drain/result/reconnect evidence, capacity
 measurements, owner decisions and PR URL. No vulnerability-free/zero-failure
 guarantee or thousands-player certification is implied by planning.
+
+## 10. Risk register
+
+| Risk | Impact | Mitigation | Gate |
+|---|---|---|---|
+| Signing key compromise ships a malicious build to every player | Critical | TUF role separation, offline threshold root, short timestamp expiry, rotation runbook | O02, U02 |
+| Root key loss leaves no way to rotate keys | High | Backup ceremony with k-of-n custody; manual signed repair installer | O02 |
+| A bad build bricks installs | High | Health-gated activation, retained previous build, journal recovery | U05, U06 |
+| Bootstrap too old for a new target | Medium | `minimum_bootstrap` in the descriptor and a signed repair path | §5.1 |
+| Someone changes rules or wire without a new contract | High | Identities computed from frozen bytes, content and goldens | §6.5, U19 |
+| Public queue split across contracts | Medium | One active public contract and a scheduled switch | §6.4, U22 |
+| Long matches hold a drain and delay releases | Medium | Defer promotion; never kill; schedule contract switches | §6.2, U15 |
+| Slot overlap starves running matches of CPU/memory | High | Measured headroom, unit weights, refuse new admissions first | §7, O04, U18 |
+| Database migration fails mid-rollout | High | Expand/contract, readiness gate, no restore-based rollback | §6.3, U16 |
+| Retained builds exhaust disk | Low–Medium | Free-space preflight, quota, cleanup that skips pinned builds | O04, U03 |
+| Static repository/CDN outage | Low | The installed game keeps working; jittered retries; mirror later | §4 |
+| Windows antivirus/SmartScreen friction | Medium | Authenticode, reputation, real-device tests, honest docs | O02, U08 |
