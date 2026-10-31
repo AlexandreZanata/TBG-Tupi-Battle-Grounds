@@ -918,3 +918,73 @@ Deferred targeted command: `cargo test -p tbg-client ui::result::tests::rematch_
 under the shared host lock/cache. Full workspace tests/clippy, WASM/Trunk,
 multiplayer/reconnect and release builds remain unrun; broad/full checks
 require the owner's explicit scope. No CI wait, remote Git or deployment.
+
+### Loading continuity result
+
+- Installed source: `84d2c18a00ae3e0ced3b160fb7e866fbed3ca517`.
+  Main implementation: `901abd5`; follow-up local commits correct Bevy
+  compatibility, text measurement, ready-state alignment and pending data.
+  `cargo fmt -p tbg-client -- --check` and `git diff --check` passed.
+  Final `cargo build --locked -p tbg-client --bin tbg-client` took 2.12 s
+  without warnings/errors. Builds/installations used the shared host lock,
+  existing target cache, `CARGO_BUILD_JOBS=2`, the production default socket,
+  and `TBG_SOURCE_COMMIT` from the committed source. Linux packaging with
+  `--no-archive`, the generated installer and `update-desktop-database`
+  passed. No release build ran.
+- Two initial compilation failures were corrected locally:
+  ``error[E0599]: no method named `id` found for enum `FontSource` in the current scope``
+  (match the actual Bevy 0.20 FontSource handle), then
+  ``error: type `Reveal` is private`` (order modules through a SystemSet).
+  An early render capture also exposed missing labels: attaching child UI
+  boxes made automatic Text nodes lose their intrinsic size. Text skeletons
+  now use a background gradient on the original layout leaf. The inspected
+  final captures contain the complete labels; those earlier captures are
+  failure evidence, not passing evidence.
+- Inspected focused 1920x972 captures with isolated data directories,
+  `xvfb-run`, a localhost socket override and the installed executable:
+  normal Lobby `.local/loading-menu-leaf.webp`, forced startup skeletons
+  `.local/loading-forced.webp`, pending ranking
+  `.local/loading-ranking-pending.webp`, normal Augments
+  `.local/loading-council.webp`, forced Augment artwork loading
+  `.local/loading-council-forced.webp`, and real Arena training
+  `.local/loading-storm.webp`. Ready views logged `boot_ready=true`,
+  `scene_waiting=false`, zero pending images/texts and zero failed images.
+  Forced startup logged 25 pending images/57 text fields; pending ranking
+  logged nine pending text fields with six table skeleton rows. Forced
+  Augments logged 38 pending images while the real clock, choices, effects
+  and costs remained readable (0 pending text fields).
+- The existing Arena capture selected Storm through its real Train here
+  action, found all five distinct buttons and asserted the actual Practice
+  arena was Storm. The result was Running, with a complete arena/HUD/Shop
+  and no pending presentation resources. Lobby captures kept the real
+  LatestView absent and real match purchases/evolutions/damage at zero.
+- A 34-second ranking capture `.local/loading-ranking-error.webp` observed
+  the existing network give-up budget ending the pending state instead of
+  leaving permanent skeleton rows. That evidence is from `6eb2f43`; the
+  subsequent error-copy change to a ranking-specific Refresh message was
+  inspected statically. The final ready ranking
+  `.local/loading-ranking-aligned.webp` and first Arcana entry
+  `.local/loading-arcanas.webp`, from `702e555`, both logged zero pending
+  and failed fields. Ranking fixtures are explicitly debug-only layout data,
+  not production accounts. Final `84d2c18` adds only conditional compilation
+  hygiene with unchanged Linux rendering; these captures were reused.
+- Ranked results now reserve their rating slot while waiting for the
+  authoritative RatingChanged message. The existing give-up budget replaces
+  a missing update with an unavailable label; a later genuine update still
+  replaces it. Casual/spectator results do not receive a rating skeleton.
+  Online-list totals also reserve their value while their first request is
+  pending. These additions compiled; live delayed-rating behavior remains
+  part of the deferred network scenarios above.
+- Installed executable metadata/source and SHA-256 against both the build
+  cache and build-info manifest passed, as did `desktop-file-validate`.
+  The local preview pointer records this installed revision. All captures
+  exited successfully; only expected virtual X11 XSETTINGS/0 mm warnings
+  appeared. No user window, preference file or account was replaced.
+- The raw-pixel cache figure is an estimate, not a measured memory or GPU
+  performance claim. Missing/corrupt-art fallback, physical logo clicks,
+  authenticated recovery, delayed rating/rematch/statistics, resizing and
+  cold-disk/driver behavior remain for consolidation; zero flashes on every
+  device has not been demonstrated. No Rust suite, workspace Clippy, other
+  target/browser build, multiplayer/reconnect campaign, remote Git, CI wait
+  or deployment ran. Owner policy files remain unstaged. Reopen TBG to use
+  the new installed Linux presentation.
