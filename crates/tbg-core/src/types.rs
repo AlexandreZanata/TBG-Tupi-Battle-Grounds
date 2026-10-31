@@ -57,11 +57,28 @@ pub enum Faction {
     Undead,
     Machines,
     Plants,
+    /// D-64 (P58 §13.5): the three new Factions, appended in this order.
+    Monsters,
+    Celestials,
+    Insects,
 }
 
 impl Faction {
     pub fn index(self) -> usize {
         self as usize
+    }
+
+    /// The English name used by the HUD, the stats API and the ranked JSON.
+    pub fn name(self) -> &'static str {
+        match self {
+            Faction::Humans => "Humans",
+            Faction::Undead => "Undead",
+            Faction::Machines => "Machines",
+            Faction::Plants => "Plants",
+            Faction::Monsters => "Monsters",
+            Faction::Celestials => "Celestials",
+            Faction::Insects => "Insects",
+        }
     }
 }
 
@@ -209,12 +226,18 @@ pub const ARCHETYPES: [Archetype; 5] = [
     Archetype::Control,
 ];
 
+/// Number of Factions: the four original ones and the three of D-64.
+pub const FACTION_COUNT: usize = 7;
+
 /// All factions, in glossary order (also their synergy index).
-pub const FACTIONS: [Faction; 4] = [
+pub const FACTIONS: [Faction; FACTION_COUNT] = [
     Faction::Humans,
     Faction::Undead,
     Faction::Machines,
     Faction::Plants,
+    Faction::Monsters,
+    Faction::Celestials,
+    Faction::Insects,
 ];
 
 /// Status effect applied to the primary target of a hit.

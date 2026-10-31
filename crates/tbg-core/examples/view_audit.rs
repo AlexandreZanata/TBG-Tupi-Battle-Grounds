@@ -360,7 +360,7 @@ struct ViewA {
     offers: [UnitKind; OFFERS],
     stronghold_hp: [i32; 2],
     units: Vec<UnitA>,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
     last_seq: u32,
     events: Vec<Event>,
     outcome: Option<tbg_core::Outcome>,
@@ -448,7 +448,7 @@ struct ViewC {
     full: bool,
     static_units: Vec<UnitStatic>,
     units: Vec<UnitDynamic>,
-    synergy: Option<[[u8; 4]; 2]>,
+    synergy: Option<[[u8; tbg_core::FACTION_COUNT]; 2]>,
     last_seq: u32,
     events: Vec<Event>,
     outcome: Option<tbg_core::Outcome>,
@@ -466,7 +466,7 @@ struct ViewB {
     static_units: Vec<UnitStatic>,
     units: Vec<UnitDynamic>,
     removed: Vec<UnitId>,
-    synergy: Option<[[u8; 4]; 2]>,
+    synergy: Option<[[u8; tbg_core::FACTION_COUNT]; 2]>,
     last_seq: u32,
     events: Vec<Event>,
     outcome: Option<tbg_core::Outcome>,
@@ -511,7 +511,7 @@ fn fx_of(unit: &tbg_core::Unit) -> u16 {
 fn derived_max_hp(
     unit: &UnitStatic,
     fx: u16,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
     arcanas: &[ArcanaPreset; 2],
     augments: &[AugmentCounts; 2],
     rules: &Ruleset,
@@ -608,22 +608,22 @@ fn build_a_state(state: &MatchState, seat: Seat, events: &[Event]) -> ViewA {
 #[derive(Default, Clone)]
 struct StaticTracker {
     units: Vec<UnitStatic>,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
 }
 
 #[derive(Default, Clone)]
 struct StaticCache {
     units: BTreeMap<UnitId, UnitStatic>,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
 }
 
 /// Sorted merge: both lists are sorted by `UnitId` (ids only grow).
 fn update_statics(
     current: &[UnitStatic],
     tracker: &mut StaticTracker,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
     full: bool,
-) -> (Vec<UnitStatic>, Option<[[u8; 4]; 2]>) {
+) -> (Vec<UnitStatic>, Option<[[u8; tbg_core::FACTION_COUNT]; 2]>) {
     let mut statics = Vec::new();
     if full {
         statics.extend_from_slice(current);
@@ -739,7 +739,7 @@ fn rebuild_c(
 fn rebuild_units(
     dynamics: &[UnitDynamic],
     statics: &BTreeMap<UnitId, UnitStatic>,
-    synergy: [[u8; 4]; 2],
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
     arcanas: &[ArcanaPreset; 2],
     augments: &[AugmentCounts; 2],
     rules: &Ruleset,
@@ -767,7 +767,12 @@ fn rebuild_units(
     Ok(units)
 }
 
-fn assemble_c(view: &ViewC, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Seat) -> MatchView {
+fn assemble_c(
+    view: &ViewC,
+    units: Vec<UnitView>,
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
+    you: Seat,
+) -> MatchView {
     MatchView {
         tick: view.tick,
         phase: view.phase,
@@ -792,7 +797,12 @@ fn assemble_c(view: &ViewC, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Se
     }
 }
 
-fn assemble_b(view: &ViewB, units: Vec<UnitView>, synergy: [[u8; 4]; 2], you: Seat) -> MatchView {
+fn assemble_b(
+    view: &ViewB,
+    units: Vec<UnitView>,
+    synergy: [[u8; tbg_core::FACTION_COUNT]; 2],
+    you: Seat,
+) -> MatchView {
     MatchView {
         tick: view.tick,
         phase: view.phase,

@@ -5,7 +5,7 @@
 
 use crate::arcana::ArcanaValues;
 use crate::ruleset::CANON;
-use crate::types::{Archetype, Faction, OnHit, StrongholdKind, Tick, UnitKind};
+use crate::types::{Archetype, Faction, OnHit, StrongholdKind, Tick, UnitKind, FACTION_COUNT};
 
 pub const TICK_HZ: u32 = 20;
 pub const LANE_LEN: i32 = 16_000;
@@ -265,14 +265,20 @@ pub enum SynergyEffect {
     Damage,
     /// Heal this many bp of max HP every `REGEN_PERIOD` ticks.
     Regen,
+    /// Move speed in bp; it joins the move bonuses under their 5 000 bp cap (D-64).
+    Movement,
 }
 
 /// Per faction (index order): the effect and its bp at level 1 and 2.
-pub const SYNERGIES: [(SynergyEffect, [i32; 2]); 4] = [
+pub const SYNERGIES: [(SynergyEffect, [i32; 2]); FACTION_COUNT] = [
     (SynergyEffect::MaxHp, [2_000, 4_000]),
     (SynergyEffect::AttackSpeed, [2_000, 4_000]),
     (SynergyEffect::Damage, [500, 2_000]),
     (SynergyEffect::Regen, [75, 200]),
+    // D-64 (P58 §13.5): Monsters damage, Celestials max HP, Insects movement.
+    (SynergyEffect::Damage, [500, 1_000]),
+    (SynergyEffect::MaxHp, [500, 1_000]),
+    (SynergyEffect::Movement, [500, 1_000]),
 ];
 
 /// One evolution form: additive modifiers on the base unit, plus the shared

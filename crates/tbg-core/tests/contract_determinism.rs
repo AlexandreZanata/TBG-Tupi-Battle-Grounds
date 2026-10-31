@@ -44,25 +44,27 @@ fn bot_matches_are_frozen() {
     // W0 (P58 §3, D-62): the bleed, weakening, queued-Slow, mark, self-reduction
     // and ability heal-cut slots joined `UnitFx`; hashes moved once, with tick,
     // winner and reason identical on all three seeds (verified).
+    // W1 (P58 §13.5, D-64): the Synergy array grew from four to seven Factions;
+    // hashes moved once, with tick, winner and reason identical (verified).
     use EndReason::StrongholdDestroyed;
     let goldens = [
         (
             1,
-            0x046f_0593_dbe8_feebu64,
+            0x5179_ac0a_c414_6409u64,
             3_336,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             7,
-            0x04db_679e_2b2c_b681,
+            0xd9a7_27fc_c92d_bfdb,
             2_286,
             Seat::B,
             StrongholdDestroyed,
         ),
         (
             42,
-            0x21bf_5451_a254_9287,
+            0xb202_0ad9_8ef8_03ed,
             6_295,
             Seat::B,
             StrongholdDestroyed,

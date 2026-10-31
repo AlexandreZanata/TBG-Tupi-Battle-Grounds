@@ -4,13 +4,13 @@
 use crate::augment;
 use crate::content::{SynergyEffect, BP, REGEN_PERIOD};
 use crate::state::{Event, MatchState};
-use crate::types::{Seat, UnitKind, FACTIONS};
+use crate::types::{Seat, UnitKind, FACTIONS, FACTION_COUNT};
 
 pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
     let rules = state.rules;
     for seat in Seat::BOTH {
         // u32: armies are uncapped (BR-U07); summons never count (BR-U08).
-        let mut counts = [0u32; 4];
+        let mut counts = [0u32; FACTION_COUNT];
         for u in state
             .units
             .iter()

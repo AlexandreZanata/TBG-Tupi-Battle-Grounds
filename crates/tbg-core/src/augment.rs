@@ -21,7 +21,7 @@ use crate::content::{
 use crate::intent::Rejection;
 use crate::rng::Pcg32;
 use crate::state::{Event, MatchState, Unit};
-use crate::types::{Seat, Tick, UnitKind};
+use crate::types::{Seat, Tick, UnitKind, FACTION_COUNT};
 
 /// A full Bounty window is 1 Energy, shared by every source (BR-E08).
 pub const BOUNTY_CEILING: u32 = 600;
@@ -285,7 +285,7 @@ fn add(sum: &mut i64, bp: i32, copies: u16) {
 /// read from the same tick's Synergy levels (BR-X11).
 pub fn unit_bonus(
     counts: &AugmentCounts,
-    synergy: [u8; 4],
+    synergy: [u8; FACTION_COUNT],
     kind: UnitKind,
     tier: u8,
 ) -> AugmentBonus {

@@ -1229,3 +1229,42 @@ balance number moves. A zero shield costs one postcard byte per unit in each vie
 
 **Reopen when** a unit wave needs another stacking rule, or the balance review
 grants the Cargo Crab shield.
+
+## D-64 · Three new Factions: Monsters, Celestials, Insects (P58 §13.5; protocol 20) — 2026-10-31 (agent decision under owner instruction; Proposed)
+
+**Decision.** `Faction` gains `Monsters`, `Celestials` and `Insects` after the
+four existing Factions. `FACTIONS` lists all seven, and `FACTION_COUNT` is
+seven. Every Synergy, view and stats array is sized by that count. Faction names
+are English (`Faction::name`) and are used by the HUD, the stats API and the
+ranked JSON.
+
+Synergy keeps the existing thresholds 2 and 4. A level picks one bonus, so
+bonuses never add twice:
+
+- Monsters: `Damage` +500 / +1 000 bp (P58 §13.5, completion C11).
+- Celestials: `MaxHp` +500 / +1 000 bp.
+- Insects: `Movement` +500 / +1 000 bp, through a new `SynergyEffect::Movement`.
+  It adds to the move bonuses before their existing 5 000 bp cap.
+
+Palettes (ART-DIRECTION §3 rows follow): Monsters in charcoal, dark, turquoise
+and ivory; Celestials in ivory, navy and gold; Insects in moss, chitin and amber.
+Death styles: Monsters topple, Celestials rise and fade, Insects curl and shrink.
+
+**Protocol 20.** The Synergy and stats arrays on the wire grow from four to seven
+entries, so the bytes change (v19 → v20). Older peers are refused.
+
+**Inactive by design.** No unit belongs to the new Factions yet, and the Shop
+pool, Augments and lab tables do not change. A Faction with no living unit has
+no Synergy level, so existing matches, goldens and balance numbers do not move.
+
+**Tests.** `contract_constants::synergies` now asserts seven entries and leaves
+the first four unchanged. `contract_protocol` pins 20.
+
+**Goldens.** The state hash covers the Synergy array, so the hashes in
+`contract_determinism` and `contract_lab` moved once. Tick, winner and reason
+are identical on all five seeds, checked against the pre-W1 commit `bd9964f`
+(the trace probe gave the same ticks, winners and reasons, and it reproduced
+the old goldens exactly before the refreeze).
+
+**Reopen when** the balance review changes a Faction bonus, or a unit wave needs
+a Faction effect the synergy table cannot express.

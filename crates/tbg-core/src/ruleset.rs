@@ -17,7 +17,7 @@ use crate::content::{
     INTEREST_MAX_BANDS, INTEREST_PER_BAND, MIN_INTERVAL, REGEN_RUNNING, STRONGHOLD_DAMAGE,
     STRONGHOLD_HP, STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
 };
-use crate::types::{Tick, UnitKind, ALL_KINDS, FULL_POOL};
+use crate::types::{Tick, UnitKind, ALL_KINDS, FACTION_COUNT, FULL_POOL};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InterestRule {
@@ -66,7 +66,7 @@ pub struct Ruleset {
     pub stronghold_interval: u16,
     pub stronghold_range: i32,
     pub synergy_thresholds: [u8; 2],
-    pub synergies: [(SynergyEffect, [i32; 2]); 4],
+    pub synergies: [(SynergyEffect, [i32; 2]); FACTION_COUNT],
     pub hatch_every: u16,
     pub hatch_every_hive: u16,
     pub beetles_per_nester: [usize; 2],
@@ -234,7 +234,7 @@ impl Ruleset {
         hp_bp += a.hp_bp + augments.hp_bp;
         dmg_bp += a.dmg_bp + augments.dmg_bp;
         atk_bp += augments.atk_bp;
-        let move_bp = augments.move_bp;
+        let mut move_bp = augments.move_bp;
         if synergy_level > 0 {
             let (effect, bps) = self.synergies[d.faction.index()];
             let bp = i64::from(bps[usize::from(synergy_level.min(2)) - 1]);
@@ -242,6 +242,7 @@ impl Ruleset {
                 SynergyEffect::MaxHp => hp_bp += bp,
                 SynergyEffect::AttackSpeed => atk_bp += bp,
                 SynergyEffect::Damage => dmg_bp += bp,
+                SynergyEffect::Movement => move_bp += bp,
                 SynergyEffect::Regen => {}
             }
         }

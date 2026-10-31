@@ -8,7 +8,7 @@ use crate::content::{self, Ability, Stats, BP, MIN_INTERVAL, OFFERS};
 use crate::rng::Pcg32;
 use crate::ruleset::Ruleset;
 use crate::types::{
-    Archetype, Arena, Faction, Seat, Status, StrongholdKind, Tick, UnitId, UnitKind,
+    Archetype, Arena, Faction, Seat, Status, StrongholdKind, Tick, UnitId, UnitKind, FACTION_COUNT,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -186,7 +186,7 @@ pub struct PlayerState {
     /// Treasury Spoils earned in the current Bounty window (BR-SK02).
     pub spoils_window: u32,
     /// Synergy level (0..=2) per `Faction` index.
-    pub synergy: [u8; 4],
+    pub synergy: [u8; FACTION_COUNT],
     pub last_seq: u32,
     pub rng: Pcg32,
     /// Smuggler cargo stream (P48-B): a new hidden stream per seat, never

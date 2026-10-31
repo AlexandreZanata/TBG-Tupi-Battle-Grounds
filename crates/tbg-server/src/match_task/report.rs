@@ -4,6 +4,7 @@ use std::time::Instant;
 
 use super::Match;
 use crate::metrics::percentile;
+use tbg_core::FACTION_COUNT;
 
 #[derive(Default)]
 pub(crate) struct SeatStats {
@@ -14,7 +15,7 @@ pub(crate) struct SeatStats {
     pub(super) purchases: std::collections::BTreeMap<String, u32>,
     pub(super) evolutions: u32,
     /// P12: purchases per faction index (for the ranked result row).
-    pub(super) factions: [u32; 4],
+    pub(super) factions: [u32; FACTION_COUNT],
     /// BR-M06: this seat tapped Surrender (additive report key).
     pub(super) surrendered: bool,
     /// P30-A view observability (never read by gameplay).

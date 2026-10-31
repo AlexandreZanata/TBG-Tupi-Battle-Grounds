@@ -8,7 +8,7 @@ use serde_json::json;
 use tbg_core::protocol::{Profile, RatingResults};
 use tbg_core::rating::{apply, delta, Score};
 use tbg_core::ArcanaPreset;
-use tbg_core::{Outcome, Seat};
+use tbg_core::{Outcome, Seat, FACTIONS, FACTION_COUNT};
 
 use super::AccountId;
 
@@ -20,14 +20,12 @@ fn score_of(outcome: Option<Outcome>, seat: Seat) -> Score {
     }
 }
 
-fn factions_json(factions: [u32; 4]) -> String {
-    json!({
-        "Humans": factions[0],
-        "Undead": factions[1],
-        "Machines": factions[2],
-        "Plants": factions[3],
-    })
-    .to_string()
+fn factions_json(factions: [u32; FACTION_COUNT]) -> String {
+    let shares = FACTIONS
+        .iter()
+        .map(|f| (f.name().to_string(), json!(factions[f.index()])))
+        .collect();
+    serde_json::Value::Object(shares).to_string()
 }
 
 pub(super) fn count(conn: &Connection) -> rusqlite::Result<i64> {
@@ -48,8 +46,8 @@ pub struct PlayerStats {
     pub draws: u32,
     /// `YYYY-MM-DD` from `created_at`.
     pub joined_day: String,
-    /// Purchase shares in percent, Humans/Undead/Machines/Plants order.
-    pub factions: [f64; 4],
+    /// Purchase shares in percent, in `Faction` index order.
+    pub factions: [f64; FACTION_COUNT],
     pub recent: Vec<RecentMatch>,
 }
 
@@ -65,8 +63,6 @@ pub struct RecentMatch {
     pub reason: String,
     pub duration_s: u64,
 }
-
-const FACTION_KEYS: [&str; 4] = ["Humans", "Undead", "Machines", "Plants"];
 
 pub(super) fn player_stats(
     conn: &Connection,
@@ -89,7 +85,7 @@ pub(super) fn player_stats(
                         losses: row.get(6)?,
                         draws: row.get(7)?,
                         joined_day: row.get(8)?,
-                        factions: [0.0; 4],
+                        factions: [0.0; FACTION_COUNT],
                         recent: Vec::new(),
                     },
                 ))
@@ -100,7 +96,7 @@ pub(super) fn player_stats(
         return Ok(None);
     };
     // Faction shares over both sides of every ranked match (one query).
-    let mut totals = [0u64; 4];
+    let mut totals = [0u64; FACTION_COUNT];
     let mut stmt = conn.prepare(
         "SELECT a_factions, b_factions, a_id FROM ranked_matches
          WHERE a_id = ?1 OR b_id = ?1",
@@ -111,8 +107,8 @@ pub(super) fn player_stats(
             (row.get(0)?, row.get(1)?, row.get(2)?);
         let mine = if a_id == id { &a_json } else { &b_json };
         if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(mine) {
-            for (i, key) in FACTION_KEYS.iter().enumerate() {
-                totals[i] += parsed[key].as_u64().unwrap_or(0);
+            for f in FACTIONS {
+                totals[f.index()] += parsed[f.name()].as_u64().unwrap_or(0);
             }
         }
     }
@@ -155,7 +151,7 @@ pub(super) fn ranked_result(
     b: AccountId,
     outcome: Option<Outcome>,
     duration_s: u64,
-    factions: [[u32; 4]; 2],
+    factions: [[u32; FACTION_COUNT]; 2],
     arcanas: [ArcanaPreset; 2],
 ) -> Result<RatingResults, rusqlite::Error> {
     let tx = conn.transaction()?;

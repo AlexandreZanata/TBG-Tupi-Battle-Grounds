@@ -12,14 +12,7 @@ pub fn spawn(
         perceptual_roughness: 0.9,
         ..default()
     });
-    let rows = [
-        FACTIONS[0],
-        FACTIONS[1],
-        FACTIONS[2],
-        FACTIONS[3],
-        ENVIRONMENT,
-        UI,
-    ];
+    let rows: Vec<[Color; 8]> = FACTIONS.into_iter().chain([ENVIRONMENT, UI]).collect();
     for (row, colors) in rows.into_iter().enumerate() {
         for (col, color) in colors.into_iter().enumerate() {
             commands.spawn((

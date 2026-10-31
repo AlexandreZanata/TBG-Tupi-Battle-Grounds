@@ -3,7 +3,7 @@
 
 use tbg_core::content::{RUNNING_START, TICK_HZ};
 use tbg_core::lab::LabStats;
-use tbg_core::{EndReason, MatchState, Seat, ALL_KINDS};
+use tbg_core::{EndReason, MatchState, Seat, ALL_KINDS, FACTION_COUNT};
 
 pub const KINDS: usize = ALL_KINDS.len();
 /// The comeback checkpoint: 2:00 of play (GAME-DESIGN §6).
@@ -21,7 +21,7 @@ impl Side {
     /// Strict purchase-majority faction index, if any (ties are mixed).
     /// Factions are identity, never tuned, so the canonical table is right.
     pub fn majority(&self) -> Option<usize> {
-        let mut counts = [0u32; 4];
+        let mut counts = [0u32; FACTION_COUNT];
         for k in ALL_KINDS {
             counts[tbg_core::content::def(k).faction.index()] +=
                 u32::from(self.purchases[k as usize]);

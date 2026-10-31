@@ -7,7 +7,7 @@ use crate::augment::AugmentCounts;
 use crate::content::{AUGMENT_OPTIONS, OFFERS, RUNNING_START};
 use crate::sim::phase_ticks_left;
 use crate::state::{Event, MatchState, Outcome, Phase};
-use crate::types::{Seat, Status, StrongholdKind, Tick, UnitId, UnitKind};
+use crate::types::{Seat, Status, StrongholdKind, Tick, UnitId, UnitKind, FACTION_COUNT};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UnitView {
@@ -99,7 +99,7 @@ pub struct MatchView {
     pub strongholds: [StrongholdView; 2],
     pub shields: [i32; 2],
     pub units: Vec<UnitView>,
-    pub synergy: [[u8; 4]; 2],
+    pub synergy: [[u8; FACTION_COUNT]; 2],
     /// Both seats' Augment copies (public, BR-AG09).
     pub augments: [AugmentCounts; 2],
     /// Present exactly while the battle is paused for a selection; both

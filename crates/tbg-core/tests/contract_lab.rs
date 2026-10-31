@@ -110,12 +110,15 @@ fn c2_per_tick_traces_are_frozen() {
     // W0 (D-62): `UnitFx` grew with the bleed, weakening, queued-Slow, mark,
     // self-reduction and ability heal-cut slots; traces and hashes moved, with
     // end ticks, winners and reasons identical on all five seeds (verified).
+    // W1 (P58 §13.5, D-64): the Synergy array grew to seven Factions; traces and
+    // hashes moved, with end ticks, winners and reasons identical on all five
+    // seeds (verified against the pre-W1 commit).
     let goldens = [
-        (1, 0x7317_ff9f_8a61_6844, 0x046f_0593_dbe8_feeb, 3_336),
-        (7, 0x8ae3_8286_6f70_c512, 0x04db_679e_2b2c_b681, 2_286),
-        (42, 0x3f47_3df1_225c_ff3e, 0x21bf_5451_a254_9287, 6_295),
-        (1000, 0x7431_6d35_e3b4_2ac1, 0x995f_ae37_3f64_74e3, 6_683),
-        (65535, 0xc2f5_9c31_a8d0_0c73, 0x752d_d5aa_92df_6c32, 5_531),
+        (1, 0xe0d4_1ba9_f7f3_42e2, 0x5179_ac0a_c414_6409, 3_336),
+        (7, 0xf0db_7322_c047_445a, 0xd9a7_27fc_c92d_bfdb, 2_286),
+        (42, 0x6846_b8b3_81ee_9782, 0xb202_0ad9_8ef8_03ed, 6_295),
+        (1000, 0xaf23_2be9_944f_66dd, 0x4e2f_0851_9ee3_42dd, 6_683),
+        (65535, 0xda3b_1789_38e6_ce41, 0x5870_7bf0_8eb0_52fe, 5_531),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

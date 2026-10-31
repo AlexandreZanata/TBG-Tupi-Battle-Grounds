@@ -11,6 +11,7 @@ use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::IntoResponse;
 use axum::Json;
 use serde_json::json;
+use tbg_core::FACTIONS;
 
 use crate::AppState;
 
@@ -121,10 +122,9 @@ pub async fn player(
             favorite = i;
         }
     }
-    let factions = ["Humans", "Undead", "Machines", "Plants"];
     let mut shares = serde_json::Map::new();
-    for (i, key) in factions.iter().enumerate() {
-        shares.insert((*key).into(), json!(stats.factions[i]));
+    for f in FACTIONS {
+        shares.insert(f.name().into(), json!(stats.factions[f.index()]));
     }
     let recent: Vec<_> = stats
         .recent
@@ -143,7 +143,7 @@ pub async fn player(
             "rank": rank, "games": stats.games, "wins": stats.wins, "losses": stats.losses,
             "draws": stats.draws, "win_rate": win_rate_of(stats.wins, stats.games),
             "joined": stats.joined_day, "factions": shares,
-            "favorite_faction": factions[favorite], "recent": recent,
+            "favorite_faction": FACTIONS[favorite].name(), "recent": recent,
         })),
     )
         .into_response()
