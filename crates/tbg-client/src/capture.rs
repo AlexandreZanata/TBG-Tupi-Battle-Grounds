@@ -17,6 +17,8 @@ mod polish_motion;
 mod reserve;
 #[cfg(target_os = "linux")]
 mod training;
+#[cfg(target_os = "linux")]
+mod troops;
 
 pub fn plugin(app: &mut App) {
     #[cfg(target_os = "linux")]
@@ -35,6 +37,11 @@ pub fn plugin(app: &mut App) {
         return;
     }
     if crate::config::url_param("capture").is_some() {
+        #[cfg(target_os = "linux")]
+        if crate::config::url_param("capture_panel").as_deref() == Some("troops") {
+            troops::plugin(app);
+            return;
+        }
         app.add_systems(Update, capture);
         #[cfg(target_os = "linux")]
         if crate::config::url_param("capture_panel").as_deref() == Some("training") {

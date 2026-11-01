@@ -1,0 +1,85 @@
+//! Capture the real Troops preview through its ordinary selection and form actions.
+
+use crate::{
+    art::anim::Clip,
+    config,
+    training::{Action, Catalog, Requests, Tab},
+    ui::shell::{Panel, Shell},
+    GameState,
+};
+use bevy::{
+    prelude::*,
+    render::view::screenshot::{save_to_disk, Screenshot, ScreenshotCaptured},
+};
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_systems(Update, capture);
+}
+
+#[allow(clippy::too_many_arguments)] // Capture reads the actual shell, model selection and camera.
+fn capture(
+    mut commands: Commands,
+    state: Res<State<GameState>>,
+    shell: Res<Shell>,
+    catalog: Res<Catalog>,
+    time: Res<Time>,
+    mut queue: ResMut<Requests>,
+    window: Single<&Window>,
+    camera: Single<&Transform, With<crate::camera::ArenaCamera>>,
+    mut started: Local<Option<f32>>,
+    mut done: Local<bool>,
+) {
+    if *done || *state.get() != GameState::Menu {
+        return;
+    }
+    let name = config::url_param("unit").unwrap_or_default();
+    let Some(unit) = tbg_core::FULL_POOL
+        .into_iter()
+        .find(|kind| format!("{kind:?}") == name)
+    else {
+        return;
+    };
+    let number = |key, max| {
+        config::url_param(key)
+            .and_then(|s| s.parse::<u8>().ok())
+            .unwrap_or(0)
+            .min(max)
+    };
+    let form = (number("tier", 2), number("branch", 1));
+    let Some(start) = *started else {
+        queue.0.extend([
+            Action::Open(Tab::Catalog),
+            Action::Select(unit),
+            Action::Form(form.0, form.1),
+            Action::Clip(Clip::Idle),
+        ]);
+        *started = Some(time.elapsed_secs());
+        return;
+    };
+    if time.elapsed_secs() < start + 2.0
+        || shell.panel != Panel::Troops
+        || catalog.selected != unit
+        || catalog.form != form
+    {
+        return;
+    }
+    let Some(path) = config::url_param("capture") else {
+        return;
+    };
+    *done = true;
+    eprintln!(
+        "P70 Troops: unit={unit:?}; form={form:?}; clip={:?}; viewport={}x{}; dpi={}; camera={camera:?}",
+        catalog.clip,
+        window.physical_width(),
+        window.physical_height(),
+        window.scale_factor(),
+    );
+    commands
+        .spawn(Screenshot::primary_window())
+        .observe(save_to_disk(path))
+        .observe(
+            |_: On<ScreenshotCaptured>, mut exit: MessageWriter<AppExit>| {
+                exit.write(AppExit::Success);
+            },
+        );
+}
