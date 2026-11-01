@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import threading
 import tomllib
 import unittest
 from unittest.mock import patch
@@ -48,23 +49,31 @@ class NativePackage(unittest.TestCase):
 
     def test_conflicting_human_identity_and_non_utf8_output_are_rejected(self):
         with patch.object(packager.subprocess, "check_output", side_effect=[
-            json.dumps({"source_commit": SOURCE, "version": VERSION, "profile": "release"}),
-            "another executable",
+            json.dumps({"source_commit": SOURCE, "version": VERSION, "profile": "release"}).encode("utf-8"),
+            b"another executable",
         ]), self.assertRaisesRegex(SystemExit, "disagrees"):
             packager.release_identity(["unused"], VERSION, SOURCE)
-        with self.assertRaises(UnicodeDecodeError):
-            packager.release_identity([
-                sys.executable, "-c", "import sys; sys.stdout.buffer.write(bytes([255]))",
-            ], VERSION, SOURCE)
+        metadata = json.dumps({"source_commit": SOURCE, "version": VERSION, "profile": "release"})
+        for flag in ["--build-info", "--version"]:
+            program = (
+                f"import sys; output = bytes([255]) if sys.argv[-1] == {flag!r} "
+                f"else {metadata.encode('utf-8')!r}; sys.stdout.buffer.write(output)"
+            )
+            with self.subTest(flag=flag), patch.object(threading, "excepthook") as reader_error:
+                with self.assertRaises(UnicodeDecodeError):
+                    packager.release_identity([sys.executable, "-c", program], VERSION, SOURCE)
+                reader_error.assert_not_called()
 
     def test_identity_probe_is_bounded_and_utf8_even_when_calling_through_a_runner(self):
         metadata = {"source_commit": SOURCE, "version": VERSION, "profile": "release"}
         identity = f"Tupi Battle Grounds {VERSION} · source {SOURCE}"
-        with patch.object(packager.subprocess, "check_output", side_effect=[json.dumps(metadata), identity]) as call:
+        with patch.object(packager.subprocess, "check_output", side_effect=[
+            json.dumps(metadata).encode("utf-8"), identity.encode("utf-8"),
+        ]) as call:
             packager.release_identity(["runner", "client.exe"], VERSION, SOURCE)
         for args in call.call_args_list:
             self.assertEqual(args.args[0][:2], ["runner", "client.exe"])
-            self.assertEqual(args.kwargs, {"encoding": "utf-8", "errors": "strict", "timeout": 30})
+            self.assertEqual(args.kwargs, {"timeout": 30})
 
 
 class WindowsWorkflow(unittest.TestCase):

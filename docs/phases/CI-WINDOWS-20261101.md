@@ -124,3 +124,48 @@ reported as passing. No TBG executable or installer was installed in these probe
 - [GitHub cache scope isolation](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#restrictions-for-accessing-a-cache).
 - [Pinned rust-cache restore implementation](https://github.com/Swatinem/rust-cache/blob/d1527c8f67ef9af357290475d4af4b0fab8f12e0/src/restore.ts)
   and [post-step condition](https://github.com/Swatinem/rust-cache/blob/d1527c8f67ef9af357290475d4af4b0fab8f12e0/action.yml).
+
+## Follow-up: CPython 3.11 Windows reader-thread failure
+
+Run [41357769918 / Windows job 125001429637](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/actions/runs/41357769918/job/125001429637)
+checked head `cd3ba9f` through merge `ca5e662325451a299797595a24a718ab25986a18`.
+The early regression step rejected the malformed-output scenario before any Rust
+compilation or installer compile. The other five package/workflow scenarios passed.
+
+On Windows, CPython 3.11.9 decodes a text pipe in `_readerthread`. Invalid UTF-8
+raised `UnicodeDecodeError` in that thread; `check_output()` returned `None` to the
+caller, whose `.strip()` then raised `AttributeError`. The Linux-only validation
+of the previous change did not expose that platform difference. The test must
+remain strict: accepting a missing result or ignoring malformed bytes is not a fix.
+
+Capture raw bytes with the same timeout/exit-status checks, then decode strict
+UTF-8 in the calling thread. Malformed output now propagates `UnicodeDecodeError`
+consistently on both platforms. Regressions inject invalid bytes into each of
+`--build-info` and `--version` and assert that no exception escapes through
+`threading.excepthook`. Source/version/profile and human/structured identity
+checks remain mandatory. Cache, compilation options and publication gates are
+unchanged by this follow-up.
+
+Validation actually executed on the corrected script diff:
+
+- Linux `python3 scripts/test-native-package.py`: **6 passed** (0.089 s).
+- Windows **CPython 3.11.9**, the same version as the failed runner:
+  `C:\TBG\windows-python3119\runtime\python.exe C:\TBG\windows-python3119\scripts\test-native-package.py -v`:
+  **6 passed** (0.244 s), including both real malformed-output subprocess cases.
+- The portable runtime came from the official Python.org 3.11.9 embeddable ZIP;
+  its published checksum matched, SHA-256 was
+  `009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b`,
+  and `python.exe` / `python311.dll` both had Windows Authenticode status **Valid**.
+  It was extracted into the existing isolated TBG VM, without a system installer,
+  registry/file associations, game launch or changes to an installed game.
+- Linux `python3 scripts/test-native-artifacts.py`: **4 passed**.
+- Linux `python3 scripts/test-ci-required-checks.py`: **9 passed**.
+- Python compilation, patch-note guard and `git diff --check`: **passed**.
+
+The earlier Inno provisioning block remains explicit; it was not retried. Actual
+Inno fixture/package compilation, the new Windows build/time and final native
+runtime/publication remain pending on their respective gates. No local Cargo
+compilation, full suite, balance gate, deployment or reinstallation was needed.
+The owner still handles the new CI outcome and merge; do not wait for CI here.
+
+Reference: [CPython v3.11.9 Windows subprocess reader and output collection](https://github.com/python/cpython/blob/v3.11.9/Lib/subprocess.py#L1598-L1646).

@@ -18,9 +18,12 @@ ROOT = Path(__file__).resolve().parents[1]
 def release_identity(command, version, commit):
     """Rust writes UTF-8 even when Windows' default Python locale is CP1252."""
     def output(flag):
+        # CPython 3.11 on Windows decodes text pipes in a reader thread;
+        # invalid bytes can yield None instead of propagating UnicodeDecodeError.
+        # Decode after capture so both platforms propagate the strict failure.
         return subprocess.check_output(
-            [*command, flag], encoding="utf-8", errors="strict", timeout=30,
-        ).strip()
+            [*command, flag], timeout=30,
+        ).decode("utf-8", errors="strict").strip()
 
     metadata = json.loads(output("--build-info"))
     expected = {"source_commit": commit, "version": version, "profile": "release"}
