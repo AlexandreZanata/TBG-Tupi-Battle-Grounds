@@ -1467,7 +1467,8 @@ installation, real signing, publication of executables or deployment.
 
 Proposed initial operational values: metadata file 1 MiB, descriptor 64 KiB,
 notes 512 KiB; archive 2 GiB compressed/8 GiB extracted/100,000 entries;
-initial attempt plus at most 2 automatic retries; discovery deadline 5 s
+initial attempt plus at most 2 automatic retries; download inactivity 30 s
+(Proposed, not a total-transfer deadline); discovery deadline 5 s
 and idle periodic check interval 6 hours; candidate readiness deadline 60 s;
 at least current/previous builds plus pinned builds; automatic highlights
 through 10 releases. Canary steps internal/5%/25%/100% concern new eligible

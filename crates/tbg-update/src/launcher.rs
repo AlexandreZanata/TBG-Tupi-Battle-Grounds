@@ -213,6 +213,10 @@ fn run_once(layout: &Layout, build: &str, args: &[OsString], outcome: Outcome) -
 
 /// The candidate exited before reporting healthy: back to `from`.
 fn roll_back(layout: &Layout, from: &str, to: &str) -> Step {
+    if !crate::policy::permits_fallback(layout, from) {
+        eprintln!("tbg-launcher: fallback is not permitted; use a trusted repair bootstrap");
+        return Step::Exit(1);
+    }
     if activate::restore(layout, from).is_err() || journal::store(layout, None).is_err() {
         return Step::Exit(1);
     }

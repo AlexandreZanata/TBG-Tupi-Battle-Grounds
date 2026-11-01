@@ -15,6 +15,7 @@ pub mod launcher;
 pub mod layout;
 pub mod limits;
 pub mod notes;
+pub mod policy;
 pub mod publish;
 pub mod receipt;
 pub mod transport;

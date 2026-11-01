@@ -49,38 +49,54 @@ fn runtime() -> tokio::runtime::Runtime {
 /// `check`: is a newer eligible release available?
 pub fn check(layout: &Layout) -> i32 {
     runtime().block_on(async {
-        let (repo, source) = match trust::open(layout).await {
-            Ok(v) => v,
-            Err(e) => return fail("unavailable", e),
-        };
-        let (pointer, descriptor) = match trust::latest(&repo, &source).await {
-            Ok(v) => v,
-            Err(e) => return fail("verification", e),
-        };
-        let current = layout.current_build().unwrap_or_default();
-        let sequence = installed(layout, &current).map_or(0, |d| d.release_sequence);
-        let state = if pointer.release_sequence > sequence && pointer.build_id != current {
-            "available"
-        } else {
-            "current"
-        };
-        let notes = trust::read_small(&repo, &descriptor.notes_target, NOTES_BYTES)
-            .await
-            .ok()
-            .and_then(|b| serde_json::from_slice::<Value>(&b).ok());
-        emit(json!({
-            "event": "status",
-            "state": state,
-            "current": current,
-            "build": descriptor.build_id,
-            "version": descriptor.display_version,
-            "size": trust::target_length(&repo, &descriptor.package_target),
-            "required": sequence < descriptor.security_floor_sequence,
-            "contract": descriptor.compatibility.match_contract,
-            "notes": notes,
-        }));
-        0
+        match tokio::time::timeout(
+            std::time::Duration::from_secs(crate::limits::DISCOVERY_SECS),
+            check_async(layout),
+        )
+        .await
+        {
+            Ok(code) => code,
+            Err(_) => fail("unavailable", "signed discovery deadline exceeded"),
+        }
     })
+}
+
+async fn check_async(layout: &Layout) -> i32 {
+    let (repo, source) = match trust::open(layout).await {
+        Ok(v) => v,
+        Err(e) => return fail("unavailable", e),
+    };
+    let (pointer, descriptor) = match trust::latest(&repo, &source).await {
+        Ok(v) => v,
+        Err(e) => return fail("verification", e),
+    };
+    let floor = match crate::policy::remember(layout, descriptor.security_floor_sequence) {
+        Ok(value) => value,
+        Err(error) => return fail("disk", error),
+    };
+    let current = layout.current_build().unwrap_or_default();
+    let sequence = installed(layout, &current).map_or(0, |d| d.release_sequence);
+    let state = if pointer.release_sequence > sequence && pointer.build_id != current {
+        "available"
+    } else {
+        "current"
+    };
+    let notes = trust::read_small(&repo, &descriptor.notes_target, NOTES_BYTES)
+        .await
+        .ok()
+        .and_then(|b| serde_json::from_slice::<Value>(&b).ok());
+    emit(json!({
+        "event": "status",
+        "state": state,
+        "current": current,
+        "build": descriptor.build_id,
+        "version": descriptor.display_version,
+        "size": trust::target_length(&repo, &descriptor.package_target),
+        "required": sequence < floor,
+        "contract": descriptor.compatibility.match_contract,
+        "notes": notes,
+    }));
+    0
 }
 
 fn stdin_cancel() -> Arc<AtomicBool> {
@@ -130,19 +146,35 @@ pub fn stage_with(layout: &Layout, build: &str, cancel: &AtomicBool) -> i32 {
 }
 
 async fn stage_async(layout: &Layout, build: &str, cancel: &AtomicBool) -> i32 {
-    let (repo, source) = match trust::open(layout).await {
-        Ok(v) => v,
-        Err(e) => return fail("unavailable", e),
+    let (repo, source) = match tokio::time::timeout(
+        std::time::Duration::from_secs(crate::limits::DISCOVERY_SECS),
+        trust::open(layout),
+    )
+    .await
+    {
+        Err(_) => return fail("unavailable", "metadata discovery deadline exceeded"),
+        Ok(result) => match result {
+            Ok(v) => v,
+            Err(e) => return fail("unavailable", e),
+        },
     };
-    let descriptor = match trust::latest(&repo, &source).await {
-        Ok((_, d)) if d.build_id == build => d,
-        Ok(_) => {
-            return fail(
-                "unsupported",
-                "that build is no longer the channel's release",
-            )
-        }
-        Err(e) => return fail("verification", e),
+    let descriptor = match tokio::time::timeout(
+        std::time::Duration::from_secs(crate::limits::DISCOVERY_SECS),
+        trust::latest(&repo, &source),
+    )
+    .await
+    {
+        Err(_) => return fail("unavailable", "descriptor discovery deadline exceeded"),
+        Ok(result) => match result {
+            Ok((_, d)) if d.build_id == build => d,
+            Ok(_) => {
+                return fail(
+                    "unsupported",
+                    "that build is no longer the channel's release",
+                )
+            }
+            Err(e) => return fail("verification", e),
+        },
     };
     let size = trust::target_length(&repo, &descriptor.package_target).unwrap_or(PACKAGE_BYTES);
     // Package + extracted copy (bounded below by 3x) next to the kept builds.
@@ -204,6 +236,16 @@ pub fn install_staged(
     archive: &std::path::Path,
     d: &ReleaseDescriptor,
 ) -> i32 {
+    let floor = match crate::policy::remember(layout, d.security_floor_sequence) {
+        Ok(value) => value,
+        Err(error) => return fail("disk", error),
+    };
+    if d.release_sequence < floor {
+        return fail(
+            "unsupported",
+            "release is below the verified security floor",
+        );
+    }
     let unpack = layout.staging().join(format!("{build}.d"));
     let _ = std::fs::remove_dir_all(&unpack);
     if let Err(e) = extract::extract(archive, &unpack) {

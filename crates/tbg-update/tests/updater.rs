@@ -453,3 +453,18 @@ fn u05_corrupt_journal_refuses_to_launch_instead_of_ignoring_recovery() {
     assert_eq!(launcher::run(&f.layout, &[]), 1);
     assert_eq!(f.layout.current_build().as_deref(), Some("b1"));
 }
+
+#[test]
+fn u06_revoked_fallback_requires_repair_without_false_recovery() {
+    let f = Fixture::new();
+    f.publish("b1", 1, OLD_GAME);
+    install_current(&f, "b1");
+    f.publish("b2", 2, "exit 3");
+    assert_eq!(f.stage("b2"), 0);
+    assert_eq!(tbg_update::policy::remember(&f.layout, 2).unwrap(), 2);
+    assert_eq!(tbg_update::policy::remember(&f.layout, 0).unwrap(), 2);
+    assert_eq!(launcher::run(&f.layout, &[]), 1);
+    assert!(activate::reconcile(&f.layout).is_err());
+    assert!(receipt::pending(&f.layout).is_none());
+    assert_eq!(f.layout.current_build().as_deref(), Some("b2"));
+}

@@ -20,6 +20,17 @@ fn need(args: &[String], name: &str) -> Result<String, String> {
     value(args, name).ok_or_else(|| format!("missing {name}"))
 }
 
+fn path(args: &[String], name: &str) -> Result<std::path::PathBuf, String> {
+    let path = std::path::PathBuf::from(need(args, name)?);
+    if path.is_absolute() {
+        Ok(path)
+    } else {
+        Ok(std::env::current_dir()
+            .map_err(|e| e.to_string())?
+            .join(path))
+    }
+}
+
 fn days(args: &[String], name: &str, default: i64) -> i64 {
     value(args, name)
         .and_then(|v| v.parse().ok())
@@ -29,36 +40,36 @@ fn days(args: &[String], name: &str, default: i64) -> i64 {
 
 async fn run(args: &[String]) -> Result<(), String> {
     match args.first().map(String::as_str) {
-        Some("init-keys") => publish::init_keys(need(args, "--keys")?.as_ref()),
+        Some("init-keys") => publish::init_keys(path(args, "--keys")?.as_ref()),
         Some("init-repo") => {
             publish::init_repo(
-                need(args, "--keys")?.as_ref(),
-                need(args, "--repo")?.as_ref(),
+                path(args, "--keys")?.as_ref(),
+                path(args, "--repo")?.as_ref(),
                 days(args, "--root-days", 365),
             )
             .await
         }
         Some("publish") => {
             let descriptor: ReleaseDescriptor =
-                fsx::read_json(need(args, "--descriptor")?.as_ref(), 64 * 1024)
+                fsx::read_json(path(args, "--descriptor")?.as_ref(), 64 * 1024)
                     .map_err(|e| e.to_string())?;
             let release = Release {
-                package: need(args, "--package")?.into(),
-                notes: need(args, "--notes")?.into(),
+                package: path(args, "--package")?,
+                notes: path(args, "--notes")?,
                 descriptor,
                 previous_contract: value(args, "--previous-contract"),
                 metadata_days: days(args, "--days", 30),
             };
             publish::publish(
-                need(args, "--keys")?.as_ref(),
-                need(args, "--repo")?.as_ref(),
+                path(args, "--keys")?.as_ref(),
+                path(args, "--repo")?.as_ref(),
                 &release,
             )
             .await
         }
         Some("check-notes") => {
             let notes: Notes = fsx::read_json(
-                need(args, "--notes")?.as_ref(),
+                path(args, "--notes")?.as_ref(),
                 tbg_update::limits::NOTES_BYTES,
             )
             .map_err(|e| e.to_string())?;

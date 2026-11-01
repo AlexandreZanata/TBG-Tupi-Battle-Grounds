@@ -15,6 +15,8 @@ pub const EXTRACTED_BYTES: u64 = 8 * 1024 * 1024 * 1024;
 pub const ARCHIVE_ENTRIES: usize = 100_000;
 /// Automatic retries after the first download attempt.
 pub const DOWNLOAD_RETRIES: u32 = 2;
+/// Maximum inactivity between chunks, not a total transfer deadline (Proposed).
+pub const DOWNLOAD_IDLE_SECS: u64 = 30;
 /// Startup discovery deadline (seconds).
 pub const DISCOVERY_SECS: u64 = 5;
 /// Background recheck interval while idle (seconds).

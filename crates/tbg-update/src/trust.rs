@@ -80,7 +80,13 @@ pub async fn read_small(repo: &Repository, name: &str, limit: u64) -> Result<Vec
         .map_err(|e| e.to_string())?
         .ok_or_else(|| format!("{name} is not a signed target"))?;
     let mut out = Vec::new();
-    while let Some(chunk) = stream.next().await {
+    while let Some(chunk) = tokio::time::timeout(
+        std::time::Duration::from_secs(crate::limits::DOWNLOAD_IDLE_SECS),
+        stream.next(),
+    )
+    .await
+    .map_err(|_| "download inactivity deadline exceeded".to_string())?
+    {
         out.extend_from_slice(&chunk.map_err(|e| format!("{name} failed verification: {e}"))?);
     }
     Ok(out)
@@ -153,7 +159,13 @@ async fn download_inner(
         .await
         .map_err(|e| e.to_string())?;
     let mut done = 0u64;
-    while let Some(chunk) = stream.next().await {
+    while let Some(chunk) = tokio::time::timeout(
+        std::time::Duration::from_secs(crate::limits::DOWNLOAD_IDLE_SECS),
+        stream.next(),
+    )
+    .await
+    .map_err(|_| "download inactivity deadline exceeded".to_string())?
+    {
         if cancel.load(Relaxed) {
             return Err("cancelled".into());
         }

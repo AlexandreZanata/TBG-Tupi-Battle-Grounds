@@ -77,14 +77,14 @@ pub fn reconcile(layout: &Layout) -> io::Result<Recovery> {
         Txn::Activating { from, to, .. } | Txn::Launching { from, to, .. } => {
             // No healthy acknowledgement was committed for `to` (that
             // clears the journal), so it is not proven: use `from`.
-            if complete(layout, &from) {
+            if complete(layout, &from) && crate::policy::permits_fallback(layout, &from) {
                 restore(layout, &from)?;
                 journal::store(layout, None)?;
                 Ok(Recovery::RolledBack { from, to })
             } else {
-                // Nothing older to return to: keep the candidate.
-                journal::store(layout, None)?;
-                Ok(Recovery::Unchanged)
+                Err(io::Error::other(
+                    "no permitted verified fallback; trusted repair required",
+                ))
             }
         }
     }
