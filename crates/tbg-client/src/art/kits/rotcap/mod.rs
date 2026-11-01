@@ -41,14 +41,28 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             tools::add(pose, Joint::Spine, [0.0, 0.0, 4.0 * w]);
             tools::add(pose, Joint::Head, [0.0, 0.0, -3.0 * w]);
             belly(pose, 0.0);
+            tools::shift(pose, Joint::Chest, [0.0, 0.006 * w, 0.0]);
+            tools::add(pose, Joint::Head, [2.0 * w, 0.0, 0.0]);
         }
-        Clip::Walk => moves::walk(m, pose, 3.0, 7.0),
+        Clip::Walk => {
+            moves::walk(m, pose, 3.0, 7.0);
+            let step = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
+            belly(pose, 0.0);
+            tools::set(pose, Joint::Head, [-3.0, 3.0 * step, -5.0 * step]);
+            tools::shift(pose, Joint::Chest, [0.0, -0.01 * step.abs(), 0.0]);
+        }
         Clip::AttackRanged => spit(m, pose, &p),
         Clip::Hit => moves::hit(m, pose, 1.0),
         Clip::Death => moves::death(m, pose, &p, Fall::Sink),
         Clip::Spawn => moves::spawn(m, pose, &p, Entry::Rise),
         Clip::Evolve => moves::evolve(m, pose, &p, Power::Burst),
-        Clip::Victory => moves::victory(m, pose, &p, Cheer::Dance),
+        Clip::Victory => {
+            let cap = (m.t / 0.8 * std::f32::consts::TAU).sin();
+            tools::set(pose, Joint::Chest, [4.0 * cap, 0.0, 3.0 * cap]);
+            tools::set(pose, Joint::Head, [-3.0 * cap, 9.0 * cap, -4.0 * cap]);
+            belly(pose, 0.25 + 0.25 * cap);
+            tools::plant(pose, &p, tools::stance(&p, 1.2, 0.0));
+        }
         _ => {}
     }
 }
@@ -92,5 +106,6 @@ fn spit(m: &Moment, pose: &mut Pose, p: &crate::art::rig::Proportions) {
         [0.0, -0.03 * draw, -0.03 * draw + 0.04 * lunge],
     );
     belly(pose, draw);
+    tools::shift(pose, Joint::Head, [0.0, 0.008 * draw, 0.018 * lunge]);
     tools::plant(pose, p, tools::stance(p, 1.3, 0.08));
 }
