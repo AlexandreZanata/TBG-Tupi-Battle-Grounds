@@ -19,13 +19,15 @@ pub const FORE: Vec3 = Vec3::new(0.0, -0.03, 0.24);
 /// Barrel axis height above the grip.
 const BORE: f32 = 0.1;
 const X90: [f32; 3] = [90.0, 0.0, 0.0];
-const HOT: Color = Color::srgb(1.0, 0.55, 0.18);
+const HOT: Color = ORANGE;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.1, tier);
     p.leg *= 0.86;
     p.torso.x *= 1.2;
     p.torso.z *= 1.2;
+    // The support hand must reach the mortar mouth during the authored reload.
+    p.arm = 0.35;
     p
 }
 
@@ -65,7 +67,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
 
 fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     let t = p.torso;
-    let plate = if f.b { IRON } else { GUNMETAL };
+    let plate = if f.b { IRON } else { RUST };
     v.extend([
         part(
             Body(Chest),
@@ -75,7 +77,7 @@ fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         ),
         part(
             Body(Chest),
-            Box(t.x * 0.5, t.y * 0.3, 0.03),
+            Box(t.x * 0.58, t.y * 0.32, 0.035),
             BRASS,
             [0.0, t.y * 0.62, t.z * 0.6],
         ),
@@ -165,10 +167,10 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     // Brass goggles; Heavy Ordnance lights them.
     for s in [-1.0f32, 1.0] {
         let at = [s * h * 0.36, h * 0.3, h * 0.92];
-        v.push(part(Body(Head), Cyl(0.04, 0.04), BRASS, at).rot(X90));
+        v.push(part(Body(Head), Cyl(0.045, 0.05), BRASS, at).rot(X90));
         let lens = part(
             Body(Head),
-            Ball(0.028),
+            Ball(0.032),
             ORANGE,
             [at[0], at[1], at[2] + 0.02],
         );
