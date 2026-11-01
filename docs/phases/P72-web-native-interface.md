@@ -73,3 +73,30 @@ victory.
   wasm32-unknown-unknown -p tbg-client -p tbg-core` clean; release wasm and
   Trunk builds succeed. Known limit: phones lose D-20's DOM keyboard input
   (out of the desktop-only scope).
+- 2026-11-01: **parity measured** with the client's own Bevy screenshot on
+  both platforms (native: rc.1 Linux build; web: comparison-only build with
+  `--features ui-acceptance`, never deployed), 1440x900, pt-BR. Mean
+  absolute difference per pixel (0–255):
+
+  | Scenario | Difference | Scenario | Difference |
+  |---|---|---|---|
+  | Troops panel | 0.07 | Unit details (evolutions) | 1.07 |
+  | Ranking | 0.15 | Shop Reserve | 1.67 |
+  | Stronghold panel | 0.28 | Fortification | 2.16 |
+  | Patch notes panel | 0.30 | Live panel | 2.71 |
+  | Arcanas panel | 0.41 | Lobby | 3.03 |
+  | Settings panel | 0.47 | Arena training (Forest) | 4.00 |
+  | Training lab | 0.70 | Running battle (shop cards) | 4.69 |
+
+  The remaining differences come from dynamic content: the lobby's demo
+  battle, random Shop offers and unit positions per match, live counters.
+  Not captured on the web within the time limits of software (SwiftShader)
+  rendering: War Council (waits for an Augment round), victory and the
+  Arenas panel; the Arenas panel's page screenshot shows the same cards.
+- 2026-11-01: **deployed** to the test environment as the web-only release
+  `p72w-b2c2d9e17509` (code `b2c2d9e`; later commits are docs) on top of the
+  P71 server: the public page loads the Bevy canvas (no DOM lobby, no page
+  errors), Casual opens `wss://…/ws/slot-a?contract=w30-…`, and the browser
+  sign-in module still issues the `__Host-tbg_refresh` cookie (Secure,
+  HttpOnly, SameSite=Strict), restores the same family and logs out.
+
