@@ -383,7 +383,7 @@ pub fn entry(s: &str) -> Option<[u8; 16]> {
         return None;
     }
     let mut bytes = [0; 16];
-    for (i, p) in s.as_bytes().chunks_exact(2).enumerate() {
+    for (i, p) in s.as_bytes().as_chunks::<2>().0.iter().enumerate() {
         bytes[i] = u8::from_str_radix(std::str::from_utf8(p).ok()?, 16).ok()?;
     }
     Some(bytes)

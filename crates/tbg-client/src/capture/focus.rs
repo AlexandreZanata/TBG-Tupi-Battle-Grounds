@@ -22,6 +22,7 @@ pub fn plugin(app: &mut App) {
     app.init_resource::<Flow>().add_systems(Update, run);
 }
 
+#[allow(clippy::too_many_arguments)] // one opt-in capture journey reads every resource it drives
 fn run(
     mut commands: Commands,
     (time, state, view): (Res<Time<Real>>, Res<State<GameState>>, Res<LatestView>),
