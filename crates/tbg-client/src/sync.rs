@@ -285,12 +285,19 @@ impl Scene<'_, '_, '_, '_, '_> {
                     v.marked = marked.contains(&u.id);
                     anim.carried = u.is_carried();
                     anim.set_reduction(u.reduction);
-                    anim.counter = u.ability_counter();
+                    anim.observe_counter(u.ability_counter());
+                    anim.completion = u.effects.and_then(|e| e.completion);
                     anim.observe_special(
                         u.special.is_some_and(|s| s.ready_in == 0),
                         u.special.and_then(|s| s.cast).map(|c| c.left),
+                        u.special.map_or(tbg_core::content::WINDUP, |s| s.windup),
                         u.status == 2,
                     );
+                    if anim.completion.is_some_and(|f| f.interrupt_ticks > 0)
+                        && u.special.is_none_or(|s| s.cast.is_none())
+                    {
+                        anim.cancel_special();
+                    }
                     visuals::update_unit_visual(self.commands, self.assets, self.lib, &mut v, u);
                 }
                 None => {
@@ -328,7 +335,13 @@ impl Scene<'_, '_, '_, '_, '_> {
             if let Some(e) = self.map.0.get(&u.id) {
                 self.commands
                     .entity(*e)
-                    .insert(crowd_ecs::LaneAnchor { pos, ..anchor });
+                    .insert(crowd_ecs::LaneAnchor { pos, ..anchor })
+                    .insert(crate::vfx::completion::Facts {
+                        view: u.effects.and_then(|f| f.completion),
+                        you,
+                        alive: u.hp > 0,
+                        form: (u.kind, u.tier, u.branch),
+                    });
             }
         }
         (you, from.units.iter().map(|u| u.id).collect())

@@ -79,6 +79,30 @@ fn resolved(
     if let Some((_, _, mut anim)) = map.0.get(&unit).and_then(|e| visuals.get_mut(*e).ok()) {
         anim.resolve_special();
     }
+    if crate::art::kits::completion::kit(kind).is_some() {
+        let at = Vec3::new(world_x(center, fx.you), 0.6, 0.0);
+        let form = map
+            .0
+            .get(&unit)
+            .and_then(|e| visuals.get(*e).ok())
+            .map_or((0, 0), |(_, _, a)| a.form);
+        let splash = if kind == UnitKind::Blastbeetle {
+            0.9
+        } else {
+            0.0
+        };
+        impacts::land(
+            commands,
+            fx.vfx,
+            Impact::Champion(kind, form.0, form.1),
+            at,
+            Area {
+                splash,
+                ..Default::default()
+            },
+        );
+        return;
+    }
     let (impact, target, area) = match kind {
         UnitKind::Crowcaller => (Impact::Plague, primary, Area::default()),
         UnitKind::Whisperer => (Impact::Mind, primary, Area::default()),

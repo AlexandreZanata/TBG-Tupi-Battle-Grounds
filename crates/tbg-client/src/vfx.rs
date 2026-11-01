@@ -84,13 +84,15 @@ pub(crate) struct Vfx {
     dur: f32,
 }
 
+pub(crate) mod completion;
 mod effects;
 pub mod impacts;
 pub mod shots;
 pub use effects::{evolve, heal, puff, sparks, splash, synergy};
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(PreStartup, init)
+    app.add_plugins(completion::plugin)
+        .add_systems(PreStartup, init)
         .add_systems(Update, (animate, shots::fly));
 }
 

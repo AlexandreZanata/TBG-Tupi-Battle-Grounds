@@ -82,7 +82,10 @@
         24,
         800,
         54
-      ]
+      ],
+      "crowd_radius": 0.47,
+      "sampled_rest_half_width": 0.42284,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "lastlight-cantor",
@@ -141,7 +144,10 @@
         32,
         2800,
         40
-      ]
+      ],
+      "crowd_radius": 0.46,
+      "sampled_rest_half_width": 0.41414,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "cragclaw",
@@ -200,7 +206,10 @@
         26,
         850,
         50
-      ]
+      ],
+      "crowd_radius": 0.51,
+      "sampled_rest_half_width": 0.46941,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "hushfang",
@@ -259,7 +268,10 @@
         24,
         800,
         60
-      ]
+      ],
+      "crowd_radius": 0.29,
+      "sampled_rest_half_width": 0.246,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "spinehurler",
@@ -318,7 +330,10 @@
         34,
         4200,
         40
-      ]
+      ],
+      "crowd_radius": 0.47,
+      "sampled_rest_half_width": 0.42096,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "mire-tender",
@@ -377,7 +392,10 @@
         34,
         2700,
         38
-      ]
+      ],
+      "crowd_radius": 0.47,
+      "sampled_rest_half_width": 0.42824,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "gorgehowl",
@@ -436,7 +454,10 @@
         36,
         1800,
         42
-      ]
+      ],
+      "crowd_radius": 0.47,
+      "sampled_rest_half_width": 0.42096,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "sunlancer",
@@ -495,7 +516,10 @@
         24,
         1000,
         52
-      ]
+      ],
+      "crowd_radius": 0.46,
+      "sampled_rest_half_width": 0.41454,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "eclipse-dancer",
@@ -554,7 +578,10 @@
         22,
         800,
         56
-      ]
+      ],
+      "crowd_radius": 0.48,
+      "sampled_rest_half_width": 0.43669,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "starbreaker",
@@ -613,7 +640,10 @@
         34,
         900,
         44
-      ]
+      ],
+      "crowd_radius": 0.54,
+      "sampled_rest_half_width": 0.49261,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "dawnmender",
@@ -672,7 +702,10 @@
         32,
         2800,
         40
-      ]
+      ],
+      "crowd_radius": 0.42,
+      "sampled_rest_half_width": 0.37509,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "prismancer",
@@ -731,7 +764,10 @@
         30,
         4000,
         42
-      ]
+      ],
+      "crowd_radius": 0.51,
+      "sampled_rest_half_width": 0.46829,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "leafcutter",
@@ -790,7 +826,10 @@
         22,
         750,
         56
-      ]
+      ],
+      "crowd_radius": 0.46,
+      "sampled_rest_half_width": 0.41943,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "blastbeetle",
@@ -849,7 +888,10 @@
         24,
         700,
         58
-      ]
+      ],
+      "crowd_radius": 0.37,
+      "sampled_rest_half_width": 0.32341,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "needlewing",
@@ -908,7 +950,10 @@
         30,
         3900,
         48
-      ]
+      ],
+      "crowd_radius": 0.46,
+      "sampled_rest_half_width": 0.41652,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "nectar-nurse",
@@ -967,7 +1012,10 @@
         36,
         2600,
         44
-      ]
+      ],
+      "crowd_radius": 0.48,
+      "sampled_rest_half_width": 0.43459,
+      "victory_duration_seconds": 3.0
     },
     {
       "id": "stridulator",
@@ -1026,7 +1074,10 @@
         36,
         1900,
         42
-      ]
+      ],
+      "crowd_radius": 0.43,
+      "sampled_rest_half_width": 0.38112,
+      "victory_duration_seconds": 3.0
     }
   ]
 }

@@ -20,6 +20,7 @@ mod cargo_crab;
 mod cargo_crate;
 mod celestial_archer;
 pub mod common;
+pub(crate) mod completion;
 mod crowcaller;
 mod demolisher;
 mod drillnest;
@@ -281,7 +282,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Capybara => Some(&CAPYBARA),
         UnitKind::RattleTick => Some(&RATTLETICK),
         #[allow(unreachable_patterns)]
-        _ => None,
+        _ => completion::kit(kind),
     }
 }
 

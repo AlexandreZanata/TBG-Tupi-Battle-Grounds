@@ -116,3 +116,26 @@ Pending at this checkpoint: schema-only deterministic hashes; registry
 contract consolidation; final art/UI/session checks; actual Linux captures;
 separate local installation. No full suite, balance gate, Windows or
 desktop-web parity claim is made.
+
+### Consolidated implementation evidence
+
+- Core completion with `--features lab,training`: 21 passed, including all 85
+  private Training forms, healing attribution and immediate Root cancellation.
+- Legacy determinism: all three winner/reason/tick guards passed, then the
+  schema-only checksum migration passed the frozen contract.
+- Protocol: 15 passed, including bounded completion facts, short windup and
+  preservation of old enum tags. Public-view privacy: three passed.
+- Final client completion focus: six passed, including all 85 life/geometry
+  samples, exact two-hand shaft/rim bindings, extra planted insect feet,
+  three-second Victory loop seams, bilingual ability templates and exact
+  0.30-second contact timing for six projectile families.
+- Art uses cached per-joint meshes, named shared palette/materials, no new
+  dependency or simulation floats. Extra insect legs/wings reuse fixed nodes.
+- Measured resting widths drove compact poses and per-kind crowd profiles;
+  see the visual correspondence contract. Production balance is still Proposed.
+- Existing registry Evolution rows were retained verbatim; 68 new rows were
+  appended. Remaining registry/ruleset/view/training consolidation was deferred
+  once on exit 75 and remains queued for the final targeted batch.
+- New localized mathematical wording was changed to font-supported prose
+  after the build script correctly rejected U+2265. No font waiver was added.
+- Actual engine portraits/lineups and installation are the next checkpoints.

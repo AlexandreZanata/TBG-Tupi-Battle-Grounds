@@ -40,7 +40,7 @@ pub fn spawn(
         row.spawn(kit::muted(
             format!(
                 "{} · {}",
-                tbg_core::FULL_POOL.len(),
+                tbg_core::COMPLETION_POOL.len(),
                 lang.key("training.champions")
             ),
             13.,

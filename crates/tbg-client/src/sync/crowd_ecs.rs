@@ -18,10 +18,13 @@ impl LaneAnchor {
             body: crowd::Body {
                 id: look.id,
                 anchor_x: pos.x,
-                radius: radius(
-                    tbg_core::content::def(look.kind).archetype,
-                    look.kind.is_summon(),
-                ),
+                radius: crate::art::kits::completion::crowd_radius(look.kind, look.tier)
+                    .unwrap_or_else(|| {
+                        radius(
+                            tbg_core::content::def(look.kind).archetype,
+                            look.kind.is_summon(),
+                        )
+                    }),
                 facing: if look.own { 1.0 } else { -1.0 },
                 ghost: false,
             },
@@ -33,7 +36,9 @@ impl LaneAnchor {
             body: crowd::Body {
                 id: u.id,
                 anchor_x: 0.0,
-                radius: radius(tbg_core::content::def(u.kind).archetype, u.is_summon()),
+                radius: crate::art::kits::completion::crowd_radius(u.kind, u.tier).unwrap_or_else(
+                    || radius(tbg_core::content::def(u.kind).archetype, u.is_summon()),
+                ),
                 facing: if u.seat == you { 1.0 } else { -1.0 },
                 ghost: u.fx & (1 << 14) != 0,
             },

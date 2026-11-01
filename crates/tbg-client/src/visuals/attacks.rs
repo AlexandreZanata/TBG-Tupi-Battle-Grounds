@@ -177,7 +177,11 @@ fn melee(
     };
     let blade = g.transform_point(tip(t, b));
     let at = a.aim_at.unwrap_or(blade);
-    let kind = impact(t, b);
+    let kind = if v.kind() == tbg_core::UnitKind::EclipseDancer {
+        Impact::Champion(v.kind(), t, if a.attack_variant() == 0 { 1 } else { 0 })
+    } else {
+        impact(t, b)
+    };
     let area = Area {
         splash: v.splash,
         hold: v.hold,

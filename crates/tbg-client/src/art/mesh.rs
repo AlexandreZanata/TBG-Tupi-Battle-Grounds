@@ -24,6 +24,8 @@ pub enum Shape {
     /// Radius, cylinder length (total height = length + 2 * radius).
     Pill(f32, f32),
     Cyl(f32, f32),
+    /// Triangular prism, radius and length along Y.
+    Prism(f32, f32),
     Cone(f32, f32),
     /// Top radius, bottom radius, height.
     Frustum(f32, f32, f32),
@@ -49,6 +51,7 @@ pub fn build(shape: Shape) -> Mesh {
             .longitudes(8)
             .latitudes(4)
             .into(),
+        Shape::Prism(r, h) => Cylinder::new(r, h).mesh().resolution(3).into(),
         Shape::Cyl(r, h) => Cylinder::new(r, h).mesh().resolution(8).into(),
         Shape::Cone(r, h) => Cone::new(r, h).mesh().resolution(8).into(),
         Shape::Frustum(top, bottom, h) => ConicalFrustum {

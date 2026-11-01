@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use tbg_core::protocol::{InviteToken, RoomCode};
 use tbg_core::{Rejection, UnitId};
 
+mod ability_completion;
 pub(crate) mod ability_details;
 mod ability_legacy;
 pub mod account;

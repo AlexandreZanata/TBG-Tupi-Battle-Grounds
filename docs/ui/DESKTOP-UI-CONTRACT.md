@@ -72,3 +72,43 @@ Actual same-source packaged Windows captures, Wine and a real Windows GPU
 session are subsequent delivery gates. Until those pass, equivalence remains
 **unverified**, regardless of Linux compilation or a successful source gate.
 No Windows-ready/support claim or signing approval follows from this document.
+
+## CC17 — Champion completion visual correspondence
+
+The seventeen new champion kits, 85 forms and bilingual local catalog use
+the same FigureLibrary, rig-v2 mesh cache, palette, animation sampling,
+projectile and public-snapshot cue paths on Linux, Windows and desktop web.
+The [coverage manifest](CHAMPION-COMPLETION-VISUAL.json) extends this contract's
+matrix and motion coverage. Existing crowd offsets and competitive geometry
+are unchanged; folded appendages and authored poses constrain visual volume.
+
+Affected cases: all seventeen base/A1/A2/B1/B2 models, default skin, weapons,
+loaded needles, healing projectiles, impacts, Evolution bursts, Idle, Walk,
+Spawn, Hit, Death, basic attacks, independent specials, Victory, Troops/card
+portraits/details, bilingual Evolution names, Training/Practice, both seats,
+reduced motion, pause/reset, reconnect and next-match cleanup. Solar spark,
+echo, regrowth, interrupt immunity, charged pounce, Nectar channel and fixed
+Prismancer warning derive exclusively from authoritative public facts.
+The additional insect feet reuse fixed spare nodes and shared world foot
+anchors. No per-platform shape, animation duration, styling or quality fork.
+
+Initial generated five-form illustrations are direction references only;
+they are not engine output or evidence of platform parity. At this checkpoint
+Linux runtime review is pending; Windows and desktop-web matched captures
+and motion comparisons are also pending. Compilation or shared code cannot
+close those gates. Update the manifest only with actual recorded observations.
+
+CC17 uses per-character cosmetic lateral radii (0.29–0.54 at base, +8%
+per Evolution tier) for the seventeen added kinds only. The exact values are
+in the coverage manifest and catalog. Existing-kind radii and solver limits
+are preserved. These offsets never affect server positions, targeting or
+range. They must be reviewed against actual models and dense formations.
+
+CC17 measurement: model-driven idle/walk half-width samples across all 85
+forms set each new cosmetic base radius, with reserved clearance and tier
+growth. Compact arm poses reduced Gravecutter's normalized half-width from
+0.6077 to 0.4228, Lastlight Cantor from 0.6491 to 0.4141, Cragclaw from
+0.6685 to 0.4694, and Dawnmender from 0.4474 to 0.3751. These are sampled
+geometry measurements, not runtime crowd/overlap acceptance or FPS evidence.
+All new Victory loops last three seconds, stay eventless, and close without
+a sampled pose seam. Shared weapon-shaft and lantern-rim bindings are tested.

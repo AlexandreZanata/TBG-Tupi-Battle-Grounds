@@ -158,7 +158,7 @@ fn filter(action: Action, c: &mut Catalog) -> bool {
 fn teams(action: Action, c: &mut Catalog) -> bool {
     match action {
         Action::Add(ally) => {
-            if !tbg_core::FULL_POOL.contains(&c.selected) {
+            if !tbg_core::COMPLETION_POOL.contains(&c.selected) {
                 return true;
             }
             let spec = c.spec();

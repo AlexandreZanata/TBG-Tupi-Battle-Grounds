@@ -60,10 +60,23 @@ pub enum ShotKind {
     WebSpit,
     SlashWave,
     BloodBolt,
+    BellEcho(u8, u8),
+    BoneQuill(u8, u8),
+    Broth(u8, u8),
+    DawnThread(u8, u8),
+    PrismShard(u8, u8),
+    IvoryNeedle(u8, u8),
 }
 
 #[derive(Clone, Copy)]
 enum Body {
+    BellEcho,
+    BoneQuill,
+    Broth,
+    DawnThread,
+    PrismShard,
+    IvoryNeedle,
+
     Shell,
     LongShell,
     GreatShell,
@@ -144,6 +157,63 @@ fn look(kind: ShotKind) -> Look {
     use ShotKind::*;
     let smoke = |every, size| Trail::Smoke { every, size };
     let (body, arc, secs, trail, roll, impact) = match kind {
+        BellEcho(t, b) => (
+            Some((Body::BellEcho, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.03,
+            CAST_FLIGHT,
+            Trail::Motes(if b == 1 { Mote::Violet } else { Mote::Spore }),
+            0.0,
+            Impact::Champion(tbg_core::UnitKind::LastlightCantor, t, b),
+        ),
+        BoneQuill(t, b) => (
+            Some((Body::BoneQuill, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.03,
+            UNIT_FLIGHT,
+            Trail::Motes(if b == 1 { Mote::Turquoise } else { Mote::Spore }),
+            0.0,
+            Impact::Champion(tbg_core::UnitKind::Spinehurler, t, b),
+        ),
+        Broth(t, b) => (
+            Some((Body::Broth, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.14,
+            CAST_FLIGHT,
+            Trail::Motes(if b == 1 { Mote::Turquoise } else { Mote::Spore }),
+            0.0,
+            Impact::Champion(tbg_core::UnitKind::MireTender, t, b),
+        ),
+        DawnThread(t, b) => (
+            Some((Body::DawnThread, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.03,
+            CAST_FLIGHT,
+            if b == 1 {
+                Trail::Motes(Mote::Water)
+            } else {
+                Trail::Sparks
+            },
+            0.0,
+            Impact::Champion(tbg_core::UnitKind::Dawnmender, t, b),
+        ),
+        PrismShard(t, b) => (
+            Some((Body::PrismShard, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.03,
+            UNIT_FLIGHT,
+            if b == 1 {
+                Trail::Motes(Mote::Water)
+            } else {
+                Trail::Sparks
+            },
+            6.0,
+            Impact::Champion(tbg_core::UnitKind::Prismancer, t, b),
+        ),
+        IvoryNeedle(t, b) => (
+            Some((Body::IvoryNeedle, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.03,
+            UNIT_FLIGHT,
+            Trail::Motes(if b == 1 { Mote::Water } else { Mote::Spore }),
+            0.0,
+            Impact::Champion(tbg_core::UnitKind::Needlewing, t, b),
+        ),
+
         Shell => (
             Some((Body::Shell, 1.0)),
             0.06,
@@ -473,6 +543,13 @@ pub fn arc(kind: ShotKind) -> f32 {
 
 /// Shared projectile meshes, built along +Z (nose forward) once.
 pub struct ShotMeshes {
+    bell_echo: Handle<Mesh>,
+    bone_quill: Handle<Mesh>,
+    broth: Handle<Mesh>,
+    dawn_thread: Handle<Mesh>,
+    prism_shard: Handle<Mesh>,
+    ivory_needle: Handle<Mesh>,
+
     shell: Handle<Mesh>,
     long_shell: Handle<Mesh>,
     great_shell: Handle<Mesh>,
@@ -537,6 +614,48 @@ impl ShotMeshes {
             ));
         }
         Self {
+            bell_echo: build(vec![
+                (Ring(0.012, 0.07, 300.0), GLOW, Transform::IDENTITY),
+                (Box(0.025, 0.08, 0.015), BONE, Transform::IDENTITY),
+            ]),
+            bone_quill: build(vec![
+                (Cyl(0.012, 0.32), IVORY, along(0.0)),
+                (Cone(0.035, 0.12), IVORY, along(0.21)),
+                (
+                    Box(0.06, 0.012, 0.05),
+                    TURQUOISE,
+                    Transform::from_xyz(0.0, 0.0, -0.12),
+                ),
+            ]),
+            broth: build(vec![
+                (
+                    Ball(0.055),
+                    SAP,
+                    Transform::from_scale(Vec3::new(1.0, 0.65, 1.5)),
+                ),
+                (
+                    Box(0.025, 0.025, 0.04),
+                    MOSS,
+                    Transform::from_xyz(0.025, 0.0, 0.01),
+                ),
+            ]),
+            dawn_thread: build(vec![
+                (Ring(0.01, 0.065, 180.0), GOLD, Transform::IDENTITY),
+                (Ball(0.026), IVORY, Transform::IDENTITY),
+            ]),
+            prism_shard: build(vec![
+                (
+                    Prism(0.085, 0.20),
+                    IVORY,
+                    along(0.02).with_scale(Vec3::new(1.0, 1.0, 0.5)),
+                ),
+                (Box(0.035, 0.02, 0.12), GOLD, Transform::IDENTITY),
+            ]),
+            ivory_needle: build(vec![
+                (Cyl(0.008, 0.39), IVORY, along(0.0)),
+                (Cone(0.022, 0.13), IVORY, along(0.26)),
+                (Ring(0.008, 0.028, 360.0), AMBER, along(-0.12)),
+            ]),
             shell: build(shell(0.07, 0.24, BRASS)),
             long_shell: build(shell(0.055, 0.34, BRASS)),
             great_shell: build(shell(0.1, 0.32, GOLD)),
@@ -700,6 +819,13 @@ impl ShotMeshes {
     }
     fn get(&self, body: Body) -> &Handle<Mesh> {
         match body {
+            Body::BellEcho => &self.bell_echo,
+            Body::BoneQuill => &self.bone_quill,
+            Body::Broth => &self.broth,
+            Body::DawnThread => &self.dawn_thread,
+            Body::PrismShard => &self.prism_shard,
+            Body::IvoryNeedle => &self.ivory_needle,
+
             Body::Shell => &self.shell,
             Body::LongShell => &self.long_shell,
             Body::GreatShell => &self.great_shell,
@@ -937,5 +1063,33 @@ mod fish_tests {
             assert_eq!(flight(from, to, arc, 1.0), to);
         }
         assert!((0.22 + look(ShotKind::Fish).secs - 0.30).abs() < 1e-5);
+    }
+}
+
+#[cfg(test)]
+mod completion_tests {
+    use super::*;
+    #[test]
+    fn completion_projectiles_keep_cast_and_ranged_authoritative_contact_timing() {
+        for (t, b) in crate::art::FORMS {
+            for kind in [
+                ShotKind::BellEcho(t, b),
+                ShotKind::Broth(t, b),
+                ShotKind::DawnThread(t, b),
+            ] {
+                let style = look(kind);
+                assert!((0.22 + style.secs - 0.30).abs() < 0.0001);
+                assert!(style.body.is_some());
+            }
+            for kind in [
+                ShotKind::BoneQuill(t, b),
+                ShotKind::PrismShard(t, b),
+                ShotKind::IvoryNeedle(t, b),
+            ] {
+                let style = look(kind);
+                assert!((0.18 + style.secs - 0.30).abs() < 0.0001);
+                assert!(style.body.is_some());
+            }
+        }
     }
 }

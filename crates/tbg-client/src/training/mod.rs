@@ -78,7 +78,13 @@ impl Default for Catalog {
     fn default() -> Self {
         Self {
             seed: 62,
-            selected: UnitKind::BoneBrute,
+            selected: crate::config::url_param("champion")
+                .and_then(|name| {
+                    tbg_core::ALL_KINDS
+                        .into_iter()
+                        .find(|k| format!("{k:?}").eq_ignore_ascii_case(&name))
+                })
+                .unwrap_or(UnitKind::BoneBrute),
             form: (0, 0),
             clip: Clip::Idle,
             revision: 0,
@@ -129,7 +135,11 @@ impl Catalog {
                 let d = tbg_core::content::def(*kind);
                 self.faction.is_none_or(|f| f == d.faction)
                     && self.role.is_none_or(|r| r == d.archetype)
-                    && (query.is_empty() || d.name.to_lowercase().contains(&query))
+                    && (query.is_empty()
+                        || d.name.to_lowercase().contains(&query)
+                        || crate::i18n::content::unit_name(crate::i18n::Lang::PtBr, *kind)
+                            .to_lowercase()
+                            .contains(&query))
             })
             .collect()
     }

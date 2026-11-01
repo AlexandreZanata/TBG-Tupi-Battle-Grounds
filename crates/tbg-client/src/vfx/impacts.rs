@@ -9,6 +9,8 @@ use super::{spawn, spawn_turned, Motion, VfxAssets};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Impact {
+    /// Character-specific completion palette, geometry and timing.
+    Champion(tbg_core::UnitKind, u8, u8),
     /// Siege Walker shells.
     Blast,
     GreatBlast,
@@ -92,6 +94,9 @@ fn around(n: usize, phase: f32) -> impl Iterator<Item = Vec3> {
 pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, area: Area) {
     let ground = at.with_y(0.05);
     match impact {
+        Impact::Champion(kind, t, b) => {
+            super::completion::impact(commands, a, kind, t, b, at, area)
+        }
         Impact::Mayhem => blast(commands, a, at, area.splash.max(0.3), 0.55),
         Impact::Blast => blast(commands, a, at, area.splash.max(0.6), 1.0),
         Impact::GreatBlast => {
@@ -931,6 +936,7 @@ pub fn muzzle(
 /// A kit's own Evolution burst, on top of the shared gold one.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Burst {
+    Champion(tbg_core::UnitKind),
     /// Machines: sparks, a fire ring and steam.
     Forge,
     /// Undead: a green soul flare and rising wisps.
@@ -944,6 +950,7 @@ pub enum Burst {
 pub fn evolution(commands: &mut Commands, a: &VfxAssets, burst: Burst, at: Vec3) {
     let ground = at.with_y(0.05);
     match burst {
+        Burst::Champion(k) => super::completion::evolution(commands, a, k, at),
         Burst::Forge => {
             spawn(
                 commands,

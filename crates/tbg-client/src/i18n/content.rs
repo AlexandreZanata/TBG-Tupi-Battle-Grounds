@@ -104,6 +104,23 @@ fn unit_msgs(kind: UnitKind) -> UnitMsgs {
         UnitKind::Microdrill => u(Msg::UnitMicrodrillName, UNIT_MICRODRILL_FORM_NAME, Msg::UnitMicrodrillGood, Msg::UnitMicrodrillWeak),
         UnitKind::Duodrill => u(Msg::UnitDuodrillName, UNIT_DUODRILL_FORM_NAME, Msg::UnitDuodrillGood, Msg::UnitDuodrillWeak),
         UnitKind::Megadrill => u(Msg::UnitMegadrillName, UNIT_MEGADRILL_FORM_NAME, Msg::UnitMegadrillGood, Msg::UnitMegadrillWeak),
+        UnitKind::Gravecutter=>u(Msg::UnitGravecutterName,UNIT_GRAVECUTTER_FORM_NAME,Msg::UnitGravecutterGood,Msg::UnitGravecutterWeak),
+        UnitKind::LastlightCantor=>u(Msg::UnitLastlightCantorName,UNIT_LASTLIGHT_CANTOR_FORM_NAME,Msg::UnitLastlightCantorGood,Msg::UnitLastlightCantorWeak),
+        UnitKind::Cragclaw=>u(Msg::UnitCragclawName,UNIT_CRAGCLAW_FORM_NAME,Msg::UnitCragclawGood,Msg::UnitCragclawWeak),
+        UnitKind::Hushfang=>u(Msg::UnitHushfangName,UNIT_HUSHFANG_FORM_NAME,Msg::UnitHushfangGood,Msg::UnitHushfangWeak),
+        UnitKind::Spinehurler=>u(Msg::UnitSpinehurlerName,UNIT_SPINEHURLER_FORM_NAME,Msg::UnitSpinehurlerGood,Msg::UnitSpinehurlerWeak),
+        UnitKind::MireTender=>u(Msg::UnitMireTenderName,UNIT_MIRE_TENDER_FORM_NAME,Msg::UnitMireTenderGood,Msg::UnitMireTenderWeak),
+        UnitKind::Gorgehowl=>u(Msg::UnitGorgehowlName,UNIT_GORGEHOWL_FORM_NAME,Msg::UnitGorgehowlGood,Msg::UnitGorgehowlWeak),
+        UnitKind::Sunlancer=>u(Msg::UnitSunlancerName,UNIT_SUNLANCER_FORM_NAME,Msg::UnitSunlancerGood,Msg::UnitSunlancerWeak),
+        UnitKind::EclipseDancer=>u(Msg::UnitEclipseDancerName,UNIT_ECLIPSE_DANCER_FORM_NAME,Msg::UnitEclipseDancerGood,Msg::UnitEclipseDancerWeak),
+        UnitKind::Starbreaker=>u(Msg::UnitStarbreakerName,UNIT_STARBREAKER_FORM_NAME,Msg::UnitStarbreakerGood,Msg::UnitStarbreakerWeak),
+        UnitKind::Dawnmender=>u(Msg::UnitDawnmenderName,UNIT_DAWNMENDER_FORM_NAME,Msg::UnitDawnmenderGood,Msg::UnitDawnmenderWeak),
+        UnitKind::Prismancer=>u(Msg::UnitPrismancerName,UNIT_PRISMANCER_FORM_NAME,Msg::UnitPrismancerGood,Msg::UnitPrismancerWeak),
+        UnitKind::Leafcutter=>u(Msg::UnitLeafcutterName,UNIT_LEAFCUTTER_FORM_NAME,Msg::UnitLeafcutterGood,Msg::UnitLeafcutterWeak),
+        UnitKind::Blastbeetle=>u(Msg::UnitBlastbeetleName,UNIT_BLASTBEETLE_FORM_NAME,Msg::UnitBlastbeetleGood,Msg::UnitBlastbeetleWeak),
+        UnitKind::Needlewing=>u(Msg::UnitNeedlewingName,UNIT_NEEDLEWING_FORM_NAME,Msg::UnitNeedlewingGood,Msg::UnitNeedlewingWeak),
+        UnitKind::NectarNurse=>u(Msg::UnitNectarNurseName,UNIT_NECTAR_NURSE_FORM_NAME,Msg::UnitNectarNurseGood,Msg::UnitNectarNurseWeak),
+        UnitKind::Stridulator=>u(Msg::UnitStridulatorName,UNIT_STRIDULATOR_FORM_NAME,Msg::UnitStridulatorGood,Msg::UnitStridulatorWeak),
     }
 }
 

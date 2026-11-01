@@ -1,0 +1,545 @@
+{
+  "schema": 1,
+  "case": "CC17 champion completion",
+  "baseline_main": "0e23a1ac2f601b182bcfcc03b25acce76e69f962",
+  "shared_presentation": [
+    "art/kits/completion",
+    "art/feet.rs",
+    "art/anim.rs",
+    "vfx/completion.rs",
+    "vfx/shots.rs",
+    "sync/special_cues.rs",
+    "training",
+    "i18n",
+    "sync/crowd_ecs.rs"
+  ],
+  "champions": [
+    {
+      "kind": "Gravecutter",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Tall narrow crescent profile; chain does not contribute to idle lateral radius; jacket is above the feet."
+    },
+    {
+      "kind": "LastlightCantor",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Vertical fan and chest-level bell; skirt hem stays above feet and does not spread into adjacent figures."
+    },
+    {
+      "kind": "Cragclaw",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Claw carried along forward lane axis; attack arc is local and not an oversized horizontal disk."
+    },
+    {
+      "kind": "Hushfang",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Longitudinal footprint with close-set feet; tail bends along the body axis instead of sweeping lateral lanes."
+    },
+    {
+      "kind": "Spinehurler",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Quills are tall rather than wide; needle remains upright outside attack and no infinite line trails."
+    },
+    {
+      "kind": "MireTender",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Wide low head but short limbs; bowl is front-centered and reed staff is vertical, not a large lateral branch."
+    },
+    {
+      "kind": "Gorgehowl",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Crescent ears grow vertically; folded fins and a short tail stay within the resting shoulder envelope."
+    },
+    {
+      "kind": "Sunlancer",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Long spear aligns with lane axis; no broad flag; crest is thin and vertical."
+    },
+    {
+      "kind": "EclipseDancer",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Blades describe compact forearm arcs; no world-yaw spinning or wide skirt."
+    },
+    {
+      "kind": "Starbreaker",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Large prop stays vertical in rest and follows a short overhead arc; body remains narrow."
+    },
+    {
+      "kind": "Dawnmender",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Lantern stays within torso/front volume; collar is narrow, coat hem stays above ankles."
+    },
+    {
+      "kind": "Prismancer",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Prism and cape are diagonal but close; beam is flat along the BattleLine rather than a screen-filling shaft."
+    },
+    {
+      "kind": "Leafcutter",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Additional feet tuck under the narrow thorax; blade is diagonal-forward rather than sideways."
+    },
+    {
+      "kind": "Blastbeetle",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Abdomen is mostly longitudinal; no wide wing opening, explosion visuals never push crowd members."
+    },
+    {
+      "kind": "Needlewing",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Wing planes kept nearly vertical, folded rearward; aim line and projectile stay narrow."
+    },
+    {
+      "kind": "NectarNurse",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Round abdomen is compact, wings upright; thread is a thin line rather than a wide healing cone."
+    },
+    {
+      "kind": "Stridulator",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "motions": [
+        "idle",
+        "walk",
+        "attack",
+        "cast",
+        "hit",
+        "spawn",
+        "evolve",
+        "death",
+        "victory"
+      ],
+      "scope": "Tall narrow chest and close folded wings; sound chevrons have a short lifetime and no lateral screen wash."
+    }
+  ],
+  "matrix": {
+    "seats": [
+      "A",
+      "B"
+    ],
+    "languages": [
+      "en",
+      "pt-BR"
+    ],
+    "states": [
+      "catalog",
+      "card",
+      "detail",
+      "evolution",
+      "training",
+      "practice",
+      "reconnect",
+      "reset",
+      "cleanup"
+    ],
+    "effects": [
+      "echo",
+      "regrowth",
+      "solar_spark",
+      "interrupt_lock",
+      "charged_pounce",
+      "nectar_channel",
+      "fixed_prism_center"
+    ],
+    "motion_settings": [
+      "normal",
+      "reduced"
+    ]
+  },
+  "evidence": {
+    "linux": {
+      "status": "pending runtime capture",
+      "compilation": "native cargo check passed with existing local ALSA SDK",
+      "geometry": "85 forms sampled; maximum 2938 triangles; paired grip and 3-second loop seam tests passed"
+    },
+    "windows": {
+      "status": "pending packaged same-source captures and motion comparison"
+    },
+    "desktop_web": {
+      "status": "pending packaged same-source captures and motion comparison"
+    }
+  },
+  "parity": "unverified",
+  "crowd_footprints": {
+    "Gravecutter": {
+      "sampled_rest_half_width": 0.42284,
+      "base": 0.47,
+      "tier1": 0.5076,
+      "tier2": 0.5452
+    },
+    "LastlightCantor": {
+      "sampled_rest_half_width": 0.41414,
+      "base": 0.46,
+      "tier1": 0.4968,
+      "tier2": 0.5336
+    },
+    "Cragclaw": {
+      "sampled_rest_half_width": 0.46941,
+      "base": 0.51,
+      "tier1": 0.5508,
+      "tier2": 0.5916
+    },
+    "Hushfang": {
+      "sampled_rest_half_width": 0.246,
+      "base": 0.29,
+      "tier1": 0.3132,
+      "tier2": 0.3364
+    },
+    "Spinehurler": {
+      "sampled_rest_half_width": 0.42096,
+      "base": 0.47,
+      "tier1": 0.5076,
+      "tier2": 0.5452
+    },
+    "MireTender": {
+      "sampled_rest_half_width": 0.42824,
+      "base": 0.47,
+      "tier1": 0.5076,
+      "tier2": 0.5452
+    },
+    "Gorgehowl": {
+      "sampled_rest_half_width": 0.42096,
+      "base": 0.47,
+      "tier1": 0.5076,
+      "tier2": 0.5452
+    },
+    "Sunlancer": {
+      "sampled_rest_half_width": 0.41454,
+      "base": 0.46,
+      "tier1": 0.4968,
+      "tier2": 0.5336
+    },
+    "EclipseDancer": {
+      "sampled_rest_half_width": 0.43669,
+      "base": 0.48,
+      "tier1": 0.5184,
+      "tier2": 0.5568
+    },
+    "Starbreaker": {
+      "sampled_rest_half_width": 0.49261,
+      "base": 0.54,
+      "tier1": 0.5832,
+      "tier2": 0.6264
+    },
+    "Dawnmender": {
+      "sampled_rest_half_width": 0.37509,
+      "base": 0.42,
+      "tier1": 0.4536,
+      "tier2": 0.4872
+    },
+    "Prismancer": {
+      "sampled_rest_half_width": 0.46829,
+      "base": 0.51,
+      "tier1": 0.5508,
+      "tier2": 0.5916
+    },
+    "Leafcutter": {
+      "sampled_rest_half_width": 0.41943,
+      "base": 0.46,
+      "tier1": 0.4968,
+      "tier2": 0.5336
+    },
+    "Blastbeetle": {
+      "sampled_rest_half_width": 0.32341,
+      "base": 0.37,
+      "tier1": 0.3996,
+      "tier2": 0.4292
+    },
+    "Needlewing": {
+      "sampled_rest_half_width": 0.41652,
+      "base": 0.46,
+      "tier1": 0.4968,
+      "tier2": 0.5336
+    },
+    "NectarNurse": {
+      "sampled_rest_half_width": 0.43459,
+      "base": 0.48,
+      "tier1": 0.5184,
+      "tier2": 0.5568
+    },
+    "Stridulator": {
+      "sampled_rest_half_width": 0.38112,
+      "base": 0.43,
+      "tier1": 0.4644,
+      "tier2": 0.4988
+    }
+  },
+  "victory_duration_seconds": 3.0
+}

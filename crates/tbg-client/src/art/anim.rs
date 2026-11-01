@@ -47,6 +47,7 @@ pub struct Animator {
     pub carried: bool,
     pub reduction: u16,
     pub counter: u8,
+    pub completion: Option<tbg_core::completion::state::View>,
     special: Option<f32>,
     special_ready: bool,
     armor_flash: f32,
@@ -99,6 +100,7 @@ impl Animator {
             carried: false,
             reduction: 0,
             counter: 0,
+            completion: None,
             special: None,
             special_ready: false,
             armor_flash: 0.0,
@@ -126,25 +128,38 @@ impl Animator {
         }
         self.reduction = bp;
     }
+    pub fn observe_counter(&mut self, n: u8) {
+        self.counter = n;
+        if self.kind == UnitKind::EclipseDancer && self.action.is_none() {
+            self.variant = n & 1;
+        }
+    }
     pub fn attack_variant(&self) -> usize {
         usize::from(self.variant & 1)
+    }
+    pub fn cancel_special(&mut self) {
+        self.special = None;
     }
     pub fn start_special(&mut self) {
         self.special = Some(0.0);
     }
     pub fn resolve_special(&mut self) {
-        let contact = f32::from(tbg_core::content::WINDUP) / tbg_core::content::TICK_HZ as f32;
+        let contact = if self.kind == UnitKind::Gorgehowl {
+            0.10
+        } else {
+            f32::from(tbg_core::content::WINDUP) / tbg_core::content::TICK_HZ as f32
+        };
         self.special = Some(self.special.unwrap_or(0.0).max(contact));
     }
-    pub fn observe_special(&mut self, ready: bool, left: Option<u16>, rooted: bool) {
+    pub fn observe_special(&mut self, ready: bool, left: Option<u16>, windup: u16, rooted: bool) {
         self.special_ready = ready;
         if rooted {
             self.special = None;
             return;
         }
         if let Some(left) = left {
-            let elapsed = f32::from(tbg_core::content::WINDUP.saturating_sub(left))
-                / tbg_core::content::TICK_HZ as f32;
+            let elapsed =
+                f32::from(windup.saturating_sub(left)) / tbg_core::content::TICK_HZ as f32;
             self.special = Some(self.special.unwrap_or(0.0).max(elapsed));
         }
     }
@@ -284,6 +299,7 @@ impl Animator {
         };
         if let Some(kit) = self.kit {
             (kit.pose)(&moment, &mut pose);
+            kits::completion::snapshot_pose(self.kind, &moment, &mut pose, self.completion);
         }
         if let Some(motion) = self.celebration {
             super::celebration::finish(motion, &moment, &mut pose);
@@ -419,6 +435,10 @@ pub fn animate(
             let (plan, gait) = (a.plan, a.gait);
             a.feet
                 .apply(&mut pose, &stride, frame * root_joint, &plan, &gait);
+            if kits::completion::is_insect(a.kind) {
+                a.feet
+                    .apply_auxiliary(&mut pose, &stride, frame * root_joint, &plan, &gait);
+            }
         } else {
             a.feet.reset();
         }
