@@ -152,6 +152,11 @@ impl Animator {
             self.special = Some(self.special.unwrap_or(0.0).max(elapsed));
         }
     }
+    /// The evaluated pose used for current-frame presentation bounds.
+    pub(crate) fn current_pose(&self) -> Pose {
+        self.preview
+            .map_or(self.last, |(clip, t)| self.pose(clip, t))
+    }
     pub fn kind(&self) -> UnitKind {
         self.kind
     }

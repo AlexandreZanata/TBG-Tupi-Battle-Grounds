@@ -7,7 +7,6 @@ use tbg_core::Archetype;
 use super::{AimTarget, UnitVisual, VisualAssets};
 use crate::art::anim::{Animator, Clip};
 use crate::art::FigureLibrary;
-use crate::camera::ArenaCamera;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum VisualCue {
@@ -139,19 +138,6 @@ fn aim(v: &mut UnitVisual, targets: &Query<&Transform, With<UnitVisual>>, dt: f3
     };
     v.aim = at.filter(|_| left > dt).map(|_| (target, left - dt));
     at
-}
-
-/// HP bars always face the camera.
-pub(super) fn billboards(
-    camera: Single<&Transform, With<ArenaCamera>>,
-    units: Query<&UnitVisual>,
-    mut transforms: Query<&mut Transform, Without<ArenaCamera>>,
-) {
-    for v in &units {
-        if let Ok(mut t) = transforms.get_mut(v.bar) {
-            t.rotation = camera.rotation;
-        }
-    }
 }
 
 #[derive(Component)]

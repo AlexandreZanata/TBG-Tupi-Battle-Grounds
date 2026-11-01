@@ -101,3 +101,20 @@ the new rear-facing short-arc regression. The earlier blocked candidate is
 therefore superseded. Carry/load is raised 20 degrees; close contact lowers
 toward the target within the original pitch limits. Simulation range, windup,
 damage and contact event time are unchanged.
+
+### Live-projection correction
+
+The first final Bonehorn B2 combat recording (`live-50c2978-Bonehorn-B2-A-standard`,
+241 ticks) still exposed its HP against the mantle when the whole Root turned
+toward a target behind the long muzzle pivot. This capture is retained as a
+failed acceptance observation. Bonehorn now keeps the full body aligned with
+the lane, with limited head aim only, matching its long crowd footprint.
+
+Height-only overhead placement is superseded by camera-projected current-pose
+body AABBs for every unit. The client transforms eight cached corners per body
+mesh, excluding held weapons and hose props, and places the bar at least 8 px
+above the projected top. It scans no mesh vertices per frame; the camera matrix
+is computed once. Form/animation/camera changes are handled before transform
+propagation. `projected-bars-check.log` passed; the long-body perspective
+regression passed in `projected-bars-regression.log`. A new live recheck is
+required before treating Bonehorn spacing and its bar as observed passing.

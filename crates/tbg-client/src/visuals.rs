@@ -14,6 +14,7 @@ use crate::ui::UiAction;
 pub mod aim;
 pub mod assets;
 mod attacks;
+mod bars;
 mod cues;
 mod growth;
 #[cfg(test)]
@@ -145,10 +146,15 @@ pub fn plugin(app: &mut App) {
             (
                 aim::update_aim,
                 cues::animate,
-                cues::billboards,
                 cues::fly,
                 highlight_inspected,
             ),
+        )
+        .add_systems(
+            PostUpdate,
+            bars::billboards
+                .after(crate::art::anim::animate)
+                .before(bevy::transform::TransformSystems::Propagate),
         )
         .add_systems(
             PostUpdate,

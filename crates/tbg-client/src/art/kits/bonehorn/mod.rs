@@ -1,4 +1,4 @@
-//! Bonehorn's diagonal quadruped gait, braced tusk shove and tightening mantle.
+//! Bonehorn's straight-lane quadruped gait, braced tusk shove and tightening mantle.
 
 mod model;
 
@@ -81,8 +81,11 @@ fn pose(m: &Moment, p: &mut Pose) {
     let plate = Node::Secondary(Spring::Back).index();
     p[plate].1.y -= m.reduction as f32 / 10_000.0 * 0.10 + m.armor_flash * 0.035;
     p[plate].0.x += m.armor_flash * 5.0;
-    if m.clip != Clip::Walk {
-        tools::face(p, m.aim, Vec3::new(0.0, 0.65, 0.65));
+    // The full quadruped footprint follows the lane. A nearby target can be
+    // behind the long muzzle pivot; turning the Root there inverted the body.
+    if let Some(aim) = m.aim {
+        let yaw = super::aim::yaw(Vec3::ZERO, aim.target).to_degrees();
+        tools::add(p, Head, [0.0, yaw.clamp(-15.0, 15.0) * aim.weight, 0.0]);
     }
 }
 
