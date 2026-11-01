@@ -257,3 +257,20 @@ fn declining_and_cancelling_survive_an_exhausted_create_budget() {
         "cancel is never rate limited"
     );
 }
+
+#[test]
+fn losing_the_account_to_another_slot_closes_its_rematch_offer() {
+    let (mut l, _rx) = lobby();
+    let a = [1; 16];
+    let b = [2; 16];
+    let _a = friends(&mut l, a, "Alpha", 1);
+    let _b = friends(&mut l, b, "Bravo", 2);
+    l.rematches.push(RematchTicket {
+        players: [a, b],
+        requested: [false, true],
+        expires: Some(Instant::now() + Duration::from_secs(60)),
+    });
+    l.owner_lost(a, 1);
+    assert!(l.sessions[&a].account.is_none());
+    assert!(l.rematches.is_empty(), "the opponent agreed to the account");
+}
