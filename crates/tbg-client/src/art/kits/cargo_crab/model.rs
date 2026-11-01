@@ -15,10 +15,9 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Secondary, Proportions, Spring},
 };
 
-const HOT: Color = Color::srgb(1.0, 0.55, 0.18);
-/// Carapace forge orange: more saturated than the palette's forge glow, so the
-/// crab reads as a machine at match-camera distance.
-const FORGE: Color = Color::srgb(1.0, 0.42, 0.10);
+const HOT: Color = ORANGE;
+/// The shared forge orange covers broad armor panels; dark joints separate the mechanism.
+const FORGE: Color = ORANGE;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(true, 0.84, tier);
@@ -82,6 +81,8 @@ fn shell(v: &mut Vec<PartSpec>, f: Form) {
                 BRASS,
             ),
             part(h, Ball(0.05), FORGE, [s * 0.13, 0.29, 0.33]).glow(),
+            part(h, Ball(0.035), STEEL, [s * 0.13, 0.29, 0.365]).scale([1.0, 1.0, 0.55]),
+            part(h, Ball(0.023), DARK, [s * 0.13, 0.29, 0.385]).scale([1.0, 1.0, 0.4]),
         ]);
     }
     // Brass rivets along the carapace rim
@@ -120,6 +121,7 @@ fn saddle(v: &mut Vec<PartSpec>, f: Form) {
         part(c, Box(0.40, 0.05, 0.34), WOOD, [0.0, 0.16, -0.03]),
         part(c, Box(0.28, 0.07, 0.24), RED_CLOTH, [0.0, 0.21, -0.04]),
         part(c, Box(0.28, 0.14, 0.05), RED_CLOTH, [0.0, 0.27, -0.15]),
+        part(c, Box(0.30, 0.035, 0.055), LINEN, [0.0, 0.34, -0.15]),
     ]);
     for s in [-1.0f32, 1.0] {
         // Safety guardrails
@@ -224,6 +226,12 @@ fn claw(v: &mut Vec<PartSpec>, p: &Proportions, f: Form, s: f32) {
             Box(0.16 * big, 0.12 * big, 0.12 * big),
             FORGE,
             [0.0, -0.10 * big, 0.04 * big],
+        ),
+        part(
+            Body(hand),
+            Box(0.17 * big, 0.04, 0.13 * big),
+            GUNMETAL,
+            [0.0, -0.05 * big, 0.04 * big],
         ),
         // Broad upper jaw and the lower jaw, opened a little
         part(
