@@ -118,3 +118,53 @@ is computed once. Form/animation/camera changes are handled before transform
 propagation. `projected-bars-check.log` passed; the long-body perspective
 regression passed in `projected-bars-regression.log`. A new live recheck is
 required before treating Bonehorn spacing and its bar as observed passing.
+
+## Consolidated delivery candidate
+
+Final runtime source: `71bbe0b3eff7fb6fc967b28a818c353345439502`. Native binary
+SHA-256: `bf024681d417f0d8b62778102660d03dbd3c6edccf7fdad70229a2373a0e05f5`.
+The final 241-tick Bonehorn B2 recording shows the bar clear above its projected
+mantle and the body aligned with the lane. Sampled temporal frames remain local
+in `review-final/bonehorn-projection-final.jpg`; one engagement is not an
+exhaustive collision claim. Tick's real engagement observed 241 ticks and 444
+damage with no friendly damage. The Practice UI flow purchased tier1 and tier2
+without losing selection, showed separate top-center tower choices, reopened
+the arena banner and dismissed it by an outside action. All six resulting
+screenshots were inspected; a first capture-order race was corrected in
+50c2978 before the valid arena-open/dismissed pair.
+
+`P71-DELIVERY-EVIDENCE.json` indexes local originals/logs by checksum. Large
+renderer recordings and private test data are ignored, not committed. The 46
+Shop portraits are versioned; the Hornet and RattleTick follow-ups have their
+own original-capture provenance in `P71-PORTRAITS.json`.
+
+### Commands actually completed
+
+Every compiling command used the nonblocking host lock, CARGO_BUILD_JOBS=2,
+the existing root target cache and native dependency pkg-config path. Focused
+commands (some earlier results reused unchanged, no automatic full suite):
+
+- `cargo test --offline --locked -p tbg-core --features lab --lib p71_ -- --test-threads=1`: 3 passed.
+- `cargo test --offline --locked -p tbg-core --features lab --test wave_a farwatch -- --test-threads=1`: 2 passed.
+- `cargo test --offline --locked -p tbg-core --test contract_ruleset_version -- --test-threads=1`: 2 passed, ruleset revision5.
+- `cargo test --offline --locked -p tbg-client --bin tbg-client p71_ -- --test-threads=1`: 6 passed before subsequent isolated crossfade/projection regressions.
+- Client filters `healing_behind`, `open_panel_tracks`, `p71_crossfade`, `p71_trident_carries`, `p71_long_body`: each 1 passed.
+- Client filter `p70_trident_`: all 3 passed after the corrected constraints.
+- Earlier tower filter: 9 passed; crowd filter: 7 passed; Pyre jet filter: 1 passed.
+- Final `cargo check --offline --locked -p tbg-client --bin tbg-client --target wasm32-unknown-unknown`: passed (1.42s); this is compilation, not browser runtime evidence.
+- Final native `cargo build --offline --locked -p tbg-client --bin tbg-client`: passed (8.20s), embedded source71bbe0b.
+- Affected-package formatting, JavaScript syntax checks and `git diff --check`: passed.
+
+### Deferred acceptance
+
+No full suite, Clippy workspace, release/packaging, Windows build, D-33 gate or
+performance benchmark was run. New Tick stats remain Proposed pending D-33 and
+owner playtest acceptance. Native evidence does not verify browser rendering.
+The full Low-mode/two-seat temporal matrix, live multiplayer reconnect and
+subjective look/fun review remain deferred. Exact heavy commands remain in
+VALIDATION.md/P71; they require explicit owner scheduling.
+
+Delivery workflow: push the execution branch, then install the verified native
+candidate and all assets as `0.1.0-native.2-p71-71bbe0b`. Preserve the previous
+launcher/desktop settings and all existing user data; verify installed hashes.
+The local installation receipt will record the actual result.
