@@ -231,3 +231,20 @@ These observations cover representative Linux cases only; disabled states,
 the remaining locale/viewport/DPI cases and Windows/web same-source packaged
 full-frame/motion comparisons remain pending consolidation. Source sharing alone
 is not proof of visual parity.
+
+### 2026-11-01 — Laboratory Practice reference proportions
+
+Linux reference: match the owner's 1366x768 laboratory screenshot. Difficulty
+choices use the standard 38-pixel laboratory controls instead of the compressed
+30-pixel rows. The Practice column uses 8-pixel gaps and a 10-pixel note inset.
+This gives the controls above the arena the reference proportions and reduces
+the flexible picture's height. The centered cover crop, full pane fill, bottom
+arena selector and Play button remain unchanged.
+
+Shared propagation: `training::catalog` is the same implementation on Linux,
+Windows and desktop web. Cover all eight arenas, both locales and viewport/DPI
+cases; check difficulty selection, proportional arena cropping, bottom controls
+and resize without clipping. Add `training-practice-reference-layout` and
+`training-practice-reference-resize`, with motion frames for the resize case.
+Linux build, representative capture and reinstall are pending. Windows/web
+same-source packaged comparisons remain pending consolidation.

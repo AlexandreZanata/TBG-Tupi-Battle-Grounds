@@ -73,7 +73,9 @@
     "fortification-tier1-a-wide",
     "fortification-tier1-b-wide",
     "upgrade-dialog-disabled",
-    "upgrade-dialog-focus-transition"
+    "upgrade-dialog-focus-transition",
+    "training-practice-reference-layout",
+    "training-practice-reference-resize"
   ],
   "motion_screens": [
     "preview-dance",
@@ -85,7 +87,8 @@
     "preview-motion-resumed",
     "preview-motion-reentry",
     "training-arena-cover-resize",
-    "upgrade-dialog-focus-transition"
+    "upgrade-dialog-focus-transition",
+    "training-practice-reference-resize"
   ],
   "motion_frames": [
     0,

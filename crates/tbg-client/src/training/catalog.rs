@@ -210,7 +210,7 @@ fn practice(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lan
         height: percent(100),
         min_height: px(0),
         flex_direction: FlexDirection::Column,
-        row_gap: px(4),
+        row_gap: px(8),
         ..default()
     })
     .with_children(|p| practice_contents(p, c, assets, lang));
@@ -227,23 +227,11 @@ fn practice_contents(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetSe
             Action::Difficulty(i as u8),
             0.,
             c.difficulty == i as u8,
-        ))
-        .insert(Node {
-            width: percent(100),
-            min_width: px(0),
-            min_height: px(30),
-            flex_shrink: 0.,
-            padding: UiRect::axes(px(10), px(5)),
-            border: UiRect::all(px(1)),
-            border_radius: BorderRadius::all(px(4)),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        });
+        ));
     }
     p.spawn((
         Node {
-            padding: UiRect::all(px(8)),
+            padding: UiRect::all(px(10)),
             border: UiRect::all(px(1)),
             ..default()
         },
