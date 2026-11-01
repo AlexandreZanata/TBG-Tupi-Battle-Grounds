@@ -1,6 +1,7 @@
 //! Android window, private settings and lifecycle services; simulation remains shared.
 
 mod endpoint;
+mod gles_shader;
 mod lifecycle;
 pub mod render;
 pub mod services;
@@ -34,7 +35,7 @@ pub fn plugin(app: &mut App) {
     );
     app.insert_resource(WinitSettings::game())
         .add_plugins(crate::ui::mobile::plugin)
-        .add_systems(Update, lifecycle::poll);
+        .add_systems(Update, (lifecycle::poll, gles_shader::adapt));
 }
 pub fn persistent_preference(key: &str) -> bool {
     matches!(
