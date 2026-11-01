@@ -225,7 +225,13 @@ const RELEASE: Feature = Feature {
         ),
         (
             "account_owner",
-            &["account_id", "slot", "generation", "epoch", "heartbeat_unix"],
+            &[
+                "account_id",
+                "slot",
+                "generation",
+                "epoch",
+                "heartbeat_unix",
+            ],
         ),
     ],
 };

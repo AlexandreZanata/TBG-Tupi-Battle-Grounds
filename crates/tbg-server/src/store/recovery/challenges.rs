@@ -17,8 +17,7 @@ pub(super) fn issue(
         [now],
     )?;
     // SQLite COUNT is an i64; rusqlite 0.41 has no usize decoding.
-    let count: i64 =
-        tx.query_row("SELECT COUNT(*) FROM recovery_challenges", [], |r| r.get(0))?;
+    let count: i64 = tx.query_row("SELECT COUNT(*) FROM recovery_challenges", [], |r| r.get(0))?;
     if count >= 128 {
         return Err(Error::Unavailable);
     }
