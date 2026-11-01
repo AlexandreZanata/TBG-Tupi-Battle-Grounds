@@ -54,6 +54,23 @@
 | Environment | grass `#7BB661` | road `#C9A46A` | water `#3FA7B5` | stone `#B9B2A3`, timber `#8A6A44`, sky top `#7FB8E6` → horizon `#E8D9B5` |
 | UI | parchment `#EFE3C6` | ink `#2B2118` | gold `#C9A13B` | iron frame `#3A3F45`, danger `#C0392B`, ok `#3E8E41` |
 
+### P70 individual color refinement (Proposed, owner visual review pending)
+
+Keep faction materials as the foundation, with readable main/support/accent
+regions for each champion. Team heraldry remains a separate localized piece;
+do not recolor whole torsos into team armor or globally increase saturation.
+
+- Old Finn uses `OILSKIN_YELLOW` (`#D8A92E`) with `OILSKIN_SHADE`
+  (`#9D6F20`) for his weathered fishing coat. His fish uses `FISH_BACK`
+  (`#426676`) and `FISH_SILVER` (`#B7D1D5`) with the existing light belly
+  colors, so the body, fins and forked tail remain distinct in flight.
+- Trident uses `SHARK_SLATE` (`#3F6370`) and `SHARK_BELLY` (`#CBD9D4`)
+  as continuous shark countershading. Rust, bone armor and branch cloth
+  retain the existing medieval material language.
+
+These are presentation colors, not new faction lore or gameplay rules.
+Individual shapes, equipment and movement must also distinguish the kits.
+
 ## 4. Rig and motion language
 
 - **Rig v2 candidate (P15):** 17 named body joints — Root, Hips, Spine, Chest, Head,

@@ -20,6 +20,14 @@ pub const SKIN: Color = hex(0xE8B98A);
 pub const HOOD_GREEN: Color = hex(0x5F7A3C);
 pub const WOOD: Color = hex(0x7A5230);
 pub const RED_CLOTH: Color = hex(0xB8433A);
+// P70: weathered fishing oilskin and silver fish, with distinct large color regions.
+pub const OILSKIN_YELLOW: Color = hex(0xD8A92E);
+pub const OILSKIN_SHADE: Color = hex(0x9D6F20);
+pub const FISH_BACK: Color = hex(0x426676);
+pub const FISH_SILVER: Color = hex(0xB7D1D5);
+// P70: Trident's marine countershading, separate from team heraldry.
+pub const SHARK_SLATE: Color = hex(0x3F6370);
+pub const SHARK_BELLY: Color = hex(0xCBD9D4);
 
 // Undead: bone, dark violet, spectral glow.
 pub const BONE: Color = hex(0xD8D2C0);
