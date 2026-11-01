@@ -47,6 +47,7 @@ impl Gallery {
     pub fn studio(&self) -> bool {
         (self.unit.is_some() && !self.range)
             || self.frames
+            || self.mode == "motion"
             || self.mode == "palette"
             || self.mode == "blockout"
             || self.mode == "strongholds"
@@ -56,7 +57,12 @@ impl Gallery {
         self.silhouette || self.studio()
     }
     pub fn floor(&self) -> bool {
-        !self.polish && !self.portrait && !self.silhouette && !self.frames && self.studio()
+        !self.polish
+            && self.mode != "motion"
+            && !self.portrait
+            && !self.silhouette
+            && !self.frames
+            && self.studio()
     }
     pub fn read() -> Self {
         let mode = config::url_param("gallery")

@@ -6,6 +6,7 @@ mod camera;
 mod figures;
 mod layout;
 mod lineup;
+pub(crate) mod motion;
 mod palette;
 pub(crate) mod polish;
 mod range;
@@ -43,6 +44,7 @@ pub fn plugin(app: &mut App) {
                 // Animation runs in PostUpdate, after all of these.
                 cycle,
                 polish::update,
+                motion::update,
                 camera::frame,
                 layout::place.before(crate::art::anim::animate),
                 turn.after(crate::art::anim::animate),
@@ -87,6 +89,8 @@ fn spawn(
         ));
     }
     match options.mode.as_str() {
+        "matchlineup" => motion::spawn_lineup(&mut commands, &lib),
+        "motion" => motion::spawn(&mut commands, &lib),
         "palette" => palette::spawn(&mut commands, meshes, mats),
         "blockout" => blockout::spawn(&mut commands, &lib, mats, window.height() > window.width()),
         // Built by `arena::strongholds`, which owns the tower parts.

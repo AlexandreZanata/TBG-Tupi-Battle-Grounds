@@ -13,7 +13,7 @@ pub fn frame(
     window: Single<&Window>,
     camera: Single<(&mut Transform, &mut DistanceFog), With<ArenaCamera>>,
 ) {
-    if options.stress {
+    if options.stress || options.mode == "matchlineup" {
         return;
     }
     let aspect = window.width() / window.height();
@@ -82,6 +82,7 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
         );
     }
     match options.mode.as_str() {
+        "motion" => super::motion::camera(),
         "palette" => (
             Vec3::new(8.0, 0.5, 1.8),
             5.8,
