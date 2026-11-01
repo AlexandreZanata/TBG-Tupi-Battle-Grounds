@@ -53,6 +53,25 @@ def rewrite(archive, output, change):
 
 
 class BrowserRelease(unittest.TestCase):
+    def test_public_probe_uses_product_agent_and_still_rejects_changed_content(self):
+        # The official Cloudflare edge returns 1010 for Python's generic agent.
+        class Response:
+            status = 200
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                return False
+            def read(self, size):
+                return b'approved entry'
+        def edge(request, *, timeout):
+            self.assertEqual(request.full_url, 'https://app.tupibg.com/')
+            self.assertEqual(request.get_header('User-agent'), 'TBG-release-health/1.0')
+            return Response()
+        with patch.object(activation, 'urlopen', side_effect=edge):
+            activation.probe('https://app.tupibg.com/', hashlib.sha256(b'approved entry').hexdigest())
+            with self.assertRaises(ValueError):
+                activation.probe('https://app.tupibg.com/', '0' * 64)
+
     def test_round_trip_seals_source_hashes_and_relative_asset_base(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

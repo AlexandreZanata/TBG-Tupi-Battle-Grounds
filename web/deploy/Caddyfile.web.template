@@ -22,10 +22,11 @@ __TBG_SITE_DOMAIN__ {
 	header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 	root * /srv/tbg/landing/current
 	# Nothing is content-hashed: pages, scripts and data revalidate by ETag; art and fonts cache a day.
+	# no-transform preserves attested bytes and prevents CDN analytics script injection.
 	@art path /media/* /assets/fonts/* /favicon.ico /apple-touch-icon.png
-	header @art Cache-Control "public, max-age=86400"
+	header @art Cache-Control "public, max-age=86400, no-transform"
 	@revalidate not path /media/* /assets/fonts/* /favicon.ico /apple-touch-icon.png
-	header @revalidate Cache-Control "no-cache"
+	header @revalidate Cache-Control "no-cache, no-transform"
 	file_server {
 		hide .*
 	}
@@ -53,7 +54,7 @@ __TBG_ADMIN_DOMAIN__ {
 	header {
 		Content-Security-Policy "default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 		X-Robots-Tag "noindex, nofollow"
-		Cache-Control "no-cache"
+		Cache-Control "no-cache, no-transform"
 	}
 	root * /srv/tbg/admin/current
 	file_server {

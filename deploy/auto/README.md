@@ -89,8 +89,10 @@ Squashing/rebasing requires a separately reviewed deployment-floor reconciliatio
 The `minimum_source` must be the full last verified runtime SHA, not an arbitrary
 old commit, a branch name or a placeholder.
 
-The local CLI is 2.45 and Debian's default gh package is 2.46; both predate needed
-attestation support. Install a current GitHub CLI using its official Linux package
+The development CLI was 2.45 and Debian's default gh package was 2.46; both
+predate needed attestation support. Official host preparation installed gh 2.103.3
+and checked the required flags; real first-artifact verification is still pending.
+For a new host, install a current GitHub CLI using its official Linux package
 instructions: https://github.com/cli/cli/blob/trunk/docs/install_linux.md. Confirm
 `gh attestation verify --help` includes `--bundle`, `--source-ref`, `--source-digest`,
 `--signer-workflow` and `--deny-self-hosted-runners`. Bundle verification must work
@@ -176,3 +178,15 @@ systemctl enable --now tbg-web-deploy.timer tbg-static-deploy.timer
 Review `web-checked.json`, `static-checked.json`, their current receipts and transition
 journals under `/var/lib/tbg-deploy`. Five-minute worker timeouts apply only to
 frontend maintenance, never to the game. Backend drain remains unbounded.
+
+## Cloudflare response integrity
+
+Public health requests explicitly identify `TBG-release-health/1.0`; the generic
+Python agent was rejected with Cloudflare 1010 on the official zone. Do not impersonate
+a browser or disable the edge protections. Byte-exact HTML probes also require
+`no-transform` in the frontend Cache-Control headers: automatic Web Analytics
+injection otherwise changes the attested response, correctly failing the digest check.
+This is configured in the game/static templates; existing TLS, WAF and API routing
+remain in place. Automatic Analytics script injection no longer occurs on these
+payloads; a future explicit analytics integration needs its own review. See
+[Cloudflare's documentation](https://developers.cloudflare.com/web-analytics/faq/).

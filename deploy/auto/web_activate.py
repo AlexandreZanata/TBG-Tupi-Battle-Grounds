@@ -3,7 +3,7 @@ import json
 import os
 import shutil
 from pathlib import Path
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 from activate import STATE, status, sync_directory, sync_file, write_json
 from policy import SHA, digest, require
@@ -41,7 +41,9 @@ def recover():
 
 
 def probe(url, expected):
-    with urlopen(url, timeout=15) as response:
+    # Cloudflare Browser Integrity Check rejects Python's generic default agent.
+    request = Request(url, headers={'User-Agent': 'TBG-release-health/1.0', 'Cache-Control': 'no-cache'})
+    with urlopen(request, timeout=15) as response:
         require(response.status == 200, 'browser entry not available')
         import hashlib
         require(hashlib.sha256(response.read(2 * 1024 * 1024 + 1)).hexdigest() == expected,

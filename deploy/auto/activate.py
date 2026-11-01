@@ -6,7 +6,7 @@ import sqlite3
 import subprocess
 import time
 from pathlib import Path
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 from policy import compatible, digest, require
 
@@ -66,7 +66,8 @@ def healthy(contract, public_url):
     for _ in range(20):
         try:
             live = status()
-            with urlopen(public_url, timeout=5) as response:
+            request = Request(public_url, headers={'User-Agent': 'TBG-release-health/1.0'})
+            with urlopen(request, timeout=5) as response:
                 public_ok = response.status == 200 and response.read(8) == b'ok'
             with urlopen('http://127.0.0.1:8080/api/leaderboard?limit=1', timeout=5) as response:
                 store_ok = response.status == 200

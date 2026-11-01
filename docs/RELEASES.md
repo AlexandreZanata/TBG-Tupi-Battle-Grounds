@@ -21,6 +21,8 @@ Three source filters avoid redeploying unrelated products:
 - `web-release.yml`: the shared Bevy browser client, core contract and its assets,
   packaged as `web-<full SHA>`. Trunk uses `/releases/<SHA>/`; the package sets the
   document base before any relative asset request. All old assets are retained.
+  Frontend `no-transform` response headers prevent CDN script injection from changing
+  the hash-bound HTML; health requests identify the TBG product explicitly.
 - `static-release.yml`: landing, safe public admin, shared art/catalog dependencies,
   packaged as `static-<full SHA>`. No Rust game rebuild or backend restart is needed
   for a static-only change. The fictional admin preview is rejected by the packager
