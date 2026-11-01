@@ -44,15 +44,16 @@ def run(config, apply, recheck):
             path.write_bytes(fetch(prefix + name, limit))
         verify(package, bundle, source, workflow=web_policy.WORKFLOW)
         manifest = web_policy.unpack(package, root/'verified', source)
-        live = web_activate.status()
-        require(live['contract'] == manifest['contract'] and not live.get('shutdown'), 'incompatible browser candidate')
-        if apply:
-            try:
+        try:
+            live = web_activate.status()
+            require(live['contract'] == manifest['contract'] and not live.get('shutdown'), 'incompatible browser candidate')
+            if apply:
                 web_activate.activate(root/'verified', manifest, config.get('public_web', 'https://app.tupibg.com'))
-            except Exception as error:
+                write_json(checked, {'source_commit': source, 'outcome': 'healthy'})
+        except Exception as error:
+            if apply:
                 write_json(checked, {'source_commit': source, 'outcome': 'operator_required', 'reason': str(error)[:500]})
-                raise
-            write_json(checked, {'source_commit': source, 'outcome': 'healthy'})
+            raise
         print(json.dumps({'verified_web_source': source, 'contract': manifest['contract'], 'activated': apply}))
 
 

@@ -26,7 +26,7 @@ def unpack(archive, destination, source):
         size = 0
         for member in tar:
             size += member.size
-            require(member.isfile() and safe_name(member.name), 'unsafe web member')
+            require(member.isfile() and member.size >= 0 and safe_name(member.name), 'unsafe web member')
             require(size <= MAX_CONTENT and len(members) < MAX_FILES + 1, 'web content limit exceeded')
             members.append(member)
         require(1 < len(members) <= MAX_FILES + 1, 'invalid web file count')
@@ -36,6 +36,7 @@ def unpack(archive, destination, source):
         require(sum(m.size for m in members) <= MAX_CONTENT, 'expanded web bundle too large')
         require('manifest.json' in names and tar.getmember('manifest.json').size <= 1024 * 1024, 'invalid web manifest')
         meta = json.load(tar.extractfile('manifest.json'))
+        require('web/index.html' in names, 'web index missing')
         require(tar.getmember('web/index.html').size <= 2 * 1024 * 1024, 'web index too large')
         require(meta.get('schema') == 1 and meta.get('source_commit') == source, 'web source mismatch')
         require(bool(CONTRACT.fullmatch(meta.get('contract', ''))), 'invalid web contract')

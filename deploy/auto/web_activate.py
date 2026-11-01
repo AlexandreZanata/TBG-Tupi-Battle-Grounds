@@ -53,6 +53,9 @@ def activate(staged, manifest, public):
     require(live['contract'] == manifest['contract'] and not live.get('shutdown'),
             'browser contract transition/drain requires coordinated release')
     require(public == 'https://app.tupibg.com', 'reviewed browser origin required')
+    require(not ROOT.is_symlink(), 'browser root requires explicit adoption')
+    ROOT.mkdir(parents=True, exist_ok=True, mode=0o755)
+    ROOT.chmod(0o755)
     root = ROOT/'releases'
     root.mkdir(parents=True, exist_ok=True, mode=0o755)
     root.chmod(0o755)

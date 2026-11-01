@@ -50,7 +50,7 @@ def verify(package, bundle, source, workflow=WORKFLOW):
 
 
 def candidate(prefix='server'):
-    require(prefix in {'server', 'web'}, 'unknown release family')
+    require(prefix in {'server', 'web', 'static'}, 'unknown release family')
     require(api('')['id'] == REPOSITORY_ID, 'repository identity changed')
     releases = api('/releases?per_page=30')
     options = [r for r in releases if not r.get('draft') and re.fullmatch(prefix + r'-[0-9a-f]{40}', r.get('tag_name', ''))]
