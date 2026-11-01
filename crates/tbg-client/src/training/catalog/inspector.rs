@@ -36,21 +36,38 @@ pub(super) fn details(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
         lang.key(&format!("unit.{name}.lore")),
         14.,
     ));
-    for (key, value) in [
-        ("hp", s.max_hp.to_string()),
-        ("damage", s.damage.to_string()),
-        ("heal", s.heal.to_string()),
-        ("splash", format!("{:.2}", s.splash as f32 / 1000.)),
-        ("interval", format!("{:.2} s", s.interval as f32 / 20.)),
-        ("range", format!("{:.2}", s.range as f32 / 1000.)),
-        ("speed", format!("{:.2}", s.speed as f32 * 20. / 1000.)),
-        ("cost", (d.cost / ENERGY_SCALE).to_string()),
-    ] {
-        p.spawn(crate::ui::label(
-            format!("{}: {value}", lang.key(&format!("training.stat.{key}"))),
-            14.,
-        ));
-    }
+    p.spawn(Node {
+        width: percent(100),
+        flex_wrap: FlexWrap::Wrap,
+        row_gap: px(7),
+        ..default()
+    })
+    .with_children(|grid| {
+        for (key, value) in [
+            ("hp", s.max_hp.to_string()),
+            ("damage", s.damage.to_string()),
+            ("heal", s.heal.to_string()),
+            ("splash", format!("{:.2}", s.splash as f32 / 1000.)),
+            ("interval", format!("{:.2} s", s.interval as f32 / 20.)),
+            ("range", format!("{:.2}", s.range as f32 / 1000.)),
+            ("speed", format!("{:.2}", s.speed as f32 * 20. / 1000.)),
+            ("cost", (d.cost / ENERGY_SCALE).to_string()),
+        ] {
+            grid.spawn((
+                Node {
+                    width: percent(50),
+                    flex_direction: FlexDirection::Column,
+                    row_gap: px(3),
+                    ..default()
+                },
+                BackgroundColor(kit::INK),
+            ))
+            .with_children(|cell| {
+                cell.spawn(kit::muted(lang.key(&format!("training.stat.{key}")), 11.));
+                cell.spawn(crate::ui::label(value, 17.));
+            });
+        }
+    });
     let on_hit = match s.on_hit {
         Some(tbg_core::OnHit::Slow { bp, ticks }) => lang.tf(
             crate::i18n::Msg::InspectSlow,
@@ -91,52 +108,68 @@ pub(super) fn details(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
         ),
         12.,
     ));
-    p.spawn(button(
+    p.spawn(skin::control(
         lang.key("training.add_ally"),
         Action::Add(true),
-        250.,
+        0.,
+        false,
     ));
-    p.spawn(button(
+    p.spawn(skin::control(
         lang.key("training.editor"),
         Action::Tab(Tab::Editor),
-        250.,
+        0.,
+        false,
     ));
 }
 pub(super) fn editor(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
     p.spawn(kit::heading(lang.key("training.editor"), 22.));
     p.spawn(kit::muted(lang.key("training.local_note"), 12.));
     team(p, &c.allies, true, lang);
-    p.spawn(button(
+    p.spawn(skin::control(
         lang.key("training.add_ally"),
         Action::Add(true),
-        250.,
+        0.,
+        false,
     ));
-    p.spawn(button(
+    p.spawn(skin::control(
         lang.key(if c.dummies {
             "training.opponent_dummies"
         } else {
             "training.opponent_champions"
         }),
         Action::Opponent,
-        250.,
+        0.,
+        false,
     ));
     if c.dummies {
         dummy(p, c, lang);
     } else {
         team(p, &c.enemies, false, lang);
-        p.spawn(button(
+        p.spawn(skin::control(
             lang.key("training.add_enemy"),
             Action::Add(false),
-            250.,
+            0.,
+            false,
         ));
     }
-    p.spawn(button(
+    p.spawn(skin::control(
         content::arena_name(lang, c.arena),
         Action::Arena,
-        250.,
+        0.,
+        false,
     ));
-    p.spawn(button(format!("Seed: {}", c.seed), Action::Seed, 250.));
-    p.spawn(button(lang.key("training.start"), Action::Start, 250.));
+    p.spawn(skin::control(
+        format!("Seed: {}", c.seed),
+        Action::Seed,
+        0.,
+        false,
+    ));
+    p.spawn(skin::control(
+        lang.key("training.start"),
+        Action::Start,
+        0.,
+        true,
+    ));
     if !c.notice.is_empty() {
         p.spawn(kit::muted(c.notice.clone(), 12.));
     }
@@ -191,17 +224,19 @@ fn dummy(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
         row.spawn(kit::heading(c.dummy_count.to_string(), 17.));
         row.spawn(button("+", Action::DummyCount(1), 45.));
     });
-    p.spawn(button(
+    p.spawn(skin::control(
         format!("{} HP", c.dummy_hp.hp()),
         Action::DummyHp,
-        250.,
+        0.,
+        false,
     ));
-    p.spawn(button(
+    p.spawn(skin::control(
         lang.key(match c.dummy_mode {
-            super::DummyMode::Finite => "training.finite",
-            super::DummyMode::Renewable => "training.renewable",
+            super::super::DummyMode::Finite => "training.finite",
+            super::super::DummyMode::Renewable => "training.renewable",
         }),
         Action::DummyMode,
-        250.,
+        0.,
+        false,
     ));
 }
