@@ -1,6 +1,7 @@
 # P66 — Native updater and match-preserving release infrastructure
 
-> **Planning only — 2026-10-31.** Owner request: professional Linux updates
+> **Implementation candidate — 2026-10-31.** See §11 for executed checks,
+> known failures and remaining release gates. Original planning context: professional Linux updates
 > without uninstalling, a Windows path, automatic in-game startup prompts,
 > durable post-update notes, and independent client/backend releases that
 > preserve running matches. No code, key generation, installation, signing,
@@ -690,3 +691,222 @@ guarantee or thousands-player certification is implied by planning.
 | Retained builds exhaust disk | Low–Medium | Free-space preflight, quota, cleanup that skips pinned builds | O04, U03 |
 | Static repository/CDN outage | Low | The installed game keeps working; jittered retries; mirror later | §4 |
 | Windows antivirus/SmartScreen friction | Medium | Authenticode, reputation, real-device tests, honest docs | O02, U08 |
+
+
+## 11. Execution and completion review — 2026-10-31
+
+**Status: Draft; not accepted for stable activation.** Initial implementation
+`e744ce9` is preserved. This continuation merges the current competitive-audit
+front through `f706c91` without importing the private operations branch. Final
+runtime/source candidate: `16cd3e3` (documentation commits follow separately).
+The owner authorized normal push and a PR to main, isolated Linux acceptance,
+and scoped operational continuation. No main merge, force-push, production
+signing or replacement of the owner's installed application was performed.
+Operational inventories, addresses, manifests and raw evidence are retained
+outside this repository in the operator-controlled workspace.
+
+### Delivered behavior
+
+- `tbg-update` uses locked `tough 0.24.0` for TUF validation, immutable targets,
+  strict descriptors, bounded streaming/extraction and a per-user stable
+  launcher. Test roots remain explicitly supplied; no official root is bundled.
+- Activation is journaled and health-gated. A durable Healthy checkpoint
+  survives a crash before its notes receipt; corrupt journals fail closed.
+  Failed candidates return only to a complete, readable, permitted build.
+  The last verified security floor is monotonic; revoked fallbacks require
+  trusted repair instead of a false success/recovery claim. Build cleanup is
+  disabled until retention approval; user data and unknown files are kept.
+- Native startup discovers asynchronously. In-game progress, cancellation,
+  Later, a nonmodal badge, manual signed checking in Settings and idle restart
+  share the same play guard. A pending online intention cancels staging and
+  waits for its helper to finish. Required updates prevent new online play;
+  offline Practice remains available. Discovery has a five-second deadline;
+  download inactivity is bounded at the Proposed 30 seconds, not total size.
+- Successful installed-build notes persist until acknowledged; recovery has a
+  separate receipt. Notes render as plain localized text. Skipped-release
+  history aggregation is not implemented.
+- Native resume uses the real Secret Service credential provider on Linux,
+  asynchronously and scoped by origin/install. It is never newly persisted in
+  ordinary preference JSON, command arguments or logs. Missing/locked vaults
+  produce a visible temporary-session state. Existing legacy plaintext resume
+  entries are ignored. Windows provider code is prepared but not accepted.
+- Backend release directory, generation-pinned slot routes, ownership leases,
+  single ranked authority and retirement gates are implemented. Pending result
+  work blocks retirement; SIGTERM has no finite match-killing cutoff. Restarted
+  workers register Ready and require explicit promotion before new admission.
+- Native workflow actions/toolchain and linuxdeploy digest are pinned. An
+  existing release/tag, package staging or output artifact is refused rather
+  than overwritten. Managed packages include Cargo.lock identity and a hashed
+  file manifest. Full protected signing/attestations are still gated by O02.
+
+### Contracts and integration limits
+
+The delivered branch uses protocol **29**, ruleset **2**, source hash
+`3d56156049e626c5`, match contract `w29-r2-3d56156049e626c5`, additive server
+schema **9**, and updater/local-state schema **1**. Protocol epoch is still
+manually versioned; the gameplay-source hash alone does not prove unchanged
+wire bytes. A complete frozen wire corpus/identity gate is pending (U19).
+The independently generated package manifest was checked against all 336
+archive entries (sizes and SHA-256), without extracting to the live install.
+
+The independently developed P68 auth candidate also used schema 9 for different
+changes and protocol 30. It is **not** merged here. A future integration must
+allocate the next combined migration, preserve both sets of tables and test
+both existing databases; equality of schema numbers is not compatibility.
+
+Legacy `/ws` reconnect can lose its original generation during overlap. Native
+slot-aware resume and ownership improve this path but do not retroactively
+upgrade already-running legacy browser tabs. Coordinated adoption is required.
+One single-host SQLite release directory and one ranked authority are deliberate
+limits, not multi-host matchmaking or seamless recovery of dead in-memory games.
+
+### Checks actually executed
+
+Checks of changing source/fixtures were not treated as evidence for an earlier
+or later binary without noting the revision.
+
+Level: **targeted consolidation**, using the shared nonblocking validation lock,
+`CARGO_BUILD_JOBS=2` and `--test-threads=1` for tests. Full workspace tests,
+balance gates, benchmarks, extensive galleries and load campaigns were not run.
+Inherited handoff results are identified separately and were not rerun by habit.
+
+Commands run from the continuation worktree, with the shared target/cache and
+native pkg-config path documented by the local harness:
+
+```bash
+cargo fmt -p tbg-update -p tbg-client -- --check
+cargo test --offline --locked -p tbg-update --test updater -- --test-threads=1
+cargo test --offline --locked -p tbg-client --bin tbg-client br_up03_resume_is_bound_to_origin_installation_freshness_and_slot -- --test-threads=1
+cargo test --offline --locked -p tbg-client --bin tbg-client p66_updates_wait_for_restore_login_join_and_reconnect -- --test-threads=1
+cargo test --offline --locked -p tbg-server --lib transport_diagnostics_preserve_cause_without_frame_secrets -- --test-threads=1
+cargo clippy --offline --locked -p tbg-client --bin tbg-client --features ui-acceptance -p tbg-update --lib --bins -- -D warnings
+cargo clippy --offline --locked -p tbg-server --lib -- -D warnings
+cargo check --offline --locked -p tbg-client --target wasm32-unknown-unknown
+cargo build --offline --locked --release -p tbg-update --bins
+cargo build --offline --locked --release -p tbg-client --features ui-acceptance --bin tbg-client
+# In crates/tbg-client, with cached matching wasm-bindgen/wasm-opt:
+trunk build --release --offline --skip-version-check
+```
+
+- Updater: **10 passed**, 0 failed, 1.09 s. Two client regressions: **1 + 1
+  passed**, no failures. Safe transport diagnostic regression: **1 passed**.
+- Final `16cd3e3` helper build passed in 17.56 s, Linux client in 3m08s,
+  WASM Rust build in 2m06s, and the enclosing release Trunk command exited 0.
+  Sandboxed Chrome 156.0.8078.79 at 1440×900 opened the full pt-BR lobby and
+  Practice through the visible control with no page errors on that same source.
+- Scoped native Clippy with warnings denied and WASM check passed. The client
+  test binary emits an existing unused `visuals::layout::Layout::clear`
+  warning; no warning suppression or unrelated test deletion was introduced.
+- Real credential provider probe: write/readback/delete of a synthetic entry
+  succeeded. A subprocess with an unavailable bus reported vault unavailable
+  without plaintext fallback. Neither probe accesses owner credentials.
+- `actionlint 1.7.12` on the changed native workflow, Bash syntax, Python
+  compilation, patch-note guard (2 entries, unchanged ruleset), formatting and
+  `git diff --check` passed. Wrong actionlint path and a nonexecutable local
+  wrapper initially failed; corrected commands used the existing binary and
+  `bash` wrapper. These were harness mistakes, not passing checks.
+- Intermediate Rust checks exposed a missing test initializer, private helper
+  access and Bevy node enum/visibility mistakes; all were corrected before
+  the final successful scoped checks. A combined client/updater release build
+  was deliberately interrupted because feature unification recompiled Bevy;
+  separate sequential builds reuse the shared cache. No cache purge occurred.
+- Inherited `e744ce9` evidence: seven updater tests; server release unit tests,
+  five release-slot integration tests (one external probe ignored), ranked,
+  ranked recovery/statistics/integrity and contract targets; bounded local
+  SIGTERM drain. These are prior handoff evidence, not fresh final-tree runs.
+
+### Acceptance coverage and remaining gates
+
+Each case below is narrower than full phase acceptance. Partial/deferred never
+means passed. A public continuity probe reproduced connection-closed failures;
+the cause is unresolved. Repetition was stopped under the same-error policy.
+The new diagnostic preserves transport error classes while redacting frame
+contents, to support a separately authorized investigation.
+
+> blocked: controlled two-generation continuity was attempted twice and
+> reproduced `connection closed` client failures. Admission changes and match
+> pinning were observed before those failures, but the transport cause remains
+> unknown. External transport and the bot harness are hypotheses, not findings.
+> No further public repetition or zero-disconnect acceptance is claimed.
+
+| Case | Actual evidence and remaining work |
+|---|---|
+| U01 | Real Linux startup/current/new plus full browser lobby observed; exhaustive unsupported/offline timing combinations pending. |
+| U02 | Synthetic TUF roots, tampered package and replay refusal pass; expiry/rotation incident matrix pending. |
+| U03 | Cancellation/missing target regression and real verified download; 429, range resume, disk-full and network interruption matrix pending. |
+| U04 | Hostile archive regression passes; Windows-reserved-path subset unexecuted. |
+| U05 | Journal state recovery, corrupt journal refusal and Healthy/receipt gap pass; not literal power-failure proof for every filesystem boundary. |
+| U06 | Candidate crash and revoked fallback regression pass; real GUI rollback recorded below. |
+| U07 | Real per-user stable desktop/CLI install with spaces/accents, no sudo, sentinel preserved; read-only/cross-filesystem/legacy-adoption matrix pending. |
+| U08 | **Blocked:** no real Windows device; managed Windows packaging explicitly refuses. |
+| U09 | Restore/login/join/reconnect guard regression passes; exhaustive council/spectator/racing-input GUI matrix pending. |
+| U10 | Real healthy update, notes before acknowledgement, close/reopen and acknowledged reopen pass; skipped-version history pending. |
+| U11 | Real vault persistence and scoped freshness tests pass; full native close/reopen/reconnect across generations pending. |
+| U12 | Local release-slot contract tests inherited; real browser build/play observed; complete cross-platform matrix pending. |
+| U13 | Ready refusal, canary boundaries and generation-pinned overlap observed; transport failures prevent continuity acceptance. |
+| U14 | Isolated ranked records grew by four distinct keys, exactly one game/rating update per synthetic participant; persistence-outage matrix pending. |
+| U15 | Retirement refusal while occupied and admission rollback observed; zero-disconnect/long-match acceptance remains open. |
+| U16 | Shared additive schema and preserved results observed; independent P68 schema collision must be resolved before integration. |
+| U17 | Idle isolated worker restart registered Ready and refused admission until promotion; arbitrary crash failover is not implemented. |
+| U18 | Bounded overlap tick/resource samples collected; no paired 5% threshold proof or player-capacity claim. |
+| U19 | Computed gameplay identity exists; full wire/golden corpus gate remains mandatory and pending. |
+| U20 | Later/manual/badge/required-play guard implemented; aggregate outcome handshake and automatic rollout halt remain pending. |
+| U21 | Localized plain-text notes validation exists; full D5/content-refusal corpus pending. |
+| U22 | Exact-contract admission exists; scheduled switch, preexisting-room grace and cross-contract transition matrix pending. |
+
+Pending commands/scenarios: the case-specific matrices above; Windows native
+U01–U08/U10; full native U11; a diagnostic two-generation continuity probe after
+root cause investigation; wire corpus and schema integration regressions;
+paired overlap measurements under separately approved capacity scope. No
+`cargo test --workspace`, full benchmark or gallery is implied by this list.
+O02 (official root custody/rotation/protected signer), O03 emergency/switch policy,
+O04 capacity/retention and O05 defaults remain owner gates. Until resolved,
+this branch is a Draft implementation candidate, not a stable updater release.
+
+
+### Final isolated Linux artifact identity
+
+All artifacts below are **synthetic preview acceptance only**, not official
+signed releases. The healthy client source is `16cd3e3d16e71f85ff9853e900d10a11a936af0a`.
+The broken candidate is a fixture script that exits before health; it must never
+be promoted outside that isolated test namespace. No private key is in a package.
+
+```text
+tbg-client       dbc9ca191b2efffbb2ce10cc334919dab0979cdbc80b37eaab01087d36a2729f
+tbg-launcher     a257b9e158a7acb35b6c536ceb227417c66b5b4ac56c2a120a34c9d6483ab560
+tbg-release      4849e73d59f152763d667e62876ea09d9effb3534f7f38259fba223b20118fe4
+healthy-package  ac5df084099b3856e4a29015a3d1cd1bdc87e7275c6df8748bf0db7c5764e3e4
+broken-package   7b158d98a4e186d7c0a744cddbbafd93ad8e2f6661aa77738d013ce1d82f3c4e
+```
+
+
+### Observed native UI journey
+
+An owned Xvfb/XTest harness drove the actual packaged Bevy client, never the
+owner's desktop. Initial N1/N2 use source `9c0bbad`; N3 uses final `16cd3e3`.
+The fixture's stable helper was explicitly repaired to the final build while
+its game was closed; this is not a claimed self-update of the helper binary.
+The official bootstrap/helper upgrade matrix remains pending.
+
+- N1 → N2: update prompt, verified download, staged restart and healthy receipt.
+  Closing before acknowledgement and reopening retained the notes; clicking
+  acknowledgement and reopening suppressed them. Existing data sentinel stayed.
+- N2 → N3: same real update path reached the final client, committed health,
+  cleared the journal and showed the exact N3 notes; GUI acknowledgement persisted.
+- On N3, Settings' signed manual check discovered the newly published test
+  candidate N4. Later closed the modal and left the visible centered badge;
+  clicking that badge reopened the update action.
+- N3 → broken N4: real verified download/stage/restart executed the stub,
+  which exited before health. The launcher restored N3, cleared the journal,
+  retained all four version directories and preserved the user-data sentinel.
+  The actual pt-BR UI showed “Atualização não aplicada”, never success; the
+  durable receipt was `recovered`, attempted N4, running N3, unacknowledged.
+  The owned game/Xvfb harness was then closed; its receipt/evidence remain.
+
+This confirms that particular real Linux failure/recovery path; it does not
+accept every U06 fault/schema/revocation combination.
+
+The harness originally read a nonexistent receipt location; verification uses
+`state/receipts/pending.json` and the helper's `notes` output. Its earlier null
+receipt field is a harness limitation, not absence of a durable game receipt.
+No keys, fixture binaries or screenshots are committed.

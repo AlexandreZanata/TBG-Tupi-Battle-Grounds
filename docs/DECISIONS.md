@@ -2510,3 +2510,26 @@ of players require capacity evidence and later multi-host routing/store
 choices, not an immediate orchestration platform. Arbitrary worker crash
 failover/checkpointing and emergency security shutdown are separate policies.
 See [P66](phases/P66-native-updates-and-release-safety.md).
+
+
+### D-91/D-92 implementation limits — 2026-10-31
+
+P66 completion is a Draft candidate. The owner requested one continuation PR
+instead of separate M1–M4 PRs; the milestone exit gates still apply. Official
+trust/signing is disabled pending O02, Windows is unverified and automatic
+retained-build deletion is disabled pending a retention decision. The Linux
+continuation replaces the initial preferences-file resume shortcut with an
+asynchronous OS credential store; vault failure keeps a visible temporary
+session and never enables plaintext persistence.
+
+The backend currently permits one ranked authority and coordinates ownership
+through a shared single-host SQLite directory. A restarted generation is Ready
+until explicitly promoted. Legacy `/ws` reconnect is not a generation-preserving
+adoption strategy. Bounded overlap exposed transport failures; no zero-disconnect
+or capacity guarantee is accepted. Full wire-corpus identity, scheduled contract
+switch/room grace, aggregate update-health halt, skipped-release notes history
+and real Windows acceptance remain open in P66 §11.
+
+Protocol 29/release schema 9 in this branch must be reconciled explicitly with
+the independent P68 protocol 30/auth schema 9 before those fronts are combined.
+Do not reuse a migration number simply because both documents named it.
