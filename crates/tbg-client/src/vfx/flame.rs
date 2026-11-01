@@ -1,6 +1,6 @@
-//! Nozzle-bound orange/red flame motion and the unchanged authoritative ground segment.
+//! Nozzle-bound orange/red flame motion driven by the authoritative event segment.
 
-use super::{spawn, Motion, VfxAssets};
+use super::VfxAssets;
 use bevy::{light::NotShadowCaster, prelude::*};
 
 /// Cosmetic lifetime matches the original flame; particles never decide hits.
@@ -22,18 +22,6 @@ pub fn profane_flame(
     end: f32,
     nozzle: Option<(Entity, Vec3)>,
 ) {
-    // The strip remains exactly [start, end], including friendly fire and both seats.
-    spawn(
-        commands,
-        &assets.chip,
-        &assets.fire,
-        Vec3::new((start + end) * 0.5, 0.025, 0.0),
-        Motion::Segment {
-            size: Vec3::new((end - start).abs(), 0.018, 0.12),
-        },
-        0.0,
-        0.28,
-    );
     let count = if crate::config::low_motion() { 4 } else { 8 };
     for piece in 0..count {
         let (mesh, material) = match piece {
