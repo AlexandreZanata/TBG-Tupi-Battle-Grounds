@@ -60,6 +60,9 @@ Cloudflare strict proxy trust and TLS; do not weaken SSL mode to hide a handshak
 
 ## Activation gates and operating commands
 
+The future end-to-end activation and native publication plan is
+[MERGE-TO-DEPLOY](plans/MERGE-TO-DEPLOY.md). It is a plan, not an activation receipt.
+
 See [deploy/auto/README](../deploy/auto/README.md) for installation, attestation and
 backend details. The installer deliberately leaves all timers disabled. Before enabling:
 
