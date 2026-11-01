@@ -179,6 +179,8 @@ struct State {
     login_limits: Limits,
     renewal_limits: Limits,
     last_cleanup: i64,
+    /// P71 (W3): newest revocation time already read from the database.
+    revocations_seen: i64,
     ip_slots: HashMap<IpAddr, Instant>,
 }
 
@@ -323,6 +325,40 @@ impl Service {
             if let Some(store) = &self.store {
                 let _ = store.auth(db::Request::Cleanup { now }).await;
             }
+        }
+        self.follow_revocations(state, now).await;
+    }
+
+    /// P71 (W3): another release slot shares the database and may revoke a family
+    /// this process still honors (Access index, live flags); apply it here within
+    /// about a second instead of after the Access expires.
+    async fn follow_revocations(&self, state: &mut State, now: i64) {
+        let Some(store) = &self.store else {
+            return;
+        };
+        if state.revocations_seen == 0 {
+            state.revocations_seen = now;
+            return;
+        }
+        let since = state.revocations_seen;
+        let Ok(db::Reply::Revoked(rows)) = store.auth(db::Request::RevokedSince { since }).await
+        else {
+            return;
+        };
+        state.revocations_seen = rows.iter().map(|(_, at)| *at).fold(since, i64::max);
+        let honored: Vec<FamilyId> = {
+            let Ok(access) = self.access.read() else {
+                return;
+            };
+            rows.iter()
+                .map(|(id, _)| *id)
+                .filter(|id| {
+                    state.flags.contains_key(id) || access.values().any(|b| b.family == *id)
+                })
+                .collect()
+        };
+        if !honored.is_empty() {
+            let _ = self.forget(state, RevocationScope::Families(honored)).await;
         }
     }
 

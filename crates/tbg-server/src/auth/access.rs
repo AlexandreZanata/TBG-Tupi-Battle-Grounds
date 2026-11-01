@@ -89,6 +89,22 @@ impl Service {
             },
         };
         self.store()?.auth(request).await?;
+        self.forget(state, scope).await
+    }
+
+    /// The in-process half of a revocation: flags, Access index, retry caches,
+    /// then the lobby closes and detaches this process's sockets. Also applied
+    /// for revocations another release slot wrote (P71, W3).
+    pub(super) async fn forget(
+        &self,
+        state: &mut State,
+        scope: RevocationScope,
+    ) -> Result<(), Error> {
+        for (id, flag) in &state.flags {
+            if scope.includes(*id, flag.account) {
+                flag.revoked.store(true, Ordering::Release);
+            }
+        }
         self.access
             .write()
             .map_err(|_| Error::Unavailable)?
