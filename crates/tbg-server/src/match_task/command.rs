@@ -70,6 +70,9 @@ impl Match {
                 let stale = seq == 0 || seq <= current;
                 let result = if stale {
                     Err(tbg_core::Rejection::Stale)
+                } else if self.paused {
+                    // P71: nobody acts while a player is reconnecting.
+                    Err(tbg_core::Rejection::Paused)
                 } else {
                     self.record(seat, Some((seq, intent)));
                     self.state.apply_intention(seat, seq, intent)
@@ -124,6 +127,7 @@ impl Match {
                 }
                 self.players[seat.index()].conn = Some(conn);
                 self.detached_at[seat.index()] = None;
+                self.seen[seat.index()] = true;
                 self.stats[seat.index()].reattached += 1;
                 self.applied[seat.index()] = false;
                 let start = self.match_start(seat);

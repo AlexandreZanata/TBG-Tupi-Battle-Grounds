@@ -58,6 +58,11 @@ pub struct NetLink {
     mode: Mode,
     socket: Option<(ewebsock::WsSender, ewebsock::WsReceiver)>,
     opened: bool,
+    /// When the open socket last delivered a frame (P71 silence watchdog).
+    heard_at: Option<f64>,
+    /// P71: the last server clock, when it last moved, and the last view.
+    clock_moved: Option<(u64, f64)>,
+    view_at: f64,
     token: Option<Token>,
     in_match: bool,
     result_id: Option<tbg_core::protocol::ResultId>,
@@ -93,6 +98,9 @@ impl NetLink {
             mode,
             socket: None,
             opened: false,
+            heard_at: None,
+            clock_moved: None,
+            view_at: 0.0,
             token: config::load_token(),
             in_match: false,
             result_id: None,

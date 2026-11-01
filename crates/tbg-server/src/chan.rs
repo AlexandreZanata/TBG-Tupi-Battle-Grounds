@@ -25,16 +25,62 @@ pub struct ConnHandle {
     pub id: u64,
     pub tx: mpsc::Sender<ConnEvent>,
     pub active: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    /// Shared with the socket task (P71).
+    pub link: std::sync::Arc<Link>,
 }
 
 impl ConnHandle {
     pub fn new(id: u64, tx: mpsc::Sender<ConnEvent>) -> Self {
+        let link = std::sync::Arc::new(Link::default());
+        link.heard();
         Self {
             id,
             tx,
             active: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true)),
+            link,
         }
     }
+
+    /// Close the socket even when its queue is full: a stalled client must
+    /// reconnect instead of keeping a socket that no longer carries its seat.
+    pub fn close(&self) {
+        self.link
+            .close
+            .store(true, std::sync::atomic::Ordering::Release);
+        let _ = self.tx.try_send(ConnEvent::Close);
+    }
+}
+
+/// When the client was last heard, and a close request that needs no queue room.
+#[derive(Default)]
+pub struct Link {
+    heard_ms: std::sync::atomic::AtomicU64,
+    close: std::sync::atomic::AtomicBool,
+}
+
+impl Link {
+    pub fn heard(&self) {
+        self.heard_ms
+            .store(uptime_ms(), std::sync::atomic::Ordering::Relaxed);
+    }
+
+    pub fn silent_for(&self) -> std::time::Duration {
+        let heard = self.heard_ms.load(std::sync::atomic::Ordering::Relaxed);
+        std::time::Duration::from_millis(uptime_ms().saturating_sub(heard))
+    }
+
+    pub fn close_requested(&self) -> bool {
+        self.close.load(std::sync::atomic::Ordering::Acquire)
+    }
+}
+
+/// Monotonic milliseconds that fit an atomic.
+fn uptime_ms() -> u64 {
+    static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
+    START
+        .get_or_init(std::time::Instant::now)
+        .elapsed()
+        .as_millis() as u64
 }
 
 pub enum ConnEvent {
@@ -100,6 +146,8 @@ pub enum LobbyCmd {
         conn: ConnHandle,
         ip: IpAddr,
         binding: crate::auth::Binding,
+        /// P71: the Access expired; only its own admitted seat may resume.
+        lease: bool,
         reply: oneshot::Sender<Option<(Token, String)>>,
     },
     AuthClaim {

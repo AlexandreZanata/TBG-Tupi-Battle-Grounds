@@ -21,6 +21,8 @@ fn production_defaults() {
     let c = Config::default();
     // GAME-DESIGN §5: 30 s reconnect window; one tick = 1 / TICK_HZ.
     assert_eq!(c.reconnect_secs, 30);
+    // P71 (BR-M03, Proposed): connection-pause budget per player per match.
+    assert_eq!(c.pause_secs, 120);
     assert_eq!(c.tick_ms, 1_000 / u64::from(TICK_HZ));
     // ARCHITECTURE §5/§11: ≤ 8 sockets per IP, global cap, account and API
     // rate limits (P11/P13), all cores unless TBG_WORKERS says otherwise.

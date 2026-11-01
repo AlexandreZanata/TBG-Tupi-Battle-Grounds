@@ -217,9 +217,10 @@ impl Lobby {
                 conn,
                 ip,
                 binding,
+                lease,
                 reply,
             } => {
-                let result = self.auth_hello(resume, conn, ip, binding);
+                let result = self.auth_hello(resume, conn, ip, binding, lease);
                 let _ = reply.send(result);
             }
             LobbyCmd::AuthClaim {

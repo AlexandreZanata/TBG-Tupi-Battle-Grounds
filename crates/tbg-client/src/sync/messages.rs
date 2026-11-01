@@ -342,6 +342,7 @@ pub(super) fn poll_link(
             Some(lang.tf(Msg::NetReconnecting, &[("secs", &format!("{left:.0}"))]))
         }
         Some(NetStatus::Connecting) => Some(lang.t(Msg::QueueConnecting).into()),
+        _ if link.match_paused(now) => Some(lang.t(Msg::NetMatchPaused).into()),
         _ => None,
     };
     if let Some(NetStatus::Failed(why)) = link.status() {

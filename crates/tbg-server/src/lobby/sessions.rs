@@ -51,7 +51,9 @@ impl Lobby {
                 conn.active
                     .store(true, std::sync::atomic::Ordering::Release);
             }
-            send(&s.conn, ConnEvent::Close);
+            if let Some(old) = &s.conn {
+                old.close();
+            }
             if let SessionState::InMatch { tx, seat } = &s.state {
                 let _ = tx.try_send(MatchCmd::Attach {
                     seat: *seat,

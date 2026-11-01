@@ -27,6 +27,8 @@ async fn server(reconnect_secs: u64) -> String {
     server_with(Config {
         tick_ms: 5,
         reconnect_secs,
+        // The window itself is under test here; P71's pause has its own file.
+        pause_secs: 0,
         max_per_ip: 1_000,
         ..Config::default()
     })
