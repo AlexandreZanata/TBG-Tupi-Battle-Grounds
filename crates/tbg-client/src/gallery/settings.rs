@@ -10,6 +10,10 @@ use tbg_core::{UnitKind, ALL_KINDS, UNIT_KINDS};
 #[derive(Resource)]
 pub struct Gallery {
     pub mode: String,
+    /// Deterministic P70 sheets; capture code advances the shared Review page.
+    pub polish: bool,
+    pub view: Option<View>,
+    pub nameless: bool,
     pub unit: Option<UnitKind>,
     pub slow: f32,
     pub silhouette: bool,
@@ -17,7 +21,7 @@ pub struct Gallery {
     pub frames: bool,
     pub stress: bool,
     pub clip: Option<Clip>,
-    /// `&tier=1|2`: contact sheet of an evolution (branch A) instead of the base.
+    /// `&tier=1|2`: contact sheet of the selected Evolution branch.
     pub tier: u8,
     /// `&branch=0|1`: branch A or B.
     pub branch: u8,
@@ -52,7 +56,7 @@ impl Gallery {
         self.silhouette || self.studio()
     }
     pub fn floor(&self) -> bool {
-        !self.portrait && !self.silhouette && !self.frames && self.studio()
+        !self.polish && !self.portrait && !self.silhouette && !self.frames && self.studio()
     }
     pub fn read() -> Self {
         let mode = config::url_param("gallery")
@@ -67,7 +71,11 @@ impl Gallery {
                 .into_iter()
                 .find(|clip| slug(&format!("{clip:?}")) == slug(&s))
         });
+        let polish = mode == "polish" || config::url_param("polish").is_some();
         Self {
+            polish,
+            view: config::url_param("view").as_deref().and_then(View::parse),
+            nameless: polish || config::url_param("nameless").is_some(),
             mode,
             unit,
             slow: config::url_param("slow")
@@ -77,7 +85,9 @@ impl Gallery {
                 .clamp(0.01, 4.0),
             silhouette: config::url_param("silhouette").is_some(),
             turn: config::url_param("turn").is_some(),
-            frames: config::url_param("frames").is_some() || config::url_param("lineup").is_some(),
+            frames: polish
+                || config::url_param("frames").is_some()
+                || config::url_param("lineup").is_some(),
             stress: config::url_param("stress")
                 .and_then(|s| s.parse::<usize>().ok())
                 .is_some_and(|n| n > 0),
@@ -136,4 +146,40 @@ fn parse_unit_kind(s: &str) -> Option<UnitKind> {
             "beetling" => Some(UnitKind::Beetling),
             _ => None,
         })
+}
+
+/// Fixed model orientation; the camera and lighting stay identical for every view.
+#[derive(Clone, Copy)]
+pub enum View {
+    Front,
+    Profile,
+    Back,
+    ThreeQuarter,
+}
+impl View {
+    fn parse(value: &str) -> Option<Self> {
+        match value {
+            "front" => Some(Self::Front),
+            "profile" => Some(Self::Profile),
+            "back" => Some(Self::Back),
+            "threequarter" => Some(Self::ThreeQuarter),
+            _ => None,
+        }
+    }
+    pub fn yaw(self) -> f32 {
+        match self {
+            Self::Front => 0.0,
+            Self::Profile => 90.0,
+            Self::Back => 180.0,
+            Self::ThreeQuarter => 25.0,
+        }
+    }
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Front => "front",
+            Self::Profile => "profile",
+            Self::Back => "back",
+            Self::ThreeQuarter => "threequarter",
+        }
+    }
 }

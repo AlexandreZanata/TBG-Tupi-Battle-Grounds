@@ -1,0 +1,1560 @@
+{
+  "schema_version": 1,
+  "phase": "P70",
+  "status": "proposed_before_implementation",
+  "reference_commit": "55510c5363e3f1e555fa5133208a5faf20c5825b",
+  "notes": [
+    "These dossiers preserve existing identity and record proposed work; no runtime inspection or finished art is claimed.",
+    "Form-specific decisions, exact palette names and contact-pose timing must be completed while implementing each champion.",
+    "Evolution keeps 1.00/1.08/1.16 scale progression, a large surface change and a silhouette addition; preserve current A/B identity."
+  ],
+  "champions": [
+    {
+      "id": "Shieldbearer",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Shieldbearer figure: a man-at-arms in mail and a team tabard behind a kite shield, an arming sword in hand. Branch A (Bulwark) grows the shield and the plate, then a castle-crested tower shield and a great helm; branch B (Vanguard) lightens him with a longer blade, plume and cape, then a winged helm and a glowing champion's sword.",
+      "existing_motion_source_summary": "Shieldbearer kit: a man-at-arms who keeps his shield up, marches behind it, and cuts round its edge with his sword; he falls back, strides in and raises the blade when he evolves or wins.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/shieldbearer/mod.rs",
+        "crates/tbg-client/src/art/kits/shieldbearer/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Kite shield and upright armored defender",
+      "proposed_color_blocking": "Steel, linen and individual cloth; shield face as the dominant accent",
+      "proposed_motion": {
+        "idle": "Checks shield edge",
+        "locomotion": "measured protected march",
+        "primary_action": "shield-led contact",
+        "victory": "shield salute with sword tap"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Bulwark",
+        "Drumguard",
+        "Rampart"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Archer",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Archer figure: a hooded yeoman archer of the Humans faction with an upright longbow, a quiver on the back, linen tunic, and team tabard. Branch A (Longbow -> Marksman) extends range and accuracy: green ranger hood with feather, yew longbow with horn nocks, then a gilded recurve greatbow, team half-cape, gold trim, and glowing eye glint. Branch B (Volley -> Arrow Rain) fires rapid storms of arrows: dark leather coif, dual quivers on back, composite war-bow, then an armored steel-brow",
+      "existing_motion_source_summary": "Archer kit: a skilled archer who steps side-on to loose arrows from an upright longbow. Paws draw string to cheek, holds aim along the arrow's arc, releases at 0.18 s with a crisp recoil, and reaches back to the quiver for the next shot.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/archer/mod.rs",
+        "crates/tbg-client/src/art/kits/archer/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Tall bow, ranger hood and narrow upright silhouette",
+      "proposed_color_blocking": "Leaf-green hood, linen and warm timber with readable fletching",
+      "proposed_motion": {
+        "idle": "Tests bowstring",
+        "locomotion": "light cautious steps",
+        "primary_action": "full draw and restrained follow-through",
+        "victory": "bows with raised bow"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "CelestialArcher",
+        "Farwatch"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "BoneBrute",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Bone Brute figure: a hunched giant skeleton with a ribcage around a glowing soul, rags and a rusty cleaver. Branch A armors it in bone (buckler, then a tower shield of skulls); branch B arms it (twin cleavers, then a great reaping scythe and a hooded cloak).",
+      "existing_motion_source_summary": "Bone Brute kit: hunched giant skeleton; alternating heavy swings per Evolution, ground impacts at the blade, Reaper's crescent sweep.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/bone_brute/mod.rs",
+        "crates/tbg-client/src/art/kits/bone_brute/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Huge hunched ribcage, skull and heavy cleaver",
+      "proposed_color_blocking": "Ivory bones, rust and concentrated soul glow",
+      "proposed_motion": {
+        "idle": "Ribcage heave",
+        "locomotion": "heavy uneven gait",
+        "primary_action": "weighty cleaver arc",
+        "victory": "jaw-rattling cleaver celebration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Hexer",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Hexer figure: a hunched skeleton witch in a ragged violet robe and a crooked pointed hat, a gnarled staff topped with a lantern skull. Branch A (Withering) rings the skull with hex runes, then crowns the hat and swells the skull with doom-lit eyes; branch B (Plague) swings a plague censer, then wears a plague beak and a greater censer.",
+      "existing_motion_source_summary": "Hexer kit: a hunched witch who leans on her skull staff, hobbles on the walk, and thrusts the staff at her target so the hex leaves the skull's mouth on the cast Release; she crumbles into the ground on death.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/hexer/mod.rs",
+        "crates/tbg-client/src/art/kits/hexer/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Crooked hat, skull lantern and skeletal witch posture",
+      "proposed_color_blocking": "Violet robe, pale skull and spectral-green focal point",
+      "proposed_motion": {
+        "idle": "Lantern circles",
+        "locomotion": "crooked shuffling steps",
+        "primary_action": "staff-led curse",
+        "victory": "theatrical staff twirl"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Bloodweaver",
+        "Crowcaller",
+        "Puppetmaster"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Sawbot",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Sawbot figure: a lean Ironworks automaton with one great glowing eye, a boiler chest, a clamp hand and a spinning saw disk for a right hand. Branch A (Overclock) lights its vents and heats the teeth, then mounts a second saw and exhausts; branch B (Plating) bolts on plates, then a horned juggernaut hull and a great saw.",
+      "existing_motion_source_summary": "Sawbot kit: a twitchy automaton whose saw never stops spinning (faster when it cuts). It scuttles forward bent low, slashes the spinning saw through its target in a spray of sparks, and topples on its face.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/sawbot/mod.rs",
+        "crates/tbg-client/src/art/kits/sawbot/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Single glowing eye, exposed saw disk and boiler",
+      "proposed_color_blocking": "Gunmetal, brass and localized hot orange teeth",
+      "proposed_motion": {
+        "idle": "Saw tension and valve twitch",
+        "locomotion": "rigid gear-driven stride",
+        "primary_action": "saw-led cut",
+        "victory": "mechanical saw flourish"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Demolisher",
+        "Oilpress"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "SiegeWalker",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Siege Walker figure: a hulking ogre gunner of the Ironworks carrying a shoulder bombard. Evolutions change the bombard (the silhouette piece), the armor (large surfaces) and, at tier 2, add a glowing signature.",
+      "existing_motion_source_summary": "Siege Walker kit: ogre gunner with a shoulder bombard that aims along its own shell's flight; five forms with their own shells and muzzles.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/siege_walker/mod.rs",
+        "crates/tbg-client/src/art/kits/siege_walker/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Hulking shoulder-bombard carrier distinct from small mortar users",
+      "proposed_color_blocking": "Iron, leather and warm bombard details with clear armor contrast",
+      "proposed_motion": {
+        "idle": "Shoulder-load adjustment",
+        "locomotion": "broad braced gait",
+        "primary_action": "shoulder cannon recoil",
+        "victory": "proud cannon lift"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Bombard"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bloomkeeper",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Bloomkeeper figure: a light-wood dryad in a leaf dress and petal skirt, a crown of blossoms in her leafy hair, a staff topped with a flower. Branch A (Blossom) blooms on her shoulders and lights the flower, then carries a blossoming tree on her back; branch B (Bramble) grows bark armor and thorns, then a thorn crown, roots at her feet and an amber thorn staff.",
+      "existing_motion_source_summary": "Bloomkeeper kit: a dryad who lifts a blessing hand while idle, walks lightly with her staff, and thrusts the flower at the ally she heals so the petals leave it on the cast Release; she sinks to her knees on death and grows up out of the soil on arrival.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/bloomkeeper/mod.rs",
+        "crates/tbg-client/src/art/kits/bloomkeeper/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Flower-crowned dryad, petal skirt and flowering staff",
+      "proposed_color_blocking": "Light bark, leaf green and large pink/cream blossom shapes",
+      "proposed_motion": {
+        "idle": "Petal breathing",
+        "locomotion": "soft rooted steps",
+        "primary_action": "flower-led healing gesture",
+        "victory": "blossom-opening dance"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "AntidoteBrewer"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Rootcaller",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Rootcaller figure: a knobbly treant shaman with a bark trunk, a moss collar and beard, amber eyes and long root claws. Branch A grows roots and thorns (vine coils, then a thorn crown and an amber heart); branch B grows fungus (a mushroom cap, then a great glowing cap and back caps).",
+      "existing_motion_source_summary": "Rootcaller kit: treant shaman whose cast drives its claws into the ground; a root ridge runs to the target and roots erupt around it for the real root duration; spores on the B branch.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/rootcaller/mod.rs",
+        "crates/tbg-client/src/art/kits/rootcaller/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Knotted treant shaman with root claws and moss beard",
+      "proposed_color_blocking": "Dark bark, moss and amber eyes distinct from flower Supports",
+      "proposed_motion": {
+        "idle": "Root-finger flex",
+        "locomotion": "rolling root-foot walk",
+        "primary_action": "soil-directed claw cast",
+        "victory": "slow branching sway"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Leechroot",
+        "Rotcap"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Nester",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Nester figure: a plump moss mother with a round leafy belly, a leaf cap and a woven nest of eggs on her back, a seed ready in hand. Branch A (Brood) grows the clutch, then carries a glowing amber hive; branch B (Venom) lays green glowing eggs, then dark spiked blight eggs.",
+      "existing_motion_source_summary": "Nester kit: a plump nest mother who rocks and pats her belly while idle, waddles on the walk, and lobs a seed overhand on the cast Release; she melts back into the soil on death and rises from it.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/nester/mod.rs",
+        "crates/tbg-client/src/art/kits/nester/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Round moss mother, nest and visible eggs",
+      "proposed_color_blocking": "Moss, warm straw and contrasting eggs",
+      "proposed_motion": {
+        "idle": "Checks nest",
+        "locomotion": "protective rounded waddle",
+        "primary_action": "careful offspring gesture",
+        "victory": "nest-protecting happy sway"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Drillnest",
+        "Smuggler"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Rampart",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Rampart figure: an ogre of the Ironworks in riveted plate carrying a mobile wall of oak and iron on the left arm, an iron gauntlet on the right. Branch A (Bastion) grows the wall and its plating, then crowns it with merlons and a team banner; branch B (Spiked) studs the wall with spikes, then mounts a hot battering ram on the right arm.",
+      "existing_motion_source_summary": "Rampart kit: an ogre who plants his wall before him, plods behind it, and punches (or rams) round its edge while keeping it up; he drops to his knees behind it when he falls and lands from his drop with a quake.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/rampart/mod.rs",
+        "crates/tbg-client/src/art/kits/rampart/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Mobile wall with broad carrier mass",
+      "proposed_color_blocking": "Oak wall, iron bands and limited individual banner accent",
+      "proposed_motion": {
+        "idle": "Settles wall",
+        "locomotion": "planted wall-bearing steps",
+        "primary_action": "braced wall strike",
+        "victory": "grounded wall salute"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Bulwark",
+        "Shieldbearer"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Longaxe",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Longaxe figure: a halberdier in a padded gambeson and kettle hat with a poleaxe longer than he is tall. Branch A hardens the cut (breastplate and broad head, then a gilded executioner's crescent); branch B widens the swing (twin-bladed bardiche, then a great halberd and horned helm).",
+      "existing_motion_source_summary": "Longaxe kit: a halberdier who rests his poleaxe upright, carries it on the shoulder, and brings it over his own front line in a two-handed chop and a ground cut reaching three tiles (branch B sweeps in a fan).",
+      "sources": [
+        "crates/tbg-client/src/art/kits/longaxe/mod.rs",
+        "crates/tbg-client/src/art/kits/longaxe/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Long poleaxe, kettle hat and asymmetric reach",
+      "proposed_color_blocking": "Padded cloth, timber and large readable steel head",
+      "proposed_motion": {
+        "idle": "Balances poleaxe",
+        "locomotion": "weapon-aware forward stride",
+        "primary_action": "wide poleaxe leverage",
+        "victory": "balanced poleaxe victory flourish"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "SolarSentinel",
+        "Trident"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Farwatch",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Farwatch figure: a hooded watchman with a heavy crossbow (arbalest) that outranges the lane. Branch A steadies the shot (a brass scope, then a gilded great arbalest, feathered hat and team cape); branch B cruels it (barbed red-fletched bolts and a masked hood, then a glowing wounding bolt and a dark red cloak).",
+      "existing_motion_source_summary": "Farwatch kit: a watchman who kneels to aim his arbalest across the lane, the bolt leaving along its own flight; recoil, then he rises and cranks the next bolt.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/farwatch/mod.rs",
+        "crates/tbg-client/src/art/kits/farwatch/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Heavy arbalest, watchman hood and sighting posture",
+      "proposed_color_blocking": "Dark ranger cloth, timber and brass sight contrast",
+      "proposed_motion": {
+        "idle": "Checks sight",
+        "locomotion": "deliberate crossbow-carrying steps",
+        "primary_action": "stable aimed release and reload",
+        "victory": "arbalest-at-rest salute"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Archer",
+        "CelestialArcher"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bombard",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Bombard figure: a stout Ironworks gunner in riveted plate with a short mortar at the hip. Branch A (Destruction) flares the bell and racks bombs on the back, then a great mortar with a glowing band and a furnace pack; branch B (Iron Fortress) adds heavy plate and a hull shield, then a twin-barrel mortar fed from an ammunition drum.",
+      "existing_motion_source_summary": "Bombard kit: a heavy gunner who braces, hip-fires a mortar so the bomb lobs along its own arc, is shoved back by the recoil, then drops the next bomb down the barrel. Heavy stomping walk, a hard landing.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/bombard/mod.rs",
+        "crates/tbg-client/src/art/kits/bombard/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Short hip mortar and compact armored gunner",
+      "proposed_color_blocking": "Dark iron with hot barrel and contrasting ammunition details",
+      "proposed_motion": {
+        "idle": "Checks mortar load",
+        "locomotion": "compact heavy steps",
+        "primary_action": "hip-mortar recoil",
+        "victory": "barrel-up gunner celebration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "SiegeWalker"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Rotcap",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Rotcap figure: a squat mushroom-folk spitter, pale stem body, a broad spotted cap with gills, a ring collar and a round spitting mouth. Branch A (Concentrated) darkens the cap with glowing toxin spots, then drips venom from its rim; branch B (Contamination) sprouts caps on the shoulders, then a cluster of caps and glowing spore pods.",
+      "existing_motion_source_summary": "Rotcap kit: a waddling mushroom that rears back and spits a toxin glob from its mouth along the glob's own arc, rises out of the soil on arrival and wilts back into it on death.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/rotcap/mod.rs",
+        "crates/tbg-client/src/art/kits/rotcap/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Wide spotted mushroom cap and spitting mouth",
+      "proposed_color_blocking": "Pale stem, contrasting cap and clearly separated toxin accents",
+      "proposed_motion": {
+        "idle": "Cap-gill pulse",
+        "locomotion": "squashy short steps",
+        "primary_action": "mouth-first spore spit",
+        "victory": "cap-bobbing circle"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Leechroot",
+        "Rootcaller"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "OldFinn",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": true,
+      "existing_identity": "Old Finn figure: a stooped old fisherman in a yellow oilskin and sou'wester, white beard, pipe, a long rod and a wicker creel. Branch A lands bigger fish (a fuller creel, then a giant catfish over the back and a gold hook); branch B lands more (a net and a second rod, then a net heaving with fish and a lantern).",
+      "existing_motion_source_summary": "Old Finn kit: a stooped fisherman who whips his rod overhead and flings a fish at the target (it lands as a splash); idle pipe puffs and a slow rod bob; he kneels when he falls.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/old_finn/mod.rs",
+        "crates/tbg-client/src/art/kits/old_finn/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Yellow oilskin, beard, long rod and recognizable flying fish",
+      "proposed_color_blocking": "Strong oilskin yellow, pale beard, dark boots and silver fish contrast",
+      "proposed_motion": {
+        "idle": "Rod bob and beard motion",
+        "locomotion": "aged fisherman steps",
+        "primary_action": "over-shoulder fish cast",
+        "victory": "rod-and-creel jig"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "AntidoteBrewer",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Antidote Brewer figure: a sprout-folk herbalist in a leaf hood and a linen apron, a glowing cure flask in hand and an herb basket on the back. Branch A (Master Antidote) gilds the flask and crowns the hood, then carries a glowing still; branch B (Rapid Brewer) straps on a bandolier of flasks, then brews in both hands from a back cauldron.",
+      "existing_motion_source_summary": "Antidote Brewer kit: it swirls its flask while idle, hurries with the flask held up, and tosses the cure at the ally it cleanses (its brew is its attack, so the flask leaves the hand on the cast Release). Pops up out of the soil.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/antidote_brewer/mod.rs",
+        "crates/tbg-client/src/art/kits/antidote_brewer/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Leaf-hooded herbalist with cure flask and herb basket",
+      "proposed_color_blocking": "Leaf hood, cream apron and a distinct cure-flask color",
+      "proposed_motion": {
+        "idle": "Inspects flask",
+        "locomotion": "careful basket-carrying steps",
+        "primary_action": "measured brew gesture",
+        "victory": "flask-toast dance"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Bloomkeeper"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Shatterback",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "A low terrestrial turtle: beak, four thick feet, soft inner shell and four detachable plates.",
+      "existing_motion_source_summary": "Shatterback: a heavy terrestrial turtle with a domed segmented shell, grounded paw strikes and a retreat into its shell on death.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/shatterback/mod.rs",
+        "crates/tbg-client/src/art/kits/shatterback/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Shell/back-plate anatomy and breakable plate identity",
+      "proposed_color_blocking": "Read the current shell materials and emphasize large plate boundaries",
+      "proposed_motion": {
+        "idle": "Back-plate settling",
+        "locomotion": "weight-bearing gait",
+        "primary_action": "shell/body-driven action",
+        "victory": "proud shell display without detached plates"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Bonehorn",
+        "Jawguard"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "BloodFurnace",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Blood Furnace figure: a skeleton knight with a furnace burning in its ribcage behind an iron grate, a flame crest on the skull and a war hammer with a heated head. Branch A (Infernal Core) feeds the fire (bigger core and flame eyes, then a blazing sun with rays and a crown of flame); branch B (Controlled Burn) banks it (a furnace door and bellows, then ember lanterns on chains and smoldering shoulders).",
+      "existing_motion_source_summary": "Blood Furnace kit: a burning skeleton knight. Its fire heaves while it idles, it marches with the hammer at its side, brings the hammer down two-handed in a burning blow, and crumbles to ash on death.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/blood_furnace/mod.rs",
+        "crates/tbg-client/src/art/kits/blood_furnace/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Burning ribcage furnace and heated war hammer",
+      "proposed_color_blocking": "Bone, dark iron and concentrated furnace fire distinct from Pyre Warden",
+      "proposed_motion": {
+        "idle": "Furnace heave",
+        "locomotion": "hammer-weighted march",
+        "primary_action": "two-handed burning hammer blow",
+        "victory": "furnace-backed hammer salute"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "PyreWarden"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bloodweaver",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Bloodweaver figure: a hooded skeleton priestess in a wine robe with a spindle staff wound in blood thread and drops of blood hovering at her hand. Branch A (Blood Sacrifice) carries a chalice, then wears a glowing heart reliquary; branch B (Blood Circulation) winds threads round her arms, then weaves with two spindles amid orbiting drops.",
+      "existing_motion_source_summary": "Bloodweaver kit: she idles weaving slow circles with her free hand, glides on the walk, and strikes the enemy with a blood spindle; stolen vitality streams from that enemy to the wounded ally (`sync/actions.rs`). She rises out of the ground and sinks back into it.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/bloodweaver/mod.rs",
+        "crates/tbg-client/src/art/kits/bloodweaver/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Skeletal priestess, spindle and visible blood threads",
+      "proposed_color_blocking": "Wine robe, pale bone and thin bright blood-thread contrast",
+      "proposed_motion": {
+        "idle": "Weaves idle threads",
+        "locomotion": "restrained robe-aware steps",
+        "primary_action": "directed Siphon weave",
+        "victory": "spindle-thread dance"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Crowcaller",
+        "Hexer",
+        "Puppetmaster"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Oilpress",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Oilpress figure: the Ironworks' walking press, an ogre sealed in a riveted boiler with a smokestack, piston arms and iron press plates for fists. Branch A (Fortress Engine) bolts on hull plates, then a bulwark, spiked anchor feet and a lit furnace; branch B (Tar Bastion) carries leaking oil barrels, then a tar tank with tar-coated plates.",
+      "existing_motion_source_summary": "Oilpress kit: a walking engine. It idles with a piston pump in its chest, plods with the heaviest stomp in the game, slams both press plates down on its target, sinks to its knees on death and lands from its drop with a quake.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/oilpress/mod.rs",
+        "crates/tbg-client/src/art/kits/oilpress/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Walking boiler press, stack and piston fists",
+      "proposed_color_blocking": "Gunmetal, oily dark surfaces and warm furnace/pressure details",
+      "proposed_motion": {
+        "idle": "Piston compression",
+        "locomotion": "rigid press-like march",
+        "primary_action": "deliberate press-fist action",
+        "victory": "rhythmic piston celebration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Demolisher",
+        "Sawbot"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Drumguard",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Drumguard figure: a marching drummer in a red coat with white straps and a team shako, a snare drum at the hip and two sticks. Branch A drives the march (a plumed shako and a bigger drum, then a grand gilded bass drum and a team standard on the back); branch B holds the line (iron bands and a steel helmet, then plate, pauldrons and glowing rhythm runes).",
+      "existing_motion_source_summary": "Drumguard kit: a drummer with no attack of his own who beats the march all the time \u2014 standing, walking (knees up), even in victory; his bonded ally takes the speed and the cover.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/drumguard/mod.rs",
+        "crates/tbg-client/src/art/kits/drumguard/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Red marching coat, shako and readable drum/sticks",
+      "proposed_color_blocking": "Red cloth, cream straps and brass drum accents",
+      "proposed_motion": {
+        "idle": "Distinct snare rhythm",
+        "locomotion": "marching cadence",
+        "primary_action": "drum-led support cue",
+        "victory": "stick-twirling drum dance"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Shieldbearer"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Leechroot",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Leechroot figure: a hunched root-beast with a leech's round toothed maw for a head, a skirt of rootlets and long whip-root hands. Branch A (Insatiable) widens the maw, then swells blood sacs on its back; branch B (Parasite) shows glowing veins, then a blood-bulb heart and maws at the root tips.",
+      "existing_motion_source_summary": "Leechroot kit: a hunched root-beast whose maw weaves as it hunts. It lashes its whip root across the target, draining it, scuttles low on the walk, claws up out of the soil and collapses back into it.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/leechroot/mod.rs",
+        "crates/tbg-client/src/art/kits/leechroot/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Toothed leech maw and long whip roots",
+      "proposed_color_blocking": "Dark roots, contrasting maw and sparse blood/sap accents",
+      "proposed_motion": {
+        "idle": "Maw pulse",
+        "locomotion": "dragging root motion",
+        "primary_action": "whip-root feeding action",
+        "victory": "curling-root victory sway"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Rootcaller",
+        "Rotcap"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "CargoCrab",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Cargo Crab figure: a robust forge-orange machine crab of the Ironworks, on thick piston legs with heavy plated pincers, and a passenger saddle on its back. Branch A (Armored Carrier) adds iron plates, spikes, and a glowing shield dome over the saddle; branch B (Turbo Carrier) adds a racing stripe, rear exhausts, leg servos, and a rear spoiler fin. Machines move on rigid pivots and pistons only (ART-DIRECTION \u00a73).",
+      "existing_motion_source_summary": "Cargo Crab kit: a scuttling carrier. Pincers ride forward and snap now and then, the walk is a quick low scuttle, the attack is a pincer lunge, it flips onto its back on death and pops out on arrival.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/cargo_crab/mod.rs",
+        "crates/tbg-client/src/art/kits/cargo_crab/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Wide mechanical crab, piston legs and usable saddle",
+      "proposed_color_blocking": "Forge orange armor, dark joints and clear saddle contrast",
+      "proposed_motion": {
+        "idle": "Pincer check",
+        "locomotion": "rigid multi-leg crab gait",
+        "primary_action": "plated-pincer contact",
+        "victory": "alternating pincer celebration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Drillnest"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Puppetmaster",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Puppetmaster figure: a tall gaunt skeleton showman in a violet tail coat and top hat, working a marionette from a control cross. Branch A (Cruel Strings) hooks the strings and arms the puppet, then lights the cross and strings and masks the face; branch B (Twisted Chorus) works a second puppet from the left hand, then carries a chorus on the coat.",
+      "existing_motion_source_summary": "Puppetmaster kit: it dances its marionette with small jerks of the control while idle, strolls with a showman's swagger, and points its control at the enemy it turns, the strings' hex leaving the cross on the cast Release (confusing is its attack). Rises from the ground; falls back on death.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/puppetmaster/mod.rs",
+        "crates/tbg-client/src/art/kits/puppetmaster/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Top hat, tailcoat, control cross and puppet",
+      "proposed_color_blocking": "Violet coat, bone hands and contrasting puppet/strings",
+      "proposed_motion": {
+        "idle": "Puppet greeting",
+        "locomotion": "showman steps",
+        "primary_action": "cross-led puppetry",
+        "victory": "marionette curtain-call dance"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Bloodweaver",
+        "Crowcaller",
+        "Hexer"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Smuggler",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Smuggler figure: a shifty runner in a dark coat, tricorn and eye patch, red sash, a lantern at the belt and a crate on a back frame. Branch A gets richer (coin pouches and stacked crates, then a gilded chest, a plumed tricorn and a team cape); branch B gets faster (a light satchel and bandana, then two crates and a lantern on a pole).",
+      "existing_motion_source_summary": "Smuggler: a one-handed revolver, a shoulder crate and a torso-only rear placement gesture.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/smuggler/mod.rs",
+        "crates/tbg-client/src/art/kits/smuggler/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Tricorn runner, crate frame, sash and lantern",
+      "proposed_color_blocking": "Dark coat, red sash, warm crate wood and lantern accent",
+      "proposed_motion": {
+        "idle": "Shifty glance and crate check",
+        "locomotion": "burdened quick steps",
+        "primary_action": "crate-placement flourish",
+        "victory": "lantern-and-crate jig"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Drillnest",
+        "Nester",
+        "Trigger"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bonehorn",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Bonehorn's low quadruped silhouette, overlapping bone mantle and five forms.",
+      "existing_motion_source_summary": "Bonehorn's diagonal quadruped gait, braced tusk shove and tightening mantle.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/bonehorn/mod.rs",
+        "crates/tbg-client/src/art/kits/bonehorn/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Low quadruped with overlapping bone mantle",
+      "proposed_color_blocking": "Dark hide against large pale bone plates",
+      "proposed_motion": {
+        "idle": "Horn/neck weight shifts",
+        "locomotion": "true quadruped gait",
+        "primary_action": "bone-mantle charge/contact",
+        "victory": "grounded horn display"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Jawguard",
+        "Shatterback"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Ravager",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Ravager's six articulated supports, anterior scythes and five predator forms.",
+      "existing_motion_source_summary": "Ravager's alternating tripod crawl and paired hook/scythe attack tracks.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/ravager/mod.rs",
+        "crates/tbg-client/src/art/kits/ravager/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Six articulated supports and anterior scythes",
+      "proposed_color_blocking": "Dark predator surfaces with bright scythe-edge contrast",
+      "proposed_motion": {
+        "idle": "Predatory forelimb twitch",
+        "locomotion": "six-limb stalking",
+        "primary_action": "scythe-led strike",
+        "victory": "raised-scythe predator display"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Mantis"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Acidmaw",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Acidmaw's long braced neck, luminous throat sac and four independently opening jaw petals.",
+      "existing_motion_source_summary": "Acidmaw's throat breathing, four-petal spit snap and precise head-space emitter.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/acidmaw/mod.rs",
+        "crates/tbg-client/src/art/kits/acidmaw/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Long braced neck, luminous throat and opening jaw petals",
+      "proposed_color_blocking": "Dark hide, turquoise throat and contrasting inner mouth",
+      "proposed_motion": {
+        "idle": "Throat breathing",
+        "locomotion": "neck-counterbalanced steps",
+        "primary_action": "jaw-petal acid release",
+        "victory": "neck-and-jaw victory display"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Whisperer",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Whisperer's floating bone bell, single eye, short tendrils and branch crests.",
+      "existing_motion_source_summary": "Whisperer's grounded float cadence and independent fear pulse overlay.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/whisperer/mod.rs",
+        "crates/tbg-client/src/art/kits/whisperer/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Floating bone bell, single eye and short tendrils",
+      "proposed_color_blocking": "Bone bell over a dark interior and focused eerie eye",
+      "proposed_motion": {
+        "idle": "Suspended bell sway",
+        "locomotion": "intentional hover",
+        "primary_action": "eye/tendril-led thought cast",
+        "victory": "circling bell celebration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Justiciar",
+        "LuminousOracle"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bulwark",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Bulwark's stone dome, iron bands, compact walker and five fortress/tool forms.",
+      "existing_motion_source_summary": "Bulwark's compact plod, two-arm tool blow and server-expiry-bound brace.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/bulwark/mod.rs",
+        "crates/tbg-client/src/art/kits/bulwark/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Stone dome, iron bands and compact walker",
+      "proposed_color_blocking": "Light/dark stone masses, dark iron and restrained mechanism accent",
+      "proposed_motion": {
+        "idle": "Dome settling",
+        "locomotion": "compact rigid walker",
+        "primary_action": "fortress-weighted contact",
+        "victory": "dome-and-leg mechanical flourish"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Rampart",
+        "Shieldbearer"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Demolisher",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Demolisher's hydraulic cuffs, near-ground fists, pressure tank and five industrial forms.",
+      "existing_motion_source_summary": "Demolisher's staggered piston settling, hydraulic punch and independent double-fist slam.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/demolisher/mod.rs",
+        "crates/tbg-client/src/art/kits/demolisher/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Near-ground hydraulic fists and pressure tank",
+      "proposed_color_blocking": "Industrial iron, pressure accents and contrasting huge cuffs",
+      "proposed_motion": {
+        "idle": "Pressure release",
+        "locomotion": "heavy fist-balanced gait",
+        "primary_action": "hydraulic crush",
+        "victory": "alternating hydraulic-piston celebration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Oilpress",
+        "Sawbot"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Crowcaller",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Crowcaller's plague mask, torn coat, shoulder raven and ritual crossbow in five forms.",
+      "existing_motion_source_summary": "Crowcaller's stalking gait, latch reload and opposed raven glance/marked-shot wing.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/crowcaller/mod.rs",
+        "crates/tbg-client/src/art/kits/crowcaller/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Plague mask, shoulder raven and ritual crossbow",
+      "proposed_color_blocking": "Dark torn coat, pale mask and distinct raven/ritual contrast",
+      "proposed_motion": {
+        "idle": "Shoulder-raven interaction",
+        "locomotion": "hunched stalking steps",
+        "primary_action": "ritual crossbow release",
+        "victory": "raven-assisted bow"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Bloodweaver",
+        "Hexer",
+        "Puppetmaster"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Trigger",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Trigger's orange feline silhouette, two revolvers, curved tail and branch-specific mercenary gear.",
+      "existing_motion_source_summary": "Trigger's alternating muzzle/recoil, hat flourish, heel-toe gait and fourth-hit offhand cue.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/trigger/mod.rs",
+        "crates/tbg-client/src/art/kits/trigger/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Orange feline, curved tail and paired revolvers",
+      "proposed_color_blocking": "Orange fur, contrasting muzzle/coat and distinct metal revolvers",
+      "proposed_motion": {
+        "idle": "Tail flick and revolver check",
+        "locomotion": "feline spring steps",
+        "primary_action": "alternating aimed gunfire",
+        "victory": "revolver-spin celebration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Smuggler"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "RattleTick",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Rattle & Tick: one heavy bruiser and an articulated shoulder brother sharing one figure.",
+      "existing_motion_source_summary": "Rattle's club swings while Tick independently points, grips and throws from the shoulder.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/rattle_tick/mod.rs",
+        "crates/tbg-client/src/art/kits/rattle_tick/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "One heavy bruiser with an independently articulated shoulder brother",
+      "proposed_color_blocking": "Different large color regions for the two figures without losing one-champion identity",
+      "proposed_motion": {
+        "idle": "Sibling interaction",
+        "locomotion": "counterbalanced shared-body gait",
+        "primary_action": "coordinated strike",
+        "victory": "two-person shoulder celebration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Capybara"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Capybara",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Capybara's broad belly, rounded muzzle, leaf necklace and five bark/stone/fiber forms.",
+      "existing_motion_source_summary": "Capybara's belly breath, rolling short steps, palm bump, local flop and sideways settling.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/capybara/mod.rs",
+        "crates/tbg-client/src/art/kits/capybara/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Broad rounded belly, muzzle and leaf necklace",
+      "proposed_color_blocking": "Warm natural body tones, leaf accent and branch-specific bark/stone contrast",
+      "proposed_motion": {
+        "idle": "Relaxed muzzle breath",
+        "locomotion": "capybara-weighted waddle",
+        "primary_action": "broad planted action",
+        "victory": "calm rounded-body dance"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "RattleTick"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Trident",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": true,
+      "existing_identity": "Trident's shark head/jaw, dorsal fin, rusted three-tine weapon and five armored forms.",
+      "existing_motion_source_summary": "Trident's two-handed short thrust, jaw breath, fin counterbalance and independent low rend sweep.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/trident/mod.rs",
+        "crates/tbg-client/src/art/kits/trident/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Taller shark with gills, dorsal fin and a longer three-tine spear clearly outside its body",
+      "proposed_color_blocking": "Cool shark back, lighter belly, dark gills and warm rust/bone weapon contrast",
+      "proposed_motion": {
+        "idle": "Jaw/fin breathing",
+        "locomotion": "tall fin-counterbalanced stride",
+        "primary_action": "two-handed frontal load, spear thrust, point contact and withdrawal, never an axe-like chop",
+        "victory": "piercing special presentation; long-trident victory without penetration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Longaxe",
+        "SolarSentinel"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "SolarSentinel",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Solar Sentinel's sun-disk shield, ivory spear armor and five light/coverage forms.",
+      "existing_motion_source_summary": "Solar Sentinel's shield-led gait, controlled spear thrust and independent sun-opening grant pose.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/solar_sentinel/mod.rs",
+        "crates/tbg-client/src/art/kits/solar_sentinel/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Sun-disk shield and ivory spear armor",
+      "proposed_color_blocking": "Ivory armor, gold sun and a separated dark cloth region",
+      "proposed_motion": {
+        "idle": "Shield/watchful stance",
+        "locomotion": "protected spear gait",
+        "primary_action": "sun-shield action",
+        "victory": "radiant shield-and-spear salute"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Longaxe",
+        "Trident"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "LuminousOracle",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Luminous Oracle's empty hood, geometric robe/cape and articulated sun-ring staff in five forms.",
+      "existing_motion_source_summary": "Oracle's small planted robe steps, staff alignment, closing offhand and lowering hood/cape fall.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/luminous_oracle/mod.rs",
+        "crates/tbg-client/src/art/kits/luminous_oracle/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Empty hood, geometric robe and articulated sun-ring staff",
+      "proposed_color_blocking": "Deep hood void, ivory/gold geometry and focused staff-ring light",
+      "proposed_motion": {
+        "idle": "Ring orbit",
+        "locomotion": "composed robe-aware glide/steps",
+        "primary_action": "weakening pulse gesture",
+        "victory": "orbiting-ring staff dance"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Justiciar",
+        "Whisperer"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "CelestialArcher",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Celestial Archer's angular gold bow, rigid feather ornaments, ivory armor and five forms.",
+      "existing_motion_source_summary": "Celestial Archer's upright draw/release, rigid wing settling and confirmed purification halo.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/celestial_archer/mod.rs",
+        "crates/tbg-client/src/art/kits/celestial_archer/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Angular gold bow and rigid feather ornaments",
+      "proposed_color_blocking": "Ivory/gold bow, distinct dark cloth and clearly separated feather shapes",
+      "proposed_motion": {
+        "idle": "Feather/bow adjustment",
+        "locomotion": "precise upright steps",
+        "primary_action": "geometric bow draw",
+        "victory": "angular bow salute distinct from Archer"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Archer",
+        "Farwatch"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Justiciar",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Justiciar's rigid segmented construct, compact chest sun and five bright/dark judgment forms.",
+      "existing_motion_source_summary": "Justiciar's cocked gauntlet basic, independent two-palm light stamp and powering-down collapse.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/justiciar/mod.rs",
+        "crates/tbg-client/src/art/kits/justiciar/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Rigid segmented construct with compact chest sun",
+      "proposed_color_blocking": "High-contrast ivory/dark segments and compact gold sun",
+      "proposed_motion": {
+        "idle": "Segment alignment",
+        "locomotion": "rigid articulated march",
+        "primary_action": "judgment-directed action",
+        "victory": "segmented ceremonial victory"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "LuminousOracle",
+        "Whisperer"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Jawguard",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Jawguard's broad beetle shell, paired mandibles, horn and five carapace/jaw forms.",
+      "existing_motion_source_summary": "Jawguard's clicking mandibles, low broad gait, braced shell and expiry-ready bite stance.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/jawguard/mod.rs",
+        "crates/tbg-client/src/art/kits/jawguard/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Broad beetle carapace, horn and paired mandibles",
+      "proposed_color_blocking": "Deep chitin, moss shell regions and amber mandible accents",
+      "proposed_motion": {
+        "idle": "Mandible flex",
+        "locomotion": "beetle-weighted stride",
+        "primary_action": "horn/mandible contact",
+        "victory": "carapace-and-mandible display"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Bonehorn",
+        "Shatterback"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Mantis",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Mantis's inverted triangular face, folded scythes, narrow abdomen and five leg/blade forms.",
+      "existing_motion_source_summary": "Mantis's prayer idle, planted high-knee gait, opposing scythe cuts and confirmed crossed fourth strike.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/mantis/mod.rs",
+        "crates/tbg-client/src/art/kits/mantis/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Triangular face, narrow abdomen and folded scythes",
+      "proposed_color_blocking": "Readable green/chitin blocks and distinct cutting edges",
+      "proposed_motion": {
+        "idle": "Scythe grooming",
+        "locomotion": "insect stalking gait",
+        "primary_action": "fast folded-blade release",
+        "victory": "symmetric mantis blade display"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Ravager"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Hornet",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Hornet's banded abdomen, opaque faceted wing pairs, stinger and five venom/swoop forms.",
+      "existing_motion_source_summary": "Hornet's planted wasp gait, slow opaque wing hum, stinger alignment and confirmed venom-sac pulse.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/hornet/mod.rs",
+        "crates/tbg-client/src/art/kits/hornet/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Banded abdomen, faceted wings and clear stinger",
+      "proposed_color_blocking": "Strong band contrast, separated wing value and venom accent",
+      "proposed_motion": {
+        "idle": "Wing-settling pulse",
+        "locomotion": "anatomy-appropriate hovering/movement",
+        "primary_action": "stinger-led release",
+        "victory": "wing-and-abdomen celebration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Weaver"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Weaver",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Weaver's eight individually grouped legs, low eyes, spinner and five web/nozzle silhouettes.",
+      "existing_motion_source_summary": "Weaver's alternating four-leg groups, braced spinner cast and abdomen curl over fixed rig nodes.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/weaver/mod.rs",
+        "crates/tbg-client/src/art/kits/weaver/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Eight grouped legs, low eye cluster and spinner",
+      "proposed_color_blocking": "Dark body, leg-edge contrast and readable silk accents",
+      "proposed_motion": {
+        "idle": "Spinner preparation",
+        "locomotion": "eight-leg coordinated gait",
+        "primary_action": "web-spit release",
+        "victory": "leg-pattern victory display"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "Hornet"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "PyreWarden",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": true,
+      "existing_identity": "Pyre Warden's coffin furnace, rigid hose, braced nozzle and five funerary armor silhouettes.",
+      "existing_motion_source_summary": "Pyre Warden's hunched drag, braced nozzle pulse and furnace fold; authoritative flame is a separate event.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/pyre_warden/mod.rs",
+        "crates/tbg-client/src/art/kits/pyre_warden/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Coffin furnace, hose and braced visible flame nozzle",
+      "proposed_color_blocking": "Funerary iron/bone against a localized vivid spectral flame",
+      "proposed_motion": {
+        "idle": "Nozzle pressure breathing",
+        "locomotion": "hunched equipment-heavy drag",
+        "primary_action": "braced emitted fire jet",
+        "victory": "coffin/nozzle victory flourish"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "BloodFurnace"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Drillnest",
+      "status": "proposed_source_dossier",
+      "mandatory_pilot": false,
+      "existing_identity": "Drillnest's low tracked foundry, honeycomb rack and five distinct feed/barrel forms.",
+      "existing_motion_source_summary": "Drillnest's grounded treads, feed-hatch production, barrel recoil and three summon libraries.",
+      "sources": [
+        "crates/tbg-client/src/art/kits/drillnest/mod.rs",
+        "crates/tbg-client/src/art/kits/drillnest/model.rs"
+      ],
+      "silhouette_head_equipment_anchor": "Low tracked foundry and honeycomb drill rack",
+      "proposed_color_blocking": "Dark tracks, iron/brass rack and warm drill/feed accents",
+      "proposed_motion": {
+        "idle": "Rack/feed motion",
+        "locomotion": "rigid tracked travel",
+        "primary_action": "drill-production cue",
+        "victory": "foundry-rack mechanical celebration"
+      },
+      "contact_and_recovery_authoring": "pending; preserve actual event channel and timings in P70 section 5",
+      "forms_to_inspect": [
+        "Base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "evolution_decisions": "Preserve existing branch equipment and large-surface progression; individual refinements pending baseline inspection.",
+      "closest_visual_comparisons": [
+        "CargoCrab",
+        "Nester",
+        "Smuggler"
+      ],
+      "clearance_review": "Inspect the named silhouette/equipment anchor against head, torso and moving limbs throughout all applicable clips and transitions; runtime findings pending.",
+      "owner_visual_approval": "pending"
+    }
+  ]
+}

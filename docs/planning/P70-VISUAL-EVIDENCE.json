@@ -1,0 +1,2406 @@
+{
+  "schema_version": 1,
+  "phase": "P70",
+  "status": "baseline_pending",
+  "reference_commit": "55510c5363e3f1e555fa5133208a5faf20c5825b",
+  "content_commit_note": "Resolve the exact tooling commit and capture-time content SHA in each artifact; no images exist in this initial index.",
+  "forms": [
+    {
+      "name": "Base",
+      "tier": 0,
+      "branch": 0
+    },
+    {
+      "name": "A1",
+      "tier": 1,
+      "branch": 0
+    },
+    {
+      "name": "A2",
+      "tier": 2,
+      "branch": 0
+    },
+    {
+      "name": "B1",
+      "tier": 1,
+      "branch": 1
+    },
+    {
+      "name": "B2",
+      "tier": 2,
+      "branch": 1
+    }
+  ],
+  "clip_ids": [
+    "Idle",
+    "Walk",
+    "AttackMelee",
+    "AttackRanged",
+    "Cast",
+    "Hit",
+    "Death",
+    "Spawn",
+    "Evolve",
+    "Victory"
+  ],
+  "coverage_semantics": "Each applicability decision applies to all five forms unless an explicit form override is added. Empty before/after lists and absent review_requirements entries mean pending, never passed. Pose sheets do not prove live events or transitions.",
+  "common_applicability": {
+    "Idle": {
+      "status": "applicable",
+      "reason": "Standing pose is sampled by the shared Animator and the selected kit.",
+      "sources": [
+        "crates/tbg-client/src/art/anim.rs"
+      ]
+    },
+    "Walk": {
+      "status": "applicable",
+      "reason": "Locomotion uses the selected kit gait/body plan; hover and tracks remain anatomical movement.",
+      "sources": [
+        "crates/tbg-client/src/art/anim.rs"
+      ]
+    },
+    "Hit": {
+      "status": "applicable",
+      "reason": "The existing Hit cue uses play_if_free, so occupied attacks can suppress the reaction.",
+      "sources": [
+        "crates/tbg-client/src/visuals/cues.rs"
+      ]
+    },
+    "Death": {
+      "status": "applicable",
+      "reason": "The existing Death cue owns this one-shot pose and corpse lifetime.",
+      "sources": [
+        "crates/tbg-client/src/visuals/cues.rs"
+      ]
+    },
+    "Spawn": {
+      "status": "applicable",
+      "reason": "The kit supports the spawn pose; gallery sampling is distinct from a live spawn transition.",
+      "sources": [
+        "crates/tbg-client/src/art/clips.rs"
+      ]
+    },
+    "Evolve": {
+      "status": "applicable",
+      "reason": "Review the kit flourish on every form; live Evolution plays after replacement, so Base is preview-only.",
+      "sources": [
+        "crates/tbg-client/src/visuals/cues.rs"
+      ]
+    },
+    "Victory": {
+      "status": "applicable",
+      "reason": "P63 resolves the selected kit Victory through Animator::present/celebrate, with bounded root motion.",
+      "sources": [
+        "crates/tbg-client/src/art/celebration.rs",
+        "crates/tbg-client/src/art/anim.rs"
+      ]
+    }
+  },
+  "review_requirement_ids": [
+    "five_forms_at_match_distance",
+    "front_profile_back",
+    "nameless_lineup",
+    "silhouette_lineup",
+    "temporal_clips_and_transitions",
+    "live_cues_and_effects",
+    "troops_preview",
+    "training",
+    "p63_victory",
+    "blue_artifact_review"
+  ],
+  "capture_metadata_contract": {
+    "required": [
+      "id",
+      "unit_id",
+      "forms",
+      "clip_or_ability",
+      "phase_before_or_after",
+      "samples",
+      "kind",
+      "content_sha",
+      "tooling_sha",
+      "camera",
+      "aim",
+      "viewport",
+      "dpi",
+      "quality",
+      "platform",
+      "renderer",
+      "scenario_seed",
+      "path_or_uri",
+      "sha256",
+      "width",
+      "height"
+    ],
+    "sample_fields": [
+      "form",
+      "clip",
+      "sample_time",
+      "duration",
+      "sample_label"
+    ],
+    "artifact_kind": "raw_pose_sheet for immutable renderer screenshots; label composed/cropped sheets as derivatives and reference originals.",
+    "duration": "Use actual Animator::duration for the selected kit/form, including Victory ownership.",
+    "storage": "Ignored local storage or an established external artifact destination; never shipping Shop portraits."
+  },
+  "captures": [],
+  "champions": [
+    {
+      "id": "Shieldbearer",
+      "faction": "Humans",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/shieldbearer/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/shieldbearer/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/shieldbearer/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/shieldbearer/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Archer",
+      "faction": "Humans",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/archer/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "AttackRanged",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/archer/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "applicable",
+          "reason": "Ranged AttackStart selects AttackRanged; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/archer/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/archer/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "BoneBrute",
+      "faction": "Undead",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/bone_brute/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/bone_brute/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bone_brute/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bone_brute/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Hexer",
+      "faction": "Undead",
+      "archetype": "Control",
+      "kit": "crates/tbg-client/src/art/kits/hexer/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/hexer/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/hexer/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Control AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/hexer/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Sawbot",
+      "faction": "Machines",
+      "archetype": "Dps",
+      "kit": "crates/tbg-client/src/art/kits/sawbot/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Dps AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/sawbot/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/sawbot/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/sawbot/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "SiegeWalker",
+      "faction": "Machines",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/siege_walker/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "AttackRanged",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/siege_walker/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "applicable",
+          "reason": "Ranged AttackStart selects AttackRanged; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/siege_walker/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/siege_walker/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bloomkeeper",
+      "faction": "Plants",
+      "archetype": "Support",
+      "kit": "crates/tbg-client/src/art/kits/bloomkeeper/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bloomkeeper/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bloomkeeper/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Support AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/bloomkeeper/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Rootcaller",
+      "faction": "Plants",
+      "archetype": "Control",
+      "kit": "crates/tbg-client/src/art/kits/rootcaller/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/rootcaller/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/rootcaller/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Control AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/rootcaller/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Nester",
+      "faction": "Plants",
+      "archetype": "Support",
+      "kit": "crates/tbg-client/src/art/kits/nester/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/nester/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/nester/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Support AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/nester/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Hatch gesture and growth snapshot",
+          "channel": "existing authoritative event/snapshot presentation",
+          "source": "crates/tbg-client/src/visuals/cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Rampart",
+      "faction": "Machines",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/rampart/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/rampart/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/rampart/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/rampart/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Longaxe",
+      "faction": "Humans",
+      "archetype": "Dps",
+      "kit": "crates/tbg-client/src/art/kits/longaxe/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Dps AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/longaxe/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/longaxe/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/longaxe/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Farwatch",
+      "faction": "Humans",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/farwatch/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "AttackRanged",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/farwatch/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "applicable",
+          "reason": "Ranged AttackStart selects AttackRanged; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/farwatch/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/farwatch/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bombard",
+      "faction": "Machines",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/bombard/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "AttackRanged",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bombard/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "applicable",
+          "reason": "Ranged AttackStart selects AttackRanged; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/bombard/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bombard/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Rotcap",
+      "faction": "Plants",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/rotcap/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "AttackRanged",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/rotcap/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "applicable",
+          "reason": "Ranged AttackStart selects AttackRanged; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/rotcap/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/rotcap/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "OldFinn",
+      "faction": "Humans",
+      "archetype": "Control",
+      "kit": "crates/tbg-client/src/art/kits/old_finn/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/old_finn/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/old_finn/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Control AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/old_finn/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "AntidoteBrewer",
+      "faction": "Plants",
+      "archetype": "Support",
+      "kit": "crates/tbg-client/src/art/kits/antidote_brewer/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/antidote_brewer/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/antidote_brewer/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Support AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/antidote_brewer/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Shatterback",
+      "faction": "Plants",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/shatterback/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/shatterback/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/shatterback/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/shatterback/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "PlateBroken and detachable plates",
+          "channel": "existing authoritative event/snapshot presentation",
+          "source": "crates/tbg-client/src/sync/actions.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "BloodFurnace",
+      "faction": "Undead",
+      "archetype": "Dps",
+      "kit": "crates/tbg-client/src/art/kits/blood_furnace/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Dps AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/blood_furnace/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/blood_furnace/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/blood_furnace/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bloodweaver",
+      "faction": "Undead",
+      "archetype": "Support",
+      "kit": "crates/tbg-client/src/art/kits/bloodweaver/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bloodweaver/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bloodweaver/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Support AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/bloodweaver/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Transfer source-to-ally effect",
+          "channel": "existing authoritative event/snapshot presentation",
+          "source": "crates/tbg-client/src/sync/actions.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Oilpress",
+      "faction": "Machines",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/oilpress/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/oilpress/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/oilpress/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/oilpress/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Drumguard",
+      "faction": "Humans",
+      "archetype": "Support",
+      "kit": "crates/tbg-client/src/art/kits/drumguard/mod.rs",
+      "attack_presentation": "Attack::None",
+      "primary_clip": null,
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "No basic attack: zero damage/heal is held by targeting::engage; drum or production uses its separate presentation channel.",
+          "sources": [
+            "crates/tbg-core/src/targeting.rs",
+            "crates/tbg-core/src/content.rs",
+            "crates/tbg-client/src/art/kits/drumguard/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "No basic attack: zero damage/heal is held by targeting::engage; drum or production uses its separate presentation channel.",
+          "sources": [
+            "crates/tbg-core/src/targeting.rs",
+            "crates/tbg-core/src/content.rs",
+            "crates/tbg-client/src/art/kits/drumguard/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "No basic attack: zero damage/heal is held by targeting::engage; drum or production uses its separate presentation channel.",
+          "sources": [
+            "crates/tbg-core/src/targeting.rs",
+            "crates/tbg-core/src/content.rs",
+            "crates/tbg-client/src/art/kits/drumguard/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Passive March drum rhythm and bonded ally cues",
+          "channel": "existing authoritative event/snapshot presentation",
+          "source": "crates/tbg-client/src/sync/actions.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Leechroot",
+      "faction": "Plants",
+      "archetype": "Dps",
+      "kit": "crates/tbg-client/src/art/kits/leechroot/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Dps AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/leechroot/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/leechroot/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/leechroot/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "CargoCrab",
+      "faction": "Machines",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/cargo_crab/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/cargo_crab/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/cargo_crab/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Boarded explicitly plays Cast for the carrier; inspect passenger clearance separately.",
+          "sources": [
+            "crates/tbg-client/src/sync/actions.rs",
+            "crates/tbg-client/src/art/kits/cargo_crab/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Boarded -> Cast and passenger climb",
+          "channel": "existing authoritative event/snapshot presentation",
+          "source": "crates/tbg-client/src/sync/actions.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Puppetmaster",
+      "faction": "Undead",
+      "archetype": "Control",
+      "kit": "crates/tbg-client/src/art/kits/puppetmaster/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/puppetmaster/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/puppetmaster/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Control AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/puppetmaster/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Smuggler",
+      "faction": "Humans",
+      "archetype": "Support",
+      "kit": "crates/tbg-client/src/art/kits/smuggler/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/smuggler/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/smuggler/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Support AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/smuggler/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "CargoDrop from Spawn(Crate); independent gesture",
+          "channel": "existing authoritative event/snapshot presentation",
+          "source": "crates/tbg-client/src/sync/actions.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bonehorn",
+      "faction": "Monsters",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/bonehorn/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/bonehorn/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bonehorn/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bonehorn/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Ravager",
+      "faction": "Monsters",
+      "archetype": "Dps",
+      "kit": "crates/tbg-client/src/art/kits/ravager/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Dps AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/ravager/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/ravager/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/ravager/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Acidmaw",
+      "faction": "Monsters",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/acidmaw/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "AttackRanged",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/acidmaw/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "applicable",
+          "reason": "Ranged AttackStart selects AttackRanged; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/acidmaw/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/acidmaw/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "CorrosiveSplash secondary effect",
+          "channel": "existing authoritative event/snapshot presentation",
+          "source": "crates/tbg-client/src/sync/actions.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Whisperer",
+      "faction": "Monsters",
+      "archetype": "Control",
+      "kit": "crates/tbg-client/src/art/kits/whisperer/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/whisperer/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/whisperer/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Control AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/whisperer/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Mind pulse",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bulwark",
+      "faction": "Machines",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/bulwark/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/bulwark/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bulwark/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/bulwark/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Armor special",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Demolisher",
+      "faction": "Machines",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/demolisher/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/demolisher/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/demolisher/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/demolisher/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Area Crush",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Crowcaller",
+      "faction": "Undead",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/crowcaller/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "AttackRanged",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/crowcaller/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "applicable",
+          "reason": "Ranged AttackStart selects AttackRanged; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/crowcaller/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/crowcaller/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Plague shot",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Trigger",
+      "faction": "Humans",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/trigger/mod.rs",
+      "attack_presentation": "Attack::TwinShot",
+      "primary_clip": "AttackRanged",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/trigger/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "applicable",
+          "reason": "Ranged AttackStart selects AttackRanged; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/trigger/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/trigger/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Crossfire opposite-hand secondary shot",
+          "channel": "existing authoritative event/snapshot presentation",
+          "source": "crates/tbg-client/src/sync/actions.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "RattleTick",
+      "faction": "Humans",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/rattle_tick/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/rattle_tick/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/rattle_tick/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/rattle_tick/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Double Mayhem",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Capybara",
+      "faction": "Plants",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/capybara/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/capybara/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/capybara/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/capybara/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Swamp Belly",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Trident",
+      "faction": "Plants",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/trident/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/trident/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/trident/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/trident/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Bloody Rend",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "SolarSentinel",
+      "faction": "Celestials",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/solar_sentinel/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/solar_sentinel/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/solar_sentinel/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/solar_sentinel/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Solar special",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "LuminousOracle",
+      "faction": "Celestials",
+      "archetype": "Control",
+      "kit": "crates/tbg-client/src/art/kits/luminous_oracle/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/luminous_oracle/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/luminous_oracle/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Control AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/luminous_oracle/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Harmonic pulse",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "CelestialArcher",
+      "faction": "Celestials",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/celestial_archer/mod.rs",
+      "attack_presentation": "Attack::CountedShot",
+      "primary_clip": "AttackRanged",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/celestial_archer/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "applicable",
+          "reason": "Ranged AttackStart selects AttackRanged; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/celestial_archer/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/celestial_archer/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Purifying special",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Justiciar",
+      "faction": "Celestials",
+      "archetype": "Control",
+      "kit": "crates/tbg-client/src/art/kits/justiciar/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/justiciar/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/justiciar/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Control AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/justiciar/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Judgment",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Jawguard",
+      "faction": "Insects",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/jawguard/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/jawguard/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/jawguard/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/jawguard/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Shell special",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Mantis",
+      "faction": "Insects",
+      "archetype": "Dps",
+      "kit": "crates/tbg-client/src/art/kits/mantis/mod.rs",
+      "attack_presentation": "Attack::Melee",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Dps AttackStart selects AttackMelee; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/mantis/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/mantis/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/mantis/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Precise Blade",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Hornet",
+      "faction": "Insects",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/hornet/mod.rs",
+      "attack_presentation": "Attack::CountedShot",
+      "primary_clip": "AttackRanged",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/hornet/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "applicable",
+          "reason": "Ranged AttackStart selects AttackRanged; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/hornet/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackRanged, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/hornet/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Venom special",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Weaver",
+      "faction": "Insects",
+      "archetype": "Control",
+      "kit": "crates/tbg-client/src/art/kits/weaver/mod.rs",
+      "attack_presentation": "Attack::Shot",
+      "primary_clip": "Cast",
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackMelee; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/weaver/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects Cast, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/weaver/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "applicable",
+          "reason": "Control AttackStart selects Cast; the selected kit owns the pose. ",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/weaver/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Web special",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "PyreWarden",
+      "faction": "Undead",
+      "archetype": "Tank",
+      "kit": "crates/tbg-client/src/art/kits/pyre_warden/mod.rs",
+      "attack_presentation": "Attack::None",
+      "primary_clip": "AttackMelee",
+      "applicability": {
+        "AttackMelee": {
+          "status": "applicable",
+          "reason": "Tank AttackStart selects AttackMelee; the selected kit owns the pose. ProfaneFlame supplies the effect separately; Attack::None prevents a second generic shot.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/art/kits/pyre_warden/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not AttackRanged; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/pyre_warden/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "Live AttackStart selects AttackMelee, not Cast; any timed special uses its separate channel rather than selecting this generic clip.",
+          "sources": [
+            "crates/tbg-client/src/visuals/cues.rs",
+            "crates/tbg-client/src/sync/special_cues.rs",
+            "crates/tbg-client/src/art/kits/pyre_warden/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "ProfaneFlame exact authoritative segment",
+          "channel": "existing authoritative event/snapshot presentation",
+          "source": "crates/tbg-client/src/sync/actions.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Drillnest",
+      "faction": "Machines",
+      "archetype": "Ranged",
+      "kit": "crates/tbg-client/src/art/kits/drillnest/mod.rs",
+      "attack_presentation": "Attack::None",
+      "primary_clip": null,
+      "applicability": {
+        "AttackMelee": {
+          "status": "not_applicable",
+          "reason": "No basic attack: zero damage/heal is held by targeting::engage; drum or production uses its separate presentation channel.",
+          "sources": [
+            "crates/tbg-core/src/targeting.rs",
+            "crates/tbg-core/src/content.rs",
+            "crates/tbg-client/src/art/kits/drillnest/mod.rs"
+          ]
+        },
+        "AttackRanged": {
+          "status": "not_applicable",
+          "reason": "No basic attack: zero damage/heal is held by targeting::engage; drum or production uses its separate presentation channel.",
+          "sources": [
+            "crates/tbg-core/src/targeting.rs",
+            "crates/tbg-core/src/content.rs",
+            "crates/tbg-client/src/art/kits/drillnest/mod.rs"
+          ]
+        },
+        "Cast": {
+          "status": "not_applicable",
+          "reason": "No basic attack: zero damage/heal is held by targeting::engage; drum or production uses its separate presentation channel.",
+          "sources": [
+            "crates/tbg-core/src/targeting.rs",
+            "crates/tbg-core/src/content.rs",
+            "crates/tbg-client/src/art/kits/drillnest/mod.rs"
+          ]
+        }
+      },
+      "event_driven_actions": [
+        {
+          "label": "Drill production",
+          "channel": "AbilityStarted/AbilityResolved -> Animator.special",
+          "source": "crates/tbg-client/src/sync/special_cues.rs",
+          "before": [],
+          "after": [],
+          "review_status": "pending"
+        }
+      ],
+      "before": [],
+      "after": [],
+      "review_requirements": {},
+      "implementation_status": "not_started",
+      "review_status": "pending",
+      "owner_visual_approval": "pending"
+    }
+  ],
+  "auxiliaries": [
+    {
+      "id": "Beetling",
+      "parent": "Nester",
+      "review_status": "pending",
+      "before": [],
+      "after": []
+    },
+    {
+      "id": "Crate",
+      "parent": "Smuggler",
+      "review_status": "pending",
+      "before": [],
+      "after": []
+    },
+    {
+      "id": "Microdrill",
+      "parent": "Drillnest",
+      "review_status": "pending",
+      "before": [],
+      "after": []
+    },
+    {
+      "id": "Duodrill",
+      "parent": "Drillnest",
+      "review_status": "pending",
+      "before": [],
+      "after": []
+    },
+    {
+      "id": "Megadrill",
+      "parent": "Drillnest",
+      "review_status": "pending",
+      "before": [],
+      "after": []
+    }
+  ],
+  "phase_acceptance": {
+    "blue_artifact_root_cause_and_fix": "pending",
+    "trident_height_and_weapon_measurements": "pending",
+    "trident_thrust_and_clearance": "pending",
+    "trident_range_boundary_regressions": "pending",
+    "trident_D33_balance_and_owner_acceptance": "pending",
+    "pyre_event_jet_both_seats_and_low": "pending",
+    "finn_fish_growth_timing_and_echo": "pending",
+    "desktop_browser_observation": "pending",
+    "targeted_consolidation": "pending"
+  },
+  "limitations": [
+    "No baseline or final render capture is claimed by this inventory.",
+    "Applicability describes existing source paths; it is not runtime inspection.",
+    "All individual briefs remain Proposed and subject to owner approval."
+  ]
+}

@@ -403,7 +403,11 @@ heavy/full-suite checks only on a separate explicit owner request.
 
 ## Champion visual identity and animation polish (owner request, 2026-10-31)
 
-**P70 — planning only**, on `codex/p70-champion-visual-polish-plan`.
+**P70 — S0 execution in progress**, on `phase/p70-champion-visual-polish`.
+The isolated work front preserves the required base and newer owner
+validation policy. See the [execution review](planning/P70-VISUAL-REVIEW.md)
+and [evidence index](planning/P70-VISUAL-EVIDENCE.json); pending cells and
+owner approvals do not count as completed art.
 Read [the executable phase](phases/P70-champion-visual-identity-polish.md),
 [the 46-champion identity/capture manifest](planning/P70-VISUAL-MANIFEST.json)
 and [the execution prompt](planning/P70-EXECUTION-PROMPT.md).
@@ -425,7 +429,7 @@ Execution order: reproducible capture tooling and immutable complete
 baseline -> shared artifact diagnosis -> three pilots -> remaining 43
 individual champions -> consolidated evidence and targeted desktop review.
 Reuse P62 previews and P63 celebration ownership; P68/P69 packaging,
-authentication and mobile work remain separate. No game build, real
-capture, gameplay change, visual approval, push or deployment is part of
-this planning delivery. Apply the current owner minimal-validation policy
-instead of historical full-suite blocks.
+authentication and mobile work remain separate. The S0 tooling build has
+passed; real capture and art acceptance are tracked separately in the
+execution review. Apply the current owner minimal-validation policy instead
+of historical full-suite blocks. No push or deployment is authorized.

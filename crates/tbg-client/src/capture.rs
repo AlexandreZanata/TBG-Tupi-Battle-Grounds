@@ -8,11 +8,18 @@ use bevy::{
 #[cfg(target_os = "linux")]
 mod arenas;
 #[cfg(target_os = "linux")]
+mod polish;
+#[cfg(target_os = "linux")]
 mod reserve;
 #[cfg(target_os = "linux")]
 mod training;
 
 pub fn plugin(app: &mut App) {
+    #[cfg(target_os = "linux")]
+    if crate::config::url_param("capture_polish").is_some() {
+        polish::plugin(app);
+        return;
+    }
     if crate::config::url_param("capture").is_some() {
         app.add_systems(Update, capture);
         #[cfg(target_os = "linux")]

@@ -7,6 +7,7 @@ mod figures;
 mod layout;
 mod lineup;
 mod palette;
+pub(crate) mod polish;
 mod range;
 mod settings;
 mod title;
@@ -41,6 +42,7 @@ pub fn plugin(app: &mut App) {
             (
                 // Animation runs in PostUpdate, after all of these.
                 cycle,
+                polish::update,
                 camera::frame,
                 layout::place.before(crate::art::anim::animate),
                 turn.after(crate::art::anim::animate),
@@ -90,6 +92,7 @@ fn spawn(
         // Built by `arena::strongholds`, which owns the tower parts.
         "strongholds" => {}
         "aim" => aim::spawn(&mut commands, &lib, &options, mats, &window),
+        _ if options.polish => polish::spawn(&mut commands, &lib, &options),
         _ if options.range => {
             let unit = options.unit.unwrap_or(tbg_core::UnitKind::SiegeWalker);
             range::spawn(&mut commands, &lib, &assets, unit);
@@ -121,12 +124,16 @@ fn turn(
     figures: Query<&Animator>,
     mut transforms: Query<&mut Transform, Without<Animator>>,
 ) {
-    if !options.turn {
+    if options.polish || (!options.turn && options.view.is_none()) {
         return;
     }
     for figure in &figures {
         if let Ok(mut t) = transforms.get_mut(figure.figure) {
-            t.rotation = Quat::from_rotation_y(time.elapsed_secs() * options.slow * 0.6);
+            let yaw = options.view.map_or_else(
+                || time.elapsed_secs() * options.slow * 0.6,
+                |view| view.yaw().to_radians(),
+            );
+            t.rotation = Quat::from_rotation_y(yaw);
         }
     }
 }
