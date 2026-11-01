@@ -1,4 +1,4 @@
-# Main-based backend delivery (prepared, not enabled)
+# Main-based delivery (prepared, activation gated)
 
 The owner requests automatic releases from GitHub main. Keep the existing single
 Debian VPS, Rust process, systemd and Caddy. GitHub Actions builds; the VPS pulls
@@ -6,9 +6,13 @@ attested public artifacts over HTTPS. GitHub receives no SSH access, VPS passwor
 origin address, personal key or long-lived production token. The owner's existing
 key-only SSH access remains the maintenance/recovery channel.
 
+The complete release-family and activation contract is in
+[docs/RELEASES.md](../../docs/RELEASES.md); development and capacity rules are in
+[DEVELOPMENT](../../docs/DEVELOPMENT.md) and [SCALING](../../docs/SCALING.md).
+
 ## Exact scope
 
-This first increment automates **compatible backend updates**. It uses the
+The backend family automates **compatible backend updates**. It uses the
 existing single-process drain fallback, not P66 two-slot canaries. During a drain
 new matches pause; existing matches and result/reconnect windows finish before
 replacement. It is not zero-downtime admission or live simulation migration.
@@ -20,8 +24,8 @@ review migrations or use the reviewed P66 rollout before rechecking. The process
 never restores a database backup during rollback, truncates a match timeout or
 kills a busy previous generation to finish a deploy.
 
-Web/game bundles, static landing/admin and Linux client distribution are separate
-artifacts. Frontend-only merges do not redeploy this backend. The existing native
+Web/game bundles and static landing/admin now have separate attested workflows and
+host controllers; Linux client distribution remains a separate native artifact. Frontend-only merges do not redeploy this backend. The existing native
 release workflow builds archives/AppImages; the TUF updater's O02 signing custody
 and public bootstrap gates remain open. This backend's GitHub OIDC provenance is
 not authorization to activate native signing or administrative player permissions.
@@ -48,16 +52,17 @@ not authorization to activate native signing or administrative player permission
    not authenticate a release. Archive extraction allows only three regular files,
    refusing traversal, duplicate members, links and size/hash mismatches.
 
-Repository is public, so the timer uses no GitHub credential. Five-minute polling
-normally uses 24 public API reads/hour; source comparisons add requests only for
-new candidates. A private repository or renamed/transferred repo requires a new
+Repository is public, so the timers use no GitHub credential. Ten-minute polling across all three families
+normally uses at most 36 public API reads/hour; source comparisons add requests for
+new candidates. Other users of the same public IP and bursts may exhaust this quota;
+verification fails closed, with no credential fallback. A private repository or renamed/transferred repo requires a new
 review of access/trust, not a silent token fallback.
 
 ## Activation and recovery
 
 The reviewed controller is installed once by the owner's computer. Artifacts
 cannot replace privileged controller scripts, systemd units or proxy settings.
-The timer and CLI serialize through the host state lock. Do not run the legacy
+All timers and CLIs serialize through the same host state lock. Do not run the legacy
 manual deploy or a provisioning job while this controller is enabled.
 
 For each eligible candidate: verify before extraction; compare live contract and
@@ -142,3 +147,32 @@ References checked 2026-11-01:
 - https://cli.github.com/manual/gh_attestation_verify
 - https://docs.docker.com/compose/how-tos/production/
 - https://kubernetes.io/docs/setup/production-environment/
+
+## Browser and public static activation
+
+`web_pull.py` promotes a source-qualified game bundle only when its contract matches
+the current server. `static_pull.py` promotes both public site pointers and rolls
+them back together if either public probe fails. Neither edits Caddy, the database,
+the backend binaries or a running game process. Packages reject privileged controller
+paths and the admin preview. Keep all previous assets and review cleanup separately.
+
+The browser controller requires the `@game_entry` route from
+`deploy/Caddyfile.domains.template`; adopt it once in a zero-connection/results
+window, preserving the real proxy trust and API routes. Public static Caddy roots
+use the include in `web/deploy/`. Initial manual bootstrap is not an attested main
+delivery; no automatic verification receipt may be fabricated for it.
+
+Install all reviewed modules/units with `install.sh`, but verify and observe the
+first real main artifact per family before enabling it. Run without `--apply` first:
+
+```bash
+GH_CONFIG_DIR=/var/lib/tbg-deploy/gh python3 /opt/tbg/deploy/web_pull.py
+GH_CONFIG_DIR=/var/lib/tbg-deploy/gh python3 /opt/tbg/deploy/static_pull.py
+# After individual --apply --recheck observation:
+touch /etc/tbg/web-deploy.enabled /etc/tbg/static-deploy.enabled
+systemctl enable --now tbg-web-deploy.timer tbg-static-deploy.timer
+```
+
+Review `web-checked.json`, `static-checked.json`, their current receipts and transition
+journals under `/var/lib/tbg-deploy`. Five-minute worker timeouts apply only to
+frontend maintenance, never to the game. Backend drain remains unbounded.

@@ -1,9 +1,9 @@
 [Unit]
-Description=Check GitHub for an approved TBG backend every five minutes
+Description=Check GitHub for an approved TBG backend every ten minutes
 
 [Timer]
 OnBootSec=2min
-OnUnitInactiveSec=5min
+OnUnitInactiveSec=10min
 RandomizedDelaySec=20s
 Unit=tbg-auto-deploy.service
 
