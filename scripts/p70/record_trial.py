@@ -233,7 +233,7 @@ def main():
     parser.add_argument('--quality', choices=['standard', 'low'], default='standard')
     parser.add_argument('--seed', type=int, default=70)
     parser.add_argument('--distance', type=int)
-    parser.add_argument('--frontline', choices=['Capybara', 'Shieldbearer'], default='Capybara')
+    parser.add_argument('--frontline', choices=['Capybara', 'Shieldbearer', 'none'], default='Capybara')
     parser.add_argument('--seconds', type=int, choices=range(12, 19), default=16)
     parser.add_argument('--fps', type=int, choices=[30, 60], default=60)
     parser.add_argument('--size', default='1920x1080')

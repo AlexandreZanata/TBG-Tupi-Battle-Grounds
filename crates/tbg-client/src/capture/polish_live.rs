@@ -27,7 +27,7 @@ struct Settings {
     seat: Seat,
     seed: u64,
     distance: i32,
-    compact_frontline: bool,
+    frontline: Option<UnitKind>,
     seconds: f64,
 }
 impl Settings {
@@ -71,8 +71,11 @@ impl Settings {
             seat,
             seed: number("trial_seed", 70)?,
             distance: distance as i32,
-            compact_frontline: config::url_param("trial_frontline").as_deref()
-                == Some("Shieldbearer"),
+            frontline: match config::url_param("trial_frontline").as_deref() {
+                Some("none") => None,
+                Some("Shieldbearer") => Some(UnitKind::Shieldbearer),
+                _ => Some(UnitKind::Capybara),
+            },
             seconds: seconds as f64,
         })
     }
@@ -167,15 +170,11 @@ fn composition(settings: &Settings) -> (Vec<TrainingUnitSpec>, Vec<TrainingUnitS
             tbg_core::Archetype::Support | tbg_core::Archetype::Control
         )
         || definition.range > 1_500;
-    if frontline {
+    if let Some(kind) = settings.frontline.filter(|_| frontline) {
         // An ordinary high-HP ally stays in Pyre's initial segment and protects Finn's repeated casts.
         shooters.push(TrainingUnitSpec {
             x: Some(mirror(start + settings.distance / 2)),
-            ..TrainingUnitSpec::base(if settings.compact_frontline {
-                UnitKind::Shieldbearer
-            } else {
-                UnitKind::Capybara
-            })
+            ..TrainingUnitSpec::base(kind)
         });
     }
     let target = if settings.unit == UnitKind::Trident {
