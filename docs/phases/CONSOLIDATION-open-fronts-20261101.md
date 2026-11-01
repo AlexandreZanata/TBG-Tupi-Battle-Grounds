@@ -19,6 +19,7 @@ Remote refs refreshed on 2026-11-01 before acting.
 | #39 | `phase/web-landing-admin-foundation` `2000407` | `phase/backend-main-integration` | yes | 0 | Absorbed by #40; close as integrated |
 | #41 | `phase/p73-active-players-challenges` `bf6da86` | `main` | no (9 commits, 96 paths) | 96 | Merged here; superseded by this PR |
 | #42 | `codex/native-downloads-publication` `e016d98` | `main` | no (1 commit, 2 docs) | 2 | Owned by the publication front; untouched |
+| #43 | `codex/laboratory-desktop-polish` `19f4cfb` | `main` (`70827a7`) | no (15 commits, 26 paths) | 26 | Added on owner request; merged here; superseded by this PR |
 
 The stale descriptions of #22/#26/#39 (25-champion pool, protocol 20/27,
 availability notes) are not instructions; main keeps 46 conventional
@@ -49,6 +50,59 @@ P63 needs no new reconciliation: it was already in the P73 base and main
 did not change `match_task/celebration.rs` or `ui/result.rs` afterwards.
 P73 keeps the complete winning cast payload and adds the personal summary
 and history status beside, not inside, `MatchEnd`.
+
+## PR #43 merge (laboratory, Evolution dialogs, Augment cards)
+
+Added to this consolidation at the owner's request. Normal merge of
+`19f4cfb`, already based on main `70827a7`. Conflicts were adjacent
+additions only: both locale catalogs keep the P73 and training keys (1556
+each, identical placeholders), `desktop-ui-contract.json` keeps both screen
+lists (55 unique) and the contract document keeps both change records.
+`ui/shell/mod.rs` auto-merged the Troops clip beside the P73 fixture banner;
+the other 21 changed paths (training catalog/stage/preview, native battle
+council/fortify/unit panel, captures, five phase reports) do not overlap P73.
+#43's own pending acceptance (same-source Windows and desktop-web full-frame
+and motion correspondence, remaining locale/viewport/DPI and interaction
+states) carries over unchanged.
+
+## Review fixes after integration
+
+An independent read-only review of the P73 server found no high-severity
+authorization or privacy defect and four verified issues, fixed in
+`50302b3`/`6c1382c` with regressions:
+
+1. A guest that signed into an account kept its directed invitations and
+   rematch ticket, so the recipient could be paired with an identity it
+   never agreed to (BR-AP03/07). Any sign-in into a different account now
+   cancels both (`lobby/auth.rs`).
+2. Losing account ownership to another slot kept the rematch ticket
+   (`lobby/ownership.rs`).
+3. The history journal loaded its own `.tmp-` staging files: one torn file
+   hid every pending entry, and a complete one replayed forever and blocked
+   slot retirement (`player_history/journal.rs`). Staging files are skipped,
+   not deleted.
+4. Declining or cancelling spent the per-IP create budget, so a shared
+   exhausted address could not close invites (`player_challenges.rs`).
+
+A missing end detail is recorded as `stronghold`; that is the existing
+Ranked convention (`settle.rs`: no explicit surrender/disconnect means the
+Stronghold fell), not a fabricated value, and was left unchanged.
+
+## Build fixes (PR #41 CI was red)
+
+PR #41's own CI run on `bf6da86` failed `clippy`, `test`, `wasm` and the
+required `check`; the first local batch reproduced the same client error.
+Fixed in `6f8f31f`:
+
+- `capture` is compiled for every debug build, but the P73 synthetic
+  fixtures (`Social`/`History::visual_fixture`) exist only with
+  `ui-acceptance`, so plain debug, test and WASM builds did not compile.
+  The P73 fixture capture is now gated by `ui-acceptance`, the same feature
+  as its "LOCAL VISUAL FIXTURE" label, so synthetic data never renders
+  unlabeled.
+- Rust 1.99 clippy (`-D warnings`) rejected the history cursor decoder's
+  manual parity check and `chunks_exact(2)`; it now uses `is_multiple_of`
+  and `as_chunks::<2>()`, with identical behavior.
 
 ## Identifiers
 
@@ -83,8 +137,9 @@ Cloudflare headers and mixed-version slots were not exercised.
 
 ## Visual correspondence
 
-`docs/ui/DESKTOP-UI-CONTRACT.md` has a P73 change record and
-`desktop-ui-contract.json` lists eight new screens. One shared Bevy
+`docs/ui/DESKTOP-UI-CONTRACT.md` keeps #43's four change records and adds a
+P73 record; `desktop-ui-contract.json` lists eight P73 screens next to #43's
+twenty laboratory/dialog/council screens. One shared Bevy
 implementation serves Linux, Windows and web; the timestamp adapter differs
 internally (Jiff system zone vs browser `Intl`) but renders the same text.
 `python3 scripts/check-desktop-ui.py` passed. Windows, browser and final-source
@@ -96,41 +151,68 @@ Linux captures are **pending**; parity is unverified.
 
 - `git diff --check`: clean at every commit.
 - `cargo fmt -p tbg-core -p tbg-server -p tbg-client --check`: exit 0.
-- `python3 scripts/check-desktop-ui.py`: passed (source routing only).
-- i18n catalog key/placeholder parity script: 1549/1549, no mismatch.
+- `python3 scripts/check-desktop-ui.py`: passed after each merge (source
+  routing only).
+- i18n catalog key/placeholder parity: 1549/1549 after P73, 1556/1556 after
+  #43, no mismatch.
 - Caddy validate + routing probe: see *Proxy and privacy*.
+- `python3 scripts/ci-test-lanes.py`: passed (new test targets are covered by
+  the package-level lanes).
+
+First targeted batch, shared lock, `CARGO_BUILD_JOBS=2`, one test thread,
+private target `/data/tbg-open-fronts-target`, at **`f1eb20f`** (P73 merge
+and proxy/contract/schema-test commits; before the review fixes, #43 and the
+build fixes):
+
+| Command | Result |
+|---------|--------|
+| `cargo test -p tbg-core --test contract_protocol --test contract_protocol_server` | 16 + 2 passed |
+| `cargo test -p tbg-server --lib lobby::player_challenges::tests` | 6 passed |
+| `cargo test -p tbg-server --lib match_task::summary::tests` | 5 passed |
+| `cargo test -p tbg-server --test player_challenges … --test ranked_stats_recovery` (11 targets) | 2/5/3/4/3/2/5/4/4/6/2 passed, 0 failed (incl. new `schema_upgrade` schema-11 case) |
+| `cargo test -p tbg-client --bin tbg-client p73_` | **compile error** (fixture gating; fixed in `6f8f31f`) |
+| `cargo check -p tbg-client --bin tbg-client --target wasm32-unknown-unknown` | **compile error** (same) |
+| `cargo build -p tbg-client --bin tbg-client --features ui-acceptance` | exit 0 |
+
+`tbg-core` is unchanged after `f1eb20f`, so its contract results stand.
+The server results predate the review fixes; the client results identified
+the build defect. None of them is evidence for the final revision.
 
 ### Deferred
 
-All compiling checks are deferred: **the shared validation slot was busy**
-(`flock -n` exit 75; another front's champion preview capture held it).
-Not retried in a loop, bypassed or waited on. Run once, in this order,
-from the worktree with a private target (the main/consolidation targets
-belong to other fronts; sharing them links stale workspace crates):
+The final batch at `6f8f31f` (plus later documentation-only commits) was
+**not run: shared validation slot busy** (`flock -n` exit 75; another
+front's champion preview capture held it). It was not retried in a loop,
+bypassed or waited on. Run once, from the worktree:
 
 ```sh
 cd /data/tbg-consolidate-open-fronts
 export CARGO_TARGET_DIR=/data/tbg-open-fronts-target
-flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 bash -eu -c '
-  cargo test --offline -p tbg-core --test contract_protocol --test contract_protocol_server -- --test-threads=1
-  cargo test --offline -p tbg-server --lib lobby::player_challenges::tests -- --test-threads=1
-  cargo test --offline -p tbg-server --lib match_task::summary::tests -- --test-threads=1
-  cargo test --offline -p tbg-server --test player_challenges --test player_match_history \
+export PKG_CONFIG_PATH=<main checkout>/.local/native-deps/root/usr/lib/x86_64-linux-gnu/pkgconfig
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 bash -u -c '
+  cargo clippy --offline --locked -p tbg-server -p tbg-client -- -D warnings
+  cargo test --offline --locked -p tbg-server --lib lobby::player_challenges::tests -- --test-threads=1
+  cargo test --offline --locked -p tbg-server --lib match_task::summary::tests -- --test-threads=1
+  cargo test --offline --locked -p tbg-server --test player_challenges --test player_match_history \
     --test history_privacy --test presence_global --test live_api --test contract_challenge \
     --test schema_upgrade --test ranked_admin --test ranked_recovery --test ranked_stats \
     --test ranked_stats_recovery -- --test-threads=1
-  cargo test --offline -p tbg-client --bin tbg-client p73_ -- --test-threads=1
-  cargo check --offline -p tbg-client --bin tbg-client --target wasm32-unknown-unknown
-  cargo build --offline -p tbg-client --bin tbg-client --features ui-acceptance
+  cargo test --offline --locked -p tbg-client --bin tbg-client -- --test-threads=1 \
+    p73_ ui::fortify::tests:: br_ag05_ag11_picking_is_local_and_confirming_queues_one_intention
+  cargo check --offline --locked -p tbg-client --bin tbg-client --target wasm32-unknown-unknown
+  cargo build --offline --locked -p tbg-client --bin tbg-client --features ui-acceptance
 '
 ```
 
-Native client commands also need the ALSA pkg-config path documented in the
-P73 report. Also deferred: browser bundle and browser screenshots, native
-final-source captures, Windows captures, `scripts/test-desktop-ui.py`
-(Pillow absent locally; CI `desktop-ui` runs it), the real two-client
-invitation/rematch/reconnect scenario and every acceptance item listed in
-the [P73 report](../planning/P73-EXECUTION-REPORT.md#blocked-and-deferred-validation).
+The PR's own CI (`quality`, `clippy`, `test`, `balance`, `wasm`,
+`desktop-ui`, required `check`) runs the workspace equivalents remotely.
+Also deferred: #43's queued release `ui-acceptance` build, browser bundle and
+browser screenshots, native final-source captures, Windows captures,
+`scripts/test-desktop-ui.py` (Pillow absent locally; CI `desktop-ui` runs
+it), the real two-client invitation/rematch/reconnect scenario and every
+acceptance item listed in the
+[P73 report](../planning/P73-EXECUTION-REPORT.md#blocked-and-deferred-validation)
+and #43's phase reports.
 
 ## Rollout and rollback
 
@@ -139,9 +221,10 @@ backend auto-deploy controller then refuses the candidate (`contract change
 staged: coordinated client release required`), the web controller refuses
 a `w32` browser candidate while the live server is `w31` (`browser contract
 transition/drain requires coordinated release`), and `native_pull.py` stops
-offering the `w31` desktop builds once the server is `w32`. Do not loosen those guards. A coordinated release needs: a
-backend candidate and the matching web client together, then a native build
-of the same source before downloads are offered again. Timers stay disabled
+offering the `w31` desktop builds once the server is `w32`. Do not loosen
+those guards. A coordinated release needs a backend candidate and the
+matching web client together, then a native build of the same source before
+downloads are offered again. Timers stay disabled
 until the owner activates each family per `deploy/auto/README.md`.
 
 Before any history activation (each a separate owner decision): deploy the
