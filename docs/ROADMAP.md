@@ -488,3 +488,30 @@ acceptance (audit failures), P66 continuity investigation and O02–O05, P68
 Windows/visual/public-HTTPS acceptance, P67 activation gates, cross-slot
 revocation before any two-slot rollout with P68 auth, and owner look/fun
 sign-off. Nothing was deployed; production stays on protocol 29.
+
+## Active players, direct challenges and rematches (2026-11-01)
+
+**P73 — planning only**, `codex/p73-active-players-challenges-plan`, audited
+against `origin/main` at `e2a18af` and coordinated with P72's shared
+Bevy web/native interface. Read [the phase](phases/P73-active-players-and-direct-challenges.md),
+[source audit and D01–D16 cases](planning/P73-PLAN-MANIFEST.json) and
+[the executor prompt](planning/P73-EXECUTION-PROMPT.md).
+
+Extend the current Live/online surface with a complete paged/searchable
+global online-account directory, accurate availability, participant-bound
+Accept/Decline/Cancel invitations, retained-session opt-out and last-opponent
+rematches from Result or Active players. Guests remain counted, not publicly
+enumerated. Reuse P39 private casual pairing and rematch consent, P47
+snapshots and P71 auth/admission continuity; all resulting Challenge games
+remain unrated. Preserve the existing link challenge and live-watch flows.
+
+Order: freeze P72/wire ownership -> directory/global snapshot accuracy ->
+bounded direct-invitation lifecycle -> rematch eligibility/navigation ->
+shared localized frontend -> one targeted consolidation. Two-slot presence
+must actually aggregate snapshots rather than labeling one slot global;
+unsupported/incompatible/draining targets remain unavailable without moving
+an active match. Proposed BR-AP rules/defaults are documented in GAME-DESIGN.
+
+No game code, production API change, test execution, UI acceptance, push,
+VPS access or deployment is part of this planning delivery. Full-suite and
+heavy validation still require the owner's explicit scoped request.
