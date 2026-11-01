@@ -28,7 +28,7 @@ pub fn adapt(mut shaders: ResMut<Assets<Shader>>, mut done: Local<bool>) {
     let mut replacement = Shader::from_wesl(adapted, shader.path.clone());
     replacement.shader_defs = shader.shader_defs.clone();
     replacement.file_dependencies = shader.file_dependencies.clone();
-    replacement.validate_shader = shader.validate_shader;
+    replacement.validate_shader = shader.validate_shader.clone();
     *shader = replacement;
     info!("Android GLES: unsupported point-shadow LOD lookup disabled; PBR lighting retained");
 }
