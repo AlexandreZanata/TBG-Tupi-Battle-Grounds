@@ -147,7 +147,10 @@ impl NetLink {
             self.note_clock(u64::from(v.clock), now);
         }
         match msg {
-            ServerMsg::MatchStart { result_id, .. } | ServerMsg::MatchEnd { result_id, .. }
+            ServerMsg::MatchStart { result_id, .. }
+            | ServerMsg::MatchEnd { result_id, .. }
+            | ServerMsg::PersonalMatchResult { result_id, .. }
+            | ServerMsg::MatchHistoryStatus { result_id, .. }
                 if self.discarded_result == Some(result_id) =>
             {
                 None

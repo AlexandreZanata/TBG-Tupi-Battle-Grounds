@@ -193,6 +193,12 @@ pub enum LobbyCmd {
     },
     /// P60: a committed (or replayed) ranked settlement, delivered to the
     /// sessions of its frozen account ids, never to whoever holds a token.
+    HistoryDone {
+        account: AccountId,
+        result_id: tbg_core::protocol::ResultId,
+        entry_id: [u8; 16],
+        state: tbg_core::protocol::HistorySaveState,
+    },
     RankedDone {
         receipt: Box<crate::ranked::RankedReceipt>,
     },
@@ -232,5 +238,7 @@ pub enum LobbyCmd {
 pub(crate) struct CompletedResult {
     pub delivered_to: Option<u64>,
     pub start: ServerMsg,
+    pub personal: Option<ServerMsg>,
+    pub history: Option<ServerMsg>,
     pub end: ServerMsg,
 }

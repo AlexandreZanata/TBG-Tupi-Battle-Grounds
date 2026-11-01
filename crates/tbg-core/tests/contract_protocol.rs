@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 31,
-        "GAME-DESIGN §12 / D-97 integration v31: authenticated hello and eight Arena identities"
+        PROTOCOL_VERSION, 32,
+        "BR-AP03/10 and D-103: protocol 32 appends private invites and personal history after the v31 eight-Arena handshake without changing old tags"
     );
 }
 
@@ -336,5 +336,60 @@ fn v30_arena_identities_append_without_renumbering_the_original_five() {
         let bytes = postcard::to_allocvec(&arena).expect("Arena wire identity");
         assert_eq!(bytes, [id as u8]);
         assert_eq!(postcard::from_bytes::<Arena>(&bytes), Ok(arena));
+    }
+}
+
+#[test]
+fn p73_appends_participant_bound_messages_and_keeps_legacy_match_end_bytes() {
+    use tbg_core::protocol::{decode_server, HistorySaveState, PlayerInviteOutcome};
+    for (tag, message) in [
+        (
+            23,
+            ClientMsg::ChallengePlayer {
+                name: "Alpha".into(),
+            },
+        ),
+        (
+            24,
+            ClientMsg::AnswerPlayerChallenge {
+                id: [1; 16],
+                accept: true,
+            },
+        ),
+        (25, ClientMsg::CancelPlayerChallenge { id: [1; 16] }),
+        (26, ClientMsg::SetPlayerChallengesEnabled { enabled: false }),
+    ] {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_client(&bytes).unwrap(), message);
+    }
+    for (tag, message) in [
+        (
+            33,
+            ServerMsg::PlayerChallengeState {
+                enabled: false,
+                outgoing: None,
+                incoming: Vec::new(),
+            },
+        ),
+        (
+            34,
+            ServerMsg::PlayerChallengeResult {
+                id: Some([1; 16]),
+                outcome: PlayerInviteOutcome::Cancelled,
+            },
+        ),
+        (
+            36,
+            ServerMsg::MatchHistoryStatus {
+                result_id: [2; 16],
+                entry_id: [3; 16],
+                state: HistorySaveState::Pending,
+            },
+        ),
+    ] {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_server(&bytes).unwrap(), message);
     }
 }

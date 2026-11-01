@@ -22,6 +22,7 @@ mod history;
 pub mod integrity_admin;
 pub mod leaderboard;
 mod matches;
+pub mod player_history;
 mod ranked;
 pub mod release;
 pub mod release_admin;
@@ -83,8 +84,24 @@ impl Store {
         path: &Path,
         policy: crate::ranked::policy::RankedPolicy,
     ) -> rusqlite::Result<Store> {
+        Self::open_history(path, policy, false)
+    }
+
+    /// Explicit additive history migration; never resets an existing privacy choice.
+    pub fn open_history(
+        path: &Path,
+        policy: crate::ranked::policy::RankedPolicy,
+        migrate_history: bool,
+    ) -> rusqlite::Result<Store> {
         let mut conn = rusqlite::Connection::open(path)?;
         schema::migrate(&mut conn)?;
+        if migrate_history {
+            schema::migrate_history(&mut conn)?;
+        }
+        let history_installed: bool = conn.query_row("SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='player_match_history')",[],|r|r.get(0))?;
+        if history_installed {
+            conn.pragma_update(None, "synchronous", "FULL")?;
+        }
         // P61 §3: this binary's ruleset revision, registered once.
         rulesets::register(
             &conn,

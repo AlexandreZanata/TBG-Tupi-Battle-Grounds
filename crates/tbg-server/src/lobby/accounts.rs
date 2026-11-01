@@ -132,6 +132,11 @@ impl Lobby {
             deny(&s.conn, AccountError::Unavailable);
             return;
         }
+        self.cancel_direct(token);
+        let Some(s) = self.session(&token) else {
+            return;
+        };
+        s.player_challenges_enabled = false;
         let released = s.account.take().map(|(id, _)| id);
         s.name = display_name();
         send(&s.conn, ConnEvent::Send(ServerMsg::LoggedOut));

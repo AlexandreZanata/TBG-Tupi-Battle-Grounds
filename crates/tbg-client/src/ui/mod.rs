@@ -29,6 +29,7 @@ pub(crate) mod evolve;
 pub(crate) mod fortify;
 #[cfg(test)]
 mod glyphs;
+pub(crate) mod history;
 mod hud;
 mod hud_portraits;
 #[cfg(not(tbg_desktop))]
@@ -53,6 +54,7 @@ pub mod ranking;
 mod ranking_ui;
 mod result;
 pub(crate) mod shell;
+pub(crate) mod social;
 mod start;
 #[cfg(test)]
 mod stronghold_data_tests;
@@ -87,6 +89,8 @@ pub enum UiAction {
     ChallengeInvalid,
     ShareChallenge,
     RequestRematch,
+    OpenPlayers,
+    OpenMyHistory,
     Cancel,
     CopyLink,
     PlayAgain,
@@ -232,6 +236,7 @@ pub fn plugin(app: &mut App) {
             inspect::plugin,
             fortify::plugin,
             shell::plugin,
+            social::plugin,
             kit::plugin,
             attribution::plugin,
         ));

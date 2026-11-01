@@ -30,6 +30,7 @@ mod leaderboard;
 mod live;
 mod matchmaking;
 mod ownership;
+mod player_challenges;
 mod presence;
 mod ranked;
 mod rematch;
@@ -77,6 +78,8 @@ pub(super) struct Session {
     pub(super) stronghold: tbg_core::StrongholdKind,
     /// P47 (BR-LV09): when this session last sent `Spectate` (one per second).
     pub(super) last_spectate: Option<Instant>,
+    pub(super) player_challenges_enabled: bool,
+    pub(super) player_challenge_actions: Vec<Instant>,
     pub(super) finished: Option<(Instant, Box<crate::chan::CompletedResult>)>,
 }
 
@@ -96,6 +99,9 @@ pub(super) struct Lobby {
     pub(super) challenges: Vec<(InviteToken, Token, Instant)>,
     /// P39: post-match rematch offers for challenge pairs.
     pub(super) rematches: Vec<RematchTicket>,
+    pub(super) player_challenges: Vec<player_challenges::DirectedInvite>,
+    pub(super) player_challenge_cooldowns: Vec<(Token, Token, Instant)>,
+    pub(super) player_challenge_accounts: HashMap<AccountId, Vec<Instant>>,
     pub(super) self_tx: mpsc::Sender<LobbyCmd>,
     pub(super) config: Arc<Config>,
     pub(super) metrics: Arc<Metrics>,
@@ -113,6 +119,7 @@ pub(super) struct Lobby {
     pub(super) featured: Option<(LiveId, Instant)>,
     /// P60: the ranked finalizer (only with a database).
     pub(super) ranked: Option<crate::ranked::finalizer::Handle>,
+    pub(super) history: Option<crate::player_history::Handle>,
     /// P60: per account, the newest settlement sequence its cached profile
     /// already contains; an older receipt never regresses it.
     pub(super) ranked_seen: HashMap<AccountId, i64>,
@@ -145,6 +152,9 @@ pub(crate) async fn run(
         rooms: Vec::new(),
         challenges: Vec::new(),
         rematches: Vec::new(),
+        player_challenges: Vec::new(),
+        player_challenge_cooldowns: Vec::new(),
+        player_challenge_accounts: HashMap::new(),
         self_tx,
         config,
         metrics,
@@ -155,6 +165,7 @@ pub(crate) async fn run(
         live_tx,
         featured: None,
         ranked: None,
+        history: None,
         ranked_seen: HashMap::new(),
     };
     // P60: one finalizer per process settles every ranked result in order;
@@ -169,6 +180,19 @@ pub(crate) async fn run(
         )
         .await;
         lobby.ranked = Some(handle);
+    }
+    if lobby.config.history_collect {
+        if let (Some(store), Some(db)) = (lobby.store.clone(), lobby.config.db.clone()) {
+            lobby.history = Some(
+                crate::player_history::start(
+                    store,
+                    crate::player_history::journal::directory(&db, lobby.release.slot()),
+                    lobby.self_tx.clone(),
+                    lobby.metrics.clone(),
+                )
+                .await,
+            );
+        }
     }
     // P66: recovery is done; the release task may now report `ready`.
     lobby.release.gate.serving.store(true, Relaxed);
@@ -268,6 +292,12 @@ impl Lobby {
                         // Also covers a reconnect racing the final match-task tick.
                         if s.conn.as_ref().map(|c| c.id) != result.delivered_to {
                             send(&s.conn, ConnEvent::Send(result.start.clone()));
+                            if let Some(summary) = &result.personal {
+                                send(&s.conn, ConnEvent::Send(summary.clone()));
+                            }
+                            if let Some(status) = &result.history {
+                                send(&s.conn, ConnEvent::Send(status.clone()));
+                            }
                             send(&s.conn, ConnEvent::Send(result.end.clone()));
                         }
                         s.finished = Some((until, Box::new(result)));
@@ -288,6 +318,31 @@ impl Lobby {
                                 &s.conn,
                                 ConnEvent::Send(ServerMsg::RematchOpen { opponent }),
                             );
+                        }
+                    }
+                }
+            }
+            LobbyCmd::HistoryDone {
+                account,
+                result_id,
+                entry_id,
+                state,
+            } => {
+                for s in self
+                    .sessions
+                    .values_mut()
+                    .filter(|s| s.account.as_ref().is_some_and(|(id, _)| *id == account))
+                {
+                    let message = ServerMsg::MatchHistoryStatus {
+                        result_id,
+                        entry_id,
+                        state,
+                    };
+                    if let Some((_, result)) = &mut s.finished {
+                        if matches!(&result.end,ServerMsg::MatchEnd {result_id:id,..} if *id==result_id)
+                        {
+                            result.history = Some(message.clone());
+                            send(&s.conn, ConnEvent::Send(message));
                         }
                     }
                 }
@@ -334,6 +389,12 @@ impl Lobby {
             // P47: watching is listen-only and answered from any state.
             ClientMsg::Spectate { id } => return self.spectate(token, id),
             ClientMsg::StopSpectating => return self.end_watch(token),
+            ClientMsg::ChallengePlayer { .. }
+            | ClientMsg::AnswerPlayerChallenge { .. }
+            | ClientMsg::CancelPlayerChallenge { .. }
+            | ClientMsg::SetPlayerChallengesEnabled { .. } => {
+                return self.direct_action(token, msg)
+            }
             _ => {}
         }
         // Any other lobby request ends a watch first (BR-LV02).

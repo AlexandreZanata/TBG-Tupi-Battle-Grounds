@@ -86,6 +86,12 @@ impl Lobby {
                 if let Some((until, result)) = &s.finished {
                     if Instant::now() < *until {
                         send(&Some(conn.clone()), ConnEvent::Send(result.start.clone()));
+                        if let Some(summary) = &result.personal {
+                            send(&Some(conn.clone()), ConnEvent::Send(summary.clone()));
+                        }
+                        if let Some(status) = &result.history {
+                            send(&Some(conn.clone()), ConnEvent::Send(status.clone()));
+                        }
                         send(&Some(conn.clone()), ConnEvent::Send(result.end.clone()));
                     }
                 }
@@ -111,6 +117,7 @@ impl Lobby {
             if let Some((t, id)) = reclaim {
                 self.reclaim(t, id);
             }
+            self.send_direct_state(token);
             return Some((token, name));
         }
         let (token, name) = crate::names::session_identity()?;
@@ -126,6 +133,8 @@ impl Lobby {
             arcanas: tbg_core::ArcanaPreset::DEFAULT,
             stronghold: tbg_core::StrongholdKind::DEFAULT,
             last_spectate: None,
+            player_challenges_enabled: false,
+            player_challenge_actions: Vec::new(),
             finished: None,
         };
         let pair = (session.token, session.name.clone());
@@ -204,6 +213,7 @@ impl Lobby {
     pub(super) fn cleanup(&mut self) {
         let now = Instant::now();
         self.limits.sweep(now);
+        self.sweep_direct();
         self.rooms.retain(|(.., created)| now - *created < ROOM_TTL);
         let window = Duration::from_secs(self.config.reconnect_secs);
         let mut released = Vec::new();

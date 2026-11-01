@@ -63,7 +63,10 @@ pub(super) fn apply(
     ),
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
-    mut inspected: ResMut<super::inspect::Inspected>,
+    (mut inspected, mut social_menu): (
+        ResMut<super::inspect::Inspected>,
+        (ResMut<super::shell::Shell>, ResMut<super::history::History>),
+    ),
     (mut lang_res, mut arena, mut celebration, info, mut training): (
         ResMut<crate::i18n::Lang>,
         ResMut<crate::arena::ActiveArena>,
@@ -221,6 +224,17 @@ pub(super) fn apply(
                 }
             }
             UiAction::RequestRematch => link.send(ClientMsg::RequestRematch, now),
+            UiAction::OpenPlayers => {
+                social_menu.0.panel = super::shell::Panel::Live;
+                social_menu.0.dirty = true;
+                next.set(GameState::Menu);
+            }
+            UiAction::OpenMyHistory => {
+                social_menu.1.mine();
+                social_menu.0.panel = super::shell::Panel::History;
+                social_menu.0.dirty = true;
+                next.set(GameState::Menu);
+            }
             UiAction::Watch(id) => {
                 config::save_watch(id);
                 *queue_info = QueueInfo::default();

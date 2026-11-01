@@ -134,7 +134,11 @@ pub(super) fn handle(
         | ServerMsg::SpectateStart { .. }
         | ServerMsg::SpectatorView(_)
         | ServerMsg::SpectateUnavailable { .. }
-        | ServerMsg::SpectateEnd { .. } => {}
+        | ServerMsg::SpectateEnd { .. }
+        | ServerMsg::PlayerChallengeState { .. }
+        | ServerMsg::PlayerChallengeResult { .. }
+        | ServerMsg::PersonalMatchResult { .. }
+        | ServerMsg::MatchHistoryStatus { .. } => {}
     }
     Ok(None)
 }

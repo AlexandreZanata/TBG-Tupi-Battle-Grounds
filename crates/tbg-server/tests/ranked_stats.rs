@@ -233,6 +233,7 @@ async fn stored_catalog_and_summary_round_trip_into_the_cohort() {
                 ruleset_source_hash: tbg_server::ranked::source_hash(),
                 seats: [IntegritySeat::default(); 2],
                 factions: [[3, 0, 0, 0, 0, 0, 0], [0; 7]],
+                history_expected: false,
                 arcanas: [ArcanaPreset::DEFAULT; 2],
                 stats: Some(summary.clone()),
             },

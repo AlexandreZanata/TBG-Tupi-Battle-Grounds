@@ -257,6 +257,14 @@ fn presence_block(
                 .replace("{battle}", &v.battle.to_string())
         },
     );
+    let online =
+        if data.live.as_ref().is_some_and(|v| v.stale) || data.unavailable && data.live.is_some() {
+            lang.key("p73.stale")
+        } else if data.live.as_ref().is_some_and(|v| !v.complete) {
+            lang.key("p73.partial")
+        } else {
+            online
+        };
     #[cfg(tbg_desktop)]
     let online = if data.live.is_none() && data.unavailable {
         lang.key("live.unavailable")
