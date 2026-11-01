@@ -39,7 +39,7 @@ pub fn profane_flame(
         let (mesh, material) = match piece {
             0 => (&assets.spike, &assets.green),
             1 => (&assets.spike, &assets.white),
-            6 => (&assets.ball, &assets.gold),
+            2 | 5 | 6 => (&assets.puff, &assets.gold),
             7 => (&assets.puff, &assets.soot),
             _ => (&assets.puff, &assets.green),
         };
@@ -105,10 +105,13 @@ fn flame_pose(from: Vec3, to: Vec3, k: f32, piece: u8) -> Transform {
         _ => {
             let phase = f32::from(piece - 2) * 0.21;
             let along = (phase + k * 0.9).fract();
-            let width = if piece == 6 { 0.022 } else { 0.11 } * fade;
+            let width = if piece == 6 { 0.022 } else { 0.14 } * fade;
+            // Tongues rise in world space; the jet rotation would flatten them
+            // along the BattleLine and hide their flame silhouette behind bodies.
             base.with_translation(
-                from.lerp(to, along) + Vec3::Y * (0.10 + 0.16 * (phase + k * 21.0).sin().abs()),
+                from.lerp(to, along) + Vec3::Y * (0.18 + 0.25 * (phase + k * 21.0).sin().abs()),
             )
+            .with_rotation(Quat::from_rotation_z(-delta.x.signum() * 0.35))
             .with_scale(Vec3::new(width, width * 3.2, width))
         }
     }
