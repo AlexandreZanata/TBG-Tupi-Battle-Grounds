@@ -47,7 +47,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     };
     body::humanoid(&mut v, &p, &look);
     body::tunic(&mut v, &p, RED_CLOTH, LINEN, DARK_LEATHER);
-    body::tabard(&mut v, &p, p.torso.x * 0.8, 0.42, None);
+
     body::greaves(&mut v, STEEL);
     body::bracers(&mut v, &p, LEATHER);
     body::pauldrons(

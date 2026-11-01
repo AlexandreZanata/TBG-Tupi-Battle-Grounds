@@ -40,7 +40,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     };
     body::humanoid(&mut v, &p, &look);
     body::tunic(&mut v, &p, RUST, TRIM, DARK_LEATHER);
-    body::tabard(&mut v, &p, 0.15, 0.36, None);
+
     body::bracers(&mut v, &p, LEATHER);
     armor(&mut v, &p, f);
     head(&mut v, &p, f);

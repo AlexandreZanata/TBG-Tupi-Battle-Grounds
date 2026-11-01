@@ -11,6 +11,18 @@ use tbg_core::StrongholdKind;
 pub(super) struct Wear {
     pub show: u8,
     pub hide: u8,
+    rest: Option<Transform>,
+    elapsed: f32,
+}
+impl Wear {
+    pub(super) fn new(show: u8, hide: u8) -> Self {
+        Self {
+            show,
+            hide,
+            rest: None,
+            elapsed: 0.0,
+        }
+    }
 }
 
 pub(super) fn stage(hp: i32, max_hp: i32) -> u8 {
@@ -88,10 +100,7 @@ pub(super) fn regions(kind: StrongholdKind) -> Vec<(Piece, Wear)> {
                         },
                         t(x, y, z),
                     ),
-                    Wear {
-                        show: 0,
-                        hide: stage,
-                    },
+                    Wear::new(0, stage),
                 ),
                 (
                     piece(
@@ -100,10 +109,7 @@ pub(super) fn regions(kind: StrongholdKind) -> Vec<(Piece, Wear)> {
                             (f32::from(stage * 3 % 11) - 5.0) * 0.13,
                         )),
                     ),
-                    Wear {
-                        show: stage,
-                        hide: 21,
-                    },
+                    Wear::new(stage, 21),
                 ),
             ]
         })
@@ -111,11 +117,12 @@ pub(super) fn regions(kind: StrongholdKind) -> Vec<(Piece, Wear)> {
 }
 
 pub(super) fn visibility(
-    towers: Query<&Tower>,
-    mut parts: Query<(&Wear, &ChildOf, &mut Visibility, &mut Transform), Without<Tower>>,
+    towers: Query<(&Tower, &Effects)>,
+    time: Res<Time>,
+    mut parts: Query<(&mut Wear, &ChildOf, &mut Visibility, &mut Transform), Without<Tower>>,
 ) {
-    for (wear, parent, mut visibility, mut transform) in &mut parts {
-        let Ok(tower) = towers.get(parent.parent()) else {
+    for (mut wear, parent, mut visibility, mut transform) in &mut parts {
+        let Ok((tower, effects)) = towers.get(parent.parent()) else {
             continue;
         };
         let stage = tower.look.map_or(0, |l| l.damage);
@@ -125,8 +132,23 @@ pub(super) fn visibility(
             Visibility::Hidden
         };
         if stage == 20 {
-            transform.scale.y = 0.08;
-            transform.translation.y = transform.translation.y.min(0.12);
+            if wear.rest.is_none() {
+                wear.rest = Some(*transform);
+                wear.elapsed = if effects.previous.is_none() {
+                    0.65
+                } else {
+                    0.0
+                };
+            }
+            wear.elapsed += time.delta_secs();
+            let k = (wear.elapsed / 0.65).clamp(0.0, 1.0);
+            let amount = 1.0 - 0.92 * (k * k * (3.0 - 2.0 * k));
+            if let Some(rest) = wear.rest {
+                transform.scale = rest.scale * Vec3::new(1.0, amount, 1.0);
+                transform.translation = rest.translation * Vec3::new(1.0, amount, 1.0);
+            }
+        } else if let Some(rest) = wear.rest.take() {
+            *transform = rest;
         }
     }
 }
@@ -160,7 +182,8 @@ pub(super) fn effects(
                 crate::vfx::wear::debris(
                     &mut commands,
                     &assets,
-                    root.translation,
+                    root.translation
+                        + Vec3::new(0.0, profile(tower.kind()).1, profile(tower.kind()).2 + 0.05),
                     stage - old,
                     tower.kind() == StrongholdKind::Artillery,
                 );

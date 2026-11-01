@@ -45,7 +45,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         },
     );
     // The ivory breastplate ends at z=0.17; its heraldry must sit on that surface.
-    body::tabard(&mut v, &p, 0.16, 0.31, Some(0.17));
+
     v.extend([
         part(
             Body(Chest),

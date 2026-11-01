@@ -57,7 +57,7 @@ pub fn debris(c: &mut Commands, a: &VfxAssets, at: Vec3, skipped: u8, timber: bo
             c,
             &a.chip,
             if timber { &a.root } else { &a.rock },
-            at + Vec3::new(sign * 0.45, 0.8, 0.5),
+            at + Vec3::new(sign * 0.20, 0.0, 0.0),
             Motion::Debris {
                 vel: Vec3::new(sign * 0.6, 0.7, 0.3),
                 size: 0.065,

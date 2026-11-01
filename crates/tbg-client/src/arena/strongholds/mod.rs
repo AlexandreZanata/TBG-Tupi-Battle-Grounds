@@ -253,10 +253,7 @@ fn dress(
                     MeshMaterial3d(art.material.clone()),
                     at,
                     Visibility::Inherited,
-                    damage::Wear {
-                        show: 0,
-                        hide: loss,
-                    },
+                    damage::Wear::new(0, loss),
                     ChildOf(root),
                 ));
             }
@@ -267,10 +264,7 @@ fn dress(
             MeshMaterial3d(art.material.clone()),
             at,
             ChildOf(root),
-            damage::Wear {
-                show: 0,
-                hide: piece.lost,
-            },
+            damage::Wear::new(0, piece.lost),
         ));
         if let Some(motion) = piece.motion {
             child.insert(Moving { motion, rest: at });

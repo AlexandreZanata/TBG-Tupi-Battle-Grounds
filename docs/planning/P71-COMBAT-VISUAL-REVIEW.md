@@ -22,3 +22,19 @@ Owner worktrees, installed fallback and P70 original evidence are preserved.
 
 Other steps continue. This report will record actual validation, renderer
 coverage, remaining acceptance, GitHub reference and final installed version.
+
+## Resumed consolidation (2026-11-01)
+
+The interrupted working tree contained only the final tower-collapse and
+debris-surface changes and removal of the obsolete tabard helper. They are
+retained. `collapse-check.log`: `cargo check --offline --locked -p tbg-client
+--bin tbg-client` passed in 3.13 s under the shared validation lock (2 jobs,
+existing native cache). Collapse now eases over 0.65 s; debris originates
+on the visible exterior. These are presentation changes only.
+
+Owner follow-ups queued for execution: stable Bloomkeeper support facing;
+Farwatch Stronghold targeting; separate top-center Evolution/Fortification
+choices with retained focus and outside dismissal; independent Tick pistol
+and brother-specific Evolution branches; larger humanoid-bee Hornet with a
+venom pistol connected to its abdomen. Gameplay changes require Proposed
+canon entries and targeted authoritative regression evidence.

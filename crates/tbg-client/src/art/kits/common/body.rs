@@ -87,18 +87,6 @@ pub fn tunic(v: &mut Vec<PartSpec>, p: &Proportions, cloth: Color, hem: Color, b
     ]);
 }
 
-/// Fitted heraldic cloth follows the chest; only the short split hem swings at the hips.
-/// `armor_front` is an explicit breastplate surface when it extends beyond the base torso.
-pub fn tabard(
-    _v: &mut Vec<PartSpec>,
-    _p: &Proportions,
-    _width: f32,
-    _length: f32,
-    _armor_front: Option<f32>,
-) {
-    // P71: allegiance belongs to the ground ring; intrinsic tunics remain in each model.
-}
-
 /// A cape hanging from the back spring.
 pub fn cape(v: &mut Vec<PartSpec>, color: Color, width: f32, length: f32) {
     let b = Secondary(Spring::Back);
