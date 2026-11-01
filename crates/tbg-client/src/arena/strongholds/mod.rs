@@ -37,6 +37,7 @@ pub(super) fn plugin(app: &mut App) {
             Update,
             (
                 sync_looks,
+                live_visibility,
                 gallery::wear_sequence,
                 aim::orders,
                 motion::fire,
@@ -293,5 +294,25 @@ fn dress(
     tower.turret = aim::turret(look);
     if let Some(t) = tower.turret.filter(|_| tower.target.is_none()) {
         tower.pitch = t.rest_pitch;
+    }
+}
+
+/// Wear updates child visibility; scene/panel ownership belongs to the live root.
+fn live_visibility(
+    state: Res<State<crate::GameState>>,
+    shell: Res<crate::ui::shell::Shell>,
+    mut towers: Query<(&Tower, &mut Visibility)>,
+) {
+    let hidden = *state.get() == crate::GameState::Gallery
+        || (*state.get() == crate::GameState::Menu
+            && shell.panel == crate::ui::shell::Panel::Troops);
+    for (tower, mut visibility) in &mut towers {
+        if tower.live {
+            *visibility = if hidden {
+                Visibility::Hidden
+            } else {
+                Visibility::Inherited
+            };
+        }
     }
 }
