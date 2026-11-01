@@ -87,7 +87,7 @@ impl Default for Catalog {
             faction: None,
             role: None,
             yaw: 0.,
-            zoom: 1.5,
+            zoom: 1.0,
             reduced: crate::config::reduced_motion(),
             allies: [UnitKind::BoneBrute, UnitKind::Hexer, UnitKind::Archer]
                 .map(TrainingUnitSpec::base)
