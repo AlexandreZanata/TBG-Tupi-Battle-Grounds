@@ -1,6 +1,8 @@
 //! Socket pump and reconnect backoff: 0.25 s, 0.5 s, 1 s, then every 2 s
 //! until `GIVE_UP` (the server window is 30 s). A frame that runs after the
-//! tab becomes visible again retries at once when a retry is due.
+//! tab becomes visible again retries at once when a retry is due. A socket
+//! that goes silent is treated as lost (P71): a dropped network often never
+//! reports `Closed`, and the seat is only safe if the client comes back.
 
 use ewebsock::{WsEvent, WsMessage};
 use tbg_core::protocol::{self, ClientMsg, ServerMsg};
@@ -10,6 +12,10 @@ use crate::config;
 
 /// Give up reconnecting after this long (server window is 30 s).
 pub(crate) const GIVE_UP: f64 = 30.0;
+
+/// The server pings every second; this much silence means the link is gone.
+/// Above the server's 3 s stale-controller limit, so the resume takes the seat back.
+const SILENT: f64 = 4.0;
 
 fn delay(tries: u32) -> f64 {
     match tries {
@@ -26,6 +32,7 @@ impl NetLink {
             return;
         }
         self.opened = false;
+        self.heard_at = None;
         self.outq.clear();
         let view = crate::auth::snapshot();
         if view.access.is_none() && view.status != crate::auth::Status::Guest {
@@ -75,10 +82,12 @@ impl NetLink {
             match ev {
                 WsEvent::Opened => {
                     self.opened = true;
+                    self.heard_at = Some(now);
                     let hello = self.hello();
                     self.outq.push_front((now + self.lag, hello));
                 }
                 WsEvent::Message(WsMessage::Binary(bytes)) => {
+                    self.heard_at = Some(now);
                     if let Ok(msg) = protocol::decode_server(&bytes) {
                         self.inq.push_back((now + self.lag, msg));
                     }
@@ -86,6 +95,9 @@ impl NetLink {
                 WsEvent::Message(_) => {}
                 WsEvent::Closed | WsEvent::Error(_) => self.lost(now),
             }
+        }
+        if self.opened && self.heard_at.is_some_and(|at| now - at > SILENT) {
+            self.lost(now);
         }
     }
 
@@ -114,8 +126,26 @@ impl NetLink {
         }
     }
 
+    /// P71: views that keep arriving with a clock that stands still mean the
+    /// server paused the match for a player's reconnect (BR-M03).
+    fn note_clock(&mut self, clock: u64, now: f64) {
+        self.view_at = now;
+        if self.clock_moved.is_none_or(|(moved, _)| moved != clock) {
+            self.clock_moved = Some((clock, now));
+        }
+    }
+
+    pub fn match_paused(&self, now: f64) -> bool {
+        self.in_match
+            && now - self.view_at < 0.5
+            && self.clock_moved.is_some_and(|(_, since)| now - since > 1.0)
+    }
+
     /// Protocol housekeeping stays here; everything else goes to the game.
     pub(super) fn handle(&mut self, msg: ServerMsg, now: f64) -> Option<ServerMsg> {
+        if let ServerMsg::View(v) = &msg {
+            self.note_clock(u64::from(v.clock), now);
+        }
         match msg {
             ServerMsg::MatchStart { result_id, .. } | ServerMsg::MatchEnd { result_id, .. }
                 if self.discarded_result == Some(result_id) =>
@@ -231,6 +261,9 @@ mod tests {
             mode,
             socket: None,
             opened: false,
+            heard_at: None,
+            clock_moved: None,
+            view_at: 0.0,
             token: Some([1; 16]),
             in_match: false,
             result_id: None,
@@ -256,6 +289,41 @@ mod tests {
                 fresh: true,
             },
         }
+    }
+
+    /// P71 (BR-M03): a clock that stands still while views keep arriving is the
+    /// server's connection pause; a clock that moves again ends it.
+    #[test]
+    fn p71_a_frozen_clock_with_live_views_reads_as_a_connection_pause() {
+        let mut net = link(Mode::Quick);
+        net.in_match = true;
+        net.note_clock(40, 0.0);
+        net.note_clock(40, 1.2);
+        assert!(net.match_paused(1.3));
+        assert!(
+            !net.match_paused(2.0),
+            "no views for 0.8 s: not a pause signal"
+        );
+        net.note_clock(41, 2.1);
+        assert!(!net.match_paused(2.2));
+    }
+
+    /// P71: a socket that stops delivering is dropped and reconnected even
+    /// though it never reported `Closed` (a lost network rarely does).
+    #[test]
+    fn p71_a_silent_socket_is_treated_as_lost() {
+        let mut net = link(Mode::Quick);
+        net.opened = true;
+        net.heard_at = Some(10.0);
+        net.read_socket(13.9);
+        assert_eq!(
+            net.status,
+            NetStatus::Ready,
+            "one missed second is not a loss"
+        );
+        net.read_socket(14.1);
+        assert!(!net.opened);
+        assert!(matches!(net.status, NetStatus::Reconnecting { since } if since == 14.1));
     }
 
     #[test]
