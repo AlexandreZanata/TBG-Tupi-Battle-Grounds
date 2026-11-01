@@ -26,7 +26,10 @@ type Buttons<'w, 's> = Query<
 #[allow(clippy::too_many_arguments)]
 pub fn mouse_and_keys(
     mouse: Res<ButtonInput<MouseButton>>,
-    #[cfg(target_os = "android")] pointer: Res<super::super::mobile::input::Pointer>,
+    #[cfg(target_os = "android")] (pointer, state): (
+        Res<super::super::mobile::input::Pointer>,
+        Res<State<crate::GameState>>,
+    ),
     #[cfg(target_os = "android")] scale: Res<UiScale>,
     keys: Res<ButtonInput<KeyCode>>,
     mut window: Single<&mut Window>,
@@ -43,7 +46,10 @@ pub fn mouse_and_keys(
     mut volume: ResMut<bevy::audio::GlobalVolume>,
 ) {
     #[cfg(target_os = "android")]
-    if window.height() > window.width() {
+    if pointer.consumed
+        || super::super::auth_ui::blocks_menu(*state.get())
+        || window.height() > window.width()
+    {
         return;
     }
     if !crate::config::bevy_ui() || super::textform::is_open(&form) {

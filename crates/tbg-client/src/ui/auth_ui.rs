@@ -18,12 +18,22 @@ enum Action {
     Login,
 }
 
+#[cfg(target_os = "android")]
+mod mobile;
 #[cfg(target_arch = "wasm32")]
 mod web;
 pub fn plugin(app: &mut App) {
     #[cfg(target_arch = "wasm32")]
     web::plugin(app);
+    #[cfg(not(target_os = "android"))]
     app.add_systems(Update, render.run_if(in_state(GameState::Menu)));
+    #[cfg(target_os = "android")]
+    app.add_systems(
+        Update,
+        (mobile::touch, render)
+            .chain()
+            .run_if(in_state(GameState::Menu)),
+    );
 }
 
 fn failure_key(error: Failure) -> &'static str {
@@ -51,42 +61,30 @@ fn render(
     mut form: NonSendMut<super::textform::ActiveForm>,
     account: Res<Account>,
     roots: Query<Entity, With<Root>>,
-    actions: Query<(&Action, &ComputedNode, &UiGlobalTransform)>,
-    mouse: Res<ButtonInput<MouseButton>>,
-    window: Single<&Window>,
+    #[cfg(not(target_os = "android"))] actions: Query<(&Action, &ComputedNode, &UiGlobalTransform)>,
+    #[cfg(not(target_os = "android"))] mouse: Res<ButtonInput<MouseButton>>,
+    #[cfg(not(target_os = "android"))] window: Single<&Window>,
     mut shown: Local<String>,
 ) {
+    #[cfg(not(target_os = "android"))]
     for (action, node, transform) in &actions {
         if mouse.just_released(MouseButton::Left)
             && window
                 .cursor_position()
                 .is_some_and(|p| node.contains_point(*transform, p * window.scale_factor()))
         {
-            match action {
-                Action::Continue => {
-                    auth::request(AuthCommand::ContinueHere);
-                }
-                Action::Guest => {
-                    auth::request(AuthCommand::Guest);
-                }
-                Action::Retry => {
-                    auth::request(if auth::snapshot().status == Status::LogoutPending {
-                        AuthCommand::Logout
-                    } else {
-                        AuthCommand::Refresh
-                    });
-                }
-                Action::Login => super::textform::open(
-                    &mut form,
-                    super::textform::TextKind::Key,
-                    lang.t(crate::i18n::Msg::AccountPromptKey),
-                ),
-            }
+            activate(*action, &mut form, *lang);
         }
     }
     let view = auth::snapshot();
     if let Some(error) = view.error {
-        if super::textform::is_open(&form) {
+        if super::textform::is_open(&form)
+            && (cfg!(not(target_os = "android"))
+                || matches!(
+                    form.kind,
+                    Some(super::textform::TextKind::Key | super::textform::TextKind::Name)
+                ))
+        {
             super::textform::set_error(&form, &lang.key(failure_key(error)));
         }
     }
@@ -126,9 +124,22 @@ fn render(
         .spawn((
             Node {
                 position_type: PositionType::Absolute,
-                right: percent(2),
-                top: px(121),
-                max_width: percent(42),
+                left: if cfg!(target_os = "android") {
+                    px(12)
+                } else {
+                    Val::Auto
+                },
+                right: if cfg!(target_os = "android") {
+                    px(12)
+                } else {
+                    percent(2)
+                },
+                top: px(if cfg!(target_os = "android") { 76 } else { 121 }),
+                max_width: if cfg!(target_os = "android") {
+                    Val::Auto
+                } else {
+                    percent(42)
+                },
                 ..default()
             },
             Root,
@@ -136,25 +147,75 @@ fn render(
             GlobalZIndex(12),
         ))
         .with_children(|root| {
-            root.spawn(kit::panel()).with_children(|panel| {
+            let mut panel = root.spawn(kit::panel());
+            #[cfg(target_os = "android")]
+            panel.insert(Node {
+                width: percent(100),
+                flex_direction: FlexDirection::Column,
+                padding: UiRect::all(px(16)),
+                row_gap: px(12),
+                ..default()
+            });
+            panel.with_children(|panel| {
                 panel.spawn(kit::muted(lang.key(key), 13.));
                 if let Some(error) = view.error {
                     panel.spawn(kit::muted(lang.key(failure_key(error)), 13.));
                 }
-                panel.spawn(kit::row()).with_children(|row| {
-                    let choices: &[(Action, &str)] = match view.status {
-                        Status::Conflict => &[(Action::Continue, "auth.continue_here")],
-                        Status::ReauthRequired => &[
-                            (Action::Login, "lobby.account.key"),
-                            (Action::Guest, "auth.guest"),
-                        ],
-                        Status::LogoutPending => &[(Action::Retry, "auth.retry")],
-                        _ => &[],
-                    };
-                    for (action, key) in choices {
-                        row.spawn((kit::control(lang.key(key), true, 190.), *action));
-                    }
-                });
+                panel
+                    .spawn(Node {
+                        flex_wrap: if cfg!(target_os = "android") {
+                            FlexWrap::Wrap
+                        } else {
+                            FlexWrap::NoWrap
+                        },
+                        ..kit::row()
+                    })
+                    .with_children(|row| {
+                        let choices: &[(Action, &str)] = match view.status {
+                            Status::Conflict => &[(Action::Continue, "auth.continue_here")],
+                            Status::ReauthRequired => &[
+                                (Action::Login, "lobby.account.key"),
+                                (Action::Guest, "auth.guest"),
+                            ],
+                            Status::LogoutPending => &[(Action::Retry, "auth.retry")],
+                            _ => &[],
+                        };
+                        for (action, key) in choices {
+                            row.spawn((kit::control(lang.key(key), true, 190.), *action));
+                        }
+                    });
             });
         });
+}
+
+fn activate(action: Action, form: &mut super::textform::ActiveForm, lang: Lang) {
+    match action {
+        Action::Continue => {
+            auth::request(AuthCommand::ContinueHere);
+        }
+        Action::Guest => {
+            auth::request(AuthCommand::Guest);
+        }
+        Action::Retry => {
+            auth::request(if auth::snapshot().status == Status::LogoutPending {
+                AuthCommand::Logout
+            } else {
+                AuthCommand::Refresh
+            });
+        }
+        Action::Login => super::textform::open(
+            form,
+            super::textform::TextKind::Key,
+            lang.t(crate::i18n::Msg::AccountPromptKey),
+        ),
+    }
+}
+
+#[cfg(target_os = "android")]
+pub(super) fn blocks_menu(state: GameState) -> bool {
+    state == GameState::Menu
+        && matches!(
+            auth::snapshot().status,
+            Status::Conflict | Status::ReauthRequired | Status::LogoutPending
+        )
 }

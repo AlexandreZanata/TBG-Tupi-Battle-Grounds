@@ -12,6 +12,7 @@ pub struct Pointer {
     pub taps: Vec<(Vec2, Vec2, bool)>,
     pub drag: Option<(Vec2, Vec2)>,
     pub touch_frame: bool,
+    pub consumed: bool,
 }
 impl Pointer {
     pub fn event(&mut self, id: u64, phase: TouchPhase, point: Vec2, now: f64) {
@@ -63,6 +64,7 @@ pub fn collect(
     pointer.taps.clear();
     pointer.drag = None;
     pointer.touch_frame = false;
+    pointer.consumed = false;
     if !window.focused {
         pointer.owner = None;
         pointer.active.clear();

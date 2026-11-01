@@ -35,6 +35,7 @@ const LONG_PRESS: f64 = 0.5;
 #[allow(clippy::too_many_arguments)] // one system reading every tap source
 pub(super) fn taps(
     form: NonSend<super::textform::ActiveForm>,
+    #[cfg(target_os = "android")] state: Res<State<crate::GameState>>,
     mouse: Res<ButtonInput<MouseButton>>,
     #[cfg(target_os = "android")] pointer: Res<super::mobile::input::Pointer>,
     touches: Res<Touches>,
@@ -47,7 +48,10 @@ pub(super) fn taps(
     (time, mut pressed_at): (Res<Time>, Local<f64>),
 ) {
     #[cfg(target_os = "android")]
-    if window.height() > window.width() {
+    if pointer.consumed
+        || super::auth_ui::blocks_menu(*state.get())
+        || window.height() > window.width()
+    {
         return;
     }
     if super::textform::is_open(&form) {
