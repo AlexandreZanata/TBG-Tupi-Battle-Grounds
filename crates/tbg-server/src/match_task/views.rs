@@ -65,6 +65,29 @@ impl Match {
         }
     }
 
+    /// P71 (BR-M03, Proposed): while a seat that has played is away with pause
+    /// budget left, both clocks stand still for both players; spending the last
+    /// of it starts the ordinary reconnect window.
+    pub(super) fn connection_pause(&mut self, tick: std::time::Duration) -> bool {
+        if self.state.outcome.is_some() {
+            return false;
+        }
+        let mut paused = false;
+        for seat in Seat::BOTH {
+            let i = seat.index();
+            if self.detached_at[i].is_none() || !self.seen[i] || self.pause_left[i].is_zero() {
+                continue;
+            }
+            self.pause_left[i] = self.pause_left[i].saturating_sub(tick);
+            if self.pause_left[i].is_zero() {
+                self.detached_at[i] = Some(std::time::Instant::now());
+            } else {
+                paused = true;
+            }
+        }
+        paused
+    }
+
     pub(super) fn detach(&mut self, seat: Seat) {
         self.players[seat.index()].conn = None;
         self.detached_at[seat.index()] = Some(std::time::Instant::now());
@@ -78,7 +101,9 @@ impl Match {
         match conn.tx.try_send(ConnEvent::Send(msg)) {
             Ok(()) => {}
             Err(mpsc::error::TrySendError::Full(_)) => {
-                let _ = conn.tx.try_send(ConnEvent::Close);
+                // The full queue cannot carry `Close`; the flag reaches the
+                // socket task, so the client reconnects into its seat (P71).
+                conn.close();
                 self.detach(seat);
             }
             Err(mpsc::error::TrySendError::Closed(_)) => self.detach(seat),

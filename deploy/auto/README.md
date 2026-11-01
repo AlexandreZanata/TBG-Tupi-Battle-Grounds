@@ -75,7 +75,8 @@ provenance. Operator status/metrics stay loopback-only; Caddy is untouched.
 
 ## Before activation
 
-**Current prerequisite:** main was `027fd61` (protocol 30) when preparation began;
+**Current prerequisite:** main was `027fd61` when preparation began and advanced
+to `e2a18af` (P71 match continuity, still protocol 30) during review;
 the deployed backend is source `8be248e` (protocol 31, ruleset 6, schema 10).
 Merge the deployed integration and this preparation into main through its required
 checks first, using a regular merge commit so the deployed SHA remains an ancestor.

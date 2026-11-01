@@ -2821,3 +2821,46 @@ incompatible match. Preserve all message tags, Arena IDs 0–7, D-97 lifetimes,
 account/seat authority, schema 10, and P71 ruleset revision 6/source identity.
 No additional gameplay number changes. See
 [the integration report](phases/BACKEND-main-integration-20261101.md).
+
+## D-100 · Match continuity under token auth — 2026-11-01 (Proposed, P71)
+
+**Decision.** A network drop, a token expiry or a lost reply must never be
+the reason a player loses a seat they can still come back to. On the
+consolidated D-99 line (protocol 30, schema 10, one auth/resume coordinator):
+
+- **Silent links.** The client treats 4 s without a server frame as a lost
+  socket and reconnects (the server pings every second). A same-session
+  resume (same token, family and account) replaces an attached controller the
+  server has not heard for 3 s; a live controller is still protected from
+  passive restores (A09). A seat whose send queue is full is detached *and*
+  its socket closed through a flag that needs no queue room.
+- **Seat lease on reconnect (BR-AS07).** An expired, unrevoked Access may take
+  back its own admitted seat for 180 s after expiry and nothing else; the
+  socket then asks for renewal. Account resume no longer applies the lobby's
+  30 s check to an in-match session (the match owns seat expiry); an idle
+  session past the window starts fresh instead of forcing a new sign-in.
+- **Refresh retries.** The rotation/registration retry cache is 300 s (was
+  30 s): a lost refresh reply is recovered by the same operation; a consumed
+  token after that is still reuse and revokes the family.
+- **Connection pause (BR-M03).** A player who has been connected and drops
+  pauses the match for both players while their 120 s per-match budget
+  lasts; then the 30 s window and the forfeit apply as before. No wire
+  change: intentions get the existing `Rejected { Paused }`, and clients
+  see the clock stand still while views keep arriving (10 Hz).
+- **Deploy safety.** `/health` answers 503 when a configured database failed
+  to open or migrate.
+
+**Why.** The P71 code map found nine paths where a drop inside the window
+still cost the seat (stale attached socket → Conflict, full queue, expired
+Access, lost refresh reply, …) and that a running match with a 30 s window
+cannot meet the owner's rule that an internet drop never decides a
+competitive match. Pausing within a bounded budget is the standard answer
+in competitive real-time games; the budget bounds abuse.
+
+**Rejected.** A presence message with a visible countdown (needs protocol
+31, against D-99; keep for an explicit owner decision). Voiding the match
+when a player never returns (indistinguishable from leaving to dodge a
+loss).
+
+**Reopen when** owner playtests show the pause budget wrong, a protocol bump
+is approved (show the remaining budget), or abuse of pauses is observed.

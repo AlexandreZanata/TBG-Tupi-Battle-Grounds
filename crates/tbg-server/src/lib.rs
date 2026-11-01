@@ -91,6 +91,9 @@ pub async fn run_with(
                     None
                 }
             });
+    // P71: a configured database that failed to open or migrate is unhealthy, so a
+    // deploy check never passes a server that runs without its records.
+    let store_failed = config.db.is_some() && store.is_none();
     let config = Arc::new(config);
     let release = shared
         .release
@@ -148,7 +151,19 @@ pub async fn run_with(
             "/api/auth/{channel}/{operation}",
             post(auth::http::handler).layer(DefaultBodyLimit::max(4096)),
         )
-        .route("/health", get(|| async { "ok" }))
+        .route(
+            "/health",
+            get(move || async move {
+                if store_failed {
+                    (
+                        axum::http::StatusCode::SERVICE_UNAVAILABLE,
+                        "store unavailable",
+                    )
+                } else {
+                    (StatusCode::OK, "ok")
+                }
+            }),
+        )
         .route("/ws", get(ws::handler))
         .route("/ws/{slot}", get(ws::slot_handler))
         .route("/ready", get(release::api::ready))

@@ -107,6 +107,11 @@ jobs:
         run: |
           cargo build --locked --release -p tbg-client
           target/release/tbg-client --version
+      # Packaging outputs never come from the dependency cache: a staging
+      # directory restored from main's entry makes the fail-closed packager
+      # refuse to reuse it.
+      - name: Start from empty packaging outputs
+        run: rm -rf target/native target/linuxdeploy.AppImage
       - name: Package Linux archive
         run: python3 scripts/package-native.py --platform linux --binary target/release/tbg-client
       # A tagged linuxdeploy release: upstream rebuilds `continuous` in place,
@@ -126,6 +131,10 @@ jobs:
             target/native/*.sha256
           if-no-files-found: error
           retention-days: 14
+      # ...and never go into it: rust-cache saves target/ after the last step.
+      - name: Keep packaging outputs out of the dependency cache
+        if: always()
+        run: rm -rf target/native target/linuxdeploy.AppImage
 
   publish:
     needs: [validate, linux]

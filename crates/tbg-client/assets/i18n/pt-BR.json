@@ -599,6 +599,7 @@
   "net.error.server_full": "O servidor está cheio - tente de novo em breve",
   "net.error.too_many_connections": "Conexões demais desta rede",
   "net.reconnecting": "Reconectando... {secs} s",
+  "net.match_paused": "Partida pausada: aguardando a reconexão de um jogador",
   "net.version": "Há uma nova versão disponível - recarregue a página",
   "profile.back": "Voltar ao ranking",
   "profile.date": "Data",

@@ -47,6 +47,11 @@ impl MatchLink {
         }
     }
 
+    /// P71 (BR-M03): the server paused the match for a player's reconnect.
+    pub fn match_paused(&self, now: f64) -> bool {
+        matches!(self, MatchLink::Net(n) if n.match_paused(now))
+    }
+
     pub fn is_quiet_probe(&self) -> bool {
         matches!(self, MatchLink::Net(n) if n.is_quiet_probe())
     }

@@ -137,6 +137,124 @@ async fn a09_same_family_passive_resume_never_displaces_an_attached_controller()
     })
     .await;
 }
+/// P71 (BR-M03, BR-AS06): a network drop TCP never reports leaves the controller
+/// attached; the same session's own resume replaces the silent socket and keeps
+/// the seat instead of opening a Conflict whose new session would forfeit it.
+#[tokio::test]
+async fn p71_a_silent_controller_is_replaced_by_its_own_resume() {
+    let (url, _) = server().await;
+    let (mut player, token) = connect(&url, None, None).await;
+    let grant = auth::register(&player, "SilentSeat").await.unwrap();
+    auth::attach(&mut player, &grant, false).await;
+    until(&mut player, |m| {
+        matches!(
+            m,
+            ServerMsg::AuthState {
+                status: AuthStatus::Active,
+                ..
+            }
+        )
+    })
+    .await;
+    let (mut rival, _) = connect(&url, None, None).await;
+    auth::send(&mut player, ClientMsg::QuickMatch).await;
+    auth::send(&mut rival, ClientMsg::QuickMatch).await;
+    let ServerMsg::MatchStart { you, .. } =
+        until(&mut player, |m| matches!(m, ServerMsg::MatchStart { .. })).await
+    else {
+        unreachable!()
+    };
+    // The link dies silently: nothing is read or sent past the 3 s limit.
+    tokio::time::sleep(Duration::from_millis(3500)).await;
+    let (mut back, resumed) = connect(&url, Some(token), Some(grant.access)).await;
+    assert_eq!(resumed, token, "the same session resumes, no new one");
+    let ServerMsg::MatchStart { you: again, .. } =
+        until(&mut back, |m| matches!(m, ServerMsg::MatchStart { .. })).await
+    else {
+        unreachable!()
+    };
+    assert_eq!(again, you, "the same seat");
+    until(&mut back, |m| matches!(m, ServerMsg::View(_))).await;
+    // The replaced socket is closed by the server, not left half-attached.
+    loop {
+        match tokio::time::timeout(Duration::from_secs(5), player.next()).await {
+            Ok(Some(Ok(tokio_tungstenite::tungstenite::Message::Close(_))))
+            | Ok(Some(Err(_)))
+            | Ok(None) => break,
+            Ok(Some(Ok(_))) => continue,
+            Err(_) => panic!("the silent socket stayed open"),
+        }
+    }
+    drop(rival);
+}
+/// P71 (BR-AS07): a drop that outlasts the Access token still takes the admitted
+/// seat back with that expired token (the seat lease), then renews on the socket;
+/// the same expired token cannot open anything else.
+#[tokio::test]
+async fn p71_br_as07_an_expired_access_takes_back_its_own_seat_only() {
+    let (url, clock) = server().await;
+    let (mut player, token) = connect(&url, None, None).await;
+    let grant = auth::register(&player, "LeaseBack").await.unwrap();
+    auth::attach(&mut player, &grant, false).await;
+    until(&mut player, |m| {
+        matches!(
+            m,
+            ServerMsg::AuthState {
+                status: AuthStatus::Active,
+                ..
+            }
+        )
+    })
+    .await;
+    let (mut rival, _) = connect(&url, None, None).await;
+    auth::send(&mut player, ClientMsg::QuickMatch).await;
+    auth::send(&mut rival, ClientMsg::QuickMatch).await;
+    let ServerMsg::MatchStart { you, .. } =
+        until(&mut player, |m| matches!(m, ServerMsg::MatchStart { .. })).await
+    else {
+        unreachable!()
+    };
+    drop(player);
+    clock.set(1000 + 901);
+    let (mut back, resumed) = connect(&url, Some(token), Some(grant.access)).await;
+    assert_eq!(resumed, token);
+    // The renewal prompt may come before or after the seat's MatchStart.
+    let (mut seat, mut renew) = (None, false);
+    for _ in 0..200 {
+        match recv(&mut back).await {
+            ServerMsg::MatchStart { you: again, .. } => seat = Some(again),
+            ServerMsg::AuthRequired {
+                reason: AuthRefusal::Expired,
+            } => renew = true,
+            _ => {}
+        }
+        if seat.is_some() && renew {
+            break;
+        }
+    }
+    assert_eq!(seat, Some(you), "the same seat");
+    assert!(renew, "the resumed socket asks for renewal");
+    let mut stranger = tokio_tungstenite::connect_async(&url).await.unwrap().0;
+    auth::send(
+        &mut stranger,
+        ClientMsg::AuthenticatedHello {
+            version: PROTOCOL_VERSION,
+            resume: None,
+            access: grant.access,
+        },
+    )
+    .await;
+    until(&mut stranger, |m| {
+        matches!(
+            m,
+            ServerMsg::AuthRequired {
+                reason: AuthRefusal::Invalid
+            }
+        )
+    })
+    .await;
+    drop(rival);
+}
 #[tokio::test]
 async fn a09_expiry_keeps_the_admitted_match_and_same_socket_renewal_works() {
     let (url, clock) = server().await;

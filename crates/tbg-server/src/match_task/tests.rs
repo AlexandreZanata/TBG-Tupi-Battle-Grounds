@@ -28,6 +28,9 @@ fn online_sequence_zero_cannot_reset_duplicate_protection() {
         state,
         players,
         detached_at: [None; 2],
+        pause_left: [std::time::Duration::ZERO; 2],
+        seen: [true; 2],
+        paused: false,
         stats: Default::default(),
         pending: Default::default(),
         applied: [false; 2],
@@ -106,6 +109,9 @@ fn a_view_drains_events_and_keeps_the_buffer() {
         state: MatchState::new(1),
         players,
         detached_at: [None; 2],
+        pause_left: [std::time::Duration::ZERO; 2],
+        seen: [true; 2],
+        paused: false,
         stats: Default::default(),
         pending: Default::default(),
         applied: [false; 2],
@@ -156,6 +162,9 @@ fn a_retransmitted_evolution_never_reuses_the_ruins_discount() {
         state,
         players,
         detached_at: [None; 2],
+        pause_left: [std::time::Duration::ZERO; 2],
+        seen: [true; 2],
+        paused: false,
         stats: Default::default(),
         pending: Default::default(),
         applied: [false; 2],
@@ -191,6 +200,58 @@ fn a_retransmitted_evolution_never_reuses_the_ruins_discount() {
     assert!(
         game.state == after_first,
         "a repeated sequence changed the match"
+    );
+}
+
+/// P71: a seat whose socket queue is full is detached *and* its socket is
+/// closed (the full queue cannot carry `Close`), so the client reconnects into
+/// the seat instead of watching a frozen match until the window forfeits it.
+#[test]
+fn p71_a_full_seat_queue_closes_the_socket_so_the_client_reconnects() {
+    let (stalled, _unread) = mpsc::channel(1);
+    let (open, _other) = mpsc::channel(256);
+    let handle = ConnHandle::new(1, stalled);
+    let players = Seat::BOTH.map(|seat| Player {
+        token: [seat.index() as u8; 16],
+        name: format!("Player {seat:?}"),
+        conn: Some(if seat == Seat::A {
+            handle.clone()
+        } else {
+            ConnHandle::new(2, open.clone())
+        }),
+        account: None,
+        arcanas: ArcanaPreset::NEUTRAL,
+        stronghold: tbg_core::StrongholdKind::Classic,
+    });
+    let mut game = Match {
+        result_id: [71; 16],
+        state: MatchState::new(1),
+        players,
+        detached_at: [None; 2],
+        pause_left: [std::time::Duration::ZERO; 2],
+        seen: [true; 2],
+        paused: false,
+        stats: Default::default(),
+        pending: Default::default(),
+        applied: [false; 2],
+        mode: MatchMode::Casual,
+        metrics: Arc::new(Metrics::default()),
+        replay: None,
+        live: None,
+        spectators: Vec::new(),
+        pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
+    };
+    game.send(Seat::A, ServerMsg::Ping { id: 1 });
+    assert!(!handle.link.close_requested(), "room left: nothing closes");
+    game.send(Seat::A, ServerMsg::Ping { id: 2 });
+    assert!(handle.link.close_requested(), "the socket is told to close");
+    assert!(game.players[0].conn.is_none() && game.detached_at[0].is_some());
+    assert!(
+        game.players[1].conn.is_some(),
+        "the other seat is untouched"
     );
 }
 

@@ -31,7 +31,10 @@ pub(crate) fn valid_origin(value: &str) -> bool {
 }
 
 const ACCESS_SECONDS: i64 = 900;
-const RETRY_SECONDS: i64 = 30;
+/// P71: a lost refresh reply is recovered by retrying the same operation; the
+/// window outlasts any outage a seat survives, so the retry never reads as reuse.
+/// Reuse after it still revokes the family.
+const RETRY_SECONDS: i64 = 300;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Error {
@@ -94,7 +97,19 @@ impl Binding {
     pub fn valid(&self, now: i64) -> bool {
         !self.revoked() && now < self.expires_at && Instant::now() < self.deadline
     }
+    /// P71 (BR-AS07): unrevoked and expired at most `LEASE_GRACE_SECS` ago. Such a
+    /// binding may take back its own admitted seat on reconnect, nothing else.
+    pub fn resumable(&self, now: i64) -> bool {
+        let grace = Duration::from_secs(LEASE_GRACE_SECS as u64);
+        !self.revoked()
+            && now < self.expires_at.saturating_add(LEASE_GRACE_SECS)
+            && Instant::now() < self.deadline + grace
+    }
 }
+
+/// A drop that outlasts the Access token must not need a refresh to come back:
+/// longer than any seat hold (reconnect window plus the P71 pause budget).
+pub(crate) const LEASE_GRACE_SECS: i64 = 180;
 
 struct NewFamily {
     name: String,
@@ -164,6 +179,8 @@ struct State {
     login_limits: Limits,
     renewal_limits: Limits,
     last_cleanup: i64,
+    /// P71 (W3): newest revocation time already read from the database.
+    revocations_seen: i64,
     ip_slots: HashMap<IpAddr, Instant>,
 }
 
@@ -222,7 +239,7 @@ impl Service {
 
     fn prune(&self, state: &mut State, now: i64) {
         if let Ok(mut access) = self.access.write() {
-            access.retain(|_, b| b.valid(now));
+            access.retain(|_, b| b.resumable(now));
         }
         state
             .rotations
@@ -308,6 +325,40 @@ impl Service {
             if let Some(store) = &self.store {
                 let _ = store.auth(db::Request::Cleanup { now }).await;
             }
+        }
+        self.follow_revocations(state, now).await;
+    }
+
+    /// P71 (W3): another release slot shares the database and may revoke a family
+    /// this process still honors (Access index, live flags); apply it here within
+    /// about a second instead of after the Access expires.
+    async fn follow_revocations(&self, state: &mut State, now: i64) {
+        let Some(store) = &self.store else {
+            return;
+        };
+        if state.revocations_seen == 0 {
+            state.revocations_seen = now;
+            return;
+        }
+        let since = state.revocations_seen;
+        let Ok(db::Reply::Revoked(rows)) = store.auth(db::Request::RevokedSince { since }).await
+        else {
+            return;
+        };
+        state.revocations_seen = rows.iter().map(|(_, at)| *at).fold(since, i64::max);
+        let honored: Vec<FamilyId> = {
+            let Ok(access) = self.access.read() else {
+                return;
+            };
+            rows.iter()
+                .map(|(id, _)| *id)
+                .filter(|id| {
+                    state.flags.contains_key(id) || access.values().any(|b| b.family == *id)
+                })
+                .collect()
+        };
+        if !honored.is_empty() {
+            let _ = self.forget(state, RevocationScope::Families(honored)).await;
         }
     }
 

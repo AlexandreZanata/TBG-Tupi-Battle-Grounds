@@ -51,6 +51,7 @@ async fn live_server_ttl(name: &str, reconnect_secs: u64) -> (String, TempDb) {
     let config = Config {
         tick_ms: 5,
         reconnect_secs,
+        pause_secs: 0,
         max_per_ip: 1_000,
         db: Some(t.db.clone()),
         ..Config::default()

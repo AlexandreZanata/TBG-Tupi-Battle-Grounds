@@ -599,6 +599,7 @@
   "net.error.server_full": "The server is full - try again soon",
   "net.error.too_many_connections": "Too many connections from this network",
   "net.reconnecting": "Reconnecting... {secs} s",
+  "net.match_paused": "Match paused: waiting for a player to reconnect",
   "net.version": "A new version is available - reload the page",
   "profile.back": "Back to ranking",
   "profile.date": "Date",

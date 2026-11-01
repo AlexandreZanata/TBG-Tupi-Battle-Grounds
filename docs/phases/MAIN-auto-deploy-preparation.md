@@ -48,3 +48,18 @@ Unit tests mock signature-command execution and service actions; they do not pro
 an actual Sigstore verification, power-loss event, production drain or rollback.
 Two-slot migration/canary, native TUF O02/public bootstrap, Windows and capacity
 acceptance remain deferred. Existing P71 look/balance reservations remain intact.
+
+## Main refresh during preparation
+
+Main advanced to `e2a18af` (PR #36: D-100 match continuity) during this task.
+Merged it normally into this preparation; the only conflict was the appended
+DECISIONS text, resolved by preserving both the deployed P71 visual/arena notes
+and the incoming D-100 decision. Kept the integration's protocol 31, eight Arenas,
+source registry 6 and new API domains. Incoming native packaging cache fixes are
+also retained. No production/native installation was changed by this merge.
+
+The first five Rust checks above passed before this refresh. A scoped merged-tree
+batch is queued under the shared lock: `cargo test --offline --locked -p tbg-server
+--test build_info --test schema_upgrade --test health --test match_continuity
+--test revocation_feed --test auth_websocket -- --test-threads=1`. Another front's
+Android release owns the slot; it was preserved. No full local suite is implied.

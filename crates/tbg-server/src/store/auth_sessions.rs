@@ -36,6 +36,7 @@ CREATE INDEX IF NOT EXISTS auth_sessions_account ON auth_sessions(account_id,exp
 CREATE INDEX IF NOT EXISTS auth_sessions_expiry ON auth_sessions(expires_at);
 CREATE UNIQUE INDEX IF NOT EXISTS auth_refresh_current ON auth_refresh_tokens(session_id) WHERE consumed_at IS NULL;
 CREATE INDEX IF NOT EXISTS auth_refresh_history ON auth_refresh_tokens(session_id,consumed_at);
+CREATE INDEX IF NOT EXISTS auth_sessions_revoked ON auth_sessions(revoked_at) WHERE revoked_at IS NOT NULL;
 ";
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -116,6 +117,10 @@ pub enum Request {
     Cleanup {
         now: i64,
     },
+    /// P71 (W3): families revoked at or after `since`, oldest first.
+    RevokedSince {
+        since: i64,
+    },
 }
 
 pub enum Reply {
@@ -132,6 +137,7 @@ pub enum Reply {
         successor: CredentialHash,
     },
     Families(Vec<FamilyId>),
+    Revoked(Vec<(FamilyId, i64)>),
     Done,
 }
 
@@ -229,6 +235,20 @@ pub(super) fn apply(conn: &mut Connection, request: Request) -> Result<Reply, Er
             Ok(Reply::Done)
         }
         Request::Cleanup { now } => cleanup(conn, now),
+        Request::RevokedSince { since } => {
+            let mut statement = conn.prepare(
+                "SELECT id,revoked_at FROM auth_sessions WHERE revoked_at>=?1 ORDER BY revoked_at LIMIT 256",
+            )?;
+            let rows = statement.query_map(params![since], |r| {
+                Ok((r.get::<_, Vec<u8>>(0)?, r.get::<_, i64>(1)?))
+            })?;
+            let mut revoked = Vec::new();
+            for row in rows {
+                let (id, at) = row?;
+                revoked.push((id.try_into().map_err(|_| Error::Unavailable)?, at));
+            }
+            Ok(Reply::Revoked(revoked))
+        }
         Request::RevokeAccount { account, now } => {
             conn.execute("UPDATE auth_sessions SET revoked_at=?1,revoke_reason='logout_all' WHERE account_id=?2 AND revoked_at IS NULL",params![now,account])?;
             Ok(Reply::Done)

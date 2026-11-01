@@ -47,6 +47,12 @@ pub(super) struct Match {
     pub(super) state: MatchState,
     pub(super) players: [Player; 2],
     pub(super) detached_at: [Option<Instant>; 2],
+    /// P71 (BR-M03, Proposed): connection-pause budget left per seat.
+    pub(super) pause_left: [Duration; 2],
+    /// P71: only a seat that has been connected can pause the match.
+    pub(super) seen: [bool; 2],
+    /// P71: this tick is a connection pause (both clocks stand still).
+    pub(super) paused: bool,
     pub(super) stats: [SeatStats; 2],
     /// P9: per-seat buffered events; cleared on every view to that seat.
     pub(super) pending: [Vec<Event>; 2],
@@ -98,6 +104,7 @@ pub(crate) fn spawn(
     let detached_at = players
         .each_ref()
         .map(|p| p.conn.is_none().then(Instant::now));
+    let seen = players.each_ref().map(|p| p.conn.is_some());
     let arcanas = players.each_ref().map(|p| p.arcanas);
     let strongholds = players.each_ref().map(|p| p.stronghold);
     let m = Match {
@@ -107,6 +114,9 @@ pub(crate) fn spawn(
             .with_arena(arena),
         players,
         detached_at,
+        pause_left: [Duration::from_secs(config.pause_secs); 2],
+        seen,
+        paused: false,
         stats: Default::default(),
         pending: [Vec::new(), Vec::new()],
         applied: [false; 2],
@@ -150,6 +160,7 @@ async fn run(
     interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
     let (mut last, mut step_ns, mut step_max, mut late, mut max_late) =
         (Instant::now(), 0u128, 0u128, 0u32, 0u128);
+    let mut held = 0u64;
     let finished = loop {
         interval.tick().await;
         let now = Instant::now();
@@ -164,11 +175,18 @@ async fn run(
         while let Ok(cmd) = rx.try_recv() {
             m.command(cmd);
         }
-        let t0 = Instant::now();
-        let ev = m.state.step();
-        let ns = t0.elapsed().as_nanos();
-        m.metrics.record_step((ns / 1_000) as u64);
-        (step_ns, step_max) = (step_ns + ns, step_max.max(ns));
+        m.paused = m.connection_pause(tick);
+        let ev = if m.paused {
+            held += 1;
+            Vec::new()
+        } else {
+            let t0 = Instant::now();
+            let ev = m.state.step();
+            let ns = t0.elapsed().as_nanos();
+            m.metrics.record_step((ns / 1_000) as u64);
+            (step_ns, step_max) = (step_ns + ns, step_max.max(ns));
+            ev
+        };
         if ev.iter().any(|e| {
             matches!(
                 e,
@@ -190,7 +208,8 @@ async fn run(
         }
         // Forfeits first, so a forfeit's final view still goes out below.
         for seat in Seat::BOTH {
-            if m.detached_at[seat.index()].is_some_and(|t| t.elapsed() > window) {
+            let pausing = m.seen[seat.index()] && !m.pause_left[seat.index()].is_zero();
+            if !pausing && m.detached_at[seat.index()].is_some_and(|t| t.elapsed() > window) {
                 m.record(seat, None);
                 let unfinished = m.state.outcome.is_none();
                 m.state.forfeit(seat);
@@ -203,7 +222,13 @@ async fn run(
         let ended = m.state.outcome.is_some();
         // The selection clock keeps 10 Hz views flowing during an Augment
         // pause, when the combat tick is frozen (BR-AG13).
-        let regular = m.state.clock.is_multiple_of(2) || ended;
+        // P71: a connection pause freezes the clock; views keep their 10 Hz.
+        let beat = if m.paused {
+            held
+        } else {
+            u64::from(m.state.clock)
+        };
+        let regular = beat.is_multiple_of(2) || ended;
         for seat in Seat::BOTH {
             let ack = m.applied[seat.index()] && !regular;
             if regular || m.applied[seat.index()] {

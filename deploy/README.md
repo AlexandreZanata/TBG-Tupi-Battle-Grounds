@@ -82,6 +82,47 @@ slot. During an overlap their reconnect may land on the other slot and
 lose its match; P66 clients pin the slot that admitted them. Browser tabs
 pick up the P66 client on their next load.
 
+## Switching production from protocol 29 to 30 (P71)
+
+The consolidated line (protocol 30, schema 10, D-99/D-100) cannot talk to a
+protocol-29 server, and a w29 → w30 contract change cannot be canaried
+(`tbg-release-admin` refuses it with `ContractChange`). Production therefore
+moves in one scheduled switch, with server, web bundle and native clients
+released together. The owner has declared the current data disposable at
+this stage, so the rollback below restores a backup instead of preserving
+newer results.
+
+1. **Backup.** On the host, with the server still running:
+   `sqlite3 /var/lib/tbg/tbg.sqlite3 ".backup /var/backups/tbg/pre-p71-$(date +%F-%H%M).sqlite3"`,
+   then `PRAGMA integrity_check;` on the copy must print `ok`. Copy the
+   `ranked-pending*` journals next to it.
+2. **Rehearse on the copy** (spare loopback port, never the live file):
+   `TBG_ADDR=127.0.0.1:18081 TBG_DB=/tmp/rehearsal.sqlite3 <new tbg-server>`.
+   `curl -s -o /dev/null -w '%{http_code}' localhost:18081/health` must be
+   `200`: since P71 a database that fails to open or migrate answers `503`.
+   `SELECT max(version) FROM schema_version;` must be `10`;
+   `PRAGMA integrity_check;` `ok`; the account and match counts unchanged.
+   A schema 9 database of either line (P66 or P68) and schema 8 take the
+   shape-verified path of D-99; a partial or foreign shape refuses to open.
+3. **Switch.** Stop the protocol-29 generation and start the new one with
+   the same `TBG_DB`. In slot mode the new generation registers warming and
+   admits nothing until `admin promote <slot>` and `admin ranked <slot>`.
+   Publish the web bundle in the same step; native players need the
+   matching client release (`0.1.1-rc.2` or later).
+4. **Verify.** `/health` 200; `/api/version` reports protocol 30 and the
+   new contract; a browser sign-in round trip over HTTPS (protected cookie,
+   restore, logout); one ranked bot match
+   (`tbg-bots --url wss://<domain>/ws --ranked --matches 1`).
+5. **Rollback.** Stop the new generation, restore the backup file over
+   `/var/lib/tbg/tbg.sqlite3` (anything written after the switch is lost),
+   and start the previous image. Old binaries cannot be pointed at a schema
+   10 file and expected to keep its auth data.
+
+New knobs: `TBG_PAUSE_SECS` (connection-pause budget per player per match,
+default 120, BR-M03 Proposed). Keep two-slot mode off in production until
+the P71 chaos and continuity checks pass (cross-slot revocation is in place
+since P71 W3).
+
 ## Update repository (P66)
 
 `/updates/` serves the signed TUF repository from `/srv/tbg/updates`

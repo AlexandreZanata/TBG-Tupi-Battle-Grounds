@@ -28,6 +28,9 @@ pub struct BotOpts {
     pub drop_after: Option<Duration>,
     /// ...and come back with the session token after this long (`None`: never).
     pub rejoin_after: Option<Duration>,
+    /// P71: drop silently — the socket stays open but quiet, like a lost network
+    /// TCP has not reported — instead of closing it.
+    pub silent_drop: bool,
     /// Surrender (BR-M06) this long after `MatchStart`: a bounded end for tests
     /// that need one but no particular winner (BR-M07 has no match length).
     pub surrender_after: Option<Duration>,
@@ -46,6 +49,7 @@ impl BotOpts {
             jitter_ms: 0,
             drop_after: None,
             rejoin_after: None,
+            silent_drop: false,
             surrender_after: None,
             timeout: Duration::from_secs(360),
             accounts: false,
@@ -79,6 +83,8 @@ pub(super) struct Session {
     pub(super) last_view: Option<Instant>,
     pub(super) drop_at: Option<Instant>,
     pub(super) surrender_at: Option<Instant>,
+    /// P71: writers of silently dropped sockets, kept open until the run ends.
+    pub(super) held: Vec<mpsc::UnboundedSender<(Instant, Vec<u8>)>>,
     /// P9: send time per unacknowledged intention seq.
     pub(super) pending: Vec<(u32, Instant)>,
     /// P9: when `QuickMatch` was sent for the current match.
@@ -104,6 +110,7 @@ pub async fn play_one(opts: BotOpts, seed: u64) -> BotResult {
         last_view: None,
         drop_at: None,
         surrender_at: None,
+        held: Vec::new(),
         pending: Vec::new(),
         queue_start: None,
         auth: None,
@@ -248,8 +255,12 @@ async fn connect_and_play(
         }
     };
     reader.abort();
-    drop(out_tx);
-    let _ = timeout(Duration::from_secs(2), writer).await;
+    if opts.silent_drop && matches!(result, Ok(Step::Dropped)) {
+        s.held.push(out_tx);
+    } else {
+        drop(out_tx);
+        let _ = timeout(Duration::from_secs(2), writer).await;
+    }
     result
 }
 

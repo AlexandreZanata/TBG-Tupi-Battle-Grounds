@@ -219,7 +219,8 @@ async fn a01_a02_rotation_is_absolute_idempotent_bounded_and_hash_only() {
             .windows(raw.len())
             .any(|window| window == raw.as_bytes()));
     }
-    server.clock.set(1031);
+    // Past the P71 retry window (300 s): a consumed token is reuse.
+    server.clock.set(1301);
     assert_eq!(
         post(
             &server,
@@ -455,6 +456,42 @@ async fn a11_family_cap_and_absolute_expiry_preserve_manual_recovery() {
         200,
         "manual AccountKey remains valid after family expiry"
     );
+}
+
+/// P71: a refresh whose reply was lost (the network dropped mid-match) is retried
+/// minutes later with the same operation and gets the same grant; the family
+/// survives, so the seat is never lost to a false reuse revocation.
+#[tokio::test]
+async fn p71_a_lost_refresh_reply_is_recovered_minutes_later_without_revocation() {
+    let server = server(None, None).await;
+    let initial = post(
+        &server,
+        "native",
+        "register",
+        registration("LostReply"),
+        vec![],
+    )
+    .await;
+    assert_eq!(initial.status, 200);
+    let body = refresh(&initial.value["refresh_token"], 7);
+    let lost = post(&server, "native", "refresh", body.clone(), vec![]).await;
+    assert_eq!(lost.status, 200);
+    server.clock.set(1000 + 240);
+    let again = post(&server, "native", "refresh", body, vec![]).await;
+    assert_eq!(again.status, 200, "the same operation is idempotent");
+    assert_eq!(
+        again.value["refresh_token"], lost.value["refresh_token"],
+        "never another successor"
+    );
+    let next = post(
+        &server,
+        "native",
+        "refresh",
+        refresh(&again.value["refresh_token"], 8),
+        vec![],
+    )
+    .await;
+    assert_eq!(next.status, 200, "the family was not revoked");
 }
 
 #[tokio::test]

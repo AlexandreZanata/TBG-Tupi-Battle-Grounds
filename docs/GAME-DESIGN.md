@@ -86,7 +86,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 |----|------|--------|-----|
 | BR-M01 | A match is a live session between exactly two players | Confirmed | S1 |
 | BR-M02 | No sub-rounds or preparation phases; shopping and combat overlap. The only exception is the Augment selection pause (BR-AG12, owner revision 2026-10-29) | Confirmed | S1 |
-| BR-M03 | A disconnected player gets a reconnect window, then forfeits; the match keeps running meanwhile | Adapted | S1, S3 |
+| BR-M03 | A disconnected player who has been connected first pauses the match for both players: combat tick, countdown and Augment selection clock stand still and intentions are refused (`Paused`) while that player's connection-pause budget lasts (**Proposed, P71**; 120 s per player per match). Then the reconnect window runs with the match running, then the player forfeits. A seat that never connected gets only the window | Adapted; pause Proposed (P71) | S1, S3 |
 | BR-M04 | Each player has a `Stronghold`; destroying the enemy `Stronghold` wins | Proposed | — |
 | BR-M05 | ~~Fixed match clock: regulation, then overtime with faster `Energy`; tie after overtime is a draw~~ | **Removed — owner revision 2026-10-29 (D-41)**: matches are open-ended, BR-M07 | — |
 | BR-M06 | A player may surrender while the match is in countdown or running (an Augment pause included); it is a forfeit (BR-M03): the opponent wins and, in ranked, it is a loss (BR-R04) | Proposed | — |
@@ -206,6 +206,7 @@ integers (see ARCHITECTURE.md §4).
 | Shop offers / rotation | 5 distinct / none: a purchase redraws all five (BR-S04) | | Army cap | none (BR-U07) |
 | Stronghold HP | 4500 | | Stronghold attack | 53 dmg / 1.0 s, range 6 |
 | Evolution cost tier 1 / tier 2 | 2 / 4 | | Reconnect window | 30 |
+| | | | Connection-pause budget (BR-M03) | 120 s per player per match (**Proposed**, P71) |
 
 **Roster (10 units + 1 summon, working names).** Every archetype appears.
 Bone Brute, Siege Walker, and Rampart are drawn with the large body plan
@@ -584,7 +585,7 @@ the product spec asks for none unless evidence needs it.
 | BR-AG10 | An Augment applies to summons only if its text names Beetlings; it never makes a summon count for Synergy or Bounty |
 | BR-AG11 | Augment effects are computed only by the simulation; clients send a round and an option index, never an effect |
 | BR-AG12 | **Pause.** While a round is open the whole battle is frozen for both players: no movement, attack, damage, healing, cooldown, status, summon, Synergy, `Energy` regen, Interest, purchase or Evolution. `Purchase` and `Evolve` are rejected (`Paused`); only `ChooseAugment` and `Forgo` are accepted. The field stays visible |
-| BR-AG13 | **Two clocks.** The combat tick is frozen during a pause; a separate selection clock (one per server step, 20 per second) keeps running and closes the window after **20 s** (400 steps, `AUGMENT_WINDOW_TICKS`; owner revision 2026-10-29, was 60 s). The round resolves on the first step after both players confirmed, or at the deadline, whichever is first; one confirmation never resumes the battle. A disconnected player does not extend the window; a reconnecting player gets the round, the time left and their confirmation back. Replays record intentions by selection clock |
+| BR-AG13 | **Two clocks.** The combat tick is frozen during a pause; a separate selection clock (one per server step, 20 per second) keeps running and closes the window after **20 s** (400 steps, `AUGMENT_WINDOW_TICKS`; owner revision 2026-10-29, was 60 s). The round resolves on the first step after both players confirmed, or at the deadline, whichever is first; one confirmation never resumes the battle. A disconnected player does not extend the window once their connection-pause budget is spent (BR-M03; while it lasts the selection clock stands still too, **Proposed** P71); a reconnecting player gets the round, the time left and their confirmation back. Replays record intentions by selection clock |
 | BR-AG14 | **Hidden choices.** A purchase is validated and paid when confirmed, but the opponent sees neither it nor a Forgo until the round resolves. At resolution both outcomes apply in seat order on the same step and become public; combat resumes on the next step for both |
 
 | Rarity | Cost | Forgo |
@@ -1594,7 +1595,7 @@ no runtime feature is enabled by this documentation. D-97 and
 | BR-AS04 | Access exists only in client/server memory; persist native refresh only in Linux Secret Service or current-user Windows Credential Manager with Local persistence; web uses an HttpOnly/Secure/SameSite=Strict host cookie, Path=/ and no Domain |
 | BR-AS05 | No new automatic AccountKey/token persistence in ordinary preferences, localStorage/sessionStorage, URLs, logs or caches. Explicit manual key backup remains possible; incomplete legacy conversion preserves the pre-existing recovery key until safe migration completes |
 | BR-AS06 | A match reconnect handle is separate from account authentication. Account resume requires matching valid Access and family/account binding; guest handles never grant an account or seat |
-| BR-AS07 | Natural Access expiry requires renewal for new account operations/matches but does not forfeit an already admitted match: its existing seat-scoped lease may finish that match. Revocation/logout invalidates that lease; reconnect uses the unchanged 30-second window with valid auth |
+| BR-AS07 | Natural Access expiry requires renewal for new account operations/matches but does not forfeit an already admitted match: its existing seat-scoped lease may finish that match. Logout-all and security revocation invalidate that lease; an ordinary logout is refused while the family holds a seat (`in_match`). Reconnect inside the seat's hold (BR-M03) may present the expired Access of that binding for up to 180 s after expiry to take back only that seat, then renews on the socket (**Proposed**, P71) |
 | BR-AS08 | Persistent families may exist on several devices, but only one account controller is active. Explicit login/Continue here performs takeover; background refresh, passive restoration and extra tabs cannot steal the controller |
 | BR-AS09 | Revocation invalidates all Access/connection bindings of its scope before a successful acknowledgment; logout-all requires manual AccountKey verification. Security revocation is not delayed by an active match |
 | BR-AS10 | Legacy key removal requires successful refresh persistence and confirmation plus manual-backup acknowledgment. Failures never silently create a new account, erase history or fall back to new plaintext secret storage |
@@ -1606,7 +1607,7 @@ Proposed auth operational defaults, not balance values or capacity evidence:
 | Setting | Value / meaning |
 |---|---|
 | Access renewal lead | 60 seconds before server-advertised expiry; suspension/offline recovery does not extend validity |
-| Rotation/registration retry cache | 30 seconds; same-grant idempotency only, never another successor; rotation conflicts disclose no tokens |
+| Rotation/registration retry cache | 300 seconds (P71, Proposed; was 30): a lost reply mid-match is recovered by the same operation, never read as reuse; same-grant idempotency only, never another successor; rotation conflicts disclose no tokens |
 | Token width | Access, Refresh and registration retry proof: 32 random bytes, 64 hex characters over HTTP |
 | Nonsecret ID width | Family, device and operation IDs: 16 random bytes; no authentication power |
 | Auth JSON request limit | 4 KiB, additionally strict field/shape validation |
