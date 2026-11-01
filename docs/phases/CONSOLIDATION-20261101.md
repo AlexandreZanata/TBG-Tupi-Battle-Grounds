@@ -207,6 +207,21 @@ server embedded), packaged from a clean worktree at the frozen commit with
 `scripts/package-native.py` and `scripts/package-appimage.sh` (cached official
 linuxdeploy, SHA-256 `8aea8da0…cdd1` checked).
 
+CI packaging tool (fixed after publication): the release workflow checked a
+pinned digest against linuxdeploy's `continuous` URL, which upstream rebuilds
+in place. Its rebuild of 2026-11-01 04:45 UTC failed `Package AppImage` on both
+PR heads after the native tests, release build and archive had passed. The
+workflow now downloads the tagged release `1-alpha-20251107-1` (SHA-256
+`c20cd71e…0b4d`, linuxdeploy `cc7b864`, patchelf 0.15.0); the published
+candidate keeps the tool above (`07333c6`, patchelf 0.19.1). Repackaging the
+published tarball with the tagged tool gave the same file set, AppImage
+runtime, `$ORIGIN/../lib` runpath and bundled library list; only the patched
+executable and `libffi.so.8` bytes, and the digests recording them, differ.
+That AppImage passed `--version` and `--contract` through its runtime and three
+GUI runs (lobby pt-BR, Forest training, offline Practice: exit 0,
+`boot_ready=true`, no failed images, no panic). CI AppImages are therefore not
+byte-identical to the published one.
+
 | Artifact | SHA-256 |
 |---|---|
 | `tupi-battle-grounds-0.1.1-rc.1-linux-x86_64.tar.gz` (37,659,996 B) | `1e558556f2c8bb2b33de896ed5c66bceb816fd90a48ae27214c37355e8c0e546` |
@@ -279,7 +294,8 @@ lavapipe), packaged by `package-native.py --runner` with Wine identity checks.
 
 Deferred (not run): full workspace suite and workspace Clippy over
 `tbg-balance` (not requested; covered by CI), D-33 balance gate and benchmarks,
-the GitHub run of the new CI (owner watches), public HTTPS cookie acceptance,
+a green GitHub release `linux` run with the tagged linuxdeploy (§7; `ci`
+passed on both PR heads), public HTTPS cookie acceptance,
 two-generation continuity (P66 public probe failure unexplained; not repeated),
 Caddy template validation (no Caddy binary locally), browser/HTML Settings
 gallery, Windows on real hardware, account-level native resume across a

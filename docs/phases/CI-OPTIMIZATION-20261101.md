@@ -140,6 +140,11 @@ name-sharding (risk of silently matching zero tests), cross-run artifact reuse.
 | Release tag | `ci` and release independent; publish ungated | max(validate, build) + publish |
 | Cache usage | 11.24 GB | ≈2.4 GB main + ≈1.3 GB per open PR |
 
+First observed PR #34 runs (main has not yet seeded the new keys): `check`
+green after 7.1 min at `b46cc86` (longest lane `balance`, 7.0 min) and 13.6 min
+at `10499fe` (`test`, 13.4 min). The release `linux` job ran 23 min and then
+failed on the moving linuxdeploy digest (CONSOLIDATION-20261101 §7).
+
 To measure after merge: the first main `ci` and native-release runs (seeding),
 a PR's restore line from main's key, lane durations, the cold compile at four
 jobs and `gh api repos/AlexandreZanata/TBG-Tupi-Battle-Grounds/actions/cache/usage`.
