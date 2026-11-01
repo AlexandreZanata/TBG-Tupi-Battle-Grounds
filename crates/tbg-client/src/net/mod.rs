@@ -3,6 +3,8 @@
 //! reconnect, and the `?lag=MS` simulator (MS/2 added each way).
 
 mod ack;
+pub mod admission;
+mod auth;
 mod login;
 mod socket;
 
@@ -10,13 +12,12 @@ use std::collections::VecDeque;
 
 pub(crate) use socket::GIVE_UP;
 use tbg_core::protocol::{
-    AccountError, ClientMsg, InviteToken, LiveId, RoomCode, ServerMsg, Token, PROTOCOL_VERSION,
+    AccessToken, ClientMsg, InviteToken, LiveId, RoomCode, ServerMsg, Token, PROTOCOL_VERSION,
 };
 
 use crate::config;
 
 use ack::AckTracker;
-use login::{needs_login, LOGIN_TIMEOUT};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mode {
@@ -53,6 +54,7 @@ pub enum NetFailure {
 }
 
 pub struct NetLink {
+    restore_pending: bool,
     mode: Mode,
     socket: Option<(ewebsock::WsSender, ewebsock::WsReceiver)>,
     opened: bool,
@@ -68,12 +70,17 @@ pub struct NetLink {
     ack: AckTracker,
     /// Post-P14: an automatic `Login` is in flight; a mode request waits.
     login_in_flight: bool,
+    auth_epoch: u64,
+    auth_access: Option<AccessToken>,
+    auth_family: Option<String>,
     held_request: bool,
     login_deadline: Option<f64>,
     outq: VecDeque<(f64, ClientMsg)>,
     inq: VecDeque<(f64, ServerMsg)>,
     /// P47: a `SpectateStart` is active; this link holds no seat.
     watching: bool,
+    /// P66: the slot path this link uses, or the admission still pending.
+    route: admission::Route,
 }
 
 impl NetLink {
@@ -82,6 +89,7 @@ impl NetLink {
             .and_then(|v| v.parse().ok())
             .unwrap_or(0.0);
         let mut link = NetLink {
+            restore_pending: !config::resume_ready(),
             mode,
             socket: None,
             opened: false,
@@ -96,11 +104,22 @@ impl NetLink {
             lag: lag_ms / 2000.0,
             ack: AckTracker::default(),
             login_in_flight: false,
+            auth_epoch: crate::auth::epoch(),
+            auth_access: None,
+            auth_family: None,
             held_request: false,
             login_deadline: None,
             outq: VecDeque::new(),
             inq: VecDeque::new(),
             watching: false,
+            // P66: a probe resumes on the endpoint its session was admitted
+            // to; every other mode asks for admission first.
+            route: admission::Route::start(
+                matches!(mode, Mode::Probe)
+                    .then(config::load_resume_endpoint)
+                    .flatten(),
+                now,
+            ),
         };
         link.connect(now);
         link
@@ -114,6 +133,16 @@ impl NetLink {
     /// something the player asked for, so the UI stays quiet about it.
     pub fn is_quiet_probe(&self) -> bool {
         matches!(self.mode, Mode::Probe) && !self.in_match
+    }
+
+    /// No pending join/login/reconnect may race a launcher update (P66 U09/U11).
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(crate) fn safe_for_update(&self) -> bool {
+        self.is_quiet_probe()
+            && !self.restore_pending
+            && !self.login_in_flight
+            && !self.held_request
+            && matches!(self.status, NetStatus::Ready | NetStatus::Failed(_))
     }
 
     /// p50 tap-to-ack latency in ms (`None` before the first ack).
@@ -133,10 +162,18 @@ impl NetLink {
         if self.socket.is_none() || self.in_match || !matches!(self.status, NetStatus::Ready) {
             return false;
         }
+        // P66: new play only on a slot admission chose; a resumed link may
+        // sit on a draining generation.
+        if !matches!(self.route, admission::Route::Ready { fresh: true, .. }) {
+            return false;
+        }
         self.mode = mode;
         self.watching = false;
         if !matches!(mode, Mode::Probe) {
-            if self.login_in_flight {
+            if self.login_in_flight
+                || crate::auth::snapshot().status != crate::auth::Status::Guest
+                    && self.auth_access.is_none()
+            {
                 self.held_request = true;
             } else {
                 self.send_request(now);
@@ -182,6 +219,34 @@ impl NetLink {
 
     /// Pump the socket, release lagged messages, reconnect when needed.
     pub fn poll(&mut self, now: f64) -> Vec<ServerMsg> {
+        if self.restore_pending {
+            if !config::resume_ready() {
+                return Vec::new();
+            }
+            self.restore_pending = false;
+            self.token = config::load_token();
+            self.route = admission::Route::start(
+                matches!(self.mode, Mode::Probe)
+                    .then(config::load_resume_endpoint)
+                    .flatten(),
+                now,
+            );
+            self.connect(now);
+        }
+        if self.route.advance(now) {
+            self.connect(now);
+        }
+        if matches!(self.route, admission::Route::UpdateRequired)
+            && !matches!(self.status, NetStatus::Failed(_))
+        {
+            self.status = NetStatus::Failed(NetFailure::VersionMismatch);
+            crate::platform::storage::set(
+                crate::platform::storage::Scope::Session,
+                "update.required",
+                "1",
+            );
+        }
+        self.sync_auth(now);
         self.read_socket(now);
         self.flush(now);
         self.reconnect(now);
@@ -190,14 +255,6 @@ impl NetLink {
             if let Some((_, msg)) = self.inq.pop_front() {
                 out.extend(self.handle(msg, now));
             }
-        }
-        if self.login_in_flight && self.login_deadline.is_some_and(|d| now >= d) {
-            self.login_in_flight = false;
-            self.login_deadline = None;
-            self.release_request(now);
-            out.push(ServerMsg::AccountError {
-                code: AccountError::BadKey,
-            });
         }
         out
     }

@@ -17,6 +17,7 @@ enum Control {
     Submit,
     Cancel,
     Reveal,
+    Remember,
 }
 
 pub fn plugin(app: &mut App) {
@@ -158,6 +159,9 @@ fn render(
                             form.focus = 2;
                             textform::cancel(&form);
                         }
+                        Control::Remember => {
+                            crate::auth::request(crate::auth::Command::ToggleRemember);
+                        }
                         Control::Reveal => {
                             form.focus = 3;
                             form.masked = !form.masked;
@@ -177,7 +181,7 @@ fn render(
             error,
             lang.code(),
             form.focus
-        )
+        ) + &crate::auth::snapshot().remember.to_string()
     } else {
         String::new()
     };
@@ -229,6 +233,22 @@ fn render(
                 if !error.is_empty() {
                     p.spawn(super::label(error, 15.))
                         .insert(TextColor(Color::srgb(1., 0.5, 0.4)));
+                }
+                if matches!(form.kind, Some(TextKind::Name | TextKind::Key)) {
+                    let checked = if crate::auth::snapshot().remember {
+                        "[x]"
+                    } else {
+                        "[ ]"
+                    };
+                    p.spawn((
+                        kit::control(
+                            format!("{checked} {}", lang.key("auth.remember")),
+                            true,
+                            440.,
+                        ),
+                        Control::Remember,
+                    ));
+                    p.spawn(kit::muted(lang.key("auth.remember_help"), 13.));
                 }
                 p.spawn(kit::row()).with_children(|row| {
                     for (key, control) in [

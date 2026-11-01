@@ -10,7 +10,8 @@ use crate::state::Outcome;
 use crate::types::{Arena, Seat, StrongholdKind};
 use crate::view::{MatchView, PublicView};
 
-/// v30: append Celestial, Clockwork and Desert Arena identities (BR-AR06);
+/// v31: combine D-97 authentication with Celestial, Clockwork and Desert (BR-AR06);
+/// v30 (D-97/BR-AS): authenticated handshakes and same-socket renewal;
 /// v24: bounded public roster effect snapshots (D-74);
 /// v23: independent cast/readiness snapshot and cues (D-71);
 /// v22: staged CorrosiveSplash cue (D-70);
@@ -22,7 +23,7 @@ use crate::view::{MatchView, PublicView};
 /// and carrier events plus `UnitView::fx`; v13: Stronghold kinds and
 /// Fortification (D-46); v12: Interest regen boost; v11: fifteen-node Arcanas.
 /// Older peers are refused by the handshake.
-pub const PROTOCOL_VERSION: u16 = 30;
+pub const PROTOCOL_VERSION: u16 = 31;
 
 /// Public result identity, independent of the combat seed and session token.
 pub type ResultId = [u8; 16];
@@ -41,44 +42,131 @@ pub const MAX_CLIENT_MSG_BYTES: usize = 1024;
 pub const ROOM_ALPHABET: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 
 pub type Token = [u8; 16];
+
+/// Account credentials have no Debug representation; the resume handle is distinct.
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct AccessToken(pub [u8; 32]);
+impl AccessToken {
+    pub fn from_hex(value: &str) -> Option<Self> {
+        if value.len() != 64 {
+            return None;
+        }
+        let nibble = |v| match v {
+            b'0'..=b'9' => Some(v - b'0'),
+            b'a'..=b'f' => Some(v - b'a' + 10),
+            _ => None,
+        };
+        let mut bytes = [0; 32];
+        for (i, pair) in value.as_bytes().as_chunks::<2>().0.iter().enumerate() {
+            bytes[i] = nibble(pair[0])? * 16 + nibble(pair[1])?;
+        }
+        Some(Self(bytes))
+    }
+}
+impl core::fmt::Debug for AccessToken {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_str("AccessToken([REDACTED])")
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum AuthStatus {
+    Active,
+    Conflict,
+    ReauthenticationRequired,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum AuthRefusal {
+    Invalid,
+    Expired,
+    Revoked,
+    Unavailable,
+}
 /// P39: a single-use Quick Challenge invitation. Independent of `Token`.
 pub type InviteToken = [u8; 16];
 pub type RoomCode = [u8; 5];
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ClientMsg {
-    Hello { version: u16, resume: Option<Token> },
+    Hello {
+        version: u16,
+        resume: Option<Token>,
+    },
     QuickMatch,
     CreateRoom,
-    JoinRoom { code: RoomCode },
+    JoinRoom {
+        code: RoomCode,
+    },
     Cancel,
-    Intent { seq: u32, intent: PlayerIntention },
-    Pong { id: u32 },
+    Intent {
+        seq: u32,
+        intent: PlayerIntention,
+    },
+    Pong {
+        id: u32,
+    },
     // P11: appended at the end (v1 peers are rejected by version anyway).
-    Register { name: String },
-    Login { key: String },
+    Register {
+        name: String,
+    },
+    Login {
+        key: String,
+    },
     Logout,
     // P12: appended at the end (older peers are rejected by version).
     RankedMatch,
     // P13: one leaderboard page (`LEADERBOARD_PAGE` rows from `offset`).
-    Leaderboard { offset: u16 },
+    Leaderboard {
+        offset: u16,
+    },
     // Post-P14 (BR-M06, Proposed): give up while the match is live.
     Surrender,
     // v8 (D-40, BR-AR05/BR-AR06): choose Arcanas while idle; the server
     // validates and answers `ArcanasSelected` or `ArcanasRejected`.
     // v11: fifteen ranks (P40); the seat still comes from the connection.
-    SetArcanas { ranks: [u8; arcana::NODES] },
+    SetArcanas {
+        ranks: [u8; arcana::NODES],
+    },
     // v9 (P39): Quick Challenge by link and both-accept rematch.
     CreateChallenge,
-    JoinChallenge { token: InviteToken },
+    JoinChallenge {
+        token: InviteToken,
+    },
     RequestRematch,
     // v13 (D-46, BR-SK01): choose the Stronghold kind while idle; the
     // server answers `StrongholdSelected` or `StrongholdRejected`.
-    SetStronghold { kind: StrongholdKind },
+    SetStronghold {
+        kind: StrongholdKind,
+    },
     // v17 (P47, BR-LV02): watch a listed live match while idle; the server
     // answers `SpectateStart` or `SpectateUnavailable`.
-    Spectate { id: LiveId },
+    Spectate {
+        id: LiveId,
+    },
     StopSpectating,
+    // D-97: reserve every old tag, including legacy account mutations.
+    AuthenticatedHello {
+        version: u16,
+        resume: Option<Token>,
+        access: AccessToken,
+    },
+    Reauthenticate {
+        access: AccessToken,
+    },
+    ClaimAccount {
+        take_over: bool,
+    },
+}
+
+impl core::fmt::Debug for ClientMsg {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        // Legacy Login and Hello also carry credentials/handles; no payload is logged.
+        f.debug_tuple("ClientMsg")
+            .field(&core::mem::discriminant(self))
+            .finish()
+    }
 }
 
 /// v17 (P47, BR-LV06/BR-LV08): the id of a listed live match. Random per
@@ -99,7 +187,7 @@ pub enum ErrorCode {
     SessionTakenOver,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ServerMsg {
     Welcome {
         token: Token,
@@ -228,6 +316,23 @@ pub enum ServerMsg {
     SpectateEnd {
         outcome: Option<Outcome>,
     },
+    AuthState {
+        status: AuthStatus,
+        access_expires_at: u64,
+        session_expires_at: u64,
+    },
+    AuthRequired {
+        reason: AuthRefusal,
+    },
+}
+
+impl core::fmt::Debug for ServerMsg {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        // Registered and Welcome retain their historical secret-bearing wire shape.
+        f.debug_tuple("ServerMsg")
+            .field(&core::mem::discriminant(self))
+            .finish()
+    }
 }
 
 /// v17 (P47, BR-LV06): a seat's public identity in a listed match. Guests

@@ -82,6 +82,10 @@ impl Lobby {
             Some(old_token) => {
                 let mut stolen = None;
                 if let Some(old) = self.sessions.get_mut(&old_token) {
+                    if let Some(conn) = &old.conn {
+                        conn.active
+                            .store(false, std::sync::atomic::Ordering::Release);
+                    }
                     send(
                         &old.conn,
                         ConnEvent::Send(ServerMsg::Error {

@@ -35,6 +35,9 @@ pub struct Data {
     pub stats: Option<Value>,
     pub unavailable: bool,
     pub update: Option<String>,
+    pub patch_notes: Value,
+    patches_request: Option<Request>,
+    next_patches: f64,
     version_request: Option<Request>,
     version_checked: bool,
     live_request: Option<Request>,
@@ -42,11 +45,11 @@ pub struct Data {
     stats_request: Option<Request>,
     next: f64,
     player: String,
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     online_loaded: bool,
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 impl Data {
     pub fn live_pending(&self) -> bool {
         self.live.is_none() && !self.unavailable
@@ -148,9 +151,28 @@ pub fn poll(
     if !crate::config::bevy_ui() {
         return;
     }
+    if time.elapsed_secs_f64() >= data.next_patches && data.patches_request.is_none() {
+        data.next_patches = time.elapsed_secs_f64() + 60.;
+        data.patches_request = Some(Request::get("/api/patch-notes"));
+    }
+    if let Some(result) = data.patches_request.as_ref().and_then(Request::take) {
+        data.patches_request = None;
+        if let Some(value) = result
+            .ok()
+            .and_then(super::patch_notes::parse)
+            .filter(|value| value != &data.patch_notes)
+        {
+            data.patch_notes = value;
+            shell.dirty |= shell.panel == super::Panel::PatchNotes;
+        }
+    }
+    // P66: a launcher-managed install learns about releases from the
+    // signed repository; `/api/version` only advises unmanaged installs.
     if !data.version_checked {
         data.version_checked = true;
-        data.version_request = Some(Request::get("/api/version"));
+        if std::env::var_os("TBG_UPDATE_HELPER").is_none() {
+            data.version_request = Some(Request::get("/api/version"));
+        }
     }
     if let Some(result) = data.version_request.as_ref().and_then(Request::take) {
         data.version_request = None;
@@ -187,7 +209,7 @@ pub fn poll(
         shell.dirty = true;
     }
     if let Some(result) = data.online_request.as_ref().and_then(Request::take) {
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         {
             data.online_loaded = true;
         }

@@ -11,7 +11,7 @@ use bevy::{
 pub fn settings() -> Window {
     let width = preference("window.width").unwrap_or(1440).clamp(1280, 7680);
     let height = preference("window.height").unwrap_or(900).clamp(720, 4320);
-    #[cfg(debug_assertions)]
+    #[cfg(any(debug_assertions, feature = "ui-acceptance"))]
     let (width, height) = crate::config::url_param("capture_size")
         .and_then(|s| {
             s.split_once('x')
@@ -125,11 +125,26 @@ fn file_layer(_app: &mut App) -> Option<BoxedLayer> {
 }
 
 pub fn asset_path() -> String {
-    let path = std::env::current_exe()
+    let sibling = std::env::current_exe()
         .ok()
         .and_then(|p| Some(p.parent()?.join("assets")));
-    path.filter(|p| p.is_dir())
-        .unwrap_or_else(|| std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("assets"))
+    #[cfg(debug_assertions)]
+    let sibling = sibling
+        .filter(|p| p.is_dir())
+        .or_else(|| Some(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("assets")));
+    sibling
+        .unwrap_or_else(|| std::path::PathBuf::from("assets"))
         .to_string_lossy()
-        .into()
+        .into_owned()
+}
+
+pub fn validate_assets() -> Result<(), &'static str> {
+    let root = std::path::PathBuf::from(asset_path());
+    if ["fonts", "lobby", "i18n", "branding"]
+        .iter()
+        .any(|folder| !root.join(folder).is_dir())
+    {
+        return Err("Game assets are missing. Extract the complete package and keep assets beside the executable.");
+    }
+    Ok(())
 }

@@ -64,7 +64,7 @@
   // Every buyable unit ships a portrait (tests/portraits.test.js). The proxy keeps
   // images for four hours, 404s included, so the URL carries a revision: bump
   // PORTRAIT_REV whenever a portrait file changes (scripts/unit-portraits.cjs).
-  const PORTRAIT_REV = 'native2-complete51';
+  const PORTRAIT_REV = 'rc1-longaxe-6fb0fb7';
   const portrait = (image, kind) => {
     if (image.dataset.kind === kind) return;
     image.dataset.kind = kind; image.style.visibility = 'hidden';

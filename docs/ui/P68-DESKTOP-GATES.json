@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "scope": "Linux-approved presentation also compiles on Windows; actual OS services remain in platform/credentials and Unix permissions.",
+  "files": [
+    {
+      "path": "crates/tbg-client/src/capture.rs",
+      "old_sha256": "65b2513493f5ea3c692e667f848e0660f3e0519768d940634cc5b4a035aa8116",
+      "presentation_conditions": 24,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/local.rs",
+      "old_sha256": "1a9ac0a15750a4e96ca249281c7af281f21b9c1baafb52a327e14d98f8b7477e",
+      "presentation_conditions": 1,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/main.rs",
+      "old_sha256": "4f9eadbef7728767d4d8603cbdd1bc55ac1d77ddfa73833d568da90d658210d1",
+      "presentation_conditions": 1,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/sync.rs",
+      "old_sha256": "b5864b47eaec37f7a47a45daeeffc4fe726c2d2412fbad6b1c6ee2307a0052b3",
+      "presentation_conditions": 10,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/sync/messages.rs",
+      "old_sha256": "a39b4af06510ea78c61ef32a30b79c0aadf37158866f91db7c8253faf7f5b8cc",
+      "presentation_conditions": 1,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/training/preview.rs",
+      "old_sha256": "462234ae6472d4caf1093efc88e4ce2319b5772ee635f55d2456729272687a1a",
+      "presentation_conditions": 2,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/actions.rs",
+      "old_sha256": "41f03a0157b4c00d867ad26ccdc33f98e2e9f4d1791d65ed15a839750a41986e",
+      "presentation_conditions": 3,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/battle_hud.rs",
+      "old_sha256": "6020d80dcf3aa60c075236db12b8ccce8a2ce8f56cfab7dc8ea72541a3492072",
+      "presentation_conditions": 1,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/countdown.rs",
+      "old_sha256": "5dac72ed7c101c9f3f877b603c54436cc91f6ee995974d195d5031ae4ca9b4f9",
+      "presentation_conditions": 7,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/evolve.rs",
+      "old_sha256": "bf9e32bda17c640f3f6065b5e9b1d07b30d691a4ea160d5c59700fa89e5423cf",
+      "presentation_conditions": 9,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/fortify.rs",
+      "old_sha256": "3e64f3333a25c4c8d169b5149888a62cf864d6edcb04bedc773ec7105271ae76",
+      "presentation_conditions": 13,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/hud.rs",
+      "old_sha256": "92e57b6434de6c2a8ab814f0cbdb050b116f71e245b84a37e092205a4970c214",
+      "presentation_conditions": 21,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/hud_update.rs",
+      "old_sha256": "96f0e569b121c12f39ba66aee314608c27b181d3c5bc1f27d17f876be5f5cdd6",
+      "presentation_conditions": 22,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/inspect.rs",
+      "old_sha256": "57ab66af811ce3d31ae28c8033f0903b29064acfcb8a21e983db995888601b5c",
+      "presentation_conditions": 5,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/keyboard.rs",
+      "old_sha256": "b31c05ac8636b83b5a17c89fc4cbf3fa5af2333ef6c34f71ef92361d643e6982",
+      "presentation_conditions": 4,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/kit/mod.rs",
+      "old_sha256": "f5ff228a45abf0568f61ae14e44c1f543d9d41258f0e0f64409cb63a814fb7c4",
+      "presentation_conditions": 1,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/mod.rs",
+      "old_sha256": "5401391b0cb877c3f049d87dee2400792c91d7399fd4305e00c87803699c942c",
+      "presentation_conditions": 13,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/ranking.rs",
+      "old_sha256": "707000ca79fe379a37f117164a6d9efe67cdb68737c3b0c5d19b2e569f58a781",
+      "presentation_conditions": 10,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/ranking_ui.rs",
+      "old_sha256": "f4600d3d94258ee8e3c75668be0c0095d5399ed25ddb568b171724620f3ebdb8",
+      "presentation_conditions": 3,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/arcanas.rs",
+      "old_sha256": "08a4607b2eef568a1a12850271def0bab15939b64ed339026b5b57b510f487a9",
+      "presentation_conditions": 2,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/arenas.rs",
+      "old_sha256": "b027cbf9ae087fa6cc93ce7a432c8c0d50c4bd2e7b4b05e2872e7bdfbc90e6a6",
+      "presentation_conditions": 3,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/data.rs",
+      "old_sha256": "61a8ef9d360a3e33ca243136112ae874e7539cbf201bb4dc42b8672837a2f08a",
+      "presentation_conditions": 3,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/header.rs",
+      "old_sha256": "481d7e14c8881c6da87f999a624985a22d3998ce89ed66ef95bce1dde6df558b",
+      "presentation_conditions": 8,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/input.rs",
+      "old_sha256": "cd6230d98288349454024bf206b5f552d12b1af031a036da1612403fcb9d09b1",
+      "presentation_conditions": 1,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/live.rs",
+      "old_sha256": "0ac777cafeaea69394a78578975aaabd82755720f537f600afc438e1168696e0",
+      "presentation_conditions": 5,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/lobby/cards.rs",
+      "old_sha256": "8e1f9a91873c3768be95ca87a40312c880f2b1f7b0723366daf6b1e4e03ad82b",
+      "presentation_conditions": 3,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/lobby/home.rs",
+      "old_sha256": "ff4bd224ac628a0e0278166aaa5ffc3847cdf3624d3293b97f89730e776615e8",
+      "presentation_conditions": 2,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/lobby/modes.rs",
+      "old_sha256": "bf90634cd2a544f0f5f49cadc52f275b2ad283419994ab48dd4a684d35d1a65e",
+      "presentation_conditions": 7,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/lobby/profile.rs",
+      "old_sha256": "84aba1e823da13d81bd8777fc77f4a7240cab9f138ed61a51acce74e0da40163",
+      "presentation_conditions": 8,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/mod.rs",
+      "old_sha256": "3bb7fc1fcf1e683818a5e552b2d5eb9f84b12d96f88bc9214c650f64f3d99aba",
+      "presentation_conditions": 20,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/settings.rs",
+      "old_sha256": "16450ea08e737921366ea46944fb14f47eae073714be14c011b1a68a4b9117f8",
+      "presentation_conditions": 4,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/strongholds.rs",
+      "old_sha256": "41e1892069a2f7adf4fa864308d8cba9e0d62ed6edfd10430fb5639523dceb63",
+      "presentation_conditions": 8,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/ui/surrender.rs",
+      "old_sha256": "1ce2978ac2ed03a5e6fa4ab557a37379e0a8a12e67cec053d336a55bf2480613",
+      "presentation_conditions": 3,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    },
+    {
+      "path": "crates/tbg-client/src/visuals/assets.rs",
+      "old_sha256": "5d43744c895a08439eec949ffe75f141d3a42aa182c563f6c27b06215ea0ee9a",
+      "presentation_conditions": 1,
+      "disposition": "shared_desktop",
+      "reason": "Native presentation/readiness, menu simulation, input or opt-in capture; browser branch remains separate."
+    }
+  ]
+}

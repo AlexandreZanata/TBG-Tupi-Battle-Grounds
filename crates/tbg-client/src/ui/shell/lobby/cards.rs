@@ -68,7 +68,12 @@ pub fn news(root: &mut ChildSpawnerCommands, page: usize, assets: &AssetServer, 
                 lang.key("lobby.news.title").to_uppercase(),
                 14.,
             ));
-            p.spawn(chrome::image(assets, "lobby/news.webp", 32.));
+            let art = ["patch-notes", "forum", "game-news"][page % 3];
+            p.spawn(chrome::image(
+                assets,
+                &format!("lobby/news/{art}.webp"),
+                38.,
+            ));
             p.spawn((
                 kit::muted(lang.key(&format!("lobby.news.{page}.title")), 13.),
                 Node {
@@ -92,7 +97,25 @@ pub fn news(root: &mut ChildSpawnerCommands, page: usize, assets: &AssetServer, 
             })
             .with_children(|r| {
                 r.spawn(news_arrow("<", -1));
-                r.spawn(kit::muted(format!("{} / 3", page + 1), 12.));
+                if page == 0 {
+                    r.spawn(super::super::button(
+                        lang.key("patches.read"),
+                        Action::Open(super::super::Panel::PatchNotes),
+                        140.,
+                    ))
+                    .insert(Node {
+                        height: px(28),
+                        width: px(140),
+                        min_height: px(28),
+                        padding: UiRect::axes(px(6), px(2)),
+                        border: UiRect::all(px(1)),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    });
+                } else {
+                    r.spawn(kit::muted(format!("{} / 3", page + 1), 12.));
+                }
                 r.spawn(news_arrow(">", 1));
             });
         });
@@ -102,14 +125,14 @@ pub fn live(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
     root.spawn(chrome::panel([75., 17., 23., 50.]))
         .with_children(|p| {
             let count = data.live.as_ref().map_or(0, |v| v.matches.len());
-            #[cfg_attr(not(target_os = "linux"), allow(unused_mut))]
+            #[cfg_attr(not(tbg_desktop), allow(unused_mut))]
             let mut _title = p.spawn(kit::heading(
                 lang.key("live.panel.title")
                     .replace("{n}", &count.to_string())
                     .to_uppercase(),
                 14.,
             ));
-            #[cfg(target_os = "linux")]
+            #[cfg(tbg_desktop)]
             _title.insert((
                 kit::Pending(data.live_pending()),
                 Node {
@@ -126,7 +149,7 @@ pub fn live(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                 ..chrome::column()
             })
             .with_children(|rows| {
-                #[cfg(target_os = "linux")]
+                #[cfg(tbg_desktop)]
                 if data.live_pending() {
                     crate::ui::native_loading::rows(rows, 3);
                 }

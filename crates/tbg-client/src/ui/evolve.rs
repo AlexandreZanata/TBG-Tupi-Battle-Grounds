@@ -4,14 +4,14 @@
 
 use bevy::prelude::*;
 use tbg_core::content::{form_of, FormDef};
-#[cfg(any(not(target_os = "linux"), test))]
+#[cfg(any(not(tbg_desktop), test))]
 use tbg_core::{content::ENERGY_SCALE, UnitView};
 use tbg_core::{OnHit, Phase, UnitId};
 
 use super::UiAction;
-#[cfg(any(not(target_os = "linux"), test))]
+#[cfg(any(not(tbg_desktop), test))]
 use super::{button, label, BUTTON, DISABLED, PANEL};
-#[cfg(any(not(target_os = "linux"), test))]
+#[cfg(any(not(tbg_desktop), test))]
 use crate::i18n::content;
 use crate::i18n::{Lang, Msg};
 use crate::sync::LatestView;
@@ -22,11 +22,11 @@ use tbg_core::content::TICK_HZ;
 pub struct Selected(pub Option<UnitId>);
 
 #[derive(Component)]
-#[cfg(any(not(target_os = "linux"), test))]
+#[cfg(any(not(tbg_desktop), test))]
 struct EvolvePanel;
 
 #[derive(Component)]
-#[cfg(any(not(target_os = "linux"), test))]
+#[cfg(any(not(tbg_desktop), test))]
 struct EvolutionChoice {
     unit: UnitId,
     branch: u8,
@@ -35,7 +35,7 @@ struct EvolutionChoice {
 pub fn plugin(app: &mut App) {
     app.init_resource::<Selected>()
         .add_systems(Update, drop_gone.run_if(in_state(GameState::InMatch)));
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     app.add_systems(
         Update,
         (
@@ -57,7 +57,7 @@ fn drop_gone(mut selected: ResMut<Selected>, view: Res<LatestView>) {
     }
 }
 
-#[cfg(any(not(target_os = "linux"), test))]
+#[cfg(any(not(tbg_desktop), test))]
 fn rebuild(
     mut commands: Commands,
     selected: Res<Selected>,
@@ -155,7 +155,7 @@ fn rebuild(
 }
 
 // Keep the same buttons while Energy regenerates or is spent in the Shop.
-#[cfg(any(not(target_os = "linux"), test))]
+#[cfg(any(not(tbg_desktop), test))]
 fn refresh_choices(
     view: Res<LatestView>,
     mut choices: Query<(&EvolutionChoice, &mut UiAction, &mut BackgroundColor)>,
@@ -189,7 +189,7 @@ pub(in crate::ui) fn choice_action(v: &tbg_core::MatchView, unit: UnitId, branch
 }
 
 /// Branch choices: tier 0 → A and B; tier 1 → next form of its branch.
-#[cfg(any(not(target_os = "linux"), test))]
+#[cfg(any(not(tbg_desktop), test))]
 fn options(u: &UnitView, lang: Lang) -> Vec<(u8, &'static str, String)> {
     let branches: Vec<u8> = match u.tier {
         0 => vec![0, 1],

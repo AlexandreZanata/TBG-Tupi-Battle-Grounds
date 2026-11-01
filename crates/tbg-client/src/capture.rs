@@ -5,60 +5,60 @@ use bevy::{
     render::view::screenshot::{save_to_disk, Screenshot, ScreenshotCaptured},
 };
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod arenas;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod focus;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod polish;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod polish_live;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod polish_motion;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod reserve;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod training;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod troops;
 
 pub fn plugin(app: &mut App) {
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     if crate::config::url_param("capture_focus").is_some() {
         focus::plugin(app);
         return;
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     if crate::config::url_param("capture_motion").is_some() {
         polish_motion::plugin(app);
         return;
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     if crate::config::url_param("capture_polish_live").is_some() {
         polish_live::plugin(app);
         return;
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     if crate::config::url_param("capture_polish").is_some() {
         polish::plugin(app);
         return;
     }
     if crate::config::url_param("capture").is_some() {
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("troops") {
             troops::plugin(app);
             return;
         }
         app.add_systems(Update, capture);
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("training") {
             training::plugin(app);
         }
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("arena_train") {
             arenas::plugin(app);
         }
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("demo_transition") {
             app.add_systems(
                 Update,
@@ -77,7 +77,7 @@ pub fn plugin(app: &mut App) {
                 },
             );
         }
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("ranking") {
             if crate::config::url_param("capture_ranking_fixture").is_some() {
                 app.add_systems(Update, ranking_fixture);
@@ -89,7 +89,7 @@ pub fn plugin(app: &mut App) {
                 },
             );
         }
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("fortify") {
             app.add_systems(
                 OnEnter(crate::GameState::InMatch),
@@ -98,14 +98,14 @@ pub fn plugin(app: &mut App) {
                 },
             );
         }
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("unit") {
             app.add_systems(
                 Update,
                 select_unit.run_if(in_state(crate::GameState::InMatch)),
             );
         }
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         if matches!(
             crate::config::url_param("capture_panel").as_deref(),
             Some("council" | "reserve")
@@ -123,7 +123,7 @@ pub fn plugin(app: &mut App) {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 fn ranking_fixture(mut ranking: ResMut<crate::ui::ranking::Ranking>, mut done: Local<bool>) {
     if *done || !ranking.open {
         return;
@@ -156,18 +156,18 @@ fn capture(
     mut commands: Commands,
     time: Res<Time>,
     state: Res<State<crate::GameState>>,
-    #[cfg(target_os = "linux")] view: Res<crate::sync::LatestView>,
-    #[cfg(target_os = "linux")] tower: Res<crate::ui::fortify::TowerOpen>,
-    #[cfg(target_os = "linux")] inspected: Res<crate::ui::inspect::Inspected>,
-    #[cfg(target_os = "linux")] reserve: Option<Res<reserve::Status>>,
-    #[cfg(target_os = "linux")] units: Query<&crate::visuals::UnitVisual>,
-    #[cfg(target_os = "linux")] stats: Res<crate::sync::MatchStats>,
-    #[cfg(target_os = "linux")] match_info: Res<crate::sync::MatchInfo>,
-    #[cfg(target_os = "linux")] loading: Res<crate::ui::native_loading::Status>,
+    #[cfg(tbg_desktop)] view: Res<crate::sync::LatestView>,
+    #[cfg(tbg_desktop)] tower: Res<crate::ui::fortify::TowerOpen>,
+    #[cfg(tbg_desktop)] inspected: Res<crate::ui::inspect::Inspected>,
+    #[cfg(tbg_desktop)] reserve: Option<Res<reserve::Status>>,
+    #[cfg(tbg_desktop)] units: Query<&crate::visuals::UnitVisual>,
+    #[cfg(tbg_desktop)] stats: Res<crate::sync::MatchStats>,
+    #[cfg(tbg_desktop)] match_info: Res<crate::sync::MatchInfo>,
+    #[cfg(tbg_desktop)] loading: Res<crate::ui::native_loading::Status>,
     mut started: Local<bool>,
-    #[cfg(target_os = "linux")] mut ready_at: Local<Option<f32>>,
+    #[cfg(tbg_desktop)] mut ready_at: Local<Option<f32>>,
 ) {
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     {
         if !loading.boot_ready || loading.scene_waiting {
             *ready_at = None;
@@ -189,8 +189,13 @@ fn capture(
     {
         return;
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     {
+        if crate::config::url_param("capture_panel").as_deref() == Some("arena_train")
+            && *state.get() != crate::GameState::InMatch
+        {
+            return;
+        }
         if crate::config::url_param("capture_panel").as_deref() == Some("reserve")
             && reserve.is_none_or(|status| !status.done)
         {
@@ -223,9 +228,9 @@ fn capture(
         return;
     };
     *started = true;
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     eprintln!("Loading capture: boot_ready={}, scene_waiting={}, pending_images={}, pending_texts={}, failed_images={}", loading.boot_ready, loading.scene_waiting, loading.images, loading.texts, loading.failed);
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     if crate::config::url_param("capture_panel").as_deref() == Some("arena_train") {
         let expected = crate::config::url_param("capture_arena").unwrap_or("storm".into());
         assert_eq!(
@@ -238,7 +243,7 @@ fn capture(
             match_info.arena.slug()
         );
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     if *state.get() == crate::GameState::Menu {
         let kinds: Vec<_> = units
             .iter()
@@ -257,7 +262,7 @@ fn capture(
         );
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 fn select_unit(
     view: Res<crate::sync::LatestView>,
     mut actions: ResMut<crate::ui::ActionQueue>,

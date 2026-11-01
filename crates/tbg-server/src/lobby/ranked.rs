@@ -16,7 +16,10 @@ impl Lobby {
         let stuck = self
             .ranked
             .as_ref()
-            .is_some_and(|r| r.unavailable.load(std::sync::atomic::Ordering::Relaxed));
+            .is_some_and(|r| r.unavailable.load(std::sync::atomic::Ordering::Relaxed))
+            // P66: only the slot holding ranked authority settles results,
+            // so only it admits ranked play (single sequence writer).
+            || !self.release.gate.ranked_open();
         match self.session(&token) {
             Some(s) if matches!(s.state, SessionState::Idle) => {
                 if stuck {

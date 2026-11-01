@@ -3,7 +3,7 @@
 
 use std::collections::{HashMap, VecDeque};
 use std::net::IpAddr;
-use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
+use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -24,10 +24,12 @@ use crate::Config;
 mod account_done;
 mod accounts;
 mod arcanas;
+mod auth;
 mod challenge;
 mod leaderboard;
 mod live;
 mod matchmaking;
+mod ownership;
 mod presence;
 mod ranked;
 mod rematch;
@@ -59,6 +61,7 @@ pub(super) enum SessionState {
 }
 
 pub(super) struct Session {
+    pub(super) auth_binding: Option<crate::auth::Binding>,
     pub(super) token: Token,
     pub(super) name: String,
     pub(super) conn: Option<ConnHandle>,
@@ -99,7 +102,9 @@ pub(super) struct Lobby {
     pub(super) store: Option<Arc<Store>>,
     /// P11: per-IP account rate limits.
     pub(super) limits: Limits,
-    pub(super) draining: Arc<AtomicBool>,
+    /// P66: the admission gate (shutdown drain and release directory) and
+    /// the slot identity used for cross-slot account ownership.
+    pub(super) release: Arc<crate::release::Runtime>,
     /// P47: public matches running now (BR-LV01); private ones never enter.
     pub(super) live: HashMap<LiveId, live::LiveMatch>,
     /// P47: the snapshot `/api/live` and `/api/online` read.
@@ -128,7 +133,7 @@ pub(crate) async fn run(
     config: Arc<Config>,
     metrics: Arc<Metrics>,
     store: Option<Arc<Store>>,
-    draining: Arc<AtomicBool>,
+    release: Arc<crate::release::Runtime>,
     live_tx: watch::Sender<Arc<LiveSnapshot>>,
 ) {
     let mut lobby = Lobby {
@@ -145,7 +150,7 @@ pub(crate) async fn run(
         metrics,
         store,
         limits: Limits::default(),
-        draining,
+        release,
         live: HashMap::new(),
         live_tx,
         featured: None,
@@ -155,15 +160,18 @@ pub(crate) async fn run(
     // P60: one finalizer per process settles every ranked result in order;
     // its journal recovery finishes before the lobby serves any command.
     if let (Some(store), Some(db)) = (lobby.store.clone(), lobby.config.db.clone()) {
+        let dir = crate::ranked::journal::dir_for_slot(&db, lobby.release.slot());
         let handle = crate::ranked::finalizer::start(
             store,
-            db,
+            dir,
             lobby.self_tx.clone(),
             lobby.metrics.clone(),
         )
         .await;
         lobby.ranked = Some(handle);
     }
+    // P66: recovery is done; the release task may now report `ready`.
+    lobby.release.gate.serving.store(true, Relaxed);
     let mut cleanup = tokio::time::interval(Duration::from_secs(10));
     let mut publish = tokio::time::interval(PUBLISH_EVERY);
     loop {
@@ -204,6 +212,29 @@ impl Lobby {
 
     fn handle(&mut self, cmd: LobbyCmd) {
         match cmd {
+            LobbyCmd::AuthenticatedHello {
+                resume,
+                conn,
+                ip,
+                binding,
+                reply,
+            } => {
+                let result = self.auth_hello(resume, conn, ip, binding);
+                let _ = reply.send(result);
+            }
+            LobbyCmd::AuthClaim {
+                token,
+                conn_id,
+                binding,
+                take_over,
+            } => self.auth_claim(token, conn_id, binding, take_over),
+            LobbyCmd::AuthIdle { families, reply } => {
+                let _ = reply.send(self.auth_idle(&families));
+            }
+            LobbyCmd::AuthRevoke { scope, reply } => {
+                let result = self.auth_revoke(&scope);
+                let _ = reply.send(result);
+            }
             LobbyCmd::Hello {
                 resume,
                 conn,
@@ -261,6 +292,7 @@ impl Lobby {
                 }
             }
             LobbyCmd::RankedDone { receipt } => self.ranked_done(*receipt),
+            LobbyCmd::OwnerLost { token, account } => self.owner_lost(token, account),
             LobbyCmd::RegisterDone {
                 token,
                 conn_id,
@@ -305,7 +337,7 @@ impl Lobby {
         }
         // Any other lobby request ends a watch first (BR-LV02).
         self.end_watch(token);
-        let draining = self.draining.load(Relaxed);
+        let draining = !self.release.gate.admits();
         let Some(s) = self.session(&token) else {
             return;
         };

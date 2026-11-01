@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 30,
-        "v30 GAME-DESIGN §12: append Celestial, Clockwork and Desert Arena identities"
+        PROTOCOL_VERSION, 31,
+        "GAME-DESIGN §12 / D-97 integration v31: authenticated hello and eight Arena identities"
     );
 }
 
@@ -262,6 +262,60 @@ fn v27_drill_fusion_is_appended_without_death() {
     let bytes = encode(&event);
     assert_eq!(bytes, [28, 1, 2, 3, 0]);
     assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn d97_auth_variants_append_without_exposing_secrets_in_debug() {
+    use tbg_core::protocol::{decode_server, AccessToken, AuthRefusal, AuthStatus};
+    let secret = AccessToken([0xab; 32]);
+    let messages = [
+        ClientMsg::AuthenticatedHello {
+            version: 30,
+            resume: Some([7; 16]),
+            access: secret,
+        },
+        ClientMsg::Reauthenticate { access: secret },
+        ClientMsg::ClaimAccount { take_over: true },
+    ];
+    for (tag, message) in (20..=22).zip(messages) {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_client(&bytes), Ok(message.clone()));
+        assert!(!format!("{message:?}").contains("171"));
+        assert!(decode_client(&bytes[..bytes.len() - 1]).is_err());
+    }
+    let states = [
+        ServerMsg::AuthState {
+            status: AuthStatus::Conflict,
+            access_expires_at: 900,
+            session_expires_at: 2_592_000,
+        },
+        ServerMsg::AuthRequired {
+            reason: AuthRefusal::Revoked,
+        },
+    ];
+    for (tag, message) in (31..=32).zip(states) {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_server(&bytes), Ok(message));
+    }
+    for raw in [
+        "ab".repeat(31),
+        "AB".repeat(32),
+        "zz".repeat(32),
+        "ab".repeat(33),
+    ] {
+        assert!(AccessToken::from_hex(&raw).is_none());
+    }
+    assert_eq!(AccessToken::from_hex(&"ab".repeat(32)), Some(secret));
+    for message in [
+        ClientMsg::Login {
+            key: "PRIVATE_RECOVERY_KEY".into(),
+        },
+        ClientMsg::Reauthenticate { access: secret },
+    ] {
+        assert!(!format!("{message:?}").contains("PRIVATE"));
+    }
 }
 
 #[test]

@@ -5,7 +5,7 @@
 //! A zero stays zero: the search never adds an ability a unit lacks.
 
 use tbg_core::content::{FormDef, UnitDef, ENERGY_SCALE, MIN_INTERVAL};
-use tbg_core::{Archetype, Ruleset, FACTIONS, UNIT_KINDS};
+use tbg_core::{Archetype, Ruleset, FACTIONS};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum UnitField {
@@ -167,8 +167,8 @@ pub fn all(r: &Ruleset) -> Vec<Knob> {
             abilities: _,
             forms,
         } = u;
-        // Summons are tuned through their Nester's forms only.
-        let shop = UNIT_KINDS.iter().any(|s| *s as usize == k);
+        // Summons have no purchase cost; their existing combat-stat knobs remain searchable.
+        let shop = u.kind.is_conventional() && r.pool.contains(&u.kind);
         for (field, value) in [
             (UnitField::Cost, i64::from(*cost)),
             (UnitField::Hp, i64::from(*hp)),

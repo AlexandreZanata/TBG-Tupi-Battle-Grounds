@@ -3,12 +3,12 @@
 use super::{button, kit, Action, Lang, UiAction};
 use bevy::prelude::*;
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod native;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 pub use native::spawn;
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) {
     root.spawn(kit::panel()).with_children(|p| {
         p.spawn(kit::heading(lang.key("arenas.title"), 32.));

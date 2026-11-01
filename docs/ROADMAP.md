@@ -365,6 +365,24 @@ the aggregate, protocol 28, terminal replay and cosmetic scene against main
 checks and remaining A01–A08 acceptance are recorded in the execution report.
 No full-suite or performance acceptance is claimed. See D-82 and Proposed §17.
 
+## Owner-requested native updater and safe releases (2026-10-31)
+
+| Phase | Spec | Scope | Status | Owner gates |
+|---|---|---|---|---|
+| P66 | [P66-native-updates-and-release-safety.md](phases/P66-native-updates-and-release-safety.md) | Signed recoverable Linux updates, Windows adapter, startup/post-update modals, protected reconnect and generation-pinned backend rollout | **Draft implementation**, `codex/p66-native-updates-release-safety`; Linux synthetic/real isolated acceptance, backend continuity incomplete | Install modes, trust/signing, emergency/version policy, measured overlap/retention and real platform evidence |
+
+[Release contracts/test matrix](planning/P66-RELEASE-CONTRACTS.md) and
+[executor prompt](planning/P66-EXECUTION-PROMPT.md). Linux managed updater
+comes first as milestone M1 (its own PR, no server change); backend safety
+M2 runs in parallel; two-slot rollout M3 follows M2; Windows M4 needs real
+devices. Backend sequence is safe drain → shared ownership/results → measured
+two-slot rollout with stable routes and one active public contract. No forced in-match restart or finite match-drain cutoff. Retain
+browser/native builds and compatible DB writers. A later multi-host capacity
+stage requires evidence and owner scope, not an assumed thousands-player SLA.
+See P66 §11 for actual implementation, targeted checks and remaining acceptance.
+Only test-root update acceptance is claimed; Windows, official signing and
+zero-disconnect rollout remain gated. No stable activation is approved.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·
@@ -467,3 +485,84 @@ No gameplay, protocol or balance change is part of this phase. P70's unresolved
 acceptance is not silently closed. Owner look/fun review follows a concrete
 rendered comparison and installed playtest. See the
 [planning report](planning/P71-PLANNING-REPORT.md) for evidence and validation.
+
+## Windows native release (owner planning request, 2026-10-31)
+
+| Phase | Spec | Deliverable | Status | Review |
+|---|---|---|---|---|
+| P68 | [P68-windows-native-release.md](phases/P68-windows-native-release.md) | Exact desktop visuals, Windows MSVC ZIP/installer, Wine/real Windows acceptance; P68-A adds Linux/Windows/web persistent auth, 15-minute Access and rotating 30-day Refresh | **Linux candidate published:** [v0.1.0-p68.1](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.0-p68.1), [Draft PR #32](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/32); protocol 30/schema 9 auth, real Linux vault/browser evidence and shared desktop routing implemented; see [execution evidence](phases/P68-execution.md). Windows/Wine/signing and exact packaged visual acceptance remain pending | A01–A14/W01–W18, coordinated wire/schema, real vaults/browser, support/CRT/signing and owner visual sign-off |
+
+Read the [acceptance plan](planning/P68-WINDOWS-ACCEPTANCE.md),
+[hashed OS-gate inventory](planning/P68-PLATFORM-GATES.csv) and
+[execution prompt](planning/P68-EXECUTION-PROMPT.md). The source audit records
+234 conditions in 37 client/build-script files, including the Linux-only
+native interface and art-generation paths. Review their context rather
+than replacing every platform guard mechanically.
+
+P65–P67 are already reserved on their independent planning branches. Their
+absence from this consolidated Linux source base does not renumber them or
+make community, updater or commerce implementation a prerequisite for P68.
+Architecture §24 and D-96 leave those planning reservations intact.
+
+The installed native Linux release is preserved. Windows CI, Wine on Linux
+and actual Windows GPU observations remain separate acceptance records.
+Documentation validation now is not a build, installation or release claim.
+
+**Owner visual requirement:** Linux and Windows must have exactly the same
+frontend appearance. P68 includes platform-specific corrections wherever
+needed while preserving the approved Linux quality. W07/W08 and phase visual
+acceptance remain blocked by any unresolved visible difference; validate
+with matched packaged captures, not merely shared code or similar styling.
+
+**Owner auth extension:** execute [P68-A](planning/P68-PERSISTENT-AUTH.md)
+before final release packages and complete A01–A14 with W01–W18. Access is
+15 minutes; refresh families expire 30 days from login and rotate without
+extending that deadline. Linux/Windows use real user vaults, web uses protected
+cookies, and legacy keys migrate safely. D-97/GAME-DESIGN §21 authorize the
+account/wire changes without a combat change or automatic production deploy.
+The [auth source manifest](planning/P68-AUTH-SOURCE-MANIFEST.csv) records
+34 relevant baseline files for migration and consumer review.
+
+## Offline recovery and opponent mute (P67, 2026-10-31)
+
+[P67](phases/P67-commerce-recovery-foundation.md) now has executable offline
+recovery and presentation fixtures on `codex/p67-commerce-recovery-base`,
+based on the owner's consolidated `55510c5`. The owner deferred fiscal work
+and prioritized recovery/mute. Payment/provider/fiscal implementation is
+pending. Runtime email and opponent-mute activation remain unavailable.
+
+Status: **Draft, validation deferred**. Formatting, schema/example and SQL DDL
+checks passed; the targeted Rust batch did not start because the shared
+nonblocking validation lock returned 75. No full suite ran. See the
+[execution report](modules/commerce/OFFLINE-EXECUTION.md) for C01–C20 scope,
+queued commands, security/integration limits and later owner gates.
+
+## Consolidated main candidate (owner request, 2026-11-01)
+
+[Draft PR #34](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/34)
+on `codex/consolidate-linux-main` contains every open front (#18, #20–#33)
+through normal merges and supersedes those PRs; closing them is the owner's
+review step. It resolves the parallel P66/P68 schema and credential work as
+one auth/resume coordinator, schema 10 and protocol 30 (D-99), adds targeted
+tests for both v9 upgrades and replaces the CI with parallel fail-closed lanes
+behind the unchanged `check`. Linux candidate:
+[v0.1.1-rc.1](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.1-rc.1).
+See the [consolidation report](phases/CONSOLIDATION-20261101.md) and the
+[CI diagnosis](phases/CI-OPTIMIZATION-20261101.md).
+
+Status: **Draft**. Open gates stay owned by their phases: competitive
+acceptance (audit failures), P66 continuity investigation and O02–O05, P68
+Windows/visual/public-HTTPS acceptance, P67 activation gates, cross-slot
+revocation before any two-slot rollout with P68 auth, and owner look/fun
+sign-off. Nothing was deployed; production stays on protocol 29.
+
+
+### 2026-11-01 main/P71 backend integration
+
+`phase/backend-main-integration` reconciles GitHub main `027fd61` authentication,
+refresh, authenticated reconnect, schema 10 and release admission with the P71
+character fixes and eight Arenas. Combined protocol: 31; ruleset: 6. Targeted
+consolidation: 90 Rust scenarios passed plus WASM compilation and source gates;
+full suite and existing balance/visual gates remain open. The reset VPS installation
+awaits owner-provided connection settings and verified host identity. See
+[the report](phases/BACKEND-main-integration-20261101.md).

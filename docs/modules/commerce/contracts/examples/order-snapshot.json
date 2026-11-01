@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "orderId": "fixture-order-one",
+  "accountId": "fixture-account-one",
+  "catalogRevision": "fixture-catalog-one",
+  "currency": "BRL",
+  "amountMinor": 2000,
+  "refundedMinor": 0,
+  "paymentState": "pending",
+  "holdState": "none",
+  "fulfillmentState": "pending",
+  "lines": [
+    {
+      "lineId": "fixture-line-one",
+      "sku": "fixture.cape-blue",
+      "quantity": 1,
+      "amountMinor": 2000
+    }
+  ]
+}

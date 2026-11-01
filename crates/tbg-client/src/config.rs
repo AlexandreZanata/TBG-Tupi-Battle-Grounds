@@ -74,7 +74,7 @@ pub fn server_url() -> String {
     }
 }
 
-fn hex16(token: &[u8; 16]) -> String {
+pub(crate) fn hex16(token: &[u8; 16]) -> String {
     token.iter().map(|b| format!("{b:02x}")).collect()
 }
 
@@ -102,8 +102,10 @@ pub fn parse_invite_token(hex: &str) -> Option<[u8; 16]> {
 /// Session token kept across page reloads so a player can resume a match.
 /// Per tab (`sessionStorage`): a shared token made two open tabs keep
 /// taking over each other's session.
+/// P66: after a native restart the auth coordinator restores the protected
+/// resume record into this same session scope.
 pub fn load_token() -> Option<[u8; 16]> {
-    parse_hex16(&preferences::get(Scope::Session, "tbg_token")?)
+    preferences::get(Scope::Session, "tbg_token").and_then(|t| parse_hex16(&t))
 }
 
 /// P47: the match a `?watch=<16 hex>` link names; `None` for anything else.
@@ -130,7 +132,61 @@ pub fn clear_watch() {
 
 pub fn save_token(token: &[u8; 16]) {
     preferences::set(Scope::Session, "tbg_token", &hex16(token));
+    #[cfg(not(target_arch = "wasm32"))]
+    resume::note_change();
 }
+
+/// P66: the slot path the current session was admitted on (`/ws/slot-a`).
+pub fn save_resume_endpoint(endpoint: &str) {
+    preferences::set(Scope::Session, "tbg_endpoint", endpoint);
+    #[cfg(not(target_arch = "wasm32"))]
+    resume::note_change();
+}
+
+/// The endpoint to resume on: this tab's (browser) or, after a native
+/// restart, the restored protected record while it was still fresh.
+pub fn load_resume_endpoint() -> Option<String> {
+    preferences::get(Scope::Session, "tbg_endpoint")
+}
+
+/// P66 §4: an installation-local, nonsecret rollout bucket (0–99), never
+/// derived from accounts or addresses.
+pub fn rollout_bucket() -> u8 {
+    const KEY: &str = "tbg.bucket";
+    if let Some(n) = preferences::get(Scope::Local, KEY).and_then(|v| v.parse::<u8>().ok()) {
+        if n < 100 {
+            return n;
+        }
+    }
+    // Native: clock nanoseconds. Browser: a byte of the server-issued
+    // session token (no clock or RNG dependency on wasm); 0 before one.
+    #[cfg(not(target_arch = "wasm32"))]
+    let n = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| (d.subsec_nanos() % 100) as u8);
+    #[cfg(target_arch = "wasm32")]
+    let n = match load_token() {
+        Some(token) => token[0] % 100,
+        None => return 0,
+    };
+    preferences::set(Scope::Local, KEY, &n.to_string());
+    n
+}
+
+/// The vault restore is asynchronous; sockets wait without blocking the menu.
+pub fn resume_ready() -> bool {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        crate::platform::resume::ready()
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        true
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+use crate::platform::resume;
 
 /// D-40/P40: the Arcana preset the lobby editor saved under `tbg.arcanas`
 /// (`{"schema":2,"ranks":[...]}`); a schema-1 six-node document is migrated,
@@ -340,14 +396,6 @@ pub fn copy_text(text: &str) {
 /// The player's account credential, in browser storage or private native preferences.
 pub fn load_account_key() -> Option<String> {
     preferences::get(Scope::Local, "tbg_account_key")
-}
-
-pub fn save_account_key(key: &str) {
-    preferences::set(Scope::Local, "tbg_account_key", key);
-}
-
-pub fn delete_account_key() {
-    preferences::remove(Scope::Local, "tbg_account_key");
 }
 
 /// A boolean preference in `localStorage` (false when unavailable).

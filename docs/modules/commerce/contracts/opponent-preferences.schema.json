@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "muteOpponentEmotes": {
+      "type": "boolean"
+    },
+    "hideOpponentCosmetics": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "muteOpponentEmotes",
+    "hideOpponentCosmetics"
+  ]
+}

@@ -5,7 +5,12 @@
 //! and both applied presets on match rows (NULL for older rows); v5/v6 add
 //! the Stronghold kind and arena; v7 (P60) adds authoritative ranked
 //! records, integrity projections and the append-only decision log; v8
-//! (P61) adds the optional per-match statistics summary.
+//! (P61) adds the optional per-match statistics summary. v9 was allocated
+//! twice by parallel fronts: P66 (release directory, audit log, cross-slot
+//! account ownership) and P68/D-97 (hash-only auth families). Either
+//! variant may already be marked 9, so v10 recognizes both feature table
+//! sets by their actual shape, creates whichever is absent and refuses a
+//! partial or foreign shape instead of trusting the version number.
 //! Timestamps come from SQLite itself, except P60's frozen `ended_unix`.
 
 use rusqlite::Connection;
@@ -149,19 +154,205 @@ const RANKED_STATS_V8: &str = "CREATE TABLE ranked_stats (
 );
 CREATE INDEX ranked_stats_cohort ON ranked_matches(ruleset_version, ended_unix, id);";
 
+const RELEASE_V9: &str = "CREATE TABLE release_slots (
+  slot TEXT PRIMARY KEY,
+  generation TEXT NOT NULL,
+  server_build TEXT NOT NULL,
+  contract TEXT NOT NULL,
+  endpoint TEXT NOT NULL,
+  state TEXT NOT NULL,
+  canary_pct INTEGER NOT NULL DEFAULT 0,
+  ranked_authority INTEGER NOT NULL DEFAULT 0,
+  matches_running INTEGER NOT NULL DEFAULT 0,
+  results_pending INTEGER NOT NULL DEFAULT 0,
+  ranked_inflight INTEGER NOT NULL DEFAULT 0,
+  heartbeat_unix INTEGER NOT NULL,
+  version INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE release_audit (
+  id INTEGER PRIMARY KEY,
+  at_unix INTEGER NOT NULL,
+  actor TEXT NOT NULL,
+  action TEXT NOT NULL,
+  slot TEXT NOT NULL,
+  detail TEXT NOT NULL
+);
+CREATE TABLE account_owner (
+  account_id INTEGER PRIMARY KEY REFERENCES accounts(id),
+  slot TEXT NOT NULL,
+  generation TEXT NOT NULL,
+  epoch INTEGER NOT NULL,
+  heartbeat_unix INTEGER NOT NULL
+);
+";
+
+/// P66 index, verified on every open like the D-97 ones (idempotent).
+const RELEASE_INDEXES: &str =
+    "CREATE INDEX IF NOT EXISTS account_owner_by_slot ON account_owner(slot);";
+
+/// One feature's tables and the columns its code reads and writes.
+struct Feature {
+    tables: &'static str,
+    indexes: &'static str,
+    shape: &'static [(&'static str, &'static [&'static str])],
+}
+
+const RELEASE: Feature = Feature {
+    tables: RELEASE_V9,
+    indexes: RELEASE_INDEXES,
+    shape: &[
+        (
+            "release_slots",
+            &[
+                "slot",
+                "generation",
+                "server_build",
+                "contract",
+                "endpoint",
+                "state",
+                "canary_pct",
+                "ranked_authority",
+                "matches_running",
+                "results_pending",
+                "ranked_inflight",
+                "heartbeat_unix",
+                "version",
+            ],
+        ),
+        (
+            "release_audit",
+            &["id", "at_unix", "actor", "action", "slot", "detail"],
+        ),
+        (
+            "account_owner",
+            &[
+                "account_id",
+                "slot",
+                "generation",
+                "epoch",
+                "heartbeat_unix",
+            ],
+        ),
+    ],
+};
+
+const AUTH: Feature = Feature {
+    tables: super::auth_sessions::TABLES,
+    indexes: super::auth_sessions::INDEXES,
+    shape: &[
+        (
+            "auth_sessions",
+            &[
+                "id",
+                "account_id",
+                "device_id",
+                "client_kind",
+                "keep_signed_in",
+                "created_at",
+                "expires_at",
+                "last_used_at",
+                "revoked_at",
+                "revoke_reason",
+            ],
+        ),
+        (
+            "auth_refresh_tokens",
+            &[
+                "token_hash",
+                "session_id",
+                "generation",
+                "issued_at",
+                "consumed_at",
+                "operation_hash",
+            ],
+        ),
+    ],
+};
+
+/// A table's column names, or `None` when it does not exist.
+fn columns(tx: &Connection, table: &str) -> rusqlite::Result<Option<Vec<String>>> {
+    let exists: bool = tx.query_row(
+        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?1)",
+        [table],
+        |r| r.get(0),
+    )?;
+    if !exists {
+        return Ok(None);
+    }
+    let mut stmt = tx.prepare("SELECT name FROM pragma_table_info(?1)")?;
+    let names = stmt
+        .query_map([table], |r| r.get(0))?
+        .collect::<rusqlite::Result<Vec<String>>>()?;
+    Ok(Some(names))
+}
+
+fn foreign_shape(table: &str) -> rusqlite::Error {
+    rusqlite::Error::SqliteFailure(
+        rusqlite::ffi::Error::new(rusqlite::ffi::SQLITE_SCHEMA),
+        Some(format!("unexpected existing shape for {table}")),
+    )
+}
+
+/// Create a feature's tables when none exists; accept them only when every
+/// table exists with every expected column. A partial set fails closed.
+fn ensure(tx: &Connection, feature: &Feature) -> rusqlite::Result<()> {
+    let mut present = 0;
+    for (table, expected) in feature.shape {
+        if let Some(found) = columns(tx, table)? {
+            if !expected.iter().all(|c| found.iter().any(|f| f == c)) {
+                return Err(foreign_shape(table));
+            }
+            present += 1;
+        }
+    }
+    if present == 0 {
+        tx.execute_batch(feature.tables)?;
+    } else if present != feature.shape.len() {
+        return Err(foreign_shape(feature.shape[0].0));
+    }
+    tx.execute_batch(feature.indexes)
+}
+
 /// Pragmas plus every missing migration in one transaction. Re-running on
 /// a migrated database is a no-op.
 pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
+    // P66: two slots may create the same new file at once. Switching it to
+    // WAL can then lose a lock race that SQLite reports at once, without
+    // consulting the busy handler; the migration is idempotent, so retry
+    // briefly (about 5 s in total) instead of opening without a store.
+    let mut attempt: u64 = 0;
+    loop {
+        match migrate_once(conn) {
+            Err(rusqlite::Error::SqliteFailure(e, _))
+                if attempt < 30
+                    && matches!(
+                        e.code,
+                        rusqlite::ErrorCode::DatabaseBusy | rusqlite::ErrorCode::DatabaseLocked
+                    ) =>
+            {
+                attempt += 1;
+                std::thread::sleep(std::time::Duration::from_millis(20 + 10 * attempt));
+            }
+            other => return other,
+        }
+    }
+}
+
+fn migrate_once(conn: &mut Connection) -> rusqlite::Result<()> {
+    // P66: two slot processes may share this file; wait for the other
+    // writer instead of failing, and migrate under one write lock so both
+    // read the same starting version.
+    conn.busy_timeout(std::time::Duration::from_secs(5))?;
     conn.pragma_update(None, "journal_mode", "WAL")?;
     conn.pragma_update(None, "synchronous", "NORMAL")?;
     conn.pragma_update(None, "foreign_keys", "ON")?;
     conn.execute_batch("CREATE TABLE IF NOT EXISTS schema_version(version INTEGER NOT NULL)")?;
-    let version: i64 = conn.query_row(
+    let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+    let version: i64 = tx.query_row(
         "SELECT COALESCE(MAX(version), 0) FROM schema_version",
         [],
         |r| r.get(0),
     )?;
-    let tx = conn.transaction()?;
     if version < 1 {
         tx.execute_batch(MATCHES_V1)?;
         tx.execute("INSERT INTO schema_version(version) VALUES (1)", [])?;
@@ -193,6 +384,19 @@ pub(super) fn migrate(conn: &mut Connection) -> rusqlite::Result<()> {
     if version < 8 {
         tx.execute_batch(RANKED_STATS_V8)?;
         tx.execute("INSERT INTO schema_version(version) VALUES (8)", [])?;
+    }
+    // v9 then v10: whichever v9 variant exists, both feature sets must.
+    if version < 10 {
+        ensure(&tx, &RELEASE)?;
+        ensure(&tx, &AUTH)?;
+        if version < 9 {
+            tx.execute("INSERT INTO schema_version(version) VALUES (9)", [])?;
+        }
+        tx.execute("INSERT INTO schema_version(version) VALUES (10)", [])?;
+    } else {
+        // Index definitions stay verified even on an already combined file.
+        tx.execute_batch(RELEASE_INDEXES)?;
+        tx.execute_batch(super::auth_sessions::INDEXES)?;
     }
     tx.commit()
 }

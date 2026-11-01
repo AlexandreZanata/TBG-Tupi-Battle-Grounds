@@ -14,7 +14,8 @@ const slug = name => name.toLowerCase().replace(/[^a-z0-9]/g, '');
 function buyable() {
   const source = fs.readFileSync(path.join(root, 'crates/tbg-core/src/types.rs'), 'utf8');
   const all = source.match(/ALL_KINDS: \[UnitKind; \d+\] = \[([\s\S]*?)\];/);
-  const summons = source.match(/pub fn is_summon\(self\) -> bool \{\s*matches!\(self,([\s\S]*?)\)\s*\}/);
+  // rustfmt may wrap `matches!(self, ...)` across lines.
+  const summons = source.match(/pub fn is_summon\(self\) -> bool \{\s*matches!\(\s*self,([\s\S]*?)\)\s*\}/);
   assert.ok(all, 'ALL_KINDS is declared in tbg-core types.rs');
   assert.ok(summons, 'the summon classification is declared in tbg-core types.rs');
   const summoned = new Set([...summons[1].matchAll(/UnitKind::(\w+)/g)].map(m => m[1]));

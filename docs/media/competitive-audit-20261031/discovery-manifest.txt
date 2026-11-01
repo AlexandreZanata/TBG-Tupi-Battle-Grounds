@@ -1,0 +1,14 @@
+command: .local/balance-audited/tbg-balance gate --pairs 64 --seed-start 0 --threads 16 --out .local/balance-audited/discovery
+git_head: b73ca56
+ruleset_fingerprint: d365d09fafcb66a4
+applied: none
+seeds: 0..64 (64 pairs)
+ruleset_base: canon
+shop_preview: false
+pool_kinds: 46
+threads: 16
+reaction_views: 5
+wall_s: 473.48
+games: 211712
+games_per_s: 447
+game_seconds_per_wall_second: 87326

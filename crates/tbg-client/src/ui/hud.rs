@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 use super::BUTTON;
 use super::{label, screen, UiAction};
 use crate::sync::MatchInfo;
@@ -12,10 +12,10 @@ use crate::GameState;
 
 #[derive(Component)]
 pub(super) enum Hud {
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     Clock,
     Hp(usize),
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     HpLabel(usize),
     Spectators,
     PrivateControls,
@@ -23,28 +23,28 @@ pub(super) enum Hud {
     Portrait(usize),
     EnergyFill,
     Info,
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     Card(usize),
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     CardText(usize),
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     CardStrip(usize),
     Augments,
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     CouncilStatus,
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     CouncilRow,
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     CouncilOption(usize),
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     CouncilOptionText(usize),
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     Forgo,
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     ForgoText,
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 fn council_card(i: usize) -> impl Bundle {
     (
         Node {
@@ -62,7 +62,7 @@ fn council_card(i: usize) -> impl Bundle {
     )
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 fn forgo_card() -> impl Bundle {
     (
         Node {
@@ -93,7 +93,7 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bundle {
     (
         Node {
@@ -116,13 +116,13 @@ pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bund
     )
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 fn card(i: usize, narrow: bool) -> impl Bundle {
     (
         Node {
             width: px(if narrow {
                 82.0
-            } else if cfg!(target_os = "linux") {
+            } else if cfg!(tbg_desktop) {
                 166.0
             } else {
                 154.0
@@ -152,7 +152,7 @@ fn card(i: usize, narrow: bool) -> impl Bundle {
                     width: percent(100),
                     height: px(if narrow {
                         52
-                    } else if cfg!(target_os = "linux") {
+                    } else if cfg!(tbg_desktop) {
                         145
                     } else {
                         76
@@ -169,7 +169,7 @@ fn card(i: usize, narrow: bool) -> impl Bundle {
     )
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 fn row(gap: f32) -> Node {
     Node {
         flex_direction: FlexDirection::Row,
@@ -179,7 +179,7 @@ fn row(gap: f32) -> Node {
     }
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 fn spawn(
     mut commands: Commands,
     info: Res<MatchInfo>,
@@ -266,7 +266,7 @@ fn spawn(
         });
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 fn spawn(
     mut commands: Commands,
     info: Res<MatchInfo>,

@@ -315,7 +315,7 @@ pub(super) fn poll_link(
             | ServerMsg::LoggedIn { .. }
             | ServerMsg::LoggedOut
             | ServerMsg::AccountError { .. }
-            | ServerMsg::RatingChanged { .. }) => inbox.0.push(msg),
+            | ServerMsg::RatingChanged { .. }) => inbox.push(msg),
             // D-40: the server's word on the preset (after a change or a
             // login) becomes what the editor shows and the next match uses.
             ServerMsg::ArcanasSelected { preset } => crate::config::save_arcanas(preset),
@@ -345,7 +345,7 @@ pub(super) fn poll_link(
         _ => None,
     };
     if let Some(NetStatus::Failed(why)) = link.status() {
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         {
             account.auto_login = false;
             account.pending = None;

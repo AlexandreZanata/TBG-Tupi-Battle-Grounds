@@ -3,12 +3,12 @@
 use super::{data::Data, kit, lobby::chrome, Account, Action, Lang, Panel, UiAction};
 use bevy::prelude::*;
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod account;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 use account::spawn as account_block;
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 pub fn spawn(
     root: &mut ChildSpawnerCommands,
     data: &Data,
@@ -62,7 +62,7 @@ pub fn spawn(
     });
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 pub fn spawn(
     root: &mut ChildSpawnerCommands,
     data: &Data,
@@ -182,7 +182,7 @@ fn navigation(
     }
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 fn account_block(
     root: &mut ChildSpawnerCommands,
     account: &Account,
@@ -257,7 +257,7 @@ fn presence_block(
                 .replace("{battle}", &v.battle.to_string())
         },
     );
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     let online = if data.live.is_none() && data.unavailable {
         lang.key("live.unavailable")
     } else {
@@ -277,9 +277,9 @@ fn presence_block(
     ))
     .with_children(|presence| {
         presence.spawn(chrome::icon(assets, "friends", 24., kit::MUTED));
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(not(tbg_desktop))]
         presence.spawn(kit::muted(online, 11.));
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         presence.spawn((
             kit::muted(online, 11.),
             kit::Pending(data.live.is_none() && !data.unavailable),

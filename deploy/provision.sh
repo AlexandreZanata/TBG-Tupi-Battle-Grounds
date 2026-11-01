@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 # One-time VPS setup (idempotent). Run on the VPS as root:
 #   sudo bash ~/tbg-src/deploy/provision.sh <domain> <ssh-user>
-# Ubuntu 22.04/24.04 or Debian 12. See deploy/README.md.
+# Ubuntu 22.04/24.04 or Debian 12/13. See deploy/README.md.
 set -euo pipefail
 
 DOMAIN="${1:?usage: provision.sh <domain> <ssh-user>}"
 SSH_USER="${2:?usage: provision.sh <domain> <ssh-user>}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
+# DOMAIN enters a proxy config and an environment file; accept a DNS name only.
+if [[ ! "$DOMAIN" =~ ^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$ ]]; then
+	echo "invalid domain" >&2
+	exit 2
+fi
 
 apt-get update
 if ! apt-cache show caddy >/dev/null 2>&1; then
@@ -16,7 +21,7 @@ if ! apt-cache show caddy >/dev/null 2>&1; then
 	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' > /etc/apt/sources.list.d/caddy-stable.list
 	apt-get update
 fi
-apt-get install -y caddy build-essential pkg-config curl sqlite3 ufw rsync
+apt-get install -y caddy build-essential pkg-config curl sqlite3 ufw rsync sudo
 
 # 2 GB swap on small machines so cargo can link.
 if [ "$(awk '/MemTotal/ {print $2}' /proc/meminfo)" -lt 3000000 ] && ! swapon --show | grep -q .; then
@@ -25,7 +30,10 @@ if [ "$(awk '/MemTotal/ {print $2}' /proc/meminfo)" -lt 3000000 ] && ! swapon --
 fi
 
 id -u tbg >/dev/null 2>&1 || useradd --system --home /var/lib/tbg --shell /usr/sbin/nologin tbg
-install -d -o root -g root /opt/tbg/bin /srv/tbg/web
+install -d -o root -g root /opt/tbg/bin /srv/tbg/web /srv/tbg/updates /etc/tbg
+# D-97 browser cookie/CSRF validation must use the deployed HTTPS origin.
+printf 'TBG_AUTH_ORIGINS=https://%s\n' "$DOMAIN" > /etc/tbg/server.env
+chmod 644 /etc/tbg/server.env
 # P14: the database and its backups hold names, ratings, and key hashes.
 install -d -m 700 -o root -g root /var/backups/tbg
 install -d -m 700 -o tbg -g tbg /var/lib/tbg
@@ -39,6 +47,8 @@ ufw allow 80,443/tcp
 ufw --force enable
 
 install -m 644 "$HERE/tbg-server.service" /etc/systemd/system/tbg-server.service
+# P66: the two-slot template stays disabled until README "Releases".
+install -m 644 "$HERE/tbg-server@.service" /etc/systemd/system/tbg-server@.service
 systemctl daemon-reload
 systemctl enable tbg-server
 

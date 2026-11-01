@@ -20,6 +20,18 @@ use crate::live::{
 impl Lobby {
     /// Publish a new snapshot if anything changed since the last one.
     pub(super) fn publish_live(&mut self, now: Instant) {
+        // P66: finished results still waiting for a reconnecting player
+        // keep an old slot from retiring until their window closes.
+        let receipts = self
+            .sessions
+            .values()
+            .filter(|s| {
+                s.conn.is_none() && s.finished.as_ref().is_some_and(|(until, _)| now < *until)
+            })
+            .count();
+        self.metrics
+            .result_receipts_pending
+            .store(receipts as u64, Relaxed);
         let snapshot = self.live_snapshot(now);
         self.metrics
             .spectators

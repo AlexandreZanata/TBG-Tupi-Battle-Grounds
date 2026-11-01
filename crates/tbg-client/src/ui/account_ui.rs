@@ -3,7 +3,6 @@
 //! them (`DespawnOnExit`).
 
 use bevy::prelude::*;
-use tbg_core::protocol::ClientMsg;
 
 use super::account::{download_key, Account, AccountScreen};
 use super::textform::{self, ActiveForm, TextKind};
@@ -22,19 +21,30 @@ pub fn plugin(app: &mut App) {
 /// Apply the P11 account buttons (called from `actions::apply`).
 pub fn apply_action(
     action: UiAction,
-    link: &mut MatchLink,
+    _link: &mut MatchLink,
     account: &mut Account,
     form: &mut ActiveForm,
     toasts: &mut Toasts,
     lang: Lang,
-    now: f64,
+    _now: f64,
 ) {
     match action {
         UiAction::CreateAccount => {
             textform::open(form, TextKind::Name, lang.t(Msg::AccountPromptName));
         }
         UiAction::HaveKey => {
-            textform::open(form, TextKind::Key, lang.t(Msg::AccountPromptKey));
+            if let Some(key) = crate::auth::migration_key() {
+                let name = tbg_core::account::parse_key(&key)
+                    .map(|(name, _)| name.to_owned())
+                    .unwrap_or_default();
+                account.screen = AccountScreen::SaveKey {
+                    key,
+                    name,
+                    saved: false,
+                };
+            } else {
+                textform::open(form, TextKind::Key, lang.t(Msg::AccountPromptKey));
+            }
         }
         UiAction::CopyKey => {
             if let AccountScreen::SaveKey { key, saved, .. } = &mut account.screen {
@@ -52,14 +62,20 @@ pub fn apply_action(
         }
         UiAction::DownloadKey => {
             if let AccountScreen::SaveKey { key, name, saved } = &mut account.screen {
-                download_key(name, key);
-                *saved = true;
-                toasts.say(Msg::AccountKeyDownloaded);
+                if download_key(name, key) {
+                    *saved = true;
+                    toasts.say(Msg::AccountKeyDownloaded);
+                } else {
+                    toasts.say(Msg::AuthBackupFailed);
+                }
             } else if let Some((profile, key)) =
                 account.profile.as_ref().zip(config::load_account_key())
             {
-                download_key(&profile.name, &key);
-                toasts.say(Msg::AccountKeyDownloaded);
+                if download_key(&profile.name, &key) {
+                    toasts.say(Msg::AccountKeyDownloaded);
+                } else {
+                    toasts.say(Msg::AuthBackupFailed);
+                }
             } else {
                 toasts.say(Msg::AccountNoKey);
             }
@@ -69,8 +85,12 @@ pub fn apply_action(
                 key, saved: true, ..
             } = &account.screen
             {
-                config::save_account_key(key);
-                account.screen = AccountScreen::None;
+                let command = if crate::auth::snapshot().access.is_none() {
+                    crate::auth::Command::Migrate(key.clone())
+                } else {
+                    crate::auth::Command::Backup
+                };
+                crate::auth::request(command);
                 toasts.say(Msg::AccountReady);
             } else {
                 toasts.say(Msg::AccountSaveFirst);
@@ -85,10 +105,7 @@ pub fn apply_action(
                 toasts.say(Msg::AccountLogoutConfirm);
             } else {
                 account.logout_armed = false;
-                match link {
-                    MatchLink::Net(n) => n.send(ClientMsg::Logout, now),
-                    _ => toasts.say(Msg::AccountNoConnection),
-                }
+                crate::auth::request(crate::auth::Command::Logout);
             }
         }
         _ => {}

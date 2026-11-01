@@ -106,9 +106,12 @@ fn br_s04_a_purchase_redraws_all_five_offers_and_nothing_rotates() {
     }
     assert_eq!(s.players[0].offers, offers, "no timed rotation");
     let pool = Ruleset::canon().pool;
+    // Keep 80 expected appearances per kind as the active roster grows:
+    // draws * five / pool.len() = 80 (BR-S01 uniform offers).
+    let draws = (16 * pool.len()) as u32;
     let mut shown = vec![0u32; pool.len()];
     let (mut bought_back, mut redraws) = (0u32, 0u32);
-    for seq in 1..=400 {
+    for seq in 1..=draws {
         let before = s.players[0].offers;
         s.players[0].energy = 10 * ENERGY_START;
         let slot = (seq % 5) as u8;
@@ -128,17 +131,18 @@ fn br_s04_a_purchase_redraws_all_five_offers_and_nothing_rotates() {
         s.units.clear();
     }
     assert!(
-        redraws > 390,
+        redraws * 40 > draws * 39,
         "every purchase redraws the five cards: {redraws}"
     );
-    // A unit is among five of 25 a fifth of the time (D-50), the bought
-    // one too: 80 of 400 expected, σ ≈ 8.
+    // The bought kind has the same five / pool.len() chance as every other
+    // kind. Preserve the original 80-appearance expectation and bounds,
+    // rather than testing the obsolete 25-kind pool's probability.
     assert!(
         (50..=110).contains(&bought_back),
-        "the bought unit comes back about a fifth of the time: {bought_back}"
+        "the bought unit returns uniformly: {bought_back} of {draws}"
     );
     for (i, n) in shown.iter().enumerate() {
-        assert!((50..=110).contains(n), "{:?} shown {n} of 400", pool[i]);
+        assert!((50..=110).contains(n), "{:?} shown {n} of {draws}", pool[i]);
     }
 }
 

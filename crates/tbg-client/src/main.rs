@@ -11,9 +11,10 @@ use bevy::prelude::*;
 mod arena;
 mod art;
 mod audio;
+mod auth;
 mod autoplay;
 mod camera;
-#[cfg(debug_assertions)]
+#[cfg(any(debug_assertions, feature = "ui-acceptance"))]
 mod capture;
 mod celebration;
 mod config;
@@ -45,6 +46,12 @@ pub enum GameState {
 }
 
 fn main() {
+    // P66: the release tooling stamps descriptors with the exact contract.
+    #[cfg(not(target_arch = "wasm32"))]
+    if std::env::args().any(|arg| arg == "--contract") {
+        println!("{}", net::admission::contract_id());
+        return;
+    }
     #[cfg(not(target_arch = "wasm32"))]
     if std::env::args().any(|arg| arg == "--version") {
         println!(
@@ -55,6 +62,31 @@ fn main() {
         );
         return;
     }
+    #[cfg(not(target_arch = "wasm32"))]
+    if std::env::args().any(|arg| arg == "--build-info") {
+        println!(
+            "{}",
+            serde_json::json!({"version":env!("CARGO_PKG_VERSION"),"protocol":tbg_core::protocol::PROTOCOL_VERSION,"contract":net::admission::contract_id(),"source_commit":option_env!("TBG_SOURCE_COMMIT").unwrap_or("development"),"target":env!("TBG_BUILD_TARGET"),"profile":if cfg!(debug_assertions){"debug"}else{"release"},"features":if cfg!(feature="ui-acceptance"){vec!["ui-acceptance"]}else{vec![]}})
+        );
+        return;
+    }
+    // One synthetic probe of the shared vault; P66 harnesses used the older flag name.
+    #[cfg(all(not(target_arch = "wasm32"), feature = "ui-acceptance"))]
+    if std::env::args().any(|arg| arg == "--auth-vault-probe" || arg == "--resume-vault-probe") {
+        platform::credentials::probe();
+        return;
+    }
+    #[cfg(all(not(target_arch = "wasm32"), feature = "ui-acceptance"))]
+    if std::env::args().any(|arg| arg == "--auth-native-journey") {
+        auth::acceptance_journey();
+        return;
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Err(message) = platform::window::validate_assets() {
+        eprintln!("TBG: {message}");
+        std::process::exit(2);
+    }
+    // P66 resume restoration now runs inside the auth coordinator's first restore.
     #[cfg(not(target_arch = "wasm32"))]
     let window = platform::window::settings();
     #[cfg(target_arch = "wasm32")]
@@ -67,7 +99,7 @@ fn main() {
     let plugins = DefaultPlugins;
     #[cfg(not(target_arch = "wasm32"))]
     let plugins = plugins.set(platform::window::log_plugin());
-    App::new()
+    let exit = App::new()
         .add_plugins(
             plugins
                 .set(WindowPlugin {
@@ -83,7 +115,7 @@ fn main() {
                     ..default()
                 }),
         )
-        .insert_resource(ClearColor(if cfg!(target_os = "linux") {
+        .insert_resource(ClearColor(if cfg!(tbg_desktop) {
             Color::srgb_u8(7, 15, 22)
         } else {
             art::palette::SKY_TOP
@@ -107,13 +139,21 @@ fn main() {
             vfx::plugin,
             audio::plugin,
         ))
+        .add_plugins(auth::plugin)
         .add_plugins(training::plugin)
         .add_plugins(platform_plugin)
         .run();
+    // P66: the launcher reads the exit code (75 applies a staged update).
+    #[cfg(not(target_arch = "wasm32"))]
+    if let AppExit::Error(code) = exit {
+        std::process::exit(i32::from(code.get()));
+    }
+    #[cfg(target_arch = "wasm32")]
+    let _ = exit;
 }
 
 fn platform_plugin(app: &mut App) {
-    #[cfg(debug_assertions)]
+    #[cfg(any(debug_assertions, feature = "ui-acceptance"))]
     capture::plugin(app);
     #[cfg(not(target_arch = "wasm32"))]
     platform::window::plugin(app);

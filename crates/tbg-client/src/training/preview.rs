@@ -62,7 +62,7 @@ fn show(
     mut clear: ResMut<ClearColor>,
     mut scenery: Query<&mut Visibility, With<crate::arena::ArenaScene>>,
     mut model: Query<(Entity, &mut Transform, &mut Animator), ModelFilter>,
-    #[cfg(target_os = "linux")] mut demo: Query<
+    #[cfg(tbg_desktop)] mut demo: Query<
         &mut Visibility,
         (
             With<crate::sync::lobby_battle::DemoUnit>,
@@ -84,7 +84,7 @@ fn show(
         if active {
             clear.0 = Color::srgb_u8(14, 22, 29);
         }
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         for mut visible in &mut demo {
             *visible = if active {
                 Visibility::Hidden

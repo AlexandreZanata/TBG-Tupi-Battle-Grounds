@@ -35,19 +35,19 @@ fn spawn(mut commands: Commands, lang: Res<crate::i18n::Lang>) {
         .with_children(|root| {
             root.spawn((
                 Node {
-                    width: if cfg!(target_os = "linux") {
+                    width: if cfg!(tbg_desktop) {
                         px(208)
                     } else {
                         Val::Auto
                     },
-                    height: if cfg!(target_os = "linux") {
+                    height: if cfg!(tbg_desktop) {
                         px(186)
                     } else {
                         Val::Auto
                     },
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
-                    justify_content: if cfg!(target_os = "linux") {
+                    justify_content: if cfg!(tbg_desktop) {
                         JustifyContent::Center
                     } else {
                         JustifyContent::FlexStart
@@ -56,7 +56,7 @@ fn spawn(mut commands: Commands, lang: Res<crate::i18n::Lang>) {
                     border_radius: BorderRadius::all(px(14)),
                     ..default()
                 },
-                BackgroundColor(if cfg!(target_os = "linux") {
+                BackgroundColor(if cfg!(tbg_desktop) {
                     Color::srgba(0.12, 0.11, 0.08, 0.73)
                 } else {
                     Color::srgba(0.04, 0.08, 0.12, 0.88)
@@ -64,21 +64,17 @@ fn spawn(mut commands: Commands, lang: Res<crate::i18n::Lang>) {
                 children![
                     super::label(
                         lang.t(crate::i18n::Msg::HudStarting),
-                        if cfg!(target_os = "linux") { 28. } else { 20. }
+                        if cfg!(tbg_desktop) { 28. } else { 20. }
                     ),
                     (
                         Text::new(""),
                         TextFont {
-                            font: if cfg!(target_os = "linux") {
+                            font: if cfg!(tbg_desktop) {
                                 super::kit::display_font().into()
                             } else {
                                 default()
                             },
-                            font_size: FontSize::Px(if cfg!(target_os = "linux") {
-                                100.
-                            } else {
-                                72.
-                            }),
+                            font_size: FontSize::Px(if cfg!(tbg_desktop) { 100. } else { 72. }),
                             ..default()
                         },
                         TextColor(Color::srgb_u8(0xF5, 0xDF, 0xB6)),
