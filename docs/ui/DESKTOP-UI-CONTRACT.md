@@ -198,3 +198,28 @@ visible. The installed executable was separately opened at 1920x970. See
 Windows and desktop-web full-frame/motion observations remain pending consolidation,
 including the previously registered laboratory and reduced-motion cases. No waiver
 or visual-parity claim follows from shared routing.
+
+### 2026-11-01 — Champion and Stronghold upgrade modal consistency
+
+Linux reference: first-tier Evolution retains two equal side-by-side choices.
+Only the second-tier remaining branch spans the entire content row. Fortification
+uses the champion's exact shared option skin, text size, heading/close geometry,
+spacing and outer frame, including the single full-width remaining second-tier
+choice. Choice names, price, next step and effects are inline instead of separate
+A/B medallions and coin boxes. Unavailable/pending feedback and authoritative
+purchase checks remain intact; purchases retain focus for the next tier.
+
+Shared propagation: `native_battle::{chrome, unit_panel, fortify}` uses one
+presentation on Linux, Windows and desktop web. The shared choice bundle grows
+into the available row, so hiding the unchosen branch removes the empty half.
+No platform-specific style or game-rule/protocol/price change is introduced.
+
+Matrix additions: `evolution-tier0-two`, `evolution-tier1-a-wide`,
+`evolution-tier1-b-wide`, `fortification-tier0-two`, `fortification-tier1-a-wide`,
+`fortification-tier1-b-wide`, `upgrade-dialog-disabled`, and
+`upgrade-dialog-focus-transition` (matched motion frames). Cover A/B, both languages,
+viewport/DPI cases, price/availability states, retained focus and dismissal.
+
+Evidence: native Linux release build, A/B local Practice flows and installation
+pending. Windows/web same-source packaged full-frame/motion comparisons remain
+pending consolidation. Source sharing alone is not proof of visual parity.

@@ -65,7 +65,15 @@
     "training-arena-cover-forest",
     "training-arena-cover-volcanic",
     "training-arena-cover-celestial",
-    "training-arena-cover-resize"
+    "training-arena-cover-resize",
+    "evolution-tier0-two",
+    "evolution-tier1-a-wide",
+    "evolution-tier1-b-wide",
+    "fortification-tier0-two",
+    "fortification-tier1-a-wide",
+    "fortification-tier1-b-wide",
+    "upgrade-dialog-disabled",
+    "upgrade-dialog-focus-transition"
   ],
   "motion_screens": [
     "preview-dance",
@@ -76,7 +84,8 @@
     "preview-motion-reduced",
     "preview-motion-resumed",
     "preview-motion-reentry",
-    "training-arena-cover-resize"
+    "training-arena-cover-resize",
+    "upgrade-dialog-focus-transition"
   ],
   "motion_frames": [
     0,
