@@ -29,6 +29,15 @@ pub const FISH_SILVER: Color = hex(0xB7D1D5);
 pub const SHARK_SLATE: Color = hex(0x3F6370);
 pub const SHARK_BELLY: Color = hex(0xCBD9D4);
 
+// P70: individual cloth, aged bone and ritual accents remain separate from team colors.
+pub const FIELD_SLATE: Color = hex(0x455766);
+pub const WINE_CLOTH: Color = hex(0x611421);
+pub const WINE_SHADE: Color = hex(0x380D14);
+pub const BLOOD_THREAD: Color = hex(0xE01A24);
+pub const RITUAL_VIOLET: Color = hex(0xC77AFF);
+pub const OLD_BONE: Color = hex(0xBFB599);
+pub const SHOWMAN_VIOLET: Color = hex(0x5C3D75);
+
 // Undead: bone, dark violet, spectral glow.
 pub const BONE: Color = hex(0xD8D2C0);
 pub const VIOLET: Color = hex(0x4B3B5C);

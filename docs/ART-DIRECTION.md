@@ -71,6 +71,17 @@ do not recolor whole torsos into team armor or globally increase saturation.
 These are presentation colors, not new faction lore or gameplay rules.
 Individual shapes, equipment and movement must also distinguish the kits.
 
+- Farwatch uses `FIELD_SLATE` (`#455766`) for a large practical coat region,
+  separating the arbalest silhouette from Archer's ranger green.
+- Bloodweaver uses `WINE_CLOTH` (`#611421`) and `WINE_SHADE` (`#380D14`)
+  for ritual cloth, with `BLOOD_THREAD` (`#E01A24`) reserved for readable
+  thread accents rather than a glowing whole body.
+- `RITUAL_VIOLET` (`#C77AFF`) separates small occult focal points from
+  spectral green. `OLD_BONE` (`#BFB599`) gives large aged bone regions
+  contrast against bright teeth/skulls. `SHOWMAN_VIOLET` (`#5C3D75`)
+  supports Puppetmaster's theatrical cloth silhouette. These remain
+  proposed individual refinements, with owner visual approval pending.
+
 ## 4. Rig and motion language
 
 - **Rig v2 candidate (P15):** 17 named body joints — Root, Hips, Spine, Chest, Head,

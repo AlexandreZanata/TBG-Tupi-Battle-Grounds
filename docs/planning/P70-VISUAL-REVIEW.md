@@ -126,3 +126,22 @@ source review and consolidate after the front is ready.
 - D-33 baseline/candidate lab and gate need the separately authorized heavy
   validation round. Owner look/fun approval remains pending for all 46.
 - No push, merge, deployment, packaging or changes to other active worktrees.
+
+## Deferred pilot consolidation and independent continuation
+
+> blocked: The scoped pilot development build and later combined pilot
+> consolidation both returned exit 75 (shared validation slot busy), before
+> Cargo started. The latter attempted the deduplicated client filters `p70_`,
+> `fish`, and `pyre_jet`, followed by the capture executable. No test, build
+> or after capture ran. The nonblocking lock was preserved; compilation
+> attempts stopped. The suspected cause is another validation owning the
+> host slot. No owner session/build was terminated or changed.
+
+Three independent source-review fronts continue the remaining 43 champion
+art passes using the already captured authentic baseline. This is a recorded
+sequence deviation: S2 runtime acceptance is still pending, so those passes
+must remain implemented candidates and cannot be signed off from source.
+The owner policy permits deferring contested compilation and continuing
+independent work; Trident range calibration and actual after evidence remain
+dependent and deferred. No arbitrary range increase substitutes for that
+calibration. The corresponding competitive change is not yet implemented.
