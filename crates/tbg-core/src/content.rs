@@ -1333,7 +1333,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     ]),
     unit(UnitKind::RattleTick,"Rattle & Tick",Humans,Tank,3_000,[900,60,38,900,28,0,0],None,RATTLE_TICK_ABILITIES,[FormDef{hp_bp:2_000,..form("Big Brother's Fury")},FormDef{dmg_bp:2_000,..form("Big Brother's Fury")},form("Tico's Tricks"),form("Tico's Tricks")]),
     unit(UnitKind::Capybara,"Capybara",Plants,Tank,3_000,[1_300,38,40,800,23,0,0],None,CAPYBARA_ABILITIES,[FormDef{hp_bp:2_000,..form("Stone Belly")},form("Stone Belly"),form("Swamp Wave"),form("Swamp Wave")]),
-    unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,1_100,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
+    unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,2_000,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
     unit(UnitKind::SolarSentinel,"Solar Sentinel",Celestials,Tank,3_000,[1_050,35,40,800,28,0,0],None,SOLAR_SENTINEL_ABILITIES,[FormDef{hp_bp:2_000,..form("Light Fortress")},form("Light Fortress"),form("Group Protection"),form("Group Protection")]),
     unit(UnitKind::LuminousOracle,"Luminous Oracle",Celestials,Control,2_400,[300,15,50,3_000,38,0,0],None,LUMINOUS_ORACLE_ABILITIES,[form("Restoring Light"),form("Restoring Light"),form("Sacred Aura"),form("Sacred Aura")]),
     unit(UnitKind::CelestialArcher,"Celestial Archer",Celestials,Ranged,2_400,[210,55,40,4_000,43,0,0],None,CELESTIAL_ARCHER_ABILITIES,[FormDef{dmg_bp:1_000,..form("Divine Precision")},FormDef{dmg_bp:1_000,..form("Divine Precision")},form("Celestial Mark"),form("Celestial Mark")]),

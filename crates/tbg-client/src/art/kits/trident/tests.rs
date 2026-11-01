@@ -304,3 +304,24 @@ fn p70_trident_reports_real_pose_dimensions_and_frontal_contact_at_strike() {
         }
     }
 }
+
+#[test]
+fn p70_trident_calibrates_candidate_world_distances_at_contact() {
+    // P70 S2: compare integer lane distances with the actual scaled weapon point, not model length.
+    for form in FORMS {
+        let spec = model::spec(form.0, form.1);
+        for distance in [1100, 1600, 1800, 2000, 2200] {
+            let mut m = moment(form, Clip::AttackMelee, 0.30);
+            m.aim = Some(Aim {
+                target: Vec3::new(0.0, 0.6, distance as f32 / 1000.0) / spec.plan.scale,
+                weight: 1.0,
+            });
+            let pose = sampled(&m);
+            let world = pose_world(UnitKind::Trident, &spec.plan, &pose);
+            let tip = world[Prop(Socket::WeaponR).index()].transform_point3(weapon::TIP)
+                * spec.plan.scale;
+            println!("P70 calibrated form={form:?} distance={distance} contact_world={tip:?} longitudinal_delta={:.4}", tip.z-distance as f32/1000.0);
+            assert!(tip.is_finite());
+        }
+    }
+}

@@ -1399,21 +1399,28 @@ online economy change.
 
 ### Proposed P70 Trident size, thrust and basic reach (owner 2026-10-31)
 
-**Proposed; not an active balance change in this planning commit.** The
-owner requests a taller Trident shark, a longer trident and a two-handed
-frontal spear thrust in place of its axe-like basic animation, with no
-weapon/body penetration. These appearance changes do not resize a server
-hitbox or create a new unit, class or faction.
+**Proposed P70 candidate: 2,000 simulation units (2.0 tiles), pending D-33
+and owner look/fun acceptance.** The isolated execution branch implements
+this authoritative base range, inherited unchanged by Base, A1, A2, B1
+and B2. The frozen reference remains 1,100 (1.1 tiles). Ruleset revision 3
+identifies the candidate; it is not an approved release balance value.
 
-The owner also explicitly requests increased authoritative basic attack
-range. The current base is **1,100 simulation units (1.1 tiles)** and the
-five current forms inherit it. P70 will propose a new integer base range
-**greater than 1,100**, calibrated to the longer weapon's visible contact.
-The exact new value is deliberately unresolved until measurement and
-D-33 baseline/candidate evidence; no new active value is set here. Record
-the selected Proposed number in this section in the same implementation
-commit as the content change, and document form inheritance and both-seat
-range boundaries. Owner look/fun acceptance remains pending.
+The owner requests a taller shark, a longer trident and a two-handed frontal
+spear thrust. Generated-mesh measurements give Base height 2.235 and weapon
+length 2.62656 world units. Contact-pose calibration compares 1.1, 1.6, 1.8,
+2.0 and 2.2 tiles. At 2.0 the point projects about 0.23–0.37 tiles beyond
+the target center in evolved forms; at 1.8 it projects 0.40–0.55 beyond.
+The 2.0 candidate is the smallest sampled increase keeping all five forms
+within roughly a normal target body's depth. This is a visual proposal,
+not balance evidence or a new hitbox. Actual opponents can close during
+windup; live before/after contact remains a separate acceptance check.
+
+Nearest-enemy/Guard/Stronghold selection and the existing special's primary
+selection algorithm are unchanged. Its primary search already uses the
+unit's effective range, so it also acquires primaries within the candidate
+reach; Bloody Rend remains centered on that locked primary with its original
+radius, damage, bleed and period. No new targeting rule or effect radius is
+introduced. The wider acquisition interval must be included in D-33 review.
 
 This narrow exception does not authorize changes to Trident's damage,
 cadence, HP, Energy cost, movement, targeting semantics, Bloody Rend area
