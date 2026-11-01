@@ -31,6 +31,17 @@ runtime source is `c481369`. P70 is already installed for local playtesting;
 this plan does not change that installation. Owner edits in the main worktree
 and historical P70 evidence are preserved.
 
+Owner follow-up also reports Rattle & Tick's weapon penetrating the ground:
+`/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_07-48-11.png`,
+1920 × 1080, SHA-256
+`632c529801fb534e15ee66eefa26dc0c9f44594cacbfa4ebbdcb4ac1148b9e42`.
+The selected unit is Base. New step S1b requires reproducing the motion,
+correcting weapon/grip/pivot geometry, checking all five forms and clips on
+both sides, and preserving combat timing and values. A generated-vertex
+clearance regression and ordinary-speed before/after are queued. The exact
+animation cause is not diagnosed from a single screenshot; no runtime fix
+is claimed in this planning update.
+
 ## Findings that determine the plan
 
 - Spawn and Evolution update both use a generic scaled bar height, not

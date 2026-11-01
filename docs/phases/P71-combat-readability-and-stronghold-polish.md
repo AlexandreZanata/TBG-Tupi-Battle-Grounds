@@ -12,7 +12,8 @@ Do not overwrite the owner's current worktree or P70 originals.
 
 ## 1. Owner outcome and scope
 
-The owner reports Trident's and Whisperer's HP bars entering their bodies, redundant blue
+The owner reports Trident's and Whisperer's HP bars entering their bodies,
+Rattle & Tick's weapon clipping through the ground, redundant blue
 team bands, hard-to-read Evolution cubes and buggy tower shots. They request
 bright yellow outlined Evolution stars, red/orange flame, a white/red/black
 Pyre Warden and professional-looking tower performances and progressive
@@ -60,6 +61,15 @@ Additional owner screenshot:
 It shows selected Base Whisperer with its HP bar crossing the floating upper
 body beneath the name label. Whisperer is a second mandatory regression case,
 not merely part of the generic roster sweep. Preserve both owner originals.
+
+Additional owner ground-clearance report:
+`/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_07-48-11.png`,
+1920 × 1080, SHA-256
+`632c529801fb534e15ee66eefa26dc0c9f44594cacbfa4ebbdcb4ac1148b9e42`.
+The selected unit is Base Rattle & Tick; the owner reports its weapon entering
+the ground. Preserve this frame and reproduce the motion before attributing
+it to a particular clip, socket, pivot or IK constraint. The club model and
+pose sources are `art/kits/rattle_tick/{model,mod}.rs`.
 
 Confirmed source limitations on P70:
 
@@ -148,6 +158,32 @@ Check the other 44 champions' five-form envelopes with
 existing evidence plus affected captures. Base/one/two-star transitions,
 reconnect, names, statuses, passenger overheads and death stay consistent.
 No need to build a general-purpose HUD framework.
+
+### S1b — Rattle & Tick weapon ground clearance
+
+1. Reproduce the owner-reported Base weapon penetration at the ordinary
+   match camera and actual BattleLine ground height. Inspect the complete
+   club geometry, grip/socket transform, arm reach and animated pose in
+   `art/kits/rattle_tick/{model,mod}.rs`, including custom parent transforms.
+2. Correct the local carry angle, hand target, weapon pivot or swing path
+   responsible for the intersection. Keep the weapon visibly held and the
+   heavy character grounded; do not lift the whole unit, hide the weapon,
+   crop the camera or shorten it merely to mask a bad transform. Preserve
+   Tick's shoulder position and independent performance.
+3. Check Base/A1/A2/B1/B2 on both sides through Idle, Walk, primary attack,
+   special overlays, Hit, Spawn, Evolve, Victory, Death and their blends.
+   The weapon can visibly contact the surface where intended, but must not
+   penetrate it; a grounded Death pose must also remain coherent.
+4. Add a focused `p71_` regression using transformed generated weapon vertices
+   against the actual ground plane over the reproduced clip and its blend
+   boundaries. Queue it with the existing client consolidation filter.
+   Capture an ordinary-speed before/after sequence, not only a safe rest pose.
+
+Acceptance: no club volume visibly sinks below the arena surface in the
+reviewed five-form sequences; grip and body clearance remain intact. Record
+minimum sampled world-space clearance and sampling limits. Keep existing
+Strike/release timing, damage, range, cadence, target rules and hitboxes.
+A finite sampled geometry test supports, but does not replace, rendered review.
 
 ### S2 — Remove body team markers across the roster
 

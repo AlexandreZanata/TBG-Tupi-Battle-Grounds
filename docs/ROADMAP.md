@@ -451,7 +451,8 @@ of historical full-suite blocks. No push or deployment is authorized.
 P70 46-champion candidate and the owner's installed-Linux screenshot.
 
 Order: freeze affected evidence → correct form-aware HP bars, tier stars and
-persistent foot allegiance → remove body team patches across all 46 kits →
+persistent foot allegiance → repair Rattle & Tick weapon ground clearance →
+remove body team patches across all 46 kits →
 white/red/black Pyre with orange/red fire → individual tower firing/animation
 repairs → cumulative 5% Stronghold degradation → scoped consolidation and
 native Linux playtest installation. Four kinds × five forms are mandatory;
