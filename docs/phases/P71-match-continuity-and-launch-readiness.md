@@ -391,6 +391,26 @@ outside git (`/data/tbg-windows-vm/REPORT.md`, `results/rc1-win11/`).
   did not reproduce locally. P71 adds `--chaos-silent` (the socket stays open
   but quiet, like a lost network) to exercise the path W1 fixes.
 
+- 2026-11-01: **W4 A/B with silent drops** (`--chaos-silent`: a dropped
+  socket stays open but quiet, rejoin after 5 s; 4 ranked matches, 8 bots):
+  consolidated rc.1 server 0/8 reconnects and 8/8 bots lost by Conflict
+  ("account controller unavailable; takeover requires explicit action");
+  P71 server 8/8 reconnects and 8/8 natural ends (`StrongholdDestroyed`).
+- 2026-11-01: **merged** to main through PR #36 (`e2a18af`; PR #35 had landed
+  on the consolidation branch after #34 merged it). The release job's cache
+  carried packaging outputs from main; `c2230c1` keeps them out.
+- 2026-11-01: **W5.5 done on the test environment** (owner order): the public
+  test server moved from the protocol-29 P66 generation to generation
+  `p71a-e2a18af02d80` (contract `w30-r2-3d56156049e626c5`), promoted with
+  ranked authority. The live database migrated schema 9 (P66 variant) to 10
+  with integrity ok and unchanged account/match/ranked counts, after an
+  integrity-checked backup. Only the game's own namespace, data directory
+  and a new image changed (other deployments, images and proxy vhosts
+  verified unchanged). **W7 done**: through the real domain and CDN the game
+  socket opens `wss://…/ws/slot-a?contract=w30-…`, the `__Host-tbg_refresh`
+  cookie is Secure/HttpOnly/SameSite=Strict/Path=/, same-family restore and
+  logout work (three synthetic accounts created; data disposable per owner).
+
 ## 6. Hand-off: remaining steps for the next agent
 
 1. **W4 A/B with silent drops** (script `/data/tbg-p71-chaos/chaos2.sh

@@ -78,10 +78,12 @@ pub(crate) fn slot() -> Option<char> {
 
 /// P66 U09: updates wait while sign-in, renewal, restore, sign-out or
 /// vault work is in flight.
+#[cfg(not(target_arch = "wasm32"))]
 pub fn idle_for_update() -> bool {
     update_idle(IN_FLIGHT.load(Ordering::Acquire), snapshot().status)
 }
 
+#[cfg(any(not(target_arch = "wasm32"), test))]
 fn update_idle(in_flight: bool, status: Status) -> bool {
     !in_flight
         && !matches!(
