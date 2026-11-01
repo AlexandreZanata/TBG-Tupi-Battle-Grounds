@@ -165,9 +165,19 @@ fn walk(m: &Moment, pose: &mut Pose, f: Form) {
             4.0 * phase.sin(),
         ],
     );
-    tools::add(pose, ForearmR, [-35.0, 0.0, 0.0]);
-    tools::set(pose, HandR, [25.0, 0.0, 0.0]);
-    if f.a {
+    // Carry the cleaver ahead of the knee with its point lifted. The shared
+    // backward arm swing plus the hunch previously drove the blade into the floor.
+    if !(f.b && f.t2) {
+        tools::set(pose, UpperArmR, [-36.0 + 8.0 * phase.sin(), 0.0, -18.0]);
+        tools::set(pose, ForearmR, [-55.0, 0.0, 0.0]);
+        tools::set(pose, HandR, [8.0, 0.0, 0.0]);
+    }
+    if f.b && !f.t2 {
+        // Butcher carries two cleavers; keep the opposite blade clear as well.
+        tools::set(pose, UpperArmL, [-32.0 - 8.0 * phase.sin(), 0.0, 18.0]);
+        tools::set(pose, ForearmL, [-50.0, 0.0, 0.0]);
+        tools::set(pose, HandL, [8.0, 0.0, 0.0]);
+    } else if f.a {
         tools::add(pose, ForearmL, [-35.0, 0.0, 0.0]);
     }
 }
