@@ -158,7 +158,7 @@ fn capture(
     #[cfg(target_os = "linux")] match_info: Res<crate::sync::MatchInfo>,
     #[cfg(target_os = "linux")] loading: Res<crate::ui::native_loading::Status>,
     mut started: Local<bool>,
-    mut ready_at: Local<Option<f32>>,
+    #[cfg(target_os = "linux")] mut ready_at: Local<Option<f32>>,
 ) {
     #[cfg(target_os = "linux")]
     {

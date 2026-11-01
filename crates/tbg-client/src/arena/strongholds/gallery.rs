@@ -98,11 +98,12 @@ pub(super) fn wear_sequence(
     mut towers: Query<(Entity, &mut Tower)>,
     mut previous: Local<Option<u8>>,
     mut start: Local<Option<f32>>,
-    loading: Res<crate::ui::native_loading::Status>,
+    #[cfg(target_os = "linux")] loading: Res<crate::ui::native_loading::Status>,
 ) {
     if config::url_param("damage_sweep").is_none() {
         return;
     }
+    #[cfg(target_os = "linux")]
     if !loading.boot_ready || loading.scene_waiting {
         return;
     }
