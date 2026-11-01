@@ -37,3 +37,13 @@ After a successful build: freeze its binary/receipt, then reinstall and verify
 its executable/assets hashes using the established local preview workflow.
 Native reinstall remains pending; the installed Ogre Archer follow-up
 `bc8ef32` was preserved. The source change is committed for GitHub delivery.
+
+## Consolidation resumed with Weaver
+
+The owner explicitly authorized waiting for the shared slot to finish the
+combined Weaver/Bone Brute/Pyre installation. The slot was acquired on
+2026-11-01 at13:40:20UTC and the native build passed in12.62s. That build
+exposed the now-unused Segment motion variant from the removed ground strip;
+its enum entry and unreachable animation branch were removed as well. No
+remaining VFX behavior changes. The final build and native install are part
+of the same owner-authorized consolidation.

@@ -41,3 +41,12 @@ its current holder. This is an explicit exception request to the AGENTS.md
 no-wait/no-poll rule, not permission to bypass the lock or raise build jobs.
 Until answered, native delivery remains pending and installed versionbc8ef32
 is preserved. The source change is committed for GitHub delivery.
+
+## Owner-authorized consolidated wait
+
+The owner explicitly answered “Wait and complete installation” on2026-11-01.
+For this consolidated native delivery only, waiting on the existing shared
+lock is authorized, without stopping its current holder, bypassing the lock,
+increasing Cargo jobs or changing target caches. This supersedes the pending
+approval above. The original nonblocking policy remains the default for
+unrelated future work. Build and installation outcomes follow below.
