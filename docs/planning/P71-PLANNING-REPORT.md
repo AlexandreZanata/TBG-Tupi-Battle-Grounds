@@ -42,6 +42,17 @@ clearance regression and ordinary-speed before/after are queued. The exact
 animation cause is not diagnosed from a single screenshot; no runtime fix
 is claimed in this planning update.
 
+Owner follow-up reopens Trident's close-range thrust: the spear enters the
+opponent before the extension reads clearly. New S1c requires earlier visible
+ready/load preparation, a raised/retracted guard and a more downward,
+target-directed thrust at close melee distance. Both hands stay attached,
+with distance-aware visual extension and no penetration of Trident's own
+body or the floor. The existing 0.30 s Strike, basic/special event timing,
+range, movement and damage remain unchanged. Actual approach/aim/blend
+recordings on both sides and all five forms are mandatory; fixed-target pose
+samples alone cannot establish the correction. This is planned, not a
+claimed runtime fix or a new mechanical cast window.
+
 ## Findings that determine the plan
 
 - Spawn and Evolution update both use a generic scaled bar height, not

@@ -185,6 +185,64 @@ minimum sampled world-space clearance and sampling limits. Keep existing
 Strike/release timing, damage, range, cadence, target rules and hitboxes.
 A finite sampled geometry test supports, but does not replace, rendered review.
 
+### S1c — Trident anticipation and distance-aware spear thrust
+
+Owner follow-up: the trident already passes into the opponent before the
+thrust reads as an attack. Start the visible preparation before the weapon
+reaches the opponent; raise/retract the weapon in the load, then aim its
+points toward the target. Against a close melee opponent, carry a more
+pronounced downward incline so extension reads as a controlled spear thrust.
+This reopens P70's unresolved live contact/axis acceptance, including B2.
+
+1. Reproduce the complete approach → ready → load → contact → withdrawal
+   sequence with an actual opponent that closes during windup. Inspect
+   `art/kits/trident/{motion,model,weapon,tests}.rs`, the Animator's aim/blend
+   handling and actual rendered target/body positions. A studio target at
+   fixed range is insufficient. Record first visual overlap versus the
+   existing AttackStart/Strike events before choosing the repair.
+2. Keep the ready/approach pose from already projecting the points through
+   the opponent. Reposition/retract the two-hand guard and raise the load
+   enough to clear the approaching body before extension. Cosmetic ready
+   preparation may precede contact; actual attack/cast onset still follows
+   the existing authoritative cue. Do not anticipate damage, change target
+   selection, add a server cast event or trigger a fake early hit.
+3. Blend the guard origin, elevation and visual extension with the actual
+   displayed target distance/height. At ordinary spear distance, deliver the
+   frontal point-led thrust; at close melee distance, start with hands/shaft
+   higher and farther back and point the spear downward toward the opponent.
+   Calibrate the elevation and extension against target silhouettes instead
+   of one fixed pitch or an arbitrary new range threshold. This remains a
+   thrust, not an overhead axe chop: the points lead toward the target and
+   the shaft stays aligned through contact and withdrawal.
+4. Preserve rigid weapon length and the existing two-hand IK anchors. Keep
+   hands reachable and the shaft/butt outside Trident's own torso, jaw and
+   fins; the tip must not sweep through the ground or pass out the far side
+   of a small opponent before the intended contact. Use bounded cosmetic
+   contact depth based on rendered geometry, not a new gameplay hitbox or
+   collision simulation. Do not solve the defect by shrinking/disappearing
+   the weapon or moving the authoritative unit farther away.
+5. Fit the new load/extension/recovery inside the existing attack timeline:
+   the primary Strike stays at 0.30 s and authoritative damage/cadence stay
+   unchanged. Preserve Bloody Rend's independent channel/timing and inspect
+   overlapping basic/special poses. Raise/retract before contact and withdraw
+   along the same line without a sideways snap, teleport or grip jump.
+6. Review all five Trident forms, both seats, near/normal range and an enemy
+   moving inward; include short/tall targets, basic/special overlap, retarget,
+   target death, Walk/Idle transitions and Hit/Evolve interruptions. Verify
+   live transforms and aim weight rather than accepting a direct pose sample
+   with forced full aim as proof of correct runtime contact.
+
+Acceptance: normal-speed footage shows readable preparation before first
+unintended body overlap, a more downward point-led thrust at close distance,
+contact at the existing cue and a controlled return. Keep current HP-bar
+clearance, own-body/ground clearance and grip regressions. Add focused `p71_`
+regressions for the reproduced close-range path, both-side aim, finite/reachable
+poses and transition clearance; queue existing `p70_trident_` regressions once
+at consolidation because this step changes the previously validated pose.
+Record before/after tip/shaft paths, event timestamps, spacing and sampling
+limits. Current range 2000 remains Proposed under P70; this is not permission
+to increase range again, change movement or delay the opponent's approach.
+
 ### S2 — Remove body team markers across the roster
 
 1. Audit shared body helpers and all 46 kit models, five auxiliaries and
