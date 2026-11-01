@@ -418,3 +418,40 @@ database mutation or deployment is part of this planning delivery. Use the
 2026-10-31 minimum-validation policy recorded in the program: documentation
 checks now; exact targeted tests once at implementation consolidation;
 heavy/full-suite checks only on a separate explicit owner request.
+
+## Windows native release (owner planning request, 2026-10-31)
+
+| Phase | Spec | Deliverable | Status | Review |
+|---|---|---|---|---|
+| P68 | [P68-windows-native-release.md](phases/P68-windows-native-release.md) | Exact desktop visuals, Windows MSVC ZIP/installer, Wine/real Windows acceptance; P68-A adds Linux/Windows/web persistent auth, 15-minute Access and rotating 30-day Refresh | **Linux candidate published:** [v0.1.0-p68.1](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.0-p68.1), [Draft PR #32](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/32); protocol 30/schema 9 auth, real Linux vault/browser evidence and shared desktop routing implemented; see [execution evidence](phases/P68-execution.md). Windows/Wine/signing and exact packaged visual acceptance remain pending | A01–A14/W01–W18, coordinated wire/schema, real vaults/browser, support/CRT/signing and owner visual sign-off |
+
+Read the [acceptance plan](planning/P68-WINDOWS-ACCEPTANCE.md),
+[hashed OS-gate inventory](planning/P68-PLATFORM-GATES.csv) and
+[execution prompt](planning/P68-EXECUTION-PROMPT.md). The source audit records
+234 conditions in 37 client/build-script files, including the Linux-only
+native interface and art-generation paths. Review their context rather
+than replacing every platform guard mechanically.
+
+P65–P67 are already reserved on their independent planning branches. Their
+absence from this consolidated Linux source base does not renumber them or
+make community, updater or commerce implementation a prerequisite for P68.
+Architecture §24 and D-96 leave those planning reservations intact.
+
+The installed native Linux release is preserved. Windows CI, Wine on Linux
+and actual Windows GPU observations remain separate acceptance records.
+Documentation validation now is not a build, installation or release claim.
+
+**Owner visual requirement:** Linux and Windows must have exactly the same
+frontend appearance. P68 includes platform-specific corrections wherever
+needed while preserving the approved Linux quality. W07/W08 and phase visual
+acceptance remain blocked by any unresolved visible difference; validate
+with matched packaged captures, not merely shared code or similar styling.
+
+**Owner auth extension:** execute [P68-A](planning/P68-PERSISTENT-AUTH.md)
+before final release packages and complete A01–A14 with W01–W18. Access is
+15 minutes; refresh families expire 30 days from login and rotate without
+extending that deadline. Linux/Windows use real user vaults, web uses protected
+cookies, and legacy keys migrate safely. D-97/GAME-DESIGN §21 authorize the
+account/wire changes without a combat change or automatic production deploy.
+The [auth source manifest](planning/P68-AUTH-SOURCE-MANIFEST.csv) records
+34 relevant baseline files for migration and consumer review.

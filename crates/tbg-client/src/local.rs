@@ -63,7 +63,7 @@ impl LocalMatch {
                 }
             }
         }
-        #[cfg(all(debug_assertions, target_os = "linux"))]
+        #[cfg(all(any(debug_assertions, feature = "ui-acceptance"), tbg_desktop))]
         if crate::config::url_param("capture").is_some()
             && crate::config::url_param("capture_panel").as_deref() == Some("council")
         {

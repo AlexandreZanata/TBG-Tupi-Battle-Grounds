@@ -5,7 +5,6 @@
 use bevy::prelude::*;
 use tbg_core::protocol::{valid_room_code, RoomCode};
 
-use super::account::Account;
 use super::ActionQueue;
 use crate::config;
 use crate::link::MatchLink;
@@ -49,7 +48,6 @@ fn join_from_url(mut queue: ResMut<ActionQueue>) {
 /// for a mode, so the name and ranked eligibility stay correct.
 fn probe_on_load(
     mut link: NonSendMut<MatchLink>,
-    mut account: ResMut<Account>,
     time: Res<Time>,
     mut done: Local<bool>,
     #[cfg(not(target_arch = "wasm32"))] mut toasts: ResMut<super::Toasts>,
@@ -71,11 +69,8 @@ fn probe_on_load(
     if config::url_param("room").is_some() || config::url_param("challenge").is_some() {
         return;
     }
-    if config::load_token().is_some()
-        || config::load_account_key().is_some()
-        || config::url_param("probe").is_some()
-    {
+    // D-97: account sessions come from the auth coordinator, never a saved key.
+    if config::load_token().is_some() || config::url_param("probe").is_some() {
         *link = MatchLink::Net(Box::new(NetLink::new(Mode::Probe, time.elapsed_secs_f64())));
-        account.auto_login = config::load_account_key().is_some();
     }
 }

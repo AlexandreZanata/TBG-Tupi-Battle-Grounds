@@ -57,9 +57,10 @@ fn add_session(
     lobby.sessions.insert(
         token,
         Session {
+            auth_binding: None,
             token,
             name: "Tester".into(),
-            conn: Some(ConnHandle { id: 1, tx }),
+            conn: Some(ConnHandle::new(1, tx)),
             state,
             account: None,
             ip: "127.0.0.1".parse().unwrap(),
@@ -200,7 +201,7 @@ fn resume_cannot_start_an_expired_rematch_before_cleanup() {
     let (tx, mut a_rx) = mpsc::channel(8);
     lobby.hello(
         Some(a),
-        ConnHandle { id: 2, tx },
+        ConnHandle::new(2, tx),
         "127.0.0.1".parse().unwrap(),
     );
     assert!(lobby.rematches.is_empty());
@@ -395,6 +396,10 @@ async fn ranked_matches_are_listed_with_ratings_and_their_end_unlists_them() {
     for (token, name, rating) in [([7; 16], "Ana", 1_300), ([8; 16], "Bia", 1_100)] {
         let mut s_rx = add_session(&mut lobby, token, SessionState::Idle);
         let s = lobby.sessions.get_mut(&token).unwrap();
+        s.auth_binding = Some(crate::auth::Binding::fixture(
+            i64::from(token[0]),
+            profile(name, rating),
+        ));
         s.account = Some((i64::from(token[0]), profile(name, rating)));
         drop(s_rx.try_recv());
     }
@@ -596,7 +601,7 @@ fn celebration_terminal_replay_uses_the_existing_window_and_explicit_dismissal()
         Box::new(completed_fixture(Seat::A)),
     ));
     let (tx, mut inbox) = mpsc::channel(8);
-    let conn = ConnHandle { id: 6363, tx };
+    let conn = ConnHandle::new(6363, tx);
     lobby.hello(Some(token), conn, std::net::IpAddr::from([127, 0, 0, 1]));
     let messages: Vec<_> = std::iter::from_fn(|| inbox.try_recv().ok())
         .filter_map(|e| {

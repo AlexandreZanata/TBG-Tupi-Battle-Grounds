@@ -5,19 +5,14 @@ use bevy::prelude::*;
 
 pub fn spawn(root: &mut ChildSpawnerCommands, account: &Account, assets: &AssetServer, lang: Lang) {
     // Both columns end at 67%, leaving the same 1% gap above their lower panels.
-    let rect = [
-        2.,
-        17.,
-        27.5,
-        if cfg!(target_os = "linux") { 50. } else { 45. },
-    ];
+    let rect = [2., 17., 27.5, if cfg!(tbg_desktop) { 50. } else { 45. }];
     let mut panel = root.spawn(chrome::panel(rect));
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     panel.insert(Node {
         row_gap: px(9),
         ..chrome::panel_node(rect)
     });
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     panel.insert((
         BackgroundColor(chrome::WOOD),
         Node {
@@ -64,12 +59,8 @@ pub fn spawn(root: &mut ChildSpawnerCommands, account: &Account, assets: &AssetS
                     align_items: AlignItems::Center,
                     column_gap: px(13),
                     padding: UiRect::axes(px(14), px(5)),
-                    border: UiRect::all(px(if cfg!(target_os = "linux") { 1. } else { 2. })),
-                    border_radius: BorderRadius::all(px(if cfg!(target_os = "linux") {
-                        4.
-                    } else {
-                        5.
-                    })),
+                    border: UiRect::all(px(if cfg!(tbg_desktop) { 1. } else { 2. })),
+                    border_radius: BorderRadius::all(px(if cfg!(tbg_desktop) { 4. } else { 5. })),
                     ..default()
                 },
                 chrome::skin(mode_color(ranked), true, ranked),
@@ -83,7 +74,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, account: &Account, assets: &AssetS
                     assets,
                     icon,
                     37.,
-                    if ranked && !cfg!(target_os = "linux") {
+                    if ranked && !cfg!(tbg_desktop) {
                         Color::srgb_u8(200, 236, 255)
                     } else {
                         kit::GOLD
@@ -107,7 +98,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, account: &Account, assets: &AssetS
 }
 
 fn mode_color(ranked: bool) -> Color {
-    if cfg!(target_os = "linux") {
+    if cfg!(tbg_desktop) {
         chrome::METAL
     } else if ranked {
         Color::srgb_u8(18, 88, 148)

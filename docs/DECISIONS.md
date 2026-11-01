@@ -2436,6 +2436,99 @@ phase/section title; do not treat a numeric collision as supersession.
 New integration behavior is documented in GAME-DESIGN's consolidated roster
 activation section and `phases/CONSOLIDATED-LINUX-RELEASE.md`.
 
+## D-96 · Windows native packages with separate Wine and Windows evidence — 2026-10-31 (Proposed, P68)
+
+**Decision.** Extend the existing Bevy desktop client from the owner's
+requested `codex/consolidated-linux-release` base, frozen at
+`55510c5363e3f1e555fa5133208a5faf20c5825b`. First share the Linux-only native
+UI and generated art paths where appropriate, keeping browser and true OS
+services distinct. Build the primary Windows release on Windows MSVC and
+reuse the native packager for a portable ZIP plus a safe per-user installer.
+No new engine, server authority, protocol feature or gameplay value is needed.
+
+**Owner visual requirement (2026-10-31).** Linux and Windows must have
+exactly the same frontend appearance, including UI layout/typography/art and
+3D lighting/effects/animation at matched conditions. Platform-specific
+adjustments are explicitly authorized to achieve that result; shared code
+alone is not acceptance evidence. Preserve the approved Linux quality and
+close every visible discrepancy before W07/W08 or P68 visual acceptance.
+No blanket OS/driver tolerance or platform-specific redesign is permitted.
+
+**Distribution.** Use pinned inputs and a reviewed CRT/import policy,
+complete assets, PE metadata/icons, user-local mutable data, safe upgrade/
+uninstall and final-artifact hashes. Signed public promotion is an owner-
+gated step; unsigned candidates may be tested only with truthful labeling.
+Do not replace old tags or claim a missing Windows artifact succeeded just
+because the Linux release exists. Preserve Linux release jobs/installation.
+
+**Why.** The existing Windows package option does not establish parity:
+many native interface paths and the art manifest are Linux-gated, packaging
+executes its input on the host, and the only release job is Linux. A Windows
+build without package/runtime checks could present a different interface,
+depend on the source checkout or miss runtime files on a clean computer.
+
+**Evidence boundaries.** Windows CI establishes build/package facts.
+Wine tests the exact Windows artifact on Linux in an owned isolated prefix;
+it is not a sandbox or proof of actual Windows drivers/shell behavior.
+Actual Windows GPU acceptance and owner visual review remain required for
+a public supported Windows release. Never change gameplay, disable TLS or
+silently strip graphics features to pass a Wine test.
+
+**Status and reservations.** Planning only; no compilation, Wine install,
+installer or runtime verification. P65–P67's independent plans reserve
+D-91–D-95 and architecture §§21–23; this base does not contain those plans.
+Historical overlapping identifiers remain untouched. The detailed scope,
+owner choices and validation levels live in [P68](phases/P68-windows-native-release.md).
+
+**Reopen when** clean-machine evidence rejects the CRT/installer choice,
+Windows support requirements change, Wine cannot provide the required GPU
+path, measured packaging/CI cost exceeds the indie project's needs, or the
+owner activates a future updater that changes artifact/install identity.
+
+## D-97 · Short Access, rotating absolute-lifetime refresh and platform vaults — 2026-10-31 (Proposed, P68-A)
+
+**Owner extension.** Add persistent authentication to P68 for Linux, Windows
+and web: 15-minute Access Tokens and 30-day Refresh Tokens. The attached
+observations are design input; source inspection confirms that automatic
+login exists but currently reuses a plaintext-persisted AccountKey. This
+decision explicitly extends D-96's original packaging-only backend/wire scope.
+
+**Decision.** Use opaque CSPRNG tokens, an in-memory Access index, and
+additive SQLite family/consumed-refresh history through the existing writer.
+Rotate atomically without extending the initial family's 30-day expiry;
+make bounded retry/conflict handling explicit and revoke on replay outside
+that policy. No JWT/OAuth/Redis service or combat-tick auth work is needed.
+GAME-DESIGN §21 owns new lifetimes, limits and revised account contracts.
+
+Native refresh uses Linux Secret Service or Windows Credential Manager
+Local persistence; Access stays in memory. Browser refresh uses a Secure/
+HttpOnly/SameSite=Strict host cookie with strict origin/CSRF controls and
+separate routes from native token-body responses. Coordinate refresh across
+tabs/processes; unavailable vaults/cookies never trigger plaintext fallback.
+Use the current explicit keyring provider APIs, not old sample assumptions.
+
+**Authority.** One active account controller, multiple durable families.
+Background refresh/passive restoration cannot take over. Authenticate the
+account/family before resume; keep the 128-bit match handle separate. Renew
+the current socket. Natural Access expiry does not forfeit an admitted
+match, but revocation invalidates its lease. New account operations require
+valid auth and reconnect keeps its existing deadline/seat checks.
+
+**Migration and limits.** Existing AccountKeys remain valid for manual
+login; remove a stored legacy key only after secure persistence/confirmation
+and backup acknowledgment. Report an incomplete migration or an unrecoverable
+lost issuance honestly; no fake success or silent new account. Keep exact
+Linux/Windows frontend visuals and compiled English/pt-BR states. Real vault,
+browser, replay/revocation and match tests are separate required evidence.
+
+**Status.** Planning only; [P68-A](planning/P68-PERSISTENT-AUTH.md) contains
+contracts, module map, proposed SQL, rollout and A01–A14 acceptance. No auth
+implementation, schema migration, credentials or production change here.
+
+**Reopen when** multiple server processes need shared auth validation,
+measured store/access-cache pressure requires a different cap, native vault
+providers cannot meet deployment constraints, a new recovery method changes
+AccountKey policy, or owner-approved security policy changes token lifetimes.
 ## D-48 amendment · Normalize roster health by active roster size — 2026-10-31 (owner-approved)
 
 The owner approved a minimum purchase share of 62.5% of the uniform share,
@@ -2533,3 +2626,14 @@ and real Windows acceptance remain open in P66 §11.
 Protocol 29/release schema 9 in this branch must be reconciled explicitly with
 the independent P68 protocol 30/auth schema 9 before those fronts are combined.
 Do not reuse a migration number simply because both documents named it.
+
+### D-97 implementation note: coordinated auth wire activation
+
+P68's isolated Linux-first candidate uses protocol 30 and schema 9, chosen
+from the actual integrated protocol-29/schema-8 base. Registration/account
+contract fixtures now issue over the native HTTP channel and authenticate
+the real WebSocket rather than sending legacy WS credentials. Rule checks
+remain unchanged; new auth/rotation/controller checks extend them. Passive
+same-family resume also preserves a still-attached controller; explicit
+Continue here alone authorizes displacement. Production protocol 29 is not
+compatible, and no production activation is implied by the candidate.

@@ -24,6 +24,7 @@ use crate::Config;
 mod account_done;
 mod accounts;
 mod arcanas;
+mod auth;
 mod challenge;
 mod leaderboard;
 mod live;
@@ -60,6 +61,7 @@ pub(super) enum SessionState {
 }
 
 pub(super) struct Session {
+    pub(super) auth_binding: Option<crate::auth::Binding>,
     pub(super) token: Token,
     pub(super) name: String,
     pub(super) conn: Option<ConnHandle>,
@@ -210,6 +212,29 @@ impl Lobby {
 
     fn handle(&mut self, cmd: LobbyCmd) {
         match cmd {
+            LobbyCmd::AuthenticatedHello {
+                resume,
+                conn,
+                ip,
+                binding,
+                reply,
+            } => {
+                let result = self.auth_hello(resume, conn, ip, binding);
+                let _ = reply.send(result);
+            }
+            LobbyCmd::AuthClaim {
+                token,
+                conn_id,
+                binding,
+                take_over,
+            } => self.auth_claim(token, conn_id, binding, take_over),
+            LobbyCmd::AuthIdle { families, reply } => {
+                let _ = reply.send(self.auth_idle(&families));
+            }
+            LobbyCmd::AuthRevoke { scope, reply } => {
+                let result = self.auth_revoke(&scope);
+                let _ = reply.send(result);
+            }
             LobbyCmd::Hello {
                 resume,
                 conn,

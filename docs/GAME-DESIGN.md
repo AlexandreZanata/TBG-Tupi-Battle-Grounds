@@ -48,7 +48,7 @@ evolve, and which factions you combine.
 | MVPUnitRoster | Launch target of 12 units; 2.0 ships the first 8 first | — |
 | Account | **Proposed (P11):** a player identity — one `PlayerName` + one `AccountKey`; holds `Rating` and statistics | `Account` |
 | PlayerName | **Proposed (P11):** unique public name chosen at account creation | `PlayerName` |
-| AccountKey | **Proposed (P11):** the only credential: `PlayerName-XXXX-XXXX-XXXX-XXXX` | `AccountKey` |
+| AccountKey | **Proposed (P11/P68-A):** the long-lived manual credential: `PlayerName-XXXX-XXXX-XXXX-XXXX`; delegated session tokens are defined in §21 | `AccountKey` |
 | MatchMode | **Proposed (P12, P39):** `Casual` (no rating change), `Ranked` (accounts only, rating changes), or `Challenge` (a direct invitation match; casual rules, no rating change) | `MatchMode` |
 | Quick Challenge | **Proposed (P39):** a direct invitation match created in one click; one different session joins by link; casual rules, no rating, no queue | `Challenge` |
 | Rematch | **Proposed (P39):** a new Challenge match between the same two sessions after both request it within the expiry | `RematchTicket` |
@@ -126,10 +126,10 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-C03 | Store purchases are granted only after server-side receipt validation | Adapted | S1, S2 |
 | BR-C04 | `StrongholdStyle`s are free cosmetics; every style has identical gameplay (styles stay cosmetic; mechanical `StrongholdKind`s are separate, BR-SK01–SK09, D-46) | Proposed | — |
 | BR-P01 | An `Account` is a unique `PlayerName` plus an `AccountKey`; names are 3–16 letters, digits or `_`, start with a letter, are unique ignoring case, and never change | Proposed | — |
-| BR-P02 | The `AccountKey` is the only credential: shown once at creation, never shown to other players, not recoverable | Proposed | — |
-| BR-P03 | One active session per account; a new login takes over the old one, including a running match | Proposed | — |
+| BR-P02 | The `AccountKey` is the long-lived manual credential: shown once at creation, never shown to other players, not recoverable on this base. P68-A delegates runtime authentication to expiring tokens (§21) without changing existing keys | Proposed (P11/P68-A) | — |
+| BR-P03 | One active account controller; explicit login/takeover can replace the old controller, including its match. P68-A allows separate persistent device families, but passive refresh/startup never takes over automatically (§21) | Proposed (P11/P68-A) | — |
 | BR-P04 | Guests may play practice, casual matches, and private rooms; ranked play needs an account | Proposed | — |
-| BR-P05 | A public profile shows name, rating, rank, record, win rate, faction mix, and the last 10 ranked results; no other personal data is stored | Proposed | — |
+| BR-P05 | A public profile shows name, rating, rank, record, win rate, faction mix, and the last 10 ranked results. P68-A additionally stores minimal private session-security metadata (§21), never exposing tokens/device identifiers on public profiles | Proposed (P11/P68-A) | — |
 | BR-R01 | Two queues: `Casual` (guests and accounts; private rooms are casual) and `Ranked` (accounts only) | Proposed | — |
 | BR-R02 | Matchmaking pairs the two longest-waiting players of the same queue, regardless of rating | Proposed | — |
 | BR-R03 | Every ranked match changes both players' `Rating` from both ratings (Elo, §5); win 1, draw ½, loss 0 | Proposed | — |
@@ -1480,3 +1480,64 @@ criterion
 on an agreed paired fixture, never an existing measured SLO. Security/result
 loss stops rollout independently. Final limits/OS/channel/signing/emergency/
 retention/player-default decisions O01–O05 remain owner gates before activation.
+
+## 21. Persistent authentication — Proposed, P68-A (owner extension)
+
+Sections 18–20 remain reserved by independent P65–P67 plans, absent from this
+consolidated base. These rules specify the owner's P68 authentication scope;
+no runtime feature is enabled by this documentation. D-97 and
+[P68-A](planning/P68-PERSISTENT-AUTH.md) own engineering details.
+
+| Rule | Contract |
+|---|---|
+| BR-AS01 | Access Tokens are opaque, independently random 256-bit credentials, valid for at most 15 minutes (900 seconds), bounded by family expiry and revocable earlier |
+| BR-AS02 | Refresh Tokens are independent random 256-bit credentials; each device-family expires 30 days (2,592,000 seconds) after initial login. Rotation never extends this absolute lifetime |
+| BR-AS03 | Rotate refresh on successful renewal in one transaction, retain consumed hashes through family expiry, and revoke the affected family on replay outside the defined bounded retry policy |
+| BR-AS04 | Access exists only in client/server memory; persist native refresh only in Linux Secret Service or current-user Windows Credential Manager with Local persistence; web uses an HttpOnly/Secure/SameSite=Strict host cookie, Path=/ and no Domain |
+| BR-AS05 | No new automatic AccountKey/token persistence in ordinary preferences, localStorage/sessionStorage, URLs, logs or caches. Explicit manual key backup remains possible; incomplete legacy conversion preserves the pre-existing recovery key until safe migration completes |
+| BR-AS06 | A match reconnect handle is separate from account authentication. Account resume requires matching valid Access and family/account binding; guest handles never grant an account or seat |
+| BR-AS07 | Natural Access expiry requires renewal for new account operations/matches but does not forfeit an already admitted match: its existing seat-scoped lease may finish that match. Revocation/logout invalidates that lease; reconnect uses the unchanged 30-second window with valid auth |
+| BR-AS08 | Persistent families may exist on several devices, but only one account controller is active. Explicit login/Continue here performs takeover; background refresh, passive restoration and extra tabs cannot steal the controller |
+| BR-AS09 | Revocation invalidates all Access/connection bindings of its scope before a successful acknowledgment; logout-all requires manual AccountKey verification. Security revocation is not delayed by an active match |
+| BR-AS10 | Legacy key removal requires successful refresh persistence and confirmation plus manual-backup acknowledgment. Failures never silently create a new account, erase history or fall back to new plaintext secret storage |
+| BR-AS11 | Vault denial/unavailability yields an explicit session-only mode. Browser uses protected persistent or session cookies according to player choice; blocked cookies permit Access-only temporary login. Session restore may retain a session cookie; logout is the reliable revocation action |
+| BR-AS12 | Auth checks, database operations and vault I/O stay outside deterministic simulation/combat ticks; all normal seat/intention/outcome authority remains on the server |
+
+Proposed auth operational defaults, not balance values or capacity evidence:
+
+| Setting | Value / meaning |
+|---|---|
+| Access renewal lead | 60 seconds before server-advertised expiry; suspension/offline recovery does not extend validity |
+| Rotation/registration retry cache | 30 seconds; same-grant idempotency only, never another successor; rotation conflicts disclose no tokens |
+| Token width | Access, Refresh and registration retry proof: 32 random bytes, 64 hex characters over HTTP |
+| Nonsecret ID width | Family, device and operation IDs: 16 random bytes; no authentication power |
+| Auth JSON request limit | 4 KiB, additionally strict field/shape validation |
+| Auth request deadline | 5 seconds; timeout is not proof that a rotation did not commit |
+| Persistent family cap | 10 nonexpired/nonrevoked families per account; refuse additional persistence explicitly, never silently evict an active match |
+| Refresh family budget | 10 requests/minute per family; plus existing separate IP login/API budgets, with Retry-After |
+| Live Access index cap | 4 × configured maximum connections (8,000 at current default); at most 16 unexpired Access entries per family; prune expired entries, then refuse excess issuance without terminating admitted matches |
+| Secret response-cache cap | At most configured maximum connections (2,000 currently), with one current retry grant per family/operation; reserve capacity before committing issuance |
+| Cleanup batch | At most 256 token/family rows total per maintenance turn; indexed expired-history deletion before empty families, no unbounded cascade on the busy writer |
+
+Use only minimal private device-family IDs, channel, hash history and
+creation/expiry/revocation timestamps; no hardware fingerprint, precise
+location or new persistent IP/UA history. Family limits and rate refusals
+must have localized actionable states. Offline logout is marked pending
+until server revocation is acknowledged; no restored login while pending.
+No combat, Energy, Shop, Rating or balance number changes in this extension.
+
+### P68-A implementation contract activation (D-97)
+
+The Linux-first candidate activates protocol **30**, appending client tags
+20–22 (`AuthenticatedHello`, `Reauthenticate`, `ClaimAccount`) and server
+tags 31–32 (`AuthState`, `AuthRequired`). Tags 0–19 / 0–30 retain their wire
+shapes. Legacy WS account variants remain decodable but are refused; account
+issuance moves to isolated auth HTTP routes. Existing manual AccountKeys
+remain valid. The server schema advances from 8 to additive schema 9.
+
+This replaces transport assumptions in BR-P01–BR-P04 and registration test
+fixtures, preserving name validation, failed-attempt refunds, ranked data,
+explicit takeover and refusal of account changes during an admitted match.
+The revision adds no simulation, balance or outcome change. Browser JSON
+includes the server issuance time so clients can schedule renewal using a
+monotonic duration instead of trusting the device's wall clock.

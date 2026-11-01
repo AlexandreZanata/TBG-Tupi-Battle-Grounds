@@ -21,7 +21,7 @@ fn hashes_equal(a: &[u8], b: &[u8]) -> bool {
     diff == 0
 }
 
-fn profile_from_row(row: &rusqlite::Row) -> rusqlite::Result<(AccountId, Profile)> {
+pub(super) fn profile_from_row(row: &rusqlite::Row) -> rusqlite::Result<(AccountId, Profile)> {
     let id: AccountId = row.get(0)?;
     let profile = Profile {
         name: row.get(1)?,
@@ -34,7 +34,7 @@ fn profile_from_row(row: &rusqlite::Row) -> rusqlite::Result<(AccountId, Profile
     Ok((id, profile))
 }
 
-const SELECT_COLS: &str = "id, name, rating, ranked_games, wins, losses, draws";
+pub(super) const SELECT_COLS: &str = "id, name, rating, ranked_games, wins, losses, draws";
 
 /// Insert a new account; the UNIQUE `name_lower` violation is `NameTaken`.
 pub(super) fn register(
@@ -43,10 +43,24 @@ pub(super) fn register(
     name_lower: &str,
     key_hash: &[u8; 32],
 ) -> Result<(AccountId, Profile), AccountError> {
+    // P66: two slots share this file; take the write lock up front so the
+    // busy handler applies instead of failing a deferred upgrade.
     let tx = conn
         .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
         .map_err(|_| AccountError::Unavailable)?;
-    let taken = tx
+    let row = register_in_transaction(&tx, name, name_lower, key_hash)?;
+    tx.commit().map_err(|_| AccountError::Unavailable)?;
+    Ok(row)
+}
+
+/// Auth issuance shares registration and its ranked baseline transaction.
+pub(super) fn register_in_transaction(
+    conn: &Connection,
+    name: &str,
+    name_lower: &str,
+    key_hash: &[u8; 32],
+) -> Result<(AccountId, Profile), AccountError> {
+    let taken = conn
         .execute(
             "INSERT INTO accounts (name, name_lower, key_hash, created_at, last_login_at)
              VALUES (?1, ?2, ?3, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
@@ -61,10 +75,10 @@ pub(super) fn register(
     if taken != 1 {
         return Err(AccountError::Unavailable);
     }
-    let id = tx.last_insert_rowid();
+    let id = conn.last_insert_rowid();
     // P60: every account starts its correction replay from a baseline row
     // written in the same transaction (1000, zero games).
-    tx.execute(
+    conn.execute(
         "INSERT INTO ranked_baseline (account_id, rating, peak_rating, ranked_games,
          wins, losses, draws, mature_games)
          SELECT id, rating, peak_rating, ranked_games, wins, losses, draws, mature_games
@@ -72,17 +86,15 @@ pub(super) fn register(
         params![id],
     )
     .map_err(|_| AccountError::Unavailable)?;
-    let row = tx
+    let row = conn
         .query_row(
             &format!("SELECT {SELECT_COLS} FROM accounts WHERE id = ?1"),
             params![id],
             profile_from_row,
         )
         .map_err(|_| AccountError::Unavailable)?;
-    tx.commit().map_err(|_| AccountError::Unavailable)?;
     Ok(row)
 }
-
 /// Look up by `name_lower`; unknown name and wrong secret both read `BadKey`.
 pub(super) fn login(
     conn: &Connection,

@@ -17,6 +17,7 @@ use crate::ranked::{JournalEntry, RankedReceipt};
 
 mod accounts;
 mod arcanas;
+pub mod auth_sessions;
 mod history;
 pub mod integrity_admin;
 pub mod leaderboard;

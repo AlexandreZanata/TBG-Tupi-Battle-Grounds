@@ -522,13 +522,17 @@ async fn draining_server_refuses_new_matches() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let url = format!("ws://{}/ws", listener.local_addr().unwrap());
     let shared = tbg_server::Shared::default();
-    shared
-        .draining
-        .store(true, std::sync::atomic::Ordering::Relaxed);
     let config = Config {
         tick_ms: 5,
         ..Config::default()
     };
+    // P66: SIGTERM drain is the admission gate's sticky shutdown flag.
+    shared
+        .release
+        .get_or_init(|| tbg_server::release::Runtime::new(&config))
+        .gate
+        .shutdown
+        .store(true, std::sync::atomic::Ordering::Relaxed);
     tokio::spawn(tbg_server::run_with(config, listener, shared));
     let mut ws = connect(&url).await;
     hello(&mut ws).await;

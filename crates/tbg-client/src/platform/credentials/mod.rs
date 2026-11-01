@@ -86,7 +86,7 @@ pub fn probe() {
         return;
     }
     let id: String = raw.iter().map(|b| format!("{b:02x}")).collect();
-    let namespace = format!("p66-synthetic-acceptance:{id}");
+    let namespace = format!("tbg-synthetic-acceptance:{id}");
     let value = format!("synthetic-refresh-{id}");
     let written = write(&namespace, &value).is_ok();
     let read_back = written && read(&namespace).is_ok_and(|v| v == value);

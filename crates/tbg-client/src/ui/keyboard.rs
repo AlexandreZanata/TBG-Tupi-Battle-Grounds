@@ -4,7 +4,7 @@ use super::{ActionQueue, UiAction};
 use crate::GameState;
 use bevy::prelude::*;
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 type Buttons<'w, 's> = Query<
     'w,
     's,
@@ -18,7 +18,7 @@ type Buttons<'w, 's> = Query<
     ),
 >;
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 type Buttons<'w, 's> = Query<
     'w,
     's,
@@ -42,7 +42,7 @@ pub(super) fn navigate(
     mut focus: Local<usize>,
     mut button_focus: ResMut<super::kit::buttons::Focus>,
     mut queue: ResMut<ActionQueue>,
-    #[cfg(target_os = "linux")] view: Res<crate::sync::LatestView>,
+    #[cfg(tbg_desktop)] view: Res<crate::sync::LatestView>,
 ) {
     if *state.get() == GameState::Menu || super::textform::is_open(&form) {
         return;
@@ -61,7 +61,7 @@ pub(super) fn navigate(
         .iter()
         .filter(|entry| {
             let (_, a, n, t, v, c, ..) = entry;
-            #[cfg(target_os = "linux")]
+            #[cfg(tbg_desktop)]
             if view.0.as_ref().is_some_and(|v| v.augment_round.is_some()) && entry.6.is_none() {
                 return false;
             }

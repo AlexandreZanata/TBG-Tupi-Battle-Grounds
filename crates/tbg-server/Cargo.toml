@@ -42,6 +42,12 @@ tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "signal
 tbg-core = { path = "../tbg-core" }
 # /metrics JSON.
 serde_json = "1"
+# D-97: strict bounded auth DTOs reject unknown and duplicate fields.
+serde = { version = "1", features = ["derive"] }
+# D-97: parse canonical configured origins instead of trusting Host headers.
+url = "2"
+# D-97: bots use the already locked HTTP engine with redirects disabled and bounded bodies.
+ureq = "=3.5.0"
 # Session tokens and match seeds from the OS.
 getrandom = "0.3"
 # Bot client (tbg-bots, tests); same tungstenite version axum 0.8.9 uses.

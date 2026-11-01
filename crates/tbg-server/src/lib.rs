@@ -6,16 +6,17 @@ use std::net::{IpAddr, SocketAddr};
 use std::sync::atomic::AtomicU64;
 use std::sync::{Arc, Mutex, OnceLock};
 
-use axum::extract::{ConnectInfo, State};
+use axum::extract::{ConnectInfo, DefaultBodyLimit, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::serve::ListenerExt;
 use axum::{Json, Router};
 use tokio::net::TcpListener;
 use tokio::sync::{mpsc, watch};
 
 mod api;
+pub mod auth;
 pub mod botclient;
 mod chan;
 pub mod config;
@@ -39,6 +40,7 @@ use metrics::Metrics;
 /// Shared by every request handler.
 #[derive(Clone)]
 pub(crate) struct AppState {
+    pub auth: Arc<auth::Service>,
     pub lobby: mpsc::Sender<chan::LobbyCmd>,
     pub metrics: Arc<Metrics>,
     pub config: Arc<Config>,
@@ -104,6 +106,19 @@ pub async fn run_with(
         tracing::error!("a release slot needs TBG_DB; it will never admit new matches");
     }
     let (lobby_tx, lobby_rx) = mpsc::channel(chan::LOBBY_QUEUE);
+    if config.auth_origins.iter().any(|v| !auth::valid_origin(v)) {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "Invalid configured authentication origin",
+        ));
+    }
+    let auth = Arc::new(auth::Service::new(
+        store.clone(),
+        lobby_tx.clone(),
+        config.auth_clock.clone(),
+        config.clone(),
+    ));
+    auth::Service::start(&auth);
     // P47: the lobby publishes the live snapshot; the API only reads it.
     let (live_tx, live_rx) = watch::channel(Arc::default());
     tokio::spawn(lobby::run(
@@ -116,6 +131,7 @@ pub async fn run_with(
         live_tx,
     ));
     let state = AppState {
+        auth,
         lobby: lobby_tx,
         metrics,
         config: config.clone(),
@@ -127,6 +143,10 @@ pub async fn run_with(
         release,
     };
     let mut app = Router::new()
+        .route(
+            "/api/auth/{channel}/{operation}",
+            post(auth::http::handler).layer(DefaultBodyLimit::max(4096)),
+        )
         .route("/health", get(|| async { "ok" }))
         .route("/ws", get(ws::handler))
         .route("/ws/{slot}", get(ws::slot_handler))

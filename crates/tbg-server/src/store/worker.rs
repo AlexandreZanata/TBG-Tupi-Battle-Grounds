@@ -19,6 +19,10 @@ use super::{accounts, arcanas, matches, ranked, stats, strongholds, AccountId};
 type Reply<T> = oneshot::Sender<T>;
 
 pub(super) enum StoreCmd {
+    Auth {
+        request: super::auth_sessions::Request,
+        reply: Reply<Result<super::auth_sessions::Reply, super::auth_sessions::Error>>,
+    },
     Register {
         name: String,
         name_lower: String,
@@ -129,6 +133,9 @@ fn serve(
     dirty: &mut bool,
 ) {
     match cmd {
+        StoreCmd::Auth { request, reply } => {
+            let _ = reply.send(super::auth_sessions::apply(conn, request));
+        }
         StoreCmd::Register {
             name,
             name_lower,

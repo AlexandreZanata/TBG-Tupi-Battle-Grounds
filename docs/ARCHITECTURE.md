@@ -839,3 +839,99 @@ on schedule. Delivery is split into milestones: Linux updater (M1) and
 backend release safety (M2) independently, then two-slot rollout (M3) and the
 Windows adapter (M4).
 See D-91/D-92 and the release-contract matrix for gates and primary references.
+
+## 24. Windows native distribution and Wine acceptance (P68, planned)
+
+Section numbers 21–23 are reserved by the independent P65–P67 plans, not
+implemented dependencies on this consolidated Linux base. [P68](phases/P68-windows-native-release.md)
+and D-96 extend the existing native client, starting at the requested
+`codex/consolidated-linux-release` commit `55510c5`.
+
+**Owner clarification (2026-10-31):** Linux and Windows must have exactly the
+same frontend appearance at equivalent viewport/UI scale, locale, quality
+and scene/time. Shared design/assets/components remain the default, with
+platform-specific DPI/font/rendering/shader adjustments wherever needed to
+produce identical visuals. Preserve the approved Linux appearance and
+quality. Visible differences block P68 visual acceptance; platform or driver
+differences are not an automatic waiver. W07/W08 require matched packaged
+captures and review of every screen, including 3D presentation and motion.
+
+- **Shared product:** Linux and Windows use the same Bevy desktop shell,
+  native HUD/loading/ranking, art inventory, training and result scene.
+  Review the [hashed platform-gate audit](planning/P68-PLATFORM-GATES.csv)
+  before enabling Windows paths. Keep real OS services in `platform/` and
+  preserve browser alternatives. No new client engine, combat authority or
+  protocol is introduced by packaging.
+- **Build:** Windows x86_64 MSVC on a pinned Windows CI image is the primary
+  release path. Pin/record Rust, SDK, installer tools and actions; use the
+  lockfile, two Cargo jobs and target-specific dependencies. Linux cross-
+  compilation is optional, subject to tooling/license review. Define CRT
+  deployment from imports and clean-user tests, not assumptions.
+- **Artifacts:** reuse the native packager for a complete portable ZIP;
+  add a per-user Inno Setup definition under `deploy/native/windows/`.
+  Both consume one clean package inventory, with assets beside the binary,
+  immutable source/protocol identity, required runtime notices and digests.
+  Development-only repository asset fallback must not conceal incomplete
+  release bundles. Windows user-data location stays stable across upgrades.
+- **Install lifecycle:** install without elevation in the agreed runtime
+  configuration; use stable product identity and user shortcuts, preserve
+  account/preferences on upgrade/uninstall, handle locked files and failures
+  safely, and never kill an online match or force a reboot. This is not a
+  substitute for P66's separately planned automatic updater.
+- **Trust and promotion:** signed public artifacts require protected
+  credentials, final-byte signature/timestamp verification and owner gates.
+  Unsigned candidates remain explicitly internal. Sign before deriving
+  embedded executable hashes; compute final archive/installer digests last.
+  Candidate jobs cannot silently skip missing Windows assets just because a
+  release already exists. Preserve existing Linux artifacts and immutable tags.
+- **Acceptance:** use downloaded final packages outside the checkout.
+  Windows CI checks identity/imports and package contracts; isolated Wine on
+  the Linux GPU checks compatibility and Linux reference parity; actual
+  Windows GPU checks consumer OS integration and drivers. Keep evidence and
+  failures separate. A build or Wine launch alone is not release acceptance.
+
+The Windows packaging work needs no separate backend or deployment topology.
+The owner's P68-A extension below adds authentication modules/tables to the
+existing server and coordinates its wire update; it changes no combat rule.
+Test against a compatible backend without restarting production.
+See the [acceptance matrix and official references](planning/P68-WINDOWS-ACCEPTANCE.md).
+
+### 24.1 Persistent authentication on Linux, Windows and web (P68-A, planned)
+
+The owner added [P68-A](planning/P68-PERSISTENT-AUTH.md) to P68 on 2026-10-31.
+GAME-DESIGN §21 and D-97 define opaque 15-minute Access Tokens and rotating
+Refresh Tokens with a 30-day absolute device-family lifetime. The existing
+AccountKey stays valid for manual login; normal automatic login uses tokens.
+This explicitly extends the earlier packaging-only backend/wire scope.
+
+The Axum server owns a small `auth/` module and a bounded volatile Access
+index/short retry cache. Its existing SQLite writer owns additive family/
+refresh-history tables, atomic rotation and revocation/cleanup. Store only
+refresh hashes, never bearer secrets in SQL, journals, outboxes or logs.
+No new service, Redis, JWT infrastructure or cryptography in simulation ticks.
+
+Client `auth/` coordinates one state machine. Native `platform/credentials/`
+uses Linux Secret Service or Windows Credential Manager with Local
+persistence; Access remains in memory and ordinary preferences hold no new
+secrets. Web uses one cookie-backed fetch/coordinator shared by HTML and
+Bevy paths, with an HttpOnly/Secure/SameSite=Strict host cookie and Web Locks.
+OS/browser failures yield explicit safe temporary modes, not plaintext files.
+Exact Linux/Windows frontend appearance remains a required contract.
+
+Separate browser/native auth route groups prevent cookie credentials from
+being echoed into JS. Apply strict origin/custom-header CSRF checks, bounds,
+no-store responses and redaction. Origin is not account identity. Verify
+Access/family before WS account resume; add coordinated authenticated-handshake controls
+and explicit takeover without background refresh stealing the match.
+
+Natural Access expiry gates new account operations but an admitted match
+may finish under its seat-only lease; refresh updates the same socket.
+Revocation invalidates that lease; valid-auth reconnect preserves the
+existing 30-second window. Old resume handles alone cannot assume an account.
+Legacy migration confirms secure persistence and manual-key backup before
+removing the existing plaintext key. Track incomplete migration honestly.
+
+Complete A01–A14 along with the Windows acceptance matrix before claiming
+P68 done. Real Linux/Windows vault security and web cookie behavior require
+separate evidence; Wine proves only compatibility. Deployment/rollback
+preserves data and existing matches, and remains under the owner's rules.

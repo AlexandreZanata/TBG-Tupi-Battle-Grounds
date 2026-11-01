@@ -4,6 +4,7 @@
 
 mod ack;
 pub mod admission;
+mod auth;
 mod login;
 mod socket;
 
@@ -11,13 +12,12 @@ use std::collections::VecDeque;
 
 pub(crate) use socket::GIVE_UP;
 use tbg_core::protocol::{
-    AccountError, ClientMsg, InviteToken, LiveId, RoomCode, ServerMsg, Token, PROTOCOL_VERSION,
+    AccessToken, ClientMsg, InviteToken, LiveId, RoomCode, ServerMsg, Token, PROTOCOL_VERSION,
 };
 
 use crate::config;
 
 use ack::AckTracker;
-use login::{needs_login, LOGIN_TIMEOUT};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mode {
@@ -70,6 +70,9 @@ pub struct NetLink {
     ack: AckTracker,
     /// Post-P14: an automatic `Login` is in flight; a mode request waits.
     login_in_flight: bool,
+    auth_epoch: u64,
+    auth_access: Option<AccessToken>,
+    auth_family: Option<String>,
     held_request: bool,
     login_deadline: Option<f64>,
     outq: VecDeque<(f64, ClientMsg)>,
@@ -101,6 +104,9 @@ impl NetLink {
             lag: lag_ms / 2000.0,
             ack: AckTracker::default(),
             login_in_flight: false,
+            auth_epoch: crate::auth::epoch(),
+            auth_access: None,
+            auth_family: None,
             held_request: false,
             login_deadline: None,
             outq: VecDeque::new(),
@@ -164,7 +170,10 @@ impl NetLink {
         self.mode = mode;
         self.watching = false;
         if !matches!(mode, Mode::Probe) {
-            if self.login_in_flight {
+            if self.login_in_flight
+                || crate::auth::snapshot().status != crate::auth::Status::Guest
+                    && self.auth_access.is_none()
+            {
                 self.held_request = true;
             } else {
                 self.send_request(now);
@@ -237,6 +246,7 @@ impl NetLink {
                 "1",
             );
         }
+        self.sync_auth(now);
         self.read_socket(now);
         self.flush(now);
         self.reconnect(now);
@@ -245,14 +255,6 @@ impl NetLink {
             if let Some((_, msg)) = self.inq.pop_front() {
                 out.extend(self.handle(msg, now));
             }
-        }
-        if self.login_in_flight && self.login_deadline.is_some_and(|d| now >= d) {
-            self.login_in_flight = false;
-            self.login_deadline = None;
-            self.release_request(now);
-            out.push(ServerMsg::AccountError {
-                code: AccountError::BadKey,
-            });
         }
         out
     }

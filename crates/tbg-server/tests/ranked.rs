@@ -1,6 +1,9 @@
 //! Ranked queue and Elo settlement (GAME-DESIGN BR-R01–BR-R07).
 //! Each test names the rule it protects.
 
+#[path = "common/auth.rs"]
+mod auth;
+
 use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
@@ -64,7 +67,7 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
         };
         match protocol::decode_server(&b).unwrap() {
             ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
-            ServerMsg::NetStats { .. } => {}
+            ServerMsg::NetStats { .. } | ServerMsg::AuthState { .. } => {}
             other => return Some(other),
         }
     }
@@ -83,15 +86,15 @@ async fn hello(ws: &mut Ws) {
 }
 
 async fn register_as(ws: &mut Ws, name: &str) -> (String, Profile) {
-    send(ws, &ClientMsg::Register { name: name.into() }).await;
-    match recv(ws).await {
-        Some(ServerMsg::Registered { key, profile }) => (key, profile),
-        other => panic!("expected Registered, got {other:?}"),
-    }
+    let grant = auth::register(ws, name).await.unwrap();
+    auth::attach(ws, &grant, false).await;
+    assert!(matches!(recv(ws).await, Some(ServerMsg::LoggedIn { .. })));
+    (grant.account_key.unwrap(), grant.profile)
 }
 
 async fn login_as(ws: &mut Ws, key: &str) -> Profile {
-    send(ws, &ClientMsg::Login { key: key.into() }).await;
+    let grant = auth::login(ws, key).await.unwrap();
+    auth::attach(ws, &grant, true).await;
     loop {
         match recv(ws).await {
             Some(ServerMsg::LoggedIn { profile }) => return profile,

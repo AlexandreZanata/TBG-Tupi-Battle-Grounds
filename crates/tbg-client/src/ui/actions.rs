@@ -84,7 +84,7 @@ pub(super) fn apply(
         selected.0 = None;
     }
     for action in std::mem::take(&mut queue.0) {
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         let action = match action {
             UiAction::PracticeArena(arena) => {
                 config::save_arena(arena);
@@ -266,7 +266,7 @@ pub(super) fn apply(
                 }
             }
             // Linux presentation actions are consumed before this system.
-            #[cfg(target_os = "linux")]
+            #[cfg(tbg_desktop)]
             UiAction::ShowArenaBanner
             | UiAction::CloseArenaBanner
             | UiAction::PickAugment(_)
@@ -402,7 +402,7 @@ pub(super) fn apply(
             }
             UiAction::CloseInspect => {
                 inspected.0 = None;
-                #[cfg(target_os = "linux")]
+                #[cfg(tbg_desktop)]
                 {
                     selected.0 = None;
                 }

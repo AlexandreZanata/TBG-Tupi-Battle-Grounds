@@ -3,7 +3,7 @@
 
 [package]
 name = "tbg-client"
-version = "0.1.0-native.3"
+version = "0.1.0-p68.1"
 edition.workspace = true
 rust-version.workspace = true
 license-file = "../../LICENSE"
@@ -13,7 +13,8 @@ name = "tbg-client"
 path = "src/main.rs"
 
 [features]
-# Opt-in packaged runtime acceptance; no automatic test actions in ordinary launches.
+# Opt-in packaged UI captures, runtime and synthetic vault acceptance;
+# inactive without explicit flags, no automatic test actions in ordinary launches.
 ui-acceptance = []
 
 [dependencies]
@@ -54,18 +55,21 @@ arboard = { version = "3.7", default-features = false, features = ["wayland-data
 open = "5"
 # Additional Bevy log layer writes native diagnostic logs to the user data directory.
 tracing-subscriber = { version = "0.3", features = ["fmt"] }
-
-# Shared with P68: explicit real OS vault providers, never a plaintext fallback.
+# D-97: explicit OS vault provider API; never store refresh in preferences.
 keyring-core = "=1.0.1"
-# Synthetic vault probe IDs use OS entropy, never game RNG.
+# D-97: ehttp follows redirects/buffers responses; auth needs bounded, nonredirecting requests.
+ureq = "=3.5.0"
+# D-97: fallible native device/operation IDs and registration retry proof.
 getrandom = "0.3"
+# D-97: canonical credential origin boundaries and redirect rejection.
+url = "2"
 
 [target.'cfg(target_os = "linux")'.dependencies]
-# Secret Service over D-Bus; vendored libdbus avoids a new system dev-package requirement.
+# D-97: real Secret Service with Rust crypto and bundled D-Bus, no plaintext fallback.
 dbus-secret-service-keyring-store = { version = "=1.0.1", features = ["crypto-rust", "vendored"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
-# Local-persistence Credential Manager adapter; actual Windows acceptance remains pending.
+# D-97: current user's Credential Manager with explicit Local persistence.
 windows-native-keyring-store = "=1.1.0"
 
 [build-dependencies]

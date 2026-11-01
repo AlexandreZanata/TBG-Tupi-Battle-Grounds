@@ -1,0 +1,35 @@
+path,source_sha256,lines,responsibility
+crates/tbg-core/src/account.rs,8f54d6b15af0482b635187beee92ef9b0b4b29dd9b4ce7ddcd19e17b71e382d7,186,AccountKey shape and 80-bit secret encoding
+crates/tbg-core/src/protocol.rs,3fec4c6a4dec701f756bfede4d7178befde0826b3fc7e428027504fb82ae82db,340,"Hello, resume Token and account wire contracts"
+crates/tbg-client/Cargo.toml,8e764adda0f3f76a529816572ded5b17135ec11154b10381d8b6c8ed2109d854,63,"Client platform, HTTP and WASM dependencies"
+crates/tbg-client/src/config.rs,92d5d6064bf4f962b9cc8d04f55138391a90819a09f015159da0c329012685e6,523,Persisted AccountKey and per-tab reconnect token
+crates/tbg-client/src/platform/storage.rs,03c6b52c70b6286875044c412cdec2c9cf9fb694b67d4945e282143b9cede540,185,Native JSON and browser storage adapters
+crates/tbg-client/src/platform/http.rs,7495dff915af4deccb23297334afd9c7096b83dc58f725b1ee0bef0269b91b63,72,Public GET transport and origin derivation
+crates/tbg-client/src/platform/mod.rs,eebc20bdac78c19190b6f2e9617c3111c50835923dbb1781b36440474309ba0f,48,Native clipboard and public link services
+crates/tbg-client/src/net/mod.rs,1f7b3d8771604510821f1cfdf2fb91e24f08f4905377a25c606b11a8dfbbd792,211,Network link state and pending request behavior
+crates/tbg-client/src/net/login.rs,bff92885cecabd43f8b0a15b4f8444e9c8491f52ca9ec12c98eaccacbd892256,45,Automatic key login decision and timeout
+crates/tbg-client/src/net/socket.rs,28632fb6938922a8f5cb61628bcc3f4a68b15c08288e6d0a1f19534c1f205cc1,404,"Hello, automatic Login, reconnect and result handling"
+crates/tbg-client/src/ui/start.rs,2a8b88d59f1caa910ceada6ee75860100d2ea8218b8092485ed4ac6e188be9fe,60,Startup authentication and mode entry
+crates/tbg-client/src/ui/account.rs,9dcb1f27e0f2b5c70f1df780cc60f9f7093544d4641f64f25f67f391f94ebf28,223,"Profile, key backup and logout state"
+crates/tbg-client/src/ui/account_ui.rs,129d3c7a801664e8d5fe292a5d05dc3e8998b128c4738c4ffe95ac7227da0d38,149,Saved-key reads and writes in account UI
+crates/tbg-client/assets/lobby/account.js,2253609b99b318240ce8ed6a202d3c72a365778113b623b215e5284404e17942,39,HTML presentation-only account form
+crates/tbg-server/Cargo.toml,9d217740553a3eebe1250d1028065059fdeaf1a41c57f554e621cc073a2df448,55,"Axum, SQLite, entropy and hashing dependencies"
+crates/tbg-server/src/lib.rs,90d10df80ac28cd23cbd3b46f6c7173d43393e2ea9150d05372864bdb1abf2f1,142,HTTP router and shared application state
+crates/tbg-server/src/config.rs,6174b5e100385c7669dd1bbc436831b7c21471b35cee1e08580e17690355512f,105,"Connection, reconnect and account rate defaults"
+crates/tbg-server/src/limits.rs,14d1f2085bb078b3ae60f9ad75314e0d1c15724b8fd27c660653b91fc6e95dd6,105,Existing per-IP account and API budgets
+crates/tbg-server/src/names.rs,237683a0e856fa9bcce497a73d79a8d532b5fff0fbc5ff9c2639d4b9ff05cb71,19,Current OS random-byte helper and failure behavior
+crates/tbg-server/src/chan.rs,c24e5aff57b76c93f6b878fc7d6d28cbc2a57683ab98ecf44e4d5c4ed1122b2a,149,"Bounded lobby, connection and match control messages"
+crates/tbg-server/src/ws.rs,880e1c1201cc30a2b8621a2921439fc2590bcfbe278f13e1e83d5fa2912e8332,246,Upgrade admission and pre-resume handshake
+crates/tbg-server/src/ws/client_msg.rs,3f9711e541ca9b59fabed7367d3cfdb6ccd357c4fcf1be282555a44adbcce4d5,107,Seat stamping and account/control message routing
+crates/tbg-server/src/lobby.rs,9f5637389841a544ea22e56b4e708dde7f8a7846e0772be0d7121e5f5eda19f1,343,"Game sessions, account ownership and lobby state"
+crates/tbg-server/src/lobby/accounts.rs,948e9ae6352c8ff2df8bd5dcfba444fbc18876bcc1d7627b94f7228889045ec7,126,"Registration, key verifier entry and logout"
+crates/tbg-server/src/lobby/account_done.rs,4dab0928de615fc3dea778e0b3161f8c83766ca7f0ac86fd2aad1867c851a652,157,"Takeover, ranked profile ordering and saved selections"
+crates/tbg-server/src/lobby/sessions.rs,304420da557d6fedec12d73eb5c0bce448c7a882a4a9d440c847c2e7df169f59,219,Account/match resume and reconnect cleanup
+crates/tbg-server/src/store/mod.rs,610fc374cb03308a86019afe51c85ca6435da1fab8e1b8c73499709b3572dbf1,244,Single SQLite writer facade and bounded queue
+crates/tbg-server/src/store/worker.rs,dbd601efa4eb316ab66eb4a0588813c62a8577ed88ed6f15bfeef43f98928e58,175,Serialized store command processing
+crates/tbg-server/src/store/schema.rs,9fee52b55e6f668b5d92e8503b34395c1b1c0705e0f7c1a020908d1cd73848c9,198,Ordered schema migrations through v8
+crates/tbg-server/src/store/accounts.rs,bac9914297052b6fbc48e430604966c3993454538008f7f0fe8d5d68a3a1f403,110,Account key-hash verifier and account baseline transaction
+crates/tbg-server/tests/accounts.rs,ef8bfe3a37de2d188412c22a241d133ff67eb1abd7aa006be54eeb4d210bc6ea,490,"Existing lifecycle, takeover and reconnect scenarios"
+crates/tbg-core/tests/contract_protocol.rs,9ecf0daf1fb3d849c8e62deaed711391ad592be6d477d5089cba5703064067b8,265,Append-only client wire fixtures
+crates/tbg-core/tests/contract_protocol_server.rs,5f98b03cb7b35185806416dfa240b242f8e08935413bde24e5663836a33c8030,210,Append-only server wire fixtures
+deploy/native/README.txt,cfab628044ab16c1e94be579bb19467c73a63bd57b26014741344ab1d6ac6ec0,35,Current native data/key storage instructions to migrate

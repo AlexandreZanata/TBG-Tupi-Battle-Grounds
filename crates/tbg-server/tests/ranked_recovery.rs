@@ -145,8 +145,8 @@ async fn v6_database_migrates_to_v8_twice_without_touching_history() {
     let version: i64 = conn
         .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
         .unwrap();
-    // v9 (P66) adds the release directory on top of v8.
-    assert_eq!(version, 9);
+    // v9/v10 add the P66 release directory and the D-97 auth families on top of v8.
+    assert_eq!(version, 10);
     let baseline: (i64, i64, i64) = conn
         .query_row(
             "SELECT rating, ranked_games, mature_games FROM ranked_baseline WHERE account_id = 1",

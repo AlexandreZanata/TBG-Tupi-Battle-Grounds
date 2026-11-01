@@ -45,11 +45,11 @@ pub struct Data {
     stats_request: Option<Request>,
     next: f64,
     player: String,
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     online_loaded: bool,
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 impl Data {
     pub fn live_pending(&self) -> bool {
         self.live.is_none() && !self.unavailable
@@ -209,7 +209,7 @@ pub fn poll(
         shell.dirty = true;
     }
     if let Some(result) = data.online_request.as_ref().and_then(Request::take) {
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         {
             data.online_loaded = true;
         }
