@@ -40,7 +40,14 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             GUNMETAL,
             [0.0, 0.20, 0.16],
         ),
-        part(Body(Chest), Box(0.14, 0.21, 0.025), ALLY, [0.0, 0.14, 0.21]),
+        part(Body(Chest), Cyl(0.09, 0.035), BRASS, [0.0, 0.20, 0.21]).rot([90.0, 0.0, 0.0]),
+        part(
+            Body(Chest),
+            Box(0.085, 0.085, 0.018),
+            ALLY,
+            [0.0, 0.20, 0.24],
+        )
+        .rot([0.0, 0.0, 45.0]),
         part(
             Body(Hips),
             Box(0.29, 0.06, 0.24),
@@ -125,7 +132,7 @@ fn cuff(
         part(
             Body(fore),
             Frustum(0.15, 0.13, 0.23),
-            GUNMETAL,
+            RUST,
             [0.0, -0.10, 0.0],
         ),
         part(Body(fore), Cyl(0.16, 0.045), BRASS, [0.0, 0.02, 0.0]),
@@ -139,7 +146,7 @@ fn cuff(
         part(Body(hand), Box(0.29, 0.07, 0.12), BRASS, [0.0, -0.04, 0.19]),
     ]);
     for x in [-0.09, 0.09] {
-        v.push(part(Body(fore), Cyl(0.022, 0.24), IRON, [x, -0.09, 0.13]));
+        v.push(part(Body(fore), Cyl(0.026, 0.24), STEEL, [x, -0.09, 0.13]));
         v.push(part(Body(hand), Ball(0.029), BRASS, [x, -0.04, 0.25]));
     }
     if f.a {
