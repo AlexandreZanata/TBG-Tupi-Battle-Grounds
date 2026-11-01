@@ -756,6 +756,11 @@ changes and protocol 30. It is **not** merged here. A future integration must
 allocate the next combined migration, preserve both sets of tables and test
 both existing databases; equality of schema numbers is not compatibility.
 
+> Consolidation update (2026-11-01): resolved on `codex/consolidate-linux-main`
+> by D-99 — schema 10 recognizes both v9 table sets by shape (tested from both
+> fronts' databases), protocol 30 is retained, and the resume record is owned
+> by the P68 auth coordinator. See [CONSOLIDATION-20261101](CONSOLIDATION-20261101.md).
+
 Legacy `/ws` reconnect can lose its original generation during overlap. Native
 slot-aware resume and ownership improve this path but do not retroactively
 upgrade already-running legacy browser tabs. Coordinated adoption is required.

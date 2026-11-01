@@ -417,3 +417,12 @@ blocked by **any** visible difference; no masks/tolerance/driver waiver.
 Signing/support/CRT/promotion decisions, public HTTPS and owner visual sign-off
 remain explicit gates. The PR stays Draft for these outstanding P68 items.
 No full-suite/benchmark/balance command is scheduled automatically.
+
+## Consolidation update (2026-11-01)
+
+The P66 front had independently used schema 9 and its own resume vault
+writer. The consolidated branch keeps this front's coordinator as the single
+vault owner, moves to server schema 10 for both feature sets, keeps protocol
+30 and routes auth requests to the release slot that holds the socket (D-99).
+Its refusal of legacy WebSocket sign-in also required adapting P66's
+release-slot tests. See [CONSOLIDATION-20261101](CONSOLIDATION-20261101.md).
