@@ -166,6 +166,20 @@ This proves public first entry/Practice launch, not a complete match or account 
 The landing browser link is enabled only after this observation; incompatible Linux
 downloads stay pending.
 
+Final public static releases: landing `20261101T201027Z-e4bdb38c8e72` and admin
+`20261101T201032Z-e4bdb38c8e72`, both source `e4bdb38c8e724dba6d12ae037e3a183942ce5acc`.
+All five public origins were rechecked: root/admin/game/API HTTPS 200, www redirects
+to root, frontend Cache-Control is `no-cache, no-transform`. Public availability JSON
+marks the browser live and Linux pending. A focused Chrome check found two enabled
+browser CTAs, no failed requests/page errors, and zero scripts/forms in public admin.
+These static pointer promotions did not reload Caddy or restart the backend.
+
+Normal branch push and [PR #40](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/40)
+target main; no merge, force-push or CI wait. All current #37/#38/#39 heads and the
+original main base are retained as ancestors. Use this consolidated PR rather than
+merging the same fronts independently. The source tree is ready for code review;
+post-merge activation and the acceptance items below remain explicit.
+
 ## Deferred acceptance and open scope
 
 - Real main artifact provenance with an empty GH config, first observed activation
