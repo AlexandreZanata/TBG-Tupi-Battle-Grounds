@@ -48,6 +48,8 @@ android {
     packaging {
         // Page-aligned, uncompressed libraries can be mapped directly from the APK.
         jniLibs.useLegacyPackaging = false
+        // Strip explicitly before provenance/staging; Gradle must preserve the verified bytes.
+        jniLibs.keepDebugSymbols += "**/*.so"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

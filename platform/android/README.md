@@ -38,8 +38,11 @@ flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
     export TBG_SOURCE_COMMIT="$(git rev-parse HEAD)"
     export CARGO_TARGET_AARCH64_LINUX_ANDROID_RUSTFLAGS="-C link-arg=-Wl,-z,max-page-size=16384"
     cargo ndk -t arm64-v8a -P 31 build --locked --release -p tbg-client --lib
+    mkdir -p .local/android-library
+    "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" --strip-unneeded \
+      -o .local/android-library/libtbg_client.so target/aarch64-linux-android/release/libtbg_client.so
     python3 scripts/package-android.py prepare --source "$TBG_SOURCE_COMMIT" \
-      --library target/aarch64-linux-android/release/libtbg_client.so
+      --library .local/android-library/libtbg_client.so
     cd platform/android
     ./gradlew :app:assembleDebug --no-parallel --max-workers=2 \
       -PprototypeVersionCode=2 -PprototypeAbi=arm64-v8a
