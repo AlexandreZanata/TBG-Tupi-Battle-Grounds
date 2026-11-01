@@ -232,9 +232,10 @@
       <div class="section-inner">
         <header class="section-head">
           <p class="eyebrow" data-i18n="play.eyebrow">Onde jogar</p>
-          <h2 id="play-title" data-i18n="play.title">Navegador e Linux</h2>
+          <h2 id="play-title" data-i18n="play.title">Escolha sua plataforma</h2>
           <p class="section-intro" data-i18n="play.intro">Só anunciamos uma plataforma quando ela está publicada e compatível com os servidores atuais.</p>
         </header>
+        <p class="download-detection" data-os-note aria-live="polite"></p>
         <div class="platforms">
           <article class="platform frame" aria-labelledby="web-title">
             <header>
@@ -249,21 +250,24 @@
               <small data-web-soon data-i18n="state.soon">Em breve</small>
             </a>
           </article>
-          <article class="platform frame" aria-labelledby="linux-title" data-linux>
-            <header>
-              <h3 id="linux-title" data-i18n="linux.title">Linux (x86_64)</h3>
-              <span class="badge badge-warn" data-linux-pending data-i18n="state.preparing">Em preparação</span>
-              <span class="badge badge-ok" data-linux-available hidden data-i18n="state.available">Disponível</span>
-            </header>
-            <p data-linux-pending data-i18n="linux.pending.text">O pacote para Linux aparecerá aqui quando houver uma versão publicada e compatível com os servidores atuais.</p>
-            <div data-linux-available hidden>
-              <p><span data-i18n="linux.version">Versão</span> <strong data-linux-version></strong></p>
-              <ul class="downloads" role="list" data-linux-downloads></ul>
-              <p class="fine-print" data-i18n="linux.requirements">Requer glibc 2.39 ou mais recente e gráficos com Vulkan. Confira o SHA-256 antes de executar.</p>
-            </div>
+          <article class="platform platform-native frame" aria-labelledby="windows-title" data-platform="windows">
+            <img class="platform-icon" src="/assets/icons/windows.svg" width="56" height="56" alt=""/>
+            <header><h3 id="windows-title" data-i18n="windows.title">Windows</h3><span class="badge" data-platform-status="windows"></span></header>
+            <p class="platform-version" data-platform-version="windows"></p>
+            <p data-i18n="windows.requirements">Windows 11 · x86_64 · DirectX 12</p>
+            <button class="btn btn-gold" type="button" data-open-downloads="windows" data-i18n="downloads.options">Ver opções de download</button>
+            <small class="platform-recommended" data-recommended="windows" hidden data-i18n="downloads.recommended">Recomendado para seu sistema</small>
+          </article>
+          <article class="platform platform-native frame" aria-labelledby="linux-title" data-platform="linux">
+            <img class="platform-icon" src="/assets/icons/linux.svg" width="56" height="56" alt=""/>
+            <header><h3 id="linux-title" data-i18n="linux.title">Linux (x86_64)</h3><span class="badge" data-platform-status="linux"></span></header>
+            <p class="platform-version" data-platform-version="linux"></p>
+            <p data-i18n="linux.requirements">glibc 2.35 ou mais recente · x86_64 · Vulkan</p>
+            <button class="btn btn-gold" type="button" data-open-downloads="linux" data-i18n="downloads.options">Ver opções de download</button>
+            <small class="platform-recommended" data-recommended="linux" hidden data-i18n="downloads.recommended">Recomendado para seu sistema</small>
           </article>
         </div>
-        <p class="fine-print" data-i18n="play.others">Outros sistemas ainda não têm pacote oficial.</p>
+        <p class="fine-print" data-i18n="play.others">Pacotes para macOS e celulares ainda não estão disponíveis. Você também pode jogar no navegador do computador.</p>
       </div>
     </section>
   </main>
@@ -283,6 +287,12 @@
       <p class="fine-print"><span data-i18n="footer.license">Código sob a TBG Visible Attribution License 1.0. Fontes Noto sob a SIL Open Font License 1.1.</span> <a href="/assets/fonts/OFL.txt" data-i18n="footer.fonts">Licença das fontes</a></p>
     </div>
   </footer>
+
+  <dialog class="native-dialog frame" data-native-dialog aria-labelledby="native-dialog-title">
+    <header class="native-dialog-heading"><div><p class="eyebrow" data-i18n="downloads.eyebrow">Seu próximo campo de batalha</p><h2 id="native-dialog-title"></h2></div><button class="native-close" type="button" data-close-downloads aria-label="Fechar" data-i18n-attr="aria-label=viewer.close">×</button></header>
+    <div data-native-content></div>
+    <p class="fine-print" data-i18n="downloads.source">Arquivos publicados no repositório original do GitHub. Nenhuma conta é necessária para baixar.</p>
+  </dialog>
 
   <dialog class="viewer" data-viewer aria-label="Captura ampliada" data-i18n-attr="aria-label=viewer.label">
     <button class="viewer-close" type="button" aria-label="Fechar" data-i18n-attr="aria-label=viewer.close" data-viewer-close>×</button>

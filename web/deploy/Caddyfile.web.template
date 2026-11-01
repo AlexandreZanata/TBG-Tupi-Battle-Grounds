@@ -20,6 +20,13 @@ __TBG_SITE_DOMAIN__ {
 	encode zstd gzip
 	import tbg_web_headers
 	header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+	# Verified native metadata changes independently of immutable static site releases.
+	handle /downloads.json {
+		root * /srv/tbg/downloads
+		rewrite * /current.json
+		header Cache-Control "no-cache, no-transform"
+		file_server
+	}
 	root * /srv/tbg/landing/current
 	# Nothing is content-hashed: pages, scripts and data revalidate by ETag; art and fonts cache a day.
 	# no-transform preserves attested bytes and prevents CDN analytics script injection.

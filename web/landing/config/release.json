@@ -15,5 +15,12 @@
     "protocol": null,
     "contract": null,
     "assets": []
+  },
+  "windows": {
+    "state": "pending",
+    "version": null,
+    "protocol": null,
+    "contract": null,
+    "assets": []
   }
 }

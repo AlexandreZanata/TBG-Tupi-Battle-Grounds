@@ -141,3 +141,31 @@
   .site-nav ul{justify-content:flex-start;gap:0 18px}
   html{scroll-padding-top:130px}
 }
+
+/* Native downloads share the site's gold frames and keep every platform visible. */
+.download-detection{margin:0 0 22px;color:var(--gold-200);font-size:.96rem}
+.platforms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.platform-native{position:relative;display:flex;flex-direction:column;gap:12px;padding:30px}
+.platform-native.is-recommended{border-color:var(--gold-300);box-shadow:inset 0 0 0 3px #050c14,0 0 30px #b98b3830}
+.platform-icon{width:56px;height:56px;margin:0 0 10px;object-fit:contain}
+.platform-native header{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.platform-native h3{margin:0}
+.platform-native p{margin:0;color:var(--text-muted)}
+.platform-native .btn{margin-top:auto}
+.platform-version{min-height:26px}
+.platform-recommended{color:var(--gold-300);font-weight:700;text-align:center}
+.native-dialog{width:min(740px,92vw);max-height:88vh;padding:30px;color:var(--text);overflow:auto}
+.native-dialog::backdrop{background:#02070de8;backdrop-filter:blur(5px)}
+.native-dialog-heading{display:flex;align-items:start;justify-content:space-between;gap:24px;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--line-strong)}
+.native-dialog-heading h2{margin:0;font-size:2rem}
+.native-close{width:42px;height:42px;flex:none;border:1px solid var(--line-strong);border-radius:6px;background:var(--ink-900);color:var(--gold-200);font-size:1.7rem;cursor:pointer}
+.native-options{display:grid;gap:16px;margin:22px 0}
+.native-option{padding:20px;border:1px solid var(--line);border-radius:var(--radius-sm);background:#0b1a2ccc}
+.native-option h3{font-size:1.25rem;margin:0 0 6px}
+.native-option p{color:var(--text-muted);font-size:.92rem;margin-bottom:14px}
+.native-option .btn{width:100%;justify-content:space-between}
+.native-checksum{margin-top:12px}
+.native-checksum summary{cursor:pointer;color:var(--text-dim);font-size:.8rem}
+.native-checksum code{display:block;font-size:.75rem;color:var(--text-muted);overflow-wrap:anywhere;margin-top:8px}
+.native-release-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+@media (max-width:1100px){.platforms{grid-template-columns:repeat(2,minmax(0,1fr))}}

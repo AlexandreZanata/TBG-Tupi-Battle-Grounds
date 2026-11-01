@@ -40,11 +40,11 @@ def api(path):
     return json.loads(fetch(API+path, 4 * 1024 * 1024))
 
 
-def verify(package, bundle, source, workflow=WORKFLOW):
+def verify(package, bundle, source, workflow=WORKFLOW, source_ref='refs/heads/main'):
     subprocess.run([
         'gh', 'attestation', 'verify', str(package), '--bundle', str(bundle),
         '--repo', REPOSITORY, '--signer-workflow', workflow,
-        '--source-ref', 'refs/heads/main', '--source-digest', source,
+        '--source-ref', source_ref, '--source-digest', source,
         '--deny-self-hosted-runners',
     ], check=True, stdout=subprocess.DEVNULL, timeout=60)
 

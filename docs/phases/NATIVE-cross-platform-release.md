@@ -61,3 +61,39 @@ cmdlet supports the parameter, selects x64 plus SDK 10.0.26100.0 and verifies th
 resulting SDK/architecture. It does not silently fall back to another SDK. This
 fix is source-reviewed; the next Windows run must provide actual environment/build
 evidence. Native artifact publication remains gated, not claimed successful.
+
+## Landing and metadata work-front checks
+
+The landing now has Windows/Linux cards, OS recommendation and keyboard-accessible
+format dialogs, translated in English/pt-BR, using the existing gold/navy design.
+Download eligibility requires a complete, original-repository, hash/size-bound
+package pair and the live server contract. The metadata-only controller shares
+the existing lock/verifier; native tag attestations do not weaken the main-only
+server/web/static policy. Initial route adoption still uses the quiet-window guard.
+
+Checks on this working diff: six `test-native-catalog.py` scenarios passed;
+`node scripts/test-native-downloads.cjs` passed; existing auto/web/static controller
+tests passed (10/12/9); `python3 web/scripts/check.py` passed (120 landing files).
+Chrome checked the pending catalog and a local-only complete fixture, Windows
+recommendation, both platform dialogs, both languages, checksums, Escape/focus
+return and zero page/CSP/console errors. Screenshots were inspected; fixture URLs
+are not published. No Cargo compilation was needed for this front.
+
+The downloaded Linux Actions artifact from run `41348898691` passed its outer
+SHA-256 and reports source `9fac2d611fff87b99dfaa38bff91898c2aed7dab`, client
+0.1.2-rc.1, release/ui-acceptance, protocol 31 and w31-r6-097385fee9a10b0f.
+Windows environment setup passed in that run; actual Windows build/runtime and
+installer evidence remain pending, distinct from this source/landing check.
+
+The Linux candidate rendered the lobby on the host's NVIDIA RTX 4060/Vulkan with
+boot_ready=true, no pending/failed images and exit 0. The packaged README still
+contained old protocol-30 prose, discovered during package inspection. Packaging
+now renders its version/source/contract from the verified executable metadata and
+explains both OS vaults. Final publication must rebuild/retest this updated source;
+the `9fac2d6` package is inspection evidence only, not the final download.
+
+The Windows lane now runs scoped platform regressions in the release profile,
+sharing optimized dependencies with the actual executable instead of compiling
+the entire Bevy graph in debug and release on a cold runner. Tests remain enabled.
+Trusted manual branch builds may save their Windows dependency cache; PRs and
+release tags cannot write it. Existing caches and active jobs were not removed.

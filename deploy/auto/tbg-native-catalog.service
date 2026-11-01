@@ -1,0 +1,23 @@
+[Unit]
+Description=Refresh verified TBG native download links without changing the running game
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/tbg/native-catalog.enabled
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/var/lib/tbg-deploy
+ExecStart=/usr/bin/python3 /opt/tbg/deploy/native_pull.py
+TimeoutStartSec=5min
+UMask=0077
+Nice=15
+IOSchedulingClass=idle
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/srv/tbg/downloads /var/lib/tbg-deploy
+Environment=GH_CONFIG_DIR=/var/lib/tbg-deploy/gh
+Environment=XDG_CACHE_HOME=/var/lib/tbg-deploy/cache
+Environment=XDG_DATA_HOME=/var/lib/tbg-deploy/data

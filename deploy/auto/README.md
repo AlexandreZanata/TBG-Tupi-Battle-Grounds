@@ -52,8 +52,8 @@ not authorization to activate native signing or administrative player permission
    not authenticate a release. Archive extraction allows only three regular files,
    refusing traversal, duplicate members, links and size/hash mismatches.
 
-Repository is public, so the timers use no GitHub credential. Ten-minute polling across all three families
-normally uses at most 36 public API reads/hour; source comparisons add requests for
+Repository is public, so the timers use no GitHub credential. Ten-minute polling across the three payload families plus native metadata
+normally uses at most 48 public API reads/hour; source comparisons add requests for
 new candidates. Other users of the same public IP and bursts may exhaust this quota;
 verification fails closed, with no credential fallback. A private repository or renamed/transferred repo requires a new
 review of access/trust, not a silent token fallback.
@@ -190,3 +190,17 @@ This is configured in the game/static templates; existing TLS, WAF and API routi
 remain in place. Automatic Analytics script injection no longer occurs on these
 payloads; a future explicit analytics integration needs its own review. See
 [Cloudflare's documentation](https://developers.cloudflare.com/web-analytics/faq/).
+
+## Native download catalog (metadata only)
+
+`native_pull.py` is separate from backend/web/static activation. It verifies the
+complete native release's manifest provenance against `native-release.yml`, its
+exact tag/source and hosted builder, then compares asset API digests/sizes and
+the live server contract. It publishes `/srv/tbg/downloads/current.json` for the
+landing's `/downloads.json` route. The shared state lock serializes it with payload
+controllers. No executable is installed, no TUF signing is activated and no game
+process or player data changes. The installer leaves its flag/timer disabled.
+
+See [the official release guide](../../docs/RELEASES.md#native-packages-and-truthful-availability)
+for the first verified release, activation and public availability checks. An old
+incompatible protocol-30 release never enables protocol-31 download buttons.

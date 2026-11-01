@@ -203,18 +203,13 @@ def check_release(mapping):
     web = config.get("webGame", {})
     if web.get("state") not in ("pending", "live") or not str(web.get("url", "")).startswith("https://app.tupibg.com/"):
         fail("release.json webGame needs state pending|live and an https://app.tupibg.com/ URL")
-    linux = config.get("linux", {})
-    if linux.get("state") not in ("pending", "available"):
-        fail("release.json linux.state must be pending or available")
-    if linux.get("state") == "available":
-        if linux.get("protocol") != protocol or linux.get("contract") != contract:
-            fail("release.json offers a Linux package that does not match the current protocol and contract")
-        for asset in linux.get("assets") or [None]:
-            ok = isinstance(asset, dict) and asset.get("kind") in ("appimage", "tarball") \
-                and str(asset.get("url", "")).startswith(LANDING_RELEASE_PREFIX) \
-                and re.fullmatch(r"[0-9a-f]{64}", str(asset.get("sha256", ""))) and isinstance(asset.get("bytes"), int)
-            if not ok:
-                fail(f"release.json Linux asset is incomplete: {asset}")
+    for os, kinds in {"linux": {"appimage", "tarball"}, "windows": {"installer", "zip"}}.items():
+        native = config.get(os, {})
+        if native.get("state") != "pending":
+            fail(f"release.json {os} must stay pending; only the verified live catalog may enable native downloads")
+    fallback = json.loads(mapping["downloads.json"].read_text())
+    if fallback != {"schema": 1, "server": server, "linux": {"state": "pending"}, "windows": {"state": "pending"}}:
+        fail("downloads.json fallback must match the authored server contract and keep both native downloads pending")
     return config
 
 
