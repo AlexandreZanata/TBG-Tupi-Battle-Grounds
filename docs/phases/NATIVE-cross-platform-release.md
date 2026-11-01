@@ -51,3 +51,13 @@ this new MSVC/protocol-31 candidate. It reports DX12/WARP software rendering,
 black engine screenshots despite visible GDI captures, slow loading and no audio
 device. These are known environment/acceptance issues to investigate rather than
 hide by disabling game quality. A running VM is not real hardware GPU acceptance.
+
+## DevShell compatibility correction
+
+The first Windows job rejected `-DevCmdArguments` on `Launch-VsDevShell.ps1` before
+compilation. That flag belongs to the underlying `Enter-VsDevShell` cmdlet. The
+helper now loads Microsoft's installed DevShell module directly, checks that the
+cmdlet supports the parameter, selects x64 plus SDK 10.0.26100.0 and verifies the
+resulting SDK/architecture. It does not silently fall back to another SDK. This
+fix is source-reviewed; the next Windows run must provide actual environment/build
+evidence. Native artifact publication remains gated, not claimed successful.
