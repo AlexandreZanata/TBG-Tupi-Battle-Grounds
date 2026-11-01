@@ -15,6 +15,19 @@ impl Service {
             .ok_or(Error::Unauthorized)
     }
 
+    /// P71 (BR-AS07): the seat-lease lookup; only the resume of an admitted
+    /// seat may use it (the lobby checks the session, family and account).
+    pub(crate) fn authenticate_lease(&self, token: [u8; 32]) -> Result<Binding, Error> {
+        let now = self.now()?;
+        self.access
+            .read()
+            .map_err(|_| Error::Unavailable)?
+            .get(&tokens::hash(&token))
+            .filter(|b| b.resumable(now))
+            .cloned()
+            .ok_or(Error::Unauthorized)
+    }
+
     async fn idle(&self, ids: &[FamilyId]) -> Result<(), Error> {
         let (reply, rx) = oneshot::channel();
         tokio::time::timeout(Duration::from_secs(5), async {

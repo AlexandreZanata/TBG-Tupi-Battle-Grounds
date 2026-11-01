@@ -31,7 +31,10 @@ pub(crate) fn valid_origin(value: &str) -> bool {
 }
 
 const ACCESS_SECONDS: i64 = 900;
-const RETRY_SECONDS: i64 = 30;
+/// P71: a lost refresh reply is recovered by retrying the same operation; the
+/// window outlasts any outage a seat survives, so the retry never reads as reuse.
+/// Reuse after it still revokes the family.
+const RETRY_SECONDS: i64 = 300;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Error {
@@ -94,7 +97,19 @@ impl Binding {
     pub fn valid(&self, now: i64) -> bool {
         !self.revoked() && now < self.expires_at && Instant::now() < self.deadline
     }
+    /// P71 (BR-AS07): unrevoked and expired at most `LEASE_GRACE_SECS` ago. Such a
+    /// binding may take back its own admitted seat on reconnect, nothing else.
+    pub fn resumable(&self, now: i64) -> bool {
+        let grace = Duration::from_secs(LEASE_GRACE_SECS as u64);
+        !self.revoked()
+            && now < self.expires_at.saturating_add(LEASE_GRACE_SECS)
+            && Instant::now() < self.deadline + grace
+    }
 }
+
+/// A drop that outlasts the Access token must not need a refresh to come back:
+/// longer than any seat hold (reconnect window plus the P71 pause budget).
+pub(crate) const LEASE_GRACE_SECS: i64 = 180;
 
 struct NewFamily {
     name: String,
@@ -222,7 +237,7 @@ impl Service {
 
     fn prune(&self, state: &mut State, now: i64) {
         if let Ok(mut access) = self.access.write() {
-            access.retain(|_, b| b.valid(now));
+            access.retain(|_, b| b.resumable(now));
         }
         state
             .rotations

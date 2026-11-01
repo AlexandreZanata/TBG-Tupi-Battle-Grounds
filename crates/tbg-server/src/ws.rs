@@ -117,6 +117,7 @@ pub(super) struct Conn {
     pub(super) id: u64,
     pub(super) binding: Option<crate::auth::Binding>,
     pub(super) active: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    pub(super) link: std::sync::Arc<crate::chan::Link>,
     pub(super) expired_notified: bool,
     pub(super) token: Token,
     pub(super) matched: Option<(Seat, mpsc::Sender<MatchCmd>)>,
@@ -146,6 +147,7 @@ async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
     let (tx, mut rx) = mpsc::channel(CONN_QUEUE);
     let handle = ConnHandle::new(id, tx);
     let active = handle.active.clone();
+    let link = handle.link.clone();
     let Some((token, binding)) = handshake(&mut socket, &app, handle, ip).await else {
         return;
     };
@@ -153,6 +155,7 @@ async fn connection(mut socket: WebSocket, ip: IpAddr, app: AppState) {
         id,
         binding,
         active,
+        link,
         expired_notified: false,
         token,
         matched: None,
@@ -234,22 +237,26 @@ async fn handshake(
         .await;
         return None;
     }
-    let binding = match access {
+    let (binding, lease) = match access {
         Some(access) => match app.auth.authenticate(access.0) {
-            Ok(binding) => Some(binding),
-            Err(_) => {
-                let _ = send(
-                    socket,
-                    &app.metrics,
-                    &ServerMsg::AuthRequired {
-                        reason: protocol::AuthRefusal::Invalid,
-                    },
-                )
-                .await;
-                return None;
-            }
+            Ok(binding) => (Some(binding), false),
+            Err(_) => match resume.and_then(|_| app.auth.authenticate_lease(access.0).ok()) {
+                // P71 (BR-AS07): a drop that outlasted the Access takes its seat back.
+                Some(binding) => (Some(binding), true),
+                None => {
+                    let _ = send(
+                        socket,
+                        &app.metrics,
+                        &ServerMsg::AuthRequired {
+                            reason: protocol::AuthRefusal::Invalid,
+                        },
+                    )
+                    .await;
+                    return None;
+                }
+            },
         },
-        None => None,
+        None => (None, false),
     };
     let (reply, rx) = oneshot::channel();
     let command = if let Some(binding) = binding.clone() {
@@ -258,6 +265,7 @@ async fn handshake(
             conn,
             ip,
             binding,
+            lease,
             reply,
         }
     } else {
@@ -299,6 +307,9 @@ async fn run_loop(
     let idle = sleep(IDLE);
     tokio::pin!(idle);
     loop {
+        if c.link.close_requested() {
+            return "server_closed";
+        }
         if c.binding.as_ref().is_some_and(|b| b.revoked()) {
             let _ = send(
                 socket,
@@ -314,6 +325,7 @@ async fn run_loop(
             msg = socket.recv() => match msg {
                 Some(Ok(Message::Binary(bytes))) => {
                     idle.as_mut().reset(tokio::time::Instant::now() + IDLE);
+                    c.link.heard();
                     c.bytes_in += bytes.len() as u64;
                     Metrics::add(&app.metrics.bytes_in, bytes.len() as u64);
                     match on_client_bytes(c, app, &bytes) {
@@ -326,11 +338,13 @@ async fn run_loop(
                 }
                 Some(Ok(Message::Ping(payload))) => {
                     idle.as_mut().reset(tokio::time::Instant::now() + IDLE);
+                    c.link.heard();
                     let _ = socket.send(Message::Pong(payload)).await;
                     None
                 }
                 Some(Ok(Message::Pong(_))) => {
                     idle.as_mut().reset(tokio::time::Instant::now() + IDLE);
+                    c.link.heard();
                     None
                 }
                 Some(Ok(Message::Close(_))) | None => return "client_closed",

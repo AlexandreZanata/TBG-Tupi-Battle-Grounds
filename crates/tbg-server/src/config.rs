@@ -12,6 +12,8 @@ pub struct Config {
     pub max_connections: usize,
     pub max_per_ip: usize,
     pub reconnect_secs: u64,
+    /// P71 (BR-M03, Proposed): connection-pause budget per player per match.
+    pub pause_secs: u64,
     /// Simulation tick length; 50 ms in production. Tests shorten it.
     pub tick_ms: u64,
     pub static_dir: Option<PathBuf>,
@@ -64,6 +66,7 @@ impl Default for Config {
             max_connections: 2_000,
             max_per_ip: 8,
             reconnect_secs: 30,
+            pause_secs: 120,
             tick_ms: 50,
             static_dir: None,
             db: None,
@@ -121,6 +124,7 @@ impl Config {
             max_connections: num("TBG_MAX_CONNECTIONS", d.max_connections as u64) as usize,
             max_per_ip: num("TBG_MAX_PER_IP", d.max_per_ip as u64) as usize,
             reconnect_secs: num("TBG_RECONNECT_SECS", d.reconnect_secs),
+            pause_secs: num("TBG_PAUSE_SECS", d.pause_secs),
             tick_ms: num("TBG_TICK_MS", d.tick_ms).max(1),
             workers: num("TBG_WORKERS", 0) as usize,
             register_per_ip_hour: num("TBG_REGISTER_PER_IP_HOUR", d.register_per_ip_hour),

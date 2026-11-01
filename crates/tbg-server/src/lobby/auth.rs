@@ -5,6 +5,10 @@ use crate::auth::Binding;
 use crate::store::auth_sessions::FamilyId;
 use tbg_core::protocol::{AuthRefusal, AuthStatus};
 
+/// Silence after which a same-session resume replaces the attached socket;
+/// below the client's own 4 s watchdog, so its first reconnect succeeds.
+const STALE_LINK: Duration = Duration::from_secs(3);
+
 impl Lobby {
     fn auth_can_start(&self, token: Token) -> bool {
         let Some(session) = self.sessions.get(&token) else {
@@ -96,9 +100,10 @@ impl Lobby {
         conn: ConnHandle,
         ip: IpAddr,
         binding: Binding,
+        lease: bool,
     ) -> Option<(Token, String)> {
         let now = self.config.auth_clock.now().ok()?;
-        if !binding.valid(now) {
+        if !binding.valid(now) && !(lease && self.lease_resumes(resume, &binding)) {
             return None;
         }
         if let Some(session) = resume.and_then(|token| self.sessions.get(&token)) {
@@ -111,28 +116,53 @@ impl Lobby {
             {
                 return None;
             }
-            if session
-                .detached_at
-                .is_some_and(|at| at.elapsed() > Duration::from_secs(self.config.reconnect_secs))
-            {
-                return None;
-            }
         }
-        // Passive restore cannot displace a still-attached controller, even with
-        // a copied same-family resume handle. A detached reconnect is distinct.
+        // P71: the match holds a seat until it ends it (window, forfeit); an idle
+        // session past the window starts fresh instead of forcing a new sign-in.
+        let window = Duration::from_secs(self.config.reconnect_secs);
         let resume = resume.filter(|token| {
             self.sessions.get(token).is_none_or(|s| {
-                s.conn
-                    .as_ref()
-                    .is_none_or(|c| !c.active.load(std::sync::atomic::Ordering::Acquire))
+                matches!(s.state, SessionState::InMatch { .. })
+                    || s.detached_at.is_none_or(|at| at.elapsed() <= window)
             })
         });
+        // Passive restore cannot displace a still-attached controller, even with
+        // a copied same-family resume handle. A detached reconnect is distinct,
+        // and so is a controller the server no longer hears (P71): it is pinged
+        // every second, so this much silence is a dead link TCP has not reported.
+        let resume = resume.filter(|token| {
+            self.sessions.get(token).is_none_or(|s| {
+                s.conn.as_ref().is_none_or(|c| {
+                    !c.active.load(std::sync::atomic::Ordering::Acquire)
+                        || c.link.silent_for() > STALE_LINK
+                })
+            })
+        });
+        // A lease only ever takes its own seat back, never opens a new session.
+        if lease && resume.is_none() {
+            return None;
+        }
         conn.active
             .store(false, std::sync::atomic::Ordering::Release);
         let id = conn.id;
         let pair = self.hello_bound(resume, conn, ip)?;
-        self.auth_claim(pair.0, id, binding, false);
+        // A lease resume renews on the socket (AuthRequired{Expired}), then claims.
+        if !lease {
+            self.auth_claim(pair.0, id, binding, false);
+        }
         Some(pair)
+    }
+
+    /// P71 (BR-AS07): an expired Access may only take back its own admitted seat.
+    fn lease_resumes(&self, resume: Option<Token>, binding: &Binding) -> bool {
+        resume
+            .and_then(|token| self.sessions.get(&token))
+            .is_some_and(|s| {
+                matches!(s.state, SessionState::InMatch { .. })
+                    && s.auth_binding.as_ref().is_some_and(|old| {
+                        old.family == binding.family && old.account == binding.account
+                    })
+            })
     }
 
     pub(super) fn auth_claim(
