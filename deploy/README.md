@@ -303,6 +303,7 @@ proxy routes are active; the browser game static bundle, landing and admin UI
 are separate frontend publications. The backend binary does not implement a
 `--version` flag; inspect its startup source metadata, binary hash and the
 loopback-only release contract instead of starting another copy.
+
 ## Static web frontends (landing, admin placeholder)
 
 The landing (`tupibg.com`, `www` redirect) and the admin placeholder (`admin.tupibg.com`) are
