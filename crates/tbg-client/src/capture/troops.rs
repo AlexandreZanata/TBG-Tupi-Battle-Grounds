@@ -68,11 +68,12 @@ fn capture(
     };
     *done = true;
     eprintln!(
-        "P70 Troops: unit={unit:?}; form={form:?}; clip={:?}; viewport={}x{}; dpi={}; camera={camera:?}",
+        "P70 Troops: unit={unit:?}; form={form:?}; clip={:?}; viewport={}x{}; dpi={}; camera={:?}",
         catalog.clip,
         window.physical_width(),
         window.physical_height(),
         window.scale_factor(),
+        *camera,
     );
     commands
         .spawn(Screenshot::primary_window())
