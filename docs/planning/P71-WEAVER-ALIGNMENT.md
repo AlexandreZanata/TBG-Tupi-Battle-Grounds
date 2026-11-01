@@ -18,3 +18,26 @@ Native build and renderer inspection will use the shared nonblocking lock,
 two Cargo jobs and existing cache. The next successful authorized Linux
 reinstall must also include the pending Pyre and Bone Brute corrections.
 No new unit tests or full-suite validation for this isolated visual change.
+
+## Current validation and delivery status
+
+Formatting and `git diff --check` passed. The native build exited75:
+**deferred: shared validation slot busy**. No retry, lock polling, waiting,
+cache bypass or interruption of the current validation was attempted. Native
+renderer verification, the refreshed Weaver portrait and local installation
+remain pending. No compile or renderer pass is claimed.
+
+Independent analytic inspection confirmed that the changed parent/rest offsets
+preserve the head rest position, and that selected points overlap the abdomen,
+cephalothorax and head-collar ellipsoids through the authored small head-rotation
+and translation envelope, including doubled cast shifts. This manually
+transcribed numerical inspection does not verify faceted meshes or runtime
+poses. Local result: `.local/p71-evidence/weaver-connection-inspection.json`,
+SHA-256 `3958333ad6ba3f320ddc6c41cf30899d60dd3f1e6cd33c1f6a9932b5debe01ec`.
+
+After three consecutive follow-ups encountered the busy shared validation slot,
+the owner was asked whether to authorize waiting for the slot without stopping
+its current holder. This is an explicit exception request to the AGENTS.md
+no-wait/no-poll rule, not permission to bypass the lock or raise build jobs.
+Until answered, native delivery remains pending and installed versionbc8ef32
+is preserved. The source change is committed for GitHub delivery.
