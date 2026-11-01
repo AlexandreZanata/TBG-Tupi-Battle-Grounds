@@ -178,7 +178,8 @@ No blank spacer is reserved beneath those two controls.
 Coverage: add `training-arena-cover-forest`, `training-arena-cover-volcanic`,
 `training-arena-cover-celestial` and `training-arena-cover-resize` for both languages
 and the contract viewport/DPI cases. Check source proportions, center framing,
-side crop, selector changes, button visibility and pane fill. The 768x382 original
+side crop, selector changes, button visibility and pane fill. The resize case also
+uses the contract motion frames for before/after layout transitions. The 768x382 original
 thumbnails and 640x360 newer arena thumbnails must both work without asset edits.
 
 Propagation audit: build.rs selects the same `tbg_desktop` presentation for Linux,
@@ -189,7 +190,11 @@ The changes in this chat already propagate at source level to those three target
 no duplicate platform code or unrelated target rebuild is needed for propagation.
 This audit is not evidence of exact rendered parity.
 
-Linux native observations and installation are pending this work front. Same-source
+Linux native release `ac50ba6` built and installed. Forest at 1920x1080, Volcanic
+and Celestial at 1920x970, live selector clicks and resizing to 1366x768 were
+inspected: proportional centered lateral crops, no bottom spacer, both controls
+visible. The installed executable was separately opened at 1920x970. See
+[the work-front report](../phases/LABORATORY-arena-cover.md). Same-source
 Windows and desktop-web full-frame/motion observations remain pending consolidation,
 including the previously registered laboratory and reduced-motion cases. No waiver
 or visual-parity claim follows from shared routing.

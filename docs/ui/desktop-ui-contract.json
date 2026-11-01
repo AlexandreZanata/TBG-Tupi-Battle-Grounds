@@ -75,7 +75,8 @@
     "preview-motion-default",
     "preview-motion-reduced",
     "preview-motion-resumed",
-    "preview-motion-reentry"
+    "preview-motion-reentry",
+    "training-arena-cover-resize"
   ],
   "motion_frames": [
     0,
