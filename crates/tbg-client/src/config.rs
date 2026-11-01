@@ -68,7 +68,7 @@ pub fn server_url() -> String {
             .unwrap_or(if cfg!(debug_assertions) {
                 "ws://127.0.0.1:8080/ws"
             } else {
-                "wss://tbg.abastevo.com.br/ws"
+                "wss://api.tupibg.com/ws"
             })
             .into()
     }

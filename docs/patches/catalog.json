@@ -115,13 +115,13 @@
         "en": [
           {
             "title": "Preview limits",
-            "body": "P70/P71 character follow-ups, support/Stronghold targeting and the new Arena modifiers retain their source reports and Proposed-value status. No D-33 gate, load capacity, public TLS deployment, signed update promotion or Windows visual acceptance is claimed. The owner is resetting the VPS; remote installation awaits its confirmed connection settings."
+            "body": "P70/P71 character follow-ups, support/Stronghold targeting and the new Arena modifiers retain their source reports and Proposed-value status. No D-33 gate, load capacity, public TLS deployment, signed update promotion or Windows visual acceptance is claimed. This backend line uses api.tupibg.com; clients must share protocol 31. Current deployment evidence is recorded separately."
           }
         ],
         "pt-BR": [
           {
             "title": "Limites desta prévia",
-            "body": "Os ajustes P70/P71, a seleção de alvo de suporte/torre e os modificadores das novas arenas mantêm seus relatórios e o estado de valores propostos. Não há alegação de aprovação D-33, capacidade de carga, instalação pública com TLS, publicação de atualização assinada ou validação visual Windows. A instalação remota aguarda as configurações confirmadas da VPS."
+            "body": "Os ajustes P70/P71, a seleção de alvo de suporte/torre e os modificadores das novas arenas mantêm seus relatórios e o estado de valores propostos. Não há alegação de aprovação D-33, capacidade de carga, instalação pública com TLS, publicação de atualização assinada ou validação visual Windows. O backend desta linha usa api.tupibg.com; os clientes precisam compartilhar o protocolo 31. A evidência da instalação está em relatório separado."
           }
         ]
       },

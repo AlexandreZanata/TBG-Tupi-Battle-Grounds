@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     env:
-      TBG_DEFAULT_SERVER: wss://tbg.abastevo.com.br/ws
+      TBG_DEFAULT_SERVER: wss://api.tupibg.com/ws
       TBG_SOURCE_COMMIT: ${{ github.sha }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0

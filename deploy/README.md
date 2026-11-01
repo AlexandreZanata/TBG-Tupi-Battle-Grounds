@@ -211,7 +211,7 @@ Never commit `deploy/.env.deploy`, IPs, domains, or keys.
 
 The integrated P71/main branch uses protocol 31, schema 10 and eight Arenas.
 Deploy its server and client together; neither protocol-30 branch is compatible.
-The owner is resetting VPS `72.60.147.2`; its replacement SSH host fingerprint,
+The owner is resetting VPS `<private VPS address>`; its replacement SSH host fingerprint,
 login settings and final domain must be confirmed before connecting/provisioning.
 Verify a changed host fingerprint in the provider console, not by automatically
 accepting the key received over the network. No remote installation is recorded
@@ -225,3 +225,32 @@ read this file. The normal single-slot deploy remains sufficient for the first
 installation; two-slot activation and signed native updates retain their separate
 operator gates. Local `.local/`, agent metadata and deployment credentials are
 excluded from source transfer. Builds use the host validation lock and two jobs.
+
+## tupibg.com domain layout
+
+The owner's public layout uses `api.tupibg.com` for the backend,
+`app.tupibg.com` for the browser game, the base/www hosts for a future landing
+page, and `admin.tupibg.com` for a future administrative suite. Landing/admin
+content is not deployed by the backend task. Connection credentials, origin
+address, host pins and SSH keys live only in private operator configuration.
+
+Set `TBG_DOMAIN=api.tupibg.com` and `TBG_APP_DOMAIN=app.tupibg.com` in the ignored
+deploy environment. `bash deploy/deploy.sh --provision --backend-only` provisions
+the split HTTPS routes and backend without rebuilding/publishing the web game.
+The native client uses `wss://api.tupibg.com/ws`; the browser keeps its same-origin
+`/api/auth/*` and `/ws` proxy on the app host. No cross-origin cookie or permissive
+CORS exception is introduced. A later normal deploy supplies the web bundle.
+
+The split template requires Caddy >=2.8 (Debian 13's official backports package
+is used on the owner's fresh image). Only the published Cloudflare CIDRs are
+trusted for `CF-Connecting-IP`; the proxy overwrites upstream X-Forwarded-For
+with the verified client IP, so direct callers cannot spoof rate-limit identity.
+Sources: https://caddyserver.com/docs/caddyfile/options#trusted-proxies and
+https://www.cloudflare.com/ips/ (checked 2026-11-01). Cloudflare must use Full
+(strict) TLS and permit WebSockets; the deployed origin also has a public TLS
+certificate. Keep `/api/release` and `/metrics` private.
+
+First installation skips the predeploy database backup when no database exists.
+The unprivileged service creates schema 10 itself; later deployments retain the
+integrity-checked pre-migration backup. Native installation uses the matching
+protocol-31 source, preserving earlier local installs and player data.
