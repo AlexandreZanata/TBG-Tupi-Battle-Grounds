@@ -14,7 +14,7 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Secondary, Proportions, Spring},
 };
 
-const HOT: Color = Color::srgb(1.0, 0.55, 0.18);
+const HOT: Color = ORANGE;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(true, 0.95, tier);
@@ -71,6 +71,18 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             [0.12, 0.2, -0.04],
         ),
         part(Body(HandR), Box(0.2, 0.2, 0.2), IRON, [0.0, -0.06, 0.0]),
+        part(
+            Body(HandR),
+            Box(0.21, 0.055, 0.21),
+            STEEL,
+            [0.0, -0.15, 0.0],
+        ),
+        part(
+            Body(Head),
+            Box(h * 1.6, h * 0.18, 0.06),
+            OGRE_SKIN,
+            [0.0, h * 0.25, h * 0.9],
+        ),
     ]);
     body::helmet(&mut v, &p, body::Helm::Kettle(IRON));
     body::pauldrons(&mut v, IRON, 0.13);
@@ -137,11 +149,27 @@ fn wall(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         ),
         part(
             c,
-            Box(wide * 0.3, tall * 0.32, 0.06),
+            Cyl(wide * 0.18, 0.075),
+            BRASS,
+            [x, y - tall * 0.05, z + 0.025],
+        )
+        .rot([90.0, 0.0, 0.0]),
+        part(
+            c,
+            Box(wide * 0.16, tall * 0.15, 0.018),
             ALLY,
-            [x, y - tall * 0.05, z + 0.006],
-        ),
+            [x, y - tall * 0.05, z + 0.070],
+        )
+        .rot([0.0, 0.0, 45.0]),
     ]);
+    for (dx, dy) in [(-0.4, -0.35), (0.4, -0.35), (-0.4, 0.35), (0.4, 0.35)] {
+        v.push(part(
+            c,
+            Ball(0.022),
+            BRASS,
+            [x + dx * wide, y + dy * tall, z + 0.04],
+        ));
+    }
     if f.a {
         v.push(part(
             c,
