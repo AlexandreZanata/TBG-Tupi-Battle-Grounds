@@ -43,15 +43,15 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
     let p = plan(tier);
     let mut v = vec![
-        part(Body(Hips), Ball(0.14), CHARCOAL, [0.0, 0.03, -0.02]).scale([1.0, 0.7, 1.2]),
+        part(Body(Hips), Ball(0.14), LEAF_DARK, [0.0, 0.03, -0.02]).scale([1.0, 0.7, 1.2]),
         part(
             Body(Chest),
             Ball(0.19),
-            if f.b { DARK } else { CHARCOAL },
+            if f.b { DARK } else { LEAF_DARK },
             [0.0, 0.18, -0.03],
         )
         .scale([0.9, 1.15, 0.8]),
-        part(Body(Chest), Pill(0.07, 0.46), CHARCOAL, [0.0, 0.44, 0.03]).rot([8.0, 0.0, 0.0]),
+        part(Body(Chest), Pill(0.085, 0.46), LEAF_DARK, [0.0, 0.44, 0.03]).rot([8.0, 0.0, 0.0]),
         part(
             Secondary(Spring::Back),
             Ball(if f.b { 0.17 } else { 0.13 }),
@@ -60,12 +60,13 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         )
         .scale([1.0, 1.4, 0.9])
         .glow(),
-        part(Body(Head), Ball(0.14), CHARCOAL, [0.0, 0.0, 0.02]).scale([1.2, 0.8, 1.1]),
+        part(Body(Head), Ball(0.14), LEAF_DARK, [0.0, 0.0, 0.02]).scale([1.2, 0.8, 1.1]),
+        part(Body(Chest), Pill(0.035, 0.36), IVORY, [0.0, 0.48, 0.105]).rot([8.0, 0.0, 0.0]),
         part(Body(Head), Ball(0.10), DARK, [0.0, 0.0, 0.17]).scale([1.0, 1.0, 0.4]),
     ];
     for (upper, lower, foot) in [(ThighL, ShinL, FootL), (ThighR, ShinR, FootR)] {
         v.extend([
-            part(Body(upper), Pill(0.05, 0.17), CHARCOAL, [0.0, -0.11, 0.0]),
+            part(Body(upper), Pill(0.055, 0.17), LEAF_DARK, [0.0, -0.11, 0.0]),
             part(Body(lower), Pill(0.037, 0.17), GUNMETAL, [0.0, -0.11, 0.0]),
             part(
                 Body(foot),
