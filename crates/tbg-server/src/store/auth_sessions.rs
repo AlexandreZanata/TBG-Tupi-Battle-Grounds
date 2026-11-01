@@ -148,7 +148,10 @@ impl super::Store {
     pub async fn auth(&self, request: Request) -> Result<Reply, Error> {
         let (reply, rx) = tokio::sync::oneshot::channel();
         self.tx
-            .try_send(super::worker::StoreCmd::Auth { request, reply })
+            .try_send(super::worker::StoreCmd::Auth {
+                request: Box::new(request),
+                reply,
+            })
             .map_err(|_| Error::Unavailable)?;
         rx.await.map_err(|_| Error::Unavailable)?
     }

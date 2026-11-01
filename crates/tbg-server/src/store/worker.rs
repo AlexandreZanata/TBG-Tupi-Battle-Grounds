@@ -19,8 +19,10 @@ use super::{accounts, arcanas, matches, ranked, stats, strongholds, AccountId};
 type Reply<T> = oneshot::Sender<T>;
 
 pub(super) enum StoreCmd {
+    // Boxed: the issuance request is by far the largest command, and P66's
+    // `try_send` hands a refused command back by value.
     Auth {
-        request: super::auth_sessions::Request,
+        request: Box<super::auth_sessions::Request>,
         reply: Reply<Result<super::auth_sessions::Reply, super::auth_sessions::Error>>,
     },
     Register {
@@ -134,7 +136,7 @@ fn serve(
 ) {
     match cmd {
         StoreCmd::Auth { request, reply } => {
-            let _ = reply.send(super::auth_sessions::apply(conn, request));
+            let _ = reply.send(super::auth_sessions::apply(conn, *request));
         }
         StoreCmd::Register {
             name,
