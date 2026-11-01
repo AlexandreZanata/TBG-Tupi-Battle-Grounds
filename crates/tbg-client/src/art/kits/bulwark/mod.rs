@@ -30,6 +30,9 @@ fn pose(m: &Moment, p: &mut Pose) {
         Clip::Idle => {
             moves::idle(m, p, &body, 0.5);
             tools::add(p, Head, [0.0, (m.clock * 0.7).sin() * 5.0, 0.0]);
+            let settle = tools::hold((m.clock * 0.24).fract(), [0.0, 0.12, 0.20, 0.40]);
+            tools::shift(p, Head, [0.0, -0.012 * settle, 0.012 * settle]);
+            tool(p, &body, -8.0 + 5.0 * settle, 0.0);
         }
         Clip::Walk => {
             moves::walk(m, p, 5.0, 3.0);
@@ -42,9 +45,20 @@ fn pose(m: &Moment, p: &mut Pose) {
                     (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin() * 3.0,
                 ],
             );
+            tool(
+                p,
+                &body,
+                -12.0,
+                0.008 * (m.walk.unwrap_or(0.0) * std::f32::consts::TAU * 2.0).cos(),
+            );
         }
         Clip::AttackMelee | Clip::AttackRanged => {
-            moves::strike(m, p, &body, CHOP, 1.1);
+            let load = tools::hold(m.t, [0.0, 0.17, 0.23, 0.30]);
+            let strike = tools::hold(m.t, [0.23, 0.30, 0.40, 0.62]);
+            tools::set(p, Chest, [-4.0 * load + 8.0 * strike, 0.0, 0.0]);
+            tool(p, &body, -15.0 - 115.0 * load - 75.0 * strike, 0.045 * load);
+            tools::face(p, m.aim, Vec3::ZERO);
+            tools::plant(p, &body, tools::stance(&body, 1.3, 0.04));
             tools::shift(
                 p,
                 Head,
@@ -65,7 +79,13 @@ fn pose(m: &Moment, p: &mut Pose) {
                 [0.0, 0.08 * tools::hold(m.t, [0.0, 0.25, 0.45, 0.8]), 0.0],
             );
         }
-        Clip::Victory => moves::victory(m, p, &body, Cheer::Raise),
+        Clip::Victory => {
+            let salute = 0.5 - 0.5 * (m.t / 0.8 * std::f32::consts::TAU).cos();
+            tools::set(p, Chest, [-3.0 * salute, 0.0, 0.0]);
+            tools::set(p, Head, [-8.0 * salute, 6.0, 0.0]);
+            tool(p, &body, -20.0 - 45.0 * salute, 0.035 * salute);
+            tools::plant(p, &body, tools::stance(&body, 1.25, 0.0));
+        }
         Clip::Cast => {}
     }
     let preparing = m
@@ -78,13 +98,15 @@ fn pose(m: &Moment, p: &mut Pose) {
         tools::plant(p, &body, tools::stance(&body, 1.0 + brace * 0.25, 0.0));
         tools::add(p, Chest, [5.0 * brace, 0.0, 0.0]);
     }
-    if matches!(m.clip, Clip::Idle | Clip::Walk) {
-        tools::reach(
-            p,
-            true,
-            Vec3::new(-0.12, 0.04, 0.16),
-            None,
-            (&body, Vec3::new(1.0, -0.6, 0.0)),
-        );
-    }
+}
+
+/// Both palms follow points on the same tool shaft throughout its lift.
+fn tool(p: &mut Pose, body: &crate::art::rig::Proportions, pitch: f32, lift: f32) {
+    moves::shoulder_arms(
+        p,
+        body,
+        Vec3::new(0.0, 0.10 + lift, 0.10),
+        Quat::from_rotation_x(pitch.to_radians()),
+        Vec3::Y * 0.12,
+    );
 }

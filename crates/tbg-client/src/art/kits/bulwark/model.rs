@@ -52,7 +52,13 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(
             Body(Chest),
             Lathe(DOME),
-            if f.a { LINEN } else { STONE },
+            if f.a {
+                LINEN
+            } else if f.b {
+                ROCK
+            } else {
+                STONE
+            },
             [0.0, 0.23, -0.16],
         ),
         part(
@@ -81,9 +87,9 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             .rot([8.0, 0.0, s * -8.0]),
             part(
                 Body(Chest),
-                Box(0.035, 0.34, 0.28),
+                Box(0.035, 0.24, 0.22),
                 ALLY,
-                [s * 0.43, 0.27, -0.12],
+                [s * 0.415, 0.27, -0.12],
             )
             .rot([0.0, 0.0, s * -12.0]),
             part(
@@ -93,6 +99,15 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
                 [s * 0.46, 0.10, -0.12],
             ),
         ]);
+    }
+    // Broad stone courses remain legible without turning the dome into a flat wall.
+    for (x, y) in [(-0.19, 0.38), (0.19, 0.38), (0.0, 0.53)] {
+        v.push(part(
+            Body(Chest),
+            Box(0.025, 0.12, 0.035),
+            ROCK,
+            [x, y, 0.20],
+        ));
     }
     for (y, r) in [(0.16, 0.43), (0.61, 0.37)] {
         v.push(part(
@@ -170,7 +185,7 @@ fn tool(v: &mut Vec<PartSpec>, f: Form) {
         part(
             n,
             Box(if f.b { 0.31 } else { 0.22 }, 0.15, 0.23),
-            STONE,
+            if f.b { STEEL } else { STONE },
             [0.0, -0.25, 0.04],
         ),
         part(n, Box(0.065, 0.17, 0.25), IRON, [0.0, -0.25, 0.04]),
