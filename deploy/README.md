@@ -254,3 +254,12 @@ First installation skips the predeploy database backup when no database exists.
 The unprivileged service creates schema 10 itself; later deployments retain the
 integrity-checked pre-migration backup. Native installation uses the matching
 protocol-31 source, preserving earlier local installs and player data.
+
+## Static web frontends (landing, admin placeholder)
+
+The landing (`tupibg.com`, `www` redirect) and the admin placeholder (`admin.tupibg.com`) are
+static sites published by `web/deploy/publish.sh`, never by this script. They live in
+`/srv/tbg/{landing,admin}` and in their own Caddy include, `/etc/caddy/tbg-web/sites.caddy`,
+which the domain template imports with `import tbg-web/*.caddy` (an empty glob is only a
+warning). See [web/deploy/README.md](../web/deploy/README.md) for release, rollback and the
+validation record.

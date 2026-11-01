@@ -106,3 +106,7 @@ __TBG_APP_DOMAIN__ {
 		file_server
 	}
 }
+
+# Static web frontends (landing, www redirect, admin placeholder) live in their own include,
+# written only by web/deploy/publish.sh. Relative to this file; an empty glob is only a warning.
+import tbg-web/*.caddy
