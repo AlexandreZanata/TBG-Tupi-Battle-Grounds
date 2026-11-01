@@ -1,10 +1,10 @@
 # P69 — Independent native Android landscape prototype
 
-**Status:** implementation resumed, 2026-11-01. The owner selected reviewed
-Linux consolidation `6e56918`, requested the landscape frontend and Android
-build/install tests, then restored physical POCO ADB access. ARM64 library
-compilation passed; packaged-device validation is in progress. See
-[device execution](P69-device-20261101.md).
+**Status:** paused by the owner, 2026-11-01. Internal ARM64 versionCode 9
+was built and installed on the POCO; the same-source Linux build and WASM
+check passed. Device acceptance is partial. The reported top blue space and
+phone-independent adaptive layout remain pending. Resume only on owner
+request; see the [execution checkpoint](P69-device-20261101.md#owner-requested-pause-and-github-checkpoint).
 **Planning branch:** `codex/p69-android-landscape-plan`.
 **Execution branch:** `codex/p69-android-native-prototype`.
 **Reviewed Linux base:** `014b0e0c046b38c551ee24534ee00709cde0e493`

@@ -493,7 +493,7 @@ sign-off. Nothing was deployed; production stays on protocol 29.
 
 | Phase | Spec | Deliverable | Status | Review |
 |---|---|---|---|---|
-| P69 | [P69-android-native-prototype.md](phases/P69-android-native-prototype.md) | Native ARM64 APK, landscape touch frontend, exact Linux gameplay/core and packaged Android-versus-Linux validation on the owner's POCO X6 Pro | **Implementation**, `codex/p69-android-native-prototype`; reviewed Linux consolidation `6e56918` integrated, ARM64 library compiles, physical POCO package/UI checks in progress; [evidence](phases/P69-device-20261101.md) | AN01–AN18, actual phone/landscape/input/performance, source parity and owner look/fun |
+| P69 | [P69-android-native-prototype.md](phases/P69-android-native-prototype.md) | Native ARM64 APK, landscape touch frontend, exact Linux gameplay/core and packaged Android-versus-Linux validation on the owner's POCO X6 Pro | **Paused by owner**, 2026-11-01; `codex/p69-android-native-prototype`, internal APK versionCode 9 installed; same-source Linux/WASM builds passed, device acceptance partial; adaptive phone layout/top blue space pending; [checkpoint](phases/P69-device-20261101.md#owner-requested-pause-and-github-checkpoint) | AN01–AN18, actual phone/landscape/input/performance, source parity and owner look/fun |
 
 P69 is explicitly independent of P68 Windows/new authentication. Do not wait
 for or import those implementations. P65–P68 phase/decision/section numbers
@@ -510,5 +510,6 @@ Read the [acceptance/runbook](planning/P69-ANDROID-ACCEPTANCE.md),
 [device facts](planning/P69-DEVICE-REFERENCE.json),
 [hashed source snapshot](planning/P69-ANDROID-SOURCE-MANIFEST.csv) and
 [execution prompt with PR-to-main handoff](planning/P69-EXECUTION-PROMPT.md).
-Documentation checks now are not compilation, APK installation, physical
-gameplay, all-Android compatibility or public-store approval.
+The execution checkpoint separates actual build/device evidence from
+remaining acceptance. No all-Android compatibility or public-store approval
+is claimed.
