@@ -10,7 +10,7 @@ use tbg_core::protocol::{AuthRefusal, AuthStatus};
 const STALE_LINK: Duration = Duration::from_secs(3);
 
 impl Lobby {
-    fn auth_can_start(&self, token: Token) -> bool {
+    pub(super) fn auth_can_start(&self, token: Token) -> bool {
         let Some(session) = self.sessions.get(&token) else {
             return false;
         };
@@ -210,6 +210,9 @@ impl Lobby {
             return;
         }
         let conn = session.conn.clone();
+        if take_over {
+            self.cancel_direct(token);
+        }
         if let Some(session) = self.sessions.get_mut(&token) {
             session.auth_binding = Some(binding.clone());
         }

@@ -4,6 +4,9 @@
 
 use serde::{Deserialize, Serialize};
 
+mod history;
+pub use history::*;
+
 use crate::arcana::{self, ArcanaPreset};
 use crate::intent::{PlayerIntention, Rejection};
 use crate::state::Outcome;
@@ -22,7 +25,8 @@ use crate::view::{MatchView, PublicView};
 /// Fortification (D-46); v12: Interest regen boost; v11: fifteen-node Arcanas.
 /// Older peers are refused by the handshake.
 /// v30 (D-97/BR-AS): authenticated handshakes and same-socket renewal.
-pub const PROTOCOL_VERSION: u16 = 30;
+/// v31 (P73): participant-bound invitations and authoritative personal history.
+pub const PROTOCOL_VERSION: u16 = 31;
 
 /// Public result identity, independent of the combat seed and session token.
 pub type ResultId = [u8; 16];
@@ -156,6 +160,19 @@ pub enum ClientMsg {
     },
     ClaimAccount {
         take_over: bool,
+    },
+    ChallengePlayer {
+        name: String,
+    },
+    AnswerPlayerChallenge {
+        id: PlayerInviteId,
+        accept: bool,
+    },
+    CancelPlayerChallenge {
+        id: PlayerInviteId,
+    },
+    SetPlayerChallengesEnabled {
+        enabled: bool,
     },
 }
 
@@ -323,6 +340,24 @@ pub enum ServerMsg {
     AuthRequired {
         reason: AuthRefusal,
     },
+    PlayerChallengeState {
+        enabled: bool,
+        outgoing: Option<PlayerInviteNotice>,
+        incoming: Vec<PlayerInviteNotice>,
+    },
+    PlayerChallengeResult {
+        id: Option<PlayerInviteId>,
+        outcome: PlayerInviteOutcome,
+    },
+    PersonalMatchResult {
+        result_id: ResultId,
+        summary: Box<PersonalMatchSummary>,
+    },
+    MatchHistoryStatus {
+        result_id: ResultId,
+        entry_id: [u8; 16],
+        state: HistorySaveState,
+    },
 }
 
 impl core::fmt::Debug for ServerMsg {
@@ -442,4 +477,24 @@ fn decode_exact<T: for<'de> Deserialize<'de>>(bytes: &[u8]) -> Result<T, DecodeE
 /// Room codes are 5 characters from `ROOM_ALPHABET`.
 pub fn valid_room_code(code: &RoomCode) -> bool {
     code.iter().all(|c| ROOM_ALPHABET.contains(c))
+}
+
+/// P73 notification locator; possession never grants a seat or account authority.
+pub type PlayerInviteId = [u8; 16];
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PlayerInviteNotice {
+    pub id: PlayerInviteId,
+    pub peer_name: String,
+    pub peer_is_guest: bool,
+    pub remaining_s: u16,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PlayerInviteOutcome {
+    Unavailable,
+    RateLimited,
+    Declined,
+    Cancelled,
+    Expired,
 }

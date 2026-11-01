@@ -45,6 +45,12 @@ pub struct Metrics {
     /// re-sequenced results, finished results still waiting for a
     /// reconnecting player, and admission answers by kind.
     pub ranked_inflight: AtomicU64,
+    pub history_pending: AtomicU64,
+    pub history_saved: AtomicU64,
+    pub history_gaps: AtomicU64,
+    pub history_failures: AtomicU64,
+    pub history_conflicts: AtomicU64,
+
     pub ranked_resequenced: AtomicU64,
     pub result_receipts_pending: AtomicU64,
     pub admit_ok: AtomicU64,
@@ -92,6 +98,12 @@ impl Default for Metrics {
             ranked_stats_gaps: AtomicU64::new(0),
             ranked_stats_failures: AtomicU64::new(0),
             ranked_inflight: AtomicU64::new(0),
+            history_pending: AtomicU64::new(0),
+            history_saved: AtomicU64::new(0),
+            history_gaps: AtomicU64::new(0),
+            history_failures: AtomicU64::new(0),
+            history_conflicts: AtomicU64::new(0),
+
             ranked_resequenced: AtomicU64::new(0),
             result_receipts_pending: AtomicU64::new(0),
             admit_ok: AtomicU64::new(0),
@@ -264,6 +276,12 @@ impl Metrics {
         // macro recursion limit).
         let release = serde_json::json!({
             "ranked_inflight": get(&self.ranked_inflight),
+            "history_pending": get(&self.history_pending),
+            "history_saved": get(&self.history_saved),
+            "history_gaps": get(&self.history_gaps),
+            "history_failures": get(&self.history_failures),
+            "history_conflicts": get(&self.history_conflicts),
+
             "ranked_resequenced": get(&self.ranked_resequenced),
             "result_receipts_pending": get(&self.result_receipts_pending),
             "admit_ok": get(&self.admit_ok),

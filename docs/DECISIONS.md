@@ -2789,3 +2789,23 @@ loss).
 
 **Reopen when** owner playtests show the pause budget wrong, a protocol bump
 is approved (show the remaining budget), or abuse of pauses is observed.
+
+## D-101 — P73 participant-bound social state and private history (Proposed, 2026-11-01)
+
+BR-AP01–16 authorize protocol 31 and additive opt-in schema 11 on base
+`e2a18af`, with the shared P72 shell at `2da0a35`. Existing wire tags and
+MatchEnd bytes remain unchanged: a new adjacent private PersonalMatchResult
+is retained and replayed in CompletedResult, followed by the existing MatchEnd.
+Both the UI and persistent participant detail consume that same summary.
+Client tags 23–26 and server tags 33–36 are appended. History is independent
+from Elo; Public/Only me defaults private and uses conditional revisions.
+A non-rating `history_expected` marker commits inside the existing Ranked
+transaction; incremental verified backfill includes late legacy writers while
+leaving modern pending complete envelopes to their journal. The optional
+Ranked journal field defaults false for legacy recovery and never enters Elo.
+Schema installation, collection, owner API and public opt-in have separate
+explicit rollout flags. Public profile/history proxy routes fail closed to
+the privacy-aware slot a, with no old-slot fallback; rollback preserves this
+guard and all additive data/journals. No deployment or production migration
+is performed by P73 execution. The already locked Jiff library is reused as
+a direct native dependency to display stored UTC dates in the system zone.

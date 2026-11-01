@@ -147,6 +147,7 @@ pub fn encode(e: &JournalEntry) -> Value {
         "factions": r.factions,
         "arcanas": r.arcanas.each_ref().map(|a| a.ranks),
         "stats": r.stats,
+        "history_expected": r.history_expected,
     })
 }
 
@@ -217,6 +218,7 @@ pub fn decode(v: &Value) -> Option<JournalEntry> {
         seats: [seat(0)?, seat(1)?],
         factions: [quad(&v["factions"][0])?, quad(&v["factions"][1])?],
         arcanas: [preset(&v["arcanas"][0])?, preset(&v["arcanas"][1])?],
+        history_expected: v["history_expected"].as_bool().unwrap_or(false),
         stats: match &v["stats"] {
             Value::Null => None,
             s => Some(s.clone()),

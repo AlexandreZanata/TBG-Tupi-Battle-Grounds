@@ -75,6 +75,7 @@ impl Lobby {
 
     /// Leave queue, owned room, owned challenge, and any open rematch.
     pub(super) fn leave_waiting(&mut self, token: Token) {
+        self.cancel_direct(token);
         if let Some(s) = self.session(&token) {
             s.finished = None;
         }
@@ -110,8 +111,25 @@ impl Lobby {
         &mut self,
         tokens: [Token; 2],
         mode: MatchMode,
-        rematchable: bool,
+        _rematchable: bool,
         listing: Listing,
+    ) {
+        let origin = if listing == Listing::Public {
+            tbg_core::protocol::MatchOrigin::PublicQueue
+        } else if mode == MatchMode::Challenge {
+            tbg_core::protocol::MatchOrigin::Invitation
+        } else {
+            tbg_core::protocol::MatchOrigin::PrivateRoom
+        };
+        self.pair_origin(tokens, mode, listing, origin);
+    }
+
+    pub(super) fn pair_origin(
+        &mut self,
+        tokens: [Token; 2],
+        mode: MatchMode,
+        listing: Listing,
+        origin: tbg_core::protocol::MatchOrigin,
     ) {
         if self.refuse_expired_pair(tokens, mode, listing) {
             return;
@@ -143,8 +161,14 @@ impl Lobby {
                 stronghold: s.map_or(tbg_core::StrongholdKind::DEFAULT, |s| s.stronghold),
             }
         });
-        if rematchable {
-            self.rematches.retain(|r| r.players != tokens);
+        // BR-AP05: all admitted online human PvP pairs receive the latest ticket.
+        for t in tokens {
+            self.cancel_direct(t);
+            self.decline_rematch(t);
+        }
+        {
+            self.rematches
+                .retain(|r| !r.players.iter().any(|t| tokens.contains(t)));
             self.rematches.push(RematchTicket {
                 players: tokens,
                 requested: [false; 2],
@@ -171,6 +195,8 @@ impl Lobby {
             self.metrics.clone(),
             match_task::Records {
                 store: self.store.clone(),
+                history: self.history.clone(),
+                origin,
                 ranked: self.ranked.clone(),
                 // P60: OS-random, separate from the public LiveId.
                 key: random_bytes::<16>(),

@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 30,
-        "D-97/P68-A v30: authenticated hello, same-socket renewal and explicit account claim"
+        PROTOCOL_VERSION, 31,
+        "BR-AP03/10 and D-101: protocol 31 appends private invites and personal history without changing old tags"
     );
 }
 
@@ -315,5 +315,60 @@ fn d97_auth_variants_append_without_exposing_secrets_in_debug() {
         ClientMsg::Reauthenticate { access: secret },
     ] {
         assert!(!format!("{message:?}").contains("PRIVATE"));
+    }
+}
+
+#[test]
+fn p73_appends_participant_bound_messages_and_keeps_legacy_match_end_bytes() {
+    use tbg_core::protocol::{decode_server, HistorySaveState, PlayerInviteOutcome};
+    for (tag, message) in [
+        (
+            23,
+            ClientMsg::ChallengePlayer {
+                name: "Alpha".into(),
+            },
+        ),
+        (
+            24,
+            ClientMsg::AnswerPlayerChallenge {
+                id: [1; 16],
+                accept: true,
+            },
+        ),
+        (25, ClientMsg::CancelPlayerChallenge { id: [1; 16] }),
+        (26, ClientMsg::SetPlayerChallengesEnabled { enabled: false }),
+    ] {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_client(&bytes).unwrap(), message);
+    }
+    for (tag, message) in [
+        (
+            33,
+            ServerMsg::PlayerChallengeState {
+                enabled: false,
+                outgoing: None,
+                incoming: Vec::new(),
+            },
+        ),
+        (
+            34,
+            ServerMsg::PlayerChallengeResult {
+                id: Some([1; 16]),
+                outcome: PlayerInviteOutcome::Cancelled,
+            },
+        ),
+        (
+            36,
+            ServerMsg::MatchHistoryStatus {
+                result_id: [2; 16],
+                entry_id: [3; 16],
+                state: HistorySaveState::Pending,
+            },
+        ),
+    ] {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_server(&bytes).unwrap(), message);
     }
 }

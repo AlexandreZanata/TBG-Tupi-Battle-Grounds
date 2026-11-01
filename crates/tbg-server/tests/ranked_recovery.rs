@@ -46,6 +46,7 @@ fn final_for(key: MatchKey, accounts: [AccountId; 2], winner: Option<Seat>) -> R
             },
         ],
         factions: [[3, 2, 2, 2, 0, 0, 0], [0; 7]],
+        history_expected: false,
         arcanas: [ArcanaPreset::DEFAULT; 2],
         stats: None,
     }

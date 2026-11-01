@@ -21,12 +21,14 @@ pub mod botclient;
 mod chan;
 pub mod config;
 mod limits;
-mod live;
+pub mod live;
 mod lobby;
 mod match_task;
 pub mod metrics;
 mod names;
 mod patch_notes;
+pub mod player_history;
+pub mod presence;
 pub mod ranked;
 pub mod release;
 pub mod stats;
@@ -41,6 +43,7 @@ use metrics::Metrics;
 #[derive(Clone)]
 pub(crate) struct AppState {
     pub auth: Arc<auth::Service>,
+    pub history_reads: Arc<tokio::sync::Semaphore>,
     pub lobby: mpsc::Sender<chan::LobbyCmd>,
     pub metrics: Arc<Metrics>,
     pub config: Arc<Config>,
@@ -51,6 +54,7 @@ pub(crate) struct AppState {
     pub api_limits: Arc<Mutex<limits::Limits>>,
     /// P47: the lobby's live snapshot, read-only (`/api/live`, `/api/online`).
     pub live: watch::Receiver<Arc<live::LiveSnapshot>>,
+    pub local_live: watch::Receiver<Arc<live::LiveSnapshot>>,
     /// P66: slot identity, admission gate and release directory.
     pub release: Arc<release::Runtime>,
 }
@@ -76,20 +80,18 @@ pub async fn run_with(
     shared: Shared,
 ) -> std::io::Result<()> {
     let metrics = shared.metrics.clone();
-    let store =
-        config
-            .db
-            .as_ref()
-            .and_then(|path| match store::Store::open_with(path, config.ranked) {
-                Ok(r) => Some(Arc::new(r)),
-                Err(e) => {
-                    tracing::error!(
-                        "match records disabled, cannot open {}: {e}",
-                        path.display()
-                    );
-                    None
-                }
-            });
+    let store = config.db.as_ref().and_then(|path| {
+        match store::Store::open_history(path, config.ranked, config.history_migrate) {
+            Ok(r) => Some(Arc::new(r)),
+            Err(e) => {
+                tracing::error!(
+                    "match records disabled, cannot open {}: {e}",
+                    path.display()
+                );
+                None
+            }
+        }
+    });
     // P71: a configured database that failed to open or migrate is unhealthy, so a
     // deploy check never passes a server that runs without its records.
     let store_failed = config.db.is_some() && store.is_none();
@@ -134,6 +136,7 @@ pub async fn run_with(
         live_tx,
     ));
     let state = AppState {
+        history_reads: Arc::new(tokio::sync::Semaphore::new(4)),
         auth,
         lobby: lobby_tx,
         metrics,
@@ -142,7 +145,8 @@ pub async fn run_with(
         next_conn_id: Arc::new(AtomicU64::new(1)),
         store,
         api_limits: Arc::default(),
-        live: live_rx,
+        live: presence::start(release.clone(), live_rx.clone(), config.presence_ports),
+        local_live: live_rx,
         release,
     };
     let mut app = Router::new()
@@ -176,7 +180,25 @@ pub async fn run_with(
         .route("/api/patch-notes", get(patch_notes::list))
         .route("/api/patch-notes/{id}", get(patch_notes::detail))
         .route("/api/online", get(api::online))
-        .with_state(state);
+        .route("/api/internal/presence", get(presence::internal))
+        .route("/api/me/matches", get(player_history::api::handler))
+        .route("/api/me/matches/{entry}", get(player_history::api::handler))
+        .route(
+            "/api/me/preferences/history",
+            get(player_history::api::handler)
+                .patch(player_history::api::handler)
+                .layer(DefaultBodyLimit::max(1024)),
+        )
+        .route(
+            "/api/players/{name}/matches",
+            get(player_history::api::handler),
+        )
+        .route(
+            "/api/players/{name}/matches/{entry}",
+            get(player_history::api::handler),
+        )
+        .with_state(state)
+        .layer(axum::middleware::from_fn(player_history::api::no_store));
     if let Some(dir) = &config.static_dir {
         app = app.fallback_service(tower_http::services::ServeDir::new(dir));
     }

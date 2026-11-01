@@ -1605,8 +1605,8 @@ prioritized recovery and opponent mute; no commercial launch is approved.
 
 ## Proposed P73 — Active players, challenges, rematches and match history
 
-Owner request, 2026-11-01. **Planning only; no behavior is activated by this
-documentation.** See [P73](phases/P73-active-players-and-direct-challenges.md).
+Owner request, 2026-11-01. **Implemented behind explicit rollout flags;
+production activation and acceptance remain pending.** See [P73](phases/P73-active-players-and-direct-challenges.md).
 
 - **BR-AP01 — Directory.** Active players lists every connected account
   across the currently known service slots, with whole-directory name
