@@ -14,7 +14,7 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const MAIL: Color = Color::srgb(0.62, 0.65, 0.7);
+const MAIL: Color = STEEL;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.05, tier);
@@ -46,6 +46,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         boots: DARK_LEATHER,
     };
     body::humanoid(&mut v, &p, &look);
+    body::tunic(&mut v, &p, RED_CLOTH, LINEN, DARK_LEATHER);
     body::tabard(&mut v, &p, p.torso.x * 0.8, 0.42, None);
     body::greaves(&mut v, STEEL);
     body::bracers(&mut v, &p, LEATHER);
@@ -170,6 +171,7 @@ fn arms(v: &mut Vec<PartSpec>, f: Form) {
         }
         return;
     }
+    v.push(part(l, Ball(0.055), BRASS, [0.115, -0.02, 0.0]).scale([0.45, 1.0, 1.0]));
     v.extend(gear::kite_shield(
         l,
         if f.a { 0.66 } else { 0.54 },
