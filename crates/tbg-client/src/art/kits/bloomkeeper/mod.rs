@@ -79,7 +79,15 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
                 (&p, Vec3::new(1.0, -0.6, -0.3)),
             );
             tools::set(pose, Joint::Head, [-6.0 * gather, 0.0, 0.0]);
-            tools::face(pose, m.aim, Vec3::ZERO);
+            // A healer may cast behind while its feet keep the lane heading.
+            // Twisting the full Root toward each heal fought forward locomotion.
+            if let Some(aim) = m.aim {
+                let yaw = super::aim::yaw(Vec3::ZERO, aim.target)
+                    .clamp(-65f32.to_radians(), 65f32.to_radians())
+                    * aim.weight;
+                tools::add(pose, Joint::Chest, [0.0, yaw.to_degrees(), 0.0]);
+                tools::add(pose, Joint::Head, [0.0, yaw.to_degrees() * 0.25, 0.0]);
+            }
             tools::plant(pose, &p, tools::stance(&p, 1.15, 0.06));
         }
         Clip::Hit => moves::hit(m, pose, 1.0),
@@ -105,5 +113,42 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             tools::plant(pose, &p, tools::stance(&p, 1.1, 0.02));
         }
         _ => moves::staff(pose, &p, 0.0, 0.0, 0.0),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn healing_behind_never_turns_the_locomotion_root() {
+        for side in [-0.001, 0.001] {
+            for t in [0.0, 0.15, 0.3, 0.6] {
+                let mut m = Moment {
+                    clip: Clip::Cast,
+                    t,
+                    tier: 0,
+                    branch: 0,
+                    aim: None,
+                    since_attack: 0.0,
+                    variant: 0,
+                    clock: 0.0,
+                    walk: None,
+                    gesture: 0.0,
+                    growth: 0.0,
+                    reduction: 0,
+                    counter: 0,
+                    armor_flash: 0.0,
+                    special: None,
+                    special_ready: false,
+                };
+                m.aim = Some(super::super::Aim {
+                    target: Vec3::new(side, 0.6, -2.0),
+                    weight: 1.0,
+                });
+                let mut p = crate::art::curves::sample(Clip::Cast, t);
+                pose(&m, &mut p);
+                assert_eq!(p[Joint::Root.index()].0.y, 0.0);
+            }
+        }
     }
 }
