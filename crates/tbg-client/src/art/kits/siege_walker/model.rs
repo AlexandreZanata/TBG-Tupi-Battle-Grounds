@@ -15,9 +15,9 @@ use crate::art::{
     },
 };
 
-const BRONZE: Color = Color::srgb(0.70, 0.47, 0.24);
-const TROUSERS: Color = Color::srgb(0.33, 0.27, 0.22);
-const HOT: Color = Color::srgb(1.0, 0.55, 0.18);
+const BRONZE: Color = BRASS;
+const TROUSERS: Color = DARK_LEATHER;
+const HOT: Color = ORANGE;
 
 /// Which Evolution pieces a form has.
 #[derive(Clone, Copy)]
@@ -204,7 +204,7 @@ fn chest(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         v.push(
             part(
                 Body(Chest),
-                Box(0.065, 0.5, 0.025),
+                Box(0.085, 0.5, 0.035),
                 DARK_LEATHER,
                 [0.07 * s, h * 0.55, 0.16],
             )
@@ -212,6 +212,9 @@ fn chest(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         );
     }
     v.push(part(Body(Chest), Cyl(0.04, 0.03), BRASS, [0.0, h * 0.55, 0.18]).rot([90.0, 0.0, 0.0]));
+    v.push(
+        part(Body(Chest), Ball(0.16), OGRE_SKIN, [0.0, h * 0.33, 0.10]).scale([1.25, 0.70, 0.8]),
+    );
     if f.a {
         // Longshot / Artillery: a riveted breastplate (large-surface change).
         let (plate, trim) = if f.t2 { (STEEL, GOLD) } else { (STEEL, BRASS) };
@@ -532,6 +535,7 @@ fn gun(v: &mut Vec<PartSpec>, f: Form) {
         for x in [-0.068, 0.068] {
             v.push(part(w, Cyl(0.064, len), metal, along(x, back + len * 0.5)).rot(x90));
             v.push(part(w, Frustum(0.085, 0.07, 0.09), GOLD, along(x, front + 0.04)).rot(x90));
+            v.push(part(w, Cyl(0.059, 0.006), DARK, along(x, front + 0.086)).rot(x90));
         }
         v.push(part(
             w,
@@ -551,6 +555,16 @@ fn gun(v: &mut Vec<PartSpec>, f: Form) {
         };
         let bell = if blunderbuss { 0.08 } else { 0.04 };
         v.push(part(w, muzzle, band, along(0.0, front + bell)).rot(x90));
+        let mouth = if blunderbuss { r * 1.85 } else { r * 1.04 };
+        v.push(
+            part(
+                w,
+                Cyl(mouth, 0.006),
+                DARK,
+                along(0.0, front + bell * 2.0 + 0.002),
+            )
+            .rot(x90),
+        );
     }
     for k in [0.12, 0.45, 0.82] {
         v.push(part(w, Cyl(r * 1.18, 0.035), band, along(0.0, back + len * k)).rot(x90));
