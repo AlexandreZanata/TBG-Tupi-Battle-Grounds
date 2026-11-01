@@ -47,10 +47,10 @@
   {
     "unit": "SiegeWalker",
     "asset": "crates/tbg-client/assets/battle/portraits/siegewalker.webp",
-    "asset_sha256": "075328e747a1672f8170df1118f130725b779ea5a32305b7c07e4b7b2f82134f",
-    "original": ".local/p71-evidence/portraits-clean-03/SiegeWalker.png",
-    "original_sha256": "279c18959763b32a49eb4f337805e1d6f9a67f6e89c7fa38bb4c4aa0b7bc7391",
-    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "asset_sha256": "86e752eabce4570939a42b7193a526555b17dbedaea2eac7eb142564513e9281",
+    "original": ".local/p71-evidence/portraits-ogre-bc8ef32/SiegeWalker.png",
+    "original_sha256": "5f373b478a274a6fef88b1194a3b8647d8cb660eec18bd9fc29b54eef5442446",
+    "source_commit": "bc8ef321fb1bfda4852ccf7d7e927c1ae945d5a1",
     "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
   },
   {

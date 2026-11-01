@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "runtime_commit": "bc8ef321fb1bfda4852ccf7d7e927c1ae945d5a1",
+  "scope": "Ogre Archer reload; targeted native validation",
+  "items": [
+    {
+      "path": ".local/p71-evidence/ogre-reload-check.log",
+      "sha256": "b5db7491c2859f9c74de402dd71a8d047042e77d56f08404cafe10db5defe3ae"
+    },
+    {
+      "path": ".local/p71-evidence/ogre-reload-native-build.log",
+      "sha256": "b5e876d374b17f7fdfbdd834dea0122358a2665d919354dd1589fd19180c7712"
+    },
+    {
+      "path": ".local/p71-evidence/candidate-bc8ef32/build.json",
+      "sha256": "e28ced0e13252c89a17efae5d38411ae25bebc1a741282a44d8c0c5a35ae717c"
+    },
+    {
+      "path": ".local/p71-evidence/live-bc8ef32-SiegeWalker-Base-A-reload/captures.json",
+      "sha256": "76e2544f047a9e39cade63dbd33f39318168b64318f4778f94db5224a9dc3e09"
+    },
+    {
+      "path": ".local/p71-evidence/live-bc8ef32-SiegeWalker-A2-B-reload/captures.json",
+      "sha256": "84425dadc4d6ac8af93e767382cb713e3601a62faaf0d106a30150ff88d0fc1a"
+    },
+    {
+      "path": ".local/p71-evidence/ogre-reload-review-bc8ef32/arm-detail.jpg",
+      "sha256": "224954b69f192cddd02e136e39603cca6b3ddf28e73c76aacfd3438d4c36e853"
+    },
+    {
+      "path": ".local/p71-evidence/ogre-reload-review-bc8ef32/A2-detail.jpg",
+      "sha256": "4e23b27b98d1ad950a62ef378bbf68dbb93f1cd6b47885ec7e47247ebb5b87f4"
+    }
+  ]
+}
