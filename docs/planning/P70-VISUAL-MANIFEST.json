@@ -1,0 +1,1696 @@
+{
+  "phase": "P70",
+  "status": "planning_only",
+  "date": "2026-10-31",
+  "reference_branch": "codex/consolidated-linux-release",
+  "reference_commit": "55510c5363e3f1e555fa5133208a5faf20c5825b",
+  "owner_reference": "Exactly the 46-champion roster; never use the older 25 as the cohort.",
+  "artistic_briefs_status": "Proposed starting directions, not new canon or approved final designs.",
+  "expected_champions": 46,
+  "expected_form_combinations": 230,
+  "clip_form_slots_before_applicability": 2300,
+  "forms": [
+    {
+      "name": "Base",
+      "tier": 0,
+      "branch": 0
+    },
+    {
+      "name": "A1",
+      "tier": 1,
+      "branch": 0
+    },
+    {
+      "name": "A2",
+      "tier": 2,
+      "branch": 0
+    },
+    {
+      "name": "B1",
+      "tier": 1,
+      "branch": 1
+    },
+    {
+      "name": "B2",
+      "tier": 2,
+      "branch": 1
+    }
+  ],
+  "clip_ids": [
+    "Idle",
+    "Walk",
+    "AttackMelee",
+    "AttackRanged",
+    "Cast",
+    "Hit",
+    "Death",
+    "Spawn",
+    "Evolve",
+    "Victory"
+  ],
+  "sampling": {
+    "normalized_times": [
+      0,
+      0.25,
+      0.5,
+      0.75
+    ],
+    "additional_times": [
+      "actual_release_or_strike",
+      "final_pose_for_one_shot_clips"
+    ],
+    "duration_source": "Animator::duration for the selected kit and form; not shared Clip::duration alone",
+    "effects": "Real existing cue/release path; frozen raw previews do not prove effects."
+  },
+  "excluded_auxiliary_ids": [
+    "Beetling",
+    "Crate",
+    "Microdrill",
+    "Duodrill",
+    "Megadrill"
+  ],
+  "role_counts": {
+    "Tank": 15,
+    "Ranged": 11,
+    "Control": 8,
+    "Dps": 6,
+    "Support": 6
+  },
+  "faction_counts": {
+    "Humans": 9,
+    "Undead": 7,
+    "Machines": 9,
+    "Plants": 9,
+    "Monsters": 4,
+    "Celestials": 4,
+    "Insects": 4
+  },
+  "champions": [
+    {
+      "id": "Shieldbearer",
+      "name": "Shieldbearer",
+      "faction": "Humans",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/shieldbearer",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/shieldbearer/mod.rs",
+        "crates/tbg-client/src/art/kits/shieldbearer/model.rs"
+      ],
+      "existing_model_description": "Shieldbearer figure: a man-at-arms in mail and a team tabard behind a kite shield, an arming sword in hand. Branch A (Bulwark) grows the shield and the plate, then a castle-crested tower shield and a great helm; branch B (Vanguard) lightens him with a longer blade, plume and cape, then a winged helm and a glowing champion's sword.",
+      "proposed_identity_brief": {
+        "recognition_target": "Kite shield and upright armored defender",
+        "color_direction": "Steel, linen and individual cloth; shield face as the dominant accent",
+        "motion_direction": "Checks shield edge; measured protected march; shield-led contact; shield salute with sword tap",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Archer",
+      "name": "Archer",
+      "faction": "Humans",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/archer",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/archer/mod.rs",
+        "crates/tbg-client/src/art/kits/archer/model.rs",
+        "crates/tbg-client/src/art/kits/archer/tests.rs"
+      ],
+      "existing_model_description": "Archer figure: a hooded yeoman archer of the Humans faction with an upright longbow, a quiver on the back, linen tunic, and team tabard. Branch A (Longbow -> Marksman) extends range and accuracy: green ranger hood with feather, yew longbow with horn nocks, then a gilded recurve greatbow, team half-cape, gold trim, and glowing eye glint. Branch B (Volley -> Arrow Rain) fires rapid storms of arrows: dark leather coif, dual quivers on back, composite war-bow, then an armored steel-brow",
+      "proposed_identity_brief": {
+        "recognition_target": "Tall bow, ranger hood and narrow upright silhouette",
+        "color_direction": "Leaf-green hood, linen and warm timber with readable fletching",
+        "motion_direction": "Tests bowstring; light cautious steps; full draw and restrained follow-through; bows with raised bow",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "BoneBrute",
+      "name": "Bone Brute",
+      "faction": "Undead",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/bone_brute",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/bone_brute/mod.rs",
+        "crates/tbg-client/src/art/kits/bone_brute/model.rs",
+        "crates/tbg-client/src/art/kits/bone_brute/motion.rs"
+      ],
+      "existing_model_description": "Bone Brute figure: a hunched giant skeleton with a ribcage around a glowing soul, rags and a rusty cleaver. Branch A armors it in bone (buckler, then a tower shield of skulls); branch B arms it (twin cleavers, then a great reaping scythe and a hooded cloak).",
+      "proposed_identity_brief": {
+        "recognition_target": "Huge hunched ribcage, skull and heavy cleaver",
+        "color_direction": "Ivory bones, rust and concentrated soul glow",
+        "motion_direction": "Ribcage heave; heavy uneven gait; weighty cleaver arc; jaw-rattling cleaver celebration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Hexer",
+      "name": "Hexer",
+      "faction": "Undead",
+      "archetype": "Control",
+      "kit_directory": "crates/tbg-client/src/art/kits/hexer",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/hexer/mod.rs",
+        "crates/tbg-client/src/art/kits/hexer/model.rs"
+      ],
+      "existing_model_description": "Hexer figure: a hunched skeleton witch in a ragged violet robe and a crooked pointed hat, a gnarled staff topped with a lantern skull. Branch A (Withering) rings the skull with hex runes, then crowns the hat and swells the skull with doom-lit eyes; branch B (Plague) swings a plague censer, then wears a plague beak and a greater censer.",
+      "proposed_identity_brief": {
+        "recognition_target": "Crooked hat, skull lantern and skeletal witch posture",
+        "color_direction": "Violet robe, pale skull and spectral-green focal point",
+        "motion_direction": "Lantern circles; crooked shuffling steps; staff-led curse; theatrical staff twirl",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Sawbot",
+      "name": "Sawbot",
+      "faction": "Machines",
+      "archetype": "Dps",
+      "kit_directory": "crates/tbg-client/src/art/kits/sawbot",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/sawbot/mod.rs",
+        "crates/tbg-client/src/art/kits/sawbot/model.rs"
+      ],
+      "existing_model_description": "Sawbot figure: a lean Ironworks automaton with one great glowing eye, a boiler chest, a clamp hand and a spinning saw disk for a right hand. Branch A (Overclock) lights its vents and heats the teeth, then mounts a second saw and exhausts; branch B (Plating) bolts on plates, then a horned juggernaut hull and a great saw.",
+      "proposed_identity_brief": {
+        "recognition_target": "Single glowing eye, exposed saw disk and boiler",
+        "color_direction": "Gunmetal, brass and localized hot orange teeth",
+        "motion_direction": "Saw tension and valve twitch; rigid gear-driven stride; saw-led cut; mechanical saw flourish",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "SiegeWalker",
+      "name": "Siege Walker",
+      "faction": "Machines",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/siege_walker",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/siege_walker/mod.rs",
+        "crates/tbg-client/src/art/kits/siege_walker/model.rs",
+        "crates/tbg-client/src/art/kits/siege_walker/motion.rs"
+      ],
+      "existing_model_description": "Siege Walker figure: a hulking ogre gunner of the Ironworks carrying a shoulder bombard. Evolutions change the bombard (the silhouette piece), the armor (large surfaces) and, at tier 2, add a glowing signature.",
+      "proposed_identity_brief": {
+        "recognition_target": "Hulking shoulder-bombard carrier distinct from small mortar users",
+        "color_direction": "Iron, leather and warm bombard details with clear armor contrast",
+        "motion_direction": "Shoulder-load adjustment; broad braced gait; shoulder cannon recoil; proud cannon lift",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bloomkeeper",
+      "name": "Bloomkeeper",
+      "faction": "Plants",
+      "archetype": "Support",
+      "kit_directory": "crates/tbg-client/src/art/kits/bloomkeeper",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/bloomkeeper/mod.rs",
+        "crates/tbg-client/src/art/kits/bloomkeeper/model.rs"
+      ],
+      "existing_model_description": "Bloomkeeper figure: a light-wood dryad in a leaf dress and petal skirt, a crown of blossoms in her leafy hair, a staff topped with a flower. Branch A (Blossom) blooms on her shoulders and lights the flower, then carries a blossoming tree on her back; branch B (Bramble) grows bark armor and thorns, then a thorn crown, roots at her feet and an amber thorn staff.",
+      "proposed_identity_brief": {
+        "recognition_target": "Flower-crowned dryad, petal skirt and flowering staff",
+        "color_direction": "Light bark, leaf green and large pink/cream blossom shapes",
+        "motion_direction": "Petal breathing; soft rooted steps; flower-led healing gesture; blossom-opening dance",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Rootcaller",
+      "name": "Rootcaller",
+      "faction": "Plants",
+      "archetype": "Control",
+      "kit_directory": "crates/tbg-client/src/art/kits/rootcaller",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/rootcaller/mod.rs",
+        "crates/tbg-client/src/art/kits/rootcaller/model.rs",
+        "crates/tbg-client/src/art/kits/rootcaller/motion.rs"
+      ],
+      "existing_model_description": "Rootcaller figure: a knobbly treant shaman with a bark trunk, a moss collar and beard, amber eyes and long root claws. Branch A grows roots and thorns (vine coils, then a thorn crown and an amber heart); branch B grows fungus (a mushroom cap, then a great glowing cap and back caps).",
+      "proposed_identity_brief": {
+        "recognition_target": "Knotted treant shaman with root claws and moss beard",
+        "color_direction": "Dark bark, moss and amber eyes distinct from flower Supports",
+        "motion_direction": "Root-finger flex; rolling root-foot walk; soil-directed claw cast; slow branching sway",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Nester",
+      "name": "Nester",
+      "faction": "Plants",
+      "archetype": "Support",
+      "kit_directory": "crates/tbg-client/src/art/kits/nester",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/nester/mod.rs",
+        "crates/tbg-client/src/art/kits/nester/model.rs"
+      ],
+      "existing_model_description": "Nester figure: a plump moss mother with a round leafy belly, a leaf cap and a woven nest of eggs on her back, a seed ready in hand. Branch A (Brood) grows the clutch, then carries a glowing amber hive; branch B (Venom) lays green glowing eggs, then dark spiked blight eggs.",
+      "proposed_identity_brief": {
+        "recognition_target": "Round moss mother, nest and visible eggs",
+        "color_direction": "Moss, warm straw and contrasting eggs",
+        "motion_direction": "Checks nest; protective rounded waddle; careful offspring gesture; nest-protecting happy sway",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Rampart",
+      "name": "Rampart",
+      "faction": "Machines",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/rampart",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/rampart/mod.rs",
+        "crates/tbg-client/src/art/kits/rampart/model.rs"
+      ],
+      "existing_model_description": "Rampart figure: an ogre of the Ironworks in riveted plate carrying a mobile wall of oak and iron on the left arm, an iron gauntlet on the right. Branch A (Bastion) grows the wall and its plating, then crowns it with merlons and a team banner; branch B (Spiked) studs the wall with spikes, then mounts a hot battering ram on the right arm.",
+      "proposed_identity_brief": {
+        "recognition_target": "Mobile wall with broad carrier mass",
+        "color_direction": "Oak wall, iron bands and limited individual banner accent",
+        "motion_direction": "Settles wall; planted wall-bearing steps; braced wall strike; grounded wall salute",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Longaxe",
+      "name": "Longaxe",
+      "faction": "Humans",
+      "archetype": "Dps",
+      "kit_directory": "crates/tbg-client/src/art/kits/longaxe",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/longaxe/mod.rs",
+        "crates/tbg-client/src/art/kits/longaxe/model.rs"
+      ],
+      "existing_model_description": "Longaxe figure: a halberdier in a padded gambeson and kettle hat with a poleaxe longer than he is tall. Branch A hardens the cut (breastplate and broad head, then a gilded executioner's crescent); branch B widens the swing (twin-bladed bardiche, then a great halberd and horned helm).",
+      "proposed_identity_brief": {
+        "recognition_target": "Long poleaxe, kettle hat and asymmetric reach",
+        "color_direction": "Padded cloth, timber and large readable steel head",
+        "motion_direction": "Balances poleaxe; weapon-aware forward stride; wide poleaxe leverage; balanced poleaxe victory flourish",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Farwatch",
+      "name": "Farwatch",
+      "faction": "Humans",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/farwatch",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/farwatch/mod.rs",
+        "crates/tbg-client/src/art/kits/farwatch/model.rs"
+      ],
+      "existing_model_description": "Farwatch figure: a hooded watchman with a heavy crossbow (arbalest) that outranges the lane. Branch A steadies the shot (a brass scope, then a gilded great arbalest, feathered hat and team cape); branch B cruels it (barbed red-fletched bolts and a masked hood, then a glowing wounding bolt and a dark red cloak).",
+      "proposed_identity_brief": {
+        "recognition_target": "Heavy arbalest, watchman hood and sighting posture",
+        "color_direction": "Dark ranger cloth, timber and brass sight contrast",
+        "motion_direction": "Checks sight; deliberate crossbow-carrying steps; stable aimed release and reload; arbalest-at-rest salute",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bombard",
+      "name": "Bombard",
+      "faction": "Machines",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/bombard",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/bombard/mod.rs",
+        "crates/tbg-client/src/art/kits/bombard/model.rs"
+      ],
+      "existing_model_description": "Bombard figure: a stout Ironworks gunner in riveted plate with a short mortar at the hip. Branch A (Destruction) flares the bell and racks bombs on the back, then a great mortar with a glowing band and a furnace pack; branch B (Iron Fortress) adds heavy plate and a hull shield, then a twin-barrel mortar fed from an ammunition drum.",
+      "proposed_identity_brief": {
+        "recognition_target": "Short hip mortar and compact armored gunner",
+        "color_direction": "Dark iron with hot barrel and contrasting ammunition details",
+        "motion_direction": "Checks mortar load; compact heavy steps; hip-mortar recoil; barrel-up gunner celebration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Rotcap",
+      "name": "Rotcap",
+      "faction": "Plants",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/rotcap",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/rotcap/mod.rs",
+        "crates/tbg-client/src/art/kits/rotcap/model.rs"
+      ],
+      "existing_model_description": "Rotcap figure: a squat mushroom-folk spitter, pale stem body, a broad spotted cap with gills, a ring collar and a round spitting mouth. Branch A (Concentrated) darkens the cap with glowing toxin spots, then drips venom from its rim; branch B (Contamination) sprouts caps on the shoulders, then a cluster of caps and glowing spore pods.",
+      "proposed_identity_brief": {
+        "recognition_target": "Wide spotted mushroom cap and spitting mouth",
+        "color_direction": "Pale stem, contrasting cap and clearly separated toxin accents",
+        "motion_direction": "Cap-gill pulse; squashy short steps; mouth-first spore spit; cap-bobbing circle",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "OldFinn",
+      "name": "Old Finn",
+      "faction": "Humans",
+      "archetype": "Control",
+      "kit_directory": "crates/tbg-client/src/art/kits/old_finn",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/old_finn/mod.rs",
+        "crates/tbg-client/src/art/kits/old_finn/model.rs"
+      ],
+      "existing_model_description": "Old Finn figure: a stooped old fisherman in a yellow oilskin and sou'wester, white beard, pipe, a long rod and a wicker creel. Branch A lands bigger fish (a fuller creel, then a giant catfish over the back and a gold hook); branch B lands more (a net and a second rod, then a net heaving with fish and a lantern).",
+      "proposed_identity_brief": {
+        "recognition_target": "Yellow oilskin, beard, long rod and recognizable flying fish",
+        "color_direction": "Strong oilskin yellow, pale beard, dark boots and silver fish contrast",
+        "motion_direction": "Rod bob and beard motion; aged fisherman steps; over-shoulder fish cast; rod-and-creel jig",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": true,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "AntidoteBrewer",
+      "name": "Antidote Brewer",
+      "faction": "Plants",
+      "archetype": "Support",
+      "kit_directory": "crates/tbg-client/src/art/kits/antidote_brewer",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/antidote_brewer/mod.rs",
+        "crates/tbg-client/src/art/kits/antidote_brewer/model.rs"
+      ],
+      "existing_model_description": "Antidote Brewer figure: a sprout-folk herbalist in a leaf hood and a linen apron, a glowing cure flask in hand and an herb basket on the back. Branch A (Master Antidote) gilds the flask and crowns the hood, then carries a glowing still; branch B (Rapid Brewer) straps on a bandolier of flasks, then brews in both hands from a back cauldron.",
+      "proposed_identity_brief": {
+        "recognition_target": "Leaf-hooded herbalist with cure flask and herb basket",
+        "color_direction": "Leaf hood, cream apron and a distinct cure-flask color",
+        "motion_direction": "Inspects flask; careful basket-carrying steps; measured brew gesture; flask-toast dance",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Shatterback",
+      "name": "Shatterback",
+      "faction": "Plants",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/shatterback",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/shatterback/mod.rs",
+        "crates/tbg-client/src/art/kits/shatterback/model.rs"
+      ],
+      "existing_model_description": "A low terrestrial turtle: beak, four thick feet, soft inner shell and four detachable plates.",
+      "proposed_identity_brief": {
+        "recognition_target": "Shell/back-plate anatomy and breakable plate identity",
+        "color_direction": "Read the current shell materials and emphasize large plate boundaries",
+        "motion_direction": "Back-plate settling; weight-bearing gait; shell/body-driven action; proud shell display without detached plates",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "BloodFurnace",
+      "name": "Blood Furnace",
+      "faction": "Undead",
+      "archetype": "Dps",
+      "kit_directory": "crates/tbg-client/src/art/kits/blood_furnace",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/blood_furnace/mod.rs",
+        "crates/tbg-client/src/art/kits/blood_furnace/model.rs"
+      ],
+      "existing_model_description": "Blood Furnace figure: a skeleton knight with a furnace burning in its ribcage behind an iron grate, a flame crest on the skull and a war hammer with a heated head. Branch A (Infernal Core) feeds the fire (bigger core and flame eyes, then a blazing sun with rays and a crown of flame); branch B (Controlled Burn) banks it (a furnace door and bellows, then ember lanterns on chains and smoldering shoulders).",
+      "proposed_identity_brief": {
+        "recognition_target": "Burning ribcage furnace and heated war hammer",
+        "color_direction": "Bone, dark iron and concentrated furnace fire distinct from Pyre Warden",
+        "motion_direction": "Furnace heave; hammer-weighted march; two-handed burning hammer blow; furnace-backed hammer salute",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bloodweaver",
+      "name": "Bloodweaver",
+      "faction": "Undead",
+      "archetype": "Support",
+      "kit_directory": "crates/tbg-client/src/art/kits/bloodweaver",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/bloodweaver/mod.rs",
+        "crates/tbg-client/src/art/kits/bloodweaver/model.rs"
+      ],
+      "existing_model_description": "Bloodweaver figure: a hooded skeleton priestess in a wine robe with a spindle staff wound in blood thread and drops of blood hovering at her hand. Branch A (Blood Sacrifice) carries a chalice, then wears a glowing heart reliquary; branch B (Blood Circulation) winds threads round her arms, then weaves with two spindles amid orbiting drops.",
+      "proposed_identity_brief": {
+        "recognition_target": "Skeletal priestess, spindle and visible blood threads",
+        "color_direction": "Wine robe, pale bone and thin bright blood-thread contrast",
+        "motion_direction": "Weaves idle threads; restrained robe-aware steps; directed Siphon weave; spindle-thread dance",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Oilpress",
+      "name": "Oilpress",
+      "faction": "Machines",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/oilpress",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/oilpress/mod.rs",
+        "crates/tbg-client/src/art/kits/oilpress/model.rs"
+      ],
+      "existing_model_description": "Oilpress figure: the Ironworks' walking press, an ogre sealed in a riveted boiler with a smokestack, piston arms and iron press plates for fists. Branch A (Fortress Engine) bolts on hull plates, then a bulwark, spiked anchor feet and a lit furnace; branch B (Tar Bastion) carries leaking oil barrels, then a tar tank with tar-coated plates.",
+      "proposed_identity_brief": {
+        "recognition_target": "Walking boiler press, stack and piston fists",
+        "color_direction": "Gunmetal, oily dark surfaces and warm furnace/pressure details",
+        "motion_direction": "Piston compression; rigid press-like march; deliberate press-fist action; rhythmic piston celebration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Drumguard",
+      "name": "Drumguard",
+      "faction": "Humans",
+      "archetype": "Support",
+      "kit_directory": "crates/tbg-client/src/art/kits/drumguard",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/drumguard/mod.rs",
+        "crates/tbg-client/src/art/kits/drumguard/model.rs"
+      ],
+      "existing_model_description": "Drumguard figure: a marching drummer in a red coat with white straps and a team shako, a snare drum at the hip and two sticks. Branch A drives the march (a plumed shako and a bigger drum, then a grand gilded bass drum and a team standard on the back); branch B holds the line (iron bands and a steel helmet, then plate, pauldrons and glowing rhythm runes).",
+      "proposed_identity_brief": {
+        "recognition_target": "Red marching coat, shako and readable drum/sticks",
+        "color_direction": "Red cloth, cream straps and brass drum accents",
+        "motion_direction": "Distinct snare rhythm; marching cadence; drum-led support cue; stick-twirling drum dance",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Leechroot",
+      "name": "Leechroot",
+      "faction": "Plants",
+      "archetype": "Dps",
+      "kit_directory": "crates/tbg-client/src/art/kits/leechroot",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/leechroot/mod.rs",
+        "crates/tbg-client/src/art/kits/leechroot/model.rs"
+      ],
+      "existing_model_description": "Leechroot figure: a hunched root-beast with a leech's round toothed maw for a head, a skirt of rootlets and long whip-root hands. Branch A (Insatiable) widens the maw, then swells blood sacs on its back; branch B (Parasite) shows glowing veins, then a blood-bulb heart and maws at the root tips.",
+      "proposed_identity_brief": {
+        "recognition_target": "Toothed leech maw and long whip roots",
+        "color_direction": "Dark roots, contrasting maw and sparse blood/sap accents",
+        "motion_direction": "Maw pulse; dragging root motion; whip-root feeding action; curling-root victory sway",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "CargoCrab",
+      "name": "Cargo Crab",
+      "faction": "Machines",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/cargo_crab",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/cargo_crab/mod.rs",
+        "crates/tbg-client/src/art/kits/cargo_crab/model.rs"
+      ],
+      "existing_model_description": "Cargo Crab figure: a robust forge-orange machine crab of the Ironworks, on thick piston legs with heavy plated pincers, and a passenger saddle on its back. Branch A (Armored Carrier) adds iron plates, spikes, and a glowing shield dome over the saddle; branch B (Turbo Carrier) adds a racing stripe, rear exhausts, leg servos, and a rear spoiler fin. Machines move on rigid pivots and pistons only (ART-DIRECTION §3).",
+      "proposed_identity_brief": {
+        "recognition_target": "Wide mechanical crab, piston legs and usable saddle",
+        "color_direction": "Forge orange armor, dark joints and clear saddle contrast",
+        "motion_direction": "Pincer check; rigid multi-leg crab gait; plated-pincer contact; alternating pincer celebration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Puppetmaster",
+      "name": "Puppetmaster",
+      "faction": "Undead",
+      "archetype": "Control",
+      "kit_directory": "crates/tbg-client/src/art/kits/puppetmaster",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/puppetmaster/mod.rs",
+        "crates/tbg-client/src/art/kits/puppetmaster/model.rs"
+      ],
+      "existing_model_description": "Puppetmaster figure: a tall gaunt skeleton showman in a violet tail coat and top hat, working a marionette from a control cross. Branch A (Cruel Strings) hooks the strings and arms the puppet, then lights the cross and strings and masks the face; branch B (Twisted Chorus) works a second puppet from the left hand, then carries a chorus on the coat.",
+      "proposed_identity_brief": {
+        "recognition_target": "Top hat, tailcoat, control cross and puppet",
+        "color_direction": "Violet coat, bone hands and contrasting puppet/strings",
+        "motion_direction": "Puppet greeting; showman steps; cross-led puppetry; marionette curtain-call dance",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Smuggler",
+      "name": "Smuggler",
+      "faction": "Humans",
+      "archetype": "Support",
+      "kit_directory": "crates/tbg-client/src/art/kits/smuggler",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/smuggler/mod.rs",
+        "crates/tbg-client/src/art/kits/smuggler/model.rs"
+      ],
+      "existing_model_description": "Smuggler figure: a shifty runner in a dark coat, tricorn and eye patch, red sash, a lantern at the belt and a crate on a back frame. Branch A gets richer (coin pouches and stacked crates, then a gilded chest, a plumed tricorn and a team cape); branch B gets faster (a light satchel and bandana, then two crates and a lantern on a pole).",
+      "proposed_identity_brief": {
+        "recognition_target": "Tricorn runner, crate frame, sash and lantern",
+        "color_direction": "Dark coat, red sash, warm crate wood and lantern accent",
+        "motion_direction": "Shifty glance and crate check; burdened quick steps; crate-placement flourish; lantern-and-crate jig",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bonehorn",
+      "name": "Bonehorn",
+      "faction": "Monsters",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/bonehorn",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/bonehorn/mod.rs",
+        "crates/tbg-client/src/art/kits/bonehorn/model.rs"
+      ],
+      "existing_model_description": "Bonehorn's low quadruped silhouette, overlapping bone mantle and five forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Low quadruped with overlapping bone mantle",
+        "color_direction": "Dark hide against large pale bone plates",
+        "motion_direction": "Horn/neck weight shifts; true quadruped gait; bone-mantle charge/contact; grounded horn display",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Ravager",
+      "name": "Ravager",
+      "faction": "Monsters",
+      "archetype": "Dps",
+      "kit_directory": "crates/tbg-client/src/art/kits/ravager",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/ravager/mod.rs",
+        "crates/tbg-client/src/art/kits/ravager/model.rs"
+      ],
+      "existing_model_description": "Ravager's six articulated supports, anterior scythes and five predator forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Six articulated supports and anterior scythes",
+        "color_direction": "Dark predator surfaces with bright scythe-edge contrast",
+        "motion_direction": "Predatory forelimb twitch; six-limb stalking; scythe-led strike; raised-scythe predator display",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Acidmaw",
+      "name": "Acidmaw",
+      "faction": "Monsters",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/acidmaw",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/acidmaw/mod.rs",
+        "crates/tbg-client/src/art/kits/acidmaw/model.rs"
+      ],
+      "existing_model_description": "Acidmaw's long braced neck, luminous throat sac and four independently opening jaw petals.",
+      "proposed_identity_brief": {
+        "recognition_target": "Long braced neck, luminous throat and opening jaw petals",
+        "color_direction": "Dark hide, turquoise throat and contrasting inner mouth",
+        "motion_direction": "Throat breathing; neck-counterbalanced steps; jaw-petal acid release; neck-and-jaw victory display",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Whisperer",
+      "name": "Whisperer",
+      "faction": "Monsters",
+      "archetype": "Control",
+      "kit_directory": "crates/tbg-client/src/art/kits/whisperer",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/whisperer/mod.rs",
+        "crates/tbg-client/src/art/kits/whisperer/model.rs"
+      ],
+      "existing_model_description": "Whisperer's floating bone bell, single eye, short tendrils and branch crests.",
+      "proposed_identity_brief": {
+        "recognition_target": "Floating bone bell, single eye and short tendrils",
+        "color_direction": "Bone bell over a dark interior and focused eerie eye",
+        "motion_direction": "Suspended bell sway; intentional hover; eye/tendril-led thought cast; circling bell celebration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Bulwark",
+      "name": "Bulwark",
+      "faction": "Machines",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/bulwark",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/bulwark/mod.rs",
+        "crates/tbg-client/src/art/kits/bulwark/model.rs"
+      ],
+      "existing_model_description": "Bulwark's stone dome, iron bands, compact walker and five fortress/tool forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Stone dome, iron bands and compact walker",
+        "color_direction": "Light/dark stone masses, dark iron and restrained mechanism accent",
+        "motion_direction": "Dome settling; compact rigid walker; fortress-weighted contact; dome-and-leg mechanical flourish",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Demolisher",
+      "name": "Demolisher",
+      "faction": "Machines",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/demolisher",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/demolisher/mod.rs",
+        "crates/tbg-client/src/art/kits/demolisher/model.rs"
+      ],
+      "existing_model_description": "Demolisher's hydraulic cuffs, near-ground fists, pressure tank and five industrial forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Near-ground hydraulic fists and pressure tank",
+        "color_direction": "Industrial iron, pressure accents and contrasting huge cuffs",
+        "motion_direction": "Pressure release; heavy fist-balanced gait; hydraulic crush; alternating hydraulic-piston celebration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Crowcaller",
+      "name": "Crowcaller",
+      "faction": "Undead",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/crowcaller",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/crowcaller/mod.rs",
+        "crates/tbg-client/src/art/kits/crowcaller/model.rs"
+      ],
+      "existing_model_description": "Crowcaller's plague mask, torn coat, shoulder raven and ritual crossbow in five forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Plague mask, shoulder raven and ritual crossbow",
+        "color_direction": "Dark torn coat, pale mask and distinct raven/ritual contrast",
+        "motion_direction": "Shoulder-raven interaction; hunched stalking steps; ritual crossbow release; raven-assisted bow",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Trigger",
+      "name": "Trigger",
+      "faction": "Humans",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/trigger",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/trigger/mod.rs",
+        "crates/tbg-client/src/art/kits/trigger/model.rs"
+      ],
+      "existing_model_description": "Trigger's orange feline silhouette, two revolvers, curved tail and branch-specific mercenary gear.",
+      "proposed_identity_brief": {
+        "recognition_target": "Orange feline, curved tail and paired revolvers",
+        "color_direction": "Orange fur, contrasting muzzle/coat and distinct metal revolvers",
+        "motion_direction": "Tail flick and revolver check; feline spring steps; alternating aimed gunfire; revolver-spin celebration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "RattleTick",
+      "name": "Rattle & Tick",
+      "faction": "Humans",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/rattle_tick",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/rattle_tick/mod.rs",
+        "crates/tbg-client/src/art/kits/rattle_tick/model.rs"
+      ],
+      "existing_model_description": "Rattle & Tick: one heavy bruiser and an articulated shoulder brother sharing one figure.",
+      "proposed_identity_brief": {
+        "recognition_target": "One heavy bruiser with an independently articulated shoulder brother",
+        "color_direction": "Different large color regions for the two figures without losing one-champion identity",
+        "motion_direction": "Sibling interaction; counterbalanced shared-body gait; coordinated strike; two-person shoulder celebration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Capybara",
+      "name": "Capybara",
+      "faction": "Plants",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/capybara",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/capybara/mod.rs",
+        "crates/tbg-client/src/art/kits/capybara/model.rs"
+      ],
+      "existing_model_description": "Capybara's broad belly, rounded muzzle, leaf necklace and five bark/stone/fiber forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Broad rounded belly, muzzle and leaf necklace",
+        "color_direction": "Warm natural body tones, leaf accent and branch-specific bark/stone contrast",
+        "motion_direction": "Relaxed muzzle breath; capybara-weighted waddle; broad planted action; calm rounded-body dance",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Trident",
+      "name": "Trident",
+      "faction": "Plants",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/trident",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/trident/mod.rs",
+        "crates/tbg-client/src/art/kits/trident/model.rs"
+      ],
+      "existing_model_description": "Trident's shark head/jaw, dorsal fin, rusted three-tine weapon and five armored forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Taller shark with gills, dorsal fin and a longer three-tine spear clearly outside its body",
+        "color_direction": "Cool shark back, lighter belly, dark gills and warm rust/bone weapon contrast",
+        "motion_direction": "Jaw/fin breathing; tall fin-counterbalanced stride; two-handed frontal load, spear thrust, point contact and withdrawal, never an axe-like chop; piercing special presentation; long-trident victory without penetration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": true,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending",
+      "additional_owner_requirements": [
+        "Increase visible standing height",
+        "Lengthen the trident coherently with grip and arm reach",
+        "Increase actual authoritative basic range beyond 1.1 tiles, with exact value pending calibration/D-33 acceptance"
+      ]
+    },
+    {
+      "id": "SolarSentinel",
+      "name": "Solar Sentinel",
+      "faction": "Celestials",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/solar_sentinel",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/solar_sentinel/mod.rs",
+        "crates/tbg-client/src/art/kits/solar_sentinel/model.rs"
+      ],
+      "existing_model_description": "Solar Sentinel's sun-disk shield, ivory spear armor and five light/coverage forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Sun-disk shield and ivory spear armor",
+        "color_direction": "Ivory armor, gold sun and a separated dark cloth region",
+        "motion_direction": "Shield/watchful stance; protected spear gait; sun-shield action; radiant shield-and-spear salute",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "LuminousOracle",
+      "name": "Luminous Oracle",
+      "faction": "Celestials",
+      "archetype": "Control",
+      "kit_directory": "crates/tbg-client/src/art/kits/luminous_oracle",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/luminous_oracle/mod.rs",
+        "crates/tbg-client/src/art/kits/luminous_oracle/model.rs"
+      ],
+      "existing_model_description": "Luminous Oracle's empty hood, geometric robe/cape and articulated sun-ring staff in five forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Empty hood, geometric robe and articulated sun-ring staff",
+        "color_direction": "Deep hood void, ivory/gold geometry and focused staff-ring light",
+        "motion_direction": "Ring orbit; composed robe-aware glide/steps; weakening pulse gesture; orbiting-ring staff dance",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "CelestialArcher",
+      "name": "Celestial Archer",
+      "faction": "Celestials",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/celestial_archer",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/celestial_archer/mod.rs",
+        "crates/tbg-client/src/art/kits/celestial_archer/model.rs"
+      ],
+      "existing_model_description": "Celestial Archer's angular gold bow, rigid feather ornaments, ivory armor and five forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Angular gold bow and rigid feather ornaments",
+        "color_direction": "Ivory/gold bow, distinct dark cloth and clearly separated feather shapes",
+        "motion_direction": "Feather/bow adjustment; precise upright steps; geometric bow draw; angular bow salute distinct from Archer",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Justiciar",
+      "name": "Justiciar",
+      "faction": "Celestials",
+      "archetype": "Control",
+      "kit_directory": "crates/tbg-client/src/art/kits/justiciar",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/justiciar/mod.rs",
+        "crates/tbg-client/src/art/kits/justiciar/model.rs"
+      ],
+      "existing_model_description": "Justiciar's rigid segmented construct, compact chest sun and five bright/dark judgment forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Rigid segmented construct with compact chest sun",
+        "color_direction": "High-contrast ivory/dark segments and compact gold sun",
+        "motion_direction": "Segment alignment; rigid articulated march; judgment-directed action; segmented ceremonial victory",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Jawguard",
+      "name": "Jawguard",
+      "faction": "Insects",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/jawguard",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/jawguard/mod.rs",
+        "crates/tbg-client/src/art/kits/jawguard/model.rs"
+      ],
+      "existing_model_description": "Jawguard's broad beetle shell, paired mandibles, horn and five carapace/jaw forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Broad beetle carapace, horn and paired mandibles",
+        "color_direction": "Deep chitin, moss shell regions and amber mandible accents",
+        "motion_direction": "Mandible flex; beetle-weighted stride; horn/mandible contact; carapace-and-mandible display",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Mantis",
+      "name": "Mantis",
+      "faction": "Insects",
+      "archetype": "Dps",
+      "kit_directory": "crates/tbg-client/src/art/kits/mantis",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/mantis/mod.rs",
+        "crates/tbg-client/src/art/kits/mantis/model.rs"
+      ],
+      "existing_model_description": "Mantis's inverted triangular face, folded scythes, narrow abdomen and five leg/blade forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Triangular face, narrow abdomen and folded scythes",
+        "color_direction": "Readable green/chitin blocks and distinct cutting edges",
+        "motion_direction": "Scythe grooming; insect stalking gait; fast folded-blade release; symmetric mantis blade display",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Hornet",
+      "name": "Hornet",
+      "faction": "Insects",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/hornet",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/hornet/mod.rs",
+        "crates/tbg-client/src/art/kits/hornet/model.rs"
+      ],
+      "existing_model_description": "Hornet's banded abdomen, opaque faceted wing pairs, stinger and five venom/swoop forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Banded abdomen, faceted wings and clear stinger",
+        "color_direction": "Strong band contrast, separated wing value and venom accent",
+        "motion_direction": "Wing-settling pulse; anatomy-appropriate hovering/movement; stinger-led release; wing-and-abdomen celebration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Weaver",
+      "name": "Weaver",
+      "faction": "Insects",
+      "archetype": "Control",
+      "kit_directory": "crates/tbg-client/src/art/kits/weaver",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/weaver/mod.rs",
+        "crates/tbg-client/src/art/kits/weaver/model.rs"
+      ],
+      "existing_model_description": "Weaver's eight individually grouped legs, low eyes, spinner and five web/nozzle silhouettes.",
+      "proposed_identity_brief": {
+        "recognition_target": "Eight grouped legs, low eye cluster and spinner",
+        "color_direction": "Dark body, leg-edge contrast and readable silk accents",
+        "motion_direction": "Spinner preparation; eight-leg coordinated gait; web-spit release; leg-pattern victory display",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "PyreWarden",
+      "name": "Pyre Warden",
+      "faction": "Undead",
+      "archetype": "Tank",
+      "kit_directory": "crates/tbg-client/src/art/kits/pyre_warden",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/pyre_warden/mod.rs",
+        "crates/tbg-client/src/art/kits/pyre_warden/model.rs"
+      ],
+      "existing_model_description": "Pyre Warden's coffin furnace, rigid hose, braced nozzle and five funerary armor silhouettes.",
+      "proposed_identity_brief": {
+        "recognition_target": "Coffin furnace, hose and braced visible flame nozzle",
+        "color_direction": "Funerary iron/bone against a localized vivid spectral flame",
+        "motion_direction": "Nozzle pressure breathing; hunched equipment-heavy drag; braced emitted fire jet; coffin/nozzle victory flourish",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": true,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    },
+    {
+      "id": "Drillnest",
+      "name": "Drillnest",
+      "faction": "Machines",
+      "archetype": "Ranged",
+      "kit_directory": "crates/tbg-client/src/art/kits/drillnest",
+      "inspected_kit_files": [
+        "crates/tbg-client/src/art/kits/drillnest/drills.rs",
+        "crates/tbg-client/src/art/kits/drillnest/mod.rs",
+        "crates/tbg-client/src/art/kits/drillnest/model.rs"
+      ],
+      "existing_model_description": "Drillnest's low tracked foundry, honeycomb rack and five distinct feed/barrel forms.",
+      "proposed_identity_brief": {
+        "recognition_target": "Low tracked foundry and honeycomb drill rack",
+        "color_direction": "Dark tracks, iron/brass rack and warm drill/feed accents",
+        "motion_direction": "Rack/feed motion; rigid tracked travel; drill-production cue; foundry-rack mechanical celebration",
+        "approval": "pending_owner"
+      },
+      "mandatory_pilot": false,
+      "implementation_status": "not_started",
+      "baseline_evidence_status": "not_captured",
+      "final_evidence_status": "not_captured",
+      "owner_visual_approval": "pending"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "crates/tbg-client/src/art/anim.rs",
+      "sha256": "e78d2d1abdb848e6b56a4550edcd23e180bcb79297c612e5b8531964a59dee7d"
+    },
+    {
+      "path": "crates/tbg-client/src/art/clips.rs",
+      "sha256": "85ae1fbd7dd64f9e8847cc7c73d6a31b0f1099b881f859882b54395ad3dcd64c"
+    },
+    {
+      "path": "crates/tbg-client/src/art/figure.rs",
+      "sha256": "36bbc69ad2e52055f5d32209be51e68ba22b75ece815d27d83503b37fc187d7d"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/acidmaw/mod.rs",
+      "sha256": "cd0ba3d85498967ebe2faf410df5b30f93e5c0a88e36e81a7346cd3601c9421d"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/acidmaw/model.rs",
+      "sha256": "48b8415e8e89411b82ef598b9954b5a5ad0d3068af306868ee8768915c5bf88c"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/antidote_brewer/mod.rs",
+      "sha256": "9c982965e5554ed7905d0440713a08eb14b1400e8ac6b52ad0f78517a048b53a"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/antidote_brewer/model.rs",
+      "sha256": "6b7c3cb06338fe735f81c84d66ed0abcd0319bcd78c3254f8f25e4f82d3c0b51"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/archer/mod.rs",
+      "sha256": "cc0b6b56b87809149a354765f10d250c9c8ccbc9989c096ab33dac6eff258718"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/archer/model.rs",
+      "sha256": "b07fba3d7a2b0bb52263134a8ce62a99e5b78b1f13a73404436197df887d498d"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/archer/tests.rs",
+      "sha256": "927b9631388048a1123f4f650e48426c0e7da07335b38b45b96c363bcd76e3d2"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/blood_furnace/mod.rs",
+      "sha256": "7eb3a6c56bc534a9c49893c62b2686a1677b2d046802235e042bdfe079431a1e"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/blood_furnace/model.rs",
+      "sha256": "fbea7e923bd014f48020ef1dc6a95f9a6cf9c068ed4de0f11dc8afb4db31316e"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bloodweaver/mod.rs",
+      "sha256": "7f21d4ba701942765d26fc73dbbf7b40a7a69778b5d9e5cbef6511c2fdfdd4de"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bloodweaver/model.rs",
+      "sha256": "3ffdac0c83c88e8d750bb5e84563cc8af90723f4b4ffe6f0caac63531438fed7"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bloomkeeper/mod.rs",
+      "sha256": "b911509169af1e64f01e1be0faa2a4466e119cb75007fe924b47620bdea34ff8"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bloomkeeper/model.rs",
+      "sha256": "3504595cbcbaf1f57672752ef14548032a63afa3a3ee734fd61c153d44dfa2e2"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bombard/mod.rs",
+      "sha256": "77fce428a5df70ee8bcd1a27347e93efa53a521718dda68bfd087bee21867231"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bombard/model.rs",
+      "sha256": "bccdef4fecad6f53320251a23ad762a11eacf140ef8f816370c4143964454738"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bone_brute/mod.rs",
+      "sha256": "378f2fbb107b75b242fbdb1663a3c001b6fa11cd90a2694ce8dda89844748991"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bone_brute/model.rs",
+      "sha256": "4040d4b81c206bdbca48e98d234eaf000dedd725be1ad01c58f0625a238a496f"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bone_brute/motion.rs",
+      "sha256": "93c52e7cb182a2777c7c5405bcaeef3488c64ea87ed71d42b38b7dcd2e836693"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bonehorn/mod.rs",
+      "sha256": "ff783f729d9a51b48598d8a493f6a031be365477430e73e4e1432f175986eb97"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bonehorn/model.rs",
+      "sha256": "c7d94293efeb0a28e032c47670c54380d547c87c71f4890ce16e15442847a32c"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bulwark/mod.rs",
+      "sha256": "1942e72e6a0d0ed4145ac9b057bf7c17f40840b8a95488c5aaffa0111f813297"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/bulwark/model.rs",
+      "sha256": "d0b0043ab15f9b94427bad62f361f25e072e47ca2594b24b3129a655480c4d65"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/capybara/mod.rs",
+      "sha256": "84849f9fd1b69d8736436b9f753c5732e43e94d8a48e1ec42e12708768b23f40"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/capybara/model.rs",
+      "sha256": "cdac2dca1ce6ccab9ad2e799672e6ccaa428911f1eb5aca541a5c90e541f51f5"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/cargo_crab/mod.rs",
+      "sha256": "72b1e51e8b2b4b1e364d4220608d2d55892d1cf8a335df87e04265d180a0fd19"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/cargo_crab/model.rs",
+      "sha256": "e8c415b2da93e6ab3d61bedfbecb26bda4e87f6e0db635b2463a5742d1ffcfcf"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/celestial_archer/mod.rs",
+      "sha256": "12b0556ab20118df2f2d5852113ba723591bc19a828e2e8e9ea097192c11b490"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/celestial_archer/model.rs",
+      "sha256": "e797581afcf5e231c6e9bc4f1bc398b45506f7b821aea6cbdbb16d750ebf91ad"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/common/body.rs",
+      "sha256": "b25e0e2b2f89f59d407b77a2a4ff422f1e57dd1d86726590e33bf2a542573d99"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/common/moves.rs",
+      "sha256": "5bac06347a80e5d2f944d9537c3d5d62d0a5ee2fd83bb3172eaab7f74deef723"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/crowcaller/mod.rs",
+      "sha256": "bb840916cfcf4b0f4849e00c9c0583d0aa7abce46a4482a9c3d2aa2d443dbd43"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/crowcaller/model.rs",
+      "sha256": "4ef18e56ef2f8733efc75ca76af38f7452ab7368df4ad94ab47f53acbbafa076"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/demolisher/mod.rs",
+      "sha256": "12679dbb62041044af1d2ff84e338a71e3b46a1058aee554967949d75a45f62f"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/demolisher/model.rs",
+      "sha256": "e5e23e05e59e232044af91acbac8bcc91caed5332ac93ca870d1bc8c47dc8c42"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/drillnest/drills.rs",
+      "sha256": "b964e6bc27cf0df37feb639d8b9d7ea2f4aec64a4282173f37d86115e6f91d11"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/drillnest/mod.rs",
+      "sha256": "45354805eae4dc7b1d45d20aa79ee5a1da0ec056f559ce7bd4172346c3c6a50c"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/drillnest/model.rs",
+      "sha256": "c0fb4f4210e84672f8db71ead9c150c86ba4f378b4637fa02382ab998f32f9d4"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/drumguard/mod.rs",
+      "sha256": "1774ee9fe0b42234585a215a2ecdeff1bead2003b6d47ac35643f54a12d8121f"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/drumguard/model.rs",
+      "sha256": "e957f2b4166e7ef6400ea3971cb7442e7334ecc13658e2b0db27a60bba92e318"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/farwatch/mod.rs",
+      "sha256": "1e32dc1b8133c2bf50cb2ba035fc8fda9f2a4a532ca4d5dd490c60f61378ebcc"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/farwatch/model.rs",
+      "sha256": "c363614e65c0eddfe3e1c8bc3a5ba4cb52184df7279410eb8f0e8822e63fd2bb"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/hexer/mod.rs",
+      "sha256": "51d38a07741f93921df6e438b8c1f5320e6f80f7dd70bbdcbe70e9120a461438"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/hexer/model.rs",
+      "sha256": "6421fac598e7ae140899e986768b75155642c865505b533f13ebb06cecca0d17"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/hornet/mod.rs",
+      "sha256": "7e503e1797be60f1024ffe34ff61fd32ba91de11573ddbf161f8bb919d1b238b"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/hornet/model.rs",
+      "sha256": "67fba8b6f0322d93147ab8b58aab327c1ef745173e4e2747a3f1f100c8b0be79"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/jawguard/mod.rs",
+      "sha256": "89ee216d012d6f96784613d811b4b166ed400fcc5984f62f56acf87927fdb634"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/jawguard/model.rs",
+      "sha256": "faecf2943b5de9a8dde2a33bfe2b7a74b6cef94edd67ee576c24a670925ed1e4"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/justiciar/mod.rs",
+      "sha256": "2a33d621d593b6b99b0b92039f08b008abfebbae220ebf0da9872cc43868931a"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/justiciar/model.rs",
+      "sha256": "7bd62083bb55815e5d7653c06f6f8446e229585572980fde3ce1ebc3fb5dc706"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/leechroot/mod.rs",
+      "sha256": "4c71bfe7eb71a4b497ffa6c919d7b829bec4779ffd7646d96332e6560a917ea3"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/leechroot/model.rs",
+      "sha256": "172a31b7fc5d1013adf4be9d39a9fed7f077ff69b79be9413de555caf9486de0"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/longaxe/mod.rs",
+      "sha256": "548f6ba7ac3566e50ba95dfbbef962e3e293cee98822ef779e5aaa49dc2a2ca8"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/longaxe/model.rs",
+      "sha256": "8a3caee1f13c68c19c28f0af18c392c46c37d3eca3c77d3ef96e9f6c042ddd9a"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/luminous_oracle/mod.rs",
+      "sha256": "b951ea0adab17895e97f28de770d6c03a534dcb2f881c96e622df5b4c30e8b2d"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/luminous_oracle/model.rs",
+      "sha256": "724acb876fb69e4c9d42add038db6cfceb99c41ed7a6259e81e89e3726e8fb57"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/mantis/mod.rs",
+      "sha256": "5f4b164f45f40a0ab752130dcd2350bdbf9a2ddc2b8df2b976716fcd3600b89c"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/mantis/model.rs",
+      "sha256": "cbf64155af7202be02833ff79d930e0b919594b4c36fa4e7f8f4ba01639d9051"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/mod.rs",
+      "sha256": "26d2526dbc39de399836d7e9569b6d84e5c0cf7c8af1056c3207989bcf683d82"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/nester/mod.rs",
+      "sha256": "a914018c4d8648517b4e309c65d388b8c3f1536913a8cacf8759e37f04990ae5"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/nester/model.rs",
+      "sha256": "d1d6371841f8787882e15f4c74393693a71b49376ced472aa9a2133a0563c7ea"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/oilpress/mod.rs",
+      "sha256": "00642b66c9022666ff86dcc42376ed3b7bab207387b19169f7810c8de6ad851d"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/oilpress/model.rs",
+      "sha256": "16236987373ecfb675a593778a4840871d320202b2754d945a5e93c09f0be18b"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/old_finn/mod.rs",
+      "sha256": "d465b911c1ecf3704e151e175a4d4110f3e1953256782ab5fd3caa388adf1971"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/old_finn/model.rs",
+      "sha256": "8f7b009754a959b1828bcecf75b0e5f5102fc8c11107b4f1b8616e793dc8ed20"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/puppetmaster/mod.rs",
+      "sha256": "04e15dc5d0dde72970dd6e62aa3c3bb437968d2975d9853c84b996a7a07c55cd"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/puppetmaster/model.rs",
+      "sha256": "38099edc0f053ef4c2a34a8aa159bb6d528a47a6549bafa83f2a193ed240c242"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/pyre_warden/mod.rs",
+      "sha256": "339419b1473fa9bc929a793fd3a6b5e20155c8b6caf30bcb32b4b5858d72d386"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/pyre_warden/model.rs",
+      "sha256": "1bd20c57d0ac45a34e2d4e5bd8a7a70e998686c9d9a880ee68f38058e6415e9b"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/rampart/mod.rs",
+      "sha256": "1b8c0e3a4c5d7cf4e6a091bf706ed2fc029838c0a0c6a0a16da1d40f052df020"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/rampart/model.rs",
+      "sha256": "66a32a76cecf4d703685a4c79676b2aaf4dcca597113685de6af60083ca8e2cd"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/rattle_tick/mod.rs",
+      "sha256": "f1560d74360669ad797a06bba90bd64529eb26cb7fe621cbe94c536665dbcb8f"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/rattle_tick/model.rs",
+      "sha256": "9af1398d6410133890c9bd79f76c51704f0f4299d22d9690635f9e4feaf88e73"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/ravager/mod.rs",
+      "sha256": "f09d9d86e19f84ee75ccdd1cb044ea4a690f2dfa2d2adfd2e4894d920631ca4c"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/ravager/model.rs",
+      "sha256": "853a403ce5a35372654f545ff0dcb80832428fb5b5f137e54d547318812fb627"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/rootcaller/mod.rs",
+      "sha256": "ede3803a10fffebc3cc6dcd41bb33401d61540db22f9f19d38fa6d9ccbff5b1a"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/rootcaller/model.rs",
+      "sha256": "cd449a8dff0b39b6ec3e9e2a8e4ac6efdfbc8d145d583f880dc3fdea685fc7ec"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/rootcaller/motion.rs",
+      "sha256": "338eb1a7a6ba210b6c6ab8409843c2cf7451d64c96a4bb5cfb6bec44b133ffd8"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/rotcap/mod.rs",
+      "sha256": "897df4754fc1e2f4eb495a40d0e4a4092362ec843665a2fb5ddc1370c6823fa6"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/rotcap/model.rs",
+      "sha256": "1b4ad1d56920f87ef4a74e451736817e577392374464a53e30c45972c5838f7f"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/sawbot/mod.rs",
+      "sha256": "02a0c4845c6ff3e35515af511fc110fb782d134cbd86e1aa95de43bb46a22190"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/sawbot/model.rs",
+      "sha256": "fb1cf365cdff31599971c7a72fc49d7b0d0d5def39808159df29d6052abc6ae3"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/shatterback/mod.rs",
+      "sha256": "0d4a43b2c20ee98a05dadb1f3d77af44360d685bc15bb0683bb80bb1ec9c6c60"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/shatterback/model.rs",
+      "sha256": "89f68a351d119278e63260728ebd07ca064e98f54bc8c344d1d66c055d44abd2"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/shieldbearer/mod.rs",
+      "sha256": "942c68732222c9fc66f0b27f4ba6bce51e472069cc362fcb0838d8948bd663f0"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/shieldbearer/model.rs",
+      "sha256": "d18b5335caff08923f9f734ba80d2ea74dddf7fe7c3a54cc75cc58b741f54732"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/siege_walker/mod.rs",
+      "sha256": "fb839729883a1dfbcf25b05ebcd03894183d382d582ce1d764334129945a0ad0"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/siege_walker/model.rs",
+      "sha256": "de040f95ff8ed9a8146bbd78d37702267beeeb51277fbd9b85bce2c3ed89b4e0"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/siege_walker/motion.rs",
+      "sha256": "dbc780f08d4179f57df9751c7635e02c9fa8181b91fa1cdc30726e45914e8859"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/smuggler/mod.rs",
+      "sha256": "d00247b2ba7560acc6647e0b2048e91728b572f175165b29304760da7b1e6d2f"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/smuggler/model.rs",
+      "sha256": "1ce75ff8a042889d4f797685bf572398d11e2ca07b52a1809a451368eb96a1a1"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/solar_sentinel/mod.rs",
+      "sha256": "de8af62372cb9f0a379e65602c6a39d4016bc0c6e041be2d4dae36d54fbdc0ca"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/solar_sentinel/model.rs",
+      "sha256": "1297ba6324d24caf13eae27bbaa676429e8d744bfeb4247fb2e292ddb9606148"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/trident/mod.rs",
+      "sha256": "4a278ddef4f32bd59f4fd529bb0303ddc1714144e12115de63d0a76176a8ff81"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/trident/model.rs",
+      "sha256": "4f517cf26970b52e98b818329edb804674d12ea50456db03004f19c7d767f42c"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/trigger/mod.rs",
+      "sha256": "d44feb7195710fa00bfeece0987ce62c220a4030b90675b250d8bd66283781a1"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/trigger/model.rs",
+      "sha256": "31ccf028dd4d42f08c6dc38494f2cf4db30a0decf1e8b5940681df03a6529d06"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/weaver/mod.rs",
+      "sha256": "8076992ccb438642badb02cc5c5a3c36db1d852f03fe6869e96ce8de0c941754"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/weaver/model.rs",
+      "sha256": "04b93514cfa9572f0a922762c792fcfbc064fcf8e27a228a986c67c7e60bc5f5"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/whisperer/mod.rs",
+      "sha256": "47a2fb082b42d09a9c59d05e803f39d1af6a17f478cf7ea40e6358f4abdd68b7"
+    },
+    {
+      "path": "crates/tbg-client/src/art/kits/whisperer/model.rs",
+      "sha256": "fb6b9782b639308c7b7b2b648b1d1880274df4ce03f9d9724cec7a10701dec41"
+    },
+    {
+      "path": "crates/tbg-client/src/art/mod.rs",
+      "sha256": "c0fcdf94ab7a292752c0261148310978c8d52759b21a9c21f8a07813b7c2884e"
+    },
+    {
+      "path": "crates/tbg-client/src/art/palette.rs",
+      "sha256": "13139f6c0170860492da7b41b25644484b43741820c878c13c53bfc7b40f35c0"
+    },
+    {
+      "path": "crates/tbg-client/src/art/rig.rs",
+      "sha256": "a21a8428e7a65f82b65639c2f0e107e9aff65240d4399994f53f6c5552b89d65"
+    },
+    {
+      "path": "crates/tbg-client/src/capture.rs",
+      "sha256": "65b2513493f5ea3c692e667f848e0660f3e0519768d940634cc5b4a035aa8116"
+    },
+    {
+      "path": "crates/tbg-client/src/config.rs",
+      "sha256": "92d5d6064bf4f962b9cc8d04f55138391a90819a09f015159da0c329012685e6"
+    },
+    {
+      "path": "crates/tbg-client/src/gallery/figures.rs",
+      "sha256": "75b2f929aa427be9b1027589ca8cdd7b7c033be9f65df2c935d42720169218cd"
+    },
+    {
+      "path": "crates/tbg-client/src/gallery/range.rs",
+      "sha256": "b43beddf307eb15e5086cfa149f4f930452361939e885919816e3d8debf38343"
+    },
+    {
+      "path": "crates/tbg-client/src/gallery/settings.rs",
+      "sha256": "481e65f8ca012536bce9134f63def94079fcec975dbcde85307fb7d901b33d90"
+    },
+    {
+      "path": "crates/tbg-client/src/sync/actions.rs",
+      "sha256": "9aa665c9573bc2113fafca046bcc34e68265d2951543928f2b39d56792b9e4d2"
+    },
+    {
+      "path": "crates/tbg-client/src/vfx.rs",
+      "sha256": "3b01120f6ab64588639eed7b7bfb06d46919081cc69d8fb0e3fab9a5841039c6"
+    },
+    {
+      "path": "crates/tbg-client/src/vfx/shots.rs",
+      "sha256": "5eab8e4a9053ca6cbe028137dd51e4104b27c900a9cc5f68dcd5975412fe80c0"
+    },
+    {
+      "path": "crates/tbg-client/src/visuals/attacks.rs",
+      "sha256": "9e94cd6b3d01b491efad0a2178f302c3a17a53a35543a3180b5bab2d54e1379d"
+    },
+    {
+      "path": "crates/tbg-core/src/content.rs",
+      "sha256": "6df66afa9f6e7c92a9cbaab822e9e2644ad7acec4d061d4cdbfa693d79dc1b03"
+    },
+    {
+      "path": "crates/tbg-core/src/pyre_warden.rs",
+      "sha256": "448a819f0402aab2a4d8d4a9b707b4566f4e09d6fa920d6be8fcc381428bc08e"
+    },
+    {
+      "path": "crates/tbg-core/src/ruleset_version.rs",
+      "sha256": "892928141f73010f5b4378a129ad3f9c3edca8ba2c1efee83ab12eb4ebfaea9b"
+    },
+    {
+      "path": "crates/tbg-core/src/trident.rs",
+      "sha256": "93401af4e76f94ae6ba01106d57c81fc3e5ff5b961065bd3202942672f4b11f9"
+    },
+    {
+      "path": "crates/tbg-core/src/types.rs",
+      "sha256": "4a2d29990539356147693d5e2bf243780378bb23048cf0d0bca956a29445a6b5"
+    },
+    {
+      "path": "scripts/native-portraits.py",
+      "sha256": "2de352ac2375e5c631f8d2edeccb1a60a10215ba2467e88545481e331a510bec"
+    }
+  ],
+  "execution_evidence_contract": {
+    "required_report": "docs/planning/P70-VISUAL-REVIEW.md",
+    "required_index": "docs/planning/P70-VISUAL-EVIDENCE.json",
+    "per_artifact_fields": [
+      "unit_id",
+      "form",
+      "clip_or_ability",
+      "phase_before_or_after",
+      "sample_time",
+      "content_sha",
+      "tooling_sha",
+      "camera",
+      "aim",
+      "viewport",
+      "dpi",
+      "quality",
+      "platform",
+      "renderer",
+      "scenario_seed",
+      "path_or_uri",
+      "sha256",
+      "width",
+      "height"
+    ],
+    "note": "No screenshots, videos, approvals or game-validation results exist by virtue of this planning manifest."
+  },
+  "owner_followup": "Trident must be taller, carry a longer trident, use frontal two-handed spear thrusts instead of axe-like chops, and gain real authoritative basic attack range.",
+  "trident_balance_exception": {
+    "status": "proposed_pending_measurement_and_D33",
+    "current_basic_range_simulation_units": 1100,
+    "current_basic_range_tiles": 1.1,
+    "new_range_requirement": "Greater than 1100 simulation units; choose the exact integer after geometry/contact calibration and D-33 evidence.",
+    "new_range_value": null,
+    "visual_requirements": [
+      "greater standing height",
+      "longer three-tine weapon",
+      "frontal two-handed piercing thrust",
+      "no major weapon/body penetration",
+      "preserve Evolution proportions from the new base"
+    ],
+    "preserve": [
+      "damage",
+      "attack cadence",
+      "HP",
+      "Energy cost",
+      "movement",
+      "targeting semantics",
+      "Bloody Rend radius",
+      "bleed",
+      "all other champion values"
+    ]
+  }
+}

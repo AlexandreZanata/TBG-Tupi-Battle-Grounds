@@ -400,3 +400,32 @@ database mutation or deployment is part of this planning delivery. Use the
 2026-10-31 minimum-validation policy recorded in the program: documentation
 checks now; exact targeted tests once at implementation consolidation;
 heavy/full-suite checks only on a separate explicit owner request.
+
+## Champion visual identity and animation polish (owner request, 2026-10-31)
+
+**P70 — planning only**, on `codex/p70-champion-visual-polish-plan`.
+Read [the executable phase](phases/P70-champion-visual-identity-polish.md),
+[the 46-champion identity/capture manifest](planning/P70-VISUAL-MANIFEST.json)
+and [the execution prompt](planning/P70-EXECUTION-PROMPT.md).
+
+Use the consolidated Linux **46-champion** roster, never the older 25.
+Every champion receives an individual identity, color/model review and
+personalized motion pass, including Victory. The fixed scope covers 230
+forms and every applicable animation/ability, with actual before/after
+evidence. Mandatory pilots: diagnose/remove the reported blue square/hole;
+fix Trident's trident/body intersection and shark identity; make Pyre
+Warden visibly emit fire; make Old Finn throw a recognizable fish that
+grows with Evolution. Trident must also become taller, carry a longer
+trident and use a frontal spear thrust rather than an axe-like motion.
+Its explicitly requested real basic-range increase is the only balance
+exception: calibrate the new value, document it as Proposed and require
+D-33 evidence/owner acceptance. Preserve all other rules and event timing.
+
+Execution order: reproducible capture tooling and immutable complete
+baseline -> shared artifact diagnosis -> three pilots -> remaining 43
+individual champions -> consolidated evidence and targeted desktop review.
+Reuse P62 previews and P63 celebration ownership; P68/P69 packaging,
+authentication and mobile work remain separate. No game build, real
+capture, gameplay change, visual approval, push or deployment is part of
+this planning delivery. Apply the current owner minimal-validation policy
+instead of historical full-suite blocks.

@@ -1397,6 +1397,29 @@ D-33 evidence and owner look/fun review are recorded in the consolidation report
 Shop reservation/Reroll remains the existing Practice preview rule, not a new
 online economy change.
 
+### Proposed P70 Trident size, thrust and basic reach (owner 2026-10-31)
+
+**Proposed; not an active balance change in this planning commit.** The
+owner requests a taller Trident shark, a longer trident and a two-handed
+frontal spear thrust in place of its axe-like basic animation, with no
+weapon/body penetration. These appearance changes do not resize a server
+hitbox or create a new unit, class or faction.
+
+The owner also explicitly requests increased authoritative basic attack
+range. The current base is **1,100 simulation units (1.1 tiles)** and the
+five current forms inherit it. P70 will propose a new integer base range
+**greater than 1,100**, calibrated to the longer weapon's visible contact.
+The exact new value is deliberately unresolved until measurement and
+D-33 baseline/candidate evidence; no new active value is set here. Record
+the selected Proposed number in this section in the same implementation
+commit as the content change, and document form inheritance and both-seat
+range boundaries. Owner look/fun acceptance remains pending.
+
+This narrow exception does not authorize changes to Trident's damage,
+cadence, HP, Energy cost, movement, targeting semantics, Bloody Rend area
+or bleed, or to any other champion. Preserve strike timing and server
+authority. See [P70](phases/P70-champion-visual-identity-polish.md).
+
 P60/P61 journal/summary Faction arrays follow FACTION_COUNT=7, preserving
 legacy four-Faction records by zero extension. P63 counts every actual drill
 spawn, including fusion outputs, without deleting consumed parents from the
