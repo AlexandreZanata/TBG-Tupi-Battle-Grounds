@@ -151,26 +151,37 @@ fn spawn(
 }
 
 fn controls(time: Res<Time<Real>>, mut state: ResMut<ArenaBanner>, mut queue: ResMut<ActionQueue>) {
+    let mut focus_arena = false;
     queue.0.retain(|action| match action {
         UiAction::ShowArenaBanner => {
             state.show(time.elapsed_secs_f64());
+            focus_arena = true;
             false
         }
         UiAction::CloseArenaBanner => {
             state.dismiss();
             false
         }
-        _ => true,
+        UiAction::Disabled => true,
+        _ => {
+            state.dismiss();
+            true
+        }
     });
+    if focus_arena {
+        queue.0.push(UiAction::Deselect);
+    }
 }
 
 fn visibility(
     time: Res<Time<Real>>,
     state: Res<ArenaBanner>,
+    selected: Res<super::super::evolve::Selected>,
+    tower: Res<super::super::fortify::TowerOpen>,
     mut banners: Query<&mut Visibility, With<Banner>>,
 ) {
     for mut visible in &mut banners {
-        *visible = if time.elapsed_secs_f64() < state.until {
+        *visible = if time.elapsed_secs_f64() < state.until && selected.0.is_none() && !tower.0 {
             Visibility::Inherited
         } else {
             Visibility::Hidden

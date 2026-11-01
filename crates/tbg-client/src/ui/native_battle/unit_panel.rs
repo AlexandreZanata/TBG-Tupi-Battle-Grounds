@@ -50,6 +50,7 @@ enum Field {
     AttackLabel,
     Stat(Stat),
     Evolution(u8),
+    EvolutionHeading,
 }
 
 pub fn plugin(app: &mut App) {
@@ -159,68 +160,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                         stat(stats, name, kind);
                     }
                 });
-            panel
-                .spawn((
-                    Node {
-                        width: percent(100),
-                        flex_direction: FlexDirection::Column,
-                        row_gap: px(5),
-                        ..default()
-                    },
-                    Upgrades,
-                ))
-                .with_children(|options| {
-                    options
-                        .spawn(Node {
-                            width: percent(100),
-                            justify_content: JustifyContent::SpaceBetween,
-                            align_items: AlignItems::Center,
-                            ..default()
-                        })
-                        .with_children(|heading| {
-                            heading.spawn(kit::heading("Evolution", 12.));
-                            heading.spawn((
-                                Node {
-                                    width: px(20),
-                                    height: px(20),
-                                    align_items: AlignItems::Center,
-                                    justify_content: JustifyContent::Center,
-                                    ..default()
-                                },
-                                UiAction::CloseEvolve,
-                                children![kit::heading("×", 14.)],
-                            ));
-                        });
-                    for branch in 0..2 {
-                        options.spawn((
-                            Node {
-                                width: percent(100),
-                                min_height: px(42),
-                                padding: UiRect::all(px(7)),
-                                border: UiRect::all(px(1)),
-                                border_radius: BorderRadius::all(px(5)),
-                                align_items: AlignItems::Center,
-                                ..default()
-                            },
-                            BackgroundColor(chrome::INK),
-                            BorderColor::all(chrome::GOLD),
-                            UiAction::Disabled,
-                            Choice(branch),
-                            kit::buttons::Chrome {
-                                enabled: false,
-                                focused: false,
-                            },
-                            kit::buttons::Palette {
-                                idle: chrome::INK,
-                                hover: Color::srgb_u8(45, 57, 60),
-                                pressed: Color::srgb_u8(28, 38, 43),
-                                border: chrome::GOLD,
-                            },
-                            children![(label("", 10.), Field::Evolution(branch))],
-                        ));
-                    }
-                });
         });
+    upgrades(&mut commands);
 }
 
 fn header(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
@@ -384,6 +325,15 @@ fn field_text(
         Field::Hp => format!("{} / {}", r.hp, r.max_hp),
         Field::AttackLabel => r.attack.0.into(),
         Field::Stat(kind) => stat_text(*kind, r),
+        Field::EvolutionHeading => format!(
+            "{} · {}",
+            r.name,
+            if view.is_some_and(|v| v.units.iter().any(|u| Some(u.id) == id && u.tier >= 2)) {
+                lang.t(crate::i18n::Msg::EvolveFully)
+            } else {
+                "Evolution"
+            }
+        ),
         Field::Evolution(branch) => evolution_text(view, id, *branch, lang),
     }
 }
@@ -441,7 +391,6 @@ fn upgrade_visibility(
                 && Some(u.id) == selected.0
                 && u.seat == v.you
                 && !u.is_summon()
-                && u.tier < 2
         })
     });
     for mut node in &mut roots {
@@ -467,4 +416,75 @@ fn choices(
         };
         chrome.enabled = *action != UiAction::Disabled;
     }
+}
+
+fn upgrades(commands: &mut Commands) {
+    commands
+        .spawn((
+            chrome::upgrade_node(),
+            chrome::frame(chrome::GOLD),
+            Upgrades,
+            UiAction::Disabled,
+            ZIndex(5),
+            DespawnOnExit(GameState::InMatch),
+        ))
+        .with_children(|options| {
+            options
+                .spawn(Node {
+                    width: percent(100),
+                    justify_content: JustifyContent::SpaceBetween,
+                    align_items: AlignItems::Center,
+                    ..default()
+                })
+                .with_children(|heading| {
+                    heading.spawn((kit::heading("Evolution", 12.), Field::EvolutionHeading));
+                    heading.spawn((
+                        Node {
+                            width: px(20),
+                            height: px(20),
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        },
+                        UiAction::CloseEvolve,
+                        children![kit::heading("×", 14.)],
+                    ));
+                });
+            options
+                .spawn(Node {
+                    width: percent(100),
+                    column_gap: px(6),
+                    ..default()
+                })
+                .with_children(|options| {
+                    for branch in 0..2 {
+                        options.spawn((
+                            Node {
+                                width: percent(50),
+                                min_height: px(55),
+                                padding: UiRect::all(px(7)),
+                                border: UiRect::all(px(1)),
+                                border_radius: BorderRadius::all(px(5)),
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            BackgroundColor(chrome::INK),
+                            BorderColor::all(chrome::GOLD),
+                            UiAction::Disabled,
+                            Choice(branch),
+                            kit::buttons::Chrome {
+                                enabled: false,
+                                focused: false,
+                            },
+                            kit::buttons::Palette {
+                                idle: chrome::INK,
+                                hover: Color::srgb_u8(45, 57, 60),
+                                pressed: Color::srgb_u8(28, 38, 43),
+                                border: chrome::GOLD,
+                            },
+                            children![(label("", 10.), Field::Evolution(branch))],
+                        ));
+                    }
+                });
+        });
 }

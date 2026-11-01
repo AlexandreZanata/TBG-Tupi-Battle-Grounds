@@ -1,5 +1,5 @@
 //! Evolution panel for the selected own unit: branch choices with their
-//! effects and costs (BR-V01). Closes after a choice, with ×, or when the
+//! effects and costs (BR-V01). Retains focus after a choice; closes with × or when the
 //! unit is gone.
 
 use bevy::prelude::*;
@@ -39,7 +39,7 @@ pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         (
-            rebuild.run_if(resource_changed::<Selected>),
+            rebuild,
             refresh_choices.run_if(resource_changed::<LatestView>),
         )
             .chain()
@@ -64,8 +64,21 @@ fn rebuild(
     view: Res<LatestView>,
     lang: Res<Lang>,
     panels: Query<Entity, With<EvolvePanel>>,
+    mut previous: Local<Option<(UnitId, u8, u8, Lang)>>,
 ) {
     let lang = *lang;
+    let key = selected.0.and_then(|id| {
+        view.0
+            .as_ref()?
+            .units
+            .iter()
+            .find(|u| u.id == id)
+            .map(|u| (id, u.tier, u.branch, lang))
+    });
+    if *previous == key {
+        return;
+    }
+    *previous = key;
     for e in &panels {
         commands.entity(e).despawn();
     }
@@ -79,11 +92,13 @@ fn rebuild(
         .spawn((
             Node {
                 position_type: PositionType::Absolute,
-                top: percent(18.0),
+                top: px(134),
+                width: px(390),
+                min_height: px(106),
                 justify_self: JustifySelf::Center,
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
-                padding: UiRect::all(px(14.0)),
+                padding: UiRect::all(px(12.0)),
                 row_gap: px(8.0),
                 border_radius: BorderRadius::all(px(12.0)),
                 ..default()
@@ -277,7 +292,7 @@ mod tests {
                 Update,
                 (
                     drop_gone,
-                    rebuild.run_if(resource_changed::<Selected>),
+                    rebuild,
                     refresh_choices.run_if(resource_changed::<LatestView>),
                 )
                     .chain(),

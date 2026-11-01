@@ -48,3 +48,15 @@ selection and can attack an unguarded Stronghold within its unchanged range.
 This owner rule is marked Proposed in §C.2; revision 4 records the changed
 ruleset source. Native `followup-check.log` passed in 1.79 s. Focused tests
 are queued for the final consolidation; no broad balance gate ran.
+
+### Evolution and Fortification focus
+
+Linux keeps the two information cards at their original anchors. Purchase
+choices occupy a shared 390 px wide, minimum 106 px high card at y=134,
+below the timer. Arena introduction uses the same slot and is suppressed
+while a purchase card is open. Outside actions dismiss focus; purchases
+retain it until selection changes, the unit disappears, or the user closes
+it. The non-Linux Evolution card rebuilds only when identity/form/language
+changes, so the next tier replaces stale choices without reopening. Browser
+Fortification choices are also separated from the information card. Browser
+arena banner now dismisses on outside pointer presses.

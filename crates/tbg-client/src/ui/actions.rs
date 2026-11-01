@@ -84,6 +84,21 @@ pub(super) fn apply(
         selected.0 = None;
     }
     for action in std::mem::take(&mut queue.0) {
+        // Purchase cards and the focused entity preserve focus; other actions are outside clicks.
+        if !matches!(
+            action,
+            UiAction::SelectUnit(_)
+                | UiAction::SelectTower
+                | UiAction::Evolve { .. }
+                | UiAction::Fortify(_)
+                | UiAction::Disabled
+                | UiAction::CloseEvolve
+                | UiAction::CloseInspect
+        ) {
+            selected.0 = None;
+            inspected.0 = None;
+            tower_open.0 = false;
+        }
         #[cfg(target_os = "linux")]
         let action = match action {
             UiAction::PracticeArena(arena) => {
@@ -364,7 +379,7 @@ pub(super) fn apply(
                     },
                     now,
                 );
-                selected.0 = None;
+                // Keep focus while the authoritative tier updates, allowing the next purchase.
             }
             // D-46: one Fortify in flight; the tier shown changes only when
             // the authoritative view does.

@@ -57,3 +57,21 @@ pub fn icon(assets: &AssetServer, name: &str, size: f32, color: Color) -> impl B
         },
     )
 }
+
+/// Shared top-center slot used by arena-sized Evolution purchase cards.
+pub(super) fn upgrade_node() -> Node {
+    Node {
+        position_type: PositionType::Absolute,
+        top: px(134),
+        left: percent(50),
+        margin: UiRect::left(px(-195)),
+        width: px(390),
+        min_height: px(106),
+        padding: UiRect::axes(px(12), px(10)),
+        border: UiRect::all(px(1)),
+        border_radius: BorderRadius::all(px(10)),
+        flex_direction: FlexDirection::Column,
+        row_gap: px(6),
+        ..default()
+    }
+}
