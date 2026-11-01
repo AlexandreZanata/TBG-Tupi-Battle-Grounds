@@ -36,12 +36,36 @@ fn pose(m: &Moment, p: &mut Pose) {
     tools::shift(p, Chest, [0.0, breath * -0.018, 0.0]);
     tendrils(p, breath * 5.0);
     match m.clip {
-        Clip::Idle | Clip::Victory => tools::set(p, Head, [0.0, (m.clock * 0.9).sin() * 5.0, 0.0]),
+        Clip::Idle => {
+            tools::set(
+                p,
+                Head,
+                [2.0 * breath, (m.clock * 0.9).sin() * 6.0, -2.0 * breath],
+            );
+            tools::set(p, Chest, [0.0, 0.0, 2.0 * breath]);
+            tools::add(p, UpperArmL, [-6.0 * breath, 0.0, 0.0]);
+            tools::add(p, ThighR, [6.0 * breath, 0.0, 0.0]);
+        }
+        Clip::Victory => {
+            let phase = m.t / 0.8 * std::f32::consts::TAU;
+            let unfurl = 0.5 - 0.5 * phase.cos();
+            tools::set(
+                p,
+                Chest,
+                [4.0 * phase.sin(), 8.0 * phase.sin(), 5.0 * phase.cos()],
+            );
+            tools::set(p, Head, [-8.0 * unfurl, -6.0 * phase.sin(), 0.0]);
+            tools::shift(p, Hips, [0.025 * phase.sin(), 0.025 * unfurl, 0.0]);
+            tendrils(p, 22.0 * unfurl);
+        }
         Clip::Walk => {
             let phase = m.walk.unwrap_or(0.0) * std::f32::consts::TAU;
             tools::set(p, Spine, [phase.cos() * 3.0, 0.0, phase.sin() * 6.0]);
             tools::shift(p, Hips, [0.0, phase.cos() * 0.035, 0.0]);
             tendrils(p, phase.sin() * 15.0);
+            tools::set(p, Head, [-4.0, phase.sin() * -4.0, 0.0]);
+            tools::add(p, UpperArmL, [12.0, 0.0, 0.0]);
+            tools::add(p, UpperArmR, [12.0, 0.0, 0.0]);
         }
         Clip::Cast | Clip::AttackRanged | Clip::AttackMelee => pulse(p, m.t, 0.65),
         Clip::Hit => {
@@ -89,4 +113,6 @@ fn pulse(p: &mut Pose, t: f32, weight: f32) {
     tendrils(p, -22.0 * fold + 35.0 * spread);
     tools::shift(p, Chest, [0.0, -0.04 * fold + 0.03 * spread, 0.0]);
     p[Prop(Back).index()].1.z += 0.035 * spread;
+    tools::add(p, Head, [-6.0 * fold + 4.0 * spread, 0.0, 0.0]);
+    tools::add(p, Spine, [5.0 * fold - 4.0 * spread, 0.0, 0.0]);
 }
