@@ -118,7 +118,7 @@ fn dress(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         );
     }
     if f.t2 {
-        let cape = if f.a { ALLY } else { WINE_SHADE };
+        let cape = if f.a { LINEN } else { WINE_SHADE };
         body::cape(v, cape, 0.28, 0.48);
     }
     if f.b {

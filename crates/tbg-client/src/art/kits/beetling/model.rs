@@ -59,7 +59,7 @@ fn shell(v: &mut Vec<PartSpec>, f: Form) {
         part(h, Ball(0.22), color, [0.0, 0.06, -0.02]).scale([1.0, 0.62, 1.3]),
         part(h, Ball(0.18), DARK, [0.0, 0.0, -0.02]).scale([1.0, 0.3, 1.25]),
         part(h, Box(0.012, 0.02, 0.48), DARK, [0.0, 0.185, -0.02]),
-        part(h, Box(0.07, 0.015, 0.12), ALLY, [0.0, 0.19, -0.12]),
+        part(h, Box(0.07, 0.015, 0.12), LINEN, [0.0, 0.19, -0.12]),
     ]);
     if f.a && !f.t2 {
         for z in [0.06, -0.08] {

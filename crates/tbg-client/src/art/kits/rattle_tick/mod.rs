@@ -102,5 +102,45 @@ fn pose(m: &Moment, p: &mut Pose) {
         p[Secondary(Spring::Back).index()].0.x = 20.0 * throw;
     }
     p[Secondary(Spring::HeadGear).index()].0.y = (m.clock * 0.9).sin() * 15.0;
+    // A downward club on a dangling hand crossed the floor even in Idle.
+    // Keep one chest-space frame and solve the holding wrist to it.
+    let active = matches!(m.clip, Clip::AttackMelee | Clip::AttackRanged | Clip::Cast);
+    let load = if active {
+        tools::hold(m.t, [0.0, 0.16, 0.18, 0.30])
+    } else {
+        0.0
+    };
+    let hit = if active {
+        tools::hold(m.t, [0.18, 0.30, 0.38, 0.70])
+    } else {
+        0.0
+    };
+    let rotation = Quat::from_rotation_x((-45.0 - 100.0 * load - 20.0 * hit).to_radians());
+    let mut origin = Vec3::new(-0.30, 0.05, 0.22);
+    let world = crate::art::presentation::pose_world(tbg_core::UnitKind::RattleTick, &body, p);
+    let chest = world[Chest.index()];
+    let mut low = f32::INFINITY;
+    for x in [-0.18, 0.18] {
+        for y in [-0.55, 0.13] {
+            for z in [-0.12, 0.12] {
+                low = low.min(
+                    chest
+                        .transform_point3(origin + rotation * Vec3::new(x, y, z))
+                        .y,
+                );
+            }
+        }
+    }
+    if low < 0.04 {
+        origin += chest.inverse().transform_vector3(Vec3::Y * (0.04 - low));
+    }
+    p[Prop(Socket::WeaponR).index()] = (crate::art::ik::degrees(rotation), origin);
+    tools::reach(
+        p,
+        false,
+        origin,
+        Some(rotation),
+        (&body, Vec3::new(-1.0, -0.2, 0.0)),
+    );
     tools::face(p, m.aim, Vec3::new(0.0, 1.0, 0.2));
 }

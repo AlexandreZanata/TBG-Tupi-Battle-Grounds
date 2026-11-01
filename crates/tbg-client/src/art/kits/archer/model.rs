@@ -126,7 +126,7 @@ fn dress(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 
     if f.a && f.t2 {
         // Marksman: team half-cape with gold hem
-        body::cape(v, ALLY, 0.34, 0.44);
+        body::cape(v, LINEN, 0.34, 0.44);
         v.push(part(
             Secondary(Spring::Back),
             Box(0.34, 0.03, 0.02),
@@ -136,7 +136,7 @@ fn dress(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         body::pauldrons(v, GOLD, 0.14);
     } else if f.b && f.t2 {
         // Arrow Rain: armored steel pauldrons and battle mantle
-        body::cape(v, ALLY, 0.36, 0.40);
+        body::cape(v, LINEN, 0.36, 0.40);
         body::pauldrons(v, IRON, 0.15);
     }
 }
@@ -168,7 +168,7 @@ fn quivers(v: &mut Vec<PartSpec>, f: Form) {
         let (color, fletch) = if f.a && f.t2 {
             (GOLD, GOLD)
         } else if f.a {
-            (DARK_LEATHER, ALLY)
+            (DARK_LEATHER, LINEN)
         } else {
             (DARK_LEATHER, LINEN)
         };
@@ -197,7 +197,7 @@ fn bow(v: &mut Vec<PartSpec>, f: Form) {
         string: if f.t2 { GOLD } else { LINEN },
         shaft: TIMBER,
         head: STEEL,
-        fletch: if f.a { ALLY } else { LINEN },
+        fletch: if f.a { LINEN } else { LINEN },
     };
     let half = half_len(f);
     v.extend(gear::bow(half, style));

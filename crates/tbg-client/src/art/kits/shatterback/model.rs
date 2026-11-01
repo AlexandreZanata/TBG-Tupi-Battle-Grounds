@@ -39,7 +39,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(
             Body(Chest),
             Ring(0.025, 0.41, 360.0),
-            ALLY,
+            LINEN,
             [0.0, 0.03, -0.1],
         )
         .scale([1.2, 1.0, 1.4]),

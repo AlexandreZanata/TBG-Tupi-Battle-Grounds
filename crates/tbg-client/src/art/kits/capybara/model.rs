@@ -92,7 +92,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Secondary(Spring::Back),
             Box(0.18, 0.14, 0.02),
-            ALLY,
+            LINEN,
             [0.0, 0.12, -0.21],
         ),
     ]);

@@ -68,6 +68,9 @@ pub(super) fn animate(
                 commands.entity(e).try_insert(Visibility::Hidden);
             }
             commands.entity(v.ring).try_insert(Visibility::Hidden);
+            commands
+                .entity(v.status_ring)
+                .try_insert(Visibility::Hidden);
             for t_cube in &v.tiers {
                 commands.entity(*t_cube).try_insert(Visibility::Hidden);
             }

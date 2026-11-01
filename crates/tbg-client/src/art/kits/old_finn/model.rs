@@ -84,26 +84,26 @@ fn clothing(v: &mut Vec<PartSpec>, p: &Proportions, f: Form, coat: Color) {
         part(
             Body(Chest),
             Box(0.16, 0.045, 0.05),
-            ALLY,
+            LINEN,
             [0.0, p.torso.y, 0.11],
         ),
         part(
             Body(Chest),
             Ball(0.032),
-            ALLY,
+            LINEN,
             [0.0, p.torso.y - 0.025, 0.15],
         ),
         part(
             Body(Chest),
             Box(0.035, 0.085, 0.018),
-            ALLY,
+            LINEN,
             [-0.025, p.torso.y - 0.065, 0.16],
         )
         .rot([0.0, 0.0, -18.0]),
         part(
             Body(Chest),
             Box(0.035, 0.07, 0.018),
-            ALLY,
+            LINEN,
             [0.025, p.torso.y - 0.065, 0.16],
         )
         .rot([0.0, 0.0, 18.0]),

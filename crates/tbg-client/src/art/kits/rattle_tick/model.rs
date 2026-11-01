@@ -21,6 +21,7 @@ pub fn plan(t: u8) -> Proportions {
 }
 pub fn parent(n: Node) -> Option<Node> {
     match n {
+        Prop(Socket::WeaponR) => Some(Body(Chest)),
         Secondary(Spring::HeadGear) | Prop(Socket::Back) | Prop(Socket::StringTop) => {
             Some(Secondary(Spring::Back))
         }
@@ -31,6 +32,7 @@ pub fn parent(n: Node) -> Option<Node> {
 }
 pub fn rest(n: Node, p: &Proportions) -> Vec3 {
     match n {
+        Prop(Socket::WeaponR) => Vec3::ZERO,
         Secondary(Spring::Back) => Vec3::new(0.28, 0.42, -0.05),
         Secondary(Spring::HeadGear) => Vec3::new(0.0, 0.22, 0.0),
         Prop(Socket::Back) => Vec3::new(0.09, 0.12, 0.0),
@@ -58,7 +60,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Body(Chest),
             Box(p.torso.x * 1.03, 0.08, p.torso.z * 1.03),
-            ALLY,
+            LINEN,
             [0.0, 0.16, 0.0],
         )
         .rot([0.0, 0.0, -24.0]),

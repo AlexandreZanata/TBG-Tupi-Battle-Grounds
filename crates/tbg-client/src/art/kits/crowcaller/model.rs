@@ -76,7 +76,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(
             Secondary(Spring::Tabard),
             Box(0.09, 0.26, 0.018),
-            ALLY,
+            LINEN,
             [0.0, -0.18, 0.017],
         ),
         part(

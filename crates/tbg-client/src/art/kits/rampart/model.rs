@@ -157,7 +157,7 @@ fn wall(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         part(
             c,
             Box(wide * 0.16, tall * 0.15, 0.018),
-            ALLY,
+            LINEN,
             [x, y - tall * 0.05, z + 0.070],
         )
         .rot([0.0, 0.0, 45.0]),
@@ -197,7 +197,7 @@ fn wall(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             part(
                 c,
                 Box(0.2, 0.14, 0.015),
-                ALLY,
+                LINEN,
                 [x + wide * 0.45 - 0.1, y + tall * 0.9, z - 0.02],
             ),
             part(

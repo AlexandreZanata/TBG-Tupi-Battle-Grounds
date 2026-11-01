@@ -65,7 +65,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Body(Chest),
             Box(0.18, 0.035, 0.16),
-            ALLY,
+            LINEN,
             [0.0, 0.20, -0.08],
         ),
         part(

@@ -1,7 +1,7 @@
 //! Place live and spectator units using client-only crowd offsets.
 
 use bevy::prelude::*;
-use tbg_core::{Archetype, Seat, UnitView};
+use tbg_core::{Archetype, Seat, UnitKind, UnitView};
 
 use crate::{config, crowd, visuals::UnitVisual};
 
@@ -22,6 +22,14 @@ impl LaneAnchor {
                     tbg_core::content::def(look.kind).archetype,
                     look.kind.is_summon(),
                 ),
+                half_length: if look.kind == UnitKind::Bonehorn {
+                    1.35
+                } else {
+                    radius(
+                        tbg_core::content::def(look.kind).archetype,
+                        look.kind.is_summon(),
+                    )
+                },
                 facing: if look.own { 1.0 } else { -1.0 },
                 ghost: false,
             },
@@ -34,6 +42,11 @@ impl LaneAnchor {
                 id: u.id,
                 anchor_x: 0.0,
                 radius: radius(tbg_core::content::def(u.kind).archetype, u.is_summon()),
+                half_length: if u.kind == UnitKind::Bonehorn {
+                    1.35 * (1.0 + f32::from(u.tier) * 0.08)
+                } else {
+                    radius(tbg_core::content::def(u.kind).archetype, u.is_summon())
+                },
                 facing: if u.seat == you { 1.0 } else { -1.0 },
                 ghost: u.fx & (1 << 14) != 0,
             },
@@ -70,6 +83,7 @@ pub(super) struct Scratch {
 pub(super) fn update(
     time: Res<Time>,
     mut scratch: Local<Scratch>,
+    library: Res<crate::art::FigureLibrary>,
     mut units: Query<(&LaneAnchor, &mut CrowdState, &mut Transform, &UnitVisual)>,
 ) {
     let enabled = *scratch
@@ -84,11 +98,18 @@ pub(super) fn update(
     bodies.clear();
     offsets.clear();
     for (anchor, state, _, visual) in &units {
-        bodies.push(crowd::Body {
+        let mut body = crowd::Body {
             anchor_x: anchor.pos.x,
             ghost: is_ghost(visual, anchor),
             ..anchor.body
-        });
+        };
+        if visual.kind() == UnitKind::Bonehorn {
+            let (tier, branch) = visual.form();
+            let depth = library.get(visual.kind(), tier, branch).occupancy;
+            body.anchor_x += (depth.x + depth.y) * 0.5 * body.facing;
+            body.half_length = (depth.y - depth.x) * 0.5;
+        }
+        bodies.push(body);
         offsets.push(state.0);
     }
     if enabled {

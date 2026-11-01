@@ -392,11 +392,11 @@ fn colors(v: &mut Vec<PartSpec>, p: &Proportions) {
         part(
             Body(Chest),
             Box(0.07, 0.46, 0.03),
-            ALLY,
+            LINEN,
             [0.02, p.torso.y * 0.5, 0.15],
         )
         .rot([-4.0, 0.0, 34.0]),
-        part(Body(Head), Ball(0.045), ALLY, [-0.09, 0.15, 0.06]),
+        part(Body(Head), Ball(0.045), LINEN, [-0.09, 0.15, 0.06]),
         part(Body(Head), Ball(0.022), GOLD, [-0.09, 0.15, 0.1]),
     ]);
 }

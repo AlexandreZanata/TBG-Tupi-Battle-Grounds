@@ -40,7 +40,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     body::glowing_eyes(&mut v, &p, MAGIC);
     marionette(&mut v, Prop(Socket::WeaponR), f, RED_CLOTH);
     if f.b {
-        marionette(&mut v, Prop(Socket::OffhandL), f, ALLY);
+        marionette(&mut v, Prop(Socket::OffhandL), f, LINEN);
     }
     if f.b && f.t2 {
         let b = Secondary(Spring::Back);
@@ -77,7 +77,7 @@ fn coat(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         part(
             Body(Chest),
             Box(0.06, 0.05, 0.02),
-            ALLY,
+            LINEN,
             [0.0, t.y * 0.86, t.x * 0.35],
         ),
         part(

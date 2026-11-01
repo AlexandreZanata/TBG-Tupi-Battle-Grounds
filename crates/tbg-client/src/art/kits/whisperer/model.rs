@@ -81,7 +81,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(
             Secondary(Spring::Tabard),
             Box(0.09, 0.28, 0.018),
-            ALLY,
+            LINEN,
             [0.0, -0.22, -0.04],
         )
         .rot([-8.0, 0.0, 8.0]),

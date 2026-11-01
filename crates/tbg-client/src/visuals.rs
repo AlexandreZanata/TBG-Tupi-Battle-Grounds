@@ -20,6 +20,7 @@ mod growth;
 pub mod layout;
 pub mod mount;
 mod names;
+mod overhead;
 mod shell;
 mod status_badges;
 mod update;
@@ -57,6 +58,7 @@ pub struct UnitVisual {
     pub figure: Entity,
     joints: [Entity; crate::art::rig::NODE_COUNT],
     ring: Entity,
+    status_ring: Entity,
     /// Rest scale of the team ring (the inspected unit's ring pulses above it).
     ring_base: f32,
     tiers: [Entity; 2],
@@ -227,11 +229,24 @@ fn spawn_form_visual(
     } else {
         lib.get(look.kind, look.tier, look.branch)
     };
-    let height = (if dummy { 1.75 } else { 1.05 }) * form.plan.scale;
+    let height = if dummy {
+        1.75 * form.plan.scale + 0.25
+    } else {
+        form.overhead
+    };
     let mesh = |m: &Handle<Mesh>, mat: &Handle<StandardMaterial>, t: Transform| {
         (Mesh3d(m.clone()), MeshMaterial3d(mat.clone()), t)
     };
-    let rot = Quat::from_rotation_y(yaw(look.own));
+    let base_yaw = if matches!(look.kind, UnitKind::Bonehorn | UnitKind::Drillnest) {
+        if look.own {
+            std::f32::consts::FRAC_PI_2
+        } else {
+            -std::f32::consts::FRAC_PI_2
+        }
+    } else {
+        yaw(look.own)
+    };
+    let rot = Quat::from_rotation_y(base_yaw);
     let figure_root = commands
         .spawn((
             Transform::from_rotation(rot).with_scale(Vec3::splat(form.plan.scale)),
@@ -250,11 +265,22 @@ fn spawn_form_visual(
     let ring_scale = Vec3::splat(0.85 * form.plan.scale);
     let ring = commands
         .spawn(mesh(
-            &a.ring,
+            if look.own { &a.ring } else { &a.enemy_ring },
             ring_mat,
             Transform::from_xyz(0.0, 0.02, 0.0).with_scale(ring_scale),
         ))
         .insert(NotShadowCaster)
+        .id();
+    let status_ring = commands
+        .spawn((
+            mesh(
+                &a.shield_outline,
+                &a.slowed,
+                Transform::from_xyz(0.0, 0.04, 0.0).with_scale(Vec3::splat(form.plan.scale)),
+            ),
+            Visibility::Hidden,
+            NotShadowCaster,
+        ))
         .id();
     let (bar, bar_fill, tiers) = spawn_bar(commands, a, height, &look);
     let bleed_badge = status_badges::spawn_bleed(commands, a, bar);
@@ -263,6 +289,7 @@ fn spawn_form_visual(
         figure: figure_root,
         joints,
         ring,
+        status_ring,
         ring_base: ring_scale.x,
         tiers,
         bar,
@@ -277,7 +304,7 @@ fn spawn_form_visual(
         faction: d.faction,
         splash: 0.0,
         form: (look.kind, look.tier, look.branch),
-        yaw: yaw(look.own),
+        yaw: base_yaw,
         tint: None,
         dying: false,
         fx: if look.kind == UnitKind::Shatterback {
@@ -315,7 +342,7 @@ fn spawn_form_visual(
             visual,
             animator,
         ))
-        .add_children(&[figure_root, ring, bar]);
+        .add_children(&[figure_root, ring, status_ring, bar]);
     // Tapping near any unit opens its status panel; own units also get the
     // Evolution panel (ui/input.rs, ui/actions.rs).
     commands.entity(root).insert(UiAction::SelectUnit(look.id));
@@ -331,19 +358,34 @@ fn spawn_bar(
     let mesh = |m: &Handle<Mesh>, mat: &Handle<StandardMaterial>, t: Transform| {
         (Mesh3d(m.clone()), MeshMaterial3d(mat.clone()), t)
     };
-    let tier_mat = if look.branch == 0 { &a.gold } else { &a.silver };
-    let tiers = [(0u8, -0.08), (1, 0.08)].map(|(i, x)| {
+    let tier_mat = &a.star_fill;
+    let tiers = [
+        (0u8, overhead::marker_x(look.tier, 0)),
+        (1, overhead::marker_x(look.tier, 1)),
+    ]
+    .map(|(i, x)| {
         let vis = if look.tier > i {
             Visibility::Inherited
         } else {
             Visibility::Hidden
         };
+        let outline = commands
+            .spawn((
+                mesh(
+                    &a.tier_star,
+                    &a.star_edge,
+                    Transform::from_xyz(0.0, 0.0, -0.01).with_scale(Vec3::splat(1.18)),
+                ),
+                NotShadowCaster,
+            ))
+            .id();
         commands
             .spawn((
-                mesh(&a.tier_cube, tier_mat, Transform::from_xyz(x, 0.1, 0.0)),
+                mesh(&a.tier_star, tier_mat, Transform::from_xyz(x, 0.19, 0.025)),
                 vis,
                 NotShadowCaster,
             ))
+            .add_child(outline)
             .id()
     });
     let bar_fill = commands
@@ -363,10 +405,7 @@ fn spawn_bar(
         .insert(NotShadowCaster)
         .id();
     let bar = commands
-        .spawn((
-            Transform::from_xyz(0.0, height + 0.25, 0.0),
-            Visibility::default(),
-        ))
+        .spawn((Transform::from_xyz(0.0, height, 0.0), Visibility::default()))
         .add_children(&[bar_bg, bar_fill, tiers[0], tiers[1]])
         .id();
     (bar, bar_fill, tiers)

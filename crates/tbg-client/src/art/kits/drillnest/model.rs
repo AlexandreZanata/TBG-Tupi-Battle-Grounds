@@ -94,7 +94,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         v.push(part(
             Body(Hips),
             Box(0.035, 0.13, 0.35),
-            ALLY,
+            LINEN,
             [s * 0.415, 0.01, 0.0],
         ));
         for z in [-0.30, -0.15, 0.0, 0.15, 0.30] {

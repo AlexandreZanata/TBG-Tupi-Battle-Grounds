@@ -60,10 +60,15 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Secondary(Spring::Back),
             Cyl(0.11, 0.05),
-            ALLY,
+            LINEN,
             [0.0, 0.0, -0.07],
         ),
-        part(Body(Chest), Box(0.12, 0.05, 0.025), ALLY, [0.0, 0.14, 0.10]),
+        part(
+            Body(Chest),
+            Box(0.12, 0.05, 0.025),
+            LINEN,
+            [0.0, 0.14, 0.10],
+        ),
     ]);
     for (s, hand, elbow, shin) in [
         (-1.0, Socket::WeaponR, ForearmR, ShinR),

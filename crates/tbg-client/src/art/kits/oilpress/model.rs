@@ -146,7 +146,7 @@ fn boiler(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             part(
                 Body(Hips),
                 Box(t.x * 0.2, 0.2, 0.065),
-                ALLY,
+                LINEN,
                 [0.0, -0.06, t.z * 0.7],
             ),
         ]);

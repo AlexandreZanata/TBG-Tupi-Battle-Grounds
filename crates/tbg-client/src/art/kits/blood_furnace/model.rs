@@ -162,7 +162,7 @@ fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         part(
             Body(Hips),
             Box(t.x * 0.35, 0.18, 0.02),
-            ALLY,
+            LINEN,
             [0.0, -0.08, t.z * 0.47],
         ),
     ]);

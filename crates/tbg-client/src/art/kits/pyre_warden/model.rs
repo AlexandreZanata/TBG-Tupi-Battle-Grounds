@@ -31,13 +31,13 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Body(Chest),
             Bevel(0.34, 0.25, 0.12, 0.025),
-            if f.a { IVORY } else { RUST },
+            if f.a { IVORY } else { RED_CLOTH },
             [0.0, 0.17, 0.04],
         ),
         part(
             Secondary(Spring::Back),
             Bevel(0.38, 0.65, 0.24, 0.035),
-            if f.b { VIOLET } else { RUST },
+            if f.b { CHARCOAL } else { RED_CLOTH },
             [0.0, 0.20, -0.22],
         ),
         part(
@@ -61,7 +61,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Prop(Socket::WeaponR),
             Cyl(0.055, if f.a && f.t2 { 0.60 } else { 0.46 }),
-            RUST,
+            RED_CLOTH,
             [0.0, 0.02, if f.a && f.t2 { 0.30 } else { 0.23 }],
         )
         .rot([90.0, 0.0, 0.0]),
@@ -79,17 +79,17 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             [0.0, -0.06, 0.05],
         ),
         part(Body(Chest), Cyl(0.059, 0.014), BRASS, [-0.09, 0.25, 0.112]).rot([90.0, 0.0, 0.0]),
-        part(Body(Chest), Cyl(0.045, 0.014), ALLY, [-0.09, 0.25, 0.124]).rot([90.0, 0.0, 0.0]),
+        part(Body(Chest), Cyl(0.045, 0.014), LINEN, [-0.09, 0.25, 0.124]).rot([90.0, 0.0, 0.0]),
         part(
             Body(Head),
             Bevel(0.22, 0.065, 0.24, 0.012),
-            RUST,
+            RED_CLOTH,
             [0.0, 0.11, 0.0],
         ),
         part(
             Body(Hips),
             Frustum(0.16, 0.21, 0.24),
-            VIOLET,
+            CHARCOAL,
             [0.0, -0.11, -0.025],
         )
         .scale([1.0, 1.0, 0.72]),
@@ -113,14 +113,22 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Prop(Socket::WeaponR),
             Cyl(0.022, 0.014),
-            GLOW,
+            FLAME_ORANGE,
             (bore + Vec3::Z * 0.008).to_array(),
         )
         .rot([90.0, 0.0, 0.0])
         .glow(),
     ]);
     for s in [-1.0, 1.0] {
-        v.push(part(Body(Head), Ball(0.025), GLOW, [s * 0.055, 0.025, 0.13]).glow());
+        v.push(
+            part(
+                Body(Head),
+                Ball(0.025),
+                FLAME_ORANGE,
+                [s * 0.055, 0.025, 0.13],
+            )
+            .glow(),
+        );
         v.push(part(
             Body(Chest),
             Box(0.035, 0.30, 0.035),
@@ -130,7 +138,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         v.push(part(
             Body(Chest),
             Box(if f.a { 0.18 } else { 0.13 }, 0.075, 0.17),
-            if f.a { IVORY } else { RUST },
+            if f.a { IVORY } else { RED_CLOTH },
             [s * 0.22, 0.18, 0.0],
         ));
         v.push(part(
@@ -143,7 +151,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             part(
                 Secondary(Spring::Back),
                 Cone(0.03, 0.09),
-                GLOW,
+                FLAME_ORANGE,
                 [s * 0.18, 0.57, -0.22],
             )
             .glow(),
@@ -153,7 +161,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
                 part(
                     Secondary(Spring::Back),
                     Box(0.07, 0.025, 0.03),
-                    GLOW,
+                    FLAME_ORANGE,
                     [s * 0.08, y, -0.35],
                 )
                 .glow(),
@@ -164,7 +172,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
                 part(
                     Prop(Socket::WeaponR),
                     Cyl(0.06, 0.12),
-                    LEAF,
+                    RED_CLOTH,
                     [s * 0.08, 0.02, 0.18],
                 )
                 .rot([90.0, 0.0, 0.0]),
@@ -189,7 +197,8 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         (0.15, -0.17, -0.12, 0.0),
     ] {
         v.push(
-            part(Prop(Socket::WeaponR), Cyl(0.025, 0.12), CHITIN, [x, y, z]).rot([0.0, 0.0, angle]),
+            part(Prop(Socket::WeaponR), Cyl(0.025, 0.12), CHARCOAL, [x, y, z])
+                .rot([0.0, 0.0, angle]),
         );
     }
     if f.a && f.t2 {

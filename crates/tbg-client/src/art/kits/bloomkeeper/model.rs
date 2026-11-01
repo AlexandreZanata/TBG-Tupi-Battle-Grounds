@@ -70,7 +70,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         );
     }
     v.push(
-        part(Body(Chest), Ball(0.065), ALLY, [0.10, 0.18, 0.13])
+        part(Body(Chest), Ball(0.065), LINEN, [0.10, 0.18, 0.13])
             .scale([0.7, 1.2, 0.25])
             .rot([0.0, 0.0, 15.0]),
     );

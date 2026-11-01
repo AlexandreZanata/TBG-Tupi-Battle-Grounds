@@ -79,21 +79,8 @@ fn torso(v: &mut Vec<PartSpec>, f: Form) {
             BRASS,
             [0.0, 0.035, 0.16],
         ),
-        // The fitted arm band and narrow belt tails remain team identifiers in every form.
-        part(
-            Body(UpperArmR),
-            Box(0.155, 0.075, 0.045),
-            ALLY,
-            [0.0, -0.09, 0.07],
-        ),
     ]);
     for s in [-1.0, 1.0] {
-        v.push(part(
-            Body(Hips),
-            Box(0.04, 0.19, 0.035),
-            ALLY,
-            [s * 0.13, -0.07, 0.18],
-        ));
         v.push(
             part(
                 Body(Chest),

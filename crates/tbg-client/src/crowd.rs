@@ -5,6 +5,7 @@ pub struct Body {
     pub id: u32,
     pub anchor_x: f32,
     pub radius: f32,
+    pub half_length: f32,
     pub facing: f32,
     pub ghost: bool,
 }
@@ -84,7 +85,7 @@ impl Solver {
 
         order.clear();
         order.extend(0..bodies.len());
-        let max_r = bodies.iter().map(|b| b.radius).fold(0.0, f32::max);
+        let max_r = bodies.iter().map(|b| b.half_length).fold(0.0, f32::max);
         for _ in 0..p.iterations {
             let px = |s: &[Offset], i: usize| bodies[i].anchor_x + s[i].dx;
             order.sort_unstable_by(|&a, &b| {
@@ -95,8 +96,8 @@ impl Solver {
             for oi in 0..order.len() {
                 let i = order[oi];
                 for &j in &order[oi + 1..] {
-                    if px(state, j) - px(state, i) > bodies[i].radius + max_r {
-                        break; // ninguém mais à frente pode encostar em i
+                    if px(state, j) - px(state, i) > bodies[i].half_length + max_r {
+                        break; // Later longitudinal envelopes cannot reach this body.
                     }
                     if bodies[i].ghost || bodies[j].ghost {
                         continue;
@@ -118,13 +119,15 @@ fn separate(bodies: &[Body], state: &mut [Offset], i: usize, j: usize, p: &Param
     let ex = (bj.anchor_x + state[j].dx) - (bi.anchor_x + state[i].dx);
     let ez = state[j].dz - state[i].dz;
     let min = bi.radius + bj.radius;
-    let d2 = ex * ex + ez * ez;
+    let longitudinal = bi.half_length + bj.half_length;
+    let ex_scaled = ex * min / longitudinal.max(min);
+    let d2 = ex_scaled * ex_scaled + ez * ez;
     if d2 >= min * min {
         return;
     }
     let d = d2.sqrt();
     let (nx, nz) = if d > 1e-4 {
-        (ex / d, ez / d)
+        (ex_scaled / d, ez / d)
     } else if bi.id < bj.id {
         (0.0, 1.0)
     } else {
@@ -192,6 +195,7 @@ mod tests {
             id,
             anchor_x: x,
             radius: 0.4,
+            half_length: 0.4,
             facing: 1.0,
             ghost: false,
         }

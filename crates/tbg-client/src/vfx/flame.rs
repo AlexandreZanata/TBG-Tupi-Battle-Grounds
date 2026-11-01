@@ -1,4 +1,4 @@
-//! Nozzle-bound spectral flame motion and the unchanged authoritative ground segment.
+//! Nozzle-bound orange/red flame motion and the unchanged authoritative ground segment.
 
 use super::{spawn, Motion, VfxAssets};
 use bevy::{light::NotShadowCaster, prelude::*};
@@ -26,7 +26,7 @@ pub fn profane_flame(
     spawn(
         commands,
         &assets.chip,
-        &assets.green,
+        &assets.fire,
         Vec3::new((start + end) * 0.5, 0.025, 0.0),
         Motion::Segment {
             size: Vec3::new((end - start).abs(), 0.018, 0.12),
@@ -37,11 +37,11 @@ pub fn profane_flame(
     let count = if crate::config::low_motion() { 4 } else { 8 };
     for piece in 0..count {
         let (mesh, material) = match piece {
-            0 => (&assets.spike, &assets.green),
-            1 => (&assets.spike, &assets.white),
+            0 => (&assets.spike, &assets.blood),
+            1 => (&assets.spike, &assets.orange),
             2 | 5 | 6 => (&assets.puff, &assets.gold),
             7 => (&assets.puff, &assets.soot),
-            _ => (&assets.puff, &assets.green),
+            _ => (&assets.puff, &assets.fire),
         };
         commands.spawn((
             Mesh3d(mesh.clone()),

@@ -64,7 +64,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     v.extend([part(
         Body(Chest),
         Box(0.18, 0.05, 0.05),
-        ALLY,
+        LINEN,
         [0.0, p.torso.y * 0.95, p.torso.z * 0.3],
     )]);
     if f.a {
@@ -81,7 +81,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         }
     }
     if f.a && f.t2 {
-        body::cape(&mut v, ALLY, 0.26, 0.42);
+        body::cape(&mut v, LINEN, 0.26, 0.42);
         v.push(
             part(
                 Body(Chest),
@@ -98,7 +98,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             v.push(part(
                 Body(shin),
                 Box(0.1, 0.03, 0.1),
-                ALLY,
+                LINEN,
                 [0.0, -0.05, 0.0],
             ));
         }

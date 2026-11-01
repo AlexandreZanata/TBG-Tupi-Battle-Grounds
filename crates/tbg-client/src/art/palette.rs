@@ -151,3 +151,6 @@ pub const UI: [Color; 8] = [
     AMBIENT_SKY,
     AMBIENT_GROUND,
 ];
+
+/// P71 furnace and flame accent, shared by the Pyre model and its effect.
+pub const FLAME_ORANGE: Color = hex(0xFF681F);

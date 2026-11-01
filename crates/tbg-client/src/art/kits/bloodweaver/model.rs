@@ -89,7 +89,7 @@ fn robe(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         part(
             Body(Chest),
             Box(0.08, t.y * 0.9, 0.02),
-            ALLY,
+            LINEN,
             [0.0, t.y * 0.45, t.x * 0.33],
         ),
     ]);

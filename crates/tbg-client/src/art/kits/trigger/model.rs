@@ -72,7 +72,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             [0.0, 0.18, -0.025],
         ),
         part(Body(Chest), Box(0.22, 0.055, 0.25), LINEN, [0.0, 0.27, 0.0]),
-        part(Body(Chest), Cone(0.08, 0.18), ALLY, [0.08, 0.15, 0.14]).rot([180.0, 0.0, -15.0]),
+        part(Body(Chest), Cone(0.08, 0.18), LINEN, [0.08, 0.15, 0.14]).rot([180.0, 0.0, -15.0]),
         part(
             Secondary(Spring::Back),
             Pill(0.04, 0.21),
@@ -139,7 +139,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
                 part(
                     Secondary(Spring::Tabard),
                     Box(0.10, 0.31, 0.035),
-                    ALLY,
+                    LINEN,
                     [s * 0.10, -0.12, -0.13],
                 )
                 .rot([0.0, 0.0, s * 8.0]),

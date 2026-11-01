@@ -87,7 +87,7 @@ fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             part(
                 Body(Chest),
                 Box(0.06, h * 1.1, 0.03),
-                ALLY,
+                LINEN,
                 [0.02, h * 0.5, p.torso.z * 0.46],
             )
             .rot([0.0, 0.0, -32.0]),
@@ -95,7 +95,7 @@ fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     }
     if f.t2 {
         body::greaves(v, STEEL);
-        let cape = if f.a { RED_CLOTH } else { ALLY };
+        let cape = if f.a { RED_CLOTH } else { LINEN };
         body::cape(v, cape, 0.3, 0.46);
     }
 }
@@ -176,7 +176,7 @@ fn poleaxe(v: &mut Vec<PartSpec>, f: Form) {
                 IRON,
                 [0.0, top - 0.04, 0.17],
             ));
-            v.push(part(w, Box(0.036, 0.48, 0.03), ALLY, [0.0, top - 0.04, 0.33]).glow());
+            v.push(part(w, Box(0.036, 0.48, 0.03), LINEN, [0.0, top - 0.04, 0.33]).glow());
             v.push(
                 part(w, Cone(0.04, 0.22), IRON, [0.0, top - 0.02, -0.16]).rot([-100.0, 0.0, 0.0]),
             );

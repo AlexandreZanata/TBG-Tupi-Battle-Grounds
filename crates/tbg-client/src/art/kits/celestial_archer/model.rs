@@ -81,12 +81,12 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             if f.b { NAVY } else { IVORY },
             [0.0, 0.14, 0.10],
         ),
-        part(Body(Chest), Box(0.22, 0.045, 0.25), ALLY, [0.0, 0.20, 0.0]).rot([0.0, 0.0, -30.0]),
+        part(Body(Chest), Box(0.22, 0.045, 0.25), LINEN, [0.0, 0.20, 0.0]).rot([0.0, 0.0, -30.0]),
         part(Prop(Socket::Back), Cyl(0.065, 0.28), NAVY, [0.0, 0.02, 0.0]).rot([0.0, 0.0, -15.0]),
         part(
             Prop(Socket::Back),
             Box(0.07, 0.20, 0.02),
-            ALLY,
+            LINEN,
             [0.0, 0.02, -0.07],
         ),
     ]);
