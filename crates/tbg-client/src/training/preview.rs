@@ -20,10 +20,13 @@ struct Model;
 #[derive(Resource, Default)]
 struct Preview {
     active: bool,
-    light: Option<Entity>,
+    stage: Option<Entity>,
     key: Option<(tbg_core::UnitKind, u8, u8, bool)>,
-    camera: Option<(Transform, Projection)>,
+    camera: Option<(Transform, Projection, DistanceFog)>,
     size: (f32, f32),
+    ambient: Option<GlobalAmbientLight>,
+    theme: Option<crate::arena::theme::Theme>,
+    clear: Option<Color>,
     clock: f32,
     clip: Option<Clip>,
     revision: u32,
@@ -31,14 +34,7 @@ struct Preview {
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<Preview>()
         .add_systems(Update, drag.run_if(in_state(GameState::Menu)))
-        .add_systems(
-            Last,
-            |state: Res<State<GameState>>, shell: Res<Shell>, mut clear: ResMut<ClearColor>| {
-                if *state.get() == GameState::Menu && shell.panel == Panel::Troops {
-                    clear.0 = Color::srgb_u8(14, 22, 29);
-                }
-            },
-        )
+        .add_systems(Last, backdrop)
         .add_systems(
             PostUpdate,
             show.before(crate::art::anim::animate)
@@ -52,12 +48,14 @@ fn show(
     mut commands: Commands,
     state: Res<State<GameState>>,
     shell: Res<Shell>,
-    c: Res<Catalog>,
+    mut c: ResMut<Catalog>,
     time: Res<Time>,
     mut preview: ResMut<Preview>,
     lib: Res<FigureLibrary>,
-    meshes: Res<Assets<Mesh>>,
-    mut camera: Single<(&mut Transform, &mut Projection), With<ArenaCamera>>,
+    assets: (ResMut<Assets<Mesh>>, ResMut<Assets<StandardMaterial>>),
+    arena: Res<crate::arena::ActiveArena>,
+    mut ambient: ResMut<GlobalAmbientLight>,
+    mut camera: Single<(&mut Transform, &mut Projection, &mut DistanceFog), With<ArenaCamera>>,
     window: Single<&Window>,
     mut clear: ResMut<ClearColor>,
     mut scenery: Query<&mut Visibility, With<crate::arena::ArenaScene>>,
@@ -70,6 +68,8 @@ fn show(
         ),
     >,
 ) {
+    let (mut meshes, mut materials) = assets;
+    let same_theme = preview.theme.is_none_or(|theme| theme == arena.0);
     let active = *state.get() == GameState::Menu && shell.panel == Panel::Troops;
     let changed = preview.active != active;
     preview.active = active;
@@ -81,9 +81,7 @@ fn show(
                 Visibility::Inherited
             };
         }
-        if active {
-            clear.0 = Color::srgb_u8(14, 22, 29);
-        }
+
         #[cfg(tbg_desktop)]
         for mut visible in &mut demo {
             *visible = if active {
@@ -94,14 +92,21 @@ fn show(
         }
     }
     if !active {
-        if let Some(light) = preview.light.take() {
-            commands.entity(light).try_despawn();
+        if changed {
+            // Reduced motion is a temporary inspection aid, not the next visit's playback mode.
+            c.reduced = false;
         }
-        if let Some((transform, projection)) = preview.camera.take() {
+        if let Some(stage) = preview.stage.take() {
+            commands.entity(stage).try_despawn();
+        }
+        if let Some((transform, projection, fog)) = preview.camera.take() {
             *camera.0 = transform;
             *camera.1 = projection;
+            if same_theme {
+                *camera.2 = fog;
+            }
             if *state.get() != GameState::Menu {
-                let (mut t, mut p) = camera.into_inner();
+                let (mut t, mut p, _) = camera.into_inner();
                 crate::camera::frame(&mut t, &mut p, window.width(), window.height());
             }
         }
@@ -110,24 +115,34 @@ fn show(
                 commands.entity(e).try_despawn();
             }
         }
+        if let Some(saved) = preview.ambient.take() {
+            if same_theme {
+                *ambient = saved;
+            }
+        }
+        if let Some(saved) = preview.clear.take() {
+            if same_theme {
+                clear.0 = saved;
+            }
+        }
         return;
     }
-    if preview.light.is_none() {
-        // Arena scenery owns its sunlight and is hidden in Troops. A local
-        // shadow-free key keeps the actual kit colors readable in this viewer.
-        preview.light = Some(
-            commands
-                .spawn((
-                    DirectionalLight {
-                        illuminance: 10_000.,
-                        shadow_maps_enabled: false,
-                        ..default()
-                    },
-                    Transform::from_xyz(11., 6., 7.).looking_at(Vec3::new(8., 1., 0.), Vec3::Y),
-                ))
-                .id(),
-        );
+    if preview.stage.is_none() {
+        preview.ambient = Some(ambient.clone());
+        preview.theme = Some(arena.0);
+        preview.clear = Some(clear.0);
+        preview.stage = Some(super::stage::spawn(
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+        ));
     }
+    clear.0 = super::stage::SKY;
+    *ambient = GlobalAmbientLight {
+        color: Color::srgb(0.66, 0.80, 0.92),
+        brightness: 700.,
+        ..default()
+    };
     let key = (c.selected, c.form.0, c.form.1, c.reduced);
     if preview.key != Some(key) {
         for (e, _, _) in &model {
@@ -145,14 +160,14 @@ fn show(
             &lib,
             c.selected,
             c.form,
-            Transform::from_xyz(8., 0.12, 0.),
+            Transform::from_xyz(8., super::stage::FLOOR, 0.),
             0,
             c.reduced,
         );
         commands.entity(root).insert(Model);
     }
     if preview.camera.is_none() {
-        preview.camera = Some((*camera.0, camera.1.clone()));
+        preview.camera = Some((*camera.0, camera.1.clone(), camera.2.clone()));
     }
     if preview.clip != Some(c.clip) || preview.revision != c.revision {
         preview.revision = c.revision;
@@ -163,14 +178,21 @@ fn show(
         preview.clock += time.delta_secs();
     }
     let (radius, height) = preview.size;
+    // Normalize only this event-free display actor; gameplay models retain their real scale.
+    let scale = (4.0 / height.max(0.1)).min(2.2 / radius.max(0.1));
     let tan = (crate::camera::FOV_Y * 0.5).tan();
     let aspect = window.width() / window.height().max(1.);
-    let distance = (radius / (tan * aspect * 0.28)).max(height / (tan * 0.70)) / c.zoom;
-    let centre = Vec3::new(8., height * 0.5, 0.);
-    let aim = centre - Vec3::Y * (distance * tan * 0.10);
-    *camera.0 = Transform::from_translation(aim + Vec3::new(0., 0.14, 1.).normalize() * distance)
+    let distance = (10.8_f32).max(6.4 / aspect) / c.zoom;
+    let aim = Vec3::new(8. + distance * tan * aspect * 0.025, 1.12, 0.);
+    *camera.0 = Transform::from_translation(aim + Vec3::new(0., 0.22, 1.).normalize() * distance)
         .looking_at(aim, Vec3::Y);
+    camera.2.color = super::stage::SKY;
+    camera.2.falloff = FogFalloff::Linear {
+        start: 19.,
+        end: 48.,
+    };
     for (_, mut transform, mut a) in &mut model {
+        transform.scale = Vec3::splat(scale);
         transform.rotation = Quat::from_rotation_y(c.yaw);
         let duration = a.duration(c.clip);
         let t = if c.reduced {
@@ -189,14 +211,14 @@ fn drag(
     mouse: Res<ButtonInput<MouseButton>>,
     window: Single<&Window>,
     shell: Res<Shell>,
+    viewport: Query<(&ComputedNode, &UiGlobalTransform), With<super::catalog::viewer::Viewport>>,
     mut c: ResMut<Catalog>,
 ) {
     let inside = shell.panel == Panel::Troops
         && window.cursor_position().is_some_and(|p| {
-            p.x > window.width() * 0.31
-                && p.x < window.width() * 0.65
-                && p.y > window.height() * 0.19
-                && p.y < window.height() * 0.66
+            viewport
+                .iter()
+                .any(|(node, t)| node.contains_point(*t, p * window.scale_factor()))
         });
     let dx: f32 = motion.read().map(|m| m.delta.x).sum();
     let dy: f32 = wheel.read().map(|m| m.y).sum();
@@ -208,5 +230,13 @@ fn drag(
     }
     if dy != 0. {
         c.zoom = (c.zoom + dy * 0.05).clamp(0.6, 1.7);
+    }
+}
+
+// Loading readiness also writes the sky during PostUpdate; keep the lab backdrop authoritative
+// only while its presentation is active, without changing arena loading behavior.
+fn backdrop(state: Res<State<GameState>>, shell: Res<Shell>, mut clear: ResMut<ClearColor>) {
+    if *state.get() == GameState::Menu && shell.panel == Panel::Troops {
+        clear.0 = super::stage::SKY;
     }
 }

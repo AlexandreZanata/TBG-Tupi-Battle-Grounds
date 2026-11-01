@@ -3,6 +3,7 @@
 pub(crate) mod catalog;
 mod preview;
 pub(crate) mod runtime;
+mod stage;
 mod trial_ui;
 
 use crate::{art::anim::Clip, GameState};
@@ -88,7 +89,8 @@ impl Default for Catalog {
             role: None,
             yaw: 0.,
             zoom: 1.0,
-            reduced: crate::config::reduced_motion(),
+            // The laboratory opens in playback mode; its toggle never inherits Result settings.
+            reduced: false,
             allies: [UnitKind::BoneBrute, UnitKind::Hexer, UnitKind::Archer]
                 .map(TrainingUnitSpec::base)
                 .to_vec(),
@@ -120,7 +122,7 @@ impl Catalog {
             x: None,
         }
     }
-    pub fn visible(&self) -> Vec<UnitKind> {
+    pub fn visible(&self, lang: crate::i18n::Lang) -> Vec<UnitKind> {
         let query = self.search.trim().to_lowercase();
         tbg_core::ALL_KINDS
             .into_iter()
@@ -129,7 +131,11 @@ impl Catalog {
                 let d = tbg_core::content::def(*kind);
                 self.faction.is_none_or(|f| f == d.faction)
                     && self.role.is_none_or(|r| r == d.archetype)
-                    && (query.is_empty() || d.name.to_lowercase().contains(&query))
+                    && (query.is_empty()
+                        || (d.name.to_lowercase().contains(&query)
+                            || crate::i18n::content::unit_name(lang, *kind)
+                                .to_lowercase()
+                                .contains(&query)))
             })
             .collect()
     }
@@ -155,6 +161,10 @@ pub fn plugin(app: &mut App) {
     runtime::plugin(app);
     preview::plugin(app);
     trial_ui::plugin(app);
+    app.add_systems(
+        PostUpdate,
+        catalog::arena_picture::cover.after(bevy::ui::UiSystems::Layout),
+    );
     app.add_systems(Update, invalidate.run_if(in_state(GameState::Menu)));
 }
 fn invalidate(catalog: Res<Catalog>, mut shell: ResMut<crate::ui::shell::Shell>) {

@@ -319,7 +319,13 @@ fn render(
                 ..default()
             };
             #[cfg(tbg_desktop)]
-            let body = page_node();
+            let body = {
+                let mut node = page_node();
+                if shell.panel == Panel::Troops {
+                    node.overflow = Overflow::clip();
+                }
+                node
+            };
             root.spawn((body, scroll, Body)).with_children(|body| {
                 #[cfg(feature = "ui-acceptance")]
                 if crate::config::url_param("capture_panel").is_some_and(|v| v.starts_with("p73-"))

@@ -1547,5 +1547,12 @@
   "p73.you": "Você",
   "p73.full_profile": "Perfil público completo",
   "p73.fixture": "FIXTURE VISUAL LOCAL · contas e dados de apresentação sintéticos",
-  "p73.connecting": "Conectando para enviar o convite…"
+  "p73.connecting": "Conectando para enviar o convite…",
+  "training.list_hint": "Selecione um campeão · role para explorar",
+  "training.no_results": "Nenhum campeão com estes filtros.",
+  "training.practice_hint": "Escolha a dificuldade e a arena para sua próxima partida de treino.",
+  "training.arena": "Arena de treino",
+  "training.reduced": "Movimento reduzido",
+  "training.reduced_on": "Movimento reduzido: ligado",
+  "training.reduced_off": "Movimento reduzido: desligado"
 }

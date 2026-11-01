@@ -75,3 +75,56 @@ pub(super) fn upgrade_node() -> Node {
         ..default()
     }
 }
+
+/// Identical Evolution/Fortification heading geometry, including the close affordance.
+pub(super) fn upgrade_header() -> Node {
+    Node {
+        width: percent(100),
+        justify_content: JustifyContent::SpaceBetween,
+        align_items: AlignItems::Center,
+        ..default()
+    }
+}
+pub(super) fn upgrade_close(action: super::super::UiAction) -> impl Bundle {
+    (
+        Node {
+            width: px(20),
+            height: px(20),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        action,
+        children![kit::heading("×", 14.)],
+    )
+}
+
+/// Equal flex shares account for the gap; a lone second-tier choice fills the row.
+pub(super) fn upgrade_choice() -> impl Bundle {
+    (
+        Node {
+            flex_grow: 1.,
+            flex_basis: px(0),
+            min_width: px(0),
+            min_height: px(55),
+            padding: UiRect::all(px(7)),
+            border: UiRect::all(px(1)),
+            border_radius: BorderRadius::all(px(5)),
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        BackgroundColor(INK),
+        BorderColor::all(GOLD),
+        super::super::UiAction::Disabled,
+        kit::buttons::Chrome {
+            enabled: false,
+            focused: false,
+        },
+        kit::buttons::Palette {
+            idle: INK,
+            hover: Color::srgb_u8(45, 57, 60),
+            pressed: Color::srgb_u8(28, 38, 43),
+            border: GOLD,
+        },
+    )
+}

@@ -1547,5 +1547,12 @@
   "p73.you": "You",
   "p73.full_profile": "Full public profile",
   "p73.fixture": "LOCAL VISUAL FIXTURE · synthetic accounts and presentation data",
-  "p73.connecting": "Connecting to send the invitation…"
+  "p73.connecting": "Connecting to send the invitation…",
+  "training.list_hint": "Select a champion · scroll to explore",
+  "training.no_results": "No champions match these filters.",
+  "training.practice_hint": "Choose a difficulty and arena for your next practice match.",
+  "training.arena": "Training arena",
+  "training.reduced": "Reduced motion",
+  "training.reduced_on": "Reduced motion: on",
+  "training.reduced_off": "Reduced motion: off"
 }
