@@ -403,15 +403,18 @@ heavy/full-suite checks only on a separate explicit owner request.
 
 ## Champion visual identity and animation polish (owner request, 2026-10-31)
 
-**P70 — 46 art source candidates implemented; phase incomplete**, on
-`phase/p70-champion-visual-polish`. The baseline has 630 renderer originals;
-there are no after captures yet. Candidate compilation/consolidation was
-deferred after two shared-lock-busy results. Trident range remains 1100,
-and Longaxe/Bone Brute B2 inherited support grips remain acceptance blockers.
-The isolated work front preserves the required base and newer owner
-validation policy. See the [execution review](planning/P70-VISUAL-REVIEW.md)
-and [evidence index](planning/P70-VISUAL-EVIDENCE.json); pending cells and
-owner approvals do not count as completed art.
+**P70 — all 46 candidates compiled, rendered and sampled-reviewed; phase
+acceptance incomplete**, on `phase/p70-champion-visual-polish`. Evidence includes
+630 before PNGs, 460 selected after sheets, twelve normal-rate motion videos
+covering 230 forms, all 46 Base match-distance lineups, 53 actual Troops
+previews and both-seat P63 fixtures. Longaxe/Bone Brute grip, Shatterback
+geometry, gallery Victory ownership and dark Troops lighting were repaired.
+Trident's authoritative range candidate is 2000 (from 1100), with passing
+boundary regressions; D-33 and owner balance approval remain pending.
+Linux build, cached WASM check and targeted regressions passed. Continuous
+all-form/live/auxiliary acceptance, browser/Windows runtime and owner look/fun
+approval remain open. See the [execution review](planning/P70-VISUAL-REVIEW.md)
+and [renderer review pack](planning/p70-review/README.md).
 Read [the executable phase](phases/P70-champion-visual-identity-polish.md),
 [the 46-champion identity/capture manifest](planning/P70-VISUAL-MANIFEST.json)
 and [the execution prompt](planning/P70-EXECUTION-PROMPT.md).

@@ -1,5 +1,10 @@
 # P70 next cohort — Monsters, Celestials and Insects
 
+> **Consolidation update (2026-11-01):** All twelve candidates compiled and have selected five-form static, B2 temporal, Base lineup and actual Troops review. Full live/continuous clearance and owner acceptance remain open.
+> See [current validation and evidence](P70-VISUAL-REVIEW.md).
+> The original work-front account below is historical; its pending-build/render
+> statements do not describe the consolidated candidate.
+
 Status: all twelve individual source implementations completed; final runtime
 and visual review pending. Source and baseline preparation completed. No final render, runtime acceptance or owner visual approval yet.
 The pilot consolidation lock returned 75; its runtime gate remains deferred.

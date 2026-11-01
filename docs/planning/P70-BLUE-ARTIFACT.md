@@ -1,5 +1,10 @@
 # P70 S1 — Blue rectangle diagnosis and fitted heraldry
 
+> **Consolidation update (2026-11-01):** The fitted heraldry was inspected in selected after images, motion samples and actual Troops previews. Team identification remains visible. This confirms the diagnosed tabard repair in those samples, not universal all-view clearance. Owner acceptance remains open.
+> See [current validation and evidence](P70-VISUAL-REVIEW.md).
+> The original work-front account below is historical; its pending-build/render
+> statements do not describe the consolidated candidate.
+
 **Status:** shared clothing correction implemented; final-renderer inspection,
 physical secondary motion, transitions and owner aesthetic approval pending.
 This is not a claim that every reported opening across the roster has been

@@ -1,5 +1,10 @@
 # P70 — Machines and Plants work front
 
+> **Consolidation update (2026-11-01):** All seventeen candidates compiled and have selected five-form static, B2 temporal, Base lineup and actual Troops review. Shatterback head/life clips and four preview shell plates were repaired. Conditional auxiliaries/live effects and owner acceptance remain open.
+> See [current validation and evidence](P70-VISUAL-REVIEW.md).
+> The original work-front account below is historical; its pending-build/render
+> statements do not describe the consolidated candidate.
+
 Status: all 17 champion implementations complete at source level; runtime,
 after captures and owner visual approval remain pending. This report records
 changes, not an aesthetic or gameplay verification pass.

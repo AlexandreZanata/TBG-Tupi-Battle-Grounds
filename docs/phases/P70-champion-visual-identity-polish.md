@@ -1,7 +1,8 @@
 # P70 — Champion identity, bespoke animation and 3D polish
 
-**Status:** all 46 champion art source candidates implemented locally; final
-compilation/evidence, Trident range change and owner approval pending.
+**Status:** all 46 candidates compiled, rendered and individually sampled-reviewed.
+Trident range 2000 is implemented as Proposed. Full visual/live acceptance, D-33,
+browser/Windows runtime and owner approval remain pending.
 See [the execution review](../planning/P70-VISUAL-REVIEW.md).
 **Owner requests:** 2026-10-31, including the follow-up requiring unique
 characters, stronger individual colors, personalized animation and the

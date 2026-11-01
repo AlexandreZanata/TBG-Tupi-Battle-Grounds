@@ -1,5 +1,10 @@
 # P70 Humans and Undead continuation
 
+> **Consolidation update (2026-11-01):** All fourteen candidates compiled and have selected five-form static, B2 temporal, Base lineup and actual Troops review. Longaxe/Bone Brute B2 grips and Longaxe ground penetration were repaired and targeted diagnostics passed. Full live/continuous clearance and owner acceptance remain open.
+> See [current validation and evidence](P70-VISUAL-REVIEW.md).
+> The original work-front account below is historical; its pending-build/render
+> statements do not describe the consolidated candidate.
+
 **Scope:** Shieldbearer, Archer, Longaxe, Farwatch, Drumguard, Smuggler,
 Trigger, RattleTick, BoneBrute, Hexer, BloodFurnace, Bloodweaver,
 Puppetmaster and Crowcaller. This front owns only those kits and this report.

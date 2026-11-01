@@ -1,5 +1,10 @@
 # P70 Trident pilot
 
+> **Consolidation update (2026-11-01):** Five-form static and B2 temporal samples, Base lineup, actual Troops and both-seat live recordings now exist. Generated dimensions and grip/clearance diagnostics passed. Actual range is Proposed 2000, ruleset 3; boundary tests passed. Close-range live contact/axis readability, D-33 and owner approval remain open.
+> See [current validation and evidence](P70-VISUAL-REVIEW.md).
+> The original work-front account below is historical; its pending-build/render
+> statements do not describe the consolidated candidate.
+
 **Status:** art implementation ready for targeted consolidation; no after-render,
 compiled result, measured range candidate or owner visual approval yet. The
 immutable 46-champion static baseline gate completed before these edits.

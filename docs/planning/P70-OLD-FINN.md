@@ -1,5 +1,10 @@
 # P70 pilot — Old Finn
 
+> **Consolidation update (2026-11-01):** Five-form static/motion, actual Troops and A2/A plus B2/B live samples are recorded. Fish regressions passed; the B2 fish/tail is visible in flight. Full five-form live growth/Echo and owner acceptance remain open.
+> See [current validation and evidence](P70-VISUAL-REVIEW.md).
+> The original work-front account below is historical; its pending-build/render
+> statements do not describe the consolidated candidate.
+
 Status: implemented candidate; final renderer inspection, live effects evidence,
 focused regressions and owner aesthetic approval remain pending.
 

@@ -1,5 +1,10 @@
 # P70 Pyre Warden pilot
 
+> **Consolidation update (2026-11-01):** Five-form static/motion, actual Troops and both-seat live trials are recorded. The jet is thicker with upright green/gold tongues; the endpoint regression passed. Standard/Low event-driven samples were inspected; crowded flame readability and owner acceptance remain open.
+> See [current validation and evidence](P70-VISUAL-REVIEW.md).
+> The original work-front account below is historical; its pending-build/render
+> statements do not describe the consolidated candidate.
+
 **Status: implementation candidate; final renderer/live-event review pending.**
 
 ## Identity and observed baseline
