@@ -9,7 +9,6 @@ use tbg_core::StrongholdKind;
 #[derive(Component)]
 pub(super) struct TowerPiece {
     pub own: bool,
-    pub hide_below: f32,
 }
 
 /// Show each flag while its tower is Classic and above its HP threshold.
@@ -34,7 +33,7 @@ pub(super) fn damage_states(
             (true, 1.0),
             |[own, enemy]| if piece.own { own } else { enemy },
         );
-        let want = if classic && fraction > piece.hide_below {
+        let want = if classic && fraction > 0.0 {
             Visibility::Inherited
         } else {
             Visibility::Hidden

@@ -9,6 +9,7 @@ mod aura;
 mod bastion;
 mod classic;
 mod command;
+mod damage;
 mod gallery;
 mod gunners;
 mod motion;
@@ -40,6 +41,8 @@ pub(super) fn plugin(app: &mut App) {
                 motion::fire,
                 aim::track,
                 motion::animate,
+                damage::visibility,
+                damage::effects,
             )
                 .chain(),
         )
@@ -52,7 +55,7 @@ pub(crate) struct Look {
     pub kind: StrongholdKind,
     pub tier: u8,
     pub branch: u8,
-    /// 0 above 66 % HP, 1 down to 33 %, 2 below.
+    /// Completed five-percent losses, 0 intact through 20 destroyed.
     pub damage: u8,
 }
 
@@ -83,14 +86,7 @@ impl Look {
 /// The three damage states: 2 at <= 1/3 of `max_hp`, 1 at <= 2/3, else 0.
 /// `max_hp` is the kind's own, after Fortification.
 pub(crate) fn damage_level(hp: i32, max_hp: i32) -> u8 {
-    let (hp, max) = (i64::from(hp), i64::from(max_hp.max(1)));
-    if 3 * hp <= max {
-        2
-    } else if 3 * hp <= 2 * max {
-        1
-    } else {
-        0
-    }
+    damage::stage(hp, max_hp)
 }
 
 /// Every piece of a kind and form, before damage.
@@ -107,6 +103,7 @@ fn pieces(kind: StrongholdKind, form: Form) -> Vec<Piece> {
 }
 
 /// The pieces a look shows: those its damage has not taken yet.
+#[cfg(test)]
 fn visible(look: Look) -> impl Iterator<Item = Piece> {
     pieces(look.kind, look.form())
         .into_iter()
@@ -126,6 +123,7 @@ pub(crate) struct Tower {
     /// Seconds since the last shot, and shots so far.
     since: f32,
     shots: u32,
+    orders: std::collections::VecDeque<AimTarget>,
     /// What the tower aims at, seconds since its last order, and how long
     /// an ordered shot has waited for the turret.
     target: Option<AimTarget>,
@@ -146,6 +144,7 @@ impl Tower {
             turret: None,
             since: f32::MAX,
             shots: 0,
+            orders: std::collections::VecDeque::new(),
             target: None,
             idle: 0.0,
             pending: None,
@@ -192,7 +191,9 @@ fn spawn_towers(
             &mut tower,
             Look::CLASSIC,
         );
-        commands.entity(root).insert(tower);
+        commands
+            .entity(root)
+            .insert((tower, damage::Effects::default()));
     }
 }
 
@@ -214,7 +215,18 @@ fn sync_looks(
     for (root, mut tower) in &mut towers {
         let i = if tower.own { me } else { 1 - me };
         let look = Look::from_view(&v.strongholds[i], v.stronghold_hp[i]);
-        if tower.live && tower.look != Some(look) {
+        if !tower.live || tower.look == Some(look) {
+            continue;
+        }
+        let same_form = tower.look.is_some_and(|old| {
+            old.kind == look.kind
+                && old.tier == look.tier
+                && old.branch == look.branch
+                && !(old.damage == 20 && look.damage < 20)
+        });
+        if same_form {
+            tower.look = Some(look);
+        } else {
             dress(&mut commands, &mut art, &mut meshes, root, &mut tower, look);
         }
     }
@@ -230,17 +242,31 @@ fn dress(
     look: Look,
 ) {
     commands.entity(root).despawn_related::<Children>();
-    for piece in visible(look) {
+    for piece in pieces(look.kind, look.form()) {
         let at = piece.placed(tower.own);
         let mut child = commands.spawn((
             Mesh3d(art.mesh(piece.def, tower.own, meshes)),
             MeshMaterial3d(art.material.clone()),
             at,
             ChildOf(root),
+            damage::Wear {
+                show: 0,
+                hide: piece.lost,
+            },
         ));
         if let Some(motion) = piece.motion {
             child.insert(Moving { motion, rest: at });
         }
+    }
+    for (piece, wear) in damage::regions(look.kind) {
+        commands.spawn((
+            Mesh3d(art.mesh(piece.def, tower.own, meshes)),
+            MeshMaterial3d(art.material.clone()),
+            piece.placed(tower.own),
+            Visibility::Hidden,
+            wear,
+            ChildOf(root),
+        ));
     }
     if look.kind == StrongholdKind::Command {
         aura::spawn(commands, art, meshes, root, tower.own, look.form(), SETBACK);

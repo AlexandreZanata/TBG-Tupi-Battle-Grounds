@@ -39,7 +39,7 @@ pub(super) fn spawn(
     let damage = config::url_param("damage")
         .and_then(|d| d.parse::<u8>().ok())
         .unwrap_or(0)
-        .min(2);
+        .min(20);
     let mut place = |kind, (tier, branch), x: f32, z: f32| {
         let look = Look {
             kind,
@@ -56,7 +56,9 @@ pub(super) fn spawn(
             ))
             .id();
         dress(&mut commands, &mut art, &mut meshes, root, &mut tower, look);
-        commands.entity(root).insert(tower);
+        commands
+            .entity(root)
+            .insert((tower, super::damage::Effects::default()));
     };
     for (row, kind) in StrongholdKind::SELECTABLE.into_iter().enumerate() {
         for (col, form) in FORMS.into_iter().enumerate() {

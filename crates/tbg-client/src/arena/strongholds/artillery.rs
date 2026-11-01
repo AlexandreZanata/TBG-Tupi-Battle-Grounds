@@ -121,25 +121,25 @@ pub(super) fn pieces(form: Form) -> Vec<Piece> {
             .aimed()
             .moving(Motion::Kick(gun(form).kick)),
         gear_at(-0.32, 1.04, 0.36),
-        whole(&PARAPET).lost(1),
+        whole(&PARAPET).lost(7),
     ];
     match form {
-        Form::A1 => p.push(whole(&SANDBAGS).lost(2).aimed()),
+        Form::A1 => p.push(whole(&SANDBAGS).lost(14).aimed()),
         Form::A2 => p.extend([
-            whole(&SANDBAGS).lost(2).aimed(),
+            whole(&SANDBAGS).lost(14).aimed(),
             whole(&BRACING),
             whole(&RECOIL_SLED).aimed().moving(Motion::Swivel),
         ]),
         Form::B1 => p.extend([
-            whole(&HOPPER).lost(2).aimed().moving(Motion::Swivel),
+            whole(&HOPPER).lost(14).aimed().moving(Motion::Swivel),
             gear_at(-0.32, 1.04, -0.36),
         ]),
         Form::B2 => p.extend([
-            whole(&HOPPER).lost(2).aimed().moving(Motion::Swivel),
+            whole(&HOPPER).lost(14).aimed().moving(Motion::Swivel),
             gear_at(-0.32, 1.04, -0.36),
-            whole(&MAGAZINE).lost(2).aimed(),
+            whole(&MAGAZINE).lost(14).aimed(),
             piece(&FLYWHEEL, along_z(-0.62, 1.3, 0.3))
-                .lost(1)
+                .lost(7)
                 .mirrored()
                 .moving(Motion::Notch(TOOTH * 0.5)),
         ]),
@@ -150,7 +150,7 @@ pub(super) fn pieces(form: Form) -> Vec<Piece> {
 
 fn gear_at(x: f32, y: f32, z: f32) -> Piece {
     piece(&GEAR, along_z(x, y, z))
-        .lost(2)
+        .lost(14)
         .mirrored()
         .moving(Motion::Notch(TOOTH))
 }

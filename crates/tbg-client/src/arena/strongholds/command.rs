@@ -57,27 +57,27 @@ const DECK: f32 = 1.5;
 const POLE: Vec3 = Vec3::new(0.45, DECK, -0.35);
 
 pub(super) fn pieces(form: Form) -> Vec<Piece> {
-    let mut p = vec![whole(&TOWER), whole(&PLATFORM).lost(2)];
+    let mut p = vec![whole(&TOWER), whole(&PLATFORM)];
     p.push(
         if form.a() {
             whole(&WAR_STANDARD)
         } else {
             whole(&STANDARD)
         }
-        .lost(1),
+        .lost(7),
     );
     if form.a() {
         p.push(whole(&WAR_ARMS));
     }
     if form == Form::A2 {
-        p.push(whole(&SUPREME_SYMBOL).lost(1));
-        p.push(whole(&SUPREME_BANNERS).lost(2));
+        p.push(whole(&SUPREME_SYMBOL).lost(7));
+        p.push(whole(&SUPREME_BANNERS).lost(14));
     }
     if form.b() {
         p.push(whole(&OUTPOST).aimed());
     }
     if form == Form::B2 {
-        p.push(whole(&OBSERVATORY).lost(1).aimed());
+        p.push(whole(&OBSERVATORY).lost(7).aimed());
     }
     p
 }

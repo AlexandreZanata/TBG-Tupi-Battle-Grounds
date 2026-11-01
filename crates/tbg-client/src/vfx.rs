@@ -88,6 +88,7 @@ mod effects;
 pub(crate) mod flame;
 pub mod impacts;
 pub mod shots;
+pub(crate) mod wear;
 pub use effects::{evolve, heal, puff, sparks, splash, synergy};
 pub use flame::profane_flame;
 

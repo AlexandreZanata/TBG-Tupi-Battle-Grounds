@@ -10,7 +10,7 @@ use bevy::prelude::*;
 
 /// Damage level at which a piece disappears: 1 hides at <= 66 % HP, 2 at
 /// <= 33 %; `NEVER` keeps the kind readable on a nearly dead tower.
-pub(super) const NEVER: u8 = 3;
+pub(super) const NEVER: u8 = 21;
 
 /// One reusable part: its primitives are built for a team color on demand.
 /// The name is the cache key, so it must be unique.
