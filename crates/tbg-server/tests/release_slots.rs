@@ -36,6 +36,7 @@ async fn slot(db: &PathBuf, name: &str) -> Slot {
         login_per_ip_min: 1_000,
         api_per_ip_min: 10_000,
         reconnect_secs: 3,
+        pause_secs: 0,
         db: Some(db.clone()),
         slot: Some(name.into()),
         generation: format!("g{name}"),

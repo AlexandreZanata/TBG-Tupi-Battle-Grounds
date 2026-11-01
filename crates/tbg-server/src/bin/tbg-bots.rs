@@ -2,7 +2,7 @@
 //! real WebSockets and report completion, RTT, view gaps, reconnects.
 //!
 //! `tbg-bots --url ws://127.0.0.1:8080/ws --matches N [--delay-ms D]
-//!   [--jitter-ms J] [--chaos-pct P] [--ramp-ms R] [--bots B] [--accounts]
+//!   [--jitter-ms J] [--chaos-pct P] [--chaos-silent] [--ramp-ms R] [--bots B] [--accounts]
 //!   [--ranked] [--spectators S]`
 //! `--spectators S` runs S anonymous spectators beside the bots (P47).
 //! Exit code 1 if any bot failed.
@@ -23,6 +23,8 @@ struct Args {
     delay_ms: u64,
     jitter_ms: u64,
     chaos_pct: u32,
+    /// P71: chaos drops keep the socket open but silent (a lost network).
+    chaos_silent: bool,
     ramp_ms: u64,
     /// Override the bot count (default 2 × matches), e.g. 1 to face a browser.
     bots: Option<u64>,
@@ -43,6 +45,7 @@ fn args() -> Args {
         delay_ms: 0,
         jitter_ms: 0,
         chaos_pct: 0,
+        chaos_silent: false,
         ramp_ms: 20,
         bots: None,
         accounts: false,
@@ -57,6 +60,9 @@ fn args() -> Args {
         .filter(|arg| {
             if arg == "--accounts" {
                 a.accounts = true;
+                false
+            } else if arg == "--chaos-silent" {
+                a.chaos_silent = true;
                 false
             } else if arg == "--ranked" {
                 // Ranked play needs accounts; one flag turns both on.
@@ -113,6 +119,7 @@ async fn main() {
         if rng.below(100) < a.chaos_pct {
             opts.drop_after = Some(Duration::from_secs(u64::from(20 + rng.below(41))));
             opts.rejoin_after = Some(Duration::from_secs(5));
+            opts.silent_drop = a.chaos_silent;
         }
         tasks.push(tokio::spawn(play_one(opts, i + 1)));
         tokio::time::sleep(Duration::from_millis(a.ramp_ms)).await;
