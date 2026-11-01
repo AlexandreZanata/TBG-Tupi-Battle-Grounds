@@ -74,7 +74,7 @@ Commands (all `--offline --locked`, Rust tests with `--test-threads=1`):
 - `cargo test -p tbg-server --test arenas`: 2 passed, including shared assignment and reconnect.
 - `cargo test -p tbg-client --bin tbg-client arena`: 11 passed; 156 filtered out. Repeated switches include all eight themes with one sun and no entity leak.
 - `cargo check -p tbg-client --bin tbg-client --target wasm32-unknown-unknown`: passed in4.49s with two pre-existing unused gallery-field/constant warnings.
-- Client test compilation had one existing unused `figure/gallery::clear` method warning.
+- Client test compilation had one existing unused `visuals/layout::Layout::clear` method warning.
 - `cargo fmt -p tbg-core -p tbg-client -p tbg-server` and `git diff --check`: passed.
 - Node focused bilingual modifier descriptions: passed. Full thumbnail-existence check awaits actual renderer exports.
 
@@ -85,3 +85,39 @@ Browser rendering/performance, full suite and D-33 balance gate remain deferred.
 The source PNG references were hash-checked and `git check-ignore` confirms all
 three are excluded from git. Protocol30 requires a matching online server;
 local Practice does not depend on a public deployment.
+
+
+### Renderer exports and catalog assets
+
+Native debug render build at source `fdd898fd227704a29ff79764abfd91df742e55e3`
+passed (`cargo build --offline --locked -p tbg-client --bin tbg-client`,15.22s),
+under the same shared lock, CARGO_BUILD_JOBS=2 and approved waiting exception.
+Its frozen binary/receipt live in ignored `.local/three-arenas-evidence/candidate-fdd898f/`.
+
+First diagnostic captures inherited Wayland and had inconsistent window sizes;
+they were excluded from thumbnail exports. The corrected runner removes
+WAYLAND_DISPLAY/WAYLAND_SOCKET, uses Xvfb1920x1080 and isolated TBG_DATA_DIR per
+arena. All three corrected PNGs are1920x1080, boot_ready=true, scene_waiting=false,
+pending_images=0, pending_texts=0, failed_images=0, with no panic. These are actual
+renderer outputs, not reference-image backgrounds or mocked geometry.
+
+Measured arena triangles (existing shared geometry included; no fixed D-30 cap):
+
+- Celestial: props11,564; total24,834.
+- Clockwork: props8,432; total21,924 including the three animated gears.
+- Desert: props19,608; total30,856.
+
+The new640x360 WebP catalog assets are exports of those corrected captures.
+`node --test crates/tbg-client/tests/arenas.test.js` passed (exit0), covering
+all eight identities, image existence, combined/signed effects and both locales.
+Original owner PNGs remain ignored and are absent from the staged tree.
+Capture manifests, full images and runtime logs stay local in
+`.local/three-arenas-evidence/v2/`. No frame-rate, browser runtime or balance
+acceptance is inferred from these stills. The native installation build follows
+thumbnail generation so its boot-art manifest includes the three new paths.
+
+Catalog previews exported from the game:
+
+![Celestial Citadel](../../crates/tbg-client/assets/arenas/celestial.webp)
+![Clockwork Bastion](../../crates/tbg-client/assets/arenas/clockwork.webp)
+![Desert Relics](../../crates/tbg-client/assets/arenas/desert.webp)
