@@ -12,7 +12,7 @@ Do not overwrite the owner's current worktree or P70 originals.
 
 ## 1. Owner outcome and scope
 
-The owner reports Trident's and Whisperer's HP bars entering their bodies,
+The owner reports Trident's, Whisperer's and Bonehorn's HP bars entering their bodies,
 Rattle & Tick's weapon clipping through the ground, redundant blue
 team bands, hard-to-read Evolution cubes and buggy tower shots. They request
 bright yellow outlined Evolution stars, red/orange flame, a white/red/black
@@ -70,6 +70,15 @@ The selected unit is Base Rattle & Tick; the owner reports its weapon entering
 the ground. Preserve this frame and reproduce the motion before attributing
 it to a particular clip, socket, pivot or IK constraint. The club model and
 pose sources are `art/kits/rattle_tick/{model,mod}.rs`.
+
+Additional owner Bonehorn report:
+`/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_07-53-42.png`,
+1920 × 1080, SHA-256
+`e21aa4676033ae7341a99b37093ce7dfe8e782ef4bdda8b640bfa2a8018d1104`.
+The selected Base Bonehorn's HP bar is partly covered by its tall back armor.
+The owner also reports a diagonal-looking walk; the still shows its oblique
+body orientation but cannot establish its trajectory. Verify body facing and
+foot motion against actual displacement in a recording.
 
 Confirmed source limitations on P70:
 
@@ -149,12 +158,14 @@ no old capture is relabeled as new, and missing evidence is explicit.
    accessible shape distinction; where absent, author a subtle solid/notched
    ring difference using shared geometry and verify both at match distance.
 
-Acceptance: Trident and Whisperer Base/A1/A2/B1/B2 bars clear their bodies
+Acceptance: Trident, Whisperer and Bonehorn Base/A1/A2/B1/B2 bars clear their bodies
 on both sides during Idle/Walk/primary action/Evolve. For Whisperer, include
 the floating body's upper envelope, hood/attachments and hover motion; the
 bar must stay stable and clear without clipping the name label or Evolution
 stars. Reproduce the selected Base case from the second owner screenshot.
-Check the other 44 champions' five-form envelopes with
+For Bonehorn, include the highest back armor/carapace and its gait bob,
+not only the head or generic humanoid height.
+Check the other 43 champions' five-form envelopes with
 existing evidence plus affected captures. Base/one/two-star transitions,
 reconnect, names, statuses, passenger overheads and death stay consistent.
 No need to build a general-purpose HUD framework.
@@ -242,6 +253,40 @@ at consolidation because this step changes the previously validated pose.
 Record before/after tip/shaft paths, event timestamps, spacing and sampling
 limits. Current range 2000 remains Proposed under P70; this is not permission
 to increase range again, change movement or delay the opponent's approach.
+
+### S1d — Bonehorn straight-facing locomotion and overhead clearance
+
+1. Make Bonehorn a mandatory S1 HP-anchor regression alongside Trident and
+   Whisperer. Inspect `art/kits/bonehorn/{model,mod}.rs` and the projected
+   whole-body silhouette, including the tall back armor in all five forms.
+   Place its HP bar above that envelope through the complete walking bob,
+   Idle and Evolution; keep the name/stars clear and the anchor stable.
+2. Reproduce the apparent diagonal walk while logging/rendering the unit's
+   actual displacement and body forward axis. The shared `visuals.rs::yaw`
+   deliberately presents units obliquely (65/-65 degrees), and Bonehorn's
+   current Walk poses do not explicitly align the body root to travel.
+   Treat this as a source lead, not proof of a diagonal simulation path.
+3. Align Bonehorn's visual longitudinal body axis, head/horn and gait with
+   its actual direction of advance down BattleLine. Keep the feet stepping
+   along that same axis rather than sideways under a rotated torso. Apply
+   the smallest kit-specific orientation correction using existing figure/
+   pose seams; do not rotate the shared camera or change every other kit's
+   facing to fix one creature. Preserve the four-legged weight and stance.
+4. Handle Walk-to-Idle/attack/recovery smoothly, with correct mirrored facing
+   on both sides, no double yaw, sudden spin, foot sliding or reversal. Keep
+   the bar billboard readable after the corrected visual rotation and check
+   horn/body/ground clearance during contact. Actual targeting and movement
+   remain authoritative; do not change lane position, speed, spacing, range,
+   stats, hitboxes or model size to disguise the problem.
+5. Record normal-speed Base/A1/A2/B1/B2 approach and stop/attack transitions
+   on both sides. Add a focused `p71_` orientation regression comparing the
+   rendered forward axis with travel under both mirrored parent frames,
+   plus the shared form-aware anchor check. Queue these for consolidation.
+
+Acceptance: Bonehorn visibly walks straight along its direction of advance,
+with coherent foot placement. The bar stays wholly above the tall armor in
+ordinary game views without name/star overlap. Before/after footage includes
+motion, not just a differently posed still; disclose finite sampling limits.
 
 ### S2 — Remove body team markers across the roster
 

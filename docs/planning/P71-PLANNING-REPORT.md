@@ -6,7 +6,7 @@ installer, saved preferences, combat values or running game were changed.
 
 ## Input and baseline
 
-Owner request: HP bar clearance for Trident and Whisperer; remove body team bands; brighter
+Owner request: HP bar clearance for Trident, Whisperer and Bonehorn; remove body team bands; brighter
 outlined yellow Evolution stars; white/red/black Pyre Warden and orange/red
 flame; polish all Stronghold performances, diagnose buggy shots and add
 cumulative breakage, fragments and fire for every 5% HP lost.
@@ -52,6 +52,17 @@ range, movement and damage remain unchanged. Actual approach/aim/blend
 recordings on both sides and all five forms are mandatory; fixed-target pose
 samples alone cannot establish the correction. This is planned, not a
 claimed runtime fix or a new mechanical cast window.
+
+Owner follow-up adds Bonehorn's HP-bar overlap and diagonal-looking walk:
+`/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_07-53-42.png`,
+1920 × 1080, SHA-256
+`e21aa4676033ae7341a99b37093ce7dfe8e782ef4bdda8b640bfa2a8018d1104`.
+S1 now includes its complete back-armor envelope and walking bob. New S1d
+requires visual body/foot alignment with actual travel, both sides and all
+five forms, including stop/attack transitions. The shared oblique figure yaw
+is a source lead to inspect; the screenshot does not prove diagonal gameplay
+movement. A kit-specific presentation repair must preserve authoritative
+movement, speed and spacing. These changes remain planned, not implemented.
 
 ## Findings that determine the plan
 
