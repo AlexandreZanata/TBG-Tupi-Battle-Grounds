@@ -18,6 +18,7 @@ pub fn button(text: impl Into<String>, action: Action, width: f32) -> impl Bundl
 #[derive(Component)]
 pub(crate) struct Pane(pub usize);
 
+pub(super) mod arena_picture;
 mod inspector;
 mod skin;
 pub(super) mod viewer;
@@ -204,6 +205,17 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
     });
 }
 fn practice(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: Lang) {
+    p.spawn(Node {
+        width: percent(100),
+        height: percent(100),
+        min_height: px(0),
+        flex_direction: FlexDirection::Column,
+        row_gap: px(8),
+        ..default()
+    })
+    .with_children(|p| practice_contents(p, c, assets, lang));
+}
+fn practice_contents(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: Lang) {
     p.spawn(kit::heading(lang.key("training.practice"), 24.));
     p.spawn(kit::muted(lang.key("training.practice_hint"), 13.));
     for (i, key) in ["easy", "medium", "hard", "impossible"]
@@ -230,21 +242,7 @@ fn practice(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lan
         note.spawn(kit::muted(lang.key("training.difficulty_note"), 12.));
     });
     p.spawn(kit::heading(lang.key("training.arena"), 19.));
-    let slug = c.arena.slug();
-    p.spawn((
-        Node {
-            width: percent(100),
-            height: px(92),
-            flex_shrink: 0.,
-            overflow: Overflow::clip(),
-            border_radius: BorderRadius::all(px(5)),
-            ..default()
-        },
-        ImageNode {
-            image_mode: NodeImageMode::Stretch,
-            ..ImageNode::new(assets.load(format!("arenas/{slug}.webp")))
-        },
-    ));
+    arena_picture::spawn(p, assets, c.arena);
     p.spawn(skin::control(
         format!("{}   >", content::arena_name(lang, c.arena)),
         Action::Arena,

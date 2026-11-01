@@ -166,3 +166,30 @@ observations, not the full-frame correspondence gate. Installed UI state was als
 inspected. Other champion/form/clip cases, Windows and desktop web observations
 remain queued for consolidation and same-source packaged comparison. No
 cross-platform parity is claimed. See [the report](../phases/LABORATORY-motion-toggle.md).
+
+### 2026-11-01 — Laboratory Practice arena cover and shared propagation audit
+
+Linux reference: the training arena picture absorbs the Practice pane's available
+height and preserves the source aspect ratio. A centered source crop fills the
+picture without squashing the arena; the arena selector and Play button follow it
+at the bottom of the pane. Update the crop after layout/image loading or resizing.
+No blank spacer is reserved beneath those two controls.
+
+Coverage: add `training-arena-cover-forest`, `training-arena-cover-volcanic`,
+`training-arena-cover-celestial` and `training-arena-cover-resize` for both languages
+and the contract viewport/DPI cases. Check source proportions, center framing,
+side crop, selector changes, button visibility and pane fill. The 768x382 original
+thumbnails and 640x360 newer arena thumbnails must both work without asset edits.
+
+Propagation audit: build.rs selects the same `tbg_desktop` presentation for Linux,
+Windows and wasm32. The entire training catalog, courtyard, model/camera/animation
+controls, local reduced-motion state and this arena crop have one implementation
+and shared assets. There are no platform-specific laboratory versions to port.
+The changes in this chat already propagate at source level to those three targets;
+no duplicate platform code or unrelated target rebuild is needed for propagation.
+This audit is not evidence of exact rendered parity.
+
+Linux native observations and installation are pending this work front. Same-source
+Windows and desktop-web full-frame/motion observations remain pending consolidation,
+including the previously registered laboratory and reduced-motion cases. No waiver
+or visual-parity claim follows from shared routing.

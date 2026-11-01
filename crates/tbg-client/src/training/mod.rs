@@ -161,6 +161,10 @@ pub fn plugin(app: &mut App) {
     runtime::plugin(app);
     preview::plugin(app);
     trial_ui::plugin(app);
+    app.add_systems(
+        PostUpdate,
+        catalog::arena_picture::cover.after(bevy::ui::UiSystems::Layout),
+    );
     app.add_systems(Update, invalidate.run_if(in_state(GameState::Menu)));
 }
 fn invalidate(catalog: Res<Catalog>, mut shell: ResMut<crate::ui::shell::Shell>) {

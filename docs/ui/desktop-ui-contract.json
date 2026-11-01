@@ -61,7 +61,11 @@
     "preview-motion-default",
     "preview-motion-reduced",
     "preview-motion-resumed",
-    "preview-motion-reentry"
+    "preview-motion-reentry",
+    "training-arena-cover-forest",
+    "training-arena-cover-volcanic",
+    "training-arena-cover-celestial",
+    "training-arena-cover-resize"
   ],
   "motion_screens": [
     "preview-dance",
