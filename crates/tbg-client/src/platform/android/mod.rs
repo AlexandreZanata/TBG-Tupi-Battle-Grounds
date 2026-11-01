@@ -1,6 +1,7 @@
 //! Android window, private settings and lifecycle services; simulation remains shared.
 
 mod lifecycle;
+pub mod render;
 pub mod services;
 use bevy::{
     prelude::*,

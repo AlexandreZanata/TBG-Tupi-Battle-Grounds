@@ -9,7 +9,7 @@ pub struct Pointer {
     last: Vec2,
     started: f64,
     cancelled: bool,
-    pub tap: Option<(Vec2, Vec2, bool)>,
+    pub taps: Vec<(Vec2, Vec2, bool)>,
     pub drag: Option<(Vec2, Vec2)>,
     pub touch_frame: bool,
 }
@@ -36,7 +36,8 @@ impl Pointer {
             }
             TouchPhase::Ended if self.owner == Some(id) => {
                 if !self.cancelled && point.distance(self.start) <= 12. {
-                    self.tap = Some((self.start, point, now - self.started >= 0.5));
+                    self.taps
+                        .push((self.start, point, now - self.started >= 0.5));
                 }
                 self.owner = None;
             }
@@ -59,7 +60,7 @@ pub fn collect(
     time: Res<Time<Real>>,
     window: Single<&Window>,
 ) {
-    pointer.tap = None;
+    pointer.taps.clear();
     pointer.drag = None;
     pointer.touch_frame = false;
     if !window.focused {
@@ -86,12 +87,12 @@ mod tests {
         // BR-AN05: each deliberate tap produces exactly one action, including quick repeats.
         let mut p = Pointer::default();
         for n in 0..2 {
-            p.tap = None;
             p.event(n, TouchPhase::Started, Vec2::ZERO, 0.);
             p.event(n, TouchPhase::Ended, Vec2::ZERO, 0.05);
-            assert!(p.tap.is_some_and(|tap| !tap.2));
+            assert!(p.taps.last().is_some_and(|tap| !tap.2));
             assert!(p.owner.is_none());
         }
+        assert_eq!(p.taps.len(), 2);
     }
     #[test]
     fn inspection_is_distinct_from_purchase_release() {
@@ -99,7 +100,7 @@ mod tests {
         let mut p = Pointer::default();
         p.event(1, TouchPhase::Started, Vec2::ZERO, 0.);
         p.event(1, TouchPhase::Ended, Vec2::ZERO, 0.7);
-        assert!(p.tap.is_some_and(|tap| tap.2));
+        assert!(p.taps.last().is_some_and(|tap| tap.2));
     }
     #[test]
     fn scrolling_and_cancel_do_not_activate() {
@@ -109,7 +110,7 @@ mod tests {
             p.event(1, TouchPhase::Started, Vec2::ZERO, 0.);
             p.event(1, phase, Vec2::new(0., 32.), 0.1);
             p.event(1, TouchPhase::Ended, Vec2::ZERO, 0.2);
-            assert!(p.tap.is_none());
+            assert!(p.taps.is_empty());
         }
     }
     #[test]
@@ -119,7 +120,7 @@ mod tests {
         p.event(2, TouchPhase::Started, Vec2::ZERO, 0.);
         p.event(2, TouchPhase::Ended, Vec2::ZERO, 0.1);
         p.event(1, TouchPhase::Ended, Vec2::ZERO, 0.2);
-        assert!(p.tap.is_none());
+        assert!(p.taps.is_empty());
     }
 }
 

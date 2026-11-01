@@ -65,6 +65,8 @@ pub fn run() {
     #[cfg(target_os = "android")]
     let window = platform::android::settings();
     let plugins = DefaultPlugins;
+    #[cfg(target_os = "android")]
+    let plugins = plugins.set(platform::android::render::plugin());
     #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
     let plugins = plugins.set(platform::window::log_plugin());
     let exit = App::new()

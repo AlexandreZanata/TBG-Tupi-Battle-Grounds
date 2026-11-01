@@ -62,38 +62,43 @@ pub fn mouse_and_keys(
         let p = t.translation;
         ((p.y * 10.) as i32, (p.x * 10.) as i32)
     });
-    let mut selected = None;
+    let mut selected = Vec::new();
     #[cfg(target_os = "android")]
-    let released = pointer.tap.map(|tap| tap.1).or_else(|| {
-        (!pointer.touch_frame && mouse.just_released(MouseButton::Left))
-            .then(|| window.cursor_position())
-            .flatten()
-    });
+    let mut releases: Vec<Vec2> = pointer.taps.iter().map(|tap| tap.1).collect();
     #[cfg(not(target_os = "android"))]
-    let released = mouse
-        .just_released(MouseButton::Left)
-        .then(|| window.cursor_position())
-        .flatten();
-    {
-        if let Some(p) = released {
-            selected = ordered.iter().position(|(_, _, _, node, t, _, clip)| {
-                let hit = {
-                    #[cfg(target_os = "android")]
-                    {
-                        super::super::mobile::input::hit(
-                            node,
-                            **t,
-                            p * window.scale_factor(),
-                            window.scale_factor() * scale.0,
-                        )
-                    }
-                    #[cfg(not(target_os = "android"))]
-                    {
-                        node.contains_point(**t, p * window.scale_factor())
-                    }
-                };
-                hit && clip.is_none_or(|c| c.contains_point(p * window.scale_factor()))
-            });
+    let mut releases = Vec::new();
+    if mouse.just_released(MouseButton::Left) {
+        if let Some(point) = window.cursor_position() {
+            #[cfg(target_os = "android")]
+            let duplicate =
+                pointer.touch_frame && pointer.taps.iter().any(|tap| tap.1.distance(point) < 2.);
+            #[cfg(not(target_os = "android"))]
+            let duplicate = false;
+            if !duplicate {
+                releases.push(point);
+            }
+        }
+    }
+    for p in releases {
+        if let Some(index) = ordered.iter().position(|(_, _, _, node, t, _, clip)| {
+            let hit = {
+                #[cfg(target_os = "android")]
+                {
+                    super::super::mobile::input::hit(
+                        node,
+                        **t,
+                        p * window.scale_factor(),
+                        window.scale_factor() * scale.0,
+                    )
+                }
+                #[cfg(not(target_os = "android"))]
+                {
+                    node.contains_point(**t, p * window.scale_factor())
+                }
+            };
+            hit && clip.is_none_or(|c| c.contains_point(p * window.scale_factor()))
+        }) {
+            selected.push(index);
         }
     }
     if keys.just_pressed(KeyCode::Tab) && !ordered.is_empty() {
@@ -103,7 +108,7 @@ pub fn mouse_and_keys(
         && !keys.any_pressed([KeyCode::AltLeft, KeyCode::AltRight])
         && !ordered.is_empty()
     {
-        selected = Some(*focus % ordered.len());
+        selected.push(*focus % ordered.len());
     }
     if keys.just_pressed(KeyCode::Escape) {
         shell.panel = Panel::Lobby;
@@ -126,12 +131,12 @@ pub fn mouse_and_keys(
     if keys.just_pressed(KeyCode::Tab) {
         button_focus.0 = ordered.get(*focus % ordered.len().max(1)).map(|row| row.0);
     }
-    if let Some(index) = selected {
+    for index in selected {
         *focus = index;
         let (_, action, ui, _, _, _, _) = ordered[index];
         if let Some(Action::Catalog(action)) = action {
             training.0.push(*action);
-            return;
+            continue;
         }
         if let Some(action) = action {
             #[cfg(tbg_native_ui)]

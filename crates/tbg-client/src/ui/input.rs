@@ -58,26 +58,25 @@ pub(super) fn taps(
         *pressed_at = now;
     }
     #[cfg(not(target_os = "android"))]
-    let long_press = now - *pressed_at >= LONG_PRESS;
+    let mut gestures: Vec<(Vec2, Vec2, bool)> = touches
+        .iter_just_released()
+        .map(|t| (t.position(), t.position(), now - *pressed_at >= LONG_PRESS))
+        .collect();
     #[cfg(target_os = "android")]
-    let long_press = pointer.tap.is_some_and(|t| t.2);
-    #[cfg(not(target_os = "android"))]
-    let mut points: Vec<Vec2> = touches.iter_just_released().map(|t| t.position()).collect();
-    #[cfg(target_os = "android")]
-    let mut points: Vec<Vec2> = pointer.tap.map(|t| t.1).into_iter().collect();
-    if mouse.just_released(MouseButton::Left) && {
-        #[cfg(target_os = "android")]
-        {
-            !pointer.touch_frame
+    let mut gestures = pointer.taps.clone();
+    if mouse.just_released(MouseButton::Left) {
+        if let Some(point) = window.cursor_position() {
+            #[cfg(target_os = "android")]
+            let duplicate =
+                pointer.touch_frame && pointer.taps.iter().any(|tap| tap.1.distance(point) < 2.);
+            #[cfg(not(target_os = "android"))]
+            let duplicate = false;
+            if !duplicate {
+                gestures.push((point, point, now - *pressed_at >= LONG_PRESS));
+            }
         }
-        #[cfg(not(target_os = "android"))]
-        {
-            true
-        }
-    } {
-        points.extend(window.cursor_position());
     }
-    for p in points {
+    for (start, p, long_press) in gestures {
         let physical = p * window.scale_factor();
         let hit = buttons
             .iter()
@@ -102,14 +101,12 @@ pub(super) fn taps(
                     && {
                         #[cfg(target_os = "android")]
                         {
-                            pointer.tap.is_none_or(|tap| {
-                                super::mobile::input::hit(
-                                    node,
-                                    **t,
-                                    tap.0 * window.scale_factor(),
-                                    window.scale_factor() * scale.0,
-                                )
-                            })
+                            super::mobile::input::hit(
+                                node,
+                                **t,
+                                start * window.scale_factor(),
+                                window.scale_factor() * scale.0,
+                            )
                         }
                         #[cfg(not(target_os = "android"))]
                         {
