@@ -73,6 +73,7 @@ pub(super) fn handle(
         ServerMsg::MatchStart { you, .. } => {
             if r.seat.is_none() {
                 s.drop_at = opts.drop_after.map(|d| Instant::now() + d);
+                s.surrender_at = opts.surrender_after.map(|d| Instant::now() + d);
             }
             r.seat = Some(you);
             if let Some(t0) = s.queue_start.take() {
@@ -87,6 +88,11 @@ pub(super) fn handle(
                     .push(now.duration_since(prev).as_millis() as u32);
             }
             resolve_ack(s, r, v.last_seq, now);
+            if s.surrender_at.is_some_and(|at| now >= at) {
+                s.surrender_at = None;
+                send(s, ClientMsg::Surrender);
+                return Ok(None);
+            }
             if let Some(intent) = s.bot.decide(&v) {
                 s.seq += 1;
                 let seq = s.seq;
