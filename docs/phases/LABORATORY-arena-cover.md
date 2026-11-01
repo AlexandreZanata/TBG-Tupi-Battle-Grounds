@@ -7,7 +7,8 @@ Windows and desktop web; do not duplicate changes if the implementation is share
 
 Implementation: a flexible picture replaces the 92-pixel stretched thumbnail;
 post-layout centered cover cropping preserves source proportions. Practice content
-uses compact consistent gaps so the image receives the remaining vertical space.
+uses compact consistent gaps and 30-pixel difficulty rows so the image receives
+enough height for a lateral center crop at the observed desktop window sizes.
 The existing image loading, selector action and Play action are retained.
 
 Propagation: audited build.rs, training plugin, catalog, viewer, preview, stage,
