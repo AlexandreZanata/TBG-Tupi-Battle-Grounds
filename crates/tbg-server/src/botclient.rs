@@ -138,14 +138,22 @@ async fn connect_and_play(
     .map_err(|_| "connect timeout".to_string())?
     .map_err(|e| format!("connect: {e}"))?;
     let (mut write, mut read) = ws.split();
-    let (in_tx, mut in_rx) = mpsc::unbounded_channel::<(Instant, Vec<u8>)>();
+    let (in_tx, mut in_rx) = mpsc::unbounded_channel::<(Instant, Result<Vec<u8>, String>)>();
     let (out_tx, mut out_rx) = mpsc::unbounded_channel::<(Instant, Vec<u8>)>();
     let reader = tokio::spawn(async move {
-        while let Some(Ok(msg)) = read.next().await {
-            if let Message::Binary(b) = msg {
-                if in_tx.send((Instant::now(), b.to_vec())).is_err() {
-                    break;
-                }
+        while let Some(frame) = read.next().await {
+            let received = match frame {
+                Ok(Message::Binary(bytes)) => Ok(bytes.to_vec()),
+                Ok(Message::Close(frame)) => Err(format!(
+                    "peer closed websocket (code {})",
+                    frame.map_or(1005, |f| u16::from(f.code))
+                )),
+                Err(error) => Err(read_failure(&error)),
+                _ => continue,
+            };
+            let closed = received.is_err();
+            if in_tx.send((Instant::now(), received)).is_err() || closed {
+                break;
             }
         }
     });
@@ -175,6 +183,7 @@ async fn connect_and_play(
             got = in_rx.recv() => {
                 let Some((arrived, bytes)) = got else { break Err("connection closed".to_string()) };
                 sleep_until(arrived + jitter(opts, &mut s.rng)).await;
+                let bytes = match bytes { Ok(bytes) => bytes, Err(error) => break Err(error) };
                 let msg = protocol::decode_server(&bytes).map_err(|_| "bad server message".to_string())?;
                 if let Some(step) = handle(msg, opts, s, r, &mut send)? {
                     break Ok(step);
@@ -192,4 +201,40 @@ async fn connect_and_play(
     drop(out_tx);
     let _ = timeout(Duration::from_secs(2), writer).await;
     result
+}
+
+/// Keep the actual transport failure without formatting messages or peer-controlled close reasons.
+fn read_failure(error: &tokio_tungstenite::tungstenite::Error) -> String {
+    use tokio_tungstenite::tungstenite::Error;
+    let detail = match error {
+        Error::Io(e) => format!("IO {:?}", e.kind()),
+        Error::Protocol(e) => format!("protocol {e}"),
+        Error::Capacity(e) => format!("capacity {e}"),
+        Error::Tls(_) => "TLS".into(),
+        Error::WriteBufferFull(_) => "write buffer full".into(),
+        Error::ConnectionClosed => "normal close before result".into(),
+        _ => "invalid transport state".into(),
+    };
+    format!("websocket read failed: {detail}")
+}
+
+#[cfg(test)]
+mod diagnostics_tests {
+    use super::*;
+    use tokio_tungstenite::tungstenite::{error::ProtocolError, Error};
+    #[test]
+    fn transport_diagnostics_preserve_cause_without_frame_secrets() {
+        let frame = Error::WriteBufferFull(Box::new(Message::Binary(
+            b"synthetic-private-frame".to_vec().into(),
+        )));
+        assert!(!read_failure(&frame).contains("synthetic-private-frame"));
+        assert!(read_failure(&Error::Protocol(
+            ProtocolError::ResetWithoutClosingHandshake
+        ))
+        .contains("reset"));
+        assert!(read_failure(&Error::Io(std::io::Error::from(
+            std::io::ErrorKind::ConnectionReset
+        )))
+        .contains("ConnectionReset"));
+    }
 }

@@ -2,7 +2,6 @@
 //! notification without starting a match task.
 
 use std::collections::{HashMap, VecDeque};
-use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
