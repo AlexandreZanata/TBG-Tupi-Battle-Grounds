@@ -10,11 +10,18 @@ mod arenas;
 #[cfg(target_os = "linux")]
 mod polish;
 #[cfg(target_os = "linux")]
+mod polish_live;
+#[cfg(target_os = "linux")]
 mod reserve;
 #[cfg(target_os = "linux")]
 mod training;
 
 pub fn plugin(app: &mut App) {
+    #[cfg(target_os = "linux")]
+    if crate::config::url_param("capture_polish_live").is_some() {
+        polish_live::plugin(app);
+        return;
+    }
     #[cfg(target_os = "linux")]
     if crate::config::url_param("capture_polish").is_some() {
         polish::plugin(app);
