@@ -1,4 +1,8 @@
 ; Per-user installer from the same immutable portable package inventory.
+; ISCC.exe's PE ProductVersion can be 0.0.0.0; use the real preprocessor version.
+#if PREPROCVER != 0x06070100
+#error Reviewed Inno Setup 6.7.1 is required; review any toolchain change explicitly
+#endif
 #ifndef PackageDir
 #error PackageDir is required
 #endif

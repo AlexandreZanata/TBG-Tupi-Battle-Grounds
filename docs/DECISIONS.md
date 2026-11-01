@@ -2892,3 +2892,34 @@ from arbitrary failing output. Gameplay source, contract, ruleset registry and D
 reservations remain unchanged. Every later intentional ruleset needs its own reviewed
 canonical identity/reference; simulation changes still require the canonical decision
 and evidence in the same commit.
+
+
+## D-102 · Preserve the registered P71 Farwatch exception in lab validation — 2026-11-01
+
+P71 already removed Farwatch's `NoStronghold` ability and documented attacking
+Strongholds at its unchanged 12-tile canonical reach (GAME-DESIGN §11). The lab
+range validator still recognized only the old ability-based exception, so applying
+even an unchanged CANON knob failed C5 at `energy_start`. This was a validator/
+active-canon inconsistency, not an Energy change or new balance evidence.
+
+**Decision.** Keep the normal candidate Stronghold-range cap and the existing
+`NoStronghold` exemption. Farwatch alone may retain its registered canonical
+reach: its candidate cap is the maximum of the candidate Stronghold range and
+Farwatch's current CANON range. Read the canonical number rather than duplicating
+12,000 in the lab. Reject Farwatch above that cap and every other Stronghold
+attacker above the ordinary cap. Do not exempt all canonical units automatically,
+change a combat value or remove role/gate checks to obtain a green CI result.
+
+Boundary regressions cover the active canonical Farwatch targeting, the exception
+ceiling, every other conventional Stronghold attacker, the old ability exemption
+and a tunable Stronghold range. C5 and its historical contract file stay intact.
+
+CI runs exact C5 first using the same checked package/features/profile, then the
+complete unfiltered balance lane. A canon mismatch therefore stops before C7/C8's
+multi-minute simulations. Cheap workflow regressions reject a missing/late preflight,
+a feature-scope bypass or filtered full lane. Required `check` still rejects any
+failed/skipped/canceled lane. No retries, ignored tests, relaxed thresholds or
+accepted competitive-balance claim are introduced. Runtime/core sources, ruleset
+revision/hash, protocol, visual correspondence and player-facing behavior remain
+unchanged. Older planning statements about Farwatch never targeting a Stronghold
+are superseded by the existing P71 owner update.

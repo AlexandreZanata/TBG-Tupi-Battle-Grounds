@@ -172,7 +172,7 @@ Speeds in tiles/s (× 50 = milli-tiles per tick), times in seconds
 | Unit | Faction | Class | Cost | HP | Dmg | Every | Range | Speed | Identity in one line |
 |------|---------|-------|------|----|-----|-------|-------|-------|----------------------|
 | Rotcap | Plants | Ranged | 3 | 200 | 12 | 1.5 | 3.5 | 0.9 | Each hit adds a poison stack (6/s, 10 s, ≤ 6 per victim) that outlives it |
-| Farwatch | Humans | Ranged | 3 | 150 | 70 | 4.0 | 12.0 | 0.9 | Shoots units across most of the lane; never targets Strongholds |
+| Farwatch | Humans | Ranged | 3 | 150 | 70 | 4.0 | 12.0 | 0.9 | **Proposed P71 owner rule:** shoots units or the enemy Stronghold at its existing 12-tile range |
 | Leechroot | Plants | DPS | 3 | 220 | 10 | 1.6 | 1.2 | 0.9 | Damage dealt to enemy units becomes permanent stacks, no maximum; lost on death |
 | Bombard | Machines | Ranged | 5 | 1 000 | 24 | 2.2 | 4.0 | 0.5 | Blast radius 1.0 hits every unit, both sides and itself |
 | Old Finn | Humans | Control | 3 | 240 | 8 | 2.0 | 3.5 | 0.9 | Fish: −15 % move each, ≤ 3, 5 s; never slows attacks |
@@ -267,20 +267,19 @@ from pulses; Second Wind; poison kill credit.
 
 **Role.** Constant long-range chip and finisher from a safe spot.
 
-**Ability.** Range 12 tiles (Siege Walker 6, Archer 4.5; the draft's
-85–90 % = 13.6–14.4 is a dose-response point, §E.4). Targets the
-nearest enemy **unit** (Guard still applies); **never targets a
-Stronghold**: when the enemy Stronghold is the only thing in range it
-holds. With no enemy units it therefore stands about 4 tiles from its
-own Stronghold, inside its own Stronghold's cover (6) — exactly the
-draft's "stays at home" picture, without a special position rule.
+**Ability (Proposed P71 owner update, 2026-11-01).** Range stays 12 tiles
+(Siege Walker 6, Archer 4.5; the draft's 13.6–14.4 is a dose-response point,
+§E.4). Farwatch now targets the nearest enemy unit **or Stronghold**, with the
+normal Guard, facing and windup rules. It stops when that target is in range;
+there is no additional home-position rule. This supersedes the original
+unit-only / `NoStronghold` behavior and its older planning scenarios below.
 
 | Case | Rule |
 |------|------|
 | Enemy Rampart within 12 tiles | Guard forces Farwatch to shoot the Rampart (a natural counter to Farwatch spam) |
 | Preparation | Normal 0.3 s windup; it never moves while it has a target (true of every unit) |
 | Splash, statuses | None in the base form |
-| Role invariant | GAME-DESIGN's "base range ≤ Stronghold range" exists to stop out-ranging bases; it is rewritten as "≤ Stronghold range **unless the unit never targets Strongholds**" and `knobs::valid` follows |
+| Role invariant | Ordinary Stronghold attackers stay within Stronghold range. Units with `NoStronghold` remain exempt. P71 Farwatch may retain its registered canonical 12-tile reach; experimental tuning may not exceed that exception unless within the experimental Stronghold range. No other kind inherits it (D-102). |
 
 **Numbers.** 70 damage / 4 s = 17.5 DPS, 39 % of Archer's. Model of
 compensation: it engages from spawn-to-contact (≈ 12 extra seconds per

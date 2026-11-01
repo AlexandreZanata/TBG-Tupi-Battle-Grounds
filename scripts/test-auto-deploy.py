@@ -116,7 +116,8 @@ class DeploymentGuards(unittest.TestCase):
             activate.write_json(state/'transition.json', {'previous': {n: str(old/n) for n in policy.FILES},
                 'contract': CONTRACT, 'public_health': 'https://api.example.com/health', 'previous_receipt': previous})
             with patch.multiple(activate, BIN=binaries, RELEASES=releases, STATE=state, JOURNAL=state/'transition.json'), \
-                 patch.object(activate, 'service') as service, patch.object(activate, 'healthy', return_value=True):
+                 patch.object(activate, 'service') as service, patch.object(activate, 'require_running_binary'), \
+                 patch.object(activate, 'healthy', return_value=True):
                 activate.recover()
             self.assertEqual([c.args[0] for c in service.call_args_list], ['stop', 'start'])
             self.assertTrue(all((binaries/n).resolve() == old/n for n in policy.FILES))
@@ -169,7 +170,7 @@ class DeploymentGuards(unittest.TestCase):
                  patch.object(activate, 'status', return_value=live), \
                  patch.object(activate.shutil, 'disk_usage', return_value=SimpleNamespace(free=1<<30)), \
                  patch.object(activate.subprocess, 'run', side_effect=command), \
-                 patch.object(activate, 'service') as service, \
+                 patch.object(activate, 'service') as service, patch.object(activate, 'require_running_binary'), \
                  patch.object(activate, 'healthy', side_effect=[False, True]):
                 previous_mask = os.umask(0o077)
                 try:
@@ -185,6 +186,25 @@ class DeploymentGuards(unittest.TestCase):
             with sqlite3.connect(db) as connection:
                 self.assertEqual(connection.execute('SELECT value FROM player_state').fetchone()[0], 'new result survives rollback')
             self.assertFalse((state/'transition.json').exists())
+
+    def test_unadopted_runtime_is_refused_before_database_or_service_changes(self):
+        with patch.object(activate, 'require_running_binary', side_effect=ValueError('explicit adoption')), \
+             patch.object(activate, 'service') as service, patch.object(activate.sqlite3, 'connect') as database:
+            with self.assertRaisesRegex(ValueError, 'explicit adoption'):
+                activate.activate(Path('/tmp/not-staged'), manifest(), 'https://api.example.com/health')
+        service.assert_not_called()
+        database.assert_not_called()
+
+    def test_running_service_must_match_the_actual_kernel_executable_path(self):
+        with patch.object(activate.subprocess, 'check_output', return_value=str(os.getpid())):
+            activate.require_running_binary(Path(sys.executable))
+            with tempfile.TemporaryDirectory() as directory:
+                wrong = Path(directory)/'unused-tbg-server'
+                wrong.write_bytes(b'not-running')
+                with self.assertRaisesRegex(ValueError, 'explicit adoption'):
+                    activate.require_running_binary(wrong)
+        with patch.object(activate.subprocess, 'check_output', return_value='0'):
+            with self.assertRaises(ValueError): activate.require_running_binary(Path(sys.executable))
 
     def test_frontend_only_merges_do_not_redeploy_backend(self):
         spec = importlib.util.spec_from_file_location('scope', ROOT/'scripts/backend-release-changes.py')

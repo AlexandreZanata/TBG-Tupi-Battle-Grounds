@@ -1,6 +1,11 @@
 {
   "schema": 1,
   "reference": "linux",
+  "required_platforms": [
+    "linux",
+    "windows",
+    "web"
+  ],
   "candidate": "windows",
   "pixel_difference_limit": 0,
   "languages": [
@@ -109,7 +114,7 @@
   ],
   "capture_index_contract": {
     "schema": 1,
-    "platform": "linux OR windows",
+    "platform": "linux OR windows OR web",
     "source_commit": "40 lowercase hexadecimal",
     "cargo_lock_sha256": "64 lowercase hexadecimal",
     "assets_sha256": "64 lowercase hexadecimal",

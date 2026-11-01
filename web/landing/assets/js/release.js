@@ -17,6 +17,8 @@ function toggle(selector, show) {
 }
 
 export async function loadRelease() {
+  // Bind the pending dialog before metadata requests; publication must not gate interaction.
+  renderNative(config);
   try {
     config = await fetchJson('/config/release.json', { maxBytes: 16 * 1024 });
   } catch {

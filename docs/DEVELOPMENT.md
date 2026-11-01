@@ -12,8 +12,13 @@ uses the existing English/pt-BR catalogs. Mobile remains outside this consolidat
 `tbg-server` owns connections, authentication, outcomes, ranked settlement and SQLite.
 The browser and native Linux/Windows clients use the same Bevy desktop presentation
 (`platform::desktop_ui`); do not add a second HTML implementation of its screens.
-See [the desktop UI contract](ui/DESKTOP-UI-CONTRACT.md). Shared code does not
-prove identical Windows GPU output; real-device acceptance remains separate.
+[AGENTS non-negotiable 8](../AGENTS.md#non-negotiables) makes Linux the canonical
+reference for every in-game visual change. Windows and desktop web must match it
+exactly, including every screen, loading/transition state, champion/form, animation,
+VFX and visible behavior. Every visual change updates the
+[correspondence contract](ui/DESKTOP-UI-CONTRACT.md), affected scenarios/motion and
+shared presentation together. Shared code or a successful build is not parity
+acceptance; record per-target evidence and deferred checks under VALIDATION.
 
 The landing and public admin are independent static sites under `web/`.
 `web/admin/app` is a local preview with fictional fixtures, not an authenticated

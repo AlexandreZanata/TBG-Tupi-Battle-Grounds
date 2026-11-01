@@ -3,11 +3,11 @@
 
 import argparse
 import os
-import shutil
 import sys
 from pathlib import Path
 
 from sites import SITES, ManifestError, files
+from asset_versions import rendered
 
 
 def stage(site, out):
@@ -19,10 +19,10 @@ def stage(site, out):
         mapping = files(site)
     except ManifestError as error:
         raise SystemExit(f"manifest error: {error}")
-    for published, source in mapping.items():
+    for published, body in rendered(mapping).items():
         target = out / published
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, target)
+        target.write_bytes(body)
         os.chmod(target, 0o644)
     for folder in [out, *[p for p in out.rglob("*") if p.is_dir()]]:
         os.chmod(folder, 0o755)

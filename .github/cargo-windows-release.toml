@@ -1,0 +1,5 @@
+# Parallelize the large application/test harness on dedicated hosted runners.
+# Dependencies retain their cached release settings; opt-level="s", ThinLTO,
+# assertions, features and the static CRT policy remain unchanged.
+[profile.release.package.tbg-client]
+codegen-units = 16

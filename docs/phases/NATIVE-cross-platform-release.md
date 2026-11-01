@@ -17,8 +17,11 @@ not native release targets.
   share the exact file inventory. Inno 6.7.1's official license permits commercial
   use without a required purchase; retain its copyright in the generated installer.
 - Windows runner is explicitly windows-2022, SDK 10.0.26100.0, Rust 1.99.0,
-  Inno 6.7.1, with actual tool identities recorded. Windows compilation uses two
-  Cargo jobs. Build/package checks inspect x64 GUI PE/resources/runtime imports.
+  Inno 6.7.1, with actual tool identities recorded. Dedicated Windows CI now uses
+  available hosted CPUs and parallel client codegen; local compilation retains
+  the shared lock/two-job limit. See [Windows CI correction](CI-WINDOWS-20261101.md)
+  for observed timings, encoding failure and deferred performance evidence.
+  Build/package checks inspect x64 GUI PE/resources/runtime imports.
 - Matching native artifacts are built on both OSes from one source and feature set.
   Publication is an explicit tag dispatch after runtime inspection, gated by all
   required CI lanes. Promotion may reuse only successful same-repository,
@@ -97,3 +100,125 @@ sharing optimized dependencies with the actual executable instead of compiling
 the entire Bevy graph in debug and release on a cold runner. Tests remain enabled.
 Trusted manual branch builds may save their Windows dependency cache; PRs and
 release tags cannot write it. Existing caches and active jobs were not removed.
+
+## Official landing adoption
+
+Landing `20261101T210337Z-e1017fc55ed0` is active. Both platform cards/dialogs
+were checked in public Chrome (English/pt-BR, pending state plus a browser-local
+fixture only, zero console/CSP errors). `/downloads.json` returns HTTPS 200 with
+`application/json` and `no-cache, no-transform`, currently both platforms pending.
+The new controller is installed with its timer disabled until an actual attested
+complete release is observed. Backend/web/static timers remain disabled.
+
+The owner explicitly authorized interruption of their single test tab for initial
+proxy adoption. A one-off guarded maintenance operation required at most that one
+connection and zero matches/ranked/results, backed up the TBG include, compared
+all other directives, validated Caddy and reloaded it. The main Caddyfile and game
+server PID stayed identical. Normal zero-connection guards remain unchanged.
+No game executable, player DB, native signing keys or unrelated service changed.
+
+## Final Linux candidate evidence
+
+Run `41349999416` built final source `e1017fc55ed069e23d4df04d46b81aa2e12dac17`.
+The downloaded Actions ZIP matched SHA-256
+`1b180774a8076cf3f384f5d974314ea146a89f9daea72ec01e5943821b06b0ef`; both
+format checksum sidecars and all 355 file-manifest entries passed. The rendered
+README now contains the exact executable source/contract and resolved version.
+The packaged lobby ran on NVIDIA RTX 4060/Vulkan (driver 595.104.02), framebuffer
+1280x720, with all loading gates ready and exit 0. The host's automation display
+clamps larger requested windows; this is not a 1440x900 or high-DPI acceptance.
+
+`python3 scripts/check-native-auth.py --client <downloaded final package>/tbg-client
+--server <existing debug backend>/tbg-server --report <owned report>` passed using
+a fresh loopback SQLite backend and synthetic account: real Secret Service secure
+persistence, same-family restore, migration, process coordination, offline logout
+pending/online revocation, no ordinary token persistence and vault cleanup. The
+reused debug backend reports protocol 31, schema 10 and the exact contract but a
+`development` source identity; this test does not certify production online play.
+
+Four metadata-only `test-native-artifacts.py` cases passed, including mixed-source/
+toolchain/lock/assets/features, changed/missing formats, wrong tag, oversized and
+ambiguous package identities. These fixtures never certify executable behavior.
+The superseded `9fac2d6` native build was canceled to avoid spending more runner
+minutes on a candidate whose README had already been superseded.
+
+## Runtime-path adoption safeguard
+
+A copied executable from the legacy VPS path lacked `--build-info` and treated it
+as a normal launch. The owned local process was stopped immediately; no production
+process or data changed. This path is not evidence of the live production source.
+The Windows synthetic backend instead uses the identified development binary and
+a fresh database bound only to the Docker bridge.
+
+Backend automation now checks the actual systemd MainPID kernel executable against
+the adopted path before touching admission/SQLite, after startup and after rollback.
+An unadopted legacy path fails closed. Two new focused regression scenarios cover
+wrong live path and refusal before DB/service side effects. Runtime adoption remains
+required before enabling backend automation; it is not performed by this task.
+
+## Current handoff state
+
+The final Linux package also rendered Settings and offline Practice at 1280x720,
+with the normal native HUD/Shop, all loading gates ready and exit 0. Its AppImage
+reported the same executable/source/contract through extract-and-run. The verified
+package was installed per user as TBG at `0.1.2-rc.1-e1017fc55ed0`, retaining older
+versions and user data; the launcher reports the correct final identity.
+
+The final Windows/native build is run `41349999416` on frozen source `e1017fc`.
+DevShell initialization is corrected; the Windows package/build stage was still
+running at the last observation. No Windows runtime, installer, same-source visual
+comparison or new public native release is claimed. General PR CI is not awaited.
+The owner requested no CI wait; publication must still use successful exact-source
+artifacts and its required publication gate, never the superseded inspection build.
+The landing remains honestly pending until a complete verified native release.
+
+The existing Windows VM is prepared with owned acceptance scripts for final package
+identity/inventory, real vault, missing assets, isolated installer lifecycle and a
+1280x720 GUI pilot. The scripts parsed in Windows PowerShell. They have not tested
+the unavailable final Windows artifact. The strict full matrix, real GPU/audio/DPI,
+Wine and publisher signing remain separate pending gates; no tolerance was added.
+
+Backend runtime-path guard: `python3 scripts/test-auto-deploy.py` passed all 12
+scenarios after the safeguard. `actionlint` passed both changed workflows with only
+the previously documented SC2086 scope-expansion diagnostics excluded from this
+local syntax invocation; CI lints were not disabled. No additional Rust build,
+full workspace suite, balance gate or extensive gallery was run.
+
+## Landing download-button cache regression (2026-11-01)
+
+The owner observed new platform cards with empty native status labels and inert
+buttons. A clean public Chrome session opened both pending dialogs with no errors.
+Origin JS headers were `no-cache, no-transform`, but the public CDN response used
+`max-age=14400, no-transform`. A local Chrome regression with that four-hour TTL
+reproduced the exact failure: old `release.js` remained in cache after new HTML
+loaded, neither native status nor click handlers initialized, and no JS network
+request occurred on the second visit. This does not depend on PR/main merge.
+
+Manual staging and attested packaging now share one deterministic JS/CSS URL
+revision across the entry and transitive imports. Manifest hashes cover the actual
+transformed payload. The live native catalog is not versioned. Download interaction
+also initializes before metadata fetches, so slow/missing releases show the pending
+modal rather than an inert button. Only landing delivery changes; no in-game
+presentation, simulation, API, player data or process is modified.
+
+Work-front checks: four focused static-asset cases and nine static-deployment
+cases passed; web manifests/generated content/JS/JSON/i18n checks passed;
+`git diff --check` passed. No Rust compilation, game build, full suite or native
+reinstallation belongs to this static-only fix. Warm-cache browser and public
+post-deployment observations are recorded separately below.
+
+The warmed-browser regression then passed with the versioned payload in the same
+Chrome context, without clearing its cache. Both Linux and Windows pending dialogs
+opened while `/downloads.json` was deliberately held unanswered. No page errors.
+Code revisions include the renderer's source identity so changing the delivery
+transform also invalidates stale module URLs. This is a landing-only cache fix;
+it neither enables an unavailable native download nor depends on a main merge.
+
+Public landing `20261101T213041Z-c8fa1108e413` is now active. Chrome loaded all 11
+JS modules using the same revision query and opened both Linux/Windows dialogs in
+pt-BR and English. Escape returned focus to each trigger; zero console/page errors.
+The pending message and absence of download links match the current live catalog.
+The published modal screenshot was inspected. Promotion switched only the landing
+pointer: no Caddy reload, server restart, admin/game publication or player-data
+change. Fix commit `c8fa110` is retained with the owner's concurrent main merge
+through a normal merge (`3144be3`); no history rewriting or force-push.
