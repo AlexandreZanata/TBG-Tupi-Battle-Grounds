@@ -55,7 +55,7 @@ Each release, into the idle slot (here `b`):
 2. `sudo /opt/tbg/bin/release-slot.sh start b <generation> ~/tbg-server`
    installs `/opt/tbg/releases/<generation>/` (never overwritten) and waits
    for `ready`. A slot that fails to become ready admits nothing.
-3. Same match contract (`tbg-server --version` and `admin status` show it):
+3. Same match contract (`admin status` and the loopback `/api/release` show it):
    `admin canary b 5`, then 25, then `admin promote b` after the indicators
    in docs/planning/P66-RELEASE-CONTRACTS.md §3 hold. A new contract is
    switched with `admin promote b` at its scheduled time (BR-UP09).
@@ -254,3 +254,11 @@ First installation skips the predeploy database backup when no database exists.
 The unprivileged service creates schema 10 itself; later deployments retain the
 integrity-checked pre-migration backup. Native installation uses the matching
 protocol-31 source, preserving earlier local installs and player data.
+
+
+The initial tupibg.com backend and native Linux client delivery is verified in
+[the deployment report](../docs/phases/VPS-tupibg-deployment.md). API/app TLS and
+proxy routes are active; the browser game static bundle, landing and admin UI
+are separate frontend publications. The backend binary does not implement a
+`--version` flag; inspect its startup source metadata, binary hash and the
+loopback-only release contract instead of starting another copy.
