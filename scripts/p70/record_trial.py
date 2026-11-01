@@ -70,6 +70,7 @@ def environment(args):
         'TBG_UNIT': args.unit, 'TBG_TIER': str(tier), 'TBG_BRANCH': str(branch),
         'TBG_TRIAL_SEAT': args.seat, 'TBG_TRIAL_SEED': str(args.seed),
         'TBG_TRIAL_SECONDS': str(args.seconds),
+        'TBG_TRIAL_FRONTLINE': args.frontline,
         'TBG_QUALITY': args.quality, 'TBG_SERVER': 'ws://127.0.0.1:9/ws',
     })
     if args.distance is not None:
@@ -213,7 +214,7 @@ def frozen_provenance(args, parser):
             'binary': str(args.binary), 'binary_sha256': digest,
             'build_receipt': str(args.build_receipt.resolve()), 'unit': args.unit,
             'form': args.form, 'seat': args.seat, 'quality': args.quality, 'seed': args.seed,
-            'initial_distance': args.distance, 'seconds': args.seconds, 'fps': args.fps,
+            'initial_distance': args.distance, 'frontline': args.frontline, 'seconds': args.seconds, 'fps': args.fps,
             'size': args.size, 'artifact_derivation': 'original-renderer-window-recording',
             'platform': 'linux', 'scenario': 'P70 canonical laboratory engagement v2'}
 
@@ -232,6 +233,7 @@ def main():
     parser.add_argument('--quality', choices=['standard', 'low'], default='standard')
     parser.add_argument('--seed', type=int, default=70)
     parser.add_argument('--distance', type=int)
+    parser.add_argument('--frontline', choices=['Capybara', 'Shieldbearer'], default='Capybara')
     parser.add_argument('--seconds', type=int, choices=range(12, 19), default=16)
     parser.add_argument('--fps', type=int, choices=[30, 60], default=60)
     parser.add_argument('--size', default='1920x1080')

@@ -27,6 +27,7 @@ struct Settings {
     seat: Seat,
     seed: u64,
     distance: i32,
+    compact_frontline: bool,
     seconds: f64,
 }
 impl Settings {
@@ -70,6 +71,8 @@ impl Settings {
             seat,
             seed: number("trial_seed", 70)?,
             distance: distance as i32,
+            compact_frontline: config::url_param("trial_frontline").as_deref()
+                == Some("Shieldbearer"),
             seconds: seconds as f64,
         })
     }
@@ -168,7 +171,11 @@ fn composition(settings: &Settings) -> (Vec<TrainingUnitSpec>, Vec<TrainingUnitS
         // An ordinary high-HP ally stays in Pyre's initial segment and protects Finn's repeated casts.
         shooters.push(TrainingUnitSpec {
             x: Some(mirror(start + settings.distance / 2)),
-            ..TrainingUnitSpec::base(UnitKind::Capybara)
+            ..TrainingUnitSpec::base(if settings.compact_frontline {
+                UnitKind::Shieldbearer
+            } else {
+                UnitKind::Capybara
+            })
         });
     }
     let target = if settings.unit == UnitKind::Trident {
@@ -284,6 +291,7 @@ fn record(
     time: Res<Time<Real>>,
     trial: Res<Trial>,
     latest: Res<LatestView>,
+    jets: Query<(&GlobalTransform, &ViewVisibility), With<crate::vfx::flame::FlameJet>>,
     mut requests: ResMut<Requests>,
     mut exit: MessageWriter<AppExit>,
 ) {
@@ -305,7 +313,8 @@ fn record(
         if recording.last_tick != Some(view.tick) {
             recording.last_tick = Some(view.tick);
             let sample = json!({"wall_seconds": elapsed, "active_ticks": session.active_ticks(),
-                "simulation_tick": view.tick, "events": view.events, "units": view.units});
+                "simulation_tick": view.tick, "events": view.events, "units": view.units,
+                "rendered_flame_pieces": jets.iter().map(|(t,v)| json!({"translation":t.translation().to_array(),"scale":t.to_scale_rotation_translation().0.to_array(),"in_view":v.get()})).collect::<Vec<_>>()});
             if let Err(error) = writeln!(recording.journal, "{sample}") {
                 fail(&mut recording, &mut exit, error);
                 return;

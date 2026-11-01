@@ -97,17 +97,19 @@ fn flame_pose(from: Vec3, to: Vec3, k: f32, piece: u8) -> Transform {
     let fade = (1.0 - k).sqrt();
     let flutter = 0.85 + 0.15 * (k * 31.0).sin();
     match piece {
-        0 => base.with_scale(Vec3::new(0.18 * flutter, length, 0.16 * fade)),
-        1 => base.with_scale(Vec3::new(0.07 * flutter, length * 0.82, 0.06 * fade)),
+        0 => base.with_scale(Vec3::new(0.30 * flutter, length, 0.26 * fade)),
+        1 => base.with_scale(Vec3::new(0.12 * flutter, length * 0.82, 0.10 * fade)),
         7 => base
             .with_translation(from.lerp(to, 0.18 + k * 0.16) + Vec3::Y * 0.12 * k)
             .with_scale(Vec3::splat(0.035 * fade)),
         _ => {
             let phase = f32::from(piece - 2) * 0.21;
             let along = (phase + k * 0.9).fract();
-            let width = if piece == 6 { 0.022 } else { 0.065 } * fade;
-            base.with_translation(from.lerp(to, along) + Vec3::Y * 0.025 * (phase + k * 21.0).sin())
-                .with_scale(Vec3::new(width, width * 2.7, width))
+            let width = if piece == 6 { 0.022 } else { 0.11 } * fade;
+            base.with_translation(
+                from.lerp(to, along) + Vec3::Y * (0.10 + 0.16 * (phase + k * 21.0).sin().abs()),
+            )
+            .with_scale(Vec3::new(width, width * 3.2, width))
         }
     }
 }
