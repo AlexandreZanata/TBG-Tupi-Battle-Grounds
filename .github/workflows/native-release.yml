@@ -25,6 +25,8 @@ on:
       - 'docs/patches/**'
       - 'scripts/check-patch-notes.py'
       - 'scripts/package-native.py'
+      - 'scripts/test-native-package.py'
+      - '.github/cargo-windows-release.toml'
       - 'scripts/*windows*.ps1'
       - 'scripts/native-release-manifest.py'
       - 'deploy/native/**'
@@ -41,6 +43,8 @@ on:
       - 'docs/patches/**'
       - 'scripts/check-patch-notes.py'
       - 'scripts/package-native.py'
+      - 'scripts/test-native-package.py'
+      - '.github/cargo-windows-release.toml'
       - 'scripts/*windows*.ps1'
       - 'scripts/native-release-manifest.py'
       - 'deploy/native/**'
@@ -150,7 +154,8 @@ jobs:
     runs-on: windows-2022
     timeout-minutes: 120
     env:
-      CARGO_BUILD_JOBS: 2
+      # Hosted jobs own their VM: use Cargo's detected CPU count, as Linux does.
+      # Local validation still requires the shared lock and two Cargo jobs.
       RUSTFLAGS: -C target-feature=+crt-static
       TBG_DEFAULT_SERVER: wss://api.tupibg.com/ws
       TBG_SOURCE_COMMIT: ${{ github.sha }}
@@ -165,26 +170,54 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.11'
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-        with:
-          key: windows-2022-msvc-static-crt-ui-acceptance
-          # Trusted manual branch candidates keep one reusable Windows cache.
-          # Fork PRs cannot save it; tags only restore tested dependencies.
-          save-if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.ref_type == 'branch') }}
-      - name: Check and build the MSVC desktop candidate
+      - name: Preflight Windows tools, identity checks and installer script
         shell: pwsh
         run: |
           . ./scripts/windows-env.ps1
+          Write-Output "Hosted logical CPUs: $([Environment]::ProcessorCount)"
           $version = python -c 'import tomllib; print(tomllib.load(open("crates/tbg-client/Cargo.toml", "rb"))["package"]["version"])'
           if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$version") { throw 'Tag and executable version differ' }
-          cargo test --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance platform:: -- --test-threads=1
+          python scripts/test-native-package.py
+          if ($LASTEXITCODE) { throw 'Native identity regression checks failed' }
+          ./scripts/test-windows-installer.ps1
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: windows-2022-msvc-static-crt-ui-acceptance-${{ hashFiles('.github/cargo-windows-release.toml') }}
+          cache-on-failure: true
+          # Same-repository PRs reuse their own merge-ref dependency cache;
+          # main/tags cannot restore PR caches. No workspace binaries are cached.
+          save-if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.ref_type == 'branch') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
+      - name: Compile Windows platform regressions
+        shell: pwsh
+        run: |
+          # rust-cache exports its input; disarm it until compilation completes.
+          'CACHE_ON_FAILURE=false' >> $env:GITHUB_ENV
+          . ./scripts/windows-env.ps1
+          cargo --config .github/cargo-windows-release.toml test --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance --no-run --timings
+          if ($LASTEXITCODE) { throw 'Windows platform regressions did not compile' }
+          # Save completed dependencies even if a later test or packaging step fails.
+          'CACHE_ON_FAILURE=true' >> $env:GITHUB_ENV
+      - name: Run Windows platform regressions
+        shell: pwsh
+        run: |
+          . ./scripts/windows-env.ps1
+          cargo --config .github/cargo-windows-release.toml test --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance platform:: -- --test-threads=1
           if ($LASTEXITCODE) { throw 'Windows platform regressions failed' }
-          cargo build --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance
+      - name: Build the MSVC release client
+        shell: pwsh
+        run: |
+          . ./scripts/windows-env.ps1
+          cargo --config .github/cargo-windows-release.toml build --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance --timings
           if ($LASTEXITCODE) { throw 'MSVC release build failed' }
+      - name: Verify the executable and package Windows formats
+        shell: pwsh
+        run: |
+          . ./scripts/windows-env.ps1
           ./scripts/check-windows-package.ps1 -Binary target/x86_64-pc-windows-msvc/release/tbg-client.exe
           if (Test-Path target/native) { Remove-Item -Recurse -Force target/native }
           python scripts/package-native.py --platform windows --binary target/x86_64-pc-windows-msvc/release/tbg-client.exe
           if ($LASTEXITCODE) { throw 'Portable Windows package validation failed' }
+          $version = python -c 'import tomllib; print(tomllib.load(open("crates/tbg-client/Cargo.toml", "rb"))["package"]["version"])'
           ./scripts/package-windows-installer.ps1 -Package "target/native/tupi-battle-grounds-$version-windows-x86_64" -Version $version
           Copy-Item "$env:RUNNER_TEMP/windows-build-tools.json","$env:RUNNER_TEMP/windows-imports.txt" target/native/
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -198,6 +231,14 @@ jobs:
             target/native/windows-imports.txt
           if-no-files-found: error
           retention-days: 14
+      - name: Preserve Windows compiler timing reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-compiler-timings-${{ github.sha }}
+          path: target/cargo-timings/*.html
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Keep packaging outputs out of the dependency cache
         if: always()
         shell: pwsh

@@ -17,8 +17,11 @@ not native release targets.
   share the exact file inventory. Inno 6.7.1's official license permits commercial
   use without a required purchase; retain its copyright in the generated installer.
 - Windows runner is explicitly windows-2022, SDK 10.0.26100.0, Rust 1.99.0,
-  Inno 6.7.1, with actual tool identities recorded. Windows compilation uses two
-  Cargo jobs. Build/package checks inspect x64 GUI PE/resources/runtime imports.
+  Inno 6.7.1, with actual tool identities recorded. Dedicated Windows CI now uses
+  available hosted CPUs and parallel client codegen; local compilation retains
+  the shared lock/two-job limit. See [Windows CI correction](CI-WINDOWS-20261101.md)
+  for observed timings, encoding failure and deferred performance evidence.
+  Build/package checks inspect x64 GUI PE/resources/runtime imports.
 - Matching native artifacts are built on both OSes from one source and feature set.
   Publication is an explicit tag dispatch after runtime inspection, gated by all
   required CI lanes. Promotion may reuse only successful same-repository,
