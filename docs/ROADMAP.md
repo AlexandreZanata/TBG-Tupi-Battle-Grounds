@@ -455,3 +455,17 @@ cookies, and legacy keys migrate safely. D-97/GAME-DESIGN §21 authorize the
 account/wire changes without a combat change or automatic production deploy.
 The [auth source manifest](planning/P68-AUTH-SOURCE-MANIFEST.csv) records
 34 relevant baseline files for migration and consumer review.
+
+## Offline recovery and opponent mute (P67, 2026-10-31)
+
+[P67](phases/P67-commerce-recovery-foundation.md) now has executable offline
+recovery and presentation fixtures on `codex/p67-commerce-recovery-base`,
+based on the owner's consolidated `55510c5`. The owner deferred fiscal work
+and prioritized recovery/mute. Payment/provider/fiscal implementation is
+pending. Runtime email and opponent-mute activation remain unavailable.
+
+Status: **Draft, validation deferred**. Formatting, schema/example and SQL DDL
+checks passed; the targeted Rust batch did not start because the shared
+nonblocking validation lock returned 75. No full suite ran. See the
+[execution report](modules/commerce/OFFLINE-EXECUTION.md) for C01–C20 scope,
+queued commands, security/integration limits and later owner gates.

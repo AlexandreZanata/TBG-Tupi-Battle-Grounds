@@ -20,6 +20,8 @@ use crate::live::{LiveProgress, LiveSnapshot};
 use crate::metrics::Metrics;
 use crate::Config;
 
+mod recovery;
+
 fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
     let (self_tx, self_rx) = mpsc::channel(8);
     (

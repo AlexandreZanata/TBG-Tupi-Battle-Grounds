@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "provider": "asaas",
+  "environment": "synthetic",
+  "eventId": "fixture-event-one",
+  "merchantId": "fixture-merchant",
+  "paymentId": "fixture-payment-one",
+  "orderId": "fixture-order-one",
+  "kind": "received",
+  "amountMinor": 2000
+}

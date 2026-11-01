@@ -25,6 +25,9 @@ mod matches;
 mod ranked;
 pub mod release;
 pub mod release_admin;
+// P67 is deliberately unavailable to server binaries until activation is reviewed.
+#[cfg(test)]
+pub(crate) mod recovery;
 mod rulesets;
 mod schema;
 pub mod stats;
