@@ -220,6 +220,14 @@ Matrix additions: `evolution-tier0-two`, `evolution-tier1-a-wide`,
 `upgrade-dialog-focus-transition` (matched motion frames). Cover A/B, both languages,
 viewport/DPI cases, price/availability states, retained focus and dismissal.
 
-Evidence: native Linux release build, A/B local Practice flows and installation
-pending. Windows/web same-source packaged full-frame/motion comparisons remain
-pending consolidation. Source sharing alone is not proof of visual parity.
+Evidence: native Linux release `ba65ac8` built and installed. Actual champion
+and Stronghold tier 0/1/2 purchases passed on branch A at 1920x970 and branch B
+at 1366x768. Two-choice widths changed from `[193, 193]` to one `[392]` and
+from `[152, 152]` to one `[310]`, respectively. Focus remained through
+purchase; outside dismissal completed. Representative modal screenshots were
+visually inspected. The packaged installed executable separately passed the
+branch-A flow using its own assets. See [the work-front report](../phases/UPGRADE-modal-consistency.md).
+These observations cover representative Linux cases only; disabled states,
+the remaining locale/viewport/DPI cases and Windows/web same-source packaged
+full-frame/motion comparisons remain pending consolidation. Source sharing alone
+is not proof of visual parity.
