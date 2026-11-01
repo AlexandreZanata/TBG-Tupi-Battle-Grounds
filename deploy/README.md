@@ -312,3 +312,11 @@ static sites published by `web/deploy/publish.sh`, never by this script. They li
 which the domain template imports with `import tbg-web/*.caddy` (an empty glob is only a
 warning). See [web/deploy/README.md](../web/deploy/README.md) for release, rollback and the
 validation record.
+
+
+Current consolidated delivery and activation status supersede the original bootstrap
+steps above: [official releases guide](../docs/RELEASES.md),
+[development](../docs/DEVELOPMENT.md), [scaling](../docs/SCALING.md), and
+[consolidation report](../docs/phases/PLAYER-safe-consolidation.md). Static frontends
+and the immutable browser entry have separate controllers; normal frontend updates
+do not reload Caddy or restart the Rust service.

@@ -4,6 +4,10 @@ Branch `phase/web-landing-admin-foundation`, based on `origin/phase/backend-main
 at `8be248e025ed8f56290d94604da75536726d765b` (protocol 31, contract `w31-r6-097385fee9a10b0f`,
 schema 10, eight Arenas). Game rules, numbers, protocol and server code are unchanged.
 
+Subsequent owner-authorized publication and automatic-delivery preparation are recorded
+in [the player-safe consolidation report](PLAYER-safe-consolidation.md). The original
+front report below preserves its upload-only handoff state.
+
 ## Owner scope
 
 Create independent frontends for the landing (`tupibg.com`, `www` redirect) and a

@@ -6,6 +6,12 @@
 > **reviewer** (a strong model such as Claude or Codex) checks every phase
 > before the next one starts.
 
+Current main-consolidation candidate: [player-safe delivery report](phases/PLAYER-safe-consolidation.md),
+joining #37/#38/#39 and earlier desktop/game fronts. Its targeted validation and
+manual host bootstrap do not close native signing, email/admin authorization, balance,
+Windows device acceptance or first attested automatic activation gates. Mobile remains
+outside this candidate. See [official release operations](RELEASES.md).
+
 ## Order of work
 
 The game must be **playable and online-validated with placeholder visuals

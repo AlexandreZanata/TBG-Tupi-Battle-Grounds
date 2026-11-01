@@ -2,6 +2,90 @@
   "schema": 1,
   "notes": [
     {
+      "id": "player-safe-delivery",
+      "version": "0.1.1-rc.1+delivery",
+      "date": "2026-11-01",
+      "status": "candidate",
+      "kind": "maintenance",
+      "ruleset_version": 6,
+      "ruleset_hash": "097385fee9a10b0f",
+      "title": {
+        "en": "Shared desktop and protected delivery",
+        "pt-BR": "Desktop compartilhado e publicação protegida"
+      },
+      "summary": {
+        "en": "One desktop presentation, compatible game/server delivery and independent public pages. Gameplay numbers are preserved by this consolidation. Automatic activation still requires verified main releases.",
+        "pt-BR": "Uma interface desktop, publicação compatível do jogo e servidor e páginas públicas independentes. Esta consolidação preserva os valores do jogo. A ativação automática ainda exige versões verificadas da main."
+      },
+      "changes": [
+        {
+          "category": "interface",
+          "subject": {
+            "en": "Browser game",
+            "pt-BR": "Jogo no navegador"
+          },
+          "field": {
+            "en": "presentation",
+            "pt-BR": "apresentação"
+          },
+          "before": {
+            "en": "Separate HTML interface",
+            "pt-BR": "Interface HTML separada"
+          },
+          "after": {
+            "en": "Same Bevy desktop screens as Linux",
+            "pt-BR": "Mesmas telas desktop Bevy do Linux"
+          },
+          "reason": {
+            "en": "Keep visual refinements and navigation in one implementation.",
+            "pt-BR": "Manter refinamentos visuais e navegação em uma implementação."
+          }
+        },
+        {
+          "category": "platform",
+          "subject": {
+            "en": "Release delivery",
+            "pt-BR": "Publicação de versões"
+          },
+          "field": {
+            "en": "update process",
+            "pt-BR": "processo de atualização"
+          },
+          "before": {
+            "en": "Independent manual frontend publication",
+            "pt-BR": "Publicação manual independente das páginas"
+          },
+          "after": {
+            "en": "CI-approved, attested backend, browser and public static candidates; activation gated",
+            "pt-BR": "Versões de servidor, navegador e páginas públicas aprovadas pela CI e com proveniência; ativação condicionada"
+          },
+          "reason": {
+            "en": "Preserve running matches, old assets and player data during compatible updates.",
+            "pt-BR": "Preservar partidas em andamento, assets antigos e dados do jogador nas atualizações compatíveis."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Current boundaries",
+            "body": "Protocol 31 and schema 10. Public admin is an in-preparation page, not a functioning console. Email recovery, native signing custody, real Windows visual acceptance and mobile remain pending. This is not a D-33 balance acceptance or full-suite release claim."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Limites atuais",
+            "body": "Protocolo 31 e banco versão 10. O admin público é uma página de preparação, sem console funcional. Recuperação por email, custódia de assinatura nativa, aceitação visual em Windows real e mobile continuam pendentes. Não há aprovação de balanceamento D-33 nem alegação de validação pela suíte completa."
+          }
+        ]
+      },
+      "document": "docs/patches/2026-11-01-player-safe-delivery.md",
+      "evidence": {
+        "accepted": false,
+        "report": "docs/phases/PLAYER-safe-consolidation.md"
+      }
+    },
+    {
       "id": "p71-main-auth-preview",
       "version": "0.1.1-rc.1+p71",
       "date": "2026-11-01",

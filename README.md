@@ -61,9 +61,14 @@ flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
 ## Run it locally
 
 ```bash
-cargo install --locked trunk                       # once
-(cd crates/tbg-client && trunk build --release)    # build the browser client
-TBG_AUTH_ORIGINS=http://localhost:8080,http://127.0.0.1:8080 TBG_STATIC_DIR=crates/tbg-client/dist cargo run --release -p tbg-server
+# Once, if Trunk is not installed:
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 cargo install --locked trunk --version 0.22.1
+# Build under the shared lock; exit 75 means defer, never retry automatically.
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 bash -euc '(cd crates/tbg-client && trunk build); cargo build --locked -p tbg-server'
+TBG_AUTH_ORIGINS=http://localhost:8080,http://127.0.0.1:8080 \
+  TBG_DB=/tmp/tbg-development.sqlite3 TBG_STATIC_DIR=crates/tbg-client/dist target/debug/tbg-server
 ```
 
 Open `http://localhost:8080/` in a desktop browser.
