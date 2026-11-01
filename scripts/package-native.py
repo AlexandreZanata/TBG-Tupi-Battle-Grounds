@@ -42,7 +42,9 @@ def main():
     if args.no_archive:
         name += f"-dev-{commit[:12]}"
     package = args.output / name
-    package.mkdir(parents=True, exist_ok=True)
+    if package.exists():
+        raise SystemExit("Refusing to reuse existing package staging; choose a fresh output directory")
+    package.mkdir(parents=True)
     binary_name = "tbg-client.exe" if args.platform == "windows" else "tbg-client"
     shutil.copy2(args.binary, package / binary_name)
     (package / binary_name).chmod(0o755)
@@ -103,8 +105,10 @@ def managed(args):
     if notes.get("build_id") != args.build_id:
         raise SystemExit("the notes name another build id")
     stage = args.output / f"managed-{args.build_id}"
-    if stage.exists():
-        shutil.rmtree(stage)
+    outputs = [stage, args.output / f"package-{args.build_id}.tar.gz",
+               args.output / f"descriptor-{args.build_id}.json", args.output / f"notes-{args.build_id}.json"]
+    if any(path.exists() for path in outputs):
+        raise SystemExit("Refusing to overwrite a managed release; choose a fresh build id/output")
     stage.mkdir(parents=True)
     shutil.copy2(binary, stage / "tbg-client")
     (stage / "tbg-client").chmod(0o755)
@@ -118,7 +122,12 @@ def managed(args):
         "build_id": args.build_id, "version": version, "commit": commit, "platform": "linux",
         "architecture": "x86_64", "contract": contract,
         "binary_sha256": hashlib.sha256((stage / "tbg-client").read_bytes()).hexdigest(),
+        "cargo_lock_sha256": hashlib.sha256((ROOT / "Cargo.lock").read_bytes()).hexdigest(),
     }, indent=2) + "\n")
+    files = [{"path":path.relative_to(stage).as_posix(),"size":path.stat().st_size,
+              "sha256":hashlib.sha256(path.read_bytes()).hexdigest()}
+             for path in sorted(stage.rglob("*")) if path.is_file()]
+    (stage / "file-manifest.json").write_text(json.dumps({"schema":1,"source_commit":commit,"files":files},indent=2)+"\n")
     archive = args.output / f"package-{args.build_id}.tar.gz"
     with tarfile.open(archive, "w:gz") as dest:
         for path in sorted(stage.rglob("*")):

@@ -7,6 +7,10 @@ linuxdeploy="$(realpath -- "${1:?Pass the official linuxdeploy AppImage}")"
 version="$(python3 -c 'import tomllib; print(tomllib.load(open("crates/tbg-client/Cargo.toml", "rb"))["package"]["version"])')"
 package="target/native/tupi-battle-grounds-$version-linux-x86_64"
 appdir="$project_dir/target/native/AppDir"
+if [[ -e "$appdir" || -e "$project_dir/target/native/tupi-battle-grounds-$version-linux-x86_64.AppImage" ]]; then
+    echo 'Refusing to reuse AppImage staging or overwrite an immutable artifact.' >&2
+    exit 1
+fi
 mkdir -p "$appdir/usr/bin" "$appdir/usr/share/applications" "$appdir/usr/share/icons/hicolor/512x512/apps"
 cp "$package/tbg-client" "$appdir/usr/bin/tbg-client"
 cp -a "$package/assets" "$appdir/usr/bin/"

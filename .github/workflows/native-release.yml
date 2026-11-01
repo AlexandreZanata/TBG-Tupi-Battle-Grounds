@@ -14,12 +14,19 @@ on:
     paths:
       - 'crates/tbg-client/**'
       - 'crates/tbg-core/**'
+      - 'crates/tbg-update/**'
       - 'Cargo.*'
       - 'docs/patches/**'
       - 'scripts/check-patch-notes.py'
       - 'scripts/package-native.py'
       - 'scripts/install-linux.sh'
+      - 'scripts/package-appimage.sh'
+      - 'scripts/managed-bootstrap.sh'
       - '.github/workflows/native-release.yml'
+
+concurrency:
+  group: native-linux-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -32,12 +39,16 @@ jobs:
       TBG_DEFAULT_SERVER: wss://tbg.abastevo.com.br/ws
       TBG_SOURCE_COMMIT: ${{ github.sha }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable action
+        with:
+          toolchain: 1.99.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.11'
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
           key: native-linux
       - name: Install native build dependencies
@@ -62,9 +73,10 @@ jobs:
       - name: Package AppImage
         run: |
           curl --fail --location --retry 3 -o target/linuxdeploy.AppImage https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          echo '8aea8da0f7f7039d2a2cecb14657d752a222a5e1d3825caeef186c82f751cdd1  target/linuxdeploy.AppImage' | sha256sum --check --strict
           chmod +x target/linuxdeploy.AppImage
           bash scripts/package-appimage.sh target/linuxdeploy.AppImage
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: tupi-battle-grounds-linux-${{ github.sha }}
           path: |
@@ -80,8 +92,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: tupi-battle-grounds-linux-${{ github.sha }}
           path: release
@@ -90,7 +104,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            echo "The immutable release already exists; keeping its verified assets."
-            exit 0
+            echo "Refusing to report publication success for an existing immutable release. Use a fresh reviewed tag." >&2
+            exit 1
           fi
           gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Tupi Battle Grounds $GITHUB_REF_NAME · Linux" --notes-file deploy/native/RELEASE-NOTES.md
