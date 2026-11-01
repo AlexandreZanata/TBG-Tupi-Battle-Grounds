@@ -108,6 +108,10 @@ impl UnitVisual {
     pub fn kind(&self) -> UnitKind {
         self.form.0
     }
+    /// The installed form may precede the animator refresh within the same snapshot.
+    pub(crate) fn form(&self) -> (u8, u8) {
+        (self.form.1, self.form.2)
+    }
     /// The unit fires or strikes through its own art kit.
     pub fn has_kit(&self) -> bool {
         self.kit().is_some()

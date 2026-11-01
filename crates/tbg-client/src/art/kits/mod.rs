@@ -38,7 +38,7 @@ mod nester;
 mod oilpress;
 mod old_finn;
 mod puppetmaster;
-mod pyre_warden;
+pub(crate) mod pyre_warden;
 mod rampart;
 mod rattle_tick;
 mod ravager;

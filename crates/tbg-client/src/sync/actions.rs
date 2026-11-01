@@ -34,12 +34,27 @@ pub(super) fn cue(
         Event::AbilityStarted { .. } | Event::AbilityResolved { .. } => {
             super::special_cues::cue(commands, fx, map, visuals, ev);
         }
-        Event::ProfaneFlame { start, end, .. } => {
+        Event::ProfaneFlame {
+            unit, start, end, ..
+        } => {
+            let nozzle = map
+                .0
+                .get(&unit)
+                .and_then(|entity| visuals.get(*entity).ok())
+                .filter(|(visual, _, _)| visual.kind() == UnitKind::PyreWarden && !visual.dying)
+                .map(|(visual, _, animator)| {
+                    let socket = crate::art::rig::Node::Prop(crate::art::rig::Socket::WeaponR);
+                    (
+                        animator.joints[socket.index()],
+                        crate::art::kits::pyre_warden::muzzle(visual.form()),
+                    )
+                });
             crate::vfx::profane_flame(
                 commands,
                 fx.vfx,
                 super::world_x(start, fx.you),
                 super::world_x(end, fx.you),
+                nozzle,
             );
         }
         Event::DrillFused { x, .. } => {
