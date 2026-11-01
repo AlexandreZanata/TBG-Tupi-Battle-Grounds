@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 use tbg_core::{Archetype, Seat, UnitKind, UnitView};
 
-use crate::{config, crowd, visuals::UnitVisual};
+use crate::{art::aim::Aim, config, crowd, visuals::UnitVisual};
 
 #[derive(Component)]
 pub(crate) struct LaneAnchor {
@@ -84,7 +84,13 @@ pub(super) fn update(
     time: Res<Time>,
     mut scratch: Local<Scratch>,
     library: Res<crate::art::FigureLibrary>,
-    mut units: Query<(&LaneAnchor, &mut CrowdState, &mut Transform, &UnitVisual)>,
+    mut units: Query<(
+        &LaneAnchor,
+        &mut CrowdState,
+        &mut Transform,
+        &UnitVisual,
+        Option<&Aim>,
+    )>,
 ) {
     let enabled = *scratch
         .enabled
@@ -97,7 +103,7 @@ pub(super) fn update(
     } = &mut *scratch;
     bodies.clear();
     offsets.clear();
-    for (anchor, state, _, visual) in &units {
+    for (anchor, state, _, visual, aim) in &units {
         let mut body = crowd::Body {
             anchor_x: anchor.pos.x,
             ghost: is_ghost(visual, anchor),
@@ -111,6 +117,18 @@ pub(super) fn update(
             body.anchor_x += (depth.x + depth.y) * 0.5 * body.facing;
             body.half_length = (depth.y - depth.x) * 0.5;
         }
+        if visual.kind() == UnitKind::Shatterback {
+            let (tier, branch) = visual.form();
+            let form = library.get(visual.kind(), tier, branch);
+            let lunge =
+                crate::art::melee::strike_profile_for_unit(visual.kind(), tier, branch).lunge;
+            body.include_envelope(
+                form.occupancy.x,
+                form.occupancy.y + lunge,
+                form.body_radius,
+                aim.map_or(visual.yaw, |aim| aim.current_yaw),
+            );
+        }
         bodies.push(body);
         offsets.push(state.0);
     }
@@ -122,7 +140,7 @@ pub(super) fn update(
             &crowd::Params::default(),
         );
     }
-    for ((anchor, mut state, mut transform, _), offset) in units.iter_mut().zip(offsets.iter()) {
+    for ((anchor, mut state, mut transform, _, _), offset) in units.iter_mut().zip(offsets.iter()) {
         state.0 = *offset;
         let delta = if enabled {
             Vec3::new(offset.dx, 0.0, offset.dz)

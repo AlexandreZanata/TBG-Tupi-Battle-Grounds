@@ -127,7 +127,7 @@ pub fn plate(tier: u8, branch: u8, index: usize) -> FigureSpec {
             ));
         }
     }
-    if f.b {
+    if f.b && f.t2 {
         v.push(
             part(Body(Chest), Box(0.045, 0.018, 0.32), ORANGE, [x, 0.40, z]).rot([0.0, 25.0, 0.0]),
         );

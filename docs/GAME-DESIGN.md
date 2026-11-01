@@ -1499,3 +1499,17 @@ the final display. This does not add a targetable head zone, physical server
 collider, damage multiplier, new range or authoritative movement rule. If
 presentation cannot fit existing combat spacing, report the concrete conflict
 before specifying a mechanical exception. See P71 S1d/S1e.
+
+
+#### P71 Shatterback head occupancy follow-up (Proposed presentation)
+
+The owner extends the existing D-57/P71 visible-body spacing to Shatterback on
+2026-11-01. Its cached form envelope includes the head, beak, torso and limbs
+through Idle, Walk and its body-driven melee attack. The displayed crowd
+footprint projects that envelope at the current figure facing and reserves its
+existing cosmetic lunge. Apply it to allied and opposing figures, including
+Evolution growth and after detachable plates are lost. Do not use a plate's
+remaining HP to shrink the flesh body. This changes client display offsets only:
+no authoritative position, collision, attack range, stat, protocol or outcome
+changes. The same request removes the orange/gold stripe from B1 shell plates;
+Base, A1 and both tier-2 plate identities retain their existing art.

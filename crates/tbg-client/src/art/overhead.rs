@@ -25,7 +25,10 @@ pub fn height(
     let mut top = 0.0f32;
     let mut radius = 0.0f32;
     let mut depth = Vec2::new(f32::INFINITY, f32::NEG_INFINITY);
-    for clip in [Clip::Idle, Clip::Walk] {
+    let clips = [Clip::Idle, Clip::Walk, Clip::AttackMelee];
+    // The turtle strikes with its body; include its head/paw drive in contact clearance.
+    let samples = if kind == UnitKind::Shatterback { 3 } else { 2 };
+    for clip in clips.into_iter().take(samples) {
         for step in 0..16 {
             let pose = a.pose(clip, step as f32 * clip.duration() / 16.0);
             let world = super::presentation::pose_world(kind, &form.plan, &pose);

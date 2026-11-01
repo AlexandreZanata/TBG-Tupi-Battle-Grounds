@@ -10,6 +10,21 @@ pub struct Body {
     pub ghost: bool,
 }
 
+impl Body {
+    /// Project a cached local body envelope, including its forward head, into the lane.
+    pub fn include_envelope(&mut self, near: f32, far: f32, width: f32, yaw: f32) {
+        let center = (near + far) * 0.5;
+        let half = (far - near) * 0.5;
+        let (sin, cos) = yaw.sin_cos();
+        self.anchor_x += center * sin;
+        self.half_length = width * cos.abs() + half * sin.abs();
+        // The solver's lane-depth origin stays at the foot anchor, so cover the offset too.
+        self.radius = self
+            .radius
+            .max(width * sin.abs() + half * cos.abs() + (center * cos).abs());
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Offset {
     pub dx: f32,
