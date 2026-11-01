@@ -52,7 +52,24 @@ victory.
 
 ## Status log
 
-- 2026-11-01: native reference captured from the rc.1 Linux build; desktop
-  presentation enabled for wasm, `bevy_ui()` constant, `index.html` reduced,
-  DOM assets and their tests removed. Web build pending (shared validation
-  lock held by another session).
+- 2026-11-01: native reference captured from the rc.1 Linux build (17
+  scenarios); desktop presentation enabled for wasm, `bevy_ui()` constant,
+  `index.html` reduced, DOM assets and their tests removed (`0061723`).
+- 2026-11-01: the lobby battle demo panicked on wasm ("time not implemented
+  on this platform": `std::time::SystemTime` in `sync/lobby_battle.rs`); the
+  browser now seeds it from `Date.now()` (`b2c2d9e`).
+- 2026-11-01: first parity result. With the same Bevy screenshot on both
+  platforms (web build with `--features ui-acceptance`, comparison only, never
+  deployed), the lobby differs from native by a mean of 5.5 (0–255 scale): the
+  same header, menu, demo battle, cards and news. Page screenshots of the
+  production web build already matched the Troops, Patch notes, Arcanas,
+  Stronghold, Arenas and Settings panels within 2–7. Remaining scenarios
+  (ranking, training, battle, War Council, Reserve, Fortification, unit
+  details, arena training) are being recaptured; the first web run used a
+  percent-encoded `?server=` that `config::url_param` reads raw (a harness
+  mistake, not a product issue: production has no `?server=`).
+- Validation: `cargo test -p tbg-client --bin tbg-client` 160 passed (2
+  ignored); clippy `-p tbg-client -D warnings` clean; `cargo check --target
+  wasm32-unknown-unknown -p tbg-client -p tbg-core` clean; release wasm and
+  Trunk builds succeed. Known limit: phones lose D-20's DOM keyboard input
+  (out of the desktop-only scope).
