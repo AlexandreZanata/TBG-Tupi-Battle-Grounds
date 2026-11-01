@@ -695,7 +695,9 @@ guarantee or thousands-player certification is implied by planning.
 
 ## 11. Execution and completion review — 2026-10-31
 
-**Status: Draft; not accepted for stable activation.** Initial implementation
+**Status: Draft; not accepted for stable activation.**
+Review: [PR #33 to main](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/33).
+Initial implementation
 `e744ce9` is preserved. This continuation merges the current competitive-audit
 front through `f706c91` without importing the private operations branch. Final
 runtime/source candidate: `16cd3e3` (documentation commits follow separately).
