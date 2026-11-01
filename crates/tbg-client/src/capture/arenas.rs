@@ -14,9 +14,27 @@ fn start(
     time: Res<Time>,
     buttons: Query<&UiAction>,
     mut queue: ResMut<ActionQueue>,
-    mut done: Local<bool>,
+    catalog: Res<crate::training::Catalog>,
+    shell: Res<crate::ui::shell::Shell>,
+    mut training: ResMut<crate::training::Requests>,
+    mut stage: Local<u8>,
 ) {
-    if *done || time.elapsed_secs() < 1. {
+    if *stage >= 2 || time.elapsed_secs() < 1. {
+        return;
+    }
+    if *stage == 1 {
+        if shell.panel == crate::ui::shell::Panel::Troops
+            && catalog.tab == crate::training::Tab::Practice
+        {
+            let target = crate::config::url_param("capture_arena").unwrap_or("storm".into());
+            assert_eq!(
+                catalog.arena.slug(),
+                target,
+                "Practice setup must show the Arena selected on its page"
+            );
+            training.0.push(crate::training::Action::Practice);
+            *stage = 2;
+        }
         return;
     }
     let choices: Vec<_> = buttons
@@ -47,5 +65,5 @@ fn start(
         arena.slug()
     );
     queue.0.push(*action);
-    *done = true;
+    *stage = 1;
 }

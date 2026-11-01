@@ -265,3 +265,19 @@ survives a simultaneous refresh completion. `cargo test ... -p tbg-client
 boundary cases. Scoped binary Clippy passed. A fresh final-source Linux/WASM
 build follows these source changes; the first binary is not the published
 artifact and is not silently relabeled.
+
+### Packaged practice journey correction
+
+The first packaged AppImage lobby capture passed with boot_ready=true,
+scene_waiting=false and zero pending/failed images or text. The Arena capture
+then asserted default MatchInfo Forest before a match existed: consolidation
+had changed Train here to open the Practice configuration screen, while the
+old capture helper never pressed that screen's Play action. Investigation also
+found its Catalog retained the startup Arena, so the configuration label could
+show Forest after choosing Storm elsewhere. Opening the shared catalog now
+synchronizes the saved Arena; the helper verifies that label, sends the normal
+Practice action and waits for InMatch before checking the actual Arena.
+This is presentation/integration glue, not a rule or balance change. The
+failed assertion is not reported as a successful gameplay observation. The
+source and package are rebuilt after this correction; no published artifact
+or existing release is overwritten.

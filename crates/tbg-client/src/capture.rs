@@ -144,6 +144,11 @@ fn capture(
     }
     #[cfg(tbg_desktop)]
     {
+        if crate::config::url_param("capture_panel").as_deref() == Some("arena_train")
+            && *state.get() != crate::GameState::InMatch
+        {
+            return;
+        }
         if crate::config::url_param("capture_panel").as_deref() == Some("reserve")
             && reserve.is_none_or(|status| !status.done)
         {
