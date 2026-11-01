@@ -14,9 +14,9 @@ use crate::art::{
     rig::{Joint::*, Node, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const WINE: Color = Color::srgb(0.38, 0.08, 0.13);
-const WINE_DARK: Color = Color::srgb(0.22, 0.05, 0.08);
-pub const BLOOD: Color = Color::srgb(0.88, 0.1, 0.14);
+const WINE: Color = WINE_CLOTH;
+const WINE_DARK: Color = WINE_SHADE;
+pub const BLOOD: Color = BLOOD_THREAD;
 /// Staff length (socket space, +Y).
 pub const STAFF: f32 = 1.05;
 
@@ -62,14 +62,14 @@ fn robe(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         part(
             Body(Chest),
             Frustum(t.x * 0.55, t.x * 0.42, t.y * 0.95),
-            WINE,
+            if f.b { WINE_DARK } else { WINE },
             [0.0, t.y * 0.5, 0.0],
         )
         .scale([1.0, 1.0, 0.75]),
         part(
             Body(Hips),
             Frustum(t.x * 0.48, t.x * 0.8, p.leg * 0.95),
-            WINE,
+            if f.b { WINE_DARK } else { WINE },
             [0.0, -p.leg * 0.45, 0.0],
         )
         .scale([1.0, 1.0, 0.85]),
@@ -100,6 +100,17 @@ fn robe(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             WINE,
             [0.0, -p.arm * 0.45, 0.0],
         ));
+    }
+    if f.a {
+        v.push(
+            part(
+                Body(Chest),
+                Frustum(t.x * 0.45, t.x * 0.60, 0.09),
+                LINEN,
+                [0.0, t.y * 0.96, 0.0],
+            )
+            .scale([1.0, 1.0, 0.72]),
+        );
     }
     if f.a && f.t2 {
         // Last Offering: a heart in a gold cage on the chest.
@@ -155,6 +166,14 @@ fn robe(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 fn spindle(v: &mut Vec<PartSpec>, at: Node, lit: bool) {
     v.extend(gear::staff(at, STAFF, WINE_DARK));
     let [x, y, z] = gear::staff_top(STAFF);
+    for offset in [-0.045, 0.0, 0.045] {
+        v.push(part(
+            at,
+            Ring(0.008, 0.058, 340.0),
+            LINEN,
+            [x, y + offset, z],
+        ));
+    }
     let thread = part(at, Ball(0.07), BLOOD, [x, y, z]).scale([0.8, 1.2, 0.8]);
     v.extend([
         if lit { thread.glow() } else { thread },
