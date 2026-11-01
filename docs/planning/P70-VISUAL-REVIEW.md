@@ -145,3 +145,19 @@ The owner policy permits deferring contested compilation and continuing
 independent work; Trident range calibration and actual after evidence remain
 dependent and deferred. No arbitrary range increase substitutes for that
 calibration. The corresponding competitive change is not yet implemented.
+
+The unchanged frozen executable also produced 50 auxiliary pose sheets
+(Beetling, Crate, Microdrill, Duodrill and Megadrill). These five entities
+remain outside the 46 champion count. Their preview columns do not imply
+playable Evolution; spawning, cargo and fusion need parent-event evidence.
+The index now links 630 authentic before originals, including the original
+460 champion sheets and 120 S1 enemy diagnostics. Each new auxiliary PNG
+was fully decoded and hashed at capture time.
+
+The live recorder now accepts the fixed roster through `FULL_POOL` and the
+manifest, retains the three pilot compositions, and derives a conservative
+ordinary engagement from the existing kind/form stats for other champions.
+It records the subject's real ID, separates its attack/ability events from
+battle-wide counts, and retains healing and summon attribution. A generic
+engagement is not proof of conditional abilities, all clips or Victory.
+Syntax/format checks passed; runtime remains deferred with the client build.

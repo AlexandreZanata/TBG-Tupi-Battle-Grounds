@@ -1,4 +1,4 @@
-//! Opt-in P70 recordings drive ordinary laboratory actions and observe canonical events.
+//! Opt-in P70 roster recordings drive ordinary laboratory actions and observe canonical events.
 
 use crate::{
     camera::ArenaCamera,
@@ -31,12 +31,11 @@ struct Settings {
 }
 impl Settings {
     fn read() -> Result<Self, String> {
-        let unit = match config::url_param("unit").as_deref() {
-            Some("Trident") => UnitKind::Trident,
-            Some("PyreWarden") => UnitKind::PyreWarden,
-            Some("OldFinn") => UnitKind::OldFinn,
-            _ => return Err("unit must select a P70 pilot".into()),
-        };
+        let name = config::url_param("unit").ok_or("missing unit")?;
+        let unit = tbg_core::FULL_POOL
+            .into_iter()
+            .find(|kind| format!("{kind:?}").eq_ignore_ascii_case(&name))
+            .ok_or("unit must belong to the frozen 46-champion roster")?;
         let tier = number("tier", 0)?;
         let branch = number("branch", 0)?;
         if tier > 2 || branch > 1 || (tier == 0 && branch != 0) {
@@ -52,7 +51,10 @@ impl Settings {
             match unit {
                 UnitKind::OldFinn => 4_300,
                 UnitKind::PyreWarden => 2_000,
-                _ => 1_500,
+                UnitKind::Trident => 1_500,
+                _ => (tbg_core::content::effective_stats(unit, tier as u8, branch as u8, 0).range
+                    + 500)
+                    .clamp(1_500, 12_000) as u64,
             },
         )?;
         let seconds = number("trial_seconds", 16)?;
@@ -155,7 +157,14 @@ fn composition(settings: &Settings) -> (Vec<TrainingUnitSpec>, Vec<TrainingUnitS
         branch: settings.form.1,
         x: Some(mirror(start)),
     }];
-    if settings.unit != UnitKind::Trident {
+    let definition = tbg_core::content::def(settings.unit);
+    let frontline = matches!(settings.unit, UnitKind::PyreWarden | UnitKind::OldFinn)
+        || matches!(
+            definition.archetype,
+            tbg_core::Archetype::Support | tbg_core::Archetype::Control
+        )
+        || definition.range > 1_500;
+    if frontline {
         // An ordinary high-HP ally stays in Pyre's initial segment and protects Finn's repeated casts.
         shooters.push(TrainingUnitSpec {
             x: Some(mirror(start + settings.distance / 2)),
@@ -232,6 +241,9 @@ fn prepare(
                     "unit": format!("{:?}", settings.unit), "tier": settings.form.0, "branch": settings.form.1,
                     "shooter_seat": format!("{:?}", settings.seat), "viewer_seat": "A", "seed": settings.seed,
                     "initial_distance": settings.distance, "requested_wall_seconds": settings.seconds,
+                    "subject_id": session.state().units.iter().find(|unit|
+                        unit.kind == settings.unit && unit.seat == settings.seat
+                        && (unit.tier, unit.branch) == settings.form).map(|unit| unit.id),
                     "active_ticks": session.active_ticks(), "scenario": format!("{:?}", session.scenario()),
                     "quality": config::url_param("quality").unwrap_or_else(|| "standard".into()),
                     "viewport": [window.physical_width(), window.physical_height()], "dpi": window.scale_factor(),
@@ -312,6 +324,9 @@ fn record(
                 "id": row.id, "unit": format!("{:?}", row.kind), "seat": format!("{:?}", row.seat),
                 "tier": row.tier, "branch": row.branch, "initial_hp": row.initial_hp,
                 "dealt": row.dealt_total(), "dealt_friendly": row.dealt_friendly,
+                "healed_allies": row.healed_allies, "healed_self": row.healed_self,
+                "summoner": row.summoner, "shield_absorbed": row.shield_absorbed,
+                "plates_absorbed": row.plates_absorbed,
                 "taken": row.taken_total(), "died_at": row.died_at,
             })
         })

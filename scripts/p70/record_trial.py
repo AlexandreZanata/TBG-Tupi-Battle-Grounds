@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Record one real P70 training engagement, preserving video, canonical events and provenance.
+"""Record one real P70 roster training engagement, preserving video, canonical events and provenance.
 
 The client pauses only during startup. ffmpeg begins before ordinary combat resumes.
 No build, simulation speed change, synthetic damage or effect is introduced here.
@@ -19,7 +19,7 @@ import sys
 import time
 
 sys.dont_write_bytecode = True
-from capture_roster import ART_PATHS, ROOT, git, sha256, write_new
+from capture_roster import ART_PATHS, MANIFEST, ROOT, git, sha256, write_new
 
 FORMS = {'Base': (0, 0), 'A1': (1, 0), 'A2': (2, 0), 'B1': (1, 1), 'B2': (2, 1)}
 DISTANCES = {'Trident': 1500, 'PyreWarden': 2000, 'OldFinn': 4300}
@@ -69,9 +69,11 @@ def environment(args):
         'TBG_CAPTURE_POLISH_LIVE': str(args.output), 'TBG_CAPTURE_SIZE': args.size,
         'TBG_UNIT': args.unit, 'TBG_TIER': str(tier), 'TBG_BRANCH': str(branch),
         'TBG_TRIAL_SEAT': args.seat, 'TBG_TRIAL_SEED': str(args.seed),
-        'TBG_TRIAL_DISTANCE': str(args.distance), 'TBG_TRIAL_SECONDS': str(args.seconds),
+        'TBG_TRIAL_SECONDS': str(args.seconds),
         'TBG_QUALITY': args.quality, 'TBG_SERVER': 'ws://127.0.0.1:9/ws',
     })
+    if args.distance is not None:
+        env['TBG_TRIAL_DISTANCE'] = str(args.distance)
     return env
 
 
@@ -95,6 +97,8 @@ def record(args, provenance):
             if (ready['unit'], ready['shooter_seat'], ready['tier'], ready['branch']) != (
                     args.unit, args.seat, *FORMS[args.form]):
                 raise ValueError('Client ready metadata differs from the requested scenario')
+            if not isinstance(ready.get('subject_id'), int):
+                raise ValueError('Subject identity missing from the actual reset training state')
             if ready['active_ticks'] != 0:
                 raise ValueError('Recording must start from the reset canonical training state')
             if ready['viewport'] != list(map(int, args.size.split('x'))):
@@ -134,9 +138,21 @@ def collect(args, provenance, ready, finished, video):
     records = [json.loads(line) for line in (args.output / 'events.jsonl').read_text().splitlines()]
     counts = Counter(name for record in records for event in record['events']
                      for name in (event if isinstance(event, dict) else [str(event)]))
+    subject = Counter()
+    for record in records:
+        for event in record['events']:
+            if not isinstance(event, dict):
+                continue
+            for name, payload in event.items():
+                if not isinstance(payload, dict):
+                    continue
+                if name == 'AttackStart' and payload.get('from') == {'Unit': ready['subject_id']}:
+                    subject[name] += 1
+                if name in ('AbilityStarted', 'AbilityResolved', 'ProfaneFlame') and payload.get('unit') == ready['subject_id']:
+                    subject[name] += 1
     if not counts['AttackStart'] or not counts['Hit']:
         raise ValueError('No actual AttackStart/Hit engagement observed; evidence is incomplete')
-    if args.unit == 'PyreWarden' and not counts['ProfaneFlame']:
+    if args.unit == 'PyreWarden' and not subject['ProfaneFlame']:
         raise ValueError('No actual ProfaneFlame observed; evidence is incomplete')
     log = (args.output / 'renderer.log').read_text(errors='replace')
     adapter = re.search(r'AdapterInfo\s*\{[^\n]*\}', log)
@@ -150,9 +166,13 @@ def collect(args, provenance, ready, finished, video):
     summary = {
         **provenance, 'kind': 'real_training_temporal_recording',
         'camera': ready['camera'], 'dpi': ready['dpi'], 'renderer': adapter.group(0),
-        'video': streams[0], 'event_counts': dict(counts), 'summary': finished, 'artifacts': artifacts,
+        'video': streams[0], 'event_counts': dict(counts), 'subject_id': ready['subject_id'],
+        'subject_source_event_counts': dict(subject), 'actual_initial_distance': ready['initial_distance'],
+        'summary': finished, 'artifacts': artifacts,
         'simulation_seconds_observed': finished['observed_active_ticks'] / finished['tick_hz'],
         'limitations': ['Single configured engagement; all clips/transitions and P63 Victory remain separate.',
+                        'Zero subject source events means no subject primary-action evidence, even if other units fought.',
+                        'Conditional healing, passengers, summons and fusion need their own observed scenarios.',
                         'Event counts alone do not verify projectile readability, Echo counts or visual contact.',
                         'Rendering throughput and active simulation time must be compared with wall_seconds.',
                         'Seat B is a real opponent-side shooter viewed through the normal Seat A laboratory camera.'],
@@ -181,7 +201,7 @@ def frozen_provenance(args, parser):
             'form': args.form, 'seat': args.seat, 'quality': args.quality, 'seed': args.seed,
             'initial_distance': args.distance, 'seconds': args.seconds, 'fps': args.fps,
             'size': args.size, 'artifact_derivation': 'original-renderer-window-recording',
-            'platform': 'linux', 'scenario': 'P70 canonical laboratory engagement v1'}
+            'platform': 'linux', 'scenario': 'P70 canonical laboratory engagement v2'}
 
 
 def main():
@@ -191,7 +211,8 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--phase', choices=['before', 'after'], required=True)
     parser.add_argument('--content-sha', required=True)
-    parser.add_argument('--unit', choices=list(DISTANCES), required=True)
+    cohort = [unit['id'] for unit in json.loads(MANIFEST.read_text())['champions']]
+    parser.add_argument('--unit', choices=cohort, required=True)
     parser.add_argument('--form', choices=list(FORMS), default='Base')
     parser.add_argument('--seat', choices=['A', 'B'], default='A')
     parser.add_argument('--quality', choices=['standard', 'low'], default='standard')
@@ -205,8 +226,8 @@ def main():
     parser.add_argument('--existing-display', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
     args.binary, args.output = args.binary.resolve(), args.output.resolve()
-    args.distance = args.distance if args.distance is not None else DISTANCES[args.unit]
-    if not 500 <= args.distance <= 12000 or not 0 <= args.seed < 2**64:
+    args.distance = args.distance if args.distance is not None else DISTANCES.get(args.unit)
+    if (args.distance is not None and not 500 <= args.distance <= 12000) or not 0 <= args.seed < 2**64:
         parser.error('Distance must be 500..12000; seed must fit u64')
     if not re.fullmatch(r'[1-9]\d{2,3}x[1-9]\d{2,3}', args.size):
         parser.error('Size must be WIDTHxHEIGHT')

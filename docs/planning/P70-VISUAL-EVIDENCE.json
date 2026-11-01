@@ -3027,36 +3027,96 @@
       "id": "Beetling",
       "parent": "Nester",
       "review_status": "pending",
-      "before": [],
-      "after": []
+      "before": [
+        "before-Beetling-ally-threequarter-standard-Idle",
+        "before-Beetling-ally-threequarter-standard-Walk",
+        "before-Beetling-ally-threequarter-standard-AttackMelee",
+        "before-Beetling-ally-threequarter-standard-AttackRanged",
+        "before-Beetling-ally-threequarter-standard-Cast",
+        "before-Beetling-ally-threequarter-standard-Hit",
+        "before-Beetling-ally-threequarter-standard-Death",
+        "before-Beetling-ally-threequarter-standard-Spawn",
+        "before-Beetling-ally-threequarter-standard-Evolve",
+        "before-Beetling-ally-threequarter-standard-Victory"
+      ],
+      "after": [],
+      "baseline_scope": "Figure-only samples. Base is the auxiliary form; other preview columns do not assert gameplay Evolution. Parent events remain pending."
     },
     {
       "id": "Crate",
       "parent": "Smuggler",
       "review_status": "pending",
-      "before": [],
-      "after": []
+      "before": [
+        "before-Crate-ally-threequarter-standard-Idle",
+        "before-Crate-ally-threequarter-standard-Walk",
+        "before-Crate-ally-threequarter-standard-AttackMelee",
+        "before-Crate-ally-threequarter-standard-AttackRanged",
+        "before-Crate-ally-threequarter-standard-Cast",
+        "before-Crate-ally-threequarter-standard-Hit",
+        "before-Crate-ally-threequarter-standard-Death",
+        "before-Crate-ally-threequarter-standard-Spawn",
+        "before-Crate-ally-threequarter-standard-Evolve",
+        "before-Crate-ally-threequarter-standard-Victory"
+      ],
+      "after": [],
+      "baseline_scope": "Figure-only samples. Base is the auxiliary form; other preview columns do not assert gameplay Evolution. Parent events remain pending."
     },
     {
       "id": "Microdrill",
       "parent": "Drillnest",
       "review_status": "pending",
-      "before": [],
-      "after": []
+      "before": [
+        "before-Microdrill-ally-threequarter-standard-Idle",
+        "before-Microdrill-ally-threequarter-standard-Walk",
+        "before-Microdrill-ally-threequarter-standard-AttackMelee",
+        "before-Microdrill-ally-threequarter-standard-AttackRanged",
+        "before-Microdrill-ally-threequarter-standard-Cast",
+        "before-Microdrill-ally-threequarter-standard-Hit",
+        "before-Microdrill-ally-threequarter-standard-Death",
+        "before-Microdrill-ally-threequarter-standard-Spawn",
+        "before-Microdrill-ally-threequarter-standard-Evolve",
+        "before-Microdrill-ally-threequarter-standard-Victory"
+      ],
+      "after": [],
+      "baseline_scope": "Figure-only samples. Base is the auxiliary form; other preview columns do not assert gameplay Evolution. Parent events remain pending."
     },
     {
       "id": "Duodrill",
       "parent": "Drillnest",
       "review_status": "pending",
-      "before": [],
-      "after": []
+      "before": [
+        "before-Duodrill-ally-threequarter-standard-Idle",
+        "before-Duodrill-ally-threequarter-standard-Walk",
+        "before-Duodrill-ally-threequarter-standard-AttackMelee",
+        "before-Duodrill-ally-threequarter-standard-AttackRanged",
+        "before-Duodrill-ally-threequarter-standard-Cast",
+        "before-Duodrill-ally-threequarter-standard-Hit",
+        "before-Duodrill-ally-threequarter-standard-Death",
+        "before-Duodrill-ally-threequarter-standard-Spawn",
+        "before-Duodrill-ally-threequarter-standard-Evolve",
+        "before-Duodrill-ally-threequarter-standard-Victory"
+      ],
+      "after": [],
+      "baseline_scope": "Figure-only samples. Base is the auxiliary form; other preview columns do not assert gameplay Evolution. Parent events remain pending."
     },
     {
       "id": "Megadrill",
       "parent": "Drillnest",
       "review_status": "pending",
-      "before": [],
-      "after": []
+      "before": [
+        "before-Megadrill-ally-threequarter-standard-Idle",
+        "before-Megadrill-ally-threequarter-standard-Walk",
+        "before-Megadrill-ally-threequarter-standard-AttackMelee",
+        "before-Megadrill-ally-threequarter-standard-AttackRanged",
+        "before-Megadrill-ally-threequarter-standard-Cast",
+        "before-Megadrill-ally-threequarter-standard-Hit",
+        "before-Megadrill-ally-threequarter-standard-Death",
+        "before-Megadrill-ally-threequarter-standard-Spawn",
+        "before-Megadrill-ally-threequarter-standard-Evolve",
+        "before-Megadrill-ally-threequarter-standard-Victory"
+      ],
+      "after": [],
+      "baseline_scope": "Figure-only samples. Base is the auxiliary form; other preview columns do not assert gameplay Evolution. Parent events remain pending."
     }
   ],
   "phase_acceptance": {
@@ -3101,6 +3161,16 @@
       "path_or_uri": ".local/p70-evidence/before-s1-enemy/captures.json",
       "sha256": "cd2dc8f170e22ed3e773e4f29055c0ace9a71bc06bb9a0ddf6f28c984bcc82cb",
       "capture_count": 120,
+      "phase_before_or_after": "before",
+      "content_sha": "55510c5363e3f1e555fa5133208a5faf20c5825b",
+      "tooling_sha": "27f98acd98b51fa69eb09f4703bd2ca59a33ed41",
+      "artifact_verification_record": "capture_roster.py decoded the original PNGs, checked dimensions and recorded SHA-256 during capture. The bookkeeping integration reuses that evidence and does not repeat original image decoding or hashing.",
+      "availability": "Ignored local artifacts; unavailable on another machine until explicitly transferred. A missing manifest or original is not a passing check."
+    },
+    {
+      "path_or_uri": ".local/p70-evidence/before-auxiliaries/captures.json",
+      "sha256": "a1d898dbd46c580b9b2e23322afd04896a3445f6ed6a84a2b3ef840a39e3b745",
+      "capture_count": 50,
       "phase_before_or_after": "before",
       "content_sha": "55510c5363e3f1e555fa5133208a5faf20c5825b",
       "tooling_sha": "27f98acd98b51fa69eb09f4703bd2ca59a33ed41",
