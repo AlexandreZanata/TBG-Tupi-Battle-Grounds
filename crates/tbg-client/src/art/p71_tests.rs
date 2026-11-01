@@ -63,7 +63,7 @@ fn p71_body_envelopes_clear_large_custom_figures() {
                 &mut meshes,
                 false,
             );
-            (form.overhead, form.occupancy) =
+            (form.overhead, form.occupancy, form.body_radius) =
                 super::overhead::height(&form, &meshes, kind, tier, branch);
             assert!(form.overhead.is_finite() && form.overhead > 0.32);
             assert!(form.occupancy.x < form.occupancy.y);

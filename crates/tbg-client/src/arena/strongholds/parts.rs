@@ -29,6 +29,8 @@ pub(super) enum Motion {
     Swivel,
     /// Aimed whole about its own origin (the ballista).
     Aim,
+    /// A separately loaded bolt: hidden after release, restored during reload.
+    Nocked,
     /// Carried by a defender: turns round the tower's axis with the aim,
     /// is aimed like a gun, and recoils this distance on each shot.
     Mounted(f32),
@@ -261,7 +263,7 @@ impl StrongholdArt {
                         }
                         let size = (high - low) * part.2.scale.abs();
                         let volume = size.x * size.y * size.z;
-                        let loss = if volume < 0.08 {
+                        let loss = if volume < 0.08 && size.max_element() < 0.75 {
                             5 + (index % 15) as u8
                         } else {
                             NEVER

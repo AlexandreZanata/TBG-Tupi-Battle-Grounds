@@ -57,6 +57,16 @@ static LONGBOW: PartDef = PartDef {
     build: longbow,
 };
 
+static LOADED_ARROW: PartDef = PartDef {
+    name: "tower loaded arrow",
+    build: |_| {
+        vec![
+            (Box(0.24, 0.01, 0.01), TIMBER, t(0.09, 0.025, 0.0)),
+            (Box(0.03, 0.02, 0.02), STEEL, t(0.22, 0.025, 0.0)),
+        ]
+    },
+};
+
 /// Classic: the sentry's feet on the crown floor, the crossbow at his chest.
 const SENTRY_AT: Vec3 = Vec3::new(0.42, 1.86, 0.0);
 const CROSSBOW_AT: Vec3 = Vec3::new(0.52, 2.12, 0.0);
@@ -79,6 +89,12 @@ pub(super) fn pieces(kind: StrongholdKind) -> Vec<Piece> {
                 .aimed()
                 .moving(Motion::Swivel),
             carried(&CROSSBOW, CROSSBOW_AT, 0.03),
+            piece(
+                &LOADED_ARROW,
+                t(CROSSBOW_AT.x, CROSSBOW_AT.y, CROSSBOW_AT.z),
+            )
+            .aimed()
+            .moving(Motion::Nocked),
         ],
         StrongholdKind::Bastion => vec![
             piece(&PORT, t(PORT_AT.x, PORT_AT.y, PORT_AT.z)).aimed(),
@@ -107,6 +123,9 @@ pub(super) fn pieces(kind: StrongholdKind) -> Vec<Piece> {
                 .aimed()
                 .moving(Motion::Swivel),
             carried(&LONGBOW, LONGBOW_AT, 0.025),
+            piece(&LOADED_ARROW, t(LONGBOW_AT.x, LONGBOW_AT.y, LONGBOW_AT.z))
+                .aimed()
+                .moving(Motion::Nocked),
         ],
         StrongholdKind::Artillery => Vec::new(),
     }
@@ -213,7 +232,6 @@ fn crossbow(_team: Color) -> Vec<Part> {
         (Box(0.24, 0.035, 0.035), WOOD, t(0.03, 0.0, 0.0)),
         (Box(0.025, 0.025, 0.24), STEEL, t(0.14, 0.0, 0.0)),
         (Box(0.008, 0.008, 0.22), LINEN, t(0.09, 0.0, 0.0)),
-        (Box(0.14, 0.012, 0.012), TIMBER, t(0.1, 0.025, 0.0)),
     ]
 }
 
@@ -297,7 +315,5 @@ fn longbow(_team: Color) -> Vec<Part> {
             t(0.07, -0.1, 0.0).with_rotation(Quat::from_rotation_z(-0.25)),
         ),
         (Box(0.006, 0.42, 0.006), LINEN, t(0.025, 0.0, 0.0)),
-        (Box(0.26, 0.01, 0.01), TIMBER, t(0.1, 0.0, 0.0)),
-        (Box(0.03, 0.02, 0.02), STEEL, t(0.23, 0.0, 0.0)),
     ]
 }

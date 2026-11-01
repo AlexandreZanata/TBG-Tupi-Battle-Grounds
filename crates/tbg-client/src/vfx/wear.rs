@@ -8,10 +8,10 @@ pub fn burn(c: &mut Commands, a: &VfxAssets, at: Vec3, fire: bool, stage: u8) {
             c,
             &a.puff,
             &a.soot,
-            at,
+            at + Vec3::new(0.0, 0.20, -0.06),
             Motion::Puff {
                 vel: Vec3::new(0.03, 0.35, 0.0),
-                size: 0.10 + f32::from(stage) * 0.005,
+                size: 0.025 + f32::from(stage) * 0.001,
             },
             0.0,
             0.8,
@@ -24,7 +24,7 @@ pub fn burn(c: &mut Commands, a: &VfxAssets, at: Vec3, fire: bool, stage: u8) {
             &a.orange,
             at,
             Motion::Sprout {
-                size: Vec3::new(0.12, 0.26, 0.12),
+                size: Vec3::new(0.15, 0.42, 0.15),
                 hold: 0.12,
             },
             0.0,
@@ -36,7 +36,7 @@ pub fn burn(c: &mut Commands, a: &VfxAssets, at: Vec3, fire: bool, stage: u8) {
             &a.fire,
             at + Vec3::Y * 0.015,
             Motion::Sprout {
-                size: Vec3::new(0.06, 0.18, 0.06),
+                size: Vec3::new(0.07, 0.28, 0.07),
                 hold: 0.10,
             },
             0.0,

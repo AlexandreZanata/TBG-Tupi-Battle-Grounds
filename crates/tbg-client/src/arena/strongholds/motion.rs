@@ -96,6 +96,13 @@ pub(super) fn pose(moving: &Moving, tower: &Tower, clock: f32) -> Transform {
                 .with_translation(turn * rest.translation)
         }
         Motion::Aim => rest.with_rotation(aimed),
+        Motion::Nocked => {
+            let turn = Quat::from_rotation_y(tower.yaw);
+            let visible = tower.pending.is_some() || tower.since >= 0.32;
+            rest.with_rotation(aimed)
+                .with_translation(turn * rest.translation)
+                .with_scale(if visible { Vec3::ONE } else { Vec3::ZERO })
+        }
         Motion::Notch(angle) => {
             let settle = tower
                 .gun

@@ -55,7 +55,8 @@ pub(super) fn regions(kind: StrongholdKind) -> Vec<(Piece, Wear)> {
     let (width, y, z) = profile(kind);
     (1..20)
         .flat_map(|stage| {
-            let x = (f32::from(stage % 5) / 4.0 - 0.5) * width * 1.7;
+            let x = (f32::from(stage % 5) / 4.0 - 0.5) * width * 1.7
+                + (f32::from(stage * 7 % 9) - 4.0) * 0.006;
             let y = y + f32::from(stage / 5)
                 * if kind == StrongholdKind::Artillery {
                     0.012
@@ -93,7 +94,12 @@ pub(super) fn regions(kind: StrongholdKind) -> Vec<(Piece, Wear)> {
                     },
                 ),
                 (
-                    piece(&CRACK, t(x, y, z + 0.025)),
+                    piece(
+                        &CRACK,
+                        t(x, y, z + 0.025).with_rotation(Quat::from_rotation_z(
+                            (f32::from(stage * 3 % 11) - 5.0) * 0.13,
+                        )),
+                    ),
                     Wear {
                         show: stage,
                         hide: 21,
@@ -183,7 +189,7 @@ pub(super) fn effects(
                 + Vec3::new(
                     (socket as f32 - 1.0) * w * 0.6,
                     if stage == 20 { 0.12 } else { y },
-                    z - 0.05,
+                    z + 0.04,
                 );
             crate::vfx::wear::burn(&mut commands, &assets, at, stage >= 9, stage);
         }

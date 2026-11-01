@@ -81,6 +81,9 @@ fn pose(m: &Moment, p: &mut Pose) {
     let plate = Node::Secondary(Spring::Back).index();
     p[plate].1.y -= m.reduction as f32 / 10_000.0 * 0.10 + m.armor_flash * 0.035;
     p[plate].0.x += m.armor_flash * 5.0;
+    if m.clip != Clip::Walk {
+        tools::face(p, m.aim, Vec3::new(0.0, 0.65, 0.65));
+    }
 }
 
 fn walk(m: &Moment, p: &mut Pose) {

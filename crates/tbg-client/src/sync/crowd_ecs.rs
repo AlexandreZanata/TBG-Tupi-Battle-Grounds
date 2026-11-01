@@ -105,7 +105,9 @@ pub(super) fn update(
         };
         if visual.kind() == UnitKind::Bonehorn {
             let (tier, branch) = visual.form();
-            let depth = library.get(visual.kind(), tier, branch).occupancy;
+            let form = library.get(visual.kind(), tier, branch);
+            let depth = form.occupancy;
+            body.radius = body.radius.max(form.body_radius);
             body.anchor_x += (depth.x + depth.y) * 0.5 * body.facing;
             body.half_length = (depth.y - depth.x) * 0.5;
         }

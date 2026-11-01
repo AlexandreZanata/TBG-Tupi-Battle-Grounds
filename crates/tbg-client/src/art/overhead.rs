@@ -13,7 +13,7 @@ pub fn height(
     kind: UnitKind,
     tier: u8,
     branch: u8,
-) -> (f32, Vec2) {
+) -> (f32, Vec2, f32) {
     let mut a = Animator::new(
         [Entity::PLACEHOLDER; NODE_COUNT],
         form.plan,
@@ -23,6 +23,7 @@ pub fn height(
     );
     a.form = (tier, branch);
     let mut top = 0.0f32;
+    let mut radius = 0.0f32;
     let mut depth = Vec2::new(f32::INFINITY, f32::NEG_INFINITY);
     for clip in [Clip::Idle, Clip::Walk] {
         for step in 0..16 {
@@ -49,6 +50,7 @@ pub fn height(
                         let at =
                             world[node.index()].transform_point3(Vec3::from(*p)) * form.plan.scale;
                         top = top.max(at.y);
+                        radius = radius.max(at.x.abs());
                         depth.x = depth.x.min(at.z);
                         depth.y = depth.y.max(at.z);
                     }
@@ -57,5 +59,5 @@ pub fn height(
         }
     }
     // Include breathing/selection lift and the billboard's lower edge at the normal camera pitch.
-    (top + 0.32, depth)
+    (top + 0.32, depth, radius)
 }

@@ -105,7 +105,7 @@ pub(super) fn pieces(form: Form) -> Vec<Piece> {
             piece(&DECK, staged),
             piece(&BALLISTA, Transform::from_translation(turret().pivot))
                 .aimed()
-                .moving(Motion::Aim),
+                .moving(Motion::Kick(0.045)),
         ]),
         _ => {}
     }
