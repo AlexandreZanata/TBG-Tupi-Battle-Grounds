@@ -100,7 +100,7 @@ def prepare(args):
                             (ROOT / "crates/tbg-core/src/protocol.rs").read_text())[1])
     info = {
         "source_sha": source, "reviewed_linux_base": BASE, "linux_version": version,
-        "android_revision": 4, "package": PACKAGE, "abi": args.abi,
+        "android_revision": 5, "package": PACKAGE, "abi": args.abi,
         "protocol": protocol, "ruleset": rules_identity(),
         "content_sha256": digest((ROOT / "crates/tbg-core/src/content.rs").read_bytes()),
         "cargo_lock_sha256": digest((ROOT / "Cargo.lock").read_bytes()),
