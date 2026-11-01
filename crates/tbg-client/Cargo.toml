@@ -47,6 +47,8 @@ ehttp = "0.7"
 semver = "1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# P73: format persisted UTC timestamps in the native system time zone using the already locked library.
+jiff = "=0.2.38"
 # OS-standard user data directory for native preferences and account credentials.
 directories = "6"
 # Retained system clipboard ownership for copying keys/links and pasting input.

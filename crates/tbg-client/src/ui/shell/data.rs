@@ -4,14 +4,16 @@ use crate::platform::http::Request;
 use bevy::prelude::*;
 use serde_json::Value;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Live {
+    pub complete: bool,
+    pub stale: bool,
     pub players: u64,
     pub battle: u64,
     pub watching: u64,
     pub matches: Vec<Battle>,
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Battle {
     pub id: u64,
     pub mode: String,
@@ -21,8 +23,10 @@ pub struct Battle {
     pub elapsed: u64,
     pub spectators: u64,
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Online {
+    pub invitable: bool,
+    pub slot: Option<String>,
     pub name: String,
     pub rating: Option<u64>,
     pub status: String,
@@ -32,6 +36,18 @@ pub struct Data {
     pub live: Option<Live>,
     pub online: Vec<Online>,
     pub online_total: u64,
+    pub online_query: String,
+    pub online_available: bool,
+    pub online_offset: usize,
+    pub online_next: Option<usize>,
+    pub online_complete: bool,
+    pub online_stale: bool,
+    pub online_error: bool,
+    pub online_revision: Option<u64>,
+    next_online: f64,
+    online_ticket: u64,
+    online_requested: u64,
+    pub online_loaded: bool,
     pub stats: Option<Value>,
     pub unavailable: bool,
     pub update: Option<String>,
@@ -45,8 +61,6 @@ pub struct Data {
     stats_request: Option<Request>,
     next: f64,
     player: String,
-    #[cfg(tbg_desktop)]
-    online_loaded: bool,
 }
 
 #[cfg(tbg_desktop)]
@@ -56,9 +70,6 @@ impl Data {
     }
     pub fn stats_pending(&self) -> bool {
         self.stats.is_none() && self.stats_request.is_some()
-    }
-    pub fn online_pending(&self) -> bool {
-        !self.online_loaded && self.online_request.is_some()
     }
 }
 
@@ -83,6 +94,8 @@ pub fn parse_live(value: &Value) -> Option<Live> {
         matches.sort_by_key(|m| format!("{:016x}", m.id) != id);
     }
     Some(Live {
+        complete: value["complete"].as_bool().unwrap_or(true),
+        stale: value["stale"].as_bool().unwrap_or(false),
         players: online["players"].as_u64()?,
         battle: online["in_battle"].as_u64()?,
         watching: online["watching"].as_u64()?,
@@ -133,6 +146,11 @@ pub fn parse_online(v: &Value) -> Option<(u64, Vec<Online>)> {
                     Some(row["rating"].as_u64()?)
                 };
                 Some(Online {
+                    invitable: row["invitable"].as_bool().unwrap_or(false),
+                    slot: row["slot"]
+                        .as_str()
+                        .filter(|s| s.len() == 1)
+                        .map(str::to_owned),
                     name: name(&row["name"])?,
                     rating,
                     status: row["status"].as_str().unwrap_or_default().into(),
@@ -147,6 +165,7 @@ pub fn poll(
     account: Res<super::Account>,
     mut data: ResMut<Data>,
     mut shell: ResMut<super::Shell>,
+    window: Single<&Window>,
 ) {
     if !crate::config::bevy_ui() {
         return;
@@ -186,10 +205,24 @@ pub fn poll(
         shell.dirty = true;
     }
     let now = time.elapsed_secs_f64();
-    if now >= data.next && data.live_request.is_none() {
+    let visible = visible(&window);
+    if visible && now >= data.next && data.live_request.is_none() {
         data.next = now + 5.;
         data.live_request = Some(Request::get("/api/live"));
-        data.online_request = Some(Request::get("/api/online"));
+    }
+    if visible
+        && shell.panel == super::Panel::Live
+        && now >= data.next_online
+        && data.online_request.is_none()
+    {
+        data.next_online = now + 5.;
+        data.online_requested = data.online_ticket;
+        data.online_request = Some(Request::get(&format!(
+            "/api/online?offset={}&limit=50&q={}&available={}",
+            data.online_offset,
+            data.online_query,
+            u8::from(data.online_available)
+        )));
     }
     let player = account.profile.as_ref().map_or("", |p| p.name.as_str());
     if player != data.player {
@@ -201,24 +234,49 @@ pub fn poll(
     if let Some(result) = data.live_request.as_ref().and_then(Request::take) {
         data.live_request = None;
         if let Some(live) = result.ok().and_then(|v| parse_live(&v)) {
+            shell.dirty |= data.live.as_ref() != Some(&live) || data.unavailable;
             data.live = Some(live);
             data.unavailable = false;
         } else {
             data.unavailable = true;
         }
-        shell.dirty = true;
+        shell.dirty |= data.unavailable;
     }
     if let Some(result) = data.online_request.as_ref().and_then(Request::take) {
-        #[cfg(tbg_desktop)]
-        {
-            data.online_loaded = true;
-        }
         data.online_request = None;
-        if let Some((total, rows)) = result.ok().and_then(|v| parse_online(&v)) {
-            data.online = rows;
-            data.online_total = total;
+        if data.online_requested == data.online_ticket {
+            if let Some((value, (total, rows))) =
+                result.ok().and_then(|v| parse_online(&v).map(|r| (v, r)))
+            {
+                let revision = value["revision"].as_u64();
+                if data.online_offset > 0 && data.online_revision != revision {
+                    data.online_offset = 0;
+                    data.next_online = 0.;
+                    data.online_stale = true;
+                } else {
+                    let changed = data.online != rows
+                        || data.online_total != total
+                        || data.online_error
+                        || !data.online_loaded;
+                    data.online = rows;
+                    data.online_total = total;
+                    data.online_next = value["next_offset"]
+                        .as_u64()
+                        .and_then(|n| usize::try_from(n).ok());
+                    data.online_revision = revision;
+                    data.online_complete = value["complete"].as_bool().unwrap_or(false);
+                    data.online_stale = value["stale"].as_bool().unwrap_or(true);
+                    data.online_error = false;
+                    data.online_loaded = true;
+                    shell.dirty |= changed;
+                }
+            } else {
+                data.online_error = true;
+                data.online_stale = true;
+                data.next_online = now + 15.;
+                shell.dirty = true;
+            }
         }
-        shell.dirty = true;
     }
     if let Some(result) = data.stats_request.as_ref().and_then(Request::take) {
         data.stats_request = None;
@@ -267,4 +325,64 @@ fn newer_client(value: &Value, current: &str, protocol: u16) -> Option<String> {
     let current = semver::Version::parse(current).ok()?;
     let incompatible = value.get("protocol")?.as_u64()? != u64::from(protocol);
     (incompatible || remote > current).then(|| latest.to_string())
+}
+
+impl Data {
+    pub fn search(&mut self, q: String) {
+        self.online_query = q
+            .chars()
+            .filter(|c| c.is_ascii_alphanumeric() || *c == '_')
+            .take(16)
+            .collect();
+        self.reset_online();
+    }
+    pub fn reset_online(&mut self) {
+        self.online_offset = 0;
+        self.online.clear();
+        self.online_next = None;
+        self.online_revision = None;
+        self.online_loaded = false;
+        self.online_error = false;
+        self.online_stale = true;
+        self.next_online = 0.;
+        self.online_ticket = self.online_ticket.wrapping_add(1);
+    }
+    pub fn page(&mut self, direction: i8) {
+        self.online_offset = if direction > 0 {
+            self.online_next.unwrap_or(self.online_offset)
+        } else {
+            self.online_offset.saturating_sub(50)
+        };
+        self.online_stale = true;
+        self.next_online = 0.;
+        self.online_ticket = self.online_ticket.wrapping_add(1);
+    }
+}
+fn visible(window: &Window) -> bool {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let _ = window;
+        web_sys::window()
+            .and_then(|w| w.document())
+            .is_some_and(|d| !d.hidden())
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        window.visible
+    }
+}
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod visibility_tests {
+    use super::*;
+    #[test]
+    fn p73_a_visible_unfocused_desktop_window_still_refreshes_presence() {
+        let mut window = Window {
+            focused: false,
+            ..Default::default()
+        };
+        assert!(visible(&window));
+        window.visible = false;
+        assert!(!visible(&window));
+    }
 }

@@ -23,6 +23,12 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                 return;
             }
         };
+        if !live.complete {
+            p.spawn(kit::muted(lang.key("p73.partial"), 16.));
+        }
+        if live.stale || data.unavailable {
+            p.spawn(kit::muted(lang.key("p73.stale"), 16.));
+        }
         p.spawn(kit::muted(
             format!("{} · {} · {}", live.players, live.battle, live.watching),
             16.,
@@ -65,40 +71,6 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                     ));
                 });
             });
-        }
-        #[cfg_attr(not(tbg_desktop), allow(unused_mut))]
-        let mut _accounts = p.spawn(kit::heading(
-            lang.key("live.accounts")
-                .replace("{count}", &data.online_total.to_string()),
-            24.,
-        ));
-        #[cfg(tbg_desktop)]
-        _accounts.insert((
-            kit::Pending(data.online_pending()),
-            Node {
-                width: percent(100),
-                min_height: px(29),
-                ..default()
-            },
-        ));
-        #[cfg(tbg_desktop)]
-        if data.online_pending() {
-            crate::ui::native_loading::rows(p, 3);
-            return;
-        }
-        if data.online.is_empty() {
-            p.spawn(kit::muted(lang.key("live.accounts_none"), 16.));
-        }
-        for row in &data.online {
-            p.spawn(super::super::label(
-                format!(
-                    "{} · {} · {}",
-                    row.name,
-                    row.rating.map_or_else(|| "—".into(), |r| r.to_string()),
-                    lang.key(&format!("live.status.{}", row.status))
-                ),
-                16.,
-            ));
         }
     });
 }

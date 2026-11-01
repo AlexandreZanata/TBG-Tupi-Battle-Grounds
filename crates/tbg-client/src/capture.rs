@@ -9,12 +9,16 @@ use bevy::{
 mod arenas;
 #[cfg(tbg_desktop)]
 mod reserve;
+mod social;
 #[cfg(tbg_desktop)]
 mod training;
 
 pub fn plugin(app: &mut App) {
     if crate::config::url_param("capture").is_some() {
         app.add_systems(Update, capture);
+        if crate::config::url_param("capture_panel").is_some_and(|v| v.starts_with("p73-")) {
+            social::plugin(app);
+        }
         #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("training") {
             training::plugin(app);

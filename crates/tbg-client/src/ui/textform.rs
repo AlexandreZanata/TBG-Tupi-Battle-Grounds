@@ -14,6 +14,7 @@ use wasm_bindgen::JsCast;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TextKind {
     CatalogSearch,
+    PlayerSearch,
     Name,
     Key,
     Room,
@@ -74,7 +75,7 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
         // The lobby styles the dialog by this marker, never by the
         // (localized) label text.
         let marker = match kind {
-            TextKind::CatalogSearch => "search",
+            TextKind::CatalogSearch | TextKind::PlayerSearch => "search",
             TextKind::Room => "room",
             TextKind::Name => "name",
             TextKind::Key => "key",
