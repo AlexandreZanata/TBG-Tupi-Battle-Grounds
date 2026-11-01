@@ -53,8 +53,9 @@ pub fn plugin(app: &mut App) {
         .add_message::<TextCancelled>()
         .insert_non_send(ActiveForm::default())
         .add_systems(Startup, wire_dom)
-        .add_systems(Update, poll)
-        .add_plugins(super::textform_bevy::plugin);
+        .add_systems(Update, poll);
+    #[cfg(not(target_os = "android"))]
+    app.add_plugins(super::textform_bevy::plugin);
 }
 
 /// Show the form for `kind` with `prompt` as its label.
