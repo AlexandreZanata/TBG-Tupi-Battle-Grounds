@@ -246,8 +246,13 @@ Windows and desktop web. Cover all eight arenas, both locales and viewport/DPI
 cases; check difficulty selection, proportional arena cropping, bottom controls
 and resize without clipping. Add `training-practice-reference-layout` and
 `training-practice-reference-resize`, with motion frames for the resize case.
-Linux build, representative capture and reinstall are pending. Windows/web
-same-source packaged comparisons remain pending consolidation.
+Linux release `e0d8f46` built and installed. Celestial Practice at 1366x768 was
+visually compared with the owner's reference; the difficulty rows, gaps and
+smaller arena picture follow its proportions. The 1920x970 layout and the actual
+installed executable at 1366x768 were also inspected, with both bottom controls
+visible. See [the work-front report](../phases/TRAINING-augment-polish.md).
+Other arenas, locales, viewport/DPI and resize cases, and Windows/web same-source
+packaged comparisons remain pending consolidation. No parity claim is made.
 
 ### 2026-11-01 — Augment cards without glow or rarity labels
 
@@ -263,5 +268,9 @@ one shared presentation on Linux, Windows and desktop web. Add
 `war-council-no-rarity-labels` and `war-council-selection-no-shadow` to cover
 all four frame rarities, selection changes, hover/keyboard focus, unavailable
 options and resolved choices; include motion frames for selection changes.
-Linux native captures and reinstall are pending. Windows/web same-source
-packaged comparison and remaining matrix cases are pending consolidation.
+Linux release `e0d8f46` built and installed. Actual War Council pointer selection
+changed between two cards; the outline and enabled confirmation remained visible
+without an external glow. Diamond and Silver frames, names, descriptions and
+prices were inspected with no rarity labels. See [the work-front report](../phases/TRAINING-augment-polish.md).
+Other rarities, keyboard focus, availability/resolved states and Windows/web
+same-source packaged comparisons remain pending consolidation.
