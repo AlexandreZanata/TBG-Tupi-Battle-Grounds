@@ -50,3 +50,29 @@ lock is authorized, without stopping its current holder, bypassing the lock,
 increasing Cargo jobs or changing target caches. This supersedes the pending
 approval above. The original nonblocking policy remains the default for
 unrelated future work. Build and installation outcomes follow below.
+
+## Consolidated native result
+
+Final runtime source: `1c0b2df8cc4f7ff9ae0657d24384f26ec68e0810`. The final
+shared-lock debug build passed in7.22s without warnings, retaining two jobs
+and the existing target. This resolves compilation deferral for Weaver,
+Bone Brute and Pyre together; no full suite/additional target was run.
+
+Inspected actual Weaver profile Idle sheet: five forms, four sampled poses
+each, with the new chitin connection visible. Refreshed and inspected its
+actual model Shop portrait. A normal-speed two-champion native recording
+(Weaver/BoneBrute, five forms each) completed20 clip/recovery steps; sampled
+Walk frames show the lifted cleavers and connected Weaver body. A separate
+Weaver Base training engagement covered232 active ticks and its full life
+cycle, at the ordinary match camera; the sampled advancing frame shows the
+body pointing along the lane. This is bounded observation, not exhaustive
+collision or browser verification. Bulk originals and private data are local.
+
+The consolidated executable includes the Pyre ground-strip removal. Flame
+piece code, palette and timing remain unchanged; no new dedicated Pyre live
+recording is claimed. No simulation sources changed in these follow-ups.
+
+Native delivery target: `0.1.0-native.2-p71-1c0b2df`, preserving user data
+and previous installs. Binary source remains1c0b2df; subsequent changes only
+refresh the Weaver portrait and reports. Installation result is recorded
+locally in `installed-consolidated-followups-linux.json`.

@@ -389,10 +389,10 @@
   {
     "unit": "Weaver",
     "asset": "crates/tbg-client/assets/battle/portraits/weaver.webp",
-    "asset_sha256": "139eb8cf5f5172021ee5017ce608eb300cbbc84e4481265ac22c936d6f48354f",
-    "original": ".local/p71-evidence/portraits-clean-22/Weaver.png",
-    "original_sha256": "67af417ddeb411a889cc11f1a755b688de502716008ec3947c2b3e63040c6852",
-    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "asset_sha256": "b26207575a9bdecb3a8a870203576b2a529c16be485250d865e7642ff4c01867",
+    "original": ".local/p71-evidence/portraits-weaver-1c0b2df/Weaver.png",
+    "original_sha256": "5560aa9fa0eb0833b6aec83374f30426a01ba50188b547a93ef72537604e7b7a",
+    "source_commit": "1c0b2df8cc4f7ff9ae0657d24384f26ec68e0810",
     "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
   },
   {

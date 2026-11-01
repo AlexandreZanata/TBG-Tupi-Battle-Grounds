@@ -41,3 +41,15 @@ native pkg-config path, then freeze the binary, inspect a bounded walk and
 reinstall with executable/asset hash verification. The exact build wrapper
 is recorded in P71-PYRE-LINE-REMOVAL.md. No simulation or other champion
 animation source was modified by this follow-up.
+
+## Consolidated native validation completed
+
+The owner authorized waiting for the shared slot for the combined native
+delivery. Final runtime1c0b2df built successfully in7.22s. A native motion
+recording with Weaver/BoneBrute completed20 clip/recovery steps across all
+five forms; Walk frames at video PTS4.5,4.9,5.3 were inspected. Cleavers
+remain above the foot/ground level in the reviewed walk frames. The Base
+BoneBrute also advanced in the ordinary-camera Weaver training engagement.
+These observations resolve native compilation/recording deferral for this
+follow-up; no exhaustive collision, full suite or browser pass is claimed.
+The same native install will deliver this pose, Pyre's line removal and Weaver.
