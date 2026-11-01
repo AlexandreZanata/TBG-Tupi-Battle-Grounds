@@ -1,0 +1,11 @@
+[Unit]
+Description=Check for compatible attested TBG browser updates
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+Unit=tbg-web-deploy.service
+
+[Install]
+WantedBy=timers.target

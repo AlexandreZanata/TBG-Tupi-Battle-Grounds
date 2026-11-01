@@ -1,4 +1,5 @@
 {
   "minimum_source": "REPLACE_WITH_LAST_VERIFIED_DEPLOYED_SOURCE_SHA",
-  "public_health": "https://api.tupibg.com/health"
+  "public_health": "https://api.tupibg.com/health",
+  "public_web": "https://app.tupibg.com"
 }

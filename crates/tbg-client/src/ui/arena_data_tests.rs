@@ -7,6 +7,28 @@ use tbg_core::content::{ARENA_RULES, ENERGY_SCALE};
 use tbg_core::Arena;
 
 #[test]
+fn every_arena_has_an_image_and_complete_desktop_copy_in_both_languages() {
+    // GAME-DESIGN §12: preserve the former DOM catalog checks in the shared UI.
+    for arena in Arena::ALL {
+        let slug = arena.slug();
+        let image = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join(format!("assets/arenas/{slug}.webp"));
+        assert!(image.is_file(), "missing arena image: {slug}");
+        for lang in [crate::i18n::Lang::En, crate::i18n::Lang::PtBr] {
+            let values = [
+                lang.key(&format!("arenas.{slug}.name")),
+                lang.key(&format!("arenas.{slug}.theme")),
+                super::arena_effect::describe(arena, lang),
+            ];
+            for value in values {
+                assert!(!value.is_empty() && !value.starts_with("arenas."));
+                assert!(!value.contains('{'), "unresolved arena text: {value}");
+            }
+        }
+    }
+}
+
+#[test]
 fn arena_page_numbers_equal_the_core_rules() {
     let text = include_str!("../../assets/arenas/arenas.json");
     let data = parse(text).unwrap_or_else(|e| panic!("arenas.json: {e}"));

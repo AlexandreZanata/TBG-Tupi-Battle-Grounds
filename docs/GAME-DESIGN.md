@@ -1717,3 +1717,13 @@ incompatible match. Preserve all message tags, Arena IDs 0–7, D-97 lifetimes,
 account/seat authority, schema 10, and P71 ruleset revision 6/source identity.
 No additional gameplay number changes. See
 [the integration report](phases/BACKEND-main-integration-20261101.md).
+
+### Proposed browser release resource bounds (2026-11-01)
+
+Operational only; no combat, matchmaking, reward or match-duration value changes.
+The independent browser publisher accepts at most 256 MiB compressed, 512 MiB
+expanded, 4,096 payload files, a 1 MiB manifest and a 2 MiB HTML entry. These
+are **Proposed** initial updater limits under §19/O04. The static publication
+worker has a five-minute timeout; that limit never applies to game processes
+or match drain. Browser releases retain immutable source-addressed assets and
+legacy files; no automatic retention deletion is approved.

@@ -40,19 +40,20 @@ def api(path):
     return json.loads(fetch(API+path, 4 * 1024 * 1024))
 
 
-def verify(package, bundle, source):
+def verify(package, bundle, source, workflow=WORKFLOW):
     subprocess.run([
         'gh', 'attestation', 'verify', str(package), '--bundle', str(bundle),
-        '--repo', REPOSITORY, '--signer-workflow', WORKFLOW,
+        '--repo', REPOSITORY, '--signer-workflow', workflow,
         '--source-ref', 'refs/heads/main', '--source-digest', source,
         '--deny-self-hosted-runners',
     ], check=True, stdout=subprocess.DEVNULL, timeout=60)
 
 
-def candidate():
+def candidate(prefix='server'):
+    require(prefix in {'server', 'web'}, 'unknown release family')
     require(api('')['id'] == REPOSITORY_ID, 'repository identity changed')
     releases = api('/releases?per_page=30')
-    options = [r for r in releases if not r.get('draft') and re.fullmatch(r'server-[0-9a-f]{40}', r.get('tag_name', ''))]
+    options = [r for r in releases if not r.get('draft') and re.fullmatch(prefix + r'-[0-9a-f]{40}', r.get('tag_name', ''))]
     return max(options, key=lambda r: r['published_at'], default=None)
 
 
