@@ -21,6 +21,10 @@ pub(crate) struct Demo {
 
 impl Default for Demo {
     fn default() -> Self {
+        // The browser's std has no clock (P72 runs this demo there too).
+        #[cfg(target_arch = "wasm32")]
+        let seed = web_sys::js_sys::Date::now() as u64;
+        #[cfg(not(target_arch = "wasm32"))]
         let seed = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_or(1, |d| d.as_nanos() as u64);
