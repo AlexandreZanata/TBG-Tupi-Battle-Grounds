@@ -77,9 +77,15 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         Clip::AttackMelee => attack(m, pose, &p, f),
         Clip::Spawn => rise(m, pose),
         Clip::Evolve => roar(m, pose, &p),
+        Clip::Victory => victory(m, pose, &p, f),
         _ => {}
     }
-    if reaper && !matches!(m.clip, Clip::AttackMelee | Clip::Death | Clip::Evolve) {
+    if reaper
+        && !matches!(
+            m.clip,
+            Clip::AttackMelee | Clip::Death | Clip::Evolve | Clip::Victory
+        )
+    {
         scythe(pose, &p, -20.0, 18.0, 0.0);
     }
 }
@@ -94,6 +100,12 @@ fn hunch(pose: &mut Pose, w: f32) {
 fn idle(m: &Moment, pose: &mut Pose, p: &Proportions, f: Form) {
     let engaged = m.aim.map_or(0.0, |a| a.weight);
     let breath = (m.clock * 1.3).sin();
+    let rattle = hold((m.clock * 0.23).rem_euclid(1.0), [0.3, 0.42, 0.5, 0.68]);
+    tools::add(
+        pose,
+        Head,
+        [2.0 * (m.clock * 19.0).sin() * rattle, 0.0, 2.0 * rattle],
+    );
     hunch(pose, 1.0);
     tools::add(pose, Chest, [3.0 * breath, 0.0, 0.0]);
     tools::add(
@@ -149,7 +161,7 @@ fn walk(m: &Moment, pose: &mut Pose, f: Form) {
         Head,
         [
             -3.0 * (phase * 2.0).cos(),
-            6.0 * phase.sin(),
+            6.0 * (phase - 0.35).sin(),
             4.0 * phase.sin(),
         ],
     );
@@ -170,6 +182,20 @@ fn attack(m: &Moment, pose: &mut Pose, p: &Proportions, f: Form) {
         _ => SLAM,
     };
     play(pose, tracks, k);
+    let brace = hold(m.t, [0.08, 0.19, 0.30, 0.48]);
+    tools::add(
+        pose,
+        Head,
+        [
+            -4.0 * brace,
+            if m.variant == 1 {
+                -6.0 * brace
+            } else {
+                3.0 * brace
+            },
+            0.0,
+        ],
+    );
     tools::face(pose, m.aim, Vec3::ZERO);
     tools::plant(pose, p, tools::stance(p, 1.35, 0.07));
 }
@@ -184,6 +210,7 @@ fn reap(m: &Moment, pose: &mut Pose, p: &Proportions) {
     let swing = (-20.0 - 95.0 * wind + 165.0 * sweep) * (1.0 - back) + -20.0 * back;
     let tilt = 18.0 + 70.0 * wind.max(sweep) * (1.0 - back);
     hunch(pose, 1.0);
+    tools::add(pose, Head, [0.0, -swing * 0.12, 0.0]);
     tools::add(pose, Chest, [0.0, swing * 0.4, 0.0]);
     tools::add(pose, Spine, [16.0 * sweep * (1.0 - back), 0.0, 0.0]);
     tools::shift(
@@ -256,4 +283,40 @@ fn rise(m: &Moment, pose: &mut Pose) {
     tools::set(pose, UpperArmL, [-150.0 * claw, 0.0, 20.0 * claw]);
     tools::set(pose, UpperArmR, [-140.0 * claw, 0.0, -20.0 * claw]);
     tools::add(pose, Spine, [20.0 * claw, 0.0, 0.0]);
+}
+
+/// The giant opens its ribs for a short roar, keeping each form's actual equipment supported.
+fn victory(m: &Moment, pose: &mut Pose, p: &Proportions, f: Form) {
+    pose.fill((Vec3::ZERO, Vec3::ZERO));
+    let roar = hold(m.t.rem_euclid(0.8), [0.08, 0.26, 0.44, 0.74]);
+    hunch(pose, 1.0 - 0.65 * roar);
+    tools::shift(pose, Hips, [0.0, -0.035, 0.0]);
+    tools::add(
+        pose,
+        Head,
+        [-9.0 * roar, 0.0, 2.0 * (m.t * 22.0).sin() * roar],
+    );
+    if f.b && f.t2 {
+        // The salute is deliberately one-handed; the free claw opens beside the ribs.
+        tools::reach(
+            pose,
+            false,
+            Vec3::new(-0.34, 0.16, 0.20),
+            Some(Quat::from_rotation_x(12f32.to_radians())),
+            (p, Vec3::new(-1.0, -0.5, -0.4)),
+        );
+        tools::set(pose, UpperArmL, [-25.0 - 25.0 * roar, 0.0, 24.0]);
+        tools::set(pose, ForearmL, [-45.0, 0.0, 0.0]);
+    } else {
+        tools::set(pose, UpperArmR, [-28.0 - 32.0 * roar, 0.0, -24.0]);
+        tools::set(pose, ForearmR, [-55.0, 0.0, 0.0]);
+        tools::set(pose, HandR, [20.0, 0.0, 0.0]);
+        tools::set(
+            pose,
+            UpperArmL,
+            [if f.a { -30.0 } else { -20.0 - 25.0 * roar }, 0.0, 24.0],
+        );
+        tools::set(pose, ForearmL, [if f.a { -65.0 } else { -45.0 }, 0.0, 0.0]);
+    }
+    tools::plant(pose, p, tools::stance(p, 1.35, 0.03));
 }
