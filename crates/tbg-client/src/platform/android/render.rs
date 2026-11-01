@@ -1,16 +1,17 @@
-//! Conservative Vulkan device capabilities avoid optional Mali descriptor-array failures.
+//! Native GLES compatibility profile; the POCO Vulkan allocator is blocked by driver errors.
 
 use bevy::render::{
-    settings::{Backends, WgpuSettings, WgpuSettingsPriority},
+    settings::{Backends, WgpuFeatures, WgpuSettings, WgpuSettingsPriority},
     RenderPlugin,
 };
 pub fn plugin() -> RenderPlugin {
     RenderPlugin {
-        // Functionality enables every advertised feature; the POCO's optional
-        // descriptor-array path fails allocation. Baseline PBR retains all game content.
+        // Keep the same PBR/art path with the engine's uniform-buffer fallback.
+        // Vulkan failed twice on the owned POCO; do not silently retry that backend.
         render_creation: WgpuSettings {
-            backends: Some(Backends::VULKAN),
-            priority: WgpuSettingsPriority::WebGPU,
+            backends: Some(Backends::GL),
+            priority: WgpuSettingsPriority::WebGL2,
+            features: WgpuFeatures::empty(),
             ..Default::default()
         }
         .into(),

@@ -19,7 +19,7 @@ android {
         minSdk = 31
         targetSdk = 36
         versionCode = prototypeCode.get().toInt()
-        versionName = "0.1.1-rc.1-android.3"
+        versionName = "0.1.1-rc.1-android.4"
         ndk { abiFilters += prototypeAbi.get() }
     }
 

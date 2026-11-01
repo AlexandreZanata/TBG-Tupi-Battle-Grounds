@@ -81,6 +81,8 @@ url = "2"
 [target.'cfg(target_os = "android")'.dependencies]
 # Exact AndroidApp/JNI lineage used by Bevy 0.20 and android-activity 0.6.1.
 jni = "=0.22.4"
+# Enable the existing engine native GLES backend after the POCO Vulkan driver allocation failure.
+bevy_render = { version = "=0.20.0", features = ["gles"] }
 # GameActivity enables the one Bevy-owned Android event loop.
 bevy = { version = "0.20", default-features = false, features = ["android-game-activity"] }
 
