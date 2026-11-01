@@ -1,0 +1,41 @@
+/* Base elements and small shared components: buttons, badges, frames, focus and motion rules. */
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:88px}
+body{margin:0;background:var(--ink-950);color:var(--text);font:400 16px/1.6 var(--font-body);text-rendering:optimizeLegibility}
+img{max-width:100%;height:auto;display:block}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;line-height:1.15;margin:0 0 .5em;color:var(--gold-200);letter-spacing:.01em}
+p{margin:0 0 1em}
+a{color:var(--gold-300);text-underline-offset:3px}
+a:hover{color:var(--gold-200)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:4px}
+::selection{background:#2f6dc399}
+
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip-link{position:absolute;left:12px;top:-60px;z-index:100;padding:10px 16px;border-radius:var(--radius-sm);background:var(--gold-400);color:var(--ink-950);font-weight:700;text-decoration:none}
+.skip-link:focus{top:12px}
+
+.eyebrow{margin:0 0 .6em;font-size:.78rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-400)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.6em;min-height:48px;padding:.7em 1.4em;border:1px solid var(--line-strong);border-radius:var(--radius-sm);background:linear-gradient(#1a3550,#0e2136);color:var(--text);font:700 1rem/1.2 var(--font-body);text-decoration:none;cursor:pointer;box-shadow:inset 0 0 0 1px #ffffff0f,0 4px 14px #0006;transition:filter .15s,transform .15s}
+.btn:hover{filter:brightness(1.15);color:var(--text)}
+.btn:active{transform:translateY(1px)}
+.btn-play{border-color:var(--play-edge);background:linear-gradient(120deg,var(--play-1),var(--play-2));color:#eaf8ff;font-family:var(--font-display);font-size:1.15rem;box-shadow:inset 0 0 0 2px #bef0ff22,0 0 18px #0085b633,0 6px 18px #0007}
+.btn-play:hover{color:#fff}
+.btn-gold{border-color:var(--gold-500);background:linear-gradient(#6e542e,#3c331f);color:#fff0c5}
+.btn[aria-disabled="true"],.btn:disabled{cursor:not-allowed;filter:saturate(.35) brightness(.8);box-shadow:none}
+.btn[aria-disabled="true"]:hover,.btn:disabled:hover{filter:saturate(.35) brightness(.8)}
+.btn small{font:600 .72rem/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase;padding:.35em .55em;border-radius:99px;background:#0008;color:var(--gold-300)}
+
+.badge{display:inline-flex;align-items:center;gap:.4em;padding:.2em .65em;border:1px solid var(--line);border-radius:99px;background:#0b1a2ccc;color:var(--text-muted);font-size:.78rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.badge-ok{border-color:#94df9366;color:var(--ok)}
+.badge-warn{border-color:#f2c06666;color:var(--warn)}
+.badge-danger{border-color:#ff9a8566;color:var(--danger)}
+.badge-info{border-color:#91ddff55;color:#bfe9ff}
+
+.frame{position:relative;border:1px solid var(--line-strong);border-radius:var(--radius);background:linear-gradient(160deg,#10243a 0%,#0a1828 60%,#0c1d30 100%);box-shadow:inset 0 0 0 3px #050c14,inset 0 0 0 4px #99733c44,var(--shadow)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
