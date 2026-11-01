@@ -9,7 +9,9 @@ use crate::art::{
     mesh::Shape::*,
     palette::*,
     rig::{
+        self,
         Joint::*,
+        Node,
         Node::{Body, Prop, Secondary},
         Proportions, Socket, Spring,
     },
@@ -62,15 +64,29 @@ pub struct Bombard {
 /// Barrel axis height above the grip: the hand rides at chest height and
 /// the barrel rests on the shoulder.
 const BORE: f32 = 0.26;
-/// Where the left hand turns the reload crank (centre of its circle).
-pub const CRANK: Vec3 = Vec3::new(0.13, BORE - 0.05, 0.02);
+/// Keep the charging handle forward of the chest and on the supporting hand's side.
+pub const RELOAD_HANDLE: Vec3 = Vec3::new(0.34, 0.10, 0.40);
+
+pub fn parent(node: Node) -> Option<Node> {
+    match node {
+        Prop(Socket::Nock) => Some(Prop(Socket::WeaponR)),
+        _ => node.parent(),
+    }
+}
+
+pub fn rest(node: Node, p: &Proportions) -> Vec3 {
+    match node {
+        Prop(Socket::Nock) => RELOAD_HANDLE,
+        _ => rig::rest(node, p),
+    }
+}
 
 pub fn bombard(f: Form) -> Bombard {
     let (len, back) = gun_length(f);
     let bell = if f.b && !f.t2 { 0.16 } else { 0.08 };
     Bombard {
         muzzle: Vec3::new(0.0, BORE, back + len + bell),
-        fore_grip: Vec3::new(0.12, 0.1, 0.12),
+        fore_grip: Vec3::new(0.28, 0.1, 0.36),
         breech: Vec3::new(0.0, BORE, back - 0.08),
     }
 }
@@ -569,7 +585,7 @@ fn gun(v: &mut Vec<PartSpec>, f: Form) {
     for k in [0.12, 0.45, 0.82] {
         v.push(part(w, Cyl(r * 1.18, 0.035), band, along(0.0, back + len * k)).rot(x90));
     }
-    // Breech block, exhaust flare, sight, mount and grip, fore-grip, crank.
+    // Breech block, exhaust flare, sight, mount and grip, fore-grip and forward charging rail.
     v.extend([
         part(w, Box(r * 2.5, r * 2.5, 0.13), IRON, along(0.0, back)),
         part(
@@ -587,20 +603,21 @@ fn gun(v: &mut Vec<PartSpec>, f: Form) {
         ),
         part(w, Box(0.07, 0.12, 0.12), IRON, [0.0, BORE - r - 0.04, 0.02]),
         part(w, Box(0.05, 0.15, 0.065), OAK, [0.0, 0.03, 0.0]).rot([12.0, 0.0, 0.0]),
-        part(w, Box(0.12, 0.03, 0.03), OAK, [0.07, 0.15, 0.12]),
-        part(w, Box(0.035, 0.1, 0.035), OAK, [0.12, 0.1, 0.12]),
-        part(w, Cyl(0.04, 0.03), BRASS, [r + 0.02, BORE, CRANK.z]).rot([0.0, 0.0, 90.0]),
+        part(w, Box(0.30, 0.035, 0.045), IRON, [0.15, 0.15, 0.36]),
+        part(w, Box(0.04, 0.10, 0.04), OAK, [0.28, 0.10, 0.36]),
+        part(w, Box(0.30, 0.035, 0.16), IRON, [0.17, 0.10, 0.36]),
+        part(w, Box(0.015, 0.018, 0.15), BRASS, [0.31, 0.12, 0.36]),
         part(
-            w,
-            Box(0.018, 0.06, 0.018),
-            IRON,
-            [r + 0.04, BORE - 0.03, CRANK.z],
+            Prop(Socket::Nock),
+            Box(0.045, 0.045, 0.045),
+            STEEL,
+            [0.0, 0.0, 0.0],
         ),
         part(
-            w,
-            Box(0.02, 0.02, 0.05),
+            Prop(Socket::Nock),
+            Cyl(0.024, 0.08),
             OAK,
-            [r + 0.05, BORE - 0.06, CRANK.z],
+            [0.0, -0.035, 0.0],
         ),
     ]);
     if f.a && !f.t2 {

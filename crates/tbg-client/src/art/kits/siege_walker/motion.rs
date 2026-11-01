@@ -2,13 +2,16 @@
 //! follow it by IK: it rests on the shoulder at ease, is shouldered and
 //! aimed along its own shell's launch tangent when engaged (the body turns
 //! so the off-center barrel lines up), kicks back on Release, and is
-//! cranked between shots. Heavy walk, drop-in spawn.
+//! cycled with a forward side lever between shots. Heavy walk, drop-in spawn.
 
 use std::f32::consts::TAU;
 
 use bevy::prelude::*;
 
-use super::model::{bombard, plan, Bombard, Form, CRANK};
+use super::{
+    model::{bombard, plan, Bombard, Form},
+    reload,
+};
 use crate::art::{
     anim::{Clip, Pose},
     kits::{
@@ -208,9 +211,7 @@ fn aim_gun(
     carry.turn *= Quat::from_rotation_x(-up * 0.7);
 }
 
-/// Right hand on the grip; the left hand joins on the fore-grip by
-/// `support` (0 leaves the shared clip's free arm), or turns the crank
-/// between shots (two turns from 0.55 s to 1.5 s after the shot).
+/// Keep the carrying hand steady while the support hand cycles the external lever.
 fn hands(
     m: &Moment,
     pose: &mut Pose,
@@ -220,23 +221,5 @@ fn hands(
 ) {
     let right_pole = Vec3::new(-1.0, -0.7, -0.5);
     tools::reach(pose, false, carry.at, Some(carry.turn), (p, right_pole));
-    if support <= 0.0 {
-        return;
-    }
-    let crank = if m.clip == Clip::Idle && m.aim.is_some() {
-        hold(m.since_attack, [0.5, 0.65, 1.4, 1.55])
-    } else {
-        0.0
-    };
-    let turn = (m.since_attack - 0.55) * TAU * 2.1;
-    let crank_at = CRANK + Vec3::new(0.0, turn.sin(), turn.cos()) * 0.045;
-    let grip = gun.fore_grip.lerp(crank_at, crank);
-    let arm = [Joint::UpperArmL, Joint::ForearmL, Joint::HandL];
-    let free = arm.map(|j| pose[j.index()].0);
-    let left_pole = Vec3::new(1.0, -0.8, -0.3);
-    let target = carry.at + carry.turn * grip;
-    tools::reach(pose, true, target, Some(carry.turn), (p, left_pole));
-    for (j, rest) in arm.into_iter().zip(free) {
-        pose[j.index()].0 = rest.lerp(pose[j.index()].0, support);
-    }
+    reload::support(m, pose, p, carry.at, carry.turn, gun.fore_grip, support);
 }
