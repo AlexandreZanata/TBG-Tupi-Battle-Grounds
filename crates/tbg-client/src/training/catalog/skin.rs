@@ -6,7 +6,7 @@ pub(super) fn colors(selected: bool) -> impl Bundle {
     let idle = if selected {
         Color::srgb_u8(23, 69, 91)
     } else {
-        kit::INK
+        Color::srgb_u8(14, 35, 48)
     };
     let edge = if selected { kit::GOLD } else { kit::LINE };
     (
@@ -75,7 +75,7 @@ pub(super) fn panel(width: f32) -> impl Bundle {
             overflow: Overflow::scroll_y(),
             ..default()
         },
-        BackgroundColor(Color::srgba(0.025, 0.065, 0.085, 0.95)),
+        BackgroundColor(Color::srgb_u8(8, 24, 34)),
         BorderColor::all(kit::GOLD),
         BoxShadow(vec![ShadowStyle {
             color: Color::BLACK.with_alpha(0.4),

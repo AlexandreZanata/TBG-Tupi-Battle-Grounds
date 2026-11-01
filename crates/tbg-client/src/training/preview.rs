@@ -34,6 +34,7 @@ struct Preview {
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<Preview>()
         .add_systems(Update, drag.run_if(in_state(GameState::Menu)))
+        .add_systems(Last, backdrop)
         .add_systems(
             PostUpdate,
             show.before(crate::art::anim::animate)
@@ -174,7 +175,7 @@ fn show(
     }
     let (radius, height) = preview.size;
     // Normalize only this event-free display actor; gameplay models retain their real scale.
-    let scale = (2.7 / height.max(0.1)).min(1.55 / radius.max(0.1));
+    let scale = (4.0 / height.max(0.1)).min(2.2 / radius.max(0.1));
     let tan = (crate::camera::FOV_Y * 0.5).tan();
     let aspect = window.width() / window.height().max(1.);
     let distance = (10.8_f32).max(6.4 / aspect) / c.zoom;
@@ -225,5 +226,13 @@ fn drag(
     }
     if dy != 0. {
         c.zoom = (c.zoom + dy * 0.05).clamp(0.6, 1.7);
+    }
+}
+
+// Loading readiness also writes the sky during PostUpdate; keep the lab backdrop authoritative
+// only while its presentation is active, without changing arena loading behavior.
+fn backdrop(state: Res<State<GameState>>, shell: Res<Shell>, mut clear: ResMut<ClearColor>) {
+    if *state.get() == GameState::Menu && shell.panel == Panel::Troops {
+        clear.0 = super::stage::SKY;
     }
 }

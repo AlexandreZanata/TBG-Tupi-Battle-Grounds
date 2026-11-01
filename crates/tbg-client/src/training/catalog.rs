@@ -91,7 +91,7 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
         if c.search.is_empty() {
             lang.key("training.search")
         } else {
-            format!("⌕  {}", c.search)
+            c.search.clone()
         },
         Action::Search,
         0.,
@@ -198,7 +198,7 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
                         12.,
                     ));
                 });
-                row.spawn(kit::heading("›", 22.));
+                row.spawn(kit::heading(">", 22.));
             });
         }
     });
@@ -246,7 +246,7 @@ fn practice(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lan
         },
     ));
     p.spawn(skin::control(
-        format!("{}   ›", content::arena_name(lang, c.arena)),
+        format!("{}   >", content::arena_name(lang, c.arena)),
         Action::Arena,
         0.,
         false,

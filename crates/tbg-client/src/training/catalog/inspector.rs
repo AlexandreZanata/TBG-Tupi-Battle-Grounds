@@ -120,6 +120,12 @@ pub(super) fn details(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
         0.,
         false,
     ));
+    p.spawn(skin::control(
+        lang.key("training.practice"),
+        Action::Tab(Tab::Practice),
+        0.,
+        true,
+    ));
 }
 pub(super) fn editor(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
     p.spawn(kit::heading(lang.key("training.editor"), 22.));

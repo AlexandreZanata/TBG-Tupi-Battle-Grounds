@@ -26,7 +26,7 @@ pub(super) fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
             flex_shrink: 0.,
             ..default()
         },
-        BackgroundColor(Color::srgba(0.025, 0.055, 0.075, 0.94)),
+        BackgroundColor(Color::srgb_u8(8, 24, 34)),
     ))
     .with_children(|p| {
         p.spawn(kit::heading(content::unit_name(lang, c.selected), 25.));
@@ -85,9 +85,9 @@ pub(super) fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
         });
         row(p, |r| {
             for (text, a) in [
-                ("‹", Action::Rotate(-1)),
-                ("›", Action::Rotate(1)),
-                ("−", Action::Zoom(-1)),
+                ("<", Action::Rotate(-1)),
+                (">", Action::Rotate(1)),
+                ("-", Action::Zoom(-1)),
                 ("+", Action::Zoom(1)),
             ] {
                 r.spawn(skin::control(text, a, 40., false));

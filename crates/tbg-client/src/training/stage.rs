@@ -51,7 +51,7 @@ pub(super) fn spawn(
             root.spawn((
                 DirectionalLight {
                     color: Color::srgb(1., 0.89, 0.72),
-                    illuminance: 11_000.,
+                    illuminance: 9_000.,
                     shadow_maps_enabled: !crate::config::load_flag("video.low")
                         && crate::config::url_param("shadows").as_deref() != Some("0"),
                     ..default()
@@ -134,6 +134,35 @@ fn courtyard() -> Vec<Part> {
         Vec3::new(6.7, 0.14, 0.88),
         GOLD,
     );
+    block(
+        &mut p,
+        Vec3::new(0., 1.3, -6.0),
+        Vec3::new(6.4, 2.6, 0.5),
+        DARK,
+    );
+    for x in [-1.9, 1.9] {
+        column(&mut p, Vec3::new(x, 0., -5.7), 3.0);
+    }
+    block(
+        &mut p,
+        Vec3::new(0., 2.0, -5.65),
+        Vec3::new(2.2, 2.5, 0.10),
+        BLUE,
+    );
+    for x in [-1.08, 1.08] {
+        block(
+            &mut p,
+            Vec3::new(x, 2.0, -5.57),
+            Vec3::new(0.035, 2.5, 0.03),
+            GOLD,
+        );
+    }
+    p.push((
+        Bevel(0.45, 0.45, 0.07, 0.03),
+        GOLD,
+        Transform::from_xyz(0., 2.85, -5.5)
+            .with_rotation(Quat::from_rotation_z(std::f32::consts::FRAC_PI_4)),
+    ));
     // Recessed walls and broken parapets give the courtyard depth without crowding the actor.
     for side in [-1., 1.] {
         for i in 0..4 {
@@ -171,11 +200,12 @@ fn courtyard() -> Vec<Part> {
             Vec3::new(x, 0.1, -9.),
             Color::srgb_u8(63, 96, 96),
         );
+        let variation = 0.75 + (i % 4) as f32 * 0.11;
         for (r, h, y) in [(0.85, 1.8, 1.7), (0.65, 1.5, 2.5)] {
             part(
                 &mut p,
-                Cone(r, h),
-                Vec3::new(x, y, -8.7),
+                Cone(r * variation, h * variation),
+                Vec3::new(x, y * variation, -8.7 - (i % 3) as f32 * 0.7),
                 Color::srgb_u8(43, 85, 69),
             );
         }
