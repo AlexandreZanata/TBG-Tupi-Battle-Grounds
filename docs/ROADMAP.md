@@ -442,3 +442,23 @@ continued while the S2 runtime gate was deferred; after evidence and owner
 acceptance remain open in the execution review. Apply the current owner
 minimal-validation policy instead
 of historical full-suite blocks. No push or deployment is authorized.
+
+
+## P71 — Combat readability and Stronghold visual polish (owner 2026-11-01)
+
+**Planned; no runtime change in this planning delivery.** Read
+[P71](phases/P71-combat-readability-and-stronghold-polish.md), based on the
+P70 46-champion candidate and the owner's installed-Linux screenshot.
+
+Order: freeze affected evidence → correct form-aware HP bars, tier stars and
+persistent foot allegiance → remove body team patches across all 46 kits →
+white/red/black Pyre with orange/red fire → individual tower firing/animation
+repairs → cumulative 5% Stronghold degradation → scoped consolidation and
+native Linux playtest installation. Four kinds × five forms are mandatory;
+Classic Base stays a reference. Branch `codex/p71-combat-visual-plan` contains
+the specification; execution belongs on `phase/p71-combat-visual-polish`.
+
+No gameplay, protocol or balance change is part of this phase. P70's unresolved
+acceptance is not silently closed. Owner look/fun review follows a concrete
+rendered comparison and installed playtest. See the
+[planning report](planning/P71-PLANNING-REPORT.md) for evidence and validation.

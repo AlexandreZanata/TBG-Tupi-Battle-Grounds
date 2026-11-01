@@ -2435,3 +2435,26 @@ and P59), D-80–D-81 (P59 and P62), D-87–D-89 (P59 and P60/P61), and D-82
 phase/section title; do not treat a numeric collision as supersession.
 New integration behavior is documented in GAME-DESIGN's consolidated roster
 activation section and `phases/CONSOLIDATED-LINUX-RELEASE.md`.
+
+
+## P71 owner visual follow-up — 2026-11-01 (planned)
+
+The owner replaces the requirement for team bands/patches on unit bodies
+with persistent blue/red ground-ring allegiance. Intrinsic clothing and
+character colors remain; statuses must not obscure team identification.
+Architectural Stronghold banners remain, while defender body clothing uses
+intrinsic colors. This supersedes ART-DIRECTION's body-heraldry requirement
+and the team-tabard detail of D-52 for this new visual phase, preserving
+D-46 mechanics and each tower's visible weapon/defender role.
+
+Unit HP bars must clear actual form silhouettes. Tier cubes become bright
+yellow, dark-outlined stars (zero/one/two by existing tier). Pyre Warden
+becomes white/red/black with recognizable orange/red fire. All four
+Stronghold kinds receive individual shot/animation polish and cumulative
+cosmetic degradation on every 5% HP loss, including missing pieces and fire.
+
+Implementation is **planned**, not delivered. Proposed details, source map,
+state-transition handling, validation scope and genuine renderer acceptance
+are specified in [P71](phases/P71-combat-readability-and-stronghold-polish.md).
+There is no combat, stat, Fortification, hitbox, protocol or balance change;
+P70's separate range candidate and outstanding visual approvals remain open.

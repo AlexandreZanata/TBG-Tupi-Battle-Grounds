@@ -1445,3 +1445,31 @@ matching the final hashes in contract_determinism. The five documented seeds
 are collected by examples/trace_canon.rs with the authoritative headless
 cadence; no additional balance value, gameplay rule or time limit changes
 in this trace-identity correction. Previous traces describe the earlier pool.
+
+
+### Proposed P71 cosmetic readability and Stronghold wear (owner 2026-11-01)
+
+Presentation follow-up only: unit team identification moves from body bands
+and patches to persistent foot rings; status effects keep allegiance visible.
+Evolution displays no star at Base, one at tier 1 and two at tier 2 on both
+branches, in bright yellow with a dark outline. Intrinsic clothing colors
+and equipment carry character/branch identity. This does not alter Evolution.
+
+Stronghold appearance reflects each completed **5% loss of current max HP**:
+`floor(20 * (max_hp - clamp(hp, 0, max_hp)) / max_hp)`, with safe integer
+intermediates and a defensive denominator of at least one. There are 21
+cosmetic states, 0 intact through 20 destroyed. Healing and BR-SK07
+Fortification reconcile against the new authoritative HP/max HP view;
+reconnect initializes directly without replaying past damage effects.
+Cracks, missing pieces, debris, smoke and fire are cosmetic. A living tower
+retains a plausible visible emitter and its exact existing firing capability.
+Only authoritative zero HP permits the final destroyed presentation.
+
+Pyre Warden's white/red/black model and red/orange flame replace its spectral
+colors, preserving ProfaneFlame's trigger, timing, exact segment, friendly
+fire and damage. Stronghold animation refinement likewise preserves
+BR-SK01–09, targets, damage, cadence, impact rules, costs and outcomes.
+The fire/smoke onset bands and palette/animation tuning in
+[P71](phases/P71-combat-readability-and-stronghold-polish.md) are Proposed art,
+not balance rules. No new simulation state, protocol or mechanical range
+change is authorized by P71. P70's Trident balance acceptance stays separate.

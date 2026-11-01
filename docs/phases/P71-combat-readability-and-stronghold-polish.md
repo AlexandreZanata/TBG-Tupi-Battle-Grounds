@@ -1,0 +1,383 @@
+# P71 — Combat readability, fire identity and Stronghold polish
+
+**Status:** planned from owner feedback, 2026-11-01; implementation not started.
+**Planning branch:** `codex/p71-combat-visual-plan`.
+**Execution branch:** `phase/p71-combat-visual-polish`.
+**Art baseline:** P70 `b2680c3` (runtime source `c481369`), preserving the
+46-champion cohort and its 230 forms. Resolve onto a reviewed descendant if
+other fronts integrate first; record the actual execution SHA and installer.
+**Delivery:** local commits, genuine renderer evidence and a native Linux
+playtest candidate; no push, merge, public deployment or release packaging.
+Do not overwrite the owner's current worktree or P70 originals.
+
+## 1. Owner outcome and scope
+
+The owner reports Trident's HP bar entering its shark body, redundant blue
+team bands, hard-to-read Evolution cubes and buggy tower shots. They request
+bright yellow outlined Evolution stars, red/orange flame, a white/red/black
+Pyre Warden and professional-looking tower performances and progressive
+breakage for every 5% HP lost.
+
+This phase changes client presentation only. Preserve authoritative combat,
+Stronghold kinds, Fortification, damage, range, cadence, targets, HP/max HP,
+friendly fire, projectile impact semantics, Energy, protocol and outcomes.
+P70's Proposed Trident range is not reopened here; its D-33 acceptance stays
+pending. Tower degradation is cosmetic and never disables its actual weapon.
+Desktop Linux is the first playtest target; share the same art with desktop
+web and Windows. Mobile and a new physics/shader/particle framework are out.
+
+Interpret Evolution markers consistently: Base has no stars, A1/B1 has one,
+A2/B2 has two. Stars have the same yellow/outline on both branches and seats;
+branch identity remains in equipment and the status panel. Do not replace
+Fortification with unit Evolution terminology.
+
+## 2. Read first, then only the source for the current step
+
+- [AGENTS.md](../../AGENTS.md), [VALIDATION.md](../VALIDATION.md).
+- [P70 review](../planning/P70-VISUAL-REVIEW.md) and its
+  [fixed roster](../planning/P70-VISUAL-MANIFEST.json).
+- [ART-DIRECTION](../ART-DIRECTION.md): team identity, P70 palette,
+  Strongholds, motion and budget sections; apply this owner override.
+- [GAME-DESIGN](../GAME-DESIGN.md): BR-SK01–09, Fortification, and the
+  Proposed P71 cosmetic contract. [DECISIONS](../DECISIONS.md): D-46/D-52,
+  the P54 kit preservation decision and the dated P71 owner follow-up.
+- [ARCHITECTURE](../ARCHITECTURE.md) §§3, 6, 7 and 10 only.
+- This phase's source map below; use local Bevy 0.20 examples when APIs change.
+
+## 3. Baseline observations and source map
+
+Owner screenshot: `/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_07-28-59.png`,
+1920 × 1080, SHA-256
+`29359afaf162a5a9eef744fdea30fe2e43a1e53e8044dc930c8f1ccd0512bcc6`.
+It shows the HP bar cutting through Trident's upper silhouette. It is a
+reported installed-build frame, not a temporal proof of any tower-shot bug.
+Do not invent animation findings from this still.
+
+Confirmed source limitations on P70:
+
+- `visuals.rs::spawn_form_visual` uses `1.05 * form.plan.scale + 0.25`
+  for ordinary unit bar height. `visuals/update.rs` repeats that formula
+  after Evolution. Neither uses the actual tall shark model.
+- `visuals/assets.rs` supplies a `tier_cube`; spawn/update use branch
+  gold/silver materials. Bars are billboarded in `visuals/cues.rs`.
+  `visuals/names.rs` and status badges share that screen region.
+- `art/mod.rs::native_form` substitutes ENEMY for parts colored ALLY.
+  Shared `art/kits/common/body.rs` and individual models author team patches.
+  Removing only one shared tabard leaves many individual team markers.
+- `visuals/update.rs` substitutes status colors for the team ring. Preserving
+  unambiguous foot allegiance is a dependency of removing body team marks.
+- Pyre's model is `art/kits/pyre_warden/model.rs`; its runtime jet and ground
+  segment are `vfx/flame.rs`, currently green/white/gold with a green strip.
+- `arena/strongholds/{mod,parts}.rs` implement only three damage states
+  (two-thirds/one-third thresholds), with disappearing pieces. `dress`
+  despawns/rebuilds children on look changes; `towers.rs` separately hides
+  Classic cloth. A new damage policy must update both paths.
+- `arena/strongholds/{aim,motion,gunners}.rs` control aiming, shutters,
+  recoil and emission; `{classic,treasury,bastion,artillery,command}.rs`
+  own distinct models. Existing `aim::fire` can emit a fallback top bolt
+  after a defender disappears. Review that presentation explicitly.
+
+Tower defects to reproduce, not yet confirmed: muzzle/mesh pose divergence,
+side mirroring, closed shutters at emission, aim delay versus impact,
+overwritten pending orders, reload seams, and damage/Fortification rebuilds
+interrupting a shot. Tie each confirmed fix to a real before/after sequence.
+
+## 4. Execution order and acceptance
+
+### S0 — Freeze feedback and affected baselines
+
+1. Create the execution worktree from the reviewed P70 descendant. Record
+   source SHA, binary SHA, quality, camera, viewport and actual installed path.
+2. Reuse immutable P70 evidence where the scene matches; preserve the owner's
+   screenshot as a hashed original. Capture only missing baselines needed
+   for HUD, Pyre and tower firing/degradation. Originals stay ignored;
+   version compact derivatives and a linked evidence index.
+3. List all 46 champions, 230 forms, five auxiliaries separately, and
+   20 selectable Stronghold forms (four kinds × Base/A1/A2/B1/B2), both sides.
+   Classic Base is a compatibility fixture, not a fifth selectable kind.
+4. Write a tower bug ledger: kind/form/seat, target position, HP stage,
+   order/emission/impact timestamps, reproduction and suspected source.
+   A generic improvement cannot substitute for a reported bug reproduction.
+
+Acceptance: fixed coverage inventory and reproducible immutable baseline;
+no old capture is relabeled as new, and missing evidence is explicit.
+
+### S1 — HP anchors, Evolution stars and persistent team rings
+
+1. Put unit overhead layout in one focused module reused by spawn and
+   Evolution update. Store a stable per-form head/body/attached-backgear
+   envelope in the existing figure cache. Include custom anatomy and scale;
+   exclude detached projectiles and the swept tip of long weapons, so a
+   polearm does not place the HP bar a spear-length above its owner.
+2. Calibrate clearance in the normal desktop camera using the projected top
+   silhouette, not an arbitrary taller constant for Trident. Keep the bar
+   stable through breathing/walking and its camera-facing bottom edge clear
+   of head/helmet/body. Avoid per-frame mesh scans or a jittering height.
+   Account for mounted Cargo Crab passengers, custom creatures, Evolution,
+   spawn/reconnect and world/root offsets. Hide overheads on existing death.
+3. Replace cube geometry with a cached five-point star plus a slightly larger
+   dark silhouette behind it. Bright unlit yellow (`#FFD43B`, Proposed) and
+   near-black (`#17120C`) outline retain contrast on snow and dark arenas.
+   At 1080p begin with roughly 10–12 px stars and a one-pixel outline, then
+   calibrate at actual game zoom. No font-dependent Unicode glyph or bloom
+   is required. Share bar billboard orientation, disable shadows and prevent
+   coplanar z-fighting. Center one star; align two above the bar with space.
+4. Move name/status offsets into that same layout so bleed/shield/mark icons,
+   labels and stars do not cover one another. Preserve legible fill and HP
+   colors. Stars represent tier, never team, branch or combat strength stats.
+5. Keep the ally/enemy team ring visible even while slow/root/mark applies.
+   Reuse existing status-badge seams or a separate small status accent;
+   do not overwrite the ring's blue/red allegiance. Preserve any existing
+   accessible shape distinction; where absent, author a subtle solid/notched
+   ring difference using shared geometry and verify both at match distance.
+
+Acceptance: Trident Base/A1/A2/B1/B2 bars clear its body on both sides during
+Idle/Walk/Attack/Evolve. Check other 45 champions' five-form envelopes with
+existing evidence plus affected captures. Base/one/two-star transitions,
+reconnect, names, statuses, passenger overheads and death stay consistent.
+No need to build a general-purpose HUD framework.
+
+### S2 — Remove body team markers across the roster
+
+1. Audit shared body helpers and all 46 kit models, five auxiliaries and
+   tower defenders. Remove strips, patches, arm bands and body emblems whose
+   only role is team color, on allies and enemies. Keep clothing/armor as
+   coherent geometry: replace a structural tabard with intrinsic cloth,
+   rather than leaving a torso hole or deleting a silhouette-defining coat.
+2. Give decorative surfaces intrinsic kit/faction colors. Keep meaningful
+   natural blues/reds (shark skin, robes, fishing coat, fire equipment).
+   Do not delete every blue/red vertex or globally desaturate the roster.
+3. Resolve color-equality remapping in `native_form`: an intrinsic color must
+   not silently turn red on the enemy. Reuse identical team-neutral unit
+   meshes when appropriate; retain variants only where a real need remains.
+   Do not add an abstraction solely to replace a color.
+4. Keep architectural Stronghold flags/banners and allegiance UI; the owner
+   removed body identification, not castle ownership or War Banner's identity.
+   Tower defenders follow the intrinsic-body palette policy too.
+5. Compare allied/enemy model, portrait, Troops and P63 appearances using the
+   same source assets. Refresh affected generated portraits through the
+   established renderer path only; do not leave old team patches in cards.
+
+Acceptance: no body patch remains solely to mark ally/enemy; the 46 identities
+remain distinct and foot allegiance/statuses remain readable in dense combat.
+Update ART-DIRECTION and the evidence index in the same logical change.
+
+### S3 — Pyre Warden becomes a fire unit
+
+1. Preserve the coffin-furnace/nozzle/hose silhouette and all five form
+   equipment differences; recolor the kit with ivory/white armor, strong
+   red furnace panels and charcoal/black fuel pack, gloves, hose and seams.
+   Metal may remain a restrained neutral. Remove the team chest badge.
+   A2/B2 must remain distinguishable by structure and material placement.
+2. Replace spectral green/violet glow with a warm orange/red furnace core,
+   orange body of flame, red outer tongues and a small yellow-white hottest
+   center. No green jet or green ground segment remains for this effect.
+   Use named semantic colors without recoloring other Undead effects.
+3. Retain the real nozzle socket, propagated transform, event endpoint,
+   ground danger segment, 0.20 s jet lifetime, trigger and current damage/
+   friendly-fire rules. Essential nozzle-to-target flame survives Low;
+   sparks/smoke are optional. Fire damage to allies must still read clearly.
+4. Check release/aim/Walk/Victory and nozzle clearance in all forms. Record
+   unobstructed and crowded actual live flames in both seats, standard/Low,
+   rather than accepting event counts as recognizable fire.
+
+Acceptance: white/red/black identity is visible at normal distance; flame
+reads as red/orange fire, exits the nozzle, and covers precisely the
+unchanged visual danger interval. Existing endpoint/timing tests remain valid.
+
+### S4 — Distinct, synchronized Stronghold performances
+
+Work through each kind and all five Fortification forms individually:
+
+- **Bastion:** weighty masonry, readable opening shutter, falconet runs out
+  before its muzzle emits, restrained recoil and recovery; B2 Sentinel's
+  ballista has tension/release and a bolt aligned to its rail.
+- **Artillery:** aligned carriage/barrel, clear load/brace/fire/recoil/return,
+  purposeful gear motion, smoke with a short bright flash; A and B cadence
+  differences come from existing authoritative intervals, not slowed shots.
+- **Treasury:** hinged trapdoors clear the coin mortar, coherent opening/
+  release/closing, a readable purse/coin volley with the existing trajectory;
+  vault/roof and Fortification additions remain recognizable.
+- **Command:** observer/archer turns with stable footing, draws, releases
+  from the visible bow and returns; banner secondary motion supports the
+  shot rather than hiding it. War Banner radius and passive remain exact.
+- **Classic compatibility:** crossbow/sentry aim, release and reset remain
+  coherent in reference/training scenes; do not expose it in the selector.
+
+Use actual render-delayed Stronghold shot orders as the cue source. Make
+muzzle flash, visible weapon, projectile origin/tangent and recoil use the
+same evaluated release pose. Fix mirrored axes, hinge pivots, target changes,
+reload/idle seams and any real order-loss bug found at S0. Review current
+SETTLE delay against the existing impact timing; never add a dramatic pause
+that makes a projectile arrive after authoritative damage. Cosmetic anticipation
+cannot require a new server event or predict damage.
+
+Do not hide a firing weapon and retain a floating bolt as a final look.
+While alive, retain a plausible attached emitter or a visible reserve firing
+port for every form/stage, synchronized with its shot. Degradation must not
+reset the shot counter/aim or rebuild a moving weapon every 5% crossing.
+Do not change mechanics to repair a visual trajectory.
+
+Acceptance: actual basic shots on both sides, near/far/off-axis targets,
+retarget/death, repeated attacks, Fortification during recoil and damage
+crossings are aligned and recover cleanly. Record each fixed bug and each
+kind's final signature sequence; a static gallery alone cannot pass motion.
+
+### S5 — Twenty cumulative 5% degradation steps
+
+Use only authoritative HP and that Stronghold's current max HP, including
+Fortification. Compute the display stage safely with integer intermediates:
+
+```text
+max = max(authoritative_max_hp, 1)
+hp = clamp(authoritative_hp, 0, max)
+stage = floor((max - hp) * 20 / max)   # 0..20, using i64 arithmetic
+```
+
+Stage 0: HP >95% through 100%; first change at HP <=95%; then <=90%,
+<=85% ... <=5%; stage 20 is zero HP. Thus there are 21 visual states,
+including intact and destroyed. Every 5% boundary adds a readable cumulative
+change: not a whole tower chunk on every minor hit, and no random rearranging.
+
+Proposed art progression (thresholds are cosmetic tuning, never gameplay):
+
+- 100%: complete structure, clean surfaces, intact machinery.
+- 95–80%: a new crack/chip per step, dust and small edge fragments.
+- 75–60%: broken crenellations, chipped facing, exposed timber, light smoke.
+- 55–40%: wider fractures, missing secondary panels/roof tiles, localized
+  small red/orange fire at authored combustible joints.
+- 35–20%: several persistent flame pockets, charred edges, sagging trim,
+  larger missing decorative pieces; firing mechanism remains readable.
+- 15–5%: heavily fractured silhouette, exposed supports and denser smoke;
+  keep the base, kind signature, team flag/marker and a credible live emitter.
+- 0%: one bounded collapse into matching rubble and residual fire/smoke;
+  outcome controls and the existing match completion remain immediately usable.
+
+Each kind/form needs authored damage regions, loss thresholds and burn sockets.
+Use masonry fragments for stone, splinters for timber and bent/detached metal
+trim for machinery. Flames attach to combustible/interior fuel regions, not
+arbitrary floating points. Maintain a cumulative deterministic damage mask
+for a given look/stage; use a stable cosmetic seed for debris variation only.
+
+Implementation should extend current reusable `Piece` metadata/cache and
+split responsibilities into focused damage/transition modules. Prefer stable
+children with visibility/material/pose changes on a stage transition. Build
+meshes/materials once per form/part, never twenty full towers or new meshes
+per frame. Change the old three-state loss constants, turret availability,
+Classic cloth thresholds and gallery damage controls together. Keep old
+working geometry and omit a new scene graph/physics dependency.
+
+Handle state changes deliberately:
+
+- A hit skipping several bands sets the complete final damage mask; play a
+  bounded combined debris burst instead of replaying every skipped explosion.
+- Initial snapshot/reconnect renders the current state directly, with no
+  fake historical hit/debris/collapse burst. Repeated identical views do not
+  accumulate emitters or retrigger transitions.
+- Real healing may restore stages from the new HP fraction. Fade in repaired
+  regions and reduce fire; do not implement a permanent worst-ever damage
+  counter that visually contradicts HP. This grants no actual healing.
+- Fortification changes max HP using BR-SK07's authoritative rounded ratio;
+  recompute from that view and carry damage onto new geometry. Do not flash
+  an intact upgraded tower or detach the active emitter. A boundary crossing
+  from authoritative integer rounding is legitimate, not a free visual heal.
+- At zero HP, use the terminal view and suppress live fire orders. Cleanup
+  finishes on rematch, leaving training, scene change and reconnect teardown.
+
+Reuse shared VFX meshes. Persistent fire/smoke should use a small fixed set
+of sockets per tower with bounded density. Cap debris bursts, expire pieces
+and reuse the existing simple VFX lifecycle; do not create an unbounded pool.
+Low quality keeps the same structural damage and at least essential flames,
+reducing smoke/sparks/debris. Reduced motion keeps damage readability without
+shake/flashing. No extra dynamic lights or shadow-casting smoke are required.
+
+Acceptance: 20 selectable forms × 21 states × 2 sides = 840 static matrix
+entries, plus Classic Base × 21 × 2 = 42 reference entries. These are coverage
+requirements, not permission to build/run hundreds of individual campaigns.
+Prefer shared contact sheets, batched state inspections and focused temporal
+transitions once at consolidation. Record pending entries explicitly.
+
+### S6 — Consolidate evidence and deliver the Linux playtest
+
+1. Produce the per-unit HUD/team-mark review and Pyre before/after, the tower
+   bug ledger, damage contact sheets and actual temporal sequences. Preserve
+   original source/binary hashes, both seats, quality and ordinary combat speed.
+2. Inspect at normal game distance on Frozen Tundra (owner screenshot), a
+   dark arena and the standard arena; use 1280×720 and 1920×1080 desktop
+   layouts. Check stars on both dark and bright backgrounds and busy lineups.
+3. On the final integrated code, run the focused checks below once. List
+   source, real results, known failures and exact deferred scenarios in
+   `docs/planning/P71-COMBAT-VISUAL-REVIEW.md`; never pass a recorded-only item.
+4. Install the verified native development candidate beside the current
+   Linux build, preserving saved data and a rollback launcher. Keep the
+   application's TBG shortcut and validate the installed binary/assets.
+   Test Troops, local bot entry, Evolution and Stronghold shots in that build.
+   Do not replace P70's evidence binaries or publish a release.
+5. Present the concrete playtest and comparison pack for owner look/fun
+   review. Update roadmap and stop for review with local commits.
+
+## 5. Validation policy and focused regression queue
+
+Planning now: Markdown/source-path inspection and `git diff --check` only.
+No Cargo, Trunk, runtime campaign or installer mutation in this planning task.
+
+Implementation work fronts: affected-package formatting, then one inexpensive
+cached client check if available; queue tests until consolidation. Every
+compiling command uses the shared nonblocking host lock and two jobs:
+
+```sh
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 cargo check --offline --locked -p tbg-client --bin tbg-client
+```
+
+Reuse the actual integrated tree's existing cache/target and installed native
+pkg-config path where needed. Busy lock (75), missing lock support or cold
+cache means deferred, never wait/poll/bypass/clean or invent a new target.
+
+Write narrow `p71_` regressions for the documented contracts that can fail:
+
+- Shared spawn/Evolution anchor selection and stable body clearance using
+  actual custom figure bounds; Base/one/two-star counts and team-neutral color
+  semantics. Rendered projection still requires visual evidence.
+- Stage boundaries at/beside every 5% threshold, clamping and i64 overflow
+  safety, varied kind max HP including Bastion 5175 and Fortification.
+- Cumulative masks, live emitter availability, healing/Fortification/view
+  idempotence and terminal/reconnect cleanup. No mechanical core test needs
+  changing merely to accept a client damage mask.
+- Actual turret configurations on both sides, release transform/tangent,
+  authoritative-order cardinality and no duplicated cosmetic shot on rebuild.
+  If a real order-loss bug exists, preserve its minimal reproduced scenario.
+
+At consolidation run this selected union sequentially under the same wrapper:
+
+```sh
+cargo test --offline --locked -p tbg-client --bin tbg-client p71_ -- --nocapture --test-threads=1
+cargo test --offline --locked -p tbg-client --bin tbg-client arena::strongholds:: -- --nocapture --test-threads=1
+cargo test --offline --locked -p tbg-client --bin tbg-client pyre_jet -- --nocapture --test-threads=1
+```
+
+Update client-only three-state tests to the new cosmetic contract while
+retaining coverage; contract tests remain append-only under AGENTS.md.
+Do not repeat unaffected P70 tests by habit. A changed muzzle/hand geometry
+also queues its existing grip regression, named in the execution report.
+
+A native build may be needed for the requested Linux playtest; do it once
+under the lock. Cached WASM checking and desktop-browser runtime inspection
+are separate consolidation evidence; Windows runtime is reported separately
+if unavailable. No full suite, workspace sweep, D-33 gate, release build,
+benchmark or packaging build is implied. Measure obvious entity/VFX growth
+with ordinary captures; a heavy performance campaign needs separate scope.
+
+## 6. Completion and report structure
+
+Record one logical local commit per step. The final report must include:
+actual base/candidate and installation path; owner requests versus Proposed
+art tuning; confirmed defect causes; per-step implementation/files; passing
+commands; real screenshot/video provenance; fixed and remaining bugs;
+coverage matrix; deferred commands/scenarios with reasons; deviations;
+rollback information; and pending owner subjective approval.
+
+Do not close P70's unrelated acceptance items through this phase, conflate
+Fortification with Evolution, claim every tower bug fixed from one still,
+or call P71 complete with missing applicable evidence. The owner approves
+look and fun after a concrete local playtest is available.
