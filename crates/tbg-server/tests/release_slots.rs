@@ -6,13 +6,16 @@
 //! rollback moves only new admissions, and A retires only when idle.
 //! Ranked results from both generations settle exactly once (U15).
 
+#[path = "common/auth.rs"]
+mod auth;
+
 use std::path::PathBuf;
 use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
 use rusqlite::Connection;
 use tbg_core::contract::MatchContract;
-use tbg_core::protocol::{self, AccountError, ClientMsg, ErrorCode, ServerMsg, PROTOCOL_VERSION};
+use tbg_core::protocol::{self, ClientMsg, ErrorCode, ServerMsg, PROTOCOL_VERSION};
 use tbg_server::store::release::{read_directory, SlotRow};
 use tbg_server::store::release_admin::{self as admin, retire_blockers};
 use tbg_server::{Config, Shared};
@@ -262,43 +265,63 @@ async fn u13_u15_a_running_match_survives_promotion_and_rollback() {
     assert_eq!(matches, 2, "each finished match recorded exactly once");
 }
 
-/// U13: an account signed up through A cannot sign in through B while A
-/// holds its live session; once that idle session leaves, B may take it.
-async fn one_live_session(a_url: &str, b_url: &str, name: &str) -> Ws {
-    let (mut on_a, _) = join(a_url, None).await;
-    send(&mut on_a, &ClientMsg::Register { name: name.into() }).await;
-    let key = match expect(&mut on_a, |m| matches!(m, ServerMsg::Registered { .. })).await {
-        Some(ServerMsg::Registered { key, .. }) => key,
-        other => panic!("not registered: {other:?}"),
-    };
-    let (mut on_b, _) = join(b_url, None).await;
-    let answer = |m: &ServerMsg| {
+/// `true` when the server signs this socket's account out within `wait`.
+async fn signed_out_within(ws: &mut Ws, wait: Duration) -> bool {
+    let deadline = tokio::time::Instant::now() + wait;
+    while tokio::time::Instant::now() < deadline {
+        if matches!(
+            next(ws, Duration::from_millis(200)).await,
+            Some(ServerMsg::LoggedOut)
+        ) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Sign a fresh guest socket in with an HTTP-issued grant (D-97).
+async fn attach_account(ws: &mut Ws, grant: &tbg_server::botclient::native_auth::Grant) {
+    auth::attach(ws, grant, false).await;
+    let reply = expect(ws, |m| {
         matches!(
             m,
-            ServerMsg::AccountError { .. } | ServerMsg::LoggedIn { .. }
+            ServerMsg::LoggedIn { .. } | ServerMsg::AuthRequired { .. }
         )
-    };
-    send(&mut on_b, &ClientMsg::Login { key: key.clone() }).await;
-    let refused = expect(&mut on_b, answer).await;
+    })
+    .await;
     assert!(
-        matches!(
-            refused,
-            Some(ServerMsg::AccountError {
-                code: AccountError::Unavailable
-            })
-        ),
-        "{refused:?}"
+        matches!(reply, Some(ServerMsg::LoggedIn { .. })),
+        "{reply:?}"
     );
-    // The release of A's hold is asynchronous: retry briefly.
+}
+
+/// U13: an account signed up through A cannot keep a session on B while A
+/// holds its live session; once that idle session leaves, B may take it.
+/// D-97/D-99: accounts sign in over HTTP and attach to the socket, so the
+/// cross-slot claim follows the attach and a lost claim signs B out.
+async fn one_live_session(a_url: &str, b_url: &str, name: &str) -> Ws {
+    let (mut on_a, _) = join(a_url, None).await;
+    let grant = auth::register(&on_a, name).await.expect("registered on A");
+    attach_account(&mut on_a, &grant).await;
+    let key = grant
+        .account_key
+        .clone()
+        .expect("registration returns the key once");
+    let (mut on_b, _) = join(b_url, None).await;
+    let on_b_grant = auth::login(&on_b, &key).await.expect("HTTP sign-in on B");
+    attach_account(&mut on_b, &on_b_grant).await;
+    assert!(
+        signed_out_within(&mut on_b, Duration::from_secs(5)).await,
+        "B must not keep the account while A holds its live session"
+    );
+    // The release of A's hold is asynchronous: retry briefly on a new socket.
     drop(on_a);
     for _ in 0..20 {
         tokio::time::sleep(Duration::from_millis(400)).await;
-        send(&mut on_b, &ClientMsg::Login { key: key.clone() }).await;
-        if matches!(
-            expect(&mut on_b, answer).await,
-            Some(ServerMsg::LoggedIn { .. })
-        ) {
-            return on_b;
+        let (mut retry, _) = join(b_url, None).await;
+        attach_account(&mut retry, &on_b_grant).await;
+        if !signed_out_within(&mut retry, Duration::from_millis(1_500)).await {
+            return retry;
         }
     }
     panic!("B never took the account after A's session left");
@@ -356,18 +379,8 @@ async fn u12_a_foreign_contract_is_refused_before_any_seat() {
 /// Sign a fresh connection in under `name` and queue it for ranked play.
 async fn ranked_player(url: &str, name: &str) -> Ws {
     let (mut ws, _) = join(url, None).await;
-    send(&mut ws, &ClientMsg::Register { name: name.into() }).await;
-    let reply = expect(&mut ws, |m| {
-        matches!(
-            m,
-            ServerMsg::Registered { .. } | ServerMsg::AccountError { .. }
-        )
-    })
-    .await;
-    assert!(
-        matches!(reply, Some(ServerMsg::Registered { .. })),
-        "{reply:?}"
-    );
+    let grant = auth::register(&ws, name).await.expect("registered");
+    attach_account(&mut ws, &grant).await;
     send(&mut ws, &ClientMsg::RankedMatch).await;
     ws
 }
