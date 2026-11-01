@@ -98,9 +98,11 @@ fn run(
         }
         6 => {
             capture(&mut commands, "arena-open.png");
-            queue.0.push(UiAction::Deselect);
         }
         7 => {
+            queue.0.push(UiAction::Deselect);
+        }
+        8 => {
             capture(&mut commands, "arena-dismissed.png");
         }
         _ => {
