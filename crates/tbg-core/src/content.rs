@@ -220,7 +220,7 @@ pub struct ArenaRule {
     pub atk_bp: i32,
     /// Extra base Energy regeneration in bp of the base rate, beside
     /// Interest's bp (BR-E05); the existing remainder keeps it exact.
-    pub regen_bp: u32,
+    pub regen_bp: i32,
     /// Sub-Energy off each player's first successful Evolution.
     pub first_evolve_discount: u32,
 }
@@ -234,8 +234,8 @@ impl ArenaRule {
     };
 }
 
-/// Indexed by `Arena::index()`: Forest, Tundra, Volcanic, Ruins, Storm.
-pub const ARENA_RULES: [ArenaRule; 5] = [
+/// Indexed by the append-only `Arena` identity (GAME-DESIGN §12).
+pub const ARENA_RULES: [ArenaRule; crate::Arena::ALL.len()] = [
     ArenaRule::NONE,
     ArenaRule {
         move_bp: -1_000,
@@ -251,6 +251,19 @@ pub const ARENA_RULES: [ArenaRule; 5] = [
     },
     ArenaRule {
         regen_bp: 800,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        move_bp: 800,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        move_bp: -500,
+        atk_bp: 800,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        regen_bp: -800,
         ..ArenaRule::NONE
     },
 ];

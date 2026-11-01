@@ -6,10 +6,7 @@ use super::{
 };
 use crate::{i18n::Lang, sync::MatchInfo, GameState};
 use bevy::prelude::*;
-use tbg_core::{
-    content::{ARENA_RULES, ENERGY_SCALE},
-    Arena,
-};
+use tbg_core::Arena;
 
 #[derive(Resource, Default)]
 pub struct ArenaBanner {
@@ -190,18 +187,7 @@ fn visibility(
 }
 
 fn effect(lang: Lang, arena: Arena) -> String {
-    let rule = ARENA_RULES[arena.index()];
-    let (key, value) = match arena {
-        Arena::Forest => return lang.key("arenas.effect.none"),
-        Arena::Tundra => ("arenas.effect.move", format!("{:+}%", rule.move_bp / 100)),
-        Arena::Volcanic => ("arenas.effect.attack", format!("{:+}%", rule.atk_bp / 100)),
-        Arena::Ruins => (
-            "arenas.effect.evolve",
-            (rule.first_evolve_discount / ENERGY_SCALE).to_string(),
-        ),
-        Arena::Storm => ("arenas.effect.regen", format!("{:+}%", rule.regen_bp / 100)),
-    };
-    lang.key(key).replace("{value}", &value)
+    crate::ui::arena_effect::describe(arena, lang)
 }
 
 fn accent(arena: Arena) -> Color {
@@ -211,6 +197,9 @@ fn accent(arena: Arena) -> Color {
         Arena::Volcanic => [255, 138, 61],
         Arena::Ruins => [217, 180, 74],
         Arena::Storm => [143, 168, 255],
+        Arena::Celestial => [108, 211, 241],
+        Arena::Clockwork => [223, 157, 73],
+        Arena::Desert => [231, 192, 111],
     };
     Color::srgb_u8(r, g, b)
 }

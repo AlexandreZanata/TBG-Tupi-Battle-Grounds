@@ -1,9 +1,13 @@
-//! Four procedural environment kits assembled with the original arena mesh pipeline.
+//! Procedural environment kits assembled with the original arena mesh pipeline.
 
 use super::{theme::Theme, Part};
 use bevy::prelude::*;
 use tbg_core::Pcg32;
 
+mod celestial;
+mod clockwork;
+mod desert;
+mod monuments;
 mod ruins;
 mod shared;
 mod storm;
@@ -24,6 +28,9 @@ pub(super) fn build(theme: Theme) -> Kit {
         Theme::Volcanic => volcanic::build(&mut kit),
         Theme::Ruins => ruins::build(&mut kit),
         Theme::Storm => storm::build(&mut kit),
+        Theme::Celestial => celestial::build(&mut kit),
+        Theme::Clockwork => clockwork::build(&mut kit),
+        Theme::Desert => desert::build(&mut kit),
         Theme::Forest => return kit,
     }
     shore_rocks(&mut kit, theme);
@@ -112,5 +119,20 @@ fn shore_rocks(kit: &mut Kit, theme: Theme) {
                 ));
             }
         }
+    }
+}
+
+pub(super) use clockwork::motion::animate;
+
+pub(super) fn spawn_motion(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    mat: &Handle<StandardMaterial>,
+    theme: Theme,
+) -> usize {
+    if theme == Theme::Clockwork {
+        clockwork::motion::spawn(commands, meshes, mat)
+    } else {
+        0
     }
 }

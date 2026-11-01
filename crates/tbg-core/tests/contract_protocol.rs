@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 29,
-        "v29 consolidated P59/P63: result identity and bounded lifetime celebration payload"
+        PROTOCOL_VERSION, 30,
+        "v30 GAME-DESIGN §12: append Celestial, Clockwork and Desert Arena identities"
     );
 }
 
@@ -262,4 +262,25 @@ fn v27_drill_fusion_is_appended_without_death() {
     let bytes = encode(&event);
     assert_eq!(bytes, [28, 1, 2, 3, 0]);
     assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn v30_arena_identities_append_without_renumbering_the_original_five() {
+    // GAME-DESIGN §12, BR-AR01/06: identical assignment on every peer and reconnect.
+    use tbg_core::Arena;
+    let order = [
+        Arena::Forest,
+        Arena::Tundra,
+        Arena::Volcanic,
+        Arena::Ruins,
+        Arena::Storm,
+        Arena::Celestial,
+        Arena::Clockwork,
+        Arena::Desert,
+    ];
+    for (id, arena) in order.into_iter().enumerate() {
+        let bytes = postcard::to_allocvec(&arena).expect("Arena wire identity");
+        assert_eq!(bytes, [id as u8]);
+        assert_eq!(postcard::from_bytes::<Arena>(&bytes), Ok(arena));
+    }
 }

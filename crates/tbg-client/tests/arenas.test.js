@@ -15,13 +15,13 @@ function speak(lang) {
   globalThis.TBG_I18N = { t: (key, args) => Object.entries(args || {}).reduce((text, [k, v]) => text.split('{' + k + '}').join(v), catalogs[lang][key] ?? key) };
 }
 
-test('five arenas, the Forest by default, each with a scene picture', () => {
-  assert.deepEqual(data.arenas.map(def => def.slug), ['forest', 'tundra', 'volcanic', 'ruins', 'storm']);
+test('eight arenas, the Forest by default, each with a scene picture', () => {
+  assert.deepEqual(data.arenas.map(def => def.slug), ['forest', 'tundra', 'volcanic', 'ruins', 'storm', 'celestial', 'clockwork', 'desert']);
   assert.equal(data.defaultArena, 'forest');
   for (const def of data.arenas) assert.ok(fs.existsSync(path.join(assets, 'arenas', def.image)), def.image);
 });
 
-test('each arena states exactly one rule, the Forest none', () => {
+test('each arena states every modifier, the Forest none', () => {
   speak('en');
   const lines = Object.fromEntries(data.arenas.map(def => [def.slug, arena.effect(def, data)]));
   assert.equal(lines.forest, 'No modifier · the reference battlefield');
@@ -29,6 +29,9 @@ test('each arena states exactly one rule, the Forest none', () => {
   assert.equal(lines.volcanic, 'Troop attack speed +8%');
   assert.equal(lines.ruins, "Each player's first Evolution costs 1 Energy less");
   assert.equal(lines.storm, 'Base Energy regeneration +8%');
+  assert.equal(lines.celestial, 'Troop movement +8%');
+  assert.equal(lines.clockwork, 'Troop movement −5% · Troop attack speed +8%');
+  assert.equal(lines.desert, 'Base Energy regeneration −8%');
 });
 
 test('every arena key exists in both languages and no placeholder is left', () => {

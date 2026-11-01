@@ -12,6 +12,7 @@ mod account_ui;
 mod actions;
 #[cfg(test)]
 mod arena_data_tests;
+mod arena_effect;
 #[cfg(test)]
 mod army_tests;
 mod attribution;

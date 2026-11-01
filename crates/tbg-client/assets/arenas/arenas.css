@@ -1,4 +1,4 @@
-/* Arenas page (lobby dialog, five scene cards) and the in-match arena
+/* Arenas page (lobby dialog, eight scene cards) and the in-match arena
    banner and chip; same frame and palette as the Stronghold picker. */
 #arena-hub{box-sizing:border-box;width:calc(100vw - 64px);max-width:1740px;max-height:calc(100vh - 64px);margin:auto;padding:0;border:1px solid #b18f57;border-radius:12px;background:radial-gradient(ellipse at 50% 0,#263839e8,#101b21f5 57%,#0a1219fa);box-shadow:0 0 0 4px #0a1219cc,0 0 0 5px #ad8c4d55,0 24px 90px #000b;color:#ebe8d9;font:15px/1.4 Camp,system-ui,sans-serif;pointer-events:auto;overflow:hidden}
 #arena-hub[open]{display:flex;flex-direction:column}#arena-hub::backdrop{background:#030b1266;backdrop-filter:blur(5px)}

@@ -218,13 +218,14 @@ fn live_seats(players: &[Player; 2]) -> [LivePlayer; 2] {
     })
 }
 
-/// Uniform over the five arenas: one OS-random byte, rejecting 255 so the
-/// remaining 255 values split evenly (51 each).
+/// Rejection sampling keeps every Arena equally likely as the catalog grows.
 pub(crate) fn draw_arena() -> tbg_core::Arena {
     loop {
         let [byte] = random_bytes::<1>();
-        if byte < 255 {
-            return tbg_core::Arena::ALL[usize::from(byte) % tbg_core::Arena::ALL.len()];
+        let count = tbg_core::Arena::ALL.len();
+        let value = usize::from(byte);
+        if value < 256 - 256 % count {
+            return tbg_core::Arena::ALL[value % count];
         }
     }
 }
@@ -232,14 +233,14 @@ pub(crate) fn draw_arena() -> tbg_core::Arena {
 #[cfg(test)]
 mod arena_tests {
     #[test]
-    fn the_draw_is_uniform_over_the_five_arenas() {
-        // 50 000 draws: 10 000 expected each, σ ≈ 89; ±6 % is ~6.7 σ.
-        let mut counts = [0u32; 5];
-        for _ in 0..50_000 {
+    fn the_draw_is_uniform_over_all_arenas() {
+        // 80 000 draws: 10 000 expected each; ±8 % exceeds eight standard deviations.
+        let mut counts = [0u32; tbg_core::Arena::ALL.len()];
+        for _ in 0..80_000 {
             counts[super::draw_arena().index()] += 1;
         }
         for (i, n) in counts.iter().enumerate() {
-            assert!((9_400..=10_600).contains(n), "arena {i}: {n} of 50 000");
+            assert!((9_200..=10_800).contains(n), "arena {i}: {n} of 80 000");
         }
     }
 }

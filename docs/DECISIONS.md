@@ -2471,3 +2471,25 @@ It has no splash/Slow, never targets allies or Strongholds, and never triggers
 club on-hit/counters. Static seat bonuses apply once, excluding branch A's
 club-only damage bonus. This replaces area control with a low-damage secondary
 attack and needs future D-33 balance acceptance; no gate has been claimed.
+
+
+## Three-arena expansion — GAME-DESIGN §12 / BR-AR06 (2026-11-01, Proposed)
+
+The owner requests three playable arenas modeled from local Celestial Citadel,
+Clockwork Bastion and Desert Relics references, using the existing five arenas'
+geometry, scene lifecycle, catalog, symmetric effects and assignment rules. The
+original reference images stay in ignored local storage and must never enter git.
+Source geometry and thumbnails rendered from the game are deliverables.
+
+The owner delegates modifier design. Initial Proposed values: Celestial +800
+movement bp; Clockwork +800 attack-speed bp and −500 movement bp; Desert −800
+base Energy regeneration bp. No existing arena value changes. ArenaRule's signed
+regeneration offset joins Interest before the existing fractional accumulation.
+The disclosed highest-difficulty Practice assistance uses that same signed rate.
+
+Append wire identities 5–7 and bump protocol 29 → 30; old peers must fail the
+version handshake instead of encountering unknown Arena variants. Bump the watched
+gameplay revision 5 → 6. Uniform pairing must derive its rejection bound from the
+catalog size, rather than the previous five-way bound. No production deployment
+is authorized by the local playtest workflow. D-33 balance acceptance and owner
+look/fun approval remain pending; no heavy balance gate is claimed.

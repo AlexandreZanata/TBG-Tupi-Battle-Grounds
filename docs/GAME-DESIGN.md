@@ -718,8 +718,8 @@ Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). S
 
 ## 12. Arenas (active, values Proposed, ARENAS-G, D-55)
 
-Every match is played in one of five `Arena`s. Each changes one small
-thing, **the same for both sides**; the Forest is the neutral reference.
+Every match is played in one of eight `Arena`s. Each applies small modifiers,
+**the same for both sides**; the Forest is the neutral reference.
 Values are **Proposed** until the balance lab confirms them (D-33).
 
 | Arena | Effect on both sides |
@@ -729,6 +729,9 @@ Values are **Proposed** until the balance lab confirms them (D-33).
 | Volcanic Forge | Troop attack speed +8 % |
 | Ancient Ruins | Each player's first successful `Evolution` costs 1 `Energy` less |
 | Storm Valley | Base `Energy` regeneration +8 % |
+| Celestial Citadel | **Proposed:** troop movement speed +8 % |
+| Clockwork Bastion | **Proposed:** troop attack speed +8 %, movement speed −5 % |
+| Desert Relics | **Proposed:** base `Energy` regeneration −8 % |
 
 - **BR-AR01** Online, the server draws the `Arena` uniformly at pairing
   (every mode: casual, ranked, rooms, challenges, rematches), before the
@@ -747,7 +750,17 @@ Values are **Proposed** until the balance lab confirms them (D-33).
   discounts, and never takes the price below 1 `Energy`. The view shows
   each player's current `Evolution` prices.
 - **BR-AR05** The Storm bonus adds 800 bp to the base regeneration beside
-  Interest (BR-E05); the existing remainder carries the rounding.
+  Interest (BR-E05); the existing remainder carries the rounding. Desert
+  subtracts 800 bp from that same base; it does not multiply Interest.
+- **BR-AR06** **Proposed, owner-requested expansion (2026-11-01):** append
+  Celestial, Clockwork and Desert after the original five identities. Online
+  draws stay uniform over the entire catalog. Celestial adds 800 movement bp;
+  Clockwork combines +800 attack-speed bp and −500 movement bp; Desert adds
+  −800 base-regeneration bp. Apply all fields once through BR-AR03/05, with
+  existing caps and rounding. No Faction, Stronghold, damage, HP, geometry,
+  price or resource-cap exception. These initial playtest values are **Proposed**
+  pending D-33 evidence; the five existing arena values stay unchanged.
+  Protocol 30 protects older peers from the appended Arena variants.
 
 ## 13. P58 roster expansion — Proposed, inactive
 

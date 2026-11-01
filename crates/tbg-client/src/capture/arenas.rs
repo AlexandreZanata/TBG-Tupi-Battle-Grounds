@@ -26,7 +26,7 @@ fn start(
             _ => None,
         })
         .collect();
-    if choices.len() != 5 {
+    if choices.len() != tbg_core::Arena::ALL.len() {
         return;
     }
     let mut arenas: Vec<_> = choices.iter().map(|(arena, _)| *arena).collect();
@@ -34,7 +34,7 @@ fn start(
     arenas.dedup();
     assert_eq!(
         arenas.len(),
-        5,
+        tbg_core::Arena::ALL.len(),
         "Every Arena must expose its own training action"
     );
     let target = crate::config::url_param("capture_arena").unwrap_or("storm".into());
@@ -42,7 +42,7 @@ fn start(
         return;
     };
     eprintln!(
-        "Arena training capture: five distinct buttons={arenas:?}; saved before={}; choosing={}",
+        "Arena training capture: distinct buttons={arenas:?}; saved before={}; choosing={}",
         crate::config::load_arena().slug(),
         arena.slug()
     );

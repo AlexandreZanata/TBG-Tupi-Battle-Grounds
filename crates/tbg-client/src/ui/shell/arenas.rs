@@ -22,13 +22,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) 
         ..default()
     })
     .with_children(|grid| {
-        for arena in [
-            tbg_core::Arena::Forest,
-            tbg_core::Arena::Tundra,
-            tbg_core::Arena::Volcanic,
-            tbg_core::Arena::Ruins,
-            tbg_core::Arena::Storm,
-        ] {
+        for arena in tbg_core::Arena::ALL {
             grid.spawn(kit::panel()).with_children(|p| {
                 let slug = arena.slug();
                 p.spawn(kit::image(
@@ -64,21 +58,5 @@ pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) 
 }
 
 fn effect(arena: tbg_core::Arena, lang: Lang) -> String {
-    let rule = tbg_core::content::ARENA_RULES[arena.index()];
-    match arena {
-        tbg_core::Arena::Forest => lang.key("arenas.effect.none"),
-        tbg_core::Arena::Tundra => lang
-            .key("arenas.effect.move")
-            .replace("{value}", &format!("{:+}%", rule.move_bp / 100)),
-        tbg_core::Arena::Volcanic => lang
-            .key("arenas.effect.attack")
-            .replace("{value}", &format!("{:+}%", rule.atk_bp / 100)),
-        tbg_core::Arena::Ruins => lang.key("arenas.effect.evolve").replace(
-            "{value}",
-            &(rule.first_evolve_discount / tbg_core::content::ENERGY_SCALE).to_string(),
-        ),
-        tbg_core::Arena::Storm => lang
-            .key("arenas.effect.regen")
-            .replace("{value}", &format!("{:+}%", rule.regen_bp / 100)),
-    }
+    crate::ui::arena_effect::describe(arena, lang)
 }

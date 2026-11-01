@@ -10,13 +10,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) 
         p.spawn(kit::muted(lang.key("arenas.online"), 15.));
     });
     root.spawn(catalog::grid()).with_children(|grid| {
-        for arena in [
-            tbg_core::Arena::Forest,
-            tbg_core::Arena::Tundra,
-            tbg_core::Arena::Volcanic,
-            tbg_core::Arena::Ruins,
-            tbg_core::Arena::Storm,
-        ] {
+        for arena in tbg_core::Arena::ALL {
             grid.spawn(catalog::card()).with_children(|card| {
                 let slug = arena.slug();
                 card.spawn(catalog::banner(
