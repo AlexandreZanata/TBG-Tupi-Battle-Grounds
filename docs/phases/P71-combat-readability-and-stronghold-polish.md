@@ -635,3 +635,15 @@ Do not close P70's unrelated acceptance items through this phase, conflate
 Fortification with Evolution, claim every tower bug fixed from one still,
 or call P71 complete with missing applicable evidence. The owner approves
 look and fun after a concrete local playtest is available.
+
+## Completed owner follow-up — Shatterback plates and head contact
+
+The2026-11-01 targeted correction removes B1 plate-top stripes and projects
+Shatterback's cached head/body envelope into the existing crowd spacing,
+including side-facing aim, the existing lunge and lost-plate states. Runtime
+ce0e406 passed the focused regressions and two real opposite-seat recordings,
+was pushed and installed locally. See the [focused execution report](P71-shatterback-contact-followup.md)
+for exact evidence, native identity and deferred checks. That report also records
+the owner's explicit standing permission to await the shared lock for this and
+subsequent requested character adjustments, preserving other processes and the
+two-job limit. No authoritative combat rule changed.

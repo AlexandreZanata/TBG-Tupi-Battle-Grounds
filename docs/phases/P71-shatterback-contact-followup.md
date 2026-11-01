@@ -75,3 +75,52 @@ refinement passed1 test,0 failed (2.62s compile,0.10s test), under the same lock
 and two-job limit. The seven generic crowd regressions remain valid unchanged.
 The final installation binary is rebuilt after this source correction; the prior
 10.04s native build was an intermediate candidate, not the delivered artifact.
+
+### Final renderer validation and Linux delivery — completed
+
+Runtime source: `ce0e4060446a03eeda0549fb1e3df21513363f10`. The final debug
+native build passed in3.54s under the shared lock with CARGO_BUILD_JOBS=2 and
+the existing cache. Its immutable binary/receipt are local in
+`.local/shatterback-contact-evidence/candidate-ce0e406/`.
+
+A matching after-Idle sheet was captured with the same1920x1080 real renderer
+configuration as the baseline. Visual comparison confirms B1's four plate-top
+stripes are removed and the B2 stripes remain. The comparison crop is local at
+`.local/shatterback-contact-evidence/b1-before-after.png`; both original sheets,
+sidecars and logs are retained. No Shop portrait regeneration was needed because
+Base artwork did not change.
+
+Two real B1 laboratory engagements used seed70, initial distance1500, no added
+frontline and12 seconds of ordinary simulation. Each was recorded by the existing
+`scripts/p70/record_trial.py` against the frozen source and receipt at1920x1080,
+30 recording frames/s. These are not playback-speed or rendering-FPS claims.
+
+- Seat A:241 active ticks (12.05 simulated seconds),10 subject AttackStart events;
+  Shatterback's plates absorbed400 HP and observed plate counts covered4,3,2,1,0.
+- Seat B:240 active ticks (12.00 simulated seconds),10 subject AttackStart events;
+  Shatterback's plates absorbed400 HP and observed plate counts covered4,3,2,1,0.
+
+Both recordings completed successfully with genuine AttackStart/Hit engagement.
+Frames at3,7 and11 recording seconds on both seats were inspected, including
+intact and depleted shell states; they show separated head/body contact without
+shrinking the flesh footprint after plate loss. Original videos, event journals,
+metadata, metrics and hashes are retained locally in `contact-seat-a/` and
+`contact-seat-b/` under the same evidence directory. The cropped contact sheet
+is `contact-samples.png`. Finite sampled frames and the targeted geometry
+regression do not prove every crowded battle or every animation transition.
+
+The final runtime commit was pushed to `origin/phase/p71-shatterback-contact`
+before installation. `python3 /tmp/tbg-install-shatterback.py` succeeded and
+verified the binary and all362 assets. Installed executable:
+`/home/iiii/.local/opt/tupi-battle-grounds/0.1.0-native.2-shatterback-ce0e406/tbg-client`.
+The TBG launcher and desktop entry now select it; `--version` confirms source
+ce0e406 and unchanged protocol30. The previous arena build and user data remain
+intact. Installation receipt: `.local/shatterback-contact-evidence/installed-linux.json`.
+
+Binary SHA-256:
+`091f607e4d74c2258cb9a34a8ed29c9b4e1e48a35d2e20e7da7d3cfbb50e2af4`.
+
+Deferred: owner look/fun approval; desktop browser runtime and a scoped WASM
+check (`cargo check --offline --locked -p tbg-client --bin tbg-client --target wasm32-unknown-unknown`);
+dense multi-unit saturation and full suite. Native was the requested installed
+target; no additional platform build, public deployment or balance gate ran.
