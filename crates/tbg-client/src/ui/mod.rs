@@ -63,6 +63,7 @@ mod start;
 mod stronghold_data_tests;
 pub(crate) mod surrender;
 pub mod textform;
+#[cfg(not(target_os = "android"))]
 mod textform_bevy;
 mod tips;
 mod toast;

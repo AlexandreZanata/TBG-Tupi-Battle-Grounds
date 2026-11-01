@@ -14,7 +14,8 @@ pub fn plugin() -> RenderPlugin {
             features: WgpuFeatures::empty(),
             // Overriding priority does not recompute limits in Default::default().
             // Zero vertex storage selects the engine's actual uniform-buffer layouts.
-            limits: WgpuLimits::downlevel_webgl2_defaults(),
+            // The POCO landscape surface is wider than WebGL2's 2048px minimum.
+            limits: WgpuLimits::downlevel_webgl2_defaults().using_resolution(WgpuLimits::default()),
             ..Default::default()
         }
         .into(),
