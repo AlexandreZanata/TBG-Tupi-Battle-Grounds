@@ -11,6 +11,7 @@ All validation below is targeted. Deferred checks are not passes.
 - Planning: `8d7df1bb372bd0a5bba292c4feaffe9e96bfceb7`, merged contextually by `b48e689`.
 - Authority, persistence, privacy, wire and regressions: `4e3ca16` (D-101).
 - Shared Bevy frontend and explicit presentation fixtures: `2b50e68`.
+- Evidence/report: `089c681`; normal merge of current main: `f49de90` (no source changes).
 - Worktree: `/tmp/tbg-p73-implementation`; branch: `phase/p73-active-players-challenges`.
 - No existing local P73 implementation branch/worktree or open P73 PR was found before work.
 - The owner's original working tree and its uncommitted files were preserved.
