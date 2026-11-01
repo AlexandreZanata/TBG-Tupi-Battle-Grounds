@@ -13,6 +13,11 @@ use tbg_core::{
 };
 
 pub fn button(text: impl Into<String>, action: Action, width: f32) -> impl Bundle {
+    let width = if cfg!(target_os = "android") {
+        width.min(160.)
+    } else {
+        width
+    };
     shell::button(text, shell::Action::Catalog(action), width)
 }
 #[derive(Component)]
@@ -25,54 +30,63 @@ pub fn spawn(
     lang: Lang,
     scroll: [Vec2; 2],
 ) {
-    parent.spawn(kit::row()).with_children(|row| {
-        for (key, tab) in [
-            ("catalog", Tab::Catalog),
-            ("editor", Tab::Editor),
-            ("practice", Tab::Practice),
-        ] {
-            row.spawn(button(
-                lang.key(&format!("training.{key}")),
-                Action::Tab(tab),
-                200.,
+    #[cfg(target_os = "android")]
+    {
+        crate::ui::mobile::training::spawn(parent, c, assets, lang, scroll);
+        return;
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        parent.spawn(kit::row()).with_children(|row| {
+            for (key, tab) in [
+                ("catalog", Tab::Catalog),
+                ("editor", Tab::Editor),
+                ("practice", Tab::Practice),
+            ] {
+                row.spawn(button(
+                    lang.key(&format!("training.{key}")),
+                    Action::Tab(tab),
+                    200.,
+                ));
+            }
+            row.spawn(kit::muted(
+                format!(
+                    "{} · {}",
+                    tbg_core::FULL_POOL.len(),
+                    lang.key("training.champions")
+                ),
+                13.,
             ));
-        }
-        row.spawn(kit::muted(
-            format!(
-                "{} · {}",
-                tbg_core::FULL_POOL.len(),
-                lang.key("training.champions")
-            ),
-            13.,
-        ));
-    });
-    parent
-        .spawn(Node {
-            width: percent(100),
-            height: percent(90),
-            min_height: px(500),
-            column_gap: px(14),
-            ..default()
-        })
-        .with_children(|row| {
-            row.spawn((panel(28.), ScrollPosition(scroll[0]), Pane(0)))
-                .with_children(|p| list(p, c, assets, lang));
-            row.spawn(Node {
-                width: percent(35),
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::FlexEnd,
-                row_gap: px(8),
+        });
+        parent
+            .spawn(Node {
+                width: percent(100),
+                height: percent(90),
+                min_height: px(500),
+                column_gap: px(14),
                 ..default()
             })
-            .with_children(|p| controls(p, c, lang));
-            row.spawn((panel(35.), ScrollPosition(scroll[1]), Pane(1)))
-                .with_children(|p| match c.tab {
-                    Tab::Catalog => details(p, c, lang),
-                    Tab::Editor => editor(p, c, lang),
-                    Tab::Practice => practice(p, c, lang),
-                });
-        });
+            .with_children(|row| {
+                row.spawn((panel(28.), ScrollPosition(scroll[0]), Pane(0)))
+                    .with_children(|p| list(p, c, assets, lang));
+                row.spawn(Node {
+                    width: percent(35),
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::FlexEnd,
+                    row_gap: px(8),
+                    ..default()
+                })
+                .with_children(|p| controls(p, c, lang));
+                row.spawn((panel(35.), ScrollPosition(scroll[1]), Pane(1)))
+                    .with_children(|p| match c.tab {
+                        Tab::Catalog => details(p, c, lang),
+                        Tab::Editor => editor(p, c, lang),
+                        Tab::Practice => practice(p, c, lang),
+                    });
+            });
+    }
 }
+#[cfg(not(target_os = "android"))]
 fn panel(width: f32) -> impl Bundle {
     (
         Node {
@@ -88,7 +102,7 @@ fn panel(width: f32) -> impl Bundle {
         BorderColor::all(kit::GOLD),
     )
 }
-fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: Lang) {
+pub(crate) fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: Lang) {
     p.spawn(kit::heading(lang.key("training.catalog"), 23.));
     p.spawn(button(
         if c.search.is_empty() {
@@ -163,7 +177,7 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
         });
     }
 }
-fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
+pub(crate) fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
     p.spawn(kit::heading(content::unit_name(lang, c.selected), 23.));
     p.spawn(kit::muted(lang.key("training.preview_note"), 12.));
     p.spawn((
@@ -222,7 +236,7 @@ fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
     });
     p.spawn(kit::muted(lang.key("training.drag_help"), 11.));
 }
-fn details(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
+pub(crate) fn details(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
     let d = def(c.selected);
     let s = effective_stats(c.selected, c.form.0, c.form.1, 0);
     p.spawn(kit::heading(
@@ -322,7 +336,7 @@ fn details(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
         250.,
     ));
 }
-fn editor(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
+pub(crate) fn editor(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
     p.spawn(kit::heading(lang.key("training.editor"), 22.));
     p.spawn(kit::muted(lang.key("training.local_note"), 12.));
     team(p, &c.allies, true, lang);
@@ -425,6 +439,7 @@ fn dummy(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
         250.,
     ));
 }
+#[cfg(not(target_os = "android"))]
 fn practice(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
     p.spawn(kit::heading(lang.key("training.practice"), 22.));
     for (i, key) in ["easy", "medium", "hard", "impossible"]

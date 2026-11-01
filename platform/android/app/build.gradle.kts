@@ -4,6 +4,8 @@ plugins {
 }
 
 val staged = layout.buildDirectory.dir("native-input")
+val prototypeAbi = providers.gradleProperty("prototypeAbi").orElse("arm64-v8a")
+require(prototypeAbi.get() in listOf("arm64-v8a", "x86_64"))
 val prototypeCode = providers.gradleProperty("prototypeVersionCode").orElse("1")
 
 android {
@@ -17,8 +19,8 @@ android {
         minSdk = 31
         targetSdk = 36
         versionCode = prototypeCode.get().toInt()
-        versionName = "0.1.0-native.3-android.1"
-        ndk { abiFilters += "arm64-v8a" }
+        versionName = "0.1.1-rc.1-android.2"
+        ndk { abiFilters += prototypeAbi.get() }
     }
 
     // A private, stable test key is supplied locally; never silently change signatures.
@@ -63,7 +65,7 @@ dependencies {
 
 val verifyNativeInput by tasks.registering(Exec::class) {
     workingDir(rootDir.resolve("../.."))
-    commandLine("python3", "scripts/package-android.py", "verify-stage")
+    commandLine("python3", "scripts/package-android.py", "verify-stage", "--abi", prototypeAbi.get())
 }
 
 // Host-only Kotlin compilation can proceed independently. Every APK/AAB must

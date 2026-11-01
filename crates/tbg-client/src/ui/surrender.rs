@@ -33,7 +33,7 @@ pub fn reset(state: &mut Surrender, ranked: bool) {
     };
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 pub(super) fn button() -> impl Bundle {
     (
         Node {
@@ -51,7 +51,7 @@ pub(super) fn button() -> impl Bundle {
     )
 }
 
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 pub(super) fn linux_button(assets: &AssetServer, lang: crate::i18n::Lang) -> impl Bundle {
     (
         Node {
@@ -104,7 +104,7 @@ fn refresh(
     });
     let bg = if state.sent {
         DISABLED
-    } else if cfg!(tbg_desktop) && state.armed_until.is_none() {
+    } else if cfg!(tbg_native_ui) && state.armed_until.is_none() {
         super::kit::INK
     } else {
         SURRENDER_BG

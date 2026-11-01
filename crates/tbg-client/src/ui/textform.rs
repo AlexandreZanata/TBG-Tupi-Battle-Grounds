@@ -35,6 +35,8 @@ pub struct TextCancelled;
 #[derive(Default)]
 pub struct ActiveForm {
     pub(super) kind: Option<TextKind>,
+    #[cfg(target_os = "android")]
+    pub(super) generation: u64,
     pub(super) edit: super::kit::edit::Edit,
     pub(super) masked: bool,
     pub(super) focus: usize,
@@ -57,6 +59,10 @@ pub fn plugin(app: &mut App) {
 
 /// Show the form for `kind` with `prompt` as its label.
 pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
+    #[cfg(target_os = "android")]
+    {
+        form.generation = form.generation.wrapping_add(1);
+    }
     form.kind = Some(kind);
     form.edit = Default::default();
     form.focus = 0;

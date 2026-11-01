@@ -1,9 +1,10 @@
 # P69 — Independent native Android landscape prototype
 
-**Status:** partial execution, 2026-10-31. Independent Kotlin host and
-package tooling prepared; shared client edits wait for P68 file release
-at the owner's explicit request. No playable APK/device-gameplay acceptance.
-See [execution evidence](P69-execution.md).
+**Status:** implementation resumed, 2026-11-01. The owner selected reviewed
+Linux consolidation `6e56918`, requested the landscape frontend and Android
+build/install tests, then restored physical POCO ADB access. ARM64 library
+compilation passed; packaged-device validation is in progress. See
+[device execution](P69-device-20261101.md).
 **Planning branch:** `codex/p69-android-landscape-plan`.
 **Execution branch:** `codex/p69-android-native-prototype`.
 **Reviewed Linux base:** `014b0e0c046b38c551ee24534ee00709cde0e493`

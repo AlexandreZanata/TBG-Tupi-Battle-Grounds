@@ -24,7 +24,7 @@ pub struct VisualAssets {
 }
 
 /// Faction body colors (ARCHITECTURE §7 primary palette).
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 pub const FACTION_COLORS: [[u8; 3]; tbg_core::FACTION_COUNT] = [
     [0x8B, 0x73, 0x55],
     [0xD8, 0xD2, 0xC0],

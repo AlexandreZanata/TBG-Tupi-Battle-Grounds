@@ -6,7 +6,7 @@ use bevy::prelude::*;
 use tbg_core::protocol::LeaderRow;
 
 use super::ranking::{Ranking, PAGE};
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 use super::screen;
 use super::{button, label, UiAction, BUTTON, PANEL};
 use crate::i18n::{Lang, Msg};
@@ -173,9 +173,9 @@ pub(super) fn panel(
     let (prev, next) = nav(&ranking);
     let lang = *lang;
     let two = window.width() / scale.0 >= TWO_COLUMNS_WIDTH;
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     let root = screen(JustifyContent::Center);
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     let root = Node {
         align_items: AlignItems::Center,
         ..super::shell::page_node()

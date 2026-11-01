@@ -125,14 +125,14 @@ pub fn live(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
     root.spawn(chrome::panel([75., 17., 23., 50.]))
         .with_children(|p| {
             let count = data.live.as_ref().map_or(0, |v| v.matches.len());
-            #[cfg_attr(not(tbg_desktop), allow(unused_mut))]
+            #[cfg_attr(not(tbg_native_ui), allow(unused_mut))]
             let mut _title = p.spawn(kit::heading(
                 lang.key("live.panel.title")
                     .replace("{n}", &count.to_string())
                     .to_uppercase(),
                 14.,
             ));
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             _title.insert((
                 kit::Pending(data.live_pending()),
                 Node {
@@ -149,7 +149,7 @@ pub fn live(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                 ..chrome::column()
             })
             .with_children(|rows| {
-                #[cfg(tbg_desktop)]
+                #[cfg(tbg_native_ui)]
                 if data.live_pending() {
                     crate::ui::native_loading::rows(rows, 3);
                 }

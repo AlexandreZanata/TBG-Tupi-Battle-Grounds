@@ -16,6 +16,11 @@ path = "src/main.rs"
 # Opt-in packaged UI captures, runtime and synthetic vault acceptance;
 # inactive without explicit flags, no automatic test actions in ordinary launches.
 ui-acceptance = []
+# Explicit internal APK-only loopback transport for a scoped ADB reverse; off in public builds.
+android-loopback = []
+
+[lib]
+crate-type = ["rlib", "cdylib"]
 
 [dependencies]
 # Bevy renderer + UI (WebGL2). Explicit features instead of the "3d"/"ui"
@@ -26,7 +31,7 @@ bevy = { version = "0.20", default-features = false, features = [
     "std", "async_executor", "bevy_asset", "bevy_log", "bevy_state", "reflect_auto_register",
     # platform: window, input, browser canvas (P41: default_font dropped, the
     # i18n plugin embeds a Latin-1 Noto Sans subset at AssetId::default instead)
-    "bevy_winit", "bevy_window", "multi_threaded", "webgl2", "x11", "wayland",
+    "bevy_winit", "bevy_window", "multi_threaded",
     # 3D rendering
     "bevy_render", "bevy_core_pipeline", "bevy_pbr", "bevy_light", "bevy_camera",
     "bevy_color", "bevy_mesh", "bevy_image", "bevy_shader",
@@ -46,7 +51,7 @@ ehttp = "0.7"
 # Compare release versions using SemVer, including native prerelease identifiers.
 semver = "1"
 
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+[target.'cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))'.dependencies]
 # OS-standard user data directory for native preferences and account credentials.
 directories = "6"
 # Retained system clipboard ownership for copying keys/links and pasting input.
@@ -57,13 +62,6 @@ open = "5"
 tracing-subscriber = { version = "0.3", features = ["fmt"] }
 # D-97: explicit OS vault provider API; never store refresh in preferences.
 keyring-core = "=1.0.1"
-# D-97: ehttp follows redirects/buffers responses; auth needs bounded, nonredirecting requests.
-ureq = "=3.5.0"
-# D-97: fallible native device/operation IDs and registration retry proof.
-getrandom = "0.3"
-# D-97: canonical credential origin boundaries and redirect rejection.
-url = "2"
-
 [target.'cfg(target_os = "linux")'.dependencies]
 # D-97: real Secret Service with Rust crypto and bundled D-Bus, no plaintext fallback.
 dbus-secret-service-keyring-store = { version = "=1.0.1", features = ["crypto-rust", "vendored"] }
@@ -72,11 +70,33 @@ dbus-secret-service-keyring-store = { version = "=1.0.1", features = ["crypto-ru
 # D-97: current user's Credential Manager with explicit Local persistence.
 windows-native-keyring-store = "=1.1.0"
 
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# D-97: ehttp follows redirects/buffers responses; auth needs bounded, nonredirecting requests.
+ureq = "=3.5.0"
+# D-97: fallible native device/operation IDs and registration retry proof.
+getrandom = "0.3"
+# D-97: canonical credential origin boundaries and redirect rejection.
+url = "2"
+
+[target.'cfg(target_os = "android")'.dependencies]
+# Exact AndroidApp/JNI lineage used by Bevy 0.20 and android-activity 0.6.1.
+jni = "=0.22.4"
+# GameActivity enables the one Bevy-owned Android event loop.
+bevy = { version = "0.20", default-features = false, features = ["android-game-activity"] }
+
+[target.'cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))'.dependencies.bevy]
+version = "0.20"
+default-features = false
+# Preserve existing desktop window backends.
+features = ["x11", "wayland"]
+
 [build-dependencies]
 # Build-time only: parse assets/i18n/*.json in build.rs (P41, D2).
 serde_json = "1"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+# WebGL2 remains browser-only.
+bevy = { version = "0.20", default-features = false, features = ["webgl2"] }
 # Page URL params, session token in localStorage, room/challenge links,
 # the native share sheet, URL cleanup, and the account text-entry overlay.
 web-sys = { version = "0.3", features = ["Window", "Location", "Storage", "Navigator", "MediaQueryList", "Clipboard", "Document", "Element", "HtmlElement", "HtmlInputElement", "HtmlAnchorElement", "History"] }

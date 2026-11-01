@@ -102,7 +102,7 @@ jobs:
       # The shipped feature set (tbg-core without `lab`), single-threaded:
       # the workspace suite in ci.yml does not test this configuration.
       - name: Test the native client
-        run: cargo test --locked -p tbg-client --bin tbg-client -- --test-threads=1
+        run: cargo test --locked -p tbg-client --lib -- --test-threads=1
       - name: Build the release client
         run: |
           cargo build --locked --release -p tbg-client

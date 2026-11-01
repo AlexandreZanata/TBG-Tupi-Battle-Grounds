@@ -345,7 +345,7 @@ pub(super) fn poll_link(
         _ => None,
     };
     if let Some(NetStatus::Failed(why)) = link.status() {
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         {
             account.auto_login = false;
             account.pending = None;

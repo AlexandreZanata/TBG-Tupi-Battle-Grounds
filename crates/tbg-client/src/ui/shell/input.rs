@@ -26,6 +26,8 @@ type Buttons<'w, 's> = Query<
 #[allow(clippy::too_many_arguments)]
 pub fn mouse_and_keys(
     mouse: Res<ButtonInput<MouseButton>>,
+    #[cfg(target_os = "android")] pointer: Res<super::super::mobile::input::Pointer>,
+    #[cfg(target_os = "android")] scale: Res<UiScale>,
     keys: Res<ButtonInput<KeyCode>>,
     mut window: Single<&mut Window>,
     buttons: Buttons,
@@ -40,6 +42,10 @@ pub fn mouse_and_keys(
     mut lights: Query<&mut DirectionalLight>,
     mut volume: ResMut<bevy::audio::GlobalVolume>,
 ) {
+    #[cfg(target_os = "android")]
+    if window.height() > window.width() {
+        return;
+    }
     if !crate::config::bevy_ui() || super::textform::is_open(&form) {
         return;
     }
@@ -57,11 +63,36 @@ pub fn mouse_and_keys(
         ((p.y * 10.) as i32, (p.x * 10.) as i32)
     });
     let mut selected = None;
-    if mouse.just_released(MouseButton::Left) {
-        if let Some(p) = window.cursor_position() {
+    #[cfg(target_os = "android")]
+    let released = pointer.tap.map(|tap| tap.1).or_else(|| {
+        (!pointer.touch_frame && mouse.just_released(MouseButton::Left))
+            .then(|| window.cursor_position())
+            .flatten()
+    });
+    #[cfg(not(target_os = "android"))]
+    let released = mouse
+        .just_released(MouseButton::Left)
+        .then(|| window.cursor_position())
+        .flatten();
+    {
+        if let Some(p) = released {
             selected = ordered.iter().position(|(_, _, _, node, t, _, clip)| {
-                node.contains_point(**t, p * window.scale_factor())
-                    && clip.is_none_or(|c| c.contains_point(p * window.scale_factor()))
+                let hit = {
+                    #[cfg(target_os = "android")]
+                    {
+                        super::super::mobile::input::hit(
+                            node,
+                            **t,
+                            p * window.scale_factor(),
+                            window.scale_factor() * scale.0,
+                        )
+                    }
+                    #[cfg(not(target_os = "android"))]
+                    {
+                        node.contains_point(**t, p * window.scale_factor())
+                    }
+                };
+                hit && clip.is_none_or(|c| c.contains_point(p * window.scale_factor()))
             });
         }
     }
@@ -103,7 +134,7 @@ pub fn mouse_and_keys(
             return;
         }
         if let Some(action) = action {
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             if matches!(action, Action::Open(_)) {
                 queue.0.push(UiAction::CloseRanking);
             }
@@ -196,7 +227,7 @@ fn video_audio(
 ) {
     match action {
         Action::Fullscreen => {
-            #[cfg(not(target_arch = "wasm32"))]
+            #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
             crate::platform::window::toggle_fullscreen(window);
             #[cfg(target_arch = "wasm32")]
             if let Some(doc) = web_sys::window().and_then(|w| w.document()) {
@@ -231,9 +262,18 @@ fn video_audio(
 
 pub fn scroll(
     mut events: MessageReader<MouseWheel>,
+    #[cfg(target_os = "android")] pointer: Res<super::super::mobile::input::Pointer>,
     window: Single<&Window>,
     mut lists: Query<(&ComputedNode, &UiGlobalTransform, &mut ScrollPosition)>,
 ) {
+    #[cfg(target_os = "android")]
+    if let Some((p, delta)) = pointer.drag {
+        for (node, t, mut position) in &mut lists {
+            if node.contains_point(*t, p * window.scale_factor()) {
+                position.0.y = (position.0.y - delta.y).max(0.);
+            }
+        }
+    }
     let Some(p) = window.cursor_position().map(|p| p * window.scale_factor()) else {
         events.clear();
         return;

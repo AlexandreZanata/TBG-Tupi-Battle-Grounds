@@ -1443,5 +1443,18 @@
   "auth.capacity": "O limite de sessões foi atingido. Revogue uma sessão antiga primeiro.",
   "auth.invalid_origin": "O acesso está indisponível para este endereço de servidor.",
   "auth.backup_title": "Guarde sua chave de recuperação",
-  "auth.backup_failed": "Não foi possível exportar a cópia. Tente novamente antes de confirmar."
+  "auth.backup_failed": "Não foi possível exportar a cópia. Tente novamente antes de confirmar.",
+  "android.done": "Concluir",
+  "android.cancel": "Cancelar",
+  "android.reveal": "Mostrar chave de recuperação",
+  "android.play": "JOGAR",
+  "android.collection": "SUA COLEÇÃO",
+  "android.offline": "Treino · jogar offline",
+  "android.rotate": "Vire o celular na horizontal para continuar",
+  "android.temporary": "Sessão temporária · credenciais apenas na memória",
+  "android.home": "Início",
+  "android.create": "Criar conta",
+  "android.sign_in": "Entrar",
+  "android.arenas": "Arenas",
+  "android.live": "Ao vivo"
 }

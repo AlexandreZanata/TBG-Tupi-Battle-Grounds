@@ -87,7 +87,7 @@ pub fn spawn(
                 })
                 .with_children(|col| {
                     col.spawn(kit::panel()).with_children(|p| {
-                        #[cfg(tbg_desktop)]
+                        #[cfg(tbg_native_ui)]
                         p.spawn(super::catalog::banner(
                             assets,
                             format!(
@@ -96,7 +96,7 @@ pub fn spawn(
                             ),
                             2.5,
                         ));
-                        #[cfg(not(tbg_desktop))]
+                        #[cfg(not(tbg_native_ui))]
                         p.spawn((
                             ImageNode::new(assets.load(format!(
                                 "arcana/{}",

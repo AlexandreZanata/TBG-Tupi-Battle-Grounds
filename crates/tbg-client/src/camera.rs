@@ -42,6 +42,8 @@ fn spawn_camera(mut commands: Commands, window: Single<&Window>) {
     // `tonemapping_luts` feature, which we leave out to keep the WASM small.
     commands.spawn((
         Camera3d::default(),
+        #[cfg(target_os = "android")]
+        Msaa::Off,
         Tonemapping::AcesFitted,
         // Soft haze on the far rim of the diorama; the lane stays crisp.
         DistanceFog {

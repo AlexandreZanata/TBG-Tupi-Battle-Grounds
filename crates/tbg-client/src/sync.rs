@@ -16,7 +16,7 @@ use crate::visuals::{self, UnitLook, VisualAssets};
 mod actions;
 pub(crate) mod crowd_ecs;
 mod events;
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 pub(crate) mod lobby_battle;
 mod messages;
 mod result;
@@ -88,7 +88,7 @@ type FxResources<'w> = (
 );
 
 pub fn plugin(app: &mut App) {
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     lobby_battle::plugin(app);
     app.init_resource::<MatchInfo>()
         .init_resource::<LatestView>()
@@ -131,7 +131,7 @@ fn render_units(state: Res<State<GameState>>, shell: Res<crate::ui::shell::Shell
     if shell.panel == crate::ui::shell::Panel::Troops && *state.get() == GameState::Menu {
         return false;
     }
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     if *state.get() == GameState::Menu {
         return lobby_battle::enabled();
     }
@@ -163,7 +163,7 @@ pub(crate) fn sync_units(
     mut fx_res: FxResources,
     mut training: ResMut<crate::training::Trial>,
     state: Res<State<GameState>>,
-    #[cfg(tbg_desktop)] mut demo: ResMut<lobby_battle::Demo>,
+    #[cfg(tbg_native_ui)] mut demo: ResMut<lobby_battle::Demo>,
 ) {
     let now = time.elapsed_secs_f64();
     let dummies = training
@@ -178,9 +178,9 @@ pub(crate) fn sync_units(
         &mut *fx_res.3,
         &mut *fx_res.4,
     );
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     let menu = *state.get() == GameState::Menu;
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     let (timeline, sounds, stats) = if menu {
         let lobby_battle::Demo {
             timeline,
@@ -192,7 +192,7 @@ pub(crate) fn sync_units(
     } else {
         (&mut buffer.timeline, sounds, stats)
     };
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     let timeline = &mut buffer.timeline;
     let stats = if *state.get() == GameState::Training {
         &mut training.stats
@@ -205,7 +205,7 @@ pub(crate) fn sync_units(
         lib: &lib,
         map: &mut map,
         visuals: &mut visuals,
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         menu,
         dummies: &dummies,
     };
@@ -246,7 +246,7 @@ struct Scene<'a, 'w, 's, 'qw, 'qs> {
     map: &'a mut UnitEntities,
     visuals: &'a mut events::Visuals<'qw, 'qs>,
     dummies: &'a [UnitId],
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     menu: bool,
 }
 
@@ -312,7 +312,7 @@ impl Scene<'_, '_, '_, '_, '_> {
                     } else {
                         visuals::spawn_unit_visual(self.commands, self.assets, self.lib, look, pos)
                     };
-                    #[cfg(tbg_desktop)]
+                    #[cfg(tbg_native_ui)]
                     if self.menu {
                         self.commands
                             .entity(e)

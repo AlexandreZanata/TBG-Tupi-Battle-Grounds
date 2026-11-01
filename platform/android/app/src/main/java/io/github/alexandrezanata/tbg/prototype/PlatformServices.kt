@@ -20,6 +20,12 @@ internal class PlatformServices(private val activity: MainActivity) {
         }
     }
 
+    fun pasteText(): String? {
+        val manager = activity.getSystemService(ClipboardManager::class.java)
+        return manager.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text
+            ?.toString()?.takeIf { it.length <= 4096 }
+    }
+
     fun paste() {
         activity.runOnUiThread {
             val manager = activity.getSystemService(ClipboardManager::class.java)
@@ -36,7 +42,7 @@ internal class PlatformServices(private val activity: MainActivity) {
         if (uri.scheme != "https" || uri.host.isNullOrBlank() || uri.userInfo != null) return false
         // Public navigation never carries credentials, room tokens or deep-link commands.
         if (uri.query != null || uri.fragment != null) return false
-        if (uri.path !in setOf("/", "/ranking", "/download", "/patch-notes") &&
+        if (uri.host != "github.com" && uri.path !in setOf("/", "/ranking", "/ranking/", "/download", "/patch-notes") &&
             uri.path?.startsWith("/profile/") != true) return false
         activity.runOnUiThread {
             try {

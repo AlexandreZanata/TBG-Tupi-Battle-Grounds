@@ -24,6 +24,11 @@ pub fn plugin(app: &mut App) {
 pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
     parent
         .spawn(Node {
+            width: if cfg!(target_os = "android") {
+                percent(100.)
+            } else {
+                Val::Auto
+            },
             column_gap: px(8),
             ..default()
         })
@@ -38,8 +43,16 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
     parent
         .spawn((
             Node {
-                width: px(166),
-                height: px(225),
+                width: px(if cfg!(target_os = "android") {
+                    166
+                } else {
+                    166
+                }),
+                height: px(if cfg!(target_os = "android") {
+                    112
+                } else {
+                    225
+                }),
                 flex_shrink: 0.,
                 ..default()
             },
@@ -56,8 +69,8 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
                     position_type: PositionType::Absolute,
                     top: px(9),
                     left: px(7),
-                    width: px(152),
-                    height: px(137),
+                    width: px(if cfg!(target_os = "android") { 60 } else { 152 }),
+                    height: px(if cfg!(target_os = "android") { 60 } else { 137 }),
                     ..default()
                 },
                 ImageNode::default(),
@@ -65,9 +78,9 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
             ));
             card.spawn(Node {
                 position_type: PositionType::Absolute,
-                left: px(12),
+                left: px(if cfg!(target_os = "android") { 76 } else { 12 }),
                 right: px(10),
-                top: px(147),
+                top: px(if cfg!(target_os = "android") { 12 } else { 147 }),
                 height: px(22),
                 overflow: Overflow::clip(),
                 ..default()
@@ -82,8 +95,8 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
             card.spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    left: px(12),
-                    top: px(170),
+                    left: px(if cfg!(target_os = "android") { 76 } else { 12 }),
+                    top: px(if cfg!(target_os = "android") { 40 } else { 170 }),
                     ..default()
                 },
                 kit::muted("", 11.),

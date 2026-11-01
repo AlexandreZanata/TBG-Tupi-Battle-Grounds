@@ -1443,5 +1443,18 @@
   "auth.capacity": "The session limit was reached. Revoke an old session first.",
   "auth.invalid_origin": "Sign-in is unavailable for this server address.",
   "auth.backup_title": "Keep your recovery key safe",
-  "auth.backup_failed": "Could not export the backup. Try again before confirming."
+  "auth.backup_failed": "Could not export the backup. Try again before confirming.",
+  "android.done": "Done",
+  "android.cancel": "Cancel",
+  "android.reveal": "Show recovery key",
+  "android.play": "PLAY",
+  "android.collection": "YOUR COLLECTION",
+  "android.offline": "Practice · play offline",
+  "android.rotate": "Turn your phone sideways to continue",
+  "android.temporary": "Temporary session · credentials stay in memory",
+  "android.home": "Home",
+  "android.create": "Create",
+  "android.sign_in": "Sign in",
+  "android.arenas": "Arenas",
+  "android.live": "Live"
 }

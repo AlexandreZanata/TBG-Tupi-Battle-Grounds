@@ -28,23 +28,23 @@ pub struct Ranking {
     /// Page offset waiting for a reply.
     pub(super) want: Option<u16>,
     pub(super) page: Option<Page>,
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     pub(super) leaders: [Option<LeaderRow>; 3],
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     pub(super) failed: bool,
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     waiting_since: Option<f64>,
 }
 
 impl Ranking {
     /// A `ServerMsg::Leaderboard` reply (routed by `sync::messages`).
     pub fn accept(&mut self, total: u32, offset: u16, rows: Vec<LeaderRow>, you: Option<u32>) {
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         {
             self.failed = false;
             self.waiting_since = None;
         }
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         if offset == 0 {
             self.leaders =
                 std::array::from_fn(|i| rows.iter().find(|row| row.rank == i as u32 + 1).cloned());
@@ -62,7 +62,7 @@ impl Ranking {
 }
 
 pub fn plugin(app: &mut App) {
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     app.add_systems(
         Update,
         super::ranking_ui::panel
@@ -76,7 +76,7 @@ pub fn plugin(app: &mut App) {
 
 /// Apply the P13 ranking buttons (called from `actions::apply`).
 pub(super) fn apply_action(action: UiAction, ranking: &mut Ranking) {
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     if matches!(
         action,
         UiAction::OpenRanking | UiAction::RankingPrev | UiAction::RankingNext
@@ -108,8 +108,8 @@ fn close(mut ranking: ResMut<Ranking>) {
 }
 
 fn request(
-    #[cfg(tbg_desktop)] mut ranking: ResMut<Ranking>,
-    #[cfg(not(tbg_desktop))] ranking: Res<Ranking>,
+    #[cfg(tbg_native_ui)] mut ranking: ResMut<Ranking>,
+    #[cfg(not(tbg_native_ui))] ranking: Res<Ranking>,
     mut link: NonSendMut<MatchLink>,
     time: Res<Time>,
     mut sent_at: Local<Option<f64>>,
@@ -118,7 +118,7 @@ fn request(
         return;
     };
     let now = time.elapsed_secs_f64();
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     {
         if ranking.waiting_since.is_none() {
             ranking.waiting_since = Some(now);

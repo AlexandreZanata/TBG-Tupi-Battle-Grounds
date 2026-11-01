@@ -4,14 +4,14 @@
 //! sent `Fortify` only blocks a second click until the view covers it.
 
 use bevy::prelude::*;
-#[cfg(any(not(tbg_desktop), test))]
+#[cfg(any(not(tbg_native_ui), test))]
 use tbg_core::content::ENERGY_SCALE;
 use tbg_core::content::FORTIFY_COST;
 use tbg_core::{MatchView, Phase, StrongholdView};
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 use super::{label, UiAction, BUTTON, DISABLED};
-#[cfg(any(not(tbg_desktop), test))]
+#[cfg(any(not(tbg_native_ui), test))]
 use crate::i18n::{content, Lang, Msg};
 use crate::sync::LatestView;
 use crate::GameState;
@@ -94,7 +94,7 @@ pub(crate) fn record(tower: StrongholdView) -> String {
 }
 
 /// `Bastion T1 Fortress`: kind, tier and, once chosen, the branch.
-#[cfg(any(not(tbg_desktop), test))]
+#[cfg(any(not(tbg_native_ui), test))]
 fn title(tower: StrongholdView, lang: Lang) -> String {
     let name = content::stronghold_name(lang, tower.kind);
     if tower.tier == 0 {
@@ -109,7 +109,7 @@ fn title(tower: StrongholdView, lang: Lang) -> String {
 }
 
 /// Phone button text for `branch`: the next step's name and its price.
-#[cfg(any(not(tbg_desktop), test))]
+#[cfg(any(not(tbg_native_ui), test))]
 fn choice_text(v: &MatchView, branch: u8, lang: Lang) -> String {
     let tower = own(v);
     let tier = tower.tier.min(1);
@@ -126,15 +126,15 @@ fn choice_text(v: &MatchView, branch: u8, lang: Lang) -> String {
 }
 
 #[derive(Component)]
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 struct FortifyTitle;
 
 #[derive(Component)]
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 struct FortifyChoice(u8);
 
 #[derive(Component)]
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 struct FortifyChoiceText(u8);
 
 pub fn plugin(app: &mut App) {
@@ -148,7 +148,7 @@ pub fn plugin(app: &mut App) {
             },
         )
         .add_systems(Update, clear_answered.run_if(in_state(GameState::InMatch)));
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     app.add_systems(
         Update,
         refresh
@@ -157,7 +157,7 @@ pub fn plugin(app: &mut App) {
     );
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 fn choice(branch: u8) -> impl Bundle {
     (
         Node {
@@ -179,7 +179,7 @@ fn choice(branch: u8) -> impl Bundle {
 /// The compact phone row: your tower and the opponent's, then the next
 /// Fortification step of each open branch. It sits above the Energy bar,
 /// so it never covers the Shop.
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 pub(super) fn control() -> impl Bundle {
     (
         Node {
@@ -203,7 +203,7 @@ fn clear_answered(view: Res<LatestView>, mut pending: ResMut<PendingFortify>) {
     }
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 type ChoiceQuery<'w, 's> = Query<
     'w,
     's,
@@ -215,7 +215,7 @@ type ChoiceQuery<'w, 's> = Query<
     ),
 >;
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 fn refresh(
     view: Res<LatestView>,
     pending: Res<PendingFortify>,

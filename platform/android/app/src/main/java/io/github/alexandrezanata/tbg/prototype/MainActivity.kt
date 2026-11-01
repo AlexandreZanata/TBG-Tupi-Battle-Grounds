@@ -64,6 +64,31 @@ class MainActivity : GameActivity() {
         val safe = insets.getInsets(WindowInsetsCompat.Type.systemBars() or
             WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.systemGestures())
         val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+        val margins = surface.layoutParams as? android.view.ViewGroup.MarginLayoutParams
+        if (margins != null) {
+            val bottom = maxOf(safe.bottom, ime.bottom)
+            if (margins.leftMargin != safe.left || margins.topMargin != safe.top ||
+                margins.rightMargin != safe.right || margins.bottomMargin != bottom) {
+                margins.setMargins(safe.left, safe.top, safe.right, bottom)
+                surface.layoutParams = margins
+            }
+        }
+
+        captureViewport(insets)
+        return result
+    }
+
+    override fun onGlobalLayout() {
+        super.onGlobalLayout()
+        val insets = androidx.core.view.ViewCompat.getRootWindowInsets(window.decorView) ?: return
+        captureViewport(insets)
+    }
+
+    private fun captureViewport(insets: WindowInsetsCompat) {
+        val surface = mSurfaceView ?: return
+        val safe = insets.getInsets(WindowInsetsCompat.Type.systemBars() or
+            WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.systemGestures())
+        val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
         val location = IntArray(2)
         surface.getLocationInWindow(location)
         val bounds = windowManager.currentWindowMetrics.bounds
@@ -75,18 +100,19 @@ class MainActivity : GameActivity() {
             .put("left_px", safe.left).put("top_px", safe.top)
             .put("right_px", safe.right).put("bottom_px", safe.bottom)
             .put("ime_bottom_px", ime.bottom).toString()
-        return result
     }
 
     // Rust calls these methods through the AndroidApp Activity reference. Nothing logs payloads.
     fun drainHostEvents(): String = events.drain().toString()
     fun viewportSnapshot(): String = viewport
     fun isHostResumed(): Boolean = resumed
+    fun isInternalBuild(): Boolean = (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
     fun hasAudioFocus(): Boolean = resumed && audioFocused
     fun showTextForm(request: String): Boolean = textInput.show(request)
     fun dismissTextForm() = textInput.dismiss()
     fun copyText(text: String) = services.copy(text)
     fun requestPaste() = services.paste()
+    fun pasteText(): String? = services.pasteText()
     fun openPublicPage(url: String): Boolean = services.openPublicPage(url)
     fun readPreference(key: String): String? = services.preference(key)
     fun writePreference(key: String, value: String?): Boolean = services.savePreference(key, value)

@@ -1,4 +1,10 @@
-# P69 execution — independent Android host, partial milestone
+# P69 execution — Android implementation
+
+**Current continuation (2026-11-01):** the owner released the Linux-base
+ownership gate, requested the initial landscape UI and native installation,
+then restored POCO ADB access in place of the emulator. See
+[device execution](P69-device-20261101.md). The report below preserves the
+2026-10-31 host-only checkpoint; it does not describe the current code.
 
 **Date:** 2026-10-31. **Validation level:** work front; owner explicitly
 authorized the later Android/Linux builds, named trace, focused cross-play

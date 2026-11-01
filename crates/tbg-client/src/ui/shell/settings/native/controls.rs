@@ -60,7 +60,7 @@ pub(super) fn button(label: String, selected: bool) -> impl Bundle {
             flex_grow: 1.,
             flex_basis: px(0),
             min_width: px(0),
-            min_height: px(40),
+            min_height: px(if cfg!(target_os = "android") { 48 } else { 40 }),
             padding: UiRect::axes(px(10), px(8)),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,

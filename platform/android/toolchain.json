@@ -22,5 +22,10 @@
   "kotlin": "2.1.20",
   "game_activity": "4.4.0",
   "appcompat": "1.7.1",
-  "game_activity_aar_sha256": "3a8b0887ac55a0a6ab56021ced7353a250539eac811278b74bccd8a5b678d9c9"
+  "game_activity_aar_sha256": "3a8b0887ac55a0a6ab56021ced7353a250539eac811278b74bccd8a5b678d9c9",
+  "emulator_abi": "x86_64",
+  "emulator_api": 35,
+  "emulator_page_size": 16384,
+  "emulator_rendering": "SwiftShader after host GPU emulator crash",
+  "reference_linux_commit": "6e56918"
 }

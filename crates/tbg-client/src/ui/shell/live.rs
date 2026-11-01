@@ -10,14 +10,14 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
             p.spawn(kit::muted(lang.key("live.unavailable"), 16.));
         }
         let Some(live) = &data.live else {
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             {
                 if data.live_pending() {
                     crate::ui::native_loading::rows(p, 3);
                 }
                 return;
             }
-            #[cfg(not(tbg_desktop))]
+            #[cfg(not(tbg_native_ui))]
             {
                 p.spawn(kit::muted(lang.key("live.loading"), 18.));
                 return;
@@ -66,13 +66,13 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                 });
             });
         }
-        #[cfg_attr(not(tbg_desktop), allow(unused_mut))]
+        #[cfg_attr(not(tbg_native_ui), allow(unused_mut))]
         let mut _accounts = p.spawn(kit::heading(
             lang.key("live.accounts")
                 .replace("{count}", &data.online_total.to_string()),
             24.,
         ));
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         _accounts.insert((
             kit::Pending(data.online_pending()),
             Node {
@@ -81,7 +81,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
                 ..default()
             },
         ));
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         if data.online_pending() {
             crate::ui::native_loading::rows(p, 3);
             return;

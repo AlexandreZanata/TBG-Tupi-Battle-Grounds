@@ -10,12 +10,13 @@ SYSTEM_LIBRARIES = {
 }
 
 
-def elf_identity(raw):
+def elf_identity(raw, abi="arm64-v8a"):
     """Require a bounded ELF64 ARM64 shared object and inspect all LOAD segments."""
     if len(raw) < 64 or raw[:6] != b"\x7fELF\x02\x01":
         raise ValueError("Expected a little-endian ELF64 shared library")
     kind, machine = struct.unpack_from("<HH", raw, 16)
-    if kind != 3 or machine != 183:
+    expected_machine={"arm64-v8a":183,"x86_64":62}.get(abi)
+    if kind != 3 or machine != expected_machine:
         raise ValueError("Expected an ARM64 ET_DYN library")
     offset = struct.unpack_from("<Q", raw, 32)[0]
     size, count = struct.unpack_from("<HH", raw, 54)
@@ -67,10 +68,10 @@ def elf_identity(raw):
         if not name or "/" in name:
             raise ValueError("Invalid ELF import path")
         imports.append(name)
-    return {"abi": "arm64-v8a", "load_alignment": [h[7] for h in loads], "imports": imports}
+    return {"abi": abi, "load_alignment": [h[7] for h in loads], "imports": imports}
 
 
-def inspect_apk_libraries(apk):
+def inspect_apk_libraries(apk, abi="arm64-v8a"):
     """Check every bundled .so, its imports, and its actual ZIP data offset."""
     result = {}
     with zipfile.ZipFile(apk) as archive, open(apk, "rb") as stream:
@@ -81,7 +82,7 @@ def inspect_apk_libraries(apk):
             if not entry.filename.endswith(".so"):
                 continue
             parts = entry.filename.split("/")
-            if len(parts) != 3 or parts[:2] != ["lib", "arm64-v8a"]:
+            if len(parts) != 3 or parts[:2] != ["lib", abi]:
                 raise ValueError("APK contains an unexpected native library location/ABI")
             if entry.compress_type != zipfile.ZIP_STORED:
                 raise ValueError("Native libraries must be uncompressed")
@@ -93,7 +94,7 @@ def inspect_apk_libraries(apk):
             data_offset = entry.header_offset + 30 + name_size + extra_size
             if data_offset % 16384:
                 raise ValueError(f"{entry.filename}: APK data is not 16 KB aligned")
-            identity = elf_identity(archive.read(entry))
+            identity = elf_identity(archive.read(entry),abi)
             identity["zip_data_offset"] = data_offset
             result[parts[2]] = identity
     if "libtbg_client.so" not in result:

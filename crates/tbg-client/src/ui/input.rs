@@ -36,6 +36,7 @@ const LONG_PRESS: f64 = 0.5;
 pub(super) fn taps(
     form: NonSend<super::textform::ActiveForm>,
     mouse: Res<ButtonInput<MouseButton>>,
+    #[cfg(target_os = "android")] pointer: Res<super::mobile::input::Pointer>,
     touches: Res<Touches>,
     window: Single<&Window>,
     scale: Res<UiScale>,
@@ -45,6 +46,10 @@ pub(super) fn taps(
     mut queue: ResMut<ActionQueue>,
     (time, mut pressed_at): (Res<Time>, Local<f64>),
 ) {
+    #[cfg(target_os = "android")]
+    if window.height() > window.width() {
+        return;
+    }
     if super::textform::is_open(&form) {
         return;
     }
@@ -52,9 +57,24 @@ pub(super) fn taps(
     if mouse.just_pressed(MouseButton::Left) || touches.iter_just_pressed().next().is_some() {
         *pressed_at = now;
     }
+    #[cfg(not(target_os = "android"))]
     let long_press = now - *pressed_at >= LONG_PRESS;
+    #[cfg(target_os = "android")]
+    let long_press = pointer.tap.is_some_and(|t| t.2);
+    #[cfg(not(target_os = "android"))]
     let mut points: Vec<Vec2> = touches.iter_just_released().map(|t| t.position()).collect();
-    if mouse.just_released(MouseButton::Left) {
+    #[cfg(target_os = "android")]
+    let mut points: Vec<Vec2> = pointer.tap.map(|t| t.1).into_iter().collect();
+    if mouse.just_released(MouseButton::Left) && {
+        #[cfg(target_os = "android")]
+        {
+            !pointer.touch_frame
+        }
+        #[cfg(not(target_os = "android"))]
+        {
+            true
+        }
+    } {
         points.extend(window.cursor_position());
     }
     for p in points {
@@ -64,7 +84,38 @@ pub(super) fn taps(
             // Respect clipping and draw order when a modal covers a panel.
             .filter(|(_, node, t, vis, _, clip)| {
                 vis.get()
-                    && node.contains_point(**t, physical)
+                    && {
+                        #[cfg(target_os = "android")]
+                        {
+                            super::mobile::input::hit(
+                                node,
+                                **t,
+                                physical,
+                                window.scale_factor() * scale.0,
+                            )
+                        }
+                        #[cfg(not(target_os = "android"))]
+                        {
+                            node.contains_point(**t, physical)
+                        }
+                    }
+                    && {
+                        #[cfg(target_os = "android")]
+                        {
+                            pointer.tap.is_none_or(|tap| {
+                                super::mobile::input::hit(
+                                    node,
+                                    **t,
+                                    tap.0 * window.scale_factor(),
+                                    window.scale_factor() * scale.0,
+                                )
+                            })
+                        }
+                        #[cfg(not(target_os = "android"))]
+                        {
+                            true
+                        }
+                    }
                     && clip.is_none_or(|c| c.contains_point(physical))
             })
             .max_by_key(|(_, _, _, _, stack, _)| stack.0)

@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 STAGE = ROOT / "platform/android/app/build/native-input"
 ASSETS = ROOT / "crates/tbg-client/assets"
 PACKAGE = "io.github.alexandrezanata.tbg.prototype"
-BASE = "014b0e0c046b38c551ee24534ee00709cde0e493"
+BASE = "6e569183b1f589faafab16bdc3f1c2b7a3d83316"
 
 
 def digest(raw):
@@ -90,7 +90,7 @@ def prepare(args):
     for name, path in libraries.items():
         if not re.fullmatch(r"lib[A-Za-z0-9_+.\-]+\.so", name):
             raise ValueError("Invalid native library filename")
-        identities[name] = elf_identity(path.read_bytes())
+        identities[name] = elf_identity(path.read_bytes(),args.abi)
         missing = set(identities[name]["imports"]) - SYSTEM_LIBRARIES - libraries.keys()
         if missing:
             raise ValueError(f"{name}: provide required native dependencies: {sorted(missing)}")
@@ -100,7 +100,7 @@ def prepare(args):
                             (ROOT / "crates/tbg-core/src/protocol.rs").read_text())[1])
     info = {
         "source_sha": source, "reviewed_linux_base": BASE, "linux_version": version,
-        "android_revision": 1, "package": PACKAGE, "abi": "arm64-v8a",
+        "android_revision": 2, "package": PACKAGE, "abi": args.abi,
         "protocol": protocol, "ruleset": rules_identity(),
         "content_sha256": digest((ROOT / "crates/tbg-core/src/content.rs").read_bytes()),
         "cargo_lock_sha256": digest((ROOT / "Cargo.lock").read_bytes()),
@@ -112,7 +112,7 @@ def prepare(args):
     with tempfile.TemporaryDirectory(prefix="native-input-", dir=STAGE.parent) as scratch:
         target = Path(scratch)
         for name, path in libraries.items():
-            dest = target / "jniLibs/arm64-v8a" / name
+            dest = target / "jniLibs" / args.abi / name
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, dest)
         for name in assets:
@@ -145,7 +145,7 @@ def verify_stage():
         raise ValueError("Invalid source inventory/Cargo.lock identity")
     if info["ruleset"] != rules_identity():
         raise ValueError("Ruleset identity changed after staging")
-    if info["package"] != PACKAGE or info["abi"] != "arm64-v8a":
+    if info["package"] != PACKAGE or info["abi"] not in {"arm64-v8a","x86_64"}:
         raise ValueError("Wrong native prototype package/ABI")
     assets = json.loads((STAGE / "assets/asset-inventory.json").read_text())
     if assets != asset_inventory() or digest(json.dumps(assets, sort_keys=True).encode()) != info["assets_sha256"]:
@@ -157,7 +157,7 @@ def verify_stage():
                      for p in (STAGE / "assets").rglob("*") if p.is_file()}
     if actual_assets != assets.keys() | {"build-info.json", "asset-inventory.json"}:
         raise ValueError("Unexpected staged assets")
-    libs = STAGE / "jniLibs/arm64-v8a"
+    libs = STAGE / "jniLibs" / info["abi"]
     if {p.name for p in libs.iterdir()} != info["native_libraries"].keys():
         raise ValueError("Unexpected staged native libraries")
     for name, expected in info["native_libraries"].items():
@@ -168,7 +168,7 @@ def verify_stage():
 
 def inspect_apk(args):
     info, assets = verify_stage()
-    libraries = inspect_apk_libraries(args.apk)
+    libraries = inspect_apk_libraries(args.apk, info["abi"])
     with zipfile.ZipFile(args.apk) as archive:
         for name in ("build-info.json", "asset-inventory.json"):
             if archive.read("assets/" + name) != (STAGE / "assets" / name).read_bytes():
@@ -179,7 +179,7 @@ def inspect_apk(args):
         if libraries.keys() != info["native_libraries"].keys():
             raise ValueError("APK native library inventory differs")
         for name, expected in info["native_libraries"].items():
-            if digest(archive.read("lib/arm64-v8a/" + name)) != expected:
+            if digest(archive.read("lib/"+info["abi"]+"/" + name)) != expected:
                 raise ValueError(f"APK library differs: {name}")
     sdk = Path(os.environ.get("ANDROID_HOME", os.environ.get("ANDROID_SDK_ROOT", "")))
     tools = sdk / "build-tools/36.0.0"
@@ -215,7 +215,9 @@ def main():
     stage.add_argument("--library", type=Path, required=True)
     stage.add_argument("--dependency", type=Path, action="append", default=[])
     stage.add_argument("--source", required=True)
-    commands.add_parser("verify-stage")
+    stage.add_argument("--abi", choices=["arm64-v8a","x86_64"], default="arm64-v8a")
+    verify = commands.add_parser("verify-stage")
+    verify.add_argument("--abi", choices=["arm64-v8a","x86_64"])
     apk = commands.add_parser("inspect-apk")
     apk.add_argument("--apk", type=Path, required=True)
     apk.add_argument("--report", type=Path, required=True)
@@ -224,7 +226,9 @@ def main():
         if args.command == "prepare":
             prepare(args)
         elif args.command == "verify-stage":
-            verify_stage()
+            info, _ = verify_stage()
+            if args.abi and info["abi"] != args.abi:
+                raise ValueError("Staged ABI does not match the selected APK variant")
             print("Verified current native staging input")
         else:
             inspect_apk(args)

@@ -13,7 +13,7 @@ pub const LINE: Color = Color::srgb_u8(74, 88, 94);
 pub const BLUE: Color = Color::srgb_u8(47, 88, 110);
 
 /// A server-backed field has not received its first value; Linux paints its reserved slot.
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 #[derive(Component)]
 pub struct Pending(pub bool);
 
@@ -86,7 +86,7 @@ pub fn control(text: impl Into<String>, enabled: bool, width: f32) -> impl Bundl
     (
         Node {
             min_width: px(width),
-            min_height: px(42),
+            min_height: px(if cfg!(target_os = "android") { 48 } else { 42 }),
             padding: UiRect::axes(px(14), px(10)),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
