@@ -303,3 +303,11 @@ proxy routes are active; the browser game static bundle, landing and admin UI
 are separate frontend publications. The backend binary does not implement a
 `--version` flag; inspect its startup source metadata, binary hash and the
 loopback-only release contract instead of starting another copy.
+## Static web frontends (landing, admin placeholder)
+
+The landing (`tupibg.com`, `www` redirect) and the admin placeholder (`admin.tupibg.com`) are
+static sites published by `web/deploy/publish.sh`, never by this script. They live in
+`/srv/tbg/{landing,admin}` and in their own Caddy include, `/etc/caddy/tbg-web/sites.caddy`,
+which the domain template imports with `import tbg-web/*.caddy` (an empty glob is only a
+warning). See [web/deploy/README.md](../web/deploy/README.md) for release, rollback and the
+validation record.

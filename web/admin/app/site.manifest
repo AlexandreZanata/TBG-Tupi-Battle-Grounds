@@ -1,0 +1,16 @@
+# LOCAL PREVIEW ONLY (stage.py refuses this site). Shared styles/scripts, game art and the
+# repository content snapshots; operational data comes from assets/js/data/fixtures.js.
+assets/shared/tokens.css    web/shared/tokens.css
+assets/shared/base.css      web/shared/base.css
+assets/shared/dom.js        web/shared/dom.js
+assets/shared/lang.js       web/shared/lang.js
+assets/fonts/               crates/tbg-client/assets/fonts/*.woff2
+media/icons/                crates/tbg-client/assets/lobby/native-icons/*.webp
+media/portraits/            crates/tbg-client/assets/battle/portraits/*.webp
+media/arenas/               crates/tbg-client/assets/arenas/*.webp
+media/emblem-160.webp       web/shared/media/emblem-160.webp
+media/wordmark-320.webp     web/landing/media/wordmark-320.webp
+media/icon-32.png           art/branding/desktop/tbg-32.png
+data/champions.json         web/landing/data/champions.json
+data/arenas.json            web/landing/data/arenas.json
+data/patch-notes.json       docs/patches/catalog.json

@@ -1,0 +1,44 @@
+/* TBG web design tokens: the game's deep-blue, iron and gold palette, shared by the landing and admin sites. */
+@font-face{font-family:"TBG Display";src:url("../fonts/BattlegroundDisplay.woff2") format("woff2");font-weight:700;font-display:swap;unicode-range:U+0000-007F}
+@font-face{font-family:"TBG Display";src:url("../fonts/BattlegroundDisplay-ext.woff2") format("woff2");font-weight:700;font-display:swap;unicode-range:U+00A0-00FF,U+2018,U+201C-201D,U+2022,U+2026,U+2192,U+25C6}
+@font-face{font-family:"TBG Sans";src:url("../fonts/BattlegroundSans.woff2") format("woff2");font-weight:400;font-display:swap;unicode-range:U+0000-007F}
+@font-face{font-family:"TBG Sans";src:url("../fonts/BattlegroundSans-ext.woff2") format("woff2");font-weight:400;font-display:swap;unicode-range:U+00A0-00FF,U+2018,U+201C-201D,U+2022,U+2026,U+2192,U+25C6}
+@font-face{font-family:"TBG Sans";src:url("../fonts/BattlegroundSansBold.woff2") format("woff2");font-weight:700;font-display:swap;unicode-range:U+0000-007F}
+@font-face{font-family:"TBG Sans";src:url("../fonts/BattlegroundSansBold-ext.woff2") format("woff2");font-weight:700;font-display:swap;unicode-range:U+00A0-00FF,U+2018,U+201C-201D,U+2022,U+2026,U+2192,U+25C6}
+
+:root{
+  color-scheme:dark;
+  --ink-950:#050c14;
+  --ink-900:#081423;
+  --ink-850:#0b1a2c;
+  --ink-800:#0e2136;
+  --ink-700:#142c45;
+  --ink-600:#1d3a57;
+  --royal-500:#2f6dc3;
+  --royal-400:#4f8fe6;
+  --gold-200:#fbe7b6;
+  --gold-300:#f0d38b;
+  --gold-400:#e2c17f;
+  --gold-500:#d9ad59;
+  --gold-600:#ba8f4e;
+  --gold-700:#8a6a35;
+  --line:#ba8f4e55;
+  --line-strong:#d9ad59aa;
+  --text:#f3ead4;
+  --text-muted:#c2cbd2;
+  --text-dim:#97a8b6;
+  --focus:#91ddff;
+  --play-1:#168fdb;
+  --play-2:#075591;
+  --play-edge:#59dbff;
+  --ok:#94df93;
+  --warn:#f2c066;
+  --danger:#ff9a85;
+  --radius:10px;
+  --radius-sm:6px;
+  --shadow:0 14px 40px #0009;
+  --font-display:"TBG Display",Georgia,"Times New Roman",serif;
+  --font-body:"TBG Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --gutter:clamp(16px,4vw,48px);
+  --content:1200px;
+}
