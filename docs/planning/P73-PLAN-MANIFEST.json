@@ -1,0 +1,722 @@
+{
+  "phase": "P73",
+  "status": "planning_only",
+  "date": "2026-11-01",
+  "audit_base": {
+    "ref": "origin/main",
+    "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+    "protocol_at_audit": 30
+  },
+  "ui_dependency": {
+    "branch": "phase/p72-web-native-ui",
+    "revision_at_audit": "2da0a35df87f29fc9cd346eaab9032b47d96af86",
+    "policy": "Use the reviewed shared Bevy web/native shell; do not restore deleted DOM lobby code."
+  },
+  "scope": {
+    "public_directory": "Every online account, global paging/search; guests counted but not listed.",
+    "direct_challenge": "Recipient-bound lobby notification with explicit acceptance, private unrated Challenge pairing.",
+    "rematch": "Latest valid server ticket after completed online PvP; shared Result/Active players actions; no rating change.",
+    "global": "Single actor directly; actual bounded public-snapshot aggregation when fixed release slots are enabled.",
+    "exclusions": [
+      "production deployment",
+      "Redis or extra paid infrastructure",
+      "match migration",
+      "cross-process matchmaking",
+      "chat/friends/forum",
+      "mobile layout work",
+      "combat or rating-formula changes",
+      "replays/playback/export",
+      "history-result editing/deletion",
+      "automatic retention purge",
+      "retroactive rematch from a history row",
+      "guessed damage/kill attribution"
+    ],
+    "match_history": "Persistent account-bound completed online results and personal statistics; owner list/detail and permission-checked public projection.",
+    "history_visibility": "Account chooses public or private; private by default; enforce across all entries, legacy profile recent, caches and public-serving slots."
+  },
+  "proposed_defaults": {
+    "direct_invite_ttl_seconds": 60,
+    "outgoing_per_controller": 1,
+    "incoming_per_recipient": 5,
+    "pair_cooldown_seconds": 15,
+    "direct_records_per_process": 512,
+    "rematch_ttl_seconds": "Reuse existing config; currently 120.",
+    "invite_ip_per_minute": "Reuse existing config; currently 30.",
+    "online_page_default": 50,
+    "online_page_max": 100,
+    "client_refresh_seconds": "Preserve existing 5 seconds, with backoff/hidden-page pause.",
+    "slot_peers_max": 2,
+    "slot_peer_timeout_ms": 750,
+    "slot_peer_response_max_bytes": 2097152,
+    "snapshot_freshness_max_seconds": 15,
+    "status": "Proposed initial limits; not measured capacity or an active configuration change."
+  },
+  "proposed_wire": {
+    "append_client": [
+      "ChallengePlayer { name: String }",
+      "AnswerPlayerChallenge { id: PlayerInviteId, accept: bool }",
+      "CancelPlayerChallenge { id: PlayerInviteId }",
+      "SetPlayerChallengesEnabled { enabled: bool }"
+    ],
+    "append_server": [
+      "PlayerChallengeState { enabled, outgoing, incoming }",
+      "PlayerChallengeResult { id, outcome }"
+    ],
+    "private_id": "PlayerInviteId = [u8; 16], OS-random, participant-bound, not a bearer join or authentication token.",
+    "existing_reused": [
+      "RequestRematch",
+      "RematchOpen",
+      "RematchState",
+      "RematchClosed",
+      "MatchMode::Challenge",
+      "Listing::Private",
+      "authoritative pair/reconnect/MatchStart path"
+    ],
+    "version": "Freeze the next genuinely unused version and append-only discriminants at execution S0; do not assume 31 is free."
+  },
+  "acceptance_cases": [
+    {
+      "id": "D01",
+      "name": "Complete browse and search",
+      "scenario": "137 connected account fixtures span at least three pages; search finds a target outside page one; filters precede paging; changing snapshot revision resets/deduplicates pages.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D02",
+      "name": "True availability",
+      "scenario": "Idle, Queued, InRoom, InChallenge, Watching, InMatch, disconnected and opted-out controllers show accurate coarse status; only eligible Idle endpoints can send/accept.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D03",
+      "name": "Consented private pairing",
+      "scenario": "Sender sends, actual recipient accepts; exactly one MatchStart per peer in private Challenge mode; fresh seed and no rating change.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D04",
+      "name": "Terminal lifecycle",
+      "scenario": "Decline, sender Cancel and TTL expiry notify the right peers, free bounded resources and cannot be replayed into a match.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D05",
+      "name": "Authorization and self challenge",
+      "scenario": "Third party cannot answer/cancel using another ID; wrong account/controller, alternate casing, own account and P39 bearer token cannot hijack a directed invite.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D06",
+      "name": "Crossed and duplicate requests",
+      "scenario": "Repeated sends, crossed A/B sends and duplicate simultaneous accept messages coalesce or terminate safely; Send never implicitly accepts and no duplicate pairing occurs.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D07",
+      "name": "Accept-time race and release gate",
+      "scenario": "Target/source becomes queued, joins a room/game, opts out, expires auth, loses connection or loses admission after the snapshot; accept fails safely without evicting current activity.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D08",
+      "name": "Auth and reconnect continuity",
+      "scenario": "Retained-session reconnect restores only remaining TTL/state; passive refresh does not take over; explicit takeover/logout/revocation cancel; no disconnected auto-start or TTL extension.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D09",
+      "name": "Legacy flow preservation",
+      "scenario": "Existing Quick Challenge link, self/expired/single-use link rejection, private rooms, ranked/casual queues and watch flow still follow their existing contracts.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D10",
+      "name": "Latest-opponent rematch",
+      "scenario": "Completed Challenge/Casual/Ranked/private PvP issues one latest ticket; both consent within existing TTL; next game is unrated private Challenge with fresh seed; Practice/spectators never get tickets.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D11",
+      "name": "Result and players navigation",
+      "scenario": "Open Active players without Cancel; same-opponent private offer and requested flags remain; explicit decline/new activity close it; guest opponent card is participant-only.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D12",
+      "name": "Privacy and API/internal-route boundary",
+      "scenario": "Public rows expose no keys/session IDs/invite IDs/private matches/guest enumeration; private WS state is participant-only; internal snapshot denies forwarded/public access and is proxy-blocked; names render as text.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D13",
+      "name": "Abuse and bounds",
+      "scenario": "Enforce TTL, one outbox, five inbox, pair cooldown, process cap and IP/account/guest rates; invented targets, slow peers and preference floods cannot grow auxiliary maps or block the lobby.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D14",
+      "name": "Actual global snapshots",
+      "scenario": "Two slot fixtures aggregate accounts and counts, deduplicate generations/controllers, discard retired snapshots and label a slow/missing/stale slot as incomplete instead of returning fake global zero.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D15",
+      "name": "Cross-slot compatibility and match safety",
+      "scenario": "Draining/incompatible/unreachable targets remain visible but unavailable; no cross-process pairing or live-match migration; ongoing match/auth-result continuity is unaffected.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "D16",
+      "name": "Shared frontend and localization",
+      "scenario": "Native Linux and web show consistent populated/search/page-two/empty/loading/error/stale/partial/invite/rematch/opt-out states; complete pt-BR/en keys, keyboard focus and no combat-blocking modal.",
+      "execution_status": "not_run"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "docs/phases/P72-web-native-interface.md",
+      "revision": "2da0a35df87f29fc9cd346eaab9032b47d96af86",
+      "sha256": "e8395a5aee62f39a8cc88107e2f5c8d8bc538a0b68efeddb8c2d386efbddc326",
+      "integration_note": "Read from the separate P72 branch; not yet assumed merged into the audited base."
+    },
+    {
+      "path": "crates/tbg-client/src/auth/mod.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "9be78aa6b07b6cda6d6883372f0da3d6d82ac1ca2de6100e2f0e115b52899b6c"
+    },
+    {
+      "path": "crates/tbg-client/src/auth/native.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "8231df2deefd444dbe01748ef88920d3acb18391ae0483aafe7e1b2007dba5cb"
+    },
+    {
+      "path": "crates/tbg-client/src/auth/transport.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "e7887d57ab08b1874f2fff78c0b12f44df662bcbd300f084648082d3d1d3fef5"
+    },
+    {
+      "path": "crates/tbg-client/src/auth/web.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "7114598bdd772fc95ca1cf5d4552dfbacc32cff3ea00b616341e1eaecb49f837"
+    },
+    {
+      "path": "crates/tbg-client/src/link.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "c14360f8eaa018949a8edc51c1df575007f34ff89d4c39fafe3ccf3fbc9fddca"
+    },
+    {
+      "path": "crates/tbg-client/src/sync/events.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "869adb4a57c1f70d616accb0d81aee2617673072736e85a8865fc2015722ed5c"
+    },
+    {
+      "path": "crates/tbg-client/src/sync/messages.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "fd3716eb19d142a47898a3c8cc9e76cead060626ae262b0f66a09b3cf28b8d5e"
+    },
+    {
+      "path": "crates/tbg-client/src/sync/result.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "144bb9d0982996da5e4b7f935bf36f35dda9ff571802f6261d49b8063081cf52"
+    },
+    {
+      "path": "crates/tbg-client/src/ui/actions.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "e027f1d7d5c9bf4af0b554b75f21078b9b68d2be732dcf51231dec69eafd71f4"
+    },
+    {
+      "path": "crates/tbg-client/src/ui/desktop_actions.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "dad432a59ace2ecb2fc0d7ef97c782a1968423acdde8a99aba10f753844bb9c9"
+    },
+    {
+      "path": "crates/tbg-client/src/ui/result.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "bc509892872f17e1899c9b3761d2b4560d259e4b74d857330c7e57adfc0ea72c"
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/data.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "5945470efc70141f1c70956fe03d81da5cef3b194135f2b86ea8314227ec4667"
+    },
+    {
+      "path": "crates/tbg-client/src/ui/shell/live.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "3a91828cec25ca2a50817a6dabb771abe49fc60db27f63d12bc25a73aea317d4"
+    },
+    {
+      "path": "crates/tbg-core/src/hits.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "5ad2f44cfc6eb625a3b4586ae46186d3ec061546e77715830657c14027865e34"
+    },
+    {
+      "path": "crates/tbg-core/src/protocol.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "640c2382e39cda94e31e100e071936995302d4eca1dbe86287e67b8c07d1d620"
+    },
+    {
+      "path": "crates/tbg-core/src/state.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "d276fee18f877862ead8e0fb816084cdff281a3f15924956e521ccbfb2bba0bd"
+    },
+    {
+      "path": "crates/tbg-core/src/training_hooks.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "0c28f8e1330118aea429662fc16df24d6b9278cdf241511dfd8a143b6fc37acf"
+    },
+    {
+      "path": "crates/tbg-core/tests/contract_protocol.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "9520d83a908c52044a0a72da8c261ed82d169f9c8f6b9a35f8803fa8450ef6fa"
+    },
+    {
+      "path": "crates/tbg-core/tests/contract_protocol_server.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "5f98b03cb7b35185806416dfa240b242f8e08935413bde24e5663836a33c8030"
+    },
+    {
+      "path": "crates/tbg-server/Cargo.toml",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "a91047956a49291cc150e322f9cdf6bbeff032a0e043f07af8eba333a0a1937e"
+    },
+    {
+      "path": "crates/tbg-server/src/api.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "8c01bd257047be5993d46f22d546f0098ff683ce30357128474c0d208d3f46f3"
+    },
+    {
+      "path": "crates/tbg-server/src/auth/access.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "2f33dfa2047e8b745a8b38094b4b6b0beffd38d9d8e206c6d9dbbacdf6e3fbd3"
+    },
+    {
+      "path": "crates/tbg-server/src/auth/http.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "378e3fb0ad49dca06aacd51eb237916c30526751bcee0f816d095ff7c8af2301"
+    },
+    {
+      "path": "crates/tbg-server/src/auth/mod.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "5a648c309d8b09e74e04843179d8e86c4d7b004eb3ab7947267c5e174c04df3c"
+    },
+    {
+      "path": "crates/tbg-server/src/auth/origin.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "ab05c3985e2cc50f7e768eb65bea3d47a1c7775907608026ef4cfbf49d6bec18"
+    },
+    {
+      "path": "crates/tbg-server/src/chan.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "c1bde0487dd6d29f32e5d1958715792cc0f9116d6559d86fe3f89a0ef5d8ad92"
+    },
+    {
+      "path": "crates/tbg-server/src/config.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "dcc160df057ead4f8bc98213f73c339101d47e107732583f02e5135e8deda508"
+    },
+    {
+      "path": "crates/tbg-server/src/limits.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "14d1f2085bb078b3ae60f9ad75314e0d1c15724b8fd27c660653b91fc6e95dd6"
+    },
+    {
+      "path": "crates/tbg-server/src/live.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "527f2a1595bf84c0876f9e047192a78a074384170ea0ceabd71fcf36fe27976c"
+    },
+    {
+      "path": "crates/tbg-server/src/lobby.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "2b9b6a00567f85eb552a53b1c5ab7c9d1f69bae12f1eba82c0aba94abae329b5"
+    },
+    {
+      "path": "crates/tbg-server/src/lobby/accounts.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "b1af6547a3c002e9d46fc50df5008621fbb59f780d80dee94aa2a7ba68cb9e0a"
+    },
+    {
+      "path": "crates/tbg-server/src/lobby/auth.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "f9fa64060dab278ad753a207cfb1b8342cee1c300afeac3544e47bfff1c2d918"
+    },
+    {
+      "path": "crates/tbg-server/src/lobby/challenge.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "fe65df82ab7c01b6d049558e394d5e403745e22dfcc9ee655bf7a2e684da2114"
+    },
+    {
+      "path": "crates/tbg-server/src/lobby/matchmaking.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "48b60803dfec7110d4d6a7b387ef67efe7ef78be7255b3e43d9e2bc9f2b90d5f"
+    },
+    {
+      "path": "crates/tbg-server/src/lobby/ownership.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "548f9736c9876703a9cf345801ba9a8f2a570cd91dcf9b862ce4462306fa0f46"
+    },
+    {
+      "path": "crates/tbg-server/src/lobby/presence.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "9e56e1e59220a3d5eb77dca40854bd68ffb905adf9f392c1e5108a5a6b958506"
+    },
+    {
+      "path": "crates/tbg-server/src/lobby/ranked.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "f6481d7669cc41e13a987214df2d53b2ef30ee856ea9faeaaaf879372cf5a9d4"
+    },
+    {
+      "path": "crates/tbg-server/src/lobby/rematch.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "16dfba5741691efef57c4d43b984b791847daae0222a725bdd9b429a7d91a64a"
+    },
+    {
+      "path": "crates/tbg-server/src/lobby/sessions.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "2b2a80aa1fb8818f8caad576f32633d5bc9f8b1e5d9c56b9f336d645462e619c"
+    },
+    {
+      "path": "crates/tbg-server/src/match_task.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "06279c66297349afbd822f305847ec335d11d0f5113a470e5713c7ffcb39d6c3"
+    },
+    {
+      "path": "crates/tbg-server/src/match_task/celebration.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "8e7ffae50789862f37589e1b697661fe4d4345bd884aa5f20f67038f5f0f9d95"
+    },
+    {
+      "path": "crates/tbg-server/src/match_task/report.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "2904d4596ec0baa4fa26e1a8eb844927fe579c545162613f166b275c3b6b3c09"
+    },
+    {
+      "path": "crates/tbg-server/src/match_task/settle.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "3daefa42da2d3fc970097ad28b2d2bbf3fe8bee4706344d57afecb49a5ecb679"
+    },
+    {
+      "path": "crates/tbg-server/src/match_task/summary.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "1150f4b0e7ae0d6e994a9ce3862f5e7b64879c366acdf5bd6313da033bfb146b"
+    },
+    {
+      "path": "crates/tbg-server/src/match_task/views.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "3ab9b3cdb8c4750dfbe363401c5a399f0095b3809a979de7613aca0f7dbfaa2b"
+    },
+    {
+      "path": "crates/tbg-server/src/ranked/finalizer.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "2bde31e4ba5728cd02f057f037d88dcc40724e338c6394ba0e71e34725b03339"
+    },
+    {
+      "path": "crates/tbg-server/src/ranked/journal.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "d5b86d50e22b4b0894d8479137e1b54aff93c7d426f554f076dc80f646466129"
+    },
+    {
+      "path": "crates/tbg-server/src/ranked/mod.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "30f5cc6481da0f1e38a35ddba769363caaa3a578dc3515809e480f62ac0eb0e5"
+    },
+    {
+      "path": "crates/tbg-server/src/release.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "f237e99d66966a0bf771034071a25be1a3bce6b131508095bf63a2757895f6fc"
+    },
+    {
+      "path": "crates/tbg-server/src/release/api.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "c8df2e86cb71c4049ae62a70368046aea3fcfdffdd067d676d8ecaa8465fa5cd"
+    },
+    {
+      "path": "crates/tbg-server/src/store/history.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "a390c837352d8b32a8b9139dcd3f020eea615dc6201fc401af31a8b3972b7ee7"
+    },
+    {
+      "path": "crates/tbg-server/src/store/matches.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "b92cf2672b759e7bf67de57299172ab908c9366dfa8992dd321cff3f5307adce"
+    },
+    {
+      "path": "crates/tbg-server/src/store/mod.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "f90bcd0c006e305da38241a472963d4e2c3158467b94d1a9970caf8a392e69bd"
+    },
+    {
+      "path": "crates/tbg-server/src/store/ranked.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "07df08692cddaa94dc20e6da40dbce1e6dc0e804a5d8bc8a5d03c0d3519b704f"
+    },
+    {
+      "path": "crates/tbg-server/src/store/release.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "1b066a1f36943a20bf078e8d02d37f0774b59ef0e2a15ed7081d55a432d35187"
+    },
+    {
+      "path": "crates/tbg-server/src/store/schema.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "5ac82ef3d2228820b9a8e116e34c192584c1618498ad9fbb82a7cb5bc0508cd3"
+    },
+    {
+      "path": "crates/tbg-server/src/store/stats.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "51d8360a7901448f201dcbae1a4ec20f4870685444534b6a28e12452e5511c91"
+    },
+    {
+      "path": "crates/tbg-server/src/store/worker.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "4c98580f0ca6bece195560c1fc6282bb9f7237cd61e559ec811bf9ebe777146b"
+    },
+    {
+      "path": "crates/tbg-server/src/ws/client_msg.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "8e0d991ac7f253df1cac6404a961168522ae01457f4ddd77dff62ee19215b02c"
+    },
+    {
+      "path": "crates/tbg-server/tests/contract_challenge.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "aa5d9a36914631c5d1c77c85478e5ee8ef426dbec30476ba0d2282fb7f37e741"
+    },
+    {
+      "path": "crates/tbg-server/tests/live_api.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "544f40cf5c3c06d65d931d8f3747ff1fefa17a0433a7b55515e4afdb5506db52"
+    },
+    {
+      "path": "crates/tbg-server/tests/online.rs",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "03512fff12b50d5a31f733981e0d9c15bddeb4f67fdb5259473566bc7ca389e3"
+    },
+    {
+      "path": "deploy/Caddyfile.template",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "100e9c4b720f459af247fb29ffe807f1884ac45a3100b515ce6480c3e1b94df2"
+    },
+    {
+      "path": "docs/phases/P39-quick-challenge-and-rematch.md",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "6316f1884b6ae668ae00b888af649d789fe4d3c84cd7a6f5210bd688a0472b64"
+    },
+    {
+      "path": "docs/phases/P47-live-spectate-and-presence.md",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "1767e37aebcc4022b22fa884186e51a1127925689e846c95d6bac31b445f22b6"
+    },
+    {
+      "path": "docs/phases/P61-ranked-stats.md",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "c9c6064e16c6fde1230870ee535d59937ee9361c3d926c1f4102a2da40b3fdf5"
+    },
+    {
+      "path": "docs/phases/P71-match-continuity-and-launch-readiness.md",
+      "revision": "e2a18af02d809b5926b752ff50e8116fe6d9e63d",
+      "sha256": "ac35c90b535f0ea795fd1fc227272436a893b120c962cb955634ad84fb2a3ce5"
+    }
+  ],
+  "owner_screenshot": {
+    "path": "/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_16-17-56.png",
+    "sha256": "03b80dc2f829ef17fd8f3cfe24111f0c1afbad51ac6ddfc1068af306cefa2b07",
+    "purpose": "Entry point/style reference; visible zero counts do not by themselves prove a backend defect.",
+    "copied_to_repository": false
+  },
+  "delivery": {
+    "implementation": "not_started",
+    "runtime_validation": "not_run",
+    "planning_report": "docs/phases/P73-active-players-and-direct-challenges.md#planning-report",
+    "required_execution_report": "docs/planning/P73-EXECUTION-REPORT.md",
+    "proposed_new_tests": [
+      "crates/tbg-server/tests/player_challenges.rs",
+      "crates/tbg-server/tests/presence_global.rs",
+      "crates/tbg-server/tests/player_match_history.rs",
+      "crates/tbg-server/tests/history_privacy.rs"
+    ],
+    "publication": "Owner explicitly authorizes normal implementation-branch publication and a GitHub PR targeting main after executing P73 (2026-11-01). No force-push, direct main push, merge, auto-merge, VPS mutation or deployment. Use Draft for deferred acceptance; return PR URL and actual validation.",
+    "owner_publication_authorized": true,
+    "target_base_branch": "main",
+    "implementation_complete_before_publication": "Execute the complete applicable phase, not just planning/scaffolding. Preserve honest deferred acceptance in a Draft PR."
+  },
+  "history_acceptance_cases": [
+    {
+      "id": "H01",
+      "name": "Mode and frozen ownership",
+      "scenario": "Account-bound completed Ranked/Casual/Challenge/rematch/private-room PvP creates the right participant entries; guests/Practice/spectators/unaccepted invites do not gain account history; late login cannot claim a different frozen seat.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H02",
+      "name": "Durable visibility choice",
+      "scenario": "Existing and new accounts default private; owner changes to public/private via authenticated committed preference; reconnect/device changes preserve it; migrations/retry never reset a saved choice.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H03",
+      "name": "Private and public authorization",
+      "scenario": "Owner sees own entries under either setting; another account cannot use a copied entry/cursor/account field to read them; public reads obey current visibility, including the legacy recent API and old ranking clients.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H04",
+      "name": "Exact MVP statistic semantics",
+      "scenario": "Successful purchases/evolutions/fortifications and finalized choices count once, including dead champions, excluding rejected commands/summon generation; Stronghold terminal values and combat/wall time are frozen correctly.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H05",
+      "name": "Unavailable and legacy metrics",
+      "scenario": "No total-damage claim from source-less Hit amounts; shield/overkill/friendly/periodic effects cannot become fabricated attribution; absent legacy fields are null/unavailable, and real measured zero stays distinct.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H06",
+      "name": "Result and reconnect consistency",
+      "scenario": "MatchEnd/CompletedResult replay, Result UI and stored detail use the same authoritative personal summary and ResultId; retry does not increment metrics or replay celebration; Stored follows actual durable acknowledgment.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H07",
+      "name": "Atomic and idempotent persistence",
+      "scenario": "Same canonical envelope replay inserts one parent and one side per participant, preserves random entry IDs and rolls back atomically on a failed side insert; conflicting duplicate quarantines rather than overwrites.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H08",
+      "name": "Crash boundaries and journal recovery",
+      "scenario": "Exercise before journal, after journal, after DB commit/before journal removal and restart; assert exact stated recovery guarantees, bounded retry and explicit unrecoverable gaps, without altering outcome or Elo.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H09",
+      "name": "Storage backpressure and release drain",
+      "scenario": "Disk full/read-only/corrupt envelope/queue cap/store outage never claims Saved or blocks a live tick; pending work is counted before slot retirement and retained/handoff to a compatible recovery owner is explicit.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H10",
+      "name": "Verified resumable backfill",
+      "scenario": "Only canonical account-bound Ranked rows backfill in bounded checkpoints; newer writes and repeated batches do not duplicate results; old non-ranked log names are never used as ownership evidence.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H11",
+      "name": "Keyset paging correctness",
+      "scenario": "More than 50 fixtures, same-end-time ties and a new head insertion preserve deterministic keyset traversal without duplicates; forged/oversize/wrong-subject/filter cursors fail safely; query plan uses the participant account/time/entry index.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H12",
+      "name": "Privacy projection and private opponents",
+      "scenario": "Public opt-in exposes only that owner summary; private-room/Challenge/rematch/guest opponent identity and other-side private stats are redacted; internal source IDs, room codes, seeds and tokens never leak.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H13",
+      "name": "Concurrent privacy saves and caches",
+      "scenario": "Commit a public-to-private revision then deny new public reads across list/detail/legacy recent; stale If-Match public save conflicts instead of overwriting; no shared cache/ETag/static-profile bypass or false retraction promise.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H14",
+      "name": "Authenticated slot routing",
+      "scenario": "Owner HTTP goes to the correct Access index with current token and Origin policy; expired token uses coordinated refresh, not an expired match lease; malformed/duplicate headers and unintended CORS fail safely.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H15",
+      "name": "Migration and safe rollback",
+      "scenario": "Additive migration preserves existing ranked/auth/store rows and settings; old public API slots cannot bypass privacy; rollback preserves guards/data/journals rather than dropping history or reviving unguarded recent.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H16",
+      "name": "Ranking and correction separation",
+      "scenario": "History outcome stays canonical while rating may be pending; committed/zero/unranked states differ; approved correction updates the safe displayed effective delta without a second Elo settlement or exposure of integrity risk signals.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H17",
+      "name": "UI and read-only scope",
+      "scenario": "Shared web/native owner/public list/detail, locale/time zone, loading/empty/error/pending/partial/private/unsupported/401/429 states and privacy save/revision behavior work; no replay/export/delete/old-history rematch action appears.",
+      "execution_status": "not_run"
+    },
+    {
+      "id": "H18",
+      "name": "Bounds, versions and confidentiality",
+      "scenario": "Enforce page/body/timeout/semaphore/journal bounds; unknown catalog/summary versions degrade safely; attacker IDs and store failure do not become empty success; no credential/payload logs or automatic purge.",
+      "execution_status": "not_run"
+    }
+  ],
+  "history_extension": {
+    "status": "planning_only",
+    "owner_decision": "The player chooses public or private history; persist the choice on the account.",
+    "spec": "docs/planning/P73-MATCH-HISTORY.md",
+    "conceptual_schema": "docs/planning/P73-HISTORY-SCHEMA.sql",
+    "default_visibility": "private",
+    "allowed_visibility": [
+      "private",
+      "public"
+    ],
+    "persistence": "Existing SQLite/store worker plus bounded terminal history envelopes, idempotent source keys, participant entries and per-slot recovery journals.",
+    "private_opponents": "Public projection redacts private-game and guest opponent identity and other-seat private data.",
+    "legacy_recent": "Existing public profile recent must respect the same visibility choice; it is not an exemption.",
+    "mutation_concurrency": "Conditional expected privacy revision (If-Match); stale save returns 409, no blind public overwrite.",
+    "required_statistics": [
+      "purchased_champions_total",
+      "purchases_by_champion",
+      "successful_evolutions",
+      "successful_fortifications",
+      "resolved_augment_choices",
+      "terminal_stronghold_kind_hp_max_hp",
+      "combat_ticks_and_wall_duration",
+      "relative_outcome_reason_mode_origin_arena_ruleset"
+    ],
+    "unsupported_metrics": [
+      "attributed_total_damage",
+      "effective_damage_received",
+      "healing",
+      "kills_assists",
+      "per_champion_damage"
+    ],
+    "unsupported_value": "null/unavailable, never fabricated zero",
+    "legacy_backfill": "Only verified account-bound Ranked rows; partial/result-only quality; no guessed old non-ranked ownership.",
+    "proposed_routes": [
+      "GET /api/me/matches",
+      "GET /api/me/matches/{entry_id}",
+      "GET /api/me/preferences/history",
+      "PATCH /api/me/preferences/history",
+      "GET /api/players/{name}/matches",
+      "GET /api/players/{name}/matches/{entry_id}"
+    ],
+    "proposed_wire": [
+      "Bounded PersonalMatchSummary on per-seat MatchEnd/CompletedResult replay",
+      "Private MatchHistoryStatus { result_id, entry_id, state: Pending|Stored|Delayed }"
+    ],
+    "read_bounds": {
+      "page_default": 20,
+      "page_max": 50,
+      "in_flight_requests": 4,
+      "timeout_ms": 2000,
+      "detail_max_bytes": 32768,
+      "paging": "indexed keyset, account plus end time plus independent participant entry ID"
+    },
+    "journal_starting_bounds": {
+      "entry_max_bytes": 32768,
+      "directory_max_bytes": 33554432,
+      "note": "Reuse existing ranked journal pattern limits for a separate history directory; do not share the rating finalizer."
+    },
+    "rollout": "Privacy-aware handlers/proxy across public-serving slots before opt-in; collection/API/UI staged; preserve guards/data/settings/journals on rollback.",
+    "retention": "No automatic deletion/purge; owner policy required before implementing destructive retention.",
+    "runtime_evidence": "Not run; only disposable conceptual-schema checks may be recorded as planning validation."
+  },
+  "planning_validation": {
+    "status": "documentation_and_disposable_schema_checks_only",
+    "source_revisions_and_hashes_checked": 68,
+    "acceptance_cases_still_not_run": 34,
+    "conceptual_sql": "Passed in-memory SQLite only: default privacy for existing/new accounts, 65-match keyset with timestamp ties, owner-bound query, public/private guard query, conditional privacy revision, constraints, atomic rollback and intended paging index.",
+    "application_api_auth_journal_slot_ui_tests": "not_run",
+    "production_database_access": "none",
+    "cargo_trunk_release_or_vps_commands": "none",
+    "limitation": "Conceptual SQL validation is not application migration, API access-control, recovery or deployment verification."
+  }
+}

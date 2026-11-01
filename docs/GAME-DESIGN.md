@@ -129,7 +129,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-P02 | The `AccountKey` is the long-lived manual credential: shown once at creation, never shown to other players, not recoverable on this base. P68-A delegates runtime authentication to expiring tokens (§21) without changing existing keys | Proposed (P11/P68-A) | — |
 | BR-P03 | One active account controller; explicit login/takeover can replace the old controller, including its match. P68-A allows separate persistent device families, but passive refresh/startup never takes over automatically (§21) | Proposed (P11/P68-A) | — |
 | BR-P04 | Guests may play practice, casual matches, and private rooms; ranked play needs an account | Proposed | — |
-| BR-P05 | A public profile shows name, rating, rank, record, win rate, faction mix, and the last 10 ranked results. P68-A additionally stores minimal private session-security metadata (§21), never exposing tokens/device identifiers on public profiles | Proposed (P11/P68-A) | — |
+| BR-P05 | A public profile shows name, rating, rank, record, win rate and faction mix. P73 makes the last 10 ranked results and detailed history subject to the account's Public/Only me choice (BR-AP11); private history exposes no recent rows. P68-A additionally stores minimal private session-security metadata (§21), never exposing tokens/device identifiers on public profiles | Proposed (P11/P68-A/P73) | — |
 | BR-R01 | Two queues: `Casual` (guests and accounts; private rooms are casual) and `Ranked` (accounts only) | Proposed | — |
 | BR-R02 | Matchmaking pairs the two longest-waiting players of the same queue, regardless of rating | Proposed | — |
 | BR-R03 | Every ranked match changes both players' `Rating` from both ratings (Elo, §5); win 1, draw ½, loss 0 | Proposed | — |
@@ -1602,3 +1602,114 @@ Offline execution fixtures additionally propose 128 outstanding challenges,
 requests/hour per synthetic source IP. These are test resource bounds only,
 not approved live operational limits. The owner deferred fiscal work and
 prioritized recovery and opponent mute; no commercial launch is approved.
+
+## Proposed P73 — Active players, challenges, rematches and match history
+
+Owner request, 2026-11-01. **Planning only; no behavior is activated by this
+documentation.** See [P73](phases/P73-active-players-and-direct-challenges.md).
+
+- **BR-AP01 — Directory.** Active players lists every connected account
+  across the currently known service slots, with whole-directory name
+  search and paging. Preserve BR-LV06: guests count toward connected
+  sessions but are not publicly enumerated; no private room/match or
+  credential data appears. Display partial/stale coverage honestly.
+- **BR-AP02 — Availability.** Public activity does not grant permission to
+  pair. Only a genuinely Idle, connected, authorized controller in a
+  compatible admitting ownership domain can send/accept a direct invite.
+  Queues, rooms, pending link challenges, watching and matches are not
+  forcibly interrupted. Private activity may be shown only as coarse busy.
+- **BR-AP03 — Explicit consent.** Send is the inviter's explicit consent;
+  only the addressed recipient can accept. Recheck both participants at
+  acceptance; consume once and use the existing private Challenge path.
+  Crossed/replayed clicks never implicitly accept or start duplicate games.
+  Direct games do not affect rating or enter a public queue.
+- **BR-AP04 — Participant-bound notifications.** Random short-lived direct
+  invitation IDs are disclosed only to participants and authorize no bearer
+  join. Public directory rows disclose no such IDs or session/account keys.
+  Reuse existing shareable Quick Challenge links separately; they are not
+  equivalent to a recipient-bound notification.
+- **BR-AP05 — Last-opponent rematch.** Extend BR-R09 ticket eligibility to
+  completed online PvP Challenge, Casual, Ranked and human private-room
+  games. Maintain one latest valid opponent ticket per participant, the
+  existing configured rematch TTL (currently 120 s), mutual consent, fresh
+  seed and private Challenge mode with no rating effect. A private guest
+  recent-opponent card does not make guest sessions public. Practice and
+  spectators create no ticket. Opening Active players is navigation, not
+  an implicit decline; explicit leave/decline and newer activity still
+  clean up the offer.
+- **BR-AP06 — Bounded invites.** Proposed initial direct-invite TTL is 60 s,
+  with 1 outgoing invitation per controller, 5 incoming per recipient,
+  15 s per sender/recipient-pair cooldown and 512 live directed records
+  per process. Retain current general WS and invite-IP limits (currently
+  30/min), with account or guest-session keys as appropriate. These are
+  tunable initial product defaults, not proven capacity figures.
+- **BR-AP07 — Opt-out and continuity.** A retained-session setting can
+  disable incoming direct challenges and close pending incoming notices;
+  it does not disable explicit Quick Challenge links. Reconnect restores
+  only the unexpired same-session state; it does not extend TTL or revive
+  terminal records. Logout/revocation/takeover invalidate directed invites.
+  No notification or acceptance can pause, move or forfeit a live match.
+- **BR-AP08 — Global snapshot and rollout.** HTTP reads bounded public
+  snapshots; no SQL or actor mutation per directory read. Fixed release
+  slots aggregate local-only snapshots in a background task, with at most
+  2 configured local peers concurrently, 750 ms timeout, 2 MiB response
+  limit and 15 s freshness cutoff as Proposed initial limits. Internal
+  snapshots remain loopback-only and publicly denied by the proxy.
+  Incompatible/draining peers stay visible but unavailable; no cross-slot
+  match migration is introduced. Missing peers produce partial coverage,
+  never fabricated global zero. Preserve the existing 5 s client refresh
+  baseline with backoff/hidden-page suspension; private invites use WS push.
+
+- **BR-AP09 — Recorded history.** Account-bound completed online Ranked,
+  Casual, Challenge/rematch and human private-room games enter persistent
+  result/statistics history. Freeze account-to-seat ownership at admission.
+  Practice/demo/training, spectators and unbound guest sessions do not gain
+  a persistent online-account history through this feature.
+- **BR-AP10 — Authoritative statistics.** The result/reconnect and stored
+  detail use the same bounded server-terminal personal summary. Count
+  successful purchases/Evolutions/Fortifications and finalized choices;
+  freeze Stronghold HP, mode, arena, outcome and both combat/wall duration.
+  Current client Stronghold-hit amounts are not total effective damage.
+  Unsupported or missing old statistics are null/unavailable, not zero.
+- **BR-AP11 — History privacy.** The account chooses Public or Only me,
+  default private for existing/new accounts. The persisted server choice
+  governs all past/future history and legacy public `recent` routes.
+  Owner reads require authentication/ownership. Public projections contain
+  only that player's permitted summary; private-game/guest opponent data,
+  other-seat private stats and internal match/session keys are not exposed.
+  Aggregate public rating/record remains governed by existing profile rules.
+- **BR-AP12 — Idempotent recording.** One canonical terminal source key,
+  independent per-participant entry IDs and a transaction/journal boundary
+  prevent duplicates on result replay, reconnect, retry or recovery.
+  Pending and Stored are distinct; an acknowledgment of Stored requires
+  durable DB success. History failure cannot alter the outcome or Elo.
+  Preserve bounded release-slot pending work and explicit recovery gaps.
+- **BR-AP13 — Legacy integrity.** Backfill only verified account-bound
+  Ranked rows, with partial/result-only quality where needed. Reuse source
+  keys so new recording and backfill cannot duplicate a game. Never infer
+  old non-ranked ownership from names, IPs or client logs. New non-ranked
+  history begins at feature activation unless later verified data exists.
+- **BR-AP14 — Viewing-only history.** This MVP shows results and personal
+  statistics. Historical entries do not authorize replay/export, editing,
+  deletion, challenge or a retrospective rematch. Current P73 rematch
+  consent and eligibility still come from the live server-issued ticket.
+- **BR-AP15 — Bounded history reads.** Proposed list defaults are 20 rows,
+  maximum 50, with indexed keyset paging; history reads have a separate
+  initial limit of 4 concurrent requests, 2 s timeout and a 32 KiB detail
+  response bound. Reuse the existing journal pattern's 32 KiB entry and
+  32 MiB total limits for the separate history-pending directory. These
+  are initial tunable bounds, not performance guarantees. No automatic
+  history purge is authorized; retention/deletion needs an owner decision.
+- **BR-AP16 — Visibility change and rollout.** Privacy updates commit
+  atomically with a revision and require the expected revision; stale
+  concurrent saves conflict rather than silently restoring public access.
+  New public requests after commit obey the current setting. History and
+  legacy profile routes cannot bypass it through cache/old-slot fallback.
+  Enable only after compatible privacy guards reach all public-serving
+  slots; rollback preserves guards, settings, additive data and journals.
+
+The required [P73 history sub-spec](planning/P73-MATCH-HISTORY.md) defines
+recording, schema, API, security, failure/recovery, UI and H01–H18 acceptance.
+It authorizes only the described account-history persistence/privacy
+extension. No combat, economy, rating formula, authentication lifetime or
+paid infrastructure change is authorized by P73.
