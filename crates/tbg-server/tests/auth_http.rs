@@ -456,3 +456,93 @@ async fn a11_family_cap_and_absolute_expiry_preserve_manual_recovery() {
         "manual AccountKey remains valid after family expiry"
     );
 }
+
+#[tokio::test]
+async fn a03_concurrent_retries_issue_one_successor_and_conflict_does_not_revoke() {
+    let server = server(None, None).await;
+    let initial = post(
+        &server,
+        "native",
+        "register",
+        registration("ParallelRetry"),
+        vec![],
+    )
+    .await;
+    let body = refresh(&initial.value["refresh_token"], 9);
+    let (a, b) = tokio::join!(
+        post(&server, "native", "refresh", body.clone(), vec![]),
+        post(&server, "native", "refresh", body, vec![])
+    );
+    assert_eq!((a.status, b.status), (200, 200));
+    assert_eq!(a.value["access_token"], b.value["access_token"]);
+    assert_eq!(a.value["refresh_token"], b.value["refresh_token"]);
+    assert_eq!(
+        post(
+            &server,
+            "native",
+            "refresh",
+            refresh(&initial.value["refresh_token"], 10),
+            vec![]
+        )
+        .await
+        .status,
+        409
+    );
+    assert_eq!(
+        post(
+            &server,
+            "native",
+            "confirm",
+            credential(&a.value["refresh_token"]),
+            vec![]
+        )
+        .await
+        .status,
+        200
+    );
+}
+
+#[tokio::test]
+async fn a10_manual_recovery_never_erases_an_unrelated_browser_cookie() {
+    let server = server(None, None).await;
+    let native = post(
+        &server,
+        "native",
+        "register",
+        registration("RecoveredUser"),
+        vec![],
+    )
+    .await;
+    let mut other_registration = registration("OtherBrowser");
+    other_registration["registration_retry_key"] = json!("03".repeat(32));
+    let browser = post(&server, "browser", "register", other_registration, vec![]).await;
+    let cookie = browser
+        .cookie
+        .unwrap()
+        .split(';')
+        .next()
+        .unwrap()
+        .to_owned();
+    let recovered = post(
+        &server,
+        "browser",
+        "logout-all",
+        json!({"account_key":native.value["account_key"]}),
+        vec![("Cookie".into(), cookie.clone())],
+    )
+    .await;
+    assert_eq!(recovered.status, 200);
+    assert!(recovered.cookie.is_none());
+    assert_eq!(
+        post(
+            &server,
+            "browser",
+            "confirm",
+            json!({}),
+            vec![("Cookie".into(), cookie)]
+        )
+        .await
+        .status,
+        200
+    );
+}

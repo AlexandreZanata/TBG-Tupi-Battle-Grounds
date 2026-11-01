@@ -255,7 +255,7 @@ fn render(output: Output, channel: Channel, now: i64) -> Result<Response, Error>
             if now >= grant.expires_at || now >= grant.family.expires_at {
                 return Err(Error::Unauthorized);
             }
-            let mut value = json!({"access_token":grant.access,"access_expires_at":grant.expires_at,"session_expires_at":grant.family.expires_at,"session_id":tokens::hex(&grant.family.id),"server_time":now,"profile":grant.profile});
+            let mut value = json!({"access_token":grant.access,"access_expires_at":grant.expires_at,"session_expires_at":grant.family.expires_at,"session_id":tokens::hex(&grant.family.id),"server_time":now,"profile":grant.profile,"persistent":grant.persistent});
             if let Some(key) = grant.account_key {
                 value["account_key"] = Value::String(key);
             }

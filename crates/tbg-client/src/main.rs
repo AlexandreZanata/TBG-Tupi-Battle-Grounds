@@ -11,9 +11,10 @@ use bevy::prelude::*;
 mod arena;
 mod art;
 mod audio;
+mod auth;
 mod autoplay;
 mod camera;
-#[cfg(debug_assertions)]
+#[cfg(any(debug_assertions, feature = "ui-acceptance"))]
 mod capture;
 mod celebration;
 mod config;
@@ -56,6 +57,29 @@ fn main() {
         return;
     }
     #[cfg(not(target_arch = "wasm32"))]
+    if std::env::args().any(|arg| arg == "--build-info") {
+        println!(
+            "{}",
+            serde_json::json!({"version":env!("CARGO_PKG_VERSION"),"protocol":tbg_core::protocol::PROTOCOL_VERSION,"source_commit":option_env!("TBG_SOURCE_COMMIT").unwrap_or("development"),"target":env!("TBG_BUILD_TARGET"),"profile":if cfg!(debug_assertions){"debug"}else{"release"},"features":if cfg!(feature="ui-acceptance"){vec!["ui-acceptance"]}else{vec![]}})
+        );
+        return;
+    }
+    #[cfg(all(not(target_arch = "wasm32"), feature = "ui-acceptance"))]
+    if std::env::args().any(|arg| arg == "--auth-vault-probe") {
+        platform::credentials::probe();
+        return;
+    }
+    #[cfg(all(not(target_arch = "wasm32"), feature = "ui-acceptance"))]
+    if std::env::args().any(|arg| arg == "--auth-native-journey") {
+        auth::acceptance_journey();
+        return;
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Err(message) = platform::window::validate_assets() {
+        eprintln!("TBG: {message}");
+        std::process::exit(2);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
     let window = platform::window::settings();
     #[cfg(target_arch = "wasm32")]
     let window = Window {
@@ -83,7 +107,7 @@ fn main() {
                     ..default()
                 }),
         )
-        .insert_resource(ClearColor(if cfg!(target_os = "linux") {
+        .insert_resource(ClearColor(if cfg!(tbg_desktop) {
             Color::srgb_u8(7, 15, 22)
         } else {
             art::palette::SKY_TOP
@@ -107,13 +131,14 @@ fn main() {
             vfx::plugin,
             audio::plugin,
         ))
+        .add_plugins(auth::plugin)
         .add_plugins(training::plugin)
         .add_plugins(platform_plugin)
         .run();
 }
 
 fn platform_plugin(app: &mut App) {
-    #[cfg(debug_assertions)]
+    #[cfg(any(debug_assertions, feature = "ui-acceptance"))]
     capture::plugin(app);
     #[cfg(not(target_arch = "wasm32"))]
     platform::window::plugin(app);

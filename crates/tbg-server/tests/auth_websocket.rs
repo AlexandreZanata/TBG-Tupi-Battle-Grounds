@@ -159,6 +159,15 @@ async fn a09_expiry_keeps_the_admitted_match_and_same_socket_renewal_works() {
     let start = until(&mut player, |m| matches!(m, ServerMsg::MatchStart { .. })).await;
     until(&mut opponent, |m| matches!(m, ServerMsg::MatchStart { .. })).await;
     clock.set(1900);
+    let (status, value) =
+        native_auth::post(&url, "logout", json!({"refresh_token":grant.refresh}), None)
+            .await
+            .unwrap();
+    assert_eq!(status, 409);
+    assert_eq!(
+        value["error"], "in_match",
+        "ordinary logout must not revoke an admitted match"
+    );
     // The expired Access cannot authorize a new account operation.
     auth::send(
         &mut player,
@@ -286,4 +295,50 @@ async fn a10_logout_all_invalidates_expired_match_leases_before_acknowledgment()
     .await;
     assert!(matches!(message,ServerMsg::View(v) if v.phase!=tbg_core::Phase::Ended));
     let _ = player.close(None).await;
+}
+
+#[tokio::test]
+async fn a09_another_family_or_guest_handle_cannot_resume_the_account() {
+    let (url, _) = server().await;
+    let (mut owner, token) = connect(&url, None, None).await;
+    let grant = auth::register(&owner, "BoundResume").await.unwrap();
+    auth::attach(&mut owner, &grant, false).await;
+    until(&mut owner, |m| {
+        matches!(
+            m,
+            ServerMsg::AuthState {
+                status: AuthStatus::Active,
+                ..
+            }
+        )
+    })
+    .await;
+    let (mut guest, fresh) = connect(&url, Some(token), None).await;
+    assert_ne!(fresh, token);
+    auth::send(&mut guest, ClientMsg::RankedMatch).await;
+    until(&mut guest, |m| {
+        matches!(
+            m,
+            ServerMsg::Error {
+                code: protocol::ErrorCode::LoginRequired
+            }
+        )
+    })
+    .await;
+    let other = auth::login(&owner, grant.account_key.as_deref().unwrap())
+        .await
+        .unwrap();
+    let mut wrong = tokio_tungstenite::connect_async(&url).await.unwrap().0;
+    auth::send(
+        &mut wrong,
+        ClientMsg::AuthenticatedHello {
+            version: PROTOCOL_VERSION,
+            resume: Some(token),
+            access: other.access,
+        },
+    )
+    .await;
+    until(&mut wrong, |m| matches!(m, ServerMsg::AuthRequired { .. })).await;
+    auth::send(&mut owner, ClientMsg::Leaderboard { offset: 0 }).await;
+    until(&mut owner, |m| matches!(m, ServerMsg::Leaderboard { .. })).await;
 }

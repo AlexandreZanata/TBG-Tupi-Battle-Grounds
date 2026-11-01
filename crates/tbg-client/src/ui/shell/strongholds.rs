@@ -5,9 +5,9 @@ use bevy::prelude::*;
 use serde_json::Value;
 use std::sync::OnceLock;
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod native;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 pub use native::spawn;
 
 pub fn stronghold_data() -> &'static Value {
@@ -21,7 +21,7 @@ fn text(v: &Value, key: &str) -> String {
     v[key].as_str().unwrap_or_default().into()
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) {
     let data = stronghold_data();
     root.spawn(kit::panel()).with_children(|p| {
@@ -115,7 +115,7 @@ fn details(
             p.spawn((kit::muted(branch_effect(step), 13.), detail_node()));
         }
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     p.spawn(Node {
         flex_grow: 1.,
         min_height: px(8),
@@ -131,20 +131,20 @@ fn details(
         Action::Stronghold(kind),
         290.,
     );
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     p.spawn(control).insert(super::catalog::button_node());
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     p.spawn(control);
 }
 
 fn detail_node() -> Node {
     Node {
-        width: if cfg!(target_os = "linux") {
+        width: if cfg!(tbg_desktop) {
             percent(100)
         } else {
             Val::Auto
         },
-        max_width: if cfg!(target_os = "linux") {
+        max_width: if cfg!(tbg_desktop) {
             percent(100)
         } else {
             px(310)

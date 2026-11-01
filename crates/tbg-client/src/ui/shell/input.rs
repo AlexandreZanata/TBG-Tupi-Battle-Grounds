@@ -103,7 +103,7 @@ pub fn mouse_and_keys(
             return;
         }
         if let Some(action) = action {
-            #[cfg(target_os = "linux")]
+            #[cfg(tbg_desktop)]
             if matches!(action, Action::Open(_)) {
                 queue.0.push(UiAction::CloseRanking);
             }

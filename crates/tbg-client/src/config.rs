@@ -342,14 +342,6 @@ pub fn load_account_key() -> Option<String> {
     preferences::get(Scope::Local, "tbg_account_key")
 }
 
-pub fn save_account_key(key: &str) {
-    preferences::set(Scope::Local, "tbg_account_key", key);
-}
-
-pub fn delete_account_key() {
-    preferences::remove(Scope::Local, "tbg_account_key");
-}
-
 /// A boolean preference in `localStorage` (false when unavailable).
 pub fn load_flag(key: &str) -> bool {
     preferences::get(Scope::Local, key).is_some_and(|v| v == "1")

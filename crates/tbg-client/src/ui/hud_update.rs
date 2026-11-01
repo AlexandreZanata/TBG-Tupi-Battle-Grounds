@@ -6,15 +6,15 @@ use tbg_core::{MatchView, Phase, FACTIONS};
 
 use super::hud::Hud;
 use super::PendingBuy;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 use super::{BUTTON, DISABLED};
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 use crate::i18n::augment;
 use crate::i18n::{content, Lang, Msg};
 use crate::sync::LatestView;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 use crate::visuals::assets::FACTION_COLORS;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 use tbg_core::content::augment_def;
 
 pub(super) fn update(
@@ -23,7 +23,7 @@ pub(super) fn update(
     lang: Res<Lang>,
     mut pending: ResMut<PendingBuy>,
     mut nodes: Query<(&Hud, &mut Node)>,
-    #[cfg(not(target_os = "linux"))] mut colors: Query<(&Hud, &mut BackgroundColor)>,
+    #[cfg(not(tbg_desktop))] mut colors: Query<(&Hud, &mut BackgroundColor)>,
     mut texts: Query<(&Hud, &mut Text)>,
 ) {
     let Some(v) = &view.0 else { return };
@@ -33,7 +33,7 @@ pub(super) fn update(
     let me = v.you.index();
     let lang = *lang;
     for (hud, mut node) in &mut nodes {
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         if let Some(show) = super::native_battle::auxiliary_visible(hud, v) {
             node.display = if show { Display::Flex } else { Display::None };
             continue;
@@ -52,7 +52,7 @@ pub(super) fn update(
                 node.display = if show { Display::Flex } else { Display::None };
                 continue;
             }
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::CouncilRow => {
                 node.display = if v.augment_round.is_some() {
                     Display::Flex
@@ -65,10 +65,10 @@ pub(super) fn update(
         };
         node.width = percent(100.0 * fraction.clamp(0.0, 1.0));
     }
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     for (hud, mut color) in &mut colors {
         match hud {
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::Card(i) => {
                 color.0 = if buyable(v, *i)
                     && pending
@@ -80,12 +80,12 @@ pub(super) fn update(
                     DISABLED
                 }
             }
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::CardStrip(i) => {
                 let c = FACTION_COLORS[def(v.offers[*i]).faction.index()];
                 color.0 = Color::srgb_u8(c[0], c[1], c[2]);
             }
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::CouncilOption(i) => {
                 let open = v
                     .augment_round
@@ -93,7 +93,7 @@ pub(super) fn update(
                     .is_some_and(|r| !r.resolved && r.ticks_left > 0 && v.energy >= r.costs[*i]);
                 color.0 = if open { BUTTON } else { DISABLED };
             }
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::Forgo => {
                 let open = v
                     .augment_round
@@ -106,13 +106,13 @@ pub(super) fn update(
     }
     for (hud, mut text) in &mut texts {
         text.0 = match hud {
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::Clock => match v.phase {
                 Phase::Countdown => lang.t(Msg::HudStarting).into(),
                 _ => clock(v),
             },
             Hud::Info => info(v, lang),
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::HpLabel(relative) => {
                 let seat = if *relative == 0 { me } else { 1 - me };
                 format!(
@@ -125,7 +125,7 @@ pub(super) fn update(
                 "{} vs {} · {} spectators",
                 info_state.you_name, info_state.opponent, v.spectators
             ),
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::CardText(i) => {
                 let d = def(v.offers[*i]);
                 [
@@ -136,9 +136,9 @@ pub(super) fn update(
                 .join("\n")
             }
             Hud::Augments => augment_list(v, v.you.index(), lang),
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::CouncilStatus => council_status(v, lang),
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::CouncilOptionText(i) => v
                 .augment_round
                 .as_ref()
@@ -158,7 +158,7 @@ pub(super) fn update(
                     )
                 })
                 .unwrap_or_default(),
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             Hud::ForgoText => {
                 if v.augment_round
                     .as_ref()
@@ -175,13 +175,13 @@ pub(super) fn update(
 }
 
 /// `m:ss` for a tick count, rounded up to whole seconds.
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 fn mmss(ticks: u32) -> String {
     let s = ticks.div_ceil(TICK_HZ);
     format!("{}:{:02}", s / 60, s % 60)
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 fn council_status(v: &MatchView, lang: Lang) -> String {
     match &v.augment_round {
         Some(r) if r.resolved => {
@@ -207,7 +207,7 @@ pub(super) fn buyable(v: &MatchView, i: usize) -> bool {
     v.energy >= d.cost && v.phase == Phase::Running && v.augment_round.is_none()
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 pub(super) fn clock(v: &MatchView) -> String {
     if v.phase == Phase::Countdown {
         return "STARTING".into();
@@ -289,5 +289,5 @@ pub(crate) fn army_label(v: &MatchView, lang: Lang) -> String {
     }
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 use tbg_core::content::{AUGMENT_ROUND_TICKS, TICK_HZ};

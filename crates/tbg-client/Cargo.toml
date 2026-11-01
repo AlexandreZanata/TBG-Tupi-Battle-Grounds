@@ -3,7 +3,7 @@
 
 [package]
 name = "tbg-client"
-version = "0.1.0-native.3"
+version = "0.1.0-p68.1"
 edition.workspace = true
 rust-version.workspace = true
 license-file = "../../LICENSE"
@@ -11,6 +11,10 @@ license-file = "../../LICENSE"
 [[bin]]
 name = "tbg-client"
 path = "src/main.rs"
+
+[features]
+# Opt-in packaged UI captures and synthetic vault acceptance; inactive without explicit flags.
+ui-acceptance = []
 
 [dependencies]
 # Bevy renderer + UI (WebGL2). Explicit features instead of the "3d"/"ui"

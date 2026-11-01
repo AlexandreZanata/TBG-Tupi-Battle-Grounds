@@ -24,6 +24,14 @@ impl NetLink {
     pub(super) fn connect(&mut self, now: f64) {
         self.opened = false;
         self.outq.clear();
+        let view = crate::auth::snapshot();
+        if view.access.is_none() && view.status != crate::auth::Status::Guest {
+            return;
+        }
+        self.auth_epoch = view.epoch;
+        self.auth_access = view.access;
+        self.auth_family = view.family;
+        self.login_in_flight = self.auth_access.is_some();
         match ewebsock::connect(config::server_url(), ewebsock::Options::default()) {
             Ok(pair) => self.socket = Some(pair),
             Err(_) => self.lost(now),
@@ -57,10 +65,7 @@ impl NetLink {
             match ev {
                 WsEvent::Opened => {
                     self.opened = true;
-                    let hello = ClientMsg::Hello {
-                        version: super::PROTOCOL_VERSION,
-                        resume: self.token,
-                    };
+                    let hello = self.hello();
                     self.outq.push_front((now + self.lag, hello));
                 }
                 WsEvent::Message(WsMessage::Binary(bytes)) => {
@@ -111,41 +116,38 @@ impl NetLink {
                 None
             }
             ServerMsg::Welcome { token, .. } => {
-                let previous = self.token;
                 config::save_token(&token);
                 self.token = Some(token);
+                self.save_resume_family();
                 self.status = NetStatus::Ready;
                 self.lost_at = None;
-                // Outside a match (first connect, or dropped while queued,
-                // which takes us out of the queue) ask for the mode again.
-                // A probe only listens: it resumes if a match finds it.
-                // Post-P14 (BR-P03): a saved key logs in before the mode
-                // request; a resumed session already carries its account.
-                let key = (!self.in_match).then(config::load_account_key).flatten();
-                let retry = self.login_in_flight;
-                if key.is_some()
-                    && (retry || super::needs_login(previous, token, true, self.in_match))
-                {
-                    if let Some(key) = key {
-                        self.send(ClientMsg::Login { key }, now);
+                if !self.in_match && !matches!(self.mode, super::Mode::Probe) {
+                    if self.auth_access.is_some() {
+                        self.held_request = true;
+                    } else {
+                        self.send_request(now);
                     }
-                    self.login_in_flight = true;
-                    self.login_deadline = Some(now + super::LOGIN_TIMEOUT);
-                    self.held_request |= !matches!(self.mode, super::Mode::Probe);
-                } else if !self.in_match && !matches!(self.mode, super::Mode::Probe) {
-                    self.login_in_flight = false;
-                    self.send_request(now);
                 }
                 None
             }
-            ServerMsg::LoggedIn { .. } | ServerMsg::AccountError { .. } => {
-                self.login_in_flight = false;
-                self.login_deadline = None;
-                if !self.in_match {
-                    self.release_request(now);
+            ServerMsg::AuthState { status, .. } => {
+                crate::auth::socket_status(status);
+                if status == protocol::AuthStatus::Active {
+                    self.login_in_flight = false;
+                    if !self.in_match {
+                        self.release_request(now);
+                    }
+                } else {
+                    self.login_in_flight = true;
                 }
-                Some(msg)
+                None
             }
+            ServerMsg::AuthRequired { reason } => {
+                crate::auth::authentication_required(reason);
+                self.login_in_flight = true;
+                None
+            }
+            ServerMsg::LoggedIn { .. } | ServerMsg::AccountError { .. } => Some(msg),
             ServerMsg::Ping { id } => {
                 self.send(ClientMsg::Pong { id }, now);
                 None
@@ -224,6 +226,9 @@ mod tests {
             lag: 0.0,
             ack: Default::default(),
             login_in_flight: false,
+            auth_epoch: crate::auth::epoch(),
+            auth_access: None,
+            auth_family: None,
             held_request: false,
             login_deadline: None,
             outq: Default::default(),
@@ -395,6 +400,18 @@ mod tests {
                 draws: 0,
             };
             net.handle(ServerMsg::LoggedIn { profile }, 1.);
+            assert!(
+                net.login_in_flight,
+                "D-97: profile alone cannot authorize a new match"
+            );
+            net.handle(
+                ServerMsg::AuthState {
+                    status: protocol::AuthStatus::Active,
+                    access_expires_at: 900,
+                    session_expires_at: 2_592_000,
+                },
+                1.,
+            );
             assert!(net.outq.iter().any(|(_, m)| matches!(
                 (mode, m),
                 (Mode::Quick, ClientMsg::QuickMatch) | (Mode::Ranked, ClientMsg::RankedMatch)

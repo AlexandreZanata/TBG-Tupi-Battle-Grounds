@@ -2,6 +2,14 @@
 
 use super::*;
 
+struct ConsumedAttempt {
+    old: CredentialHash,
+    operation: CredentialHash,
+    family: Family,
+    at: i64,
+    successor: CredentialHash,
+}
+
 impl Service {
     pub(super) async fn login(
         &self,
@@ -193,7 +201,17 @@ impl Service {
             } => {
                 self.family_rate(&mut state, family.id, now)?;
                 return self
-                    .retry(&mut state, old, operation, family, at, successor, now)
+                    .retry(
+                        &mut state,
+                        ConsumedAttempt {
+                            old,
+                            operation,
+                            family,
+                            at,
+                            successor,
+                        },
+                        now,
+                    )
                     .await;
             }
             _ => return Err(Error::Unavailable),
@@ -253,13 +271,16 @@ impl Service {
     async fn retry(
         &self,
         state: &mut State,
-        old: CredentialHash,
-        operation: CredentialHash,
-        family: Family,
-        at: i64,
-        successor: CredentialHash,
+        attempt: ConsumedAttempt,
         now: i64,
     ) -> Result<Grant, Error> {
+        let ConsumedAttempt {
+            old,
+            operation,
+            family,
+            at,
+            successor,
+        } = attempt;
         if state
             .flags
             .get(&family.id)

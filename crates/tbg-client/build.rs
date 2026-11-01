@@ -19,7 +19,20 @@ fn escape(value: &str) -> String {
 }
 
 fn main() {
-    native_art_manifest();
+    println!(
+        "cargo:rustc-env=TBG_BUILD_TARGET={}",
+        std::env::var("TARGET").unwrap_or_default()
+    );
+    // Presentation depends on the compilation target, never on the build host.
+    println!("cargo:rustc-check-cfg=cfg(tbg_desktop)");
+    let desktop = matches!(
+        std::env::var("CARGO_CFG_TARGET_OS").as_deref(),
+        Ok("linux" | "windows")
+    );
+    if desktop {
+        println!("cargo:rustc-cfg=tbg_desktop");
+    }
+    native_art_manifest(desktop);
     println!("cargo:rerun-if-env-changed=TBG_DEFAULT_SERVER");
     println!("cargo:rerun-if-env-changed=TBG_SOURCE_COMMIT");
     let dir =
@@ -124,11 +137,8 @@ fn main() {
     std::fs::write(out, code).unwrap();
 }
 
-fn native_art_manifest() {
-    if !std::env::var("TARGET")
-        .unwrap_or_default()
-        .contains("linux")
-    {
+fn native_art_manifest(desktop: bool) {
+    if !desktop {
         return;
     }
     let root = std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("assets");

@@ -77,7 +77,10 @@ pub async fn post(
             .header("Content-Type", "application/json")
             .header("X-TBG-Client", "native");
         if let Some(access) = bearer {
-            request = request.header("Authorization", format!("Bearer {access}"));
+            let mut header = ureq::http::HeaderValue::from_str(&format!("Bearer {access}"))
+                .map_err(|_| "invalid Access credential")?;
+            header.set_sensitive(true);
+            request = request.header("Authorization", header);
         }
         let mut response = request
             .send(body.as_slice())

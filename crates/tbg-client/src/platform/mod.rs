@@ -46,3 +46,33 @@ pub fn open_page(path: &str) {
         }
     }
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+pub mod credentials;
+
+/// An explicit owner-requested backup export; never used for automatic session persistence.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn export_recovery_key(name: &str, key: &str) -> bool {
+    use std::io::Write;
+    let Some(dir) = storage::data_dir() else {
+        return false;
+    };
+    let safe: String = name
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric() || *c == '_')
+        .collect();
+    if safe.is_empty() || std::fs::create_dir_all(&dir).is_err() {
+        return false;
+    }
+    let mut options = std::fs::OpenOptions::new();
+    options.create(true).truncate(true).write(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    options
+        .open(dir.join(format!("{safe}-tbg-key.txt")))
+        .and_then(|mut file| file.write_all(key.as_bytes()).and_then(|_| file.sync_all()))
+        .is_ok()
+}

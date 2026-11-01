@@ -30,7 +30,7 @@ pub fn plugin(app: &mut App) {
 }
 
 fn forced() -> bool {
-    cfg!(debug_assertions)
+    cfg!(any(debug_assertions, feature = "ui-acceptance"))
         && crate::config::url_param("capture").is_some()
         && crate::config::url_param("capture_loading").is_some()
 }

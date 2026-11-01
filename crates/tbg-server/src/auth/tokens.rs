@@ -34,7 +34,7 @@ pub(super) fn decode<const N: usize>(value: &str) -> Result<[u8; N], Error> {
         return Err(Error::Unauthorized);
     }
     let mut bytes = [0; N];
-    for (i, pair) in value.as_bytes().chunks_exact(2).enumerate() {
+    for (i, pair) in value.as_bytes().as_chunks::<2>().0.iter().enumerate() {
         let nibble = |b| match b {
             b'0'..=b'9' => Ok(b - b'0'),
             b'a'..=b'f' => Ok(b - b'a' + 10),

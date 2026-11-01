@@ -28,23 +28,23 @@ pub struct Ranking {
     /// Page offset waiting for a reply.
     pub(super) want: Option<u16>,
     pub(super) page: Option<Page>,
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     pub(super) leaders: [Option<LeaderRow>; 3],
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     pub(super) failed: bool,
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     waiting_since: Option<f64>,
 }
 
 impl Ranking {
     /// A `ServerMsg::Leaderboard` reply (routed by `sync::messages`).
     pub fn accept(&mut self, total: u32, offset: u16, rows: Vec<LeaderRow>, you: Option<u32>) {
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         {
             self.failed = false;
             self.waiting_since = None;
         }
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         if offset == 0 {
             self.leaders =
                 std::array::from_fn(|i| rows.iter().find(|row| row.rank == i as u32 + 1).cloned());
@@ -62,7 +62,7 @@ impl Ranking {
 }
 
 pub fn plugin(app: &mut App) {
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     app.add_systems(
         Update,
         super::ranking_ui::panel
@@ -76,7 +76,7 @@ pub fn plugin(app: &mut App) {
 
 /// Apply the P13 ranking buttons (called from `actions::apply`).
 pub(super) fn apply_action(action: UiAction, ranking: &mut Ranking) {
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     if matches!(
         action,
         UiAction::OpenRanking | UiAction::RankingPrev | UiAction::RankingNext
@@ -108,8 +108,8 @@ fn close(mut ranking: ResMut<Ranking>) {
 }
 
 fn request(
-    #[cfg(target_os = "linux")] mut ranking: ResMut<Ranking>,
-    #[cfg(not(target_os = "linux"))] ranking: Res<Ranking>,
+    #[cfg(tbg_desktop)] mut ranking: ResMut<Ranking>,
+    #[cfg(not(tbg_desktop))] ranking: Res<Ranking>,
     mut link: NonSendMut<MatchLink>,
     time: Res<Time>,
     mut sent_at: Local<Option<f64>>,
@@ -118,7 +118,7 @@ fn request(
         return;
     };
     let now = time.elapsed_secs_f64();
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     {
         if ranking.waiting_since.is_none() {
             ranking.waiting_since = Some(now);
