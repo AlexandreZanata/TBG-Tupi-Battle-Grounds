@@ -29,11 +29,12 @@ pub(super) fn spawn(
         return;
     }
     *done = true;
-    if !config::url_param("gallery").is_some_and(|m| m.eq_ignore_ascii_case("strongholds")) {
-        return;
-    }
+    // Hide roots, since wear updates can legitimately re-show their child meshes.
     for root in &live {
         commands.entity(root).insert(Visibility::Hidden);
+    }
+    if !config::url_param("gallery").is_some_and(|m| m.eq_ignore_ascii_case("strongholds")) {
+        return;
     }
     let own = config::url_param("enemy").is_none();
     let damage = config::url_param("damage")
