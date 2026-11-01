@@ -525,3 +525,9 @@ an active match. Proposed BR-AP rules/defaults are documented in GAME-DESIGN.
 No game code, production API change, test execution, UI acceptance, push,
 VPS access or deployment is part of this planning delivery. Full-suite and
 heavy validation still require the owner's explicit scoped request.
+
+**P73 execution handoff authorization, 2026-11-01:** after implementation,
+normally publish its branch and open a GitHub PR targeting `main`, per the
+owner's explicit instruction. This scoped exception does not authorize
+force-push, direct main changes, merge, auto-merge or deployment. Unrun
+acceptance must be listed in a Draft PR rather than claimed complete.

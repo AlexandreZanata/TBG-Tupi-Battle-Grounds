@@ -3,6 +3,11 @@
 **Status:** planning only, 2026-11-01. No runtime feature implemented.
 **Planning branch:** `codex/p73-active-players-challenges-plan`.
 **Execution branch:** `phase/p73-active-players-challenges`.
+**Execution publication authorization, 2026-11-01:** the owner explicitly
+requests normal publication of the completed implementation branch and a
+GitHub PR targeting `main`. This is a scoped exception to generic no-push
+guidance; no force-push, direct push to main, merge or deploy is authorized.
+This documentation-only planning work does not publish an implementation PR.
 **Audited base:** `origin/main` at
 `e2a18af02d809b5926b752ff50e8116fe6d9e63d` (P71 token-auth continuity).
 **UI integration:** coordinate with P72's shared Bevy web/native interface;
@@ -429,8 +434,11 @@ large captures/binaries in git.
 Finish `docs/planning/P73-EXECUTION-REPORT.md` with source versions, wire
 indices, files changed, commands/results, screenshots, exact deferred
 checks, global coverage, history persistence/privacy/migration evidence
-and owner look/fun review. No deploy, VPS mutation,
-push, automatic merge or production readiness claim is authorized here.
+and owner look/fun review. After implementation, normally publish its branch
+and open/update a PR targeting main as the owner explicitly requested.
+Use Draft when applicable acceptance remains deferred, documenting the
+remaining gates. No deploy, VPS mutation, force-push, direct main push,
+automatic merge or unsupported production readiness claim is authorized.
 
 ## 9. Acceptance and validation
 

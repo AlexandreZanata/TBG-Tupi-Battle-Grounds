@@ -532,7 +532,10 @@
       "crates/tbg-server/tests/player_match_history.rs",
       "crates/tbg-server/tests/history_privacy.rs"
     ],
-    "publication": "Local commits and stop for review; current AGENTS.md forbids push. No VPS/deploy authorization."
+    "publication": "Owner explicitly authorizes normal implementation-branch publication and a GitHub PR targeting main after executing P73 (2026-11-01). No force-push, direct main push, merge, auto-merge, VPS mutation or deployment. Use Draft for deferred acceptance; return PR URL and actual validation.",
+    "owner_publication_authorized": true,
+    "target_base_branch": "main",
+    "implementation_complete_before_publication": "Execute the complete applicable phase, not just planning/scaffolding. Preserve honest deferred acceptance in a Draft PR."
   },
   "history_acceptance_cases": [
     {

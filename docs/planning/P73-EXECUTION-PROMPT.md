@@ -13,7 +13,13 @@ The owner's required history extension is
 in `docs/planning/P73-HISTORY-SCHEMA.sql`. Execute it as part of P73.
 
 Create an isolated `phase/p73-active-players-challenges` branch from the
-reviewed current integration base, including these planning documents.
+latest reviewed `origin/main`, including these P73 planning documents from
+`codex/p73-active-players-challenges-plan`. Fetch current references first;
+the audit SHA below is evidence, not permission to downgrade current main.
+Bring only P73-specific specs/contracts and integrate its GAME-DESIGN and
+ROADMAP entries by context; never replace those current files wholesale
+with older planning-branch copies. Check existing worktrees/branches before
+creating another one and preserve any already-active P73 implementation.
 The audit reference is `e2a18af02d809b5926b752ff50e8116fe6d9e63d`.
 Coordinate with P72's shared Bevy browser/native interface before touching
 common UI files. Never restore a removed HTML lobby, downgrade the roster,
@@ -99,7 +105,8 @@ Implement the phase's Proposed wire/types/defaults and freeze actual
 append-only discriminants and next free protocol version at S0. Document
 product values in GAME-DESIGN in the same relevant commit. Do not assume
 protocol 31 is unused. Keep combat, rating calculation and auth architecture
-unchanged; extend only the listed invitation/rematch/presence contracts.
+unchanged; extend only the listed invitation/rematch/presence and
+history/statistics/privacy contracts.
 
 Build the UI on the same Bevy shell for native Linux, Windows and web.
 Complete pt-BR/en and existing locale coverage, keyboard/focus behavior,
@@ -112,9 +119,12 @@ out of API rows, URLs, logs and screenshots. No giant central module.
 Work in phase order: compatibility/UI/schema freeze -> accurate paged global
 presence -> directed invitations/rematch -> history's H0–H4 persistence,
 privacy and API work -> shared localized UI -> one targeted consolidation
-and evidence report. Write D01–D16 and H01–H18 regressions and actual
-two-client/slot scenarios from the manifest. Validate the conceptual SQL
-only on disposable fixtures during planning; no real DB migration now.
+and evidence report. Complete every applicable implementation step; do not
+stop at scaffolding, a mock screen or another plan. Write D01–D16 and
+H01–H18 regressions and actual two-client/slot scenarios from the manifest.
+Implement the versioned migration and validate it on isolated disposable
+fixtures. The conceptual SQL is not an already-installed migration; no
+production database migration or production-data mutation is authorized.
 
 Follow the owner's minimal local validation policy. Format affected crates
 and run at most one cheap cached focused check per relevant front. Queue
@@ -132,9 +142,29 @@ checks and pending owner look/fun approval. Fixtures must be labeled and
 must never be represented as production users. Do not call incomplete
 global coverage or unrun tests verified.
 
-Commit logical changes locally and stop for review. Current AGENTS.md
-forbids pushing; no push, merge or deployment is authorized by this prompt.
-If the owner later explicitly authorizes publication, open a PR targeting
-`main` with the implementation/report/evidence and no automatic merge.
+**Owner publication authorization (2026-11-01):** after executing P73,
+publish the implementation branch and open a GitHub PR targeting `main`.
+This explicit task instruction overrides the generic no-push instruction
+only for normal publication of this P73 implementation branch and its PR.
+Do not request the same publication approval again. Never force-push,
+rewrite history, push to main, merge, enable auto-merge or deploy.
+
+Review the final diff for unrelated changes, secrets and large binaries;
+commit logical changes, normally push the implementation branch and create
+or update its existing PR with base `main`. Use the available GitHub
+connector or authenticated CLI. The title and description are in English.
+Suggested title: `feat(p73): add active players, challenges, rematches and match history`.
+Describe resulting player behavior, public/private access rules, actual
+checks, screenshots/evidence, migration/rollback and any remaining gates.
+When using `gh`, write a multiline description to a file and use
+`--body-file`; preserve real newlines and never include credentials.
+
+If applicable checks or owner visual acceptance remain deferred, open a
+Draft PR listing them explicitly; do not mark the phase complete or claim
+validation that did not run. Fix relevant implementation/CI failures within
+scope. Return the PR URL, branch/commit, actual validation and pending items.
+If GitHub access is unavailable, preserve local work and report the exact
+publication blocker without treating that as permission to abandon the
+authorized implementation. Stop after the reviewable PR handoff.
 
 ---
