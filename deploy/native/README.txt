@@ -1,11 +1,11 @@
-TBG (Tupi Battle Grounds) — P68 Linux prerelease candidate
+TBG (Tupi Battle Grounds) — 0.1.1-rc.1 consolidated Linux prerelease candidate
 
-This candidate uses protocol 30. The previously published production server
-uses protocol 29 and is NOT compatible with this authentication update.
+This candidate uses protocol 30 and server schema 10. The previously published
+production server uses protocol 29 and is NOT compatible with this update.
 Practice and the training laboratory work offline. Online acceptance uses a
 separate compatible test server; this release does not deploy a new backend.
 Windows packaging and exact packaged Windows/Linux visual acceptance remain
-pending. Existing native.2/native.3 downloads and installations are preserved.
+pending. Existing native.2/native.3/p68.1 downloads and installations are preserved.
 
 Linux: extract the complete tar.gz and run ./tbg-client from any working
 directory. Keep assets, licenses and metadata beside it. ./install.sh adds the
@@ -27,6 +27,9 @@ migration AND explicit recovery-backup acknowledgment. Keep that backup safe.
 Signing out offline stays pending until server revocation can be confirmed.
 Natural Access expiry does not end an admitted match; security revocation does
 invalidate its lease. Passive restoration never takes over another controller.
+A short-lived match-resume record (reconnect handle, server slot and account
+binding) is kept in the same Secret Service by the same coordinator so a
+restarted game can return to its match; it is never written to preferences.
 
 F11 or Alt+Enter: fullscreen. Settings: audio, language, VSync and shadows.
 --server ws://127.0.0.1:8080/ws selects a compatible local test backend.

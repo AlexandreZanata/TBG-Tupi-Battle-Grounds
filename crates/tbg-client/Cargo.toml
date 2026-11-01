@@ -3,7 +3,7 @@
 
 [package]
 name = "tbg-client"
-version = "0.1.0-p68.1"
+version = "0.1.1-rc.1"
 edition.workspace = true
 rust-version.workspace = true
 license-file = "../../LICENSE"

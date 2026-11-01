@@ -2,6 +2,115 @@
   "schema": 1,
   "notes": [
     {
+      "id": "linux-rc1-consolidated",
+      "version": "0.1.1-rc.1",
+      "date": "2026-11-01",
+      "status": "candidate",
+      "kind": "maintenance",
+      "ruleset_version": 2,
+      "ruleset_hash": "3d56156049e626c5",
+      "title": {
+        "en": "Consolidated Linux candidate",
+        "pt-BR": "Candidata Linux consolidada"
+      },
+      "summary": {
+        "en": "One build with the complete roster, arenas, laboratory, celebration, protected sign-in and the recoverable Linux updater foundation. Requires protocol 30; the protocol-29 production server is incompatible. Gameplay numbers are preserved.",
+        "pt-BR": "Uma build com elenco completo, arenas, laboratório, celebração, acesso protegido e a base do atualizador Linux recuperável. Exige protocolo 30; o servidor publicado no protocolo 29 é incompatível. Os números do jogo foram preservados."
+      },
+      "changes": [
+        {
+          "category": "platform",
+          "subject": {
+            "en": "Native resume",
+            "pt-BR": "Retomada nativa"
+          },
+          "field": {
+            "en": "vault owner",
+            "pt-BR": "dono do cofre"
+          },
+          "before": {
+            "en": "Separate resume writer beside sign-in",
+            "pt-BR": "Gravação de retomada separada do acesso"
+          },
+          "after": {
+            "en": "One sign-in and resume coordinator",
+            "pt-BR": "Um coordenador de acesso e retomada"
+          },
+          "reason": {
+            "en": "Restore and write protected credentials once, under one lock, with a visible temporary mode.",
+            "pt-BR": "Restaurar e gravar credenciais protegidas uma vez, sob um lock, com modo temporário visível."
+          }
+        },
+        {
+          "category": "platform",
+          "subject": {
+            "en": "Server storage",
+            "pt-BR": "Armazenamento do servidor"
+          },
+          "field": {
+            "en": "schema version",
+            "pt-BR": "versão do schema"
+          },
+          "before": 9,
+          "after": 10,
+          "reason": {
+            "en": "Keep both the release directory and sign-in families, whichever earlier version a database had.",
+            "pt-BR": "Manter o diretório de releases e as famílias de acesso, qualquer que fosse a versão anterior do banco."
+          }
+        },
+        {
+          "category": "platform",
+          "subject": {
+            "en": "Updates",
+            "pt-BR": "Atualizações"
+          },
+          "field": {
+            "en": "play guard",
+            "pt-BR": "proteção do jogo"
+          },
+          "before": {
+            "en": "Socket state only",
+            "pt-BR": "Somente o estado do socket"
+          },
+          "after": {
+            "en": "Socket and sign-in state",
+            "pt-BR": "Socket e estado do acesso"
+          },
+          "reason": {
+            "en": "Never restart for an update during sign-in, renewal, restore, queueing, a match or a reconnect.",
+            "pt-BR": "Nunca reiniciar para atualizar durante acesso, renovação, restauração, fila, partida ou reconexão."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Candidate compatibility",
+            "body": "Linux prerelease with protocol 30 and server schema 10. Offline Practice and the laboratory remain available. The production server on protocol 29 is not compatible; no server is deployed by this release."
+          },
+          {
+            "title": "Not active yet",
+            "body": "Official signing and automatic updates wait for owner gate O02. Windows is unverified and not supported; two-slot server rollout stays inactive. The competitive audit approved no new balance values and its failures remain open."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Compatibilidade da candidata",
+            "body": "Prévia Linux com protocolo 30 e schema 10 no servidor. Treino offline e laboratório continuam disponíveis. O servidor de produção no protocolo 29 não é compatível; nenhum servidor é implantado por esta release."
+          },
+          {
+            "title": "Ainda não ativo",
+            "body": "Assinatura oficial e atualização automática aguardam o gate O02 do proprietário. Windows não está verificado nem suportado; o rollout com dois slots continua inativo. A auditoria competitiva não aprovou novos valores e suas reprovações continuam abertas."
+          }
+        ]
+      },
+      "document": "docs/patches/2026-11-01-linux-rc1.md",
+      "evidence": {
+        "report": "docs/phases/CONSOLIDATION-20261101.md",
+        "accepted": false
+      }
+    },
+    {
       "id": "p68-linux-auth-candidate",
       "version": "0.1.0-p68.1",
       "date": "2026-10-31",
