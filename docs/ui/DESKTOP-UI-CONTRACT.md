@@ -136,3 +136,17 @@ historical captures do not certify every required surface or animation.
 - Validation: policy/link/JSON inspection and `git diff --check` only. No builds,
   new captures or cross-platform runtime validation were run for this policy
   change. Full visual/motion correspondence remains unverified, not waived.
+
+### 2026-11-01 — Canonical cross-platform source and asset bytes
+
+- Linux remains the reference. Text inputs use UTF-8/LF on every checkout;
+  binary artwork is preserved verbatim. Git's Windows CRLF conversion must not
+  change shipped catalogs, the dependency-lock digest or hashed rule sources.
+- `.gitattributes` and the native input preflight enforce these build inputs
+  before compilation. The historical archive remains excluded from conversion.
+- The complete native promotion guard still requires identical assets, lock,
+  features and MatchContract across the final Linux/Windows package pair. It
+  rejects differences rather than normalizing away evidence after a build.
+- Local synthetic Windows-autocrlf checkout tests and input guards passed.
+  Same-source final packages and the existing pixel/motion matrix remain the
+  acceptance evidence; line-ending tests do not certify visual parity.
