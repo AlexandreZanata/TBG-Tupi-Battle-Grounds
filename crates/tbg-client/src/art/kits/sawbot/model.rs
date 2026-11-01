@@ -14,7 +14,7 @@ use crate::art::{
     rig::{Joint, Joint::*, Node::Body, Node::Secondary, Proportions, Spring},
 };
 
-const HOT: Color = Color::srgb(1.0, 0.55, 0.18);
+const HOT: Color = ORANGE;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 0.98, tier);
@@ -48,6 +48,23 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         boots: IRON,
     };
     body::humanoid(&mut v, &p, &look);
+    // A narrow engine casing leaves the saw and the cyclops as the main shapes.
+    v.extend([
+        part(
+            Body(Chest),
+            Cyl(0.15, 0.28),
+            if f.a { RUST } else { GUNMETAL },
+            [0.0, 0.18, 0.0],
+        )
+        .scale([1.0, 1.0, 0.78]),
+        part(Body(Chest), Cyl(0.155, 0.035), BRASS, [0.0, 0.30, 0.0]).scale([1.0, 1.0, 0.78]),
+        part(
+            Body(Head),
+            Box(0.25, 0.045, 0.08),
+            GUNMETAL,
+            [0.0, 0.085, 0.11],
+        ),
+    ]);
     head(&mut v, &p, f);
     chest(&mut v, &p, f);
     saw(&mut v, HandR, f, radius(f));
@@ -76,8 +93,8 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             GUNMETAL,
             [0.0, 0.0, 0.0],
         ),
-        part(Body(Head), Cyl(h * 0.5, 0.04), BRASS, [0.0, 0.0, h * 0.8]).rot([90.0, 0.0, 0.0]),
-        part(Body(Head), Ball(h * 0.38), HOT, [0.0, 0.0, h * 0.8]).glow(),
+        part(Body(Head), Cyl(h * 0.62, 0.055), BRASS, [0.0, 0.0, h * 0.8]).rot([90.0, 0.0, 0.0]),
+        part(Body(Head), Ball(h * 0.43), HOT, [0.0, 0.0, h * 0.98]).glow(),
         part(
             Body(Head),
             Cyl(0.008, h * 0.9),
@@ -175,6 +192,7 @@ fn saw(v: &mut Vec<PartSpec>, hand: Joint, f: Form, r: f32) {
         part(at, Cyl(0.035, 0.08), BRASS, [0.0, -0.06, 0.0]),
         part(at, Cyl(r, 0.018), STEEL, [0.0, -0.13, 0.0]),
         part(at, Cyl(r * 0.35, 0.03), GUNMETAL, [0.0, -0.13, 0.0]),
+        part(at, Ring(0.012, r * 0.80, 360.0), BRASS, [0.0, -0.115, 0.0]),
     ]);
     for i in 0..10 {
         let a = i as f32 / 10.0 * std::f32::consts::TAU;
