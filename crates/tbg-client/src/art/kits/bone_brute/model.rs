@@ -67,7 +67,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     skull(&mut v, f);
     arms(&mut v, &p, f);
     weapons(&mut v, f);
-    colors(&mut v);
     FigureSpec { plan: p, parts: v }
 }
 
@@ -117,12 +116,6 @@ fn legs(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             ));
         }
     }
-}
-
-/// Team rag tied round the left arm and a team hem on the cape: the side
-/// reads from the match camera.
-fn colors(v: &mut Vec<PartSpec>) {
-    v.extend([]);
 }
 
 fn pelvis(v: &mut Vec<PartSpec>, f: Form) {

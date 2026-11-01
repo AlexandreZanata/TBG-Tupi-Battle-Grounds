@@ -157,3 +157,14 @@ all-kind form distinction/budgets and the six new-kit motion/binding checks.
 The first amended-source targeted batch returned exit 75 (shared slot busy),
 without compiling or waiting. Updated captures, portrait assets, final binary
 and Linux installation are pending at this source checkpoint.
+
+Amended-source consolidation: all eleven client-focused scenarios passed:
+`ring_only_` (2), `every_kit_` (2), `completion_` (6) and
+`every_kind_has_its_own_figure` (1), with `--test-threads=1` under the shared
+host lock and two Cargo jobs. This covers 340 presentations, both-seat body
+mesh identity, reserved colors, retained fallback materials, Root/Slow badge
+reuse, budgets and distinct Evolutions. The first actual compile exposed two
+empty affiliation-only builders and one test fixture needing the added badge;
+these were removed/updated before the successful batch. Unused removed-flag
+imports were also cleaned. Source-routing and `git diff --check` passed.
+Logs are in the ignored artifact directory `validation/ring-only-checks.json`.

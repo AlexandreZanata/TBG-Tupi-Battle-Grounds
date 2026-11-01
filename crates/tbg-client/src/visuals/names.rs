@@ -153,6 +153,7 @@ mod tests {
             mark_badge: None,
             weaken_badge: None,
             venom_badge: None,
+            control_badge: None,
             marked: false,
             secondary_shot: None,
             dead_for: 0.0,

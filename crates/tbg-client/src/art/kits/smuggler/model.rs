@@ -42,9 +42,8 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(gun, Cyl(0.04, 0.07), BRASS, [0.0, 0.04, 0.08]).rot([90.0, 0.0, 0.0]),
         part(gun, Box(0.045, 0.10, 0.05), WOOD, [0.0, -0.06, 0.02]).rot([15.0, 0.0, 0.0]),
     ]);
-    // Lantern at the belt, leather kerchief at the neck.
+    // A personal lantern hangs from the belt.
     v.extend(gear::lantern(Body(Hips), [0.19, -0.08, 0.06], 1.1));
-    v.extend([]);
     if f.a {
         for x in [-0.12, 0.1] {
             v.extend(gear::sack(Body(Hips), [x, -0.05, 0.13], GOLD, 0.45));

@@ -12,7 +12,7 @@ use crate::art::{
     kits::common::{body, body::Helm, Form},
     mesh::Shape::*,
     palette::*,
-    rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
+    rig::{Joint::*, Node::Body, Node::Prop, Proportions, Socket},
 };
 
 pub fn plan(tier: u8) -> Proportions {
