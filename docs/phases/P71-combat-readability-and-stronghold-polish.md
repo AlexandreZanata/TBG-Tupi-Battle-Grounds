@@ -1,6 +1,6 @@
 # P71 — Combat readability, fire identity and Stronghold polish
 
-**Status:** execution in progress; Trident motion refinement blocked, see execution report.
+**Status:** implemented; native delivery consolidation and owner look/fun review, see execution report.
 **Planning branch:** `codex/p71-combat-visual-plan`.
 **Execution branch:** `phase/p71-combat-visual-polish`.
 **Art baseline:** P70 `b2680c3` (runtime source `c481369`), preserving the

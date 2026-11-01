@@ -210,8 +210,10 @@ fn p70_trident_holds_spear_clear_of_body_across_clips_specials_and_blends() {
                 for next in [Clip::Idle, Clip::Hit, Clip::Death] {
                     let to = sampled(&moment(form, next, 0.0));
                     for weight in [0.25, 0.5, 0.75] {
-                        let (grip, clearance) =
-                            inspect_pose(form, &blend(&pose, &to, weight), &meshes);
+                        let mut blended = blend(&pose, &to, weight);
+                        // Exercise the actual Animator constraint pass; retain the grip/clearance limits.
+                        motion::finish_blend(&mut blended, &model::plan(form.0));
+                        let (grip, clearance) = inspect_pose(form, &blended, &meshes);
                         largest_grip_error = largest_grip_error.max(grip);
                         smallest_clearance = smallest_clearance.min(clearance);
                     }
@@ -324,5 +326,33 @@ fn p70_trident_calibrates_candidate_world_distances_at_contact() {
             println!("P70 calibrated form={form:?} distance={distance} contact_world={tip:?} longitudinal_delta={:.4}", tip.z-distance as f32/1000.0);
             assert!(tip.is_finite());
         }
+    }
+}
+
+#[test]
+fn p71_trident_carries_above_and_lowers_toward_a_close_target() {
+    for form in FORMS {
+        let mut carry = moment(form, Clip::Walk, 0.0);
+        carry.aim = Some(Aim {
+            target: Vec3::new(0.0, 0.4, 1.0),
+            weight: 1.0,
+        });
+        let world = pose_world(UnitKind::Trident, &model::plan(form.0), &sampled(&carry));
+        assert!(
+            world[Prop(Socket::WeaponR).index()]
+                .transform_vector3(Vec3::Z)
+                .y
+                > 0.2
+        );
+        let mut thrust = carry;
+        thrust.clip = Clip::AttackMelee;
+        thrust.t = 0.30;
+        let world = pose_world(UnitKind::Trident, &model::plan(form.0), &sampled(&thrust));
+        assert!(
+            world[Prop(Socket::WeaponR).index()]
+                .transform_vector3(Vec3::Z)
+                .y
+                < -0.1
+        );
     }
 }

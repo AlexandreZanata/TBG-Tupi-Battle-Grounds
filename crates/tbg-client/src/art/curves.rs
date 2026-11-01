@@ -85,5 +85,24 @@ pub fn events_between(clip: Clip, from: f32, to: f32) -> Vec<ClipEvent> {
     events
 }
 pub fn blend(a: &Pose, b: &Pose, t: f32) -> Pose {
-    std::array::from_fn(|i| (a[i].0.lerp(b[i].0, t), a[i].1.lerp(b[i].1, t)))
+    std::array::from_fn(|i| {
+        (
+            super::ik::degrees(super::ik::quat(a[i].0).slerp(super::ik::quat(b[i].0), t)),
+            a[i].1.lerp(b[i].1, t),
+        )
+    })
+}
+
+#[cfg(test)]
+mod rotation_tests {
+    use super::*;
+    #[test]
+    fn p71_crossfade_uses_short_arc_across_rear_facing_boundary() {
+        let mut a = [(Vec3::ZERO, Vec3::ZERO); NODE_COUNT];
+        let mut b = a;
+        a[0].0.y = 179.0;
+        b[0].0.y = -179.0;
+        let mid = blend(&a, &b, 0.5);
+        assert!((super::super::ik::quat(mid[0].0) * Vec3::Z).dot(-Vec3::Z) > 0.999);
+    }
 }

@@ -51,7 +51,7 @@ mod siege_walker;
 mod smuggler;
 mod solar_sentinel;
 mod tools;
-mod trident;
+pub(crate) mod trident;
 mod trigger;
 mod weaver;
 mod whisperer;

@@ -1,4 +1,4 @@
-# P71 execution review — in progress
+# P71 execution review — native delivery consolidation
 
 Owner authorized implementation, local commits, GitHub push, then Linux native
 installation on 2026-11-01. This also applies to subsequent requested targeted
@@ -8,7 +8,7 @@ merge, force push, public deployment or full-suite validation is authorized.
 Execution branch: `phase/p71-combat-visual-polish`, base `6d5d2a2`.
 Owner worktrees, installed fallback and P70 original evidence are preserved.
 
-## Blocked Trident contact refinement
+## Earlier blocked Trident contact refinement
 
 > blocked: New Trident raised-load/downward-contact motion failed the existing
 > grip regression twice. `consolidation-fixed.log` reports `form (0, 0): grip
@@ -84,3 +84,20 @@ visible bore and grip. Four articulated hose sections follow the abdomen and
 pistol sockets through the actual sampled pose; the hose continuity test
 passed across five forms and Idle/Walk/Attack/Death samples. Hose sections use
 existing prop slots and cached primitive meshes, with no new dependency.
+
+### Trident resumed after owner continuation
+
+The owner's request to finish the interrupted task reopens this step. A smaller
+raised carry/load is being tested against the unchanged grip/body-clearance
+contracts, instead of repeating the earlier large raised-guard candidate.
+
+The resumed guard alone failed the grip test (`trident-resumed.log`, error
+0.41407296), exposing a rotation wrap during raw Euler crossfades. The corrected
+pipeline uses quaternion short-arc interpolation and restores the two-hand
+constraint after a Trident crossfade. The existing <0.05 grip and mesh-clearance
+assertions are unchanged; blend scenarios now exercise that runtime constraint
+pass. `trident-resumed-constraints.log`: all 3 Trident regressions passed, plus
+the new rear-facing short-arc regression. The earlier blocked candidate is
+therefore superseded. Carry/load is raised 20 degrees; close contact lowers
+toward the target within the original pitch limits. Simulation range, windup,
+damage and contact event time are unchanged.

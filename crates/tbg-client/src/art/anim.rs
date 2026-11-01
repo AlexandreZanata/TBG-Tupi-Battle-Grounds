@@ -361,6 +361,9 @@ impl Animator {
             }
             walk = None;
         }
+        if self.kind == UnitKind::Trident {
+            kits::trident::motion::finish_blend(&mut pose, &self.plan);
+        }
         self.last = pose;
         (pose, walk)
     }

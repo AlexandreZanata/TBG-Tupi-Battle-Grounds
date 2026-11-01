@@ -1,7 +1,7 @@
 //! Trident's shark anatomy, shared weapon anchors and two-handed spear performance.
 
 mod model;
-mod motion;
+pub(crate) mod motion;
 mod weapon;
 
 #[cfg(test)]

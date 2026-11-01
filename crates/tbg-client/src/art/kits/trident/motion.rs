@@ -48,7 +48,7 @@ fn idle(m: &Moment, p: &mut Pose) -> (f32, f32) {
     tools::set(p, Head, [-2.0 - breath, 3.0 * (m.clock * 0.55).sin(), 0.0]);
     p[Secondary(Spring::HeadGear).index()].0.x = 2.0 + 2.0 * breath;
     p[Secondary(Spring::Back).index()].0.z = -2.0 * breath;
-    (0.0, 8.0 + breath)
+    (0.0, -20.0 + breath)
 }
 
 fn walk(m: &Moment, p: &mut Pose) -> (f32, f32) {
@@ -57,7 +57,7 @@ fn walk(m: &Moment, p: &mut Pose) -> (f32, f32) {
     tools::set(p, Head, [-3.0, -2.0 * step, -step]);
     p[Secondary(Spring::Back).index()].0.z = -6.0 * step;
     p[Secondary(Spring::HeadGear).index()].0.x = 2.0;
-    (-0.01 * step, 10.0 + 2.0 * step)
+    (-0.01 * step, -20.0 + 2.0 * step)
 }
 
 fn stroke(t: f32, recovery: f32) -> (f32, f32) {
@@ -82,7 +82,7 @@ fn attack(t: f32, p: &mut Pose) -> (f32, f32) {
     );
     p[Secondary(Spring::HeadGear).index()].0.x = 3.0 + 5.0 * contact;
     p[Secondary(Spring::Back).index()].0.x = -5.0 * load + 3.0 * contact;
-    (-0.06 * load + 0.14 * contact, 8.0)
+    (-0.06 * load + 0.14 * contact, -20.0 + 28.0 * contact)
 }
 
 fn hit(m: &Moment, p: &mut Pose) -> (f32, f32) {
@@ -142,7 +142,13 @@ fn grip(m: &Moment, p: &mut Pose, body: &Proportions, slide: f32, pitch: f32) {
         let target = chest.inverse().transform_point3(aim.target);
         let delta = target - GUARD;
         let wanted = -delta.y.atan2(delta.xz().length()).to_degrees();
-        pitch + (wanted.clamp(-12.0, 28.0) - pitch) * aim.weight
+        // Carry/load above the opposing body; lower onto it only during the thrust.
+        let contact = if matches!(m.clip, Clip::AttackMelee | Clip::AttackRanged | Clip::Cast) {
+            stroke(m.t, 0.62).1
+        } else {
+            0.0
+        };
+        pitch + (wanted.clamp(-12.0, 28.0) - 8.0) * aim.weight * contact
     });
     let rotation =
         Quat::from_rotation_y(SHAFT_YAW.to_radians()) * Quat::from_rotation_x(pitch.to_radians());
@@ -165,5 +171,23 @@ fn grip(m: &Moment, p: &mut Pose, body: &Proportions, slide: f32, pitch: f32) {
         let direction = chest.transform_vector3(rotation * Vec3::Z);
         p[Root.index()].0.y +=
             aim::line_yaw(origin, direction, aim.target).to_degrees() * aim.weight;
+    }
+}
+
+/// Restore the two hand constraints after a pose crossfade, using the actual spear frame.
+pub(crate) fn finish_blend(pose: &mut Pose, body: &Proportions) {
+    let (rotation, origin) = pose[Prop(Socket::WeaponR).index()];
+    let rotation = ik::quat(rotation);
+    for (left, anchor, pole) in [
+        (false, Vec3::ZERO, Vec3::new(-1.0, -0.4, 0.0)),
+        (true, weapon::SUPPORT, Vec3::new(1.0, -0.4, 0.0)),
+    ] {
+        tools::reach(
+            pose,
+            left,
+            origin + rotation * anchor,
+            Some(rotation),
+            (body, pole),
+        );
     }
 }
