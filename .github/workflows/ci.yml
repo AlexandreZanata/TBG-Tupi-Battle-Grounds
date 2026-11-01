@@ -49,6 +49,7 @@ jobs:
           python3 scripts/test-web-deploy.py
           python3 scripts/test-static-deploy.py
           python3 scripts/test-native-catalog.py
+          python3 scripts/test-native-artifacts.py
           node scripts/test-native-downloads.cjs
           python3 web/scripts/check.py
           python3 scripts/test-ci-test-lanes.py

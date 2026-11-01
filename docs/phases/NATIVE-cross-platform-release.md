@@ -113,3 +113,28 @@ connection and zero matches/ranked/results, backed up the TBG include, compared
 all other directives, validated Caddy and reloaded it. The main Caddyfile and game
 server PID stayed identical. Normal zero-connection guards remain unchanged.
 No game executable, player DB, native signing keys or unrelated service changed.
+
+## Final Linux candidate evidence
+
+Run `41349999416` built final source `e1017fc55ed069e23d4df04d46b81aa2e12dac17`.
+The downloaded Actions ZIP matched SHA-256
+`1b180774a8076cf3f384f5d974314ea146a89f9daea72ec01e5943821b06b0ef`; both
+format checksum sidecars and all 355 file-manifest entries passed. The rendered
+README now contains the exact executable source/contract and resolved version.
+The packaged lobby ran on NVIDIA RTX 4060/Vulkan (driver 595.104.02), framebuffer
+1280x720, with all loading gates ready and exit 0. The host's automation display
+clamps larger requested windows; this is not a 1440x900 or high-DPI acceptance.
+
+`python3 scripts/check-native-auth.py --client <downloaded final package>/tbg-client
+--server <existing debug backend>/tbg-server --report <owned report>` passed using
+a fresh loopback SQLite backend and synthetic account: real Secret Service secure
+persistence, same-family restore, migration, process coordination, offline logout
+pending/online revocation, no ordinary token persistence and vault cleanup. The
+reused debug backend reports protocol 31, schema 10 and the exact contract but a
+`development` source identity; this test does not certify production online play.
+
+Four metadata-only `test-native-artifacts.py` cases passed, including mixed-source/
+toolchain/lock/assets/features, changed/missing formats, wrong tag, oversized and
+ambiguous package identities. These fixtures never certify executable behavior.
+The superseded `9fac2d6` native build was canceled to avoid spending more runner
+minutes on a candidate whose README had already been superseded.
