@@ -176,6 +176,52 @@ async fn v8_file_gains_both_sets_and_a_combined_file_reopens_unchanged() {
     let _ = std::fs::remove_file(p);
 }
 
+/// BR-AP11/13 (D-103): the opt-in schema 11 is additive on a file reached
+/// from either v9 family; it keeps every older row, defaults accounts to
+/// private, reopens without the flag and is a no-op when installed twice.
+#[tokio::test]
+async fn opt_in_history_schema_11_applies_over_both_reconciled_v9_families() {
+    for drop_one_family in [
+        "DROP TABLE auth_refresh_tokens; DROP TABLE auth_sessions;",
+        "DROP TABLE account_owner; DROP TABLE release_audit; DROP TABLE release_slots;",
+    ] {
+        let p = populated().await;
+        sql(
+            &p,
+            &format!("{drop_one_family} DELETE FROM schema_version WHERE version = 10;"),
+        );
+        assert_combined(&p).await;
+        let store = Store::open_history(&p, Default::default(), true).unwrap();
+        let (_, profile) = store
+            .login("upgrader".into(), KEY_HASH)
+            .await
+            .expect("the AccountKey still signs in on schema 11");
+        assert_eq!(profile.rating, 1234);
+        drop(store);
+        assert_eq!(count(&p, "SELECT MAX(version) FROM schema_version"), 11);
+        assert_eq!(
+            count(
+                &p,
+                "SELECT COUNT(*) FROM accounts
+                 WHERE history_visibility = 'private' AND history_privacy_revision = 0"
+            ),
+            count(&p, "SELECT COUNT(*) FROM accounts"),
+            "BR-AP11: existing accounts stay Only me"
+        );
+        assert_eq!(count(&p, "SELECT COUNT(*) FROM ranked_baseline"), 1);
+        assert_eq!(count(&p, "SELECT COUNT(*) FROM matches"), 1);
+        let versions = count(&p, "SELECT COUNT(*) FROM schema_version");
+        drop(Store::open(&p).expect("a flag-off restart opens schema 11"));
+        drop(Store::open_history(&p, Default::default(), true).unwrap());
+        assert_eq!(
+            count(&p, "SELECT COUNT(*) FROM schema_version"),
+            versions,
+            "re-running the opt-in migration is a no-op"
+        );
+        let _ = std::fs::remove_file(p);
+    }
+}
+
 #[tokio::test]
 async fn a_partial_or_foreign_v9_shape_refuses_to_open() {
     let partial = populated().await;
