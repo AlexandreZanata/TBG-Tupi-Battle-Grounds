@@ -210,3 +210,12 @@ opened while `/downloads.json` was deliberately held unanswered. No page errors.
 Code revisions include the renderer's source identity so changing the delivery
 transform also invalidates stale module URLs. This is a landing-only cache fix;
 it neither enables an unavailable native download nor depends on a main merge.
+
+Public landing `20261101T213041Z-c8fa1108e413` is now active. Chrome loaded all 11
+JS modules using the same revision query and opened both Linux/Windows dialogs in
+pt-BR and English. Escape returned focus to each trigger; zero console/page errors.
+The pending message and absence of download links match the current live catalog.
+The published modal screenshot was inspected. Promotion switched only the landing
+pointer: no Caddy reload, server restart, admin/game publication or player-data
+change. Fix commit `c8fa110` is retained with the owner's concurrent main merge
+through a normal merge (`3144be3`); no history rewriting or force-push.
