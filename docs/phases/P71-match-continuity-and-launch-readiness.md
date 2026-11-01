@@ -383,3 +383,39 @@ outside git (`/data/tbg-windows-vm/REPORT.md`, `results/rc1-win11/`).
   `deploy/README.md` (backup, rehearsal on a copy with the new `/health`,
   switch, verify, rollback). **W6 done** (section 4b). PR #35 opened (stacked
   on PR #34).
+- 2026-11-01: **W4 first result**: `tbg-bots --ranked --matches 4
+  --chaos-pct 100` (each bot closes its socket 20–60 s into the match and
+  rejoins 5 s later) against the consolidated rc.1 server: 8/8 completed,
+  8/8 reconnects, outcomes all `StrongholdDestroyed`, no forfeit. A clean
+  close therefore already resumes on protocol 30; the P66 `connection closed`
+  did not reproduce locally. P71 adds `--chaos-silent` (the socket stays open
+  but quiet, like a lost network) to exercise the path W1 fixes.
+
+## 6. Hand-off: remaining steps for the next agent
+
+1. **W4 A/B with silent drops** (script `/data/tbg-p71-chaos/chaos2.sh
+   <tbg-server> <tbg-bots> <label> --chaos-silent`): run the P71 `tbg-bots`
+   against the consolidated server (`/data/tbg-consolidate-target/debug/`) and
+   against the P71 server; expected: the baseline loses silently dropped
+   ranked seats (Conflict on resume), P71 keeps them. Record both outputs.
+2. **Client checks** (if not recorded below): `cargo test -p tbg-client --bin
+   tbg-client` and `cargo clippy -p tbg-client -- -D warnings` with the native
+   `PKG_CONFIG_PATH`, then commit the watchdog and pause notice.
+3. **rc.2** from the P71 head after CI is green: bump `crates/tbg-client`
+   to `0.1.1-rc.2` (and `tbg-server` `version.rs` latest), add the patch-note
+   entry (`docs/patches/`, gate `scripts/check-patch-notes.py`), build with
+   the consolidation scripts kept in `/data/tbg-p71-handoff/scripts/release/`
+   (`build-all.sh`, `package-linux.sh`, `smoke-linux.py`,
+   `verify-artifacts.py`, `browser-smoke.cjs`), the Windows cross build
+   (`/data/tbg-windows-cross/build-windows.sh`) and the VM suite
+   (`/data/tbg-windows-vm/run-suite.sh`); publish as a prerelease with
+   download-back like rc.1.
+4. **W5.5 production switch** through the owner's ops workspace (k3s +
+   nginx, outside git) following `deploy/README.md` "Switching production from
+   protocol 29 to 30", then **W7** HTTPS on the real domain
+   (`/data/tbg-p71-handoff/scripts/p71/https-smoke.cjs` adapted to the
+   public origin).
+5. Still open in code: W1.6 ownership re-claim retry (slot mode only), W1.7
+   browser temporary mode while seated, the two-slot continuity run
+   (P66 U13/U15) once W4 passes, and the owner decisions on the Proposed
+   values (pause 120 s, retry cache 300 s, seat lease 180 s).
