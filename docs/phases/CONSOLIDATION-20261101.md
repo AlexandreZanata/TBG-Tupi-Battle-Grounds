@@ -168,7 +168,7 @@ requested or run.
 hash ignores the checkout path for workspace members and freshness is decided
 by source mtimes, so worktrees sharing one target directory can reuse each
 other's artifacts. All results below come from a dedicated target directory
-(`/data/tbg-consolidate-target`, cold build). Earlier fronts that relied on the
+outside the shared checkout cache (cold build). Earlier fronts that relied on the
 shared cache should treat cross-worktree results with care.
 
 Commands (binaries from one `cargo test --offline --locked -p tbg-core
