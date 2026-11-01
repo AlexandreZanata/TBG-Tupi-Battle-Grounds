@@ -22,6 +22,8 @@ impl Body {
         self.radius = self
             .radius
             .max(width * sin.abs() + half * cos.abs() + (center * cos).abs());
+        // Pair separation uses at least a circle; its broad phase must cover that same reach.
+        self.half_length = self.half_length.max(self.radius);
     }
 }
 

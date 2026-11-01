@@ -77,10 +77,7 @@ fn p71_body_envelopes_clear_large_custom_figures() {
 
 #[test]
 fn shatterback_head_clears_allies_and_enemies_in_every_form() {
-    use crate::{
-        art::anim::Clip,
-        crowd::{Body, Offset, Params, Solver},
-    };
+    // D-57/P71: measured flesh/head occupancy follows Evolution and facing, not plate count.
     let kind = UnitKind::Shatterback;
     let kit = kits::kit(kind).unwrap();
     let mut meshes = Assets::<Mesh>::default();
@@ -100,80 +97,101 @@ fn shatterback_head_clears_allies_and_enemies_in_every_form() {
         else {
             panic!("head positions missing")
         };
-        let lunge = super::melee::strike_profile_for_unit(kind, tier, branch).lunge;
-        for degrees in [65.0f32, 90.0, -65.0, -90.0] {
-            let yaw = degrees.to_radians();
-            let facing = degrees.signum();
+        for degrees in [25.0f32, 65.0, 90.0, -25.0, -65.0, -90.0] {
             for opposing in [false, true] {
-                let root = 8.0;
-                let other = root + facing * 0.8;
-                let mut turtle = Body {
-                    id: 1,
-                    anchor_x: root,
-                    radius: 0.5,
-                    half_length: 0.5,
-                    facing,
-                    ghost: false,
-                };
-                turtle.include_envelope(
-                    form.occupancy.x,
-                    form.occupancy.y + lunge,
-                    form.body_radius,
-                    yaw,
-                );
-                let bodies = [
-                    turtle,
-                    Body {
-                        id: 2,
-                        anchor_x: other,
-                        radius: 0.4,
-                        half_length: 0.4,
-                        facing: if opposing { -facing } else { facing },
-                        ghost: false,
-                    },
-                ];
-                let mut offsets = [Offset::default(); 2];
-                let mut solver = Solver::default();
-                let params = Params::default();
-                for _ in 0..180 {
-                    solver.solve(&bodies, &mut offsets, 1.0 / 60.0, &params);
-                }
-                let head_root = Vec3::new(root + offsets[0].dx, 0.0, offsets[0].dz);
-                let enemy = Vec3::new(other + offsets[1].dx, 0.0, offsets[1].dz);
-                let rotation = Quat::from_rotation_y(yaw);
-                let mut animator = Animator::new(
-                    [Entity::PLACEHOLDER; NODE_COUNT],
-                    form.plan,
-                    Entity::PLACEHOLDER,
-                    kind,
-                    0,
-                );
-                animator.form = (tier, branch);
-                for clip in [Clip::Idle, Clip::Walk, Clip::AttackMelee] {
-                    for step in 0..8 {
-                        let pose = animator.pose(clip, kit.duration(clip) * step as f32 / 8.0);
-                        let world = pose_world(kind, &form.plan, &pose);
-                        for vertex in vertices {
-                            let p = world[Node::Body(super::rig::Joint::Head).index()]
-                                .transform_point3(Vec3::from(*vertex))
-                                * form.plan.scale;
-                            let head = head_root
-                                + rotation
-                                    * (p + if clip == Clip::AttackMelee {
-                                        Vec3::Z * lunge
-                                    } else {
-                                        Vec3::ZERO
-                                    });
-                            assert!(head.xz().distance(enemy.xz())>=0.38,
-                                "Shatterback {tier}/{branch} yaw={degrees} opposing={opposing} {clip:?}: head enters adjacent body");
-                        }
-                    }
-                }
-                for (body, offset) in bodies.iter().zip(offsets) {
-                    assert!((-params.max_back - 1e-6..=params.max_dx + 1e-6)
-                        .contains(&(offset.dx * body.facing)));
-                }
+                shatterback_contact_case(&form, vertices, (tier, branch), degrees, opposing);
             }
         }
+    }
+}
+
+fn shatterback_contact_case(
+    form: &super::FigureForm,
+    vertices: &[[f32; 3]],
+    (tier, branch): (u8, u8),
+    degrees: f32,
+    opposing: bool,
+) {
+    use crate::{
+        art::anim::Clip,
+        crowd::{Body, Offset, Params, Solver},
+    };
+    let kind = UnitKind::Shatterback;
+    let kit = kits::kit(kind).unwrap();
+    let lunge = super::melee::strike_profile_for_unit(kind, tier, branch).lunge;
+    let yaw = degrees.to_radians();
+    let facing = degrees.signum();
+    let root = 8.0;
+    let other = root + facing * 0.8;
+    let mut turtle = Body {
+        id: 1,
+        anchor_x: root,
+        radius: 0.5,
+        half_length: 0.5,
+        facing,
+        ghost: false,
+    };
+    turtle.include_envelope(
+        form.occupancy.x,
+        form.occupancy.y + lunge,
+        form.body_radius,
+        yaw,
+    );
+    assert!(
+        turtle.half_length >= turtle.radius,
+        "broad phase must cover the solver's circle minimum at every yaw"
+    );
+    let bodies = [
+        turtle,
+        Body {
+            id: 2,
+            anchor_x: other,
+            radius: 0.4,
+            half_length: 0.4,
+            facing: if opposing { -facing } else { facing },
+            ghost: false,
+        },
+    ];
+    let mut offsets = [Offset::default(); 2];
+    let mut solver = Solver::default();
+    let params = Params::default();
+    for _ in 0..180 {
+        solver.solve(&bodies, &mut offsets, 1.0 / 60.0, &params);
+    }
+    let head_root = Vec3::new(root + offsets[0].dx, 0.0, offsets[0].dz);
+    let enemy = Vec3::new(other + offsets[1].dx, 0.0, offsets[1].dz);
+    let rotation = Quat::from_rotation_y(yaw);
+    let mut animator = Animator::new(
+        [Entity::PLACEHOLDER; NODE_COUNT],
+        form.plan,
+        Entity::PLACEHOLDER,
+        kind,
+        0,
+    );
+    animator.form = (tier, branch);
+    for clip in [Clip::Idle, Clip::Walk, Clip::AttackMelee] {
+        for step in 0..8 {
+            let pose = animator.pose(clip, kit.duration(clip) * step as f32 / 8.0);
+            let world = pose_world(kind, &form.plan, &pose);
+            for vertex in vertices {
+                let p = world[Node::Body(super::rig::Joint::Head).index()]
+                    .transform_point3(Vec3::from(*vertex))
+                    * form.plan.scale;
+                let head = head_root
+                    + rotation
+                        * (p + if clip == Clip::AttackMelee {
+                            Vec3::Z * lunge
+                        } else {
+                            Vec3::ZERO
+                        });
+                assert!(head.xz().distance(enemy.xz())>=0.38,
+                    "Shatterback {tier}/{branch} yaw={degrees} opposing={opposing} {clip:?}: head enters adjacent body");
+            }
+        }
+    }
+    for (body, offset) in bodies.iter().zip(offsets) {
+        assert!(
+            (-params.max_back - 1e-6..=params.max_dx + 1e-6).contains(&(offset.dx * body.facing))
+        );
     }
 }

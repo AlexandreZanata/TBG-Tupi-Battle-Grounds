@@ -59,3 +59,19 @@ its build receipt and renderer log. Visual inspection confirms the orange/gold
 stripe on B1 plates; the B2 stripe is intentionally retained. Native after-captures
 and installation follow the source commit. No full suite, release packaging,
 browser runtime or dense-crowd guarantee is claimed.
+
+### Side-facing broad-phase refinement
+
+Review found that the existing pair solver uses at least a circular longitudinal
+reach. A turtle turned across the lane can project wider than it is long, so its
+new footprint must keep half_length at least radius for the unchanged broad-phase
+search to see the same pairs. The clamp is local to the new envelope method;
+existing crowd parameters and other champions' footprints are unchanged.
+
+The real-head regression now samples six mirrored yaw angles (±25, ±65, ±90),
+all five forms, both allied/opposing contact and Idle/Walk/melee with lunge.
+It asserts that broad-phase reach invariant too. A focused rerun after this
+refinement passed1 test,0 failed (2.62s compile,0.10s test), under the same lock
+and two-job limit. The seven generic crowd regressions remain valid unchanged.
+The final installation binary is rebuilt after this source correction; the prior
+10.04s native build was an intermediate candidate, not the delivered artifact.
