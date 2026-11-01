@@ -57,7 +57,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Body(Chest),
             Ball(0.25),
-            if f.b { CHITIN } else { MOSS },
+            if f.b { CHITIN } else { VIOLET },
             [0.0, 0.0, -0.08],
         )
         .scale([1.0, 0.8, 1.2]),
@@ -76,13 +76,24 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         )
         .rot([90.0, 0.0, 0.0]),
     ];
+    for s in [-1.0, 1.0] {
+        v.push(
+            part(
+                Body(Chest),
+                Pill(0.025, 0.30),
+                LINEN,
+                [s * 0.10, 0.17, -0.10],
+            )
+            .rot([80.0, 0.0, s * 18.0]),
+        );
+    }
     for (j, s, z) in LEGS {
         let spread = if f.b && z > 0.05 { 0.36 } else { 0.28 };
         v.push(
             part(
                 Body(j),
                 Box(spread, 0.035, 0.035),
-                MOSS,
+                VIOLET,
                 [s * spread * 0.45, 0.04, 0.0],
             )
             .rot([0.0, -s * z * 100.0, s * 15.0]),
