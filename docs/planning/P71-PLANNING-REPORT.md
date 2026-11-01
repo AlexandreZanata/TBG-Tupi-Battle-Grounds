@@ -64,6 +64,18 @@ is a source lead to inspect; the screenshot does not prove diagonal gameplay
 movement. A kit-specific presentation repair must preserve authoritative
 movement, speed and spacing. These changes remain planned, not implemented.
 
+Owner follow-up adds Bonehorn's head to its body blocking/occupancy area
+because it enters opponents. S1e now explicitly includes head, muzzle, horn
+and armor in the visual footprint and checks opposing bodies as well as
+allies. Source inspection found scale-based circular display footprints and
+independent per-seat layout in `visuals/layout.rs`; core combat uses its own
+one-dimensional positions. The chosen scope is a head-inclusive presentation
+repair under D-57, with stable contact, both-side/five-form evidence and
+credible weapon cues, preserving authoritative movement and damage. A new
+mechanical collider is not silently inferred from this visual defect. If a
+credible correction conflicts with existing spacing, that conflict is reported
+before a separately specified gameplay proposal. Implementation is pending.
+
 ## Findings that determine the plan
 
 - Spawn and Evolution update both use a generic scaled bar height, not

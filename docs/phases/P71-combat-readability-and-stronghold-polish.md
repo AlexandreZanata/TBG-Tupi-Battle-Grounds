@@ -288,6 +288,62 @@ with coherent foot placement. The bar stays wholly above the tall armor in
 ordinary game views without name/star overlap. Before/after footage includes
 motion, not just a differently posed still; disclose finite sampling limits.
 
+### S1e — Bonehorn head-inclusive body occupancy
+
+Owner follow-up: treat Bonehorn's head as part of its body blocking area;
+it currently enters enemies. Include the forward head/muzzle and horn in
+the visible occupied volume, rather than spacing units only from its trunk
+or foot ring. This is a mandatory contact repair alongside S1d's facing fix.
+
+Source clarification: `visuals/layout.rs` already separates drawn bodies
+using scale-based circular footprints; its seats are laid out independently.
+The core remains one-dimensional and is not driven by rendered meshes
+(D-57). Implement this request through the existing presentation occupancy
+seam, including opposing units, rather than silently introducing physical
+head colliders or changing attack ranges in the simulation.
+
+1. Reproduce Bonehorn's head overlap in live approach/contact, on both sides,
+   using corrected S1d orientation. Measure the form's body footprint from
+   transformed torso, head, muzzle, horn and attached armor. Exclude transient
+   effects and unheld projectiles. Cache stable form extents; do not perform
+   per-frame vertex collision or move the gameplay coordinate to follow a
+   bobbing head. A narrow forward extent must not inflate every unit's radius
+   or unnecessarily widen Bonehorn on all sides.
+2. Use head-inclusive occupancy when resolving visual contact with allies
+   and enemies. The current independent-seat layout cannot by itself prove
+   cross-team clearance. Add the minimum bounded cross-side reconciliation
+   needed for Bonehorn's frontal volume; keep unit ordering, allegiance and
+   its four-legged gait coherent. Check existing broad-phase grid reach
+   assumptions when extents grow, so distant buckets do not miss its head.
+3. Stop the drawn body from advancing through an opponent before contact.
+   Head/horn may make brief intentional contact at the existing strike, but
+   must not remain buried in or emerge through the enemy. Keep both figures
+   within their legible combat relationship; avoid oscillation, sudden rank
+   jumps, sideways sliding or shifting a whole formation every head bob.
+   Verify different enemy sizes and Bonehorn-versus-Bonehorn, including a
+   crowded frontline and enemies moving inward during windup.
+4. Any necessary drawn offset remains cosmetic and bounded: retain server x,
+   simulation movement/stopping, target identity, range checks, damage and
+   event timing. Preserve credible contact for Bonehorn and the opponent's
+   weapon after separation; do not create a visible miss with remote damage.
+   Ring, HP bar, stars, name, selection/picking and attack target anchors must
+   follow the final displayed figure consistently. Do not change body size,
+   camera or gameplay reach to mask overlap.
+5. Add focused `p71_` cases for forward head occupancy, both seats and five
+   forms, mixed-size/close opposing bodies, grid-boundary candidates and
+   stable unchanged-view resolution. Preserve existing useful layout tests;
+   any necessary client-only front-position exception must be explicit and
+   limited to this contact policy, not a weakened universal no-overlap claim.
+   Record actual before/after approach and strike sequences at normal speed.
+
+Acceptance: the head is visibly part of the area occupied by Bonehorn; it
+stops at opponents rather than entering their bodies. Verify contact, gait,
+HUD and targeting cues together in all five forms and both seats, recording
+maximum cosmetic offsets and finite sampling limits. No head-based damage,
+new targetable zone or authoritative body-block mechanic is implied. If the
+requested look cannot fit the existing combat spacing credibly, document that
+specific conflict for product review before proposing a mechanical change.
+
 ### S2 — Remove body team markers across the roster
 
 1. Audit shared body helpers and all 46 kit models, five auxiliaries and

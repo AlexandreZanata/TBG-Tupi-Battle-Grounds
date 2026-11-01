@@ -1473,3 +1473,16 @@ The fire/smoke onset bands and palette/animation tuning in
 [P71](phases/P71-combat-readability-and-stronghold-polish.md) are Proposed art,
 not balance rules. No new simulation state, protocol or mechanical range
 change is authorized by P71. P70's Trident balance acceptance stays separate.
+
+
+#### P71 Bonehorn head occupancy clarification (Proposed presentation)
+
+The owner's 2026-11-01 follow-up includes Bonehorn's head/muzzle/horn in its
+visible body blocking area. Under the existing D-57 display layout, opposing
+and allied figures must account for that forward extent instead of letting
+the head enter another body. Stable cached form bounds and bounded cosmetic
+separation preserve credible contact; HUD, selection and attack anchors follow
+the final display. This does not add a targetable head zone, physical server
+collider, damage multiplier, new range or authoritative movement rule. If
+presentation cannot fit existing combat spacing, report the concrete conflict
+before specifying a mechanical exception. See P71 S1d/S1e.
