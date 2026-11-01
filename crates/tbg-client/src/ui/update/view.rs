@@ -10,7 +10,6 @@ use serde_json::Value;
 use super::{UpdState, Updater};
 use crate::i18n::Lang;
 use crate::ui::{kit, UiAction};
-use crate::GameState;
 
 #[derive(Component)]
 pub(super) struct UpdateOverlay;
@@ -159,13 +158,10 @@ pub(super) fn overlay(
     mut commands: Commands,
     updater: Res<Updater>,
     lang: Res<Lang>,
-    state: Res<State<GameState>>,
     roots: Query<Entity, With<UpdateOverlay>>,
     mut shown: Local<String>,
 ) {
-    let wanted = (*state.get() == GameState::Menu)
-        .then(|| modal(&updater, *lang))
-        .flatten();
+    let wanted = updater.idle.then(|| modal(&updater, *lang)).flatten();
     let signature = format!("{wanted:?}");
     if signature == *shown {
         return;

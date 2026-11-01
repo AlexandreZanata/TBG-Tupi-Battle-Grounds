@@ -1414,5 +1414,6 @@
   "patches.offline": "Release notes included with this version.",
   "patches.preview": "Preview · Competitive values still require owner playtesting.",
   "patches.ruleset": "Ruleset",
-  "patches.read": "Patch notes"
+  "patches.read": "Patch notes",
+  "update.resume.temporary": "Session recovery is temporary: the secure vault is unavailable. Keep this window open to preserve reconnect."
 }

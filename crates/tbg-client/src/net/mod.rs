@@ -54,6 +54,7 @@ pub enum NetFailure {
 }
 
 pub struct NetLink {
+    restore_pending: bool,
     mode: Mode,
     socket: Option<(ewebsock::WsSender, ewebsock::WsReceiver)>,
     opened: bool,
@@ -85,6 +86,7 @@ impl NetLink {
             .and_then(|v| v.parse().ok())
             .unwrap_or(0.0);
         let mut link = NetLink {
+            restore_pending: !config::resume_ready(),
             mode,
             socket: None,
             opened: false,
@@ -125,6 +127,16 @@ impl NetLink {
     /// something the player asked for, so the UI stays quiet about it.
     pub fn is_quiet_probe(&self) -> bool {
         matches!(self.mode, Mode::Probe) && !self.in_match
+    }
+
+    /// No pending join/login/reconnect may race a launcher update (P66 U09/U11).
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(crate) fn safe_for_update(&self) -> bool {
+        self.is_quiet_probe()
+            && !self.restore_pending
+            && !self.login_in_flight
+            && !self.held_request
+            && matches!(self.status, NetStatus::Ready | NetStatus::Failed(_))
     }
 
     /// p50 tap-to-ack latency in ms (`None` before the first ack).
@@ -198,6 +210,20 @@ impl NetLink {
 
     /// Pump the socket, release lagged messages, reconnect when needed.
     pub fn poll(&mut self, now: f64) -> Vec<ServerMsg> {
+        if self.restore_pending {
+            if !config::resume_ready() {
+                return Vec::new();
+            }
+            self.restore_pending = false;
+            self.token = config::load_token();
+            self.route = admission::Route::start(
+                matches!(self.mode, Mode::Probe)
+                    .then(config::load_resume_endpoint)
+                    .flatten(),
+                now,
+            );
+            self.connect(now);
+        }
         if self.route.advance(now) {
             self.connect(now);
         }

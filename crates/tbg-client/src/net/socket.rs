@@ -22,6 +22,9 @@ fn delay(tries: u32) -> f64 {
 
 impl NetLink {
     pub(super) fn connect(&mut self, now: f64) {
+        if self.restore_pending {
+            return;
+        }
         self.opened = false;
         self.outq.clear();
         // P66: no socket until admission chose the slot path.
@@ -218,6 +221,7 @@ mod tests {
 
     fn link(mode: Mode) -> NetLink {
         NetLink {
+            restore_pending: false,
             mode,
             socket: None,
             opened: false,
@@ -243,6 +247,26 @@ mod tests {
                 fresh: true,
             },
         }
+    }
+
+    #[test]
+    fn p66_updates_wait_for_restore_login_join_and_reconnect() {
+        let mut net = link(Mode::Probe);
+        assert!(net.safe_for_update());
+        net.restore_pending = true;
+        assert!(!net.safe_for_update());
+        net.restore_pending = false;
+        net.login_in_flight = true;
+        assert!(!net.safe_for_update());
+        net.login_in_flight = false;
+        net.mode = Mode::Quick;
+        assert!(!net.safe_for_update());
+        net.mode = Mode::Probe;
+        net.status = NetStatus::Reconnecting { since: 0. };
+        assert!(!net.safe_for_update());
+        net.status = NetStatus::Ready;
+        net.in_match = true;
+        assert!(!net.safe_for_update());
     }
 
     #[test]

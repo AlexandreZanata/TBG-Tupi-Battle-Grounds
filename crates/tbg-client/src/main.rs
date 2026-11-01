@@ -13,7 +13,7 @@ mod art;
 mod audio;
 mod autoplay;
 mod camera;
-#[cfg(debug_assertions)]
+#[cfg(any(debug_assertions, feature = "ui-acceptance"))]
 mod capture;
 mod celebration;
 mod config;
@@ -45,6 +45,12 @@ pub enum GameState {
 }
 
 fn main() {
+    #[cfg(all(not(target_arch = "wasm32"), feature = "ui-acceptance"))]
+    if std::env::args().any(|arg| arg == "--resume-vault-probe") {
+        platform::credentials::probe();
+        return;
+    }
+
     // P66: the release tooling stamps descriptors with the exact contract.
     #[cfg(not(target_arch = "wasm32"))]
     if std::env::args().any(|arg| arg == "--contract") {
@@ -62,7 +68,10 @@ fn main() {
         return;
     }
     #[cfg(not(target_arch = "wasm32"))]
-    let window = platform::window::settings();
+    let window = {
+        platform::resume::initialize();
+        platform::window::settings()
+    };
     #[cfg(target_arch = "wasm32")]
     let window = Window {
         title: "Tupi Battle Grounds".into(),
@@ -126,7 +135,7 @@ fn main() {
 }
 
 fn platform_plugin(app: &mut App) {
-    #[cfg(debug_assertions)]
+    #[cfg(any(debug_assertions, feature = "ui-acceptance"))]
     capture::plugin(app);
     #[cfg(not(target_arch = "wasm32"))]
     platform::window::plugin(app);

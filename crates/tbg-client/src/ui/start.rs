@@ -12,7 +12,8 @@ use crate::link::MatchLink;
 use crate::net::{Mode, NetLink};
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Startup, (join_from_url, probe_on_load));
+    app.add_systems(Startup, join_from_url)
+        .add_systems(Update, probe_on_load);
 }
 
 /// `?challenge=TOKEN` joins a Quick Challenge; `?room=CODE` joins a
@@ -46,7 +47,27 @@ fn join_from_url(mut queue: ResMut<ActionQueue>) {
 /// socket is reused by the next Quick Match / room / challenge action.
 /// Post-P14: any new session logs in with the stored key before asking
 /// for a mode, so the name and ranked eligibility stay correct.
-fn probe_on_load(mut link: NonSendMut<MatchLink>, mut account: ResMut<Account>) {
+fn probe_on_load(
+    mut link: NonSendMut<MatchLink>,
+    mut account: ResMut<Account>,
+    time: Res<Time>,
+    mut done: Local<bool>,
+    #[cfg(not(target_arch = "wasm32"))] mut toasts: ResMut<super::Toasts>,
+    #[cfg(not(target_arch = "wasm32"))] lang: Res<crate::i18n::Lang>,
+    #[cfg(not(target_arch = "wasm32"))] state: Res<State<crate::GameState>>,
+) {
+    #[cfg(not(target_arch = "wasm32"))]
+    if *state.get() == crate::GameState::InMatch {
+        crate::platform::resume::touch();
+    }
+    if *done || !config::resume_ready() {
+        return;
+    }
+    *done = true;
+    #[cfg(not(target_arch = "wasm32"))]
+    if !crate::platform::resume::available() {
+        toasts.push_for(lang.key("update.resume.temporary"), 6.);
+    }
     if config::url_param("room").is_some() || config::url_param("challenge").is_some() {
         return;
     }
@@ -54,7 +75,7 @@ fn probe_on_load(mut link: NonSendMut<MatchLink>, mut account: ResMut<Account>) 
         || config::load_account_key().is_some()
         || config::url_param("probe").is_some()
     {
-        *link = MatchLink::Net(Box::new(NetLink::new(Mode::Probe, 0.0)));
+        *link = MatchLink::Net(Box::new(NetLink::new(Mode::Probe, time.elapsed_secs_f64())));
         account.auto_login = config::load_account_key().is_some();
     }
 }

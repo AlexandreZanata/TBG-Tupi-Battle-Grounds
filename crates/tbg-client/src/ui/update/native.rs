@@ -35,6 +35,7 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(Startup, detect).add_systems(
         Update,
         (
+            read_idle,
             report_health,
             schedule,
             pump,
@@ -50,6 +51,32 @@ fn detect(mut updater: ResMut<Updater>) {
     if updater.inner.managed.is_some() {
         updater.state = UpdState::Checking;
     }
+}
+
+fn read_idle(
+    mut updater: ResMut<Updater>,
+    state: Res<State<GameState>>,
+    link: NonSend<crate::link::MatchLink>,
+) {
+    updater.idle = *state.get() == GameState::Menu
+        && crate::config::resume_ready()
+        && match &*link {
+            crate::link::MatchLink::Net(n) => n.safe_for_update(),
+            _ => true,
+        };
+}
+
+pub(super) fn stage_busy(updater: &Updater) -> bool {
+    updater
+        .inner
+        .running
+        .as_ref()
+        .is_some_and(|(command, _)| command == "stage")
+        || updater
+            .inner
+            .queued
+            .iter()
+            .any(|args| args.first().is_some_and(|a| a == "stage"))
 }
 
 /// Healthy = the menu is up and the packaged assets loaded (P66 §3.2):
@@ -83,9 +110,9 @@ fn report_health(
 
 /// Queue `notes` shortly after the healthy report, then `check`; recheck
 /// while idle in the lobby every few hours.
-fn schedule(mut updater: ResMut<Updater>, state: Res<State<GameState>>, time: Res<Time>) {
+fn schedule(mut updater: ResMut<Updater>, time: Res<Time>) {
     let now = time.elapsed_secs_f64();
-    let idle = *state.get() == GameState::Menu;
+    let idle = updater.idle;
     let inner = &mut updater.inner;
     let Some(reported) = inner.reported_at else {
         return;
@@ -103,7 +130,7 @@ fn schedule(mut updater: ResMut<Updater>, state: Res<State<GameState>>, time: Re
         inner.last_check = Some(now);
         inner.queued.push_back(vec!["check".into()]);
     }
-    if inner.running.is_none() {
+    if idle && inner.running.is_none() {
         if let (Some(args), Some(m)) = (inner.queued.pop_front(), inner.managed.clone()) {
             let refs: Vec<&str> = args.iter().map(String::as_str).collect();
             match Running::start(&m, &refs) {
@@ -197,8 +224,8 @@ fn on_event(updater: &mut Updater, command: &str, e: Value) {
 
 /// BR-UP02: a download never competes with online play. Leaving the lobby
 /// cancels it; the modal offers it again once the player is idle.
-fn pause_online_download(mut updater: ResMut<Updater>, state: Res<State<GameState>>) {
-    if *state.get() == GameState::Menu {
+fn pause_online_download(mut updater: ResMut<Updater>) {
+    if updater.idle {
         return;
     }
     if let Some((command, running)) = updater.inner.running.as_mut() {
@@ -222,7 +249,7 @@ pub(super) fn apply(
             UpdState::Error(_) => updater.state = UpdState::Off,
             _ => {}
         },
-        UiAction::UpdateNow if state == GameState::Menu => {
+        UiAction::UpdateNow if state == GameState::Menu && updater.idle => {
             if let UpdState::Available {
                 build,
                 version,
@@ -243,13 +270,25 @@ pub(super) fn apply(
             }
         }
         UiAction::UpdateCancel => {
-            if let Some((_, running)) = updater.inner.running.as_mut() {
+            updater
+                .inner
+                .queued
+                .retain(|args| args.first().is_none_or(|a| a != "stage"));
+            if let Some((command, running)) = updater
+                .inner
+                .running
+                .as_mut()
+                .filter(|(command, _)| command == "stage")
+            {
+                let _ = command;
                 running.cancel();
+            } else {
+                updater.state = UpdState::Off;
             }
         }
         // Only from the idle lobby; `take_actions` then drops every other
         // queued action so no match request races the exit.
-        UiAction::UpdateRestart if state == GameState::Menu => {
+        UiAction::UpdateRestart if state == GameState::Menu && updater.idle => {
             if matches!(updater.state, UpdState::Staged { .. }) {
                 updater.state = UpdState::Applying;
                 if let Some(code) = std::num::NonZeroU8::new(EXIT_APPLY) {

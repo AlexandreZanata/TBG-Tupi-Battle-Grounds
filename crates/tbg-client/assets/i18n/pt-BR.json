@@ -1414,5 +1414,6 @@
   "patches.offline": "Notas de atualização incluídas nesta versão.",
   "patches.preview": "Prévia · Valores competitivos ainda dependem de testes do dono.",
   "patches.ruleset": "Regras",
-  "patches.read": "Ler notas"
+  "patches.read": "Ler notas",
+  "update.resume.temporary": "A recuperação da sessão é temporária: o cofre seguro está indisponível. Mantenha esta janela aberta para preservar a reconexão."
 }

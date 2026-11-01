@@ -15,6 +15,9 @@ pub fn spawn(
     assets: &AssetServer,
 ) {
     controls::heading(root, assets, lang);
+    if !crate::platform::resume::available() {
+        root.spawn(kit::muted(lang.key("update.resume.temporary"), 13.));
+    }
     root.spawn(Node {
         grid_template_columns: RepeatedGridTrack::flex(2, 1.),
         ..catalog::grid()

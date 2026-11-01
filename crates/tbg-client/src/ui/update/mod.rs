@@ -56,6 +56,8 @@ pub struct Updater {
     /// The pending notes receipt to present, as the helper reported it.
     pub notes: Option<serde_json::Value>,
     inner: native::Inner,
+    pub(super) idle: bool,
+    pending_play: Option<UiAction>,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -92,6 +94,33 @@ pub(super) fn take_actions(
     queue.0.retain(|a| !ours(a));
     for action in mine {
         native::apply(&mut updater, action, *state.get(), &mut exit);
+    }
+    let online = |a: &UiAction| {
+        matches!(
+            a,
+            UiAction::Quick
+                | UiAction::Ranked
+                | UiAction::CreateRoom
+                | UiAction::JoinRoom(_)
+                | UiAction::CreateChallenge
+                | UiAction::JoinChallenge(_)
+                | UiAction::Watch(_)
+        )
+    };
+    if native::stage_busy(&updater) && queue.0.iter().any(online) {
+        updater.pending_play = queue.0.iter().find(|a| online(a)).copied();
+        queue.0.retain(|a| !online(a));
+        native::apply(
+            &mut updater,
+            UiAction::UpdateCancel,
+            *state.get(),
+            &mut exit,
+        );
+    }
+    if !native::stage_busy(&updater) && !updater.applying() {
+        if let Some(action) = updater.pending_play.take() {
+            queue.0.push(action);
+        }
     }
     if updater.applying() {
         queue.0.clear();

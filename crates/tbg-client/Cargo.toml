@@ -12,6 +12,10 @@ license-file = "../../LICENSE"
 name = "tbg-client"
 path = "src/main.rs"
 
+[features]
+# Opt-in packaged runtime acceptance; no automatic test actions in ordinary launches.
+ui-acceptance = []
+
 [dependencies]
 # Bevy renderer + UI (WebGL2). Explicit features instead of the "3d"/"ui"
 # collections: drops gamepads (gilrs needs libudev), glTF, animation,
@@ -50,6 +54,19 @@ arboard = { version = "3.7", default-features = false, features = ["wayland-data
 open = "5"
 # Additional Bevy log layer writes native diagnostic logs to the user data directory.
 tracing-subscriber = { version = "0.3", features = ["fmt"] }
+
+# Shared with P68: explicit real OS vault providers, never a plaintext fallback.
+keyring-core = "=1.0.1"
+# Synthetic vault probe IDs use OS entropy, never game RNG.
+getrandom = "0.3"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Secret Service over D-Bus; vendored libdbus avoids a new system dev-package requirement.
+dbus-secret-service-keyring-store = { version = "=1.0.1", features = ["crypto-rust", "vendored"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+# Local-persistence Credential Manager adapter; actual Windows acceptance remains pending.
+windows-native-keyring-store = "=1.1.0"
 
 [build-dependencies]
 # Build-time only: parse assets/i18n/*.json in build.rs (P41, D2).

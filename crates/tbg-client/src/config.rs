@@ -74,7 +74,7 @@ pub fn server_url() -> String {
     }
 }
 
-fn hex16(token: &[u8; 16]) -> String {
+pub(crate) fn hex16(token: &[u8; 16]) -> String {
     token.iter().map(|b| format!("{b:02x}")).collect()
 }
 
@@ -178,61 +178,20 @@ pub fn rollout_bucket() -> u8 {
     n
 }
 
-/// P66 §3.3: a native restart (crash, update, voluntary close) can resume
-/// the session's match on its original generation. The record lives in
-/// the private preferences file beside the account key (0600 in a 0700
-/// directory), never in arguments, URLs or logs, and expires quickly.
-#[cfg(not(target_arch = "wasm32"))]
-mod resume {
-    use super::{hex16, parse_hex16, preferences, Scope};
-
-    const KEY: &str = "tbg.resume";
-    /// The server keeps a seat 30 s; a record older than this is useless.
-    const FRESH_SECS: u64 = 120;
-
-    fn now() -> u64 {
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map_or(0, |d| d.as_secs())
+/// The vault restore is asynchronous; sockets wait without blocking the menu.
+pub fn resume_ready() -> bool {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        crate::platform::resume::ready()
     }
-
-    fn read() -> Option<serde_json::Value> {
-        let raw = preferences::get(Scope::Local, KEY)?;
-        let v: serde_json::Value = serde_json::from_str(&raw).ok()?;
-        let saved = v.get("saved")?.as_u64()?;
-        (now().saturating_sub(saved) <= FRESH_SECS).then_some(v)
-    }
-
-    fn write(token: Option<String>, endpoint: Option<String>) {
-        let old = read();
-        let field = |name: &str| {
-            old.as_ref()
-                .and_then(|v| v.get(name)?.as_str().map(String::from))
-        };
-        let value = serde_json::json!({
-            "token": token.or_else(|| field("token")),
-            "endpoint": endpoint.or_else(|| field("endpoint")),
-            "saved": now(),
-        });
-        preferences::set(Scope::Local, KEY, &value.to_string());
-    }
-
-    pub(super) fn save_token(token: &[u8; 16]) {
-        write(Some(hex16(token)), None);
-    }
-
-    pub(super) fn save_endpoint(endpoint: &str) {
-        write(None, Some(endpoint.to_string()));
-    }
-
-    pub(super) fn token() -> Option<[u8; 16]> {
-        parse_hex16(read()?.get("token")?.as_str()?)
-    }
-
-    pub(super) fn endpoint() -> Option<String> {
-        read()?.get("endpoint")?.as_str().map(String::from)
+    #[cfg(target_arch = "wasm32")]
+    {
+        true
     }
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+use crate::platform::resume;
 
 /// D-40/P40: the Arcana preset the lobby editor saved under `tbg.arcanas`
 /// (`{"schema":2,"ranks":[...]}`); a schema-1 six-node document is migrated,
@@ -450,6 +409,8 @@ pub fn save_account_key(key: &str) {
 
 pub fn delete_account_key() {
     preferences::remove(Scope::Local, "tbg_account_key");
+    #[cfg(not(target_arch = "wasm32"))]
+    resume::clear();
 }
 
 /// A boolean preference in `localStorage` (false when unavailable).

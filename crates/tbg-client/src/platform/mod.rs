@@ -40,6 +40,10 @@ pub fn update_report() -> UpdateReport {
         outcome: slug(&outcome),
     }
 }
+#[cfg(not(target_arch = "wasm32"))]
+pub mod credentials;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod resume;
 pub mod storage;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod window;
