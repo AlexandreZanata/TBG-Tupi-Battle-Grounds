@@ -78,6 +78,8 @@ fn a08_cancelled_completed_login_never_publishes_identity_and_retains_revocation
         retry_at: 0.,
         secure: false,
         remember: true,
+        resume_write: None,
+        resume_retry_at: 0.,
     };
     let mut account = crate::ui::account::Account::default();
     let mut inbox = crate::ui::account::AccountInbox::default();
@@ -128,5 +130,112 @@ fn a08_cancelled_completed_login_never_publishes_identity_and_retains_revocation
     assert!(
         session.next.is_none(),
         "the queued Guest action is fulfilled by revocation, never followed by a second logout"
+    );
+}
+
+#[test]
+fn p66_auth_http_follows_the_admitted_generation_slot() {
+    set_endpoint("/ws/slot-b");
+    assert_eq!(slot(), Some('b'));
+    for unrouted in ["/ws", "/ws/slot-bb", "/ws/slot-B", "/ws/slot-", "/other"] {
+        set_endpoint(unrouted);
+        assert_eq!(slot(), None, "{unrouted}");
+    }
+}
+
+#[test]
+fn br_as07_one_forced_renewal_per_refusal_and_never_after_revocation() {
+    use tbg_core::protocol::AuthRefusal;
+    let view = Snapshot {
+        access: Some(AccessToken([1; 32])),
+        status: Status::Authenticated,
+        ..Snapshot::default()
+    };
+    let forced = AtomicBool::new(false);
+    assert!(should_renew(AuthRefusal::Expired, &view, &forced));
+    assert!(
+        !should_renew(AuthRefusal::Invalid, &view, &forced),
+        "a renewed Access the server still refuses (misrouted generation) must not loop"
+    );
+    // `AuthState::Active` re-arms the single renewal.
+    forced.store(false, Ordering::Release);
+    assert!(should_renew(AuthRefusal::Invalid, &view, &forced));
+    assert!(!should_renew(
+        AuthRefusal::Revoked,
+        &view,
+        &AtomicBool::new(false)
+    ));
+    let signed_out = Snapshot {
+        access: None,
+        ..view.clone()
+    };
+    assert!(!should_renew(
+        AuthRefusal::Expired,
+        &signed_out,
+        &AtomicBool::new(false)
+    ));
+}
+
+#[test]
+fn p66_u09_updates_wait_for_restore_renewal_sign_out_and_vault_work() {
+    for busy in [Status::Restoring, Status::Refreshing, Status::LogoutPending] {
+        assert!(!update_idle(false, busy));
+    }
+    for idle in [
+        Status::Guest,
+        Status::Authenticated,
+        Status::PersistenceUnavailable,
+        Status::Conflict,
+        Status::ReauthRequired,
+    ] {
+        assert!(update_idle(false, idle));
+        assert!(
+            !update_idle(true, idle),
+            "any coordinator operation blocks updates"
+        );
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn p66_a_busy_resume_write_is_kept_without_touching_identity() {
+    let mut session = Session {
+        backup_after_login: false,
+        origin: Err(Failure::InvalidOrigin),
+        pending: None,
+        next: None,
+        refresh: None,
+        family: None,
+        account: None,
+        device: None,
+        access: None,
+        deadline: 0.,
+        retry_at: 0.,
+        secure: false,
+        remember: false,
+        resume_write: Some(Some("synthetic-record".into())),
+        resume_retry_at: 0.,
+    };
+    let mut account = crate::ui::account::Account::default();
+    let mut inbox = crate::ui::account::AccountInbox::default();
+    // Epoch zero is stale: resume results bypass the identity state machine.
+    session.settle(
+        0,
+        Kind::Resume,
+        Err(Failure::Busy),
+        0.,
+        &mut account,
+        &mut inbox,
+    );
+    assert_eq!(
+        crate::platform::resume::take_pending(),
+        Some(Some("synthetic-record".into())),
+        "another process held the lock: retry the same write later"
+    );
+    assert!(session.pending.is_none() && session.next.is_none());
+    assert!(account.profile.is_none() && inbox.0.is_empty());
+    assert!(
+        session.resume_retry_at > 0.,
+        "a busy lock backs off instead of retrying every frame"
     );
 }

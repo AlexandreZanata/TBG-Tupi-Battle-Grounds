@@ -95,6 +95,12 @@ impl Store {
     pub fn save(&self) -> Result<(), Failure> {
         write(&self.path, &self.meta)
     }
+    /// P66 resume record: per origin and installation (device), never per
+    /// account; `~` cannot appear in an account name, so it never collides.
+    pub fn resume_namespace(&self, origin: &str) -> Result<String, Failure> {
+        let encoded: String = origin.bytes().map(|v| format!("{v:02x}")).collect();
+        Ok(format!("{encoded}:~resume:{}", self.device()?))
+    }
     pub fn namespace(&self, origin: &str, account: &str) -> Result<String, Failure> {
         if !tbg_core::account::valid_name_shape(account) {
             return Err(Failure::Incompatible);

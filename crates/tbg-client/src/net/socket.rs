@@ -32,10 +32,12 @@ impl NetLink {
             return;
         }
         // P66: no socket until admission chose the slot path.
-        let super::admission::Route::Ready { url, .. } = &self.route else {
+        let super::admission::Route::Ready { url, endpoint, .. } = &self.route else {
             return;
         };
         let url = url.clone();
+        // D-97 + P66: auth HTTP must reach the generation that verifies this Access.
+        crate::auth::set_endpoint(endpoint);
         self.auth_epoch = view.epoch;
         self.auth_access = view.access;
         self.auth_family = view.family;

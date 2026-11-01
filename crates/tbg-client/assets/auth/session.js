@@ -1,6 +1,6 @@
 // One memory-only coordinator is shared by the Bevy and HTML entry points.
 const symbol = Symbol.for('org.tupi.TBG.auth.v1');
-const state = globalThis[symbol] ||= {epoch:0, grant:null, access:null, device:null};
+const state = globalThis[symbol] ||= {epoch:0, grant:null, access:null, device:null, slot:null};
 const prefix = 'tbg.auth.v1.';
 const hex = bytes => [...crypto.getRandomValues(new Uint8Array(bytes))].map(v=>v.toString(16).padStart(2,'0')).join('');
 const failure = error => {throw new Error(error);};
@@ -14,6 +14,8 @@ async function post(operation,body,access,credentials) {
   try {
     const headers={'Content-Type':'application/json','X-TBG-Auth':'1','Cache-Control':'no-store'};
     if(access)headers.Authorization=`Bearer ${access}`;
+    // P66: auth follows the release generation that holds this tab's socket.
+    if(/^[a-z]$/.test(state.slot||''))headers['X-TBG-Slot']=state.slot;
     const response=await fetch(`/api/auth/browser/${operation}`,{method:'POST',headers,body:JSON.stringify(body),credentials,cache:'no-store',redirect:'error',signal:controller.signal});
     if(response.status===404||response.status>=300&&response.status<400)failure('incompatible');
     if(!response.body)failure('incompatible');
@@ -112,6 +114,7 @@ async function run(request) {
 export function startAuth(raw,callback) {
   let request;try{request=JSON.parse(raw);}catch{callback(JSON.stringify({error:'incompatible'}));return;}
   state.epoch=Math.max(state.epoch,request.epoch);
+  state.slot=typeof request.slot==='string'&&/^[a-z]$/.test(request.slot)?request.slot:null;
   const execute=()=>run(request).catch(async error=>{
     if(['login','register'].includes(request.kind)&&error.message==='unavailable') {write('logout_pending','1');return {kind:'logout_pending',error:'unavailable'};}
     if(request.epoch!==state.epoch&&['login','register','refresh'].includes(request.kind)) {

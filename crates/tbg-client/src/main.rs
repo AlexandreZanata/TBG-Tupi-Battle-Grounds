@@ -72,9 +72,7 @@ fn main() {
     }
     // One synthetic probe of the shared vault; P66 harnesses used the older flag name.
     #[cfg(all(not(target_arch = "wasm32"), feature = "ui-acceptance"))]
-    if std::env::args()
-        .any(|arg| arg == "--auth-vault-probe" || arg == "--resume-vault-probe")
-    {
+    if std::env::args().any(|arg| arg == "--auth-vault-probe" || arg == "--resume-vault-probe") {
         platform::credentials::probe();
         return;
     }
@@ -88,11 +86,9 @@ fn main() {
         eprintln!("TBG: {message}");
         std::process::exit(2);
     }
+    // P66 resume restoration now runs inside the auth coordinator's first restore.
     #[cfg(not(target_arch = "wasm32"))]
-    let window = {
-        platform::resume::initialize();
-        platform::window::settings()
-    };
+    let window = platform::window::settings();
     #[cfg(target_arch = "wasm32")]
     let window = Window {
         title: "Tupi Battle Grounds".into(),

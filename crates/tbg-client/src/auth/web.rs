@@ -34,10 +34,17 @@ pub(super) fn start(
         Kind::Refresh => "refresh",
         Kind::Backup => "backup",
         Kind::Logout => "logout",
+        // Resume records are native-only; the browser keeps them per tab.
+        Kind::Resume => {
+            if let Ok(mut slot) = slot.lock() {
+                *slot = Some(Err(Failure::Incompatible));
+            }
+            return;
+        }
     };
-    let request =
-        json!({"kind":name,"input":input,"origin":origin,"epoch":epoch,"remember":remember})
-            .to_string();
+    let generation = super::slot().map(String::from);
+    let request = json!({"kind":name,"input":input,"origin":origin,"epoch":epoch,"remember":remember,"slot":generation})
+        .to_string();
     let output = slot.clone();
     let callback = Closure::once_into_js(move |raw: String| {
         let result = parse(&raw);

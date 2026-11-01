@@ -1542,6 +1542,17 @@ The revision adds no simulation, balance or outcome change. Browser JSON
 includes the server issuance time so clients can schedule renewal using a
 monotonic duration instead of trusting the device's wall clock.
 
+### Consolidation with P66 (D-99, Proposed)
+
+The consolidated P66+P68 line keeps wire protocol **30** (P66 adds no wire
+type; its admission contract travels over HTTP and the socket URL) and moves
+the server schema to **10**, which holds both the P66 release directory and
+these auth families whichever v9 a database already had. A native client
+restores its P66 resume record (handle, slot endpoint, family binding) only
+through this auth coordinator; BR-AS06 binding is unchanged and a guest
+record never yields an account. Auth requests follow the release slot that
+holds the socket. No combat, Energy, Shop, Rating or balance value changes.
+
 ## 20. Commerce, recovery and opponent preferences (P67, Proposed)
 
 **Proposed — planning/documentary base only, 2026-10-31.** See

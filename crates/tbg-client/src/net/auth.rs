@@ -38,6 +38,9 @@ impl NetLink {
         } else {
             storage::remove(Scope::Session, "tbg_resume_family");
         }
+        // P66: a native restart may resume this handle only with this binding.
+        #[cfg(not(target_arch = "wasm32"))]
+        crate::platform::resume::note_change();
     }
     pub(super) fn sync_auth(&mut self, now: f64) {
         let view = auth::snapshot();

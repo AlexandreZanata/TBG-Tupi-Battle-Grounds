@@ -957,3 +957,24 @@ and Zaflas-specific company/accounting setup is an input, not guessed data.
 Client cosmetic preferences resolve presentation only, preserving mechanical
 identity and gameplay. P64 i18n/P65 permissions/P66 generation security are
 integrated according to their actual merged contracts. See D-93–D-95.
+
+## 26. Consolidated auth, resume and release slots (D-99, Proposed)
+
+Section 25 is reserved by the independent P69 plan. The consolidated line
+joins P66 (§22) and P68 (§24) without a second coordinator:
+
+- `tbg-client/src/auth/` is the only vault reader/writer. Its first restore
+  also reads the P66 resume record (`platform/resume.rs` keeps only the record
+  format, freshness and coalesced pending writes) under the per-origin process
+  lock, bounded by P66's 5-second visible wait. Later writes run as coordinator
+  operations; an identity change queues the record's removal.
+- `NetLink::connect` needs both P66 admission (slot path plus contract) and
+  P68 credential state, and tells the coordinator which slot the socket uses.
+  Native and browser auth requests carry `X-TBG-Slot`; `deploy/Caddyfile.template`
+  routes `/api/auth/*` by it and the server refuses another slot's requests.
+- `tbg-server/src/store/schema.rs` v10 verifies both v9 feature table sets by
+  shape. Updates wait for any coordinator operation (`auth::idle_for_update`)
+  as well as P66's socket guard.
+
+Cross-slot revocation propagation is not implemented: two-slot rollout with
+P68 auth stays inactive until it is (D-99 limits).

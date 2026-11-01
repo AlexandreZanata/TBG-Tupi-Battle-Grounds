@@ -79,6 +79,10 @@ pub(super) fn post(
         .header("Content-Type", "application/json")
         .header("X-TBG-Client", "native")
         .header("Cache-Control", "no-store");
+    // P66: the proxy routes auth to the generation holding this client's socket.
+    if let Some(slot) = super::slot() {
+        request = request.header("X-TBG-Slot", slot.to_string());
+    }
     if let Some(access) = access {
         let encoded: String = access.0.iter().map(|v| format!("{v:02x}")).collect();
         let mut header = ureq::http::HeaderValue::from_str(&format!("Bearer {encoded}"))

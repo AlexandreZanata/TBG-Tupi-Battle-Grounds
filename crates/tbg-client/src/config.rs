@@ -102,12 +102,10 @@ pub fn parse_invite_token(hex: &str) -> Option<[u8; 16]> {
 /// Session token kept across page reloads so a player can resume a match.
 /// Per tab (`sessionStorage`): a shared token made two open tabs keep
 /// taking over each other's session.
+/// P66: after a native restart the auth coordinator restores the protected
+/// resume record into this same session scope.
 pub fn load_token() -> Option<[u8; 16]> {
-    let session = preferences::get(Scope::Session, "tbg_token").and_then(|t| parse_hex16(&t));
-    // P66: after a native restart the protected resume record carries it.
-    #[cfg(not(target_arch = "wasm32"))]
-    let session = session.or_else(resume::token);
-    session
+    preferences::get(Scope::Session, "tbg_token").and_then(|t| parse_hex16(&t))
 }
 
 /// P47: the match a `?watch=<16 hex>` link names; `None` for anything else.
@@ -135,23 +133,20 @@ pub fn clear_watch() {
 pub fn save_token(token: &[u8; 16]) {
     preferences::set(Scope::Session, "tbg_token", &hex16(token));
     #[cfg(not(target_arch = "wasm32"))]
-    resume::save_token(token);
+    resume::note_change();
 }
 
 /// P66: the slot path the current session was admitted on (`/ws/slot-a`).
 pub fn save_resume_endpoint(endpoint: &str) {
     preferences::set(Scope::Session, "tbg_endpoint", endpoint);
     #[cfg(not(target_arch = "wasm32"))]
-    resume::save_endpoint(endpoint);
+    resume::note_change();
 }
 
 /// The endpoint to resume on: this tab's (browser) or, after a native
-/// restart, the protected resume record while it is still fresh.
+/// restart, the restored protected record while it was still fresh.
 pub fn load_resume_endpoint() -> Option<String> {
-    let session = preferences::get(Scope::Session, "tbg_endpoint");
-    #[cfg(not(target_arch = "wasm32"))]
-    let session = session.or_else(resume::endpoint);
-    session
+    preferences::get(Scope::Session, "tbg_endpoint")
 }
 
 /// P66 §4: an installation-local, nonsecret rollout bucket (0–99), never

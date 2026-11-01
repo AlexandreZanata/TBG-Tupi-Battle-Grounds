@@ -5,7 +5,7 @@ use super::{
     transport,
     types::{parse_grant, valid_hex, Failure, Grant, Outcome},
 };
-use crate::platform::credentials;
+use crate::platform::{credentials, resume};
 use serde_json::{json, Value};
 use std::sync::{
     atomic::{AtomicU64, Ordering},
@@ -20,6 +20,8 @@ pub(super) enum Operation {
     Refresh,
     Backup,
     Logout,
+    /// P66: write (`Some`) or remove the resume record, same lock and vault.
+    Resume(Option<String>),
 }
 pub(super) struct Work {
     pub origin: String,
@@ -72,15 +74,29 @@ impl Vault {
 }
 
 pub(super) fn run(mut work: Work) -> Result<Outcome, Failure> {
+    if let Operation::Resume(write) = &work.operation {
+        let store = Store::open(&work.origin)?;
+        return persist_resume(&work.origin, &store, write.as_deref());
+    }
+    let restoring = matches!(work.operation, Operation::Restore);
     let mut store = match Store::open(&work.origin) {
         Ok(store) => Some(store),
-        Err(Failure::Busy) => return Err(Failure::Busy),
-        Err(error) if matches!(work.operation, Operation::Restore | Operation::Backup) => {
-            return Err(error)
+        Err(error)
+            if error == Failure::Busy
+                || matches!(work.operation, Operation::Restore | Operation::Backup) =>
+        {
+            if restoring {
+                resume::restored(Err(()));
+            }
+            return Err(error);
         }
         Err(_) => None,
     };
-    if matches!(work.operation, Operation::Restore) {
+    let mut vault = true;
+    if restoring {
+        if let Some(s) = &store {
+            vault = restore_resume(&work.origin, s);
+        }
         work.remember = store
             .as_ref()
             .is_some_and(|s| s.meta.get("remember").and_then(Value::as_bool) == Some(true));
@@ -93,13 +109,45 @@ pub(super) fn run(mut work: Work) -> Result<Outcome, Failure> {
         return logout(&work, store.as_mut());
     }
     match &work.operation {
-        Operation::Restore => restore(&work, store.as_mut().ok_or(Failure::StorageUnavailable)?),
+        Operation::Restore => restore(
+            &work,
+            store.as_mut().ok_or(Failure::StorageUnavailable)?,
+            vault,
+        ),
         Operation::Login(key) => login(&work, store.as_mut(), Some(key), None),
         Operation::Register(name) => login(&work, store.as_mut(), None, Some(name)),
         Operation::Refresh => refresh(&work, store.as_mut()),
         Operation::Backup => backup(&work, store.as_mut().ok_or(Failure::StorageUnavailable)?),
         Operation::Logout => logout(&work, store.as_mut()),
+        Operation::Resume(_) => Err(Failure::Incompatible),
     }
+}
+
+/// P66 + D-97: one restoration reads the resume record under this lock,
+/// bounded by the visible restore wait, and publishes it once. `false`
+/// means the vault did not answer, so the refresh read is skipped too.
+fn restore_resume(origin: &str, store: &Store) -> bool {
+    let read =
+        store.resume_namespace(origin).map_err(|_| ()).and_then(
+            |ns| match credentials::read_within(&ns, resume::restore_budget()) {
+                Ok(raw) => Ok(Some(raw)),
+                Err(credentials::Error::Missing) => Ok(None),
+                Err(_) => Err(()),
+            },
+        );
+    let answered = read.is_ok();
+    resume::restored(read);
+    answered
+}
+
+fn persist_resume(origin: &str, store: &Store, write: Option<&str>) -> Result<Outcome, Failure> {
+    let namespace = store.resume_namespace(origin)?;
+    match write {
+        Some(raw) => credentials::write(&namespace, raw),
+        None => credentials::remove(&namespace),
+    }
+    .map(|()| Outcome::Resumed)
+    .map_err(|_| Failure::StorageUnavailable)
 }
 
 pub(super) fn legacy(origin: &str) -> Option<String> {
@@ -114,11 +162,15 @@ pub(super) fn legacy(origin: &str) -> Option<String> {
     crate::config::load_account_key()
 }
 
-fn restore(work: &Work, store: &mut Store) -> Result<Outcome, Failure> {
+fn restore(work: &Work, store: &mut Store, vault: bool) -> Result<Outcome, Failure> {
     if store.meta.get("remember").and_then(Value::as_bool) != Some(true) {
         return Ok(Outcome::Guest {
             legacy: legacy(&work.origin),
         });
+    }
+    // A vault that did not answer the resume read would block this one too.
+    if !vault {
+        return Err(Failure::StorageUnavailable);
     }
     let account = store.account().ok_or(Failure::NoSession)?.to_owned();
     let namespace = store.namespace(&work.origin, &account)?;

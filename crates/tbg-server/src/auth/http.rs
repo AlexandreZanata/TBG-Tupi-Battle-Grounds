@@ -75,6 +75,22 @@ fn bearer(headers: &HeaderMap) -> Result<Option<String>, Error> {
     Ok(Some(value.to_owned()))
 }
 
+/// P66: each release slot keeps its own Access index, so a request naming
+/// another slot was misrouted. Single-server mode and unnamed requests pass.
+fn slot_matches(headers: &HeaderMap, mine: Option<&str>) -> Result<(), Error> {
+    let mut named = headers.get_all("x-tbg-slot").iter();
+    let Some(first) = named.next() else {
+        return Ok(());
+    };
+    if named.next().is_some() {
+        return Err(Error::BadRequest);
+    }
+    match mine {
+        Some(slot) if first.as_bytes() != slot.as_bytes() => Err(Error::Unavailable),
+        _ => Ok(()),
+    }
+}
+
 pub(crate) async fn handler(
     State(app): State<AppState>,
     ConnectInfo(peer): ConnectInfo<SocketAddr>,
@@ -116,6 +132,7 @@ async fn prepare(
         _ => return Err(Error::Forbidden),
     };
     origin::validate(channel, &headers, &app.config.auth_origins)?;
+    slot_matches(&headers, app.release.slot())?;
     let cookie = if channel == Channel::Browser {
         origin::cookie(&headers)?
     } else {
@@ -324,4 +341,21 @@ fn failure(error: Error) -> Response {
             .insert("retry-after", axum::http::HeaderValue::from_static("60"));
     }
     response
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn p66_auth_requests_are_served_only_by_the_named_generation() {
+        let mut headers = HeaderMap::new();
+        assert_eq!(slot_matches(&headers, Some("a")), Ok(()), "unnamed request");
+        headers.insert("x-tbg-slot", "b".parse().unwrap());
+        assert_eq!(slot_matches(&headers, None), Ok(()), "single-server mode");
+        assert_eq!(slot_matches(&headers, Some("b")), Ok(()));
+        assert_eq!(slot_matches(&headers, Some("a")), Err(Error::Unavailable));
+        headers.append("x-tbg-slot", "b".parse().unwrap());
+        assert_eq!(slot_matches(&headers, Some("b")), Err(Error::BadRequest));
+    }
 }

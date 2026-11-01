@@ -61,6 +61,7 @@ fn read_idle(
 ) {
     updater.idle = *state.get() == GameState::Menu
         && crate::config::resume_ready()
+        && crate::auth::idle_for_update()
         && match &*link {
             crate::link::MatchLink::Net(n) => n.safe_for_update(),
             _ => true,

@@ -148,4 +148,6 @@ pub(super) enum Outcome {
     },
     LoggedOut,
     LogoutPending(Failure),
+    /// P66: the resume record was written or removed.
+    Resumed,
 }

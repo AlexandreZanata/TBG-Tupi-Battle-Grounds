@@ -2699,3 +2699,50 @@ Reopen for different sales channels/issuer, new tax requirements or content
 that cannot preserve tactical readability. itch.io download purchases remain
 their configured platform channel, with no automatic Asaas or Inventory link.
 See [P67](phases/P67-commerce-recovery-foundation.md).
+
+## D-99 · One auth/resume coordinator, schema 10 and protocol 30 for the consolidated P66+P68 line — 2026-11-01 (Proposed, consolidation)
+
+**Context.** P66 (#33) and P68 (#32) were developed in parallel from
+`014b0e0`. Both copied one vault module, both wrote native credentials
+(P66: a resume record from its own thread; P68: refresh families under a
+per-origin process lock) and both allocated server schema 9 for different
+tables. P66 kept wire protocol 29; P68 moved to 30.
+
+**Decision.**
+- **One coordinator.** The P68 auth coordinator is the only code that reads or
+  writes the OS vault. P66's resume record (handle, slot endpoint, family
+  binding, origin, freshness) is restored by the coordinator's first restore,
+  under the same lock, with P66's 5-second visible wait, and later writes are
+  coalesced coordinator operations. No second restore path or vault writer
+  remains. Record schema 2 adds the family binding; P66's schema-1 synthetic
+  records are ignored.
+- **Schema 10.** Either v9 variant may exist. v10 recognizes the P66 release
+  tables and the P68 auth tables by their actual columns, creates whichever
+  set is absent, re-verifies their indexes on every open and refuses a
+  partial or foreign shape (the store then does not open) instead of
+  trusting the version number.
+- **Protocol 30 retained, not reused blindly.** P66 changed no wire type: its
+  admission and contract travel over HTTP and the WebSocket URL. The combined
+  wire is byte-identical to P68's protocol 30 (contract_protocol goldens
+  unchanged), and gameplay sources are unchanged (Ruleset 2,
+  `3d56156049e626c5`), so the computed match contract is
+  `w30-r2-3d56156049e626c5`. A protocol-29 build (production, P66
+  previews) receives the readable VersionMismatch.
+- **Auth follows the generation.** Each release slot keeps its own in-memory
+  Access index (D-97). Clients name the slot their socket was admitted to
+  (`X-TBG-Slot`), the proxy routes `/api/auth/*` by it and a server refuses a
+  request naming another slot. One automatic renewal per refusal episode
+  prevents a refresh loop when a generation still refuses the new Access.
+- **Ownership and updates.** An authenticated account attach also claims P66
+  cross-slot ownership. Updates wait for any coordinator operation and for
+  restore, renewal and sign-out states, in addition to P66's socket guard.
+
+**Limits.** Revocation committed through one slot reaches the shared database
+at once, but another slot's in-memory Access and live bindings are not
+notified (they expire within 15 minutes). Two-slot rollout with P68 auth stays
+inactive until cross-slot revocation propagation is implemented and accepted.
+The account-ownership claim after an authenticated attach is asynchronous.
+
+**Reopen when** a shared Access index or revocation feed is introduced, the
+wire changes, P67 recovery activates AccountKey rotation (it must call the
+D-97 revocation barrier), or real two-slot acceptance shows these limits wrong.

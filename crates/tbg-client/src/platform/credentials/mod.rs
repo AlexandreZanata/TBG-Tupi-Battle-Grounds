@@ -1,4 +1,4 @@
-//! Real per-user OS vaults; callers serialize each credential with the auth process lock.
+//! Real per-user OS vaults; only the auth coordinator calls these, under its process lock.
 
 use keyring_core::Entry;
 
@@ -47,6 +47,20 @@ pub fn read(namespace: &str) -> Result<String, Error> {
         return Err(Error::Invalid);
     }
     Ok(value)
+}
+
+/// A read that may wait on an unlock prompt returns after `limit`; the call
+/// keeps running on its own thread and a late answer is discarded (P66).
+pub fn read_within(namespace: &str, limit: std::time::Duration) -> Result<String, Error> {
+    let (tx, rx) = std::sync::mpsc::sync_channel(1);
+    let key = namespace.to_owned();
+    std::thread::Builder::new()
+        .name("tbg-vault-read".into())
+        .spawn(move || {
+            let _ = tx.send(read(&key));
+        })
+        .map_err(|_| Error::Unavailable)?;
+    rx.recv_timeout(limit).unwrap_or(Err(Error::Unavailable))
 }
 
 pub fn write(namespace: &str, value: &str) -> Result<(), Error> {

@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 use std::sync::{
-    atomic::{AtomicU64, Ordering},
+    atomic::{AtomicBool, AtomicU64, Ordering},
     Arc, LazyLock, Mutex, RwLock,
 };
 use tbg_core::protocol::{AccessToken, Profile, ServerMsg};
@@ -50,6 +50,57 @@ impl Default for Snapshot {
 static VIEW: LazyLock<RwLock<Snapshot>> = LazyLock::new(|| RwLock::new(Snapshot::default()));
 static EPOCH: LazyLock<Arc<AtomicU64>> = LazyLock::new(|| Arc::new(AtomicU64::new(1)));
 static COMMAND: Mutex<Option<Command>> = Mutex::new(None);
+/// Any coordinator operation (including vault I/O) is running.
+static IN_FLIGHT: AtomicBool = AtomicBool::new(false);
+/// One automatic renewal per `AuthRequired` episode; `AuthState::Active` re-arms it.
+static FORCED_RENEWAL: AtomicBool = AtomicBool::new(false);
+/// P66: the release slot whose generation verifies this client's Access.
+static SLOT: Mutex<Option<char>> = Mutex::new(None);
+
+/// P66 + D-97: each release generation keeps its own Access index, so auth
+/// HTTP follows the slot the socket was admitted to (`/ws/slot-b` -> `b`).
+pub fn set_endpoint(endpoint: &str) {
+    let slot = endpoint.strip_prefix("/ws/slot-").and_then(|rest| {
+        let mut letters = rest.chars();
+        match (letters.next(), letters.next()) {
+            (Some(letter), None) if letter.is_ascii_lowercase() => Some(letter),
+            _ => None,
+        }
+    });
+    if let Ok(mut current) = SLOT.lock() {
+        *current = slot;
+    }
+}
+
+pub(crate) fn slot() -> Option<char> {
+    SLOT.lock().ok().and_then(|s| *s)
+}
+
+/// P66 U09: updates wait while sign-in, renewal, restore, sign-out or
+/// vault work is in flight.
+pub fn idle_for_update() -> bool {
+    update_idle(IN_FLIGHT.load(Ordering::Acquire), snapshot().status)
+}
+
+fn update_idle(in_flight: bool, status: Status) -> bool {
+    !in_flight
+        && !matches!(
+            status,
+            Status::Restoring | Status::Refreshing | Status::LogoutPending
+        )
+}
+
+/// One automatic renewal per refusal episode; revocation never renews.
+fn should_renew(
+    reason: tbg_core::protocol::AuthRefusal,
+    view: &Snapshot,
+    forced: &AtomicBool,
+) -> bool {
+    reason != tbg_core::protocol::AuthRefusal::Revoked
+        && view.access.is_some()
+        && view.status != Status::ReauthRequired
+        && !forced.swap(true, Ordering::AcqRel)
+}
 
 pub enum Command {
     Login(String),
@@ -87,6 +138,9 @@ pub fn request(command: Command) -> bool {
         let next = EPOCH.fetch_add(1, Ordering::AcqRel) + 1;
         #[cfg(target_arch = "wasm32")]
         web::invalidate(next);
+        // P66: the old identity's resume handle must not survive a restart.
+        #[cfg(not(target_arch = "wasm32"))]
+        crate::platform::resume::clear();
         if let Ok(mut view) = VIEW.write() {
             view.epoch = next;
             view.access = None;
@@ -112,6 +166,9 @@ pub fn migration_key() -> Option<String> {
 }
 static LEGACY: Mutex<Option<String>> = Mutex::new(None);
 pub fn socket_status(status: tbg_core::protocol::AuthStatus) {
+    if status == tbg_core::protocol::AuthStatus::Active {
+        FORCED_RENEWAL.store(false, Ordering::Release);
+    }
     if let Ok(mut view) = VIEW.write() {
         view.status = match status {
             tbg_core::protocol::AuthStatus::Active => {
@@ -128,12 +185,10 @@ pub fn socket_status(status: tbg_core::protocol::AuthStatus) {
 }
 pub fn authentication_required(reason: tbg_core::protocol::AuthRefusal) {
     let view = snapshot();
-    if reason != tbg_core::protocol::AuthRefusal::Revoked
-        && view.access.is_some()
-        && view.status != Status::ReauthRequired
-    {
+    if should_renew(reason, &view, &FORCED_RENEWAL) {
         // A server restart loses Access, not the durable family. Attempt one
-        // coordinated renewal before requiring the manual recovery key.
+        // coordinated renewal before requiring the manual recovery key; a
+        // renewal the server still refuses (e.g. a misrouted generation) stops.
         let _ = request(Command::Refresh);
     } else if let Ok(mut view) = VIEW.write() {
         view.status = Status::ReauthRequired;
@@ -150,6 +205,8 @@ enum Kind {
     Refresh,
     Backup,
     Logout,
+    /// P66: persist the resume record (native only, never changes status).
+    Resume,
 }
 type ResultSlot = Arc<Mutex<Option<Result<Outcome, Failure>>>>;
 struct Pending {
@@ -173,6 +230,10 @@ struct Session {
     retry_at: f64,
     secure: bool,
     remember: bool,
+    /// The resume write in flight, retried when the lock was busy.
+    resume_write: Option<Option<String>>,
+    /// Another game process held the lock: wait before the next resume write.
+    resume_retry_at: f64,
 }
 
 pub fn plugin(app: &mut App) {
@@ -190,6 +251,8 @@ pub fn plugin(app: &mut App) {
         retry_at: 0.,
         secure: false,
         remember: false,
+        resume_write: None,
+        resume_retry_at: 0.,
     };
     #[cfg(not(target_arch = "wasm32"))]
     if let Ok(origin) = &session.origin {
@@ -247,8 +310,11 @@ fn tick(
             && now >= session.retry_at
         {
             session.start(Kind::Refresh, None);
+        } else if now >= session.resume_retry_at {
+            session.persist_resume();
         }
     }
+    IN_FLIGHT.store(session.pending.is_some(), Ordering::Release);
     let view = snapshot();
     let restoring = view.status == Status::Restoring;
     if account.auto_login != restoring {
@@ -278,7 +344,7 @@ impl Session {
                 if self
                     .pending
                     .as_ref()
-                    .is_some_and(|p| p.kind != Kind::Restore)
+                    .is_some_and(|p| !matches!(p.kind, Kind::Restore | Kind::Resume))
                 {
                     return;
                 }
@@ -356,7 +422,7 @@ impl Session {
                 Kind::Restore | Kind::Login | Kind::Register => Status::Restoring,
                 Kind::Refresh => Status::Refreshing,
                 Kind::Logout => Status::LogoutPending,
-                Kind::Backup => view.status,
+                Kind::Backup | Kind::Resume => view.status,
             };
         }
         match result {
@@ -390,6 +456,7 @@ impl Session {
             Kind::Refresh => native::Operation::Refresh,
             Kind::Backup => native::Operation::Backup,
             Kind::Logout => native::Operation::Logout,
+            Kind::Resume => native::Operation::Resume(input),
         };
         let work = native::Work {
             origin,
@@ -432,6 +499,36 @@ impl Session {
         web::start(kind, input, origin, current, self.remember, slot);
     }
 
+    /// P66: the coordinator is the only vault writer, so pending resume
+    /// writes wait until no other operation holds the per-origin lock.
+    #[cfg(not(target_arch = "wasm32"))]
+    fn persist_resume(&mut self) {
+        if let Some(write) = crate::platform::resume::take_pending() {
+            self.resume_write = Some(write.clone());
+            self.start(Kind::Resume, write);
+        }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn persist_resume(&mut self) {}
+
+    fn resume_done(&mut self, result: Result<Outcome, Failure>, now: f64) {
+        let write = self.resume_write.take().flatten();
+        if matches!(result, Err(Failure::Busy)) {
+            self.resume_retry_at = now + 2.;
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        crate::platform::resume::persisted(
+            write,
+            match result {
+                Ok(_) => Ok(()),
+                Err(failure) => Err(failure == Failure::Busy),
+            },
+        );
+        #[cfg(target_arch = "wasm32")]
+        let _ = (write, result);
+    }
+
     fn settle(
         &mut self,
         issued_epoch: u64,
@@ -441,6 +538,11 @@ impl Session {
         account: &mut crate::ui::account::Account,
         inbox: &mut crate::ui::account::AccountInbox,
     ) {
+        if kind == Kind::Resume {
+            // Independent of the identity epoch: a newer clear() is already queued.
+            self.resume_done(result, now);
+            return;
+        }
         if issued_epoch == epoch() {
             self.complete(kind, result, now, account, inbox);
             return;
@@ -529,6 +631,8 @@ impl Session {
                 }
                 inbox.push(ServerMsg::LoggedOut);
             }
+            // Resume writes settle before identity results (see `settle`).
+            Ok(Outcome::Resumed) => {}
             Ok(Outcome::LogoutPending(error)) => {
                 if let Ok(mut view) = VIEW.write() {
                     view.status = Status::LogoutPending;
