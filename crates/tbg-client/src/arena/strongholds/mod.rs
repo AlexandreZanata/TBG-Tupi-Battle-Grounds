@@ -245,6 +245,22 @@ fn dress(
     commands.entity(root).despawn_related::<Children>();
     for piece in pieces(look.kind, look.form()) {
         let at = piece.placed(tower.own);
+        if piece.lost < parts::NEVER && piece.motion.is_none() {
+            for (mesh, loss) in art.fragments(piece.def, tower.own, meshes) {
+                commands.spawn((
+                    Mesh3d(mesh),
+                    MeshMaterial3d(art.material.clone()),
+                    at,
+                    Visibility::Inherited,
+                    damage::Wear {
+                        show: 0,
+                        hide: loss,
+                    },
+                    ChildOf(root),
+                ));
+            }
+            continue;
+        }
         let mut child = commands.spawn((
             Mesh3d(art.mesh(piece.def, tower.own, meshes)),
             MeshMaterial3d(art.material.clone()),

@@ -43,11 +43,11 @@ static CRACK: PartDef = PartDef {
 /// Kind-specific positions on the camera-facing foundation, not floating smoke in the lane.
 fn profile(kind: StrongholdKind) -> (f32, f32, f32) {
     match kind {
-        StrongholdKind::Artillery => (0.62, 0.28, 0.62),
-        StrongholdKind::Bastion => (0.68, 0.55, 0.74),
-        StrongholdKind::Treasury => (0.52, 0.60, 0.52),
-        StrongholdKind::Command => (0.47, 0.70, 0.47),
-        StrongholdKind::Classic => (0.46, 0.65, 0.46),
+        StrongholdKind::Artillery => (0.84, 0.70, 0.83),
+        StrongholdKind::Bastion => (0.84, 0.76, 1.12),
+        StrongholdKind::Treasury => (0.76, 0.50, 0.645),
+        StrongholdKind::Command => (0.47, 0.55, 0.65),
+        StrongholdKind::Classic => (0.56, 0.48, 0.80),
     }
 }
 
@@ -56,7 +56,27 @@ pub(super) fn regions(kind: StrongholdKind) -> Vec<(Piece, Wear)> {
     (1..20)
         .flat_map(|stage| {
             let x = (f32::from(stage % 5) / 4.0 - 0.5) * width * 1.7;
-            let y = y + f32::from(stage / 5) * 0.12;
+            let y = y + f32::from(stage / 5)
+                * if kind == StrongholdKind::Artillery {
+                    0.012
+                } else {
+                    0.12
+                };
+            let z = match kind {
+                StrongholdKind::Command => {
+                    ((0.66 - (y - 0.24) * 0.06 / 1.11).powi(2) - x * x)
+                        .max(0.0)
+                        .sqrt()
+                        + 0.015
+                }
+                StrongholdKind::Classic => {
+                    ((0.82 - (y - 0.24) * 0.06 / 0.71).powi(2) - x * x)
+                        .max(0.0)
+                        .sqrt()
+                        + 0.015
+                }
+                _ => z,
+            };
             [
                 (
                     piece(

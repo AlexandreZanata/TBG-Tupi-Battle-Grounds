@@ -197,6 +197,7 @@ pub(crate) struct StrongholdArt {
     pub ring_material: Handle<StandardMaterial>,
     meshes: HashMap<(&'static str, bool), Handle<Mesh>>,
     rings: HashMap<(i32, bool), Handle<Mesh>>,
+    fragments: HashMap<(&'static str, bool), Vec<(Handle<Mesh>, u8)>>,
 }
 
 impl FromWorld for StrongholdArt {
@@ -220,6 +221,7 @@ impl FromWorld for StrongholdArt {
             ring_material,
             meshes: HashMap::new(),
             rings: HashMap::new(),
+            fragments: HashMap::new(),
         }
     }
 }
@@ -229,6 +231,45 @@ impl StrongholdArt {
         self.meshes
             .entry((def.name, own))
             .or_insert_with(|| meshes.add(build(def, own)))
+            .clone()
+    }
+
+    /// Keep load-bearing large primitives while peeling small trim off cumulatively.
+    pub fn fragments(
+        &mut self,
+        def: &PartDef,
+        own: bool,
+        meshes: &mut Assets<Mesh>,
+    ) -> Vec<(Handle<Mesh>, u8)> {
+        self.fragments
+            .entry((def.name, own))
+            .or_insert_with(|| {
+                (def.build)(team(own))
+                    .into_iter()
+                    .enumerate()
+                    .map(|(index, part)| {
+                        let geometry = crate::art::mesh::build(part.0);
+                        let mut low = Vec3::splat(f32::INFINITY);
+                        let mut high = Vec3::splat(f32::NEG_INFINITY);
+                        if let Some(bevy::mesh::VertexAttributeValues::Float32x3(v)) =
+                            geometry.attribute(Mesh::ATTRIBUTE_POSITION)
+                        {
+                            for p in v {
+                                low = low.min(Vec3::from(*p));
+                                high = high.max(Vec3::from(*p));
+                            }
+                        }
+                        let size = (high - low) * part.2.scale.abs();
+                        let volume = size.x * size.y * size.z;
+                        let loss = if volume < 0.08 {
+                            5 + (index % 15) as u8
+                        } else {
+                            NEVER
+                        };
+                        (meshes.add(painted(vec![part])), loss)
+                    })
+                    .collect()
+            })
             .clone()
     }
 

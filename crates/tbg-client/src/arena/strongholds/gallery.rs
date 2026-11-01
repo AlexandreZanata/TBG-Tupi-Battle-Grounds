@@ -97,11 +97,17 @@ pub(super) fn wear_sequence(
     mut meshes: ResMut<Assets<Mesh>>,
     mut towers: Query<(Entity, &mut Tower)>,
     mut previous: Local<Option<u8>>,
+    mut start: Local<Option<f32>>,
+    loading: Res<crate::ui::native_loading::Status>,
 ) {
     if config::url_param("damage_sweep").is_none() {
         return;
     }
-    let step = ((time.elapsed_secs() - 3.0).max(0.0) / 0.5) as u8;
+    if !loading.boot_ready || loading.scene_waiting {
+        return;
+    }
+    let start = *start.get_or_insert(time.elapsed_secs());
+    let step = ((time.elapsed_secs() - start).max(0.0) / 0.5) as u8;
     let stage = if step > 20 { 0 } else { step };
     if *previous == Some(stage) {
         return;
