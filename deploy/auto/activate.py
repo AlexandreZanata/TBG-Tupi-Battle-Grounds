@@ -48,6 +48,17 @@ def status():
         return json.loads(response.read(65536))
 
 
+def require_running_binary(expected):
+    # An unused legacy install path must never produce a false successful promotion.
+    pid = subprocess.check_output(
+        ['systemctl', 'show', 'tbg-server.service', '-p', 'MainPID', '--value'], text=True, timeout=5,
+    ).strip()
+    require(pid.isdecimal() and int(pid) > 0, 'game service has no running main process')
+    actual = Path('/proc')/pid/'exe'
+    require(actual.resolve(strict=True) == Path(expected).resolve(strict=True),
+            'runtime executable path requires explicit adoption; no deployment applied')
+
+
 def service(action):
     # TimeoutStopSec=infinity is intentional: never kill a match to finish deploy.
     subprocess.run(['systemctl', action, 'tbg-server.service'], check=True)
@@ -84,6 +95,7 @@ def rollback(journal):
     for name, path in journal['previous'].items():
         switch(name, Path(path))
     service('start')
+    require_running_binary(BIN/'tbg-server')
     require(healthy(journal['contract'], journal['public_health']), 'rollback health failed; operator required')
     if journal.get('previous_receipt') is None:
         (STATE/'current.json').unlink(missing_ok=True)
@@ -99,6 +111,7 @@ def recover():
 
 
 def check_compatibility(manifest):
+    require_running_binary(BIN/'tbg-server')
     live = status()
     with sqlite3.connect(f'file:{DB}?mode=ro', uri=True) as connection:
         schema = connection.execute('SELECT max(version) FROM schema_version').fetchone()[0]
@@ -147,6 +160,7 @@ def activate(staged, manifest, public_health):
         for name in manifest['files']:
             switch(name, candidate/name)
         service('start')
+        require_running_binary(candidate/'tbg-server')
         require(healthy(manifest['contract'], public_health), 'candidate health failed')
         write_json(STATE/'current.json', manifest)
         JOURNAL.unlink()

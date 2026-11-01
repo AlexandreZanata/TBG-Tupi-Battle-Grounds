@@ -45,7 +45,10 @@ applied update. Old tabs keep loading their source-qualified assets.
 
 Backend automation accepts only the exact live MatchContract and database schema,
 and only the single-process mode. Contract/schema changes stop for coordinated
-client/migration review. It never rolls back player data, shortens the drain or kills
+client/migration review. Before any pause or DB operation, it requires the systemd
+main process kernel executable to match the adopted binary path; post-start and
+rollback perform the same check. An unused legacy install path cannot masquerade
+as a successful update. It never rolls back player data, shortens the drain or kills
 active matches. If rollback itself fails, operator intervention remains visible.
 There is a temporary matchmaking pause during a backend drain; this is not HA.
 
@@ -64,7 +67,8 @@ backend details. The installer deliberately leaves all timers disabled. Before e
    ancestor. Use its full SHA as the private config's `minimum_source`.
 2. Install a current GitHub CLI with the attestation flags listed in the runbook.
    Verify a real main package with an empty GH configuration and no personal token.
-3. Adopt the domain configuration and immutable directories once, in a verified
+3. Adopt the domain configuration, actual systemd executable path and immutable
+   directories once, in a verified
    quiet window; preserve current releases and legacy assets.
 4. Dry-verify, apply and observe the first real attested candidate for each family.
    A message saying “Waiting for the first candidate” is not acceptance.

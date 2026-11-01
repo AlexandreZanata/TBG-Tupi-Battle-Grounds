@@ -138,3 +138,45 @@ toolchain/lock/assets/features, changed/missing formats, wrong tag, oversized an
 ambiguous package identities. These fixtures never certify executable behavior.
 The superseded `9fac2d6` native build was canceled to avoid spending more runner
 minutes on a candidate whose README had already been superseded.
+
+## Runtime-path adoption safeguard
+
+A copied executable from the legacy VPS path lacked `--build-info` and treated it
+as a normal launch. The owned local process was stopped immediately; no production
+process or data changed. This path is not evidence of the live production source.
+The Windows synthetic backend instead uses the identified development binary and
+a fresh database bound only to the Docker bridge.
+
+Backend automation now checks the actual systemd MainPID kernel executable against
+the adopted path before touching admission/SQLite, after startup and after rollback.
+An unadopted legacy path fails closed. Two new focused regression scenarios cover
+wrong live path and refusal before DB/service side effects. Runtime adoption remains
+required before enabling backend automation; it is not performed by this task.
+
+## Current handoff state
+
+The final Linux package also rendered Settings and offline Practice at 1280x720,
+with the normal native HUD/Shop, all loading gates ready and exit 0. Its AppImage
+reported the same executable/source/contract through extract-and-run. The verified
+package was installed per user as TBG at `0.1.2-rc.1-e1017fc55ed0`, retaining older
+versions and user data; the launcher reports the correct final identity.
+
+The final Windows/native build is run `41349999416` on frozen source `e1017fc`.
+DevShell initialization is corrected; the Windows package/build stage was still
+running at the last observation. No Windows runtime, installer, same-source visual
+comparison or new public native release is claimed. General PR CI is not awaited.
+The owner requested no CI wait; publication must still use successful exact-source
+artifacts and its required publication gate, never the superseded inspection build.
+The landing remains honestly pending until a complete verified native release.
+
+The existing Windows VM is prepared with owned acceptance scripts for final package
+identity/inventory, real vault, missing assets, isolated installer lifecycle and a
+1280x720 GUI pilot. The scripts parsed in Windows PowerShell. They have not tested
+the unavailable final Windows artifact. The strict full matrix, real GPU/audio/DPI,
+Wine and publisher signing remain separate pending gates; no tolerance was added.
+
+Backend runtime-path guard: `python3 scripts/test-auto-deploy.py` passed all 12
+scenarios after the safeguard. `actionlint` passed both changed workflows with only
+the previously documented SC2086 scope-expansion diagnostics excluded from this
+local syntax invocation; CI lints were not disabled. No additional Rust build,
+full workspace suite, balance gate or extensive gallery was run.
