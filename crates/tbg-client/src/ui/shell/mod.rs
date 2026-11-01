@@ -281,7 +281,13 @@ fn render(
                 ..default()
             };
             #[cfg(tbg_desktop)]
-            let body = page_node();
+            let body = {
+                let mut node = page_node();
+                if shell.panel == Panel::Troops {
+                    node.overflow = Overflow::clip();
+                }
+                node
+            };
             root.spawn((body, scroll, Body)).with_children(|body| {
                 #[cfg(tbg_desktop)]
                 if let Some(version) = &data.update {

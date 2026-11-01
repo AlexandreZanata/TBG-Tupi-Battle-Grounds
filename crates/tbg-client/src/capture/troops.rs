@@ -45,13 +45,24 @@ fn capture(
             .unwrap_or(0)
             .min(max)
     };
+    let tab = match config::url_param("troops_tab").as_deref() {
+        Some("practice") => Tab::Practice,
+        Some("editor") => Tab::Editor,
+        _ => Tab::Catalog,
+    };
+    let clip = match config::url_param("troops_clip").as_deref() {
+        Some("walk") => Clip::Walk,
+        Some("attack") => Clip::AttackMelee,
+        Some("victory") => Clip::Victory,
+        _ => Clip::Idle,
+    };
     let form = (number("tier", 2), number("branch", 1));
     let Some(start) = *started else {
         queue.0.extend([
-            Action::Open(Tab::Catalog),
+            Action::Open(tab),
             Action::Select(unit),
             Action::Form(form.0, form.1),
-            Action::Clip(Clip::Idle),
+            Action::Clip(clip),
         ]);
         *started = Some(time.elapsed_secs());
         return;
@@ -60,6 +71,7 @@ fn capture(
         || shell.panel != Panel::Troops
         || catalog.selected != unit
         || catalog.form != form
+        || catalog.tab != tab
     {
         return;
     }

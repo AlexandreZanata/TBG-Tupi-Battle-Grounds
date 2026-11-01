@@ -3,6 +3,7 @@
 pub(crate) mod catalog;
 mod preview;
 pub(crate) mod runtime;
+mod stage;
 mod trial_ui;
 
 use crate::{art::anim::Clip, GameState};
@@ -120,7 +121,7 @@ impl Catalog {
             x: None,
         }
     }
-    pub fn visible(&self) -> Vec<UnitKind> {
+    pub fn visible(&self, lang: crate::i18n::Lang) -> Vec<UnitKind> {
         let query = self.search.trim().to_lowercase();
         tbg_core::ALL_KINDS
             .into_iter()
@@ -129,7 +130,11 @@ impl Catalog {
                 let d = tbg_core::content::def(*kind);
                 self.faction.is_none_or(|f| f == d.faction)
                     && self.role.is_none_or(|r| r == d.archetype)
-                    && (query.is_empty() || d.name.to_lowercase().contains(&query))
+                    && (query.is_empty()
+                        || (d.name.to_lowercase().contains(&query)
+                            || crate::i18n::content::unit_name(lang, *kind)
+                                .to_lowercase()
+                                .contains(&query)))
             })
             .collect()
     }

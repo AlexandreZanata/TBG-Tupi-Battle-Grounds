@@ -1450,5 +1450,10 @@
   "auth.capacity": "O limite de sessões foi atingido. Revogue uma sessão antiga primeiro.",
   "auth.invalid_origin": "O acesso está indisponível para este endereço de servidor.",
   "auth.backup_title": "Guarde sua chave de recuperação",
-  "auth.backup_failed": "Não foi possível exportar a cópia. Tente novamente antes de confirmar."
+  "auth.backup_failed": "Não foi possível exportar a cópia. Tente novamente antes de confirmar.",
+  "training.list_hint": "Selecione um campeão · role para explorar",
+  "training.no_results": "Nenhum campeão com estes filtros.",
+  "training.practice_hint": "Escolha a dificuldade e a arena para sua próxima partida de treino.",
+  "training.arena": "Arena de treino",
+  "training.reduced": "Movimento reduzido"
 }

@@ -1450,5 +1450,10 @@
   "auth.capacity": "The session limit was reached. Revoke an old session first.",
   "auth.invalid_origin": "Sign-in is unavailable for this server address.",
   "auth.backup_title": "Keep your recovery key safe",
-  "auth.backup_failed": "Could not export the backup. Try again before confirming."
+  "auth.backup_failed": "Could not export the backup. Try again before confirming.",
+  "training.list_hint": "Select a champion · scroll to explore",
+  "training.no_results": "No champions match these filters.",
+  "training.practice_hint": "Choose a difficulty and arena for your next practice match.",
+  "training.arena": "Training arena",
+  "training.reduced": "Reduced motion"
 }
