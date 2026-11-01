@@ -269,3 +269,8 @@ git diff --check
 All 20 tests passed (2 + 3 + 7 + 8). Formatting, patch-note/source identity and diff
 checks passed. Full workspace tests remain with GitHub; no local full-suite run or
 new D-33 acceptance is claimed. Windows packaging/download work is recorded separately.
+
+Native follow-up in progress: the owner explicitly requested Windows Docker/KVM
+runtime comparison, matching Linux/Windows release artifacts and OS-aware landing
+downloads. Existing TBG VM data/evidence are preserved. The old GNU/protocol-30 VM
+prototype does not constitute acceptance of the new MSVC/protocol-31 packages.

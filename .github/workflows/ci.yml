@@ -7,7 +7,7 @@ on:
     # Native release tags run this suite inside native-release.yml, where it
     # gates publication; running it here as well would validate the same
     # commit twice.
-    tags: ['**', '!v*-native.*']
+    tags: ['**', '!v[0-9]*']
   workflow_dispatch:
   workflow_call:
 

@@ -1,33 +1,28 @@
-TBG 0.1.1-rc.1 - consolidated Linux candidate, protocol 30, schema 10.
+TBG 0.1.2-rc.1 — Linux and Windows beta candidate
 
-One build from the consolidation pull request that joins #18-#33: the
-complete 46-champion roster with forms and abilities, five refined arenas
-with training in each, the troops/training laboratory, the winner-only
-victory celebration, English/pt-BR presentation, ranked records, the
-competitive audit with illustrated patch notes, protected sign-in (P68) and
-the recoverable Linux updater foundation (P66). Gameplay and balance numbers
-are unchanged: Ruleset 2 / 3d56156049e626c5.
+Protocol 31, schema 10, ruleset 6 / 097385fee9a10b0f.
 
-Compatibility. This candidate requires a protocol-30 server built from the
-same consolidation. The production server currently deployed uses protocol 29
-and is NOT compatible: online play reports that an update is required, while
-offline Practice and the training laboratory keep working. No server was
-deployed and no existing installation is replaced by this download.
+Shared Bevy desktop interface, 46 conventional champions, eight Arenas, local
+training, winner celebrations, illustrated cards/Augments and protected sessions.
+This candidate includes the already documented P70/P71 Proposed changes; it is not
+a new competitive balance acceptance.
 
-Sign-in and resume. Access stays in memory. "Keep me signed in" and the
-short-lived match-resume record use the current user's Secret Service only;
-a locked or missing vault shows a visible temporary session. AccountKeys keep
-working for manual sign-in and recovery.
+Linux: x86_64 archive and AppImage (glibc 2.35+, Vulkan).
+Windows: x86_64 MSVC portable ZIP and per-user installer (Windows 11, DirectX 12).
+Both packages use the same source, assets, dependency lock and declared features.
 
-Not included or not active. Official signing and automatic updates wait for
-owner gate O02 (no update root is bundled). Windows is not supported by this
-release: any Windows test build attached here is unofficial, unsigned,
-cross-compiled and checked only under Wine. Two-slot server rollout stays
-inactive. Competitive balance acceptance and owner look/fun sign-off remain
-open; the audit's recorded failures are not hidden.
+The Windows executable/installer are unsigned beta artifacts. GitHub build provenance
+and SHA-256 checksums authenticate the release pipeline and integrity; they are not an
+Authenticode publisher signature. SmartScreen reputation is not claimed.
 
-Linux x86_64, glibc 2.39 or newer, Vulkan-capable graphics, ALSA, X11 or
-Wayland. Extract the tar.gz and run ./tbg-client (or ./install.sh for a
-per-user launcher), or run the AppImage. Verify SHA256SUMS first. Each archive
-carries build-info.json (version, protocol, contract, source commit,
-Cargo.lock and asset digests) and file-manifest.json.
+Windows VM and visual acceptance results are recorded in the linked execution report.
+Do not infer complete GPU/audio/DPI acceptance or exact pixel equality from shared
+code, a successful compile or a partial capture. The current release manifest keeps
+visual acceptance pending until the required full comparison is completed.
+
+Authentication uses the real OS vault when persistence is chosen. P67 email recovery
+and commerce remain offline foundations. Native TUF signing and two-slot rollout are
+separate gated mechanisms. Preserve existing accounts, preferences and older packages.
+
+Source, individual asset checksums and the exact compatible contract are in
+`tbg-native-release.json`; `native-provenance.jsonl` binds the artifacts to GitHub CI.
