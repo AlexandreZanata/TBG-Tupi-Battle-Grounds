@@ -50,11 +50,18 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Body(Chest),
             Box(if f.a { 0.37 } else { 0.30 }, 0.26, 0.10),
-            IVORY,
+            GOLD,
             [0.0, 0.16, 0.12],
         ),
         part(Body(Chest), Cyl(0.07, 0.025), GOLD, [0.0, 0.22, 0.215]).rot([90.0, 0.0, 0.0]),
         part(Body(Head), Ball(0.18), IVORY, [0.0, 0.02, 0.0]),
+        part(
+            Body(Head),
+            Box(0.23, 0.035, 0.07),
+            GOLD,
+            [0.0, 0.055, 0.145],
+        )
+        .rot([-12.0, 0.0, 0.0]),
         part(Body(Head), Box(0.15, 0.05, 0.04), NAVY, [0.0, 0.0, 0.16]),
         part(Body(Head), Box(0.05, 0.22, 0.035), GOLD, [0.0, 0.07, 0.18]),
         part(
