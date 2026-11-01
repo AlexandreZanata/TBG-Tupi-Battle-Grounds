@@ -65,11 +65,11 @@ pub fn rest(node: Node, p: &Proportions) -> Vec3 {
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
     let mut v = vec![
-        part(Body(Hips), Ball(0.26), CHARCOAL, [0.0, 0.015, -0.10]).scale([0.85, 0.75, 1.6]),
+        part(Body(Hips), Ball(0.26), VIOLET, [0.0, 0.015, -0.10]).scale([0.85, 0.75, 1.6]),
         part(
             Body(Chest),
             Ball(0.25),
-            if f.b { DARK } else { CHARCOAL },
+            if f.b { DARK } else { VIOLET },
             [0.0, 0.0, 0.02],
         )
         .scale([1.0, 0.8, 1.5]),
@@ -129,7 +129,7 @@ fn limb(v: &mut Vec<PartSpec>, upper: Node, lower: Node, foot: Node, s: f32, fro
         part(
             upper,
             Ball(0.09),
-            if f.a { IVORY } else { GUNMETAL },
+            if f.a { IVORY } else { RUST },
             [0.0, 0.0, 0.0],
         )
         .scale([1.2, 0.65, 1.1]),
@@ -144,7 +144,8 @@ fn limb(v: &mut Vec<PartSpec>, upper: Node, lower: Node, foot: Node, s: f32, fro
         );
     }
     if front {
-        let w = if f.b { 0.105 } else { 0.075 };
+        v.push(part(lower, Ball(0.09), RUST, [0.0, -0.03, 0.11]).scale([0.65, 0.65, 1.5]));
+        let w = if f.b { 0.115 } else { 0.085 };
         v.extend([
             part(lower, Cone(w, 0.38), IVORY, [0.0, -0.06, 0.17]).rot([-55.0, 0.0, s * -20.0]),
             part(lower, Cone(w * 0.7, 0.26), IVORY, [s * -0.07, -0.02, 0.37]).rot([
