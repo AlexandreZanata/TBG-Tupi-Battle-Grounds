@@ -11,6 +11,7 @@ use tbg_core::{MatchView, Outcome, Seat, UnitId};
 use crate::art::FigureLibrary;
 use crate::audio::Sounds;
 use crate::vfx::VfxAssets;
+use crate::visuals::layout::{self, Body, Layout};
 use crate::visuals::{self, UnitLook, VisualAssets};
 
 mod actions;
@@ -82,6 +83,7 @@ pub fn plugin(app: &mut App) {
         .init_resource::<LatestView>()
         .init_resource::<ViewBuffer>()
         .init_resource::<UnitEntities>()
+        .init_resource::<Layout>()
         .init_resource::<QueueInfo>()
         .init_resource::<RematchInfo>()
         .init_resource::<MatchStats>()
@@ -99,15 +101,15 @@ pub fn plugin(app: &mut App) {
 
 /// Lane x in milli-tiles → world x, mirrored for seat B.
 pub fn world_x(x: i32, you: Seat) -> f32 {
-    let t = x as f32 / 1000.0;
+    world_tile(x as f32 / 1000.0, you)
+}
+
+/// Lane x in tiles → world x, mirrored for seat B.
+pub fn world_tile(t: f32, you: Seat) -> f32 {
     match you {
         Seat::A => t,
         Seat::B => LANE_LEN as f32 / 1000.0 - t,
     }
-}
-
-fn lane_z(id: UnitId) -> f32 {
-    [-0.8, 0.0, 0.8][(id % 3) as usize]
 }
 
 #[allow(clippy::too_many_arguments)] // the one system that turns views into the scene
@@ -118,6 +120,7 @@ fn sync_units(
     lib: Res<FigureLibrary>,
     mut buffer: ResMut<ViewBuffer>,
     mut map: ResMut<UnitEntities>,
+    mut layout: ResMut<Layout>,
     mut visuals: events::Visuals,
     mut fx_res: FxResources,
 ) {
@@ -127,6 +130,8 @@ fn sync_units(
         assets: &assets,
         lib: &lib,
         map: &mut map,
+        layout: &mut layout,
+        dt: time.delta_secs(),
         visuals: &mut visuals,
     };
     // Borrowed, not cloned: the frame lives only while units are placed.
@@ -172,6 +177,9 @@ struct Scene<'a, 'w, 's, 'qw, 'qs> {
     assets: &'a VisualAssets,
     lib: &'a FigureLibrary,
     map: &'a mut UnitEntities,
+    layout: &'a mut Layout,
+    /// Seconds since the last frame, for the layout's easing.
+    dt: f32,
     visuals: &'a mut events::Visuals<'qw, 'qs>,
 }
 
@@ -180,11 +188,30 @@ impl Scene<'_, '_, '_, '_, '_> {
     /// of the way to its position in `to`; return the seat and unit ids.
     fn place(&mut self, from: &MatchView, to: &MatchView, alpha: f32) -> (Seat, Vec<UnitId>) {
         let you = from.you;
+        self.layout.begin();
+        // Both views list units by id, so one cursor walks `to` with `from`.
+        let mut next = 0;
         for u in &from.units {
+            while to.units.get(next).is_some_and(|n| n.id < u.id) {
+                next += 1;
+            }
             // A unit absent from the next view (it died) holds its position.
-            let to_x = to.units.iter().find(|n| n.id == u.id).map_or(u.x, |n| n.x);
+            let to_x = match to.units.get(next) {
+                Some(n) if n.id == u.id => n.x,
+                _ => u.x,
+            };
             let x = u.x as f32 + (to_x - u.x) as f32 * alpha;
-            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, lane_z(u.id));
+            self.layout.push(Body {
+                id: u.id,
+                seat: u.seat,
+                x: x / 1000.0,
+                radius: layout::BASE_RADIUS * self.lib.get(u.kind, u.tier, u.branch).plan.scale,
+            });
+        }
+        self.layout.solve(self.dt);
+        for (i, u) in from.units.iter().enumerate() {
+            let slot = self.layout.slot(i);
+            let pos = Vec3::new(world_tile(slot.x, you), 0.0, slot.z);
             match self
                 .map
                 .0
@@ -213,8 +240,9 @@ impl Scene<'_, '_, '_, '_, '_> {
     }
 }
 
-fn clear_units(mut commands: Commands, mut map: ResMut<UnitEntities>) {
+fn clear_units(mut commands: Commands, mut map: ResMut<UnitEntities>, mut layout: ResMut<Layout>) {
     for (_, e) in map.0.drain() {
         commands.entity(e).try_despawn();
     }
+    layout.clear();
 }

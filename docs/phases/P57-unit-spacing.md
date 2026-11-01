@@ -1,6 +1,6 @@
 # P57 — Units take up space on screen (client display layout)
 
-**Status:** planned (owner request 2026-10-30). Not started.
+**Status:** implemented on `phase/p57-unit-spacing` (client only, D-57). Owner look pending.
 **Goal:** large armies stop drawing units inside each other, with no
 server change, no extra bandwidth and no visible FPS cost.
 
@@ -161,3 +161,160 @@ penalties. That is a GAME-DESIGN change with balance consequences and a
 per-tick server cost; it needs its own decision and lab evidence. P57
 does not prevent it: the display layout would then follow the 2D
 positions the server sends.
+
+## Phase report
+
+### What was built
+
+Commits on `phase/p57-unit-spacing` (from `docs/p57-unit-spacing`):
+
+- `a9582d1` `visuals/layout.rs` (display slots, greedy placement, easing,
+  unit tests) wired into `sync.rs`: `Scene::place` draws at the slot,
+  `lane_z` is gone, and the next view is read with one cursor walk.
+- `0c12ebb` melee impacts land on the real target; the lunge is skipped
+  when the target is out of reach (`aim.rs`).
+- `64f871a` one-and-a-tenth-tile buckets, the fastest-of-50 timing in the
+  300-unit test, and the ignored `probe_bot_matches` measurement.
+- this commit: the phase report, the ROADMAP line, D-57 and `docs/media/p57/`.
+
+`git diff --stat docs/p57-unit-spacing..HEAD` touches only
+`crates/tbg-client`, `docs/DECISIONS.md`, `docs/ROADMAP.md`,
+`docs/phases/P57-unit-spacing.md` and `docs/media/p57/`. Nothing in
+`tbg-core`, `tbg-server`, the protocol, GAME-DESIGN or a contract test.
+
+### Deviations
+
+- **Cargo Crab passenger is not tied to its carrier.** The view does not
+  carry the carried bit (`tbg-core/src/view.rs`; P55 already records it), so
+  the client cannot tell who rides. A passenger has the carrier's `x` in
+  the simulation and is laid out as an ordinary unit, so it takes a free
+  slot next to its crab. Fixing it needs a view change (protocol), which
+  this phase forbids.
+- **Dying units do not reserve space.** They leave the view when they die
+  and keep their last transform (nothing moves them), but they are not
+  layout obstacles. For the death clip and the 0.9 s corpse a neighbour can
+  slide over a corpse.
+- **Melee impacts stay on the real target at any distance.** The 2.6-tile
+  guard used to send an impact to the attacker's blade when the target was
+  far. The layout can put a back-rank attacker 3–5 tiles from its target, so
+  the impact now lands on the target and the lunge is what stops at
+  `REACH` (2.6 tiles). Visible look: owner sign-off.
+- **Opposing seats are laid out independently**, as the plan says. Units
+  of different seats can still overlap where both seats stand on their
+  rank-0 row in the same place (see the numbers). Removing that needs one
+  joint layout, which would move one seat's front line off its true `x`;
+  the plan forbids that. Recorded as a limitation, not fixed.
+- **Ignored probe.** `probe_bot_matches` is measurement code, kept so the
+  numbers can be reproduced: `cargo test --release -p tbg-client
+  probe_bot_matches -- --ignored --nocapture`.
+- **D-57 on a gap.** D-56 is taken by parallel Cargo Crab work on another
+  branch (`bc2942b`); this branch goes from D-55 to D-57, as the plan asked.
+
+### Verification (real output)
+
+Shared machine: other sessions kept the load average at 14–18 on 16 cores
+during the browser runs, so only the native numbers and the build results
+below are clean.
+
+| Check | Result |
+|-------|--------|
+| `cargo fmt --all -- --check` | clean |
+| `cargo clippy --workspace --all-targets -- -D warnings` | `Finished`, exit 0 (final code) |
+| `cargo test --release -p tbg-client layout -- --include-ignored` | `test result: ok. 6 passed; 0 failed` |
+| `cargo test -p tbg-client` (debug, final code) | `test result: ok. 101 passed; 0 failed; 1 ignored` (the ignored one is the probe) |
+| `cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown` | exit 0 |
+| `node --test tests/*.test.js` | `pass 30`, `fail 0` |
+| `trunk build --release` | `✅ success` (final code) |
+
+### Layout unit tests (`visuals/layout.rs`)
+
+| Test | Contract |
+|------|----------|
+| `no_overlap_while_the_lane_has_room` | 20 units at one `x` per seat, plus a spread army with large bodies: zero overlapping pairs |
+| `front_unit_stays_at_its_true_x_and_nothing_is_ahead` | each seat's front unit is drawn at its `x`; no unit is drawn ahead of it |
+| `same_input_gives_the_same_slots_in_any_order` | reversed input, identical slots |
+| `surviving_units_keep_their_file_when_one_dies` | the front unit of seat A dies; every other unit keeps its file |
+| `three_hundred_units_within_budget` | 300 units, fastest of 50 frames, must be under 2 ms in debug |
+
+### Layout cost
+
+| Case | Result |
+|------|--------|
+| 300 units, release, fastest of 50 frames (stress: 150 per seat packed into 14 tiles) | 295 µs; the budget is 200 µs, so **over budget in this stress case** |
+| 300 units, debug | under the 2 ms test bound |
+| bot matches, release, mean over 22,590 samples (about 11 units each) | 1.1 µs per frame |
+
+A real army is at most about 28 units (the bot's peak), so the stress case
+is about ten times larger than a real match needs.
+
+### Overlap before and after (40 bot × bot matches, sampled every 0.5 s)
+
+Probe: `probe_bot_matches`, offline `tbg-core` matches (no network). Radii
+from the figure plan (0.36 small, 0.54 large). Both columns use the same
+drawn-disc test (centres closer than `r₁ + r₂ − 0.02`).
+
+| Metric | Old lane rule (`lane_z`) | New layout |
+|--------|--------------------------|------------|
+| Samples (22,590) with at least one overlap | 91.4 % | 19.6 % |
+| Overlapping pairs in total | 225,933 | 4,663 |
+| …of which same seat | 221,847 | 86 |
+| …of which opposing seats | 4,086 | 4,577 |
+| Units (249,321 unit-samples) overlapping at least one other | 63.6 % | 3.7 % |
+| Units overlapping two or more others | 41.0 % | 0.014 % (36 units) |
+| Worst pile: most overlaps on one unit | 16 | 3 |
+| Opposing-seat pairs with both units on rank 0 | not counted | 3,850 (1,563 with two small bodies) |
+
+The target from the plan, zero overlapping pairs, is not reached: the
+remaining pairs are almost all between opposing seats, which the plan
+lays out independently (see *Deviations*). Same-seat overlaps went from
+221,847 to 86.
+
+### Browser (desktop Chrome headless, software GL, ?measure, 1920×1080)
+
+`?autoplay=practice&army=N&measure`, 45 s after the hook appeared, the
+baseline build (`main` of this phase, `8587f9a`) against this branch.
+Units are the sampled figures from `window.__getTbgMetrics()`.
+
+| Run | Army | Build | FPS | p50 ms | p95 ms | p99 ms | Load 1 min |
+|-----|------|-------|-----|--------|--------|--------|------------|
+| 1 | 40 | baseline | 16.5 | 50.1 | 83.4 | 116.7 | ≈17 |
+| 1 | 40 | new | 7.6 | 133.3 | 216.7 | 316.7 | ≈17 |
+| 1 | 150 | baseline | 7.0 | 133.3 | 266.6 | 383.4 | ≈17 |
+| 1 | 150 | new | 13.8 | 66.7 | 116.6 | 166.7 | ≈17 |
+| 2 | 40 | new | 14.2 | 66.6 | 133.4 | 183.4 | 17.0 |
+| 2 | 40 | baseline | 18.5 | 50.0 | 100.0 | 133.3 | 18.6 |
+| 2 | 150 | new | 19.0 | 50.0 | 83.4 | 116.7 | 18.0 |
+| 2 | 150 | baseline | 19.6 | 50.0 | 83.3 | 133.3 | 17.1 |
+| 3 | 40 | new | 16.9 | 50.0 | 100.0 | 133.3 | 16.3 |
+| 3 | 40 | baseline | 19.8 | 49.9 | 99.9 | 166.7 | 15.3 |
+| 3 | 150 | new | 21.8 | 33.3 | 149.9 | 183.3 | 14.1 |
+| 3 | 150 | baseline | 23.2 | 33.3 | 133.3 | 166.7 | 13.9 |
+
+Reading: at army 40 the new build was slower in all three pairs (FPS 2–9
+lower, p95 up to 130 ms higher). At army 150 the pairs are mixed. The
+layout itself costs about 1 µs per frame at real army sizes, so this is
+not the layout's arithmetic. The likely cause is the animator: eased
+positions keep units moving, so more units walk and fewer idle. That is a
+hypothesis, not measured. **The FPS and p95 criterion is not met on this
+machine**, and the software GL plus the shared load make it impossible
+to settle here. Re-measure on the owner's desktop when the machine is idle.
+
+Screenshots (960×540 JPG, mid-match, not a comparison of the same frame):
+`docs/media/p57/base-40.jpg`, `docs/media/p57/new-40.jpg`,
+`docs/media/p57/base-150.jpg`, `docs/media/p57/new-150.jpg`.
+
+### Not done
+
+- The two-minute Practice match looked at for jitter and lane swaps, and a
+  selection click followed to its ring and tag. Not run end to end. The
+  selection code is unchanged: the tag and ring follow the unit's root, and
+  the root now carries the slot.
+- The overlap target of zero across opposing seats (see *Deviations*).
+- The FPS and p95 criterion at `army=40` (see *Browser*).
+
+### Owner sign-off (look and fun)
+
+- The five-file, eight-rank look, and whether back ranks read well.
+- Melee impacts on displaced back-rank attackers (*Deviations*).
+- Whether the unit-to-unit overlap that remains between opposing seats is
+  acceptable for the first version.
