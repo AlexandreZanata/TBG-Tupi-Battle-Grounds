@@ -9,7 +9,7 @@ use bevy::prelude::*;
 use crate::art::{
     anim::{Clip, Easing::*, Pose},
     kits::{
-        tools::{self, hold, play, snap, window, Track},
+        tools::{self, hold, play, window, Track},
         Moment,
     },
     rig::{Joint::*, Proportions},
@@ -28,17 +28,6 @@ pub const ATTACK: f32 = 0.62;
 
 const Z: [f32; 3] = [0.0; 3];
 
-/// Two-handed overhead chop (axes, hammers, mallets).
-#[rustfmt::skip]
-pub const CHOP: &[Track] = &[
-    (UpperArmR, &[(0.0, [-30.0, 0.0, -10.0], Z, CubicInOut), (0.32, [-190.0, 0.0, -8.0], Z, CubicIn), (0.484, [-45.0, 0.0, -6.0], Z, Linear), (0.645, [-40.0, 0.0, -6.0], Z, CubicInOut), (1.0, [-30.0, 0.0, -10.0], Z, CubicInOut)]),
-    (ForearmR, &[(0.0, [-40.0, 0.0, 0.0], Z, CubicInOut), (0.32, [-55.0, 0.0, 0.0], Z, CubicIn), (0.484, [-8.0, 0.0, 0.0], Z, Linear), (1.0, [-40.0, 0.0, 0.0], Z, CubicInOut)]),
-    (UpperArmL, &[(0.0, [-30.0, 0.0, 10.0], Z, CubicInOut), (0.32, [-185.0, 0.0, 6.0], Z, CubicIn), (0.484, [-50.0, 0.0, 6.0], Z, Linear), (0.645, [-45.0, 0.0, 6.0], Z, CubicInOut), (1.0, [-30.0, 0.0, 10.0], Z, CubicInOut)]),
-    (ForearmL, &[(0.0, [-40.0, 0.0, 0.0], Z, CubicInOut), (0.32, [-50.0, 0.0, 0.0], Z, CubicIn), (0.484, [-10.0, 0.0, 0.0], Z, Linear), (1.0, [-40.0, 0.0, 0.0], Z, CubicInOut)]),
-    (Spine, &[(0.0, [4.0, 0.0, 0.0], Z, CubicInOut), (0.32, [-14.0, 0.0, 0.0], Z, CubicIn), (0.484, [26.0, 0.0, 0.0], Z, Linear), (0.645, [24.0, 0.0, 0.0], Z, CubicInOut), (1.0, [4.0, 0.0, 0.0], Z, CubicInOut)]),
-    (Hips, &[(0.0, Z, [0.0, -0.02, 0.0], CubicInOut), (0.32, Z, [0.0, 0.02, -0.03], CubicIn), (0.484, Z, [0.0, -0.07, 0.06], Linear), (0.645, Z, [0.0, -0.06, 0.05], CubicInOut), (1.0, Z, [0.0, -0.02, 0.0], CubicInOut)]),
-];
-
 /// One-handed side slash, right arm (swords, cleavers, claws).
 #[rustfmt::skip]
 pub const SLASH: &[Track] = &[
@@ -47,47 +36,6 @@ pub const SLASH: &[Track] = &[
     (ForearmR, &[(0.0, [-45.0, 0.0, 0.0], Z, CubicInOut), (0.32, [-60.0, 0.0, 0.0], Z, CubicIn), (0.484, [-5.0, 0.0, 0.0], Z, CubicOut), (1.0, [-45.0, 0.0, 0.0], Z, CubicInOut)]),
     (UpperArmL, &[(0.0, [-10.0, 0.0, 12.0], Z, CubicInOut), (0.32, [-40.0, 0.0, 30.0], Z, CubicIn), (0.484, [-10.0, 0.0, 35.0], Z, CubicInOut), (1.0, [-10.0, 0.0, 12.0], Z, CubicInOut)]),
     (Hips, &[(0.0, Z, [0.0, -0.02, 0.0], CubicInOut), (0.32, Z, [0.0, -0.03, -0.02], CubicIn), (0.484, Z, [0.0, -0.06, 0.05], CubicInOut), (1.0, Z, [0.0, -0.02, 0.0], CubicInOut)]),
-];
-
-/// A lunging thrust with the right arm (spears, daggers, pincers).
-#[rustfmt::skip]
-pub const THRUST: &[Track] = &[
-    (UpperArmR, &[(0.0, [-35.0, 0.0, -12.0], Z, CubicInOut), (0.32, [-60.0, 0.0, -25.0], Z, CubicIn), (0.484, [-92.0, 0.0, -4.0], Z, Linear), (0.645, [-88.0, 0.0, -4.0], Z, CubicInOut), (1.0, [-35.0, 0.0, -12.0], Z, CubicInOut)]),
-    (ForearmR, &[(0.0, [-40.0, 0.0, 0.0], Z, CubicInOut), (0.32, [-95.0, 0.0, 0.0], Z, CubicIn), (0.484, [-4.0, 0.0, 0.0], Z, Linear), (1.0, [-40.0, 0.0, 0.0], Z, CubicInOut)]),
-    (Chest, &[(0.0, [4.0, 0.0, 0.0], Z, CubicInOut), (0.32, [-4.0, -25.0, 0.0], Z, CubicIn), (0.484, [12.0, 20.0, 0.0], Z, Linear), (1.0, [4.0, 0.0, 0.0], Z, CubicInOut)]),
-    (Hips, &[(0.0, Z, [0.0, -0.02, 0.0], CubicInOut), (0.32, Z, [0.0, -0.03, -0.06], CubicIn), (0.484, Z, [0.0, -0.07, 0.1], Linear), (0.645, Z, [0.0, -0.06, 0.09], CubicInOut), (1.0, Z, [0.0, -0.02, 0.0], CubicInOut)]),
-];
-
-/// An overhand throw with the right arm; the release lands at k 0.29.
-#[rustfmt::skip]
-pub const THROW: &[Track] = &[
-    (UpperArmR, &[(0.0, [-20.0, 0.0, -10.0], Z, CubicInOut), (0.2, [-170.0, 0.0, -25.0], Z, CubicIn), (0.29, [-80.0, 0.0, -10.0], Z, CubicOut), (0.45, [-30.0, 0.0, -8.0], Z, CubicInOut), (1.0, [-20.0, 0.0, -10.0], Z, CubicInOut)]),
-    (ForearmR, &[(0.0, [-30.0, 0.0, 0.0], Z, CubicInOut), (0.2, [-90.0, 0.0, 0.0], Z, CubicIn), (0.29, [-10.0, 0.0, 0.0], Z, CubicOut), (1.0, [-30.0, 0.0, 0.0], Z, CubicInOut)]),
-    (UpperArmL, &[(0.0, [-10.0, 0.0, 10.0], Z, CubicInOut), (0.2, [-70.0, 0.0, 20.0], Z, CubicIn), (0.29, [-20.0, 0.0, 25.0], Z, CubicOut), (1.0, [-10.0, 0.0, 10.0], Z, CubicInOut)]),
-    (Chest, &[(0.0, [2.0, 0.0, 0.0], Z, CubicInOut), (0.2, [-12.0, -30.0, 0.0], Z, CubicIn), (0.29, [14.0, 25.0, 0.0], Z, CubicOut), (1.0, [2.0, 0.0, 0.0], Z, CubicInOut)]),
-    (Hips, &[(0.0, Z, Z, CubicInOut), (0.2, Z, [0.0, 0.0, -0.05], CubicIn), (0.29, Z, [0.0, -0.04, 0.06], CubicOut), (1.0, Z, Z, CubicInOut)]),
-];
-
-/// Both hands raised, then pushed at the target; release at k 0.355.
-#[rustfmt::skip]
-pub const CAST: &[Track] = &[
-    (UpperArmL, &[(0.0, [-15.0, 0.0, 10.0], Z, CubicInOut), (0.25, [-160.0, 0.0, 25.0], Z, CubicIn), (0.355, [-95.0, 0.0, 8.0], Z, CubicOut), (0.6, [-90.0, 0.0, 8.0], Z, CubicInOut), (1.0, [-15.0, 0.0, 10.0], Z, CubicInOut)]),
-    (UpperArmR, &[(0.0, [-15.0, 0.0, -10.0], Z, CubicInOut), (0.25, [-160.0, 0.0, -25.0], Z, CubicIn), (0.355, [-95.0, 0.0, -8.0], Z, CubicOut), (0.6, [-90.0, 0.0, -8.0], Z, CubicInOut), (1.0, [-15.0, 0.0, -10.0], Z, CubicInOut)]),
-    (ForearmL, &[(0.0, [-20.0, 0.0, 0.0], Z, CubicInOut), (0.355, [-5.0, 0.0, 0.0], Z, CubicInOut), (1.0, [-20.0, 0.0, 0.0], Z, CubicInOut)]),
-    (ForearmR, &[(0.0, [-20.0, 0.0, 0.0], Z, CubicInOut), (0.355, [-5.0, 0.0, 0.0], Z, CubicInOut), (1.0, [-20.0, 0.0, 0.0], Z, CubicInOut)]),
-    (Chest, &[(0.0, Z, Z, CubicInOut), (0.25, [-12.0, 0.0, 0.0], Z, CubicIn), (0.355, [14.0, 0.0, 0.0], Z, CubicOut), (1.0, Z, Z, CubicInOut)]),
-    (Hips, &[(0.0, Z, Z, CubicInOut), (0.25, Z, [0.0, 0.04, 0.0], CubicIn), (0.355, Z, [0.0, -0.05, 0.04], CubicOut), (1.0, Z, Z, CubicInOut)]),
-];
-
-/// One hand (and its staff) lifted, then pointed at the target; release at
-/// k 0.355 (supports, single-hand casters).
-#[rustfmt::skip]
-pub const POINT: &[Track] = &[
-    (UpperArmR, &[(0.0, [-20.0, 0.0, -10.0], Z, CubicInOut), (0.25, [-150.0, 0.0, -20.0], Z, CubicIn), (0.355, [-85.0, 0.0, -6.0], Z, CubicOut), (0.6, [-80.0, 0.0, -6.0], Z, CubicInOut), (1.0, [-20.0, 0.0, -10.0], Z, CubicInOut)]),
-    (ForearmR, &[(0.0, [-30.0, 0.0, 0.0], Z, CubicInOut), (0.25, [-20.0, 0.0, 0.0], Z, CubicIn), (0.355, [-5.0, 0.0, 0.0], Z, CubicOut), (1.0, [-30.0, 0.0, 0.0], Z, CubicInOut)]),
-    (UpperArmL, &[(0.0, [-10.0, 0.0, 10.0], Z, CubicInOut), (0.25, [-40.0, 0.0, 40.0], Z, CubicIn), (0.355, [-20.0, 0.0, 30.0], Z, CubicOut), (1.0, [-10.0, 0.0, 10.0], Z, CubicInOut)]),
-    (Chest, &[(0.0, Z, Z, CubicInOut), (0.25, [-10.0, -10.0, 0.0], Z, CubicIn), (0.355, [10.0, 10.0, 0.0], Z, CubicOut), (1.0, Z, Z, CubicInOut)]),
-    (Hips, &[(0.0, Z, Z, CubicInOut), (0.25, Z, [0.0, 0.03, 0.0], CubicIn), (0.355, Z, [0.0, -0.03, 0.03], CubicOut), (1.0, Z, Z, CubicInOut)]),
 ];
 
 /// Play an attack table over the common length and keep the feet down.
@@ -305,40 +253,17 @@ pub fn evolve(m: &Moment, pose: &mut Pose, p: &Proportions, power: Power) {
     tools::plant(pose, p, tools::stance(p, 1.3, 0.03));
 }
 
-#[derive(Clone, Copy)]
-pub enum Cheer {
-    /// Pumps the weapon arm.
-    Raise,
-    /// Both arms up, bouncing.
-    Both,
-    /// Rocks side to side.
-    Dance,
-}
-
 /// The victory loop (0.8 s).
-pub fn victory(m: &Moment, pose: &mut Pose, p: &Proportions, cheer: Cheer) {
+pub fn victory(m: &Moment, pose: &mut Pose, p: &Proportions) {
     let k = (m.t / 0.8).rem_euclid(1.0);
     let beat = (k * std::f32::consts::TAU).sin();
     pose[Root.index()] = (Vec3::ZERO, Vec3::Y * 0.04 * beat.max(0.0));
     for j in [UpperArmL, UpperArmR, ForearmL, ForearmR] {
         pose[j.index()].0 = Vec3::ZERO;
     }
-    match cheer {
-        Cheer::Raise => {
-            tools::set(pose, UpperArmR, [-160.0 - 15.0 * beat, 0.0, -15.0]);
-            tools::set(pose, UpperArmL, [-20.0, 0.0, 25.0]);
-            tools::set(pose, ForearmL, [-60.0, 0.0, 0.0]);
-        }
-        Cheer::Both => {
-            tools::set(pose, UpperArmL, [-160.0 - 10.0 * beat, 0.0, 25.0]);
-            tools::set(pose, UpperArmR, [-160.0 + 10.0 * beat, 0.0, -25.0]);
-        }
-        Cheer::Dance => {
-            tools::add(pose, Spine, [0.0, 0.0, 10.0 * beat]);
-            tools::set(pose, UpperArmL, [-40.0, 0.0, 50.0 + 20.0 * beat]);
-            tools::set(pose, UpperArmR, [-40.0, 0.0, -50.0 + 20.0 * beat]);
-        }
-    }
+    tools::add(pose, Spine, [0.0, 0.0, 10.0 * beat]);
+    tools::set(pose, UpperArmL, [-40.0, 0.0, 50.0 + 20.0 * beat]);
+    tools::set(pose, UpperArmR, [-40.0, 0.0, -50.0 + 20.0 * beat]);
     tools::add(pose, Head, [-15.0, 10.0 * beat, 0.0]);
     tools::plant(pose, p, tools::stance(p, 1.2, 0.0));
 }
@@ -349,31 +274,6 @@ pub fn guard(pose: &mut Pose, w: f32) {
     tools::add(pose, ForearmR, [-40.0 * w, 0.0, 0.0]);
     tools::add(pose, UpperArmL, [-25.0 * w, 0.0, 8.0 * w]);
     tools::add(pose, ForearmL, [-30.0 * w, 0.0, 0.0]);
-}
-
-/// Both hands on a pole held in the right hand's socket (haft along +Y):
-/// `swing` turns it about the body (degrees, + toward the left), `tilt`
-/// leans its top forward (degrees), `drop` lowers the hands, `span` is
-/// how far down the haft the left hand holds.
-pub fn pole(pose: &mut Pose, p: &Proportions, (swing, tilt): (f32, f32), drop: f32, span: f32) {
-    let turn = Quat::from_rotation_y(swing.to_radians());
-    let grip = turn * Quat::from_rotation_x(tilt.to_radians());
-    let wrist = turn * Vec3::new(-0.1, 0.0, 0.26) + Vec3::new(-0.08, 0.1 - drop, 0.0);
-    tools::reach(
-        pose,
-        false,
-        wrist,
-        Some(grip),
-        (p, Vec3::new(-1.0, -0.5, -0.4)),
-    );
-    let lower = wrist + grip * Vec3::new(0.0, -span, 0.0);
-    tools::reach(
-        pose,
-        true,
-        lower,
-        Some(grip),
-        (p, Vec3::new(1.0, -0.5, -0.4)),
-    );
 }
 
 /// A long weapon at the shoulder in both hands (crossbows, guns): the
@@ -408,20 +308,6 @@ pub fn aim_level(m: &Moment, pose: &mut Pose, height: f32, arc: f32) -> f32 {
     crate::art::kits::aim::pitch(need).clamp(-0.5, 0.9) * aim.weight
 }
 
-/// The overhand `THROW` retimed so the release lands on a cast's Release
-/// (k 0.355) instead of a ranged one (k 0.29): tossed flasks, crates.
-pub fn toss(m: &Moment, pose: &mut Pose, p: &Proportions) {
-    let k = (m.t / ATTACK).clamp(0.0, 1.0);
-    let k = if k < 0.355 {
-        k * 0.29 / 0.355
-    } else {
-        0.29 + (k - 0.355) * 0.71 / 0.645
-    };
-    play(pose, THROW, k);
-    tools::face(pose, m.aim, Vec3::ZERO);
-    tools::plant(pose, p, tools::stance(p, 1.2, 0.06));
-}
-
 /// A staff (along the right socket's +Y) held upright at the right side:
 /// `tilt` leans its head forward (degrees), `lift` raises the hand,
 /// `fore` pushes it forward.
@@ -434,32 +320,4 @@ pub fn staff(pose: &mut Pose, p: &Proportions, tilt: f32, lift: f32, fore: f32) 
         Some(grip),
         (p, Vec3::new(-1.0, -0.5, -0.4)),
     );
-}
-
-/// A staff cast: raise the staff, thrust its head at the target on the
-/// cast Release (0.22 s), the free hand clawing after it; then settle.
-pub fn staff_cast(m: &Moment, pose: &mut Pose, p: &Proportions) {
-    let raise = window(m.t, 0.0, 0.2);
-    let thrust = snap(m.t, 0.2, 0.24) * (1.0 - window(m.t, 0.4, 0.62));
-    tools::face(pose, m.aim, Vec3::ZERO);
-    tools::add(
-        pose,
-        Chest,
-        [-8.0 * raise * (1.0 - thrust) + 12.0 * thrust, 0.0, 0.0],
-    );
-    staff(
-        pose,
-        p,
-        -15.0 * raise + 70.0 * thrust,
-        0.15 * raise,
-        0.18 * thrust,
-    );
-    tools::reach(
-        pose,
-        true,
-        Vec3::new(0.18, 0.2 + 0.1 * raise, 0.25 + 0.1 * thrust),
-        None,
-        (p, Vec3::new(1.0, -0.6, -0.3)),
-    );
-    tools::plant(pose, p, tools::stance(p, 1.3, 0.08));
 }
