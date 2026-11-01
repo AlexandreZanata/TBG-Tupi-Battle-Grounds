@@ -24,7 +24,12 @@ fn capture(
     mut exit: MessageWriter<AppExit>,
 ) {
     let Some(review) = review else { return };
-    if review.page >= PAGE_COUNT {
+    let pages = if crate::config::url_param("capture_idle_only").is_some() {
+        1
+    } else {
+        PAGE_COUNT
+    };
+    if review.page >= pages {
         exit.write(AppExit::Success);
         return;
     }

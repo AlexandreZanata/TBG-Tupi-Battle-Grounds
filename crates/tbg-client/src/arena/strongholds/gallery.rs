@@ -87,3 +87,41 @@ pub(super) fn spawn(
         },
     ));
 }
+
+/// Opt-in temporal fixture: damage, destruction, then a fresh healthy rematch look.
+pub(super) fn wear_sequence(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut art: ResMut<StrongholdArt>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut towers: Query<(Entity, &mut Tower)>,
+    mut previous: Local<Option<u8>>,
+) {
+    if config::url_param("damage_sweep").is_none() {
+        return;
+    }
+    let step = ((time.elapsed_secs() - 3.0).max(0.0) / 0.5) as u8;
+    let stage = if step > 20 { 0 } else { step };
+    if *previous == Some(stage) {
+        return;
+    }
+    for (root, mut tower) in &mut towers {
+        if tower.live {
+            continue;
+        }
+        let Some(mut look) = tower.look else {
+            continue;
+        };
+        look.damage = stage;
+        if *previous == Some(20) && stage == 0 {
+            dress(&mut commands, &mut art, &mut meshes, root, &mut tower, look);
+        } else {
+            tower.look = Some(look);
+        }
+    }
+    eprintln!(
+        "P71 wear fixture: stage={stage}, time={}",
+        time.elapsed_secs()
+    );
+    *previous = Some(stage);
+}

@@ -37,6 +37,7 @@ pub(super) fn plugin(app: &mut App) {
             Update,
             (
                 sync_looks,
+                gallery::wear_sequence,
                 aim::orders,
                 motion::fire,
                 aim::track,

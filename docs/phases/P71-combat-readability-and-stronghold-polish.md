@@ -1,13 +1,15 @@
 # P71 — Combat readability, fire identity and Stronghold polish
 
-**Status:** planned from owner feedback, 2026-11-01; implementation not started.
+**Status:** execution in progress; Trident motion refinement blocked, see execution report.
 **Planning branch:** `codex/p71-combat-visual-plan`.
 **Execution branch:** `phase/p71-combat-visual-polish`.
 **Art baseline:** P70 `b2680c3` (runtime source `c481369`), preserving the
 46-champion cohort and its 230 forms. Resolve onto a reviewed descendant if
 other fronts integrate first; record the actual execution SHA and installer.
 **Delivery:** local commits, genuine renderer evidence and a native Linux
-playtest candidate; no push, merge, public deployment or release packaging.
+playtest candidate. Owner authorization on 2026-11-01 adds GitHub push after
+commits and native Linux reinstall afterward, including subsequent targeted
+adjustments. No merge, public deployment or release packaging.
 Do not overwrite the owner's current worktree or P70 originals.
 
 ## 1. Owner outcome and scope

@@ -57,7 +57,11 @@ per-step demands for broad checks. See *Verification* below and
    inbound message; never panic on client input; rate limits and
    timeouts as specified; TLS for anything public.
 5. **Archive.** Never import from, edit, or delete `archive/`.
-6. **Git.** Never push, force-push, or rewrite history. One logical change
+6. **Git.** Never force-push or rewrite history. The owner explicitly
+   authorized the P71 delivery workflow on 2026-11-01: commit completed
+   changes, push the execution branch to GitHub, then reinstall the native
+   Linux playtest. Apply that same workflow to each subsequent requested
+   targeted adjustment. This does not authorize merging or public deployment. One logical change
    per commit. No build outputs or large binaries in git.
 7. **English only** in code, comments, docs, and commits.
 
