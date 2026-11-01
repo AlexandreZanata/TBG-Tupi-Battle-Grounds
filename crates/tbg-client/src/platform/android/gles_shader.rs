@@ -14,7 +14,7 @@ pub fn adapt(mut shaders: ResMut<Assets<Shader>>, mut done: Local<bool>) {
         return;
     };
     *done = true;
-    let Some(shader) = shaders.get_mut(id) else {
+    let Some(mut shader) = shaders.get_mut(id) else {
         return;
     };
     let Source::Wesl(source) = &shader.source else {
