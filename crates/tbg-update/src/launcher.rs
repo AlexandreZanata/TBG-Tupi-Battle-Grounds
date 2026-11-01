@@ -139,8 +139,12 @@ pub fn run(layout: &Layout, args: &[OsString]) -> i32 {
             let _ = receipt::record(layout, receipt::Kind::Recovered, &to, &from, Vec::new());
             outcome = Outcome::Recovered;
         }
+        Ok(Recovery::Committed { .. }) => outcome = Outcome::Updated,
         Ok(_) => {}
-        Err(e) => eprintln!("tbg-launcher: journal recovery failed: {e}"),
+        Err(e) => {
+            eprintln!("tbg-launcher: journal recovery failed: {e}");
+            return 1;
+        }
     }
     loop {
         let Some(build) = layout
@@ -216,12 +220,21 @@ fn roll_back(layout: &Layout, from: &str, to: &str) -> Step {
     Step::Relaunch(Outcome::Recovered)
 }
 
-/// The candidate proved healthy: clear the journal, queue its notes and
-/// drop releases older than the kept fallback.
+/// Commit health before notes, then clear the journal. Retention needs owner policy.
 fn commit(layout: &Layout, from: &str, to: &str) {
-    if journal::store(layout, None).is_ok() {
-        let _ = receipt::record(layout, receipt::Kind::Updated, to, from, Vec::new());
-        let _ = activate::cleanup(layout, &[]);
+    let Some(Txn::Launching { id, .. }) = journal::load(layout) else {
+        return;
+    };
+    let healthy = Txn::Healthy {
+        id,
+        from: from.into(),
+        to: to.into(),
+    };
+    if journal::store(layout, Some(&healthy))
+        .and_then(|_| activate::finish_healthy(layout, from, to))
+        .is_err()
+    {
+        eprintln!("tbg-launcher: healthy receipt commit pending; retained recovery journal");
     }
 }
 

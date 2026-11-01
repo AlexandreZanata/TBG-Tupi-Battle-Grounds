@@ -26,12 +26,21 @@ pub enum Txn {
         from: String,
         to: String,
     },
+    /// Boot health is durable; finish the notes receipt before clearing the journal.
+    Healthy {
+        id: String,
+        from: String,
+        to: String,
+    },
 }
 
 impl Txn {
     pub fn id(&self) -> &str {
         match self {
-            Txn::Staged { id, .. } | Txn::Activating { id, .. } | Txn::Launching { id, .. } => id,
+            Txn::Staged { id, .. }
+            | Txn::Activating { id, .. }
+            | Txn::Launching { id, .. }
+            | Txn::Healthy { id, .. } => id,
         }
     }
 }
@@ -43,10 +52,18 @@ struct Doc {
 }
 
 pub fn load(layout: &Layout) -> Option<Txn> {
-    let doc: Doc = fsx::read_json(&layout.journal(), 64 * 1024).ok()?;
-    (doc.schema == crate::descriptor::LOCAL_STATE)
-        .then_some(doc.txn)
-        .flatten()
+    load_checked(layout).ok().flatten()
+}
+
+pub fn load_checked(layout: &Layout) -> std::io::Result<Option<Txn>> {
+    if !layout.journal().try_exists()? {
+        return Ok(None);
+    }
+    let doc: Doc = fsx::read_json(&layout.journal(), 64 * 1024)?;
+    if doc.schema != crate::descriptor::LOCAL_STATE {
+        return Err(std::io::Error::other("unsupported update journal schema"));
+    }
+    Ok(doc.txn)
 }
 
 pub fn store(layout: &Layout, txn: Option<&Txn>) -> std::io::Result<()> {

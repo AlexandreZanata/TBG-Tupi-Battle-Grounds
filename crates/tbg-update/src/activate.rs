@@ -43,16 +43,29 @@ pub enum Recovery {
         from: String,
         to: String,
     },
+    /// The healthy candidate's receipt is now durable, including after a crash.
+    Committed {
+        from: String,
+        to: String,
+    },
     /// The switch had not started: the old selection stands.
     Unchanged,
 }
 
 /// Reconcile the journal with the selection files (U05).
 pub fn reconcile(layout: &Layout) -> io::Result<Recovery> {
-    let Some(txn) = journal::load(layout) else {
+    let Some(txn) = journal::load_checked(layout)? else {
         return Ok(Recovery::Nothing);
     };
     match txn {
+        Txn::Healthy { from, to, .. } => {
+            if !complete(layout, &to) {
+                return Err(io::Error::other("healthy release is incomplete"));
+            }
+            restore(layout, &to)?;
+            finish_healthy(layout, &from, &to)?;
+            Ok(Recovery::Committed { from, to })
+        }
         Txn::Staged { to, .. } => {
             if complete(layout, &to) {
                 Ok(Recovery::StillStaged(to))
@@ -75,6 +88,12 @@ pub fn reconcile(layout: &Layout) -> io::Result<Recovery> {
             }
         }
     }
+}
+
+/// The receipt must survive before the last recovery marker disappears (U10).
+pub fn finish_healthy(layout: &Layout, from: &str, to: &str) -> io::Result<()> {
+    crate::receipt::record(layout, crate::receipt::Kind::Updated, to, from, Vec::new())?;
+    journal::store(layout, None)
 }
 
 /// Remove release directories that are not current, previous, staged or

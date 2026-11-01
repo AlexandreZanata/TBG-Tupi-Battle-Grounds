@@ -404,3 +404,52 @@ fn copy_dir(from: &Path, to: &Path) {
         fs::copy(e.path(), to.join(e.file_name())).unwrap();
     }
 }
+
+#[test]
+fn u10_crash_after_health_keeps_the_candidate_and_recovers_notes() {
+    let f = Fixture::new();
+    f.publish("b1", 1, "exit 0");
+    install_current(&f, "b1");
+    f.publish("b2", 2, "exit 0");
+    assert_eq!(f.stage("b2"), 0);
+    activate::switch(&f.layout, "b1", "b2").unwrap();
+    journal::store(
+        &f.layout,
+        Some(&Txn::Healthy {
+            id: "interrupted-commit".into(),
+            from: "b1".into(),
+            to: "b2".into(),
+        }),
+    )
+    .unwrap();
+    assert_eq!(
+        activate::reconcile(&f.layout).unwrap(),
+        activate::Recovery::Committed {
+            from: "b1".into(),
+            to: "b2".into(),
+        }
+    );
+    assert_eq!(f.layout.current_build().as_deref(), Some("b2"));
+    assert_eq!(receipt::pending(&f.layout).unwrap().build, "b2");
+    assert_eq!(
+        activate::reconcile(&f.layout).unwrap(),
+        activate::Recovery::Nothing
+    );
+    assert!(receipt::acknowledge(&f.layout, "b2").unwrap());
+    assert_eq!(
+        activate::reconcile(&f.layout).unwrap(),
+        activate::Recovery::Nothing
+    );
+    assert!(receipt::pending(&f.layout).is_none());
+}
+
+#[test]
+fn u05_corrupt_journal_refuses_to_launch_instead_of_ignoring_recovery() {
+    let f = Fixture::new();
+    f.publish("b1", 1, "exit 0");
+    install_current(&f, "b1");
+    fs::write(f.layout.journal(), b"{interrupted").unwrap();
+    assert!(activate::reconcile(&f.layout).is_err());
+    assert_eq!(launcher::run(&f.layout, &[]), 1);
+    assert_eq!(f.layout.current_build().as_deref(), Some("b1"));
+}
