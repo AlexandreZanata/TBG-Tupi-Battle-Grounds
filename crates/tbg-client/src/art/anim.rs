@@ -223,6 +223,11 @@ impl Animator {
             self.play(clip);
         }
     }
+    /// Return a review cycle from a looping action to locomotion, with the normal pose blend.
+    pub fn finish_action(&mut self) {
+        self.action = None;
+        self.fade = Some((self.last, FADE));
+    }
     pub fn set_base(&mut self, clip: Clip) {
         if self.base != clip {
             self.base = clip;

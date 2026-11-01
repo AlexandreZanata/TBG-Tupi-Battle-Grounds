@@ -46,7 +46,7 @@ impl Review {
             "secondary_motion": "rest-equilibrium; temporal capture required",
             "aim": null,
             "layout": "columns Base/A1/A2/B1/B2; rows ascending sample time",
-            "camera_preset": "p70-fixed-sheet-v1",
+            "camera_preset": if wide() { "p70-wide-sheet-v1" } else { "p70-fixed-sheet-v1" },
             "camera": {
                 "center": center.to_array(),
                 "half_width": half_width,
@@ -76,7 +76,11 @@ pub(super) fn spawn(commands: &mut Commands, lib: &FigureLibrary, options: &Gall
                 lib,
                 unit,
                 form,
-                Vec3::new(column as f32 * COLUMN_GAP, -(row as f32) * ROW_GAP, 0.0),
+                Vec3::new(
+                    column as f32 * COLUMN_GAP * spacing(),
+                    -(row as f32) * ROW_GAP * spacing(),
+                    0.0,
+                ),
                 &lib.material,
             );
             commands.entity(animator.figure).insert(
@@ -161,11 +165,23 @@ pub(super) fn update(
 /// Same framing for all champions, forms, orientations and source revisions.
 pub(super) fn camera() -> (Vec3, f32, f32, Vec3) {
     (
-        Vec3::new(7.0, -7.0, 0.0),
-        9.2,
-        10.6,
+        Vec3::new(7.0, -7.0, 0.0) * spacing(),
+        9.2 * spacing(),
+        10.6 * spacing(),
         Vec3::new(0.0, 0.7, 10.0),
     )
+}
+
+fn wide() -> bool {
+    crate::config::url_param("polish_wide").is_some()
+}
+
+fn spacing() -> f32 {
+    if wide() {
+        1.6
+    } else {
+        1.0
+    }
 }
 
 pub(super) fn duration(unit: UnitKind, form: (u8, u8), clip: Clip) -> f32 {

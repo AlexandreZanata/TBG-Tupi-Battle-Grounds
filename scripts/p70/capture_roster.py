@@ -110,6 +110,8 @@ def capture(directory, unit, view, args):
         'TBG_CAPTURE_POLISH': str(directory), 'TBG_CAPTURE_SIZE': args.size,
         'TBG_QUALITY': args.quality, 'TBG_SERVER': 'ws://127.0.0.1:9/ws',
     })
+    if args.wide:
+        env['TBG_POLISH_WIDE'] = '1'
     command = ['xvfb-run', '-a', '-s', f'-screen 0 {args.size}x24', str(args.binary)]
     # A dedicated process group lets timeout clean up only this capture's Xvfb/client.
     with (directory / 'renderer.log').open('x') as log:
@@ -143,6 +145,7 @@ def main():
     parser.add_argument('--team', choices=['ally', 'enemy'], default='ally')
     parser.add_argument('--size', default='1920x2160')
     parser.add_argument('--timeout', type=int, default=180)
+    parser.add_argument('--wide', action='store_true', help='Supplementary framing for long weapons; keep fixed sheets for baseline pairs')
     parser.add_argument('--resume', action='store_true')
     parser.add_argument('--plan-only', action='store_true')
     parser.add_argument('units', nargs='*')
@@ -172,7 +175,7 @@ def main():
     plan = {'phase': args.phase, 'content_sha': args.content_sha, 'tooling_sha': tooling,
             'units': units, 'views': args.views, 'forms': manifest['forms'],
             'clip_ids': manifest['clip_ids'], 'size': args.size, 'quality': args.quality,
-            'team': args.team, 'binary': str(args.binary), 'binary_sha256': digest,
+            'team': args.team, 'wide': args.wide, 'binary': str(args.binary), 'binary_sha256': digest,
             'build_receipt': str(args.build_receipt.resolve()),
             'evidence_kind': 'event-free-pose-sheets', 'artifact_derivation': 'renderer-original'}
     if args.plan_only:

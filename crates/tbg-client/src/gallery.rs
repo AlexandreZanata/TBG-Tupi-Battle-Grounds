@@ -113,7 +113,10 @@ fn cycle(time: Res<Time>, options: Res<Gallery>, mut figures: Query<(&mut Animat
         }
         c.shown = Some(step);
         match CLIPS[i] {
-            base @ (Clip::Idle | Clip::Walk) => anim.set_base(base),
+            base @ (Clip::Idle | Clip::Walk) => {
+                anim.finish_action();
+                anim.set_base(base);
+            }
             clip => anim.play(clip),
         }
     }
