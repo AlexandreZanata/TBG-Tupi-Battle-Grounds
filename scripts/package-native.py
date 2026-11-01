@@ -68,7 +68,11 @@ def main():
         (package / "LICENSE-STATUS.txt").write_text(
             "The project owner has not selected a project license.\n"
             "See THIRD_PARTY_NOTICES.md and assets/fonts/OFL.txt for third-party notices.\n")
-    shutil.copy2(ROOT / "deploy/native/README.txt", package / "README.txt")
+    readme = (ROOT / "deploy/native/README.txt").read_text()
+    for marker, value in {"VERSION": version, "PLATFORM": args.platform,
+                          "SOURCE": commit, "CONTRACT": metadata["contract"]}.items():
+        readme = readme.replace("@" + marker + "@", value)
+    (package / "README.txt").write_text(readme, encoding="utf-8")
     if args.platform == "linux":
         shutil.copy2(ROOT / "scripts/install-linux.sh", package / "install.sh")
         (package / "install.sh").chmod(0o755)

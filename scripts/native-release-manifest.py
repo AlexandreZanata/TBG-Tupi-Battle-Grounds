@@ -24,7 +24,7 @@ def identity(archive):
         with zipfile.ZipFile(archive) as package:
             names = package.namelist()
             indexes = [name for name in names if name.count('/') == 1 and name.endswith('/build-info.json')]
-            require(len(indexes) == 1, 'one package identity required')
+            require(len(indexes) == 1 and package.getinfo(indexes[0]).file_size <= 65536, 'one bounded package identity required')
             return json.loads(package.read(indexes[0]))
     with tarfile.open(archive, 'r:gz') as package:
         indexes = [m for m in package if m.isfile() and m.name.count('/') == 1 and m.name.endswith('/build-info.json')]

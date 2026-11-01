@@ -27,7 +27,7 @@ on:
       - 'scripts/package-native.py'
       - 'scripts/*windows*.ps1'
       - 'scripts/native-release-manifest.py'
-      - 'deploy/native/windows/**'
+      - 'deploy/native/**'
       - 'scripts/install-linux.sh'
       - 'scripts/package-appimage.sh'
       - 'scripts/managed-bootstrap.sh'
@@ -43,7 +43,7 @@ on:
       - 'scripts/package-native.py'
       - 'scripts/*windows*.ps1'
       - 'scripts/native-release-manifest.py'
-      - 'deploy/native/windows/**'
+      - 'deploy/native/**'
       - 'scripts/install-linux.sh'
       - 'scripts/package-appimage.sh'
       - 'scripts/managed-bootstrap.sh'
@@ -168,14 +168,16 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: windows-2022-msvc-static-crt-ui-acceptance
-          save-if: ${{ github.ref == 'refs/heads/main' }}
+          # Trusted manual branch candidates keep one reusable Windows cache.
+          # Fork PRs cannot save it; tags only restore tested dependencies.
+          save-if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.ref_type == 'branch') }}
       - name: Check and build the MSVC desktop candidate
         shell: pwsh
         run: |
           . ./scripts/windows-env.ps1
           $version = python -c 'import tomllib; print(tomllib.load(open("crates/tbg-client/Cargo.toml", "rb"))["package"]["version"])'
           if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$version") { throw 'Tag and executable version differ' }
-          cargo test --locked -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance platform:: -- --test-threads=1
+          cargo test --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance platform:: -- --test-threads=1
           if ($LASTEXITCODE) { throw 'Windows platform regressions failed' }
           cargo build --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance
           if ($LASTEXITCODE) { throw 'MSVC release build failed' }
