@@ -12,7 +12,7 @@ Do not overwrite the owner's current worktree or P70 originals.
 
 ## 1. Owner outcome and scope
 
-The owner reports Trident's HP bar entering its shark body, redundant blue
+The owner reports Trident's and Whisperer's HP bars entering their bodies, redundant blue
 team bands, hard-to-read Evolution cubes and buggy tower shots. They request
 bright yellow outlined Evolution stars, red/orange flame, a white/red/black
 Pyre Warden and professional-looking tower performances and progressive
@@ -52,6 +52,14 @@ Owner screenshot: `/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_07-28-5
 It shows the HP bar cutting through Trident's upper silhouette. It is a
 reported installed-build frame, not a temporal proof of any tower-shot bug.
 Do not invent animation findings from this still.
+
+Additional owner screenshot:
+`/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_07-46-37.png`,
+1920 × 1080, SHA-256
+`f606ea8f2c650df016791d61361cf76b5d8c7a19d787a4b3a8d6e4f98d07c19e`.
+It shows selected Base Whisperer with its HP bar crossing the floating upper
+body beneath the name label. Whisperer is a second mandatory regression case,
+not merely part of the generic roster sweep. Preserve both owner originals.
 
 Confirmed source limitations on P70:
 
@@ -131,8 +139,12 @@ no old capture is relabeled as new, and missing evidence is explicit.
    accessible shape distinction; where absent, author a subtle solid/notched
    ring difference using shared geometry and verify both at match distance.
 
-Acceptance: Trident Base/A1/A2/B1/B2 bars clear its body on both sides during
-Idle/Walk/Attack/Evolve. Check other 45 champions' five-form envelopes with
+Acceptance: Trident and Whisperer Base/A1/A2/B1/B2 bars clear their bodies
+on both sides during Idle/Walk/primary action/Evolve. For Whisperer, include
+the floating body's upper envelope, hood/attachments and hover motion; the
+bar must stay stable and clear without clipping the name label or Evolution
+stars. Reproduce the selected Base case from the second owner screenshot.
+Check the other 44 champions' five-form envelopes with
 existing evidence plus affected captures. Base/one/two-star transitions,
 reconnect, names, statuses, passenger overheads and death stay consistent.
 No need to build a general-purpose HUD framework.

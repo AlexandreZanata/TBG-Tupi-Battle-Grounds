@@ -6,7 +6,7 @@ installer, saved preferences, combat values or running game were changed.
 
 ## Input and baseline
 
-Owner request: HP bar clearance for Trident; remove body team bands; brighter
+Owner request: HP bar clearance for Trident and Whisperer; remove body team bands; brighter
 outlined yellow Evolution stars; white/red/black Pyre Warden and orange/red
 flame; polish all Stronghold performances, diagnose buggy shots and add
 cumulative breakage, fragments and fire for every 5% HP lost.
@@ -16,6 +16,15 @@ The inspected owner screenshot is 1920 × 1080 at
 `29359afaf162a5a9eef744fdea30fe2e43a1e53e8044dc930c8f1ccd0512bcc6`.
 Its source file was read only. It confirms the bar overlap but cannot prove
 a firing animation fault or the exact simulation state.
+
+Owner follow-up adds selected Base Whisperer in
+`/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_07-46-37.png`,
+1920 × 1080, SHA-256
+`f606ea8f2c650df016791d61361cf76b5d8c7a19d787a4b3a8d6e4f98d07c19e`.
+The HP bar crosses the floating upper body beneath its name. S1 explicitly
+requires both-seat, five-form Whisperer clearance through hover and primary
+motion, with stable placement and no name/star overlap. This remains a
+planning addition; no runtime fix is claimed.
 
 Planning branch `codex/p71-combat-visual-plan` starts at P70 `b2680c3`, whose
 runtime source is `c481369`. P70 is already installed for local playtesting;
