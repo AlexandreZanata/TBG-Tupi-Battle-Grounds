@@ -14,11 +14,13 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const COAT: Color = Color::srgb(0.32, 0.24, 0.2);
-const HAT: Color = Color::srgb(0.17, 0.14, 0.13);
+const COAT: Color = RUST;
+const HAT: Color = CHARCOAL;
 
 pub fn plan(tier: u8) -> Proportions {
-    body::plan(false, 1.0, tier)
+    let mut p = body::plan(false, 1.0, tier);
+    p.arm = 0.20;
+    p
 }
 
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
@@ -35,6 +37,21 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     body::tunic(&mut v, &p, COAT, DARK_LEATHER, RED_CLOTH);
     head(&mut v, &p, f);
     pack(&mut v, f);
+    v.push(
+        part(
+            Body(Chest),
+            Box(0.045, 0.37, 0.025),
+            LINEN,
+            [-0.11, 0.19, 0.15],
+        )
+        .rot([0.0, 0.0, -14.0]),
+    );
+    v.push(part(
+        Body(Chest),
+        Box(0.06, 0.05, 0.028),
+        BRASS,
+        [-0.08, 0.12, 0.17],
+    ));
     let gun = Prop(Socket::WeaponR);
     v.extend([
         part(gun, Box(0.06, 0.09, 0.12), IRON, [0.0, 0.02, 0.08]),
