@@ -38,3 +38,13 @@ choices with retained focus and outside dismissal; independent Tick pistol
 and brother-specific Evolution branches; larger humanoid-bee Hornet with a
 venom pistol connected to its abdomen. Gameplay changes require Proposed
 canon entries and targeted authoritative regression evidence.
+
+### Support facing and Farwatch follow-up
+
+Bloomkeeper now twists the upper body for healing rather than repeatedly
+turning the locomotion Root. A regression covers rear targets on either side
+of the ±180-degree boundary. Farwatch uses ordinary Guard/nearest-target
+selection and can attack an unguarded Stronghold within its unchanged range.
+This owner rule is marked Proposed in §C.2; revision 4 records the changed
+ruleset source. Native `followup-check.log` passed in 1.79 s. Focused tests
+are queued for the final consolidation; no broad balance gate ran.

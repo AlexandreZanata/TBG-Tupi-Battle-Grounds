@@ -701,7 +701,7 @@ Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). S
 | Unit | Faction | Class | Cost | HP | Dmg | Every | Range | Speed | Identity in one line |
 |------|---------|-------|------|----|-----|-------|-------|-------|----------------------|
 | Rotcap | Plants | Ranged | 3 | 200 | 12 | 1.5 | 3.5 | 0.9 | Each hit adds a poison stack (6/s, 10 s, ≤ 6 per victim) that outlives it |
-| Farwatch | Humans | Ranged | 3 | 150 | 70 | 4.0 | 12.0 | 0.9 | Shoots units across most of the lane; never targets Strongholds |
+| Farwatch | Humans | Ranged | 3 | 150 | 70 | 4.0 | 12.0 | 0.9 | **Proposed (P71 owner, 2026-11-01):** shoots units or the enemy Stronghold within its existing range; normal nearest-target and Guard rules apply |
 | Leechroot | Plants | DPS | 3 | 300 | 10 | 1.6 | 1.2 | 0.9 | Damage dealt to enemy units becomes permanent stacks, no maximum; lost on death |
 | Bombard | Machines | Ranged | 5 | 1 000 | 24 | 2.2 | 4.0 | 0.5 | Blast radius 1.0 hits every unit, both sides and itself |
 | Old Finn | Humans | Control | 3 | 240 | 8 | 2.0 | 5.25 | 0.9 | Fish: −15 % move each, ≤ 3, 5 s; never slows attacks |

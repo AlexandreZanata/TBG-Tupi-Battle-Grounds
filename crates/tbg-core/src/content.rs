@@ -966,7 +966,6 @@ const BONEHORN_ABILITIES: [[Ability; 2]; 5] = [
 const NO_ABILITIES: [[Ability; 2]; 5] = [[Ability::None; 2]; 5];
 const HATCH_ABILITIES: [[Ability; 2]; 5] = [[Ability::Hatch; 2]; 5];
 const GUARD_ABILITIES: [[Ability; 2]; 5] = [[Ability::Guard; 2]; 5];
-const NOSTRONGHOLD_ABILITIES: [[Ability; 2]; 5] = [[Ability::NoStronghold; 2]; 5];
 const BLAST_ABILITIES: [[Ability; 2]; 5] = [[Ability::Blast { friendly: true }; 2]; 5];
 
 #[allow(clippy::too_many_arguments)] // one call per roster row reads as a table
@@ -1100,7 +1099,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         FormDef { splash_add: 400, splash_bp: 6_000, ..form("Line Breaker") },
     ]),
     unit(UnitKind::Farwatch, "Farwatch", Humans, Ranged, 1_800,
-        [150, 70, 80, 12_000, 45, 0, 0], None, NOSTRONGHOLD_ABILITIES, [
+        [150, 70, 80, 12_000, 45, 0, 0], None, NO_ABILITIES, [
         FormDef { atk_bp: 2_500, ..form("Steady Hands") },
         FormDef { vs_below_bp: 10_000, vs_below_hp_bp: 3_500, ..form("Finishing Shot") },
         FormDef { on_hit: slow(2_500, 30), ..form("Crippling Arrow") },
