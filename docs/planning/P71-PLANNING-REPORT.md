@@ -76,6 +76,17 @@ mechanical collider is not silently inferred from this visual defect. If a
 credible correction conflicts with existing spacing, that conflict is reported
 before a separately specified gameplay proposal. Implementation is pending.
 
+Owner follow-up adds Drillnest's diagonal-looking locomotion:
+`/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_07-56-28.png`,
+1920 × 1080, SHA-256
+`3d8c8a65cf33fda2fcce2e1089c124199910b8635ea4fda24c2c256671cfc734`.
+New S1f requires aligning chassis, tracks and production assembly with travel
+in all five forms and both sides. Verify Walk/stop and production overlays
+so a pose reset cannot reintroduce the diagonal. The screenshot shows an
+oblique model; temporal reproduction will distinguish visual facing from
+movement. Drillnest remains a producer with unchanged spawn/fusion/interval
+rules. This update records a required correction, not an implemented fix.
+
 ## Findings that determine the plan
 
 - Spawn and Evolution update both use a generic scaled bar height, not

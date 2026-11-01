@@ -80,6 +80,16 @@ The owner also reports a diagonal-looking walk; the still shows its oblique
 body orientation but cannot establish its trajectory. Verify body facing and
 foot motion against actual displacement in a recording.
 
+Additional owner Drillnest report:
+`/home/iiii/Pictures/Screenshots/Screenshot_2026-11-01_07-56-28.png`,
+1920 × 1080, SHA-256
+`3d8c8a65cf33fda2fcce2e1089c124199910b8635ea4fda24c2c256671cfc734`.
+Selected Base Drillnest is visibly oblique to BattleLine; the owner reports
+it moving diagonally. Record chassis facing versus actual travel before
+attributing this to gameplay movement. Preserve this original with the
+other feedback frames. Drillnest joins Bonehorn as a mandatory locomotion
+alignment case.
+
 Confirmed source limitations on P70:
 
 - `visuals.rs::spawn_form_visual` uses `1.05 * form.plan.scale + 0.25`
@@ -343,6 +353,41 @@ maximum cosmetic offsets and finite sampling limits. No head-based damage,
 new targetable zone or authoritative body-block mechanic is implied. If the
 requested look cannot fit the existing combat spacing credibly, document that
 specific conflict for product review before proposing a mechanical change.
+
+### S1f — Drillnest chassis and track alignment
+
+1. Reproduce the selected Base Drillnest approach from the owner screenshot
+   in normal-speed footage. Inspect `art/kits/drillnest/{model,mod}.rs`,
+   the shared figure yaw, Walk root/track motion and special overlay. Compare
+   its longitudinal chassis/track axis with actual displayed travel; a static
+   oblique silhouette alone does not prove diagonal simulation movement.
+2. Align the chassis, both tracks and attached production assembly with the
+   direction of advance, using the existing kit/figure seams. Keep track
+   motion consistent with displacement so the machine rolls forward rather
+   than sliding sideways. Handle both sides and parent transforms without
+   applying yaw twice or changing the camera/global roster facing.
+3. Review Base/A1/A2/B1/B2 in Walk, Idle, start/stop, Evolve, Hit, Death,
+   Victory and actual drill production. In particular, special overlays must
+   not reset the root orientation back to the unwanted diagonal during
+   production or erase locomotion alignment. Keep production sockets and
+   spawned cosmetic cues consistent with the displayed assembly.
+4. Preserve Drillnest's authoritative movement, range, production trigger,
+   intervals, spawn coordinates, living drill cap and fusion rules. It is a
+   producer, not a conventional shooting tank: do not add a cannon attack
+   merely to match the owner's colloquial vehicle description. Check actual
+   Microdrill production and the existing higher-rank presentation without
+   silently changing any simulation position to follow the cosmetic chassis.
+5. Reuse a small existing orientation helper if it naturally supports both
+   Bonehorn and Drillnest; otherwise keep the correction within each kit.
+   Do not build a new motion framework or change every champion's facing.
+   Add focused `p71_` mirrored-axis/transition regressions, including the
+   production overlay, and queue them for targeted consolidation.
+
+Acceptance: all five forms visibly roll straight along travel on both sides;
+tracks, body and production assembly stay coherent through starts, stops
+and production. Preserve grounded geometry, bar/star/name alignment and
+existing production cues. Supply real before/after motion, source/binary
+provenance and sampling limits; no runtime fix is claimed by this plan.
 
 ### S2 — Remove body team markers across the roster
 
