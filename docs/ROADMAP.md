@@ -588,6 +588,10 @@ separate. See [the preparation report](phases/MAIN-auto-deploy-preparation.md).
 **P73 — implemented, Draft review pending**,
 `phase/p73-active-players-challenges`, based on `origin/main` at `e2a18af`
 and the P72 shared Bevy web/native interface at `2da0a35`.
+**Consolidation, 2026-11-01:** merged onto main `70827a7` in
+`codex/consolidate-open-fronts` with protocol 32 and D-103; compiling
+acceptance is still deferred, so P73 remains Draft/pending. See
+[the consolidation report](phases/CONSOLIDATION-open-fronts-20261101.md).
 See the [execution report](planning/P73-EXECUTION-REPORT.md) for real scoped
 validation, native fixture captures and deferred final/browser acceptance.
 Read [the phase](phases/P73-active-players-and-direct-challenges.md),
