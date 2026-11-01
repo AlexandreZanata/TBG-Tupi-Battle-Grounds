@@ -3,6 +3,7 @@
 use super::*;
 use crate::chan::ConnEvent;
 use crate::lobby::tests::{add_session, lobby};
+use crate::lobby::RematchTicket;
 use tbg_core::protocol::{ClientMsg, Profile};
 
 fn friends(l: &mut Lobby, t: Token, name: &str, id: i64) -> tokio::sync::mpsc::Receiver<ConnEvent> {
@@ -183,5 +184,76 @@ fn receiving_opt_out_does_not_remove_the_senders_explicit_outgoing_consent() {
     assert!(
         !l.direct_ready(a),
         "the opted-out sender is still closed to incoming invitations"
+    );
+}
+
+#[tokio::test]
+async fn signing_a_guest_into_an_account_withdraws_the_guests_offers() {
+    // BR-AP03/07: the recipient agreed to play the guest, not the account.
+    let (mut l, _rx) = lobby();
+    let guest = [1; 16];
+    let b = [2; 16];
+    let _g = add_session(&mut l, guest, SessionState::Idle);
+    let _b = friends(&mut l, b, "Bravo", 2);
+    send(&mut l, guest, "Bravo");
+    assert_eq!(l.player_challenges.len(), 1, "precondition: guest offer");
+    l.rematches.push(RematchTicket {
+        players: [guest, b],
+        requested: [false; 2],
+        expires: Some(Instant::now() + Duration::from_secs(60)),
+    });
+    let profile = Profile {
+        name: "Xray".into(),
+        rating: 1000,
+        ranked_games: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+    };
+    l.auth_claim(guest, 1, crate::auth::Binding::fixture(9, profile), false);
+    assert_eq!(
+        l.sessions[&guest].account.as_ref().map(|(id, _)| *id),
+        Some(9)
+    );
+    assert!(l.player_challenges.is_empty());
+    assert!(!l.rematches.iter().any(|r| r.players.contains(&guest)));
+}
+
+#[test]
+fn declining_and_cancelling_survive_an_exhausted_create_budget() {
+    let (mut l, _rx) = lobby();
+    let a = [1; 16];
+    let b = [2; 16];
+    let _a = friends(&mut l, a, "Alpha", 1);
+    let _b = friends(&mut l, b, "Bravo", 2);
+    send(&mut l, a, "Bravo");
+    let id = l.player_challenges[0].id;
+    for _ in 0..40 {
+        l.direct_limit(b);
+    }
+    l.direct_action(b, ClientMsg::AnswerPlayerChallenge { id, accept: false });
+    assert!(
+        l.player_challenges.is_empty(),
+        "decline is never rate limited"
+    );
+    l.player_challenge_cooldowns.clear();
+    send(&mut l, b, "Alpha");
+    assert!(l.player_challenges.is_empty(), "creating still is");
+    l.sessions
+        .get_mut(&b)
+        .unwrap()
+        .player_challenge_actions
+        .clear();
+    l.player_challenge_accounts.clear();
+    l.limits = Default::default();
+    send(&mut l, b, "Alpha");
+    let id = l.player_challenges[0].id;
+    for _ in 0..40 {
+        l.direct_limit(b);
+    }
+    l.direct_action(b, ClientMsg::CancelPlayerChallenge { id });
+    assert!(
+        l.player_challenges.is_empty(),
+        "cancel is never rate limited"
     );
 }

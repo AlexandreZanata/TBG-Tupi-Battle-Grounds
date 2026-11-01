@@ -100,7 +100,10 @@ pub fn load(dir: &Path) -> io::Result<Vec<Envelope>> {
         if used > DIR_CAP || result.len() >= 1024 {
             return Err(io::Error::other("history recovery bound exceeded"));
         }
-        if entry.path().extension().is_some_and(|e| e == "json") {
+        // A `.tmp-` file was never renamed, so `write` reported failure and
+        // nothing acknowledged it; replaying it would also never remove it.
+        let staged = entry.file_name().to_string_lossy().starts_with(".tmp-");
+        if !staged && entry.path().extension().is_some_and(|e| e == "json") {
             result.push(read(&entry.path())?);
         }
     }

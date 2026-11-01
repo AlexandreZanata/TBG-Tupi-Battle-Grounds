@@ -100,6 +100,18 @@ async fn a_committed_file_replays_after_crash_without_changing_participant_ids()
         .unwrap();
     journal::remove(&dir, &e).unwrap();
     assert!(journal::load(&dir).unwrap().is_empty());
+    // BR-AP12: an unrenamed staging file (torn or complete) was never
+    // acknowledged; it neither hides valid entries nor replays forever.
+    let other = envelope(2, accounts);
+    journal::write(&dir, &other).unwrap();
+    let torn = dir.join(".tmp-torn.json");
+    std::fs::write(&torn, b"{\"partial").unwrap();
+    let staged = dir.join(".tmp-complete.json");
+    std::fs::write(&staged, serde_json::to_vec(&e).unwrap()).unwrap();
+    assert_eq!(journal::load(&dir).unwrap(), vec![other.clone()]);
+    journal::remove(&dir, &other).unwrap();
+    std::fs::remove_file(torn).unwrap();
+    std::fs::remove_file(staged).unwrap();
     let oversized = dir.join("bad.json");
     std::fs::write(&oversized, vec![b' '; 32769]).unwrap();
     assert!(journal::load(&dir).is_err());

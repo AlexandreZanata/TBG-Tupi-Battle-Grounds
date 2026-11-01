@@ -89,7 +89,14 @@ impl Lobby {
             self.send_direct_state(token);
             return;
         }
-        if !self.direct_limit(token) {
+        // Declining or cancelling only closes a record, so like opting out it
+        // never spends a budget that a shared address may have exhausted.
+        let closing = matches!(
+            msg,
+            tbg_core::protocol::ClientMsg::CancelPlayerChallenge { .. }
+                | tbg_core::protocol::ClientMsg::AnswerPlayerChallenge { accept: false, .. }
+        );
+        if !closing && !self.direct_limit(token) {
             self.direct_result(token, None, Outcome::RateLimited);
             return;
         }

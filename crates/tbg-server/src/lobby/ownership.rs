@@ -84,6 +84,8 @@ impl Lobby {
             return;
         }
         self.cancel_direct(token);
+        // The opponent agreed to rematch the account, not the guest left behind.
+        self.decline_rematch(token);
         let Some(s) = self.session(&token) else {
             return;
         };

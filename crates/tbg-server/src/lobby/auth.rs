@@ -210,8 +210,13 @@ impl Lobby {
             return;
         }
         let conn = session.conn.clone();
-        if take_over {
+        // BR-AP03/07: consent was given to the previous identity (often a
+        // guest); a sign-in into another account must not inherit it.
+        if take_over || !already {
             self.cancel_direct(token);
+        }
+        if !already {
+            self.decline_rematch(token);
         }
         if let Some(session) = self.sessions.get_mut(&token) {
             session.auth_binding = Some(binding.clone());
