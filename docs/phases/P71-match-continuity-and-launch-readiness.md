@@ -335,3 +335,17 @@ Windows official release, look/fun.
 
 - 2026-11-01: plan written; findings 1.1–1.4 mapped; 1.5 done; W6 VM
   installed and suite running; W0–W5 not started.
+- 2026-11-01: **W0 done** on PR #34 (`6e56918`): `BotOpts::surrender_after`;
+  spectate 6/6 locally (58.7 s).
+- 2026-11-01: **W1 (server), W2 (server) and W5.1 done** (`a99464b`, D-100):
+  silent-controller takeover (3 s), full-queue close, expired-Access seat
+  lease (180 s), match-owned seat expiry for account resume, retry cache
+  300 s, connection pause (120 s budget, `TBG_PAUSE_SECS`), `/health` 503 on a
+  failed store. Local: lib 59, accounts 12, auth_http 7, auth_websocket 6,
+  contract 3, health 2, match_continuity 2, ranked 6, release_slots 5;
+  clippy (CI scope) clean.
+- 2026-11-01: **W1/W2 client** written (4 s silence watchdog; "match paused"
+  notice inferred from a frozen clock, `net.match_paused` in en/pt-BR);
+  client tests pending a client build. Not done yet: W1.4 client refresh
+  retry spacing, W1.6 ownership retry, W1.7 browser temporary mode, W3, W4,
+  W5.2–5.5, W7; W8 records partly (D-100, GAME-DESIGN rows).
