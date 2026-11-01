@@ -138,3 +138,48 @@ asserts MatchInfo equals the clicked Arena. This changes no combat rule or value
 The native candidate is rebuilt for these two client changes; all three final
 Practice captures and their results follow below. Earlier core/protocol/server
 results remain valid because those sources did not change.
+
+
+### Final native Practice validation and installation — complete
+
+Final runtime source: `d4436e07e883be275e79ba91810b6d8b94e9d392`.
+Native debug build passed in18.00s after the Practice setup correction.
+The affected WASM binary check passed in1.97s (the same two existing gallery
+warnings). Both ran sequentially under the shared lock with two build jobs.
+The owner-approved wait also preserved an unrelated Android build holding that
+lock. No process from another work front was interrupted.
+
+The exact frozen installation binary passed all three real bot Practice captures:
+Celestial, Clockwork and Desert. In each case the helper observed eight distinct
+Arena buttons, clicked the requested arena, verified that setup and saved choice
+agreed, followed the actual Play action and captured `Phase::Running` with
+MatchInfo.arena equal to the selected arena. All PNGs are1920x1080, boot-ready,
+with zero pending/failed images or text and no panic. The eight-card catalog also
+loaded without missing resources; its second row uses the existing scroll panel.
+All three final Practice images and the catalog were visually inspected. The
+BattleLine stays clear and the Strongholds/HUD keep the original placement.
+
+Local evidence: `.local/three-arenas-evidence/v3/captures-practice.json`, the three
+per-arena `runtime.log`/`scene.png` pairs and `v3/catalog/`. The earlier diagnostic
+setup capture timed out after150s; it is not counted as a pass. The corrected
+flow above resolves that diagnostic failure.
+
+The source branch was pushed to `origin/phase/arenas-three-new` before native
+installation, under the owner's standing workflow. Original reference PNGs and
+all full-resolution capture folders remain ignored and were not pushed.
+
+`python3 /tmp/tbg-install-three-arenas.py` completed successfully. Installed:
+`/home/iiii/.local/opt/tupi-battle-grounds/0.1.0-native.2-arenas-d4436e0/tbg-client`.
+The existing launcher and desktop entry now select it; all362 assets and the
+binary hash were checked against the source/frozen candidate. Launcher
+`--version` confirms protocol30 and source d4436e0. Previous installation and
+user data remain intact. The installation receipt is local at
+`.local/three-arenas-evidence/installed-three-arenas-linux.json`.
+
+Binary SHA-256:
+`0831eb72e7f880dad9dea7c4191d3c7e8ed774d77a65b15305eca401b1f52345`.
+
+Remaining acceptance: owner look/fun and Proposed-value approval; D-33 balance
+measurement; browser rendering/performance and full suite. None is claimed as
+passed. Protocol30 online play requires a matching server; no public server was
+deployed. Native Practice and the focused local server tests do not require it.
