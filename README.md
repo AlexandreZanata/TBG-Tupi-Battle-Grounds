@@ -83,6 +83,9 @@ CI rejects missing revision notes. Linux also includes an offline snapshot.
 
 ## P68 Linux prerelease candidate
 
+[Download the Linux candidate](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.0-p68.1)
+(AppImage or tar.gz, x86_64, **glibc 2.39+**, unsigned prerelease).
+
 `0.1.0-p68.1` introduces protocol-30 authentication, optional real OS-vault
 persistence and the shared Linux/Windows desktop presentation contract.
 **The existing protocol-29 production server is incompatible.** Offline

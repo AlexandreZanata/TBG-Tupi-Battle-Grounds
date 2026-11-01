@@ -11,9 +11,9 @@ the direct request, superseding the attached handoff's default prohibition
 on automatic public promotion. No production deployment, main merge,
 certificate purchase or change to another front is authorized here.
 
-Status: transactional storage and auth/wire integration implemented; directed
-auth consolidation in progress. No new release, real-user vault migration or
-installed application change yet.
+Status: Linux-first candidate **0.1.0-p68.1 published** with directed auth,
+real-provider/browser and packaged runtime evidence below. Windows acceptance
+remains pending. No real-user migration or installed application change occurred.
 
 ## Step 0: reviewed source and ownership
 
@@ -63,12 +63,12 @@ installed application change yet.
 2. P68-A canonical wire, transactional store, bounded auth service and
    socket authority: implemented; targeted server/protocol scenarios passed.
 3. Native vaults, browser coordinator, shared auth UX and legacy migration:
-   implemented; synthetic coordinator tests passed; real provider/browser
-   journeys remain pending before the artifact evidence is recorded.
+   implemented; synthetic coordinator tests and real Linux provider/browser
+   journeys passed with the explicit transport/platform limits below.
 4. Shared desktop routing/art and machine-checkable UI contract: implemented;
    source routing gate and comparator negative cases passed.
 5. Focused consolidation, Linux reference/package and immutable GitHub
-   prerelease: pending.
+   prerelease: complete for the Linux candidate scope, with deferred gates below.
 6. Windows/Wine/signing and exact cross-platform visual acceptance: deferred
    to the requested subsequent Windows stage, never represented as passing.
 
@@ -85,10 +85,10 @@ source manifests and current auth boundaries; fetch the four explicit refs;
 check ancestry/remote release identities; hash baseline source inputs;
 resolve the additive decision-record conflict preserving both sides.
 
-A01–A14 and W01–W18: implementation acceptance pending except the recorded
-source/ownership inventory portion of W01. Commands, outcomes, artifacts,
-secure-store modes, exact failures and remaining gates will be appended as
-they actually execute. No deferred platform check is a pass.
+The following chronological ledger records directed acceptance evidence.
+It does not mark all A01–A14/W01–W18 accepted: Windows, public HTTPS, full
+matched visual and remaining device scenarios are explicitly deferred below.
+No deferred platform check is a pass.
 
 ### P68-A durable storage front
 
@@ -281,3 +281,139 @@ This is presentation/integration glue, not a rule or balance change. The
 failed assertion is not reported as a successful gameplay observation. The
 source and package are rebuilt after this correction; no published artifact
 or existing release is overwritten.
+
+
+## Published Linux candidate and final consolidation
+
+Release: [v0.1.0-p68.1](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.0-p68.1).
+Draft implementation PR: [#32](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/32).
+The annotated tag resolves to code source
+`e59be5e910bf406222538105ed0a7af9ffce4a6c`. Later report-only commits do
+not relabel or rebuild these immutable artifacts. Protocol 30, schema 9,
+Ruleset 2 / `3d56156049e626c5`, 46 active/51 presentation kinds are unchanged
+from the implemented candidate identity. Existing releases were not replaced;
+this prerelease is not promoted to latest and does not trigger P66's native
+publisher. Main was not merged, CI was not awaited, production was not deployed
+and the installed native.3/data were preserved.
+
+### Final commands and results
+
+- Scoped `cargo clippy --offline --locked -p tbg-client --bin tbg-client
+  --features ui-acceptance -- -D warnings`: passed after the Practice setup
+  correction (1.31 s). A subsequent release batch received SIGTERM (exit 143)
+  without a compiler diagnostic; no old binary was relabeled. One fresh batch
+  passed: `cargo build --offline --locked --release -p tbg-client --bin
+  tbg-client --features ui-acceptance` (3m07s), then `trunk build --release
+  --offline --skip-version-check` (Rust compilation 2m07s plus wasm-opt).
+  Both used source SHA above, shared Cargo target/cache, the host lock,
+  CARGO_BUILD_JOBS=2 and BINARYEN_CORES=2. No concurrent Rust validation ran.
+- `python3 scripts/package-native.py --platform linux --binary
+  .local/release-p68-candidate/tbg-client`, followed by
+  `bash scripts/package-appimage.sh <cached-official-linuxdeploy>` under the
+  same lock: passed. Cached linuxdeploy SHA-256:
+  `8aea8da0f7f7039d2a2cecb14657d752a222a5e1d3825caeef186c82f751cdd1`.
+  Only owned unpublished staging was moved aside; shared Cargo caches and
+  another front's artifacts were not deleted. Package identities, all 352
+  portable and 358 AppDir manifest entries, post-patching executable hashes
+  and safe tar paths verified. No byte-for-byte rebuild claim is made.
+- `python3 scripts/check-native-auth.py --client
+  target/native/AppDir/usr/bin/tbg-client --server
+  .local/release-p68/tbg-server-test --report
+  .local/release-p68-candidate/packaged-native-auth.json`: passed against the
+  real Secret Service with synthetic account/data only. Secure persistence,
+  same-family restore, explicit migration, process exclusion, token-free
+  ordinary metadata, offline pending logout, restart/revocation and synthetic
+  vault cleanup were all true. The final unbundled executable passed too.
+  The separate unavailable-provider result above remains the negative case;
+  no plaintext/mock provider fallback was introduced.
+- Actual Chrome 156.0.8078.79 with its sandbox, isolated profile and the auth
+  module on an owned same-origin fixture: protected HttpOnly/Secure/Strict
+  cookies were observed through the browser cookie API, not document.cookie;
+  persistent/session selection, same-family restoration, simultaneous Web
+  Locks tabs, absolute expiry, native-route/CSRF rejection, ordinary storage
+  and offline/restart logout passed. The first harness query filtered secure
+  cookies with an HTTP URL and hid them; inspecting the unfiltered cookie API
+  corrected that harness failure. HTTP loopback's secure-context exception
+  does **not** establish public HTTPS acceptance. Synthetic Node tests remain
+  distinct evidence from these real-cookie observations.
+- `node .local/browser-game-smoke.cjs` on the final Trunk distribution:
+  real game lobby and Practice through the visible control observed in pt-BR
+  at 1440x900; page_errors=[]; sandbox enabled. This is a focused browser
+  journey, not a complete game-screen gallery or cross-platform comparison.
+- `python3 .local/capture-packaged-linux.py`: final AppImage outside the
+  checkout, fresh temporary preferences, X11/Xvfb 1440x900, pt-BR. All five
+  Arena training actions existed, Storm remained selected in configuration
+  and actual Practice started in Storm. Capture reported boot_ready=true,
+  scene_waiting=false, pending_images=0, pending_texts=0, failed_images=0.
+  Screenshot visually inspected. The earlier packaged lobby screenshot was
+  also inspected; its demo did not populate real match purchases/stats.
+- `python3 .local/capture-offline-linux.py`: final AppImage outside the
+  checkout with **no backend listening**, fresh data and an owned reserved
+  loopback port. The same visible Practice route started Storm successfully.
+  No production connection or installed application data was used.
+- Missing-assets negative case: final release executable copied alone to an
+  unrelated temporary directory exited 2 before graphics with `TBG: Game
+  assets are missing. Extract the complete package and keep assets beside
+  the executable.` It did not borrow checkout assets.
+- Final source routing, patch-note and diff checks passed. Directed case totals
+  are 89 Rust scenarios, 3 synthetic browser-coordinator scenarios and 2 strict
+  comparator negative scenarios; reruns are not additional coverage. Earlier
+  exact target commands and corrected failures remain in this ledger. No full
+  workspace suite, broad benchmark, balance gate or extensive gallery ran.
+- Normal branch push, new annotated tag push and `gh release create
+  v0.1.0-p68.1 ... --verify-tag --prerelease --latest=false` succeeded.
+  `gh release download v0.1.0-p68.1 --repo
+  AlexandreZanata/TBG-Tupi-Battle-Grounds --dir
+  .local/release-p68-downloaded`, then `sha256sum -c SHA256SUMS`: every
+  published asset passed download-back verification. Tag dereferencing also
+  matched the exact source SHA. No release upload was inferred from local
+  files alone.
+
+### Environment and artifacts
+
+Pop!_OS 24.04 x86_64; Linux 7.2.6-76070206-generic; Rust/Cargo 1.99.0;
+release profile with `ui-acceptance`; NVIDIA GeForce RTX 4060 Laptop GPU,
+NVIDIA 595.104.02, Vulkan; X11/Xvfb for isolated captures. Xvfb emitted
+XSETTINGS/zero-millimeter-display warnings, without capture/asset failure.
+The ELF requires **glibc 2.39 or newer**. AppImage does not bundle glibc or
+GPU drivers; older Linux distributions are not claimed compatible. Both
+packages are unsigned candidates. Windows support/signing remain undecided.
+
+- AppImage: 31,734,264 bytes; SHA-256
+  `055569484d5bb961a0b352ace53ca45921599eae81102857cb624c5ec6a3178b`.
+- Portable tar.gz: 37,590,537 bytes; SHA-256
+  `af72529e33eac0fafd719c66de812a0b997c6646fd4b79a7fa45f0fe267ea6fa`.
+- Assets SHA-256: `330bf402c958b5d3024f1814fdbfa9e38132ea4615e3328c3b6eb9a65b6b401f`.
+- Cargo.lock SHA-256: `229debac9048d089ed9c47f8b3ffad4994713fd07da0584fdd7d967718662f19`.
+- Release attachments include separate portable/AppImage build-info and full
+  manifests, individual digests, provenance.json and SHA256SUMS. ELF hashes
+  differ after linuxdeploy's RPATH patch and are explicitly distinguished.
+- Owned local evidence: `.local/release-p68-candidate/` (native/bundled auth,
+  browser game, Storm online-test/offline screenshots, missing-assets report,
+  manifest verification, release metadata); real-cookie report remains
+  `.local/release-p68-final/browser-auth.json`. No account keys/tokens, test
+  databases, profiles, build outputs or screenshots were committed to Git.
+
+### Remaining acceptance and next delivery
+
+A01–A06/A09–A13 have the directed unit/store/HTTP/socket/client evidence above;
+this is not an assertion that every manual/device/long-running variant has
+been observed. A07 has actual Linux available/unavailable provider evidence;
+Windows Credential Manager denial/Local persistence and Wine are pending.
+A08 has real loopback cookie/session/multi-tab evidence and negative route
+checks; blocked-cookie policies and actual public HTTPS remain unobserved.
+A14's common code/i18n/source identity and strict contract are implemented;
+exact Linux/Windows packaged pixels and both-language device journeys remain
+pending. Natural-expiry/controller authority is tested in focused server
+scenarios; the full actual cross-platform two-client match/reconnect journey
+is not claimed from those tests.
+
+W01/W13 and Linux portions of W03/W11/W12/W14 have the concrete evidence
+above. No Windows W02–W12 claim follows: MSVC PE/ZIP/installer, clean-user
+install/upgrade/uninstall, Wine prefix, actual Windows GPU/DPI/audio/input/
+clipboard/TLS, authoritative mixed-platform match and full matched capture
+matrix need the subsequent Windows delivery. W07/W08 remain unverified and
+blocked by **any** visible difference; no masks/tolerance/driver waiver.
+Signing/support/CRT/promotion decisions, public HTTPS and owner visual sign-off
+remain explicit gates. The PR stays Draft for these outstanding P68 items.
+No full-suite/benchmark/balance command is scheduled automatically.
