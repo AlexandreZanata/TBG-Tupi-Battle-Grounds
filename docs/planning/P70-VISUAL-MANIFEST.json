@@ -1,6 +1,6 @@
 {
   "phase": "P70",
-  "status": "planning_only",
+  "status": "all_champion_source_candidates_final_evidence_pending",
   "date": "2026-10-31",
   "reference_branch": "codex/consolidated-linux-release",
   "reference_commit": "55510c5363e3f1e555fa5133208a5faf20c5825b",
@@ -104,10 +104,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "b09240fdd63829196960f953c148c425212f8f56",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/shieldbearer/mod.rs",
+          "crates/tbg-client/src/art/kits/shieldbearer/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Archer",
@@ -128,10 +141,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "c846aa0721d0a90e6a5fa819589e0ccf5dddb18c",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/archer/mod.rs",
+          "crates/tbg-client/src/art/kits/archer/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "BoneBrute",
@@ -152,10 +178,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "3bb89377b4b290a2334381e6826a586a7844191b",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/bone_brute/model.rs",
+          "crates/tbg-client/src/art/kits/bone_brute/motion.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Hexer",
@@ -175,10 +214,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "1a20c5d1ba9258da38fb89f8b1528419cc7321dc",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/hexer/mod.rs",
+          "crates/tbg-client/src/art/kits/hexer/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Sawbot",
@@ -198,10 +250,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "17e38c2acf0ac83aebece03a25ac0d701cf62930",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/sawbot/mod.rs",
+          "crates/tbg-client/src/art/kits/sawbot/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "SiegeWalker",
@@ -222,10 +287,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "20b420af48bc368e5c824ed39def3baf476fa0a6",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/siege_walker/model.rs",
+          "crates/tbg-client/src/art/kits/siege_walker/motion.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Bloomkeeper",
@@ -245,10 +323,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "f58f6cc001c607aa4d99b01f166ac9137dca4971",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/bloomkeeper/mod.rs",
+          "crates/tbg-client/src/art/kits/bloomkeeper/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Rootcaller",
@@ -269,10 +360,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "f8f26f144e6157a2f5c0d7d9e9513b5d19e76ff7",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/rootcaller/model.rs",
+          "crates/tbg-client/src/art/kits/rootcaller/motion.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Nester",
@@ -292,10 +396,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "8d9d645cd16018fbf99fe42c69a480defa88a00b",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/nester/mod.rs",
+          "crates/tbg-client/src/art/kits/nester/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Rampart",
@@ -315,10 +432,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "9362ae6f06f2fecccff966de76b46df8c0d34303",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/rampart/mod.rs",
+          "crates/tbg-client/src/art/kits/rampart/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Longaxe",
@@ -338,10 +468,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "c5c6f7c154f9462a685a755870fb049a422d3dbe",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/longaxe/mod.rs",
+          "crates/tbg-client/src/art/kits/longaxe/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Farwatch",
@@ -361,10 +504,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "0467e19e31b1f124da58948aeac79de57ae11f20",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/farwatch/mod.rs",
+          "crates/tbg-client/src/art/kits/farwatch/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Bombard",
@@ -384,10 +540,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "16ad98e8317247047adc937de767b79e2c3ce025",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/bombard/mod.rs",
+          "crates/tbg-client/src/art/kits/bombard/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Rotcap",
@@ -407,10 +576,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "11e58b8960bd4b7c9b1f926959ec7fca6ef56c4b",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/rotcap/mod.rs",
+          "crates/tbg-client/src/art/kits/rotcap/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "OldFinn",
@@ -430,10 +612,24 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": true,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "08f46643f762dbefa658c1339f9f263a030c242c",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-OLD-FINN.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/old_finn/mod.rs",
+          "crates/tbg-client/src/art/kits/old_finn/model.rs",
+          "crates/tbg-client/src/art/kits/old_finn/motion.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "AntidoteBrewer",
@@ -453,10 +649,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "53f089f0403091e298d5ef598bc0e4a47deac956",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/antidote_brewer/mod.rs",
+          "crates/tbg-client/src/art/kits/antidote_brewer/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Shatterback",
@@ -476,10 +685,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "9e5b70a309e0f7b901f28f7291b6a5f5aaded4d7",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/shatterback/mod.rs",
+          "crates/tbg-client/src/art/kits/shatterback/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "BloodFurnace",
@@ -499,10 +721,24 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "96079550bbab952a260a62f1af65d4de1fc773e1",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/blood_furnace/mod.rs",
+          "crates/tbg-client/src/art/kits/blood_furnace/model.rs",
+          "crates/tbg-client/src/art/kits/blood_furnace/motion.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Bloodweaver",
@@ -522,10 +758,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "130820a03cecf337ac7cd9e655add17bb2958242",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/bloodweaver/mod.rs",
+          "crates/tbg-client/src/art/kits/bloodweaver/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Oilpress",
@@ -545,10 +794,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "ad5e2318758ca39b79474e3bb3ea46b9c7af69b3",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/oilpress/mod.rs",
+          "crates/tbg-client/src/art/kits/oilpress/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Drumguard",
@@ -568,10 +830,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "9ab520ce722423ad1c7248691e233a1b74ff0930",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/drumguard/mod.rs",
+          "crates/tbg-client/src/art/kits/drumguard/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Leechroot",
@@ -591,10 +866,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "e03a344256be4620b57e71347cdae6c27a4d787a",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/leechroot/mod.rs",
+          "crates/tbg-client/src/art/kits/leechroot/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "CargoCrab",
@@ -606,7 +894,7 @@
         "crates/tbg-client/src/art/kits/cargo_crab/mod.rs",
         "crates/tbg-client/src/art/kits/cargo_crab/model.rs"
       ],
-      "existing_model_description": "Cargo Crab figure: a robust forge-orange machine crab of the Ironworks, on thick piston legs with heavy plated pincers, and a passenger saddle on its back. Branch A (Armored Carrier) adds iron plates, spikes, and a glowing shield dome over the saddle; branch B (Turbo Carrier) adds a racing stripe, rear exhausts, leg servos, and a rear spoiler fin. Machines move on rigid pivots and pistons only (ART-DIRECTION §3).",
+      "existing_model_description": "Cargo Crab figure: a robust forge-orange machine crab of the Ironworks, on thick piston legs with heavy plated pincers, and a passenger saddle on its back. Branch A (Armored Carrier) adds iron plates, spikes, and a glowing shield dome over the saddle; branch B (Turbo Carrier) adds a racing stripe, rear exhausts, leg servos, and a rear spoiler fin. Machines move on rigid pivots and pistons only (ART-DIRECTION \u00a73).",
       "proposed_identity_brief": {
         "recognition_target": "Wide mechanical crab, piston legs and usable saddle",
         "color_direction": "Forge orange armor, dark joints and clear saddle contrast",
@@ -614,10 +902,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "ce5ba37521b97831d589c4c37481373afdf0538c",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/cargo_crab/mod.rs",
+          "crates/tbg-client/src/art/kits/cargo_crab/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Puppetmaster",
@@ -637,10 +938,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "90f959d1f6cdcc3fb868781ffe83932e956c2ff9",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/puppetmaster/mod.rs",
+          "crates/tbg-client/src/art/kits/puppetmaster/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Smuggler",
@@ -660,10 +974,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "76b2f7028ac7eb237796ae68a66ccf999bc34258",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/smuggler/mod.rs",
+          "crates/tbg-client/src/art/kits/smuggler/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Bonehorn",
@@ -683,10 +1010,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "24045f0bbdb7a6333d39c65ec284c4a0ceac8b9c",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/bonehorn/mod.rs",
+          "crates/tbg-client/src/art/kits/bonehorn/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Ravager",
@@ -706,10 +1046,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "9a72f783e8ce3d97ee5a491546e15e5673112e3f",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/ravager/mod.rs",
+          "crates/tbg-client/src/art/kits/ravager/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Acidmaw",
@@ -729,10 +1082,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "77fa4517365e6bb4eef7e8e3644e686f070dcbd0",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/acidmaw/mod.rs",
+          "crates/tbg-client/src/art/kits/acidmaw/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Whisperer",
@@ -752,10 +1118,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "b60e6866897bf0986f9b6825a41928bb67091628",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/whisperer/mod.rs",
+          "crates/tbg-client/src/art/kits/whisperer/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Bulwark",
@@ -775,10 +1154,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "aff5a30a4b9ac8092432be058c80a56a122937b0",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/bulwark/mod.rs",
+          "crates/tbg-client/src/art/kits/bulwark/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Demolisher",
@@ -798,10 +1190,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "d6b8436911abf2b8774699e554618ff4880615f0",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/demolisher/mod.rs",
+          "crates/tbg-client/src/art/kits/demolisher/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Crowcaller",
@@ -821,10 +1226,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "921dedfa9f7b4bc84cda05579d4408d4296dcee4",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/crowcaller/mod.rs",
+          "crates/tbg-client/src/art/kits/crowcaller/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Trigger",
@@ -844,10 +1262,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "1f57463314edac810a724975936d2731437b4b70",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/trigger/mod.rs",
+          "crates/tbg-client/src/art/kits/trigger/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "RattleTick",
@@ -867,10 +1298,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "e1cd7919604dcca52dc5a4eeb93868780b20929c",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-HUMANS-UNDEAD.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/rattle_tick/mod.rs",
+          "crates/tbg-client/src/art/kits/rattle_tick/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Capybara",
@@ -890,10 +1334,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "642406f4fc8c7770c4180f6a94be380e3da35257",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/capybara/mod.rs",
+          "crates/tbg-client/src/art/kits/capybara/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Trident",
@@ -913,15 +1370,31 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": true,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
       "owner_visual_approval": "pending",
       "additional_owner_requirements": [
         "Increase visible standing height",
         "Lengthen the trident coherently with grip and arm reach",
         "Increase actual authoritative basic range beyond 1.1 tiles, with exact value pending calibration/D-33 acceptance"
-      ]
+      ],
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "4bd8fa51f291174f38314c6f5016e4d3a9415393",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-TRIDENT.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/trident/mod.rs",
+          "crates/tbg-client/src/art/kits/trident/model.rs",
+          "crates/tbg-client/src/art/kits/trident/motion.rs",
+          "crates/tbg-client/src/art/kits/trident/tests.rs",
+          "crates/tbg-client/src/art/kits/trident/weapon.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "SolarSentinel",
@@ -941,10 +1414,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "dc9597f76a07864277a58f8535f3e7603f21faa1",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/solar_sentinel/mod.rs",
+          "crates/tbg-client/src/art/kits/solar_sentinel/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "LuminousOracle",
@@ -964,10 +1450,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "761f5f792efac006c54226257695ddfa7bdf5032",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/luminous_oracle/mod.rs",
+          "crates/tbg-client/src/art/kits/luminous_oracle/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "CelestialArcher",
@@ -987,10 +1486,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "47395cf21c38b39ef7d6faaf56398737ca171f75",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/celestial_archer/mod.rs",
+          "crates/tbg-client/src/art/kits/celestial_archer/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Justiciar",
@@ -1010,10 +1522,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "97aa9ec48e66ce4be8076fb1c631a3f5563dc911",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/justiciar/mod.rs",
+          "crates/tbg-client/src/art/kits/justiciar/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Jawguard",
@@ -1033,10 +1558,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "9f56a914557b7b07d0824f4744916d99d726ac2c",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/jawguard/mod.rs",
+          "crates/tbg-client/src/art/kits/jawguard/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Mantis",
@@ -1056,10 +1594,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "2d5e7d1db6bc7f0eeb35652d57414decc702060c",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/mantis/mod.rs",
+          "crates/tbg-client/src/art/kits/mantis/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Hornet",
@@ -1079,10 +1630,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "d15b38bd746385d96fe8ec83967e97c59eacbc47",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/hornet/mod.rs",
+          "crates/tbg-client/src/art/kits/hornet/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Weaver",
@@ -1102,10 +1666,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "50adb31c7f3592b6830b36fc725d7ae4dbe54b04",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/weaver/mod.rs",
+          "crates/tbg-client/src/art/kits/weaver/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "PyreWarden",
@@ -1125,10 +1702,24 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": true,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "66a29638486dec39862962c2a3c30141ae1ec56c",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-PYRE-WARDEN.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/pyre_warden/mod.rs",
+          "crates/tbg-client/src/art/kits/pyre_warden/model.rs",
+          "crates/tbg-client/src/art/kits/pyre_warden/motion.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     },
     {
       "id": "Drillnest",
@@ -1149,10 +1740,23 @@
         "approval": "pending_owner"
       },
       "mandatory_pilot": false,
-      "implementation_status": "not_started",
-      "baseline_evidence_status": "not_captured",
-      "final_evidence_status": "not_captured",
-      "owner_visual_approval": "pending"
+      "implementation_status": "source_candidate_runtime_pending",
+      "baseline_evidence_status": "five_form_static_originals_recorded_temporal_pending",
+      "final_evidence_status": "pending_no_after_artifacts",
+      "owner_visual_approval": "pending",
+      "implementation": {
+        "status": "source_candidate_runtime_pending",
+        "art_commit": "7f4c43d34560d0022246a1dfa5253373c2d1e4c3",
+        "integration_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708",
+        "report": "docs/planning/P70-NEXT-MACHINES-PLANTS.md",
+        "changed_kit_files": [
+          "crates/tbg-client/src/art/kits/drillnest/mod.rs",
+          "crates/tbg-client/src/art/kits/drillnest/model.rs"
+        ],
+        "runtime_validation": "deferred_shared_validation_lock_busy",
+        "after_evidence": "pending",
+        "owner_visual_approval": "pending"
+      }
     }
   ],
   "source_files": [
@@ -1669,7 +2273,7 @@
   },
   "owner_followup": "Trident must be taller, carry a longer trident, use frontal two-handed spear thrusts instead of axe-like chops, and gain real authoritative basic attack range.",
   "trident_balance_exception": {
-    "status": "proposed_pending_measurement_and_D33",
+    "status": "range_change_not_implemented_pending_runtime_calibration_and_D33",
     "current_basic_range_simulation_units": 1100,
     "current_basic_range_tiles": 1.1,
     "new_range_requirement": "Greater than 1100 simulation units; choose the exact integer after geometry/contact calibration and D-33 evidence.",
@@ -1691,6 +2295,8 @@
       "Bloody Rend radius",
       "bleed",
       "all other champion values"
-    ]
-  }
+    ],
+    "implementation_report": "docs/planning/P70-TRIDENT.md"
+  },
+  "candidate_source_commit": "45ddd2438901b86a68f358ce461fa3fa63343708"
 }

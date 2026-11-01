@@ -1,163 +1,231 @@
 # P70 visual execution review
 
-**Status: S0 pose baseline recorded; S1 candidate committed; S2 pilot candidates in progress. No art acceptance or completed phase is claimed.**
-Owner request: 2026-10-31. Execution is local only on
-`phase/p70-champion-visual-polish` in `.local/p70-champion-visual-polish`.
+**Status: 46 individual source candidates implemented; phase incomplete.**
+All champion kits have model/color and authored Idle, Walk, primary action
+or support/production performance, and Victory changes. Candidate compilation,
+after images, temporal/live acceptance and the real Trident range increase
+remain pending. This is a local work-front handoff, not approved final art.
 
-## Frozen scope and source
+Integrated source revision: `45ddd2438901b86a68f358ce461fa3fa63343708` (before this report/index commit).
+Execution: `phase/p70-champion-visual-polish`, isolated in
+`.local/p70-champion-visual-polish`. The owner's original worktree and active
+builds were preserved. No push, merge, deployment or packaging occurred.
 
-- Required content base: `55510c5363e3f1e555fa5133208a5faf20c5825b`.
-- Planning parent: `60416ae` (the required base plus P70 planning files).
-- Owner policy preservation: `3dc532b`; current root-worktree AGENTS.md and
-  docs/VALIDATION.md were copied into this isolated branch. Owner edits in
-  the original worktree remain untouched.
-- The fixed [manifest](P70-VISUAL-MANIFEST.json) still contains exactly
-  46 champions / 230 forms / 2,300 clip/form slots per source revision.
-- [Evidence index](P70-VISUAL-EVIDENCE.json): source applicability resolves
-  1,835 applicable pose slots and 465 inapplicable slots per revision.
-  Inapplicability is explained from actual cue/targeting/kit paths. Specials
-  remain separate event channels; generic Cast samples do not prove them.
-- [Individual dossiers](P70-DOSSIERS.json) preserve every existing identity
-  and proposed color/motion direction. They are preparation, not completed
-  model passes or visual approvals.
-- [Pilot source audit](P70-PILOT-SOURCE-AUDIT.md) records source-supported
-  defects, remaining visual questions and exact proposed regression scope.
+## Scope and implementation index
 
-## S0 tooling
+The required base is `55510c5363e3f1e555fa5133208a5faf20c5825b`; planning
+parent is `60416ae`. Commit `3dc532b` preserves the newer owner validation
+policy on this branch. The fixed cohort remains **46 champions / 230 forms**.
+No auxiliary entity is counted as a champion.
 
-The existing frame gallery incorrectly fixed branch 0 and used the shared
-clip duration. It now preserves the requested branch, includes actual
-strike/release and terminal poses, and uses the selected kit and P63
-Victory durations. `Animator::present` provides the existing event-free
-preview path. No kit/model/pose/effect/combat content changed in this step.
+The [manifest](P70-VISUAL-MANIFEST.json), [dossiers](P70-DOSSIERS.json) and
+[evidence index](P70-VISUAL-EVIDENCE.json) link each champion to its local
+art commit, changed kit files, implementation report and existing before
+originals. Every after list and owner approval remains pending. Original
+identity briefs remain Proposed, not new lore or accepted designs.
 
-`gallery/polish.rs` reuses 30 figures per champion to render the five forms
-across up to six deduplicated sample times, sequentially covering all ten
-clip IDs. Captures have fixed camera geometry, explicit front/profile/back/
-three-quarter orientation, selectable team and nameless framing. Static
-secondary attachments are deliberately sampled at rest equilibrium and
-labeled as such; temporal spring/transition inspection remains required.
+- [Trident](P70-TRIDENT.md), [Pyre Warden](P70-PYRE-WARDEN.md) and
+  [Old Finn](P70-OLD-FINN.md): the three mandatory pilot candidates.
+- [Humans and Undead](P70-NEXT-HUMANS-UNDEAD.md): the other 14 kits.
+- [Machines and Plants](P70-NEXT-MACHINES-PLANTS.md): the other 17 kits.
+- [Monsters, Celestials and Insects](P70-NEXT-MONSTERS-CELESTIALS-INSECTS.md):
+  the other 12 kits.
 
-`capture/polish.rs` records renderer originals and per-sheet metadata,
-refuses overwrite, waits for loading readiness and settled frames, and
-advances only on the renderer's screenshot callback. The orchestration
-script uses one process per champion/view, isolated preferences, bounded
-timeouts, immutable original paths, source/binary provenance, PNG decoding,
-hashes and resumable completed units. It does not touch Shop portraits.
+These are per-kit changes to the existing procedural figures and pose seams:
+shield salutes, revised gun/shaft grip targets, pressure mechanisms, leaf/staff
+performances, multiple-support animal motion and distinct creature displays.
+New semantic palette roles are centralized and documented as Proposed in
+ART-DIRECTION. Existing A/B equipment progression, shared IK, meshes, event
+timings and P63 ownership remain. No replacement animation framework,
+dependency, per-frame mesh creation or platform-specific generic character
+was added. Core/server/protocol/balance sources and contract tests are unchanged.
 
-Raw captures belong under ignored `.local/p70-evidence/`. No paintover or
-generated image can substitute for renderer evidence. All 46 champions now
-have ten original before sheets (460 originals), covering all five forms.
-An additional 120 enemy-team sheets cover Archer, Bone Brute and Trident
-from three-quarter, front, profile and back for S1. Their three hashed
-manifests are linked from the evidence index. The renderer was Vulkan on
-NVIDIA GeForce RTX 4060 Laptop GPU, NVIDIA 595.104.02, at 1920 × 2160,
-standard quality and isolated native preferences. Each original was decoded
-and hashed at capture time. These are Linux event-free poses, not temporal,
-live-effect, web or Windows acceptance.
+## Authentic evidence: before only
 
-## S1 and S2 candidates
+Content is frozen at the required base; tooling is
+`27f98acd98b51fa69eb09f4703bd2ca59a33ed41`. Its private executable receipt
+records SHA-256
+`1883b601100297d8cf890d9a1a90658fee55713d485e64ef7678aff07675fc52`.
+The unmodified art remains reconstructable in `.local/p70-frozen-baseline`.
 
-The [blue-artifact investigation](P70-BLUE-ARTIFACT.md) identifies the shared
-opaque team tabard and its incompatible hip/chest attachment as one reproduced
-cause. Changing teams changed the patch from blue to red while the background
-remained blue. Closed geometry and opaque materials do not support a universal
-hole/culling explanation. Four callers now use fitted chest heraldry; distinct
-rag/ribbon/skeletal surfaces still require individual review.
+The index links four hashed capture manifests and **630 immutable renderer
+originals**, each fully decoded and hashed at capture time:
 
-[Old Finn](P70-OLD-FINN.md), [Pyre Warden](P70-PYRE-WARDEN.md) and Trident
-have candidate authored model/motion work. Pilot after renders and live
-combat inspection remain pending. The new live recorder drives ordinary
-training actions and records real event/HP observations at unchanged combat
-speed; it does not synthesize combat events.
+- 460 champion sheets: all 46, five forms, all ten clip IDs sampled.
+- 120 enemy-team diagnostic sheets: Archer, Bone Brute and Trident,
+  three-quarter/front/profile/back views.
+- 50 auxiliary sheets: Beetling, Crate, Microdrill, Duodrill and Megadrill.
+  Non-Base preview columns do not imply playable auxiliary Evolution.
 
+The champion matrix has 2,300 clip/form slots per revision: 1,835 applicable
+and 465 explicitly inapplicable. All applicable before pose slots are recorded;
+**zero after slots and zero temporal recordings are recorded**. Specials
+are independent event channels and cannot be proven by a generic Cast pose.
 
-## Validation actually run
+Capture conditions: Linux, Vulkan, NVIDIA GeForce RTX 4060 Laptop GPU,
+NVIDIA 595.104.02; 1920 × 2160, standard quality, fixed camera, isolated
+preferences. Static attachments are labeled rest-equilibrium samples.
+These images do not establish live effects, loop continuity, match-distance
+readability, browser/Windows compatibility or improved final appearance.
 
-Level: **work front**, with the explicitly requested baseline capture build.
-The owner did not request a full suite, release build or balance gate.
+[Compact review sheets](p70-review/README.md) are lossless WebP derivatives
+of genuine before crops, with original/crop hashes and resizing/caption
+provenance. They are explicitly labeled BEFORE; no painted or generated
+image substitutes for evidence. Bulk originals/binaries remain ignored.
+No shipping Shop portraits were overwritten.
 
-- `cargo fmt -p tbg-client -- --check`: passed.
-- `git diff --check`: passed.
-- Python AST parsing and `capture_roster.py --help`: passed.
-- `python3 scripts/p70/validate_evidence.py --json`: bookkeeping valid,
-  phase incomplete; initially 0 before / 0 after verified pose slots.
-- The first locked offline development build failed because `alsa.pc` was
-  outside the default pkg-config path. The existing local dependency path
-  documented in NATIVE-client.md was reused; no packages were installed.
-- Corrected scoped command:
+The gallery now selects the correct A/B branch and actual kit/P63 duration,
+including strike/release and final poses. The new live recorder uses ordinary
+training actions, captures original video and authoritative event/HP journals,
+and distinguishes the subject's events from other units. It covers the fixed
+roster without changing combat speed. Its candidate runtime is unverified;
+a generic engagement does not prove conditional abilities or every clip.
 
-  ```sh
-  flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
-    env CARGO_BUILD_JOBS=2 \
-    CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/target \
-    PKG_CONFIG_PATH=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/native-deps/root/usr/lib/x86_64-linux-gnu/pkgconfig \
-    cargo build --offline --locked -p tbg-client --bin tbg-client
-  ```
+## Blue artifact and mandatory pilots
 
-  Result: exit 0, `Finished dev profile [unoptimized + debuginfo] ... in
-  56.63s`. This compiled the S0 capture/gallery working diff against the
-  unchanged required content, using the existing shared target cache.
+The [artifact investigation](P70-BLUE-ARTIFACT.md) reproduced one cause:
+an opaque team tabard attached at the hips intersected independently moving
+chest geometry. Changing teams changed blue to red while the blue background
+remained unchanged. Closed geometry/opaque materials did not support a
+universal hole or culling explanation. Four callers now have fitted chest
+heraldry and a short split hem. Team identification remains; distinct rags,
+ribbons and skeletal surfaces are separate cases. Final regression is pending.
 
-The combined pilot development build was attempted once with the same
-scoped command and returned **75 (shared validation lock busy)** before
-compilation. It is deferred; no waiting, polling, lock bypass, new target
-directory or claim of candidate compilation followed. Continue independent
-source review and consolidate after the front is ready.
+Trident has larger legs/torso, a shark jaw/gills/dorsal fin, slate/ivory blocks,
+a longer three-tine weapon and a dedicated two-hand frontal load/thrust/withdraw
+at the unchanged 0.30 s Strike. The weapon has one chest-relative frame and
+wrists solved to its shaft. Nominal construction length is 1.52 versus 1.21
+figure units (about +25.6%); this is source arithmetic, not executed mesh or
+standing-height measurement. Written diagnostics cover the five forms,
+contact direction, grip, sampled shaft/tine clearance and life-clip blends.
 
-## Deferred acceptance and decisions
+**Trident's authoritative range is still 1100.** No proposed integer has
+been selected, no active value/version/contract was changed, and this requested
+competitive change is not implemented. A longer-looking weapon does not
+satisfy it. Real opponent spacing, cosmetic lunge and posed geometry must
+calibrate the value first; GAME-DESIGN Proposed entry, range-only content
+change, ruleset/contracts and both-seat/form boundary tests then belong in
+one separate logical change. D-33 evidence and owner balance acceptance stay
+pending; damage, cadence and Bloody Rend radius/bleed remain unchanged.
 
-- The 460-sheet static before campaign and 120-sheet S1 enemy diagnostic
-  campaign completed. Temporal before reconstruction from the frozen tree,
-  all final captures, remaining 43 art passes, lineup, live abilities,
-  Troops/training, P63 and transition checks remain pending.
-- The reproduced tabard issue is documented separately; there is no claim
-  that every blue patch shares that cause or that the final regression
-  campaign has passed.
-- Trident height, weapon reach and proposed integer range remain unmeasured
-  and unselected. Core range remains 1,100; no balance acceptance is claimed.
-- Queue the new scoped regression at consolidation, under the host lock:
-  `cargo test -p tbg-client --bin tbg-client
-  p70_pose_sheets_include_event_and_final_without_duplicate_samples --
-  --test-threads=1`. It was written but not run on the work front.
-- Existing kit event-time and fish trajectory checks, pilot-specific new
-  regressions, WASM/browser validation and Windows runtime are deferred to
-  the relevant final changes. Native compilation does not establish parity.
-- D-33 baseline/candidate lab and gate need the separately authorized heavy
-  validation round. Owner look/fun approval remains pending for all 46.
-- No push, merge, deployment, packaging or changes to other active worktrees.
+Pyre Warden has an open visible nozzle and a bound green/white flame jet with
+readable essential geometry in Low quality. Existing ProfaneFlame events
+remain the only trigger. The jet follows the actual displayed form/socket
+after transform propagation, before visibility checks; its endpoint and exact
+ground danger segment remain authoritative. No particle decides damage.
 
-## Deferred pilot consolidation and independent continuation
+Old Finn has a readable oilskin/fishing silhouette and a fish with distinct
+back/belly, forked tail, gills, eyes and fins. Fish scales are 1.0/1.35/1.70
+across Base/tier1/tier2 on both branches. Existing release 0.22 s, flight
+0.08 s, hit 0.30 s, clearance trajectory and Echo path are retained. Written
+fish and flame endpoint regressions are queued, not passed.
+
+## Source review findings and remaining known defects
+
+Independent source audits corrected newly introduced Longaxe Victory grip,
+Drumguard loop seam, Smuggler barrel yaw at release, Bloomkeeper sash
+occlusion and Shatterback node matching. They also reviewed
+socket/event contracts and identified short-arm reach cases in Oracle,
+Solar Sentinel, Hornet, Farwatch, Bombard and several held props. Source
+reach bounds are not rendered clearance or continuous collision proofs.
+
+Two inherited defects remain explicit acceptance blockers in the
+[Humans/Undead report](P70-NEXT-HUMANS-UNDEAD.md): Longaxe's ready/primary
+support target exceeds its arm span, and Bone Brute B2's scythe support target
+does too. Their new Victory poses avoid those helper calls; their existing
+primary/ready weapon paths were preserved pending a calibrated local repair.
+No claim of complete grip safety is made.
+
+All champions still require all-form geometry/transition review, nameless
+lineup at normal match distance, real primary/special cues, P62 Troops and
+training, P63 Victory and owner look/fun approval. Parent-linked auxiliary
+review must include Nester/Beetling, Smuggler/Crate, Cargo Crab passengers and
+Drillnest production/fusion. Static sheets cannot replace these observations.
+
+## Validation actually completed
+
+Level: **work front**, including the explicitly requested baseline campaign.
+The only successful compile was the S0 capture tooling against unchanged art.
+The first attempt could not find `alsa.pc`; reusing the already installed
+local pkg-config directory resolved it, with no package installation:
+
+```sh
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 \
+  CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/target \
+  PKG_CONFIG_PATH=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/native-deps/root/usr/lib/x86_64-linux-gnu/pkgconfig \
+  cargo build --offline --locked -p tbg-client --bin tbg-client
+```
+
+Result at S0: exit 0, `Finished dev profile [unoptimized + debuginfo] ...
+in 56.63s`. Each baseline capture campaign subsequently completed with exit 0.
+The initial restricted Xvfb launch could not open its display; the same isolated
+display workflow ran successfully with the required local display permission.
+
+Final source-only checks, separately from compilation:
+
+- Per-front `rustfmt --edition 2021` on owned files: exit 0.
+- `cargo fmt -p tbg-client -- --check`: exit 0, no output.
+- `git diff --check`: exit 0, no output.
+- Python AST parsing and both capture scripts' `--help`: exit 0.
+- P70 Markdown local links: present.
+- `python3 scripts/p70/validate_evidence.py --metadata-only --json`:
+  bookkeeping valid; phase incomplete; 46/230 cohort; 1,835 before / 0 after
+  applicable recorded slots; 630 locally available originals; 2,380 pending
+  acceptance items. Original decode/hash checks were not repeated; capture-time
+  checks were reused. This does not claim candidate visual validation.
+- Source coverage: all 46 kit directories change model and pose sources;
+  no core/server/balance/dependency/contract diff against the required base.
+  A source-audit assertion initially included GAME-DESIGN against the pre-plan
+  base and flagged the existing Proposed P70 exception. Comparing that document
+  with planning parent `60416ae` confirms execution did not change it.
+
+## Blocked compilation and exact continuation
 
 > blocked: The scoped pilot development build and later combined pilot
 > consolidation both returned exit 75 (shared validation slot busy), before
-> Cargo started. The latter attempted the deduplicated client filters `p70_`,
-> `fish`, and `pyre_jet`, followed by the capture executable. No test, build
-> or after capture ran. The nonblocking lock was preserved; compilation
-> attempts stopped. The suspected cause is another validation owning the
-> host slot. No owner session/build was terminated or changed.
+> Cargo started. The latter selected client filters `p70_`, `fish`, `pyre_jet`
+> followed by the capture executable. No candidate test/build/after capture
+> ran. The suspected cause is another validation owning the host slot.
+> Compilation attempts stopped after the repeated result. No lock polling,
+> bypass, cache deletion, fresh target, raised parallelism or terminated
+> owner session/build was used.
 
-Three independent source-review fronts continue the remaining 43 champion
-art passes using the already captured authentic baseline. This is a recorded
-sequence deviation: S2 runtime acceptance is still pending, so those passes
-must remain implemented candidates and cannot be signed off from source.
-The owner policy permits deferring contested compilation and continuing
-independent work; Trident range calibration and actual after evidence remain
-dependent and deferred. No arbitrary range increase substitutes for that
-calibration. The corresponding competitive change is not yet implemented.
+Sequence deviation: independent source work on the remaining 43 continued
+using already captured baselines while S2 runtime acceptance was deferred.
+This follows the owner instruction to continue independent art; it does not
+turn the pilot gate into a pass. No full suite, balance gate, release build,
+performance campaign or other heavy acceptance was run.
 
-The unchanged frozen executable also produced 50 auxiliary pose sheets
-(Beetling, Crate, Microdrill, Duodrill and Megadrill). These five entities
-remain outside the 46 champion count. Their preview columns do not imply
-playable Evolution; spawning, cargo and fusion need parent-event evidence.
-The index now links 630 authentic before originals, including the original
-460 champion sheets and 120 S1 enemy diagnostics. Each new auxiliary PNG
-was fully decoded and hashed at capture time.
+The designated reviewer should resume the following only in a later authorized
+validation round; do not automatically retry the contested slot in this run:
 
-The live recorder now accepts the fixed roster through `FULL_POOL` and the
-manifest, retains the three pilot compositions, and derives a conservative
-ordinary engagement from the existing kind/form stats for other champions.
-It records the subject's real ID, separates its attack/ability events from
-battle-wide counts, and retains healing and summon attribution. A generic
-engagement is not proof of conditional abilities, all clips or Victory.
-Syntax/format checks passed; runtime remains deferred with the client build.
+1. Compile the consolidated client under the same nonblocking host lock,
+   two build jobs and existing target/pkg-config paths above. Run the union
+   of client regressions once, using the same wrapper and
+   `cargo test --offline --locked -p tbg-client --bin tbg-client <FILTER> --
+   --nocapture --test-threads=1`. Filters: `p70_`, `fish`, `pyre_jet`,
+   `kits_keep_the_simulation_event_times`, `art::kits::archer::tests`,
+   `art::celebration::tests`, `custom_ring_follows_its_later_weapon_parent`.
+   Read each result; formatting is not a type check and written tests may fail.
+2. Freeze that exact successful binary and receipt before after capture.
+   `scripts/p70/capture_roster.py --help` and `record_trial.py --help`
+   define the reproducible CLI. Preserve originals, source/tooling hashes,
+   viewport/quality and event journals; never label the frozen old binary
+   as an after candidate. Reconstruct temporal before only from frozen art
+   with reviewed tooling-only additions, not an edited champion.
+3. Resolve the two known grip defects, run affected diagnostics and capture
+   final five-form/static, temporal, live, Low/both-seat and auxiliary evidence.
+   Populate every champion's paired links and review requirements truthfully.
+   Check the normal gallery's Victory-to-Idle/Walk ownership during temporal
+   review; static presentation does not establish this transition.
+4. Measure/calibrate Trident, implement the narrow Proposed range change with
+   its contracts and boundary tests, then queue D-33 baseline/candidate and
+   held-out evidence. Heavy lab/gate commands still need the owner's separate
+   scope authorization; thresholds are not test fixes.
+5. Verify desktop browser/WASM and Windows against the shared assets in their
+   relevant final environments. Native success alone proves neither. Obtain
+   owner visual/fun and balance approval only with concrete final evidence.
+
+Individual art commit hashes are recorded per champion in the linked machine-
+readable files. All changes remain local and reviewable; **P70 is not complete**.

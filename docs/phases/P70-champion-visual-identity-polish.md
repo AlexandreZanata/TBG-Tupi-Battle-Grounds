@@ -1,6 +1,8 @@
 # P70 — Champion identity, bespoke animation and 3D polish
 
-**Status:** planning only; no model, animation or gameplay change implemented.
+**Status:** all 46 champion art source candidates implemented locally; final
+compilation/evidence, Trident range change and owner approval pending.
+See [the execution review](../planning/P70-VISUAL-REVIEW.md).
 **Owner requests:** 2026-10-31, including the follow-up requiring unique
 characters, stronger individual colors, personalized animation and the
 Trident weapon/body intersection fix. The subsequent owner instruction
@@ -522,7 +524,7 @@ Fill `docs/planning/P70-VISUAL-REVIEW.md` with:
 - Local commits and review handoff. Stop for review; do not push, deploy or
   claim approval automatically.
 
-## Planning report
+## Planning report (historical planning delivery)
 
 Prepared from source inspection only. The square/hole and Trident clipping
 are owner-reported defects pending runtime reproduction. Individual briefs

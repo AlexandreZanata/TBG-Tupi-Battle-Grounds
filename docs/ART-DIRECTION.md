@@ -68,9 +68,6 @@ do not recolor whole torsos into team armor or globally increase saturation.
   as continuous shark countershading. Rust, bone armor and branch cloth
   retain the existing medieval material language.
 
-These are presentation colors, not new faction lore or gameplay rules.
-Individual shapes, equipment and movement must also distinguish the kits.
-
 - Farwatch uses `FIELD_SLATE` (`#455766`) for a large practical coat region,
   separating the arbalest silhouette from Archer's ranger green.
 - Bloodweaver uses `WINE_CLOTH` (`#611421`) and `WINE_SHADE` (`#380D14`)
@@ -81,6 +78,9 @@ Individual shapes, equipment and movement must also distinguish the kits.
   contrast against bright teeth/skulls. `SHOWMAN_VIOLET` (`#5C3D75`)
   supports Puppetmaster's theatrical cloth silhouette. These remain
   proposed individual refinements, with owner visual approval pending.
+
+These are presentation colors, not new faction lore or gameplay rules.
+Individual shapes, equipment and movement must also distinguish the kits.
 
 ## 4. Rig and motion language
 

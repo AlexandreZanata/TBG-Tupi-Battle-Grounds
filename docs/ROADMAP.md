@@ -403,7 +403,11 @@ heavy/full-suite checks only on a separate explicit owner request.
 
 ## Champion visual identity and animation polish (owner request, 2026-10-31)
 
-**P70 — S0 execution in progress**, on `phase/p70-champion-visual-polish`.
+**P70 — 46 art source candidates implemented; phase incomplete**, on
+`phase/p70-champion-visual-polish`. The baseline has 630 renderer originals;
+there are no after captures yet. Candidate compilation/consolidation was
+deferred after two shared-lock-busy results. Trident range remains 1100,
+and Longaxe/Bone Brute B2 inherited support grips remain acceptance blockers.
 The isolated work front preserves the required base and newer owner
 validation policy. See the [execution review](planning/P70-VISUAL-REVIEW.md)
 and [evidence index](planning/P70-VISUAL-EVIDENCE.json); pending cells and
@@ -429,7 +433,9 @@ Execution order: reproducible capture tooling and immutable complete
 baseline -> shared artifact diagnosis -> three pilots -> remaining 43
 individual champions -> consolidated evidence and targeted desktop review.
 Reuse P62 previews and P63 celebration ownership; P68/P69 packaging,
-authentication and mobile work remain separate. The S0 tooling build has
-passed; real capture and art acceptance are tracked separately in the
-execution review. Apply the current owner minimal-validation policy instead
+authentication and mobile work remain separate. The S0 tooling build and
+before campaign completed. Independent art
+continued while the S2 runtime gate was deferred; after evidence and owner
+acceptance remain open in the execution review. Apply the current owner
+minimal-validation policy instead
 of historical full-suite blocks. No push or deployment is authorized.
