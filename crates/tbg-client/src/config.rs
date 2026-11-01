@@ -521,9 +521,10 @@ pub fn save_arena(arena: tbg_core::Arena) {
     preferences::set(Scope::Local, ARENA_KEY, arena.slug());
 }
 
-/// Keep the HTML path until the owner approves the migrated screens.
+/// The Bevy (native Linux) presentation everywhere; the owner approved the
+/// migrated screens for the browser on 2026-11-01 (P72).
 pub fn bevy_ui() -> bool {
-    cfg!(not(target_arch = "wasm32")) || url_param("ui").as_deref() == Some("bevy")
+    true
 }
 
 /// Low freezes decorative kit noise while action and authoritative status timing stay live.

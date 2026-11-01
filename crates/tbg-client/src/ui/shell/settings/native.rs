@@ -15,6 +15,8 @@ pub fn spawn(
     assets: &AssetServer,
 ) {
     controls::heading(root, assets, lang);
+    // The native resume record (P66) lives in the OS vault; the browser has none.
+    #[cfg(not(target_arch = "wasm32"))]
     if !crate::platform::resume::available() {
         root.spawn(kit::muted(lang.key("update.resume.temporary"), 13.));
     }

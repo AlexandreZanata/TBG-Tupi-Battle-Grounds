@@ -44,22 +44,6 @@ pub(crate) enum Offer {
     Idle,
 }
 
-impl Offer {
-    /// The desktop projection's word for this state (hud.js styles by it).
-    #[cfg(any(target_arch = "wasm32", test))]
-    pub(crate) fn code(self) -> &'static str {
-        match self {
-            Offer::Open => "open",
-            Offer::Short => "short",
-            Offer::Closed => "closed",
-            Offer::Max => "max",
-            Offer::Paused => "paused",
-            Offer::Pending => "pending",
-            Offer::Idle => "idle",
-        }
-    }
-}
-
 pub(crate) fn own(v: &MatchView) -> StrongholdView {
     v.strongholds[v.you.index()]
 }
@@ -85,12 +69,6 @@ pub(crate) fn offer(v: &MatchView, branch: u8, pending: bool) -> Offer {
         return Offer::Short;
     }
     Offer::Open
-}
-
-/// `Kind|tier|branch`, the desktop HUD's projection of a seat's tower.
-#[cfg(any(target_arch = "wasm32", test))]
-pub(crate) fn record(tower: StrongholdView) -> String {
-    format!("{:?}|{}|{}", tower.kind, tower.tier, tower.branch)
 }
 
 /// `Bastion T1 Fortress`: kind, tier and, once chosen, the branch.
@@ -314,7 +292,7 @@ mod tests {
             title(own(&v), Lang::PtBr),
             "Artilharia T1 Canh\u{E3}o Pesado"
         );
-        assert_eq!(record(own(&v)), "Artillery|1|0");
-        assert_eq!(offer(&v, 1, false).code(), "closed");
+        assert_eq!((own(&v).tier, own(&v).branch), (1, 0));
+        assert_eq!(offer(&v, 1, false), Offer::Closed);
     }
 }

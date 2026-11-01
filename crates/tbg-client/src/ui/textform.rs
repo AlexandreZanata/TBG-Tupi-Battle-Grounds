@@ -227,20 +227,9 @@ fn wire_dom(mut form: NonSendMut<ActiveForm>) {
 #[cfg(not(target_arch = "wasm32"))]
 fn wire_dom() {}
 
-/// Mobile web keeps the existing DOM input so its virtual keyboard opens (D-20).
+/// The Bevy form everywhere: P72 removed the DOM input with the HTML layer, so
+/// narrow (phone) browsers lose D-20's native virtual keyboard; phones are out
+/// of the current desktop-only scope (AGENTS.md).
 pub(super) fn bevy_form() -> bool {
-    if !crate::config::bevy_ui() {
-        return false;
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        return web_sys::window()
-            .and_then(|w| w.inner_width().ok())
-            .and_then(|v| v.as_f64())
-            .is_some_and(|width| width >= 900.0);
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        true
-    }
+    crate::config::bevy_ui()
 }
