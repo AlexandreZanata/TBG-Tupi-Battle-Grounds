@@ -58,6 +58,10 @@ fn apply(
         match action {
             Action::Open(tab) => {
                 catalog.tab = tab;
+                if tab == super::Tab::Practice {
+                    // Arena cards update storage after this persistent Catalog was created.
+                    catalog.arena = crate::config::load_arena();
+                }
                 shell.panel = Panel::Troops;
                 shell.dirty = true;
                 next.set(GameState::Menu);

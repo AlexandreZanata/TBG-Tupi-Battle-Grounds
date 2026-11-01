@@ -121,3 +121,20 @@ Catalog previews exported from the game:
 ![Celestial Citadel](../../crates/tbg-client/assets/arenas/celestial.webp)
 ![Clockwork Bastion](../../crates/tbg-client/assets/arenas/clockwork.webp)
 ![Desert Relics](../../crates/tbg-client/assets/arenas/desert.webp)
+
+### Practice setup follow-through correction
+
+The first final-candidate diagnostic reached the difficulty setup rather than a
+Running match: P62 routes PracticeArena through PracticeSetup. The old opt-in
+arena capture helper clicked only the first button. It was stopped without
+claiming a Running-match pass; its setup log remains local under v2/celestial-practice.
+
+Inspection also found that Catalog persists across screens: selecting an Arena
+card updates saved storage after Catalog initialization, so opening Practice could
+display the previous arena. Opening the Practice tab now reloads only its Arena
+field from storage. The opt-in helper follows the real visible Practice Play
+action, asserts setup Arena equals saved selection, then the existing capture
+asserts MatchInfo equals the clicked Arena. This changes no combat rule or value.
+The native candidate is rebuilt for these two client changes; all three final
+Practice captures and their results follow below. Earlier core/protocol/server
+results remain valid because those sources did not change.
