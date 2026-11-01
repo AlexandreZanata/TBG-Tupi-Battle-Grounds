@@ -97,3 +97,19 @@ sharing optimized dependencies with the actual executable instead of compiling
 the entire Bevy graph in debug and release on a cold runner. Tests remain enabled.
 Trusted manual branch builds may save their Windows dependency cache; PRs and
 release tags cannot write it. Existing caches and active jobs were not removed.
+
+## Official landing adoption
+
+Landing `20261101T210337Z-e1017fc55ed0` is active. Both platform cards/dialogs
+were checked in public Chrome (English/pt-BR, pending state plus a browser-local
+fixture only, zero console/CSP errors). `/downloads.json` returns HTTPS 200 with
+`application/json` and `no-cache, no-transform`, currently both platforms pending.
+The new controller is installed with its timer disabled until an actual attested
+complete release is observed. Backend/web/static timers remain disabled.
+
+The owner explicitly authorized interruption of their single test tab for initial
+proxy adoption. A one-off guarded maintenance operation required at most that one
+connection and zero matches/ranked/results, backed up the TBG include, compared
+all other directives, validated Caddy and reloaded it. The main Caddyfile and game
+server PID stayed identical. Normal zero-connection guards remain unchanged.
+No game executable, player DB, native signing keys or unrelated service changed.
