@@ -15,16 +15,16 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const EMBER: Color = Color::srgb(1.0, 0.45, 0.12);
-const SUN: Color = Color::srgb(1.0, 0.78, 0.3);
-const SOOT: Color = Color::srgb(0.22, 0.2, 0.2);
-const OLD_BONE: Color = Color::srgb(0.75, 0.71, 0.6);
+const EMBER: Color = ORANGE;
+const SUN: Color = SAP;
+const SOOT: Color = CHARCOAL;
 /// Hammer length (socket space, +Z).
 const HAFT: f32 = 0.6;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.06, tier);
     p.torso.x *= 1.1;
+    p.arm = 0.25;
     p
 }
 
@@ -136,8 +136,22 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 
 fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     let t = p.torso;
-    body::pauldrons(v, if f.b && f.t2 { SOOT } else { IRON }, 0.1);
-    body::greaves(v, IRON);
+    body::pauldrons(v, if f.a && f.t2 { IRON } else { SOOT }, 0.115);
+    body::greaves(v, GUNMETAL);
+    for arm in [ForearmL, ForearmR] {
+        v.push(part(
+            Body(arm),
+            Cyl(0.058, 0.11),
+            SOOT,
+            [0.0, -p.arm * 0.55, 0.0],
+        ));
+        v.push(part(
+            Body(arm),
+            Ring(0.009, 0.060, 360.0),
+            RUST,
+            [0.0, -p.arm * 0.40, 0.0],
+        ));
+    }
     v.extend([
         part(
             Body(Hips),
@@ -178,6 +192,9 @@ fn hammer(v: &mut Vec<PartSpec>, f: Form) {
     let w = Prop(Socket::WeaponR);
     let head = if f.a && f.t2 { SUN } else { IRON };
     v.extend(gear::hammer(w, HAFT, head));
+    for z in [0.0, 0.14] {
+        v.push(part(w, Cyl(0.030, 0.075), DARK_LEATHER, [0.0, 0.0, z]).rot([90.0, 0.0, 0.0]));
+    }
     let band = part(w, Cyl(0.075, 0.05), EMBER, [0.0, 0.0, HAFT * 0.85]).rot([90.0, 0.0, 0.0]);
     v.push(if f.a || f.t2 { band.glow() } else { band });
 }
