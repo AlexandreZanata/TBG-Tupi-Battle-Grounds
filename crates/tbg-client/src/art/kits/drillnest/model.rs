@@ -53,10 +53,15 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Body(Chest),
             Box(if f.a { 0.50 } else { 0.39 }, 0.22, 0.40),
-            OAK,
+            if f.b { RUST } else { BRASS },
             [0.0, 0.04, -0.03],
         ),
-        part(Body(Head), Box(0.20, 0.08, 0.16), BRASS, [0.0, 0.0, -0.12]),
+        part(
+            Body(Head),
+            Box(0.20, 0.08, 0.16),
+            GUNMETAL,
+            [0.0, 0.0, -0.12],
+        ),
         part(
             Prop(Socket::WeaponR),
             Cyl(if f.b { 0.10 } else { 0.07 }, 0.35),
@@ -69,6 +74,13 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             Ring(0.018, 0.085, 360.0),
             BRASS,
             [0.0, 0.0, 0.33],
+        )
+        .rot([90.0, 0.0, 0.0]),
+        part(
+            Prop(Socket::WeaponR),
+            Cyl(if f.b { 0.078 } else { 0.052 }, 0.008),
+            DARK,
+            [0.0, 0.0, 0.337],
         )
         .rot([90.0, 0.0, 0.0]),
     ];
@@ -133,8 +145,12 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         (-0.065, 0.22),
         (0.065, 0.22),
     ] {
-        v.push(part(Body(Chest), Cyl(0.045, 0.16), CHITIN, [x, y, -0.07]).rot([90.0, 0.0, 0.0]));
-        v.push(part(Body(Chest), Cone(0.035, 0.10), BRASS, [x, y, 0.06]).rot([90.0, 0.0, 0.0]));
+        v.push(part(Body(Chest), Cyl(0.057, 0.16), CHITIN, [x, y, 0.12]).rot([90.0, 0.0, 0.0]));
+        v.push(part(Body(Chest), Cone(0.040, 0.10), BRASS, [x, y, 0.22]).rot([90.0, 0.0, 0.0]));
+        v.push(
+            part(Body(Chest), Ring(0.009, 0.054, 360.0), STEEL, [x, y, 0.205])
+                .rot([90.0, 0.0, 0.0]),
+        );
     }
     FigureSpec { plan: p, parts: v }
 }
