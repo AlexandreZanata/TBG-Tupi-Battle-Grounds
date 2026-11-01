@@ -110,9 +110,9 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     }
 }
 
-fn dress(v: &mut Vec<PartSpec>, _p: &Proportions, f: Form) {
+fn dress(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     // Team tabard is visible from match camera
-    body::tabard(v, 0.18, 0.30);
+    body::tabard(v, p, 0.18, 0.30, None);
 
     if f.a && f.t2 {
         // Marksman: team half-cape with gold hem

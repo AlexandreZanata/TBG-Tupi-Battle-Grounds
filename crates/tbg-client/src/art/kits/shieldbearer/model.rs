@@ -46,7 +46,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         boots: DARK_LEATHER,
     };
     body::humanoid(&mut v, &p, &look);
-    body::tabard(&mut v, p.torso.x * 0.8, 0.42);
+    body::tabard(&mut v, &p, p.torso.x * 0.8, 0.42, None);
     body::greaves(&mut v, STEEL);
     body::bracers(&mut v, &p, LEATHER);
     body::pauldrons(

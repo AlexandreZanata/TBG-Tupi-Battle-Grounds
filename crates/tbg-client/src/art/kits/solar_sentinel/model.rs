@@ -44,7 +44,8 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             boots: GOLD,
         },
     );
-    body::tabard(&mut v, 0.16, 0.31);
+    // The ivory breastplate ends at z=0.17; its heraldry must sit on that surface.
+    body::tabard(&mut v, &p, 0.16, 0.31, Some(0.17));
     v.extend([
         part(
             Body(Chest),
@@ -52,7 +53,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             IVORY,
             [0.0, 0.16, 0.12],
         ),
-        part(Body(Chest), Cyl(0.07, 0.025), GOLD, [0.0, 0.22, 0.18]).rot([90.0, 0.0, 0.0]),
+        part(Body(Chest), Cyl(0.07, 0.025), GOLD, [0.0, 0.22, 0.215]).rot([90.0, 0.0, 0.0]),
         part(Body(Head), Ball(0.18), IVORY, [0.0, 0.02, 0.0]),
         part(Body(Head), Box(0.15, 0.05, 0.04), NAVY, [0.0, 0.0, 0.16]),
         part(Body(Head), Box(0.05, 0.22, 0.035), GOLD, [0.0, 0.07, 0.18]),

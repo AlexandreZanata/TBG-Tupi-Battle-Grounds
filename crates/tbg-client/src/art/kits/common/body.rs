@@ -87,24 +87,84 @@ pub fn tunic(v: &mut Vec<PartSpec>, p: &Proportions, cloth: Color, hem: Color, b
     ]);
 }
 
-/// A team tabard on the tabard spring, gold hem and lozenge.
-pub fn tabard(v: &mut Vec<PartSpec>, width: f32, length: f32) {
-    let t = Secondary(Spring::Tabard);
+/// Fitted heraldic cloth follows the chest; only the short split hem swings at the hips.
+/// `armor_front` is an explicit breastplate surface when it extends beyond the base torso.
+pub fn tabard(
+    v: &mut Vec<PartSpec>,
+    p: &Proportions,
+    width: f32,
+    length: f32,
+    armor_front: Option<f32>,
+) {
+    let width = width.min(p.torso.x * 0.60);
+    let height = length.min(p.torso.y * 0.78);
+    let y = p.torso.y * 0.51;
+    let slope = p.torso.x * 0.10 * 0.72 / p.torso.y;
+    let pitch = if armor_front.is_some() {
+        0.0
+    } else {
+        slope.atan().to_degrees()
+    };
+    let z = armor_front.unwrap_or(p.torso.x * 0.481 * 0.72) + 0.016;
+    let chest = Body(Chest);
     v.extend([
         part(
-            t,
-            Box(width, length, 0.018),
-            ALLY,
-            [0.0, 0.09 - (length - 0.34) * 0.5, 0.025],
-        ),
-        part(
-            t,
-            Box(width * 0.83, 0.02, 0.022),
+            chest,
+            Frustum(width * 0.55, width * 0.30, height),
             GOLD,
-            [0.0, 0.09 - length + 0.17 + 0.005, 0.025],
-        ),
-        part(t, Box(0.05, 0.05, 0.022), GOLD, [0.0, 0.16, 0.026]).rot([0.0, 0.0, 45.0]),
+            [0.0, y, z],
+        )
+        .scale([1.0, 1.0, 0.11])
+        .rot([pitch, 0.0, 0.0]),
+        part(
+            chest,
+            Frustum(width * 0.49, width * 0.25, height * 0.91),
+            ALLY,
+            [0.0, y, z + 0.004],
+        )
+        .scale([1.0, 1.0, 0.11])
+        .rot([pitch, 0.0, 0.0]),
+        part(
+            chest,
+            Box(0.035, 0.035, 0.009),
+            GOLD,
+            [0.0, y + 0.012, z + 0.023],
+        )
+        .rot([pitch, 0.0, 45.0]),
     ]);
+    // Shoulder loops make the attachment legible from the match camera, not a floating front card.
+    for side in [-1.0, 1.0] {
+        v.extend([
+            part(
+                chest,
+                Box(0.028, 0.03, p.torso.z * 1.12),
+                LEATHER,
+                [side * width * 0.43, p.torso.y * 0.98, 0.0],
+            ),
+            part(
+                chest,
+                Box(0.035, 0.034, 0.018),
+                ALLY,
+                [
+                    side * width * 0.43,
+                    p.torso.y * 0.98 + 0.012,
+                    p.torso.z * 0.49,
+                ],
+            ),
+        ]);
+    }
+    let hem = (length - height).clamp(0.07, 0.14);
+    for side in [-1.0, 1.0] {
+        v.push(
+            part(
+                Secondary(Spring::Tabard),
+                Frustum(width * 0.17, width * 0.10, hem),
+                ALLY,
+                [side * width * 0.22, -hem * 0.5, p.torso.x * 0.10 + 0.012],
+            )
+            .scale([1.0, 1.0, 0.15]),
+        );
+    }
 }
 
 /// A cape hanging from the back spring.
