@@ -10,6 +10,11 @@ The laboratory now uses the standard 38-pixel controls, 8-pixel gaps and a
 centered, proportional arena picture; selector and Play stay at the bottom.
 No arena asset, rule, default difficulty, selection action or crop code changes.
 
+Augment cards no longer contain a BoxShadow component or a rarity text node.
+The obsolete rarity text/color update code is removed. Frame assets, illustration,
+name/description/price positions, selected border, affordability guards and
+confirmation actions are unchanged. No assets or game-rule values change.
+
 Validation level: work front with the owner's standing native build/reinstall
 authorization. Formatting, source routing and diff checks passed on the current
 Rust changes. Final build, targeted Linux captures, packaging and installation

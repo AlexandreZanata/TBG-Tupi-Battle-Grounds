@@ -248,3 +248,20 @@ and resize without clipping. Add `training-practice-reference-layout` and
 `training-practice-reference-resize`, with motion frames for the resize case.
 Linux build, representative capture and reinstall are pending. Windows/web
 same-source packaged comparisons remain pending consolidation.
+
+### 2026-11-01 — Augment cards without glow or rarity labels
+
+Linux reference: remove the card's BoxShadow entirely, including the selected
+green glow that extended below the illustrated frame. Selection remains visible
+through the existing thin outline. Remove the rarity text node from every card;
+Bronze/Silver/Gold/Diamond frame artwork and price remain the visual identifiers.
+Name, description, price, art placement, availability, keyboard focus and
+two-step authoritative confirmation retain their existing behavior.
+
+Shared propagation: `native_battle::council::{options, texts, layout}` supplies
+one shared presentation on Linux, Windows and desktop web. Add
+`war-council-no-rarity-labels` and `war-council-selection-no-shadow` to cover
+all four frame rarities, selection changes, hover/keyboard focus, unavailable
+options and resolved choices; include motion frames for selection changes.
+Linux native captures and reinstall are pending. Windows/web same-source
+packaged comparison and remaining matrix cases are pending consolidation.

@@ -75,7 +75,9 @@
     "upgrade-dialog-disabled",
     "upgrade-dialog-focus-transition",
     "training-practice-reference-layout",
-    "training-practice-reference-resize"
+    "training-practice-reference-resize",
+    "war-council-no-rarity-labels",
+    "war-council-selection-no-shadow"
   ],
   "motion_screens": [
     "preview-dance",
@@ -88,7 +90,8 @@
     "preview-motion-reentry",
     "training-arena-cover-resize",
     "upgrade-dialog-focus-transition",
-    "training-practice-reference-resize"
+    "training-practice-reference-resize",
+    "war-council-selection-no-shadow"
   ],
   "motion_frames": [
     0,

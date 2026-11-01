@@ -12,7 +12,7 @@ use bevy::prelude::*;
 use serde_json::Value;
 use std::sync::OnceLock;
 use tbg_core::{
-    content::{augment_def, AugmentRarity, AUGMENT_WINDOW_TICKS, ENERGY_SCALE, TICK_HZ},
+    content::{augment_def, AUGMENT_WINDOW_TICKS, ENERGY_SCALE, TICK_HZ},
     view::RoundView,
     MatchView,
 };
@@ -44,7 +44,6 @@ enum Picture {
 enum Field {
     Time,
     Waiting,
-    Rarity(usize),
     Name(usize),
     Description(usize),
     Cost(usize),
@@ -155,14 +154,13 @@ fn options(
         &mut UiAction,
         &mut kit::buttons::Chrome,
         &mut kit::buttons::Palette,
-        &mut BoxShadow,
     )>,
 ) {
     if !view.is_changed() && !selection.is_changed() {
         return;
     }
     let Some(v) = &view.0 else { return };
-    for (card, mut action, mut chrome, mut palette, mut shadow) in &mut cards {
+    for (card, mut action, mut chrome, mut palette) in &mut cards {
         let selected = selection.picked == Some(card.0 as u8);
         chrome.enabled = affordable(v, card.0 as u8);
         *action = if chrome.enabled {
@@ -175,15 +173,6 @@ fn options(
         } else {
             Color::NONE
         };
-        shadow.0 = vec![ShadowStyle {
-            color: if selected {
-                Color::srgb_u8(116, 186, 84).with_alpha(0.4)
-            } else {
-                Color::BLACK.with_alpha(0.5)
-            },
-            blur_radius: px(16),
-            ..default()
-        }];
     }
 }
 
@@ -250,11 +239,11 @@ fn texts(
     lang: Res<crate::i18n::Lang>,
     view: Res<LatestView>,
     selection: Res<Selection>,
-    mut texts: Query<(&Field, &mut Text, &mut TextColor)>,
+    mut texts: Query<(&Field, &mut Text)>,
 ) {
     let Some(v) = &view.0 else { return };
     let Some(r) = &v.augment_round else { return };
-    for (field, mut text, mut color) in &mut texts {
+    for (field, mut text) in &mut texts {
         let want = match field {
             Field::Time => {
                 let seconds = r.ticks_left.div_ceil(TICK_HZ);
@@ -271,23 +260,17 @@ fn texts(
         if text.0 != want {
             text.0 = want;
         }
-        if let Field::Rarity(i) = field {
-            if let Some(def) = augment_def(r.options[*i]) {
-                color.0 = rarity_color(def.rarity);
-            }
-        }
     }
 }
 
 fn card_text(field: &Field, r: &RoundView, lang: crate::i18n::Lang) -> String {
-    let (Field::Rarity(i) | Field::Name(i) | Field::Description(i) | Field::Cost(i)) = field else {
+    let (Field::Name(i) | Field::Description(i) | Field::Cost(i)) = field else {
         return String::new();
     };
     let Some(def) = augment_def(r.options[*i]) else {
         return String::new();
     };
     match field {
-        Field::Rarity(_) => format!("{:?}", def.rarity).to_uppercase(),
         Field::Name(_) => crate::i18n::content::augment_name(lang, def.id)
             .unwrap_or(def.name)
             .into(),
@@ -295,16 +278,6 @@ fn card_text(field: &Field, r: &RoundView, lang: crate::i18n::Lang) -> String {
         Field::Cost(_) => (r.costs[*i] / ENERGY_SCALE).to_string(),
         _ => String::new(),
     }
-}
-
-fn rarity_color(rarity: AugmentRarity) -> Color {
-    let [r, g, b] = match rarity {
-        AugmentRarity::Bronze => [215, 137, 105],
-        AugmentRarity::Silver => [143, 198, 232],
-        AugmentRarity::Gold => [232, 188, 104],
-        AugmentRarity::Diamond => [240, 223, 173],
-    };
-    Color::srgb_u8(r, g, b)
 }
 
 fn update_layout(view: Res<LatestView>, mut nodes: Query<(&Layout, &mut Node)>) {
