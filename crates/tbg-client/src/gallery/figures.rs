@@ -165,6 +165,7 @@ pub(super) fn spawn_one(
         ))
         .id();
     let joints = figure::spawn_joints(commands, figure, kind, &form.plan, &form.meshes, material);
+    crate::art::presentation::attachments(commands, lib, kind, (tier, branch), &joints, material);
     if *material == lib.material {
         figure::spawn_glow(commands, &joints, &form.glow, &lib.glow_material);
     }

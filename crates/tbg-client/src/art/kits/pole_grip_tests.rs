@@ -82,6 +82,22 @@ fn check_pose(
         m.tier, m.branch, m.variant, m.t
     );
     let gap = check_hands(&world, shaft, butt, top, &label);
+    if kind == UnitKind::Longaxe {
+        if let Some(mesh) = &meshes[Node::Prop(Socket::WeaponR).index()] {
+            if let Some(VertexAttributeValues::Float32x3(vertices)) =
+                mesh.attribute(Mesh::ATTRIBUTE_POSITION)
+            {
+                let lowest = vertices
+                    .iter()
+                    .map(|v| shaft.transform_point3(Vec3::from(*v)).y)
+                    .fold(f32::INFINITY, f32::min);
+                assert!(
+                    lowest >= -0.02,
+                    "{label}: poleaxe digs below the ground: {lowest}"
+                );
+            }
+        }
+    }
     for body in [Joint::Hips, Joint::Chest, Joint::Head] {
         if let Some(mesh) = &meshes[body.index()] {
             check_clearance(

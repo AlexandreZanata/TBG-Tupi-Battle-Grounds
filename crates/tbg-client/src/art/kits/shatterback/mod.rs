@@ -4,8 +4,8 @@
 pub(crate) mod model;
 use bevy::prelude::*;
 
-use super::common::{moves, moves::*, Form};
-use super::{tools, Attack, Gait, Kit, Moment};
+use super::common::{moves, Form};
+use super::{tools, Anatomy, Attack, Gait, Kit, Moment};
 use crate::art::{
     anim::{Clip, Pose},
     rig::{Joint, Node},
@@ -13,8 +13,15 @@ use crate::art::{
 use crate::vfx::impacts::{Burst, Impact};
 use model::plan;
 
+static ANATOMY: Anatomy = Anatomy {
+    rest: model::rest,
+    parent: Node::parent,
+    springs: false,
+    planted_legs: true,
+};
+
 pub const KIT: Kit = Kit {
-    anatomy: None,
+    anatomy: Some(&ANATOMY),
     figure: model::spec,
     pose,
     gait: Gait::HEAVY,
@@ -59,12 +66,30 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             tools::plant(pose, &p, tools::stance(&p, 1.5, 0.02));
         }
         Clip::Hit => {
-            moves::hit(m, pose, 0.45);
-            stoop(pose, 0.8);
+            pose.fill((Vec3::ZERO, Vec3::ZERO));
+            let recoil = tools::hold(m.t, [0.0, 0.04, 0.08, 0.25]);
+            tools::set(pose, Joint::Chest, [-4.0 * recoil, 0.0, 0.0]);
+            tools::shift(pose, Joint::Head, [0.0, 0.0, -0.06 * recoil]);
         }
-        Clip::Death => moves::death(m, pose, &p, Fall::Kneel),
-        Clip::Spawn => moves::spawn(m, pose, &p, Entry::Rise),
-        Clip::Evolve => moves::evolve(m, pose, &p, Power::Burst),
+        Clip::Death => {
+            pose.fill((Vec3::ZERO, Vec3::ZERO));
+            let retreat = tools::window(m.t, 0.0, 0.65);
+            tools::shift(pose, Joint::Hips, [0.0, -0.08 * retreat, 0.0]);
+            tools::shift(pose, Joint::Head, [0.0, -0.02 * retreat, -0.18 * retreat]);
+            tools::set(pose, Joint::Head, [8.0 * retreat, 0.0, 0.0]);
+        }
+        Clip::Spawn => {
+            pose.fill((Vec3::ZERO, Vec3::ZERO));
+            let emerge = tools::window(m.t, 0.0, 0.60);
+            tools::shift(pose, Joint::Root, [0.0, -0.25 * (1.0 - emerge), 0.0]);
+            tools::shift(pose, Joint::Head, [0.0, 0.0, -0.12 * (1.0 - emerge)]);
+        }
+        Clip::Evolve => {
+            pose.fill((Vec3::ZERO, Vec3::ZERO));
+            let shake = (m.t * 18.0).sin() * tools::hold(m.t, [0.0, 0.15, 0.45, 0.9]);
+            tools::set(pose, Joint::Chest, [0.0, 0.0, 3.0 * shake]);
+            tools::set(pose, Joint::Head, [-3.0, -4.0 * shake, 0.0]);
+        }
         Clip::Victory => {
             let proud = 0.5 - 0.5 * (m.t / 0.8 * std::f32::consts::TAU).cos();
             pose[Joint::Root.index()] = (Vec3::ZERO, Vec3::ZERO);
@@ -87,12 +112,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         }
         _ => stoop(pose, 1.0),
     }
-    if matches!(
-        m.clip,
-        Clip::Idle | Clip::Walk | Clip::AttackMelee | Clip::Victory
-    ) {
-        forepaws(m, pose, &p);
-    }
+    forepaws(m, pose, &p);
 }
 
 /// Front paws use the existing arm IK; their targets stay on the local ground.

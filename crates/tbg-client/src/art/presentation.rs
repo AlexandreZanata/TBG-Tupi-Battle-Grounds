@@ -36,6 +36,7 @@ pub fn spawn(
         &lib.material,
     );
     figure::spawn_glow(commands, &joints, &model.glow, &lib.glow_material);
+    attachments(commands, lib, kind, form, &joints, &lib.material);
     if reduced {
         for joint in joints {
             commands
@@ -49,6 +50,35 @@ pub fn spawn(
     animator.treadmill = true;
     commands.entity(root).insert(animator);
     root
+}
+
+/// Event-free previews show the intact shell; live combat owns detachable plate state separately.
+pub fn attachments(
+    commands: &mut Commands,
+    lib: &FigureLibrary,
+    kind: UnitKind,
+    form: (u8, u8),
+    joints: &[Entity; NODE_COUNT],
+    material: &Handle<StandardMaterial>,
+) {
+    if kind != UnitKind::Shatterback {
+        return;
+    }
+    if let Some(plates) = lib.shells.get(&form) {
+        for mesh in plates {
+            let plate = commands
+                .spawn((
+                    Mesh3d(mesh.clone()),
+                    MeshMaterial3d(material.clone()),
+                    Transform::IDENTITY,
+                    Visibility::Inherited,
+                ))
+                .id();
+            commands
+                .entity(joints[rig::Joint::Chest.index()])
+                .add_child(plate);
+        }
+    }
 }
 
 /// Custom kit parents may appear later in the fixed slot order.

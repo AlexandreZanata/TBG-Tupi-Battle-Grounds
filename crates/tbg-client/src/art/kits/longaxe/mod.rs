@@ -159,7 +159,7 @@ fn attack(m: &Moment, pose: &mut Pose, p: &Proportions, f: Form) {
     } else {
         (
             -10.0 * (1.0 - back),
-            ((10.0 - 60.0 * wind) * (1.0 - cut) + 110.0 * cut) * (1.0 - back) + 15.0 * back,
+            ((10.0 - 60.0 * wind) * (1.0 - cut) + 65.0 * cut) * (1.0 - back) + 15.0 * back,
         )
     };
     tools::add(

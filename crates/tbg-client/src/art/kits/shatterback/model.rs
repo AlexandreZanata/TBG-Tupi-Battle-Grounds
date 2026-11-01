@@ -4,7 +4,7 @@ use crate::art::{
     kits::common::{body, Form},
     mesh::Shape::*,
     palette::*,
-    rig::{Joint::*, Node::Body, Proportions},
+    rig::{self, Joint::*, Node, Node::Body, Proportions},
 };
 use bevy::prelude::*;
 const HIDE: Color = MOSS;
@@ -22,6 +22,13 @@ pub fn plan(tier: u8) -> Proportions {
 }
 pub fn tip() -> Vec3 {
     Vec3::new(0.0, 0.0, 0.24)
+}
+pub fn rest(node: Node, p: &Proportions) -> Vec3 {
+    match node {
+        // Rotate at the visible neck, rather than orbiting an invisible humanoid head socket.
+        Body(Head) => Vec3::new(0.0, 0.20, 0.33),
+        _ => rig::rest(node, p),
+    }
 }
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let p = plan(tier);
@@ -92,12 +99,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             if f.a { BRASS } else { IRON },
             [0.0, p.head * 0.6, 0.04],
         ));
-    }
-    // The neck emerges ahead of the shell instead of balancing the head on its top.
-    for part in &mut v {
-        if matches!(part.node, Body(Head)) {
-            part.at.z += 0.32;
-        }
     }
     FigureSpec { plan: p, parts: v }
 }
