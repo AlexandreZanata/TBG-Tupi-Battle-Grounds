@@ -77,6 +77,38 @@ fn bot_matches_are_frozen() {
             StrongholdDestroyed,
         ),
     ];
+    // D-101: keep the revision-2 baseline above; append the documented P70/P71
+    // candidate instead of applying old outcomes to a different ruleset.
+    let goldens = match (
+        tbg_core::ruleset_version::RULESET_VERSION,
+        tbg_core::ruleset_version::ruleset_source_hash(),
+    ) {
+        (2, 0x3d56_1560_49e6_26c5) => goldens,
+        (6, 0x0973_85fe_e9a1_0b0f) => [
+            (
+                1,
+                0xe318_aa87_b746_f36c,
+                4_044,
+                Seat::B,
+                StrongholdDestroyed,
+            ),
+            (
+                7,
+                0xb796_fd4f_3eb1_2d9f,
+                9_982,
+                Seat::B,
+                StrongholdDestroyed,
+            ),
+            (
+                42,
+                0x5259_4b93_cce3_8cf5,
+                10_382,
+                Seat::A,
+                StrongholdDestroyed,
+            ),
+        ],
+        revision => panic!("register an explicit canonical baseline for {revision:?}"),
+    };
     let mut observed = Vec::with_capacity(goldens.len());
     let mut expected = Vec::with_capacity(goldens.len());
     for (seed, hash, tick, winner, reason) in goldens {

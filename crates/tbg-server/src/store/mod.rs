@@ -30,6 +30,8 @@ pub mod release_admin;
 pub(crate) mod recovery;
 mod rulesets;
 mod schema;
+/// Database shape expected by this server build. Automatic deployment requires equality.
+pub const DATABASE_SCHEMA_VERSION: i64 = schema::CURRENT_VERSION;
 pub mod stats;
 mod strongholds;
 mod worker;

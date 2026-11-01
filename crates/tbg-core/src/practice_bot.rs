@@ -141,7 +141,7 @@ impl PracticeBot {
         let bp = rules
             .interest
             .regen_bp(state.players[Seat::B.index()].energy)
-            + state.arena_rule().regen_bp;
+            .saturating_add_signed(state.arena_rule().regen_bp);
         self.regen_frac += u64::from(rules.regen_running) * u64::from(bp);
         let gain = (self.regen_frac / 10_000) as u32;
         self.regen_frac %= 10_000;

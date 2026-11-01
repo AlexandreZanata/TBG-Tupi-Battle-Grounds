@@ -1,0 +1,11 @@
+[Unit]
+Description=Check for compatible attested TBG static frontend updates
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=10min
+RandomizedDelaySec=30s
+Unit=tbg-static-deploy.service
+
+[Install]
+WantedBy=timers.target

@@ -14,7 +14,7 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const MAIL: Color = Color::srgb(0.62, 0.65, 0.7);
+const MAIL: Color = STEEL;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.05, tier);
@@ -46,7 +46,8 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         boots: DARK_LEATHER,
     };
     body::humanoid(&mut v, &p, &look);
-    body::tabard(&mut v, p.torso.x * 0.8, 0.42);
+    body::tunic(&mut v, &p, RED_CLOTH, LINEN, DARK_LEATHER);
+
     body::greaves(&mut v, STEEL);
     body::bracers(&mut v, &p, LEATHER);
     body::pauldrons(
@@ -151,7 +152,7 @@ fn arms(v: &mut Vec<PartSpec>, f: Form) {
             part(
                 r,
                 Box(0.02, 0.022, blade(f)),
-                ALLY,
+                LINEN,
                 [0.0, 0.0, 0.1 + blade(f) * 0.5],
             )
             .glow(),
@@ -160,7 +161,7 @@ fn arms(v: &mut Vec<PartSpec>, f: Form) {
     if f.a && f.t2 {
         // A tower shield crowned with a castle's merlons.
         v.extend([
-            part(l, Box(0.05, 0.78, 0.5), ALLY, [0.09, -0.08, 0.0]),
+            part(l, Box(0.05, 0.78, 0.5), LINEN, [0.09, -0.08, 0.0]),
             part(l, Box(0.055, 0.8, 0.06), GOLD, [0.09, -0.08, 0.22]),
             part(l, Box(0.055, 0.8, 0.06), GOLD, [0.09, -0.08, -0.22]),
             part(l, Box(0.06, 0.2, 0.2), GOLD, [0.1, 0.0, 0.0]),
@@ -170,6 +171,7 @@ fn arms(v: &mut Vec<PartSpec>, f: Form) {
         }
         return;
     }
+    v.push(part(l, Ball(0.055), BRASS, [0.115, -0.02, 0.0]).scale([0.45, 1.0, 1.0]));
     v.extend(gear::kite_shield(
         l,
         if f.a { 0.66 } else { 0.54 },

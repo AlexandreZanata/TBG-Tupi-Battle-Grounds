@@ -15,6 +15,9 @@
 
 use rusqlite::Connection;
 
+/// Latest ordered database migration, also bound into deployment metadata.
+pub(super) const CURRENT_VERSION: i64 = 10;
+
 const MATCHES_V1: &str = "CREATE TABLE IF NOT EXISTS matches (
     id INTEGER PRIMARY KEY,
     ended_at TEXT NOT NULL,

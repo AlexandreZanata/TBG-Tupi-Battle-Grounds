@@ -14,13 +14,22 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Secondary, Proportions, Spring},
 };
 
-const STEM: Color = Color::srgb(0.9, 0.86, 0.74);
-const STEM_DARK: Color = Color::srgb(0.74, 0.68, 0.54);
-const GILLS: Color = Color::srgb(0.62, 0.5, 0.4);
-const SPOT: Color = Color::srgb(0.95, 0.9, 0.78);
-const TOXIN: Color = Color::srgb(0.55, 0.95, 0.2);
-const VENOM_CAP: Color = Color::srgb(0.42, 0.2, 0.36);
-const SPORE: Color = Color::srgb(0.85, 0.95, 0.4);
+const STEM: Color = LINEN;
+const STEM_DARK: Color = TRIM;
+const GILLS: Color = BARK;
+const SPOT: Color = IVORY;
+const TOXIN: Color = LEAF;
+const VENOM_CAP: Color = VIOLET;
+const SPORE: Color = SAP;
+// A cap has a flat underside: the lower half of a sphere obscured the mouth.
+const CAP: &[[f32; 2]] = &[
+    [0.0, 0.0],
+    [1.0, 0.0],
+    [0.92, 0.20],
+    [0.71, 0.35],
+    [0.38, 0.46],
+    [0.0, 0.5],
+];
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 0.95, tier);
@@ -45,6 +54,13 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         boots: BARK,
     };
     body::humanoid(&mut v, &p, &look);
+    v.retain(|part| !matches!(part.node, Body(Chest | FootL | FootR)));
+    v.push(part(Body(Chest), Ball(0.19), STEM, [0.0, 0.16, 0.0]).scale([1.05, 1.05, 0.78]));
+    for foot in [FootL, FootR] {
+        v.push(
+            part(Body(foot), Ball(0.08), STEM_DARK, [0.0, -0.02, 0.06]).scale([1.15, 0.65, 1.45]),
+        );
+    }
     let t = p.torso;
     v.extend([
         // The mushroom ring as a collar, and the team's sash.
@@ -58,7 +74,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(
             Body(Chest),
             Box(t.x * 1.0, 0.06, t.z * 0.8),
-            ALLY,
+            LINEN,
             [0.0, t.y * 0.25, 0.02],
         )
         .rot([0.0, 0.0, 12.0]),
@@ -85,10 +101,10 @@ fn face(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     let h = p.head;
     let m = mouth(p);
     v.extend([
-        part(Body(Head), Ball(h * 0.24), DARK, m.to_array()).scale([1.0, 0.8, 0.5]),
+        part(Body(Head), Ball(h * 0.32), DARK, m.to_array()).scale([1.0, 0.85, 0.5]),
         part(
             Body(Head),
-            Ring(0.012, h * 0.24, 360.0),
+            Ring(0.014, h * 0.32, 360.0),
             STEM_DARK,
             m.to_array(),
         )
@@ -104,12 +120,12 @@ fn cap(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     let r = h * if f.a && f.t2 { 3.0 } else { 2.6 };
     let color = match (f.a, f.t2) {
         (true, true) => VENOM_CAP,
-        (true, false) => Color::srgb(0.6, 0.24, 0.24),
+        (true, false) => RED_CLOTH,
         _ => MUSHROOM,
     };
     let y = h * 0.75;
     v.extend([
-        part(Body(Head), Ball(r), color, [0.0, y, 0.0]).scale([1.0, 0.5, 1.0]),
+        part(Body(Head), Lathe(CAP), color, [0.0, y, 0.0]).scale([r, r, r]),
         part(
             Body(Head),
             Cyl(r * 0.96, 0.02),

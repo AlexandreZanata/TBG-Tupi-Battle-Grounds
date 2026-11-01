@@ -66,14 +66,20 @@ pub(super) fn animate(
     }
 }
 
-fn pose(moving: &Moving, tower: &Tower, clock: f32) -> Transform {
+pub(super) fn pose(moving: &Moving, tower: &Tower, clock: f32) -> Transform {
     let rest = moving.rest;
+    let clock_since = tower.pending.map_or(tower.since, |waited| waited - 0.06);
     let aimed = gun_rotation(tower.own, tower.yaw, tower.pitch);
     match moving.motion {
         Motion::Kick(distance) => {
             let k = kick(tower.since / recover(tower));
+            let travel = if distance < 0.0 {
+                -distance * hatch(clock_since) - 0.035 * k
+            } else {
+                -distance * k
+            };
             rest.with_rotation(aimed)
-                .with_translation(rest.translation + aimed * Vec3::NEG_X * distance * k)
+                .with_translation(rest.translation + aimed * Vec3::X * travel)
         }
         Motion::Mounted(distance) => {
             let k = kick(tower.since / recover(tower));
@@ -82,7 +88,7 @@ fn pose(moving: &Moving, tower: &Tower, clock: f32) -> Transform {
                 .with_translation(turn * rest.translation + aimed * Vec3::NEG_X * distance * k)
         }
         Motion::Hatch(angle) => {
-            rest.with_rotation(rest.rotation * Quat::from_rotation_x(-angle * hatch(tower.since)))
+            rest.with_rotation(rest.rotation * Quat::from_rotation_x(-angle * hatch(clock_since)))
         }
         Motion::Swivel => {
             let turn = Quat::from_rotation_y(tower.yaw);
@@ -90,6 +96,13 @@ fn pose(moving: &Moving, tower: &Tower, clock: f32) -> Transform {
                 .with_translation(turn * rest.translation)
         }
         Motion::Aim => rest.with_rotation(aimed),
+        Motion::Nocked => {
+            let turn = Quat::from_rotation_y(tower.yaw);
+            let visible = tower.pending.is_some() || tower.since >= 0.32;
+            rest.with_rotation(aimed)
+                .with_translation(turn * rest.translation)
+                .with_scale(if visible { Vec3::ONE } else { Vec3::ZERO })
+        }
         Motion::Notch(angle) => {
             let settle = tower
                 .gun
@@ -114,7 +127,12 @@ fn recover(tower: &Tower) -> f32 {
 /// How far a hatch stands open (0..=1) `since` seconds after a shot:
 /// snaps open, holds while the shot leaves, swings shut.
 pub(super) fn hatch(since: f32) -> f32 {
-    let open = (since / 0.06).clamp(0.0, 1.0);
+    // The release pose is already open; opening after release hid the muzzle.
+    let open = if since.is_finite() && since < 0.65 {
+        (1.0 + since / 0.06).clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
     let shut = ((since - 0.3) / 0.35).clamp(0.0, 1.0);
     open * (1.0 - shut * shut * (3.0 - 2.0 * shut))
 }

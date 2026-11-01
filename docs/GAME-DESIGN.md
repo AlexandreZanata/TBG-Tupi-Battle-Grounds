@@ -307,7 +307,12 @@ necessary, never sufficient; the owner's playtest decides.
 | Nash equilibrium of the full pool: support / largest weight | ≥ 3 policies / ≤ 50 % | yes |
 
 **Role invariants (Proposed).** Searched rulesets keep: base range ≤
-Stronghold range; cost between 1 Energy and the Energy cap; interval ≥
+Stronghold range, except units that never target Strongholds and Farwatch's
+registered canonical reach (**Proposed P71 owner rule**, clarified by D-102).
+P71 allows Farwatch to target Strongholds at its existing 12.0-tile base range;
+this exception does not authorize a greater experimental range or exempt another
+Stronghold attacker. If the experimental Stronghold range is larger, the ordinary
+cap still applies. Cost stays between 1 Energy and the Energy cap; interval ≥
 the minimum; in a faction with a Tank, a Tank has the most HP per Energy;
 in a faction with a Ranged unit, a Ranged unit has the longest range; a
 zero stays zero (no new ability). Untuned by the lab: Synergy thresholds,
@@ -702,7 +707,7 @@ Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). S
 | Unit | Faction | Class | Cost | HP | Dmg | Every | Range | Speed | Identity in one line |
 |------|---------|-------|------|----|-----|-------|-------|-------|----------------------|
 | Rotcap | Plants | Ranged | 3 | 200 | 12 | 1.5 | 3.5 | 0.9 | Each hit adds a poison stack (6/s, 10 s, ≤ 6 per victim) that outlives it |
-| Farwatch | Humans | Ranged | 3 | 150 | 70 | 4.0 | 12.0 | 0.9 | Shoots units across most of the lane; never targets Strongholds |
+| Farwatch | Humans | Ranged | 3 | 150 | 70 | 4.0 | 12.0 | 0.9 | **Proposed (P71 owner, 2026-11-01):** shoots units or the enemy Stronghold within its existing range; normal nearest-target and Guard rules apply |
 | Leechroot | Plants | DPS | 3 | 300 | 10 | 1.6 | 1.2 | 0.9 | Damage dealt to enemy units becomes permanent stacks, no maximum; lost on death |
 | Bombard | Machines | Ranged | 5 | 1 000 | 24 | 2.2 | 4.0 | 0.5 | Blast radius 1.0 hits every unit, both sides and itself |
 | Old Finn | Humans | Control | 3 | 240 | 8 | 2.0 | 5.25 | 0.9 | Fish: −15 % move each, ≤ 3, 5 s; never slows attacks |
@@ -719,8 +724,8 @@ Fifteen new units are specified in [ROSTER-EXPANSION.md](ROSTER-EXPANSION.md). S
 
 ## 12. Arenas (active, values Proposed, ARENAS-G, D-55)
 
-Every match is played in one of five `Arena`s. Each changes one small
-thing, **the same for both sides**; the Forest is the neutral reference.
+Every match is played in one of eight `Arena`s. Each applies small modifiers,
+**the same for both sides**; the Forest is the neutral reference.
 Values are **Proposed** until the balance lab confirms them (D-33).
 
 | Arena | Effect on both sides |
@@ -730,6 +735,9 @@ Values are **Proposed** until the balance lab confirms them (D-33).
 | Volcanic Forge | Troop attack speed +8 % |
 | Ancient Ruins | Each player's first successful `Evolution` costs 1 `Energy` less |
 | Storm Valley | Base `Energy` regeneration +8 % |
+| Celestial Citadel | **Proposed:** troop movement speed +8 % |
+| Clockwork Bastion | **Proposed:** troop attack speed +8 %, movement speed −5 % |
+| Desert Relics | **Proposed:** base `Energy` regeneration −8 % |
 
 - **BR-AR01** Online, the server draws the `Arena` uniformly at pairing
   (every mode: casual, ranked, rooms, challenges, rematches), before the
@@ -748,7 +756,17 @@ Values are **Proposed** until the balance lab confirms them (D-33).
   discounts, and never takes the price below 1 `Energy`. The view shows
   each player's current `Evolution` prices.
 - **BR-AR05** The Storm bonus adds 800 bp to the base regeneration beside
-  Interest (BR-E05); the existing remainder carries the rounding.
+  Interest (BR-E05); the existing remainder carries the rounding. Desert
+  subtracts 800 bp from that same base; it does not multiply Interest.
+- **BR-AR06** **Proposed, owner-requested expansion (2026-11-01):** append
+  Celestial, Clockwork and Desert after the original five identities. Online
+  draws stay uniform over the entire catalog. Celestial adds 800 movement bp;
+  Clockwork combines +800 attack-speed bp and −500 movement bp; Desert adds
+  −800 base-regeneration bp. Apply all fields once through BR-AR03/05, with
+  existing caps and rounding. No Faction, Stronghold, damage, HP, geometry,
+  price or resource-cap exception. These initial playtest values are **Proposed**
+  pending D-33 evidence; the five existing arena values stay unchanged.
+  Protocol 30 protects older peers from the appended Arena variants.
 
 ## 13. P58 roster expansion — Proposed, inactive
 
@@ -822,6 +840,12 @@ damage, interval and range come from T11's flame. Other base rows preserve
 the text apart from integer speed conversion. No printed PNG number is
 used. R21's interval is its production cadence, not a zero-damage attack.
 
+The table preserves the P59 reference. Its R07 range is superseded in the current
+P70 candidate by the explicitly Proposed 2,000-unit reach in §14 below; other
+R07 base values remain unchanged. D-101 applies that documented override to
+current candidate assertions and retains the original table and revision-2
+deterministic references. Ruleset 6 is not a D-33-approved balance release.
+
 ### 13.2 Proposed primary abilities
 
 Times are ticks; percentages use basis points (1%=100 bp). Parameters
@@ -835,7 +859,7 @@ special range equals base attack range and ability target is an enemy unit.
 | R02 | Esmagamento em Área: period 200; caster-centered radius 2500; damage 120; no displacement or true interruption |
 | R03 | Marca do Corvo: readiness every 140; next valid basic hit marks for 80; Slow 2000 bp, heal-cut 3000 bp, own basic damage vs own marked target +1500 bp |
 | R04 | Tiro Cruzado: every fourth completed enemy-unit primary hit; one additional target within 1500 of primary; secondary damage 6000 bp of current static basic damage |
-| R05 | Bagunça em Dobro: period 180; damage 60; primary-centered radius 1200; Slow 1500 bp for 30; independent of club |
+| R05 | **Proposed P71 owner change (2026-11-01): Tick pistol**, period 30 ticks (1.5 s), range 3000, damage 12; nearest targetable enemy troop with Guard priority; single target, no Slow/splash; independent of Rattle club, movement and counters. Existing six-tick locked special windup, root/death cancellation and seat damage bonuses apply; Rattle Evolution damage bonus is excluded |
 | R06 | Barrigada do Brejo: period 200; caster-centered radius 1500; damage 65; Slow 1500 bp for 40 |
 | R07 | Rasgo Sangrento: period 180; primary-centered radius 1500; damage 75; one bleed slot, 5 HP per 20 ticks, four pulses |
 | R08 | Couraça Primordial: each positive HP-damage receipt adds 300 bp reduction for subsequent hits, five stacks maximum / 1500 bp; all expire after 60 ticks without HP damage. Step size is a completion |
@@ -868,7 +892,7 @@ an additional modest benefit below are completion hypotheses for testing.
 | R02 | Punhos Reforçados: +2000 bp special damage → radius 3000 | Sistema de Choque: period 160 → basic hits Slow 1500 bp for 40 |
 | R03 | Corvo Pestilento: cut 4000 bp → mark duration 110 | Besta da Ruína: +1500 bp basic damage → own mark bonus 2500 bp |
 | R04 | Pistoleiro Veloz: +1500 bp attack speed → +1000 bp movement | Bala Ricocheteante: secondary ratio 7500 bp → search radius 2000 |
-| R05 | Fúria do Grandão: +2000 bp HP → +2000 bp basic damage | Truques do Tico: period 150 → radius 1500, Slow 2000 bp |
+| R05 | Fúria do Grandão: +2000 bp HP → +2000 bp basic damage | **Proposed P71:** Tick pistol: period 24 → damage 18. Rattle branch remains HP +2000 bp → club damage +2000 bp; each branch changes only its brother’s attack channel |
 | R06 | Barriga de Pedra: +2000 bp HP → 1500 bp self-reduction for 40 after impact | Onda do Brejo: period 160 → radius 1900, Slow 2000 bp |
 | R07 | Fúria Oceânica: +2000 bp HP → bleed 7 per pulse | Maré Sangrenta: period 150 → radius 1900 |
 | R08 | Couraça Ancestral: +2000 bp HP → stack expiry 80 | Presas de Pedra: basic damage +1500 bp vs units with base range ≤1600 → replace bonus with 2500 bp |
@@ -1398,6 +1422,36 @@ D-33 evidence and owner look/fun review are recorded in the consolidation report
 Shop reservation/Reroll remains the existing Practice preview rule, not a new
 online economy change.
 
+### Proposed P70 Trident size, thrust and basic reach (owner 2026-10-31)
+
+**Proposed P70 candidate: 2,000 simulation units (2.0 tiles), pending D-33
+and owner look/fun acceptance.** The isolated execution branch implements
+this authoritative base range, inherited unchanged by Base, A1, A2, B1
+and B2. The frozen reference remains 1,100 (1.1 tiles). Ruleset revision 3
+identifies the candidate; it is not an approved release balance value.
+
+The owner requests a taller shark, a longer trident and a two-handed frontal
+spear thrust. Generated-mesh measurements give Base height 2.235 and weapon
+length 2.62656 world units. Contact-pose calibration compares 1.1, 1.6, 1.8,
+2.0 and 2.2 tiles. At 2.0 the point projects about 0.23–0.37 tiles beyond
+the target center in evolved forms; at 1.8 it projects 0.40–0.55 beyond.
+The 2.0 candidate is the smallest sampled increase keeping all five forms
+within roughly a normal target body's depth. This is a visual proposal,
+not balance evidence or a new hitbox. Actual opponents can close during
+windup; live before/after contact remains a separate acceptance check.
+
+Nearest-enemy/Guard/Stronghold selection and the existing special's primary
+selection algorithm are unchanged. Its primary search already uses the
+unit's effective range, so it also acquires primaries within the candidate
+reach; Bloody Rend remains centered on that locked primary with its original
+radius, damage, bleed and period. No new targeting rule or effect radius is
+introduced. The wider acquisition interval must be included in D-33 review.
+
+This narrow exception does not authorize changes to Trident's damage,
+cadence, HP, Energy cost, movement, targeting semantics, Bloody Rend area
+or bleed, or to any other champion. Preserve strike timing and server
+authority. See [P70](phases/P70-champion-visual-identity-polish.md).
+
 P60/P61 journal/summary Faction arrays follow FACTION_COUNT=7, preserving
 legacy four-Faction records by zero extension. P63 counts every actual drill
 spawn, including fusion outputs, without deleting consumed parents from the
@@ -1416,6 +1470,61 @@ matching the final hashes in contract_determinism. The five documented seeds
 are collected by examples/trace_canon.rs with the authoritative headless
 cadence; no additional balance value, gameplay rule or time limit changes
 in this trace-identity correction. Previous traces describe the earlier pool.
+
+
+### Proposed P71 cosmetic readability and Stronghold wear (owner 2026-11-01)
+
+Presentation follow-up only: unit team identification moves from body bands
+and patches to persistent foot rings; status effects keep allegiance visible.
+Evolution displays no star at Base, one at tier 1 and two at tier 2 on both
+branches, in bright yellow with a dark outline. Intrinsic clothing colors
+and equipment carry character/branch identity. This does not alter Evolution.
+
+Stronghold appearance reflects each completed **5% loss of current max HP**:
+`floor(20 * (max_hp - clamp(hp, 0, max_hp)) / max_hp)`, with safe integer
+intermediates and a defensive denominator of at least one. There are 21
+cosmetic states, 0 intact through 20 destroyed. Healing and BR-SK07
+Fortification reconcile against the new authoritative HP/max HP view;
+reconnect initializes directly without replaying past damage effects.
+Cracks, missing pieces, debris, smoke and fire are cosmetic. A living tower
+retains a plausible visible emitter and its exact existing firing capability.
+Only authoritative zero HP permits the final destroyed presentation.
+
+Pyre Warden's white/red/black model and red/orange flame replace its spectral
+colors, preserving ProfaneFlame's trigger, timing, exact segment, friendly
+fire and damage. Stronghold animation refinement likewise preserves
+BR-SK01–09, targets, damage, cadence, impact rules, costs and outcomes.
+The fire/smoke onset bands and palette/animation tuning in
+[P71](phases/P71-combat-readability-and-stronghold-polish.md) are Proposed art,
+not balance rules. No new simulation state, protocol or mechanical range
+change is authorized by P71. P70's Trident balance acceptance stays separate.
+
+
+#### P71 Bonehorn head occupancy clarification (Proposed presentation)
+
+The owner's 2026-11-01 follow-up includes Bonehorn's head/muzzle/horn in its
+visible body blocking area. Under the existing D-57 display layout, opposing
+and allied figures must account for that forward extent instead of letting
+the head enter another body. Stable cached form bounds and bounded cosmetic
+separation preserve credible contact; HUD, selection and attack anchors follow
+the final display. This does not add a targetable head zone, physical server
+collider, damage multiplier, new range or authoritative movement rule. If
+presentation cannot fit existing combat spacing, report the concrete conflict
+before specifying a mechanical exception. See P71 S1d/S1e.
+
+
+#### P71 Shatterback head occupancy follow-up (Proposed presentation)
+
+The owner extends the existing D-57/P71 visible-body spacing to Shatterback on
+2026-11-01. Its cached form envelope includes the head, beak, torso and limbs
+through Idle, Walk and its body-driven melee attack. The displayed crowd
+footprint projects that envelope at the current figure facing and reserves its
+existing cosmetic lunge. Apply it to allied and opposing figures, including
+Evolution growth and after detachable plates are lost. Do not use a plate's
+remaining HP to shrink the flesh body. This changes client display offsets only:
+no authoritative position, collision, attack range, stat, protocol or outcome
+changes. The same request removes the orange/gold stripe from B1 shell plates;
+Base, A1 and both tier-2 plate identities retain their existing art.
 
 ## 19. Native updates and match continuity (P66, Proposed)
 
@@ -1602,3 +1711,30 @@ Offline execution fixtures additionally propose 128 outstanding challenges,
 requests/hour per synthetic source IP. These are test resource bounds only,
 not approved live operational limits. The owner deferred fiscal work and
 prioritized recovery and opponent mute; no commercial launch is approved.
+
+
+## Main/auth and eight-Arena integration — 2026-11-01
+
+The owner requests reconciliation of `main` authentication, refresh and reconnect
+with the P71 character and three-Arena branch, followed by deployment to the
+owner-reset VPS after its connection settings are supplied. This explicitly
+authorizes this integration and that deployment; it does not promote a signed
+client update or alter the existing pending balance/visual acceptance gates.
+
+Both independent branches allocated protocol 30 to different contracts: D-97
+authentication on `main`, and the appended Arena variants on P71. Their combined
+contract uses protocol **31** so neither older peer can silently enter an
+incompatible match. Preserve all message tags, Arena IDs 0–7, D-97 lifetimes,
+account/seat authority, schema 10, and P71 ruleset revision 6/source identity.
+No additional gameplay number changes. See
+[the integration report](phases/BACKEND-main-integration-20261101.md).
+
+### Proposed browser release resource bounds (2026-11-01)
+
+Operational only; no combat, matchmaking, reward or match-duration value changes.
+The independent browser publisher accepts at most 256 MiB compressed, 512 MiB
+expanded, 4,096 payload files, a 1 MiB manifest and a 2 MiB HTML entry. These
+are **Proposed** initial updater limits under §19/O04. The static publication
+worker has a five-minute timeout; that limit never applies to game processes
+or match drain. Browser releases retain immutable source-addressed assets and
+legacy files; no automatic retention deletion is approved.

@@ -61,7 +61,10 @@ impl Default for Config {
     fn default() -> Self {
         Config {
             auth_clock: crate::auth::Clock::default(),
-            auth_origins: vec!["https://tbg.abastevo.com.br".into()],
+            auth_origins: vec![
+                "https://app.tupibg.com".into(),
+                "https://api.tupibg.com".into(),
+            ],
             addr: "0.0.0.0:8080".into(),
             max_connections: 2_000,
             max_per_ip: 8,

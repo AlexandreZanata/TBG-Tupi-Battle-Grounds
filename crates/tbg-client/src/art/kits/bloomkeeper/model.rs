@@ -15,9 +15,8 @@ use crate::art::{
     rig::{Joint::*, Node, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const DRYAD: Color = Color::srgb(0.8, 0.68, 0.5);
-const THORN: Color = Color::srgb(0.24, 0.16, 0.1);
-const AMBER: Color = Color::srgb(1.0, 0.72, 0.25);
+const DRYAD: Color = TRIM;
+const THORN: Color = DARK_LEATHER;
 /// Staff length (socket space, +Y).
 const STAFF: f32 = 1.05;
 
@@ -41,6 +40,20 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         boots: BARK,
     };
     body::humanoid(&mut v, &p, &look);
+    v.retain(|part| !matches!(part.node, Body(Chest)));
+    v.push(part(Body(Chest), Ball(0.19), LEAF, [0.0, 0.17, 0.0]).scale([1.05, 1.0, 0.74]));
+    for (arm, sign) in [(UpperArmL, 1.0), (UpperArmR, -1.0)] {
+        v.push(
+            part(
+                Body(arm),
+                Ball(0.10),
+                if f.b { BARK } else { LEAF_DARK },
+                [0.02 * sign, 0.035, 0.0],
+            )
+            .scale([1.15, 0.65, 0.75])
+            .rot([0.0, 0.0, -25.0 * sign]),
+        );
+    }
     body::tunic(&mut v, &p, LEAF, LEAF_DARK, BARK);
     let t = p.torso;
     for i in 0..6 {
@@ -48,7 +61,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         v.push(
             part(
                 Body(Hips),
-                Ball(0.07),
+                Ball(0.085),
                 BLOSSOM,
                 [a.sin() * t.x * 0.5, -0.12, a.cos() * t.z * 0.6],
             )
@@ -57,13 +70,9 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         );
     }
     v.push(
-        part(
-            Body(Chest),
-            Box(t.x * 1.0, 0.05, t.z * 0.9),
-            ALLY,
-            [0.0, t.y * 0.4, 0.02],
-        )
-        .rot([0.0, 0.0, 15.0]),
+        part(Body(Chest), Ball(0.065), LINEN, [0.10, 0.18, 0.13])
+            .scale([0.7, 1.2, 0.25])
+            .rot([0.0, 0.0, 15.0]),
     );
     hair(&mut v, &p, f);
     staff(&mut v, f);
@@ -152,9 +161,9 @@ fn flower(v: &mut Vec<PartSpec>, at: Node, [x, y, z]: [f32; 3], s: f32, lit: boo
         v.push(
             part(
                 at,
-                Ball(0.035 * s),
+                Ball(0.045 * s),
                 BLOSSOM,
-                [x + a.sin() * 0.04 * s, y, z + a.cos() * 0.04 * s],
+                [x + a.sin() * 0.052 * s, y, z + a.cos() * 0.052 * s],
             )
             .scale([1.0, 0.5, 1.0]),
         );

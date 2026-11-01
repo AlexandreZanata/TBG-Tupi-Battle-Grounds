@@ -39,12 +39,12 @@ pub fn rest(node: Node, p: &Proportions) -> Vec3 {
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
     let mut v = vec![
-        part(Body(Hips), Ball(0.35), CHARCOAL, [0.0, 0.0, 0.0]).scale([1.0, 0.9, 1.15]),
-        part(Body(Spine), Ball(0.39), CHARCOAL, [0.0, 0.0, 0.06]).scale([1.05, 0.95, 1.4]),
+        part(Body(Hips), Ball(0.35), DARK_LEATHER, [0.0, 0.0, 0.0]).scale([1.0, 0.9, 1.15]),
+        part(Body(Spine), Ball(0.39), DARK_LEATHER, [0.0, 0.0, 0.06]).scale([1.05, 0.95, 1.4]),
         part(
             Body(Chest),
             Ball(0.40),
-            if f.b { DARK } else { CHARCOAL },
+            if f.b { DARK } else { DARK_LEATHER },
             [0.0, 0.01, 0.04],
         )
         .scale([1.12, 1.05, 1.1]),
@@ -67,7 +67,12 @@ fn legs(v: &mut Vec<PartSpec>, f: Form) {
         (ThighR, ShinR, FootR),
     ] {
         v.extend([
-            part(Body(upper), Pill(0.14, 0.15), CHARCOAL, [0.0, -0.14, 0.0]),
+            part(
+                Body(upper),
+                Pill(0.14, 0.15),
+                DARK_LEATHER,
+                [0.0, -0.14, 0.0],
+            ),
             part(
                 Body(lower),
                 Frustum(0.12, 0.09, 0.29),
@@ -77,7 +82,7 @@ fn legs(v: &mut Vec<PartSpec>, f: Form) {
             part(Body(lower), Ball(0.13), IVORY, [0.0, 0.01, 0.04]).scale([1.0, 0.65, 1.0]),
             part(
                 Body(foot),
-                Box(0.23, 0.13, 0.29),
+                Box(0.24, 0.13, 0.31),
                 GUNMETAL,
                 [0.0, 0.03, 0.06],
             ),
@@ -98,8 +103,8 @@ fn legs(v: &mut Vec<PartSpec>, f: Form) {
 fn skull(v: &mut Vec<PartSpec>, f: Form) {
     let h = Body(Head);
     v.extend([
-        part(h, Ball(0.29), CHARCOAL, [0.0, 0.0, 0.04]).scale([1.05, 0.85, 1.3]),
-        part(h, Box(0.40, 0.25, 0.47), CHARCOAL, [0.0, -0.10, 0.26]),
+        part(h, Ball(0.29), DARK_LEATHER, [0.0, 0.0, 0.04]).scale([1.05, 0.85, 1.3]),
+        part(h, Box(0.40, 0.25, 0.47), RUST, [0.0, -0.10, 0.26]),
         part(h, Ball(0.22), DARK, [0.0, -0.08, 0.46]).scale([1.1, 0.65, 0.55]),
         part(h, Box(0.44, 0.09, 0.22), IVORY, [0.0, 0.12, 0.14]).rot([-12.0, 0.0, 0.0]),
         part(
@@ -111,6 +116,11 @@ fn skull(v: &mut Vec<PartSpec>, f: Form) {
         .rot([32.0, 0.0, 0.0]),
     ]);
     for s in [-1.0, 1.0] {
+        v.push(
+            part(h, Ball(0.13), RUST, [s * 0.22, 0.04, 0.18])
+                .scale([0.38, 0.75, 1.25])
+                .rot([0.0, s * -12.0, 0.0]),
+        );
         v.extend([
             part(
                 h,
@@ -177,7 +187,7 @@ fn mantle(v: &mut Vec<PartSpec>, f: Form) {
             part(
                 Body(Spine),
                 Box(0.035, 0.32, 0.46),
-                ALLY,
+                LINEN,
                 [s * 0.38, -0.02, -0.04],
             )
             .rot([0.0, 0.0, s * -10.0]),

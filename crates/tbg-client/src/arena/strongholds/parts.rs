@@ -10,7 +10,7 @@ use bevy::prelude::*;
 
 /// Damage level at which a piece disappears: 1 hides at <= 66 % HP, 2 at
 /// <= 33 %; `NEVER` keeps the kind readable on a nearly dead tower.
-pub(super) const NEVER: u8 = 3;
+pub(super) const NEVER: u8 = 21;
 
 /// One reusable part: its primitives are built for a team color on demand.
 /// The name is the cache key, so it must be unique.
@@ -29,6 +29,8 @@ pub(super) enum Motion {
     Swivel,
     /// Aimed whole about its own origin (the ballista).
     Aim,
+    /// A separately loaded bolt: hidden after release, restored during reload.
+    Nocked,
     /// Carried by a defender: turns round the tower's axis with the aim,
     /// is aimed like a gun, and recoils this distance on each shot.
     Mounted(f32),
@@ -189,6 +191,8 @@ pub(super) fn gear(r: f32, color: Color) -> Vec<Part> {
     parts
 }
 
+type DamageFragments = Vec<(Handle<Mesh>, u8)>;
+
 /// Meshes and materials every tower shares: each part is built once per
 /// team color and reused by every tower and every form.
 #[derive(Resource)]
@@ -197,6 +201,7 @@ pub(crate) struct StrongholdArt {
     pub ring_material: Handle<StandardMaterial>,
     meshes: HashMap<(&'static str, bool), Handle<Mesh>>,
     rings: HashMap<(i32, bool), Handle<Mesh>>,
+    fragments: HashMap<(&'static str, bool), DamageFragments>,
 }
 
 impl FromWorld for StrongholdArt {
@@ -220,6 +225,7 @@ impl FromWorld for StrongholdArt {
             ring_material,
             meshes: HashMap::new(),
             rings: HashMap::new(),
+            fragments: HashMap::new(),
         }
     }
 }
@@ -229,6 +235,45 @@ impl StrongholdArt {
         self.meshes
             .entry((def.name, own))
             .or_insert_with(|| meshes.add(build(def, own)))
+            .clone()
+    }
+
+    /// Keep load-bearing large primitives while peeling small trim off cumulatively.
+    pub fn fragments(
+        &mut self,
+        def: &PartDef,
+        own: bool,
+        meshes: &mut Assets<Mesh>,
+    ) -> DamageFragments {
+        self.fragments
+            .entry((def.name, own))
+            .or_insert_with(|| {
+                (def.build)(team(own))
+                    .into_iter()
+                    .enumerate()
+                    .map(|(index, part)| {
+                        let geometry = crate::art::mesh::build(part.0);
+                        let mut low = Vec3::splat(f32::INFINITY);
+                        let mut high = Vec3::splat(f32::NEG_INFINITY);
+                        if let Some(bevy::mesh::VertexAttributeValues::Float32x3(v)) =
+                            geometry.attribute(Mesh::ATTRIBUTE_POSITION)
+                        {
+                            for p in v {
+                                low = low.min(Vec3::from(*p));
+                                high = high.max(Vec3::from(*p));
+                            }
+                        }
+                        let size = (high - low) * part.2.scale.abs();
+                        let volume = size.x * size.y * size.z;
+                        let loss = if volume < 0.08 && size.max_element() < 0.75 {
+                            5 + (index % 15) as u8
+                        } else {
+                            NEVER
+                        };
+                        (meshes.add(painted(vec![part])), loss)
+                    })
+                    .collect()
+            })
             .clone()
     }
 

@@ -20,6 +20,7 @@ struct Model;
 #[derive(Resource, Default)]
 struct Preview {
     active: bool,
+    light: Option<Entity>,
     key: Option<(tbg_core::UnitKind, u8, u8, bool)>,
     camera: Option<(Transform, Projection)>,
     size: (f32, f32),
@@ -93,6 +94,9 @@ fn show(
         }
     }
     if !active {
+        if let Some(light) = preview.light.take() {
+            commands.entity(light).try_despawn();
+        }
         if let Some((transform, projection)) = preview.camera.take() {
             *camera.0 = transform;
             *camera.1 = projection;
@@ -107,6 +111,22 @@ fn show(
             }
         }
         return;
+    }
+    if preview.light.is_none() {
+        // Arena scenery owns its sunlight and is hidden in Troops. A local
+        // shadow-free key keeps the actual kit colors readable in this viewer.
+        preview.light = Some(
+            commands
+                .spawn((
+                    DirectionalLight {
+                        illuminance: 10_000.,
+                        shadow_maps_enabled: false,
+                        ..default()
+                    },
+                    Transform::from_xyz(11., 6., 7.).looking_at(Vec3::new(8., 1., 0.), Vec3::Y),
+                ))
+                .id(),
+        );
     }
     let key = (c.selected, c.form.0, c.form.1, c.reduced);
     if preview.key != Some(key) {
@@ -147,7 +167,7 @@ fn show(
     let aspect = window.width() / window.height().max(1.);
     let distance = (radius / (tan * aspect * 0.28)).max(height / (tan * 0.70)) / c.zoom;
     let centre = Vec3::new(8., height * 0.5, 0.);
-    let aim = centre - Vec3::Y * (distance * tan * 0.28);
+    let aim = centre - Vec3::Y * (distance * tan * 0.10);
     *camera.0 = Transform::from_translation(aim + Vec3::new(0., 0.14, 1.).normalize() * distance)
         .looking_at(aim, Vec3::Y);
     for (_, mut transform, mut a) in &mut model {

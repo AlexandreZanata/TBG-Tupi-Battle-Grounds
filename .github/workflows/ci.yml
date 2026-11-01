@@ -7,7 +7,7 @@ on:
     # Native release tags run this suite inside native-release.yml, where it
     # gates publication; running it here as well would validate the same
     # commit twice.
-    tags: ['**', '!v*-native.*']
+    tags: ['**', '!v[0-9]*']
   workflow_dispatch:
   workflow_call:
 
@@ -45,6 +45,15 @@ jobs:
       - name: Required-check and test-lane regression guards
         run: |
           python3 scripts/test-ci-required-checks.py
+          python3 scripts/test-auto-deploy.py
+          python3 scripts/test-web-deploy.py
+          python3 scripts/test-static-deploy.py
+          python3 scripts/test-static-assets.py
+          python3 scripts/test-native-catalog.py
+          python3 scripts/test-native-artifacts.py
+          python3 scripts/test-native-package.py
+          node scripts/test-native-downloads.cjs
+          python3 web/scripts/check.py
           python3 scripts/test-ci-test-lanes.py
           python3 scripts/ci-test-lanes.py
       - name: Fetch the patch comparison base
@@ -147,6 +156,10 @@ jobs:
         run: cargo --config .github/cargo-ci.toml test --locked --no-fail-fast $TEST_SCOPE --no-run
       - name: Keep the compiled dependencies even if a test fails
         run: echo "CACHE_ON_FAILURE=true" >> "$GITHUB_ENV"
+      # Reject a canon/search-space mismatch before the multi-minute C7/C8
+      # simulations. The complete lane below still runs every existing test.
+      - name: Preflight canonical balance invariants
+        run: cargo --config .github/cargo-ci.toml test --locked $TEST_SCOPE --test contract c5_every_tunable_number_is_registered -- --exact --test-threads=1
       - name: Balance-lab contracts (C3, C5-C9, C11) and lab tests
         run: cargo --config .github/cargo-ci.toml test --locked --no-fail-fast $TEST_SCOPE
 

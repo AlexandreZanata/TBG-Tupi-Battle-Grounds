@@ -145,10 +145,7 @@ fn flag(
             },
         ));
         if tower {
-            entity.insert(TowerPiece {
-                own,
-                hide_below: 2.0 / 3.0,
-            });
+            entity.insert(TowerPiece { own });
         }
     }
     48

@@ -58,6 +58,8 @@ fn pose(m: &Moment, p: &mut Pose) {
                 tools::set(p, *j, [0.0, s * k * 18.0, 0.0]);
                 tools::shift(p, *j, [0.0, k.max(0.0) * 0.045, 0.0]);
             }
+            // Keep the longitudinal body/head axis aligned with the lane while stepping.
+            tools::set(p, Chest, [0.0, 0.0, phase.sin() * 1.5]);
         }
         Clip::AttackMelee | Clip::AttackRanged | Clip::Cast => cast(m.t, p),
         Clip::Hit => tools::shift(
@@ -84,8 +86,25 @@ fn pose(m: &Moment, p: &mut Pose) {
             Hips,
             [0.0, -0.20 * (1.0 - tools::window(m.t, 0.0, 0.5)), 0.0],
         ),
-        Clip::Victory => tools::set(p, Head, [-12.0, 0.0, 0.0]),
-        Clip::Idle => {}
+        Clip::Victory => {
+            let phase = m.t / 0.8 * std::f32::consts::TAU;
+            p[Root.index()] = (Vec3::ZERO, Vec3::ZERO);
+            for (i, (j, s, _)) in model::LEGS.iter().enumerate() {
+                let ripple = (phase - (i % 4) as f32 * std::f32::consts::FRAC_PI_2)
+                    .sin()
+                    .max(0.0);
+                tools::set(p, *j, [0.0, s * 9.0 * ripple, 0.0]);
+                tools::shift(p, *j, [0.0, 0.025 * ripple, 0.0]);
+            }
+            tools::set(p, Head, [-8.0 * (0.5 - 0.5 * phase.cos()), 0.0, 0.0]);
+            tools::set(p, Chest, [4.0 * phase.sin(), 0.0, 0.0]);
+        }
+        Clip::Idle => {
+            let test = (m.clock * 1.25).sin();
+            tools::set(p, UpperArmL, [0.0, 5.0 * test.max(0.0), 0.0]);
+            tools::set(p, UpperArmR, [0.0, 5.0 * test.min(0.0), 0.0]);
+            tools::set(p, Head, [2.0 * test, 3.0 * test, 0.0]);
+        }
     }
     if let Some(t) = m.special {
         cast(t * 0.62, p);
@@ -97,4 +116,8 @@ fn cast(t: f32, p: &mut Pose) {
     tools::set(p, Chest, [-15.0 * k, 0.0, 0.0]);
     tools::set(p, Head, [8.0 * k, 0.0, 0.0]);
     tools::shift(p, Head, [0.0, 0.02 * k, 0.025 * k]);
+    tools::shift(p, Chest, [0.0, -0.015 * k, 0.02 * k]);
+    for (j, s) in [(UpperArmL, 1.0), (UpperArmR, -1.0)] {
+        tools::set(p, j, [0.0, s * 12.0 * k, 0.0]);
+    }
 }

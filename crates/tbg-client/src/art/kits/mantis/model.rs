@@ -40,24 +40,35 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         &mut v,
         &p,
         &body::Look {
-            skin: MOSS,
+            skin: LEAF,
             cloth: CHITIN,
-            legs: MOSS,
+            legs: LEAF,
             boots: CHITIN,
         },
     );
     v.extend([
-        part(Body(Head), Cone(0.18, 0.26), MOSS, [0.0, 0.02, 0.0])
+        part(Body(Head), Cone(0.18, 0.26), LEAF, [0.0, 0.02, 0.0])
             .rot([180.0, 0.0, 0.0])
             .scale([1.25, 1.0, 0.5]),
-        part(Secondary(Spring::Back), Ball(0.11), MOSS, [0.0, 0.0, -0.06]).scale([0.8, 1.15, 1.6]),
+        part(
+            Secondary(Spring::Back),
+            Ball(0.11),
+            LEAF_DARK,
+            [0.0, 0.0, -0.06],
+        )
+        .scale([0.8, 1.15, 1.6]),
         part(
             Secondary(Spring::Back),
             Cyl(0.11, 0.05),
-            ALLY,
+            LINEN,
             [0.0, 0.0, -0.07],
         ),
-        part(Body(Chest), Box(0.12, 0.05, 0.025), ALLY, [0.0, 0.14, 0.10]),
+        part(
+            Body(Chest),
+            Box(0.12, 0.05, 0.025),
+            LINEN,
+            [0.0, 0.14, 0.10],
+        ),
     ]);
     for (s, hand, elbow, shin) in [
         (-1.0, Socket::WeaponR, ForearmR, ShinR),
@@ -83,11 +94,11 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             part(
                 Prop(hand),
                 Ring(
-                    if f.b { 0.035 } else { 0.024 },
+                    if f.b { 0.042 } else { 0.032 },
                     if f.b { 0.18 } else { 0.15 },
                     135.0,
                 ),
-                if f.b { CHITIN } else { AMBER },
+                if f.b { CHITIN } else { IVORY },
                 [0.0, -0.08, 0.08],
             )
             .rot([90.0, 0.0, s * 45.0]),
@@ -96,7 +107,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             part(
                 Prop(hand),
                 Cone(0.035, 0.18),
-                if f.b { CHARCOAL } else { AMBER },
+                if f.b { IVORY } else { AMBER },
                 [0.0, -0.04, 0.23],
             )
             .rot([90.0, 0.0, 0.0]),

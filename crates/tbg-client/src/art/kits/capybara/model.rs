@@ -16,7 +16,7 @@ use bevy::prelude::*;
 pub fn plan(t: u8) -> Proportions {
     let mut p = body::plan(true, 1.05, t);
     p.leg = 0.25;
-    p.arm = 0.18;
+    p.arm = 0.20;
     p.torso.y = 0.32;
     p.torso.x = 0.48;
     p
@@ -64,18 +64,18 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         )
         .scale([1.12, 1.10, 0.65]),
         part(Body(Head), Ball(0.205), LEATHER, [0.0, 0.02, 0.0]).scale([1.1, 0.9, 1.1]),
-        part(Body(Head), Pill(0.13, 0.12), TRIM, [0.0, -0.045, 0.20]).rot([0.0, 0.0, 90.0]),
+        part(Body(Head), Ball(0.16), TRIM, [0.0, -0.045, 0.24]).scale([1.05, 0.75, 1.35]),
         part(
             Body(Head),
             Box(0.055, 0.055, 0.025),
             LINEN,
-            [0.0, -0.14, 0.26],
+            [0.0, -0.14, 0.40],
         ),
         part(
             Body(Head),
-            Box(0.09, 0.025, 0.025),
+            Box(0.12, 0.025, 0.025),
             DARK_LEATHER,
-            [0.0, -0.01, 0.32],
+            [0.0, -0.01, 0.44],
         ),
         part(
             Body(Hips),
@@ -92,16 +92,21 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Secondary(Spring::Back),
             Box(0.18, 0.14, 0.02),
-            ALLY,
+            LINEN,
             [0.0, 0.12, -0.21],
         ),
     ]);
     for s in [-1.0, 1.0] {
-        v.push(part(Body(Head), Ball(0.06), LEATHER, [s * 0.16, 0.17, 0.0]));
-        v.push(part(Body(Head), Ball(0.03), RUST, [s * 0.16, 0.18, 0.04]));
-        v.push(part(Body(Head), Ball(0.025), DARK, [s * 0.13, 0.11, 0.16]));
+        v.push(part(
+            Body(Head),
+            Ball(0.045),
+            LEATHER,
+            [s * 0.16, 0.17, 0.0],
+        ));
+        v.push(part(Body(Head), Ball(0.024), RUST, [s * 0.16, 0.18, 0.03]));
+        v.push(part(Body(Head), Ball(0.021), DARK, [s * 0.15, 0.10, 0.19]));
         v.push(
-            part(Body(Chest), Ball(0.07), LEAF_DARK, [s * 0.20, 0.33, 0.18])
+            part(Body(Chest), Ball(0.07), LEAF_DARK, [s * 0.20, 0.33, 0.28])
                 .scale([0.7, 1.0, 0.35])
                 .rot([0.0, 0.0, s * 30.0]),
         );
@@ -113,6 +118,9 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
                 [s * x, -0.10, 0.25],
             ));
         }
+    }
+    for hand in [HandL, HandR] {
+        v.push(part(Body(hand), Ball(0.07), LEATHER, [0.0, -0.025, 0.02]).scale([1.05, 0.85, 1.2]));
     }
     if f.a && f.t2 {
         for s in [-1.0, 1.0] {
@@ -129,10 +137,21 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         for y in [-0.05, 0.10] {
             v.push(part(
                 Secondary(Spring::Tabard),
-                Box(0.56, 0.04, 0.06),
+                Box(0.22, 0.035, 0.035),
                 BARK,
-                [0.0, y, 0.27],
+                [0.0, y, 0.315],
             ));
+            for sign in [-1.0, 1.0] {
+                v.push(
+                    part(
+                        Secondary(Spring::Tabard),
+                        Box(0.18, 0.035, 0.035),
+                        BARK,
+                        [sign * 0.18, y, 0.27],
+                    )
+                    .rot([0.0, sign * 25.0, 0.0]),
+                );
+            }
         }
         if f.t2 {
             v.push(part(Body(Hips), Cyl(0.38, 0.08), BARK, [0.0, 0.04, 0.0]));

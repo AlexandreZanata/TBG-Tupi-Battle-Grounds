@@ -6,7 +6,11 @@ use bevy::prelude::*;
 #[derive(Resource)]
 pub struct VisualAssets {
     pub ring: Handle<Mesh>,
+    pub enemy_ring: Handle<Mesh>,
     pub tier_cube: Handle<Mesh>,
+    pub tier_star: Handle<Mesh>,
+    pub star_fill: Handle<StandardMaterial>,
+    pub star_edge: Handle<StandardMaterial>,
     pub shield_outline: Handle<Mesh>,
     pub bar: Handle<Mesh>,
     pub projectile: Handle<Mesh>,
@@ -15,7 +19,6 @@ pub struct VisualAssets {
     pub rooted: Handle<StandardMaterial>,
     pub marked: Handle<StandardMaterial>,
     pub gold: Handle<StandardMaterial>,
-    pub silver: Handle<StandardMaterial>,
     pub flash: Handle<StandardMaterial>,
     pub heal: Handle<StandardMaterial>,
     pub bar_bg: Handle<StandardMaterial>,
@@ -53,7 +56,6 @@ pub(super) fn init(
     let rooted = lit(rgb([0x7A, 0x4E, 0x22]));
     let marked = lit(crate::art::palette::GLOW);
     let gold = lit(rgb([0xD9, 0xB4, 0x4A]));
-    let silver = lit(rgb([0xC8, 0xD0, 0xD8]));
     let projectile_mat = lit(rgb([0xFF, 0xF3, 0xB0]));
     let mut unlit = |c: Color| {
         mats.add(StandardMaterial {
@@ -62,6 +64,8 @@ pub(super) fn init(
             ..default()
         })
     };
+    let star_fill = unlit(rgb([0xFF, 0xD4, 0x3B]));
+    let star_edge = unlit(rgb([0x17, 0x12, 0x0C]));
     let flash = unlit(Color::WHITE);
     let heal = unlit(rgb([0x9C, 0xFF, 0x9C]));
     let bar_bg = unlit(rgb([0x1D, 0x2B, 0x36]));
@@ -72,11 +76,17 @@ pub(super) fn init(
     ]
     .map(&mut unlit);
     commands.insert_resource(VisualAssets {
+        enemy_ring: meshes.add(crate::art::mesh::build(crate::art::mesh::Shape::Ring(
+            0.035, 0.40, 320.0,
+        ))),
         ring: meshes.add(Cylinder::new(0.42, 0.03).mesh().resolution(16)),
         shield_outline: meshes.add(crate::art::mesh::build(crate::art::mesh::Shape::Ring(
             0.012, 0.52, 360.0,
         ))),
         tier_cube: meshes.add(Cuboid::new(0.12, 0.12, 0.12)),
+        tier_star: meshes.add(super::overhead::star()),
+        star_fill,
+        star_edge,
         bar: meshes.add(Rectangle::new(0.8, 0.08)),
         projectile: meshes.add(Sphere::new(0.09)),
         team,
@@ -84,7 +94,6 @@ pub(super) fn init(
         rooted,
         marked,
         gold,
-        silver,
         flash,
         heal,
         bar_bg,

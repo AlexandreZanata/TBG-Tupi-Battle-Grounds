@@ -16,6 +16,9 @@ pub(super) fn spawn(commands: &mut Commands, theme: Theme) {
         Theme::Ruins => (13_000.0, 900.0),
         Theme::Volcanic => (12_000.0, 850.0),
         Theme::Storm => (11_500.0, 1000.0),
+        Theme::Celestial => (13_000.0, 950.0),
+        Theme::Clockwork => (12_000.0, 900.0),
+        Theme::Desert => (13_000.0, 900.0),
     };
     // Always set: switching back to the Forest must restore its sky.
     commands.insert_resource(ClearColor(if theme == Theme::Forest {

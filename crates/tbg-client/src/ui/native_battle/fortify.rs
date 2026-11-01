@@ -180,17 +180,30 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                             ));
                         });
                 });
-            option(panel, 0);
-            option(panel, 1);
-            panel.spawn((
-                kit::heading("", 10.),
-                Node {
+        });
+    commands
+        .spawn((
+            chrome::upgrade_node(),
+            chrome::frame(chrome::GOLD),
+            Panel,
+            Visibility::Hidden,
+            UiAction::Disabled,
+            ZIndex(5),
+            DespawnOnExit(GameState::InMatch),
+        ))
+        .with_children(|panel| {
+            panel.spawn(kit::heading("Fortification", 12.));
+            panel
+                .spawn(Node {
                     width: percent(100),
-                    min_height: px(14),
+                    column_gap: px(6),
                     ..default()
-                },
-                Field::Note,
-            ));
+                })
+                .with_children(|row| {
+                    option(row, 0);
+                    option(row, 1);
+                });
+            panel.spawn((kit::muted("", 10.), Field::Note));
         });
 }
 
@@ -198,7 +211,7 @@ fn option(parent: &mut ChildSpawnerCommands, branch: u8) {
     parent
         .spawn((
             Node {
-                width: percent(100),
+                width: percent(50),
                 min_height: px(55),
                 padding: UiRect::all(px(7)),
                 border: UiRect::all(px(1)),

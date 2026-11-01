@@ -21,3 +21,6 @@ dist/
 
 # Local server runs started from the repository root
 /tbg.sqlite3*
+
+# Python script bytecode
+__pycache__/

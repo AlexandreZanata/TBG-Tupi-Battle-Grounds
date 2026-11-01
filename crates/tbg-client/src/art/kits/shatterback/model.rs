@@ -4,15 +4,17 @@ use crate::art::{
     kits::common::{body, Form},
     mesh::Shape::*,
     palette::*,
-    rig::{Joint::*, Node::Body, Proportions},
+    rig::{self, Joint::*, Node, Node::Body, Proportions},
 };
 use bevy::prelude::*;
-const HIDE: Color = Color::srgb(0.42, 0.49, 0.25);
-const SLATE: Color = Color::srgb(0.46, 0.49, 0.37);
+const HIDE: Color = MOSS;
+const SLATE: Color = ROCK;
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(true, 0.88, tier);
     p.leg *= 0.60;
-    p.arm *= 0.75;
+    // Low shoulders and long enough forelimbs let the existing four paws bear weight.
+    p.arm = 0.26;
+    p.torso.y = 0.16;
     p.torso.x *= 1.35;
     p.torso.z *= 1.9;
     p.head *= 0.85;
@@ -20,6 +22,13 @@ pub fn plan(tier: u8) -> Proportions {
 }
 pub fn tip() -> Vec3 {
     Vec3::new(0.0, 0.0, 0.24)
+}
+pub fn rest(node: Node, p: &Proportions) -> Vec3 {
+    match node {
+        // Rotate at the visible neck, rather than orbiting an invisible humanoid head socket.
+        Body(Head) => Vec3::new(0.0, 0.20, 0.33),
+        _ => rig::rest(node, p),
+    }
 }
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let p = plan(tier);
@@ -30,15 +39,23 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(
             Body(Chest),
             Ring(0.025, 0.41, 360.0),
-            ALLY,
+            LINEN,
             [0.0, 0.03, -0.1],
         )
-        .rot([90.0, 0.0, 0.0])
-        .scale([1.2, 1.4, 1.0]),
+        .scale([1.2, 1.0, 1.4]),
     );
     for joint in [ThighL, ThighR, UpperArmL, UpperArmR] {
         v.push(part(Body(joint), Ball(0.12), HIDE, [0.0, -0.08, 0.0]).scale([1.0, 1.45, 1.0]));
     }
+    for joint in [ForearmL, ForearmR] {
+        v.push(part(
+            Body(joint),
+            Pill(0.075, 0.12),
+            HIDE,
+            [0.0, -0.11, 0.0],
+        ));
+    }
+    v.push(part(Body(Chest), Pill(0.09, 0.20), HIDE, [0.0, 0.20, 0.33]).rot([90.0, 0.0, 0.0]));
     for joint in [FootL, FootR, HandL, HandR] {
         v.push(part(
             Body(joint),
@@ -110,9 +127,9 @@ pub fn plate(tier: u8, branch: u8, index: usize) -> FigureSpec {
             ));
         }
     }
-    if f.b {
+    if f.b && f.t2 {
         v.push(
-            part(Body(Chest), Box(0.024, 0.018, 0.32), ORANGE, [x, 0.40, z]).rot([0.0, 25.0, 0.0]),
+            part(Body(Chest), Box(0.045, 0.018, 0.32), ORANGE, [x, 0.40, z]).rot([0.0, 25.0, 0.0]),
         );
     }
     FigureSpec {

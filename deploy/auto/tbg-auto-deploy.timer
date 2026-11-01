@@ -1,0 +1,11 @@
+[Unit]
+Description=Check GitHub for an approved TBG backend every ten minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=10min
+RandomizedDelaySec=20s
+Unit=tbg-auto-deploy.service
+
+[Install]
+WantedBy=timers.target

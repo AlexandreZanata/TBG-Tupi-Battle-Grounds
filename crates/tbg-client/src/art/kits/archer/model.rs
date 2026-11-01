@@ -17,7 +17,7 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const HOT: Color = Color::srgb(1.0, 0.55, 0.18);
+const HOT: Color = AMBER;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.0, tier);
@@ -105,18 +105,27 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             body::glowing_eyes(v, p, GOLD);
         }
     } else {
-        // Base form: classic oak hood
-        body::hood(v, p, OAK, DARK_LEATHER);
+        // Base form: ranger-green hood against the linen tunic
+        body::hood(v, p, HOOD_GREEN, DARK_LEATHER);
     }
 }
 
-fn dress(v: &mut Vec<PartSpec>, _p: &Proportions, f: Form) {
+fn dress(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
+    // The short ranger mantle frames the bow arm without covering the linen body.
+    v.push(
+        part(
+            Body(Chest),
+            Frustum(p.torso.x * 0.49, p.torso.x * 0.62, 0.10),
+            if f.b { DARK_LEATHER } else { HOOD_GREEN },
+            [0.0, p.torso.y * 0.94, -0.015],
+        )
+        .scale([1.0, 1.0, 0.75]),
+    );
     // Team tabard is visible from match camera
-    body::tabard(v, 0.18, 0.30);
 
     if f.a && f.t2 {
         // Marksman: team half-cape with gold hem
-        body::cape(v, ALLY, 0.34, 0.44);
+        body::cape(v, LINEN, 0.34, 0.44);
         v.push(part(
             Secondary(Spring::Back),
             Box(0.34, 0.03, 0.02),
@@ -126,7 +135,7 @@ fn dress(v: &mut Vec<PartSpec>, _p: &Proportions, f: Form) {
         body::pauldrons(v, GOLD, 0.14);
     } else if f.b && f.t2 {
         // Arrow Rain: armored steel pauldrons and battle mantle
-        body::cape(v, ALLY, 0.36, 0.40);
+        body::cape(v, LINEN, 0.36, 0.40);
         body::pauldrons(v, IRON, 0.15);
     }
 }
@@ -157,8 +166,6 @@ fn quivers(v: &mut Vec<PartSpec>, f: Form) {
         // Single quiver on back
         let (color, fletch) = if f.a && f.t2 {
             (GOLD, GOLD)
-        } else if f.a {
-            (DARK_LEATHER, ALLY)
         } else {
             (DARK_LEATHER, LINEN)
         };
@@ -187,7 +194,7 @@ fn bow(v: &mut Vec<PartSpec>, f: Form) {
         string: if f.t2 { GOLD } else { LINEN },
         shaft: TIMBER,
         head: STEEL,
-        fletch: if f.a { ALLY } else { LINEN },
+        fletch: LINEN,
     };
     let half = half_len(f);
     v.extend(gear::bow(half, style));

@@ -41,6 +41,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         Clip::Cast => cast(m, pose, &p),
         Clip::Spawn => sprout(m, pose),
         Clip::Evolve => bloom(m, pose, &p),
+        Clip::Victory => victory(m, pose, &p),
         _ => {}
     }
 }
@@ -66,7 +67,11 @@ fn idle(m: &Moment, pose: &mut Pose, p: &Proportions) {
     ] {
         tools::set(pose, upper, [-12.0 - 30.0 * engaged, 0.0, 8.0 * s]);
         tools::set(pose, fore, [-15.0 - 40.0 * engaged, 0.0, 0.0]);
-        tools::set(pose, hand, [8.0 * flex - 10.0 * engaged, 0.0, 0.0]);
+        tools::set(
+            pose,
+            hand,
+            [8.0 * flex * s - 10.0 * engaged, 0.0, 5.0 * sway * s],
+        );
     }
     tools::face(pose, m.aim, Vec3::ZERO);
     tools::shift(pose, Hips, [0.0, -0.025 * engaged, 0.0]);
@@ -79,6 +84,8 @@ fn walk(m: &Moment, pose: &mut Pose) {
     tools::add(pose, Head, [-4.0, 0.0, -4.0 * phase.sin()]);
     tools::add(pose, ForearmL, [-25.0, 0.0, 0.0]);
     tools::add(pose, ForearmR, [-25.0, 0.0, 0.0]);
+    tools::set(pose, HandL, [10.0 + 6.0 * phase.sin(), 0.0, -8.0]);
+    tools::set(pose, HandR, [10.0 - 6.0 * phase.sin(), 0.0, 8.0]);
 }
 
 fn cast(m: &Moment, pose: &mut Pose, p: &Proportions) {
@@ -87,8 +94,31 @@ fn cast(m: &Moment, pose: &mut Pose, p: &Proportions) {
     let tremble = (m.t * 70.0).sin() * hold(k, [0.37, 0.42, 0.7, 0.75]);
     tools::add(pose, Chest, [0.0, 0.0, 2.5 * tremble]);
     tools::add(pose, Head, [2.0 * tremble, 0.0, 0.0]);
+    tools::add(pose, HandL, [2.0 * tremble, 0.0, -2.0 * tremble]);
+    tools::add(pose, HandR, [-2.0 * tremble, 0.0, 2.0 * tremble]);
     tools::face(pose, m.aim, Vec3::ZERO);
     tools::plant(pose, p, tools::stance(p, 1.3, 0.06));
+}
+
+/// The treant opens its branches while its roots remain planted.
+fn victory(m: &Moment, pose: &mut Pose, p: &Proportions) {
+    let open = 0.5 - 0.5 * (m.t / 0.8 * TAU).cos();
+    tools::set(pose, Spine, [3.0 - 7.0 * open, 0.0, 0.0]);
+    tools::set(pose, Chest, [0.0, 0.0, 3.0 * (m.t / 0.8 * TAU).sin()]);
+    tools::set(pose, Head, [-10.0 * open, 0.0, 0.0]);
+    for (upper, fore, hand, sign) in [
+        (UpperArmL, ForearmL, HandL, 1.0),
+        (UpperArmR, ForearmR, HandR, -1.0),
+    ] {
+        tools::set(
+            pose,
+            upper,
+            [-25.0 - 45.0 * open, 0.0, sign * (12.0 + 23.0 * open)],
+        );
+        tools::set(pose, fore, [-22.0, 0.0, 0.0]);
+        tools::set(pose, hand, [15.0 - 20.0 * open, 0.0, 0.0]);
+    }
+    tools::plant(pose, p, tools::stance(p, 1.3, 0.0));
 }
 
 /// Evolve (0.9 s): sinks its claws, then springs up with its branches

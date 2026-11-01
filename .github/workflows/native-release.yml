@@ -1,20 +1,22 @@
-name: Native Linux release
+name: Native desktop release
 
 on:
   workflow_dispatch:
     inputs:
       publish:
-        description: Publish the validated Linux artifacts (tag required)
+        description: Publish validated Linux and Windows artifacts (tag required)
         type: boolean
         default: false
+      promotion_run:
+        description: Completed exact-source native workflow_dispatch run to promote without rebuilding tested bytes
+        type: string
+        default: ''
   push:
     # Main packages once per relevant merge so pull requests and release tags
     # restore a warm dependency cache (a pull request's cache is visible only
     # to that pull request; tags and pull requests can restore main's).
     branches: [main]
-    tags:
-      - 'v*-native.*'
-    # Ignored for tag pushes: every release tag still runs.
+    # Tags are promoted by explicit dispatch after the downloaded artifacts are tested.
     paths:
       - 'crates/tbg-client/**'
       - 'crates/tbg-core/**'
@@ -23,6 +25,11 @@ on:
       - 'docs/patches/**'
       - 'scripts/check-patch-notes.py'
       - 'scripts/package-native.py'
+      - 'scripts/test-native-package.py'
+      - '.github/cargo-windows-release.toml'
+      - 'scripts/*windows*.ps1'
+      - 'scripts/native-release-manifest.py'
+      - 'deploy/native/**'
       - 'scripts/install-linux.sh'
       - 'scripts/package-appimage.sh'
       - 'scripts/managed-bootstrap.sh'
@@ -36,6 +43,11 @@ on:
       - 'docs/patches/**'
       - 'scripts/check-patch-notes.py'
       - 'scripts/package-native.py'
+      - 'scripts/test-native-package.py'
+      - '.github/cargo-windows-release.toml'
+      - 'scripts/*windows*.ps1'
+      - 'scripts/native-release-manifest.py'
+      - 'deploy/native/**'
       - 'scripts/install-linux.sh'
       - 'scripts/package-appimage.sh'
       - 'scripts/managed-bootstrap.sh'
@@ -44,7 +56,7 @@ on:
 # A newer commit cancels only the same pull request's packaging run; main,
 # tag and dispatch runs get a unique group and are never cancelled or replaced.
 concurrency:
-  group: native-linux-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  group: native-desktop-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -65,10 +77,11 @@ jobs:
       contents: read
 
   linux:
+    if: inputs.promotion_run == ''
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     env:
-      TBG_DEFAULT_SERVER: wss://tbg.abastevo.com.br/ws
+      TBG_DEFAULT_SERVER: wss://api.tupibg.com/ws
       TBG_SOURCE_COMMIT: ${{ github.sha }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -102,10 +115,10 @@ jobs:
       # The shipped feature set (tbg-core without `lab`), single-threaded:
       # the workspace suite in ci.yml does not test this configuration.
       - name: Test the native client
-        run: cargo test --locked -p tbg-client --bin tbg-client -- --test-threads=1
+        run: cargo test --locked -p tbg-client --bin tbg-client --features ui-acceptance -- --test-threads=1
       - name: Build the release client
         run: |
-          cargo build --locked --release -p tbg-client
+          cargo build --locked --release -p tbg-client --features ui-acceptance
           target/release/tbg-client --version
       # Packaging outputs never come from the dependency cache: a staging
       # directory restored from main's entry makes the fail-closed packager
@@ -136,23 +149,163 @@ jobs:
         if: always()
         run: rm -rf target/native target/linuxdeploy.AppImage
 
-  publish:
-    needs: [validate, linux]
-    if: github.ref_type == 'tag' && (github.event_name == 'push' || inputs.publish)
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    permissions:
-      contents: write
+  windows:
+    if: inputs.promotion_run == ''
+    runs-on: windows-2022
+    timeout-minutes: 120
+    env:
+      # Hosted jobs own their VM: use Cargo's detected CPU count, as Linux does.
+      # Local validation still requires the shared lock and two Cargo jobs.
+      RUSTFLAGS: -C target-feature=+crt-static
+      TBG_DEFAULT_SERVER: wss://api.tupibg.com/ws
+      TBG_SOURCE_COMMIT: ${{ github.sha }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      # Same-run artifact only: the binary embeds TBG_SOURCE_COMMIT, so a build
-      # from another run (a pull request's merge commit) is never reused.
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch; compiler pinned by input
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          targets: x86_64-pc-windows-msvc
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+      - name: Provision the reviewed Inno Setup distribution
+        shell: pwsh
+        run: ./scripts/setup-windows-inno.ps1
+      - name: Preflight Windows tools, identity checks and installer script
+        shell: pwsh
+        run: |
+          . ./scripts/windows-env.ps1
+          Write-Output "Hosted logical CPUs: $([Environment]::ProcessorCount)"
+          $version = python -c 'import tomllib; print(tomllib.load(open("crates/tbg-client/Cargo.toml", "rb"))["package"]["version"])'
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$version") { throw 'Tag and executable version differ' }
+          python scripts/test-native-package.py
+          if ($LASTEXITCODE) { throw 'Native identity regression checks failed' }
+          ./scripts/test-windows-tools.ps1
+          ./scripts/test-windows-installer.ps1
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: windows-2022-msvc-static-crt-ui-acceptance-${{ hashFiles('.github/cargo-windows-release.toml') }}
+          cache-on-failure: true
+          # Same-repository PRs reuse their own merge-ref dependency cache;
+          # main/tags cannot restore PR caches. No workspace binaries are cached.
+          save-if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.ref_type == 'branch') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
+      - name: Compile Windows platform regressions
+        shell: pwsh
+        run: |
+          # rust-cache exports its input; disarm it until compilation completes.
+          'CACHE_ON_FAILURE=false' >> $env:GITHUB_ENV
+          . ./scripts/windows-env.ps1
+          cargo --config .github/cargo-windows-release.toml test --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance --no-run --timings
+          if ($LASTEXITCODE) { throw 'Windows platform regressions did not compile' }
+          # Save completed dependencies even if a later test or packaging step fails.
+          'CACHE_ON_FAILURE=true' >> $env:GITHUB_ENV
+      - name: Run Windows platform regressions
+        shell: pwsh
+        run: |
+          . ./scripts/windows-env.ps1
+          cargo --config .github/cargo-windows-release.toml test --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance platform:: -- --test-threads=1
+          if ($LASTEXITCODE) { throw 'Windows platform regressions failed' }
+      - name: Build the MSVC release client
+        shell: pwsh
+        run: |
+          . ./scripts/windows-env.ps1
+          cargo --config .github/cargo-windows-release.toml build --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance --timings
+          if ($LASTEXITCODE) { throw 'MSVC release build failed' }
+      - name: Verify the executable and package Windows formats
+        shell: pwsh
+        run: |
+          . ./scripts/windows-env.ps1
+          ./scripts/check-windows-package.ps1 -Binary target/x86_64-pc-windows-msvc/release/tbg-client.exe
+          if (Test-Path target/native) { Remove-Item -Recurse -Force target/native }
+          python scripts/package-native.py --platform windows --binary target/x86_64-pc-windows-msvc/release/tbg-client.exe
+          if ($LASTEXITCODE) { throw 'Portable Windows package validation failed' }
+          $version = python -c 'import tomllib; print(tomllib.load(open("crates/tbg-client/Cargo.toml", "rb"))["package"]["version"])'
+          ./scripts/package-windows-installer.ps1 -Package "target/native/tupi-battle-grounds-$version-windows-x86_64" -Version $version
+          Copy-Item "$env:RUNNER_TEMP/windows-build-tools.json","$env:RUNNER_TEMP/windows-imports.txt" target/native/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: tupi-battle-grounds-windows-${{ github.sha }}
+          path: |
+            target/native/*.zip
+            target/native/*-setup.exe
+            target/native/*.sha256
+            target/native/windows-build-tools.json
+            target/native/windows-imports.txt
+          if-no-files-found: error
+          retention-days: 14
+      - name: Preserve Windows compiler timing reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-compiler-timings-${{ github.sha }}
+          path: target/cargo-timings/*.html
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Keep packaging outputs out of the dependency cache
+        if: always()
+        shell: pwsh
+        run: if (Test-Path target/native) { Remove-Item -Recurse -Force target/native }
+
+  promotion-source:
+    if: github.ref_type == 'tag' && inputs.publish && inputs.promotion_run != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Verify the exact-source successful desktop build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NATIVE_BUILD_RUN: ${{ inputs.promotion_run }}
+        run: python3 scripts/check-native-promotion.py
+
+  publish:
+    needs: [validate, linux, windows, promotion-source]
+    if: >-
+      always() && github.ref_type == 'tag' && inputs.publish &&
+      needs.validate.result == 'success' &&
+      ((inputs.promotion_run != '' && needs.promotion-source.result == 'success') ||
+      (inputs.promotion_run == '' && needs.linux.result == 'success' && needs.windows.result == 'success'))
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      # Reuse tested bytes only after source/run verification; never a PR merge artifact.
+      # Without promotion_run this reads this same workflow run.
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: tupi-battle-grounds-linux-${{ github.sha }}
+          pattern: tupi-battle-grounds-*-${{ github.sha }}
+          run-id: ${{ inputs.promotion_run || github.run_id }}
+          github-token: ${{ github.token }}
+          merge-multiple: true
           path: release
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+      - name: Bind the complete native download set to this source and contract
+        run: python3 scripts/native-release-manifest.py --artifacts release --tag "$GITHUB_REF_NAME"
+      - name: Attest the native manifest and packages
+        id: provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: release/*
+      - name: Preserve the native verification bundle
+        env:
+          BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+        run: cp "$BUNDLE" release/native-provenance.jsonl
       - name: Publish a versioned prerelease
         env:
           GH_TOKEN: ${{ github.token }}
@@ -161,4 +314,4 @@ jobs:
             echo "Refusing to report publication success for an existing immutable release. Use a fresh reviewed tag." >&2
             exit 1
           fi
-          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Tupi Battle Grounds $GITHUB_REF_NAME · Linux" --notes-file deploy/native/RELEASE-NOTES.md
+          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Tupi Battle Grounds $GITHUB_REF_NAME · Linux and Windows beta" --notes-file deploy/native/RELEASE-NOTES.md

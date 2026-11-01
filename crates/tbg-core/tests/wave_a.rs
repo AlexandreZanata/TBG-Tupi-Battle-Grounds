@@ -1,4 +1,4 @@
-//! Wave A (P44): Farwatch never targets Strongholds, Bombard's friendly
+//! Wave A (P44): Farwatch targets Strongholds, Bombard's friendly
 //! blast, Longaxe's second-rank reach, and the splash-share math.
 //! Micro-scenarios cite the §C rules they freeze.
 
@@ -28,30 +28,20 @@ fn unit_at(s: &MatchState, id: u32) -> tbg_core::Unit {
     s.units[i]
 }
 
-// Farwatch (§C.2): the enemy Stronghold alone in range is held, never shot.
+// P71 owner change, Proposed §C.2: Farwatch fires at an unguarded Stronghold.
 #[test]
-fn farwatch_holds_instead_of_hitting_a_stronghold() {
+fn farwatch_hits_a_stronghold_without_enemy_troops() {
     for seat in Seat::BOTH {
         let mut s = state(11);
-        let (start, home) = match seat {
-            Seat::A => (500, 4_000),
-            Seat::B => (15_500, 12_000),
-        };
+        let start = if seat == Seat::A { 4_000 } else { 12_000 };
         let fw = s.lab_spawn_at(seat, UnitKind::Farwatch, 0, 0, start);
-        let evs = step_n(&mut s, 400);
-        assert!(
-            evs.iter().all(|e| !matches!(e, Event::Hit { .. })),
-            "{seat:?}: Farwatch hit something with no enemy unit around"
-        );
-        assert!(
-            (unit_at(&s, fw).x - home).abs() <= 45,
-            "{seat:?}: Farwatch did not hold at the Stronghold's edge"
-        );
-        assert_eq!(
-            s.player(seat.other()).stronghold_hp,
-            4_500,
-            "{seat:?}: the enemy Stronghold took damage"
-        );
+        let hp = s.player(seat.other()).stronghold_hp;
+        let evs = step_n(&mut s, 100);
+        assert!(evs.iter().any(|e| matches!(e,
+            Event::AttackStart { from: Target::Unit(a), to: Target::Stronghold(b) }
+            if *a == fw && *b == seat.other())));
+        assert!(s.player(seat.other()).stronghold_hp < hp);
+        assert!((unit_at(&s, fw).x - start).abs() <= 45);
     }
 }
 
@@ -122,10 +112,16 @@ fn bombard_blast_hits_allies_fully() {
 #[test]
 fn bombard_blast_spares_the_own_stronghold() {
     let mut s = state(51);
-    let _bombard = s.lab_spawn_at(Seat::A, UnitKind::Bombard, 0, 0, 2_000);
-    // A Farwatch holds its ground, so the blast stays on the same spot.
+    let bombard = s.lab_spawn_at(Seat::A, UnitKind::Bombard, 0, 0, 1_000);
+    // P71 Farwatch can attack Strongholds: keep the Bombard nearer than the
+    // tower so enemy fire cannot confound the friendly-blast exclusion.
     let _enemy = s.lab_spawn_at(Seat::B, UnitKind::Farwatch, 0, 0, 800);
-    step_n(&mut s, 400);
+    let events = step_n(&mut s, 400);
+    assert!(
+        events.iter().any(|event| matches!(event,
+        Event::Hit { to: Target::Unit(id), amount: 24 } if *id == bombard)),
+        "the fixture must produce a blast beside the own Stronghold"
+    );
     assert_eq!(
         s.player(Seat::A).stronghold_hp,
         4_500,

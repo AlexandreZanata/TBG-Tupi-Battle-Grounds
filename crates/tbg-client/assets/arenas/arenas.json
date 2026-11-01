@@ -7,6 +7,9 @@
     { "id": 1, "slug": "tundra", "image": "tundra.webp", "accent": "#9fd3ec", "moveBp": -1000, "attackBp": 0, "regenBp": 0, "firstEvolveDiscount": 0 },
     { "id": 2, "slug": "volcanic", "image": "volcanic.webp", "accent": "#ff8a3d", "moveBp": 0, "attackBp": 800, "regenBp": 0, "firstEvolveDiscount": 0 },
     { "id": 3, "slug": "ruins", "image": "ruins.webp", "accent": "#d9b44a", "moveBp": 0, "attackBp": 0, "regenBp": 0, "firstEvolveDiscount": 600 },
-    { "id": 4, "slug": "storm", "image": "storm.webp", "accent": "#8fa8ff", "moveBp": 0, "attackBp": 0, "regenBp": 800, "firstEvolveDiscount": 0 }
+    { "id": 4, "slug": "storm", "image": "storm.webp", "accent": "#8fa8ff", "moveBp": 0, "attackBp": 0, "regenBp": 800, "firstEvolveDiscount": 0 },
+    { "id": 5, "slug": "celestial", "image": "celestial.webp", "accent": "#6cd3f1", "moveBp": 800, "attackBp": 0, "regenBp": 0, "firstEvolveDiscount": 0 },
+    { "id": 6, "slug": "clockwork", "image": "clockwork.webp", "accent": "#df9d49", "moveBp": -500, "attackBp": 800, "regenBp": 0, "firstEvolveDiscount": 0 },
+    { "id": 7, "slug": "desert", "image": "desert.webp", "accent": "#e7c06f", "moveBp": 0, "attackBp": 0, "regenBp": -800, "firstEvolveDiscount": 0 }
   ]
 }

@@ -5,12 +5,15 @@ use bevy::prelude::*;
 use tbg_core::UnitKind;
 
 pub fn spawn(commands: &mut Commands, options: &Gallery, unit: UnitKind) {
+    if options.nameless {
+        return;
+    }
     let title = if options.lineup {
         let name = tbg_core::content::def(unit).name;
         format!("{name} | Base / A1 / A2 / B1 / B2\nrows: idle / walk / attack")
     } else if options.frames {
         format!(
-            "{unit:?}{} | CONTACT SHEET | 0 / 25 / 50 / 75 %\n{}",
+            "{unit:?}{} | CONTACT SHEET | 0 / 25 / 50 / 75 % + event + final\n{}",
             form_label(options),
             options.clip.map_or_else(
                 || "Idle / Walk | Melee / Ranged | Cast / Hit | Death / Spawn | Evolve / Victory"
@@ -40,6 +43,9 @@ pub fn spawn(commands: &mut Commands, options: &Gallery, unit: UnitKind) {
 
 /// Keep the native Archer forms explicit on the review sheet.
 fn form_label(options: &Gallery) -> String {
-    let form = ["", " Longbow", " Marksman"][usize::from(options.tier.min(2))];
-    format!(" v2{form}")
+    if options.tier == 0 {
+        return " Base".into();
+    }
+    let branch = if options.branch == 0 { 'A' } else { 'B' };
+    format!(" {branch}{}", options.tier)
 }

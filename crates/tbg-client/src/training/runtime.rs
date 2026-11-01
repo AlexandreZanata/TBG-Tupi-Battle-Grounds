@@ -60,6 +60,10 @@ fn apply(
                 // Arena pages and this shared editor use the same saved choice.
                 catalog.arena = crate::config::load_arena();
                 catalog.tab = tab;
+                if tab == super::Tab::Practice {
+                    // Arena cards update storage after this persistent Catalog was created.
+                    catalog.arena = crate::config::load_arena();
+                }
                 shell.panel = Panel::Troops;
                 shell.dirty = true;
                 next.set(GameState::Menu);

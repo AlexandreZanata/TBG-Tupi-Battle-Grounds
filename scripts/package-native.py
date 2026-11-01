@@ -15,6 +15,30 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def release_identity(command, version, commit):
+    """Rust writes UTF-8 even when Windows' default Python locale is CP1252."""
+    def output(flag):
+        # CPython 3.11 on Windows decodes text pipes in a reader thread;
+        # invalid bytes can yield None instead of propagating UnicodeDecodeError.
+        # Decode after capture so both platforms propagate the strict failure.
+        return subprocess.check_output(
+            [*command, flag], timeout=30,
+        ).decode("utf-8", errors="strict").strip()
+
+    metadata = json.loads(output("--build-info"))
+    expected = {"source_commit": commit, "version": version, "profile": "release"}
+    for field, value in expected.items():
+        if metadata.get(field) != value:
+            raise SystemExit(
+                f"Native build {field} mismatch: expected {value!r}, got {metadata.get(field)!r}. "
+                "Rebuild this source with TBG_SOURCE_COMMIT=$(git rev-parse HEAD)."
+            )
+    identity = output("--version")
+    if f" {version} ·" not in identity or f"source {commit}" not in identity:
+        raise SystemExit(f"Native --version disagrees with --build-info: {identity!r}")
+    return metadata
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", choices=["linux", "windows"], required=True)
@@ -36,17 +60,12 @@ def main():
     args = parser.parse_args()
     if args.managed:
         return managed(args)
-    version = tomllib.loads((ROOT / "crates/tbg-client/Cargo.toml").read_text())["package"]["version"]
-    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    version = tomllib.loads((ROOT / "crates/tbg-client/Cargo.toml").read_text(encoding="utf-8"))["package"]["version"]
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, encoding="utf-8").strip()
     run = [str(args.runner.resolve())] if args.runner else []
     if args.runner and args.platform != "windows":
         raise SystemExit("--runner is only for unofficial cross-built Windows packages")
-    identity = subprocess.check_output([*run, str(args.binary.resolve()), "--version"], text=True).strip()
-    if f" {version} ·" not in identity or f"source {commit}" not in identity:
-        raise SystemExit("Build with TBG_SOURCE_COMMIT=$(git rev-parse HEAD); executable and source must match")
-    metadata=json.loads(subprocess.check_output([*run, str(args.binary.resolve()),"--build-info"],text=True))
-    if metadata.get("source_commit")!=commit or metadata.get("version")!=version or metadata.get("profile")!="release":
-        raise SystemExit("Native delivery requires matching release build metadata")
+    metadata = release_identity([*run, str(args.binary.resolve())], version, commit)
     name = f"tupi-battle-grounds-{version}-{args.platform}-x86_64"
     if args.no_archive:
         name += f"-dev-{commit[:12]}"
@@ -68,7 +87,11 @@ def main():
         (package / "LICENSE-STATUS.txt").write_text(
             "The project owner has not selected a project license.\n"
             "See THIRD_PARTY_NOTICES.md and assets/fonts/OFL.txt for third-party notices.\n")
-    shutil.copy2(ROOT / "deploy/native/README.txt", package / "README.txt")
+    readme = (ROOT / "deploy/native/README.txt").read_text(encoding="utf-8")
+    for marker, value in {"VERSION": version, "PLATFORM": args.platform,
+                          "SOURCE": commit, "CONTRACT": metadata["contract"]}.items():
+        readme = readme.replace("@" + marker + "@", value)
+    (package / "README.txt").write_text(readme, encoding="utf-8")
     if args.platform == "linux":
         shutil.copy2(ROOT / "scripts/install-linux.sh", package / "install.sh")
         (package / "install.sh").chmod(0o755)
@@ -82,7 +105,7 @@ def main():
         "features":metadata["features"],"target":metadata["target"],"profile":metadata["profile"],
         "contract":metadata.get("contract"),
         "cargo_lock_sha256":hashlib.sha256((ROOT / "Cargo.lock").read_bytes()).hexdigest(),
-        "protocol": int(re.search(r"PROTOCOL_VERSION: u16 = (\d+)", (ROOT / "crates/tbg-core/src/protocol.rs").read_text()).group(1)),
+        "protocol": int(re.search(r"PROTOCOL_VERSION: u16 = (\d+)", (ROOT / "crates/tbg-core/src/protocol.rs").read_text(encoding="utf-8")).group(1)),
         "binary_sha256": hashlib.sha256((package / binary_name).read_bytes()).hexdigest(),
     }, indent=2) + "\n")
     manifest=[{"path":p.relative_to(package).as_posix(),"size":p.stat().st_size,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted(package.rglob("*")) if p.is_file()]

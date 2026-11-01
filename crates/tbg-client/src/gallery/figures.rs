@@ -30,7 +30,7 @@ pub fn spawn(
         .map_or_else(|| CLIPS.to_vec(), |clip| vec![clip]);
     if options.portrait {
         let (root, mut animator) = spawn_one(commands, lib, unit, (0, 0), Vec3::ZERO, &material);
-        animator.preview = Some((Clip::Idle, 0.4));
+        animator.present(Clip::Idle, 0.4);
         commands.entity(root).insert(animator);
         return;
     }
@@ -49,7 +49,8 @@ pub fn spawn(
             unit,
             clips,
             &material,
-            (options.tier, window.height() > window.width()),
+            (options.tier, options.branch),
+            window.height() > window.width(),
         );
     } else if options.silhouette || options.unit.is_none() {
         roster(commands, lib, options, &material);
@@ -81,20 +82,25 @@ fn frames(
     unit: UnitKind,
     clips: Vec<Clip>,
     material: &Handle<StandardMaterial>,
-    (tier, portrait): (u8, bool),
+    form: (u8, u8),
+    portrait: bool,
 ) {
     for (i, clip) in clips.into_iter().enumerate() {
-        for quarter in 0..4 {
-            let layout = Layout::Frame(i, quarter);
+        let duration = super::polish::duration(unit, form, clip);
+        for (sample, t) in super::polish::sample_times(clip, duration)
+            .into_iter()
+            .enumerate()
+        {
+            let layout = Layout::Frame(i, sample);
             let (root, mut animator) = spawn_one(
                 commands,
                 lib,
                 unit,
-                (tier, 0),
+                form,
                 layout.position(portrait),
                 material,
             );
-            animator.preview = Some((clip, clip.duration() * quarter as f32 / 4.0));
+            animator.present(clip, t);
             let stage = commands
                 .spawn((
                     Mesh3d(lib.stage.clone()),
@@ -126,7 +132,7 @@ fn roster(
             let (root, mut a) = spawn_one(commands, lib, kind, form, pos, material);
             a.rate = options.slow;
             if options.silhouette {
-                a.preview = Some((Clip::Idle, 0.0));
+                a.present(Clip::Idle, 0.0);
             }
             commands.entity(root).insert((
                 a,
@@ -159,6 +165,7 @@ pub(super) fn spawn_one(
         ))
         .id();
     let joints = figure::spawn_joints(commands, figure, kind, &form.plan, &form.meshes, material);
+    crate::art::presentation::attachments(commands, lib, kind, (tier, branch), &joints, material);
     if *material == lib.material {
         figure::spawn_glow(commands, &joints, &form.glow, &lib.glow_material);
     }

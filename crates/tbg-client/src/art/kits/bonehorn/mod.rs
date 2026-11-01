@@ -1,4 +1,4 @@
-//! Bonehorn's diagonal quadruped gait, braced tusk shove and tightening mantle.
+//! Bonehorn's straight-lane quadruped gait, braced tusk shove and tightening mantle.
 
 mod model;
 
@@ -34,10 +34,21 @@ fn pose(m: &Moment, p: &mut Pose) {
     p.fill((Vec3::ZERO, Vec3::ZERO));
     tools::set(p, Head, [5.0, 0.0, 0.0]);
     match m.clip {
-        Clip::Idle | Clip::Victory => {
+        Clip::Idle => {
             let breath = (m.clock * 1.4).sin();
-            tools::shift(p, Chest, [0.0, breath * 0.012, 0.0]);
-            tools::add(p, Head, [breath * 2.0, 0.0, 0.0]);
+            let sniff = tools::wave(m.clock, 0.65, 0.8);
+            tools::shift(p, Chest, [0.0, breath * 0.012, -0.015 * sniff]);
+            tools::add(p, Head, [5.0 + sniff * 5.0, sniff * 3.0, -breath]);
+            tools::set(p, Spine, [0.0, 0.0, breath * 1.2]);
+        }
+        Clip::Victory => {
+            let show = 0.5 - 0.5 * (m.t / 0.8 * std::f32::consts::TAU).cos();
+            tools::set(p, Head, [-16.0 * show, 9.0 * show, 0.0]);
+            tools::shift(p, Chest, [0.0, 0.025 * show, -0.025 * show]);
+            tools::set(p, Spine, [-3.0 * show, 0.0, 0.0]);
+            for j in [ForearmL, ForearmR] {
+                tools::set(p, j, [-5.0 * show, 0.0, 0.0]);
+            }
         }
         Clip::Walk => walk(m, p),
         Clip::AttackMelee | Clip::AttackRanged => shove(m, p),
@@ -70,6 +81,12 @@ fn pose(m: &Moment, p: &mut Pose) {
     let plate = Node::Secondary(Spring::Back).index();
     p[plate].1.y -= m.reduction as f32 / 10_000.0 * 0.10 + m.armor_flash * 0.035;
     p[plate].0.x += m.armor_flash * 5.0;
+    // The full quadruped footprint follows the lane. A nearby target can be
+    // behind the long muzzle pivot; turning the Root there inverted the body.
+    if let Some(aim) = m.aim {
+        let yaw = super::aim::yaw(Vec3::ZERO, aim.target).to_degrees();
+        tools::add(p, Head, [0.0, yaw.clamp(-15.0, 15.0) * aim.weight, 0.0]);
+    }
 }
 
 fn walk(m: &Moment, p: &mut Pose) {
@@ -85,7 +102,12 @@ fn walk(m: &Moment, p: &mut Pose) {
         tools::set(p, lower, [-swing.max(0.0) * 28.0, 0.0, 0.0]);
     }
     tools::shift(p, Hips, [0.0, (phase * 2.0).cos() * 0.018, 0.0]);
-    tools::add(p, Head, [phase.sin() * 3.0, 0.0, 0.0]);
+    tools::add(p, Head, [phase.sin() * 3.0, -phase.sin() * 2.0, 0.0]);
+    tools::set(
+        p,
+        Chest,
+        [(phase * 2.0).sin() * 2.0, 0.0, phase.sin() * -1.5],
+    );
 }
 
 fn shove(m: &Moment, p: &mut Pose) {
@@ -96,7 +118,8 @@ fn shove(m: &Moment, p: &mut Pose) {
         Chest,
         [0.0, -0.08 * coil + 0.08 * hit, -0.09 * coil + 0.12 * hit],
     );
-    tools::add(p, Head, [22.0 * coil - 32.0 * hit, 0.0, 0.0]);
+    tools::add(p, Head, [26.0 * coil - 36.0 * hit, 0.0, 0.0]);
+    tools::shift(p, Head, [0.0, -0.02 * coil, -0.025 * coil + 0.035 * hit]);
     for j in [UpperArmL, UpperArmR] {
         tools::set(p, j, [-12.0 * coil + 8.0 * hit, 0.0, 0.0]);
     }

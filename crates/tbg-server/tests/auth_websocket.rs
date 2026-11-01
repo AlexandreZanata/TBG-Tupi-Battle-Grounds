@@ -460,3 +460,82 @@ async fn a09_another_family_or_guest_handle_cannot_resume_the_account() {
     auth::send(&mut owner, ClientMsg::Leaderboard { offset: 0 }).await;
     until(&mut owner, |m| matches!(m, ServerMsg::Leaderboard { .. })).await;
 }
+
+#[tokio::test]
+async fn integrated_arena_survives_refresh_and_authenticated_reconnect() {
+    // GAME-DESIGN §12 / BR-AS09–10: renewing identity cannot redraw or replace a match.
+    let (url, clock) = server().await;
+    let (mut player, token) = connect(&url, None, None).await;
+    let grant = auth::register(&player, "ArenaRenewal").await.unwrap();
+    auth::attach(&mut player, &grant, false).await;
+    until(&mut player, |m| {
+        matches!(
+            m,
+            ServerMsg::AuthState {
+                status: AuthStatus::Active,
+                ..
+            }
+        )
+    })
+    .await;
+    let (mut opponent, _) = connect(&url, None, None).await;
+    auth::send(&mut player, ClientMsg::QuickMatch).await;
+    auth::send(&mut opponent, ClientMsg::QuickMatch).await;
+    let ServerMsg::MatchStart {
+        result_id,
+        arena,
+        you,
+        ..
+    } = until(&mut player, |m| matches!(m, ServerMsg::MatchStart { .. })).await
+    else {
+        unreachable!()
+    };
+    assert!(tbg_core::Arena::ALL.contains(&arena));
+    assert!(
+        matches!(until(&mut opponent, |m| matches!(m, ServerMsg::MatchStart { .. })).await,
+        ServerMsg::MatchStart { arena: other, .. } if other == arena)
+    );
+    clock.set(1900);
+    let (status, value) = native_auth::post(
+        &url,
+        "refresh",
+        json!({
+            "refresh_token": grant.refresh, "operation_id": "32".repeat(16)
+        }),
+        None,
+    )
+    .await
+    .unwrap();
+    assert_eq!(status, 200);
+    let renewed = native_auth::parse(&value).unwrap();
+    auth::send(
+        &mut player,
+        ClientMsg::Reauthenticate {
+            access: renewed.access,
+        },
+    )
+    .await;
+    until(&mut player, |m| {
+        matches!(
+            m,
+            ServerMsg::AuthState {
+                status: AuthStatus::Active,
+                ..
+            }
+        )
+    })
+    .await;
+    drop(player);
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    let (mut resumed, _) = connect(&url, Some(token), Some(renewed.access)).await;
+    assert!(
+        matches!(until(&mut resumed, |m| matches!(m, ServerMsg::MatchStart { .. })).await,
+        ServerMsg::MatchStart { result_id: id, arena: same, you: seat, .. }
+            if id == result_id && same == arena && seat == you)
+    );
+    auth::send(&mut resumed, ClientMsg::Surrender).await;
+    assert!(
+        matches!(until(&mut resumed, |m| matches!(m, ServerMsg::MatchEnd { .. })).await,
+        ServerMsg::MatchEnd { result_id: id, .. } if id == result_id)
+    );
+}

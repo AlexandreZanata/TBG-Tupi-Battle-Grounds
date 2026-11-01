@@ -16,9 +16,8 @@ use crate::art::{
     },
 };
 
-const OLD_BONE: Color = Color::srgb(0.75, 0.71, 0.6);
-const BLOOD: Color = Color::srgb(0.45, 0.12, 0.12);
-const SOUL: Color = Color::srgb(0.55, 1.0, 0.68);
+const BLOOD: Color = WINE_CLOTH;
+const SOUL: Color = GLOW;
 
 #[derive(Clone, Copy)]
 pub struct Form {
@@ -38,13 +37,13 @@ impl Form {
 }
 
 /// Long arms and a deep chest; the hunch is posed, not modeled.
-pub fn plan(tier: u8) -> Proportions {
+pub fn plan(tier: u8, branch: u8) -> Proportions {
     Proportions {
         scale: 1.45 * 1.2 * (1.0 + 0.08 * f32::from(tier.min(2))),
         leg: 0.36,
         torso: Vec3::new(0.5, 0.38, 0.28),
         head: 0.14,
-        arm: 0.25,
+        arm: if tier == 2 && branch == 1 { 0.32 } else { 0.25 },
     }
 }
 
@@ -59,7 +58,7 @@ pub fn tip(f: Form) -> Vec3 {
 
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
-    let p = plan(tier);
+    let p = plan(tier, branch);
     let mut v = Vec::with_capacity(140);
     legs(&mut v, &p, f);
     pelvis(&mut v, f);
@@ -123,18 +122,23 @@ fn legs(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 /// reads from the match camera.
 fn colors(v: &mut Vec<PartSpec>) {
     v.extend([
-        part(Body(UpperArmL), Box(0.1, 0.06, 0.1), ALLY, [0.0, -0.1, 0.0]),
+        part(
+            Body(UpperArmL),
+            Box(0.1, 0.06, 0.1),
+            LINEN,
+            [0.0, -0.1, 0.0],
+        ),
         part(
             Body(UpperArmL),
             Box(0.03, 0.12, 0.02),
-            ALLY,
+            LINEN,
             [0.04, -0.17, -0.04],
         )
         .rot([0.0, 0.0, 12.0]),
         part(
             Secondary(Spring::Back),
             Box(0.43, 0.06, 0.025),
-            ALLY,
+            LINEN,
             [0.0, -0.32, -0.04],
         ),
     ]);
@@ -207,7 +211,15 @@ fn ribcage(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     for (i, w) in [0.17, 0.2, 0.21, 0.19, 0.15].into_iter().enumerate() {
         let y = 0.07 + i as f32 * 0.062;
         // The 110° gap faces the spine (-Z).
-        v.push(part(Body(Chest), Ring(0.018, w, 250.0), BONE, [0.0, y, 0.0]).rot([0.0, 35.0, 0.0]));
+        v.push(
+            part(
+                Body(Chest),
+                Ring(0.019, w, 250.0),
+                if i % 2 == 0 { IVORY } else { BONE },
+                [0.0, y, 0.0],
+            )
+            .rot([0.0, 35.0, 0.0]),
+        );
     }
     v.extend([
         part(Body(Chest), Box(0.05, 0.28, 0.04), BONE, [0.0, 0.2, 0.15]),
@@ -347,6 +359,14 @@ fn skull(v: &mut Vec<PartSpec>, f: Form) {
         part(Body(Head), Ball(0.022), eye, [0.05, 0.0, 0.15]).glow(),
         part(Body(Head), Ball(0.022), eye, [-0.05, 0.0, 0.15]).glow(),
     ]);
+    for x in [-0.055, 0.0, 0.055] {
+        v.push(part(
+            Body(Head),
+            Box(0.018, 0.025, 0.018),
+            DARK,
+            [x, -0.085, 0.134],
+        ));
+    }
     if f.a && f.t2 {
         // Bone Wall: a horned skull helm.
         for s in [-1.0f32, 1.0] {
@@ -456,10 +476,10 @@ fn cleaver(v: &mut Vec<PartSpec>, at: crate::art::rig::Node, bloody: bool) {
         part(at, Cyl(0.026, 0.22), DARK_LEATHER, [0.0, 0.0, 0.03]).rot([90.0, 0.0, 0.0]),
         part(at, Ball(0.038), BONE, [0.0, 0.0, -0.09]),
         part(at, Box(0.06, 0.07, 0.04), IRON, [0.0, -0.01, 0.15]),
-        part(at, Box(0.032, 0.21, 0.36), GUNMETAL, [0.0, -0.06, 0.33]),
+        part(at, Box(0.032, 0.21, 0.36), CHARCOAL, [0.0, -0.06, 0.33]),
         part(at, Box(0.038, 0.03, 0.37), DARK, [0.0, 0.05, 0.33]),
         part(at, Box(0.036, 0.03, 0.36), STEEL, [0.0, -0.165, 0.33]),
-        part(at, Box(0.034, 0.08, 0.1), RUST, [0.0, -0.04, 0.42]),
+        part(at, Box(0.034, 0.10, 0.18), RUST, [0.0, -0.04, 0.42]),
         part(at, Cyl(0.025, 0.04), DARK, [0.0, -0.02, 0.24]).rot([0.0, 0.0, 90.0]),
     ]);
     if bloody {

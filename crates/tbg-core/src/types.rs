@@ -360,15 +360,21 @@ pub enum Arena {
     Volcanic,
     Ruins,
     Storm,
+    Celestial,
+    Clockwork,
+    Desert,
 }
 
 impl Arena {
-    pub const ALL: [Arena; 5] = [
+    pub const ALL: [Arena; 8] = [
         Arena::Forest,
         Arena::Tundra,
         Arena::Volcanic,
         Arena::Ruins,
         Arena::Storm,
+        Arena::Celestial,
+        Arena::Clockwork,
+        Arena::Desert,
     ];
 
     pub fn index(self) -> usize {
@@ -387,6 +393,9 @@ impl Arena {
             Arena::Volcanic => "volcanic",
             Arena::Ruins => "ruins",
             Arena::Storm => "storm",
+            Arena::Celestial => "celestial",
+            Arena::Clockwork => "clockwork",
+            Arena::Desert => "desert",
         }
     }
 

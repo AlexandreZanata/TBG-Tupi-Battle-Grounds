@@ -2436,6 +2436,64 @@ phase/section title; do not treat a numeric collision as supersession.
 New integration behavior is documented in GAME-DESIGN's consolidated roster
 activation section and `phases/CONSOLIDATED-LINUX-RELEASE.md`.
 
+
+## P71 owner visual follow-up — 2026-11-01 (planned)
+
+The owner replaces the requirement for team bands/patches on unit bodies
+with persistent blue/red ground-ring allegiance. Intrinsic clothing and
+character colors remain; statuses must not obscure team identification.
+Architectural Stronghold banners remain, while defender body clothing uses
+intrinsic colors. This supersedes ART-DIRECTION's body-heraldry requirement
+and the team-tabard detail of D-52 for this new visual phase, preserving
+D-46 mechanics and each tower's visible weapon/defender role.
+
+Unit HP bars must clear actual form silhouettes. Tier cubes become bright
+yellow, dark-outlined stars (zero/one/two by existing tier). Pyre Warden
+becomes white/red/black with recognizable orange/red fire. All four
+Stronghold kinds receive individual shot/animation polish and cumulative
+cosmetic degradation on every 5% HP loss, including missing pieces and fire.
+
+Implementation is **planned**, not delivered. Proposed details, source map,
+state-transition handling, validation scope and genuine renderer acceptance
+are specified in [P71](phases/P71-combat-readability-and-stronghold-polish.md).
+There is no combat, stat, Fortification, hitbox, protocol or balance change;
+P70's separate range candidate and outstanding visual approvals remain open.
+
+## P71 owner follow-up — independent Tick pistol (2026-11-01, Proposed)
+
+Supersedes D-76's bomb channel. The owner requests Tick in black clothes with
+a pistol, firing independently at medium-range enemy troops without steering
+Rattle. Keep Rattle's base Tank stats, movement, club, HP pool and branch A.
+Tick uses the existing special timer, fixed six-tick windup, events, root/death
+cancellation and locked-target policy; no new Unit or protocol field. Proposed
+playtest values: range3000, damage12, period30; B1 period24, B2 damage18.
+It has no splash/Slow, never targets allies or Strongholds, and never triggers
+club on-hit/counters. Static seat bonuses apply once, excluding branch A's
+club-only damage bonus. This replaces area control with a low-damage secondary
+attack and needs future D-33 balance acceptance; no gate has been claimed.
+
+
+## Three-arena expansion — GAME-DESIGN §12 / BR-AR06 (2026-11-01, Proposed)
+
+The owner requests three playable arenas modeled from local Celestial Citadel,
+Clockwork Bastion and Desert Relics references, using the existing five arenas'
+geometry, scene lifecycle, catalog, symmetric effects and assignment rules. The
+original reference images stay in ignored local storage and must never enter git.
+Source geometry and thumbnails rendered from the game are deliverables.
+
+The owner delegates modifier design. Initial Proposed values: Celestial +800
+movement bp; Clockwork +800 attack-speed bp and −500 movement bp; Desert −800
+base Energy regeneration bp. No existing arena value changes. ArenaRule's signed
+regeneration offset joins Interest before the existing fractional accumulation.
+The disclosed highest-difficulty Practice assistance uses that same signed rate.
+
+Append wire identities 5–7 and bump protocol 29 → 30; old peers must fail the
+version handshake instead of encountering unknown Arena variants. Bump the watched
+gameplay revision 5 → 6. Uniform pairing must derive its rejection bound from the
+catalog size, rather than the previous five-way bound. No production deployment
+is authorized by the local playtest workflow. D-33 balance acceptance and owner
+look/fun approval remain pending; no heavy balance gate is claimed.
+
 ## D-96 · Windows native packages with separate Wine and Windows evidence — 2026-10-31 (Proposed, P68)
 
 **Decision.** Extend the existing Bevy desktop client from the owner's
@@ -2747,6 +2805,23 @@ The account-ownership claim after an authenticated attach is asynchronous.
 wire changes, P67 recovery activates AccountKey rotation (it must call the
 D-97 revocation barrier), or real two-slot acceptance shows these limits wrong.
 
+
+## Main/auth and eight-Arena integration — 2026-11-01
+
+The owner requests reconciliation of `main` authentication, refresh and reconnect
+with the P71 character and three-Arena branch, followed by deployment to the
+owner-reset VPS after its connection settings are supplied. This explicitly
+authorizes this integration and that deployment; it does not promote a signed
+client update or alter the existing pending balance/visual acceptance gates.
+
+Both independent branches allocated protocol 30 to different contracts: D-97
+authentication on `main`, and the appended Arena variants on P71. Their combined
+contract uses protocol **31** so neither older peer can silently enter an
+incompatible match. Preserve all message tags, Arena IDs 0–7, D-97 lifetimes,
+account/seat authority, schema 10, and P71 ruleset revision 6/source identity.
+No additional gameplay number changes. See
+[the integration report](phases/BACKEND-main-integration-20261101.md).
+
 ## D-100 · Match continuity under token auth — 2026-11-01 (Proposed, P71)
 
 **Decision.** A network drop, a token expiry or a lost reply must never be
@@ -2789,3 +2864,62 @@ loss).
 
 **Reopen when** owner playtests show the pause budget wrong, a protocol bump
 is approved (show the remaining budget), or abuse of pauses is observed.
+
+
+## D-101 · Versioned deterministic references for the P70/P71 candidate — 2026-11-01
+
+The documented Proposed P70 Trident reach (2,000 instead of the P59 reference
+1,100), P71 Farwatch targeting and Tick pistol, and later registered state changes
+make ruleset 6 / `097385fee9a10b0f` a different candidate from ruleset 2. Apply
+explicit outcome/hash/trace references to each exact revision and source identity;
+retain the older revision-2 arrays intact and reject unregistered identities.
+
+Five canonical same-seed Bot matches were collected through the unchanged real
+`headless::play` driver with `examples/trace_canon.rs`. Seeds 1/7/42/1000/65535 end
+at 4044/9982/10382/8869/8613 ticks, winners B/B/A/B/B, all StrongholdDestroyed.
+The matching traces/final hashes are appended in the contract tests. The P59 roster
+reference row stays intact; its assertion applies the existing later Trident override.
+
+The Bombard friendly-blast exclusion fixture must keep its attacking Bombard nearer
+to the enemy Farwatch than the own Stronghold is. Otherwise P71 legitimately lets
+Farwatch hit that Stronghold and confounds the assertion. Require a real self-blast
+next to the tower and preserve the strict unchanged-HP guard. Do not weaken targeting
+or friendly-fire implementation to make the scenario pass.
+
+This decision reconciles tests with already documented candidates, not a new gameplay
+change, balance acceptance, determinism tolerance or authorization to reset fixtures
+from arbitrary failing output. Gameplay source, contract, ruleset registry and D-33
+reservations remain unchanged. Every later intentional ruleset needs its own reviewed
+canonical identity/reference; simulation changes still require the canonical decision
+and evidence in the same commit.
+
+
+## D-102 · Preserve the registered P71 Farwatch exception in lab validation — 2026-11-01
+
+P71 already removed Farwatch's `NoStronghold` ability and documented attacking
+Strongholds at its unchanged 12-tile canonical reach (GAME-DESIGN §11). The lab
+range validator still recognized only the old ability-based exception, so applying
+even an unchanged CANON knob failed C5 at `energy_start`. This was a validator/
+active-canon inconsistency, not an Energy change or new balance evidence.
+
+**Decision.** Keep the normal candidate Stronghold-range cap and the existing
+`NoStronghold` exemption. Farwatch alone may retain its registered canonical
+reach: its candidate cap is the maximum of the candidate Stronghold range and
+Farwatch's current CANON range. Read the canonical number rather than duplicating
+12,000 in the lab. Reject Farwatch above that cap and every other Stronghold
+attacker above the ordinary cap. Do not exempt all canonical units automatically,
+change a combat value or remove role/gate checks to obtain a green CI result.
+
+Boundary regressions cover the active canonical Farwatch targeting, the exception
+ceiling, every other conventional Stronghold attacker, the old ability exemption
+and a tunable Stronghold range. C5 and its historical contract file stay intact.
+
+CI runs exact C5 first using the same checked package/features/profile, then the
+complete unfiltered balance lane. A canon mismatch therefore stops before C7/C8's
+multi-minute simulations. Cheap workflow regressions reject a missing/late preflight,
+a feature-scope bypass or filtered full lane. Required `check` still rejects any
+failed/skipped/canceled lane. No retries, ignored tests, relaxed thresholds or
+accepted competitive-balance claim are introduced. Runtime/core sources, ruleset
+revision/hash, protocol, visual correspondence and player-facing behavior remain
+unchanged. Older planning statements about Farwatch never targeting a Stronghold
+are superseded by the existing P71 owner update.

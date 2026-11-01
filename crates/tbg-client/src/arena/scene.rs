@@ -107,6 +107,9 @@ mod tests {
                 Theme::Volcanic,
                 Theme::Ruins,
                 Theme::Storm,
+                Theme::Celestial,
+                Theme::Clockwork,
+                Theme::Desert,
                 Theme::Forest,
             ] {
                 app.world_mut().resource_mut::<ActiveArena>().0 = theme;

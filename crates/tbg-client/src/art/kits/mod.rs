@@ -27,7 +27,7 @@ mod drumguard;
 mod farwatch;
 pub mod gait;
 mod hexer;
-mod hornet;
+pub(crate) mod hornet;
 mod jawguard;
 mod justiciar;
 mod leechroot;
@@ -38,7 +38,7 @@ mod nester;
 mod oilpress;
 mod old_finn;
 mod puppetmaster;
-mod pyre_warden;
+pub(crate) mod pyre_warden;
 mod rampart;
 mod rattle_tick;
 mod ravager;
@@ -51,7 +51,7 @@ mod siege_walker;
 mod smuggler;
 mod solar_sentinel;
 mod tools;
-mod trident;
+pub(crate) mod trident;
 mod trigger;
 mod weaver;
 mod whisperer;
@@ -166,6 +166,7 @@ pub struct Moment {
     /// Independent special cast channel, in seconds from server windup start.
     pub special: Option<f32>,
     pub special_ready: bool,
+    pub special_aim: Option<Vec3>,
 }
 
 static SIEGE_WALKER: Kit = siege_walker::KIT;
@@ -296,3 +297,6 @@ impl Kit {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod pole_grip_tests;

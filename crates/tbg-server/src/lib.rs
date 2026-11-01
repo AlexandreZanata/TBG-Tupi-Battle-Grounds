@@ -18,6 +18,7 @@ use tokio::sync::{mpsc, watch};
 mod api;
 pub mod auth;
 pub mod botclient;
+pub mod build_info;
 mod chan;
 pub mod config;
 mod limits;
