@@ -42,14 +42,77 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
                 * tools::hold((m.clock * 0.25).rem_euclid(1.0), [0.0, 0.05, 0.25, 0.3]);
             let belly = Vec3::new(0.1, 0.12 + 0.03 * pat, 0.24);
             tools::reach(pose, true, belly, None, (&p, Vec3::new(1.0, -0.6, -0.2)));
+            let check = tools::hold((m.clock * 0.2).fract(), [0.15, 0.28, 0.40, 0.60]);
+            tools::add(pose, Joint::Head, [-5.0 * check, 22.0 * check, 0.0]);
+            tools::set(pose, Joint::ForearmR, [-22.0, 0.0, 0.0]);
         }
-        Clip::Walk => moves::walk(m, pose, 2.0, 9.0),
-        Clip::Cast => moves::toss(m, pose, &p),
+        Clip::Walk => {
+            moves::walk(m, pose, 2.0, 7.0);
+            let step = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
+            tools::reach(
+                pose,
+                true,
+                Vec3::new(0.17, 0.10, 0.22),
+                None,
+                (&p, Vec3::new(1.0, -0.7, -0.3)),
+            );
+            tools::set(pose, Joint::UpperArmR, [-12.0 + 8.0 * step, 0.0, -18.0]);
+            tools::set(pose, Joint::ForearmR, [-30.0, 0.0, 0.0]);
+            tools::set(pose, Joint::Head, [-3.0, 0.0, -3.0 * step]);
+        }
+        Clip::Cast => {
+            let gather = tools::hold(m.t, [0.0, 0.14, 0.17, 0.25]);
+            let offer = tools::hold(m.t, [0.17, 0.22, 0.32, 0.62]);
+            tools::set(
+                pose,
+                Joint::Chest,
+                [-4.0 * gather + 6.0 * offer, -7.0 * gather, 0.0],
+            );
+            tools::reach(
+                pose,
+                false,
+                Vec3::new(
+                    -0.22 + 0.07 * offer,
+                    0.18 + 0.11 * gather + 0.06 * offer,
+                    0.15 + 0.14 * offer,
+                ),
+                Some(Quat::from_rotation_x((-15.0 + 40.0 * offer).to_radians())),
+                (&p, Vec3::new(-1.0, -0.6, -0.3)),
+            );
+            tools::reach(
+                pose,
+                true,
+                Vec3::new(0.13, 0.13, 0.23),
+                None,
+                (&p, Vec3::new(1.0, -0.7, -0.3)),
+            );
+            tools::face(pose, m.aim, Vec3::ZERO);
+            tools::plant(pose, &p, tools::stance(&p, 1.2, 0.04));
+        }
         Clip::Hit => moves::hit(m, pose, 0.8),
         Clip::Death => moves::death(m, pose, &p, Fall::Sink),
         Clip::Spawn => moves::spawn(m, pose, &p, Entry::Rise),
         Clip::Evolve => moves::evolve(m, pose, &p, Power::Burst),
-        Clip::Victory => moves::victory(m, pose, &p, Cheer::Both),
+        Clip::Victory => {
+            let sway = (m.t / 0.8 * std::f32::consts::TAU).sin();
+            tools::set(pose, Joint::Chest, [2.0, 0.0, 5.0 * sway]);
+            tools::set(pose, Joint::Head, [-6.0, 12.0 * sway, -3.0 * sway]);
+            tools::reach(
+                pose,
+                true,
+                Vec3::new(0.12, 0.13, 0.23),
+                None,
+                (&p, Vec3::new(1.0, -0.7, -0.3)),
+            );
+            tools::reach(
+                pose,
+                false,
+                Vec3::new(-0.24, 0.23, 0.10),
+                None,
+                (&p, Vec3::new(-1.0, -0.5, -0.5)),
+            );
+            tools::plant(pose, &p, tools::stance(&p, 1.15, 0.0));
+        }
         _ => {}
     }
     let hatch = tools::hold(m.gesture, [0.0, 0.06, 0.18, 0.42]);
