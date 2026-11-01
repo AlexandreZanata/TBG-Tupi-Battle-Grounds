@@ -139,3 +139,21 @@ desktop-web parity claim is made.
 - New localized mathematical wording was changed to font-supported prose
   after the build script correctly rejected U+2265. No font waiver was added.
 - Actual engine portraits/lineups and installation are the next checkpoints.
+
+
+### Owner body-identity amendment
+
+The owner rejected the blue hip squares in the runtime portraits. The older
+ART-DIRECTION instruction requiring body team colors is explicitly superseded:
+remove affiliation geometry and trim, share one body mesh set for both seats,
+and preserve blue/red foot rings during control effects. All 68 registered kinds
+and five presentation forms are covered, including retained fallback paths.
+Real shields, organs, garments and faction colors remain intrinsic and fixed.
+The new control HUD badge updates its material when Root changes to Slow.
+
+Focused regression coverage includes all 340 authored forms, shared body mesh
+handles for both seats, reserved ownership colors, status-badge transitions,
+all-kind form distinction/budgets and the six new-kit motion/binding checks.
+The first amended-source targeted batch returned exit 75 (shared slot busy),
+without compiling or waiting. Updated captures, portrait assets, final binary
+and Linux installation are pending at this source checkpoint.

@@ -109,7 +109,6 @@ fn shell(v: &mut Vec<PartSpec>, f: Form) {
     }
     if f.b {
         // Turbo Carrier: high-contrast racing stripe down the shell
-        v.push(part(h, Box(0.09, 0.025, 0.68), ALLY, [0.0, 0.185, 0.0]));
     }
 }
 
@@ -147,15 +146,12 @@ fn saddle(v: &mut Vec<PartSpec>, f: Form) {
         ));
     }
     let b = Secondary(Spring::Back);
-    v.extend([
-        part(b, Cyl(0.014, 0.55), WOOD, [-0.18, 0.20, 0.05]),
-        part(b, Box(0.018, 0.14, 0.20), ALLY, [-0.18, 0.40, -0.03]),
-    ]);
+    v.extend([part(b, Cyl(0.014, 0.55), WOOD, [-0.18, 0.20, 0.05])]);
     if f.a && f.t2 {
         // A2 Fortress Crab: protective shield ring and energy emitter
         v.extend([
-            part(c, Ring(0.018, 0.30, 360.0), ALLY, [0.0, 0.22, -0.03]).glow(),
-            part(c, Ball(0.05), ALLY, [0.0, 0.34, -0.17]).glow(),
+            part(c, Ring(0.018, 0.30, 360.0), BRASS, [0.0, 0.22, -0.03]).glow(),
+            part(c, Ball(0.05), BRASS, [0.0, 0.34, -0.17]).glow(),
             part(c, Box(0.44, 0.035, 0.38), GOLD, [0.0, 0.14, -0.03]),
         ]);
     }
@@ -275,8 +271,5 @@ fn exhausts(v: &mut Vec<PartSpec>, f: Form) {
                     .glow(),
             );
         }
-    }
-    if f.t2 {
-        v.push(part(h, Box(0.03, 0.16, 0.25), ALLY, [0.0, 0.27, -0.24]).rot([-15.0, 0.0, 0.0]));
     }
 }

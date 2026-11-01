@@ -1,8 +1,8 @@
 //! Archer figure: a hooded yeoman archer of the Humans faction with an upright
-//! longbow, a quiver on the back, linen tunic, and team tabard.
+//! longbow, a quiver on the back, linen tunic, and leather boots.
 //! Branch A (Longbow -> Marksman) extends range and accuracy: green ranger hood
 //! with feather, yew longbow with horn nocks, then a gilded recurve greatbow,
-//! team half-cape, gold trim, and glowing eye glint.
+//! leather half-cape, gold trim, and glowing eye glint.
 //! Branch B (Volley -> Arrow Rain) fires rapid storms of arrows: dark leather
 //! coif, dual quivers on back, composite war-bow, then an armored steel-brow
 //! hood, twin gilded quivers, double-cable siege bow with glowing riser runes.
@@ -111,12 +111,9 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 }
 
 fn dress(v: &mut Vec<PartSpec>, _p: &Proportions, f: Form) {
-    // Team tabard is visible from match camera
-    body::tabard(v, 0.18, 0.30);
-
     if f.a && f.t2 {
-        // Marksman: team half-cape with gold hem
-        body::cape(v, ALLY, 0.34, 0.44);
+        // Marksman: leather half-cape with gold hem
+        body::cape(v, LEATHER, 0.34, 0.44);
         v.push(part(
             Secondary(Spring::Back),
             Box(0.34, 0.03, 0.02),
@@ -126,7 +123,7 @@ fn dress(v: &mut Vec<PartSpec>, _p: &Proportions, f: Form) {
         body::pauldrons(v, GOLD, 0.14);
     } else if f.b && f.t2 {
         // Arrow Rain: armored steel pauldrons and battle mantle
-        body::cape(v, ALLY, 0.36, 0.40);
+        body::cape(v, LEATHER, 0.36, 0.40);
         body::pauldrons(v, IRON, 0.15);
     }
 }
@@ -158,7 +155,7 @@ fn quivers(v: &mut Vec<PartSpec>, f: Form) {
         let (color, fletch) = if f.a && f.t2 {
             (GOLD, GOLD)
         } else if f.a {
-            (DARK_LEATHER, ALLY)
+            (DARK_LEATHER, LEATHER)
         } else {
             (DARK_LEATHER, LINEN)
         };
@@ -187,7 +184,7 @@ fn bow(v: &mut Vec<PartSpec>, f: Form) {
         string: if f.t2 { GOLD } else { LINEN },
         shaft: TIMBER,
         head: STEEL,
-        fletch: if f.a { ALLY } else { LINEN },
+        fletch: if f.a { LEATHER } else { LINEN },
     };
     let half = half_len(f);
     v.extend(gear::bow(half, style));

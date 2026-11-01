@@ -2810,3 +2810,12 @@ effect cues use one shared presentation path. Linux is the visual reference;
 Windows and desktop-web comparison remains pending until actual observations.
 The local install uses a separate preview launcher/data directory and never
 replaces the user's normal TBG launcher or activates the online roster.
+
+## Ring-only champion ownership (owner, 2026-11-01)
+
+The owner rejected the generic blue body plaques and required team identity
+only at the feet. Remove new and legacy affiliation geometry, replace actual
+equipment's ownership paint with fixed faction materials, and share one body
+mesh set for both seats. Root/Slow move to HUD status badges so ownership
+rings stay blue/red. This supersedes ART-DIRECTION §2's old team-tabard rule.
+No simulation value, champion identity, ability or outcome changes.

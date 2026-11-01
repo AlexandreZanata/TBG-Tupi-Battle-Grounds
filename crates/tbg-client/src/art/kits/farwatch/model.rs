@@ -1,6 +1,6 @@
 //! Farwatch figure: a hooded watchman with a heavy crossbow (arbalest)
 //! that outranges the lane. Branch A steadies the shot (a brass scope,
-//! then a gilded great arbalest, feathered hat and team cape); branch B
+//! then a gilded great arbalest, feathered hat and leather cape); branch B
 //! cruels it (barbed red-fletched bolts and a masked hood, then a glowing
 //! wounding bolt and a dark red cloak).
 
@@ -110,7 +110,7 @@ fn dress(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     }
     if f.t2 {
         let cape = if f.a {
-            ALLY
+            LEATHER
         } else {
             Color::srgb(0.35, 0.08, 0.1)
         };

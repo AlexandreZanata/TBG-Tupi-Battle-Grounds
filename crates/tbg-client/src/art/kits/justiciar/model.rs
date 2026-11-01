@@ -60,12 +60,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         )
         .rot([90.0, 0.0, 0.0]),
         part(Secondary(Spring::Back), Ball(0.04), IVORY, [0.0, 0.0, 0.03]).glow(),
-        part(
-            Body(UpperArmL),
-            Box(0.19, 0.08, 0.17),
-            ALLY,
-            [0.0, 0.0, 0.0],
-        ),
     ]);
     for j in [ForearmL, ForearmR] {
         v.push(part(Body(j), Cyl(0.026, 0.23), GUNMETAL, [0.0, -0.08, 0.0]));

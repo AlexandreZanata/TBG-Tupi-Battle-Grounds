@@ -141,7 +141,7 @@ fn legs(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 }
 
 fn hips(v: &mut Vec<PartSpec>, f: Form) {
-    let cloth = if f.b { RUST } else { ALLY };
+    let cloth = if f.b { RUST } else { BRASS };
     v.extend([
         part(Body(Hips), Box(0.42, 0.17, 0.29), TROUSERS, [0.0, 0.0, 0.0]),
         part(
@@ -163,7 +163,7 @@ fn hips(v: &mut Vec<PartSpec>, f: Form) {
             LEATHER,
             [-0.19, 0.02, 0.12],
         ),
-        // Team loincloth on the tabard spring, iron-weighted hem.
+        // Brass loincloth on the tabard spring, iron-weighted hem.
         part(
             Secondary(Spring::Tabard),
             Box(0.2, 0.27, 0.02),
@@ -176,13 +176,6 @@ fn hips(v: &mut Vec<PartSpec>, f: Form) {
             IRON,
             [0.0, -0.2, 0.0],
         ),
-        part(
-            Secondary(Spring::Tabard),
-            Box(0.06, 0.06, 0.025),
-            ALLY,
-            [0.0, -0.06, 0.004],
-        )
-        .rot([0.0, 0.0, 45.0]),
     ]);
 }
 
@@ -355,12 +348,7 @@ fn head(v: &mut Vec<PartSpec>, f: Form) {
                 GOLD,
                 [0.0, 0.035, -0.01],
             ));
-            v.push(part(
-                Secondary(Spring::HeadGear),
-                Box(0.04, 0.14, 0.26),
-                ALLY,
-                [0.0, 0.17, -0.03],
-            ));
+
             v.push(part(
                 Secondary(Spring::HeadGear),
                 Box(0.045, 0.04, 0.27),
@@ -466,12 +454,6 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 
 fn back(v: &mut Vec<PartSpec>, f: Form) {
     let b = Secondary(Spring::Back);
-    // A team pennant on a pole: the side reads from the match camera.
-    v.extend([
-        part(b, Cyl(0.014, 0.62), WOOD, [0.12, 0.22, -0.16]),
-        part(b, Box(0.02, 0.15, 0.2), ALLY, [0.12, 0.44, -0.27]),
-        part(b, Box(0.022, 0.03, 0.2), GOLD, [0.12, 0.36, -0.27]),
-    ]);
     if f.t2 {
         // A furnace-boiler that feeds the great guns; glowing firebox.
         v.extend([

@@ -86,12 +86,6 @@ fn robe(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             DARK_LEATHER,
             [0.0, 0.02, 0.0],
         ),
-        part(
-            Body(Chest),
-            Box(0.08, t.y * 0.9, 0.02),
-            ALLY,
-            [0.0, t.y * 0.45, t.x * 0.33],
-        ),
     ]);
     for arm in [UpperArmL, UpperArmR] {
         v.push(part(

@@ -541,5 +541,35 @@
       "tier2": 0.4988
     }
   },
-  "victory_duration_seconds": 3.0
+  "victory_duration_seconds": 3.0,
+  "ring_only_owner_amendment": {
+    "date": "2026-11-01",
+    "registered_kinds": 68,
+    "presentation_forms": 340,
+    "body_policy": "Identical geometry and intrinsic material for both seats; no affiliation squares, plaques, ribbons or generic team tabards.",
+    "identity": "Blue/red foot rings persist during Root, Slow and marks; harmful effects use separate HUD badges.",
+    "shared_paths": [
+      "art/mod.rs",
+      "art/kits",
+      "art/palette.rs",
+      "art/roster",
+      "visuals/update.rs",
+      "visuals/status_badges.rs",
+      "assets/battle/portraits"
+    ],
+    "coverage": [
+      "all kinds and Evolution forms",
+      "Shop portraits",
+      "Troops",
+      "Training",
+      "Practice",
+      "summons and carried units",
+      "idle/walk/attack/cast/hit/spawn/evolve/death/victory",
+      "both seats",
+      "Root/Slow/mark"
+    ],
+    "linux": "Updated captures and installation pending",
+    "windows": "pending actual packaged visual comparison",
+    "desktop_web": "pending actual browser visual and motion comparison"
+  }
 }

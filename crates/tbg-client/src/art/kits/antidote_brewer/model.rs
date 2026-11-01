@@ -53,7 +53,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             LINEN,
             [0.0, -0.1, t.z * 0.55],
         ),
-        part(Body(Chest), Ball(0.05), ALLY, [0.0, t.y * 0.55, t.z * 0.44]).scale([0.7, 1.3, 0.3]),
     ]);
     head(&mut v, &p, f);
     hands(&mut v, f);

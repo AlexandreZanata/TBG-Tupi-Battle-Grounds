@@ -73,7 +73,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             [0.0, 0.0, 0.02],
         )
         .scale([1.0, 0.8, 1.5]),
-        part(Body(Spine), Box(0.27, 0.04, 0.40), ALLY, [0.0, 0.23, -0.05]),
         part(
             Body(Spine),
             Box(0.29, 0.05, 0.06),

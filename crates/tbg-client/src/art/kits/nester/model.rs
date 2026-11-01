@@ -54,12 +54,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             [0.0, t.y * 0.32, t.z * 0.18],
         )
         .scale([1.0, 0.9, 0.85]),
-        part(
-            Body(Chest),
-            Box(t.x * 0.9, 0.05, t.z * 1.1),
-            ALLY,
-            [0.0, t.y * 0.75, 0.0],
-        ),
         part(Body(Head), Ball(h * 1.15), LEAF_DARK, [0.0, h * 0.45, 0.0]).scale([1.2, 0.45, 1.2]),
         part(
             Body(Head),

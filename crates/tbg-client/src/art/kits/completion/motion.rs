@@ -134,10 +134,13 @@ fn rest_grip(k: UnitKind, m: &Moment, p: &mut Pose, b: &crate::art::rig::Proport
                 (b, Vec3::new(0.2, -0.8, 0.25)),
             );
         }
-        Leafcutter => {
-            tools::set(p, UpperArmR, [-28.0, 0.0, -8.0]);
-            tools::set(p, ForearmR, [-45.0, 0.0, 0.0]);
-        }
+        Leafcutter => tools::reach(
+            p,
+            false,
+            Vec3::new(-0.12, 0.13, 0.14),
+            Some(Quat::IDENTITY),
+            (b, Vec3::new(-0.2, -0.8, 0.25)),
+        ),
         LastlightCantor => {
             tools::reach(
                 p,
@@ -393,14 +396,30 @@ fn shaft(k: UnitKind, m: &Moment, p: &mut Pose, b: &crate::art::rig::Proportions
     } else {
         0.0
     };
-    let angle = -1.05 - if k == Starbreaker { 1.15 * load } else { 0.0 } + 0.90 * hit;
+    let angle = if k == Starbreaker {
+        -2.20 * load - 0.15 * hit
+    } else {
+        -1.05 + 0.90 * hit
+    };
     let rotation = Quat::from_rotation_x(angle);
-    let hand = Vec3::new(
-        0.0,
-        0.12 + 0.15 * load + 0.02 * hit,
-        0.13 - 0.03 * load + 0.02 * hit,
-    );
-    let grip = 0.20 - 0.10 * hit;
+    let hand = if k == Starbreaker {
+        Vec3::new(
+            0.0,
+            0.17 + 0.10 * load + 0.02 * hit,
+            0.10 - 0.03 * load + 0.05 * hit,
+        )
+    } else {
+        Vec3::new(
+            0.0,
+            0.12 + 0.15 * load + 0.02 * hit,
+            0.13 - 0.03 * load + 0.02 * hit,
+        )
+    };
+    let grip = if k == Starbreaker {
+        0.13 - 0.03 * hit
+    } else {
+        0.20 - 0.10 * hit
+    };
     shaft_pose(p, b, hand, rotation, grip);
 }
 fn shaft_pose(

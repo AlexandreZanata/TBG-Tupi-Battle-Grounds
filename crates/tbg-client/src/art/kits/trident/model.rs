@@ -77,7 +77,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Body(Chest),
             Box(0.35, 0.08, 0.30),
-            if f.b { RED_CLOTH } else { ALLY },
+            if f.b { RED_CLOTH } else { GUNMETAL },
             [0.0, 0.18, 0.0],
         )
         .rot([0.0, 0.0, -20.0]),
@@ -102,12 +102,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
                 .rot([15.0, 0.0, s * 10.0]),
             );
         }
-        v.push(part(
-            Body(Hips),
-            Box(0.035, 0.22, 0.04),
-            ALLY,
-            [s * 0.12, -0.06, 0.19],
-        ));
     }
     for x in [-0.12, 0.0, 0.12] {
         v.push(

@@ -1,4 +1,4 @@
-//! Shared construction tools, not character silhouettes: bowls, blades, insect anatomy and team marks.
+//! Shared construction tools, not character silhouettes: bowls, blades, insect anatomy and faction details.
 pub(super) use crate::art::{
     figure::{part, FigureSpec, PartSpec},
     kits::common::{body, Form},
@@ -33,15 +33,7 @@ pub fn humanoid(
     );
     v
 }
-pub fn team(v: &mut Vec<PartSpec>, n: Node, width: f32) {
-    v.push(part(n, Box(width, 0.14, 0.02), ALLY, [0.0, -0.03, 0.145]));
-    v.push(part(
-        n,
-        Box(width * 0.8, 0.018, 0.022),
-        LINEN,
-        [0.0, -0.09, 0.146],
-    ));
-}
+
 pub fn blade(v: &mut Vec<PartSpec>, n: Node, len: f32, c: Color, curved: bool) {
     v.push(part(n, Cyl(0.022, 0.14), OAK, [0.0, 0.0, 0.0]).rot([90.0, 0.0, 0.0]));
     v.push(part(n, Box(0.17, 0.035, 0.04), GOLD, [0.0, 0.0, 0.06]));
@@ -157,7 +149,7 @@ pub fn insect(p: &Proportions, f: Form, waist: f32) -> Vec<PartSpec> {
             [s * 0.105, 0.02, 0.105],
         ));
     }
-    team(&mut v, Body(Hips), 0.08);
+
     v
 }
 pub fn insect_parent(n: Node) -> Option<Node> {

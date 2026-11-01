@@ -136,7 +136,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             );
         }
     }
-    team(&mut v, Body(Chest), 0.07);
+
     FigureSpec { plan: p, parts: v }
 }
 pub fn pose(m: &Moment, p: &mut Pose) {

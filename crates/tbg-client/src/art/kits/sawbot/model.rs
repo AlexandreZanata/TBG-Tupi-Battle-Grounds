@@ -111,12 +111,6 @@ fn chest(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             [0.0, t.y * 0.55, t.z * 0.42],
         ),
         part(
-            Body(Chest),
-            Box(t.x * 0.25, 0.04, 0.03),
-            ALLY,
-            [0.0, t.y * 0.88, t.z * 0.42],
-        ),
-        part(
             Secondary(Spring::Back),
             Cyl(0.04, 0.3),
             IRON,

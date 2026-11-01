@@ -81,13 +81,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             .rot([8.0, 0.0, s * -8.0]),
             part(
                 Body(Chest),
-                Box(0.035, 0.34, 0.28),
-                ALLY,
-                [s * 0.43, 0.27, -0.12],
-            )
-            .rot([0.0, 0.0, s * -12.0]),
-            part(
-                Body(Chest),
                 Box(0.045, 0.03, 0.29),
                 LINEN,
                 [s * 0.46, 0.10, -0.12],

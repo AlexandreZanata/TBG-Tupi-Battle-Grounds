@@ -56,7 +56,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
     if f.t2 {
         v.push(part(Body(Chest), Cone(0.11, 0.16), GOLD, [0.0, 0.21, 0.14]).scale([1.0, 1.0, 0.3]));
     }
-    team(&mut v, Body(Hips), 0.10);
+
     FigureSpec { plan: p, parts: v }
 }
 pub fn plan(t: u8) -> Proportions {

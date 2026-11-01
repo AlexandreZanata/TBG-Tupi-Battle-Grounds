@@ -43,14 +43,14 @@ pub fn hammer(at: Node, len: f32, head: Color) -> Vec<PartSpec> {
     ]
 }
 
-/// A kite shield on the forearm's outside (+X), point down, team face.
+/// A kite shield on the forearm's outside (+X), point down, steel face.
 pub fn kite_shield(at: Node, size: f32, rim: Color) -> Vec<PartSpec> {
     vec![
-        part(at, Box(0.04, size, size * 0.8), ALLY, [0.08, 0.0, 0.0]),
+        part(at, Box(0.04, size, size * 0.8), STEEL, [0.08, 0.0, 0.0]),
         part(
             at,
             Box(0.04, size * 0.55, size * 0.55),
-            ALLY,
+            STEEL,
             [0.08, -size * 0.5, 0.0],
         )
         .rot([45.0, 0.0, 0.0]),

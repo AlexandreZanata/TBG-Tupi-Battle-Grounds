@@ -40,6 +40,17 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         );
         v.push(part(Body(Head), Ball(0.025), TURQUOISE, [s * 0.12, 0.04, 0.15]).glow());
     }
+    for side in [-1.0, 1.0] {
+        v.push(
+            part(
+                Secondary(Spring::HeadGear),
+                Pill(0.035, 0.13),
+                CHARCOAL,
+                [side * 0.15, 0.10, -0.02],
+            )
+            .rot([0.0, 0.0, side * -25.0]),
+        );
+    }
     for i in 0..4 {
         v.push(
             part(
@@ -64,7 +75,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             );
         }
     }
-    team(&mut v, Body(Hips), 0.10);
+
     FigureSpec { plan: p, parts: v }
 }
 pub fn plan(t: u8) -> Proportions {

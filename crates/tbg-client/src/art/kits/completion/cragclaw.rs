@@ -64,7 +64,24 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             .rot([10.0, 0.0, 0.0]),
         );
     }
-    team(&mut v, Body(Hips), 0.11);
+
+    for side in [-1.0, 1.0] {
+        v.push(part(
+            Body(Head),
+            Ball(0.032),
+            CHARCOAL,
+            [side * 0.085, 0.04, 0.125],
+        ));
+        v.push(
+            part(
+                Body(Head),
+                Ball(0.022),
+                TURQUOISE,
+                [side * 0.085, 0.045, 0.15],
+            )
+            .glow(),
+        );
+    }
     FigureSpec { plan: p, parts: v }
 }
 pub fn plan(t: u8) -> Proportions {

@@ -44,7 +44,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             boots: GOLD,
         },
     );
-    body::tabard(&mut v, 0.16, 0.31);
+
     v.extend([
         part(
             Body(Chest),

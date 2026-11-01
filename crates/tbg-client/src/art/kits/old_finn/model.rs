@@ -49,7 +49,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     head(&mut v, &p, f);
     creel(&mut v, f);
     rod(&mut v, f);
-    // Buttons down the oilskin and a team neckerchief.
+    // Buttons down the oilskin and a leather neckerchief.
     for y in [0.12, 0.22, 0.32] {
         v.push(part(
             Body(Chest),
@@ -58,12 +58,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             [0.0, y, p.torso.z * 0.47],
         ));
     }
-    v.push(part(
-        Body(Chest),
-        Box(0.2, 0.06, 0.06),
-        ALLY,
-        [0.0, p.torso.y * 0.95, p.torso.z * 0.3],
-    ));
+
     if f.a {
         for hand in [HandL, HandR] {
             v.push(part(

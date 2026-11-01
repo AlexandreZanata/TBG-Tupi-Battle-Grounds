@@ -50,7 +50,24 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             .rot([-15.0, 0.0, 0.0]),
         );
     }
-    team(&mut v, Body(Hips), 0.10);
+
+    for side in [-1.0, 1.0] {
+        v.push(part(
+            Body(Head),
+            Ball(0.032),
+            CHARCOAL,
+            [side * 0.09, 0.055, 0.17],
+        ));
+        v.push(
+            part(
+                Body(Head),
+                Ball(0.022),
+                TURQUOISE,
+                [side * 0.09, 0.06, 0.195],
+            )
+            .glow(),
+        );
+    }
     FigureSpec { plan: p, parts: v }
 }
 pub fn plan(t: u8) -> Proportions {

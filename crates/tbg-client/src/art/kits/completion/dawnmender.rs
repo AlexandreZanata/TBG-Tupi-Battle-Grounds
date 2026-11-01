@@ -54,7 +54,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             part.at.x += grip;
         }
     }
-    team(&mut v, Body(Hips), 0.10);
+
     FigureSpec { plan: p, parts: v }
 }
 pub fn plan(t: u8) -> Proportions {

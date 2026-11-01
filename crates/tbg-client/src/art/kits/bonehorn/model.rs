@@ -176,13 +176,6 @@ fn mantle(v: &mut Vec<PartSpec>, f: Form) {
         v.extend([
             part(
                 Body(Spine),
-                Box(0.035, 0.32, 0.46),
-                ALLY,
-                [s * 0.38, -0.02, -0.04],
-            )
-            .rot([0.0, 0.0, s * -10.0]),
-            part(
-                Body(Spine),
                 Box(0.045, 0.04, 0.47),
                 LINEN,
                 [s * 0.40, -0.16, -0.04],

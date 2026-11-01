@@ -89,12 +89,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             BARK,
             [0.0, 0.12, -0.15],
         ),
-        part(
-            Secondary(Spring::Back),
-            Box(0.18, 0.14, 0.02),
-            ALLY,
-            [0.0, 0.12, -0.21],
-        ),
     ]);
     for s in [-1.0, 1.0] {
         v.push(part(Body(Head), Ball(0.06), LEATHER, [s * 0.16, 0.17, 0.0]));

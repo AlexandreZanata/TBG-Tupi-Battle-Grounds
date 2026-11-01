@@ -72,7 +72,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             OAK,
             [0.0, -0.06, 0.05],
         ),
-        part(Body(Chest), Box(0.13, 0.11, 0.035), ALLY, [0.0, 0.07, 0.10]),
         part(Body(Head), Box(0.20, 0.055, 0.22), IRON, [0.0, 0.11, 0.0]),
     ]);
     for s in [-1.0, 1.0] {

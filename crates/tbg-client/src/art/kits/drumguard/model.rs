@@ -1,7 +1,7 @@
 //! Drumguard figure: a marching drummer in a red coat with white straps
-//! and a team shako, a snare drum at the hip and two sticks. Branch A
+//! and a red shako, a snare drum at the hip and two sticks. Branch A
 //! drives the march (a plumed shako and a bigger drum, then a grand gilded
-//! bass drum and a team standard on the back); branch B holds the line
+//! bass drum and a gilded bass-drum hardware); branch B holds the line
 //! (iron bands and a steel helmet, then plate, pauldrons and glowing
 //! rhythm runes).
 
@@ -55,12 +55,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             [0.0, p.torso.y * 0.62, p.torso.z * 0.44],
         ));
     }
-    if f.a && f.t2 {
-        let b = Secondary(Spring::Back);
-        v.push(part(b, Cyl(0.015, 0.9), WOOD, [0.12, 0.25, -0.06]));
-        v.push(part(b, Box(0.02, 0.22, 0.3), ALLY, [0.12, 0.55, -0.22]));
-        v.push(part(b, Ball(0.03), GOLD, [0.12, 0.72, -0.06]));
-    }
     FigureSpec { plan: p, parts: v }
 }
 
@@ -69,17 +63,17 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     if f.b {
         body::helmet(v, p, Helm::Cap(STEEL));
         if f.t2 {
-            body::helmet(v, p, Helm::Plumed(STEEL, ALLY));
+            body::helmet(v, p, Helm::Plumed(STEEL, LEATHER));
         }
         return;
     }
-    // Shako: a tall team cylinder with a gold plate and a peak.
+    // Shako: a tall red cylinder with a gold plate and a peak.
     let tall = if f.a { 0.26 } else { 0.2 };
     v.extend([
         part(
             Body(Head),
             Cyl(h * 0.85, tall),
-            ALLY,
+            RED_CLOTH,
             [0.0, h * 0.55 + tall * 0.5, -h * 0.05],
         ),
         part(
@@ -116,7 +110,7 @@ fn drum(v: &mut Vec<PartSpec>, f: Form) {
         (0.14, 0.13)
     };
     let at = [0.08, 0.02, 0.2];
-    let shell = if f.a && f.t2 { GOLD } else { ALLY };
+    let shell = if f.a && f.t2 { GOLD } else { LEATHER };
     let rim = if f.b { IRON } else { BRASS };
     v.extend([
         part(Body(Hips), Cyl(r, depth), shell, at),

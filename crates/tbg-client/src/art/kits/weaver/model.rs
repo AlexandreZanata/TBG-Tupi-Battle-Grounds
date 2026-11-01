@@ -63,12 +63,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         .scale([1.0, 0.8, 1.2]),
         part(Body(Head), Ball(0.14), CHITIN, [0.0, 0.0, 0.0]).scale([1.2, 0.6, 1.0]),
         part(
-            Body(Chest),
-            Box(0.18, 0.035, 0.16),
-            ALLY,
-            [0.0, 0.20, -0.08],
-        ),
-        part(
             Prop(Socket::WeaponR),
             Cyl(if f.a { 0.045 } else { 0.03 }, 0.14),
             AMBER,

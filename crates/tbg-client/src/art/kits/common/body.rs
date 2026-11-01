@@ -1,5 +1,5 @@
 //! The shared rig-v2 anatomy (the Archer v2 family) and dress pieces:
-//! tunics, belts, team tabards, capes, hoods, helmets, pauldrons, beards.
+//! tunics, belts, capes, hoods, helmets, pauldrons, beards.
 //! Coordinates are in each joint's space; figures face +Z, left is +X.
 
 use bevy::prelude::*;
@@ -84,26 +84,6 @@ pub fn tunic(v: &mut Vec<PartSpec>, p: &Proportions, cloth: Color, hem: Color, b
             GOLD,
             [0.0, 0.04, p.torso.z * 0.55],
         ),
-    ]);
-}
-
-/// A team tabard on the tabard spring, gold hem and lozenge.
-pub fn tabard(v: &mut Vec<PartSpec>, width: f32, length: f32) {
-    let t = Secondary(Spring::Tabard);
-    v.extend([
-        part(
-            t,
-            Box(width, length, 0.018),
-            ALLY,
-            [0.0, 0.09 - (length - 0.34) * 0.5, 0.025],
-        ),
-        part(
-            t,
-            Box(width * 0.83, 0.02, 0.022),
-            GOLD,
-            [0.0, 0.09 - length + 0.17 + 0.005, 0.025],
-        ),
-        part(t, Box(0.05, 0.05, 0.022), GOLD, [0.0, 0.16, 0.026]).rot([0.0, 0.0, 45.0]),
     ]);
 }
 

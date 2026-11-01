@@ -112,3 +112,16 @@ growth. Compact arm poses reduced Gravecutter's normalized half-width from
 geometry measurements, not runtime crowd/overlap acceptance or FPS evidence.
 All new Victory loops last three seconds, stay eventless, and close without
 a sampled pose seam. Shared weapon-shaft and lantern-rim bindings are tested.
+
+## Ring-only champion ownership — owner amendment, 2026-11-01
+
+All 68 registered kinds and their five forms remove body affiliation plaques,
+ribbons and generic tabards. Real equipment uses fixed intrinsic materials;
+body meshes are cached once and shared by both seats. Blue/red ground rings
+carry ownership, including during Root/Slow; those effects use HUD badges.
+This amendment applies equally to Linux, Windows and desktop web, portraits,
+Shop/Troops/Training/Practice, carried units, summons, Victory and Death.
+The owner explicitly replaced the older body-team-color instruction in
+ART-DIRECTION §2. New physical badges or seat-dependent body recoloring are
+forbidden. Updated Linux captures/installation are in progress; packaged
+Windows/desktop-web and both-seat motion comparisons remain pending.

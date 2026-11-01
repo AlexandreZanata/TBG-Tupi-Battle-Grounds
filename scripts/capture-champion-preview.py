@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import time
@@ -15,7 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def capture(binary, scratch, kind, lineup):
-    slug = next(c['id'] for c in json.loads((ROOT / 'docs/champion-completion/catalog.json').read_text())['champions'] if c['kind'] == kind)
+    catalog = json.loads((ROOT / 'docs/champion-completion/catalog.json').read_text())['champions']
+    slug = next((c['id'] for c in catalog if c['kind'] == kind), kind.lower())
     width, height = (1600, 1000) if lineup else (400, 400)
     png = scratch / f'{slug}{"-lineup" if lineup else "-portrait"}.png'
     env = {k:v for k,v in os.environ.items() if not k.startswith("TBG_")}
@@ -55,13 +57,20 @@ def main():
     parser.add_argument('--binary', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--kinds', nargs='*')
+    parser.add_argument('--all-portraits', action='store_true', help='Refresh every registered non-Crate portrait, plus the seventeen new lineups')
     args = parser.parse_args()
     binary = args.binary.resolve()
     scratch = args.output.resolve()
     scratch.mkdir(parents=True, exist_ok=True)
     info = json.loads(subprocess.check_output([str(binary),'--build-info'], text=True))
     catalog = json.loads((ROOT / 'docs/champion-completion/catalog.json').read_text())['champions']
-    kinds = args.kinds or [c['kind'] for c in catalog]
+    new_kinds = [c['kind'] for c in catalog]
+    if args.all_portraits:
+        source = (ROOT / 'crates/tbg-core/src/types.rs').read_text()
+        pool = re.search(r'ALL_KINDS: \[UnitKind; \d+\] = \[([\s\S]*?)\];', source)[1]
+        kinds = [k for k in re.findall(r'UnitKind::(\w+)', pool) if k != 'Crate']
+    else:
+        kinds = args.kinds or new_kinds
     report = {'build': info, 'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
               'os': platform.platform(), 'surface': 'Linux X11/Xvfb; actual Bevy native render',
               'parity': 'Windows/desktop web unverified', 'captures': []}
@@ -72,7 +81,7 @@ def main():
             raise SystemExit('Choose a fresh output directory for a different executable')
         report=previous
     for kind in kinds:
-        for lineup in [False, True]:
+        for lineup in ([False, True] if kind in new_kinds else [False]):
             mode='lineup: idle/walk/attack' if lineup else 'base portrait'
             cached=next((c for c in report['captures'] if c['kind']==kind and c['mode']==mode),None)
             if cached and (scratch/cached['image']).exists() and hashlib.sha256((scratch/cached['image']).read_bytes()).hexdigest()==cached['sha256']:

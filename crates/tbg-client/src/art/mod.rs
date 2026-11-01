@@ -24,6 +24,8 @@ pub mod kits;
 mod legacy;
 pub mod melee;
 pub mod mesh;
+#[cfg(test)]
+mod ownership_tests;
 pub mod palette;
 pub mod presentation;
 pub mod rig;
@@ -43,18 +45,14 @@ pub struct FigureForm {
     pub meshes: [Option<Handle<Mesh>>; NODE_COUNT],
     pub triangles: usize,
     pub native: bool,
-    enemy_meshes: Option<[Option<Handle<Mesh>>; NODE_COUNT]>,
     /// Unlit glow layer per joint (`figure::spawn_glow`), shared by both teams.
     pub glow: [Option<Handle<Mesh>>; NODE_COUNT],
 }
 
 impl FigureForm {
-    pub fn meshes(&self, own: bool) -> &[Option<Handle<Mesh>>; NODE_COUNT] {
-        if own {
-            &self.meshes
-        } else {
-            self.enemy_meshes.as_ref().unwrap_or(&self.meshes)
-        }
+    /// Ownership never recolors body geometry; the floor ring supplies that information.
+    pub fn meshes(&self, _own: bool) -> &[Option<Handle<Mesh>>; NODE_COUNT] {
+        &self.meshes
     }
 }
 
@@ -124,7 +122,7 @@ fn build_library(
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
             if let Some(kit) = kits::kit(kind) {
-                let form = native_form((kit.figure)(tier, branch), &mut meshes, true);
+                let form = native_form((kit.figure)(tier, branch), &mut meshes);
                 info!(
                     "figure {kind:?} {tier}/{branch} (kit): {} triangles, {} glow joints",
                     form.triangles,
@@ -138,7 +136,6 @@ fn build_library(
                 let form = native_form(
                     roster::humans::shieldbearer_v2::spec(tier, branch),
                     &mut meshes,
-                    true,
                 );
                 info!(
                     "figure Shieldbearer {tier}/{branch} (v2): {} triangles, {} mesh joints",
@@ -153,7 +150,6 @@ fn build_library(
                 let form = native_form(
                     roster::undead::bone_brute_v2::spec(tier, branch),
                     &mut meshes,
-                    true,
                 );
                 info!(
                     "figure BoneBrute {tier}/{branch} (v2): {} triangles, {} mesh joints",
@@ -165,11 +161,7 @@ fn build_library(
                 continue;
             }
             if kind == UnitKind::Hexer {
-                let form = native_form(
-                    roster::undead::hexer_v2::spec(tier, branch),
-                    &mut meshes,
-                    true,
-                );
+                let form = native_form(roster::undead::hexer_v2::spec(tier, branch), &mut meshes);
                 info!(
                     "figure Hexer {tier}/{branch} (v2): {} triangles, {} mesh joints",
                     form.triangles,
@@ -180,11 +172,8 @@ fn build_library(
                 continue;
             }
             if kind == UnitKind::Sawbot {
-                let form = native_form(
-                    roster::machines::sawbot_v2::spec(tier, branch),
-                    &mut meshes,
-                    true,
-                );
+                let form =
+                    native_form(roster::machines::sawbot_v2::spec(tier, branch), &mut meshes);
                 info!(
                     "figure Sawbot {tier}/{branch} (v2): {} triangles, {} mesh joints",
                     form.triangles,
@@ -198,7 +187,6 @@ fn build_library(
                 let form = native_form(
                     roster::machines::siege_walker_v2::spec(tier, branch),
                     &mut meshes,
-                    true,
                 );
                 info!(
                     "figure SiegeWalker {tier}/{branch} (v2): {} triangles, {} mesh joints",
@@ -213,7 +201,6 @@ fn build_library(
                 let form = native_form(
                     roster::machines::rampart_v2::spec(tier, branch),
                     &mut meshes,
-                    true,
                 );
                 info!(
                     "figure Rampart {tier}/{branch} (v2): {} triangles, {} mesh joints",
@@ -228,7 +215,6 @@ fn build_library(
                 let form = native_form(
                     roster::plants::bloomkeeper_v2::spec(tier, branch),
                     &mut meshes,
-                    true,
                 );
                 info!(
                     "figure Bloomkeeper {tier}/{branch} (v2): {} triangles, {} mesh joints",
@@ -243,7 +229,6 @@ fn build_library(
                 let form = native_form(
                     roster::plants::rootcaller_v2::spec(tier, branch),
                     &mut meshes,
-                    true,
                 );
                 info!(
                     "figure Rootcaller {tier}/{branch} (v2): {} triangles, {} mesh joints",
@@ -255,11 +240,7 @@ fn build_library(
                 continue;
             }
             if kind == UnitKind::Nester {
-                let form = native_form(
-                    roster::plants::nester_v2::spec(tier, branch),
-                    &mut meshes,
-                    true,
-                );
+                let form = native_form(roster::plants::nester_v2::spec(tier, branch), &mut meshes);
                 info!(
                     "figure Nester {tier}/{branch} (v2): {} triangles, {} mesh joints",
                     form.triangles,
@@ -270,11 +251,8 @@ fn build_library(
                 continue;
             }
             if kind == UnitKind::Beetling {
-                let form = native_form(
-                    roster::plants::beetling_v2::spec(tier, branch),
-                    &mut meshes,
-                    true,
-                );
+                let form =
+                    native_form(roster::plants::beetling_v2::spec(tier, branch), &mut meshes);
                 info!(
                     "figure Beetling {tier}/{branch} (v2): {} triangles, {} mesh joints",
                     form.triangles,
@@ -298,7 +276,6 @@ fn build_library(
                     meshes: handles,
                     triangles,
                     native: false,
-                    enemy_meshes: None,
                     glow: Default::default(),
                 },
             );
@@ -308,7 +285,7 @@ fn build_library(
     let blockouts = ALL_KINDS
         .into_iter()
         .map(|kind| {
-            let form = native_form(roster::blockout::spec(kind), &mut meshes, false);
+            let form = native_form(roster::blockout::spec(kind), &mut meshes);
             info!("blockout {kind:?}: {} triangles", form.triangles);
             (kind, form)
         })
@@ -330,7 +307,7 @@ fn build_library(
             ((t, b), parts)
         })
         .collect();
-    let training_dummy = native_form(training_dummy::spec(), &mut meshes, false);
+    let training_dummy = native_form(training_dummy::spec(), &mut meshes);
     commands.insert_resource(FigureLibrary {
         training_dummy,
         shells,
@@ -342,7 +319,7 @@ fn build_library(
     });
 }
 
-fn native_form(mut spec: figure::FigureSpec, meshes: &mut Assets<Mesh>, team: bool) -> FigureForm {
+fn native_form(spec: figure::FigureSpec, meshes: &mut Assets<Mesh>) -> FigureForm {
     let built = figure::build_joint_meshes(&spec);
     let glow = figure::build_glow_meshes(&spec);
     let triangles = built
@@ -353,20 +330,11 @@ fn native_form(mut spec: figure::FigureSpec, meshes: &mut Assets<Mesh>, team: bo
         .sum();
     let handles = built.map(|m| m.map(|m| meshes.add(m)));
     let glow = glow.map(|m| m.map(|m| meshes.add(m)));
-    let enemy_meshes = team.then(|| {
-        for p in &mut spec.parts {
-            if p.color == palette::ALLY {
-                p.color = palette::ENEMY;
-            }
-        }
-        figure::build_joint_meshes(&spec).map(|m| m.map(|m| meshes.add(m)))
-    });
     FigureForm {
         plan: spec.plan,
         meshes: handles,
         triangles,
         native: true,
-        enemy_meshes,
         glow,
     }
 }

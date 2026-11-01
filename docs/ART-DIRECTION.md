@@ -30,15 +30,22 @@
 - **Color:** vertex colors from the palette only (no textures for units).
   Each material slot uses three values: base, shade (−18 % value), light
   (+12 % value) baked by height/normal. Saturation is reserved for faction
-  accents and team colors.
+  accents; team colors are reserved for ground identity rings/HUD.
 - **Light:** one warm key light (`#FFE9C7`), sky/ground ambient
   (`#A9C8E8` / `#6B5A43`), soft fog. A rim term (fresnel, shader-free
   approximation via vertex light baking on silhouettes) keeps figures
   separated from the ground.
-- **Team identity (readability, never optional):** tabard/plume/banner
-  slots use the team color — ally `#3FA9F5`, enemy `#F2545B` — plus a
-  ground ring (ally solid, enemy notched) so color-blind players read it
-  by shape too.
+- **Team identity — owner rule, 2026-11-01 (never optional):** ally/enemy
+  separation uses the blue (`#3FA9F5`) and red (`#F2545B`) ground rings at
+  the feet, plus existing HUD semantics. Champion bodies, armor, clothing,
+  weapons and all Evolution forms must be identical for both seats.
+  Never add affiliation plaques, colored squares, armbands, generic team
+  tabards or body labels. Remove the geometry, not merely its blue paint.
+  Intrinsic faction/character colors remain authored and seat-independent;
+  navy Celestial cloth and turquoise Monster organs are not ownership marks.
+  Temporary combat feedback remains authoritative and distinct from ownership.
+  Control statuses must not overwrite the blue/red identity ring.
+
 
 ## 3. Palette (start values; P15 locks them)
 
@@ -49,7 +56,7 @@
 | Machines — *The Ironworks* | iron `#4A5058` | brass `#B5893B` | forge glow `#FF8A3D` | leather `#5C3B26`; ogre skin `#8C9A6B` |
 | Plants — *The Wildwood* | bark `#6B4F2E` | moss `#4E9F3D` | bloom `#F28AB2` | amber sap `#F2B544` |
 | Monsters — *The Pit* (Proposed, D-64) | charcoal `#2E3033` | dark `#2A2430` | turquoise `#2BB3A8` | bone `#F1EBDD`; gunmetal hide `#4A5058` |
-| Celestials — *The Halo* (Proposed, D-64) | ivory `#F1EBDD` | navy `#1F2F5A` | gold `#D9B44A` | dark blue cloth; team tabard |
+| Celestials — *The Halo* (Proposed, D-64) | ivory `#F1EBDD` | navy `#1F2F5A` | gold `#D9B44A` | dark blue faction cloth; no team tabard |
 | Insects — *The Hive* (Proposed, D-64) | moss `#5C6B2E` | chitin `#2C2A1E` | amber `#D98E2B` | linen `#E6D8B8`; ogre skin `#8C9A6B` |
 | Environment | grass `#7BB661` | road `#C9A46A` | water `#3FA7B5` | stone `#B9B2A3`, timber `#8A6A44`, sky top `#7FB8E6` → horizon `#E8D9B5` |
 | UI | parchment `#EFE3C6` | ink `#2B2118` | gold `#C9A13B` | iron frame `#3A3F45`, danger `#C0392B`, ok `#3E8E41` |
@@ -108,7 +115,7 @@ D-31): an Evolution must read at match distance without zooming. Every tier
 changes at least three things: (1) scale — tier 1 +8 %, tier 2 +16 % over
 the base form; (2) a large-surface color or material change (cloak, hood,
 armor plates — not only a trim); (3) a new silhouette piece. Tier 2 also
-carries the branch's signature artifact with an accent glow (gold or team
+carries the branch's signature artifact with an accent glow (gold or faction
 color). Branch A reads defensive/precise, branch B offensive/area. Check:
 on the 1280×800 lineup at match-camera distance a tester names base,
 tier 1, and tier 2 of every unit correctly.
@@ -246,7 +253,7 @@ To ensure tier progression reads instantly without zooming (D-31), every evoluti
 4. **Branch Identity & Signature Artifact:**
    - **Branch A (Defensive / Precision):** Reinforced armor pieces, tower shields, extended weapon lengths, balanced symmetric silhouettes.
    - **Branch B (Offensive / Area / Havoc):** Aggressive asymmetry, dual weapons, heavy warheads, spiked appendages, or auxiliary quivers/censers.
-   - **Tier 2 Signature Artifact:** Must carry the branch's capstone artifact displaying a subtle emissive glow (gold `#D9B44A` or faction/team accent).
+   - **Tier 2 Signature Artifact:** Must carry the branch's capstone artifact displaying a subtle emissive glow (gold `#D9B44A` or faction accent).
 
 ### 11.4 Detail density and rendering rules
 
@@ -268,3 +275,11 @@ Before signing off on any troop, strongpoint, or arena asset, verify the 6-point
 ## Owner-approved maritime scenery follow-up (2026-10-30)
 
 The original arena geometry/camera remains fixed. Procedural offshore isles, lighthouse, pier, sailboat and a small cascade enrich the surroundings; batched vertex-colored azure water and broken foam provide depth. The main arena keeps one warm key and cool fill, one 1024 shadow map/cascade. Offshore objects share existing PBR materials and skip shadow casting/receiving; no texture or custom water shader is introduced. The owner approved the displayed design and the specific 12.9 ms reference-case p95 acceptance bound. See [implementation, measurements and scope](art/ARENA-SEASCAPE.md) and [versioned acceptance criteria](art/ARENA-SEASCAPE-PERFORMANCE.json); broader device/download budgets remain unchanged.
+
+### Champion body ownership checklist (owner, 2026-11-01)
+
+- No blue/red affiliation plaques or generic identification geometry on bodies.
+- Own and opposing versions share the exact same body mesh/material cache.
+- All five forms preserve this rule, including carried/summoned champions.
+- Ground rings retain team identity while Root/Slow appear in HUD status badges.
+- Portraits come from the corrected engine models; do not paint over old badges.

@@ -79,12 +79,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             CHITIN,
             [s * 0.34, -0.03, 0.0],
         ));
-        v.push(part(
-            Body(Hips),
-            Box(0.035, 0.13, 0.35),
-            ALLY,
-            [s * 0.415, 0.01, 0.0],
-        ));
+
         for z in [-0.30, -0.15, 0.0, 0.15, 0.30] {
             v.push(
                 part(Body(Hips), Cyl(0.07, 0.15), BRASS, [s * 0.34, -0.03, z])

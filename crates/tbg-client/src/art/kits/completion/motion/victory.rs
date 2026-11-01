@@ -119,9 +119,9 @@ fn starbreaker(m: &Moment, p: &mut Pose, b: &crate::art::rig::Proportions) {
     shaft_pose(
         p,
         b,
-        Vec3::new(0.0, 0.12 + 0.06 * s.max(0.0), 0.13),
-        Quat::from_rotation_x(-1.05 - 0.20 * s.max(0.0)),
-        0.20,
+        Vec3::new(0.0, 0.17 + 0.06 * s.max(0.0), 0.10),
+        Quat::from_rotation_x(-0.10 - 0.35 * s.max(0.0)),
+        0.13,
     );
     tools::set(p, FootL, [-10.0 * s.max(0.0), 0.0, 0.0]);
     tools::set(p, FootR, [-10.0 * (-s).max(0.0), 0.0, 0.0]);

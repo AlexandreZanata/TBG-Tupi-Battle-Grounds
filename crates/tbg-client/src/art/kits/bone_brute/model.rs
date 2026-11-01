@@ -122,22 +122,7 @@ fn legs(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 /// Team rag tied round the left arm and a team hem on the cape: the side
 /// reads from the match camera.
 fn colors(v: &mut Vec<PartSpec>) {
-    v.extend([
-        part(Body(UpperArmL), Box(0.1, 0.06, 0.1), ALLY, [0.0, -0.1, 0.0]),
-        part(
-            Body(UpperArmL),
-            Box(0.03, 0.12, 0.02),
-            ALLY,
-            [0.04, -0.17, -0.04],
-        )
-        .rot([0.0, 0.0, 12.0]),
-        part(
-            Secondary(Spring::Back),
-            Box(0.43, 0.06, 0.025),
-            ALLY,
-            [0.0, -0.32, -0.04],
-        ),
-    ]);
+    v.extend([]);
 }
 
 fn pelvis(v: &mut Vec<PartSpec>, f: Form) {
