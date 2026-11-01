@@ -39,7 +39,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         boots: DARK_LEATHER,
     };
     body::humanoid(&mut v, &p, &look);
-    body::tunic(&mut v, &p, TRIM, DARK_LEATHER, LEATHER);
+    body::tunic(&mut v, &p, RUST, TRIM, DARK_LEATHER);
     body::tabard(&mut v, &p, 0.15, 0.36, None);
     body::bracers(&mut v, &p, LEATHER);
     armor(&mut v, &p, f);
@@ -50,6 +50,15 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
 
 fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     let h = p.torso.y;
+    // Padded shoulder panels distinguish the polearm infantry from plate defenders.
+    for arm in [UpperArmL, UpperArmR] {
+        v.push(part(
+            Body(arm),
+            Pill(0.074, 0.045),
+            RUST,
+            [0.0, -0.035, 0.0],
+        ));
+    }
     // Quilted gambeson ribs.
     for y in [0.3, 0.55, 0.8] {
         v.push(part(
