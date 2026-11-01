@@ -74,6 +74,8 @@ fn ours(action: &UiAction) -> bool {
     matches!(
         action,
         UiAction::UpdateNow
+            | UiAction::UpdateCheck
+            | UiAction::UpdateOpen
             | UiAction::UpdateLater
             | UiAction::UpdateCancel
             | UiAction::UpdateRestart

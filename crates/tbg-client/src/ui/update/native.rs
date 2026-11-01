@@ -41,6 +41,7 @@ pub(super) fn plugin(app: &mut App) {
             pump,
             pause_online_download,
             super::view::overlay,
+            super::view::badge,
         )
             .chain(),
     );
@@ -188,6 +189,15 @@ fn on_event(updater: &mut Updater, command: &str, e: Value) {
             }
         }
         ("check", Some("status")) if text(&e, "state") == "available" => {
+            crate::platform::storage::set(
+                crate::platform::storage::Scope::Session,
+                "update.required",
+                if e.get("required").and_then(Value::as_bool) == Some(true) {
+                    "1"
+                } else {
+                    "0"
+                },
+            );
             updater.state = UpdState::Available {
                 build: text(&e, "build"),
                 version: text(&e, "version"),
@@ -243,6 +253,12 @@ pub(super) fn apply(
     exit: &mut MessageWriter<AppExit>,
 ) {
     match action {
+        UiAction::UpdateCheck if updater.idle => {
+            updater.inner.last_check = None;
+            updater.snoozed = None;
+            updater.state = UpdState::Checking;
+        }
+        UiAction::UpdateOpen if updater.idle => updater.snoozed = None,
         UiAction::UpdateLater => match &updater.state {
             UpdState::Available { build, .. } => updater.snoozed = Some(build.clone()),
             UpdState::Staged { version } => updater.snoozed = Some(version.clone()),

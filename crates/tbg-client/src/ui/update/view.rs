@@ -207,3 +207,50 @@ pub(super) fn overlay(
             });
         });
 }
+
+#[derive(Component)]
+pub(super) struct UpdateBadge;
+
+/// Later leaves an accessible non-modal way back to the verified update.
+pub(super) fn badge(
+    mut commands: Commands,
+    updater: Res<Updater>,
+    lang: Res<Lang>,
+    roots: Query<Entity, With<UpdateBadge>>,
+    mut shown: Local<String>,
+) {
+    let wanted = updater.idle
+        && updater.snoozed.is_some()
+        && matches!(
+            updater.state,
+            UpdState::Available { .. } | UpdState::Staged { .. }
+        );
+    let signature = format!("{wanted}:{}", lang.key("update.open"));
+    if signature == *shown {
+        return;
+    }
+    *shown = signature;
+    for entity in &roots {
+        commands.entity(entity).despawn();
+    }
+    if wanted {
+        commands
+            .spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: px(118.),
+                    justify_self: JustifySelf::Center,
+                    ..default()
+                },
+                GlobalZIndex(80),
+                UpdateBadge,
+            ))
+            .with_children(|root| {
+                root.spawn(kit::button(
+                    lang.key("update.open"),
+                    UiAction::UpdateOpen,
+                    280.,
+                ));
+            });
+    }
+}

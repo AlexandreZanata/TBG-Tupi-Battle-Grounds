@@ -148,6 +148,10 @@ pub enum UiAction {
     #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
     UpdateNow,
     #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateCheck,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateOpen,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
     UpdateLater,
     #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
     UpdateCancel,

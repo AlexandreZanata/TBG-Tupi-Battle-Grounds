@@ -1415,5 +1415,7 @@
   "patches.preview": "Preview · Competitive values still require owner playtesting.",
   "patches.ruleset": "Ruleset",
   "patches.read": "Patch notes",
-  "update.resume.temporary": "Session recovery is temporary: the secure vault is unavailable. Keep this window open to preserve reconnect."
+  "update.resume.temporary": "Session recovery is temporary: the secure vault is unavailable. Keep this window open to preserve reconnect.",
+  "update.check": "Check for updates",
+  "update.open": "Update available · Open"
 }
