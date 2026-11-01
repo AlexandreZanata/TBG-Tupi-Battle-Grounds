@@ -158,7 +158,19 @@ fn capture(
     #[cfg(target_os = "linux")] match_info: Res<crate::sync::MatchInfo>,
     #[cfg(target_os = "linux")] loading: Res<crate::ui::native_loading::Status>,
     mut started: Local<bool>,
+    mut ready_at: Local<Option<f32>>,
 ) {
+    #[cfg(target_os = "linux")]
+    {
+        if !loading.boot_ready || loading.scene_waiting {
+            *ready_at = None;
+            return;
+        }
+        let ready = *ready_at.get_or_insert(time.elapsed_secs());
+        if time.elapsed_secs() - ready < 0.8 {
+            return;
+        }
+    }
     let delay = crate::config::url_param("capture_after")
         .and_then(|s| s.parse::<f32>().ok())
         .unwrap_or(8.0)
