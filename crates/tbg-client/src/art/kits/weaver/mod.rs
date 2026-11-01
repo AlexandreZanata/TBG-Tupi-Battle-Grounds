@@ -58,8 +58,8 @@ fn pose(m: &Moment, p: &mut Pose) {
                 tools::set(p, *j, [0.0, s * k * 18.0, 0.0]);
                 tools::shift(p, *j, [0.0, k.max(0.0) * 0.045, 0.0]);
             }
-            tools::set(p, Chest, [0.0, phase.sin() * -3.0, phase.sin() * 1.5]);
-            tools::set(p, Head, [0.0, phase.sin() * 2.0, 0.0]);
+            // Keep the longitudinal body/head axis aligned with the lane while stepping.
+            tools::set(p, Chest, [0.0, 0.0, phase.sin() * 1.5]);
         }
         Clip::AttackMelee | Clip::AttackRanged | Clip::Cast => cast(m.t, p),
         Clip::Hit => tools::shift(

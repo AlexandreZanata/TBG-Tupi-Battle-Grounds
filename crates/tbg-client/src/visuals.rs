@@ -243,7 +243,10 @@ fn spawn_form_visual(
     let mesh = |m: &Handle<Mesh>, mat: &Handle<StandardMaterial>, t: Transform| {
         (Mesh3d(m.clone()), MeshMaterial3d(mat.clone()), t)
     };
-    let base_yaw = if matches!(look.kind, UnitKind::Bonehorn | UnitKind::Drillnest) {
+    let base_yaw = if matches!(
+        look.kind,
+        UnitKind::Bonehorn | UnitKind::Drillnest | UnitKind::Weaver
+    ) {
         if look.own {
             std::f32::consts::FRAC_PI_2
         } else {

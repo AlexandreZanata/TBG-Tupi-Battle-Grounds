@@ -29,7 +29,8 @@ pub fn plan(t: u8) -> Proportions {
 pub fn parent(n: Node) -> Option<Node> {
     match n {
         Body(j) if LEGS.iter().any(|p| p.0 == j) => Some(Body(Hips)),
-        Body(Chest) | Body(Head) => Some(Body(Hips)),
+        Body(Chest) => Some(Body(Hips)),
+        Body(Head) => Some(Body(Chest)),
         Prop(Socket::WeaponR) => Some(Body(Head)),
         Secondary(_) => Some(Body(Chest)),
         _ => n.parent(),
@@ -44,7 +45,8 @@ pub fn rest(n: Node, p: &Proportions) -> Vec3 {
     match n {
         Body(Hips) => Vec3::new(0.0, 0.31, 0.0),
         Body(Chest) => Vec3::new(0.0, 0.06, -0.18),
-        Body(Head) => Vec3::new(0.0, -0.04, 0.25),
+        // Preserve the head's rest position while inheriting the body's motion.
+        Body(Head) => Vec3::new(0.0, -0.10, 0.43),
         Prop(Socket::WeaponR) => Vec3::new(0.0, 0.0, 0.11),
         Secondary(_) => Vec3::ZERO,
         _ => rig::rest(n, p),
@@ -61,6 +63,9 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             [0.0, 0.0, -0.08],
         )
         .scale([1.0, 0.8, 1.2]),
+        // A low cephalothorax and overlapping collar close the old exposed gap.
+        part(Body(Chest), Ball(0.15), CHITIN, [0.0, -0.06, 0.20]).scale([1.05, 0.70, 1.20]),
+        part(Body(Head), Ball(0.10), CHITIN, [0.0, 0.0, -0.09]).scale([1.15, 0.80, 1.40]),
         part(Body(Head), Ball(0.14), CHITIN, [0.0, 0.0, 0.0]).scale([1.2, 0.6, 1.0]),
         part(
             Body(Chest),
