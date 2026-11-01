@@ -1,0 +1,1032 @@
+{
+  "status": "Proposed; implementation and measured validation pending",
+  "baseline_commit": "0e23a1ac2f601b182bcfcc03b25acce76e69f962",
+  "owner_scope": "All 17 champions; initial five-form low-poly images, then scoped implementation, validation and local Linux installation. No push or public deployment.",
+  "form_order": [
+    "BASE",
+    "A1",
+    "A2",
+    "B1",
+    "B2"
+  ],
+  "scale_contract": [
+    1,
+    1.08,
+    1.16,
+    1.08,
+    1.16
+  ],
+  "stat_columns": [
+    "cost_energy",
+    "hp",
+    "basic_damage",
+    "interval_ticks",
+    "range_millitiles",
+    "move_millitiles_per_tick"
+  ],
+  "champions": [
+    {
+      "id": "gravecutter",
+      "code": "CC01",
+      "name": {
+        "en": "Gravecutter",
+        "pt": "Ceifador de Correntes"
+      },
+      "faction": "Undead",
+      "archetype": "DPS",
+      "default_skin": {
+        "en": "Barrow Duelist",
+        "pt": "Duelista do Túmulo"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Gravetaker",
+          "pt": "Coveiro",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Final Harvester",
+          "pt": "Ceifador Final",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Chain Dancer",
+          "pt": "Dançarino de Correntes",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Soul Reaver",
+          "pt": "Ceifador de Almas",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Gravecutter",
+      "shape": "Exposed skull, narrow split fencing jacket, curved forearm blade and compact chain; no hood or staff.",
+      "weapon": "Short articulated chain crescent; chain stays coiled near the forearm between attacks.",
+      "projectile": "None; one small crescent contact streak, never a simulated ranged attack.",
+      "idle": "Checks the wrist chain and tilts the bare skull; jacket tails counter-sway.",
+      "walk": "Quick heel-to-toe fencing steps, chain wrist tucked; no sliding or long swinging chain.",
+      "attack": "Coils wrist, diagonal hook at the authoritative hit, then reels the blade back close.",
+      "special": "A short green crescent tightens at the blade when the target qualifies for the finisher.",
+      "victory": "Two heel taps, wrist-chain twirl held vertically, blade-over-heart bow.",
+      "death": "Knees fold in sequence; chain slackens, blade settles beside the body; soul clasp dims.",
+      "space": "Tall narrow crescent profile; chain does not contribute to idle lateral radius; jacket is above the feet.",
+      "stats": [
+        4,
+        300,
+        48,
+        24,
+        800,
+        54
+      ]
+    },
+    {
+      "id": "lastlight-cantor",
+      "code": "CC02",
+      "name": {
+        "en": "Lastlight Cantor",
+        "pt": "Cantora do Último Sino"
+      },
+      "faction": "Undead",
+      "archetype": "Support",
+      "default_skin": {
+        "en": "Mourning Bell",
+        "pt": "Sino de Luto"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Vigil Bell",
+          "pt": "Sino da Vigília",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Sanctuary Bell",
+          "pt": "Sino do Santuário",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Funeral Choir",
+          "pt": "Coro Fúnebre",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Last Requiem",
+          "pt": "Último Réquiem",
+          "scale": 1.16
+        }
+      ],
+      "kind": "LastlightCantor",
+      "shape": "Bare skull in front of a mourning fan, bell-shaped skirt and one large handbell; no wizard hood or pole.",
+      "weapon": "Broad bronze handbell with one rigid clapper socket.",
+      "projectile": "Soft green bell ripple travels from the bell to the healed ally; echo uses a single small wrist glyph.",
+      "idle": "Bell breath-sway and gentle free-hand finger opening.",
+      "walk": "Short processional steps; bell lags the shoulder and the fan stays vertical.",
+      "attack": "Raises bell, sounds one measured toll, then presents the free palm toward the patient.",
+      "special": "Echo rune closes once when nonlethal HP damage consumes it; no resurrection or death cancellation.",
+      "victory": "Three alternating bell swings, two small side steps and a ceremonial fan bow.",
+      "death": "Kneels holding the bell upright; clapper stops last and the head bows into the fan.",
+      "space": "Vertical fan and chest-level bell; skirt hem stays above feet and does not spread into adjacent figures.",
+      "stats": [
+        3,
+        280,
+        0,
+        32,
+        2800,
+        40
+      ]
+    },
+    {
+      "id": "cragclaw",
+      "code": "CC03",
+      "name": {
+        "en": "Cragclaw",
+        "pt": "Garra-de-Basalto"
+      },
+      "faction": "Monsters",
+      "archetype": "DPS",
+      "default_skin": {
+        "en": "Obsidian Prow",
+        "pt": "Proa de Obsidiana"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Edgeclaw",
+          "pt": "Garra Afiada",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Obsidian Chisel",
+          "pt": "Cinzel de Obsidiana",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Splitclaw",
+          "pt": "Garra Fendida",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Shardsweeper",
+          "pt": "Varredor de Estilhaços",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Cragclaw",
+      "shape": "Lean wedge-shaped lizard, small hornless head, one broad chisel forearm and one tiny balancing arm.",
+      "weapon": "One asymmetric slab claw; broad planar cutting edge rather than two identical weapons.",
+      "projectile": "None; short flat turquoise shard fan at melee contact, capped and immediately fading.",
+      "idle": "Lowers the small shoulder, flexes the single heavy claw and balances with the tail.",
+      "walk": "Uneven quick stride with a counter-rotating small arm; weight never reads as a Tank.",
+      "attack": "Low compact slash; empowered sweep has visible shoulder coil and a longer recovery.",
+      "special": "A shallow wedge on the ground marks the local sweep; no displacement or stun.",
+      "victory": "Three claw-tip ground taps followed by a compact shoulder shimmy.",
+      "death": "Heavy claw touches first; narrow body folds behind it and head rests on its edge.",
+      "space": "Claw carried along forward lane axis; attack arc is local and not an oversized horizontal disk.",
+      "stats": [
+        4,
+        340,
+        44,
+        26,
+        850,
+        50
+      ]
+    },
+    {
+      "id": "hushfang",
+      "code": "CC04",
+      "name": {
+        "en": "Hushfang",
+        "pt": "Presa Silenciosa"
+      },
+      "faction": "Monsters",
+      "archetype": "DPS",
+      "default_skin": {
+        "en": "Quiet Hunt",
+        "pt": "Caçada Silenciosa"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Silent Prowler",
+          "pt": "Espreitador Silencioso",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Fang Warden",
+          "pt": "Guardião das Presas",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Flint Hunter",
+          "pt": "Caçador de Sílex",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Midnight Pounce",
+          "pt": "Bote da Meia-noite",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Hushfang",
+      "shape": "Low long-backed four-legged panther-lizard, broad saber fangs and swept ears; never a humanoid werewolf.",
+      "weapon": "Jaw and paired saber fangs; tail is a rearward visual counterweight.",
+      "projectile": "None; one small fang flash on the charged first melee hit.",
+      "idle": "Alternating forepaw knead, small ear turns and slow tail coil.",
+      "walk": "Diagonal feline four-beat gait, head low; charge changes posture without added movement.",
+      "attack": "Draws the head back and bites at normal melee reach; no jump across targets.",
+      "special": "Fang bases acquire a restrained turquoise readiness glint, removed immediately by qualifying control.",
+      "victory": "Two front-paw steps, a grounded back stretch and a small head shake.",
+      "death": "Forelegs bend, chest settles, rear folds afterward; tail follows without a ragdoll.",
+      "space": "Longitudinal footprint with close-set feet; tail bends along the body axis instead of sweeping lateral lanes.",
+      "stats": [
+        4,
+        300,
+        46,
+        24,
+        800,
+        60
+      ]
+    },
+    {
+      "id": "spinehurler",
+      "code": "CC05",
+      "name": {
+        "en": "Spinehurler",
+        "pt": "Arremessa-Espinhos"
+      },
+      "faction": "Monsters",
+      "archetype": "Ranged",
+      "default_skin": {
+        "en": "Five-Quill Hunter",
+        "pt": "Caçador das Cinco Cerdas"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Keen Needle",
+          "pt": "Agulha Precisa",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Spine Lancer",
+          "pt": "Lanceiro de Espinhos",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Barbed Fan",
+          "pt": "Leque Farpado",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Needle Phalanx",
+          "pt": "Falange de Agulhas",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Spinehurler",
+      "shape": "Slim upright porcupine reptile with a vertical fan of five broad quills, round snout and upright throwing needle.",
+      "weapon": "One bone needle in hand and a compact dorsal supply fan; no bow or gun.",
+      "projectile": "Ivory straight needle with turquoise binding; empowered shot leaves a short narrow line to one secondary victim.",
+      "idle": "Selects one quill and checks its straightness; head makes short alert turns.",
+      "walk": "Light steps, vertical needle tucked and quill fan rigid over the back.",
+      "attack": "Overhand needle throw with a matching nocked prop hide/reload, release before impact.",
+      "special": "A second thin needle trace is shown only when the server reports a valid piercing secondary.",
+      "victory": "Balances the needle vertically, lets the quill fan ripple once and catches it.",
+      "death": "Needle lowers first, fan folds backward as the body sits and rolls slightly aside.",
+      "space": "Quills are tall rather than wide; needle remains upright outside attack and no infinite line trails.",
+      "stats": [
+        4,
+        260,
+        42,
+        34,
+        4200,
+        40
+      ]
+    },
+    {
+      "id": "mire-tender",
+      "code": "CC06",
+      "name": {
+        "en": "Mire Tender",
+        "pt": "Curandeiro do Brejo"
+      },
+      "faction": "Monsters",
+      "archetype": "Support",
+      "default_skin": {
+        "en": "Reed Broth",
+        "pt": "Caldo de Junco"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Brothkeeper",
+          "pt": "Guardião do Caldo",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Deep Remedy",
+          "pt": "Remédio Profundo",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Reed Tender",
+          "pt": "Zelador do Junco",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Mire Sage",
+          "pt": "Sábio do Brejo",
+          "scale": 1.16
+        }
+      ],
+      "kind": "MireTender",
+      "shape": "Squat toad with broad triangular head, shallow stone bowl and vertical spoon staff; no plant humanoid or mushrooms.",
+      "weapon": "Spoon-shaped reed and stone broth bowl; tools stay clear of the face.",
+      "projectile": "Single turquoise medicinal droplet; quiet regeneration is a small reed-shaped glyph, no large healing fog.",
+      "idle": "Slow throat breath, gentle bowl tilt and one wrist stir.",
+      "walk": "Short webbed-foot steps, bowl stabilized and spoon following the stride.",
+      "attack": "Scoops broth, tips the spoon and releases one droplet toward the patient.",
+      "special": "Regeneration glyph disappears on actual HP damage; protected hits do not invent damage.",
+      "victory": "Bowl-balanced two-step, three spoon stirs and a pleased throat bob.",
+      "death": "Protects the bowl, sits down, spoon slides to the ground and eyelids lower.",
+      "space": "Wide low head but short limbs; bowl is front-centered and reed staff is vertical, not a large lateral branch.",
+      "stats": [
+        3,
+        310,
+        0,
+        34,
+        2700,
+        38
+      ]
+    },
+    {
+      "id": "gorgehowl",
+      "code": "CC07",
+      "name": {
+        "en": "Gorgehowl",
+        "pt": "Rugido Oco"
+      },
+      "faction": "Monsters",
+      "archetype": "Control",
+      "default_skin": {
+        "en": "Cavern Resonance",
+        "pt": "Ressonância da Caverna"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Deep Resonator",
+          "pt": "Ressonador Profundo",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Quietbreaker",
+          "pt": "Quebra-silêncio",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Split Echo",
+          "pt": "Eco Bipartido",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Chasm Voice",
+          "pt": "Voz do Abismo",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Gorgehowl",
+      "shape": "Compact upright cave mole-bat, wide flat spade head, two vertical crescent ear trumpets and flat ribbed ivory sternum; short neck, no throat sac.",
+      "weapon": "Paired crescent ear trumpets and ribbed sternum; no handheld weapon.",
+      "projectile": "Short concentric turquoise sound wedges at the victim, not a traveling physical missile.",
+      "idle": "Ear fins alternate tiny listening tilts; short neck stays still.",
+      "walk": "Compact digitigrade steps, ear fins counterbalance close to the head.",
+      "attack": "Small jaw jab and one focused sound pulse; feet remain planted.",
+      "special": "Ear trumpets cant forward and the sternum contracts before a short interrupting cry.",
+      "victory": "Three silent ear-fan beats, alternating finger taps and one small proud head lift.",
+      "death": "Throat deflates first, hands meet the ground, long neck bows last.",
+      "space": "Crescent ears grow vertically; folded fins and a short tail stay within the resting shoulder envelope.",
+      "stats": [
+        4,
+        330,
+        18,
+        36,
+        1800,
+        42
+      ]
+    },
+    {
+      "id": "sunlancer",
+      "code": "CC08",
+      "name": {
+        "en": "Sunlancer",
+        "pt": "Lanceiro da Aurora"
+      },
+      "faction": "Celestials",
+      "archetype": "DPS",
+      "default_skin": {
+        "en": "First Light",
+        "pt": "Primeira Luz"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Dawn Point",
+          "pt": "Ponta da Aurora",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Sun Pact",
+          "pt": "Pacto Solar",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Ember Lance",
+          "pt": "Lança da Centelha",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Daybreak Oath",
+          "pt": "Juramento da Alvorada",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Sunlancer",
+      "shape": "Light spear fencer with triangular chest harness and narrow open sun crest; no shield or winged archer silhouette.",
+      "weapon": "Long solar spear with one clear spearhead; stows almost vertical between attacks.",
+      "projectile": "None; one gold spear contact glint and one small consumable spark glyph on the primary victim.",
+      "idle": "Rolls the spear grip and shifts to a balanced fencing guard.",
+      "walk": "Light high-knee approach with a compact vertical spear and fixed crest.",
+      "attack": "Linear planted-foot thrust, rear hand follows the haft and recoils exactly after contact.",
+      "special": "An ally melee strike consumes the single victim spark in one small gold cross-flash.",
+      "victory": "Four-step lance salute, shaft half-roll close to chest and a forward nod.",
+      "death": "Spear braces, knee touches, grip releases and crest tips forward.",
+      "space": "Long spear aligns with lane axis; no broad flag; crest is thin and vertical.",
+      "stats": [
+        4,
+        320,
+        44,
+        24,
+        1000,
+        52
+      ]
+    },
+    {
+      "id": "eclipse-dancer",
+      "code": "CC09",
+      "name": {
+        "en": "Eclipse Dancer",
+        "pt": "Duelista do Eclipse"
+      },
+      "faction": "Celestials",
+      "archetype": "DPS",
+      "default_skin": {
+        "en": "Divided Sky",
+        "pt": "Céu Dividido"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Sun Step",
+          "pt": "Passo Solar",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Zenith Blade",
+          "pt": "Lâmina do Zênite",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Moon Step",
+          "pt": "Passo Lunar",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Midnight Waltz",
+          "pt": "Valsa da Meia-noite",
+          "scale": 1.16
+        }
+      ],
+      "kind": "EclipseDancer",
+      "shape": "Compact athletic duelist, asymmetric short waist panels, split sun/moon halo and two strongly different curved blades.",
+      "weapon": "Gold solar saber right, ivory lunar crescent left; both remain close to the torso in crowds.",
+      "projectile": "None; gold or cool-ivory narrow contact crescent selected by the authoritative alternating counter.",
+      "idle": "Alternating blade grip checks; half-halo and waist panels overlap softly.",
+      "walk": "Cross-step fencing walk with no root spin and blades carried down at distinct angles.",
+      "attack": "Right solar cut alternates with left lunar hook; one actual hit per basic cycle.",
+      "special": "Lunar self-heal flash only follows actual unit HP damage, never shield damage or tower hits.",
+      "victory": "Two compact crossing steps, sun blade up and moon blade down, then reverses the pose.",
+      "death": "Blades cross protectively, knees fold and the half-halo settles close to the back.",
+      "space": "Blades describe compact forearm arcs; no world-yaw spinning or wide skirt.",
+      "stats": [
+        4,
+        290,
+        42,
+        22,
+        800,
+        56
+      ]
+    },
+    {
+      "id": "starbreaker",
+      "code": "CC10",
+      "name": {
+        "en": "Starbreaker",
+        "pt": "Martelo Estelar"
+      },
+      "faction": "Celestials",
+      "archetype": "DPS",
+      "default_skin": {
+        "en": "Caged Star",
+        "pt": "Estrela Enjaulada"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Starmaul",
+          "pt": "Marreta Estelar",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Constellation Breaker",
+          "pt": "Quebra-constelações",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Hammer Dance",
+          "pt": "Dança do Martelo",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Nova Forge",
+          "pt": "Forja da Nova",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Starbreaker",
+      "shape": "Lean connected ivory construct with one star inset face and huge two-handed crystal hammer; no skull or bulky Justiciar fists.",
+      "weapon": "Faceted star-cage hammer; heavy head carried above/along the forward axis.",
+      "projectile": "None; short gold/blue planar hammer impact; no meteor or persistent terrain effect.",
+      "idle": "Checks the hammer balance, exposed joints make tiny rigid settling motions.",
+      "walk": "Grounded deliberate stride with visibly counterweighted hammer; not the heavy Tank march.",
+      "attack": "Clear two-hand overhead anticipation, contact on Hit, visible recovery; no invented extra damage frames.",
+      "special": "A restrained star pressure glyph appears on eligible high-base-HP enemy hits.",
+      "victory": "Hammer rests vertically; two alternating heel lifts and one proud overhead half-raise.",
+      "death": "Hammer head touches ground, shoulders fold around shaft and star face dims.",
+      "space": "Large prop stays vertical in rest and follows a short overhead arc; body remains narrow.",
+      "stats": [
+        5,
+        330,
+        58,
+        34,
+        900,
+        44
+      ]
+    },
+    {
+      "id": "dawnmender",
+      "code": "CC11",
+      "name": {
+        "en": "Dawnmender",
+        "pt": "Tecelã da Alvorada"
+      },
+      "faction": "Celestials",
+      "archetype": "Support",
+      "default_skin": {
+        "en": "Held Sunrise",
+        "pt": "Alvorada nas Mãos"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Calm Lantern",
+          "pt": "Lanterna Serena",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Sanctuary Light",
+          "pt": "Luz do Santuário",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Battle Beacon",
+          "pt": "Farol de Batalha",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Dawn Chorus",
+          "pt": "Coro da Aurora",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Dawnmender",
+      "shape": "Short bell-shaped healer coat, exposed round face and a circular lantern held with both hands; no wizard staff or head halo.",
+      "weapon": "One chest-height sunrise lantern; hands grip separate fixed rim sockets.",
+      "projectile": "A compact warm light mote from the lantern; contextual heal bonus is a small bright lantern-rim pulse.",
+      "idle": "Gently cradles lantern and breathes; shoulder collar counter-sways.",
+      "walk": "Small steady steps; keeps the lantern level and turns the head toward the patient.",
+      "attack": "Raises the lantern a little, opens its shutters, sends one light mote and closes them.",
+      "special": "Front-pressure bonus is snapshotted at preparation; no permanent aura or unlimited enemy-count scaling.",
+      "victory": "Two-step lantern cradle dance, gentle dip and a short sunrise presentation.",
+      "death": "Kneels protecting the lantern, shutters close and the glow extinguishes last.",
+      "space": "Lantern stays within torso/front volume; collar is narrow, coat hem stays above ankles.",
+      "stats": [
+        3,
+        290,
+        0,
+        32,
+        2800,
+        40
+      ]
+    },
+    {
+      "id": "prismancer",
+      "code": "CC12",
+      "name": {
+        "en": "Prismancer",
+        "pt": "Prismante"
+      },
+      "faction": "Celestials",
+      "archetype": "Ranged",
+      "default_skin": {
+        "en": "True Alignment",
+        "pt": "Alinhamento Perfeito"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Keen Focus",
+          "pt": "Foco Preciso",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Crystal Needle",
+          "pt": "Agulha de Cristal",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Open Prism",
+          "pt": "Prisma Aberto",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Triune Prism",
+          "pt": "Prisma Trino",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Prismancer",
+      "shape": "Angular short cape, geometric brow band and forearm-braced triangular prism; no tall staff, bow or halo.",
+      "weapon": "Gold fork and triangular crystal braced to right forearm; left fingertips adjust the focus.",
+      "projectile": "Basic tiny azure shard; special uses one thin fixed segment warning followed by a single bounded beam.",
+      "idle": "Turns the prism minutely and checks a short geometric sight line.",
+      "walk": "Measured cross-steps, prism braced close to shoulder and cape kept short.",
+      "attack": "Aligns fork, releases a single shard and restores the forearm guard.",
+      "special": "Warning segment is fixed at cast start and remains fixed; beam resolves once without tracking targets.",
+      "victory": "Traces a small triangle with the focus, shoulder sway and brief prism presentation.",
+      "death": "Prism lowers, left hand catches the fork and body folds to the side; crystal dims intact.",
+      "space": "Prism and cape are diagonal but close; beam is flat along the BattleLine rather than a screen-filling shaft.",
+      "stats": [
+        4,
+        250,
+        32,
+        30,
+        4000,
+        42
+      ]
+    },
+    {
+      "id": "leafcutter",
+      "code": "CC13",
+      "name": {
+        "en": "Leafcutter",
+        "pt": "Saúva-Lâmina"
+      },
+      "faction": "Insects",
+      "archetype": "DPS",
+      "default_skin": {
+        "en": "Serrated Mandible",
+        "pt": "Mandíbula Serrilhada"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Keen Mandible",
+          "pt": "Mandíbula Afiada",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Deep Serration",
+          "pt": "Serrilha Profunda",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Swift Saw",
+          "pt": "Serra Veloz",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Amber Reaper",
+          "pt": "Ceifadora de Âmbar",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Leafcutter",
+      "shape": "Ant with bent antennae, narrow waist, two tool arms and four planted legs; one serrated blade, no Mantis scythe arms.",
+      "weapon": "One flat mandible sword, teeth are broad geometric notches rather than tiny saw noise.",
+      "projectile": "None; compact serrated contact streak and existing bounded bleed indicator.",
+      "idle": "Antenna alternation and a small mandible sword test with no full-body sway.",
+      "walk": "Four-foot alternating ant gait; sword points along the lane and abdomen stays steady.",
+      "attack": "Low single serrated pull-cut; no extra hits from the tooth animation.",
+      "special": "Bleed uses the existing strongest refresh family and cleanup rules; no new venom stack.",
+      "victory": "Four-foot marching shuffle, antenna salute and a diagonal blade tap.",
+      "death": "Four legs tuck sequentially and sword rests on its flat side; antennae lower last.",
+      "space": "Additional feet tuck under the narrow thorax; blade is diagonal-forward rather than sideways.",
+      "stats": [
+        3,
+        260,
+        34,
+        22,
+        750,
+        56
+      ]
+    },
+    {
+      "id": "blastbeetle",
+      "code": "CC14",
+      "name": {
+        "en": "Blastbeetle",
+        "pt": "Besouro-Estalo"
+      },
+      "faction": "Insects",
+      "archetype": "DPS",
+      "default_skin": {
+        "en": "Volatile Amber",
+        "pt": "Âmbar Volátil"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Tight Carapace",
+          "pt": "Carapaça Ajustada",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Amber Heart",
+          "pt": "Coração de Âmbar",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Split Shell",
+          "pt": "Casca Fendida",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Final Flash",
+          "pt": "Estalo Final",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Blastbeetle",
+      "shape": "Small lean click-beetle with arched thorax and glowing faceted abdomen, two short claws and four small feet; no Tank shell.",
+      "weapon": "Short striking foreclaws and the organic abdomen; no metal bomb or modern fuse.",
+      "projectile": "None; one bounded near-death amber pop with flat shard shapes, no recursive explosions.",
+      "idle": "Small thorax spring compression and contained abdomen light pulses.",
+      "walk": "Fast springy four-foot scuttle; shell lids remain close to abdomen.",
+      "attack": "Short paired-claw jab presented as one basic hit, followed by a visible spring recoil.",
+      "special": "Combat death resolves one capped local damage burst; sale or replacement never triggers it.",
+      "victory": "Two tiny grounded clicks, abdomen sway and shell-lid bow; no victory explosion.",
+      "death": "Legs compress, shell opens a little and the single server-authorized pop plays before the body settles.",
+      "space": "Abdomen is mostly longitudinal; no wide wing opening, explosion visuals never push crowd members.",
+      "stats": [
+        3,
+        240,
+        32,
+        24,
+        700,
+        58
+      ]
+    },
+    {
+      "id": "needlewing",
+      "code": "CC15",
+      "name": {
+        "en": "Needlewing",
+        "pt": "Libélula Agulha"
+      },
+      "faction": "Insects",
+      "archetype": "Ranged",
+      "default_skin": {
+        "en": "Still Sight",
+        "pt": "Mira Imóvel"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Keen Sight",
+          "pt": "Mira Precisa",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Hunt Window",
+          "pt": "Janela de Caça",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Needle Volley",
+          "pt": "Salva de Agulhas",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Amber Guide",
+          "pt": "Guia de Âmbar",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Needlewing",
+      "shape": "Dragonfly with long narrow abdomen, large focused eyes, four planted legs and four narrow folded wing planes.",
+      "weapon": "Organic needle guide on the forearm, natural ivory needle; no rifle or metal scope.",
+      "projectile": "Thin straight ivory needle with a tiny amber tip; charged version gets one short dark-amber tail.",
+      "idle": "Eye/head tracking and a very small wing fold twitch; never hovers.",
+      "walk": "Four-foot measured walking gait with rearward wing panels and stable needle guide.",
+      "attack": "Braces the guide, releases the needle, then makes one precise reload motion.",
+      "special": "Opportunity bonus checks the locked target windup at impact; it never interrupts or reads player intentions.",
+      "victory": "Needle-guide salute, two paired wing clicks and a small four-foot step pattern.",
+      "death": "Needle guide lowers, abdomen rests, wings fold together and head bows.",
+      "space": "Wing planes kept nearly vertical, folded rearward; aim line and projectile stay narrow.",
+      "stats": [
+        4,
+        240,
+        38,
+        30,
+        3900,
+        48
+      ]
+    },
+    {
+      "id": "nectar-nurse",
+      "code": "CC16",
+      "name": {
+        "en": "Nectar Nurse",
+        "pt": "Ama de Néctar"
+      },
+      "faction": "Insects",
+      "archetype": "Support",
+      "default_skin": {
+        "en": "Honey Thread",
+        "pt": "Fio de Mel"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Honey Keeper",
+          "pt": "Guardiã do Mel",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Golden Remedy",
+          "pt": "Remédio Dourado",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Silken Nectar",
+          "pt": "Néctar Sedoso",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Hive Lifeline",
+          "pt": "Fio Vital da Colmeia",
+          "scale": 1.16
+        }
+      ],
+      "kind": "NectarNurse",
+      "shape": "Rounded bee medic, short apron, two compact upright wings, honey bowl and short curved dipper; no queen crown.",
+      "weapon": "Honey bowl in left hand, curved dipper in right; one controlled nectar thread.",
+      "projectile": "No ballistic shot; one thin amber thread joins current patient only while a real channel is active.",
+      "idle": "Stirs once and checks the honey thread; antennae tilt asymmetrically.",
+      "walk": "Small four-foot rocking walk, honey bowl stable and wing panels tucked.",
+      "attack": "Starts the bounded heal channel instead of performing another normal heal cycle.",
+      "special": "Patient remains locked for the channel; pulses stop on death, incapacity or loss of range.",
+      "victory": "Honey-dipper stir, bowl-balanced heel taps and a little wing flutter close to the back.",
+      "death": "Dipper rests across bowl, legs fold and channel thread snaps immediately.",
+      "space": "Round abdomen is compact, wings upright; thread is a thin line rather than a wide healing cone.",
+      "stats": [
+        3,
+        270,
+        0,
+        36,
+        2600,
+        44
+      ]
+    },
+    {
+      "id": "stridulator",
+      "code": "CC17",
+      "name": {
+        "en": "Stridulator",
+        "pt": "Cigarra Estridente"
+      },
+      "faction": "Insects",
+      "archetype": "Control",
+      "default_skin": {
+        "en": "Amber Resonance",
+        "pt": "Ressonância de Âmbar"
+      },
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Echo Chamber",
+          "pt": "Câmara de Eco",
+          "scale": 1.08
+        },
+        {
+          "code": "A2",
+          "en": "Resonant Crown",
+          "pt": "Coroa Ressonante",
+          "scale": 1.16
+        },
+        {
+          "code": "B1",
+          "en": "Cutting Rhythm",
+          "pt": "Ritmo Cortante",
+          "scale": 1.08
+        },
+        {
+          "code": "B2",
+          "en": "Amber Chorus",
+          "pt": "Coro de Âmbar",
+          "scale": 1.16
+        }
+      ],
+      "kind": "Stridulator",
+      "shape": "Thin cicada, folded wing cape, four narrow legs and dominant ribbed chest resonator; no spider web or instrument.",
+      "weapon": "Natural thorax resonator opened by two arm gestures; no handheld staff.",
+      "projectile": "Small amber sound chevrons; standard Slow indicator stays separate from decorative ripples.",
+      "idle": "Antenna metronome and shallow chest bellows with wings still.",
+      "walk": "Four-foot staccato steps, chest upright and folded wings tracking the back.",
+      "attack": "One focused rib squeeze and small jab pulse, no hidden multi-hit sound damage.",
+      "special": "Announced resonator opening applies standard non-stacking Slow to at most two close enemies.",
+      "victory": "Three-beat thorax accordion gesture, alternating foot taps and an antenna bow.",
+      "death": "Resonator closes, wings fold tighter and four legs sink in sequence.",
+      "space": "Tall narrow chest and close folded wings; sound chevrons have a short lifetime and no lateral screen wash.",
+      "stats": [
+        4,
+        310,
+        18,
+        36,
+        1900,
+        42
+      ]
+    }
+  ]
+}
