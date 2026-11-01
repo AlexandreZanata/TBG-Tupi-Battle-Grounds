@@ -1,5 +1,6 @@
 //! Android window, private settings and lifecycle services; simulation remains shared.
 
+mod endpoint;
 mod lifecycle;
 pub mod render;
 pub mod services;
@@ -50,21 +51,19 @@ pub fn persistent_preference(key: &str) -> bool {
     )
 }
 
-/// Android release endpoints require WSS; local emulator tests are opt-in debug builds.
+/// Android release endpoints require WSS; local tests need both feature and debuggable host.
 pub fn endpoint_allowed(raw: &str) -> bool {
-    let Ok(url) = url::Url::parse(raw) else {
-        return false;
-    };
-    if !url.username().is_empty()
-        || url.password().is_some()
-        || url.query().is_some()
-        || url.fragment().is_some()
-    {
-        return false;
-    }
-    url.scheme() == "wss"
-        || (cfg!(feature = "android-loopback")
-            && services::flag(jni::jni_str!("isInternalBuild"))
-            && url.scheme() == "ws"
-            && url.host_str() == Some("127.0.0.1"))
+    endpoint::allowed(raw, internal_loopback(), None)
+}
+
+pub fn socket_endpoint_allowed(raw: &str) -> bool {
+    endpoint::allowed(
+        raw,
+        internal_loopback(),
+        Some(&crate::net::admission::contract_id()),
+    )
+}
+
+fn internal_loopback() -> bool {
+    cfg!(feature = "android-loopback") && services::flag(jni::jni_str!("isInternalBuild"))
 }

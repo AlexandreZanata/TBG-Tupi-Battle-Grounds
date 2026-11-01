@@ -37,7 +37,7 @@ impl NetLink {
         };
         let url = url.clone();
         #[cfg(target_os = "android")]
-        if !crate::platform::android::endpoint_allowed(&url) {
+        if !crate::platform::android::socket_endpoint_allowed(&url) {
             self.lost(now);
             return;
         }

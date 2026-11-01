@@ -2,6 +2,9 @@
 
 #[cfg(target_os = "android")]
 pub mod android;
+#[cfg(all(test, not(target_os = "android")))]
+#[path = "android/endpoint.rs"]
+mod android_endpoint;
 pub mod http;
 
 /// P66 §7: what this client reports with an admission request: its
