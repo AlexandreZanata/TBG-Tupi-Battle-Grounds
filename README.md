@@ -59,7 +59,7 @@ cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
 ```bash
 cargo install --locked trunk                       # once
 (cd crates/tbg-client && trunk build --release)    # build the browser client
-TBG_STATIC_DIR=crates/tbg-client/dist cargo run --release -p tbg-server
+TBG_AUTH_ORIGINS=http://localhost:8080,http://127.0.0.1:8080 TBG_STATIC_DIR=crates/tbg-client/dist cargo run --release -p tbg-server
 ```
 
 Open `http://localhost:8080/` (or `http://<your LAN IP>:8080/` on a phone).
@@ -68,7 +68,7 @@ URL options: `?autoplay=practice|quick` (a bot plays for you), `?lag=300`
 `?shadows=0`, `?room=CODE`. Bot load test:
 `cargo run --release -p tbg-server --bin tbg-bots -- --matches 50`.
 Accounts: guests play everything except ranked; "Create account" in the
-menu gives you a name plus a key (your only credential — save it; the
+menu gives you a name plus a manual recovery key (save it; the
 server stores only its hash). Log in with the key on any device. Load
 tests with `--accounts` need `TBG_REGISTER_PER_IP_HOUR` raised on the test
 server only.
@@ -80,6 +80,24 @@ Field news opens the shared **Patch notes** page in Linux and the browser
 `/api/patch-notes`, with details at `/api/patch-notes/{id}`. Every gameplay
 revision needs [documented patch notes and evidence](docs/patches/README.md);
 CI rejects missing revision notes. Linux also includes an offline snapshot.
+
+## P68 Linux prerelease candidate
+
+`0.1.0-p68.1` introduces protocol-30 authentication, optional real OS-vault
+persistence and the shared Linux/Windows desktop presentation contract.
+**The existing protocol-29 production server is incompatible.** Offline
+Practice/training remains available; online testing requires a compatible
+isolated backend. This candidate does not deploy or replace that server.
+
+Access stays in memory; optional Linux refresh persistence uses Secret
+Service. Browser refresh uses a protected host cookie with exact configured
+origins. Vault/cookie failure produces visible temporary mode. Existing
+manual keys remain valid, and failed/incomplete legacy conversion preserves
+the original recovery key. See [native instructions](deploy/native/README.txt),
+[execution evidence](docs/phases/P68-execution.md) and the
+[desktop UI contract](docs/ui/DESKTOP-UI-CONTRACT.md). Windows packages, Wine,
+a real Windows GPU and matched packaged visual acceptance are pending;
+shared code alone does not establish identical rendering.
 
 Deploying to a VPS: [deploy/README.md](deploy/README.md).
 

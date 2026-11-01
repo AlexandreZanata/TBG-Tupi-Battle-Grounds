@@ -7,9 +7,13 @@ linuxdeploy="$(realpath -- "${1:?Pass the official linuxdeploy AppImage}")"
 version="$(python3 -c 'import tomllib; print(tomllib.load(open("crates/tbg-client/Cargo.toml", "rb"))["package"]["version"])')"
 package="target/native/tupi-battle-grounds-$version-linux-x86_64"
 appdir="$project_dir/target/native/AppDir"
+if [[ -e "$appdir" || -e "$project_dir/target/native/tupi-battle-grounds-$version-linux-x86_64.AppImage" ]]; then
+    echo 'Refusing to reuse AppImage staging or overwrite an existing artifact.' >&2
+    exit 1
+fi
 mkdir -p "$appdir/usr/bin" "$appdir/usr/share/applications" "$appdir/usr/share/icons/hicolor/512x512/apps"
 cp "$package/tbg-client" "$appdir/usr/bin/tbg-client"
-cp -a "$package/assets" "$appdir/usr/bin/"
+cp -a "$package/assets" "$package/licenses" "$appdir/usr/bin/"
 cp "$package/THIRD_PARTY_NOTICES.md" "$package/README.txt" "$package/build-info.json" "$appdir/usr/bin/"
 for notice in "$package"/LICENSE*; do
     if [[ -f "$notice" ]]; then cp "$notice" "$appdir/usr/bin/"; fi
@@ -38,6 +42,9 @@ info["unbundled_binary_sha256"] = info["binary_sha256"]
 info["binary_sha256"] = hashlib.sha256((folder / "tbg-client").read_bytes()).hexdigest()
 info["format"] = "appimage"
 path.write_text(json.dumps(info, indent=2) + "\n")
+root=folder.parents[1]
+files=[{"path":p.relative_to(root).as_posix(),"size":p.stat().st_size,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted(root.rglob("*")) if p.is_file() and p.name!="file-manifest.json"]
+(root/"file-manifest.json").write_text(json.dumps({"schema":1,"source_commit":info["commit"],"files":files},indent=2)+"\n")
 PY
 tool_dir="$project_dir/target/native/linuxdeploy-tool"
 mkdir -p "$tool_dir"

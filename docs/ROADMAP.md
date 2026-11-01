@@ -405,7 +405,7 @@ heavy/full-suite checks only on a separate explicit owner request.
 
 | Phase | Spec | Deliverable | Status | Review |
 |---|---|---|---|---|
-| P68 | [P68-windows-native-release.md](phases/P68-windows-native-release.md) | Exact desktop visuals, Windows MSVC ZIP/installer, Wine/real Windows acceptance; P68-A adds Linux/Windows/web persistent auth, 15-minute Access and rotating 30-day Refresh | **Planning only** on `codex/p68-windows-native-release-plan`, based on `codex/consolidated-linux-release` at `55510c5`; no executable, auth implementation or Wine installation | A01–A14/W01–W18, coordinated wire/schema, real vaults/browser, support/CRT/signing and owner visual sign-off |
+| P68 | [P68-windows-native-release.md](phases/P68-windows-native-release.md) | Exact desktop visuals, Windows MSVC ZIP/installer, Wine/real Windows acceptance; P68-A adds Linux/Windows/web persistent auth, 15-minute Access and rotating 30-day Refresh | **Linux-first implementation in progress** on `codex/p68-windows-native-release`; protocol 30/schema 9 auth and shared desktop routing implemented; see [execution evidence](phases/P68-execution.md). Windows/Wine/signing and exact packaged visual acceptance remain pending | A01–A14/W01–W18, coordinated wire/schema, real vaults/browser, support/CRT/signing and owner visual sign-off |
 
 Read the [acceptance plan](planning/P68-WINDOWS-ACCEPTANCE.md),
 [hashed OS-gate inventory](planning/P68-PLATFORM-GATES.csv) and

@@ -61,10 +61,12 @@ installed application change yet.
 
 1. Base/audit and current policy: complete; source inventories retained.
 2. P68-A canonical wire, transactional store, bounded auth service and
-   socket authority: pending.
+   socket authority: implemented; targeted server/protocol scenarios passed.
 3. Native vaults, browser coordinator, shared auth UX and legacy migration:
-   pending.
-4. Shared desktop routing/art and machine-checkable UI contract: pending.
+   implemented; synthetic coordinator tests passed; real provider/browser
+   journeys remain pending before the artifact evidence is recorded.
+4. Shared desktop routing/art and machine-checkable UI contract: implemented;
+   source routing gate and comparator negative cases passed.
 5. Focused consolidation, Linux reference/package and immutable GitHub
    prerelease: pending.
 6. Windows/Wine/signing and exact cross-platform visual acceptance: deferred
@@ -160,3 +162,76 @@ acceptance. Browser check warnings and pre-existing test-only `Layout::clear`
 warning are recorded for scoped cleanup. Real vault/browser journeys,
 migration cancellation/offline cases, package evidence and Windows visual
 gates remain separate acceptance work. These checks are not a full suite.
+
+### Native/browser coordination and shared UI front
+
+The client now uses one epoch-checked coordinator for HTTP auth and socket
+identity. Native refresh uses the explicit real keyring providers, a per-origin
+OS process lock independent of TBG_DATA_DIR, and nonsecret atomic metadata.
+There is no plaintext token/AccountKey fallback. Temporary sessions are visible.
+Browser credentials use one Web Locks coordinator, nonsecret operation markers,
+strict bounded fetch/no redirects and an Access-only fallback when coordination
+or cookies are unavailable. Public DOM status/remember controls never receive
+Access, Refresh or recovery keys. Explicit key export uses Blob URLs on web;
+native recovery export reports a write failure before backup acknowledgment.
+
+Logout/account switches invalidate the epoch before work completes. Late
+successes retain revocation proof and schedule cleanup instead of publishing
+identity. Native cancellation stores pending proof only in the real vault;
+unavailable secure storage leaves an explicit nonsecret recovery marker.
+Offline logout remains pending. Legacy deletion requires current-family secure
+confirmation and explicit backup acknowledgment, and compare-and-remove never
+erases a replaced key. Ordinary account updates no longer rebuild the header
+on every frame. Public grant metadata includes persistence choice and server
+time; restored session cookies never silently become persistent cookies.
+
+Linux presentation guards were reviewed by concern (HUD/details/countdown,
+menus/header/catalogs/ranking, loading/GPU readiness, lobby demo and capture)
+and moved to the target-side `tbg_desktop` selector for Linux and Windows.
+Actual vaults/Unix file permissions remain OS-specific. Native art inventory
+uses the target OS, sorted paths and normalized separators. Source check
+`python3 scripts/check-desktop-ui.py` passed; it is explicitly not visual proof.
+The comparator requires the complete same-input matrix and rejects missing
+frames, source/assets/settings differences and every decoded pixel mismatch.
+Two directed comparator negative-case tests passed using existing Pillow 13.0.0
+in the project's logo-tools environment. System Python lacked Pillow; no
+system package install was attempted. The small CI gate pins Pillow 13.0.0.
+
+`node crates/tbg-client/tests/auth-session.test.cjs`: 3 synthetic coordinator
+cases passed (no Web Locks => credentials omitted; late cancelled login;
+serialized lost-reply retry). These mocks are not real-cookie evidence.
+`cargo test ... -p tbg-client --bin tbg-client auth:: -- --test-threads=1`:
+4 passed, including a completed-but-cancelled login never publishing identity
+and retaining revocation proof. Scoped client Clippy with `ui-acceptance` and
+server `--lib` passed with `-D warnings`; initial new lints were corrected
+(constant-size chunk decoding, retry argument grouping, nested migration
+condition). Native and WASM checks passed; a browser bridge method was corrected
+to Bevy 0.20's `insert_non_send`. The existing test-only Layout::clear warning
+remains recorded; default binary Clippy passes without suppressing it.
+
+Additional HTTP/socket edge cases passed: concurrent same-operation retries,
+unrelated cookie preservation during manual recovery, wrong-family/guest
+resume refusal and ordinary logout refusing an admitted match. Latest focused
+HTTP/socket run: 6 + 4 passed. No full workspace suite, balance gate, benchmark,
+Windows build, Wine, installation or production rollout was run.
+
+### Candidate preparation
+
+Fresh identity: `0.1.0-p68.1`, protocol 30, schema 9, Ruleset 2 /
+3d56156049e626c5. The `v0.1.0-p68.1` candidate does not match the existing
+native-tag publisher trigger; P66's workflow/updater and existing releases
+are untouched. Package staging now refuses reuse/overwrite, records assets,
+Cargo.lock, executable and file manifests, and includes exact provider/D-Bus
+license texts. Release-mode assets must be beside the executable; source-tree
+fallback is restricted to debug builds. `--version` and `--build-info` run
+before graphics and expose no credentials. Opt-in `ui-acceptance` enables
+packaged captures and strictly loopback/fresh-directory synthetic auth probes.
+`check-native-auth.py` starts/stops only its own backend process, validates
+restart/offline logout and reports real vault availability without logging
+credentials. The package/runtime runs and their hashes are still pending.
+
+Static checks passed: affected Cargo formatting, `git diff --check`, Python
+syntax for package/comparison/journey scripts, shell syntax for AppImage,
+JS module syntax, patch-note gate (3 entries; same ruleset fingerprint).
+The candidate's public patch note explicitly preserves game numbers and states
+production incompatibility and the remaining Windows visual gates.

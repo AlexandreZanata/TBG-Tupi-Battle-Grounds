@@ -2,6 +2,115 @@
   "schema": 1,
   "notes": [
     {
+      "id": "p68-linux-auth-candidate",
+      "version": "0.1.0-p68.1",
+      "date": "2026-10-31",
+      "status": "candidate",
+      "kind": "maintenance",
+      "ruleset_version": 2,
+      "ruleset_hash": "3d56156049e626c5",
+      "title": {
+        "en": "Linux sign-in and desktop presentation candidate",
+        "pt-BR": "Candidata de acesso no Linux e interface desktop"
+      },
+      "summary": {
+        "en": "Protected native sessions and a shared desktop UI contract. This candidate requires protocol 30; the protocol-29 production server is incompatible. Gameplay numbers are preserved.",
+        "pt-BR": "Sessões nativas protegidas e contrato de interface desktop compartilhada. Esta candidata exige protocolo 30; o servidor publicado no protocolo 29 é incompatível. Os números do jogo foram preservados."
+      },
+      "changes": [
+        {
+          "category": "account",
+          "subject": {
+            "en": "Account sessions",
+            "pt-BR": "Sessões de conta"
+          },
+          "field": {
+            "en": "credential storage",
+            "pt-BR": "armazenamento de credenciais"
+          },
+          "before": {
+            "en": "Saved key in preferences",
+            "pt-BR": "Chave salva nas preferências"
+          },
+          "after": {
+            "en": "Memory-only Access and real OS refresh vault",
+            "pt-BR": "Access em memória e refresh no cofre do sistema"
+          },
+          "reason": {
+            "en": "Optional secure persistence replaces new plaintext credential writes; incomplete legacy migration retains the original key.",
+            "pt-BR": "A persistência segura opcional substitui novas gravações de credenciais em texto simples; migrações incompletas preservam a chave original."
+          }
+        },
+        {
+          "category": "platform",
+          "subject": {
+            "en": "Desktop UI",
+            "pt-BR": "Interface desktop"
+          },
+          "field": {
+            "en": "presentation routing",
+            "pt-BR": "seleção da apresentação"
+          },
+          "before": {
+            "en": "Linux-only refined presentation",
+            "pt-BR": "Apresentação refinada exclusiva do Linux"
+          },
+          "after": {
+            "en": "Shared Linux/Windows presentation and strict comparison contract",
+            "pt-BR": "Apresentação Linux/Windows compartilhada e contrato estrito de comparação"
+          },
+          "reason": {
+            "en": "Preserve Linux quality while making every unresolved Windows visual difference an explicit acceptance blocker.",
+            "pt-BR": "Preservar a qualidade do Linux e tratar cada diferença visual Windows não resolvida como bloqueio explícito de aceitação."
+          }
+        },
+        {
+          "category": "protocol",
+          "subject": {
+            "en": "Online compatibility",
+            "pt-BR": "Compatibilidade online"
+          },
+          "field": {
+            "en": "protocol version",
+            "pt-BR": "versão do protocolo"
+          },
+          "before": 29,
+          "after": 30,
+          "reason": {
+            "en": "Authenticate before account resume and renew the same socket without changing competitive simulation.",
+            "pt-BR": "Autenticar antes de restaurar uma conta e renovar o mesmo socket sem mudar a simulação competitiva."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Candidate compatibility",
+            "body": "Linux prerelease with protocol 30 and schema 9 authentication. Offline Practice remains available. Existing production protocol 29 is not compatible; no production server is deployed by this release."
+          },
+          {
+            "title": "Desktop UI contract",
+            "body": "Linux and Windows now select the same desktop presentation. Windows packages, Wine, actual Windows GPU and matched packaged visual acceptance remain pending; shared code is not proof of identical rendering."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Compatibilidade da candidata",
+            "body": "Prévia Linux com autenticação no protocolo 30 e esquema 9. O treino offline continua disponível. O servidor publicado no protocolo 29 é incompatível; esta versão não publica um novo servidor."
+          },
+          {
+            "title": "Contrato visual desktop",
+            "body": "Linux e Windows selecionam a mesma apresentação desktop. Pacotes Windows, Wine, GPU Windows real e comparação visual dos pacotes seguem pendentes; compartilhar código não comprova renderização idêntica."
+          }
+        ]
+      },
+      "document": "docs/patches/2026-10-31-p68-linux.md",
+      "evidence": {
+        "report": "docs/phases/P68-execution.md",
+        "accepted": false
+      }
+    },
+    {
       "id": "native-3-competitive-audit",
       "version": "0.1.0-native.3",
       "date": "2026-10-31",
