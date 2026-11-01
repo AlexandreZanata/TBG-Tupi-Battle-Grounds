@@ -3,6 +3,7 @@
 //! output is byte-identical for any thread count (contract C3).
 
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::OnceLock;
 
 use tbg_core::headless::{self, Moment};
 use tbg_core::{ArcanaPreset, MatchState, PlayerIntention, Ruleset, Seat, StrongholdKind};
@@ -57,36 +58,30 @@ pub struct Matchup {
 }
 
 /// Map `f` over `items` on `threads` workers; results in item order.
-pub fn parallel_map<T: Sync, R: Send>(
+pub fn parallel_map<T: Sync, R: Send + Sync>(
     items: &[T],
     threads: usize,
     f: impl Fn(&T) -> R + Sync,
 ) -> Vec<R> {
     let next = AtomicUsize::new(0);
-    let mut out: Vec<(usize, R)> = std::thread::scope(|scope| {
-        let workers: Vec<_> = (0..threads.max(1))
-            .map(|_| {
-                scope.spawn(|| {
-                    let mut local = Vec::new();
-                    loop {
-                        let i = next.fetch_add(1, Ordering::Relaxed);
-                        let Some(item) = items.get(i) else { break };
-                        local.push((i, f(item)));
-                    }
-                    local
-                })
-            })
-            .collect();
-        workers
-            .into_iter()
-            .flat_map(|w| {
-                // A panicking job must fail the run, never shift results.
-                w.join().unwrap_or_else(|e| std::panic::resume_unwind(e))
-            })
-            .collect()
+    let slots: Vec<OnceLock<R>> = (0..items.len()).map(|_| OnceLock::new()).collect();
+    std::thread::scope(|scope| {
+        for _ in 0..threads.max(1).min(items.len()) {
+            let slots = &slots;
+            let next = &next;
+            let f = &f;
+            scope.spawn(move || loop {
+                let index = next.fetch_add(1, Ordering::Relaxed);
+                let Some(item) = items.get(index) else { break };
+                assert!(slots[index].set(f(item)).is_ok(), "duplicate job index");
+            });
+        }
     });
-    out.sort_unstable_by_key(|(i, _)| *i);
-    out.into_iter().map(|(_, r)| r).collect()
+    // Each job owns exactly one slot; no completion-order sort or clone is needed.
+    slots
+        .into_iter()
+        .map(|slot| slot.into_inner().expect("worker completed"))
+        .collect()
 }
 
 /// One game. `swapped` puts participant 1 on seat A; each participant keeps
@@ -123,6 +118,7 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
     });
     let mut sides: [Side; 2] = Default::default();
     let mut hp = None;
+    let mut shop_journals: [crate::shop_metrics::Journal; 2] = Default::default();
     let ended = headless::play_with(
         &mut state,
         |state| setup.apply(state),
@@ -134,19 +130,44 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
                 intent,
                 result: Ok(()),
             } => {
-                let side = &mut sides[participant(seat, seat_a)];
+                let index = participant(seat, seat_a);
+                let side = &mut sides[index];
+                shop_journals[index].record(side, view, intent);
                 match intent {
                     PlayerIntention::Purchase { offer } => {
-                        side.purchases[view.offers[usize::from(offer)] as usize] += 1;
+                        let i = usize::from(offer);
+                        let cost = m.rules.def(view.offers[i]).cost;
+                        side.purchases[view.offers[i] as usize] += 1;
+                        side.spent += u64::from(cost);
+                        side.expensive_bought += u32::from(
+                            (6 * tbg_core::content::ENERGY_SCALE
+                                ..=7 * tbg_core::content::ENERGY_SCALE)
+                                .contains(&cost),
+                        );
                     }
                     PlayerIntention::Evolve { unit, branch } => {
                         if let Some(u) = view.units.iter().find(|u| u.id == unit) {
                             side.evolutions[u.kind as usize][usize::from(branch.min(1))] += 1;
+                            side.spent += u64::from(view.evolve_costs[usize::from(u.tier.min(1))]);
                         }
                     }
-                    PlayerIntention::ChooseAugment { .. }
-                    | PlayerIntention::Forgo { .. }
-                    | PlayerIntention::Fortify { .. } => {}
+                    PlayerIntention::ChooseAugment { option, .. } => {
+                        side.spent += u64::from(
+                            view.augment_round
+                                .as_ref()
+                                .and_then(|r| r.costs.get(usize::from(option)))
+                                .copied()
+                                .unwrap_or(0),
+                        );
+                    }
+                    PlayerIntention::Fortify { .. } => {
+                        let tier = usize::from(view.strongholds[seat.index()].tier.min(1));
+                        side.spent += u64::from(m.rules.fortify_cost[tier]);
+                    }
+                    PlayerIntention::Reserve { .. }
+                    | PlayerIntention::Release { .. }
+                    | PlayerIntention::Reroll { .. }
+                    | PlayerIntention::Forgo { .. } => {}
                 }
             }
             Moment::Intention { .. } => {}
@@ -174,7 +195,7 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
         hp_at_checkpoint: hp,
         sides,
         seat_a,
-        stats,
+        stats: Some(Box::new(stats)),
         stall: state.lab.stall_at_end(state.tick),
     }
 }

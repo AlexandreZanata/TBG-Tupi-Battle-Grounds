@@ -14,10 +14,12 @@ use crate::vfx::shots::ShotKind;
 use model::Form;
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose: motion::pose,
     gait: Gait::LIGHT,
     attack: Attack::Shot {
+        loaded: None,
         from: Node::Prop(Socket::WeaponR),
         muzzle: |tier, branch| model::tips(Form::of(tier, branch)),
         shot,

@@ -17,6 +17,7 @@ use crate::art::{
 use crate::vfx::impacts::Burst;
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: spec,
     pose,
     gait: Gait::HEAVY,

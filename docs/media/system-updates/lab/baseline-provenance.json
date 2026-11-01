@@ -1,0 +1,7 @@
+{
+  "base": "9008f11",
+  "binary_sha256": "e598374e710912349ca0ef4d402028643456c49dc3df2116c62b625cba0b2833",
+  "pairs_per_champion": 2000,
+  "seed_start": 9000,
+  "note": "Seven reference runs; after-change and 20,000-pair confirmation are deferred. The runtime manifest git_head names the active worktree, not the separately preserved baseline binary."
+}

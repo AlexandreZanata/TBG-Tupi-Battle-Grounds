@@ -44,6 +44,20 @@ pub enum Impact {
     Shards,
     Sparks,
     Bite,
+    Acid,
+    Mind,
+    Piston,
+    Plague,
+    Mayhem,
+    Belly,
+    Rend,
+    Solar,
+    Harmonic,
+    Purify,
+    Judgment,
+    Web,
+    Precise,
+    Venom,
 }
 
 /// What the attacker brings to an impact: splash radius (tiles, 0 = none)
@@ -56,6 +70,7 @@ pub struct Area {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Muzzle {
+    Pistol,
     Bombard,
     GreatBombard,
     Blunderbuss,
@@ -77,6 +92,7 @@ fn around(n: usize, phase: f32) -> impl Iterator<Item = Vec3> {
 pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, area: Area) {
     let ground = at.with_y(0.05);
     match impact {
+        Impact::Mayhem => blast(commands, a, at, area.splash.max(0.3), 0.55),
         Impact::Blast => blast(commands, a, at, area.splash.max(0.6), 1.0),
         Impact::GreatBlast => {
             blast(commands, a, at, area.splash.max(0.8), 1.45);
@@ -243,6 +259,123 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
         }
         Impact::Cannon => cannon(commands, a, at, 1.0),
         Impact::GreatCannon => cannon(commands, a, at, 1.5),
+        Impact::Plague => motes(commands, a, at, &a.green, (4, 0.4), 0.18),
+        Impact::Rend => {
+            motes(commands, a, at, &a.blood, (6, 0.8), 0.3);
+            spawn(
+                commands,
+                &a.ring,
+                &a.blood,
+                ground,
+                Motion::Grow {
+                    radius: area.splash.max(0.3),
+                },
+                0.0,
+                0.22,
+            );
+        }
+        Impact::Venom => motes(commands, a, at, &a.green, (5, 0.4), 0.25),
+        Impact::Precise => motes(commands, a, at, &a.green, (4, 0.35), 0.18),
+        Impact::Web => {
+            spawn(
+                commands,
+                &a.ring,
+                &a.white,
+                ground,
+                Motion::Grow { radius: 0.30 },
+                0.0,
+                0.35,
+            );
+        }
+        Impact::Judgment => {
+            spawn(
+                commands,
+                &a.ring,
+                &a.gold,
+                ground,
+                Motion::Grow {
+                    radius: area.splash.max(0.3),
+                },
+                0.0,
+                0.3,
+            );
+            motes(commands, a, at, &a.gold, (6, 0.6), 0.25);
+        }
+        Impact::Purify => {
+            motes(commands, a, at, &a.gold, (7, 0.7), 0.22);
+            spawn(
+                commands,
+                &a.puff,
+                &a.flash,
+                at,
+                Motion::Flash { size: 0.20 },
+                0.0,
+                0.12,
+            );
+        }
+        Impact::Harmonic => {
+            motes(commands, a, at, &a.gold, (4, 0.35), 0.25);
+            spawn(
+                commands,
+                &a.puff,
+                &a.flash,
+                at,
+                Motion::Flash { size: 0.12 },
+                0.0,
+                0.12,
+            );
+        }
+        Impact::Solar => {
+            motes(commands, a, at, &a.gold, (5, 0.5), 0.3);
+            spawn(
+                commands,
+                &a.ring,
+                &a.gold,
+                ground,
+                Motion::Grow { radius: 0.45 },
+                0.0,
+                0.3,
+            );
+        }
+        Impact::Belly => {
+            slam(commands, a, ground, area.splash.max(0.3), 4);
+            spawn(
+                commands,
+                &a.ring,
+                &a.water,
+                ground,
+                Motion::Grow {
+                    radius: area.splash.max(0.3),
+                },
+                0.0,
+                0.35,
+            );
+        }
+        Impact::Piston => {
+            slam(commands, a, ground, area.splash.max(0.8), 6);
+            spawn(
+                commands,
+                &a.puff,
+                &a.orange,
+                at,
+                Motion::Flash { size: 0.16 },
+                0.0,
+                0.12,
+            );
+        }
+        Impact::Mind => {
+            motes(commands, a, at, &a.turquoise, (5, 0.5), 0.2);
+            spawn(
+                commands,
+                &a.ring,
+                &a.turquoise,
+                ground,
+                Motion::Grow { radius: 0.4 },
+                0.0,
+                0.3,
+            );
+        }
+        Impact::Acid => motes(commands, a, at, &a.turquoise, (6, 0.6), 0.35),
         Impact::Poison => motes(commands, a, at, &a.spore, (7, 0.9), area.splash.max(0.5)),
         Impact::Splash => {
             motes(commands, a, at, &a.water, (9, 1.4), 0.6);
@@ -675,6 +808,7 @@ pub fn muzzle(
     back: Option<Vec3>,
 ) {
     let size = match kind {
+        Muzzle::Pistol => 0.35,
         Muzzle::Bombard | Muzzle::Cannon => 1.0,
         Muzzle::Blunderbuss => 1.25,
         Muzzle::GreatBombard | Muzzle::GreatCannon => 1.5,

@@ -17,10 +17,12 @@ use crate::vfx::{impacts::Burst, shots::ShotKind};
 use model::plan;
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose,
     gait: Gait::LIGHT,
     attack: Attack::Shot {
+        loaded: None,
         from: Node::Prop(Socket::WeaponR),
         muzzle: |_, _| model::FLASK,
         shot: |_, _| ShotKind::Flask,

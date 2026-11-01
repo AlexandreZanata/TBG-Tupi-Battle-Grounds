@@ -21,7 +21,6 @@ impl Lobby {
         // the longest-waiting other session.
         match self.queue.pop_front() {
             Some(other) => {
-                self.queued_at.remove(&other);
                 self.pair([other, token], MatchMode::Casual, false, Listing::Public);
             }
             None => {
@@ -76,6 +75,9 @@ impl Lobby {
 
     /// Leave queue, owned room, owned challenge, and any open rematch.
     pub(super) fn leave_waiting(&mut self, token: Token) {
+        if let Some(s) = self.session(&token) {
+            s.finished = None;
+        }
         self.leave_queue_room(token);
         self.challenges.retain(|(_, owner, _)| *owner != token);
         if let Some(s) = self.session(&token) {
@@ -93,6 +95,7 @@ impl Lobby {
         // P12: ranked and casual queues never mix, but one cancel leaves both.
         self.ranked_queue.retain(|t| *t != token);
         self.queued_at.remove(&token);
+        self.ranked_queued_at.remove(&token);
         self.rooms.retain(|(_, owner, _)| *owner != token);
         if let Some(s) = self.session(&token) {
             if matches!(s.state, SessionState::Queued | SessionState::InRoom) {
@@ -110,11 +113,20 @@ impl Lobby {
         rematchable: bool,
         listing: Listing,
     ) {
+        if self.refuse_expired_pair(tokens, mode, listing) {
+            return;
+        }
         // P9: queue wait per paired session (the joiner waited ~0 ms).
         for t in tokens {
             if let Some(t0) = self.queued_at.remove(&t) {
                 self.metrics
                     .record_queue_wait(t0.elapsed().as_millis().min(u128::from(u64::MAX)) as u64);
+            }
+            // P60: ranked waits are measured separately (no await, no SQL).
+            if let Some(t0) = self.ranked_queued_at.remove(&t) {
+                self.metrics.record_ranked_queue_wait(
+                    t0.elapsed().as_millis().min(u128::from(u64::MAX)) as u64,
+                );
             }
         }
         let players = tokens.map(|t| {
@@ -157,7 +169,13 @@ impl Lobby {
             self.self_tx.clone(),
             self.config.clone(),
             self.metrics.clone(),
-            self.store.clone(),
+            match_task::Records {
+                store: self.store.clone(),
+                ranked: self.ranked.clone(),
+                // P60: OS-random, separate from the public LiveId.
+                key: random_bytes::<16>(),
+                stats: self.config.stats == crate::ranked::policy::StatsMode::Collect,
+            },
         );
         if let (Some(id), Some((seats, kinds))) = (live, listed) {
             self.register_live(
@@ -177,6 +195,7 @@ impl Lobby {
         }
         for (seat, token) in Seat::BOTH.into_iter().zip(tokens) {
             if let Some(s) = self.session(&token) {
+                s.finished = None;
                 s.state = SessionState::InMatch {
                     tx: tx.clone(),
                     seat,

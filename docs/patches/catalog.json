@@ -1,0 +1,442 @@
+{
+  "schema": 1,
+  "notes": [
+    {
+      "id": "linux-rc1-consolidated",
+      "version": "0.1.1-rc.1",
+      "date": "2026-11-01",
+      "status": "candidate",
+      "kind": "maintenance",
+      "ruleset_version": 2,
+      "ruleset_hash": "3d56156049e626c5",
+      "title": {
+        "en": "Consolidated Linux candidate",
+        "pt-BR": "Candidata Linux consolidada"
+      },
+      "summary": {
+        "en": "One build with the complete roster, arenas, laboratory, celebration, protected sign-in and the recoverable Linux updater foundation. Requires protocol 30; the protocol-29 production server is incompatible. Gameplay numbers are preserved.",
+        "pt-BR": "Uma build com elenco completo, arenas, laboratório, celebração, acesso protegido e a base do atualizador Linux recuperável. Exige protocolo 30; o servidor publicado no protocolo 29 é incompatível. Os números do jogo foram preservados."
+      },
+      "changes": [
+        {
+          "category": "platform",
+          "subject": {
+            "en": "Native resume",
+            "pt-BR": "Retomada nativa"
+          },
+          "field": {
+            "en": "vault owner",
+            "pt-BR": "dono do cofre"
+          },
+          "before": {
+            "en": "Separate resume writer beside sign-in",
+            "pt-BR": "Gravação de retomada separada do acesso"
+          },
+          "after": {
+            "en": "One sign-in and resume coordinator",
+            "pt-BR": "Um coordenador de acesso e retomada"
+          },
+          "reason": {
+            "en": "Restore and write protected credentials once, under one lock, with a visible temporary mode.",
+            "pt-BR": "Restaurar e gravar credenciais protegidas uma vez, sob um lock, com modo temporário visível."
+          }
+        },
+        {
+          "category": "platform",
+          "subject": {
+            "en": "Server storage",
+            "pt-BR": "Armazenamento do servidor"
+          },
+          "field": {
+            "en": "schema version",
+            "pt-BR": "versão do schema"
+          },
+          "before": 9,
+          "after": 10,
+          "reason": {
+            "en": "Keep both the release directory and sign-in families, whichever earlier version a database had.",
+            "pt-BR": "Manter o diretório de releases e as famílias de acesso, qualquer que fosse a versão anterior do banco."
+          }
+        },
+        {
+          "category": "platform",
+          "subject": {
+            "en": "Updates",
+            "pt-BR": "Atualizações"
+          },
+          "field": {
+            "en": "play guard",
+            "pt-BR": "proteção do jogo"
+          },
+          "before": {
+            "en": "Socket state only",
+            "pt-BR": "Somente o estado do socket"
+          },
+          "after": {
+            "en": "Socket and sign-in state",
+            "pt-BR": "Socket e estado do acesso"
+          },
+          "reason": {
+            "en": "Never restart for an update during sign-in, renewal, restore, queueing, a match or a reconnect.",
+            "pt-BR": "Nunca reiniciar para atualizar durante acesso, renovação, restauração, fila, partida ou reconexão."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Candidate compatibility",
+            "body": "Linux prerelease with protocol 30 and server schema 10. Offline Practice and the laboratory remain available. The production server on protocol 29 is not compatible; no server is deployed by this release."
+          },
+          {
+            "title": "Not active yet",
+            "body": "Official signing and automatic updates wait for owner gate O02. Windows is unverified and not supported; two-slot server rollout stays inactive. The competitive audit approved no new balance values and its failures remain open."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Compatibilidade da candidata",
+            "body": "Prévia Linux com protocolo 30 e schema 10 no servidor. Treino offline e laboratório continuam disponíveis. O servidor de produção no protocolo 29 não é compatível; nenhum servidor é implantado por esta release."
+          },
+          {
+            "title": "Ainda não ativo",
+            "body": "Assinatura oficial e atualização automática aguardam o gate O02 do proprietário. Windows não está verificado nem suportado; o rollout com dois slots continua inativo. A auditoria competitiva não aprovou novos valores e suas reprovações continuam abertas."
+          }
+        ]
+      },
+      "document": "docs/patches/2026-11-01-linux-rc1.md",
+      "evidence": {
+        "report": "docs/phases/CONSOLIDATION-20261101.md",
+        "accepted": false
+      }
+    },
+    {
+      "id": "p68-linux-auth-candidate",
+      "version": "0.1.0-p68.1",
+      "date": "2026-10-31",
+      "status": "candidate",
+      "kind": "maintenance",
+      "ruleset_version": 2,
+      "ruleset_hash": "3d56156049e626c5",
+      "title": {
+        "en": "Linux sign-in and desktop presentation candidate",
+        "pt-BR": "Candidata de acesso no Linux e interface desktop"
+      },
+      "summary": {
+        "en": "Protected native sessions and a shared desktop UI contract. This candidate requires protocol 30; the protocol-29 production server is incompatible. Gameplay numbers are preserved.",
+        "pt-BR": "Sessões nativas protegidas e contrato de interface desktop compartilhada. Esta candidata exige protocolo 30; o servidor publicado no protocolo 29 é incompatível. Os números do jogo foram preservados."
+      },
+      "changes": [
+        {
+          "category": "account",
+          "subject": {
+            "en": "Account sessions",
+            "pt-BR": "Sessões de conta"
+          },
+          "field": {
+            "en": "credential storage",
+            "pt-BR": "armazenamento de credenciais"
+          },
+          "before": {
+            "en": "Saved key in preferences",
+            "pt-BR": "Chave salva nas preferências"
+          },
+          "after": {
+            "en": "Memory-only Access and real OS refresh vault",
+            "pt-BR": "Access em memória e refresh no cofre do sistema"
+          },
+          "reason": {
+            "en": "Optional secure persistence replaces new plaintext credential writes; incomplete legacy migration retains the original key.",
+            "pt-BR": "A persistência segura opcional substitui novas gravações de credenciais em texto simples; migrações incompletas preservam a chave original."
+          }
+        },
+        {
+          "category": "platform",
+          "subject": {
+            "en": "Desktop UI",
+            "pt-BR": "Interface desktop"
+          },
+          "field": {
+            "en": "presentation routing",
+            "pt-BR": "seleção da apresentação"
+          },
+          "before": {
+            "en": "Linux-only refined presentation",
+            "pt-BR": "Apresentação refinada exclusiva do Linux"
+          },
+          "after": {
+            "en": "Shared Linux/Windows presentation and strict comparison contract",
+            "pt-BR": "Apresentação Linux/Windows compartilhada e contrato estrito de comparação"
+          },
+          "reason": {
+            "en": "Preserve Linux quality while making every unresolved Windows visual difference an explicit acceptance blocker.",
+            "pt-BR": "Preservar a qualidade do Linux e tratar cada diferença visual Windows não resolvida como bloqueio explícito de aceitação."
+          }
+        },
+        {
+          "category": "protocol",
+          "subject": {
+            "en": "Online compatibility",
+            "pt-BR": "Compatibilidade online"
+          },
+          "field": {
+            "en": "protocol version",
+            "pt-BR": "versão do protocolo"
+          },
+          "before": 29,
+          "after": 30,
+          "reason": {
+            "en": "Authenticate before account resume and renew the same socket without changing competitive simulation.",
+            "pt-BR": "Autenticar antes de restaurar uma conta e renovar o mesmo socket sem mudar a simulação competitiva."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Candidate compatibility",
+            "body": "Linux prerelease with protocol 30 and schema 9 authentication. Offline Practice remains available. Existing production protocol 29 is not compatible; no production server is deployed by this release."
+          },
+          {
+            "title": "Desktop UI contract",
+            "body": "Linux and Windows now select the same desktop presentation. Windows packages, Wine, actual Windows GPU and matched packaged visual acceptance remain pending; shared code is not proof of identical rendering."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Compatibilidade da candidata",
+            "body": "Prévia Linux com autenticação no protocolo 30 e esquema 9. O treino offline continua disponível. O servidor publicado no protocolo 29 é incompatível; esta versão não publica um novo servidor."
+          },
+          {
+            "title": "Contrato visual desktop",
+            "body": "Linux e Windows selecionam a mesma apresentação desktop. Pacotes Windows, Wine, GPU Windows real e comparação visual dos pacotes seguem pendentes; compartilhar código não comprova renderização idêntica."
+          }
+        ]
+      },
+      "document": "docs/patches/2026-10-31-p68-linux.md",
+      "evidence": {
+        "report": "docs/phases/P68-execution.md",
+        "accepted": false
+      }
+    },
+    {
+      "id": "native-3-competitive-audit",
+      "version": "0.1.0-native.3",
+      "date": "2026-10-31",
+      "status": "preview",
+      "kind": "maintenance",
+      "ruleset_version": 2,
+      "ruleset_hash": "3d56156049e626c5",
+      "title": {
+        "en": "Competitive balance audit and field reports",
+        "pt-BR": "Auditoria competitiva e notícias dos campos"
+      },
+      "summary": {
+        "en": "Reliable CANON measurements, compact simulations and transparent patch history. Gameplay numbers are preserved; competitive failures remain visible.",
+        "pt-BR": "Medições confiáveis das regras online, simulações compactas e histórico transparente. Os números do jogo foram preservados; as reprovações competitivas ficam registradas."
+      },
+      "changes": [
+        {
+          "category": "lab",
+          "subject": {
+            "en": "Canonical rules",
+            "pt-BR": "Regras online"
+          },
+          "field": {
+            "en": "default ruleset",
+            "pt-BR": "regras de referência"
+          },
+          "before": {
+            "en": "Practice preview",
+            "pt-BR": "Prévia de treino"
+          },
+          "after": {
+            "en": "Online CANON",
+            "pt-BR": "Regras online CANON"
+          },
+          "reason": {
+            "en": "Competitive measurements must use the same rules as the authoritative server.",
+            "pt-BR": "As medições competitivas precisam usar as mesmas regras do servidor autoritativo."
+          }
+        },
+        {
+          "category": "lab",
+          "subject": {
+            "en": "Champion cost coverage",
+            "pt-BR": "Cobertura de custos dos campeões"
+          },
+          "field": {
+            "en": "searchable costs",
+            "pt-BR": "custos analisados"
+          },
+          "before": 10,
+          "after": 46,
+          "reason": {
+            "en": "Every active conventional champion now participates in cost screening.",
+            "pt-BR": "Todos os campeões convencionais ativos passam a participar da análise de custo."
+          }
+        },
+        {
+          "category": "lab",
+          "subject": {
+            "en": "Roster-health criterion",
+            "pt-BR": "Critério de saúde do elenco"
+          },
+          "field": {
+            "en": "minimum purchase share per kind",
+            "pt-BR": "participação mínima nas compras por campeão"
+          },
+          "before": {
+            "en": "2.5% fixed (115% total for 46 kinds)",
+            "pt-BR": "2,5% fixos (115% no total com 46 campeões)"
+          },
+          "after": {
+            "en": "0.625 / N active kinds (about 1.36% at 46)",
+            "pt-BR": "0,625 / N campeões ativos (cerca de 1,36% com 46)"
+          },
+          "reason": {
+            "en": "Owner-approved normalization preserves the rigor used at 25 kinds while removing an impossible total. Other limits are unchanged.",
+            "pt-BR": "A normalização aprovada pelo dono preserva o rigor usado com 25 campeões e remove uma soma impossível. Os outros limites permanecem iguais."
+          }
+        },
+        {
+          "category": "performance",
+          "subject": {
+            "en": "Simulation results",
+            "pt-BR": "Resultados das simulações"
+          },
+          "field": {
+            "en": "retained combat arrays",
+            "pt-BR": "contadores de combate retidos"
+          },
+          "before": {
+            "en": "one per game",
+            "pt-BR": "um por partida"
+          },
+          "after": {
+            "en": "lossless aggregate per evaluation",
+            "pt-BR": "agregado por avaliação, sem perda"
+          },
+          "reason": {
+            "en": "Paired observations remain available; combat totals no longer occupy memory per finished game.",
+            "pt-BR": "As observações pareadas são preservadas; totais de combate deixam de ocupar memória por partida concluída."
+          }
+        },
+        {
+          "category": "interface",
+          "subject": {
+            "en": "Field news",
+            "pt-BR": "Notícias dos campos"
+          },
+          "field": {
+            "en": "public patch history",
+            "pt-BR": "histórico público de atualizações"
+          },
+          "before": {
+            "en": "static welcome message",
+            "pt-BR": "mensagem estática de boas-vindas"
+          },
+          "after": {
+            "en": "read-only API and shared patch page",
+            "pt-BR": "API de consulta e página compartilhada"
+          },
+          "reason": {
+            "en": "Changes and their evidence can be reviewed from the lobby.",
+            "pt-BR": "Mudanças e suas evidências podem ser consultadas pelo lobby."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Competitive evidence",
+            "body": "Discovery simulated 211,712 complete matches. Machines dominated, heavy/cheap spam exceeded limits, 13 base forms were oppressive and the Nash mix concentrated on one strategy. Controlled numeric candidates were not accepted. The owner chose to preserve gameplay values and address concentration in a separate rule-design phase. Independent confirmation completed another 423,424 matches; the strict required gate also failed. No numeric changes are shipped."
+          },
+          {
+            "title": "Interface and compatibility",
+            "body": "New patch notes, forum and game-news artwork. Existing matches remain authoritative and protocol 29 is unchanged."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Evidência competitiva",
+            "body": "A descoberta simulou 211.712 partidas completas. A facção Máquinas dominou, compras repetidas caras e baratas excederam os limites, 13 formas base foram dominantes e a análise de Nash se concentrou em uma estratégia. Os candidatos numéricos não foram aceitos. O dono escolheu preservar os valores e tratar a concentração de tropas em uma fase própria de regras. A confirmação independente concluiu mais 423.424 partidas; o gate obrigatório também reprovou. Nenhuma mudança numérica foi publicada."
+          },
+          {
+            "title": "Interface e compatibilidade",
+            "body": "Novas artes de patch notes, fórum e notícias do jogo. As partidas continuam autoritativas e o protocolo 29 permanece igual."
+          }
+        ]
+      },
+      "evidence": {
+        "report": "docs/phases/COMPETITIVE-BALANCE-PATCH-NOTES.md",
+        "accepted": false,
+        "seed_blocks": {
+          "discovery": "0..64",
+          "screening": "200000..200256; 25 control/candidate runs, 12,800 games",
+          "confirmation": "1000000..1000128; 423424 games; strict required gate FAILED; no accepted numeric candidate"
+        }
+      },
+      "document": "docs/patches/2026-10-31-native-3.md"
+    },
+    {
+      "id": "native-2-consolidation",
+      "version": "0.1.0-native.2",
+      "date": "2026-10-31",
+      "status": "preview",
+      "kind": "content",
+      "ruleset_version": 2,
+      "ruleset_hash": "3d56156049e626c5",
+      "title": {
+        "en": "Complete roster and Linux consolidation",
+        "pt-BR": "Elenco completo e consolidação Linux"
+      },
+      "summary": {
+        "en": "46 champions, five refined arenas, the training laboratory and victory celebrations.",
+        "pt-BR": "46 campeões, cinco arenas refinadas, laboratório de treino e celebrações de vitória."
+      },
+      "changes": [
+        {
+          "category": "content",
+          "subject": {
+            "en": "Conventional roster",
+            "pt-BR": "Elenco convencional"
+          },
+          "field": {
+            "en": "Shop pool",
+            "pt-BR": "elenco da Loja"
+          },
+          "before": 25,
+          "after": 46,
+          "reason": {
+            "en": "Owner-requested activation of the complete authored roster. Values remain Proposed for competitive acceptance.",
+            "pt-BR": "Ativação do elenco completo solicitada pelo dono. Os valores continuam Propostos para aceitação competitiva."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Delivered",
+            "body": "Shared Linux navigation, fifty actual-model portraits, training with exact teams and targets, and complete lifetime winner celebrations. Protocol 29 requires client and server updates together."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Entregue",
+            "body": "Navegação compartilhada no Linux, cinquenta retratos dos modelos reais, treino com equipes exatas e alvos, e celebrações com todos os participantes vencedores. O protocolo 29 exige atualizar cliente e servidor juntos."
+          }
+        ]
+      },
+      "evidence": {
+        "report": "docs/phases/CONSOLIDATED-LINUX-RELEASE.md",
+        "accepted": false,
+        "seed_blocks": {
+          "discovery": "not a balance acceptance",
+          "confirmation": "pending"
+        }
+      },
+      "document": "docs/patches/2026-10-31-native-2.md"
+    }
+  ]
+}

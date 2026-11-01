@@ -1,15 +1,29 @@
 //! `tbg-server` binary: read env config, bind, serve. On SIGTERM/Ctrl-C it
-//! stops starting matches and exits once running ones finish (max 300 s).
+//! stops starting matches and exits once running matches, queued results
+//! and reconnect result windows are done (P66 BR-UP06: no time limit; a
+//! stuck drain is reported, never cut).
 
 use std::sync::atomic::Ordering::Relaxed;
 use std::time::{Duration, Instant};
 
+use tbg_server::release::Runtime;
 use tbg_server::{Config, Shared};
 
-const DRAIN_LIMIT: Duration = Duration::from_secs(300);
+/// How often a waiting drain logs what it still waits for.
+const DRAIN_REPORT: Duration = Duration::from_secs(30);
 
 fn main() {
-    let config = Config::from_env();
+    let mut config = Config::from_env();
+    // P60: an invalid integrity setting is a start-up error, never a default.
+    let settings = tbg_server::ranked::policy::RankedPolicy::from_env()
+        .and_then(|p| tbg_server::ranked::policy::StatsMode::from_env().map(|s| (p, s)));
+    match settings {
+        Ok((policy, stats)) => (config.ranked, config.stats) = (policy, stats),
+        Err(e) => {
+            eprintln!("tbg-server: {e}");
+            std::process::exit(2);
+        }
+    }
     // P10: worker count from `TBG_WORKERS` (0 = all cores); the runtime is
     // built by hand instead of `#[tokio::main]` so the count applies.
     let mut rt = tokio::runtime::Builder::new_multi_thread();
@@ -39,17 +53,32 @@ async fn serve(config: Config) {
         }
         _ = shutdown_signal() => {}
     }
-    shared.draining.store(true, Relaxed);
+    let Some(release) = shared.release.get().cloned() else {
+        return;
+    };
+    release.gate.shutdown.store(true, Relaxed);
     let started = Instant::now();
+    let mut reported: Option<Instant> = None;
     loop {
-        let running = shared.metrics.matches_running.load(Relaxed);
-        if running == 0 || started.elapsed() > DRAIN_LIMIT {
-            tracing::info!(running, "shutdown: done");
-            return;
+        let load = Runtime::load(&shared.metrics, shared.store.get().map(|s| s.as_ref()));
+        if load.matches_running == 0 && load.results_pending == 0 {
+            break;
         }
-        tracing::info!(running, "shutdown: waiting for matches");
-        tokio::time::sleep(Duration::from_secs(5)).await;
+        if reported.is_none_or(|t| t.elapsed() >= DRAIN_REPORT) {
+            tracing::info!(
+                running = load.matches_running,
+                results_pending = load.results_pending,
+                waited_s = started.elapsed().as_secs(),
+                "shutdown: draining; running matches and results finish first"
+            );
+            reported = Some(Instant::now());
+        }
+        tokio::time::sleep(Duration::from_secs(1)).await;
     }
+    if let Some(store) = shared.store.get() {
+        tbg_server::release::retire(&release, store).await;
+    }
+    tracing::info!(waited_s = started.elapsed().as_secs(), "shutdown: done");
 }
 
 async fn shutdown_signal() {

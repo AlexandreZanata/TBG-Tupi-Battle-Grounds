@@ -85,6 +85,10 @@ fn synergies() {
             (SynergyEffect::AttackSpeed, [2_000, 4_000]),
             (SynergyEffect::Damage, [500, 2_000]),
             (SynergyEffect::Regen, [75, 200]),
+            // D-64: Monsters damage, Celestials max HP, Insects movement.
+            (SynergyEffect::Damage, [500, 1_000]),
+            (SynergyEffect::MaxHp, [500, 1_000]),
+            (SynergyEffect::Movement, [500, 1_000]),
         ]
     );
 }

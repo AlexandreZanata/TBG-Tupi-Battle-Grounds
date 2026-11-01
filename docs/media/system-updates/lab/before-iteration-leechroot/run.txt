@@ -1,0 +1,4 @@
+favor-leechroot vs bot: 46.4% [44.2 – 48.4] over 2000 seed pairs
+stalled matches (60 s): 0.8% (32/4000)
+favor-leechroot vs bot (median ±10 pp)           46.4% [44.3% – 48.5%]        target 36.4% – 56.4%      PASS
+1 rows, 0 failing

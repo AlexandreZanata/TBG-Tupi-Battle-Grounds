@@ -4,13 +4,13 @@
 use crate::augment;
 use crate::content::{SynergyEffect, BP, REGEN_PERIOD};
 use crate::state::{Event, MatchState};
-use crate::types::{Seat, UnitKind, FACTIONS};
+use crate::types::{Seat, UnitKind, FACTIONS, FACTION_COUNT};
 
 pub(crate) fn update(state: &mut MatchState, ev: &mut Vec<Event>) {
     let rules = state.rules;
     for seat in Seat::BOTH {
         // u32: armies are uncapped (BR-U07); summons never count (BR-U08).
-        let mut counts = [0u32; 4];
+        let mut counts = [0u32; FACTION_COUNT];
         for u in state
             .units
             .iter()
@@ -75,13 +75,21 @@ fn regenerate(state: &mut MatchState) {
         }
         let bp = i64::from(bps[usize::from(level) - 1]);
         let mut heal = (i64::from(u.max_hp) * bp / BP) as i32;
-        if state.tick < u.heal_cut_until {
-            heal = (i64::from(heal) * i64::from(10_000 - u.heal_cut_bp).max(0) / 10_000) as i32;
+        let cut = crate::roster_slots::heal_cut_now(&u, state.tick);
+        if cut > 0 {
+            heal = (i64::from(heal) * i64::from(10_000 - cut).max(0) / 10_000) as i32;
         }
         if heal <= 0 {
             continue;
         }
         let unit = &mut state.units[idx];
         unit.hp = (unit.hp + heal).min(unit.max_hp);
+        let restored = unit.hp - u.hp;
+        crate::training_hooks::scoped(
+            state,
+            crate::training_hooks::Source::Team(u.seat),
+            crate::training_hooks::Effect::Regen,
+            |s| crate::training_hooks::restored(s, &u, restored),
+        );
     }
 }

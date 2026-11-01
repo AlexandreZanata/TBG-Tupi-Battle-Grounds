@@ -8,8 +8,11 @@ use bevy::asset::{AssetId, Assets};
 use bevy::prelude::*;
 use bevy::text::Font;
 
+pub mod augment;
 pub(crate) mod check;
 pub mod content;
+#[cfg(test)]
+mod content_coverage;
 #[cfg(test)]
 mod tests;
 
@@ -32,6 +35,19 @@ impl Lang {
             Lang::En => EN[index],
             Lang::PtBr => PT_BR[index],
         }
+    }
+
+    /// Dynamic catalog families resolve once while constructing a screen.
+    pub fn key(self, key: &str) -> String {
+        KEYS.binary_search(&key)
+            .map(|i| {
+                match self {
+                    Self::En => EN[i],
+                    Self::PtBr => PT_BR[i],
+                }
+                .to_string()
+            })
+            .unwrap_or_else(|_| key.to_string())
     }
 
     /// Re-text a static label only when the language changes.
@@ -107,6 +123,20 @@ impl Lang {
             Lang::PtBr => text.replace('.', ","),
         }
     }
+
+    /// Like [`Lang::decimal`] with trailing zeros dropped: `15`, `0.15`, `2.5`.
+    pub fn compact(self, value: f64, places: usize) -> String {
+        let text = format!("{value:.places$}");
+        let text = if text.contains('.') {
+            text.trim_end_matches('0').trim_end_matches('.')
+        } else {
+            &text
+        };
+        match self {
+            Lang::En => text.to_string(),
+            Lang::PtBr => text.replace('.', ","),
+        }
+    }
 }
 
 /// Static Bevy label: translated at spawn, re-texted only on `Lang` change.
@@ -133,6 +163,9 @@ fn startup_lang() -> Lang {
     #[cfg(not(target_arch = "wasm32"))]
     {
         crate::config::url_param("lang")
+            .or_else(|| {
+                crate::platform::storage::get(crate::platform::storage::Scope::Local, "tbg.lang")
+            })
             .and_then(|code| Lang::from_code(&code))
             .unwrap_or_default()
     }
@@ -146,4 +179,12 @@ pub fn plugin(app: &mut App) {
     let mut fonts = app.world_mut().resource_mut::<Assets<Font>>();
     let font = Font::from_bytes(UI_FONT.to_vec());
     fonts.insert(AssetId::default(), font).unwrap();
+    fonts
+        .insert(
+            crate::ui::kit::display_font().id(),
+            Font::from_bytes(
+                include_bytes!("../../assets/fonts/BattlegroundDisplayUi.ttf").to_vec(),
+            ),
+        )
+        .unwrap();
 }

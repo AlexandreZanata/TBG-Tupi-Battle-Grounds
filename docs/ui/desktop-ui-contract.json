@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "reference": "linux",
+  "candidate": "windows",
+  "pixel_difference_limit": 0,
+  "languages": [
+    "en",
+    "pt-BR"
+  ],
+  "scenarios": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "effective_ui_scale": 1.0
+    },
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "effective_ui_scale": 1.5
+    },
+    {
+      "viewport": [
+        2560,
+        1440
+      ],
+      "effective_ui_scale": 2.0
+    }
+  ],
+  "screens": [
+    "lobby",
+    "account",
+    "account-restoring",
+    "account-temporary",
+    "account-conflict",
+    "arcanas",
+    "strongholds",
+    "arenas-forest",
+    "arenas-tundra",
+    "arenas-volcanic",
+    "arenas-ruins",
+    "arenas-storm",
+    "ranking",
+    "troops",
+    "training",
+    "preview-dance",
+    "settings",
+    "battle-seat-a",
+    "battle-seat-b",
+    "unit-details",
+    "evolution",
+    "fortification",
+    "war-council",
+    "loading",
+    "victory-seat-a",
+    "victory-seat-b",
+    "next-match-cleanup"
+  ],
+  "motion_screens": [
+    "preview-dance",
+    "victory-seat-a",
+    "victory-seat-b",
+    "next-match-cleanup"
+  ],
+  "motion_frames": [
+    0,
+    10,
+    20,
+    40
+  ],
+  "matching_identity_fields": [
+    "source_commit",
+    "cargo_lock_sha256",
+    "assets_sha256",
+    "features",
+    "graphics",
+    "scene_seed"
+  ],
+  "capture_index_contract": {
+    "schema": 1,
+    "platform": "linux OR windows",
+    "source_commit": "40 lowercase hexadecimal",
+    "cargo_lock_sha256": "64 lowercase hexadecimal",
+    "assets_sha256": "64 lowercase hexadecimal",
+    "binary_sha256": "64 lowercase hexadecimal",
+    "package_sha256": "64 lowercase hexadecimal",
+    "features": [],
+    "graphics": {
+      "quality": "record exact shared settings"
+    },
+    "scene_seed": 68,
+    "environment": {
+      "os": "required",
+      "gpu": "required",
+      "driver": "required",
+      "backend": "required"
+    },
+    "captures": [
+      {
+        "screen": "required matrix screen",
+        "language": "en OR pt-BR",
+        "viewport": [
+          1280,
+          720
+        ],
+        "effective_ui_scale": 1.0,
+        "frame": 0,
+        "file": "relative/path.png"
+      }
+    ]
+  }
+}

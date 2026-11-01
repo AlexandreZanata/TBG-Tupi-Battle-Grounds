@@ -25,6 +25,7 @@ use crate::value::{self, estimate, report as value_report};
 struct Ctx {
     rules: &'static Ruleset,
     applied: String,
+    profile: String,
     budget: Budget,
     pairs: u64,
     seed_start: u64,
@@ -35,7 +36,12 @@ struct Ctx {
 fn ctx(a: &Args, default_pairs: u64, default_seed: u64) -> Result<Ctx, String> {
     // P44: the lab plays the full staging pool (ROSTER-EXPANSION §F.5);
     // since D-50 online draws the same pool.
-    let mut rules = Ruleset::preview().clone();
+    let profile = a.str("ruleset").unwrap_or("canon");
+    let mut rules = match profile {
+        "canon" => Ruleset::canon().clone(),
+        "preview" => Ruleset::preview().clone(),
+        other => return Err(format!("unknown ruleset {other}; use canon or preview")),
+    };
     let applied = a.str("apply").unwrap_or("").to_string();
     knobs::apply(&mut rules, &applied)?;
     let cores = std::thread::available_parallelism().map_or(1, |n| n.get()) as u64;
@@ -43,15 +49,21 @@ fn ctx(a: &Args, default_pairs: u64, default_seed: u64) -> Result<Ctx, String> {
         .str("out")
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from("target/balance").join(&a.command));
+    let pairs = a.num("pairs", default_pairs)?;
+    let seed_start = a.num("seed-start", default_seed)?;
+    seed_start
+        .checked_add(pairs)
+        .ok_or("seed range overflows u64")?;
     Ok(Ctx {
         rules: Box::leak(Box::new(rules)),
         applied,
+        profile: profile.into(),
         budget: Budget {
-            threads: a.num("threads", cores)? as usize,
+            threads: a.num("threads", cores)?.min(cores) as usize,
             reaction: a.num("reaction", u64::from(gate::REACTION))? as u32,
         },
-        pairs: a.num("pairs", default_pairs)?,
-        seed_start: a.num("seed-start", default_seed)?,
+        pairs,
+        seed_start,
         out: Out::new(&dir).map_err(|e| format!("{}: {e}", dir.display()))?,
         started: Instant::now(),
     })
@@ -81,7 +93,7 @@ impl Ctx {
             m,
             "applied: {}",
             if self.applied.is_empty() {
-                "canon"
+                "none"
             } else {
                 &self.applied
             }
@@ -96,6 +108,9 @@ impl Ctx {
         if !note.is_empty() {
             let _ = writeln!(m, "{note}");
         }
+        let _ = writeln!(m, "ruleset_base: {}", self.profile);
+        let _ = writeln!(m, "shop_preview: {}", self.rules.shop.is_some());
+        let _ = writeln!(m, "pool_kinds: {}", self.rules.pool.len());
         let _ = writeln!(m, "threads: {}", self.budget.threads);
         let _ = writeln!(m, "reaction_views: {}", self.budget.reaction);
         let _ = writeln!(m, "wall_s: {wall:.2}");
@@ -114,8 +129,9 @@ impl Ctx {
 }
 
 fn games_and_ticks(results: &gate::Results) -> (u64, u64) {
-    let games = results.values().map(|v| v.len() as u64 * 2).sum();
+    let games = results.pairs.values().map(|v| v.len() as u64 * 2).sum();
     let ticks = results
+        .pairs
         .values()
         .flat_map(|v| v.iter().flat_map(|p| p.iter().map(|r| u64::from(r.ticks))))
         .sum();
@@ -158,8 +174,8 @@ fn run(a: &Args) -> Result<(), String> {
         setup: Setup::None,
         arcanas: [ArcanaPreset::NEUTRAL; 2],
     };
-    let results: gate::Results =
-        [(pair, run_pairs(&[m], c.seeds(), c.budget.threads).remove(0))].into();
+    let mut results = gate::Results::default();
+    results.insert(pair, run_pairs(&[m], c.seeds(), c.budget.threads).remove(0));
     let s = gate::scores(&results, pair.0, pair.1).unwrap_or_default();
     let e = stats::mean(&s, stats::RESAMPLES, 99);
     let mut text = format!(
@@ -173,8 +189,9 @@ fn run(a: &Args) -> Result<(), String> {
     );
     // Stagnation row for turtle comps (P47): share of games stalling 60 s
     // with no Stronghold damage and no conventional death (P42 stall rule).
-    let games: u32 = results.values().map(|p| p.len() as u32).sum::<u32>() * 2;
+    let games: u32 = results.pairs.values().map(|p| p.len() as u32).sum::<u32>() * 2;
     let stalled: u32 = results
+        .pairs
         .values()
         .flat_map(|p| p.iter().flat_map(|g| [&g[0], &g[1]]))
         .filter(|r| r.stall >= 60 * tbg_core::content::TICK_HZ)
@@ -199,13 +216,21 @@ fn run(a: &Args) -> Result<(), String> {
     c.out
         .write("roster.csv", &report::roster_csv(&results, c.rules))
         .map_err(|e| e.to_string())?;
+    c.out
+        .write("shop.csv", &report::shop_csv(&results))
+        .map_err(|e| e.to_string())?;
     let (g, t) = games_and_ticks(&results);
     c.finish(g, t, "")
 }
 
 fn duels_cmd(a: &Args) -> Result<(), String> {
     let c = ctx(a, 1, DISCOVERY)?;
-    let m = duels::matrix(c.rules, c.budget.threads);
+    let m = if a.flag("base-only") {
+        let bases = duels::forms().into_iter().filter(|f| f.tier == 0).collect();
+        duels::matrix_of(c.rules, bases, c.budget.threads)
+    } else {
+        duels::matrix(c.rules, c.budget.threads)
+    };
     let summary = report::duel_summary(&m, c.rules);
     print!("{summary}");
     c.out
@@ -238,7 +263,7 @@ fn meta_text(results: &gate::Results) -> (String, String) {
 
 fn meta_cmd(a: &Args) -> Result<(), String> {
     let c = ctx(a, 256, DISCOVERY)?;
-    let results = gate::run(
+    let results = gate::run_reported(
         c.rules,
         Scope::Full,
         c.seeds(),
@@ -263,18 +288,36 @@ pub fn required(name: &str) -> bool {
 }
 
 fn gate_cmd(a: &Args) -> Result<(), String> {
+    let scope = match a.str("scope").unwrap_or("full") {
+        "full" => Scope::Full,
+        "suite" if !a.flag("strict") => Scope::Suite,
+        "suite" => return Err("--strict requires the full pool, including Nash evidence".into()),
+        other => return Err(format!("unknown scope {other}; use full or suite")),
+    };
     let c = ctx(a, 1_000, CONFIRMATION)?;
-    let results = gate::run(
+    let results = gate::run_reported(
         c.rules,
-        Scope::Full,
+        scope,
         c.seeds(),
         c.budget.reaction,
         c.budget.threads,
     );
     let matrix = duels::matrix(c.rules, c.budget.threads);
-    let rows = gate::rows(&results, Some((&matrix, c.rules)), stats::RESAMPLES);
+    let rows = gate::rows_with_threads(
+        &results,
+        Some((&matrix, c.rules)),
+        stats::RESAMPLES,
+        c.budget.threads,
+    );
     let table = report::table(&rows);
-    let (meta_txt, payoff) = meta_text(&results);
+    let (meta_txt, payoff) = if scope == Scope::Full {
+        meta_text(&results)
+    } else {
+        (
+            "Screening suite only: full-pool Nash evidence is absent.\n".into(),
+            String::new(),
+        )
+    };
     print!("{table}\n{meta_txt}");
     let w = |n: &str, s: &str| c.out.write(n, s).map_err(|e| e.to_string());
     w("gate.txt", &format!("{table}\n{meta_txt}"))?;
@@ -284,7 +327,7 @@ fn gate_cmd(a: &Args) -> Result<(), String> {
     w("duels.txt", &report::duel_summary(&matrix, c.rules))?;
     w("duels.csv", &report::duels_csv(&matrix, c.rules))?;
     let (g, t) = games_and_ticks(&results);
-    c.finish(g, t, "")?;
+    c.finish(g, t, &format!("scope: {scope:?}"))?;
     let failing: Vec<&str> = rows
         .iter()
         .filter(|r| required(&r.name) && !r.pass())
@@ -428,7 +471,12 @@ fn confirm(a: &Args) -> Result<(), String> {
             c.budget.threads,
         );
         let matrix = duels::matrix(rules, c.budget.threads);
-        let rows = gate::rows(&full, Some((&matrix, rules)), stats::RESAMPLES);
+        let rows = gate::rows_with_threads(
+            &full,
+            Some((&matrix, rules)),
+            stats::RESAMPLES,
+            c.budget.threads,
+        );
         let _ = writeln!(
             text,
             "== {label}, reaction {} ==\n{}",

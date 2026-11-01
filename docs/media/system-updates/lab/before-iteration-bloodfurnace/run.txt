@@ -1,0 +1,4 @@
+favor-bloodfurnace vs bot: 52.9% [50.8 – 55.0] over 2000 seed pairs
+stalled matches (60 s): 1.1% (42/4000)
+favor-bloodfurnace vs bot (median ±10 pp)        52.9% [50.7% – 55.0%]        target 42.9% – 62.9%      PASS
+1 rows, 0 failing

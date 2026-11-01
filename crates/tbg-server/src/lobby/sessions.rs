@@ -7,7 +7,6 @@ use tbg_core::protocol::{InviteToken, ServerMsg, Token};
 
 use super::{send, Lobby, Session, SessionState, ROOM_TTL};
 use crate::chan::{ConnEvent, ConnHandle, MatchCmd};
-use crate::names::{display_name, random_bytes};
 
 impl Lobby {
     /// Resume a known session (taking over any older socket) or create one.
@@ -16,12 +15,42 @@ impl Lobby {
         resume: Option<Token>,
         conn: ConnHandle,
         ip: IpAddr,
-    ) -> (Token, String) {
+    ) -> Option<(Token, String)> {
+        let reserved = resume.is_some_and(|t| {
+            self.sessions
+                .get(&t)
+                .is_some_and(|s| s.account.is_some() || s.auth_binding.is_some())
+        });
+        let resume = if reserved {
+            let _ = conn.tx.try_send(ConnEvent::Send(ServerMsg::AuthRequired {
+                reason: tbg_core::protocol::AuthRefusal::Invalid,
+            }));
+            None
+        } else {
+            resume
+        };
+        self.hello_bound(resume, conn, ip)
+    }
+
+    pub(super) fn hello_bound(
+        &mut self,
+        resume: Option<Token>,
+        conn: ConnHandle,
+        ip: IpAddr,
+    ) -> Option<(Token, String)> {
         // A reload does not resume a watch: the new socket starts `Idle` (BR-LV02).
         if let Some(t) = resume {
             self.end_watch(t);
         }
         if let Some(s) = resume.and_then(|t| self.sessions.get_mut(&t)) {
+            if let Some(old) = &s.conn {
+                old.active
+                    .store(false, std::sync::atomic::Ordering::Release);
+            }
+            if s.account.is_some() {
+                conn.active
+                    .store(true, std::sync::atomic::Ordering::Release);
+            }
             send(&s.conn, ConnEvent::Close);
             if let SessionState::InMatch { tx, seat } = &s.state {
                 let _ = tx.try_send(MatchCmd::Attach {
@@ -34,6 +63,8 @@ impl Lobby {
                     tx: tx.clone(),
                 });
             }
+            // P66: a resumed signed-in session claims its account again.
+            let reclaim = s.account.as_ref().map(|(id, _)| (s.token, *id));
             // P14: a resumed session that holds an account tells the new
             // socket (a reload keeps the token but not the client's profile).
             if let Some((_, profile)) = &s.account {
@@ -49,6 +80,14 @@ impl Lobby {
                 _ => None,
             };
             let idle = matches!(s.state, SessionState::Idle);
+            if idle {
+                if let Some((until, result)) = &s.finished {
+                    if Instant::now() < *until {
+                        send(&Some(conn.clone()), ConnEvent::Send(result.start.clone()));
+                        send(&Some(conn.clone()), ConnEvent::Send(result.end.clone()));
+                    }
+                }
+            }
             s.conn = Some(conn);
             s.ip = ip;
             s.detached_at = None;
@@ -67,11 +106,16 @@ impl Lobby {
             } else if idle {
                 self.resume_rematch(token);
             }
-            return (token, name);
+            if let Some((t, id)) = reclaim {
+                self.reclaim(t, id);
+            }
+            return Some((token, name));
         }
+        let (token, name) = crate::names::session_identity()?;
         let session = Session {
-            token: random_bytes::<16>(),
-            name: display_name(),
+            auth_binding: None,
+            token,
+            name,
             conn: Some(conn),
             state: SessionState::Idle,
             account: None,
@@ -80,10 +124,11 @@ impl Lobby {
             arcanas: tbg_core::ArcanaPreset::DEFAULT,
             stronghold: tbg_core::StrongholdKind::DEFAULT,
             last_spectate: None,
+            finished: None,
         };
         let pair = (session.token, session.name.clone());
         self.sessions.insert(session.token, session);
-        pair
+        Some(pair)
     }
 
     pub(super) fn disconnected(&mut self, token: Token, conn_id: u64) {
@@ -100,7 +145,15 @@ impl Lobby {
         };
         s.conn = None;
         s.detached_at = Some(Instant::now());
+        // P66: an idle signed-in session frees its account for other slots;
+        // a resume re-claims it. A seat in a match keeps it.
+        let idle_account = matches!(s.state, SessionState::Idle)
+            .then(|| s.account.as_ref().map(|(id, _)| *id))
+            .flatten();
         self.leave_queue_room(token);
+        if let Some(id) = idle_account {
+            self.release_owner(id);
+        }
     }
 
     /// A reload on the result screen recovers the open rematch offer.
@@ -151,13 +204,26 @@ impl Lobby {
         self.limits.sweep(now);
         self.rooms.retain(|(.., created)| now - *created < ROOM_TTL);
         let window = Duration::from_secs(self.config.reconnect_secs);
+        let mut released = Vec::new();
         self.sessions.retain(|_, s| {
+            if s.finished.as_ref().is_some_and(|(until, _)| now >= *until) {
+                s.finished = None;
+            }
             let gone = s.detached_at.is_some_and(|t| now - t > window);
-            !gone || matches!(s.state, SessionState::InMatch { .. })
+            let keep = !gone || matches!(s.state, SessionState::InMatch { .. });
+            if !keep {
+                released.extend(s.account.as_ref().map(|(id, _)| *id));
+            }
+            keep
         });
+        for id in released {
+            self.release_owner(id);
+        }
         self.queue.retain(|t| self.sessions.contains_key(t));
         self.ranked_queue.retain(|t| self.sessions.contains_key(t));
         self.queued_at.retain(|t, _| self.queue.contains(t));
+        self.ranked_queued_at
+            .retain(|t, _| self.ranked_queue.contains(t));
 
         let ttl = Duration::from_secs(self.config.challenge_ttl_secs);
         let expired: Vec<(InviteToken, Token)> = self

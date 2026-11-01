@@ -46,7 +46,7 @@ pub fn plugin(app: &mut App) {
         .insert_resource(RefreshTimer(Timer::from_seconds(0.5, TimerMode::Repeating)))
         .add_systems(Startup, spawn_overlay)
         .add_systems(Update, update_overlay);
-    if crate::config::url_param("measure").is_some() {
+    if crate::config::url_param("measure").is_some() || crate::config::url_param("perf").is_some() {
         app.init_resource::<Probe>()
             .add_systems(PostUpdate, probe_motion);
     }
@@ -132,7 +132,7 @@ fn update_overlay(
         return;
     }
     #[cfg(target_arch = "wasm32")]
-    if crate::config::url_param("measure").is_some() {
+    if crate::config::url_param("measure").is_some() || crate::config::url_param("perf").is_some() {
         if let Some(doc) = web_sys::window().and_then(|w| w.document()) {
             if let Some(el) = doc.get_element_by_id("tbg-measure") {
                 let _ =

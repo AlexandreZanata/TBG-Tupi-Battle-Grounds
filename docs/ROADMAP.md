@@ -175,14 +175,18 @@ Phase files are written one at a time, starting with P42.
 | P38 | [P38-arcana-validation-and-release.md](phases/P38-arcana-validation-and-release.md) | Human, security, performance, and real-server gates; owner release decision | planned | — |
 | P39 | [P39-quick-challenge-and-rematch.md](phases/P39-quick-challenge-and-rematch.md) | One-click link challenge; both-accept rematch; private rooms, queues, and reconnect preserved | implemented; 29 online tests and browser evidence; **owner physical-phone/PWA check pending** | PR #2 follow-up fixes pending |
 | P40 | [P40-arcana-trees.md](phases/P40-arcana-trees.md) | Fifteen-node trees, twelve points, three supremes, preset migration, editor and lab evidence | implemented; audited on `phase/p40-review` (Quickdraw cap fixed, Deadeye re-measured to +0.25 tile); War and Vitality builds trail the default, browser look check open | — |
-| P41 | [P41-i18n-pt-br.md](phases/P41-i18n-pt-br.md) | Client-only English + Brazilian Portuguese: compiled catalogs, lobby language selector, Latin-1 fonts, zero per-frame cost | steps 0–5 implemented (catalogs, fonts, resolver, lobby; PR #9); steps 6–8 and owner decisions O-P41-1…5 open | — |
+| P41 | [P41-i18n-pt-br.md](phases/P41-i18n-pt-br.md) | Client-only English + Brazilian Portuguese: compiled catalogs, lobby language selector, Latin-1 fonts, zero per-frame cost | steps 0–5 implemented (PR #9); browser-client steps 6–9 and 11 completed by P64 (`codex/p64-i18n-completeness`); step 10 pt-BR values proposed, owner review O-P41-1/2 open | — |
 | P42 | [P42-roster-baseline.md](phases/P42-roster-baseline.md) | Roster canon (D-48), lab combat counters, stall and duration rows, `comp-*` policy, baseline on main | in progress | — |
-| P47 | [P47-live-spectate-and-presence.md](phases/P47-live-spectate-and-presence.md) | Lobby: players online and in battle always visible, Live battles panel (public Casual + Ranked), real-time spectating for guests and accounts | implemented on `phase/p47-live-lobby` (protocol v17, GAME-DESIGN §13, D-59); not merged, not deployed; owner look pending | yes (owner: look) |
+| P47 | [P47-live-spectate-and-presence.md](phases/P47-live-spectate-and-presence.md) | Lobby: players online and in battle always visible, Live battles panel (public Casual + Ranked), real-time spectating for guests and accounts | merged in PR #19; deployed with arena visuals and Leave/Ranking fixes (D-59, GAME-DESIGN §14); owner look pending | yes (owner: look) |
 | P54 | [P54-unit-art-kits.md](phases/P54-unit-art-kits.md) | Unit art kits (own model, motion, aim, projectile per character); gait v2 for every unit; Strongholds aim and fire their own projectiles; Siege Walker, Bone Brute, Rootcaller final kits | done; **owner approved (2026-10-30)**; tower defenders and lobby-faithful dress added (D-52) | yes (owner) |
 | P55 | [P55-champion-kits.md](phases/P55-champion-kits.md) | Every unrefined champion on its own art kit (fifteen new champions, the Crate, seven originals) on a shared kit library; support action cues (D-53) | done; **owner approved (2026-10-30)** | yes (owner) |
+| PORTRAITS | [PORTRAITS-shop-cards.md](phases/PORTRAITS-shop-cards.md) | Shop card portraits for all 25 buyable units from the current 3D models, same framing as the original set; capture tool and test | implemented, awaiting owner look | yes (owner: look) |
 | A-1 | [A1-visual-polish-troops-strongholds.md](phases/A1-visual-polish-troops-strongholds.md) | Troop polish: directional aim from `AttackStart`, directed melee, 55 rig-v2 forms, full animation pass (D-47). Steps 10–12 (Strongholds) **superseded by D-46** | consolidated 2026-10-30: kit units keep the P54/P55 look (owner direction); A-1 drives the Archer and any kind without a kit (D-47) | — |
 | ARENAS-G | [ARENAS-gameplay.md](phases/ARENAS-gameplay.md) | Arenas in the real game: server draw at pairing, symmetric modifiers (Proposed), practice choice, scene switching, Arenas lobby page; lab measurement deferred by the owner | implemented, awaiting owner look | yes (owner: look, fun, values) |
-| P57 | [P57-unit-spacing.md](phases/P57-unit-spacing.md) | Units take up space on screen: client display layout (five files, ranks behind the front, smoothing); server and protocol unchanged | planned | yes (owner: look) |
+| P56 | [P56-archer-crab-selection.md](phases/P56-archer-crab-selection.md) | Part A fixes: Archer bow on its kit (curved, drawable string, native path removed), Cargo Crab carry rule (D-60), carrier id in the view (D-61, protocol 18), passengers seated on their carrier with a boarding arc, crab visual rebuilt, selective name tags | Part A implemented and verified; balance deferred by owner; look sign-off pending | yes (owner: look) |
+| P57 | [P57-unit-spacing.md](phases/P57-unit-spacing.md) | Units take up space on screen; server and protocol unchanged | consolidated with PR #21 crowd renderer; sorted views and target/lunge corrections retained; owner look pending | yes (owner: look) |
+| P58 | [P58-roster-expansion-planning.md](phases/P58-roster-expansion-planning.md) | Docs-only plan for 21 units + Monsters/Celestials/Insects: catalog, audit, GAME-DESIGN §13 registry, future waves | planned; reaudited | — |
+| P59 | [P59-roster-expansion-impl.md](phases/P59-roster-expansion-impl.md) | Roster expansion implementation (21 units, 3 Factions) in waves W0 to W11, per P58; status report lists what is open | W0/W1 and four inactive Monsters kinds implemented (D-62–D-66); integration reviewed; kits and W2–W11 open; owner look pending | yes (owner: P58 decisions) |
 
 ## Independent arena art follow-up
 
@@ -193,6 +197,16 @@ layout. The owner requested client visuals and documentation only, based on
 See the [arena art catalog and preview links](ARENAS.md). Implementation and
 desktop evidence are tracked in that report; owner visual approval is pending.
 The gameplay integration is [ARENAS-G](phases/ARENAS-gameplay.md).
+
+## Independent system update front (2026-10-31)
+
+[SYSTEM-updates](phases/SYSTEM-updates.md) implements the owner's champion
+adjustments, client crowd, local Shop Reserve/Reroll preview and repeatable
+performance scenes on `phase/system-champions-crowd-shop`, based on main
+`9008f11`. Work-front validation follows the owner's updated minimal policy.
+Balance confirmation, visual approval and measurement-dependent optimizations
+remain pending. CANON Shop stays disabled; no Frontage or gameplay Ghost.
+Draft PR delivery is for consolidation; it is not a release approval.
 
 ## Pending validations (owner)
 
@@ -289,6 +303,10 @@ All code for P1–P8 is implemented and validated on the development PC
 > the phase file with the real command outputs and measurements, commit
 > it, and stop.
 
+## Owner-requested arena reference refinement (2026-10-31)
+
+[Visual refinement](art/ARENA-REFERENCE-REFINEMENT.md) of the four themed arenas from main `9008f11`, following the supplied temple, snow, lava and storm references. Forest remains the approved reference. Empty before/after captures are requested; local validation is scoped to formatting, static checks and the necessary development WASM builds/browser gallery. Full suite, release profiling and subjective approval are deferred. Publication is authorized as a new visual PR; no merge or deploy.
+
 ## Owner-requested art follow-ups (2026-10-30)
 
 Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and future Synergy emblems](art/FACTIONS.md), then [illustrated lobby and account presentation](art/LOBBY-PRESENTATION.md). Reports include asset budgets, measured fidelity, desktop galleries and verification limits. These cosmetic follow-ups do not complete or replace a planned gameplay phase.
@@ -297,8 +315,176 @@ Implemented on `codex/ranking-ui` for review in PR #14: [Faction Shop molds and 
 
 [Arena seascape](art/ARENA-SEASCAPE.md): implemented and validated on `codex/arena-seascape`, based on main `6ef155b`, then integrated into `codex/ranking-ui` for PR #14 at the owner's request to publish all changes from this chat. Owner approved the displayed design and the 12.9 ms reference p95 limit (+15.2% over its measured baseline). Report includes before/after desktop captures, performance/build measurements, local commits and the separate pre-existing online-test exclusion. Current authorization is GitHub publication only; no main merge or VPS deployment. Broader P30 status is unchanged.
 
+## Owner-requested Troops and training phase (2026-10-31)
+
+| Phase | Spec | Scope | Status | Owner checkpoints |
+|---|---|---|---|---|
+| P62 | [P62-troops-training-lab.md](phases/P62-troops-training-lab.md) | Troops catalog: lore, abilities, stats and animated model; exact-team combat laboratory, wooden dummies and Easy/Medium/Hard/Impossible practice bots | **in progress** on `phase/p62-troops-training-lab`: Step 0 recorded; Step 3 core kernel slice written (work-front checks only, tests queued); Steps 1, 2, 4, 5 pending | Integration base, proposed limits/dummy semantics, Impossible assistance, lore/look/fun |
+| P62 | [P62-troops-training-lab.md](phases/P62-troops-training-lab.md) | Troops catalog: lore, abilities, stats and animated model; exact-team combat laboratory, wooden dummies and Easy/Medium/Hard/Impossible practice bots | **planning only** on `codex/p62-troops-training-plan`; no implementation or gameplay validation | Integration base, proposed limits/dummy semantics, Impossible assistance, lore/look/fun |
+
+Read [player journeys and validation cases](planning/TROOPS-TRAINING.md).
+Execute catalog/content → model preview/Dance → safe training core/dummy →
+team editor/measurement → practice profiles → targeted consolidation.
+Preserve the existing Bot baseline, canonical combat, online outcomes and
+offline balance-lab boundary. No mobile work or full-suite run is included.
+
+P60/P61 were planned on `docs/p60-p61-ranked-integrity-stats`; their IDs
+remain reserved and they are not dependencies of P62. P59 roster expansion
+and the native desktop shell have separate branches: freeze their actual
+merged state before execution. No staged champion is enabled by this plan.
+D-80/D-81 avoid the inspected P59 decision reservations through D-79.
+Use the current owner's minimal-validation policy, including shared lock
+and two-job cap; historical broad verification blocks are not authorization.
+## Owner-requested localization completion (2026-10-31)
+
+| Phase | Spec | Scope | Status | Review |
+|---|---|---|---|---|
+| P64 | [P64-i18n-completeness.md](phases/P64-i18n-completeness.md) | Finish P41: champions/abilities, Augments, Arcanas, Strongholds, HUD/common states, API/ranking profiles, native and standalone views; shared keys and live language refresh | **implemented on main's browser client** (`codex/p64-i18n-completeness`, Draft PR); native shell rows deferred (not on main) | Browser journeys/screenshots and owner translation review pending |
+
+[Audit/file inventory](planning/P64-I18N-AUDIT.md),
+[hashed source manifest](planning/P64-I18N-SOURCE-MANIFEST.csv), and
+[executor prompt with authorized PR-to-main delivery](planning/P64-EXECUTION-PROMPT.md).
+P41's existing partial implementation remains partial until these applicable
+gaps are fixed and validated. Equal catalog key sets do not close its content
+or dynamic-view acceptance. No game code was changed by this plan.
+
+## Owner-requested victory celebration (2026-10-31)
+
+| Phase | Spec | Scope | Status | Owner checkpoints |
+|---|---|---|---|---|
+| P63 | [P63-victory-celebration.md](phases/P63-victory-celebration.md) | Winner's complete living/dead cast in the arena, facing the player; current per-kit Victory, future signature dances, reliable cast summary and accessible result controls | **implementation draft**, `codex/p63-victory-celebration`; [execution evidence](phases/P63-execution.md) | Complete animated cast and pages of 64 approved; shared existing Victory now, exclusive pilot deferred by owner; visual/performance acceptance pending |
+
+Implement cast inventory/contract → end/reconnect delivery → Result scene/
+frontal formation → shared motion and signature pilot → targeted review.
+P63 shares animation ownership with P62; the complete training laboratory
+is not a dependency. Existing animations may ship first; unique dances for
+the whole roster are a later content pass. The execution branch implements
+the aggregate, protocol 28, terminal replay and cosmetic scene against main
+`9008f11`; unrelated native/roster/training fronts remain separate. Targeted
+checks and remaining A01–A08 acceptance are recorded in the execution report.
+No full-suite or performance acceptance is claimed. See D-82 and Proposed §17.
+
+## Owner-requested native updater and safe releases (2026-10-31)
+
+| Phase | Spec | Scope | Status | Owner gates |
+|---|---|---|---|---|
+| P66 | [P66-native-updates-and-release-safety.md](phases/P66-native-updates-and-release-safety.md) | Signed recoverable Linux updates, Windows adapter, startup/post-update modals, protected reconnect and generation-pinned backend rollout | **Draft implementation**, `codex/p66-native-updates-release-safety`; Linux synthetic/real isolated acceptance, backend continuity incomplete | Install modes, trust/signing, emergency/version policy, measured overlap/retention and real platform evidence |
+
+[Release contracts/test matrix](planning/P66-RELEASE-CONTRACTS.md) and
+[executor prompt](planning/P66-EXECUTION-PROMPT.md). Linux managed updater
+comes first as milestone M1 (its own PR, no server change); backend safety
+M2 runs in parallel; two-slot rollout M3 follows M2; Windows M4 needs real
+devices. Backend sequence is safe drain → shared ownership/results → measured
+two-slot rollout with stable routes and one active public contract. No forced in-match restart or finite match-drain cutoff. Retain
+browser/native builds and compatible DB writers. A later multi-host capacity
+stage requires evidence and owner scope, not an assumed thousands-player SLA.
+See P66 §11 for actual implementation, targeted checks and remaining acceptance.
+Only test-root update acceptance is claimed; Windows, official signing and
+zero-disconnect rollout remain gated. No stable activation is approved.
+
 ## Later (not planned yet)
 
 `Inventory` and cosmetics store (BR-C01–C03) · units 9–12 · replays/VOD (live spectating is P47) ·
 rating-based matchmaking and seasons (D-18) · `Reposition`/bench design ·
 WebGPU build · delta views · additional regions (ARCHITECTURE §12).
+
+## Native distribution (owner request, 2026-10-31)
+
+[NATIVE-client.md](phases/NATIVE-client.md) tracks `phase/native-linux-windows`:
+full shared Bevy interface, Linux release and installation first, Windows
+second. D-60 records scope and D-61 the owner's visible-attribution license.
+Implementation is in progress; consolidated acceptance, visual sign-off,
+GitHub publication and installation are pending. The front uses the current
+minimal validation policy and does not claim release readiness.
+## Ranked integrity and statistics program (planning, 2026-10-31)
+
+| Phase | Spec | Deliverable | Status | Review |
+|---|---|---|---|---|
+| P60 | [P60-ranked-integrity.md](phases/P60-ranked-integrity.md) | Shared v7 ranked identity/recovery, shadow signals, optional whole-pair budgets, audit/correction CLI | **In progress** on `codex/p60-p61-ranked-implementation`: steps 0–5 implemented in shadow mode (no gate active), including the `tbg-ranked-admin` correction CLI; scoped clippy and targeted tests pass; steps 6 (owner gate) and 7 pending; D-87/D-89 and BR-RI Proposed | focused tests, CLI, review, owner activation pending |
+| P61 | [P61-ranked-stats.md](phases/P61-ranked-stats.md) | v8 side summaries, internal CLI, public aggregate API/desktop lobby page, patch-note workflow | **In progress**: §3 ruleset identity, E0 (collector, v8, post-commit insert) and E1 (internal aggregation, `tbg-stats`) delivered, targeted tests pass; E2/E3 (public API, lobby page, patch workflow) not started; D-88/D-89 | implementation, review, privacy/look/publication decisions pending |
+
+Read [RANKED-PROGRAM.md](planning/RANKED-PROGRAM.md) first: audited current
+behavior, requirements, improvements, numbering reservations, execution
+order and owner decisions. P59 and D-60–69 are already used by parallel
+fronts; P60/P61 and D-87–89 must be reconciled again at merge.
+
+Recommended order: P60 foundation/shadow -> P61 collection/internal report
+-> one focused consolidation -> P61 public UI -> optional P60 enforcement
+only with owner approval and shadow evidence. Automated Elo retention is
+explicitly deferred, not part of a hidden stage activation.
+
+No production implementation, full test suite, balance lab, VPS access,
+database mutation or deployment is part of this planning delivery. Use the
+2026-10-31 minimum-validation policy recorded in the program: documentation
+checks now; exact targeted tests once at implementation consolidation;
+heavy/full-suite checks only on a separate explicit owner request.
+
+## Windows native release (owner planning request, 2026-10-31)
+
+| Phase | Spec | Deliverable | Status | Review |
+|---|---|---|---|---|
+| P68 | [P68-windows-native-release.md](phases/P68-windows-native-release.md) | Exact desktop visuals, Windows MSVC ZIP/installer, Wine/real Windows acceptance; P68-A adds Linux/Windows/web persistent auth, 15-minute Access and rotating 30-day Refresh | **Linux candidate published:** [v0.1.0-p68.1](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.0-p68.1), [Draft PR #32](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/32); protocol 30/schema 9 auth, real Linux vault/browser evidence and shared desktop routing implemented; see [execution evidence](phases/P68-execution.md). Windows/Wine/signing and exact packaged visual acceptance remain pending | A01–A14/W01–W18, coordinated wire/schema, real vaults/browser, support/CRT/signing and owner visual sign-off |
+
+Read the [acceptance plan](planning/P68-WINDOWS-ACCEPTANCE.md),
+[hashed OS-gate inventory](planning/P68-PLATFORM-GATES.csv) and
+[execution prompt](planning/P68-EXECUTION-PROMPT.md). The source audit records
+234 conditions in 37 client/build-script files, including the Linux-only
+native interface and art-generation paths. Review their context rather
+than replacing every platform guard mechanically.
+
+P65–P67 are already reserved on their independent planning branches. Their
+absence from this consolidated Linux source base does not renumber them or
+make community, updater or commerce implementation a prerequisite for P68.
+Architecture §24 and D-96 leave those planning reservations intact.
+
+The installed native Linux release is preserved. Windows CI, Wine on Linux
+and actual Windows GPU observations remain separate acceptance records.
+Documentation validation now is not a build, installation or release claim.
+
+**Owner visual requirement:** Linux and Windows must have exactly the same
+frontend appearance. P68 includes platform-specific corrections wherever
+needed while preserving the approved Linux quality. W07/W08 and phase visual
+acceptance remain blocked by any unresolved visible difference; validate
+with matched packaged captures, not merely shared code or similar styling.
+
+**Owner auth extension:** execute [P68-A](planning/P68-PERSISTENT-AUTH.md)
+before final release packages and complete A01–A14 with W01–W18. Access is
+15 minutes; refresh families expire 30 days from login and rotate without
+extending that deadline. Linux/Windows use real user vaults, web uses protected
+cookies, and legacy keys migrate safely. D-97/GAME-DESIGN §21 authorize the
+account/wire changes without a combat change or automatic production deploy.
+The [auth source manifest](planning/P68-AUTH-SOURCE-MANIFEST.csv) records
+34 relevant baseline files for migration and consumer review.
+
+## Offline recovery and opponent mute (P67, 2026-10-31)
+
+[P67](phases/P67-commerce-recovery-foundation.md) now has executable offline
+recovery and presentation fixtures on `codex/p67-commerce-recovery-base`,
+based on the owner's consolidated `55510c5`. The owner deferred fiscal work
+and prioritized recovery/mute. Payment/provider/fiscal implementation is
+pending. Runtime email and opponent-mute activation remain unavailable.
+
+Status: **Draft, validation deferred**. Formatting, schema/example and SQL DDL
+checks passed; the targeted Rust batch did not start because the shared
+nonblocking validation lock returned 75. No full suite ran. See the
+[execution report](modules/commerce/OFFLINE-EXECUTION.md) for C01–C20 scope,
+queued commands, security/integration limits and later owner gates.
+
+## Consolidated main candidate (owner request, 2026-11-01)
+
+[Draft PR #34](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/34)
+on `codex/consolidate-linux-main` contains every open front (#18, #20–#33)
+through normal merges and supersedes those PRs; closing them is the owner's
+review step. It resolves the parallel P66/P68 schema and credential work as
+one auth/resume coordinator, schema 10 and protocol 30 (D-99), adds targeted
+tests for both v9 upgrades and replaces the CI with parallel fail-closed lanes
+behind the unchanged `check`. Linux candidate:
+[v0.1.1-rc.1](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.1-rc.1).
+See the [consolidation report](phases/CONSOLIDATION-20261101.md) and the
+[CI diagnosis](phases/CI-OPTIMIZATION-20261101.md).
+
+Status: **Draft**. Open gates stay owned by their phases: competitive
+acceptance (audit failures), P66 continuity investigation and O02–O05, P68
+Windows/visual/public-HTTPS acceptance, P67 activation gates, cross-slot
+revocation before any two-slot rollout with P68 auth, and owner look/fun
+sign-off. Nothing was deployed; production stays on protocol 29.

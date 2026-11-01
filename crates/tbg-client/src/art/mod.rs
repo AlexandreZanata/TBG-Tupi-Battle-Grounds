@@ -13,13 +13,7 @@ pub mod aim;
 pub mod anim;
 #[cfg(test)]
 mod anim_tests;
-mod archer_aim;
-pub mod archer_v2;
-mod archer_v2_clips;
-#[cfg(test)]
-mod archer_v2_tests;
-pub mod arrows;
-pub mod bow;
+pub mod celebration;
 mod clips;
 mod curves;
 pub mod death;
@@ -31,11 +25,13 @@ mod legacy;
 pub mod melee;
 pub mod mesh;
 pub mod palette;
+pub mod presentation;
 pub mod rig;
 pub(crate) mod roster;
 #[cfg(test)]
 mod roster_tests;
-mod springs;
+pub(crate) mod springs;
+mod training_dummy;
 
 use rig::{Proportions as BodyPlan, NODE_COUNT};
 
@@ -47,8 +43,6 @@ pub struct FigureForm {
     pub meshes: [Option<Handle<Mesh>>; NODE_COUNT],
     pub triangles: usize,
     pub native: bool,
-    /// Half the bow-string length for native archer forms (`bow.rs`).
-    pub bow_half: f32,
     enemy_meshes: Option<[Option<Handle<Mesh>>; NODE_COUNT]>,
     /// Unlit glow layer per joint (`figure::spawn_glow`), shared by both teams.
     pub glow: [Option<Handle<Mesh>>; NODE_COUNT],
@@ -66,14 +60,15 @@ impl FigureForm {
 
 #[derive(Resource)]
 pub struct FigureLibrary {
+    pub training_dummy: FigureForm,
     forms: HashMap<(UnitKind, u8, u8), FigureForm>,
     blockouts: HashMap<UnitKind, FigureForm>,
     /// One shared material for every figurine (vertex colors).
     pub material: Handle<StandardMaterial>,
     /// One shared unlit vertex-color material for every glow layer.
     pub glow_material: Handle<StandardMaterial>,
-    pub bow: bow::BowAssets,
     pub stage: Handle<Mesh>,
+    pub shells: HashMap<(u8, u8), [Handle<Mesh>; 4]>,
 }
 
 impl FigureLibrary {
@@ -96,14 +91,7 @@ pub fn plugin(app: &mut App) {
         // after all Update movement and before transforms propagate.
         .add_systems(
             PostUpdate,
-            (anim::animate, bow::strings)
-                .chain()
-                .before(bevy::transform::TransformSystems::Propagate),
-        )
-        .add_systems(Update, arrows::fly)
-        .add_systems(
-            PostUpdate,
-            arrows::release.after(bevy::transform::TransformSystems::Propagate),
+            anim::animate.before(bevy::transform::TransformSystems::Propagate),
         )
         .add_systems(
             PostUpdate,
@@ -126,9 +114,13 @@ fn build_library(
         unlit: true,
         ..default()
     });
-    let bow = bow::BowAssets::new(&mut meshes);
     let mut forms = HashMap::new();
-    for kind in ALL_KINDS {
+    for kind in tbg_core::ruleset::CANON
+        .units
+        .iter()
+        .map(|def| def.kind)
+        .filter(|kind| ALL_KINDS.contains(kind) || kits::kit(*kind).is_some())
+    {
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
             if let Some(kit) = kits::kit(kind) {
@@ -137,23 +129,6 @@ fn build_library(
                     "figure {kind:?} {tier}/{branch} (kit): {} triangles, {} glow joints",
                     form.triangles,
                     form.glow.iter().flatten().count()
-                );
-                max_tris = max_tris.max(form.triangles);
-                forms.insert((kind, tier, branch), form);
-                continue;
-            }
-            if kind == UnitKind::Archer {
-                let mut form = native_form(
-                    roster::humans::archer_v2::spec_full(tier, branch),
-                    &mut meshes,
-                    true,
-                );
-                form.bow_half = archer_v2::bow_half(tier);
-                info!(
-                    "figure Archer {tier}/{branch} (v2): {} triangles + {} bow/arrow triangles, {} mesh joints",
-                    form.triangles,
-                    bow.triangles,
-                    form.meshes.iter().flatten().count()
                 );
                 max_tris = max_tris.max(form.triangles);
                 forms.insert((kind, tier, branch), form);
@@ -323,7 +298,6 @@ fn build_library(
                     meshes: handles,
                     triangles,
                     native: false,
-                    bow_half: 0.64,
                     enemy_meshes: None,
                     glow: Default::default(),
                 },
@@ -343,12 +317,27 @@ fn build_library(
         mesh::build(mesh::Shape::Box(1.3, 0.05, 1.3)),
         palette::PARCHMENT,
     ));
+    let shells = FORMS
+        .into_iter()
+        .map(|(t, b)| {
+            let parts = std::array::from_fn(|i| {
+                let spec = kits::shatterback::model::plate(t, b, i);
+                let mesh = figure::build_joint_meshes(&spec)[rig::Joint::Chest.index()]
+                    .take()
+                    .unwrap_or_else(|| Cuboid::new(0.1, 0.1, 0.1).into());
+                meshes.add(mesh)
+            });
+            ((t, b), parts)
+        })
+        .collect();
+    let training_dummy = native_form(training_dummy::spec(), &mut meshes, false);
     commands.insert_resource(FigureLibrary {
+        training_dummy,
+        shells,
         forms,
         blockouts,
         material,
         glow_material,
-        bow,
         stage,
     });
 }
@@ -377,7 +366,6 @@ fn native_form(mut spec: figure::FigureSpec, meshes: &mut Assets<Mesh>, team: bo
         meshes: handles,
         triangles,
         native: true,
-        bow_half: 0.64,
         enemy_meshes,
         glow,
     }

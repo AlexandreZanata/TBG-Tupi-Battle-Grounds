@@ -2,7 +2,6 @@
 //! notification without starting a match task.
 
 use std::collections::{HashMap, VecDeque};
-use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -11,7 +10,7 @@ use tokio::sync::{mpsc, watch};
 use tbg_core::protocol::{
     ClientMsg, LiveId, LivePlayer, MatchMode, Profile, ServerMsg, SpectateRefusal,
 };
-use tbg_core::{Arena, StrongholdKind};
+use tbg_core::{Arena, Seat, StrongholdKind};
 
 use super::live::{Listing, LiveMatch};
 use super::{Lobby, RematchTicket, Session, SessionState};
@@ -21,6 +20,8 @@ use crate::live::{LiveProgress, LiveSnapshot};
 use crate::metrics::Metrics;
 use crate::Config;
 
+mod recovery;
+
 fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
     let (self_tx, self_rx) = mpsc::channel(8);
     (
@@ -29,6 +30,7 @@ fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
             queue: VecDeque::new(),
             ranked_queue: VecDeque::new(),
             queued_at: HashMap::new(),
+            ranked_queued_at: HashMap::new(),
             rooms: Vec::new(),
             challenges: Vec::new(),
             rematches: Vec::new(),
@@ -37,10 +39,12 @@ fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
             metrics: Arc::new(Metrics::default()),
             store: None,
             limits: Limits::default(),
-            draining: Arc::new(AtomicBool::new(false)),
+            release: crate::release::Runtime::new(&Config::default()),
             live: HashMap::new(),
             live_tx: watch::channel(Arc::default()).0,
             featured: None,
+            ranked: None,
+            ranked_seen: HashMap::new(),
         },
         self_rx,
     )
@@ -55,9 +59,10 @@ fn add_session(
     lobby.sessions.insert(
         token,
         Session {
+            auth_binding: None,
             token,
             name: "Tester".into(),
-            conn: Some(ConnHandle { id: 1, tx }),
+            conn: Some(ConnHandle::new(1, tx)),
             state,
             account: None,
             ip: "127.0.0.1".parse().unwrap(),
@@ -65,6 +70,7 @@ fn add_session(
             arcanas: tbg_core::ArcanaPreset::DEFAULT,
             stronghold: tbg_core::StrongholdKind::DEFAULT,
             last_spectate: None,
+            finished: None,
         },
     );
     rx
@@ -197,7 +203,7 @@ fn resume_cannot_start_an_expired_rematch_before_cleanup() {
     let (tx, mut a_rx) = mpsc::channel(8);
     lobby.hello(
         Some(a),
-        ConnHandle { id: 2, tx },
+        ConnHandle::new(2, tx),
         "127.0.0.1".parse().unwrap(),
     );
     assert!(lobby.rematches.is_empty());
@@ -219,7 +225,9 @@ fn reconnect_during_drain_keeps_rematch_from_starting() {
         expires: Some(Instant::now() + Duration::from_secs(60)),
     });
     lobby
-        .draining
+        .release
+        .gate
+        .shutdown
         .store(true, std::sync::atomic::Ordering::Relaxed);
     lobby.try_start_rematch([a, b]);
     assert_eq!(lobby.rematches.len(), 1);
@@ -390,6 +398,10 @@ async fn ranked_matches_are_listed_with_ratings_and_their_end_unlists_them() {
     for (token, name, rating) in [([7; 16], "Ana", 1_300), ([8; 16], "Bia", 1_100)] {
         let mut s_rx = add_session(&mut lobby, token, SessionState::Idle);
         let s = lobby.sessions.get_mut(&token).unwrap();
+        s.auth_binding = Some(crate::auth::Binding::fixture(
+            i64::from(token[0]),
+            profile(name, rating),
+        ));
         s.account = Some((i64::from(token[0]), profile(name, rating)));
         drop(s_rx.try_recv());
     }
@@ -404,6 +416,7 @@ async fn ranked_matches_are_listed_with_ratings_and_their_end_unlists_them() {
     lobby.handle(LobbyCmd::MatchEnded {
         tokens: [[7; 16], [8; 16]],
         live: Some(id),
+        finished: Box::new(Seat::BOTH.map(completed_fixture)),
     });
     lobby.publish_live(Instant::now());
     assert!(
@@ -552,4 +565,67 @@ fn a_watcher_returns_to_idle_on_stop_disconnect_and_match_end() {
     lobby.spectate([2; 16], 1);
     lobby.live_ended(1);
     assert!(matches!(lobby.sessions[&[2; 16]].state, SessionState::Idle));
+}
+
+fn completed_fixture(seat: Seat) -> crate::chan::CompletedResult {
+    crate::chan::CompletedResult {
+        delivered_to: None,
+        start: ServerMsg::MatchStart {
+            result_id: [63; 16],
+            you: seat,
+            you_name: "You".into(),
+            you_rating: None,
+            opponent: "Other".into(),
+            mode: tbg_core::protocol::MatchMode::Casual,
+            opponent_rating: None,
+            arcanas: [tbg_core::ArcanaPreset::DEFAULT; 2],
+            arena: tbg_core::Arena::Forest,
+        },
+        end: ServerMsg::MatchEnd {
+            result_id: [63; 16],
+            last_tick: 120,
+            cast: None,
+            outcome: tbg_core::Outcome {
+                winner: Some(Seat::A),
+                reason: tbg_core::EndReason::Forfeit,
+            },
+        },
+    }
+}
+
+#[test]
+fn celebration_terminal_replay_uses_the_existing_window_and_explicit_dismissal() {
+    let (mut lobby, _rx) = lobby();
+    let token = [63; 16];
+    let _old = add_session(&mut lobby, token, SessionState::Idle);
+    lobby.sessions.get_mut(&token).unwrap().finished = Some((
+        Instant::now() + Duration::from_secs(30),
+        Box::new(completed_fixture(Seat::A)),
+    ));
+    let (tx, mut inbox) = mpsc::channel(8);
+    let conn = ConnHandle::new(6363, tx);
+    lobby.hello(Some(token), conn, std::net::IpAddr::from([127, 0, 0, 1]));
+    let messages: Vec<_> = std::iter::from_fn(|| inbox.try_recv().ok())
+        .filter_map(|e| {
+            if let ConnEvent::Send(m) = e {
+                Some(m)
+            } else {
+                None
+            }
+        })
+        .collect();
+    assert!(messages
+        .iter()
+        .any(|m| matches!(m,ServerMsg::MatchStart{result_id,..} if *result_id==[63;16])));
+    assert!(messages
+        .iter()
+        .any(|m| matches!(m, ServerMsg::MatchEnd { last_tick: 120, .. })));
+    lobby.leave_waiting(token);
+    assert!(lobby.sessions[&token].finished.is_none());
+    lobby.sessions.get_mut(&token).unwrap().finished = Some((
+        Instant::now() - Duration::from_secs(1),
+        Box::new(completed_fixture(Seat::A)),
+    ));
+    lobby.cleanup();
+    assert!(lobby.sessions[&token].finished.is_none());
 }

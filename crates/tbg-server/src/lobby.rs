@@ -3,7 +3,7 @@
 
 use std::collections::{HashMap, VecDeque};
 use std::net::IpAddr;
-use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
+use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -24,10 +24,12 @@ use crate::Config;
 mod account_done;
 mod accounts;
 mod arcanas;
+mod auth;
 mod challenge;
 mod leaderboard;
 mod live;
 mod matchmaking;
+mod ownership;
 mod presence;
 mod ranked;
 mod rematch;
@@ -59,6 +61,7 @@ pub(super) enum SessionState {
 }
 
 pub(super) struct Session {
+    pub(super) auth_binding: Option<crate::auth::Binding>,
     pub(super) token: Token,
     pub(super) name: String,
     pub(super) conn: Option<ConnHandle>,
@@ -74,6 +77,7 @@ pub(super) struct Session {
     pub(super) stronghold: tbg_core::StrongholdKind,
     /// P47 (BR-LV09): when this session last sent `Spectate` (one per second).
     pub(super) last_spectate: Option<Instant>,
+    pub(super) finished: Option<(Instant, Box<crate::chan::CompletedResult>)>,
 }
 
 pub(super) struct Lobby {
@@ -84,6 +88,9 @@ pub(super) struct Lobby {
     pub(super) ranked_queue: VecDeque<Token>,
     /// P9: when each queued session sent `QuickMatch` (for `queue_wait`).
     pub(super) queued_at: HashMap<Token, Instant>,
+    /// P60: when each ranked waiter sent `RankedMatch`; never read by the
+    /// Casual queue or its fallbacks.
+    pub(super) ranked_queued_at: HashMap<Token, Instant>,
     pub(super) rooms: Vec<(RoomCode, Token, Instant)>,
     /// P39: single-use Quick Challenge invitations.
     pub(super) challenges: Vec<(InviteToken, Token, Instant)>,
@@ -95,13 +102,20 @@ pub(super) struct Lobby {
     pub(super) store: Option<Arc<Store>>,
     /// P11: per-IP account rate limits.
     pub(super) limits: Limits,
-    pub(super) draining: Arc<AtomicBool>,
+    /// P66: the admission gate (shutdown drain and release directory) and
+    /// the slot identity used for cross-slot account ownership.
+    pub(super) release: Arc<crate::release::Runtime>,
     /// P47: public matches running now (BR-LV01); private ones never enter.
     pub(super) live: HashMap<LiveId, live::LiveMatch>,
     /// P47: the snapshot `/api/live` and `/api/online` read.
     pub(super) live_tx: watch::Sender<Arc<LiveSnapshot>>,
     /// P47 (BR-LV07): the featured match and when it got the spot.
     pub(super) featured: Option<(LiveId, Instant)>,
+    /// P60: the ranked finalizer (only with a database).
+    pub(super) ranked: Option<crate::ranked::finalizer::Handle>,
+    /// P60: per account, the newest settlement sequence its cached profile
+    /// already contains; an older receipt never regresses it.
+    pub(super) ranked_seen: HashMap<AccountId, i64>,
 }
 
 /// P39: a rematch offer between the two sessions of a challenge match.
@@ -119,7 +133,7 @@ pub(crate) async fn run(
     config: Arc<Config>,
     metrics: Arc<Metrics>,
     store: Option<Arc<Store>>,
-    draining: Arc<AtomicBool>,
+    release: Arc<crate::release::Runtime>,
     live_tx: watch::Sender<Arc<LiveSnapshot>>,
 ) {
     let mut lobby = Lobby {
@@ -127,6 +141,7 @@ pub(crate) async fn run(
         queue: VecDeque::new(),
         ranked_queue: VecDeque::new(),
         queued_at: HashMap::new(),
+        ranked_queued_at: HashMap::new(),
         rooms: Vec::new(),
         challenges: Vec::new(),
         rematches: Vec::new(),
@@ -135,11 +150,28 @@ pub(crate) async fn run(
         metrics,
         store,
         limits: Limits::default(),
-        draining,
+        release,
         live: HashMap::new(),
         live_tx,
         featured: None,
+        ranked: None,
+        ranked_seen: HashMap::new(),
     };
+    // P60: one finalizer per process settles every ranked result in order;
+    // its journal recovery finishes before the lobby serves any command.
+    if let (Some(store), Some(db)) = (lobby.store.clone(), lobby.config.db.clone()) {
+        let dir = crate::ranked::journal::dir_for_slot(&db, lobby.release.slot());
+        let handle = crate::ranked::finalizer::start(
+            store,
+            dir,
+            lobby.self_tx.clone(),
+            lobby.metrics.clone(),
+        )
+        .await;
+        lobby.ranked = Some(handle);
+    }
+    // P66: recovery is done; the release task may now report `ready`.
+    lobby.release.gate.serving.store(true, Relaxed);
     let mut cleanup = tokio::time::interval(Duration::from_secs(10));
     let mut publish = tokio::time::interval(PUBLISH_EVERY);
     loop {
@@ -180,6 +212,29 @@ impl Lobby {
 
     fn handle(&mut self, cmd: LobbyCmd) {
         match cmd {
+            LobbyCmd::AuthenticatedHello {
+                resume,
+                conn,
+                ip,
+                binding,
+                reply,
+            } => {
+                let result = self.auth_hello(resume, conn, ip, binding);
+                let _ = reply.send(result);
+            }
+            LobbyCmd::AuthClaim {
+                token,
+                conn_id,
+                binding,
+                take_over,
+            } => self.auth_claim(token, conn_id, binding, take_over),
+            LobbyCmd::AuthIdle { families, reply } => {
+                let _ = reply.send(self.auth_idle(&families));
+            }
+            LobbyCmd::AuthRevoke { scope, reply } => {
+                let result = self.auth_revoke(&scope);
+                let _ = reply.send(result);
+            }
             LobbyCmd::Hello {
                 resume,
                 conn,
@@ -192,7 +247,11 @@ impl Lobby {
             LobbyCmd::Client { token, msg } => self.client(token, msg),
             LobbyCmd::Disconnected { token, conn_id } => self.disconnected(token, conn_id),
             LobbyCmd::LiveProgress { id, progress } => self.live_progress(id, progress),
-            LobbyCmd::MatchEnded { tokens, live } => {
+            LobbyCmd::MatchEnded {
+                tokens,
+                live,
+                finished,
+            } => {
                 if let Some(id) = live {
                     self.live_ended(id);
                 }
@@ -201,9 +260,16 @@ impl Lobby {
                         .get(&t)
                         .map_or_else(String::new, |s| s.name.clone())
                 });
-                for t in tokens {
+                let until = Instant::now() + Duration::from_secs(self.config.reconnect_secs);
+                for (t, result) in tokens.into_iter().zip(*finished) {
                     if let Some(s) = self.session(&t) {
                         s.state = SessionState::Idle;
+                        // Also covers a reconnect racing the final match-task tick.
+                        if s.conn.as_ref().map(|c| c.id) != result.delivered_to {
+                            send(&s.conn, ConnEvent::Send(result.start.clone()));
+                            send(&s.conn, ConnEvent::Send(result.end.clone()));
+                        }
+                        s.finished = Some((until, Box::new(result)));
                         send(&s.conn, ConnEvent::LeaveMatch);
                     }
                 }
@@ -225,9 +291,8 @@ impl Lobby {
                     }
                 }
             }
-            LobbyCmd::RankedDone { tokens, results } => {
-                self.ranked_done(tokens, results);
-            }
+            LobbyCmd::RankedDone { receipt } => self.ranked_done(*receipt),
+            LobbyCmd::OwnerLost { token, account } => self.owner_lost(token, account),
             LobbyCmd::RegisterDone {
                 token,
                 conn_id,
@@ -272,7 +337,7 @@ impl Lobby {
         }
         // Any other lobby request ends a watch first (BR-LV02).
         self.end_watch(token);
-        let draining = self.draining.load(Relaxed);
+        let draining = !self.release.gate.admits();
         let Some(s) = self.session(&token) else {
             return;
         };

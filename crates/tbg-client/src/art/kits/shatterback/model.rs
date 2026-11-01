@@ -1,176 +1,122 @@
-//! Shatterback figure: a hulking stone-bark grove beast carrying four
-//! great mossy plates on its back, bark pauldrons and amber eyes under a
-//! heavy brow. Branch A (Thornplates) thickens the plates and studs them
-//! with thorns, then lights the thorn tips; branch B (Unleashed) cracks
-//! them open on a glowing core, then sheds them for a bare blazing back
-//! and spiked fists.
-
-use bevy::prelude::*;
-
+//! A low terrestrial turtle: beak, four thick feet, soft inner shell and four detachable plates.
 use crate::art::{
     figure::{part, FigureSpec, PartSpec},
     kits::common::{body, Form},
     mesh::Shape::*,
     palette::*,
-    rig::{Joint::*, Node::Body, Node::Secondary, Proportions, Spring},
+    rig::{Joint::*, Node::Body, Proportions},
 };
-
-const HIDE: Color = Color::srgb(0.45, 0.36, 0.26);
-const SLATE: Color = Color::srgb(0.5, 0.5, 0.46);
-const MOSS: Color = Color::srgb(0.36, 0.5, 0.2);
-const THORN: Color = Color::srgb(0.24, 0.16, 0.1);
-const CORE: Color = Color::srgb(1.0, 0.5, 0.15);
-const AMBER: Color = Color::srgb(1.0, 0.72, 0.25);
-
+use bevy::prelude::*;
+const HIDE: Color = Color::srgb(0.42, 0.49, 0.25);
+const SLATE: Color = Color::srgb(0.46, 0.49, 0.37);
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(true, 0.88, tier);
-    p.torso.z *= 1.3;
-    p.arm *= 1.2;
+    p.leg *= 0.60;
+    p.arm *= 0.75;
+    p.torso.x *= 1.35;
+    p.torso.z *= 1.9;
     p.head *= 0.85;
     p
 }
-
 pub fn tip() -> Vec3 {
-    Vec3::new(0.0, -0.12, 0.0)
+    Vec3::new(0.0, 0.0, 0.24)
 }
-
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
-    let f = Form::of(tier, branch);
     let p = plan(tier);
-    let mut v = Vec::with_capacity(130);
-    let look = body::Look {
-        skin: HIDE,
-        cloth: BARK,
-        legs: BARK,
-        boots: SLATE,
-    };
-    body::humanoid(&mut v, &p, &look);
-    head(&mut v, &p, f);
-    plates(&mut v, &p, f);
-    fists(&mut v, f);
-    body::pauldrons(&mut v, if f.b && f.t2 { BARK } else { SLATE }, 0.13);
-    let t = p.torso;
-    // Moss over the shoulders and a team sash across the chest.
-    v.extend([
+    let f = Form::of(tier, branch);
+    let mut v = Vec::new();
+    v.push(part(Body(Chest), Ball(0.38), BARK, [0.0, 0.09, -0.1]).scale([1.35, 0.65, 1.65]));
+    v.push(
         part(
             Body(Chest),
-            Box(t.x * 0.9, 0.06, t.z * 0.9),
-            MOSS,
-            [0.0, t.y * 0.95, 0.0],
-        ),
-        part(
-            Body(Chest),
-            Box(t.x * 1.0, 0.07, t.z * 0.95),
+            Ring(0.025, 0.41, 360.0),
             ALLY,
-            [0.0, t.y * 0.45, 0.02],
+            [0.0, 0.03, -0.1],
         )
-        .rot([0.0, 0.0, -18.0]),
-    ]);
+        .rot([90.0, 0.0, 0.0])
+        .scale([1.2, 1.4, 1.0]),
+    );
+    for joint in [ThighL, ThighR, UpperArmL, UpperArmR] {
+        v.push(part(Body(joint), Ball(0.12), HIDE, [0.0, -0.08, 0.0]).scale([1.0, 1.45, 1.0]));
+    }
+    for joint in [FootL, FootR, HandL, HandR] {
+        v.push(part(
+            Body(joint),
+            Box(0.18, 0.12, 0.24),
+            HIDE,
+            [0.0, -0.03, 0.06],
+        ));
+        for x in [-0.055, 0.0, 0.055] {
+            v.push(
+                part(Body(joint), Cone(0.022, 0.08), BONE, [x, -0.05, 0.2]).rot([90.0, 0.0, 0.0]),
+            );
+        }
+    }
+    v.push(part(Body(Head), Ball(p.head * 1.1), HIDE, [0.0, 0.0, 0.08]).scale([1.0, 0.75, 1.25]));
+    v.push(part(Body(Head), Cone(0.11, 0.18), BONE, [0.0, -0.03, 0.24]).rot([90.0, 0.0, 0.0]));
+    body::glowing_eyes(&mut v, &p, if f.b { ORANGE } else { SAP });
+    v.push(part(Body(Hips), Cone(0.07, 0.25), HIDE, [0.0, -0.03, -0.35]).rot([-110.0, 0.0, 0.0]));
+    if f.a {
+        v.push(
+            part(
+                Body(Chest),
+                Ring(0.02, 0.2, 360.0),
+                BRASS,
+                [0.0, 0.15, 0.25],
+            )
+            .rot([65.0, 0.0, 0.0]),
+        );
+    }
+    if f.b {
+        v.push(part(
+            Body(Chest),
+            Box(0.05, 0.08, 0.18),
+            ORANGE,
+            [0.0, 0.15, 0.27],
+        ));
+    }
+    if f.t2 {
+        v.push(part(
+            Body(Head),
+            Box(0.1, 0.05, 0.12),
+            if f.a { BRASS } else { IRON },
+            [0.0, p.head * 0.6, 0.04],
+        ));
+    }
     FigureSpec { plan: p, parts: v }
 }
-
-fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
-    let h = p.head;
-    v.extend([
+/// Each plate has its own shared mesh and entity, rather than being merged into the shell.
+pub fn plate(tier: u8, branch: u8, index: usize) -> FigureSpec {
+    let f = Form::of(tier, branch);
+    let x = if index.is_multiple_of(2) { -0.22 } else { 0.22 };
+    let z = if index < 2 { 0.14 } else { -0.27 };
+    let mut v: Vec<PartSpec> = vec![
+        part(Body(Chest), Ball(0.25), SLATE, [x, 0.26, z]).scale([1.0, 0.6, 1.25]),
         part(
-            Body(Head),
-            Box(h * 2.0, h * 0.4, h * 0.6),
-            SLATE,
-            [0.0, h * 0.45, h * 0.55],
-        ),
-        part(
-            Body(Head),
-            Box(h * 1.4, h * 0.5, h * 0.6),
-            HIDE,
-            [0.0, -h * 0.55, h * 0.6],
-        ),
-        part(Body(Head), Ball(h * 0.5), MOSS, [0.0, h * 0.85, -h * 0.1]).scale([1.6, 0.5, 1.3]),
-    ]);
-    body::glowing_eyes(v, p, if f.b { CORE } else { AMBER });
-}
-
-/// Four plates down the back spring, overlapping like a pangolin's.
-fn plates(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
-    let b = Secondary(Spring::Back);
-    let t = p.torso;
-    let keep = if f.b && f.t2 { 2 } else { 4 };
-    let thick = if f.a { 0.09 } else { 0.06 };
-    for i in 0..keep {
-        let k = i as f32;
-        let (y, w) = (0.26 - 0.17 * k, t.x * (1.15 - 0.14 * k));
-        let at = [0.0, y, -0.12 - 0.03 * k];
-        // Rounded overlapping shell plates, mossy along the top.
-        v.extend([
-            part(b, Ball(w * 0.5), SLATE, at)
-                .scale([1.0, 0.5, thick * 4.0])
-                .rot([-35.0, 0.0, 0.0]),
-            part(b, Ball(w * 0.42), MOSS, [0.0, y + 0.07, -0.08 - 0.03 * k])
-                .scale([1.0, 0.18, thick * 4.5])
-                .rot([-35.0, 0.0, 0.0]),
-        ]);
-        if f.a {
-            for x in [-0.35, 0.0, 0.35] {
-                let thorn = part(
-                    b,
-                    Cone(0.03, 0.13),
-                    THORN,
-                    [x * w, y + 0.02, -0.16 - 0.02 * k],
-                )
-                .rot([-115.0, 0.0, 0.0]);
-                v.push(thorn);
-                if f.t2 {
-                    v.push(part(b, Ball(0.025), AMBER, [x * w, y - 0.02, -0.33 - 0.03 * k]).glow());
-                }
-            }
-        }
-        if f.b && !f.t2 {
-            // Unleashed: a crack through each plate shows the core.
-            v.push(
-                part(
-                    b,
-                    Box(0.025, 0.18, thick * 1.2),
-                    CORE,
-                    [w * 0.12, y, -0.1 - 0.02 * k],
-                )
-                .rot([-25.0, 0.0, 20.0])
-                .glow(),
-            );
+            Body(Chest),
+            Ball(0.21),
+            if f.b { LEAF_DARK } else { LEAF },
+            [x, 0.35, z],
+        )
+        .scale([1.0, 0.22, 1.2]),
+    ];
+    if f.a {
+        for offset in [-0.08, 0.08] {
+            v.push(part(
+                Body(Chest),
+                Cone(0.04, if f.t2 { 0.23 } else { 0.15 }),
+                BONE,
+                [x + offset, 0.46, z],
+            ));
         }
     }
-    if f.b && f.t2 {
-        // Rampage: the shed plates bare a blazing core between the
-        // shoulder blades.
-        v.extend([
-            part(b, Ball(0.13), CORE, [0.0, -0.2, -0.06]).glow(),
-            part(b, Ring(0.025, 0.15, 360.0), BARK, [0.0, -0.2, -0.06]).rot([90.0, 0.0, 0.0]),
-        ]);
-        for x in [-0.12, 0.12] {
-            v.push(
-                part(b, Box(0.1, 0.12, 0.05), SLATE, [x, -0.36, -0.08]).rot([
-                    -30.0,
-                    0.0,
-                    30.0 * x.signum(),
-                ]),
-            );
-        }
+    if f.b {
+        v.push(
+            part(Body(Chest), Box(0.024, 0.018, 0.32), ORANGE, [x, 0.40, z]).rot([0.0, 25.0, 0.0]),
+        );
     }
-}
-
-fn fists(v: &mut Vec<PartSpec>, f: Form) {
-    for hand in [HandL, HandR] {
-        v.push(part(
-            Body(hand),
-            Box(0.19, 0.17, 0.19),
-            SLATE,
-            [0.0, -0.05, 0.0],
-        ));
-        if f.b && f.t2 {
-            for x in [-0.06, 0.06] {
-                v.push(
-                    part(Body(hand), Cone(0.03, 0.1), THORN, [x, -0.03, 0.12])
-                        .rot([90.0, 0.0, 0.0]),
-                );
-            }
-        }
+    FigureSpec {
+        plan: plan(tier),
+        parts: v,
     }
 }

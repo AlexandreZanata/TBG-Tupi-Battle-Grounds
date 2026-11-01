@@ -16,10 +16,12 @@ use crate::vfx::{impacts::Burst, shots::ShotKind};
 use model::{plan, TIP};
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose,
     gait: Gait::LIGHT,
     attack: Attack::Shot {
+        loaded: None,
         from: Node::Prop(Socket::WeaponR),
         muzzle: |_, _| TIP,
         shot: |_, _| ShotKind::Fish,

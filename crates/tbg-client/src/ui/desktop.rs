@@ -48,7 +48,8 @@ mod web {
             lobby.0 = false;
             return;
         };
-        lobby.0 = camera::desktop(window.width(), window.height())
+        lobby.0 = !crate::config::bevy_ui()
+            && camera::desktop(window.width(), window.height())
             && root.get_attribute("data-ready").as_deref() == Some("true");
         let screen =
             if !lobby.0 || *state.get() != GameState::Menu || crate::config::arena_preview() {

@@ -20,7 +20,10 @@
     try { const response = await fetch('assets/lobby/art.json', {cache: 'no-cache'}); if (response.ok) sources = await response.json(); } catch (_) { /* SVG defaults work offline. */ }
     root.querySelectorAll('[data-art]').forEach(image => {
       const source = sources[image.dataset.art];
-      image.src = typeof source === 'string' && source.startsWith('assets/lobby/') ? source : image.dataset.art === 'profile' ? 'assets/lobby/profile-v2.webp' : 'assets/lobby/' + image.dataset.art + '.svg';
+      // Branding is shared with desktop launchers outside the lobby art folder.
+      const approved = typeof source === 'string' &&
+        (source.startsWith('assets/lobby/') || source.startsWith('assets/branding/'));
+      image.src = approved ? source : image.dataset.art === 'profile' ? 'assets/lobby/profile-v2.webp' : 'assets/lobby/' + image.dataset.art + '.svg';
       image.decoding = 'async';
     });
     root.querySelectorAll('use[data-icon]').forEach(icon => icon.setAttribute('href', 'assets/lobby/icons.svg#' + icon.dataset.icon));
@@ -83,8 +86,16 @@
   const newsTitle = i => T('lobby.news.' + i + '.title');
   const newsBody = i => T('lobby.news.' + i + '.body');
   let story = 0;
+  const newsArt = ['patch-notes', 'forum', 'game-news'];
+  function renderNewsArt() {
+    const image = root.querySelector('[data-art="news"]');
+    if (image) image.src = 'assets/lobby/news/' + newsArt[story] + '.webp';
+    const link = root.querySelector('[data-patch-notes]');
+    if (link) link.hidden = story !== 0;
+  }
   root.querySelectorAll('[data-news]').forEach(button => button.addEventListener('click', () => {
     story = (story + Number(button.dataset.news) + NEWS_COUNT) % NEWS_COUNT;
+    renderNewsArt();
     set('[data-news-title]', newsTitle(story)); set('[data-news-body]', newsBody(story)); set('[data-news-page]', (story + 1) + ' / ' + NEWS_COUNT);
   }));
   let initialPanelOpened = false;
@@ -97,6 +108,7 @@
     if (selector) root.querySelector(selector).click();
   }
   function render() {
+    renderNewsArt();
     const name = root.dataset.player || '';
     root.querySelectorAll('[data-member]').forEach(node => { node.hidden = !name; });
     root.querySelectorAll('[data-guest]').forEach(node => { node.hidden = Boolean(name); });

@@ -8,6 +8,10 @@ sources; U+2192 comes from Noto Sans Symbols (Regular/Bold) and U+25C6 from
 Noto Sans Symbols 2, same project and license. BattlegroundSansUi.ttf is the
 full D5 subset of Noto Sans Regular for the Bevy UI (O-P41-3).
 
+Native UI: BattlegroundDisplayUi.ttf merges the existing BattlegroundDisplay
+and BattlegroundDisplay-ext subsets with fonttools.merge.Merger (fonttools),
+then clears flavor to save a TTF. Copyright and license are unchanged.
+
 License: OFL-1.1
 PREAMBLE
 

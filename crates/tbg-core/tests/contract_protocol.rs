@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 17,
-        "v17: live spectating (P47): Spectate, StopSpectating, Spectate* replies"
+        PROTOCOL_VERSION, 30,
+        "D-97/P68-A v30: authenticated hello, same-socket renewal and explicit account claim"
     );
 }
 
@@ -186,4 +186,134 @@ fn v17_spectating_messages_are_appended() {
         tbg_core::protocol::decode_server(&bytes),
         Ok(ServerMsg::SpectatorView(Box::new(view)))
     );
+}
+
+#[test]
+fn v22_corrosive_splash_is_appended_and_round_trips() {
+    // D-70: existing Event tags stay fixed; only tag 23 is appended.
+    let event = tbg_core::Event::CorrosiveSplash {
+        from: 1,
+        primary: 2,
+        to: 3,
+    };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [23, 1, 2, 3]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn v23_independent_ability_cues_are_appended() {
+    // D-71: caster kind is the discriminator; primary/center/tick are public facts.
+    let events = [
+        tbg_core::Event::AbilityStarted {
+            unit: 1,
+            kind: tbg_core::UnitKind::Whisperer,
+            primary: Some(2),
+            center: 0,
+            tick: 7,
+        },
+        tbg_core::Event::AbilityResolved {
+            unit: 1,
+            kind: tbg_core::UnitKind::Whisperer,
+            primary: Some(2),
+            center: 0,
+            tick: 7,
+        },
+    ];
+    for (event, tag) in events.into_iter().zip([24, 25]) {
+        let bytes = encode(&event);
+        assert_eq!(bytes, [tag, 1, 30, 1, 2, 0, 7]);
+        assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+    }
+}
+
+#[test]
+fn v25_crossfire_is_appended() {
+    // D-75: preserve all previous event tags and expose only the chosen secondary.
+    let event = tbg_core::Event::Crossfire { from: 1, to: 3 };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [26, 1, 3]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn v26_profane_flame_is_appended_with_exact_endpoints() {
+    // D-87 appends tag27 and preserves every earlier byte contract.
+    let event = tbg_core::Event::ProfaneFlame {
+        unit: 1,
+        start: 0,
+        end: 0,
+        tick: 7,
+    };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [27, 1, 0, 0, 7]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn v27_drill_fusion_is_appended_without_death() {
+    // D-88: old tags remain unchanged; fusion has its own public cue.
+    let event = tbg_core::Event::DrillFused {
+        first: 1,
+        second: 2,
+        unit: 3,
+        x: 0,
+    };
+    let bytes = encode(&event);
+    assert_eq!(bytes, [28, 1, 2, 3, 0]);
+    assert_eq!(postcard::from_bytes::<tbg_core::Event>(&bytes), Ok(event));
+}
+
+#[test]
+fn d97_auth_variants_append_without_exposing_secrets_in_debug() {
+    use tbg_core::protocol::{decode_server, AccessToken, AuthRefusal, AuthStatus};
+    let secret = AccessToken([0xab; 32]);
+    let messages = [
+        ClientMsg::AuthenticatedHello {
+            version: 30,
+            resume: Some([7; 16]),
+            access: secret,
+        },
+        ClientMsg::Reauthenticate { access: secret },
+        ClientMsg::ClaimAccount { take_over: true },
+    ];
+    for (tag, message) in (20..=22).zip(messages) {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_client(&bytes), Ok(message.clone()));
+        assert!(!format!("{message:?}").contains("171"));
+        assert!(decode_client(&bytes[..bytes.len() - 1]).is_err());
+    }
+    let states = [
+        ServerMsg::AuthState {
+            status: AuthStatus::Conflict,
+            access_expires_at: 900,
+            session_expires_at: 2_592_000,
+        },
+        ServerMsg::AuthRequired {
+            reason: AuthRefusal::Revoked,
+        },
+    ];
+    for (tag, message) in (31..=32).zip(states) {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_server(&bytes), Ok(message));
+    }
+    for raw in [
+        "ab".repeat(31),
+        "AB".repeat(32),
+        "zz".repeat(32),
+        "ab".repeat(33),
+    ] {
+        assert!(AccessToken::from_hex(&raw).is_none());
+    }
+    assert_eq!(AccessToken::from_hex(&"ab".repeat(32)), Some(secret));
+    for message in [
+        ClientMsg::Login {
+            key: "PRIVATE_RECOVERY_KEY".into(),
+        },
+        ClientMsg::Reauthenticate { access: secret },
+    ] {
+        assert!(!format!("{message:?}").contains("PRIVATE"));
+    }
 }

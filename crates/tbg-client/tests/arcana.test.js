@@ -99,3 +99,30 @@ test('BR-AR03/10 preview: roster includes Nester, Rampart; Renewal only reaches 
   assert.equal(data.summon.affected, false);
   assert.match(data.summon.text, /Proposed/);
 });
+
+test('P64: Arcana catalog English equals arcana.json; every node, family and copy line is paired', () => {
+  const {catalogs} = require('./i18n-runtime.js');
+  const en = catalogs.en, pt = catalogs['pt-BR'];
+  const slug = id => id.replace(/-/g, '_');
+  for (const family of data.families) {
+    const id = 'arcana.family.' + slug(family.id) + '.';
+    assert.equal(en[id + 'name'], family.name);
+    assert.equal(en[id + 'description'], family.description);
+    assert.ok(pt[id + 'name'] && pt[id + 'description'], family.id);
+  }
+  for (const node of data.nodes) {
+    const id = 'arcana.node.' + slug(node.id) + '.';
+    for (const [field, value] of [['name', node.name], ['eligibility', node.eligibility], ['per_rank', node.perRankText], ['effect', node.effect]]) {
+      assert.equal(en[id + field], value, id + field);
+      assert.ok(pt[id + field], id + field);
+    }
+    if (node.rankTwoText) assert.equal(en[id + 'rank_two'], node.rankTwoText);
+  }
+  for (const [key, value] of Object.entries(data.copy)) assert.equal(en['arcana.copy.' + key], value, key);
+  assert.equal(en['arcana.summon'], data.summon.text);
+  // Localized requirement text keeps the same ranks the rules compute.
+  const ranks = data.nodes.map(() => 0);
+  const combined = data.nodes[byName.get('Combined Arms')];
+  const describe = (node, rank, now) => pt['arcana.requirement'].replace('{name}', pt['arcana.node.' + slug(node.id) + '.name']).replace('{rank}', rank).replace('{now}', now);
+  assert.deepEqual(rules.missing(ranks, data, combined, describe), rules.missing(ranks, data, combined).map((_, i) => describe(data.nodes[combined.requires[i][0]], combined.requires[i][1], 0)));
+});

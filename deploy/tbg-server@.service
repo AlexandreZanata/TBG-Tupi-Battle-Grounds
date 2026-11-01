@@ -1,0 +1,38 @@
+# P66 release slot %i (a or b, D-92): one immutable server generation per
+# slot, both on loopback behind the fixed Caddy routes /ws/slot-a and
+# /ws/slot-b. `release-slot.sh` writes the slot's env file and executable
+# link; a new generation always goes to the idle slot, never over a
+# running one. Promotion and rollback are database changes, not restarts.
+[Unit]
+Description=TBG game server, release slot %i
+After=network-online.target
+Wants=network-online.target
+Conflicts=tbg-server.service
+
+[Service]
+User=tbg
+Group=tbg
+WorkingDirectory=/var/lib/tbg
+# TBG_ADDR, TBG_GENERATION and TBG_SERVER_BUILD of this slot.
+EnvironmentFile=/etc/tbg/slot-%i.env
+Environment=TBG_SLOT=%i
+Environment=TBG_WS_ENDPOINT=/ws/slot-%i
+Environment=TBG_DB=/var/lib/tbg/tbg.sqlite3
+ExecStart=/opt/tbg/slots/%i/tbg-server
+# A crash restarts the same generation; it re-registers with its state.
+Restart=on-failure
+RestartSec=2
+KillSignal=SIGTERM
+# BR-UP06: SIGTERM stops new admissions and waits, without a time limit,
+# for running matches and pending results; the operator stops a slot only
+# after `tbg-release-admin retire-check` passes, so no cutoff kills one.
+TimeoutStopSec=infinity
+LimitNOFILE=65536
+NoNewPrivileges=true
+UMask=0077
+# P66 §7: live matches outrank backups and builds on a shared host.
+CPUWeight=200
+IOWeight=200
+
+[Install]
+WantedBy=multi-user.target

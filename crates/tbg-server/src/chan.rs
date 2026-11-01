@@ -8,9 +8,7 @@ use tokio::sync::{mpsc, oneshot};
 
 use axum::body::Bytes;
 
-use tbg_core::protocol::{
-    AccountError, ClientMsg, LiveId, Profile, RatingResults, ServerMsg, Token,
-};
+use tbg_core::protocol::{AccountError, ClientMsg, LiveId, Profile, ServerMsg, Token};
 use tbg_core::{PlayerIntention, Seat};
 
 use crate::live::LiveProgress;
@@ -26,6 +24,17 @@ pub const MATCH_QUEUE: usize = 256;
 pub struct ConnHandle {
     pub id: u64,
     pub tx: mpsc::Sender<ConnEvent>,
+    pub active: std::sync::Arc<std::sync::atomic::AtomicBool>,
+}
+
+impl ConnHandle {
+    pub fn new(id: u64, tx: mpsc::Sender<ConnEvent>) -> Self {
+        Self {
+            id,
+            tx,
+            active: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true)),
+        }
+    }
 }
 
 pub enum ConnEvent {
@@ -43,12 +52,14 @@ pub enum ConnEvent {
 pub enum MatchCmd {
     /// `seat` is stamped by the connection task, never read from the client.
     Intent {
+        conn_id: u64,
         seat: Seat,
         seq: u32,
         intent: PlayerIntention,
     },
     /// BR-M06 (Proposed): `seat` gives up; the other seat wins (BR-M03).
     Surrender {
+        conn_id: u64,
         seat: Seat,
     },
     /// Ignored unless `conn_id` is the seat's current connection.
@@ -79,12 +90,38 @@ pub enum MatchCmd {
 }
 
 pub enum LobbyCmd {
+    /// P66: another slot claimed this session's account (cross-slot BR-P03).
+    OwnerLost {
+        token: Token,
+        account: crate::store::AccountId,
+    },
+    AuthenticatedHello {
+        resume: Option<Token>,
+        conn: ConnHandle,
+        ip: IpAddr,
+        binding: crate::auth::Binding,
+        reply: oneshot::Sender<Option<(Token, String)>>,
+    },
+    AuthClaim {
+        token: Token,
+        conn_id: u64,
+        binding: crate::auth::Binding,
+        take_over: bool,
+    },
+    AuthIdle {
+        families: Vec<crate::store::auth_sessions::FamilyId>,
+        reply: oneshot::Sender<bool>,
+    },
+    AuthRevoke {
+        scope: crate::auth::RevocationScope,
+        reply: oneshot::Sender<bool>,
+    },
     Hello {
         resume: Option<Token>,
         conn: ConnHandle,
         /// P11: memory-only, for account rate limits; never stored or logged.
         ip: IpAddr,
-        reply: oneshot::Sender<(Token, String)>,
+        reply: oneshot::Sender<Option<(Token, String)>>,
     },
     Client {
         token: Token,
@@ -99,16 +136,17 @@ pub enum LobbyCmd {
     MatchEnded {
         tokens: [Token; 2],
         live: Option<LiveId>,
+        finished: Box<[CompletedResult; 2]>,
     },
     /// P47: cosmetic progress of a listed match, sent with `try_send`.
     LiveProgress {
         id: LiveId,
         progress: LiveProgress,
     },
-    /// P12: settled ranked ratings per seat, seats A then B.
+    /// P60: a committed (or replayed) ranked settlement, delivered to the
+    /// sessions of its frozen account ids, never to whoever holds a token.
     RankedDone {
-        tokens: [Token; 2],
-        results: RatingResults,
+        receipt: Box<crate::ranked::RankedReceipt>,
     },
     /// P11: store replies arrive here so the lobby never awaits SQLite.
     /// Ignored unless `conn_id` is still the session's current connection.
@@ -120,10 +158,12 @@ pub enum LobbyCmd {
         ip: IpAddr,
         result: Result<(AccountId, Profile, String), AccountError>,
     },
+    /// The `i64` is the committed ranked high-water mark read with the
+    /// profile (P60): older settlements are already part of it.
     LoginDone {
         token: Token,
         conn_id: u64,
-        result: Result<(AccountId, Profile), AccountError>,
+        result: Result<(AccountId, Profile, i64), AccountError>,
     },
     /// D-40: an account's saved Arcana preset, loaded after login.
     ArcanasLoaded {
@@ -137,4 +177,12 @@ pub enum LobbyCmd {
         account: AccountId,
         kind: tbg_core::StrongholdKind,
     },
+}
+
+/// Compact replayable terminal delivery, retained only for the existing reconnect window.
+#[derive(Clone, Debug)]
+pub(crate) struct CompletedResult {
+    pub delivered_to: Option<u64>,
+    pub start: ServerMsg,
+    pub end: ServerMsg,
 }

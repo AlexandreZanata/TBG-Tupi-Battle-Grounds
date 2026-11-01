@@ -610,3 +610,11 @@ values". Fill the report.
 - Limitations: steps 0-5 done; A-1 still unmerged, steps 6+ wait for it.
   Screenshots so far: step-0 practice baseline, step-2 menu, step-3 lobby+Bevy
   font probes, step-4 pt-BR battle, step-5 lobby en/pt + settings/friend pt.
+- P64 (2026-10-31, `codex/p64-i18n-completeness`): browser-client steps 6
+  (battle HUD/War Council), 7 (Arcana), 8 (Bevy UI, with the literal-text
+  guard `i18n_content_coverage_no_literal_ui_text`), 9 (content names and
+  `i18n_matches_core_canon` as `i18n_content_coverage_*`) and 11 (ranking
+  pages, external resolver under the unchanged CSP) are implemented. Step 10
+  pt-BR values exist for every key as owner-review proposals; the layout
+  pass, screenshots and step 12 measurements remain open. See the
+  [P64 execution report](P64-i18n-completeness.md#7-execution-report-2026-10-31).

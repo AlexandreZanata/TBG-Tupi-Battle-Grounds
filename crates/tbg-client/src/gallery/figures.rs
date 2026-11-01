@@ -158,7 +158,7 @@ pub(super) fn spawn_one(
             Visibility::default(),
         ))
         .id();
-    let joints = figure::spawn_joints(commands, figure, &form.plan, &form.meshes, material);
+    let joints = figure::spawn_joints(commands, figure, kind, &form.plan, &form.meshes, material);
     if *material == lib.material {
         figure::spawn_glow(commands, &joints, &form.glow, &lib.glow_material);
     }
@@ -168,18 +168,6 @@ pub(super) fn spawn_one(
     animator.form = (tier, branch);
     // Review figures walk in place.
     animator.treadmill = true;
-    animator.archer = form.native && kind == UnitKind::Archer;
-    if animator.archer {
-        crate::art::bow::attach(
-            commands,
-            root,
-            &animator,
-            lib,
-            material,
-            true,
-            form.bow_half,
-        );
-    }
     (root, animator)
 }
 

@@ -3,18 +3,36 @@
 use bevy::prelude::*;
 
 use super::{label, PANEL};
+use crate::i18n::{Lang, Msg};
+
+/// What a toast says: text its producer already composed in the active
+/// language, or a catalog message resolved when the toast is shown.
+enum Say {
+    Text(String),
+    Msg(Msg, Vec<(&'static str, String)>),
+}
 
 #[derive(Resource, Default)]
-pub struct Toasts(Vec<(String, f32)>);
+pub struct Toasts(Vec<(Say, f32)>);
 
 impl Toasts {
     /// Show `text` for `secs` seconds (replaces any toast on screen).
     pub fn push_for(&mut self, text: impl Into<String>, secs: f32) {
-        self.0.push((text.into(), secs));
+        self.0.push((Say::Text(text.into()), secs));
     }
 
     pub fn push(&mut self, text: impl Into<String>) {
-        self.0.push((text.into(), 1.5));
+        self.0.push((Say::Text(text.into()), 1.5));
+    }
+
+    /// Show a catalog message for 1.5 s.
+    pub fn say(&mut self, msg: Msg) {
+        self.0.push((Say::Msg(msg, Vec::new()), 1.5));
+    }
+
+    /// Show a catalog template filled with `args` for 1.5 s.
+    pub fn say_with(&mut self, msg: Msg, args: &[(&'static str, String)]) {
+        self.0.push((Say::Msg(msg, args.to_vec()), 1.5));
     }
 }
 
@@ -37,9 +55,24 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-fn show(mut commands: Commands, mut toasts: ResMut<Toasts>, existing: Query<Entity, With<Toast>>) {
-    let Some((text, secs)) = toasts.0.pop() else {
+fn show(
+    mut commands: Commands,
+    mut toasts: ResMut<Toasts>,
+    lang: Res<Lang>,
+    existing: Query<Entity, With<Toast>>,
+) {
+    let Some((say, secs)) = toasts.0.pop() else {
         return;
+    };
+    let text = match say {
+        Say::Text(text) => text,
+        Say::Msg(msg, args) => {
+            let args: Vec<(&str, &dyn std::fmt::Display)> = args
+                .iter()
+                .map(|(name, value)| (*name, value as &dyn std::fmt::Display))
+                .collect();
+            lang.tf(msg, &args)
+        }
     };
     toasts.0.clear();
     for e in &existing {

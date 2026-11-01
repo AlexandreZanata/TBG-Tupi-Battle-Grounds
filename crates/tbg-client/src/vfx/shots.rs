@@ -35,6 +35,8 @@ pub enum ShotKind {
     Coins,
     /// Kit champions (P55).
     Arrow,
+    /// Archer Arrow Rain (B2): smaller, faster arrows trailing sparks.
+    ArrowStorm,
     Glob,
     Fish,
     Bomb,
@@ -44,6 +46,20 @@ pub enum ShotKind {
     Flask,
     Blood,
     Puppet,
+    Acid,
+    Thought,
+    PlagueBolt,
+    Bullet,
+    CrossBullet,
+    SunSpark,
+    CelestialArrow,
+    PurifyingArrow,
+    JudgmentBolt,
+    Sting,
+    VenomSting,
+    WebSpit,
+    SlashWave,
+    BloodBolt,
 }
 
 #[derive(Clone, Copy)]
@@ -64,6 +80,12 @@ enum Body {
     Petal,
     Seed,
     Flask,
+    Acid,
+    RitualBolt,
+    SunMote,
+    RadiantArrow,
+    Stamp,
+    Stinger,
 }
 
 #[derive(Clone, Copy)]
@@ -101,6 +123,7 @@ enum Mote {
     Violet,
     Petal,
     Blood,
+    Turquoise,
 }
 
 /// Seconds a unit shot flies: Release at 0.18 s plus this lands at the
@@ -108,6 +131,14 @@ enum Mote {
 pub const UNIT_FLIGHT: f32 = 0.12;
 /// A cast's root ridge: Release at 0.22 s plus this lands at 0.30 s.
 pub const CAST_FLIGHT: f32 = 0.08;
+/// Old Finn releases at 0.22 s and lands at the authoritative Hit at 0.30 s.
+pub const FISH_FLIGHT: f32 = 0.08;
+pub const FISH_MIN_APEX: f32 = 2.0;
+
+pub fn fish_arc(from: Vec3, to: Vec3) -> f32 {
+    let horizontal = (to - from).xz().length();
+    (horizontal * 0.5).max(FISH_MIN_APEX) / from.distance(to).max(0.001)
+}
 
 fn look(kind: ShotKind) -> Look {
     use ShotKind::*;
@@ -242,6 +273,97 @@ fn look(kind: ShotKind) -> Look {
             0.0,
             Impact::Bolt,
         ),
+        ArrowStorm => (
+            Some((Body::Arrow, 0.72)),
+            0.03,
+            UNIT_FLIGHT * 0.8,
+            Trail::Sparks,
+            0.0,
+            Impact::Bolt,
+        ),
+        WebSpit => (
+            Some((Body::Seed, 0.7)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
+        ),
+        Sting | VenomSting => (
+            Some((Body::Stinger, if kind == VenomSting { 1.15 } else { 1.0 })),
+            0.03,
+            UNIT_FLIGHT,
+            if kind == VenomSting {
+                Trail::Motes(Mote::Spore)
+            } else {
+                Trail::Sparks
+            },
+            0.0,
+            Impact::Sparks,
+        ),
+        JudgmentBolt => (
+            Some((Body::Stamp, 1.0)),
+            0.0,
+            CAST_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
+        ),
+        CelestialArrow | PurifyingArrow => (
+            Some((
+                Body::RadiantArrow,
+                if kind == PurifyingArrow { 1.3 } else { 1.0 },
+            )),
+            0.03,
+            UNIT_FLIGHT,
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
+        ),
+        SunSpark => (
+            Some((Body::SunMote, 1.0)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Sparks,
+            1.0,
+            Impact::Harmonic,
+        ),
+        Bullet | CrossBullet => (
+            Some((Body::Bolt, 0.24)),
+            0.0,
+            if kind == CrossBullet {
+                0.04
+            } else {
+                UNIT_FLIGHT
+            },
+            Trail::Sparks,
+            0.0,
+            Impact::Sparks,
+        ),
+        PlagueBolt => (
+            Some((Body::RitualBolt, 1.0)),
+            0.03,
+            UNIT_FLIGHT,
+            Trail::Motes(Mote::Spore),
+            0.0,
+            Impact::Plague,
+        ),
+        Thought => (
+            Some((Body::Orb, 0.8)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Motes(Mote::Turquoise),
+            0.0,
+            Impact::Mind,
+        ),
+        Acid => (
+            Some((Body::Acid, 1.0)),
+            0.06,
+            UNIT_FLIGHT,
+            Trail::Motes(Mote::Turquoise),
+            2.0,
+            Impact::Acid,
+        ),
         Glob => (
             Some((Body::Glob, 1.0)),
             0.12,
@@ -252,8 +374,8 @@ fn look(kind: ShotKind) -> Look {
         ),
         Fish => (
             Some((Body::Fish, 1.0)),
-            0.35,
-            CAST_FLIGHT,
+            0.5,
+            FISH_FLIGHT,
             Trail::Motes(Mote::Water),
             22.0,
             Impact::Splash,
@@ -298,6 +420,14 @@ fn look(kind: ShotKind) -> Look {
             14.0,
             Impact::Cleanse,
         ),
+        BloodBolt => (
+            Some((Body::Orb, 0.6)),
+            0.04,
+            CAST_FLIGHT,
+            Trail::Motes(Mote::Blood),
+            0.0,
+            Impact::Blood,
+        ),
         Blood => (
             Some((Body::Orb, 1.0)),
             0.15,
@@ -305,6 +435,17 @@ fn look(kind: ShotKind) -> Look {
             Trail::Motes(Mote::Blood),
             0.0,
             Impact::Blood,
+        ),
+        SlashWave => (
+            None,
+            0.0,
+            0.08,
+            Trail::Ridge {
+                every: 0.012,
+                size: 0.7,
+            },
+            0.0,
+            Impact::Cleave,
         ),
         Puppet => (
             Some((Body::Orb, 0.8)),
@@ -342,6 +483,12 @@ pub struct ShotMeshes {
     purse: Handle<Mesh>,
     arrow: Handle<Mesh>,
     glob: Handle<Mesh>,
+    acid: Handle<Mesh>,
+    ritual_bolt: Handle<Mesh>,
+    sun_mote: Handle<Mesh>,
+    radiant_arrow: Handle<Mesh>,
+    stamp: Handle<Mesh>,
+    stinger: Handle<Mesh>,
     fish: Handle<Mesh>,
     bomb: Handle<Mesh>,
     orb: Handle<Mesh>,
@@ -446,6 +593,40 @@ impl ShotMeshes {
                     Transform::from_xyz(0.0, 0.0, -0.26),
                 ),
             ]),
+            stinger: build(vec![
+                (Cyl(0.012, 0.12), AMBER, along(0.0)),
+                (Cone(0.025, 0.10), CHITIN, along(0.11)),
+            ]),
+            stamp: build(vec![
+                (Box(0.07, 0.07, 0.12), GOLD, Transform::IDENTITY),
+                (Box(0.035, 0.035, 0.13), IVORY, Transform::IDENTITY),
+            ]),
+            radiant_arrow: build(vec![
+                (Cyl(0.007, 0.40), IVORY, along(0.0)),
+                (Cone(0.028, 0.08), GOLD, along(0.23)),
+                (
+                    Box(0.07, 0.012, 0.07),
+                    NAVY,
+                    Transform::from_xyz(0.0, 0.0, -0.17),
+                ),
+            ]),
+            sun_mote: build(vec![
+                (Ball(0.04), IVORY, Transform::IDENTITY),
+                (Ring(0.009, 0.06, 360.0), GOLD, Transform::IDENTITY),
+            ]),
+            ritual_bolt: build(vec![
+                (Cyl(0.012, 0.28), DARK_LEATHER, along(0.0)),
+                (Cone(0.032, 0.09), BONE, along(0.18)),
+                (Ball(0.027), GLOW, Transform::from_xyz(0.0, 0.0, 0.10)),
+            ]),
+            acid: build(vec![
+                (
+                    Ball(0.07),
+                    TURQUOISE,
+                    Transform::from_scale(Vec3::new(0.8, 0.8, 1.5)),
+                ),
+                (Ball(0.035), IVORY, Transform::from_xyz(0.0, 0.025, 0.06)),
+            ]),
             glob: build(vec![
                 (
                     Ball(0.075),
@@ -529,6 +710,12 @@ impl ShotMeshes {
             Body::Purse => &self.purse,
             Body::Arrow => &self.arrow,
             Body::Glob => &self.glob,
+            Body::Acid => &self.acid,
+            Body::RitualBolt => &self.ritual_bolt,
+            Body::SunMote => &self.sun_mote,
+            Body::RadiantArrow => &self.radiant_arrow,
+            Body::Stamp => &self.stamp,
+            Body::Stinger => &self.stinger,
             Body::Fish => &self.fish,
             Body::Bomb => &self.bomb,
             Body::Orb => &self.orb,
@@ -594,12 +781,17 @@ pub(super) fn fly(
         s.age += dt;
         s.t = (s.t + dt / l.secs).min(1.0);
         let ground = l.body.is_none();
+        let arc = if s.kind == ShotKind::Fish {
+            fish_arc(s.from, s.to)
+        } else {
+            l.arc
+        };
         let at = if ground {
             s.from.lerp(s.to, s.t).with_y(0.02)
         } else {
-            flight(s.from, s.to, l.arc, s.t)
+            flight(s.from, s.to, arc, s.t)
         };
-        let dir = tangent(s.from, s.to, l.arc, s.t);
+        let dir = tangent(s.from, s.to, arc, s.t);
         t.translation = at;
         t.rotation = Quat::from_rotation_arc(Vec3::Z, dir) * Quat::from_rotation_z(l.roll * s.age);
         s.trail += dt;
@@ -625,6 +817,7 @@ fn trail(commands: &mut Commands, a: &VfxAssets, trail: Trail, at: Vec3, dir: Ve
     match trail {
         Trail::Motes(mote) => {
             let mat = match mote {
+                Mote::Turquoise => &a.turquoise,
                 Mote::Spore => &a.spore,
                 Mote::Water => &a.water,
                 Mote::Violet => &a.violet,
@@ -728,5 +921,21 @@ mod tests {
         for kind in [ShotKind::Roots, ShotKind::Strangle, ShotKind::Spores] {
             assert!((0.22 + look(kind).secs - 0.30).abs() < 1e-6, "{kind:?}");
         }
+    }
+}
+
+#[cfg(test)]
+mod fish_tests {
+    use super::*;
+    #[test]
+    fn fish_lands_at_hit_and_clears_allies() {
+        for distance in [0.1, 1.0, 5.25] {
+            let from = Vec3::new(0.0, 1.0, 0.0);
+            let to = Vec3::new(distance, 0.6, 0.0);
+            let arc = fish_arc(from, to);
+            assert!(flight(from, to, arc, 0.5).y >= from.lerp(to, 0.5).y + FISH_MIN_APEX - 1e-5);
+            assert_eq!(flight(from, to, arc, 1.0), to);
+        }
+        assert!((0.22 + look(ShotKind::Fish).secs - 0.30).abs() < 1e-5);
     }
 }

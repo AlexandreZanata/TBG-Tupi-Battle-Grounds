@@ -16,6 +16,7 @@ use crate::vfx::impacts::{Burst, Impact};
 use model::plan;
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose,
     gait: Gait::HEAVY,

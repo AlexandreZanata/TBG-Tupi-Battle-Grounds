@@ -73,15 +73,27 @@ fn build_layer(spec: &FigureSpec, glow: bool) -> [Option<Mesh>; NODE_COUNT] {
 pub fn spawn_joints(
     commands: &mut Commands,
     root: Entity,
+    kind: tbg_core::UnitKind,
     plan: &Proportions,
     meshes: &[Option<Handle<Mesh>>; NODE_COUNT],
     material: &Handle<StandardMaterial>,
 ) -> [Entity; NODE_COUNT] {
-    let mut ids = [root; NODE_COUNT];
+    let anatomy = super::kits::kit(kind).and_then(|kit| kit.anatomy);
+    // A custom parent may occupy a later slot, so allocate every entity first.
+    let ids = std::array::from_fn(|_| {
+        commands
+            .spawn((Transform::IDENTITY, Visibility::default()))
+            .id()
+    });
     for node in rig::nodes() {
-        let parent = node.parent().map_or(root, |p| ids[p.index()]);
-        let mut e = commands.spawn((
-            Transform::from_translation(rig::rest(node, plan)),
+        let parent = anatomy
+            .map_or_else(|| node.parent(), |a| (a.parent)(node))
+            .map_or(root, |p| ids[p.index()]);
+        let mut e = commands.entity(ids[node.index()]);
+        e.insert((
+            Transform::from_translation(
+                anatomy.map_or_else(|| rig::rest(node, plan), |a| (a.rest)(node, plan)),
+            ),
             Visibility::default(),
         ));
         if let Some(m) = &meshes[node.index()] {
@@ -91,13 +103,12 @@ pub fn spawn_joints(
             let back = Node::Prop(rig::Socket::Back).index();
             let used = meshes[node.index()].is_some()
                 || (matches!(s, rig::Spring::Back) && meshes[back].is_some());
-            if used {
+            if used && anatomy.is_none_or(|a| a.springs) {
                 e.insert(SpringJoint::new(parent));
             }
         }
         let id = e.id();
         commands.entity(parent).add_child(id);
-        ids[node.index()] = id;
     }
     ids
 }
@@ -126,4 +137,42 @@ pub fn spawn_glow(
             Some(id)
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::art::{
+        kits,
+        rig::{Socket, Spring},
+    };
+    #[derive(Resource)]
+    struct Nodes([Entity; NODE_COUNT]);
+    #[test]
+    fn custom_ring_follows_its_later_weapon_parent() {
+        // D-80: the Oracle staff is later than its ring in the fixed node array.
+        let mut app = App::new();
+        app.add_systems(Startup, |mut commands: Commands| {
+            let kind = tbg_core::UnitKind::LuminousOracle;
+            let plan = (kits::kit(kind).unwrap().figure)(0, 0).plan;
+            let root = commands
+                .spawn((Transform::IDENTITY, Visibility::default()))
+                .id();
+            let meshes = std::array::from_fn(|_| None);
+            let ids = spawn_joints(
+                &mut commands,
+                root,
+                kind,
+                &plan,
+                &meshes,
+                &Handle::default(),
+            );
+            commands.insert_resource(Nodes(ids));
+        });
+        app.update();
+        let ids = app.world().resource::<Nodes>().0;
+        let ring = ids[Node::Secondary(Spring::HeadGear).index()];
+        let staff = ids[Node::Prop(Socket::WeaponR).index()];
+        assert_eq!(app.world().get::<ChildOf>(ring).unwrap().parent(), staff);
+    }
 }

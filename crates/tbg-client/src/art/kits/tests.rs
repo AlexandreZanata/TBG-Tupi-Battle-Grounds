@@ -40,11 +40,33 @@ fn every_kit_form_builds_within_the_doubled_budget() {
                 "{kind:?} {tier}/{branch}: {tris} triangles, scale {:.2}",
                 spec.plan.scale
             );
-            assert!(tris <= 6_000, "{kind:?} {tier}/{branch}: {tris}");
+            let detached: usize = if kind == UnitKind::Shatterback {
+                (0..4)
+                    .map(|i| {
+                        let plate = super::shatterback::model::plate(tier, branch, i);
+                        figure::build_joint_meshes(&plate)
+                            .iter()
+                            .flatten()
+                            .map(mesh::triangles)
+                            .sum::<usize>()
+                    })
+                    .sum()
+            } else {
+                0
+            };
+            assert!(
+                tris + detached <= 6_000,
+                "{kind:?} {tier}/{branch}: {} including detachable plates",
+                tris + detached
+            );
         }
-        // Each tier reads bigger (ART-DIRECTION §5).
+        // ART-DIRECTION §5 applies to legal player Evolutions; summon ranks have fixed sizes.
         let scale = |t| (k.figure)(t, 0).plan.scale;
-        assert!(scale(0) < scale(1) && scale(1) < scale(2));
+        if kind.is_conventional() {
+            assert!(scale(0) < scale(1) && scale(1) < scale(2));
+        } else {
+            assert!(scale(0).is_finite() && scale(0) > 0.);
+        }
     }
 }
 
@@ -78,7 +100,7 @@ fn every_kit_has_five_distinct_forms() {
         v.sort();
         v
     };
-    for kind in kits() {
+    for kind in kits().into_iter().filter(|kind| kind.is_conventional()) {
         let k = kit(kind).expect("kit");
         for (i, a) in FORMS.iter().enumerate() {
             for b in &FORMS[i + 1..] {
@@ -121,6 +143,11 @@ fn the_bombard_points_along_its_shells_flight() {
             Vec3::new(1.6, 0.6, 4.4),
         ] {
             let m = Moment {
+                reduction: 0,
+                counter: 0,
+                armor_flash: 0.0,
+                special: None,
+                special_ready: false,
                 clip: Clip::Idle,
                 t: 0.4,
                 tier,
@@ -133,6 +160,8 @@ fn the_bombard_points_along_its_shells_flight() {
                 variant: 0,
                 clock: 3.0,
                 walk: None,
+                gesture: 1e6,
+                growth: 0.0,
             };
             let mut pose = sample(Clip::Idle, 0.4);
             (k.pose)(&m, &mut pose);
@@ -154,5 +183,28 @@ fn the_bombard_points_along_its_shells_flight() {
                 "{tier}/{branch} {target:?}: elevation off by {lift}"
             );
         }
+    }
+}
+
+#[test]
+fn drill_summon_ranks_have_distinct_base_silhouettes_without_player_evolution() {
+    let mut signatures = Vec::new();
+    for kind in [
+        UnitKind::Microdrill,
+        UnitKind::Duodrill,
+        UnitKind::Megadrill,
+    ] {
+        assert!(kind.is_summon());
+        let spec = (kit(kind).expect("drill kit").figure)(0, 0);
+        let signature: Vec<_> = spec
+            .parts
+            .iter()
+            .map(|p| format!("{:?}/{:?}", p.shape, p.at))
+            .collect();
+        assert!(
+            !signatures.contains(&signature),
+            "each fusion rank must read differently"
+        );
+        signatures.push(signature);
     }
 }

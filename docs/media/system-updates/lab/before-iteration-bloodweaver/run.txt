@@ -1,0 +1,4 @@
+favor-bloodweaver vs bot: 47.2% [45.1 – 49.3] over 2000 seed pairs
+stalled matches (60 s): 1.2% (50/4000)
+favor-bloodweaver vs bot (median ±10 pp)         47.2% [45.2% – 49.4%]        target 37.2% – 57.2%      PASS
+1 rows, 0 failing

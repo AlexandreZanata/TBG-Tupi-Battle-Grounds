@@ -247,7 +247,7 @@ tables are the one allowed exception.
   browser accepts `?lag=MS` to feel added latency.
 - **Bandwidth (hypothesis):** about 400 B per view → about 4 KB/s down and
   under 0.5 KB/s up per player; about 2 MB per 4-minute match for both.
-- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §13):**
+- **Live battles and spectating (P47, protocol v17, GAME-DESIGN §14):**
   `Spectate{id}` and `StopSpectating` (client) and `SpectateStart`,
   `SpectatorView(PublicView)`, `SpectateUnavailable{reason}`,
   `SpectateEnd{outcome}` (server) are appended to the enums. Public
@@ -639,3 +639,342 @@ rules and values, D-34–D-38 the reasons, each phase file the exact steps.
 - **Budgets.** Step time ≤ +10 % at 100 units a side over P16-B; view
   growth of tens of bytes; per-match memory under 1 KB more; measured in
   every phase and re-checked under load in P16-F8.
+
+
+### Shop preview staging (D-69, 2026-10-31)
+
+Reserve/Release/Reroll append to PlayerIntention and Rejection. CANON.shop
+is None; only local Practice and explicit lab policies enable them. Private
+Shop state is serialized inside MatchState for deterministic replay/hash
+identity. The three preview-only MatchView fields are skipped by serde,
+so the existing v20 online View layout stays intact until activation.
+The owner checkpoint removes those skips and bumps the protocol together.
+PublicView contains no Shop fields. The desktop disables every card and
+Shop action until the previous Shop mutation is acknowledged or rejected.
+
+
+### Ability display follow-up (champion adjustments, 2026-10-31)
+
+UnitView keeps its existing shape; fx now packs the preallocated plate,
+growth and carrier display bits. Nester uses the growth field for timer
+maturity; Leechroot saturates its visible stack display at seven without
+capping simulation Essence. Shatterback's four outer plates are cached per
+form and rendered as separate children so one can detach without replacing
+the whole model. Crowd reads carrier state and remains presentation only.
+
+## Native client migration (D-70, work in progress)
+
+The native Linux client and opt-in browser UI (`?ui=bevy`) share the Bevy
+screens in `ui/shell`, the text editor and UI kit, and the existing UiAction
+queue. The HTML path remains available until owner visual review. The shared
+HUD renders authoritative values; spectator controls expose no seat actions.
+
+`platform/` owns private atomic preferences, process-local sessions, callback
+HTTP, clipboard/browser integration, native window controls and diagnostic
+logs. Native audio and WSS are enabled. Assets resolve beside the executable
+in a distribution, with a repository path fallback during development.
+Account keys remain local plaintext credentials; Linux preference files are
+0600 and their directory is 0700. System keyring support is deferred.
+
+The owner-selected visible-attribution license (D-71) is bundled with native
+packages. A persistent interface footer links to the creator and original
+repository. Linux packaging and a per-user installer are implemented; actual
+release artifacts, consolidated acceptance and Windows builds remain pending.
+See [NATIVE-client.md](phases/NATIVE-client.md) for evidence and deferred checks.
+## 18. Troops and local training (P62, Proposed)
+
+**Planning only.** See [P62](phases/P62-troops-training-lab.md), D-80/D-81
+and GAME-DESIGN §16. Section 17 is reserved by the separate P60/P61 plan.
+
+- **Content/presentation.** One catalog model resolves active core IDs,
+  available forms and effective stats; authored lore and localized ability
+  text live in client presentation catalogs. Preview reuses champion kits
+  with one owned scene/camera and explicit lifecycle. Browser/native lobby
+  adapters route to the same state; record the actual integrated shell.
+- **Core training.** Optional `training` support owns a private canonical
+  MatchState plus deterministic runtime-only scenario/target/metrics data.
+  Factor combat stepping only as needed; preserve the normal path's event
+  order, hashes and RNG. Exact teams do not modify the canonical Shop pool.
+  C10's offline `lab` restriction remains. A training runtime must be
+  explicitly constructed even when Cargo unifies features.
+- **Dummy.** Runtime-tagged inert Crate carrier, with explicit cargo/hatch
+  suppression, HP/view override and dummy rendering. No global Crate or
+  wire enum change. Its summon-like eligibility is visible to the player;
+  selected champion opponents model conventional-unit interactions.
+- **Observation.** Record effective damage/healing at mutation points with
+  per-instance/effect provenance, including periodic and summon sources.
+  Counters and IDs are bounded; no inference from rendered numbers or
+  unattributed Hit messages. Existing network event schemas stay unchanged.
+- **Client route.** Dedicated local training session/commands alongside
+  normal practice and Net. Entry requires idle state; stale commands are
+  session-bound. Exit removes scene resources, counters and pending actions
+  before normal play resumes. Existing idle presence may remain but cannot
+  advertise or persist a training match.
+- **Bots.** Separate practice profiles preserve the existing Bot baseline.
+  Fair profiles consume legal own-seat views only. Proposed Impossible
+  assistance is a disclosed local controller credit, never a CANON or
+  server change. No network inference service or new database is required.
+- **Verification/cost.** Focused training fixtures plus unchanged normal
+  behavior, C10/protocol contracts and desktop journeys at consolidation.
+  Minimal per-front checks use the shared nonblocking host lock and at most
+  two Cargo jobs. No full suite, bot calibration, benchmark, build or deploy
+  is authorized by this documentation-only task.
+## 17. Planned ranked record foundation and statistics (P60/P61)
+
+**Proposed, not implemented.** [The joint program](planning/RANKED-PROGRAM.md)
+audits main `9008f11` and separates actual behavior from historical plans.
+In particular, §16's `matches.ruleset_fp` and expanded strategic seat
+records are not current schema v6. Today's default per-IP socket cap is
+8 in `Config::default`; deployed overrides/proxy configuration were not
+inspected. The checked-in deploy script installs but does not invoke the
+backup script before migration.
+
+- **Authority and identity (D-87/D-89).** Frozen connection-bound accounts
+  plus a separate random match key identify a final result. The single
+  writer commits both ratings and the authoritative record atomically;
+  a small private completion journal supports idempotent restart recovery.
+  Notifications validate account identity and sequence, including takeover.
+  FIFO and combat have no risk query or new pairing wait.
+- **Crate boundaries.** Pure eligibility math over copied facts lives in
+  core alongside rating math, outside simulation state. Server collectors
+  use successful commands and existing events; no extra core tick work,
+  I/O, per-tick scans or event history. Event bookkeeping still has a small
+  measurable server cost. Exact damage attribution is not claimed.
+- **Schema ownership.** P60 v7: match key/version, integrity facts/status,
+  indexed participant history, baseline, revision and append-only decisions.
+  P61 v8: one optional bounded raw JSON summary per match. Stats write only
+  after authoritative commit; failed optional data creates a coverage gap.
+  No legacy backfill or fuzzy join between `matches` and `ranked_matches`.
+- **Corrections.** A local admin CLI previews and applies a revision-leased
+  decision on a stopped server with a backup. It replays frozen deltas for
+  affected accounts; original history remains and later opponents are not
+  rerated. Snapshot rebuild follows the same committed revision.
+- **Statistics (D-88).** A low-priority, read-only SQLite connection inside
+  `store/` streams eligible patch rows into bounded discardable aggregates.
+  API requests only read privacy-filtered snapshots; no request-time SQL.
+  Versions, missing data and independent risk/settlement states define the
+  cohort. Shared/private cache TTL is 60 seconds, every error is no-store;
+  actual external cache rules require verification before publication.
+- **Client.** Seven localized Statistics tabs reuse desktop lobby/Ranking
+  panels with a single active view. HTTP JSON has its own schema; collection,
+  CLI and statistics UI need no postcard change. Only P60 enforcement
+  receipts take a new wire version and corresponding contract update.
+- **Operations.** No new service/dependency. Implement a real pre-migration
+  backup/scratch restore gate. Flags disable public statistics or reward
+  restrictions while retaining records. Do not downgrade to a pre-integrity
+  binary against enforced records or erase newer games during rollback.
+
+GAME-DESIGN §§14/15 own every proposed threshold and budget. Detailed SQL,
+types, rollout gates, failure modes and focused validation commands belong
+to [P60](phases/P60-ranked-integrity.md) and [P61](phases/P61-ranked-stats.md).
+The owner's minimal-validation policy applies; this documentation is not
+evidence that the planned runtime behavior has been verified.
+## 20. Localization completion (P64, planned)
+
+[P64](phases/P64-i18n-completeness.md) completes P41 using compiled client
+catalogs and the existing browser runtime. Core/server keep canonical
+identities, numeric mechanics and language-independent API/wire/storage
+data. Client resolvers map content IDs and result/status/error codes to
+localized display text and parameterized descriptions. Native bilingual
+helpers migrate into the same checked catalogs.
+
+Locale participates in report/DOM/native text invalidation; async language
+loads cannot overwrite newer selections. Standalone ranking/profile entry
+points use the same resolver/policy under their CSP. Number/date/plural
+formatting occurs only at display boundaries. Content coverage, reference,
+placeholder and glyph guards complement parity; technical/name exceptions
+are reviewed explicitly. No new translation service, gameplay rule or
+database migration is needed. See D-90 and the source audit for limitations.
+
+## 19. Victory celebration (P63, Proposed)
+
+[P63](phases/P63-victory-celebration.md), GAME-DESIGN §17 and D-82 describe a
+Result-owned cosmetic arena scene. It reuses FigureLibrary, champion kits
+and a shared celebration resolver with the P62 preview where integrated.
+Presentation figures are separate from UnitEntities and never affect combat.
+
+An authoritative runtime-only aggregate tracks all eligible participants
+by seat/kind/last form, retaining dead-unit counts without whole dead states.
+The compact final cast follows match-end/reconnect delivery, not a new
+database or HTTP service. Any new end payload needs one coordinated protocol
+revision and all consumers updated; choose its number on the real base.
+Preserve normal simulation hashes/events/RNG and avoid private-data leakage.
+
+Client modules own summary validation/lazy slots, frontal formation/camera,
+scene lifecycle and motion. Proposed pagination bounds visible figures to
+64 while exposing every participant; owner must approve that strategy or
+a measured all-at-once alternative. Result controls and network polling stay
+active. Missing/invalid cosmetics fall back to the regular result, and exit
+clears the scene before another match. Focused cast/protocol/reconnect/
+rematch/lifecycle checks and desktop visual review gate implementation.
+## 22. Native updates and release safety (P66, Proposed)
+
+[P66](phases/P66-native-updates-and-release-safety.md) separates signed
+artifact discovery, per-user transactional install, presentation/notes,
+admission compatibility and worker retirement. A small native launcher/helper
+owns trusted metadata/staging/journal/health rollback; Bevy gets asynchronous
+status and safe idle controls, not network/file work in the render loop.
+Linux managed installs come first; Windows has a real platform adapter and
+acceptance gate. User data and protected resume credentials live outside
+versioned release directories. Native restart resumes the owning generation
+before applying a new incompatible build.
+
+Each match pins generation/rules/content/features/wire. Initial safe drain
+may pause admission; two preconfigured slots later preserve existing sockets
+while new compatible admissions move to a ready generation. Durable shared
+ownership/fencing and idempotent result finalization precede coexistence.
+Retirement includes pending results/reconnect delivery, not just match count
+or a finite SIGTERM timer. No routine proxy reload or live simulation migration.
+
+Keep immutable browser/native assets, compatible DB readers/writers and
+expand/contract migration. Sign release metadata through a distinct protected
+release authority; P65 news/admin is not an executable distribution trust
+root. CDN/static delivery avoids archive traffic through the game server.
+Measure same-host overlap before activation; scale workers/routing/durable
+coordination across hosts only when measured demand justifies it. Planned
+deployment continuity does not imply crash failover or proven capacity.
+Contract identities are computed from frozen wire bytes, content tables and
+determinism goldens; public matchmaking runs one active contract and switches
+on schedule. Delivery is split into milestones: Linux updater (M1) and
+backend release safety (M2) independently, then two-slot rollout (M3) and the
+Windows adapter (M4).
+See D-91/D-92 and the release-contract matrix for gates and primary references.
+
+## 24. Windows native distribution and Wine acceptance (P68, planned)
+
+Section numbers 21–23 are reserved by the independent P65–P67 plans, not
+implemented dependencies on this consolidated Linux base. [P68](phases/P68-windows-native-release.md)
+and D-96 extend the existing native client, starting at the requested
+`codex/consolidated-linux-release` commit `55510c5`.
+
+**Owner clarification (2026-10-31):** Linux and Windows must have exactly the
+same frontend appearance at equivalent viewport/UI scale, locale, quality
+and scene/time. Shared design/assets/components remain the default, with
+platform-specific DPI/font/rendering/shader adjustments wherever needed to
+produce identical visuals. Preserve the approved Linux appearance and
+quality. Visible differences block P68 visual acceptance; platform or driver
+differences are not an automatic waiver. W07/W08 require matched packaged
+captures and review of every screen, including 3D presentation and motion.
+
+- **Shared product:** Linux and Windows use the same Bevy desktop shell,
+  native HUD/loading/ranking, art inventory, training and result scene.
+  Review the [hashed platform-gate audit](planning/P68-PLATFORM-GATES.csv)
+  before enabling Windows paths. Keep real OS services in `platform/` and
+  preserve browser alternatives. No new client engine, combat authority or
+  protocol is introduced by packaging.
+- **Build:** Windows x86_64 MSVC on a pinned Windows CI image is the primary
+  release path. Pin/record Rust, SDK, installer tools and actions; use the
+  lockfile, two Cargo jobs and target-specific dependencies. Linux cross-
+  compilation is optional, subject to tooling/license review. Define CRT
+  deployment from imports and clean-user tests, not assumptions.
+- **Artifacts:** reuse the native packager for a complete portable ZIP;
+  add a per-user Inno Setup definition under `deploy/native/windows/`.
+  Both consume one clean package inventory, with assets beside the binary,
+  immutable source/protocol identity, required runtime notices and digests.
+  Development-only repository asset fallback must not conceal incomplete
+  release bundles. Windows user-data location stays stable across upgrades.
+- **Install lifecycle:** install without elevation in the agreed runtime
+  configuration; use stable product identity and user shortcuts, preserve
+  account/preferences on upgrade/uninstall, handle locked files and failures
+  safely, and never kill an online match or force a reboot. This is not a
+  substitute for P66's separately planned automatic updater.
+- **Trust and promotion:** signed public artifacts require protected
+  credentials, final-byte signature/timestamp verification and owner gates.
+  Unsigned candidates remain explicitly internal. Sign before deriving
+  embedded executable hashes; compute final archive/installer digests last.
+  Candidate jobs cannot silently skip missing Windows assets just because a
+  release already exists. Preserve existing Linux artifacts and immutable tags.
+- **Acceptance:** use downloaded final packages outside the checkout.
+  Windows CI checks identity/imports and package contracts; isolated Wine on
+  the Linux GPU checks compatibility and Linux reference parity; actual
+  Windows GPU checks consumer OS integration and drivers. Keep evidence and
+  failures separate. A build or Wine launch alone is not release acceptance.
+
+The Windows packaging work needs no separate backend or deployment topology.
+The owner's P68-A extension below adds authentication modules/tables to the
+existing server and coordinates its wire update; it changes no combat rule.
+Test against a compatible backend without restarting production.
+See the [acceptance matrix and official references](planning/P68-WINDOWS-ACCEPTANCE.md).
+
+### 24.1 Persistent authentication on Linux, Windows and web (P68-A, planned)
+
+The owner added [P68-A](planning/P68-PERSISTENT-AUTH.md) to P68 on 2026-10-31.
+GAME-DESIGN §21 and D-97 define opaque 15-minute Access Tokens and rotating
+Refresh Tokens with a 30-day absolute device-family lifetime. The existing
+AccountKey stays valid for manual login; normal automatic login uses tokens.
+This explicitly extends the earlier packaging-only backend/wire scope.
+
+The Axum server owns a small `auth/` module and a bounded volatile Access
+index/short retry cache. Its existing SQLite writer owns additive family/
+refresh-history tables, atomic rotation and revocation/cleanup. Store only
+refresh hashes, never bearer secrets in SQL, journals, outboxes or logs.
+No new service, Redis, JWT infrastructure or cryptography in simulation ticks.
+
+Client `auth/` coordinates one state machine. Native `platform/credentials/`
+uses Linux Secret Service or Windows Credential Manager with Local
+persistence; Access remains in memory and ordinary preferences hold no new
+secrets. Web uses one cookie-backed fetch/coordinator shared by HTML and
+Bevy paths, with an HttpOnly/Secure/SameSite=Strict host cookie and Web Locks.
+OS/browser failures yield explicit safe temporary modes, not plaintext files.
+Exact Linux/Windows frontend appearance remains a required contract.
+
+Separate browser/native auth route groups prevent cookie credentials from
+being echoed into JS. Apply strict origin/custom-header CSRF checks, bounds,
+no-store responses and redaction. Origin is not account identity. Verify
+Access/family before WS account resume; add coordinated authenticated-handshake controls
+and explicit takeover without background refresh stealing the match.
+
+Natural Access expiry gates new account operations but an admitted match
+may finish under its seat-only lease; refresh updates the same socket.
+Revocation invalidates that lease; valid-auth reconnect preserves the
+existing 30-second window. Old resume handles alone cannot assume an account.
+Legacy migration confirms secure persistence and manual-key backup before
+removing the existing plaintext key. Track incomplete migration honestly.
+
+Complete A01–A14 along with the Windows acceptance matrix before claiming
+P68 done. Real Linux/Windows vault security and web cookie behavior require
+separate evidence; Wine proves only compatibility. Deployment/rollback
+preserves data and existing matches, and remains under the owner's rules.
+
+## 23. Commerce and recovery foundation (P67, Proposed)
+
+[P67](phases/P67-commerce-recovery-foundation.md) and its
+[module map](modules/commerce/README.md) establish separate documented folders
+for accounts/recovery, payments/ledger, Asaas mapping, Zaflas fiscal policy,
+presentation and validation, plus initial JSON contracts/synthetic examples.
+This is documentary scaffolding; no running integration or new crate exists.
+
+Future server commerce modules own exact money, quotes/orders, authenticated
+provider evidence, bounded inbox/outbox/reconciliation and source grants.
+Keep worker/persistence separate from match-result work. Identity recovery
+uses the authoritative account store and stable AccountId, preserving paid
+Inventory while rotating credentials and invalidating stale sessions. Neither
+domain introduces PII/provider I/O into core simulation or cash into Shop Energy.
+
+Asaas is the only initial provider and Pix the initial method; external calls
+remain disabled pending separate authorization. Fiscal issuance is independent
+and Zaflas-specific company/accounting setup is an input, not guessed data.
+Client cosmetic preferences resolve presentation only, preserving mechanical
+identity and gameplay. P64 i18n/P65 permissions/P66 generation security are
+integrated according to their actual merged contracts. See D-93–D-95.
+
+## 26. Consolidated auth, resume and release slots (D-99, Proposed)
+
+Section 25 is reserved by the independent P69 plan. The consolidated line
+joins P66 (§22) and P68 (§24) without a second coordinator:
+
+- `tbg-client/src/auth/` is the only vault reader/writer. Its first restore
+  also reads the P66 resume record (`platform/resume.rs` keeps only the record
+  format, freshness and coalesced pending writes) under the per-origin process
+  lock, bounded by P66's 5-second visible wait. Later writes run as coordinator
+  operations; an identity change queues the record's removal.
+- `NetLink::connect` needs both P66 admission (slot path plus contract) and
+  P68 credential state, and tells the coordinator which slot the socket uses.
+  Native and browser auth requests carry `X-TBG-Slot`; `deploy/Caddyfile.template`
+  routes `/api/auth/*` by it and the server refuses another slot's requests.
+- `tbg-server/src/store/schema.rs` v10 verifies both v9 feature table sets by
+  shape. Updates wait for any coordinator operation (`auth::idle_for_update`)
+  as well as P66's socket guard.
+
+Cross-slot revocation propagation is not implemented: two-slot rollout with
+P68 auth stays inactive until it is (D-99 limits).

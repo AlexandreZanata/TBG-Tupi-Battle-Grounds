@@ -7,9 +7,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assets = path.resolve(__dirname, '../assets');
 const data = JSON.parse(fs.readFileSync(path.join(assets, 'stronghold/strongholds.json'), 'utf8'));
+const {boot, catalogs} = require('./i18n-runtime.js');
 require('../assets/stronghold/describe.js');
 const tower = globalThis.TbgStronghold;
 const byKind = name => tower.kind(data, name);
+const english = boot('en').then(({i18n}) => { globalThis.TBG_I18N = i18n; return i18n; });
+test.beforeEach(() => english);
 
 test('BR-SK01: four selectable kinds, Bastion by default, Classic never offered', () => {
   assert.deepEqual(data.kinds.map(def => def.kind), ['Treasury', 'Bastion', 'Artillery', 'Command']);
@@ -62,4 +65,36 @@ test('every kind has its tower drawing and the HUD understands every offer state
   for (const def of data.kinds) assert.ok(sprite.includes('id="' + tower.icon(def.kind).slice(1) + '"'), def.kind);
   const css = fs.readFileSync(path.join(assets, 'battle/fortify.css'), 'utf8');
   for (const state of ['short', 'closed', 'paused', 'idle', 'pending']) assert.ok(css.includes('[data-state=' + state + ']'), state);
+});
+
+test('P64: catalog English equals the pinned JSON prose; pt-BR keeps every number', async () => {
+  const en = catalogs.en, pt = catalogs['pt-BR'];
+  for (const [key, value] of Object.entries(data.copy)) assert.equal(en['stronghold.copy.' + key], value, key);
+  for (const def of data.kinds) {
+    const id = 'stronghold.' + def.kind.toLowerCase() + '.';
+    assert.equal(en[id + 'name'], def.name);
+    for (const field of ['specialty', 'summary']) assert.equal(en[id + field], def[field], id + field);
+    assert.equal(en[id + 'passive.name'], def.passive.name);
+    assert.equal(en[id + 'passive.text'], def.passive.text);
+    def.advantages.forEach((line, i) => assert.equal(en[id + 'advantage.' + i], line));
+    def.disadvantages.forEach((line, i) => assert.equal(en[id + 'disadvantage.' + i], line));
+    def.branches.forEach((branch, b) => {
+      assert.equal(en[id + 'branch.' + b + '.name'], branch.name);
+      branch.steps.forEach((step, i) => assert.equal(en[id + 'step.' + (b * 2 + i) + '.name'], step.name));
+    });
+    assert.ok(pt[id + 'passive.text'] && pt[id + 'summary'], def.kind);
+  }
+  const {i18n} = await boot('pt-BR');
+  globalThis.TBG_I18N = i18n;
+  try {
+    const treasury = byKind('Treasury'), artillery = byKind('Artillery');
+    assert.equal(tower.name(treasury), 'Tesouro');
+    assert.equal(tower.branchName(treasury, 1), 'Casa da Moeda');
+    assert.match(tower.fill(tower.text(treasury, 'passive.text'), treasury.stats, data), /paga 0,15 de Energia, no m\u00e1ximo 0,6 de Energia por janela de 10 s/);
+    assert.equal(tower.effect(data, artillery, 1, 1), 'Ataca a cada 0,85 s (antes 1,00 s)');
+    assert.equal(tower.effect(data, treasury, 1, 2), 'Esp\u00f3lios de 0,25 de Energia por abate, limite de 0,9 de Energia por janela');
+    assert.equal(tower.tiles(1000), '1 casa');
+  } finally {
+    globalThis.TBG_I18N = await english;
+  }
 });

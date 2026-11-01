@@ -1,6 +1,9 @@
 //! Account store and protocol tests (GAME-DESIGN BR-P01–BR-P05).
 //! Each test names the rule it protects.
 
+#[path = "common/auth.rs"]
+mod auth;
+
 use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
@@ -76,7 +79,7 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
         };
         match protocol::decode_server(&b).unwrap() {
             ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
-            ServerMsg::NetStats { .. } => {}
+            ServerMsg::NetStats { .. } | ServerMsg::AuthState { .. } => {}
             other => return Some(other),
         }
     }
@@ -127,11 +130,10 @@ async fn connect(url: &str) -> Ws {
 
 /// Register and return the (plain key, profile).
 async fn register_as(ws: &mut Ws, name: &str) -> (String, Profile) {
-    send(ws, &ClientMsg::Register { name: name.into() }).await;
-    match recv(ws).await {
-        Some(ServerMsg::Registered { key, profile }) => (key, profile),
-        other => panic!("expected Registered, got {other:?}"),
-    }
+    let grant = auth::register(ws, name).await.unwrap();
+    auth::attach(ws, &grant, false).await;
+    assert!(matches!(recv(ws).await, Some(ServerMsg::LoggedIn { .. })));
+    (grant.account_key.unwrap(), grant.profile)
 }
 
 #[tokio::test]
@@ -211,27 +213,14 @@ async fn br_p01_register_name_taken_and_invalid() {
     let mut ws = connect(&url).await;
     hello(&mut ws).await;
     register_as(&mut ws, "Aldric").await;
-    // Same name in another case → NameTaken.
-    send(
-        &mut ws,
-        &ClientMsg::Register {
-            name: "ALDRIC".into(),
-        },
-    )
-    .await;
+    // D-97: HTTP issuance preserves name rules and does not alter the socket identity.
     assert!(matches!(
-        recv(&mut ws).await,
-        Some(ServerMsg::AccountError {
-            code: AccountError::NameTaken
-        })
+        auth::register(&ws, "ALDRIC").await,
+        Err(AccountError::NameTaken)
     ));
-    // Bad shape → NameInvalid.
-    send(&mut ws, &ClientMsg::Register { name: "x".into() }).await;
     assert!(matches!(
-        recv(&mut ws).await,
-        Some(ServerMsg::AccountError {
-            code: AccountError::NameInvalid
-        })
+        auth::register(&ws, "x").await,
+        Err(AccountError::NameInvalid)
     ));
 }
 
@@ -244,7 +233,8 @@ async fn br_p02_login_same_profile_and_bad_secret() {
     // A new socket with the key logs into the same profile.
     let mut ws2 = connect(&url).await;
     hello(&mut ws2).await;
-    send(&mut ws2, &ClientMsg::Login { key: key.clone() }).await;
+    let grant = auth::login(&ws2, &key).await.unwrap();
+    auth::attach(&mut ws2, &grant, true).await;
     match recv(&mut ws2).await {
         Some(ServerMsg::LoggedIn { profile: p }) => assert_eq!(p, profile),
         other => panic!("expected LoggedIn, got {other:?}"),
@@ -255,18 +245,9 @@ async fn br_p02_login_same_profile_and_bad_secret() {
     bad[last] = if bad[last] == b'0' { b'1' } else { b'0' };
     let mut ws3 = connect(&url).await;
     hello(&mut ws3).await;
-    send(
-        &mut ws3,
-        &ClientMsg::Login {
-            key: String::from_utf8(bad).unwrap(),
-        },
-    )
-    .await;
     assert!(matches!(
-        recv(&mut ws3).await,
-        Some(ServerMsg::AccountError {
-            code: AccountError::BadKey
-        })
+        auth::login(&ws3, &String::from_utf8(bad).unwrap()).await,
+        Err(AccountError::BadKey)
     ));
 }
 
@@ -282,18 +263,9 @@ async fn br_p01_register_rate_limited_per_ip() {
     }
     let mut ws = connect(&url).await;
     hello(&mut ws).await;
-    send(
-        &mut ws,
-        &ClientMsg::Register {
-            name: "Rlfour".into(),
-        },
-    )
-    .await;
     assert!(matches!(
-        recv(&mut ws).await,
-        Some(ServerMsg::AccountError {
-            code: AccountError::RateLimited
-        })
+        auth::register(&ws, "Rlfour").await,
+        Err(AccountError::RateLimited)
     ));
 }
 
@@ -320,7 +292,8 @@ async fn br_p03_second_login_takes_over_live_match() {
     // A second login with the same key takes the match over (BR-P03).
     let mut a2 = connect(&url).await;
     hello(&mut a2).await;
-    send(&mut a2, &ClientMsg::Login { key }).await;
+    let grant = auth::login(&a2, &key).await.unwrap();
+    auth::attach(&mut a2, &grant, true).await;
     let mut saw_start = false;
     let mut saw_view = false;
     for _ in 0..50 {
@@ -407,15 +380,15 @@ async fn br_p04_account_messages_refused_in_match() {
     .await;
     assert!(matches!(
         recv_no_views(&mut a).await,
-        Some(ServerMsg::AccountError {
-            code: AccountError::Unavailable
+        Some(ServerMsg::AuthRequired {
+            reason: protocol::AuthRefusal::Invalid
         })
     ));
     send(&mut a, &ClientMsg::Logout).await;
     assert!(matches!(
         recv_no_views(&mut a).await,
-        Some(ServerMsg::AccountError {
-            code: AccountError::Unavailable
+        Some(ServerMsg::AuthRequired {
+            reason: protocol::AuthRefusal::Invalid
         })
     ));
 }
@@ -450,10 +423,26 @@ async fn br_p04_resumed_session_reports_its_account() {
     let (url, _t) = live_server("proto-resume-account").await;
     let mut a = connect(&url).await;
     let token = hello_token(&mut a, None).await;
-    register_as(&mut a, "Resumer").await;
+    let grant = auth::register(&a, "Resumer").await.unwrap();
+    auth::attach(&mut a, &grant, false).await;
+    assert!(matches!(
+        recv(&mut a).await,
+        Some(ServerMsg::LoggedIn { .. })
+    ));
     drop(a);
+    // Wait for the original controller's ordinary detach before passive reconnect.
+    tokio::time::sleep(Duration::from_millis(30)).await;
     let mut a2 = connect(&url).await;
-    assert_eq!(hello_token(&mut a2, Some(token)).await, token);
+    send(
+        &mut a2,
+        &ClientMsg::AuthenticatedHello {
+            version: PROTOCOL_VERSION,
+            resume: Some(token),
+            access: grant.access,
+        },
+    )
+    .await;
+    assert!(matches!(recv(&mut a2).await,Some(ServerMsg::Welcome{token:t,..}) if t==token));
     match recv(&mut a2).await {
         Some(ServerMsg::LoggedIn { profile }) => assert_eq!(profile.name, "Resumer"),
         other => panic!("expected LoggedIn after resume, got {other:?}"),

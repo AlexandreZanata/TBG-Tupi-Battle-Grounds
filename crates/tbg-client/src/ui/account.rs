@@ -3,17 +3,20 @@
 //! (filled by `sync::messages`); text entry comes from `textform` events.
 
 use bevy::prelude::*;
-use tbg_core::protocol::{AccountError, ClientMsg, Profile, ServerMsg};
+use tbg_core::protocol::{AccountError, Profile, ServerMsg};
 
 use super::textform::{self, ActiveForm, TextCancelled, TextEntered, TextKind};
 use super::Toasts;
-use crate::config;
-use crate::link::MatchLink;
-use crate::net::{Mode, NetLink};
+use crate::i18n::{Lang, Msg};
 
 /// Replies the account panel owns (filled by `sync::messages`).
 #[derive(Resource, Default)]
-pub struct AccountInbox(pub Vec<ServerMsg>);
+pub struct AccountInbox(pub Vec<(u64, ServerMsg)>);
+impl AccountInbox {
+    pub fn push(&mut self, message: ServerMsg) {
+        self.0.push((crate::auth::epoch(), message));
+    }
+}
 
 #[derive(Default)]
 pub(crate) enum AccountScreen {
@@ -46,57 +49,34 @@ pub fn plugin(app: &mut App) {
         .add_systems(Update, (watch_text, text_cancelled, drain_inbox));
 }
 
-fn error_text(code: AccountError) -> &'static str {
+fn error_msg(code: AccountError) -> Msg {
     match code {
-        AccountError::NameTaken => "That name is taken",
-        AccountError::NameInvalid => "3-16 letters, digits or _; start with a letter",
-        AccountError::RateLimited => "Too many tries, wait a bit",
-        AccountError::Unavailable => "Finish your match first",
-        AccountError::BadKey => "That key didn't work",
+        AccountError::NameTaken => Msg::AccountErrorNameTaken,
+        AccountError::NameInvalid => Msg::AccountErrorNameInvalid,
+        AccountError::RateLimited => Msg::AccountErrorRateLimited,
+        AccountError::Unavailable => Msg::AccountErrorUnavailable,
+        AccountError::BadKey => Msg::AccountErrorBadKey,
     }
 }
 
-/// A Net link that sends account messages: reuse the idle probe socket,
-/// else open a listen-only one (it sends nothing by itself).
-fn ensure_link(link: &mut MatchLink, now: f64) -> &mut NetLink {
-    if let MatchLink::Net(n) = link {
-        if n.reuse(Mode::Probe, now) {
-            return match link {
-                MatchLink::Net(n) => n,
-                _ => unreachable!(),
-            };
-        }
-    }
-    *link = MatchLink::Net(Box::new(NetLink::new(Mode::Probe, now)));
-    match link {
-        MatchLink::Net(n) => n,
-        _ => unreachable!(),
-    }
-}
-
-fn watch_text(
-    mut events: MessageReader<TextEntered>,
-    mut link: NonSendMut<MatchLink>,
-    mut account: ResMut<Account>,
-    time: Res<Time>,
-) {
+fn watch_text(mut events: MessageReader<TextEntered>, mut account: ResMut<Account>) {
     for ev in events.read() {
-        let now = time.elapsed_secs_f64();
-        let req = match ev.kind {
-            TextKind::Name => ClientMsg::Register {
-                name: ev.value.clone(),
-            },
-            TextKind::Key => ClientMsg::Login {
-                key: ev.value.clone(),
-            },
+        let command = match ev.kind {
+            TextKind::Name => crate::auth::Command::Register(ev.value.clone()),
+            TextKind::Key => crate::auth::Command::Login(ev.value.clone()),
+            _ => continue,
         };
-        ensure_link(&mut link, now).send(req, now);
-        account.pending = Some(ev.kind);
+        if crate::auth::request(command) {
+            account.pending = Some(ev.kind);
+        }
     }
 }
 
 fn text_cancelled(mut events: MessageReader<TextCancelled>, mut account: ResMut<Account>) {
     for _ in events.read() {
+        if matches!(account.pending, Some(TextKind::Name | TextKind::Key)) {
+            crate::auth::request(crate::auth::Command::Guest);
+        }
         account.pending = None;
     }
 }
@@ -108,8 +88,12 @@ fn drain_inbox(
     mut form: NonSendMut<ActiveForm>,
     mut toasts: ResMut<Toasts>,
     time: Res<Time>,
+    lang: Res<Lang>,
 ) {
-    for msg in std::mem::take(&mut inbox.0) {
+    for (epoch, msg) in std::mem::take(&mut inbox.0) {
+        if epoch != crate::auth::epoch() {
+            continue;
+        }
         match msg {
             ServerMsg::Registered { key, profile } => {
                 account.profile = Some(profile.clone());
@@ -128,7 +112,7 @@ fn drain_inbox(
                 account.auto_login = false;
                 textform::close(&mut form);
                 if !was_auto {
-                    toasts.push(format!("Logged in as {}", profile.name));
+                    toasts.say_with(Msg::AccountLoggedIn, &[("name", profile.name.clone())]);
                 }
             }
             ServerMsg::LoggedOut => {
@@ -136,8 +120,7 @@ fn drain_inbox(
                 account.screen = AccountScreen::None;
                 account.logout_armed = false;
                 account.rating_change = None;
-                config::delete_account_key();
-                toasts.push("Logged out");
+                toasts.say(Msg::AccountLoggedOut);
             }
             // P12: settled by the store after `MatchEnd`; the result screen
             // counts it up. The menu chip refreshes from the new profile.
@@ -157,16 +140,16 @@ fn drain_inbox(
                     // Post-P14: a stored key failed (or timed out); the
                     // player continues as guest and the UI says so.
                     account.profile = None;
-                    toasts.push("Saved key didn't work - playing as guest");
+                    toasts.say(Msg::AccountSavedKeyFailed);
                 } else if code == AccountError::Unavailable
                     && (was_auto || account.profile.is_some())
                 {
                     // P14: the auto-login raced a resumed match; the server
                     // already sent `LoggedIn` for the session. Stay quiet.
                 } else if textform::is_open(&form) {
-                    textform::set_error(&form, error_text(code));
+                    textform::set_error(&form, lang.t(error_msg(code)));
                 } else {
-                    toasts.push(error_text(code));
+                    toasts.say(error_msg(code));
                 }
             }
             _ => {}
@@ -174,26 +157,24 @@ fn drain_inbox(
     }
 }
 
-/// Download `<Name>-tbg-key.txt` through a `data:` anchor (P11).
+/// Export only after the player's explicit recovery-key download action.
 #[cfg(target_arch = "wasm32")]
-pub(crate) fn download_key(name: &str, key: &str) {
-    use wasm_bindgen::JsCast;
-
-    let Some(doc) = web_sys::window().and_then(|w| w.document()) else {
-        return;
-    };
-    let Ok(el) = doc.create_element("a") else {
-        return;
-    };
-    let Ok(a) = el.dyn_into::<web_sys::HtmlAnchorElement>() else {
-        return;
-    };
-    // The key alphabet needs no URL escaping (alphanumerics and `-`).
-    a.set_href(&format!("data:text/plain,{key}"));
-    a.set_download(&format!("{name}-tbg-key.txt"));
-    a.click();
-    a.remove();
+pub(crate) fn download_key(name: &str, key: &str) -> bool {
+    #[wasm_bindgen::prelude::wasm_bindgen(inline_js = r#"
+    export function downloadAccountKey(name,key) {
+      const blob=new Blob([key],{type:'text/plain'}),url=URL.createObjectURL(blob);
+      const link=document.createElement('a');link.href=url;link.download=name+'-tbg-key.txt';
+      link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),0);
+    }
+    "#)]
+    extern "C" {
+        #[wasm_bindgen::prelude::wasm_bindgen(catch,js_name=downloadAccountKey)]
+        fn export_key(name: &str, key: &str) -> Result<(), wasm_bindgen::JsValue>;
+    }
+    export_key(name, key).is_ok()
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn download_key(_name: &str, _key: &str) {}
+pub(crate) fn download_key(name: &str, key: &str) -> bool {
+    crate::platform::export_recovery_key(name, key)
+}

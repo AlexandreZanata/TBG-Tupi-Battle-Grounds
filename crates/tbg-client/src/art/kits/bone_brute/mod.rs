@@ -13,6 +13,7 @@ use crate::vfx::impacts::Impact;
 use model::Form;
 
 pub const KIT: Kit = Kit {
+    anatomy: None,
     figure: model::spec,
     pose: motion::pose,
     gait: Gait::HEAVY,

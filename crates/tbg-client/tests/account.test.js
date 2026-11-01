@@ -13,7 +13,9 @@ function fixture(){
   const reveal=node(),observers=[];
   nodes['tbg-form'].querySelector=()=>reveal;
   Object.defineProperty(nodes['tbg-input'],'value',{get(){throw new Error('Presentation must never read credentials');}});
-  const context={document:{getElementById:id=>nodes[id]},MutationObserver:class{constructor(f){this.render=f;}observe(n){observers.push({node:n,render:this.render});}},fetch(){throw new Error('Presentation must not call an account API');}};
+  const {catalogs}=require('./i18n-runtime.js');
+  const TBG_I18N={t:key=>catalogs.en[key]??key};
+  const context={TBG_I18N,document:{getElementById:id=>nodes[id],addEventListener(){}},MutationObserver:class{constructor(f){this.render=f;}observe(n){observers.push({node:n,render:this.render});}},fetch(){throw new Error('Presentation must not call an account API');}};
   vm.runInNewContext(source,context);
   return {nodes,reveal,update(){observers.forEach(o=>o.render());}};
 }
@@ -22,13 +24,14 @@ test('existing Name and Key forms gain clear copy, masked keys, and reset reveal
   const f=fixture();
   assert.equal(f.nodes['tbg-form-ok'].textContent,'Create account');
   assert.equal(f.nodes['tbg-input'].type,'text');assert.equal(f.reveal.hidden,true);
-  f.nodes['tbg-form-label'].textContent='Paste your account key';f.update();
+  // P64: Rust marks the kind; a localized label (any language) is never parsed.
+  f.nodes['tbg-form-label'].textContent='Cole a chave da sua conta';f.nodes['tbg-form'].dataset.kind='key';f.update();
   assert.equal(f.nodes['account-title'].textContent,'Welcome back');
   assert.equal(f.nodes['tbg-form-ok'].textContent,'Sign in');
   assert.equal(f.nodes['tbg-input'].type,'password');assert.equal(f.reveal.hidden,false);
   f.reveal.listeners.click();assert.equal(f.nodes['tbg-input'].type,'text');assert.equal(f.reveal['aria-pressed'],'true');
   f.update();assert.equal(f.nodes['tbg-input'].type,'password');assert.equal(f.reveal['aria-pressed'],'false');
-  f.nodes['tbg-form-label'].textContent='Choose a name (3-16 letters, digits, _)';f.update();
+  f.nodes['tbg-form-label'].textContent='Choose a name (3-16 letters, digits, _)';f.nodes['tbg-form'].dataset.kind='name';f.update();
   assert.equal(f.nodes['tbg-input'].type,'text');assert.equal(f.reveal.hidden,true);
 });
 

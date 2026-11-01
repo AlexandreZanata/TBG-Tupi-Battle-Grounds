@@ -18,11 +18,64 @@ fn escape(value: &str) -> String {
     out
 }
 
+/// P66 §6.5: the match contract's gameplay source hash, computed here
+/// exactly like `tbg_core::ruleset_version::ruleset_source_hash` (FNV-1a 64
+/// over `path, 0x00, source, 0xFF` in `WATCHED` order) so the client does
+/// not link 400 KB of rule sources. A unit test pins the two together.
+fn contract_source_hash() {
+    let core =
+        std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("../tbg-core/src");
+    let list = core.join("ruleset_version.rs");
+    println!("cargo:rerun-if-changed={}", list.display());
+    let text = std::fs::read_to_string(&list).expect("tbg-core ruleset_version.rs");
+    let mut h: u64 = 0xcbf2_9ce4_8422_2325;
+    let mut feed = |bytes: &[u8]| {
+        for b in bytes {
+            h = (h ^ u64::from(*b)).wrapping_mul(0x0100_0000_01b3);
+        }
+    };
+    for line in text.lines() {
+        let Some(rest) = line.trim().strip_prefix("(\"") else {
+            continue;
+        };
+        let Some((path, _)) = rest.split_once("\", include_str!(") else {
+            continue;
+        };
+        let file = core.join(path);
+        println!("cargo:rerun-if-changed={}", file.display());
+        let source = std::fs::read(&file).unwrap_or_else(|e| panic!("contract source {path}: {e}"));
+        feed(path.as_bytes());
+        feed(&[0x00]);
+        feed(&source);
+        feed(&[0xFF]);
+    }
+    println!("cargo:rustc-env=TBG_CONTRACT_SOURCE_HASH={h:016x}");
+}
+
 fn main() {
-    println!("cargo:rerun-if-changed=assets/i18n/en.json");
-    println!("cargo:rerun-if-changed=assets/i18n/pt-BR.json");
+    contract_source_hash();
+    println!(
+        "cargo:rustc-env=TBG_BUILD_TARGET={}",
+        std::env::var("TARGET").unwrap_or_default()
+    );
+    // Presentation depends on the compilation target, never on the build host.
+    println!("cargo:rustc-check-cfg=cfg(tbg_desktop)");
+    let desktop = matches!(
+        std::env::var("CARGO_CFG_TARGET_OS").as_deref(),
+        Ok("linux" | "windows")
+    );
+    if desktop {
+        println!("cargo:rustc-cfg=tbg_desktop");
+    }
+    native_art_manifest(desktop);
+    println!("cargo:rerun-if-env-changed=TBG_DEFAULT_SERVER");
+    println!("cargo:rerun-if-env-changed=TBG_SOURCE_COMMIT");
     let dir =
         std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("assets/i18n");
+    // Absolute paths keep generated catalogs correct across worktree caches.
+    for name in ["en.json", "pt-BR.json"] {
+        println!("cargo:rerun-if-changed={}", dir.join(name).display());
+    }
     let read = |name: &str| {
         let raw = std::fs::read_to_string(dir.join(name))
             .unwrap_or_else(|e| panic!("i18n: cannot read {name}: {e}"));
@@ -69,6 +122,11 @@ fn main() {
         code.push_str(&format!("    {v} = {i},\n"));
     }
     code.push_str("}\n");
+    code.push_str("pub(super) static KEYS: [&str; MSG_COUNT] = [\n");
+    for key in &keys {
+        code.push_str(&format!("    \"{}\",\n", escape(key)));
+    }
+    code.push_str("];\n");
     let table = |name: &str, map: &std::collections::HashMap<&str, &str>| {
         let mut s = format!("pub(super) static {name}: [&str; MSG_COUNT] = [\n");
         for key in &keys {
@@ -112,4 +170,36 @@ fn main() {
     }
     let out = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("catalog.rs");
     std::fs::write(out, code).unwrap();
+}
+
+fn native_art_manifest(desktop: bool) {
+    if !desktop {
+        return;
+    }
+    let root = std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("assets");
+    println!("cargo:rerun-if-changed={}", root.display());
+    fn collect(root: &std::path::Path, dir: &std::path::Path, paths: &mut Vec<String>) {
+        for entry in std::fs::read_dir(dir).unwrap().map(Result::unwrap) {
+            let path = entry.path();
+            if path.is_dir() {
+                collect(root, &path, paths);
+            } else if path.extension().is_some_and(|s| s == "webp") {
+                paths.push(
+                    path.strip_prefix(root)
+                        .unwrap()
+                        .to_string_lossy()
+                        .replace('\\', "/"),
+                );
+            }
+        }
+    }
+    let mut paths = Vec::new();
+    collect(&root, &root, &mut paths);
+    paths.sort();
+    let values = paths
+        .iter()
+        .map(|p| format!("{p:?},\n"))
+        .collect::<String>();
+    let output = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("native_art.rs");
+    std::fs::write(output, format!("pub const ART: &[&str] = &[\n{values}];\n")).unwrap();
 }

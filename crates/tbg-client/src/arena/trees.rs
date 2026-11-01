@@ -25,7 +25,11 @@ pub(super) fn pine(parts: &mut Vec<Part>, at: Vec3, s: f32) {
         (0.36, 0.86, 1.98, Color::srgb(0.52, 0.66, 0.23)),
     ] {
         parts.push((
-            Cone(radius * s, height * s),
+            Canopy(
+                radius * s,
+                height * s,
+                at.x.to_bits() ^ at.z.to_bits() ^ (at.z + y).to_bits(),
+            ),
             color,
             Transform::from_translation(at + Vec3::Y * y * s)
                 .with_rotation(Quat::from_rotation_y(at.x * 0.8)),
@@ -73,11 +77,11 @@ pub(super) fn flowers(parts: &mut Vec<Part>, at: Vec3) {
                 0.16,
                 (flower % 2) as f32 * 0.13,
             );
-        parts.push((Ball(0.043), GOLD, Transform::from_translation(p)));
+        parts.push((Cyl(0.043, 0.035), GOLD, Transform::from_translation(p)));
         for petal in 0..5 {
             let a = petal as f32 * std::f32::consts::TAU / 5.0;
             parts.push((
-                Ball(0.045),
+                Cyl(0.045, 0.025),
                 LINEN,
                 Transform::from_translation(p + Vec3::new(a.cos() * 0.07, 0.0, a.sin() * 0.07))
                     .with_scale(Vec3::new(1.0, 0.35, 1.0)),

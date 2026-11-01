@@ -103,6 +103,7 @@
 .inspect-stats{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}
 .inspect-stats>div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #ffffff10;padding-bottom:2px}
 .inspect-stats>div.wide{grid-column:1/-1}
+.inspect-stats>[hidden]{display:none}.inspect-effects{align-items:flex-start}.inspect-effects dd{white-space:normal;line-height:1.4;max-width:220px}
 .inspect-stats dt{color:#9fb0b4;font-size:11px}
 .inspect-stats dd{margin:0;font-weight:700;font-size:12px;font-variant-numeric:tabular-nums;color:#f3ead6;text-align:right}
 .inspect-stats dd[data-status='Slowed']{color:#86d4ff}.inspect-stats dd[data-status='Rooted']{color:#a9e36d}
@@ -160,3 +161,12 @@
 .battle-live{left:50%;bottom:18px;transform:translateX(-50%);padding:8px 16px;border-radius:999px;background:rgba(20,14,6,.84);color:#f4e7c4;font-size:14px;font-weight:600;white-space:nowrap}
 #tbg-battle:not([data-spectating="true"]) .battle-live{top:70px;right:18px;bottom:auto;left:auto;transform:none;font-size:12px}
 .battle-leave{top:18px;right:18px;height:44px;padding:0 16px;border-radius:10px;background:#3a2a14;color:#f4e7c4;font-size:13px;font-weight:700}
+
+/* Shop reservations remain visible even when the unit is unaffordable. */
+.shop-slot{position:relative;display:flex}
+.shop-lock{position:absolute;right:7px;top:34px;z-index:2;width:32px;height:32px;border:1px solid #c3a46a;border-radius:6px;background:#162431;color:#ffe3a1!important}
+.shop-lock:disabled{opacity:.45}
+.reserve-charges{position:absolute;left:8px;right:8px;top:72px;text-align:center;background:#292113e8;color:#ffe4a3;font-size:12px;padding:4px;border:1px solid #d4af60;pointer-events:none}
+.battle-card.reserved{filter:drop-shadow(0 0 5px #ffcf65);outline:2px solid #f5cd72}
+.shop-reroll{padding:6px 12px;min-width:128px;min-height:34px;white-space:nowrap}
+.shop-reroll:disabled{opacity:.45}

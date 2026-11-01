@@ -7,6 +7,7 @@ use crate::content::{Ability, BP, LANE_LEN, MIN_INTERVAL, WINDUP};
 use crate::hits::{damage, resolve_hit};
 use crate::state::{stronghold_x, Event, MatchState, Target, Unit};
 use crate::targeting::{self, Engage};
+use crate::training_hooks::{self, Effect, Source};
 use crate::types::{Seat, Status, UnitId, UnitKind};
 
 mod formation;
@@ -14,7 +15,10 @@ use formation::FormationIndex;
 
 /// Count down statuses and cooldowns.
 pub(crate) fn tick_timers(state: &mut MatchState) {
+    let rules = state.rules();
     for u in &mut state.units {
+        crate::jawguard::tick(rules, u, state.tick);
+        let before = u.status;
         u.status = match u.status {
             Status::Slowed { bp, ticks_left } if ticks_left > 1 => Status::Slowed {
                 bp,
@@ -25,7 +29,14 @@ pub(crate) fn tick_timers(state: &mut MatchState) {
             },
             _ => Status::None,
         };
+        crate::roster_slots::release_queued_slow(u, before, state.tick);
         u.cooldown = u.cooldown.saturating_sub(1);
+        if !u.is_summon()
+            && (crate::specials::period(rules, u.kind, u.tier, u.branch).is_some()
+                || crate::drillnest::period(rules, u.kind, u.tier, u.branch).is_some())
+        {
+            u.action_cd = u.action_cd.saturating_sub(1);
+        }
     }
     for p in &mut state.players {
         p.stronghold_cooldown = p.stronghold_cooldown.saturating_sub(1);
@@ -42,6 +53,7 @@ pub(crate) fn run_units(state: &mut MatchState, ev: &mut Vec<Event>) {
     let mut formations = FormationIndex::new();
     for idx in 0..state.units.len() {
         advance_unit(state, idx, ev, &mut formations);
+        crate::specials::advance(state, idx, ev);
     }
     // ...and again after everyone moved.
     sync_passengers(state);
@@ -71,7 +83,8 @@ fn advance_unit(
     formations: &mut FormationIndex,
 ) {
     let u = state.units[idx];
-    if u.hp <= 0 {
+    // P62: a training dummy is an inert target; it never starts a windup.
+    if u.hp <= 0 || training_hooks::is_dummy(state, u.id) {
         return;
     }
     if let Status::Rooted { .. } = u.status {
@@ -87,7 +100,9 @@ fn advance_unit(
             return;
         }
         if targeting::alive(state, target) {
-            resolve_hit(state, &u, target, &st, ev);
+            training_hooks::scoped(state, Source::Unit(u.id), Effect::Direct, |s| {
+                resolve_hit(s, &u, target, &st, ev)
+            });
         }
         let distance = (targeting::target_x(state, target) - u.x).abs();
         let quickdraw = if u.is_summon() {
@@ -121,6 +136,8 @@ fn advance_unit(
                 // decided at windup start, so AttackStart already shows it.
                 // Root cancels the windup and the betrayal with it.
                 let (target, betrayed) = crate::support::betray_windup(state, &u, st.range, target);
+                crate::ravager::retarget(state, idx, target);
+                crate::mantis::retarget(state, idx, target);
                 state.units[idx].windup = Some((target, WINDUP));
                 state.units[idx].fx.betray = betrayed;
                 ev.push(Event::AttackStart {
@@ -133,7 +150,7 @@ fn advance_unit(
         None => {
             // Carried passengers never walk on their own; the crab carries
             // them (their x stays synced around this tick).
-            if u.fx.carrier.is_some() {
+            if u.fx.carrier.is_some() || crate::bulwark::anchored(state, &u) {
                 return;
             }
             // Drumguard B2: the bonded ally ignores slows and fish.
@@ -145,6 +162,23 @@ fn advance_unit(
                     _ => st.speed,
                 }
             };
+            // D-56: a Cargo Crab carrying a passenger moves at the speed of the
+            // faster of the two units before carry bonuses are applied.
+            if let Some(pid) = u.fx.passenger {
+                if let Some(pi) = state.unit_index(pid) {
+                    let pu = &state.units[pi];
+                    let pst = state.stats_of(pu);
+                    let pass_speed = if pu.fx.march_ignore_slow {
+                        pst.speed
+                    } else {
+                        match pu.status {
+                            Status::Slowed { bp, .. } => scale_down(pst.speed, bp),
+                            _ => pst.speed,
+                        }
+                    };
+                    speed = speed.max(pass_speed);
+                }
+            }
             // Old Finn fish (P45): movement only, multiplicative with any
             // status slow, so no combination reaches zero. Never touches
             // the attack interval. Oilpress A2 immunity covers it.
@@ -328,7 +362,11 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
                 .map(|u| u.id)
                 .collect();
             for id in victims {
-                crate::hits::damage(state, Target::Unit(id), s.amount, ev);
+                // ponytail: `Shrapnel` keeps no plate owner, so the lab shows
+                // this as unattributed; add a source id to attribute it.
+                training_hooks::scoped(state, Source::Unknown, Effect::Shrapnel, |st| {
+                    crate::hits::damage(st, Target::Unit(id), s.amount, ev)
+                });
             }
         }
     }
@@ -340,6 +378,9 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
         }
     }
     state.units.retain(|u| u.hp > 0);
+    // Clear a dead prey before projecting counters in this tick's views.
+    crate::roster_slots::tick_marks(state);
+    crate::specials::cancel_gone(state);
     #[cfg(feature = "lab")]
     if dead[0] + dead[1] > 0 {
         crate::lab::progress(state);

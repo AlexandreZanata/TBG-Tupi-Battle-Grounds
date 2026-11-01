@@ -184,50 +184,50 @@ fn attack(
         Target::Unit(id) => map.0.get(&id).map(|e| AimTarget::Unit(*e)),
         Target::Stronghold(_) => pos_of(map, visuals, you, to).map(AimTarget::Point),
     };
-    let (shoots, splash) =
-        match from {
-            Target::Unit(id) => {
-                cue(map, visuals, fx.assets, id, VisualCue::AttackStart);
-                let info = map.0.get(&id).and_then(|e| visuals.get_mut(*e).ok()).map(
-                    |(mut v, _, anim)| {
+    let (shoots, splash) = match from {
+        Target::Unit(id) => {
+            cue(map, visuals, fx.assets, id, VisualCue::AttackStart);
+            let info =
+                map.0
+                    .get(&id)
+                    .and_then(|e| visuals.get_mut(*e).ok())
+                    .map(|(mut v, _, _)| {
                         if let Some(t) = target {
                             v.engage(t);
                         }
-                        (v.archetype, v.splash, v.has_kit(), anim.archer, v.yaw)
-                    },
-                );
-                let (arch, splash, kit, is_archer, base_yaw) =
-                    info.unwrap_or((Archetype::Tank, 0.0, false, false, 0.0));
-                // A-1 aim (D-47) for units without a kit; kits aim themselves.
-                if let (false, Some(&e)) = (kit, map.0.get(&id)) {
-                    let hold = match arch {
-                        Archetype::Ranged => 0.18,
-                        Archetype::Support | Archetype::Control => 0.22,
-                        Archetype::Tank | Archetype::Dps => 0.30,
-                    };
-                    commands.entity(e).insert(crate::art::aim::Aim::new(
-                        to, fx.time, hold, base_yaw, base_yaw,
-                    ));
-                }
-                fx.ring.push(from, to, fx.time + 0.30);
-                fx.sounds.play(match arch {
-                    Archetype::Ranged if splash > 0.0 => Sound::Cannon,
-                    Archetype::Ranged | Archetype::Control | Archetype::Support => Sound::Shot,
-                    Archetype::Tank | Archetype::Dps => Sound::Melee,
-                });
-                // Kit units fire their own shots and impacts (visuals/attacks.rs).
-                // The native Archer fires its own arrow at Release (A-1 F5).
-                let ranged = !matches!(arch, Archetype::Tank | Archetype::Dps);
-                (ranged && !kit && !is_archer, if kit { 0.0 } else { splash })
+                        (v.archetype, v.splash, v.has_kit(), v.yaw)
+                    });
+            let (arch, splash, kit, base_yaw) = info.unwrap_or((Archetype::Tank, 0.0, false, 0.0));
+            // A-1 aim (D-47) for units without a kit; kits aim themselves.
+            if let (false, Some(&e)) = (kit, map.0.get(&id)) {
+                let hold = match arch {
+                    Archetype::Ranged => 0.18,
+                    Archetype::Support | Archetype::Control => 0.22,
+                    Archetype::Tank | Archetype::Dps => 0.30,
+                };
+                commands.entity(e).insert(crate::art::aim::Aim::new(
+                    to, fx.time, hold, base_yaw, base_yaw,
+                ));
             }
-            Target::Stronghold(seat) => {
-                // Towers aim and fire their own projectiles (arena/strongholds).
-                if let Some(t) = target {
-                    fx.orders.0.push((seat == you, t));
-                }
-                (false, 0.0)
+            fx.ring.push(from, to, fx.time + 0.30);
+            fx.sounds.play(match arch {
+                Archetype::Ranged if splash > 0.0 => Sound::Cannon,
+                Archetype::Ranged | Archetype::Control | Archetype::Support => Sound::Shot,
+                Archetype::Tank | Archetype::Dps => Sound::Melee,
+            });
+            // Kit units fire their own shots and impacts (visuals/attacks.rs),
+            // the Archer included: its arrow leaves the bow at Release.
+            let ranged = !matches!(arch, Archetype::Tank | Archetype::Dps);
+            (ranged && !kit, if kit { 0.0 } else { splash })
+        }
+        Target::Stronghold(seat) => {
+            // Towers aim and fire their own projectiles (arena/strongholds).
+            if let Some(t) = target {
+                fx.orders.0.push((seat == you, t));
             }
-        };
+            (false, 0.0)
+        }
+    };
     let (a, b) = (
         pos_of(map, visuals, you, from),
         pos_of(map, visuals, you, to),

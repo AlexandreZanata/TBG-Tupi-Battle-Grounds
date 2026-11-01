@@ -15,7 +15,13 @@ pub mod aim;
 pub mod assets;
 mod attacks;
 mod cues;
+mod growth;
+#[cfg(test)]
+pub mod layout;
+pub mod mount;
 mod names;
+mod shell;
+mod status_badges;
 mod update;
 
 pub use assets::VisualAssets;
@@ -56,6 +62,11 @@ pub struct UnitVisual {
     tiers: [Entity; 2],
     bar: Entity,
     bar_fill: Entity,
+    bleed_badge: Entity,
+    shield_outline: Option<Entity>,
+    mark_badge: Option<Entity>,
+    weaken_badge: Option<Entity>,
+    venom_badge: Option<Entity>,
     pub own: bool,
     pub archetype: Archetype,
     pub faction: Faction,
@@ -66,6 +77,11 @@ pub struct UnitVisual {
     /// Tint material, seconds left, already applied to the joints.
     tint: Option<(Handle<StandardMaterial>, f32, bool)>,
     pub dying: bool,
+    fx: u16,
+    /// Derived from public caster marks; never feeds a gameplay decision.
+    pub marked: bool,
+    /// One server-selected cosmetic offhand destination, consumed by the real joint emitter.
+    pub secondary_shot: Option<Vec3>,
     dead_for: f32,
     last_x: f32,
     /// Seconds without moving (walk/idle hysteresis).
@@ -115,7 +131,7 @@ impl UnitVisual {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(names::plugin)
+    app.add_plugins((names::plugin, shell::plugin, growth::plugin))
         .init_resource::<TowerOrders>()
         .add_systems(PreStartup, assets::init)
         .add_systems(
@@ -155,6 +171,12 @@ fn highlight_inspected(
                 t.scale = Vec3::splat(scale);
             }
         }
+        if let Ok(mut t) = transforms.get_mut(v.figure) {
+            let target_y = if is_selected { 0.07 } else { 0.0 };
+            if (t.translation.y - target_y).abs() > 1e-4 {
+                t.translation.y = target_y;
+            }
+        }
     }
 }
 
@@ -174,9 +196,34 @@ pub fn spawn_unit_visual(
     look: UnitLook,
     pos: Vec3,
 ) -> Entity {
+    spawn_form_visual(commands, a, lib, look, pos, false)
+}
+
+pub fn spawn_training_dummy(
+    commands: &mut Commands,
+    a: &VisualAssets,
+    lib: &FigureLibrary,
+    look: UnitLook,
+    pos: Vec3,
+) -> Entity {
+    spawn_form_visual(commands, a, lib, look, pos, true)
+}
+
+fn spawn_form_visual(
+    commands: &mut Commands,
+    a: &VisualAssets,
+    lib: &FigureLibrary,
+    look: UnitLook,
+    pos: Vec3,
+    dummy: bool,
+) -> Entity {
     let d = def(look.kind);
-    let form = lib.get(look.kind, look.tier, look.branch);
-    let height = 1.05 * form.plan.scale;
+    let form = if dummy {
+        &lib.training_dummy
+    } else {
+        lib.get(look.kind, look.tier, look.branch)
+    };
+    let height = (if dummy { 1.75 } else { 1.05 }) * form.plan.scale;
     let mesh = |m: &Handle<Mesh>, mat: &Handle<StandardMaterial>, t: Transform| {
         (Mesh3d(m.clone()), MeshMaterial3d(mat.clone()), t)
     };
@@ -190,6 +237,7 @@ pub fn spawn_unit_visual(
     let joints = figure::spawn_joints(
         commands,
         figure_root,
+        look.kind,
         &form.plan,
         form.meshes(look.own),
         &lib.material,
@@ -205,6 +253,7 @@ pub fn spawn_unit_visual(
         .insert(NotShadowCaster)
         .id();
     let (bar, bar_fill, tiers) = spawn_bar(commands, a, height, &look);
+    let bleed_badge = status_badges::spawn_bleed(commands, a, bar);
     let glow = figure::spawn_glow(commands, &joints, &form.glow, &lib.glow_material);
     let mut visual = UnitVisual {
         figure: figure_root,
@@ -214,6 +263,11 @@ pub fn spawn_unit_visual(
         tiers,
         bar,
         bar_fill,
+        bleed_badge,
+        shield_outline: None,
+        mark_badge: None,
+        weaken_badge: None,
+        venom_badge: None,
         own: look.own,
         archetype: d.archetype,
         faction: d.faction,
@@ -222,6 +276,13 @@ pub fn spawn_unit_visual(
         yaw: yaw(look.own),
         tint: None,
         dying: false,
+        fx: if look.kind == UnitKind::Shatterback {
+            4 << 8
+        } else {
+            0
+        },
+        marked: false,
+        secondary_shot: None,
         dead_for: 0.0,
         last_x: pos.x,
         still: 1.0,
@@ -235,20 +296,13 @@ pub fn spawn_unit_visual(
     let mut animator = Animator::new(joints, form.plan, figure_root, look.kind, look.id);
     animator.native = form.native;
     animator.form = (look.tier, look.branch);
-    animator.archer = form.native && look.kind == UnitKind::Archer;
-    animator.play(crate::art::anim::Clip::Spawn);
-    let root = commands.spawn_empty().id();
-    if animator.archer {
-        crate::art::bow::attach(
-            commands,
-            root,
-            &animator,
-            lib,
-            &lib.material,
-            look.own,
-            form.bow_half,
-        );
+    if dummy {
+        animator.kit = None;
+        animator.preview = Some((crate::art::anim::Clip::Idle, 0.));
+    } else {
+        animator.play(crate::art::anim::Clip::Spawn);
     }
+    let root = commands.spawn_empty().id();
     commands
         .entity(root)
         .insert((

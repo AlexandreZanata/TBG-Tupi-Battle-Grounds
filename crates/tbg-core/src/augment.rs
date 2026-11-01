@@ -21,7 +21,7 @@ use crate::content::{
 use crate::intent::Rejection;
 use crate::rng::Pcg32;
 use crate::state::{Event, MatchState, Unit};
-use crate::types::{Seat, Tick, UnitKind};
+use crate::types::{Seat, Tick, UnitKind, FACTION_COUNT};
 
 /// A full Bounty window is 1 Energy, shared by every source (BR-E08).
 pub const BOUNTY_CEILING: u32 = 600;
@@ -285,7 +285,7 @@ fn add(sum: &mut i64, bp: i32, copies: u16) {
 /// read from the same tick's Synergy levels (BR-X11).
 pub fn unit_bonus(
     counts: &AugmentCounts,
-    synergy: [u8; 4],
+    synergy: [u8; FACTION_COUNT],
     kind: UnitKind,
     tier: u8,
 ) -> AugmentBonus {
@@ -731,11 +731,7 @@ pub fn heal_amount(
         );
     }
     let bonus = bonus.clamp(0, 10_000);
-    let cut = if state.tick < target.heal_cut_until {
-        target.heal_cut_bp
-    } else {
-        0
-    };
+    let cut = crate::roster_slots::heal_cut_now(target, state.tick);
     let scaled = i64::from(base) * i64::from(10_000 + bonus) / BP;
     let after_cut = scaled * i64::from(10_000 - cut).max(0) / 10_000;
     (target.max_hp - target.hp).min(after_cut.max(0).min(i64::from(i32::MAX)) as i32)

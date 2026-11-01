@@ -107,12 +107,17 @@ fn c2_per_tick_traces_are_frozen() {
     // D-50: the Shop draws all 25 kinds; traces and end ticks moved.
     // D-55 (ARENAS-G): the arena fields joined the serialized state; the
     // Forest is neutral: traces and hashes moved, end ticks identical.
+    // D-68: owner champion changes in GAME-DESIGN, collected with update_probe.
+    // D-69: appended private Shop state; all D-68 outcomes and ticks identical.
+    // D-68/D-69 integration: protocol-20 slots + Shop state; owner range correction.
+    // 46-kind CANON activation (GAME-DESIGN consolidation amendment);
+    // collected with examples/trace_canon.rs, same server cadence and Bot.
     let goldens = [
-        (1, 0x5609_ff29_778f_5630, 0xdf5d_547e_36e4_7845, 3_336),
-        (7, 0xd331_26a2_2fa9_245e, 0xca17_5202_6278_78e5, 2_286),
-        (42, 0xb138_5327_fc8e_9dfc, 0x4069_7a3a_89d9_10e1, 6_295),
-        (1000, 0x3f3e_9285_2ce7_ec9f, 0x840b_4353_126f_d199, 6_683),
-        (65535, 0x9243_c0ae_0f2f_5803, 0x4726_93d6_139e_6d32, 5_531),
+        (1, 0x77fd9e4abe880db1u64, 0x78908734d3dc7ec1u64, 3844),
+        (7, 0xca07e68322bdf61fu64, 0x7ab50dfdd5735803u64, 15586),
+        (42, 0x5af8901a3d72b530u64, 0xc4377231f72a0c57u64, 5049),
+        (1000, 0x8423d39086a7e075u64, 0x74b875d065a507a1u64, 7559),
+        (65535, 0x2c3c3a735f7b3712u64, 0x528f18fd57983ffau64, 7737),
     ];
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");

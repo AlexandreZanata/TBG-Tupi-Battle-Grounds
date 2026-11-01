@@ -1,3 +1,5 @@
+> Superseded 2026-10-31 by the owner's new-shop-charge design (D-69, GAME-DESIGN §10.3). The implementation/report is in SYSTEM-updates.md. CANON remains disabled.
+
 # P16-F2 — Shop Reserve: hold one offer for later
 
 **Depends on:** P16-F1 reviewed, canon switched, owner checkpoint done.

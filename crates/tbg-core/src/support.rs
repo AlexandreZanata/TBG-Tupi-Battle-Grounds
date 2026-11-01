@@ -1,160 +1,10 @@
-//! Ally-support actions (P46–P47): Bloodweaver transfers, Drumguard bonds.
+//! Ally-support actions (P46–P47): Drumguard bonds and Cargo Crab transport.
 //! Cargo Crab boarding joins in P48 (ROSTER-EXPANSION §F.3).
-
-use std::cmp::Reverse;
 
 use crate::afflictions::abilities_of;
 use crate::content::{Ability, Stats, LANE_LEN};
 use crate::state::{Event, MatchState, Target, Unit};
 use crate::types::{Archetype, OnHit, UnitId};
-
-/// The attacker's Transfer params, if any (absolute per form slot, like Brew).
-pub(crate) fn transfer_of(state: &MatchState, attacker: &Unit) -> Option<(u16, u16, bool)> {
-    abilities_of(state, attacker)
-        .into_iter()
-        .find_map(|ability| match ability {
-            Ability::Transfer {
-                amount,
-                low_bp,
-                second,
-            } => Some((amount, low_bp, second)),
-            _ => None,
-        })
-}
-
-/// The transfer pair (§C.14): among allied **conventional** units in range
-/// (itself included; summons excluded as donors and receivers), the donor
-/// is the highest HP % and the receiver the lowest HP % below full; they
-/// must be different units and the donor's % higher. Ties: nearest, then
-/// lowest id. `exclude` skips two units (the Double Flask second transfer).
-pub(crate) fn transfer_pair(
-    state: &MatchState,
-    u: &Unit,
-    range: i32,
-    exclude: [Option<UnitId>; 2],
-) -> Option<(UnitId, UnitId, i32)> {
-    let mut donor: Option<(i32, i32, UnitId, i32)> = None;
-    let mut receiver: Option<(i32, i32, UnitId, i32)> = None;
-    for a in state.units.iter().filter(|a| {
-        a.seat == u.seat
-            && a.hp > 0
-            && !a.is_summon()
-            && Some(a.id) != exclude[0]
-            && Some(a.id) != exclude[1]
-            && (a.x - u.x).abs() <= range
-    }) {
-        // `pct` in basis points of max HP; the receiver also tracks HP
-        // missing below full.
-        let pct = (i64::from(a.hp) * 10_000 / i64::from(a.max_hp.max(1))) as i32;
-        let dist = (a.x - u.x).abs();
-        // Donor: highest %, then nearest, then lowest id.
-        let better_donor = match donor {
-            None => true,
-            Some((p, d, id, _)) => (pct, Reverse(dist), Reverse(id)) > (p, Reverse(d), Reverse(id)),
-        };
-        if better_donor {
-            donor = Some((pct, dist, a.id, a.hp - 1));
-        }
-        // Receiver: lowest % below full, then nearest, then lowest id.
-        if a.hp < a.max_hp {
-            let better_receiver = match receiver {
-                None => true,
-                Some((p, d, id, _)) => (pct, dist, id) < (p, d, id),
-            };
-            if better_receiver {
-                receiver = Some((pct, dist, a.id, a.max_hp - a.hp));
-            }
-        }
-    }
-    let (dpct, _, donor_id, donor_headroom) = donor?;
-    let (rpct, _, receiver_id, missing) = receiver?;
-    if donor_id == receiver_id || dpct <= rpct {
-        return None;
-    }
-    // A pair that would move nothing is no pair: the weaver waits ready.
-    let headroom = donor_headroom.min(missing);
-    if headroom < 1 {
-        return None;
-    }
-    Some((donor_id, receiver_id, headroom))
-}
-
-/// The Bloodweaver's cast (§C.14): the donor loses `amount` HP directly (no
-/// reduction, plates or Second Wind; never below 1 HP); the receiver gains
-/// it minus heal cut (Grievous Wounds, Deep Wound turn transfers into a net
-/// loss). Not a heal (no Arcana/Augment bonus, no Purification) and not
-/// damage (no on-hit, lifesteal, Essence).
-pub(crate) fn transfer_cast(
-    state: &mut MatchState,
-    attacker: &Unit,
-    range: i32,
-    amount_param: u16,
-    low_bp: u16,
-    second: bool,
-    ev: &mut Vec<Event>,
-) {
-    if let Some((donor, receiver, headroom)) = transfer_pair(state, attacker, range, [None, None]) {
-        transfer_one(state, donor, receiver, amount_param, low_bp, headroom, ev);
-        if second {
-            if let Some((donor2, receiver2, headroom2)) =
-                transfer_pair(state, attacker, range, [Some(donor), Some(receiver)])
-            {
-                transfer_one(
-                    state,
-                    donor2,
-                    receiver2,
-                    amount_param,
-                    low_bp,
-                    headroom2,
-                    ev,
-                );
-            }
-        }
-    }
-}
-
-/// One donor→receiver move. `headroom` is min(donor HP − 1, receiver missing
-/// HP) at selection time; the A2 double is capped by it so donors survive.
-fn transfer_one(
-    state: &mut MatchState,
-    donor: UnitId,
-    receiver: UnitId,
-    amount_param: u16,
-    low_bp: u16,
-    headroom: i32,
-    ev: &mut Vec<Event>,
-) {
-    let Some(di) = state.unit_index(donor) else {
-        return;
-    };
-    let Some(ri) = state.unit_index(receiver) else {
-        return;
-    };
-    let mut amount = i32::from(amount_param).min(headroom);
-    let receiver_pct =
-        i64::from(state.units[ri].hp) * 10_000 / i64::from(state.units[ri].max_hp.max(1));
-    if low_bp > 0 && receiver_pct < i64::from(low_bp) {
-        // Last Offering: double, still capped so the donor survives.
-        amount = (amount * 2).min(state.units[di].hp - 1);
-    }
-    if amount <= 0 {
-        return;
-    }
-    state.units[di].hp -= amount;
-    let cut = if state.tick < state.units[ri].heal_cut_until {
-        state.units[ri].heal_cut_bp
-    } else {
-        0
-    };
-    let gain = amount - amount * cut.min(10_000) / 10_000;
-    let u = &mut state.units[ri];
-    u.hp = (u.hp + gain).min(u.max_hp);
-    ev.push(Event::Transfer {
-        from: donor,
-        to: receiver,
-        amount,
-    });
-}
 
 /// Drumguard bonds (P47, §C.6): every tick, each living Drumguard bonds to
 /// the nearest allied conventional non-Drumguard within reach (ties lowest
@@ -361,20 +211,24 @@ fn carry_of(state: &MatchState, u: &Unit) -> Option<(i32, u16, u16, u16, u16, u1
         })
 }
 
-/// Crab movement bonus while carrying (B1 steady, B2 surge): basis points.
+/// Crab movement bonus while carrying, in basis points (BR-X12, D-60): the
+/// larger of the +20 % base (D-56) and the branch bonus (B1 steady, B2 surge
+/// while armed), never their sum, so a branch keeps its documented value.
 pub(crate) fn carry_move_bp(state: &MatchState, u: &Unit) -> u16 {
     if u.fx.passenger.is_none() {
         return 0;
     }
+    const BASE_CARRY_MOVE_BP: u16 = 2_000;
     match carry_of(state, u) {
         Some((_, _, _, move_bp, _, surge_bp)) => {
-            if surge_bp > 0 && state.tick < u.fx.surge_until {
+            let branch = if surge_bp > 0 && state.tick < u.fx.surge_until {
                 surge_bp
             } else {
                 move_bp
-            }
+            };
+            BASE_CARRY_MOVE_BP.max(branch)
         }
-        None => 0,
+        None => BASE_CARRY_MOVE_BP,
     }
 }
 
@@ -566,7 +420,12 @@ pub(crate) fn betray_resolve(
         fur.saturating_add(plates)
             .saturating_add(i32::from(attacker.fx.betray_bp)),
     );
-    let _removed = crate::hits::damage(state, target, amount.max(1), ev);
+    let _removed = crate::training_hooks::scoped(
+        state,
+        crate::training_hooks::Source::Unit(attacker.id),
+        crate::training_hooks::Effect::Betrayal,
+        |s| crate::hits::damage(s, target, amount.max(1), ev),
+    );
     // A2 Stumble: the betrayer is slowed 30 % for 2 s (ward-aware).
     if attacker.fx.betray_stumble {
         let _applied = crate::hits::apply_on_hit(

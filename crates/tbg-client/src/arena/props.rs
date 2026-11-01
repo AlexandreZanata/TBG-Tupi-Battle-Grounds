@@ -44,6 +44,17 @@ pub(super) fn scatter() -> Vec<Part> {
             _ => trees::grass(&mut parts, at, unit() * 6.0),
         }
     }
+    for (x, z, s) in [
+        (0.0, 3.0, 0.65),
+        (4.4, 4.0, 1.0),
+        (9.6, 4.8, 0.8),
+        (16.7, 3.5, 0.9),
+    ] {
+        let at = Vec3::new(x, 0.0, z);
+        trees::bush(&mut parts, at + Vec3::new(0.55, 0.0, 0.18), s * 0.58);
+        rocks::boulder(&mut parts, at + Vec3::new(-0.50, 0.0, 0.24), s * 0.45, x);
+        trees::flowers(&mut parts, at + Vec3::new(0.22, 0.0, 0.60));
+    }
     camp::fences(&mut parts);
     camp::supplies(&mut parts);
     camp::log(&mut parts, Vec3::new(10.9, 0.0, 4.3));

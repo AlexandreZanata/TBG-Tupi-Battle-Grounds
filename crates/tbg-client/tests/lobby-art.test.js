@@ -13,12 +13,14 @@ test('the four feature illustrations, logo, player crest and status background a
   let total=0;
   for(const a of catalog.assets){
     for(const f of new Set(Object.values(a.asset))){
-      assert.match(f,/^[a-z0-9-]+\.(svg|webp)$/);
+      assert.match(f,/^(?:[a-z0-9-]+\.(?:svg|webp)|\.\.\/branding\/tbg-emblem\.webp)$/);
       const bytes=fs.readFileSync(path.join(folder,f));
       assert.ok(bytes.length>0);total+=f.endsWith('.svg')?zlib.gzipSync(bytes).length:bytes.length;
     }
     const key=a.id==='crest-v2'?'emblem':a.id.replace(/-v2$/,'');
-    assert.equal(mapping[key],'assets/lobby/'+a.asset.display);
+    const url=new URL(mapping[key],'https://tbg.invalid/');
+    assert.equal(url.origin,'https://tbg.invalid');
+    assert.equal(url.pathname,path.posix.normalize('/assets/lobby/'+a.asset.display));
   }
   assert.ok(total<=catalog.artBudgetBytes);
   const html=fs.readFileSync(path.resolve(__dirname,'../index.html'),'utf8');

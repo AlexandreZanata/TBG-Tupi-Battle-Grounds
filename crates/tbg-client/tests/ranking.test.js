@@ -45,7 +45,7 @@ test('BR-P05: a late public profile response cannot replace the current account 
  const root={hidden:true,dataset:{},addEventListener(){},replaceChildren(){contentReady=true;},querySelector(){return {};},querySelectorAll(){return [];}};
  const lobby={dataset:{player:'OldPlayer'}};
  const make=()=>({dataset:{},setAttribute(){},append(){},className:'',textContent:''});
- const document={getElementById:id=>id==='tbg-ranking'?root:lobby,createElement:tag=>tag==='template'?{content:{querySelector:()=>root}}:make()};
+ const document={getElementById:id=>id==='tbg-ranking'?root:lobby,createElement:tag=>tag==='template'?{content:{querySelector:()=>root}}:make(),addEventListener(){}};
  const profile=name=>({...row(1,name),recent:[]});
  const fetch=async url=>{
   if(url.includes('panel.html'))return new Promise(resolve=>{resolveTemplate=()=>resolve({ok:true,text:async()=>'<trusted template>'});});
@@ -55,7 +55,8 @@ test('BR-P05: a late public profile response cannot replace the current account 
   return {ok:true,json:async()=>profile('NewPlayer')};
  };
  const render={navigation(){},text(){assert.ok(contentReady);},pager(){assert.ok(contentReady);},get:()=>({classList:{add(){}}}),podium(){},table(){},profile:(_,p)=>{if(p)calls.push(p.name);}};
- const context=vm.createContext({document,fetch,URLSearchParams,AbortController,location:{search:''},TbgRankingData:D,TbgRankingRender:render,MutationObserver:class{constructor(fn){mutation=fn;}observe(){}}});
+ const TBG_I18N={t:key=>key,apply(){},ready:Promise.resolve(),lang:'en'};
+ const context=vm.createContext({document,fetch,URLSearchParams,AbortController,location:{search:''},TBG_I18N,TbgRankingData:D,TbgRankingRender:render,MutationObserver:class{constructor(fn){mutation=fn;}observe(){}}});
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/ranking/controller.js'),'utf8'),context);
  const opening=context.TbgRanking.open();
  // Identity updates may arrive while the shared template is still in flight.

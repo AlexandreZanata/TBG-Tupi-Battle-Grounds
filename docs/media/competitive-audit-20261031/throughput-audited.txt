@@ -1,0 +1,6 @@
+threads  games/s  speed-up vs 1x (game-seconds per wall-second)
+      1       54       20354x
+      2      108       40414x
+      4      196       73449x
+      8      302      113465x
+     16      328      123117x

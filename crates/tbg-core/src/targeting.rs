@@ -21,14 +21,6 @@ pub(crate) fn engage(state: &MatchState, u: &Unit, st: &Stats) -> Option<Engage>
             return Some(Engage::Act(Target::Unit(ally)));
         }
     }
-    // No-attack healers-with-nothing-to-do are handled below; Bloodweavers
-    // transfer instead of attacking when a pair exists.
-    if crate::support::transfer_of(state, u).is_some() {
-        if let Some((donor, _, _)) = crate::support::transfer_pair(state, u, st.range, [None, None])
-        {
-            return Some(Engage::Act(Target::Unit(donor)));
-        }
-    }
     // Puppetmasters confuse instead of attacking when a victim exists.
     if crate::support::puppet_of(state, u).is_some() {
         if let Some(victim) = crate::support::puppet_target(state, u, st.range) {
@@ -76,7 +68,7 @@ pub(crate) fn targetable(unit: &Unit) -> bool {
 /// Stronghold when it is strictly nearer or no enemy unit exists. A unit
 /// that never targets Strongholds (Farwatch) takes the nearest enemy unit
 /// in range instead, and holds when there is none.
-fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
+pub(crate) fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option<Target> {
     let enemy = u.seat.other();
     let no_stronghold = state
         .rules()

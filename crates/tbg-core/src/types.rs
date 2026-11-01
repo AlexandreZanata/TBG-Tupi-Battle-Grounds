@@ -57,11 +57,28 @@ pub enum Faction {
     Undead,
     Machines,
     Plants,
+    /// D-64 (P58 §13.5): the three new Factions, appended in this order.
+    Monsters,
+    Celestials,
+    Insects,
 }
 
 impl Faction {
     pub fn index(self) -> usize {
         self as usize
+    }
+
+    /// The English name used by the HUD, the stats API and the ranked JSON.
+    pub fn name(self) -> &'static str {
+        match self {
+            Faction::Humans => "Humans",
+            Faction::Undead => "Undead",
+            Faction::Machines => "Machines",
+            Faction::Plants => "Plants",
+            Faction::Monsters => "Monsters",
+            Faction::Celestials => "Celestials",
+            Faction::Insects => "Insects",
+        }
     }
 }
 
@@ -105,6 +122,49 @@ pub enum UnitKind {
     Smuggler,
     /// Smuggler cargo crate (BR-U08); never in the Shop.
     Crate,
+    // D-66 (P59 pilot, Proposed): the Monsters base kinds, appended so older kinds
+    // keep their indices. Their authored kits and rules are active in the consolidated Shop roster.
+    Bonehorn,
+    Ravager,
+    Acidmaw,
+    Whisperer,
+    /// D-72: R01, active in the consolidated roster.
+    Bulwark,
+    /// D-73: R02, active in the consolidated roster.
+    Demolisher,
+    /// D-74: R03, active in the consolidated roster.
+    Crowcaller,
+    /// D-75: R04, active in the consolidated roster.
+    Trigger,
+    /// D-76: R05, active in the consolidated roster.
+    RattleTick,
+    /// D-77: R06, active in the consolidated roster.
+    Capybara,
+    /// D-78: R07, active in the consolidated roster.
+    Trident,
+    /// D-79: R12, active in the consolidated roster.
+    SolarSentinel,
+    /// D-80: R13, active in the consolidated roster.
+    LuminousOracle,
+    /// D-81: R14, active in the consolidated roster.
+    CelestialArcher,
+    /// D-82: R15, active in the consolidated roster.
+    Justiciar,
+    /// D-83: R16, active in the consolidated roster.
+    Jawguard,
+    /// D-84: R17, active in the consolidated roster.
+    Mantis,
+    /// D-85: R18, active in the consolidated roster.
+    Hornet,
+    /// D-86: R19, active in the consolidated roster.
+    Weaver,
+    /// D-87: R20, active in the consolidated roster.
+    PyreWarden,
+    /// D-88: R21, active in the consolidated roster.
+    Drillnest,
+    Microdrill,
+    Duodrill,
+    Megadrill,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -124,7 +184,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
 #[rustfmt::skip]
-pub const ALL_KINDS: [UnitKind; 27] = [
+pub const ALL_KINDS: [UnitKind; 51] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -152,13 +212,44 @@ pub const ALL_KINDS: [UnitKind; 27] = [
     UnitKind::Puppetmaster,
     UnitKind::Smuggler,
     UnitKind::Crate,
+    UnitKind::Bonehorn,
+    UnitKind::Ravager,
+    UnitKind::Acidmaw,
+    UnitKind::Whisperer,
+    UnitKind::Bulwark,
+    UnitKind::Demolisher,
+    UnitKind::Crowcaller,
+    UnitKind::Trigger,
+    UnitKind::RattleTick,
+    UnitKind::Capybara,
+    UnitKind::Trident,
+    UnitKind::SolarSentinel,
+    UnitKind::LuminousOracle,
+    UnitKind::CelestialArcher,
+    UnitKind::Justiciar,
+    UnitKind::Jawguard,
+    UnitKind::Mantis,
+    UnitKind::Hornet,
+    UnitKind::Weaver,
+    UnitKind::PyreWarden,
+    UnitKind::Drillnest,
+    UnitKind::Microdrill,
+    UnitKind::Duodrill,
+    UnitKind::Megadrill,
 ];
 
 impl UnitKind {
     /// Summon kinds: created by abilities, never bought (BR-U08). Beetlings
     /// hatch from Nesters; crates drop from Smugglers.
     pub fn is_summon(self) -> bool {
-        matches!(self, UnitKind::Beetling | UnitKind::Crate)
+        matches!(
+            self,
+            UnitKind::Beetling
+                | UnitKind::Crate
+                | UnitKind::Microdrill
+                | UnitKind::Duodrill
+                | UnitKind::Megadrill
+        )
     }
 
     /// Conventional units: everything the lab duels and favors (BR-U08:
@@ -169,10 +260,9 @@ impl UnitKind {
 }
 
 /// The full conventional roster in `UnitKind` order: the staging pool the
-/// lab and the Practice preview draw from (P46: 19 kinds; grows per wave
-/// until the P53 owner switch moves it into `CANON.pool`).
+/// laboratory, Practice and authoritative online matches draw from.
 #[rustfmt::skip]
-pub const FULL_POOL: [UnitKind; 25] = [
+pub const FULL_POOL: [UnitKind; 46] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -198,6 +288,27 @@ pub const FULL_POOL: [UnitKind; 25] = [
     UnitKind::CargoCrab,
     UnitKind::Puppetmaster,
     UnitKind::Smuggler,
+    UnitKind::Bonehorn,
+    UnitKind::Ravager,
+    UnitKind::Acidmaw,
+    UnitKind::Whisperer,
+    UnitKind::Bulwark,
+    UnitKind::Demolisher,
+    UnitKind::Crowcaller,
+    UnitKind::Trigger,
+    UnitKind::RattleTick,
+    UnitKind::Capybara,
+    UnitKind::Trident,
+    UnitKind::SolarSentinel,
+    UnitKind::LuminousOracle,
+    UnitKind::CelestialArcher,
+    UnitKind::Justiciar,
+    UnitKind::Jawguard,
+    UnitKind::Mantis,
+    UnitKind::Hornet,
+    UnitKind::Weaver,
+    UnitKind::PyreWarden,
+    UnitKind::Drillnest,
 ];
 
 /// All playable archetypes, in glossary order.
@@ -209,12 +320,18 @@ pub const ARCHETYPES: [Archetype; 5] = [
     Archetype::Control,
 ];
 
+/// Number of Factions: the four original ones and the three of D-64.
+pub const FACTION_COUNT: usize = 7;
+
 /// All factions, in glossary order (also their synergy index).
-pub const FACTIONS: [Faction; 4] = [
+pub const FACTIONS: [Faction; FACTION_COUNT] = [
     Faction::Humans,
     Faction::Undead,
     Faction::Machines,
     Faction::Plants,
+    Faction::Monsters,
+    Faction::Celestials,
+    Faction::Insects,
 ];
 
 /// Status effect applied to the primary target of a hit.

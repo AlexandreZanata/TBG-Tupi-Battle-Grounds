@@ -2,16 +2,18 @@
 
 use super::*;
 use crate::chan::ConnEvent;
+use tbg_core::protocol::ServerMsg;
 use tbg_core::{ArcanaPreset, EndReason, Outcome};
 
 #[test]
 fn online_sequence_zero_cannot_reset_duplicate_protection() {
     // ARCHITECTURE section 5: authoritative intentions are applied once;
     // offline seq=0 must never reset an online seat's acknowledgement.
+    let (transport, _receiver) = mpsc::channel(256);
     let players = Seat::BOTH.map(|seat| Player {
         token: [seat.index() as u8; 16],
         name: format!("Player {seat:?}"),
-        conn: None,
+        conn: Some(ConnHandle::new(seat.index() as u64 + 1, transport.clone())),
         account: None,
         arcanas: ArcanaPreset::NEUTRAL,
         stronghold: tbg_core::StrongholdKind::Classic,
@@ -22,6 +24,7 @@ fn online_sequence_zero_cannot_reset_duplicate_protection() {
     }
     state.players[0].energy = 100_000;
     let mut game = Match {
+        result_id: [63; 16],
         state,
         players,
         detached_at: [None; 2],
@@ -34,12 +37,46 @@ fn online_sequence_zero_cannot_reset_duplicate_protection() {
         live: None,
         spectators: Vec::new(),
         pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
     };
     let command = |seq| MatchCmd::Intent {
+        conn_id: 1,
         seat: Seat::A,
         seq,
         intent: tbg_core::PlayerIntention::Purchase { offer: 0 },
     };
+    // D-97: delayed frames from a replaced/revoked controller are discarded
+    // before competitive state, metrics, replay or acknowledgement can change.
+    let before = game.state.clone();
+    game.command(MatchCmd::Intent {
+        conn_id: 99,
+        seat: Seat::A,
+        seq: 1,
+        intent: tbg_core::PlayerIntention::Purchase { offer: 0 },
+    });
+    game.command(MatchCmd::Surrender {
+        conn_id: 99,
+        seat: Seat::A,
+    });
+    assert!(game.state == before);
+    assert_eq!(game.stats[0].intents, 0);
+    game.players[0]
+        .conn
+        .as_ref()
+        .unwrap()
+        .active
+        .store(false, std::sync::atomic::Ordering::Release);
+    game.command(command(1));
+    assert!(game.state == before);
+    assert_eq!(game.stats[0].intents, 0);
+    game.players[0]
+        .conn
+        .as_ref()
+        .unwrap()
+        .active
+        .store(true, std::sync::atomic::Ordering::Release);
     game.command(command(1));
     let after_first = game.state.clone();
     for sequence in [1, 0, 0, 1] {
@@ -65,6 +102,7 @@ fn a_view_drains_events_and_keeps_the_buffer() {
         stronghold: tbg_core::StrongholdKind::Classic,
     });
     let mut game = Match {
+        result_id: [63; 16],
         state: MatchState::new(1),
         players,
         detached_at: [None; 2],
@@ -77,6 +115,9 @@ fn a_view_drains_events_and_keeps_the_buffer() {
         live: None,
         spectators: Vec::new(),
         pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
     };
     for _ in 0..40 {
         let events = game.state.step();
@@ -95,10 +136,11 @@ fn a_view_drains_events_and_keeps_the_buffer() {
 fn a_retransmitted_evolution_never_reuses_the_ruins_discount() {
     // D-55: the discount is spent once, on a valid paid Evolution; the
     // server refuses a repeated sequence before the core sees it.
+    let (transport, _receiver) = mpsc::channel(256);
     let players = Seat::BOTH.map(|seat| Player {
         token: [seat.index() as u8; 16],
         name: format!("Player {seat:?}"),
-        conn: None,
+        conn: Some(ConnHandle::new(seat.index() as u64 + 1, transport.clone())),
         account: None,
         arcanas: ArcanaPreset::NEUTRAL,
         stronghold: tbg_core::StrongholdKind::Classic,
@@ -110,6 +152,7 @@ fn a_retransmitted_evolution_never_reuses_the_ruins_discount() {
     state.players[0].offers[0] = tbg_core::UnitKind::Shieldbearer;
     state.players[0].energy = 100_000;
     let mut game = Match {
+        result_id: [63; 16],
         state,
         players,
         detached_at: [None; 2],
@@ -122,8 +165,12 @@ fn a_retransmitted_evolution_never_reuses_the_ruins_discount() {
         live: None,
         spectators: Vec::new(),
         pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
     };
     let intent = |seq, intent| MatchCmd::Intent {
+        conn_id: 1,
         seat: Seat::A,
         seq,
         intent,
@@ -155,10 +202,7 @@ async fn challenge_initial_detached_forfeits() {
     let players = Seat::BOTH.map(|seat| Player {
         token: [seat.index() as u8; 16],
         name: format!("Player {seat:?}"),
-        conn: (seat == Seat::B).then(|| ConnHandle {
-            id: 1,
-            tx: conn_tx.clone(),
-        }),
+        conn: (seat == Seat::B).then(|| ConnHandle::new(1, conn_tx.clone())),
         account: None,
         arcanas: ArcanaPreset::DEFAULT,
         stronghold: tbg_core::StrongholdKind::DEFAULT,
@@ -178,11 +222,11 @@ async fn challenge_initial_detached_forfeits() {
         lobby_tx,
         config,
         metrics.clone(),
-        None,
+        super::Records::default(),
     );
     let outcome = tokio::time::timeout(Duration::from_secs(3), async {
         while let Some(ConnEvent::Send(msg)) = conn_rx.recv().await {
-            if let ServerMsg::MatchEnd { outcome } = msg {
+            if let ServerMsg::MatchEnd { outcome, .. } = msg {
                 return outcome;
             }
         }

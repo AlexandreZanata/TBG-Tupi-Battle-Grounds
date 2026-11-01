@@ -7,6 +7,7 @@ use crate::augment;
 use crate::content::{Ability, Stats, BP};
 use crate::state::{stronghold_x, Event, MatchState, Target, Unit};
 use crate::targeting;
+use crate::training_hooks::{self, Effect, Source};
 use crate::types::{OnHit, Seat, Status, UnitId};
 
 pub(crate) fn resolve_hit(
@@ -23,6 +24,9 @@ pub(crate) fn resolve_hit(
         crate::support::betray_resolve(state, attacker, target, st, ev);
         return;
     }
+    if crate::pyre_warden::resolve(state, attacker, target, st, ev) {
+        return;
+    }
     // Puppetmasters confuse instead of dealing damage (§C.10).
     if crate::support::puppet_of(state, attacker).is_some() {
         crate::support::puppet_cast(state, attacker, target, st.range, ev);
@@ -37,11 +41,6 @@ pub(crate) fn resolve_hit(
             crate::afflictions::brew_cast(state, attacker, st.range, id, strip, ward, second, ev);
             return;
         }
-        // Bloodweavers transfer instead of healing.
-        if let Some((amount, low_bp, second)) = crate::support::transfer_of(state, attacker) {
-            crate::support::transfer_cast(state, attacker, st.range, amount, low_bp, second, ev);
-            return;
-        }
         let _restored = heal(state, attacker.seat, id, st.heal, true, ev);
         #[cfg(feature = "lab")]
         crate::lab::healed(state, attacker, _restored);
@@ -51,7 +50,12 @@ pub(crate) fn resolve_hit(
                 let a = state.units[i];
                 let near = (a.x - tx).abs() <= st.splash;
                 if a.seat == attacker.seat && a.id != id && a.hp > 0 && a.hp < a.max_hp && near {
-                    let _restored = heal(state, attacker.seat, a.id, st.heal, true, ev);
+                    let _restored = training_hooks::scoped(
+                        state,
+                        Source::Unit(attacker.id),
+                        Effect::Splash,
+                        |s| heal(s, attacker.seat, a.id, st.heal, true, ev),
+                    );
                     #[cfg(feature = "lab")]
                     crate::lab::healed(state, attacker, _restored);
                 }
@@ -59,7 +63,21 @@ pub(crate) fn resolve_hit(
         }
         return;
     }
-    let mut amount = st.damage;
+    let purification = crate::celestial_archer::empowered(state, attacker, target);
+    let mut amount = purification.map_or(st.damage, |raw| auxiliary_amount(st, raw));
+    amount = amount.saturating_add(auxiliary_amount(
+        st,
+        crate::jawguard::bonus(state, attacker, target),
+    ));
+    amount = amount.saturating_add(auxiliary_amount(
+        st,
+        crate::mantis::bonus(state, attacker, target),
+    ));
+    // R13: a weakened attacker's basic hit loses its weakening before any bonus.
+    let weaken = crate::roster_slots::weaken_now(&attacker.fx, state.tick);
+    if weaken > 0 {
+        amount = scale(amount, -weaken);
+    }
     if !attacker.is_summon() {
         let target_status = match target {
             Target::Unit(id) => state
@@ -80,15 +98,33 @@ pub(crate) fn resolve_hit(
             augment::situational_bp(state, attacker, target)
                 + arcana_bp
                 + conditional_bp(state, attacker, target)
+                + crate::bonehorn::short_range_bonus(state, attacker, target)
+                + crate::ravager::bonus(state, attacker, target)
+                + crate::crowcaller::bonus(state, attacker, target)
                 + furnace_bonus(state, attacker, target)
                 + plates_bonus(state, attacker)
                 + crate::stronghold::aura_bp(state, attacker),
         );
     }
+    if purification.is_some() {
+        crate::celestial_archer::strip(state, target);
+    }
+    amount = crate::drillnest::bonus(state, attacker, target, amount);
     let removed = damage(state, target, amount, ev);
+    crate::celestial_archer::completed(state, attacker, target, ev);
+    crate::jawguard::completed(state, attacker, target);
+    crate::mantis::completed(state, attacker, target, ev);
+    crate::ravager::completed(state, attacker, target);
+    crate::acidmaw::completed(state, attacker, target, st, ev);
+    crate::trigger::completed(state, attacker, target, st, ev);
+    crate::crowcaller::completed(state, attacker, target, ev);
+    crate::hornet::completed(state, attacker, target, st, ev);
     #[cfg(feature = "lab")]
     if let Target::Unit(_) = target {
         crate::lab::dealt(state, attacker, removed);
+    }
+    if let Target::Unit(id) = target {
+        crate::siphon::apply(state, attacker, id, removed, ev);
     }
     if let Target::Unit(id) = target {
         let hostile = state
@@ -139,7 +175,12 @@ pub(crate) fn resolve_hit(
             };
             if conventional && bp > 0 {
                 let healed = (i64::from(removed) * i64::from(bp) / BP) as i32;
-                let _restored = heal(state, attacker.seat, attacker.id, healed, false, ev);
+                let _restored = training_hooks::scoped(
+                    state,
+                    Source::Unit(attacker.id),
+                    Effect::Lifesteal,
+                    |s| heal(s, attacker.seat, attacker.id, healed, false, ev),
+                );
                 #[cfg(feature = "lab")]
                 crate::lab::healed(state, attacker, _restored);
             }
@@ -164,6 +205,26 @@ pub(crate) fn resolve_hit(
             splash(state, attacker, target, tx, &ramped, ev);
         }
     }
+}
+
+/// Registry auxiliary damage takes static caster percentages once, no basic-hit hooks.
+pub(crate) fn auxiliary_amount(st: &Stats, value: u16) -> i32 {
+    (i64::from(value).saturating_mul(BP.saturating_add(st.damage_bp)) / BP)
+        .clamp(0, i64::from(i32::MAX)) as i32
+}
+
+pub(crate) fn auxiliary_hit(
+    state: &mut MatchState,
+    attacker: &Unit,
+    id: UnitId,
+    amount: i32,
+    ev: &mut Vec<Event>,
+) {
+    let _removed = damage(state, Target::Unit(id), amount, ev);
+    #[cfg(feature = "lab")]
+    crate::lab::dealt(state, attacker, _removed);
+    #[cfg(not(feature = "lab"))]
+    let _ = attacker;
 }
 
 pub(crate) fn scale(value: i32, bp: i32) -> i32 {
@@ -347,7 +408,16 @@ pub(crate) fn furnace_bonus(state: &mut MatchState, attacker: &Unit, target: Tar
     let max_hp = attacker.max_hp.max(1);
     let burn = (i64::from(max_hp) * i64::from(burn_bp) / 10_000).max(1) as i32;
     if let Some(ai) = state.unit_index(attacker.id) {
-        state.units[ai].hp = (state.units[ai].hp - burn).max(0);
+        let before = state.units[ai];
+        state.units[ai].hp = (before.hp - burn).max(0);
+        let lost = before.hp - state.units[ai].hp;
+        training_hooks::lost_by(
+            state,
+            &before,
+            lost,
+            Source::Unit(before.id),
+            Effect::SelfBurn,
+        );
     }
     if matches!(target, Target::Stronghold(_)) {
         return 0;
@@ -425,7 +495,10 @@ fn splash(
         let e = state.units[i];
         let near = (e.x - tx).abs() <= st.splash;
         if e.hp > 0 && near && primary != Target::Unit(e.id) && (friendly || e.seat == enemy) {
-            let _removed = damage(state, Target::Unit(e.id), amount, ev);
+            let _removed =
+                training_hooks::scoped(state, Source::Unit(attacker.id), Effect::Splash, |s| {
+                    damage(s, Target::Unit(e.id), amount, ev)
+                });
             #[cfg(feature = "lab")]
             crate::lab::dealt(state, attacker, _removed);
             if !attacker.is_summon() {
@@ -445,13 +518,17 @@ fn splash(
     if friendly {
         let base = Target::Stronghold(enemy);
         if primary != base && (stronghold_x(enemy) - tx).abs() <= st.splash {
-            damage(state, base, amount, ev);
+            training_hooks::scoped(state, Source::Unit(attacker.id), Effect::Splash, |s| {
+                damage(s, base, amount, ev)
+            });
         }
         return;
     }
     let base = Target::Stronghold(enemy);
     if primary != base && (stronghold_x(enemy) - tx).abs() <= st.splash {
-        damage(state, base, amount, ev);
+        training_hooks::scoped(state, Source::Unit(attacker.id), Effect::Splash, |s| {
+            damage(s, base, amount, ev)
+        });
     }
 }
 
@@ -488,7 +565,8 @@ pub(crate) fn damage(
             let dr = (augment::damage_reduction_bp(state, &victim)
                 + arcana_dr
                 + i32::from(victim.fx.march_dr_bp)
-                + i32::from(crate::support::carry_dr_bp(state, &victim)))
+                + i32::from(crate::support::carry_dr_bp(state, &victim))
+                + crate::roster_slots::self_dr_now(&victim.fx, state.tick))
             .min(2_000);
             let amount = if dr > 0 {
                 let reduced = i64::from(amount) * (BP - i64::from(dr)) / BP;
@@ -501,7 +579,9 @@ pub(crate) fn damage(
                 amount
             };
             // P48-A: Cargo Crab A2 emergency shield absorbs before plates.
+            let reduced = amount;
             let amount = absorb_shield(state, id, amount);
+            let after_shield = amount;
             // P46: Shatterback plates absorb after damage reduction, before HP.
             let amount = absorb_plates(state, id, amount, ev);
             let copies = augment::second_wind_charges(&state.player(owner).augments);
@@ -522,8 +602,16 @@ pub(crate) fn damage(
             if removed > 0 && u.hp <= 0 && conventional {
                 state.army[owner.index()].remove(archetype);
             }
+            crate::bonehorn::after_hp_damage(state, id, removed);
             #[cfg(feature = "lab")]
             crate::lab::taken(state, owner, victim.kind, removed);
+            training_hooks::lost(
+                state,
+                &victim,
+                removed,
+                reduced - after_shield,
+                after_shield - amount,
+            );
             removed
         }
         Target::Stronghold(seat) => {
@@ -542,6 +630,7 @@ pub(crate) fn damage(
             if removed > 0 {
                 augment::after_stronghold_damage(state, seat, ev);
             }
+            training_hooks::lost_tower(state, seat, removed);
             #[cfg(feature = "lab")]
             if removed > 0 {
                 crate::lab::progress(state);
@@ -551,7 +640,7 @@ pub(crate) fn damage(
     }
 }
 
-fn heal(
+pub(crate) fn heal(
     state: &mut MatchState,
     healer: Seat,
     id: u32,
@@ -569,6 +658,8 @@ fn heal(
     }
     let u = &mut state.units[i];
     u.hp = (u.hp + effective).min(u.max_hp);
+    let gained = u.hp - target.hp;
+    training_hooks::restored(state, &target, gained);
     ev.push(Event::Heal {
         to: id,
         amount: effective,
@@ -595,6 +686,29 @@ fn status_ticks(base: u16, bp: i32) -> u16 {
 /// Root replaces anything (keeping the longer root); a stronger slow
 /// replaces a slow, an equal or weaker one refreshes it; slow never
 /// replaces root. Only duration is modified by Augments (BR-X07).
+/// Duration is snapshotted once, including outgoing Augments and victim Arcana.
+pub(crate) fn status_duration(state: &MatchState, id: u32, attacker: Seat, ticks: u16) -> u16 {
+    let Some(i) = state.unit_index(id) else {
+        return 0;
+    };
+    let bonus = augment::status_duration_bp(&state.player(attacker).augments);
+    let target = state.units[i];
+    let archetype = state.rules().def(target.kind).archetype;
+    let shorten = |ticks| {
+        if target.is_summon() {
+            ticks
+        } else {
+            arcana::shorten_status(
+                &state.player(target.seat).arcanas,
+                &state.rules().arcana,
+                archetype,
+                ticks,
+            )
+        }
+    };
+    shorten(status_ticks(ticks, bonus))
+}
+
 pub(crate) fn apply_on_hit(
     state: &mut MatchState,
     id: u32,
@@ -612,28 +726,13 @@ pub(crate) fn apply_on_hit(
     {
         return 0;
     }
-    let bonus = augment::status_duration_bp(&state.player(attacker).augments);
-    let target = state.units[i];
-    let archetype = state.rules().def(target.kind).archetype;
-    let shorten = |ticks| {
-        if target.is_summon() {
-            ticks
-        } else {
-            arcana::shorten_status(
-                &state.player(target.seat).arcanas,
-                &state.rules().arcana,
-                archetype,
-                ticks,
-            )
-        }
-    };
     let on_hit = match on_hit {
         OnHit::Slow { bp, ticks } => OnHit::Slow {
             bp,
-            ticks: shorten(status_ticks(ticks, bonus)),
+            ticks: status_duration(state, id, attacker, ticks),
         },
         OnHit::Root { ticks } => OnHit::Root {
-            ticks: shorten(status_ticks(ticks, bonus)),
+            ticks: status_duration(state, id, attacker, ticks),
         },
     };
     let applied = match on_hit {

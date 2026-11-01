@@ -10,9 +10,11 @@ use crate::types::{Seat, Status, UnitId, UnitKind};
 /// Summons whose lifetime ended drop to 0 HP; `remove_dead` reports them.
 pub(crate) fn expire(state: &mut MatchState) {
     let tick = state.tick;
-    for u in &mut state.units {
-        if u.expires_at.is_some_and(|end| tick >= end) {
-            u.hp = 0;
+    for idx in 0..state.units.len() {
+        let u = state.units[idx];
+        if u.hp > 0 && u.expires_at.is_some_and(|end| tick >= end) {
+            state.units[idx].hp = 0;
+            crate::training_hooks::vanished(state, &u);
         }
     }
 }
@@ -78,11 +80,15 @@ pub(crate) fn hatch(state: &mut MatchState, ev: &mut Vec<Event>) {
             continue;
         }
         if n.kind == UnitKind::Smuggler {
-            cargo_tick(state, idx, &n);
+            cargo_tick(state, idx, &n, ev);
             continue;
         }
         if n.kind == UnitKind::Crate {
-            crate_tick(state, idx, &n, ev);
+            // P62: a training dummy is carried by an inert Crate; it never
+            // opens. Real Smuggler crates keep their timer.
+            if !crate::training_hooks::is_dummy(state, n.id) {
+                crate_tick(state, idx, &n, ev);
+            }
             continue;
         }
         if !state
@@ -155,6 +161,9 @@ fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
         heal_cut_bp: 0,
         second_wind_used: 0,
     });
+    state
+        .participation
+        .born(nester.seat, kind, nester.tier, nester.branch, true);
     ev.push(Event::Spawn {
         unit: id,
         seat: nester.seat,
@@ -163,9 +172,9 @@ fn spawn_beetling(state: &mut MatchState, nester: &Unit, ev: &mut Vec<Event>) {
 }
 
 /// Smuggler cargo (P48-B, §C.11): every `every` ticks the Smuggler drops a
-/// Crate (120 HP, no attack, no movement, targetable) at its own x. The
+/// Crate (120 HP, no attack, no movement, targetable) behind its carrier. The
 /// first crate comes after a full interval.
-fn cargo_tick(state: &mut MatchState, idx: usize, smuggler: &Unit) {
+fn cargo_tick(state: &mut MatchState, idx: usize, smuggler: &Unit, ev: &mut Vec<Event>) {
     let cd = smuggler.action_cd.saturating_sub(1);
     state.units[idx].action_cd = cd;
     if cd > 0 {
@@ -202,13 +211,19 @@ fn cargo_tick(state: &mut MatchState, idx: usize, smuggler: &Unit) {
     }
     let id = state.next_unit_id;
     state.next_unit_id += 1;
+    ev.push(Event::Spawn {
+        unit: id,
+        seat: smuggler.seat,
+        kind: UnitKind::Crate,
+    });
     state.units.push(Unit {
         id,
         seat: smuggler.seat,
         kind: UnitKind::Crate,
         tier: 0,
         branch: 0,
-        x: smuggler.x,
+        x: (smuggler.x - smuggler.seat.dir() * crate::content::CRATE_DROP_BACK)
+            .clamp(0, crate::content::LANE_LEN),
         hp: state.rules().def(UnitKind::Crate).hp,
         max_hp: state.rules().def(UnitKind::Crate).hp,
         cooldown: 0,
@@ -256,7 +271,9 @@ fn crate_tick(state: &mut MatchState, idx: usize, krate: &Unit, ev: &mut Vec<Eve
     });
     // The open crate is spent.
     if let Some(i) = state.unit_index(krate.id) {
+        let spent = state.units[i];
         state.units[i].hp = 0;
+        crate::training_hooks::vanished(state, &spent);
     }
 }
 
@@ -402,6 +419,7 @@ fn spawn_cargo(
         heal_cut_bp: 0,
         second_wind_used: 0,
     });
+    state.participation.born(seat, kind, tier, branch, true);
     ev.push(Event::Spawn {
         unit: id,
         seat,

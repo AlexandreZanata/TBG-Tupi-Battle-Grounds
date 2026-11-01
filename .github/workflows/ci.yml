@@ -1,26 +1,204 @@
 name: ci
 
 on:
-  push:
   pull_request:
+  push:
+    branches: [main]
+    # Native release tags run this suite inside native-release.yml, where it
+    # gates publication; running it here as well would validate the same
+    # commit twice.
+    tags: ['**', '!v*-native.*']
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# Only a newer commit on the same pull request cancels a run. Main, tags,
+# dispatches and release calls get a unique group: never cancelled or replaced.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# One pinned compiler for every lane and the native release build keeps lints
+# reproducible and cache keys stable (rust-cache hashes the rustc version).
+# CARGO_BUILD_JOBS is deliberately unset: hosted runners are dedicated VMs
+# (4 vCPU / 16 GB for public repositories) and cargo uses every CPU. The
+# two-job limit in docs/VALIDATION.md protects the owner's shared desktop.
+env:
+  RUST_TOOLCHAIN: 1.99.0
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          components: rustfmt, clippy
-          targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@v2
-      - name: Install Bevy system dependencies
-        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
-      - name: fmt
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; rustc pinned by the toolchain input
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: rustfmt
+      - name: Format
         run: cargo fmt --all -- --check
-      - name: clippy
-        run: cargo clippy --workspace -- -D warnings
-      - name: test
-        run: cargo test --workspace
-      - name: wasm check
-        run: cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+      - name: Required-check and test-lane regression guards
+        run: |
+          python3 scripts/test-ci-required-checks.py
+          python3 scripts/test-ci-test-lanes.py
+          python3 scripts/ci-test-lanes.py
+      - name: Fetch the patch comparison base
+        env:
+          PATCH_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -n "$PATCH_BASE" && "$PATCH_BASE" != 0000000000000000000000000000000000000000 ]]; then
+            git fetch --no-tags --depth=1 origin "$PATCH_BASE"
+            echo "PATCH_BASE=$PATCH_BASE" >> "$GITHUB_ENV"
+          else
+            git fetch --no-tags --depth=1 origin main
+            echo "PATCH_BASE=origin/main" >> "$GITHUB_ENV"
+          fi
+      - name: Mandatory gameplay patch notes
+        run: |
+          python3 scripts/test-patch-notes.py
+          python3 scripts/check-patch-notes.py --base "$PATCH_BASE"
+
+  clippy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; rustc pinned by the toolchain input
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: clippy
+      # Saved only after a successful lint: a partial check never becomes the
+      # exact-match entry that later runs would restore and never refresh.
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: ubuntu-24.04-x86_64-unknown-linux-gnu-dev-check
+          save-if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      - name: Install Bevy system dependencies
+        timeout-minutes: 10
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+      - name: Clippy (complete workspace)
+        run: cargo clippy --locked --workspace -- -D warnings
+
+  # `cargo test --workspace` split across two runners. The scopes reproduce the
+  # whole-workspace feature unification; scripts/ci-test-lanes.py proves it on
+  # every run and fails if a manifest change breaks the equivalence.
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      TEST_SCOPE: --workspace --exclude tbg-balance --features tbg-core/lab
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; rustc pinned by the toolchain input
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: ubuntu-24.04-x86_64-unknown-linux-gnu-test-${{ hashFiles('.github/cargo-ci.toml') }}
+          cache-on-failure: true
+          save-if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      # A cancelled or failed compile must not save a partial cache (measured:
+      # a PR #33 run cancelled 17 s after it started stored 150 MB that the next
+      # run restored as an exact match and never refreshed). Saving on failure
+      # is re-armed below, once the tests have compiled, so a failing test
+      # still keeps the build.
+      - name: Save the cache only after the tests compile
+        run: echo "CACHE_ON_FAILURE=false" >> "$GITHUB_ENV"
+      - name: Install Bevy system dependencies
+        timeout-minutes: 10
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+      - name: Compile tests (optimized simulation)
+        run: cargo --config .github/cargo-ci.toml test --locked --no-fail-fast $TEST_SCOPE --no-run
+      - name: Keep the compiled dependencies even if a test fails
+        run: echo "CACHE_ON_FAILURE=true" >> "$GITHUB_ENV"
+      - name: Test (workspace without the balance lab)
+        run: cargo --config .github/cargo-ci.toml test --locked --no-fail-fast $TEST_SCOPE
+
+  balance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TEST_SCOPE: -p tbg-balance --features tbg-core/training
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; rustc pinned by the toolchain input
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: ubuntu-24.04-x86_64-unknown-linux-gnu-test-${{ hashFiles('.github/cargo-ci.toml') }}
+          cache-on-failure: true
+          save-if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      - name: Save the cache only after the tests compile
+        run: echo "CACHE_ON_FAILURE=false" >> "$GITHUB_ENV"
+      # Pure Rust (tbg-core + tbg-balance): no system packages needed.
+      - name: Compile balance-lab tests (optimized simulation)
+        run: cargo --config .github/cargo-ci.toml test --locked --no-fail-fast $TEST_SCOPE --no-run
+      - name: Keep the compiled dependencies even if a test fails
+        run: echo "CACHE_ON_FAILURE=true" >> "$GITHUB_ENV"
+      - name: Balance-lab contracts (C3, C5-C9, C11) and lab tests
+        run: cargo --config .github/cargo-ci.toml test --locked --no-fail-fast $TEST_SCOPE
+
+  wasm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; rustc pinned by the toolchain input
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: ubuntu-24.04-wasm32-unknown-unknown-dev-check
+          save-if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      - name: WASM compatibility
+        run: cargo check --locked -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+
+  # Former desktop-ui-contract.yml (PR #32), now gated by `check` on every run
+  # instead of an optional path-filtered workflow; it takes about 15 seconds.
+  desktop-ui:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - run: python3 -m pip install Pillow==13.0.0
+      - run: python3 scripts/check-desktop-ui.py
+      - run: python3 scripts/test-desktop-ui.py
+      - run: node crates/tbg-client/tests/auth-session.test.cjs
+
+  # Preserve the required status name; skipped dependencies must never turn green.
+  check:
+    if: ${{ always() }}
+    needs: [quality, clippy, test, balance, wasm, desktop-ui]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Require every lane to pass
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: python3 scripts/ci-required-checks.py

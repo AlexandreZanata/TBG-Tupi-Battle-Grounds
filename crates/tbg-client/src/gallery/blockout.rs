@@ -44,7 +44,8 @@ pub fn spawn(
                 Visibility::default(),
             ))
             .id();
-        let joints = figure::spawn_joints(commands, figure, &form.plan, &form.meshes, &material);
+        let joints =
+            figure::spawn_joints(commands, figure, kind, &form.plan, &form.meshes, &material);
         let mut animator = Animator::new(joints, form.plan, figure, kind, i as u32);
         animator.native = true;
         if silhouette {

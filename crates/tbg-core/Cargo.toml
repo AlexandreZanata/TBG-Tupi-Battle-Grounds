@@ -16,6 +16,9 @@ path = "src/lib.rs"
 # Offline balance lab only (D-33): unit duels without the Shop. Never
 # enabled by tbg-server or tbg-client (contract C10).
 lab = []
+# Local Troops training laboratory only (P62, D-80): enabled by tbg-client,
+# never by tbg-server. Inert unless a `TrainingSession` is constructed.
+training = []
 # Native benchmark allocator counters only; no simulation or protocol changes.
 bench-alloc = ["bench-profile"]
 # Opt-in operation counts for isolated native benchmarks, disabled online.

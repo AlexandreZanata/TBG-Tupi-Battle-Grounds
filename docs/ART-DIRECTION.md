@@ -48,6 +48,9 @@
 | Undead — *The Barrow* | bone `#D8D2C0` | rusted iron `#6E4B3A` | soul-fire `#7CF29A` | tattered violet cloth `#4B3B5C` |
 | Machines — *The Ironworks* | iron `#4A5058` | brass `#B5893B` | forge glow `#FF8A3D` | leather `#5C3B26`; ogre skin `#8C9A6B` |
 | Plants — *The Wildwood* | bark `#6B4F2E` | moss `#4E9F3D` | bloom `#F28AB2` | amber sap `#F2B544` |
+| Monsters — *The Pit* (Proposed, D-64) | charcoal `#2E3033` | dark `#2A2430` | turquoise `#2BB3A8` | bone `#F1EBDD`; gunmetal hide `#4A5058` |
+| Celestials — *The Halo* (Proposed, D-64) | ivory `#F1EBDD` | navy `#1F2F5A` | gold `#D9B44A` | dark blue cloth; team tabard |
+| Insects — *The Hive* (Proposed, D-64) | moss `#5C6B2E` | chitin `#2C2A1E` | amber `#D98E2B` | linen `#E6D8B8`; ogre skin `#8C9A6B` |
 | Environment | grass `#7BB661` | road `#C9A46A` | water `#3FA7B5` | stone `#B9B2A3`, timber `#8A6A44`, sky top `#7FB8E6` → horizon `#E8D9B5` |
 | UI | parchment `#EFE3C6` | ink `#2B2118` | gold `#C9A13B` | iron frame `#3A3F45`, danger `#C0392B`, ok `#3E8E41` |
 
@@ -225,6 +228,9 @@ Colors strictly follow the palette defined in §3. Mechanical and organic constr
 | **Undead** (*The Barrow*) | Bone `#D8D2C0` | Rusted iron `#6E4B3A` | Soul-fire `#7CF29A` (plus tattered violet `#4B3B5C`) | Exposed ribcages, jagged bone protrusions, asymmetrical rotting joints, jerky hunched postures. |
 | **Machines** (*The Ironworks*) | Iron `#4A5058` | Brass `#B5893B` | Forge glow `#FF8A3D` (plus leather `#5C3B26`) | **Rigid mechanical pivots and pistons only.** No organic flexing or human limb arcs; boxy plate assemblies, visible rivets and exhausts. |
 | **Plants** (*The Wildwood*) | Bark `#6B4F2E` | Moss green `#4E9F3D` | Bloom pink `#F28AB2` (plus amber sap `#F2B544`) | Curving organic vine boughs, root tendrils, mushroom caps, natural foliage volumes; zero sharp industrial corners. |
+| **Monsters** (*The Pit*, Proposed, D-64) | Charcoal hide `#2E3033` | Bone `#F1EBDD` | Turquoise `#2BB3A8` (organ glow) | Primordial quadrupeds and predators: bone plates, heavy heads and tusks, low wide bodies; no flight, no wings. |
+| **Celestials** (*The Halo*, Proposed, D-64) | Ivory `#F1EBDD` | Navy `#1F2F5A` | Gold `#D9B44A` halos | Order and protection: upright guardians, geometric gold halos and disks, symmetrical plate; no organic flex. |
+| **Insects** (*The Hive*, Proposed, D-64) | Moss `#5C6B2E` | Chitin `#2C2A1E` | Amber `#D98E2B` | Colony discipline: segmented chitin shells, mandibles, asymmetric wings and webs; hinge joints only. |
 
 ### 11.3 Evolution visual progression rules
 

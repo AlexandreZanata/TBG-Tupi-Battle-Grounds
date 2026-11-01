@@ -3,25 +3,53 @@
 
 use tbg_core::content::{RUNNING_START, TICK_HZ};
 use tbg_core::lab::LabStats;
-use tbg_core::{EndReason, MatchState, Seat, ALL_KINDS};
+use tbg_core::{EndReason, MatchState, Seat, ALL_KINDS, FACTION_COUNT};
 
 pub const KINDS: usize = ALL_KINDS.len();
 /// The comeback checkpoint: 2:00 of play (GAME-DESIGN §6).
 pub const CHECKPOINT: u32 = RUNNING_START + 120 * TICK_HZ;
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Side {
     pub purchases: [u16; KINDS],
     /// Evolutions per kind and branch (both tiers).
     pub evolutions: [[u16; 2]; KINDS],
     pub max_army: u16,
+    pub reservations: u32,
+    pub reserved_bought: u32,
+    pub reserve_wait_shops: u32,
+    pub rerolls: u32,
+    pub reroll_energy: u64,
+    pub spent: u64,
+    pub max_reroll_streak: u8,
+    pub expensive_bought: u32,
+    pub no_frontline_at_60s: Option<bool>,
+}
+
+impl Default for Side {
+    fn default() -> Self {
+        Self {
+            purchases: [0; KINDS],
+            evolutions: [[0; 2]; KINDS],
+            max_army: 0,
+            reservations: 0,
+            reserved_bought: 0,
+            reserve_wait_shops: 0,
+            rerolls: 0,
+            reroll_energy: 0,
+            spent: 0,
+            max_reroll_streak: 0,
+            expensive_bought: 0,
+            no_frontline_at_60s: None,
+        }
+    }
 }
 
 impl Side {
     /// Strict purchase-majority faction index, if any (ties are mixed).
     /// Factions are identity, never tuned, so the canonical table is right.
     pub fn majority(&self) -> Option<usize> {
-        let mut counts = [0u32; 4];
+        let mut counts = [0u32; FACTION_COUNT];
         for k in ALL_KINDS {
             counts[tbg_core::content::def(k).faction.index()] +=
                 u32::from(self.purchases[k as usize]);
@@ -45,7 +73,7 @@ pub struct MatchResult {
     /// Participant playing seat A.
     pub seat_a: usize,
     /// Per-kind combat counters in participant order (P42).
-    pub stats: LabStats,
+    pub stats: Option<Box<LabStats>>,
     /// Longest stall including the tail, in ticks (P42).
     pub stall: u32,
 }
@@ -86,6 +114,17 @@ pub fn observe_tick(
     for seat in Seat::BOTH {
         let p = participant(seat, seat_a);
         let army = state.army_size(seat).min(usize::from(u16::MAX)) as u16;
+        if state.tick == RUNNING_START + 60 * TICK_HZ {
+            sides[p].no_frontline_at_60s = Some(!state.units.iter().any(|u| {
+                u.seat == seat
+                    && !u.kind.is_summon()
+                    && u.summoner.is_none()
+                    && matches!(
+                        state.rules().def(u.kind).archetype,
+                        tbg_core::Archetype::Tank | tbg_core::Archetype::Dps
+                    )
+            }));
+        }
         sides[p].max_army = sides[p].max_army.max(army);
     }
     if state.tick == CHECKPOINT {
