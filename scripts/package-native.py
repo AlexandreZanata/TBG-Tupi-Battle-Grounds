@@ -22,6 +22,9 @@ def main():
     parser.add_argument("--output", type=Path, default=ROOT / "target/native")
     parser.add_argument("--no-archive", action="store_true",
                         help="Prepare a commit-specific local preview directory without compression")
+    parser.add_argument("--runner", type=Path,
+                        help="Unofficial cross builds only: command that runs the binary for its identity "
+                             "checks (e.g. a Wine wrapper). Official Windows packages are checked on Windows (P68).")
     parser.add_argument("--managed", action="store_true",
                         help="P66: build a managed-update release target (flat archive + descriptor)")
     parser.add_argument("--build-id", help="P66 managed: release build id ([a-z0-9._-])")
@@ -35,10 +38,13 @@ def main():
         return managed(args)
     version = tomllib.loads((ROOT / "crates/tbg-client/Cargo.toml").read_text())["package"]["version"]
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-    identity = subprocess.check_output([str(args.binary.resolve()), "--version"], text=True).strip()
+    run = [str(args.runner.resolve())] if args.runner else []
+    if args.runner and args.platform != "windows":
+        raise SystemExit("--runner is only for unofficial cross-built Windows packages")
+    identity = subprocess.check_output([*run, str(args.binary.resolve()), "--version"], text=True).strip()
     if f" {version} ·" not in identity or f"source {commit}" not in identity:
         raise SystemExit("Build with TBG_SOURCE_COMMIT=$(git rev-parse HEAD); executable and source must match")
-    metadata=json.loads(subprocess.check_output([str(args.binary.resolve()),"--build-info"],text=True))
+    metadata=json.loads(subprocess.check_output([*run, str(args.binary.resolve()),"--build-info"],text=True))
     if metadata.get("source_commit")!=commit or metadata.get("version")!=version or metadata.get("profile")!="release":
         raise SystemExit("Native delivery requires matching release build metadata")
     name = f"tupi-battle-grounds-{version}-{args.platform}-x86_64"
