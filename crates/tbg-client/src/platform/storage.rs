@@ -46,6 +46,12 @@ pub fn remove(scope: Scope, key: &str) {
     native::update(scope, key, None);
 }
 
+/// Native legacy removal is serialized by the auth process lock; web owns this under Web Locks.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn remove_if_matches(scope: Scope, key: &str, expected: &str) -> bool {
+    native::remove_if_matches(scope, key, expected)
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 pub fn data_dir() -> Option<std::path::PathBuf> {
     if let Some(path) = std::env::var_os("TBG_DATA_DIR") {
@@ -111,6 +117,36 @@ mod native {
                     return false;
                 }
                 true
+            }
+        }
+    }
+
+    pub(super) fn remove_if_matches(scope: Scope, key: &str, expected: &str) -> bool {
+        match scope {
+            Scope::Session => {
+                let Ok(mut values) = SESSION.get_or_init(Mutex::default).lock() else {
+                    return false;
+                };
+                if values.get(key).map(String::as_str) != Some(expected) {
+                    return false;
+                }
+                values.remove(key);
+                true
+            }
+            Scope::Local => {
+                let Ok(_guard) = LOCAL.lock() else {
+                    return false;
+                };
+                let Some(dir) = data_dir() else {
+                    return false;
+                };
+                let path = dir.join("preferences.json");
+                let mut values = read(&path);
+                if values.get(key).map(String::as_str) != Some(expected) {
+                    return false;
+                }
+                values.remove(key);
+                write(&path, &values).is_ok() && !read(&path).contains_key(key)
             }
         }
     }

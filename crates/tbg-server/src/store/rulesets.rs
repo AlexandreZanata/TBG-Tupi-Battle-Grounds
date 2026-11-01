@@ -10,6 +10,13 @@ pub(super) fn register(
     source_hash: &str,
     catalog_json: &str,
 ) -> rusqlite::Result<()> {
+    // P66: two release slots may register the same revision at the same
+    // moment, so insert it if absent and then compare what is stored.
+    conn.execute(
+        "INSERT OR IGNORE INTO ranked_rulesets (version, source_hash, catalog_json)
+         VALUES (?1, ?2, ?3)",
+        params![version, source_hash, catalog_json],
+    )?;
     let stored: Option<(String, String)> = conn
         .query_row(
             "SELECT source_hash, catalog_json FROM ranked_rulesets WHERE version = ?1",
@@ -19,19 +26,13 @@ pub(super) fn register(
         .optional()?;
     match stored {
         Some((hash, catalog)) if hash == source_hash && catalog == catalog_json => Ok(()),
-        Some(_) => {
+        _ => {
             tracing::error!(
-                "ruleset revision {version} is registered with a different hash or catalog; \
-                 append a new RULESET_VERSION instead of reusing it"
+                "ruleset revision {version} is registered with a different hash or catalog \
+                 (or its hash belongs to another revision); append a new RULESET_VERSION \
+                 instead of reusing it"
             );
             Err(rusqlite::Error::InvalidQuery)
         }
-        None => conn
-            .execute(
-                "INSERT INTO ranked_rulesets (version, source_hash, catalog_json)
-                 VALUES (?1, ?2, ?3)",
-                params![version, source_hash, catalog_json],
-            )
-            .map(|_| ()),
     }
 }

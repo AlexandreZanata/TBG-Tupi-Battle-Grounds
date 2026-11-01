@@ -15,6 +15,9 @@ pub fn spawn(
     assets: &AssetServer,
 ) {
     controls::heading(root, assets, lang);
+    if !crate::platform::resume::available() {
+        root.spawn(kit::muted(lang.key("update.resume.temporary"), 13.));
+    }
     root.spawn(Node {
         grid_template_columns: RepeatedGridTrack::flex(2, 1.),
         ..catalog::grid()
@@ -272,6 +275,13 @@ fn account_panel(
                 ..default()
             });
             card.spawn(kit::muted(words(lang, "APPLICATION", "APLICATIVO"), 10.));
+            if std::env::var_os("TBG_UPDATE_HELPER").is_some() {
+                card.spawn(kit::button(
+                    lang.key("update.check"),
+                    UiAction::UpdateCheck,
+                    260.,
+                ));
+            }
             card.spawn(controls::group()).with_children(|actions| {
                 actions.spawn((
                     controls::button(lang.key("native.downloads"), false),

@@ -84,7 +84,7 @@ pub(super) fn apply(
         selected.0 = None;
     }
     for action in std::mem::take(&mut queue.0) {
-        #[cfg(target_os = "linux")]
+        #[cfg(tbg_desktop)]
         let action = match action {
             UiAction::PracticeArena(arena) => {
                 config::save_arena(arena);
@@ -131,7 +131,17 @@ pub(super) fn apply(
         ) {
             extra.2.play(Sound::Click);
         }
+        let update_required = crate::platform::storage::get(
+            crate::platform::storage::Scope::Session,
+            "update.required",
+        )
+        .as_deref()
+            == Some("1");
         let mut online = |mode: Mode, link: &mut MatchLink, last: &mut LastMode| {
+            if update_required {
+                extra.1.push(lang_res.key("update.required.body"));
+                return;
+            }
             // P12: ranked stays ranked for Play again; rooms re-queue casual.
             *last = if mode == Mode::Ranked {
                 LastMode::Ranked
@@ -162,6 +172,9 @@ pub(super) fn apply(
             next.set(GameState::Queue);
         };
         match action {
+            UiAction::RequestRematch | UiAction::Watch(_) if update_required => {
+                extra.1.push(lang_res.key("update.required.body"));
+            }
             UiAction::PracticeSetup => {
                 training.0.push(crate::training::Action::Open(
                     crate::training::Tab::Practice,
@@ -253,7 +266,7 @@ pub(super) fn apply(
                 }
             }
             // Linux presentation actions are consumed before this system.
-            #[cfg(target_os = "linux")]
+            #[cfg(tbg_desktop)]
             UiAction::ShowArenaBanner
             | UiAction::CloseArenaBanner
             | UiAction::PickAugment(_)
@@ -389,7 +402,7 @@ pub(super) fn apply(
             }
             UiAction::CloseInspect => {
                 inspected.0 = None;
-                #[cfg(target_os = "linux")]
+                #[cfg(tbg_desktop)]
                 {
                     selected.0 = None;
                 }

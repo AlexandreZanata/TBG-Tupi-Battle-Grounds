@@ -157,6 +157,9 @@ pub enum SettleError {
     ConflictingDuplicate,
     /// Both seats froze the same account: an internal invariant failure.
     SameAccount,
+    /// P66: another slot's finalizer already committed this sequence for a
+    /// different match; the caller re-sequences after the newest row.
+    SequenceTaken,
 }
 
 impl From<rusqlite::Error> for SettleError {
@@ -234,9 +237,19 @@ pub(super) fn settle(
     if r.accounts[0] == r.accounts[1] {
         return Err(SettleError::SameAccount);
     }
-    let tx = conn.transaction()?;
+    // P66: IMMEDIATE takes the write lock first, so a second slot process
+    // sharing this file waits instead of failing its read-to-write upgrade.
+    let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
     if let Some(receipt) = existing(&tx, r)? {
         return Ok(receipt);
+    }
+    let taken: i64 = tx.query_row(
+        "SELECT COUNT(*) FROM ranked_matches WHERE id = ?1",
+        params![entry.completion_seq],
+        |row| row.get(0),
+    )?;
+    if taken > 0 {
+        return Err(SettleError::SequenceTaken);
     }
     let (last_utc, revision): (i64, i64) = tx.query_row(
         "SELECT last_utc, revision FROM ranked_meta WHERE singleton = 1",

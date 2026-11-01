@@ -9,6 +9,13 @@ use crate::chan::MatchCmd;
 use super::Match;
 
 impl Match {
+    fn owns_connection(&self, seat: Seat, id: u64) -> bool {
+        self.players[seat.index()]
+            .conn
+            .as_ref()
+            .is_some_and(|c| c.id == id && c.active.load(std::sync::atomic::Ordering::Acquire))
+    }
+
     /// P16-C: log a command for the replay, at the tick it is applied.
     /// Logged even after the outcome: a late intention still sets
     /// `last_seq`, which is part of the state hash.
@@ -43,7 +50,15 @@ impl Match {
 
     pub(super) fn command(&mut self, cmd: MatchCmd) {
         match cmd {
-            MatchCmd::Intent { seat, seq, intent } => {
+            MatchCmd::Intent {
+                conn_id,
+                seat,
+                seq,
+                intent,
+            } => {
+                if !self.owns_connection(seat, conn_id) {
+                    return;
+                }
                 self.stats[seat.index()].intents += 1;
                 // P9: any processed intention earns an ack view this tick.
                 self.applied[seat.index()] = true;
@@ -70,7 +85,10 @@ impl Match {
                     self.send(seat, ServerMsg::Rejected { seq, reason });
                 }
             }
-            MatchCmd::Surrender { seat } => {
+            MatchCmd::Surrender { seat, conn_id } => {
+                if !self.owns_connection(seat, conn_id) {
+                    return;
+                }
                 // BR-M06/BR-M03: forfeit, idempotent (a second surrender or
                 // an already-finished match changes nothing).
                 if self.state.outcome.is_none() {

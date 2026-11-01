@@ -52,7 +52,7 @@ fn short_cache_headers() -> [(axum::http::HeaderName, &'static str); 1] {
     [(header::CACHE_CONTROL, "public, max-age=5")]
 }
 
-fn limited(app: &AppState, ip: IpAddr) -> bool {
+pub(crate) fn limited(app: &AppState, ip: IpAddr) -> bool {
     let Ok(mut limits) = app.api_limits.lock() else {
         return false;
     };

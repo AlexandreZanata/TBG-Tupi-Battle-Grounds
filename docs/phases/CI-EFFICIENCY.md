@@ -164,3 +164,31 @@ The final targeted contract result above is the completed integration evidence.
 - [Workflow concurrency and cancellation](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)
 - [Workflow event filters](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows)
 - [rust-cache configuration and failure caching](https://github.com/Swatinem/rust-cache)
+
+## PR #31 follow-up: roster-independent Shop regression
+
+The latest head `014b0e0` failed native run 41242952250 in
+`br_s04_a_purchase_redraws_all_five_offers_and_nothing_rotates`:
+`Shieldbearer shown 42 of 400`. The test retained a 25-kind assumption
+(5/25 inclusion, 80 expected appearances), although online CANON contains
+46 kinds (400*5/46 = about 43.48). This is a stale sampling fixture, not a
+production Shop bias. The separate `check` failure correctly propagated
+`native: failure`; format, Clippy and WASM lanes passed.
+
+Scale the deterministic purchase sample linearly with the actual CANON pool:
+16 draws per kind, so each kind and the just-purchased kind still expect
+80 appearances. Preserve the original 50..110 bounds, five distinct offers,
+pool membership, no timed rotation and greater-than-97.5% redraw checks.
+For 46 kinds this is 736 purchases; no gameplay source, balance threshold,
+required status or security check changes. Future roster additions no longer
+silently invalidate a fixed 25-kind probability. Work remains small and
+linear in roster size.
+
+Directed consolidation (shared nonblocking host lock, CARGO_BUILD_JOBS=2):
+`cargo --config .github/cargo-ci.toml test --offline --locked -p tbg-core
+--test rules -- --test-threads=1` passed all 14 tests (5.26 s build, 0.02 s
+execution). Affected package formatting passed;
+`python3 scripts/test-ci-required-checks.py` passed all 3 fail-closed guard
+scenarios; `git diff --check` passed. No full workspace suite, balance gate,
+benchmark or remote CI wait was executed. A normal PR branch push is
+explicitly authorized; the owner will review CI and merge manually.

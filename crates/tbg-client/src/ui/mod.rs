@@ -17,6 +17,7 @@ mod army_tests;
 mod attribution;
 #[cfg(test)]
 mod augment_data_tests;
+mod auth_ui;
 mod battle_hud;
 #[cfg(test)]
 mod battle_wiring_tests;
@@ -31,7 +32,7 @@ pub(crate) mod fortify;
 mod glyphs;
 mod hud;
 mod hud_portraits;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 mod hud_top;
 mod hud_update;
 mod input;
@@ -43,15 +44,15 @@ pub(crate) mod kit;
 #[cfg(test)]
 mod lobby_panels_tests;
 mod menu;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod native_battle;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 pub(crate) mod native_loading;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod native_ranking;
 mod queue;
 pub mod ranking;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 mod ranking_ui;
 mod result;
 pub(crate) mod shell;
@@ -63,6 +64,7 @@ pub mod textform;
 mod textform_bevy;
 mod tips;
 mod toast;
+pub(crate) mod update;
 
 pub use actions::ActionQueue;
 pub use toast::{Banner, Toasts};
@@ -77,7 +79,7 @@ pub enum UiAction {
     CelebrationMotion,
     Practice,
     PracticeSetup,
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     PracticeArena(tbg_core::Arena),
     Quick,
     CreateRoom,
@@ -143,9 +145,24 @@ pub enum UiAction {
     CloseRanking,
     // BR-M06: two-tap surrender in the HUD.
     Surrender,
-    #[cfg(target_os = "linux")]
+    // P66: the native update overlay (ui/update), handled before `apply`.
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateNow,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateCheck,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateOpen,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateLater,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateCancel,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateRestart,
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    UpdateNotesOk,
+    #[cfg(tbg_desktop)]
     ShowArenaBanner,
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     CloseArenaBanner,
     // P41: lobby Settings language switch (DOM selector via data-action).
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))] // built from DOM strings on the web
@@ -156,9 +173,9 @@ pub enum UiAction {
     PreviewArena(tbg_core::Arena),
     // Owner revision 2026-10-29: War Council actions.
     ChooseAugment(u8),
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     PickAugment(u8),
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     ConfirmAugment,
     ForgoAugment,
     /// D-46: buy the next Fortification tier of your own tower on a branch.
@@ -175,16 +192,25 @@ pub const DISABLED: Color = Color::srgb(0.30, 0.32, 0.35);
 pub const TEXT: Color = Color::srgb(0.96, 0.95, 0.90);
 
 pub fn plugin(app: &mut App) {
-    #[cfg(target_os = "linux")]
+    // P66: the native update overlay (no-op in the browser).
+    update::plugin(app);
+    #[cfg(tbg_desktop)]
     native_battle::plugin(app);
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     native_ranking::plugin(app);
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     native_loading::plugin(app);
     app.init_resource::<PendingBuy>()
         .add_systems(
             Update,
-            (input::taps, keyboard::navigate, actions::apply, scale_ui).chain(),
+            (
+                input::taps,
+                keyboard::navigate,
+                update::take_actions,
+                actions::apply,
+                scale_ui,
+            )
+                .chain(),
         )
         .add_plugins((
             actions::plugin,
@@ -204,6 +230,7 @@ pub fn plugin(app: &mut App) {
             tips::plugin,
         ))
         .add_plugins((
+            auth_ui::plugin,
             battle_hud::plugin,
             inspect::plugin,
             fortify::plugin,

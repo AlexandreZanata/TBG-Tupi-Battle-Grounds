@@ -57,6 +57,8 @@ fn apply(
         }
         match action {
             Action::Open(tab) => {
+                // Arena pages and this shared editor use the same saved choice.
+                catalog.arena = crate::config::load_arena();
                 catalog.tab = tab;
                 shell.panel = Panel::Troops;
                 shell.dirty = true;

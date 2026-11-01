@@ -1,5 +1,11 @@
 # Native Linux and Windows client
 
+> P68 Linux-first successor: protocol 30/schema 9 authentication and secure
+> refresh persistence supersede this historical preview's credential storage.
+> See [P68 execution](P68-execution.md) and [current package instructions](../../deploy/native/README.txt).
+> The existing protocol-29 production endpoint remains incompatible with that candidate.
+
+
 Owner request, 2026-10-31. Branch: `phase/native-linux-windows`.
 
 ## Scope and order

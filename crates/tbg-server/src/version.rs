@@ -4,7 +4,7 @@ use axum::{http::header, response::IntoResponse, Json};
 use serde_json::json;
 
 pub async fn get() -> impl IntoResponse {
-    let latest = option_env!("TBG_LATEST_CLIENT").unwrap_or("0.1.0-native.3");
+    let latest = option_env!("TBG_LATEST_CLIENT").unwrap_or("0.1.1-rc.1");
     let releases = "https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases";
     (
         [(header::CACHE_CONTROL, "no-cache, max-age=0")],

@@ -150,14 +150,22 @@ fn fast(url: &str) -> BotOpts {
     }
 }
 
+/// Seat A surrenders after `surrender_after` when a test needs a bounded end.
 fn spawn_bots(
     url: &str,
+    surrender_after: Option<Duration>,
 ) -> (
     tokio::task::JoinHandle<BotResult>,
     tokio::task::JoinHandle<BotResult>,
 ) {
     (
-        tokio::spawn(play_one(fast(url), 21)),
+        tokio::spawn(play_one(
+            BotOpts {
+                surrender_after,
+                ..fast(url)
+            },
+            21,
+        )),
         tokio::spawn(play_one(fast(url), 22)),
     )
 }
@@ -166,7 +174,8 @@ fn spawn_bots(
 async fn a_guest_watches_a_casual_bot_match_to_the_end() {
     let url = server(200).await;
     let base = http_base(&url);
-    let (bot_a, bot_b) = spawn_bots(&url);
+    // BR-M07: no match length, so the end comes from a surrender (BR-M06), not a race with the bots' budget.
+    let (bot_a, bot_b) = spawn_bots(&url, Some(Duration::from_secs(20)));
     let listed = wait_listed(&base, 1).await;
     let row = &listed["matches"][0];
     assert_eq!(row["mode"], "casual");
@@ -296,7 +305,7 @@ async fn a_queued_player_cannot_watch_and_an_unknown_id_is_not_found() {
 async fn a_full_match_refuses_the_next_spectator() {
     let url = server(1).await;
     let base = http_base(&url);
-    let (bot_a, bot_b) = spawn_bots(&url);
+    let (bot_a, bot_b) = spawn_bots(&url, None);
     let listed = wait_listed(&base, 1).await;
     let id = parse_id(listed["featured"].as_str().unwrap());
 
@@ -365,7 +374,7 @@ async fn players_see_the_watcher_count_and_the_match_arena() {
 async fn a_spectator_that_never_reads_is_dropped_and_the_seats_finish() {
     let url = server(200).await;
     let base = http_base(&url);
-    let (bot_a, bot_b) = spawn_bots(&url);
+    let (bot_a, bot_b) = spawn_bots(&url, None);
     let listed = wait_listed(&base, 1).await;
     let id = parse_id(listed["featured"].as_str().unwrap());
 

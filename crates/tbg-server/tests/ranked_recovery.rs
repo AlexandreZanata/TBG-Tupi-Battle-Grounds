@@ -110,15 +110,17 @@ async fn a_failed_insert_rolls_back_both_accounts() {
         result: final_for([1; 16], accounts, Some(Seat::A)),
     };
     store.settle_ranked(entry.clone()).await.unwrap();
-    // A new key reusing a committed sequence fails inside the transaction,
-    // after both account updates ran: neither may persist.
+    // A new key reusing a committed sequence is refused inside the
+    // transaction and neither account changes. P66: the refusal is the
+    // explicit `SequenceTaken` (checked before any update), so a second
+    // slot's finalizer re-sequences instead of retrying forever.
     let clash = JournalEntry {
         result: final_for([2; 16], accounts, Some(Seat::B)),
         ..entry
     };
     assert!(matches!(
         store.settle_ranked(clash).await,
-        Err(SettleError::Sql(_))
+        Err(SettleError::SequenceTaken)
     ));
     let (_, a) = store.login("alda".into(), hash_of(1)).await.unwrap();
     let (_, b) = store.login("bram".into(), hash_of(2)).await.unwrap();
@@ -143,7 +145,8 @@ async fn v6_database_migrates_to_v8_twice_without_touching_history() {
     let version: i64 = conn
         .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
         .unwrap();
-    assert_eq!(version, 8);
+    // v9/v10 add the P66 release directory and the D-97 auth families on top of v8.
+    assert_eq!(version, 10);
     let baseline: (i64, i64, i64) = conn
         .query_row(
             "SELECT rating, ranked_games, mature_games FROM ranked_baseline WHERE account_id = 1",

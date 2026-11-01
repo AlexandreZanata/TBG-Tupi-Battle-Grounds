@@ -2,7 +2,7 @@
 
 mod arcanas;
 mod arenas;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 mod catalog;
 mod data;
 mod header;
@@ -12,10 +12,10 @@ mod lobby;
 mod patch_notes;
 mod settings;
 mod strongholds;
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 pub(super) use data::Data as LobbyData;
 
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 pub(super) use strongholds::{branch_effect, expand, stronghold_data};
 
 use super::{
@@ -96,7 +96,7 @@ struct Root;
 struct Body;
 
 /// Every Linux menu page reserves the same clear region below the shared header.
-#[cfg(target_os = "linux")]
+#[cfg(tbg_desktop)]
 pub(super) fn page_node() -> Node {
     Node {
         flex_direction: FlexDirection::Column,
@@ -159,7 +159,7 @@ fn render(
     lang: Res<Lang>,
     catalog: Res<crate::training::Catalog>,
     sounds: Res<Sounds>,
-    #[cfg(target_os = "linux")] volume: Res<bevy::audio::GlobalVolume>,
+    #[cfg(tbg_desktop)] volume: Res<bevy::audio::GlobalVolume>,
     form: NonSend<ActiveForm>,
     roots: Query<Entity, With<Root>>,
     window: Single<&Window>,
@@ -174,11 +174,11 @@ fn render(
         return;
     }
     let modal = matches!(account.screen, AccountScreen::SaveKey { .. });
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     let modal = modal || ranking.open;
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     let volume_changed = shell.panel == Panel::Settings && volume.is_changed();
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(tbg_desktop))]
     let volume_changed = false;
     if !shell.dirty
         && !volume_changed
@@ -213,7 +213,7 @@ fn render(
     }
     let compact = window.width() < 900.;
     let home = shell.panel == Panel::Lobby;
-    #[cfg(target_os = "linux")]
+    #[cfg(tbg_desktop)]
     let home = home && !ranking.open;
     commands
         .spawn((
@@ -222,7 +222,7 @@ fn render(
                 width: percent(100),
                 height: percent(100),
                 flex_direction: FlexDirection::Column,
-                padding: UiRect::all(px(if cfg!(target_os = "linux") || home {
+                padding: UiRect::all(px(if cfg!(tbg_desktop) || home {
                     0
                 } else if compact {
                     10
@@ -241,7 +241,7 @@ fn render(
             DespawnOnExit(GameState::Menu),
         ))
         .with_children(|root| {
-            #[cfg(target_os = "linux")]
+            #[cfg(tbg_desktop)]
             {
                 header::spawn(
                     root,
@@ -260,9 +260,9 @@ fn render(
                 lobby::spawn(root, &shell, &data, &account, &assets, *lang);
                 return;
             }
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             navigation(root, *lang, shell.panel, &data, compact, &assets);
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             if let Some(version) = &data.update {
                 root.spawn(button(
                     format!("{} · {version}", lang.key("native.update")),
@@ -270,7 +270,7 @@ fn render(
                     320.,
                 ));
             }
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             let body = Node {
                 flex_grow: 1.,
                 min_height: px(0),
@@ -280,10 +280,10 @@ fn render(
                 row_gap: px(16),
                 ..default()
             };
-            #[cfg(target_os = "linux")]
+            #[cfg(tbg_desktop)]
             let body = page_node();
             root.spawn((body, scroll, Body)).with_children(|body| {
-                #[cfg(target_os = "linux")]
+                #[cfg(tbg_desktop)]
                 if let Some(version) = &data.update {
                     body.spawn(button(
                         format!("{} · {version}", lang.key("native.update")),
@@ -294,9 +294,9 @@ fn render(
                 match shell.panel {
                     Panel::Lobby => {}
                     Panel::Friends => lobby::friends(body, *lang),
-                    #[cfg(not(target_os = "linux"))]
+                    #[cfg(not(tbg_desktop))]
                     Panel::Settings => settings::spawn(body, &account, &sounds, &window, *lang),
-                    #[cfg(target_os = "linux")]
+                    #[cfg(tbg_desktop)]
                     Panel::Settings => settings::spawn(
                         body,
                         &account,
@@ -323,7 +323,7 @@ fn render(
                     Panel::Kit => settings::gallery(body, *lang),
                 }
             });
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(tbg_desktop))]
             root.spawn(kit::muted(
                 format!(
                     "{} · v{} · {}",
@@ -337,7 +337,7 @@ fn render(
     let _ = form;
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(tbg_desktop))]
 fn navigation(
     root: &mut ChildSpawnerCommands,
     lang: Lang,

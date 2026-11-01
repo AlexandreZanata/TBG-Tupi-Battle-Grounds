@@ -48,7 +48,7 @@ evolve, and which factions you combine.
 | MVPUnitRoster | Launch target of 12 units; 2.0 ships the first 8 first | — |
 | Account | **Proposed (P11):** a player identity — one `PlayerName` + one `AccountKey`; holds `Rating` and statistics | `Account` |
 | PlayerName | **Proposed (P11):** unique public name chosen at account creation | `PlayerName` |
-| AccountKey | **Proposed (P11):** the only credential: `PlayerName-XXXX-XXXX-XXXX-XXXX` | `AccountKey` |
+| AccountKey | **Proposed (P11/P68-A):** the long-lived manual credential: `PlayerName-XXXX-XXXX-XXXX-XXXX`; delegated session tokens are defined in §21 | `AccountKey` |
 | MatchMode | **Proposed (P12, P39):** `Casual` (no rating change), `Ranked` (accounts only, rating changes), or `Challenge` (a direct invitation match; casual rules, no rating change) | `MatchMode` |
 | Quick Challenge | **Proposed (P39):** a direct invitation match created in one click; one different session joins by link; casual rules, no rating, no queue | `Challenge` |
 | Rematch | **Proposed (P39):** a new Challenge match between the same two sessions after both request it within the expiry | `RematchTicket` |
@@ -126,10 +126,10 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-C03 | Store purchases are granted only after server-side receipt validation | Adapted | S1, S2 |
 | BR-C04 | `StrongholdStyle`s are free cosmetics; every style has identical gameplay (styles stay cosmetic; mechanical `StrongholdKind`s are separate, BR-SK01–SK09, D-46) | Proposed | — |
 | BR-P01 | An `Account` is a unique `PlayerName` plus an `AccountKey`; names are 3–16 letters, digits or `_`, start with a letter, are unique ignoring case, and never change | Proposed | — |
-| BR-P02 | The `AccountKey` is the only credential: shown once at creation, never shown to other players, not recoverable | Proposed | — |
-| BR-P03 | One active session per account; a new login takes over the old one, including a running match | Proposed | — |
+| BR-P02 | The `AccountKey` is the long-lived manual credential: shown once at creation, never shown to other players, not recoverable on this base. P68-A delegates runtime authentication to expiring tokens (§21) without changing existing keys | Proposed (P11/P68-A) | — |
+| BR-P03 | One active account controller; explicit login/takeover can replace the old controller, including its match. P68-A allows separate persistent device families, but passive refresh/startup never takes over automatically (§21) | Proposed (P11/P68-A) | — |
 | BR-P04 | Guests may play practice, casual matches, and private rooms; ranked play needs an account | Proposed | — |
-| BR-P05 | A public profile shows name, rating, rank, record, win rate, faction mix, and the last 10 ranked results; no other personal data is stored | Proposed | — |
+| BR-P05 | A public profile shows name, rating, rank, record, win rate, faction mix, and the last 10 ranked results. P68-A additionally stores minimal private session-security metadata (§21), never exposing tokens/device identifiers on public profiles | Proposed (P11/P68-A) | — |
 | BR-R01 | Two queues: `Casual` (guests and accounts; private rooms are casual) and `Ranked` (accounts only) | Proposed | — |
 | BR-R02 | Matchmaking pairs the two longest-waiting players of the same queue, regardless of rating | Proposed | — |
 | BR-R03 | Every ranked match changes both players' `Rating` from both ratings (Elo, §5); win 1, draw ½, loss 0 | Proposed | — |
@@ -1415,6 +1415,192 @@ matching the final hashes in contract_determinism. The five documented seeds
 are collected by examples/trace_canon.rs with the authoritative headless
 cadence; no additional balance value, gameplay rule or time limit changes
 in this trace-identity correction. Previous traces describe the earlier pool.
+
+## 19. Native updates and match continuity (P66, Proposed)
+
+**Proposed — planning only, 2026-10-31.** See
+[P66](phases/P66-native-updates-and-release-safety.md) and
+[release contracts](planning/P66-RELEASE-CONTRACTS.md). This does not authorize
+installation, real signing, publication of executables or deployment.
+
+- **BR-UP01:** Linux managed installs check for updates asynchronously at
+  startup and show localized availability at a safe idle point. Windows
+  follows the same contract after native platform verification. Updates
+  preserve user data and require no uninstall/reinstall after trusted adoption.
+- **BR-UP02:** routine update prompts/application do not interrupt playing,
+  reconnecting or time-sensitive session state. No forced client restart,
+  expensive extraction or default update download during online matches.
+  Incompatible minimum builds restrict new admissions, not current combat.
+- **BR-UP03:** signed verified complete releases activate transactionally.
+  Candidate health and permitted fallback are explicit; no partial/mixed
+  assets. Reopen recovers journal state and retains original-generation
+  resume capability. Existing unsigned installs need a trusted bootstrap.
+- **BR-UP04:** after healthy activation show exact installed-version notes
+  until durable acknowledgement, even after closing/reopening. A rollback
+  reports recovery, not successful installation. EN/pt-BR and offline notes
+  are part of the initial contract.
+- **BR-UP05:** each online match retains its admitted generation/rules/
+  content/features/wire. Compatible client/backend-only patches can release
+  independently; incompatible generations coexist or wait for safe drain.
+  No new match-duration cap, live balance swap or forced migration is added.
+- **BR-UP06:** old workers retire only after matches, durable results and
+  protected reconnect/delivery state settle. Long drain defers promotion;
+  no routine 300/330-second cutoff. Rollback redirects new admission without
+  terminating existing matches on either generation.
+- **BR-UP07:** emergency security containment and arbitrary machine failure
+  have explicit separate policies. Planned deployment continuity does not
+  guarantee crash failover. Capacity for thousands requires measurements,
+  overlap headroom and later multi-host coordination as demand grows.
+- **BR-UP08:** the startup update modal appears at most once per launch per
+  build; Later keeps a non-modal badge. A required update blocks only new
+  online admissions: Practice vs Bot, Settings and installed notes stay
+  usable offline on the installed build.
+- **BR-UP09:** public matchmaking admits one active match contract at a time.
+  A new contract is trialled on the opt-in preview channel, its client is
+  published ahead of a scheduled switch, and behind clients then receive
+  UpdateRequired at queue/room time while already-admitted matches finish on
+  their generation. Percentage canaries apply to same-contract releases only.
+  Rooms, challenges, rematches and spectating never cross contracts.
+- **BR-UP10:** every release ships EN and pt-BR notes as plain text in the
+  D5 charset. A release whose computed ruleset/content identity changed must
+  include a gameplay-changes section.
+
+Proposed initial operational values: metadata file 1 MiB, descriptor 64 KiB,
+notes 512 KiB; archive 2 GiB compressed/8 GiB extracted/100,000 entries;
+initial attempt plus at most 2 automatic retries; download inactivity 30 s
+(Proposed, not a total-transfer deadline); discovery deadline 5 s
+and idle periodic check interval 6 hours; candidate readiness deadline 60 s;
+at least current/previous builds plus pinned builds; automatic highlights
+through 10 releases. Canary steps internal/5%/25%/100% concern new eligible
+admissions of same-contract releases only. New-contract client published at
+least 24 h before its scheduled switch; client rollout halts at 2% failed or
+recovered outcomes over at least 100 reports; notes at most 40 items of 280
+characters per locale. A 5% p99 tick/view regression is an initial stop
+criterion
+on an agreed paired fixture, never an existing measured SLO. Security/result
+loss stops rollout independently. Final limits/OS/channel/signing/emergency/
+retention/player-default decisions O01–O05 remain owner gates before activation.
+
+## 21. Persistent authentication — Proposed, P68-A (owner extension)
+
+Sections 18–20 remain reserved by independent P65–P67 plans, absent from this
+consolidated base. These rules specify the owner's P68 authentication scope;
+no runtime feature is enabled by this documentation. D-97 and
+[P68-A](planning/P68-PERSISTENT-AUTH.md) own engineering details.
+
+| Rule | Contract |
+|---|---|
+| BR-AS01 | Access Tokens are opaque, independently random 256-bit credentials, valid for at most 15 minutes (900 seconds), bounded by family expiry and revocable earlier |
+| BR-AS02 | Refresh Tokens are independent random 256-bit credentials; each device-family expires 30 days (2,592,000 seconds) after initial login. Rotation never extends this absolute lifetime |
+| BR-AS03 | Rotate refresh on successful renewal in one transaction, retain consumed hashes through family expiry, and revoke the affected family on replay outside the defined bounded retry policy |
+| BR-AS04 | Access exists only in client/server memory; persist native refresh only in Linux Secret Service or current-user Windows Credential Manager with Local persistence; web uses an HttpOnly/Secure/SameSite=Strict host cookie, Path=/ and no Domain |
+| BR-AS05 | No new automatic AccountKey/token persistence in ordinary preferences, localStorage/sessionStorage, URLs, logs or caches. Explicit manual key backup remains possible; incomplete legacy conversion preserves the pre-existing recovery key until safe migration completes |
+| BR-AS06 | A match reconnect handle is separate from account authentication. Account resume requires matching valid Access and family/account binding; guest handles never grant an account or seat |
+| BR-AS07 | Natural Access expiry requires renewal for new account operations/matches but does not forfeit an already admitted match: its existing seat-scoped lease may finish that match. Revocation/logout invalidates that lease; reconnect uses the unchanged 30-second window with valid auth |
+| BR-AS08 | Persistent families may exist on several devices, but only one account controller is active. Explicit login/Continue here performs takeover; background refresh, passive restoration and extra tabs cannot steal the controller |
+| BR-AS09 | Revocation invalidates all Access/connection bindings of its scope before a successful acknowledgment; logout-all requires manual AccountKey verification. Security revocation is not delayed by an active match |
+| BR-AS10 | Legacy key removal requires successful refresh persistence and confirmation plus manual-backup acknowledgment. Failures never silently create a new account, erase history or fall back to new plaintext secret storage |
+| BR-AS11 | Vault denial/unavailability yields an explicit session-only mode. Browser uses protected persistent or session cookies according to player choice; blocked cookies permit Access-only temporary login. Session restore may retain a session cookie; logout is the reliable revocation action |
+| BR-AS12 | Auth checks, database operations and vault I/O stay outside deterministic simulation/combat ticks; all normal seat/intention/outcome authority remains on the server |
+
+Proposed auth operational defaults, not balance values or capacity evidence:
+
+| Setting | Value / meaning |
+|---|---|
+| Access renewal lead | 60 seconds before server-advertised expiry; suspension/offline recovery does not extend validity |
+| Rotation/registration retry cache | 30 seconds; same-grant idempotency only, never another successor; rotation conflicts disclose no tokens |
+| Token width | Access, Refresh and registration retry proof: 32 random bytes, 64 hex characters over HTTP |
+| Nonsecret ID width | Family, device and operation IDs: 16 random bytes; no authentication power |
+| Auth JSON request limit | 4 KiB, additionally strict field/shape validation |
+| Auth request deadline | 5 seconds; timeout is not proof that a rotation did not commit |
+| Persistent family cap | 10 nonexpired/nonrevoked families per account; refuse additional persistence explicitly, never silently evict an active match |
+| Refresh family budget | 10 requests/minute per family; plus existing separate IP login/API budgets, with Retry-After |
+| Live Access index cap | 4 × configured maximum connections (8,000 at current default); at most 16 unexpired Access entries per family; prune expired entries, then refuse excess issuance without terminating admitted matches |
+| Secret response-cache cap | At most configured maximum connections (2,000 currently), with one current retry grant per family/operation; reserve capacity before committing issuance |
+| Cleanup batch | At most 256 token/family rows total per maintenance turn; indexed expired-history deletion before empty families, no unbounded cascade on the busy writer |
+
+Use only minimal private device-family IDs, channel, hash history and
+creation/expiry/revocation timestamps; no hardware fingerprint, precise
+location or new persistent IP/UA history. Family limits and rate refusals
+must have localized actionable states. Offline logout is marked pending
+until server revocation is acknowledged; no restored login while pending.
+No combat, Energy, Shop, Rating or balance number changes in this extension.
+
+### P68-A implementation contract activation (D-97)
+
+The Linux-first candidate activates protocol **30**, appending client tags
+20–22 (`AuthenticatedHello`, `Reauthenticate`, `ClaimAccount`) and server
+tags 31–32 (`AuthState`, `AuthRequired`). Tags 0–19 / 0–30 retain their wire
+shapes. Legacy WS account variants remain decodable but are refused; account
+issuance moves to isolated auth HTTP routes. Existing manual AccountKeys
+remain valid. The server schema advances from 8 to additive schema 9.
+
+This replaces transport assumptions in BR-P01–BR-P04 and registration test
+fixtures, preserving name validation, failed-attempt refunds, ranked data,
+explicit takeover and refusal of account changes during an admitted match.
+The revision adds no simulation, balance or outcome change. Browser JSON
+includes the server issuance time so clients can schedule renewal using a
+monotonic duration instead of trusting the device's wall clock.
+
+### Consolidation with P66 (D-99, Proposed)
+
+The consolidated P66+P68 line keeps wire protocol **30** (P66 adds no wire
+type; its admission contract travels over HTTP and the socket URL) and moves
+the server schema to **10**, which holds both the P66 release directory and
+these auth families whichever v9 a database already had. A native client
+restores its P66 resume record (handle, slot endpoint, family binding) only
+through this auth coordinator; BR-AS06 binding is unchanged and a guest
+record never yields an account. Auth requests follow the release slot that
+holds the socket. No combat, Energy, Shop, Rating or balance value changes.
+
+## 20. Commerce, recovery and opponent preferences (P67, Proposed)
+
+**Proposed — planning/documentary base only, 2026-10-31.** See
+[P67](phases/P67-commerce-recovery-foundation.md) and the
+[new module folders](modules/commerce/README.md). No real payment, email,
+invoice, item catalog or authentication change is activated in this branch.
+
+- **BR-CO01:** preserve BR-C01–C03: paid items are cosmetic/account-bound,
+  with validated server evidence. Cash checkout is separate from core Shop/
+  Energy. Existing free cosmetics are not made paid implicitly.
+- **BR-CO02:** verified recovery email is a prerequisite for paid checkout;
+  name/key play and guests remain available. Enrollment/change needs trusted
+  proof. Recovery rotates the key on the same AccountId, preserves purchases
+  and ranking, consumes a temporary challenge and revokes stale sessions.
+  Email receives a temporary link, not the permanent account key.
+- **BR-CO03:** initial payment scope is Asaas Pix and fixed nontransferable
+  cosmetic items. No subscriptions, wallet, gift transfers, paid randomized
+  rewards or competitive advantage. Orders freeze server prices/legal terms;
+  integer BRL minor units are authoritative.
+- **BR-CO04:** normal grant follows verified matching PIX receipt and unique
+  source entitlement application. Client return/screenshot/QR creation is
+  insufficient. Duplicate/late/out-of-order facts and unknown outcomes are
+  reconciled; refunds/holds compensate specific sources without gameplay bans.
+- **BR-CO05:** Zaflas is intended fiscal issuer, pending real legal/company/
+  accounting setup. Invoice authorization, payment and item delivery remain
+  distinct linked records. Fiscal document type/rates and consumer/privacy/
+  younger-player policy require appropriate review before sales.
+- **BR-CO06:** opponent emotes may be locally muted, and optional opponent
+  cosmetics replaced by approved baselines. Preserve actual kind/form,
+  StrongholdKind, timing, team/status/projectile readability and equipment
+  ownership. Paid ownership cannot override the viewer's preference.
+- **BR-CO07:** itch.io package transactions remain a separate platform
+  channel; they do not automatically become Asaas charges or cosmetic grants.
+  Provider/email/fiscal integrations remain off until explicitly authorized.
+
+Proposed initial recovery limits: temporary recovery link 15 minutes,
+verification 24 hours, three dispatches/hour/account/destination with bounded
+IP controls. Initial documentary order schema permits up to 20 distinct
+cosmetic lines, quantity 1 each; fixture SKU/2,000-cent value is illustrative,
+not an approved catalog/price. Opponent mute/hide defaults false pending
+younger-player policy. Schema version 1 is local to documents, not a game
+protocol or DB version. O01–O05 confirm real policies before activation.
+
+Offline execution fixtures additionally propose 128 outstanding challenges,
+64 captured mail messages, 256 sliding-window admission records and 12
+requests/hour per synthetic source IP. These are test resource bounds only,
+not approved live operational limits. The owner deferred fiscal work and
+prioritized recovery and opponent mute; no commercial launch is approved.
 
 ## 22. Native Android landscape prototype — Proposed, P69 (owner request)
 

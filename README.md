@@ -59,7 +59,7 @@ cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
 ```bash
 cargo install --locked trunk                       # once
 (cd crates/tbg-client && trunk build --release)    # build the browser client
-TBG_STATIC_DIR=crates/tbg-client/dist cargo run --release -p tbg-server
+TBG_AUTH_ORIGINS=http://localhost:8080,http://127.0.0.1:8080 TBG_STATIC_DIR=crates/tbg-client/dist cargo run --release -p tbg-server
 ```
 
 Open `http://localhost:8080/` (or `http://<your LAN IP>:8080/` on a phone).
@@ -68,7 +68,7 @@ URL options: `?autoplay=practice|quick` (a bot plays for you), `?lag=300`
 `?shadows=0`, `?room=CODE`. Bot load test:
 `cargo run --release -p tbg-server --bin tbg-bots -- --matches 50`.
 Accounts: guests play everything except ranked; "Create account" in the
-menu gives you a name plus a key (your only credential — save it; the
+menu gives you a name plus a manual recovery key (save it; the
 server stores only its hash). Log in with the key on any device. Load
 tests with `--accounts` need `TBG_REGISTER_PER_IP_HOUR` raised on the test
 server only.
@@ -80,6 +80,29 @@ Field news opens the shared **Patch notes** page in Linux and the browser
 `/api/patch-notes`, with details at `/api/patch-notes/{id}`. Every gameplay
 revision needs [documented patch notes and evidence](docs/patches/README.md);
 CI rejects missing revision notes. Linux also includes an offline snapshot.
+
+## Consolidated Linux prerelease candidate
+
+[Download the Linux candidate](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.1-rc.1)
+(AppImage or tar.gz, x86_64, **glibc 2.39+**, unsigned prerelease).
+
+`0.1.1-rc.1` is built from the consolidation of the open pull requests
+#18-#33: complete roster, five arenas with training, laboratory, victory
+celebration, English/pt-BR, ranked records, competitive audit and patch notes,
+protected sign-in (P68) and the recoverable Linux updater foundation (P66).
+It uses protocol 30 and server schema 10; gameplay numbers are unchanged.
+**The existing protocol-29 production server is incompatible.** Offline
+Practice/training remains available; online play needs a compatible server
+built from the same consolidation, which this release does not deploy.
+
+Access stays in memory; optional Linux refresh persistence and the short
+match-resume record use Secret Service through one coordinator. Browser
+refresh uses a protected host cookie with exact configured origins.
+Vault/cookie failure produces a visible temporary mode. Existing manual keys
+remain valid. Official signing/automatic updates (O02), Windows support and
+two-slot server rollout are not active. See [native instructions](deploy/native/README.txt),
+the [consolidation report](docs/phases/CONSOLIDATION-20261101.md) and the
+[desktop UI contract](docs/ui/DESKTOP-UI-CONTRACT.md).
 
 Deploying to a VPS: [deploy/README.md](deploy/README.md).
 

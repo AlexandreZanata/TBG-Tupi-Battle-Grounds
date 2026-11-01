@@ -1,6 +1,5 @@
 //! Both-accept rematch tickets, requests, decline, and expiry (BR-R09).
 
-use std::sync::atomic::Ordering::Relaxed;
 use std::time::Instant;
 
 use tbg_core::protocol::{MatchMode, ServerMsg, Token};
@@ -78,7 +77,7 @@ impl Lobby {
             self.expire_ticket(ticket);
             return;
         }
-        if self.draining.load(Relaxed) || self.rematches[i].requested != [true, true] {
+        if !self.release.gate.admits() || self.rematches[i].requested != [true, true] {
             return;
         }
         let connected = players.iter().all(|p| {

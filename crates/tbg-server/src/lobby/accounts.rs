@@ -62,14 +62,20 @@ impl Lobby {
             return self.account_error(&token, AccountError::RateLimited);
         }
         let tx = self.self_tx.clone();
+        let owner = self.owner_claim();
         tokio::spawn(async move {
             let secret = tbg_core::account::encode_secret(&random_bytes::<10>());
             let key = tbg_core::account::format_key(&name, &secret);
             let hash = sha256(&secret);
-            let result = store
+            let mut result = store
                 .register(name, hash)
                 .await
                 .map(|(id, profile)| (id, profile, key));
+            if let (Ok((id, ..)), Some(c)) = (&result, &owner) {
+                if let Err(e) = super::ownership::claim(&store, *id, c).await {
+                    result = Err(e);
+                }
+            }
             let _ = tx
                 .send(LobbyCmd::RegisterDone {
                     token,
@@ -98,9 +104,16 @@ impl Lobby {
             return self.account_error(&token, AccountError::Unavailable);
         };
         let tx = self.self_tx.clone();
+        let owner = self.owner_claim();
         tokio::spawn(async move {
             let name_lower = name.to_ascii_lowercase();
-            let result = store.login_fresh(name_lower, sha256(&secret)).await;
+            let mut result = store.login_fresh(name_lower, sha256(&secret)).await;
+            // P66: a live session on another slot keeps the account there.
+            if let (Ok((id, ..)), Some(c)) = (&result, &owner) {
+                if let Err(e) = super::ownership::claim(&store, *id, c).await {
+                    result = Err(e);
+                }
+            }
             let _ = tx
                 .send(LobbyCmd::LoginDone {
                     token,
@@ -119,8 +132,11 @@ impl Lobby {
             deny(&s.conn, AccountError::Unavailable);
             return;
         }
-        s.account = None;
+        let released = s.account.take().map(|(id, _)| id);
         s.name = display_name();
         send(&s.conn, ConnEvent::Send(ServerMsg::LoggedOut));
+        if let Some(id) = released {
+            self.release_owner(id);
+        }
     }
 }

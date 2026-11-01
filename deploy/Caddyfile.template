@@ -1,15 +1,56 @@
 __TBG_DOMAIN__ {
 	encode zstd gzip
-	handle /ws {
+	# P66 (D-92): fixed release-slot routes. Slot a is the single server's
+	# port, so both modes share this file and promotion never reloads it.
+	handle /ws/slot-a {
 		reverse_proxy 127.0.0.1:8080
 	}
-	handle /health {
+	handle /ws/slot-b {
+		reverse_proxy 127.0.0.1:8082
+	}
+	# Operator status is loopback-only; never proxy it.
+	handle /api/release {
+		respond 404
+	}
+	# P66 + D-97: each generation keeps its own Access index, so an auth
+	# request naming its slot (X-TBG-Slot) reaches that slot; unnamed auth
+	# requests keep the shared route below. Named matchers keep file order.
+	@auth_slot_a {
+		path /api/auth/*
+		header X-TBG-Slot a
+	}
+	handle @auth_slot_a {
 		reverse_proxy 127.0.0.1:8080
 	}
-	# P13: read-only ranking API (the server sends its own 10 s cache
-	# headers and per-IP limits).
-	handle /api/* {
-		reverse_proxy 127.0.0.1:8080
+	@auth_slot_b {
+		path /api/auth/*
+		header X-TBG-Slot b
+	}
+	handle @auth_slot_b {
+		reverse_proxy 127.0.0.1:8082
+	}
+	# Legacy `/ws` clients, health and the read-only APIs (P13 ranking with
+	# its own 10 s cache headers and per-IP limits, P66 admission): every
+	# slot reads the same database, so the first live slot answers and a
+	# refused connection retries the other one.
+	@shared path /ws /health /api/*
+	handle @shared {
+		reverse_proxy 127.0.0.1:8080 127.0.0.1:8082 {
+			lb_policy first
+			lb_try_duration 2s
+			fail_duration 10s
+		}
+	}
+	# P66: the signed update repository (TUF). Missing files must be real
+	# 404s (clients probe the next root version); metadata revalidates,
+	# consistent-snapshot targets never change.
+	handle_path /updates/* {
+		root * /srv/tbg/updates
+		@meta path *.json
+		header @meta Cache-Control "no-cache"
+		@target not path *.json
+		header @target Cache-Control "public, max-age=31536000, immutable"
+		file_server
 	}
 	handle {
 		root * /srv/tbg/web

@@ -15,6 +15,7 @@ use tbg_core::{Outcome, Pcg32, Seat};
 
 mod handle;
 use handle::handle;
+pub mod native_auth;
 pub mod spectators;
 
 #[derive(Clone, Debug)]
@@ -27,6 +28,9 @@ pub struct BotOpts {
     pub drop_after: Option<Duration>,
     /// ...and come back with the session token after this long (`None`: never).
     pub rejoin_after: Option<Duration>,
+    /// Surrender (BR-M06) this long after `MatchStart`: a bounded end for tests
+    /// that need one but no particular winner (BR-M07 has no match length).
+    pub surrender_after: Option<Duration>,
     pub timeout: Duration,
     /// P11: register a `Tb…` account first, then play logged in.
     pub accounts: bool,
@@ -42,6 +46,7 @@ impl BotOpts {
             jitter_ms: 0,
             drop_after: None,
             rejoin_after: None,
+            surrender_after: None,
             timeout: Duration::from_secs(360),
             accounts: false,
             ranked: false,
@@ -73,12 +78,14 @@ pub(super) struct Session {
     pub(super) seq: u32,
     pub(super) last_view: Option<Instant>,
     pub(super) drop_at: Option<Instant>,
+    pub(super) surrender_at: Option<Instant>,
     /// P9: send time per unacknowledged intention seq.
     pub(super) pending: Vec<(u32, Instant)>,
     /// P9: when `QuickMatch` was sent for the current match.
     pub(super) queue_start: Option<Instant>,
-    /// P11: a `Register` was sent for this connection (awaiting the key).
-    pub(super) registering: bool,
+    pub(super) auth: Option<native_auth::Grant>,
+    pub(super) auth_received: Instant,
+    pub(super) auth_retry_at: Instant,
 }
 
 pub(super) enum Step {
@@ -96,10 +103,36 @@ pub async fn play_one(opts: BotOpts, seed: u64) -> BotResult {
         seq: 0,
         last_view: None,
         drop_at: None,
+        surrender_at: None,
         pending: Vec::new(),
         queue_start: None,
-        registering: false,
+        auth: None,
+        auth_received: Instant::now(),
+        auth_retry_at: Instant::now(),
     };
+    if opts.accounts || opts.ranked {
+        let mut registered = false;
+        for _ in 0..10 {
+            let name = handle::bot_name(&mut s);
+            match native_auth::register(&opts.url, &name).await {
+                Ok(grant) => {
+                    s.auth = Some(grant);
+                    s.auth_received = Instant::now();
+                    registered = true;
+                    break;
+                }
+                Err("name_taken") => continue,
+                Err(error) => {
+                    r.error = Some(error.into());
+                    return r;
+                }
+            }
+        }
+        if !registered {
+            r.error = Some("registration attempts exhausted".into());
+            return r;
+        }
+    }
     loop {
         match connect_and_play(&opts, &mut s, &mut r, deadline).await {
             Ok(Step::Done) => return r,
@@ -138,14 +171,22 @@ async fn connect_and_play(
     .map_err(|_| "connect timeout".to_string())?
     .map_err(|e| format!("connect: {e}"))?;
     let (mut write, mut read) = ws.split();
-    let (in_tx, mut in_rx) = mpsc::unbounded_channel::<(Instant, Vec<u8>)>();
+    let (in_tx, mut in_rx) = mpsc::unbounded_channel::<(Instant, Result<Vec<u8>, String>)>();
     let (out_tx, mut out_rx) = mpsc::unbounded_channel::<(Instant, Vec<u8>)>();
     let reader = tokio::spawn(async move {
-        while let Some(Ok(msg)) = read.next().await {
-            if let Message::Binary(b) = msg {
-                if in_tx.send((Instant::now(), b.to_vec())).is_err() {
-                    break;
-                }
+        while let Some(frame) = read.next().await {
+            let received = match frame {
+                Ok(Message::Binary(bytes)) => Ok(bytes.to_vec()),
+                Ok(Message::Close(frame)) => Err(format!(
+                    "peer closed websocket (code {})",
+                    frame.map_or(1005, |f| u16::from(f.code))
+                )),
+                Err(error) => Err(read_failure(&error)),
+                _ => continue,
+            };
+            let closed = received.is_err();
+            if in_tx.send((Instant::now(), received)).is_err() || closed {
+                break;
             }
         }
     });
@@ -162,20 +203,38 @@ async fn connect_and_play(
         let at = Instant::now() + jitter(opts, &mut s.rng);
         let _ = out_tx.send((at, protocol::encode(&msg)));
     };
-    send(
-        s,
+    let hello = if let Some(auth) = &s.auth {
+        ClientMsg::AuthenticatedHello {
+            version: PROTOCOL_VERSION,
+            resume: s.token,
+            access: auth.access,
+        }
+    } else {
         ClientMsg::Hello {
             version: PROTOCOL_VERSION,
             resume: s.token,
-        },
-    );
+        }
+    };
+    send(s, hello);
     let result = loop {
         let drop_at = s.drop_at.unwrap_or(deadline + Duration::from_secs(3600));
         tokio::select! {
             got = in_rx.recv() => {
                 let Some((arrived, bytes)) = got else { break Err("connection closed".to_string()) };
                 sleep_until(arrived + jitter(opts, &mut s.rng)).await;
+                let bytes = match bytes { Ok(bytes) => bytes, Err(error) => break Err(error) };
                 let msg = protocol::decode_server(&bytes).map_err(|_| "bad server message".to_string())?;
+                let refused=matches!(msg,protocol::ServerMsg::AuthRequired{..});
+                let due=s.auth.as_ref().is_some_and(|a|s.auth_received.elapsed().as_secs()>=a.expires_at.saturating_sub(a.server_time+60).max(0) as u64);
+                if s.auth.is_some() && (refused || due) && Instant::now()>=s.auth_retry_at {
+                    let auth=s.auth.as_ref().ok_or("missing auth session")?;
+                    match native_auth::refresh(&opts.url,auth).await {
+                        Ok(grant)=> {let access=grant.access;s.auth=Some(grant);s.auth_received=Instant::now();send(s,ClientMsg::Reauthenticate{access});}
+                        Err(error) if r.seat.is_none()=>break Err(error.into()),
+                        Err(_)=> {s.auth_retry_at=Instant::now()+Duration::from_secs(60);}
+                    }
+                    if refused {continue;}
+                } else if refused && r.seat.is_some() {continue;}
                 if let Some(step) = handle(msg, opts, s, r, &mut send)? {
                     break Ok(step);
                 }
@@ -192,4 +251,40 @@ async fn connect_and_play(
     drop(out_tx);
     let _ = timeout(Duration::from_secs(2), writer).await;
     result
+}
+
+/// Keep the actual transport failure without formatting messages or peer-controlled close reasons.
+fn read_failure(error: &tokio_tungstenite::tungstenite::Error) -> String {
+    use tokio_tungstenite::tungstenite::Error;
+    let detail = match error {
+        Error::Io(e) => format!("IO {:?}", e.kind()),
+        Error::Protocol(e) => format!("protocol {e}"),
+        Error::Capacity(e) => format!("capacity {e}"),
+        Error::Tls(_) => "TLS".into(),
+        Error::WriteBufferFull(_) => "write buffer full".into(),
+        Error::ConnectionClosed => "normal close before result".into(),
+        _ => "invalid transport state".into(),
+    };
+    format!("websocket read failed: {detail}")
+}
+
+#[cfg(test)]
+mod diagnostics_tests {
+    use super::*;
+    use tokio_tungstenite::tungstenite::{error::ProtocolError, Error};
+    #[test]
+    fn transport_diagnostics_preserve_cause_without_frame_secrets() {
+        let frame = Error::WriteBufferFull(Box::new(Message::Binary(
+            b"synthetic-private-frame".to_vec().into(),
+        )));
+        assert!(!read_failure(&frame).contains("synthetic-private-frame"));
+        assert!(read_failure(&Error::Protocol(
+            ProtocolError::ResetWithoutClosingHandshake
+        ))
+        .contains("reset"));
+        assert!(read_failure(&Error::Io(std::io::Error::from(
+            std::io::ErrorKind::ConnectionReset
+        )))
+        .contains("ConnectionReset"));
+    }
 }

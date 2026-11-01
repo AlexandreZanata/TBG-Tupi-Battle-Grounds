@@ -7,6 +7,9 @@
 //! free name was refused after a couple of taken ones. Only accounts that
 //! were actually created may count.
 
+#[path = "common/auth.rs"]
+mod auth;
+
 use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
@@ -60,7 +63,9 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
         };
         match protocol::decode_server(&b).unwrap() {
             ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
-            ServerMsg::NetStats { .. } | ServerMsg::ArcanasSelected { .. } => {}
+            ServerMsg::NetStats { .. }
+            | ServerMsg::ArcanasSelected { .. }
+            | ServerMsg::AuthState { .. } => {}
             other => return Some(other),
         }
     }
@@ -82,12 +87,10 @@ async fn connect(url: &str) -> Ws {
 
 /// `Ok(account name)` or `Err(code)`.
 async fn register(ws: &mut Ws, name: &str) -> Result<String, AccountError> {
-    send(ws, &ClientMsg::Register { name: name.into() }).await;
-    match recv(ws).await {
-        Some(ServerMsg::Registered { profile, .. }) => Ok(profile.name),
-        Some(ServerMsg::AccountError { code }) => Err(code),
-        other => panic!("unexpected reply {other:?}"),
-    }
+    // D-97: preserve the name/refund contract through the isolated HTTP route.
+    auth::register(ws, name)
+        .await
+        .map(|grant| grant.profile.name)
 }
 
 #[tokio::test]

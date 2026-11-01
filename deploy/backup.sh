@@ -25,10 +25,12 @@ if [ "${1:-}" = "--predeploy" ]; then
 		exit 1
 	fi
 	# P60: journaled ranked results not yet settled travel with the copy.
-	pending="$(dirname "$DB")/ranked-pending"
-	if [ -d "$pending" ]; then
-		cp -a "$pending" "${out%.sqlite3}-ranked-pending"
-	fi
+	# P66: one journal per release slot (ranked-pending, ranked-pending-b).
+	for pending in "$(dirname "$DB")"/ranked-pending*; do
+		if [ -d "$pending" ]; then
+			cp -a "$pending" "${out%.sqlite3}-$(basename "$pending")"
+		fi
+	done
 	echo "pre-deploy backup ok: $out"
 	exit 0
 fi

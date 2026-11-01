@@ -2,7 +2,7 @@
 
 use tokio::time::Instant;
 
-use tbg_core::protocol::{AccountError, ClientMsg, ServerMsg};
+use tbg_core::protocol::{ClientMsg, ServerMsg};
 
 use super::{BotOpts, BotResult, Session, Step};
 
@@ -23,6 +23,16 @@ fn resolve_ack(s: &mut Session, r: &mut BotResult, last_seq: u32, now: Instant) 
     }
 }
 
+/// P11: `Tb` + 10 random alphanumerics (12 chars, starts with a letter).
+pub(super) fn bot_name(s: &mut Session) -> String {
+    const ALPHA: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let mut name = String::from("Tb");
+    for _ in 0..10 {
+        name.push(ALPHA[s.rng.below(62) as usize] as char);
+    }
+    name
+}
+
 pub(super) fn handle(
     msg: ServerMsg,
     opts: &BotOpts,
@@ -30,42 +40,40 @@ pub(super) fn handle(
     r: &mut BotResult,
     send: &mut impl FnMut(&mut Session, ClientMsg),
 ) -> Result<Option<Step>, String> {
-    /// P11: `Tb` + 10 random alphanumerics (12 chars, starts with a letter).
-    fn bot_name(s: &mut Session) -> String {
-        const ALPHA: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        let mut name = String::from("Tb");
-        for _ in 0..10 {
-            name.push(ALPHA[s.rng.below(62) as usize] as char);
-        }
-        name
-    }
-
     match msg {
         ServerMsg::Welcome { token, .. } => {
-            if s.token.replace(token).is_none() {
-                if (opts.accounts || opts.ranked) && !s.registering {
-                    s.registering = true;
-                    let name = bot_name(s);
-                    send(s, ClientMsg::Register { name });
-                } else {
-                    s.queue_start = Some(Instant::now());
-                    send(s, ClientMsg::QuickMatch);
-                }
-            }
-        }
-        // P11: registered (and auto-logged-in); queue for real this time.
-        // P12: ranked bots join the ranked queue right away.
-        ServerMsg::Registered { .. } => {
-            s.queue_start = Some(Instant::now());
-            if opts.ranked {
-                send(s, ClientMsg::RankedMatch);
-            } else {
+            if s.token.replace(token).is_none() && s.auth.is_none() {
+                s.queue_start = Some(Instant::now());
                 send(s, ClientMsg::QuickMatch);
             }
+        }
+        ServerMsg::AuthState {
+            status: tbg_core::protocol::AuthStatus::Active,
+            ..
+        } => {
+            if r.seat.is_none() && s.queue_start.is_none() {
+                s.queue_start = Some(Instant::now());
+                send(
+                    s,
+                    if opts.ranked {
+                        ClientMsg::RankedMatch
+                    } else {
+                        ClientMsg::QuickMatch
+                    },
+                );
+            }
+        }
+        ServerMsg::AuthState { .. } => {
+            return Err("account controller unavailable; takeover requires explicit action".into())
+        }
+        ServerMsg::AuthRequired { .. } => return Err("account authentication required".into()),
+        ServerMsg::Registered { .. } => {
+            return Err("legacy authentication response is incompatible".into())
         }
         ServerMsg::MatchStart { you, .. } => {
             if r.seat.is_none() {
                 s.drop_at = opts.drop_after.map(|d| Instant::now() + d);
+                s.surrender_at = opts.surrender_after.map(|d| Instant::now() + d);
             }
             r.seat = Some(you);
             if let Some(t0) = s.queue_start.take() {
@@ -80,6 +88,11 @@ pub(super) fn handle(
                     .push(now.duration_since(prev).as_millis() as u32);
             }
             resolve_ack(s, r, v.last_seq, now);
+            if s.surrender_at.is_some_and(|at| now >= at) {
+                s.surrender_at = None;
+                send(s, ClientMsg::Surrender);
+                return Ok(None);
+            }
             if let Some(intent) = s.bot.decide(&v) {
                 s.seq += 1;
                 let seq = s.seq;
@@ -103,14 +116,6 @@ pub(super) fn handle(
         }
         ServerMsg::Error { code } => return Err(format!("server error {code:?}")),
         ServerMsg::Queued | ServerMsg::RoomCreated { .. } | ServerMsg::RoomNotFound => {}
-        // Bot names are seeded, so a rerun against the same database meets
-        // its old names: try the next one instead of waiting forever.
-        ServerMsg::AccountError {
-            code: AccountError::NameTaken,
-        } => {
-            let name = bot_name(s);
-            send(s, ClientMsg::Register { name });
-        }
         ServerMsg::AccountError { code } => return Err(format!("account error {code:?}")),
         // Bots ignore other account/rating replies; completion ends the run.
         ServerMsg::LoggedIn { .. }

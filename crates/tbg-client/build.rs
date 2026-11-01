@@ -18,8 +18,56 @@ fn escape(value: &str) -> String {
     out
 }
 
+/// P66 §6.5: the match contract's gameplay source hash, computed here
+/// exactly like `tbg_core::ruleset_version::ruleset_source_hash` (FNV-1a 64
+/// over `path, 0x00, source, 0xFF` in `WATCHED` order) so the client does
+/// not link 400 KB of rule sources. A unit test pins the two together.
+fn contract_source_hash() {
+    let core =
+        std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("../tbg-core/src");
+    let list = core.join("ruleset_version.rs");
+    println!("cargo:rerun-if-changed={}", list.display());
+    let text = std::fs::read_to_string(&list).expect("tbg-core ruleset_version.rs");
+    let mut h: u64 = 0xcbf2_9ce4_8422_2325;
+    let mut feed = |bytes: &[u8]| {
+        for b in bytes {
+            h = (h ^ u64::from(*b)).wrapping_mul(0x0100_0000_01b3);
+        }
+    };
+    for line in text.lines() {
+        let Some(rest) = line.trim().strip_prefix("(\"") else {
+            continue;
+        };
+        let Some((path, _)) = rest.split_once("\", include_str!(") else {
+            continue;
+        };
+        let file = core.join(path);
+        println!("cargo:rerun-if-changed={}", file.display());
+        let source = std::fs::read(&file).unwrap_or_else(|e| panic!("contract source {path}: {e}"));
+        feed(path.as_bytes());
+        feed(&[0x00]);
+        feed(&source);
+        feed(&[0xFF]);
+    }
+    println!("cargo:rustc-env=TBG_CONTRACT_SOURCE_HASH={h:016x}");
+}
+
 fn main() {
-    native_art_manifest();
+    contract_source_hash();
+    println!(
+        "cargo:rustc-env=TBG_BUILD_TARGET={}",
+        std::env::var("TARGET").unwrap_or_default()
+    );
+    // Presentation depends on the compilation target, never on the build host.
+    println!("cargo:rustc-check-cfg=cfg(tbg_desktop)");
+    let desktop = matches!(
+        std::env::var("CARGO_CFG_TARGET_OS").as_deref(),
+        Ok("linux" | "windows")
+    );
+    if desktop {
+        println!("cargo:rustc-cfg=tbg_desktop");
+    }
+    native_art_manifest(desktop);
     println!("cargo:rerun-if-env-changed=TBG_DEFAULT_SERVER");
     println!("cargo:rerun-if-env-changed=TBG_SOURCE_COMMIT");
     let dir =
@@ -124,11 +172,8 @@ fn main() {
     std::fs::write(out, code).unwrap();
 }
 
-fn native_art_manifest() {
-    if !std::env::var("TARGET")
-        .unwrap_or_default()
-        .contains("linux")
-    {
+fn native_art_manifest(desktop: bool) {
+    if !desktop {
         return;
     }
     let root = std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("assets");
