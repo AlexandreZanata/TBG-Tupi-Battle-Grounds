@@ -190,3 +190,103 @@ package directory with `--test-threads=1`):
 | Python: desktop UI source gate and comparator tests, CI required-check tests (9), lane-split tests (13), patch-note tests and gate | passed |
 | Toy workspace with the exact split `cargo test` flags | lanes rc=0; negative case rc=101 as required |
 | `cargo fmt --check` (client, server), `git diff --check` | clean |
+| Clippy `-D warnings` on tbg-core, tbg-server, tbg-client, tbg-update | first run failed (`result_large_err` from the combined store command), passed after boxing it; affected auth/store/slot tests rerun and passed |
+| WASM check (client + core) and release Trunk build | passed |
+
+## 7. Linux prerelease `v0.1.1-rc.1`
+
+[Release](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.1-rc.1)
+(prerelease, not "latest"; no existing tag or asset was replaced; the
+`v*-native.*` publisher was not triggered). Frozen source commit
+`0a6753807f378bdf4e496466076a1a7eb5310189` (annotated tag `v0.1.1-rc.1`);
+later commits are documentation only and do not relabel the artifacts.
+
+Build: `cargo build --release -p tbg-client --bin tbg-client --features
+ui-acceptance` (rustc 1.99.0, `TBG_SOURCE_COMMIT` and the production default
+server embedded), packaged from a clean worktree at the frozen commit with
+`scripts/package-native.py` and `scripts/package-appimage.sh` (cached official
+linuxdeploy, SHA-256 `8aea8da0…cdd1` checked).
+
+| Artifact | SHA-256 |
+|---|---|
+| `tupi-battle-grounds-0.1.1-rc.1-linux-x86_64.tar.gz` (37,659,996 B) | `1e558556f2c8bb2b33de896ed5c66bceb816fd90a48ae27214c37355e8c0e546` |
+| `tupi-battle-grounds-0.1.1-rc.1-linux-x86_64.AppImage` (31,787,512 B) | `5ed1399bf9375011fde01e309f17622dafc16204e489ad56825eb6d33a0ccc79` |
+| executable before RPATH patch / inside AppImage | `2ee64073…7344` / `2e5216d0…e324` |
+| assets / Cargo.lock | `dd577bcd…05da` / `d5bb1e0e…a369` |
+
+Identity: `0.1.1-rc.1 · protocol 30`, contract `w30-r2-3d56156049e626c5`,
+release profile, x86_64-unknown-linux-gnu, glibc 2.39 minimum. All 352 portable
+and 358 AppImage manifest entries were re-hashed; tar paths are safe.
+Download-back (`gh release download` into a fresh directory, then
+`sha256sum -c SHA256SUMS`): all 12 listed files OK, archives byte-identical.
+
+Executed outside the checkout with isolated HOME/data, Xvfb 1440x900, against
+an owned loopback server built from the same commit:
+
+- 15 GUI runs from the AppImage — lobby pt-BR and en; Troops, Arenas, Arcanas,
+  Stronghold, Settings, Patch notes and Live panels; training started from
+  each of the five arenas (Forest, Tundra, Volcanic, Ruins, Storm); offline
+  Practice with no backend. Every run: exit 0, `boot_ready=true`, no pending or
+  failed images, no panic. Captures inspected: shared header with the Tupi
+  wordmark and emblem, catalogs, battle HUD, Shop portraits, Energy/Interest/
+  reroll, arena names.
+- Missing assets: the executable alone exits 2 with the documented message.
+- Installer with isolated HOME/XDG: per-user install, launchers and menu
+  entry; reinstall idempotent; a modified executable is refused. The owner's
+  installation was not touched.
+- `scripts/check-native-auth.py` on the AppImage's executable with the real
+  Secret Service: secure persistence, same-family restore, legacy migration,
+  process coordination, token-free metadata, offline pending logout, remote
+  revocation and vault cleanup all true. With the Secret Service made
+  unavailable to that process: no persistence or migration, legacy key kept
+  in visible temporary mode, logout pending and revocation on recovery, no
+  plaintext fallback.
+- Crash and resume (P66 U11 slice, guest): two packaged clients autoplayed a
+  Quick match; client A was SIGKILLed mid-match and restarted without
+  autoplay on the same data directory; 18 s later its capture showed it back in
+  the same running match. The synthetic resume vault entry was then removed by
+  its exact name. Account resume across a restart is covered by unit tests
+  only; the server's drain correctly kept running while the match was live.
+- Browser (Chrome 156, sandbox) on the release Trunk bundle served by the same
+  server: lobby and Practice through the visible control with no page errors;
+  protected HttpOnly/Secure/SameSite=Strict cookie, same-family restore, no
+  credentials in localStorage; the slot header is sent only when a slot is
+  named. A server started as slot `a` refuses an auth request naming slot `b`
+  (503) and treats its own slot like an unnamed request. Loopback HTTP uses the
+  secure-context exception; public HTTPS was not tested.
+
+## 8. Windows executable (unofficial, Linux-only checks)
+
+The owner asked for a Windows executable tested as far as Linux allows. P68's
+plan builds official Windows artifacts with MSVC on Windows; this is a
+**different, unofficial** path: `x86_64-pc-windows-gnu` cross-compiled from the
+frozen commit in a local container (Ubuntu 24.04 mingw-w64, Wine 9.0, Mesa
+lavapipe), packaged by `package-native.py --runner` with Wine identity checks.
+
+- `tupi-battle-grounds-0.1.1-rc.1-windows-x86_64-unofficial.zip`
+  `c8136cf37d4c0a3eb43817b492aad5edc77d1b7c12c332c2e9799967d7e2e9d5` (attached to
+  the prerelease, clearly labelled); executable imports only Windows system
+  DLLs; same assets and Cargo.lock digests as Linux.
+- Under Wine: `--version`, `--build-info`, `--contract` correct; missing
+  assets exit 2. The default DX12 path failed in the container (Wine has no FXC
+  shader compiler) and Xvfb modes made winit assert; with
+  `WGPU_BACKEND=vulkan` inside a Wine virtual desktop the lobby rendered and a
+  Practice match ran (captures inspected).
+- Not established: real Windows GPU/DPI/fonts/audio/input, Credential Manager,
+  installer, signing, W07/W08 pixel equivalence. Wine is not Windows.
+
+## 9. Deferred checks and open gates
+
+Deferred (not run): full workspace suite and workspace Clippy over
+`tbg-balance` (not requested; covered by CI), D-33 balance gate and benchmarks,
+the GitHub run of the new CI (owner watches), public HTTPS cookie acceptance,
+two-generation continuity (P66 public probe failure unexplained; not repeated),
+Caddy template validation (no Caddy binary locally), browser/HTML Settings
+gallery, Windows on real hardware, account-level native resume across a
+restart, P70 portrait recapture (P70 not merged).
+
+Gates that keep PR #34 a Draft: competitive acceptance (audit failures
+open), P66 O02–O05 and continuity, cross-slot revocation before any two-slot
+rollout with P68 auth, P68 Windows/visual/public-HTTPS gates, P67 activation
+gates, owner look/fun sign-off. This candidate is incompatible with the
+deployed protocol-29 server; nothing was deployed and no installation changed.

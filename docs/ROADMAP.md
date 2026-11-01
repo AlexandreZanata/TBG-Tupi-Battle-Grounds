@@ -469,3 +469,22 @@ checks passed; the targeted Rust batch did not start because the shared
 nonblocking validation lock returned 75. No full suite ran. See the
 [execution report](modules/commerce/OFFLINE-EXECUTION.md) for C01–C20 scope,
 queued commands, security/integration limits and later owner gates.
+
+## Consolidated main candidate (owner request, 2026-11-01)
+
+[Draft PR #34](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/34)
+on `codex/consolidate-linux-main` contains every open front (#18, #20–#33)
+through normal merges and supersedes those PRs; closing them is the owner's
+review step. It resolves the parallel P66/P68 schema and credential work as
+one auth/resume coordinator, schema 10 and protocol 30 (D-99), adds targeted
+tests for both v9 upgrades and replaces the CI with parallel fail-closed lanes
+behind the unchanged `check`. Linux candidate:
+[v0.1.1-rc.1](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.1-rc.1).
+See the [consolidation report](phases/CONSOLIDATION-20261101.md) and the
+[CI diagnosis](phases/CI-OPTIMIZATION-20261101.md).
+
+Status: **Draft**. Open gates stay owned by their phases: competitive
+acceptance (audit failures), P66 continuity investigation and O02–O05, P68
+Windows/visual/public-HTTPS acceptance, P67 activation gates, cross-slot
+revocation before any two-slot rollout with P68 auth, and owner look/fun
+sign-off. Nothing was deployed; production stays on protocol 29.
