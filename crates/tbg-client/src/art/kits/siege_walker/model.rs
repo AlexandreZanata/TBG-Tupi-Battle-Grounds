@@ -91,7 +91,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let p = plan(tier);
     let mut v = Vec::with_capacity(120);
     legs(&mut v, &p, f);
-    hips(&mut v, f);
+    hips(&mut v);
     chest(&mut v, &p, f);
     head(&mut v, f);
     arms(&mut v, &p, f);
@@ -140,8 +140,7 @@ fn legs(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     }
 }
 
-fn hips(v: &mut Vec<PartSpec>, f: Form) {
-    let cloth = if f.b { RUST } else { BRASS };
+fn hips(v: &mut Vec<PartSpec>) {
     v.extend([
         part(Body(Hips), Box(0.42, 0.17, 0.29), TROUSERS, [0.0, 0.0, 0.0]),
         part(
@@ -162,19 +161,6 @@ fn hips(v: &mut Vec<PartSpec>, f: Form) {
             Box(0.08, 0.1, 0.07),
             LEATHER,
             [-0.19, 0.02, 0.12],
-        ),
-        // Brass loincloth on the tabard spring, iron-weighted hem.
-        part(
-            Secondary(Spring::Tabard),
-            Box(0.2, 0.27, 0.02),
-            cloth,
-            [0.0, -0.08, 0.0],
-        ),
-        part(
-            Secondary(Spring::Tabard),
-            Box(0.2, 0.035, 0.026),
-            IRON,
-            [0.0, -0.2, 0.0],
         ),
     ]);
 }
@@ -336,7 +322,7 @@ fn head(v: &mut Vec<PartSpec>, f: Form) {
         );
     }
     match (f.a, f.b, f.t2) {
-        // Artillery: a plumed great helm in gunmetal and gold.
+        // Artillery: a great helm in gunmetal and gold.
         (true, _, true) => {
             v.push(
                 part(Body(Head), Ball(0.142), GUNMETAL, [0.0, 0.05, -0.01])
@@ -347,13 +333,6 @@ fn head(v: &mut Vec<PartSpec>, f: Form) {
                 Box(0.3, 0.035, 0.29),
                 GOLD,
                 [0.0, 0.035, -0.01],
-            ));
-
-            v.push(part(
-                Secondary(Spring::HeadGear),
-                Box(0.045, 0.04, 0.27),
-                GOLD,
-                [0.0, 0.1, -0.03],
             ));
         }
         // Concussion: an iron face guard with glowing slits.

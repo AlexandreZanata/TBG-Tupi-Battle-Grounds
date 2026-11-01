@@ -343,7 +343,8 @@
       "source": "crates/tbg-client/src/art/kits/siege_walker/model.rs",
       "previous_ally_color_references": 4,
       "remaining_ally_color_references": 0,
-      "removed_lines": 13
+      "removed_lines": 13,
+      "additional_review": "Removed complete generic hip tabard and its metal hem, plus the leftover affiliation crest trim; no repaint substitute."
     },
     {
       "source": "crates/tbg-client/src/art/kits/smuggler/model.rs",

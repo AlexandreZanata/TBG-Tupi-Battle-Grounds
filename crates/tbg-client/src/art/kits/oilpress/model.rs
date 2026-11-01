@@ -138,7 +138,7 @@ fn boiler(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         );
     }
     if f.a && f.t2 {
-        // Immovable Mass: a bulwark on the hips with the team's stripe.
+        // Immovable Mass: an iron bulwark on the hips.
         v.extend([part(
             Body(Hips),
             Box(t.x * 1.05, 0.22, 0.06),

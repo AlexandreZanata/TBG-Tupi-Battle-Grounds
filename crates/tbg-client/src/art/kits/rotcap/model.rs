@@ -47,7 +47,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     body::humanoid(&mut v, &p, &look);
     let t = p.torso;
     v.extend([
-        // The mushroom ring as a collar, and the team's sash.
+        // The mushroom ring forms a natural collar.
         part(
             Body(Chest),
             Frustum(t.x * 0.62, t.x * 0.45, 0.08),
