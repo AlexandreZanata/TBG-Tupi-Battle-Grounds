@@ -1,5 +1,5 @@
 //! Contract: `assets/arenas/arenas.json` (the lobby Arenas page and the
-//! in-match banner) names the five arenas in id order and states exactly
+//! in-match banner) names all eight arenas in id order and states exactly
 //! the modifiers of `tbg-core` (GAME-DESIGN §12, D-55).
 
 use super::json_lite::parse;

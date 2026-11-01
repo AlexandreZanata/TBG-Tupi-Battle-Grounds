@@ -16,7 +16,9 @@ use crate::art::{
 };
 
 pub fn plan(tier: u8) -> Proportions {
-    body::plan(false, 1.0, tier)
+    let mut p = body::plan(false, 1.0, tier);
+    p.arm = 0.21;
+    p
 }
 
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
@@ -46,6 +48,20 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     head(&mut v, &p, f);
     drum(&mut v, f);
     sticks(&mut v);
+    for fore in [ForearmL, ForearmR] {
+        v.push(part(
+            Body(fore),
+            Cyl(0.058, 0.055),
+            LINEN,
+            [0.0, -p.arm * 0.70, 0.0],
+        ));
+        v.push(part(
+            Body(fore),
+            Ring(0.008, 0.060, 360.0),
+            BRASS,
+            [0.0, -p.arm * 0.58, 0.0],
+        ));
+    }
     if f.b {
         body::pauldrons(&mut v, STEEL, 0.08);
         v.push(part(
@@ -58,7 +74,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     if f.a && f.t2 {
         let b = Secondary(Spring::Back);
         v.push(part(b, Cyl(0.015, 0.9), WOOD, [0.12, 0.25, -0.06]));
-        v.push(part(b, Box(0.02, 0.22, 0.3), ALLY, [0.12, 0.55, -0.22]));
+        v.push(part(b, Box(0.02, 0.22, 0.3), LINEN, [0.12, 0.55, -0.22]));
         v.push(part(b, Ball(0.03), GOLD, [0.12, 0.72, -0.06]));
     }
     FigureSpec { plan: p, parts: v }
@@ -69,7 +85,7 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     if f.b {
         body::helmet(v, p, Helm::Cap(STEEL));
         if f.t2 {
-            body::helmet(v, p, Helm::Plumed(STEEL, ALLY));
+            body::helmet(v, p, Helm::Plumed(STEEL, LINEN));
         }
         return;
     }
@@ -79,7 +95,7 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         part(
             Body(Head),
             Cyl(h * 0.85, tall),
-            ALLY,
+            LINEN,
             [0.0, h * 0.55 + tall * 0.5, -h * 0.05],
         ),
         part(
@@ -107,16 +123,20 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 
 /// The drum hangs on a sling at the left hip (on the hips, so it bobs with
 /// the march).
-fn drum(v: &mut Vec<PartSpec>, f: Form) {
-    let (r, depth) = if f.a && f.t2 {
+pub fn drum_size(f: Form) -> (f32, f32) {
+    if f.a && f.t2 {
         (0.2, 0.18)
     } else if f.a {
         (0.16, 0.15)
     } else {
         (0.14, 0.13)
-    };
+    }
+}
+
+fn drum(v: &mut Vec<PartSpec>, f: Form) {
+    let (r, depth) = drum_size(f);
     let at = [0.08, 0.02, 0.2];
-    let shell = if f.a && f.t2 { GOLD } else { ALLY };
+    let shell = if f.a && f.t2 { GOLD } else { LINEN };
     let rim = if f.b { IRON } else { BRASS };
     v.extend([
         part(Body(Hips), Cyl(r, depth), shell, at),
@@ -128,13 +148,13 @@ fn drum(v: &mut Vec<PartSpec>, f: Form) {
         ),
         part(
             Body(Hips),
-            Cyl(r * 1.05, 0.025),
+            Ring(0.012, r * 1.01, 360.0),
             rim,
             [at[0], at[1] + depth * 0.5, at[2]],
         ),
         part(
             Body(Hips),
-            Cyl(r * 1.05, 0.025),
+            Ring(0.012, r * 1.01, 360.0),
             rim,
             [at[0], at[1] - depth * 0.5, at[2]],
         ),

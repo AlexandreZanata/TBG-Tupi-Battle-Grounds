@@ -1,0 +1,22 @@
+[Unit]
+Description=Verify and deploy CI-approved TBG main candidates
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/tbg/auto-deploy.enabled
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/var/lib/tbg-deploy
+ExecStart=/usr/bin/python3 /opt/tbg/deploy/pull.py --apply
+TimeoutStartSec=infinity
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/tbg/bin /opt/tbg/releases /var/backups/tbg /var/lib/tbg-deploy /var/lib/tbg
+# gh uses public Sigstore metadata; no owner's home or auth token is needed.
+Environment=GH_CONFIG_DIR=/var/lib/tbg-deploy/gh
+Environment=XDG_CACHE_HOME=/var/lib/tbg-deploy/cache
+Environment=XDG_DATA_HOME=/var/lib/tbg-deploy/data

@@ -1,5 +1,5 @@
 //! Arena modifiers (ARENAS-G, D-55): the Forest is neutral, every other
-//! arena changes exactly one thing, the same for both seats, applied once
+//! arena applies small symmetric modifiers, applied once
 //! on the shared stats/Energy/Evolution paths.
 
 use tbg_core::content::{AugmentBonus, ARENA_RULES, ENERGY_SCALE, EVOLVE_COST};
@@ -35,7 +35,7 @@ fn every_arena_has_an_identity_and_the_forest_is_neutral() {
         assert_eq!(Arena::from_index(i), Some(arena));
         assert_eq!(Arena::from_slug(arena.slug()), Some(arena));
     }
-    assert_eq!(Arena::from_index(5), None);
+    assert_eq!(Arena::from_index(Arena::ALL.len()), None);
     assert_eq!(Arena::default(), Arena::Forest);
     assert_eq!(ARENA_RULES[0], tbg_core::content::ArenaRule::NONE);
 }
@@ -245,5 +245,64 @@ fn an_arena_is_deterministic_and_fixed_for_the_match() {
     };
     for arena in Arena::ALL {
         assert_eq!(play(arena), play(arena), "{arena:?}");
+    }
+}
+
+#[test]
+fn celestial_and_clockwork_apply_their_stats_symmetrically() {
+    // BR-AR03/06: use the same one-truncation path for every troop, including summons.
+    let rules = tbg_core::Ruleset::canon();
+    for (arena, move_bp, atk_bp) in [(Arena::Celestial, 800, 0), (Arena::Clockwork, -500, 800)] {
+        let mut state = running(arena);
+        for seat in Seat::BOTH {
+            for kind in [UnitKind::Shieldbearer, UnitKind::Archer, UnitKind::Beetling] {
+                let seq = state.players[seat.index()].last_seq + 1;
+                let id = buy(&mut state, seat, kind, seq);
+                let expected = rules.stats_with(
+                    kind,
+                    0,
+                    0,
+                    0,
+                    &ArcanaPreset::NEUTRAL,
+                    &AugmentBonus {
+                        move_bp,
+                        atk_bp,
+                        ..AugmentBonus::default()
+                    },
+                );
+                assert_eq!(
+                    state.stats_of(&unit(&state, id)),
+                    expected,
+                    "{arena:?} {seat:?} {kind:?}"
+                );
+            }
+        }
+        assert_eq!(state.evolve_price(Seat::A, 0), EVOLVE_COST[0]);
+        assert_eq!(
+            state.player(Seat::A).stronghold,
+            running(Arena::Forest).player(Seat::A).stronghold
+        );
+    }
+}
+
+#[test]
+fn desert_reduces_base_regeneration_without_changing_interest_or_losing_fractions() {
+    // BR-AR05/06: subtract 800 bp of the base, never 8% of the Interest-adjusted rate.
+    let rules = tbg_core::Ruleset::canon();
+    for energy in [0, rules.interest.band * 2] {
+        let mut state = running(Arena::Desert);
+        let mut gains = [0u64; 2];
+        for _ in 0..1000 {
+            for seat in Seat::BOTH {
+                state.players[seat.index()].energy = energy;
+            }
+            state.step();
+            for seat in Seat::BOTH {
+                gains[seat.index()] += u64::from(state.players[seat.index()].energy - energy);
+            }
+        }
+        let bp = rules.interest.regen_bp(energy) - 800;
+        let expected = u64::from(rules.regen_running) * 1000 * u64::from(bp) / 10_000;
+        assert_eq!(gains, [expected; 2]);
     }
 }

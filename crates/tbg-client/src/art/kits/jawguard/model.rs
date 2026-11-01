@@ -66,7 +66,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Body(Head),
             Ball(0.20),
-            if f.b { CHARCOAL } else { MOSS },
+            if f.b { CHARCOAL } else { CHITIN },
             [0.0, 0.0, 0.0],
         )
         .scale([1.1, 0.8, 1.0]),
@@ -78,7 +78,25 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         )
         .rot([20.0, 0.0, 0.0]),
     ]);
+    v.push(
+        part(
+            Body(Head),
+            Box(0.30, 0.055, 0.10),
+            AMBER,
+            [0.0, 0.085, 0.11],
+        )
+        .rot([-10.0, 0.0, 0.0]),
+    );
     for s in [-1.0, 1.0] {
+        v.push(
+            part(
+                Secondary(Spring::Back),
+                Ball(0.19),
+                AMBER,
+                [s * 0.26, 0.10, -0.11],
+            )
+            .scale([0.20, 1.0, 0.8]),
+        );
         v.push(part(
             Body(Head),
             Ball(0.035),
@@ -88,7 +106,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         v.push(part(
             Body(Chest),
             Box(0.035, 0.25, 0.29),
-            ALLY,
+            LINEN,
             [s * 0.29, 0.15, 0.0],
         ));
         let n = if s < 0.0 {

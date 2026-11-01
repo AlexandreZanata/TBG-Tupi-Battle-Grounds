@@ -13,19 +13,19 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const MOSS: Color = Color::srgb(0.5, 0.62, 0.3);
-const WICKER: Color = Color::srgb(0.66, 0.5, 0.28);
-const SEED: Color = Color::srgb(0.55, 0.4, 0.22);
-const VENOM: Color = Color::srgb(0.55, 0.95, 0.2);
-const BLIGHT: Color = Color::srgb(0.36, 0.2, 0.42);
-const HONEY: Color = Color::srgb(0.95, 0.7, 0.25);
-const THORN: Color = Color::srgb(0.24, 0.16, 0.1);
+const WICKER: Color = TRIM;
+const SEED: Color = BARK;
+const VENOM: Color = LEAF;
+const BLIGHT: Color = VIOLET;
+const HONEY: Color = SAP;
+const THORN: Color = DARK_LEATHER;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.0, tier);
     p.torso.x *= 1.25;
     p.torso.z *= 1.3;
     p.leg *= 0.85;
+    p.arm = 0.20;
     p
 }
 
@@ -50,14 +50,14 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(
             Body(Chest),
             Ball(t.x * 0.55),
-            LEAF,
+            if f.b { LEAF_DARK } else { MOSS },
             [0.0, t.y * 0.32, t.z * 0.18],
         )
         .scale([1.0, 0.9, 0.85]),
         part(
             Body(Chest),
             Box(t.x * 0.9, 0.05, t.z * 1.1),
-            ALLY,
+            LINEN,
             [0.0, t.y * 0.75, 0.0],
         ),
         part(Body(Head), Ball(h * 1.15), LEAF_DARK, [0.0, h * 0.45, 0.0]).scale([1.2, 0.45, 1.2]),
@@ -83,6 +83,32 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         .scale([0.8, 1.2, 0.8]),
     ]);
     nest(&mut v, f);
+    // A broad straw lip and high eggs make the nest visible above the shoulders.
+    v.push(part(
+        Secondary(Spring::Back),
+        Ring(0.028, 0.24, 360.0),
+        WICKER,
+        [0.0, 0.12, -0.14],
+    ));
+    for x in [-0.17, 0.17] {
+        v.push(
+            part(
+                Secondary(Spring::Back),
+                Ball(0.075),
+                if f.b {
+                    if f.t2 {
+                        BLIGHT
+                    } else {
+                        VENOM
+                    }
+                } else {
+                    LINEN
+                },
+                [x, 0.20, -0.10],
+            )
+            .scale([0.85, 1.2, 0.85]),
+        );
+    }
     if f.b && !f.t2 {
         for (x, y) in [(-0.1, 0.5), (0.12, 0.3), (0.0, 0.15)] {
             v.push(

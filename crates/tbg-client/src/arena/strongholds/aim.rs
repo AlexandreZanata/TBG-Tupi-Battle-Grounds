@@ -48,7 +48,7 @@ pub(crate) fn turret(look: Look) -> Option<Turret> {
     let form = Form::of(look.tier, look.branch);
     match look.kind {
         StrongholdKind::Artillery => Some(super::artillery::turret(form)),
-        StrongholdKind::Bastion if form == Form::B2 && look.damage < 1 => {
+        StrongholdKind::Bastion if form == Form::B2 && look.damage < 20 => {
             Some(super::bastion::turret())
         }
         kind => super::gunners::turret(kind, look.damage),
@@ -117,9 +117,16 @@ pub(super) fn orders(mut orders: ResMut<TowerOrders>, mut towers: Query<&mut Tow
     for (own, target) in orders.0.drain(..) {
         for mut tower in &mut towers {
             if tower.live && tower.own == own {
-                tower.target = Some(target);
+                if tower.look.is_some_and(|l| l.damage == 20) {
+                    continue;
+                }
+                if tower.pending.is_some() {
+                    tower.orders.push_back(target);
+                } else {
+                    tower.target = Some(target);
+                    tower.pending = Some(0.0);
+                }
                 tower.idle = 0.0;
-                tower.pending = Some(0.0);
             }
         }
     }
@@ -135,6 +142,18 @@ pub(super) fn track(
 ) {
     let dt = time.delta_secs();
     for (mut tower, root) in &mut towers {
+        if tower.look.is_some_and(|l| l.damage == 20) {
+            tower.pending = None;
+            tower.orders.clear();
+            continue;
+        }
+        if tower.pending.is_none() {
+            if let Some(target) = tower.orders.pop_front() {
+                tower.target = Some(target);
+                tower.pending = Some(0.0);
+                tower.idle = 0.0;
+            }
+        }
         tower.idle += dt;
         let target = tower.target.and_then(|t| match t {
             AimTarget::Unit(e) => units.get(e).ok().map(|u| u.translation + Vec3::Y * CHEST),
@@ -156,7 +175,7 @@ pub(super) fn track(
         let Some(waited) = tower.pending else {
             continue;
         };
-        if yaw_error.abs() > 0.08 && waited < SETTLE {
+        if waited < 0.06 || (yaw_error.abs() > 0.08 && waited < SETTLE) {
             tower.pending = Some(waited + dt);
             continue;
         }
@@ -184,15 +203,70 @@ fn fire(commands: &mut Commands, vfx: &VfxAssets, tower: &Tower, root: Vec3, at:
         shots::fire(commands, vfx, ShotKind::Crossbow, from, at, area);
         return;
     };
-    let turn = gun_rotation(tower.own, tower.yaw, tower.pitch);
-    let from = pivot_at(tower.own, &t, root, tower.yaw) + turn * t.muzzle;
+    // Evaluate the actual moving piece used by the renderer at release.
+    let frame = release_frame(tower, &t);
+    let turn = frame.rotation;
+    let from = root + frame.transform_point(t.muzzle);
     impacts::muzzle(commands, vfx, t.flash, from, turn * Vec3::X, None);
     shots::fire(commands, vfx, t.shot, from, at, area);
+}
+
+fn release_frame(tower: &Tower, turret: &Turret) -> Transform {
+    let form = tower.look.map_or(Form::Base, |l| l.form());
+    let expected = side(tower.own, turret.pivot);
+    let weapon = super::pieces(tower.kind(), form).into_iter().find(|p| {
+        matches!(
+            p.motion,
+            Some(
+                super::parts::Motion::Kick(_)
+                    | super::parts::Motion::Mounted(_)
+                    | super::parts::Motion::Aim
+            )
+        ) && p.placed(tower.own).translation.distance(expected) < 0.01
+    });
+    if let Some(piece) = weapon {
+        let moving = super::motion::Moving {
+            motion: piece.motion.unwrap_or(super::parts::Motion::Aim),
+            rest: piece.placed(tower.own),
+        };
+        return super::motion::pose(&moving, tower, 0.0);
+    }
+    Transform::from_translation(pivot_at(tower.own, turret, Vec3::ZERO, tower.yaw))
+        .with_rotation(gun_rotation(tower.own, tower.yaw, tower.pitch))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn p71_every_live_form_keeps_its_actual_firing_piece() {
+        for kind in tbg_core::StrongholdKind::SELECTABLE {
+            for (tier, branch) in crate::art::FORMS {
+                for own in [false, true] {
+                    let mut tower = Tower::new(own, false);
+                    tower.look = Some(Look {
+                        kind,
+                        tier,
+                        branch,
+                        damage: 19,
+                    });
+                    tower.since = 0.0;
+                    tower.turret = turret(tower.look.unwrap());
+                    let t = tower.turret.expect("living tower retains emitter");
+                    let frame = release_frame(&tower, &t);
+                    assert!(frame.translation.is_finite());
+                    assert!(frame.transform_point(t.muzzle).is_finite());
+                    if kind == StrongholdKind::Bastion && !(tier == 2 && branch == 1) {
+                        assert!(
+                            frame.transform_point(t.muzzle).x.abs() > 0.8,
+                            "muzzle must clear shutter"
+                        );
+                    }
+                }
+            }
+        }
+    }
 
     #[test]
     fn aimed_barrels_point_along_their_shots_on_both_sides() {

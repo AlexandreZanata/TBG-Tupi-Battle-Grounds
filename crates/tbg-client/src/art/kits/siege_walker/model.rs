@@ -9,15 +9,17 @@ use crate::art::{
     mesh::Shape::*,
     palette::*,
     rig::{
+        self,
         Joint::*,
+        Node,
         Node::{Body, Prop, Secondary},
         Proportions, Socket, Spring,
     },
 };
 
-const BRONZE: Color = Color::srgb(0.70, 0.47, 0.24);
-const TROUSERS: Color = Color::srgb(0.33, 0.27, 0.22);
-const HOT: Color = Color::srgb(1.0, 0.55, 0.18);
+const BRONZE: Color = BRASS;
+const TROUSERS: Color = DARK_LEATHER;
+const HOT: Color = ORANGE;
 
 /// Which Evolution pieces a form has.
 #[derive(Clone, Copy)]
@@ -62,15 +64,29 @@ pub struct Bombard {
 /// Barrel axis height above the grip: the hand rides at chest height and
 /// the barrel rests on the shoulder.
 const BORE: f32 = 0.26;
-/// Where the left hand turns the reload crank (centre of its circle).
-pub const CRANK: Vec3 = Vec3::new(0.13, BORE - 0.05, 0.02);
+/// Keep the charging handle forward of the chest and on the supporting hand's side.
+pub const RELOAD_HANDLE: Vec3 = Vec3::new(0.34, 0.10, 0.40);
+
+pub fn parent(node: Node) -> Option<Node> {
+    match node {
+        Prop(Socket::Nock) => Some(Prop(Socket::WeaponR)),
+        _ => node.parent(),
+    }
+}
+
+pub fn rest(node: Node, p: &Proportions) -> Vec3 {
+    match node {
+        Prop(Socket::Nock) => RELOAD_HANDLE,
+        _ => rig::rest(node, p),
+    }
+}
 
 pub fn bombard(f: Form) -> Bombard {
     let (len, back) = gun_length(f);
     let bell = if f.b && !f.t2 { 0.16 } else { 0.08 };
     Bombard {
         muzzle: Vec3::new(0.0, BORE, back + len + bell),
-        fore_grip: Vec3::new(0.12, 0.1, 0.12),
+        fore_grip: Vec3::new(0.28, 0.1, 0.36),
         breech: Vec3::new(0.0, BORE, back - 0.08),
     }
 }
@@ -141,7 +157,7 @@ fn legs(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 }
 
 fn hips(v: &mut Vec<PartSpec>, f: Form) {
-    let cloth = if f.b { RUST } else { ALLY };
+    let cloth = if f.b { RUST } else { LINEN };
     v.extend([
         part(Body(Hips), Box(0.42, 0.17, 0.29), TROUSERS, [0.0, 0.0, 0.0]),
         part(
@@ -179,7 +195,7 @@ fn hips(v: &mut Vec<PartSpec>, f: Form) {
         part(
             Secondary(Spring::Tabard),
             Box(0.06, 0.06, 0.025),
-            ALLY,
+            LINEN,
             [0.0, -0.06, 0.004],
         )
         .rot([0.0, 0.0, 45.0]),
@@ -204,7 +220,7 @@ fn chest(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         v.push(
             part(
                 Body(Chest),
-                Box(0.065, 0.5, 0.025),
+                Box(0.085, 0.5, 0.035),
                 DARK_LEATHER,
                 [0.07 * s, h * 0.55, 0.16],
             )
@@ -212,6 +228,9 @@ fn chest(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         );
     }
     v.push(part(Body(Chest), Cyl(0.04, 0.03), BRASS, [0.0, h * 0.55, 0.18]).rot([90.0, 0.0, 0.0]));
+    v.push(
+        part(Body(Chest), Ball(0.16), OGRE_SKIN, [0.0, h * 0.33, 0.10]).scale([1.25, 0.70, 0.8]),
+    );
     if f.a {
         // Longshot / Artillery: a riveted breastplate (large-surface change).
         let (plate, trim) = if f.t2 { (STEEL, GOLD) } else { (STEEL, BRASS) };
@@ -358,7 +377,7 @@ fn head(v: &mut Vec<PartSpec>, f: Form) {
             v.push(part(
                 Secondary(Spring::HeadGear),
                 Box(0.04, 0.14, 0.26),
-                ALLY,
+                LINEN,
                 [0.0, 0.17, -0.03],
             ));
             v.push(part(
@@ -469,7 +488,7 @@ fn back(v: &mut Vec<PartSpec>, f: Form) {
     // A team pennant on a pole: the side reads from the match camera.
     v.extend([
         part(b, Cyl(0.014, 0.62), WOOD, [0.12, 0.22, -0.16]),
-        part(b, Box(0.02, 0.15, 0.2), ALLY, [0.12, 0.44, -0.27]),
+        part(b, Box(0.02, 0.15, 0.2), LINEN, [0.12, 0.44, -0.27]),
         part(b, Box(0.022, 0.03, 0.2), GOLD, [0.12, 0.36, -0.27]),
     ]);
     if f.t2 {
@@ -532,6 +551,7 @@ fn gun(v: &mut Vec<PartSpec>, f: Form) {
         for x in [-0.068, 0.068] {
             v.push(part(w, Cyl(0.064, len), metal, along(x, back + len * 0.5)).rot(x90));
             v.push(part(w, Frustum(0.085, 0.07, 0.09), GOLD, along(x, front + 0.04)).rot(x90));
+            v.push(part(w, Cyl(0.059, 0.006), DARK, along(x, front + 0.086)).rot(x90));
         }
         v.push(part(
             w,
@@ -551,11 +571,21 @@ fn gun(v: &mut Vec<PartSpec>, f: Form) {
         };
         let bell = if blunderbuss { 0.08 } else { 0.04 };
         v.push(part(w, muzzle, band, along(0.0, front + bell)).rot(x90));
+        let mouth = if blunderbuss { r * 1.85 } else { r * 1.04 };
+        v.push(
+            part(
+                w,
+                Cyl(mouth, 0.006),
+                DARK,
+                along(0.0, front + bell * 2.0 + 0.002),
+            )
+            .rot(x90),
+        );
     }
     for k in [0.12, 0.45, 0.82] {
         v.push(part(w, Cyl(r * 1.18, 0.035), band, along(0.0, back + len * k)).rot(x90));
     }
-    // Breech block, exhaust flare, sight, mount and grip, fore-grip, crank.
+    // Breech block, exhaust flare, sight, mount and grip, fore-grip and forward charging rail.
     v.extend([
         part(w, Box(r * 2.5, r * 2.5, 0.13), IRON, along(0.0, back)),
         part(
@@ -573,20 +603,21 @@ fn gun(v: &mut Vec<PartSpec>, f: Form) {
         ),
         part(w, Box(0.07, 0.12, 0.12), IRON, [0.0, BORE - r - 0.04, 0.02]),
         part(w, Box(0.05, 0.15, 0.065), OAK, [0.0, 0.03, 0.0]).rot([12.0, 0.0, 0.0]),
-        part(w, Box(0.12, 0.03, 0.03), OAK, [0.07, 0.15, 0.12]),
-        part(w, Box(0.035, 0.1, 0.035), OAK, [0.12, 0.1, 0.12]),
-        part(w, Cyl(0.04, 0.03), BRASS, [r + 0.02, BORE, CRANK.z]).rot([0.0, 0.0, 90.0]),
+        part(w, Box(0.30, 0.035, 0.045), IRON, [0.15, 0.15, 0.36]),
+        part(w, Box(0.04, 0.10, 0.04), OAK, [0.28, 0.10, 0.36]),
+        part(w, Box(0.30, 0.035, 0.16), IRON, [0.17, 0.10, 0.36]),
+        part(w, Box(0.015, 0.018, 0.15), BRASS, [0.31, 0.12, 0.36]),
         part(
-            w,
-            Box(0.018, 0.06, 0.018),
-            IRON,
-            [r + 0.04, BORE - 0.03, CRANK.z],
+            Prop(Socket::Nock),
+            Box(0.045, 0.045, 0.045),
+            STEEL,
+            [0.0, 0.0, 0.0],
         ),
         part(
-            w,
-            Box(0.02, 0.02, 0.05),
+            Prop(Socket::Nock),
+            Cyl(0.024, 0.08),
             OAK,
-            [r + 0.05, BORE - 0.06, CRANK.z],
+            [0.0, -0.035, 0.0],
         ),
     ]);
     if f.a && !f.t2 {

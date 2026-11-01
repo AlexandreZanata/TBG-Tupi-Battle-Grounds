@@ -57,7 +57,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         Clip::Death => moves::death(m, pose, &p, Fall::Back),
         Clip::Spawn => moves::spawn(m, pose, &p, Entry::Pop),
         Clip::Evolve => moves::evolve(m, pose, &p, Power::Spin),
-        Clip::Victory => moves::victory(m, pose, &p, Cheer::Dance),
+        Clip::Victory => moves::victory(m, pose, &p),
         _ => {}
     }
     if m.clip != Clip::Walk {

@@ -37,16 +37,37 @@ fn pose(m: &Moment, p: &mut Pose) {
     if m.clip == Clip::Walk {
         let k = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
         tools::set(p, Hips, [2.0 * k, 0.0, 0.0]);
+        tools::set(p, Chest, [-1.5 * k, 0.0, 0.8 * k]);
         for (s, n) in [(-1.0, Spring::Tabard), (1.0, Spring::HeadGear)] {
             p[Secondary(n).index()].1.z = s * k * 0.025;
         }
+    }
+    if m.clip == Clip::Idle {
+        let feed = tools::hold((m.clock * 0.24).fract(), [0.0, 0.10, 0.18, 0.35]);
+        tools::shift(p, Chest, [0.0, 0.006 * feed, -0.012 * feed]);
+        tools::set(p, Head, [0.0, 4.0 * feed, 0.0]);
     }
     if let Some(t) = m.special {
         let load = tools::hold(t, [0.0, 0.20, 0.30, 0.62]);
         tools::shift(p, Chest, [0.0, 0.04 * load, -0.025 * load]);
         p[Prop(Socket::WeaponR).index()].1.z = -0.08 * load;
+        tools::set(p, Head, [-5.0 * load, 0.0, 0.0]);
+        tools::shift(p, Hips, [0.0, -0.012 * load, 0.0]);
     }
     match m.clip {
+        Clip::Victory => {
+            let ready = 0.5 - 0.5 * (m.t / 0.8 * std::f32::consts::TAU).cos();
+            tools::set(p, Root, [0.0, 0.0, 0.0]);
+            p[Root.index()].1 = Vec3::ZERO;
+            tools::set(p, Chest, [-4.0 * ready, 0.0, 0.0]);
+            tools::shift(p, Chest, [0.0, 0.018 * ready, 0.0]);
+            p[Prop(Socket::WeaponR).index()].0.x = -5.0 * (1.0 - ready);
+            tools::set(
+                p,
+                Head,
+                [0.0, 7.0 * (m.t / 0.8 * std::f32::consts::TAU).sin(), 0.0],
+            );
+        }
         Clip::Death => {
             let k = tools::window(m.t, 0.0, 0.8);
             tools::set(p, Chest, [25.0 * k, 0.0, 0.0]);

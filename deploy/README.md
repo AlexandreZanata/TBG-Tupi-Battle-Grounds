@@ -55,7 +55,7 @@ Each release, into the idle slot (here `b`):
 2. `sudo /opt/tbg/bin/release-slot.sh start b <generation> ~/tbg-server`
    installs `/opt/tbg/releases/<generation>/` (never overwritten) and waits
    for `ready`. A slot that fails to become ready admits nothing.
-3. Same match contract (`tbg-server --version` and `admin status` show it):
+3. Same match contract (`admin status` and the loopback `/api/release` show it):
    `admin canary b 5`, then 25, then `admin promote b` after the indicators
    in docs/planning/P66-RELEASE-CONTRACTS.md §3 hold. A new contract is
    switched with `admin promote b` at its scheduled time (BR-UP09).
@@ -247,3 +247,59 @@ ssh <host> 'sudo rm /etc/systemd/system/tbg-server.service.d/bots.conf && sudo s
 ```
 
 Never commit `deploy/.env.deploy`, IPs, domains, or keys.
+
+## Fresh Debian 13 integration (2026-11-01)
+
+The integrated P71/main branch uses protocol 31, schema 10 and eight Arenas.
+Deploy its server and client together; neither protocol-30 branch is compatible.
+The owner is resetting VPS `<private VPS address>`; its replacement SSH host fingerprint,
+login settings and final domain must be confirmed before connecting/provisioning.
+Verify a changed host fingerprint in the provider console, not by automatically
+accepting the key received over the network. No remote installation is recorded
+until that connection is available.
+
+Debian 13 is an intended fresh-host target, alongside the previously documented
+systems; actual provisioning on Debian 13 remains pending. `provision.sh` installs
+`sudo` for minimal images and writes `/etc/tbg/server.env` with
+`TBG_AUTH_ORIGINS=https://<domain>` for D-97 cookie/origin checks. Both service modes
+read this file. The normal single-slot deploy remains sufficient for the first
+installation; two-slot activation and signed native updates retain their separate
+operator gates. Local `.local/`, agent metadata and deployment credentials are
+excluded from source transfer. Builds use the host validation lock and two jobs.
+
+## tupibg.com domain layout
+
+The owner's public layout uses `api.tupibg.com` for the backend,
+`app.tupibg.com` for the browser game, the base/www hosts for a future landing
+page, and `admin.tupibg.com` for a future administrative suite. Landing/admin
+content is not deployed by the backend task. Connection credentials, origin
+address, host pins and SSH keys live only in private operator configuration.
+
+Set `TBG_DOMAIN=api.tupibg.com` and `TBG_APP_DOMAIN=app.tupibg.com` in the ignored
+deploy environment. `bash deploy/deploy.sh --provision --backend-only` provisions
+the split HTTPS routes and backend without rebuilding/publishing the web game.
+The native client uses `wss://api.tupibg.com/ws`; the browser keeps its same-origin
+`/api/auth/*` and `/ws` proxy on the app host. No cross-origin cookie or permissive
+CORS exception is introduced. A later normal deploy supplies the web bundle.
+
+The split template requires Caddy >=2.8 (Debian 13's official backports package
+is used on the owner's fresh image). Only the published Cloudflare CIDRs are
+trusted for `CF-Connecting-IP`; the proxy overwrites upstream X-Forwarded-For
+with the verified client IP, so direct callers cannot spoof rate-limit identity.
+Sources: https://caddyserver.com/docs/caddyfile/options#trusted-proxies and
+https://www.cloudflare.com/ips/ (checked 2026-11-01). Cloudflare must use Full
+(strict) TLS and permit WebSockets; the deployed origin also has a public TLS
+certificate. Keep `/api/release` and `/metrics` private.
+
+First installation skips the predeploy database backup when no database exists.
+The unprivileged service creates schema 10 itself; later deployments retain the
+integrity-checked pre-migration backup. Native installation uses the matching
+protocol-31 source, preserving earlier local installs and player data.
+
+
+The initial tupibg.com backend and native Linux client delivery is verified in
+[the deployment report](../docs/phases/VPS-tupibg-deployment.md). API/app TLS and
+proxy routes are active; the browser game static bundle, landing and admin UI
+are separate frontend publications. The backend binary does not implement a
+`--version` flag; inspect its startup source metadata, binary hash and the
+loopback-only release contract instead of starting another copy.

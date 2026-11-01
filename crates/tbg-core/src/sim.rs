@@ -209,7 +209,7 @@ impl MatchState {
         for p in &mut self.players {
             // Interest (BR-E05–E07): the more Energy is held, the faster it
             // grows; the remainder carries over so the rate stays exact.
-            let bp = rule.regen_bp(p.energy) + arena_bp;
+            let bp = rule.regen_bp(p.energy).saturating_add_signed(arena_bp);
             let scaled = regen * u64::from(bp) + u64::from(p.regen_frac);
             p.regen_frac = (scaled % 10_000) as u32;
             let gain = u32::try_from(scaled / 10_000).unwrap_or(u32::MAX);

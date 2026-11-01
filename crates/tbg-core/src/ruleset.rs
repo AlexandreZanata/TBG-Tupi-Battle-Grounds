@@ -105,7 +105,7 @@ pub struct Ruleset {
     /// Conditional Arcana values for the nine new nodes.
     pub arcana: ArcanaValues,
     /// Arena modifiers by `Arena::index()` (ARENAS-G).
-    pub arenas: [ArenaRule; 5],
+    pub arenas: [ArenaRule; crate::Arena::ALL.len()],
 }
 
 /// The only ruleset used online.

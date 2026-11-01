@@ -14,10 +14,10 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Secondary, Proportions, Spring},
 };
 
-const ROOT: Color = Color::srgb(0.52, 0.35, 0.24);
-const ROOT_DARK: Color = Color::srgb(0.36, 0.24, 0.16);
-const GUM: Color = Color::srgb(0.66, 0.22, 0.24);
-const BLOOD: Color = Color::srgb(0.85, 0.1, 0.12);
+const ROOT: Color = BARK;
+const ROOT_DARK: Color = DARK_LEATHER;
+const GUM: Color = RED_CLOTH;
+const BLOOD: Color = DANGER;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 0.98, tier);
@@ -43,6 +43,11 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         boots: ROOT_DARK,
     };
     body::humanoid(&mut v, &p, &look);
+    v.retain(|part| !matches!(part.node, Body(Chest)));
+    v.push(part(Body(Chest), Ball(0.19), ROOT_DARK, [0.0, 0.16, 0.0]).scale([1.15, 1.05, 0.85]));
+    for (x, lean) in [(-0.12, -15.0), (0.12, 15.0)] {
+        v.push(part(Body(Chest), Pill(0.045, 0.20), ROOT, [x, 0.16, 0.13]).rot([0.0, 0.0, lean]));
+    }
     maw(&mut v, &p, f);
     roots(&mut v, &p, f);
     let t = p.torso;
@@ -50,7 +55,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(
             Body(Chest),
             Box(0.05, t.y * 0.9, t.z * 1.05),
-            ALLY,
+            LINEN,
             [t.x * 0.2, t.y * 0.5, 0.0],
         )
         .rot([0.0, 0.0, -25.0]),
@@ -130,7 +135,7 @@ fn maw(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         part(Body(Head), Cyl(r, 0.04), DARK, [0.0, y, front]).rot(face),
         part(
             Body(Head),
-            Ring(0.035, r, 360.0),
+            Ring(0.043, r, 360.0),
             GUM,
             [0.0, y, front + 0.01],
         )
@@ -181,8 +186,8 @@ fn roots(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         let mid = [0.0, -a * 0.6, 0.04];
         let end = [0.0, -a * 1.3, 0.07];
         v.extend([
-            gear::strut(Body(hand), [0.0, -0.04, 0.0], mid, 0.03, ROOT),
-            gear::strut(Body(hand), mid, end, 0.02, ROOT),
+            gear::strut(Body(hand), [0.0, -0.04, 0.0], mid, 0.043, ROOT),
+            gear::strut(Body(hand), mid, end, 0.03, ROOT),
             part(
                 Body(hand),
                 Cone(0.02, 0.1),

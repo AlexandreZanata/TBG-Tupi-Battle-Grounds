@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "scope": "Weaver alignment/head connection, Bone Brute walk and Pyre ground-line removal",
+  "runtime_commit": "1c0b2df8cc4f7ff9ae0657d24384f26ec68e0810",
+  "binary_sha256": "c90e0e8d3c17306ad241c71825083ae6050505c680cd685bd41b390deeb92ac4",
+  "native_build": "passed; 7.22s; owner-authorized wait on existing shared lock; two jobs",
+  "items": [
+    {
+      "path": ".local/p71-evidence/consolidated-followups-native-build.log",
+      "sha256": "b197c6716b9224d7652bcc1842bcde0922b0000bd83cc5891a08fca1f9c4a0ad"
+    },
+    {
+      "path": ".local/p71-evidence/consolidated-followups-final-build.log",
+      "sha256": "12e08d45029d9c4cd3d01348e587a38e439545a31f5da725ec4777a95aaac238"
+    },
+    {
+      "path": ".local/p71-evidence/candidate-1c0b2df/build.json",
+      "sha256": "e10999595ecf196ab8371d969aecb10ea74e8d2cc264b54f28a61b318729ff59"
+    },
+    {
+      "path": ".local/p71-evidence/native-wait-authorization.json",
+      "sha256": "f39d1cf050e50ee2e3eb003798354fed2b61ba7b0899771e68d09c6deed540ff"
+    },
+    {
+      "path": ".local/p71-evidence/weaver-profile-1c0b2df/00.png",
+      "sha256": "71f94246e0b43e13e32a0d6072f9682820a9a8c7f0186dd19612f6d95459a194"
+    },
+    {
+      "path": ".local/p71-evidence/weaver-profile-1c0b2df/00.json",
+      "sha256": "137d73dba3396eaef538aa8bed30d0a96b4f5944cd00d1afdb71a55b8e0bfbb5"
+    },
+    {
+      "path": ".local/p71-evidence/motion-1c0b2df-Weaver-BoneBrute/captures.json",
+      "sha256": "fd2b00afcbb62e477c6c912db07018c8d31f3e9e0f9cebf4446ece79fdaa0a72"
+    },
+    {
+      "path": ".local/p71-evidence/live-1c0b2df-Weaver-Base-A/captures.json",
+      "sha256": "d717ffd2bc3fc4b6688307a583534f2fcb453f19c3252be1a12812541b4a9c27"
+    },
+    {
+      "path": ".local/p71-evidence/portraits-weaver-1c0b2df/Weaver.png",
+      "sha256": "5560aa9fa0eb0833b6aec83374f30426a01ba50188b547a93ef72537604e7b7a"
+    },
+    {
+      "path": ".local/p71-evidence/review-consolidated-1c0b2df/walk-0.jpg",
+      "sha256": "f4af8c07d1f95af08b8208632b65d06c799a3ed1905ec2813d60d635839609d6"
+    },
+    {
+      "path": ".local/p71-evidence/review-consolidated-1c0b2df/walk-1.jpg",
+      "sha256": "6791d283d1a770ee7d6ef678a6b2b512be5d2cf13c18d113973775094fbee05f"
+    },
+    {
+      "path": ".local/p71-evidence/review-consolidated-1c0b2df/walk-2.jpg",
+      "sha256": "38868545e85d9e891b0787b9578249c9cd905b832a1a8972a6bae53e8748e1b9"
+    },
+    {
+      "path": ".local/p71-evidence/review-consolidated-1c0b2df/weaver-live.jpg",
+      "sha256": "21f18a241ad04557947b18af8e8120dd52dcb9ffeac6e11bd4d6e4e75e4d96a8"
+    }
+  ],
+  "deferred": [
+    "Full suite",
+    "WASM compilation and browser runtime for these follow-ups",
+    "Full multiplayer/performance/Low-quality matrix",
+    "Owner subjective sign-off"
+  ]
+}

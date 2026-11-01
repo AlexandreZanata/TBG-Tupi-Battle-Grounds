@@ -148,6 +148,7 @@ fn the_bombard_points_along_its_shells_flight() {
                 armor_flash: 0.0,
                 special: None,
                 special_ready: false,
+                special_aim: None,
                 clip: Clip::Idle,
                 t: 0.4,
                 tier,

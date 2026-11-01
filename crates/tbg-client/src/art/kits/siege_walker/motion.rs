@@ -2,13 +2,16 @@
 //! follow it by IK: it rests on the shoulder at ease, is shouldered and
 //! aimed along its own shell's launch tangent when engaged (the body turns
 //! so the off-center barrel lines up), kicks back on Release, and is
-//! cranked between shots. Heavy walk, drop-in spawn.
+//! cycled with a forward side lever between shots. Heavy walk, drop-in spawn.
 
 use std::f32::consts::TAU;
 
 use bevy::prelude::*;
 
-use super::model::{bombard, plan, Bombard, Form, CRANK};
+use super::{
+    model::{bombard, plan, Bombard, Form},
+    reload,
+};
 use crate::art::{
     anim::{Clip, Pose},
     kits::{
@@ -63,6 +66,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         Clip::Spawn => (spawn(m, pose, &p), 0.0),
         Clip::Evolve => (salute(m, pose, &p), 0.0),
         Clip::Idle => (idle(m, pose, engaged), engaged),
+        Clip::Victory => (victory(m, pose, &p), 0.0),
         _ => (at_ease(), 0.0),
     };
     if brace > 0.0 {
@@ -71,7 +75,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
     }
     let support = match m.clip {
         Clip::Idle => brace,
-        Clip::AttackRanged | Clip::Evolve => 1.0,
+        Clip::AttackRanged | Clip::Evolve | Clip::Victory => 1.0,
         _ => 0.0,
     };
     hands(m, pose, (&p, &gun), carry, support);
@@ -86,7 +90,11 @@ fn idle(m: &Moment, pose: &mut Pose, engaged: f32) -> Carry {
         Joint::Head,
         [0.0, 10.0 * tools::wave(m.clock, 0.4, 1.0), 0.0],
     );
-    blend(at_ease(), braced(), engaged)
+    let settle = hold((m.clock * 0.22).fract(), [0.08, 0.16, 0.22, 0.38]) * (1.0 - engaged);
+    tools::add(pose, Joint::Chest, [-3.0 * settle, 0.0, -2.0 * settle]);
+    let mut carry = blend(at_ease(), braced(), engaged);
+    carry.at.y += 0.024 * settle;
+    carry
 }
 
 fn walk(m: &Moment, pose: &mut Pose) -> Carry {
@@ -101,6 +109,12 @@ fn walk(m: &Moment, pose: &mut Pose) -> Carry {
     );
     let mut carry = at_ease();
     carry.at.y += 0.012 * (phase * 2.0).cos();
+    carry.turn *= Quat::from_rotation_z((2.0 * phase.sin()).to_radians());
+    tools::set(
+        pose,
+        Joint::ForearmL,
+        [-24.0 - 10.0 * phase.sin(), 0.0, 0.0],
+    );
     carry
 }
 
@@ -116,7 +130,21 @@ fn fire(m: &Moment, pose: &mut Pose) -> (Carry, f32) {
     tools::shift(pose, Joint::Root, [0.0, 0.0, -0.07 * kick]);
     tools::shift(pose, Joint::Hips, [0.0, -0.025 * kick, 0.0]);
     tools::add(pose, Joint::Head, [6.0 * kick, 0.0, 0.0]);
+    tools::add(pose, Joint::Spine, [2.0 * brace - 3.0 * kick, 0.0, 0.0]);
     (carry, brace)
+}
+
+/// A planted artillery salute keeps both hands on the existing gun grips.
+fn victory(m: &Moment, pose: &mut Pose, p: &Proportions) -> Carry {
+    let lift = 0.5 - 0.5 * (m.t / 0.8 * TAU).cos();
+    tools::set(pose, Joint::Spine, [-4.0 * lift, 0.0, 0.0]);
+    tools::set(pose, Joint::Chest, [0.0, -8.0, 0.0]);
+    tools::set(pose, Joint::Head, [-8.0 - 12.0 * lift, 8.0, 0.0]);
+    tools::plant(pose, p, tools::stance(p, 1.3, 0.04));
+    let mut carry = braced();
+    carry.turn *= Quat::from_rotation_x((-15.0 - 30.0 * lift).to_radians());
+    carry.at.y += 0.025 * lift;
+    carry
 }
 
 fn spawn(m: &Moment, pose: &mut Pose, p: &Proportions) -> Carry {
@@ -183,9 +211,7 @@ fn aim_gun(
     carry.turn *= Quat::from_rotation_x(-up * 0.7);
 }
 
-/// Right hand on the grip; the left hand joins on the fore-grip by
-/// `support` (0 leaves the shared clip's free arm), or turns the crank
-/// between shots (two turns from 0.55 s to 1.5 s after the shot).
+/// Keep the carrying hand steady while the support hand cycles the external lever.
 fn hands(
     m: &Moment,
     pose: &mut Pose,
@@ -195,23 +221,5 @@ fn hands(
 ) {
     let right_pole = Vec3::new(-1.0, -0.7, -0.5);
     tools::reach(pose, false, carry.at, Some(carry.turn), (p, right_pole));
-    if support <= 0.0 {
-        return;
-    }
-    let crank = if m.clip == Clip::Idle && m.aim.is_some() {
-        hold(m.since_attack, [0.5, 0.65, 1.4, 1.55])
-    } else {
-        0.0
-    };
-    let turn = (m.since_attack - 0.55) * TAU * 2.1;
-    let crank_at = CRANK + Vec3::new(0.0, turn.sin(), turn.cos()) * 0.045;
-    let grip = gun.fore_grip.lerp(crank_at, crank);
-    let arm = [Joint::UpperArmL, Joint::ForearmL, Joint::HandL];
-    let free = arm.map(|j| pose[j.index()].0);
-    let left_pole = Vec3::new(1.0, -0.8, -0.3);
-    let target = carry.at + carry.turn * grip;
-    tools::reach(pose, true, target, Some(carry.turn), (p, left_pole));
-    for (j, rest) in arm.into_iter().zip(free) {
-        pose[j.index()].0 = rest.lerp(pose[j.index()].0, support);
-    }
+    reload::support(m, pose, p, carry.at, carry.turn, gun.fore_grip, support);
 }

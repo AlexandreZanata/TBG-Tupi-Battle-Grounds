@@ -29,17 +29,18 @@ pub(super) fn spawn(
         return;
     }
     *done = true;
-    if !config::url_param("gallery").is_some_and(|m| m.eq_ignore_ascii_case("strongholds")) {
-        return;
-    }
+    // Hide roots, since wear updates can legitimately re-show their child meshes.
     for root in &live {
         commands.entity(root).insert(Visibility::Hidden);
+    }
+    if !config::url_param("gallery").is_some_and(|m| m.eq_ignore_ascii_case("strongholds")) {
+        return;
     }
     let own = config::url_param("enemy").is_none();
     let damage = config::url_param("damage")
         .and_then(|d| d.parse::<u8>().ok())
         .unwrap_or(0)
-        .min(2);
+        .min(20);
     let mut place = |kind, (tier, branch), x: f32, z: f32| {
         let look = Look {
             kind,
@@ -56,7 +57,9 @@ pub(super) fn spawn(
             ))
             .id();
         dress(&mut commands, &mut art, &mut meshes, root, &mut tower, look);
-        commands.entity(root).insert(tower);
+        commands
+            .entity(root)
+            .insert((tower, super::damage::Effects::default()));
     };
     for (row, kind) in StrongholdKind::SELECTABLE.into_iter().enumerate() {
         for (col, form) in FORMS.into_iter().enumerate() {
@@ -84,4 +87,49 @@ pub(super) fn spawn(
             ..default()
         },
     ));
+}
+
+/// Opt-in temporal fixture: damage, destruction, then a fresh healthy rematch look.
+pub(super) fn wear_sequence(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut art: ResMut<StrongholdArt>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut towers: Query<(Entity, &mut Tower)>,
+    mut previous: Local<Option<u8>>,
+    mut start: Local<Option<f32>>,
+    #[cfg(target_os = "linux")] loading: Res<crate::ui::native_loading::Status>,
+) {
+    if config::url_param("damage_sweep").is_none() {
+        return;
+    }
+    #[cfg(target_os = "linux")]
+    if !loading.boot_ready || loading.scene_waiting {
+        return;
+    }
+    let start = *start.get_or_insert(time.elapsed_secs());
+    let step = ((time.elapsed_secs() - start).max(0.0) / 0.5) as u8;
+    let stage = if step > 20 { 0 } else { step };
+    if *previous == Some(stage) {
+        return;
+    }
+    for (root, mut tower) in &mut towers {
+        if tower.live {
+            continue;
+        }
+        let Some(mut look) = tower.look else {
+            continue;
+        };
+        look.damage = stage;
+        if *previous == Some(20) && stage == 0 {
+            dress(&mut commands, &mut art, &mut meshes, root, &mut tower, look);
+        } else {
+            tower.look = Some(look);
+        }
+    }
+    eprintln!(
+        "P71 wear fixture: stage={stage}, time={}",
+        time.elapsed_secs()
+    );
+    *previous = Some(stage);
 }

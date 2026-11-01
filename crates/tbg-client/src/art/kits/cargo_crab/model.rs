@@ -15,10 +15,9 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Secondary, Proportions, Spring},
 };
 
-const HOT: Color = Color::srgb(1.0, 0.55, 0.18);
-/// Carapace forge orange: more saturated than the palette's forge glow, so the
-/// crab reads as a machine at match-camera distance.
-const FORGE: Color = Color::srgb(1.0, 0.42, 0.10);
+const HOT: Color = ORANGE;
+/// The shared forge orange covers broad armor panels; dark joints separate the mechanism.
+const FORGE: Color = ORANGE;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(true, 0.84, tier);
@@ -82,6 +81,8 @@ fn shell(v: &mut Vec<PartSpec>, f: Form) {
                 BRASS,
             ),
             part(h, Ball(0.05), FORGE, [s * 0.13, 0.29, 0.33]).glow(),
+            part(h, Ball(0.035), STEEL, [s * 0.13, 0.29, 0.365]).scale([1.0, 1.0, 0.55]),
+            part(h, Ball(0.023), DARK, [s * 0.13, 0.29, 0.385]).scale([1.0, 1.0, 0.4]),
         ]);
     }
     // Brass rivets along the carapace rim
@@ -109,7 +110,7 @@ fn shell(v: &mut Vec<PartSpec>, f: Form) {
     }
     if f.b {
         // Turbo Carrier: high-contrast racing stripe down the shell
-        v.push(part(h, Box(0.09, 0.025, 0.68), ALLY, [0.0, 0.185, 0.0]));
+        v.push(part(h, Box(0.09, 0.025, 0.68), LINEN, [0.0, 0.185, 0.0]));
     }
 }
 
@@ -120,6 +121,7 @@ fn saddle(v: &mut Vec<PartSpec>, f: Form) {
         part(c, Box(0.40, 0.05, 0.34), WOOD, [0.0, 0.16, -0.03]),
         part(c, Box(0.28, 0.07, 0.24), RED_CLOTH, [0.0, 0.21, -0.04]),
         part(c, Box(0.28, 0.14, 0.05), RED_CLOTH, [0.0, 0.27, -0.15]),
+        part(c, Box(0.30, 0.035, 0.055), LINEN, [0.0, 0.34, -0.15]),
     ]);
     for s in [-1.0f32, 1.0] {
         // Safety guardrails
@@ -149,13 +151,13 @@ fn saddle(v: &mut Vec<PartSpec>, f: Form) {
     let b = Secondary(Spring::Back);
     v.extend([
         part(b, Cyl(0.014, 0.55), WOOD, [-0.18, 0.20, 0.05]),
-        part(b, Box(0.018, 0.14, 0.20), ALLY, [-0.18, 0.40, -0.03]),
+        part(b, Box(0.018, 0.14, 0.20), LINEN, [-0.18, 0.40, -0.03]),
     ]);
     if f.a && f.t2 {
         // A2 Fortress Crab: protective shield ring and energy emitter
         v.extend([
-            part(c, Ring(0.018, 0.30, 360.0), ALLY, [0.0, 0.22, -0.03]).glow(),
-            part(c, Ball(0.05), ALLY, [0.0, 0.34, -0.17]).glow(),
+            part(c, Ring(0.018, 0.30, 360.0), LINEN, [0.0, 0.22, -0.03]).glow(),
+            part(c, Ball(0.05), LINEN, [0.0, 0.34, -0.17]).glow(),
             part(c, Box(0.44, 0.035, 0.38), GOLD, [0.0, 0.14, -0.03]),
         ]);
     }
@@ -225,6 +227,12 @@ fn claw(v: &mut Vec<PartSpec>, p: &Proportions, f: Form, s: f32) {
             FORGE,
             [0.0, -0.10 * big, 0.04 * big],
         ),
+        part(
+            Body(hand),
+            Box(0.17 * big, 0.04, 0.13 * big),
+            GUNMETAL,
+            [0.0, -0.05 * big, 0.04 * big],
+        ),
         // Broad upper jaw and the lower jaw, opened a little
         part(
             Body(hand),
@@ -277,6 +285,6 @@ fn exhausts(v: &mut Vec<PartSpec>, f: Form) {
         }
     }
     if f.t2 {
-        v.push(part(h, Box(0.03, 0.16, 0.25), ALLY, [0.0, 0.27, -0.24]).rot([-15.0, 0.0, 0.0]));
+        v.push(part(h, Box(0.03, 0.16, 0.25), LINEN, [0.0, 0.27, -0.24]).rot([-15.0, 0.0, 0.0]));
     }
 }

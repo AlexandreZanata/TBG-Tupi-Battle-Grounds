@@ -18,7 +18,7 @@ use crate::vfx::{impacts::Muzzle, shots::ShotKind};
 
 static SENTRY: PartDef = PartDef {
     name: "classic sentry",
-    build: |team| figure(team, STEEL),
+    build: |_team| figure(LINEN, STEEL),
 };
 static CROSSBOW: PartDef = PartDef {
     name: "classic crossbow",
@@ -50,11 +50,21 @@ static MORTAR: PartDef = PartDef {
 };
 static ARCHER: PartDef = PartDef {
     name: "command archer",
-    build: |team| figure(team, HOOD_GREEN),
+    build: |_team| figure(LINEN, HOOD_GREEN),
 };
 static LONGBOW: PartDef = PartDef {
     name: "command longbow",
     build: longbow,
+};
+
+static LOADED_ARROW: PartDef = PartDef {
+    name: "tower loaded arrow",
+    build: |_| {
+        vec![
+            (Box(0.24, 0.01, 0.01), TIMBER, t(0.09, 0.025, 0.0)),
+            (Box(0.03, 0.02, 0.02), STEEL, t(0.22, 0.025, 0.0)),
+        ]
+    },
 };
 
 /// Classic: the sentry's feet on the crown floor, the crossbow at his chest.
@@ -76,10 +86,15 @@ pub(super) fn pieces(kind: StrongholdKind) -> Vec<Piece> {
     match kind {
         StrongholdKind::Classic => vec![
             piece(&SENTRY, t(SENTRY_AT.x, SENTRY_AT.y, SENTRY_AT.z))
-                .lost(1)
                 .aimed()
                 .moving(Motion::Swivel),
-            carried(&CROSSBOW, CROSSBOW_AT, 0.03).lost(1),
+            carried(&CROSSBOW, CROSSBOW_AT, 0.03),
+            piece(
+                &LOADED_ARROW,
+                t(CROSSBOW_AT.x, CROSSBOW_AT.y, CROSSBOW_AT.z),
+            )
+            .aimed()
+            .moving(Motion::Nocked),
         ],
         StrongholdKind::Bastion => vec![
             piece(&PORT, t(PORT_AT.x, PORT_AT.y, PORT_AT.z)).aimed(),
@@ -90,29 +105,27 @@ pub(super) fn pieces(kind: StrongholdKind) -> Vec<Piece> {
             fixed(&FALCONET, FALCONET_AT, -0.2),
         ],
         StrongholdKind::Treasury => vec![
-            piece(&HATCH, t(HATCH_AT.x, HATCH_AT.y, HATCH_AT.z))
-                .lost(1)
-                .mirrored(),
+            piece(&HATCH, t(HATCH_AT.x, HATCH_AT.y, HATCH_AT.z)).mirrored(),
             // Two leaves hinged on the hatch's long edges, opening upward.
             piece(&TRAPDOOR, t(HATCH_AT.x, HATCH_AT.y + 0.02, -0.12))
-                .lost(1)
                 .mirrored()
                 .moving(Motion::Hatch(1.9)),
             piece(
                 &TRAPDOOR,
                 t(HATCH_AT.x, HATCH_AT.y + 0.02, 0.12).with_rotation(Quat::from_rotation_y(PI)),
             )
-            .lost(1)
             .mirrored()
             .moving(Motion::Hatch(1.9)),
-            fixed(&MORTAR, MORTAR_AT, 0.05).lost(1),
+            fixed(&MORTAR, MORTAR_AT, 0.05),
         ],
         StrongholdKind::Command => vec![
             piece(&ARCHER, t(ARCHER_AT.x, ARCHER_AT.y, ARCHER_AT.z))
-                .lost(2)
                 .aimed()
                 .moving(Motion::Swivel),
-            carried(&LONGBOW, LONGBOW_AT, 0.025).lost(2),
+            carried(&LONGBOW, LONGBOW_AT, 0.025),
+            piece(&LOADED_ARROW, t(LONGBOW_AT.x, LONGBOW_AT.y, LONGBOW_AT.z))
+                .aimed()
+                .moving(Motion::Nocked),
         ],
         StrongholdKind::Artillery => Vec::new(),
     }
@@ -130,7 +143,7 @@ pub(super) fn turret(kind: StrongholdKind, damage: u8) -> Option<Turret> {
         arc,
     };
     match kind {
-        StrongholdKind::Classic if damage < 1 => Some(aimed(
+        StrongholdKind::Classic if damage < 200 => Some(aimed(
             CROSSBOW_AT,
             true,
             PI,
@@ -144,7 +157,7 @@ pub(super) fn turret(kind: StrongholdKind, damage: u8) -> Option<Turret> {
             Vec3::new(0.27, 0.0, 0.0),
             (ShotKind::RapidCannon, Muzzle::Bombard),
         )),
-        StrongholdKind::Treasury if damage < 1 => Some(Turret {
+        StrongholdKind::Treasury if damage < 200 => Some(Turret {
             rest_pitch: 0.8,
             ..aimed(
                 MORTAR_AT,
@@ -154,7 +167,7 @@ pub(super) fn turret(kind: StrongholdKind, damage: u8) -> Option<Turret> {
                 (ShotKind::Coins, Muzzle::Coin),
             )
         }),
-        StrongholdKind::Command if damage < 2 => Some(aimed(
+        StrongholdKind::Command if damage < 20 => Some(aimed(
             LONGBOW_AT,
             true,
             PI,
@@ -219,7 +232,6 @@ fn crossbow(_team: Color) -> Vec<Part> {
         (Box(0.24, 0.035, 0.035), WOOD, t(0.03, 0.0, 0.0)),
         (Box(0.025, 0.025, 0.24), STEEL, t(0.14, 0.0, 0.0)),
         (Box(0.008, 0.008, 0.22), LINEN, t(0.09, 0.0, 0.0)),
-        (Box(0.14, 0.012, 0.012), TIMBER, t(0.1, 0.025, 0.0)),
     ]
 }
 
@@ -303,7 +315,5 @@ fn longbow(_team: Color) -> Vec<Part> {
             t(0.07, -0.1, 0.0).with_rotation(Quat::from_rotation_z(-0.25)),
         ),
         (Box(0.006, 0.42, 0.006), LINEN, t(0.025, 0.0, 0.0)),
-        (Box(0.26, 0.01, 0.01), TIMBER, t(0.1, 0.0, 0.0)),
-        (Box(0.03, 0.02, 0.02), STEEL, t(0.23, 0.0, 0.0)),
     ]
 }

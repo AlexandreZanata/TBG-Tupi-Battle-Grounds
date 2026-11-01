@@ -117,6 +117,12 @@
   const TS = globalThis.TbgStronghold;
   const fortPanel = root.querySelector('[data-fort-panel]');
   const fortOptions = [...fortPanel.querySelectorAll('[data-fort-branch]')];
+  const fortUpgrades = document.createElement('aside');
+  fortUpgrades.className = 'fort-upgrades';
+  fortUpgrades.hidden = true;
+  fortUpgrades.setAttribute('aria-label', t('fortify.heading'));
+  fortUpgrades.append(fortPanel.querySelector('.fort-options'), fortPanel.querySelector('.fort-note'));
+  root.append(fortUpgrades);
   const fort = {data: null, loading: null};
   function fortData() {
     fort.loading ||= fetch('assets/stronghold/strongholds.json')
@@ -173,8 +179,10 @@
     plates(you, enemy);
     const def = fort.data && TS.kind(fort.data, you.kind);
     fortPanel.hidden = !def || s.towerOpen !== 'true';
+    fortUpgrades.hidden = fortPanel.hidden;
     if (!def || fortPanel.hidden) return;
     fortPanel.style.setProperty('--tower', def.color);
+    fortUpgrades.style.setProperty('--tower', def.color);
     const toggleLabel = t(fortToggle.getAttribute('aria-expanded') === 'true' ? 'fortify.hide' : 'fortify.show');
     if (fortToggle.getAttribute('aria-label') !== toggleLabel) fortToggle.setAttribute('aria-label', toggleLabel);
     fortPanel.querySelector('[data-fort-icon]').setAttribute('href', TS.icon(def.kind));

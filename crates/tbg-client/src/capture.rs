@@ -8,12 +8,47 @@ use bevy::{
 #[cfg(tbg_desktop)]
 mod arenas;
 #[cfg(tbg_desktop)]
+mod focus;
+#[cfg(tbg_desktop)]
+mod polish;
+#[cfg(tbg_desktop)]
+mod polish_live;
+#[cfg(tbg_desktop)]
+mod polish_motion;
+#[cfg(tbg_desktop)]
 mod reserve;
 #[cfg(tbg_desktop)]
 mod training;
+#[cfg(tbg_desktop)]
+mod troops;
 
 pub fn plugin(app: &mut App) {
+    #[cfg(tbg_desktop)]
+    if crate::config::url_param("capture_focus").is_some() {
+        focus::plugin(app);
+        return;
+    }
+    #[cfg(tbg_desktop)]
+    if crate::config::url_param("capture_motion").is_some() {
+        polish_motion::plugin(app);
+        return;
+    }
+    #[cfg(tbg_desktop)]
+    if crate::config::url_param("capture_polish_live").is_some() {
+        polish_live::plugin(app);
+        return;
+    }
+    #[cfg(tbg_desktop)]
+    if crate::config::url_param("capture_polish").is_some() {
+        polish::plugin(app);
+        return;
+    }
     if crate::config::url_param("capture").is_some() {
+        #[cfg(tbg_desktop)]
+        if crate::config::url_param("capture_panel").as_deref() == Some("troops") {
+            troops::plugin(app);
+            return;
+        }
         app.add_systems(Update, capture);
         #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("training") {
@@ -130,7 +165,19 @@ fn capture(
     #[cfg(tbg_desktop)] match_info: Res<crate::sync::MatchInfo>,
     #[cfg(tbg_desktop)] loading: Res<crate::ui::native_loading::Status>,
     mut started: Local<bool>,
+    #[cfg(tbg_desktop)] mut ready_at: Local<Option<f32>>,
 ) {
+    #[cfg(tbg_desktop)]
+    {
+        if !loading.boot_ready || loading.scene_waiting {
+            *ready_at = None;
+            return;
+        }
+        let ready = *ready_at.get_or_insert(time.elapsed_secs());
+        if time.elapsed_secs() - ready < 0.8 {
+            return;
+        }
+    }
     let delay = crate::config::url_param("capture_after")
         .and_then(|s| s.parse::<f32>().ok())
         .unwrap_or(8.0)

@@ -183,6 +183,7 @@ Phase files are written one at a time, starting with P42.
 | PORTRAITS | [PORTRAITS-shop-cards.md](phases/PORTRAITS-shop-cards.md) | Shop card portraits for all 25 buyable units from the current 3D models, same framing as the original set; capture tool and test | implemented, awaiting owner look | yes (owner: look) |
 | A-1 | [A1-visual-polish-troops-strongholds.md](phases/A1-visual-polish-troops-strongholds.md) | Troop polish: directional aim from `AttackStart`, directed melee, 55 rig-v2 forms, full animation pass (D-47). Steps 10–12 (Strongholds) **superseded by D-46** | consolidated 2026-10-30: kit units keep the P54/P55 look (owner direction); A-1 drives the Archer and any kind without a kit (D-47) | — |
 | ARENAS-G | [ARENAS-gameplay.md](phases/ARENAS-gameplay.md) | Arenas in the real game: server draw at pairing, symmetric modifiers (Proposed), practice choice, scene switching, Arenas lobby page; lab measurement deferred by the owner | implemented, awaiting owner look | yes (owner: look, fun, values) |
+| ARENAS-3 | [ARENAS-three-new.md](phases/ARENAS-three-new.md) | Celestial Citadel, Clockwork Bastion and Desert Relics; original geometry and symmetric Proposed modifiers; local-only concept references | implemented; targeted checks passed, native Linux installed | yes (owner: look, fun, values) |
 | P56 | [P56-archer-crab-selection.md](phases/P56-archer-crab-selection.md) | Part A fixes: Archer bow on its kit (curved, drawable string, native path removed), Cargo Crab carry rule (D-60), carrier id in the view (D-61, protocol 18), passengers seated on their carrier with a boarding arc, crab visual rebuilt, selective name tags | Part A implemented and verified; balance deferred by owner; look sign-off pending | yes (owner: look) |
 | P57 | [P57-unit-spacing.md](phases/P57-unit-spacing.md) | Units take up space on screen; server and protocol unchanged | consolidated with PR #21 crowd renderer; sorted views and target/lunge corrections retained; owner look pending | yes (owner: look) |
 | P58 | [P58-roster-expansion-planning.md](phases/P58-roster-expansion-planning.md) | Docs-only plan for 21 units + Monsters/Celestials/Insects: catalog, audit, GAME-DESIGN §13 registry, future waves | planned; reaudited | — |
@@ -419,6 +420,72 @@ database mutation or deployment is part of this planning delivery. Use the
 checks now; exact targeted tests once at implementation consolidation;
 heavy/full-suite checks only on a separate explicit owner request.
 
+## Champion visual identity and animation polish (owner request, 2026-10-31)
+
+**P70 — all 46 candidates compiled, rendered and sampled-reviewed; phase
+acceptance incomplete**, on `phase/p70-champion-visual-polish`. Evidence includes
+630 before PNGs, 460 selected after sheets, twelve normal-rate motion videos
+covering 230 forms, all 46 Base match-distance lineups, 53 actual Troops
+previews and both-seat P63 fixtures. Longaxe/Bone Brute grip, Shatterback
+geometry, gallery Victory ownership and dark Troops lighting were repaired.
+Trident's authoritative range candidate is 2000 (from 1100), with passing
+boundary regressions; D-33 and owner balance approval remain pending.
+Linux build, cached WASM check and targeted regressions passed. Continuous
+all-form/live/auxiliary acceptance, browser/Windows runtime and owner look/fun
+approval remain open. See the [execution review](planning/P70-VISUAL-REVIEW.md)
+and [renderer review pack](planning/p70-review/README.md).
+Read [the executable phase](phases/P70-champion-visual-identity-polish.md),
+[the 46-champion identity/capture manifest](planning/P70-VISUAL-MANIFEST.json)
+and [the execution prompt](planning/P70-EXECUTION-PROMPT.md).
+
+Use the consolidated Linux **46-champion** roster, never the older 25.
+Every champion receives an individual identity, color/model review and
+personalized motion pass, including Victory. The fixed scope covers 230
+forms and every applicable animation/ability, with actual before/after
+evidence. Mandatory pilots: diagnose/remove the reported blue square/hole;
+fix Trident's trident/body intersection and shark identity; make Pyre
+Warden visibly emit fire; make Old Finn throw a recognizable fish that
+grows with Evolution. Trident must also become taller, carry a longer
+trident and use a frontal spear thrust rather than an axe-like motion.
+Its explicitly requested real basic-range increase is the only balance
+exception: calibrate the new value, document it as Proposed and require
+D-33 evidence/owner acceptance. Preserve all other rules and event timing.
+
+Execution order: reproducible capture tooling and immutable complete
+baseline -> shared artifact diagnosis -> three pilots -> remaining 43
+individual champions -> consolidated evidence and targeted desktop review.
+Reuse P62 previews and P63 celebration ownership; P68/P69 packaging,
+authentication and mobile work remain separate. The S0 tooling build and
+before campaign completed. Independent art
+continued while the S2 runtime gate was deferred; after evidence and owner
+acceptance remain open in the execution review. Apply the current owner
+minimal-validation policy instead
+of historical full-suite blocks. No push or deployment is authorized.
+
+
+## P71 — Combat readability and Stronghold visual polish (owner 2026-11-01)
+
+**Planned; no runtime change in this planning delivery.** Read
+[P71](phases/P71-combat-readability-and-stronghold-polish.md), based on the
+P70 46-champion candidate and the owner's installed-Linux screenshot.
+
+Order: freeze affected evidence → correct form-aware HP bars, tier stars and
+persistent foot allegiance → repair Rattle & Tick weapon ground clearance →
+refine Trident approach/load and close-range downward thrust → align Bonehorn
+locomotion, tall-armor HP clearance and head-inclusive body occupancy → align
+Drillnest chassis/tracks through locomotion and production → remove body team
+patches across all 46 kits →
+white/red/black Pyre with orange/red fire → individual tower firing/animation
+repairs → cumulative 5% Stronghold degradation → scoped consolidation and
+native Linux playtest installation. Four kinds × five forms are mandatory;
+Classic Base stays a reference. Branch `codex/p71-combat-visual-plan` contains
+the specification; execution belongs on `phase/p71-combat-visual-polish`.
+
+No gameplay, protocol or balance change is part of this phase. P70's unresolved
+acceptance is not silently closed. Owner look/fun review follows a concrete
+rendered comparison and installed playtest. See the
+[planning report](planning/P71-PLANNING-REPORT.md) for evidence and validation.
+
 ## Windows native release (owner planning request, 2026-10-31)
 
 | Phase | Spec | Deliverable | Status | Review |
@@ -488,3 +555,24 @@ acceptance (audit failures), P66 continuity investigation and O02–O05, P68
 Windows/visual/public-HTTPS acceptance, P67 activation gates, cross-slot
 revocation before any two-slot rollout with P68 auth, and owner look/fun
 sign-off. Nothing was deployed; production stays on protocol 29.
+
+
+### 2026-11-01 main/P71 backend integration
+
+`phase/backend-main-integration` reconciles GitHub main `027fd61` authentication,
+refresh, authenticated reconnect, schema 10 and release admission with the P71
+character fixes and eight Arenas. Combined protocol: 31; ruleset: 6. Targeted
+consolidation: 90 Rust scenarios passed plus WASM compilation and source gates;
+full suite and existing balance/visual gates remain open. The reset VPS installation
+awaits owner-provided connection settings and verified host identity. See
+[the report](phases/BACKEND-main-integration-20261101.md).
+
+
+### 2026-11-01 automatic main delivery preparation
+
+`phase/main-auto-deploy` prepares CI-gated, attested backend candidates and a
+VPS-pull controller with compatibility guards, match drain and durable rollback.
+This keeps the owner's PC as the SSH maintenance channel. The timer is not
+installed/enabled; main integration and the first real attested package/verifier
+acceptance remain prerequisites. Native signing and frontend publication remain
+separate. See [the preparation report](phases/MAIN-auto-deploy-preparation.md).

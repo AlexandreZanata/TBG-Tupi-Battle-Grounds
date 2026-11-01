@@ -19,7 +19,7 @@ pub const HEAD_Y: f32 = HAFT * 0.72;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.05, tier);
-    p.arm = 0.19;
+    p.arm = 0.26;
     p
 }
 
@@ -39,8 +39,8 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         boots: DARK_LEATHER,
     };
     body::humanoid(&mut v, &p, &look);
-    body::tunic(&mut v, &p, TRIM, DARK_LEATHER, LEATHER);
-    body::tabard(&mut v, 0.15, 0.36);
+    body::tunic(&mut v, &p, RUST, TRIM, DARK_LEATHER);
+
     body::bracers(&mut v, &p, LEATHER);
     armor(&mut v, &p, f);
     head(&mut v, &p, f);
@@ -50,6 +50,15 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
 
 fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     let h = p.torso.y;
+    // Padded shoulder panels distinguish the polearm infantry from plate defenders.
+    for arm in [UpperArmL, UpperArmR] {
+        v.push(part(
+            Body(arm),
+            Pill(0.074, 0.045),
+            RUST,
+            [0.0, -0.035, 0.0],
+        ));
+    }
     // Quilted gambeson ribs.
     for y in [0.3, 0.55, 0.8] {
         v.push(part(
@@ -78,7 +87,7 @@ fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             part(
                 Body(Chest),
                 Box(0.06, h * 1.1, 0.03),
-                ALLY,
+                LINEN,
                 [0.02, h * 0.5, p.torso.z * 0.46],
             )
             .rot([0.0, 0.0, -32.0]),
@@ -86,7 +95,7 @@ fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     }
     if f.t2 {
         body::greaves(v, STEEL);
-        let cape = if f.a { RED_CLOTH } else { ALLY };
+        let cape = if f.a { RED_CLOTH } else { LINEN };
         body::cape(v, cape, 0.3, 0.46);
     }
 }
@@ -167,7 +176,7 @@ fn poleaxe(v: &mut Vec<PartSpec>, f: Form) {
                 IRON,
                 [0.0, top - 0.04, 0.17],
             ));
-            v.push(part(w, Box(0.036, 0.48, 0.03), ALLY, [0.0, top - 0.04, 0.33]).glow());
+            v.push(part(w, Box(0.036, 0.48, 0.03), LINEN, [0.0, top - 0.04, 0.33]).glow());
             v.push(
                 part(w, Cone(0.04, 0.22), IRON, [0.0, top - 0.02, -0.16]).rot([-100.0, 0.0, 0.0]),
             );

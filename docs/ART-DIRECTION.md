@@ -35,10 +35,14 @@
   (`#A9C8E8` / `#6B5A43`), soft fog. A rim term (fresnel, shader-free
   approximation via vertex light baking on silhouettes) keeps figures
   separated from the ground.
-- **Team identity (readability, never optional):** tabard/plume/banner
-  slots use the team color — ally `#3FA9F5`, enemy `#F2545B` — plus a
-  ground ring (ally solid, enemy notched) so color-blind players read it
-  by shape too.
+- **Team identity — owner override, 2026-11-01 (P71, planned):** units use
+  persistent ground rings — ally `#3FA9F5`, enemy `#F2545B` — with a
+  solid/notched shape distinction. Remove body bands, patches and heraldry
+  whose only purpose is team identification; clothing keeps intrinsic kit
+  colors. Status effects must not replace foot allegiance. Architectural
+  Stronghold banners remain. P70's fitted team tabards are the historical
+  implementation baseline, superseded as a design requirement by this request.
+  See [P71](phases/P71-combat-readability-and-stronghold-polish.md).
 
 ## 3. Palette (start values; P15 locks them)
 
@@ -49,10 +53,39 @@
 | Machines — *The Ironworks* | iron `#4A5058` | brass `#B5893B` | forge glow `#FF8A3D` | leather `#5C3B26`; ogre skin `#8C9A6B` |
 | Plants — *The Wildwood* | bark `#6B4F2E` | moss `#4E9F3D` | bloom `#F28AB2` | amber sap `#F2B544` |
 | Monsters — *The Pit* (Proposed, D-64) | charcoal `#2E3033` | dark `#2A2430` | turquoise `#2BB3A8` | bone `#F1EBDD`; gunmetal hide `#4A5058` |
-| Celestials — *The Halo* (Proposed, D-64) | ivory `#F1EBDD` | navy `#1F2F5A` | gold `#D9B44A` | dark blue cloth; team tabard |
+| Celestials — *The Halo* (Proposed, D-64) | ivory `#F1EBDD` | navy `#1F2F5A` | gold `#D9B44A` | dark blue intrinsic cloth; team ring (P71) |
 | Insects — *The Hive* (Proposed, D-64) | moss `#5C6B2E` | chitin `#2C2A1E` | amber `#D98E2B` | linen `#E6D8B8`; ogre skin `#8C9A6B` |
 | Environment | grass `#7BB661` | road `#C9A46A` | water `#3FA7B5` | stone `#B9B2A3`, timber `#8A6A44`, sky top `#7FB8E6` → horizon `#E8D9B5` |
 | UI | parchment `#EFE3C6` | ink `#2B2118` | gold `#C9A13B` | iron frame `#3A3F45`, danger `#C0392B`, ok `#3E8E41` |
+
+### P70 individual color refinement (Proposed, owner visual review pending)
+
+Keep faction materials as the foundation, with readable main/support/accent
+regions for each champion. P70 kept localized team heraldry; P71 supersedes
+that requirement with intrinsic clothing and persistent team rings. Do not
+recolor whole torsos into team armor or globally increase saturation.
+
+- Old Finn uses `OILSKIN_YELLOW` (`#D8A92E`) with `OILSKIN_SHADE`
+  (`#9D6F20`) for his weathered fishing coat. His fish uses `FISH_BACK`
+  (`#426676`) and `FISH_SILVER` (`#B7D1D5`) with the existing light belly
+  colors, so the body, fins and forked tail remain distinct in flight.
+- Trident uses `SHARK_SLATE` (`#3F6370`) and `SHARK_BELLY` (`#CBD9D4`)
+  as continuous shark countershading. Rust, bone armor and branch cloth
+  retain the existing medieval material language.
+
+- Farwatch uses `FIELD_SLATE` (`#455766`) for a large practical coat region,
+  separating the arbalest silhouette from Archer's ranger green.
+- Bloodweaver uses `WINE_CLOTH` (`#611421`) and `WINE_SHADE` (`#380D14`)
+  for ritual cloth, with `BLOOD_THREAD` (`#E01A24`) reserved for readable
+  thread accents rather than a glowing whole body.
+- `RITUAL_VIOLET` (`#C77AFF`) separates small occult focal points from
+  spectral green. `OLD_BONE` (`#BFB599`) gives large aged bone regions
+  contrast against bright teeth/skulls. `SHOWMAN_VIOLET` (`#5C3D75`)
+  supports Puppetmaster's theatrical cloth silhouette. These remain
+  proposed individual refinements, with owner visual approval pending.
+
+These are presentation colors, not new faction lore or gameplay rules.
+Individual shapes, equipment and movement must also distinguish the kits.
 
 ## 4. Rig and motion language
 
@@ -115,13 +148,39 @@ tier 1, and tier 2 of every unit correctly.
 
 ## 6. Strongholds
 
-Three **free cosmetic** styles, identical in gameplay (BR-U05, BR-C04):
-**Stone Keep** (round stone tower, crenellations, banner), **Timber Fort**
-(palisade ring + wooden watchtower), **Gatehouse** (twin towers and a
-portcullis arch). Each has: team banners, a defender on top that animates
-the Stronghold's attack (crossbow bolt), four damage states (100–75 %,
-75–50 %, 50–25 %, < 25 %) with smoke and debris, a hit shake, and a
-collapse sequence at defeat. Budget ≤ 4 000 triangles per style.
+The active Strongholds are **Treasury, Bastion, Artillery and Command**,
+with kind-exclusive Fortification (D-46), plus nonselectable Classic for
+reference scenes. Preserve distinct Base/A1/A2/B1/B2 silhouettes and D-52's
+visible defenders/weapons. Earlier Stone Keep/Timber Fort/Gatehouse cosmetic
+plans and their four coarse damage bands are superseded.
+
+**P71 owner follow-up, planned:** polish every kind's aim, anticipation,
+release, recoil/reload and recovery with the actual visible muzzle. Every
+5% of authoritative HP lost adds cumulative structural degradation, debris,
+scorching and eventually localized red/orange fire. Derive the state from
+the kind's current max HP after Fortification. The tower keeps a credible
+firing mechanism while alive; breakage never changes combat. Reconnect,
+healing and Fortification reconcile to current HP, with bounded transition
+VFX and no full-history replay. At zero HP, a bounded matching collapse
+must leave the result controls usable. Reuse cached parts, shared materials
+and the existing VFX lifecycle. No new triangle ceiling replaces D-30;
+measure the final ordinary playtest and disclose unmeasured performance.
+
+### P71 unit HUD and fire palette (Proposed tuning)
+
+HP bars clear the actual stable head/body/attached-gear envelope for each
+form; spawn and Evolution use one layout. Exclude detached projectiles and
+long weapon tips from bar height. Bright yellow `#FFD43B` five-point stars
+with a thin near-black `#17120C` silhouette replace gold/silver cubes:
+Base none, tier 1 one, tier 2 two on either branch and team. Keep stars,
+names and status badges clear of each other at normal desktop game distance.
+
+Pyre Warden uses white/ivory armor, strong red furnace panels and charcoal/
+black pack, hose and seams. Its flame is orange/red with a small hottest
+light core, replacing this kit's green spectral fire and green danger strip.
+Preserve the five form silhouettes, actual nozzle, event lifetime, endpoint
+and friendly-fire segment. This changes one kit's art direction, not the
+whole Undead palette. All tuning remains subject to rendered owner review.
 
 ## 7. UI kit
 

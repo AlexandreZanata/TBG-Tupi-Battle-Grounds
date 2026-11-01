@@ -3,8 +3,9 @@
 
 mod model;
 mod motion;
+mod reload;
 
-use super::{Attack, Flash, Gait, Kit};
+use super::{Anatomy, Attack, Flash, Gait, Kit};
 use crate::art::{
     anim::Clip,
     rig::{Node, Socket},
@@ -12,8 +13,15 @@ use crate::art::{
 use crate::vfx::{impacts::Muzzle, shots::ShotKind};
 use model::{bombard, Form};
 
+static ANATOMY: Anatomy = Anatomy {
+    rest: model::rest,
+    parent: model::parent,
+    springs: true,
+    planted_legs: true,
+};
+
 pub const KIT: Kit = Kit {
-    anatomy: None,
+    anatomy: Some(&ANATOMY),
     figure: model::spec,
     pose: motion::pose,
     gait: Gait::HEAVY,

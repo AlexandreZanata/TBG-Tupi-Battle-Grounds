@@ -24,7 +24,7 @@ static CROWN: PartDef = PartDef {
 };
 
 pub(super) fn pieces() -> Vec<Piece> {
-    vec![whole(&BASE), whole(&MID).lost(2), whole(&CROWN).lost(1)]
+    vec![whole(&BASE), whole(&MID).lost(14), whole(&CROWN).lost(7)]
 }
 
 fn at(y: f32) -> Transform {

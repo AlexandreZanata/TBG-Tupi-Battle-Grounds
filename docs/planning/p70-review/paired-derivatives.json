@@ -1,0 +1,1530 @@
+[
+  {
+    "kind": "paired_base_idle_derivative",
+    "path": "docs/planning/p70-review/paired-celestials.webp",
+    "sha256": "98793d07648a846186903baa9b849c8b27a0cd0d311e77d77d7e029f6ae5ed44",
+    "sources": [
+      {
+        "unit": "SolarSentinel",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/SolarSentinel/ally-threequarter/00.png",
+        "sha256": "57abe94fc32a1721f7c4b8fb391316b534106cca7f0b3c1834403f06f65e5f5c",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "SolarSentinel",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-14-d4566f5/SolarSentinel/ally-threequarter/00.png",
+        "sha256": "9aec8dfe7b5c2890879a88ff8c3f3b2f0e915aa8a661d068476aa57578b93b62",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "LuminousOracle",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/LuminousOracle/ally-threequarter/00.png",
+        "sha256": "dd6cfc9d1b3f1bbba1165a947ea105e694d3a5b379bb35f52c0986b441c32cd9",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "LuminousOracle",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-15-d4566f5/LuminousOracle/ally-threequarter/00.png",
+        "sha256": "034b8838b6ad2a3a8772ef4a1f3ffe055020ee73e6ac5f80161978987a9bc237",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "CelestialArcher",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/CelestialArcher/ally-threequarter/00.png",
+        "sha256": "ecce5bad5ff14a8dafe7abbe363a654ecf331006428cbab80e9b5b6e768c55ac",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "CelestialArcher",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-15-d4566f5/CelestialArcher/ally-threequarter/00.png",
+        "sha256": "caccd8d6f499f1c2671188b430950b86fce0907790373955eee8fef23a22d218",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Justiciar",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Justiciar/ally-threequarter/00.png",
+        "sha256": "de9d682c5c22be1a595e88bb834d15ed1f99235bd6c0e743189386871ed8ce2a",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Justiciar",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-16-d4566f5/Justiciar/ally-threequarter/00.png",
+        "sha256": "d8667db1a7849bd8af7a20eda962424da9566e98b9bb88314d997bb511b37637",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      }
+    ],
+    "provenance_note": "Copied unchanged comparison derivative; crop/resize metadata links immutable renderer originals. Base Idle only. Shatterback before lacks detachable plates."
+  },
+  {
+    "kind": "paired_base_idle_derivative",
+    "path": "docs/planning/p70-review/paired-humans.webp",
+    "sha256": "c6f99f59c3a808ee6bef957894ee1e9c0f10b5b2c25e51c8c5a797ba27cfc652",
+    "sources": [
+      {
+        "unit": "Shieldbearer",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Shieldbearer/ally-threequarter/00.png",
+        "sha256": "789cf444dc5d746bd074d6d87ca064319ea22735620a9d9060906d4a7e87bb68",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Shieldbearer",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-cohort-d4566f5/Shieldbearer/ally-threequarter/00.png",
+        "sha256": "1a0559ca5e6127b59cc7167a3f629748d6214c670e17ccac2aab0e01baa0ade3",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Archer",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Archer/ally-threequarter/00.png",
+        "sha256": "b3add17637ee527526b2654d0a6d16ab279002ee911eaed9d2d6ec9779f42219",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Archer",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-cohort-d4566f5/Archer/ally-threequarter/00.png",
+        "sha256": "ec24bec890bf2dd0ce4b188eef22c7844c7d8381688ed1c5f485404e7021f19a",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Longaxe",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Longaxe/ally-threequarter/00.png",
+        "sha256": "a1b220ae3e4b596e5cc1ebbd6ef27964285072b3a325184358aa296c395df5ea",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Longaxe",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-repairs-1d6e456/Longaxe/ally-threequarter/00.png",
+        "sha256": "f53453e4ebcef3206a9754648f3f73c6e41e1779927f8f68a91c25257c08df9c",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Farwatch",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Farwatch/ally-threequarter/00.png",
+        "sha256": "cbb6bdef0d70b825c33ebba730375d24be0ba534ea7f3d746026775359f29ddd",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Farwatch",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-3-d4566f5/Farwatch/ally-threequarter/00.png",
+        "sha256": "3b7b690582cecb8fcbc54c98934bc671a3e71f0f959a2be518cd33aad60d0661",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "OldFinn",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/OldFinn/ally-threequarter/00.png",
+        "sha256": "5e380d06d86addd717f2a7706aed88338f0a497fed50dcd6fb6abb4d9e6d0ff6",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "OldFinn",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-8319c12/OldFinn/ally-threequarter/00.png",
+        "sha256": "c8fdb92659a8e978c7e14b63488953e229119a54dcafcaf125c13b3e6de57383",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Drumguard",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Drumguard/ally-threequarter/00.png",
+        "sha256": "217a416dcf427aab760db72c0295cf58aa5a805ed5121be179def69cfc6a82ac",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Drumguard",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-7-d4566f5/Drumguard/ally-threequarter/00.png",
+        "sha256": "f834413325624f9ebffc6871e549f7989688b90d70739623df5c3876057e5747",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Smuggler",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Smuggler/ally-threequarter/00.png",
+        "sha256": "75251f553f992adb77925e703ae72b3143d9d9b2fc019adc383fe374da38104d",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Smuggler",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-9-d4566f5/Smuggler/ally-threequarter/00.png",
+        "sha256": "68cdd0cd5f8c5ac72ee34d4294054fec183cb9e2ac52d46e106da032a62c8022",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Trigger",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Trigger/ally-threequarter/00.png",
+        "sha256": "c6ea969e7899b8c63d3f3eb71d6251a7ab6704d05574bf04487ab32bbec26c97",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Trigger",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-13-d4566f5/Trigger/ally-threequarter/00.png",
+        "sha256": "1b316288b1e9e7c149bb721ff01accf00c514a812ea42449989dfa3eb1786957",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "RattleTick",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/RattleTick/ally-threequarter/00.png",
+        "sha256": "328e31133fe8659268611beaa98b9fe250534b80b2494b8504a734a85ebe3ba2",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "RattleTick",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-13-d4566f5/RattleTick/ally-threequarter/00.png",
+        "sha256": "61e0a748613b22c00678b2dbdbe2b705db1650222f4afe423f096c414341b4c4",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      }
+    ],
+    "provenance_note": "Copied unchanged comparison derivative; crop/resize metadata links immutable renderer originals. Base Idle only. Shatterback before lacks detachable plates."
+  },
+  {
+    "kind": "paired_base_idle_derivative",
+    "path": "docs/planning/p70-review/paired-insects.webp",
+    "sha256": "70fc0efef71aee36430dc0ff517ae52897ad3b7364b0699b80a37d426009e6a9",
+    "sources": [
+      {
+        "unit": "Jawguard",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Jawguard/ally-threequarter/00.png",
+        "sha256": "c72d86081e46277275841445d7237b86ff37ae45054c49d0456dd548bdf06537",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Jawguard",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-16-d4566f5/Jawguard/ally-threequarter/00.png",
+        "sha256": "97b950f1120e928471d5e10a302153bfb1221cc0cf580db420b46ba9c1ebb161",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Mantis",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Mantis/ally-threequarter/00.png",
+        "sha256": "b5005f2c552aa5a6adbe55bb275e8ff7a95c3d95c8fd7668e3d55849074f6f40",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Mantis",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-17-d4566f5/Mantis/ally-threequarter/00.png",
+        "sha256": "810f56fd28198ec64a1bc6d8d4732e6247348cc082efb596d267c8eae809b74a",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Hornet",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Hornet/ally-threequarter/00.png",
+        "sha256": "8aca281408f8d65413cf2a0ba1677a0510e8672233452d5396a54f63b92e85da",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Hornet",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-17-d4566f5/Hornet/ally-threequarter/00.png",
+        "sha256": "7515f2e92043aa92c5bc59b90d218f21a37e9c94f76b30651d5881fa1b56fc5f",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Weaver",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Weaver/ally-threequarter/00.png",
+        "sha256": "1293ff318ae69fe8e1c8ef794fb96376db4a6353030c3b173c1f80a84f0849e8",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Weaver",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-18-d4566f5/Weaver/ally-threequarter/00.png",
+        "sha256": "69478780cec4b0735a0798e67e55f64d35c2e0f62f050d91e355911a1c404cc4",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      }
+    ],
+    "provenance_note": "Copied unchanged comparison derivative; crop/resize metadata links immutable renderer originals. Base Idle only. Shatterback before lacks detachable plates."
+  },
+  {
+    "kind": "paired_base_idle_derivative",
+    "path": "docs/planning/p70-review/paired-machines.webp",
+    "sha256": "6b482a417c34722a65ccce3e3dba304a1c66bfae81da94f1ebbaf20e04d0d07f",
+    "sources": [
+      {
+        "unit": "Sawbot",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Sawbot/ally-threequarter/00.png",
+        "sha256": "8cb0c1cb091d871a767c1b8805aee858dbcdd1f8feeb476cfe594a993f4b53f9",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Sawbot",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-cohort-d4566f5/Sawbot/ally-threequarter/00.png",
+        "sha256": "56c5071fe5a077ae05d51888ffe1d15464168862327b7c3295f4d157a10d74e9",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "SiegeWalker",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/SiegeWalker/ally-threequarter/00.png",
+        "sha256": "c1d741d9625dbabb128c7a2edc5c9e3ecb997722fe7fb3113a239a590e5d2345",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "SiegeWalker",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-cohort-d4566f5/SiegeWalker/ally-threequarter/00.png",
+        "sha256": "de40eafe9aeb8db8fc7d5b8514c620541174ade1ada4e5e2506263b0140afd18",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Rampart",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Rampart/ally-threequarter/00.png",
+        "sha256": "13f18d4c34e8ded0a344b6be693ef330c59be34ed86bc65fdca4ed38bd17b038",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Rampart",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-2-d4566f5/Rampart/ally-threequarter/00.png",
+        "sha256": "f891b0a2ccf148866b8a724530e35064f834431c2d73965ef935cc42215093a7",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Bombard",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Bombard/ally-threequarter/00.png",
+        "sha256": "476e1fb478e001513c4f015336d1740735bdbe8e3aa1bab017380c18f713066a",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Bombard",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-3-d4566f5/Bombard/ally-threequarter/00.png",
+        "sha256": "17f081727b389a42f210f01dd4b33b0a62354f896dea6fb10f4b4b1fbfb48c17",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Oilpress",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Oilpress/ally-threequarter/00.png",
+        "sha256": "caa1105b68613ee17af026e2c93a091875b230475c2f30328451bb6058c202a4",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Oilpress",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-6-d4566f5/Oilpress/ally-threequarter/00.png",
+        "sha256": "43f9caecb012b43cb29063527c8e1662abc2857569450b13d56ac92ca90debf8",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "CargoCrab",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/CargoCrab/ally-threequarter/00.png",
+        "sha256": "5cd712ad1ace2df6c5c05fbd99f8288c877aedc13b7b4d1f2e0de2a3fe27b70f",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "CargoCrab",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-8-d4566f5/CargoCrab/ally-threequarter/00.png",
+        "sha256": "ea2dba2d6ba73edd013d82aed782e1c0b74548092a739d15bb97316eab403462",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Bulwark",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Bulwark/ally-threequarter/00.png",
+        "sha256": "1fbbf110dba9ae3a5bdb51587eab0f695f9a90ce3bfb956f8e063e1543361e8a",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Bulwark",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-11-d4566f5/Bulwark/ally-threequarter/00.png",
+        "sha256": "803925815d5657db2ce323ae8e86ed1f773d975a4a741b7a2256a416d0e955dd",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Demolisher",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Demolisher/ally-threequarter/00.png",
+        "sha256": "9881e7c21a06a1e6e65b8d21f567b75fd47175342a823d88ce83d6c8ad8f3ebf",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Demolisher",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-12-d4566f5/Demolisher/ally-threequarter/00.png",
+        "sha256": "345744743e69f773b72355c1d1654a32a4cba9b097afc9b47ba8530c90f3e6e0",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Drillnest",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Drillnest/ally-threequarter/00.png",
+        "sha256": "36fe3ef82f5c6f4b53a5ba1cb126f3e3910ba14369d1a21c7e6a5a9ee09b8628",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Drillnest",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-18-d4566f5/Drillnest/ally-threequarter/00.png",
+        "sha256": "738f8d848da82b84f680d15545dfe4f26a8434aea39c01c093436dc064971733",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      }
+    ],
+    "provenance_note": "Copied unchanged comparison derivative; crop/resize metadata links immutable renderer originals. Base Idle only. Shatterback before lacks detachable plates."
+  },
+  {
+    "kind": "paired_base_idle_derivative",
+    "path": "docs/planning/p70-review/paired-monsters.webp",
+    "sha256": "32facd8149743ef71344b864b24d8f5b8cebbc117b27baefd340d796530a8c59",
+    "sources": [
+      {
+        "unit": "Bonehorn",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Bonehorn/ally-threequarter/00.png",
+        "sha256": "fdc436044ea85da906baa582e3c1a05af32cfafb29c43f634eb821466463c080",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Bonehorn",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-9-d4566f5/Bonehorn/ally-threequarter/00.png",
+        "sha256": "7cb4baa687236804e0f88739fe0a7017fa8c7a0287d0734b3ac075a6d2ff434d",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Ravager",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Ravager/ally-threequarter/00.png",
+        "sha256": "24d3c3a900dacc25d8baa40d156f7406e34390ed7d80d4758709bb2d1b2057ae",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Ravager",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-10-d4566f5/Ravager/ally-threequarter/00.png",
+        "sha256": "28ebaff0c526501f1e5390e021fe4f587595d0945b9f30548977e4c92afd9017",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Acidmaw",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Acidmaw/ally-threequarter/00.png",
+        "sha256": "b9b5fa9268cb2517195d3dc13b9060b8a7d4e06139ec8436a328b5091c1cd7ab",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Acidmaw",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-10-d4566f5/Acidmaw/ally-threequarter/00.png",
+        "sha256": "b40f241bd8a0a47ed84527cd443d1def847be88f3bb1ab657f31f108047f50bf",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Whisperer",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Whisperer/ally-threequarter/00.png",
+        "sha256": "f55124f7a4f883d352e83978d43cb42fde37a84fdbf2a90fec575ef11a5c003d",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Whisperer",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-11-d4566f5/Whisperer/ally-threequarter/00.png",
+        "sha256": "a65e6e190d37b01c8e0803a8b0bcd2db388687457843c67b8928913abb10d3a4",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      }
+    ],
+    "provenance_note": "Copied unchanged comparison derivative; crop/resize metadata links immutable renderer originals. Base Idle only. Shatterback before lacks detachable plates."
+  },
+  {
+    "kind": "paired_base_idle_derivative",
+    "path": "docs/planning/p70-review/paired-plants.webp",
+    "sha256": "4f9ab77818f005e9b5de525eaeadce8ec1c9a3b6720107c53813ce2e68096a92",
+    "sources": [
+      {
+        "unit": "Bloomkeeper",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Bloomkeeper/ally-threequarter/00.png",
+        "sha256": "eb19cc6a455f299192b205c68234c0a76b6c19cc4737d8edea04fdd82266d878",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Bloomkeeper",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-cohort-d4566f5/Bloomkeeper/ally-threequarter/00.png",
+        "sha256": "abf0c7525a141ffee45253af2f79f0d2013f1abdbca11fb5b25a7649bb6a5764",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Rootcaller",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Rootcaller/ally-threequarter/00.png",
+        "sha256": "b51a83be41fd8d8522adf8e4aa81543ed5f9a65a0d7a556f405c9f0b974708b1",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Rootcaller",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-1-d4566f5/Rootcaller/ally-threequarter/00.png",
+        "sha256": "d53810d7f8a9a87103ce129d121ddda9b31591ab7e4603af2aea755eb9a69b71",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Nester",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Nester/ally-threequarter/00.png",
+        "sha256": "8ab0b88f4d4436c5a6314a6833de0323e010f1716c060e60035b1e378a1e666d",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Nester",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-1-d4566f5/Nester/ally-threequarter/00.png",
+        "sha256": "5cec773bf68781f8fdd86b5e5d88ed181cb0d702649ae941b91cd513f196ccdc",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Rotcap",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Rotcap/ally-threequarter/00.png",
+        "sha256": "095aab819b2046997d9ed58ac44b150842bf8a9fa44aaea2b95fad9cd9469219",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Rotcap",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-4-d4566f5/Rotcap/ally-threequarter/00.png",
+        "sha256": "5ce6ee6ace6e79ca145cab987cea67bdbbcd57c3493ce9a0c8f9a9ae6a5e62ef",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "AntidoteBrewer",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/AntidoteBrewer/ally-threequarter/00.png",
+        "sha256": "3634ffc6c178b70de2ef25ef8c1c588f0b28fd42d4b33c332a81505e94eb22b6",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "AntidoteBrewer",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-4-d4566f5/AntidoteBrewer/ally-threequarter/00.png",
+        "sha256": "72072ee5e1628dd0b5c10c1e55be49d66372831dbd6a8f4335022f245f1d23cd",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Shatterback",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Shatterback/ally-threequarter/00.png",
+        "sha256": "c5070a08af7cd2b760343d73bbc7cc3b552b528ffa99d20b8d7ee9174e58d378",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Shatterback",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-repairs-1d6e456/Shatterback/ally-threequarter/00.png",
+        "sha256": "ab226847455a8109a08baae931afa40e33da49fd765f17df74485d91d689f5a0",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Leechroot",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Leechroot/ally-threequarter/00.png",
+        "sha256": "e2c1cba5ca6dd62df2412b9541b84205de60dce498cbdceed5c30d498f35ee66",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Leechroot",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-7-d4566f5/Leechroot/ally-threequarter/00.png",
+        "sha256": "e16228d8e27103a8dd0c9b90d84fdd0c0d7d7db3a612f9169418bf4a5d5c6d33",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Capybara",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Capybara/ally-threequarter/00.png",
+        "sha256": "0316e98cc2ce38d68acc269eb610d75fbf71b409f9e17f38c3c47b8a0b939667",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Capybara",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-14-d4566f5/Capybara/ally-threequarter/00.png",
+        "sha256": "674ee998db9d63013e47f51bb3e0632afad4357e7caf0346e6f5af85b23fd42f",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Trident",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-smoke-display/Trident/ally-threequarter/00.png",
+        "sha256": "ce5ca845d24a4599ba5197f24d2d2bc3b0bce53ebe432a65986d687e69f57e47",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Trident",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-8319c12/Trident/ally-threequarter/00.png",
+        "sha256": "6dc3046983d930cfacceafe69c4d678594f75908f01faacccc46f17f248e2e3e",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      }
+    ],
+    "provenance_note": "Copied unchanged comparison derivative; crop/resize metadata links immutable renderer originals. Base Idle only. Shatterback before lacks detachable plates."
+  },
+  {
+    "kind": "paired_base_idle_derivative",
+    "path": "docs/planning/p70-review/paired-undead.webp",
+    "sha256": "ef7616b919e32145c2a6a418a102a9629ab36d4fe5759f8d0e45537d71bc9ddc",
+    "sources": [
+      {
+        "unit": "BoneBrute",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/BoneBrute/ally-threequarter/00.png",
+        "sha256": "1375d6ef5340a55906cd17f17b1c36082ffe5057cd1d4725fb257c9e224646dd",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "BoneBrute",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-cohort-d4566f5/BoneBrute/ally-threequarter/00.png",
+        "sha256": "6b981d5049f09a1ca9d79ebb595a87c2575ce994250490bae5bde24114630600",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Hexer",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Hexer/ally-threequarter/00.png",
+        "sha256": "140287dc255c79066244cf4a87c7ced1d6a45c4668f475accd5ad62647db8502",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Hexer",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-cohort-d4566f5/Hexer/ally-threequarter/00.png",
+        "sha256": "928f0b68bdc58a5f38b23de83daa700cfd8017fd20d2b1c5d5e073abd2e99e97",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "BloodFurnace",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/BloodFurnace/ally-threequarter/00.png",
+        "sha256": "8f54f3e196f22f2e890447780eb6f59a62ae97c77430ce0826adb8088cb31bda",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "BloodFurnace",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-5-d4566f5/BloodFurnace/ally-threequarter/00.png",
+        "sha256": "bafe651558654ea864a3ecc7547239e3653dfad97c40ac1724c4e38a2f330571",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Bloodweaver",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Bloodweaver/ally-threequarter/00.png",
+        "sha256": "6bc4cfde0a483b1af8076af194dc76a8e4990333173a9a6380033780451518a7",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Bloodweaver",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-6-d4566f5/Bloodweaver/ally-threequarter/00.png",
+        "sha256": "b0b8acd7c7939dac70f00587521570d277b7647e323dbfe591eaf72be3accd3a",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Puppetmaster",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Puppetmaster/ally-threequarter/00.png",
+        "sha256": "4fb5257945026bed76df8f42e6198c14af928bde460f6069cb9c749bd1093f9f",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Puppetmaster",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-8-d4566f5/Puppetmaster/ally-threequarter/00.png",
+        "sha256": "503948376ddfcc06b924c290aba7f09f10c61572e7abe585ef82d06726d738bc",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Crowcaller",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/Crowcaller/ally-threequarter/00.png",
+        "sha256": "8f24413aefa9c6c2fccd95469238aa943282b4d0b0d340bbf10070ec0df11344",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "Crowcaller",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-bounded-12-d4566f5/Crowcaller/ally-threequarter/00.png",
+        "sha256": "32856f3ab08207f3c295d6fc5d469c79f505363a8e3b43334cc054100add0467",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "PyreWarden",
+        "phase": "BEFORE",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/before-cohort/PyreWarden/ally-threequarter/00.png",
+        "sha256": "e8c121f65e6a4b4ea3b6b42f4322fcd7c40302a743d7650055817f0f39c5fcb7",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      },
+      {
+        "unit": "PyreWarden",
+        "phase": "AFTER",
+        "path": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/p70-champion-visual-polish/.local/p70-evidence/after-8319c12/PyreWarden/ally-threequarter/00.png",
+        "sha256": "20cd2a6d21e128d08ea3f4cbf687e4ad2dc7872f3e33d75b4fc29cba71ce2c97",
+        "crop": [
+          40,
+          40,
+          384,
+          400
+        ],
+        "resize": [
+          240,
+          250
+        ]
+      }
+    ],
+    "provenance_note": "Copied unchanged comparison derivative; crop/resize metadata links immutable renderer originals. Base Idle only. Shatterback before lacks detachable plates."
+  }
+]

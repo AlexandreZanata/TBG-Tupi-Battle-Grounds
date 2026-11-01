@@ -32,3 +32,7 @@
 @keyframes fort-pending{from{filter:brightness(.85)}to{filter:brightness(1.2)}}
 @media(min-width:1280px) and (max-height:800px){.fortify-panel{top:90px;left:10px;width:250px;padding:8px 10px 10px}.fort-icon{width:36px;height:44px}.fort-hp{margin:6px 0 4px}.fort-passive{margin-bottom:6px}.fort-option{padding:5px 7px}}
 @media(prefers-reduced-motion:reduce){.fort-option{transition:none}.fort-option[data-state=pending]{animation:none}}
+
+/* Purchase choices share the arena banner slot; tower information stays left. */
+.fort-upgrades{position:absolute;left:50%;top:134px;transform:translateX(-50%);width:390px;min-height:106px;box-sizing:border-box;padding:12px;border:1px solid #c9a86a;border-radius:10px;background:linear-gradient(#17262ef2,#0a1219f2);pointer-events:auto;font:12px/1.25 Camp,BattleBody,sans-serif;z-index:5}
+.fort-upgrades[hidden]{display:none}.fort-upgrades .fort-options{flex-direction:row}.fort-upgrades .fort-option{width:50%;gap:4px;padding:6px}.fort-upgrades .fort-letter{display:none}.fort-upgrades .fort-note{margin:6px 0 0}

@@ -15,6 +15,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--client',type=Path,required=True);parser.add_argument('--server',type=Path,required=True);parser.add_argument('--report',type=Path,required=True)
     args=parser.parse_args();client=args.client.resolve();server=args.server.resolve()
+    client_identity=json.loads(subprocess.check_output([str(client),'--build-info'],text=True))
     with tempfile.TemporaryDirectory(prefix='tbg-p68-native-auth-') as temporary:
         root=Path(temporary)
         with socket.socket() as reserved:reserved.bind(('127.0.0.1',0));port=reserved.getsockname()[1]
@@ -28,7 +29,7 @@ def main():
                         if process.poll() is not None:raise RuntimeError('owned synthetic backend stopped before readiness')
                         try:
                             with urlopen(origin+'/api/version',timeout=.3) as response:identity=json.load(response)
-                            if identity.get('protocol')!=30:raise RuntimeError('synthetic backend protocol mismatch')
+                            if identity.get('protocol')!=client_identity['protocol']:raise RuntimeError('synthetic backend protocol mismatch')
                             return process
                         except OSError:time.sleep(.05)
                     raise RuntimeError('synthetic backend readiness timed out')

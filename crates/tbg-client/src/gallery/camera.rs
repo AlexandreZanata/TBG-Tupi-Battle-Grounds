@@ -13,7 +13,7 @@ pub fn frame(
     window: Single<&Window>,
     camera: Single<(&mut Transform, &mut DistanceFog), With<ArenaCamera>>,
 ) {
-    if options.stress {
+    if options.stress || options.mode == "matchlineup" {
         return;
     }
     let aspect = window.width() / window.height();
@@ -82,6 +82,7 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
         );
     }
     match options.mode.as_str() {
+        "motion" => super::motion::camera(),
         "palette" => (
             Vec3::new(8.0, 0.5, 1.8),
             5.8,
@@ -117,6 +118,7 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
                 Vec3::new(0.0, 1.25, 1.0),
             )
         }
+        _ if options.polish => super::polish::camera(),
         _ if options.frames => sheet(options, portrait),
         _ if options.silhouette => (Vec3::new(8.0, 0.7, -2.8), 9.0, 3.0, Vec3::Z),
         _ if options.unit.is_some() => unit(portrait),
@@ -162,7 +164,7 @@ fn sheet(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
     };
     let cols = if portrait { 1 } else { 2 };
     let rows = clips.div_ceil(cols);
-    let width = (cols.min(clips) * 4 - 1) as f32 * 1.6;
+    let width = (cols.min(clips) * super::polish::SAMPLE_COLUMNS - 1) as f32 * 1.6;
     let height = (rows - 1) as f32 * 2.0;
     (
         Vec3::new(width * 0.5, 0.65 - height * 0.5, 0.0),

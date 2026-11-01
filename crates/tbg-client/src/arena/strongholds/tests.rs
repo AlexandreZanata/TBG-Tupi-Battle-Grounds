@@ -28,31 +28,20 @@ fn look(kind: StrongholdKind, form: Form, damage: u8) -> Look {
 
 #[test]
 fn damage_states_follow_the_kinds_own_max_hp() {
-    assert_eq!(damage_level(4_500, 4_500), 0);
-    assert_eq!(damage_level(3_001, 4_500), 0);
-    assert_eq!(
-        damage_level(3_000, 4_500),
-        1,
-        "exactly 66 % hides the crown"
-    );
-    assert_eq!(damage_level(1_501, 4_500), 1);
-    assert_eq!(
-        damage_level(1_500, 4_500),
-        2,
-        "exactly 33 % hides the middle"
-    );
-    assert_eq!(damage_level(0, 4_500), 2);
-    // A Bastion at 3 400 / 5 175 is under 66 % of its own max, though it
-    // would be above 66 % of the reference 4 500.
+    assert_eq!(damage_level(4500, 4500), 0);
+    assert_eq!(damage_level(4276, 4500), 0);
+    assert_eq!(damage_level(4275, 4500), 1);
+    assert_eq!(damage_level(3000, 4500), 6);
+    assert_eq!(damage_level(0, 4500), 20);
     let bastion = StrongholdView {
         kind: StrongholdKind::Bastion,
         tier: 0,
         branch: 1,
-        max_hp: 5_175,
+        max_hp: 5175,
     };
-    let seen = Look::from_view(&bastion, 3_400);
+    let seen = Look::from_view(&bastion, 4916);
     assert_eq!(seen.damage, 1);
-    assert_eq!(seen.branch, 0, "no branch is chosen before tier 1");
+    assert_eq!(seen.branch, 0);
 }
 
 #[test]
@@ -84,8 +73,8 @@ fn damage_only_removes_pieces_and_keeps_the_kind() {
     {
         for form in FORMS {
             let healthy = names(look(kind, form, 0));
-            let hurt = names(look(kind, form, 1));
-            let dying = names(look(kind, form, 2));
+            let hurt = names(look(kind, form, 7));
+            let dying = names(look(kind, form, 19));
             assert!(hurt.is_subset(&healthy) && dying.is_subset(&hurt));
             assert!(
                 dying.len() < healthy.len(),

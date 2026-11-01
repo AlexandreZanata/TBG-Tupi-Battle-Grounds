@@ -31,7 +31,12 @@ pub fn plugin(app: &mut App) {
     scene::plugin(app);
     app.add_systems(
         Update,
-        (towers::damage_states, life::animate, maritime::animate),
+        (
+            towers::damage_states,
+            life::animate,
+            maritime::animate,
+            themes::animate,
+        ),
     );
     strongholds::plugin(app);
 }
@@ -164,6 +169,7 @@ fn build(
     // The Strongholds are the kind-based D-46 towers (owner-approved P54
     // look) in every arena: `strongholds` builds them from the views.
     total += life::spawn(commands, meshes, mats, &mat, theme);
+    total += themes::spawn_motion(commands, meshes, &mat, theme);
     info!("arena total: {total} triangles");
     lighting::spawn(commands, theme);
 }

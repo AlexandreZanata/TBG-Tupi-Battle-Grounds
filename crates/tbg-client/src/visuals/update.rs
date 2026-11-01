@@ -36,21 +36,21 @@ pub fn update_unit_visual(
         let t = Transform::from_rotation(Quat::from_rotation_y(v.yaw))
             .with_scale(Vec3::splat(form.plan.scale));
         commands.entity(v.figure).try_insert(t);
-        commands.entity(v.bar).try_insert(Transform::from_xyz(
-            0.0,
-            1.05 * form.plan.scale + 0.25,
-            0.0,
-        ));
-        let mat = if u.branch == 0 { &a.gold } else { &a.silver };
+        commands
+            .entity(v.bar)
+            .try_insert(Transform::from_xyz(0.0, form.overhead, 0.0));
+        let mat = &a.star_fill;
         for (i, cube) in v.tiers.iter().enumerate() {
             let vis = if usize::from(u.tier) > i {
                 Visibility::Inherited
             } else {
                 Visibility::Hidden
             };
-            commands
-                .entity(*cube)
-                .try_insert((vis, MeshMaterial3d(mat.clone())));
+            commands.entity(*cube).try_insert((
+                vis,
+                MeshMaterial3d(mat.clone()),
+                Transform::from_xyz(super::overhead::marker_x(u.tier, i), 0.19, 0.025),
+            ));
         }
     }
     let ratio = (u.hp as f32 / u.max_hp.max(1) as f32).clamp(0.0, 1.0);
@@ -63,12 +63,25 @@ pub fn update_unit_visual(
     super::status_badges::bleed(commands, v.bleed_badge, u);
     super::status_badges::shield(commands, a, v, u);
     super::status_badges::hostile(commands, a, v, u);
-    let ring = match u.status {
-        1 => &a.slowed,
-        2 => &a.rooted,
-        _ if v.marked => &a.marked,
-        _ => &a.team[usize::from(!v.own)],
+    let status = match u.status {
+        1 => Some(&a.slowed),
+        2 => Some(&a.rooted),
+        _ if v.marked => Some(&a.marked),
+        _ => None,
     };
+    commands
+        .entity(v.status_ring)
+        .try_insert(if status.is_some() {
+            Visibility::Inherited
+        } else {
+            Visibility::Hidden
+        });
+    if let Some(mat) = status {
+        commands
+            .entity(v.status_ring)
+            .try_insert(MeshMaterial3d(mat.clone()));
+    }
+    let ring = &a.team[usize::from(!v.own)];
     commands
         .entity(v.ring)
         .try_insert(MeshMaterial3d(ring.clone()));

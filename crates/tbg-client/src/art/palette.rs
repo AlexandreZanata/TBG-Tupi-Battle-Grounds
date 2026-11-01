@@ -20,6 +20,23 @@ pub const SKIN: Color = hex(0xE8B98A);
 pub const HOOD_GREEN: Color = hex(0x5F7A3C);
 pub const WOOD: Color = hex(0x7A5230);
 pub const RED_CLOTH: Color = hex(0xB8433A);
+// P70: weathered fishing oilskin and silver fish, with distinct large color regions.
+pub const OILSKIN_YELLOW: Color = hex(0xD8A92E);
+pub const OILSKIN_SHADE: Color = hex(0x9D6F20);
+pub const FISH_BACK: Color = hex(0x426676);
+pub const FISH_SILVER: Color = hex(0xB7D1D5);
+// P70: Trident's marine countershading, separate from team heraldry.
+pub const SHARK_SLATE: Color = hex(0x3F6370);
+pub const SHARK_BELLY: Color = hex(0xCBD9D4);
+
+// P70: individual cloth, aged bone and ritual accents remain separate from team colors.
+pub const FIELD_SLATE: Color = hex(0x455766);
+pub const WINE_CLOTH: Color = hex(0x611421);
+pub const WINE_SHADE: Color = hex(0x380D14);
+pub const BLOOD_THREAD: Color = hex(0xE01A24);
+pub const RITUAL_VIOLET: Color = hex(0xC77AFF);
+pub const OLD_BONE: Color = hex(0xBFB599);
+pub const SHOWMAN_VIOLET: Color = hex(0x5C3D75);
 
 // Undead: bone, dark violet, spectral glow.
 pub const BONE: Color = hex(0xD8D2C0);
@@ -134,3 +151,6 @@ pub const UI: [Color; 8] = [
     AMBIENT_SKY,
     AMBIENT_GROUND,
 ];
+
+/// P71 furnace and flame accent, shared by the Pyre model and its effect.
+pub const FLAME_ORANGE: Color = hex(0xFF681F);

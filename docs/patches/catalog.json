@@ -2,6 +2,136 @@
   "schema": 1,
   "notes": [
     {
+      "id": "p71-main-auth-preview",
+      "version": "0.1.1-rc.1+p71",
+      "date": "2026-11-01",
+      "status": "preview",
+      "kind": "gameplay-preview",
+      "ruleset_version": 6,
+      "ruleset_hash": "097385fee9a10b0f",
+      "title": {
+        "en": "P71 characters, eight Arenas and protected sign-in",
+        "pt-BR": "Personagens P71, oito arenas e acesso protegido"
+      },
+      "summary": {
+        "en": "Preview joining P71 character and Stronghold polish with main authentication, rotating refresh and reconnect. Requires protocol 31 and matching client/server. New gameplay values remain Proposed; this is not a balance-approved release.",
+        "pt-BR": "Prévia que reúne o polimento P71 de personagens e torres com autenticação, renovação de credenciais e reconexão da main. Exige cliente e servidor no protocolo 31. Os novos valores continuam propostos; esta versão não tem aprovação de balanceamento."
+      },
+      "changes": [
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Arenas",
+            "pt-BR": "Arenas"
+          },
+          "field": {
+            "en": "catalog and symmetric effects",
+            "pt-BR": "catálogo e efeitos simétricos"
+          },
+          "before": {
+            "en": "Five Arenas",
+            "pt-BR": "Cinco arenas"
+          },
+          "after": {
+            "en": "Eight: Celestial movement +8%; Clockwork attack speed +8% and movement -5%; Desert base Energy regeneration -8% (Proposed).",
+            "pt-BR": "Oito: Celestial movimento +8%; Clockwork velocidade de ataque +8% e movimento -5%; Desert regeneração base de Energy -8% (propostos)."
+          },
+          "reason": {
+            "en": "Owner-requested reference-based scenery and modifier design. Original five values are preserved.",
+            "pt-BR": "Novos cenários e modificadores solicitados pelo proprietário. Valores das cinco arenas originais preservados."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Rattle & Tick",
+            "pt-BR": "Rattle & Tick"
+          },
+          "field": {
+            "en": "secondary attack",
+            "pt-BR": "ataque secundário"
+          },
+          "before": {
+            "en": "Tick bomb channel",
+            "pt-BR": "Canal de bomba do Tick"
+          },
+          "after": {
+            "en": "Independent troop-only pistol: range 3000, damage 12, period 30 ticks; B1 period 24, B2 damage 18 (Proposed).",
+            "pt-BR": "Pistola independente contra tropas: alcance 3000, dano 12, período 30 ticks; B1 período 24, B2 dano 18 (propostos)."
+          },
+          "reason": {
+            "en": "Owner-requested mixed unit; Rattle movement and primary club stay independent. D-33 acceptance remains pending.",
+            "pt-BR": "Unidade mista solicitada pelo proprietário; movimento e clava de Rattle independentes. Aceitação D-33 pendente."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Characters and Strongholds",
+            "pt-BR": "Personagens e torres"
+          },
+          "field": {
+            "en": "combat readability",
+            "pt-BR": "leitura visual do combate"
+          },
+          "before": {
+            "en": "Body team patches, square Evolution marks and overlapping silhouettes",
+            "pt-BR": "Marcas de equipe no corpo, evolução com quadrados e sobreposições visuais"
+          },
+          "after": {
+            "en": "Ground-ring allegiance, outlined stars, form-aware HP clearance, corrected weapon/walk poses and cosmetic tower damage stages.",
+            "pt-BR": "Equipe pelo círculo dos pés, estrelas contornadas, barras acima de cada forma, correções de armas/caminhada e estágios cosméticos de dano nas torres."
+          },
+          "reason": {
+            "en": "Preserve character identity and make attacks, Evolution and damage easier to read.",
+            "pt-BR": "Preservar a identidade dos personagens e facilitar a leitura de ataques, evolução e dano."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Online compatibility",
+            "pt-BR": "Compatibilidade online"
+          },
+          "field": {
+            "en": "wire contract",
+            "pt-BR": "contrato de comunicação"
+          },
+          "before": {
+            "en": "Separate protocol-30 branches for authentication and appended Arenas",
+            "pt-BR": "Branches separadas no protocolo 30 para autenticação e novas arenas"
+          },
+          "after": {
+            "en": "Combined protocol 31; schema 10; secure authentication, rotating refresh and authenticated resume.",
+            "pt-BR": "Protocolo integrado 31; banco versão 10; autenticação protegida, renovação rotativa e retomada autenticada."
+          },
+          "reason": {
+            "en": "Prevent incompatible clients from silently entering a match. Existing auth lifetimes and seat checks are preserved.",
+            "pt-BR": "Impedir a entrada de clientes incompatíveis em partidas. Prazos da autenticação e validação do lado preservados."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Preview limits",
+            "body": "P70/P71 character follow-ups, support/Stronghold targeting and the new Arena modifiers retain their source reports and Proposed-value status. No D-33 gate, load capacity, public TLS deployment, signed update promotion or Windows visual acceptance is claimed. This backend line uses api.tupibg.com; clients must share protocol 31. Current deployment evidence is recorded separately."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Limites desta prévia",
+            "body": "Os ajustes P70/P71, a seleção de alvo de suporte/torre e os modificadores das novas arenas mantêm seus relatórios e o estado de valores propostos. Não há alegação de aprovação D-33, capacidade de carga, instalação pública com TLS, publicação de atualização assinada ou validação visual Windows. O backend desta linha usa api.tupibg.com; os clientes precisam compartilhar o protocolo 31. A evidência da instalação está em relatório separado."
+          }
+        ]
+      },
+      "document": "docs/patches/2026-11-01-p71-main-auth.md",
+      "evidence": {
+        "accepted": false,
+        "report": "docs/phases/BACKEND-main-integration-20261101.md"
+      }
+    },
+    {
       "id": "linux-rc1-consolidated",
       "version": "0.1.1-rc.1",
       "date": "2026-11-01",

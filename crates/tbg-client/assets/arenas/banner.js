@@ -40,6 +40,14 @@
     arena.load().then(loaded => { data = loaded; show(4500); }).catch(() => {});
   }
   chip.addEventListener('click', () => show(3500));
+  document.addEventListener('pointerdown', event => {
+    if (!chip.contains(event.target) && !banner.contains(event.target)) {
+      banner.dataset.visible = 'false'; clearTimeout(timer);
+    }
+  });
+  new MutationObserver(() => {
+    if (root.dataset.inspect || root.dataset.towerOpen === 'true') banner.dataset.visible = 'false';
+  }).observe(root, {attributes:true, attributeFilter:['data-inspect','data-tower-open']});
   document.addEventListener('tbg:lang', fill);
   new MutationObserver(update).observe(root, { attributes: true, attributeFilter: ['data-arena', 'hidden'] });
 })();

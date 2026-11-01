@@ -66,6 +66,9 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         Clip::Idle => {
             moves::idle(m, pose, &p, 0.2);
             let ready = m.aim.map_or(0.0, |a| a.weight);
+            let check = tools::hold((m.clock * 0.24).rem_euclid(1.0), [0.15, 0.28, 0.40, 0.62])
+                * (1.0 - ready);
+            tools::add(pose, Joint::Head, [9.0 * check, -10.0 * check, 0.0]);
             // Relaxed carry vs combat ready stance
             tools::set(
                 pose,
@@ -78,13 +81,21 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
                 Joint::UpperArmR,
                 [-8.0 - 15.0 * ready, 0.0, -8.0 - 10.0 * ready],
             );
-            tools::set(pose, Joint::ForearmR, [-15.0 - 25.0 * ready, 0.0, 0.0]);
+            tools::set(
+                pose,
+                Joint::ForearmR,
+                [-15.0 - 25.0 * ready - 35.0 * check, 0.0, 0.0],
+            );
         }
         Clip::Walk => {
             moves::walk(m, pose, 5.0, 2.0);
             // Low carry in left hand while walking
             tools::set(pose, Joint::UpperArmL, [-28.0, 0.0, -8.0]);
             tools::set(pose, Joint::ForearmL, [-60.0, 0.0, 0.0]);
+            let scout = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
+            tools::set(pose, Joint::UpperArmR, [-12.0, 0.0, -10.0]);
+            tools::set(pose, Joint::ForearmR, [-24.0 - 5.0 * scout, 0.0, 0.0]);
+            tools::add(pose, Joint::Head, [-2.0, 6.0 * scout, 0.0]);
         }
         Clip::AttackRanged => lift = aim(m, pose, &p, half),
         Clip::Hit => {
@@ -109,12 +120,16 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             tools::set(pose, Joint::ForearmR, [-15.0, 0.0, 0.0]);
         }
         Clip::Victory => {
-            moves::victory(m, pose, &p, Cheer::Raise);
-            // Victorious bow salute
-            tools::set(pose, Joint::UpperArmL, [-170.0, 0.0, 15.0]);
-            tools::set(pose, Joint::ForearmL, [-10.0, 0.0, 0.0]);
-            tools::set(pose, Joint::UpperArmR, [-150.0, 0.0, -30.0]);
-            tools::set(pose, Joint::ForearmR, [-20.0, 0.0, 0.0]);
+            pose.fill((Vec3::ZERO, Vec3::ZERO));
+            gear::bow_rest(pose, half);
+            let bow = tools::hold(m.t.rem_euclid(0.8), [0.08, 0.26, 0.42, 0.74]);
+            tools::set(pose, Joint::Spine, [7.0 * bow, 0.0, 0.0]);
+            tools::set(pose, Joint::Head, [9.0 * bow, -5.0, 0.0]);
+            tools::set(pose, Joint::UpperArmL, [-38.0, 0.0, 15.0]);
+            tools::set(pose, Joint::ForearmL, [-62.0, 0.0, 0.0]);
+            tools::set(pose, Joint::UpperArmR, [-20.0 - 18.0 * bow, 0.0, -12.0]);
+            tools::set(pose, Joint::ForearmR, [-55.0, 0.0, 0.0]);
+            tools::plant(pose, &p, tools::stance(&p, 1.1, 0.08));
         }
         _ => {
             moves::idle(m, pose, &p, 0.2);
@@ -128,6 +143,8 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
 /// the elevation the bow is tilted up by, in degrees.
 fn aim(m: &Moment, pose: &mut Pose, p: &Proportions, half: f32) -> f32 {
     let draw_k = tools::window(m.t, 0.0, 0.12);
+    let anchor = tools::hold(m.t, [0.06, 0.12, 0.18, 0.30]);
+    tools::add(pose, Joint::Head, [-3.0 * anchor, 0.0, 2.0 * anchor]);
     let recover_k = tools::window(m.t, 0.45, 0.62);
     let kick = tools::snap(m.t, RELEASE, 0.21) * (1.0 - tools::window(m.t, 0.22, 0.32));
     let reach = tools::window(m.t, 0.30, 0.44) * (1.0 - tools::window(m.t, 0.48, 0.60));

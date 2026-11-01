@@ -43,7 +43,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         &p,
         &body::Look {
             skin: ORANGE,
-            cloth: if f.b { DARK_LEATHER } else { OAK },
+            cloth: if f.b { CHARCOAL } else { FIELD_SLATE },
             legs: CHARCOAL,
             boots: DARK_LEATHER,
         },
@@ -54,16 +54,16 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(Body(Head), Cone(0.025, 0.035), DARK, [0.0, -0.005, 0.21]).rot([90.0, 0.0, 0.0]),
         part(
             Secondary(Spring::HeadGear),
-            Cyl(if f.a { 0.34 } else { 0.30 }, 0.025),
+            Cyl(if f.a { 0.27 } else { 0.23 }, 0.025),
             DARK_LEATHER,
             [0.0, 0.15, 0.0],
         )
         .rot([if f.a { 9.0 } else { 0.0 }, 0.0, -8.0]),
         part(
             Secondary(Spring::HeadGear),
-            Frustum(0.17, 0.13, 0.19),
+            Frustum(0.15, 0.13, 0.13),
             OAK,
-            [0.0, 0.25, -0.025],
+            [0.0, 0.22, -0.025],
         ),
         part(
             Secondary(Spring::HeadGear),
@@ -71,8 +71,8 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             GOLD,
             [0.0, 0.18, -0.025],
         ),
-        part(Body(Chest), Box(0.22, 0.055, 0.25), ALLY, [0.0, 0.27, 0.0]),
-        part(Body(Chest), Cone(0.08, 0.18), ALLY, [0.08, 0.15, 0.14]).rot([180.0, 0.0, -15.0]),
+        part(Body(Chest), Box(0.22, 0.055, 0.25), LINEN, [0.0, 0.27, 0.0]),
+        part(Body(Chest), Cone(0.08, 0.18), LINEN, [0.08, 0.15, 0.14]).rot([180.0, 0.0, -15.0]),
         part(
             Secondary(Spring::Back),
             Pill(0.04, 0.21),
@@ -95,7 +95,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
                 Body(Head),
                 Cone(0.075, 0.16),
                 ORANGE,
-                [s * 0.14, 0.17, -0.015],
+                [s * 0.19, 0.17, -0.015],
             )
             .rot([0.0, 0.0, -s * 15.0]),
         );
@@ -139,7 +139,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
                 part(
                     Secondary(Spring::Tabard),
                     Box(0.10, 0.31, 0.035),
-                    ALLY,
+                    LINEN,
                     [s * 0.10, -0.12, -0.13],
                 )
                 .rot([0.0, 0.0, s * 8.0]),

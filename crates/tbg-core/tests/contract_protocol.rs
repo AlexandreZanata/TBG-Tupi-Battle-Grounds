@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 30,
-        "D-97/P68-A v30: authenticated hello, same-socket renewal and explicit account claim"
+        PROTOCOL_VERSION, 31,
+        "GAME-DESIGN §12 / D-97 integration v31: authenticated hello and eight Arena identities"
     );
 }
 
@@ -315,5 +315,26 @@ fn d97_auth_variants_append_without_exposing_secrets_in_debug() {
         ClientMsg::Reauthenticate { access: secret },
     ] {
         assert!(!format!("{message:?}").contains("PRIVATE"));
+    }
+}
+
+#[test]
+fn v30_arena_identities_append_without_renumbering_the_original_five() {
+    // GAME-DESIGN §12, BR-AR01/06: identical assignment on every peer and reconnect.
+    use tbg_core::Arena;
+    let order = [
+        Arena::Forest,
+        Arena::Tundra,
+        Arena::Volcanic,
+        Arena::Ruins,
+        Arena::Storm,
+        Arena::Celestial,
+        Arena::Clockwork,
+        Arena::Desert,
+    ];
+    for (id, arena) in order.into_iter().enumerate() {
+        let bytes = postcard::to_allocvec(&arena).expect("Arena wire identity");
+        assert_eq!(bytes, [id as u8]);
+        assert_eq!(postcard::from_bytes::<Arena>(&bytes), Ok(arena));
     }
 }
