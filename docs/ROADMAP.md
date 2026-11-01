@@ -566,3 +566,13 @@ consolidation: 90 Rust scenarios passed plus WASM compilation and source gates;
 full suite and existing balance/visual gates remain open. The reset VPS installation
 awaits owner-provided connection settings and verified host identity. See
 [the report](phases/BACKEND-main-integration-20261101.md).
+
+
+### 2026-11-01 automatic main delivery preparation
+
+`phase/main-auto-deploy` prepares CI-gated, attested backend candidates and a
+VPS-pull controller with compatibility guards, match drain and durable rollback.
+This keeps the owner's PC as the SSH maintenance channel. The timer is not
+installed/enabled; main integration and the first real attested package/verifier
+acceptance remain prerequisites. Native signing and frontend publication remain
+separate. See [the preparation report](phases/MAIN-auto-deploy-preparation.md).

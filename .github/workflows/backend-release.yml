@@ -1,0 +1,115 @@
+name: Backend release candidate
+
+on:
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-release-main
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  RUST_TOOLCHAIN: 1.99.0
+
+jobs:
+  scope:
+    # No pull-request build, fork, failed CI or stale main commit can publish.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_sha == github.sha
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    outputs:
+      deployable: ${{ steps.scope.outputs.deployable }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Keep frontend-only changes out of backend deployment
+        id: scope
+        run: python3 scripts/backend-release-changes.py
+
+  build:
+    needs: [scope]
+    if: needs.scope.outputs.deployable == 'true'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    env:
+      TBG_SOURCE_COMMIT: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch; compiler pinned by input
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: backend-ubuntu22-release
+      - name: Build immutable backend (glibc 2.35 baseline)
+        run: cargo build --locked --release -p tbg-server --bin tbg-server --bin tbg-release-admin
+      - name: Package exact source identity
+        run: python3 scripts/package-backend.py --output "$RUNNER_TEMP/backend"
+      - name: Attest package with GitHub OIDC
+        id: provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/backend/*.tar.gz
+      - name: Keep the verification bundle beside the package
+        env:
+          BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+        run: cp "$BUNDLE" "$RUNNER_TEMP/backend/provenance.jsonl"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: backend-${{ github.event.workflow_run.head_sha }}
+          path: ${{ runner.temp }}/backend/*
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: [build]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: backend-${{ github.event.workflow_run.head_sha }}
+          path: candidate
+      - name: Publish one immutable, CI-approved candidate
+        shell: bash
+        run: |
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          current=$(gh api "repos/$GH_REPO/git/ref/heads/main" --jq .object.sha)
+          if [[ "$current" != "$SOURCE_SHA" ]]; then
+            echo 'Main advanced; its newer CI run owns the next publication.'
+            exit 0
+          fi
+          if gh release view "server-$SOURCE_SHA" >/dev/null 2>&1; then
+            echo 'Immutable candidate already exists; never replace its assets.'
+            exit 1
+          fi
+          gh release create "server-$SOURCE_SHA" candidate/* \
+            --target "$SOURCE_SHA" --prerelease --latest=false \
+            --title "Backend $SOURCE_SHA" \
+            --notes 'CI-approved backend candidate. Production verifies provenance, exact match contract and database schema before activation. This is not a native-client release.'
