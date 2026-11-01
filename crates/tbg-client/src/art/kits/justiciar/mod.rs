@@ -42,8 +42,25 @@ pub const KIT: Kit = Kit {
 fn pose(m: &Moment, p: &mut Pose) {
     let body = model::plan(m.tier);
     match m.clip {
-        Clip::Idle => moves::idle(m, p, &body, 0.3),
-        Clip::Walk => moves::walk(m, p, 2.0, 1.0),
+        Clip::Idle => {
+            let align = tools::wave(m.clock, 0.55, 0.2);
+            tools::set(p, Chest, [0.0, 0.0, 0.0]);
+            tools::set(p, Head, [2.0, 4.0 * align, 0.0]);
+            tools::set(p, UpperArmR, [-22.0, 0.0, -8.0]);
+            tools::set(p, ForearmR, [-35.0 - 6.0 * align, 0.0, 0.0]);
+            tools::set(p, UpperArmL, [-8.0, 0.0, 12.0]);
+            tools::set(p, ForearmL, [-12.0, 0.0, 0.0]);
+            tools::plant(p, &body, tools::stance(&body, 1.25, 0.02));
+        }
+        Clip::Walk => {
+            moves::walk(m, p, 2.0, 1.0);
+            let step = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
+            tools::set(p, UpperArmL, [-12.0 - 9.0 * step, 0.0, 12.0]);
+            tools::set(p, UpperArmR, [-12.0 + 9.0 * step, 0.0, -12.0]);
+            tools::set(p, ForearmL, [-28.0, 0.0, 0.0]);
+            tools::set(p, ForearmR, [-28.0, 0.0, 0.0]);
+            tools::set(p, Head, [-1.0, 0.0, 0.0]);
+        }
         Clip::Cast | Clip::AttackRanged | Clip::AttackMelee => {
             tools::set(p, UpperArmL, [-15.0, 0.0, 8.0]);
             tools::set(p, ForearmL, [-15.0, 0.0, 0.0]);
@@ -51,7 +68,13 @@ fn pose(m: &Moment, p: &mut Pose) {
             let punch = tools::hold(m.t, [0.15, 0.22, 0.30, 0.60]);
             tools::set(p, UpperArmR, [-100.0 * cock - 55.0 * punch, 0.0, -10.0]);
             tools::set(p, ForearmR, [-65.0 * cock, 0.0, 0.0]);
-            tools::set(p, Chest, [-6.0 * cock + 8.0 * punch, 0.0, 0.0]);
+            tools::set(
+                p,
+                Chest,
+                [-6.0 * cock + 8.0 * punch, -8.0 * cock + 5.0 * punch, 0.0],
+            );
+            tools::set(p, HandR, [-8.0 * cock + 5.0 * punch, 0.0, 0.0]);
+            tools::set(p, Head, [-2.0 * punch, 0.0, 0.0]);
         }
         Clip::Hit => {
             moves::hit(m, p, 0.5);
@@ -67,7 +90,25 @@ fn pose(m: &Moment, p: &mut Pose) {
             p[Secondary(Spring::Back).index()].1.z +=
                 0.05 * tools::hold(m.t, [0.0, 0.25, 0.50, 0.9]);
         }
-        Clip::Victory => moves::victory(m, p, &body, Cheer::Both),
+        Clip::Victory => {
+            let decree = 0.5 - 0.5 * (m.t / 0.8 * std::f32::consts::TAU).cos();
+            p[Root.index()] = (Vec3::ZERO, Vec3::ZERO);
+            tools::set(p, Chest, [-4.0 * decree, 0.0, 0.0]);
+            for (upper, fore, s) in [(UpperArmL, ForearmL, 1.0), (UpperArmR, ForearmR, -1.0)] {
+                tools::set(
+                    p,
+                    upper,
+                    [-45.0 - 15.0 * decree, 0.0, s * (8.0 + 30.0 * decree)],
+                );
+                tools::set(
+                    p,
+                    fore,
+                    [-100.0 + 55.0 * decree, 0.0, -s * 12.0 * (1.0 - decree)],
+                );
+            }
+            tools::set(p, Head, [6.0 - 8.0 * decree, 0.0, 0.0]);
+            tools::plant(p, &body, tools::stance(&body, 1.25, 0.02));
+        }
     }
     if m.clip != Clip::Death {
         p[Secondary(Spring::Back).index()].1.z += (m.clock * 1.5).sin() * 0.008;

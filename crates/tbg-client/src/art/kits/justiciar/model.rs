@@ -47,7 +47,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Body(Chest),
             Box(if f.a { 0.47 } else { 0.39 }, 0.30, 0.14),
-            IVORY,
+            CHARCOAL,
             [0.0, 0.15, 0.12],
         ),
         part(Body(Head), Box(0.23, 0.20, 0.18), IVORY, [0.0, 0.02, 0.0]),
@@ -67,6 +67,23 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             [0.0, 0.0, 0.0],
         ),
     ]);
+    for s in [-1.0, 1.0] {
+        v.push(
+            part(
+                Body(Chest),
+                Box(0.065, 0.27, 0.16),
+                IVORY,
+                [s * if f.a { 0.23 } else { 0.19 }, 0.16, 0.12],
+            )
+            .rot([0.0, 0.0, s * -9.0]),
+        );
+        v.push(part(
+            Body(Chest),
+            Box(0.12, 0.045, 0.19),
+            GOLD,
+            [s * 0.20, 0.30, 0.08],
+        ));
+    }
     for j in [ForearmL, ForearmR] {
         v.push(part(Body(j), Cyl(0.026, 0.23), GUNMETAL, [0.0, -0.08, 0.0]));
         for y in [-0.02, -0.10, -0.18] {
