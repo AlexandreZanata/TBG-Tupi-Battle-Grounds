@@ -56,10 +56,14 @@ pub(super) fn linux_button(assets: &AssetServer, lang: crate::i18n::Lang) -> imp
     (
         Node {
             position_type: PositionType::Absolute,
-            top: px(18),
-            right: px(18),
-            min_width: px(120),
-            height: px(40),
+            top: px(if cfg!(target_os = "android") { 4 } else { 18 }),
+            right: px(if cfg!(target_os = "android") { 6 } else { 18 }),
+            min_width: px(if cfg!(target_os = "android") {
+                100
+            } else {
+                120
+            }),
+            height: px(if cfg!(target_os = "android") { 48 } else { 40 }),
             padding: UiRect::axes(px(12), px(0)),
             column_gap: px(7),
             justify_content: JustifyContent::Center,

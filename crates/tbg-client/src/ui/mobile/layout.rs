@@ -5,6 +5,8 @@ use bevy::prelude::*;
 #[derive(Resource, Default)]
 pub struct Metrics {
     pub density: f32,
+    /// Extra safe insets inside the surface, in Android dp (left, top, right, bottom).
+    pub safe: Vec4,
 }
 pub fn measure(
     window: Single<&Window>,
@@ -21,6 +23,15 @@ pub fn measure(
                 .filter(|v| v.is_finite() && *v > 0.)
             {
                 metrics.density = density as f32;
+                let n = |key: &str| value[key].as_f64().unwrap_or(0.) as f32;
+                let outside_right = n("width_px") - n("surface_x_px") - n("surface_width_px");
+                let outside_bottom = n("height_px") - n("surface_y_px") - n("surface_height_px");
+                metrics.safe = Vec4::new(
+                    (n("left_px") - n("surface_x_px")).max(0.),
+                    (n("top_px") - n("surface_y_px")).max(0.),
+                    (n("right_px") - outside_right).max(0.),
+                    (n("bottom_px").max(n("ime_bottom_px")) - outside_bottom).max(0.),
+                ) / metrics.density;
                 if *last != (window.physical_width(), window.physical_height()) {
                     bevy::log::info!("Android viewport {raw}");
                 }

@@ -67,7 +67,26 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 position_type: PositionType::Absolute,
                 left: px(SIDE_LEFT),
                 bottom: px(SHOP_BOTTOM),
-                width: px(278),
+                top: if cfg!(target_os = "android") {
+                    px(8)
+                } else {
+                    Val::Auto
+                },
+                max_height: if cfg!(target_os = "android") {
+                    percent(96)
+                } else {
+                    Val::Auto
+                },
+                overflow: if cfg!(target_os = "android") {
+                    Overflow::scroll_y()
+                } else {
+                    Overflow::default()
+                },
+                width: px(if cfg!(target_os = "android") {
+                    330
+                } else {
+                    278
+                }),
                 padding: UiRect::all(px(12)),
                 border: UiRect::all(px(1)),
                 border_radius: BorderRadius::all(px(6)),

@@ -8,9 +8,17 @@ use crate::sync::{LatestView, MatchInfo};
 use bevy::prelude::*;
 use tbg_core::{content::TICK_HZ, Phase};
 
-const SCORE_TOP: f32 = 12.;
-const CLOCK_HEIGHT: f32 = 76.;
-const PLATE_HEIGHT: f32 = 55.;
+const SCORE_TOP: f32 = if cfg!(target_os = "android") { 4. } else { 12. };
+const CLOCK_HEIGHT: f32 = if cfg!(target_os = "android") {
+    48.
+} else {
+    76.
+};
+const PLATE_HEIGHT: f32 = if cfg!(target_os = "android") {
+    44.
+} else {
+    55.
+};
 pub(super) const PLATE_TOP: f32 = SCORE_TOP + (CLOCK_HEIGHT - PLATE_HEIGHT) / 2.;
 
 #[derive(Component)]
@@ -30,8 +38,12 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, assets: &Asset
         .spawn(Node {
             position_type: PositionType::Absolute,
             top: px(SCORE_TOP),
-            left: percent(22),
-            width: percent(56),
+            left: if cfg!(target_os = "android") {
+                px(8)
+            } else {
+                percent(22)
+            },
+            width: percent(if cfg!(target_os = "android") { 80 } else { 56 }),
             height: px(CLOCK_HEIGHT),
             align_items: AlignItems::Center,
             ..default()
@@ -40,7 +52,7 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, assets: &Asset
             plate(row, info, assets, 0);
             row.spawn((
                 Node {
-                    width: px(116),
+                    width: px(if cfg!(target_os = "android") { 72 } else { 116 }),
                     height: px(CLOCK_HEIGHT),
                     flex_shrink: 0.,
                     border: UiRect::all(px(3)),
@@ -54,7 +66,17 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, assets: &Asset
                 ZIndex(2),
             ))
             .with_children(|clock| {
-                clock.spawn((chrome::title("0:00", 29.), Readout::Clock));
+                clock.spawn((
+                    chrome::title(
+                        "0:00",
+                        if cfg!(target_os = "android") {
+                            20.
+                        } else {
+                            29.
+                        },
+                    ),
+                    Readout::Clock,
+                ));
                 clock.spawn((kit::muted("GET READY", 8.), Readout::Phase));
             });
             plate(row, info, assets, 1);
@@ -94,8 +116,8 @@ fn plate(
             plate
                 .spawn((
                     Node {
-                        width: px(38),
-                        height: px(44),
+                        width: px(if cfg!(target_os = "android") { 24 } else { 38 }),
+                        height: px(if cfg!(target_os = "android") { 30 } else { 44 }),
                         flex_shrink: 0.,
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
@@ -173,7 +195,7 @@ fn vitality(parent: &mut ChildSpawnerCommands, relative: usize) {
         .spawn((
             Node {
                 width: percent(100),
-                height: px(20),
+                height: px(if cfg!(target_os = "android") { 16 } else { 20 }),
                 overflow: Overflow::clip(),
                 border_radius: BorderRadius::all(px(3)),
                 border: UiRect::all(px(1)),

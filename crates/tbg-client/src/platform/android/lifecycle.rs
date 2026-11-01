@@ -20,7 +20,20 @@ pub fn poll(
     state: Res<State<GameState>>,
     sinks: Query<&AudioSink>,
     mut previous: Local<bool>,
+    mut battle_mode: Local<Option<bool>>,
 ) {
+    let battle = matches!(
+        *state.get(),
+        GameState::InMatch | GameState::Training | GameState::Result
+    );
+    if *battle_mode != Some(battle)
+        && services::send(
+            jni::jni_str!("setBattleViewport"),
+            if battle { "true" } else { "false" },
+        )
+    {
+        *battle_mode = Some(battle);
+    }
     let focused = services::flag(jni::jni_str!("hasAudioFocus"));
     if !focused || focused != *previous {
         for sink in &sinks {

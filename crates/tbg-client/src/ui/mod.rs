@@ -239,8 +239,9 @@ pub fn plugin(app: &mut App) {
             fortify::plugin,
             shell::plugin,
             kit::plugin,
-            attribution::plugin,
         ));
+    #[cfg(not(target_os = "android"))]
+    app.add_plugins(attribution::plugin);
 }
 
 /// Scale the whole UI with the smaller window side (phones ≈ 0.9, desktop 1.5).

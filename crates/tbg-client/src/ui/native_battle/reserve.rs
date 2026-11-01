@@ -43,9 +43,18 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer, slot: usiz
             Node {
                 position_type: PositionType::Absolute,
                 right: px(8),
-                top: px(12),
-                width: px(27),
-                height: px(28),
+                top: if cfg!(target_os = "android") {
+                    Val::Auto
+                } else {
+                    px(12)
+                },
+                bottom: if cfg!(target_os = "android") {
+                    px(6)
+                } else {
+                    Val::Auto
+                },
+                width: px(if cfg!(target_os = "android") { 40 } else { 27 }),
+                height: px(if cfg!(target_os = "android") { 40 } else { 28 }),
                 border: UiRect::all(px(1)),
                 border_radius: BorderRadius::all(px(5)),
                 align_items: AlignItems::Center,

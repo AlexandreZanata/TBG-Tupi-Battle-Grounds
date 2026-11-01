@@ -5,6 +5,8 @@ mod gles_shader;
 mod lifecycle;
 pub mod render;
 pub mod services;
+#[cfg(feature = "android-loopback")]
+mod telemetry;
 use bevy::{
     prelude::*,
     window::{MonitorSelection, WindowMode, WindowResizeConstraints},
@@ -36,6 +38,8 @@ pub fn plugin(app: &mut App) {
     app.insert_resource(WinitSettings::game())
         .add_plugins(crate::ui::mobile::plugin)
         .add_systems(Update, (lifecycle::poll, gles_shader::adapt));
+    #[cfg(feature = "android-loopback")]
+    app.add_systems(Update, telemetry::collect);
 }
 pub fn persistent_preference(key: &str) -> bool {
     matches!(
