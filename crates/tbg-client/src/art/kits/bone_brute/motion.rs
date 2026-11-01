@@ -68,7 +68,7 @@ const DOUBLE: &[Track] = &[
 
 pub fn pose(m: &Moment, pose: &mut Pose) {
     let f = Form::of(m.tier, m.branch);
-    let p = plan(m.tier);
+    let p = plan(m.tier, m.branch);
     let reaper = f.b && f.t2;
     match m.clip {
         Clip::Idle => idle(m, pose, &p, f),
@@ -231,24 +231,21 @@ fn reap(m: &Moment, pose: &mut Pose, p: &Proportions) {
 /// toward the left), `tilt` lowers the blade forward, `drop` lowers the
 /// hands.
 fn scythe(pose: &mut Pose, p: &Proportions, swing: f32, tilt: f32, drop: f32) {
-    let turn = Quat::from_rotation_y(swing.to_radians());
-    let grip = turn * Quat::from_rotation_x(tilt.to_radians());
-    let wrist = turn * Vec3::new(-0.12, 0.0, 0.3) + Vec3::new(-0.1, 0.08 - drop, 0.0);
-    tools::reach(
-        pose,
-        false,
-        wrist,
-        Some(grip),
-        (p, Vec3::new(-1.0, -0.5, -0.4)),
-    );
-    let lower = wrist + grip * Vec3::new(0.0, -0.26, 0.0);
-    tools::reach(
-        pose,
-        true,
-        lower,
-        Some(grip),
-        (p, Vec3::new(1.0, -0.5, -0.4)),
-    );
+    let grip = Quat::from_rotation_y(swing.to_radians()) * Quat::from_rotation_x(tilt.to_radians());
+    let wrist = Vec3::new(-0.02, 0.30 - drop * 0.2, 0.32);
+    for (left, side) in [(false, -1.0), (true, 1.0)] {
+        tools::reach(
+            pose,
+            left,
+            wrist + grip * Vec3::Y * if left { 0.12 } else { 0.0 },
+            Some(grip),
+            (p, Vec3::new(side, -0.5, -0.4)),
+        );
+    }
+    // Slide the existing haft through the grip instead of crossing the rear shaft through the ribs.
+    pose[crate::art::rig::Node::Prop(crate::art::rig::Socket::WeaponR).index()]
+        .1
+        .y = 0.34;
 }
 
 /// Evolve (0.9 s): gathers itself, then rears up and roars, arms flung

@@ -441,3 +441,23 @@ Final whitespace output: scoped `git diff --check` returned 0 with no findings.
 printed no whitespace findings; each returned 1 because the new file differs
 from `/dev/null`. No compile/test or rendered validation is implied by these
 source-only results.
+
+## Native consolidation follow-up (2026-11-01)
+
+The inherited Longaxe and Bone Brute B2 primary grip defects were reproduced
+against generated body meshes. Local pole frames now keep the right wrist
+forward and slide the haft toward its butt, with a separate reachable support
+anchor. Longaxe loads upright beside its head. Longaxe arm length is 0.26;
+only Bone Brute B2 uses 0.32 (other forms retain 0.25). These are figure
+proportions, not simulation hitboxes or stats. Attack duration and Strike
+remain 0.62 s / 0.30 s.
+
+The focused `p70_pole_` regression passed: five Longaxe forms and Bone Brute
+B2, two variants, both aim directions, 65 samples each. Both wrists contact
+the real haft (maximum sampled axis error rounded to 0.000000), retain
+distinct grip anchors, and five shaft surface lines do not intersect the
+head, chest or hip meshes. Earlier iterations exposed Longaxe head/chest
+crossing and Bone Brute chest crossing/short support reach; these drove the
+correction rather than weakening assertions. This sampled primary check is
+not continuous collision proof or acceptance of every life-clip blend.
+Rendered follow-up and owner approval remain required.

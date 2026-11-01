@@ -19,7 +19,7 @@ pub const HEAD_Y: f32 = HAFT * 0.72;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.05, tier);
-    p.arm = 0.19;
+    p.arm = 0.26;
     p
 }
 

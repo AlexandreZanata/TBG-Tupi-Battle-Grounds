@@ -45,7 +45,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             moves::idle(m, pose, &p, 0.3);
             let ready = m.aim.map_or(0.0, |a| a.weight);
             if ready > 0.0 {
-                moves::pole(pose, &p, (-15.0, 20.0 * ready), 0.0, 0.32);
+                hold_pole(pose, &p, -15.0, 20.0 * ready, 0.0);
             } else {
                 rest(pose, &p);
                 let balance =
@@ -172,7 +172,26 @@ fn attack(m: &Moment, pose: &mut Pose, p: &Proportions, f: Form) {
         Joint::Hips,
         [0.0, -0.06 * cut * (1.0 - back), 0.08 * cut * (1.0 - back)],
     );
-    moves::pole(pose, p, (swing, tilt), 0.12 * cut * (1.0 - back), 0.34);
+    hold_pole(pose, p, swing, tilt, 0.12 * cut * (1.0 - back));
     tools::face(pose, m.aim, Vec3::ZERO);
     tools::plant(pose, p, tools::stance(p, 1.35, 0.1));
+}
+
+/// Center both wrists in their shared reachable volume; grip near the butt to keep it outside the chest.
+fn hold_pole(pose: &mut Pose, p: &Proportions, swing: f32, tilt: f32, drop: f32) {
+    let lift = (-tilt / 50.0).clamp(0.0, 1.0);
+    let grip = Quat::from_rotation_y(swing.to_radians())
+        * Quat::from_rotation_x(tilt.max(0.0).to_radians())
+        * Quat::from_rotation_z((15.0 * lift).to_radians());
+    let wrist = Vec3::new(-0.04, 0.26 + 0.08 * lift - drop * 0.2, 0.25);
+    for (left, side) in [(false, -1.0), (true, 1.0)] {
+        tools::reach(
+            pose,
+            left,
+            wrist + grip * Vec3::Y * if left { 0.12 } else { 0.0 },
+            Some(grip),
+            (p, Vec3::new(side, -0.5, -0.4)),
+        );
+    }
+    pose[Node::Prop(Socket::WeaponR).index()].1.y = 0.66;
 }

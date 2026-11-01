@@ -37,13 +37,13 @@ impl Form {
 }
 
 /// Long arms and a deep chest; the hunch is posed, not modeled.
-pub fn plan(tier: u8) -> Proportions {
+pub fn plan(tier: u8, branch: u8) -> Proportions {
     Proportions {
         scale: 1.45 * 1.2 * (1.0 + 0.08 * f32::from(tier.min(2))),
         leg: 0.36,
         torso: Vec3::new(0.5, 0.38, 0.28),
         head: 0.14,
-        arm: 0.25,
+        arm: if tier == 2 && branch == 1 { 0.32 } else { 0.25 },
     }
 }
 
@@ -58,7 +58,7 @@ pub fn tip(f: Form) -> Vec3 {
 
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
-    let p = plan(tier);
+    let p = plan(tier, branch);
     let mut v = Vec::with_capacity(140);
     legs(&mut v, &p, f);
     pelvis(&mut v, f);

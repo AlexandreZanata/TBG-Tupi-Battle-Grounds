@@ -296,3 +296,6 @@ impl Kit {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod pole_grip_tests;
