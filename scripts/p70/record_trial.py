@@ -97,6 +97,10 @@ def record(args, provenance):
             if (ready['unit'], ready['shooter_seat'], ready['tier'], ready['branch']) != (
                     args.unit, args.seat, *FORMS[args.form]):
                 raise ValueError('Client ready metadata differs from the requested scenario')
+            if ready['quality'] != args.quality or ready['seed'] != args.seed:
+                raise ValueError('Actual quality/seed differs from the requested recording')
+            if args.distance is not None and ready['initial_distance'] != args.distance:
+                raise ValueError('Actual initial distance differs from the explicit request')
             if not isinstance(ready.get('subject_id'), int):
                 raise ValueError('Subject identity missing from the actual reset training state')
             if ready['active_ticks'] != 0:
@@ -135,6 +139,8 @@ def collect(args, provenance, ready, finished, video):
     streams = probe.get('streams', [])
     if len(streams) != 1 or int(streams[0].get('nb_read_frames', 0)) == 0:
         raise ValueError('Recording has no decodable video frames')
+    if [streams[0]['width'], streams[0]['height']] != ready['viewport']:
+        raise ValueError('Decoded video dimensions differ from the actual client viewport')
     records = [json.loads(line) for line in (args.output / 'events.jsonl').read_text().splitlines()]
     counts = Counter(name for record in records for event in record['events']
                      for name in (event if isinstance(event, dict) else [str(event)]))
@@ -165,6 +171,14 @@ def collect(args, provenance, ready, finished, video):
         artifacts[name] = {'path': str(path), 'sha256': sha256(path), 'bytes': path.stat().st_size}
     summary = {
         **provenance, 'kind': 'real_training_temporal_recording',
+        'id': f'{args.phase}-{args.unit}-{args.form}-seat-{args.seat}-{args.quality}-training-{args.seed}-{ready["initial_distance"]}',
+        'unit_id': args.unit, 'forms': [args.form], 'clip_or_ability': 'training_engagement',
+        'phase_before_or_after': args.phase, 'samples': [],
+        'aim': {'source': 'Unmodified canonical training targeting; inspect recorded events.'},
+        'viewport': ready['viewport'], 'scenario_seed': args.seed,
+        'path_or_uri': str(video), 'sha256': artifacts['original.mkv']['sha256'],
+        'width': streams[0]['width'], 'height': streams[0]['height'],
+        'review_status': 'recorded_not_reviewed',
         'camera': ready['camera'], 'dpi': ready['dpi'], 'renderer': adapter.group(0),
         'video': streams[0], 'event_counts': dict(counts), 'subject_id': ready['subject_id'],
         'subject_source_event_counts': dict(subject), 'actual_initial_distance': ready['initial_distance'],
