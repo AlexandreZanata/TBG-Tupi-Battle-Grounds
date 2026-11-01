@@ -30,7 +30,7 @@ check_release() {
 
 # Uploads arrive in the SSH user's private ~/tbg-web-upload; refuse anything else before deleting.
 check_upload() {
-	[[ "$1" =~ ^/(root|home/[a-z_][a-z0-9_-]*)/tbg-web-upload/[a-z0-9.-]+$ ]] || die "unexpected upload path: $1"
+	[[ "$1" =~ ^/(root|home/[a-z_][a-z0-9_-]*)/tbg-web-upload/[A-Za-z0-9.-]+$ ]] || die "unexpected upload path: $1"
 }
 
 install_release() { # <site> <release> <upload dir>
