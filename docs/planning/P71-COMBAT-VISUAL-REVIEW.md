@@ -73,3 +73,14 @@ branch ownership). Two Farwatch targeting regressions passed, including Guard.
 The client check initially found E0624 on pose sampling visibility; it was
 corrected before the successful test build. D-33 balance gate and broad
 multiplayer validation remain deferred; the values are Proposed playtest data.
+
+### Hornet follow-up
+
+Hornet's presentation scale changes from 0.94 to 1.10 (17.0% larger), retaining
+the existing Evolution growth and gameplay size/range. A fuller striped
+abdomen, larger compound eyes, dark antennae and four wings reinforce the
+humanoid bee. A broad brass/charcoal venom pistol has a green reservoir,
+visible bore and grip. Four articulated hose sections follow the abdomen and
+pistol sockets through the actual sampled pose; the hose continuity test
+passed across five forms and Idle/Walk/Attack/Death samples. Hose sections use
+existing prop slots and cached primitive meshes, with no new dependency.

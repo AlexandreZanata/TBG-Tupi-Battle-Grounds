@@ -33,7 +33,11 @@ pub fn height(
                 if matches!(
                     node,
                     Node::Prop(
-                        Socket::WeaponR | Socket::OffhandL | Socket::Nock | Socket::StringTop
+                        Socket::WeaponR
+                            | Socket::OffhandL
+                            | Socket::Nock
+                            | Socket::StringTop
+                            | Socket::StringBottom
                     )
                 ) {
                     continue;

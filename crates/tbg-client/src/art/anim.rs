@@ -180,6 +180,8 @@ impl Animator {
         self.fade = None;
         self.aim = None;
         self.aim_at = None;
+        self.special_at = None;
+        self.special_aim = None;
         self.hit_stop = 0.;
         self.carried = false;
         self.events.clear();
@@ -203,6 +205,8 @@ impl Animator {
         self.fade = None;
         self.aim = None;
         self.aim_at = None;
+        self.special_at = None;
+        self.special_aim = None;
         self.special = None;
         self.special_ready = false;
         self.armor_flash = 0.;
@@ -443,6 +447,14 @@ pub fn animate(
                     |body| (body.rest)(node, &a.plan),
                 ) + off;
                 t.rotation = ik::quat(rot);
+            }
+        }
+        if a.kind == UnitKind::Hornet {
+            let hose = kits::hornet::hose::segments(&a.plan, &pose);
+            for (socket, local) in kits::hornet::hose::SOCKETS.into_iter().zip(hose) {
+                if let Ok(mut t) = transforms.get_mut(a.joints[rig::Node::Prop(socket).index()]) {
+                    *t = local;
+                }
             }
         }
         if let Some(kit) = a.kit {

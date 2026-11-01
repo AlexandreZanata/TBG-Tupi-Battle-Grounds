@@ -375,7 +375,14 @@ fn evolution_text(
         "{} · {} Energy\n{}",
         form.name,
         v.evolve_costs[usize::from(u.tier.min(1))] / ENERGY_SCALE,
-        evolve::describe(form, lang)
+        {
+            let stats = evolve::describe(form, lang);
+            if stats.is_empty() {
+                super::super::ability_details::describe(u.kind, u.tier + 1, branch, lang)
+            } else {
+                stats
+            }
+        }
     )
 }
 

@@ -1,4 +1,5 @@
 //! Hornet's planted wasp gait, slow opaque wing hum, stinger alignment and confirmed venom-sac pulse.
+pub(crate) mod hose;
 mod model;
 use super::{
     common::{moves, moves::*},
