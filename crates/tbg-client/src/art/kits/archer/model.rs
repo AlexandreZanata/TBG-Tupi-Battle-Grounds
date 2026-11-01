@@ -166,8 +166,6 @@ fn quivers(v: &mut Vec<PartSpec>, f: Form) {
         // Single quiver on back
         let (color, fletch) = if f.a && f.t2 {
             (GOLD, GOLD)
-        } else if f.a {
-            (DARK_LEATHER, LINEN)
         } else {
             (DARK_LEATHER, LINEN)
         };
@@ -196,7 +194,7 @@ fn bow(v: &mut Vec<PartSpec>, f: Form) {
         string: if f.t2 { GOLD } else { LINEN },
         shaft: TIMBER,
         head: STEEL,
-        fletch: if f.a { LINEN } else { LINEN },
+        fletch: LINEN,
     };
     let half = half_len(f);
     v.extend(gear::bow(half, style));

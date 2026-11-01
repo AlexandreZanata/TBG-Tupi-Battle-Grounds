@@ -5,7 +5,7 @@ pub fn star() -> Mesh {
     let mut positions = Vec::<[f32; 3]>::new();
     let point = |i: usize| {
         let angle = std::f32::consts::FRAC_PI_2 + i as f32 * std::f32::consts::PI / 5.0;
-        let radius = if i % 2 == 0 { 0.105 } else { 0.047 };
+        let radius = if i.is_multiple_of(2) { 0.105 } else { 0.047 };
         [angle.cos() * radius, angle.sin() * radius, 0.0]
     };
     for i in 0..10 {

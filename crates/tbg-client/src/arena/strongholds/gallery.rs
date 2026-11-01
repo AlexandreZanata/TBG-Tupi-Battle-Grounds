@@ -96,8 +96,7 @@ pub(super) fn wear_sequence(
     mut art: ResMut<StrongholdArt>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut towers: Query<(Entity, &mut Tower)>,
-    mut previous: Local<Option<u8>>,
-    mut start: Local<Option<f32>>,
+    mut sequence: Local<(Option<u8>, Option<f32>)>,
     #[cfg(target_os = "linux")] loading: Res<crate::ui::native_loading::Status>,
 ) {
     if config::url_param("damage_sweep").is_none() {
@@ -107,6 +106,7 @@ pub(super) fn wear_sequence(
     if !loading.boot_ready || loading.scene_waiting {
         return;
     }
+    let (previous, start) = &mut *sequence;
     let start = *start.get_or_insert(time.elapsed_secs());
     let step = ((time.elapsed_secs() - start).max(0.0) / 0.5) as u8;
     let stage = if step > 20 { 0 } else { step };

@@ -23,9 +23,7 @@ pub fn plugin(app: &mut App) {
 
 fn run(
     mut commands: Commands,
-    time: Res<Time<Real>>,
-    state: Res<State<GameState>>,
-    view: Res<LatestView>,
+    (time, state, view): (Res<Time<Real>>, Res<State<GameState>>, Res<LatestView>),
     inspected: Res<crate::ui::inspect::Inspected>,
     selected: Res<crate::ui::evolve::Selected>,
     mut queue: ResMut<ActionQueue>,
@@ -69,7 +67,7 @@ fn run(
             .observe(save_to_disk(directory.join(name)));
     };
     match flow.stage {
-        2 | 3 | 4 => {
+        2..=4 => {
             let wanted = flow.stage - 2;
             if tier != Some(wanted) {
                 return;

@@ -12,6 +12,9 @@ use bevy::prelude::*;
 
 pub(super) mod motion;
 
+// Scene height in hundredths of a unit, not an angular approximation of PI.
+const CHIMNEY_CAP_Y: f32 = 314.0 / 100.0;
+
 pub(super) fn build(kit: &mut Kit) {
     let p = Theme::Clockwork.palette();
     fortress(kit);
@@ -90,7 +93,7 @@ fn fortress(kit: &mut Kit) {
             (0.21, 2.5, 1.25, p.stone),
             (0.30, 0.16, 2.57, p.accent),
             (0.26, 0.45, 2.86, p.dark),
-            (0.31, 0.14, 3.14, p.accent),
+            (0.31, 0.14, CHIMNEY_CAP_Y, p.accent),
         ] {
             parts.push((Cyl(r, h), col, Transform::from_xyz(x, y, -4.83)));
         }

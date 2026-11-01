@@ -53,7 +53,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         Clip::Walk => {
             let step = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
             tools::set(pose, Joint::Spine, [3.0, 0.0, 2.0 * step]);
-            tools::set(pose, Joint::Chest, [-2.0 * step.abs(), 0.0, -1.0 * step]);
+            tools::set(pose, Joint::Chest, [-2.0 * step.abs(), 0.0, -step]);
             tools::set(pose, Joint::Head, [-4.0, 0.0, -2.0 * step]);
         }
         Clip::AttackMelee => {

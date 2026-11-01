@@ -191,6 +191,8 @@ pub(super) fn gear(r: f32, color: Color) -> Vec<Part> {
     parts
 }
 
+type DamageFragments = Vec<(Handle<Mesh>, u8)>;
+
 /// Meshes and materials every tower shares: each part is built once per
 /// team color and reused by every tower and every form.
 #[derive(Resource)]
@@ -199,7 +201,7 @@ pub(crate) struct StrongholdArt {
     pub ring_material: Handle<StandardMaterial>,
     meshes: HashMap<(&'static str, bool), Handle<Mesh>>,
     rings: HashMap<(i32, bool), Handle<Mesh>>,
-    fragments: HashMap<(&'static str, bool), Vec<(Handle<Mesh>, u8)>>,
+    fragments: HashMap<(&'static str, bool), DamageFragments>,
 }
 
 impl FromWorld for StrongholdArt {
@@ -242,7 +244,7 @@ impl StrongholdArt {
         def: &PartDef,
         own: bool,
         meshes: &mut Assets<Mesh>,
-    ) -> Vec<(Handle<Mesh>, u8)> {
+    ) -> DamageFragments {
         self.fragments
             .entry((def.name, own))
             .or_insert_with(|| {

@@ -201,3 +201,38 @@ post-merge activation and the acceptance items below remain explicit.
 
 Main delivery is source-prepared and host-staged, not automatically activated. Do
 not mark the whole game release-ready or imply all deferred phases are accepted.
+
+## CI Clippy follow-up (2026-11-01)
+
+Owner-reported CI at source `bf01020` failed the workspace Clippy lane with 11
+client diagnostics. The integrated P70/P71 art/capture source exceeded argument/type
+complexity limits and contained redundant branches/arithmetic/range patterns. This
+was not a network, dependency download or server failure. Earlier targeted compilation
+and tests were not Clippy evidence; the failing lane is recorded explicitly here.
+
+Fixes group existing Bevy SystemParams and local sweep state without changing their
+access or lifetime, name the damage-fragment collection, remove the redundant
+`With<UnitVisual>` filter (the required query reference already selects it), and
+simplify equivalent color/arithmetic/pattern expressions. The Clockwork value `3.14`
+was a scene height, not an angle: `CHIMNEY_CAP_Y = 314.0 / 100.0` preserves the same
+f32 geometry instead of incorrectly replacing it with PI. No rule values, protocol,
+CI configuration, lint suppression or warning policy changed.
+
+Validation level: work front. On the final nine-file client diff:
+
+```bash
+cargo fmt -p tbg-client -- --check
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 \
+    CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/target \
+    PKG_CONFIG_PATH=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/native-deps/root/usr/lib/x86_64-linux-gnu/pkgconfig \
+    cargo clippy --offline --locked -p tbg-client --bin tbg-client -- -D warnings
+git diff --check
+```
+
+All passed. Rust/Clippy 1.99.0; Clippy exited 0 in 7.12 seconds using the existing
+cache. No new regression test is warranted for equivalent lint-only refactors.
+The workspace Clippy command (`cargo clippy --locked --workspace -- -D warnings`)
+and other CI lanes remain for GitHub; no full local suite, additional target build,
+rendering gallery, installation or deployment was run. Normal push updates #40;
+CI completion and main merge remain with the owner.

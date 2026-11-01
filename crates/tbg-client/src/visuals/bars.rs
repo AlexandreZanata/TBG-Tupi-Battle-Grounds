@@ -6,7 +6,7 @@ use bevy::prelude::*;
 /// Project current body bounds so long heads and rotated silhouettes never cover HP.
 pub(super) fn billboards(
     camera: Single<(&Camera, &Transform), With<ArenaCamera>>,
-    units: Query<(&UnitVisual, &Animator, &Transform), (With<UnitVisual>, Without<ArenaCamera>)>,
+    units: Query<(&UnitVisual, &Animator, &Transform), Without<ArenaCamera>>,
     bounds: Query<&bevy::camera::primitives::Aabb>,
     mut transforms: Query<&mut Transform, (Without<ArenaCamera>, Without<UnitVisual>)>,
 ) {
