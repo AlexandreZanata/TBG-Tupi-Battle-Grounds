@@ -1,6 +1,6 @@
 // Shop portraits: captures each buyable unit's base form in the gallery portrait
 // mode (?gallery=<Kind>&portrait) and writes a 400x400 WebP to
-// crates/tbg-client/assets/battle/portraits/<slug>.webp (the slug rule of hud.js).
+// crates/tbg-client/assets/battle/portraits/<slug>.webp (the slug rule of the Bevy HUD, ui/hud_portraits.rs).
 // Optional tool: needs Playwright and a local Chrome, and a static server of the
 // client build first: python3 -m http.server <port> --directory crates/tbg-client/dist
 // Image analysis and WebP encoding run inside Chrome (canvas), so nothing else
@@ -9,8 +9,8 @@
 // name or path, default 'playwright'), TBG_CHROME_CHANNEL (default 'chrome'), and
 // TBG_UNITS_URL (optional: a separate build to shoot Archer and Cargo Crab from,
 // e.g. after their kits change; by default every unit comes from TBG_PREVIEW_URL).
-// After changing any portrait, bump PORTRAIT_REV in assets/battle/hud.js: the proxy
-// caches images (and 404s) for four hours, so the URL needs a new revision.
+// The proxy caches /assets/ for an hour: a changed portrait reaches browsers on
+// the next deploy's cache expiry (the Bevy HUD loads it by path).
 // Usage: node scripts/unit-portraits.cjs [Kind ...]   (no kinds: all buyable units)
 const fs = require('node:fs/promises');
 const path = require('node:path');
@@ -25,7 +25,7 @@ const BACKGROUND = [21, 33, 42];
 const args = process.argv.slice(2);
 const special = new Set(['Archer', 'CargoCrab']);
 
-// Same rule as hud.js `slug`: the UnitKind name, lowercase, no separators.
+// Same rule as the HUD slug: the UnitKind name, lowercase, no separators.
 const slug = kind => kind.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 // Buyable roster = tbg-core FULL_POOL (summons are never in the Shop).

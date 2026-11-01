@@ -148,6 +148,7 @@ pub(super) enum Outcome {
     },
     LoggedOut,
     LogoutPending(Failure),
-    /// P66: the resume record was written or removed.
+    /// P66: the resume record was written or removed (native vault only).
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
     Resumed,
 }

@@ -142,38 +142,6 @@ pub fn report(
     })
 }
 
-#[cfg(any(target_arch = "wasm32", test))]
-impl Report {
-    /// One `|`-separated record for the HTML battle layer (no field holds `|`):
-    /// 18 legacy fields, then the localized status label (P64).
-    pub fn record(&self) -> String {
-        [
-            self.kind.clone(),
-            self.name.to_string(),
-            self.form.clone(),
-            self.faction.clone(),
-            self.role.clone(),
-            self.own.to_string(),
-            self.hp.to_string(),
-            self.max_hp.to_string(),
-            self.attack.0.to_string(),
-            self.attack.1.to_string(),
-            self.every.clone(),
-            self.per_second.clone(),
-            self.range.clone(),
-            self.speed.clone(),
-            self.splash.clone(),
-            self.on_hit.clone(),
-            self.status.to_string(),
-            self.synergy.clone(),
-            self.effects.clone(),
-            self.ability.clone(),
-            self.status_label.to_string(),
-        ]
-        .join("|")
-    }
-}
-
 #[derive(Component)]
 #[cfg(not(tbg_desktop))]
 struct InspectPanel;
@@ -318,9 +286,15 @@ mod tests {
             super::report(&v, 999, &neutral, en).is_none(),
             "gone units close the panel"
         );
-        let record = enemy.record();
-        assert_eq!(record.split('|').count(), 21, "{record}");
-        assert!(record.starts_with("Hexer|Hexer|Base form|Undead|Control|false|123|300|"));
+        assert_eq!(
+            (
+                enemy.kind.as_str(),
+                enemy.form.as_str(),
+                enemy.faction.as_str(),
+                enemy.role.as_str()
+            ),
+            ("Hexer", "Base form", "Undead", "Control")
+        );
         // P64 T02/T03: Portuguese text, same numbers, canonical ids kept.
         let pt = super::report(&v, theirs, &neutral, crate::i18n::Lang::PtBr).unwrap();
         assert_eq!(
@@ -330,9 +304,11 @@ mod tests {
         assert_eq!((pt.kind.as_str(), pt.status), ("Hexer", "Ready"));
         assert_eq!(pt.on_hit, "Lentid\u{E3}o 40% 2,0 s");
         assert_eq!((pt.every.as_str(), pt.range.as_str()), ("1,40 s", "3,5"));
-        let record = pt.record();
-        assert!(record.contains("|Mortos-Vivos|Controle|"), "{record}");
-        assert!(record.ends_with("|Pronto"), "{record}");
+        assert_eq!(
+            (pt.faction.as_str(), pt.role.as_str()),
+            ("Mortos-Vivos", "Controle")
+        );
+        assert_eq!(pt.status_label, "Pronto");
     }
 
     #[test]

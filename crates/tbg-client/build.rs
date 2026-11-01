@@ -59,11 +59,13 @@ fn main() {
         std::env::var("TARGET").unwrap_or_default()
     );
     // Presentation depends on the compilation target, never on the build host.
+    // P72 (owner, 2026-11-01): the browser uses the same desktop presentation
+    // as native Linux; only platform services (vault, files, updates) differ.
     println!("cargo:rustc-check-cfg=cfg(tbg_desktop)");
     let desktop = matches!(
         std::env::var("CARGO_CFG_TARGET_OS").as_deref(),
         Ok("linux" | "windows")
-    );
+    ) || std::env::var("CARGO_CFG_TARGET_ARCH").as_deref() == Ok("wasm32");
     if desktop {
         println!("cargo:rustc-cfg=tbg_desktop");
     }

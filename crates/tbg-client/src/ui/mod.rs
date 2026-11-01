@@ -20,8 +20,6 @@ mod attribution;
 mod augment_data_tests;
 mod auth_ui;
 mod battle_hud;
-#[cfg(test)]
-mod battle_wiring_tests;
 mod countdown;
 mod desktop;
 #[cfg(target_arch = "wasm32")]
@@ -42,8 +40,6 @@ pub(crate) mod inspect;
 mod json_lite;
 mod keyboard;
 pub(crate) mod kit;
-#[cfg(test)]
-mod lobby_panels_tests;
 mod menu;
 #[cfg(tbg_desktop)]
 mod native_battle;
