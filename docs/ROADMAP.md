@@ -491,9 +491,12 @@ sign-off. Nothing was deployed; production stays on protocol 29.
 
 ## Active players, direct challenges and rematches (2026-11-01)
 
-**P73 — planning only**, `codex/p73-active-players-challenges-plan`, audited
-against `origin/main` at `e2a18af` and coordinated with P72's shared
-Bevy web/native interface. Read [the phase](phases/P73-active-players-and-direct-challenges.md),
+**P73 — implemented, Draft review pending**,
+`phase/p73-active-players-challenges`, based on `origin/main` at `e2a18af`
+and the P72 shared Bevy web/native interface at `2da0a35`.
+See the [execution report](planning/P73-EXECUTION-REPORT.md) for real scoped
+validation, native fixture captures and deferred final/browser acceptance.
+Read [the phase](phases/P73-active-players-and-direct-challenges.md),
 [source audit and D01–D16/H01–H18 cases](planning/P73-PLAN-MANIFEST.json) and
 [the executor prompt](planning/P73-EXECUTION-PROMPT.md).
 
@@ -522,9 +525,11 @@ must actually aggregate snapshots rather than labeling one slot global;
 unsupported/incompatible/draining targets remain unavailable without moving
 an active match. Proposed BR-AP rules/defaults are documented in GAME-DESIGN.
 
-No game code, production API change, test execution, UI acceptance, push,
-VPS access or deployment is part of this planning delivery. Full-suite and
-heavy validation still require the owner's explicit scoped request.
+The implementation adds protocol 31 and explicitly gated additive schema 11.
+No production flags, database, VPS or deployment were changed. Final checks
+blocked by the shared validation lock, browser captures and owner look/fun
+acceptance remain pending; this phase is not approved or release-ready.
+Full-suite and heavy validation still require the owner's explicit scoped request.
 
 **P73 execution handoff authorization, 2026-11-01:** after implementation,
 normally publish its branch and open a GitHub PR targeting `main`, per the

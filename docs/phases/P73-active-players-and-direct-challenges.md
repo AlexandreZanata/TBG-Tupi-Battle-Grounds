@@ -1,6 +1,8 @@
 # P73 — Active players, challenges, rematches and match history
 
-**Status:** planning only, 2026-11-01. No runtime feature implemented.
+**Status:** implementation Draft, 2026-11-01. Runtime code and targeted
+regressions are implemented; final late-edit compilation, browser captures
+and owner acceptance remain pending. See the [execution report](../planning/P73-EXECUTION-REPORT.md).
 **Planning branch:** `codex/p73-active-players-challenges-plan`.
 **Execution branch:** `phase/p73-active-players-challenges`.
 **Execution publication authorization, 2026-11-01:** the owner explicitly

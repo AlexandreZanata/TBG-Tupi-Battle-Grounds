@@ -1,6 +1,6 @@
 {
   "phase": "P73",
-  "status": "planning_only",
+  "status": "implementation_draft",
   "date": "2026-11-01",
   "audit_base": {
     "ref": "origin/main",
@@ -79,97 +79,113 @@
       "id": "D01",
       "name": "Complete browse and search",
       "scenario": "137 connected account fixtures span at least three pages; search finds a target outside page one; filters precede paging; changing snapshot revision resets/deduplicates pages.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D02",
       "name": "True availability",
       "scenario": "Idle, Queued, InRoom, InChallenge, Watching, InMatch, disconnected and opted-out controllers show accurate coarse status; only eligible Idle endpoints can send/accept.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D03",
       "name": "Consented private pairing",
       "scenario": "Sender sends, actual recipient accepts; exactly one MatchStart per peer in private Challenge mode; fresh seed and no rating change.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D04",
       "name": "Terminal lifecycle",
       "scenario": "Decline, sender Cancel and TTL expiry notify the right peers, free bounded resources and cannot be replayed into a match.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D05",
       "name": "Authorization and self challenge",
       "scenario": "Third party cannot answer/cancel using another ID; wrong account/controller, alternate casing, own account and P39 bearer token cannot hijack a directed invite.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D06",
       "name": "Crossed and duplicate requests",
       "scenario": "Repeated sends, crossed A/B sends and duplicate simultaneous accept messages coalesce or terminate safely; Send never implicitly accepts and no duplicate pairing occurs.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D07",
       "name": "Accept-time race and release gate",
       "scenario": "Target/source becomes queued, joins a room/game, opts out, expires auth, loses connection or loses admission after the snapshot; accept fails safely without evicting current activity.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D08",
       "name": "Auth and reconnect continuity",
       "scenario": "Retained-session reconnect restores only remaining TTL/state; passive refresh does not take over; explicit takeover/logout/revocation cancel; no disconnected auto-start or TTL extension.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D09",
       "name": "Legacy flow preservation",
       "scenario": "Existing Quick Challenge link, self/expired/single-use link rejection, private rooms, ranked/casual queues and watch flow still follow their existing contracts.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D10",
       "name": "Latest-opponent rematch",
       "scenario": "Completed Challenge/Casual/Ranked/private PvP issues one latest ticket; both consent within existing TTL; next game is unrated private Challenge with fresh seed; Practice/spectators never get tickets.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D11",
       "name": "Result and players navigation",
       "scenario": "Open Active players without Cancel; same-opponent private offer and requested flags remain; explicit decline/new activity close it; guest opponent card is participant-only.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D12",
       "name": "Privacy and API/internal-route boundary",
       "scenario": "Public rows expose no keys/session IDs/invite IDs/private matches/guest enumeration; private WS state is participant-only; internal snapshot denies forwarded/public access and is proxy-blocked; names render as text.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D13",
       "name": "Abuse and bounds",
       "scenario": "Enforce TTL, one outbox, five inbox, pair cooldown, process cap and IP/account/guest rates; invented targets, slow peers and preference floods cannot grow auxiliary maps or block the lobby.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D14",
       "name": "Actual global snapshots",
       "scenario": "Two slot fixtures aggregate accounts and counts, deduplicate generations/controllers, discard retired snapshots and label a slow/missing/stale slot as incomplete instead of returning fake global zero.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D15",
       "name": "Cross-slot compatibility and match safety",
       "scenario": "Draining/incompatible/unreachable targets remain visible but unavailable; no cross-process pairing or live-match migration; ongoing match/auth-result continuity is unaffected.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     },
     {
       "id": "D16",
       "name": "Shared frontend and localization",
       "scenario": "Native Linux and web show consistent populated/search/page-two/empty/loading/error/stale/partial/invite/rematch/opt-out states; complete pt-BR/en keys, keyboard focus and no combat-blocking modal.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#d01d16-evidence-ledger"
     }
   ],
   "source_files": [
@@ -542,113 +558,131 @@
       "id": "H01",
       "name": "Mode and frozen ownership",
       "scenario": "Account-bound completed Ranked/Casual/Challenge/rematch/private-room PvP creates the right participant entries; guests/Practice/spectators/unaccepted invites do not gain account history; late login cannot claim a different frozen seat.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H02",
       "name": "Durable visibility choice",
       "scenario": "Existing and new accounts default private; owner changes to public/private via authenticated committed preference; reconnect/device changes preserve it; migrations/retry never reset a saved choice.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H03",
       "name": "Private and public authorization",
       "scenario": "Owner sees own entries under either setting; another account cannot use a copied entry/cursor/account field to read them; public reads obey current visibility, including the legacy recent API and old ranking clients.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H04",
       "name": "Exact MVP statistic semantics",
       "scenario": "Successful purchases/evolutions/fortifications and finalized choices count once, including dead champions, excluding rejected commands/summon generation; Stronghold terminal values and combat/wall time are frozen correctly.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H05",
       "name": "Unavailable and legacy metrics",
       "scenario": "No total-damage claim from source-less Hit amounts; shield/overkill/friendly/periodic effects cannot become fabricated attribution; absent legacy fields are null/unavailable, and real measured zero stays distinct.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H06",
       "name": "Result and reconnect consistency",
       "scenario": "MatchEnd/CompletedResult replay, Result UI and stored detail use the same authoritative personal summary and ResultId; retry does not increment metrics or replay celebration; Stored follows actual durable acknowledgment.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H07",
       "name": "Atomic and idempotent persistence",
       "scenario": "Same canonical envelope replay inserts one parent and one side per participant, preserves random entry IDs and rolls back atomically on a failed side insert; conflicting duplicate quarantines rather than overwrites.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H08",
       "name": "Crash boundaries and journal recovery",
       "scenario": "Exercise before journal, after journal, after DB commit/before journal removal and restart; assert exact stated recovery guarantees, bounded retry and explicit unrecoverable gaps, without altering outcome or Elo.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H09",
       "name": "Storage backpressure and release drain",
       "scenario": "Disk full/read-only/corrupt envelope/queue cap/store outage never claims Saved or blocks a live tick; pending work is counted before slot retirement and retained/handoff to a compatible recovery owner is explicit.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H10",
       "name": "Verified resumable backfill",
       "scenario": "Only canonical account-bound Ranked rows backfill in bounded checkpoints; newer writes and repeated batches do not duplicate results; old non-ranked log names are never used as ownership evidence.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H11",
       "name": "Keyset paging correctness",
       "scenario": "More than 50 fixtures, same-end-time ties and a new head insertion preserve deterministic keyset traversal without duplicates; forged/oversize/wrong-subject/filter cursors fail safely; query plan uses the participant account/time/entry index.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H12",
       "name": "Privacy projection and private opponents",
       "scenario": "Public opt-in exposes only that owner summary; private-room/Challenge/rematch/guest opponent identity and other-side private stats are redacted; internal source IDs, room codes, seeds and tokens never leak.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H13",
       "name": "Concurrent privacy saves and caches",
       "scenario": "Commit a public-to-private revision then deny new public reads across list/detail/legacy recent; stale If-Match public save conflicts instead of overwriting; no shared cache/ETag/static-profile bypass or false retraction promise.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H14",
       "name": "Authenticated slot routing",
       "scenario": "Owner HTTP goes to the correct Access index with current token and Origin policy; expired token uses coordinated refresh, not an expired match lease; malformed/duplicate headers and unintended CORS fail safely.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H15",
       "name": "Migration and safe rollback",
       "scenario": "Additive migration preserves existing ranked/auth/store rows and settings; old public API slots cannot bypass privacy; rollback preserves guards/data/journals rather than dropping history or reviving unguarded recent.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H16",
       "name": "Ranking and correction separation",
       "scenario": "History outcome stays canonical while rating may be pending; committed/zero/unranked states differ; approved correction updates the safe displayed effective delta without a second Elo settlement or exposure of integrity risk signals.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H17",
       "name": "UI and read-only scope",
       "scenario": "Shared web/native owner/public list/detail, locale/time zone, loading/empty/error/pending/partial/private/unsupported/401/429 states and privacy save/revision behavior work; no replay/export/delete/old-history rematch action appears.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     },
     {
       "id": "H18",
       "name": "Bounds, versions and confidentiality",
       "scenario": "Enforce page/body/timeout/semaphore/journal bounds; unknown catalog/summary versions degrade safely; attacker IDs and store failure do not become empty success; no credential/payload logs or automatic purge.",
-      "execution_status": "not_run"
+      "execution_status": "partial_evidence_acceptance_pending",
+      "execution_evidence": "docs/planning/P73-EXECUTION-REPORT.md#h01h18-evidence-ledger"
     }
   ],
   "history_extension": {
-    "status": "planning_only",
+    "status": "implementation_draft",
     "owner_decision": "The player chooses public or private history; persist the choice on the account.",
     "spec": "docs/planning/P73-MATCH-HISTORY.md",
     "conceptual_schema": "docs/planning/P73-HISTORY-SCHEMA.sql",
@@ -707,7 +741,7 @@
     },
     "rollout": "Privacy-aware handlers/proxy across public-serving slots before opt-in; collection/API/UI staged; preserve guards/data/settings/journals on rollback.",
     "retention": "No automatic deletion/purge; owner policy required before implementing destructive retention.",
-    "runtime_evidence": "Not run; only disposable conceptual-schema checks may be recorded as planning validation."
+    "runtime_evidence": "See execution report: targeted disposable-db/socket tests passed before final edits; final lock-busy checks, browser and owner acceptance remain deferred."
   },
   "planning_validation": {
     "status": "documentation_and_disposable_schema_checks_only",
@@ -717,6 +751,8 @@
     "application_api_auth_journal_slot_ui_tests": "not_run",
     "production_database_access": "none",
     "cargo_trunk_release_or_vps_commands": "none",
-    "limitation": "Conceptual SQL validation is not application migration, API access-control, recovery or deployment verification."
-  }
+    "limitation": "Conceptual SQL validation is not application migration, API access-control, recovery or deployment verification.",
+    "historical_note": "This object records the earlier documentation-only audit, not implementation validation. See execution_report for current evidence and blockers."
+  },
+  "execution_report": "docs/planning/P73-EXECUTION-REPORT.md"
 }

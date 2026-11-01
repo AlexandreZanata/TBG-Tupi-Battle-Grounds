@@ -3,6 +3,10 @@
 -- migration runner. Apply only to a disposable database for plan validation.
 -- Existing accounts/ranked_matches tables are prerequisites.
 
+-- Distinguish P73 complete-envelope writers from draining legacy Ranked writers.
+ALTER TABLE ranked_matches ADD COLUMN history_expected INTEGER NOT NULL DEFAULT 0
+  CHECK (history_expected IN (0, 1));
+
 ALTER TABLE accounts ADD COLUMN history_visibility TEXT NOT NULL DEFAULT 'private'
   CHECK (history_visibility IN ('private', 'public'));
 ALTER TABLE accounts ADD COLUMN history_privacy_revision INTEGER NOT NULL DEFAULT 0
