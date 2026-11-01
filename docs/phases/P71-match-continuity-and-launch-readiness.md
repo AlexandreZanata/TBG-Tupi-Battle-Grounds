@@ -331,6 +331,33 @@ hashes and download-back; the Windows report exists; the records are
 updated. Owner gates that remain after P71: balance, O02 signing custody,
 Windows official release, look/fun.
 
+## 4b. W6 result — Windows 11 VM (2026-11-01)
+
+Real Windows 11 Pro 25H2 (build 26200.8037) in `dockurr/windows`
+(`sha256:16fd7c39…2ea`, KVM, 4 vCPU, 6 GB, disk on `/data`), no GPU: wgpu
+chose DX12 on WARP ("Microsoft Basic Render Driver"). Artifact: the rc.1
+unofficial ZIP (hash verified in Windows). Detailed report and evidence stay
+outside git (`/data/tbg-windows-vm/REPORT.md`, `results/rc1-win11/`).
+
+- **Works:** `--version`/`--build-info`/`--contract`; missing-assets refusal
+  (exit 2); Windows Credential Manager probe (write, read back, delete; no
+  entry left in `cmdkey /list`); the full native auth journey including the
+  offline-pending logout (same result as Linux); HTTP and WebSocket to a host
+  server; lobby UI and art; a real `SendInput` click switching the lobby to
+  the Troops panel (pt-BR text and 3D unit; GDI frame matches the Linux
+  capture at MAD 13.3); offline Practice and arena training start; no audio
+  device handled gracefully. 8 GUI runs: exit 0, 0 panics, 0 ERROR lines.
+- **Not verified:** the `ui-acceptance` captures are uniformly black on
+  DX12/WARP while the window renders (suspected screenshot readback on
+  WARP; unknown on hardware DX12), and WARP needs 75–251 s to reach 14 s of
+  game time, so `boot_ready` was never reached at capture time. 6 of 15
+  scenarios ran. Not proven: real GPU drivers, signed installer and
+  SmartScreen, physical audio/input, HiDPI, Windows 10/ARM64, an online match
+  between Windows clients.
+- **Configuration notes:** `TBG_AUTH_ORIGINS` accepts only https or loopback
+  http; native auth refuses plain `ws://` to a non-loopback host (by design),
+  so VM auth runs went through a temporary loopback port proxy.
+
 ## 5. Status log
 
 - 2026-11-01: plan written; findings 1.1–1.4 mapped; 1.5 done; W6 VM
@@ -346,6 +373,13 @@ Windows official release, look/fun.
   clippy (CI scope) clean.
 - 2026-11-01: **W1/W2 client** written (4 s silence watchdog; "match paused"
   notice inferred from a frozen clock, `net.match_paused` in en/pt-BR);
-  client tests pending a client build. Not done yet: W1.4 client refresh
-  retry spacing, W1.6 ownership retry, W1.7 browser temporary mode, W3, W4,
-  W5.2–5.5, W7; W8 records partly (D-100, GAME-DESIGN rows).
+  client tests pending a client build. Not done yet: W1.6 ownership retry,
+  W1.7 browser temporary mode, W4, W5.3–5.5, W7; W8 records partly (D-100,
+  GAME-DESIGN rows). W1.4 is covered by the 300 s server retry window (the
+  client's 60 s retry wait stays inside it).
+- 2026-11-01: **W3 done** (`2e15dd9`): revocation feed between slots;
+  `revocation_feed` passes in ~1 s and fails after 6 s with the feed off.
+- 2026-11-01: **W5.2 done**: production switch procedure in
+  `deploy/README.md` (backup, rehearsal on a copy with the new `/health`,
+  switch, verify, rollback). **W6 done** (section 4b). PR #35 opened (stacked
+  on PR #34).
