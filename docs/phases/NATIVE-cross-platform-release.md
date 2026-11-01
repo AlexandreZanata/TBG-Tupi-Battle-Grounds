@@ -180,3 +180,33 @@ scenarios after the safeguard. `actionlint` passed both changed workflows with o
 the previously documented SC2086 scope-expansion diagnostics excluded from this
 local syntax invocation; CI lints were not disabled. No additional Rust build,
 full workspace suite, balance gate or extensive gallery was run.
+
+## Landing download-button cache regression (2026-11-01)
+
+The owner observed new platform cards with empty native status labels and inert
+buttons. A clean public Chrome session opened both pending dialogs with no errors.
+Origin JS headers were `no-cache, no-transform`, but the public CDN response used
+`max-age=14400, no-transform`. A local Chrome regression with that four-hour TTL
+reproduced the exact failure: old `release.js` remained in cache after new HTML
+loaded, neither native status nor click handlers initialized, and no JS network
+request occurred on the second visit. This does not depend on PR/main merge.
+
+Manual staging and attested packaging now share one deterministic JS/CSS URL
+revision across the entry and transitive imports. Manifest hashes cover the actual
+transformed payload. The live native catalog is not versioned. Download interaction
+also initializes before metadata fetches, so slow/missing releases show the pending
+modal rather than an inert button. Only landing delivery changes; no in-game
+presentation, simulation, API, player data or process is modified.
+
+Work-front checks: four focused static-asset cases and nine static-deployment
+cases passed; web manifests/generated content/JS/JSON/i18n checks passed;
+`git diff --check` passed. No Rust compilation, game build, full suite or native
+reinstallation belongs to this static-only fix. Warm-cache browser and public
+post-deployment observations are recorded separately below.
+
+The warmed-browser regression then passed with the versioned payload in the same
+Chrome context, without clearing its cache. Both Linux and Windows pending dialogs
+opened while `/downloads.json` was deliberately held unanswered. No page errors.
+Code revisions include the renderer's source identity so changing the delivery
+transform also invalidates stale module URLs. This is a landing-only cache fix;
+it neither enables an unavailable native download nor depends on a main merge.

@@ -28,7 +28,7 @@ __TBG_SITE_DOMAIN__ {
 		file_server
 	}
 	root * /srv/tbg/landing/current
-	# Nothing is content-hashed: pages, scripts and data revalidate by ETag; art and fonts cache a day.
+	# JS/CSS references carry a content revision; pages/data revalidate and art/fonts cache a day.
 	# no-transform preserves attested bytes and prevents CDN analytics script injection.
 	@art path /media/* /assets/fonts/* /favicon.ico /apple-touch-icon.png
 	header @art Cache-Control "public, max-age=86400, no-transform"

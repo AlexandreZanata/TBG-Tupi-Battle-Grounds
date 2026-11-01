@@ -57,3 +57,21 @@ installed. Content sync derives names, Factions, Archetypes and Arena modifiers 
 
 See [deploy/README.md](deploy/README.md): immutable releases under `/srv/tbg/<site>/releases`,
 atomic symlink activation, a Caddy include validated before any reload, and rollback.
+
+## Static code cache consistency
+
+Manual staging and attested static packaging both use
+`web/scripts/asset_versions.py`. The delivered HTML and every transitive JS/CSS
+reference carry one deterministic content revision (`?v=<sha256>`), computed from
+the site's text inputs. Source files remain unchanged. A nested module change
+therefore invalidates the complete module graph for returning visitors, not just
+the entry script. CDN browser-TTL overrides cannot combine newly loaded HTML
+with an older cached download controller. No bundler or runtime cache purge is
+required; CSP and hash-bound package verification remain intact.
+
+The live `/downloads.json` URL stays unversioned and no-cache so a newly verified
+compatible release can change download links independently. Download dialogs are
+initialized before metadata requests and explain the pending state even while
+those requests are slow or unavailable. A missing native release never disables
+the interaction itself. Changing these rules requires the focused static-asset
+and static-package regressions, not a Rust rebuild.
