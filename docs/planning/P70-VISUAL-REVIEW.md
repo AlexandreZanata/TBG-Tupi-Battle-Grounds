@@ -1,6 +1,6 @@
 # P70 visual execution review
 
-**Status: S0 in progress; no art acceptance or completed phase is claimed.**
+**Status: S0 pose baseline recorded; S1 candidate committed; S2 pilot candidates in progress. No art acceptance or completed phase is claimed.**
 Owner request: 2026-10-31. Execution is local only on
 `phase/p70-champion-visual-polish` in `.local/p70-champion-visual-polish`.
 
@@ -46,8 +46,31 @@ timeouts, immutable original paths, source/binary provenance, PNG decoding,
 hashes and resumable completed units. It does not touch Shop portraits.
 
 Raw captures belong under ignored `.local/p70-evidence/`. No paintover or
-generated image can substitute for renderer evidence. Captures are not yet
-present at the initial tooling commit; index entries remain pending.
+generated image can substitute for renderer evidence. All 46 champions now
+have ten original before sheets (460 originals), covering all five forms.
+An additional 120 enemy-team sheets cover Archer, Bone Brute and Trident
+from three-quarter, front, profile and back for S1. Their three hashed
+manifests are linked from the evidence index. The renderer was Vulkan on
+NVIDIA GeForce RTX 4060 Laptop GPU, NVIDIA 595.104.02, at 1920 × 2160,
+standard quality and isolated native preferences. Each original was decoded
+and hashed at capture time. These are Linux event-free poses, not temporal,
+live-effect, web or Windows acceptance.
+
+## S1 and S2 candidates
+
+The [blue-artifact investigation](P70-BLUE-ARTIFACT.md) identifies the shared
+opaque team tabard and its incompatible hip/chest attachment as one reproduced
+cause. Changing teams changed the patch from blue to red while the background
+remained blue. Closed geometry and opaque materials do not support a universal
+hole/culling explanation. Four callers now use fitted chest heraldry; distinct
+rag/ribbon/skeletal surfaces still require individual review.
+
+[Old Finn](P70-OLD-FINN.md), [Pyre Warden](P70-PYRE-WARDEN.md) and Trident
+have candidate authored model/motion work. Pilot after renders and live
+combat inspection remain pending. The new live recorder drives ordinary
+training actions and records real event/HP observations at unchanged combat
+speed; it does not synthesize combat events.
+
 
 ## Validation actually run
 
@@ -76,13 +99,21 @@ The owner did not request a full suite, release build or balance gate.
   56.63s`. This compiled the S0 capture/gallery working diff against the
   unchanged required content, using the existing shared target cache.
 
+The combined pilot development build was attempted once with the same
+scoped command and returned **75 (shared validation lock busy)** before
+compilation. It is deferred; no waiting, polling, lock bypass, new target
+directory or claim of candidate compilation followed. Continue independent
+source review and consolidate after the front is ready.
+
 ## Deferred acceptance and decisions
 
-- Baseline/final renderer campaigns, all 46 individual art passes, blue
-  artifact runtime reproduction, lineup, live abilities, Troops/training,
-  P63 and temporal transition checks remain pending at this checkpoint.
-- Source inspection is not a confirmed root cause of the reported blue
-  square/hole. The shared tabard is only one of several independent leads.
+- The 460-sheet static before campaign and 120-sheet S1 enemy diagnostic
+  campaign completed. Temporal before reconstruction from the frozen tree,
+  all final captures, remaining 43 art passes, lineup, live abilities,
+  Troops/training, P63 and transition checks remain pending.
+- The reproduced tabard issue is documented separately; there is no claim
+  that every blue patch shares that cause or that the final regression
+  campaign has passed.
 - Trident height, weapon reach and proposed integer range remain unmeasured
   and unselected. Core range remains 1,100; no balance acceptance is claimed.
 - Queue the new scoped regression at consolidation, under the host lock:

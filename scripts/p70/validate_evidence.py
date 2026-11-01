@@ -3,6 +3,8 @@
 
 A successful default run validates bookkeeping, not visual completion. Use
 --require-complete at phase acceptance; absent captures never count as passes.
+Use --metadata-only for bookkeeping updates that reuse capture-time integrity
+checks; its output distinguishes recorded coverage from reverified originals.
 """
 import argparse
 import hashlib
@@ -38,6 +40,38 @@ def sha256(path):
         for chunk in iter(lambda: source.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def local_path(uri):
+    if urlparse(uri).scheme:
+        raise ValueError(f"External artifact is not locally available: {uri}")
+    path = Path(uri)
+    return path if path.is_absolute() else ROOT / path
+
+
+def linked_captures(index):
+    captures, errors = [], []
+    for link in index.get("capture_manifests", []):
+        uri = link.get("path_or_uri", "<missing>")
+        try:
+            path = local_path(uri)
+            if not path.is_file():
+                raise ValueError("linked capture manifest unavailable on this machine")
+            if not re.fullmatch(r"[0-9a-f]{64}", link.get("sha256", "")):
+                raise ValueError("linked manifest needs a valid SHA-256")
+            if sha256(path) != link["sha256"]:
+                raise ValueError("linked capture manifest SHA-256 mismatch")
+            data = read_json(path)
+            records = data if isinstance(data, list) else data["captures"]
+            if len(records) != link["capture_count"]:
+                raise ValueError("linked capture count differs from the index")
+            for field in ("content_sha", "tooling_sha", "phase_before_or_after"):
+                if any(record.get(field) != link[field] for record in records):
+                    raise ValueError(f"linked captures differ from recorded {field}")
+            captures.extend(records)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            errors.append(f"{uri}: {error}")
+    return captures, errors
 
 
 def roster_errors(manifest, index):
@@ -146,7 +180,7 @@ def capture_errors(capture, ids, forms):
     return errors
 
 
-def artifact_errors(capture):
+def artifact_errors(capture, metadata_only=False):
     uri = capture["path_or_uri"]
     if urlparse(uri).scheme:
         return ["external artifact not locally verified; download through the approved artifact workflow first"]
@@ -158,6 +192,9 @@ def artifact_errors(capture):
     errors = []
     if capture["kind"] == "raw_pose_sheet" and path.suffix.lower() != ".png":
         errors.append("raw pose evidence must preserve the renderer's original PNG")
+    if metadata_only:
+        # Availability is checked now; capture_roster owns the recorded byte/decode checks.
+        return errors
     if sha256(path) != capture["sha256"]:
         errors.append("artifact SHA-256 mismatch")
     if path.suffix.lower() == ".png":
@@ -238,18 +275,40 @@ def summarize(index, captures):
     return covered, applicable, missing
 
 
+def reference_errors(index, captures):
+    errors = []
+    by_id = {capture["id"]: capture for capture in captures}
+    for entry in index["champions"] + index["auxiliaries"]:
+        for phase in ("before", "after"):
+            references = entry[phase]
+            if len(references) != len(set(references)):
+                errors.append(f'{entry["id"]}: duplicate {phase} references')
+            for reference in references:
+                capture = by_id.get(reference)
+                if capture is None:
+                    errors.append(f'{entry["id"]}: unavailable {phase} capture reference {reference}')
+                elif capture["unit_id"] != entry["id"] or capture["phase_before_or_after"] != phase:
+                    errors.append(f'{entry["id"]}: mismatched {phase} capture reference {reference}')
+    return errors
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--index", type=Path, default=INDEX)
     parser.add_argument("--captures", type=Path, action="append", default=[],
                         help="Additional capture array or object containing a captures array")
     parser.add_argument("--require-complete", action="store_true")
+    parser.add_argument("--metadata-only", action="store_true",
+                        help="Check manifest hashes, metadata and file availability; do not rehash/decode original PNGs")
     parser.add_argument("--json", action="store_true", help="Print the summary as JSON")
     args = parser.parse_args()
     try:
         manifest, index = read_json(MANIFEST), read_json(args.index)
         errors = roster_errors(manifest, index) + source_errors(index)
         captures = list(index["captures"])
+        linked, link_errors = linked_captures(index)
+        captures.extend(linked)
+        errors.extend(link_errors)
         for path in args.captures:
             extra = read_json(path)
             captures.extend(extra if isinstance(extra, list) else extra["captures"])
@@ -263,31 +322,39 @@ def main():
                 found.append("duplicate capture ID")
             seen.add(name)
             if not found:
-                found.extend(artifact_errors(capture))
+                found.extend(artifact_errors(capture, args.metadata_only))
             errors.extend(f"{name}: {error}" for error in found)
             if not found:
                 valid.append(capture)
         covered, applicable, missing = summarize(index, valid)
+        errors.extend(reference_errors(index, valid))
+        verified = valid if not args.metadata_only else []
+        verified_covered = covered if not args.metadata_only else {"before": 0, "after": 0}
         summary = {
             "bookkeeping_valid": not errors,
-            "phase_complete": not errors and not missing,
+            "phase_complete": not errors and not missing and not args.metadata_only,
             "champions": len(index["champions"]), "forms": 230,
             "clip_form_slots_per_revision": 2300,
             "applicable_clip_form_slots_per_revision": applicable,
-            "verified_raw_pose_slots": covered, "verified_artifacts": len(valid),
+            "recorded_raw_pose_slots": covered, "recorded_artifacts": len(captures),
+            "locally_available_artifacts": len(valid),
+            "verified_raw_pose_slots": verified_covered, "verified_artifacts": len(verified),
+            "original_integrity_rechecked": not args.metadata_only,
             "pending_items": len(missing), "errors": errors,
-            "note": "Bookkeeping validity does not imply implemented art or passed visual review.",
+            "note": ("Bookkeeping validity does not imply implemented art or passed visual review. "
+                     + ("Original hashes, PNG dimensions and full decode were not repeated; recorded capture-time checks are reused."
+                        if args.metadata_only else "Original hashes, PNG dimensions and full decode were checked in this invocation.")),
         }
         if args.json:
             print(json.dumps(summary, indent=2))
         else:
             print(f"46 champions / 230 forms / 2,300 clip-form slots per revision")
-            print(f"Applicable pose slots: {applicable}; before: {covered['before']}; after: {covered['after']}")
-            print(f"Verified artifacts: {len(valid)}; pending acceptance items: {len(missing)}")
+            print(f"Applicable pose slots: {applicable}; recorded before: {covered['before']}; after: {covered['after']}")
+            print(f"Recorded artifacts: {len(captures)}; available: {len(valid)}; reverified: {len(verified)}; pending acceptance items: {len(missing)}")
             for error in errors:
                 print(f"ERROR: {error}", file=sys.stderr)
             print(summary["note"])
-        return 1 if errors or (args.require_complete and missing) else 0
+        return 1 if errors or (args.require_complete and not summary["phase_complete"]) else 0
     except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"Invalid evidence input: {error}", file=sys.stderr)
         return 1

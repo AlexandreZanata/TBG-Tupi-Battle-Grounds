@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "phase": "P70",
-  "status": "baseline_pending",
+  "status": "baseline_pose_originals_recorded",
   "reference_commit": "55510c5363e3f1e555fa5133208a5faf20c5825b",
-  "content_commit_note": "Resolve the exact tooling commit and capture-time content SHA in each artifact; no images exist in this initial index.",
+  "content_commit_note": "Baseline content 55510c5363e3f1e555fa5133208a5faf20c5825b and tooling 27f98acd98b51fa69eb09f4703bd2ca59a33ed41 are recorded in the immutable capture manifests. Current integration HEAD is not substituted for either captured revision.",
   "forms": [
     {
       "name": "Base",
@@ -181,12 +181,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Shieldbearer-ally-threequarter-standard-Idle",
+        "before-Shieldbearer-ally-threequarter-standard-Walk",
+        "before-Shieldbearer-ally-threequarter-standard-AttackMelee",
+        "before-Shieldbearer-ally-threequarter-standard-AttackRanged",
+        "before-Shieldbearer-ally-threequarter-standard-Cast",
+        "before-Shieldbearer-ally-threequarter-standard-Hit",
+        "before-Shieldbearer-ally-threequarter-standard-Death",
+        "before-Shieldbearer-ally-threequarter-standard-Spawn",
+        "before-Shieldbearer-ally-threequarter-standard-Evolve",
+        "before-Shieldbearer-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Archer",
@@ -224,12 +236,64 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Archer-ally-threequarter-standard-Idle",
+        "before-Archer-ally-threequarter-standard-Walk",
+        "before-Archer-ally-threequarter-standard-AttackMelee",
+        "before-Archer-ally-threequarter-standard-AttackRanged",
+        "before-Archer-ally-threequarter-standard-Cast",
+        "before-Archer-ally-threequarter-standard-Hit",
+        "before-Archer-ally-threequarter-standard-Death",
+        "before-Archer-ally-threequarter-standard-Spawn",
+        "before-Archer-ally-threequarter-standard-Evolve",
+        "before-Archer-ally-threequarter-standard-Victory",
+        "before-Archer-enemy-threequarter-standard-Idle",
+        "before-Archer-enemy-threequarter-standard-Walk",
+        "before-Archer-enemy-threequarter-standard-AttackMelee",
+        "before-Archer-enemy-threequarter-standard-AttackRanged",
+        "before-Archer-enemy-threequarter-standard-Cast",
+        "before-Archer-enemy-threequarter-standard-Hit",
+        "before-Archer-enemy-threequarter-standard-Death",
+        "before-Archer-enemy-threequarter-standard-Spawn",
+        "before-Archer-enemy-threequarter-standard-Evolve",
+        "before-Archer-enemy-threequarter-standard-Victory",
+        "before-Archer-enemy-front-standard-Idle",
+        "before-Archer-enemy-front-standard-Walk",
+        "before-Archer-enemy-front-standard-AttackMelee",
+        "before-Archer-enemy-front-standard-AttackRanged",
+        "before-Archer-enemy-front-standard-Cast",
+        "before-Archer-enemy-front-standard-Hit",
+        "before-Archer-enemy-front-standard-Death",
+        "before-Archer-enemy-front-standard-Spawn",
+        "before-Archer-enemy-front-standard-Evolve",
+        "before-Archer-enemy-front-standard-Victory",
+        "before-Archer-enemy-profile-standard-Idle",
+        "before-Archer-enemy-profile-standard-Walk",
+        "before-Archer-enemy-profile-standard-AttackMelee",
+        "before-Archer-enemy-profile-standard-AttackRanged",
+        "before-Archer-enemy-profile-standard-Cast",
+        "before-Archer-enemy-profile-standard-Hit",
+        "before-Archer-enemy-profile-standard-Death",
+        "before-Archer-enemy-profile-standard-Spawn",
+        "before-Archer-enemy-profile-standard-Evolve",
+        "before-Archer-enemy-profile-standard-Victory",
+        "before-Archer-enemy-back-standard-Idle",
+        "before-Archer-enemy-back-standard-Walk",
+        "before-Archer-enemy-back-standard-AttackMelee",
+        "before-Archer-enemy-back-standard-AttackRanged",
+        "before-Archer-enemy-back-standard-Cast",
+        "before-Archer-enemy-back-standard-Hit",
+        "before-Archer-enemy-back-standard-Death",
+        "before-Archer-enemy-back-standard-Spawn",
+        "before-Archer-enemy-back-standard-Evolve",
+        "before-Archer-enemy-back-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "BoneBrute",
@@ -267,12 +331,64 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-BoneBrute-ally-threequarter-standard-Idle",
+        "before-BoneBrute-ally-threequarter-standard-Walk",
+        "before-BoneBrute-ally-threequarter-standard-AttackMelee",
+        "before-BoneBrute-ally-threequarter-standard-AttackRanged",
+        "before-BoneBrute-ally-threequarter-standard-Cast",
+        "before-BoneBrute-ally-threequarter-standard-Hit",
+        "before-BoneBrute-ally-threequarter-standard-Death",
+        "before-BoneBrute-ally-threequarter-standard-Spawn",
+        "before-BoneBrute-ally-threequarter-standard-Evolve",
+        "before-BoneBrute-ally-threequarter-standard-Victory",
+        "before-BoneBrute-enemy-threequarter-standard-Idle",
+        "before-BoneBrute-enemy-threequarter-standard-Walk",
+        "before-BoneBrute-enemy-threequarter-standard-AttackMelee",
+        "before-BoneBrute-enemy-threequarter-standard-AttackRanged",
+        "before-BoneBrute-enemy-threequarter-standard-Cast",
+        "before-BoneBrute-enemy-threequarter-standard-Hit",
+        "before-BoneBrute-enemy-threequarter-standard-Death",
+        "before-BoneBrute-enemy-threequarter-standard-Spawn",
+        "before-BoneBrute-enemy-threequarter-standard-Evolve",
+        "before-BoneBrute-enemy-threequarter-standard-Victory",
+        "before-BoneBrute-enemy-front-standard-Idle",
+        "before-BoneBrute-enemy-front-standard-Walk",
+        "before-BoneBrute-enemy-front-standard-AttackMelee",
+        "before-BoneBrute-enemy-front-standard-AttackRanged",
+        "before-BoneBrute-enemy-front-standard-Cast",
+        "before-BoneBrute-enemy-front-standard-Hit",
+        "before-BoneBrute-enemy-front-standard-Death",
+        "before-BoneBrute-enemy-front-standard-Spawn",
+        "before-BoneBrute-enemy-front-standard-Evolve",
+        "before-BoneBrute-enemy-front-standard-Victory",
+        "before-BoneBrute-enemy-profile-standard-Idle",
+        "before-BoneBrute-enemy-profile-standard-Walk",
+        "before-BoneBrute-enemy-profile-standard-AttackMelee",
+        "before-BoneBrute-enemy-profile-standard-AttackRanged",
+        "before-BoneBrute-enemy-profile-standard-Cast",
+        "before-BoneBrute-enemy-profile-standard-Hit",
+        "before-BoneBrute-enemy-profile-standard-Death",
+        "before-BoneBrute-enemy-profile-standard-Spawn",
+        "before-BoneBrute-enemy-profile-standard-Evolve",
+        "before-BoneBrute-enemy-profile-standard-Victory",
+        "before-BoneBrute-enemy-back-standard-Idle",
+        "before-BoneBrute-enemy-back-standard-Walk",
+        "before-BoneBrute-enemy-back-standard-AttackMelee",
+        "before-BoneBrute-enemy-back-standard-AttackRanged",
+        "before-BoneBrute-enemy-back-standard-Cast",
+        "before-BoneBrute-enemy-back-standard-Hit",
+        "before-BoneBrute-enemy-back-standard-Death",
+        "before-BoneBrute-enemy-back-standard-Spawn",
+        "before-BoneBrute-enemy-back-standard-Evolve",
+        "before-BoneBrute-enemy-back-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Hexer",
@@ -310,12 +426,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Hexer-ally-threequarter-standard-Idle",
+        "before-Hexer-ally-threequarter-standard-Walk",
+        "before-Hexer-ally-threequarter-standard-AttackMelee",
+        "before-Hexer-ally-threequarter-standard-AttackRanged",
+        "before-Hexer-ally-threequarter-standard-Cast",
+        "before-Hexer-ally-threequarter-standard-Hit",
+        "before-Hexer-ally-threequarter-standard-Death",
+        "before-Hexer-ally-threequarter-standard-Spawn",
+        "before-Hexer-ally-threequarter-standard-Evolve",
+        "before-Hexer-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Sawbot",
@@ -353,12 +481,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Sawbot-ally-threequarter-standard-Idle",
+        "before-Sawbot-ally-threequarter-standard-Walk",
+        "before-Sawbot-ally-threequarter-standard-AttackMelee",
+        "before-Sawbot-ally-threequarter-standard-AttackRanged",
+        "before-Sawbot-ally-threequarter-standard-Cast",
+        "before-Sawbot-ally-threequarter-standard-Hit",
+        "before-Sawbot-ally-threequarter-standard-Death",
+        "before-Sawbot-ally-threequarter-standard-Spawn",
+        "before-Sawbot-ally-threequarter-standard-Evolve",
+        "before-Sawbot-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "SiegeWalker",
@@ -396,12 +536,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-SiegeWalker-ally-threequarter-standard-Idle",
+        "before-SiegeWalker-ally-threequarter-standard-Walk",
+        "before-SiegeWalker-ally-threequarter-standard-AttackMelee",
+        "before-SiegeWalker-ally-threequarter-standard-AttackRanged",
+        "before-SiegeWalker-ally-threequarter-standard-Cast",
+        "before-SiegeWalker-ally-threequarter-standard-Hit",
+        "before-SiegeWalker-ally-threequarter-standard-Death",
+        "before-SiegeWalker-ally-threequarter-standard-Spawn",
+        "before-SiegeWalker-ally-threequarter-standard-Evolve",
+        "before-SiegeWalker-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Bloomkeeper",
@@ -439,12 +591,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Bloomkeeper-ally-threequarter-standard-Idle",
+        "before-Bloomkeeper-ally-threequarter-standard-Walk",
+        "before-Bloomkeeper-ally-threequarter-standard-AttackMelee",
+        "before-Bloomkeeper-ally-threequarter-standard-AttackRanged",
+        "before-Bloomkeeper-ally-threequarter-standard-Cast",
+        "before-Bloomkeeper-ally-threequarter-standard-Hit",
+        "before-Bloomkeeper-ally-threequarter-standard-Death",
+        "before-Bloomkeeper-ally-threequarter-standard-Spawn",
+        "before-Bloomkeeper-ally-threequarter-standard-Evolve",
+        "before-Bloomkeeper-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Rootcaller",
@@ -482,12 +646,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Rootcaller-ally-threequarter-standard-Idle",
+        "before-Rootcaller-ally-threequarter-standard-Walk",
+        "before-Rootcaller-ally-threequarter-standard-AttackMelee",
+        "before-Rootcaller-ally-threequarter-standard-AttackRanged",
+        "before-Rootcaller-ally-threequarter-standard-Cast",
+        "before-Rootcaller-ally-threequarter-standard-Hit",
+        "before-Rootcaller-ally-threequarter-standard-Death",
+        "before-Rootcaller-ally-threequarter-standard-Spawn",
+        "before-Rootcaller-ally-threequarter-standard-Evolve",
+        "before-Rootcaller-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Nester",
@@ -534,12 +710,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Nester-ally-threequarter-standard-Idle",
+        "before-Nester-ally-threequarter-standard-Walk",
+        "before-Nester-ally-threequarter-standard-AttackMelee",
+        "before-Nester-ally-threequarter-standard-AttackRanged",
+        "before-Nester-ally-threequarter-standard-Cast",
+        "before-Nester-ally-threequarter-standard-Hit",
+        "before-Nester-ally-threequarter-standard-Death",
+        "before-Nester-ally-threequarter-standard-Spawn",
+        "before-Nester-ally-threequarter-standard-Evolve",
+        "before-Nester-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Rampart",
@@ -577,12 +765,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Rampart-ally-threequarter-standard-Idle",
+        "before-Rampart-ally-threequarter-standard-Walk",
+        "before-Rampart-ally-threequarter-standard-AttackMelee",
+        "before-Rampart-ally-threequarter-standard-AttackRanged",
+        "before-Rampart-ally-threequarter-standard-Cast",
+        "before-Rampart-ally-threequarter-standard-Hit",
+        "before-Rampart-ally-threequarter-standard-Death",
+        "before-Rampart-ally-threequarter-standard-Spawn",
+        "before-Rampart-ally-threequarter-standard-Evolve",
+        "before-Rampart-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Longaxe",
@@ -620,12 +820,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Longaxe-ally-threequarter-standard-Idle",
+        "before-Longaxe-ally-threequarter-standard-Walk",
+        "before-Longaxe-ally-threequarter-standard-AttackMelee",
+        "before-Longaxe-ally-threequarter-standard-AttackRanged",
+        "before-Longaxe-ally-threequarter-standard-Cast",
+        "before-Longaxe-ally-threequarter-standard-Hit",
+        "before-Longaxe-ally-threequarter-standard-Death",
+        "before-Longaxe-ally-threequarter-standard-Spawn",
+        "before-Longaxe-ally-threequarter-standard-Evolve",
+        "before-Longaxe-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Farwatch",
@@ -663,12 +875,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Farwatch-ally-threequarter-standard-Idle",
+        "before-Farwatch-ally-threequarter-standard-Walk",
+        "before-Farwatch-ally-threequarter-standard-AttackMelee",
+        "before-Farwatch-ally-threequarter-standard-AttackRanged",
+        "before-Farwatch-ally-threequarter-standard-Cast",
+        "before-Farwatch-ally-threequarter-standard-Hit",
+        "before-Farwatch-ally-threequarter-standard-Death",
+        "before-Farwatch-ally-threequarter-standard-Spawn",
+        "before-Farwatch-ally-threequarter-standard-Evolve",
+        "before-Farwatch-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Bombard",
@@ -706,12 +930,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Bombard-ally-threequarter-standard-Idle",
+        "before-Bombard-ally-threequarter-standard-Walk",
+        "before-Bombard-ally-threequarter-standard-AttackMelee",
+        "before-Bombard-ally-threequarter-standard-AttackRanged",
+        "before-Bombard-ally-threequarter-standard-Cast",
+        "before-Bombard-ally-threequarter-standard-Hit",
+        "before-Bombard-ally-threequarter-standard-Death",
+        "before-Bombard-ally-threequarter-standard-Spawn",
+        "before-Bombard-ally-threequarter-standard-Evolve",
+        "before-Bombard-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Rotcap",
@@ -749,12 +985,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Rotcap-ally-threequarter-standard-Idle",
+        "before-Rotcap-ally-threequarter-standard-Walk",
+        "before-Rotcap-ally-threequarter-standard-AttackMelee",
+        "before-Rotcap-ally-threequarter-standard-AttackRanged",
+        "before-Rotcap-ally-threequarter-standard-Cast",
+        "before-Rotcap-ally-threequarter-standard-Hit",
+        "before-Rotcap-ally-threequarter-standard-Death",
+        "before-Rotcap-ally-threequarter-standard-Spawn",
+        "before-Rotcap-ally-threequarter-standard-Evolve",
+        "before-Rotcap-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "OldFinn",
@@ -792,12 +1040,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-OldFinn-ally-threequarter-standard-Idle",
+        "before-OldFinn-ally-threequarter-standard-Walk",
+        "before-OldFinn-ally-threequarter-standard-AttackMelee",
+        "before-OldFinn-ally-threequarter-standard-AttackRanged",
+        "before-OldFinn-ally-threequarter-standard-Cast",
+        "before-OldFinn-ally-threequarter-standard-Hit",
+        "before-OldFinn-ally-threequarter-standard-Death",
+        "before-OldFinn-ally-threequarter-standard-Spawn",
+        "before-OldFinn-ally-threequarter-standard-Evolve",
+        "before-OldFinn-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "AntidoteBrewer",
@@ -835,12 +1095,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-AntidoteBrewer-ally-threequarter-standard-Idle",
+        "before-AntidoteBrewer-ally-threequarter-standard-Walk",
+        "before-AntidoteBrewer-ally-threequarter-standard-AttackMelee",
+        "before-AntidoteBrewer-ally-threequarter-standard-AttackRanged",
+        "before-AntidoteBrewer-ally-threequarter-standard-Cast",
+        "before-AntidoteBrewer-ally-threequarter-standard-Hit",
+        "before-AntidoteBrewer-ally-threequarter-standard-Death",
+        "before-AntidoteBrewer-ally-threequarter-standard-Spawn",
+        "before-AntidoteBrewer-ally-threequarter-standard-Evolve",
+        "before-AntidoteBrewer-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Shatterback",
@@ -887,12 +1159,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Shatterback-ally-threequarter-standard-Idle",
+        "before-Shatterback-ally-threequarter-standard-Walk",
+        "before-Shatterback-ally-threequarter-standard-AttackMelee",
+        "before-Shatterback-ally-threequarter-standard-AttackRanged",
+        "before-Shatterback-ally-threequarter-standard-Cast",
+        "before-Shatterback-ally-threequarter-standard-Hit",
+        "before-Shatterback-ally-threequarter-standard-Death",
+        "before-Shatterback-ally-threequarter-standard-Spawn",
+        "before-Shatterback-ally-threequarter-standard-Evolve",
+        "before-Shatterback-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "BloodFurnace",
@@ -930,12 +1214,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-BloodFurnace-ally-threequarter-standard-Idle",
+        "before-BloodFurnace-ally-threequarter-standard-Walk",
+        "before-BloodFurnace-ally-threequarter-standard-AttackMelee",
+        "before-BloodFurnace-ally-threequarter-standard-AttackRanged",
+        "before-BloodFurnace-ally-threequarter-standard-Cast",
+        "before-BloodFurnace-ally-threequarter-standard-Hit",
+        "before-BloodFurnace-ally-threequarter-standard-Death",
+        "before-BloodFurnace-ally-threequarter-standard-Spawn",
+        "before-BloodFurnace-ally-threequarter-standard-Evolve",
+        "before-BloodFurnace-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Bloodweaver",
@@ -982,12 +1278,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Bloodweaver-ally-threequarter-standard-Idle",
+        "before-Bloodweaver-ally-threequarter-standard-Walk",
+        "before-Bloodweaver-ally-threequarter-standard-AttackMelee",
+        "before-Bloodweaver-ally-threequarter-standard-AttackRanged",
+        "before-Bloodweaver-ally-threequarter-standard-Cast",
+        "before-Bloodweaver-ally-threequarter-standard-Hit",
+        "before-Bloodweaver-ally-threequarter-standard-Death",
+        "before-Bloodweaver-ally-threequarter-standard-Spawn",
+        "before-Bloodweaver-ally-threequarter-standard-Evolve",
+        "before-Bloodweaver-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Oilpress",
@@ -1025,12 +1333,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Oilpress-ally-threequarter-standard-Idle",
+        "before-Oilpress-ally-threequarter-standard-Walk",
+        "before-Oilpress-ally-threequarter-standard-AttackMelee",
+        "before-Oilpress-ally-threequarter-standard-AttackRanged",
+        "before-Oilpress-ally-threequarter-standard-Cast",
+        "before-Oilpress-ally-threequarter-standard-Hit",
+        "before-Oilpress-ally-threequarter-standard-Death",
+        "before-Oilpress-ally-threequarter-standard-Spawn",
+        "before-Oilpress-ally-threequarter-standard-Evolve",
+        "before-Oilpress-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Drumguard",
@@ -1078,12 +1398,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Drumguard-ally-threequarter-standard-Idle",
+        "before-Drumguard-ally-threequarter-standard-Walk",
+        "before-Drumguard-ally-threequarter-standard-AttackMelee",
+        "before-Drumguard-ally-threequarter-standard-AttackRanged",
+        "before-Drumguard-ally-threequarter-standard-Cast",
+        "before-Drumguard-ally-threequarter-standard-Hit",
+        "before-Drumguard-ally-threequarter-standard-Death",
+        "before-Drumguard-ally-threequarter-standard-Spawn",
+        "before-Drumguard-ally-threequarter-standard-Evolve",
+        "before-Drumguard-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Leechroot",
@@ -1121,12 +1453,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Leechroot-ally-threequarter-standard-Idle",
+        "before-Leechroot-ally-threequarter-standard-Walk",
+        "before-Leechroot-ally-threequarter-standard-AttackMelee",
+        "before-Leechroot-ally-threequarter-standard-AttackRanged",
+        "before-Leechroot-ally-threequarter-standard-Cast",
+        "before-Leechroot-ally-threequarter-standard-Hit",
+        "before-Leechroot-ally-threequarter-standard-Death",
+        "before-Leechroot-ally-threequarter-standard-Spawn",
+        "before-Leechroot-ally-threequarter-standard-Evolve",
+        "before-Leechroot-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "CargoCrab",
@@ -1172,12 +1516,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-CargoCrab-ally-threequarter-standard-Idle",
+        "before-CargoCrab-ally-threequarter-standard-Walk",
+        "before-CargoCrab-ally-threequarter-standard-AttackMelee",
+        "before-CargoCrab-ally-threequarter-standard-AttackRanged",
+        "before-CargoCrab-ally-threequarter-standard-Cast",
+        "before-CargoCrab-ally-threequarter-standard-Hit",
+        "before-CargoCrab-ally-threequarter-standard-Death",
+        "before-CargoCrab-ally-threequarter-standard-Spawn",
+        "before-CargoCrab-ally-threequarter-standard-Evolve",
+        "before-CargoCrab-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Puppetmaster",
@@ -1215,12 +1571,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Puppetmaster-ally-threequarter-standard-Idle",
+        "before-Puppetmaster-ally-threequarter-standard-Walk",
+        "before-Puppetmaster-ally-threequarter-standard-AttackMelee",
+        "before-Puppetmaster-ally-threequarter-standard-AttackRanged",
+        "before-Puppetmaster-ally-threequarter-standard-Cast",
+        "before-Puppetmaster-ally-threequarter-standard-Hit",
+        "before-Puppetmaster-ally-threequarter-standard-Death",
+        "before-Puppetmaster-ally-threequarter-standard-Spawn",
+        "before-Puppetmaster-ally-threequarter-standard-Evolve",
+        "before-Puppetmaster-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Smuggler",
@@ -1267,12 +1635,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Smuggler-ally-threequarter-standard-Idle",
+        "before-Smuggler-ally-threequarter-standard-Walk",
+        "before-Smuggler-ally-threequarter-standard-AttackMelee",
+        "before-Smuggler-ally-threequarter-standard-AttackRanged",
+        "before-Smuggler-ally-threequarter-standard-Cast",
+        "before-Smuggler-ally-threequarter-standard-Hit",
+        "before-Smuggler-ally-threequarter-standard-Death",
+        "before-Smuggler-ally-threequarter-standard-Spawn",
+        "before-Smuggler-ally-threequarter-standard-Evolve",
+        "before-Smuggler-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Bonehorn",
@@ -1310,12 +1690,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Bonehorn-ally-threequarter-standard-Idle",
+        "before-Bonehorn-ally-threequarter-standard-Walk",
+        "before-Bonehorn-ally-threequarter-standard-AttackMelee",
+        "before-Bonehorn-ally-threequarter-standard-AttackRanged",
+        "before-Bonehorn-ally-threequarter-standard-Cast",
+        "before-Bonehorn-ally-threequarter-standard-Hit",
+        "before-Bonehorn-ally-threequarter-standard-Death",
+        "before-Bonehorn-ally-threequarter-standard-Spawn",
+        "before-Bonehorn-ally-threequarter-standard-Evolve",
+        "before-Bonehorn-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Ravager",
@@ -1353,12 +1745,24 @@
         }
       },
       "event_driven_actions": [],
-      "before": [],
+      "before": [
+        "before-Ravager-ally-threequarter-standard-Idle",
+        "before-Ravager-ally-threequarter-standard-Walk",
+        "before-Ravager-ally-threequarter-standard-AttackMelee",
+        "before-Ravager-ally-threequarter-standard-AttackRanged",
+        "before-Ravager-ally-threequarter-standard-Cast",
+        "before-Ravager-ally-threequarter-standard-Hit",
+        "before-Ravager-ally-threequarter-standard-Death",
+        "before-Ravager-ally-threequarter-standard-Spawn",
+        "before-Ravager-ally-threequarter-standard-Evolve",
+        "before-Ravager-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Acidmaw",
@@ -1405,12 +1809,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Acidmaw-ally-threequarter-standard-Idle",
+        "before-Acidmaw-ally-threequarter-standard-Walk",
+        "before-Acidmaw-ally-threequarter-standard-AttackMelee",
+        "before-Acidmaw-ally-threequarter-standard-AttackRanged",
+        "before-Acidmaw-ally-threequarter-standard-Cast",
+        "before-Acidmaw-ally-threequarter-standard-Hit",
+        "before-Acidmaw-ally-threequarter-standard-Death",
+        "before-Acidmaw-ally-threequarter-standard-Spawn",
+        "before-Acidmaw-ally-threequarter-standard-Evolve",
+        "before-Acidmaw-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Whisperer",
@@ -1457,12 +1873,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Whisperer-ally-threequarter-standard-Idle",
+        "before-Whisperer-ally-threequarter-standard-Walk",
+        "before-Whisperer-ally-threequarter-standard-AttackMelee",
+        "before-Whisperer-ally-threequarter-standard-AttackRanged",
+        "before-Whisperer-ally-threequarter-standard-Cast",
+        "before-Whisperer-ally-threequarter-standard-Hit",
+        "before-Whisperer-ally-threequarter-standard-Death",
+        "before-Whisperer-ally-threequarter-standard-Spawn",
+        "before-Whisperer-ally-threequarter-standard-Evolve",
+        "before-Whisperer-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Bulwark",
@@ -1509,12 +1937,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Bulwark-ally-threequarter-standard-Idle",
+        "before-Bulwark-ally-threequarter-standard-Walk",
+        "before-Bulwark-ally-threequarter-standard-AttackMelee",
+        "before-Bulwark-ally-threequarter-standard-AttackRanged",
+        "before-Bulwark-ally-threequarter-standard-Cast",
+        "before-Bulwark-ally-threequarter-standard-Hit",
+        "before-Bulwark-ally-threequarter-standard-Death",
+        "before-Bulwark-ally-threequarter-standard-Spawn",
+        "before-Bulwark-ally-threequarter-standard-Evolve",
+        "before-Bulwark-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Demolisher",
@@ -1561,12 +2001,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Demolisher-ally-threequarter-standard-Idle",
+        "before-Demolisher-ally-threequarter-standard-Walk",
+        "before-Demolisher-ally-threequarter-standard-AttackMelee",
+        "before-Demolisher-ally-threequarter-standard-AttackRanged",
+        "before-Demolisher-ally-threequarter-standard-Cast",
+        "before-Demolisher-ally-threequarter-standard-Hit",
+        "before-Demolisher-ally-threequarter-standard-Death",
+        "before-Demolisher-ally-threequarter-standard-Spawn",
+        "before-Demolisher-ally-threequarter-standard-Evolve",
+        "before-Demolisher-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Crowcaller",
@@ -1613,12 +2065,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Crowcaller-ally-threequarter-standard-Idle",
+        "before-Crowcaller-ally-threequarter-standard-Walk",
+        "before-Crowcaller-ally-threequarter-standard-AttackMelee",
+        "before-Crowcaller-ally-threequarter-standard-AttackRanged",
+        "before-Crowcaller-ally-threequarter-standard-Cast",
+        "before-Crowcaller-ally-threequarter-standard-Hit",
+        "before-Crowcaller-ally-threequarter-standard-Death",
+        "before-Crowcaller-ally-threequarter-standard-Spawn",
+        "before-Crowcaller-ally-threequarter-standard-Evolve",
+        "before-Crowcaller-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Trigger",
@@ -1665,12 +2129,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Trigger-ally-threequarter-standard-Idle",
+        "before-Trigger-ally-threequarter-standard-Walk",
+        "before-Trigger-ally-threequarter-standard-AttackMelee",
+        "before-Trigger-ally-threequarter-standard-AttackRanged",
+        "before-Trigger-ally-threequarter-standard-Cast",
+        "before-Trigger-ally-threequarter-standard-Hit",
+        "before-Trigger-ally-threequarter-standard-Death",
+        "before-Trigger-ally-threequarter-standard-Spawn",
+        "before-Trigger-ally-threequarter-standard-Evolve",
+        "before-Trigger-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "RattleTick",
@@ -1717,12 +2193,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-RattleTick-ally-threequarter-standard-Idle",
+        "before-RattleTick-ally-threequarter-standard-Walk",
+        "before-RattleTick-ally-threequarter-standard-AttackMelee",
+        "before-RattleTick-ally-threequarter-standard-AttackRanged",
+        "before-RattleTick-ally-threequarter-standard-Cast",
+        "before-RattleTick-ally-threequarter-standard-Hit",
+        "before-RattleTick-ally-threequarter-standard-Death",
+        "before-RattleTick-ally-threequarter-standard-Spawn",
+        "before-RattleTick-ally-threequarter-standard-Evolve",
+        "before-RattleTick-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Capybara",
@@ -1769,12 +2257,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Capybara-ally-threequarter-standard-Idle",
+        "before-Capybara-ally-threequarter-standard-Walk",
+        "before-Capybara-ally-threequarter-standard-AttackMelee",
+        "before-Capybara-ally-threequarter-standard-AttackRanged",
+        "before-Capybara-ally-threequarter-standard-Cast",
+        "before-Capybara-ally-threequarter-standard-Hit",
+        "before-Capybara-ally-threequarter-standard-Death",
+        "before-Capybara-ally-threequarter-standard-Spawn",
+        "before-Capybara-ally-threequarter-standard-Evolve",
+        "before-Capybara-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Trident",
@@ -1821,12 +2321,64 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Trident-ally-threequarter-standard-Idle",
+        "before-Trident-ally-threequarter-standard-Walk",
+        "before-Trident-ally-threequarter-standard-AttackMelee",
+        "before-Trident-ally-threequarter-standard-AttackRanged",
+        "before-Trident-ally-threequarter-standard-Cast",
+        "before-Trident-ally-threequarter-standard-Hit",
+        "before-Trident-ally-threequarter-standard-Death",
+        "before-Trident-ally-threequarter-standard-Spawn",
+        "before-Trident-ally-threequarter-standard-Evolve",
+        "before-Trident-ally-threequarter-standard-Victory",
+        "before-Trident-enemy-threequarter-standard-Idle",
+        "before-Trident-enemy-threequarter-standard-Walk",
+        "before-Trident-enemy-threequarter-standard-AttackMelee",
+        "before-Trident-enemy-threequarter-standard-AttackRanged",
+        "before-Trident-enemy-threequarter-standard-Cast",
+        "before-Trident-enemy-threequarter-standard-Hit",
+        "before-Trident-enemy-threequarter-standard-Death",
+        "before-Trident-enemy-threequarter-standard-Spawn",
+        "before-Trident-enemy-threequarter-standard-Evolve",
+        "before-Trident-enemy-threequarter-standard-Victory",
+        "before-Trident-enemy-front-standard-Idle",
+        "before-Trident-enemy-front-standard-Walk",
+        "before-Trident-enemy-front-standard-AttackMelee",
+        "before-Trident-enemy-front-standard-AttackRanged",
+        "before-Trident-enemy-front-standard-Cast",
+        "before-Trident-enemy-front-standard-Hit",
+        "before-Trident-enemy-front-standard-Death",
+        "before-Trident-enemy-front-standard-Spawn",
+        "before-Trident-enemy-front-standard-Evolve",
+        "before-Trident-enemy-front-standard-Victory",
+        "before-Trident-enemy-profile-standard-Idle",
+        "before-Trident-enemy-profile-standard-Walk",
+        "before-Trident-enemy-profile-standard-AttackMelee",
+        "before-Trident-enemy-profile-standard-AttackRanged",
+        "before-Trident-enemy-profile-standard-Cast",
+        "before-Trident-enemy-profile-standard-Hit",
+        "before-Trident-enemy-profile-standard-Death",
+        "before-Trident-enemy-profile-standard-Spawn",
+        "before-Trident-enemy-profile-standard-Evolve",
+        "before-Trident-enemy-profile-standard-Victory",
+        "before-Trident-enemy-back-standard-Idle",
+        "before-Trident-enemy-back-standard-Walk",
+        "before-Trident-enemy-back-standard-AttackMelee",
+        "before-Trident-enemy-back-standard-AttackRanged",
+        "before-Trident-enemy-back-standard-Cast",
+        "before-Trident-enemy-back-standard-Hit",
+        "before-Trident-enemy-back-standard-Death",
+        "before-Trident-enemy-back-standard-Spawn",
+        "before-Trident-enemy-back-standard-Evolve",
+        "before-Trident-enemy-back-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "SolarSentinel",
@@ -1873,12 +2425,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-SolarSentinel-ally-threequarter-standard-Idle",
+        "before-SolarSentinel-ally-threequarter-standard-Walk",
+        "before-SolarSentinel-ally-threequarter-standard-AttackMelee",
+        "before-SolarSentinel-ally-threequarter-standard-AttackRanged",
+        "before-SolarSentinel-ally-threequarter-standard-Cast",
+        "before-SolarSentinel-ally-threequarter-standard-Hit",
+        "before-SolarSentinel-ally-threequarter-standard-Death",
+        "before-SolarSentinel-ally-threequarter-standard-Spawn",
+        "before-SolarSentinel-ally-threequarter-standard-Evolve",
+        "before-SolarSentinel-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "LuminousOracle",
@@ -1925,12 +2489,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-LuminousOracle-ally-threequarter-standard-Idle",
+        "before-LuminousOracle-ally-threequarter-standard-Walk",
+        "before-LuminousOracle-ally-threequarter-standard-AttackMelee",
+        "before-LuminousOracle-ally-threequarter-standard-AttackRanged",
+        "before-LuminousOracle-ally-threequarter-standard-Cast",
+        "before-LuminousOracle-ally-threequarter-standard-Hit",
+        "before-LuminousOracle-ally-threequarter-standard-Death",
+        "before-LuminousOracle-ally-threequarter-standard-Spawn",
+        "before-LuminousOracle-ally-threequarter-standard-Evolve",
+        "before-LuminousOracle-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "CelestialArcher",
@@ -1977,12 +2553,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-CelestialArcher-ally-threequarter-standard-Idle",
+        "before-CelestialArcher-ally-threequarter-standard-Walk",
+        "before-CelestialArcher-ally-threequarter-standard-AttackMelee",
+        "before-CelestialArcher-ally-threequarter-standard-AttackRanged",
+        "before-CelestialArcher-ally-threequarter-standard-Cast",
+        "before-CelestialArcher-ally-threequarter-standard-Hit",
+        "before-CelestialArcher-ally-threequarter-standard-Death",
+        "before-CelestialArcher-ally-threequarter-standard-Spawn",
+        "before-CelestialArcher-ally-threequarter-standard-Evolve",
+        "before-CelestialArcher-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Justiciar",
@@ -2029,12 +2617,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Justiciar-ally-threequarter-standard-Idle",
+        "before-Justiciar-ally-threequarter-standard-Walk",
+        "before-Justiciar-ally-threequarter-standard-AttackMelee",
+        "before-Justiciar-ally-threequarter-standard-AttackRanged",
+        "before-Justiciar-ally-threequarter-standard-Cast",
+        "before-Justiciar-ally-threequarter-standard-Hit",
+        "before-Justiciar-ally-threequarter-standard-Death",
+        "before-Justiciar-ally-threequarter-standard-Spawn",
+        "before-Justiciar-ally-threequarter-standard-Evolve",
+        "before-Justiciar-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Jawguard",
@@ -2081,12 +2681,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Jawguard-ally-threequarter-standard-Idle",
+        "before-Jawguard-ally-threequarter-standard-Walk",
+        "before-Jawguard-ally-threequarter-standard-AttackMelee",
+        "before-Jawguard-ally-threequarter-standard-AttackRanged",
+        "before-Jawguard-ally-threequarter-standard-Cast",
+        "before-Jawguard-ally-threequarter-standard-Hit",
+        "before-Jawguard-ally-threequarter-standard-Death",
+        "before-Jawguard-ally-threequarter-standard-Spawn",
+        "before-Jawguard-ally-threequarter-standard-Evolve",
+        "before-Jawguard-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Mantis",
@@ -2133,12 +2745,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Mantis-ally-threequarter-standard-Idle",
+        "before-Mantis-ally-threequarter-standard-Walk",
+        "before-Mantis-ally-threequarter-standard-AttackMelee",
+        "before-Mantis-ally-threequarter-standard-AttackRanged",
+        "before-Mantis-ally-threequarter-standard-Cast",
+        "before-Mantis-ally-threequarter-standard-Hit",
+        "before-Mantis-ally-threequarter-standard-Death",
+        "before-Mantis-ally-threequarter-standard-Spawn",
+        "before-Mantis-ally-threequarter-standard-Evolve",
+        "before-Mantis-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Hornet",
@@ -2185,12 +2809,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Hornet-ally-threequarter-standard-Idle",
+        "before-Hornet-ally-threequarter-standard-Walk",
+        "before-Hornet-ally-threequarter-standard-AttackMelee",
+        "before-Hornet-ally-threequarter-standard-AttackRanged",
+        "before-Hornet-ally-threequarter-standard-Cast",
+        "before-Hornet-ally-threequarter-standard-Hit",
+        "before-Hornet-ally-threequarter-standard-Death",
+        "before-Hornet-ally-threequarter-standard-Spawn",
+        "before-Hornet-ally-threequarter-standard-Evolve",
+        "before-Hornet-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Weaver",
@@ -2237,12 +2873,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Weaver-ally-threequarter-standard-Idle",
+        "before-Weaver-ally-threequarter-standard-Walk",
+        "before-Weaver-ally-threequarter-standard-AttackMelee",
+        "before-Weaver-ally-threequarter-standard-AttackRanged",
+        "before-Weaver-ally-threequarter-standard-Cast",
+        "before-Weaver-ally-threequarter-standard-Hit",
+        "before-Weaver-ally-threequarter-standard-Death",
+        "before-Weaver-ally-threequarter-standard-Spawn",
+        "before-Weaver-ally-threequarter-standard-Evolve",
+        "before-Weaver-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "PyreWarden",
@@ -2289,12 +2937,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-PyreWarden-ally-threequarter-standard-Idle",
+        "before-PyreWarden-ally-threequarter-standard-Walk",
+        "before-PyreWarden-ally-threequarter-standard-AttackMelee",
+        "before-PyreWarden-ally-threequarter-standard-AttackRanged",
+        "before-PyreWarden-ally-threequarter-standard-Cast",
+        "before-PyreWarden-ally-threequarter-standard-Hit",
+        "before-PyreWarden-ally-threequarter-standard-Death",
+        "before-PyreWarden-ally-threequarter-standard-Spawn",
+        "before-PyreWarden-ally-threequarter-standard-Evolve",
+        "before-PyreWarden-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     },
     {
       "id": "Drillnest",
@@ -2342,12 +3002,24 @@
           "review_status": "pending"
         }
       ],
-      "before": [],
+      "before": [
+        "before-Drillnest-ally-threequarter-standard-Idle",
+        "before-Drillnest-ally-threequarter-standard-Walk",
+        "before-Drillnest-ally-threequarter-standard-AttackMelee",
+        "before-Drillnest-ally-threequarter-standard-AttackRanged",
+        "before-Drillnest-ally-threequarter-standard-Cast",
+        "before-Drillnest-ally-threequarter-standard-Hit",
+        "before-Drillnest-ally-threequarter-standard-Death",
+        "before-Drillnest-ally-threequarter-standard-Spawn",
+        "before-Drillnest-ally-threequarter-standard-Evolve",
+        "before-Drillnest-ally-threequarter-standard-Victory"
+      ],
       "after": [],
       "review_requirements": {},
       "implementation_status": "not_started",
       "review_status": "pending",
-      "owner_visual_approval": "pending"
+      "owner_visual_approval": "pending",
+      "baseline_evidence_status": "pose_originals_recorded"
     }
   ],
   "auxiliaries": [
@@ -2399,8 +3071,58 @@
     "targeted_consolidation": "pending"
   },
   "limitations": [
-    "No baseline or final render capture is claimed by this inventory.",
+    "The index records 460 original baseline pose sheets through SHA-256-bound local manifests; final art captures and live event evidence remain pending.",
     "Applicability describes existing source paths; it is not runtime inspection.",
-    "All individual briefs remain Proposed and subject to owner approval."
-  ]
+    "All individual briefs remain Proposed and subject to owner approval.",
+    "Use scripts/p70/validate_evidence.py --metadata-only for bookkeeping updates that reuse capture-time integrity checks. This verifies manifest hashes and original availability; it explicitly does not rehash or decode every original again. Full default validation rechecks original integrity."
+  ],
+  "capture_manifests": [
+    {
+      "path_or_uri": ".local/p70-evidence/before-smoke-display/captures.json",
+      "sha256": "67fe871dd7e02edc180ff0a165142bcb4eec8775a475004881c24d72d7d97ec3",
+      "capture_count": 10,
+      "phase_before_or_after": "before",
+      "content_sha": "55510c5363e3f1e555fa5133208a5faf20c5825b",
+      "tooling_sha": "27f98acd98b51fa69eb09f4703bd2ca59a33ed41",
+      "artifact_verification_record": "capture_roster.py decoded the original PNGs, checked dimensions and recorded SHA-256 during capture. The bookkeeping integration reuses that evidence and does not repeat original image decoding or hashing.",
+      "availability": "Ignored local artifacts; unavailable on another machine until explicitly transferred. A missing manifest or original is not a passing check."
+    },
+    {
+      "path_or_uri": ".local/p70-evidence/before-cohort/captures.json",
+      "sha256": "4440eb281c869e04c2d52f0b5028a2a1666dbd60ae04f6eab11aedf4b697ba8d",
+      "capture_count": 450,
+      "phase_before_or_after": "before",
+      "content_sha": "55510c5363e3f1e555fa5133208a5faf20c5825b",
+      "tooling_sha": "27f98acd98b51fa69eb09f4703bd2ca59a33ed41",
+      "artifact_verification_record": "capture_roster.py decoded the original PNGs, checked dimensions and recorded SHA-256 during capture. The bookkeeping integration reuses that evidence and does not repeat original image decoding or hashing.",
+      "availability": "Ignored local artifacts; unavailable on another machine until explicitly transferred. A missing manifest or original is not a passing check."
+    },
+    {
+      "path_or_uri": ".local/p70-evidence/before-s1-enemy/captures.json",
+      "sha256": "cd2dc8f170e22ed3e773e4f29055c0ace9a71bc06bb9a0ddf6f28c984bcc82cb",
+      "capture_count": 120,
+      "phase_before_or_after": "before",
+      "content_sha": "55510c5363e3f1e555fa5133208a5faf20c5825b",
+      "tooling_sha": "27f98acd98b51fa69eb09f4703bd2ca59a33ed41",
+      "artifact_verification_record": "capture_roster.py decoded the original PNGs, checked dimensions and recorded SHA-256 during capture. The bookkeeping integration reuses that evidence and does not repeat original image decoding or hashing.",
+      "availability": "Ignored local artifacts; unavailable on another machine until explicitly transferred. A missing manifest or original is not a passing check."
+    }
+  ],
+  "baseline_coverage": {
+    "recorded_original_pose_sheets": 460,
+    "champions": 46,
+    "forms": 230,
+    "clip_ids_sampled": 10,
+    "recorded_clip_form_slots": 2300,
+    "applicable_clip_form_slots": 1835,
+    "platform": "linux",
+    "team": "ally",
+    "view": "threequarter",
+    "quality": "standard",
+    "viewport": [
+      1920,
+      2160
+    ],
+    "scope": "Event-free static poses including actual kit duration, applicable release/strike samples and one-shot final poses. Does not establish live combat effects, continuous motion, transitions, front/back/side views, enemy-team coverage or final art."
+  }
 }
