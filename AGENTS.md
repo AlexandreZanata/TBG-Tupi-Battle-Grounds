@@ -11,8 +11,9 @@ authoritative server, built mostly by AI agents, at minimal running cost.
 MVP, not enterprise software: speed, visual quality, fun, working
 multiplayer, low cost.
 
-**Platform focus (owner rule, 2026-10-29): desktop browsers only, for
-now.** Mobile is a later maturity stage of the game. Do not design,
+**Platform focus (owner rule, 2026-11-01): Linux, Windows and desktop
+browsers, with Linux as the visual reference.** Mobile is a later maturity
+stage of the game. Do not design,
 verify, or fix phone layouts or touch input unless a task explicitly asks;
 keep existing phone code compiling, but spend no effort on it.
 
@@ -33,6 +34,7 @@ per-step demands for broad checks. See *Verification* below and
 | `docs/DECISIONS.md` | Why the big choices were made and what reopens them |
 | `docs/VALIDATION.md` | Minimal local checks, shared resource lock, consolidation, explicit full-suite procedure |
 | `docs/ART-DIRECTION.md` | Medieval style guide, rig and motion rules, character procedure (visual phases P15+) |
+| `docs/ui/DESKTOP-UI-CONTRACT.md` | Core visual correspondence: Linux reference, identical Windows and desktop web presentation |
 | `crates/tbg-core` | Deterministic rules, content tables, bot, protocol (shared) |
 | `crates/tbg-client` | Bevy client → WASM/WebGL2 |
 | `crates/tbg-server` | Axum/Tokio authoritative server |
@@ -64,6 +66,28 @@ per-step demands for broad checks. See *Verification* below and
    targeted adjustment. This does not authorize merging or public deployment. One logical change
    per commit. No build outputs or large binaries in git.
 7. **English only** in code, comments, docs, and commits.
+8. **Visual correspondence — core owner rule (2026-11-01).** Linux is
+   the canonical reference for the entire in-game frontend. **Every visual
+   change must look and behave exactly the same on Linux, Windows and
+   desktop web.** This applies to every feature, fix, refactor, asset and
+   optimization, across all screens, UI components, HUDs, modals, cards,
+   typography, layout, loading/error states and transitions; all Arenas,
+   cameras, models, Evolution forms, materials, colors, lighting, shadows,
+   VFX and animations; and every champion's visible behavior, including
+   spawning, movement, facing, attacks, abilities, hit/death feedback and
+   celebrations, with matching timing and motion.
+   Every such change must include an entry in the
+   [visual correspondence contract](docs/ui/DESKTOP-UI-CONTRACT.md),
+   identifying the affected cases and updating its matrix/motion coverage
+   and shared presentation in the same change. Implement once and propagate
+   to all three targets. Platform adapters may differ internally only to
+   preserve identical presentation; no missing feature, visual downgrade,
+   separate platform styling, tolerance or renderer/driver waiver is
+   allowed without an explicit owner-approved contract change. Visible
+   champion behavior remains subject to server authority and game canon.
+   Follow `docs/VALIDATION.md`: queue scoped cross-platform checks at
+   consolidation, record unverified targets as pending, and never claim
+   parity from shared code, compilation or Linux-only screenshots.
 
 ## How to work a phase (executor)
 

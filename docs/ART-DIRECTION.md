@@ -6,6 +6,12 @@
 > [DECISIONS.md](DECISIONS.md) D-22–D-24. Status: **Proposed** until the
 > owner signs off P15; values marked *start* are tuned by P15.
 
+**Core correspondence rule:** every art, animation or visible champion-behavior
+change follows [AGENTS non-negotiable 8](../AGENTS.md#non-negotiables) and the
+[visual correspondence contract](ui/DESKTOP-UI-CONTRACT.md). Linux is the reference;
+Windows and desktop web must match exactly. Update that contract and its affected
+cases/motion coverage in the same change; this applies to all phases and kits.
+
 ## 1. Pillars
 
 1. **Readable first.** A player on a phone at arm's length tells side,
