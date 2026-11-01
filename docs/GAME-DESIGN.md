@@ -835,6 +835,12 @@ damage, interval and range come from T11's flame. Other base rows preserve
 the text apart from integer speed conversion. No printed PNG number is
 used. R21's interval is its production cadence, not a zero-damage attack.
 
+The table preserves the P59 reference. Its R07 range is superseded in the current
+P70 candidate by the explicitly Proposed 2,000-unit reach in §14 below; other
+R07 base values remain unchanged. D-101 applies that documented override to
+current candidate assertions and retains the original table and revision-2
+deterministic references. Ruleset 6 is not a D-33-approved balance release.
+
 ### 13.2 Proposed primary abilities
 
 Times are ticks; percentages use basis points (1%=100 bp). Parameters

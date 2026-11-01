@@ -501,7 +501,12 @@ fn proposed_p59_bases_match_section_13() {
         (PyreWarden, Undead, Tank, 6, [800, 12, 10, 2_800, 23]),
         (Drillnest, Machines, Ranged, 5, [900, 0, 44, 4_500, 23]),
     ];
-    for (kind, faction, archetype, energy, base) in rows {
+    for (kind, faction, archetype, energy, mut base) in rows {
+        // D-101 / Proposed P70 reach: preserve the original P59 reference row
+        // above while applying its explicitly documented later exception.
+        if kind == Trident {
+            base[3] = 2_000;
+        }
         let d = def(kind);
         assert_eq!(
             (d.faction, d.archetype, d.cost),

@@ -236,3 +236,36 @@ The workspace Clippy command (`cargo clippy --locked --workspace -- -D warnings`
 and other CI lanes remain for GitHub; no full local suite, additional target build,
 rendering gallery, installation or deployment was run. Normal push updates #40;
 CI completion and main merge remain with the owner.
+
+## CI canonical-reference follow-up (2026-11-01, D-101)
+
+Run 41346300403 / job 124967085631 failed `contract_determinism`, `contract_lab`,
+`contract_roster` and `wave_a`. The first three applied the revision-2 references
+or original P59 Trident row to documented P70/P71 candidates in revision 6. The last
+fixture let the updated Farwatch legitimately shoot the own Stronghold, attributing
+its 70 damage to the 24-damage Bombard blast.
+
+D-101 preserves the old arrays/table, appends revision-6 references keyed by exact
+ruleset/source hash and applies the existing Proposed Trident exception. Unknown
+source identities fail closed. The Bombard starts nearer to Farwatch than its own
+Stronghold, and the fixture additionally requires a real self-blast before asserting
+unchanged tower HP. No gameplay implementation, contract or balance value changed.
+
+Collected five complete canonical traces with `cargo run --offline --locked --quiet
+-p tbg-core --example trace_canon`, then ran exactly:
+
+```bash
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 \
+    CARGO_TARGET_DIR=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/target \
+    cargo test --offline --locked -p tbg-core --features lab \
+      --test contract_determinism --test contract_lab --test contract_roster \
+      --test wave_a -- --test-threads=1
+cargo fmt -p tbg-core -- --check
+python3 scripts/check-patch-notes.py --base origin/main
+git diff --check
+```
+
+All 20 tests passed (2 + 3 + 7 + 8). Formatting, patch-note/source identity and diff
+checks passed. Full workspace tests remain with GitHub; no local full-suite run or
+new D-33 acceptance is claimed. Windows packaging/download work is recorded separately.

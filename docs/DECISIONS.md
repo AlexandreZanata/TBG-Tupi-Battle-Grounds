@@ -2864,3 +2864,31 @@ loss).
 
 **Reopen when** owner playtests show the pause budget wrong, a protocol bump
 is approved (show the remaining budget), or abuse of pauses is observed.
+
+
+## D-101 · Versioned deterministic references for the P70/P71 candidate — 2026-11-01
+
+The documented Proposed P70 Trident reach (2,000 instead of the P59 reference
+1,100), P71 Farwatch targeting and Tick pistol, and later registered state changes
+make ruleset 6 / `097385fee9a10b0f` a different candidate from ruleset 2. Apply
+explicit outcome/hash/trace references to each exact revision and source identity;
+retain the older revision-2 arrays intact and reject unregistered identities.
+
+Five canonical same-seed Bot matches were collected through the unchanged real
+`headless::play` driver with `examples/trace_canon.rs`. Seeds 1/7/42/1000/65535 end
+at 4044/9982/10382/8869/8613 ticks, winners B/B/A/B/B, all StrongholdDestroyed.
+The matching traces/final hashes are appended in the contract tests. The P59 roster
+reference row stays intact; its assertion applies the existing later Trident override.
+
+The Bombard friendly-blast exclusion fixture must keep its attacking Bombard nearer
+to the enemy Farwatch than the own Stronghold is. Otherwise P71 legitimately lets
+Farwatch hit that Stronghold and confounds the assertion. Require a real self-blast
+next to the tower and preserve the strict unchanged-HP guard. Do not weaken targeting
+or friendly-fire implementation to make the scenario pass.
+
+This decision reconciles tests with already documented candidates, not a new gameplay
+change, balance acceptance, determinism tolerance or authorization to reset fixtures
+from arbitrary failing output. Gameplay source, contract, ruleset registry and D-33
+reservations remain unchanged. Every later intentional ruleset needs its own reviewed
+canonical identity/reference; simulation changes still require the canonical decision
+and evidence in the same commit.

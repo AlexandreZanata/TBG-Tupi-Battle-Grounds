@@ -18,10 +18,15 @@ fn main() {
                 }
             }
         ));
+        let outcome = state.outcome.expect("completed match has an outcome");
         println!(
-            "({seed}, 0x{trace:016x}u64, 0x{:016x}u64, {}),",
+            "{} {:016x} {seed} {trace:016x} {:016x} {} {:?} {:?}",
+            tbg_core::ruleset_version::RULESET_VERSION,
+            tbg_core::ruleset_version::ruleset_source_hash(),
             state.hash(),
-            state.tick
+            state.tick,
+            outcome.winner.expect("reference match has a winner"),
+            outcome.reason
         );
     }
 }

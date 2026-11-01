@@ -112,10 +112,16 @@ fn bombard_blast_hits_allies_fully() {
 #[test]
 fn bombard_blast_spares_the_own_stronghold() {
     let mut s = state(51);
-    let _bombard = s.lab_spawn_at(Seat::A, UnitKind::Bombard, 0, 0, 2_000);
-    // A Farwatch holds its ground, so the blast stays on the same spot.
+    let bombard = s.lab_spawn_at(Seat::A, UnitKind::Bombard, 0, 0, 1_000);
+    // P71 Farwatch can attack Strongholds: keep the Bombard nearer than the
+    // tower so enemy fire cannot confound the friendly-blast exclusion.
     let _enemy = s.lab_spawn_at(Seat::B, UnitKind::Farwatch, 0, 0, 800);
-    step_n(&mut s, 400);
+    let events = step_n(&mut s, 400);
+    assert!(
+        events.iter().any(|event| matches!(event,
+        Event::Hit { to: Target::Unit(id), amount: 24 } if *id == bombard)),
+        "the fixture must produce a blast beside the own Stronghold"
+    );
     assert_eq!(
         s.player(Seat::A).stronghold_hp,
         4_500,
