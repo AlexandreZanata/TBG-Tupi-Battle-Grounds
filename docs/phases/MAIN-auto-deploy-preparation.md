@@ -58,8 +58,17 @@ and the incoming D-100 decision. Kept the integration's protocol 31, eight Arena
 source registry 6 and new API domains. Incoming native packaging cache fixes are
 also retained. No production/native installation was changed by this merge.
 
-The first five Rust checks above passed before this refresh. A scoped merged-tree
-batch is queued under the shared lock: `cargo test --offline --locked -p tbg-server
+The first five Rust checks above passed before this refresh. The scoped merged-tree
+batch completed under the shared lock: `cargo test --offline --locked -p tbg-server
 --test build_info --test schema_upgrade --test health --test match_continuity
---test revocation_feed --test auth_websocket -- --test-threads=1`. Another front's
-Android release owns the slot; it was preserved. No full local suite is implied.
+--test revocation_feed --test auth_websocket -- --test-threads=1`. The other front's
+Android release held the slot and was preserved. After it finished, the batch
+compiled in 25.65 seconds and **17 Rust scenarios passed**: auth/reconnect 7,
+offline identity 1, health 2, match continuity 2, cross-slot revocation 1 and
+schema upgrades 4. The final unique scoped validation is **32 Python + 17 Rust
+= 49 passing scenarios**. No full local suite was run.
+
+Review: https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/38
+(draft, main not merged, GitHub's existing required CI remains a separate gate).
+The production runtime and native installation remain the previously verified
+8be248e delivery. This preparation did not activate a production update.
