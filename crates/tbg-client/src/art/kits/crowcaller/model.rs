@@ -18,7 +18,7 @@ pub const MUZZLE: Vec3 = Vec3::new(0.0, 0.035, 0.34);
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 0.98, tier);
     p.torso.x *= 0.82;
-    p.arm = 0.20;
+    p.arm = 0.21;
     p
 }
 pub fn parent(n: Node) -> Option<Node> {
@@ -75,7 +75,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         ),
         part(
             Secondary(Spring::Tabard),
-            Box(0.20, 0.31, 0.018),
+            Box(0.09, 0.26, 0.018),
             ALLY,
             [0.0, -0.18, 0.017],
         ),
@@ -113,6 +113,15 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             .rot([180.0, 0.0, 0.0]),
         );
     }
+    v.push(
+        part(
+            Body(Chest),
+            Frustum(p.torso.x * 0.49, p.torso.x * 0.65, 0.11),
+            FIELD_SLATE,
+            [0.0, 0.30, -0.015],
+        )
+        .scale([1.0, 1.0, 0.75]),
+    );
     raven(&mut v);
     crossbow(&mut v, f);
     upgrades(&mut v, f);
@@ -129,11 +138,23 @@ fn raven(v: &mut Vec<PartSpec>) {
         part(
             Prop(Socket::Back),
             Box(0.02, 0.12, 0.11),
-            DARK,
+            FIELD_SLATE,
             [-0.07, -0.015, -0.02],
         )
         .rot([0.0, 0.0, -18.0]),
     ]);
+    for z in [-0.065, -0.025, 0.015] {
+        v.push(
+            part(
+                Prop(Socket::Back),
+                Cone(0.018, 0.12),
+                GUNMETAL,
+                [-0.073, -0.08, z],
+            )
+            .scale([0.4, 1.0, 1.0])
+            .rot([12.0, 0.0, -18.0]),
+        );
+    }
     for s in [-1.0, 1.0] {
         v.push(part(
             body,
