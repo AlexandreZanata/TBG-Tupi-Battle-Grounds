@@ -299,10 +299,10 @@
   {
     "unit": "RattleTick",
     "asset": "crates/tbg-client/assets/battle/portraits/rattletick.webp",
-    "asset_sha256": "4bb08683d6d037d3ced54b18ebd47e7ba29f268e9b7c404bc9fb88b63663ace5",
-    "original": ".local/p71-evidence/portraits-clean-17/RattleTick.png",
-    "original_sha256": "d2fdc7858a4ec4e64082f500c5cfd8c9fc26180028485e69001c1f1e2abce010",
-    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "asset_sha256": "e6db9dcc7223569c19d90cd70eaac23b050449b24498f20805d8cfcc660757a6",
+    "original": ".local/p71-evidence/portraits-followup-fbc9983/RattleTick.png",
+    "original_sha256": "c1fc089dfad80fe169b896f4d2ac40e950045ab4bea628f79ba27774717e40a6",
+    "source_commit": "fbc998366e16d3c11c6648b671ba8364f839a4a6",
     "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
   },
   {
@@ -380,10 +380,10 @@
   {
     "unit": "Hornet",
     "asset": "crates/tbg-client/assets/battle/portraits/hornet.webp",
-    "asset_sha256": "927a3c5e95d773de0eb5b3ff845e4963130799fb4edb6654068cd29900cd85e4",
-    "original": ".local/p71-evidence/portraits-clean-22/Hornet.png",
-    "original_sha256": "90b9866b9814baac127cc2de273d5e6b31373b2cdff3b95cd01da9437f159198",
-    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "asset_sha256": "47f3a3850033cd6bf78e13a95181048dafae9fdc6fde58cd1004ee430848ab3c",
+    "original": ".local/p71-evidence/portraits-followup-fbc9983/Hornet.png",
+    "original_sha256": "cd3cd7cc832b8014045c3323f6add9fc0162c25fae3b8c06a503a3935179702b",
+    "source_commit": "fbc998366e16d3c11c6648b671ba8364f839a4a6",
     "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
   },
   {
