@@ -1,6 +1,6 @@
 //! Regressions for real figure bounds, held-weapon clearance and close-contact presentation.
 use super::{
-    anim::{Animator, Clip, CLIPS},
+    anim::{Animator, CLIPS},
     figure, kits,
     presentation::pose_world,
     rig::{Node, Socket, NODE_COUNT},

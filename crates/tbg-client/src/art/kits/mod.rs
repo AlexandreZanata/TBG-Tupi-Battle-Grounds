@@ -27,7 +27,7 @@ mod drumguard;
 mod farwatch;
 pub mod gait;
 mod hexer;
-mod hornet;
+pub(crate) mod hornet;
 mod jawguard;
 mod justiciar;
 mod leechroot;
@@ -166,6 +166,7 @@ pub struct Moment {
     /// Independent special cast channel, in seconds from server windup start.
     pub special: Option<f32>,
     pub special_ready: bool,
+    pub special_aim: Option<Vec3>,
 }
 
 static SIEGE_WALKER: Kit = siege_walker::KIT;

@@ -60,3 +60,16 @@ it. The non-Linux Evolution card rebuilds only when identity/form/language
 changes, so the next tier replaces stale choices without reopening. Browser
 Fortification choices are also separated from the information card. Browser
 arena banner now dismisses on outside pointer presses.
+
+### Independent Tick pistol
+
+Authoritative special timer now targets troops at medium range independently
+of the club; its single-target pistol replaces the old area bomb/Slow. Branch
+A remains Rattle HP/club; B improves only Tick cadence/damage. Static branch A
+damage is explicitly excluded from Tick scaling. Three new core regressions
+passed (both seats, independent movement/basic windup/counter, no collateral,
+branch ownership). Two Farwatch targeting regressions passed, including Guard.
+`followup-targeted.log`: 3 core + 2 Farwatch + 6 P71 client tests passed.
+The client check initially found E0624 on pose sampling visibility; it was
+corrected before the successful test build. D-33 balance gate and broad
+multiplayer validation remain deferred; the values are Proposed playtest data.

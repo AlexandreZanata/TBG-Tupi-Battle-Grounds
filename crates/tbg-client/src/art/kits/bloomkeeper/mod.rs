@@ -140,6 +140,7 @@ mod tests {
                     armor_flash: 0.0,
                     special: None,
                     special_ready: false,
+                    special_aim: None,
                 };
                 m.aim = Some(super::super::Aim {
                     target: Vec3::new(side, 0.6, -2.0),

@@ -2458,3 +2458,16 @@ state-transition handling, validation scope and genuine renderer acceptance
 are specified in [P71](phases/P71-combat-readability-and-stronghold-polish.md).
 There is no combat, stat, Fortification, hitbox, protocol or balance change;
 P70's separate range candidate and outstanding visual approvals remain open.
+
+## P71 owner follow-up — independent Tick pistol (2026-11-01, Proposed)
+
+Supersedes D-76's bomb channel. The owner requests Tick in black clothes with
+a pistol, firing independently at medium-range enemy troops without steering
+Rattle. Keep Rattle's base Tank stats, movement, club, HP pool and branch A.
+Tick uses the existing special timer, fixed six-tick windup, events, root/death
+cancellation and locked-target policy; no new Unit or protocol field. Proposed
+playtest values: range3000, damage12, period30; B1 period24, B2 damage18.
+It has no splash/Slow, never targets allies or Strongholds, and never triggers
+club on-hit/counters. Static seat bonuses apply once, excluding branch A's
+club-only damage bonus. This replaces area control with a low-damage secondary
+attack and needs future D-33 balance acceptance; no gate has been claimed.

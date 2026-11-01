@@ -5,7 +5,7 @@
 
 /// Gameplay revision. Bump it, and append a line to
 /// `tests/fixtures/ruleset-versions.txt`, whenever a watched source changes.
-pub const RULESET_VERSION: u32 = 4;
+pub const RULESET_VERSION: u32 = 5;
 /// Version of the per-match summary JSON (P61 §4).
 pub const SUMMARY_VERSION: u16 = 2;
 

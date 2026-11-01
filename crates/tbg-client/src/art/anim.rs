@@ -38,6 +38,8 @@ pub struct Animator {
     pub form: (u8, u8),
     /// The engaged target in world space; visuals refresh it every frame.
     pub aim_at: Option<Vec3>,
+    pub special_at: Option<Vec3>,
+    special_aim: Option<Vec3>,
     /// Walk in place at content speed (review tools): feet are not planted.
     pub treadmill: bool,
     pub gait: Gait,
@@ -92,6 +94,8 @@ impl Animator {
             celebration: None,
             form: (0, 0),
             aim_at: None,
+            special_at: None,
+            special_aim: None,
             treadmill: false,
             gait,
             gesture: 1e6,
@@ -262,7 +266,7 @@ impl Animator {
         self.kit
             .map_or_else(|| clip.duration(), |k| k.duration(clip))
     }
-    pub(super) fn pose(&self, clip: Clip, t: f32) -> Pose {
+    pub(crate) fn pose(&self, clip: Clip, t: f32) -> Pose {
         let mut pose = sample(clip, t);
         let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.0));
         let moment = Moment {
@@ -286,6 +290,7 @@ impl Animator {
             armor_flash: self.armor_flash,
             special: self.special,
             special_ready: self.special_ready,
+            special_aim: self.special_aim,
         };
         if let Some(kit) = self.kit {
             (kit.pose)(&moment, &mut pose);
@@ -370,6 +375,7 @@ impl Animator {
             let local = frame.inverse().transform_vector3(moved).with_y(0.0);
             self.heading = local.normalize_or(Vec3::Z);
         }
+        self.special_aim = self.special_at.map(|w| frame.inverse().transform_point3(w));
         let engaged = self.aim_at.is_some() && self.base != Clip::Walk;
         let goal = if engaged { 1.0 } else { 0.0 };
         let rate = dt / if engaged { AIM_IN } else { AIM_OUT };

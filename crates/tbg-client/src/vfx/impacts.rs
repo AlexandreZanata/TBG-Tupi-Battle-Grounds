@@ -48,7 +48,6 @@ pub enum Impact {
     Mind,
     Piston,
     Plague,
-    Mayhem,
     Belly,
     Rend,
     Solar,
@@ -92,7 +91,6 @@ fn around(n: usize, phase: f32) -> impl Iterator<Item = Vec3> {
 pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, area: Area) {
     let ground = at.with_y(0.05);
     match impact {
-        Impact::Mayhem => blast(commands, a, at, area.splash.max(0.3), 0.55),
         Impact::Blast => blast(commands, a, at, area.splash.max(0.6), 1.0),
         Impact::GreatBlast => {
             blast(commands, a, at, area.splash.max(0.8), 1.45);

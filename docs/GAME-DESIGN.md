@@ -834,7 +834,7 @@ special range equals base attack range and ability target is an enemy unit.
 | R02 | Esmagamento em Área: period 200; caster-centered radius 2500; damage 120; no displacement or true interruption |
 | R03 | Marca do Corvo: readiness every 140; next valid basic hit marks for 80; Slow 2000 bp, heal-cut 3000 bp, own basic damage vs own marked target +1500 bp |
 | R04 | Tiro Cruzado: every fourth completed enemy-unit primary hit; one additional target within 1500 of primary; secondary damage 6000 bp of current static basic damage |
-| R05 | Bagunça em Dobro: period 180; damage 60; primary-centered radius 1200; Slow 1500 bp for 30; independent of club |
+| R05 | **Proposed P71 owner change (2026-11-01): Tick pistol**, period 30 ticks (1.5 s), range 3000, damage 12; nearest targetable enemy troop with Guard priority; single target, no Slow/splash; independent of Rattle club, movement and counters. Existing six-tick locked special windup, root/death cancellation and seat damage bonuses apply; Rattle Evolution damage bonus is excluded |
 | R06 | Barrigada do Brejo: period 200; caster-centered radius 1500; damage 65; Slow 1500 bp for 40 |
 | R07 | Rasgo Sangrento: period 180; primary-centered radius 1500; damage 75; one bleed slot, 5 HP per 20 ticks, four pulses |
 | R08 | Couraça Primordial: each positive HP-damage receipt adds 300 bp reduction for subsequent hits, five stacks maximum / 1500 bp; all expire after 60 ticks without HP damage. Step size is a completion |
@@ -867,7 +867,7 @@ an additional modest benefit below are completion hypotheses for testing.
 | R02 | Punhos Reforçados: +2000 bp special damage → radius 3000 | Sistema de Choque: period 160 → basic hits Slow 1500 bp for 40 |
 | R03 | Corvo Pestilento: cut 4000 bp → mark duration 110 | Besta da Ruína: +1500 bp basic damage → own mark bonus 2500 bp |
 | R04 | Pistoleiro Veloz: +1500 bp attack speed → +1000 bp movement | Bala Ricocheteante: secondary ratio 7500 bp → search radius 2000 |
-| R05 | Fúria do Grandão: +2000 bp HP → +2000 bp basic damage | Truques do Tico: period 150 → radius 1500, Slow 2000 bp |
+| R05 | Fúria do Grandão: +2000 bp HP → +2000 bp basic damage | **Proposed P71:** Tick pistol: period 24 → damage 18. Rattle branch remains HP +2000 bp → club damage +2000 bp; each branch changes only its brother’s attack channel |
 | R06 | Barriga de Pedra: +2000 bp HP → 1500 bp self-reduction for 40 after impact | Onda do Brejo: period 160 → radius 1900, Slow 2000 bp |
 | R07 | Fúria Oceânica: +2000 bp HP → bleed 7 per pulse | Maré Sangrenta: period 150 → radius 1900 |
 | R08 | Couraça Ancestral: +2000 bp HP → stack expiry 80 | Presas de Pedra: basic damage +1500 bp vs units with base range ≤1600 → replace bonus with 2500 bp |

@@ -427,12 +427,10 @@ pub enum Ability {
         protection: u16,
         protection_ticks: u16,
     },
-    DoubleMayhem {
+    ShoulderPistol {
         period: u16,
-        radius: i32,
+        range: i32,
         damage: u16,
-        bp: u16,
-        ticks: u16,
     },
     None,
     /// Nester Hatch (values unchanged, still from the Hatch rule).
@@ -687,24 +685,22 @@ const fn crow(ticks: u16, cut_bp: u16, bonus_bp: u16) -> [Ability; 2] {
         Ability::None,
     ]
 }
-const fn mayhem(period: u16, radius: i32, bp: u16) -> [Ability; 2] {
+const fn pistol(period: u16, damage: u16) -> [Ability; 2] {
     [
-        Ability::DoubleMayhem {
+        Ability::ShoulderPistol {
             period,
-            radius,
-            damage: 60,
-            bp,
-            ticks: 30,
+            range: 3_000,
+            damage,
         },
         Ability::None,
     ]
 }
 const RATTLE_TICK_ABILITIES: [[Ability; 2]; 5] = [
-    mayhem(180, 1_200, 1_500),
-    mayhem(180, 1_200, 1_500),
-    mayhem(180, 1_200, 1_500),
-    mayhem(150, 1_200, 1_500),
-    mayhem(150, 1_500, 2_000),
+    pistol(30, 12),
+    pistol(30, 12),
+    pistol(30, 12),
+    pistol(24, 12),
+    pistol(24, 18),
 ];
 const fn belly(period: u16, radius: i32, bp: u16, protection: u16) -> [Ability; 2] {
     [

@@ -52,6 +52,7 @@ fn p70_pole_hands_stay_on_the_haft_and_the_shaft_clears_head_and_chest() {
                             armor_flash: 0.0,
                             special: None,
                             special_ready: false,
+                            special_aim: None,
                         };
                         worst = worst.max(check_pose(kind, &spec, &meshes, &moment, butt, top));
                     }

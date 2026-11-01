@@ -29,6 +29,7 @@ fn posed(clip: Clip, t: f32, tier: u8, branch: u8) -> Pose {
         armor_flash: 0.0,
         special: None,
         special_ready: false,
+        special_aim: None,
         clip,
         t,
         tier,

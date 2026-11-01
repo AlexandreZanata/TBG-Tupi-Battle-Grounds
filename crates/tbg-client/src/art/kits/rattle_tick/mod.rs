@@ -1,5 +1,6 @@
-//! Rattle's club swings while Tick independently points, grips and throws from the shoulder.
+//! Rattle's club swings while Tick independently aims and fires a pistol from the shoulder.
 mod model;
+mod tick;
 use super::{
     common::{moves, moves::*},
     tools, Anatomy, Attack, Gait, Kit, Moment,
@@ -95,12 +96,6 @@ fn pose(m: &Moment, p: &mut Pose) {
             tools::plant(p, &body, tools::stance(&body, 1.3, 0.03));
         }
     }
-    if let Some(t) = m.special {
-        let wind = tools::hold(t, [0.0, 0.15, 0.22, 0.30]);
-        let throw = tools::hold(t, [0.18, 0.30, 0.40, 0.70]);
-        p[Prop(Socket::StringTop).index()].0.x = -150.0 * wind - 30.0 * throw;
-        p[Secondary(Spring::Back).index()].0.x = 20.0 * throw;
-    }
     p[Secondary(Spring::HeadGear).index()].0.y = (m.clock * 0.9).sin() * 15.0;
     // A downward club on a dangling hand crossed the floor even in Idle.
     // Keep one chest-space frame and solve the holding wrist to it.
@@ -143,4 +138,5 @@ fn pose(m: &Moment, p: &mut Pose) {
         (&body, Vec3::new(-1.0, -0.2, 0.0)),
     );
     tools::face(p, m.aim, Vec3::new(0.0, 1.0, 0.2));
+    tick::pose(m, p, &body);
 }
