@@ -92,3 +92,40 @@ verbatim third-party license copies already present on main. They are preserved
 byte-for-byte (`git diff origin/main -- deploy/native/licenses` is empty).
 `git diff --cached --check -- . ':(exclude)deploy/native/licenses/**'` passes for
 all source, documentation and integration edits. No license text was reformatted.
+
+## Delivery and pending native packaging
+
+Integrated merge commit: `f35d9c8c09ae51e5e8a337287cadbf3de26f9fe2`, pushed to
+`origin/phase/backend-main-integration`. Both `027fd61` (main) and `9da3ff9`
+(P71) are ancestors. The execution tree was clean after that commit. Main itself
+was not modified remotely. No tags, releases or signed artifacts were published.
+
+> blocked: Native executable generation was terminated twice with exit 143
+> (SIGTERM), without a Rust compiler error. First command: `cargo build --offline
+> --locked -p tbg-client -p tbg-server --bin tbg-client --bin tbg-server --bin
+> tbg-release-admin` under the shared lock. A separate-package retry under that
+> same lock also received 143 while waiting for the compilation slot. A host
+> inspection showed the unrelated Android front owning the lock; it was preserved
+> and was not interrupted. The sender of the termination signal is unknown.
+
+Per AGENTS' repeated-error rule, stop this packaging step after the second
+termination. No frozen candidate or new Linux installation was created. Keep the
+previous native installation (Shatterback source `ce0e406`, protocol 30), desktop
+launcher, running windows and player data untouched. The old client is incompatible
+with the integrated protocol-31 backend and must be updated before testing it.
+Native test compilation passed; that does not establish an installed executable.
+
+Exact remaining commands, using the existing target cache, two jobs and the host
+lock: `cargo build --offline --locked -p tbg-client --bin tbg-client`, then
+`cargo build --offline --locked -p tbg-server --bin tbg-server --bin
+tbg-release-admin`. Stamp `TBG_SOURCE_COMMIT` with the integrated runtime commit,
+verify the frozen client's `--build-info` identifies protocol 31 and contract
+`w31-r6-097385fee9a10b0f`, then install that exact client plus assets/notices in a
+new version directory and atomically update the local launcher.
+
+The prepared synthetic executable HTTP smoke check and one isolated Clockwork
+Practice capture were **not run**, since they require that frozen candidate.
+Actual Debian 13 release compilation/provisioning, TLS, browser cookie acceptance,
+public health and a live remote reconnect await the owner's VPS settings. None
+of those deferred steps is reported as passing. No release or broad load build
+was run locally.
