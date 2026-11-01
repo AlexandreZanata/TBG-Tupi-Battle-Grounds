@@ -1,5 +1,5 @@
 # Compile the real installer script with a tiny fixture before an expensive Rust build.
-param([string]$Compiler = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe')
+param([string]$Compiler = $env:TBG_INNO_COMPILER)
 $ErrorActionPreference = 'Stop'
 $stage = Join-Path $env:RUNNER_TEMP ('tbg-installer-preflight-' + [Guid]::NewGuid().ToString('N'))
 try {

@@ -169,3 +169,74 @@ compilation, full suite, balance gate, deployment or reinstallation was needed.
 The owner still handles the new CI outcome and merge; do not wait for CI here.
 
 Reference: [CPython v3.11.9 Windows subprocess reader and output collection](https://github.com/python/cpython/blob/v3.11.9/Lib/subprocess.py#L1598-L1646).
+
+## Follow-up: authoritative Inno version and reproducible Windows tools
+
+Native run [41358422829 / Windows job 125003388479](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/actions/runs/41358422829/job/125003388479)
+passed all six Python regressions, then rejected `ISCC.exe`'s PE ProductVersion.
+The reviewed official 6.7.1 distribution reproduces that resource as `0.0.0.0`
+(for both ISCC and ISCmplr), while an actual compilation reports **Compiler engine
+version: Inno Setup 6.7.1**. The previous resource-based check rejected the correct
+compiler. This was an incorrect identification method, not evidence that Inno had
+changed to an unreviewed version.
+
+Use the real `PREPROCVER` value in the production installer script and reject any
+value other than `0x06070100`. The same guard runs when compiling the tiny early
+fixture and the real package. Missing compiler files and nonzero compilation
+results remain errors; the version requirement is not removed or widened.
+
+CI now provisions the official distribution identified by
+`deploy/native/windows/inno-toolchain.json`: immutable release URL, version and
+SHA-256. Verify the digest **before execution** and use a private runner-temporary
+portable directory with `/CURRENTUSER /PORTABLE=1`. Preserve global tools, file
+associations and installed applications. Record the distribution, compiler and
+engine hashes in `windows-build-tools.json`; pass the resulting compiler path to
+both installer invocations. A runner image update no longer selects another Inno
+version silently.
+
+The log also showed an unnecessary `stable` sync after DevShell, despite CI's
+pinned Rust 1.99.0. `windows-rust.ps1` restores the rustup proxy directory at the
+front of PATH, selects the exact workflow version, verifies `rustc -V` and persists
+`RUSTUP_TOOLCHAIN` for the subsequent cache action. Each build step reapplies it
+after DevShell. A floating request or different actual compiler fails closed.
+This removes a source of compiler/cache drift; it does not relax MSVC/SDK/static
+CRT checks or change release settings and game presentation.
+
+### Executed validation on this script/workflow diff
+
+- Windows VM: `scripts/test-windows-tools.ps1` passed the pinned proxy/environment
+  selection, wrong/floating Rust refusal and modified-distribution SHA refusal
+  before execution. Rust version scenarios use controlled command fixtures;
+  they are not a real MSVC/Rust build.
+- Windows VM: `scripts/setup-windows-inno.ps1 -InstallerPath <official-local-download>`
+  passed exact distribution verification and portable provisioning. This uses
+  the same setup path as CI after download; the existing official download's
+  Authenticode signature had already been verified as Valid.
+- Windows VM: `scripts/test-windows-installer.ps1` **compiled the real production
+  script successfully in 1.016 s**, including the exact PREPROCVER check, both
+  languages, resources, Pascal locking code, output and SHA-256 sidecar. The
+  fixture was removed and never installed, launched or published.
+- The combined isolated VM command (tool regressions, provisioning, installer
+  compile and Python tests) exited **0 in 4.7 s**. This corrects the earlier
+  provisioning limitation with a different method: copy the verified setup to a
+  local path, use explicit portable mode and wait only for the installer process,
+  rather than `Start-Process -Wait`'s entire descendant tree. The old two timeout
+  attempts remain recorded above; they are no longer the current tool-test state.
+- Windows CPython 3.11.9: `python.exe scripts/test-native-package.py -v`:
+  **7 passed** (0.184 s), including the new pinned-distribution/engine guard.
+- Linux `python3 scripts/test-native-package.py`: **7 passed** (0.079 s).
+- Linux `python3 scripts/test-ci-required-checks.py`: **9 passed**.
+- Linux `python3 scripts/test-native-artifacts.py`: **4 passed**.
+- PowerShell parser, Python compilation, native-workflow actionlint, patch-note
+  guard and `git diff --check`: **passed**. The existing local actionlint SC2086
+  exclusion is unchanged; no CI failure suppression was introduced.
+
+The actual hosted DevShell plus restored Rust compiler, complete release build,
+final installer lifecycle, end-to-end CI time and new release acceptance remain
+pending on their respective gates. No Rust compilation/full local suite, game
+installation, production deployment or release publication was performed. Push
+without waiting for the new CI, as requested by the owner.
+
+Sources: [Inno's authoritative PREPROCVER](https://jrsoftware.org/ishelp/topic_predefinedvars.htm),
+[6.7.1 portable mode implementation](https://github.com/jrsoftware/issrc/blob/is-6_7_1/isportable.iss),
+[rustup toolchain override order](https://rust-lang.github.io/rustup/overrides.html).

@@ -113,6 +113,23 @@ class WindowsWorkflow(unittest.TestCase):
         self.assertNotIn("CARGO_BUILD_JOBS: 2", self.windows)
         self.assertIn("needs: [validate, linux, windows, promotion-source]", self.jobs["publish"])
 
+    def test_inno_uses_the_reviewed_distribution_and_engine_version_not_pe_placeholders(self):
+        spec = json.loads((ROOT / "deploy/native/windows/inno-toolchain.json").read_text(encoding="utf-8"))
+        self.assertEqual(spec, {
+            "version": "6.7.1",
+            "url": "https://github.com/jrsoftware/issrc/releases/download/is-6_7_1/innosetup-6.7.1.exe",
+            "sha256": "4d11e8050b6185e0d49bd9e8cc661a7a59f44959a621d31d11033124c4e8a7b0",
+        })
+        installer = (ROOT / "deploy/native/windows/tbg.iss").read_text(encoding="utf-8")
+        self.assertIn("#if PREPROCVER != 0x06070100", installer)
+        setup = (ROOT / "scripts/setup-windows-inno.ps1").read_text(encoding="utf-8")
+        self.assertLess(setup.index('if ($hash -ne $spec.sha256)'), setup.index('Start-Process -FilePath $setup'))
+        self.assertIn('/CURRENTUSER /PORTABLE=1', setup)
+        self.assertLess(self.windows.index('scripts/setup-windows-inno.ps1'), self.windows.index('scripts/windows-env.ps1'))
+        packager = (ROOT / "scripts/package-windows-installer.ps1").read_text(encoding="utf-8")
+        self.assertNotIn('VersionInfo.ProductVersion', packager)
+        self.assertIn('$env:TBG_INNO_COMPILER', packager)
+
 
 if __name__ == "__main__":
     unittest.main()

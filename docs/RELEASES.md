@@ -107,8 +107,13 @@ measurement and upgrade boundaries.
 
 `native-release.yml` builds the Linux tarball/AppImage and Windows x64 MSVC
 ZIP/per-user installer from one SHA, dependency lock, art inventory and feature set.
-Windows uses static CRT, SDK 10.0.26100.0 and Inno 6.7.1; the runner records actual
-tool identities. Build jobs have read-only permissions. Tag dispatch publication
+Windows uses static CRT, SDK 10.0.26100.0 and Inno 6.7.1. The workflow provisions
+the official Inno distribution from `deploy/native/windows/inno-toolchain.json`,
+verifies its SHA-256 before running it in a private portable tools directory,
+and checks the real `PREPROCVER` during fixture and production compilation.
+`ISCC.exe` PE version resources may be `0.0.0.0` and are not version authority.
+After DevShell, the reviewed rustup proxy and exact Rust version are restored;
+the runner records the actual compiler and Inno provenance/hashes. Build jobs have read-only permissions. Tag dispatch publication
 requires all CI lanes. A successful exact-source native dispatch can be promoted
 by its run ID without rebuilding the tested package bytes. Never use PR merge
 artifacts or overwrite an existing tag's assets. Native versions do not need a main

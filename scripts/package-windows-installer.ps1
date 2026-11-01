@@ -3,10 +3,12 @@ param(
     [Parameter(Mandatory=$true)][string]$Package,
     [Parameter(Mandatory=$true)][string]$Version,
     [string]$Output = 'target/native',
-    [string]$Compiler = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+    [string]$Compiler = $env:TBG_INNO_COMPILER
 )
 $ErrorActionPreference = 'Stop'
-if ((Get-Item $Compiler).VersionInfo.ProductVersion -notmatch '^6\.7\.1(?:\.|$)') { throw 'Reviewed Inno Setup 6.7.1 is required; update the tool review explicitly' }
+if (!$Compiler) { throw 'Run scripts/setup-windows-inno.ps1 or pass the reviewed Compiler explicitly' }
+Get-Item -LiteralPath $Compiler -ErrorAction Stop | Out-Null
+# The installer script checks PREPROCVER before accepting any package inputs.
 $root = (Resolve-Path $Package).Path
 $destination = (Resolve-Path $Output).Path
 & $Compiler "/DPackageDir=$root" "/DBuildVersion=$Version" "/DOutputDir=$destination" deploy/native/windows/tbg.iss

@@ -13,4 +13,12 @@ if (!$enter.Parameters.ContainsKey('DevCmdArguments')) { throw 'Visual Studio De
 if ($env:WindowsSDKVersion.TrimEnd('\') -ne '10.0.26100.0') { throw 'Pinned Windows SDK 10.0.26100.0 was not selected' }
 if ($env:VSCMD_ARG_TGT_ARCH -ne 'x64') { throw 'MSVC target architecture must be x64' }
 if (!(Get-Command rc.exe -ErrorAction SilentlyContinue)) { throw 'Windows SDK resource compiler missing' }
-[ordered]@{ os = [Environment]::OSVersion.VersionString; visualStudio = $installation; toolset = $env:VCToolsVersion; sdk = $env:WindowsSDKVersion; rust = (& rustc -V); inno = (Get-Item 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe').VersionInfo.ProductVersion } | ConvertTo-Json | Set-Content -Encoding utf8 (Join-Path $env:RUNNER_TEMP 'windows-build-tools.json')
+# DevShell can prepend a separate stable Rust installation to PATH.
+. (Join-Path $PSScriptRoot 'windows-rust.ps1')
+if (!$env:TBG_INNO_COMPILER) { throw 'Run scripts/setup-windows-inno.ps1 before selecting the build environment' }
+$inno = Get-Content (Join-Path (Split-Path $env:TBG_INNO_COMPILER) 'tbg-toolchain.json') -Raw | ConvertFrom-Json
+[ordered]@{
+    os = [Environment]::OSVersion.VersionString; visualStudio = $installation
+    toolset = $env:VCToolsVersion; sdk = $env:WindowsSDKVersion; rust = $rust
+    inno = $inno; innoCompiler = $env:TBG_INNO_COMPILER
+} | ConvertTo-Json | Set-Content -Encoding utf8 (Join-Path $env:RUNNER_TEMP 'windows-build-tools.json')
