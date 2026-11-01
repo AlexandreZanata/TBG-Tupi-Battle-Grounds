@@ -41,7 +41,11 @@ Linux client, the up-to-date visual reference.
   the local preview proxy. No action can succeed (`ADMIN_AVAILABLE = false`).
 
 **Pending (owner decisions or later work)**
-- Publication: `upload`, `activate`, `caddy-apply` (commands in `web/deploy/README.md`).
+- Publication: releases `20261101T194012Z-93648c8e9013` (landing, 115 files) and
+  `20261101T194016Z-93648c8e9013` (admin placeholder, 16 files) are uploaded to the host and
+  inspected (root-owned, 644/755, no hidden, secret or script files in the admin release) but
+  **not active**; `activate … --confirm` and `--confirm caddy-apply` wait for the owner's
+  direct approval (commands in `web/deploy/README.md`). Public hosts are unchanged.
 - Flip `webGame` to `live` once the web build is published and verified on `app.tupibg.com`;
   offer Linux once a protocol-31 package is published with checksums.
 - Server-side admin authentication/authorization:
