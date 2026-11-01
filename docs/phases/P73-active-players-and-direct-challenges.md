@@ -1,4 +1,4 @@
-# P73 — Global active players, direct challenges and rematches
+# P73 — Active players, challenges, rematches and match history
 
 **Status:** planning only, 2026-11-01. No runtime feature implemented.
 **Planning branch:** `codex/p73-active-players-challenges-plan`.
@@ -9,6 +9,9 @@
 freeze its reviewed integration SHA before editing common shell files.
 **Source/evidence scope:** [audit manifest and acceptance cases](../planning/P73-PLAN-MANIFEST.json).
 **Handoff:** [copyable execution prompt](../planning/P73-EXECUTION-PROMPT.md).
+**History extension:** [results, statistics, persistence and public/private
+visibility](../planning/P73-MATCH-HISTORY.md), required by the owner on
+2026-11-01. It is part of P73, not a separate phase.
 
 ## 1. Player outcome and scope
 
@@ -25,6 +28,14 @@ rematch offer remains valid. Both must agree. A rematch is a new private
 Challenge with a fresh seed and **no rating change**, including when the
 previous game was Ranked.
 
+The same phase adds the player's paged **Match history**: results and
+their own available match statistics, with an account setting choosing
+**Public / Only me**. Default private; enforce the preference on the
+server, including the legacy public profile's recent results. The history
+sub-spec defines authoritative metrics, storage/recovery, API, privacy,
+legacy data and H01–H18 acceptance. Viewing old rows is read-only; it does
+not create a replay or a retroactive rematch invitation.
+
 Global means the service's active presence, not a friends list, historical
 registration database, country filter or the first 50 results. Retain the
 existing privacy contract: **all online accounts are browseable; guest
@@ -40,6 +51,9 @@ Never fill the page with fake players or present a request failure as zero.
 
 - `AGENTS.md`, this phase, GAME-DESIGN BR-R08/09, BR-LV06 and the Proposed
   P73 section; ARCHITECTURE security, sessions and release/admission sections.
+- The required [history sub-spec](../planning/P73-MATCH-HISTORY.md) and
+  [conceptual history schema](../planning/P73-HISTORY-SCHEMA.sql); apply
+  its privacy/recording contracts alongside the directory work.
 - P39 Quick Challenge/rematch and P47 live/presence specs as historical
   context. Follow current code and owner validation policy, not their old
   full-suite command lists.
@@ -91,6 +105,15 @@ Rust paths are relative to their crate's `src/`, unless stated otherwise.
    revocation and explicit takeovers must never create a new match.
 9. P72 is moving the browser to the same Bevy shell as native. Extend that
    canonical UI, not a new page framework or a replacement DOM lobby.
+10. The public profile currently exposes only the last 10 Ranked results,
+    not a full personal history. Generic match logs do not provide safe
+    account ownership; P61 summaries are optional/Ranked-oriented.
+11. Result counters are client-local; current `damage_dealt` measures
+    reported enemy-Stronghold hit amounts, not effective total damage.
+    Never persist that as total HP damage or fabricate missing statistics.
+12. Persistent history/account privacy requires an additive schema and
+    terminal recording. Presence and invitations still need no new durable
+    database; isolate their ephemeral state from permanent result storage.
 
 ## 4. Product journeys
 
@@ -99,6 +122,9 @@ Rust paths are relative to their crate's `src/`, unless stated otherwise.
 The header entry opens the existing Live surface with clear **Live battles**
 and **Active players** sections/tabs. Keep Watch/Copy watch link working.
 Rows show account name, rating, localized activity and Challenge action.
+Use the existing profile view when opening a player's name; its history
+entry obeys that account's Public/Only me setting. Do not preload the match
+history of every visible row.
 Provide case-insensitive name search, availability filter and pagination/
 Load more. Search/filter apply to the whole server snapshot before paging,
 not only to the current 50 rows. Maintain keyboard focus while refreshing.
@@ -149,6 +175,17 @@ connected sessions as a count of distinct real human beings.
 - Reconnect within the existing retained session restores remaining TTL
   and acceptance state. No persistent invite history or guaranteed recovery
   after process restart, logout or an expired session is promised.
+
+### Match history and account visibility
+
+Browse the authenticated player's complete retained online history using
+real keyset paging, then open a result/statistics detail. Public profiles
+may display only the opted-in player's allowed projection. A Public/Only me
+preference is saved on the account and applied to all existing/new entries
+and to older profile APIs. Private-game opponent information is redacted
+in public views, and missing legacy statistics are unavailable rather than
+zero. No replay/export/edit/delete or old-match challenge action is added.
+Use the full history sub-spec as the implementation contract.
 
 ## 5. Presence and global aggregation
 
@@ -334,7 +371,9 @@ Extend `live.rs`, `lobby/presence.rs`, `api.rs` and shared DTO parsing;
 separate presence status from invitable eligibility. Implement global
 snapshot aggregation in a dedicated server presence module only when slot
 mode is configured, using the existing release directory/HTTP dependency.
-Add internal-route proxy denial. No new database schema or per-request SQL.
+Add internal-route proxy denial. Presence reads remain snapshot-only;
+the history extension has its own additive schema and bounded indexed
+account-history reads.
 
 ### S2 — Directed invites
 
@@ -354,6 +393,11 @@ decline/new-activity behavior and guests' private recent-opponent card.
 
 ### S4 — Shared frontend and localization
 
+Implement the history sub-spec's H0–H4 backend/privacy work before enabling
+history in the shared frontend; its H5/H6 work joins S4/S5 here. Allocate
+one coordinated schema/wire version and do not run a second consolidation
+campaign just because history is documented in a separate sub-spec.
+
 Extend `ui/shell/live.rs` or split a cohesive `ui/shell/players.rs` module;
 put invitation UI/state in its own client module. Reuse UiAction/network/
 message routing, current dialogs, toasts and result controls. Avoid a god
@@ -361,6 +405,9 @@ file combining fetches, presence, invitations and matching logic.
 
 Implement search, real paging, status/disabled reasons, self state,
 incoming/outgoing cards, opt-out and rematch/private recent opponent.
+Add Match history list/details and account Public/Only me control from the
+history sub-spec. Result/reconnect and persisted details share one bounded
+authoritative terminal summary; no separate client-inferred history totals.
 Preserve visual parity with native Linux and web after P72; Windows uses
 the same frontend assets/layout. Add all keys to existing language catalogs,
 at least complete pt-BR/en and consistent existing locale coverage. No
@@ -381,12 +428,14 @@ large captures/binaries in git.
 
 Finish `docs/planning/P73-EXECUTION-REPORT.md` with source versions, wire
 indices, files changed, commands/results, screenshots, exact deferred
-checks, global coverage and owner look/fun review. No deploy, VPS mutation,
+checks, global coverage, history persistence/privacy/migration evidence
+and owner look/fun review. No deploy, VPS mutation,
 push, automatic merge or production readiness claim is authorized here.
 
 ## 9. Acceptance and validation
 
-The machine-readable manifest defines D01–D16 scenarios. Required results:
+The machine-readable manifest defines D01–D16 and H01–H18 scenarios.
+Required results:
 
 - Every listed online account is reachable through real paging/search;
   no invisible 51st row, duplicate accounts or guest-session disclosure.
@@ -402,6 +451,12 @@ The machine-readable manifest defines D01–D16 scenarios. Required results:
   reports partial coverage honestly and never disrupts a draining match.
 - pt-BR/en and shared desktop UI show real loading/error/empty states;
   the same frontend behavior is inspected on native Linux and web.
+- History uses authoritative terminal data, persists idempotently through
+  normal failures/restart and is linked only to frozen account participants.
+- Public/Only me is a durable server-enforced choice; private history never
+  leaks through old `recent`, detail/cursor, cache, proxy or old-slot routes.
+- Legacy Ranked backfill is verified and resumable; unavailable stats are
+  explicit, no non-ranked ownership is guessed, no automatic purge occurs.
 
 **Planning now:** inspect docs/links, validate JSON/source paths and
 `git diff --check`. No game build, online tests or deploy.
@@ -427,6 +482,9 @@ targets and new tests, then run the deduplicated set once under that lock:
 - `cargo test -p tbg-server --test contract_challenge -- --test-threads=1`
 - New Proposed `--test player_challenges` target for D03–D13.
 - New Proposed `--test presence_global` target for D01/D02/D14/D15.
+- New Proposed `--test player_match_history` and `--test history_privacy`
+  targets for H01–H18, including reconnect, duplicates, migration and
+  visibility races. Validate conceptual DDL in disposable SQLite only.
 - Affected exact core protocol test targets and client parser/state tests,
   named in the executor's report after their actual paths are frozen.
 - Focused two-client create/accept/decline/cancel/reconnect/rematch and
@@ -444,12 +502,22 @@ without an explicit owner request for that scope.
 
 Prepared from repository inspection and the supplied screenshot only.
 No directory feature, invitation, rematch extension, snapshot federation,
-UI approval or live validation is claimed as implemented by these docs.
+history persistence, privacy feature, UI approval or live validation is
+claimed as implemented by these docs.
 
-Planning validation completed: `python3 -m json.tool
+Initial directory-only planning validation completed: `python3 -m json.tool
 docs/planning/P73-PLAN-MANIFEST.json` parsed successfully. A one-off Python
 audit checked 37 baseline source revisions/SHA-256 hashes, two new relative
 links, D01–D16 uniqueness/pending status, BR-AP01–08 and the proposed client
 wire names against this phase. `git diff --check` passed. Runtime scenarios,
 Cargo/Trunk checks, browser/native captures, slot testing and VPS work were
 not run because this delivery changes documentation only.
+
+History extension planning validation: the expanded manifest has 68
+verified baseline source paths/revisions/hashes, seven new relative links,
+16 Proposed BR-AP rules and 34 D/H acceptance scenarios still pending
+runtime execution. The conceptual SQL passed disposable in-memory SQLite
+checks for default privacy, 65-match keyset traversal with time ties,
+owner/public query predicates, conditional privacy revisions, constraints,
+atomic rollback and the intended paging index. This is not a production
+migration, API authorization, journal recovery or browser/native test.

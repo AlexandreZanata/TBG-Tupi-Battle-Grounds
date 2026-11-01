@@ -494,7 +494,7 @@ sign-off. Nothing was deployed; production stays on protocol 29.
 **P73 — planning only**, `codex/p73-active-players-challenges-plan`, audited
 against `origin/main` at `e2a18af` and coordinated with P72's shared
 Bevy web/native interface. Read [the phase](phases/P73-active-players-and-direct-challenges.md),
-[source audit and D01–D16 cases](planning/P73-PLAN-MANIFEST.json) and
+[source audit and D01–D16/H01–H18 cases](planning/P73-PLAN-MANIFEST.json) and
 [the executor prompt](planning/P73-EXECUTION-PROMPT.md).
 
 Extend the current Live/online surface with a complete paged/searchable
@@ -505,9 +505,19 @@ enumerated. Reuse P39 private casual pairing and rematch consent, P47
 snapshots and P71 auth/admission continuity; all resulting Challenge games
 remain unrated. Preserve the existing link challenge and live-watch flows.
 
+**Owner extension, 2026-11-01:** [Match history and account privacy](planning/P73-MATCH-HISTORY.md)
+is part of P73. Add persistent account-bound online results and own
+statistics, list/detail views and a saved Public/Only me setting (default
+private), including guards for legacy `recent` APIs. The sub-spec and
+[conceptual additive schema](planning/P73-HISTORY-SCHEMA.sql) cover source
+identity, terminal summaries, idempotent journals/transactions, verified
+Ranked backfill, private projections, slot-aware API, migration/rollback
+and H01–H18 validation. No replay or old-history rematch action is added.
+
 Order: freeze P72/wire ownership -> directory/global snapshot accuracy ->
 bounded direct-invitation lifecycle -> rematch eligibility/navigation ->
-shared localized frontend -> one targeted consolidation. Two-slot presence
+history persistence/privacy/API -> shared localized frontend -> one
+targeted consolidation. Two-slot presence
 must actually aggregate snapshots rather than labeling one slot global;
 unsupported/incompatible/draining targets remain unavailable without moving
 an active match. Proposed BR-AP rules/defaults are documented in GAME-DESIGN.
