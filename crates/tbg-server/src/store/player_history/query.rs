@@ -207,7 +207,7 @@ pub fn detail(conn: &mut Connection, subject: &Subject, entry: &str) -> Result<V
 
 fn decode_hex(s: &str) -> Option<Vec<u8>> {
     if s.len() > 512
-        || s.len() % 2 != 0
+        || !s.len().is_multiple_of(2)
         || !s
             .bytes()
             .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
@@ -215,7 +215,9 @@ fn decode_hex(s: &str) -> Option<Vec<u8>> {
         return None;
     }
     s.as_bytes()
-        .chunks_exact(2)
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|p| {
             std::str::from_utf8(p)
                 .ok()

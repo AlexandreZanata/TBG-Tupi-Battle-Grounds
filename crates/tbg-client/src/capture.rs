@@ -17,6 +17,9 @@ mod polish_live;
 mod polish_motion;
 #[cfg(tbg_desktop)]
 mod reserve;
+// P73 synthetic fixtures exist only where their "LOCAL VISUAL FIXTURE" label
+// is also compiled, never in a plain debug build.
+#[cfg(feature = "ui-acceptance")]
 mod social;
 #[cfg(tbg_desktop)]
 mod training;
@@ -51,6 +54,7 @@ pub fn plugin(app: &mut App) {
             return;
         }
         app.add_systems(Update, capture);
+        #[cfg(feature = "ui-acceptance")]
         if crate::config::url_param("capture_panel").is_some_and(|v| v.starts_with("p73-")) {
             social::plugin(app);
         }
