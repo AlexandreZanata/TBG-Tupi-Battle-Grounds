@@ -5,12 +5,13 @@
 
 /// Gameplay revision. Bump it, and append a line to
 /// `tests/fixtures/ruleset-versions.txt`, whenever a watched source changes.
-pub const RULESET_VERSION: u32 = 2;
+pub const RULESET_VERSION: u32 = 3;
 /// Version of the per-match summary JSON (P61 §4).
 pub const SUMMARY_VERSION: u16 = 2;
 
 /// Watched gameplay sources, sorted by path (`ruleset-sources.txt`).
-pub const WATCHED: [(&str, &str); 45] = [
+#[rustfmt::skip] // The client build script reads one literal entry per line.
+pub const WATCHED: [(&str, &str); 51] = [
     ("acidmaw.rs", include_str!("acidmaw.rs")),
     ("afflictions.rs", include_str!("afflictions.rs")),
     ("arcana.rs", include_str!("arcana.rs")),
@@ -21,7 +22,13 @@ pub const WATCHED: [(&str, &str); 45] = [
     ("celestial_archer.rs", include_str!("celestial_archer.rs")),
     ("combat.rs", include_str!("combat.rs")),
     ("combat/formation.rs", include_str!("combat/formation.rs")),
+    ("completion/mod.rs", include_str!("completion/mod.rs")),
+    ("completion/specials.rs", include_str!("completion/specials.rs")),
+    ("completion/state.rs", include_str!("completion/state.rs")),
+    ("completion/strikers.rs", include_str!("completion/strikers.rs")),
+    ("completion/supports.rs", include_str!("completion/supports.rs")),
     ("content.rs", include_str!("content.rs")),
+    ("content/completion.rs", include_str!("content/completion.rs")),
     ("crowcaller.rs", include_str!("crowcaller.rs")),
     ("demolisher.rs", include_str!("demolisher.rs")),
     ("drillnest/effects.rs", include_str!("drillnest/effects.rs")),

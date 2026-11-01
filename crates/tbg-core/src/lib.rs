@@ -17,6 +17,7 @@ mod capybara;
 pub mod celebration;
 mod celestial_archer;
 mod combat;
+pub mod completion;
 pub mod content;
 pub mod contract;
 mod crowcaller;

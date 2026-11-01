@@ -1,7 +1,7 @@
 //! Independent special readiness and locked windups, after each unit's basic action (P58 §3.1).
 
 use crate::{
-    content::{Ability, WINDUP},
+    content::Ability,
     state::{Event, MatchState, PendingCast, Unit},
     types::{Status, UnitKind},
     view::SpecialView,
@@ -9,6 +9,9 @@ use crate::{
 };
 
 pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> Option<u16> {
+    if let Some(period) = crate::completion::special_period(rules, kind, tier, branch) {
+        return Some(period);
+    }
     rules
         .def(kind)
         .ability(tier, branch)
@@ -41,6 +44,7 @@ pub(crate) fn view(rules: &Ruleset, u: &Unit) -> Option<SpecialView> {
     Some(SpecialView {
         ready_in: u.action_cd,
         cast: u.fx.special,
+        windup: crate::completion::special_windup(rules, u),
     })
 }
 
@@ -69,6 +73,9 @@ pub(crate) fn advance(state: &mut MatchState, i: usize, ev: &mut Vec<Event>) {
 }
 
 fn primary(state: &MatchState, u: &Unit) -> Option<u32> {
+    if let Some(target) = crate::completion::special_primary(state, u) {
+        return target;
+    }
     if crate::solar_sentinel::parameters(state, u).is_some() {
         return crate::solar_sentinel::target(state, u, None);
     }
@@ -95,6 +102,9 @@ fn primary(state: &MatchState, u: &Unit) -> Option<u32> {
 }
 
 fn center(state: &MatchState, u: &Unit, target: Option<u32>) -> i32 {
+    if u.kind == UnitKind::Prismancer && u.fx.special.is_some() {
+        return u.fx.completion.beam_center;
+    }
     if matches!(
         u.kind,
         UnitKind::Bulwark | UnitKind::Demolisher | UnitKind::Capybara | UnitKind::Jawguard
@@ -111,9 +121,10 @@ fn start(state: &mut MatchState, i: usize, u: &Unit, every: u16, ev: &mut Vec<Ev
         return;
     };
     let center = center(state, u, Some(target));
+    crate::completion::special_start(state, i, center);
     state.units[i].fx.special = Some(PendingCast {
         target: Some(target),
-        left: WINDUP,
+        left: crate::completion::special_windup(state.rules(), u),
     });
     state.units[i].action_cd = every;
     ev.push(Event::AbilityStarted {
@@ -135,7 +146,7 @@ fn advance_cast(
     let alive = cast
         .target
         .is_none_or(|id| state.unit_index(id).is_some_and(|t| state.units[t].hp > 0));
-    if !alive {
+    if !alive && u.kind != UnitKind::Prismancer {
         state.units[i].fx.special = None;
         return;
     }
@@ -163,6 +174,7 @@ fn advance_cast(
                 crate::trident::resolve(state, u, target, ev);
                 crate::capybara::resolve(state, u, ev);
                 crate::rattle_tick::resolve(state, u, target, ev);
+                crate::completion::special_resolve(state, u, target, ev);
             },
         );
     }
@@ -179,6 +191,9 @@ fn advance_cast(
 /// A death later in id order must not leave a stale pending target in a view.
 pub(crate) fn cancel_gone(state: &mut MatchState) {
     for i in 0..state.units.len() {
+        if state.units[i].kind == UnitKind::Prismancer {
+            continue;
+        }
         let target = state.units[i].fx.special.and_then(|c| c.target);
         if target.is_some_and(|id| state.unit_index(id).is_none_or(|t| state.units[t].hp <= 0)) {
             state.units[i].fx.special = None;

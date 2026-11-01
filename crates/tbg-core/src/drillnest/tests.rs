@@ -152,18 +152,21 @@ fn r21_fusion_never_cleanses_control_dots_cuts_or_weakness_and_never_adds_shield
         left: 4,
         next: 20,
         source: Some(Seat::B),
+        producer: None,
     };
     s.units[j].fx.bleed = Bleed {
         value: 7,
         left: 2,
         next: 10,
         source: Some(Seat::A),
+        producer: None,
     };
     s.units[j].fx.venom = Bleed {
         value: 7,
         left: 4,
         next: 20,
         source: Some(Seat::B),
+        producer: None,
     };
     roster_slots::apply_weaken(&mut s.units[i].fx, 1000, 20, 0);
     roster_slots::apply_weaken(&mut s.units[j].fx, 2000, 10, 0);

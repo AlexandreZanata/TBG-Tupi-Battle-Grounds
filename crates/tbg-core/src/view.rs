@@ -49,6 +49,8 @@ pub struct UnitView {
 pub struct SpecialView {
     pub ready_in: u16,
     pub cast: Option<crate::state::PendingCast>,
+    /// Exact authoritative special anticipation; ordinary spells keep six ticks.
+    pub windup: u16,
 }
 
 /// `UnitView.fx` bit for a summon by unit, e.g. Smuggler cargo (BR-U08):
@@ -238,7 +240,8 @@ fn unit_view(u: &crate::state::Unit, tick: Tick, rules: &crate::Ruleset) -> Unit
                         .max(crate::celestial_archer::counter(u))
                         .max(crate::jawguard::counter(u))
                         .max(crate::mantis::counter(u))
-                        .max(crate::hornet::counter(u)),
+                        .max(crate::hornet::counter(u))
+                        .max(crate::completion::counter(u)),
                 ) << FX_COUNTER_SHIFT;
             if u.is_summon() {
                 fx |= FX_SUMMON;

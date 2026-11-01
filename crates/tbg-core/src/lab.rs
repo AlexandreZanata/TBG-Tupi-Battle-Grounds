@@ -98,6 +98,13 @@ pub(crate) fn healed(state: &mut MatchState, healer: &Unit, amount: i32) {
     }
 }
 
+/// Delayed care retains faction/seat attribution after the original healer dies.
+pub(crate) fn healed_kind(state: &mut MatchState, seat: Seat, kind: UnitKind, amount: i32) {
+    if amount > 0 {
+        state.lab.healed[seat.index()][kind as usize] += amount as u64;
+    }
+}
+
 pub(crate) fn status(state: &mut MatchState, attacker: &Unit, ticks: u16) {
     if ticks > 0 {
         state.lab.status_ticks[attacker.seat.index()][attacker.kind as usize] += u64::from(ticks);

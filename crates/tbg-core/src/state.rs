@@ -114,6 +114,8 @@ pub struct UnitFx {
     pub special: Option<PendingCast>,
     /// R18/P58 §3.2: one venom family, separate from bleed and Rotcap stacks.
     pub venom: Bleed,
+    /// Champion-completion local-preview state; fixed-size and replay-visible.
+    pub completion: crate::completion::state::Fx,
 }
 
 /// One special locked at start; the ordinary basic windup stays independent.
@@ -131,6 +133,8 @@ pub struct Bleed {
     pub next: Tick,
     pub left: u8,
     pub source: Option<Seat>,
+    /// Attribution for shared non-stacking bleed producers; old bleeds default to Trident.
+    pub producer: Option<UnitKind>,
 }
 
 /// A Slow queued behind a Root (R19).

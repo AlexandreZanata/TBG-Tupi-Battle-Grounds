@@ -22,7 +22,7 @@ use crate::view::{MatchView, PublicView};
 /// Fortification (D-46); v12: Interest regen boost; v11: fifteen-node Arcanas.
 /// Older peers are refused by the handshake.
 /// v30 (D-97/BR-AS): authenticated handshakes and same-socket renewal.
-pub const PROTOCOL_VERSION: u16 = 30;
+pub const PROTOCOL_VERSION: u16 = 32;
 
 /// Public result identity, independent of the combat seed and session token.
 pub type ResultId = [u8; 16];

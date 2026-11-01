@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 30,
-        "D-97/P68-A v30: authenticated hello, same-socket renewal and explicit account claim"
+        PROTOCOL_VERSION, 32,
+        "CC-ID01 v32: appended local champion tags and public completion facts/windup schema"
     );
 }
 
@@ -316,4 +316,39 @@ fn d97_auth_variants_append_without_exposing_secrets_in_debug() {
     ] {
         assert!(!format!("{message:?}").contains("PRIVATE"));
     }
+}
+
+#[test]
+fn cc_id01_v32_completion_facts_and_short_cast_roundtrip_without_reordering_old_kind_tags() {
+    use tbg_core::{completion::state::View, state::PendingCast, view::SpecialView, UnitKind};
+    assert_eq!(encode(&UnitKind::Megadrill), [50]);
+    assert_eq!(encode(&UnitKind::Gravecutter), [51]);
+    assert_eq!(encode(&UnitKind::Stridulator), [67]);
+    let facts = View {
+        echo_ticks: 80,
+        regrowth_pulses: 4,
+        spark_ticks: 60,
+        interrupt_ticks: 80,
+        charged: true,
+        channel_target: Some(23),
+        channel_pulses: 3,
+        beam_center: Some(5200),
+    };
+    let special = SpecialView {
+        ready_in: 0,
+        cast: Some(PendingCast {
+            target: Some(23),
+            left: 2,
+        }),
+        windup: 2,
+    };
+    let bytes = encode(&(facts, special));
+    assert!(
+        bytes.len() < 64,
+        "bounded reconnect facts must stay compact"
+    );
+    assert_eq!(
+        postcard::from_bytes::<(View, SpecialView)>(&bytes),
+        Ok((facts, special))
+    );
 }

@@ -19,7 +19,7 @@ use crate::content::{
     STRONGHOLD_HP, STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
     UNIT_KIND_COUNT,
 };
-use crate::types::{Tick, UnitKind, FACTION_COUNT, FULL_POOL};
+use crate::types::{Tick, UnitKind, COMPLETION_POOL, FACTION_COUNT, FULL_POOL};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InterestRule {
@@ -154,7 +154,7 @@ impl Ruleset {
     /// Leaked once (a few KB, freed at exit).
     pub fn preview() -> &'static Ruleset {
         Box::leak(Box::new(Ruleset {
-            pool: &FULL_POOL,
+            pool: &COMPLETION_POOL,
             shop: Some(ShopRule::default()),
             ..CANON.clone()
         }))

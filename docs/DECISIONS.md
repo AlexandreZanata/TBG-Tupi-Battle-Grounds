@@ -2789,3 +2789,24 @@ loss).
 
 **Reopen when** owner playtests show the pause budget wrong, a protocol bump
 is approved (show the remaining budget), or abuse of pauses is observed.
+
+## CC-ID01 — Local champion completion identity (2026-11-01)
+
+Owner authorized all seventeen champions and continuation through local Linux
+installation. Append tags after Megadrill; retain production's 46-entry Shop
+pool. The explicit local preview uses 63 conventional kinds, nine per Faction.
+New values remain Proposed under GAME-DESIGN CC01–CC17 until empirical
+balance and owner look/fun sign-off. No public deployment is authorized.
+
+Protocol 32 distinguishes the new snapshot effect/channel/windup schema from
+main's 30 and another preview's 31. Ruleset revision 3 watches every new
+gameplay module. Empty per-unit state slots necessarily alter serialized
+hashes for legacy matches; retain their frozen winners/reasons/ticks and
+change only checksums supported by the same deterministic scenarios.
+The registry contract changes from 51 to 68 entries, not the online pool.
+
+All geometry, materials, life clips, victory motion, projectiles and public
+effect cues use one shared presentation path. Linux is the visual reference;
+Windows and desktop-web comparison remains pending until actual observations.
+The local install uses a separate preview launcher/data directory and never
+replaces the user's normal TBG launcher or activates the online roster.

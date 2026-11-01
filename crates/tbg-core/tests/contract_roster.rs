@@ -161,7 +161,8 @@ fn roster_composition() {
     // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
-    assert_eq!(UNITS.len(), 51);
+    // CC-ID01: append seventeen local-preview tags; production Shop remains 46.
+    assert_eq!(UNITS.len(), 68);
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     // Owner activation: all 51 registered kinds, 46 conventional Shop entries.
     assert_eq!(tbg_core::FULL_POOL.len(), 46);
@@ -447,7 +448,75 @@ Duodrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 h
 Megadrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Megadrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Megadrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Megadrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Megadrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gravecutter/Gravetaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gravecutter/Final Harvester: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gravecutter/Chain Dancer: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Gravecutter/Soul Reaver: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Lastlight Cantor/Vigil Bell: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Lastlight Cantor/Sanctuary Bell: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Lastlight Cantor/Funeral Choir: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Lastlight Cantor/Last Requiem: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cragclaw/Edgeclaw: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cragclaw/Obsidian Chisel: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cragclaw/Splitclaw: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Cragclaw/Shardsweeper: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hushfang/Silent Prowler: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hushfang/Fang Warden: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hushfang/Flint Hunter: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Hushfang/Midnight Pounce: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Spinehurler/Keen Needle: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Spinehurler/Spine Lancer: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Spinehurler/Barbed Fan: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Spinehurler/Needle Phalanx: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Mire Tender/Brothkeeper: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Mire Tender/Deep Remedy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Mire Tender/Reed Tender: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Mire Tender/Mire Sage: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gorgehowl/Deep Resonator: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gorgehowl/Quietbreaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gorgehowl/Split Echo: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Gorgehowl/Chasm Voice: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Sunlancer/Dawn Point: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Sunlancer/Sun Pact: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Sunlancer/Ember Lance: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Sunlancer/Daybreak Oath: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Eclipse Dancer/Sun Step: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Eclipse Dancer/Zenith Blade: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Eclipse Dancer/Moon Step: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Eclipse Dancer/Midnight Waltz: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Starbreaker/Starmaul: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Starbreaker/Constellation Breaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Starbreaker/Hammer Dance: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Starbreaker/Nova Forge: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Dawnmender/Calm Lantern: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Dawnmender/Sanctuary Light: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Dawnmender/Battle Beacon: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Dawnmender/Dawn Chorus: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Prismancer/Keen Focus: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Prismancer/Crystal Needle: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Prismancer/Open Prism: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Prismancer/Triune Prism: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Leafcutter/Keen Mandible: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Leafcutter/Deep Serration: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Leafcutter/Swift Saw: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Leafcutter/Amber Reaper: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Blastbeetle/Tight Carapace: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Blastbeetle/Amber Heart: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Blastbeetle/Split Shell: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Blastbeetle/Final Flash: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Needlewing/Keen Sight: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Needlewing/Hunt Window: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Needlewing/Needle Volley: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Needlewing/Amber Guide: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Nectar Nurse/Honey Keeper: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Nectar Nurse/Golden Remedy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Nectar Nurse/Silken Nectar: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Nectar Nurse/Hive Lifeline: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Stridulator/Echo Chamber: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Stridulator/Resonant Crown: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Stridulator/Cutting Rhythm: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Stridulator/Amber Chorus: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {

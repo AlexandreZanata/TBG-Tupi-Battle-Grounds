@@ -128,6 +128,7 @@ fn p67_c19_all_canonical_forms_and_stronghold_kinds_keep_mechanical_identity() {
                             special: Some(tbg_core::view::SpecialView {
                                 ready_in: 10,
                                 cast: None,
+                                windup: tbg_core::content::WINDUP,
                             }),
                             effects: None,
                         };

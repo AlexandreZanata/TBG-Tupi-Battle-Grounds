@@ -41,6 +41,9 @@ pub(crate) fn resolve_hit(
             crate::afflictions::brew_cast(state, attacker, st.range, id, strip, ward, second, ev);
             return;
         }
+        if crate::completion::heal_action(state, attacker, id, st, ev) {
+            return;
+        }
         let _restored = heal(state, attacker.seat, id, st.heal, true, ev);
         #[cfg(feature = "lab")]
         crate::lab::healed(state, attacker, _restored);
@@ -63,6 +66,8 @@ pub(crate) fn resolve_hit(
         }
         return;
     }
+    let lunar_bp = crate::completion::lunar_bp(state, attacker, target);
+    let completion_bonus = crate::completion::basic_bonus(state, attacker, target, st);
     let purification = crate::celestial_archer::empowered(state, attacker, target);
     let mut amount = purification.map_or(st.damage, |raw| auxiliary_amount(st, raw));
     amount = amount.saturating_add(auxiliary_amount(
@@ -73,6 +78,7 @@ pub(crate) fn resolve_hit(
         st,
         crate::mantis::bonus(state, attacker, target),
     ));
+    amount = amount.saturating_add(completion_bonus);
     // R13: a weakened attacker's basic hit loses its weakening before any bonus.
     let weaken = crate::roster_slots::weaken_now(&attacker.fx, state.tick);
     if weaken > 0 {
@@ -119,6 +125,7 @@ pub(crate) fn resolve_hit(
     crate::trigger::completed(state, attacker, target, st, ev);
     crate::crowcaller::completed(state, attacker, target, ev);
     crate::hornet::completed(state, attacker, target, st, ev);
+    crate::completion::completed(state, attacker, target, st, ev);
     #[cfg(feature = "lab")]
     if let Target::Unit(_) = target {
         crate::lab::dealt(state, attacker, removed);
@@ -173,6 +180,7 @@ pub(crate) fn resolve_hit(
             } else {
                 augment::lifesteal_bp(&state.player(attacker.seat).augments)
             };
+            let bp = (bp + lunar_bp).min(1_200);
             if conventional && bp > 0 {
                 let healed = (i64::from(removed) * i64::from(bp) / BP) as i32;
                 let _restored = training_hooks::scoped(
@@ -612,6 +620,7 @@ pub(crate) fn damage(
                 reduced - after_shield,
                 after_shield - amount,
             );
+            crate::completion::after_damage(state, id, removed, ev);
             removed
         }
         Target::Stronghold(seat) => {
@@ -764,6 +773,13 @@ pub(crate) fn apply_on_hit(
             ticks_left: ticks,
         },
     };
+    if matches!(u.status, Status::Rooted { .. }) {
+        u.fx.completion.channel = None;
+    }
+    if u.kind == crate::UnitKind::Hushfang {
+        u.fx.completion.charged = false;
+        u.fx.completion.walk_ticks = 0;
+    }
     ev.push(Event::StatusApplied { unit: id });
     applied
 }

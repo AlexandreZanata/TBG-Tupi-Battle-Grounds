@@ -88,3 +88,31 @@ phase does not invent a paid Store, unlock or Inventory requirement.
 Work-front mode. Documentation/art inspection and git diff --check at this
 checkpoint. Compilation and tests wait for the corresponding implementation;
 full suite and heavy matrices are not authorized by this phase.
+
+### Implementation checkpoint
+
+- `cargo check -p tbg-core --lib`: passed (2.10 s) under the shared lock.
+- `cargo check -p tbg-client --bin tbg-client`: passed (3.95 s) after using
+  the repository's existing local ALSA SDK. Initial attempt failed because
+  the host's default pkg-config path did not contain alsa.pc; no dependency
+  was installed and audio support was not removed.
+- `cargo test -p tbg-core --lib completion_ -- --test-threads=1`:
+  20 passed, 0 failed, 50 filtered out, 0.02 s execution.
+- `cargo test -p tbg-client --bin tbg-client completion_ --
+  --test-threads=1 --nocapture`: two passed, 0 failed, 162 filtered out.
+  All 85 forms built and sampled through ten life/action clips; maximum
+  measured cost 2938 triangles (limit 6000). All additional insect feet
+  retained their world contact in the targeted stance scenario.
+- The same client test command had earlier returned 75 while another build
+  held the shared slot. No lock was removed or active build interrupted.
+- `python3 scripts/check-desktop-ui.py`: passed; this proves routing only.
+- The runtime Training allowlist integration was found during review and is
+  being covered by an additional 85-form session scenario. The latest
+  triangular prism and footprint integration require final focused checks.
+- Known unrelated test-only warning: `visuals/layout.rs::Layout::clear` is
+  unused in this build. A new unused test import was removed.
+
+Pending at this checkpoint: schema-only deterministic hashes; registry
+contract consolidation; final art/UI/session checks; actual Linux captures;
+separate local installation. No full suite, balance gate, Windows or
+desktop-web parity claim is made.

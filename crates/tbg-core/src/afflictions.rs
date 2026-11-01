@@ -250,6 +250,8 @@ pub(crate) fn affliction_score(state: &MatchState, idx: usize) -> u32 {
     score += u32::from(crate::roster_slots::weaken_now(&u.fx, state.tick) > 0);
     score += u32::from(u.fx.ability_cut_bp > 0 && state.tick < u.fx.ability_cut_until);
     score += u32::from(crate::crowcaller::marked(state, u.id));
+    score +=
+        u32::from(u.fx.completion.spark.amount > 0 && state.tick < u.fx.completion.spark.until);
     score
 }
 
@@ -298,6 +300,7 @@ fn cleanse(
     u.fx.weaken_until = 0;
     u.fx.ability_cut_bp = 0;
     u.fx.ability_cut_until = 0;
+    u.fx.completion.spark = Default::default();
     // P58 §3.2: the bleed goes before any ordinary poison stack, and it takes
     // one of the strip count (a Proposed contract, see roster_slots).
     let mut strip = strip;

@@ -9,7 +9,13 @@ watch capybara.rs
 watch celestial_archer.rs
 watch combat.rs
 watch combat/formation.rs
+watch completion/mod.rs
+watch completion/specials.rs
+watch completion/state.rs
+watch completion/strikers.rs
+watch completion/supports.rs
 watch content.rs
+watch content/completion.rs
 watch crowcaller.rs
 watch demolisher.rs
 watch drillnest/effects.rs
@@ -70,3 +76,4 @@ exclude view.rs per-seat presentation of authoritative state
 exclude view/effects.rs cosmetic metadata, tests or read-only presentation
 exclude view/public.rs spectator presentation
 exclude view/visibility.rs presentation filtering
+exclude completion/tests.rs focused local-preview regression scenarios, no gameplay

@@ -107,7 +107,11 @@ pub(crate) fn heal_cut_now(u: &Unit, now: Tick) -> i32 {
 /// application. An active slot takes an equal or stronger value and restarts
 /// its count without moving the next pulse; a weaker value is ignored.
 pub(crate) fn apply_bleed(fx: &mut UnitFx, value: u16, pulses: u8, source: Seat, now: Tick) {
+    let accepted = fx.bleed.left == 0 || value >= fx.bleed.value;
     apply_dot(&mut fx.bleed, value, pulses, source, now);
+    if accepted {
+        fx.bleed.producer = Some(crate::UnitKind::Trident);
+    }
 }
 /// R18: its own family, never an entry in Rotcap's stack array.
 pub(crate) fn apply_venom(fx: &mut UnitFx, value: u16, pulses: u8, source: Seat, now: Tick) {
@@ -120,6 +124,7 @@ fn apply_dot(slot: &mut Bleed, value: u16, pulses: u8, source: Seat, now: Tick) 
             next: now.saturating_add(BLEED_PERIOD),
             left: pulses,
             source: Some(source),
+            producer: None,
         };
     } else if value >= slot.value {
         slot.value = value;
@@ -150,11 +155,11 @@ fn tick_dot(state: &mut MatchState, ev: &mut Vec<Event>, venom: bool) {
         crate::lab::dot_dealt(
             state,
             slot.source,
-            if venom {
+            slot.producer.unwrap_or(if venom {
                 crate::UnitKind::Hornet
             } else {
                 crate::UnitKind::Trident
-            },
+            }),
             _removed,
         );
         let slot = if venom {

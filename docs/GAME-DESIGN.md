@@ -1602,3 +1602,145 @@ Offline execution fixtures additionally propose 128 outstanding challenges,
 requests/hour per synthetic source IP. These are test resource bounds only,
 not approved live operational limits. The owner deferred fiscal work and
 prioritized recovery and opponent mute; no commercial launch is approved.
+
+## Champion completion — Proposed local preview (CC01–CC17)
+
+**Proposed, owner-authorized 2026-11-01.** Seventeen new conventional kinds
+complete nine champions per Faction. This initial implementation is a local
+Practice/Training preview. The online FULL_POOL keeps its existing 46 kinds;
+COMPLETION_POOL contains 63. Existing units, economy, Shop rules, Evolution
+prices, Synergy and Strongholds retain their values. Initial new numbers are
+hypotheses, not balance-lab results or production acceptance.
+
+Every new champion has one Archetype and four Evolution forms. Base and
+form display names, identity and full visual contracts are in
+[the catalog](champion-completion/catalog.json) and
+[execution phase](phases/CHAMPION-COMPLETION.md).
+
+### Initial base registry
+
+Cost is Energy. Interval is ticks; range and movement are milli-tiles and
+milli-tiles/tick. The four Supports have no damaging basic. Their base heals
+are Lastlight Cantor 36, Mire Tender 34, Dawnmender 34 and Nectar Nurse 12
+per channel pulse. All new values in this section are **Proposed**.
+
+| ID | Champion | Faction / Archetype | Cost | HP | Damage | Interval | Range | Move |
+|---|---|---|---:|---:|---:|---:|---:|---:|
+| CC01 | Gravecutter | Undead / DPS | 4 | 300 | 48 | 24 | 800 | 54 |
+| CC02 | Lastlight Cantor | Undead / Support | 3 | 280 | 0 | 32 | 2800 | 40 |
+| CC03 | Cragclaw | Monsters / DPS | 4 | 340 | 44 | 26 | 850 | 50 |
+| CC04 | Hushfang | Monsters / DPS | 4 | 300 | 46 | 24 | 800 | 60 |
+| CC05 | Spinehurler | Monsters / Ranged | 4 | 260 | 42 | 34 | 4200 | 40 |
+| CC06 | Mire Tender | Monsters / Support | 3 | 310 | 0 | 34 | 2700 | 38 |
+| CC07 | Gorgehowl | Monsters / Control | 4 | 330 | 18 | 36 | 1800 | 42 |
+| CC08 | Sunlancer | Celestials / DPS | 4 | 320 | 44 | 24 | 1000 | 52 |
+| CC09 | Eclipse Dancer | Celestials / DPS | 4 | 290 | 42 | 22 | 800 | 56 |
+| CC10 | Starbreaker | Celestials / DPS | 5 | 330 | 58 | 34 | 900 | 44 |
+| CC11 | Dawnmender | Celestials / Support | 3 | 290 | 0 | 32 | 2800 | 40 |
+| CC12 | Prismancer | Celestials / Ranged | 4 | 250 | 32 | 30 | 4000 | 42 |
+| CC13 | Leafcutter | Insects / DPS | 3 | 260 | 34 | 22 | 750 | 56 |
+| CC14 | Blastbeetle | Insects / DPS | 3 | 240 | 32 | 24 | 700 | 58 |
+| CC15 | Needlewing | Insects / Ranged | 4 | 240 | 38 | 30 | 3900 | 48 |
+| CC16 | Nectar Nurse | Insects / Support | 3 | 270 | 0 | 36 | 2600 | 44 |
+| CC17 | Stridulator | Insects / Control | 4 | 310 | 18 | 36 | 1900 | 42 |
+
+### Shared competitive reading
+
+- **CC-C01:** old kind tags remain unchanged; new tags append after Megadrill.
+  Purchases, deployment, Evolution, damage/healing and outcomes stay authoritative.
+- **CC-C02:** no new ability heals a Stronghold or receives special Stronghold
+  damage. Specials, secondary hits, healing triggers and on-death bursts affect
+  units only. Ordinary damaging basics retain ordinary Stronghold targeting.
+- **CC-C03:** all added values are integers. Timed victim families are bounded:
+  one echo, one regrowth and one solar spark. They never stack between copies.
+  Stronger replaces, equal refreshes, weaker is ignored until expiry.
+- **CC-C04:** base attack windup and existing timing remain unchanged. Gorgehowl
+  has an explicit two-tick interrupt windup, not a zero-time cancellation;
+  all other independent new specials use the shared six-tick windup.
+- **CC-C05:** A1 and A2 each add 1500 bp to basic damage (or healing for a
+  Support). B1 adds 300 range; B2 adds 1500 bp attack speed. Ability-specific
+  branch values replace their earlier step; they never sum implicitly.
+- **CC-C06:** one actual basic hit, not animation contact count, advances a
+  striker proc. Stronghold hits, secondary damage, DoTs and betrayal never
+  advance or activate new unit-only procs.
+- **CC-C07:** source death does not erase an applied echo, spark, regrowth or
+  bleed. Normal healing reductions, protections and cleanse policies apply.
+  New public durations, readiness and channel facts reconstruct after reconnect.
+- **CC-C08:** a new local protocol/schema identity accompanies any changed view
+  shape. The current production server is not silently treated as compatible.
+
+Ability parameter registry and focused regression scenarios are recorded with
+the implementation in content/completion.rs and the following execution notes.
+
+### Proposed ability parameters and identity amendment
+
+A/B are the selected branch step (0, 1 or 2). The following values are
+**Proposed** for local testing only. Percentages are integer basis points.
+
+- **CC01:** below 3500 bp victim HP, +3000 + A×1000 bp basic damage.
+- **CC02:** healing leaves one echo of 18 + B×6, lasting 80 ticks.
+  Next nonlethal HP damage consumes it once; it cannot resurrect.
+- **CC03:** every third unit hit sweeps 22 + A×8 damage within
+  900 + B×350 of the primary; at most two other enemies (three at B2).
+- **CC04:** 20 moving ticks charge +5000 + A×1500 bp on the next
+  unit basic. Any Slow/Root clears movement progress and charge.
+- **CC05:** every third unit hit pierces one enemy up to 1600 behind
+  the primary for 6000 + B×1500 bp of static basic damage.
+- **CC06:** each heal leaves 5 + B×3 healing for four pulses, 20 ticks
+  apart. Actual HP damage cancels regrowth; absorbed shield damage does not.
+- **CC07:** ready every 160 − A×20 ticks. Two-tick windup; cancel one
+  still-pending special of the closest legal enemy. Victim immunity lasts
+  80 ticks; Ward and existing control immunity protect it. No basic cancel.
+- **CC08:** every third unit hit leaves a 60-tick solar spark of
+  16 + B×6 damage. Only another conventional ally with printed base
+  range ≤1600 consumes it on a unit basic. Cleanse removes the spark.
+- **CC09:** alternate solar and lunar unit hits. A solar hit against a victim
+  above/equal 5000 bp HP adds 1500 + A×500 bp basic damage; a lunar
+  hit against a victim below that grants 600 + B×300 bp lifesteal from
+  actual enemy HP removed,
+  within the existing combined 1200 bp cap. No shield or Stronghold healing.
+- **CC10:** basic bonus is 400 + A×100 bp of the victim's printed
+  base HP, capped at 50 + A×10. Ordinary mitigation and shields still apply.
+- **CC11:** at heal preparation snapshot up to two enemies within 1200
+  of the patient; each adds 8 + B×2 healing, scaled by healing modifiers.
+- **CC12:** ready every 160 ticks; six-tick windup locks the announced
+  primary coordinate. Deal 45 + A×15 to up to three enemies within
+  800 + B×300 of that fixed coordinate even if the primary dies.
+- **CC13:** basic applies the existing single bleed family, 4 + A damage
+  for three pulses. Producer kind is retained for offline attribution.
+- **CC14:** combat death bursts once for 60 + A×15 damage within 900,
+  at most three enemies. No ally/Stronghold hit or recursive beetle burst.
+- **CC15:** every third unit hit adds 3000 + A×1000 bp if the victim
+  is winding a basic; it never cancels that attack.
+- **CC16:** heal begins a locked patient channel: 4 + B pulses separated
+  by five ticks, first pulse at 10000 + A×3000 bp healing. Remaining
+  pulses retain snapshotted base healing. Root, death, or lost range cancels.
+- **CC17:** ready every 160 − B×20 ticks; six-tick windup applies
+  standard 2000 bp Slow for 30 + A×10 ticks to at most two enemies
+  within 700 of the locked primary. Existing Root priority remains.
+
+Fusion preserves victim echo/regrowth/spark and interruption immunity,
+without inheriting a producer's attack sequence or channel. Strongest
+compatible family survives; remaining duration/pulses are conservatively
+retained. Existing summon limits and targeting rules remain unchanged.
+
+**CC-ID01:** register 68 kinds, preserve the first 51 tags, keep the
+46-kind CANON Shop, and expose 63 conventional kinds only in the local
+preview. Protocol 32 identifies the new public windup/channel/effect shape;
+31 was already used by another local preview. Ruleset revision 3 includes
+the six new gameplay modules in its source identity. Empty completion
+state and bleed producer slots change legacy state checksums, so the
+existing three golden outcome/winner/tick guards must remain intact
+while schema-only hash values are refreshed with observed evidence.
+
+**CC-ID02:** private TrainingScenario validation accepts COMPLETION_POOL,
+not the online Shop pool. All 85 forms can be placed explicitly; summons
+remain rejected. Training still bypasses economy and never sets a match
+outcome. Online intention/admission rules are unchanged.
+
+CC16 Root cancellation clears the authoritative channel immediately, including
+its public reconnect facts; no delayed visual thread survives that Root.
+
+CC-ID01 appends the 68 Proposed Evolution records to the frozen registry
+contract, preserving all 204 pre-existing rows verbatim. Names come from
+the bilingual catalog; numeric deltas follow CC-C05.

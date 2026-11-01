@@ -3,6 +3,8 @@
 //! basis points (10 000 = 100%). No other file may contain balance numbers;
 //! the simulation reads them through `ruleset::CANON` (D-33).
 
+pub mod completion;
+
 use crate::arcana::ArcanaValues;
 use crate::ruleset::CANON;
 use crate::types::{Archetype, Faction, OnHit, StrongholdKind, Tick, UnitKind, FACTION_COUNT};
@@ -358,6 +360,8 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    /// Owner-authorized local preview kits, inactive in the online pool.
+    Completion(completion::Ability),
     DrillNest {
         period: u16,
     },
@@ -1005,7 +1009,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 51;
+pub const UNIT_KIND_COUNT: usize = crate::ALL_KINDS.len();
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1347,6 +1351,127 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::Microdrill,"Microdrill",Machines,Dps,0,[45,18,14,600,95,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),form("Producer B"),form("Producer B")]),
     unit(UnitKind::Duodrill,"Duodrill",Machines,Dps,0,[110,40,17,600,73,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),FormDef{dmg_bp:1500,..form("Producer B")},form("Producer B")]),
     unit(UnitKind::Megadrill,"Megadrill",Machines,Dps,0,[260,90,22,600,50,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),form("Producer B"),form("Producer B")]),
+    // Champion completion: Proposed initial local-preview values.
+    unit(UnitKind::Gravecutter, "Gravecutter", Undead, Dps, 2400,
+        [300, 48, 24, 800, 54, 0, 0], None, completion::forms(UnitKind::Gravecutter), [
+            FormDef { dmg_bp: 1_500, ..form("Gravetaker") },
+            FormDef { dmg_bp: 1_500, ..form("Final Harvester") },
+            FormDef { range_add: 300, ..form("Chain Dancer") },
+            FormDef { atk_bp: 1_500, ..form("Soul Reaver") },
+        ]),
+    unit(UnitKind::LastlightCantor, "Lastlight Cantor", Undead, Support, 1800,
+        [280, 0, 32, 2800, 40, 0, 36], None, completion::forms(UnitKind::LastlightCantor), [
+            FormDef { heal_bp: 1_500, ..form("Vigil Bell") },
+            FormDef { heal_bp: 1_500, ..form("Sanctuary Bell") },
+            FormDef { range_add: 300, ..form("Funeral Choir") },
+            FormDef { atk_bp: 1_500, ..form("Last Requiem") },
+        ]),
+    unit(UnitKind::Cragclaw, "Cragclaw", Monsters, Dps, 2400,
+        [340, 44, 26, 850, 50, 0, 0], None, completion::forms(UnitKind::Cragclaw), [
+            FormDef { dmg_bp: 1_500, ..form("Edgeclaw") },
+            FormDef { dmg_bp: 1_500, ..form("Obsidian Chisel") },
+            FormDef { range_add: 300, ..form("Splitclaw") },
+            FormDef { atk_bp: 1_500, ..form("Shardsweeper") },
+        ]),
+    unit(UnitKind::Hushfang, "Hushfang", Monsters, Dps, 2400,
+        [300, 46, 24, 800, 60, 0, 0], None, completion::forms(UnitKind::Hushfang), [
+            FormDef { dmg_bp: 1_500, ..form("Silent Prowler") },
+            FormDef { dmg_bp: 1_500, ..form("Fang Warden") },
+            FormDef { range_add: 300, ..form("Flint Hunter") },
+            FormDef { atk_bp: 1_500, ..form("Midnight Pounce") },
+        ]),
+    unit(UnitKind::Spinehurler, "Spinehurler", Monsters, Ranged, 2400,
+        [260, 42, 34, 4200, 40, 0, 0], None, completion::forms(UnitKind::Spinehurler), [
+            FormDef { dmg_bp: 1_500, ..form("Keen Needle") },
+            FormDef { dmg_bp: 1_500, ..form("Spine Lancer") },
+            FormDef { range_add: 300, ..form("Barbed Fan") },
+            FormDef { atk_bp: 1_500, ..form("Needle Phalanx") },
+        ]),
+    unit(UnitKind::MireTender, "Mire Tender", Monsters, Support, 1800,
+        [310, 0, 34, 2700, 38, 0, 34], None, completion::forms(UnitKind::MireTender), [
+            FormDef { heal_bp: 1_500, ..form("Brothkeeper") },
+            FormDef { heal_bp: 1_500, ..form("Deep Remedy") },
+            FormDef { range_add: 300, ..form("Reed Tender") },
+            FormDef { atk_bp: 1_500, ..form("Mire Sage") },
+        ]),
+    unit(UnitKind::Gorgehowl, "Gorgehowl", Monsters, Control, 2400,
+        [330, 18, 36, 1800, 42, 0, 0], None, completion::forms(UnitKind::Gorgehowl), [
+            FormDef { dmg_bp: 1_500, ..form("Deep Resonator") },
+            FormDef { dmg_bp: 1_500, ..form("Quietbreaker") },
+            FormDef { range_add: 300, ..form("Split Echo") },
+            FormDef { atk_bp: 1_500, ..form("Chasm Voice") },
+        ]),
+    unit(UnitKind::Sunlancer, "Sunlancer", Celestials, Dps, 2400,
+        [320, 44, 24, 1000, 52, 0, 0], None, completion::forms(UnitKind::Sunlancer), [
+            FormDef { dmg_bp: 1_500, ..form("Dawn Point") },
+            FormDef { dmg_bp: 1_500, ..form("Sun Pact") },
+            FormDef { range_add: 300, ..form("Ember Lance") },
+            FormDef { atk_bp: 1_500, ..form("Daybreak Oath") },
+        ]),
+    unit(UnitKind::EclipseDancer, "Eclipse Dancer", Celestials, Dps, 2400,
+        [290, 42, 22, 800, 56, 0, 0], None, completion::forms(UnitKind::EclipseDancer), [
+            FormDef { dmg_bp: 1_500, ..form("Sun Step") },
+            FormDef { dmg_bp: 1_500, ..form("Zenith Blade") },
+            FormDef { range_add: 300, ..form("Moon Step") },
+            FormDef { atk_bp: 1_500, ..form("Midnight Waltz") },
+        ]),
+    unit(UnitKind::Starbreaker, "Starbreaker", Celestials, Dps, 3000,
+        [330, 58, 34, 900, 44, 0, 0], None, completion::forms(UnitKind::Starbreaker), [
+            FormDef { dmg_bp: 1_500, ..form("Starmaul") },
+            FormDef { dmg_bp: 1_500, ..form("Constellation Breaker") },
+            FormDef { range_add: 300, ..form("Hammer Dance") },
+            FormDef { atk_bp: 1_500, ..form("Nova Forge") },
+        ]),
+    unit(UnitKind::Dawnmender, "Dawnmender", Celestials, Support, 1800,
+        [290, 0, 32, 2800, 40, 0, 34], None, completion::forms(UnitKind::Dawnmender), [
+            FormDef { heal_bp: 1_500, ..form("Calm Lantern") },
+            FormDef { heal_bp: 1_500, ..form("Sanctuary Light") },
+            FormDef { range_add: 300, ..form("Battle Beacon") },
+            FormDef { atk_bp: 1_500, ..form("Dawn Chorus") },
+        ]),
+    unit(UnitKind::Prismancer, "Prismancer", Celestials, Ranged, 2400,
+        [250, 32, 30, 4000, 42, 0, 0], None, completion::forms(UnitKind::Prismancer), [
+            FormDef { dmg_bp: 1_500, ..form("Keen Focus") },
+            FormDef { dmg_bp: 1_500, ..form("Crystal Needle") },
+            FormDef { range_add: 300, ..form("Open Prism") },
+            FormDef { atk_bp: 1_500, ..form("Triune Prism") },
+        ]),
+    unit(UnitKind::Leafcutter, "Leafcutter", Insects, Dps, 1800,
+        [260, 34, 22, 750, 56, 0, 0], None, completion::forms(UnitKind::Leafcutter), [
+            FormDef { dmg_bp: 1_500, ..form("Keen Mandible") },
+            FormDef { dmg_bp: 1_500, ..form("Deep Serration") },
+            FormDef { range_add: 300, ..form("Swift Saw") },
+            FormDef { atk_bp: 1_500, ..form("Amber Reaper") },
+        ]),
+    unit(UnitKind::Blastbeetle, "Blastbeetle", Insects, Dps, 1800,
+        [240, 32, 24, 700, 58, 0, 0], None, completion::forms(UnitKind::Blastbeetle), [
+            FormDef { dmg_bp: 1_500, ..form("Tight Carapace") },
+            FormDef { dmg_bp: 1_500, ..form("Amber Heart") },
+            FormDef { range_add: 300, ..form("Split Shell") },
+            FormDef { atk_bp: 1_500, ..form("Final Flash") },
+        ]),
+    unit(UnitKind::Needlewing, "Needlewing", Insects, Ranged, 2400,
+        [240, 38, 30, 3900, 48, 0, 0], None, completion::forms(UnitKind::Needlewing), [
+            FormDef { dmg_bp: 1_500, ..form("Keen Sight") },
+            FormDef { dmg_bp: 1_500, ..form("Hunt Window") },
+            FormDef { range_add: 300, ..form("Needle Volley") },
+            FormDef { atk_bp: 1_500, ..form("Amber Guide") },
+        ]),
+    unit(UnitKind::NectarNurse, "Nectar Nurse", Insects, Support, 1800,
+        [270, 0, 36, 2600, 44, 0, 12], None, completion::forms(UnitKind::NectarNurse), [
+            FormDef { heal_bp: 1_500, ..form("Honey Keeper") },
+            FormDef { heal_bp: 1_500, ..form("Golden Remedy") },
+            FormDef { range_add: 300, ..form("Silken Nectar") },
+            FormDef { atk_bp: 1_500, ..form("Hive Lifeline") },
+        ]),
+    unit(UnitKind::Stridulator, "Stridulator", Insects, Control, 2400,
+        [310, 18, 36, 1900, 42, 0, 0], None, completion::forms(UnitKind::Stridulator), [
+            FormDef { dmg_bp: 1_500, ..form("Echo Chamber") },
+            FormDef { dmg_bp: 1_500, ..form("Resonant Crown") },
+            FormDef { range_add: 300, ..form("Cutting Rhythm") },
+            FormDef { atk_bp: 1_500, ..form("Amber Chorus") },
+        ]),
+
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

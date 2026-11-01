@@ -52,7 +52,9 @@ pub(crate) fn run_units(state: &mut MatchState, ev: &mut Vec<Event>) {
     // spawns happen before it and removal happens afterwards.
     let mut formations = FormationIndex::new();
     for idx in 0..state.units.len() {
+        let before = state.units[idx].x;
         advance_unit(state, idx, ev, &mut formations);
+        crate::completion::movement(state, idx, before);
         crate::specials::advance(state, idx, ev);
     }
     // ...and again after everyone moved.
@@ -94,6 +96,9 @@ fn advance_unit(
         return;
     }
     let st = state.stats_of(&u);
+    if crate::completion::channeling(&u) {
+        return;
+    }
     if let Some((target, ticks)) = u.windup {
         if ticks > 1 {
             state.units[idx].windup = Some((target, ticks - 1));
@@ -140,6 +145,7 @@ fn advance_unit(
                 crate::mantis::retarget(state, idx, target);
                 state.units[idx].windup = Some((target, WINDUP));
                 state.units[idx].fx.betray = betrayed;
+                crate::completion::prepare_heal(state, idx, target, &st);
                 ev.push(Event::AttackStart {
                     from: Target::Unit(u.id),
                     to: target,
@@ -351,7 +357,7 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
     }
     // P46: drain the shrapnel queue before removal. Chains terminate:
     // shrapnel only spawns on plate breaks, and plates only decrease.
-    while !state.shrapnel.is_empty() {
+    while crate::completion::death_bursts(state, ev) || !state.shrapnel.is_empty() {
         let queue = std::mem::take(&mut state.shrapnel);
         for s in queue {
             let enemy = s.seat.other();
