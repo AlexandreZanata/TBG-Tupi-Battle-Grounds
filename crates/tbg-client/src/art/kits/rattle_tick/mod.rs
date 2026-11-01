@@ -38,11 +38,17 @@ fn pose(m: &Moment, p: &mut Pose) {
     match m.clip {
         Clip::Idle => {
             moves::idle(m, p, &body, 0.9);
-            p[Prop(Socket::Back).index()].0.x = -55.0 + (m.clock * 0.8).sin() * 10.0;
+            let chat = tools::hold((m.clock * 0.23).rem_euclid(1.0), [0.12, 0.28, 0.42, 0.64]);
+            p[Prop(Socket::Back).index()].0.x = -55.0 - 35.0 * chat;
+            tools::add(p, Head, [-5.0 * chat, 18.0 * chat, 0.0]);
         }
         Clip::Walk => {
             moves::walk(m, p, 5.0, 2.0);
-            p[Secondary(Spring::Back).index()].0.x = (m.clock * 4.0).sin() * 7.0;
+            let step = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
+            p[Secondary(Spring::Back).index()].0.x = -4.0 * step;
+            p[Secondary(Spring::Back).index()].0.z = -4.0 * step;
+            p[Prop(Socket::Back).index()].0.x = -45.0;
+            tools::add(p, Head, [0.0, 4.0 * step, 0.0]);
         }
         Clip::AttackMelee | Clip::AttackRanged | Clip::Cast => {
             let load = tools::hold(m.t, [0.0, 0.16, 0.18, 0.30]);
@@ -55,6 +61,9 @@ fn pose(m: &Moment, p: &mut Pose) {
             tools::set(p, UpperArmR, [-145.0 * load - 50.0 * hit, 0.0, -12.0]);
             tools::set(p, ForearmR, [-30.0, 0.0, 0.0]);
             tools::set(p, UpperArmL, [-55.0 * load, 0.0, 20.0]);
+            p[Secondary(Spring::HeadGear).index()].0.x = 12.0 * hit;
+            p[Secondary(Spring::Back).index()].0.z = -5.0 * load + 5.0 * hit;
+            p[Prop(Socket::Back).index()].0.x = -45.0 - 25.0 * load;
         }
         Clip::Hit => {
             moves::hit(m, p, 0.8);
@@ -70,7 +79,21 @@ fn pose(m: &Moment, p: &mut Pose) {
             moves::evolve(m, p, &body, Power::Burst);
             p[Prop(Socket::Back).index()].0.z = 45.0 * (m.t * 7.0).sin();
         }
-        Clip::Victory => moves::victory(m, p, &body, Cheer::Both),
+        Clip::Victory => {
+            p.fill((Vec3::ZERO, Vec3::ZERO));
+            let t = m.t.rem_euclid(0.8);
+            let brother = tools::hold(t, [0.0, 0.14, 0.28, 0.42]);
+            let tick = tools::hold(t, [0.32, 0.46, 0.60, 0.78]);
+            tools::set(p, UpperArmR, [8.0, 0.0, -18.0]);
+            tools::set(p, ForearmR, [-20.0, 0.0, 0.0]);
+            tools::set(p, UpperArmL, [-35.0 - 40.0 * brother, 0.0, 30.0]);
+            tools::set(p, ForearmL, [-70.0, 0.0, 0.0]);
+            tools::set(p, Head, [-3.0, 12.0 * tick, 0.0]);
+            p[Prop(Socket::Back).index()].0.x = -50.0 - 85.0 * tick;
+            p[Prop(Socket::StringTop).index()].0.x = -40.0;
+            p[Secondary(Spring::Back).index()].0.z = -4.0 * brother;
+            tools::plant(p, &body, tools::stance(&body, 1.3, 0.03));
+        }
     }
     if let Some(t) = m.special {
         let wind = tools::hold(t, [0.0, 0.15, 0.22, 0.30]);

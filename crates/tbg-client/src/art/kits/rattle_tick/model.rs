@@ -91,7 +91,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Secondary(Spring::Back),
             Box(0.14, 0.20, 0.11),
-            if f.b { ALLY } else { LEATHER },
+            RED_CLOTH,
             [0.0, 0.08, 0.0],
         ),
         part(
@@ -103,7 +103,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Secondary(Spring::HeadGear),
             Cone(0.09, 0.10),
-            OAK,
+            RED_CLOTH,
             [0.0, 0.08, 0.0],
         )
         .rot([0.0, 0.0, -15.0]),
@@ -144,6 +144,21 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             .rot([-70.0, 0.0, 0.0]),
         );
     }
+    v.push(part(
+        Secondary(Spring::Back),
+        Box(0.16, 0.035, 0.13),
+        DARK_LEATHER,
+        [0.0, -0.025, 0.0],
+    ));
+    v.push(
+        part(
+            Secondary(Spring::Back),
+            Box(0.035, 0.16, 0.12),
+            LINEN,
+            [0.035, 0.08, 0.0],
+        )
+        .rot([0.0, 0.0, -14.0]),
+    );
     club(&mut v, f);
     if f.a {
         v.push(
@@ -202,7 +217,7 @@ fn club(v: &mut Vec<PartSpec>, f: Form) {
         [0.0, -0.40, 0.0],
     ));
     for y in [-0.32, -0.48] {
-        v.push(part(w, Box(0.21, 0.045, 0.21), IRON, [0.0, y, 0.0]));
+        v.push(part(w, Box(0.21, 0.045, 0.21), STEEL, [0.0, y, 0.0]));
         for s in [-1.0, 1.0] {
             v.push(part(w, Cone(0.025, 0.08), IRON, [s * 0.14, y, 0.0]).rot([0.0, 0.0, s * 90.0]));
         }
