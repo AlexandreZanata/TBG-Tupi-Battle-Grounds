@@ -28,6 +28,9 @@ pub struct BotOpts {
     pub drop_after: Option<Duration>,
     /// ...and come back with the session token after this long (`None`: never).
     pub rejoin_after: Option<Duration>,
+    /// Surrender (BR-M06) this long after `MatchStart`: a bounded end for tests
+    /// that need one but no particular winner (BR-M07 has no match length).
+    pub surrender_after: Option<Duration>,
     pub timeout: Duration,
     /// P11: register a `Tb…` account first, then play logged in.
     pub accounts: bool,
@@ -43,6 +46,7 @@ impl BotOpts {
             jitter_ms: 0,
             drop_after: None,
             rejoin_after: None,
+            surrender_after: None,
             timeout: Duration::from_secs(360),
             accounts: false,
             ranked: false,
@@ -74,6 +78,7 @@ pub(super) struct Session {
     pub(super) seq: u32,
     pub(super) last_view: Option<Instant>,
     pub(super) drop_at: Option<Instant>,
+    pub(super) surrender_at: Option<Instant>,
     /// P9: send time per unacknowledged intention seq.
     pub(super) pending: Vec<(u32, Instant)>,
     /// P9: when `QuickMatch` was sent for the current match.
@@ -98,6 +103,7 @@ pub async fn play_one(opts: BotOpts, seed: u64) -> BotResult {
         seq: 0,
         last_view: None,
         drop_at: None,
+        surrender_at: None,
         pending: Vec::new(),
         queue_start: None,
         auth: None,
