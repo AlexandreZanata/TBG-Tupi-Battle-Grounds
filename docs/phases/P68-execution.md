@@ -235,3 +235,33 @@ syntax for package/comparison/journey scripts, shell syntax for AppImage,
 JS module syntax, patch-note gate (3 entries; same ruleset fingerprint).
 The candidate's public patch note explicitly preserves game numbers and states
 production incompatibility and the remaining Windows visual gates.
+
+### First real Linux provider evidence and final connection boundary correction
+
+At source `a5b10c5e14b5c34ef865c951bb68fcf19818e541`, the Linux release
+build passed in 3m24s; the Trunk release build passed in 2m12s. Headless identity
+reported protocol 30, the exact source SHA, x86_64-unknown-linux-gnu, release
+profile and `ui-acceptance`. Core protocol contracts passed again (14 tests).
+
+`python3 scripts/check-native-auth.py --client <built-client> --server <owned-test-server> --report <owned-output>`
+passed against the **real Secret Service**: secure write/readback, same-family
+restore/rotation, explicit legacy migration, per-origin process exclusion,
+no tokens in ordinary auth metadata, offline logout marker, backend restart,
+revocation and removal of the synthetic vault entry. A separate run with
+`DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/tbg-p68-unavailable-secret-service`
+made only that subprocess's real provider unavailable: secure persistence and
+migration remained false, the pre-existing synthetic key was preserved,
+logout stayed pending offline and remote revocation completed on recovery.
+No real-user account, installed app data or unrelated vault entry was used.
+
+Final connection review adds origin binding to the permitted family-bound
+resume handle, including guests, and holds/reissues an expired mode request
+only after renewed authorization. Acknowledged invitations remain probes and
+are not recreated. Duplicate refresh requests coalesce; a server losing its
+Access index can try the existing durable family before manual recovery, while
+revocation/invalid renewal stops new authorization. Explicit Continue here
+survives a simultaneous refresh completion. `cargo test ... -p tbg-client
+--bin tbg-client net:: -- --test-threads=1`: 8 passed, including the two new
+boundary cases. Scoped binary Clippy passed. A fresh final-source Linux/WASM
+build follows these source changes; the first binary is not the published
+artifact and is not silently relabeled.

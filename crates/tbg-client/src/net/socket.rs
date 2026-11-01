@@ -145,6 +145,7 @@ impl NetLink {
             ServerMsg::AuthRequired { reason } => {
                 crate::auth::authentication_required(reason);
                 self.login_in_flight = true;
+                self.held_request |= !self.in_match && !matches!(self.mode, super::Mode::Probe);
                 None
             }
             ServerMsg::LoggedIn { .. } | ServerMsg::AccountError { .. } => Some(msg),
@@ -235,6 +236,34 @@ mod tests {
             inq: Default::default(),
             watching: false,
         }
+    }
+
+    #[test]
+    fn an_expired_queue_request_waits_for_authorization_and_is_reissued_after_renewal() {
+        let mut net = link(Mode::Quick);
+        net.handle(
+            ServerMsg::AuthRequired {
+                reason: protocol::AuthRefusal::Expired,
+            },
+            0.,
+        );
+        assert!(net.held_request && net.login_in_flight);
+        assert!(!net
+            .outq
+            .iter()
+            .any(|(_, m)| matches!(m, ClientMsg::QuickMatch)));
+        net.handle(
+            ServerMsg::AuthState {
+                status: protocol::AuthStatus::Active,
+                access_expires_at: 1900,
+                session_expires_at: 2_593_000,
+            },
+            1.,
+        );
+        assert!(net
+            .outq
+            .iter()
+            .any(|(_, m)| matches!(m, ClientMsg::QuickMatch)));
     }
 
     #[test]

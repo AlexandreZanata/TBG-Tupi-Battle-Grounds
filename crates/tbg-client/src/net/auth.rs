@@ -9,9 +9,12 @@ use crate::{
 impl NetLink {
     pub(super) fn hello(&self) -> ClientMsg {
         let saved = storage::get(Scope::Session, "tbg_resume_family");
-        let resume = self
-            .token
-            .filter(|_| login::resume_matches(saved.as_deref(), self.auth_family.as_deref()));
+        let saved_origin = storage::get(Scope::Session, "tbg_resume_origin");
+        let current_origin = crate::platform::http::origin(&crate::config::server_url());
+        let resume = self.token.filter(|_| {
+            login::resume_matches(saved.as_deref(), self.auth_family.as_deref())
+                && login::origin_matches(saved_origin.as_deref(), current_origin.as_deref())
+        });
         match self.auth_access {
             Some(access) => ClientMsg::AuthenticatedHello {
                 version: PROTOCOL_VERSION,
@@ -25,6 +28,11 @@ impl NetLink {
         }
     }
     pub(super) fn save_resume_family(&self) {
+        if let Some(origin) = crate::platform::http::origin(&crate::config::server_url()) {
+            storage::set(Scope::Session, "tbg_resume_origin", &origin);
+        } else {
+            storage::remove(Scope::Session, "tbg_resume_origin");
+        }
         if let Some(family) = &self.auth_family {
             storage::set(Scope::Session, "tbg_resume_family", family);
         } else {

@@ -127,16 +127,18 @@ pub fn socket_status(status: tbg_core::protocol::AuthStatus) {
     }
 }
 pub fn authentication_required(reason: tbg_core::protocol::AuthRefusal) {
-    match reason {
-        tbg_core::protocol::AuthRefusal::Expired => {
-            let _ = request(Command::Refresh);
-        }
-        _ => {
-            if let Ok(mut view) = VIEW.write() {
-                view.status = Status::ReauthRequired;
-                view.error = Some(Failure::InvalidKey);
-            }
-        }
+    let view = snapshot();
+    if reason != tbg_core::protocol::AuthRefusal::Revoked
+        && view.access.is_some()
+        && view.status != Status::ReauthRequired
+    {
+        // A server restart loses Access, not the durable family. Attempt one
+        // coordinated renewal before requiring the manual recovery key.
+        let _ = request(Command::Refresh);
+    } else if let Ok(mut view) = VIEW.write() {
+        view.status = Status::ReauthRequired;
+        view.error = Some(Failure::InvalidKey);
+        view.access = None;
     }
 }
 
@@ -314,7 +316,9 @@ impl Session {
             _ => {}
         }
         if self.pending.is_some() {
-            self.next = Some(command);
+            if !matches!(command, Command::Refresh) {
+                self.next = Some(command);
+            }
             return;
         }
         match command {
@@ -539,11 +543,24 @@ impl Session {
                     view.error = Some(error);
                     view.status = if kind == Kind::Logout {
                         Status::LogoutPending
-                    } else if kind == Kind::Refresh && self.access.is_some() {
+                    } else if kind == Kind::Refresh
+                        && self.access.is_some()
+                        && matches!(
+                            error,
+                            Failure::Unavailable
+                                | Failure::Busy
+                                | Failure::StorageUnavailable
+                                | Failure::RateLimited
+                                | Failure::Capacity
+                        )
+                    {
                         Status::PersistenceUnavailable
                     } else {
                         Status::ReauthRequired
                     };
+                    if view.status == Status::ReauthRequired {
+                        view.access = None;
+                    }
                 }
                 account.pending = None;
             }
@@ -582,7 +599,7 @@ impl Session {
             view.secure = secure;
             view.remember = self.remember;
             view.error = None;
-            view.manual_claim = kind == Kind::Login;
+            view.manual_claim |= kind == Kind::Login;
         }
         if self.backup_after_login && kind == Kind::Login {
             self.backup_after_login = false;
