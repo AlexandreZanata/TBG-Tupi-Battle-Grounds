@@ -2436,6 +2436,13 @@ phase/section title; do not treat a numeric collision as supersession.
 New integration behavior is documented in GAME-DESIGN's consolidated roster
 activation section and `phases/CONSOLIDATED-LINUX-RELEASE.md`.
 
+## D-48 amendment · Normalize roster health by active roster size — 2026-10-31 (owner-approved)
+
+The owner approved a minimum purchase share of 62.5% of the uniform share,
+0.625 / N for each of the N active conventional kinds. This preserves the
+original 2.5% floor at 25 kinds and yields approximately 1.36% at 46 kinds.
+The old fixed floor would require 115% total participation at 46 kinds.
+No other balance target or gameplay number changes in this amendment.
 ## D-91 · Signed recoverable native updates — 2026-10-31 (Proposed)
 
 **Decision.** P66 starts with per-user managed Linux installs, stable launcher/

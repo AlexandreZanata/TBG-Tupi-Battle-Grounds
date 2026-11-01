@@ -1,0 +1,26 @@
+candidate,apply,score_percent,lo95_percent,hi95_percent,pairs,seeds,decision
+control,none,97.3,95.3,99.2,256,200000..200256,diagnostic control
+demolisher-hp,Demolisher.hp=938,97.1,94.9,98.8,256,200000..200256,not accepted; owner preserved gameplay values
+drillnest-cost,Drillnest.cost=3600,96.9,94.5,98.8,256,200000..200256,not accepted; owner preserved gameplay values
+drillnest-hp,Drillnest.hp=675,97.7,95.7,99.2,256,200000..200256,not accepted; owner preserved gameplay values
+evolution-cost1,evolve_cost.0=1800,98.0,96.1,99.6,256,200000..200256,not accepted; owner preserved gameplay values
+machine-damage,"SiegeWalker.damage=64,Bombard.damage=18,Demolisher.damage=60,Rampart.damage=26,Sawbot.damage=41,Oilpress.damage=19,CargoCrab.damage=15,Bulwark.damage=23",94.9,92.2,97.5,256,200000..200256,not accepted; owner preserved gameplay values
+machine-hp,"SiegeWalker.hp=525,Bombard.hp=750,Demolisher.hp=938,Rampart.hp=1125,Sawbot.hp=174,Oilpress.hp=2700,CargoCrab.hp=1050,Bulwark.hp=1050",95.1,92.4,97.5,256,200000..200256,not accepted; owner preserved gameplay values
+machines-costs,"SiegeWalker.cost=3600,Drillnest.cost=3600,Demolisher.cost=4200",98.0,96.1,99.6,256,200000..200256,not accepted; owner preserved gameplay values
+machines-pressure,"SiegeWalker.damage=64,Drillnest.hp=675,Demolisher.damage=60",97.5,95.5,99.2,256,200000..200256,not accepted; owner preserved gameplay values
+machines-synergy,"synergy.machines.1=375,synergy.machines.2=1500",97.7,95.7,99.2,256,200000..200256,not accepted; owner preserved gameplay values
+no-machine-bonus,"synergy.machines.1=1,synergy.machines.2=1",95.5,92.8,97.9,256,200000..200256,not accepted; owner preserved gameplay values
+oilpress-combined,"Oilpress.hp=2700,Oilpress.ReinforcedHull.hp_bp=15000,Oilpress.ImmovableMass.hp_bp=15000",98.0,96.1,99.6,256,200000..200256,not accepted; owner preserved gameplay values
+oilpress-cost,Oilpress.cost=4800,97.3,94.9,99.2,256,200000..200256,not accepted; owner preserved gameplay values
+oilpress-forms15,"Oilpress.ReinforcedHull.hp_bp=15000,Oilpress.ImmovableMass.hp_bp=15000",96.9,94.5,98.8,256,200000..200256,not accepted; owner preserved gameplay values
+oilpress-forms25,"Oilpress.ReinforcedHull.hp_bp=25000,Oilpress.ImmovableMass.hp_bp=25000",97.3,95.3,99.2,256,200000..200256,not accepted; owner preserved gameplay values
+oilpress-forms5,"Oilpress.ReinforcedHull.hp_bp=5000,Oilpress.ImmovableMass.hp_bp=5000",97.1,94.9,98.8,256,200000..200256,not accepted; owner preserved gameplay values
+oilpress-hp25,Oilpress.hp=2700,98.0,96.1,99.6,256,200000..200256,not accepted; owner preserved gameplay values
+ranged-pair,"SiegeWalker.damage=64,SiegeWalker.range=4500,Bombard.hp=750,Bombard.damage=18",96.9,94.5,98.8,256,200000..200256,not accepted; owner preserved gameplay values
+siege-canary,SiegeWalker.damage=1,89.5,85.5,93.0,256,200000..200256,not accepted; owner preserved gameplay values
+siege-cost,SiegeWalker.cost=3600,98.2,96.5,99.6,256,200000..200256,not accepted; owner preserved gameplay values
+siege-damage,SiegeWalker.damage=64,96.1,93.8,98.4,256,200000..200256,not accepted; owner preserved gameplay values
+siege-damage50,SiegeWalker.damage=43,95.9,93.4,98.0,256,200000..200256,not accepted; owner preserved gameplay values
+siege-hp,SiegeWalker.hp=525,98.0,96.1,99.6,256,200000..200256,not accepted; owner preserved gameplay values
+siege-pressure,"SiegeWalker.hp=525,SiegeWalker.damage=64,SiegeWalker.range=4500,SiegeWalker.splash=1125",98.8,97.3,100.0,256,200000..200256,not accepted; owner preserved gameplay values
+siege-range,SiegeWalker.range=4500,98.4,96.9,99.6,256,200000..200256,not accepted; owner preserved gameplay values

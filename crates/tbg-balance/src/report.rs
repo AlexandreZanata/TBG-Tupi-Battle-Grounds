@@ -115,25 +115,21 @@ pub fn roster_csv(results: &crate::gate::Results, rules: &Ruleset) -> String {
     let mut taken = vec![0u64; n];
     let mut healed = vec![0u64; n];
     let mut status = vec![0u64; n];
-    for pairs in results.values() {
+    for pairs in results.pairs.values() {
         for game in pairs.iter().flat_map(|p| [&p[0], &p[1]]) {
             for p in 0..2 {
                 for (k, &count) in game.sides[p].purchases.iter().enumerate() {
                     purchases[k] += u64::from(count);
                 }
-                for (k, &total) in game.stats.dealt[p].iter().take(n).enumerate() {
-                    dealt[k] += total;
-                }
-                for (k, &total) in game.stats.taken[p].iter().take(n).enumerate() {
-                    taken[k] += total;
-                }
-                for (k, &total) in game.stats.healed[p].iter().take(n).enumerate() {
-                    healed[k] += total;
-                }
-                for (k, &total) in game.stats.status_ticks[p].iter().take(n).enumerate() {
-                    status[k] += total;
-                }
             }
+        }
+    }
+    for seat in 0..2 {
+        for kind in 0..n {
+            dealt[kind] += results.combat.dealt[seat][kind];
+            taken[kind] += results.combat.taken[seat][kind];
+            healed[kind] += results.combat.healed[seat][kind];
+            status[kind] += results.combat.status_ticks[seat][kind];
         }
     }
     let mut s = String::from(
@@ -246,7 +242,7 @@ pub fn duel_summary(m: &Matrix, rules: &Ruleset) -> String {
 /// Per-policy private-Shop metrics, aggregated only offline.
 pub fn shop_csv(results: &crate::gate::Results) -> String {
     let mut out=String::from("policy,games,reservations,reserved_bought,wait_shops,rerolls,reroll_energy,total_energy_spent,max_streak,expensive_purchases,no_frontline_at_60s,reached_60s,mean_ticks,seat_a_wins\n");
-    for ((a, b), pairs) in results {
+    for ((a, b), pairs) in &results.pairs {
         for (participant, policy) in [a, b].into_iter().enumerate() {
             let (
                 mut games,

@@ -274,7 +274,7 @@ human playtests. Targets are starting hypotheses.
 | Decisive play | Matches decided by Stronghold kill / overtime / draw | ≥ 60% / ≤ 30% / ≤ 2% |
 | Decision frequency | Intentions per player per match | ≥ 25 (one every 4–7 s) |
 | Strategic variety | Win rate of any faction-majority army (harness + humans) | 45–55% |
-| Roster health | Purchase share of each unit | ≥ 2.5 % (owner decision O-R2, 2026-10-29: 5 % is impossible with 25 units, whose even share is 4.0 %) |
+| Roster health | Purchase share of each unit | ≥ 62.5% of uniform share: 0.625 / N of purchases for each active conventional kind (owner D-48 amendment, 2026-10-31; 2.5% at N=25, approximately 1.36% at N=46) |
 | Counterplay | Every unit has a documented counter in the roster | 100% |
 | Comebacks | Wins by the player behind in Stronghold HP at 2:00 | ≥ 20% |
 | Readability | Testers can explain why they lost | ≥ 4 of 5 testers |

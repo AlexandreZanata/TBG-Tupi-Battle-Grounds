@@ -1,26 +1,101 @@
 name: ci
 
 on:
-  push:
   pull_request:
+  push:
+    branches: [main]
+    tags: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new commit supersedes only this PR/ref's CI, never native release/P66 jobs.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_BUILD_JOBS: 2
 
 jobs:
-  check:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt, clippy
-          targets: wasm32-unknown-unknown
+          components: rustfmt
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Required-check regression guards
+        run: python3 scripts/test-ci-required-checks.py
+      - name: Fetch the patch comparison base
+        env:
+          PATCH_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -n "$PATCH_BASE" && "$PATCH_BASE" != 0000000000000000000000000000000000000000 ]]; then
+            git fetch --no-tags --depth=1 origin "$PATCH_BASE"
+            echo "PATCH_BASE=$PATCH_BASE" >> "$GITHUB_ENV"
+          else
+            git fetch --no-tags --depth=1 origin main
+            echo "PATCH_BASE=origin/main" >> "$GITHUB_ENV"
+          fi
+      - name: Mandatory gameplay patch notes
+        run: |
+          python3 scripts/test-patch-notes.py
+          python3 scripts/check-patch-notes.py --base "$PATCH_BASE"
+
+  native:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: ci-native-sim-opt2-v1
+          cache-on-failure: true
       - name: Install Bevy system dependencies
         run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
-      - name: fmt
-        run: cargo fmt --all -- --check
-      - name: clippy
-        run: cargo clippy --workspace -- -D warnings
-      - name: test
-        run: cargo test --workspace
-      - name: wasm check
-        run: cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+      - name: Clippy (complete workspace)
+        run: cargo clippy --locked --workspace -- -D warnings
+      - name: Test (complete workspace, optimized simulation)
+        run: cargo --config .github/cargo-ci.toml test --locked --workspace
+
+  wasm:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ci-wasm-v1
+          cache-on-failure: true
+      - name: WASM compatibility
+        run: cargo check --locked -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+
+  # Preserve the required status name; skipped dependencies must never turn green.
+  check:
+    if: ${{ always() }}
+    needs: [quality, native, wasm]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Require every lane to pass
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: python3 scripts/ci-required-checks.py

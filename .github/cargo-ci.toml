@@ -1,0 +1,10 @@
+# Keep the full deterministic lab contracts fast without changing local/release profiles.
+[profile.test]
+debug-assertions = true
+overflow-checks = true
+
+[profile.test.package.tbg-core]
+opt-level = 2
+
+[profile.test.package.tbg-balance]
+opt-level = 2
