@@ -307,7 +307,12 @@ necessary, never sufficient; the owner's playtest decides.
 | Nash equilibrium of the full pool: support / largest weight | ≥ 3 policies / ≤ 50 % | yes |
 
 **Role invariants (Proposed).** Searched rulesets keep: base range ≤
-Stronghold range; cost between 1 Energy and the Energy cap; interval ≥
+Stronghold range, except units that never target Strongholds and Farwatch's
+registered canonical reach (**Proposed P71 owner rule**, clarified by D-102).
+P71 allows Farwatch to target Strongholds at its existing 12.0-tile base range;
+this exception does not authorize a greater experimental range or exempt another
+Stronghold attacker. If the experimental Stronghold range is larger, the ordinary
+cap still applies. Cost stays between 1 Energy and the Energy cap; interval ≥
 the minimum; in a faction with a Tank, a Tank has the most HP per Energy;
 in a faction with a Ranged unit, a Ranged unit has the longest range; a
 zero stays zero (no new ability). Untuned by the lab: Synergy thresholds,
