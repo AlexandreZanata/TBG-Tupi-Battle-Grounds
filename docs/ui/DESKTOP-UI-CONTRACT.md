@@ -136,3 +136,28 @@ historical captures do not certify every required surface or animation.
 - Validation: policy/link/JSON inspection and `git diff --check` only. No builds,
   new captures or cross-platform runtime validation were run for this policy
   change. Full visual/motion correspondence remains unverified, not waived.
+
+### 2026-11-01 — P73 Active players, invitations, rematch and match history
+
+- Reference: Linux native is canonical. P73 adds the Active players directory
+  (search, filters, paging, availability, loading/empty/failed/stale/partial
+  states), incoming/outgoing invitation notices, Result actions (Players, My
+  history, recorded Pending/Stored/Delayed status, rematch offer in every
+  online PvP mode), owner history list/detail/settings and the public profile
+  history preview. No Arena, champion, combat VFX or Victory dance changed.
+- Propagation: one shared Bevy implementation (`ui/history`, `ui/social`,
+  `ui/shell/live`, `ui/result`) with shared pt-BR/en catalogs for Linux,
+  Windows and web. The only target split is the timestamp service adapter:
+  native reads the system zone through Jiff and the browser through `Intl`;
+  both render the same `dd/mm/yyyy HH:MM ±hh:mm` (pt-BR) or
+  `mm/dd/yyyy HH:MM ±hh:mm` (en) text, so layout and visible output match.
+- Coverage: `desktop-ui-contract.json` adds `live-players`, `player-invites`,
+  `result-p73-actions`, `result-rematch`, `history-owner-private`,
+  `history-owner-public`, `history-detail` and `history-public-profile`.
+  The contract still lists only the original five Arena screens; extending it
+  to Celestial, Clockwork and Desert belongs to the eight-Arena front.
+- Validation: source gate `python3 scripts/check-desktop-ui.py` passed on the
+  consolidated tree. Seven native Linux fixture captures exist from the P73
+  front at a pre-final revision (`docs/planning/evidence/p73/`). Windows and
+  browser captures, and final-source Linux captures, are **pending**;
+  correspondence is unverified, not waived.

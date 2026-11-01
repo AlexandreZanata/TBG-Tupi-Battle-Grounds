@@ -62,6 +62,14 @@
     "loading",
     "victory-seat-a",
     "victory-seat-b",
+    "live-players",
+    "player-invites",
+    "result-p73-actions",
+    "result-rematch",
+    "history-owner-private",
+    "history-owner-public",
+    "history-detail",
+    "history-public-profile",
     "next-match-cleanup"
   ],
   "motion_screens": [
