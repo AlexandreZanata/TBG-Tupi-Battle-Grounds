@@ -89,7 +89,8 @@ impl Default for Catalog {
             role: None,
             yaw: 0.,
             zoom: 1.0,
-            reduced: crate::config::reduced_motion(),
+            // The laboratory opens in playback mode; its toggle never inherits Result settings.
+            reduced: false,
             allies: [UnitKind::BoneBrute, UnitKind::Hexer, UnitKind::Archer]
                 .map(TrainingUnitSpec::base)
                 .to_vec(),

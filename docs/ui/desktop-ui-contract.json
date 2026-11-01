@@ -57,13 +57,21 @@
     "loading",
     "victory-seat-a",
     "victory-seat-b",
-    "next-match-cleanup"
+    "next-match-cleanup",
+    "preview-motion-default",
+    "preview-motion-reduced",
+    "preview-motion-resumed",
+    "preview-motion-reentry"
   ],
   "motion_screens": [
     "preview-dance",
     "victory-seat-a",
     "victory-seat-b",
-    "next-match-cleanup"
+    "next-match-cleanup",
+    "preview-motion-default",
+    "preview-motion-reduced",
+    "preview-motion-resumed",
+    "preview-motion-reentry"
   ],
   "motion_frames": [
     0,
@@ -111,5 +119,10 @@
         "file": "relative/path.png"
       }
     ]
-  }
+  },
+  "required_platforms": [
+    "linux",
+    "windows",
+    "web"
+  ]
 }

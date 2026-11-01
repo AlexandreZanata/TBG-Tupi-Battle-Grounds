@@ -93,7 +93,11 @@ pub(super) fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
                 r.spawn(skin::control(text, a, 40., false));
             }
             r.spawn(skin::control(
-                lang.key("training.reduced"),
+                lang.key(if c.reduced {
+                    "training.reduced_on"
+                } else {
+                    "training.reduced_off"
+                }),
                 Action::Motion,
                 244.,
                 c.reduced,

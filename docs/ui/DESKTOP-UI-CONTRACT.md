@@ -72,3 +72,28 @@ Actual same-source packaged Windows captures, Wine and a real Windows GPU
 session are subsequent delivery gates. Until those pass, equivalence remains
 **unverified**, regardless of Linux compilation or a successful source gate.
 No Windows-ready/support claim or signing approval follows from this document.
+
+## 2026-11-01 — Laboratory reduced-motion toggle
+
+Linux reference: Troops opens with ordinary playback even if the saved Result
+reduced-motion preference is enabled. The laboratory toggle is temporary to that
+visit, labels its on/off state explicitly, and never reads or changes the Result
+preference. Exiting Troops resets the toggle; changing its internal tabs does not.
+Manually enabling reduced motion still samples the existing static pose; disabling
+it resumes the existing animation. No champion clip, dance, projectile, combat
+behavior or timing is modified by this correction.
+
+Shared propagation: `training::{Catalog, runtime, preview, catalog::viewer}` and
+both locale catalogs are shared by Linux, Windows and desktop web. No target-specific
+presentation is introduced. Required platforms are listed explicitly in the JSON.
+Source sharing does not establish rendered correspondence.
+
+Matrix additions: `preview-motion-default`, `preview-motion-reduced`,
+`preview-motion-resumed`, `preview-motion-reentry`, each with the contract's motion
+frames. Cover Dance/Victory and Attack, default and evolved forms, pt-BR and EN,
+with a previously saved global reduced-motion value of 1. Check button state,
+motion before/after toggling, reentry, and unchanged global preference bytes.
+
+Evidence at implementation: Linux native build and focused motion observations
+pending. Windows and desktop web observations are queued for consolidation, pending
+same-source packaged comparison. No cross-platform parity is claimed.

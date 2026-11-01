@@ -126,10 +126,7 @@ fn viewer(action: Action, c: &mut Catalog) -> bool {
         Action::Tab(tab) => c.tab = tab,
         Action::Rotate(d) => c.yaw += f32::from(d) * 0.25,
         Action::Zoom(d) => c.zoom = (c.zoom + f32::from(d) * 0.1).clamp(0.6, 1.7),
-        Action::Motion => {
-            c.reduced = !c.reduced;
-            crate::config::save_reduced_motion(c.reduced);
-        }
+        Action::Motion => c.reduced = !c.reduced,
         _ => return false,
     }
     true

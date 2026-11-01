@@ -1455,5 +1455,7 @@
   "training.no_results": "No champions match these filters.",
   "training.practice_hint": "Choose a difficulty and arena for your next practice match.",
   "training.arena": "Training arena",
-  "training.reduced": "Reduced motion"
+  "training.reduced": "Reduced motion",
+  "training.reduced_on": "Reduced motion: on",
+  "training.reduced_off": "Reduced motion: off"
 }

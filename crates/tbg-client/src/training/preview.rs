@@ -48,7 +48,7 @@ fn show(
     mut commands: Commands,
     state: Res<State<GameState>>,
     shell: Res<Shell>,
-    c: Res<Catalog>,
+    mut c: ResMut<Catalog>,
     time: Res<Time>,
     mut preview: ResMut<Preview>,
     lib: Res<FigureLibrary>,
@@ -92,6 +92,10 @@ fn show(
         }
     }
     if !active {
+        if changed {
+            // Reduced motion is a temporary inspection aid, not the next visit's playback mode.
+            c.reduced = false;
+        }
         if let Some(stage) = preview.stage.take() {
             commands.entity(stage).try_despawn();
         }
