@@ -1,7 +1,8 @@
 # Ogre faction and Machine replacement
 
-**Delivered locally:** Linux preview 0.1.2-ogres.1, code source e44f0f3, installed
-and native-witness verified; GitHub PR publication is the final step.
+**Delivered locally:** Linux preview 0.1.2-ogres.1, code source e44f0f3, installed,
+opened and native-witness verified. Published as draft
+[PR #48](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/48).
 Branch: `codex/ogre-faction`.
 Owner-authorized scope and initial numeric proposals: GAME-DESIGN OG-01 and
 DECISIONS OG-01. Nine new champions, 45 new forms, existing Ogre Archer transfer
@@ -25,6 +26,15 @@ Node equality expression in the new Hook Brawler model; replaced it with a
 variant match. Final results and commands will be appended after consolidation.
 Windows/desktop-web visual motion, full competitive balance and look/fun
 acceptance remain pending. No full workspace suite is authorized or run.
+
+Final review gallery: `http://localhost:8964/`, with nine native portraits,
+ten five-form sheets and nine separately identified AI concept sheets.
+All 28 embedded images loaded in the desktop browser. The landing preview is
+`http://localhost:8604/#champions`; its final Ogre-filter capture is
+[available here](../ogre-faction/previews/landing-ogres.jpg).
+The installed native application is open for owner validation. The PR contains
+the implementation and scoped evidence; merge and public deployment remain
+outside this delivery.
 
 ## Initial scoped consolidation (ruleset 8)
 
