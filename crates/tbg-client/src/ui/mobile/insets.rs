@@ -11,15 +11,7 @@ pub fn apply(
     window: Single<&Window>,
     metrics: Res<Metrics>,
     mut frame: Query<(Entity, &mut Node), With<SafeFrame>>,
-    roots: Query<
-        Entity,
-        (
-            With<Node>,
-            Without<ChildOf>,
-            Without<SafeFrame>,
-            Without<FullBleed>,
-        ),
-    >,
+    roots: Query<Entity, (With<Node>, Without<ChildOf>, Without<SafeFrame>)>,
 ) {
     let safe = metrics.safe;
     let density = if metrics.density > 0. {
