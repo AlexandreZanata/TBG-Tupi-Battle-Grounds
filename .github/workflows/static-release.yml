@@ -34,6 +34,10 @@ jobs:
           persist-credentials: false
       - name: Select public frontend inputs
         id: scope
+        # Compare with the last published candidate (read-only job token), so a
+        # change skipped by an outdated run is still published by the next one.
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: python3 scripts/static-release-changes.py
 
   build:

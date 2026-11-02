@@ -1,20 +1,35 @@
 #!/usr/bin/env python3
 """Verify and promote browser releases independently under the shared deployment lock."""
 import argparse
-import fcntl
 import json
 import re
+import subprocess
 import tempfile
 from pathlib import Path
+from urllib.error import URLError
 
 import web_activate
 import web_policy
 from activate import STATE, write_json
+from control import Deferred, deployment_lock, run_controller
+from github import api, candidate, fetch
 from policy import REPOSITORY, require
-from pull import api, candidate, fetch, verify
+from pull import verify
+
+WAITING = STATE/'web-waiting.json'
 
 
-def run(config, apply, recheck):
+def live_server():
+    try:
+        live = web_activate.status()
+    except (URLError, OSError) as error:
+        raise Deferred(f'game server unreachable for the browser contract check: {error}') from None
+    if live.get('shutdown'):
+        raise Deferred('game server is draining; browser promotion waits')
+    return live
+
+
+def run(config, apply, recheck, adopt=False):
     if apply:
         web_activate.recover()
     release = candidate('web')
@@ -26,6 +41,10 @@ def run(config, apply, recheck):
     if not recheck and checked.exists() and json.loads(checked.read_text()).get('source_commit') == source:
         print('Browser candidate already handled; inspect web-checked.json.')
         return
+    live = live_server()
+    waiting = json.loads(WAITING.read_text()) if WAITING.exists() else None
+    if waiting and waiting.get('source_commit') == source and waiting.get('contract') != live['contract']:
+        raise Deferred(f"browser {source} waits for server contract {waiting.get('contract')}")
     current = web_activate.RECEIPT
     floor = json.loads(current.read_text())['source_commit'] if current.exists() else config['minimum_source']
     require(re.fullmatch(r'[0-9a-f]{40}', floor) is not None, 'verified browser source floor required')
@@ -42,13 +61,23 @@ def run(config, apply, recheck):
             asset = next((a for a in release['assets'] if a['name'] == name), None)
             require(asset is not None and asset['browser_download_url'] == prefix + name, 'unexpected web asset URL')
             path.write_bytes(fetch(prefix + name, limit))
-        verify(package, bundle, source, workflow=web_policy.WORKFLOW)
-        manifest = web_policy.unpack(package, root/'verified', source)
         try:
-            live = web_activate.status()
-            require(live['contract'] == manifest['contract'] and not live.get('shutdown'), 'incompatible browser candidate')
+            verify(package, bundle, source, workflow=web_policy.WORKFLOW)
+            manifest = web_policy.unpack(package, root/'verified', source)
+        except (subprocess.CalledProcessError, ValueError) as error:
             if apply:
-                web_activate.activate(root/'verified', manifest, config.get('public_web', 'https://app.tupibg.com'))
+                write_json(checked, {'source_commit': source, 'outcome': 'rejected', 'reason': str(error)[:500]})
+            raise
+        if manifest['contract'] != live['contract']:
+            # A coordinated release brings the server first; then this applies on its own.
+            if apply:
+                write_json(WAITING, {'source_commit': source, 'contract': manifest['contract']})
+            raise Deferred(f"browser {source} needs server contract {manifest['contract']}, live is {live['contract']}")
+        if apply:
+            WAITING.unlink(missing_ok=True)
+        try:
+            if apply:
+                web_activate.activate(root/'verified', manifest, config.get('public_web', 'https://app.tupibg.com'), adopt)
                 write_json(checked, {'source_commit': source, 'outcome': 'healthy'})
         except Exception as error:
             if apply:
@@ -62,11 +91,14 @@ def main():
     parser.add_argument('--config', type=Path, default=Path('/etc/tbg/auto-deploy.json'))
     parser.add_argument('--apply', action='store_true')
     parser.add_argument('--recheck', action='store_true')
+    parser.add_argument('--adopt', action='store_true',
+                        help='replace an entry pointer that changed outside this controller')
     args = parser.parse_args()
-    STATE.mkdir(mode=0o700, exist_ok=True)
-    with (STATE/'lock').open('w') as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        run(json.loads(args.config.read_text()), args.apply, args.recheck)
+
+    def body():
+        with deployment_lock():
+            run(json.loads(args.config.read_text()), args.apply, args.recheck, args.adopt)
+    run_controller(body)
 
 
 if __name__ == '__main__':

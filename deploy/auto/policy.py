@@ -57,8 +57,12 @@ def unpack(archive, destination, source):
         return manifest
 
 
+def single_process(live):
+    """The single-process path restarts the only game server; a release-slot host promotes instead."""
+    require(live.get('slot') is None, 'a release-slot host is promoted through the slot coordinator')
+
+
 def compatible(manifest, live, schema):
-    require(live.get('slot') is None, 'two-slot activation requires the P66 rollout procedure')
     require(live.get('contract') == manifest['contract'], 'contract change staged: coordinated client release required')
     require(schema == manifest['database_schema'], 'database change staged: migration review required')
     require(not live.get('shutdown'), 'another drain is in progress')

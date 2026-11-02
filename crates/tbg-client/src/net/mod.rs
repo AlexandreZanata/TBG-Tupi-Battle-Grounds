@@ -86,6 +86,9 @@ pub struct NetLink {
     watching: bool,
     /// P66: the slot path this link uses, or the admission still pending.
     route: admission::Route,
+    /// P66: how often a draining slot's refusal was answered with a fresh admission, and when last.
+    readmits: u32,
+    readmit_at: f64,
 }
 
 impl NetLink {
@@ -128,6 +131,8 @@ impl NetLink {
                     .flatten(),
                 now,
             ),
+            readmits: 0,
+            readmit_at: 0.0,
         };
         link.connect(now);
         link

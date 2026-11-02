@@ -75,6 +75,16 @@ completing migration. A matching integer alone is not migration evidence. Review
 tests when touching these contracts. Keep stable account identity, credential
 rotation, seat ownership, result receipts and the single ranked writer intact.
 
+Server changes reach players by promotion into the idle release slot while the other
+slot keeps running its matches, so both generations must read and write the same
+database and speak the same contract: schema changes are additive (expand first), and
+a wire/gameplay contract change is a separate coordinated release the automation refuses.
+Anything that lives in one process's memory (queues, rooms, invitations, rematch offers,
+spectator lists) does not follow a promotion; `lobby_waiting` and the drain refusal in
+`lobby/matchmaking.rs` exist for that, so extend them with any new waiting state.
+`python3 scripts/rehearse-slot-release.py --help` rehearses a promotion locally with real
+processes and bots; run it when touching `release.rs`, the lobby or `deploy/auto/slots.py`.
+
 Email registration/recovery and provider integrations remain P67 offline contracts
 and fixtures. Live account creation still uses a name and generated key; merging
 documents does not implement SMTP, deliver email or activate commerce. Document any
@@ -83,6 +93,16 @@ such future integration and obtain the required owner/provider inputs separately
 Gameplay edits require their Proposed canon entries, source fingerprint and bilingual
 patch notes; balance values additionally require D-33 evidence. Use the existing
 [patch process](patches/README.md), never edit a contract test to hide a failure.
+
+## Desktop versions
+
+A pull request that changes shipped desktop inputs (client/core/update crates outside
+tests, `Cargo.*`, `.gitattributes`, `rust-toolchain.toml`, licenses, packaging scripts,
+`deploy/native/**`, `docs/patches/**`) must bump `crates/tbg-client/Cargo.toml`
+(and `Cargo.lock`) to an unpublished SemVer and title `deploy/native/RELEASE-NOTES.md`
+with it. `python3 scripts/check-native-version.py --base origin/main` runs the same
+check locally; CI fails early otherwise. Its merge publishes that version
+automatically; see [RELEASES](RELEASES.md).
 
 ## Review and handoff
 

@@ -29,6 +29,8 @@ pub struct Gate {
     pub ranked: AtomicBool,
     /// Store and ranked recovery finished; the slot can be made ready.
     pub serving: AtomicBool,
+    /// The directory marks this slot `draining`: running work finishes, nothing new starts.
+    pub drain: AtomicBool,
 }
 
 impl Gate {
@@ -39,7 +41,13 @@ impl Gate {
             open: AtomicBool::new(!slot_mode),
             ranked: AtomicBool::new(!slot_mode),
             serving: AtomicBool::new(false),
+            drain: AtomicBool::new(false),
         }
+    }
+
+    /// Promoted away from, or SIGTERM: players still waiting here would wait for nobody.
+    pub fn draining(&self) -> bool {
+        self.shutdown.load(Relaxed) || self.drain.load(Relaxed)
     }
 
     /// May the lobby start a new match now?
@@ -119,11 +127,12 @@ pub async fn run(runtime: Arc<Runtime>, store: Arc<Store>, metrics: Arc<Metrics>
         }
     }
     let mut ticks = tokio::time::interval(TICK);
-    let mut n: u64 = 0;
     loop {
         ticks.tick().await;
-        n += 1;
-        tick(&runtime, &store, &metrics, &id, n.is_multiple_of(5)).await;
+        // An admitting slot without ranked authority asks for it every second, so ranked play
+        // resumes within about a second of a promotion instead of the next five-second poll.
+        let handoff = runtime.gate.open.load(Relaxed) && !runtime.gate.ranked.load(Relaxed);
+        tick(&runtime, &store, &metrics, &id, handoff).await;
     }
 }
 
@@ -161,6 +170,10 @@ async fn tick(
         .find(|r| r.slot == id.slot && r.generation == id.generation);
     let open = mine && own.is_some_and(SlotRow::admits);
     runtime.gate.open.store(open, Relaxed);
+    runtime
+        .gate
+        .drain
+        .store(mine && own.is_some_and(|r| r.state == "draining"), Relaxed);
     runtime
         .gate
         .ranked

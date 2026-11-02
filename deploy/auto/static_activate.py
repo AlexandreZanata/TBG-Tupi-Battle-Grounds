@@ -74,9 +74,14 @@ def stage(staged, manifest):
     return previous
 
 
-def activate(staged, manifest):
+def activate(staged, manifest, adopt=False):
     previous = stage(staged, manifest)
-    write_json(JOURNAL, {'previous': previous, 'receipt': json.loads(RECEIPT.read_text()) if RECEIPT.exists() else None})
+    receipt = json.loads(RECEIPT.read_text()) if RECEIPT.exists() else None
+    # Never silently overwrite a site published outside the controller.
+    expected = (receipt or {}).get('source_commit')
+    require(adopt or all(target == expected for target in previous.values()),
+            'a static site changed outside the controller; review it, then rerun with --adopt')
+    write_json(JOURNAL, {'previous': previous, 'receipt': receipt})
     try:
         for site in SITES:
             entry(site, manifest['source_commit'])

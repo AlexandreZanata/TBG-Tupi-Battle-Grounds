@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from urllib.request import Request, urlopen
 
-from policy import compatible, digest, require
+from policy import compatible, digest, require, single_process
 
 BIN = Path('/opt/tbg/bin')
 RELEASES = Path('/opt/tbg/releases')
@@ -113,6 +113,7 @@ def recover():
 def check_compatibility(manifest):
     require_running_binary(BIN/'tbg-server')
     live = status()
+    single_process(live)
     with sqlite3.connect(f'file:{DB}?mode=ro', uri=True) as connection:
         schema = connection.execute('SELECT max(version) FROM schema_version').fetchone()[0]
     compatible(manifest, live, schema)
