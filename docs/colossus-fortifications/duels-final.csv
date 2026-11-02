@@ -1,0 +1,9 @@
+section,kind,tier,branch,seat,opponent,ticks,hp,remaining,queued,score
+duel,Colossus,0,0,A, SiegeWalker,,,,,0
+duel,Colossus,0,0,B, SiegeWalker,,,,,0
+duel,Colossus,0,0,A, Archer,,,,,1
+duel,Colossus,0,0,B, Archer,,,,,1
+duel,Colossus,0,0,A, Longaxe,,,,,1
+duel,Colossus,0,0,B, Longaxe,,,,,1
+duel,Colossus,0,0,A, Trident,,,,,0
+duel,Colossus,0,0,B, Trident,,,,,0

@@ -222,7 +222,7 @@ fn advance_unit(
             let mut x = u.x + u.seat.dir() * speed;
             x = formations.clamp(state, &u, x);
             x = escort_clamp(state, &u, x);
-            state.units[idx].x = x.clamp(0, LANE_LEN);
+            crate::occupancy::move_unit(state, idx, x.clamp(0, LANE_LEN));
         }
     }
 }
@@ -275,6 +275,9 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
         }
         // Kind and Fortification shape the real shot (BR-SK03, BR-SK06).
         let tower = state.stronghold(seat);
+        if tower.damage <= 0 {
+            continue;
+        }
         let sx = stronghold_x(seat);
         let target = state
             .units
@@ -317,13 +320,9 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
             crate::lab::stronghold(state, seat, removed);
             let killed = was_alive && state.unit_index(id).is_some_and(|i| state.units[i].hp <= 0);
             if killed && removed > 0 {
-                if let Some((max, ticks)) = augment::tower_fury_rule(&state.player(seat).augments) {
-                    let until = state.tick.saturating_add(u32::from(ticks));
-                    let p = state.player_mut(seat);
-                    p.fury_stacks = p.fury_stacks.saturating_add(1).min(max);
-                    p.fury_until = until;
-                }
+                crate::stronghold_power::killed(state, seat);
             }
+            crate::stronghold_power::collateral(state, seat, id, amount, ev);
             state.player_mut(seat).stronghold_cooldown = tower.interval;
         }
     }

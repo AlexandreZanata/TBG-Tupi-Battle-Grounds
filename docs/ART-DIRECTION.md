@@ -372,3 +372,26 @@ Every new champion has Base/A1/A2/B1/B2 silhouettes, +8/+16 percent tier scale,
 material progression and a tier-two artifact. Concepts and engine captures
 have separate source/hash manifests. Team identity is **only** the existing
 blue/red foot circle; no square body plaque, team tabard or ownership paint.
+
+
+### GD-01 Colossus / PK-01 physical reservation (2026-11-02)
+
+Gods starts with one colossal grounded stone champion. Its sculpted ivory
+and charcoal body, geometric crown, bronze glyph bands and single tall back
+obelisk must read apart from Ogre tusks, marine shells, armored knights and
+machine barrels. The A branch is sunlit ivory/gold; B is a charcoal/amber
+monolith. Retain the same body identity across five forms; no floating prop
+swap, team plaque or pedestal. Ownership uses foot rings only.
+
+Carry the real obelisk on the back; draw with both hands, anticipate, slam at
+the canonical hit cue, then recover under its weight. Use a heavy low stride,
+kneeling stone death and slow victory salute. Stone chips and a ground shock
+ring belong to the real hit point. Gallery spacing may adapt to its size;
+gameplay scale is never shrunk to fit a screenshot. Catalog inspection uses
+the existing bounded display actor and keeps the full gameplay model intact.
+
+The authoring-only footprint exporter samples native geometry/poses including
+weapons, arms and rear aim. Export measurements to integer core profiles;
+core never imports graphics. Lateral placement is now authoritative (PK-01),
+not a second visual spring. Preserve identical interpolation and timing on
+Linux, Windows and desktop web; record each unobserved target as pending.

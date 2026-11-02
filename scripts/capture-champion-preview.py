@@ -77,7 +77,7 @@ def main():
     new_kinds = [c['kind'] for c in catalog]
     expanded = json.loads((ROOT / 'docs/ogre-faction/catalog.json').read_text())['champions']
     abyssals = json.loads((ROOT / 'docs/abyssal-faction/catalog.json').read_text())['champions']
-    lineup_kinds = [*new_kinds, 'SiegeWalker', 'Trident', *(c['kind'] for c in expanded), *(c['kind'] for c in abyssals)]
+    lineup_kinds = [*new_kinds, 'SiegeWalker', 'Trident', 'Colossus', *(c['kind'] for c in expanded), *(c['kind'] for c in abyssals)]
     if args.all_portraits:
         source = (ROOT / 'crates/tbg-core/src/types.rs').read_text()
         pool = re.search(r'ALL_KINDS: \[UnitKind; \d+\] = \[([\s\S]*?)\];', source)[1]

@@ -2192,3 +2192,133 @@ before/after transfer retain their original screen records. These bounded
 results justify the two initial proposals only; they do not establish full
 team/form/budget balance. The final proposal is revision 10, source hash
 `523044fc973bac39`; canonical trace validation pins that exact identity.
+
+
+## TW-01 / PK-01 / GD-01 — Proposed owner revision (2026-11-02)
+
+Owner authorizes stronger Strongholds and Fortifications, width-limited
+BattleLine occupancy, and Gods with one gigantic Colossus. These proposals
+supersede conflicting earlier numeric rows. Competitive acceptance remains
+subject to D-33; the bounded screen is not the full gate.
+
+**TW-01.** Reference Stronghold HP 6750 and damage 159 (formerly 4500/53).
+Printed base HP/damage by kind: Classic 6750/159, Treasury 6277/144,
+Bastion 7762/141, Artillery 5737/174, Command 6480/144. HP is +50%, truncated
+to integer, and damage is exactly triple each former printed value.
+Fortification costs become 3600 then 6000 sub-Energy (6 then 10 Energy).
+Existing branch lock, proportional HP rescaling and maximum tier 2 remain.
+
+- Treasury: 270 sub-Energy per eligible kill, cap 1080 per existing 200-tick
+  window; A +2500 HP bp per step; B +90 spoils per step and +540 cap at B2.
+- Bastion: 1500 bp incoming damage reduction, before shields; A +3000 HP bp
+  and +500 armor bp per step; B1 +1500 range, B2 +3000 damage bp.
+- Artillery: primary shot also damages at most three other living enemies
+  within 1000 milli-tiles, sorted by distance then ID, for 4000 bp of shot
+  damage. A +4000 damage bp and +2000 splash bp per step. B intervals 14/10
+  ticks. No friendly splash; collateral conventional kills count toward the
+  existing Tower Fury cap/duration. Zero configured tower damage means no fire,
+  including the D-33 duel Arena. It never becomes a one-damage shot.
+- Command: aura 1500 bp in 5000 milli-tiles; A +750 aura bp per step;
+  B +1500 aura radius per step. Existing eligibility and additive caps remain.
+
+**PK-01 activation.** Physical lanes are a private Practice/Training and
+explicit lab-spawn candidate. Long-running preview bot probes exposed
+persistent stalemates, so competitive canonical matches keep legacy movement
+and presentation until D-33 acceptance. This flag is server-owned and public
+in both views; no PlayerIntention can enable it. The entire roster is
+covered in the local preview. Do not claim ranked activation or completed
+competitive acceptance.
+
+**PK-01.** The BattleLine has 5000 milli-tiles of usable lateral width,
+with a matching 5.08-tile path. Fifty integer columns of 100 reserve
+champion body, arms and held equipment. The normative per-kind base profile
+is [content/occupancy.rs](../crates/tbg-core/src/content/occupancy.rs), derived
+from the [native mesh measurements](colossus-fortifications/native-footprints.json)
+over all five forms, Idle/Walk/attack, 16 samples and six front/rear/lateral
+aim cases. Each measured bound is rounded up to 50 milli-tiles with 100 extra
+clearance; tier growth is 8% per tier. Profiles wider than the corridor occupy
+all columns and cannot be passed; their visuals may extend beyond the path.
+This conservative weapon envelope bounds dense ranged rows (two base Archers;
+capacity also depends on tier and mixed widths). A three-tile initial candidate
+blocked ranged units behind idle Supports and did not finish the bounded bot
+probe; five tiles permits those bypasses while retaining physical capacity.
+
+Capacity at a longitudinal position is the set of non-overlapping column
+reservations, not an Archetype quota or a global army cap. Same-seat following
+spacing is follower front + leader back + 100; opposing body separation is
+both body half-lengths +100. Ordinary unit reach stays root-based, with a floor at the two body
+half-lengths plus the 100-milli-tile contact gap. This lets a short melee
+attack hit touching bodies without adding free reach to ranged attacks or
+heals. Stronghold reach stays root-based. Existing
+combat targets and area radii remain longitudinal; lateral columns govern
+occupancy and passage, not a new two-dimensional targeting game.
+
+Prefer existing placed units, then front-to-back progress, seat, and stable
+ID. Preserve slots while stationary. A bypass needs a clear swept lateral
+strip, moves at most one column per tick and locks for 20 ticks on completion
+or a blocked transition. The server supplies lateral position in UnitView;
+clients interpolate it on the same snapshot timeline and apply no second
+live repulsion solver. Stress tools retain their separate cosmetic solver.
+
+Paid purchases and summons with no room wait in a deployment queue; do not
+discard them, attack, heal, block, generate Synergy or tick their action
+cooldowns while waiting. Summon expiry still advances on the combat clock.
+New births first try the base anchor. If a stationary backline blocks it,
+choose the nearest free footprint in the owner's first third of the
+BattleLine (endpoint 5333 for Seat A, mirrored for Seat B), without appearing
+beyond a living hostile front. This changes only a new unit's initial
+materialization, never teleports a deployed unit. Wait if that zone is full.
+Release them deterministically when room opens. Only the owner's queued
+count is exposed; queued identities and the enemy count are private. Training
+and the balance duel's elimination/HP accounting include waiting units.
+The Practice bot prefers Fortification/Evolution while its own entrance has
+a queue; after those upgrades it seeks narrow attackers that can use free
+strips and can attack a Stronghold. This is opponent policy, not a restriction
+on player purchases.
+An Evolution that cannot fit while preserving every deployed ally is rejected
+with LaneFull before spending Energy. A forced displacement that leaves no
+legal projection currently retains the active unit targetable; resolving all
+teleport/displacement congestion is a documented remaining limitation.
+
+Rolling-cask damage, collision and healing retain OG-02 longitudinal rules.
+Their immutable launch origin/target and exact lateral burst coordinate are
+public presentation facts so the rendered cask starts at its carrier and
+meets the actual contact lane; clients decide no hit or heal.
+
+**GD-01.** Append Gods (Deuses), currently exactly one conventional champion,
+Colossus (Colosso), Tank: cost 10800 sub-Energy = **18 Energy**, HP **2400**,
+damage **170**, interval **110 ticks**, range **4500**, movement **22**
+milli-tiles/tick, full-damage frontal splash **1800**. Base damage is exactly
+2x SiegeWalker and range equals its corresponding form. The obelisk is one
+real prop, carried vertically on the back, drawn and slammed in the attack
+direction. Splash excludes enemies behind the attacker relative to that hit.
+
+- A1 Sun Obelisk / Obelisco Solar: +2500 damage bp, +1500 range.
+- A2 Pillar of Dawn / Pilar da Aurora: +600 splash radius.
+- B1 Ancient Monolith / Monólito Ancestral: +3000 HP bp.
+- B2 Eternal Monument / Monumento Eterno: another +3000 HP bp.
+
+Existing Evolution common bonuses/costs apply. Gods has no Synergy bonus
+while its roster has only one kind. It cannot ride a Cargo Crab (Tank).
+The private authored roster becomes **82 champions / 10 Factions**: nine
+Factions of nine and Gods of one; FULL_POOL remains 46. New Gods content is
+Practice/Training preview only. Team identity stays on foot rings, with no
+body plaques or seat recoloring. Wire **36**, gameplay revision **11** identify
+the new layout/rules; older enum indices and historical fixtures are retained.
+
+
+TW-01 canonical trace identity: revision 11, source `a0a1d508c59e5841`.
+The exact tower boost changes bot outcomes/ticks; append the observed five
+canonical trace fixtures without changing any historical entry. Physical
+lanes remain false in this baseline and true in the private PK-01 scenarios.
+
+
+GD-01 bounded tuning: the first 3600-HP/70-tick candidate won all eight base
+reference duels at Energy 18 and all eight evolved counter duels at Energy 24.
+The 2400-HP/70-tick follow-up still won the eight evolved cases. The final
+Proposed candidate is **2400 HP, 110-tick interval (5.5 s)**; the owner-fixed
+18-Energy cost, 170 damage and Ogre Archer range stay intact. In the bounded
+Energy-24 base panel, Sawbot, Farwatch and Mantis beat it on both seats;
+Ravager loses. All four evolved reference forms still lose at that budget.
+This identifies initial counterplay, not full team/form/budget acceptance.
+Raw measurements and scope are in [the report](phases/COLOSSUS-FORTIFICATIONS-PACKING.md).

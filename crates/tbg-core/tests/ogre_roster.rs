@@ -17,8 +17,8 @@ fn ogre_range_matches_archer_in_every_evolution() {
 }
 #[test]
 fn ogre_roster_has_nine_per_faction_and_balanced_roles() {
-    assert_eq!(COMPLETION_POOL.len(), 81);
-    assert_eq!(FACTIONS.len(), 9);
+    assert_eq!(COMPLETION_POOL.len(), 82);
+    assert_eq!(FACTIONS.len(), 10);
     assert_eq!(FULL_POOL.len(), 46);
     assert_eq!(Faction::Ogres.index(), 7);
     assert_eq!(SiegeWalker as usize, 5);
@@ -28,7 +28,7 @@ fn ogre_roster_has_nine_per_faction_and_balanced_roles() {
                 .iter()
                 .filter(|&&k| def(k).faction == faction)
                 .count(),
-            9,
+            if faction == Faction::Gods { 1 } else { 9 },
             "{faction:?}"
         );
     }

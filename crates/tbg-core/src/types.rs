@@ -65,6 +65,7 @@ pub enum Faction {
     Ogres,
     /// AB-01: ancient marine civilization, including the existing Trident.
     Abyssals,
+    Gods,
 }
 
 impl Faction {
@@ -84,6 +85,7 @@ impl Faction {
             Faction::Insects => "Insects",
             Faction::Ogres => "Ogres",
             Faction::Abyssals => "Abyssals",
+            Faction::Gods => "Gods",
         }
     }
 }
@@ -208,6 +210,7 @@ pub enum UnitKind {
     TrenchLamplighter,
     FoamWeaver,
     PodSnapper,
+    Colossus,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -227,7 +230,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
 #[rustfmt::skip]
-pub const ALL_KINDS: [UnitKind; 86] = [
+pub const ALL_KINDS: [UnitKind; 87] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -314,6 +317,7 @@ pub const ALL_KINDS: [UnitKind; 86] = [
     UnitKind::TrenchLamplighter,
     UnitKind::FoamWeaver,
     UnitKind::PodSnapper,
+    UnitKind::Colossus,
 ];
 
 impl UnitKind {
@@ -391,7 +395,7 @@ pub const FULL_POOL: [UnitKind; 46] = [
 
 /// Owner-authorized local champion preview; the online pool remains FULL_POOL.
 #[rustfmt::skip]
-pub const COMPLETION_POOL: [UnitKind; 81] = [
+pub const COMPLETION_POOL: [UnitKind; 82] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -473,6 +477,7 @@ pub const COMPLETION_POOL: [UnitKind; 81] = [
     UnitKind::TrenchLamplighter,
     UnitKind::FoamWeaver,
     UnitKind::PodSnapper,
+    UnitKind::Colossus,
 ];
 
 /// All playable archetypes, in glossary order.
@@ -485,7 +490,7 @@ pub const ARCHETYPES: [Archetype; 5] = [
 ];
 
 /// Number of Factions, including the owner-authorized Ogre expansion.
-pub const FACTION_COUNT: usize = 9;
+pub const FACTION_COUNT: usize = 10;
 
 /// All factions, in glossary order (also their synergy index).
 pub const FACTIONS: [Faction; FACTION_COUNT] = [
@@ -498,6 +503,7 @@ pub const FACTIONS: [Faction; FACTION_COUNT] = [
     Faction::Insects,
     Faction::Ogres,
     Faction::Abyssals,
+    Faction::Gods,
 ];
 
 /// Status effect applied to the primary target of a hit.

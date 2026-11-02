@@ -25,7 +25,9 @@ impl MatchState {
     /// Practice preview (ROSTER-EXPANSION §F.5): the full staging pool,
     /// offline only. Identical to canon until P44 adds new kinds.
     pub fn with_preview(seed: u64, arcanas: [ArcanaPreset; 2]) -> MatchState {
-        MatchState::lab(seed, Ruleset::preview(), arcanas)
+        let mut state = MatchState::lab(seed, Ruleset::preview(), arcanas);
+        state.physical_lanes = true;
+        state
     }
 
     /// A match on another ruleset: the offline balance lab only (D-33).
@@ -94,6 +96,7 @@ impl MatchState {
             RUNNING_START.saturating_add(rules.augment.round_ticks)
         };
         MatchState {
+            physical_lanes: false,
             tick: 0,
             clock: 0,
             phase: Phase::Countdown,
@@ -102,6 +105,7 @@ impl MatchState {
                 ..player(i as u64 + 1)
             }),
             units: Vec::new(),
+            deployments: Vec::new(),
             barrels: Vec::new(),
             next_unit_id: 1,
             outcome: None,
@@ -160,6 +164,7 @@ impl MatchState {
     /// Synergy, timers, afflictions, summons, bonds, boarding, then every
     /// unit acts. Tower fire and deaths follow in the caller.
     pub(crate) fn unit_pass(&mut self, ev: &mut Vec<Event>) {
+        crate::occupancy::arrange(self);
         synergy::update(self, ev);
         combat::tick_timers(self);
         crate::roster_slots::tick_marks(self);
@@ -173,6 +178,7 @@ impl MatchState {
         crate::support::boarding(self, ev);
         combat::run_units(self, ev);
         crate::barrel::advance(self, ev);
+        crate::occupancy::arrange(self);
     }
 
     /// The seat gives up (or its reconnect window expired): the other wins.

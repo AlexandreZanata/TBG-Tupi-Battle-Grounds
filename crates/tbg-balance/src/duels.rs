@@ -103,6 +103,7 @@ pub fn duel(arena: &'static Ruleset, a: Form, b: Form, budget: u32) -> Option<f6
         let hp = Seat::BOTH.map(|seat| {
             s.units
                 .iter()
+                .chain(s.deployments.iter())
                 .filter(|u| u.seat == seat && u.hp > 0)
                 .map(|u| i64::from(u.hp))
                 .sum::<i64>()

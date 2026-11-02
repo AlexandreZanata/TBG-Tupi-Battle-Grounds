@@ -21,6 +21,8 @@ mod reserve;
 // is also compiled, never in a plain debug build.
 #[cfg(tbg_desktop)]
 mod barrel;
+#[cfg(tbg_desktop)]
+mod packing;
 #[cfg(feature = "ui-acceptance")]
 mod social;
 #[cfg(tbg_desktop)]
@@ -176,6 +178,7 @@ fn capture(
     #[cfg(tbg_desktop)] loading: Res<crate::ui::native_loading::Status>,
     #[cfg(tbg_desktop)] support_probe: Option<Res<training::SupportProbe>>,
     #[cfg(tbg_desktop)] barrel_probe: Option<Res<barrel::Status>>,
+    #[cfg(tbg_desktop)] packing_probe: Option<Res<packing::Status>>,
     mut started: Local<bool>,
     #[cfg(tbg_desktop)] mut ready_at: Local<Option<f32>>,
 ) {
@@ -206,6 +209,9 @@ fn capture(
         // Shader/font work can outlive the requested delay on a busy machine.
         // Capture the ready scene, never the loading overlay in front of it.
         if !loading.boot_ready || loading.scene_waiting {
+            return;
+        }
+        if packing_probe.is_some_and(|probe| !probe.ready) {
             return;
         }
         if barrel_probe.is_some_and(|probe| !probe.ready) {

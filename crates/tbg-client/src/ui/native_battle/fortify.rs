@@ -315,8 +315,11 @@ fn field_text(
             v.stronghold_hp[v.you.index()].max(0),
             tower.max_hp
         ),
-        Field::PassiveName => value(&def["passive"], "name"),
-        Field::Passive => shell::expand(&value(&def["passive"], "text"), stats),
+        Field::PassiveName => lang.key(&format!(
+            "stronghold.{}.passive.name",
+            format!("{:?}", tower.kind).to_lowercase()
+        )),
+        Field::Passive => shell::passive(lang, tower.kind, stats),
         Field::EvolutionHeading => format!(
             "{} · {}",
             crate::i18n::content::stronghold_name(lang, tower.kind),
@@ -355,10 +358,6 @@ fn evolution_text(v: &MatchView, def: &Value, branch: u8, lang: crate::i18n::Lan
         ),
         shell::branch_effect(step),
     )
-}
-
-fn value(value: &Value, key: &str) -> String {
-    value[key].as_str().unwrap_or_default().into()
 }
 
 fn note(v: &MatchView, pending: bool) -> String {

@@ -407,16 +407,20 @@ fn completion_cc17_rhythm_keeps_standard_root_priority_and_two_victim_cap() {
 }
 
 #[test]
-fn completion_pool_is_local_only_and_all_nine_factions_have_nine_conventional_kinds() {
+fn completion_pool_keeps_nine_full_factions_and_one_god() {
     assert_eq!(crate::FULL_POOL.len(), 46);
-    assert_eq!(crate::COMPLETION_POOL.len(), 81);
+    assert_eq!(crate::COMPLETION_POOL.len(), 82);
     for faction in crate::FACTIONS {
         assert_eq!(
             crate::COMPLETION_POOL
                 .iter()
                 .filter(|&&kind| content::def(kind).faction == faction)
                 .count(),
-            9
+            if faction == crate::Faction::Gods {
+                1
+            } else {
+                9
+            }
         );
     }
     assert!(crate::COMPLETION_POOL.iter().all(|kind| !kind.is_summon()));
@@ -470,7 +474,7 @@ fn completion_seeded_mixed_preview_remains_deterministic_with_both_evolution_bra
 
 #[cfg(feature = "training")]
 #[test]
-fn completion_all_175_forms_start_and_advance_in_private_training() {
+fn completion_all_180_forms_start_and_advance_in_private_training() {
     use crate::training::{
         Opponent, SessionId, TrainingCommand, TrainingScenario, TrainingSession, TrainingUnitSpec,
         SCHEMA,
@@ -527,7 +531,7 @@ fn completion_all_175_forms_start_and_advance_in_private_training() {
             covered += 1;
         }
     }
-    assert_eq!(covered, 175);
+    assert_eq!(covered, 180);
 }
 
 #[test]

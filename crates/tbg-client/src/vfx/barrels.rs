@@ -97,6 +97,7 @@ pub(crate) fn place(
                 b,
                 b.x as f32 + (end as f32 - b.x as f32) * alpha,
                 from.you,
+                lateral(b, to, end, b.x as f32 + (end as f32 - b.x as f32) * alpha),
                 &mut keys,
             );
         }
@@ -122,6 +123,7 @@ pub(crate) fn place(
             b,
             origin as f32 + (b.x as f32 - origin as f32) * k,
             from.you,
+            lateral(b, to, b.x, origin as f32 + (b.x as f32 - origin as f32) * k),
             &mut keys,
         );
     }
@@ -134,6 +136,35 @@ pub(crate) fn place(
         }
     });
 }
+fn lateral(b: &Barrel, view: &MatchView, end: i32, x: f32) -> f32 {
+    let destination = view
+        .events
+        .iter()
+        .find_map(|e| match e {
+            Event::BarrelBurst {
+                source,
+                center,
+                center_z,
+                ..
+            } if *source == b.source => Some((*center, *center_z)),
+            _ => None,
+        })
+        .or_else(|| {
+            view.units
+                .iter()
+                .find(|u| u.id == b.target)
+                .map(|u| (u.x, i32::from(u.lane_z)))
+        });
+    let (tx, tz) = destination.unwrap_or((end, b.origin_z));
+    let span = tx - b.origin_x;
+    let k = if span == 0 {
+        1.0
+    } else {
+        ((x - b.origin_x as f32) / span as f32).clamp(0.0, 1.0)
+    };
+    (b.origin_z as f32 + (tz - b.origin_z) as f32 * k) / 1000.0
+}
+#[allow(clippy::too_many_arguments)] // Shared snapshot projection keeps roll and lateral interpolation together.
 fn draw(
     c: &mut Commands,
     a: &VfxAssets,
@@ -141,6 +172,7 @@ fn draw(
     b: &Barrel,
     x: f32,
     you: tbg_core::Seat,
+    z: f32,
     keys: &mut Vec<(u32, u32)>,
 ) {
     let key = (b.source, b.launched);
@@ -154,7 +186,8 @@ fn draw(
     };
     let scale = 1.16 * 1.2 * (1.0 + 0.08 * f32::from(b.tier.min(2)));
     let x = crate::sync::world_tile(x / 1000.0, you);
-    let transform = Transform::from_xyz(x, 0.205 * scale, 0.0)
+    let z = z * if you == tbg_core::Seat::A { 1.0 } else { -1.0 };
+    let transform = Transform::from_xyz(x, 0.205 * scale, z)
         .with_scale(Vec3::splat(scale))
         .with_rotation(Quat::from_rotation_z(-x / (0.205 * scale)));
     if let Some((_, e)) = entities.0.iter().find(|(k, _)| *k == key) {

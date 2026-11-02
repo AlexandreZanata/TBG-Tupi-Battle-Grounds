@@ -1,4 +1,4 @@
-//! Place live and spectator units using client-only crowd offsets.
+//! Follow authoritative live/spectator roots; retain cosmetic offsets only in stress tools.
 
 use bevy::prelude::*;
 use tbg_core::{Archetype, Seat, UnitKind, UnitView};
@@ -7,6 +7,7 @@ use crate::{art::aim::Aim, config, crowd, visuals::UnitVisual};
 
 #[derive(Component)]
 pub(crate) struct LaneAnchor {
+    pub authoritative: bool,
     pub pos: Vec3,
     pub(super) body: crowd::Body,
 }
@@ -14,6 +15,7 @@ pub(crate) struct LaneAnchor {
 impl LaneAnchor {
     pub fn for_stress(look: &crate::visuals::UnitLook, pos: Vec3) -> Self {
         Self {
+            authoritative: false,
             pos: pos.with_z(0.0),
             body: crowd::Body {
                 id: look.id,
@@ -38,8 +40,9 @@ impl LaneAnchor {
             },
         }
     }
-    pub fn from_view(u: &UnitView, you: Seat) -> Self {
+    pub fn from_view(u: &UnitView, you: Seat, physical: bool) -> Self {
         Self {
+            authoritative: physical,
             pos: Vec3::ZERO,
             body: crowd::Body {
                 id: u.id,
@@ -97,6 +100,14 @@ pub(super) fn update(
         Option<&Aim>,
     )>,
 ) {
+    // PK-01: live/spectator poses follow the shared authoritative timeline, without a second repulsion solver.
+    if units.iter().all(|(a, _, _, _, _)| a.authoritative) {
+        for (anchor, mut state, mut transform, _, _) in &mut units {
+            state.0 = default();
+            transform.translation = anchor.pos;
+        }
+        return;
+    }
     let enabled = *scratch
         .enabled
         .get_or_insert_with(|| config::url_param("crowd").as_deref() != Some("0"));

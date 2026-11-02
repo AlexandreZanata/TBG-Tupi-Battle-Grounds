@@ -1,7 +1,7 @@
 //! OG-02: authoritative swept rolling barrels, finite travel and collision-centered area healing.
-use crate::{
-    completion, content::Stats, Event, MatchState, Seat, Target, Tick, Unit, UnitId, UnitKind,
-};
+#[cfg(any(test, feature = "lab"))]
+use crate::UnitKind;
+use crate::{completion, content::Stats, Event, MatchState, Seat, Target, Tick, Unit, UnitId};
 use serde::{Deserialize, Serialize};
 
 /// Public immutable launch facts plus the current integer travel position.
@@ -12,6 +12,9 @@ pub struct Barrel {
     pub launched: Tick,
     pub tier: u8,
     pub branch: u8,
+    pub origin_x: i32,
+    pub origin_z: i32,
+    pub target: UnitId,
     pub x: i32,
     pub direction: i32,
     pub remaining: i32,
@@ -48,6 +51,9 @@ pub(crate) fn launch(state: &mut MatchState, u: &Unit, target: UnitId, st: &Stat
         launched: state.tick,
         tier: u.tier,
         branch: u.branch,
+        origin_x: u.x,
+        origin_z: crate::occupancy::lateral(u),
+        target,
         x: u.x,
         direction: if v.x < u.x { -1 } else { 1 },
         remaining: st.range,
@@ -122,6 +128,9 @@ fn burst(state: &mut MatchState, b: &Barrel, contact: UnitId, ev: &mut Vec<Event
         seat: b.seat,
         contact,
         center: b.x,
+        center_z: state
+            .unit_index(contact)
+            .map_or(0, |i| crate::occupancy::lateral(&state.units[i])),
         radius: b.radius,
         tier: b.tier,
         branch: b.branch,

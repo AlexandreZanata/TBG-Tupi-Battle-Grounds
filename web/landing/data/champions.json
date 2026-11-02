@@ -64,6 +64,13 @@
         "en": "Abyssals",
         "pt-BR": "Abissais"
       }
+    },
+    {
+      "id": "gods",
+      "name": {
+        "en": "Gods",
+        "pt-BR": "Deuses"
+      }
     }
   ],
   "archetypes": [
@@ -993,6 +1000,17 @@
       "faction": "plants",
       "archetype": "ranged",
       "portrait": "media/portraits/podsnapper.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "colossus",
+      "name": {
+        "en": "Colossus",
+        "pt-BR": "Colosso"
+      },
+      "faction": "gods",
+      "archetype": "tank",
+      "portrait": "media/portraits/colossus.webp",
       "availability": "preview"
     }
   ]

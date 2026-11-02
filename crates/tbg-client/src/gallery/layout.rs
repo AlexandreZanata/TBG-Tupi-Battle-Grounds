@@ -8,6 +8,8 @@ pub enum Layout {
     Frame(usize, usize),
     /// `&lineup`: (pose row, form column), the same in either orientation.
     Lineup(usize, usize),
+    Monument(usize, usize),
+    MonumentForm(usize),
 }
 impl Layout {
     pub fn position(&self, portrait: bool) -> Vec3 {
@@ -21,6 +23,8 @@ impl Layout {
                 Vec3::new((i % cols) as f32 * 2.0, 0.0, -((i / cols) as f32) * 2.2)
             }
             Self::Lineup(row, col) => Vec3::new(col as f32 * 2.1, -(row as f32) * 2.5, 0.0),
+            Self::Monument(row, col) => Vec3::new(col as f32 * 6.0, -(row as f32) * 8.5, 0.0),
+            Self::MonumentForm(i) => Vec3::new(i as f32 * 6.0, 0.0, 0.0),
             Self::Frame(i, sample) => {
                 let cols = if portrait { 1 } else { 2 };
                 Vec3::new(

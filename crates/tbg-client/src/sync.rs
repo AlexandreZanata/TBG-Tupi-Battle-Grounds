@@ -271,7 +271,7 @@ impl Scene<'_, '_, '_, '_, '_> {
         // Both views list units by id, so one cursor walks `to` with `from`.
         let mut next = 0;
         for u in &from.units {
-            let anchor = crowd_ecs::LaneAnchor::from_view(u, you);
+            let anchor = crowd_ecs::LaneAnchor::from_view(u, you, from.physical_lanes);
             while to.units.get(next).is_some_and(|n| n.id < u.id) {
                 next += 1;
             }
@@ -281,7 +281,17 @@ impl Scene<'_, '_, '_, '_, '_> {
                 _ => u.x,
             };
             let x = u.x as f32 + (to_x - u.x) as f32 * alpha;
-            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, 0.0);
+            let to_z = to
+                .units
+                .get(next)
+                .filter(|n| n.id == u.id)
+                .map_or(u.lane_z, |n| n.lane_z);
+            let z = f32::from(u.lane_z) + (f32::from(to_z) - f32::from(u.lane_z)) * alpha;
+            let pos = Vec3::new(
+                world_x(x.round() as i32, you),
+                0.0,
+                z / 1000.0 * if you == Seat::A { 1.0 } else { -1.0 },
+            );
             match self
                 .map
                 .0

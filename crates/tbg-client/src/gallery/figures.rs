@@ -56,17 +56,17 @@ pub fn spawn(
         roster(commands, lib, options, &material);
     } else {
         for (i, form) in FORMS.into_iter().enumerate() {
-            let cols = if window.width() > window.height() {
-                5
+            let layout = if unit == UnitKind::Colossus {
+                Layout::MonumentForm(i)
             } else {
-                2
+                Layout::Form(i)
             };
-            let pos = Vec3::new((i % cols) as f32 * 2.0, 0.0, -((i / cols) as f32) * 2.2);
+            let pos = layout.position(window.height() > window.width());
             let (root, mut a) = spawn_one(commands, lib, unit, form, pos, &material);
             a.rate = options.slow;
             commands.entity(root).insert((
                 a,
-                Layout::Form(i),
+                layout,
                 Cycle {
                     offset: 0,
                     shown: None,
@@ -104,6 +104,7 @@ fn frames(
             if tbg_core::content::def(unit).faction == tbg_core::Faction::Ogres
                 || crate::art::kits::ogres::contains(unit)
                 || tbg_core::content::def(unit).faction == tbg_core::Faction::Abyssals
+                || tbg_core::content::def(unit).faction == tbg_core::Faction::Gods
                 || crate::art::kits::abyssals::contains(unit)
             {
                 commands.entity(root).insert((animator, layout));

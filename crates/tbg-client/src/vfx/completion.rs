@@ -23,10 +23,33 @@ pub fn impact(c: &mut Commands, a: &VfxAssets, k: UnitKind, t: u8, b: u8, at: Ve
                 &a.turquoise
             }
         }
+        Colossus => {
+            if b == 0 {
+                &a.gold
+            } else {
+                &a.amber
+            }
+        }
         PodSnapper => &a.green,
         _ => &a.amber,
     };
     match k {
+        Colossus => {
+            chips(c, a, &a.bone, at, 8, 0.18 * power);
+            for i in 0..2 {
+                spawn(
+                    c,
+                    &a.ring,
+                    mat,
+                    at.with_y(0.04),
+                    Motion::Grow {
+                        radius: area.splash.max(1.8) * (0.8 + i as f32 * 0.2),
+                    },
+                    i as f32 * 0.07,
+                    0.34,
+                );
+            }
+        }
         NacreDuelist | ReefLancer => {
             spawn(
                 c,

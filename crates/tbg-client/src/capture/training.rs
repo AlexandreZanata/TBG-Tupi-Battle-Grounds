@@ -7,6 +7,9 @@ use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(Update, journey);
+    if crate::config::url_param("capture_packing").is_some() {
+        super::packing::plugin(app);
+    }
     if crate::config::url_param("capture_barrel").is_some() {
         super::barrel::plugin(app);
     }
@@ -124,6 +127,19 @@ fn journey(
             ];
             catalog.dummies = false;
         }
+        if crate::config::url_param("capture_packing").is_some() {
+            use tbg_core::{training::TrainingUnitSpec, UnitKind::*};
+            let placed = |kind, x| TrainingUnitSpec {
+                x: Some(x),
+                ..TrainingUnitSpec::base(kind)
+            };
+            catalog.selected = Colossus;
+            catalog.allies = vec![placed(Colossus, 9000)];
+            catalog.allies.extend((0..10).map(|_| placed(Archer, 7000)));
+            catalog.allies.push(placed(FoamWeaver, 5000));
+            catalog.enemies = vec![placed(BasaltBulwark, 13500)];
+            catalog.dummies = false;
+        }
         queue.0.push(Action::Open(Tab::Editor));
         *stage = 1;
         return;
@@ -146,6 +162,7 @@ fn journey(
             *observed = (id.0, s.active_ticks(), time.elapsed_secs());
             *stage = 3;
         }
+        3 if crate::config::url_param("capture_packing").is_some() => {}
         3 if time.elapsed_secs() > observed.2 + 0.5 => {
             assert!(matches!(
                 s.lifecycle(),

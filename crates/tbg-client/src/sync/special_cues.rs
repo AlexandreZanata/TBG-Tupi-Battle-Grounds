@@ -36,6 +36,7 @@ pub(super) fn cue(
         }
         Event::BarrelBurst {
             center,
+            center_z,
             radius,
             tier,
             branch,
@@ -45,7 +46,16 @@ pub(super) fn cue(
                 commands,
                 fx.vfx,
                 Impact::Champion(UnitKind::GustDrummer, tier, branch),
-                Vec3::new(world_x(center, fx.you), 0.25, 0.0),
+                Vec3::new(
+                    world_x(center, fx.you),
+                    0.25,
+                    center_z as f32 / 1000.0
+                        * if fx.you == tbg_core::Seat::A {
+                            1.0
+                        } else {
+                            -1.0
+                        },
+                ),
                 Area {
                     splash: radius as f32 / 1000.0,
                     ..default()

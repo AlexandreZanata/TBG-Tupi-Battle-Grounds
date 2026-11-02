@@ -10,6 +10,7 @@ use tbg_core::{MatchView, PublicView, Seat, UnitKind};
 
 pub fn match_view(view: &PublicView) -> MatchView {
     MatchView {
+        physical_lanes: view.physical_lanes,
         reserve: [0; tbg_core::content::OFFERS],
         held_mask: 0,
         reroll_cost: None,
@@ -29,6 +30,7 @@ pub fn match_view(view: &PublicView) -> MatchView {
         shields: view.shields,
         units: view.units.clone(),
         barrels: view.barrels.clone(),
+        queued: 0,
         synergy: view.synergy,
         augments: view.augments,
         // Only seat A's flag fits the seat-shaped round; the HUD says "choosing".

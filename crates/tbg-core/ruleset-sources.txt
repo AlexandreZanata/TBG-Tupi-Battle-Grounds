@@ -17,6 +17,7 @@ watch completion/strikers.rs
 watch completion/supports.rs
 watch content.rs
 watch content/completion.rs
+watch content/occupancy.rs
 watch crowcaller.rs
 watch demolisher.rs
 watch drillnest/effects.rs
@@ -28,6 +29,8 @@ watch jawguard.rs
 watch justiciar.rs
 watch luminous_oracle.rs
 watch mantis.rs
+watch occupancy.rs
+watch occupancy/deployment.rs
 watch pyre_warden.rs
 watch rattle_tick.rs
 watch ravager.rs
@@ -42,6 +45,7 @@ watch solar_sentinel.rs
 watch specials.rs
 watch state.rs
 watch stronghold.rs
+watch stronghold_power.rs
 watch summon.rs
 watch support.rs
 watch synergy.rs
@@ -80,3 +84,6 @@ exclude view/public.rs spectator presentation
 exclude view/visibility.rs presentation filtering
 exclude completion/tests.rs focused local-preview regression scenarios, no gameplay
 exclude barrel/tests.rs OG-02 regression scenarios, not simulation rules
+
+exclude occupancy/tests.rs PK-01 regression tests, not gameplay
+exclude stronghold_power/tests.rs TW-01 regression tests, not gameplay

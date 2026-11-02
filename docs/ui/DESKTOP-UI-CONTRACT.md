@@ -439,3 +439,33 @@ AB-01/OG-02 evidence: 38 ready Linux engine captures (95 forms, three poses), 11
 Final AB-01/OG-02 Linux witness: installed source `5553393`, all 379 asset hashes verified, five real Training scenarios passed (both cask contacts, mixed Abyssals, two attacked rear-healers with foot yaw 0). See `docs/abyssal-faction/linux-validation.json`. Four nonfatal entity commands after reset need cleanup investigation. Windows/game-web and browser-observed landing appearance remain pending.
 
 Rivet Ballista retains its pre-refinement head and arm proportions. The shared Ogre-module walking accent also reaches this Machine; include its Walk clip in the same pending cross-platform motion comparison. Its prior Ogre-delivery reference sheet remains historical.
+
+
+## TW-01 / PK-01 / GD-01 — Gods and authoritative passage (2026-11-02)
+
+Affected shared presentation: Colossus and all five forms, one back-carried
+obelisk, heavy walk, draw/slam, stone ground impact, spawn/evolve/hit,
+kneeling death and monumental victory salute; Gods palette, bilingual names,
+portraits and filters. No body team markers. The native review gallery must
+space monumental forms without changing gameplay scale.
+
+Widen the common BattleLine floor to match five usable tiles; move meadow
+dressing outside it and extend the Command aura arc to its edges.
+All 87 kinds use server-provided lateral positions when the authoritative
+physical-lanes candidate flag is enabled, interpolated on the existing
+timeline. Those matches use no competing repulsion solver. Legacy canonical
+matches and stress tools retain their prior cosmetic solver while the
+candidate awaits competitive acceptance. The same flag travels to spectators. Show the local
+deployment count in HUD/Training and localize LaneFull. Rolling casks use
+launch origin/target and exact burst lane to follow shifted figures.
+Stronghold preview/Fortification panels share the new HP, damage, costs,
+Bastion armor, Artillery splash, Treasury spoils and Command aura facts.
+
+Coverage matrix additions: Linux / Windows / desktop game-web, both seats,
+Colossus five forms × Idle/Walk/attack/Hit/Spawn/Evolve/Death/Victory,
+obelisk recovery at the authoritative hit cue; crowded Archers, mixed widths,
+full-width blockage, gradual free-lane bypass, stationary pause, queue release,
+rejected Evolution, cask interception and all four Fortification branches.
+Linux engine captures and targeted witnesses are the reference evidence;
+Windows and desktop game-web observation remain pending until recorded.
+Shared code and native compilation never certify correspondence.

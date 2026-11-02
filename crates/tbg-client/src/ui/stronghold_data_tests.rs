@@ -22,6 +22,9 @@ fn int(value: &Json, what: &str) -> i64 {
 
 fn assert_stats(json: &Json, expected: StrongholdStats, what: &str) {
     let fields = [
+        ("armorBp", i64::from(expected.armor_bp)),
+        ("splashBp", i64::from(expected.splash_bp)),
+        ("splashRadius", i64::from(expected.splash_radius)),
         ("maxHp", i64::from(expected.max_hp)),
         ("damage", i64::from(expected.damage)),
         ("interval", i64::from(expected.interval)),

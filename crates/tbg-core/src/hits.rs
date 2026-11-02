@@ -501,7 +501,9 @@ fn splash(
     // Index loop, no clone: dead units are only removed in `remove_dead`.
     for i in 0..state.units.len() {
         let e = state.units[i];
-        let near = (e.x - tx).abs() <= st.splash;
+        let in_front = attacker.kind != crate::UnitKind::Colossus
+            || (e.x - attacker.x) * (tx - attacker.x).signum() >= 0;
+        let near = (e.x - tx).abs() <= st.splash && in_front;
         if e.hp > 0 && near && primary != Target::Unit(e.id) && (friendly || e.seat == enemy) {
             let _removed =
                 training_hooks::scoped(state, Source::Unit(attacker.id), Effect::Splash, |s| {
@@ -625,6 +627,9 @@ pub(crate) fn damage(
         }
         Target::Stronghold(seat) => {
             let tick = state.tick;
+            let p = state.player(seat);
+            let armor = crate::stronghold_power::armor(p.stronghold, p.fort_tier, p.fort_branch);
+            let amount = scale(amount, -armor);
             let p = state.player_mut(seat);
             let between = p.stronghold_hp;
             let mut incoming = amount;

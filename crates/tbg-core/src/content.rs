@@ -4,6 +4,7 @@
 //! the simulation reads them through `ruleset::CANON` (D-33).
 
 pub mod completion;
+pub mod occupancy;
 
 use crate::arcana::ArcanaValues;
 use crate::ruleset::CANON;
@@ -55,15 +56,21 @@ pub const BEETLES_PER_NESTER: [usize; 2] = [2, 3];
 pub const BEETLES_PER_PLAYER: usize = 6;
 pub const BEETLE_LIFETIME: Tick = 200;
 
-pub const STRONGHOLD_HP: i32 = 4_500;
-/// P16-C lab evidence (D-33, Proposed): 65 → 53.
-pub const STRONGHOLD_DAMAGE: i32 = 53;
+pub const STRONGHOLD_HP: i32 = 6_750;
+/// TW-01 owner revision: the 53-damage reference is tripled.
+pub const STRONGHOLD_DAMAGE: i32 = 159;
 pub const STRONGHOLD_INTERVAL: u16 = 20;
 pub const STRONGHOLD_RANGE: i32 = 6_000;
 
-/// Fortification price to tier 1 and to tier 2 (BR-SK05): 3 then 4 Energy.
+/// TW-01 Fortification price: 6 then 10 Energy.
 /// Its own price, never the unit `EVOLVE_COST` (Proposed, D-46).
-pub const FORTIFY_COST: [u32; 2] = [1_800, 2_400];
+pub const FORTIFY_COST: [u32; 2] = [3_600, 6_000];
+pub const BASTION_ARMOR_BP: i32 = 1_500;
+pub const BASTION_ARMOR_STEP_BP: i32 = 500;
+pub const ARTILLERY_SPLASH_BP: i32 = 4_000;
+pub const ARTILLERY_SPLASH_STEP_BP: i32 = 2_000;
+pub const ARTILLERY_SPLASH_RADIUS: i32 = 1_000;
+pub const ARTILLERY_SPLASH_TARGETS: usize = 3;
 
 /// One Fortification step of a kind's branch. Each field adds to the kind's
 /// base while the step is owned; `interval` replaces the base interval when
@@ -131,57 +138,56 @@ const fn kind(kind: StrongholdKind, name: &'static str, hp_bp: i32, dmg_bp: i32)
 }
 
 /// Every Stronghold kind in `StrongholdKind` order. Treasury and Command
-/// keep the product hypotheses' ratios to the reference tower (4 200/60 and
-/// 4 300/60 against 4 500/65) on today's 4 500 HP / 53 damage; Artillery
-/// and Bastion moved off theirs after the lab matrix (Proposed, D-46).
+/// keep their distinct HP ratios. TW-01 triples the former rounded damage
+/// exactly, with a small coefficient correction for integer truncation.
 #[rustfmt::skip]
 pub const STRONGHOLD_KINDS: [KindDef; 5] = [
     kind(StrongholdKind::Classic, "Classic", 0, 0),
     KindDef {
-        // 0.15 Energy a kill, at most 0.6 Energy per 10 s window.
-        spoils: 90,
-        spoils_cap: 360,
+        // TW-01: 0.45 Energy a kill, at most 1.8 Energy per 10 s window.
+        spoils: 270,
+        spoils_cap: 1080,
         branch_names: ["Armored Vault", "Mint"],
         branches: [
-            [Fortification { hp_bp: 1_200, ..fort("Reinforced Vault") },
-             Fortification { hp_bp: 1_200, ..fort("Grand Vault") }],
-            [Fortification { spoils_add: 30, ..fort("Coinage") },
-             // 0.25 Energy a kill; ceiling 0.6 -> 0.9 Energy a window.
-             Fortification { spoils_add: 30, spoils_cap_add: 180, ..fort("Royal Mint") }],
+            [Fortification { hp_bp: 2_500, ..fort("Reinforced Vault") },
+             Fortification { hp_bp: 2_500, ..fort("Grand Vault") }],
+            [Fortification { spoils_add: 90, ..fort("Coinage") },
+             // TW-01: 0.75 Energy a kill; ceiling 1.8 -> 2.7 Energy a window.
+             Fortification { spoils_add: 90, spoils_cap_add: 540, ..fort("Royal Mint") }],
         ],
-        ..kind(StrongholdKind::Treasury, "Treasury", -700, -800)
+        ..kind(StrongholdKind::Treasury, "Treasury", -700, -900)
     },
     KindDef {
         branch_names: ["Fortress", "Sentinel"],
         branches: [
-            [Fortification { hp_bp: 1_500, ..fort("Reinforced Walls") },
-             Fortification { hp_bp: 1_500, ..fort("Imperial Fortress") }],
-            [Fortification { range_add: 1_000, ..fort("Watchtower") },
-             Fortification { dmg_bp: 1_500, ..fort("Royal Sentinel") }],
+            [Fortification { hp_bp: 3_000, ..fort("Reinforced Walls") },
+             Fortification { hp_bp: 3_000, ..fort("Imperial Fortress") }],
+            [Fortification { range_add: 1_500, ..fort("Watchtower") },
+             Fortification { dmg_bp: 3_000, ..fort("Royal Sentinel") }],
         ],
-        ..kind(StrongholdKind::Bastion, "Bastion", 1_500, -1_000)
+        ..kind(StrongholdKind::Bastion, "Bastion", 1_500, -1_100)
     },
     KindDef {
         branch_names: ["Heavy Cannon", "Rapid Fire"],
         branches: [
-            [Fortification { dmg_bp: 2_000, ..fort("Heavy Shot") },
-             Fortification { dmg_bp: 2_000, ..fort("Great Cannon") }],
-            [Fortification { interval: 17, ..fort("Quick Reload") },
-             Fortification { interval: 14, ..fort("Advanced Mechanism") }],
+            [Fortification { dmg_bp: 4_000, ..fort("Heavy Shot") },
+             Fortification { dmg_bp: 4_000, ..fort("Great Cannon") }],
+            [Fortification { interval: 14, ..fort("Quick Reload") },
+             Fortification { interval: 10, ..fort("Advanced Mechanism") }],
         ],
         ..kind(StrongholdKind::Artillery, "Artillery", -1_500, 1_000)
     },
     KindDef {
-        aura_bp: 500,
-        aura_range: 4_000,
+        aura_bp: 1_500,
+        aura_range: 5_000,
         branch_names: ["War Standard", "Forward Banner"],
         branches: [
-            [Fortification { aura_bp_add: 300, ..fort("War Cry") },
-             Fortification { aura_bp_add: 300, ..fort("Supreme Command") }],
-            [Fortification { aura_range_add: 1_000, ..fort("Outpost") },
-             Fortification { aura_range_add: 1_000, ..fort("High Command") }],
+            [Fortification { aura_bp_add: 750, ..fort("War Cry") },
+             Fortification { aura_bp_add: 750, ..fort("Supreme Command") }],
+            [Fortification { aura_range_add: 1_500, ..fort("Outpost") },
+             Fortification { aura_range_add: 1_500, ..fort("High Command") }],
         ],
-        ..kind(StrongholdKind::Command, "Command", -400, -800)
+        ..kind(StrongholdKind::Command, "Command", -400, -900)
     },
 ];
 
@@ -301,6 +307,7 @@ pub const SYNERGIES: [(SynergyEffect, [i32; 2]); FACTION_COUNT] = [
     (SynergyEffect::AttackSpeed, [500, 1_000]),
     // AB-01 Proposed: deliberate marine movement, under the existing movement cap.
     (SynergyEffect::Movement, [500, 1_000]),
+    (SynergyEffect::Movement, [0, 0]),
 ];
 
 /// One evolution form: additive modifiers on the base unit, plus the shared
@@ -1613,6 +1620,15 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
             FormDef { range_add: 250, ..form("Split Husk") },
             FormDef { atk_bp: 1500, ..form("Harvest Burst") },
         ]),
+
+    // GD-01: a single Gods champion; the Faction deliberately has no Synergy bonus yet.
+    unit(UnitKind::Colossus, "Colossus", Gods, Tank, 10_800,
+        [2_400, 170, 110, 4_500, 22, 1_800, 0], None, NO_ABILITIES, [
+        FormDef { dmg_bp: 2_500, range_add: 1_500, ..form("Sun Obelisk") },
+        FormDef { splash_add: 600, ..form("Pillar of Dawn") },
+        FormDef { hp_bp: 3_000, ..form("Ancient Monolith") },
+        FormDef { hp_bp: 3_000, ..form("Eternal Monument") },
+    ]),
 
 ];
 

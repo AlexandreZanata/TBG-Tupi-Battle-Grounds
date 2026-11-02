@@ -64,6 +64,10 @@ pub struct Stack {
 /// All zeroes until the unit's wave lands; never part of views in P43.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UnitFx {
+    /// PK-01: first occupied lateral cell plus one; zero means not yet placed.
+    pub lane_slot: u8,
+    pub lane_goal: u8,
+    pub lane_lock_until: Tick,
     pub poison: [Stack; 6],
     pub fish: [Stack; 3],
     pub confused_until: Tick,
@@ -392,6 +396,7 @@ pub enum Event {
         seat: Seat,
         contact: UnitId,
         center: i32,
+        center_z: i32,
         radius: i32,
         tier: u8,
         branch: u8,
@@ -401,6 +406,8 @@ pub enum Event {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MatchState {
+    /// PK-01 candidate: private Practice/Training until long-run competitive acceptance.
+    pub physical_lanes: bool,
     /// The combat clock: frozen while an Augment selection pauses the
     /// battle, so every tick-based rule counts effective combat (BR-AG12).
     pub tick: Tick,
@@ -411,6 +418,8 @@ pub struct MatchState {
     pub players: [PlayerState; 2],
     /// Always sorted by id (new units get the next, larger id).
     pub units: Vec<Unit>,
+    /// Paid or summoned overflow waiting for physical lane capacity.
+    pub deployments: Vec<Unit>,
     /// OG-02 launch snapshots survive caster death and serialize for replay.
     pub barrels: Vec<crate::barrel::Barrel>,
     pub next_unit_id: UnitId,

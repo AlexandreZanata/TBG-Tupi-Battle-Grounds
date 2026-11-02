@@ -16,7 +16,7 @@ mod strongholds;
 pub(super) use data::Data as LobbyData;
 
 #[cfg(tbg_desktop)]
-pub(super) use strongholds::{branch_effect, expand, stronghold_data};
+pub(super) use strongholds::{branch_effect, passive, stronghold_data};
 
 use super::{
     account::{Account, AccountScreen},

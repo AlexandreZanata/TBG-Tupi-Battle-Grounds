@@ -58,6 +58,13 @@ pub(super) fn scatter() -> Vec<Part> {
     camp::fences(&mut parts);
     camp::supplies(&mut parts);
     camp::log(&mut parts, Vec3::new(10.9, 0.0, 4.3));
+    // PK-01: keep the existing meadow dressing clear of the widened shared BattleLine.
+    for (_, _, transform) in &mut parts {
+        let z = &mut transform.translation.z;
+        if z.abs() > 1.7 {
+            *z += z.signum();
+        }
+    }
     parts
 }
 

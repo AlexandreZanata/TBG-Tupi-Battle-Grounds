@@ -28,6 +28,7 @@ pub fn rejection(lang: Lang, reason: tbg_core::Rejection) -> &'static str {
         tbg_core::Rejection::ReserveFull => Msg::RejectionReserveFull,
         tbg_core::Rejection::AlreadyHeld => Msg::RejectionAlreadyHeld,
         tbg_core::Rejection::NoReserve => Msg::RejectionNoReserve,
+        tbg_core::Rejection::LaneFull => Msg::RejectionLaneFull,
         tbg_core::Rejection::StalePrice => Msg::RejectionStalePrice,
     })
 }
@@ -138,6 +139,7 @@ fn unit_msgs(kind: UnitKind) -> UnitMsgs {
         UnitKind::UndertowHerald=>u(Msg::UnitUndertowHeraldName,UNIT_UNDERTOW_HERALD_FORM_NAME,Msg::UnitUndertowHeraldGood,Msg::UnitUndertowHeraldWeak),
         UnitKind::TrenchLamplighter=>u(Msg::UnitTrenchLamplighterName,UNIT_TRENCH_LAMPLIGHTER_FORM_NAME,Msg::UnitTrenchLamplighterGood,Msg::UnitTrenchLamplighterWeak),
         UnitKind::FoamWeaver=>u(Msg::UnitFoamWeaverName,UNIT_FOAM_WEAVER_FORM_NAME,Msg::UnitFoamWeaverGood,Msg::UnitFoamWeaverWeak),
+        UnitKind::Colossus=>u(Msg::UnitColossusName,UNIT_COLOSSUS_FORM_NAME,Msg::UnitColossusGood,Msg::UnitColossusWeak),
         UnitKind::PodSnapper=>u(Msg::UnitPodSnapperName,UNIT_POD_SNAPPER_FORM_NAME,Msg::UnitPodSnapperGood,Msg::UnitPodSnapperWeak),
     }
 }
@@ -173,6 +175,7 @@ pub fn faction(lang: Lang, faction: Faction) -> &'static str {
         Faction::Celestials => Msg::FactionCelestials,
         Faction::Insects => Msg::FactionInsects,
         Faction::Ogres => Msg::FactionOgres,
+        Faction::Gods => Msg::FactionGods,
         Faction::Abyssals => Msg::FactionAbyssals,
     })
 }

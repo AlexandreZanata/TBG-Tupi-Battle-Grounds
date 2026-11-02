@@ -3048,3 +3048,43 @@ and mixed-team validation remain pending; no threshold or release gate changed.
 Revision 10's final source hash is `523044fc973bac39`. The five canonical trace
 fixtures preserve the observed end ticks/outcomes; checksums change with the
 ninth Synergy slot and rolling-cask state layout. Older fixtures remain intact.
+
+
+## TW-01 / PK-01 / GD-01 — Strongholds, physical capacity and Gods (2026-11-02)
+
+Implement the owner's explicit tower boost and one 18-Energy Colossus as
+Proposed in GAME-DESIGN. Preserve old kind indices, append Gods/Colossus,
+wire 36 and ruleset 11. Keep online FULL_POOL at 46 and the private preview
+at 82. Gods has no invented Synergy benefit. Colossus is a Tank so carrying
+rules and existing tank counters can recognize its monumental body.
+
+Resolve crowd capacity in authoritative integer core state. A local spring
+solver cannot enforce passage or prevent repeatedly changing crowded roots.
+Native authoring exports conservative real body/weapon envelopes for 87 kinds
+and 435 forms, including summons and rear aim. The fixed 5-tile corridor and
+width reservation admit only as many units per row as fit; overflow waits,
+without deleting purchases or adding a global purchase cap. A new birth may use the nearest free footprint in its own backfield third,
+never beyond the hostile front. A stationary sniper at the base must not
+permanently prevent a giant from materializing. Existing units never teleport
+through a blocker. Persist slots,
+limit bypass speed and use a one-second lock. Evolution never spends Energy
+on an impossible fit. Reuse the existing longitudinal combat model, retaining
+authored root reach with a body-contact floor to avoid short-melee deadlock
+without extending ranged attacks.
+
+This changes deterministic combat traces and Stronghold outcomes, not just
+serialization. Append new revision-specific fixtures; retain every historical
+baseline. D-33 bounded defense/duel measurements are reported separately from
+the full balance gate. Displacement congestion, mixed-team acceptance and
+cross-platform observation remain explicit limits, not passed gates.
+
+
+PK-01 activation boundary: repeated bounded preview bot probes found long-run
+stalemates, even after widening the corridor, preserving root attack reach
+and allowing births in the defended backfield. Do not activate this candidate
+in competitive matches on a passing geometry check. Private Practice, Training
+and explicit lab spawns opt into authoritative physical lanes; regular canon
+keeps legacy movement and client crowd presentation. The read-only flag is
+part of both views. This preserves the competitive baseline while the owner
+validates the local proposal. Long-run preview balance is a known unresolved
+issue, separate from the requested exact TW-01 tower boost.

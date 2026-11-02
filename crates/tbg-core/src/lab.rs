@@ -9,6 +9,7 @@ use crate::types::{Seat, Tick, UnitId, UnitKind};
 impl MatchState {
     /// Place a unit of any form without the Shop or Energy, for unit duels.
     pub fn lab_spawn(&mut self, seat: Seat, kind: UnitKind, tier: u8, branch: u8) -> UnitId {
+        self.physical_lanes = true;
         self.spawn(seat, kind, tier.min(2), branch.min(1))
     }
 

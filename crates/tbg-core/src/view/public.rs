@@ -29,6 +29,7 @@ pub struct PublicRound {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PublicView {
+    pub physical_lanes: bool,
     /// Combat tick: frozen while an Augment selection pauses the battle.
     pub tick: Tick,
     /// Selection clock: advances every step, pauses included (BR-AG13).
@@ -70,6 +71,7 @@ impl MatchState {
             resolved: Seat::BOTH.map(|s| self.player(s).augment_resolved >= self.augments.round),
         });
         PublicView {
+            physical_lanes: self.physical_lanes,
             tick: self.tick,
             clock: self.clock,
             elapsed: self.tick.saturating_sub(crate::content::RUNNING_START),

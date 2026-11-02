@@ -189,7 +189,16 @@ pub(super) fn track(
 }
 
 fn fire(commands: &mut Commands, vfx: &VfxAssets, tower: &Tower, root: Vec3, at: Vec3) {
-    let area = Area::default();
+    let look = tower.look;
+    let (_, radius) = tbg_core::stronghold_power::blast(
+        tower.kind(),
+        look.map_or(0, |v| v.tier),
+        look.map_or(0, |v| v.branch),
+    );
+    let area = Area {
+        splash: radius as f32 / 1000.0,
+        ..default()
+    };
     let Some(t) = tower.turret else {
         let from = root + side(tower.own, top(tower.kind()));
         impacts::muzzle(

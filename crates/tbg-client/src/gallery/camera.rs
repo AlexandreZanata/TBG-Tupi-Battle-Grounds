@@ -120,6 +120,12 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
         }
         _ if options.polish => super::polish::camera(),
         _ if options.frames => sheet(options, portrait),
+        _ if options.unit == Some(tbg_core::UnitKind::Colossus) => (
+            Vec3::new(12.0, 3.0, 0.0),
+            15.0,
+            4.0,
+            Vec3::new(0.0, 1.2, 10.0),
+        ),
         _ if options.silhouette => (Vec3::new(8.0, 0.7, -2.8), 9.0, 3.0, Vec3::Z),
         _ if options.unit.is_some() => unit(portrait),
         _ => (
@@ -149,6 +155,14 @@ fn unit(portrait: bool) -> (Vec3, f32, f32, Vec3) {
 }
 fn sheet(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
     if options.lineup {
+        if options.unit == Some(tbg_core::UnitKind::Colossus) {
+            return (
+                Vec3::new(12.0, -4.6, 0.0),
+                16.0,
+                14.5,
+                Vec3::new(0.0, 1.2, 10.0),
+            );
+        }
         // Five forms per row; idle, walk and attack rows (`Layout::Lineup`).
         return (
             Vec3::new(4.2, -1.45, 0.0),

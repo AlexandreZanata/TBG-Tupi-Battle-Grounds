@@ -78,3 +78,6 @@ pub use types::*;
 pub use view::{MatchView, PublicView, StrongholdView, UnitView};
 
 pub mod practice_bot;
+
+pub mod occupancy;
+pub mod stronghold_power;

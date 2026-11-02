@@ -5,13 +5,13 @@
 
 /// Gameplay revision. Bump it, and append a line to
 /// `tests/fixtures/ruleset-versions.txt`, whenever a watched source changes.
-pub const RULESET_VERSION: u32 = 10;
+pub const RULESET_VERSION: u32 = 11;
 /// Version of the per-match summary JSON (P61 §4).
 pub const SUMMARY_VERSION: u16 = 2;
 
 /// Watched gameplay sources, sorted by path (`ruleset-sources.txt`).
 #[rustfmt::skip] // The client build script reads one literal entry per line.
-pub const WATCHED: [(&str, &str); 52] = [
+pub const WATCHED: [(&str, &str); 56] = [
     ("acidmaw.rs", include_str!("acidmaw.rs")),
     ("afflictions.rs", include_str!("afflictions.rs")),
     ("arcana.rs", include_str!("arcana.rs")),
@@ -30,6 +30,7 @@ pub const WATCHED: [(&str, &str); 52] = [
     ("completion/supports.rs", include_str!("completion/supports.rs")),
     ("content.rs", include_str!("content.rs")),
     ("content/completion.rs", include_str!("content/completion.rs")),
+    ("content/occupancy.rs", include_str!("content/occupancy.rs")),
     ("crowcaller.rs", include_str!("crowcaller.rs")),
     ("demolisher.rs", include_str!("demolisher.rs")),
     ("drillnest/effects.rs", include_str!("drillnest/effects.rs")),
@@ -41,6 +42,8 @@ pub const WATCHED: [(&str, &str); 52] = [
     ("justiciar.rs", include_str!("justiciar.rs")),
     ("luminous_oracle.rs", include_str!("luminous_oracle.rs")),
     ("mantis.rs", include_str!("mantis.rs")),
+    ("occupancy.rs", include_str!("occupancy.rs")),
+    ("occupancy/deployment.rs", include_str!("occupancy/deployment.rs")),
     ("pyre_warden.rs", include_str!("pyre_warden.rs")),
     ("rattle_tick.rs", include_str!("rattle_tick.rs")),
     ("ravager.rs", include_str!("ravager.rs")),
@@ -55,6 +58,7 @@ pub const WATCHED: [(&str, &str); 52] = [
     ("specials.rs", include_str!("specials.rs")),
     ("state.rs", include_str!("state.rs")),
     ("stronghold.rs", include_str!("stronghold.rs")),
+    ("stronghold_power.rs", include_str!("stronghold_power.rs")),
     ("summon.rs", include_str!("summon.rs")),
     ("support.rs", include_str!("support.rs")),
     ("synergy.rs", include_str!("synergy.rs")),

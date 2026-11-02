@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 35,
-        "AB-01/OG-02: ninth Faction and rolling casks require wire 35, preserving message tags"
+        PROTOCOL_VERSION, 36,
+        "TW-01/PK-01/GD-01: lateral occupancy, private queue count and tenth Faction require wire 36"
     );
 }
 
@@ -455,4 +455,21 @@ fn ab01_og02_tags_are_appended_and_barrels_roundtrip_in_both_public_views() {
         postcard::from_bytes::<tbg_core::PublicView>(&encode(&public)),
         Ok(public)
     );
+}
+
+// TW-01/PK-01/GD-01: identities append, lateral position and private waiting facts roundtrip.
+#[test]
+fn gd01_wire36_appends_gods_and_retains_legacy_tags() {
+    assert_eq!(encode(&tbg_core::Faction::Gods), [9]);
+    assert_eq!(encode(&tbg_core::UnitKind::Colossus), [86]);
+    assert_eq!(encode(&tbg_core::UnitKind::SiegeWalker), [5]);
+    let mut state = tbg_core::MatchState::new(8);
+    let mut view = state.view_for(tbg_core::Seat::A, &[]);
+    view.queued = 7;
+    assert_eq!(
+        postcard::from_bytes::<tbg_core::MatchView>(&encode(&view)),
+        Ok(view)
+    );
+    state.phase = tbg_core::Phase::Running;
+    assert!(encode(&tbg_core::Rejection::LaneFull).len() <= 2);
 }

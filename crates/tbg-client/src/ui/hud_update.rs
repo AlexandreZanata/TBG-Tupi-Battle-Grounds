@@ -281,7 +281,10 @@ pub(crate) fn army_counts(v: &MatchView) -> (usize, usize) {
 /// `Army N`, plus `Brood M` while the seat has summons.
 pub(crate) fn army_label(v: &MatchView, lang: Lang) -> String {
     let (army, brood) = army_counts(v);
-    let label = lang.tf(Msg::HudArmy, &[("army", &army)]);
+    let mut label = lang.tf(Msg::HudArmy, &[("army", &army)]);
+    if v.queued > 0 {
+        label.push_str(&lang.tf(Msg::HudDeploymentQueue, &[("count", &v.queued)]));
+    }
     if brood > 0 {
         format!("{label} | {}", lang.tf(Msg::HudBrood, &[("brood", &brood)]))
     } else {

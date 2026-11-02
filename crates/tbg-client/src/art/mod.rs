@@ -17,10 +17,14 @@ pub mod anim;
 mod anim_tests;
 pub mod celebration;
 mod clips;
+#[cfg(test)]
+mod colossus_tests;
 mod curves;
 pub mod death;
 mod feet;
 pub mod figure;
+#[cfg(all(debug_assertions, not(target_arch = "wasm32")))]
+pub(crate) mod footprint_export;
 pub mod ik;
 pub mod kits;
 mod legacy;

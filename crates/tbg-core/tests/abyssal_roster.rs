@@ -15,7 +15,7 @@ fn ab01_trident_moves_to_abyssals_and_pod_snapper_replaces_its_plant_slot() {
                 .iter()
                 .filter(|k| def(**k).faction == f)
                 .count(),
-            9,
+            if f == Faction::Gods { 1 } else { 9 },
             "{f:?}"
         );
     }

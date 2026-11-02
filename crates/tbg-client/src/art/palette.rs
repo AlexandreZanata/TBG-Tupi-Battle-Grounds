@@ -140,6 +140,7 @@ pub const FACTIONS: [[Color; 8]; tbg_core::FACTION_COUNT] = [
         IVORY,
         AMBER,
     ],
+    [IVORY, ROCK, GOLD, LINEN, FIELD_SLATE, IVORY, GOLD, AMBER],
 ];
 pub const SLOTS: [PaletteSlot; 8] = [
     PaletteSlot::Base,

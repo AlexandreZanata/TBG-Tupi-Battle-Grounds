@@ -149,6 +149,12 @@ fn bot_matches_are_frozen() {
             (7, 0x70c562418d530b55, 9982, Seat::B, StrongholdDestroyed),
             (42, 0xcea96d41f552661d, 10382, Seat::A, StrongholdDestroyed),
         ],
+        // TW-01/PK-01/GD-01: stronger towers; physical-lanes candidate stays private.
+        (11, 0xa0a1d508c59e5841) => [
+            (1, 0xae47594e85732bbc, 16625, Seat::B, StrongholdDestroyed),
+            (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
+            (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

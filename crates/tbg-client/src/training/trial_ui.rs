@@ -247,6 +247,7 @@ fn update(
                     .state()
                     .units
                     .iter()
+                    .chain(s.state().deployments.iter())
                     .find(|u| u.id == *id)
                     .map_or(0, |u| u.hp);
                 format!(
@@ -262,7 +263,22 @@ fn update(
                 )
             }
         };
-        let value = if matches!(field, Field::Selected) {
+        let value = if matches!(field, Field::Status) {
+            let queued = s
+                .state()
+                .deployments
+                .iter()
+                .filter(|u| u.seat == Seat::A)
+                .count();
+            if queued > 0 {
+                format!(
+                    "{value}{}",
+                    lang.tf(crate::i18n::Msg::HudDeploymentQueue, &[("count", &queued)])
+                )
+            } else {
+                value
+            }
+        } else if matches!(field, Field::Selected) {
             let effects = trial
                 .target
                 .and_then(|id| {

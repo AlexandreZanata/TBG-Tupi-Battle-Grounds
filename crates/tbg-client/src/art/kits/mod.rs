@@ -20,6 +20,7 @@ mod capybara;
 mod cargo_crab;
 mod cargo_crate;
 mod celestial_archer;
+pub(crate) mod colossus;
 pub mod common;
 pub(crate) mod completion;
 mod crowcaller;
@@ -285,6 +286,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Capybara => Some(&CAPYBARA),
         UnitKind::RattleTick => Some(&RATTLETICK),
         #[allow(unreachable_patterns)]
+        UnitKind::Colossus => Some(&colossus::KIT),
         _ => abyssals::kit(kind)
             .or_else(|| ogres::kit(kind))
             .or_else(|| completion::kit(kind)),

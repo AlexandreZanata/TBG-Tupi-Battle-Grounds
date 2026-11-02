@@ -11,6 +11,9 @@ use crate::types::{Seat, StrongholdKind};
 /// A seat's tower after its kind and Fortification.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct StrongholdStats {
+    pub armor_bp: i32,
+    pub splash_bp: i32,
+    pub splash_radius: i32,
     pub max_hp: i32,
     pub damage: i32,
     pub interval: u16,
@@ -37,7 +40,11 @@ pub fn stats(rules: &Ruleset, kind: StrongholdKind, tier: u8, branch: u8) -> Str
     let def = kind_def(kind);
     let base_hp = scale(rules.stronghold_hp, def.hp_bp);
     let base_dmg = scale(rules.stronghold_damage, def.dmg_bp);
+    let (splash_bp, splash_radius) = crate::stronghold_power::blast(kind, tier, branch);
     let mut s = StrongholdStats {
+        armor_bp: crate::stronghold_power::armor(kind, tier, branch),
+        splash_bp,
+        splash_radius,
         max_hp: base_hp,
         damage: base_dmg,
         interval: rules.stronghold_interval,

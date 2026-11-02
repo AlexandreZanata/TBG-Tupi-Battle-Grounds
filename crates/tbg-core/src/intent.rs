@@ -67,6 +67,8 @@ pub enum Rejection {
     AlreadyHeld,
     NoReserve,
     StalePrice,
+    /// The upgraded footprint cannot fit without removing an active unit.
+    LaneFull,
 }
 
 impl MatchState {
@@ -240,6 +242,12 @@ impl MatchState {
             return Err(Rejection::WrongBranch);
         }
         let cost = self.evolve_price(seat, u.tier);
+        if self.player(seat).energy < cost {
+            return Err(Rejection::NotEnoughEnergy);
+        }
+        if !crate::occupancy::evolution_fits(self, id) {
+            return Err(Rejection::LaneFull);
+        }
         if !self.player_mut(seat).spend(cost) {
             return Err(Rejection::NotEnoughEnergy);
         }

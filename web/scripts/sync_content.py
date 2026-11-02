@@ -20,7 +20,7 @@ CORE = REPO / "crates/tbg-core/src"
 ASSETS = REPO / "crates/tbg-client/assets"
 OUT = REPO / "web/landing/data"
 LANGS = ("en", "pt-BR")
-FACTIONS = ("Humans", "Undead", "Machines", "Plants", "Monsters", "Celestials", "Insects", "Ogres", "Abyssals")
+FACTIONS = ("Humans", "Undead", "Machines", "Plants", "Monsters", "Celestials", "Insects", "Ogres", "Abyssals", "Gods")
 ARCHETYPES = ("Tank", "Dps", "Support", "Ranged", "Control")
 
 
