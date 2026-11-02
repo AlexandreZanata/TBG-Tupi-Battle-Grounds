@@ -180,6 +180,15 @@ pub async fn run_with(
         release,
     };
     let mut app = Router::new()
+        .route("/api/me/account", get(identity::http::handler))
+        .route("/api/me/email", post(identity::http::handler))
+        .route("/api/me/email/verify", post(identity::http::handler))
+        .route("/api/me/email/resend", post(identity::http::handler))
+        .route(
+            "/api/me/email/change/confirm",
+            post(identity::http::handler),
+        )
+        .route("/api/me/email/change/cancel", post(identity::http::handler))
         .route(
             "/api/auth/{channel}/{operation}",
             post(auth::http::handler).layer(DefaultBodyLimit::max(4096)),

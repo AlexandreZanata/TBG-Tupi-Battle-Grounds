@@ -23,6 +23,9 @@ struct Login {
 #[serde(deny_unknown_fields)]
 struct Register {
     name: String,
+    #[serde(default)]
+    email: String,
+    locale: String,
     device_id: String,
     persistent: bool,
     registration_retry_key: String,
@@ -200,6 +203,8 @@ async fn execute(
             Ok(Output::Grant(
                 auth.register(
                     input.name,
+                    input.email,
+                    input.locale,
                     &input.device_id,
                     input.persistent,
                     &input.registration_retry_key,
@@ -275,6 +280,7 @@ fn render(output: Output, channel: Channel, now: i64) -> Result<Response, Error>
             let mut value = json!({"access_token":grant.access,"access_expires_at":grant.expires_at,"session_expires_at":grant.family.expires_at,"session_id":tokens::hex(&grant.family.id),"server_time":now,"profile":grant.profile,"persistent":grant.persistent});
             if let Some(key) = grant.account_key {
                 value["account_key"] = Value::String(key);
+                value["email_state"] = Value::String("unverified".into());
             }
             if channel == Channel::Native {
                 value["refresh_token"] = Value::String(grant.refresh.clone());
@@ -321,6 +327,11 @@ fn set_cookie(response: &mut Response, cookie: String) -> Result<(), Error> {
 
 fn failure(error: Error) -> Response {
     let (status, code) = match error {
+        Error::RegistrationClosed => (StatusCode::SERVICE_UNAVAILABLE, "registration_closed"),
+        Error::EmailLimit => (StatusCode::CONFLICT, "email_limit"),
+        Error::EmailBlocked => (StatusCode::FORBIDDEN, "email_blocked"),
+        Error::EmailInvalid => (StatusCode::BAD_REQUEST, "email_invalid"),
+        Error::EmailRequired => (StatusCode::BAD_REQUEST, "email_required"),
         Error::Unauthorized => (StatusCode::UNAUTHORIZED, "auth_required"),
         Error::Forbidden => (StatusCode::FORBIDDEN, "forbidden"),
         Error::BadRequest => (StatusCode::BAD_REQUEST, "bad_request"),

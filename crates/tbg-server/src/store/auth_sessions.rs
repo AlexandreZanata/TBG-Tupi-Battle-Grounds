@@ -79,6 +79,10 @@ pub struct Issuance {
 
 pub enum Request {
     Issue(Issuance),
+    IssueEmail {
+        issue: Issuance,
+        email: super::recovery::service::Enrollment,
+    },
     Rotate {
         old_hash: CredentialHash,
         new_hash: CredentialHash,
@@ -143,6 +147,10 @@ pub enum Reply {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {
+    RegistrationClosed,
+    EmailLimit,
+    EmailBlocked,
+    EmailInvalid,
     Unauthorized,
     Unavailable,
     NameTaken,
@@ -181,7 +189,8 @@ impl From<AccountError> for Error {
 
 pub(super) fn apply(conn: &mut Connection, request: Request) -> Result<Reply, Error> {
     match request {
-        Request::Issue(issue) => issue_family(conn, issue),
+        Request::Issue(issue) => issue_family(conn, issue, None),
+        Request::IssueEmail { issue, email } => issue_family(conn, issue, Some(email)),
         Request::Rotate {
             old_hash,
             new_hash,
@@ -256,14 +265,25 @@ pub(super) fn apply(conn: &mut Connection, request: Request) -> Result<Reply, Er
     }
 }
 
-fn issue_family(conn: &mut Connection, issue: Issuance) -> Result<Reply, Error> {
+fn issue_family(
+    conn: &mut Connection,
+    issue: Issuance,
+    email: Option<super::recovery::service::Enrollment>,
+) -> Result<Reply, Error> {
     let tx = conn.transaction()?;
+    if let Some(input) = &email {
+        super::recovery::service::registration(&tx, &input.email, &input.locale)
+            .map_err(Error::from)?;
+    }
     let lower = issue.name.to_ascii_lowercase();
     let (account, profile) = if issue.register {
         accounts::register_in_transaction(&tx, &issue.name, &lower, &issue.key_hash)?
     } else {
         accounts::login(&tx, &lower, &issue.key_hash)?
     };
+    if let Some(input) = email {
+        super::recovery::service::enroll(&tx, account, &input, issue.now).map_err(Error::from)?;
+    }
     let count:u32=tx.query_row("SELECT COUNT(*) FROM auth_sessions WHERE account_id=?1 AND revoked_at IS NULL AND expires_at>?2",params![account,issue.now],|r|r.get(0))?;
     if count >= 10 {
         return Err(Error::FamilyLimit);
@@ -411,4 +431,17 @@ fn logout_family(
         expires_at: row.4,
         persistent: row.5,
     }))
+}
+
+impl From<super::recovery::Error> for Error {
+    fn from(value: super::recovery::Error) -> Self {
+        use super::recovery::Error as E;
+        match value {
+            E::EmailInvalid => Self::EmailInvalid,
+            E::EmailBlocked => Self::EmailBlocked,
+            E::EmailLimit => Self::EmailLimit,
+            E::RegistrationClosed => Self::RegistrationClosed,
+            _ => Self::Unavailable,
+        }
+    }
 }

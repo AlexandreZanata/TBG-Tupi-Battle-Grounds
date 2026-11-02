@@ -32,6 +32,7 @@ impl Service {
                 name,
                 key_hash: tokens::hash(&secret),
                 register: false,
+                email: None,
                 device,
                 persistent,
                 channel,
@@ -45,6 +46,8 @@ impl Service {
     pub(super) async fn register(
         &self,
         name: String,
+        address: String,
+        locale: String,
         device: &str,
         persistent: bool,
         retry: &str,
@@ -52,12 +55,23 @@ impl Service {
         ip: IpAddr,
     ) -> Result<Grant, Error> {
         tbg_core::account::check_name(&name).map_err(|_| Error::NameInvalid)?;
+        if address.is_empty() {
+            return Err(Error::EmailRequired);
+        }
+        let store = self.store()?;
+        let email = store
+            .release(move |db| crate::store::recovery::service::registration(db, &address, &locale))
+            .await
+            .ok_or(Error::Unavailable)?
+            .map_err(db::Error::from)?;
         let device = tokens::decode::<16>(device)?;
         let retry = tokens::hash(&tokens::decode::<32>(retry)?);
         let fingerprint = tokens::hash(
             format!(
-                "{}:{}:{}:{}",
+                "{}:{}:{}:{}:{}:{}",
                 name,
+                email.email,
+                email.locale,
                 tokens::hex(&device),
                 persistent,
                 channel.as_str()
@@ -108,6 +122,7 @@ impl Service {
                     name,
                     key_hash: tokens::hash(&secret),
                     register: true,
+                    email: Some(email),
                     device,
                     persistent,
                     channel,
@@ -149,7 +164,8 @@ impl Service {
             access: tokens::random::<32>()?,
             refresh: tokens::random::<32>()?,
         };
-        let request = db::Request::Issue(db::Issuance {
+        let email = request.email;
+        let issuance = db::Issuance {
             name: request.name,
             key_hash: request.key_hash,
             register: request.register,
@@ -159,7 +175,14 @@ impl Service {
             persistent: request.persistent,
             refresh_hash: tokens::hash(&secrets.refresh),
             now,
-        });
+        };
+        let request = match email {
+            Some(email) => db::Request::IssueEmail {
+                issue: issuance,
+                email,
+            },
+            None => db::Request::Issue(issuance),
+        };
         let reply = self.store()?.auth(request).await?;
         match self.publish(state, reply, secrets, now, key) {
             Ok(grant) => Ok(grant),

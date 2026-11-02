@@ -574,6 +574,7 @@ compatibility; visual parity needs real captures.
 ### Steps
 | Step | Commits | Work-front check (command → result) | Tests written | Deferred |
 |---|---|---|---|---|
+| S3 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_identity` and preserved P67 offline scenarios; BR-P01/02 helper amended with canon | Compilations/tests queued S14; live verification and desktop captures pending. |
 | S2 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | Mail capture, two-writer lease, retry exhaustion, queue bound, code-at-rest and Debug canaries | Cold compilation and tests queued for S14; SMTP never contacted. |
 | S1 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | Appended IC-13 history-after-v12 and damaged-shape tests | Compilation cold; tests queued for S14. Legacy recovery fixture API conversion follows in S3. |
 

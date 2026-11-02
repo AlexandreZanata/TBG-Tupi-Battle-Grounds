@@ -2,7 +2,7 @@
 
 use super::Error;
 
-pub(crate) fn normalize(email: &str) -> Result<String, Error> {
+pub fn normalize(email: &str) -> Result<String, Error> {
     let email = email.trim_matches(' ');
     if !email.is_ascii() || email.len() > 254 {
         return Err(Error::Denied);

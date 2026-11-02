@@ -13,7 +13,7 @@ fn origin(ws: &Ws) -> String {
     format!("ws://{}/ws", stream.peer_addr().unwrap())
 }
 pub async fn register(ws: &Ws, name: &str) -> Result<Grant, AccountError> {
-    let body = json!({"name":name,"device_id":native_auth::random_hex(16).unwrap(),"persistent":false,"registration_retry_key":native_auth::random_hex(32).unwrap()});
+    let body = json!({"name":name,"email":format!("{name}@example.invalid"),"locale":"en","device_id":native_auth::random_hex(16).unwrap(),"persistent":false,"registration_retry_key":native_auth::random_hex(32).unwrap()});
     let (status, value) = native_auth::post(&origin(ws), "register", body, None)
         .await
         .unwrap();
