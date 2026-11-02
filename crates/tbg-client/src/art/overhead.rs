@@ -11,9 +11,8 @@ use tbg_core::UnitKind;
 pub(crate) fn reserves_equipment(kind: UnitKind) -> bool {
     matches!(
         kind,
-        UnitKind::SiegeWalker | UnitKind::Trident | UnitKind::Colossus
-    ) || super::kits::ogres::contains(kind)
-        || super::kits::abyssals::contains(kind)
+        UnitKind::SiegeWalker | UnitKind::Colossus | UnitKind::GustDrummer
+    )
 }
 
 pub fn height(
@@ -80,9 +79,20 @@ pub fn height(
                                 | Socket::StringBottom
                         )
                     );
-                    if hand_equipment && !equipment {
+                    if hand_equipment && (!equipment || kind == UnitKind::Colossus) {
                         continue;
                     }
+                    let colossus_arm = matches!(
+                        node,
+                        Node::Body(
+                            super::rig::Joint::UpperArmL
+                                | super::rig::Joint::ForearmL
+                                | super::rig::Joint::HandL
+                                | super::rig::Joint::UpperArmR
+                                | super::rig::Joint::ForearmR
+                                | super::rig::Joint::HandR
+                        )
+                    );
                     for layer in [&form.meshes, &form.glow] {
                         let Some(VertexAttributeValues::Float32x3(v)) = layer[node.index()]
                             .as_ref()
@@ -97,9 +107,11 @@ pub fn height(
                             if !hand_equipment {
                                 top = top.max(at.y);
                             }
-                            radius = radius.max(at.x.abs());
-                            depth.x = depth.x.min(at.z);
-                            depth.y = depth.y.max(at.z);
+                            if kind != UnitKind::Colossus || colossus_arm {
+                                radius = radius.max(at.x.abs());
+                                depth.x = depth.x.min(at.z);
+                                depth.y = depth.y.max(at.z);
+                            }
                         }
                     }
                 }
