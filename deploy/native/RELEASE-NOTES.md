@@ -1,4 +1,9 @@
-TBG 0.1.4-colossus.1 — Champions, shared match sides and automatic delivery beta
+TBG 0.1.4-colossus.2 — Compatible automatic delivery verification beta
+
+This immutable follow-up keeps the colossus.1 gameplay and presentation. The Linux
+preview installer reads the committed client version, so later verified packages
+remain installable without a hardcoded preview-version update. This release also
+provides the owner-authorized compatible timer-only delivery witness.
 
 Protocol 36, schema 10 (P73 history schema 11 remains opt-in), ruleset 13 /
 b66993d9e87a9cfc. This contract requires a coordinated release from protocol 31;

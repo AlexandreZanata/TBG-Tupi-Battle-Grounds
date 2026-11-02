@@ -8,6 +8,7 @@ from pathlib import Path
 import shlex
 import shutil
 import subprocess
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -28,7 +29,8 @@ def main():
                     '9fb7be01ac08cbed3bce1aa466d7243418490957', 'HEAD'], cwd=ROOT, check=True)
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     info = json.loads(subprocess.check_output([str(binary), '--build-info'], text=True))
-    if (info['source_commit'] != commit or info['version'] != '0.1.4-colossus.1'
+    version = tomllib.loads((ROOT / 'crates/tbg-client/Cargo.toml').read_text())['package']['version']
+    if (info['source_commit'] != commit or info['version'] != version
             or info['protocol'] != 36 or info['target'] != 'x86_64-unknown-linux-gnu'):
         raise SystemExit('Build the committed 82-champion Linux source with TBG_SOURCE_COMMIT before installation')
     prefix = args.prefix.expanduser().resolve()
