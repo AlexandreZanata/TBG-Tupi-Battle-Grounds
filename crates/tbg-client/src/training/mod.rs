@@ -3,6 +3,7 @@
 pub(crate) mod catalog;
 mod preview;
 pub(crate) mod runtime;
+mod stage;
 mod trial_ui;
 
 use crate::{art::anim::Clip, GameState};
@@ -78,7 +79,13 @@ impl Default for Catalog {
     fn default() -> Self {
         Self {
             seed: 62,
-            selected: UnitKind::BoneBrute,
+            selected: crate::config::url_param("champion")
+                .and_then(|name| {
+                    tbg_core::ALL_KINDS
+                        .into_iter()
+                        .find(|k| format!("{k:?}").eq_ignore_ascii_case(&name))
+                })
+                .unwrap_or(UnitKind::BoneBrute),
             form: (0, 0),
             clip: Clip::Idle,
             revision: 0,
@@ -88,7 +95,8 @@ impl Default for Catalog {
             role: None,
             yaw: 0.,
             zoom: 1.0,
-            reduced: crate::config::reduced_motion(),
+            // The laboratory opens in playback mode; its toggle never inherits Result settings.
+            reduced: false,
             allies: [UnitKind::BoneBrute, UnitKind::Hexer, UnitKind::Archer]
                 .map(TrainingUnitSpec::base)
                 .to_vec(),
@@ -120,7 +128,7 @@ impl Catalog {
             x: None,
         }
     }
-    pub fn visible(&self) -> Vec<UnitKind> {
+    pub fn visible(&self, lang: crate::i18n::Lang) -> Vec<UnitKind> {
         let query = self.search.trim().to_lowercase();
         tbg_core::ALL_KINDS
             .into_iter()
@@ -129,7 +137,14 @@ impl Catalog {
                 let d = tbg_core::content::def(*kind);
                 self.faction.is_none_or(|f| f == d.faction)
                     && self.role.is_none_or(|r| r == d.archetype)
-                    && (query.is_empty() || d.name.to_lowercase().contains(&query))
+                    && (query.is_empty()
+                        || [
+                            d.name,
+                            crate::i18n::content::unit_name(lang, *kind),
+                            crate::i18n::content::unit_name(crate::i18n::Lang::PtBr, *kind),
+                        ]
+                        .iter()
+                        .any(|name| name.to_lowercase().contains(&query)))
             })
             .collect()
     }
@@ -155,10 +170,37 @@ pub fn plugin(app: &mut App) {
     runtime::plugin(app);
     preview::plugin(app);
     trial_ui::plugin(app);
+    app.add_systems(
+        PostUpdate,
+        catalog::arena_picture::cover.after(bevy::ui::UiSystems::Layout),
+    );
     app.add_systems(Update, invalidate.run_if(in_state(GameState::Menu)));
 }
 fn invalidate(catalog: Res<Catalog>, mut shell: ResMut<crate::ui::shell::Shell>) {
     if catalog.is_changed() && shell.panel == crate::ui::shell::Panel::Troops {
         shell.dirty = true;
+    }
+}
+
+#[cfg(test)]
+mod completion_catalog_tests {
+    use super::*;
+    #[test]
+    fn completion_catalog_keeps_all_new_champions_and_bilingual_search_in_the_pr44_ui() {
+        let mut catalog = Catalog::default();
+        let shown = catalog.visible(crate::i18n::Lang::En);
+        assert_eq!(
+            shown.iter().filter(|kind| kind.is_conventional()).count(),
+            // GD-04: Colossus, Volthar and Astreon.
+            84
+        );
+        for kind in tbg_core::COMPLETION_POOL.into_iter().skip(46) {
+            assert!(shown.contains(&kind));
+            for language in [crate::i18n::Lang::En, crate::i18n::Lang::PtBr] {
+                catalog.search = crate::i18n::content::unit_name(language, kind).to_owned();
+                assert!(catalog.visible(crate::i18n::Lang::En).contains(&kind));
+                assert!(catalog.visible(crate::i18n::Lang::PtBr).contains(&kind));
+            }
+        }
     }
 }

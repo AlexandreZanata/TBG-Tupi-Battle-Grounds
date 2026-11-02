@@ -83,6 +83,13 @@ impl Lobby {
         if s.account.as_ref().is_none_or(|(a, _)| *a != account) {
             return;
         }
+        self.cancel_direct(token);
+        // The opponent agreed to rematch the account, not the guest left behind.
+        self.decline_rematch(token);
+        let Some(s) = self.session(&token) else {
+            return;
+        };
+        s.player_challenges_enabled = false;
         s.account = None;
         s.name = display_name();
         send(

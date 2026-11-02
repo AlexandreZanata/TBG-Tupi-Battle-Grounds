@@ -50,6 +50,7 @@ pub(super) fn spawn(
                 tier: 0,
                 branch: 0,
                 own: false,
+                seat: tbg_core::Seat::B,
             },
             Vec3::new(FIRST_X + gap, 0.0, z),
         );
@@ -63,6 +64,7 @@ pub(super) fn spawn(
                 tier,
                 branch,
                 own: true,
+                seat: tbg_core::Seat::A,
             },
             Vec3::new(FIRST_X, 0.0, z),
         );

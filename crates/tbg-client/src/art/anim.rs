@@ -14,6 +14,7 @@ use super::{
 };
 use bevy::prelude::*;
 use tbg_core::UnitKind;
+mod support_facing;
 const FADE: f32 = 0.1;
 /// Seconds for the aim to swing fully in, and to let go.
 const AIM_IN: f32 = 0.15;
@@ -38,6 +39,8 @@ pub struct Animator {
     pub form: (u8, u8),
     /// The engaged target in world space; visuals refresh it every frame.
     pub aim_at: Option<Vec3>,
+    /// Relation of the authoritative action target; incoming hits never retarget the caster.
+    pub(crate) aim_is_ally: bool,
     pub special_at: Option<Vec3>,
     special_aim: Option<Vec3>,
     /// Walk in place at content speed (review tools): feet are not planted.
@@ -49,6 +52,7 @@ pub struct Animator {
     pub carried: bool,
     pub reduction: u16,
     pub counter: u8,
+    pub completion: Option<tbg_core::completion::state::View>,
     special: Option<f32>,
     special_ready: bool,
     armor_flash: f32,
@@ -61,6 +65,7 @@ pub struct Animator {
     phase: f32,
     feet: FootLocks,
     aim: Option<Aim>,
+    support_facing: support_facing::Facing,
     since_attack: f32,
     variant: u8,
     clock: f32,
@@ -94,6 +99,7 @@ impl Animator {
             celebration: None,
             form: (0, 0),
             aim_at: None,
+            aim_is_ally: false,
             special_at: None,
             special_aim: None,
             treadmill: false,
@@ -103,6 +109,7 @@ impl Animator {
             carried: false,
             reduction: 0,
             counter: 0,
+            completion: None,
             special: None,
             special_ready: false,
             armor_flash: 0.0,
@@ -115,6 +122,7 @@ impl Animator {
             phase,
             feet: FootLocks::default(),
             aim: None,
+            support_facing: support_facing::Facing::default(),
             since_attack: 1e6,
             variant: 0,
             clock: phase * 100.0,
@@ -130,25 +138,40 @@ impl Animator {
         }
         self.reduction = bp;
     }
+    pub fn observe_counter(&mut self, n: u8) {
+        self.counter = n;
+        if self.kind == UnitKind::EclipseDancer && self.action.is_none() {
+            self.variant = n & 1;
+        }
+    }
     pub fn attack_variant(&self) -> usize {
         usize::from(self.variant & 1)
+    }
+    pub fn cancel_special(&mut self) {
+        self.special = None;
     }
     pub fn start_special(&mut self) {
         self.special = Some(0.0);
     }
     pub fn resolve_special(&mut self) {
-        let contact = f32::from(tbg_core::content::WINDUP) / tbg_core::content::TICK_HZ as f32;
+        let contact = if self.kind == UnitKind::GustDrummer {
+            0.60
+        } else if self.kind == UnitKind::Gorgehowl {
+            0.10
+        } else {
+            f32::from(tbg_core::content::WINDUP) / tbg_core::content::TICK_HZ as f32
+        };
         self.special = Some(self.special.unwrap_or(0.0).max(contact));
     }
-    pub fn observe_special(&mut self, ready: bool, left: Option<u16>, rooted: bool) {
+    pub fn observe_special(&mut self, ready: bool, left: Option<u16>, windup: u16, rooted: bool) {
         self.special_ready = ready;
         if rooted {
             self.special = None;
             return;
         }
         if let Some(left) = left {
-            let elapsed = f32::from(tbg_core::content::WINDUP.saturating_sub(left))
-                / tbg_core::content::TICK_HZ as f32;
+            let elapsed =
+                f32::from(windup.saturating_sub(left)) / tbg_core::content::TICK_HZ as f32;
             self.special = Some(self.special.unwrap_or(0.0).max(elapsed));
         }
     }
@@ -185,6 +208,7 @@ impl Animator {
         self.fade = None;
         self.aim = None;
         self.aim_at = None;
+        self.aim_is_ally = false;
         self.special_at = None;
         self.special_aim = None;
         self.hit_stop = 0.;
@@ -275,15 +299,32 @@ impl Animator {
         self.kit
             .map_or_else(|| clip.duration(), |k| k.duration(clip))
     }
+    /// Event-free geometry sampling includes engaged aim and the independent reload clock.
+    pub(super) fn clearance_pose(
+        &mut self,
+        clip: Clip,
+        t: f32,
+        target: Option<Vec3>,
+        age: f32,
+    ) -> Pose {
+        self.aim = target.map(|target| Aim {
+            target,
+            weight: 1.0,
+        });
+        self.since_attack = age;
+        self.clock = age;
+        self.pose(clip, t)
+    }
     pub(crate) fn pose(&self, clip: Clip, t: f32) -> Pose {
         let mut pose = sample(clip, t);
         let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.0));
+        let support_cast = self.friendly_support() && support_facing::combat(clip);
         let moment = Moment {
             clip,
             t,
             tier: self.form.0,
             branch: self.form.1,
-            aim: self.aim,
+            aim: if support_cast { None } else { self.aim },
             since_attack: self.since_attack,
             variant: self.variant,
             clock: if crate::config::low_motion() {
@@ -298,16 +339,28 @@ impl Animator {
             counter: self.counter,
             armor_flash: self.armor_flash,
             special: self.special,
-            special_ready: self.special_ready,
+            special_ready: if self.kind == UnitKind::GustDrummer {
+                self.completion.is_none_or(|v| v.barrel_ready_in == 0)
+            } else {
+                self.special_ready
+            },
             special_aim: self.special_aim,
         };
         if let Some(kit) = self.kit {
             (kit.pose)(&moment, &mut pose);
+            kits::completion::snapshot_pose(self.kind, &moment, &mut pose, self.completion);
         }
         if let Some(motion) = self.celebration {
             super::celebration::finish(motion, &moment, &mut pose);
         }
+        if support_cast {
+            self.support_facing.apply(&mut pose);
+        }
         pose
+    }
+    fn friendly_support(&self) -> bool {
+        self.aim_is_ally
+            && tbg_core::content::def(self.kind).archetype == tbg_core::Archetype::Support
     }
     fn action_pose(&mut self, dt: f32) -> Pose {
         let mut pose = self.last;
@@ -366,8 +419,11 @@ impl Animator {
             }
             walk = None;
         }
-        if self.kind == UnitKind::Trident {
-            kits::trident::motion::finish_blend(&mut pose, &self.plan);
+        match self.kind {
+            UnitKind::Trident => kits::trident::motion::finish_blend(&mut pose, &self.plan),
+            UnitKind::Astreon => kits::astreon::motion::finish_blend(&mut pose, &self.plan),
+            UnitKind::Volthar => kits::volthar::motion::finish_blend(&mut pose, &self.plan),
+            _ => {}
         }
         self.last = pose;
         (pose, walk)
@@ -388,7 +444,10 @@ impl Animator {
             self.heading = local.normalize_or(Vec3::Z);
         }
         self.special_aim = self.special_at.map(|w| frame.inverse().transform_point3(w));
-        let engaged = self.aim_at.is_some() && self.base != Clip::Walk;
+        let attacking = self
+            .action
+            .is_some_and(|(c, _)| matches!(c, Clip::AttackMelee | Clip::AttackRanged | Clip::Cast));
+        let engaged = self.aim_at.is_some() && (self.base != Clip::Walk || attacking);
         let goal = if engaged { 1.0 } else { 0.0 };
         let rate = dt / if engaged { AIM_IN } else { AIM_OUT };
         let weight = self.aim.map_or(0.0, |a| a.weight);
@@ -400,6 +459,13 @@ impl Animator {
         self.aim = target
             .filter(|_| weight > 0.0)
             .map(|target| Aim { target, weight });
+        // Walking fades the look weight, not the live patient's chosen rear shoulder.
+        let support_aim = self
+            .friendly_support()
+            .then_some(target)
+            .flatten()
+            .map(|target| Aim { target, weight });
+        self.support_facing.observe(support_aim, dt);
     }
 }
 pub fn animate(
@@ -442,6 +508,10 @@ pub fn animate(
             let (plan, gait) = (a.plan, a.gait);
             a.feet
                 .apply(&mut pose, &stride, frame * root_joint, &plan, &gait);
+            if kits::completion::is_insect(a.kind) {
+                a.feet
+                    .apply_auxiliary(&mut pose, &stride, frame * root_joint, &plan, &gait);
+            }
         } else {
             a.feet.reset();
         }
@@ -478,6 +548,18 @@ fn show_loaded(
     a: &Animator,
     visibility: &mut Query<&mut Visibility, Without<Animator>>,
 ) {
+    if a.kind == UnitKind::GustDrummer {
+        if let Ok(mut visible) =
+            visibility.get_mut(a.joints[rig::Node::Prop(rig::Socket::WeaponR).index()])
+        {
+            *visible = if a.completion.is_none_or(|v| v.barrel_ready_in == 0) {
+                Visibility::Inherited
+            } else {
+                Visibility::Hidden
+            };
+        }
+        return;
+    }
     let loaded = match kit.attack {
         Attack::Shot { loaded, .. } | Attack::CountedShot { loaded, .. } => loaded,
         _ => None,

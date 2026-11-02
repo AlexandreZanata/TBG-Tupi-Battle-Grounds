@@ -582,3 +582,83 @@ This keeps the owner's PC as the SSH maintenance channel. The timer is not
 installed/enabled; main integration and the first real attested package/verifier
 acceptance remain prerequisites. Native signing and frontend publication remain
 separate. See [the preparation report](phases/MAIN-auto-deploy-preparation.md).
+
+## Active players, direct challenges and rematches (2026-11-01)
+
+**P73 — implemented, Draft review pending**,
+`phase/p73-active-players-challenges`, based on `origin/main` at `e2a18af`
+and the P72 shared Bevy web/native interface at `2da0a35`.
+**Consolidation, 2026-11-01:** merged onto main `70827a7` in
+`codex/consolidate-open-fronts` with protocol 32 and D-103; compiling
+acceptance is still deferred, so P73 remains Draft/pending. See
+[the consolidation report](phases/CONSOLIDATION-open-fronts-20261101.md).
+See the [execution report](planning/P73-EXECUTION-REPORT.md) for real scoped
+validation, native fixture captures and deferred final/browser acceptance.
+Read [the phase](phases/P73-active-players-and-direct-challenges.md),
+[source audit and D01–D16/H01–H18 cases](planning/P73-PLAN-MANIFEST.json) and
+[the executor prompt](planning/P73-EXECUTION-PROMPT.md).
+
+Extend the current Live/online surface with a complete paged/searchable
+global online-account directory, accurate availability, participant-bound
+Accept/Decline/Cancel invitations, retained-session opt-out and last-opponent
+rematches from Result or Active players. Guests remain counted, not publicly
+enumerated. Reuse P39 private casual pairing and rematch consent, P47
+snapshots and P71 auth/admission continuity; all resulting Challenge games
+remain unrated. Preserve the existing link challenge and live-watch flows.
+
+**Owner extension, 2026-11-01:** [Match history and account privacy](planning/P73-MATCH-HISTORY.md)
+is part of P73. Add persistent account-bound online results and own
+statistics, list/detail views and a saved Public/Only me setting (default
+private), including guards for legacy `recent` APIs. The sub-spec and
+[conceptual additive schema](planning/P73-HISTORY-SCHEMA.sql) cover source
+identity, terminal summaries, idempotent journals/transactions, verified
+Ranked backfill, private projections, slot-aware API, migration/rollback
+and H01–H18 validation. No replay or old-history rematch action is added.
+
+Order: freeze P72/wire ownership -> directory/global snapshot accuracy ->
+bounded direct-invitation lifecycle -> rematch eligibility/navigation ->
+history persistence/privacy/API -> shared localized frontend -> one
+targeted consolidation. Two-slot presence
+must actually aggregate snapshots rather than labeling one slot global;
+unsupported/incompatible/draining targets remain unavailable without moving
+an active match. Proposed BR-AP rules/defaults are documented in GAME-DESIGN.
+
+The implementation adds protocol 32 (allocated at consolidation, D-103; main
+already used 31) and explicitly gated additive schema 11.
+No production flags, database, VPS or deployment were changed. Final checks
+blocked by the shared validation lock, browser captures and owner look/fun
+acceptance remain pending; this phase is not approved or release-ready.
+Full-suite and heavy validation still require the owner's explicit scoped request.
+
+**P73 execution handoff authorization, 2026-11-01:** after implementation,
+normally publish its branch and open a GitHub PR targeting `main`, per the
+owner's explicit instruction. This scoped exception does not authorize
+force-push, direct main changes, merge, auto-merge or deployment. Unrun
+acceptance must be listed in a Draft PR rather than claimed complete.
+
+## Gods expansion: Colossus refinement, Volthar and Astreon (owner, 2026-11-02)
+
+**GD-04 — implemented, Draft review pending**, `phase/gods-faction-expansion`,
+based on PR #48 (`codex/ogre-faction` `747e2ad`) plus the unpushed Colossus
+fixes CROWD-EXIT-01 and GD-03. Refines the Colossus visually (stats and
+abilities unchanged; branch B stays dark) and adds Volthar (Storm Judgment
+chain lightning) and Astreon (Verdict Lance max-HP pierce) to the local preview
+pool with five forms each. Wire 37, ruleset 14, D-105; values Proposed. See
+[the phase report](phases/GODS-faction-expansion.md). Windows/web parity,
+D-33 balance acceptance and owner look/fun sign-off remain pending.
+
+
+## P74 — War Auxiliaries (`Mineiro` & `Mercador`), 3D Precincts & Construction Animations (2026-11-02)
+
+Spec: [`docs/phases/P74-war-auxiliaries.md`](phases/P74-war-auxiliaries.md).
+Authoritative `Mineiro` (cost 6 Energy, 12s preparation, +0.06 Energy/s for 180s
+outside Interest multipliers, single-hire per match) and `Mercador` (cost 4
+Energy, counts post-hire champion purchases `0..3` to grant 1 free reroll per 3
+purchases up to 3 activations/9 purchases without increasing `reroll_streak`).
+Bottom-right navy-and-gold `Auxiliares (0/2)` HUD panel with 3D portraits and
+free-reroll indicator on the Reroll button. Procedural low-poly 3D `Mineiro`
+(mine outcrop, timber shoring, swinging lantern, rails, ore cart) and `Mercador`
+(red-and-cream striped market stall, balance-scales banner, crates/sacks, timber
+pier over water, and wave-bobbing wooden Merchant Caravel ship) with 3-stage
+construction animations, active work/delivery loops, and theme-harmonized
+palettes across all eight Arenas.

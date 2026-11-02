@@ -1,4 +1,4 @@
-//! Persistent arena chip and dismissible five-second introduction per Linux match.
+//! Common Arena/side chip and dismissible five-second match introduction.
 
 use super::{
     super::{kit, label, ActionQueue, UiAction},
@@ -51,6 +51,7 @@ fn spawn(
 ) {
     state.show(time.elapsed_secs_f64());
     let accent = accent(info.arena);
+    let (side_name, side_description, side_color) = side_copy(*lang, &info);
     let name = lang.key(&format!("arenas.{}.name", info.arena.slug()));
     commands
         .spawn((
@@ -83,6 +84,9 @@ fn spawn(
             .with_children(|chip| {
                 chip.spawn(chrome::icon(&assets, "island", 14., accent));
                 chip.spawn(label(name.clone(), 14.));
+                chip.spawn(kit::muted("·", 13.));
+                chip.spawn(label(side_name.clone(), 13.))
+                    .insert(TextColor(side_color));
             });
         });
     commands
@@ -102,7 +106,7 @@ fn spawn(
             root.spawn((
                 Node {
                     width: px(390),
-                    min_height: px(106),
+                    min_height: px(146),
                     padding: UiRect::axes(px(24), px(12)),
                     border: UiRect::all(px(1)),
                     border_radius: BorderRadius::all(px(10)),
@@ -129,6 +133,13 @@ fn spawn(
                     TextLayout::justify(Justify::Center),
                 ));
                 banner.spawn(kit::muted(lang.key("arenas.symmetric"), 10.));
+                banner
+                    .spawn(label(side_name.clone(), 17.))
+                    .insert(TextColor(side_color));
+                banner.spawn((
+                    label(side_description.clone(), 12.),
+                    TextLayout::justify(Justify::Center),
+                ));
                 banner.spawn((
                     Node {
                         position_type: PositionType::Absolute,
@@ -202,4 +213,55 @@ fn accent(arena: Arena) -> Color {
         Arena::Desert => [231, 192, 111],
     };
     Color::srgb_u8(r, g, b)
+}
+
+fn side_copy(lang: Lang, info: &MatchInfo) -> (String, String, Color) {
+    if info.spectating {
+        return (
+            lang.key("battle.side.spectator"),
+            lang.key("battle.side.common"),
+            chrome::GOLD,
+        );
+    }
+    let blue = info.you.unwrap_or(tbg_core::Seat::A) == tbg_core::Seat::A;
+    let key = if blue { "blue" } else { "red" };
+    (
+        lang.key(&format!("battle.side.{key}")),
+        lang.key(&format!("battle.side.{key}_description")),
+        if blue {
+            crate::art::palette::ALLY
+        } else {
+            crate::art::palette::ENEMY
+        },
+    )
+}
+
+#[cfg(test)]
+mod side_tests {
+    use super::*;
+
+    #[test]
+    fn side01_intro_identifies_the_real_side_and_neutral_spectator() {
+        for (side, expected) in [
+            (tbg_core::Seat::A, "Lado azul"),
+            (tbg_core::Seat::B, "Lado vermelho"),
+        ] {
+            let info = MatchInfo {
+                you: Some(side),
+                ..default()
+            };
+            let (title, description, _) = side_copy(Lang::PtBr, &info);
+            assert_eq!(title, expected);
+            assert!(description.contains(if side == tbg_core::Seat::A {
+                "fica à esquerda"
+            } else {
+                "fica à direita"
+            }));
+            let watch = MatchInfo {
+                spectating: true,
+                ..info
+            };
+            assert_eq!(side_copy(Lang::PtBr, &watch).0, "Azul contra Vermelho");
+        }
+    }
 }

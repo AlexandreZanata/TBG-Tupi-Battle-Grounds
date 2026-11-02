@@ -173,15 +173,16 @@ fn quickdraw_stays_inside_the_attack_speed_cap() {
     // Augment stack already at the cap leaves Quickdraw nothing to add.
     let interval = |preset: ArcanaPreset| {
         let mut s = arena(6, preset, ArcanaPreset::NEUTRAL);
+        // OG-01 moved SiegeWalker to Ogres; the replacement is a real Ranged Machine.
         // Tuned Gears (id 8, Machines +8% attack speed), far past the cap.
         s.players[0].augments[8] = 200;
-        spawn(&mut s, Seat::A, UnitKind::SiegeWalker, 6_000);
+        spawn(&mut s, Seat::A, UnitKind::RivetBallista, 6_000);
         let target = spawn(&mut s, Seat::B, UnitKind::Rampart, 7_000);
         let hits = hit_ticks(&mut s, target, 3);
         hits[2] - hits[1]
     };
     let capped = interval(DEFAULT);
-    assert_eq!(capped, 25, "half of the 2.5 s base interval");
+    assert_eq!(capped, 11, "half of the 1.1 s base interval");
     assert_eq!(
         interval(PRECISION_FULL),
         capped,

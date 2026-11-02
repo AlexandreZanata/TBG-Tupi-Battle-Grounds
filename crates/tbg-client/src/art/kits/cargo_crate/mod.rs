@@ -35,11 +35,10 @@ fn spec(tier: u8, branch: u8) -> FigureSpec {
     let r = Body(Joint::Root);
     let mut v = gear::crate_box(r, [0.0, 0.22, 0.0], 0.46);
     v.extend([
-        // Lid slats, a rope lashing and the team's shipping mark.
+        // Lid slats, a rope lashing and reinforced corners.
         part(r, Box(0.48, 0.04, 0.14), WOOD, [0.0, 0.41, -0.15]),
         part(r, Box(0.48, 0.04, 0.14), WOOD, [0.0, 0.41, 0.15]),
         part(r, Ring(0.014, 0.232, 360.0), LINEN, [0.0, 0.235, 0.0]).rot([0.0, 0.0, 90.0]),
-        part(r, Box(0.14, 0.1, 0.02), LINEN, [-0.12, 0.3, 0.235]),
     ]);
     if f.a {
         v.extend(gear::sack(r, [0.1, 0.55, 0.02], GOLD, 0.8));

@@ -1,0 +1,460 @@
+{
+  "status": "Proposed AB-01; private local preview",
+  "target_roster": 81,
+  "factions": 9,
+  "champions": [
+    {
+      "kind": "NacreDuelist",
+      "name": {
+        "pt": "Espadachim de Nácar",
+        "en": "Nacre Duelist"
+      },
+      "faction": "Abyssals",
+      "archetype": "Dps",
+      "stats": [
+        2400,
+        430,
+        64,
+        22,
+        1050,
+        54,
+        0
+      ],
+      "shape": "slender upright shark-faced duelist with swept-back head fin, two short crescent nacre forearm blades pointing down, narrow dark violet sash, exposed pale sea-green chest and asymmetric fin greaves",
+      "kit": "Every third completed hit punishes an enemy preparing a basic attack.",
+      "forms": [
+        {
+          "code": "A1",
+          "pt": "Fio de Marfim",
+          "en": "Ivory Edge"
+        },
+        {
+          "code": "A2",
+          "pt": "Lâmina da Maré",
+          "en": "Tideblade"
+        },
+        {
+          "code": "B1",
+          "pt": "Gumes de Espuma",
+          "en": "Foam Edges"
+        },
+        {
+          "code": "B2",
+          "pt": "Dança de Nácar",
+          "en": "Nacre Dance"
+        }
+      ],
+      "kit_pt": "O terceiro golpe ganha força contra inimigos preparando um ataque básico.",
+      "default_costume": {
+        "pt": "Desafiante de Nácar",
+        "en": "Nacre Challenger"
+      },
+      "weapon": "Paired short forward nacre fin blades on the gauntlets; no hanging hook or chain.",
+      "projectile": "None; compact crescent contact sweep.",
+      "victory": "Alternating torso sway with both blades tucked upward.",
+      "native_refinement": "The illustrative crescent blades are adapted to forward shell fins to distinguish this silhouette from Hook Brawler."
+    },
+    {
+      "kind": "ReefLancer",
+      "name": {
+        "pt": "Lanceira do Recife",
+        "en": "Reef Lancer"
+      },
+      "faction": "Abyssals",
+      "archetype": "Dps",
+      "stats": [
+        2400,
+        410,
+        58,
+        26,
+        1300,
+        48,
+        0
+      ],
+      "shape": "tall lean manta-faced female amphibious lancer, broad lateral head fins, short three-pronged ivory trident carried upright close to right shoulder, coral-colored segmented waist armor, one spiral shell shoulder guard",
+      "kit": "Every third thrust pierces one enemy standing closely behind the target.",
+      "forms": [
+        {
+          "code": "A1",
+          "pt": "Vigia do Recife",
+          "en": "Reef Watch"
+        },
+        {
+          "code": "A2",
+          "pt": "Tridente da Guarda",
+          "en": "Guard Trident"
+        },
+        {
+          "code": "B1",
+          "pt": "Farpas de Coral",
+          "en": "Coral Barbs"
+        },
+        {
+          "code": "B2",
+          "pt": "Caçadora da Corrente",
+          "en": "Current Huntress"
+        }
+      ],
+      "kit_pt": "O terceiro golpe atravessa um inimigo próximo atrás do alvo.",
+      "default_costume": {
+        "pt": "Vigia de Coral",
+        "en": "Coral Watch"
+      },
+      "weapon": "Compact upright ivory trident with a contrasting spiral shell shoulder.",
+      "projectile": "None; precise narrow contact streak.",
+      "victory": "Raises the trident and bows the head."
+    },
+    {
+      "kind": "TrenchFist",
+      "name": {
+        "pt": "Punho da Fossa",
+        "en": "Trench Fist"
+      },
+      "faction": "Abyssals",
+      "archetype": "Dps",
+      "stats": [
+        2400,
+        480,
+        62,
+        30,
+        850,
+        42,
+        0
+      ],
+      "shape": "short deep-sea fighter with flattened hammerhead-like head, very long compact right forearm ending in a huge faceted saltstone gauntlet, tiny free left hand, ochre cloth wraps, dark olive sea skin, squat webbed feet",
+      "kit": "Heavy impacts add capped damage based on the target maximum health.",
+      "forms": [
+        {
+          "code": "A1",
+          "pt": "Punho de Pedra-Mar",
+          "en": "Seastone Fist"
+        },
+        {
+          "code": "A2",
+          "pt": "Quebra-Quilhas",
+          "en": "Keelbreaker"
+        },
+        {
+          "code": "B1",
+          "pt": "Manoplas de Sal",
+          "en": "Salt Gauntlets"
+        },
+        {
+          "code": "B2",
+          "pt": "Abalo Abissal",
+          "en": "Abyssal Quake"
+        }
+      ],
+      "kit_pt": "Golpes pesados causam dano adicional limitado pela vida-base do alvo.",
+      "default_costume": {
+        "pt": "Quebrador de Pedra-Mar",
+        "en": "Seastone Breaker"
+      },
+      "weapon": "One oversized faceted saltstone gauntlet; free left hand stays small.",
+      "projectile": "None; salt chips and a small ground ring.",
+      "victory": "Holds the heavy fist overhead with a weighted knee bounce."
+    },
+    {
+      "kind": "PearlSlinger",
+      "name": {
+        "pt": "Fundeiro de Pérolas",
+        "en": "Pearl Slinger"
+      },
+      "faction": "Abyssals",
+      "archetype": "Ranged",
+      "stats": [
+        2400,
+        340,
+        52,
+        24,
+        4100,
+        48,
+        0
+      ],
+      "shape": "small round-faced fish folk slinger with a wide folded fin hood, two round pearl pouches at hips, a compact curved shell sling in the right hand, rust-brown short cape and pale turquoise skin",
+      "kit": "Every third impact shatters into a small bounded splash around the target.",
+      "forms": [
+        {
+          "code": "A1",
+          "pt": "Bolsa de Pérolas",
+          "en": "Pearl Pouch"
+        },
+        {
+          "code": "A2",
+          "pt": "Olho da Maré",
+          "en": "Tide Eye"
+        },
+        {
+          "code": "B1",
+          "pt": "Concha Fragmentada",
+          "en": "Split Shell"
+        },
+        {
+          "code": "B2",
+          "pt": "Chuva de Pérolas",
+          "en": "Pearl Rain"
+        }
+      ],
+      "kit_pt": "A terceira pérola estilhaça e atinge poucos inimigos próximos do alvo.",
+      "default_costume": {
+        "pt": "Bolsa do Recife",
+        "en": "Reef Pouch"
+      },
+      "weapon": "Curved shell sling and two round hip pearl pouches.",
+      "projectile": "Rounded pearl with nacre ring, soft water trail and fragment impact.",
+      "victory": "Raises the sling and rolls the wrist above a small hip sway."
+    },
+    {
+      "kind": "AbyssHarpooner",
+      "name": {
+        "pt": "Arpoadora do Abismo",
+        "en": "Abyss Harpooner"
+      },
+      "faction": "Abyssals",
+      "archetype": "Ranged",
+      "stats": [
+        2400,
+        360,
+        64,
+        26,
+        4300,
+        42,
+        0
+      ],
+      "shape": "upright eel-faced huntress with long narrow jaw, short back fin, compact hand-held wooden harpoon launcher with a clearly visible long ivory barbed bolt, cream chest straps and dark sea-plum coat",
+      "kit": "Barbed bolts apply one non-stacking bleed family.",
+      "forms": [
+        {
+          "code": "A1",
+          "pt": "Arpão de Nácar",
+          "en": "Nacre Harpoon"
+        },
+        {
+          "code": "A2",
+          "pt": "Mira das Fossas",
+          "en": "Trench Sight"
+        },
+        {
+          "code": "B1",
+          "pt": "Lança Farpada",
+          "en": "Barbed Spear"
+        },
+        {
+          "code": "B2",
+          "pt": "Caçada Abissal",
+          "en": "Abyss Hunt"
+        }
+      ],
+      "kit_pt": "Arpões farpados deixam sangramento que não acumula com outro sangramento.",
+      "default_costume": {
+        "pt": "Caçada das Fossas",
+        "en": "Trench Hunt"
+      },
+      "weapon": "Wood-and-nacre hand-held launcher with barbed bolt and branch-B back bolts.",
+      "projectile": "Slender barbed ivory bolt with a wooden shaft.",
+      "victory": "Presents the launcher and tilts the shoulders."
+    },
+    {
+      "kind": "UndertowHerald",
+      "name": {
+        "pt": "Arauto da Ressaca",
+        "en": "Undertow Herald"
+      },
+      "faction": "Abyssals",
+      "archetype": "Control",
+      "stats": [
+        2400,
+        420,
+        34,
+        30,
+        2500,
+        40,
+        0
+      ],
+      "shape": "broad-necked amphibious herald with three small chin fins, large spiral conch horn held near chest in both hands, flat scalloped shoulder mantle, ivory head stripe and deep green skin",
+      "kit": "Periodic announced conch pulses slow a bounded group near the primary target.",
+      "forms": [
+        {
+          "code": "A1",
+          "pt": "Concha Ressonante",
+          "en": "Resonant Conch"
+        },
+        {
+          "code": "A2",
+          "pt": "Voz da Ressaca",
+          "en": "Undertow Voice"
+        },
+        {
+          "code": "B1",
+          "pt": "Trompa da Maré",
+          "en": "Tide Horn"
+        },
+        {
+          "code": "B2",
+          "pt": "Chamado do Maelstrom",
+          "en": "Maelstrom Call"
+        }
+      ],
+      "kit_pt": "Pulsos anunciados da concha retardam um grupo limitado perto do alvo.",
+      "default_costume": {
+        "pt": "Concha Antiga",
+        "en": "Ancient Conch"
+      },
+      "weapon": "Flared spiral conch held at chest height; branched mouth/ribs change with Evolution.",
+      "projectile": "Spiral shell pulse; delayed Slow has a separate authoritative cue.",
+      "victory": "Holds the conch in both hands and nods to its rhythm."
+    },
+    {
+      "kind": "TrenchLamplighter",
+      "name": {
+        "pt": "Faroleiro da Fossa",
+        "en": "Trench Lamplighter"
+      },
+      "faction": "Abyssals",
+      "archetype": "Control",
+      "stats": [
+        2400,
+        370,
+        42,
+        30,
+        3300,
+        38,
+        0
+      ],
+      "shape": "very tall thin angler-faced lamplighter with short bent fishing-lure head fin, an amber glass lantern inside a cage of ivory shell ribs on a compact staff, dark indigo split robe and pale green hands",
+      "kit": "A delayed light pulse strikes a locked visible ground point; enemies can walk out.",
+      "forms": [
+        {
+          "code": "A1",
+          "pt": "Lanterna de Âmbar",
+          "en": "Amber Lantern"
+        },
+        {
+          "code": "A2",
+          "pt": "Farol das Profundezas",
+          "en": "Deep Beacon"
+        },
+        {
+          "code": "B1",
+          "pt": "Vidro Salino",
+          "en": "Saltglass"
+        },
+        {
+          "code": "B2",
+          "pt": "Olho do Abismo",
+          "en": "Abyss Eye"
+        }
+      ],
+      "kit_pt": "O farol anuncia um ponto fixo antes do pulso; inimigos podem sair da área.",
+      "default_costume": {
+        "pt": "Último Farol",
+        "en": "Last Beacon"
+      },
+      "weapon": "Amber lantern enclosed by shell ribs on a short staff; living lure on the head.",
+      "projectile": "Amber faceted shard for basics; the special marks a fixed ground center before resolving.",
+      "victory": "Raises the lantern and follows it with a lifted head."
+    },
+    {
+      "kind": "FoamWeaver",
+      "name": {
+        "pt": "Tecelã de Espuma",
+        "en": "Foam Weaver"
+      },
+      "faction": "Abyssals",
+      "archetype": "Support",
+      "stats": [
+        1800,
+        340,
+        0,
+        34,
+        2800,
+        42,
+        30
+      ],
+      "shape": "graceful amphibious healer with two lateral soft head fins, an open half-shell chalice held in both hands with a small suspended pearl, overlapping white nacre skirt panels, plum shoulder scarf and sea-green skin",
+      "kit": "Healing leaves a short non-stacking echo consumed by the next nonlethal health hit.",
+      "forms": [
+        {
+          "code": "A1",
+          "pt": "Taça de Espuma",
+          "en": "Foam Chalice"
+        },
+        {
+          "code": "A2",
+          "pt": "Fonte de Nácar",
+          "en": "Nacre Spring"
+        },
+        {
+          "code": "B1",
+          "pt": "Fios da Maré",
+          "en": "Tide Threads"
+        },
+        {
+          "code": "B2",
+          "pt": "Manto da Arrebentação",
+          "en": "Surf Mantle"
+        }
+      ],
+      "kit_pt": "A cura deixa um eco curto consumido pelo próximo golpe não letal na vida.",
+      "default_costume": {
+        "pt": "Manto de Espuma",
+        "en": "Foam Mantle"
+      },
+      "weapon": "Half-shell chalice, open fins and one suspended pearl.",
+      "projectile": "Small pearlescent foam cluster; the healing echo remains visible on the patient.",
+      "victory": "Presents the pearl with both arms and turns the upper body gently."
+    },
+    {
+      "kind": "PodSnapper",
+      "name": {
+        "pt": "Estala-Vagens",
+        "en": "Pod Snapper"
+      },
+      "faction": "Plants",
+      "archetype": "Ranged",
+      "stats": [
+        2400,
+        390,
+        52,
+        26,
+        3900,
+        40,
+        0
+      ],
+      "shape": "small upright living wood creature with a broad split seed-pod launcher enclosing its right forearm, three large ivory seeds visible inside the green jaws of the pod, asymmetrical curled leaf crown, squat root feet and ochre bark chest, no face mask or mushrooms",
+      "kit": "Every third completed hit plants one bounded non-stacking seed mark consumed by the next allied melee strike.",
+      "forms": [
+        {
+          "code": "A1",
+          "pt": "Vagem de Ferro",
+          "en": "Ironpod"
+        },
+        {
+          "code": "A2",
+          "pt": "Sementeira Real",
+          "en": "Royal Seeder"
+        },
+        {
+          "code": "B1",
+          "pt": "Casca Estalada",
+          "en": "Split Husk"
+        },
+        {
+          "code": "B2",
+          "pt": "Estouro da Colheita",
+          "en": "Harvest Burst"
+        }
+      ],
+      "kit_pt": "O terceiro disparo planta uma marca consumida pelo próximo golpe corpo a corpo de outro aliado.",
+      "default_costume": {
+        "pt": "Guardião das Sementes",
+        "en": "Seedkeeper"
+      },
+      "weapon": "Split living forearm pod with three visible seeds and animated jaws.",
+      "projectile": "Ivory seed with green pod tip; its shared mark has bounded public duration.",
+      "victory": "Bobs its leaf crown and lifts the seed pod."
+    }
+  ],
+  "existing_abyssal": "Trident",
+  "replacement_faction": "Plants"
+}

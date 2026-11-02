@@ -42,9 +42,7 @@ impl Lobby {
         self.metrics
             .live_matches
             .store(self.live.len() as u64, Relaxed);
-        if **self.live_tx.borrow() != snapshot {
-            self.live_tx.send_replace(Arc::new(snapshot));
-        }
+        self.live_tx.send_replace(Arc::new(snapshot));
     }
 
     fn live_snapshot(&mut self, now: Instant) -> LiveSnapshot {
@@ -72,7 +70,13 @@ impl Lobby {
             rows.insert(0, row);
         }
         rows.truncate(LIST_ROWS);
+        let old = self.live_tx.borrow();
+        let changed = old.counts != counts || old.accounts != accounts;
         LiveSnapshot {
+            revision: old.revision.saturating_add(u64::from(changed)),
+            updated_unix: crate::store::release::now_unix(),
+            complete: true,
+            stale: false,
             counts,
             featured,
             matches: rows,
@@ -86,7 +90,7 @@ impl Lobby {
         let mut counts = Counts::default();
         let mut seen = HashSet::new();
         let mut accounts = Vec::new();
-        for s in self.sessions.values() {
+        for (token, s) in &self.sessions {
             if matches!(s.state, SessionState::InMatch { .. }) {
                 counts.in_battle += 1;
             }
@@ -100,10 +104,17 @@ impl Lobby {
             if !seen.insert(*id) {
                 continue;
             }
+            let invitable = self.direct_ready(*token) && !self.direct_pending(*token);
             accounts.push(OnlineRow {
+                invitable,
+                slot: self.release.slot().map(str::to_owned),
                 name: profile.name.clone(),
                 rating: profile.rating,
-                status: presence_status(&s.state),
+                status: if self.direct_pending(*token) {
+                    PresenceStatus::Busy
+                } else {
+                    presence_status(&s.state)
+                },
             });
         }
         counts.accounts = seen.len() as u32;
@@ -145,9 +156,8 @@ fn presence_status(state: &SessionState) -> PresenceStatus {
         SessionState::Queued => PresenceStatus::Queued,
         SessionState::InMatch { .. } => PresenceStatus::Playing,
         SessionState::Watching { .. } => PresenceStatus::Watching,
-        SessionState::Idle | SessionState::InRoom | SessionState::InChallenge { .. } => {
-            PresenceStatus::Idle
-        }
+        SessionState::Idle => PresenceStatus::Idle,
+        SessionState::InRoom | SessionState::InChallenge { .. } => PresenceStatus::Busy,
     }
 }
 

@@ -132,6 +132,11 @@ impl PracticeBot {
     /// Only a caller-owned local Practice state receives this disclosed assistance.
     /// Compute before step, apply after step: identical pre-regen Interest and arena rate.
     pub fn regen_bonus(&mut self, state: &MatchState) -> u32 {
+        self.regen_bonus_for(state, Seat::B)
+    }
+
+    /// Practice can place the bot on either seat; assistance follows that bot.
+    pub fn regen_bonus_for(&mut self, state: &MatchState, seat: Seat) -> u32 {
         let regenerates = state.phase == Phase::Running
             || (state.phase == Phase::Countdown && state.tick == crate::content::RUNNING_START);
         if self.difficulty != 3 || !regenerates || state.augments.selecting() {
@@ -140,7 +145,7 @@ impl PracticeBot {
         let rules = state.rules();
         let bp = rules
             .interest
-            .regen_bp(state.players[Seat::B.index()].energy)
+            .regen_bp(state.players[seat.index()].energy)
             .saturating_add_signed(state.arena_rule().regen_bp);
         self.regen_frac += u64::from(rules.regen_running) * u64::from(bp);
         let gain = (self.regen_frac / 10_000) as u32;

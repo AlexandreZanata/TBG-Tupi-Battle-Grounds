@@ -1,11 +1,9 @@
 //! `ServerMsg` → world: match info, the render timeline (P30-C), unit
-//! entities, event cues. The only place that mirrors coordinates: the
-//! player's own Stronghold is always at world x = 0.
+//! entities and event cues in a common blue-left/red-right world.
 
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use tbg_core::content::LANE_LEN;
 use tbg_core::{MatchView, Outcome, Seat, UnitId};
 
 use crate::art::FigureLibrary;
@@ -31,6 +29,8 @@ pub use messages::{QueueInfo, ViewGaps};
 
 #[derive(Resource, Default)]
 pub struct MatchInfo {
+    pub personal: Option<Box<tbg_core::protocol::PersonalMatchSummary>>,
+    pub history_save: Option<tbg_core::protocol::HistorySaveState>,
     pub result_id: Option<tbg_core::protocol::ResultId>,
     pub celebration: Option<tbg_core::celebration::CelebrationCast>,
     pub you: Option<Seat>,
@@ -56,6 +56,7 @@ pub struct MatchInfo {
 /// P39: the result-screen rematch offer and its request state.
 #[derive(Resource, Default)]
 pub struct RematchInfo {
+    pub opponent: String,
     /// Ignore offers already in flight when the player explicitly leaves.
     pub dismissed: bool,
     pub open: bool,
@@ -92,6 +93,7 @@ pub fn plugin(app: &mut App) {
     lobby_battle::plugin(app);
     app.init_resource::<MatchInfo>()
         .init_resource::<LatestView>()
+        .init_resource::<crate::vfx::barrels::Entities>()
         .init_resource::<ViewBuffer>()
         .init_resource::<UnitEntities>()
         .init_resource::<QueueInfo>()
@@ -138,17 +140,14 @@ fn render_units(state: Res<State<GameState>>, shell: Res<crate::ui::shell::Shell
     matches!(*state.get(), GameState::InMatch | GameState::Training)
 }
 
-/// Lane x in milli-tiles → world x, mirrored for seat B.
+/// Authoritative lane x in milli-tiles, identical for every viewer.
 pub fn world_x(x: i32, you: Seat) -> f32 {
     world_tile(x as f32 / 1000.0, you)
 }
 
-/// Lane x in tiles → world x, mirrored for seat B.
-pub fn world_tile(t: f32, you: Seat) -> f32 {
-    match you {
-        Seat::A => t,
-        Seat::B => LANE_LEN as f32 / 1000.0 - t,
-    }
+/// Common world orientation; ownership never changes presentation coordinates.
+pub fn world_tile(t: f32, _you: Seat) -> f32 {
+    t
 }
 
 #[allow(clippy::too_many_arguments)] // the one system that turns views into the scene
@@ -162,6 +161,7 @@ pub(crate) fn sync_units(
     mut visuals: events::Visuals,
     mut fx_res: FxResources,
     mut training: ResMut<crate::training::Trial>,
+    mut barrels: ResMut<crate::vfx::barrels::Entities>,
     state: Res<State<GameState>>,
     #[cfg(tbg_desktop)] mut demo: ResMut<lobby_battle::Demo>,
 ) {
@@ -210,10 +210,12 @@ pub(crate) fn sync_units(
         dummies: &dummies,
     };
     // Borrowed, not cloned: the frame lives only while units are placed.
-    let placed = timeline
-        .frame(now, time.delta_secs_f64())
-        .map(|f| scene.place(f.from, f.to, f.alpha));
+    let placed = timeline.frame(now, time.delta_secs_f64()).map(|f| {
+        crate::vfx::barrels::place(scene.commands, vfx, &mut barrels, f.from, f.to, f.alpha);
+        scene.place(f.from, f.to, f.alpha)
+    });
     let Some((you, alive)) = placed else {
+        crate::vfx::barrels::clear(scene.commands, &mut barrels);
         return;
     };
     let mut fx = events::Fx {
@@ -264,7 +266,7 @@ impl Scene<'_, '_, '_, '_, '_> {
         // Both views list units by id, so one cursor walks `to` with `from`.
         let mut next = 0;
         for u in &from.units {
-            let anchor = crowd_ecs::LaneAnchor::from_view(u, you);
+            let anchor = crowd_ecs::LaneAnchor::from_view(u, you, from.physical_lanes);
             while to.units.get(next).is_some_and(|n| n.id < u.id) {
                 next += 1;
             }
@@ -274,7 +276,13 @@ impl Scene<'_, '_, '_, '_, '_> {
                 _ => u.x,
             };
             let x = u.x as f32 + (to_x - u.x) as f32 * alpha;
-            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, 0.0);
+            let to_z = to
+                .units
+                .get(next)
+                .filter(|n| n.id == u.id)
+                .map_or(u.lane_z, |n| n.lane_z);
+            let z = f32::from(u.lane_z) + (f32::from(to_z) - f32::from(u.lane_z)) * alpha;
+            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, z / 1000.0);
             match self
                 .map
                 .0
@@ -285,12 +293,19 @@ impl Scene<'_, '_, '_, '_, '_> {
                     v.marked = marked.contains(&u.id);
                     anim.carried = u.is_carried();
                     anim.set_reduction(u.reduction);
-                    anim.counter = u.ability_counter();
+                    anim.observe_counter(u.ability_counter());
+                    anim.completion = u.effects.and_then(|e| e.completion);
                     anim.observe_special(
                         u.special.is_some_and(|s| s.ready_in == 0),
                         u.special.and_then(|s| s.cast).map(|c| c.left),
+                        u.special.map_or(tbg_core::content::WINDUP, |s| s.windup),
                         u.status == 2,
                     );
+                    if anim.completion.is_some_and(|f| f.interrupt_ticks > 0)
+                        && u.special.is_none_or(|s| s.cast.is_none())
+                    {
+                        anim.cancel_special();
+                    }
                     visuals::update_unit_visual(self.commands, self.assets, self.lib, &mut v, u);
                 }
                 None => {
@@ -300,6 +315,7 @@ impl Scene<'_, '_, '_, '_, '_> {
                         tier: u.tier,
                         branch: u.branch,
                         own: u.seat == you,
+                        seat: u.seat,
                     };
                     let e = if self.dummies.contains(&u.id) {
                         visuals::spawn_training_dummy(
@@ -328,7 +344,13 @@ impl Scene<'_, '_, '_, '_, '_> {
             if let Some(e) = self.map.0.get(&u.id) {
                 self.commands
                     .entity(*e)
-                    .insert(crowd_ecs::LaneAnchor { pos, ..anchor });
+                    .insert(crowd_ecs::LaneAnchor { pos, ..anchor })
+                    .insert(crate::vfx::completion::Facts {
+                        view: u.effects.and_then(|f| f.completion),
+                        you,
+                        alive: u.hp > 0,
+                        form: (u.kind, u.tier, u.branch),
+                    });
             }
         }
         (you, from.units.iter().map(|u| u.id).collect())
@@ -346,3 +368,35 @@ fn clear_units(
 }
 
 pub(crate) mod cleanup;
+
+#[cfg(test)]
+mod side_tests {
+    use super::*;
+
+    #[test]
+    fn side01_players_and_spectators_share_world_coordinates_and_facing() {
+        for viewer in Seat::BOTH {
+            assert_eq!(world_x(0, viewer), 0.);
+            assert_eq!(world_x(16_000, viewer), 16.);
+            assert_eq!(world_x(4_750, viewer), 4.75);
+            for seat in Seat::BOTH {
+                let mut populated = tbg_core::MatchState::new(41);
+                while populated.phase != tbg_core::Phase::Running {
+                    populated.step();
+                }
+                populated.players[seat.index()].energy = 20 * tbg_core::content::ENERGY_SCALE;
+                populated
+                    .apply_intention(seat, 1, tbg_core::PlayerIntention::Purchase { offer: 0 })
+                    .unwrap();
+                let unit = populated
+                    .view_for(viewer, &[])
+                    .units
+                    .into_iter()
+                    .find(|u| u.seat == seat)
+                    .unwrap();
+                let anchor = crowd_ecs::LaneAnchor::from_view(&unit, viewer, false);
+                assert_eq!(anchor.body.facing, seat.dir() as f32);
+            }
+        }
+    }
+}

@@ -24,6 +24,7 @@ pub struct UnitView {
     pub tier: u8,
     pub branch: u8,
     pub x: i32,
+    pub lane_z: i16,
     pub hp: i32,
     pub max_hp: i32,
     /// 0 none, 1 slowed, 2 rooted.
@@ -49,6 +50,8 @@ pub struct UnitView {
 pub struct SpecialView {
     pub ready_in: u16,
     pub cast: Option<crate::state::PendingCast>,
+    /// Exact authoritative special anticipation; ordinary spells keep six ticks.
+    pub windup: u16,
 }
 
 /// `UnitView.fx` bit for a summon by unit, e.g. Smuggler cargo (BR-U08):
@@ -102,6 +105,7 @@ pub struct StrongholdView {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MatchView {
+    pub physical_lanes: bool,
     /// Combat tick: frozen while an Augment selection pauses the battle.
     pub tick: Tick,
     /// Selection clock: advances every step, pauses included (BR-AG13).
@@ -113,6 +117,8 @@ pub struct MatchView {
     pub phase_ticks_left: u32,
     pub you: Seat,
     pub energy: u32,
+    /// Own paid units waiting for lane capacity; opponent queue remains private.
+    pub queued: u32,
     /// Energy regeneration now, in basis points of the base rate: 10 000
     /// plus 2 500 per full 5 Energy held, at most 22 500 (BR-E05).
     pub regen_bp: u32,
@@ -126,6 +132,7 @@ pub struct MatchView {
     pub strongholds: [StrongholdView; 2],
     pub shields: [i32; 2],
     pub units: Vec<UnitView>,
+    pub barrels: Vec<crate::barrel::Barrel>,
     pub synergy: [[u8; FACTION_COUNT]; 2],
     /// Both seats' Augment copies (public, BR-AG09).
     pub augments: [AugmentCounts; 2],
@@ -138,12 +145,15 @@ pub struct MatchView {
     /// BR-LV05: how many spectators watch this match. Set by the server
     /// when it sends the view; a count, never who (`0` from `view_for`).
     pub spectators: u16,
+    /// Public War Auxiliary state for both seats (BR-AX11, D-106).
+    pub auxiliaries: [[crate::auxiliary::AuxiliarySlotView; crate::auxiliary::AUXILIARY_SLOTS]; 2],
+    /// Private Merchant free rerolls held by the viewing seat (BR-AX08).
+    pub free_rerolls: u8,
     /// BR-S13: the viewing seat only, never the opponent or PublicView.
     #[serde(skip)]
     pub reserve: [u8; OFFERS],
     #[serde(skip)]
     pub held_mask: u8,
-    #[serde(skip)]
     pub reroll_cost: Option<u32>,
 }
 
@@ -167,6 +177,7 @@ impl MatchState {
             resolved: me.augment_resolved >= self.augments.round,
         });
         MatchView {
+            physical_lanes: self.physical_lanes,
             tick: self.tick,
             clock: self.clock,
             elapsed: self.tick.saturating_sub(RUNNING_START),
@@ -174,6 +185,12 @@ impl MatchState {
             phase_ticks_left: phase_ticks_left(self),
             you: seat,
             energy: me.energy,
+            queued: self
+                .deployments
+                .iter()
+                .filter(|u| u.seat == seat && !u.is_summon())
+                .count()
+                .min(u32::MAX as usize) as u32,
             regen_bp: self.rules.interest.regen_bp(me.energy),
             evolve_costs: [0, 1].map(|tier| self.evolve_price(seat, tier)),
             offers: me.offers,
@@ -194,6 +211,7 @@ impl MatchState {
                 .filter(|u| u.hp > 0)
                 .map(|u| unit_view(u, self.tick, self.rules))
                 .collect(),
+            barrels: self.barrels.clone(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],
             augment_round: round,
@@ -201,6 +219,8 @@ impl MatchState {
             events: events.to_vec(),
             outcome: self.outcome,
             spectators: 0,
+            auxiliaries: crate::auxiliary::views(self),
+            free_rerolls: me.free_rerolls,
         }
     }
 }
@@ -220,6 +240,7 @@ fn unit_view(u: &crate::state::Unit, tick: Tick, rules: &crate::Ruleset) -> Unit
         tier: u.tier,
         branch: u.branch,
         x: u.x,
+        lane_z: crate::occupancy::lateral(u) as i16,
         hp: u.hp,
         max_hp: u.max_hp,
         status: match u.status {
@@ -238,7 +259,10 @@ fn unit_view(u: &crate::state::Unit, tick: Tick, rules: &crate::Ruleset) -> Unit
                         .max(crate::celestial_archer::counter(u))
                         .max(crate::jawguard::counter(u))
                         .max(crate::mantis::counter(u))
-                        .max(crate::hornet::counter(u)),
+                        .max(crate::hornet::counter(u))
+                        .max(crate::volthar::counter(u))
+                        .max(crate::astreon::counter(u))
+                        .max(crate::completion::counter(u)),
                 ) << FX_COUNTER_SHIFT;
             if u.is_summon() {
                 fx |= FX_SUMMON;

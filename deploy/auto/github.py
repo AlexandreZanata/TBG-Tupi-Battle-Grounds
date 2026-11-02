@@ -74,4 +74,3 @@ def candidate(prefix='server', listing=None):
     listing = releases() if listing is None else listing
     options = [r for r in listing if not r.get('draft') and re.fullmatch(prefix + r'-[0-9a-f]{40}', r.get('tag_name', ''))]
     return max(options, key=lambda r: r['published_at'], default=None)
-

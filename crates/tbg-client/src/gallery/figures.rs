@@ -56,17 +56,17 @@ pub fn spawn(
         roster(commands, lib, options, &material);
     } else {
         for (i, form) in FORMS.into_iter().enumerate() {
-            let cols = if window.width() > window.height() {
-                5
+            let layout = if super::monument(unit) {
+                Layout::MonumentForm(i)
             } else {
-                2
+                Layout::Form(i)
             };
-            let pos = Vec3::new((i % cols) as f32 * 2.0, 0.0, -((i / cols) as f32) * 2.2);
+            let pos = layout.position(window.height() > window.width());
             let (root, mut a) = spawn_one(commands, lib, unit, form, pos, &material);
             a.rate = options.slow;
             commands.entity(root).insert((
                 a,
-                Layout::Form(i),
+                layout,
                 Cycle {
                     offset: 0,
                     shown: None,
@@ -101,6 +101,15 @@ fn frames(
                 material,
             );
             animator.present(clip, t);
+            if tbg_core::content::def(unit).faction == tbg_core::Faction::Ogres
+                || crate::art::kits::ogres::contains(unit)
+                || tbg_core::content::def(unit).faction == tbg_core::Faction::Abyssals
+                || tbg_core::content::def(unit).faction == tbg_core::Faction::Gods
+                || crate::art::kits::abyssals::contains(unit)
+            {
+                commands.entity(root).insert((animator, layout));
+                continue;
+            }
             let stage = commands
                 .spawn((
                     Mesh3d(lib.stage.clone()),
@@ -180,7 +189,7 @@ pub(super) fn spawn_one(
 
 /// The default Archer turns side-on to shoot, so review it at 45° to
 /// see the chest and the arrow line together; everything else keeps 25°.
-fn yaw(kind: UnitKind) -> f32 {
+pub(super) fn yaw(kind: UnitKind) -> f32 {
     if kind == UnitKind::Archer {
         45.0
     } else {

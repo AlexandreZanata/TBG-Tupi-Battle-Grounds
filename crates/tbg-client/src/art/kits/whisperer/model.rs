@@ -80,13 +80,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(Prop(Back), Box(0.025, 0.11, 0.025), DARK, [0.0, 0.0, 0.13]),
         part(
             Secondary(Spring::Tabard),
-            Box(0.09, 0.28, 0.018),
-            LINEN,
-            [0.0, -0.22, -0.04],
-        )
-        .rot([-8.0, 0.0, 8.0]),
-        part(
-            Secondary(Spring::Tabard),
             Box(0.10, 0.025, 0.024),
             LINEN,
             [-0.02, -0.35, -0.02],

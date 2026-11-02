@@ -72,6 +72,7 @@ class FakeHost(slot_host.SystemHost):
         self.ranked_busy = 0
         self.public_slot = None      # the public route keeps answering this slot
         self.schema_version = 10
+        self.next_contract = CONTRACT
         self.identity = None         # what --build-info says, when it should lie
         self.inspect_error = None    # raised by --build-info (a hang, a crash)
 
@@ -228,7 +229,7 @@ class FakeHost(slot_host.SystemHost):
             target.mkdir()
             (target/'tbg-server').write_bytes(Path(binary).read_bytes())
             version = self.rows[slot]['version'] + 1 if slot in self.rows else 1
-            self.rows[slot] = row(slot, 'warming', generation, version=version, heartbeat_unix=self.t)
+            self.rows[slot] = row(slot, 'warming', generation, contract=self.next_contract, version=version, heartbeat_unix=self.t)
             self.idle[slot] = quiet()
             if 'start' in self.fail:
                 return 1, 'not ready'              # registered, then the process died while warming
@@ -421,6 +422,32 @@ class Refusals(SlotCase):
         with self.assertRaisesRegex(slots.Rejected, 'database'):
             self.go()
         self.assertEqual(self.names(), [])
+
+    def test_operator_confirmation_is_exact_and_cannot_authorize_a_schema_change(self):
+        changed = manifest(contract='w36-r13-' + '0'*16)
+        with self.assertRaisesRegex(ValueError, 'operator-confirmed'):
+            slots.preflight(self.host, changed, coordinated_contract='w36-r13-' + '1'*16)
+        self.host.schema_version = 11
+        with self.assertRaisesRegex(slots.Rejected, 'database'):
+            slots.preflight(self.host, changed, coordinated_contract=changed['contract'])
+        self.assertEqual(self.names(), [])
+
+    def test_an_attended_contract_switch_keeps_old_matches_and_resumes_safe_drain(self):
+        changed = manifest(contract='w36-r13-' + '0'*16)
+        self.host.next_contract = changed['contract']
+        self.host.load('a', matches_running=1)
+        with self.assertRaises(control.Deferred):
+            slots.activate(self.host, self.staged, changed, CONFIG,
+                           coordinated_contract=changed['contract'])
+        self.assertEqual(self.host.rows['a']['matches_running'], 1)
+        self.assertIn('a', self.host.running)
+        self.assertEqual(self.host.active_slot(), 'b')
+        self.assertEqual(self.journal()['coordinated_contract'], changed['contract'])
+        self.host.load('a', matches_running=0)
+        slots.resume(self.host, CONFIG)
+        self.assertEqual(self.host.rows['a']['state'], 'retired')
+        self.assertEqual(self.host.violations, [])
+        self.assertIsNone(self.journal())
 
     def test_an_unfinished_previous_release_defers_and_a_stray_process_needs_review(self):
         self.host.rows['b'] = row('b', 'draining', 'older')
@@ -722,7 +749,7 @@ class CrashResume(SlotCase):
 class Controller(SlotCase):
     """pull.py in slot mode: gates before downloads, permanent refusals latch once, outcomes hold only when a person is needed."""
 
-    def run_pull(self, apply=True, **patches):
+    def run_pull(self, apply=True, coordinated_contract=None, **patches):
         calls = {'fetch': 0}
 
         def fetch(url, limit):
@@ -737,7 +764,8 @@ class Controller(SlotCase):
         options.update(patches)
         with patch.multiple(pull, STATE=self.state, **options), patch.object(pull.slots, 'SystemHost', return_value=self.host), \
              patch.object(control, 'HOLD', self.state/'hold.json'):
-            pull.run({'minimum_source': OLD, 'public_health': CONFIG['public_health']}, apply, False)
+            pull.run({'minimum_source': OLD, 'public_health': CONFIG['public_health']}, apply, False,
+                     coordinated_contract=coordinated_contract)
         return calls
 
     def checked(self):
@@ -762,6 +790,18 @@ class Controller(SlotCase):
     def test_a_dry_run_reports_the_slot_preflight_and_changes_nothing(self):
         calls = self.run_pull(apply=False)
         self.assertEqual((calls['fetch'], self.names(), self.checked()), (2, [], None))
+
+    def test_only_an_explicit_operator_argument_permits_the_confirmed_contract(self):
+        changed = manifest(contract='w36-r13-' + '0'*16)
+        calls = self.run_pull(apply=False, coordinated_contract=changed['contract'], unpack=lambda *a: changed)
+        self.assertEqual((calls['fetch'], self.names(), self.checked()), (2, [], None))
+        unit = (ROOT/'deploy/auto/tbg-auto-deploy.service').read_text()
+        self.assertNotIn('--coordinated-contract', unit)
+        with self.assertRaisesRegex(ValueError, 'exact operator-confirmed'):
+            self.run_pull(apply=False, coordinated_contract='latest')
+        with patch.object(pull.slots, 'in_slot_mode', return_value=False), \
+             self.assertRaisesRegex(ValueError, 'require release slots'):
+            self.run_pull(apply=False, coordinated_contract=changed['contract'])
 
     def test_activation_outcomes_are_latched_or_held_by_what_they_need(self):
         for failure, outcome, held in [(slots.Rejected('no', SOURCE), 'rejected', False),

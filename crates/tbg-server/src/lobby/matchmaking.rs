@@ -116,6 +116,7 @@ impl Lobby {
 
     /// Leave queue, owned room, owned challenge, and any open rematch.
     pub(super) fn leave_waiting(&mut self, token: Token) {
+        self.cancel_direct(token);
         if let Some(s) = self.session(&token) {
             s.finished = None;
         }
@@ -151,12 +152,32 @@ impl Lobby {
         &mut self,
         tokens: [Token; 2],
         mode: MatchMode,
-        rematchable: bool,
+        _rematchable: bool,
         listing: Listing,
+    ) {
+        let origin = if listing == Listing::Public {
+            tbg_core::protocol::MatchOrigin::PublicQueue
+        } else if mode == MatchMode::Challenge {
+            tbg_core::protocol::MatchOrigin::Invitation
+        } else {
+            tbg_core::protocol::MatchOrigin::PrivateRoom
+        };
+        self.pair_origin(tokens, mode, listing, origin);
+    }
+
+    pub(super) fn pair_origin(
+        &mut self,
+        tokens: [Token; 2],
+        mode: MatchMode,
+        listing: Listing,
+        origin: tbg_core::protocol::MatchOrigin,
     ) {
         if self.refuse_expired_pair(tokens, mode, listing) {
             return;
         }
+        // SIDE-01: arrival order never assigns blue/red; every account-bound
+        // field and connection follows the same randomized seat ordering.
+        let tokens = assign_sides(tokens, random_bytes::<1>()[0]);
         // P9: queue wait per paired session (the joiner waited ~0 ms).
         for t in tokens {
             if let Some(t0) = self.queued_at.remove(&t) {
@@ -184,8 +205,14 @@ impl Lobby {
                 stronghold: s.map_or(tbg_core::StrongholdKind::DEFAULT, |s| s.stronghold),
             }
         });
-        if rematchable {
-            self.rematches.retain(|r| r.players != tokens);
+        // BR-AP05: all admitted online human PvP pairs receive the latest ticket.
+        for t in tokens {
+            self.cancel_direct(t);
+            self.decline_rematch(t);
+        }
+        {
+            self.rematches
+                .retain(|r| !r.players.iter().any(|t| tokens.contains(t)));
             self.rematches.push(RematchTicket {
                 players: tokens,
                 requested: [false; 2],
@@ -212,6 +239,8 @@ impl Lobby {
             self.metrics.clone(),
             match_task::Records {
                 store: self.store.clone(),
+                history: self.history.clone(),
+                origin,
                 ranked: self.ranked.clone(),
                 // P60: OS-random, separate from the public LiveId.
                 key: random_bytes::<16>(),
@@ -250,6 +279,32 @@ impl Lobby {
                 );
             }
         }
+    }
+}
+
+fn assign_sides(mut tokens: [Token; 2], draw: u8) -> [Token; 2] {
+    if draw & 1 != 0 {
+        tokens.swap(0, 1);
+    }
+    tokens
+}
+
+#[cfg(test)]
+mod side_tests {
+    use super::assign_sides;
+
+    #[test]
+    fn side01_arrival_order_has_equal_blue_and_red_assignments() {
+        let first = [1; 16];
+        let second = [2; 16];
+        let mut blue = 0;
+        for draw in 0..=u8::MAX {
+            let seats = assign_sides([first, second], draw);
+            assert_ne!(seats[0], seats[1]);
+            assert!(seats.contains(&first) && seats.contains(&second));
+            blue += usize::from(seats[0] == first);
+        }
+        assert_eq!(blue, 128);
     }
 }
 

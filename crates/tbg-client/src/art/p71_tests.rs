@@ -58,11 +58,8 @@ fn p71_body_envelopes_clear_large_custom_figures() {
     let mut meshes = Assets::<Mesh>::default();
     for kind in tbg_core::FULL_POOL {
         for (tier, branch) in FORMS {
-            let mut form = super::native_form(
-                (kits::kit(kind).unwrap().figure)(tier, branch),
-                &mut meshes,
-                false,
-            );
+            let mut form =
+                super::native_form((kits::kit(kind).unwrap().figure)(tier, branch), &mut meshes);
             (form.overhead, form.occupancy, form.body_radius) =
                 super::overhead::height(&form, &meshes, kind, tier, branch);
             assert!(form.overhead.is_finite() && form.overhead > 0.32);
@@ -82,7 +79,7 @@ fn shatterback_head_clears_allies_and_enemies_in_every_form() {
     let kit = kits::kit(kind).unwrap();
     let mut meshes = Assets::<Mesh>::default();
     for (tier, branch) in FORMS {
-        let mut form = super::native_form((kit.figure)(tier, branch), &mut meshes, false);
+        let mut form = super::native_form((kit.figure)(tier, branch), &mut meshes);
         (form.overhead, form.occupancy, form.body_radius) =
             super::overhead::height(&form, &meshes, kind, tier, branch);
         let mesh = meshes

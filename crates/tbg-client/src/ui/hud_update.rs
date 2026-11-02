@@ -30,6 +30,7 @@ pub(super) fn update(
     if pending.0.is_some_and(|(_, seq)| v.last_seq >= seq) {
         pending.0 = None;
     }
+    #[cfg(not(tbg_desktop))]
     let me = v.you.index();
     let lang = *lang;
     for (hud, mut node) in &mut nodes {
@@ -40,7 +41,11 @@ pub(super) fn update(
         }
         let fraction = match hud {
             // Kinds and Fortification give each seat its own max HP (BR-SK07).
+            #[cfg(tbg_desktop)]
+            Hud::Hp(i) => hp_fraction(v, *i),
+            #[cfg(not(tbg_desktop))]
             Hud::Hp(0) => hp_fraction(v, me),
+            #[cfg(not(tbg_desktop))]
             Hud::Hp(_) => hp_fraction(v, 1 - me),
             Hud::EnergyFill => {
                 let band = (INTEREST_BAND * INTEREST_MAX_BANDS) as f32;
@@ -281,7 +286,10 @@ pub(crate) fn army_counts(v: &MatchView) -> (usize, usize) {
 /// `Army N`, plus `Brood M` while the seat has summons.
 pub(crate) fn army_label(v: &MatchView, lang: Lang) -> String {
     let (army, brood) = army_counts(v);
-    let label = lang.tf(Msg::HudArmy, &[("army", &army)]);
+    let mut label = lang.tf(Msg::HudArmy, &[("army", &army)]);
+    if v.queued > 0 {
+        label.push_str(&lang.tf(Msg::HudDeploymentQueue, &[("count", &v.queued)]));
+    }
     if brood > 0 {
         format!("{label} | {}", lang.tf(Msg::HudBrood, &[("brood", &brood)]))
     } else {

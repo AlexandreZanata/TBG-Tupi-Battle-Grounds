@@ -437,25 +437,10 @@ fn upgrades(commands: &mut Commands) {
         ))
         .with_children(|options| {
             options
-                .spawn(Node {
-                    width: percent(100),
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_items: AlignItems::Center,
-                    ..default()
-                })
+                .spawn(chrome::upgrade_header())
                 .with_children(|heading| {
                     heading.spawn((kit::heading("Evolution", 12.), Field::EvolutionHeading));
-                    heading.spawn((
-                        Node {
-                            width: px(20),
-                            height: px(20),
-                            align_items: AlignItems::Center,
-                            justify_content: JustifyContent::Center,
-                            ..default()
-                        },
-                        UiAction::CloseEvolve,
-                        children![kit::heading("×", 14.)],
-                    ));
+                    heading.spawn(chrome::upgrade_close(UiAction::CloseEvolve));
                 });
             options
                 .spawn(Node {
@@ -466,29 +451,8 @@ fn upgrades(commands: &mut Commands) {
                 .with_children(|options| {
                     for branch in 0..2 {
                         options.spawn((
-                            Node {
-                                width: percent(50),
-                                min_height: px(55),
-                                padding: UiRect::all(px(7)),
-                                border: UiRect::all(px(1)),
-                                border_radius: BorderRadius::all(px(5)),
-                                align_items: AlignItems::Center,
-                                ..default()
-                            },
-                            BackgroundColor(chrome::INK),
-                            BorderColor::all(chrome::GOLD),
-                            UiAction::Disabled,
+                            chrome::upgrade_choice(),
                             Choice(branch),
-                            kit::buttons::Chrome {
-                                enabled: false,
-                                focused: false,
-                            },
-                            kit::buttons::Palette {
-                                idle: chrome::INK,
-                                hover: Color::srgb_u8(45, 57, 60),
-                                pressed: Color::srgb_u8(28, 38, 43),
-                                border: chrome::GOLD,
-                            },
                             children![(label("", 10.), Field::Evolution(branch))],
                         ));
                     }

@@ -1,4 +1,4 @@
-//! Shieldbearer figure: a man-at-arms in mail and a team tabard behind a
+//! Shieldbearer figure: a man-at-arms in mail and linen behind a
 //! kite shield, an arming sword in hand. Branch A (Bulwark) grows the
 //! shield and the plate, then a castle-crested tower shield and a great
 //! helm; branch B (Vanguard) lightens him with a longer blade, plume and
@@ -46,7 +46,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         boots: DARK_LEATHER,
     };
     body::humanoid(&mut v, &p, &look);
-    body::tunic(&mut v, &p, RED_CLOTH, LINEN, DARK_LEATHER);
 
     body::greaves(&mut v, STEEL);
     body::bracers(&mut v, &p, LEATHER);
@@ -147,21 +146,11 @@ fn arms(v: &mut Vec<PartSpec>, f: Form) {
         STEEL,
         if f.b { GOLD } else { STEEL },
     ));
-    if f.b && f.t2 {
-        v.push(
-            part(
-                r,
-                Box(0.02, 0.022, blade(f)),
-                LINEN,
-                [0.0, 0.0, 0.1 + blade(f) * 0.5],
-            )
-            .glow(),
-        );
-    }
+
     if f.a && f.t2 {
         // A tower shield crowned with a castle's merlons.
         v.extend([
-            part(l, Box(0.05, 0.78, 0.5), LINEN, [0.09, -0.08, 0.0]),
+            part(l, Box(0.05, 0.78, 0.5), STEEL, [0.09, -0.08, 0.0]),
             part(l, Box(0.055, 0.8, 0.06), GOLD, [0.09, -0.08, 0.22]),
             part(l, Box(0.055, 0.8, 0.06), GOLD, [0.09, -0.08, -0.22]),
             part(l, Box(0.06, 0.2, 0.2), GOLD, [0.1, 0.0, 0.0]),

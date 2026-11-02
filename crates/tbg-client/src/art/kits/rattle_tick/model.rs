@@ -58,13 +58,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
     );
     v.extend([
         part(
-            Body(Chest),
-            Box(p.torso.x * 1.03, 0.08, p.torso.z * 1.03),
-            LINEN,
-            [0.0, 0.16, 0.0],
-        )
-        .rot([0.0, 0.0, -24.0]),
-        part(
             Body(Head),
             Box(0.31, 0.08, 0.12),
             DARK_LEATHER,
@@ -93,7 +86,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Secondary(Spring::Back),
             Box(0.14, 0.20, 0.11),
-            CHARCOAL,
+            if f.b { LINEN } else { LEATHER },
             [0.0, 0.08, 0.0],
         ),
         part(

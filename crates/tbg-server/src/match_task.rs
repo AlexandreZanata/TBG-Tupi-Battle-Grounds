@@ -21,6 +21,7 @@ use crate::Config;
 mod celebration;
 mod command;
 mod live;
+mod personal;
 mod report;
 mod settle;
 mod spectators;
@@ -83,6 +84,8 @@ pub(super) struct Match {
 #[derive(Clone, Default)]
 pub(crate) struct Records {
     pub store: Option<Arc<Store>>,
+    pub history: Option<crate::player_history::Handle>,
+    pub origin: tbg_core::protocol::MatchOrigin,
     pub ranked: Option<finalizer::Handle>,
     pub key: MatchKey,
     /// P61: collect the optional summary (`TBG_RANKED_STATS=collect`).
@@ -161,7 +164,7 @@ async fn run(
     let (mut last, mut step_ns, mut step_max, mut late, mut max_late) =
         (Instant::now(), 0u128, 0u128, 0u32, 0u128);
     let mut held = 0u64;
-    let finished = loop {
+    let (finished, history_envelope) = loop {
         interval.tick().await;
         let now = Instant::now();
         let lateness = now.duration_since(last).saturating_sub(tick).as_millis();
@@ -198,9 +201,7 @@ async fn run(
             m.reached_running = true;
         }
         // P61: fold this tick's semantic events once, before fan-out.
-        if m.mode == MatchMode::Ranked {
-            m.summary.observe(&ev, &m.state);
-        }
+        m.summary.observe(&ev, &m.state);
         m.report_progress(&lobby, started);
         m.note_spectate_events(&ev);
         for p in &mut m.pending {
@@ -240,12 +241,34 @@ async fn run(
             m.send_spectator_views();
         }
         if let Some(outcome) = m.state.outcome {
-            let finished = Box::new(Seat::BOTH.map(|seat| m.completed(seat, outcome)));
+            let summaries = m.personal_summaries(
+                records.origin,
+                started.elapsed().as_millis().min(u128::from(u64::MAX)) as u64,
+            );
+            let envelope = records
+                .history
+                .as_ref()
+                .and_then(|_| m.history_envelope(records.key, summaries.clone()));
+            let finished = Box::new(Seat::BOTH.map(|seat| {
+                m.completed(
+                    seat,
+                    outcome,
+                    summaries[seat.index()].clone(),
+                    envelope.as_ref(),
+                )
+            }));
             for seat in Seat::BOTH {
-                m.send(seat, finished[seat.index()].end.clone());
+                let result = &finished[seat.index()];
+                if let Some(summary) = &result.personal {
+                    m.send(seat, summary.clone());
+                }
+                if let Some(status) = &result.history {
+                    m.send(seat, status.clone());
+                }
+                m.send(seat, result.end.clone());
             }
             m.end_spectators(outcome);
-            break finished;
+            break (finished, envelope);
         }
     };
     if let (Some(mut replay), Some(tx)) = (m.replay.take(), &config.replays) {
@@ -259,7 +282,12 @@ async fn run(
     // `RatingChanged` by frozen account id once it commits. Awaiting here
     // only delays this finished task, never a running match.
     if m.mode == MatchMode::Ranked {
-        if let Some(result) = m.ranked_final(records.key, started, records.stats) {
+        if let Some(result) = m.ranked_final(
+            records.key,
+            started,
+            records.stats,
+            records.history.is_some(),
+        ) {
             match &records.ranked {
                 Some(handle) => {
                     // P66: counted before the hand-off so retirement never
@@ -281,6 +309,22 @@ async fn run(
             finished,
         })
         .await;
+    if let (Some(handle), Some(envelope)) = (&records.history, history_envelope) {
+        if !handle.submit(envelope.clone()) {
+            for side in &envelope.sides {
+                if let Some(account) = side.account {
+                    let _ = lobby
+                        .send(LobbyCmd::HistoryDone {
+                            account,
+                            result_id: m.result_id,
+                            entry_id: side.entry_id,
+                            state: tbg_core::protocol::HistorySaveState::Delayed,
+                        })
+                        .await;
+                }
+            }
+        }
+    }
     let line = m.log_end(
         seed,
         started,

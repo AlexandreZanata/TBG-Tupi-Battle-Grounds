@@ -1,8 +1,8 @@
 //! Archer figure: a hooded yeoman archer of the Humans faction with an upright
-//! longbow, a quiver on the back, linen tunic, and team tabard.
+//! longbow, a quiver on the back, linen tunic, and leather boots.
 //! Branch A (Longbow -> Marksman) extends range and accuracy: green ranger hood
 //! with feather, yew longbow with horn nocks, then a gilded recurve greatbow,
-//! team half-cape, gold trim, and glowing eye glint.
+//! leather half-cape, gold trim, and glowing eye glint.
 //! Branch B (Volley -> Arrow Rain) fires rapid storms of arrows: dark leather
 //! coif, dual quivers on back, composite war-bow, then an armored steel-brow
 //! hood, twin gilded quivers, double-cable siege bow with glowing riser runes.
@@ -121,10 +121,9 @@ fn dress(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         )
         .scale([1.0, 1.0, 0.75]),
     );
-    // Team tabard is visible from match camera
 
     if f.a && f.t2 {
-        // Marksman: team half-cape with gold hem
+        // Marksman: linen half-cape with gold hem
         body::cape(v, LINEN, 0.34, 0.44);
         v.push(part(
             Secondary(Spring::Back),
@@ -166,6 +165,8 @@ fn quivers(v: &mut Vec<PartSpec>, f: Form) {
         // Single quiver on back
         let (color, fletch) = if f.a && f.t2 {
             (GOLD, GOLD)
+        } else if f.a {
+            (DARK_LEATHER, LEATHER)
         } else {
             (DARK_LEATHER, LINEN)
         };
@@ -194,7 +195,7 @@ fn bow(v: &mut Vec<PartSpec>, f: Form) {
         string: if f.t2 { GOLD } else { LINEN },
         shaft: TIMBER,
         head: STEEL,
-        fletch: LINEN,
+        fletch: if f.a { LEATHER } else { LINEN },
     };
     let half = half_len(f);
     v.extend(gear::bow(half, style));

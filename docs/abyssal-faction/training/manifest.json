@@ -1,0 +1,78 @@
+{
+  "build": {
+    "contract": "w35-r10-523044fc973bac39",
+    "features": [],
+    "profile": "debug",
+    "protocol": 35,
+    "source_commit": "5553393ea24db4e04efde5acd7dd036777b887ae",
+    "target": "x86_64-unknown-linux-gnu",
+    "version": "0.1.3-abyssals.1"
+  },
+  "binary_sha256": "8c3955c25d6a1679fc17dba7349d2e93774f70ff31dd49f695f03fa3f16f4c6a",
+  "scenes": [
+    {
+      "kind": "GustDrummer",
+      "case": "barrel-allies",
+      "image": "barrel-allies.webp",
+      "log": "barrel-allies.log (original in local artifact directory)",
+      "sha256": "1553610d387083c09013a433791fe99be3e82e14b2d3c0582a2984cbdc579a2f",
+      "witness": [
+        "Native rolling-barrel witness passed: rendered_frames=27, reload_hidden=true, area_heal=true, paused=true, intercepted=false",
+        "Training journey passed: pause, exact single step, reset identity, stale action rejection and independent local rendering"
+      ],
+      "source_png_sha256": "06b59eb90faf5fc3f04021c925087f5682ace813c8e2859c4a60c0fa1ccee21e",
+      "encoding": "WebP quality 90; native screenshot format conversion only"
+    },
+    {
+      "kind": "GustDrummer",
+      "case": "barrel-intercept",
+      "image": "barrel-intercept.webp",
+      "log": "barrel-intercept.log (original in local artifact directory)",
+      "sha256": "ec055527c22ce033114c5a7a253a2bf66506ab9056ada4c8105bfd7c9b390709",
+      "witness": [
+        "Native rolling-barrel witness passed: rendered_frames=17, reload_hidden=true, area_heal=true, paused=true, intercepted=true",
+        "Training journey passed: pause, exact single step, reset identity, stale action rejection and independent local rendering"
+      ],
+      "source_png_sha256": "d6fedc8fd289c1bd71587e00d521a6ce4becba776e34d7145c050bad6445fa97",
+      "encoding": "WebP quality 90; native screenshot format conversion only"
+    },
+    {
+      "kind": "Trident",
+      "case": "abyssal-crowd",
+      "image": "abyssal-crowd.webp",
+      "log": "abyssal-crowd.log (original in local artifact directory)",
+      "sha256": "ab372ec131a78d7da549b9c07f255e0aaf04a5b55c5efa6537a752472db755b9",
+      "witness": [
+        "Training journey passed: pause, exact single step, reset identity, stale action rejection and independent local rendering"
+      ],
+      "source_png_sha256": "e32ce3e60699def6fa2a3e802224fa2e57635e00fe6815b65af62dbcdb560a4e",
+      "encoding": "WebP quality 90; native screenshot format conversion only"
+    },
+    {
+      "kind": "GustDrummer",
+      "case": "barrel-rear",
+      "image": "barrel-rear.webp",
+      "log": "barrel-rear.log (original in local artifact directory)",
+      "sha256": "abbfee918e3ec681de611b06cd4f5ed6d309261e64381217eb1e2ec5393f6959",
+      "witness": [
+        "Training journey passed: pause, exact single step, reset identity, stale action rejection and independent local rendering",
+        "Support rear-heal visual regression passed: kind=GustDrummer, rear_frames=60, attacked=true, max_foot_yaw=0"
+      ],
+      "source_png_sha256": "132f287fc1891015ced837b159a8253c9fe117a37833130c247d3833c8b80810",
+      "encoding": "WebP quality 90; native screenshot format conversion only"
+    },
+    {
+      "kind": "FoamWeaver",
+      "case": "foam-rear",
+      "image": "foam-rear.webp",
+      "log": "foam-rear.log (original in local artifact directory)",
+      "sha256": "6eacd5b2efbc528e5b472ea4a89215c30ec0d77d0ba636b6630ae0c3ab9a4015",
+      "witness": [
+        "Training journey passed: pause, exact single step, reset identity, stale action rejection and independent local rendering",
+        "Support rear-heal visual regression passed: kind=FoamWeaver, rear_frames=60, attacked=true, max_foot_yaw=0"
+      ],
+      "source_png_sha256": "f2efb9424a976b92d7dcd503b1aeb6b8c63e7aba8d578715bf1278c835932c62",
+      "encoding": "WebP quality 90; native screenshot format conversion only"
+    }
+  ]
+}

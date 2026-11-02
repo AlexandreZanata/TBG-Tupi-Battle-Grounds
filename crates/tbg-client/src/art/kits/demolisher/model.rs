@@ -40,14 +40,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             GUNMETAL,
             [0.0, 0.20, 0.16],
         ),
-        part(Body(Chest), Cyl(0.09, 0.035), BRASS, [0.0, 0.20, 0.21]).rot([90.0, 0.0, 0.0]),
-        part(
-            Body(Chest),
-            Box(0.085, 0.085, 0.018),
-            LINEN,
-            [0.0, 0.20, 0.24],
-        )
-        .rot([0.0, 0.0, 45.0]),
         part(
             Body(Hips),
             Box(0.29, 0.06, 0.24),

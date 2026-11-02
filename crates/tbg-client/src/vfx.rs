@@ -50,6 +50,7 @@ pub struct VfxAssets {
     /// Lit vertex colors, for painted projectile meshes.
     pub(super) painted: Handle<StandardMaterial>,
     pub(super) shots: shots::ShotMeshes,
+    pub(super) casks: [Handle<Mesh>; 5],
 }
 
 #[derive(Clone, Copy)]
@@ -64,6 +65,8 @@ pub(super) enum Motion {
     Puff { vel: Vec3, size: f32 },
     /// Thrown with `vel` under gravity, tumbling, resting on the ground.
     Debris { vel: Vec3, size: f32 },
+    /// Keeps the announced segment length while thickness fades.
+    Segment { size: Vec3 },
     /// Pops to `size` and vanishes (muzzle flashes, blast cores).
     Flash { size: f32 },
     /// Grows out of the ground to `size` (its own +Y), holds, sinks back.
@@ -82,6 +85,8 @@ pub(crate) struct Vfx {
     dur: f32,
 }
 
+pub(crate) mod barrels;
+pub(crate) mod completion;
 mod effects;
 pub(crate) mod flame;
 pub mod impacts;
@@ -91,7 +96,10 @@ pub use effects::{evolve, heal, puff, sparks, splash, synergy};
 pub use flame::profane_flame;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(PreStartup, init)
+    app.add_plugins(completion::plugin)
+        .add_systems(OnExit(crate::GameState::Training), barrels::clear_system)
+        .add_systems(OnExit(crate::GameState::InMatch), barrels::clear_system)
+        .add_systems(PreStartup, init)
         .add_systems(Update, (animate, shots::fly))
         .add_systems(
             PostUpdate,
@@ -191,6 +199,7 @@ fn init(
         oil,
         painted,
         shots,
+        casks: barrels::meshes(&mut meshes),
     });
 }
 
@@ -291,6 +300,7 @@ fn pose(v: &Vfx, k: f32) -> Transform {
                 .with_rotation(spin * v.rotation)
                 .with_scale(Vec3::splat(size * (fade * 2.0).min(1.0)))
         }
+        Motion::Segment { size } => at.with_scale(Vec3::new(size.x, size.y, size.z * fade)),
         Motion::Flash { size } => {
             let pop = (k / 0.25).min(1.0);
             at.with_scale(Vec3::splat(

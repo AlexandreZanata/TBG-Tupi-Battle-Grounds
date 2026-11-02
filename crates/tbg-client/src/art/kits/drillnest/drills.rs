@@ -98,12 +98,7 @@ fn spec(rank: u8, t: u8, b: u8) -> FigureSpec {
             );
         }
     }
-    v.push(part(
-        Body(Chest),
-        Box(width * 2.0, 0.035, 0.12),
-        LINEN,
-        [0.0, 0.085, -0.02],
-    ));
+
     v.push(part(
         Body(Chest),
         Box(width * 2.0, 0.065, 0.12),

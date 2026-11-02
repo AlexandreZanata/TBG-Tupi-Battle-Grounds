@@ -29,6 +29,7 @@ fn dot(a: Bleed, b: Bleed) -> Bleed {
     Bleed {
         value: winner.value,
         source: winner.source,
+        producer: winner.producer,
         next: a.next.min(b.next),
         left: a.left.max(b.left),
     }
@@ -102,6 +103,7 @@ pub(super) fn inherit(a: &Unit, b: &Unit, now: Tick) -> UnitFx {
         (None, b) => b,
     };
     UnitFx {
+        completion: crate::completion::state::inherit(a.fx.completion, b.fx.completion, now),
         poison: stacks(a.fx.poison, b.fx.poison),
         fish: stacks(a.fx.fish, b.fx.fish),
         bleed: dot(a.fx.bleed, b.fx.bleed),

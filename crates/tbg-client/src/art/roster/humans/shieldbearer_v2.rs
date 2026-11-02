@@ -1,12 +1,12 @@
 //! Native rig-v2 Shieldbearer: base form with kite shield and flanged mace,
 //! Branch A (Bulwark / Fortress) with tower shield, plate cuirass, and crest,
-//! Branch B (Vanguard / Champion) with spear, fluted pauldrons, and back banner.
+//! Branch B (Vanguard / Champion) with spear, fluted pauldrons, and embossed armor.
 
 use crate::art::{
     figure::{part, FigureSpec, PartSpec},
     mesh::Shape::*,
     palette::*,
-    rig::{BodyPlan, Joint::*, Node::Body, Node::Secondary, Proportions, Spring},
+    rig::{BodyPlan, Joint::*, Node::Body, Proportions},
 };
 use bevy::prelude::Vec3;
 
@@ -56,10 +56,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     shield(&mut parts, tier, branch);
     weapon(&mut parts, tier, branch);
 
-    if branch == 1 && tier >= 1 {
-        banner(&mut parts, tier);
-    }
-
     FigureSpec { plan, parts }
 }
 
@@ -80,22 +76,6 @@ fn armor(parts: &mut Vec<PartSpec>, tier: u8, branch: u8) {
         )
         .scale([1.08, 1.0, 0.85]),
     );
-
-    // Team tabard with gold hem on Spring::Tabard
-    parts.extend([
-        part(
-            Secondary(Spring::Tabard),
-            Box(0.18, 0.36, 0.02),
-            ALLY,
-            [0.0, 0.09, 0.03],
-        ),
-        part(
-            Secondary(Spring::Tabard),
-            Box(0.16, 0.03, 0.025),
-            GOLD,
-            [0.0, -0.08, 0.03],
-        ),
-    ]);
 
     // Pauldrons (shoulder plates)
     let pauldron_mat = if tier >= 2 { GOLD } else { STEEL };
@@ -248,28 +228,4 @@ fn weapon(parts: &mut Vec<PartSpec>, tier: u8, branch: u8) {
             .rot([90.0, 0.0, 0.0]),
         );
     }
-}
-
-fn banner(parts: &mut Vec<PartSpec>, tier: u8) {
-    // Back pole on Spring::Back
-    let pole_h = if tier >= 2 { 0.90 } else { 0.75 };
-    parts.push(part(
-        Secondary(Spring::Back),
-        Cyl(0.016, pole_h),
-        WOOD,
-        [0.0, pole_h / 2.0, -0.14],
-    ));
-    // Fluttering team banner
-    parts.push(part(
-        Secondary(Spring::Back),
-        Box(0.02, 0.28, 0.36),
-        ALLY,
-        [0.0, pole_h - 0.18, -0.32],
-    ));
-    parts.push(part(
-        Secondary(Spring::Back),
-        Box(0.025, 0.04, 0.38),
-        GOLD,
-        [0.0, pole_h - 0.04, -0.32],
-    ));
 }

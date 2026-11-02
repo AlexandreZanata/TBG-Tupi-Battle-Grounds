@@ -63,7 +63,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     }
     let t = p.torso;
     v.extend([
-        // The mushroom ring as a collar, and the team's sash.
+        // The mushroom ring forms a natural collar.
         part(
             Body(Chest),
             Frustum(t.x * 0.62, t.x * 0.45, 0.08),
@@ -71,13 +71,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             [0.0, t.y * 0.88, 0.0],
         )
         .scale([1.0, 1.0, 0.8]),
-        part(
-            Body(Chest),
-            Box(t.x * 1.0, 0.06, t.z * 0.8),
-            LINEN,
-            [0.0, t.y * 0.25, 0.02],
-        )
-        .rot([0.0, 0.0, 12.0]),
     ]);
     face(&mut v, &p, f);
     cap(&mut v, &p, f);

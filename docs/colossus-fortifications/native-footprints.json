@@ -1,0 +1,872 @@
+[
+  {
+    "aim_cases": 6,
+    "back": 1260,
+    "body": 882,
+    "forms": 5,
+    "front": 1308,
+    "kind": "Shieldbearer",
+    "samples_per_clip": 16,
+    "width": 2518
+  },
+  {
+    "aim_cases": 6,
+    "back": 884,
+    "body": 870,
+    "forms": 5,
+    "front": 1128,
+    "kind": "Archer",
+    "samples_per_clip": 16,
+    "width": 2183
+  },
+  {
+    "aim_cases": 6,
+    "back": 3105,
+    "body": 1644,
+    "forms": 5,
+    "front": 3105,
+    "kind": "BoneBrute",
+    "samples_per_clip": 16,
+    "width": 5937
+  },
+  {
+    "aim_cases": 6,
+    "back": 1378,
+    "body": 715,
+    "forms": 5,
+    "front": 1378,
+    "kind": "Hexer",
+    "samples_per_clip": 16,
+    "width": 2530
+  },
+  {
+    "aim_cases": 6,
+    "back": 915,
+    "body": 966,
+    "forms": 5,
+    "front": 966,
+    "kind": "Sawbot",
+    "samples_per_clip": 16,
+    "width": 1880
+  },
+  {
+    "aim_cases": 6,
+    "back": 1887,
+    "body": 1124,
+    "forms": 5,
+    "front": 1887,
+    "kind": "SiegeWalker",
+    "samples_per_clip": 16,
+    "width": 3175
+  },
+  {
+    "aim_cases": 6,
+    "back": 612,
+    "body": 555,
+    "forms": 5,
+    "front": 1252,
+    "kind": "Bloomkeeper",
+    "samples_per_clip": 16,
+    "width": 2081
+  },
+  {
+    "aim_cases": 6,
+    "back": 1033,
+    "body": 1033,
+    "forms": 5,
+    "front": 1033,
+    "kind": "Rootcaller",
+    "samples_per_clip": 16,
+    "width": 1989
+  },
+  {
+    "aim_cases": 6,
+    "back": 855,
+    "body": 586,
+    "forms": 5,
+    "front": 855,
+    "kind": "Nester",
+    "samples_per_clip": 16,
+    "width": 1486
+  },
+  {
+    "aim_cases": 6,
+    "back": 1075,
+    "body": 1206,
+    "forms": 5,
+    "front": 1206,
+    "kind": "Rampart",
+    "samples_per_clip": 16,
+    "width": 2403
+  },
+  {
+    "aim_cases": 6,
+    "back": 535,
+    "body": 535,
+    "forms": 5,
+    "front": 535,
+    "kind": "Beetling",
+    "samples_per_clip": 16,
+    "width": 940
+  },
+  {
+    "aim_cases": 6,
+    "back": 4226,
+    "body": 892,
+    "forms": 5,
+    "front": 4226,
+    "kind": "Longaxe",
+    "samples_per_clip": 16,
+    "width": 7432
+  },
+  {
+    "aim_cases": 6,
+    "back": 1148,
+    "body": 646,
+    "forms": 5,
+    "front": 1148,
+    "kind": "Farwatch",
+    "samples_per_clip": 16,
+    "width": 1986
+  },
+  {
+    "aim_cases": 6,
+    "back": 950,
+    "body": 927,
+    "forms": 5,
+    "front": 985,
+    "kind": "Bombard",
+    "samples_per_clip": 16,
+    "width": 1682
+  },
+  {
+    "aim_cases": 6,
+    "back": 835,
+    "body": 835,
+    "forms": 5,
+    "front": 835,
+    "kind": "Rotcap",
+    "samples_per_clip": 16,
+    "width": 1469
+  },
+  {
+    "aim_cases": 6,
+    "back": 1487,
+    "body": 640,
+    "forms": 5,
+    "front": 1487,
+    "kind": "OldFinn",
+    "samples_per_clip": 16,
+    "width": 2666
+  },
+  {
+    "aim_cases": 6,
+    "back": 635,
+    "body": 598,
+    "forms": 5,
+    "front": 635,
+    "kind": "AntidoteBrewer",
+    "samples_per_clip": 16,
+    "width": 1156
+  },
+  {
+    "aim_cases": 6,
+    "back": 1266,
+    "body": 1266,
+    "forms": 5,
+    "front": 1266,
+    "kind": "Shatterback",
+    "samples_per_clip": 16,
+    "width": 2342
+  },
+  {
+    "aim_cases": 6,
+    "back": 1180,
+    "body": 680,
+    "forms": 5,
+    "front": 1180,
+    "kind": "BloodFurnace",
+    "samples_per_clip": 16,
+    "width": 1913
+  },
+  {
+    "aim_cases": 6,
+    "back": 1326,
+    "body": 593,
+    "forms": 5,
+    "front": 1326,
+    "kind": "Bloodweaver",
+    "samples_per_clip": 16,
+    "width": 2345
+  },
+  {
+    "aim_cases": 6,
+    "back": 1201,
+    "body": 1497,
+    "forms": 5,
+    "front": 1497,
+    "kind": "Oilpress",
+    "samples_per_clip": 16,
+    "width": 2947
+  },
+  {
+    "aim_cases": 6,
+    "back": 597,
+    "body": 597,
+    "forms": 5,
+    "front": 597,
+    "kind": "Drumguard",
+    "samples_per_clip": 16,
+    "width": 1143
+  },
+  {
+    "aim_cases": 6,
+    "back": 1271,
+    "body": 1271,
+    "forms": 5,
+    "front": 1271,
+    "kind": "Leechroot",
+    "samples_per_clip": 16,
+    "width": 2298
+  },
+  {
+    "aim_cases": 6,
+    "back": 1476,
+    "body": 1847,
+    "forms": 5,
+    "front": 1847,
+    "kind": "CargoCrab",
+    "samples_per_clip": 16,
+    "width": 3610
+  },
+  {
+    "aim_cases": 6,
+    "back": 797,
+    "body": 596,
+    "forms": 5,
+    "front": 820,
+    "kind": "Puppetmaster",
+    "samples_per_clip": 16,
+    "width": 1507
+  },
+  {
+    "aim_cases": 6,
+    "back": 805,
+    "body": 602,
+    "forms": 5,
+    "front": 805,
+    "kind": "Smuggler",
+    "samples_per_clip": 16,
+    "width": 1564
+  },
+  {
+    "aim_cases": 6,
+    "back": 356,
+    "body": 361,
+    "forms": 5,
+    "front": 361,
+    "kind": "Crate",
+    "samples_per_clip": 16,
+    "width": 674
+  },
+  {
+    "aim_cases": 6,
+    "back": 1410,
+    "body": 2232,
+    "forms": 5,
+    "front": 2232,
+    "kind": "Bonehorn",
+    "samples_per_clip": 16,
+    "width": 1760
+  },
+  {
+    "aim_cases": 6,
+    "back": 1054,
+    "body": 1299,
+    "forms": 5,
+    "front": 1299,
+    "kind": "Ravager",
+    "samples_per_clip": 16,
+    "width": 1587
+  },
+  {
+    "aim_cases": 6,
+    "back": 797,
+    "body": 651,
+    "forms": 5,
+    "front": 797,
+    "kind": "Acidmaw",
+    "samples_per_clip": 16,
+    "width": 1419
+  },
+  {
+    "aim_cases": 6,
+    "back": 641,
+    "body": 640,
+    "forms": 5,
+    "front": 655,
+    "kind": "Whisperer",
+    "samples_per_clip": 16,
+    "width": 1417
+  },
+  {
+    "aim_cases": 6,
+    "back": 989,
+    "body": 989,
+    "forms": 5,
+    "front": 989,
+    "kind": "Bulwark",
+    "samples_per_clip": 16,
+    "width": 1781
+  },
+  {
+    "aim_cases": 6,
+    "back": 1397,
+    "body": 1421,
+    "forms": 5,
+    "front": 1421,
+    "kind": "Demolisher",
+    "samples_per_clip": 16,
+    "width": 2937
+  },
+  {
+    "aim_cases": 6,
+    "back": 852,
+    "body": 710,
+    "forms": 5,
+    "front": 852,
+    "kind": "Crowcaller",
+    "samples_per_clip": 16,
+    "width": 1480
+  },
+  {
+    "aim_cases": 6,
+    "back": 613,
+    "body": 447,
+    "forms": 5,
+    "front": 613,
+    "kind": "Trigger",
+    "samples_per_clip": 16,
+    "width": 1183
+  },
+  {
+    "aim_cases": 6,
+    "back": 1543,
+    "body": 1079,
+    "forms": 5,
+    "front": 1623,
+    "kind": "RattleTick",
+    "samples_per_clip": 16,
+    "width": 3104
+  },
+  {
+    "aim_cases": 6,
+    "back": 1498,
+    "body": 1498,
+    "forms": 5,
+    "front": 1498,
+    "kind": "Capybara",
+    "samples_per_clip": 16,
+    "width": 2647
+  },
+  {
+    "aim_cases": 6,
+    "back": 2537,
+    "body": 1226,
+    "forms": 5,
+    "front": 2574,
+    "kind": "Trident",
+    "samples_per_clip": 16,
+    "width": 4674
+  },
+  {
+    "aim_cases": 6,
+    "back": 1334,
+    "body": 598,
+    "forms": 5,
+    "front": 1334,
+    "kind": "SolarSentinel",
+    "samples_per_clip": 16,
+    "width": 2661
+  },
+  {
+    "aim_cases": 6,
+    "back": 539,
+    "body": 534,
+    "forms": 5,
+    "front": 618,
+    "kind": "LuminousOracle",
+    "samples_per_clip": 16,
+    "width": 1101
+  },
+  {
+    "aim_cases": 6,
+    "back": 957,
+    "body": 828,
+    "forms": 5,
+    "front": 957,
+    "kind": "CelestialArcher",
+    "samples_per_clip": 16,
+    "width": 1902
+  },
+  {
+    "aim_cases": 6,
+    "back": 1005,
+    "body": 1134,
+    "forms": 5,
+    "front": 1134,
+    "kind": "Justiciar",
+    "samples_per_clip": 16,
+    "width": 2316
+  },
+  {
+    "aim_cases": 6,
+    "back": 1458,
+    "body": 1078,
+    "forms": 5,
+    "front": 1458,
+    "kind": "Jawguard",
+    "samples_per_clip": 16,
+    "width": 2724
+  },
+  {
+    "aim_cases": 6,
+    "back": 807,
+    "body": 871,
+    "forms": 5,
+    "front": 1116,
+    "kind": "Mantis",
+    "samples_per_clip": 16,
+    "width": 2073
+  },
+  {
+    "aim_cases": 6,
+    "back": 1194,
+    "body": 715,
+    "forms": 5,
+    "front": 1194,
+    "kind": "Hornet",
+    "samples_per_clip": 16,
+    "width": 2239
+  },
+  {
+    "aim_cases": 6,
+    "back": 604,
+    "body": 604,
+    "forms": 5,
+    "front": 646,
+    "kind": "Weaver",
+    "samples_per_clip": 16,
+    "width": 1165
+  },
+  {
+    "aim_cases": 6,
+    "back": 1235,
+    "body": 773,
+    "forms": 5,
+    "front": 1246,
+    "kind": "PyreWarden",
+    "samples_per_clip": 16,
+    "width": 2147
+  },
+  {
+    "aim_cases": 6,
+    "back": 509,
+    "body": 508,
+    "forms": 5,
+    "front": 668,
+    "kind": "Drillnest",
+    "samples_per_clip": 16,
+    "width": 947
+  },
+  {
+    "aim_cases": 6,
+    "back": 212,
+    "body": 214,
+    "forms": 5,
+    "front": 347,
+    "kind": "Microdrill",
+    "samples_per_clip": 16,
+    "width": 431
+  },
+  {
+    "aim_cases": 6,
+    "back": 221,
+    "body": 214,
+    "forms": 5,
+    "front": 347,
+    "kind": "Duodrill",
+    "samples_per_clip": 16,
+    "width": 513
+  },
+  {
+    "aim_cases": 6,
+    "back": 230,
+    "body": 214,
+    "forms": 5,
+    "front": 395,
+    "kind": "Megadrill",
+    "samples_per_clip": 16,
+    "width": 595
+  },
+  {
+    "aim_cases": 6,
+    "back": 971,
+    "body": 820,
+    "forms": 5,
+    "front": 971,
+    "kind": "Gravecutter",
+    "samples_per_clip": 16,
+    "width": 1788
+  },
+  {
+    "aim_cases": 6,
+    "back": 892,
+    "body": 786,
+    "forms": 5,
+    "front": 997,
+    "kind": "LastlightCantor",
+    "samples_per_clip": 16,
+    "width": 1935
+  },
+  {
+    "aim_cases": 6,
+    "back": 1149,
+    "body": 916,
+    "forms": 5,
+    "front": 1149,
+    "kind": "Cragclaw",
+    "samples_per_clip": 16,
+    "width": 2113
+  },
+  {
+    "aim_cases": 6,
+    "back": 654,
+    "body": 1004,
+    "forms": 5,
+    "front": 1004,
+    "kind": "Hushfang",
+    "samples_per_clip": 16,
+    "width": 592
+  },
+  {
+    "aim_cases": 6,
+    "back": 1052,
+    "body": 788,
+    "forms": 5,
+    "front": 1052,
+    "kind": "Spinehurler",
+    "samples_per_clip": 16,
+    "width": 1674
+  },
+  {
+    "aim_cases": 6,
+    "back": 857,
+    "body": 755,
+    "forms": 5,
+    "front": 884,
+    "kind": "MireTender",
+    "samples_per_clip": 16,
+    "width": 1534
+  },
+  {
+    "aim_cases": 6,
+    "back": 685,
+    "body": 770,
+    "forms": 5,
+    "front": 770,
+    "kind": "Gorgehowl",
+    "samples_per_clip": 16,
+    "width": 1491
+  },
+  {
+    "aim_cases": 6,
+    "back": 1551,
+    "body": 625,
+    "forms": 5,
+    "front": 1551,
+    "kind": "Sunlancer",
+    "samples_per_clip": 16,
+    "width": 2878
+  },
+  {
+    "aim_cases": 6,
+    "back": 1163,
+    "body": 795,
+    "forms": 5,
+    "front": 1163,
+    "kind": "EclipseDancer",
+    "samples_per_clip": 16,
+    "width": 2182
+  },
+  {
+    "aim_cases": 6,
+    "back": 1434,
+    "body": 775,
+    "forms": 5,
+    "front": 1434,
+    "kind": "Starbreaker",
+    "samples_per_clip": 16,
+    "width": 2638
+  },
+  {
+    "aim_cases": 6,
+    "back": 639,
+    "body": 625,
+    "forms": 5,
+    "front": 639,
+    "kind": "Dawnmender",
+    "samples_per_clip": 16,
+    "width": 1225
+  },
+  {
+    "aim_cases": 6,
+    "back": 895,
+    "body": 764,
+    "forms": 5,
+    "front": 895,
+    "kind": "Prismancer",
+    "samples_per_clip": 16,
+    "width": 1767
+  },
+  {
+    "aim_cases": 6,
+    "back": 1100,
+    "body": 784,
+    "forms": 5,
+    "front": 1116,
+    "kind": "Leafcutter",
+    "samples_per_clip": 16,
+    "width": 1881
+  },
+  {
+    "aim_cases": 6,
+    "back": 727,
+    "body": 727,
+    "forms": 5,
+    "front": 727,
+    "kind": "Blastbeetle",
+    "samples_per_clip": 16,
+    "width": 1253
+  },
+  {
+    "aim_cases": 6,
+    "back": 1231,
+    "body": 732,
+    "forms": 5,
+    "front": 1247,
+    "kind": "Needlewing",
+    "samples_per_clip": 16,
+    "width": 2065
+  },
+  {
+    "aim_cases": 6,
+    "back": 709,
+    "body": 693,
+    "forms": 5,
+    "front": 709,
+    "kind": "NectarNurse",
+    "samples_per_clip": 16,
+    "width": 1348
+  },
+  {
+    "aim_cases": 6,
+    "back": 665,
+    "body": 727,
+    "forms": 5,
+    "front": 727,
+    "kind": "Stridulator",
+    "samples_per_clip": 16,
+    "width": 1412
+  },
+  {
+    "aim_cases": 6,
+    "back": 1009,
+    "body": 891,
+    "forms": 5,
+    "front": 1009,
+    "kind": "BasaltBulwark",
+    "samples_per_clip": 16,
+    "width": 1883
+  },
+  {
+    "aim_cases": 6,
+    "back": 1234,
+    "body": 832,
+    "forms": 5,
+    "front": 1234,
+    "kind": "CinderMaul",
+    "samples_per_clip": 16,
+    "width": 2372
+  },
+  {
+    "aim_cases": 6,
+    "back": 896,
+    "body": 896,
+    "forms": 5,
+    "front": 896,
+    "kind": "HookBrawler",
+    "samples_per_clip": 16,
+    "width": 1604
+  },
+  {
+    "aim_cases": 6,
+    "back": 1190,
+    "body": 767,
+    "forms": 5,
+    "front": 1227,
+    "kind": "FlintRunner",
+    "samples_per_clip": 16,
+    "width": 2314
+  },
+  {
+    "aim_cases": 6,
+    "back": 840,
+    "body": 733,
+    "forms": 5,
+    "front": 840,
+    "kind": "ClayBinder",
+    "samples_per_clip": 16,
+    "width": 1604
+  },
+  {
+    "aim_cases": 6,
+    "back": 1022,
+    "body": 783,
+    "forms": 5,
+    "front": 1022,
+    "kind": "GustDrummer",
+    "samples_per_clip": 16,
+    "width": 1796
+  },
+  {
+    "aim_cases": 6,
+    "back": 948,
+    "body": 678,
+    "forms": 5,
+    "front": 956,
+    "kind": "HideMender",
+    "samples_per_clip": 16,
+    "width": 1797
+  },
+  {
+    "aim_cases": 6,
+    "back": 540,
+    "body": 625,
+    "forms": 5,
+    "front": 625,
+    "kind": "PebbleSlinger",
+    "samples_per_clip": 16,
+    "width": 1140
+  },
+  {
+    "aim_cases": 6,
+    "back": 939,
+    "body": 640,
+    "forms": 5,
+    "front": 976,
+    "kind": "RivetBallista",
+    "samples_per_clip": 16,
+    "width": 1659
+  },
+  {
+    "aim_cases": 6,
+    "back": 1053,
+    "body": 770,
+    "forms": 5,
+    "front": 1053,
+    "kind": "NacreDuelist",
+    "samples_per_clip": 16,
+    "width": 2057
+  },
+  {
+    "aim_cases": 6,
+    "back": 1117,
+    "body": 816,
+    "forms": 5,
+    "front": 1117,
+    "kind": "ReefLancer",
+    "samples_per_clip": 16,
+    "width": 2067
+  },
+  {
+    "aim_cases": 6,
+    "back": 971,
+    "body": 844,
+    "forms": 5,
+    "front": 997,
+    "kind": "TrenchFist",
+    "samples_per_clip": 16,
+    "width": 1906
+  },
+  {
+    "aim_cases": 6,
+    "back": 512,
+    "body": 531,
+    "forms": 5,
+    "front": 537,
+    "kind": "PearlSlinger",
+    "samples_per_clip": 16,
+    "width": 1001
+  },
+  {
+    "aim_cases": 6,
+    "back": 1325,
+    "body": 671,
+    "forms": 5,
+    "front": 1346,
+    "kind": "AbyssHarpooner",
+    "samples_per_clip": 16,
+    "width": 2253
+  },
+  {
+    "aim_cases": 6,
+    "back": 854,
+    "body": 646,
+    "forms": 5,
+    "front": 900,
+    "kind": "UndertowHerald",
+    "samples_per_clip": 16,
+    "width": 1751
+  },
+  {
+    "aim_cases": 6,
+    "back": 605,
+    "body": 654,
+    "forms": 5,
+    "front": 754,
+    "kind": "TrenchLamplighter",
+    "samples_per_clip": 16,
+    "width": 1384
+  },
+  {
+    "aim_cases": 6,
+    "back": 742,
+    "body": 606,
+    "forms": 5,
+    "front": 756,
+    "kind": "FoamWeaver",
+    "samples_per_clip": 16,
+    "width": 1350
+  },
+  {
+    "aim_cases": 6,
+    "back": 774,
+    "body": 599,
+    "forms": 5,
+    "front": 775,
+    "kind": "PodSnapper",
+    "samples_per_clip": 16,
+    "width": 1512
+  },
+  {
+    "aim_cases": 6,
+    "back": 2110,
+    "body": 2179,
+    "forms": 5,
+    "front": 6401,
+    "kind": "Colossus",
+    "samples_per_clip": 16,
+    "width": 4202
+  }
+]

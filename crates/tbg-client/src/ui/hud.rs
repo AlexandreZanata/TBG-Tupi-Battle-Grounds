@@ -280,7 +280,7 @@ fn spawn(
             DespawnOnExit(GameState::InMatch),
         ))
         .with_children(|root| {
-            super::native_battle::score(root, &info, &assets);
+            super::native_battle::score(root, &info, &assets, *lang);
             if !info.spectating {
                 root.spawn(super::surrender::linux_button(&assets, *lang));
             }
@@ -319,6 +319,7 @@ fn spawn(
                     super::native_battle::cards(bottom, &assets);
                 });
             });
+            super::native_battle::auxiliaries(root, &assets);
             root.spawn((
                 Node {
                     position_type: PositionType::Absolute,

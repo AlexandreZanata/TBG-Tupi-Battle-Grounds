@@ -10,6 +10,7 @@
 mod auth;
 
 use std::path::PathBuf;
+use std::sync::atomic::Ordering::Relaxed;
 use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
@@ -25,6 +26,7 @@ type Ws =
 
 struct Slot {
     addr: String,
+    shared: Shared,
 }
 
 async fn slot(db: &PathBuf, name: &str) -> Slot {
@@ -43,8 +45,9 @@ async fn slot(db: &PathBuf, name: &str) -> Slot {
         ws_endpoint: format!("/ws/slot-{name}"),
         ..Config::default()
     };
-    tokio::spawn(tbg_server::run_with(config, listener, Shared::default()));
-    Slot { addr }
+    let shared = Shared::default();
+    tokio::spawn(tbg_server::run_with(config, listener, shared.clone()));
+    Slot { addr, shared }
 }
 
 impl Slot {
@@ -90,7 +93,21 @@ async fn until(db: &PathBuf, what: &str, pred: impl Fn(&[SlotRow]) -> bool) {
         }
         tokio::time::sleep(Duration::from_millis(50)).await;
     }
-    panic!("timed out waiting for {what}");
+    let rows = read_directory(&admin_conn(db)).unwrap();
+    let load: Vec<_> = rows
+        .iter()
+        .map(|r| {
+            (
+                &r.slot,
+                &r.state,
+                r.matches_running,
+                r.results_pending,
+                r.ranked_inflight,
+                r.ranked_authority,
+            )
+        })
+        .collect();
+    panic!("timed out waiting for {what}: {load:?}");
 }
 
 async fn send(ws: &mut Ws, msg: &ClientMsg) {
@@ -111,6 +128,26 @@ async fn next(ws: &mut Ws, wait: Duration) -> Option<ServerMsg> {
             other => return Some(other),
         }
     }
+}
+
+/// Real clients keep answering pings while the retirement gate is observed.
+fn responsive_clients(clients: [Ws; 4]) -> [tokio::task::JoinHandle<()>; 4] {
+    clients.map(|mut ws| {
+        tokio::spawn(async move { while next(&mut ws, Duration::from_secs(5)).await.is_some() {} })
+    })
+}
+
+fn load_components(slot: &Slot) -> (u64, u64, u64, u64) {
+    let metrics = &slot.shared.metrics;
+    (
+        metrics.ranked_inflight.load(Relaxed),
+        metrics.result_receipts_pending.load(Relaxed),
+        metrics.history_pending.load(Relaxed),
+        slot.shared
+            .store
+            .get()
+            .map_or(0, |store| store.jobs_pending()),
+    )
 }
 
 /// Wait for a message matching `want` (≤ 10 s); `None` if it never came.
@@ -241,6 +278,9 @@ async fn u13_u15_a_running_match_survives_promotion_and_rollback() {
             "match ends"
         );
     }
+    // Real clients keep answering pings after the result. An unread synthetic
+    // socket can expire during directory checks and create a new reconnect receipt.
+    let keepalive = responsive_clients([p1, p2, q1, q2]);
     // U14: B (now draining) retires only once its match, its queued records
     // and any ranked authority it took are gone; the gate refuses before.
     until(&db, "both slots idle", |r| {
@@ -264,6 +304,13 @@ async fn u13_u15_a_running_match_survives_promotion_and_rollback() {
         .query_row("SELECT COUNT(*) FROM matches", [], |r| r.get(0))
         .unwrap();
     assert_eq!(matches, 2, "each finished match recorded exactly once");
+    for task in keepalive {
+        assert!(
+            !task.is_finished(),
+            "finished clients remain responsive through the drain check"
+        );
+        task.abort();
+    }
 }
 
 /// `true` when the server signs this socket's account out within `wait`.
@@ -473,9 +520,20 @@ async fn u15_ranked_results_from_two_generations_settle_exactly_once() {
     assert_eq!(settle(&mut r3, &mut r4).await, (1020, 980));
     // …then the older match on A ends and still settles, once, after it.
     assert_eq!(settle(&mut r1, &mut r2).await, (1020, 980));
+    let keepalive = responsive_clients([r1, r2, r3, r4]);
+    let waiting = tokio::time::Instant::now();
+    let diagnostic_written = std::cell::Cell::new(false);
     until(&db, "both slots idle", |r| {
-        r.iter()
-            .all(|s| s.matches_running == 0 && s.results_pending == 0)
+        if waiting.elapsed() > Duration::from_secs(12) && !diagnostic_written.replace(true) {
+            eprintln!(
+                "ranked drain components (ranked, receipts, history, store jobs): a={:?}, b={:?}",
+                load_components(&a),
+                load_components(&b)
+            );
+        }
+        r.len() == 2
+            && r.iter()
+                .all(|s| s.matches_running == 0 && s.results_pending == 0)
     })
     .await;
     let conn = admin_conn(&db);
@@ -512,6 +570,13 @@ async fn u15_ranked_results_from_two_generations_settle_exactly_once() {
             .map(|d| d.count())
             .unwrap_or(0);
         assert_eq!(left, 0, "{name} still holds results");
+    }
+    for task in keepalive {
+        assert!(
+            !task.is_finished(),
+            "ranked clients remain responsive through the drain check"
+        );
+        task.abort();
     }
 }
 

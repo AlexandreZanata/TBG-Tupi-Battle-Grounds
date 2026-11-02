@@ -1,0 +1,45 @@
+{
+  "status": "Unused concept reserved after owner requested Trident transfer; not implemented or counted",
+  "champion": {
+    "kind": "NacreBastion",
+    "name": {
+      "pt": "Bastião de Nácar",
+      "en": "Nacre Bastion"
+    },
+    "faction": "Abyssals",
+    "archetype": "Tank",
+    "stats": [
+      3000,
+      1050,
+      40,
+      28,
+      900,
+      38,
+      0
+    ],
+    "shape": "broad amphibious guardian, short fan-shaped head crest, pale ivory scallop shell shield fitted vertically to the left arm, small pearl-headed right baton, sea-green skin, webbed feet and layered dark turquoise waist wraps",
+    "kit": "While healthy, strikes harder; when wounded, recovers a bounded share of damage dealt.",
+    "forms": [
+      {
+        "code": "A1",
+        "pt": "Parede de Conchas",
+        "en": "Shellwall"
+      },
+      {
+        "code": "A2",
+        "pt": "Cidadela de Nácar",
+        "en": "Nacre Citadel"
+      },
+      {
+        "code": "B1",
+        "pt": "Carapaça de Sal",
+        "en": "Salt Shell"
+      },
+      {
+        "code": "B2",
+        "pt": "Couraça das Fossas",
+        "en": "Trench Carapace"
+      }
+    ]
+  }
+}

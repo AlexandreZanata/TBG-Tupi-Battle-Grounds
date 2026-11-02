@@ -1,0 +1,85 @@
+{
+  "purpose": "optimized native five-form review sheets, WebP quality 90; originals retained separately",
+  "captures": [
+    {
+      "kind": "SiegeWalker",
+      "file": "docs/ogre-faction/previews/siegewalker-forms.webp",
+      "sha256": "3e6a530fd8b7a796cba2ef40f1930376d4881b7452577da1d3a856a0f61f3430",
+      "original_png_sha256": "b221cd3614901244e7e3180ac7ee5c74e14610043a3f195d93e8855ef4113960",
+      "capture_source_commit": "abe78933a556633fe13ad29dd07651052e218e7d",
+      "bytes": 89228
+    },
+    {
+      "kind": "RivetBallista",
+      "file": "docs/ogre-faction/previews/rivetballista-forms.webp",
+      "sha256": "5c171bebcdb9276b59766f45070e7211c6778d2b111c8fce3a9fcf53d24ee28a",
+      "original_png_sha256": "3006364768884d08b8c3d1bd3953091fdb7b16b073e474c346867c25fa683a51",
+      "capture_source_commit": "abe78933a556633fe13ad29dd07651052e218e7d",
+      "bytes": 42156
+    },
+    {
+      "kind": "BasaltBulwark",
+      "file": "docs/ogre-faction/previews/basaltbulwark-forms.webp",
+      "sha256": "5aa83e936886e557017345eedb5754c09ca2f71854b92cf532248157e3504792",
+      "original_png_sha256": "87f69edff0b76eb3e8d9599cd2063148700e79dc2137f04807ee1babf9efc0fa",
+      "capture_source_commit": "03b9b2de158c2a6d5e75873c814e501beec7fbd8",
+      "bytes": 56170
+    },
+    {
+      "kind": "CinderMaul",
+      "file": "docs/ogre-faction/previews/cindermaul-forms.webp",
+      "sha256": "01dcd4ccf5eb0b9a4ba3e5a1bf1f8958a6e93c93c406daf5691e3fa9e1d51d5f",
+      "original_png_sha256": "97a74670365c51113861b45d8d5ab3b43bcda219026596115fbddebfb7d51b85",
+      "capture_source_commit": "03b9b2de158c2a6d5e75873c814e501beec7fbd8",
+      "bytes": 57580
+    },
+    {
+      "kind": "HookBrawler",
+      "file": "docs/ogre-faction/previews/hookbrawler-forms.webp",
+      "sha256": "ee463cfb2d1bcae3ed6c796b26d02aa86dc4ef3cc3c1861c5175be618c57b1ae",
+      "original_png_sha256": "51835a0c8dfbe47adb1e21b5be1318e55443749ace6805dd329a9e4be0b745d9",
+      "capture_source_commit": "03b9b2de158c2a6d5e75873c814e501beec7fbd8",
+      "bytes": 53008
+    },
+    {
+      "kind": "FlintRunner",
+      "file": "docs/ogre-faction/previews/flintrunner-forms.webp",
+      "sha256": "5913880d92bac6fa094bb096bcedcf7aca4e465e85303830d51ced9b303d4b08",
+      "original_png_sha256": "499578d15297652614795c844493bfbfe3e21f3447222fbdb7382a23a0594e39",
+      "capture_source_commit": "03b9b2de158c2a6d5e75873c814e501beec7fbd8",
+      "bytes": 52802
+    },
+    {
+      "kind": "ClayBinder",
+      "file": "docs/ogre-faction/previews/claybinder-forms.webp",
+      "sha256": "8c590489171a2cf8aa9ffa637bd1c8cd5455fda6e6b90e04599c6e70863b3084",
+      "original_png_sha256": "03068354391648a19c8f236f434c0ab328048274568da27d3131315262ea9d56",
+      "capture_source_commit": "03b9b2de158c2a6d5e75873c814e501beec7fbd8",
+      "bytes": 55614
+    },
+    {
+      "kind": "GustDrummer",
+      "file": "docs/ogre-faction/previews/gustdrummer-forms.webp",
+      "sha256": "23b7675c513052cf298af47c2469168dbb46cc72879464cdd632a216e64a8364",
+      "original_png_sha256": "45e01de3a070b520de072d0ae049ebdf8f238082a4d5ec91353ff5e5dc238f07",
+      "capture_source_commit": "03b9b2de158c2a6d5e75873c814e501beec7fbd8",
+      "bytes": 53744
+    },
+    {
+      "kind": "HideMender",
+      "file": "docs/ogre-faction/previews/hidemender-forms.webp",
+      "sha256": "2d05ef8ddc7c78ca997f783e88bb4efd496e8d0a1ef476c78b764e87de600ab3",
+      "original_png_sha256": "066a26e1b011254d2635821e605e7dd10e83c2addecda4fc5a11941706acbeba",
+      "capture_source_commit": "03b9b2de158c2a6d5e75873c814e501beec7fbd8",
+      "bytes": 49736
+    },
+    {
+      "kind": "PebbleSlinger",
+      "file": "docs/ogre-faction/previews/pebbleslinger-forms.webp",
+      "sha256": "383e701a2e200067b32a3f9a073e9013b2ccb6227b909d3926a56c5186bedf7c",
+      "original_png_sha256": "434970187a121c1a0be0c05c389720d1af8a466bd0543cb14e1fcf6c9c0a9f01",
+      "capture_source_commit": "03b9b2de158c2a6d5e75873c814e501beec7fbd8",
+      "bytes": 41916
+    }
+  ]
+}

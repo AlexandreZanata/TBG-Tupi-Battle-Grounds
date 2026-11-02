@@ -2,7 +2,8 @@
 Description=Check for compatible attested TBG browser updates
 
 [Timer]
-OnBootSec=2min
+OnActiveSec=80s
+AccuracySec=1s
 OnUnitInactiveSec=10min
 RandomizedDelaySec=30s
 Unit=tbg-web-deploy.service

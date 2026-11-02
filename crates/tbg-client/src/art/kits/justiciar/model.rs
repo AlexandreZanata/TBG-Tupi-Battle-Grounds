@@ -60,12 +60,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         )
         .rot([90.0, 0.0, 0.0]),
         part(Secondary(Spring::Back), Ball(0.04), IVORY, [0.0, 0.0, 0.03]).glow(),
-        part(
-            Body(UpperArmL),
-            Box(0.19, 0.08, 0.17),
-            LINEN,
-            [0.0, 0.0, 0.0],
-        ),
     ]);
     for s in [-1.0, 1.0] {
         v.push(

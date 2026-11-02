@@ -41,6 +41,9 @@ pub(crate) fn resolve_hit(
             crate::afflictions::brew_cast(state, attacker, st.range, id, strip, ward, second, ev);
             return;
         }
+        if crate::completion::heal_action(state, attacker, id, st, ev) {
+            return;
+        }
         let _restored = heal(state, attacker.seat, id, st.heal, true, ev);
         #[cfg(feature = "lab")]
         crate::lab::healed(state, attacker, _restored);
@@ -63,6 +66,8 @@ pub(crate) fn resolve_hit(
         }
         return;
     }
+    let lunar_bp = crate::completion::lunar_bp(state, attacker, target);
+    let completion_bonus = crate::completion::basic_bonus(state, attacker, target, st);
     let purification = crate::celestial_archer::empowered(state, attacker, target);
     let mut amount = purification.map_or(st.damage, |raw| auxiliary_amount(st, raw));
     amount = amount.saturating_add(auxiliary_amount(
@@ -73,6 +78,9 @@ pub(crate) fn resolve_hit(
         st,
         crate::mantis::bonus(state, attacker, target),
     ));
+    amount = amount.saturating_add(completion_bonus);
+    amount = amount.saturating_add(crate::volthar::bonus(state, attacker, target, st));
+    amount = amount.saturating_add(crate::astreon::bonus(state, attacker, target, st));
     // R13: a weakened attacker's basic hit loses its weakening before any bonus.
     let weaken = crate::roster_slots::weaken_now(&attacker.fx, state.tick);
     if weaken > 0 {
@@ -109,16 +117,21 @@ pub(crate) fn resolve_hit(
     if purification.is_some() {
         crate::celestial_archer::strip(state, target);
     }
+    // GD-04: the capped pierce joins after offensive percentages, before defenses.
+    amount = amount.saturating_add(crate::astreon::pierce(state, attacker, target));
     amount = crate::drillnest::bonus(state, attacker, target, amount);
     let removed = damage(state, target, amount, ev);
     crate::celestial_archer::completed(state, attacker, target, ev);
     crate::jawguard::completed(state, attacker, target);
     crate::mantis::completed(state, attacker, target, ev);
+    crate::astreon::completed(state, attacker, target, ev);
+    crate::volthar::completed(state, attacker, target, st, ev);
     crate::ravager::completed(state, attacker, target);
     crate::acidmaw::completed(state, attacker, target, st, ev);
     crate::trigger::completed(state, attacker, target, st, ev);
     crate::crowcaller::completed(state, attacker, target, ev);
     crate::hornet::completed(state, attacker, target, st, ev);
+    crate::completion::completed(state, attacker, target, st, ev);
     #[cfg(feature = "lab")]
     if let Target::Unit(_) = target {
         crate::lab::dealt(state, attacker, removed);
@@ -173,6 +186,7 @@ pub(crate) fn resolve_hit(
             } else {
                 augment::lifesteal_bp(&state.player(attacker.seat).augments)
             };
+            let bp = (bp + lunar_bp).min(1_200);
             if conventional && bp > 0 {
                 let healed = (i64::from(removed) * i64::from(bp) / BP) as i32;
                 let _restored = training_hooks::scoped(
@@ -493,7 +507,9 @@ fn splash(
     // Index loop, no clone: dead units are only removed in `remove_dead`.
     for i in 0..state.units.len() {
         let e = state.units[i];
-        let near = (e.x - tx).abs() <= st.splash;
+        let in_front = attacker.kind != crate::UnitKind::Colossus
+            || (e.x - attacker.x) * (tx - attacker.x).signum() >= 0;
+        let near = (e.x - tx).abs() <= st.splash && in_front;
         if e.hp > 0 && near && primary != Target::Unit(e.id) && (friendly || e.seat == enemy) {
             let _removed =
                 training_hooks::scoped(state, Source::Unit(attacker.id), Effect::Splash, |s| {
@@ -612,10 +628,14 @@ pub(crate) fn damage(
                 reduced - after_shield,
                 after_shield - amount,
             );
+            crate::completion::after_damage(state, id, removed, ev);
             removed
         }
         Target::Stronghold(seat) => {
             let tick = state.tick;
+            let p = state.player(seat);
+            let armor = crate::stronghold_power::armor(p.stronghold, p.fort_tier, p.fort_branch);
+            let amount = scale(amount, -armor);
             let p = state.player_mut(seat);
             let between = p.stronghold_hp;
             let mut incoming = amount;
@@ -764,6 +784,13 @@ pub(crate) fn apply_on_hit(
             ticks_left: ticks,
         },
     };
+    if matches!(u.status, Status::Rooted { .. }) {
+        u.fx.completion.channel = None;
+    }
+    if u.kind == crate::UnitKind::Hushfang {
+        u.fx.completion.charged = false;
+        u.fx.completion.walk_ticks = 0;
+    }
     ev.push(Event::StatusApplied { unit: id });
     applied
 }

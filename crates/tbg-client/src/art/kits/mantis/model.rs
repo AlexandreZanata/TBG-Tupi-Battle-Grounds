@@ -50,25 +50,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(Body(Head), Cone(0.18, 0.26), LEAF, [0.0, 0.02, 0.0])
             .rot([180.0, 0.0, 0.0])
             .scale([1.25, 1.0, 0.5]),
-        part(
-            Secondary(Spring::Back),
-            Ball(0.11),
-            LEAF_DARK,
-            [0.0, 0.0, -0.06],
-        )
-        .scale([0.8, 1.15, 1.6]),
-        part(
-            Secondary(Spring::Back),
-            Cyl(0.11, 0.05),
-            LINEN,
-            [0.0, 0.0, -0.07],
-        ),
-        part(
-            Body(Chest),
-            Box(0.12, 0.05, 0.025),
-            LINEN,
-            [0.0, 0.14, 0.10],
-        ),
+        part(Secondary(Spring::Back), Ball(0.11), MOSS, [0.0, 0.0, -0.06]).scale([0.8, 1.15, 1.6]),
     ]);
     for (s, hand, elbow, shin) in [
         (-1.0, Socket::WeaponR, ForearmR, ShinR),

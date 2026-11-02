@@ -107,6 +107,78 @@ fn bot_matches_are_frozen() {
                 StrongholdDestroyed,
             ),
         ],
+        // CC-ID03: schema-only completion slots preserve all three PR44 outcomes/ticks.
+        (7, 0xa9fa_44b5_5cde_a10b) => [
+            (
+                1,
+                0xe553_d0e8_59e5_b19c,
+                4_044,
+                Seat::B,
+                StrongholdDestroyed,
+            ),
+            (
+                7,
+                0x50f9_1188_6d89_5e19,
+                9_982,
+                Seat::B,
+                StrongholdDestroyed,
+            ),
+            (
+                42,
+                0x4f6f_6f12_eae1_933f,
+                10_382,
+                Seat::A,
+                StrongholdDestroyed,
+            ),
+        ],
+        // OG-01: Ogre range/faction and appended eighth Synergy slot.
+        (8, 0x3d07d8f3e73671ef) => [
+            (1, 0xdc6ddee0ab7abe7e, 4044, Seat::B, StrongholdDestroyed),
+            (7, 0x981a89b67d681f3d, 9982, Seat::B, StrongholdDestroyed),
+            (42, 0x750b2a389290829d, 10382, Seat::A, StrongholdDestroyed),
+        ],
+        // OG-01 candidate 9 changes staged kinds only; canonical traces remain frozen.
+        (9, 0x89698dcd4bcb5ddd) => [
+            (1, 0xdc6ddee0ab7abe7e, 4044, Seat::B, StrongholdDestroyed),
+            (7, 0x981a89b67d681f3d, 9982, Seat::B, StrongholdDestroyed),
+            (42, 0x750b2a389290829d, 10382, Seat::A, StrongholdDestroyed),
+        ],
+        // AB-01/OG-02: ninth Synergy slot and empty rolling-cask state; staged tuning is private.
+        (10, 0x523044fc973bac39) => [
+            (1, 0x4b854f968429a97c, 4044, Seat::B, StrongholdDestroyed),
+            (7, 0x70c562418d530b55, 9982, Seat::B, StrongholdDestroyed),
+            (42, 0xcea96d41f552661d, 10382, Seat::A, StrongholdDestroyed),
+        ],
+        // TW-01/PK-01/GD-01: stronger towers; physical-lanes candidate stays private.
+        (11, 0xa0a1d508c59e5841) => [
+            (1, 0xae47594e85732bbc, 16625, Seat::B, StrongholdDestroyed),
+            (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
+            (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
+        ],
+        // RESTORE-01: canonical behavior unchanged; only private constructors restore legacy movement.
+        (12, 0x8f5a8ebb3e4f88ec) => [
+            (1, 0xae47594e85732bbc, 16625, Seat::B, StrongholdDestroyed),
+            (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
+            (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
+        ],
+        // R13: equivalent divisibility syntax preserves the revision-12 traces exactly.
+        (13, 0xb66993d9e87a9cfc) => [
+            (1, 0xae47594e85732bbc, 16625, Seat::B, StrongholdDestroyed),
+            (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
+            (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
+        ],
+        // GD-04: Gods join only the private preview pool; canonical bot traces are unchanged.
+        (14, 0xf354f651c056d615) => [
+            (1, 0xae47594e85732bbc, 16625, Seat::B, StrongholdDestroyed),
+            (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
+            (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
+        ],
+        // INT-06: auxiliary fields join serialized state; R14 outcomes and ticks are retained.
+        (15, 0xcc459351581b7763) => [
+            (1, 0x498ca4c4ecd99d8c, 16625, Seat::B, StrongholdDestroyed),
+            (7, 0xd3ae68c37379b915, 14265, Seat::B, StrongholdDestroyed),
+            (42, 0x66740835064ae569, 23274, Seat::A, StrongholdDestroyed),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

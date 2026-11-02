@@ -90,8 +90,12 @@ fn damage_only_removes_pieces_and_keeps_the_kind() {
 fn artillery_recoil_matches_the_authoritative_cadence() {
     let interval = |f| artillery::gun(f).interval;
     assert_eq!(interval(Form::Base), 1.0, "20 ticks at 20 ticks/s");
-    assert_eq!(interval(Form::B1), 0.85, "Quick Reload: 17 ticks");
-    assert_eq!(interval(Form::B2), 0.7, "Advanced Mechanism: 14 ticks");
+    assert_eq!(interval(Form::B1), 0.7, "TW-01 Quick Reload: 14 ticks");
+    assert_eq!(
+        interval(Form::B2),
+        0.5,
+        "TW-01 Advanced Mechanism: 10 ticks"
+    );
     for form in FORMS {
         let gun = artillery::gun(form);
         assert!(
@@ -106,11 +110,8 @@ fn artillery_recoil_matches_the_authoritative_cadence() {
 
 #[test]
 fn war_banner_radius_is_the_authoritative_one() {
-    let tiles: Vec<i32> = FORMS
-        .iter()
-        .map(|f| aura::radius_milli(*f) / 1000)
-        .collect();
-    assert_eq!(tiles, [4, 4, 4, 5, 6]);
+    let milli_tiles: Vec<i32> = FORMS.iter().map(|f| aura::radius_milli(*f)).collect();
+    assert_eq!(milli_tiles, [5_000, 5_000, 5_000, 6_500, 8_000], "TW-01");
 }
 
 /// Prints the triangle count of every form (`cargo test -- --nocapture`)

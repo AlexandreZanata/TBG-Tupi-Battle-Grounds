@@ -17,6 +17,14 @@ mod polish_live;
 mod polish_motion;
 #[cfg(tbg_desktop)]
 mod reserve;
+// P73 synthetic fixtures exist only where their "LOCAL VISUAL FIXTURE" label
+// is also compiled, never in a plain debug build.
+#[cfg(tbg_desktop)]
+mod barrel;
+#[cfg(tbg_desktop)]
+mod packing;
+#[cfg(feature = "ui-acceptance")]
+mod social;
 #[cfg(tbg_desktop)]
 mod training;
 #[cfg(tbg_desktop)]
@@ -50,6 +58,10 @@ pub fn plugin(app: &mut App) {
             return;
         }
         app.add_systems(Update, capture);
+        #[cfg(feature = "ui-acceptance")]
+        if crate::config::url_param("capture_panel").is_some_and(|v| v.starts_with("p73-")) {
+            social::plugin(app);
+        }
         #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("training") {
             training::plugin(app);
@@ -164,6 +176,9 @@ fn capture(
     #[cfg(tbg_desktop)] stats: Res<crate::sync::MatchStats>,
     #[cfg(tbg_desktop)] match_info: Res<crate::sync::MatchInfo>,
     #[cfg(tbg_desktop)] loading: Res<crate::ui::native_loading::Status>,
+    #[cfg(tbg_desktop)] support_probe: Option<Res<training::SupportProbe>>,
+    #[cfg(tbg_desktop)] barrel_probe: Option<Res<barrel::Status>>,
+    #[cfg(tbg_desktop)] packing_probe: Option<Res<packing::Status>>,
     mut started: Local<bool>,
     #[cfg(tbg_desktop)] mut ready_at: Local<Option<f32>>,
 ) {
@@ -191,6 +206,20 @@ fn capture(
     }
     #[cfg(tbg_desktop)]
     {
+        // Shader/font work can outlive the requested delay on a busy machine.
+        // Capture the ready scene, never the loading overlay in front of it.
+        if !loading.boot_ready || loading.scene_waiting {
+            return;
+        }
+        if packing_probe.is_some_and(|probe| !probe.ready) {
+            return;
+        }
+        if barrel_probe.is_some_and(|probe| !probe.ready) {
+            return;
+        }
+        if support_probe.is_some_and(|probe| !probe.ready) {
+            return;
+        }
         if crate::config::url_param("capture_panel").as_deref() == Some("arena_train")
             && *state.get() != crate::GameState::InMatch
         {

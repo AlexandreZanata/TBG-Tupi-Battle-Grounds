@@ -107,9 +107,11 @@ fn forgo_discount_and_convergence_are_dynamic() {
     let mut s = running(4);
     s.players[0].augments.add(12); // Field Promotion
     s.players[0].augments.add(34); // Convergence
-    s.players[0].synergy = [1, 1, 0, 0, 0, 0, 0];
+    s.players[0].synergy = [0; tbg_core::FACTION_COUNT];
+    s.players[0].synergy[0] = 1;
+    s.players[0].synergy[1] = 1;
     let with = stats(&s, Seat::A, UnitKind::Shieldbearer, 0);
-    s.players[0].synergy = [1, 0, 0, 0, 0, 0, 0];
+    s.players[0].synergy[1] = 0;
     let without = stats(&s, Seat::A, UnitKind::Shieldbearer, 0);
     assert!(with.max_hp > without.max_hp);
     assert!(with.damage > without.damage);
@@ -193,7 +195,8 @@ fn bounty_and_stone_mend_credit_the_killer() {
 
 #[test]
 fn tower_fury_counts_only_stronghold_kills() {
-    let mut s = arena(9);
+    // TW-01: zero configured tower damage now means no fire; this scenario needs a real shot.
+    let mut s = running(9);
     s.players[0].augments.add(22);
     let dead = spawn(&mut s, Seat::B, UnitKind::Archer, 500);
     s.units.iter_mut().find(|u| u.id == dead).unwrap().hp = 1;

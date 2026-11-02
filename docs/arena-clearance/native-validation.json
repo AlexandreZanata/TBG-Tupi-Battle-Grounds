@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "source_commit": "e8689274404c1cc4f3fcc2b2344125cf5f8e504f",
+  "contract": "w36-r12-8f5a8ebb3e4f88ec",
+  "binary_sha256": "b06fbfc4cd88ce06cf70c322d77304a9b088a967902a07d87686e43c1d9d43bd",
+  "verified_installed_assets": 380,
+  "client_tests": {
+    "passed": 9,
+    "failed": 0,
+    "arena_geometry_cases": 2,
+    "original_crowd_cases": 7,
+    "animated_samples_per_arena": 160
+  },
+  "native_linux_captures": [
+    {
+      "arena": "forest",
+      "exit_code": 0,
+      "image": "forest.png",
+      "image_sha256": "37cdd876c39e362aa6676b521e5bc0efa87c5b85fb81c87130e7fe9a799faf15",
+      "source_commit": "e8689274404c1cc4f3fcc2b2344125cf5f8e504f",
+      "ready": true
+    },
+    {
+      "arena": "tundra",
+      "exit_code": 0,
+      "image": "tundra.png",
+      "image_sha256": "f8b057e9d4fe2e9ce4df46cbb028fe5aef541721461418c29e800f13b6a84eec",
+      "source_commit": "e8689274404c1cc4f3fcc2b2344125cf5f8e504f",
+      "ready": true
+    },
+    {
+      "arena": "volcanic",
+      "exit_code": 0,
+      "image": "volcanic.png",
+      "image_sha256": "9e3f9186a2516fc8f613ed1a27366e868c79af38411565a4a0fb6cba68ee6e7b",
+      "source_commit": "e8689274404c1cc4f3fcc2b2344125cf5f8e504f",
+      "ready": true
+    },
+    {
+      "arena": "ruins",
+      "exit_code": 0,
+      "image": "ruins.png",
+      "image_sha256": "01655e9e2b1ce6e2d35bb8042c0979e5e10464be9195bc25422996d4dc5bdcbb",
+      "source_commit": "e8689274404c1cc4f3fcc2b2344125cf5f8e504f",
+      "ready": true
+    },
+    {
+      "arena": "storm",
+      "exit_code": 0,
+      "image": "storm.png",
+      "image_sha256": "6bdf07ee31efe7454ccfb88f4f7f34188afcbc6355bf94f631d2741e4bc64674",
+      "source_commit": "e8689274404c1cc4f3fcc2b2344125cf5f8e504f",
+      "ready": true
+    },
+    {
+      "arena": "celestial",
+      "exit_code": 0,
+      "image": "celestial.png",
+      "image_sha256": "3678bb0473cba36f97886a2094f9bae6c3127faf1acbc936609e67cef3621414",
+      "source_commit": "e8689274404c1cc4f3fcc2b2344125cf5f8e504f",
+      "ready": true
+    },
+    {
+      "arena": "clockwork",
+      "exit_code": 0,
+      "image": "clockwork.png",
+      "image_sha256": "ebfd4ad1bfa13776cf4de9582940dd3ed57db84097f1fa104b04d29d5ee50516",
+      "source_commit": "e8689274404c1cc4f3fcc2b2344125cf5f8e504f",
+      "ready": true
+    },
+    {
+      "arena": "desert",
+      "exit_code": 0,
+      "image": "desert.png",
+      "image_sha256": "7a037a2d837a6549b975e2a813df0654f428a232d8a556265f1d4316d82563b6",
+      "source_commit": "e8689274404c1cc4f3fcc2b2344125cf5f8e504f",
+      "ready": true
+    }
+  ],
+  "observed_platforms": [
+    "Linux"
+  ],
+  "pending_platform_observations": [
+    "Windows",
+    "desktop game-web"
+  ],
+  "local_originals": ".local/arena-clearance-2026-11-02/",
+  "local_gallery": "http://localhost:8966/arenas.html"
+}

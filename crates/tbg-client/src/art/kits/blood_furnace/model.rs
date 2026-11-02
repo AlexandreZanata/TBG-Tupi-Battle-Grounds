@@ -136,36 +136,14 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 
 fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     let t = p.torso;
-    body::pauldrons(v, if f.a && f.t2 { IRON } else { SOOT }, 0.115);
-    body::greaves(v, GUNMETAL);
-    for arm in [ForearmL, ForearmR] {
-        v.push(part(
-            Body(arm),
-            Cyl(0.058, 0.11),
-            SOOT,
-            [0.0, -p.arm * 0.55, 0.0],
-        ));
-        v.push(part(
-            Body(arm),
-            Ring(0.009, 0.060, 360.0),
-            RUST,
-            [0.0, -p.arm * 0.40, 0.0],
-        ));
-    }
-    v.extend([
-        part(
-            Body(Hips),
-            Box(t.x * 0.9, 0.16, t.z * 0.9),
-            SOOT,
-            [0.0, -0.06, 0.0],
-        ),
-        part(
-            Body(Hips),
-            Box(t.x * 0.35, 0.18, 0.02),
-            LINEN,
-            [0.0, -0.08, t.z * 0.47],
-        ),
-    ]);
+    body::pauldrons(v, if f.b && f.t2 { SOOT } else { IRON }, 0.1);
+    body::greaves(v, IRON);
+    v.extend([part(
+        Body(Hips),
+        Box(t.x * 0.9, 0.16, t.z * 0.9),
+        SOOT,
+        [0.0, -0.06, 0.0],
+    )]);
     if f.b && f.t2 {
         // Eternal Embers: lanterns of ember swinging from chains, and
         // smoldering coals on the shoulders.

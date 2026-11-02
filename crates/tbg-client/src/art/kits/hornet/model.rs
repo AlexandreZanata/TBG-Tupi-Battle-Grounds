@@ -80,12 +80,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         )
         .rot([-70.0, 0.0, 0.0]),
         part(
-            Secondary(Spring::Back),
-            Box(0.13, 0.11, 0.025),
-            LINEN,
-            [0.0, 0.02, -0.27],
-        ),
-        part(
             Prop(Socket::WeaponR),
             Box(0.16, 0.15, 0.29),
             CHARCOAL,

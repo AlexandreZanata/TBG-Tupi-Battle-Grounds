@@ -84,7 +84,12 @@ pub(crate) fn enemy_in_range(state: &MatchState, u: &Unit, range: i32) -> Option
         // looking its id up again adds log(n) work to every candidate.
         .filter(|e| e.seat == enemy && e.hp > 0 && targetable(e))
     {
-        let key = ((e.x - u.x).abs(), e.id);
+        let d = if state.physical_lanes {
+            crate::occupancy::distance(u, e, range)
+        } else {
+            (u.x - e.x).abs()
+        };
+        let key = (d, e.id);
         #[cfg(feature = "bench-profile")]
         crate::profiling::TARGET_CANDIDATES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         nearest = Some(nearest.map_or(key, |n| n.min(key)));
@@ -114,7 +119,14 @@ fn most_damaged_ally(state: &MatchState, u: &Unit, range: i32) -> Option<UnitId>
         .units
         .iter()
         .filter(|a| a.seat == u.seat && a.hp > 0 && a.hp < a.max_hp)
-        .filter(|a| (a.x - u.x).abs() <= range)
+        .filter(|a| u.kind != crate::UnitKind::GustDrummer || a.id != u.id)
+        .filter(|a| {
+            if state.physical_lanes {
+                crate::occupancy::distance(u, a, range) <= range
+            } else {
+                (u.x - a.x).abs() <= range
+            }
+        })
         .map(|a| (i64::from(a.hp) * BP / i64::from(a.max_hp), a.id))
         .min()
         .map(|(_, id)| id)

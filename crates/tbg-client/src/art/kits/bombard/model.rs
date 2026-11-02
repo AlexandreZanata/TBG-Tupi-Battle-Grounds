@@ -238,12 +238,6 @@ fn hull_shield(v: &mut Vec<PartSpec>, size: f32) {
         part(b, Box(size, size * 1.15, 0.04), IRON, [0.0, 0.0, -0.06]),
         part(
             b,
-            Box(size * 0.8, size * 0.95, 0.02),
-            LINEN,
-            [0.0, 0.0, -0.085],
-        ),
-        part(
-            b,
             Box(size * 0.15, size * 0.95, 0.025),
             BRASS,
             [0.0, 0.0, -0.09],

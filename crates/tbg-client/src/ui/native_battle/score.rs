@@ -4,7 +4,10 @@ use super::{
     super::{hud::Hud, kit},
     chrome,
 };
-use crate::sync::{LatestView, MatchInfo};
+use crate::{
+    i18n::{Lang, Msg},
+    sync::{LatestView, MatchInfo},
+};
 use bevy::prelude::*;
 use tbg_core::{content::TICK_HZ, Phase};
 
@@ -25,7 +28,12 @@ pub fn plugin(app: &mut App) {
     app.add_systems(Update, update.run_if(in_state(crate::GameState::InMatch)));
 }
 
-pub fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, assets: &AssetServer) {
+pub fn spawn(
+    parent: &mut ChildSpawnerCommands,
+    info: &MatchInfo,
+    assets: &AssetServer,
+    lang: Lang,
+) {
     parent
         .spawn(Node {
             position_type: PositionType::Absolute,
@@ -37,7 +45,7 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, assets: &Asset
             ..default()
         })
         .with_children(|row| {
-            plate(row, info, assets, 0);
+            plate(row, info, assets, lang, 0);
             row.spawn((
                 Node {
                     width: px(116),
@@ -57,7 +65,7 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, assets: &Asset
                 clock.spawn((chrome::title("0:00", 29.), Readout::Clock));
                 clock.spawn((kit::muted("GET READY", 8.), Readout::Phase));
             });
-            plate(row, info, assets, 1);
+            plate(row, info, assets, lang, 1);
         });
 }
 
@@ -65,9 +73,11 @@ fn plate(
     parent: &mut ChildSpawnerCommands,
     info: &MatchInfo,
     assets: &AssetServer,
+    lang: Lang,
     relative: usize,
 ) {
-    let own = relative == 0;
+    let blue = relative == 0;
+    let own = info.you.unwrap_or(tbg_core::Seat::A).index() == relative;
     let name = if own { &info.you_name } else { &info.opponent };
     parent
         .spawn((
@@ -81,7 +91,7 @@ fn plate(
                 border_radius: BorderRadius::all(px(7)),
                 column_gap: px(10),
                 align_items: AlignItems::Center,
-                flex_direction: if own {
+                flex_direction: if blue {
                     FlexDirection::Row
                 } else {
                     FlexDirection::RowReverse
@@ -104,7 +114,7 @@ fn plate(
                     },
                     ImageNode::new(assets.load(format!(
                         "battle/native/crest-{}.webp",
-                        if own { "ally" } else { "enemy" }
+                        if blue { "ally" } else { "enemy" }
                     ))),
                 ))
                 .with_children(|crest| {
@@ -131,7 +141,7 @@ fn plate(
                         width: percent(100),
                         justify_content: JustifyContent::SpaceBetween,
                         align_items: AlignItems::Center,
-                        flex_direction: if own {
+                        flex_direction: if blue {
                             FlexDirection::Row
                         } else {
                             FlexDirection::RowReverse
@@ -146,6 +156,12 @@ fn plate(
                         };
                         let display_name = rating
                             .map_or_else(|| name.clone(), |rating| format!("{name} ({rating})"));
+                        let display_name =
+                            if own && !info.spectating && name.as_str() != lang.t(Msg::BattleYou) {
+                                format!("{display_name} · {}", lang.t(Msg::BattleYou))
+                            } else {
+                                display_name
+                            };
                         line.spawn((
                             Node {
                                 max_width: percent(68),
@@ -223,13 +239,6 @@ fn vitality(parent: &mut ChildSpawnerCommands, relative: usize) {
 fn update(view: Res<LatestView>, info: Res<MatchInfo>, mut texts: Query<(&Readout, &mut Text)>) {
     let Some(v) = &view.0 else { return };
     for (kind, mut text) in &mut texts {
-        let seat = |relative| {
-            if relative == 0 {
-                v.you.index()
-            } else {
-                1 - v.you.index()
-            }
-        };
         let want = match kind {
             Readout::Clock => {
                 let s = v.elapsed / TICK_HZ;
@@ -246,7 +255,7 @@ fn update(view: Res<LatestView>, info: Res<MatchInfo>, mut texts: Query<(&Readou
             }
             .into(),
             Readout::Hp(relative) => {
-                let i = seat(*relative);
+                let i = *relative;
                 format!(
                     "{} / {}",
                     v.stronghold_hp[i].max(0),
@@ -254,7 +263,7 @@ fn update(view: Res<LatestView>, info: Res<MatchInfo>, mut texts: Query<(&Readou
                 )
             }
             Readout::Tower(relative) => {
-                let tower = v.strongholds[seat(*relative)];
+                let tower = v.strongholds[*relative];
                 format!("{:?} T{}", tower.kind, tower.tier)
             }
         };

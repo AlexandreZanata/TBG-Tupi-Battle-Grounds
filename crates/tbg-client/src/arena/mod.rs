@@ -3,9 +3,11 @@
 use crate::art::mesh::{self, Shape};
 use bevy::{light::NotShadowCaster, prelude::*};
 
+mod auxiliaries;
 mod camp;
 mod cliffs;
 mod clouds;
+mod dressing;
 mod geometry;
 mod ground;
 mod life;
@@ -21,6 +23,9 @@ mod themes;
 mod towers;
 mod trees;
 mod water;
+
+#[cfg(test)]
+mod clearance_tests;
 
 pub(super) type Part = (Shape, Color, Transform);
 
@@ -39,6 +44,7 @@ pub fn plugin(app: &mut App) {
         ),
     );
     strongholds::plugin(app);
+    auxiliaries::plugin(app);
 }
 
 pub(super) fn painted(parts: Vec<Part>) -> Mesh {
@@ -60,7 +66,11 @@ fn build(
     theme: theme::Theme,
 ) {
     info!("arena scene: {}", theme.name());
-    let kit = themes::build(theme);
+    let mut kit = themes::build(theme);
+    kit.props
+        .retain(|(_, _, t)| !auxiliaries::overlaps_precinct(t.translation));
+    kit.glow
+        .retain(|(_, _, t)| !auxiliaries::overlaps_precinct(t.translation));
     let mat = mats.add(StandardMaterial {
         base_color: Color::WHITE,
         perceptual_roughness: 1.0,
@@ -85,6 +95,9 @@ fn build(
             "props",
             painted(if theme == theme::Theme::Forest {
                 props::scatter()
+                    .into_iter()
+                    .filter(|(_, _, t)| !auxiliaries::overlaps_precinct(t.translation))
+                    .collect()
             } else {
                 kit.props
             }),

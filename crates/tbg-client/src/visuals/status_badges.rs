@@ -55,7 +55,7 @@ pub(super) fn shield(
     commands.entity(e).try_insert(Visibility::Inherited);
 }
 
-/// Marks and weakening keep their own badges when a control ring has priority.
+/// Harmful effects have HUD badges separate from the ownership ring.
 pub(super) fn hostile(
     commands: &mut Commands,
     a: &VisualAssets,
@@ -109,5 +109,102 @@ fn badge(
             ))
             .id()
     });
-    commands.entity(e).try_insert(Visibility::Inherited);
+    commands
+        .entity(e)
+        .try_insert((Visibility::Inherited, MeshMaterial3d(material.clone())));
+}
+
+/// Control is a HUD fact; it must never replace the ownership ring color.
+pub(super) fn control(
+    commands: &mut Commands,
+    a: &VisualAssets,
+    v: &mut super::UnitVisual,
+    u: &tbg_core::UnitView,
+) {
+    let material = if u.status == 2 { &a.rooted } else { &a.slowed };
+    badge(
+        commands,
+        &mut v.control_badge,
+        (v.bar, &a.tier_cube, material, 0.94),
+        u.hp > 0 && u.status != 0,
+    );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::ecs::system::RunSystemOnce;
+
+    #[derive(Resource, Default)]
+    struct Badge(Option<Entity>);
+
+    #[test]
+    fn ring_only_control_badge_changes_material_and_hides_without_reallocation() {
+        let mut world = World::new();
+        world.init_resource::<Assets<Mesh>>();
+        world.init_resource::<Assets<StandardMaterial>>();
+        world.init_resource::<Badge>();
+        world.run_system_once(super::super::assets::init).unwrap();
+        // Exercise the actual retained HUD entity through Root -> Slow -> cleared.
+        world
+            .run_system_once(
+                |mut commands: Commands, a: Res<VisualAssets>, mut slot: ResMut<Badge>| {
+                    let bar = commands.spawn_empty().id();
+                    badge(
+                        &mut commands,
+                        &mut slot.0,
+                        (bar, &a.tier_cube, &a.rooted, 0.94),
+                        true,
+                    );
+                },
+            )
+            .unwrap();
+        let entity = world.resource::<Badge>().0.unwrap();
+        let root = world.resource::<VisualAssets>().rooted.clone();
+        assert_eq!(
+            world
+                .get::<MeshMaterial3d<StandardMaterial>>(entity)
+                .unwrap()
+                .0,
+            root
+        );
+        world
+            .run_system_once(
+                |mut commands: Commands, a: Res<VisualAssets>, mut slot: ResMut<Badge>| {
+                    let parent = commands.spawn_empty().id();
+                    badge(
+                        &mut commands,
+                        &mut slot.0,
+                        (parent, &a.tier_cube, &a.slowed, 0.94),
+                        true,
+                    );
+                },
+            )
+            .unwrap();
+        assert_eq!(world.resource::<Badge>().0, Some(entity));
+        assert_eq!(
+            world
+                .get::<MeshMaterial3d<StandardMaterial>>(entity)
+                .unwrap()
+                .0,
+            world.resource::<VisualAssets>().slowed
+        );
+        world
+            .run_system_once(
+                |mut commands: Commands, a: Res<VisualAssets>, mut slot: ResMut<Badge>| {
+                    badge(
+                        &mut commands,
+                        &mut slot.0,
+                        (Entity::PLACEHOLDER, &a.tier_cube, &a.slowed, 0.94),
+                        false,
+                    );
+                },
+            )
+            .unwrap();
+        assert_eq!(world.resource::<Badge>().0, Some(entity));
+        assert_eq!(
+            *world.get::<Visibility>(entity).unwrap(),
+            Visibility::Hidden
+        );
+    }
 }

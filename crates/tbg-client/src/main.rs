@@ -46,6 +46,15 @@ pub enum GameState {
 }
 
 fn main() {
+    #[cfg(all(debug_assertions, not(target_arch = "wasm32")))]
+    if let Some(path) = config::url_param("export-footprints") {
+        if let Err(error) = art::footprint_export::write(&path) {
+            eprintln!("Footprint export failed: {error}");
+            std::process::exit(1);
+        }
+        return;
+    }
+
     // P66: the release tooling stamps descriptors with the exact contract.
     #[cfg(not(target_arch = "wasm32"))]
     if std::env::args().any(|arg| arg == "--contract") {
@@ -91,7 +100,11 @@ fn main() {
     let window = platform::window::settings();
     #[cfg(target_arch = "wasm32")]
     let window = Window {
-        title: "Tupi Battle Grounds".into(),
+        title: format!(
+            "TBG · {} · R{}",
+            env!("CARGO_PKG_VERSION"),
+            tbg_core::ruleset_version::RULESET_VERSION
+        ),
         canvas: Some("#bevy".into()),
         fit_canvas_to_parent: true,
         ..default()

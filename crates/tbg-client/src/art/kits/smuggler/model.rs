@@ -1,7 +1,7 @@
 //! Smuggler figure: a shifty runner in a dark coat, tricorn and eye patch,
 //! red sash, a lantern at the belt and a crate on a back frame. Branch A
 //! gets richer (coin pouches and stacked crates, then a gilded chest, a
-//! plumed tricorn and a team cape); branch B gets faster (a light satchel
+//! plumed tricorn and a leather cape); branch B gets faster (a light satchel
 //! and bandana, then two crates and a lantern on a pole).
 
 use bevy::prelude::*;
@@ -59,14 +59,8 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(gun, Cyl(0.04, 0.07), BRASS, [0.0, 0.04, 0.08]).rot([90.0, 0.0, 0.0]),
         part(gun, Box(0.045, 0.10, 0.05), WOOD, [0.0, -0.06, 0.02]).rot([15.0, 0.0, 0.0]),
     ]);
-    // Lantern at the belt, team kerchief at the neck.
+    // A personal lantern hangs from the belt.
     v.extend(gear::lantern(Body(Hips), [0.19, -0.08, 0.06], 1.1));
-    v.extend([part(
-        Body(Chest),
-        Box(0.18, 0.05, 0.05),
-        LINEN,
-        [0.0, p.torso.y * 0.95, p.torso.z * 0.3],
-    )]);
     if f.a {
         for x in [-0.12, 0.1] {
             v.extend(gear::sack(Body(Hips), [x, -0.05, 0.13], GOLD, 0.45));
@@ -81,7 +75,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         }
     }
     if f.a && f.t2 {
-        body::cape(&mut v, LINEN, 0.26, 0.42);
+        body::cape(&mut v, LEATHER, 0.26, 0.42);
         v.push(
             part(
                 Body(Chest),
@@ -91,17 +85,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             )
             .rot([80.0, 0.0, 0.0]),
         );
-    }
-    if f.b {
-        // Runner's boots striped in team color.
-        for shin in [ShinL, ShinR] {
-            v.push(part(
-                Body(shin),
-                Box(0.1, 0.03, 0.1),
-                LINEN,
-                [0.0, -0.05, 0.0],
-            ));
-        }
     }
     FigureSpec { plan: p, parts: v }
 }

@@ -48,10 +48,14 @@ def resume_transition(host, config):
         raise
 
 
-def run(config, apply, recheck, maintenance_window=False, ignore_lobby=False):
+def run(config, apply, recheck, maintenance_window=False, ignore_lobby=False, coordinated_contract=None):
     require_no_hold()
     host = slots.SystemHost()
     slot_mode = slots.in_slot_mode(host)
+    if coordinated_contract is not None:
+        require(slot_mode and not maintenance_window, 'coordinated contract changes require release slots')
+        require(re.fullmatch(r'w[0-9]+-r[0-9]+-[0-9a-f]{16}', coordinated_contract) is not None,
+                'an exact operator-confirmed contract is required')
     if apply:
         resume_transition(host if slot_mode else None, config)
     release = candidate()
@@ -71,14 +75,14 @@ def run(config, apply, recheck, maintenance_window=False, ignore_lobby=False):
     if current.exists() and json.loads(current.read_text()).get('source_commit') == source:
         print('Candidate is the current verified deployment.')
         return
-    download_and_handle(release, source, config, apply, maintenance_window, host if slot_mode else None, ignore_lobby)
+    download_and_handle(release, source, config, apply, maintenance_window, host if slot_mode else None, ignore_lobby, coordinated_contract)
 
 
-def activate_in_slot(host, staged, manifest, config, source, ignore_lobby=False):
+def activate_in_slot(host, staged, manifest, config, source, ignore_lobby=False, coordinated_contract=None):
     """Promote through the idle release slot; only a state that needs a person holds the controller."""
     checked = STATE/'checked.json'
     try:
-        slots.activate(host, staged, manifest, slot_config(config), ignore_lobby)
+        slots.activate(host, staged, manifest, slot_config(config), ignore_lobby, coordinated_contract)
     except slots.Rejected as error:
         write_json(checked, {'source_commit': source, 'outcome': 'rejected', 'reason': str(error)[:500]})
         raise
@@ -96,7 +100,7 @@ def activate_in_slot(host, staged, manifest, config, source, ignore_lobby=False)
     print('Promoted CI-approved compatible source '+source+' through the idle release slot')
 
 
-def download_and_handle(release, source, config, apply, maintenance_window=False, host=None, ignore_lobby=False):
+def download_and_handle(release, source, config, apply, maintenance_window=False, host=None, ignore_lobby=False, coordinated_contract=None):
     checked = STATE/'checked.json'
     if apply and host is not None:
         # Nothing is downloaded while the host cannot start a release (a busy lobby, a previous release still draining).
@@ -124,12 +128,12 @@ def download_and_handle(release, source, config, apply, maintenance_window=False
             if host is None:
                 check_compatibility(manifest)
             else:
-                slots.preflight(host, manifest)
+                slots.preflight(host, manifest, coordinated_contract)
             print(json.dumps({'verified_source': source, 'contract': manifest['contract'], 'database_schema': manifest['database_schema'],
                               'mode': 'single' if host is None else 'slots', 'activated': False}))
             return
         if host is not None:
-            activate_in_slot(host, folder/'verified', manifest, config, source, ignore_lobby)
+            activate_in_slot(host, folder/'verified', manifest, config, source, ignore_lobby, coordinated_contract)
             return
         # Automation never stops the only game process: a single-process
         # restart interrupts players and needs an explicit operator window.
@@ -154,6 +158,8 @@ def main():
                         help='operator-attended single-process restart; never used by the timer')
     parser.add_argument('--ignore-lobby', action='store_true',
                         help='operator only: promote without waiting for an empty lobby (waiters are refused and ask again)')
+    parser.add_argument('--coordinated-contract',
+                        help='operator only: exact reviewed client contract; never supplied by a timer')
     parser.add_argument('--release-hold', action='store_true', help='clear a reviewed operator hold first')
     args = parser.parse_args()
     config = json.loads(args.config.read_text())
@@ -162,7 +168,7 @@ def main():
         with deployment_lock():
             if args.release_hold:
                 release_hold()
-            run(config, args.apply, args.recheck, args.maintenance_window, args.ignore_lobby)
+            run(config, args.apply, args.recheck, args.maintenance_window, args.ignore_lobby, args.coordinated_contract)
     run_controller(body)
 
 

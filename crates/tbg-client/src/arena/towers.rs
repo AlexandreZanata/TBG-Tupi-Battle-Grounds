@@ -21,8 +21,7 @@ pub(super) fn damage_states(
     }
     // Ratios are of each kind's own max HP after Fortification.
     let state = view.0.as_ref().map(|v| {
-        let me = v.you.index();
-        [me, 1 - me].map(|i| {
+        [0, 1].map(|i| {
             let s = &v.strongholds[i];
             let fraction = v.stronghold_hp[i] as f32 / s.max_hp.max(1) as f32;
             (s.kind == StrongholdKind::Classic, fraction)

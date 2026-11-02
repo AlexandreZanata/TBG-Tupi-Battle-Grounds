@@ -39,6 +39,10 @@ pub enum PlayerIntention {
     Reroll {
         cost: u32,
     },
+    /// P74 (BR-AX01–BR-AX10): hire a War Auxiliary (`0` = Miner, `1` = Merchant).
+    HireAuxiliary {
+        slot: u8,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -67,6 +71,12 @@ pub enum Rejection {
     AlreadyHeld,
     NoReserve,
     StalePrice,
+    /// The upgraded footprint cannot fit without removing an active unit.
+    LaneFull,
+    /// Auxiliary slot index outside `0..AUXILIARY_SLOTS` (BR-AX01).
+    BadAuxiliarySlot,
+    /// The requested auxiliary was already hired this match (BR-AX03).
+    AuxiliaryAlreadyHired,
 }
 
 impl MatchState {
@@ -88,6 +98,7 @@ impl MatchState {
             | PlayerIntention::Reserve { .. }
             | PlayerIntention::Release { .. }
             | PlayerIntention::Reroll { .. }
+            | PlayerIntention::HireAuxiliary { .. }
                 if paused =>
             {
                 Err(Rejection::Paused)
@@ -97,6 +108,7 @@ impl MatchState {
             }
             PlayerIntention::Release { offer } => crate::shop::release(self, seat, offer),
             PlayerIntention::Reroll { cost } => crate::shop::reroll(self, seat, cost),
+            PlayerIntention::HireAuxiliary { slot } => crate::auxiliary::hire(self, seat, slot),
             PlayerIntention::Purchase { offer } => self.purchase(seat, offer),
             PlayerIntention::Evolve { unit, branch } => self.evolve(seat, unit, branch),
             PlayerIntention::ChooseAugment { round, option } => {
@@ -130,6 +142,7 @@ impl MatchState {
         let p = self.player_mut(seat);
         shop::new_shop(p, pool, Some(slot));
         p.reroll_streak = 0;
+        crate::auxiliary::on_champion_purchase(self, seat);
         Ok(())
     }
 
@@ -240,6 +253,12 @@ impl MatchState {
             return Err(Rejection::WrongBranch);
         }
         let cost = self.evolve_price(seat, u.tier);
+        if self.player(seat).energy < cost {
+            return Err(Rejection::NotEnoughEnergy);
+        }
+        if !crate::occupancy::evolution_fits(self, id) {
+            return Err(Rejection::LaneFull);
+        }
         if !self.player_mut(seat).spend(cost) {
             return Err(Rejection::NotEnoughEnergy);
         }

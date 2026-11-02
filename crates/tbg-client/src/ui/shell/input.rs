@@ -34,7 +34,9 @@ pub fn mouse_and_keys(
     mut form: NonSendMut<super::ActiveForm>,
     mut queue: ResMut<super::super::ActionQueue>,
     mut training: ResMut<crate::training::Requests>,
+    mut social: ResMut<super::super::social::Requests>,
     mut focus: Local<usize>,
+    mut social_focus: Local<Option<super::super::social::Action>>,
     mut button_focus: ResMut<super::kit::buttons::Focus>,
     lang: Res<Lang>,
     mut lights: Query<&mut DirectionalLight>,
@@ -56,6 +58,12 @@ pub fn mouse_and_keys(
         let p = t.translation;
         ((p.y * 10.) as i32, (p.x * 10.) as i32)
     });
+    if let Some(anchor) = *social_focus {
+        if let Some(index)=ordered.iter().position(|(_,action,_,_,_,_,_)|matches!(action,Some(Action::Social(value)) if *value==anchor)) {
+            *focus=index;
+            button_focus.0=Some(ordered[index].0);
+        }
+    }
     let mut selected = None;
     if mouse.just_released(MouseButton::Left) {
         if let Some(p) = window.cursor_position() {
@@ -95,9 +103,26 @@ pub fn mouse_and_keys(
     if keys.just_pressed(KeyCode::Tab) {
         button_focus.0 = ordered.get(*focus % ordered.len().max(1)).map(|row| row.0);
     }
+    if keys.just_pressed(KeyCode::Tab) {
+        *social_focus =
+            ordered
+                .get(*focus % ordered.len().max(1))
+                .and_then(|(_, action, _, _, _, _, _)| match action {
+                    Some(Action::Social(a)) => Some(*a),
+                    _ => None,
+                });
+    }
     if let Some(index) = selected {
         *focus = index;
+        *social_focus = match ordered[index].1 {
+            Some(Action::Social(a)) => Some(*a),
+            _ => None,
+        };
         let (_, action, ui, _, _, _, _) = ordered[index];
+        if let Some(Action::Social(action)) = action {
+            social.0.push(*action);
+            return;
+        }
         if let Some(Action::Catalog(action)) = action {
             training.0.push(*action);
             return;

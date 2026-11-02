@@ -20,6 +20,7 @@ fn unit(id: u32, x: i32) -> UnitView {
         tier: 0,
         branch: 0,
         x,
+        lane_z: 0,
         hp: 100,
         max_hp: 100,
         status: 0,

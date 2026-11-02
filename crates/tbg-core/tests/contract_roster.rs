@@ -124,7 +124,27 @@ fn staged_waves_match_section_11() {
 
 #[test]
 fn base_stats_match_game_design_table() {
-    for row in &ROSTER {
+    // OG-01 appends the requested transfer/range; the previous table stays frozen.
+    let ogre = Row {
+        kind: UnitKind::SiegeWalker,
+        faction: Faction::Ogres,
+        archetype: Archetype::Ranged,
+        cost: 5,
+        hp: 700,
+        damage: 85,
+        heal: 0,
+        every_cs: 250,
+        range_ct: 450,
+        speed_ct: 66,
+        splash_ct: 150,
+        on_hit: None,
+    };
+    for legacy in &ROSTER {
+        let row = if legacy.kind == UnitKind::SiegeWalker {
+            &ogre
+        } else {
+            legacy
+        };
         let u: &UnitDef = def(row.kind);
         let name = u.name;
         assert_eq!(u.kind, row.kind, "UNITS order must follow UnitKind");
@@ -161,7 +181,12 @@ fn roster_composition() {
     // D-66: the four Monsters base kinds follow the 27 of `ALL_KINDS`, in
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
-    assert_eq!(UNITS.len(), 51);
+    // CC-ID01: append seventeen local-preview tags; production Shop remains 46.
+    assert_eq!(
+        UNITS.len(),
+        68 + 9 + 9 + 1 + 2,
+        "GD-01 appends Colossus after AB-01; GD-04 appends Volthar and Astreon"
+    );
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     // Owner activation: all 51 registered kinds, 46 conventional Shop entries.
     assert_eq!(tbg_core::FULL_POOL.len(), 46);
@@ -179,7 +204,8 @@ fn roster_composition() {
             .iter()
             .take(27)
             .filter(|u| u.faction == f && u.kind.is_conventional());
-        assert_eq!(sold.count(), n, "{f:?}");
+        let expected = if f == Faction::Machines { n - 1 } else { n };
+        assert_eq!(sold.count(), expected, "{f:?}");
     }
     for a in [
         Archetype::Tank,
@@ -447,7 +473,75 @@ Duodrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 h
 Megadrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Megadrill/Producer A: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Megadrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
-Megadrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+Megadrill/Producer B: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gravecutter/Gravetaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gravecutter/Final Harvester: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gravecutter/Chain Dancer: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Gravecutter/Soul Reaver: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Lastlight Cantor/Vigil Bell: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Lastlight Cantor/Sanctuary Bell: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Lastlight Cantor/Funeral Choir: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Lastlight Cantor/Last Requiem: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cragclaw/Edgeclaw: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cragclaw/Obsidian Chisel: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cragclaw/Splitclaw: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Cragclaw/Shardsweeper: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hushfang/Silent Prowler: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hushfang/Fang Warden: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hushfang/Flint Hunter: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Hushfang/Midnight Pounce: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Spinehurler/Keen Needle: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Spinehurler/Spine Lancer: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Spinehurler/Barbed Fan: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Spinehurler/Needle Phalanx: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Mire Tender/Brothkeeper: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Mire Tender/Deep Remedy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Mire Tender/Reed Tender: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Mire Tender/Mire Sage: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gorgehowl/Deep Resonator: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gorgehowl/Quietbreaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gorgehowl/Split Echo: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Gorgehowl/Chasm Voice: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Sunlancer/Dawn Point: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Sunlancer/Sun Pact: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Sunlancer/Ember Lance: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Sunlancer/Daybreak Oath: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Eclipse Dancer/Sun Step: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Eclipse Dancer/Zenith Blade: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Eclipse Dancer/Moon Step: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Eclipse Dancer/Midnight Waltz: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Starbreaker/Starmaul: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Starbreaker/Constellation Breaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Starbreaker/Hammer Dance: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Starbreaker/Nova Forge: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Dawnmender/Calm Lantern: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Dawnmender/Sanctuary Light: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Dawnmender/Battle Beacon: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Dawnmender/Dawn Chorus: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Prismancer/Keen Focus: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Prismancer/Crystal Needle: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Prismancer/Open Prism: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Prismancer/Triune Prism: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Leafcutter/Keen Mandible: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Leafcutter/Deep Serration: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Leafcutter/Swift Saw: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Leafcutter/Amber Reaper: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Blastbeetle/Tight Carapace: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Blastbeetle/Amber Heart: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Blastbeetle/Split Shell: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Blastbeetle/Final Flash: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Needlewing/Keen Sight: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Needlewing/Hunt Window: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Needlewing/Needle Volley: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Needlewing/Amber Guide: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Nectar Nurse/Honey Keeper: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Nectar Nurse/Golden Remedy: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Nectar Nurse/Silken Nectar: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Nectar Nurse/Hive Lifeline: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Stridulator/Echo Chamber: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Stridulator/Resonant Crown: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Stridulator/Cutting Rhythm: hp=0 dmg=0 atk=0 speed=0 range+=300 splash+=0 heal=0 dmg+=0 hit=-
+Stridulator/Amber Chorus: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
 
 #[test]
 fn evolution_forms_are_frozen() {
@@ -455,7 +549,16 @@ fn evolution_forms_are_frozen() {
         .iter()
         .flat_map(|u| u.forms.iter().map(move |f| form_line(u.name, f)))
         .collect();
-    let frozen: Vec<&str> = FORMS.lines().collect();
+    // Preserve the previous fixture and append explicit changed/new OG-01 definitions.
+    let mut frozen: Vec<&str> = FORMS.lines().collect();
+    frozen.splice(20..24, OGRE_ARCHER_FORMS.lines());
+    let mut ogre: Vec<&str> = OGRE_NEW_FORMS.lines().collect();
+    // OG-02 preserves the historical drum fixture and appends its replacement.
+    ogre.splice(20..24, BARREL_KEEPER_FORMS.lines());
+    frozen.extend(ogre);
+    frozen.extend(ABYSSAL_NEW_FORMS.lines());
+    frozen.extend(GODS_NEW_FORMS.lines());
+    frozen.extend(GODS_GD04_FORMS.lines());
     assert_eq!(shipped.len(), frozen.len(), "form count changed");
     for (got, want) in shipped.iter().zip(frozen) {
         assert_eq!(got, want);
@@ -501,10 +604,12 @@ fn proposed_p59_bases_match_section_13() {
         (PyreWarden, Undead, Tank, 6, [800, 12, 10, 2_800, 23]),
         (Drillnest, Machines, Ranged, 5, [900, 0, 44, 4_500, 23]),
     ];
-    for (kind, faction, archetype, energy, mut base) in rows {
+    for (kind, mut faction, archetype, energy, mut base) in rows {
         // D-101 / Proposed P70 reach: preserve the original P59 reference row
         // above while applying its explicitly documented later exception.
         if kind == Trident {
+            // AB-01: the owner moves the marine Tank from Plants to Abyssals.
+            faction = Abyssals;
             base[3] = 2_000;
         }
         let d = def(kind);
@@ -541,3 +646,57 @@ fn proposed_drills_match_section_13_4_and_stay_outside_shop_pools() {
         assert!(!tbg_core::types::UNIT_KINDS.contains(&kind));
     }
 }
+
+// OG-01 Proposed: explicit appended Evolution definitions.
+const OGRE_ARCHER_FORMS: &str =
+    "Ogre Archer/Longshot: hp=0 dmg=0 atk=0 speed=0 range+=1500 splash+=0 heal=0 dmg+=0 hit=-
+Ogre Archer/Artillery: hp=0 dmg=5000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Ogre Archer/Shrapnel: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=1000 heal=0 dmg+=0 hit=-
+Ogre Archer/Concussion: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=root 16t";
+const OGRE_NEW_FORMS: &str =
+    "Basalt Bulwark/Cairn Guard: hp=1500 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Basalt Bulwark/Stonewall: hp=1500 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Basalt Bulwark/Cracked Guard: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Basalt Bulwark/Quake Bastion: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cinder Maul/Coalbreaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cinder Maul/Ember Anvil: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cinder Maul/Twin Brands: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Cinder Maul/Furnace Fists: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hook Brawler/Ironhook: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hook Brawler/Anchorbreaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hook Brawler/Barbed Loop: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Hook Brawler/Chainmaster: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Flint Runner/Trailblade: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Flint Runner/Flint Gale: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Flint Runner/Sparksprinter: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Flint Runner/Obsidian Rush: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Clay Binder/Clay Seal: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Clay Binder/Earthlock: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Clay Binder/Mire Mask: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Clay Binder/Quagmire Sage: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gust Drummer/Stormbeat: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gust Drummer/Thunderhide: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gust Drummer/Hollow Rhythm: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Gust Drummer/Typhoon Drum: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hide Mender/Field Stitch: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Hide Mender/Leather Surgeon: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Hide Mender/Spirit Spool: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Hide Mender/Ancestral Seam: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pebble Slinger/Counterweight: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pebble Slinger/Cliffshot: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pebble Slinger/Split Pouch: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Pebble Slinger/Hail Sling: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rivet Ballista/Rail Guide: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rivet Ballista/Needle Engine: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rivet Ballista/Triple Magazine: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Rivet Ballista/Rivet Storm: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+
+// Proposed AB-01 / OG-02: appended form facts, guarded with the canon change.
+const BARREL_KEEPER_FORMS:&str="Barrel Keeper/Field Cask: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-\nBarrel Keeper/Balm Reserve: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-\nBarrel Keeper/Rolling Remedy: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nBarrel Keeper/Harvest Cask: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1000 dmg+=0 hit=-";
+const ABYSSAL_NEW_FORMS:&str="Nacre Duelist/Ivory Edge: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nNacre Duelist/Tideblade: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nNacre Duelist/Foam Edges: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nNacre Duelist/Nacre Dance: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nReef Lancer/Reef Watch: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nReef Lancer/Guard Trident: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nReef Lancer/Coral Barbs: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nReef Lancer/Current Huntress: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Fist/Seastone Fist: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Fist/Keelbreaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Fist/Salt Gauntlets: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nTrench Fist/Abyssal Quake: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPearl Slinger/Pearl Pouch: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPearl Slinger/Tide Eye: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPearl Slinger/Split Shell: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nPearl Slinger/Pearl Rain: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAbyss Harpooner/Nacre Harpoon: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAbyss Harpooner/Trench Sight: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAbyss Harpooner/Barbed Spear: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nAbyss Harpooner/Abyss Hunt: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nUndertow Herald/Resonant Conch: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nUndertow Herald/Undertow Voice: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nUndertow Herald/Tide Horn: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nUndertow Herald/Maelstrom Call: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Lamplighter/Amber Lantern: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Lamplighter/Deep Beacon: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Lamplighter/Saltglass: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nTrench Lamplighter/Abyss Eye: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nFoam Weaver/Foam Chalice: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-\nFoam Weaver/Nacre Spring: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-\nFoam Weaver/Tide Threads: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nFoam Weaver/Surf Mantle: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPod Snapper/Ironpod: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPod Snapper/Royal Seeder: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPod Snapper/Split Husk: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nPod Snapper/Harvest Burst: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+
+// GD-01 / INT-01: append Colossus without replacing any previous form row.
+const GODS_NEW_FORMS: &str = "Colossus/Sun Obelisk: hp=0 dmg=2500 atk=0 speed=0 range+=1500 splash+=0 heal=0 dmg+=0 hit=-\nColossus/Pillar of Dawn: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=600 heal=0 dmg+=0 hit=-\nColossus/Ancient Monolith: hp=3000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nColossus/Eternal Monument: hp=3000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+
+// GD-04: Volthar and Astreon forms change only their ability rows.
+const GODS_GD04_FORMS: &str = "Volthar/Storm Herald: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nVolthar/Celestial Sovereign: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nVolthar/Hammer of Wrath: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nVolthar/Divine Tempest: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAstreon/Giant Piercer: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAstreon/Primordial Lance: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAstreon/Final Sentence: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAstreon/Absolute Verdict: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";

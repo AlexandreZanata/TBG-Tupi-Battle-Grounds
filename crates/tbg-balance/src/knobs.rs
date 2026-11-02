@@ -75,6 +75,9 @@ const ARCANA_NAMES: [&str; 6] = [
 pub fn all(r: &Ruleset) -> Vec<Knob> {
     let Ruleset {
         shop,
+        // Untunable by generic search: P74 uses the owner's fixed profile;
+        // its value needs dedicated auxiliary-hiring policies (the reference Bot never hires).
+        auxiliary: _,
         energy_start,
         // Untunable: no gameplay cap. The lab builds `Some(cap)` directly.
         energy_cap: _,

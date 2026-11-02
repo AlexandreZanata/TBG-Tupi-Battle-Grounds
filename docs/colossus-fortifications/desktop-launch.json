@@ -1,0 +1,10 @@
+{
+  "pid": 4036669,
+  "running_after_start": true,
+  "source_commit": "a1f6446ce60153589e95bd4edde263e18faeba26",
+  "binary": "/home/iiii/.local/opt/tupi-battle-grounds-champion-preview/0.1.4-colossus.1-a1f6446ce601/tbg-client",
+  "data_directory": "/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/colossus-2026-11-02/desktop-data",
+  "preserved_previous_session": 3991473,
+  "still_running": true,
+  "previous_process_present": true
+}

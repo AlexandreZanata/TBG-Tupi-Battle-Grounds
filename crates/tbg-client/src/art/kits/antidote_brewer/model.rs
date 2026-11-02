@@ -40,7 +40,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     body::tunic(&mut v, &p, HOOD_GREEN, LEAF_DARK, LEATHER);
     let t = p.torso;
     v.extend([
-        // Apron with the team's leaf on it.
+        // A practical leaf-green apron.
         part(
             Body(Chest),
             Box(t.x * 0.7, t.y * 0.7, 0.02),
@@ -53,13 +53,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             LINEN,
             [0.0, -0.1, t.z * 0.55],
         ),
-        part(
-            Body(Chest),
-            Ball(0.05),
-            LINEN,
-            [0.0, t.y * 0.55, t.z * 0.68],
-        )
-        .scale([0.7, 1.3, 0.3]),
     ]);
     for arm in [UpperArmL, UpperArmR] {
         v.push(

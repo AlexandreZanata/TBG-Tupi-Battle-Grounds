@@ -69,11 +69,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             .rot([0.0, a.to_degrees(), 0.0]),
         );
     }
-    v.push(
-        part(Body(Chest), Ball(0.065), LINEN, [0.10, 0.18, 0.13])
-            .scale([0.7, 1.2, 0.25])
-            .rot([0.0, 0.0, 15.0]),
-    );
+
     hair(&mut v, &p, f);
     staff(&mut v, f);
     if f.a {

@@ -61,6 +61,11 @@ pub enum Faction {
     Monsters,
     Celestials,
     Insects,
+    /// Owner-authorized Ogre faction; appended to preserve wire indices.
+    Ogres,
+    /// AB-01: ancient marine civilization, including the existing Trident.
+    Abyssals,
+    Gods,
 }
 
 impl Faction {
@@ -78,6 +83,9 @@ impl Faction {
             Faction::Monsters => "Monsters",
             Faction::Celestials => "Celestials",
             Faction::Insects => "Insects",
+            Faction::Ogres => "Ogres",
+            Faction::Abyssals => "Abyssals",
+            Faction::Gods => "Gods",
         }
     }
 }
@@ -165,6 +173,47 @@ pub enum UnitKind {
     Microdrill,
     Duodrill,
     Megadrill,
+    // Champion completion: appended; local preview only until owner acceptance.
+    Gravecutter,
+    LastlightCantor,
+    Cragclaw,
+    Hushfang,
+    Spinehurler,
+    MireTender,
+    Gorgehowl,
+    Sunlancer,
+    EclipseDancer,
+    Starbreaker,
+    Dawnmender,
+    Prismancer,
+    Leafcutter,
+    Blastbeetle,
+    Needlewing,
+    NectarNurse,
+    Stridulator,
+    // Ogre expansion: appended; staged in the owner preview.
+    BasaltBulwark,
+    CinderMaul,
+    HookBrawler,
+    FlintRunner,
+    ClayBinder,
+    GustDrummer,
+    HideMender,
+    PebbleSlinger,
+    RivetBallista,
+    NacreDuelist,
+    ReefLancer,
+    TrenchFist,
+    PearlSlinger,
+    AbyssHarpooner,
+    UndertowHerald,
+    TrenchLamplighter,
+    FoamWeaver,
+    PodSnapper,
+    Colossus,
+    /// GD-04: Gods expansion, appended to preserve every earlier wire index.
+    Volthar,
+    Astreon,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -184,7 +233,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
 #[rustfmt::skip]
-pub const ALL_KINDS: [UnitKind; 51] = [
+pub const ALL_KINDS: [UnitKind; 89] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -236,6 +285,44 @@ pub const ALL_KINDS: [UnitKind; 51] = [
     UnitKind::Microdrill,
     UnitKind::Duodrill,
     UnitKind::Megadrill,
+    UnitKind::Gravecutter,
+    UnitKind::LastlightCantor,
+    UnitKind::Cragclaw,
+    UnitKind::Hushfang,
+    UnitKind::Spinehurler,
+    UnitKind::MireTender,
+    UnitKind::Gorgehowl,
+    UnitKind::Sunlancer,
+    UnitKind::EclipseDancer,
+    UnitKind::Starbreaker,
+    UnitKind::Dawnmender,
+    UnitKind::Prismancer,
+    UnitKind::Leafcutter,
+    UnitKind::Blastbeetle,
+    UnitKind::Needlewing,
+    UnitKind::NectarNurse,
+    UnitKind::Stridulator,
+    UnitKind::BasaltBulwark,
+    UnitKind::CinderMaul,
+    UnitKind::HookBrawler,
+    UnitKind::FlintRunner,
+    UnitKind::ClayBinder,
+    UnitKind::GustDrummer,
+    UnitKind::HideMender,
+    UnitKind::PebbleSlinger,
+    UnitKind::RivetBallista,
+    UnitKind::NacreDuelist,
+    UnitKind::ReefLancer,
+    UnitKind::TrenchFist,
+    UnitKind::PearlSlinger,
+    UnitKind::AbyssHarpooner,
+    UnitKind::UndertowHerald,
+    UnitKind::TrenchLamplighter,
+    UnitKind::FoamWeaver,
+    UnitKind::PodSnapper,
+    UnitKind::Colossus,
+    UnitKind::Volthar,
+    UnitKind::Astreon,
 ];
 
 impl UnitKind {
@@ -311,6 +398,95 @@ pub const FULL_POOL: [UnitKind; 46] = [
     UnitKind::Drillnest,
 ];
 
+/// Owner-authorized local champion preview; the online pool remains FULL_POOL.
+#[rustfmt::skip]
+pub const COMPLETION_POOL: [UnitKind; 84] = [
+    UnitKind::Shieldbearer,
+    UnitKind::Archer,
+    UnitKind::BoneBrute,
+    UnitKind::Hexer,
+    UnitKind::Sawbot,
+    UnitKind::SiegeWalker,
+    UnitKind::Bloomkeeper,
+    UnitKind::Rootcaller,
+    UnitKind::Nester,
+    UnitKind::Rampart,
+    UnitKind::Longaxe,
+    UnitKind::Farwatch,
+    UnitKind::Bombard,
+    UnitKind::Rotcap,
+    UnitKind::OldFinn,
+    UnitKind::AntidoteBrewer,
+    UnitKind::Shatterback,
+    UnitKind::BloodFurnace,
+    UnitKind::Bloodweaver,
+    UnitKind::Oilpress,
+    UnitKind::Drumguard,
+    UnitKind::Leechroot,
+    UnitKind::CargoCrab,
+    UnitKind::Puppetmaster,
+    UnitKind::Smuggler,
+    UnitKind::Bonehorn,
+    UnitKind::Ravager,
+    UnitKind::Acidmaw,
+    UnitKind::Whisperer,
+    UnitKind::Bulwark,
+    UnitKind::Demolisher,
+    UnitKind::Crowcaller,
+    UnitKind::Trigger,
+    UnitKind::RattleTick,
+    UnitKind::Capybara,
+    UnitKind::Trident,
+    UnitKind::SolarSentinel,
+    UnitKind::LuminousOracle,
+    UnitKind::CelestialArcher,
+    UnitKind::Justiciar,
+    UnitKind::Jawguard,
+    UnitKind::Mantis,
+    UnitKind::Hornet,
+    UnitKind::Weaver,
+    UnitKind::PyreWarden,
+    UnitKind::Drillnest,
+    UnitKind::Gravecutter,
+    UnitKind::LastlightCantor,
+    UnitKind::Cragclaw,
+    UnitKind::Hushfang,
+    UnitKind::Spinehurler,
+    UnitKind::MireTender,
+    UnitKind::Gorgehowl,
+    UnitKind::Sunlancer,
+    UnitKind::EclipseDancer,
+    UnitKind::Starbreaker,
+    UnitKind::Dawnmender,
+    UnitKind::Prismancer,
+    UnitKind::Leafcutter,
+    UnitKind::Blastbeetle,
+    UnitKind::Needlewing,
+    UnitKind::NectarNurse,
+    UnitKind::Stridulator,
+    UnitKind::BasaltBulwark,
+    UnitKind::CinderMaul,
+    UnitKind::HookBrawler,
+    UnitKind::FlintRunner,
+    UnitKind::ClayBinder,
+    UnitKind::GustDrummer,
+    UnitKind::HideMender,
+    UnitKind::PebbleSlinger,
+    UnitKind::RivetBallista,
+    UnitKind::NacreDuelist,
+    UnitKind::ReefLancer,
+    UnitKind::TrenchFist,
+    UnitKind::PearlSlinger,
+    UnitKind::AbyssHarpooner,
+    UnitKind::UndertowHerald,
+    UnitKind::TrenchLamplighter,
+    UnitKind::FoamWeaver,
+    UnitKind::PodSnapper,
+    UnitKind::Colossus,
+    UnitKind::Volthar,
+    UnitKind::Astreon,
+];
+
 /// All playable archetypes, in glossary order.
 pub const ARCHETYPES: [Archetype; 5] = [
     Archetype::Tank,
@@ -320,8 +496,8 @@ pub const ARCHETYPES: [Archetype; 5] = [
     Archetype::Control,
 ];
 
-/// Number of Factions: the four original ones and the three of D-64.
-pub const FACTION_COUNT: usize = 7;
+/// Number of Factions, including the owner-authorized Ogre expansion.
+pub const FACTION_COUNT: usize = 10;
 
 /// All factions, in glossary order (also their synergy index).
 pub const FACTIONS: [Faction; FACTION_COUNT] = [
@@ -332,6 +508,9 @@ pub const FACTIONS: [Faction; FACTION_COUNT] = [
     Faction::Monsters,
     Faction::Celestials,
     Faction::Insects,
+    Faction::Ogres,
+    Faction::Abyssals,
+    Faction::Gods,
 ];
 
 /// Status effect applied to the primary target of a hit.

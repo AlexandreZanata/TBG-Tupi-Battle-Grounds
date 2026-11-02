@@ -2924,6 +2924,212 @@ revision/hash, protocol, visual correspondence and player-facing behavior remain
 unchanged. Older planning statements about Farwatch never targeting a Stronghold
 are superseded by the existing P71 owner update.
 
+
+## D-103 · P73 participant-bound social state and private history — 2026-11-01 (Proposed, P73)
+
+BR-AP01–16 authorize an appended protocol bump and additive opt-in schema 11.
+P73 was planned on base `e2a18af` (protocol 30) with the shared P72 shell at
+`2da0a35`; main meanwhile allocated protocol 31 to the D-97 authentication and
+eight-Arena integration and D-101/D-102 to deterministic references and the
+Farwatch lab exception. The consolidation onto main `70827a7` therefore uses
+protocol **32** and this decision ID; it renumbers no existing decision.
+Existing wire tags and MatchEnd bytes remain unchanged: a new adjacent private PersonalMatchResult
+is retained and replayed in CompletedResult, followed by the existing MatchEnd.
+Both the UI and persistent participant detail consume that same summary.
+Client tags 23–26 and server tags 33–36 are appended. History is independent
+from Elo; Public/Only me defaults private and uses conditional revisions.
+A non-rating `history_expected` marker commits inside the existing Ranked
+transaction; incremental verified backfill includes late legacy writers while
+leaving modern pending complete envelopes to their journal. The optional
+Ranked journal field defaults false for legacy recovery and never enters Elo.
+Schema installation, collection, owner API and public opt-in have separate
+explicit rollout flags. Public profile/history proxy routes fail closed to
+the privacy-aware slot a, with no old-slot fallback; rollback preserves this
+guard and all additive data/journals. No deployment or production migration
+is performed by P73 execution. The already locked Jiff library is reused as
+a direct native dependency to display stored UTC dates in the system zone.
+
+## CC-ID01 — Local champion completion identity (2026-11-01)
+
+Owner authorized all seventeen champions and continuation through local Linux
+installation. Append tags after Megadrill; retain production's 46-entry Shop
+pool. The explicit local preview uses 63 conventional kinds, nine per Faction.
+New values remain Proposed under GAME-DESIGN CC01–CC17 until empirical
+balance and owner look/fun sign-off. No public deployment is authorized.
+
+Protocol 32 distinguishes the new snapshot effect/channel/windup schema from
+main's 30 and another preview's 31. Ruleset revision 3 watches every new
+gameplay module. Empty per-unit state slots necessarily alter serialized
+hashes for legacy matches; retain their frozen winners/reasons/ticks and
+change only checksums supported by the same deterministic scenarios.
+The registry contract changes from 51 to 68 entries, not the online pool.
+
+All geometry, materials, life clips, victory motion, projectiles and public
+effect cues use one shared presentation path. Linux is the visual reference;
+Windows and desktop-web comparison remains pending until actual observations.
+The local install uses a separate preview launcher/data directory and never
+replaces the user's normal TBG launcher or activates the online roster.
+
+## Ring-only champion ownership (owner, 2026-11-01)
+
+The owner rejected the generic blue body plaques and required team identity
+only at the feet. Remove new and legacy affiliation geometry, replace actual
+equipment's ownership paint with fixed faction materials, and share one body
+mesh set for both seats. Root/Slow move to HUD status badges so ownership
+rings stay blue/red. This supersedes ART-DIRECTION §2's old team-tabard rule.
+No simulation value, champion identity, ability or outcome changes.
+
+
+## CC-ID03 — PR44 laboratory baseline in the local champion preview (2026-11-01)
+
+The owner rejected the older installed laboratory and explicitly selected
+PR44 head `0b56bb4` (D-103). Merge that complete integration locally, retaining
+its P71 visual changes and the CC17 roster and ring-only bodies. Do not push,
+merge the public PR, activate history flags, migrate a database or deploy.
+
+The two unpublished branches independently assigned protocol 32 and gameplay
+revision 3 to different schemas/sources. The combined local preview uses
+protocol 33 and revision 7, preserving the PR44 canonical revision 1–6 ledger.
+The previous unpublished CC17 ledger is retained verbatim as
+`champion-preview-ruleset-fork.txt`; that branch's source, commit and installed
+binary remain available. Old message tags and both branches' appended protocol
+contracts are retained. This is a new local preview identity, not a public
+compatibility or release claim. Client preview version is `0.1.2-cc.1`.
+
+## OG-01 — Ogre faction and 72-champion authored catalog (Proposed, 2026-11-01)
+
+Owner authorization: create eight Ogres around the existing Ogre Archer, reduce
+its range to the Archer's, reserve space for its shoulder weapon and arms,
+add a Machine replacement (explicit follow-up answer), update the landing and
+publish one GitHub PR. This owner request authorizes pushing the execution
+branch and opening that PR, overriding the generic no-push instruction for this
+one delivery. No merge or public deployment is included.
+
+Append Faction Ogres and nine UnitKinds; keep all earlier discriminants. The
+eighth Synergy array entry changes snapshot bytes: wire revision 34, ruleset
+8. Preserve older four- and seven-faction stored summaries by zero-extending
+Ogres on load. Keep prior identity ledger entries and append this revision.
+The private authored roster is 72, online 46; public cards state preview
+availability. Balance and cross-platform visual acceptance remain distinct.
+
+## AB-01 / OG-02 — Abyssal roster, Trident transfer and rolling remedy (2026-11-01)
+
+Owner authorized refining the nine Ogres against the attached Hook Brawler
+reference, replacing Gust Drummer with a long-reload healing-cask Support,
+and creating the next Faction, Abyssals. Before further implementation the
+owner requested moving existing Trident into Abyssals with a replacement.
+Trident moves from Plants and fills the Abyssal Tank slot. Pod Snapper is
+its Ranged Plant replacement; the earlier Nacre Bastion concept is reserved,
+not implemented or counted. Eight new Abyssals plus one Plant preserve nine
+per Faction: 81 authored conventional champions in nine Factions.
+
+New numeric rules and complete ability parameters are Proposed in
+GAME-DESIGN AB-01/OG-02. Existing kind indices are preserved, nine kinds and
+one Faction append. Wire 35 carries the ninth Synergy slot, active rolling
+barrels and basic-heal reload facts; revision 10 includes the new watched
+barrel simulation. Legacy four/seven/eight-Faction summary records zero-extend.
+The online FULL_POOL remains 46, with Trident's owner-requested Faction change.
+New kinds remain private-preview-only pending D-33 competitive acceptance.
+
+A cask follows integer swept collision with living units of either seat,
+then heals allies around the contact point and minimally damages an enemy
+interceptor. Travel is finite, survives caster death and freezes with combat.
+This must live in core state and both views; a cosmetic pre-decided projectile
+would fail the requested interception behavior. Client drawing shares the
+unit snapshot timeline; body identity uses foot rings only. Built-in imagegen
+references remain distinct from real native captures. Windows/game-web visual
+correspondence and owner look/fun acceptance require actual observation.
+
+AB-01's initial 108 duels exposed a weak Nacre Duelist and a strong Pearl
+Slinger. Two targeted follow-ups (12, then six seat-swapped duels) produced
+Proposed final Nacre 430/64/22/1050/54 and Pearl 340/52/24/4100/48, splash 14.
+The final Pearl panel has Archer as a counter. Full competitive acceptance
+and mixed-team validation remain pending; no threshold or release gate changed.
+Revision 10's final source hash is `523044fc973bac39`. The five canonical trace
+fixtures preserve the observed end ticks/outcomes; checksums change with the
+ninth Synergy slot and rolling-cask state layout. Older fixtures remain intact.
+
+
+## TW-01 / PK-01 / GD-01 — Strongholds, physical capacity and Gods (2026-11-02)
+
+Implement the owner's explicit tower boost and one 18-Energy Colossus as
+Proposed in GAME-DESIGN. Preserve old kind indices, append Gods/Colossus,
+wire 36 and ruleset 11. Keep online FULL_POOL at 46 and the private preview
+at 82. Gods has no invented Synergy benefit. Colossus is a Tank so carrying
+rules and existing tank counters can recognize its monumental body.
+
+Resolve crowd capacity in authoritative integer core state. A local spring
+solver cannot enforce passage or prevent repeatedly changing crowded roots.
+Native authoring exports conservative real body/weapon envelopes for 87 kinds
+and 435 forms, including summons and rear aim. The fixed 5-tile corridor and
+width reservation admit only as many units per row as fit; overflow waits,
+without deleting purchases or adding a global purchase cap. A new birth may use the nearest free footprint in its own backfield third,
+never beyond the hostile front. A stationary sniper at the base must not
+permanently prevent a giant from materializing. Existing units never teleport
+through a blocker. Persist slots,
+limit bypass speed and use a one-second lock. Evolution never spends Energy
+on an impossible fit. Reuse the existing longitudinal combat model, retaining
+authored root reach with a body-contact floor to avoid short-melee deadlock
+without extending ranged attacks.
+
+This changes deterministic combat traces and Stronghold outcomes, not just
+serialization. Append new revision-specific fixtures; retain every historical
+baseline. D-33 bounded defense/duel measurements are reported separately from
+the full balance gate. Displacement congestion, mixed-team acceptance and
+cross-platform observation remain explicit limits, not passed gates.
+
+
+PK-01 activation boundary: repeated bounded preview bot probes found long-run
+stalemates, even after widening the corridor, preserving root attack reach
+and allowing births in the defended backfield. Do not activate this candidate
+in competitive matches on a passing geometry check. Private Practice, Training
+and explicit preview lab experiments opt into authoritative physical lanes; regular canon
+keeps legacy movement and client crowd presentation. The read-only flag is
+part of both views. This preserves the competitive baseline while the owner
+validates the local proposal. Long-run preview balance is a known unresolved
+issue, separate from the requested exact TW-01 tower boost.
+
+
+## RESTORE-01 — Return to legacy pushing (2026-11-02)
+
+The owner reports visual delay, queued pieces and stationary armies and explicitly
+requests the former pushing/advancing format while keeping the widened Arena.
+Disable PK-01 in private Practice and Training. Keep the explicit offline
+experiment for historical diagnostics; ordinary play never uses its queue.
+Stabilize the existing client-only crowd solver with a fixed presentation step,
+anchor/ID ordering and bounded displacement smoothing. Do not smooth server
+anchors or delay a newly purchased figure. Keep towers/Gods unchanged.
+
+
+## RESTORE-02 / ARENA-CLEAR-01 — Original pushing, clear wide road (2026-11-02)
+
+The owner rejects the added offset smoothing and requests exactly the former
+movement apart from more lateral room. Restore the old solver and direct offset
+application, keeping RESTORE-01 immediate entry and no normal physical lanes.
+Only the shared lateral bound differs from the pre-PK-01 movement source.
+
+The Forest widened its static dressing with a blanket part translation while
+fire retained old brazier coordinates; other kits still used narrow-lane fittings.
+Remove the blanket translation. Author common brazier/fence origins for the wider
+road and move whole trees, rocks, palms, columns and temple steps at their origins.
+Protect the rendered road rectangle across all eight Arenas with geometry and
+animated-mesh regressions, including matching fire/pedestal coordinates.
+
+
+## SIDE-01 — Common blue-left/red-right presentation (2026-11-02)
+
+The owner explicitly selected a common blue-left/red-right orientation for
+every player, then requested random sides online (including Ranked) and versus
+bots, localized side announcements, validation and GitHub delivery. Remove
+viewer-relative world mirroring and keep the common camera. Public seat A/B
+already communicates side; no duplicate team-color protocol field is needed.
+Keep actual ownership for actions/private views while deriving facing, ring
+color, tower geometry/orders, HUD plates and coordinates from absolute side.
+Randomize the complete paired token order once before freezing account/loadout
+fields. Reconnection reuses that match assignment. Local Practice uses a separate
+seeded side draw and seat-aware disclosed bot assistance. No matchmaking-rating
+policy or Elo formula change is included in this presentation/assignment task.
+
 ## D-104 · Compatible server releases are promoted through the release slots, never by restarting the game — 2026-11-02 (Proposed)
 
 The official host first ran one `tbg-server` process, so every automatic backend delivery
@@ -2958,3 +3164,144 @@ not follow a promotion and stay documented limits.
 a scheduled promotion), a second host is added (match ownership and routing), a measurement
 shows an interruption the rehearsal and the observed promotions did not, or capacity no longer
 fits two overlapping generations.
+
+## INT-02 — D-44 price-canary policy correction (2026-11-02)
+
+The consolidated C7 gate missed SiegeWalker's existing x3 cost mutation. No
+combat stat, threshold, sample size, duel budget or assertion is changed. The
+internal Favor controller spent on cheap redraws even while the desired offer
+was already present but unaffordable, including fallback-bot reaction ticks.
+That can remove the price canary from its own measured army before the policy
+can afford it. D-44 refresh-by-buying applies when the desired kind is absent.
+
+Favor now banks for a present preferred kind and protects it between scheduled
+decisions. If absent, its cheapest redraw and bot fallback remain. Comp retains
+its separately documented affordable-composition policy. This corrects offline
+lab controls only; the shipped bot, server simulation, online Shop and all
+player rules are unchanged. Existing source-specific reports remain historical;
+new policy-sensitive experiments must be recomputed before claiming acceptance.
+
+A held-offer regression failed before the change and both present/absent
+scenarios pass after it. A bounded 32-pair original favor-vs-Bot screen changed
+from the diagnostic's ineffective controls to a 1.000000 versus 0.796875 price
+comparison after the fix (20.3125 points). This is screening evidence, not the
+full C7 result or D-33 acceptance. The original 256-pair C7 test and its 10-point
+match/20-point duel criteria remain intact and queued to hosted CI.
+
+## INT-03 — Isolate healing-canary controls without changing a threshold (2026-11-02)
+
+After INT-02 the full 256-pair C7 price canary passed SiegeWalker, then exposed
+Bloomkeeper x2 HP/healing at 0.88 -> 0.80 against the shipped Bot. Scaling a
+Ruleset changes both armies: that opponent can buy the same buffed healer.
+The value engine already has BotAvoid(kind) for exactly this confound. Retain
+the original observation and add that isolated control for pure-healer C7 rows,
+using the same 256 paired seeds and +0.10 gain. All duel/match thresholds,
+mutations, budgets, original rows and assertions for other kinds remain.
+This is calibration of the canary, not acceptance or tuning of the live roster.
+
+Inspection also found that BotAvoid passed through the outer reaction schedule
+and the shipped Bot's own schedule, slowing the control twice. Like Bot, it now
+owns its internal cadence directly. A new active-simulation regression compares
+Bot and BotAvoid when the avoided kind is absent from the pool: actions and
+state hashes must match. Neither change affects the production bot or gameplay.
+Local Rust execution was deferred when the shared validation lock returned 75;
+the exact new test and unchanged full C7 remain queued to protected hosted CI.
+
+## INT-04 — Preserve C7 measurements while avoiding unused mutant rows (2026-11-02)
+
+For every single-kind mutation C7 rebuilt a full 46-base-form matrix, although
+it only consumes that mutated kind's row and weak/oppressive membership. The
+reference matrix remains complete. Mutant measurements now use a test-only
+helper that calls the reference pair builder for every target/opponent pair,
+all three unchanged budgets, both seat orders and the same duel limit. No
+opponent, target kind, sample, threshold or assertion is omitted. Other rows
+are explicitly unmeasured and are never consumed by this test or a live gate.
+
+An equivalence regression compares the whole target score row, averages and
+both consumed flags against the complete reference builder for normal, x2
+HP/damage and x3 cost rules. This is a reduction of unconsumed work, not a
+shorter battle, smaller statistical sample or additional pass criterion.
+Local compilation remains deferred under the earlier shared-lock contention;
+the new proof and complete original C7 run in required hosted CI.
+
+## INT-05 — Owner-authorized controlled wounded-army healing canary (2026-11-02)
+
+The owner explicitly approved changing the healing fixture while retaining
+256 paired seeds, the +0.10 score-gain requirement and every live value.
+INT-03's isolated policy still started at 0.93, leaving insufficient headroom.
+Retain both earlier observations; add an equal-Energy wounded-army control
+using the original damaging kinds, all existing duel budgets, both seat orders
+and 25/50/75 percent initial combat-unit HP. The controlled opponent never
+fields the mutated healer. No Shop policy runs, and the canonical duel arena
+disables Stronghold fire/regeneration; no live ruleset is changed.
+
+Each case starts in contact, with the healer behind its escorts. Extinction
+or the unchanged duel 90-second bound decides the score from fighting HP;
+a pure healer cannot win after its escorts die. Both variants use identical
+initial rosters, wounds, seed and physical seats. A dedicated 256-pair
+regression requires unsaturated baseline headroom and the unchanged planted
+x2 HP/heal gain. This is canary sensitivity, not online balance acceptance.
+
+## D-105 · Gods expansion reuses counted-hit hooks and one public link event — 2026-11-02 (Proposed, GD-04)
+
+**Context.** The owner asked for two new Gods champions with a chained lightning
+and a same-target max-HP pierce, in the real game, without parallel targeting or
+damage systems. Crossfire (R04) and Precise Strike (R17) already implement a
+counted fourth hit and a same-enemy sequence inside `hits::resolve_hit`.
+
+**Decision.** `volthar.rs` and `astreon.rs` follow those modules: parameters live
+in the content `Ability` table per form; counters reuse `UnitFx::attacks` and
+`mark_target`, so the serialized unit layout, replay hashes and earlier canonical
+traces are unchanged. Chain links are auxiliary hits (defenses apply, no hooks).
+One appended public `Event::StormArc` per link lets clients draw the exact
+server-chosen path; the counter reaches the client through the existing progress
+bits. Appending kinds and the event bumps wire 36 → 37 and ruleset 13 → 14.
+
+**Reopen when** a Gods Synergy is approved, when D-33 evidence moves a value, or
+if a future champion needs per-unit state that `UnitFx` cannot express.
+
+
+## D-106 — War Auxiliaries (`Mineiro` and `Mercador`) architecture (2026-11-02)
+
+**Context:** P74 introduces two purchasable off-lane War Auxiliaries (`Mineiro`
+for unmultiplied Energy production and `Mercador` for purchase-driven free
+Shop rerolls) with a dedicated bottom-right two-slot HUD panel and animated
+low-poly 3D precincts/ships across all eight Arenas.
+
+**Decision:**
+1. Keep `PlayerState::{auxiliaries, free_rerolls}` in `tbg-core` with integer-only
+   Bresenham sub-energy accounting (`36` sub-energy/s over `3_600` ticks) and
+   append `PlayerIntention::HireAuxiliary { slot }`,
+   `Rejection::{BadAuxiliarySlot, AuxiliaryAlreadyHired}`, and
+   `Event::{AuxiliaryHired, AuxiliaryTriggered}` without renumbering any existing
+   wire tag.
+2. Expose public `auxiliaries: [[AuxiliarySlotView; 2]; 2]` in both `MatchView`
+   and `PublicView`, and private `free_rerolls: u8` in `MatchView`.
+3. Render the bottom-right `Auxiliares (0/2)` navy-and-gold HUD panel in
+   `native_battle/auxiliaries.rs` without moving the five conventional Shop cards
+   or the `Energy / Interest / Army / Reroll` bar.
+4. Place the symmetric Left (`x = -2.55`) and Right (`x = +18.55`) 3D precincts
+   at `z = -3.45` (`Mineiro`) and `z = +3.45` (`Mercador`, pier, and Caravel
+   ship), strictly outside the widened `ARENA-CLEAR-01` road box
+   (`x ∈ [-1.1, 17.1], z ∈ [-2.67, 2.67]`), with theme-adapted palettes and prop
+   pad filtering across all eight Arenas.
+
+## INT-06 — Integrated P74/GD-04 wire, state and release identity (2026-11-02)
+
+The owner explicitly requested integration and testing of #51, both new Gods
+and the other agent's Colossus refinement. Merge both published histories.
+Keep the exact CROWD-EXIT-01 HOME_HALF_WIDTH solution and full live envelopes.
+The combined release uses wire 38 and ruleset 15: GD-04's wire 37/R14 and
+P74's parallel R13 are recorded historical branch identities, not conflicting
+current declarations. Preserve all older canonical registry rows; retain the
+unreleased P74 identity in a registry comment.
+
+P74 auxiliary phases and free rerolls must participate in serialized state
+and deterministic hashes. Removing serde(skip) repairs that omission; zeroed
+new fields necessarily change state hashes while unused-feature outcomes and
+ticks must remain identical. Append observed R15 baselines, never rewrite old
+rows. Serialize the owning seat's reroll quote for real network roundtrips;
+free rerolls and quotes remain absent from PublicView. Values, the 46-unit
+online Shop and proposed 84-unit local preview are unchanged.
+
+Integrated source identity after formatting: `w38-r15-cc459351581b7763` (59 watched files).

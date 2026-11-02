@@ -13,13 +13,7 @@ use bevy::prelude::*;
 
 pub(super) fn build(kit: &mut Kit) {
     let p = Theme::Storm.palette();
-    for (i, (at, s)) in back_row().into_iter().enumerate() {
-        if i % 7 == 0 {
-            shared::dead_tree(&mut kit.props, at, s, rgb(0x454552));
-        } else {
-            bent_tree(&mut kit.props, at, s * 0.83);
-        }
-    }
+
     for (x, z, s) in [
         (0.6, -3.6, 1.35),
         (4.9, -4.5, 1.65),
@@ -36,13 +30,7 @@ pub(super) fn build(kit: &mut Kit) {
         1.55,
         rgb(0x4a4245),
     );
-    for (i, at, s) in scatter(0x5704).into_iter().filter(|(i, _, _)| i % 4 != 1) {
-        match i % 3 {
-            0 => boulder(&mut kit.props, at, s, p.stone),
-            1 => grass(&mut kit.props, at, s),
-            _ => boulder(&mut kit.props, at, s * 0.65, p.dark),
-        }
-    }
+
     for (x, z, s) in [
         (0.2, 3.0, 0.5),
         (5.0, 4.2, 0.65),
@@ -152,6 +140,32 @@ pub(super) fn build(kit: &mut Kit) {
                 Transform::from_xyz(x, 0.48, 1.6),
             ),
         ]);
+    }
+    for (i, at, s) in crate::arena::dressing::spaced(
+        &kit.props,
+        &kit.glow,
+        back_row()
+            .into_iter()
+            .enumerate()
+            .map(|(i, (at, s))| (i, at, s))
+            .collect(),
+        1.2,
+    ) {
+        if i % 7 == 0 {
+            shared::dead_tree(&mut kit.props, at, s, rgb(0x454552));
+        } else {
+            bent_tree(&mut kit.props, at, s * 0.83);
+        }
+    }
+    for (i, at, s) in scatter(0x5704, &kit.props, &kit.glow)
+        .into_iter()
+        .filter(|(i, _, _)| i % 4 != 1)
+    {
+        match i % 3 {
+            0 => boulder(&mut kit.props, at, s, p.stone),
+            1 => grass(&mut kit.props, at, s),
+            _ => boulder(&mut kit.props, at, s * 0.65, p.dark),
+        }
     }
 }
 

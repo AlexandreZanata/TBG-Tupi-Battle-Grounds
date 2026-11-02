@@ -294,6 +294,7 @@ impl TrainingSession {
             self.state
                 .units
                 .iter()
+                .chain(self.state.deployments.iter())
                 .any(|u| u.seat == seat && u.hp > 0 && !self.is_dummy(u.id))
         };
         let allies = alive(Seat::A);

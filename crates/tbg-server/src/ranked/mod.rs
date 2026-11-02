@@ -93,6 +93,8 @@ pub struct RankedFinal {
     /// P61 §4: the optional, size-bounded side summary; `None` when
     /// collection is off or the summary was a coverage gap.
     pub stats: Option<serde_json::Value>,
+    /// P73: a separate complete history envelope owns this source; legacy backfill must not preempt it.
+    pub history_expected: bool,
 }
 
 /// A `RankedFinal` with its completion order and frozen UTC second.
