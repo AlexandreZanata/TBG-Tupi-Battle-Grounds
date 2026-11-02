@@ -2,7 +2,15 @@
 
 use bevy::{prelude::*, shader::Source};
 
-pub fn adapt(mut shaders: ResMut<Assets<Shader>>, mut done: Local<bool>) {
+pub fn adapt(
+    mut shaders: ResMut<Assets<Shader>>,
+    adapter: Res<bevy::render::renderer::RenderAdapterInfo>,
+    mut done: Local<bool>,
+) {
+    if adapter.backend != bevy::render::settings::Backend::Gl {
+        *done = true;
+        return;
+    }
     if *done {
         return;
     }

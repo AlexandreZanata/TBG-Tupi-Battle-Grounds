@@ -44,6 +44,8 @@ fn spawn_camera(mut commands: Commands, window: Single<&Window>) {
         Camera3d::default(),
         #[cfg(target_os = "android")]
         Msaa::Off,
+        #[cfg(target_os = "android")]
+        bevy::render::view::NoIndirectDrawing,
         Tonemapping::AcesFitted,
         // Soft haze on the far rim of the diorama; the lane stays crisp.
         DistanceFog {

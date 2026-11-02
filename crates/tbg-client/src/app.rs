@@ -83,7 +83,14 @@ pub fn run() {
     let window = platform::android::settings();
     let plugins = DefaultPlugins;
     #[cfg(target_os = "android")]
-    let plugins = plugins.set(platform::android::render::plugin());
+    let plugins = plugins
+        .set(platform::android::render::plugin())
+        .set(bevy::pbr::PbrPlugin {
+            // gfxstream advertises GPU preprocessing but corrupts shared mesh instances.
+            // The engine's CPU builder submits the identical meshes/materials and motion.
+            use_gpu_instance_buffer_builder: false,
+            ..default()
+        });
     #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
     let plugins = plugins.set(platform::window::log_plugin());
     let exit = App::new()

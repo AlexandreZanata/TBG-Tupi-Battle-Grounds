@@ -128,7 +128,7 @@ def prepare(args):
             shutil.rmtree(STAGE)
         shutil.move(str(target), STAGE)
     verify_stage()
-    print(f"Prepared {len(assets)} assets and {len(libraries)} verified ARM64 libraries")
+    print(f"Prepared {len(assets)} assets and {len(libraries)} verified {args.abi} libraries")
 
 
 def verify_stage():

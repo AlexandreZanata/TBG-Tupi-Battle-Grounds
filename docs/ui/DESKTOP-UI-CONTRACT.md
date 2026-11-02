@@ -844,3 +844,9 @@ Practice/Training, battle/HUD/Shop/auxiliaries/details, War Council, settings,
 confirmations/results/Victory/reconnect and return cleanup. All observations
 for this integrated source are pending; shared routing/builds never prove parity.
 See [P69 current execution](../phases/P69-mobile-20261102.md).
+
+P69 candidate 16 uses the engine's direct CPU mesh submission on Android
+following corrupted gfxstream geometry; no mesh, material, lighting rule or
+animation asset is replaced. The GLES point-shadow specialization no longer
+runs on Vulkan. Linux/Windows/web use their unchanged submission paths.
+Android visual comparison of the corrected path remains pending.
