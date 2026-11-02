@@ -68,6 +68,15 @@ evolve, and which factions you combine.
 | Augment | **Proposed (P16-F5, not active):** an in-match bonus bought with `Energy` from an `AugmentRound`; not an `Arcana` (pre-match) and not a store item | `Augment` |
 | AugmentRound | **Proposed (P16-F5, not active):** a timed offer of three `Augment`s, identical for both players | `AugmentRound` |
 | Forgo | **Proposed (P16-F5, not active):** declining or letting an `AugmentRound` expire, compensated with `Energy` | `Forgo` |
+| RecoveryEmail | **Proposed (P75, inactive):** the private, verified address that lets an `Account` replace a lost `AccountKey` in place (§22) | `recovery_identity` |
+| Operator | **Proposed (P75, inactive):** an administrator identity (Owner or Moderator) separate from every `Account`; signs in to the console with an `AdminKey` | `Operator` |
+| AdminKey | **Proposed (P75, inactive):** an Operator's long-lived console credential `TBGADM-…`, claimed and recovered only by email | `AdminKey` |
+| Suspension | **Proposed (P75, inactive):** an Operator's temporary or permanent ban of an `Account` from playing; history is never rewritten | `account_moderation` |
+| Report | **Proposed (P75, inactive):** a player's private complaint about another `Account`, with server-captured evidence | `Report` |
+| MatchChat | **Proposed (P75, inactive):** short plain-text messages between the two seats of one online match; never part of the simulation | `ChatSend`/`Chat` |
+| Emoji | **Proposed (P75, inactive):** a picture a seat sends during a match from its three `EmojiSlot`s; standard or custom; purely cosmetic | `EmojiRef` |
+| EmojiSlot | **Proposed (P75, inactive):** one of an account's three equipped emojis, frozen at pairing | `account_emoji_slots` |
+| CustomEmoji | **Proposed (P75, inactive):** a player-uploaded image/GIF usable by its owner only after an Operator approved it | `emoji_assets` |
 
 Retired legacy names — never reuse for new concepts: `CharacterDefinition`,
 `CharacterCatalog`, `CharacterStudio(Window)`, `ProceduralCharacterBuilder`,
@@ -2581,3 +2590,53 @@ and FULL_POOL stays 46. Wire 38 carries the combined public auxiliary phases,
 private free-reroll balance/quote and StormArc events. R15 includes auxiliary
 state in deterministic hashes and replay serialization; no phase or currency
 may disappear after a roundtrip. These repairs introduce no new balance value.
+
+## 22. Administration, moderation, key recovery and match social (P75, Proposed)
+
+**Proposed — planning only, 2026-11-02, inactive until P75 is implemented,
+reviewed and activated by the owner.** Owner request: required player
+email, in-game key recovery by email without losing anything, a complete
+administration suite with bans and moderation, account reports, real-time
+match chat, emojis with three slots and moderated custom emojis/GIFs, and a
+single Owner administrator claimed by email. See
+[P75](phases/P75-admin-moderation-and-match-social.md) and its
+[requirements](planning/P75-REQUIREMENTS.md) and
+[contracts](planning/P75-CONTRACTS.md). No combat, Energy, Shop, Evolution,
+Synergy, Rating formula or balance value changes. BR-P01/BR-P02 are amended
+by the P75 implementation in the same commits as their contract tests
+(registration requires an email; the key becomes recoverable); until then
+they stay as written above.
+
+| Rule | Contract |
+|---|---|
+| BR-ID01 | A new `Account` needs an email address at creation; the account, its `AccountKey` and the unverified address are created together. Guests need nothing |
+| BR-ID02 | An address becomes the `RecoveryEmail` only after an emailed code is entered in game. Addresses are private: never shown to other players, in public pages, logs or URLs |
+| BR-ID03 | Pre-P75 accounts keep playing; adding an address needs the current `AccountKey`. Changing a verified address needs the key plus codes from the old and new addresses, or the key plus a 7-day hold the old address can cancel |
+| BR-ID04 | At most 5 accounts per address; blocked addresses cannot register |
+| BR-RC01 | "Lost your key?" asks for the `PlayerName` and the address and always answers the same way. A code goes only to a verified address that matches the name |
+| BR-RC02 | Entering the code replaces the key **on the same Account**: name, `Rating`, statistics, ranked records, match history, Arcanas, Stronghold kind, emojis and every other account record stay exactly as they were. The new key is shown once in game; the old key and every session stop working at once |
+| BR-RC03 | Recovery codes are single-use and expire after 15 minutes or 5 wrong attempts; keys are never emailed. Losing both the key and the verified mailbox cannot be recovered |
+| BR-AD01 | `Operator`s are separate from `Account`s. There is exactly one Owner, created from the host's configured address with no key; the Owner claims an `AdminKey` through an emailed code and recovers a lost one the same way. A new key revokes the previous key and sessions |
+| BR-AD02 | Console sign-in uses the `AdminKey` plus an emailed login code (Proposed default). The Owner may invite Moderators with fewer powers. Every Operator action needs a reason and is audited permanently |
+| BR-MD01 | An Operator may suspend an `Account` for 1 hour to 365 days or permanently, restrict its chat or emojis (1 hour to 90 days), or sign it out everywhere. Moderators may suspend for at most 30 days |
+| BR-MD02 | A suspension takes effect at once on every server: sessions end, queues and invitations are cancelled and a seat in a running match loses by forfeit, rated exactly like a surrender (BR-M06, BR-R04). The player sees the end time and reason category |
+| BR-MD03 | A suspended account is hidden from the Leaderboard, directory, live list and public profile while suspended. Suspensions never edit ratings, results or anyone's history; lifting one restores everything |
+| BR-MD04 | Reports never punish automatically; no Operator action can change a match result, rating or history (ranked corrections stay the D-89 command-line flow) |
+| BR-RP01 | A signed-in player may report another account after an online match they played together (within 7 days), from a public profile/directory, or for a custom emoji shown in that match. Reasons: cheating, abusive chat, offensive name, offensive emoji, harassment, griefing, impersonation, other; optional comment ≤ 500 characters |
+| BR-RP02 | One open report per reporter, target and match; at most 10 reports per day. The reporter is never revealed to the target |
+| BR-CH01 | During an online PvP match (any mode) the two seats may exchange `MatchChat`. Spectators, practice and training have none. Text never enters the simulation |
+| BR-CH02 | Sending text requires an account with a verified address and no chat restriction; guests read only. Messages are 1–120 Latin-1 characters, at most 3 per 5 seconds and 20 per minute; blocked terms are masked |
+| BR-CH03 | Each player can mute the opponent's text and emojis and choose Chat All / Emojis only / Off. Chat starts disabled until the owner switches it on |
+| BR-EM01 | Every account has three `EmojiSlot`s (guests use the defaults), frozen at pairing. Sixteen standard emojis ship with the game; their ids never change or get reused |
+| BR-EM02 | A seat may send an emoji from its slots at most once per 2 seconds and 8 times per 30 seconds; it shows next to the sender's name for 2.5 seconds |
+| BR-CE01 | A player with a verified address may upload PNG, GIF or static WebP (≤ 1 MiB). The server converts it to at most 24 frames of 128 px within 4 seconds; nothing is usable until an Operator who saw every frame approves it |
+| BR-CE02 | Approved custom emojis are usable only by their uploader; an Operator may revoke one at any time, which removes it from every slot at once. At most 3 uploads per day and 10 kept per account |
+
+**Proposed operational values (P75):** codes 10 characters
+(`XXXXX-XXXXX`); verification/claim codes 24 h; recovery 15 min; console
+login code 10 min; console sessions idle 30 min / absolute 8 h, ≤ 3,
+sensitive re-entry 5 min; mail retries up to 8 with backoff to 6 h; outbox
+≤ 2,000 pending; transcripts ≤ 200 lines/32 KiB kept 7 days; closed reports
+180 days; rejected emoji sheets 30 days; global pending emojis ≤ 500;
+initial switches: chat off, emojis on, custom display off, uploads off,
+reports on, registration on. All are owner decisions O-P75-01…13.

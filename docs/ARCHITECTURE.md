@@ -997,3 +997,32 @@ See [RELEASES](RELEASES.md) for activation and compatibility boundaries,
 Automation is prepared; enabling it requires a real verified main artifact and an
 observed first delivery per family. Native TUF custody, privileged admin and email
 recovery are not implicitly activated by these pipelines.
+
+## 28. Administration, moderation and match social (P75, Proposed)
+
+[P75](phases/P75-admin-moderation-and-match-social.md) (planning only)
+adds, without touching `tbg-core` simulation:
+
+- **Identity:** the P67 `store/recovery` fixture becomes production code:
+  required registration email, emailed codes, in-place key rotation on the
+  same AccountId and the existing `revoke_account` barrier (D-108).
+- **Mail:** `mail/` with an SMTP transport (lettre over rustls) and a test
+  capture; a SQLite outbox that stores intent only; one dispatcher per host
+  through a database lease. Secrets come from systemd credentials, never
+  from `Config`'s Debug output.
+- **Operators:** `admin/` serves `/admin-api/v1/*` on a loopback listener
+  per release slot (8090/8092), proxied only from `admin.tupibg.com`;
+  `__Host-` session cookie, CSRF header, exact Origin, capability checks per
+  request, append-only audit in the same transaction (D-107).
+- **Moderation:** suspension/restriction state with an append-only history
+  and a feed every slot follows about once per second (like the P71 W3
+  revocation feed); a ban forfeits an admitted seat (D-109).
+- **Social:** protocol 39 appends chat/emoji messages handled by the match
+  task beside, never inside, `MatchState`; a per-match social record
+  (participants, outcome, loadouts, masked transcript) supports reports
+  for 7 days (D-110). Custom emoji sheets are normalized by the server and
+  served only when approved (D-111).
+- **Schema 12:** one additive, shape-verified feature after the
+  flag-gated v11 history migration, whose gate must test for v11 itself.
+  Schema and protocol both change, so delivery is attended
+  ([operations](planning/P75-OPERATIONS.md)).
