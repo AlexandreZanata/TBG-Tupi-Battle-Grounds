@@ -29,3 +29,11 @@ Logs live in `/data/tbg-consolidation-evidence/heartbeat-red.log` and
 `heartbeat-green.log`. Full local workspace acceptance was not run. A main
 retry started before the second CI failure was inspected; no further blind
 retry is authorized by this report. Production promotion remains pending.
+
+## Expanded Faction fixture consolidation
+
+CI 41457513916 caught two remaining seven-Faction assignments in the Augment
+Convergence scenario. The fixture now initializes the published FACTION_COUNT
+and toggles the same original two counts. The targeted scenario passed (1 test);
+its assertions and gameplay behavior are unchanged. The repository search found
+no other fixed-size seven-Faction Rust synergy fixtures.
