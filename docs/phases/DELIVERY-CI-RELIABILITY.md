@@ -297,3 +297,16 @@ match. Propagate HireAuxiliary there without treating it as a champion
 purchase. Its ten-entry purchase counters are also sized to UNIT_KIND_COUNT
 so canonical purchases cannot index outside them. All core examples now
 compile with lab enabled; no benchmark or example simulation was executed.
+
+The next full hosted test lane at 4721870 passed every other target and
+found a training-only count fixture: 190 forms were exercised successfully
+but the final literal still required 180. GD-04 adds two preview champions
+with five forms each. Keep every scenario and assert five forms for every
+preview-only kind, deriving the active/preview boundary from FULL_POOL.
+This test is enabled by training, so a lab-only core run did not cover it.
+The same head passed the complete hosted balance lane, including C7.
+
+The 190-form scenario passed with the CI-equivalent lab+training feature
+combination and its fully qualified exact name. An earlier training-only
+command selected zero tests and is not counted as evidence. Source hash
+remains cc459351581b7763 because completion/tests.rs is classified test-only.
