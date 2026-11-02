@@ -48,6 +48,16 @@ impl Default for Snapshot {
         }
     }
 }
+impl Snapshot {
+    /// Socket admission proves current identity, never durable storage.
+    fn active_status(&self) -> Status {
+        if self.status == Status::PersistenceUnavailable || self.remember && !self.secure {
+            Status::PersistenceUnavailable
+        } else {
+            Status::Authenticated
+        }
+    }
+}
 static VIEW: LazyLock<RwLock<Snapshot>> = LazyLock::new(|| RwLock::new(Snapshot::default()));
 static EPOCH: LazyLock<Arc<AtomicU64>> = LazyLock::new(|| Arc::new(AtomicU64::new(1)));
 static COMMAND: Mutex<Option<Command>> = Mutex::new(None);
@@ -174,13 +184,7 @@ pub fn socket_status(status: tbg_core::protocol::AuthStatus) {
     }
     if let Ok(mut view) = VIEW.write() {
         view.status = match status {
-            tbg_core::protocol::AuthStatus::Active => {
-                if view.remember && !view.secure {
-                    Status::PersistenceUnavailable
-                } else {
-                    Status::Authenticated
-                }
-            }
+            tbg_core::protocol::AuthStatus::Active => view.active_status(),
             tbg_core::protocol::AuthStatus::Conflict => Status::Conflict,
             tbg_core::protocol::AuthStatus::ReauthenticationRequired => Status::ReauthRequired,
         };
@@ -309,7 +313,10 @@ fn tick(
                     | Status::PersistenceUnavailable
                     | Status::Conflict
             )
-            && now >= session.deadline - 60.
+            && (now >= session.deadline - 60.
+                || snapshot().status == Status::PersistenceUnavailable
+                    && session.remember
+                    && !session.secure)
             && now >= session.retry_at
         {
             session.start(Kind::Refresh, None);
@@ -600,8 +607,9 @@ impl Session {
             Ok(Outcome::SignedIn {
                 grant,
                 secure,
+                warning,
                 device,
-            }) => self.signed_in(kind, grant, secure, device, now, inbox),
+            }) => self.signed_in(kind, grant, secure, warning, device, now, inbox),
             Ok(Outcome::Guest { legacy }) => {
                 if let Ok(mut slot) = LEGACY.lock() {
                     *slot = legacy.clone();
@@ -674,11 +682,13 @@ impl Session {
         }
     }
 
+    #[allow(clippy::too_many_arguments)] // The completed grant carries its persistence result independently of identity.
     fn signed_in(
         &mut self,
         kind: Kind,
         grant: Grant,
         secure: bool,
+        warning: Option<Failure>,
         device: String,
         now: f64,
         inbox: &mut crate::ui::account::AccountInbox,
@@ -690,8 +700,9 @@ impl Session {
         self.account = Some(grant.profile.name.clone());
         self.device = Some(device);
         self.secure = secure;
+        self.retry_at = if warning.is_some() { now + 60. } else { 0. };
         if kind == Kind::Restore {
-            self.remember = grant.persistent && secure;
+            self.remember = grant.persistent;
         }
         if let Ok(mut view) = VIEW.write() {
             view.status = if !secure && (self.remember || cfg!(target_arch = "wasm32")) {
@@ -705,7 +716,7 @@ impl Session {
             view.profile = Some(grant.profile.clone());
             view.secure = secure;
             view.remember = self.remember;
-            view.error = None;
+            view.error = warning;
             view.manual_claim |= kind == Kind::Login;
         }
         if self.backup_after_login && kind == Kind::Login {

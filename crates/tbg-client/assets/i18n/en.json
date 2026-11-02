@@ -1429,6 +1429,7 @@
   "auth.remember_help": "Use this option only on your own device.",
   "auth.restoring": "Restoring your session…",
   "auth.refreshing": "Renewing your session…",
+  "auth.connection_pending": "You are signed in. Session renewal or recovery could not be confirmed. Retry.",
   "auth.temporary": "Temporary session. Secure persistence is unavailable.",
   "auth.session_only": "Signed in for this session.",
   "auth.conflict": "This account is active on another device.",

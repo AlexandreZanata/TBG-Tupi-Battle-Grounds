@@ -749,3 +749,21 @@ orientations and live contact envelopes. Real WebSocket auxiliary ownership,
 private free currency, quote roundtrips and reconnect passed independently.
 Packaged integrated Linux capture and Windows/browser rendered observations
 remain pending; no parity is inferred from these tests or shared code.
+
+### 2026-11-02 — Accurate session warnings and persistence recovery
+
+Linux reference: a confirmed signed-in account shows no temporary-storage
+warning. Actual vault failures retain the existing temporary-session notice.
+A failed HTTP renewal/confirmation instead says the account is connected and
+session renewal/recovery could not be confirmed, with the existing localized
+Retry control. Queue/socket admission cannot clear a persistence failure;
+successful coordinator recovery clears it. Both Bevy and legacy HTML controls
+use one Rust status-to-message selector. No champion motion is affected.
+
+Matrix additions: account-confirmation-pending, account-confirmation-retry,
+account-renewal-network-outage and account-queue-return-persistence, alongside
+the existing account-restoring/temporary/conflict cases. Shared state, messages
+and controls propagate to Linux, Windows and desktop web. Runtime evidence and
+remaining target observations are recorded in
+[the focused report](../phases/AUTH-SESSION-PERSISTENCE-FIX.md). Native-only tests
+or synthetic JavaScript regressions do not prove cross-platform visual parity.

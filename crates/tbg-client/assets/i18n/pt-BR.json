@@ -1429,6 +1429,7 @@
   "auth.remember_help": "Use esta opção apenas no seu dispositivo.",
   "auth.restoring": "Restaurando sua sessão…",
   "auth.refreshing": "Renovando sua sessão…",
+  "auth.connection_pending": "Você está conectado. Não foi possível confirmar a renovação ou recuperação da sessão. Tente novamente.",
   "auth.temporary": "Sessão temporária. O armazenamento seguro está indisponível.",
   "auth.session_only": "Conectado apenas nesta sessão.",
   "auth.conflict": "Esta conta está ativa em outro dispositivo.",

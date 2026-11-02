@@ -46,14 +46,66 @@ pub(super) fn run() -> Result<serde_json::Value, Failure> {
         current_epoch: current.clone(),
     };
     let Outcome::SignedIn {
-        grant,
-        secure,
+        mut grant,
+        mut secure,
+        warning,
         device,
     } = native::run(work)?
     else {
         return Err(Failure::Incompatible);
     };
     let key = grant.account_key.clone().ok_or(Failure::Incompatible)?;
+    let retry_case = crate::config::url_param("auth-persistence-retry").is_some();
+    if retry_case {
+        // The owned test proxy rejects both initial confirm attempts, after
+        // the real OS vault write. Recovery must not create a second family.
+        let meta = Store::open(&origin)?;
+        if secure
+            || warning != Some(Failure::Unavailable)
+            || meta
+                .meta
+                .get("remember")
+                .and_then(serde_json::Value::as_bool)
+                != Some(false)
+            || meta
+                .meta
+                .get("remember_requested")
+                .and_then(serde_json::Value::as_bool)
+                != Some(true)
+            || meta
+                .meta
+                .get("credential_saved")
+                .and_then(serde_json::Value::as_bool)
+                != Some(true)
+        {
+            return Err(Failure::Incompatible);
+        }
+        drop(meta);
+        let result = native::run(Work {
+            origin: origin.clone(),
+            operation: Operation::Restore,
+            remember: false,
+            refresh: None,
+            family: None,
+            account: None,
+            device: None,
+            access: None,
+            epoch: 1,
+            current_epoch: current.clone(),
+        })?;
+        match result {
+            Outcome::SignedIn {
+                grant: recovered,
+                secure: true,
+                warning: None,
+                ..
+            } if recovered.family == grant.family => {
+                grant = recovered;
+                secure = true;
+            }
+            _ => return Err(Failure::Incompatible),
+        }
+    }
     let make = |operation| Work {
         origin: origin.clone(),
         operation,
@@ -100,6 +152,41 @@ pub(super) fn run() -> Result<serde_json::Value, Failure> {
     } else {
         false
     };
+    if retry_case {
+        // BR-AS03/04: model a previous failed vault write by leaving an older,
+        // consumed refresh in this synthetic entry while memory has the current
+        // generation. Renewal must never replay that stale credential.
+        let mut meta = Store::open(&origin)?;
+        let namespace = meta.namespace(&origin, &rotated.profile.name)?;
+        let stale =
+            json!({"refresh":grant.refresh,"family":grant.family,"operation":null}).to_string();
+        crate::platform::credentials::write(&namespace, &stale)
+            .map_err(|_| Failure::StorageUnavailable)?;
+        meta.meta["credential_saved"] = json!(false);
+        meta.meta["remember"] = json!(false);
+        meta.save()?;
+        drop(meta);
+        match native::run(Work {
+            origin: origin.clone(),
+            operation: Operation::Refresh,
+            remember: true,
+            refresh: rotated.refresh.clone(),
+            family: Some(rotated.family.clone()),
+            account: Some(rotated.profile.name.clone()),
+            device: Some(device.clone()),
+            access: Some(rotated.access),
+            epoch: 1,
+            current_epoch: current.clone(),
+        })? {
+            Outcome::SignedIn {
+                grant: recovered,
+                secure: true,
+                warning: None,
+                ..
+            } if recovered.family == rotated.family => rotated = recovered,
+            _ => return Err(Failure::Incompatible),
+        }
+    }
     work = Work {
         origin: origin.clone(),
         operation: Operation::Backup,
@@ -197,6 +284,6 @@ pub(super) fn run() -> Result<serde_json::Value, Failure> {
     let namespace = meta.namespace(&origin, &rotated.profile.name)?;
     let vault_cleanup = crate::platform::credentials::remove(&namespace).is_ok();
     Ok(
-        json!({"synthetic_loopback_only":true,"secure_persistence":secure,"restored_same_family":restored,"process_coordination":coordinated,"migration_completed":migrated,"legacy_preserved_in_temporary_mode":!secure&&key_preserved,"ordinary_auth_metadata_contains_no_tokens":clean,"offline_pending_observed":offline_pending,"remote_revocation":true,"vault_cleanup":vault_cleanup}),
+        json!({"synthetic_loopback_only":true,"secure_persistence":secure,"restored_same_family":restored,"process_coordination":coordinated,"migration_completed":migrated,"legacy_preserved_in_temporary_mode":!secure&&key_preserved,"ordinary_auth_metadata_contains_no_tokens":clean,"offline_pending_observed":offline_pending,"remote_revocation":true,"vault_cleanup":vault_cleanup,"confirmation_outage_recovered":retry_case,"stale_vault_recovered":retry_case}),
     )
 }

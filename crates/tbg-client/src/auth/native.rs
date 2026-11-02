@@ -97,9 +97,7 @@ pub(super) fn run(mut work: Work) -> Result<Outcome, Failure> {
         if let Some(s) = &store {
             vault = restore_resume(&work.origin, s);
         }
-        work.remember = store
-            .as_ref()
-            .is_some_and(|s| s.meta.get("remember").and_then(Value::as_bool) == Some(true));
+        work.remember = store.as_ref().is_some_and(|s| remember_requested(s));
     }
     if !matches!(work.operation, Operation::Logout)
         && store
@@ -163,13 +161,16 @@ pub(super) fn legacy(origin: &str) -> Option<String> {
 }
 
 fn restore(work: &Work, store: &mut Store, vault: bool) -> Result<Outcome, Failure> {
-    if store.meta.get("remember").and_then(Value::as_bool) != Some(true) {
+    if !remember_requested(store) {
         return Ok(Outcome::Guest {
             legacy: legacy(&work.origin),
         });
     }
     // A vault that did not answer the resume read would block this one too.
     if !vault {
+        return Err(Failure::StorageUnavailable);
+    }
+    if store.meta.get("credential_saved").and_then(Value::as_bool) == Some(false) {
         return Err(Failure::StorageUnavailable);
     }
     let account = store.account().ok_or(Failure::NoSession)?.to_owned();
@@ -184,11 +185,7 @@ fn login(
     key: Option<&str>,
     name: Option<&str>,
 ) -> Result<Outcome, Failure> {
-    if work.refresh.is_some()
-        || store
-            .as_ref()
-            .is_some_and(|s| s.meta.get("remember").and_then(Value::as_bool) == Some(true))
-    {
+    if work.refresh.is_some() || store.as_ref().is_some_and(|s| remember_requested(s)) {
         match logout(work, store.as_deref_mut())? {
             Outcome::LoggedOut => {}
             Outcome::LogoutPending(error) => return Ok(Outcome::LogoutPending(error)),
@@ -207,20 +204,50 @@ fn login(
     let operation = if key.is_some() { "login" } else { "register" };
     let value = retry(&work.origin, operation, body, None)?;
     let grant = parse_grant(value, true)?;
-    let secure = save_grant(work, store.as_deref_mut(), &grant, None)?;
+    let (secure, warning) = save_grant(work, store.as_deref_mut(), &grant, None)?;
     cancelled(work, &grant, store)?;
     Ok(Outcome::SignedIn {
         grant,
         secure,
+        warning,
         device,
     })
 }
 
 fn refresh(work: &Work, mut store: Option<&mut Store>) -> Result<Outcome, Failure> {
     let account = work.account.as_deref().ok_or(Failure::NoSession)?;
+    // The lock serializes processes, but it does not make their identities
+    // equal. Never replace another process's newer account/family metadata.
+    if store.as_ref().is_some_and(|s| {
+        s.meta
+            .get("family")
+            .and_then(Value::as_str)
+            .zip(work.family.as_deref())
+            .is_some_and(|(stored, current)| stored != current)
+    }) {
+        return renew(
+            work,
+            None,
+            work.refresh.clone().ok_or(Failure::NoSession)?,
+            work.family.clone().ok_or(Failure::NoSession)?,
+            false,
+        );
+    }
     if work.remember {
         if let Some(s) = &mut store {
-            if let Ok(vault) = Vault::read(&s.namespace(&work.origin, account)?) {
+            // After a failed write, the live refresh is newer than the vault.
+            // Retrying that stale vault generation can revoke the whole family.
+            let saved = s
+                .meta
+                .get("credential_saved")
+                .and_then(Value::as_bool)
+                .unwrap_or(s.meta.get("remember").and_then(Value::as_bool) == Some(true));
+            let stored = if saved {
+                Vault::read(&s.namespace(&work.origin, account)?)
+            } else {
+                Err(Failure::NoSession)
+            };
+            if let Ok(vault) = stored {
                 if work
                     .family
                     .as_ref()
@@ -244,7 +271,7 @@ fn refresh(work: &Work, mut store: Option<&mut Store>) -> Result<Outcome, Failur
         store,
         work.refresh.clone().ok_or(Failure::NoSession)?,
         work.family.clone().ok_or(Failure::NoSession)?,
-        false,
+        work.remember,
     )
 }
 
@@ -264,8 +291,8 @@ fn renew(
             .filter(|v| valid_hex(v, 16))
         {
             let account = s.account().ok_or(Failure::NoSession)?;
-            let stored = Vault::read(&s.namespace(&work.origin, account)?)?;
-            if stored.operation.as_deref() != Some(pending) {
+            let stored = Vault::read(&s.namespace(&work.origin, account)?);
+            if stored.as_ref().map(|v| v.operation.as_deref()).ok() != Some(Some(pending)) {
                 operation = pending.to_owned();
             }
         }
@@ -288,20 +315,23 @@ fn renew(
         Some(s) => s.device()?.to_owned(),
         None => work.device.clone().ok_or(Failure::NoSession)?,
     };
-    let secure = if persist {
+    let (secure, warning) = if persist {
         save_grant(work, store.as_deref_mut(), &grant, Some(&operation))?
     } else {
         if let Some(s) = &mut store {
             s.meta["remember"] = json!(false);
+            s.meta["remember_requested"] = json!(false);
+            s.meta["credential_saved"] = json!(false);
             s.meta["operation"] = Value::Null;
             s.save()?;
         }
-        false
+        (false, work.remember.then_some(Failure::StorageUnavailable))
     };
     cancelled(work, &grant, store)?;
     Ok(Outcome::SignedIn {
         grant,
         secure,
+        warning,
         device,
     })
 }
@@ -311,41 +341,79 @@ fn save_grant(
     store: Option<&mut Store>,
     grant: &Grant,
     operation: Option<&str>,
-) -> Result<bool, Failure> {
+) -> Result<(bool, Option<Failure>), Failure> {
     let Some(store) = store else {
-        return Ok(false);
+        return Ok((false, work.remember.then_some(Failure::StorageUnavailable)));
     };
     if work.current_epoch.load(Ordering::Acquire) != work.epoch {
-        return Ok(false);
+        // The caller must still revoke the completed grant in cancelled().
+        return Ok((false, None));
     }
     let namespace = store.namespace(&work.origin, &grant.profile.name)?;
     let mut secure = false;
+    let mut saved = false;
+    let mut warning = None;
     if work.remember {
         let secret=json!({"refresh":grant.refresh.as_deref().ok_or(Failure::Incompatible)?,"family":grant.family,"operation":operation}).to_string();
         if credentials::write(&namespace, &secret).is_ok() {
-            let confirmed = transport::post(
+            saved = true;
+            let confirmed = retry(
                 &work.origin,
                 "confirm",
                 json!({"refresh_token":grant.refresh}),
                 None,
             );
-            secure = confirmed.is_ok_and(|v| {
-                v.get("session_id").and_then(Value::as_str) == Some(grant.family.as_str())
-            });
+            match confirmed {
+                Ok(value)
+                    if value.get("session_id").and_then(Value::as_str)
+                        == Some(grant.family.as_str()) =>
+                {
+                    secure = true
+                }
+                Ok(_) => warning = Some(Failure::Incompatible),
+                Err(error) => warning = Some(error),
+            }
+        } else {
+            warning = Some(Failure::StorageUnavailable);
         }
+    }
+    if let Some(error) = warning {
+        bevy::log::warn!(
+            stage = if saved {
+                "confirmation"
+            } else {
+                "credential_write"
+            },
+            ?error,
+            "Session persistence needs retry"
+        );
     }
     store.meta["account"] = json!(grant.profile.name);
     store.meta["family"] = json!(grant.family);
     store.meta["remember"] = json!(secure);
+    // Keep intent and write status separate from server confirmation. A
+    // transient failure must not silently turn off the player's choice.
+    store.meta["remember_requested"] = json!(work.remember);
+    store.meta["credential_saved"] = json!(saved);
     store.meta["logout_pending"] = json!(false);
     store.meta["operation"] = Value::Null;
     if store.save().is_err() {
         if Vault::read(&namespace).is_ok_and(|v| v.family == grant.family) {
             let _ = credentials::remove(&namespace);
         }
-        return Ok(false);
+        bevy::log::warn!(stage = "metadata_write", "Session persistence needs retry");
+        return Ok((false, Some(Failure::StorageUnavailable)));
     }
-    Ok(secure)
+    Ok((secure, warning))
+}
+
+fn remember_requested(store: &Store) -> bool {
+    store.meta.get("remember").and_then(Value::as_bool) == Some(true)
+        || store
+            .meta
+            .get("remember_requested")
+            .and_then(Value::as_bool)
+            == Some(true)
 }
 
 fn cancelled(work: &Work, grant: &Grant, mut store: Option<&mut Store>) -> Result<(), Failure> {
@@ -383,6 +451,8 @@ fn cancelled(work: &Work, grant: &Grant, mut store: Option<&mut Store>) -> Resul
         }
         if s.meta.get("family").and_then(Value::as_str) == Some(grant.family.as_str()) {
             s.meta["remember"] = json!(false);
+            s.meta["remember_requested"] = json!(false);
+            s.meta["credential_saved"] = json!(false);
             s.save()?;
         }
     }
@@ -445,6 +515,8 @@ fn finish_pending(work: &Work, store: &mut Store) -> Result<Option<Outcome>, Fai
             }
             store.meta["logout_pending"] = json!(false);
             store.meta["remember"] = json!(false);
+            store.meta["remember_requested"] = json!(false);
+            store.meta["credential_saved"] = json!(false);
             store.save()?;
             Ok(Some(Outcome::LoggedOut))
         }
@@ -503,6 +575,8 @@ fn logout(work: &Work, mut store: Option<&mut Store>) -> Result<Outcome, Failure
             }
             if let Some(s) = store.filter(|_| owns_meta) {
                 s.meta["remember"] = json!(false);
+                s.meta["remember_requested"] = json!(false);
+                s.meta["credential_saved"] = json!(false);
                 s.meta["logout_pending"] = json!(false);
                 s.meta["family"] = Value::Null;
                 s.save()?;
@@ -559,7 +633,7 @@ fn retry(
     access: Option<AccessToken>,
 ) -> Result<Value, Failure> {
     match transport::post(origin, operation, body.clone(), access) {
-        Err(Failure::Unavailable) if operation == "register" || operation == "refresh" => {
+        Err(Failure::Unavailable) if matches!(operation, "register" | "refresh" | "confirm") => {
             transport::post(origin, operation, body, access)
         }
         result => result,

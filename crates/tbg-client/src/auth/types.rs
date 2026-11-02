@@ -141,6 +141,7 @@ pub(super) enum Outcome {
     SignedIn {
         grant: Grant,
         secure: bool,
+        warning: Option<Failure>,
         device: String,
     },
     Backup {

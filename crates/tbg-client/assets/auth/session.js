@@ -26,14 +26,14 @@ async function post(operation,body,access,credentials) {
     if(response.status!==200)failure(typeof value.error==='string'?value.error:'incompatible');
     return value;
   } catch(error) {
-    const known=['incompatible','auth_required','name_taken','name_invalid','rate_limited','conflict','recovery_required','in_match','capacity','family_limit','unavailable'];
+    const known=['incompatible','auth_required','name_taken','name_invalid','rate_limited','conflict','recovery_required','in_match','capacity','family_limit','unavailable','storage_unavailable'];
     failure(known.includes(error.message)?error.message:'unavailable');
   } finally {clearTimeout(timer);}
 }
 
 async function retry(operation,body,access,credentials) {
   try{return await post(operation,body,access,credentials);}catch(error){
-    if(error.message==='unavailable'&&['refresh','register'].includes(operation))return post(operation,body,access,credentials);
+    if(error.message==='unavailable'&&['refresh','register','confirm'].includes(operation))return post(operation,body,access,credentials);
     throw error;
   }
 }
@@ -101,14 +101,15 @@ async function run(request) {
     if(out.kind!=='logged_out'){write('logout_pending','1');failure('revocation_pending');}
     failure('cancelled');
   }
-  let secure=false;
+  let secure=false,warning=durable?null:'storage_unavailable';
   if(durable) {
-    try{const proof=await post('confirm',{},null,credentials);secure=proof.session_id===grant.session_id;}catch{/* Cookies blocked: keep Access only and display temporary mode. */}
-    if(!secure)write('logout_pending','1');
+    try{const proof=await retry('confirm',{},null,credentials);secure=proof.session_id===grant.session_id;if(!secure)warning='conflict';}catch(error){warning=error.message==='auth_required'?'storage_unavailable':error.message;}
+    // A transport outage does not prove cookies are blocked or require logout.
+    if(!secure&&warning==='storage_unavailable')write('logout_pending','1');
   }
   state.grant={...grant};delete state.grant.account_key;state.access=grant.access_token;
   notify();
-  return {kind:'signed_in',grant,secure,device:state.device};
+  return {kind:'signed_in',grant,secure,...(warning?{warning}:{}),device:state.device};
 }
 
 export function startAuth(raw,callback) {

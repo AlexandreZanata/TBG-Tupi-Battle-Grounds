@@ -106,6 +106,7 @@ fn a08_cancelled_completed_login_never_publishes_identity_and_retains_revocation
         Ok(Outcome::SignedIn {
             grant,
             secure: true,
+            warning: None,
             device: "01".repeat(16),
         }),
         0.,
@@ -238,4 +239,102 @@ fn p66_a_busy_resume_write_is_kept_without_touching_identity() {
         session.resume_retry_at > 0.,
         "a busy lock backs off instead of retrying every frame"
     );
+}
+
+#[test]
+fn br_as04_11_confirmation_retry_retains_identity_and_recovers_persistence() {
+    let mut session = Session {
+        backup_after_login: false,
+        origin: Err(Failure::InvalidOrigin),
+        pending: None,
+        next: None,
+        refresh: None,
+        family: None,
+        account: None,
+        device: None,
+        access: None,
+        deadline: 0.,
+        retry_at: 0.,
+        secure: false,
+        remember: true,
+        resume_write: None,
+        resume_retry_at: 0.,
+    };
+    let grant = || Grant {
+        access: AccessToken([0xab; 32]),
+        refresh: Some("cd".repeat(32)),
+        family: "ef".repeat(16),
+        profile: Profile {
+            name: "RetryUser".into(),
+            rating: 1000,
+            ranked_games: 0,
+            wins: 0,
+            losses: 0,
+            draws: 0,
+        },
+        account_key: None,
+        remaining: 900,
+        persistent: true,
+    };
+    let previous = snapshot();
+    let mut account = crate::ui::account::Account::default();
+    let mut inbox = crate::ui::account::AccountInbox::default();
+    session.complete(
+        Kind::Restore,
+        Ok(Outcome::SignedIn {
+            grant: grant(),
+            secure: false,
+            warning: Some(Failure::Unavailable),
+            device: "01".repeat(16),
+        }),
+        10.,
+        &mut account,
+        &mut inbox,
+    );
+    let pending = snapshot();
+    assert_eq!(pending.status, Status::PersistenceUnavailable);
+    assert_eq!(
+        pending.error,
+        Some(Failure::Unavailable),
+        "BR-AS11: a failed confirmation is not a failed vault"
+    );
+    assert!(pending.access.is_some() && pending.profile.is_some() && pending.remember);
+    assert_eq!(
+        pending.active_status(),
+        Status::PersistenceUnavailable,
+        "BR-AS06: queue/socket admission cannot confirm persistence"
+    );
+    assert_eq!(
+        session.retry_at, 70.,
+        "use the existing bounded retry delay"
+    );
+    session.complete(
+        Kind::Refresh,
+        Ok(Outcome::SignedIn {
+            grant: grant(),
+            secure: true,
+            warning: None,
+            device: "01".repeat(16),
+        }),
+        70.,
+        &mut account,
+        &mut inbox,
+    );
+    let recovered = snapshot();
+    assert_eq!(recovered.status, Status::Authenticated);
+    assert!(recovered.secure && recovered.remember && recovered.access == pending.access);
+    assert_eq!(recovered.error, None);
+    // BR-AS07: a transient renewal failure retains the current identity and
+    // its existing secure-storage status until the coordinator can retry.
+    session.complete(
+        Kind::Refresh,
+        Err(Failure::Unavailable),
+        80.,
+        &mut account,
+        &mut inbox,
+    );
+    let outage = snapshot();
+    assert_eq!(outage.error, Some(Failure::Unavailable));
+    assert!(outage.secure && outage.access == recovered.access);
+    *VIEW.write().unwrap() = previous;
 }

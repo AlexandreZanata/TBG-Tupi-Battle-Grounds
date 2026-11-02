@@ -78,6 +78,9 @@ fn parse(raw: &str) -> Result<Outcome, Failure> {
                 false,
             )?,
             secure: value.get("secure").and_then(Value::as_bool) == Some(true),
+            warning: value
+                .get("warning")
+                .map(|warning| public_error(&json!({"error":warning}))),
             device: value
                 .get("device")
                 .and_then(Value::as_str)
