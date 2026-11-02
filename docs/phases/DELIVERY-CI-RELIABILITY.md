@@ -37,3 +37,21 @@ Convergence scenario. The fixture now initializes the published FACTION_COUNT
 and toggles the same original two counts. The targeted scenario passed (1 test);
 its assertions and gameplay behavior are unchanged. The repository search found
 no other fixed-size seven-Faction Rust synergy fixtures.
+
+## Protocol audit and attended switch
+
+The next hosted test lane reached the exploratory view_audit example and exposed
+constructors that predated lane_z, queued, physical_lanes and barrels. Its
+prototype headers now carry those fields, its unit dynamics retain lane_z and
+BarrelBurst has a named audit entry. Byte decomposition accounts for all current
+fields. Core test and example compilation are checked separately; the full audit
+benchmark is deferred. No runtime protocol or gameplay bytes changed.
+
+The explicit operator-only --coordinated-contract path retains all source,
+provenance, schema, identity, quiet-lobby, public-health and drain guards. The
+systemd timer never supplies that argument. Policy tests cover exact confirmation,
+wrong contract/schema rejection, single-process refusal and a busy old match
+surviving the switch and later retirement: 54 slot tests and 21 pull-policy tests
+passed. No timeout, required CI gate or normal automatic compatibility guard was
+relaxed. The first new fixture failed because the fake host still announced its
+constant old contract; its start identity now models the intended candidate.
