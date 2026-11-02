@@ -3,7 +3,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title data-i18n="meta.title">Tupi Battle Grounds — estratégia 1x1 em tempo real</title>
   <meta name="description" content="Duelos 1x1 em tempo real com combate automático em uma única Linha de Batalha, Loja contínua, Evolução ramificada e Sinergias de Facção." data-i18n-attr="content=meta.description">
   <meta name="theme-color" content="#082423">
@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="/assets/shared/base.css">
   <link rel="stylesheet" href="/assets/css/landing.css">
   <script type="module" src="/assets/js/main.js"></script>
+  <script type="module" src="/assets/js/nav.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main" data-i18n="nav.skip">Pular para o conteúdo</a>
@@ -37,7 +38,7 @@
       <a class="brand" href="/" aria-label="Tupi Battle Grounds — início" data-i18n-attr="aria-label=nav.home">
         <img src="/media/wordmark-320.webp" width="160" height="64" alt="">
       </a>
-      <nav class="site-nav" aria-label="Seções" data-i18n-attr="aria-label=nav.label">
+      <nav class="site-nav" id="site-nav" aria-label="Seções" data-i18n-attr="aria-label=nav.label">
         <ul>
           <li><a href="#game" data-i18n="nav.game">O jogo</a></li>
           <li><a href="#how-to-play" data-i18n="nav.how">Como jogar</a></li>
@@ -52,6 +53,7 @@
         <button type="button" data-lang="pt-BR" lang="pt-BR" aria-pressed="true" title="Português (Brasil)">PT</button>
         <button type="button" data-lang="en" lang="en" aria-pressed="false" title="English">EN</button>
       </div>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu" data-i18n-attr="aria-label=nav.menu" data-nav-toggle hidden><span class="nav-toggle-bars"></span></button>
     </div>
   </header>
 
@@ -75,6 +77,12 @@
             <span data-web-pending data-i18n="web.pending.short">O jogo no navegador ainda está em preparação.</span>
             <span data-web-live hidden data-i18n="web.live.short">Direto no navegador do computador, sem instalação.</span>
           </p>
+          <ul class="hero-stats" role="list">
+            <li><strong>1x1</strong><span data-i18n="stats.duel">Ao vivo</span></li>
+            <li><strong data-stat="champions">84</strong><span data-i18n="stats.champions">Campeões</span></li>
+            <li><strong data-stat="factions">10</strong><span data-i18n="stats.factions">Facções</span></li>
+            <li><strong>8</strong><span data-i18n="stats.arenas">Arenas</span></li>
+          </ul>
         </div>
         <figure class="hero-shot frame">
           <img src="/media/captures/battle-volcanic-1600.webp" srcset="/media/captures/battle-volcanic-800.webp 800w, /media/captures/battle-volcanic-1600.webp 1600w" sizes="(min-width: 1100px) 640px, 92vw" width="1600" height="900" alt="Batalha real na Forja Vulcânica: unidades dos dois lados se enfrentam na Linha de Batalha, com a Loja de cinco ofertas abaixo" data-i18n-attr="alt=hero.shot.alt">
@@ -92,26 +100,32 @@
         </header>
         <ul class="pillars" role="list">
           <li class="pillar">
+            <svg class="pillar-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M5 3l8.5 8.5M3.5 6.5l3-3M9 13l-4 4M3 19l2 2M19 3l-8.5 8.5M17.5 3.5l3 3M15 13l4 4M21 19l-2 2"/></svg>
             <h3 data-i18n="pillar.live.title">Duelo 1x1 ao vivo</h3>
             <p data-i18n="pillar.live.text">Os dois jogadores agem ao mesmo tempo e o campo de batalha muda em tempo real.</p>
           </li>
           <li class="pillar">
+            <svg class="pillar-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/><circle cx="12" cy="12" r="2"/></svg>
             <h3 data-i18n="pillar.line.title">Uma Linha de Batalha</h3>
             <p data-i18n="pillar.line.text">Sem movimento lateral: as unidades avançam e lutam sozinhas em uma única pista.</p>
           </li>
           <li class="pillar">
+            <svg class="pillar-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>
             <h3 data-i18n="pillar.shop.title">Loja contínua</h3>
             <p data-i18n="pillar.shop.text">Cinco ofertas durante toda a partida; cada compra renova as cinco. Não existe fase de preparação.</p>
           </li>
           <li class="pillar">
+            <svg class="pillar-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><circle cx="12" cy="19" r="2"/><circle cx="6" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><path d="M12 17v-5M12 12c0-3-6-2-6-5M12 12c0-3 6-2 6-5"/></svg>
             <h3 data-i18n="pillar.evolution.title">Evolução ramificada</h3>
             <p data-i18n="pillar.evolution.text">Cada unidade enviada pode evoluir por um de dois ramos, mantendo a mesma porcentagem de vida.</p>
           </li>
           <li class="pillar">
+            <svg class="pillar-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M9 4l5 3v6l-5 3-5-3V7z"/><path d="M15 8l5 3v6l-5 3-5-3"/></svg>
             <h3 data-i18n="pillar.synergy.title">Sinergias de Facção</h3>
             <p data-i18n="pillar.synergy.text">Com 2 e com 4 unidades vivas da mesma Facção, todas elas recebem bônus.</p>
           </li>
           <li class="pillar">
+            <svg class="pillar-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
             <h3 data-i18n="pillar.fair.title">Justo por design</h3>
             <p data-i18n="pillar.fair.text">O servidor decide combate, Energia, Loja, Evolução e resultados. Sem pay-to-win: itens pagos, se existirem, serão apenas cosméticos.</p>
           </li>
@@ -267,8 +281,16 @@
             <button class="btn btn-gold" type="button" data-open-downloads="linux" data-i18n="downloads.options">Ver opções de download</button>
             <small class="platform-recommended" data-recommended="linux" hidden data-i18n="downloads.recommended">Recomendado para seu sistema</small>
           </article>
+          <article class="platform platform-native frame" aria-labelledby="android-title" data-platform="android">
+            <img class="platform-icon" src="/assets/icons/android.svg" width="56" height="56" alt=""/>
+            <header><h3 id="android-title" data-i18n="android.title">Android</h3><span class="badge" data-platform-status="android"></span></header>
+            <p class="platform-version" data-platform-version="android"></p>
+            <p data-i18n="android.requirements">Celulares e tablets Android</p>
+            <button class="btn btn-gold" type="button" data-open-downloads="android" data-i18n="android.cta">Ver detalhes</button>
+            <small class="platform-recommended" data-recommended="android" hidden data-i18n="downloads.recommended">Recomendado para seu sistema</small>
+          </article>
         </div>
-        <p class="fine-print" data-i18n="play.others">Pacotes para macOS e celulares ainda não estão disponíveis. Você também pode jogar no navegador do computador.</p>
+        <p class="fine-print" data-i18n="play.others">Pacotes para macOS e iOS ainda não estão disponíveis. Você também pode jogar no navegador do computador.</p>
       </div>
     </section>
   </main>
@@ -290,9 +312,13 @@
   </footer>
 
   <dialog class="native-dialog frame" data-native-dialog aria-labelledby="native-dialog-title">
-    <header class="native-dialog-heading"><div><p class="eyebrow" data-i18n="downloads.eyebrow">Seu próximo campo de batalha</p><h2 id="native-dialog-title"></h2></div><button class="native-close" type="button" data-close-downloads aria-label="Fechar" data-i18n-attr="aria-label=viewer.close">×</button></header>
+    <header class="native-dialog-heading">
+      <img class="native-dialog-icon" src="/assets/icons/windows.svg" width="64" height="64" alt="" data-native-icon>
+      <div class="native-dialog-titles"><p class="eyebrow" data-i18n="downloads.eyebrow">Seu próximo campo de batalha</p><h2 id="native-dialog-title"></h2><p class="native-release-meta" data-native-meta></p></div>
+      <button class="native-close" type="button" data-close-downloads aria-label="Fechar" data-i18n-attr="aria-label=viewer.close">×</button>
+    </header>
     <div data-native-content></div>
-    <p class="fine-print" data-i18n="downloads.source">Arquivos publicados no repositório original do GitHub. Nenhuma conta é necessária para baixar.</p>
+    <p class="fine-print native-source" data-i18n="downloads.source">Arquivos publicados no repositório original do GitHub. Nenhuma conta é necessária para baixar.</p>
   </dialog>
 
   <dialog class="viewer" data-viewer aria-label="Captura ampliada" data-i18n-attr="aria-label=viewer.label">
