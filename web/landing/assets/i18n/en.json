@@ -56,8 +56,8 @@
   "how.7.text": "No clock decides the match: whoever destroys the enemy Stronghold first wins.",
   "how.modes": "Modes: Casual, Ranked, Challenge a Friend, Private Room and Practice vs Bot. Balance values are still being tested and may change.",
   "champions.eyebrow": "Champions and Factions",
-  "champions.title": "46 champions in 7 Factions",
-  "champions.intro": "Every champion belongs to a Faction and has an Archetype. Portraits are rendered from the game's actual models.",
+  "champions.title": "72 champions in 8 Factions",
+  "champions.intro": "Nine champions per Faction, each with an Archetype. New champions marked “In testing” are available in the local preview. Portraits rendered from the actual game models.",
   "champions.filter": "Filter by Faction",
   "state.loading": "Loading…",
   "arenas.eyebrow": "Arenas",
@@ -192,5 +192,6 @@
   "downloads.checksum": "SHA-256 checksum",
   "downloads.unsigned": "Unsigned Windows beta. Publisher verification and complete visual acceptance are still pending.",
   "downloads.pixels.pending": "Cross-platform visual acceptance is in progress. See the release notes for tested environments.",
-  "downloads.notes": "Release notes on GitHub"
+  "downloads.notes": "Release notes on GitHub",
+  "champions.preview": "In testing"
 }

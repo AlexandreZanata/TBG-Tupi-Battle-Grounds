@@ -75,6 +75,8 @@ def main():
     info = json.loads(subprocess.check_output([str(binary),'--build-info'], text=True))
     catalog = json.loads((ROOT / 'docs/champion-completion/catalog.json').read_text())['champions']
     new_kinds = [c['kind'] for c in catalog]
+    expanded = json.loads((ROOT / 'docs/ogre-faction/catalog.json').read_text())['champions']
+    lineup_kinds = [*new_kinds, 'SiegeWalker', *(c['kind'] for c in expanded)]
     if args.all_portraits:
         source = (ROOT / 'crates/tbg-core/src/types.rs').read_text()
         pool = re.search(r'ALL_KINDS: \[UnitKind; \d+\] = \[([\s\S]*?)\];', source)[1]
@@ -107,7 +109,7 @@ def main():
             report['captures'].append({**record, 'build': seed['build'], 'binary_sha256': seed['binary_sha256']})
         existing.write_text(json.dumps(report, indent=2)+'\n')
     for kind in kinds:
-        for lineup in ([False, True] if kind in new_kinds else [False]):
+        for lineup in ([False, True] if kind in lineup_kinds else [False]):
             mode='lineup: idle/walk/attack' if lineup else 'base portrait'
             cached=next((c for c in report['captures'] if c['kind']==kind and c['mode']==mode),None)
             if cached and (scratch/cached['image']).exists() and hashlib.sha256((scratch/cached['image']).read_bytes()).hexdigest()==cached['sha256'] and ready(scratch/cached['log']):

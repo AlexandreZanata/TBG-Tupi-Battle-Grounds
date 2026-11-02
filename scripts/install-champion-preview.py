@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install the committed CC17 Linux preview without replacing the ordinary client or its data."""
+"""Install the committed Ogre expansion Linux preview without replacing the ordinary client or its data."""
 import argparse
 import hashlib
 import json
@@ -28,9 +28,9 @@ def main():
                     '9fb7be01ac08cbed3bce1aa466d7243418490957', 'HEAD'], cwd=ROOT, check=True)
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     info = json.loads(subprocess.check_output([str(binary), '--build-info'], text=True))
-    if (info['source_commit'] != commit or info['version'] != '0.1.2-cc.2'
-            or info['protocol'] != 33 or info['target'] != 'x86_64-unknown-linux-gnu'):
-        raise SystemExit('Build the committed CC17 Linux source with TBG_SOURCE_COMMIT before installation')
+    if (info['source_commit'] != commit or info['version'] != '0.1.2-ogres.1'
+            or info['protocol'] != 34 or info['target'] != 'x86_64-unknown-linux-gnu'):
+        raise SystemExit('Build the committed Ogre expansion Linux source with TBG_SOURCE_COMMIT before installation')
     prefix = args.prefix.expanduser().resolve()
     slot = prefix / 'opt/tupi-battle-grounds-champion-preview' / f"{info['version']}-{commit[:12]}"
     data = prefix / 'share/tupi-battle-grounds-champion-preview'
@@ -38,7 +38,7 @@ def main():
               'sha256': sha(p)} for p in sorted((ROOT / 'crates/tbg-client/assets').rglob('*')) if p.is_file()]
     manifest = {'schema': 1, **info, 'binary_sha256': sha(binary),
                 'cargo_lock_sha256': sha(ROOT / 'Cargo.lock'), 'assets': files,
-                'scope': 'CC17 local Practice/Training preview; online roster is not activated',
+                'scope': '72-champion local Practice/Training preview; online roster is not activated',
                 'laboratory_baseline': 'PR44 / 9fb7be01ac08cbed3bce1aa466d7243418490957',
                 'data_directory': str(data)}
     if slot.exists():
@@ -60,7 +60,7 @@ def main():
     content = ('#!/bin/sh\n'
                f'export TBG_DATA_DIR={shlex.quote(str(data))}\n'
                f'exec {shlex.quote(str(slot / "tbg-client"))} --panel troops '
-               '--champion Gravecutter --server ws://127.0.0.1:8080/ws "$@"\n')
+               '--champion SiegeWalker --server ws://127.0.0.1:8080/ws "$@"\n')
     if launcher.exists() and not launcher.read_text().startswith('#!/bin/sh\nexport TBG_DATA_DIR='):
         raise SystemExit(f'Refusing to replace an unrelated launcher at {launcher}')
     launcher.write_text(content)
@@ -69,8 +69,8 @@ def main():
     applications.mkdir(parents=True, exist_ok=True)
     quoted = str(launcher).replace('\\', '\\\\').replace('"', '\\"').replace('`', '\\`').replace('$', '\\$')
     desktop = applications / 'tbg-champions-preview.desktop'
-    desktop.write_text('[Desktop Entry]\nType=Application\nName=TBG · 17 Champions Preview\n'
-                       'Name[pt_BR]=TBG · Prévia dos 17 Campeões\n'
+    desktop.write_text('[Desktop Entry]\nType=Application\nName=TBG · 72 Champions Preview\n'
+                       'Name[pt_BR]=TBG · Prévia dos 72 Campeões\n'
                        'Comment=Local champion and Evolution validation\n'
                        f'Exec="{quoted}"\nIcon={slot}/assets/branding/tbg-icon-512.png\n'
                        'Terminal=false\nCategories=Game;StrategyGame;\n')

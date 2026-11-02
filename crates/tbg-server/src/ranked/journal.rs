@@ -176,7 +176,7 @@ pub fn decode(v: &Value) -> Option<JournalEntry> {
     // Older journals had four Factions; append the new Factions as zero without truncation.
     let quad = |x: &Value| -> Option<[u32; tbg_core::FACTION_COUNT]> {
         let values = x.as_array()?;
-        if values.len() != 4 && values.len() != tbg_core::FACTION_COUNT {
+        if values.len() != 4 && values.len() != 7 && values.len() != tbg_core::FACTION_COUNT {
             return None;
         }
         let mut out = [0; tbg_core::FACTION_COUNT];

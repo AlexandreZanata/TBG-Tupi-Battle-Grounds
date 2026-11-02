@@ -131,6 +131,12 @@ fn bot_matches_are_frozen() {
                 StrongholdDestroyed,
             ),
         ],
+        // OG-01: Ogre range/faction and appended eighth Synergy slot.
+        (8, 0x3d07d8f3e73671ef) => [
+            (1, 0xdc6ddee0ab7abe7e, 4044, Seat::B, StrongholdDestroyed),
+            (7, 0x981a89b67d681f3d, 9982, Seat::B, StrongholdDestroyed),
+            (42, 0x750b2a389290829d, 10382, Seat::A, StrongholdDestroyed),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

@@ -1,4 +1,4 @@
-//! Siege Walker figure: a hulking ogre gunner of the Ironworks carrying a
+//! Siege Walker figure: a hulking ogre gunner of the Ogre faction carrying a
 //! shoulder bombard. Evolutions change the bombard (the silhouette piece),
 //! the armor (large surfaces) and, at tier 2, add a glowing signature.
 

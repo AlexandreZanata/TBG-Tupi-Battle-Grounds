@@ -387,3 +387,26 @@ frames and maximum local foot yaw 0. Both original and new support kits were
 observed; the final installed witness used Nectar Nurse. Six unique focused
 tests include 200 form/seat/frame-rate cases and walking aim-fade continuity.
 Windows and desktop-web actual motion comparison remain pending.
+
+### 2026-11-01 — OG-01 Ogre faction, equipment clearance and catalog
+
+Shared native kits cover nine new champions × five forms on Linux, Windows
+and desktop web: distinct shapes, intrinsic material progression, weapons,
+projectiles, action/life clips and celebrations. New Ogres join the existing
+Ogre Archer; Rivet Ballista replaces its Machine roster slot. Foot rings alone
+identify ownership; no body plaques or presentation pedestal on Ogre captures.
+
+SiegeWalker/Ogre Archer and new kits reserve measured body, arms and held
+weapon envelopes across Idle/Walk/attack. Overhead labels still exclude the
+weapon height. Rotated clearance feeds the existing cosmetic crowd solver;
+server position/range/collision rules remain authoritative. Cases: five Ogre
+Archer forms, both seats, frontal/oblique aim, fire/reload, mixed adjacent
+figures and Evolution growth; stable rear-patient support posture also covers
+Hide Mender. Existing bounded lane offsets apply; dense-lane clearance needs
+actual observation and is never certified only by compilation.
+
+Landing: 72 actual-model portrait cards, eight filters with nine units each,
+English/Portuguese titles and explicit preview-only availability. Counts derive
+from core roster sources. Desktop Linux/browser observation, Windows and
+same-source web motion comparisons are recorded in
+[the expansion report](../phases/OGRE-FACTION.md); pending until observed.

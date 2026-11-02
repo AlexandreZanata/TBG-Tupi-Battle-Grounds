@@ -6089,7 +6089,7 @@ dependencies = [
 
 [[package]]
 name = "tbg-client"
-version = "0.1.2-cc.2"
+version = "0.1.2-ogres.1"
 dependencies = [
  "arboard",
  "bevy",

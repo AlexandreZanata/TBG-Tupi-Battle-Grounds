@@ -1,0 +1,333 @@
+{
+  "status": "Proposed implementation; owner authorized eight Ogres plus a replacement Machine and a GitHub PR",
+  "baseline": "e6f30bf",
+  "existing_ogre": "SiegeWalker",
+  "target_roster": 72,
+  "factions": 8,
+  "champions": [
+    {
+      "kind": "BasaltBulwark",
+      "name": {
+        "pt": "Bastião de Basalto",
+        "en": "Basalt Bulwark"
+      },
+      "faction": "Ogres",
+      "archetype": "Tank",
+      "shape": "broad ochre-skinned ogre with a blunt square jaw, tiny lower tusks, one massive upright faceted basalt shield strapped to the left forearm, short stone knuckle on right fist, bare cropped head, compact charcoal leather harness; equipment hugs body",
+      "ability": "Crusher",
+      "kit": "Stone chips erupt on heavy unit hits; durable single frontline, no healing",
+      "branch_a": "stone shield stacks upward, slate shoulder cap and pale face stripe",
+      "branch_b": "cracked dark shield, copper arm wraps and amber fissures",
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Cairn Guard",
+          "pt": "Guarda do Marco"
+        },
+        {
+          "code": "A2",
+          "en": "Stonewall",
+          "pt": "Muralha de Pedra"
+        },
+        {
+          "code": "B1",
+          "en": "Cracked Guard",
+          "pt": "Guarda Fraturada"
+        },
+        {
+          "code": "B2",
+          "en": "Quake Bastion",
+          "pt": "Bastião Sísmico"
+        }
+      ]
+    },
+    {
+      "kind": "CinderMaul",
+      "name": {
+        "pt": "Marreta de Brasa",
+        "en": "Cinder Maul"
+      },
+      "faction": "Ogres",
+      "archetype": "Dps",
+      "shape": "stocky brick-red ogre with low coal-black brow, two short square-headed iron forge hammers held vertically near ribs, asymmetric leather apron and small glowing coals in a rear basket, no guns",
+      "ability": "Sweep",
+      "kit": "Every third completed hit sends a compact cinder sweep into nearby enemies",
+      "branch_a": "one tall double-faced hammer, pale forged plates and upright coal crown",
+      "branch_b": "twin charcoal hammers with orange cracks, oxblood apron and iron collar",
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Coalbreaker",
+          "pt": "Quebra-Carvão"
+        },
+        {
+          "code": "A2",
+          "en": "Ember Anvil",
+          "pt": "Bigorna Incandescente"
+        },
+        {
+          "code": "B1",
+          "en": "Twin Brands",
+          "pt": "Marcas Gêmeas"
+        },
+        {
+          "code": "B2",
+          "en": "Furnace Fists",
+          "pt": "Punhos da Fornalha"
+        }
+      ]
+    },
+    {
+      "kind": "HookBrawler",
+      "name": {
+        "pt": "Brigão do Gancho",
+        "en": "Hook Brawler"
+      },
+      "faction": "Ogres",
+      "archetype": "Dps",
+      "shape": "lean slate-green ogre, hooked iron right gauntlet, tight chain coiled around left forearm, asymmetric short dark teal coat, one chipped tusk and wrapped head, chain remains compact; no anchor or giant shoulder pole",
+      "ability": "Finisher",
+      "kit": "A precise hook strike gains damage against wounded foes; no forced movement",
+      "branch_a": "single polished tall hook and cream rope sash",
+      "branch_b": "double inward hooks, dark iron chain loops and copper collar",
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Ironhook",
+          "pt": "Gancho de Ferro"
+        },
+        {
+          "code": "A2",
+          "en": "Anchorbreaker",
+          "pt": "Quebra-Âncoras"
+        },
+        {
+          "code": "B1",
+          "en": "Barbed Loop",
+          "pt": "Laço Farpado"
+        },
+        {
+          "code": "B2",
+          "en": "Chainmaster",
+          "pt": "Mestre das Correntes"
+        }
+      ]
+    },
+    {
+      "kind": "FlintRunner",
+      "name": {
+        "pt": "Corredor de Sílex",
+        "en": "Flint Runner"
+      },
+      "faction": "Ogres",
+      "archetype": "Dps",
+      "shape": "tall wiry sand-colored ogre with long wrapped legs, forward neck and two small chipped obsidian cleavers held close to hips, swept-back white hair crest, rust-orange short mantle, no shield or firearm",
+      "ability": "Pounce",
+      "kit": "Walking charges the next hit; fast flanking silhouette without teleportation",
+      "branch_a": "long pale flint blade and white leather shoulder mantle",
+      "branch_b": "paired black obsidian cleavers with amber mineral edges and rust wraps",
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Trailblade",
+          "pt": "Lâmina da Trilha"
+        },
+        {
+          "code": "A2",
+          "en": "Flint Gale",
+          "pt": "Vendaval de Sílex"
+        },
+        {
+          "code": "B1",
+          "en": "Sparksprinter",
+          "pt": "Passo de Faísca"
+        },
+        {
+          "code": "B2",
+          "en": "Obsidian Rush",
+          "pt": "Arrancada de Obsidiana"
+        }
+      ]
+    },
+    {
+      "kind": "ClayBinder",
+      "name": {
+        "pt": "Molda-Barro",
+        "en": "Clay Binder"
+      },
+      "faction": "Ogres",
+      "archetype": "Control",
+      "shape": "heavy muted umber ogre with round ochre ceramic face mask, a tall narrow clay jar strapped vertically on back, left hand shaping a small floating earth clod, right hand short crooked stone rod, dry cream layered skirt, no foliage",
+      "ability": "Beam",
+      "kit": "Periodic earth pulse and slowing clay keep compact groups in place",
+      "branch_a": "ivory sealed mask, stacked dry clay shoulder plates and angular earth rod",
+      "branch_b": "dark glazed mask, ochre cracked jar and mineral glow",
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Clay Seal",
+          "pt": "Selo de Argila"
+        },
+        {
+          "code": "A2",
+          "en": "Earthlock",
+          "pt": "Trava-Terra"
+        },
+        {
+          "code": "B1",
+          "en": "Mire Mask",
+          "pt": "Máscara do Lodo"
+        },
+        {
+          "code": "B2",
+          "en": "Quagmire Sage",
+          "pt": "Sábio do Atoleiro"
+        }
+      ]
+    },
+    {
+      "kind": "GustDrummer",
+      "name": {
+        "pt": "Tambor do Vendaval",
+        "en": "Gust Drummer"
+      },
+      "faction": "Ogres",
+      "archetype": "Control",
+      "shape": "round olive ogre with swept ivory hair, a single tall cylindrical hide drum suspended vertically in front of abdomen, two stubby bone mallets held near drum rim, narrow brown fur collar; drum stays within shoulders, no shield",
+      "ability": "Interrupt",
+      "kit": "Timed drum shock interrupts hostile special-ability windups; ordinary attacks remain intact, with readable anticipation and counterplay",
+      "branch_a": "pale skin drum face, upright horn resonator and cream fur",
+      "branch_b": "black drum body with copper hoops, twin short wind pipes and ochre wraps",
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Stormbeat",
+          "pt": "Batida da Tempestade"
+        },
+        {
+          "code": "A2",
+          "en": "Thunderhide",
+          "pt": "Couro do Trovão"
+        },
+        {
+          "code": "B1",
+          "en": "Hollow Rhythm",
+          "pt": "Ritmo Oco"
+        },
+        {
+          "code": "B2",
+          "en": "Typhoon Drum",
+          "pt": "Tambor do Tufão"
+        }
+      ]
+    },
+    {
+      "kind": "HideMender",
+      "name": {
+        "pt": "Remendeiro de Couro",
+        "en": "Hide Mender"
+      },
+      "faction": "Ogres",
+      "archetype": "Support",
+      "shape": "warm gray-green ogre medic with round spectacles, patchwork tan leather shoulder cape, large carved bone sewing needle in right hand, thick amber thread spool carried vertically on back, a stitched leather satchel at left hip; no cooking equipment, no wings",
+      "ability": "Regrowth",
+      "kit": "Stitches apply several small healing pulses; feet stable for rear allies",
+      "branch_a": "cream stitched mantle and ivory needle with small brass loop",
+      "branch_b": "dark patchwork cape, larger amber spool with pale thread halo",
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Field Stitch",
+          "pt": "Ponto de Campo"
+        },
+        {
+          "code": "A2",
+          "en": "Leather Surgeon",
+          "pt": "Cirurgião do Couro"
+        },
+        {
+          "code": "B1",
+          "en": "Spirit Spool",
+          "pt": "Carretel Espiritual"
+        },
+        {
+          "code": "B2",
+          "en": "Ancestral Seam",
+          "pt": "Costura Ancestral"
+        }
+      ]
+    },
+    {
+      "kind": "PebbleSlinger",
+      "name": {
+        "pt": "Lança-Seixos",
+        "en": "Pebble Slinger"
+      },
+      "faction": "Ogres",
+      "archetype": "Ranged",
+      "shape": "small hunched blue-gray ogre with large ears, a compact upright Y-shaped wooden slingshot in right hand and a leather stone pouch in left, gravel satchel on back, mustard vest and dark wrapped feet, angular bald crown",
+      "ability": "Opportunity",
+      "kit": "Aimed pebbles punish an enemy committing to an attack; active timing cue",
+      "branch_a": "tall pale reinforced fork, counterweight and cream stone sack",
+      "branch_b": "double leather pouch, black mineral stones and orange bindings",
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Counterweight",
+          "pt": "Contrapeso"
+        },
+        {
+          "code": "A2",
+          "en": "Cliffshot",
+          "pt": "Tiro do Penhasco"
+        },
+        {
+          "code": "B1",
+          "en": "Split Pouch",
+          "pt": "Bolsa Dupla"
+        },
+        {
+          "code": "B2",
+          "en": "Hail Sling",
+          "pt": "Estilingue de Granizo"
+        }
+      ]
+    },
+    {
+      "kind": "RivetBallista",
+      "name": {
+        "pt": "Balista de Rebites",
+        "en": "Rivet Ballista"
+      },
+      "faction": "Machines",
+      "archetype": "Ranged",
+      "shape": "compact upright medieval clockwork ballista automaton with two long bent iron legs and broad brass feet, faceted ivory wedge head, narrow forward bolt rail gripped by jointed arms, vertical rivet magazine rising behind head, warm brass chest and dark iron pelvis; no ogre skin, wheels, cannon or drill",
+      "ability": "Pierce",
+      "kit": "Every third rivet pierces one target behind; precise replacement for Machines ranged slot",
+      "branch_a": "long cream rail, vertical sight fin and pale steel armor",
+      "branch_b": "triple upright magazine, black iron housing and copper feed gear",
+      "forms": [
+        {
+          "code": "A1",
+          "en": "Rail Guide",
+          "pt": "Guia de Trilho"
+        },
+        {
+          "code": "A2",
+          "en": "Needle Engine",
+          "pt": "Motor de Agulhas"
+        },
+        {
+          "code": "B1",
+          "en": "Triple Magazine",
+          "pt": "Pente Triplo"
+        },
+        {
+          "code": "B2",
+          "en": "Rivet Storm",
+          "pt": "Tempestade de Rebites"
+        }
+      ]
+    }
+  ]
+}

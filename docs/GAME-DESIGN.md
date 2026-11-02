@@ -2010,3 +2010,59 @@ retained their winner, Stronghold-destruction reason and tick (4044, 9982,
 references append beside the unchanged revision-2 and revision-6 contracts.
 The additive P73 protocol/history module is explicitly excluded from combat
 source hashing because it contains transport/API schemas, guarded by wire 33.
+
+## Ogre expansion — Proposed OG-01 (owner, 2026-11-01)
+
+The owner requests an eighth Faction, **Ogres**, using the existing SiegeWalker
+identifier/displayed **Ogre Archer / Arqueiro Ogro** and eight new conventional
+champions. The owner also approves a replacement Machine to retain nine per
+Faction in the authored preview roster: **72 conventional champions**, eight
+Factions, nine each. Existing kind and Faction indices are preserved; append
+Ogres after Insects and the nine kinds after Stridulator. Summons never count.
+The private preview pool grows to 72; the established online pool remains 46
+until separate competitive balance acceptance. The public landing catalog
+lists all authored champions and visibly identifies preview-only availability.
+
+**Proposed, explicitly requested range change:** Ogre Archer moves from Machines
+to Ogres and has the Archer's exact range in every form: base 4500, A1/A2 6000,
+B1/B2 4500. Its other stats, splash, Evolution effects, large-unit rules and
+server authority are unchanged. Cosmetic equipment clearance never changes
+collision, targeting, damage or the permitted authoritative lane offsets.
+
+**Proposed Ogre Synergy:** the existing 2/4 living-unit thresholds grant +500/
+1000 bp attack speed, through the existing AttackSpeed effect and caps.
+
+The nine new definitions and all integer ability parameters are in
+`content.rs` and `content/completion.rs`; their bilingual forms and unique art
+briefs are in [the expansion catalog](ogre-faction/catalog.json). These are
+initial proposals, not a competitive balance or deployment claim. Reused typed
+ability primitives retain their unit-only targeting, deterministic ordering,
+caps, server windups and no-resurrection rules.
+
+- Basalt Bulwark: Tank, 740 HP, 34 damage, 32-tick interval, 900 range, 35 speed;
+  unit-only max-HP chip damage capped at 24 (B1/B2 cap +8 per tier).
+- Cinder Maul: Dps, 400/45/30/900/43; every third hit sweeps 20 damage into up
+  to two nearby enemies (A damage +7/tier; B radius +250/tier, B2 third target).
+- Hook Brawler: Dps, 340/40/25/1000/50; +2500 bp unit damage below 30% HP,
+  A branch +1000 bp per tier. No hook displacement is implied by the visuals.
+- Flint Runner: Dps, 300/35/22/800/62; 24 walking ticks charge a +4000 bp next
+  hit, A +1500 bp/tier. No teleportation or client-authored movement.
+- Clay Binder: Control, 360/22/34/3000/36; 20% Slow for 20 ticks on hits;
+  periodic 24-damage earth pulse, 180-tick period, 750 radius, three targets.
+  A period -15/tier; B damage +8 and radius +150/tier.
+- Gust Drummer: Control, 420/20/36/1900/38; 12-tick interrupt windup, 180-tick
+  period, eight-tick lock; A period -15/tier, B lock +2/tier.
+- Hide Mender: Support, 360 HP, zero damage, 32-tick interval, 2800 range,
+  38 speed, 30 heal; four regrowth pulses of 4 at 20-tick gaps, B +2/tier.
+- Pebble Slinger: Ranged, 280/36/28/4100/48; every third-hit opportunity
+  window adds 3000 bp against a foe's hostile windup, A +1000 bp/tier.
+- Rivet Ballista: Machines/Ranged, 290/37/30/4300/40; every third rivet
+  pierces one target within 1200 behind for 4500 bp, B +1000 bp/tier.
+
+All new units cost 2400 Energy subunits except Basalt Bulwark 3000 and Hide
+Mender 1800. All have zero base splash and base heal except Hide Mender.
+A1/A2 add 1500 bp per tier to damage (Tank HP, Support heal); B1 adds 250 range,
+B2 adds 1500 bp attack speed. The standard Evolution rules remain unchanged.
+Basalt chip ratio is 300 bp, A +100 bp/tier. Source values are initial **Proposed**
+local-preview values; D-33 targeted screening and full competitive acceptance
+are recorded separately in the expansion report.

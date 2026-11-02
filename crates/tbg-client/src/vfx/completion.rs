@@ -205,6 +205,105 @@ pub fn impact(c: &mut Commands, a: &VfxAssets, k: UnitKind, t: u8, b: u8, at: Ve
                 );
             }
         }
+        BasaltBulwark => chips(c, a, &a.white, at, 3, 0.10 * power),
+        CinderMaul => {
+            chips(c, a, &a.amber, at, 4, 0.06 * power);
+            spawn(
+                c,
+                &a.ring,
+                &a.amber,
+                at,
+                Motion::Grow {
+                    radius: 0.18 * power,
+                },
+                0.0,
+                0.18,
+            );
+        }
+        HookBrawler => spawn(
+            c,
+            &a.crescent,
+            &a.white,
+            at,
+            Motion::Sweep {
+                size: 0.17 * power,
+                turn: -0.7,
+            },
+            0.0,
+            0.16,
+        ),
+        FlintRunner => {
+            for x in [-0.035, 0.035] {
+                spawn(
+                    c,
+                    &a.chip,
+                    &a.white,
+                    at + Vec3::X * x,
+                    Motion::Segment {
+                        size: Vec3::new(0.012, 0.12, 0.05),
+                    },
+                    0.0,
+                    0.14,
+                );
+            }
+        }
+        ClayBinder => {
+            chips(c, a, &a.amber, at, 3, 0.08);
+            spawn(
+                c,
+                &a.ring,
+                &a.amber,
+                at.with_y(0.03),
+                Motion::Grow {
+                    radius: 0.23 * power,
+                },
+                0.0,
+                0.26,
+            );
+        }
+        GustDrummer => {
+            for i in 0..2 {
+                spawn(
+                    c,
+                    &a.ring,
+                    &a.white,
+                    at,
+                    Motion::Grow {
+                        radius: 0.18 + i as f32 * 0.10,
+                    },
+                    i as f32 * 0.045,
+                    0.20,
+                );
+            }
+        }
+        HideMender => {
+            for y in [0.0, 0.06] {
+                spawn(
+                    c,
+                    &a.ring,
+                    &a.gold,
+                    at + Vec3::Y * y,
+                    Motion::Grow { radius: 0.12 },
+                    0.0,
+                    0.25,
+                );
+            }
+        }
+        PebbleSlinger => chips(c, a, &a.white, at, 2, 0.055 * power),
+        RivetBallista => {
+            chips(c, a, &a.gold, at, 2, 0.035);
+            spawn(
+                c,
+                &a.chip,
+                &a.white,
+                at,
+                Motion::Segment {
+                    size: Vec3::new(0.025, 0.025, 0.10),
+                },
+                0.0,
+                0.12,
+            );
+        }
         _ => {}
     }
 }

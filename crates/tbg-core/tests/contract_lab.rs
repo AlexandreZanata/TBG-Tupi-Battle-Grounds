@@ -133,6 +133,14 @@ fn c2_per_tick_traces_are_frozen() {
             (1000, 0x691f7d391aeaf998, 0x5916e7f9018b83fd, 8869),
             (65535, 0x3a8c4b25c812f504, 0xac5524f22bc861e9, 8613),
         ],
+        // OG-01: explicit canonical trace for the requested Ogre revision.
+        (8, 0x3d07d8f3e73671ef) => [
+            (1, 0xb28190b76fda00fb, 0xdc6ddee0ab7abe7e, 4044),
+            (7, 0x1c8f1dee7e671e96, 0x981a89b67d681f3d, 9982),
+            (42, 0x7cf4b2ac39262edd, 0x750b2a389290829d, 10382),
+            (1000, 0x2f5fcbb3660cdd4c, 0xc80e2d0725d28b4d, 8869),
+            (65535, 0x322f254d7eb09476, 0xa8b07cb5b9434daf, 19759),
+        ],
         revision => panic!("register an explicit canonical trace for {revision:?}"),
     };
     for (seed, t, h, tick) in goldens {

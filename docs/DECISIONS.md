@@ -2995,3 +2995,19 @@ The previous unpublished CC17 ledger is retained verbatim as
 binary remain available. Old message tags and both branches' appended protocol
 contracts are retained. This is a new local preview identity, not a public
 compatibility or release claim. Client preview version is `0.1.2-cc.1`.
+
+## OG-01 — Ogre faction and 72-champion authored catalog (Proposed, 2026-11-01)
+
+Owner authorization: create eight Ogres around the existing Ogre Archer, reduce
+its range to the Archer's, reserve space for its shoulder weapon and arms,
+add a Machine replacement (explicit follow-up answer), update the landing and
+publish one GitHub PR. This owner request authorizes pushing the execution
+branch and opening that PR, overriding the generic no-push instruction for this
+one delivery. No merge or public deployment is included.
+
+Append Faction Ogres and nine UnitKinds; keep all earlier discriminants. The
+eighth Synergy array entry changes snapshot bytes: wire revision 34, ruleset
+8. Preserve older four- and seven-faction stored summaries by zero-extending
+Ogres on load. Keep prior identity ledger entries and append this revision.
+The private authored roster is 72, online 46; public cards state preview
+availability. Balance and cross-platform visual acceptance remain distinct.

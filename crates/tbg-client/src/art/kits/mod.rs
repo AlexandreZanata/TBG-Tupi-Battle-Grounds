@@ -36,6 +36,7 @@ mod longaxe;
 mod luminous_oracle;
 mod mantis;
 mod nester;
+pub(crate) mod ogres;
 mod oilpress;
 mod old_finn;
 mod puppetmaster;
@@ -283,7 +284,7 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Capybara => Some(&CAPYBARA),
         UnitKind::RattleTick => Some(&RATTLETICK),
         #[allow(unreachable_patterns)]
-        _ => completion::kit(kind),
+        _ => ogres::kit(kind).or_else(|| completion::kit(kind)),
     }
 }
 

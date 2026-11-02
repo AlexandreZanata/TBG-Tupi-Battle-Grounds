@@ -121,6 +121,15 @@ fn unit_msgs(kind: UnitKind) -> UnitMsgs {
         UnitKind::Needlewing=>u(Msg::UnitNeedlewingName,UNIT_NEEDLEWING_FORM_NAME,Msg::UnitNeedlewingGood,Msg::UnitNeedlewingWeak),
         UnitKind::NectarNurse=>u(Msg::UnitNectarNurseName,UNIT_NECTAR_NURSE_FORM_NAME,Msg::UnitNectarNurseGood,Msg::UnitNectarNurseWeak),
         UnitKind::Stridulator=>u(Msg::UnitStridulatorName,UNIT_STRIDULATOR_FORM_NAME,Msg::UnitStridulatorGood,Msg::UnitStridulatorWeak),
+        UnitKind::BasaltBulwark=>u(Msg::UnitBasaltBulwarkName,UNIT_BASALT_BULWARK_FORM_NAME,Msg::UnitBasaltBulwarkGood,Msg::UnitBasaltBulwarkWeak),
+        UnitKind::CinderMaul=>u(Msg::UnitCinderMaulName,UNIT_CINDER_MAUL_FORM_NAME,Msg::UnitCinderMaulGood,Msg::UnitCinderMaulWeak),
+        UnitKind::HookBrawler=>u(Msg::UnitHookBrawlerName,UNIT_HOOK_BRAWLER_FORM_NAME,Msg::UnitHookBrawlerGood,Msg::UnitHookBrawlerWeak),
+        UnitKind::FlintRunner=>u(Msg::UnitFlintRunnerName,UNIT_FLINT_RUNNER_FORM_NAME,Msg::UnitFlintRunnerGood,Msg::UnitFlintRunnerWeak),
+        UnitKind::ClayBinder=>u(Msg::UnitClayBinderName,UNIT_CLAY_BINDER_FORM_NAME,Msg::UnitClayBinderGood,Msg::UnitClayBinderWeak),
+        UnitKind::GustDrummer=>u(Msg::UnitGustDrummerName,UNIT_GUST_DRUMMER_FORM_NAME,Msg::UnitGustDrummerGood,Msg::UnitGustDrummerWeak),
+        UnitKind::HideMender=>u(Msg::UnitHideMenderName,UNIT_HIDE_MENDER_FORM_NAME,Msg::UnitHideMenderGood,Msg::UnitHideMenderWeak),
+        UnitKind::PebbleSlinger=>u(Msg::UnitPebbleSlingerName,UNIT_PEBBLE_SLINGER_FORM_NAME,Msg::UnitPebbleSlingerGood,Msg::UnitPebbleSlingerWeak),
+        UnitKind::RivetBallista=>u(Msg::UnitRivetBallistaName,UNIT_RIVET_BALLISTA_FORM_NAME,Msg::UnitRivetBallistaGood,Msg::UnitRivetBallistaWeak),
     }
 }
 
@@ -154,6 +163,7 @@ pub fn faction(lang: Lang, faction: Faction) -> &'static str {
         Faction::Monsters => Msg::FactionMonsters,
         Faction::Celestials => Msg::FactionCelestials,
         Faction::Insects => Msg::FactionInsects,
+        Faction::Ogres => Msg::FactionOgres,
     })
 }
 

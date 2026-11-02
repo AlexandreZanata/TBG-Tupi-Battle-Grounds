@@ -64,6 +64,8 @@ pub enum ShotKind {
     WebSpit,
     SlashWave,
     BloodBolt,
+    /// Ogre expansion: separate mesh, timing and impact recipes by kind.
+    Ogre(tbg_core::UnitKind, u8, u8),
     BellEcho(u8, u8),
     BoneQuill(u8, u8),
     Broth(u8, u8),
@@ -74,6 +76,10 @@ pub enum ShotKind {
 
 #[derive(Clone, Copy)]
 enum Body {
+    OgrePebble,
+    ClayClod,
+    Stitch,
+    Rivet,
     BellEcho,
     BoneQuill,
     Broth,
@@ -161,6 +167,23 @@ fn look(kind: ShotKind) -> Look {
     use ShotKind::*;
     let smoke = |every, size| Trail::Smoke { every, size };
     let (body, arc, secs, trail, roll, impact) = match kind {
+        Ogre(k, t, b) => {
+            use tbg_core::UnitKind::*;
+            let (body, arc, secs, trail, roll) = match k {
+                PebbleSlinger => (Body::OgrePebble, 0.14, UNIT_FLIGHT, smoke(0.02, 0.035), 9.0),
+                ClayBinder => (Body::ClayClod, 0.08, CAST_FLIGHT, smoke(0.02, 0.06), 3.0),
+                HideMender => (Body::Stitch, 0.04, CAST_FLIGHT, Trail::Sparks, 0.0),
+                _ => (Body::Rivet, 0.01, UNIT_FLIGHT, Trail::Sparks, 0.0),
+            };
+            (
+                Some((body, 1.0 + f32::from(t.min(2)) * 0.08)),
+                arc,
+                secs,
+                trail,
+                roll,
+                Impact::Champion(k, t, b),
+            )
+        }
         BellEcho(t, b) => (
             Some((Body::BellEcho, 1.0 + f32::from(t.min(2)) * 0.08)),
             0.03,
@@ -547,6 +570,10 @@ pub fn arc(kind: ShotKind) -> f32 {
 
 /// Shared projectile meshes, built along +Z (nose forward) once.
 pub struct ShotMeshes {
+    ogre_pebble: Handle<Mesh>,
+    clay_clod: Handle<Mesh>,
+    stitch: Handle<Mesh>,
+    rivet: Handle<Mesh>,
     bell_echo: Handle<Mesh>,
     bone_quill: Handle<Mesh>,
     broth: Handle<Mesh>,
@@ -618,6 +645,32 @@ impl ShotMeshes {
             ));
         }
         Self {
+            ogre_pebble: build(vec![
+                (Bevel(0.10, 0.08, 0.12, 0.02), ROCK, Transform::IDENTITY),
+                (
+                    Box(0.03, 0.07, 0.08),
+                    IVORY,
+                    Transform::from_xyz(0.02, 0.0, 0.0),
+                ),
+            ]),
+            clay_clod: build(vec![
+                (Ball(0.08), RUST, Transform::IDENTITY),
+                (Cone(0.055, 0.11), AMBER, along(0.06)),
+            ]),
+            stitch: build(vec![
+                (Cyl(0.009, 0.16), IVORY, along(0.0)),
+                (
+                    Ring(0.006, 0.028, 360.0),
+                    BRASS,
+                    Transform::from_xyz(0.0, 0.0, -0.09),
+                ),
+            ]),
+            rivet: build(vec![
+                (Cyl(0.016, 0.16), STEEL, along(0.0)),
+                (Cyl(0.04, 0.035), BRASS, along(-0.08)),
+                (Cone(0.02, 0.07), IRON, along(0.11)),
+            ]),
+
             bell_echo: build(vec![
                 (Ring(0.012, 0.07, 300.0), GLOW, Transform::IDENTITY),
                 (Box(0.025, 0.08, 0.015), BONE, Transform::IDENTITY),
@@ -806,6 +859,10 @@ impl ShotMeshes {
     }
     fn get(&self, body: Body) -> &Handle<Mesh> {
         match body {
+            Body::OgrePebble => &self.ogre_pebble,
+            Body::ClayClod => &self.clay_clod,
+            Body::Stitch => &self.stitch,
+            Body::Rivet => &self.rivet,
             Body::BellEcho => &self.bell_echo,
             Body::BoneQuill => &self.bone_quill,
             Body::Broth => &self.broth,

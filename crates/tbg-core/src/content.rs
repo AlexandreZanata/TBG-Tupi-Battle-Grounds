@@ -297,6 +297,8 @@ pub const SYNERGIES: [(SynergyEffect, [i32; 2]); FACTION_COUNT] = [
     (SynergyEffect::Damage, [500, 1_000]),
     (SynergyEffect::MaxHp, [500, 1_000]),
     (SynergyEffect::Movement, [500, 1_000]),
+    // OG-01 Proposed: steady Ogre attack tempo, using the existing synergy effect.
+    (SynergyEffect::AttackSpeed, [500, 1_000]),
 ];
 
 /// One evolution form: additive modifiers on the base unit, plus the shared
@@ -1061,9 +1063,9 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         FormDef { hp_bp: 6_000, ..form("Plating") },
         FormDef { hp_bp: 6_000, splash_add: 800, ..form("Juggernaut") },
     ]),
-    unit(UnitKind::SiegeWalker, "Siege Walker", Machines, Ranged, 3_000,
-        [700, 85, 50, 6_000, 33, 1_500, 0], None, NO_ABILITIES, [
-        FormDef { range_add: 2_000, ..form("Longshot") },
+    unit(UnitKind::SiegeWalker, "Ogre Archer", Ogres, Ranged, 3_000,
+        [700, 85, 50, 4_500, 33, 1_500, 0], None, NO_ABILITIES, [
+        FormDef { range_add: 1_500, ..form("Longshot") },
         FormDef { dmg_bp: 5_000, ..form("Artillery") },
         FormDef { splash_add: 1_000, ..form("Shrapnel") },
         FormDef { on_hit: root(16), ..form("Concussion") },
@@ -1478,6 +1480,70 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
             FormDef { dmg_bp: 1_500, ..form("Resonant Crown") },
             FormDef { range_add: 300, ..form("Cutting Rhythm") },
             FormDef { atk_bp: 1_500, ..form("Amber Chorus") },
+        ]),
+    // OG-01 Proposed: staged Ogre expansion and Machine replacement.
+    unit(UnitKind::BasaltBulwark, "Basalt Bulwark", Ogres, Tank, 3000,
+        [740, 34, 32, 900, 35, 0, 0], None, completion::forms(UnitKind::BasaltBulwark), [
+            FormDef { hp_bp: 1_500, ..form("Cairn Guard") },
+            FormDef { hp_bp: 1_500, ..form("Stonewall") },
+            FormDef { range_add: 250, ..form("Cracked Guard") },
+            FormDef { atk_bp: 1_500, ..form("Quake Bastion") },
+        ]),
+    unit(UnitKind::CinderMaul, "Cinder Maul", Ogres, Dps, 2400,
+        [400, 45, 30, 900, 43, 0, 0], None, completion::forms(UnitKind::CinderMaul), [
+            FormDef { dmg_bp: 1_500, ..form("Coalbreaker") },
+            FormDef { dmg_bp: 1_500, ..form("Ember Anvil") },
+            FormDef { range_add: 250, ..form("Twin Brands") },
+            FormDef { atk_bp: 1_500, ..form("Furnace Fists") },
+        ]),
+    unit(UnitKind::HookBrawler, "Hook Brawler", Ogres, Dps, 2400,
+        [340, 40, 25, 1000, 50, 0, 0], None, completion::forms(UnitKind::HookBrawler), [
+            FormDef { dmg_bp: 1_500, ..form("Ironhook") },
+            FormDef { dmg_bp: 1_500, ..form("Anchorbreaker") },
+            FormDef { range_add: 250, ..form("Barbed Loop") },
+            FormDef { atk_bp: 1_500, ..form("Chainmaster") },
+        ]),
+    unit(UnitKind::FlintRunner, "Flint Runner", Ogres, Dps, 2400,
+        [300, 35, 22, 800, 62, 0, 0], None, completion::forms(UnitKind::FlintRunner), [
+            FormDef { dmg_bp: 1_500, ..form("Trailblade") },
+            FormDef { dmg_bp: 1_500, ..form("Flint Gale") },
+            FormDef { range_add: 250, ..form("Sparksprinter") },
+            FormDef { atk_bp: 1_500, ..form("Obsidian Rush") },
+        ]),
+    unit(UnitKind::ClayBinder, "Clay Binder", Ogres, Control, 2400,
+        [360, 22, 34, 3000, 36, 0, 0], slow(2_000, 20), completion::forms(UnitKind::ClayBinder), [
+            FormDef { dmg_bp: 1_500, ..form("Clay Seal") },
+            FormDef { dmg_bp: 1_500, ..form("Earthlock") },
+            FormDef { range_add: 250, ..form("Mire Mask") },
+            FormDef { atk_bp: 1_500, ..form("Quagmire Sage") },
+        ]),
+    unit(UnitKind::GustDrummer, "Gust Drummer", Ogres, Control, 2400,
+        [420, 20, 36, 1900, 38, 0, 0], None, completion::forms(UnitKind::GustDrummer), [
+            FormDef { dmg_bp: 1_500, ..form("Stormbeat") },
+            FormDef { dmg_bp: 1_500, ..form("Thunderhide") },
+            FormDef { range_add: 250, ..form("Hollow Rhythm") },
+            FormDef { atk_bp: 1_500, ..form("Typhoon Drum") },
+        ]),
+    unit(UnitKind::HideMender, "Hide Mender", Ogres, Support, 1800,
+        [360, 0, 32, 2800, 38, 0, 30], None, completion::forms(UnitKind::HideMender), [
+            FormDef { heal_bp: 1_500, ..form("Field Stitch") },
+            FormDef { heal_bp: 1_500, ..form("Leather Surgeon") },
+            FormDef { range_add: 250, ..form("Spirit Spool") },
+            FormDef { atk_bp: 1_500, ..form("Ancestral Seam") },
+        ]),
+    unit(UnitKind::PebbleSlinger, "Pebble Slinger", Ogres, Ranged, 2400,
+        [280, 36, 28, 4100, 48, 0, 0], None, completion::forms(UnitKind::PebbleSlinger), [
+            FormDef { dmg_bp: 1_500, ..form("Counterweight") },
+            FormDef { dmg_bp: 1_500, ..form("Cliffshot") },
+            FormDef { range_add: 250, ..form("Split Pouch") },
+            FormDef { atk_bp: 1_500, ..form("Hail Sling") },
+        ]),
+    unit(UnitKind::RivetBallista, "Rivet Ballista", Machines, Ranged, 2400,
+        [290, 37, 30, 4300, 40, 0, 0], None, completion::forms(UnitKind::RivetBallista), [
+            FormDef { dmg_bp: 1_500, ..form("Rail Guide") },
+            FormDef { dmg_bp: 1_500, ..form("Needle Engine") },
+            FormDef { range_add: 250, ..form("Triple Magazine") },
+            FormDef { atk_bp: 1_500, ..form("Rivet Storm") },
         ]),
 
 ];

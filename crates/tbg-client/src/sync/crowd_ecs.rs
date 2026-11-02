@@ -122,11 +122,17 @@ pub(super) fn update(
             body.anchor_x += (depth.x + depth.y) * 0.5 * body.facing;
             body.half_length = (depth.y - depth.x) * 0.5;
         }
-        if visual.kind() == UnitKind::Shatterback {
+        if visual.kind() == UnitKind::Shatterback
+            || visual.kind() == UnitKind::SiegeWalker
+            || crate::art::kits::ogres::contains(visual.kind())
+        {
             let (tier, branch) = visual.form();
             let form = library.get(visual.kind(), tier, branch);
-            let lunge =
-                crate::art::melee::strike_profile_for_unit(visual.kind(), tier, branch).lunge;
+            let lunge = if visual.kind() == UnitKind::Shatterback {
+                crate::art::melee::strike_profile_for_unit(visual.kind(), tier, branch).lunge
+            } else {
+                0.0
+            };
             body.include_envelope(
                 form.occupancy.x,
                 form.occupancy.y + lunge,

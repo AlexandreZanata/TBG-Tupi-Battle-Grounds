@@ -89,6 +89,8 @@ fn synergies() {
             (SynergyEffect::Damage, [500, 1_000]),
             (SynergyEffect::MaxHp, [500, 1_000]),
             (SynergyEffect::Movement, [500, 1_000]),
+            // OG-01 Proposed: Ogre tempo at the existing 2/4 thresholds.
+            (SynergyEffect::AttackSpeed, [500, 1_000]),
         ]
     );
 }

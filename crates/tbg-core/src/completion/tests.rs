@@ -407,9 +407,9 @@ fn completion_cc17_rhythm_keeps_standard_root_priority_and_two_victim_cap() {
 }
 
 #[test]
-fn completion_pool_is_local_only_and_all_seven_factions_have_nine_conventional_kinds() {
+fn completion_pool_is_local_only_and_all_eight_factions_have_nine_conventional_kinds() {
     assert_eq!(crate::FULL_POOL.len(), 46);
-    assert_eq!(crate::COMPLETION_POOL.len(), 63);
+    assert_eq!(crate::COMPLETION_POOL.len(), 72);
     for faction in crate::FACTIONS {
         assert_eq!(
             crate::COMPLETION_POOL
@@ -528,4 +528,52 @@ fn completion_all_85_forms_start_and_advance_in_private_training() {
         }
     }
     assert_eq!(covered, 85);
+}
+
+#[test]
+fn completion_ogre_sweep_and_stitches_keep_allied_damage_and_pulse_contracts() {
+    // OG-01: reuse the authoritative sweep/regrowth families; visual equipment adds no rules.
+    let mut s = arena();
+    let a = add(&mut s, CinderMaul, Seat::A, 4000);
+    let b = add(&mut s, BoneBrute, Seat::B, 4700);
+    let extra = add(&mut s, BoneBrute, Seat::B, 4800);
+    let ally = add(&mut s, Archer, Seat::A, 4800);
+    let before = get(&s, ally).hp;
+    for _ in 0..2 {
+        basic(&mut s, a, b);
+    }
+    assert_eq!(get(&s, extra).hp, get(&s, extra).max_hp);
+    basic(&mut s, a, b);
+    assert!(get(&s, extra).hp < get(&s, extra).max_hp);
+    assert_eq!(get(&s, ally).hp, before);
+    let healer = add(&mut s, HideMender, Seat::A, 4000);
+    wound(&mut s, ally, 100);
+    basic(&mut s, healer, ally);
+    let healed = get(&s, ally).hp;
+    s.tick += 20;
+    tick(&mut s, &mut Vec::new());
+    assert!(get(&s, ally).hp > healed);
+    hits::damage(&mut s, Target::Unit(ally), 1, &mut Vec::new());
+    assert_eq!(get(&s, ally).fx.completion.regrowth.left, 0);
+}
+#[test]
+fn completion_ogre_drum_interrupts_specials_and_preserves_basic_windup() {
+    // OG-01: the drum uses the existing interrupt/ward/lockout contract, not a new aggro rule.
+    let mut s = arena();
+    let a = add(&mut s, GustDrummer, Seat::A, 4000);
+    let b = add(&mut s, Whisperer, Seat::B, 4700);
+    let i = s.unit_index(b).unwrap();
+    s.units[i].fx.special = Some(PendingCast {
+        target: Some(a),
+        left: 6,
+    });
+    s.units[i].windup = Some((Target::Unit(a), 5));
+    let u = get(&s, a);
+    s.units[i].fx.ward_until = s.tick + 10;
+    special_resolve(&mut s, &u, b, &mut Vec::new());
+    assert!(get(&s, b).fx.special.is_some());
+    s.units[i].fx.ward_until = 0;
+    special_resolve(&mut s, &u, b, &mut Vec::new());
+    assert!(get(&s, b).fx.special.is_none());
+    assert_eq!(get(&s, b).windup, Some((Target::Unit(a), 5)));
 }

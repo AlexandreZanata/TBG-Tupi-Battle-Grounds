@@ -24,6 +24,8 @@ pub mod kits;
 mod legacy;
 pub mod melee;
 pub mod mesh;
+#[cfg(test)]
+mod ogre_tests;
 mod overhead;
 #[cfg(test)]
 mod ownership_tests;

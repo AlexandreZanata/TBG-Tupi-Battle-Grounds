@@ -118,6 +118,49 @@ const fn form(kind: UnitKind, slot: u8) -> [super::Ability; 2] {
         0
     };
     let value = match kind {
+        UnitKind::BasaltBulwark => Ability::Crusher {
+            max_hp_bp: 300 + a * 100,
+            cap: 24 + b * 8,
+        },
+        UnitKind::CinderMaul => Ability::Sweep {
+            every: 3,
+            damage: 20 + a * 7,
+            radius: 850 + b as i32 * 250,
+            targets: if b == 2 { 3 } else { 2 },
+        },
+        UnitKind::HookBrawler => Ability::Finisher {
+            below_bp: 3_000,
+            bonus_bp: 2_500 + a * 1_000,
+        },
+        UnitKind::FlintRunner => Ability::Pounce {
+            walk_ticks: 24,
+            bonus_bp: 4_000 + a * 1_500,
+        },
+        UnitKind::ClayBinder => Ability::Beam {
+            period: 180 - a * 15,
+            damage: 24 + b * 8,
+            radius: 750 + b as i32 * 150,
+            targets: 3,
+        },
+        UnitKind::GustDrummer => Ability::Interrupt {
+            period: 180 - a * 15,
+            lock_ticks: 8 + b * 2,
+            windup: 12,
+        },
+        UnitKind::HideMender => Ability::Regrowth {
+            heal: 4 + b * 2,
+            pulses: 4,
+            gap: 20,
+        },
+        UnitKind::PebbleSlinger => Ability::Opportunity {
+            every: 3,
+            bonus_bp: 3_000 + a * 1_000,
+        },
+        UnitKind::RivetBallista => Ability::Pierce {
+            every: 3,
+            ratio_bp: 4_500 + b * 1_000,
+            behind: 1_200,
+        },
         UnitKind::Gravecutter => Ability::Finisher {
             below_bp: 3_500,
             bonus_bp: 3_000 + a * 1_000,

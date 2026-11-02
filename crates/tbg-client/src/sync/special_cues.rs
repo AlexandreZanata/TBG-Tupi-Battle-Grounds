@@ -87,7 +87,8 @@ fn resolved(
     if let Some((_, _, mut anim)) = map.0.get(&unit).and_then(|e| visuals.get_mut(*e).ok()) {
         anim.resolve_special();
     }
-    if crate::art::kits::completion::kit(kind).is_some() {
+    if crate::art::kits::completion::kit(kind).is_some() || crate::art::kits::ogres::contains(kind)
+    {
         let at = Vec3::new(world_x(center, fx.you), 0.6, 0.0);
         let form = map
             .0

@@ -297,6 +297,22 @@ impl Animator {
         self.kit
             .map_or_else(|| clip.duration(), |k| k.duration(clip))
     }
+    /// Event-free geometry sampling includes engaged aim and the independent reload clock.
+    pub(super) fn clearance_pose(
+        &mut self,
+        clip: Clip,
+        t: f32,
+        target: Option<Vec3>,
+        age: f32,
+    ) -> Pose {
+        self.aim = target.map(|target| Aim {
+            target,
+            weight: 1.0,
+        });
+        self.since_attack = age;
+        self.clock = age;
+        self.pose(clip, t)
+    }
     pub(crate) fn pose(&self, clip: Clip, t: f32) -> Pose {
         let mut pose = sample(clip, t);
         let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.0));

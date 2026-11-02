@@ -61,6 +61,8 @@ pub enum Faction {
     Monsters,
     Celestials,
     Insects,
+    /// Owner-authorized Ogre faction; appended to preserve wire indices.
+    Ogres,
 }
 
 impl Faction {
@@ -78,6 +80,7 @@ impl Faction {
             Faction::Monsters => "Monsters",
             Faction::Celestials => "Celestials",
             Faction::Insects => "Insects",
+            Faction::Ogres => "Ogres",
         }
     }
 }
@@ -183,6 +186,16 @@ pub enum UnitKind {
     Needlewing,
     NectarNurse,
     Stridulator,
+    // Ogre expansion: appended; staged in the owner preview.
+    BasaltBulwark,
+    CinderMaul,
+    HookBrawler,
+    FlintRunner,
+    ClayBinder,
+    GustDrummer,
+    HideMender,
+    PebbleSlinger,
+    RivetBallista,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -202,7 +215,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
 #[rustfmt::skip]
-pub const ALL_KINDS: [UnitKind; 68] = [
+pub const ALL_KINDS: [UnitKind; 77] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -271,6 +284,15 @@ pub const ALL_KINDS: [UnitKind; 68] = [
     UnitKind::Needlewing,
     UnitKind::NectarNurse,
     UnitKind::Stridulator,
+    UnitKind::BasaltBulwark,
+    UnitKind::CinderMaul,
+    UnitKind::HookBrawler,
+    UnitKind::FlintRunner,
+    UnitKind::ClayBinder,
+    UnitKind::GustDrummer,
+    UnitKind::HideMender,
+    UnitKind::PebbleSlinger,
+    UnitKind::RivetBallista,
 ];
 
 impl UnitKind {
@@ -348,7 +370,7 @@ pub const FULL_POOL: [UnitKind; 46] = [
 
 /// Owner-authorized local champion preview; the online pool remains FULL_POOL.
 #[rustfmt::skip]
-pub const COMPLETION_POOL: [UnitKind; 63] = [
+pub const COMPLETION_POOL: [UnitKind; 72] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -412,6 +434,15 @@ pub const COMPLETION_POOL: [UnitKind; 63] = [
     UnitKind::Needlewing,
     UnitKind::NectarNurse,
     UnitKind::Stridulator,
+    UnitKind::BasaltBulwark,
+    UnitKind::CinderMaul,
+    UnitKind::HookBrawler,
+    UnitKind::FlintRunner,
+    UnitKind::ClayBinder,
+    UnitKind::GustDrummer,
+    UnitKind::HideMender,
+    UnitKind::PebbleSlinger,
+    UnitKind::RivetBallista,
 ];
 
 /// All playable archetypes, in glossary order.
@@ -423,8 +454,8 @@ pub const ARCHETYPES: [Archetype; 5] = [
     Archetype::Control,
 ];
 
-/// Number of Factions: the four original ones and the three of D-64.
-pub const FACTION_COUNT: usize = 7;
+/// Number of Factions, including the owner-authorized Ogre expansion.
+pub const FACTION_COUNT: usize = 8;
 
 /// All factions, in glossary order (also their synergy index).
 pub const FACTIONS: [Faction; FACTION_COUNT] = [
@@ -435,6 +466,7 @@ pub const FACTIONS: [Faction; FACTION_COUNT] = [
     Faction::Monsters,
     Faction::Celestials,
     Faction::Insects,
+    Faction::Ogres,
 ];
 
 /// Status effect applied to the primary target of a hit.

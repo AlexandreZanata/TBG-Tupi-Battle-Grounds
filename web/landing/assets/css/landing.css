@@ -169,3 +169,6 @@
 .native-checksum code{display:block;font-size:.75rem;color:var(--text-muted);overflow-wrap:anywhere;margin-top:8px}
 .native-release-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 @media (max-width:1100px){.platforms{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Preview availability follows the source roster, independent of Faction. */
+.champion-preview{display:inline-block;margin:.2rem 0;padding:.15rem .5rem;border:1px solid var(--gold,#c9a13b);border-radius:999px;font-size:.75rem;color:var(--gold,#c9a13b)}
