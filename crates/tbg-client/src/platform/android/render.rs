@@ -7,11 +7,18 @@ use bevy::render::{
 use std::ffi::{c_char, c_int, CStr};
 
 pub fn plugin() -> RenderPlugin {
-    RenderPlugin {
+    let render_creation = if emulator() {
+        // Emulator EGL exposes no sRGB window surface, which Bevy 0.20 requires on GLES
+        // (SURFACE_VIEW_FORMATS); its Vulkan device uses the engine's normal limits.
+        WgpuSettings {
+            backends: Some(Backends::VULKAN),
+            ..Default::default()
+        }
+    } else {
         // Keep the same PBR/art path with the engine's uniform-buffer fallback.
         // Vulkan failed twice on the owned POCO; do not silently retry that backend.
-        render_creation: WgpuSettings {
-            backends: Some(backend(emulator())),
+        WgpuSettings {
+            backends: Some(Backends::GL),
             priority: WgpuSettingsPriority::WebGL2,
             features: WgpuFeatures::empty(),
             // Overriding priority does not recompute limits in Default::default().
@@ -20,18 +27,10 @@ pub fn plugin() -> RenderPlugin {
             limits: WgpuLimits::downlevel_webgl2_defaults().using_resolution(WgpuLimits::default()),
             ..Default::default()
         }
-        .into(),
+    };
+    RenderPlugin {
+        render_creation: render_creation.into(),
         ..Default::default()
-    }
-}
-
-/// Emulator EGL exposes no sRGB window surface, which Bevy 0.20 requires on
-/// GLES (SURFACE_VIEW_FORMATS); only emulators use Vulkan, with the same limits.
-fn backend(emulator: bool) -> Backends {
-    if emulator {
-        Backends::VULKAN
-    } else {
-        Backends::GL
     }
 }
 
@@ -51,13 +50,4 @@ fn emulator() -> bool {
         if emulator { "Vulkan (emulator)" } else { "GLES" }
     );
     emulator
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn devices_keep_gles_and_only_emulators_use_vulkan() {
-        assert_eq!(super::backend(false), super::Backends::GL);
-        assert_eq!(super::backend(true), super::Backends::VULKAN);
-    }
 }
