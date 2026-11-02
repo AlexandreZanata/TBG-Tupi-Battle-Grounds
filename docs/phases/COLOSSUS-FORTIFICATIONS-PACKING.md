@@ -48,7 +48,7 @@ Commands below use `--offline --locked`; test execution uses `--test-threads=1`.
 - `cargo check -p tbg-core --lib --features lab,training`: passed on the work
   front. Formatting and `git diff --check` passed on the integrated source.
 - `cargo test -p tbg-core --features lab,training --lib -- pk01_ gd01_`:
-  final 12 passed. Includes mirrored giant blocking, ranged row capacity,
+  final 14 passed. Includes mirrored giant blocking, ranged row capacity,
   stable recomputation, mixed-form conservation, queue release/replay/privacy,
   gradual bypass, failed Evolution without spending, protected backfield birth,
   no ranged reach extension, bot preference and real frontal Colossus damage.
@@ -108,7 +108,8 @@ unchanged tower evidence and retest only the tuned private champion.
 
 > blocked: repeated preview bot probes reached 120 s wall time with both
 > Strongholds intact and persistent front/queue formations. Initial three-tile
-> geometry, later five-tile/root-range/birth/bot candidates were inspected;
+> geometry, later five-tile/root-range/birth/bot candidates on the legacy
+> 46-kind/Classic reference were inspected;
 > full preview bot end-to-end balance is unresolved. Stop repeating this probe.
 > PK-01 stays private rather than entering competitive canonical play.
 
@@ -117,8 +118,8 @@ projection exists; zero overlap for every teleport/congestion case is not
 claimed. Existing combat/area rules remain longitudinal. Five-tile floor and
 meadow dressing are shared; themed scenery clearance still needs observation.
 
-Native Linux actual captures, a short packing witness and the installation
-receipt are pending below. Windows/desktop game-web comparison, both-seat
+Native Linux actual captures, the packing witness and the installation
+receipt are verified below. Windows/desktop game-web comparison, both-seat
 continuous crowd motion, dense mixed-team fun review and full D-33 acceptance
 remain pending. No shared-code or native-only parity claim is permitted.
 
@@ -126,3 +127,67 @@ Actual landing browser inspection remains blocked: fresh browser inventory
 worked, but selecting localhost returned `browser.user is unavailable`.
 Static/link/HTTP checks do not substitute for browser appearance. Old preview
 sessions and installations remain available; the new slot is separate.
+
+
+## Final Linux observation and installation
+
+Source code was committed before building. Preview `0.1.4-colossus.1` is
+installed from `a1f6446ce60153589e95bd4edde263e18faeba26`, protocol 36,
+`w36-r11-a0a1d508c59e5841`, in the separate champion-preview slot. Native
+build used the existing cache/lock and two jobs; `strip --strip-unneeded`
+only removed symbols. It remains a debug build, not a release build.
+The installer verified the binary and **all 380 asset hashes**. See
+[receipt](../colossus-fortifications/installed-validation.json). Existing
+native sessions were preserved; a new Colossus catalog window uses isolated
+data. The source differs from the pictured revisions only in test/lab-boundary
+hardening and the bot's Fortification spending preference, not champion art.
+
+The original three-pose lineup clipped the tallest rest form, and a later
+fixed framing clipped the forward slam. The final shared camera measures
+all posed vertices/depth before framing. The final **1600x1000 native PNG**
+shows all five forms in Idle/Walk/impact with no clipped weapon, inspected
+visually. It is 300684 bytes and is committed without image alteration.
+The base portrait is native 400x400, lossless WebP, unchanged pixels on the
+committed recapture. [Per-image build/hash provenance](../colossus-fortifications/render-manifest.json)
+keeps portrait `edac2cd` and measured-framing lineup `31a6cbc` distinct.
+
+Three real Training witnesses passed, with zero entity-command warnings in
+these scenes (headless X11 display warnings remain):
+
+- Physical packing: eight active units, five waiting, 20 stationary frames,
+  root error below 0.015 world units and no competing cosmetic repulsion.
+- Allied rolling cask: 25 rendered flight frames, reload prop hidden, actual
+  area healing, paused state stable, pause/step/reset identity journey passed.
+- Enemy interception: 15 rendered flight frames, actual enemy contact and
+  area healing, reload hidden, paused state stable, identity journey passed.
+
+The old interception fixture placed the enemy inside reserved bodies; it was
+projected away and timed out. The corrected debug-only fixture leaves legal
+body space and includes the wounded carrier/near ally in the real burst.
+The harness isolates render subprocesses so a terminated scene cannot close
+its parent. Earlier timeout/interruption is not claimed as a pass. Successful
+scene provenance is [recorded per case](../colossus-fortifications/native-witnesses.json).
+
+Final targeted follow-up: the two changed numeric-constant cases and all 14
+Stronghold contract cases passed (13 short numeric/action cases, then the
+single fortified destruction/replay case in 0.80 s). The bot price-saving
+regression passed. Final explicit-preview boundary/geometry group: 14 passed;
+its first parse failure in two edited test arrays was corrected before the
+successful rerun. The eight base counter results are byte-identical after
+moving physical-lane activation from the placement hook to explicit preview
+experiments; ordinary D-33 matrices retain canonical movement.
+
+Local static gallery <http://localhost:8966/> and refreshed landing
+<http://localhost:8604/#champions> serve HTTP 200, including the new native
+portrait. The landing process was replaced only after PID/cwd/command
+ownership verification. Browser visual inspection remains unavailable as
+noted above. Static checks pass for 82 champions, ten filters, nine counts of
+nine plus one God, and 36 preview-only entries. No public deployment.
+
+Remaining: preview long-run stalemate resolution and owner look/fun review;
+forced-displacement congestion; Windows/desktop game-web visual/motion
+comparison; continuous dense mixed-team/both-seat presentation; full D-33
+competitive acceptance. These remain pending rather than passing by inference.
+The broad preexisting `completion_all_180_forms_start_and_advance_in_private_training`
+acceptance test was updated for the new count but not expanded into this
+focused run. No full workspace suite or unrelated heavy checks were run.

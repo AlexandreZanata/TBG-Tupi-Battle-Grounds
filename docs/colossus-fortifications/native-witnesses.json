@@ -1,0 +1,69 @@
+{
+  "surface": "Linux X11/Xvfb; real Bevy native renderer",
+  "parity": "Windows and desktop game-web unobserved",
+  "cases": [
+    {
+      "name": "packing",
+      "image": "packing.png",
+      "log": "packing.log",
+      "seconds": 14.0,
+      "sha256": "0a92d1e25f80cc430384d7da541516b0ba0f4775ffe78af0319581848d40d1a0",
+      "witnesses": [
+        "PK-01 native witness passed: active=8, queued=5, stationary_frames=20, root_error<0.015, no_cosmetic_repulsion=true"
+      ],
+      "entity_warnings": 0,
+      "build": {
+        "contract": "w36-r11-a0a1d508c59e5841",
+        "features": [],
+        "profile": "debug",
+        "protocol": 36,
+        "source_commit": "edac2cd0de2094a0cdf355f2085efccebde6a98d",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.1"
+      },
+      "binary_sha256": "2ff7d970ea94543d2884134bee7d7dd31f304cd1f86bf97bd2349e2ececf1c66"
+    },
+    {
+      "name": "barrel-ally",
+      "image": "barrel-ally.png",
+      "log": "barrel-ally.log",
+      "seconds": 13.9,
+      "sha256": "9bc0f66fe1e8cca65f91695fcb1aea9d1c6fc491bfd06b6d7637c0c53e00d3bc",
+      "witnesses": [
+        "Native rolling-barrel witness passed: rendered_frames=25, reload_hidden=true, area_heal=true, paused=true, intercepted=false"
+      ],
+      "entity_warnings": 0,
+      "build": {
+        "contract": "w36-r11-a0a1d508c59e5841",
+        "features": [],
+        "profile": "debug",
+        "protocol": 36,
+        "source_commit": "edac2cd0de2094a0cdf355f2085efccebde6a98d",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.1"
+      },
+      "binary_sha256": "2ff7d970ea94543d2884134bee7d7dd31f304cd1f86bf97bd2349e2ececf1c66"
+    },
+    {
+      "name": "barrel-intercept",
+      "image": "proof-final/barrel-intercept.png",
+      "log": "proof-final/barrel-intercept.log",
+      "seconds": 15.46,
+      "sha256": "9bcbcb2d98ae1700a736847d23520b6d3ca87e834ed95ce974c9b14df1ac35a7",
+      "witnesses": [
+        "Native rolling-barrel witness passed: rendered_frames=15, reload_hidden=true, area_heal=true, paused=true, intercepted=true"
+      ],
+      "entity_warnings": 0,
+      "build": {
+        "contract": "w36-r11-a0a1d508c59e5841",
+        "features": [],
+        "profile": "debug",
+        "protocol": 36,
+        "source_commit": "31a6cbcb3bb20d0b1b0874cb95910539473edae6",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.1"
+      },
+      "binary_sha256": "ec295afac35678a27dd0a5afa986f423b6d090a8e24994b844c6c12fce73adc1"
+    }
+  ]
+}

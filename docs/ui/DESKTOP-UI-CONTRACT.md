@@ -476,3 +476,11 @@ three lineup rows, including forward obelisk depth. It fits the projected bounds
 with the shared camera FOV and margins for the title/footer. Cases include the
 highest A2 crown/obelisk and the B2 forward slam. Linux native capture is the
 reference; Windows/game-web observation of this same framing remains pending.
+
+
+Final GD-01 Linux evidence: actual 400x400 portrait and unclipped 1600x1000
+vertex-fitted five-form sheet, plus native packing/allied-cask/interception
+witnesses. The installed debug preview is source `a1f6446`, wire 36, with all
+380 asset hashes verified. Exact renderer revisions, observations and pending
+Windows/desktop game-web cases are in the TW-01/PK-01/GD-01 phase report.
+The new catalog window uses separate data and preserves the earlier session.

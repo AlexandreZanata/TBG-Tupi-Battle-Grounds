@@ -63,3 +63,17 @@ The final bounded Energy-18 panel beats Archer/Longaxe and loses to Ogre Archer
 and Trident on both seats. At Energy 24 the base Sawbot, Farwatch and Mantis
 panels also counter it. Those results, including evolved references that still
 lose, are recorded without claiming full competitive acceptance.
+
+
+## Actual Linux model captures
+
+![Colossus base portrait](../../crates/tbg-client/assets/battle/portraits/colossus.webp)
+
+![Five forms, idle, walk and frontal slam](colossus-lineup.png)
+
+[Renderer provenance](render-manifest.json) and [native witnesses](native-witnesses.json)
+record the real source revisions and original image hashes. The portrait is
+lossless engine output; the Evolution sheet is the original native PNG.
+[Installed build verification](installed-validation.json) records all 380 asset
+hashes and the exact debug binary. Local review: <http://localhost:8966/>;
+updated 82-champion landing: <http://localhost:8604/#champions>.

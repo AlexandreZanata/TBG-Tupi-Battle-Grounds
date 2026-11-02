@@ -1,0 +1,60 @@
+{
+  "surface": "Linux X11/Xvfb; actual Bevy native render",
+  "captures": [
+    {
+      "kind": "Colossus",
+      "forms": [
+        "base",
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ],
+      "image": "colossus-lineup.png",
+      "sha256": "0df0c0dd205499f4273c6f7360b4f9235a0607884e52d99651370989ba7c3808",
+      "size": [
+        1600,
+        1000
+      ],
+      "seconds": 18.46,
+      "mode": "lineup: idle/walk/attack",
+      "log": "colossus-lineup.log",
+      "build": {
+        "contract": "w36-r11-a0a1d508c59e5841",
+        "features": [],
+        "profile": "debug",
+        "protocol": 36,
+        "source_commit": "31a6cbcb3bb20d0b1b0874cb95910539473edae6",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.1"
+      },
+      "binary_sha256": "ec295afac35678a27dd0a5afa986f423b6d090a8e24994b844c6c12fce73adc1"
+    }
+  ],
+  "portrait": {
+    "kind": "Colossus",
+    "forms": [
+      "base"
+    ],
+    "image": "colossus-portrait.png",
+    "sha256": "554c3bac04e57d103ee0d36db97e0bb3723d142e5ad13dceabc9805a3d54bae8",
+    "size": [
+      400,
+      400
+    ],
+    "seconds": 14.12,
+    "mode": "base portrait",
+    "log": "colossus-portrait.log",
+    "build": {
+      "contract": "w36-r11-a0a1d508c59e5841",
+      "features": [],
+      "profile": "debug",
+      "protocol": 36,
+      "source_commit": "edac2cd0de2094a0cdf355f2085efccebde6a98d",
+      "target": "x86_64-unknown-linux-gnu",
+      "version": "0.1.4-colossus.1"
+    },
+    "binary_sha256": "2ff7d970ea94543d2884134bee7d7dd31f304cd1f86bf97bd2349e2ececf1c66"
+  },
+  "note": "Actual native captures. Portrait source edac2cd; lineup source 31a6cbc. The gallery-only framing change does not change the model or portrait pixels."
+}
