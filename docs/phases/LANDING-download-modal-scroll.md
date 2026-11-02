@@ -28,12 +28,26 @@ scrolling. No product workaround or weakened assertion was needed.
 
 `git diff --check` and `python3 web/scripts/check.py` passed (120 landing files,
 16 public-admin files, 115 local-preview files and generated content checks).
-Public verification is recorded when executed. No Rust/Trunk build, native packaging, full suite or
-gameplay validation is needed for this CSS-only public-site fix. Other browsers
+No Rust/Trunk build, native packaging, full suite or gameplay validation is
+needed for this CSS-only public-site fix. Other browsers
 and phone layouts remain unverified; mobile is outside this request.
 
 ## Publication
 
-Publish only a new immutable landing directory and atomically switch its entry.
-Preserve the current download catalog, backend process, other site pointers,
-proxy configuration, databases and deployment activation flags/timers.
+Published source `cb68ad4` as immutable landing release
+`20261102T002642Z-cb68ad4e34a9` using the existing static staging/upload helper.
+The upload helper repeated its required static checks successfully. Activation
+ran under the existing nonblocking VPS deployment lock after matching the staged
+HTML/CSS digests. The previous entry and protected state were backed up; public
+HTML returned 200 with the exact staged digest.
+
+On the actual public site with both complete 0.1.2-rc.1 packages available, all
+six pointer/close paths passed again: scroll **8029 before, during and after**,
+correct opener focus, closed dialog and no browser-console errors. No page jump
+occurred on opening or closing. Proof screenshots/measurements are outside Git.
+
+Before/after checks confirmed the same backend PID 5283, kernel executable,
+Caddy configuration, public download-catalog digest and game/admin site pointers.
+All four deployment timers/flags remained disabled/absent. No database mutation,
+proxy reload, backend restart or native application change was involved. The old
+landing release remains available for rollback. No CI completion was awaited.
