@@ -60,6 +60,11 @@ impl Bot {
             return None;
         }
         self.wait = 3 + self.rng.below(6);
+        let tower = view.strongholds[view.you.index()];
+        if army(view) >= EVOLVE_ARMY && tower.kind != StrongholdKind::Classic && tower.tier < 2 {
+            // TW-01: save for the real Fortification price instead of spending each small gain.
+            return self.fortify(view);
+        }
         // PK-01: spend on deployed power before filling an already blocked entrance.
         // This is an opponent preference; players retain unlimited purchases.
         if view.queued > 0 {

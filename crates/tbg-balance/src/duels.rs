@@ -71,12 +71,28 @@ pub fn arena(rules: &Ruleset) -> &'static Ruleset {
 /// Score of `a` (1 win, ½ draw, 0 loss) with `a` on seat A, or `None` if
 /// either side cannot field one unit with the budget.
 pub fn duel(arena: &'static Ruleset, a: Form, b: Form, budget: u32) -> Option<f64> {
+    duel_with_lanes(arena, a, b, budget, false)
+}
+
+/// Explicit PK-01 private candidate. Canonical matrices/gates keep canonical movement.
+pub fn preview_duel(arena: &'static Ruleset, a: Form, b: Form, budget: u32) -> Option<f64> {
+    duel_with_lanes(arena, a, b, budget, true)
+}
+
+fn duel_with_lanes(
+    arena: &'static Ruleset,
+    a: Form,
+    b: Form,
+    budget: u32,
+    physical: bool,
+) -> Option<f64> {
     let energy = budget * ENERGY_SCALE;
     let counts = [a, b].map(|f| energy / f.cost(arena));
     if counts.contains(&0) {
         return None;
     }
     let mut s = MatchState::with_rules(0, arena);
+    s.physical_lanes = physical;
     while s.tick < RUNNING_START {
         s.step();
     }

@@ -18,9 +18,9 @@ fn main() {
         let other = Form { kind, tier, branch };
         for swapped in [false, true] {
             let score = if swapped {
-                1.0 - duels::duel(rules, other, god, 24).unwrap()
+                1.0 - duels::preview_duel(rules, other, god, 24).unwrap()
             } else {
-                duels::duel(rules, god, other, 24).unwrap()
+                duels::preview_duel(rules, god, other, 24).unwrap()
             };
             println!(
                 "{kind:?},{tier},{branch},24,{},{score}",

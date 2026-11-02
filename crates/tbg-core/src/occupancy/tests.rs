@@ -2,9 +2,46 @@
 use super::*;
 use crate::{Seat, UnitKind::*};
 #[test]
+fn pk01_lab_placement_keeps_canonical_movement_unless_explicitly_enabled() {
+    let mut s = MatchState::new(1);
+    s.lab_spawn(Seat::A, Archer, 0, 0);
+    assert!(
+        !s.physical_lanes,
+        "PK-01: a placement hook cannot silently change the duel rules"
+    );
+    let preview = MatchState::with_preview(1, [crate::ArcanaPreset::NEUTRAL; 2]);
+    assert!(preview.physical_lanes);
+    assert!(preview.view_for(Seat::A, &[]).physical_lanes);
+}
+#[test]
+fn tw01_bot_saves_for_the_repriced_fortification() {
+    let mut s = MatchState::new(7).with_strongholds([
+        crate::StrongholdKind::Bastion,
+        crate::StrongholdKind::Classic,
+    ]);
+    s.physical_lanes = true;
+    s.phase = crate::Phase::Running;
+    for _ in 0..6 {
+        s.lab_spawn_at(Seat::A, Archer, 0, 0, 8000);
+    }
+    arrange(&mut s);
+    assert_eq!(s.army_size(Seat::A), 6);
+    s.players[0].energy = content::FORTIFY_COST[0] - 1;
+    assert_eq!(
+        crate::bot::Bot::new(4).decide(&s.view_for(Seat::A, &[])),
+        None
+    );
+    s.players[0].energy += 1;
+    assert!(matches!(
+        crate::bot::Bot::new(4).decide(&s.view_for(Seat::A, &[])),
+        Some(crate::PlayerIntention::Fortify { .. })
+    ));
+}
+#[test]
 fn pk01_stationary_backline_does_not_permanently_prevent_a_large_birth() {
     for seat in Seat::BOTH {
         let mut s = MatchState::new(9);
+        s.physical_lanes = true;
         s.lab_spawn(seat, Farwatch, 0, 0);
         arrange(&mut s);
         s.lab_spawn(seat, BoneBrute, 0, 0);
@@ -25,6 +62,7 @@ fn pk01_stationary_backline_does_not_permanently_prevent_a_large_birth() {
 #[test]
 fn pk01_backfield_birth_never_jumps_a_hostile_front() {
     let mut s = MatchState::new(9);
+    s.physical_lanes = true;
     s.lab_spawn(Seat::A, Farwatch, 0, 0);
     s.lab_spawn_at(Seat::B, Colossus, 0, 0, 3000);
     arrange(&mut s);
@@ -36,6 +74,7 @@ fn pk01_backfield_birth_never_jumps_a_hostile_front() {
 #[test]
 fn pk01_contact_floor_does_not_extend_ranged_reach() {
     let mut s = MatchState::new(2);
+    s.physical_lanes = true;
     s.lab_spawn_at(Seat::A, Farwatch, 0, 0, 500);
     s.lab_spawn_at(Seat::B, Archer, 0, 0, 13500);
     assert!(crate::targeting::enemy_in_range(&s, &s.units[0], 12000).is_none());
@@ -53,6 +92,7 @@ fn pk01_bot_prefers_deployed_power_when_entrance_is_blocked() {
         crate::StrongholdKind::Bastion,
         crate::StrongholdKind::Classic,
     ]);
+    s.physical_lanes = true;
     s.phase = crate::Phase::Running;
     s.players[0].energy = 30000;
     for _ in 0..8 {
@@ -68,6 +108,7 @@ fn pk01_bot_prefers_deployed_power_when_entrance_is_blocked() {
 #[test]
 fn pk01_ranged_rows_are_bounded_and_stable() {
     let mut s = MatchState::new(1);
+    s.physical_lanes = true;
     for _ in 0..12 {
         s.lab_spawn_at(Seat::A, Archer, 0, 0, 8000);
     }
@@ -89,6 +130,7 @@ fn pk01_ranged_rows_are_bounded_and_stable() {
 #[test]
 fn pk01_queue_conserves_paid_units_and_releases_when_space_opens() {
     let mut s = MatchState::new(1);
+    s.physical_lanes = true;
     for _ in 0..8 {
         s.lab_spawn(Seat::A, Colossus, 0, 0);
     }
@@ -116,6 +158,7 @@ fn pk01_colossus_blocks_its_whole_width_and_has_exact_ogre_range_and_double_dama
     );
     for seat in Seat::BOTH {
         let mut s = MatchState::new(3);
+        s.physical_lanes = true;
         let dir = seat.dir();
         let mid = 8000;
         s.lab_spawn_at(seat, Colossus, 0, 0, mid);
@@ -131,6 +174,7 @@ fn pk01_colossus_blocks_its_whole_width_and_has_exact_ogre_range_and_double_dama
 #[test]
 fn pk01_free_lateral_space_allows_a_bypass_and_locks_the_new_lane() {
     let mut s = MatchState::new(2);
+    s.physical_lanes = true;
     s.lab_spawn_at(Seat::A, Beetling, 0, 0, 8000);
     s.lab_spawn_at(Seat::A, Beetling, 0, 0, 4500);
     arrange(&mut s);
@@ -149,6 +193,7 @@ fn pk01_free_lateral_space_allows_a_bypass_and_locks_the_new_lane() {
 #[test]
 fn pk01_blocked_evolution_keeps_energy_and_deployed_units() {
     let mut s = MatchState::new(3);
+    s.physical_lanes = true;
     s.phase = crate::Phase::Running;
     s.players[0].energy = 10000;
     let id = s.lab_spawn(Seat::A, AbyssHarpooner, 1, 0);
@@ -172,6 +217,7 @@ fn pk01_blocked_evolution_keeps_energy_and_deployed_units() {
 #[test]
 fn pk01_colossus_frontal_area_damage_reaches_multiple_enemies() {
     let mut s = MatchState::with_arcanas(2, [crate::ArcanaPreset::NEUTRAL; 2]);
+    s.physical_lanes = true;
     s.phase = crate::Phase::Running;
     s.tick = content::RUNNING_START;
     s.lab_spawn_at(Seat::A, Colossus, 0, 0, 6000);
@@ -207,6 +253,7 @@ fn pk01_colossus_frontal_area_damage_reaches_multiple_enemies() {
 #[test]
 fn pk01_mixed_form_envelopes_pack_without_losing_units() {
     let mut s = MatchState::new(11);
+    s.physical_lanes = true;
     let mut total = 0;
     for kind in crate::COMPLETION_POOL {
         for (t, b) in [(0, 0), (1, 0), (2, 0), (1, 1), (2, 1)] {
@@ -243,6 +290,7 @@ fn pk01_mixed_form_envelopes_pack_without_losing_units() {
 #[test]
 fn gd01_slam_splash_excludes_the_rear_half_plane() {
     let mut s = MatchState::with_arcanas(1, [crate::ArcanaPreset::NEUTRAL; 2]);
+    s.physical_lanes = true;
     let source = s.lab_spawn_at(Seat::A, Colossus, 0, 0, 6000);
     let primary = s.lab_spawn_at(Seat::B, FoamWeaver, 0, 0, 7000);
     let forward = s.lab_spawn_at(Seat::B, FoamWeaver, 0, 0, 7200);

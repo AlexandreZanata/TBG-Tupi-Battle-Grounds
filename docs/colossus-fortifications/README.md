@@ -29,7 +29,7 @@ is available in Practice and Training. No public release is implied.
 
 ## Capacity
 
-The candidate is active in private Practice, Training and explicit lab spawns.
+The candidate is active in private Practice, Training and explicit preview lab experiments.
 Competitive canonical matches retain legacy movement pending D-33; repeated
 preview bot probes exposed persistent long-run stalemates.
 

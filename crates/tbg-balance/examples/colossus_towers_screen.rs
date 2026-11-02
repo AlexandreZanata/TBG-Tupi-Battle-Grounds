@@ -66,9 +66,9 @@ fn main() {
         };
         for swapped in [false, true] {
             let score = if swapped {
-                1.0 - duels::duel(rules, b, a, 18).unwrap()
+                1.0 - duels::preview_duel(rules, b, a, 18).unwrap()
             } else {
-                duels::duel(rules, a, b, 18).unwrap()
+                duels::preview_duel(rules, a, b, 18).unwrap()
             };
             println!(
                 "duel,Colossus,0,0,{}, {opponent:?},,,,,{score}",

@@ -2222,7 +2222,7 @@ Existing branch lock, proportional HP rescaling and maximum tier 2 remain.
   B +1500 aura radius per step. Existing eligibility and additive caps remain.
 
 **PK-01 activation.** Physical lanes are a private Practice/Training and
-explicit lab-spawn candidate. Long-running preview bot probes exposed
+explicitly opted-in lab candidate. Long-running preview bot probes exposed
 persistent stalemates, so competitive canonical matches keep legacy movement
 and presentation until D-33 acceptance. This flag is server-owned and public
 in both views; no PlayerIntention can enable it. The entire roster is
@@ -2322,3 +2322,20 @@ Energy-24 base panel, Sawbot, Farwatch and Mantis beat it on both seats;
 Ravager loses. All four evolved reference forms still lose at that budget.
 This identifies initial counterplay, not full team/form/budget acceptance.
 Raw measurements and scope are in [the report](phases/COLOSSUS-FORTIFICATIONS-PACKING.md).
+
+TW-01 / GD-01 Proposed contract migration: revision 11 pins the 6750/159
+reference tower, 6/10-Energy Fortification, stronger branch/passive values and
+Gods' zero-bonus Synergy row. Historical D-46 assertions stay in the contract
+files behind their legacy revision path; unchanged ownership, spending,
+window, aura timing and proportional-rescaling assertions still apply.
+
+TW-01 opponent policy: once the existing six-unit preference threshold is
+reached, a Practice bot with an unfinished selectable Stronghold saves the
+actual next Fortification price before buying more troops. Classic matches
+are unchanged by this policy. This is a bot spending preference, never a
+player purchase restriction or a changed Fortification price.
+
+PK-01 lab boundary: ordinary lab placement hooks do not change the physical-lanes
+flag. Canonical duel matrices and gates retain canonical movement; the
+Colossus candidate screen explicitly calls the preview duel path. This keeps
+offline canon equivalent to online canon while the private proposal is tested.

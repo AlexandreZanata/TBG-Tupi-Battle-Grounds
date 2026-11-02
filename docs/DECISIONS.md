@@ -3083,7 +3083,7 @@ PK-01 activation boundary: repeated bounded preview bot probes found long-run
 stalemates, even after widening the corridor, preserving root attack reach
 and allowing births in the defended backfield. Do not activate this candidate
 in competitive matches on a passing geometry check. Private Practice, Training
-and explicit lab spawns opt into authoritative physical lanes; regular canon
+and explicit preview lab experiments opt into authoritative physical lanes; regular canon
 keeps legacy movement and client crowd presentation. The read-only flag is
 part of both views. This preserves the competitive baseline while the owner
 validates the local proposal. Long-run preview balance is a known unresolved

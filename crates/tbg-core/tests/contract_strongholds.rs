@@ -10,6 +10,8 @@ use tbg_core::{
 };
 
 use StrongholdKind::{Artillery, Bastion, Classic, Command, Treasury};
+// TW-01 Proposed in GAME-DESIGN; historical assertions remain available below.
+const TW01: bool = tbg_core::ruleset_version::RULESET_VERSION == 11;
 
 /// Running, with only the effects under test: no regen, no Interest, no
 /// Augment rounds.
@@ -116,7 +118,14 @@ fn br_sk05_tier_one_picks_the_branch_tier_two_repeats_it() {
 
 #[test]
 fn br_sk05_costs_are_three_and_four_energy_and_need_the_energy() {
-    assert_eq!(FORTIFY_COST, [3 * ENERGY_SCALE, 4 * ENERGY_SCALE]);
+    assert_eq!(
+        FORTIFY_COST,
+        if TW01 {
+            [6 * ENERGY_SCALE, 10 * ENERGY_SCALE]
+        } else {
+            [3 * ENERGY_SCALE, 4 * ENERGY_SCALE]
+        }
+    );
     let mut s = arena([Artillery, Classic]);
     s.players[0].energy = FORTIFY_COST[0] - 1;
     assert_eq!(fortify(&mut s, Seat::A, 0), Err(Rejection::NotEnoughEnergy));
@@ -147,7 +156,8 @@ fn br_sk07_more_max_hp_keeps_the_ratio_never_heals() {
     energy(&mut s, Seat::A, 20);
     fortify(&mut s, Seat::A, 0).unwrap();
     let max1 = s.stronghold(Seat::A).max_hp;
-    assert_eq!(max1, STRONGHOLD_HP * 11_500 / 10_000 * 11_500 / 10_000);
+    let growth = if TW01 { 13000 } else { 11500 };
+    assert_eq!(max1, STRONGHOLD_HP * 11_500 / 10_000 * growth / 10_000);
     assert_eq!(s.players[0].stronghold_hp, rescale_hp(max0 / 2, max0, max1));
     // Same ratio, rounded down: never a free heal of the HP already lost.
     let (hp0, hp) = (i64::from(max0 / 2), i64::from(s.players[0].stronghold_hp));
@@ -161,6 +171,10 @@ fn br_sk07_more_max_hp_keeps_the_ratio_never_heals() {
 
 #[test]
 fn br_sk06_every_branch_changes_the_real_numbers() {
+    if TW01 {
+        tw01_branch_values();
+        return;
+    }
     let rules = Ruleset::canon();
     let at = |kind, tier, branch| stronghold::stats(rules, kind, tier, branch);
     // Treasury: Armored Vault +12 % / +12 % HP; Mint 0.20 / 0.25 Energy.
@@ -238,7 +252,10 @@ fn br_sk06_artillery_branches_change_the_real_shot() {
         first_shot([Artillery, Classic], 2, 0),
         (heavy.damage, heavy.interval)
     );
-    assert_eq!(first_shot([Artillery, Classic], 2, 1).1, 14);
+    assert_eq!(
+        first_shot([Artillery, Classic], 2, 1).1,
+        if TW01 { 10 } else { 14 }
+    );
 }
 
 fn kill(s: &mut MatchState, id: u32) {
@@ -264,7 +281,8 @@ fn br_sk02_spoils_pay_eligible_enemy_deaths_within_the_window_cap() {
     for i in 0..6 {
         let id = spawn(&mut s, Seat::B, UnitKind::Shieldbearer, 15_000);
         kill(&mut s, id);
-        assert_eq!(s.players[0].energy, (90 * (i + 1)).min(360));
+        let (spoils, cap) = if TW01 { (270, 1080) } else { (90, 360) };
+        assert_eq!(s.players[0].energy, (spoils * (i + 1)).min(cap));
     }
     // The opponent (Classic) earns nothing from the deaths of A's units.
     assert_eq!(s.players[1].energy, 0);
@@ -274,7 +292,7 @@ fn br_sk02_spoils_pay_eligible_enemy_deaths_within_the_window_cap() {
     }
     let id = spawn(&mut s, Seat::B, UnitKind::Shieldbearer, 15_000);
     kill(&mut s, id);
-    assert_eq!(s.players[0].energy, 450);
+    assert_eq!(s.players[0].energy, if TW01 { 1350 } else { 450 });
 }
 
 #[test]
@@ -287,7 +305,7 @@ fn br_sk02_royal_mint_pays_more_with_a_higher_ceiling() {
         let id = spawn(&mut s, Seat::B, UnitKind::Shieldbearer, 15_000);
         kill(&mut s, id);
     }
-    assert_eq!(s.players[0].energy, 540);
+    assert_eq!(s.players[0].energy, if TW01 { 1620 } else { 540 });
 }
 
 /// Damage of one Shieldbearer hit from A at `x` on a B unit right ahead.
@@ -329,7 +347,7 @@ fn br_sk04_war_banner_reaches_only_conventional_allies_in_its_radius() {
     // Inside the 4-tile radius: +5 %; outside: nothing.
     assert_eq!(
         hit_at([Command, Classic], 3_000, 0, 0),
-        base * 10_500 / 10_000
+        base * if TW01 { 11500 } else { 10500 } / 10_000
     );
     assert_eq!(hit_at([Command, Classic], 5_500, 0, 0), base);
     // Other kinds have no aura.
@@ -337,11 +355,11 @@ fn br_sk04_war_banner_reaches_only_conventional_allies_in_its_radius() {
     // War Standard tier 2: +11 %; Forward Banner tier 2 reaches 6 tiles.
     assert_eq!(
         hit_at([Command, Classic], 3_000, 2, 0),
-        base * 11_100 / 10_000
+        base * if TW01 { 13000 } else { 11100 } / 10_000
     );
     assert_eq!(
         hit_at([Command, Classic], 5_500, 2, 1),
-        base * 10_500 / 10_000
+        base * if TW01 { 11500 } else { 10500 } / 10_000
     );
 }
 
@@ -350,9 +368,13 @@ fn br_sk04_the_aura_is_read_at_hit_time_and_ends_outside() {
     // The same unit hits for the bonus inside, then for its base outside:
     // nothing is stored on the unit, so it cannot stack or linger.
     let base = def(UnitKind::Shieldbearer).damage;
-    let inside = hit_at([Command, Classic], 3_900, 0, 0);
-    let outside = hit_at([Command, Classic], 4_100, 0, 0);
-    assert_eq!((inside, outside), (base * 10_500 / 10_000, base));
+    let radius = if TW01 { 5000 } else { 4000 };
+    let inside = hit_at([Command, Classic], radius - 100, 0, 0);
+    let outside = hit_at([Command, Classic], radius + 100, 0, 0);
+    assert_eq!(
+        (inside, outside),
+        (base * if TW01 { 11500 } else { 10500 } / 10_000, base)
+    );
 }
 
 #[test]
@@ -403,4 +425,35 @@ fn br_sk09_kind_matches_still_end_by_destruction_and_replay_identically() {
         "the bot fortifies a chosen kind"
     );
     assert_eq!(replay.run().hash(), s.hash());
+}
+
+/// TW-01: append the requested branch/passive numbers without erasing D-46.
+fn tw01_branch_values() {
+    let at = |kind, tier, branch| stronghold::stats(Ruleset::canon(), kind, tier, branch);
+    let t = at(Treasury, 0, 0);
+    assert_eq!((t.spoils, t.spoils_cap), (270, 1080));
+    assert_eq!(at(Treasury, 2, 0).max_hp, t.max_hp * 15000 / 10000);
+    assert_eq!(at(Treasury, 1, 1).spoils, 360);
+    assert_eq!(
+        (at(Treasury, 2, 1).spoils, at(Treasury, 2, 1).spoils_cap),
+        (450, 1620)
+    );
+    let b = at(Bastion, 0, 0);
+    assert_eq!(at(Bastion, 2, 0).max_hp, b.max_hp * 16000 / 10000);
+    assert_eq!(at(Bastion, 2, 0).armor_bp, 2500);
+    assert_eq!(at(Bastion, 1, 1).range, b.range + 1500);
+    assert_eq!(at(Bastion, 2, 1).damage, b.damage * 13000 / 10000);
+    let a = at(Artillery, 0, 0);
+    assert_eq!(a.interval, STRONGHOLD_INTERVAL);
+    assert_eq!(at(Artillery, 2, 0).damage, a.damage * 18000 / 10000);
+    assert_eq!(at(Artillery, 2, 0).splash_bp, 8000);
+    assert_eq!(at(Artillery, 1, 1).interval, 14);
+    assert_eq!(at(Artillery, 2, 1).interval, 10);
+    assert_eq!(
+        (at(Command, 0, 0).aura_bp, at(Command, 0, 0).aura_range),
+        (1500, 5000)
+    );
+    assert_eq!(at(Command, 2, 0).aura_bp, 3000);
+    assert_eq!(at(Command, 1, 1).aura_range, 6500);
+    assert_eq!(at(Command, 2, 1).aura_range, 8000);
 }

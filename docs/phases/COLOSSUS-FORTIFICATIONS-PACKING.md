@@ -30,7 +30,7 @@ Original checkout edits were not used as an implementation workspace.
   Evolution rejection. Births may use the nearest free footprint in the own
   backfield third, never beyond a hostile front. No active unit teleports to
   bypass a blocker. Casks use launch origin/target and exact burst lane.
-- Private Practice/Training and explicit lab spawns enable physical lanes.
+- Private Practice/Training and explicit preview lab experiments enable physical lanes.
   Canonical competitive matches keep legacy movement/crowd presentation until
   long-run acceptance. Both views carry the authoritative flag. Preview games
   interpolate lateral roots without a second cosmetic repulsion solver.
