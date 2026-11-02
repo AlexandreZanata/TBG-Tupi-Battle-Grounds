@@ -3088,3 +3088,14 @@ keeps legacy movement and client crowd presentation. The read-only flag is
 part of both views. This preserves the competitive baseline while the owner
 validates the local proposal. Long-run preview balance is a known unresolved
 issue, separate from the requested exact TW-01 tower boost.
+
+
+## RESTORE-01 — Return to legacy pushing (2026-11-02)
+
+The owner reports visual delay, queued pieces and stationary armies and explicitly
+requests the former pushing/advancing format while keeping the widened Arena.
+Disable PK-01 in private Practice and Training. Keep the explicit offline
+experiment for historical diagnostics; ordinary play never uses its queue.
+Stabilize the existing client-only crowd solver with a fixed presentation step,
+anchor/ID ordering and bounded displacement smoothing. Do not smooth server
+anchors or delay a newly purchased figure. Keep towers/Gods unchanged.

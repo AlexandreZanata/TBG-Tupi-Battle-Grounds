@@ -2339,3 +2339,26 @@ PK-01 lab boundary: ordinary lab placement hooks do not change the physical-lane
 flag. Canonical duel matrices and gates retain canonical movement; the
 Colossus candidate screen explicitly calls the preview duel path. This keeps
 offline canon equivalent to online canon while the private proposal is tested.
+
+
+## RESTORE-01 — Proposed owner correction (2026-11-02)
+
+Supersedes PK-01 activation. The owner rejected physical passage blocking and
+waiting purchases after observing stationary armies and delayed pieces.
+Restore legacy movement in all normal constructors, including private Practice
+and Training: purchases spawn immediately, allies do not block authoritative
+progress, and Evolution never waits for footprint capacity. Keep the five-tile
+BattleLine floor, every TW-01 tower value/ability and all Gods content.
+The rejected PK-01 experiment remains explicit lab-only for historical tests;
+it must not be enabled by Practice, Training or placement hooks.
+
+Crowd separation is presentation only. Keep old pushing/overtaking and existing
+longitudinal offset bounds. Use 2.1 tiles of lateral centre clearance on the
+wide floor, a 60 Hz cosmetic solver (at most two catch-up steps), stable
+anchor/ID pair ordering, 12/s offset easing, 4 tiles/s maximum cosmetic offset
+travel and a 0.002-tile stationary deadband. New figures appear immediately;
+only cosmetic displacement is eased, never authoritative movement. Aim envelopes
+expand clearance without shifting the sort anchor. These are presentation
+parameters and cannot change attacks, outcomes, Energy or unit entry.
+Ruleset 12 identifies the changed preview default; wire 36 layout is preserved.
+Canonical replay checksums/outcomes remain those of revision 11.

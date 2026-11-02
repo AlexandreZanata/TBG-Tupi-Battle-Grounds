@@ -1,4 +1,4 @@
-//! Follow authoritative live/spectator roots; retain cosmetic offsets only in stress tools.
+//! Smooth cosmetic pushing around unchanged authoritative anchors in live play and spectating.
 
 use bevy::prelude::*;
 use tbg_core::{Archetype, Seat, UnitKind, UnitView};
@@ -78,7 +78,7 @@ fn is_ghost(visual: &UnitVisual, anchor: &LaneAnchor) -> bool {
 }
 
 #[derive(Component, Default)]
-pub(crate) struct CrowdState(crowd::Offset);
+pub(crate) struct CrowdState(crowd::Offset, Option<Vec2>);
 
 #[derive(Default)]
 pub(super) struct Scratch {
@@ -104,6 +104,7 @@ pub(super) fn update(
     if units.iter().all(|(a, _, _, _, _)| a.authoritative) {
         for (anchor, mut state, mut transform, _, _) in &mut units {
             state.0 = default();
+            state.1 = None;
             transform.translation = anchor.pos;
         }
         return;
@@ -135,6 +136,7 @@ pub(super) fn update(
         }
         if visual.kind() == UnitKind::Shatterback
             || matches!(visual.kind(), UnitKind::SiegeWalker | UnitKind::Trident)
+            || visual.kind() == UnitKind::Colossus
             || crate::art::kits::ogres::contains(visual.kind())
             || crate::art::kits::abyssals::contains(visual.kind())
         {
@@ -165,11 +167,42 @@ pub(super) fn update(
     }
     for ((anchor, mut state, mut transform, _, _), offset) in units.iter_mut().zip(offsets.iter()) {
         state.0 = *offset;
-        let delta = if enabled {
-            Vec3::new(offset.dx, 0.0, offset.dz)
+        let target = if enabled {
+            Vec2::new(offset.dx, offset.dz)
         } else {
-            Vec3::new(0.0, 0.0, [-0.8, 0.0, 0.8][(anchor.body.id % 3) as usize])
+            Vec2::new(0.0, [-0.8, 0.0, 0.8][(anchor.body.id % 3) as usize])
         };
-        transform.translation = anchor.pos + delta;
+        let shown = smooth_offset(state.1, target, time.delta_secs());
+        state.1 = Some(shown);
+        // Only the cosmetic displacement is eased; a new/moving server anchor is never delayed.
+        transform.translation = anchor.pos + Vec3::new(shown.x, 0., shown.y);
+    }
+}
+
+fn smooth_offset(previous: Option<Vec2>, target: Vec2, dt: f32) -> Vec2 {
+    let Some(previous) = previous else {
+        return target;
+    };
+    let error = target - previous;
+    if error.length_squared() <= 0.002 * 0.002 {
+        return previous;
+    }
+    let dt = dt.clamp(0., 1. / 30.);
+    previous + (error * (1. - (-12. * dt).exp())).clamp_length_max(4. * dt)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn restore01_new_figures_are_immediate_and_only_cosmetic_offsets_are_smoothed() {
+        let target = Vec2::new(-0.7, 2.1);
+        assert_eq!(smooth_offset(None, target, 0.), target);
+        let result = smooth_offset(Some(Vec2::ZERO), target, 1. / 60.);
+        assert!(result.length() <= 4. / 60. + 1e-6);
+        assert_eq!(
+            smooth_offset(Some(target), target + Vec2::splat(0.0001), 1. / 60.),
+            target
+        );
     }
 }

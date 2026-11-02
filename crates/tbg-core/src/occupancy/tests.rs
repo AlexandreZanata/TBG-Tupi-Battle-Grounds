@@ -10,8 +10,8 @@ fn pk01_lab_placement_keeps_canonical_movement_unless_explicitly_enabled() {
         "PK-01: a placement hook cannot silently change the duel rules"
     );
     let preview = MatchState::with_preview(1, [crate::ArcanaPreset::NEUTRAL; 2]);
-    assert!(preview.physical_lanes);
-    assert!(preview.view_for(Seat::A, &[]).physical_lanes);
+    assert!(!preview.physical_lanes);
+    assert!(!preview.view_for(Seat::A, &[]).physical_lanes);
 }
 #[test]
 fn tw01_bot_saves_for_the_repriced_fortification() {

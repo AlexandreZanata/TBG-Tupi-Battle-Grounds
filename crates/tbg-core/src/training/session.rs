@@ -326,7 +326,6 @@ impl TrainingSession {
 /// running from the first tick.
 fn build(scenario: TrainingScenario, id: SessionId) -> TrainingSession {
     let mut state = MatchState::new(scenario.seed).with_arena(scenario.arena);
-    state.physical_lanes = true;
     state.phase = Phase::Running;
     state.tick = RUNNING_START;
     state.training = Some(Box::default());

@@ -484,3 +484,20 @@ witnesses. The installed debug preview is source `a1f6446`, wire 36, with all
 380 asset hashes verified. Exact renderer revisions, observations and pending
 Windows/desktop game-web cases are in the TW-01/PK-01/GD-01 phase report.
 The new catalog window uses separate data and preserves the earlier session.
+
+
+## RESTORE-01 — Legacy movement on the wide BattleLine (2026-11-02)
+
+Shared Linux/Windows/desktop game-web path: all normal matches, private Practice,
+Training and spectators keep legacy authoritative progression and immediate
+unit entry, with cosmetic pushing only. The five-tile floor, stronger towers,
+all champion models and foot-ring identification remain. No gameplay capacity
+queue is active in those modes. The visible window revision identifies R12.
+
+Crowd offsets use fixed 60 Hz relaxation, stable anchor/ID order and eased,
+speed-bounded presentation offsets; authoritative anchors remain immediate.
+Aim changes do not reorder figures by moving a virtual anchor. Cases: repeated
+purchases into a crowded line, twelve mixed large/ranged figures, free advancement,
+Evolution among allies, crowded idle/turning, 30/60/120 Hz, pause and both seats.
+Targeted tests and the Linux native witness are recorded in the restoration
+report. Windows/desktop game-web visual observation remains pending.

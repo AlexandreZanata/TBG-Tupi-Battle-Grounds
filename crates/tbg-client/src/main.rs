@@ -100,7 +100,11 @@ fn main() {
     let window = platform::window::settings();
     #[cfg(target_arch = "wasm32")]
     let window = Window {
-        title: "Tupi Battle Grounds".into(),
+        title: format!(
+            "TBG · {} · R{}",
+            env!("CARGO_PKG_VERSION"),
+            tbg_core::ruleset_version::RULESET_VERSION
+        ),
         canvas: Some("#bevy".into()),
         fit_canvas_to_parent: true,
         ..default()

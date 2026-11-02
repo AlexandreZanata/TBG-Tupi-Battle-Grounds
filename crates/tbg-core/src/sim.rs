@@ -22,12 +22,9 @@ impl MatchState {
         MatchState::lab(seed, &CANON, arcanas)
     }
 
-    /// Practice preview (ROSTER-EXPANSION §F.5): the full staging pool,
-    /// offline only. Identical to canon until P44 adds new kinds.
+    /// Practice preview: expanded roster with legacy movement and immediate deployment.
     pub fn with_preview(seed: u64, arcanas: [ArcanaPreset; 2]) -> MatchState {
-        let mut state = MatchState::lab(seed, Ruleset::preview(), arcanas);
-        state.physical_lanes = true;
-        state
+        MatchState::lab(seed, Ruleset::preview(), arcanas)
     }
 
     /// A match on another ruleset: the offline balance lab only (D-33).

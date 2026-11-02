@@ -16,8 +16,7 @@ impl Body {
         let center = (near + far) * 0.5;
         let half = (far - near) * 0.5;
         let (sin, cos) = yaw.sin_cos();
-        self.anchor_x += center * sin;
-        self.half_length = width * cos.abs() + half * sin.abs();
+        self.half_length = width * cos.abs() + half * sin.abs() + (center * sin).abs();
         // The solver's lane-depth origin stays at the foot anchor, so cover the offset too.
         self.radius = self
             .radius
@@ -51,7 +50,7 @@ pub struct Params {
 impl Default for Params {
     fn default() -> Self {
         Self {
-            half_width: 1.1,
+            half_width: 2.1,
             max_dx: 0.15,
             max_back: 0.7,
             x_share: 0.5,
@@ -77,13 +76,12 @@ pub fn solve(bodies: &[Body], state: &mut [Offset], dt: f32, p: &Params) {
 #[derive(Default)]
 pub struct Solver {
     order: Vec<usize>,
+    accumulated: f64,
 }
 
 impl Solver {
     pub fn solve(&mut self, bodies: &[Body], state: &mut [Offset], dt: f32, p: &Params) {
-        let order = &mut self.order;
         assert_eq!(bodies.len(), state.len());
-        let dt = dt.clamp(0.0, 1.0 / 30.0);
         for (b, o) in bodies.iter().zip(state.iter_mut()) {
             if !o.init {
                 *o = Offset {
@@ -93,6 +91,18 @@ impl Solver {
                     ..*o
                 };
             }
+        }
+        self.accumulated += f64::from(dt.clamp(0.0, 1.0 / 30.0));
+        const STEP: f64 = 1.0 / 60.0;
+        while self.accumulated >= STEP {
+            self.step(bodies, state, STEP as f32, p);
+            self.accumulated -= STEP;
+        }
+    }
+
+    fn step(&mut self, bodies: &[Body], state: &mut [Offset], dt: f32, p: &Params) {
+        let order = &mut self.order;
+        for o in state.iter_mut() {
             let target = o.home * p.half_width;
             o.vel_z += (target - o.dz) * p.home_k * dt;
             o.vel_z *= (-p.damping * dt).exp();
@@ -103,17 +113,20 @@ impl Solver {
         order.clear();
         order.extend(0..bodies.len());
         let max_r = bodies.iter().map(|b| b.half_length).fold(0.0, f32::max);
+        // Cosmetic pushes must not swap the next pass's pair order.
+        order.sort_unstable_by(|&a, &b| {
+            bodies[a]
+                .anchor_x
+                .total_cmp(&bodies[b].anchor_x)
+                .then(bodies[a].id.cmp(&bodies[b].id))
+        });
         for _ in 0..p.iterations {
-            let px = |s: &[Offset], i: usize| bodies[i].anchor_x + s[i].dx;
-            order.sort_unstable_by(|&a, &b| {
-                px(state, a)
-                    .total_cmp(&px(state, b))
-                    .then(bodies[a].id.cmp(&bodies[b].id))
-            });
             for oi in 0..order.len() {
                 let i = order[oi];
                 for &j in &order[oi + 1..] {
-                    if px(state, j) - px(state, i) > bodies[i].half_length + max_r {
+                    if bodies[j].anchor_x - bodies[i].anchor_x
+                        > bodies[i].half_length + max_r + 2.0 * p.max_back.max(p.max_dx)
+                    {
                         break; // Later longitudinal envelopes cannot reach this body.
                     }
                     if bodies[i].ghost || bodies[j].ghost {
@@ -275,5 +288,27 @@ mod tests {
     fn deterministic_for_spectators() {
         let b: Vec<Body> = (1..=8).map(|id| body(id, 4.0 + id as f32 * 0.05)).collect();
         assert_eq!(run(&b, 120), run(&b, 120));
+    }
+
+    #[test]
+    fn restore01_offsets_match_at_60_and_120_hz() {
+        let bodies: Vec<_> = (1..=12).map(|id| body(id, 4.0)).collect();
+        let run_at = |hz: u32| {
+            let mut solver = Solver::default();
+            let mut offsets = vec![Offset::default(); bodies.len()];
+            for _ in 0..hz * 4 {
+                solver.solve(&bodies, &mut offsets, 1. / hz as f32, &Params::default());
+            }
+            offsets
+        };
+        assert_eq!(run_at(60), run_at(120));
+    }
+
+    #[test]
+    fn restore01_aim_envelope_keeps_the_authoritative_sort_anchor() {
+        let mut b = body(1, 4.0);
+        b.include_envelope(-0.5, 3.5, 0.8, 0.9);
+        assert_eq!(b.anchor_x, 4.0);
+        assert!(b.half_length >= b.radius);
     }
 }
