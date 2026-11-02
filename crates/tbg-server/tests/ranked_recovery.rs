@@ -45,7 +45,11 @@ fn final_for(key: MatchKey, accounts: [AccountId; 2], winner: Option<Seat>) -> R
                 ..IntegritySeat::default()
             },
         ],
-        factions: [[3, 2, 2, 2, 0, 0, 0], [0; 7]],
+        factions: {
+            let mut factions = [[0; tbg_core::FACTION_COUNT]; 2];
+            factions[0][..4].copy_from_slice(&[3, 2, 2, 2]);
+            factions
+        },
         history_expected: false,
         arcanas: [ArcanaPreset::DEFAULT; 2],
         stats: None,

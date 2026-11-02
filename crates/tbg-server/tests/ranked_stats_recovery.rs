@@ -49,7 +49,11 @@ fn entry(accounts: [i64; 2], stats: Option<serde_json::Value>) -> JournalEntry {
             ruleset_version: tbg_core::ruleset_version::RULESET_VERSION,
             ruleset_source_hash: tbg_server::ranked::source_hash(),
             seats: [IntegritySeat::default(); 2],
-            factions: [[1, 0, 0, 0, 0, 0, 0], [0; 7]],
+            factions: {
+                let mut factions = [[0; tbg_core::FACTION_COUNT]; 2];
+                factions[0][..1].copy_from_slice(&[1]);
+                factions
+            },
             history_expected: false,
             arcanas: [ArcanaPreset::DEFAULT; 2],
             stats,
