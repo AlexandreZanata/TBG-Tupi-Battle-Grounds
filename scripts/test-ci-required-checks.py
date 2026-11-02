@@ -4,13 +4,15 @@ import importlib.util
 from pathlib import Path
 import re
 import sys
+import tomllib
 import unittest
 
 sys.dont_write_bytecode = True
 SPEC = importlib.util.spec_from_file_location('ci_gate', Path(__file__).with_name('ci-required-checks.py'))
 GATE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(GATE)
-WORKFLOWS = Path(__file__).resolve().parents[1]/'.github/workflows'
+ROOT = Path(__file__).resolve().parents[1]
+WORKFLOWS = ROOT/'.github/workflows'
 PINNED = re.compile(r'^\s*(?:-\s+)?uses:\s+(?:\./\.github/workflows/[\w.-]+\.ya?ml|[\w.-]+/[\w.-]+(?:/[\w./-]+)?@[0-9a-f]{40}\s+#\s*\S.*)$')
 
 
@@ -79,6 +81,14 @@ class WorkflowPolicy(unittest.TestCase):
                 if re.match(r'^\s*(?:-\s+)?uses:', line):
                     with self.subTest(workflow=name, line=line.strip()):
                         self.assertRegex(line, PINNED)
+
+    def test_toolchain_file_pins_the_workflow_compiler(self):
+        # rust-toolchain.toml overrides the action's toolchain input on Linux.
+        channel = tomllib.loads((ROOT/'rust-toolchain.toml').read_text())['toolchain']['channel']
+        for name, text in workflow_texts().items():
+            for value in re.findall(r'(?m)^\s*RUST_TOOLCHAIN:\s*(\S+)\s*$', text):
+                with self.subTest(workflow=name):
+                    self.assertEqual(value, channel)
 
     def test_only_pull_request_runs_are_ever_cancelled(self):
         texts = workflow_texts()
