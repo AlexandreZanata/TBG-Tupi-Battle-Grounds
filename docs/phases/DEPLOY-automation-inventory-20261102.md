@@ -77,8 +77,8 @@ Debian 13, Python 3.13.5, Caddy 2.11.2, gh 2.103.3. No controller receipt
    `THIRD_PARTY_NOTICES.md` and `rust-toolchain.toml`.
 10. Publish retries exit 1 when the release exists in every family; nothing
     reconciles a partial publication.
-11. Tokenless `gh attestation verify --bundle` on the host is documented as pending
-    and unproven.
+11. ~~Tokenless `gh attestation verify --bundle` on the host was unproven.~~
+    **Resolved, 2026-11-02:** see *Dry verification on the host*.
 12. The release image toolchain followed `stable` (`rust-toolchain.toml`), not the
     pinned 1.99.0; fixed by PR #46 with a guard.
 
@@ -90,6 +90,25 @@ points at `web-checked.json`; verify/download failures are not latched, so large
 archives are re-downloaded every run; a leftover `.staging` directory blocks a SHA;
 a briefly unreachable backend latches a web candidate as operator-required; the
 native controller has no dry-run or journal.
+
+## Dry verification on the host
+
+Run on the VPS as the controllers' operator, without `--apply`, with an empty
+temporary `GH_CONFIG_DIR` and `GH_TOKEN`/`GITHUB_TOKEN` unset:
+
+| Controller | Candidate | Result |
+|------------|-----------|--------|
+| `static_pull.py` | `static-70827a7…` | exit 0 in 7 s: attestation, digests and both sites verified; `activated: false` |
+| `web_pull.py` | `web-70827a7…` | exit 0 in 7 s: attestation, digests verified, contract `w31-r6-097385fee9a10b0f` equals the live server; `activated: false` |
+
+The empty `gh` directory stayed empty, and no candidate directory was left in
+`/var/lib/tbg-deploy`. The dry paths write no latch (`static_pull.py:47-53`,
+`web_pull.py:44-50`), so served content and receipts are unchanged.
+
+The live manual releases are ancestors of main `70827a7`: landing `c8fa110`, admin
+`e4bdb38` and browser `71eb818`. Applying these candidates therefore moves forward.
+The live Caddy site routes `/downloads.json` to `/srv/tbg/downloads/current.json`,
+so a static landing release cannot replace the native catalog.
 
 ## Preserved strengths
 
@@ -132,6 +151,6 @@ drains that never kill matches, pinned actions and fail-closed `check` aggregati
    planned restart.
 6. **Coordinated protocol 32 release** for PR #44.
 
-No secret is needed so far: GitHub-hosted builds use the ephemeral `GITHUB_TOKEN`
-with OIDC attestation, the host pulls public releases over HTTPS, and the frontend
-receives no credential.
+No secret is needed: GitHub-hosted builds use the ephemeral `GITHUB_TOKEN` with
+OIDC attestation; the host verified attestations tokenlessly (above) and pulls
+public releases over HTTPS; the frontend receives no credential.
