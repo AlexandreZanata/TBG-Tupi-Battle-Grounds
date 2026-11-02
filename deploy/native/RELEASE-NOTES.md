@@ -1,18 +1,25 @@
-TBG 0.1.2-rc.2 — Linux and Windows beta candidate
+TBG 0.1.4-colossus.1 — Champions, shared match sides and automatic delivery beta
 
-Protocol 31, schema 10, ruleset 6 / 097385fee9a10b0f.
+Protocol 36, schema 10 (P73 history schema 11 remains opt-in), ruleset 12 /
+8f5a8ebb3e4f88ec. This contract requires a coordinated release from protocol 31;
+compatible-only delivery must not bypass its production contract gate.
 
-Same gameplay, protocol and contract as 0.1.2-rc.1. This is the first version
-published by the automatic main pipeline: one exact-source build per platform,
-promoted byte for byte, built with the pinned Rust 1.99.0 from LF-normalized
-sources. While the server switches to a new release, a request the old server
-refuses is now asked again through the server's admission step (at most three
-times in 30 seconds) instead of showing "server full".
+The local Practice/Training preview contains 82 champions across ten Factions,
+with five-form low-poly kits, refined Ogres, Abyssals, Gods/Colossus and rolling
+healing casks. Online FULL_POOL remains the separately gated 46-champion roster.
+The existing Proposed tower changes, broader BattleLine, original pushing and
+intrinsic body colors are retained. Widening the road no longer widens the
+preferred departure formation before contact.
 
-Shared Bevy desktop interface, 46 conventional champions, eight Arenas, local
-training, winner celebrations, illustrated cards/Augments and protected sessions.
-This candidate includes the already documented P70/P71 Proposed changes; it is not
-a new competitive balance acceptance.
+Blue stays left and red stays right for every desktop player and spectator.
+Online and Practice sides are randomized; the side announcement, private controls,
+Stronghold, reconnection and result ownership follow the assigned seat. P73 adds
+participant-bound social state and opt-in private history; laboratory refinements
+and the landing dialog scroll fix are included.
+
+Includes reviewed A/B backend delivery and bounded re-admission (three retries
+within 30 seconds), main-based publication and exact-source native packages.
+Native publication does not install an update on a player's computer.
 
 Linux: x86_64 archive and AppImage (glibc 2.35+, Vulkan).
 Windows: x86_64 MSVC portable ZIP and per-user installer (Windows 11, DirectX 12).
