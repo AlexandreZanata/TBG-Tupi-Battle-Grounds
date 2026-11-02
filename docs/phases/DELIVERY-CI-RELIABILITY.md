@@ -277,3 +277,23 @@ Packaged ui-acceptance client compilation also passed. The view-audit example
 now carries auxiliary state, private free rerolls and quotes through every
 prototype and exact header accounting; its focused compilation passed.
 The audit benchmark itself was not executed.
+
+The first extended CI at 8fc4a04 exposed two missing balance-lab integration
+hooks: exhaustive Ruleset classification and successful-intention accounting.
+P74's owner-fixed auxiliary profile is explicitly untunable by the generic
+search (whose reference Bot never hires auxiliaries); dedicated hiring policies
+are required for useful valuation. Validated hires now count their actual
+Energy cost in runner spending. No gameplay value, search bound, sample or
+gate threshold changed. These scoped fixes are checked before republication.
+
+Balance integration fix validation passed: strict balance-library clippy,
+C5 exact preflight (1), wound/cadence/Favor control union (4), and the
+R15 Ranked SIDE-01 command/reconnect/account-settlement case (1).
+These use the shared lock and two jobs; the hosted complete lane remains
+mandatory and no unrelated local suite was run.
+
+CI a557c6a found the legacy core balance example's exhaustive intention
+match. Propagate HireAuxiliary there without treating it as a champion
+purchase. Its ten-entry purchase counters are also sized to UNIT_KIND_COUNT
+so canonical purchases cannot index outside them. All core examples now
+compile with lab enabled; no benchmark or example simulation was executed.
