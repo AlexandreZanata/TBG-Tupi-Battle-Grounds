@@ -19,7 +19,9 @@ const PENDING = {
 let current = null;
 let opened = null;
 let initialized = false;
-const choice = detectedOS(navigator.userAgentData?.platform ?? navigator.platform, navigator.userAgent);
+const platformName = navigator.userAgentData?.platform ?? navigator.platform;
+// Android only highlights its availability card; detectedOS stays desktop-only.
+const choice = /Android/i.test(`${platformName} ${navigator.userAgent}`) ? 'android' : detectedOS(platformName, navigator.userAgent);
 
 function option(asset, recommended) {
   const size = t('linux.size', { size: (asset.bytes / 1048576).toFixed(1) });
