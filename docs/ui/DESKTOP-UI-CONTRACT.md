@@ -469,3 +469,10 @@ rejected Evolution, cask interception and all four Fortification branches.
 Linux engine captures and targeted witnesses are the reference evidence;
 Windows and desktop game-web observation remain pending until recorded.
 Shared code and native compilation never certify correspondence.
+
+
+GD-01 gallery framing uses the actual posed vertices of all five forms in the
+three lineup rows, including forward obelisk depth. It fits the projected bounds
+with the shared camera FOV and margins for the title/footer. Cases include the
+highest A2 crown/obelisk and the B2 forward slam. Linux native capture is the
+reference; Windows/game-web observation of this same framing remains pending.

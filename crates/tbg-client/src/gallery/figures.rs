@@ -189,7 +189,7 @@ pub(super) fn spawn_one(
 
 /// The default Archer turns side-on to shoot, so review it at 45° to
 /// see the chest and the arrow line together; everything else keeps 25°.
-fn yaw(kind: UnitKind) -> f32 {
+pub(super) fn yaw(kind: UnitKind) -> f32 {
     if kind == UnitKind::Archer {
         45.0
     } else {

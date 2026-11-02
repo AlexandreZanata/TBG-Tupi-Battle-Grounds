@@ -10,6 +10,7 @@ pub fn frame(
     lib: Res<crate::art::FigureLibrary>,
     meshes: Res<Assets<Mesh>>,
     mut cached: Local<Option<(tbg_core::UnitKind, (f32, f32))>>,
+    mut monument: Local<Option<(Vec3, Vec3)>>,
     window: Single<&Window>,
     camera: Single<(&mut Transform, &mut DistanceFog), With<ArenaCamera>>,
 ) {
@@ -17,7 +18,12 @@ pub fn frame(
         return;
     }
     let aspect = window.width() / window.height();
-    let (center, width, height, offset) = if options.portrait {
+    let (center, width, height, offset) = if options.lineup
+        && options.unit == Some(tbg_core::UnitKind::Colossus)
+    {
+        let bounds = *monument.get_or_insert_with(|| super::monument_frame::bounds(&lib, &meshes));
+        super::monument_frame::target(bounds, aspect)
+    } else if options.portrait {
         let kind = options.unit.unwrap_or(tbg_core::UnitKind::Archer);
         let (radius, h) = cached
             .get_or_insert_with(|| {
@@ -155,14 +161,6 @@ fn unit(portrait: bool) -> (Vec3, f32, f32, Vec3) {
 }
 fn sheet(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
     if options.lineup {
-        if options.unit == Some(tbg_core::UnitKind::Colossus) {
-            return (
-                Vec3::new(12.0, -4.6, 0.0),
-                16.0,
-                14.5,
-                Vec3::new(0.0, 1.2, 10.0),
-            );
-        }
         // Five forms per row; idle, walk and attack rows (`Layout::Lineup`).
         return (
             Vec3::new(4.2, -1.45, 0.0),

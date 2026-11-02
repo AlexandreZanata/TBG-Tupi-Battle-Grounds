@@ -6,6 +6,7 @@ mod camera;
 mod figures;
 mod layout;
 mod lineup;
+mod monument_frame;
 pub(crate) mod motion;
 mod palette;
 pub(crate) mod polish;
