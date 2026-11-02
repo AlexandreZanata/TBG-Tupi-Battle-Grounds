@@ -977,8 +977,8 @@ joins P66 (§22) and P68 (§24) without a second coordinator:
   shape. Updates wait for any coordinator operation (`auth::idle_for_update`)
   as well as P66's socket guard.
 
-Cross-slot revocation propagation is not implemented: two-slot rollout with
-P68 auth stays inactive until it is (D-99 limits).
+Cross-slot revocation propagates within a second since P71 W3 (`revocation_feed`),
+which is what allows two-slot rollout with P68 auth; D-104 drives it automatically.
 
 
 ## 27. Main delivery and player continuity (prepared, 2026-11-01)
@@ -988,7 +988,8 @@ independent attested backend, browser and static-site publications; the host pul
 and verifies source/workflow/ancestry provenance without a GitHub token or inbound
 runner. Browser assets have immutable source-qualified URLs and a stable entry
 pointer, preserving open tabs. Landing/public-admin updates do not touch game
-processes. Compatible backend updates drain without a forced retirement deadline.
+processes. Compatible backend updates are promoted into the idle release slot while the
+previous slot drains without a forced retirement deadline (D-104).
 
 See [RELEASES](RELEASES.md) for activation and compatibility boundaries,
 [DEVELOPMENT](DEVELOPMENT.md) for the shared Bevy UI and migration procedure, and

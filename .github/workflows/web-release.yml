@@ -37,6 +37,10 @@ jobs:
           persist-credentials: false
       - name: Select only browser game source
         id: scope
+        # Compare with the last published candidate (read-only job token), so a
+        # change skipped by an outdated run is still published by the next one.
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: python3 scripts/web-release-changes.py
 
   build:

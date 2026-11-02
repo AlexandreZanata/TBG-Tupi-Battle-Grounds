@@ -240,6 +240,58 @@ fn reconnect_during_drain_keeps_rematch_from_starting() {
     assert!(matches!(lobby.sessions[&a].state, SessionState::Idle));
 }
 
+/// P66 (D-92): a slot that is drained from stops starting matches, so a player still waiting
+/// for a partner is told the way a refused request is, and the slot coordinator counts them.
+#[test]
+fn a_draining_slot_refuses_the_players_still_waiting_and_a_live_one_keeps_them() {
+    use std::sync::atomic::Ordering::Relaxed;
+    use tbg_core::protocol::{ErrorCode, ServerMsg};
+    let (mut lobby, _self_rx) = lobby();
+    let queued = [1; 16];
+    let owner = [2; 16];
+    let host = [3; 16];
+    let mut queued_rx = add_session(&mut lobby, queued, SessionState::Queued);
+    let mut owner_rx = add_session(
+        &mut lobby,
+        owner,
+        SessionState::InChallenge { token: [7; 16] },
+    );
+    let mut host_rx = add_session(&mut lobby, host, SessionState::InRoom);
+    lobby.queue.push_back(queued);
+    lobby.challenges.push(([7; 16], owner, Instant::now()));
+    lobby.rooms.push((*b"ABCDE", host, Instant::now()));
+    assert_eq!(lobby.waiting(), 3);
+
+    lobby.refuse_waiters();
+    assert_eq!(
+        lobby.waiting(),
+        3,
+        "a slot that still admits keeps its waiters"
+    );
+    assert!(queued_rx.try_recv().is_err());
+
+    // An invitation whose owner already left only waits for a reload: nobody to wait for.
+    lobby.challenges.push(([8; 16], [9; 16], Instant::now()));
+    assert_eq!(lobby.waiting(), 3);
+
+    lobby.release.gate.drain.store(true, Relaxed);
+    lobby.refuse_waiters();
+    assert_eq!(lobby.waiting(), 0);
+    for (token, rx) in [
+        (queued, &mut queued_rx),
+        (owner, &mut owner_rx),
+        (host, &mut host_rx),
+    ] {
+        expect(
+            rx,
+            ServerMsg::Error {
+                code: ErrorCode::ServerFull,
+            },
+        );
+        assert!(matches!(lobby.sessions[&token].state, SessionState::Idle));
+    }
+}
+
 #[test]
 fn delayed_account_preset_cannot_change_a_waiting_challenge() {
     // BR-AR05: even a database reply must respect the frozen selection.

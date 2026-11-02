@@ -99,3 +99,45 @@ fn after_a_contract_switch_old_clients_must_update_and_nothing_stale_admits() {
         Decision::Unavailable
     );
 }
+
+/// A slot that has just started answers from the database instead of its empty view, so a player is
+/// never told "unavailable" while the other slot admits (release into the slot the proxy tries first).
+#[tokio::test]
+async fn a_slot_that_has_not_read_the_directory_yet_reads_it_instead_of_turning_players_away() {
+    let dir = std::env::temp_dir().join(format!("tbg-admission-view-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let store = std::sync::Arc::new(Store::open(&dir.join("db.sqlite3")).unwrap());
+    let other = SlotIdentity {
+        slot: "b".into(),
+        generation: "gb".into(),
+        server_build: "test".into(),
+        contract: "c1".into(),
+        endpoint: "/ws/slot-b".into(),
+    };
+    store
+        .release(move |conn| {
+            crate::store::release::register(conn, &other, now_unix()).unwrap();
+            conn.execute("UPDATE release_slots SET state = 'active'", [])
+                .unwrap();
+        })
+        .await
+        .unwrap();
+    let empty = std::sync::Arc::new(Vec::new());
+
+    let rows = directory_view(empty.clone(), true, Some(&store)).await;
+    assert_eq!(
+        slot_of(decide(&rows, Some(&own()), "c1", "c1", 0, now_unix())),
+        "b"
+    );
+    let alone = directory_view(empty.clone(), true, None).await;
+    assert_eq!(
+        decide(&alone, Some(&own()), "c1", "c1", 0, now_unix()),
+        Decision::Unavailable
+    );
+    let single = directory_view(empty, false, Some(&store)).await;
+    assert!(
+        single.is_empty(),
+        "a single server answers for itself without a directory"
+    );
+    std::fs::remove_dir_all(dir).ok();
+}

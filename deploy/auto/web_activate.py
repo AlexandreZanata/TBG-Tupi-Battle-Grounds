@@ -50,7 +50,7 @@ def probe(url, expected):
                 'public browser entry differs from attested candidate')
 
 
-def activate(staged, manifest, public):
+def activate(staged, manifest, public, adopt=False):
     live = status()
     require(live['contract'] == manifest['contract'] and not live.get('shutdown'),
             'browser contract transition/drain requires coordinated release')
@@ -87,7 +87,12 @@ def activate(staged, manifest, public):
     require(not pointer.is_symlink() or pointer.resolve().is_dir(), 'dangling web pointer')
     previous = pointer.resolve().name if pointer.is_symlink() else None
     require(previous is None or pointer.resolve().parent == root.resolve(), 'web pointer escapes releases')
-    write_json(JOURNAL, {'previous': previous, 'receipt': json.loads(RECEIPT.read_text()) if RECEIPT.exists() else None})
+    receipt = json.loads(RECEIPT.read_text()) if RECEIPT.exists() else None
+    # A manual or foreign publish is never overwritten silently (drift); the
+    # first adoption of a hand-made entry is an explicit operator decision.
+    require(adopt or previous == (receipt or {}).get('source_commit'),
+            'browser entry changed outside the controller; review it, then rerun with --adopt')
+    write_json(JOURNAL, {'previous': previous, 'receipt': receipt})
     try:
         entry(manifest['source_commit'])
         probe(public + '/', manifest['files']['index.html'])

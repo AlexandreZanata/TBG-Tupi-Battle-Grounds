@@ -3,8 +3,11 @@
 //!
 //! `tbg-bots --url ws://127.0.0.1:8080/ws --matches N [--delay-ms D]
 //!   [--jitter-ms J] [--chaos-pct P] [--chaos-silent] [--ramp-ms R] [--bots B] [--accounts]
-//!   [--ranked] [--spectators S]`
+//!   [--ranked] [--spectators S] [--surrender-s S] [--seed N]`
 //! `--spectators S` runs S anonymous spectators beside the bots (P47).
+//! `--surrender-s S` makes every bot surrender S seconds after `MatchStart`, so a rehearsal
+//! match has a bounded end (BR-M07 gives matches no length). `--seed N` offsets the bots' seeds:
+//! account names are drawn from them, so a database that already holds every default name needs a new one.
 //! Exit code 1 if any bot failed.
 
 use std::time::Duration;
@@ -36,6 +39,10 @@ struct Args {
     timeout_s: Option<u64>,
     /// P47: anonymous spectators watching listed matches while the bots play.
     spectators: u64,
+    /// Surrender this long after `MatchStart` (a bounded rehearsal match).
+    surrender_s: Option<u64>,
+    /// Offset of the bots' seeds (default 0): names and play are drawn from them.
+    seed: u64,
 }
 
 fn args() -> Args {
@@ -52,6 +59,8 @@ fn args() -> Args {
         ranked: false,
         timeout_s: None,
         spectators: 0,
+        surrender_s: None,
+        seed: 0,
     };
     let raw: Vec<String> = std::env::args().skip(1).collect();
     // Bare flags take no value; everything else comes in key/value pairs.
@@ -93,6 +102,8 @@ fn args() -> Args {
             "--bots" => a.bots = Some(num()),
             "--timeout-s" => a.timeout_s = Some(num()),
             "--spectators" => a.spectators = num(),
+            "--surrender-s" => a.surrender_s = Some(num()),
+            "--seed" => a.seed = num(),
             other => panic!("unknown argument {other}"),
         }
     }
@@ -116,12 +127,13 @@ async fn main() {
         if let Some(s) = a.timeout_s {
             opts.timeout = Duration::from_secs(s);
         }
+        opts.surrender_after = a.surrender_s.map(Duration::from_secs);
         if rng.below(100) < a.chaos_pct {
             opts.drop_after = Some(Duration::from_secs(u64::from(20 + rng.below(41))));
             opts.rejoin_after = Some(Duration::from_secs(5));
             opts.silent_drop = a.chaos_silent;
         }
-        tasks.push(tokio::spawn(play_one(opts, i + 1)));
+        tasks.push(tokio::spawn(play_one(opts, a.seed + i + 1)));
         tokio::time::sleep(Duration::from_millis(a.ramp_ms)).await;
     }
     // P47: spectators watch while the bots play, then stop with them.

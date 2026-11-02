@@ -12,6 +12,9 @@ pub struct Metrics {
     pub matches_running: AtomicU64,
     pub matches_finished: AtomicU64,
     pub queue_len: AtomicU64,
+    /// Release gate for the host's slot coordinator: players waiting on this process for a partner
+    /// (queues, rooms, invitations, rematch offers). They cannot follow a promotion to the other slot.
+    pub lobby_waiting: AtomicU64,
     pub bytes_in: AtomicU64,
     pub bytes_out: AtomicU64,
     /// P30-A: view messages and their encoded bytes (both seats).
@@ -77,6 +80,7 @@ impl Default for Metrics {
             matches_running: AtomicU64::new(0),
             matches_finished: AtomicU64::new(0),
             queue_len: AtomicU64::new(0),
+            lobby_waiting: AtomicU64::new(0),
             bytes_in: AtomicU64::new(0),
             bytes_out: AtomicU64::new(0),
             view_messages: AtomicU64::new(0),
@@ -243,6 +247,7 @@ impl Metrics {
             "matches_running": get(&self.matches_running),
             "matches_finished": get(&self.matches_finished),
             "queue_len": get(&self.queue_len),
+            "lobby_waiting": get(&self.lobby_waiting),
             "bytes_in": get(&self.bytes_in),
             "bytes_out": get(&self.bytes_out),
             "view_messages": get(&self.view_messages),

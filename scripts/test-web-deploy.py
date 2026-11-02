@@ -220,5 +220,58 @@ class BrowserRelease(unittest.TestCase):
         self.assertIn('attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8', text)
 
 
+    def test_entry_changed_outside_the_controller_needs_explicit_adoption(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            staged = root/'staged'
+            manifest = policy.unpack(fixture(root), staged, SOURCE)
+            web, state = root/'web', root/'state'
+            state.mkdir()
+            for name in [OLD, 'c' * 40]:
+                (web/'releases'/name).mkdir(parents=True)
+            (web/'current').symlink_to('releases/' + 'c' * 40)
+            receipt = state/'web-current.json'
+            receipt.write_text(json.dumps({'source_commit': OLD}))
+            with patch.multiple(activation, ROOT=web, JOURNAL=state/'journal.json', RECEIPT=receipt, STATE=state), \
+                 patch.object(activation, 'status', return_value={'contract': CONTRACT, 'shutdown': False}), \
+                 patch.object(activation, 'probe'):
+                with self.assertRaisesRegex(ValueError, 'changed outside the controller'):
+                    activation.activate(staged, manifest, 'https://app.tupibg.com')
+                self.assertEqual((web/'current').resolve().name, 'c' * 40)
+                activation.activate(staged, manifest, 'https://app.tupibg.com', adopt=True)
+            self.assertEqual((web/'current').resolve().name, SOURCE)
+
+    def test_new_server_contract_waits_and_draining_server_defers_without_latch(self):
+        import web_pull
+        from control import Deferred
+        prefix = 'https://github.com/' + pull.REPOSITORY + '/releases/download/web-' + SOURCE + '/'
+        names = ['tbg-web-' + SOURCE + '.tar.gz', 'provenance.jsonl']
+        release = {'tag_name': 'web-' + SOURCE, 'assets': [{'name': n, 'browser_download_url': prefix + n} for n in names]}
+        with tempfile.TemporaryDirectory() as temporary:
+            state = Path(temporary)
+            receipt = state/'web-current.json'
+            receipt.write_text(json.dumps({'source_commit': OLD}))
+            live = {'contract': CONTRACT, 'shutdown': False}
+            with patch.multiple(web_pull, STATE=state, WAITING=state/'web-waiting.json',
+                                candidate=lambda family: release, api=lambda path: {'status': 'ahead'},
+                                verify=lambda *a, **k: None), \
+                 patch.object(web_pull, 'fetch', return_value=b'x') as fetch, \
+                 patch.object(web_pull.web_policy, 'unpack', return_value={'contract': 'w32-r6-097385fee9a10b0f'}), \
+                 patch.object(web_pull.web_activate, 'RECEIPT', receipt), \
+                 patch.object(web_pull.web_activate, 'status', side_effect=lambda: live), \
+                 patch.object(web_pull.web_activate, 'activate') as promote:
+                with self.assertRaisesRegex(Deferred, 'needs server contract w32'):
+                    web_pull.run({'minimum_source': OLD}, True, False)
+                fetch.reset_mock()
+                with self.assertRaisesRegex(Deferred, 'waits for server contract'):
+                    web_pull.run({'minimum_source': OLD}, True, False)
+                fetch.assert_not_called()
+                live['shutdown'] = True
+                with self.assertRaisesRegex(Deferred, 'draining'):
+                    web_pull.run({'minimum_source': OLD}, True, False)
+                promote.assert_not_called()
+            self.assertFalse((state/'web-checked.json').exists(), 'transient states are not outcomes')
+
+
 if __name__ == '__main__':
     unittest.main()

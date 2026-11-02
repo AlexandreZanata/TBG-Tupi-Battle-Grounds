@@ -119,4 +119,30 @@ class NativeCatalog(unittest.TestCase):
                 self.assertFalse((root/'receipt.json').exists())
 
 
+    def test_active_tag_beyond_the_first_page_is_revalidated_and_a_deleted_one_fails_closed(self):
+        # Every main merge adds server/web/static releases; the active native tag
+        # must not silently fall out of view and keep stale links enabled.
+        from urllib.error import HTTPError
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            public, state = root/'public', root/'state'
+            state.mkdir()
+            receipt = state/'receipt.json'
+            meta, release = release_pair()
+            receipt.write_text(json.dumps(meta))
+            newer = [{'tag_name': 'web-' + 'c' * 40, 'draft': False, 'assets': []}]
+            with patch.multiple(worker, ROOT=public, STATE=state, RECEIPT=receipt, CHECKED=state/'checked.json'), \
+                 patch.object(worker, 'status', return_value=LIVE), \
+                 patch.object(worker, 'api', side_effect=[{'id': worker.REPOSITORY_ID}, newer, release]) as api:
+                worker.run({'minimum_source': 'b' * 40})
+                self.assertEqual(api.call_args_list[2].args[0], '/releases/tags/v0.1.2-rc.1')
+                self.assertEqual(json.loads((public/'current.json').read_text())['linux']['state'], 'available')
+                gone = HTTPError('https://api.github.com', 404, 'Not Found', {}, None)
+                with patch.object(worker, 'api', side_effect=[{'id': worker.REPOSITORY_ID}, newer, gone]):
+                    with self.assertRaisesRegex(ValueError, 'no longer published'):
+                        worker.run({'minimum_source': 'b' * 40})
+                value = json.loads((public/'current.json').read_text())
+                self.assertEqual((value['linux']['state'], value['windows']['state']), ('pending', 'pending'))
+
+
 if __name__ == '__main__': unittest.main()

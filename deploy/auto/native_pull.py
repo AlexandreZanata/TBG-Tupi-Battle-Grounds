@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """Refresh public native download links from verified GitHub releases; never install executables."""
 import argparse
-import fcntl
 import json
 import os
 from pathlib import Path
 import re
 import tempfile
+from urllib.error import HTTPError
+from urllib.parse import quote
 
 from activate import STATE, status, sync_directory, write_json
+from control import deployment_lock, run_controller
+from github import PAGE, REPOSITORY_ID, api, fetch
 from native_policy import WORKFLOW, catalog, version_key
 from policy import REPOSITORY, require
-from pull import REPOSITORY_ID, api, fetch, verify
+from pull import verify
 
 ROOT = Path('/srv/tbg/downloads')
 RECEIPT = STATE/'native-current.json'
@@ -47,18 +50,39 @@ def synchronize(live):
     pending(live)
 
 
+def native(release):
+    return (not release.get('draft') and re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?', release.get('tag_name', ''))
+            and any(a['name'] == 'tbg-native-release.json' for a in release.get('assets', [])))
+
+
+def published(tag):
+    """The active tag by name: newer server/web/static releases may push it off the first page."""
+    try:
+        release = api('/releases/tags/' + quote(tag, safe=''))
+    except HTTPError as error:
+        if error.code == 404:
+            return None
+        raise
+    return release if native(release) else None
+
+
 def run(config):
     live = status()
     synchronize(live)
     require(api('')['id'] == REPOSITORY_ID, 'repository identity changed')
-    releases = api('/releases?per_page=30')
-    candidates = [r for r in releases if not r.get('draft') and re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?', r.get('tag_name', ''))
-                  and any(a['name'] == 'tbg-native-release.json' for a in r.get('assets', []))]
+    candidates = [r for r in api(f'/releases?per_page={PAGE}') if native(r)]
+    old = json.loads(RECEIPT.read_text()) if RECEIPT.exists() else None
+    if old and not any(r['tag_name'] == old['tag'] for r in candidates):
+        active = published(old['tag'])
+        if active is None:
+            # Revoked or deleted: never leave its links enabled.
+            pending(live)
+            raise ValueError(f"active native release {old['tag']} is no longer published")
+        candidates.append(active)
     if not candidates:
         print('Waiting for the first complete verified native release.')
         return
     release = max(candidates, key=lambda r: (version_key(r['tag_name'][1:]), r['published_at']))
-    old = json.loads(RECEIPT.read_text()) if RECEIPT.exists() else None
     if old and old['tag'] == release['tag_name']:
         try:
             publish(catalog(old, release, live))
@@ -95,10 +119,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path, default=Path('/etc/tbg/auto-deploy.json'))
     args = parser.parse_args()
-    STATE.mkdir(mode=0o700, exist_ok=True)
-    with (STATE/'lock').open('w') as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        run(json.loads(args.config.read_text()))
+
+    def body():
+        with deployment_lock():
+            run(json.loads(args.config.read_text()))
+    run_controller(body)
 
 
 if __name__ == '__main__':

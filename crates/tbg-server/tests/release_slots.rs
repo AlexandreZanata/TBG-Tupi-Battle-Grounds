@@ -81,7 +81,7 @@ fn admin_conn(db: &PathBuf) -> Connection {
 }
 
 /// Wait until `pred` holds on the directory (≤ 15 s: heartbeats are 1 s,
-/// the ranked handoff runs every 5 s).
+/// the ranked handoff runs every second).
 async fn until(db: &PathBuf, what: &str, pred: impl Fn(&[SlotRow]) -> bool) {
     for _ in 0..300 {
         let rows = read_directory(&admin_conn(db)).unwrap_or_default();
@@ -326,6 +326,46 @@ async fn one_live_session(a_url: &str, b_url: &str, name: &str) -> Ws {
         }
     }
     panic!("B never took the account after A's session left");
+}
+
+/// Automatic promotion (docs/RELEASES): players waiting on the old slot are counted so the
+/// coordinator waits for them, are told to ask again if one slips in, and ranked play resumes on
+/// the new slot by itself within about a second.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn a_promotion_refuses_stranded_waiters_and_moves_ranked_play_within_seconds() {
+    let (db, a, _b) = two_ready_slots().await;
+    let (mut waiter, _) = join(&a.url("a"), None).await;
+    send(&mut waiter, &ClientMsg::QuickMatch).await;
+    for _ in 0..50 {
+        if get_json(&a.addr, "/metrics").await["lobby_waiting"] == 1 {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    assert_eq!(get_json(&a.addr, "/metrics").await["lobby_waiting"], 1);
+
+    admin::promote(&mut admin_conn(&db), "b", "test", None).unwrap();
+    let promoted = tokio::time::Instant::now();
+    let refused = expect(&mut waiter, |m| matches!(m, ServerMsg::Error { .. })).await;
+    assert!(
+        matches!(
+            refused,
+            Some(ServerMsg::Error {
+                code: ErrorCode::ServerFull
+            })
+        ),
+        "{refused:?}"
+    );
+    assert_eq!(get_json(&a.addr, "/metrics").await["lobby_waiting"], 0);
+    until(&db, "b holds ranked authority", |r| {
+        r.iter().any(|s| s.slot == "b" && s.ranked_authority)
+    })
+    .await;
+    assert!(
+        promoted.elapsed() < Duration::from_secs(5),
+        "ranked authority followed the promotion in {:?}",
+        promoted.elapsed()
+    );
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]

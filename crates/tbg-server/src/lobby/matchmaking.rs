@@ -3,7 +3,7 @@
 use std::time::Instant;
 
 use tbg_core::protocol::{
-    valid_room_code, LivePlayer, MatchMode, RoomCode, ServerMsg, Token, ROOM_ALPHABET,
+    valid_room_code, ErrorCode, LivePlayer, MatchMode, RoomCode, ServerMsg, Token, ROOM_ALPHABET,
 };
 use tbg_core::Seat;
 
@@ -70,6 +70,47 @@ impl Lobby {
                     send(&s.conn, ConnEvent::Send(ServerMsg::RoomNotFound));
                 }
             }
+        }
+    }
+
+    /// Players waiting here for a partner. A promotion to the other release slot cannot
+    /// carry them along, so the slot coordinator waits for this to reach zero. An invitation
+    /// or rematch offer whose owner has left (it only survives for a reload) waits for nobody.
+    pub(super) fn waiting(&self) -> usize {
+        let here = |token: &Token| self.sessions.get(token).is_some_and(|s| s.conn.is_some());
+        self.queue.len()
+            + self.ranked_queue.len()
+            + self.rooms.len()
+            + self.challenges.iter().filter(|(_, o, _)| here(o)).count()
+            + self
+                .rematches
+                .iter()
+                .filter(|r| r.expires.is_some() && r.players.iter().any(here))
+                .count()
+    }
+
+    /// A draining slot starts nothing new, so a partner never arrives for these players: tell
+    /// them the way a refused request does, and a client re-admits through the new slot.
+    pub(super) fn refuse_waiters(&mut self) {
+        if !self.release.gate.draining() {
+            return;
+        }
+        let mut waiters: Vec<Token> = self
+            .queue
+            .iter()
+            .chain(self.ranked_queue.iter())
+            .copied()
+            .collect();
+        waiters.extend(self.rooms.iter().map(|(_, owner, _)| *owner));
+        waiters.extend(self.challenges.iter().map(|(_, owner, _)| *owner));
+        for token in waiters {
+            self.leave_waiting(token);
+            self.send_to(
+                token,
+                ServerMsg::Error {
+                    code: ErrorCode::ServerFull,
+                },
+            );
         }
     }
 
