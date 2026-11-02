@@ -33,6 +33,7 @@ pub(super) fn start(
         Kind::Register => "register",
         Kind::Refresh => "refresh",
         Kind::Backup => "backup",
+        Kind::RecoveryKey => "recovery-key",
         Kind::Logout => "logout",
         // Resume records are native-only; the browser keeps them per tab.
         Kind::Resume => {
@@ -65,6 +66,13 @@ fn parse(raw: &str) -> Result<Outcome, Failure> {
     }
     let value: Value = serde_json::from_str(raw).map_err(|_| Failure::Incompatible)?;
     match value.get("kind").and_then(Value::as_str) {
+        Some("recovery_key") => Ok(Outcome::RecoveryKey {
+            key: value
+                .get("key")
+                .and_then(Value::as_str)
+                .filter(|key| tbg_core::account::parse_key(key).is_some())
+                .map(str::to_owned),
+        }),
         Some("guest") => Ok(Outcome::Guest {
             legacy: value
                 .get("legacy")
@@ -78,6 +86,9 @@ fn parse(raw: &str) -> Result<Outcome, Failure> {
                 false,
             )?,
             secure: value.get("secure").and_then(Value::as_bool) == Some(true),
+            warning: value
+                .get("warning")
+                .map(|warning| public_error(&json!({"error":warning}))),
             device: value
                 .get("device")
                 .and_then(Value::as_str)

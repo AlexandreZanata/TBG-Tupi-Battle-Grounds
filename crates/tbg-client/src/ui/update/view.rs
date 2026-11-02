@@ -129,6 +129,7 @@ fn state_modal(state: &UpdState, lang: Lang) -> Option<Modal> {
                 "unavailable" | "download" => "update.error.offline",
                 "verification" => "update.error.verification",
                 "disk" => "update.error.disk",
+                "setup" => "update.setup_required",
                 _ => "update.error.other",
             };
             (
@@ -143,6 +144,28 @@ fn state_modal(state: &UpdState, lang: Lang) -> Option<Modal> {
 
 /// The modal for the current state, if the lobby should show one.
 fn modal(updater: &Updater, lang: Lang) -> Option<Modal> {
+    if updater.opened && matches!(updater.state, UpdState::Off | UpdState::Checking) {
+        return Some((
+            lang.key("native.downloads"),
+            vec![lang.key(if updater.state == UpdState::Checking {
+                "update.checking"
+            } else {
+                "update.current"
+            })],
+            vec![
+                (lang.key("update.check"), UiAction::UpdateCheck),
+                (
+                    lang.key(if updater.automatic {
+                        "update.auto_on"
+                    } else {
+                        "update.auto_off"
+                    }),
+                    UiAction::UpdateAutomatic,
+                ),
+                (lang.key("common.close"), UiAction::UpdateLater),
+            ],
+        ));
+    }
     if let Some(n) = &updater.notes {
         return Some(notes_modal(n, lang));
     }
@@ -252,5 +275,30 @@ pub(super) fn badge(
                     280.,
                 ));
             });
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn br_up01_settings_opens_an_in_app_modal_for_checking_and_current_builds() {
+        let mut updater = Updater {
+            opened: true,
+            state: UpdState::Checking,
+            ..Default::default()
+        };
+        for lang in [Lang::En, Lang::PtBr] {
+            let (_, lines, buttons) = modal(&updater, lang).unwrap();
+            assert_eq!(lines, vec![lang.key("update.checking")]);
+            assert!(buttons
+                .iter()
+                .any(|(_, action)| *action == UiAction::UpdateAutomatic));
+        }
+        updater.state = UpdState::Off;
+        assert!(modal(&updater, Lang::PtBr).is_some());
+        updater.opened = false;
+        assert!(modal(&updater, Lang::PtBr).is_none());
     }
 }

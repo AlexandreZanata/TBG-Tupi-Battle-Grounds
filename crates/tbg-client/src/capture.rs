@@ -24,6 +24,8 @@ mod barrel;
 #[cfg(tbg_desktop)]
 mod packing;
 #[cfg(feature = "ui-acceptance")]
+mod settings;
+#[cfg(feature = "ui-acceptance")]
 mod social;
 #[cfg(tbg_desktop)]
 mod training;
@@ -58,6 +60,13 @@ pub fn plugin(app: &mut App) {
             return;
         }
         app.add_systems(Update, capture);
+        #[cfg(feature = "ui-acceptance")]
+        if matches!(
+            crate::config::url_param("capture_panel").as_deref(),
+            Some("account-backup" | "updates")
+        ) {
+            settings::plugin(app);
+        }
         #[cfg(feature = "ui-acceptance")]
         if crate::config::url_param("capture_panel").is_some_and(|v| v.starts_with("p73-")) {
             social::plugin(app);

@@ -946,6 +946,109 @@
         }
       },
       "document": "docs/patches/2026-11-02-auxiliaries-gods.md"
+    },
+    {
+      "id": "native-settings-auto-updates",
+      "version": "0.1.4-colossus.4",
+      "date": "2026-11-02",
+      "ruleset_version": 15,
+      "status": "candidate",
+      "title": {
+        "en": "Account backups and in-app Linux updates",
+        "pt-BR": "Cópia da chave e atualizações dentro do aplicativo"
+      },
+      "summary": {
+        "en": "Newest-first update history, explicit protected recovery-key backup and managed in-app updates. The installed gameplay content, authoritative backend endpoint and ranked match contract are preserved.",
+        "pt-BR": "Histórico com as notas mais recentes primeiro, cópia protegida da chave e atualizações dentro do aplicativo. O conteúdo do jogo, a conexão com o backend e o contrato da ranqueada foram preservados."
+      },
+      "changes": [
+        {
+          "subject": {
+            "en": "Update history",
+            "pt-BR": "Histórico de atualizações"
+          },
+          "field": {
+            "en": "Display order",
+            "pt-BR": "Ordem de exibição"
+          },
+          "before": {
+            "en": "Feed order could place older notes first.",
+            "pt-BR": "A ordem do catálogo podia mostrar notas antigas primeiro."
+          },
+          "after": {
+            "en": "Newest date, ruleset and version first; all historical entries are retained.",
+            "pt-BR": "Data, regras e versão mais recentes primeiro; todas as notas anteriores são mantidas."
+          },
+          "reason": {
+            "en": "Keep the latest installed changes visible even with an older online catalog.",
+            "pt-BR": "Manter as mudanças mais recentes visíveis mesmo com um catálogo online antigo."
+          }
+        },
+        {
+          "subject": {
+            "en": "Account recovery key",
+            "pt-BR": "Chave da conta"
+          },
+          "field": {
+            "en": "Protected backup and export",
+            "pt-BR": "Cópia protegida e exportação"
+          },
+          "before": {
+            "en": "Settings looked for a legacy key although the active login uses Access and Refresh.",
+            "pt-BR": "As Configurações procuravam uma chave antiga embora o login ativo use Access e Refresh."
+          },
+          "after": {
+            "en": "An explicitly supplied original key can be verified, protected in the native OS vault, copied and downloaded without changing the active login.",
+            "pt-BR": "Uma chave original informada pelo jogador pode ser validada, protegida no cofre nativo, copiada e baixada sem trocar o login ativo."
+          },
+          "reason": {
+            "en": "A logged-in session cannot reconstruct a recovery key that the server stores only as a hash.",
+            "pt-BR": "Uma sessão conectada não consegue reconstruir uma chave que o servidor guarda somente como hash."
+          }
+        },
+        {
+          "subject": {
+            "en": "Downloads and updates",
+            "pt-BR": "Downloads e atualizações"
+          },
+          "field": {
+            "en": "In-app update flow",
+            "pt-BR": "Atualização dentro do aplicativo"
+          },
+          "before": {
+            "en": "Settings opened an external website and the legacy install bypassed the update launcher.",
+            "pt-BR": "As Configurações abriam um site externo e a instalação antiga não passava pelo iniciador de atualizações."
+          },
+          "after": {
+            "en": "The shared modal controls signed managed updates at a safe idle point; online play requests take priority. Initial channel activation requires owner approval.",
+            "pt-BR": "O modal compartilhado controla atualizações assinadas em um momento seguro; pedidos de partida online têm prioridade. A ativação inicial do canal depende da aprovação do dono."
+          },
+          "reason": {
+            "en": "Update without manual uninstall while retaining accounts, existing content and the ranked backend contract.",
+            "pt-BR": "Atualizar sem desinstalação manual, preservando contas, conteúdo existente e o contrato do backend da ranqueada."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Account and app",
+            "body": "Settings can copy or download an explicitly imported original recovery key without switching the active login. Signed updates run through the installed launcher and wait while online play is active."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Conta e aplicativo",
+            "body": "As Configurações podem copiar ou baixar uma chave original informada pelo jogador sem trocar o login ativo. Atualizações assinadas usam o iniciador instalado e aguardam enquanto houver atividade online."
+          }
+        ]
+      },
+      "ruleset_hash": "cc459351581b7763",
+      "document": "docs/patches/2026-11-02-native-settings.md",
+      "evidence": {
+        "report": "docs/phases/NATIVE-SETTINGS-UPDATES.md",
+        "accepted": false
+      }
     }
   ]
 }

@@ -12,6 +12,8 @@ pub(crate) mod api;
 mod native;
 #[cfg(not(target_arch = "wasm32"))]
 mod native_store;
+#[cfg(not(target_arch = "wasm32"))]
+mod recovery_key;
 mod transport;
 mod types;
 #[cfg(target_arch = "wasm32")]
@@ -45,6 +47,16 @@ impl Default for Snapshot {
             legacy_available: false,
             error: None,
             manual_claim: false,
+        }
+    }
+}
+impl Snapshot {
+    /// Socket admission proves current identity, never durable storage.
+    fn active_status(&self) -> Status {
+        if self.status == Status::PersistenceUnavailable || self.remember && !self.secure {
+            Status::PersistenceUnavailable
+        } else {
+            Status::Authenticated
         }
     }
 }
@@ -111,6 +123,7 @@ pub enum Command {
     Migrate(String),
     Refresh,
     Backup,
+    RecoveryKey(Option<String>),
     Logout,
     ToggleRemember,
     ContinueHere,
@@ -174,13 +187,7 @@ pub fn socket_status(status: tbg_core::protocol::AuthStatus) {
     }
     if let Ok(mut view) = VIEW.write() {
         view.status = match status {
-            tbg_core::protocol::AuthStatus::Active => {
-                if view.remember && !view.secure {
-                    Status::PersistenceUnavailable
-                } else {
-                    Status::Authenticated
-                }
-            }
+            tbg_core::protocol::AuthStatus::Active => view.active_status(),
             tbg_core::protocol::AuthStatus::Conflict => Status::Conflict,
             tbg_core::protocol::AuthStatus::ReauthenticationRequired => Status::ReauthRequired,
         };
@@ -207,6 +214,7 @@ enum Kind {
     Register,
     Refresh,
     Backup,
+    RecoveryKey,
     Logout,
     /// P66: persist the resume record (native only, never changes status).
     Resume,
@@ -309,7 +317,10 @@ fn tick(
                     | Status::PersistenceUnavailable
                     | Status::Conflict
             )
-            && now >= session.deadline - 60.
+            && (now >= session.deadline - 60.
+                || snapshot().status == Status::PersistenceUnavailable
+                    && session.remember
+                    && !session.secure)
             && now >= session.retry_at
         {
             session.start(Kind::Refresh, None);
@@ -406,6 +417,7 @@ impl Session {
             }
             Command::Refresh => self.start(Kind::Refresh, None),
             Command::Backup => self.start(Kind::Backup, None),
+            Command::RecoveryKey(key) => self.start(Kind::RecoveryKey, key),
             Command::Logout => self.start(Kind::Logout, None),
             _ => {}
         }
@@ -425,7 +437,7 @@ impl Session {
                 Kind::Restore | Kind::Login | Kind::Register => Status::Restoring,
                 Kind::Refresh => Status::Refreshing,
                 Kind::Logout => Status::LogoutPending,
-                Kind::Backup | Kind::Resume => view.status,
+                Kind::Backup | Kind::RecoveryKey | Kind::Resume => view.status,
             };
         }
         match result {
@@ -458,6 +470,7 @@ impl Session {
             Kind::Register => native::Operation::Register(input.unwrap_or_default()),
             Kind::Refresh => native::Operation::Refresh,
             Kind::Backup => native::Operation::Backup,
+            Kind::RecoveryKey => native::Operation::RecoveryKey(input),
             Kind::Logout => native::Operation::Logout,
             Kind::Resume => native::Operation::Resume(input),
         };
@@ -596,12 +609,21 @@ impl Session {
         account: &mut crate::ui::account::Account,
         inbox: &mut crate::ui::account::AccountInbox,
     ) {
+        if kind == Kind::RecoveryKey {
+            account.key_result = Some(match result {
+                Ok(Outcome::RecoveryKey { key }) => Ok(key),
+                Err(error) => Err(error),
+                _ => Err(Failure::Incompatible),
+            });
+            return;
+        }
         match result {
             Ok(Outcome::SignedIn {
                 grant,
                 secure,
+                warning,
                 device,
-            }) => self.signed_in(kind, grant, secure, device, now, inbox),
+            }) => self.signed_in(kind, grant, secure, warning, device, now, inbox),
             Ok(Outcome::Guest { legacy }) => {
                 if let Ok(mut slot) = LEGACY.lock() {
                     *slot = legacy.clone();
@@ -636,6 +658,7 @@ impl Session {
             }
             // Resume writes settle before identity results (see `settle`).
             Ok(Outcome::Resumed) => {}
+            Ok(Outcome::RecoveryKey { .. }) => {}
             Ok(Outcome::LogoutPending(error)) => {
                 if let Ok(mut view) = VIEW.write() {
                     view.status = Status::LogoutPending;
@@ -674,11 +697,13 @@ impl Session {
         }
     }
 
+    #[allow(clippy::too_many_arguments)] // The completed grant carries its persistence result independently of identity.
     fn signed_in(
         &mut self,
         kind: Kind,
         grant: Grant,
         secure: bool,
+        warning: Option<Failure>,
         device: String,
         now: f64,
         inbox: &mut crate::ui::account::AccountInbox,
@@ -690,8 +715,9 @@ impl Session {
         self.account = Some(grant.profile.name.clone());
         self.device = Some(device);
         self.secure = secure;
+        self.retry_at = if warning.is_some() { now + 60. } else { 0. };
         if kind == Kind::Restore {
-            self.remember = grant.persistent && secure;
+            self.remember = grant.persistent;
         }
         if let Ok(mut view) = VIEW.write() {
             view.status = if !secure && (self.remember || cfg!(target_arch = "wasm32")) {
@@ -705,7 +731,7 @@ impl Session {
             view.profile = Some(grant.profile.clone());
             view.secure = secure;
             view.remember = self.remember;
-            view.error = None;
+            view.error = warning;
             view.manual_claim |= kind == Kind::Login;
         }
         if self.backup_after_login && kind == Kind::Login {

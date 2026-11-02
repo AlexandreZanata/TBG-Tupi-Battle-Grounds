@@ -62,21 +62,11 @@ fn publish(
             _ => {}
         }
     }
-    let key = match view.status {
-        Status::Restoring => "auth.restoring",
-        Status::Refreshing => "auth.refreshing",
-        Status::PersistenceUnavailable => "auth.temporary",
-        Status::Conflict => "auth.conflict",
-        Status::ReauthRequired => "auth.reauth",
-        Status::LogoutPending => "auth.logout_pending",
-        Status::Guest if view.legacy_available => "auth.legacy",
-        Status::Authenticated if !view.remember => "auth.session_only",
-        _ => "",
-    };
+    let key = super::status_key(&view).unwrap_or("");
     let choices: &[(&str, &str)] = match view.status {
         Status::Conflict => &[("continue", "auth.continue_here")],
         Status::ReauthRequired => &[("login", "lobby.account.key"), ("guest", "auth.guest")],
-        Status::LogoutPending => &[("retry", "auth.retry")],
+        Status::LogoutPending | Status::PersistenceUnavailable => &[("retry", "auth.retry")],
         Status::Guest if view.legacy_available => &[("login", "lobby.account.key")],
         _ => &[],
     };

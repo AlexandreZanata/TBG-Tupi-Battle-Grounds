@@ -17,6 +17,7 @@ pub enum TextKind {
     PlayerSearch,
     Name,
     Key,
+    BackupKey,
     Room,
 }
 
@@ -61,7 +62,7 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
     form.kind = Some(kind);
     form.edit = Default::default();
     form.focus = 0;
-    form.masked = kind == TextKind::Key;
+    form.masked = matches!(kind, TextKind::Key | TextKind::BackupKey);
     form.prompt = prompt.into();
     *form.error.lock().unwrap_or_else(|e| e.into_inner()) = String::new();
     *form.submitted.lock().unwrap_or_else(|e| e.into_inner()) = None;
@@ -78,7 +79,7 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
             TextKind::CatalogSearch | TextKind::PlayerSearch => "search",
             TextKind::Room => "room",
             TextKind::Name => "name",
-            TextKind::Key => "key",
+            TextKind::Key | TextKind::BackupKey => "key",
         };
         let _ = dom.form.set_attribute("data-kind", marker);
         set_error_text(dom, None);
@@ -95,6 +96,11 @@ pub fn is_open(form: &ActiveForm) -> bool {
 /// Hide the form and forget what it was collecting.
 pub fn close(form: &mut ActiveForm) {
     form.kind = None;
+    form.edit = Default::default();
+    *form
+        .submitted
+        .lock()
+        .unwrap_or_else(|error| error.into_inner()) = None;
     #[cfg(target_arch = "wasm32")]
     if let Some(dom) = &form.dom {
         dom.form.set_hidden(true);

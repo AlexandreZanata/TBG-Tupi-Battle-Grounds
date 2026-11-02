@@ -46,3 +46,25 @@ test('a lost refresh reply retries the same operation before another tab rotates
   assert.equal(operations[0],operations[1]);assert.notEqual(operations[1],operations[2]);
   for(const value of app.values.values())assert.notEqual(value,a.grant.access_token,'Access cannot enter localStorage');
 });
+
+test('BR-AS04/11: a confirmation outage preserves login and retries without blaming cookie storage',async()=>{
+  let confirmations=0,logouts=0;
+  const app=setup({fetch:async(path)=>{
+    if(path.endsWith('/logout')){logouts++;return response({});}
+    if(path.endsWith('/confirm')){confirmations++;return confirmations<=2?response({error:'unavailable'},503):response({session_id:grant().session_id});}
+    return response(grant());
+  }});
+  const first=await app.run({kind:'login',input:'Synthetic-0000-0000-0000-0000'});
+  assert.equal(first.kind,'signed_in');assert.equal(first.secure,false);assert.equal(first.warning,'unavailable');
+  assert.equal(app.values.get('tbg.auth.v1.logout_pending'),undefined,'a network failure is not a logout request');
+  const recovered=await app.run({kind:'refresh'});
+  assert.equal(recovered.kind,'signed_in');assert.equal(recovered.secure,true);assert.equal(recovered.warning,undefined);
+  assert.equal(logouts,1,'retry must renew the current family, not sign it out');
+});
+
+test('BR-AS11: blocked cookies remain an explicit storage failure',async()=>{
+  const app=setup({fetch:async(path)=>path.endsWith('/confirm')?response({error:'auth_required'},401):response(grant())});
+  const result=await app.run({kind:'login',input:'Synthetic-0000-0000-0000-0000'});
+  assert.equal(result.kind,'signed_in');assert.equal(result.secure,false);assert.equal(result.warning,'storage_unavailable');
+  assert.equal(app.values.get('tbg.auth.v1.logout_pending'),'1');
+});
