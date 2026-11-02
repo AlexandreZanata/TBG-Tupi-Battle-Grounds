@@ -850,3 +850,7 @@ following corrupted gfxstream geometry; no mesh, material, lighting rule or
 animation asset is replaced. The GLES point-shadow specialization no longer
 runs on Vulkan. Linux/Windows/web use their unchanged submission paths.
 Android visual comparison of the corrected path remains pending.
+
+P69's next direct-submission candidate also selects the public render-world
+`GpuPreprocessingMode::None`; phase batches must match the CPU builder.
+Candidate 16 failed this runtime requirement; its screenshot is not accepted.

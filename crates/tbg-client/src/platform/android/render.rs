@@ -57,3 +57,16 @@ fn emulator() -> bool {
     );
     emulator
 }
+
+/// Keep phase allocation consistent with the engine's CPU instance builder.
+pub fn cpu_submission(app: &mut bevy::prelude::App) {
+    use bevy::render::{
+        batching::gpu_preprocessing::{GpuPreprocessingMode, GpuPreprocessingSupport},
+        RenderApp,
+    };
+    if let Some(render) = app.get_sub_app_mut(RenderApp) {
+        render.insert_resource(GpuPreprocessingSupport {
+            max_supported_mode: GpuPreprocessingMode::None,
+        });
+    }
+}
