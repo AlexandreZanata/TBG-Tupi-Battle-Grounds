@@ -42,3 +42,31 @@ metadata and all asset hashes, preventing another old-baseline installation.
 Windows/desktop-web visual and motion comparison, full suite, balance gates
 and upstream P73 multiplayer/production acceptance remain pending. This task
 updates a local Linux preview; it does not certify the draft public PR.
+
+
+## Consolidated source checks
+
+Sixty core scenarios passed: the three-match legacy behavior guard (one test),
+21 completion cases, 17 protocol contracts, seven roster contracts, two ruleset
+contracts, two determinism contracts, nine Training session scenarios and one
+isolation scenario. The former revision-2/revision-6 canonical deterministic
+rows remain unchanged; revision 7 appends the measured schema checksums.
+
+Twenty-three focused client scenarios passed, including 340 ring-only forms,
+all-kind budgets/distinction, 85 new motion forms, real grips/feet, victory
+seams, localized ability templates and catalog search, P71 overhead envelopes,
+Evolution/fortify/Augment behavior and P73 client identity/privacy controls.
+The existing test-only unused Layout::clear warning remains unrelated.
+
+Integration fixes: classify the upstream P73 history-schema module outside
+combat hashing; move CC attack tracks into its own motion module because PR44
+removed the old unused common constants; retain the fixed-length completion
+VFX segment; use the PR's current Trident/Finn models with affiliation-only
+neckerchief geometry removed; adapt locale strings to the current borrowed
+return type. No combat values were retuned.
+
+PR44's existing Troops capture journey already selects the editor tab and
+Evolution form through normal actions. Extend its allowlist to the local
+63-entry pool and wait for real scene readiness, so the new laboratory can
+be inspected with a new champion without inventing another UI or bypassing
+authoritative commands. Actual Linux capture/installation is the next step.

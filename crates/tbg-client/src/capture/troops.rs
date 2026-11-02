@@ -22,6 +22,7 @@ fn capture(
     state: Res<State<GameState>>,
     shell: Res<Shell>,
     catalog: Res<Catalog>,
+    loading: Res<crate::ui::native_loading::Status>,
     time: Res<Time>,
     mut queue: ResMut<Requests>,
     window: Single<&Window>,
@@ -29,11 +30,11 @@ fn capture(
     mut started: Local<Option<f32>>,
     mut done: Local<bool>,
 ) {
-    if *done || *state.get() != GameState::Menu {
+    if *done || *state.get() != GameState::Menu || !loading.boot_ready || loading.scene_waiting {
         return;
     }
     let name = config::url_param("unit").unwrap_or_default();
-    let Some(unit) = tbg_core::FULL_POOL
+    let Some(unit) = tbg_core::COMPLETION_POOL
         .into_iter()
         .find(|kind| format!("{kind:?}") == name)
     else {
@@ -79,6 +80,7 @@ fn capture(
         return;
     };
     *done = true;
+    eprintln!("Loading capture: boot_ready={}, scene_waiting={}, pending_images={}, pending_texts={}, failed_images={}", loading.boot_ready, loading.scene_waiting, loading.images, loading.texts, loading.failed);
     eprintln!(
         "P70 Troops: unit={unit:?}; form={form:?}; clip={:?}; viewport={}x{}; dpi={}; camera={:?}",
         catalog.clip,

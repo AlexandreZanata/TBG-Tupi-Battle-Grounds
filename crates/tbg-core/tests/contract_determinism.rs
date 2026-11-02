@@ -107,6 +107,30 @@ fn bot_matches_are_frozen() {
                 StrongholdDestroyed,
             ),
         ],
+        // CC-ID03: schema-only completion slots preserve all three PR44 outcomes/ticks.
+        (7, 0xa9fa_44b5_5cde_a10b) => [
+            (
+                1,
+                0xe553_d0e8_59e5_b19c,
+                4_044,
+                Seat::B,
+                StrongholdDestroyed,
+            ),
+            (
+                7,
+                0x50f9_1188_6d89_5e19,
+                9_982,
+                Seat::B,
+                StrongholdDestroyed,
+            ),
+            (
+                42,
+                0x4f6f_6f12_eae1_933f,
+                10_382,
+                Seat::A,
+                StrongholdDestroyed,
+            ),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

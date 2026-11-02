@@ -43,8 +43,24 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     head(&mut v, &p, f);
     creel(&mut v, f);
     rod(&mut v, f);
-    // Buttons down the oilskin and a leather neckerchief.
-    for y in [0.12, 0.22, 0.32] {
+    FigureSpec { plan: p, parts: v }
+}
+
+fn clothing(v: &mut Vec<PartSpec>, p: &Proportions, f: Form, coat: Color) {
+    v.push(part(Body(Chest), Ball(0.20), coat, [0.0, 0.13, 0.0]).scale([1.0, 0.85, 0.78]));
+    for side in [-1.0, 1.0] {
+        v.push(
+            part(
+                Body(Chest),
+                Box(0.07, 0.10, 0.025),
+                OILSKIN_SHADE,
+                [side * 0.125, 0.08, 0.15],
+            )
+            .rot([0.0, 0.0, side * 6.0]),
+        );
+    }
+    // Branch B keeps the yellow sleeves/hat while the large navy bib identifies the net fisherman.
+    if f.b {
         v.push(part(
             Body(Chest),
             Box(0.25, 0.23, 0.045),
@@ -63,35 +79,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     for y in [0.10, 0.19, 0.28] {
         v.push(part(Body(Chest), Ball(0.019), BRASS, [0.0, y, 0.174]));
     }
-    // A fitted neckerchief knot and tails preserve the team marker as clothing.
-    v.extend([
-        part(
-            Body(Chest),
-            Box(0.16, 0.045, 0.05),
-            LINEN,
-            [0.0, p.torso.y, 0.11],
-        ),
-        part(
-            Body(Chest),
-            Ball(0.032),
-            LINEN,
-            [0.0, p.torso.y - 0.025, 0.15],
-        ),
-        part(
-            Body(Chest),
-            Box(0.035, 0.085, 0.018),
-            LINEN,
-            [-0.025, p.torso.y - 0.065, 0.16],
-        )
-        .rot([0.0, 0.0, -18.0]),
-        part(
-            Body(Chest),
-            Box(0.035, 0.07, 0.018),
-            LINEN,
-            [0.025, p.torso.y - 0.065, 0.16],
-        )
-        .rot([0.0, 0.0, 18.0]),
-    ]);
     for (arm, fore, shin, foot) in [
         (UpperArmL, ForearmL, ShinL, FootL),
         (UpperArmR, ForearmR, ShinR, FootR),
@@ -111,7 +98,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         ));
         v.push(part(Body(foot), Ball(0.08), CHARCOAL, [0.0, -0.02, 0.11]).scale([0.9, 0.52, 1.15]));
     }
-
     if f.a {
         for hand in [HandL, HandR] {
             v.push(part(

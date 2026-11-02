@@ -3,6 +3,8 @@ use super::super::{
     common::moves::{self, *},
     tools, Moment,
 };
+mod attacks;
+use attacks::*;
 mod signatures;
 mod victory;
 use super::{forms, plan};

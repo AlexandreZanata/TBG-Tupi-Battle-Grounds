@@ -2002,3 +2002,11 @@ balance. Its combined schema/source identity uses wire 33 and ruleset 7,
 with the collision/migration documented in DECISIONS CC-ID03. The online
 FULL_POOL remains 46; local Practice/Training uses 63 conventional kinds.
 No production activation or empirical balance acceptance is implied.
+
+
+CC-ID03 measured identity migration: all three PR44 legacy reference matches
+retained their winner, Stronghold-destruction reason and tick (4044, 9982,
+10382). Empty completion fields change serialized checksums only; revision-7
+references append beside the unchanged revision-2 and revision-6 contracts.
+The additive P73 protocol/history module is explicitly excluded from combat
+source hashing because it contains transport/API schemas, guarded by wire 33.

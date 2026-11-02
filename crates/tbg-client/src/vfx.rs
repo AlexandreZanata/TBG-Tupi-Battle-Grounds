@@ -64,6 +64,8 @@ pub(super) enum Motion {
     Puff { vel: Vec3, size: f32 },
     /// Thrown with `vel` under gravity, tumbling, resting on the ground.
     Debris { vel: Vec3, size: f32 },
+    /// Keeps the announced segment length while thickness fades.
+    Segment { size: Vec3 },
     /// Pops to `size` and vanishes (muzzle flashes, blast cores).
     Flash { size: f32 },
     /// Grows out of the ground to `size` (its own +Y), holds, sinks back.
@@ -293,6 +295,7 @@ fn pose(v: &Vfx, k: f32) -> Transform {
                 .with_rotation(spin * v.rotation)
                 .with_scale(Vec3::splat(size * (fade * 2.0).min(1.0)))
         }
+        Motion::Segment { size } => at.with_scale(Vec3::new(size.x, size.y, size.z * fade)),
         Motion::Flash { size } => {
             let pop = (k / 0.25).min(1.0);
             at.with_scale(Vec3::splat(

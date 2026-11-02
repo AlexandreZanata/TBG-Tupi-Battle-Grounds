@@ -139,7 +139,7 @@ impl Catalog {
                     && self.role.is_none_or(|r| r == d.archetype)
                     && (query.is_empty()
                         || [
-                            d.name.to_owned(),
+                            d.name,
                             crate::i18n::content::unit_name(lang, *kind),
                             crate::i18n::content::unit_name(crate::i18n::Lang::PtBr, *kind),
                         ]
@@ -196,7 +196,7 @@ mod completion_catalog_tests {
         for kind in tbg_core::COMPLETION_POOL.into_iter().skip(46) {
             assert!(shown.contains(&kind));
             for language in [crate::i18n::Lang::En, crate::i18n::Lang::PtBr] {
-                catalog.search = crate::i18n::content::unit_name(language, kind);
+                catalog.search = crate::i18n::content::unit_name(language, kind).to_owned();
                 assert!(catalog.visible(crate::i18n::Lang::En).contains(&kind));
                 assert!(catalog.visible(crate::i18n::Lang::PtBr).contains(&kind));
             }

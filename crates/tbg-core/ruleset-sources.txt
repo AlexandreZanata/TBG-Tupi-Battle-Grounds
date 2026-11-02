@@ -77,3 +77,4 @@ exclude view/effects.rs cosmetic metadata, tests or read-only presentation
 exclude view/public.rs spectator presentation
 exclude view/visibility.rs presentation filtering
 exclude completion/tests.rs focused local-preview regression scenarios, no gameplay
+exclude protocol/history.rs P73 message and API data schemas; wire version guards serialization, not combat

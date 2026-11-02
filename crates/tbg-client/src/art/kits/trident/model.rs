@@ -74,53 +74,13 @@ fn torso(v: &mut Vec<PartSpec>, f: Form) {
             [0.0, 0.035, 0.0],
         ),
         part(
-            Secondary(Spring::Back),
-            Cone(
-                if f.a && f.t2 { 0.25 } else { 0.20 },
-                if f.a && f.t2 { 0.62 } else { 0.36 },
-            ),
-            if f.a && f.t2 { BONE } else { GUNMETAL },
-            [0.0, if f.a && f.t2 { 0.28 } else { 0.12 }, -0.07],
-        )
-        .scale([0.28, 1.0, 1.0])
-        .rot([-20.0, 0.0, 0.0]),
-        part(
-            Body(Chest),
-            Ball(0.21),
-            if f.a { BONE } else { STONE },
-            [0.0, 0.17, 0.17],
-        )
-        .scale([1.15, 1.3, 0.40]),
-        part(
-            Body(Chest),
-            Box(0.35, 0.08, 0.30),
-            if f.b { RED_CLOTH } else { GUNMETAL },
-            [0.0, 0.18, 0.0],
-        )
-        .rot([0.0, 0.0, -20.0]),
+            Body(Hips),
+            Box(0.07, 0.065, 0.025),
+            BRASS,
+            [0.0, 0.035, 0.16],
+        ),
     ]);
     for s in [-1.0, 1.0] {
-        v.push(part(Body(Head), Ball(0.026), DARK, [s * 0.21, 0.075, 0.13]));
-        v.push(part(Body(Head), Ball(0.012), AMBER, [s * 0.22, 0.08, 0.15]));
-        for x in [0.04, 0.10] {
-            v.push(
-                part(Body(Head), Cone(0.019, 0.055), BONE, [s * x, -0.07, 0.28])
-                    .rot([180.0, 0.0, 0.0]),
-            );
-        }
-        for z in [-0.09, -0.04, 0.01] {
-            v.push(
-                part(
-                    Body(Head),
-                    Box(0.012, 0.09, 0.012),
-                    DARK,
-                    [s * 0.23, -0.015, z],
-                )
-                .rot([15.0, 0.0, s * 10.0]),
-            );
-        }
-    }
-    for x in [-0.12, 0.0, 0.12] {
         v.push(
             part(
                 Body(Chest),
