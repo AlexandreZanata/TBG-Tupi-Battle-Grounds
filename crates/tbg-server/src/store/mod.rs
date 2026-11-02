@@ -27,6 +27,8 @@ mod ranked;
 pub mod release;
 pub mod release_admin;
 // P67 is deliberately unavailable to server binaries until activation is reviewed.
+#[path = "recovery/outbox.rs"]
+pub mod mail_outbox;
 mod p75;
 #[cfg(test)]
 pub(crate) mod recovery;

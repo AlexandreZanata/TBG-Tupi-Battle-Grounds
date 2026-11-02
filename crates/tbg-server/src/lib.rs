@@ -21,9 +21,11 @@ pub mod botclient;
 pub mod build_info;
 mod chan;
 pub mod config;
+pub mod identity;
 mod limits;
 pub mod live;
 mod lobby;
+pub mod mail;
 mod match_task;
 pub mod metrics;
 mod names;
@@ -97,6 +99,33 @@ pub async fn run_with(
     // deploy check never passes a server that runs without its records.
     let store_failed = config.db.is_some() && store.is_none();
     let config = Arc::new(config);
+    if let Some(store) = &store {
+        let transport = config
+            .mail_capture
+            .clone()
+            .map(mail::transport::Transport::Capture)
+            .or_else(|| {
+                config
+                    .mail
+                    .load()
+                    .and_then(|c| mail::transport::Transport::smtp(&config.mail, c))
+            });
+        if let Some(transport) = transport {
+            mail::dispatch::start(
+                store.clone(),
+                Arc::new(transport),
+                config.mail.clone(),
+                format!(
+                    "{}:{}",
+                    config.slot.as_deref().unwrap_or("single"),
+                    std::process::id()
+                ),
+                config.auth_clock.clone(),
+                metrics.clone(),
+            );
+        }
+    }
+
     let release = shared
         .release
         .get_or_init(|| release::Runtime::new(&config))
